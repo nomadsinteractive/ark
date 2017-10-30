@@ -1,0 +1,36 @@
+#ifndef ARK_PLUGIN_PYTHON_EXTENSION_WRAPPER_H_
+#define ARK_PLUGIN_PYTHON_EXTENSION_WRAPPER_H_
+
+#include <Python.h>
+
+#include <list>
+
+#include "core/types/weak_ptr.h"
+#include "core/types/shared_ptr.h"
+
+namespace ark {
+namespace plugin {
+namespace python {
+
+class PyGarbageCollector;
+class PyInstance;
+
+class Wrapper {
+public:
+
+    int traverse(visitproc visit, void* args);
+    int clear();
+
+    void addCollector(const WeakPtr<PyGarbageCollector>& collector);
+    void setPyInstance(const sp<PyInstance>& pyInstance);
+
+private:
+    std::list<WeakPtr<PyGarbageCollector>> _garbage_collectors;
+    sp<PyInstance> _instances;
+};
+
+}
+}
+}
+
+#endif

@@ -1,0 +1,7 @@
+function(ark_gen_pybindings NAME NAMESPACES MODULENAME DIRS)
+    unset(LOCAL_GENERATED_SRC_LIST)
+    ark_add_python_generated_unit(py_${NAME}_bindings ${CMAKE_CURRENT_SOURCE_DIR} "${DIRS}" plugin/python/tools/python/gen_py_bindings.py -p ${NAMESPACES} -m ${MODULENAME} -o ${ARK_GENERATED_FILE_DIRECTORY}/py_${NAME}_bindings -l ${ARK_SRC_DIR}/tools/python ${DIRS})
+    list(APPEND LOCAL_INCLUDE_DIRS ${ARK_PYTHON_INCLUDE_DIR})
+    ark_parse_dependencies(${ARGN})
+    ark_add_shared_library(ark-${NAME}-pybindings ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST} ark-python ${ARK_PYTHON_LIBRARIES})
+endfunction(ark_gen_pybindings)

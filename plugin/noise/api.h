@@ -1,0 +1,16 @@
+#ifndef ARK_PLUGIN_NOISE_API_H_
+#define ARK_PLUGIN_NOISE_API_H_
+
+#include "core/base/api.h"
+
+#ifndef ARK_FLAG_BUILD_SHARED_PLUGIN
+    #ifdef ARK_FLAG_BUILDING_PLUGIN_NOISE
+    #   define ARK_PLUGIN_NOISE_API ARK_API_EXPORT_DECLARATION
+    #else
+    #   define ARK_PLUGIN_NOISE_API ARK_API_IMPORT_DECLARATION
+    #endif
+#else
+#   define ARK_PLUGIN_NOISE_API
+#endif
+
+#endif

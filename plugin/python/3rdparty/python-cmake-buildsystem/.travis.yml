@@ -1,0 +1,41 @@
+os:
+  - linux
+  - osx
+
+language: c
+
+compiler:
+ - gcc
+ - clang
+
+env:
+ - PY_VERSION_PATCH=10
+ - PY_VERSION_PATCH=9
+ - PY_VERSION_PATCH=8
+ - PY_VERSION_PATCH=7
+ - PY_VERSION_PATCH=6
+ - PY_VERSION_PATCH=5
+ - PY_VERSION_PATCH=4
+ - PY_VERSION_PATCH=3
+
+sudo: false
+
+branches:
+ only:
+  - master
+  - /^ci.*$/
+
+addons:
+  apt:
+    packages:
+     - libssl-dev
+
+before_script:
+ - wget -P /tmp/ https://raw.githubusercontent.com/davidsansome/python-cmake-buildsystem/dashboard/travis_dashboard.cmake
+
+script:
+ - ctest -V -S /tmp/travis_dashboard.cmake
+
+after_script:
+ - cat ${TRAVIS_BUILD_DIR}-build/CMakeCache.txt
+
