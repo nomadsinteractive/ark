@@ -1,0 +1,86 @@
+#ifndef ARK_APP_VIEW_BUTTON_H_
+#define ARK_APP_VIEW_BUTTON_H_
+
+#include "core/base/api.h"
+#include "core/base/bean_factory.h"
+#include "core/forwarding.h"
+#include "core/inf/builder.h"
+#include "core/inf/runnable.h"
+#include "core/types/class.h"
+#include "core/types/weak_ptr.h"
+
+#include "graphics/inf/renderer.h"
+#include "graphics/forwarding.h"
+
+#include "app/inf/event_listener.h"
+#include "app/view/view.h"
+#include "app/forwarding.h"
+
+namespace ark {
+
+//[[core::class]]
+class ARK_API Button final : public View, public Renderer {
+public:
+    Button(const sp<Renderer>& foreground, const sp<Renderer>& background, const sp<Size>& block, Gravity gravity);
+    ~Button();
+
+    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
+
+/*
+//  [[script::bindings::property]]
+    virtual const sp<Size>& size() override;
+//  [[script::bindings::property]]
+    const sp<Runnable>& onClick() const;
+//  [[script::bindings::property]]
+    void setOnClick(const sp<Runnable>& onClicked);
+*/
+
+//  [[script::bindings::auto]]
+    void setForeground(View::State status, const sp<Renderer>& foreground);
+//  [[script::bindings::auto]]
+    void setBackground(View::State status, const sp<Renderer>& background);
+
+//  [[plugin::builder]]
+    class BUILDER : public Builder<Button> {
+    public:
+        BUILDER(BeanFactory& parent, const document& doc);
+
+        virtual sp<Button> build(const sp<Scope>& args) override;
+
+    private:
+        void loadStatus(const sp<Button>& button, const document& doc, BeanFactory& args, const sp<Scope>&);
+
+    private:
+        BeanFactory _parent;
+        document _manifest;
+        sp<Builder<Renderer>> _foreground, _background;
+        sp<Builder<Size>> _size;
+        String _gravity;
+    };
+
+//  [[plugin::builder("button")]]
+    class BUILDER_IMPL2 : public Builder<Renderer> {
+    public:
+        BUILDER_IMPL2(BeanFactory& parent, const document& doc);
+
+        virtual sp<Renderer> build(const sp<Scope>& args) override;
+
+    private:
+        BUILDER _delegate;
+    };
+
+private:
+    virtual bool fireOnPush() override;
+    virtual bool fireOnRelease() override;
+
+private:
+    op<RendererWithState> _foreground;
+    op<RendererWithState> _background;
+    Gravity _gravity;
+
+
+};
+
+}
+
+#endif

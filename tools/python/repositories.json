@@ -1,0 +1,113 @@
+[
+    {
+        "url": "https://github.com/hpicgs/glbinding.git",
+        "name": "glbinding",
+        "tag": "v2.1.1"
+    },
+    {
+        "url": "git://git.code.sf.net/p/libpng/code",
+        "name": "libpng",
+        "tag": "v1.6.17"
+    },
+    {
+        "url": "https://github.com/libjpeg-turbo/libjpeg-turbo.git",
+        "name": "libjpeg-turbo",
+        "tag": "1.5.1"
+    },
+    {
+        "url": "https://github.com/madler/zlib.git",
+        "name": "zlib",
+        "tag": "v1.2.8"
+    },
+    {
+        "url": "https://github.com/leethomason/tinyxml2.git",
+        "name": "tinyxml2",
+        "tag": "3.0.0"
+    },
+    {
+        "url": "git://git.savannah.gnu.org/freetype/freetype2.git",
+        "name": "freetype",
+        "tag": "VER-2-7-1"
+    },
+    {
+        "url": "https://github.com/g-truc/glm.git",
+        "name": "glm",
+        "tag": "0.9.8.4"
+    },
+    {
+        "url": "https://github.com/anholt/libepoxy.git",
+        "name": "libepoxy",
+        "tag": "v1.3.1"
+    },
+    {
+        "url": "https://git.assembla.com/portaudio.git",
+        "name": "portaudio",
+        "tag": "pa_stable_v190600_20161030"
+    },
+    {
+        "url": "https://github.com/spurious/SDL-mirror.git",
+        "name": "SDL2",
+        "branch": "remotes/origin/release-2.0.4"
+    },
+    {
+        "url": "https://github.com/python/cpython.git",
+        "name": "Python",
+        "tag": "v3.6.1"
+    },
+    {
+        "url": "https://github.com/python-cmake-buildsystem/python-cmake-buildsystem.git",
+        "name": "python-cmake-buildsystem"
+    },
+    {
+        "url": "http://www.nih.at/libzip/libzip-1.1.2.tar.gz",
+        "name": "libzip-1.1.2"
+    },
+    {
+        "url": "https://github.com/xiph/ogg.git",
+        "name": "libogg",
+        "branch": "master"
+    },
+    {
+        "url": "https://github.com/xiph/vorbis.git",
+        "name": "libvorbis",
+        "branch": "master"
+    },
+    {
+        "url": "https://github.com/assimp/assimp.git",
+        "name": "assimp",
+        "tag": "v4.0.1"
+    },
+    {
+        "url": "https://github.com/ruslo/polly.git",
+        "name": "polly"
+    },
+    {
+        "url": "https://github.com/nothings/stb.git",
+        "name": "stb"
+    },
+    {
+        "url": "https://github.com/yaml/libyaml.git",
+        "name": "libyaml",
+        "tag": "0.1.7"
+    },
+    {
+        "url": "https://github.com/tronkko/dirent.git",
+        "name": "dirent",
+        "tag": "1.22"
+    },
+    {
+        "url": "https://github.com/Auburns/FastNoise.git",
+        "name": "FastNoise",
+        "tag": "0.4"
+    },
+    {
+        "url": "https://github.com/Auburns/FastNoiseSIMD.git",
+        "name": "FastNoiseSIMD",
+        "tag": "0.7"
+    },
+    {
+        "url": "https://github.com/jlblancoc/nanoflann.git",
+        "name": "nanoflann",
+        "tag": "master"
+    }
+]

@@ -1,0 +1,61 @@
+#include "app/base/rigid_body.h"
+
+#include <algorithm>
+#include <iterator>
+
+#include "core/inf/variable.h"
+
+#include "graphics/base/v2.h"
+#include "graphics/base/size.h"
+
+#include "app/inf/collision_callback.h"
+
+namespace ark {
+
+RigidBody::RigidBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const sp<Numeric>& rotation)
+    : _type(type), _shape(shape), _position(position), _size(size), _rotation(rotation)
+{
+}
+
+Collider::BodyType RigidBody::type() const
+{
+    return _type;
+}
+
+Collider::BodyShape RigidBody::shape() const
+{
+    return _shape;
+}
+
+V2 RigidBody::xy() const
+{
+    const V pos =_position->val();
+    return V2(pos.x(), pos.y());
+}
+
+float RigidBody::width() const
+{
+    return _size->width();
+}
+
+float RigidBody::height() const
+{
+    return _size->height();
+}
+
+const sp<VV2>& RigidBody::position() const
+{
+    return _position;
+}
+
+const sp<Size>& RigidBody::size() const
+{
+    return _size;
+}
+
+const sp<Numeric>& RigidBody::rotation() const
+{
+    return _rotation;
+}
+
+}

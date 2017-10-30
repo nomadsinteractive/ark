@@ -1,0 +1,7 @@
+#ifndef ARK_PLATFORMS_ANDROID_PLATFORM_LOG_H_
+#define ARK_PLATFORMS_ANDROID_PLATFORM_LOG_H_
+
+#define  LOGD(...)
+#define  LOGE(...)
+
+#endif

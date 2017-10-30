@@ -1,0 +1,43 @@
+#ifndef ARK_APP_IMPL_LAYOUT_GRID_LAYOUT_H_
+#define ARK_APP_IMPL_LAYOUT_GRID_LAYOUT_H_
+
+#include "core/inf/builder.h"
+
+#include "app/forwarding.h"
+#include "app/inf/layout.h"
+#include "app/view/view.h"
+
+namespace ark {
+
+class GridLayout : public Layout {
+public:
+    GridLayout(uint32_t rows, uint32_t cols, const View::Gravity gravity);
+
+    virtual void begin(LayoutParam& layoutParam) override;
+    virtual Rect place(LayoutParam& layoutParam) override;
+    virtual Rect end() override;
+
+//  [[plugin::builder("grid")]]
+    class BUILDER : public Builder<Layout> {
+    public:
+        BUILDER(BeanFactory& parent, const document& doc);
+
+        virtual sp<Layout> build(const sp<Scope>& args) override;
+
+    private:
+        sp<Builder<Numeric>> _rows, _cols;
+        View::Gravity _gravity;
+
+    };
+
+private:
+    uint32_t _rows, _cols;
+    View::Gravity _gravity;
+
+    float _grid_width, _grid_height;
+    uint32_t _flow_index;
+};
+
+}
+
+#endif

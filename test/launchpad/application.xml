@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <script id="script" class="python">
+        <library path="asset:///runtime.egg"/>
+        <library path="."/>
+    </script>
+    <shader id="s001" snippet="[alpha, point-size, $snippet]"/>
+    <numeric id="linear" class="linear" v="100" t="1.0"/>
+    <numeric id="accelerate" class="accelerate" v="100" a="20" t="1.0"/>
+    <numeric id="g4" class="sin" x="0"/>
+    <numeric id="g5" class="cos" x="0"/>
+    <numeric id="g6" ref="@g5" style="translation: 5.0"/>
+    <numeric id="g7" ref="@g5" style="translation: $t"/>
+    <numeric id="g8" class="expression" value="3 + 5"/>
+    <numeric id="g9" class="expression" value="3 + @g7"/>
+    <numeric id="g10" class="expression" value="2 * (3 + @g7) / 5.0"/>
+    <numeric id="g11" class="expression" value="@g8 + 2 * (3 + @g7) / 5.0"/>
+    <numeric id="g12" class="expression" value="(@g8 + 2 * (3 + @g7) / 5.0) + (@g8 * 2)"/>
+    <numeric id="g13" class="expression" value="sin(0) + 2 * cos(0) + sqrt(4)"/>
+    <boolean id="g14" value="true"/>
+    <boolean id="g15" value="false"/>
+    <boolean id="g16" value="@g14 or @g15"/>
+    <boolean id="g16" value="@g8 > 1.0 and true"/>
+    <vec2 id="vertex" x="@linear" y="@accelerate"/>
+    <vec2 id="vertex-wrapper" delegate="@vertex"/>
+    <vec2 id="v1" x="20" y="30"/>
+    <vec2 id="v2" x="@linear" y="30"/>
+    <vec2 id="v3" x="0" y="@accelerate"/>
+    <expirable id="@e1" class="by-timeout" timeout="2s"/>
+    <expirable id="e004" ref="@e1"/>
+    <transform id="t1" pivot="@v1"/>
+    <transform id="t2" pivot="@v1" translation="(20, 30)"/>
+    <transform id="t3" pivot="@v1" translation="@v2" scale="(2.0, 2.0)"/>
+    <transform id="t4" pivot="@v1" translation="@v2" scale="(2.0, 2.0)" rotation="@g5"/>
+    <shape id="b2_shape_ball" class="ball" radius="0.5"/>
+    <world id="world" ref="@world" class="b2World" gravity="0, -10" pixel-per-meter="100, 100"/>
+    <body id="body" ref="@body" class="b2Body" world="@world" position="0, 4" shape="@b2_shape_ball"/>
+    <vec2 id="position" class="b2Position" body="@body"/>
+    <numeric id="rotation" class="b2Rotation" body="@body"/>
+    <audio id="ogg_test" class="ogg" src="test.ogg"/>
+    <audio-player id="audio_player" class="portaudio"/>
+    <layout id="layout-001" class="gravity" gravity="center"/>
+    <layout id="layout-002" class="gravity" gravity="left|bottom"/>
+    <layout id="layout-003" class="gravity" gravity="right|top"/>
+    <layout id="layout-004" class="horizontal" gravity="center"/>
+    <layout id="layout-005" class="horizontal" gravity="left|top"/>
+    <layout id="layout-006" class="horizontal" gravity="right|bottom"/>
+    <layout id="layout-007" class="vertical" gravity="center"/>
+    <layout id="layout-008" class="vertical" gravity="left|bottom"/>
+    <layout id="layout-009" class="vertical" gravity="right|top"/>
+    <layout id="layout-010" class="grid" gravity="center" cols="2" rows="2"/>
+    <vertical-scrollable id="scrollable-001" tile-height="50" height="100" rows="3" tile-maker="$tile_maker" scroller="$scroller"/>
+    <string-bundle id="string-bundle-001" class="yaml" path="i18n/${locale}"/>
+    <render-object id="c001" type="0" position="100, @c001-fall" size="20, 20"/>
+    <render-object id="c002" type="0" position="100, 0" size="200, 40"/>
+    <numeric id="c001-fall" class="accelerate" s="400" a="-500"/>
+    <collider id="collider-001" class="simple"/>
+</resources>

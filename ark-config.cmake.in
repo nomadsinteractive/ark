@@ -1,0 +1,21 @@
+# It defines the following variables
+#  ARK_SRC_DIR              - ARK source directory
+#  ARK_INCLUDE_DIRS         - include directories for ARK
+#  ARK_LIBRARIES            - libraries to link against
+#  ARK_OPENGL_LIBRARIES     - opengl libraries to link against
+
+
+# Our library dependencies (contains definitions for IMPORTED targets)
+if(NOT TARGET ark AND NOT ark_BINARY_DIR)
+    include("${CMAKE_CURRENT_LIST_DIR}/ark-targets.cmake")
+endif()
+
+# Compute paths
+set(ARK_INCLUDE_DIRS "@ARK_INCLUDE_DIRS@")
+set(ARK_SRC_DIR "@ARK_SRC_DIR@")
+set(ARK_LIBRARIES "@ARK_LIBRARIES@")
+set(ARK_STATIC_LIBRARIES "@ARK_STATIC_LIBRARIES@")
+set(ARK_OPENGL_INCLUDE_DIRS "@ARK_OPENGL_INCLUDE_DIRS@")
+set(ARK_OPENGL_LIBRARIES "@ARK_OPENGL_LIBRARIES@")
+
+include(${ARK_SRC_DIR}/tools/cmake/core.cmake)

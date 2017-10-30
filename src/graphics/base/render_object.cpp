@@ -1,0 +1,162 @@
+#include "graphics/base/render_object.h"
+
+#include "core/base/bean_factory.h"
+#include "core/inf/iterator.h"
+#include "core/inf/variable.h"
+#include "core/epi/expired.h"
+#include "core/util/bean_utils.h"
+
+#include "graphics/base/filter.h"
+#include "graphics/base/size.h"
+#include "graphics/base/transform.h"
+#include "graphics/base/vec2.h"
+
+namespace ark {
+
+namespace {
+
+class IntegerRange : public Integer {
+public:
+    IntegerRange(const sp<Range>& range, const sp<Expired>& expired)
+        : _range(range), _expired(expired) {
+    }
+
+    virtual int32_t val() override {
+        bool hasNext = _range->hasNext();
+        if(hasNext)
+            return _range->next();
+        if(_expired)
+            _expired->expire();
+        return 0;
+    }
+
+private:
+    sp<Range> _range;
+    sp<Expired> _expired;
+};
+
+}
+
+RenderObject::RenderObject(uint32_t type, const sp<VV2>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Filter>& filter)
+    : _type(type), _position(position), _size(size), _transform(transform), _filter(Null::toSafe<Filter>(filter))
+{
+}
+
+uint32_t RenderObject::type() const
+{
+    return _integer_type ? static_cast<uint32_t>(_integer_type->val()) : _type;
+}
+
+const sp<Filter>& RenderObject::filter() const
+{
+    return _filter;
+}
+
+float RenderObject::width() const
+{
+    return _size->width();
+}
+
+float RenderObject::height() const
+{
+    return _size->height();
+}
+
+const sp<Size>& RenderObject::size()
+{
+    return _size.ensure();
+}
+
+const sp<Transform>& RenderObject::transform() const
+{
+    return _transform.ensure();
+}
+
+void RenderObject::setType(uint32_t type)
+{
+    _type = type;
+    _integer_type = nullptr;
+}
+
+void RenderObject::setTypeAnimate(const sp<Range>& range, const sp<Expired>& expired)
+{
+    _integer_type = sp<IntegerRange>::make(range, expired);
+}
+
+float RenderObject::x() const
+{
+    return _position->val().x();
+}
+
+float RenderObject::y() const
+{
+    return _position->val().y();
+}
+
+V2 RenderObject::xy() const
+{
+    return _position->val();
+}
+
+const sp<VV2>& RenderObject::position() const
+{
+    return _position.ensure();
+}
+
+void RenderObject::setPosition(const sp<VV2>& position)
+{
+    _position.assign(position);
+}
+
+void RenderObject::setSize(const sp<Size>& size)
+{
+    _size.assign(size);
+}
+
+void RenderObject::setTransform(const sp<Transform>& transform)
+{
+    _transform.assign(transform);
+}
+
+void RenderObject::setFilter(const sp<Filter>& filter)
+{
+    _filter = Null::toSafe<Filter>(filter);
+}
+
+void RenderObject::setTag(const Box& tag)
+{
+    _tag = tag;
+}
+
+const Box& RenderObject::tag() const
+{
+    return _tag;
+}
+
+RenderObject::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
+    : _type(parent.ensureBuilder<Numeric>(doc, Constants::Attributes::TYPE)),
+      _position(parent.getBuilder<Vec2>(doc, Constants::Attributes::POSITION)),
+      _size(parent.getBuilder<Size>(doc, Constants::Attributes::SIZE)),
+      _transform(parent.getBuilder<Transform>(doc, Constants::Attributes::TRANSFORM)),
+      _filter(parent.getBuilder<Filter>(doc, Constants::Attributes::FILTER))
+{
+}
+
+sp<RenderObject> RenderObject::BUILDER::build(const sp<Scope>& args)
+{
+    const sp<Numeric> type = _type->build(args);
+    DWARN(type, "RenderObject has no type, assuming 0");
+    return sp<RenderObject>::make(type ? static_cast<uint32_t>(type->val()) : 0, _position->build(args), _size->build(args), _transform->build(args), _filter->build(args));
+}
+
+RenderObject::EXPIRABLE_DECORATOR::EXPIRABLE_DECORATOR(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value)
+    : _delegate(delegate), _expired(parent.ensureBuilder<Expired>(value))
+{
+}
+
+sp<RenderObject> RenderObject::EXPIRABLE_DECORATOR::build(const sp<Scope>& args)
+{
+    return _delegate->build(args).absorb(_expired->build(args));
+}
+
+}

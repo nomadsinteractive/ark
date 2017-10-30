@@ -1,0 +1,80 @@
+#ifndef ARK_CORE_BASE_CLOCK_H_
+#define ARK_CORE_BASE_CLOCK_H_
+
+#include "core/forwarding.h"
+#include "core/base/api.h"
+#include "core/inf/builder.h"
+#include "core/inf/variable.h"
+#include "core/types/shared_ptr.h"
+
+namespace ark {
+
+class ARK_API Clock : public Variable<uint64_t> {
+public:
+    class ARK_API Interval {
+    public:
+        Interval(uint64_t usec);
+        Interval(const Interval& interval);
+
+        float sec() const;
+        uint64_t usec() const;
+
+    private:
+        uint64_t _usec;
+    };
+
+    class ARK_API Elapsing {
+    public:
+        Elapsing(const Clock& clock);
+        Elapsing(const Elapsing& other);
+
+        void reset();
+        Interval elapsed();
+
+    private:
+        sp<Variable<uint64_t>> _ticker;
+        uint64_t _last_tick;
+    };
+
+public:
+    Clock(const sp<Variable<uint64_t>>& ticker);
+    Clock(const Clock& other);
+//  [[script::bindings::auto]]
+    Clock();
+
+    virtual uint64_t val() override;
+
+    uint64_t tick() const;
+
+    const sp<Variable<uint64_t>> ticker() const;
+    void setTicker(const sp<Variable<uint64_t>>& ticker);
+
+//  [[script::bindings::auto]]
+    sp<Numeric> duration() const;
+//  [[script::bindings::auto]]
+    sp<Numeric> durationUtil(const sp<Numeric>& until) const;
+
+//  [[script::bindings::auto]]
+    void pause() const;
+//  [[script::bindings::auto]]
+    void resume() const;
+
+//  [[plugin::builder]]
+    class BUILDER : public Builder<Clock> {
+    public:
+        BUILDER() = default;
+
+        virtual sp<Clock> build(const sp<Scope>& args) override;
+    };
+
+
+private:
+    class Ticker;
+
+private:
+    sp<Ticker> _ticker;
+};
+
+}
+
+#endif

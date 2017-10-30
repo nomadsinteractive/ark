@@ -1,0 +1,47 @@
+#ifndef ARK_CORE_BASE_PLUGIN_MANAGER_H_
+#define ARK_CORE_BASE_PLUGIN_MANAGER_H_
+
+#include <functional>
+#include <map>
+
+#include "core/base/api.h"
+#include "core/base/plugin.h"
+#include "core/collection/list.h"
+#include "core/forwarding.h"
+#include "core/types/shared_ptr.h"
+
+namespace ark {
+
+class ARK_API PluginManager {
+public:
+
+    typedef void (*PluginInitializer)(Ark&, PluginManager&);
+
+    template<typename T> sp<Callable<T>> getCallable(const String& name) const {
+        for(const sp<Plugin>& i : _plugins) {
+            const sp<Callable<T>> callable = i->library().getCallable<T>(name);
+            if(callable)
+                return callable;
+        }
+        return nullptr;
+    }
+
+    sp<BeanFactory> createBeanFactory(const sp<Dictionary<document>>& documentById) const;
+
+    void each(std::function<bool(const sp<Plugin>&)> visitor) const;
+
+    void load(const String& name);
+
+    void addPlugin(const sp<Plugin>& plugin);
+    const sp<Plugin>& getPlugin(const String& name) const;
+
+    const List<sp<Plugin>> plugins() const;
+
+private:
+    List<sp<Plugin>> _plugins;
+    std::map<String, sp<Plugin>> _plugins_by_name;
+};
+
+}
+
+#endif

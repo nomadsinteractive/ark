@@ -1,0 +1,28 @@
+#include "graphics/impl/alphabet/alphabet_with_fallback.h"
+
+#include "core/base/bean_factory.h"
+
+namespace ark {
+
+AlphabetWithFallback::AlphabetWithFallback(const sp<Alphabet>& alphabet, const sp<Alphabet>& fallback)
+    : _alphabet(alphabet), _fallback(fallback), _load_success(false)
+{
+}
+
+bool AlphabetWithFallback::load(uint32_t c, uint32_t& width, uint32_t& height, bool loadGlyph, bool hasFallback)
+{
+    _load_success = _alphabet->load(c, width, height, loadGlyph, true);
+    if(_load_success)
+        return true;
+    return _fallback->load(c, width, height, loadGlyph, hasFallback);
+}
+
+void AlphabetWithFallback::draw(const bitmap& image, int32_t x, int32_t y)
+{
+    if(_load_success)
+        _alphabet->draw(image, x, y);
+    else
+        _fallback->draw(image, x, y);
+}
+
+}

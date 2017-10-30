@@ -1,0 +1,17 @@
+# File for suppressing errors found in pid 11724: "nomads-moonlight.exe"
+
+# Suppression for Error #1
+UNADDRESSABLE ACCESS
+name=Error #1 (update to meaningful name)
+python36.dll!*
+
+# Suppression for Error #2
+UNINITIALIZED READ
+name=Error #2 (update to meaningful name)
+python36.dll!*
+
+# Suppression for Error #29
+INVALID HEAP ARGUMENT
+name=Error #29 (update to meaningful name)
+drmemorylib.dll!replace_operator_delete_nothrow
+glbindingd.dll!*

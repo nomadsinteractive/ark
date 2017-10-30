@@ -1,0 +1,1 @@
+list(APPEND LOCAL_COMPILE_OPTIONS "-std=gnu++11")
