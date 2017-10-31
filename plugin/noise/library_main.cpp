@@ -6,8 +6,9 @@
 
 using namespace ark;
 
-extern "C" ARK_API void __ark_noise_initialize__(Ark&, PluginManager& pm);
+extern "C" ARK_API Plugin* __ark_noise_initialize__(Ark&);
 
-void __ark_noise_initialize__(Ark&, PluginManager& pm)
+Plugin* __ark_noise_initialize__(Ark&)
 {
+    return nullptr;
 }

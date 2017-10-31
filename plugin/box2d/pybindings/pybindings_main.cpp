@@ -72,10 +72,9 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Body::Typ
 }
 }
 
-extern "C" ARK_API void __ark_box2d_pybindings_initialize__(Ark&, PluginManager& pm);
+extern "C" ARK_API Plugin* __ark_box2d_pybindings_initialize__(Ark&);
 
-void __ark_box2d_pybindings_initialize__(Ark& ark, PluginManager& pm)
+Plugin* __ark_box2d_pybindings_initialize__(Ark& ark)
 {
-    Ark::push(ark);
-    pm.addPlugin(sp<Box2dPybindingsPlugin>::make());
+    return new Box2dPybindingsPlugin();
 }

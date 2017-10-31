@@ -202,7 +202,7 @@ private:
 Ark::Ark(int32_t argc, const char** argv, const String& manfiestSrc)
     : _argc(argc), _argv(argv)
 {
-    push(*this);
+    push();
     __ark_bootstrap__();
 
     String appFilename;
@@ -218,17 +218,20 @@ Ark::Ark(int32_t argc, const char** argv, const String& manfiestSrc)
     _asset = sp<ArkAsset>::make(sp<RawAsset>::make(assetDir, appDir), manifest);
     _application_context = createApplicationContext(manifest);
     put<RenderEngine>(createRenderEngine(static_cast<RenderEngineVersion>(Documents::getAttribute<int32_t>(manifest, "gl-version", 0))));
+
+    loadPlugins(manifest);
 }
 
 Ark::~Ark()
 {
     for(auto iter = _instance_stack.begin(); iter != _instance_stack.end(); ++iter)
-        if(*iter == _instance)
+        if(*iter == this)
         {
-            _instance_stack.erase(iter);
-            break;
+            iter = _instance_stack.erase(iter);
+            if(iter == _instance_stack.end())
+                break;
         }
-    _instance = _instance_stack.front();
+    _instance = _instance_stack.size() > 0 ? _instance_stack.front() : nullptr;
 }
 
 Ark& Ark::instance()
@@ -237,10 +240,10 @@ Ark& Ark::instance()
     return *_instance;
 }
 
-void Ark::push(Ark& instance)
+void Ark::push()
 {
     _instance_stack.push_front(_instance);
-    _instance = &instance;
+    _instance = this;
 }
 
 sp<BeanFactory> Ark::createBeanFactory(const String& src) const
@@ -320,6 +323,14 @@ sp<RenderEngine> Ark::createRenderEngine(RenderEngineVersion type)
     }
     DFATAL("Unknown engine type");
     return nullptr;
+}
+
+void Ark::loadPlugins(const document& manifest) const
+{
+    const Global<PluginManager> pluginManager;
+
+    for(const document& i : manifest->children("plugin"))
+        pluginManager->load(Documents::ensureAttribute(i, Constants::Attributes::NAME));
 }
 
 }

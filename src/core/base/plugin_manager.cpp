@@ -31,25 +31,15 @@ void PluginManager::load(const String& name)
     void* symbol = Platform::dlSymbol(library, symbolName.c_str());
     DCHECK(symbol, "Error loading plugin \"%s\", symbol \"%s\" not found", name.c_str(), symbolName.c_str());
     PluginInitializer func = reinterpret_cast<PluginInitializer>(symbol);
-    func(Ark::instance(), *this);
+    Plugin* plugin = func(Ark::instance());
+    DCHECK(plugin, "Error loading plugin \"%s\", PluginInitializer returned null", name.c_str());
+    addPlugin(sp<Plugin>::adopt(plugin));
 }
 
 void PluginManager::addPlugin(const sp<Plugin>& plugin)
 {
     plugin->initialize();
     _plugins.push_back(plugin);
-    _plugins_by_name[plugin->name()] = plugin;
-}
-
-const sp<Plugin>& PluginManager::getPlugin(const String& name) const
-{
-    auto iter = _plugins_by_name.find(name);
-    return iter != _plugins_by_name.end() ? iter->second : sp<Plugin>::null();
-}
-
-const List<sp<Plugin>> PluginManager::plugins() const
-{
-    return _plugins;
 }
 
 }

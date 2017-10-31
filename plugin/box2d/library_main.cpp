@@ -10,10 +10,9 @@
 using namespace ark;
 using namespace ark::plugin::box2d;
 
-extern "C" ARK_API void __ark_box2d_initialize__(Ark&, PluginManager& pm);
+extern "C" ARK_API Plugin* __ark_box2d_initialize__(Ark&);
 
-void __ark_box2d_initialize__(Ark& ark, PluginManager& pm)
+Plugin* __ark_box2d_initialize__(Ark& ark)
 {
-    Ark::push(ark);
-    pm.addPlugin(sp<Box2dPlugin>::make());
+    return new Box2dPlugin();
 }

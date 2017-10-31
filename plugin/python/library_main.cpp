@@ -10,10 +10,10 @@
 using namespace ark;
 using namespace ark::plugin::python;
 
-extern "C" ARK_API void __ark_python_initialize__(Ark& ark, PluginManager& pm);
+extern "C" ARK_API Plugin* __ark_python_initialize__(Ark&);
 
-void __ark_python_initialize__(Ark& ark, PluginManager& pm)
+Plugin* __ark_python_initialize__(Ark& ark)
 {
-    Ark::push(ark);
-    pm.addPlugin(sp<PythonPlugin>::make());
+    ark.push();
+    return new PythonPlugin();
 }

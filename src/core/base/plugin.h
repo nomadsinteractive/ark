@@ -25,8 +25,6 @@ public:
     Plugin(const String& name, PluginType type);
     virtual ~Plugin() = default;
 
-    void initialize();
-
     virtual BeanFactory::Factory createBeanFactory(const BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById);
     virtual BeanFactory::Factory createResourceLoader(const BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById, const sp<ResourceLoaderContext>& resourceLoaderContext);
     virtual Library createLibrary();
@@ -40,10 +38,15 @@ public:
     const Library& library() const;
 
 private:
+    void initialize();
+
+private:
     Library _library;
 
     String _name;
     PluginType _type;
+
+    friend class PluginManager;
 };
 
 }

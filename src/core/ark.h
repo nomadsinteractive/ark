@@ -37,7 +37,8 @@ public:
     ~Ark();
 
     static Ark& instance();
-    static void push(Ark& instance);
+
+    void push();
 
     template<typename T> const sp<T>& query() const {
         return _interfaces.get<T>();
@@ -68,6 +69,8 @@ private:
 
     sp<ApplicationContext> createApplicationContext(const document& manifest);
     sp<RenderEngine> createRenderEngine(RenderEngineVersion type);
+
+    void loadPlugins(const document& manifest) const;
 
 private:
     static Ark* _instance;

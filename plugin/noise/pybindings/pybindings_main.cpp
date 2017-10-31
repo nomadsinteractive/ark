@@ -43,22 +43,15 @@ public:
             __init_py_noise_bindings__(noisemodule);
             PyModule_AddObject(arkmodule, "noise", noisemodule);
 
-//            PyArkType* type = PythonInterpreter::instance()->getPyArkType<Arena>();
-//            {
-//                std::map<TypeId, PyArkType::LoaderFunction>& loader = type->ensureLoader("load");
-//                loader[Type<World>::id()] = [](PyArkType::Instance& inst, const String& id, const sp<Scope>& args)->Box { return inst.unpack<Arena>()->load<World>(id, args).pack(); };
-//                loader[Type<Body>::id()] = [](PyArkType::Instance& inst, const String& id, const sp<Scope>& args)->Box { return inst.unpack<Arena>()->load<Body>(id, args).pack(); };
-//            }
         }
     }
 };
 
 }
 
-extern "C" ARK_API void __ark_noise_pybindings_initialize__(Ark&, PluginManager& pm);
+extern "C" ARK_API Plugin* __ark_noise_pybindings_initialize__(Ark&);
 
-void __ark_noise_pybindings_initialize__(Ark& ark, PluginManager& pm)
+Plugin* __ark_noise_pybindings_initialize__(Ark&)
 {
-    Ark::push(ark);
-    pm.addPlugin(sp<NoisePybindingsPlugin>::make());
+    return new NoisePybindingsPlugin();
 }

@@ -15,7 +15,7 @@ namespace ark {
 class ARK_API PluginManager {
 public:
 
-    typedef void (*PluginInitializer)(Ark&, PluginManager&);
+    typedef Plugin* (*PluginInitializer)(Ark&);
 
     template<typename T> sp<Callable<T>> getCallable(const String& name) const {
         for(const sp<Plugin>& i : _plugins) {
@@ -33,13 +33,10 @@ public:
     void load(const String& name);
 
     void addPlugin(const sp<Plugin>& plugin);
-    const sp<Plugin>& getPlugin(const String& name) const;
-
-    const List<sp<Plugin>> plugins() const;
 
 private:
     List<sp<Plugin>> _plugins;
-    std::map<String, sp<Plugin>> _plugins_by_name;
+
 };
 
 }

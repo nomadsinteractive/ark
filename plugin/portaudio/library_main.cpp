@@ -10,10 +10,9 @@
 using namespace ark;
 using namespace ark::plugin::portaudio;
 
-extern "C" ARK_API void __ark_portaudio_initialize__(Ark& ark, PluginManager& pm);
+extern "C" ARK_API Plugin* __ark_portaudio_initialize__(Ark&);
 
-void __ark_portaudio_initialize__(Ark& ark, PluginManager& pm)
+Plugin* __ark_portaudio_initialize__(Ark& ark)
 {
-    Ark::push(ark);
-    pm.addPlugin(sp<PortaudioPlugin>::make());
+    return new PortaudioPlugin();
 }
