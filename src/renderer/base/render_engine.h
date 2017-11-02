@@ -1,6 +1,7 @@
 #ifndef ARK_RENDERER_INF_RENDER_ENGINE_H_
 #define ARK_RENDERER_INF_RENDER_ENGINE_H_
 
+#include <map>
 #include <regex>
 
 #include "core/ark.h"
@@ -28,6 +29,9 @@ public:
 
     const std::regex& inPattern() const;
     const std::regex& outPattern() const;
+    const std::regex& inOutPattern() const;
+
+    const std::map<String, String>& annotations() const;
 
     sp<RenderView> createRenderView(const Viewport& viewport) const;
 
@@ -39,7 +43,6 @@ private:
 private:
     Ark::RenderEngineVersion _version;
 
-    String _name;
     String _in_type_name;
     String _out_type_name;
     String _fragment_name;
@@ -49,6 +52,9 @@ private:
 
     std::regex _in_pattern;
     std::regex _out_pattern;
+    std::regex _in_out_pattern;
+
+    std::map<String, String> _annotations;
 };
 
 }

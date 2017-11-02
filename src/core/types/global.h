@@ -23,6 +23,10 @@ public:
         return _inst;
     }
 
+    operator const T& () const {
+        return _inst;
+    }
+
 private:
     const sp<T>& _inst;
 };

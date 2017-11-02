@@ -14,10 +14,12 @@
 
 namespace ark {
 
-static const char _var_pattern[] = "\\s+([\\w\\d]+)\\s+(?:a_|v_)([\\w\\d_]+);";
+static const char _var_pattern[] = "%s\\s+([\\w\\d]+)\\s+(?:a_|v_)([\\w\\d_]+);";
 
 RenderEngine::RenderEngine(Ark::RenderEngineVersion version, const sp<RenderViewFactory>& renderViewFactory)
-    : _version(version), _render_view_factory(renderViewFactory)
+    : _version(version), _in_type_name("${vert.in}"), _out_type_name("${vert.out}"), _fragment_name("${frag.color}"), _render_view_factory(renderViewFactory),
+      _in_pattern(Strings::sprintf(_var_pattern, "(?:attribute|in)").c_str()), _out_pattern(Strings::sprintf(_var_pattern, "(?:varying|out)").c_str()),
+      _in_out_pattern(Strings::sprintf(_var_pattern, "(?:varying|in)").c_str())
 {
     if(version != Ark::AUTO)
         chooseGLVersion(version);
@@ -94,6 +96,16 @@ const std::regex& RenderEngine::outPattern() const
     return _out_pattern;
 }
 
+const std::regex& RenderEngine::inOutPattern() const
+{
+    return _in_out_pattern;
+}
+
+const std::map<String, String>& RenderEngine::annotations() const
+{
+    return _annotations;
+}
+
 sp<RenderView> RenderEngine::createRenderView(const Viewport& viewport) const
 {
     return _render_view_factory->createRenderView(viewport);
@@ -110,21 +122,23 @@ void RenderEngine::chooseGLVersion(Ark::RenderEngineVersion version)
     LOGD("Choose GLVersion = %d", version);
     if(version == Ark::OPENGL_20 || version == Ark::OPENGL_21)
     {
-        _in_type_name = "attribute";
-        _out_type_name = "varying";
-        _fragment_name = "gl_FragColor";
+        _annotations["vert.in"] = "attribute";
+        _annotations["vert.out"] = "varying";
+        _annotations["frag.in"] = "varying";
+        _annotations["frag.out"] = "varying";
+        _annotations["frag.color"] = "gl_FragColor";
         _gl_procedure_factory = sp<gles20::GLProcedureFactoryGLES20>::make();
     }
     else
     {
-        _in_type_name = "in";
-        _out_type_name = "out";
-        _fragment_name = "v_FragColor";
+        _annotations["vert.in"] = "in";
+        _annotations["vert.out"] = "out";
+        _annotations["frag.in"] = "in";
+        _annotations["frag.out"] = "out";
+        _annotations["frag.color"] = "v_FragColor";
         _gl_procedure_factory = sp<gles30::GLProcedureFactoryGLES30>::make();
     }
     _version = version;
-    _in_pattern = std::regex((_in_type_name + _var_pattern).c_str());
-    _out_pattern = std::regex((_out_type_name + _var_pattern).c_str());
 }
 
 }

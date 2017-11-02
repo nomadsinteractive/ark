@@ -29,15 +29,22 @@ public:
         PyObject* weakreflist;
 
         template<typename T> const sp<T>& unpack() const {
+            DCHECK(typeCheck<T>(), "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::getClass<T>()->name());
             return box->unpack<T>();
         }
 
         template<typename T> sp<T>& unpack() {
+            DCHECK(typeCheck<T>(), "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::getClass<T>()->name());
             return box->unpack<T>();
         }
 
         template<typename T> void pack(const sp<T>& ptr) {
+            NOT_NULL(box);
             *box = ptr.pack();
+        }
+
+        template<typename T> bool typeCheck() {
+            return box && box->typeId() == Type<T>::id();
         }
 
         Wrapper* getWrapper() {

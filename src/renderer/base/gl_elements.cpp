@@ -16,75 +16,6 @@
 
 namespace ark {
 
-namespace {
-
-class GLSnippetWrapper : public GLSnippet {
-public:
-    GLSnippetWrapper(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix)
-        : _delegate(sp<CoreGLSnippet>::make(*this, glResourceManager, shader, arrayBuffer, appendix)) {
-    }
-
-    virtual void preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context) override {
-        _delegate->preCompile(source, context);
-    }
-
-    virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override {
-        _delegate->preDraw(graphicsContext, shader, context);
-    }
-
-    virtual void postDraw(GraphicsContext& graphicsContext) override {
-        _delegate->postDraw(graphicsContext);
-    }
-
-private:
-    sp<GLSnippet> _delegate;
-
-    friend class CoreGLSnippet;
-
-};
-
-class CoreGLSnippet : public GLSnippet {
-public:
-    CoreGLSnippet(GLSnippetWrapper& wrapper, const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix)
-        : _wrapper(wrapper), _gl_resource_manager(glResourceManager), _shader(shader), _array_buffer(arrayBuffer), _appendix(appendix) {
-    }
-
-    virtual void preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context) override {
-        const sp<GLSnippet> delegate = _wrapper._delegate;
-        _wrapper._delegate = createGLSnippet();
-        _wrapper.preCompile(source, context);
-
-    }
-    virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override {
-        const sp<GLSnippet> delegate = _wrapper._delegate;
-        _wrapper._delegate = createGLSnippet();
-        _wrapper.preDraw(graphicsContext, shader, context);
-
-    }
-    virtual void postDraw(GraphicsContext& graphicsContext) override {
-        const sp<GLSnippet> delegate = _wrapper._delegate;
-        _wrapper._delegate = createGLSnippet();
-        _wrapper.postDraw(graphicsContext);
-    }
-private:
-    sp<GLSnippet> createGLSnippet() {
-        const Global<RenderEngine> renderEngine;
-        const sp<GLSnippet> coreGLSnippet = renderEngine->createCoreGLSnippet(_gl_resource_manager, _shader, _array_buffer);
-        return _appendix ? sp<GLSnippet>::adopt(new GLSnippetLinkedChain(coreGLSnippet, _appendix)) : coreGLSnippet;
-    }
-
-private:
-    GLSnippetWrapper& _wrapper;
-
-    sp<GLResourceManager> _gl_resource_manager;
-    sp<GLShader> _shader;
-    GLBuffer _array_buffer;
-
-    sp<GLSnippet> _appendix;
-};
-
-}
-
 GLElements::GLElements(const sp<GLShader>& shader, const sp<GLTexture>& texture, const sp<GLModel>& model, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_manager(resourceLoaderContext->glResourceManager()), _shader(shader), _texture(texture), _model(model), _mode(static_cast<GLenum>(model->mode()))
     , _array_buffer(_resource_manager->createGLBuffer(nullptr, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW))
@@ -102,12 +33,62 @@ void GLElements::render(const LayerContext& renderContext, RenderCommandPipeline
     }
 }
 
-sp<GLSnippet> GLElements::createCoreGLSnippet(const sp<GLSnippet>& glSnippet)
+sp<GLSnippet> GLElements::createCoreGLSnippet(const sp<GLSnippet>& glSnippet) const
 {
     return sp<GLSnippetWrapper>::make(_resource_manager, _shader, _array_buffer, glSnippet);
-//    const Global<RenderEngine> renderEngine;
-//    const sp<GLSnippet> proc = renderEngine->createCoreGLSnippet(_resource_manager, _shader, _array_buffer);
-//    return glSnippet ? sp<GLSnippet>::adopt(new GLSnippetLinkedChain(proc, glSnippet)) : proc;
+}
+
+GLElements::CoreGLSnippet::CoreGLSnippet(GLElements::GLSnippetWrapper& wrapper, const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix)
+    : _wrapper(wrapper), _gl_resource_manager(glResourceManager), _shader(shader), _array_buffer(arrayBuffer), _appendix(appendix)
+{
+}
+
+void GLElements::CoreGLSnippet::preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context)
+{
+    const sp<GLSnippet> delegate = _wrapper._delegate;
+    _wrapper._delegate = createGLSnippet();
+    _wrapper.preCompile(source, context);
+}
+
+void GLElements::CoreGLSnippet::preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context)
+{
+    const sp<GLSnippet> delegate = _wrapper._delegate;
+    _wrapper._delegate = createGLSnippet();
+    _wrapper.preDraw(graphicsContext, shader, context);
+}
+
+void GLElements::CoreGLSnippet::postDraw(GraphicsContext& graphicsContext)
+{
+    const sp<GLSnippet> delegate = _wrapper._delegate;
+    _wrapper._delegate = createGLSnippet();
+    _wrapper.postDraw(graphicsContext);
+}
+
+sp<GLSnippet> GLElements::CoreGLSnippet::createGLSnippet() const
+{
+    const Global<RenderEngine> renderEngine;
+    const sp<GLSnippet> coreGLSnippet = renderEngine->createCoreGLSnippet(_gl_resource_manager, _shader, _array_buffer);
+    return _appendix ? sp<GLSnippet>::adopt(new GLSnippetLinkedChain(coreGLSnippet, _appendix)) : coreGLSnippet;
+}
+
+GLElements::GLSnippetWrapper::GLSnippetWrapper(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix)
+    : _delegate(sp<CoreGLSnippet>::make(*this, glResourceManager, shader, arrayBuffer, appendix))
+{
+}
+
+void GLElements::GLSnippetWrapper::preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context)
+{
+    _delegate->preCompile(source, context);
+}
+
+void GLElements::GLSnippetWrapper::preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context)
+{
+    _delegate->preDraw(graphicsContext, shader, context);
+}
+
+void GLElements::GLSnippetWrapper::postDraw(GraphicsContext& graphicsContext)
+{
+    _delegate->postDraw(graphicsContext);
 }
 
 }

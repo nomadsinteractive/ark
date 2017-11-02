@@ -25,6 +25,7 @@ class GLSnippetContext;
 class GLTexture;
 class GLTextureLoader;
 class GLTextureResource;
+class GLUniform;
 class GraphicsContext;
 class RenderLayer;
 class RenderEngine;

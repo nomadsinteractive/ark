@@ -11,23 +11,24 @@
 
 namespace ark {
 
-GLShaderPreprocessor::GLShaderPreprocessor(const String& inType, const String& outType)
-    : _in_declarations(inType), _out_declarations(outType)
+GLShaderPreprocessor::GLShaderPreprocessor(ShaderType type, const String& source)
+    : _type(type), _source(source), _in_declarations(type == SHADER_TYPE_VERTEX ? "${vert.in}" : "${frag.in}"),
+      _out_declarations(type == SHADER_TYPE_VERTEX ? "${vert.out}" : "${frag.out}")
 {
 }
 
-void GLShaderPreprocessor::parse(GLShaderPreprocessor::Context& context, const String& src, GLShaderSource& shader)
+void GLShaderPreprocessor::parse1(GLShaderSource& shader)
 {
-    if(src.find("void main()") != String::npos)
+    if(_source.find("void main()") != String::npos)
     {
-        DWARN(false, "Shader which contains main function will not be preprocessed by ark shader preprocessor. Try to replace it with ark_main(vec2 position, ...) for better flexibilty and compatibilty");
+        DWARN(false, "Shader which contains main function will not be preprocessed by ark shader preprocessor. Try to replace it with \"vec4 ark_main(vec2 position, ...)\" for better flexibilty and compatibilty");
         return;
     }
 
     uint32_t prefixStart = 0;
     static const std::regex FUNC_PATTERN("vec4\\s+ark_main\\(([^)]*)\\)");
 
-    src.search(FUNC_PATTERN, [&prefixStart, this] (const std::smatch& m)->bool {
+    _source.search(FUNC_PATTERN, [&prefixStart, this] (const std::smatch& m)->bool {
         const String prefix = prefixStart == 0 ? m.prefix().str() : m.prefix().str().substr(prefixStart);
         const String remaining = m.suffix().str();
         String body;
@@ -41,11 +42,10 @@ void GLShaderPreprocessor::parse(GLShaderPreprocessor::Context& context, const S
     parseCodeBlock(_main_block, shader);
 }
 
-void GLShaderPreprocessor::preprocess(GLShaderPreprocessor::Context& context, String& src, ShaderType type, GLShaderSource& shader)
+void GLShaderPreprocessor::parse2(GLShaderPreprocessor::Context& context, GLShaderSource& shader)
 {
-    _in_declarations.parse(src, (context.renderEngine->version() < Ark::OPENGL_30 && type == SHADER_TYPE_FRAGMENT)
-                           ? context.renderEngine->outPattern() : context.renderEngine->inPattern());
-    _out_declarations.parse(src, context.renderEngine->outPattern());
+    _in_declarations.parse(_source, _type == SHADER_TYPE_FRAGMENT ? context.renderEngine->inOutPattern() : context.renderEngine->inPattern());
+    _out_declarations.parse(_source, context.renderEngine->outPattern());
 
     if(!_main_block)
         return;
@@ -64,7 +64,7 @@ void GLShaderPreprocessor::preprocess(GLShaderPreprocessor::Context& context, St
         sb << ") {\n    " << _main_block->_procedure._body << "\n}" << _main_block->_suffix;
     }
 
-    const String outVar = type == SHADER_TYPE_VERTEX ? "gl_Position" : context.renderEngine->fragmentName();
+    const String outVar = _type == SHADER_TYPE_VERTEX ? "gl_Position" : context.renderEngine->fragmentName();
     sb << "\n\nvoid main() {\n    " << outVar << " = ark_main(";
 
     const auto begin = _main_block->_procedure._ins.begin();
@@ -72,14 +72,14 @@ void GLShaderPreprocessor::preprocess(GLShaderPreprocessor::Context& context, St
     {
         if(iter != begin)
             sb << ", ";
-        sb << (type == SHADER_TYPE_VERTEX ? "a_" : "v_");
+        sb << (_type == SHADER_TYPE_VERTEX ? "a_" : "v_");
         sb << Strings::capitalFirst(iter->second);
     }
     sb << ");\n}\n\n";
 
-    src = sb.str();
+    _source = sb.str();
 
-    if(type == SHADER_TYPE_VERTEX)
+    if(_type == SHADER_TYPE_VERTEX)
     {
         for(const auto& i : _main_block->_procedure._ins)
             context.vertexIns.push_back(i);
@@ -89,11 +89,60 @@ void GLShaderPreprocessor::preprocess(GLShaderPreprocessor::Context& context, St
         for(const auto& i : context.vertexIns)
             context.addAttribute(Strings::capitalFirst(i.second), i.first, context.vertexInsDeclared, shader);
     }
-    if(type == SHADER_TYPE_FRAGMENT)
+    if(_type == SHADER_TYPE_FRAGMENT)
     {
         for(const std::pair<String, String>& i : _main_block->_procedure._ins)
             context.fragmentIns.push_back(i);
     }
+}
+
+void GLShaderPreprocessor::done()
+{
+    insertAfter(";", getDeclarations());
+}
+
+String GLShaderPreprocessor::preprocess(const RenderEngine& renderEngine) const
+{
+    DCHECK(renderEngine.version() > 0, "Unintialized RenderEngine");
+
+    static std::regex var_pattern("\\$\\{([\\w.]+)\\}");
+
+    StringBuilder sb;
+    if(_type == SHADER_TYPE_FRAGMENT && renderEngine.version() >= Ark::OPENGL_30)
+    {
+        sb << "#define texture2D texture\n";
+        sb << "";
+    }
+
+    std::map<String, String> annotations = renderEngine.annotations();
+    annotations.insert(_annotations.begin(), _annotations.end());
+
+    sb << _source.replace(var_pattern, [&annotations] (Array<String>& matches)->String {
+        const String& varName = matches.array()[1];
+        const auto iter = annotations.find(varName);
+        DCHECK(iter != annotations.end(), "Cannot find constant \"%s\" in RenderEngine", varName.c_str());
+        return iter->second;
+    });
+
+    return sb.str();
+}
+
+void GLShaderPreprocessor::insertPredefinedUniforms(const List<GLUniform>& uniforms)
+{
+    static const std::regex UNIFORM_PATTERN("uniform\\s+[\\w\\d]+\\s+([^;]+);");
+    std::set<String> names;
+    List<String> generated;
+    _source.search(UNIFORM_PATTERN, [&names](const std::smatch& m)->bool {
+        names.insert(m[1].str());
+        return true;
+    });
+
+    for(const GLUniform& i : uniforms)
+        if(names.find(i.name()) == names.end() && _source.find(i.name()) != String::npos)
+            generated.push_back(i.declaration());
+
+    for(const String& i : generated)
+        _uniform_declarations << i << '\n';
 }
 
 uint32_t GLShaderPreprocessor::parseFunctionBody(const String& s, String& body)
@@ -103,6 +152,13 @@ uint32_t GLShaderPreprocessor::parseFunctionBody(const String& s, String& body)
     String::size_type end = Strings::parentheses(s, pos, '{', '}');
     body = s.substr(pos + 1, end - 1).strip();
     return end + 1;
+}
+
+void GLShaderPreprocessor::insertAfter(const String& statement, const String& str)
+{
+    String::size_type pos = _source.find(statement);
+    if(pos != String::npos)
+        _source.insert(pos + 1, str);
 }
 
 String GLShaderPreprocessor::getDeclarations()
@@ -213,12 +269,6 @@ void GLShaderPreprocessor::Context::addAttribute(const String& name, const Strin
         source.addAttribute(name, type);
     }
 }
-
-//void GLShaderPreprocessor::Context::addAttributeInSource(const String& name, const String& type, std::map<String, String>& vars, std::map<String, String>& varsInSource, GLShaderSource& source)
-//{
-//    varsInSource[name] = type;
-//    addAttribute(name, type, vars, source);
-//}
 
 void GLShaderPreprocessor::Context::addVertexSource(const String& source)
 {

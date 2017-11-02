@@ -7,8 +7,9 @@
 
 #include "graphics/forwarding.h"
 
-#include "renderer/base/gl_buffer.h"
 #include "renderer/forwarding.h"
+#include "renderer/base/gl_buffer.h"
+#include "renderer/inf/gl_snippet.h"
 
 #include "platform/gl/gl.h"
 
@@ -21,7 +22,45 @@ public:
     void render(const LayerContext& renderContext, RenderCommandPipeline& pipeline, float x, float y);
 
 private:
-    sp<GLSnippet> createCoreGLSnippet(const sp<GLSnippet>& glSnippet);
+    class GLSnippetWrapper;
+
+    class CoreGLSnippet : public GLSnippet {
+    public:
+        CoreGLSnippet(GLSnippetWrapper& wrapper, const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix);
+
+        virtual void preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context) override;
+        virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override;
+        virtual void postDraw(GraphicsContext& graphicsContext) override;
+
+    private:
+        sp<GLSnippet> createGLSnippet() const;
+
+    private:
+        GLSnippetWrapper& _wrapper;
+
+        sp<GLResourceManager> _gl_resource_manager;
+        sp<GLShader> _shader;
+        GLBuffer _array_buffer;
+
+        sp<GLSnippet> _appendix;
+    };
+
+    class GLSnippetWrapper : public GLSnippet {
+    public:
+        GLSnippetWrapper(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix);
+
+        virtual void preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context) override;
+        virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override;
+        virtual void postDraw(GraphicsContext& graphicsContext) override;
+
+    private:
+        sp<GLSnippet> _delegate;
+
+        friend class CoreGLSnippet;
+    };
+
+private:
+    sp<GLSnippet> createCoreGLSnippet(const sp<GLSnippet>& glSnippet) const;
 
 private:
     sp<GLResourceManager> _resource_manager;

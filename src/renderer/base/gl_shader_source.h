@@ -49,8 +49,10 @@ private:
     void insertBefore(String& src, const String& statement, const String& str);
     void insertAfter(String& src, const String& statement, const String& str);
 
-    String _vertex;
-    String _fragment;
+    GLShaderPreprocessor _vertex;
+    GLShaderPreprocessor _fragment;
+//    String _vertex;
+//    String _fragment;
     uint32_t _stride;
     sp<ResourceLoaderContext::Synchronizer> _synchronizer;
 

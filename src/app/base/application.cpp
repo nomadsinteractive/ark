@@ -115,9 +115,7 @@ void Application::onResume()
 void Application::onDestroy()
 {
     LOGD("");
-
     _alive = false;
-
     const sp<ApplicationDelegate> applicationDelegate = _application_delegate;
     const sp<ApplicationContext> applicationContext = _application_context;
     _application_context->resume();
@@ -130,11 +128,8 @@ void Application::onDestroy()
 
 void Application::onSurfaceCreated()
 {
+    LOGD("");
     Platform::glInitialize();
-
-    const Global<RenderEngine> renderEngine;
-    renderEngine->initialize();
-
     _surface->onSurfaceCreated();
     _application_delegate->onSurfaceCreated(_surface);
 }
@@ -142,6 +137,10 @@ void Application::onSurfaceCreated()
 void Application::onSurfaceChanged(uint32_t width, uint32_t height)
 {
     LOGD("width = %d, height = %d", width, height);
+
+    const Global<RenderEngine> renderEngine;
+    renderEngine->initialize();
+
     _surface->onSurfaceChanged(width, height);
     _application_delegate->onSurfaceChanged(width, height);
     _width = width;

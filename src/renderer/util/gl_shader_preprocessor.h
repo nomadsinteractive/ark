@@ -1,6 +1,8 @@
 #ifndef ARK_RENDERER_UTIL_GL_SHADER_PREPROCESSOR_H_
 #define ARK_RENDERER_UTIL_GL_SHADER_PREPROCESSOR_H_
 
+#include <map>
+
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/base/string_builder.h"
@@ -53,6 +55,23 @@ private:
         CodeBlock(CodeBlock&& other);
     };
 
+    class Declaration {
+    public:
+        Declaration(const String& category);
+
+        void declare(const String& type, const String& prefix, const String& name);
+        void parse(const String& src, const std::regex& pattern);
+
+        bool dirty() const;
+        bool has(const String& name) const;
+        String str() const;
+
+        String _category;
+
+        StringBuilder _lines;
+        std::map<String, String> _declared;
+    };
+
 public:
     enum ShaderType {
         SHADER_TYPE_VERTEX,
@@ -71,52 +90,46 @@ public:
         List<Snippet> _fragment_snippets;
 
         void addAttribute(const String& name, const String& type, std::map<String, String>& vars, GLShaderSource& source);
-//        void addAttributeInSource(const String& name, const String& type, std::map<String, String>& vars, std::map<String, String>& varsInSource, GLShaderSource& source);
-
         void addVertexSource(const String& source);
         void addFragmentColorModifier(const String& modifier);
         void addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure);
     };
 
-    class Declaration {
-    public:
-        Declaration(const String& category);
-
-        void declare(const String& type, const String& prefix, const String& name);
-        void parse(const String& src, const std::regex& pattern);
-
-        bool dirty() const;
-        bool has(const String& name) const;
-        String str() const;
-
-//    private:
-        String _category;
-
-        StringBuilder _lines;
-        std::map<String, String> _declared;
-    };
-
 public:
-    GLShaderPreprocessor(const String& inType, const String& outType);
+    GLShaderPreprocessor(ShaderType type, const String& source);
 
-    void parse(Context& context, const String& src, GLShaderSource& shader);
-    void preprocess(Context& context, String& src, ShaderType type, GLShaderSource& shader);
+    void parse1(GLShaderSource& shader);
+    void parse2(Context& context, GLShaderSource& shader);
+    void done();
 
     void addUniform(const String& type, const String& name);
+
+    String preprocess(const RenderEngine& renderEngine) const;
+
+    void insertPredefinedUniforms(const List<GLUniform>& uniforms);
 
 private:
     void parseCodeBlock(CodeBlock& codeBlock, GLShaderSource& shader);
     uint32_t parseFunctionBody(const String& s, String& body);
 
+    String getDeclarations();
+    void insertAfter(const String& statement, const String& str);
+
 private:
     sp<CodeBlock> _main_block;
 
 public:
+    ShaderType _type;
+    String _source;
+
     StringBuilder _uniform_declarations;
+    std::map<String, String> _annotations;
+
+public:
     Declaration _in_declarations;
     Declaration _out_declarations;
 
-    String getDeclarations();
+
     void declare(StringBuilder& sb, const List<std::pair<String, String>>& vars, const String& inType, const String& prefix, std::map<String, String>& declared) const;
 
     friend class GLShaderSource;

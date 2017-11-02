@@ -17,7 +17,7 @@
 namespace ark {
 
 GLShaderSource::GLShaderSource(const String& vertex, const String& fragment, const sp<ResourceLoaderContext::Synchronizer>& synchronizer)
-    : _vertex(vertex), _fragment(fragment), _stride(0), _synchronizer(synchronizer)
+    : _vertex(GLShaderPreprocessor::SHADER_TYPE_VERTEX, vertex), _fragment(GLShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment), _stride(0), _synchronizer(synchronizer)
 {
 }
 
@@ -29,28 +29,28 @@ void GLShaderSource::loadPredefinedParam(BeanFactory& factory, const sp<Scope>& 
 
 String& GLShaderSource::vertex()
 {
-    return _vertex;
+    return _vertex._source;
 }
 
 const String& GLShaderSource::vertex() const
 {
-    return _vertex;
+    return _vertex._source;
 }
 
 String& GLShaderSource::fragment()
 {
-    return _fragment;
+    return _fragment._source;
 }
 
 const String& GLShaderSource::fragment() const
 {
-    return _fragment;
+    return _fragment._source;
 }
 
 sp<GLProgram> GLShaderSource::makeGLProgram() const
 {
     const Global<RenderEngine> renderEngine;
-    return sp<GLProgram>::make(renderEngine->getGLSLVersion(), _vertex, _fragment);
+    return sp<GLProgram>::make(renderEngine->getGLSLVersion(), _vertex.preprocess(renderEngine), _fragment.preprocess(renderEngine));
 }
 
 void GLShaderSource::addPredefinedAttribute(const String& name, const String& type)
@@ -68,30 +68,26 @@ void GLShaderSource::addSnippet(const sp<GLSnippet>& snippet)
 GLShader::Slot GLShaderSource::preprocess()
 {
     GLShaderPreprocessor::Context context;
-    const String& inType = context.renderEngine->inTypeName();
-    const String& outType = context.renderEngine->outTypeName();
-    const String& fragmentInTypeName = context.renderEngine->version() >= Ark::OPENGL_30 ? inType : outType;
 
-    GLShaderPreprocessor p1(inType, outType), p2(fragmentInTypeName, outType);
-    p1.parse(context, _vertex, *this);
-    p2.parse(context, _fragment, *this);
-    p1.preprocess(context, _vertex, GLShaderPreprocessor::SHADER_TYPE_VERTEX, *this);
-    p2.preprocess(context, _fragment, GLShaderPreprocessor::SHADER_TYPE_FRAGMENT, *this);
+    if(_snippet)
+        _snippet->preCompile(*this, context);
 
-    for(const auto& i : p1._in_declarations._declared)
+    _vertex.parse1(*this);
+    _fragment.parse1(*this);
+    _vertex.parse2(context, *this);
+    _fragment.parse2(context, *this);
+
+    for(const auto& i : _vertex._in_declarations._declared)
         if(context.vertexInsDeclared.find(i.first) == context.vertexInsDeclared.end())
         {
             context.vertexInsDeclared[i.first] = i.second;
             addAttribute(i.second, i.first);
         }
 
-    std::map<String, String> attributes = p2._in_declarations._declared;
+    std::map<String, String> attributes = _fragment._in_declarations._declared;
     if(_snippet)
-    {
-        _snippet->preCompile(*this, context);
         for(const auto& iter : _attributes)
             attributes[iter.first] = iter.second.type();
-    }
 
     StringBuilder vertMainSource;
     StringBuilder fragColorModifier;
@@ -100,28 +96,25 @@ GLShader::Slot GLShaderSource::preprocess()
 
     std::set<String> fragmentUsedVars;
     static const std::regex VAR_PATTERN("\\bv_([\\w\\d_]+)\\b");
-    _fragment.search(VAR_PATTERN, [&fragmentUsedVars](const std::smatch& m)->bool {
+    _fragment._source.search(VAR_PATTERN, [&fragmentUsedVars](const std::smatch& m)->bool {
         fragmentUsedVars.insert(m[1].str());
         return true;
     });
 
-    if(context.renderEngine->version() >= Ark::OPENGL_30)
-        _fragment = "#define texture2D texture\n" + _fragment;
-
     List<String> generated;
 
     for(const auto& i : context.vertexIns)
-        p1._in_declarations.declare(i.first, "a_", Strings::capitalFirst(i.second));
+        _vertex._in_declarations.declare(i.first, "a_", Strings::capitalFirst(i.second));
     for(const auto& i : context.fragmentIns)
     {
         const String n = Strings::capitalFirst(i.second);
         fragmentUsedVars.insert(n);
-        p2._in_declarations.declare(i.first, "v_", n);
+        _fragment._in_declarations.declare(i.first, "v_", n);
     }
 
     for(const auto& iter : attributes)
     {
-        if(!p1._in_declarations.has(iter.first) && !p1._out_declarations.has(iter.first))
+        if(!_vertex._in_declarations.has(iter.first) && !_vertex._out_declarations.has(iter.first))
         {
             generated.push_back(iter.first);
             addAttribute(iter.first, iter.second);
@@ -134,27 +127,27 @@ GLShader::Slot GLShaderSource::preprocess()
     for(const auto& i : attributes)
     {
         if(fragmentUsedVars.find(i.first) != fragmentUsedVars.end())
-            p2._in_declarations.declare(i.second, "v_", i.first);
+            _fragment._in_declarations.declare(i.second, "v_", i.first);
     }
-
-    if(context.renderEngine->version() >= Ark::OPENGL_30)
-        p2._out_declarations.declare("vec4", "v_", "FragColor");
 
     if(generated.size())
     {
         for(const String& i : generated)
         {
-            p1._in_declarations.declare(attributes[i], "a_", i);
+            _vertex._in_declarations.declare(attributes[i], "a_", i);
             if(fragmentUsedVars.find(i) != fragmentUsedVars.end())
             {
-                p1._out_declarations.declare(attributes[i], "v_", i);
+                _vertex._out_declarations.declare(attributes[i], "v_", i);
                 vertMainSource << "v_" << i << " = " << "a_" << i << ";\n";
             }
         }
     }
 
     for(const auto& i : context.vertexOuts)
-        p1._out_declarations.declare(i.first, "", i.second);
+        _vertex._out_declarations.declare(i.first, "", i.second);
+
+    if(context.renderEngine->version() >= Ark::OPENGL_30)
+        _fragment._out_declarations.declare("vec4", "v_", "FragColor");
 
     for(const GLShaderPreprocessor::Snippet& i : context._vertex_snippets)
     {
@@ -188,50 +181,32 @@ GLShader::Slot GLShaderSource::preprocess()
 
     if(fragColorModifier.dirty())
     {
-        String::size_type pos = _fragment.rfind(';');
+        String::size_type pos = _fragment._source.rfind(';');
         DCHECK(pos != String::npos, "Cannot find fragment color modifier point, empty fragment shader?");
-        _fragment.insert(pos, fragColorModifier.str());
+        _fragment._source.insert(pos, fragColorModifier.str());
     }
     if(fragProcedures.dirty())
-        insertBefore(_fragment, "void main()", fragProcedures.str());
+        insertBefore(_fragment._source, "void main()", fragProcedures.str());
     if(fragProcedureCalls.dirty())
     {
-        String::size_type pos = _fragment.rfind(';');
+        String::size_type pos = _fragment._source.rfind(';');
         DCHECK(pos != String::npos, "Cannot find fragment color modifier point, empty fragment shader?");
-        _fragment.insert(pos + 1, fragProcedureCalls.str());
+        _fragment._source.insert(pos + 1, fragProcedureCalls.str());
     }
 
     if(vertMainSource.dirty())
     {
         vertMainSource << "    ";
-        insertBefore(_vertex, "gl_Position =", vertMainSource.str());
+        insertBefore(_vertex._source, "gl_Position =", vertMainSource.str());
     }
 
-    insertPredefinedUniforms(_vertex, p1._uniform_declarations);
-    insertPredefinedUniforms(_fragment, p2._uniform_declarations);
+    _vertex.insertPredefinedUniforms(_uniforms);
+    _fragment.insertPredefinedUniforms(_uniforms);
 
-    insertAfter(_vertex, ";", p1.getDeclarations());
-    insertAfter(_fragment, ";", p2.getDeclarations());
+    _vertex.done();
+    _fragment.done();
 
-    return GLShader::Slot(_vertex, _fragment);
-}
-
-void GLShaderSource::insertPredefinedUniforms(const String& source, StringBuilder& sb)
-{
-    static const std::regex UNIFORM_PATTERN("uniform\\s+[\\w\\d]+\\s+([^;]+);");
-    std::set<String> names;
-    List<String> generated;
-    source.search(UNIFORM_PATTERN, [&names](const std::smatch& m)->bool {
-        names.insert(m[1].str());
-        return true;
-    });
-
-    for(const GLUniform& i : _uniforms)
-        if(names.find(i.name()) == names.end() && source.find(i.name()) != String::npos)
-            generated.push_back(i.declaration());
-
-    for(const String& i : generated)
-        sb << i << '\n';
+    return GLShader::Slot(_vertex._source, _fragment._source);
 }
 
 void GLShaderSource::addAttribute(const String& name, const String& type)
@@ -320,13 +295,6 @@ void GLShaderSource::insertBefore(String& src, const String& statement, const St
     String::size_type pos = src.find(statement);
     if(pos != String::npos)
         src.insert(pos, str);
-}
-
-void GLShaderSource::insertAfter(String& src, const String& statement, const String& str)
-{
-    String::size_type pos = src.find(statement);
-    if(pos != String::npos)
-        src.insert(pos + 1, str);
 }
 
 }
