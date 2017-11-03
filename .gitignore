@@ -1,5 +1,7 @@
 .*
 !/.gitignore
+bin
+gen
 out
 
 # Prerequisites
