@@ -10,6 +10,7 @@ class ImageLayer;
 class GLAttribute;
 class GLBuffer;
 class GLConstants;
+class GLContext;
 class GLFramebuffer;
 class GLModel;
 class GLProcedureFactory;

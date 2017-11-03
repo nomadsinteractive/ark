@@ -1,9 +1,6 @@
 #ifndef ARK_RENDERER_INF_RENDER_ENGINE_H_
 #define ARK_RENDERER_INF_RENDER_ENGINE_H_
 
-#include <map>
-#include <regex>
-
 #include "core/ark.h"
 #include "core/base/string.h"
 #include "core/types/shared_ptr.h"
@@ -16,45 +13,22 @@ namespace ark {
 
 class RenderEngine {
 public:
-    RenderEngine(Ark::RenderEngineVersion version, const sp<RenderViewFactory>& renderViewFactory);
+    RenderEngine(Ark::GLVersion version, const sp<RenderViewFactory>& renderViewFactory);
 
     void initialize();
 
-    Ark::RenderEngineVersion version() const;
-    uint32_t getGLSLVersion() const;
-
-    const String& inTypeName() const;
-    const String& outTypeName() const;
-    const String& fragmentName() const;
-
-    const std::regex& inPattern() const;
-    const std::regex& outPattern() const;
-    const std::regex& inOutPattern() const;
-
-    const std::map<String, String>& annotations() const;
-
     sp<RenderView> createRenderView(const Viewport& viewport) const;
-
     sp<GLSnippet> createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer) const;
 
 private:
-    void chooseGLVersion(Ark::RenderEngineVersion version);
+    void chooseGLVersion(Ark::GLVersion version);
 
 private:
-    Ark::RenderEngineVersion _version;
-
-    String _in_type_name;
-    String _out_type_name;
-    String _fragment_name;
+    sp<GLContext> _gl_context;
 
     sp<RenderViewFactory> _render_view_factory;
     sp<GLProcedureFactory> _gl_procedure_factory;
 
-    std::regex _in_pattern;
-    std::regex _out_pattern;
-    std::regex _in_out_pattern;
-
-    std::map<String, String> _annotations;
 };
 
 }

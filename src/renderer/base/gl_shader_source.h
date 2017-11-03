@@ -26,7 +26,7 @@ public:
     String& fragment();
     const String& fragment() const;
 
-    sp<GLProgram> makeGLProgram() const;
+    sp<GLProgram> makeGLProgram(GraphicsContext& graphicsContext) const;
 
     void addPredefinedAttribute(const String& name, const String& type);
     void addUniform(const String& name, GLUniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed);
@@ -34,11 +34,12 @@ public:
     const sp<GLSnippet>& snippet() const;
     void addSnippet(const sp<GLSnippet>& snippet);
 
+    GLShader::Slot preprocess(GraphicsContext& graphicsContext);
+
 private:
-    GLShader::Slot preprocess();
+    void initialize();
 
     void addAttribute(const String& name, const String& type);
-
     void insertPredefinedUniforms(const String& source, StringBuilder& sb);
 
     void loadPredefinedAttribute(const document& manifest);
@@ -51,8 +52,6 @@ private:
 
     GLShaderPreprocessor _vertex;
     GLShaderPreprocessor _fragment;
-//    String _vertex;
-//    String _fragment;
     uint32_t _stride;
     sp<ResourceLoaderContext::Synchronizer> _synchronizer;
 

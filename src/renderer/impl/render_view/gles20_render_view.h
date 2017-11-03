@@ -14,7 +14,7 @@ namespace ark {
 
 class GLES20RenderView : public RenderView {
 public:
-    GLES20RenderView(const sp<GLResourceManager>& glResources, const Viewport& viewport);
+    GLES20RenderView(const sp<GLContext>& glContext, const sp<GLResourceManager>& glResources, const Viewport& viewport);
     ~GLES20RenderView();
 
     virtual void onSurfaceCreated() override;
@@ -25,7 +25,6 @@ private:
     void initialize(uint32_t width, uint32_t height);
     
 private:
-    sp<GLResourceManager> _gl_resource_manager;
     op<GraphicsContext> _graphics_context;
     Viewport _viewport;
 

@@ -16,8 +16,8 @@ namespace ark {
 uint32_t g_GLViewportWidth = 0;
 uint32_t g_GLViewportHeight = 0;
 
-GLES20RenderView::GLES20RenderView(const sp<GLResourceManager>& glResources, const Viewport& viewport)
-    : _gl_resource_manager(glResources), _graphics_context(new GraphicsContext(glResources)), _viewport(viewport)
+GLES20RenderView::GLES20RenderView(const sp<GLContext>& glContext, const sp<GLResourceManager>& glResourceManager, const Viewport& viewport)
+    : _graphics_context(new GraphicsContext(glContext, glResourceManager)), _viewport(viewport)
 {
 }
 
@@ -34,7 +34,7 @@ void GLES20RenderView::onSurfaceCreated()
 
 void GLES20RenderView::onSurfaceChanged(uint32_t width, uint32_t height)
 {
-    _graphics_context.reset(new GraphicsContext(_gl_resource_manager));
+    _graphics_context.reset(new GraphicsContext(_graphics_context->glContext(), _graphics_context->glResourceManager()));
     initialize(width, height);
 }
 

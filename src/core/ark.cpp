@@ -217,7 +217,7 @@ Ark::Ark(int32_t argc, const char** argv, const String& manfiestSrc)
     const String& assetDir = Documents::getAttribute(manifest, "asset-dir");
     _asset = sp<ArkAsset>::make(sp<RawAsset>::make(assetDir, appDir), manifest);
     _application_context = createApplicationContext(manifest);
-    put<RenderEngine>(createRenderEngine(static_cast<RenderEngineVersion>(Documents::getAttribute<int32_t>(manifest, "gl-version", 0))));
+    put<RenderEngine>(createRenderEngine(static_cast<GLVersion>(Documents::getAttribute<int32_t>(manifest, "gl-version", 0))));
 
     loadPlugins(manifest);
 }
@@ -301,7 +301,7 @@ sp<ApplicationContext> Ark::createApplicationContext(const document& manifest)
     return applicationContext;
 }
 
-sp<RenderEngine> Ark::createRenderEngine(RenderEngineVersion type)
+sp<RenderEngine> Ark::createRenderEngine(GLVersion type)
 {
     const sp<RenderViewFactory> renderViewFactory = sp<GLES20RenderViewFactory>::make(_application_context->applicationResource()->glResourceManager());
 

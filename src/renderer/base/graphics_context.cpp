@@ -11,8 +11,8 @@
 
 namespace ark {
 
-GraphicsContext::GraphicsContext(const sp<GLResourceManager>& glResources)
-    : _gl_resource_manager(glResources), _steady_clock(Platform::getSteadyClock())
+GraphicsContext::GraphicsContext(const sp<GLContext>& glContext, const sp<GLResourceManager>& glResources)
+    : _gl_context(glContext), _gl_resource_manager(glResources), _steady_clock(Platform::getSteadyClock())
 {
     _matrix_stack.push(MVPMatrix());
     _top = &_matrix_stack.top();
@@ -42,7 +42,9 @@ const sp<GLProgram>& GraphicsContext::getGLProgram(GLShader& shader)
         return shader.program();
     }
 
-    const auto iter = _gl_prepared_programs.find(shader.slot());
+    const GLShader::Slot slot = shader.preprocess(*this);
+
+    const auto iter = _gl_prepared_programs.find(slot);
     if(iter != _gl_prepared_programs.end())
     {
         const sp<GLProgram> program = iter->second.lock();
@@ -57,16 +59,21 @@ const sp<GLProgram>& GraphicsContext::getGLProgram(GLShader& shader)
             _gl_prepared_programs.erase(iter);
     }
 
-    const sp<GLProgram>& program = shader.makeGLProgram();
+    const sp<GLProgram>& program = shader.makeGLProgram(*this);
     _gl_resource_manager->prepare(program, GLResourceManager::PS_ON_SURFACE_READY);
     program->prepare(*this);
-    _gl_prepared_programs[shader.slot()] = program;
+    _gl_prepared_programs[slot] = program;
     return program;
 }
 
 const sp<GLResourceManager>& GraphicsContext::glResourceManager() const
 {
     return _gl_resource_manager;
+}
+
+const sp<GLContext>& GraphicsContext::glContext() const
+{
+    return _gl_context;
 }
 
 void GraphicsContext::glOrtho(float left, float right, float top, float bottom, float near, float far)

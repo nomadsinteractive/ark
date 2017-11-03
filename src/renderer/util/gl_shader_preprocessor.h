@@ -79,7 +79,6 @@ public:
     };
 
     struct Context {
-        Global<RenderEngine> renderEngine;
         List<std::pair<String, String>> vertexIns;
         List<std::pair<String, String>> vertexOuts;
         List<std::pair<String, String>> fragmentIns;
@@ -95,16 +94,26 @@ public:
         void addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure);
     };
 
+    static const char* ANNOTATION_VERT_IN;
+    static const char* ANNOTATION_VERT_OUT;
+    static const char* ANNOTATION_FRAG_IN;
+    static const char* ANNOTATION_FRAG_OUT;
+    static const char* ANNOTATION_FRAG_COLOR;
+
+    static std::regex _IN_PATTERN;
+    static std::regex _OUT_PATTERN;
+    static std::regex _IN_OUT_PATTERN;
+
 public:
     GLShaderPreprocessor(ShaderType type, const String& source);
 
     void parse1(GLShaderSource& shader);
     void parse2(Context& context, GLShaderSource& shader);
-    void done();
+    void preprocess();
 
     void addUniform(const String& type, const String& name);
 
-    String preprocess(const RenderEngine& renderEngine) const;
+    String process(const GLContext& glContext) const;
 
     void insertPredefinedUniforms(const List<GLUniform>& uniforms);
 

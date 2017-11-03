@@ -38,6 +38,8 @@ public:
 
     void use(GraphicsContext& graphicsContext);
 
+    Slot preprocess(GraphicsContext& graphicsContext);
+
     void bindUniforms(GraphicsContext& graphicsContext) const;
     void bindAttributes(GraphicsContext& graphicsContext) const;
     void bindAttributes(GraphicsContext& graphicsContext, const sp<GLProgram>& program) const;
@@ -45,10 +47,9 @@ public:
     const sp<GLProgram>& program() const;
     void setProgram(const sp<GLProgram>& program);
 
-    const Slot& slot() const;
     const sp<GLSnippet>& snippet() const;
 
-    const sp<GLProgram>& makeGLProgram();
+    const sp<GLProgram>& makeGLProgram(GraphicsContext& graphicsContext);
 
     uint32_t stride() const;
 
@@ -74,8 +75,6 @@ public:
 
 private:
     sp<GLShaderSource> _source;
-    Slot _slot;
-
     sp<GLProgram> _program;
 };
 

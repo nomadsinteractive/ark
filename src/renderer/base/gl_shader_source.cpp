@@ -8,8 +8,9 @@
 #include "core/types/global.h"
 #include "core/util/documents.h"
 
-#include "renderer/base/render_engine.h"
+#include "renderer/base/gl_context.h"
 #include "renderer/base/gl_program.h"
+#include "renderer/base/graphics_context.h"
 #include "renderer/impl/gl_snippet/gl_snippet_linked_chain.h"
 #include "renderer/util/gl_shader_preprocessor.h"
 
@@ -47,10 +48,10 @@ const String& GLShaderSource::fragment() const
     return _fragment._source;
 }
 
-sp<GLProgram> GLShaderSource::makeGLProgram() const
+sp<GLProgram> GLShaderSource::makeGLProgram(GraphicsContext& graphicsContext) const
 {
-    const Global<RenderEngine> renderEngine;
-    return sp<GLProgram>::make(renderEngine->getGLSLVersion(), _vertex.preprocess(renderEngine), _fragment.preprocess(renderEngine));
+    const sp<GLContext>& glContext = graphicsContext.glContext();
+    return sp<GLProgram>::make(glContext->getGLSLVersion(), _vertex.process(glContext), _fragment.process(glContext));
 }
 
 void GLShaderSource::addPredefinedAttribute(const String& name, const String& type)
@@ -65,7 +66,18 @@ void GLShaderSource::addSnippet(const sp<GLSnippet>& snippet)
     _snippet = _snippet ? sp<GLSnippet>::adopt(new GLSnippetLinkedChain(_snippet, snippet)) : snippet;
 }
 
-GLShader::Slot GLShaderSource::preprocess()
+GLShader::Slot GLShaderSource::preprocess(GraphicsContext& graphicsContext)
+{
+    if(graphicsContext.glContext()->version() >= Ark::OPENGL_30)
+        _fragment._out_declarations.declare("vec4", "v_", "FragColor");
+
+    _vertex.preprocess();
+    _fragment.preprocess();
+
+    return GLShader::Slot(_vertex._source, _fragment._source);
+}
+
+void GLShaderSource::initialize()
 {
     GLShaderPreprocessor::Context context;
 
@@ -146,9 +158,6 @@ GLShader::Slot GLShaderSource::preprocess()
     for(const auto& i : context.vertexOuts)
         _vertex._out_declarations.declare(i.first, "", i.second);
 
-    if(context.renderEngine->version() >= Ark::OPENGL_30)
-        _fragment._out_declarations.declare("vec4", "v_", "FragColor");
-
     for(const GLShaderPreprocessor::Snippet& i : context._vertex_snippets)
     {
         switch(i._type)
@@ -203,10 +212,6 @@ GLShader::Slot GLShaderSource::preprocess()
     _vertex.insertPredefinedUniforms(_uniforms);
     _fragment.insertPredefinedUniforms(_uniforms);
 
-    _vertex.done();
-    _fragment.done();
-
-    return GLShader::Slot(_vertex._source, _fragment._source);
 }
 
 void GLShaderSource::addAttribute(const String& name, const String& type)

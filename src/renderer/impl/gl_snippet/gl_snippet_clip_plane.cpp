@@ -38,9 +38,9 @@ void GLSnippetClipPlane::postDraw(GraphicsContext& /*graphicsContext*/)
 }
 
 GLSnippetClipPlane::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _enabled(Ark::instance().global<RenderEngine>()->version() >= Ark::OPENGL_30)
+//    : _enabled(Ark::instance().global<RenderEngine>()->version() >= Ark::OPENGL_30)
 {
-    if(_enabled)
+//    if(_enabled)
     {
         uint32_t defid = 0;
         for(const document& i : manifest->children())
@@ -55,9 +55,9 @@ GLSnippetClipPlane::BUILDER::BUILDER(BeanFactory& factory, const document& manif
 
 sp<GLSnippet> GLSnippetClipPlane::BUILDER::build(const sp<Scope>& args)
 {
-    DWARN(_enabled, "GL_CLIP_PLANE not supported, GLVersion \"%d\"", Ark::instance().global<RenderEngine>()->version());
-    if(!_enabled)
-        return sp<GLSnippet>::make();
+//    DWARN(_enabled, "GL_CLIP_PLANE not supported, GLVersion \"%d\"", Ark::instance().global<RenderEngine>()->version());
+//    if(!_enabled)
+//        return sp<GLSnippet>::make();
 
     const sp<GLSnippetClipPlane> snippet = sp<GLSnippetClipPlane>::make();
     for(const auto& i : _planes)

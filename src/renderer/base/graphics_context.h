@@ -18,7 +18,7 @@ namespace ark {
 
 class ARK_API GraphicsContext {
 public:
-    GraphicsContext(const sp<GLResourceManager>& glResourceManager);
+    GraphicsContext(const sp<GLContext>& glContext, const sp<GLResourceManager>& glResourceManager);
     ~GraphicsContext();
 
     void onSurfaceReady();
@@ -27,6 +27,8 @@ public:
     const sp<GLProgram>& getGLProgram(GLShader& shader);
 
     const sp<GLResourceManager>& glResourceManager() const;
+    const sp<GLContext>& glContext() const;
+
     const sp<GLProgram>& program() const;
 
     void glOrtho(float left, float right, float top, float bottom, float near, float far);
@@ -75,7 +77,9 @@ private:
     };
 
 private:
+    sp<GLContext> _gl_context;
     sp<GLResourceManager> _gl_resource_manager;
+
     sp<Variable<uint64_t>> _steady_clock;
 
     sp<GLProgram> _program;

@@ -7,13 +7,26 @@
 #include "core/base/string_builder.h"
 #include "core/util/strings.h"
 
+#include "renderer/base/gl_context.h"
 #include "renderer/base/gl_shader_source.h"
+
+#define VAR_PATTERN "\\s+([\\w\\d]+)\\s+(?:a_|v_)([\\w\\d_]+);"
 
 namespace ark {
 
+const char* GLShaderPreprocessor::ANNOTATION_VERT_IN = "${vert.in}";
+const char* GLShaderPreprocessor::ANNOTATION_VERT_OUT = "${vert.out}";
+const char* GLShaderPreprocessor::ANNOTATION_FRAG_IN = "${frag.in}";
+const char* GLShaderPreprocessor::ANNOTATION_FRAG_OUT = "${frag.out}";
+const char* GLShaderPreprocessor::ANNOTATION_FRAG_COLOR = "${frag.color}";
+
+std::regex GLShaderPreprocessor::_IN_PATTERN("(?:attribute|in)" VAR_PATTERN);
+std::regex GLShaderPreprocessor::_OUT_PATTERN("(?:varying|out)" VAR_PATTERN);
+std::regex GLShaderPreprocessor::_IN_OUT_PATTERN("(?:varying|in)" VAR_PATTERN);
+
 GLShaderPreprocessor::GLShaderPreprocessor(ShaderType type, const String& source)
-    : _type(type), _source(source), _in_declarations(type == SHADER_TYPE_VERTEX ? "${vert.in}" : "${frag.in}"),
-      _out_declarations(type == SHADER_TYPE_VERTEX ? "${vert.out}" : "${frag.out}")
+    : _type(type), _source(source), _in_declarations(type == SHADER_TYPE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
+      _out_declarations(type == SHADER_TYPE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT)
 {
 }
 
@@ -44,8 +57,8 @@ void GLShaderPreprocessor::parse1(GLShaderSource& shader)
 
 void GLShaderPreprocessor::parse2(GLShaderPreprocessor::Context& context, GLShaderSource& shader)
 {
-    _in_declarations.parse(_source, _type == SHADER_TYPE_FRAGMENT ? context.renderEngine->inOutPattern() : context.renderEngine->inPattern());
-    _out_declarations.parse(_source, context.renderEngine->outPattern());
+    _in_declarations.parse(_source, _type == SHADER_TYPE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
+    _out_declarations.parse(_source, _OUT_PATTERN);
 
     if(!_main_block)
         return;
@@ -64,7 +77,7 @@ void GLShaderPreprocessor::parse2(GLShaderPreprocessor::Context& context, GLShad
         sb << ") {\n    " << _main_block->_procedure._body << "\n}" << _main_block->_suffix;
     }
 
-    const String outVar = _type == SHADER_TYPE_VERTEX ? "gl_Position" : context.renderEngine->fragmentName();
+    const String outVar = _type == SHADER_TYPE_VERTEX ? "gl_Position" : ANNOTATION_FRAG_COLOR;
     sb << "\n\nvoid main() {\n    " << outVar << " = ark_main(";
 
     const auto begin = _main_block->_procedure._ins.begin();
@@ -96,25 +109,25 @@ void GLShaderPreprocessor::parse2(GLShaderPreprocessor::Context& context, GLShad
     }
 }
 
-void GLShaderPreprocessor::done()
+void GLShaderPreprocessor::preprocess()
 {
     insertAfter(";", getDeclarations());
 }
 
-String GLShaderPreprocessor::preprocess(const RenderEngine& renderEngine) const
+String GLShaderPreprocessor::process(const GLContext& glContext) const
 {
-    DCHECK(renderEngine.version() > 0, "Unintialized RenderEngine");
+    DCHECK(glContext.version() > 0, "Unintialized GLContext");
 
     static std::regex var_pattern("\\$\\{([\\w.]+)\\}");
 
     StringBuilder sb;
-    if(_type == SHADER_TYPE_FRAGMENT && renderEngine.version() >= Ark::OPENGL_30)
+    if(_type == SHADER_TYPE_FRAGMENT && glContext.version() >= Ark::OPENGL_30)
     {
         sb << "#define texture2D texture\n";
         sb << "";
     }
 
-    std::map<String, String> annotations = renderEngine.annotations();
+    std::map<String, String> annotations = glContext.annotations();
     annotations.insert(_annotations.begin(), _annotations.end());
 
     sb << _source.replace(var_pattern, [&annotations] (Array<String>& matches)->String {
@@ -296,7 +309,7 @@ void GLShaderPreprocessor::Context::addFragmentProcedure(const String& name, con
     sb << "vec4 ark_" << name << "(vec4 c" << declareParams.str() << ") {\n    " << procedure << "\n}\n\n";
     _fragment_snippets.push_back(Snippet(SNIPPET_TYPE_PROCEDURE, sb.str()));
     sb.clear();
-    sb << "\n    " << renderEngine->fragmentName() << " = ark_" << name << '(' << renderEngine->fragmentName() << callParams.str() << ");";
+    sb << "\n    " << ANNOTATION_FRAG_COLOR << " = ark_" << name << '(' << ANNOTATION_FRAG_COLOR << callParams.str() << ");";
     _fragment_snippets.push_back(Snippet(SNIPPET_TYPE_PROCEDURE_CALL, sb.str()));
 }
 

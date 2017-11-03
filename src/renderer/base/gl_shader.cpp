@@ -50,17 +50,18 @@ private:
 }
 
 GLShader::GLShader(const sp<GLShaderSource>& source)
-    : _source(source), _slot(_source->preprocess())
+    : _source(source)
 {
+    _source->initialize();
 }
 
 GLShader::GLShader(const GLShader& other)
-    : _source(other._source), _slot(other._slot), _program(other._program)
+    : _source(other._source), _program(other._program)
 {
 }
 
 GLShader::GLShader(GLShader&& other)
-    : _source(std::move(other._source)), _slot(other._slot), _program(std::move(other._program))
+    : _source(std::move(other._source)), _program(std::move(other._program))
 {
 }
 
@@ -83,6 +84,11 @@ sp<GLShader> GLShader::fromStringTable(const String& vertex, const String& fragm
 void GLShader::use(GraphicsContext& graphicsContext)
 {
     graphicsContext.glUseProgram(graphicsContext.getGLProgram(*this));
+}
+
+GLShader::Slot GLShader::preprocess(GraphicsContext& graphicsContext)
+{
+    return _source->preprocess(graphicsContext);
 }
 
 void GLShader::bindUniforms(GraphicsContext& graphicsContext) const
@@ -117,19 +123,14 @@ void GLShader::setProgram(const sp<GLProgram>& program)
     _program = program;
 }
 
-const GLShader::Slot& GLShader::slot() const
-{
-    return _slot;
-}
-
 const sp<GLSnippet>& GLShader::snippet() const
 {
     return _source->snippet();
 }
 
-const sp<GLProgram>& GLShader::makeGLProgram()
+const sp<GLProgram>& GLShader::makeGLProgram(GraphicsContext& graphicsContext)
 {
-    _program = _source->makeGLProgram();
+    _program = _source->makeGLProgram(graphicsContext);
     return _program;
 }
 
