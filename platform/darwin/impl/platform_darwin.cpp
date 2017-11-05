@@ -26,7 +26,7 @@ void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* cont
     fflush(nullptr);
 }
 
-sp<Asset> Platform::getAsset_impl(const String& path, const String& appPath)
+sp<Asset> Platform::getAsset(const String& path, const String& appPath)
 {
     if(isDirectory(path))
         return sp<DictionaryWithFallback<sp<Readable>>>::make(sp<DirectoryAsset>::make(appPath), sp<DirectoryAsset>::make(path));
