@@ -28,28 +28,29 @@ private:
     public:
         CoreGLSnippet(GLSnippetWrapper& wrapper, const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix);
 
-        virtual void preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context) override;
+        virtual void preInitialize(GLShaderSource& source) override;
+        virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context) override;
         virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override;
         virtual void postDraw(GraphicsContext& graphicsContext) override;
 
     private:
-        sp<GLSnippet> createGLSnippet() const;
+        sp<GLSnippet> createGLSnippet(GraphicsContext& graphicsContext) const;
 
     private:
         GLSnippetWrapper& _wrapper;
+        sp<GLSnippet> _delegate;
 
         sp<GLResourceManager> _gl_resource_manager;
         sp<GLShader> _shader;
         GLBuffer _array_buffer;
-
-        sp<GLSnippet> _appendix;
     };
 
     class GLSnippetWrapper : public GLSnippet {
     public:
         GLSnippetWrapper(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix);
 
-        virtual void preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context) override;
+        virtual void preInitialize(GLShaderSource& source) override;
+        virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context) override;
         virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override;
         virtual void postDraw(GraphicsContext& graphicsContext) override;
 
@@ -58,9 +59,6 @@ private:
 
         friend class CoreGLSnippet;
     };
-
-private:
-    sp<GLSnippet> createCoreGLSnippet(const sp<GLSnippet>& glSnippet) const;
 
 private:
     sp<GLResourceManager> _resource_manager;

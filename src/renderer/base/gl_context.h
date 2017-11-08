@@ -5,6 +5,9 @@
 
 #include "core/ark.h"
 #include "core/base/string.h"
+#include "core/types/shared_ptr.h"
+
+#include "renderer/forwarding.h"
 
 namespace ark {
 
@@ -20,9 +23,15 @@ public:
 
     uint32_t getGLSLVersion() const;
 
+    sp<GLSnippet> createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer) const;
+
 private:
     Ark::GLVersion _version;
     std::map<String, String> _annotations;
+
+    sp<GLProcedureFactory> _gl_procedure_factory;
+
+    friend class RenderEngine;
 };
 
 }

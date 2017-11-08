@@ -6,7 +6,6 @@
 
 #include "renderer/base/gl_context.h"
 #include "renderer/inf/render_view_factory.h"
-#include "renderer/inf/gl_procedure_factory.h"
 
 #include "renderer/gles20/impl/gl_procedure_factory/gl_procedure_factory_gles20.h"
 #include "renderer/gles30/impl/gl_procedure_factory/gl_procedure_factory_gles30.h"
@@ -41,11 +40,6 @@ sp<RenderView> RenderEngine::createRenderView(const Viewport& viewport) const
     return _render_view_factory->createRenderView(_gl_context, viewport);
 }
 
-sp<GLSnippet> RenderEngine::createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer) const
-{
-    return _gl_procedure_factory->createCoreGLSnippet(glResourceManager, shader, arrayBuffer);
-}
-
 void RenderEngine::chooseGLVersion(Ark::GLVersion version)
 {
     DCHECK(version != Ark::AUTO, "Cannot set OpenGL version to \"auto\" manually.");
@@ -58,7 +52,7 @@ void RenderEngine::chooseGLVersion(Ark::GLVersion version)
         annotations["frag.in"] = "varying";
         annotations["frag.out"] = "varying";
         annotations["frag.color"] = "gl_FragColor";
-        _gl_procedure_factory = sp<gles20::GLProcedureFactoryGLES20>::make();
+        _gl_context->_gl_procedure_factory = sp<gles20::GLProcedureFactoryGLES20>::make();
     }
     else
     {
@@ -67,9 +61,9 @@ void RenderEngine::chooseGLVersion(Ark::GLVersion version)
         annotations["frag.in"] = "in";
         annotations["frag.out"] = "out";
         annotations["frag.color"] = "v_FragColor";
-        _gl_procedure_factory = sp<gles30::GLProcedureFactoryGLES30>::make();
+        _gl_context->_gl_procedure_factory = sp<gles30::GLProcedureFactoryGLES30>::make();
     }
-    _gl_context->setVersion(version);
+    _gl_context->_version = version;
 }
 
 }

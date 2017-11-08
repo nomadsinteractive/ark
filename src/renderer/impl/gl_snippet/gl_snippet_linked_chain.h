@@ -13,7 +13,8 @@ class GLSnippetLinkedChain : public GLSnippet {
 public:
     GLSnippetLinkedChain(const sp<GLSnippet>& delegate, const sp<GLSnippet>& next);
 
-    virtual void preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context) override;
+    virtual void preInitialize(GLShaderSource& source) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context) override;
     virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 

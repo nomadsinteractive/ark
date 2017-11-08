@@ -36,7 +36,7 @@ public:
         return *_inst;
     }
 
-    void reset(T* instance, bool autoRelease = true) {
+    void reset(T* instance = nullptr, bool autoRelease = true) {
         if(_auto_release && _inst)
             delete _inst;
         _inst = instance;
@@ -44,7 +44,7 @@ public:
     }
 
     ~OwnedPtr() {
-        reset(nullptr);
+        reset();
     }
 
 private:

@@ -4,9 +4,13 @@
 
 namespace ark {
 
-void GLSnippetPointSize::preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context)
+void GLSnippetPointSize::preInitialize(GLShaderSource& source)
 {
     source.addPredefinedAttribute("PointSize", "float");
+}
+
+void GLSnippetPointSize::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context)
+{
     context.addVertexSource("gl_PointSize = a_PointSize;");
 }
 

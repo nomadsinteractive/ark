@@ -4,11 +4,14 @@
 
 namespace ark {
 
-void GLSnippetAlpha::preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context)
+void GLSnippetAlpha::preInitialize(GLShaderSource& source)
 {
-    source.addPredefinedAttribute("Alpha", "float");
+    source.addPredefinedAttribute("Alpha", "float", GLShaderPreprocessor::SHADER_TYPE_FRAGMENT);
+}
+
+void GLSnippetAlpha::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context)
+{
     context.addFragmentColorModifier("vec4(1.0, 1.0, 1.0, v_Alpha)");
-    context.fragmentIns.push_back(std::pair<String, String>("float", "Alpha"));
 }
 
 sp<GLSnippet> GLSnippetAlpha::DICTIONARY::build(const sp<Scope>& args)

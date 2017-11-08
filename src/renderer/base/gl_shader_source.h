@@ -28,7 +28,7 @@ public:
 
     sp<GLProgram> makeGLProgram(GraphicsContext& graphicsContext) const;
 
-    void addPredefinedAttribute(const String& name, const String& type);
+    void addPredefinedAttribute(const String& name, const String& type, uint32_t scopes = 0);
     void addUniform(const String& name, GLUniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed);
 
     const sp<GLSnippet>& snippet() const;
@@ -47,8 +47,7 @@ private:
 
     void loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
 
-    void insertBefore(String& src, const String& statement, const String& str);
-    void insertAfter(String& src, const String& statement, const String& str);
+    op<GLShaderPreprocessor::Context> _preprocessor_context;
 
     GLShaderPreprocessor _vertex;
     GLShaderPreprocessor _fragment;

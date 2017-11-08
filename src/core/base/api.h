@@ -2,6 +2,8 @@
 #define ARK_CORE_API_H_
 
 #include <map>
+#include <thread>
+
 #include <stdint.h>
 #include <string>
 
@@ -153,6 +155,9 @@ template<typename T> T __prop__(const String& name, const T& defvalue) {
 
 extern bool g_isOriginBottom;
 extern float g_upDirection;
+
+extern std::thread::id g_kMainThread;
+extern std::thread::id g_kRenderThread;
 
 }
 

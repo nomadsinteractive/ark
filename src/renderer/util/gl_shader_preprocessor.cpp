@@ -30,7 +30,7 @@ GLShaderPreprocessor::GLShaderPreprocessor(ShaderType type, const String& source
 {
 }
 
-void GLShaderPreprocessor::parse1(GLShaderSource& shader)
+void GLShaderPreprocessor::parseMainFunction(GLShaderSource& shader)
 {
     if(_source.find("void main()") != String::npos)
     {
@@ -55,7 +55,7 @@ void GLShaderPreprocessor::parse1(GLShaderSource& shader)
     parseCodeBlock(_main_block, shader);
 }
 
-void GLShaderPreprocessor::parse2(GLShaderPreprocessor::Context& context, GLShaderSource& shader)
+void GLShaderPreprocessor::parseDeclarations(GLShaderPreprocessor::Context& context, GLShaderSource& shader)
 {
     _in_declarations.parse(_source, _type == SHADER_TYPE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
     _out_declarations.parse(_source, _OUT_PATTERN);
@@ -95,17 +95,18 @@ void GLShaderPreprocessor::parse2(GLShaderPreprocessor::Context& context, GLShad
     if(_type == SHADER_TYPE_VERTEX)
     {
         for(const auto& i : _main_block->_procedure._ins)
-            context.vertexIns.push_back(i);
+            context._vertex_in.push_back(i);
 
         for(const std::pair<String, String>& i : _main_block->_procedure._outs)
-            context.vertexOuts.push_back(i);
-        for(const auto& i : context.vertexIns)
-            context.addAttribute(Strings::capitalFirst(i.second), i.first, context.vertexInsDeclared, shader);
+            context._vertex_out.push_back(i);
+
+        for(const auto& i : context._vertex_in)
+            context.addAttribute(Strings::capitalFirst(i.second), i.first, context._vert_in_declared, shader);
     }
-    if(_type == SHADER_TYPE_FRAGMENT)
+    else if(_type == SHADER_TYPE_FRAGMENT)
     {
         for(const std::pair<String, String>& i : _main_block->_procedure._ins)
-            context.fragmentIns.push_back(i);
+            context._fragment_in.push_back(i);
     }
 }
 
@@ -285,12 +286,12 @@ void GLShaderPreprocessor::Context::addAttribute(const String& name, const Strin
 
 void GLShaderPreprocessor::Context::addVertexSource(const String& source)
 {
-    _vertex_snippets.push_back(Snippet(SNIPPET_TYPE_SOURCE, source));
+    _vert_snippets.push_back(Snippet(SNIPPET_TYPE_SOURCE, source));
 }
 
 void GLShaderPreprocessor::Context::addFragmentColorModifier(const String& modifier)
 {
-    _fragment_snippets.push_back(Snippet(SNIPPET_TYPE_MULTIPLY, modifier));
+    _frag_snippets.push_back(Snippet(SNIPPET_TYPE_MULTIPLY, modifier));
 }
 
 void GLShaderPreprocessor::Context::addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure)
@@ -307,11 +308,84 @@ void GLShaderPreprocessor::Context::addFragmentProcedure(const String& name, con
     }
     StringBuilder sb;
     sb << "vec4 ark_" << name << "(vec4 c" << declareParams.str() << ") {\n    " << procedure << "\n}\n\n";
-    _fragment_snippets.push_back(Snippet(SNIPPET_TYPE_PROCEDURE, sb.str()));
+    _frag_snippets.push_back(Snippet(SNIPPET_TYPE_PROCEDURE, sb.str()));
     sb.clear();
     sb << "\n    " << ANNOTATION_FRAG_COLOR << " = ark_" << name << '(' << ANNOTATION_FRAG_COLOR << callParams.str() << ");";
-    _fragment_snippets.push_back(Snippet(SNIPPET_TYPE_PROCEDURE_CALL, sb.str()));
+    _frag_snippets.push_back(Snippet(SNIPPET_TYPE_PROCEDURE_CALL, sb.str()));
 }
+
+void GLShaderPreprocessor::Context::precompile(String& vertSource, String& fragSource)
+{
+    doSnippetPrecompile();
+    doPrecompile(vertSource, fragSource);
+}
+
+void GLShaderPreprocessor::Context::doSnippetPrecompile()
+{
+    for(const GLShaderPreprocessor::Snippet& i : _vert_snippets)
+    {
+        switch(i._type)
+        {
+        case GLShaderPreprocessor::SNIPPET_TYPE_SOURCE:
+            _vert_main_source << i._src << '\n';
+            break;
+        default:
+            break;
+        }
+    }
+
+    for(const GLShaderPreprocessor::Snippet& i : _frag_snippets)
+    {
+        switch(i._type)
+        {
+        case GLShaderPreprocessor::SNIPPET_TYPE_MULTIPLY:
+            _frag_color_modifier << " * " << i._src;
+            break;
+        case GLShaderPreprocessor::SNIPPET_TYPE_PROCEDURE:
+            _frag_procedures << i._src;
+            break;
+        case GLShaderPreprocessor::SNIPPET_TYPE_PROCEDURE_CALL:
+            _frag_procedure_calls << i._src;
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+void GLShaderPreprocessor::Context::doPrecompile(String& vertSource, String& fragSource)
+{
+    if(_frag_color_modifier.dirty())
+    {
+        String::size_type pos = fragSource.rfind(';');
+        DCHECK(pos != String::npos, "Cannot find fragment color modifier point, empty fragment shader?");
+        fragSource.insert(pos, _frag_color_modifier.str());
+    }
+
+    if(_frag_procedures.dirty())
+        insertBefore(fragSource, "void main()", _frag_procedures.str());
+
+    if(_frag_procedure_calls.dirty())
+    {
+        String::size_type pos = fragSource.rfind(';');
+        DCHECK(pos != String::npos, "Cannot find fragment color modifier point, empty fragment shader?");
+        fragSource.insert(pos + 1, _frag_procedure_calls.str());
+    }
+
+    if(_vert_main_source.dirty())
+    {
+        _vert_main_source << "    ";
+        insertBefore(vertSource, "gl_Position =", _vert_main_source.str());
+    }
+}
+
+void GLShaderPreprocessor::Context::insertBefore(String& src, const String& statement, const String& str)
+{
+    String::size_type pos = src.find(statement);
+    if(pos != String::npos)
+        src.insert(pos, str);
+}
+
 
 GLShaderPreprocessor::Declaration::Declaration(const String& category)
     : _category(category)

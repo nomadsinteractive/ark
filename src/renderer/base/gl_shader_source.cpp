@@ -18,7 +18,10 @@
 namespace ark {
 
 GLShaderSource::GLShaderSource(const String& vertex, const String& fragment, const sp<ResourceLoaderContext::Synchronizer>& synchronizer)
-    : _vertex(GLShaderPreprocessor::SHADER_TYPE_VERTEX, vertex), _fragment(GLShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment), _stride(0), _synchronizer(synchronizer)
+    : _preprocessor_context(new GLShaderPreprocessor::Context()),
+      _vertex(GLShaderPreprocessor::SHADER_TYPE_VERTEX, vertex),
+      _fragment(GLShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment), _stride(0),
+      _synchronizer(synchronizer)
 {
 }
 
@@ -54,10 +57,13 @@ sp<GLProgram> GLShaderSource::makeGLProgram(GraphicsContext& graphicsContext) co
     return sp<GLProgram>::make(glContext->getGLSLVersion(), _vertex.process(glContext), _fragment.process(glContext));
 }
 
-void GLShaderSource::addPredefinedAttribute(const String& name, const String& type)
+void GLShaderSource::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
 {
     if(_attributes.find(name) == _attributes.end())
         _attributes[name] = getPredefinedAttribute(name, type);
+
+    if(scopes & GLShaderPreprocessor::SHADER_TYPE_FRAGMENT)
+        _preprocessor_context->_fragment_in.push_back(std::pair<String, String>(type, name));
 }
 
 void GLShaderSource::addSnippet(const sp<GLSnippet>& snippet)
@@ -68,31 +74,46 @@ void GLShaderSource::addSnippet(const sp<GLSnippet>& snippet)
 
 GLShader::Slot GLShaderSource::preprocess(GraphicsContext& graphicsContext)
 {
-    if(graphicsContext.glContext()->version() >= Ark::OPENGL_30)
-        _fragment._out_declarations.declare("vec4", "v_", "FragColor");
+    if(_preprocessor_context)
+    {
+        if(_snippet)
+            _snippet->preCompile(graphicsContext, _preprocessor_context);
 
-    _vertex.preprocess();
-    _fragment.preprocess();
+        _preprocessor_context->precompile(_vertex._source, _fragment._source);
 
+        _vertex.insertPredefinedUniforms(_uniforms);
+        _fragment.insertPredefinedUniforms(_uniforms);
+
+        if(graphicsContext.glContext()->version() >= Ark::OPENGL_30)
+            _fragment._out_declarations.declare("vec4", "v_", "FragColor");
+
+        _vertex.preprocess();
+        _fragment.preprocess();
+
+        _preprocessor_context.reset();
+    }
     return GLShader::Slot(_vertex._source, _fragment._source);
 }
 
 void GLShaderSource::initialize()
 {
-    GLShaderPreprocessor::Context context;
+    DCHECK(_preprocessor_context, "GLShaderSource should not be initialized more than once");
+
+    GLShaderPreprocessor::Context& context = _preprocessor_context;
 
     if(_snippet)
-        _snippet->preCompile(*this, context);
+        _snippet->preInitialize(*this);
 
-    _vertex.parse1(*this);
-    _fragment.parse1(*this);
-    _vertex.parse2(context, *this);
-    _fragment.parse2(context, *this);
+    _vertex.parseMainFunction(*this);
+    _fragment.parseMainFunction(*this);
+
+    _vertex.parseDeclarations(context, *this);
+    _fragment.parseDeclarations(context, *this);
 
     for(const auto& i : _vertex._in_declarations._declared)
-        if(context.vertexInsDeclared.find(i.first) == context.vertexInsDeclared.end())
+        if(context._vert_in_declared.find(i.first) == context._vert_in_declared.end())
         {
-            context.vertexInsDeclared[i.first] = i.second;
+            context._vert_in_declared[i.first] = i.second;
             addAttribute(i.second, i.first);
         }
 
@@ -100,11 +121,6 @@ void GLShaderSource::initialize()
     if(_snippet)
         for(const auto& iter : _attributes)
             attributes[iter.first] = iter.second.type();
-
-    StringBuilder vertMainSource;
-    StringBuilder fragColorModifier;
-    StringBuilder fragProcedures;
-    StringBuilder fragProcedureCalls;
 
     std::set<String> fragmentUsedVars;
     static const std::regex VAR_PATTERN("\\bv_([\\w\\d_]+)\\b");
@@ -115,9 +131,9 @@ void GLShaderSource::initialize()
 
     List<String> generated;
 
-    for(const auto& i : context.vertexIns)
+    for(const auto& i : context._vertex_in)
         _vertex._in_declarations.declare(i.first, "a_", Strings::capitalFirst(i.second));
-    for(const auto& i : context.fragmentIns)
+    for(const auto& i : context._fragment_in)
     {
         const String n = Strings::capitalFirst(i.second);
         fragmentUsedVars.insert(n);
@@ -150,67 +166,13 @@ void GLShaderSource::initialize()
             if(fragmentUsedVars.find(i) != fragmentUsedVars.end())
             {
                 _vertex._out_declarations.declare(attributes[i], "v_", i);
-                vertMainSource << "v_" << i << " = " << "a_" << i << ";\n";
+                context._vert_main_source << "v_" << i << " = " << "a_" << i << ";\n";
             }
         }
     }
 
-    for(const auto& i : context.vertexOuts)
+    for(const auto& i : context._vertex_out)
         _vertex._out_declarations.declare(i.first, "", i.second);
-
-    for(const GLShaderPreprocessor::Snippet& i : context._vertex_snippets)
-    {
-        switch(i._type)
-        {
-            case GLShaderPreprocessor::SNIPPET_TYPE_SOURCE:
-                vertMainSource << i._src << '\n';
-            break;
-            default:
-            break;
-        }
-    }
-
-    for(const GLShaderPreprocessor::Snippet& i : context._fragment_snippets)
-    {
-        switch(i._type)
-        {
-            case GLShaderPreprocessor::SNIPPET_TYPE_MULTIPLY:
-                fragColorModifier << " * " << i._src;
-            break;
-            case GLShaderPreprocessor::SNIPPET_TYPE_PROCEDURE:
-                fragProcedures << i._src;
-            break;
-            case GLShaderPreprocessor::SNIPPET_TYPE_PROCEDURE_CALL:
-                fragProcedureCalls << i._src;
-            break;
-            default:
-                break;
-        }
-    }
-
-    if(fragColorModifier.dirty())
-    {
-        String::size_type pos = _fragment._source.rfind(';');
-        DCHECK(pos != String::npos, "Cannot find fragment color modifier point, empty fragment shader?");
-        _fragment._source.insert(pos, fragColorModifier.str());
-    }
-    if(fragProcedures.dirty())
-        insertBefore(_fragment._source, "void main()", fragProcedures.str());
-    if(fragProcedureCalls.dirty())
-    {
-        String::size_type pos = _fragment._source.rfind(';');
-        DCHECK(pos != String::npos, "Cannot find fragment color modifier point, empty fragment shader?");
-        _fragment._source.insert(pos + 1, fragProcedureCalls.str());
-    }
-
-    if(vertMainSource.dirty())
-    {
-        vertMainSource << "    ";
-        insertBefore(_vertex._source, "gl_Position =", vertMainSource.str());
-    }
-
-    _vertex.insertPredefinedUniforms(_uniforms);
-    _fragment.insertPredefinedUniforms(_uniforms);
 
 }
 
@@ -293,13 +255,6 @@ GLAttribute GLShaderSource::getPredefinedAttribute(const String& name, const Str
         return GLAttribute("a_" + name, type, GL_UNSIGNED_BYTE, 1, GL_FALSE);
     DFATAL("Unknown attribute type \"%s\"", type.c_str());
     return GLAttribute();
-}
-
-void GLShaderSource::insertBefore(String& src, const String& statement, const String& str)
-{
-    String::size_type pos = src.find(statement);
-    if(pos != String::npos)
-        src.insert(pos, str);
 }
 
 }

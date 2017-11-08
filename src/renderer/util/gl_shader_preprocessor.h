@@ -79,19 +79,34 @@ public:
     };
 
     struct Context {
-        List<std::pair<String, String>> vertexIns;
-        List<std::pair<String, String>> vertexOuts;
-        List<std::pair<String, String>> fragmentIns;
+        List<std::pair<String, String>> _vertex_in;
+        List<std::pair<String, String>> _vertex_out;
 
-        std::map<String, String> vertexInsDeclared;
+        List<std::pair<String, String>> _fragment_in;
 
-        List<Snippet> _vertex_snippets;
-        List<Snippet> _fragment_snippets;
+        std::map<String, String> _vert_in_declared;
+
+        List<Snippet> _vert_snippets;
+        List<Snippet> _frag_snippets;
+
+        StringBuilder _vert_main_source;
+        StringBuilder _frag_color_modifier;
+        StringBuilder _frag_procedures;
+        StringBuilder _frag_procedure_calls;
 
         void addAttribute(const String& name, const String& type, std::map<String, String>& vars, GLShaderSource& source);
         void addVertexSource(const String& source);
         void addFragmentColorModifier(const String& modifier);
         void addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure);
+
+        void precompile(String& vertSource, String& fragSource);
+
+    private:
+        void doSnippetPrecompile();
+        void doPrecompile(String& vertSource, String& fragSource);
+
+        void insertBefore(String& src, const String& statement, const String& str);
+
     };
 
     static const char* ANNOTATION_VERT_IN;
@@ -107,8 +122,8 @@ public:
 public:
     GLShaderPreprocessor(ShaderType type, const String& source);
 
-    void parse1(GLShaderSource& shader);
-    void parse2(Context& context, GLShaderSource& shader);
+    void parseMainFunction(GLShaderSource& shader);
+    void parseDeclarations(Context& context, GLShaderSource& shader);
     void preprocess();
 
     void addUniform(const String& type, const String& name);

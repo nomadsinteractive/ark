@@ -13,8 +13,8 @@ namespace ark {
 
 class GLSnippetClipPlane : public GLSnippet {
 public:
-
-    virtual void preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context) override;
+    virtual void preInitialize(GLShaderSource& source) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context) override;
     virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 
@@ -26,15 +26,15 @@ public:
         virtual sp<GLSnippet> build(const sp<Scope>& args) override;
 
     private:
-        bool _enabled;
         List<std::pair<uint32_t, sp<Builder<VV4>>>> _planes;
     };
 
 private:
+    bool _enabled;
+
     List<std::pair<uint32_t, sp<VV4>>> _planes;
 
     friend class BUILDER;
-
 };
 
 }

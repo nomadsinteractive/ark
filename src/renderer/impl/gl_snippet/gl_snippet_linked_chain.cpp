@@ -12,10 +12,16 @@ GLSnippetLinkedChain::GLSnippetLinkedChain(const sp<GLSnippet>& delegate, const 
     NOT_NULL(next);
 }
 
-void GLSnippetLinkedChain::preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context)
+void GLSnippetLinkedChain::preInitialize(GLShaderSource& source)
 {
-    _delegate->preCompile(source, context);
-    _next->preCompile(source, context);
+    _delegate->preInitialize(source);
+    _next->preInitialize(source);
+}
+
+void GLSnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context)
+{
+    _delegate->preCompile(graphicsContext, context);
+    _next->preCompile(graphicsContext, context);
 }
 
 void GLSnippetLinkedChain::preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context)

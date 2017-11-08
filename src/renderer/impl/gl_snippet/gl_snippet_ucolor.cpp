@@ -14,9 +14,13 @@ GLSnippetUColor::GLSnippetUColor(const sp<VV4>& color)
 {
 }
 
-void GLSnippetUColor::preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context)
+void GLSnippetUColor::preInitialize(GLShaderSource& source)
 {
     source.addUniform("u_Color", GLUniform::UNIFORM_F4, sp<FlatableV4f>::make(_color), _color.as<Changed>());
+}
+
+void GLSnippetUColor::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context)
+{
     context.addFragmentColorModifier("u_Color");
 }
 

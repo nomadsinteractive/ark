@@ -16,9 +16,7 @@ public:
     RenderEngine(Ark::GLVersion version, const sp<RenderViewFactory>& renderViewFactory);
 
     void initialize();
-
     sp<RenderView> createRenderView(const Viewport& viewport) const;
-    sp<GLSnippet> createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer) const;
 
 private:
     void chooseGLVersion(Ark::GLVersion version);
@@ -27,7 +25,6 @@ private:
     sp<GLContext> _gl_context;
 
     sp<RenderViewFactory> _render_view_factory;
-    sp<GLProcedureFactory> _gl_procedure_factory;
 
 };
 
