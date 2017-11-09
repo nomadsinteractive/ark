@@ -9,7 +9,7 @@ void GLSnippetPointSize::preInitialize(GLShaderSource& source)
     source.addPredefinedAttribute("PointSize", "float");
 }
 
-void GLSnippetPointSize::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context)
+void GLSnippetPointSize::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context)
 {
     context.addVertexSource("gl_PointSize = a_PointSize;");
 }

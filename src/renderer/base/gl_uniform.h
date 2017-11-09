@@ -28,7 +28,7 @@ public:
         UNIFORM_MAT4V,
     };
 
-    GLUniform(const String& name, Type type, const sp<Flatable>& flatable, const sp<Changed>& changed, const sp<ResourceLoaderContext::Synchronizer>& synchronizer = nullptr);
+    GLUniform(const String& name, Type type, const sp<Flatable>& flatable, const sp<Changed>& changed, const sp<RenderController>& renderController);
     GLUniform(const GLUniform& other);
 
     const String& name() const;
@@ -38,7 +38,7 @@ public:
     String declaration() const;
 
 private:
-    void synchronize(const sp<ResourceLoaderContext::Synchronizer>& synchronizer);
+    void synchronize(const sp<RenderController>& renderController);
 
 private:
     String _name;

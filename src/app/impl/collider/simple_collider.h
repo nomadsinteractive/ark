@@ -9,6 +9,8 @@
 #include "core/types/shared_ptr.h"
 #include "core/types/weak_ptr.h"
 
+#include "renderer/forwarding.h"
+
 #include "app/inf/collider.h"
 #include "app/base/rigid_body.h"
 #include "app/impl/collider/static_segments.h"
@@ -17,19 +19,19 @@ namespace ark {
 
 class SimpleCollider : public Collider {
 public:
-    SimpleCollider(const sp<ApplicationContext>& applicationContext);
+    SimpleCollider(const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual sp<RigidBody> createBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size) override;
 
 //  [[plugin::resource-loader("simple")]]
     class BUILDER : public Builder<Collider> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ApplicationContext>& applicationContext);
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<Collider> build(const sp<Scope>& args) override;
 
     private:
-        sp<ApplicationContext> _application_context;
+        sp<ResourceLoaderContext> _resource_loader_context;
 
     };
 
@@ -96,7 +98,7 @@ public:
 
 private:
     sp<Stub> _stub;
-    sp<ApplicationContext> _application_context;
+    sp<ResourceLoaderContext> _resource_loader_context;
 };
 
 }

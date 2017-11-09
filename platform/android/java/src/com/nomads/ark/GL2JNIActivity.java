@@ -49,4 +49,9 @@ public class GL2JNIActivity extends Activity {
         super.onDestroy();
         JNILib.onDestroy();
     }
+
+    @Override
+    public void onBackPressed() {
+        JNILib.onEvent(10000, 0, 0, System.currentTimeMillis());
+    }
 }

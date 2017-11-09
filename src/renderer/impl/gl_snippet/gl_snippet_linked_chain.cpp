@@ -18,7 +18,7 @@ void GLSnippetLinkedChain::preInitialize(GLShaderSource& source)
     _next->preInitialize(source);
 }
 
-void GLSnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context)
+void GLSnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context)
 {
     _delegate->preCompile(graphicsContext, context);
     _next->preCompile(graphicsContext, context);

@@ -4,7 +4,6 @@
 #include "core/base/api.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/util/gl_shader_preprocessor.h"
 
 namespace ark {
 
@@ -14,7 +13,7 @@ public:
 
     virtual void preInitialize(GLShaderSource& source) {}
 
-    virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context) {}
+    virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) {}
     virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) {}
     virtual void postDraw(GraphicsContext& graphicsContext) {}
 };

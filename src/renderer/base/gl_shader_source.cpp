@@ -12,16 +12,16 @@
 #include "renderer/base/gl_program.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/impl/gl_snippet/gl_snippet_linked_chain.h"
-#include "renderer/util/gl_shader_preprocessor.h"
+#include "renderer/base/gl_shader_preprocessor.h"
 
 
 namespace ark {
 
-GLShaderSource::GLShaderSource(const String& vertex, const String& fragment, const sp<ResourceLoaderContext::Synchronizer>& synchronizer)
-    : _preprocessor_context(new GLShaderPreprocessor::Context()),
+GLShaderSource::GLShaderSource(const String& vertex, const String& fragment, const sp<RenderController>& renderController)
+    : _preprocessor_context(new GLShaderPreprocessorContext()),
       _vertex(GLShaderPreprocessor::SHADER_TYPE_VERTEX, vertex),
       _fragment(GLShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment), _stride(0),
-      _synchronizer(synchronizer)
+      _render_controller(renderController)
 {
 }
 
@@ -29,26 +29,6 @@ void GLShaderSource::loadPredefinedParam(BeanFactory& factory, const sp<Scope>& 
 {
     loadPredefinedUniform(factory, args, manifest);
     loadPredefinedAttribute(manifest);
-}
-
-String& GLShaderSource::vertex()
-{
-    return _vertex._source;
-}
-
-const String& GLShaderSource::vertex() const
-{
-    return _vertex._source;
-}
-
-String& GLShaderSource::fragment()
-{
-    return _fragment._source;
-}
-
-const String& GLShaderSource::fragment() const
-{
-    return _fragment._source;
 }
 
 sp<GLProgram> GLShaderSource::makeGLProgram(GraphicsContext& graphicsContext) const
@@ -95,11 +75,21 @@ GLShader::Slot GLShaderSource::preprocess(GraphicsContext& graphicsContext)
     return GLShader::Slot(_vertex._source, _fragment._source);
 }
 
+GLShaderPreprocessor& GLShaderSource::vertex()
+{
+    return _vertex;
+}
+
+GLShaderPreprocessor& GLShaderSource::fragment()
+{
+    return _fragment;
+}
+
 void GLShaderSource::initialize()
 {
     DCHECK(_preprocessor_context, "GLShaderSource should not be initialized more than once");
 
-    GLShaderPreprocessor::Context& context = _preprocessor_context;
+    GLShaderPreprocessorContext& context = _preprocessor_context;
 
     if(_snippet)
         _snippet->preInitialize(*this);
@@ -188,7 +178,7 @@ void GLShaderSource::addAttribute(const String& name, const String& type)
 
 void GLShaderSource::addUniform(const String& name, GLUniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed)
 {
-    _uniforms.push_back(GLUniform(name, type, flatable, changed, _synchronizer));
+    _uniforms.push_back(GLUniform(name, type, flatable, changed, _render_controller));
 }
 
 const sp<GLSnippet>& GLShaderSource::snippet() const

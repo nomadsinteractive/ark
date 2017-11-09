@@ -29,7 +29,7 @@ private:
         CoreGLSnippet(GLSnippetWrapper& wrapper, const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix);
 
         virtual void preInitialize(GLShaderSource& source) override;
-        virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context) override;
+        virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) override;
         virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override;
         virtual void postDraw(GraphicsContext& graphicsContext) override;
 
@@ -50,7 +50,7 @@ private:
         GLSnippetWrapper(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix);
 
         virtual void preInitialize(GLShaderSource& source) override;
-        virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context) override;
+        virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) override;
         virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override;
         virtual void postDraw(GraphicsContext& graphicsContext) override;
 

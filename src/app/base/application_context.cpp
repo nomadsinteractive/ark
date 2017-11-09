@@ -62,7 +62,7 @@ private:
 
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources)
     : _application_resource(applicationResources), _ticker(sp<EngineTicker>::make()),
-      _clock(sp<Clock>::make(_ticker)), _executor(sp<ThreadPoolExecutor>::make()), _render_synchronizer(sp<RenderController>::make()),
+      _clock(sp<Clock>::make(_ticker)), _executor(sp<ThreadPoolExecutor>::make()), _render_controller(sp<RenderController>::make()),
       _event_listeners(new EventListenerList()), _string_table(Global<StringTable>())
 {
     Ark& ark = Ark::instance();
@@ -70,7 +70,7 @@ ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicatio
     for(int32_t i = 0; i < ark.argc(); i++)
         _argv.push_back(ark.argv()[i]);
 
-    _render_synchronizer->addPreUpdateRequest(_ticker);
+    _render_controller->addPreUpdateRequest(_ticker);
     initMessageLoop();
 }
 
@@ -113,7 +113,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const sp<Dictionary<
 {
     const sp<BeanFactory> beanFactory = Ark::instance().createBeanFactory(documentDictionary);
     const sp<GLResourceManager> glResourceManager = _application_resource->glResourceManager();
-    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), glResourceManager, _executor, _render_synchronizer);
+    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), glResourceManager, _executor, _render_controller);
     const Global<PluginManager> pluginManager;
     pluginManager->each([&] (const sp<Plugin>& plugin)->bool {
         plugin->loadResourceLoader(beanFactory, documentDictionary, context);
@@ -136,7 +136,7 @@ const sp<GLResourceManager>& ApplicationContext::glResourceManager() const
 
 const sp<RenderController>& ApplicationContext::renderController() const
 {
-    return _render_synchronizer;
+    return _render_controller;
 }
 
 const sp<Executor>& ApplicationContext::executor() const
@@ -162,7 +162,7 @@ bool ApplicationContext::onEvent(const Event& event)
 void ApplicationContext::addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& expired)
 {
     DWARN(expired, "Adding an unexpirable prerendering task");
-    _render_synchronizer->addPreUpdateRequest(task, expired);
+    _render_controller->addPreUpdateRequest(task, expired);
 }
 
 void ApplicationContext::addEventListener(const sp<EventListener>& eventListener)

@@ -10,15 +10,16 @@
 
 namespace ark {
 
-ResourceLoaderContext::ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<GLResourceManager>& glResourceManager, const sp<Executor>& executor, const sp<RenderController>& synchronizer)
-    : _documents(documents), _gl_resource_manager(glResourceManager), _executor(executor), _texture_loader(sp<GLTextureLoader>::make(glResourceManager)), _synchronizer(sp<Synchronizer>::make(synchronizer))
+ResourceLoaderContext::ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<GLResourceManager>& glResourceManager, const sp<Executor>& executor, const sp<RenderController>& renderController)
+    : _documents(documents), _gl_resource_manager(glResourceManager), _executor(executor), _render_controller(renderController),
+      _texture_loader(sp<GLTextureLoader>::make(glResourceManager)), _context_expired(sp<Expired::Impl>::make(false))
 {
 }
 
 ResourceLoaderContext::~ResourceLoaderContext()
 {
     LOGD("");
-    _synchronizer->expire();
+    _context_expired->set(true);
 }
 
 const sp<Dictionary<document>>& ResourceLoaderContext::documents() const
@@ -36,30 +37,14 @@ const sp<Executor>& ResourceLoaderContext::executor() const
     return _executor;
 }
 
+const sp<RenderController>& ResourceLoaderContext::renderController() const
+{
+    return _render_controller;
+}
+
 const sp<GLTextureLoader>& ResourceLoaderContext::textureLoader() const
 {
     return _texture_loader;
-}
-
-const sp<ResourceLoaderContext::Synchronizer>& ResourceLoaderContext::synchronizer() const
-{
-    return _synchronizer;
-}
-
-ResourceLoaderContext::Synchronizer::Synchronizer(const sp<RenderController>& delegate)
-    : _delegate(delegate), _expired(sp<Boolean::Impl>::make(false))
-{
-}
-
-void ResourceLoaderContext::Synchronizer::addPreUpdateRequest(const sp<Runnable>& task)
-{
-    const sp<Boolean> expired = sp<BooleanOr>::make(_expired, sp<BooleanByWeakRef<Runnable>>::make(task, 1));
-    _delegate->addPreUpdateRequest(task, expired);
-}
-
-void ResourceLoaderContext::Synchronizer::expire()
-{
-    _expired->set(true);
 }
 
 }

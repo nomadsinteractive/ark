@@ -20,6 +20,7 @@ class GLResource;
 class GLResourceManager;
 class GLShader;
 class GLShaderPreprocessor;
+class GLShaderPreprocessorContext;
 class GLShaderSource;
 class GLSnippet;
 class GLSnippetContext;

@@ -17,6 +17,7 @@ public:
         ACTION_DOWN,
         ACTION_UP,
         ACTION_MOVE,
+        ACTION_BACK_PRESSED,
         ACTION_CANCEL
     };
 //  [[script::bindings::enumeration]]

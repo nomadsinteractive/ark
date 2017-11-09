@@ -36,7 +36,7 @@ void GLElements::render(const LayerContext& renderContext, RenderCommandPipeline
 }
 
 GLElements::CoreGLSnippet::CoreGLSnippet(GLSnippetWrapper& wrapper, const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix)
-    : _wrapper(wrapper), _gl_resource_manager(glResourceManager), _shader(shader), _array_buffer(arrayBuffer), _delegate(appendix)
+    : _wrapper(wrapper), _delegate(appendix), _gl_resource_manager(glResourceManager), _shader(shader), _array_buffer(arrayBuffer)
 {
 }
 
@@ -45,7 +45,7 @@ void GLElements::CoreGLSnippet::preInitialize(GLShaderSource& source)
     _wrapper.preInitialize(source);
 }
 
-void GLElements::CoreGLSnippet::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context)
+void GLElements::CoreGLSnippet::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context)
 {
     const sp<GLSnippet> delegate = _wrapper._delegate;
     _wrapper._delegate = createGLSnippet(graphicsContext);
@@ -80,7 +80,7 @@ void GLElements::GLSnippetWrapper::preInitialize(GLShaderSource& source)
     _delegate->preInitialize(source);
 }
 
-void GLElements::GLSnippetWrapper::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context)
+void GLElements::GLSnippetWrapper::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context)
 {
     _delegate->preCompile(graphicsContext, context);
 }

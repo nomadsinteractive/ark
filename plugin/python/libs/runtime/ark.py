@@ -194,6 +194,7 @@ class Event:
     ACTION_UP = 4
     ACTION_MOVE = 5
     ACTION_CANCEL = 6
+    ACTION_BACK_PRESSED = 7
 
     CODE_NONE = 0
     CODE_MOUSE_BUTTON_LEFT = 1

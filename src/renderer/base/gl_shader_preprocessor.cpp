@@ -1,4 +1,4 @@
-#include "renderer/util/gl_shader_preprocessor.h"
+#include "renderer/base/gl_shader_preprocessor.h"
 
 #include <regex>
 
@@ -55,7 +55,7 @@ void GLShaderPreprocessor::parseMainFunction(GLShaderSource& shader)
     parseCodeBlock(_main_block, shader);
 }
 
-void GLShaderPreprocessor::parseDeclarations(GLShaderPreprocessor::Context& context, GLShaderSource& shader)
+void GLShaderPreprocessor::parseDeclarations(GLShaderPreprocessorContext& context, GLShaderSource& shader)
 {
     _in_declarations.parse(_source, _type == SHADER_TYPE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
     _out_declarations.parse(_source, _OUT_PATTERN);
@@ -275,7 +275,7 @@ GLShaderPreprocessor::CodeBlock::CodeBlock(GLShaderPreprocessor::CodeBlock&& oth
 {
 }
 
-void GLShaderPreprocessor::Context::addAttribute(const String& name, const String& type, std::map<String, String>& vars, GLShaderSource& source)
+void GLShaderPreprocessorContext::addAttribute(const String& name, const String& type, std::map<String, String>& vars, GLShaderSource& source)
 {
     if(vars.find(name) == vars.end())
     {
@@ -284,17 +284,17 @@ void GLShaderPreprocessor::Context::addAttribute(const String& name, const Strin
     }
 }
 
-void GLShaderPreprocessor::Context::addVertexSource(const String& source)
+void GLShaderPreprocessorContext::addVertexSource(const String& source)
 {
-    _vert_snippets.push_back(Snippet(SNIPPET_TYPE_SOURCE, source));
+    _vert_snippets.push_back(GLShaderPreprocessor::Snippet(GLShaderPreprocessor::SNIPPET_TYPE_SOURCE, source));
 }
 
-void GLShaderPreprocessor::Context::addFragmentColorModifier(const String& modifier)
+void GLShaderPreprocessorContext::addFragmentColorModifier(const String& modifier)
 {
-    _frag_snippets.push_back(Snippet(SNIPPET_TYPE_MULTIPLY, modifier));
+    _frag_snippets.push_back(GLShaderPreprocessor::Snippet(GLShaderPreprocessor::SNIPPET_TYPE_MULTIPLY, modifier));
 }
 
-void GLShaderPreprocessor::Context::addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure)
+void GLShaderPreprocessorContext::addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure)
 {
     StringBuilder declareParams;
     StringBuilder callParams;
@@ -308,19 +308,19 @@ void GLShaderPreprocessor::Context::addFragmentProcedure(const String& name, con
     }
     StringBuilder sb;
     sb << "vec4 ark_" << name << "(vec4 c" << declareParams.str() << ") {\n    " << procedure << "\n}\n\n";
-    _frag_snippets.push_back(Snippet(SNIPPET_TYPE_PROCEDURE, sb.str()));
+    _frag_snippets.push_back(GLShaderPreprocessor::Snippet(GLShaderPreprocessor::SNIPPET_TYPE_PROCEDURE, sb.str()));
     sb.clear();
-    sb << "\n    " << ANNOTATION_FRAG_COLOR << " = ark_" << name << '(' << ANNOTATION_FRAG_COLOR << callParams.str() << ");";
-    _frag_snippets.push_back(Snippet(SNIPPET_TYPE_PROCEDURE_CALL, sb.str()));
+    sb << "\n    " << GLShaderPreprocessor::ANNOTATION_FRAG_COLOR << " = ark_" << name << '(' << GLShaderPreprocessor::ANNOTATION_FRAG_COLOR << callParams.str() << ");";
+    _frag_snippets.push_back(GLShaderPreprocessor::Snippet(GLShaderPreprocessor::SNIPPET_TYPE_PROCEDURE_CALL, sb.str()));
 }
 
-void GLShaderPreprocessor::Context::precompile(String& vertSource, String& fragSource)
+void GLShaderPreprocessorContext::precompile(String& vertSource, String& fragSource)
 {
     doSnippetPrecompile();
     doPrecompile(vertSource, fragSource);
 }
 
-void GLShaderPreprocessor::Context::doSnippetPrecompile()
+void GLShaderPreprocessorContext::doSnippetPrecompile()
 {
     for(const GLShaderPreprocessor::Snippet& i : _vert_snippets)
     {
@@ -353,7 +353,7 @@ void GLShaderPreprocessor::Context::doSnippetPrecompile()
     }
 }
 
-void GLShaderPreprocessor::Context::doPrecompile(String& vertSource, String& fragSource)
+void GLShaderPreprocessorContext::doPrecompile(String& vertSource, String& fragSource)
 {
     if(_frag_color_modifier.dirty())
     {
@@ -379,7 +379,7 @@ void GLShaderPreprocessor::Context::doPrecompile(String& vertSource, String& fra
     }
 }
 
-void GLShaderPreprocessor::Context::insertBefore(String& src, const String& statement, const String& str)
+void GLShaderPreprocessorContext::insertBefore(String& src, const String& statement, const String& str)
 {
     String::size_type pos = src.find(statement);
     if(pos != String::npos)

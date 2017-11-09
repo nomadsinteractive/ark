@@ -12,6 +12,7 @@
 #include "graphics/impl/flatable/flatable_color4f_array.h"
 
 #include "renderer/base/gl_program.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
 
 namespace ark {
@@ -57,12 +58,12 @@ private:
 
 }
 
-GLUniform::GLUniform(const String& name, GLUniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed, const sp<ResourceLoaderContext::Synchronizer>& synchronizer)
+GLUniform::GLUniform(const String& name, GLUniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed, const sp<RenderController>& renderController)
     : _name(name), _type(type), _flatable(flatable), _changed(changed)
 {
-    DWARN(synchronizer, "Initialize GLUniform \"%s\" without synchronizer, which might cause multithreading concurrency problems", name.c_str());
-    if(synchronizer)
-        synchronize(synchronizer);
+    DWARN(renderController, "Initialize GLUniform \"%s\" without RenderController, which might cause multithreading concurrency problems", name.c_str());
+    if(renderController)
+        synchronize(renderController);
 }
 
 GLUniform::GLUniform(const GLUniform& other)
@@ -147,10 +148,10 @@ String GLUniform::declaration() const
     return s ? Strings::sprintf("uniform %s %s[%d];", t.c_str(), _name.c_str(), s) : Strings::sprintf("uniform %s %s;", t.c_str(), _name.c_str());
 }
 
-void GLUniform::synchronize(const sp<ResourceLoaderContext::Synchronizer>& synchronizer)
+void GLUniform::synchronize(const sp<RenderController>& renderController)
 {
     const sp<SynchronizedFlattable> synchronized = sp<SynchronizedFlattable>::make(_flatable, _changed);
-    synchronizer->addPreUpdateRequest(synchronized);
+    renderController->addPreUpdateRequest(synchronized);
     _flatable = synchronized;
     _changed = synchronized->notifier();
 }

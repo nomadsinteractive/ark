@@ -4,6 +4,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/inf/gl_snippet.h"
+#include "renderer/base/gl_shader_preprocessor.h"
 
 namespace ark {
 namespace gles30 {
@@ -12,10 +13,12 @@ class BindVertexArray : public GLSnippet {
 public:
     BindVertexArray(const sp<GLResource>& vertexArray);
 
+    virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) override;
     virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override;
 
 private:
     sp<GLResource> _vertex_array;
+
 };
 
 }

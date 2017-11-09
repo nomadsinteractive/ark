@@ -69,7 +69,8 @@ Bezier2::BUILDER::BUILDER(BeanFactory& parent, const document& manifest, const s
 sp<Vec3> Bezier2::BUILDER::build(const sp<Scope>& args)
 {
     const sp<VV3> vv3 = sp<Bezier2>::make(_t ? _t->build(args) : Ark::instance().clock()->duration(), _v->build(args), _p1->build(args), _p2->build(args), _p3->build(args), _on_arrival->build(args));
-    return sp<Vec3>::make(_resource_loader_context->synchronizer()->synchronize<V3>(vv3));
+    const sp<VV3> synchronized = _resource_loader_context->synchronize<V3>(vv3);
+    return sp<Vec3>::make(synchronized);
 }
 
 }

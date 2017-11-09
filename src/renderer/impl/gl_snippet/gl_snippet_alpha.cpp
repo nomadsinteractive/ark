@@ -9,7 +9,7 @@ void GLSnippetAlpha::preInitialize(GLShaderSource& source)
     source.addPredefinedAttribute("Alpha", "float", GLShaderPreprocessor::SHADER_TYPE_FRAGMENT);
 }
 
-void GLSnippetAlpha::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context)
+void GLSnippetAlpha::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context)
 {
     context.addFragmentColorModifier("vec4(1.0, 1.0, 1.0, v_Alpha)");
 }

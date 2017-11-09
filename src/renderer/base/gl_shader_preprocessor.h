@@ -78,37 +78,6 @@ public:
         SHADER_TYPE_FRAGMENT
     };
 
-    struct Context {
-        List<std::pair<String, String>> _vertex_in;
-        List<std::pair<String, String>> _vertex_out;
-
-        List<std::pair<String, String>> _fragment_in;
-
-        std::map<String, String> _vert_in_declared;
-
-        List<Snippet> _vert_snippets;
-        List<Snippet> _frag_snippets;
-
-        StringBuilder _vert_main_source;
-        StringBuilder _frag_color_modifier;
-        StringBuilder _frag_procedures;
-        StringBuilder _frag_procedure_calls;
-
-        void addAttribute(const String& name, const String& type, std::map<String, String>& vars, GLShaderSource& source);
-        void addVertexSource(const String& source);
-        void addFragmentColorModifier(const String& modifier);
-        void addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure);
-
-        void precompile(String& vertSource, String& fragSource);
-
-    private:
-        void doSnippetPrecompile();
-        void doPrecompile(String& vertSource, String& fragSource);
-
-        void insertBefore(String& src, const String& statement, const String& str);
-
-    };
-
     static const char* ANNOTATION_VERT_IN;
     static const char* ANNOTATION_VERT_OUT;
     static const char* ANNOTATION_FRAG_IN;
@@ -123,7 +92,7 @@ public:
     GLShaderPreprocessor(ShaderType type, const String& source);
 
     void parseMainFunction(GLShaderSource& shader);
-    void parseDeclarations(Context& context, GLShaderSource& shader);
+    void parseDeclarations(GLShaderPreprocessorContext& context, GLShaderSource& shader);
     void preprocess();
 
     void addUniform(const String& type, const String& name);
@@ -142,6 +111,8 @@ private:
 private:
     sp<CodeBlock> _main_block;
 
+    friend class GLShaderPreprocessorContext;
+
 public:
     ShaderType _type;
     String _source;
@@ -149,14 +120,43 @@ public:
     StringBuilder _uniform_declarations;
     std::map<String, String> _annotations;
 
-public:
     Declaration _in_declarations;
     Declaration _out_declarations;
 
-
     void declare(StringBuilder& sb, const List<std::pair<String, String>>& vars, const String& inType, const String& prefix, std::map<String, String>& declared) const;
 
-    friend class GLShaderSource;
+};
+
+class GLShaderPreprocessorContext {
+public:
+    List<std::pair<String, String>> _vertex_in;
+    List<std::pair<String, String>> _vertex_out;
+
+    List<std::pair<String, String>> _fragment_in;
+
+    std::map<String, String> _vert_in_declared;
+
+    List<GLShaderPreprocessor::Snippet> _vert_snippets;
+    List<GLShaderPreprocessor::Snippet> _frag_snippets;
+
+    StringBuilder _vert_main_source;
+    StringBuilder _frag_color_modifier;
+    StringBuilder _frag_procedures;
+    StringBuilder _frag_procedure_calls;
+
+    void addAttribute(const String& name, const String& type, std::map<String, String>& vars, GLShaderSource& source);
+    void addVertexSource(const String& source);
+    void addFragmentColorModifier(const String& modifier);
+    void addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure);
+
+    void precompile(String& vertSource, String& fragSource);
+
+private:
+    void doSnippetPrecompile();
+    void doPrecompile(String& vertSource, String& fragSource);
+
+    void insertBefore(String& src, const String& statement, const String& str);
+
 };
 
 }

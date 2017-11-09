@@ -10,7 +10,7 @@ namespace ark {
 class GLSnippetAcolor : public GLSnippet {
 public:
     virtual void preInitialize(GLShaderSource& source) override;
-    virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) override;
 
 //  [[plugin::builder::by-value("acolor")]]
     class DICTIONARY : public Builder<GLSnippet> {

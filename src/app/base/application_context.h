@@ -68,64 +68,11 @@ public:
     void resume();
 
     template<typename T> void deferUnref(const sp<T>& inst) {
-        _render_synchronizer->deferUnref(inst.pack());
+        _render_controller->deferUnref(inst.pack());
     }
 
 private:
     class EngineTicker;
-
-    template<typename T> class VariableSynchronizer : public Runnable {
-    private:
-        class Synchronized : public Variable<T> {
-        public:
-            Synchronized(const sp<Variable<T>>& delegate)
-                : _delegate(delegate) {
-            }
-
-            virtual T val() override {
-                return _val;
-            }
-
-            void update() {
-                _val = _delegate->val();
-            }
-
-        private:
-            sp<Variable<T>> _delegate;
-            T _val;
-
-        };
-
-    public:
-        virtual void run() override {
-            for(const sp<Synchronized>& i : _variables)
-                i->update();
-        }
-
-        sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate) {
-            const sp<Synchronized> synchronized = sp<Synchronized>::make(delegate);
-            _variables.push_back(synchronized);
-            return synchronized;
-        }
-
-    private:
-        WeakItemList<Synchronized> _variables;
-
-    };
-
-public:
-    template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate) {
-        const auto iter = _synchronizers.find(Type<T>::id());
-        if(iter == _synchronizers.end()) {
-            const sp<VariableSynchronizer<T>> synchronizer = sp<VariableSynchronizer<T>>::make();
-            _synchronizers.emplace(Type<T>::id(), synchronizer);
-            _render_synchronizer->addPreUpdateRequest(synchronizer);
-            return synchronizer->synchronize(delegate);
-        } else {
-            VariableSynchronizer<T>* synchronizer = static_cast<VariableSynchronizer<T>*>(iter->second.get());
-            return synchronizer->synchronize(delegate);
-        }
-    }
 
 private:
     void initMessageLoop();
@@ -144,15 +91,13 @@ private:
     sp<Clock> _clock;
     sp<MessageLoopThread> _message_loop_application;
     sp<Executor> _executor;
-    sp<RenderController> _render_synchronizer;
+    sp<RenderController> _render_controller;
 
     op<EventListenerList> _event_listeners;
     sp<EventListener> _default_event_listener;
 
     sp<ResourceLoader> _resource_loader;
     sp<StringTable> _string_table;
-
-    std::map<TypeId, sp<Runnable>> _synchronizers;
 
     friend class Ark;
     friend class Application;

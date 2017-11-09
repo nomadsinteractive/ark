@@ -34,7 +34,7 @@ public:
     }
 
     virtual sp<GLShader> build(const sp<Scope>& args) override {
-        const sp<GLShaderSource> source = sp<GLShaderSource>::make(_vertex_src, _fragment_src, _resource_loader_context->synchronizer());
+        const sp<GLShaderSource> source = sp<GLShaderSource>::make(_vertex_src, _fragment_src, _resource_loader_context->renderController());
         source->loadPredefinedParam(_factory, args, _manifest);
         return sp<GLShader>::make(source);
     }
@@ -75,7 +75,7 @@ sp<Builder<GLShader>> GLShader::fromDocument(BeanFactory& factory, const documen
 sp<GLShader> GLShader::fromStringTable(const String& vertex, const String& fragment, const sp<GLSnippet>& snippet, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
     const Global<StringTable> stringTable;
-    const sp<GLShaderSource> source = sp<GLShaderSource>::make(stringTable->getString(vertex), stringTable->getString(fragment), resourceLoaderContext->synchronizer());
+    const sp<GLShaderSource> source = sp<GLShaderSource>::make(stringTable->getString(vertex), stringTable->getString(fragment), resourceLoaderContext->renderController());
     if(snippet)
         source->addSnippet(snippet);
     return sp<GLShader>::make(source);
@@ -170,7 +170,7 @@ GLShader::BUILDER::BUILDER(BeanFactory& parent, const document& doc, const sp<Re
 
 sp<GLShader> GLShader::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<GLShaderSource> source = sp<GLShaderSource>::make(_vertex->build(args), _fragment->build(args), _resource_loader_context->synchronizer());
+    const sp<GLShaderSource> source = sp<GLShaderSource>::make(_vertex->build(args), _fragment->build(args), _resource_loader_context->renderController());
     source->loadPredefinedParam(_factory, args, _manifest);
     if(_snippet)
         source->addSnippet(_snippet->build(args));

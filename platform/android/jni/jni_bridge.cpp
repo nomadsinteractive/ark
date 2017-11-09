@@ -95,5 +95,27 @@ JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onDestroy(JNIEnv* env, jobject
 
 JNIEXPORT jboolean JNICALL Java_com_nomads_ark_JNILib_onEvent(JNIEnv* env, jobject obj, jint action, jfloat x, jfloat y, jlong timestamp)
 {
-	return _application->onEvent(Event(action == 0 ? Event::ACTION_DOWN : (action == 1 ? Event::ACTION_UP : Event::ACTION_MOVE), x, y, timestamp));
+	Event::Action s;
+	switch(action)
+	{
+		case 0:
+			s = Event::ACTION_DOWN;
+			break;
+		case 1:
+			s = Event::ACTION_UP;
+			break;
+		case 2:
+			s = Event::ACTION_MOVE;
+			break;
+		case 3:
+			s = Event::ACTION_CANCEL;
+			break;
+		case 10000:
+			s = Event::ACTION_BACK_PRESSED;
+			break;
+		default:
+			DFATAL("Unrecognized action code: %d", action);
+			break;
+	}
+	return _application->onEvent(Event(s, x, y, timestamp));
 }

@@ -24,7 +24,7 @@ void GLSnippetClipPlane::preInitialize(GLShaderSource& source)
     }
 }
 
-void GLSnippetClipPlane::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessor::Context& context)
+void GLSnippetClipPlane::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context)
 {
     _enabled = graphicsContext.glContext()->version() >= Ark::OPENGL_30;
 

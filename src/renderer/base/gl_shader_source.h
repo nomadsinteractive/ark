@@ -11,20 +11,15 @@
 #include "renderer/base/gl_attribute.h"
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/util/gl_shader_preprocessor.h"
+#include "renderer/base/gl_shader_preprocessor.h"
 
 namespace ark {
 
 class ARK_API GLShaderSource {
 public:
-    GLShaderSource(const String& vertex, const String& fragment, const sp<ResourceLoaderContext::Synchronizer>& synchronizer);
+    GLShaderSource(const String& vertex, const String& fragment, const sp<RenderController>& renderController);
 
     void loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
-
-    String& vertex();
-    const String& vertex() const;
-    String& fragment();
-    const String& fragment() const;
 
     sp<GLProgram> makeGLProgram(GraphicsContext& graphicsContext) const;
 
@@ -35,6 +30,9 @@ public:
     void addSnippet(const sp<GLSnippet>& snippet);
 
     GLShader::Slot preprocess(GraphicsContext& graphicsContext);
+
+    GLShaderPreprocessor& vertex();
+    GLShaderPreprocessor& fragment();
 
 private:
     void initialize();
@@ -47,12 +45,12 @@ private:
 
     void loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
 
-    op<GLShaderPreprocessor::Context> _preprocessor_context;
+    op<GLShaderPreprocessorContext> _preprocessor_context;
 
     GLShaderPreprocessor _vertex;
     GLShaderPreprocessor _fragment;
     uint32_t _stride;
-    sp<ResourceLoaderContext::Synchronizer> _synchronizer;
+    sp<RenderController> _render_controller;
 
     std::map<String, GLAttribute> _attributes;
     List<GLUniform> _uniforms;
@@ -60,7 +58,7 @@ private:
     sp<GLSnippet> _snippet;
 
     friend class GLShader;
-    friend struct GLShaderPreprocessor::Context;
+    friend class GLShaderPreprocessorContext;
 
 };
 

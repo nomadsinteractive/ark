@@ -12,6 +12,8 @@
 #include "graphics/base/size.h"
 #include "graphics/base/v2.h"
 
+#include "renderer/base/resource_loader_context.h"
+
 #include "app/base/application_context.h"
 #include "app/base/rigid_body.h"
 #include "app/inf/collision_callback.h"
@@ -40,19 +42,19 @@ private:
 
 }
 
-SimpleCollider::SimpleCollider(const sp<ApplicationContext>& applicationContext)
-    : _stub(sp<Stub>::make()), _application_context(applicationContext)
+SimpleCollider::SimpleCollider(const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _stub(sp<Stub>::make()), _resource_loader_context(resourceLoaderContext)
 {
 }
 
-SimpleCollider::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ApplicationContext>& applicationContext)
-    : _application_context(applicationContext)
+SimpleCollider::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _resource_loader_context(resourceLoaderContext)
 {
 }
 
 sp<Collider> SimpleCollider::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<SimpleCollider>::make(_application_context);
+    return sp<SimpleCollider>::make(_resource_loader_context);
 }
 
 sp<RigidBody> SimpleCollider::createBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size)
@@ -61,7 +63,7 @@ sp<RigidBody> SimpleCollider::createBody(Collider::BodyType type, Collider::Body
 
     if(type == Collider::BODY_TYPE_DYNAMIC)
     {
-        const sp<VV2> position = _application_context->synchronize<V2>(sp<DynamicPosition>::make(rigidBody));
+        const sp<VV2> position = _resource_loader_context->synchronize<V2>(sp<DynamicPosition>::make(rigidBody));
         rigidBody->setPosition(position);
     }
     else if(type == Collider::BODY_TYPE_KINEMATIC)

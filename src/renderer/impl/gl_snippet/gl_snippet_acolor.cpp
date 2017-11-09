@@ -9,7 +9,7 @@ void GLSnippetAcolor::preInitialize(GLShaderSource& source)
     source.addPredefinedAttribute("Color", "vec4", GLShaderPreprocessor::SHADER_TYPE_FRAGMENT);
 }
 
-void GLSnippetAcolor::preCompile(GraphicsContext& /*graphicsContext*/, GLShaderPreprocessor::Context& context)
+void GLSnippetAcolor::preCompile(GraphicsContext& /*graphicsContext*/, GLShaderPreprocessorContext& context)
 {
     context.addFragmentColorModifier("v_Color");
 }
