@@ -251,7 +251,7 @@ class Event:
 
 
 class Transform:
-    def __init__(self, pivot=None, rotation=None, scale=None, translation=None):
+    def __init__(self, rotation=None, scale=None, translation=None):
         pass
 
 

@@ -21,6 +21,11 @@ V2::V2(const V2& other)
 {
 }
 
+V2 V2::identity()
+{
+    return V2(1.0f, 1.0f);
+}
+
 bool V2::operator ==(const V2& other) const
 {
     return _x == other._x && _y == other._y;
@@ -43,19 +48,14 @@ float V2::x() const
     return _x;
 }
 
-void V2::setX(float x)
-{
-    _x = x;
-}
-
 float V2::y() const
 {
     return _y;
 }
 
-void V2::setY(float y)
+float V2::z() const
 {
-    _y = y;
+    return 0;
 }
 
 float V2::dot(const V2& other) const

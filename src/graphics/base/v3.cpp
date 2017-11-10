@@ -44,11 +44,6 @@ float V3::z() const
     return _z;
 }
 
-void V3::setZ(float z)
-{
-    _z = z;
-}
-
 float V3::dot(const V3& other) const
 {
     return _x * other._x + _y * other._y + _z * other._z;

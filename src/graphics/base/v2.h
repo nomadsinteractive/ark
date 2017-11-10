@@ -13,15 +13,15 @@ public:
     V2(float x, float y);
     V2(const V2& other);
 
+    static V2 identity();
+
     bool operator ==(const V2& other) const;
     bool operator !=(const V2& other) const;
     const V2& operator =(const V2& other);
 
     float x() const;
-    void setX(float x);
-
     float y() const;
-    void setY(float y);
+    float z() const;
 
     float dot(const V2& other) const;
 
@@ -31,6 +31,7 @@ private:
 
     friend class V3;
     friend class V4;
+    friend class Color;
 };
 
 }

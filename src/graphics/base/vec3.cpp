@@ -276,9 +276,7 @@ Vec3::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& str)
     {
         const array<float> values = Strings::toArray<float>(str);
         float* ptr = values->array();
-        _v3.setX(ptr[0]);
-        _v3.setY(ptr[1]);
-        _v3.setZ(ptr[2]);
+        _v3 = V3(ptr[0], ptr[1], ptr[2]);
     }
 
 }

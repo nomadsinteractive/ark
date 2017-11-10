@@ -36,34 +36,34 @@ Color::Color(const Color& color)
 
 float Color::red() const
 {
-    return _color.x();
+    return _color._x;
 }
 
 void Color::setRed(float red)
 {
-    _color.setX(red);
+    _color._x = red;
     _changed = true;
 }
 
 float Color::green() const
 {
-    return _color.y();
+    return _color._y;
 }
 
 void Color::setGreen(float green)
 {
-    _color.setY(green);
+    _color._y = green;
     _changed = true;
 }
 
 float Color::blue() const
 {
-    return _color.z();
+    return _color._z;
 }
 
 void Color::setBlue(float blue)
 {
-    _color.setZ(blue);
+    _color._z = blue;
     _changed = true;
 }
 
@@ -74,7 +74,7 @@ float Color::alpha() const
 
 void Color::setAlpha(float alpha)
 {
-    _color.setW(alpha);
+    _color._w = alpha;
     _changed = true;
 }
 

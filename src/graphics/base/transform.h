@@ -17,7 +17,7 @@ namespace ark {
 class ARK_API Transform {
 public:
 //  [[script::bindings::auto]]
-    Transform(const sp<VV>& pivot = nullptr, const sp<Numeric>& rotation = nullptr, const sp<VV>& scale = nullptr, const sp<VV>& translation = nullptr);
+    Transform(const sp<Numeric>& rotation = nullptr, const sp<VV>& scale = nullptr, const sp<VV>& translation = nullptr);
     Transform(const Transform& other);
 //    Transform();
 
@@ -45,11 +45,6 @@ public:
     Snapshot snapshot(float px = 0, float py = 0) const;
 
 //  [[script::bindings::property]]
-    const sp<VV>& pivot() const;
-//  [[script::bindings::property]]
-    void setPivot(const sp<VV>& pivot);
-
-//  [[script::bindings::property]]
     const sp<Numeric>& rotation();
 //  [[script::bindings::property]]
     void setRotation(const sp<Numeric>& rotation);
@@ -72,7 +67,6 @@ public:
         virtual sp<Transform> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<VV>> _pivot;
         sp<Builder<Numeric>> _rotation;
         sp<Builder<VV>> _scale;
         sp<Builder<VV>> _translation;
@@ -92,7 +86,9 @@ public:
     };
 
 private:
-    sp<VV> _pivot;
+    static const sp<VV>& identity();
+
+private:
     SafePtr<Numeric, Numeric::Impl> _rotation;
     sp<VV> _scale;
     SafePtr<VV, VV::Impl> _translation;

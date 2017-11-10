@@ -90,9 +90,8 @@ array<uint8_t> GLModelNinePatch::getArrayBuffer(GLResourceManager& resourceManag
         Rect paintRect(position.x() + i.x, position.y() + i.y, position.x() + i.x + renderObject->size()->width(), position.y() + i.y + renderObject->size()->height());
         if(transform)
         {
-            const V pivot = transform->pivot()->val();
-            const V translate = transform->translation()->val();
-            paintRect.translate(translate.x() - pivot.x(), translate.y() - pivot.y());
+            const Transform::Snapshot snapshot = transform->snapshot();
+            paintRect.translate(snapshot.translate.x() - snapshot.pivot_x, snapshot.translate.y() - snapshot.pivot_y);
         }
         const Item& ninePatch = _nine_patch_items.at(renderObject->type());
         filter->setVaryings(buf, _stride, 16);

@@ -18,12 +18,13 @@ public:
     const V4& operator =(const V4& other);
 
     float w() const;
-    void setW(float w);
 
     float dot(const V4& other) const;
 
 private:
     float _w;
+
+    friend class Color;
 };
 
 }

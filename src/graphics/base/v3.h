@@ -18,7 +18,6 @@ public:
     const V3& operator =(const V3& other);
 
     float z() const;
-    void setZ(float z);
 
     float dot(const V3& other) const;
     V3 cross(const V3& other) const;
@@ -27,6 +26,7 @@ private:
     float _z;
 
     friend class V4;
+    friend class Color;
 };
 
 }

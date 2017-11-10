@@ -48,11 +48,6 @@ float V4::w() const
     return _w;
 }
 
-void V4::setW(float w)
-{
-    _w = w;
-}
-
 float V4::dot(const V4& other) const
 {
     return _x * other._x + _y * other._y + _z * other._z + _w * other._w;
