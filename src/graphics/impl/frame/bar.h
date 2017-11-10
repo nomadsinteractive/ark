@@ -13,7 +13,7 @@ namespace ark {
 //[[core::class]]
 class Bar : public Renderer, public Block {
 public:
-    Bar(const sp<Layer>& layer, const sp<RenderObject>& bottom, const sp<RenderObject>& bolierplate, const sp<RenderObject>& top, const sp<VV2>& direction, const sp<Size>& size);
+    Bar(const sp<Layer>& layer, const sp<RenderObject>& bottom, const sp<RenderObject>& bolierplate, const sp<RenderObject>& top, const sp<VV>& direction, const sp<Size>& size);
 
     virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
 
@@ -30,7 +30,7 @@ public:
         sp<Builder<Layer>> _layer;
         sp<Builder<Size>> _size;
         sp<Builder<RenderObject>> _bottom, _top, _boilerplate;
-        sp<Builder<VV2>> _direction;
+        sp<Builder<VV>> _direction;
     };
 
 private:
@@ -40,7 +40,7 @@ private:
     sp<RenderObject> _bottom;
     sp<RenderObject> _boilerplate;
     sp<RenderObject> _top;
-    sp<VV2> _direction;
+    sp<VV> _direction;
     sp<Size> _size;
 
     sp<RenderLayer> _render_layer;

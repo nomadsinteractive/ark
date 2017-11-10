@@ -37,7 +37,7 @@ void ParticleEmitter::render(RenderCommandPipeline& /*pipeline*/, float /*x*/, f
 uint64_t ParticleEmitter::emitParticles(uint64_t tick)
 {
     uint64_t nextTick = std::numeric_limits<std::uint64_t>::max();
-    const V2 position = _stub->_position->val();
+    const V position = _stub->_position->val();
     for(Particale& i : _particles)
         nextTick = std::min(i.show(position.x(), position.y(), _clock, tick, _render_layer), nextTick);
     return nextTick;
@@ -47,7 +47,7 @@ ParticleEmitter::BUILDER::BUILDER(BeanFactory& parent, const document& manifest,
     : _factory(parent), _manifest(manifest), _resource_loader_context(resourceLoaderContext),
       _clock(parent.getBuilder<Clock>(manifest, Constants::Attributes::CLOCK, false)),
       _type(parent.getBuilder<Numeric>(manifest, Constants::Attributes::TYPE, false)),
-      _position(parent.getBuilder<VV2>(manifest, Constants::Attributes::POSITION)),
+      _position(parent.getBuilder<VV>(manifest, Constants::Attributes::POSITION)),
       _size(parent.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _render_layer(parent.ensureBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER))
 {
@@ -69,7 +69,7 @@ ParticleEmitter::Particale::Particale(const sp<Stub>& stub, const document& mani
     DCHECK(_interval, "Interval must be greater than 0");
 
     _type = factory.getBuilder<Numeric>(manifest, Constants::Attributes::TYPE, false);
-    _position = factory.getBuilder<Vec2>(manifest, Constants::Attributes::POSITION, false);
+    _position = factory.getBuilder<Vec>(manifest, Constants::Attributes::POSITION, false);
     _size = factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE, false);
     _transform = factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM);
     _filter = factory.getBuilder<Filter>(manifest, Constants::Attributes::FILTER);
@@ -121,7 +121,7 @@ uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clo
 
         _x += dx;
         _y += dy;
-        const sp<Vec2> position = makePosition(_stub->_vec2_object_pool, _stub->_numeric_object_pool, _x , _y);
+        const sp<Vec> position = makePosition(_stub->_vec2_object_pool, _stub->_numeric_object_pool, _x , _y);
         const sp<Boolean> expired = _expired->build(_stub->_arguments);
         const sp<RenderObject> renderObject = _stub->_render_object_pool->allocate<RenderObject>(
                     type, position,
@@ -132,18 +132,18 @@ uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clo
     return last_emit_tick + _interval;
 }
 
-sp<Vec2> ParticleEmitter::Particale::makePosition(ObjectPool<Vec2>& vec2ObjectPool, ObjectPool<Numeric>& numericObjectPool, float x, float y) const
+sp<Vec> ParticleEmitter::Particale::makePosition(ObjectPool<Vec>& vec2ObjectPool, ObjectPool<Numeric>& numericObjectPool, float x, float y) const
 {
     if(_position)
-        return vec2ObjectPool.allocate<Vec2>(_position->build(_stub->_arguments)->translate(numericObjectPool, x, y));
-    return vec2ObjectPool.allocate<Vec2>(x, y);
+        return vec2ObjectPool.allocate<Vec>(_position->build(_stub->_arguments)->translate(numericObjectPool, x, y));
+    return vec2ObjectPool.allocate<Vec>(x, y);
 }
 
-ParticleEmitter::Stub::Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t type, const sp<VV2>& position, const sp<Size>& size, const sp<Scope>& arguments)
+ParticleEmitter::Stub::Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Scope>& arguments)
     : _arguments(sp<Scope>::make(arguments)), _type(type), _position(position), _size(size),
       _render_object_pool(resourceLoaderContext->getObjectPool<RenderObject>()),
       _numeric_object_pool(resourceLoaderContext->getObjectPool<Numeric>()),
-      _vec2_object_pool(resourceLoaderContext->getObjectPool<Vec2>())
+      _vec2_object_pool(resourceLoaderContext->getObjectPool<Vec>())
 {
 }
 

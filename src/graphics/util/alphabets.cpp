@@ -34,7 +34,7 @@ void Alphabets::place(float boundary, float letterSpacing, float lineIndent, con
             flowx = x + lineIndent;
         }
     }
-    const sp<Vec2> position = sp<Vec2>::make(flowx, flowy);
+    const sp<Vec> position = sp<Vec>::make(flowx, flowy);
     renderObjects->push_back(sp<RenderObject>::make(c, position, size));
     flowx += size->width();
 }

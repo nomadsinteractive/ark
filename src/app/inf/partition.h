@@ -12,7 +12,7 @@ public:
     virtual ~Partition() = default;
 
 //  [[script::bindings::auto]]
-    virtual uint32_t addPoint(const sp<VV2>& pos) = 0;
+    virtual uint32_t addPoint(const sp<VV>& pos) = 0;
 //  [[script::bindings::auto]]
     virtual void updatePoint(uint32_t id) = 0;
 //  [[script::bindings::auto]]

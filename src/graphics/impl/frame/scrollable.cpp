@@ -67,7 +67,7 @@ void Scrollable::RollingAdapter::putTile(int32_t rowIndex, int32_t colIndex, con
     _tiles->array()[rowIndex * _params._col_count + colIndex] = tile;
 }
 
-Scrollable::Scrollable(const sp<VV2>& scroller, const sp<TileMaker>& tileMaker, const sp<Size>& size, const Scrollable::Params& params)
+Scrollable::Scrollable(const sp<VV>& scroller, const sp<TileMaker>& tileMaker, const sp<Size>& size, const Scrollable::Params& params)
     : _params(params), _rolling_view(RollingAdapter(_params), RollingAdapter(_params)), _scroller(scroller), _tile_maker(tileMaker), _size(size),
       _scroll_x(0), _scroll_y(0)
 {
@@ -128,7 +128,7 @@ void Scrollable::updateTask()
 
 void Scrollable::update()
 {
-    const V2 scroll = _scroller->val();
+    const V scroll = _scroller->val();
     int32_t scrollX = static_cast<int32_t>(scroll.x());
     int32_t scrollY = static_cast<int32_t>(scroll.y());
     if(scrollX != _scroll_x || scrollY != _scroll_y)
@@ -155,7 +155,7 @@ Scrollable::Params::Params(int32_t rowCount, int32_t colCount, int32_t rowIndex,
 }
 
 Scrollable::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _scroller(parent.ensureBuilder<VV2>(doc, "scroller")), _tile_maker(parent.ensureBuilder<TileMaker>(doc, "tile-maker")), _size(parent.ensureBuilder<Size>(doc, Constants::Attributes::SIZE)),
+    : _scroller(parent.ensureBuilder<VV>(doc, "scroller")), _tile_maker(parent.ensureBuilder<TileMaker>(doc, "tile-maker")), _size(parent.ensureBuilder<Size>(doc, Constants::Attributes::SIZE)),
       _rows(Documents::ensureAttribute<int32_t>(doc, "rows")), _cols(Documents::ensureAttribute<int32_t>(doc, "cols")),
       _row_index(_rows / 2), _col_index(_cols / 2),
       _tile_width(Documents::ensureAttribute<int32_t>(doc, "tile-width")), _tile_height(Documents::ensureAttribute<int32_t>(doc, "tile-height"))

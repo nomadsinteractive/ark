@@ -22,14 +22,14 @@ namespace ark {
 
 namespace {
 
-class DynamicPosition : public VV2 {
+class DynamicPosition : public VV {
 public:
     DynamicPosition(const sp<SimpleCollider::RigidBodyImpl>& rigidBody)
         : _body_stub(rigidBody->stub()), _bounds(0, 0, rigidBody->size()->width(), rigidBody->size()->height()) {
     }
 
-    virtual V2 val() override {
-        const V2 position = _body_stub->_position->val();
+    virtual V val() override {
+        const V position = _body_stub->_position->val();
         _bounds.setCenter(position.x(), position.y());
         _body_stub->collision(_bounds);
         return position;
@@ -63,7 +63,7 @@ sp<RigidBody> SimpleCollider::createBody(Collider::BodyType type, Collider::Body
 
     if(type == Collider::BODY_TYPE_DYNAMIC)
     {
-        const sp<VV2> position = _resource_loader_context->synchronize<V2>(sp<DynamicPosition>::make(rigidBody));
+        const sp<VV> position = _resource_loader_context->synchronize<V>(sp<DynamicPosition>::make(rigidBody));
         rigidBody->setPosition(position);
     }
     else if(type == Collider::BODY_TYPE_KINEMATIC)
@@ -83,7 +83,7 @@ SimpleCollider::Stub::Stub()
 
 void SimpleCollider::Stub::insert(const sp<RigidBodyImpl>& rigidObject)
 {
-    const V2 position = rigidObject->position()->val();
+    const V position = rigidObject->position()->val();
     const sp<Size>& size = rigidObject->size();
     _x_axis_segment.insert(rigidObject->id(), position.x(), size->width() / 2);
     _y_axis_segment.insert(rigidObject->id(), position.y(), size->height() / 2);
@@ -170,7 +170,7 @@ void SimpleCollider::RigidBodyImpl::setPosition(const sp<VV>& position)
     _position = position;
 }
 
-V2 SimpleCollider::RigidBodyImpl::xy() const
+V SimpleCollider::RigidBodyImpl::xy() const
 {
     return _stub->_position->val();
 }
@@ -200,7 +200,7 @@ void SimpleCollider::RigidBodyImpl::Stub::collision(const Rect& rect)
             uint32_t id = *iter;
             const sp<RigidBodyImpl> rigidBody = s->findRigidBody(id);
             const sp<Size>& size = rigidBody->size();
-            const V2 position = rigidBody->xy();
+            const V position = rigidBody->xy();
             const Rect irect(position.x() - size->width() / 2, position.y() - size->height() / 2, position.x() + size->width() / 2, position.y() + size->height() / 2);
             bool overlap = irect.overlap(rect);
             if(overlap)

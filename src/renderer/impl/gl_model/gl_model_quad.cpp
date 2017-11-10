@@ -33,7 +33,7 @@ array<uint8_t> GLModelQuad::getArrayBuffer(GLResourceManager& resourceManager, c
     for(const LayerContext::Item& i : renderContext.items()) {
         const Atlas::Item& texCoord = _atlas->at(i.renderObject->type());
         const sp<Transform>& transform = i.renderObject->transform();
-        const V2 position = i.renderObject->position()->val();
+        const V position = i.renderObject->position()->val();
         float w = i.renderObject->width();
         float h = i.renderObject->height();
         float width = w == 0 ? texCoord.width() : w;

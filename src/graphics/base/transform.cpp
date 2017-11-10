@@ -11,8 +11,8 @@
 
 namespace ark {
 
-Transform::Transform(const sp<VV2>& pivot, const sp<Numeric>& rotate, const sp<VV2>& scale, const sp<VV2>& translation)
-    : _pivot(pivot), _rotation(rotate), _scale(scale ? scale : sp<VV2>::adopt(new VV2::Impl(V2(1.0f, 1.0f)))), _translation(translation)
+Transform::Transform(const sp<VV>& pivot, const sp<Numeric>& rotate, const sp<VV>& scale, const sp<VV>& translation)
+    : _pivot(pivot), _rotation(rotate), _scale(scale ? scale : sp<VV>::adopt(new VV::Impl(V(1.0f, 1.0f)))), _translation(translation)
 {
 }
 
@@ -31,7 +31,7 @@ Transform::Snapshot Transform::snapshot(float px, float py) const
     Snapshot ss(px, py);
     if(_pivot)
     {
-        const V2 p = _pivot->val();
+        const V p = _pivot->val();
         ss.pivot_x += p.x();
         ss.pivot_y += p.y();
     }
@@ -41,12 +41,12 @@ Transform::Snapshot Transform::snapshot(float px, float py) const
     return ss;
 }
 
-const sp<VV2>& Transform::pivot() const
+const sp<VV>& Transform::pivot() const
 {
     return _pivot;
 }
 
-void Transform::setPivot(const sp<VV2>& pivot)
+void Transform::setPivot(const sp<VV>& pivot)
 {
     _pivot = pivot;
 }
@@ -61,22 +61,22 @@ void Transform::setRotation(const sp<Numeric>& rotate)
     _rotation.assign(rotate);
 }
 
-const sp<VV2>& Transform::scale() const
+const sp<VV>& Transform::scale() const
 {
     return _scale;
 }
 
-void Transform::setScale(const sp<VV2>& scale)
+void Transform::setScale(const sp<VV>& scale)
 {
     _scale = scale;
 }
 
-const sp<VV2>& Transform::translation() const
+const sp<VV>& Transform::translation() const
 {
     return _translation.ensure();
 }
 
-void Transform::setTranslation(const sp<VV2>& translation)
+void Transform::setTranslation(const sp<VV>& translation)
 {
     _translation.assign(translation);
 }
@@ -136,7 +136,7 @@ void Transform::Snapshot::map(float x, float y, float tx, float ty, float& mx, f
 }
 
 Transform::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _pivot(parent.getBuilder<VV2>(doc, "pivot")), _rotation(parent.getBuilder<Numeric>(doc, "rotation")), _scale(parent.getBuilder<VV2>(doc, "scale")), _translation(parent.getBuilder<VV2>(doc, "translation"))
+    : _pivot(parent.getBuilder<VV>(doc, "pivot")), _rotation(parent.getBuilder<Numeric>(doc, "rotation")), _scale(parent.getBuilder<VV>(doc, "scale")), _translation(parent.getBuilder<VV>(doc, "translation"))
 {
 }
 
@@ -157,7 +157,7 @@ sp<Transform> Transform::DICTIONARY::build(const sp<Scope>& args)
 
 template<> ARK_API const sp<Transform>& Null::ptr()
 {
-    static const sp<Transform> inst = sp<Transform>::make(Null::ptr<VV2>(), Null::ptr<Numeric>(), sp<VV2::Const>::make(V2(1.0f, 1.0f)), Null::ptr<VV2>());
+    static const sp<Transform> inst = sp<Transform>::make(Null::ptr<VV>(), Null::ptr<Numeric>(), sp<VV::Const>::make(V(1.0f, 1.0f)), Null::ptr<VV>());
     return inst;
 }
 

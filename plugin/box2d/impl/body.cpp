@@ -145,23 +145,23 @@ void Body::applyTorque(float torque)
     _body->ApplyTorque(torque, true);
 }
 
-void Body::applyForce(const sp<VV2>& force, const sp<VV2>& point)
+void Body::applyForce(const sp<VV>& force, const sp<VV>& point)
 {
-    const V2 f = force->val();
-    const V2 p = point->val();
+    const V f = force->val();
+    const V p = point->val();
     _body->ApplyForce(b2Vec2(f.x(), f.y()), b2Vec2(p.x(), p.y()), true);
 }
 
-void Body::applyForceToCenter(const sp<VV2>& force)
+void Body::applyForceToCenter(const sp<VV>& force)
 {
-    const V2 f = force->val();
+    const V f = force->val();
     _body->ApplyForceToCenter(b2Vec2(f.x(), f.y()), true);
 }
 
-void Body::applyLinearImpulse(const sp<VV2>& impulse, const sp<VV2>& point)
+void Body::applyLinearImpulse(const sp<VV>& impulse, const sp<VV>& point)
 {
-    const V2 i = impulse->val();
-    const V2 p = point->val();
+    const V i = impulse->val();
+    const V p = point->val();
     _body->ApplyLinearImpulse(b2Vec2(i.x(), i.y()), b2Vec2(p.x(), p.y()), true);
 }
 
@@ -178,7 +178,7 @@ b2Body* Body::b2Instance() const
 Body::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& parent, const document& doc)
     : _world(parent.ensureBuilder<Object>(doc, "world")),
       _shape(parent.ensureBuilder<Shape>(doc, "shape")),
-      _position(parent.ensureBuilder<VV2>(doc, Constants::Attributes::POSITION)),
+      _position(parent.ensureBuilder<VV>(doc, Constants::Attributes::POSITION)),
       _density(Documents::getAttribute<float>(doc, "density", 1.0f)),
       _friction(Documents::getAttribute<float>(doc, "friction", 0.2f))
 {
@@ -189,7 +189,7 @@ sp<Body> Body::BUILDER_IMPL1::build(const sp<Scope>& args)
 {
     const sp<World> world = BeanUtils::as<World>(_world, args);
     const sp<Shape> shape = _shape->build(args);
-    const V2 p = _position->build(args)->val();
+    const V p = _position->build(args)->val();
     return sp<Body>::make(world, Body::BODY_TYPE_DYNAMIC, p.x(), p.y(), shape, _density, _friction);
 }
 
@@ -198,11 +198,11 @@ Body::POSITION_BUILDER::POSITION_BUILDER(BeanFactory& parent, const document& do
 {
 }
 
-sp<Vec2> Body::POSITION_BUILDER::build(const sp<Scope>& args)
+sp<Vec> Body::POSITION_BUILDER::build(const sp<Scope>& args)
 {
     const sp<Body> body = _body->build(args).as<Body>();
     DCHECK(body, "Illegal body object");
-    return sp<Vec2>::make(sp<_PositionX>::make(body), sp<_PositionY>::make(body));
+    return sp<Vec>::make(sp<_PositionX>::make(body), sp<_PositionY>::make(body));
 }
 
 Body::ROTATION_BUILDER::ROTATION_BUILDER(BeanFactory& parent, const document& doc)
@@ -227,7 +227,7 @@ sp<RenderObject> Body::RENDER_OBJECT_DECORATOR::build(const sp<Scope>& args)
     const sp<Body> body = _body->build(args).as<Body>();
     NOT_NULL(body);
     sp<RenderObject> decorated = _delegate->build(args);
-    decorated->setPosition(sp<Vec2>::make(sp<_PositionX>::make(body), sp<_PositionY>::make(body)));
+    decorated->setPosition(sp<Vec>::make(sp<_PositionX>::make(body), sp<_PositionY>::make(body)));
     decorated->transform()->setRotation(sp<_Angle>::make(body));
     decorated.absorb(body);
     return decorated;

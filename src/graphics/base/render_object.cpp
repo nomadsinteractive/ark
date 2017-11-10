@@ -37,7 +37,7 @@ private:
 
 }
 
-RenderObject::RenderObject(uint32_t type, const sp<VV2>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Filter>& filter)
+RenderObject::RenderObject(uint32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Filter>& filter)
     : _type(type), _position(position), _size(size), _transform(transform), _filter(Null::toSafe<Filter>(filter))
 {
 }
@@ -93,17 +93,17 @@ float RenderObject::y() const
     return _position->val().y();
 }
 
-V2 RenderObject::xy() const
+V RenderObject::xy() const
 {
     return _position->val();
 }
 
-const sp<VV2>& RenderObject::position() const
+const sp<VV>& RenderObject::position() const
 {
     return _position.ensure();
 }
 
-void RenderObject::setPosition(const sp<VV2>& position)
+void RenderObject::setPosition(const sp<VV>& position)
 {
     _position.assign(position);
 }
@@ -135,7 +135,7 @@ const Box& RenderObject::tag() const
 
 RenderObject::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
     : _type(parent.ensureBuilder<Numeric>(doc, Constants::Attributes::TYPE)),
-      _position(parent.getBuilder<Vec2>(doc, Constants::Attributes::POSITION)),
+      _position(parent.getBuilder<Vec>(doc, Constants::Attributes::POSITION)),
       _size(parent.getBuilder<Size>(doc, Constants::Attributes::SIZE)),
       _transform(parent.getBuilder<Transform>(doc, Constants::Attributes::TRANSFORM)),
       _filter(parent.getBuilder<Filter>(doc, Constants::Attributes::FILTER))

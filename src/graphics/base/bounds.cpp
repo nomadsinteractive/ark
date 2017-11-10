@@ -36,21 +36,21 @@ std::vector<String> psplit(const String& value)
 }
 
 Bounds::Bounds()
-    : _position(Null::ptr<Vec2>()), _size(Null::ptr<Size>())
+    : _position(Null::ptr<Vec>()), _size(Null::ptr<Size>())
 {
 }
 
 Bounds::Bounds(const Rect& rectf)
-    : _position(sp<Vec2>::make(rectf.left(), rectf.top())), _size(sp<Size>::make(rectf.width(), rectf.height()))
+    : _position(sp<Vec>::make(rectf.left(), rectf.top())), _size(sp<Size>::make(rectf.width(), rectf.height()))
 {
 }
 
 Bounds::Bounds(float x, float y, float w, float h)
-    : _position(sp<Vec2>::make(x, y)), _size(sp<Size>::make(w, h))
+    : _position(sp<Vec>::make(x, y)), _size(sp<Size>::make(w, h))
 {
 }
 
-Bounds::Bounds(const sp<Vec2>& position, const sp<Size>& size)
+Bounds::Bounds(const sp<Vec>& position, const sp<Size>& size)
     : _position(position), _size(size)
 {
 }
@@ -61,7 +61,7 @@ bool Bounds::ptin(float x, float y) const
     return rectf.ptin(x, y);
 }
 
-const sp<Vec2>& Bounds::position() const
+const sp<Vec>& Bounds::position() const
 {
     return _position;
 }
@@ -109,7 +109,7 @@ Bounds::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)
 
     if(strs.size() == 2)
     {
-        _position = parent.ensureBuilder<Vec2>(strs[0]);
+        _position = parent.ensureBuilder<Vec>(strs[0]);
         _size = parent.ensureBuilder<Size>(strs[1]);
     }
     else if(strs.size() == 4)

@@ -7,7 +7,7 @@
 
 namespace ark {
 
-KDTreePartition::Adapter::Point::Point(uint32_t id, const sp<VV2>& position)
+KDTreePartition::Adapter::Point::Point(uint32_t id, const sp<VV>& position)
     : _id(id), _position(position), _disposed(false)
 {
     update();
@@ -15,7 +15,7 @@ KDTreePartition::Adapter::Point::Point(uint32_t id, const sp<VV2>& position)
 
 void KDTreePartition::Adapter::Point::update()
 {
-    const V2 v2 = _position->val();
+    const V v2 = _position->val();
     _v[0] = v2.x();
     _v[1] = v2.y();
 }
@@ -32,7 +32,7 @@ KDTreePartition::KDTreePartition()
     buildIndex();
 }
 
-uint32_t KDTreePartition::addPoint(const sp<VV2>& pos)
+uint32_t KDTreePartition::addPoint(const sp<VV>& pos)
 {
     uint32_t id = _adapter.pts.size();
     const Adapter::Point pt(_id_generator++, pos);

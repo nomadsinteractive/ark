@@ -66,11 +66,11 @@ public:
 //  [[script::bindings::auto]]
     void applyTorque(float torque);
 //  [[script::bindings::auto]]
-    void applyForce(const sp<VV2>& force, const sp<VV2>& point);
+    void applyForce(const sp<VV>& force, const sp<VV>& point);
 //  [[script::bindings::auto]]
-    void applyForceToCenter(const sp<VV2>& force);
+    void applyForceToCenter(const sp<VV>& force);
 //  [[script::bindings::auto]]
-    void applyLinearImpulse(const sp<VV2>& impulse, const sp<VV2>& point);
+    void applyLinearImpulse(const sp<VV>& impulse, const sp<VV>& point);
 //  [[script::bindings::auto]]
     void applyAngularImpulse(float impulse);
 
@@ -86,7 +86,7 @@ public:
     private:
         sp<Builder<Object>> _world;
         sp<Builder<Shape>> _shape;
-        sp<Builder<VV2>> _position;
+        sp<Builder<VV>> _position;
         float _density;
         float _friction;
 
@@ -104,11 +104,11 @@ public:
     };
 
 //  [[plugin::builder("b2Position")]]
-    class POSITION_BUILDER : public Builder<Vec2> {
+    class POSITION_BUILDER : public Builder<Vec> {
     public:
         POSITION_BUILDER(BeanFactory& parent, const document& doc);
 
-        virtual sp<Vec2> build(const sp<Scope>& args) override;
+        virtual sp<Vec> build(const sp<Scope>& args) override;
 
     private:
         sp<Builder<Object>> _body;

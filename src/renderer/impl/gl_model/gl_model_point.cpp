@@ -34,7 +34,7 @@ array<uint8_t> GLModelPoint::getArrayBuffer(GLResourceManager& resourceManager, 
     for(const LayerContext::Item& i : renderContext.items()) {
         const Atlas::Item& texCoord = _atlas->at(i.renderObject->type());
         const sp<Transform>& transform = i.renderObject->transform();
-        const V2 position = i.renderObject->position()->val();
+        const V position = i.renderObject->position()->val();
         const Transform::Snapshot snapshot = transform ? transform->snapshot() : Transform::Snapshot(0, 0);
         float tx = position.x() + x + i.x;
         float ty = position.y() + y + i.y;

@@ -27,10 +27,10 @@ Collider::BodyShape RigidBody::shape() const
     return _shape;
 }
 
-V2 RigidBody::xy() const
+V RigidBody::xy() const
 {
     const V pos =_position->val();
-    return V2(pos.x(), pos.y());
+    return V(pos.x(), pos.y());
 }
 
 float RigidBody::width() const
@@ -43,7 +43,7 @@ float RigidBody::height() const
     return _size->height();
 }
 
-const sp<VV2>& RigidBody::position() const
+const sp<VV>& RigidBody::position() const
 {
     return _position;
 }

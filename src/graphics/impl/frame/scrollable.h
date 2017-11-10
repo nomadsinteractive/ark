@@ -51,7 +51,7 @@ private:
     };
 
 public:
-    Scrollable(const sp<VV2>& scroller, const sp<TileMaker>& tileMaker, const sp<Size>& size, const Params& params);
+    Scrollable(const sp<VV>& scroller, const sp<TileMaker>& tileMaker, const sp<Size>& size, const Params& params);
 
     virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
 
@@ -67,7 +67,7 @@ public:
         virtual sp<Renderer> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<VV2>> _scroller;
+        sp<Builder<VV>> _scroller;
         sp<Builder<TileMaker>> _tile_maker;
         sp<Builder<Size>> _size;
 
@@ -86,7 +86,7 @@ private:
 private:
     Params _params;
     Dual<RollingAdapter> _rolling_view;
-    sp<VV2> _scroller;
+    sp<VV> _scroller;
     sp<TileMaker> _tile_maker;
     sp<Size> _size;
     int32_t _scroll_x;

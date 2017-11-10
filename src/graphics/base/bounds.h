@@ -14,12 +14,12 @@ public:
     Bounds();
     Bounds(const Rect& rect);
     Bounds(float x, float y, float w, float h);
-    Bounds(const sp<Vec2>& position, const sp<Size>& size);
+    Bounds(const sp<Vec>& position, const sp<Size>& size);
 
 //  [[script::bindings::auto]]
     bool ptin(float x, float y) const;
 //  [[script::bindings::property]]
-    const sp<Vec2>& position() const;
+    const sp<Vec>& position() const;
 //  [[script::bindings::property]]
     virtual const sp<Size>& size() override;
 
@@ -45,14 +45,14 @@ public:
         virtual sp<Bounds> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Vec2>> _position;
+        sp<Builder<Vec>> _position;
         sp<Builder<Size>> _size;
 
         sp<Builder<Numeric>> _x, _y, _w, _h;
     };
 
 private:
-    sp<Vec2> _position;
+    sp<Vec> _position;
     sp<Size> _size;
 
 };

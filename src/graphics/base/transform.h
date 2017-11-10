@@ -17,7 +17,7 @@ namespace ark {
 class ARK_API Transform {
 public:
 //  [[script::bindings::auto]]
-    Transform(const sp<VV2>& pivot = nullptr, const sp<Numeric>& rotation = nullptr, const sp<VV2>& scale = nullptr, const sp<VV2>& translation = nullptr);
+    Transform(const sp<VV>& pivot = nullptr, const sp<Numeric>& rotation = nullptr, const sp<VV>& scale = nullptr, const sp<VV>& translation = nullptr);
     Transform(const Transform& other);
 //    Transform();
 
@@ -38,16 +38,16 @@ public:
 
         float pivot_x, pivot_y;
         float rotation;
-        V2 scale;
-        V2 translate;
+        V scale;
+        V translate;
     };
 
     Snapshot snapshot(float px = 0, float py = 0) const;
 
 //  [[script::bindings::property]]
-    const sp<VV2>& pivot() const;
+    const sp<VV>& pivot() const;
 //  [[script::bindings::property]]
-    void setPivot(const sp<VV2>& pivot);
+    void setPivot(const sp<VV>& pivot);
 
 //  [[script::bindings::property]]
     const sp<Numeric>& rotation();
@@ -55,14 +55,14 @@ public:
     void setRotation(const sp<Numeric>& rotation);
 
 //  [[script::bindings::property]]
-    const sp<VV2>& scale() const;
+    const sp<VV>& scale() const;
 //  [[script::bindings::property]]
-    void setScale(const sp<VV2>& scale);
+    void setScale(const sp<VV>& scale);
 
 //  [[script::bindings::property]]
-    const sp<VV2>& translation() const;
+    const sp<VV>& translation() const;
 //  [[script::bindings::property]]
-    void setTranslation(const sp<VV2>& translation);
+    void setTranslation(const sp<VV>& translation);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Transform> {
@@ -72,10 +72,10 @@ public:
         virtual sp<Transform> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<VV2>> _pivot;
+        sp<Builder<VV>> _pivot;
         sp<Builder<Numeric>> _rotation;
-        sp<Builder<VV2>> _scale;
-        sp<Builder<VV2>> _translation;
+        sp<Builder<VV>> _scale;
+        sp<Builder<VV>> _translation;
 
     };
 
@@ -92,10 +92,10 @@ public:
     };
 
 private:
-    sp<VV2> _pivot;
+    sp<VV> _pivot;
     SafePtr<Numeric, Numeric::Impl> _rotation;
-    sp<VV2> _scale;
-    SafePtr<VV2, VV2::Impl> _translation;
+    sp<VV> _scale;
+    SafePtr<VV, VV::Impl> _translation;
 
 };
 

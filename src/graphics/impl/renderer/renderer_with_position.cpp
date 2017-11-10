@@ -7,7 +7,7 @@
 
 namespace ark {
 
-RendererWithPosition::RendererWithPosition(const sp<Renderer>& renderer, const sp<VV2>& position)
+RendererWithPosition::RendererWithPosition(const sp<Renderer>& renderer, const sp<VV>& position)
     : _renderer(renderer), _position(position)
 {
     DCHECK(renderer && position, "Arguments must be not null");
@@ -15,12 +15,12 @@ RendererWithPosition::RendererWithPosition(const sp<Renderer>& renderer, const s
 
 void RendererWithPosition::render(RenderCommandPipeline& pipeline, float x, float y)
 {
-    const V2 position = _position->val();
+    const V position = _position->val();
     _renderer->render(pipeline, x + position.x(), y + position.y());
 }
 
 RendererWithPosition::DECORATOR::DECORATOR(BeanFactory& parent, const sp<Builder<Renderer>>& delegate, const String& value)
-    : _delegate(delegate), _position(parent.ensureBuilder<VV2>(value))
+    : _delegate(delegate), _position(parent.ensureBuilder<VV>(value))
 {
 }
 

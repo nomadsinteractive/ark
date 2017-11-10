@@ -66,7 +66,7 @@ public:
 
         void setPosition(const sp<VV>& position);
 
-        V2 xy() const;
+        V xy() const;
 
         uint32_t id() const;
         void collision(const Rect& rect);

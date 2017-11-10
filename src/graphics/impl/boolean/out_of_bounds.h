@@ -11,7 +11,7 @@ namespace ark {
 
 class OutOfBounds : public Boolean {
 public:
-    OutOfBounds(const sp<Bounds>& bounds, const sp<VV2>& position);
+    OutOfBounds(const sp<Bounds>& bounds, const sp<VV>& position);
 
     virtual bool val() override;
 
@@ -24,12 +24,12 @@ public:
 
     private:
         sp<Builder<Bounds>> _bounds;
-        sp<Builder<VV2>> _position;
+        sp<Builder<VV>> _position;
     };
 
 private:
     sp<Bounds> _bounds;
-    sp<VV2> _position;
+    sp<VV> _position;
 
 };
 

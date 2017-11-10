@@ -20,17 +20,17 @@ namespace ark {
 class ParticleEmitter : public Renderer {
 private:
     struct Stub {
-        Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t type, const sp<VV2>& position, const sp<Size>& size, const sp<Scope>& arguments);
+        Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Scope>& arguments);
 
         sp<Scope> _arguments;
 
         uint32_t _type;
-        SafePtr<VV2> _position;
+        SafePtr<VV> _position;
         sp<Size> _size;
 
         sp<ObjectPool<RenderObject>> _render_object_pool;
         sp<ObjectPool<Numeric>> _numeric_object_pool;
-        sp<ObjectPool<Vec2>> _vec2_object_pool;
+        sp<ObjectPool<Vec>> _vec2_object_pool;
     };
 
 public:
@@ -53,7 +53,7 @@ public:
 
         sp<Builder<Clock>> _clock;
         sp<Builder<Numeric>> _type;
-        sp<Builder<VV2>> _position;
+        sp<Builder<VV>> _position;
         sp<Builder<Size>> _size;
         sp<Builder<RenderLayer>> _render_layer;
 
@@ -83,13 +83,13 @@ private:
         uint64_t show(float x, float y, const sp<Clock>& clock, uint64_t tick, const sp<RenderLayer>& renderLayer);
 
     private:
-        sp<Vec2> makePosition(ObjectPool<Vec2>& vec2ObjectPool, ObjectPool<Numeric>& numericObjectPool, float x, float y) const;
+        sp<Vec> makePosition(ObjectPool<Vec>& vec2ObjectPool, ObjectPool<Numeric>& numericObjectPool, float x, float y) const;
 
     private:
         sp<Stub> _stub;
 
         sp<Builder<Numeric>> _type;
-        sp<Builder<Vec2>> _position;
+        sp<Builder<Vec>> _position;
         sp<Builder<Size>> _size;
         sp<Builder<Transform>> _transform;
         sp<Builder<Filter>> _filter;

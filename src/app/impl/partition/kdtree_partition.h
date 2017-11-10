@@ -19,7 +19,7 @@ class KDTreePartition : public Partition {
 public:
     KDTreePartition();
 
-    virtual uint32_t addPoint(const sp<VV2>& pos) override;
+    virtual uint32_t addPoint(const sp<VV>& pos) override;
     virtual void updatePoint(uint32_t id) override;
     virtual void removePoint(uint32_t id) override;
     virtual List<uint32_t> within(float x, float y, float radius) override;
@@ -38,14 +38,14 @@ private:
     struct Adapter {
 
         struct Point {
-            Point(uint32_t id, const sp<VV2>& position);
+            Point(uint32_t id, const sp<VV>& position);
             Point(const Point& other) = default;
 
             void update();
             void dispose();
 
             uint32_t _id;
-            sp<VV2> _position;
+            sp<VV> _position;
             float _v[2];
             bool _disposed;
         };

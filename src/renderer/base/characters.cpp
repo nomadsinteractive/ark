@@ -103,7 +103,7 @@ void Characters::place(float boundary, wchar_t c, const sp<Size>& itemSize, floa
             flowx = _x + _line_indent;
         }
     }
-    _characters.push_back(sp<RenderObject>::make(c, sp<VV2::Impl>::make(V2(flowx, flowy)), itemSize));
+    _characters.push_back(sp<RenderObject>::make(c, sp<VV::Impl>::make(V(flowx, flowy)), itemSize));
     flowx += itemSize->width();
 }
 

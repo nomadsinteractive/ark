@@ -93,8 +93,8 @@ void World::BUILDER_IMPL1::createBody(Body::Type type, const sp<World>& world, c
     float density = Documents::getAttribute<float>(manifest, "density", 0);
     float friction = Documents::getAttribute<float>(manifest, "friction", 0.2f);
     const sp<Shape> shape = _parent.ensure<Shape>(manifest, args);
-    const sp<VV2> pos = _parent.ensure<VV2>(manifest, Constants::Attributes::POSITION, args);
-    const V2 v2 = pos->val();
+    const sp<VV> pos = _parent.ensure<VV>(manifest, Constants::Attributes::POSITION, args);
+    const V v2 = pos->val();
     b2Body* body = world->createBody(type, v2.x(), v2.y(), shape, density, friction);
     if(ref)
         _parent.setReference<Object>(ref, sp<Body>::make(world, body));

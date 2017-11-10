@@ -17,7 +17,7 @@ namespace ark {
 class ARK_API RenderObject : public Block {
 public:
 //  [[script::bindings::auto]]
-    RenderObject(uint32_t type, const sp<VV2>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Filter>& filter = nullptr);
+    RenderObject(uint32_t type, const sp<VV>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Filter>& filter = nullptr);
 
 //  [[script::bindings::meta(absorb())]]
 //  [[script::bindings::meta(expire())]]
@@ -49,11 +49,11 @@ public:
 //  [[script::bindings::property]]
     float y() const;
 //  [[script::bindings::property]]
-    V2 xy() const;
+    V xy() const;
 //  [[script::bindings::property]]
-    const sp<VV2>& position() const;
+    const sp<VV>& position() const;
 //  [[script::bindings::property]]
-    void setPosition(const sp<VV2>& position);
+    void setPosition(const sp<VV>& position);
 //  [[script::bindings::property]]
     void setSize(const sp<Size>& size);
 //  [[script::bindings::property]]
@@ -75,7 +75,7 @@ public:
 
     private:
         sp<Builder<Numeric>> _type;
-        sp<Builder<Vec2>> _position;
+        sp<Builder<Vec>> _position;
         sp<Builder<Size>> _size;
         sp<Builder<Transform>> _transform;
         sp<Builder<Filter>> _filter;
@@ -98,7 +98,7 @@ private:
     uint32_t _type;
     sp<Integer> _integer_type;
 
-    SafePtr<VV2, Vec2> _position;
+    SafePtr<VV, Vec> _position;
     SafePtr<Size> _size;
     SafePtr<Transform> _transform;
     sp<Filter> _filter;

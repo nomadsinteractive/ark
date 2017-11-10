@@ -29,14 +29,14 @@ public:
     Collider::BodyShape shape() const;
 
 //  [[script::bindings::property]]
-    V2 xy() const;
+    V xy() const;
 //  [[script::bindings::property]]
     float width() const;
 //  [[script::bindings::property]]
     float height() const;
 
 //  [[script::bindings::property]]
-    const sp<VV2>& position() const;
+    const sp<VV>& position() const;
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 //  [[script::bindings::property]]
