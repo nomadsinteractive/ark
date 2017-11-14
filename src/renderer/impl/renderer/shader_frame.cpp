@@ -66,7 +66,9 @@ ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<GLShader>& shader, const
 
 void ShaderFrame::render(RenderCommandPipeline& pipeline, float x, float y)
 {
-    _elements.render(_render_context, pipeline, x, y);
+    const sp<RenderCommand> renderCommand = _elements.render(_render_context, x, y);
+    if(renderCommand)
+        pipeline.add(renderCommand);
 }
 
 const sp<Size>& ShaderFrame::size()

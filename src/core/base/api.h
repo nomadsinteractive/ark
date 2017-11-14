@@ -2,7 +2,6 @@
 #define ARK_CORE_API_H_
 
 #include <map>
-#include <thread>
 
 #include <stdint.h>
 #include <string>
@@ -55,12 +54,14 @@
 #   define DCHECK(cond, ...) CHECK(cond, __VA_ARGS__)
 #   define DWARN(cond, ...) WARN(cond, __VA_ARGS__)
 #   define DTRACE(cond) if(cond) __trace__()
+#   define DTHREAD_CHECK(threadId) __thread_check__<threadId>(__ARK_FUNCTION__)
 #else
 #   define DFATAL(...)
 #   define DCHECK(cond, ...) (void (cond))
 #   define DWARN(cond, ...) (void (cond))
 #   define DWARN(cond, ...) (void (cond))
 #   define DTRACE(cond) (void (cond))
+#   define DTHREAD_CHECK(threadId) (void (cond))
 #endif
 
 #define NOT_NULL(x) DCHECK(x, "Null Pointer Exception")
@@ -132,32 +133,38 @@ const char* const NINE_PATCH_PATCHES = "patches";
 }
 }
 
+enum THREAD_ID {
+    THREAD_ID_MAIN,
+    THREAD_ID_OPEN_GL
+};
+
 void ARK_API __fatal__(const char* func, const char* condition, const char* format, ...);
 void ARK_API __warning__(const char* func, const char* format, ...);
 
-uint32_t ARK_API __trace__();
-
 namespace _internal {
 
-template<typename T> class _Properties {
-public:
-    static std::map<std::string, T> _PROPERTIES;
+template<THREAD_ID ID> struct ThreadFlag {
+    static THREAD_ID& id() {
+        thread_local THREAD_ID _thread_id;
+        return _thread_id;
+    }
 };
 
-template<typename T> std::map<std::string, T> _Properties<T>::_PROPERTIES;
-
 }
 
-template<typename T> T __prop__(const String& name, const T& defvalue) {
-    auto iter = _internal::_Properties<T>::_PROPERTIES.find(name);
-    return iter != _internal::_Properties<T>::_PROPERTIES.end() ? iter->second : defvalue;
+template<THREAD_ID ID> void __thread_init__() {
+    _internal::ThreadFlag<ID>::id() = ID;
 }
+
+template<THREAD_ID ID> void __thread_check__(const char* func) {
+    if(_internal::ThreadFlag<ID>::id() != ID)
+        __fatal__(func, "<none>", "ThreadId check failed: %d, should be %d", _internal::ThreadFlag<ID>::id(), ID);
+}
+
+uint32_t ARK_API __trace__();
 
 extern bool g_isOriginBottom;
 extern float g_upDirection;
-
-extern std::thread::id g_kMainThread;
-extern std::thread::id g_kRenderThread;
 
 }
 

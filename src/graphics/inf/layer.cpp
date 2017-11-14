@@ -1,6 +1,7 @@
 #include "graphics/inf/layer.h"
 
 #include "graphics/base/layer_context.h"
+#include "graphics/base/render_command_pipeline.h"
 
 namespace ark {
 
@@ -16,8 +17,10 @@ const sp<LayerContext>& Layer::renderContext() const
 
 void Layer::render(RenderCommandPipeline& pipeline, float x, float y)
 {
-    render(_render_context, pipeline, x, y);
+    const sp<RenderCommand> renderCommand = render(_render_context, x, y);
     _render_context->clear();
+    if(renderCommand)
+        pipeline.add(renderCommand);
 }
 
 }

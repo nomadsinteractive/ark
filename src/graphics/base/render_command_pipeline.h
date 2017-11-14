@@ -17,7 +17,7 @@ public:
     void reset();
     void add(const sp<RenderCommand>& renderCommand);
 
-    virtual void draw(const op<GraphicsContext>& graphicsContext) override;
+    virtual void draw(GraphicsContext& graphicsContext) override;
 
 private:
     std::list<sp<RenderCommand>> _commands;

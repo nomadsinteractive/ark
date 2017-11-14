@@ -37,7 +37,7 @@ private:
 public:
     AlphabetLayer(const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual void render(const LayerContext& renderContext, RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual sp<RenderCommand> render(const LayerContext& renderContext, float x, float y) override;
 
     const sp<Alphabet>& alphabet() const;
     const sp<Atlas>& atlas() const;

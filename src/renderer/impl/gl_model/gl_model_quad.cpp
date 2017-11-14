@@ -38,11 +38,12 @@ array<uint8_t> GLModelQuad::getArrayBuffer(GLResourceManager& resourceManager, c
         float h = i.renderObject->height();
         float width = w == 0 ? texCoord.width() : w;
         float height = h == 0 ? texCoord.height() : h;
-        const Transform::Snapshot snapshot = transform ? transform->snapshot(texCoord.pivotX(), texCoord.pivotY()) : Transform::Snapshot(texCoord.pivotX(), texCoord.pivotY());
+        Transform::Snapshot snapshot = transform ? transform->snapshot() : Transform::Snapshot();
         bool clockwise = snapshot.isFrontfaceCCW();
         float tx = position.x() + x + i.x;
         float ty = position.y() + y + i.y;
         i.renderObject->filter()->setVaryings(buf, _stride, 4);
+        snapshot.pivot = V(texCoord.pivotX(), texCoord.pivotY());
         if(clockwise ^ g_isOriginBottom)
         {
             map(buf, snapshot, 0.0f, tx, height, ty, texCoord.left(), texCoord.bottom());

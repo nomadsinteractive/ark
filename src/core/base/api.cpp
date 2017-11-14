@@ -13,9 +13,6 @@ namespace ark {
 bool g_isOriginBottom = false;
 float g_upDirection = 1.0f;
 
-std::thread::id g_kMainThread;
-std::thread::id g_kRenderThread;
-
 void __fatal__(const char* func, const char* condition, const char* format, ...)
 {
     va_list args;

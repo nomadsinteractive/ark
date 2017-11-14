@@ -12,14 +12,14 @@ DrawElements::DrawElements(const GLSnippetContext& context, const sp<GLShader>& 
 {
 }
 
-void DrawElements::draw(const op<GraphicsContext>& graphicsContext)
+void DrawElements::draw(GraphicsContext& graphicsContext)
 {
     _shader->use(graphicsContext);
     _shader->bindUniforms(graphicsContext);
 
     if(_context._texture)
         _context._texture->active(_shader->program(), static_cast<uint32_t>(GL_TEXTURE0));
-    graphicsContext->glUpdateMVPMatrix();
+    graphicsContext.glUpdateMVPMatrix();
 
     _snippet->preDraw(graphicsContext, _shader, _context);
     glDrawElements(_context._mode, _context._index_buffer.length<uint16_t>(), GL_UNSIGNED_SHORT, 0);

@@ -19,10 +19,10 @@ public:
 //  [[script::bindings::auto]]
     Transform(const sp<Numeric>& rotation = nullptr, const sp<VV>& scale = nullptr, const sp<VV>& translation = nullptr);
     Transform(const Transform& other);
-//    Transform();
 
     class ARK_API Snapshot {
     public:
+        Snapshot();
         Snapshot(float px, float py);
         Snapshot(const Snapshot& other) = default;
 
@@ -36,7 +36,9 @@ public:
 
         void map(float x, float y, float tx, float ty, float& mx, float& my) const;
 
-        float pivot_x, pivot_y;
+        bool disabled;
+        V pivot;
+
         float rotation;
         V scale;
         V translate;

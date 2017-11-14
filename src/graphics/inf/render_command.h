@@ -12,7 +12,7 @@ class ARK_API RenderCommand {
 public:
     virtual ~RenderCommand() = default;
 
-    virtual void draw(const op<GraphicsContext>& graphicsContext) = 0;
+    virtual void draw(GraphicsContext& graphicsContext) = 0;
 
 };
 

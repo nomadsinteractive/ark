@@ -19,7 +19,7 @@ public:
 
     virtual void render(RenderCommandPipeline& pipeline, float x, float y) override final;
 
-    virtual void render(const LayerContext& renderContext, RenderCommandPipeline& pipeline, float x, float y) = 0;
+    virtual sp<RenderCommand> render(const LayerContext& renderContext, float x, float y) = 0;
 
 private:
     sp<LayerContext> _render_context;

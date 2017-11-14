@@ -14,7 +14,7 @@ class PointLayer : public Layer {
 public:
     PointLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual void render(const LayerContext& renderContext, RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual sp<RenderCommand> render(const LayerContext& renderContext, float x, float y) override;
 
 //  [[plugin::resource-loader("point-layer")]]
     class BUILDER : public Builder<Layer> {

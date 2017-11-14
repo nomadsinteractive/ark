@@ -14,7 +14,7 @@ class DrawElements : public RenderCommand {
 public:
     DrawElements(const GLSnippetContext& context, const sp<GLShader>& shader, const sp<GLSnippet>& procedure);
 
-    virtual void draw(const op<GraphicsContext>& graphicsContext) override;
+    virtual void draw(GraphicsContext& graphicsContext) override;
 
 private:
     GLSnippetContext _context;

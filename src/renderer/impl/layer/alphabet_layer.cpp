@@ -26,7 +26,7 @@ AlphabetLayer::AlphabetLayer(const sp<Alphabet>& alphabet, uint32_t textureWidth
 {
 }
 
-void AlphabetLayer::render(const LayerContext& renderContext, RenderCommandPipeline& pipeline, float x, float y)
+sp<RenderCommand> AlphabetLayer::render(const LayerContext& renderContext, float x, float y)
 {
     if(!_preparing_characters.empty())
     {
@@ -36,7 +36,7 @@ void AlphabetLayer::render(const LayerContext& renderContext, RenderCommandPipel
 
         doPrepare(true);
     }
-    _image_layer->render(renderContext, pipeline, x, y);
+    return _image_layer->render(renderContext, x, y);
 }
 
 void AlphabetLayer::doPrepare(bool allowReset)

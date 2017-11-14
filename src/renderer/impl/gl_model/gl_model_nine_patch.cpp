@@ -91,7 +91,7 @@ array<uint8_t> GLModelNinePatch::getArrayBuffer(GLResourceManager& resourceManag
         if(transform)
         {
             const Transform::Snapshot snapshot = transform->snapshot();
-            paintRect.translate(snapshot.translate.x() - snapshot.pivot_x, snapshot.translate.y() - snapshot.pivot_y);
+            paintRect.translate(snapshot.translate.x() - snapshot.pivot.x(), snapshot.translate.y() - snapshot.pivot.y());
         }
         const Item& ninePatch = _nine_patch_items.at(renderObject->type());
         filter->setVaryings(buf, _stride, 16);

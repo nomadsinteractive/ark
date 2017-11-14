@@ -15,9 +15,9 @@ NinePatchLayer::NinePatchLayer(const sp<Atlas>& atlas, const sp<GLShader>& shade
 {
 }
 
-void NinePatchLayer::render(const LayerContext& renderContext, RenderCommandPipeline& pipeline, float x, float y)
+sp<RenderCommand> NinePatchLayer::render(const LayerContext& renderContext, float x, float y)
 {
-    _nine_patch_elements.render(renderContext, pipeline, x, y);
+    return _nine_patch_elements.render(renderContext, x, y);
 }
 
 NinePatchLayer::BUILDER::BUILDER(BeanFactory& parent, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

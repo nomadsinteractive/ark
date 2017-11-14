@@ -19,7 +19,7 @@ class ARK_API GLElements {
 public:
     GLElements(const sp<GLShader>& shader, const sp<GLTexture>& texture, const sp<GLModel>& model, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    void render(const LayerContext& renderContext, RenderCommandPipeline& pipeline, float x, float y);
+    sp<RenderCommand> render(const LayerContext& renderContext, float x, float y);
 
 private:
     class GLSnippetWrapper;

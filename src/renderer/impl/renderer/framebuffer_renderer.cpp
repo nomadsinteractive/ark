@@ -4,7 +4,6 @@
 #include "core/util/documents.h"
 
 #include "graphics/base/render_command_pipeline.h"
-#include "graphics/base/size.h"
 
 #include "renderer/base/gl_buffer.h"
 #include "renderer/base/gl_framebuffer.h"
@@ -33,7 +32,7 @@ public:
         return _pipeline;
     }
 
-    virtual void draw(const op<GraphicsContext>& graphicsContext) override {
+    virtual void draw(GraphicsContext& graphicsContext) override {
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo->id());
         glViewport(0, 0, static_cast<GLsizei>(_fbo->texture()->width()), static_cast<GLsizei>(_fbo->texture()->height()));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

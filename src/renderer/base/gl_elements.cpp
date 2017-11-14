@@ -25,14 +25,15 @@ GLElements::GLElements(const sp<GLShader>& shader, const sp<GLTexture>& texture,
 {
 }
 
-void GLElements::render(const LayerContext& renderContext, RenderCommandPipeline& pipeline, float x, float y)
+sp<RenderCommand> GLElements::render(const LayerContext& renderContext, float x, float y)
 {
     const GLBuffer indexBuffer = _model->getIndexBuffer(_resource_manager, renderContext);
     if(indexBuffer)
     {
         const array<uint8_t> buf = _model->getArrayBuffer(_resource_manager, renderContext, x, y);
-        pipeline.add(_render_command_pool->allocate<DrawElements>(GLSnippetContext(_texture, _array_buffer.snapshot(buf), indexBuffer, _mode), _shader, _gl_snippet));
+        return _render_command_pool->allocate<DrawElements>(GLSnippetContext(_texture, _array_buffer.snapshot(buf), indexBuffer, _mode), _shader, _gl_snippet);
     }
+    return nullptr;
 }
 
 GLElements::CoreGLSnippet::CoreGLSnippet(GLSnippetWrapper& wrapper, const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix)
