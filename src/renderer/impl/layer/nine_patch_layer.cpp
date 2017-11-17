@@ -15,7 +15,7 @@ NinePatchLayer::NinePatchLayer(const sp<Atlas>& atlas, const sp<GLShader>& shade
 {
 }
 
-sp<RenderCommand> NinePatchLayer::render(const LayerContext& renderContext, float x, float y)
+sp<RenderCommand> NinePatchLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
 {
     return _nine_patch_elements.render(renderContext, x, y);
 }

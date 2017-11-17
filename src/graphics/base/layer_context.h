@@ -13,23 +13,28 @@ class LayerContext {
 public:
     struct Item {
         Item(float x, float y, const sp<RenderObject>& renderObject);
-        Item(const Item& other);
-        Item(Item&& other);
+        Item(const Item& other) = default;
 
         float x, y;
-        sp<RenderObject> renderObject;
+        sp<RenderObject> _render_object;
+    };
+
+    struct Snapshot {
+        Snapshot(const LayerContext& layerContext);
+
+        std::list<RenderObject::Snapshot> _items;
     };
 
 public:
-
-    const std::list<Item>& items() const;
-
-    void draw(const std::list<Item>& items);
     void draw(float x, float y, const sp<RenderObject>& renderObject);
     void clear();
 
+    Snapshot snapshot() const;
+
 private:
     std::list<Item> _items;
+
+    friend struct Snapshot;
 };
 
 }

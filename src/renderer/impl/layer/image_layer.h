@@ -13,7 +13,7 @@ class ImageLayer : public Layer {
 public:
     ImageLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual sp<RenderCommand> render(const LayerContext& renderContext, float x, float y) override;
+    virtual sp<RenderCommand> render(const LayerContext::Snapshot& layerContext, float x, float y) override;
 
     const sp<Atlas>& atlas() const;
 

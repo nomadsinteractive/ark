@@ -17,7 +17,7 @@ class MovieclipRenderer : public Renderer, public Expired {
 public:
     MovieclipRenderer(const sp<Movieclip>& movieclip, const sp<Numeric>& duration, float interval);
 
-    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
 //  [[plugin::builder("movieclip")]]
     class BUILDER : public Builder<Renderer> {

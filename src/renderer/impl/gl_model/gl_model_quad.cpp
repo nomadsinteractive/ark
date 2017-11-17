@@ -21,50 +21,49 @@ GLModelQuad::GLModelQuad(const sp<GLShader>& shader, const sp<Atlas>& atlas)
     _tex_coordinate_offset /= 2;
 }
 
-array<uint8_t> GLModelQuad::getArrayBuffer(GLResourceManager& resourceManager, const LayerContext& renderContext, float x, float y)
+array<uint8_t> GLModelQuad::getArrayBuffer(GLResourceManager& resourceManager, const LayerContext::Snapshot& renderContext, float x, float y)
 {
-    uint32_t len = renderContext.items().size() * _stride;
+    uint32_t len = renderContext._items.size() * _stride;
 
     NOT_NULL(len);
 
     const array<uint8_t> preallocated = resourceManager.getPreallocatedArray(len * 4);
 
     uint8_t* buf = preallocated->array();
-    for(const LayerContext::Item& i : renderContext.items()) {
-        const Atlas::Item& texCoord = _atlas->at(i.renderObject->type());
-        const sp<Transform>& transform = i.renderObject->transform();
-        const V position = i.renderObject->position()->val();
-        float w = i.renderObject->width();
-        float h = i.renderObject->height();
+    for(const RenderObject::Snapshot& renderObject : renderContext._items) {
+        const Atlas::Item& texCoord = _atlas->at(renderObject._type);
+        Transform::Snapshot transform = renderObject._transform;
+        const V& position = renderObject._position;
+        float w = renderObject._size.x();
+        float h = renderObject._size.y();
         float width = w == 0 ? texCoord.width() : w;
         float height = h == 0 ? texCoord.height() : h;
-        Transform::Snapshot snapshot = transform ? transform->snapshot() : Transform::Snapshot();
-        bool clockwise = snapshot.isFrontfaceCCW();
-        float tx = position.x() + x + i.x;
-        float ty = position.y() + y + i.y;
-        i.renderObject->filter()->setVaryings(buf, _stride, 4);
-        snapshot.pivot = V(texCoord.pivotX(), texCoord.pivotY());
+        bool clockwise = transform.isFrontfaceCCW();
+        float tx = position.x() + x;
+        float ty = position.y() + y;
+        renderObject._filter->setVaryings(buf, _stride, 4);
+        transform.pivot = V(texCoord.pivotX(), texCoord.pivotY());
         if(clockwise ^ g_isOriginBottom)
         {
-            map(buf, snapshot, 0.0f, tx, height, ty, texCoord.left(), texCoord.bottom());
-            map(buf, snapshot, 0.0f, tx, 0.0f, ty, texCoord.left(), texCoord.top());
-            map(buf, snapshot, width, tx, height, ty, texCoord.right(), texCoord.bottom());
-            map(buf, snapshot, width, tx, 0.0f, ty, texCoord.right(), texCoord.top());
+            map(buf, transform, 0.0f, tx, height, ty, texCoord.left(), texCoord.bottom());
+            map(buf, transform, 0.0f, tx, 0.0f, ty, texCoord.left(), texCoord.top());
+            map(buf, transform, width, tx, height, ty, texCoord.right(), texCoord.bottom());
+            map(buf, transform, width, tx, 0.0f, ty, texCoord.right(), texCoord.top());
         }
         else
         {
-            map(buf, snapshot, 0.0f, tx, 0.0f, ty, texCoord.left(), texCoord.top());
-            map(buf, snapshot, 0.0f, tx, height, ty, texCoord.left(), texCoord.bottom());
-            map(buf, snapshot, width, tx, 0.0f, ty, texCoord.right(), texCoord.top());
-            map(buf, snapshot, width, tx, height, ty, texCoord.right(), texCoord.bottom());
+            map(buf, transform, 0.0f, tx, 0.0f, ty, texCoord.left(), texCoord.top());
+            map(buf, transform, 0.0f, tx, height, ty, texCoord.left(), texCoord.bottom());
+            map(buf, transform, width, tx, 0.0f, ty, texCoord.right(), texCoord.top());
+            map(buf, transform, width, tx, height, ty, texCoord.right(), texCoord.bottom());
         }
     }
     return preallocated;
 }
 
-GLBuffer GLModelQuad::getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext& renderContext)
+GLBuffer GLModelQuad::getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext::Snapshot& renderContext)
 {
-    return glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_TRANGLES, renderContext.items().size() * 6);
+    return glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_TRANGLES, renderContext._items.size() * 6);
 }
 
 uint32_t GLModelQuad::mode() const

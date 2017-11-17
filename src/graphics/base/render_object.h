@@ -9,12 +9,25 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/inf/block.h"
+#include "graphics/base/transform.h"
 
 namespace ark {
 
 //[[script::bindings::container]]
 //[[core::class]]
 class ARK_API RenderObject : public Block {
+public:
+    struct Snapshot {
+        Snapshot(uint32_t type, const V& position, const V& size, const Transform::Snapshot& transform, const sp<Filter>& filter);
+        Snapshot(const Snapshot& other) = default;
+
+        uint32_t _type;
+        V _position;
+        V _size;
+        Transform::Snapshot _transform;
+        sp<Filter> _filter;
+    };
+
 public:
 //  [[script::bindings::auto]]
     RenderObject(uint32_t type, const sp<VV>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Filter>& filter = nullptr);
@@ -65,6 +78,8 @@ public:
     void setTag(const Box& tag);
 //  [[script::bindings::property]]
     const Box& tag() const;
+
+    Snapshot snapshot() const;
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<RenderObject> {

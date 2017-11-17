@@ -7,11 +7,11 @@ RendererWithState::RendererWithState(const sp<Renderer>& def)
 {
 }
 
-void RendererWithState::render(RenderCommandPipeline& pipeline, float x, float y)
+void RendererWithState::render(RenderRequest& renderRequest, float x, float y)
 {
     const sp<Renderer>& current = getRendererByCurrentStatus();
     if(current)
-        current->render(pipeline, x, y);
+        current->render(renderRequest, x, y);
 }
 
 View::State RendererWithState::status() const

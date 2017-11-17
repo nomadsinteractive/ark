@@ -14,7 +14,7 @@ class RendererWithPosition : public Renderer {
 public:
     RendererWithPosition(const sp<Renderer>& renderer, const sp<VV>& position);
 
-    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
 //  [[plugin::style("position")]]
     class DECORATOR : public Builder<Renderer> {

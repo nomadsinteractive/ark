@@ -1,26 +1,35 @@
 #include "graphics/inf/layer.h"
 
 #include "graphics/base/layer_context.h"
-#include "graphics/base/render_command_pipeline.h"
+#include "graphics/base/render_request.h"
 
 namespace ark {
 
 Layer::Layer()
-    : _render_context(sp<LayerContext>::make())
+    : _layer_context(sp<LayerContext>::make())
 {
 }
 
-const sp<LayerContext>& Layer::renderContext() const
+const sp<LayerContext>& Layer::layerContext() const
 {
-    return _render_context;
+    return _layer_context;
 }
 
-void Layer::render(RenderCommandPipeline& pipeline, float x, float y)
+Layer::Renderer::Renderer(const sp<Layer>& layer)
+    : _layer(layer)
 {
-    const sp<RenderCommand> renderCommand = render(_render_context, x, y);
-    _render_context->clear();
+}
+
+void Layer::Renderer::render(RenderRequest& renderRequest, float x, float y)
+{
+/*
+    const sp<RenderCommand> renderCommand = _layer->render(_layer->layerContext()->snapshot(), x, y);
+    _layer->layerContext()->clear();
     if(renderCommand)
-        pipeline.add(renderCommand);
+        renderRequest.addRequest(renderCommand);
+/*/
+    renderRequest.addBackgroundRequest(_layer, x, y);
+/**/
 }
 
 }

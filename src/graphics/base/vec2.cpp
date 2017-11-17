@@ -185,7 +185,7 @@ Vec2 Vec2::translate(float x, float y) const
     return Vec2(sp<Translate>::make(_x, x), sp<Translate>::make(_y, y));
 }
 
-Vec2 Vec2::translate(ObjectPool<Numeric>& op, float x, float y) const
+Vec2 Vec2::translate(ObjectPool& op, float x, float y) const
 {
     return Vec2(op.allocate<Translate>(_x, x), op.allocate<Translate>(_y, y));
 }

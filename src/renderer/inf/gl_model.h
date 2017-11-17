@@ -5,6 +5,7 @@
 #include "core/forwarding.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/layer_context.h"
 
 #include "renderer/forwarding.h"
 
@@ -14,8 +15,8 @@ class ARK_API GLModel {
 public:
     virtual ~GLModel() = default;
 
-    virtual array<uint8_t> getArrayBuffer(GLResourceManager& resourceManager, const LayerContext& renderContext, float x, float y) = 0;
-    virtual GLBuffer getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext& renderContext) = 0;
+    virtual array<uint8_t> getArrayBuffer(GLResourceManager& resourceManager, const LayerContext::Snapshot& renderContext, float x, float y) = 0;
+    virtual GLBuffer getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext::Snapshot& renderContext) = 0;
 
     virtual uint32_t mode() const = 0;
 };

@@ -5,9 +5,9 @@
 #include "core/types/global.h"
 
 #include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_shader_preprocessor.h"
 #include "renderer/base/gl_shader_source.h"
 #include "renderer/inf/gl_snippet.h"
-#include "renderer/util/gl_shader_preprocessor.h"
 
 namespace ark {
 namespace unittest {
@@ -16,10 +16,13 @@ namespace {
 
 class GLSnippetTest : public GLSnippet {
 public:
-    virtual void preCompile(GLShaderSource& source, GLShaderPreprocessor::Context& context) override {
+    virtual void preInitialize(GLShaderSource& source) override {
         source.addPredefinedAttribute("Alpha01", "float");
         source.addPredefinedAttribute("PointSize", "float");
         source.addUniform("u_Color01", GLUniform::UNIFORM_F4, nullptr, nullptr);
+    }
+
+    virtual void preCompile(GraphicsContext& /*graphicsContext*/, GLShaderPreprocessorContext& context) override {
         context.addFragmentColorModifier("vec4(1.0, 1.0, 1.0, v_Alpha01)");
         context.addFragmentColorModifier("u_Color01");
         context.addVertexSource("gl_PointSize = a_PointSize;");
@@ -28,6 +31,7 @@ public:
         ins.push_back(std::pair<String, String>("vec2", "texCoordinate"));
         context.addFragmentProcedure("shadow", ins, "return c;");
     }
+
 };
 
 }
@@ -46,9 +50,9 @@ public:
         source->addSnippet(snippet);
         const GLShader shader(source);
 
-        puts(source->vertex().c_str());
+        puts(source->vertex()._source.c_str());
         puts("---------------------------------------------------------------------");
-        puts(source->fragment().c_str());
+        puts(source->fragment()._source.c_str());
         if(shader.stride() == 0)
             return 1;
         if(!shader.getAttribute("Position").length())

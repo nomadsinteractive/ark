@@ -1,10 +1,11 @@
-#include "app/base/surface_controller.h"
+#include "graphics/base/surface_controller.h"
 
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/impl/renderer/renderer_group.h"
 #include "graphics/inf/layer.h"
 
 #include "app/base/application_context.h"
+#include "graphics/base/render_request.h"
 
 namespace ark {
 
@@ -27,26 +28,27 @@ void SurfaceController::addControl(const sp<Renderer>& control)
 
 void SurfaceController::addLayer(const sp<Layer>& layer)
 {
-    _layers->addRenderer(layer);
+    _layers->addRenderer(sp<Layer::Renderer>::make(layer));
 }
 
-void SurfaceController::requestUpdate()
+void SurfaceController::addRenderCommand(const sp<RenderCommand>& renderCommand)
 {
-    if(_queue_length < 2)
-    {
-        const sp<RenderCommandPipeline> renderCommand = _render_command_pipe_line_pool.allocate<RenderCommandPipeline>();
-        _renderers->render(renderCommand, 0, 0);
-        _controls->render(renderCommand, 0, 0);
-        _layers->render(renderCommand, 0, 0);
-        _render_commands.push(renderCommand);
-        _queue_length ++;
-    }
+    _render_commands.push(renderCommand);
+}
+
+void SurfaceController::update(RenderRequest& renderRequest)
+{
+    const sp<RenderCommandPipeline> renderCommand = _render_command_pipe_line_pool.allocate<RenderCommandPipeline>();
+    renderRequest.start(renderCommand);
+    _renderers->render(renderRequest, 0, 0);
+    _controls->render(renderRequest, 0, 0);
+    _layers->render(renderRequest, 0, 0);
+    renderRequest.finish();
 }
 
 sp<RenderCommandPipeline> SurfaceController::getRenderCommand()
 {
     std::queue<sp<RenderCommandPipeline>>& synchronized = _render_commands.synchronized();
-//    DWARN(!synchronized.empty(), "RenderCommandPipeLine queue is empty, frame skipped");
     if(!synchronized.empty())
     {
         _last_render_command = synchronized.front();

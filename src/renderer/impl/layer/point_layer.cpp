@@ -16,7 +16,7 @@ PointLayer::PointLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const
 {
 }
 
-sp<RenderCommand> PointLayer::render(const LayerContext& renderContext, float x, float y)
+sp<RenderCommand> PointLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
 {
     return _elements.render(renderContext, x, y);
 }

@@ -14,7 +14,7 @@ class RendererWithVisibility : public Renderer {
 public:
     RendererWithVisibility(const sp<Renderer>& renderer, const sp<Boolean>& visibility);
 
-    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
 //  [[plugin::style("visibility")]]
     class DECORATOR : public Builder<Renderer> {

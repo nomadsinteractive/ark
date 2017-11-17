@@ -11,7 +11,9 @@
 #include "renderer/base/render_controller.h"
 
 #include "app/base/application_context.h"
-#include "app/base/surface_controller.h"
+#include "graphics/base/surface_controller.h"
+
+#include "app/base/surface_updater.h"
 
 #include "platform/platform.h"
 
@@ -21,18 +23,18 @@ namespace {
 
 class SurfaceControllerUpdateTask : public Runnable {
 public:
-    SurfaceControllerUpdateTask(const sp<RenderController>& synchronizer, const sp<SurfaceController>& surfaceController)
-        : _synchronizer(synchronizer), _surface_controller(surfaceController) {
+    SurfaceControllerUpdateTask(const sp<RenderController>& renderController, const sp<SurfaceUpdater>& surfaceUpdater)
+        : _render_controller(renderController), _surface_updater(surfaceUpdater) {
     }
 
     virtual void run() override {
-        _synchronizer->preUpdate();
-        _surface_controller->requestUpdate();
+        _render_controller->preUpdate();
+        _surface_updater->requestUpdate();
     }
 
 private:
-    sp<RenderController> _synchronizer;
-    sp<SurfaceController> _surface_controller;
+    sp<RenderController> _render_controller;
+    sp<SurfaceUpdater> _surface_updater;
 };
 
 }
@@ -69,7 +71,8 @@ void Surface::onRenderFrame()
 
 void Surface::scheduleUpdate(const sp<ApplicationContext>& applicationContext, uint32_t fps)
 {
-    applicationContext->schedule(sp<SurfaceControllerUpdateTask>::make(applicationContext->renderController(), _surface_controller), 1.0f / fps);
+    const sp<SurfaceUpdater> surfaceUpdater = sp<SurfaceUpdater>::make(applicationContext->executor(), _surface_controller);
+    applicationContext->schedule(sp<SurfaceControllerUpdateTask>::make(applicationContext->renderController(), surfaceUpdater), 1.0f / fps);
 }
 
 }

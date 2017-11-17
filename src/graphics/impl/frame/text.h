@@ -16,7 +16,7 @@ class Text : public Renderer, public Block {
 public:
     Text(const sp<Layer>& layer, const Alphabets::Characters& characters);
 
-    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
     virtual const sp<Size>& size() override;
 

@@ -30,7 +30,7 @@ private:
         void doPlace(float clientHeight, const sp<Layout>& layout);
         void doEnd(const Rect& p);
 
-        void render(RenderCommandPipeline& pipeline, float x, float y) const;
+        void render(RenderRequest& renderRequest, float x, float y) const;
 
         bool onEventDispatch(const Event& event, float x, float y);
 
@@ -48,7 +48,7 @@ public:
     ~ViewGroup();
 
     virtual void addRenderer(const sp<Renderer>& renderer) override;
-    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
     bool onEvent(const Event& event, float x, float y);
 

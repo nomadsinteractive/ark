@@ -16,6 +16,11 @@ V2::V2(float x, float y)
 {
 }
 
+V2::V2(float x, float y, float /*z*/)
+    : _x(x), _y(y)
+{
+}
+
 V2::V2(const V2& other)
     : _x(other._x), _y(other._y)
 {

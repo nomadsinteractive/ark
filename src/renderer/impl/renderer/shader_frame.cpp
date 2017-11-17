@@ -5,6 +5,7 @@
 #include "core/util/documents.h"
 
 #include "graphics/base/render_command_pipeline.h"
+#include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
 #include "graphics/base/vec2.h"
 
@@ -26,7 +27,7 @@ public:
         : _size(size) {
     }
 
-    virtual array<uint8_t> getArrayBuffer(GLResourceManager& resourceManager, const LayerContext& /*renderContext*/, float x, float y) override {
+    virtual array<uint8_t> getArrayBuffer(GLResourceManager& resourceManager, const LayerContext::Snapshot& /*renderContext*/, float x, float y) override {
         float top = g_isOriginBottom ? y + _size->height() : y, bottom = g_isOriginBottom ? y : y + _size->height();
         uint16_t uvtop = g_isOriginBottom ? 0xffff : 0, uvbottom = g_isOriginBottom ? 0 : 0xffff;
         FixedArray<float, 16> buffer({x, bottom, 0, 0, x, top, 0, 0, x + _size->width(), bottom, 0, 0, x + _size->width(), top, 0, 0});
@@ -44,7 +45,7 @@ public:
         return preallocated;
     }
 
-    virtual GLBuffer getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext& /*renderContext*/) override {
+    virtual GLBuffer getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext::Snapshot& /*renderContext*/) override {
         return glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_TRANGLES, 6);
     }
 
@@ -64,11 +65,11 @@ ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<GLShader>& shader, const
 {
 }
 
-void ShaderFrame::render(RenderCommandPipeline& pipeline, float x, float y)
+void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
     const sp<RenderCommand> renderCommand = _elements.render(_render_context, x, y);
     if(renderCommand)
-        pipeline.add(renderCommand);
+        renderRequest.addRequest(renderCommand);
 }
 
 const sp<Size>& ShaderFrame::size()

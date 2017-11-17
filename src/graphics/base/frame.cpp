@@ -63,10 +63,10 @@ const sp<Renderer>& Frame::renderer() const
     return _renderer;
 }
 
-void Frame::render(RenderCommandPipeline& pipeline, float x, float y)
+void Frame::render(RenderRequest& renderRequest, float x, float y)
 {
     NOT_NULL(_block);
-    _renderer->render(pipeline, x, y);
+    _renderer->render(renderRequest, x, y);
 }
 
 const sp<Size>& Frame::size()

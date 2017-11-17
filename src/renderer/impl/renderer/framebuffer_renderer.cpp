@@ -3,6 +3,7 @@
 #include "core/base/bean_factory.h"
 #include "core/util/documents.h"
 
+#include "graphics/base/render_request.h"
 #include "graphics/base/render_command_pipeline.h"
 
 #include "renderer/base/gl_buffer.h"
@@ -49,16 +50,17 @@ private:
 }
 
 FrameBufferRenderer::FrameBufferRenderer(const sp<Renderer>& delegate, const sp<GLTexture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _delegate(delegate), _fbo(sp<GLFramebuffer>::make(resourceLoaderContext->glResourceManager()->recycler(), texture))
+    : _delegate(delegate), _render_commands_pool(resourceLoaderContext->objectPool()), _fbo(sp<GLFramebuffer>::make(resourceLoaderContext->glResourceManager()->recycler(), texture))
 {
     resourceLoaderContext->glResourceManager()->prepare(_fbo, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
 }
 
-void FrameBufferRenderer::render(RenderCommandPipeline& pipeline, float x, float y)
+void FrameBufferRenderer::render(RenderRequest& renderRequest, float x, float y)
 {
-    const sp<DrawElementsToFBO> drawElements = _render_commands_pool.allocate<DrawElementsToFBO>(_fbo);
-    _delegate->render(drawElements->pipeline(), x, y);
-    pipeline.add(drawElements);
+    const sp<DrawElementsToFBO> drawElements = _render_commands_pool->allocate<DrawElementsToFBO>(_fbo);
+    FATAL("Unimplemented");
+//    _delegate->render(drawElements->pipeline(), x, y);
+    renderRequest.addRequest(drawElements);
 }
 
 FrameBufferRenderer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

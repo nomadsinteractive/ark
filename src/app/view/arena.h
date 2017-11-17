@@ -36,7 +36,7 @@ public:
 //  [[script::bindings::auto]]
     virtual void setRendererDelegate(const sp<Renderer>& delegate) override;
 
-    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
     virtual bool onEvent(const Event& event) override;
 
 //  [[script::bindings::loader]]

@@ -12,7 +12,7 @@ VerticalScrollable::VerticalScrollable(const sp<TileMaker>& tileMaker, const sp<
     update();
 }
 
-void VerticalScrollable::render(RenderCommandPipeline& pipeline, float x, float y)
+void VerticalScrollable::render(RenderRequest& renderRequest, float x, float y)
 {
     int32_t scrollPosition = static_cast<int32_t>(_scroller->val());
     if(scrollPosition != _scroll_position)
@@ -24,7 +24,7 @@ void VerticalScrollable::render(RenderCommandPipeline& pipeline, float x, float 
     {
         Tile<sp<Renderer>>& tile = _tiles[(i - _grid_position) / _tile_height];
         ensureTile(tile, i);
-        tile.renderer()->render(pipeline, x, y + tile.offset() - gs);
+        tile.renderer()->render(renderRequest, x, y + tile.offset() - gs);
     }
 }
 

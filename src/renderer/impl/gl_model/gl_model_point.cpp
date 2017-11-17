@@ -22,31 +22,30 @@ GLModelPoint::GLModelPoint(const sp<GLShader>& shader, const sp<Atlas>& texCoord
     _tex_coordinate_offset /= 2;
 }
 
-array<uint8_t> GLModelPoint::getArrayBuffer(GLResourceManager& resourceManager, const LayerContext& renderContext, float x, float y)
+array<uint8_t> GLModelPoint::getArrayBuffer(GLResourceManager& resourceManager, const LayerContext::Snapshot& renderContext, float x, float y)
 {
-    uint32_t len = renderContext.items().size() * _stride;
+    uint32_t len = renderContext._items.size() * _stride;
 
     NOT_NULL(len > 0);
 
     const array<uint8_t> preallocated = resourceManager.getPreallocatedArray(len * 4);
 
     uint8_t* buf = preallocated->array();
-    for(const LayerContext::Item& i : renderContext.items()) {
-        const Atlas::Item& texCoord = _atlas->at(i.renderObject->type());
-        const sp<Transform>& transform = i.renderObject->transform();
-        const V position = i.renderObject->position()->val();
-        const Transform::Snapshot snapshot = transform ? transform->snapshot() : Transform::Snapshot(0, 0);
-        float tx = position.x() + x + i.x;
-        float ty = position.y() + y + i.y;
-        i.renderObject->filter()->setVaryings(buf, _stride, 1);
-        map(buf, snapshot, 0.0f, tx, 0.0f, ty, (texCoord.left() + texCoord.right()) / 2, (texCoord.top() + texCoord.bottom()) / 2);
+    for(const RenderObject::Snapshot& renderObject : renderContext._items) {
+        const Atlas::Item& texCoord = _atlas->at(renderObject._type);
+        const V position = renderObject._position;
+        const Transform::Snapshot& transform = renderObject._transform;
+        float tx = position.x() + x;
+        float ty = position.y() + y;
+        renderObject._filter->setVaryings(buf, _stride, 1);
+        map(buf, transform, 0.0f, tx, 0.0f, ty, (texCoord.left() + texCoord.right()) / 2, (texCoord.top() + texCoord.bottom()) / 2);
     }
     return preallocated;
 }
 
-GLBuffer GLModelPoint::getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext& renderContext)
+GLBuffer GLModelPoint::getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext::Snapshot& renderContext)
 {
-    return glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_POINTS, renderContext.items().size());
+    return glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_POINTS, renderContext._items.size());
 }
 
 uint32_t GLModelPoint::mode() const

@@ -27,7 +27,7 @@ ParticleEmitter::ParticleEmitter(const sp<Stub>& stub, const sp<Clock>& clock,
         _particles.push_back(Particale(_stub, doc, beanFactory));
 }
 
-void ParticleEmitter::render(RenderCommandPipeline& /*pipeline*/, float /*x*/, float /*y*/)
+void ParticleEmitter::render(RenderRequest& /*renderRequest*/, float /*x*/, float /*y*/)
 {
     uint64_t tick = _clock->tick();
     if(tick > _next_tick)
@@ -115,15 +115,15 @@ uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clo
     {
         if(_iteration)
         {
-            _iteration->doIteration(_stub->_arguments, _stub->_numeric_object_pool, duration, let);
+            _iteration->doIteration(_stub->_arguments, _stub->_object_pool, duration, let);
             let += dt;
         }
 
         _x += dx;
         _y += dy;
-        const sp<Vec> position = makePosition(_stub->_vec2_object_pool, _stub->_numeric_object_pool, _x , _y);
+        const sp<Vec> position = makePosition(_stub->_object_pool, _x , _y);
         const sp<Boolean> expired = _expired->build(_stub->_arguments);
-        const sp<RenderObject> renderObject = _stub->_render_object_pool->allocate<RenderObject>(
+        const sp<RenderObject> renderObject = _stub->_object_pool->allocate<RenderObject>(
                     type, position,
                     size, transform, filter);
         DWARN(expired, "You're creating particles that will NEVER expire, is that what you really want?");
@@ -132,18 +132,16 @@ uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clo
     return last_emit_tick + _interval;
 }
 
-sp<Vec> ParticleEmitter::Particale::makePosition(ObjectPool<Vec>& vec2ObjectPool, ObjectPool<Numeric>& numericObjectPool, float x, float y) const
+sp<Vec> ParticleEmitter::Particale::makePosition(ObjectPool& objectPool, float x, float y) const
 {
     if(_position)
-        return vec2ObjectPool.allocate<Vec>(_position->build(_stub->_arguments)->translate(numericObjectPool, x, y));
-    return vec2ObjectPool.allocate<Vec>(x, y);
+        return objectPool.allocate<Vec>(_position->build(_stub->_arguments)->translate(objectPool, x, y));
+    return objectPool.allocate<Vec>(x, y);
 }
 
 ParticleEmitter::Stub::Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Scope>& arguments)
     : _arguments(sp<Scope>::make(arguments)), _type(type), _position(position), _size(size),
-      _render_object_pool(resourceLoaderContext->getObjectPool<RenderObject>()),
-      _numeric_object_pool(resourceLoaderContext->getObjectPool<Numeric>()),
-      _vec2_object_pool(resourceLoaderContext->getObjectPool<Vec>())
+      _object_pool(resourceLoaderContext->objectPool())
 {
 }
 
@@ -158,10 +156,10 @@ ParticleEmitter::Iteration::Iteration(BeanFactory& factory, const document& mani
     }
 }
 
-void ParticleEmitter::Iteration::doIteration(const sp<Scope>& scope, const sp<ObjectPool<Numeric>>& numericPool, const sp<Numeric>& duration, uint64_t baseline)
+void ParticleEmitter::Iteration::doIteration(const sp<Scope>& scope, const sp<ObjectPool>& objectPool, const sp<Numeric>& duration, uint64_t baseline)
 {
     float translate = baseline / 1000000.0f;
-    scope->put<Numeric>(_name, numericPool->allocate<Translate>(duration, translate));
+    scope->put<Numeric>(_name, objectPool->allocate<Translate>(duration, translate));
     for(const auto& i : _numerics)
         scope->put(i.first, i.second->build(scope));
 }

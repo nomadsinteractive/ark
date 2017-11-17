@@ -15,8 +15,8 @@ class GLModelPoint : public GLModel {
 public:
     GLModelPoint(const sp<GLShader>& shader, const sp<Atlas>& texCoords);
 
-    virtual array<uint8_t> getArrayBuffer(GLResourceManager& resourceManager, const LayerContext& renderContext, float x, float y) override;
-    virtual GLBuffer getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext& renderContext) override;
+    virtual array<uint8_t> getArrayBuffer(GLResourceManager& resourceManager, const LayerContext::Snapshot& renderContext, float x, float y) override;
+    virtual GLBuffer getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext::Snapshot& renderContext) override;
 
     virtual uint32_t mode() const override;
 

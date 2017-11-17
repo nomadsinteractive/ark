@@ -13,10 +13,10 @@ RendererWithPosition::RendererWithPosition(const sp<Renderer>& renderer, const s
     DCHECK(renderer && position, "Arguments must be not null");
 }
 
-void RendererWithPosition::render(RenderCommandPipeline& pipeline, float x, float y)
+void RendererWithPosition::render(RenderRequest& renderRequest, float x, float y)
 {
     const V position = _position->val();
-    _renderer->render(pipeline, x + position.x(), y + position.y());
+    _renderer->render(renderRequest, x + position.x(), y + position.y());
 }
 
 RendererWithPosition::DECORATOR::DECORATOR(BeanFactory& parent, const sp<Builder<Renderer>>& delegate, const String& value)
