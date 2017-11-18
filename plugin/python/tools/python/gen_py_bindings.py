@@ -561,7 +561,7 @@ if __name__ == '__main__':
     def autoenumeration(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
         for i in x[1].split(','):
-            varname = i.strip().split('=', maxsplit=1)[0]
+            varname = i.strip().split('=')[0]
             if varname:
                 genclass.add_constant(varname, '%s::%s' % (main_class, varname))
 
