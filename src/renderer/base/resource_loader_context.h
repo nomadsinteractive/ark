@@ -7,7 +7,6 @@
 #include "core/collection/expirable_item_list.h"
 #include "core/base/api.h"
 #include "core/base/object_pool.h"
-#include "core/base/generic_object_pool.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
@@ -21,7 +20,7 @@
 namespace ark {
 
 class ARK_API ResourceLoaderContext {
-public:
+private:
     template<typename T> class Synchronizer : public Runnable, public Boolean {
     private:
         class SynchronizedVariable : public Variable<T> {
@@ -77,11 +76,13 @@ public:
     const sp<Executor>& executor() const;
     const sp<RenderController>& renderController() const;
     const sp<GLTextureLoader>& textureLoader() const;
+    const sp<ObjectPool>& objectPool() const;
 
-    template<typename T> sp<ObjectPool<T>> getObjectPool() {
-        return _generic_object_pool.getObjectPool<T>();
+    template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& expired = nullptr) {
+        return getSynchronizer<T>()->synchronize(delegate, expired);
     }
 
+private:
     template<typename T> sp<Synchronizer<T>> getSynchronizer() {
         const auto iter = _synchronizers.find(Type<T>::id());
         if(iter == _synchronizers.end()) {
@@ -93,21 +94,16 @@ public:
         return iter->second;
     }
 
-    template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& expired = nullptr) {
-        return getSynchronizer<T>()->synchronize(delegate, expired);
-    }
-
 private:
     sp<Dictionary<document>> _documents;
     sp<GLResourceManager> _gl_resource_manager;
     sp<Executor> _executor;
     sp<RenderController> _render_controller;
     sp<GLTextureLoader> _texture_loader;
+    sp<ObjectPool> _object_pool;
 
     sp<Expired::Impl> _context_expired;
     std::map<TypeId, sp<Runnable>> _synchronizers;
-
-    GenericObjectPool _generic_object_pool;
 
 };
 

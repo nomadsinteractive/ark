@@ -15,9 +15,9 @@ ImageLayer::ImageLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const
 {
 }
 
-void ImageLayer::render(const LayerContext& renderContext, RenderCommandPipeline& pipeline, float x, float y)
+sp<RenderCommand> ImageLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
 {
-    _elements.render(renderContext, pipeline, x, y);
+    return _elements.render(renderContext, x, y);
 }
 
 const sp<Atlas>& ImageLayer::atlas() const

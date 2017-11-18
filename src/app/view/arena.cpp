@@ -43,12 +43,12 @@ void Arena::setRendererDelegate(const sp<Renderer>& delegate)
     _view_group = delegate.as<ViewGroup>();
 }
 
-void Arena::render(RenderCommandPipeline& pipeline, float x, float y)
+void Arena::render(RenderRequest& renderRequest, float x, float y)
 {
     NOT_NULL(_view_group);
-    _renderer->render(pipeline, x, y);
+    _renderer->render(renderRequest, x, y);
     for(const sp<Renderer>& i : _layers)
-        i->render(pipeline, x, y);
+        i->render(renderRequest, x, y);
 }
 
 bool Arena::onEvent(const Event& event)
@@ -111,8 +111,8 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
     {
         if(i->name() == Constants::Attributes::LAYER)
         {
-            const sp<Renderer> layer = factory.build<Layer>(i, args);
-            arena->addLayer(layer ? layer : factory.ensure<Renderer>(i, args));
+            const sp<Layer> layer = factory.build<Layer>(i, args);
+            arena->addLayer(layer ? sp<Layer::Renderer>::make(layer) : factory.ensure<Renderer>(i, args));
         }
         else if(i->name() == Constants::Attributes::RENDER_LAYER)
             arena->addRenderer(factory.ensure<RenderLayer>(i, args));

@@ -14,7 +14,7 @@ void RenderCommandPipeline::add(const sp<RenderCommand>& renderCommand)
     _commands.push_back(renderCommand);
 }
 
-void RenderCommandPipeline::draw(const op<GraphicsContext>& graphicsContext)
+void RenderCommandPipeline::draw(GraphicsContext& graphicsContext)
 {
     for(const sp<RenderCommand>& i : _commands)
         i->draw(graphicsContext);

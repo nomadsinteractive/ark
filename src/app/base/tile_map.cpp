@@ -25,7 +25,7 @@ TileMap::~TileMap()
     delete[] _tiles;
 }
 
-void TileMap::render(RenderCommandPipeline& /*pipeline*/, float x, float y)
+void TileMap::render(RenderRequest& /*renderRequest*/, float x, float y)
 {
     const V scroll = _scroller->val();
     float sx = scroll.x(), sy = scroll.y();
@@ -38,7 +38,7 @@ void TileMap::render(RenderCommandPipeline& /*pipeline*/, float x, float y)
     int32_t rowIdEnd = std::min<int32_t>(_row_count, static_cast<int32_t>(cy / _tile_height));
     int32_t colIdEnd = std::min<int32_t>(_col_count, static_cast<int32_t>(cx / _tile_width));
 
-    const sp<LayerContext>& layerContext = _layer->renderContext();
+    const sp<LayerContext>& layerContext = _layer->layerContext();
     for(int32_t i = rowIdStart; i < rowIdEnd; i++)
     {
         if(i >= 0)

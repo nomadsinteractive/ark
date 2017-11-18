@@ -21,9 +21,9 @@ Text::Text(const sp<Layer>& layer, const Alphabets::Characters& characters)
 {
 }
 
-void Text::render(RenderCommandPipeline& /*pipeline*/, float x, float y)
+void Text::render(RenderRequest& /*pipeline*/, float x, float y)
 {
-    const sp<LayerContext>& renderContext = _layer->renderContext();
+    const sp<LayerContext>& renderContext = _layer->layerContext();
     for(const sp<RenderObject>& i : _characters._render_objects->items())
         renderContext->draw(x, y, i);
 }

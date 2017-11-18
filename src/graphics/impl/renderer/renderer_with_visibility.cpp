@@ -12,10 +12,10 @@ RendererWithVisibility::RendererWithVisibility(const sp<Renderer>& renderer, con
     NOT_NULL(_visibility);
 }
 
-void RendererWithVisibility::render(RenderCommandPipeline& pipeline, float x, float y)
+void RendererWithVisibility::render(RenderRequest& renderRequest, float x, float y)
 {
     if(_visibility->val())
-        _renderer->render(pipeline, x, y);
+        _renderer->render(renderRequest, x, y);
 }
 
 RendererWithVisibility::DECORATOR::DECORATOR(BeanFactory& parent, const sp<Builder<Renderer>>& delegate, const String& value)

@@ -17,7 +17,7 @@ class FrameBufferRenderer : public Renderer {
 public:
     FrameBufferRenderer(const sp<Renderer>& delegate, const sp<GLTexture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
 //  [[plugin::resource-loader("framebuffer")]]
     class BUILDER : public Builder<Renderer> {
@@ -35,7 +35,7 @@ public:
 
 private:
     sp<Renderer> _delegate;
-    ObjectPool<RenderCommand> _render_commands_pool;
+    sp<ObjectPool> _render_commands_pool;
 
     sp<GLFramebuffer> _fbo;
 

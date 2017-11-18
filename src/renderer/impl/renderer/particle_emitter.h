@@ -28,15 +28,13 @@ private:
         SafePtr<VV> _position;
         sp<Size> _size;
 
-        sp<ObjectPool<RenderObject>> _render_object_pool;
-        sp<ObjectPool<Numeric>> _numeric_object_pool;
-        sp<ObjectPool<Vec>> _vec2_object_pool;
+        sp<ObjectPool> _object_pool;
     };
 
 public:
     ParticleEmitter(const sp<Stub>& stub, const sp<Clock>& clock, const sp<RenderLayer>& renderLayer, const List<document>& particleDescriptor, BeanFactory& beanFactory);
 
-    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
 //  [[plugin::resource-loader("particle-emitter")]]
     class BUILDER : public Builder<Renderer> {
@@ -64,7 +62,7 @@ private:
     public:
         Iteration(BeanFactory& factory, const document& manifest);
 
-        void doIteration(const sp<Scope>& scope, const sp<ObjectPool<Numeric>>& numericPool, const sp<Numeric>& duration, uint64_t baseline);
+        void doIteration(const sp<Scope>& scope, const sp<ObjectPool>& objectPool, const sp<Numeric>& duration, uint64_t baseline);
 
         uint32_t count() const;
 
@@ -83,7 +81,7 @@ private:
         uint64_t show(float x, float y, const sp<Clock>& clock, uint64_t tick, const sp<RenderLayer>& renderLayer);
 
     private:
-        sp<Vec> makePosition(ObjectPool<Vec>& vec2ObjectPool, ObjectPool<Numeric>& numericObjectPool, float x, float y) const;
+        sp<Vec> makePosition(ObjectPool& objectPool, float x, float y) const;
 
     private:
         sp<Stub> _stub;

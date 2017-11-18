@@ -5,24 +5,34 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/layer_context.h"
 #include "graphics/inf/renderer.h"
 
 namespace ark {
 
 //[[script::bindings::auto]]
-class ARK_API Layer : public Renderer, Implements<Layer, Renderer> {
+//[[core::class]]
+class ARK_API Layer {
 public:
     Layer();
     virtual ~Layer() = default;
 
-    const sp<LayerContext>& renderContext() const;
+    const sp<LayerContext>& layerContext() const;
 
-    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override final;
+    virtual sp<RenderCommand> render(const LayerContext::Snapshot& layerContext, float x, float y) = 0;
 
-    virtual void render(const LayerContext& renderContext, RenderCommandPipeline& pipeline, float x, float y) = 0;
+    class Renderer : public ark::Renderer {
+    public:
+        Renderer(const sp<Layer>& layer);
+
+        virtual void render(RenderRequest& renderRequest, float x, float y) override;
+
+    private:
+        sp<Layer> _layer;
+    };
 
 private:
-    sp<LayerContext> _render_context;
+    sp<LayerContext> _layer_context;
 
 };
 

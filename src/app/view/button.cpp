@@ -25,9 +25,9 @@ Button::~Button()
 {
 }
 
-void Button::render(RenderCommandPipeline& pipeline, float x, float y)
+void Button::render(RenderRequest& renderRequest, float x, float y)
 {
-    _background->render(pipeline, x, y);
+    _background->render(renderRequest, x, y);
     if(_gravity != NONE)
     {
         const sp<Renderer>& fg = _foreground->getRendererByCurrentStatus();
@@ -38,14 +38,14 @@ void Button::render(RenderCommandPipeline& pipeline, float x, float y)
             if(size)
             {
                 Rect target = GravityLayout::place(_gravity, _layout_param->size()->width(), _layout_param->size()->height(), size->width(), size->height());
-                fg->render(pipeline, x + target.left(), y + target.top());
+                fg->render(renderRequest, x + target.left(), y + target.top());
             }
             else
-                fg->render(pipeline, x, y);
+                fg->render(renderRequest, x, y);
         }
     }
     else
-        _foreground->render(pipeline, x, y);
+        _foreground->render(renderRequest, x, y);
 }
 
 void Button::setForeground(View::State status, const sp<Renderer>& foreground)

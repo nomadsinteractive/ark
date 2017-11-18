@@ -6,6 +6,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/layer_context.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/gl_buffer.h"
@@ -19,7 +20,7 @@ class ARK_API GLElements {
 public:
     GLElements(const sp<GLShader>& shader, const sp<GLTexture>& texture, const sp<GLModel>& model, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    void render(const LayerContext& renderContext, RenderCommandPipeline& pipeline, float x, float y);
+    sp<RenderCommand> render(const LayerContext::Snapshot& renderContext, float x, float y);
 
 private:
     class GLSnippetWrapper;
@@ -69,7 +70,7 @@ private:
 
     GLBuffer _array_buffer;
 
-    sp<ObjectPool<RenderCommand>> _render_command_pool;
+    sp<ObjectPool> _render_command_pool;
     sp<GLSnippet> _gl_snippet;
 };
 

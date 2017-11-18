@@ -15,7 +15,7 @@ class Bar : public Renderer, public Block {
 public:
     Bar(const sp<Layer>& layer, const sp<RenderObject>& bottom, const sp<RenderObject>& bolierplate, const sp<RenderObject>& top, const sp<VV>& direction, const sp<Size>& size);
 
-    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
     virtual const sp<Size>& size() override;
 

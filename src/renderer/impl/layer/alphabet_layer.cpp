@@ -26,17 +26,17 @@ AlphabetLayer::AlphabetLayer(const sp<Alphabet>& alphabet, uint32_t textureWidth
 {
 }
 
-void AlphabetLayer::render(const LayerContext& renderContext, RenderCommandPipeline& pipeline, float x, float y)
+sp<RenderCommand> AlphabetLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
 {
     if(!_preparing_characters.empty())
     {
 
-        for(const LayerContext::Item& i : renderContext.items())
-            _preparing_characters.insert(i.renderObject->type());
+        for(const RenderObject::Snapshot& i : renderContext._items)
+            _preparing_characters.insert(i._type);
 
         doPrepare(true);
     }
-    _image_layer->render(renderContext, pipeline, x, y);
+    return _image_layer->render(renderContext, x, y);
 }
 
 void AlphabetLayer::doPrepare(bool allowReset)

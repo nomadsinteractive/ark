@@ -20,7 +20,7 @@ public:
     TileMap(const sp<Layer>& layer, const sp<VV>& scroller, uint32_t width, uint32_t height, uint32_t tileWidth, uint32_t tileHeight);
     ~TileMap();
 
-    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 // [[script::bindings::property]]
     virtual const sp<Size>& size() override;
 

@@ -1,5 +1,5 @@
-#ifndef ARK_APP_BASE_SURFACE_CONTROLLER_H_
-#define ARK_APP_BASE_SURFACE_CONTROLLER_H_
+#ifndef ARK_GRAPHICS_BASE_SURFACE_CONTROLLER_H_
+#define ARK_GRAPHICS_BASE_SURFACE_CONTROLLER_H_
 
 #include "core/base/api.h"
 #include "core/base/object_pool.h"
@@ -24,7 +24,11 @@ public:
 // [[script::bindings::auto]]
     void addLayer(const sp<Layer>& layer);
 
-    void requestUpdate();
+    void addRenderCommand(const sp<RenderCommand>& renderCommand);
+
+//    void requestUpdate();
+
+    void update(RenderRequest& renderRequest);
 
     sp<RenderCommandPipeline> getRenderCommand();
 
@@ -33,7 +37,7 @@ private:
     sp<RendererGroup> _controls;
     sp<RendererGroup> _layers;
 
-    ObjectPool<RenderCommandPipeline> _render_command_pipe_line_pool;
+    ObjectPool _render_command_pipe_line_pool;
     OCSQueue<sp<RenderCommandPipeline>> _render_commands;
     sp<RenderCommandPipeline> _last_render_command;
     uint32_t _queue_length;

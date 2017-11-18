@@ -15,7 +15,7 @@ public:
     RendererDelegate();
     RendererDelegate(const sp<Renderer>& delegate);
 
-    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
     virtual void setRendererDelegate(const sp<Renderer>& delegate) override;
 

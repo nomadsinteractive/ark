@@ -23,7 +23,7 @@ class RendererWithState;
 class ResourceLoader;
 class RigidBody;
 class Surface;
-class SurfaceController;
+class SurfaceUpdater;
 
 }
 

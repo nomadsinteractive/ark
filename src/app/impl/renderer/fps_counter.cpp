@@ -29,7 +29,7 @@ const sp<Size>& FPSCounter::size()
     return Null::toSafe<Size>(_characters._size);
 }
 
-void FPSCounter::render(RenderCommandPipeline& /*pipeline*/, float x, float y)
+void FPSCounter::render(RenderRequest& /*renderRequest*/, float x, float y)
 {
     ++ _frame_rendered;
     float duration = _duration->val();
@@ -43,7 +43,7 @@ void FPSCounter::render(RenderCommandPipeline& /*pipeline*/, float x, float y)
     }
     if(_characters._render_objects)
         for(const sp<RenderObject>& i : _characters._render_objects->items())
-            _image_layer->renderContext()->draw(x, y, i);
+            _image_layer->layerContext()->draw(x, y, i);
 }
 
 void FPSCounter::updateFPS(float fps)

@@ -211,10 +211,10 @@ private:
             addWeakType();
     }
 
-    template<typename U> friend class ObjectPool;
     template<typename U> friend class SharedPtr;
 
     friend class MemoryPool;
+    friend class ObjectPool;
 
 private:
     std::shared_ptr<T> _ptr;

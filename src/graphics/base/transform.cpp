@@ -66,8 +66,13 @@ const sp<VV>& Transform::identity()
     return IDENTITY;
 }
 
+Transform::Snapshot::Snapshot()
+    : disabled(true), rotation(0)
+{
+}
+
 Transform::Snapshot::Snapshot(float px, float py)
-    : pivot_x(px), pivot_y(py), rotation(0), scale(V::identity())
+    : disabled(false), pivot(px, py), rotation(0), scale(V::identity())
 {
 }
 
@@ -82,9 +87,9 @@ void Transform::Snapshot::toMatrix(Matrix& matrix) const
 {
     matrix.setIdentity();
     matrix.translate(translate.x(), translate.y(), translate.z());
-    matrix.scale(scale.x(), scale.y(), 1.0f);
+    matrix.scale(scale.x(), scale.y(), scale.z());
     matrix.rotate(rotation, 0, 0, 1.0f);
-    matrix.translate(-pivot_x, -pivot_y, 0);
+    matrix.translate(-pivot.x(), -pivot.y(), -pivot.z());
 }
 
 bool Transform::Snapshot::isFrontfaceCCW() const
@@ -95,7 +100,7 @@ bool Transform::Snapshot::isFrontfaceCCW() const
 bool Transform::Snapshot::operator ==(const Transform::Snapshot& other) const
 {
     return translate == other.translate && scale == other.scale
-            && rotation == other.rotation && pivot_x == other.pivot_x && pivot_y == other.pivot_y;
+            && rotation == other.rotation && pivot == other.pivot;
 }
 
 bool Transform::Snapshot::operator !=(const Transform::Snapshot& other) const
@@ -105,10 +110,16 @@ bool Transform::Snapshot::operator !=(const Transform::Snapshot& other) const
 
 void Transform::Snapshot::map(float x, float y, float tx, float ty, float& mx, float& my) const
 {
+    if(disabled)
+    {
+        mx = x - pivot.x() + tx;
+        my = y - pivot.y() + ty;
+        return;
+    }
     if(rotation == 0.0f)
     {
-        mx = (x - pivot_x) * scale.x() + translate.x();
-        my = (y - pivot_y) * scale.y() + translate.y();
+        mx = (x - pivot.x()) * scale.x() + translate.x();
+        my = (y - pivot.y()) * scale.y() + translate.y();
     }
     else
     {

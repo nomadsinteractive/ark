@@ -11,6 +11,7 @@ class ARK_API V2 {
 public:
     V2();
     V2(float x, float y);
+    V2(float x, float y, float z);
     V2(const V2& other);
 
     static V2 identity();

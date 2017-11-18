@@ -70,7 +70,7 @@ public:
 //  [[script::bindings::auto]]
     Vec3 translate(const Vec3& translation) const;
     Vec3 translate(float x, float y, float z) const;
-    Vec3 translate(ObjectPool<Numeric>& op, float x, float y, float z) const;
+    Vec3 translate(ObjectPool& op, float x, float y, float z) const;
 
 //  [[plugin::builder("vec3")]]
     class BUILDER : public Builder<Vec3> {

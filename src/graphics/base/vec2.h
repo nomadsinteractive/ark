@@ -69,7 +69,7 @@ public:
 //  [[script::bindings::auto]]
     Vec2 translate(const Vec2& translation) const;
     Vec2 translate(float x, float y) const;
-    Vec2 translate(ObjectPool<Numeric>& op, float x, float y) const;
+    Vec2 translate(ObjectPool& op, float x, float y) const;
 
 //  [[script::bindings::auto]]
     sp<VV2> transform(const sp<Transform>& transform, const sp<VV2>& org) const;

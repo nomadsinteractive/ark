@@ -14,7 +14,7 @@ MovieclipRenderer::MovieclipRenderer(const sp<Movieclip>& movieclip, const sp<Nu
     DCHECK(_interval > 0, "Movieclip interval must be greater than 0");
 }
 
-void MovieclipRenderer::render(RenderCommandPipeline& pipeline, float x, float y)
+void MovieclipRenderer::render(RenderRequest& renderRequest, float x, float y)
 {
     uint32_t frameid = static_cast<uint32_t>(_duration->val() / _interval) + 1;
     if(frameid != _frame_id)
@@ -23,7 +23,7 @@ void MovieclipRenderer::render(RenderCommandPipeline& pipeline, float x, float y
         _current = _movieclip->next();
     }
     if(_current)
-        _current->render(pipeline, x, y);
+        _current->render(renderRequest, x, y);
     else
         _expired = true;
 }

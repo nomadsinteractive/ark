@@ -82,6 +82,7 @@ void Application::onEventTask(const Event& event)
 void Application::onCreate()
 {
     LOGD("");
+    __thread_init__<THREAD_ID_MAIN>();
     const Global<StringTable> stringTable;
     stringTable->addStringBundle("asset", sp<AssetStringBundle>::make());
     const Global<RenderEngine> renderEngine;
@@ -95,6 +96,7 @@ void Application::onCreate()
 void Application::onPause()
 {
     LOGD("");
+    DTHREAD_CHECK(THREAD_ID_MAIN);
     _alive = false;
     _application_context->postTask([this] () {
         onPauseTask();
@@ -105,6 +107,7 @@ void Application::onPause()
 void Application::onResume()
 {
     LOGD("");
+    DTHREAD_CHECK(THREAD_ID_MAIN);
     _application_context->resume();
     _application_context->postTask([this] () {
         onResumeTask();
@@ -115,6 +118,7 @@ void Application::onResume()
 void Application::onDestroy()
 {
     LOGD("");
+    DTHREAD_CHECK(THREAD_ID_MAIN);
     _alive = false;
     const sp<ApplicationDelegate> applicationDelegate = _application_delegate;
     const sp<ApplicationContext> applicationContext = _application_context;
@@ -129,6 +133,7 @@ void Application::onDestroy()
 void Application::onSurfaceCreated()
 {
     LOGD("");
+    __thread_init__<THREAD_ID_OPEN_GL>();
     Platform::glInitialize();
     _surface->onSurfaceCreated();
     _application_delegate->onSurfaceCreated(_surface);
@@ -137,7 +142,7 @@ void Application::onSurfaceCreated()
 void Application::onSurfaceChanged(uint32_t width, uint32_t height)
 {
     LOGD("width = %d, height = %d", width, height);
-
+    DTHREAD_CHECK(THREAD_ID_OPEN_GL);
     const Global<RenderEngine> renderEngine;
     renderEngine->initialize();
 

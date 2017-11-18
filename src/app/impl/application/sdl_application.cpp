@@ -11,12 +11,12 @@
 #include "core/util/math.h"
 
 #include "graphics/base/bitmap.h"
+#include "graphics/base/surface_controller.h"
 #include "graphics/inf/render_view.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_controller.h"
 #include "app/base/surface.h"
-#include "app/base/surface_controller.h"
 
 #include "platform/platform.h"
 

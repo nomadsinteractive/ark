@@ -16,7 +16,7 @@ class NinePatchLayer : public Layer {
 public:
     NinePatchLayer(const sp<Atlas>& atlas, const sp<GLShader>& shader, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual void render(const LayerContext& renderContext, RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual sp<RenderCommand> render(const LayerContext::Snapshot& layerContext, float x, float y) override;
 
 //  [[plugin::resource-loader("nine-patch-layer")]]
     class BUILDER : public Builder<Layer> {

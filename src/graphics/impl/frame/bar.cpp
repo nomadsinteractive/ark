@@ -17,11 +17,10 @@ Bar::Bar(const sp<Layer>& layer, const sp<RenderObject>& bottom, const sp<Render
 {
 }
 
-void Bar::render(RenderCommandPipeline& pipeline, float x, float y)
+void Bar::render(RenderRequest& renderRequest, float x, float y)
 {
     update();
-
-    _render_layer->render(pipeline, x, y);
+    _render_layer->render(renderRequest, x, y);
 }
 
 const sp<Size>& Bar::size()

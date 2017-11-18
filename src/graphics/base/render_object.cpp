@@ -8,7 +8,6 @@
 
 #include "graphics/base/filter.h"
 #include "graphics/base/size.h"
-#include "graphics/base/transform.h"
 #include "graphics/base/vec2.h"
 
 namespace ark {
@@ -133,6 +132,11 @@ const Box& RenderObject::tag() const
     return _tag;
 }
 
+RenderObject::Snapshot RenderObject::snapshot() const
+{
+    return Snapshot(type(), _position->val(), V(_size->width(), _size->height()), _transform->snapshot(), _filter);
+}
+
 RenderObject::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
     : _type(parent.ensureBuilder<Numeric>(doc, Constants::Attributes::TYPE)),
       _position(parent.getBuilder<Vec>(doc, Constants::Attributes::POSITION)),
@@ -157,6 +161,11 @@ RenderObject::EXPIRABLE_DECORATOR::EXPIRABLE_DECORATOR(BeanFactory& parent, cons
 sp<RenderObject> RenderObject::EXPIRABLE_DECORATOR::build(const sp<Scope>& args)
 {
     return _delegate->build(args).absorb(_expired->build(args));
+}
+
+RenderObject::Snapshot::Snapshot(uint32_t type, const V& position, const V& size, const Transform::Snapshot& transform, const sp<Filter>& filter)
+    : _type(type), _position(position), _size(size), _transform(transform), _filter(filter)
+{
 }
 
 }

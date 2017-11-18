@@ -20,7 +20,7 @@ public:
 
     virtual const sp<Size>& size() override;
 
-    virtual void render(RenderCommandPipeline& pipeline, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
     void updateFPS(float fps);
 

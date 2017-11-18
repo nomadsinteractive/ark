@@ -74,26 +74,24 @@ GLModelNinePatch::GLModelNinePatch(const sp<GLShader>& shader, const document& m
     }
 }
 
-array<uint8_t> GLModelNinePatch::getArrayBuffer(GLResourceManager& resourceManager, const LayerContext& renderContext, float x, float y) {
-    const uint32_t size = renderContext.items().size();
+array<uint8_t> GLModelNinePatch::getArrayBuffer(GLResourceManager& resourceManager, const LayerContext::Snapshot& renderContext, float x, float y) {
+    const uint32_t size = renderContext._items.size();
     const uint32_t floatStride = _stride / 4;
     DCHECK(size > 0, "Empty RenderContext");
     const array<uint8_t> preallocated = resourceManager.getPreallocatedArray(size * 16 * _stride);
     GLfloat* buf = reinterpret_cast<GLfloat*>(preallocated->array());
     memset(buf, 0, preallocated->length());
-    for(const LayerContext::Item& i : renderContext.items())
+    for(const RenderObject::Snapshot& renderObject : renderContext._items)
     {
-        const sp<RenderObject>& renderObject = i.renderObject;
-        const sp<Transform>& transform = i.renderObject->transform();
-        const sp<Filter>& filter = renderObject->filter();
-        const V position = i.renderObject->position()->val();
-        Rect paintRect(position.x() + i.x, position.y() + i.y, position.x() + i.x + renderObject->size()->width(), position.y() + i.y + renderObject->size()->height());
-        if(transform)
+        const Transform::Snapshot& transform = renderObject._transform;
+        const sp<Filter>& filter = renderObject._filter;
+        const V& position = renderObject._position;
+        Rect paintRect(position.x(), position.y(), position.x() + renderObject._size.x(), position.y() + renderObject._size.y());
+        if(!transform.disabled)
         {
-            const Transform::Snapshot snapshot = transform->snapshot();
-            paintRect.translate(snapshot.translate.x() - snapshot.pivot_x, snapshot.translate.y() - snapshot.pivot_y);
+            paintRect.translate(transform.translate.x() - transform.pivot.x(), transform.translate.y() - transform.pivot.y());
         }
-        const Item& ninePatch = _nine_patch_items.at(renderObject->type());
+        const Item& ninePatch = _nine_patch_items.at(renderObject._type);
         filter->setVaryings(buf, _stride, 16);
         fillPaintingRect(buf, paintRect, ninePatch, floatStride, x, y);
         buf += (_stride * 4);
@@ -101,9 +99,9 @@ array<uint8_t> GLModelNinePatch::getArrayBuffer(GLResourceManager& resourceManag
     return preallocated;
 }
 
-GLBuffer GLModelNinePatch::getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext& renderContext)
+GLBuffer GLModelNinePatch::getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext::Snapshot& renderContext)
 {
-    const uint32_t size = renderContext.items().size();
+    const uint32_t size = renderContext._items.size();
     return size ? glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_NINE_PATCH, size * 30 - 2) : GLBuffer();
 }
 

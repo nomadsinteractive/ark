@@ -101,9 +101,9 @@ public:
         if(!v3 || v3->x() != 0 || v3->y() != 110)
             return 15;
 
-        const sp<Transform> t1 = beanFactory.load<Transform>("t1");
-        if(!t1 || t1->pivot()->val().x() != 20.0f || t1->pivot()->val().y() != 30.0f)
-            return 17;
+//        const sp<Transform> t1 = beanFactory.load<Transform>("t1");
+//        if(!t1 || t1->pivot()->val().x() != 20.0f || t1->pivot()->val().y() != 30.0f)
+//            return 17;
 
         sp<Transform> t2 = beanFactory.load<Transform>("t2");
         if(!t2 || t2->translation()->val().x() != 20.0f || t2->translation()->val().y() != 30.0f)

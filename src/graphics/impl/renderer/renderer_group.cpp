@@ -20,10 +20,10 @@ void RendererGroup::addRenderer(const sp<Renderer>& renderer)
     _items.push_back(renderer);
 }
 
-void RendererGroup::render(RenderCommandPipeline& pipeline, float x, float y)
+void RendererGroup::render(RenderRequest& renderRequest, float x, float y)
 {
     for(const sp<Renderer>& i : _items)
-        i->render(pipeline, x, y);
+        i->render(renderRequest, x, y);
 }
 
 void RendererGroup::loadGroup(const document& manifest, BeanFactory& factory, const sp<Scope>& args)
@@ -32,7 +32,7 @@ void RendererGroup::loadGroup(const document& manifest, BeanFactory& factory, co
     {
         if(i->name() == Constants::Attributes::LAYER)
         {
-            const sp<Renderer> layer = factory.ensure<Layer>(i, args);
+            const sp<Renderer> layer = sp<Layer::Renderer>::make(factory.ensure<Layer>(i, args));
             const String& style = Documents::getAttribute(i, Constants::Attributes::STYLE);
             addRenderer(style ? factory.decorate<Renderer>(sp<BuilderByInstance<Renderer>>::make(layer), style)->build(args) : layer);
         }

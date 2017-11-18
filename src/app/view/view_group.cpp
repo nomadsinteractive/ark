@@ -67,9 +67,9 @@ void ViewGroup::Placement::doEnd(const Rect& p)
     }
 }
 
-void ViewGroup::Placement::render(RenderCommandPipeline& pipeline, float x, float y) const
+void ViewGroup::Placement::render(RenderRequest& renderRequest, float x, float y) const
 {
-    _renderer->render(pipeline, x + _x, y + _y);
+    _renderer->render(renderRequest, x + _x, y + _y);
 }
 
 bool ViewGroup::Placement::onEventDispatch(const Event& event, float x, float y)
@@ -110,17 +110,17 @@ void ViewGroup::addRenderer(const sp<Renderer>& renderer)
     _layout_requested = true;
 }
 
-void ViewGroup::render(RenderCommandPipeline& pipeline, float x, float y)
+void ViewGroup::render(RenderRequest& renderRequest, float x, float y)
 {
     if(_background)
-        _background->render(pipeline, x, y);
+        _background->render(renderRequest, x, y);
 
     if(_layout_requested)
         doLayout();
 
     for(const sp<Placement>& i: _placments)
     {
-        i->render(pipeline, x, y);
+        i->render(renderRequest, x, y);
         _layout_requested = _layout_requested || i->isExpired();
     }
 }

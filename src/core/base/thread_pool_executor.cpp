@@ -69,7 +69,7 @@ void ThreadPoolExecutor::Worker::Stub::run()
     while(_thread_stub->status() != Thread::THREAD_STATE_TERMINATED)
     {
         _busy = false;
-        _thread_stub->wait(100000);
+        _thread_stub->wait(1000);
         sp<Runnable> front;
         if(_pendings.pop(front))
         {

@@ -13,10 +13,10 @@ RendererDelegate::RendererDelegate(const sp<Renderer>& delegate)
 {
 }
 
-void RendererDelegate::render(RenderCommandPipeline& pipeline, float x, float y)
+void RendererDelegate::render(RenderRequest& renderRequest, float x, float y)
 {
     if(_delegate)
-        _delegate->render(pipeline, x, y);
+        _delegate->render(renderRequest, x, y);
 }
 
 void RendererDelegate::setRendererDelegate(const sp<Renderer>& delegate)

@@ -247,7 +247,7 @@ Vec3 Vec3::translate(float x, float y, float z) const
     return Vec3(sp<Translate>::make(_x, x), sp<Translate>::make(_y, y), sp<Translate>::make(_z, z));
 }
 
-Vec3 Vec3::translate(ObjectPool<Numeric>& op, float x, float y, float z) const
+Vec3 Vec3::translate(ObjectPool& op, float x, float y, float z) const
 {
     return Vec3(op.allocate<Translate>(_x, x), op.allocate<Translate>(_y, y), op.allocate<Translate>(_z, z));
 }

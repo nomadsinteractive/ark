@@ -15,7 +15,7 @@ RendererWithPivot::RendererWithPivot(const sp<Renderer>& renderer, Pivot pivot)
     DCHECK(_block, "Only block renderer may have pivot");
 }
 
-void RendererWithPivot::render(RenderCommandPipeline& pipeline, float x, float y)
+void RendererWithPivot::render(RenderRequest& renderRequest, float x, float y)
 {
     float ox = 0, oy = 0;
     const sp<Size>& size = _block->size();
@@ -32,7 +32,7 @@ void RendererWithPivot::render(RenderCommandPipeline& pipeline, float x, float y
     else if((_pivot & BOTTOM) == BOTTOM)
         oy = g_isOriginBottom ? 0.0f : -size->height();
 
-    _renderer->render(pipeline, x + ox, y + oy);
+    _renderer->render(renderRequest, x + ox, y + oy);
 }
 
 RendererWithPivot::STYLE::STYLE(BeanFactory& /*factory*/, const sp<Builder<Renderer>>& delegate, const String& value)

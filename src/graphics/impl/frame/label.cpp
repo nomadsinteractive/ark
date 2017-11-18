@@ -20,9 +20,9 @@ Label::Label(const sp<Characters>& characters)
 {
 }
 
-void Label::render(RenderCommandPipeline& /*pipeline*/, float x, float y)
+void Label::render(RenderRequest& /*pipeline*/, float x, float y)
 {
-    const sp<LayerContext>& renderContext = _characters->layer()->renderContext();
+    const sp<LayerContext>& renderContext = _characters->layer()->layerContext();
     for(const sp<RenderObject>& i : _characters->characters())
         renderContext->draw(x, y, i);
 }
