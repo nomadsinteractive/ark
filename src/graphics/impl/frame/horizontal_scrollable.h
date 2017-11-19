@@ -15,7 +15,7 @@ class HorizontalScrollable : public Renderer {
 public:
     HorizontalScrollable(const sp<TileMaker>& tileMaker, const sp<Numeric>& scroller, int32_t width, int32_t tileWidth, uint32_t itemCount);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual sp<RenderCommand> render(RenderRequest& renderRequest, float x, float y) override;
 
 //  [[plugin::builder("horizontal-scrollable")]]
     class BUILDER : public Builder<Renderer> {

@@ -7,11 +7,26 @@
 #include "core/base/object_pool.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/render_command_pipeline.h"
 #include "graphics/inf/render_command.h"
+#include "graphics/inf/renderer.h"
 
 namespace ark {
 
 class RenderRequest {
+public:
+    class RenderContext {
+    public:
+        RenderContext(const ObjectPool& objectPool);
+
+        void addRenderCommand(const sp<RenderCommand>& renderCommand);
+        sp<RenderCommand> toRenderCommand() const;
+
+    private:
+        ObjectPool _object_pool;
+        sp<RenderCommandPipeline> _pipeline;
+    };
+
 public:
     RenderRequest(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController);
 
@@ -21,7 +36,7 @@ public:
     bool isFinished();
 
     void addRequest(const sp<RenderCommand>& renderCommand);
-    void addBackgroundRequest(const sp<Layer>& layer, float x, float y);
+    sp<RenderCommand> addBackgroundRequest(const sp<Layer>& layer, float x, float y);
 
 public:
     struct Stub {

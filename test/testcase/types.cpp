@@ -159,7 +159,7 @@ public:
 
         sp<D> b = nb.as<D>();
 
-        ObjectPool<B> pool;
+        ObjectPool pool;
         {
             sp<B> p1 = pool.allocate<B>();
             sp<B> p2 = pool.allocate<B>();

@@ -12,7 +12,7 @@ class ARK_API Renderer {
 public:
     virtual ~Renderer() = default;
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) = 0;
+    virtual sp<RenderCommand> render(RenderRequest& renderRequest, float x, float y) = 0;
 
 //  [[script::bindings::meta(absorb())]]
 //  [[script::bindings::meta(addRenderer())]]

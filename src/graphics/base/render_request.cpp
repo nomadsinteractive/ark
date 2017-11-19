@@ -68,13 +68,12 @@ void RenderRequest::addRequest(const sp<RenderCommand>& renderCommand)
     _stub->_render_command_pipe_line->add(renderCommand);
 }
 
-void RenderRequest::addBackgroundRequest(const sp<Layer>& layer, float x, float y)
+sp<RenderCommand> RenderRequest::addBackgroundRequest(const sp<Layer>& layer, float x, float y)
 {
     const sp<BackgroundRenderCommand> renderCommand = _render_command_pool.allocate<BackgroundRenderCommand>(_stub, layer, x, y);
-    _stub->_render_command_pipe_line->add(renderCommand);
     _stub->_background_renderer_count++;
     _executor->execute(renderCommand);
-//    return renderCommand;
+    return renderCommand;
 }
 
 RenderRequest::Stub::Stub(const sp<SurfaceController>& surfaceController)

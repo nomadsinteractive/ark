@@ -112,7 +112,7 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
         if(i->name() == Constants::Attributes::LAYER)
         {
             const sp<Layer> layer = factory.build<Layer>(i, args);
-            arena->addLayer(layer ? sp<Layer::Renderer>::make(layer) : factory.ensure<Renderer>(i, args));
+            arena->addLayer(layer ? sp<Renderer>::adopt(new Layer::Renderer(layer)) : factory.ensure<Renderer>(i, args));
         }
         else if(i->name() == Constants::Attributes::RENDER_LAYER)
             arena->addRenderer(factory.ensure<RenderLayer>(i, args));

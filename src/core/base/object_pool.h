@@ -41,6 +41,7 @@ public:
     ObjectPool()
         : _items(sp<std::unordered_map<TypeId, sp<LockFreeStack<sp<Cached>>>>>::make()) {
     }
+    ObjectPool(const ObjectPool& other) = default;
 
     template<typename U, typename... Args> sp<U> allocate(Args... args) {
         const sp<LockFreeStack<sp<Cached>>>& queue = ensure(Type<U>::id());

@@ -20,16 +20,9 @@ Layer::Renderer::Renderer(const sp<Layer>& layer)
 {
 }
 
-void Layer::Renderer::render(RenderRequest& renderRequest, float x, float y)
+sp<RenderCommand> Layer::Renderer::render(RenderRequest& renderRequest, float x, float y)
 {
-/*
-    const sp<RenderCommand> renderCommand = _layer->render(_layer->layerContext()->snapshot(), x, y);
-    _layer->layerContext()->clear();
-    if(renderCommand)
-        renderRequest.addRequest(renderCommand);
-/*/
-    renderRequest.addBackgroundRequest(_layer, x, y);
-/**/
+    return renderRequest.addBackgroundRequest(_layer, x, y);
 }
 
 }

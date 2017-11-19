@@ -28,16 +28,16 @@ public:
 
 //    void requestUpdate();
 
-    void update(RenderRequest& renderRequest);
+    sp<RenderCommand> update(RenderRequest& renderRequest);
 
     sp<RenderCommandPipeline> getRenderCommand();
 
 private:
+    sp<ObjectPool> _object_pool;
     sp<RendererGroup> _renderers;
     sp<RendererGroup> _controls;
     sp<RendererGroup> _layers;
 
-    ObjectPool _render_command_pipe_line_pool;
     OCSQueue<sp<RenderCommandPipeline>> _render_commands;
     sp<RenderCommandPipeline> _last_render_command;
     uint32_t _queue_length;

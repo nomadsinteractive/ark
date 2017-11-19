@@ -1,5 +1,7 @@
 #include "graphics/base/surface_controller.h"
 
+#include "core/base/object_pool.h"
+
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/impl/renderer/renderer_group.h"
 #include "graphics/inf/layer.h"
@@ -10,8 +12,9 @@
 namespace ark {
 
 SurfaceController::SurfaceController()
-    : _renderers(sp<RendererGroup>::make()), _controls(sp<RendererGroup>::make()),
-      _layers(sp<RendererGroup>::make()), _last_render_command(_render_command_pipe_line_pool.allocate<RenderCommandPipeline>()),
+    : _object_pool(sp<ObjectPool>::make()), _renderers(sp<RendererGroup>::make()),
+      _controls(sp<RendererGroup>::make()), _layers(sp<RendererGroup>::make()),
+      _last_render_command(_object_pool->allocate<RenderCommandPipeline>()),
       _queue_length(0)
 {
 }
@@ -36,14 +39,15 @@ void SurfaceController::addRenderCommand(const sp<RenderCommand>& renderCommand)
     _render_commands.push(renderCommand);
 }
 
-void SurfaceController::update(RenderRequest& renderRequest)
+sp<RenderCommand> SurfaceController::update(RenderRequest& renderRequest)
 {
-    const sp<RenderCommandPipeline> renderCommand = _render_command_pipe_line_pool.allocate<RenderCommandPipeline>();
+    const sp<RenderCommandPipeline> renderCommand = _object_pool->allocate<RenderCommandPipeline>();
     renderRequest.start(renderCommand);
     _renderers->render(renderRequest, 0, 0);
     _controls->render(renderRequest, 0, 0);
     _layers->render(renderRequest, 0, 0);
     renderRequest.finish();
+    return renderCommand;
 }
 
 sp<RenderCommandPipeline> SurfaceController::getRenderCommand()

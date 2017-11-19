@@ -11,7 +11,8 @@ void RenderCommandPipeline::reset()
 
 void RenderCommandPipeline::add(const sp<RenderCommand>& renderCommand)
 {
-    _commands.push_back(renderCommand);
+    if(renderCommand)
+        _commands.push_back(renderCommand);
 }
 
 void RenderCommandPipeline::draw(GraphicsContext& graphicsContext)

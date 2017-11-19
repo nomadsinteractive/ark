@@ -6,7 +6,7 @@
 #include "core/base/bean_factory.h"
 #include "core/base/scope.h"
 
-#include "graphics/base/render_command_pipeline.h"
+#include "graphics/base/render_request.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/inf/tile_maker.h"
 #include "graphics/impl/frame/vertical_scrollable.h"
@@ -27,7 +27,7 @@ public:
         : _tile_x(tileX), _tile_y(tileY) {
     }
 
-    virtual void render(RenderCommandPipeline& /*pipeline*/, float /*x*/, float y) override {
+    virtual void render(RenderRequest& /*pipeline*/, float /*x*/, float y) override {
         const int32_t idx = (_tile_y + _tile_height) / _tile_height;
         if(_render_position[idx] != y)
             _error_code = _error_base + idx;
@@ -93,7 +93,7 @@ private:
         _render_position[1] = p2;
         _render_position[2] = p3;
         _render_position[3] = p4;
-        RenderCommandPipeline pipeline;
+        RenderRequest pipeline(nullptr, nullptr);
         scrollable->render(pipeline, 0.0f, 0.0f);
         return _error_code;
     }

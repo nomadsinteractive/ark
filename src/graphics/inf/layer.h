@@ -25,7 +25,7 @@ public:
     public:
         Renderer(const sp<Layer>& layer);
 
-        virtual void render(RenderRequest& renderRequest, float x, float y) override;
+        virtual sp<RenderCommand> render(RenderRequest& renderRequest, float x, float y) override;
 
     private:
         sp<Layer> _layer;

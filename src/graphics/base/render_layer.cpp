@@ -13,11 +13,12 @@ RenderLayer::RenderLayer(const sp<Layer>& layer)
 {
 }
 
-void RenderLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
+sp<RenderCommand> RenderLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
 {
     const sp<LayerContext>& renderContext = _layer->layerContext();
     for(const sp<RenderObject>& i : _render_objects)
         renderContext->draw(x, y, i);
+    return nullptr;
 }
 
 void RenderLayer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& expired)
