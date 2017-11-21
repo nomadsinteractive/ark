@@ -19,11 +19,11 @@ public:
 //  [[script::bindings::auto]]
     Vec4(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z, const sp<Numeric>& w) noexcept;
     Vec4(const sp<VV4>& delegate) noexcept;
-    Vec4(const Vec4& other) noexcept;
-    Vec4(Vec4&& other) noexcept;
+    Vec4(const Vec4& other) noexcept = default;
+    Vec4(Vec4&& other) noexcept = default;
 
-    const Vec4& operator =(const Vec4& other);
-    const Vec4& operator =(Vec4&& other);
+    Vec4& operator =(const Vec4& other) = default;
+    Vec4& operator =(Vec4&& other) = default;
 
     friend Vec4 operator +(const Vec4& lvalue, const Vec4& rvalue);
     friend Vec4 operator -(const Vec4& lvalue, const Vec4& rvalue);

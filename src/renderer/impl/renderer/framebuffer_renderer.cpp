@@ -23,44 +23,45 @@ extern uint32_t g_GLViewportHeight;
 
 namespace {
 
-class DrawElementsToFBO : public RenderCommand {
+class PreDrawElementsToFBO : public RenderCommand {
 public:
-    DrawElementsToFBO(const sp<GLFramebuffer>& fbo)
-        : _fbo(fbo), _pipeline(sp<RenderCommandPipeline>::make()) {
+    PreDrawElementsToFBO(const sp<GLFramebuffer>& fbo)
+        : _fbo(fbo) {
     }
 
-    const sp<RenderCommandPipeline>& pipeline() const {
-        return _pipeline;
-    }
-
-    virtual void draw(GraphicsContext& graphicsContext) override {
+    virtual void draw(GraphicsContext& /*graphicsContext*/) override {
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo->id());
         glViewport(0, 0, static_cast<GLsizei>(_fbo->texture()->width()), static_cast<GLsizei>(_fbo->texture()->height()));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        _pipeline->draw(graphicsContext);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, g_GLViewportWidth, g_GLViewportHeight);
     }
 
 private:
     sp<GLFramebuffer> _fbo;
-    sp<RenderCommandPipeline> _pipeline;
+};
+
+class PostDrawElementsToFBO : public RenderCommand {
+public:
+    virtual void draw(GraphicsContext& /*graphicsContext*/) override {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, g_GLViewportWidth, g_GLViewportHeight);
+    }
+
 };
 
 }
 
 FrameBufferRenderer::FrameBufferRenderer(const sp<Renderer>& delegate, const sp<GLTexture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _delegate(delegate), _render_commands_pool(resourceLoaderContext->objectPool()), _fbo(sp<GLFramebuffer>::make(resourceLoaderContext->glResourceManager()->recycler(), texture))
+    : _delegate(delegate), _fbo(sp<GLFramebuffer>::make(resourceLoaderContext->glResourceManager()->recycler(), texture)),
+      _pre_draw(sp<PreDrawElementsToFBO>::make(_fbo)), _post_draw(sp<PostDrawElementsToFBO>::make())
 {
     resourceLoaderContext->glResourceManager()->prepare(_fbo, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
 }
 
 void FrameBufferRenderer::render(RenderRequest& renderRequest, float x, float y)
 {
-    const sp<DrawElementsToFBO> drawElements = _render_commands_pool->allocate<DrawElementsToFBO>(_fbo);
-    FATAL("Unimplemented");
-//    _delegate->render(drawElements->pipeline(), x, y);
-    renderRequest.addRequest(drawElements);
+    renderRequest.addRequest(_pre_draw);
+    _delegate->render(renderRequest, x, y);
+    renderRequest.addRequest(_post_draw);
 }
 
 FrameBufferRenderer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

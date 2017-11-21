@@ -38,8 +38,8 @@ private:
     class KeyEventListener {
     public:
         KeyEventListener(const sp<Runnable>& onPress, const sp<Runnable>& onRelease, const sp<Runnable>& onClick, const sp<Runnable>& onRepeat);
-        KeyEventListener(const KeyEventListener& other);
-        KeyEventListener(KeyEventListener&& other);
+        KeyEventListener(const KeyEventListener& other) = default;
+        KeyEventListener(KeyEventListener&& other) = default;
 
         void onEvent(const EventDispatcher& dispatcher, const Event& event);
 
@@ -55,11 +55,11 @@ private:
     class MotionEventListener {
     public:
         MotionEventListener(const sp<EventListener>& onPress, const sp<EventListener>& onRelease, const sp<EventListener>& onClick, const sp<EventListener>& onMove);
-        MotionEventListener(const MotionEventListener& other);
-        MotionEventListener(MotionEventListener&& other);
+        MotionEventListener(const MotionEventListener& other) = default;
+        MotionEventListener(MotionEventListener&& other) = default;
 
-        const MotionEventListener& operator =(const MotionEventListener& other);
-        const MotionEventListener& operator =(MotionEventListener&& other);
+        MotionEventListener& operator =(const MotionEventListener& other) = default;
+        MotionEventListener& operator =(MotionEventListener&& other) = default;
 
         bool onEvent(const EventDispatcher& dispatcher, const Event& event);
 

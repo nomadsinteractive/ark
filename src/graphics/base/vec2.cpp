@@ -45,33 +45,9 @@ Vec2::Vec2(float x, float y, const sp<Numeric>& xProperty, const sp<Numeric>& yP
 {
 }
 
-Vec2::Vec2(const Vec2& other) noexcept
-    : _x(other._x), _y(other._y)
-{
-}
-
-Vec2::Vec2(Vec2&& other) noexcept
-    : _x(std::move(other._x)), _y(std::move(other._y))
-{
-}
-
 Vec2::Vec2(VV2& other) noexcept
     : Vec2(other.val())
 {
-}
-
-const Vec2& Vec2::operator =(const Vec2& other)
-{
-    _x = other._x;
-    _y = other._y;
-    return *this;
-}
-
-const Vec2& Vec2::operator =(Vec2&& other)
-{
-    _x = std::move(other._x);
-    _y = std::move(other._y);
-    return *this;
 }
 
 V2 Vec2::val()
@@ -187,7 +163,7 @@ Vec2 Vec2::translate(float x, float y) const
 
 Vec2 Vec2::translate(ObjectPool& op, float x, float y) const
 {
-    return Vec2(op.allocate<Translate>(_x, x), op.allocate<Translate>(_y, y));
+    return Vec2(op.obtain<Translate>(_x, x), op.obtain<Translate>(_y, y));
 }
 
 sp<VV2> Vec2::transform(const sp<Transform>& transform, const sp<VV2>& org) const

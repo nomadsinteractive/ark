@@ -20,7 +20,7 @@ void RendererGroup::addRenderer(const sp<Renderer>& renderer)
     _items.push_back(renderer);
 }
 
-sp<RenderCommand> RendererGroup::render(RenderRequest& renderRequest, float x, float y)
+void RendererGroup::render(RenderRequest& renderRequest, float x, float y)
 {
     for(const sp<Renderer>& i : _items)
         i->render(renderRequest, x, y);

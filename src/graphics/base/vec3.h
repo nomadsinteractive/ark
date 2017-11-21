@@ -18,11 +18,11 @@ public:
 //  [[script::bindings::auto]]
     Vec3(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z) noexcept;
     Vec3(const sp<VV3>& delegate) noexcept;
-    Vec3(const Vec3& other) noexcept;
-    Vec3(Vec3&& other) noexcept;
+    Vec3(const Vec3& other) noexcept = default;
+    Vec3(Vec3&& other) noexcept = default;
 
-    const Vec3& operator =(const Vec3& other);
-    const Vec3& operator =(Vec3&& other);
+    Vec3& operator =(const Vec3& other) = default;
+    Vec3& operator =(Vec3&& other) = default;
 
     friend Vec3 operator +(const Vec3& lvalue, const Vec3& rvalue);
     friend Vec3 operator -(const Vec3& lvalue, const Vec3& rvalue);

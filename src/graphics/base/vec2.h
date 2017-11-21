@@ -20,12 +20,12 @@ public:
 //  [[script::bindings::auto]]
     Vec2(const sp<Numeric>& xProperty, const sp<Numeric>& yProperty) noexcept;
     Vec2(float x, float y, const sp<Numeric>& xProperty, const sp<Numeric>& yProperty) noexcept;
-    Vec2(const Vec2& other) noexcept;
-    Vec2(Vec2&& other) noexcept;
     Vec2(VV2& other) noexcept;
+    Vec2(const Vec2& other) noexcept = default;
+    Vec2(Vec2&& other) noexcept = default;
 
-    const Vec2& operator =(const Vec2& other);
-    const Vec2& operator =(Vec2&& other);
+    Vec2& operator =(const Vec2& other) = default;
+    Vec2& operator =(Vec2&& other) = default;
 
     virtual V2 val() override;
 

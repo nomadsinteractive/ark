@@ -13,21 +13,21 @@ namespace ark {
 //[[core::class]]
 class Frame final : public Renderer, public Block {
 public:
-    Frame();
+    Frame() = default;
+    Frame(const Frame& other) = default;
+    Frame(Frame&& other) = default;
     Frame(const sp<Renderer>& renderer);
     Frame(const sp<Renderer>& renderer, const sp<Block>& block);
     Frame(const sp<RenderObject>& renderObject, const sp<Layer>& layer);
-    Frame(const Frame& other);
-    Frame(Frame&& other);
 
     explicit operator bool() const;
 
-    const Frame& operator =(const Frame& other);
-    const Frame& operator =(Frame&& other);
+    Frame& operator =(const Frame& other) = default;
+    Frame& operator =(Frame&& other) = default;
 
     const sp<Renderer>& renderer() const;
 
-    virtual sp<RenderCommand> render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
     virtual const sp<Size>& size() override;
     const sp<Size>& size() const;

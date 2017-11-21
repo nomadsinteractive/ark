@@ -31,7 +31,7 @@ sp<RenderCommand> GLElements::render(const LayerContext::Snapshot& renderContext
     if(indexBuffer)
     {
         const array<uint8_t> buf = _model->getArrayBuffer(_resource_manager, renderContext, x, y);
-        return _render_command_pool->allocate<DrawElements>(GLSnippetContext(_texture, _array_buffer.snapshot(buf), indexBuffer, _mode), _shader, _gl_snippet);
+        return _render_command_pool->obtain<DrawElements>(GLSnippetContext(_texture, _array_buffer.snapshot(buf), indexBuffer, _mode), _shader, _gl_snippet);
     }
     return nullptr;
 }

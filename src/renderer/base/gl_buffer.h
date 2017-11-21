@@ -56,8 +56,8 @@ public:
     class Snapshot {
     public:
         Snapshot(const sp<Stub>& stub, const bytearray& array);
-        Snapshot(const Snapshot& other);
-        Snapshot(Snapshot&& other);
+        Snapshot(const Snapshot& other) = default;
+        Snapshot(Snapshot&& other) = default;
 
         uint32_t id() const;
         void prepare(GraphicsContext& graphicsContext) const;

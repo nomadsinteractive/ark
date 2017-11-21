@@ -16,8 +16,8 @@ public:
     Scalar(float value);
 //  [[script::bindings::auto]]
     Scalar(const sp<Numeric>& delegate);
-    Scalar(const Scalar& other);
-    Scalar(Scalar&& other);
+    Scalar(const Scalar& other) = default;
+    Scalar(Scalar&& other) = default;
 
 //  [[script::bindings::auto]]
     virtual float val() override;

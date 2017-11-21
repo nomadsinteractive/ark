@@ -46,8 +46,8 @@ public:
     Class();
     Class(TypeId id);
     Class(TypeId id, const char* name, IClass* delegate);
-    Class(const Class& other);
-    Class(Class&& other);
+    Class(const Class& other) = default;
+    Class(Class&& other) = default;
 
     TypeId id() const;
     const char* name() const;
@@ -55,8 +55,8 @@ public:
 
     bool isInstance(TypeId id) const;
 
-    const Class& operator =(const Class& other);
-    const Class& operator =(Class&& other);
+    Class& operator =(const Class& other) = default;
+    Class& operator =(Class&& other) = default;
 
     Box cast(const Box& box, TypeId id);
 

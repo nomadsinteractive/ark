@@ -235,43 +235,13 @@ GLShaderPreprocessor::Snippet::Snippet(GLShaderPreprocessor::SnippetType type, c
 {
 }
 
-GLShaderPreprocessor::Snippet::Snippet(const GLShaderPreprocessor::Snippet& other)
-    : _type(other._type), _src(other._src)
-{
-}
-
-GLShaderPreprocessor::Snippet::Snippet(GLShaderPreprocessor::Snippet&& other)
-    : _type(other._type), _src(std::move(other._src))
-{
-}
-
 GLShaderPreprocessor::Procedure::Procedure(const String& name, const String& params, const String& body)
     : _name(name), _params(params), _body(body)
 {
 }
 
-GLShaderPreprocessor::Procedure::Procedure(const GLShaderPreprocessor::Procedure& other)
-    : _name(other._name), _params(other._params), _body(other._body)
-{
-}
-
-GLShaderPreprocessor::Procedure::Procedure(GLShaderPreprocessor::Procedure&& other)
-    : _name(std::move(other._name)), _params(std::move(other._params)), _body(std::move(other._body))
-{
-}
-
 GLShaderPreprocessor::CodeBlock::CodeBlock(const String& prefix, const GLShaderPreprocessor::Procedure& procedure, const String& suffix)
     : _prefix(prefix), _procedure(procedure), _suffix(suffix)
-{
-}
-
-GLShaderPreprocessor::CodeBlock::CodeBlock(const GLShaderPreprocessor::CodeBlock& other)
-    : _prefix(other._prefix), _procedure(other._procedure), _suffix(other._suffix)
-{
-}
-
-GLShaderPreprocessor::CodeBlock::CodeBlock(GLShaderPreprocessor::CodeBlock&& other)
-    : _prefix(std::move(other._prefix)), _procedure(std::move(other._procedure)), _suffix(std::move(other._suffix))
 {
 }
 

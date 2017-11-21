@@ -15,10 +15,9 @@ RendererByRenderObject::RendererByRenderObject(const sp<RenderObject>& renderObj
     NOT_NULL(_layer);
 }
 
-sp<RenderCommand> RendererByRenderObject::render(RenderRequest& /*renderRequest*/, float x, float y)
+void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, float x, float y)
 {
     _layer->layerContext()->draw(x, y, _render_object);
-    return nullptr;
 }
 
 const sp<Size>& RendererByRenderObject::size()

@@ -26,33 +26,33 @@ private:
 
     struct Snippet {
         Snippet(SnippetType type, const String& src);
-        Snippet(const Snippet& other);
-        Snippet(Snippet&& other);
+        Snippet(const Snippet& other) = default;
+        Snippet(Snippet&& other) = default;
 
         SnippetType _type;
         String _src;
     };
 
     struct Procedure {
+        Procedure(const String& name, const String& params, const String& body);
+        Procedure(const Procedure& other) = default;
+        Procedure(Procedure&& other) = default;
+
         String _name;
         String _params;
         String _body;
         List<std::pair<String, String>> _ins;
         List<std::pair<String, String>> _outs;
-
-        Procedure(const String& name, const String& params, const String& body);
-        Procedure(const Procedure& other);
-        Procedure(Procedure&& other);
     };
 
     struct CodeBlock {
+        CodeBlock(const String& prefix, const Procedure& procedure, const String& suffix);
+        CodeBlock(const CodeBlock& other) = default;
+        CodeBlock(CodeBlock&& other) = default;
+
         String _prefix;
         Procedure _procedure;
         String _suffix;
-
-        CodeBlock(const String& prefix, const Procedure& procedure, const String& suffix);
-        CodeBlock(const CodeBlock& other);
-        CodeBlock(CodeBlock&& other);
     };
 
     class Declaration {

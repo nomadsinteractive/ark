@@ -19,8 +19,8 @@ public:
     class Varying {
     public:
         Varying(uint16_t offset, const sp<Flatable>& flatable);
-        Varying(const Varying& other);
-        Varying(Varying&& other);
+        Varying(const Varying& other) = default;
+        Varying(Varying&& other) = default;
 
         void settle(uint8_t* ptr) const;
 

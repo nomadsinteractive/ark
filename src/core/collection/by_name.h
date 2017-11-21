@@ -13,12 +13,12 @@ namespace ark {
 
 class ARK_API ByName {
 public:
-    ByName();
-    ByName(const ByName& other);
-    ByName(ByName&& other);
+    ByName() = default;
+    ByName(const ByName& other) = default;
+    ByName(ByName&& other) = default;
 
-    const ByName& operator =(const ByName& other);
-    const ByName& operator =(ByName&& other);
+    ByName& operator =(const ByName& other) = default;
+    ByName& operator =(ByName&& other) = default;
 
     template<typename T> void put(const String& name, const sp<T>& item) {
         _items[name] = item.pack();

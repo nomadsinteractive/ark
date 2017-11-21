@@ -123,7 +123,7 @@ uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clo
         _y += dy;
         const sp<Vec> position = makePosition(_stub->_object_pool, _x , _y);
         const sp<Boolean> expired = _expired->build(_stub->_arguments);
-        const sp<RenderObject> renderObject = _stub->_object_pool->allocate<RenderObject>(
+        const sp<RenderObject> renderObject = _stub->_object_pool->obtain<RenderObject>(
                     type, position,
                     size, transform, filter);
         DWARN(expired, "You're creating particles that will NEVER expire, is that what you really want?");
@@ -135,8 +135,8 @@ uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clo
 sp<Vec> ParticleEmitter::Particale::makePosition(ObjectPool& objectPool, float x, float y) const
 {
     if(_position)
-        return objectPool.allocate<Vec>(_position->build(_stub->_arguments)->translate(objectPool, x, y));
-    return objectPool.allocate<Vec>(x, y);
+        return objectPool.obtain<Vec>(_position->build(_stub->_arguments)->translate(objectPool, x, y));
+    return objectPool.obtain<Vec>(x, y);
 }
 
 ParticleEmitter::Stub::Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Scope>& arguments)
@@ -159,7 +159,7 @@ ParticleEmitter::Iteration::Iteration(BeanFactory& factory, const document& mani
 void ParticleEmitter::Iteration::doIteration(const sp<Scope>& scope, const sp<ObjectPool>& objectPool, const sp<Numeric>& duration, uint64_t baseline)
 {
     float translate = baseline / 1000000.0f;
-    scope->put<Numeric>(_name, objectPool->allocate<Translate>(duration, translate));
+    scope->put<Numeric>(_name, objectPool->obtain<Translate>(duration, translate));
     for(const auto& i : _numerics)
         scope->put(i.first, i.second->build(scope));
 }

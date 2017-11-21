@@ -36,16 +36,6 @@ Class::Class(TypeId id, const char* name, IClass* delegate)
     _implements.insert(id);
 }
 
-Class::Class(const Class& other)
-    : _id(other._id), _name(other._name), _implements(other._implements), _delegate(other._delegate)
-{
-}
-
-Class::Class(Class&& other)
-    : _id(other._id), _name(other._name), _implements(std::move(other._implements)), _delegate(other._delegate)
-{
-}
-
 TypeId Class::id() const
 {
     return _id;
@@ -64,24 +54,6 @@ const std::unordered_set<TypeId>& Class::implements() const
 bool Class::isInstance(TypeId id) const
 {
     return _implements.find(id) != _implements.end();
-}
-
-const Class& Class::operator =(const Class& other)
-{
-    _id = other._id;
-    _name = other._name;
-    _implements = other._implements;
-    _delegate = other._delegate;
-    return *this;
-}
-
-const Class& Class::operator =(Class&& other)
-{
-    _id = other._id;
-    _name = other._name;
-    _implements = std::move(other._implements);
-    _delegate = other._delegate;
-    return *this;
 }
 
 Box Class::cast(const Box& box, TypeId id)

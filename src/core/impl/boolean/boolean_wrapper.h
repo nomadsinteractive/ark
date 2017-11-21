@@ -14,8 +14,8 @@ class ARK_API BooleanWrapper : public Boolean {
 public:
     BooleanWrapper(bool value);
     BooleanWrapper(const sp<Boolean>& delegate);
-    BooleanWrapper(const BooleanWrapper& other);
-    BooleanWrapper(BooleanWrapper&& other);
+    BooleanWrapper(const BooleanWrapper& other) = default;
+    BooleanWrapper(BooleanWrapper&& other) = default;
 
     virtual bool val() override;
 

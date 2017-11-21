@@ -10,16 +10,6 @@ Identifier::Identifier(IdType type, const String& package, const String& value)
 {
 }
 
-Identifier::Identifier(const Identifier& other)
-    : _type(other._type), _package(other._package), _value(other._value)
-{
-}
-
-Identifier::Identifier(Identifier&& other)
-    : _type(other._type), _package(std::move(other._package)), _value(std::move(other._value))
-{
-}
-
 Identifier Identifier::parse(const String& s, Format format)
 {
     DCHECK(s, "Illegal identifier: empty string");

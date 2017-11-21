@@ -43,7 +43,7 @@ public:
     }
     ObjectPool(const ObjectPool& other) = default;
 
-    template<typename U, typename... Args> sp<U> allocate(Args... args) {
+    template<typename U, typename... Args> sp<U> obtain(Args... args) {
         const sp<LockFreeStack<sp<Cached>>>& queue = ensure(Type<U>::id());
         sp<Cached> cached;
 

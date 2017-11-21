@@ -63,17 +63,7 @@ bool EventDispatcher::onEvent(const Event& event)
 }
 
 EventDispatcher::KeyEventListener::KeyEventListener(const sp<Runnable>& onPress, const sp<Runnable>& onRelease, const sp<Runnable>& onClick, const sp<Runnable>& onRepeat)
-    : _on_press(onPress), _on_release(onRelease), _on_click(onClick), _on_repeat(onRepeat)
-{
-}
-
-EventDispatcher::KeyEventListener::KeyEventListener(const EventDispatcher::KeyEventListener& other)
-    : _on_press(other._on_press), _on_release(other._on_release), _on_click(other._on_click), _on_repeat(other._on_repeat)
-{
-}
-
-EventDispatcher::KeyEventListener::KeyEventListener(EventDispatcher::KeyEventListener&& other)
-    : _on_press(std::move(other._on_press)), _on_release(std::move(other._on_release)), _on_click(std::move(other._on_click)), _on_repeat(std::move(other._on_repeat))
+    : _on_press(onPress), _on_release(onRelease), _on_click(onClick), _on_repeat(onRepeat), _pressed_timestamp(0)
 {
 }
 
@@ -105,36 +95,8 @@ void EventDispatcher::KeyEventListener::onEvent(const EventDispatcher& dispatche
 }
 
 EventDispatcher::MotionEventListener::MotionEventListener(const sp<EventListener>& onPress, const sp<EventListener>& onRelease, const sp<EventListener>& onClick, const sp<EventListener>& onMove)
-    : _on_down(onPress), _on_up(onRelease), _on_click(onClick), _on_move(onMove)
+    : _on_down(onPress), _on_up(onRelease), _on_click(onClick), _on_move(onMove), _pressed_x(0), _pressed_y(0)
 {
-}
-
-EventDispatcher::MotionEventListener::MotionEventListener(const EventDispatcher::MotionEventListener& other)
-    : _on_down(other._on_down), _on_up(other._on_up), _on_click(other._on_click), _on_move(other._on_move)
-{
-}
-
-EventDispatcher::MotionEventListener::MotionEventListener(EventDispatcher::MotionEventListener&& other)
-    : _on_down(std::move(other._on_down)), _on_up(std::move(other._on_up)), _on_click(std::move(other._on_click)), _on_move(std::move(other._on_move))
-{
-}
-
-const EventDispatcher::MotionEventListener& EventDispatcher::MotionEventListener::operator =(const MotionEventListener& other)
-{
-    _on_down = other._on_down;
-    _on_up = other._on_up;
-    _on_click = other._on_click;
-    _on_move = other._on_move;
-    return *this;
-}
-
-const EventDispatcher::MotionEventListener& EventDispatcher::MotionEventListener::operator =(MotionEventListener&& other)
-{
-    _on_down = std::move(other._on_down);
-    _on_up = std::move(other._on_up);
-    _on_click = std::move(other._on_click);
-    _on_move = std::move(other._on_move);
-    return *this;
 }
 
 bool EventDispatcher::MotionEventListener::onEvent(const EventDispatcher& dispatcher, const Event& event)

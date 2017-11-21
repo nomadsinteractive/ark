@@ -14,11 +14,12 @@ class ARK_API String final {
 public:
     typedef std::string::size_type size_type;
 
-    String();
+    String() = default;
+    String(const String& other) = default;
+    String(String&& other) = default;
+
     String(const char* s);
-    String(const String& other);
     String(size_type length, char fill);
-    String(String&& other);
     String(const std::string& str);
     String(std::string&& str);
     ~String();

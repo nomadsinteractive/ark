@@ -55,16 +55,6 @@ GLShader::GLShader(const sp<GLShaderSource>& source)
     _source->initialize();
 }
 
-GLShader::GLShader(const GLShader& other)
-    : _source(other._source), _program(other._program)
-{
-}
-
-GLShader::GLShader(GLShader&& other)
-    : _source(std::move(other._source)), _program(std::move(other._program))
-{
-}
-
 sp<Builder<GLShader>> GLShader::fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment)
 {
     const Global<StringTable> stringTable;

@@ -15,19 +15,6 @@ namespace ark {
 
 class RenderRequest {
 public:
-    class RenderContext {
-    public:
-        RenderContext(const ObjectPool& objectPool);
-
-        void addRenderCommand(const sp<RenderCommand>& renderCommand);
-        sp<RenderCommand> toRenderCommand() const;
-
-    private:
-        ObjectPool _object_pool;
-        sp<RenderCommandPipeline> _pipeline;
-    };
-
-public:
     RenderRequest(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController);
 
     void start(const sp<RenderCommandPipeline>& renderCommandPipeline);
@@ -36,7 +23,7 @@ public:
     bool isFinished();
 
     void addRequest(const sp<RenderCommand>& renderCommand);
-    sp<RenderCommand> addBackgroundRequest(const sp<Layer>& layer, float x, float y);
+    void addBackgroundRequest(const sp<Layer>& layer, float x, float y);
 
 public:
     struct Stub {

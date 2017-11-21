@@ -13,9 +13,9 @@ namespace ark {
 
 class ARK_API ByType {
 public:
-    ByType();
-    ByType(const ByType& other);
-    ByType(ByType&& other);
+    ByType() = default;
+    ByType(const ByType& other) = default;
+    ByType(ByType&& other) = default;
 
     template<typename T> bool has() {
         return _items.find(Type<T>::id()) != _items.end();

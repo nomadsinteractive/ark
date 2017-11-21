@@ -90,32 +90,6 @@ Vec3::Vec3(const sp<VV3>& delegate) noexcept
     setDelegate(delegate);
 }
 
-Vec3::Vec3(const Vec3& other) noexcept
-    : _x(other._x), _y(other._y), _z(other._z)
-{
-}
-
-Vec3::Vec3(Vec3&& other) noexcept
-    : _x(std::move(other._x)), _y(std::move(other._y)), _z(std::move(other._z))
-{
-}
-
-const Vec3& Vec3::operator =(const Vec3& other)
-{
-    _x = other._x;
-    _y = other._y;
-    _z = other._z;
-    return *this;
-}
-
-const Vec3& Vec3::operator =(Vec3&& other)
-{
-    _x = std::move(other._x);
-    _y = std::move(other._y);
-    _z = std::move(other._z);
-    return *this;
-}
-
 V3 Vec3::val()
 {
     return V3(_x->val(), _y->val(), _z->val());
@@ -249,7 +223,7 @@ Vec3 Vec3::translate(float x, float y, float z) const
 
 Vec3 Vec3::translate(ObjectPool& op, float x, float y, float z) const
 {
-    return Vec3(op.allocate<Translate>(_x, x), op.allocate<Translate>(_y, y), op.allocate<Translate>(_z, z));
+    return Vec3(op.obtain<Translate>(_x, x), op.obtain<Translate>(_y, y), op.obtain<Translate>(_z, z));
 }
 
 Vec3::BUILDER::BUILDER(BeanFactory& parent, const document& doc)

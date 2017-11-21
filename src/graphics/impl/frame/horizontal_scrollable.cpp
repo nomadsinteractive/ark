@@ -11,7 +11,7 @@ HorizontalScrollable::HorizontalScrollable(const sp<TileMaker>& tileMaker, const
       _scroll_position(std::numeric_limits<int32_t>::min()), _grid_position(0) {
 }
 
-sp<RenderCommand> HorizontalScrollable::render(RenderRequest& renderRequest, float x, float y)
+void HorizontalScrollable::render(RenderRequest& renderRequest, float x, float y)
 {
     int32_t scrollPosition = static_cast<int32_t>(_scroller->val());
     if(scrollPosition != _scroll_position)

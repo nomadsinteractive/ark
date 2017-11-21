@@ -4,22 +4,8 @@
 
 namespace ark {
 
-Scope::Scope()
-{
-}
-
 Scope::Scope(const std::map<String, Box>& variables)
     : _variables(variables)
-{
-}
-
-Scope::Scope(const Scope& other)
-    : _variables(other._variables)
-{
-}
-
-Scope::Scope(Scope&& other)
-    : _variables(std::move(other._variables))
 {
 }
 

@@ -93,16 +93,6 @@ GLBuffer::Snapshot::Snapshot(const sp<GLBuffer::Stub>& stub, const bytearray& ar
 {
 }
 
-GLBuffer::Snapshot::Snapshot(const GLBuffer::Snapshot& other)
-    : _stub(other._stub), _array(other._array)
-{
-}
-
-GLBuffer::Snapshot::Snapshot(GLBuffer::Snapshot&& other)
-    : _stub(std::move(other._stub)), _array(std::move(other._array))
-{
-}
-
 uint32_t GLBuffer::Snapshot::id() const
 {
     return _stub->id();

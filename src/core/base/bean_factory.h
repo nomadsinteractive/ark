@@ -232,8 +232,8 @@ public:
 public:
     BeanFactory(std::nullptr_t);
     BeanFactory();
-    BeanFactory(const BeanFactory& other);
-    BeanFactory(BeanFactory&& other);
+    BeanFactory(const BeanFactory& other) = default;
+    BeanFactory(BeanFactory&& other) = default;
     ~BeanFactory();
 
     template<typename T> sp<T> load(const String& id, const sp<Scope>& args = nullptr) {

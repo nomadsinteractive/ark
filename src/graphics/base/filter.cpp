@@ -127,16 +127,6 @@ Filter::Varying::Varying(uint16_t offset, const sp<Flatable>& flatable)
 {
 }
 
-Filter::Varying::Varying(const Filter::Varying& other)
-    : _offset(other._offset), _flatable(other._flatable)
-{
-}
-
-Filter::Varying::Varying(Filter::Varying&& other)
-    : _offset(other._offset), _flatable(std::move(other._flatable))
-{
-}
-
 void Filter::Varying::settle(uint8_t* ptr) const
 {
     _flatable->flat(ptr + _offset);

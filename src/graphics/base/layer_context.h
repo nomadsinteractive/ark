@@ -21,8 +21,11 @@ public:
 
     struct Snapshot {
         Snapshot(const LayerContext& layerContext);
+        Snapshot(Snapshot&& other) = default;
 
         std::list<RenderObject::Snapshot> _items;
+
+        DISALLOW_COPY_AND_ASSIGN(Snapshot);
     };
 
 public:

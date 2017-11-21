@@ -106,34 +106,6 @@ Vec4::Vec4(const sp<VV4>& delegate) noexcept
     setDelegate(delegate);
 }
 
-Vec4::Vec4(const Vec4& other) noexcept
-    : _x(other._x), _y(other._y), _z(other._z), _w(other._w)
-{
-}
-
-Vec4::Vec4(Vec4&& other) noexcept
-    : _x(std::move(other._x)), _y(std::move(other._y)), _z(std::move(other._z)), _w(std::move(other._w))
-{
-}
-
-const Vec4& Vec4::operator =(const Vec4& other)
-{
-    _x = other._x;
-    _y = other._y;
-    _z = other._z;
-    _w = other._w;
-    return *this;
-}
-
-const Vec4& Vec4::operator =(Vec4&& other)
-{
-    _x = std::move(other._x);
-    _y = std::move(other._y);
-    _z = std::move(other._z);
-    _w = std::move(other._w);
-    return *this;
-}
-
 V4 Vec4::val()
 {
     return V4(_x->val(), _y->val(), _z->val(), _w->val());

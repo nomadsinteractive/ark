@@ -15,8 +15,8 @@ namespace ark {
 class GLSnippetContext {
 public:
     GLSnippetContext(const sp<GLTexture>& texture, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer& indexBuffer, GLenum mode);
-    GLSnippetContext(const GLSnippetContext& other);
-    GLSnippetContext(GLSnippetContext&& other);
+    GLSnippetContext(const GLSnippetContext& other) = default;
+    GLSnippetContext(GLSnippetContext&& other) = default;
 
     sp<GLTexture> _texture;
 

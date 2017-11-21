@@ -16,7 +16,7 @@ class RendererByRenderObject : public Renderer, public Block {
 public:
     RendererByRenderObject(const sp<RenderObject>& renderObject, const sp<Layer>& layer);
 
-    virtual sp<RenderCommand> render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
     virtual const sp<Size>& size() override;
 

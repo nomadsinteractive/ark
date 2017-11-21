@@ -20,9 +20,9 @@ Layer::Renderer::Renderer(const sp<Layer>& layer)
 {
 }
 
-sp<RenderCommand> Layer::Renderer::render(RenderRequest& renderRequest, float x, float y)
+void Layer::Renderer::render(RenderRequest& renderRequest, float x, float y)
 {
-    return renderRequest.addBackgroundRequest(_layer, x, y);
+    renderRequest.addBackgroundRequest(_layer, x, y);
 }
 
 }

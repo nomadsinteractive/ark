@@ -16,8 +16,8 @@ public:
         FORMAT_URL_STRICT
     };
 
-    Identifier(const Identifier& other);
-    Identifier(Identifier&& other);
+    Identifier(const Identifier& other) = default;
+    Identifier(Identifier&& other) = default;
 
     static Identifier parse(const String& s, Format format = FORMAT_NAMESPACE_STRICT);
     static Identifier parseRef(const String& s);

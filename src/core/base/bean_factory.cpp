@@ -10,17 +10,7 @@ BeanFactory::BeanFactory()
     : _references(sp<Scope>::make()), _factories(sp<List<Factory>>::make()) {
 }
 
-BeanFactory::BeanFactory(const BeanFactory& other)
-    : _references(other._references), _factories(other._factories), _packages(other._packages)
-{
-}
-
 BeanFactory::~BeanFactory()
-{
-}
-
-BeanFactory::BeanFactory(BeanFactory&& other)
-    : _references(std::move(other._references)), _factories(std::move(other._factories)), _packages(std::move(other._packages))
 {
 }
 

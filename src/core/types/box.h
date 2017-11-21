@@ -17,13 +17,14 @@ class ARK_API Box {
 public:
     typedef std::function<void(void*)> Destructor;
 
-    Box() noexcept;
-    Box(const Box& other);
-    Box(Box&& other);
+    Box() noexcept = default;
+    Box(const Box& other) = default;
+    Box(Box&& other) = default;
+
+    Box& operator =(const Box& other) = default;
+    Box& operator =(Box&& other) = default;
 
     explicit operator bool() const;
-    const Box& operator =(const Box& other);
-    const Box& operator =(Box&& other);
 
     TypeId typeId() const;
 

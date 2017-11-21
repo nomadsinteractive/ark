@@ -23,16 +23,6 @@ Scalar::Scalar(const sp<Numeric>& delegate)
 {
 }
 
-Scalar::Scalar(const Scalar& other)
-    : _delegate(other._delegate), _value(other._value)
-{
-}
-
-Scalar::Scalar(Scalar&& other)
-    : _delegate(std::move(other._delegate)), _value(other._value)
-{
-}
-
 float Scalar::val()
 {
     return std::isnan(_value) ? _delegate->val() : _value;

@@ -35,9 +35,9 @@ public:
 
 private:
     sp<Renderer> _delegate;
-    sp<ObjectPool> _render_commands_pool;
-
     sp<GLFramebuffer> _fbo;
+    sp<RenderCommand> _pre_draw;
+    sp<RenderCommand> _post_draw;
 
 };
 

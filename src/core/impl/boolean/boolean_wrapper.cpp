@@ -16,16 +16,6 @@ BooleanWrapper::BooleanWrapper(const sp<Boolean>& delegate)
 {
 }
 
-BooleanWrapper::BooleanWrapper(const BooleanWrapper& other)
-    : _delegate(other._delegate), _value(other._value)
-{
-}
-
-BooleanWrapper::BooleanWrapper(BooleanWrapper&& other)
-    : _delegate(std::move(other._delegate)), _value(other._value)
-{
-}
-
 bool BooleanWrapper::val()
 {
     return _delegate ? _delegate->val() : _value;

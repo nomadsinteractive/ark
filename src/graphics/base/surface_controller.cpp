@@ -14,7 +14,7 @@ namespace ark {
 SurfaceController::SurfaceController()
     : _object_pool(sp<ObjectPool>::make()), _renderers(sp<RendererGroup>::make()),
       _controls(sp<RendererGroup>::make()), _layers(sp<RendererGroup>::make()),
-      _last_render_command(_object_pool->allocate<RenderCommandPipeline>()),
+      _last_render_command(_object_pool->obtain<RenderCommandPipeline>()),
       _queue_length(0)
 {
 }
@@ -41,7 +41,7 @@ void SurfaceController::addRenderCommand(const sp<RenderCommand>& renderCommand)
 
 sp<RenderCommand> SurfaceController::update(RenderRequest& renderRequest)
 {
-    const sp<RenderCommandPipeline> renderCommand = _object_pool->allocate<RenderCommandPipeline>();
+    const sp<RenderCommandPipeline> renderCommand = _object_pool->obtain<RenderCommandPipeline>();
     renderRequest.start(renderCommand);
     _renderers->render(renderRequest, 0, 0);
     _controls->render(renderRequest, 0, 0);

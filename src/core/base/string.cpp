@@ -13,10 +13,6 @@ namespace ark {
 
 String::size_type String::npos = std::string::npos;
 
-String::String()
-{
-}
-
 String::String(const char* s)
     : _str(s)
 {
@@ -32,18 +28,8 @@ String::String(std::string&& str)
 {
 }
 
-String::String(const String& other)
-    : _str(other._str)
-{
-}
-
 String::String(size_type length, char fill)
     : _str(length, fill)
-{
-}
-
-String::String(String&& other)
-    : _str(std::move(other._str))
 {
 }
 
