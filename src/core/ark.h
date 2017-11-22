@@ -33,7 +33,7 @@ public:
         OPENGL_45 = 45,
     };
 
-    Ark(int32_t argc, const char** argv, const String& manfiestSrc = String::null());
+    Ark(int32_t argc, const char** argv, const String& manfiestSrc = String());
     ~Ark();
 
     static Ark& instance();

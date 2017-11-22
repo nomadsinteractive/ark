@@ -18,6 +18,7 @@ const sp<LayerContext>& Layer::layerContext() const
 Layer::Renderer::Renderer(const sp<Layer>& layer)
     : _layer(layer)
 {
+    NOT_NULL(_layer);
 }
 
 void Layer::Renderer::render(RenderRequest& renderRequest, float x, float y)

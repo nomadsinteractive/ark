@@ -13,7 +13,7 @@ namespace ark {
 
 class DictionaryByAttributeName : public Dictionary<document> {
 public:
-    DictionaryByAttributeName(const document& doc, const String& attrName, const String& childName = String::null());
+    DictionaryByAttributeName(const document& doc, const String& attrName, const String& childName = String());
 
     virtual document get(const String& name) override;
 
