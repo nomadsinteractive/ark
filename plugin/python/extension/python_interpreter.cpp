@@ -3,7 +3,6 @@
 #include "core/base/scope.h"
 #include "core/inf/variable.h"
 #include "core/inf/message_loop.h"
-#include "core/impl/range/integer_array.h"
 #include "core/types/box.h"
 #include "core/types/global.h"
 #include "core/types/null.h"
@@ -22,52 +21,13 @@
 #include "python/impl/adapter/collision_callback_python_adapter.h"
 #include "python/impl/adapter/python_callable_runnable.h"
 #include "python/impl/adapter/python_callable_event_listener.h"
-#include "python/impl/adapter/python_callable_tile_maker.h"
 
+#include "python/impl/duck/py_callable_duck_type.h"
+#include "python/impl/duck/py_object_duck_type.h"
 
 namespace ark {
 namespace plugin {
 namespace python {
-
-namespace {
-
-class PyCallableDuckType : public Duck<Runnable>, public Duck<EventListener>, public Duck<TileMaker>, public Implements<PyCallableDuckType, Duck<Runnable>, Duck<EventListener>, Duck<TileMaker>> {
-public:
-    PyCallableDuckType(const sp<PyInstance>& inst)
-        : _instance(inst) {
-    }
-
-    virtual void to(sp<Runnable>& inst) override {
-        inst = sp<PythonCallableRunnable>::make(_instance);
-    }
-
-    virtual void to(sp<EventListener>& inst) override {
-        inst = sp<PythonCallableEventListener>::make(_instance);
-    }
-
-    virtual void to(sp<TileMaker>& inst) override {
-        inst = sp<PythonCallableTileMaker>::make(_instance);
-    }
-
-private:
-    sp<PyInstance> _instance;
-};
-
-class PyObjectDuckType : public Duck<CollisionCallback>, public Implements<PyObjectDuckType, Duck<CollisionCallback>> {
-public:
-    PyObjectDuckType(const sp<PyInstance>& inst)
-        : _instance(inst) {
-    }
-
-    virtual void to(sp<CollisionCallback>& inst) override {
-        inst = sp<CollisionCallbackPythonAdapter>::make(_instance);
-    }
-
-private:
-    sp<PyInstance> _instance;
-};
-
-}
 
 sp<PythonInterpreter> PythonInterpreter::_INSTANCE;
 
@@ -220,10 +180,6 @@ sp<Scope> PythonInterpreter::toScope(PyObject* kws)
                 pyDuck.absorb<PyGarbageCollector>(sp<PyGarbageCollector>::make(owned));
                 scope->put<PyCallableDuckType>(sKey, pyDuck);
             }
-            else if(PyList_Check(item))
-            {
-                scope->put<Array<int32_t>>(sKey, sp<IntegerArray>::make(toArray<int32_t>(item)));
-            }
             else if(isPyArkTypeObject(Py_TYPE(item)))
                 scope->put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
             else
@@ -358,6 +314,32 @@ template<> ARK_PLUGIN_PYTHON_API uint32_t PythonInterpreter::toType<uint32_t>(Py
 template<> ARK_PLUGIN_PYTHON_API int32_t PythonInterpreter::toType<int32_t>(PyObject* object)
 {
     return static_cast<int32_t>(PyLong_AsLong(object));
+}
+
+template<> ARK_PLUGIN_PYTHON_API Color PythonInterpreter::toType<Color>(PyObject* object)
+{
+    if(PyLong_Check(object))
+        return Color(static_cast<uint32_t>(PyLong_AsLongLong(object)));
+    if(PyTuple_Check(object))
+    {
+        float r, g, b, a = 1.0f;
+        if(PyArg_ParseTuple(object, "fff|f", &r, &g, &b, &a))
+            return Color(r, g, b, a);
+    }
+    if(PyList_Check(object))
+    {
+        uint32_t len = PyObject_Length(object);
+        if(len >= 3)
+        {
+            float r = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 0)));
+            float g = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 1)));
+            float b = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 2)));
+            float a = len > 3 ? static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 3))) : 1.0f;
+            return Color(r, g, b, a);
+        }
+    }
+    DFATAL("Color object should be either int or float array. (eg. 0xffffffff or (1.0, 1.0, 1.0, 1.0))");
+    return Color();
 }
 
 template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Vec2>(const Vec2& value)

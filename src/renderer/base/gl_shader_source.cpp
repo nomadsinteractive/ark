@@ -5,6 +5,7 @@
 #include "core/base/bean_factory.h"
 #include "core/dom/document.h"
 #include "core/inf/array.h"
+#include "core/inf/flatable.h"
 #include "core/types/global.h"
 #include "core/util/documents.h"
 
@@ -204,23 +205,30 @@ void GLShaderSource::loadPredefinedUniform(BeanFactory& factory, const sp<Scope>
         const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
-        String::size_type pos = type.find('[');
-        bool isArray = pos != String::npos;
-        const String stype = isArray ? type.substr(0, pos) : type;
-        const sp<Flatable> flatable = factory.ensure<Flatable>(stype, value, args);
+        const sp<Flatable> flatable = factory.ensure<Flatable>(type, value, args);
+        const uint32_t size = flatable->size();
+        const uint32_t length = flatable->length();
         GLUniform::Type glType = GLUniform::UNIFORM_F1;
-        if(stype == "float")
-            glType = isArray ? GLUniform::UNIFORM_F1V : GLUniform::UNIFORM_F1;
-        else if(stype == "vec2")
-            glType = isArray ? GLUniform::UNIFORM_F2V : GLUniform::UNIFORM_F2;
-        else if(stype == "vec3")
-            glType = isArray ? GLUniform::UNIFORM_F3V : GLUniform::UNIFORM_F3;
-        else if(stype == "v4f")
-            glType = isArray ? GLUniform::UNIFORM_F4V : GLUniform::UNIFORM_F4;
-        else if(stype == "mat")
-            glType = isArray ? GLUniform::UNIFORM_MAT4V : GLUniform::UNIFORM_MAT4;
-        else
+        switch (size / length) {
+        case 4:
+            glType = length > 1 ? GLUniform::UNIFORM_F1V : GLUniform::UNIFORM_F1;
+            break;
+        case 8:
+            glType = length > 1 ? GLUniform::UNIFORM_F2V : GLUniform::UNIFORM_F2;
+            break;
+        case 12:
+            glType = length > 1 ? GLUniform::UNIFORM_F3V : GLUniform::UNIFORM_F3;
+            break;
+        case 16:
+            glType = length > 1 ? GLUniform::UNIFORM_F4V : GLUniform::UNIFORM_F4;
+            break;
+        case 64:
+            glType = length > 1 ? GLUniform::UNIFORM_MAT4V : GLUniform::UNIFORM_MAT4;
+            break;
+        default:
             FATAL("Unknow type \"%s\"", type.c_str());
+            break;
+        }
         addUniform(name, glType, flatable, flatable.as<Changed>());
     }
 }

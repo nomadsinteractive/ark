@@ -1,4 +1,4 @@
-#include "extension/py_ark_boolean_type.h"
+#include "python/extension/py_ark_boolean_type.h"
 
 #include "core/impl/boolean/boolean_wrapper.h"
 

@@ -23,6 +23,11 @@ uint32_t FlatableV4f::size()
     return sizeof(V4);
 }
 
+uint32_t FlatableV4f::length()
+{
+    return 1;
+}
+
 FlatableV4f::BUILDER::BUILDER(BeanFactory& parent, const String& value)
     : _vv4(parent.ensureBuilder<VV4>(value))
 {

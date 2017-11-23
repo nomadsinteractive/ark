@@ -14,12 +14,20 @@ FlatableColor4fArray::FlatableColor4fArray(const sp<Array<Color>>& colorArray)
 
 void FlatableColor4fArray::flat(void* buf)
 {
-    FATAL("Unimplement");
+    Color* colors = _color_array->array();
+    V4* vbuf = reinterpret_cast<V4*>(buf);
+    for(uint32_t i = 0; i < _color_array->length(); i++)
+        vbuf[i] = colors[i].val();
 }
 
 uint32_t FlatableColor4fArray::size()
 {
-    return _color_array->length() * 16;
+    return _color_array->length() * sizeof(V4);
+}
+
+uint32_t FlatableColor4fArray::length()
+{
+    return _color_array->length();
 }
 
 FlatableColor4fArray::BUILDER::BUILDER(BeanFactory& parent, const String& value)

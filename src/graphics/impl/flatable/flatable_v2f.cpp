@@ -22,6 +22,11 @@ uint32_t FlatableV2f::size()
     return sizeof(V2);
 }
 
+uint32_t FlatableV2f::length()
+{
+    return 1;
+}
+
 FlatableV2f::BUILDER::BUILDER(BeanFactory& parent, const String& value)
     : _vv2(parent.ensureBuilder<VV2>(value))
 {

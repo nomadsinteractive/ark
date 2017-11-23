@@ -1,4 +1,4 @@
-#include "extension/py_ark_numeric_type.h"
+#include "python/extension/py_ark_numeric_type.h"
 
 #include "core/impl/numeric/add.h"
 #include "core/impl/numeric/divide.h"

@@ -21,6 +21,11 @@ uint32_t FlatableUint8::size()
     return 1;
 }
 
+uint32_t FlatableUint8::length()
+{
+    return 1;
+}
+
 FlatableUint8::BUILDER::BUILDER(BeanFactory& parent, const String &value)
     : _numeric(parent.ensureBuilder<Numeric>(value))
 {

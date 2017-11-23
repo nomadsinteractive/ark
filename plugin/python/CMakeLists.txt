@@ -35,8 +35,10 @@ add_subdirectory(3rdparty/python-cmake-buildsystem)
 list(APPEND LOCAL_LIBS ${ARK_LIBRARIES})
 list(APPEND LOCAL_LIBS ${ARK_PYTHON_LIBRARIES})
 
-list(APPEND LOCAL_INCLUDE_DIRS .)
-list(APPEND LOCAL_INCLUDE_DIRS ..)
+get_filename_component(PLUGIN_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
+
+#list(APPEND LOCAL_INCLUDE_DIRS .)
+list(APPEND LOCAL_INCLUDE_DIRS ${PLUGIN_ROOT_DIR})
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_SRC_DIR})
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_SRC_DIR}/src)
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_GLBINDINGS_INCLUDE_DIRS})
@@ -46,6 +48,7 @@ list(APPEND ARK_PYTHON_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Python/I
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(extension LOCAL_SRC_LIST)
 aux_source_directory(impl/adapter LOCAL_SRC_LIST)
+aux_source_directory(impl/duck LOCAL_SRC_LIST)
 aux_source_directory(impl/script LOCAL_SRC_LIST)
 
 ark_add_python_generated_unit(py_ark_bindings ${ARK_SRC_DIR} "src/app src/core src/graphics src/renderer plugin/python/extension" plugin/python/tools/python/gen_py_bindings.py -p ark::plugin::python -m ark -o ${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings -l "${ARK_SRC_DIR}/tools/python" src/app src/core src/graphics src/renderer platform plugin/python/extension)

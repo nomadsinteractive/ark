@@ -11,6 +11,7 @@ public:
 
     virtual void flat(void* buf) = 0;
     virtual uint32_t size() = 0;
+    virtual uint32_t length() = 0;
 };
 
 }

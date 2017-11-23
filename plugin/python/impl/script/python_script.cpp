@@ -1,4 +1,4 @@
-#include "impl/script/python_script.h"
+#include "python/impl/script/python_script.h"
 
 #include "core/base/plugin_manager.h"
 #include "core/base/scope.h"

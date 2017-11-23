@@ -110,10 +110,7 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
     for(const document& i : _manifest->children())
     {
         if(i->name() == Constants::Attributes::LAYER)
-        {
-            const sp<Layer> layer = factory.build<Layer>(i, args);
-            arena->addLayer(layer ? sp<Renderer>::adopt(new Layer::Renderer(layer)) : factory.ensure<Renderer>(i, args));
-        }
+            arena->addLayer(sp<Layer::Renderer>::make(factory.ensure<Layer>(i, args)));
         else if(i->name() == Constants::Attributes::RENDER_LAYER)
             arena->addRenderer(factory.ensure<RenderLayer>(i, args));
         else

@@ -21,6 +21,11 @@ uint32_t FlatableNumeric::size()
     return 4;
 }
 
+uint32_t FlatableNumeric::length()
+{
+    return 1;
+}
+
 FlatableNumeric::BUILDER::BUILDER(BeanFactory& parent, const String &value)
     : _numeric(parent.ensureBuilder<Numeric>(value))
 {

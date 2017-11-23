@@ -108,7 +108,7 @@ if __name__ == '__main__':
     source = '''
 %s
 
-#include "extension/py_ark_meta_type.h"
+#include "python/extension/py_ark_meta_type.h"
 
 %s''' % (includes, declare_namespaces(namespaces, '\n\n'.join(i.declare() for i in pytypes)))
     output_tofile(source, params['n'] + '.cpp', outputdir)

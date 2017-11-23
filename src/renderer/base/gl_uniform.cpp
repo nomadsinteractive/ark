@@ -22,7 +22,7 @@ namespace {
 class SynchronizedFlattable : public Flatable, public Runnable {
 public:
     SynchronizedFlattable(const sp<Flatable>& delegate, const sp<Changed>& changed)
-        : _delegate(delegate), _changed(changed), _notifier(sp<Changed>::make(false)), _size(delegate->size()),
+        : _delegate(delegate), _changed(changed), _notifier(sp<Changed>::make(false)), _size(delegate->size()), _length(delegate->length()),
           _buffer(sp<DynamicArray<uint8_t>>::make(_size), sp<DynamicArray<uint8_t>>::make(_size)) {
         run();
     }
@@ -33,6 +33,10 @@ public:
 
     virtual uint32_t size() override {
         return _size;
+    }
+
+    virtual uint32_t length() override {
+        return _length;
     }
 
     virtual void run() override {
@@ -52,6 +56,7 @@ private:
     sp<Changed> _changed;
     sp<Changed> _notifier;
     uint32_t _size;
+    uint32_t _length;
 
     Dual<array<uint8_t>> _buffer;
 };
