@@ -29,7 +29,7 @@ public:
     Collider::BodyShape shape() const;
 
 //  [[script::bindings::property]]
-    V xy() const;
+    V2 xy() const;
 //  [[script::bindings::property]]
     float width() const;
 //  [[script::bindings::property]]

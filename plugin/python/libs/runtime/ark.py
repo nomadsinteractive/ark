@@ -12,6 +12,10 @@ class _ArkObject:
     pass
 
 
+class Object:
+    pass
+
+
 class Boolean:
     def __init__(self, v):
         self._v = v

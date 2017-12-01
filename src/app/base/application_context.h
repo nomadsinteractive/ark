@@ -43,7 +43,7 @@ public:
     bool onEvent(const Event& event);
 
 //  [[script::bindings::auto]]
-    void addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& expired);
+    void addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& expired = nullptr);
 //  [[script::bindings::auto]]
     void addEventListener(const sp<EventListener>& eventListener);
 //  [[script::bindings::auto]]

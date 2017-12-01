@@ -19,7 +19,6 @@ private:
     public:
         CallerBuilderV1(const sp<Callable<sp<T>(const sp<T>&)>>& callable, const sp<Builder<T>>& a1)
             : _callable(callable), _a1(a1) {
-            NOT_NULL(_callable);
         }
 
         virtual sp<T> build(const sp<Scope>& args) override {
@@ -35,7 +34,6 @@ private:
     public:
         CallerBuilderV2(const sp<Callable<sp<T>(const sp<T>&, const sp<T>&)>>& callable, const sp<Builder<T>>& a1, const sp<Builder<T>>& a2)
             : _callable(callable), _a1(a1), _a2(a2) {
-            NOT_NULL(_callable);
         }
 
         virtual sp<T> build(const sp<Scope>& args) override {
@@ -108,10 +106,12 @@ public:
                 typedef sp<N> ParamType;
                 if(paramList.size() == 1) {
                     const sp<Callable<ParamType(const ParamType&)>> callable = pluginManager->getCallable<ParamType(const ParamType&)>(func);
+                    DCHECK(callable, "Undefined function \"%s\"", func.c_str());
                     return sp<CallerBuilderV1<N>>::make(callable, compile(factory, params));
                 }
                 else if(paramList.size() == 2) {
                     const sp<Callable<ParamType(const ParamType&, const ParamType&)>> callable = pluginManager->getCallable<ParamType(const ParamType&, const ParamType&)>(func);
+                    DCHECK(callable, "Undefined function \"%s\"", func.c_str());
                     return sp<CallerBuilderV2<N>>::make(callable, compile(factory, paramList[0]), compile(factory, paramList[1]));
                 }
                 DFATAL("Unsupported parameter number: %d", paramList.size());

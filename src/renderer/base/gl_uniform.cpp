@@ -150,7 +150,7 @@ String GLUniform::declaration() const
     case UNIFORM_MAT4:
         t = "mat4";
     }
-    return s ? Strings::sprintf("uniform %s %s[%d];", t.c_str(), _name.c_str(), s) : Strings::sprintf("uniform %s %s;", t.c_str(), _name.c_str());
+    return s ? Strings::sprintf("uniform %s %s[%d];", t.c_str(), _name.c_str(), s + 1) : Strings::sprintf("uniform %s %s;", t.c_str(), _name.c_str());
 }
 
 void GLUniform::synchronize(const sp<RenderController>& renderController)

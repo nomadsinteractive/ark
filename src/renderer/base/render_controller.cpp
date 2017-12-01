@@ -12,7 +12,14 @@ void RenderController::addPreUpdateRequest(const sp<Runnable>& task)
 
 void RenderController::addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired)
 {
-    _on_pre_update_request.push_back(task, expired);
+    if(expired)
+        _on_pre_update_request.push_back(task, expired);
+    else
+    {
+        const sp<Expired> e = task.as<Expired>();
+        DCHECK(e, "Adding an unexpired running task, it's that what you REALLY want?");
+        _on_pre_update_request.push_back(task, e);
+    }
 }
 
 void RenderController::preUpdate()

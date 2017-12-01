@@ -161,7 +161,6 @@ bool ApplicationContext::onEvent(const Event& event)
 
 void ApplicationContext::addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& expired)
 {
-    DWARN(expired, "Adding an unexpirable prerendering task");
     _render_controller->addPreUpdateRequest(task, expired);
 }
 
