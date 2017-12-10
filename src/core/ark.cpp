@@ -301,11 +301,11 @@ sp<ApplicationContext> Ark::createApplicationContext(const document& manifest)
     return applicationContext;
 }
 
-sp<RenderEngine> Ark::createRenderEngine(GLVersion type)
+sp<RenderEngine> Ark::createRenderEngine(GLVersion version)
 {
     const sp<RenderViewFactory> renderViewFactory = sp<GLES20RenderViewFactory>::make(_application_context->applicationResource()->glResourceManager());
 
-    switch(type) {
+    switch(version) {
     case AUTO:
     case OPENGL_20:
     case OPENGL_21:
@@ -319,9 +319,10 @@ sp<RenderEngine> Ark::createRenderEngine(GLVersion type)
     case OPENGL_43:
     case OPENGL_44:
     case OPENGL_45:
-        return sp<RenderEngine>::make(type, renderViewFactory);
+    case OPENGL_46:
+        return sp<RenderEngine>::make(version, renderViewFactory);
     }
-    DFATAL("Unknown engine type");
+    DFATAL("Unknown engine type: %d", version);
     return nullptr;
 }
 
