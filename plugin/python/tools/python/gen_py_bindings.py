@@ -24,6 +24,7 @@ BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^\]]*\]
 
 CLASS_DELIMITER = '\n//%s\n\n' % ('-' * 120)
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
+TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4')
 
 
 def gen_header_source(filename, results):
@@ -163,6 +164,8 @@ class GenArgument:
                               objname=objname, argname=argname)
         if m == 'char*':
             return self._gen_var_declare('String', objname, 'toType', 'String', argname)
+        if m in TYPE_DEFINED_OBJ:
+            return self._gen_var_declare(m, objname, 'toType', m, argname)
         if m in TYPE_DEFINED_SP:
             return self._gen_var_declare(m, objname, 'toSharedPtr', m[0].upper() + m[1:], argname)
         if m != self._accept_type:

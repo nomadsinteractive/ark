@@ -27,7 +27,7 @@ public:
 
     virtual const sp<Size>& size() override;
 
-//  [[plugin::resource-loader("shader")]]
+//  [[plugin::resource-loader("shader-frame")]]
     class BUILDER : public Builder<Renderer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);

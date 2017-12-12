@@ -105,10 +105,10 @@ void Vec2::setY(float y)
     _y->set(y);
 }
 
-void Vec2::setXY(float x, float y)
+void Vec2::setXy(const V2& xy)
 {
-    _x->set(x);
-    _y->set(y);
+    _x->set(xy.x());
+    _y->set(xy.y());
 }
 
 sp<Numeric> Vec2::vx() const

@@ -316,6 +316,28 @@ template<> ARK_PLUGIN_PYTHON_API int32_t PythonInterpreter::toType<int32_t>(PyOb
     return static_cast<int32_t>(PyLong_AsLong(object));
 }
 
+template<> ARK_PLUGIN_PYTHON_API V2 PythonInterpreter::toType<V2>(PyObject* object)
+{
+    if(PyTuple_Check(object))
+    {
+        float x, y;
+        if(PyArg_ParseTuple(object, "ff", &x, &y))
+            return V2(x, y);
+    }
+    if(PyList_Check(object))
+    {
+        uint32_t len = PyObject_Length(object);
+        if(len == 2)
+        {
+            float x = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 0)));
+            float y = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 1)));
+            return V2(x, y);
+        }
+    }
+    DFATAL("V2 object should be either lenth-2 tuple or list. (eg. [0, 0], (1.0, 1.0))");
+    return V2();
+}
+
 template<> ARK_PLUGIN_PYTHON_API Color PythonInterpreter::toType<Color>(PyObject* object)
 {
     if(PyLong_Check(object))

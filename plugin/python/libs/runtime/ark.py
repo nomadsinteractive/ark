@@ -78,6 +78,10 @@ class Vec2:
     def xy(self):
         return self._x, self._y
 
+    @xy.setter
+    def xy(self, val):
+        pass
+
     @y.setter
     def y(self, v):
         pass
