@@ -6,6 +6,7 @@
 
 namespace ark {
 
+const Color Color::TRANSPARENT1(0);
 const Color Color::WHITE(1.0f, 1.0f, 1.0f, 1.0f);
 const Color Color::BLACK(0.0f, 0.0f, 0.0f, 1.0f);
 

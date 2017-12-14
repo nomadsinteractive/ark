@@ -15,8 +15,7 @@ namespace ark {
 
 class ARK_API ApplicationDelegate : public EventListener {
 public:
-    ApplicationDelegate(const Color& backgroundColor);
-    virtual ~ApplicationDelegate();
+    virtual ~ApplicationDelegate() = default;
 
     virtual const char* name() = 0;
 
@@ -32,8 +31,6 @@ public:
     virtual bool onEvent(const Event& event);
 
 protected:
-    Color _background_color;
-
     sp<ApplicationContext> _application_context;
     sp<RenderView> _render_view;
     sp<Surface> _surface;

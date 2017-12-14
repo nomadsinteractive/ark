@@ -13,15 +13,6 @@
 
 namespace ark {
 
-ApplicationDelegate::ApplicationDelegate(const Color& backgroundColor)
-    : _background_color(backgroundColor)
-{
-}
-
-ApplicationDelegate::~ApplicationDelegate()
-{
-}
-
 void ApplicationDelegate::onCreate(Application& application, const sp<Surface>& surface)
 {
     _application_context = application.context();
@@ -53,7 +44,8 @@ void ApplicationDelegate::onSurfaceChanged(uint32_t /*width*/, uint32_t /*height
 
 void ApplicationDelegate::onSurfaceDraw()
 {
-    glClearColor(_background_color.red(), _background_color.green(), _background_color.blue(), 1.0f);
+    const Color& backgroundColor = _application_context->backgroundColor();
+    glClearColor(backgroundColor.red(), backgroundColor.green(), backgroundColor.blue(), backgroundColor.alpha());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _surface->onRenderFrame();

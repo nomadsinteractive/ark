@@ -63,7 +63,7 @@ private:
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources)
     : _application_resource(applicationResources), _ticker(sp<EngineTicker>::make()),
       _clock(sp<Clock>::make(_ticker)), _executor(sp<ThreadPoolExecutor>::make()), _render_controller(sp<RenderController>::make()),
-      _event_listeners(new EventListenerList()), _string_table(Global<StringTable>())
+      _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK)
 {
     Ark& ark = Ark::instance();
 
@@ -204,6 +204,16 @@ sp<String> ApplicationContext::getString(const String& resid)
 sp<Runnable> ApplicationContext::defer(const sp<Runnable>& task) const
 {
     return sp<DeferedRunnable>::make(_message_loop_application, task);
+}
+
+const Color& ApplicationContext::backgroundColor() const
+{
+    return _background_color;
+}
+
+void ApplicationContext::setBackgroundColor(const Color& backgroundColor)
+{
+    _background_color = backgroundColor;
 }
 
 void ApplicationContext::pause()

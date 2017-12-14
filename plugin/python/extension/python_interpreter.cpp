@@ -441,6 +441,10 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<V3>(const
     return v3;
 }
 
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Color>(const Color& color)
+{
+    return PythonInterpreter::instance()->fromSharedPtr<Color>(sp<Color>::make(color));
+}
 
 }
 }

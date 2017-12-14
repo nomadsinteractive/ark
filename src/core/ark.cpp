@@ -213,13 +213,13 @@ Ark::Ark(int32_t argc, const char** argv, const String& manfiestSrc)
     NOT_NULL(appAsset);
     const sp<Readable> readable = manfiestSrc ? appAsset->get(manfiestSrc) : nullptr;
     DWARN(!manfiestSrc || readable, "Cannot load application manifest \"%s\"", manfiestSrc.c_str());
-    const document manifest = readable ? Documents::loadFromReadable(readable) : document::make("");
-    const String& assetDir = Documents::getAttribute(manifest, "asset-dir");
-    _asset = sp<ArkAsset>::make(sp<RawAsset>::make(assetDir, appDir), manifest);
-    _application_context = createApplicationContext(manifest);
-    put<RenderEngine>(createRenderEngine(static_cast<GLVersion>(Documents::getAttribute<int32_t>(manifest, "gl-version", 0))));
+    _manifest = readable ? Documents::loadFromReadable(readable) : document::make("");
+    const String& assetDir = Documents::getAttribute(_manifest, "asset-dir");
+    _asset = sp<ArkAsset>::make(sp<RawAsset>::make(assetDir, appDir), _manifest);
+    _application_context = createApplicationContext(_manifest);
+    put<RenderEngine>(createRenderEngine(static_cast<GLVersion>(Documents::getAttribute<int32_t>(_manifest, "gl-version", 0))));
 
-    loadPlugins(manifest);
+    loadPlugins(_manifest);
 }
 
 Ark::~Ark()
@@ -268,6 +268,11 @@ int32_t Ark::argc() const
 const char** Ark::argv() const
 {
     return _argv;
+}
+
+const document& Ark::manifest() const
+{
+    return _manifest;
 }
 
 sp<Asset> Ark::getAsset(const String& path) const

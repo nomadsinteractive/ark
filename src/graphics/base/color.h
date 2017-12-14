@@ -48,6 +48,7 @@ public:
     bool operator != (const Color& other) const;
     const Color& operator =(const Color& other);
 
+    static const Color TRANSPARENT1;
     static const Color WHITE;
     static const Color BLACK;
 

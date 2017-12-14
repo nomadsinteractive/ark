@@ -59,6 +59,8 @@ public:
     int32_t argc() const;
     const char** argv() const;
 
+    const document& manifest() const;
+
     sp<Asset> getAsset(const String& path) const;
     sp<Readable> getResource(const String& path) const;
 
@@ -79,6 +81,8 @@ private:
 
     int32_t _argc;
     const char** _argv;
+
+    document _manifest;
 
     sp<ApplicationContext> _application_context;
     ByType _interfaces;
