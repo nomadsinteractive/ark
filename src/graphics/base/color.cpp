@@ -6,7 +6,7 @@
 
 namespace ark {
 
-const Color Color::TRANSPARENT1(0);
+const Color Color::NONE(0);
 const Color Color::WHITE(1.0f, 1.0f, 1.0f, 1.0f);
 const Color Color::BLACK(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -92,6 +92,12 @@ uint32_t Color::value() const
 void Color::setValue(uint32_t value)
 {
     _color = V4((value >> 24) / 255.0f, ((value >> 16) & 0xff) / 255.0f, ((value >> 8) & 0xff) / 255.0f, (value & 0xff) / 255.0f);
+    _changed = true;
+}
+
+void Color::assign(const Color& other)
+{
+    _color = other._color;
     _changed = true;
 }
 

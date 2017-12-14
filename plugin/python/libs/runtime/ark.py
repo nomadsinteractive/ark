@@ -444,6 +444,13 @@ class Color:
     def __init__(self, v):
         pass
 
+    def assign(self, other):
+        pass
+
+    @propertry
+    def value(self):
+        return None
+
 
 class Platform:
     @staticmethod
