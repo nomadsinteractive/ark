@@ -91,7 +91,6 @@ public:
         const sp<RigidBodyImpl::Stub>& stub() const;
 
     private:
-        uint32_t _id;
         sp<Stub> _stub;
     };
 
