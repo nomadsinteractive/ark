@@ -96,6 +96,7 @@ bool ViewGroup::Placement::onEventDispatch(const Event& event, float x, float y)
 ViewGroup::ViewGroup(const Frame& background, const sp<Layout>& layout, const sp<LayoutParam>& layoutParam)
     : View(!layoutParam && background ? sp<LayoutParam>::make(background.size()) : layoutParam), _background(background.renderer()), _layout(layout), _layout_requested(false)
 {
+    DCHECK(!_layout || _layout_param, "Null LayoutParam. This would happen if your ViewGroup has neither background or size defined.");
 }
 
 ViewGroup::~ViewGroup()

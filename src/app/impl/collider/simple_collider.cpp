@@ -104,7 +104,7 @@ void SimpleCollider::Stub::remove(const RigidBodyImpl& rigidBody)
 
 sp<SimpleCollider::RigidBodyImpl> SimpleCollider::Stub::createRigidBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const sp<SimpleCollider::Stub>& self)
 {
-    const sp<SimpleCollider::RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(type, shape, position, size, ++_rigid_body_base_id, self);
+    const sp<SimpleCollider::RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(++_rigid_body_base_id, type, shape, position, size, self);
     _rigid_bodies[rigidBody->id()] = rigidBody;
     return rigidBody;
 }
@@ -116,8 +116,8 @@ sp<SimpleCollider::RigidBodyImpl> SimpleCollider::Stub::findRigidBody(uint32_t i
     return iter->second;
 }
 
-SimpleCollider::RigidBodyImpl::RigidBodyImpl(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, uint32_t id, const WeakPtr<SimpleCollider::Stub>& stub)
-    : RigidBody(type, shape, position, size, Null::ptr<Numeric>()), _id(id), _stub(sp<Stub>::make(stub, position))
+SimpleCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const WeakPtr<SimpleCollider::Stub>& stub)
+    : RigidBody(id, type, shape, position, size, Null::ptr<Numeric>()), _stub(sp<Stub>::make(stub, position))
 {
 }
 
@@ -173,11 +173,6 @@ void SimpleCollider::RigidBodyImpl::setPosition(const sp<VV>& position)
 V SimpleCollider::RigidBodyImpl::xy() const
 {
     return _stub->_position->val();
-}
-
-uint32_t SimpleCollider::RigidBodyImpl::id() const
-{
-    return _id;
 }
 
 SimpleCollider::RigidBodyImpl::Stub::Stub(const WeakPtr<SimpleCollider::Stub>& colliderStub, const sp<VV>& position)

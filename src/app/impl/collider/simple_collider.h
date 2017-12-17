@@ -57,7 +57,7 @@ public:
 
     class RigidBodyImpl : public RigidBody {
     public:
-        RigidBodyImpl(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, uint32_t id, const WeakPtr<SimpleCollider::Stub>& stub);
+        RigidBodyImpl(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const WeakPtr<SimpleCollider::Stub>& stub);
         ~RigidBodyImpl();
 
         virtual void dispose() override;
@@ -68,7 +68,6 @@ public:
 
         V xy() const;
 
-        uint32_t id() const;
         void collision(const Rect& rect);
 
     public:
