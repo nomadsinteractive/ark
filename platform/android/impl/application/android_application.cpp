@@ -2,10 +2,11 @@
 
 #include "core/inf/runnable.h"
 
+#include "graphics/base/surface_controller.h"
+
 #include "app/base/application_context.h"
 #include "app/base/application_controller.h"
 #include "app/base/surface.h"
-#include "app/base/surface_controller.h"
 
 #include "util/jni_util.h"
 
