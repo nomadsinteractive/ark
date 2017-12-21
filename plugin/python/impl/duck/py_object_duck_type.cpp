@@ -31,6 +31,11 @@ void PyObjectDuckType::to(sp<Array<int32_t>>& inst)
     inst = sp<IntegerArray>::make(PythonInterpreter::instance()->toArray<int32_t>(_instance->instance()));
 }
 
+void PyObjectDuckType::to(sp<Range>& inst)
+{
+    inst = sp<IntegerArray>::make(PythonInterpreter::instance()->toArray<int32_t>(_instance->instance()));
+}
+
 }
 }
 }

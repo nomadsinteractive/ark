@@ -25,6 +25,7 @@ class ResourceLoader;
 class RigidBody;
 class Surface;
 class SurfaceUpdater;
+class TileMap;
 
 }
 

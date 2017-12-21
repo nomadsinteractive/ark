@@ -86,13 +86,13 @@ void Rect::translate(float x, float y)
 
 bool Rect::ptin(float x, float y) const
 {
-    if(_left <= _right && (x < _left || x > _right))
+    if(_left <= _right && (x < _left || x >= _right))
         return false;
-    if(_left > _right && (x > _left || x < _right))
+    if(_left > _right && (x > _left || x <= _right))
         return false;
-    if(_top <= _bottom && (y < _top || y > _bottom))
+    if(_top <= _bottom && (y < _top || y >= _bottom))
         return false;
-    if(_top > _bottom && (y > _top || y < _bottom))
+    if(_top > _bottom && (y > _top || y <= _bottom))
         return false;
     return true;
 }

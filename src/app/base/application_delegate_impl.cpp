@@ -30,18 +30,20 @@ void ApplicationDelegateImpl::onCreate(ark::Application& application, const sp<a
     LOGD("onCreate");
     ApplicationDelegate::onCreate(application, surface);
 
-    const sp<ResourceLoader> appResourceLoader = application.context()->createResourceLoader("application.xml");
+    const sp<ApplicationContext>& applicationContext = application.context();
+    const sp<ResourceLoader> appResourceLoader = applicationContext->createResourceLoader("application.xml");
     NOT_NULL(appResourceLoader);
     _script = appResourceLoader->load<Script>("script");
     NOT_NULL(_script);
 
     const sp<Scope> vars = sp<Scope>::make();
-    vars->put<ApplicationContext>("_application_context", application.context());
+    vars->put<ApplicationContext>("_application_context", applicationContext);
     vars->put<ResourceLoader>("_resource_loader", appResourceLoader);
     vars->put<SurfaceController>("_surface_controller", surface->controller());
     vars->put<Size>("_render_resolution", _application_manifest->renderResolution());
 
-    application.context()->setDefaultEventListener(sp<EventListenerByScript>::make(_script, "on_unhandled_event"));
+    applicationContext->setBackgroundColor(Documents::getAttribute<Color>(_application_manifest->manifest(), "background-color", Color::BLACK));
+    applicationContext->setDefaultEventListener(sp<EventListenerByScript>::make(_script, "on_unhandled_event"));
 
     for(const document& i : _application_manifest->manifest()->children("script"))
     {
