@@ -4,6 +4,7 @@
 #include <set>
 
 #include "core/inf/builder.h"
+#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/weak_ptr.h"
 
@@ -36,7 +37,21 @@ public:
 
     };
 
-    class RigidBodyImpl;
+private:
+    class RigidBodyStatic : public RigidBody {
+    public:
+        RigidBodyStatic(uint32_t width, uint32_t height);
+
+        void setId(uint32_t id);
+        void setPosition(float x, float y);
+
+        virtual void dispose() override;
+        virtual const sp<CollisionCallback>& collisionCallback() const override;
+        virtual void setCollisionCallback(const sp<CollisionCallback>& collisionCallback) override;
+
+    private:
+        sp<VV2::Impl> _position;
+    };
 
 public:
     class RigidBodyImpl : public RigidBody {
@@ -50,13 +65,15 @@ public:
             sp<CollisionCallback> _collision_callback;
 
         private:
-            void beginContact(const sp<RigidBodyImpl>& rigidBody);
-            void endContact(const sp<RigidBodyImpl>& rigidBody);
+            void beginContact(const sp<RigidBody>& rigidBody);
+            void endContact(const sp<RigidBody>& rigidBody);
+
+            void updateRigidBodyStatic(uint32_t id, float tileWidth, float tileHeight, uint32_t colCount);
 
         private:
             sp<TileMap> _tile_map;
             std::set<uint32_t> _contacts;
-            sp<RigidBodyImpl> _static_rigid_body;
+            sp<RigidBodyStatic> _rigid_body_static;
             Rect _last_collision;
         };
 
@@ -67,7 +84,6 @@ public:
         virtual const sp<CollisionCallback>& collisionCallback() const override;
         virtual void setCollisionCallback(const sp<CollisionCallback>& collisionCallback) override;
 
-        void setId(uint32_t id);
         void setPosition(const sp<VV>& position);
 
         V2 xy() const;

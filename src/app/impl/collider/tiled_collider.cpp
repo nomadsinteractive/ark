@@ -59,6 +59,7 @@ sp<Collider> TiledCollider::BUILDER::build(const sp<Scope>& args)
 sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size)
 {
     DCHECK(type != Collider::BODY_TYPE_STATIC, "Cannot create static body in TiledCollider");
+    NOT_NULL(position && size);
 
     const sp<RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(++_rigid_body_base, type, shape, position, size, _tile_map);
     rigidBody->setPosition(_resource_loader_context->synchronize<V>(sp<DynamicPosition>::make(rigidBody)));
@@ -70,16 +71,24 @@ TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type
 {
 }
 
-void TiledCollider::RigidBodyImpl::Stub::beginContact(const sp<RigidBodyImpl>& rigidBody)
+void TiledCollider::RigidBodyImpl::Stub::beginContact(const sp<RigidBody>& rigidBody)
 {
     if(_collision_callback)
         _collision_callback->onBeginContact(rigidBody);
 }
 
-void TiledCollider::RigidBodyImpl::Stub::endContact(const sp<TiledCollider::RigidBodyImpl>& rigidBody)
+void TiledCollider::RigidBodyImpl::Stub::endContact(const sp<RigidBody>& rigidBody)
 {
     if(_collision_callback)
         _collision_callback->onEndContact(rigidBody);
+}
+
+void TiledCollider::RigidBodyImpl::Stub::updateRigidBodyStatic(uint32_t id, float tileWidth, float tileHeight, uint32_t colCount)
+{
+    uint32_t row = id / colCount;
+    uint32_t col = id % colCount;
+    _rigid_body_static->setId(id);
+    _rigid_body_static->setPosition(col * tileWidth + tileWidth / 2.0f, row * tileHeight + tileHeight / 2.0f);
 }
 
 const sp<TiledCollider::RigidBodyImpl::Stub>& TiledCollider::RigidBodyImpl::stub() const
@@ -97,11 +106,6 @@ void TiledCollider::RigidBodyImpl::setCollisionCallback(const sp<CollisionCallba
     _stub->_collision_callback = collisionCallback;
 }
 
-void TiledCollider::RigidBodyImpl::setId(uint32_t id)
-{
-    _id = id;
-}
-
 void TiledCollider::RigidBodyImpl::dispose()
 {
 }
@@ -117,7 +121,7 @@ V2 TiledCollider::RigidBodyImpl::xy() const
 }
 
 TiledCollider::RigidBodyImpl::Stub::Stub(const sp<TileMap>& tileMap, const sp<VV2>& position)
-    : _tile_map(tileMap), _position(position), _static_rigid_body(sp<RigidBodyImpl>::make(0, Collider::BODY_TYPE_STATIC, Collider::BODY_SHAPE_BOX, nullptr, nullptr, nullptr))
+    : _tile_map(tileMap), _position(position), _rigid_body_static(sp<RigidBodyStatic>::make(tileMap->tileWidth(), tileMap->tileHeight()))
 {
 }
 
@@ -152,17 +156,49 @@ void TiledCollider::RigidBodyImpl::Stub::collision(const Rect& rect)
         {
             if(_contacts.find(id) == _contacts.end())
             {
-                _static_rigid_body->setId(id);
-                beginContact(_static_rigid_body);
+                updateRigidBodyStatic(id, tileWidth, tileHeight, _tile_map->colCount());
+                beginContact(_rigid_body_static);
             }
         }
         else
         {
-            _static_rigid_body->setId(id);
-            endContact(_static_rigid_body);
+            updateRigidBodyStatic(id, tileWidth, tileHeight, _tile_map->colCount());
+            _rigid_body_static->setId(id);
+            endContact(_rigid_body_static);
         }
     _contacts = contacts;
     _last_collision = rect;
+}
+
+TiledCollider::RigidBodyStatic::RigidBodyStatic(uint32_t width, uint32_t height)
+    : RigidBody(0, Collider::BODY_TYPE_STATIC, Collider::BODY_SHAPE_BOX, sp<VV2::Impl>::make(V2()), sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), nullptr)
+{
+    _position = position();
+}
+
+void TiledCollider::RigidBodyStatic::setId(uint32_t id)
+{
+    _id = id;
+}
+
+void TiledCollider::RigidBodyStatic::setPosition(float x, float y)
+{
+    _position->set(V2(x, y));
+}
+
+void TiledCollider::RigidBodyStatic::dispose()
+{
+}
+
+const sp<CollisionCallback>& TiledCollider::RigidBodyStatic::collisionCallback() const
+{
+    DFATAL("Invaild property");
+    return sp<CollisionCallback>::null();
+}
+
+void TiledCollider::RigidBodyStatic::setCollisionCallback(const sp<CollisionCallback>& collisionCallback)
+{
+    DFATAL("Invaild property");
 }
 
 }
