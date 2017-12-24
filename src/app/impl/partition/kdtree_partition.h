@@ -2,7 +2,7 @@
 #define ARK_APP_IMPL_PARTITION_KDTREE_PARTITION_H_
 
 #include <vector>
-#include <unordered_map>
+#include <unordered_set>
 
 #include <nanoflann.hpp>
 
@@ -25,10 +25,10 @@ public:
     virtual List<uint32_t> within(float x, float y, float radius) override;
 
 public:
-//  [[plugin::builder("kdtree")]]
-    class BUILDER : public Builder<Partition> {
+//  [[plugin::builder::by-value("kdtree")]]
+    class DICTIONARY : public Builder<Partition> {
     public:
-        BUILDER();
+        DICTIONARY();
 
         virtual sp<Partition> build(const sp<Scope>& args) override;
 
@@ -42,12 +42,10 @@ private:
             Point(const Point& other) = default;
 
             void update();
-            void dispose();
 
             uint32_t _id;
             sp<VV> _position;
             float _v[2];
-            bool _disposed;
         };
 
         std::vector<Point> pts;
@@ -71,9 +69,8 @@ private:
 	Adapter _adapter;
 	op<kd_tree_t> _tree;
 
-	uint32_t _id_generator;
 	uint32_t _updated_count;
-	std::unordered_map<uint32_t, uint32_t> _id_map;
+    std::unordered_set<uint32_t> _id_recycler;
 };
 
 }
