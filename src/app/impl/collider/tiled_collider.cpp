@@ -121,7 +121,7 @@ V2 TiledCollider::RigidBodyImpl::xy() const
 }
 
 TiledCollider::RigidBodyImpl::Stub::Stub(const sp<TileMap>& tileMap, const sp<VV2>& position)
-    : _tile_map(tileMap), _position(position), _rigid_body_static(sp<RigidBodyStatic>::make(tileMap->tileWidth(), tileMap->tileHeight()))
+    : _position(position), _tile_map(tileMap), _rigid_body_static(sp<RigidBodyStatic>::make(tileMap->tileWidth(), tileMap->tileHeight()))
 {
 }
 
