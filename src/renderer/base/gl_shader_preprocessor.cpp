@@ -112,7 +112,7 @@ void GLShaderPreprocessor::parseDeclarations(GLShaderPreprocessorContext& contex
 
 void GLShaderPreprocessor::preprocess()
 {
-    insertAfter(";", getDeclarations());
+    _source = getDeclarations() + _source;
 }
 
 String GLShaderPreprocessor::process(const GLContext& glContext) const
@@ -156,7 +156,8 @@ void GLShaderPreprocessor::insertPredefinedUniforms(const List<GLUniform>& unifo
             generated.push_back(i.declaration());
 
     for(const String& i : generated)
-        _uniform_declarations << i << '\n';
+        if(i.find('[') == String::npos)
+            _uniform_declarations << i << '\n';
 }
 
 uint32_t GLShaderPreprocessor::parseFunctionBody(const String& s, String& body)
