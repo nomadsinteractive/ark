@@ -90,6 +90,10 @@ void GLUniform::prepare(GraphicsContext&, const sp<GLProgram>& program) const
         DCHECK(_flatable->size() <= sizeof(buf), "Size too large: %d", _flatable->size());
         _flatable->flat(buf);
         switch(_type) {
+        case UNIFORM_I1:
+            DCHECK(_flatable->size() == 4, "Wrong uniform1i size: %d", _flatable->size());
+            uniform.setUniform1i(*reinterpret_cast<int32_t*>(buf));
+            break;
         case UNIFORM_F1:
             DCHECK(_flatable->size() == 4, "Wrong uniform1f size: %d", _flatable->size());
             uniform.setUniform1f(buf[0]);
@@ -99,7 +103,7 @@ void GLUniform::prepare(GraphicsContext&, const sp<GLProgram>& program) const
             uniform.setUniform2f(buf[0], buf[1]);
             break;
         case UNIFORM_F3:
-            DCHECK(_flatable->size() == 12, "Wrong uniform2f size: %d", _flatable->size());
+            DCHECK(_flatable->size() == 12, "Wrong uniform3f size: %d", _flatable->size());
             uniform.setUniform3f(buf[0], buf[1], buf[2]);
             break;
         case UNIFORM_F4:

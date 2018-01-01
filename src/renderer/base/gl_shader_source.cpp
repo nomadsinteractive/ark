@@ -211,7 +211,12 @@ void GLShaderSource::loadPredefinedUniform(BeanFactory& factory, const sp<Scope>
         GLUniform::Type glType = GLUniform::UNIFORM_F1;
         switch (size / length) {
         case 4:
-            glType = length > 1 ? GLUniform::UNIFORM_F1V : GLUniform::UNIFORM_F1;
+            if(type[0] == 'f')
+                glType = length > 1 ? GLUniform::UNIFORM_F1V : GLUniform::UNIFORM_F1;
+            else if(type[0] == 'i')
+                glType = length > 1 ? GLUniform::UNIFORM_I1V : GLUniform::UNIFORM_I1;
+            else
+                FATAL("Unknow type \"%s\"", type.c_str());
             break;
         case 8:
             glType = length > 1 ? GLUniform::UNIFORM_F2V : GLUniform::UNIFORM_F2;

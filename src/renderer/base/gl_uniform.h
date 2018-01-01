@@ -16,10 +16,12 @@ namespace ark {
 class GLUniform {
 public:
     enum Type {
+        UNIFORM_I1,
         UNIFORM_F1,
         UNIFORM_F2,
         UNIFORM_F3,
         UNIFORM_F4,
+        UNIFORM_I1V,
         UNIFORM_F1V,
         UNIFORM_F2V,
         UNIFORM_F3V,
