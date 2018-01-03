@@ -29,11 +29,13 @@ public:
     }
 
     virtual V2 val() override {
-        const sp<SimpleCollider::RigidBodyImpl> rigidBody = _rigid_body.ensure();
+        const sp<SimpleCollider::RigidBodyImpl> rigidBody = _rigid_body.lock();
         const V position = _position->val();
-        _bounds.setCenter(position.x(), position.y());
-        rigidBody->collision(_bounds);
-        rigidBody->update();
+        if(rigidBody && rigidBody->id()) {
+            _bounds.setCenter(position.x(), position.y());
+            rigidBody->collision(_bounds);
+            rigidBody->update();
+        }
         return position;
     }
 
