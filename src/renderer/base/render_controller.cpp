@@ -5,11 +5,6 @@
 
 namespace ark {
 
-void RenderController::addPreUpdateRequest(const sp<Runnable>& task)
-{
-    _on_pre_update_request.push_back(task);
-}
-
 void RenderController::addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired)
 {
     if(expired)

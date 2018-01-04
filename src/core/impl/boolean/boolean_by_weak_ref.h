@@ -9,11 +9,8 @@ namespace ark {
 
 template<typename T> class BooleanByWeakRef : public Boolean {
 public:
-    BooleanByWeakRef(const sp<T>& ptr, long useCount = 0)
+    BooleanByWeakRef(const sp<T>& ptr, long useCount)
         : _weak_ref(ptr.ptr()), _use_count(useCount) {
-    }
-    BooleanByWeakRef(const BooleanByWeakRef& other)
-        : _weak_ref(other._weak_ref), _use_count(other._use_count) {
     }
 
     virtual bool val() override {

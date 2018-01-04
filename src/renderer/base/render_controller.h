@@ -13,7 +13,6 @@ namespace ark {
 class RenderController {
 public:
 
-    void addPreUpdateRequest(const sp<Runnable>& task);
     void addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired);
 
     void preUpdate();

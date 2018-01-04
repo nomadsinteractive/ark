@@ -6,6 +6,7 @@
 #include "core/base/thread.h"
 #include "core/base/thread_pool_executor.h"
 #include "core/base/plugin_manager.h"
+#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/impl/dictionary/dictionary_impl.h"
 #include "core/impl/message_loop/message_loop_default.h"
@@ -70,7 +71,7 @@ ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicatio
     for(int32_t i = 0; i < ark.argc(); i++)
         _argv.push_back(ark.argv()[i]);
 
-    _render_controller->addPreUpdateRequest(_ticker);
+    _render_controller->addPreUpdateRequest(_ticker, sp<BooleanByWeakRef<EngineTicker>>::make(_ticker, 1));
     initMessageLoop();
 }
 

@@ -7,6 +7,7 @@
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/impl/array/dynamic_array.h"
+#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/util/strings.h"
 
 #include "graphics/impl/flatable/flatable_color4f_array.h"
@@ -160,7 +161,7 @@ String GLUniform::declaration() const
 void GLUniform::synchronize(const sp<RenderController>& renderController)
 {
     const sp<SynchronizedFlattable> synchronized = sp<SynchronizedFlattable>::make(_flatable, _changed);
-    renderController->addPreUpdateRequest(synchronized);
+    renderController->addPreUpdateRequest(synchronized, sp<BooleanByWeakRef<Flatable>>::make(synchronized, 1));
     _flatable = synchronized;
     _changed = synchronized->notifier();
 }
