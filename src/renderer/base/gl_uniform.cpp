@@ -130,6 +130,11 @@ String GLUniform::declaration() const
     String t;
     uint32_t s = 0;
     switch(_type) {
+    case UNIFORM_I1V:
+        s = _flatable->size() / 4;
+    case UNIFORM_I1:
+        t = "int";
+        break;
     case UNIFORM_F1V:
         s = _flatable->size() / 4;
     case UNIFORM_F1:

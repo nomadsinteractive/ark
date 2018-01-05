@@ -10,7 +10,7 @@ namespace ark {
 RendererWithPosition::RendererWithPosition(const sp<Renderer>& renderer, const sp<VV>& position)
     : _renderer(renderer), _position(position)
 {
-    DCHECK(renderer && position, "Arguments must be not null");
+    DCHECK(renderer && position, "Arguments must not be null");
 }
 
 void RendererWithPosition::render(RenderRequest& renderRequest, float x, float y)
