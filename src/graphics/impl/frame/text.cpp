@@ -75,7 +75,7 @@ Alphabets::Characters Text::BUILDER::createCharacters(const Atlas& atlas, const 
                                                  : Alphabets::create(atlas, s, _letter_spacing, _line_indent, y, width, _line_height, -_line_indent);
         for(const sp<RenderObject>& j : cs._render_objects->items())
             characters._render_objects->push_back(j);
-        y += (g_isOriginBottom ? -cs._size->height() : cs._size->height());
+        y -= (g_upDirection * cs._size->height());
     }
     return characters;
 }

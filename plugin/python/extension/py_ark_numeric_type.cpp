@@ -183,7 +183,7 @@ PyObject* PyArkNumericType::__idiv__(Instance* self, PyObject* args)
     return reinterpret_cast<PyObject*>(self);
 }
 
-int PyArkNumericType::__init__(Instance* self, PyObject* args, PyObject* kwargs)
+int PyArkNumericType::__init__(Instance* self, PyObject* args, PyObject* /*kwargs*/)
 {
     PyObject* delegate;
     if(!PyArg_ParseTuple(args, "O", &delegate))

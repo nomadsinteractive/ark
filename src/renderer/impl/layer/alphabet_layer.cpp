@@ -30,10 +30,8 @@ sp<RenderCommand> AlphabetLayer::render(const LayerContext::Snapshot& renderCont
 {
     if(!_preparing_characters.empty())
     {
-
         for(const RenderObject::Snapshot& i : renderContext._items)
-            _preparing_characters.insert(i._type);
-
+            _preparing_characters.push(i._type);
         doPrepare(true);
     }
     return _image_layer->render(renderContext, x, y);
@@ -42,20 +40,18 @@ sp<RenderCommand> AlphabetLayer::render(const LayerContext::Snapshot& renderCont
 void AlphabetLayer::doPrepare(bool allowReset)
 {
     bool updated = false;
-    for(uint32_t c : _preparing_characters)
+    for(uint32_t c : _preparing_characters.clear())
     {
         if(!_stub->hasCharacterGlyph(c))
         {
             if(!_stub->prepare(c, allowReset))
             {
                 _stub->reset();
-                doPrepare(false);
-                return;
+                return doPrepare(false);
             }
             updated = true;
         }
     }
-    _preparing_characters.clear();
 
     if(updated)
         _resource_loader_context->glResourceManager()->prepare(_stub->atlas()->texture(), GLResourceManager::PS_ONCE_FORCE);
@@ -80,7 +76,10 @@ const sp<ImageLayer>& AlphabetLayer::imageLayer() const
 void AlphabetLayer::prepare(const std::wstring& text)
 {
     for(wchar_t c : text)
-        _preparing_characters.insert(static_cast<uint32_t>(c));
+    {
+        _preparing_characters.push(static_cast<uint32_t>(c));
+        _image_layer->atlas()->add(c, 0, 0, 0, 0);
+    }
 }
 
 AlphabetLayer::Stub::Stub(const sp<Alphabet>& alphabet, const sp<GLResourceManager>& glResourceManager, uint32_t textureWidth, uint32_t textureHeight)
@@ -97,7 +96,7 @@ const sp<Alphabet>& AlphabetLayer::Stub::alphabet() const
 
 bool AlphabetLayer::Stub::hasCharacterGlyph(uint32_t c) const
 {
-    return _atlas->has(c);
+    return _atlas->has(c) && _atlas->at(c).width() != 0;
 }
 
 bool AlphabetLayer::Stub::prepare(uint32_t c, bool allowOverflow)

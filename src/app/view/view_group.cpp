@@ -6,6 +6,7 @@
 
 #include "graphics/base/frame.h"
 #include "graphics/base/render_layer.h"
+#include "graphics/base/size.h"
 #include "graphics/impl/renderer/renderer_delegate.h"
 
 #include "app/base/event.h"
@@ -13,30 +14,30 @@
 
 namespace ark {
 
-ViewGroup::Placement::Placement(const sp<Renderer>& renderer)
-    : _x(0), _y(0), _renderer(renderer), _view(renderer.as<View>()), _view_group(renderer.as<ViewGroup>()), _renderer_delegate(renderer.as<RendererDelegate>()), _expirable(renderer.as<Expired>())
+ViewGroup::Placement::Placement(const sp<Renderer>& renderer, bool layoutRequested)
+    : _x(0), _y(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _view_group(renderer.as<ViewGroup>()), _renderer_delegate(renderer.as<RendererDelegate>()), _expirable(renderer.as<Expired>())
 {
     NOT_NULL(renderer);
-}
-
-const sp<Renderer>& ViewGroup::Placement::renderer() const
-{
-    return _renderer;
-}
-
-const sp<ViewGroup>& ViewGroup::Placement::viewGroup() const
-{
-    return _view_group;
-}
-
-const sp<View>& ViewGroup::Placement::view() const
-{
-    return _view;
 }
 
 bool ViewGroup::Placement::isExpired() const
 {
     return _expirable && _expirable->val();
+}
+
+bool ViewGroup::Placement::layoutRequested() const
+{
+    return _layout_requested;
+}
+
+void ViewGroup::Placement::updateLayout()
+{
+    if(_view)
+    {
+        _layout_width = _view->size()->width();
+        _layout_height = _view->size()->height();
+    }
+    _layout_requested = false;
 }
 
 void ViewGroup::Placement::doPlace(float clientHeight, const sp<Layout>& layout)
@@ -55,21 +56,27 @@ void ViewGroup::Placement::doPlace(float clientHeight, const sp<Layout>& layout)
     }
 }
 
-void ViewGroup::Placement::doEnd(const Rect& p)
+void ViewGroup::Placement::doLayoutEnd(const Rect& p)
 {
     if(_view)
     {
         _x += p.left();
-        if(g_isOriginBottom)
-            _y -= p.top();
-        else
-            _y += p.top();
+        _y -= (g_upDirection * p.top());
     }
+    updateLayout();
 }
 
-void ViewGroup::Placement::render(RenderRequest& renderRequest, float x, float y) const
+void ViewGroup::Placement::render(RenderRequest& renderRequest, float x, float y)
 {
-    _renderer->render(renderRequest, x + _x, y + _y);
+    if(!_layout_requested)
+    {
+        _renderer->render(renderRequest, x + _x, y + _y);
+        if(_view)
+        {
+            _layout_requested = _layout_width != _view->size()->width();
+            _layout_requested = _layout_requested || _layout_height != _view->size()->height();
+        }
+    }
 }
 
 bool ViewGroup::Placement::onEventDispatch(const Event& event, float x, float y)
@@ -94,7 +101,7 @@ bool ViewGroup::Placement::onEventDispatch(const Event& event, float x, float y)
 }
 
 ViewGroup::ViewGroup(const Frame& background, const sp<Layout>& layout, const sp<LayoutParam>& layoutParam)
-    : View(!layoutParam && background ? sp<LayoutParam>::make(background.size()) : layoutParam), _background(background.renderer()), _layout(layout), _layout_requested(false)
+    : View(!layoutParam && background ? sp<LayoutParam>::make(background.size()) : layoutParam), _background(background.renderer()), _layout(layout)
 {
     DCHECK(!_layout || _layout_param, "Null LayoutParam. This would happen if your ViewGroup has neither background or size defined.");
 }
@@ -108,7 +115,7 @@ void ViewGroup::addRenderer(const sp<Renderer>& renderer)
 {
     NOT_NULL(renderer);
     _renderers.push_back(renderer);
-    _layout_requested = true;
+    _placments.push_back(sp<Placement>::make(renderer, static_cast<bool>(_layout)));
 }
 
 void ViewGroup::render(RenderRequest& renderRequest, float x, float y)
@@ -116,14 +123,11 @@ void ViewGroup::render(RenderRequest& renderRequest, float x, float y)
     if(_background)
         _background->render(renderRequest, x, y);
 
-    if(_layout_requested)
+    if(isLayoutNeeded())
         doLayout();
 
     for(const sp<Placement>& i: _placments)
-    {
         i->render(renderRequest, x, y);
-        _layout_requested = _layout_requested || i->isExpired();
-    }
 }
 
 bool ViewGroup::onEvent(const Event& event, float x, float y)
@@ -140,26 +144,38 @@ bool ViewGroup::onEvent(const Event& event, float x, float y)
 
 void ViewGroup::doLayout()
 {
-    _layout_requested = false;
-    _placments.clear();
-
     if(_layout)
+    {
         _layout->begin(_layout_param);
 
-    for(const sp<Renderer>& i : _renderers)
-    {
-        const sp<Placement> placement = sp<Placement>::make(i);
-        _placments.push_back(placement);
-        if(_layout)
-            placement->doPlace(_layout_param->contentHeight(), _layout);
-    }
+        for(const sp<Placement>& i: _placments)
+            i->doPlace(_layout_param->contentHeight(), _layout);
 
-    if(_layout)
-    {
-        Rect p = _layout->end();
+        const Rect p = _layout->end();
         for(const sp<Placement>& i : _placments)
-            i->doEnd(p);
+            i->doLayoutEnd(p);
     }
+    else
+        for(const sp<Placement>& i : _placments)
+            i->updateLayout();
+}
+
+bool ViewGroup::isLayoutNeeded()
+{
+    bool layoutNeeded = false;
+    for(auto iter = _placments.begin(); iter != _placments.end(); ++iter)
+    {
+        const sp<Placement>& i = *iter;
+        if(i->isExpired())
+        {
+            iter = _placments.erase(iter);
+            if(iter == _placments.end())
+                return true;
+            continue;
+        }
+        layoutNeeded = layoutNeeded || i->layoutRequested();
+    }
+    return layoutNeeded;
 }
 
 ViewGroup::BUILDER::BUILDER(BeanFactory& parent, const document& manifest)

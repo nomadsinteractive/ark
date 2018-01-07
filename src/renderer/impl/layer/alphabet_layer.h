@@ -1,9 +1,8 @@
 #ifndef ARK_RENDERER_IMPL_LAYER_ALPHABET_LAYER_H_
 #define ARK_RENDERER_IMPL_LAYER_ALPHABET_LAYER_H_
 
-#include <set>
-
 #include "core/base/string.h"
+#include "core/concurrent/lock_free_stack.h"
 #include "core/inf/builder.h"
 
 #include "graphics/forwarding.h"
@@ -69,7 +68,7 @@ private:
     sp<ResourceLoaderContext> _resource_loader_context;
     sp<GLShader> _shader;
     sp<ImageLayer> _image_layer;
-    std::set<uint32_t> _preparing_characters;
+    LockFreeStack<uint32_t> _preparing_characters;
 };
 
 }

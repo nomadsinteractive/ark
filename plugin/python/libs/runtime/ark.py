@@ -164,6 +164,14 @@ class Scalar:
     def __init__(self, x):
         self._x = x
 
+    @property
+    def delegate(self):
+        return None
+
+    @delegate.setter
+    def delegate(self, val):
+        pass
+
     def val(self):
         return self._x
 
