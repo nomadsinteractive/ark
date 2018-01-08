@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_IMPL_NUMERIC_EXPECTATION_H_
-#define ARK_CORE_IMPL_NUMERIC_EXPECTATION_H_
+#ifndef ARK_CORE_IMPL_NUMERIC_EXPECT_H_
+#define ARK_CORE_IMPL_NUMERIC_EXPECT_H_
 
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
@@ -8,13 +8,13 @@
 
 namespace ark {
 
-class Expectataion : public Numeric {
+class Expect : public Numeric {
 public:
-    Expectataion(const sp<Numeric>& delegate, const sp<Runnable>& onArrival, const sp<Numeric>& expectation);
+    Expect(const sp<Numeric>& delegate, const sp<Runnable>& onArrival, const sp<Numeric>& expectation);
 
     virtual float val() override;
 
-//  [[plugin::builder("expectation")]]
+//  [[plugin::builder("expect")]]
     class BUILDER : public Builder<Numeric> {
     public:
         BUILDER(BeanFactory& parent, const document& doc);
@@ -28,7 +28,7 @@ public:
 
     };
 
-//  [[plugin::style("expectation")]]
+//  [[plugin::style("expect")]]
     class STYLE : public Builder<Numeric> {
     public:
         STYLE(BeanFactory& parent, const sp<Builder<Numeric>>& delegate, const String& value);

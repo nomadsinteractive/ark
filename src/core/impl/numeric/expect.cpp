@@ -1,4 +1,4 @@
-#include "core/impl/numeric/expectation.h"
+#include "core/impl/numeric/expect.h"
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
@@ -9,12 +9,12 @@
 
 namespace ark {
 
-Expectataion::Expectataion(const sp<Numeric>& delegate, const sp<Runnable>& onArrival, const sp<Numeric>& expectation)
+Expect::Expect(const sp<Numeric>& delegate, const sp<Runnable>& onArrival, const sp<Numeric>& expectation)
     : _stub(sp<Stub>::make(delegate, onArrival, expectation))
 {
 }
 
-float Expectataion::val()
+float Expect::val()
 {
     const sp<Stub> stub = _stub;
     if(stub->_delegate)
@@ -37,31 +37,31 @@ float Expectataion::val()
     return stub->_expectation->val();
 }
 
-Expectataion::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
+Expect::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
     : _delegate(parent.ensureBuilder<Numeric>(doc, Constants::Attributes::DELEGATE)),
       _expectation(parent.ensureBuilder<Numeric>(doc, Constants::Attributes::VALUE)),
       _on_arrival(parent.getBuilder<Runnable>(doc, "onarrival"))
 {
 }
 
-sp<Numeric> Expectataion::BUILDER::build(const sp<Scope>& args)
+sp<Numeric> Expect::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<Numeric>::adopt(new Expectataion(_delegate->build(args), _on_arrival->build(args), _expectation->build(args)));
+    return sp<Numeric>::adopt(new Expect(_delegate->build(args), _on_arrival->build(args), _expectation->build(args)));
 }
 
-Expectataion::STYLE::STYLE(BeanFactory& beanFactory, const sp<Builder<Numeric>>& delegate, const String& value)
+Expect::STYLE::STYLE(BeanFactory& beanFactory, const sp<Builder<Numeric>>& delegate, const String& value)
     : _delegate(delegate)
 {
     BeanUtils::parse<Numeric, Runnable>(beanFactory, value, _expectation, _on_arrival);
     DCHECK(_expectation, "\"%s\"Error expectation format, should be (expectation[, on_arrival])", value.c_str());
 }
 
-sp<Numeric> Expectataion::STYLE::build(const sp<Scope>& args)
+sp<Numeric> Expect::STYLE::build(const sp<Scope>& args)
 {
-    return sp<Numeric>::adopt(new Expectataion(_delegate->build(args), _on_arrival ? _on_arrival->build(args) : nullptr, _expectation->build(args)));
+    return sp<Numeric>::adopt(new Expect(_delegate->build(args), _on_arrival ? _on_arrival->build(args) : nullptr, _expectation->build(args)));
 }
 
-Expectataion::Stub::Stub(const sp<Numeric>& delegate, const sp<Runnable>& onArrival, const sp<Numeric>& expectataion)
+Expect::Stub::Stub(const sp<Numeric>& delegate, const sp<Runnable>& onArrival, const sp<Numeric>& expectataion)
     : _delegate(delegate), _on_arrival(onArrival), _expectation(expectataion), _delta(_expectation->val() - _delegate->val()), _epsilon(std::abs(_delta) / 100.0f)
 {
 }
