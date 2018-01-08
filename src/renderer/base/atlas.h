@@ -17,8 +17,7 @@ namespace ark {
 
 class ARK_API Atlas {
 public:
-    Atlas(const sp<GLTexture>& texture);
-    Atlas(const Atlas& other);
+    Atlas(const sp<GLTexture>& texture, bool allowDefaultItem = false);
 
     class ARK_API Importer {
     public:
@@ -31,7 +30,11 @@ public:
     public:
         Item();
         Item(uint16_t left, uint16_t top, uint16_t right, uint16_t bottom, float width, float height, float pivotX = 0, float pivotY = 0);
-        Item(const Item& other);
+        Item(const Item& other) = default;
+        Item(Item&& other) = default;
+
+        Item& operator=(const Item& other) = default;
+        Item& operator=(Item&& other) = default;
 
         const sp<Size>& size() const;
 
@@ -83,15 +86,19 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
     };
 private:
-    void addItem(uint32_t id, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom, float width, float height, float pivotX, float pivotY);
+    Item makeItem(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX, float pivotY) const;
 
 private:
     sp<GLTexture> _texture;
     uint16_t _half_pixel_x, _half_pixel_y;
 
-    ByIndex<Item> _atlas;
+    op<ByIndex<Item>> _atlas;
+    bool _allow_default_item;
+    Item _default_item;
 
     friend class BUILDER;
+
+    DISALLOW_COPY_AND_ASSIGN(Atlas);
 };
 
 }

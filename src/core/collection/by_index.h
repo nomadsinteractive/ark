@@ -25,6 +25,10 @@ public:
         _items[index] = item;
     }
 
+    void update(uint32_t index, const T& item) {
+        at(index) = item;
+    }
+
     template<typename... Args> void make(uint32_t index, Args&&... args) {
         _items[index] = T(std::forward<Args>(args)...);
     }
@@ -35,10 +39,6 @@ public:
 
     const std::unordered_map<uint32_t, T>& items() const {
         return _items;
-    }
-
-    void clear() {
-        _items.clear();
     }
 
     bool has(uint32_t index) const {

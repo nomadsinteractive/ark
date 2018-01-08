@@ -53,8 +53,6 @@ void Characters::setText(const std::wstring& text)
 {
     _text = text;
     _characters.clear();
-    if(_alphabet_layer)
-        _alphabet_layer->prepare(text);
     createContent();
 }
 

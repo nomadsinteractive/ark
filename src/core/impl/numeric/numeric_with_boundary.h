@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_IMPL_NUMERIC_BOUNDARY_H_
-#define ARK_CORE_IMPL_NUMERIC_BOUNDARY_H_
+#ifndef ARK_CORE_IMPL_NUMERIC_NUMERIC_WITH_BOUNDARY_H_
+#define ARK_CORE_IMPL_NUMERIC_NUMERIC_WITH_BOUNDARY_H_
 
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
@@ -8,9 +8,9 @@
 
 namespace ark {
 
-class Boundary : public Numeric {
+class NumericWithBoundary : public Numeric {
 public:
-    Boundary(const sp<Numeric>& delegate, const sp<Numeric>& boundary, const sp<Runnable>& oncross);
+    NumericWithBoundary(const sp<Numeric>& delegate, const sp<Numeric>& boundary, const sp<Runnable>& oncross);
 
     virtual float val() override;
 

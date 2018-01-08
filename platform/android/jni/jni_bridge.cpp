@@ -99,7 +99,7 @@ JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onDestroy(JNIEnv* env, jobject
 
 JNIEXPORT jboolean JNICALL Java_com_nomads_ark_JNILib_onEvent(JNIEnv* env, jobject obj, jint action, jfloat x, jfloat y, jlong timestamp)
 {
-    Event::Action s;
+    Event::Action s = Event::ACTION_KEY_NONE;
     switch(action)
     {
         case 0:

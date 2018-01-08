@@ -14,13 +14,9 @@
 
 namespace ark {
 
-Atlas::Atlas(const sp<GLTexture>& texture)
-    : _texture(texture), _half_pixel_x(static_cast<uint16_t>(32768 / texture->width())), _half_pixel_y(static_cast<uint16_t>(32768 / texture->height()))
-{
-}
-
-Atlas::Atlas(const Atlas& other)
-    : _texture(other._texture), _half_pixel_x(other._half_pixel_x), _half_pixel_y(other._half_pixel_y), _atlas(other._atlas)
+Atlas::Atlas(const sp<GLTexture>& texture, bool allowDefaultItem)
+    : _texture(texture), _half_pixel_x(static_cast<uint16_t>(32768 / texture->width())), _half_pixel_y(static_cast<uint16_t>(32768 / texture->height())),
+      _atlas(new ByIndex<Item>()), _allow_default_item(allowDefaultItem)
 {
 }
 
@@ -51,35 +47,39 @@ uint16_t Atlas::halfPixelY() const
 
 bool Atlas::has(uint32_t c) const
 {
-    return _atlas.has(c);
-}
-
-void Atlas::addItem(uint32_t id, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom, float width, float height, float pivotX, float pivotY)
-{
-    _atlas.add(id, g_isOriginBottom ? Item(left + _half_pixel_x, bottom - _half_pixel_y, right - _half_pixel_x, top + _half_pixel_y, width, height, pivotX, pivotY)
-                                    : Item(left + _half_pixel_x, top + _half_pixel_y, right - _half_pixel_x, bottom - _half_pixel_y, width, height, pivotX, pivotY));
+    return _atlas->has(c);
 }
 
 void Atlas::add(uint32_t id, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX, float pivotY)
 {
-    addItem(id, unnormalize(left, _texture->width()), unnormalize(top, _texture->height()),
-            unnormalize(right, _texture->width()), unnormalize(bottom, _texture->height()),
-            static_cast<float>(right - left), static_cast<float>(bottom - top), pivotX, pivotY);
+    _atlas->add(id, makeItem(left, top, right, bottom, pivotX, pivotY));
 }
 
 const Atlas::Item& Atlas::at(uint32_t id) const
 {
-    return _atlas.at(id);
+    return _allow_default_item ? (has(id) ? _atlas->at(id) : _default_item) : _atlas->at(id);
 }
 
 void Atlas::clear()
 {
-    _atlas.clear();
+    _atlas.reset(new ByIndex<Item>());
 }
 
 uint16_t Atlas::unnormalize(uint32_t x, uint32_t s)
 {
     return static_cast<uint16_t>(x * 65536 / s);
+}
+
+Atlas::Item Atlas::makeItem(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX, float pivotY) const
+{
+    uint16_t l = unnormalize(left, _texture->width());
+    uint16_t t = unnormalize(top, _texture->height());
+    uint16_t r = unnormalize(right, _texture->width());
+    uint16_t b = unnormalize(bottom, _texture->height());
+    float width = static_cast<float>(right - left);
+    float height = static_cast<float>(bottom - top);
+    return g_isOriginBottom ? Item(l + _half_pixel_x, b - _half_pixel_y, r - _half_pixel_x, t + _half_pixel_y, width, height, pivotX, pivotY)
+                            : Item(l + _half_pixel_x, t + _half_pixel_y, r - _half_pixel_x, b - _half_pixel_y, width, height, pivotX, pivotY);
 }
 
 Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -128,11 +128,6 @@ Atlas::Item::Item()
 
 Atlas::Item::Item(uint16_t left, uint16_t top, uint16_t right, uint16_t bottom, float width, float height, float pivotX, float pivotY)
     : _left(left), _top(top), _right(right), _bottom(bottom), _size(sp<Size>::make(width, height)), _pivot_x(pivotX), _pivot_y(pivotY)
-{
-}
-
-Atlas::Item::Item(const Atlas::Item& other)
-    : _left(other._left), _top(other._top), _right(other._right), _bottom(other._bottom), _size(other._size), _pivot_x(other._pivot_x), _pivot_y(other._pivot_y)
 {
 }
 
