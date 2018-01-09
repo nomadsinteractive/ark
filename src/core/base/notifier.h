@@ -11,6 +11,7 @@ public:
     Notifier(const sp<Runnable>& notifier);
 
     void notify();
+    void notifyOnce();
 
 private:
     sp<Runnable> _runnable;

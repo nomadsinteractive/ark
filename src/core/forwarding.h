@@ -35,6 +35,7 @@ class Clock;
 class Document;
 class Element;
 class Executor;
+class Expectation;
 class Expired;
 class Flatable;
 class Future;

@@ -117,9 +117,7 @@ void GLProgram::dispose()
 
 void GLProgram::use() const
 {
-    GLDebug::glCheckError("ab");
     glUseProgram(_id);
-    GLDebug::glCheckError("abc");
 }
 
 void GLProgram::Attribute::setVertexPointer(GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer) const

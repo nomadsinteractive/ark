@@ -51,6 +51,10 @@ class Numeric:
     def val(self):
         return None
 
+    @property
+    def delegate(self):
+        return None
+
 
 class Expired:
     def __init__(self, v=False):
@@ -200,6 +204,10 @@ class Algorithm:
 class Clock:
     pass
 
+
+class Expectation:
+    def __init__(self, expectation, onfire):
+        pass
 
 class Event:
 

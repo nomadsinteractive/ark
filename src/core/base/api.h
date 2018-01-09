@@ -88,6 +88,7 @@ const char* const CLASS = "class";
 const char* const CLOCK = "clock";
 const char* const COLOR = "color";
 const char* const DELEGATE = "delegate";
+const char* const EXPECT = "expect";
 const char* const FILTER = "filter";
 const char* const FOREGROUND = "foreground";
 const char* const EXPIRED = "expired";
