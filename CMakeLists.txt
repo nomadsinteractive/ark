@@ -47,6 +47,7 @@ aux_source_directory(src/core/impl/bean_factory LOCAL_SRC_LIST)
 aux_source_directory(src/core/impl/builder LOCAL_SRC_LIST)
 aux_source_directory(src/core/impl/dictionary LOCAL_SRC_LIST)
 aux_source_directory(src/core/impl/flatable LOCAL_SRC_LIST)
+aux_source_directory(src/core/impl/integer LOCAL_SRC_LIST)
 aux_source_directory(src/core/impl/message_loop LOCAL_SRC_LIST)
 aux_source_directory(src/core/impl/readable LOCAL_SRC_LIST)
 aux_source_directory(src/core/impl/runnable LOCAL_SRC_LIST)
@@ -177,7 +178,6 @@ endif()
 
 add_subdirectory(plugin/assimp)
 
-set_source_files_properties(${GENERATED_TESTCASE_LAUNCHPAD} PROPERTIES GENERATED true)
 add_custom_command(OUTPUT ${GENERATED_TESTCASE_LAUNCHPAD}
     COMMAND python ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py ${ARK_SRC_DIR}/test/testcase ${GENERATED_TESTCASE_LAUNCHPAD}
     DEPENDS ${TEST_SRC_LIST} ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py

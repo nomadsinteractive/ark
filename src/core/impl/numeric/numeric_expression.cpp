@@ -87,14 +87,4 @@ sp<Numeric> NumericExpression::BUILDER::build(const sp<Scope>& args)
     return _expression->build(args);
 }
 
-NumericExpression::NUMERIC_BUILDER::NUMERIC_BUILDER(BeanFactory& parent, const document& doc)
-    : _expression(Expression::Compiler<float, NumericOperation>().compile(parent, Documents::ensureAttribute(doc, Constants::Attributes::VALUE)))
-{
-}
-
-sp<Numeric> NumericExpression::NUMERIC_BUILDER::build(const sp<Scope>& args)
-{
-    return sp<Numeric::Impl>::make(_expression->build(args)->val());
-}
-
 }

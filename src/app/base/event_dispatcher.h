@@ -12,7 +12,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API EventDispatcher : public EventListener {
 public:
 //  [[script::bindings::auto]]

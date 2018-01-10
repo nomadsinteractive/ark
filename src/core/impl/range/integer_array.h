@@ -10,7 +10,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API IntegerArray : public Array<int32_t>, public Range {
 public:
     IntegerArray(const sp<Array<int32_t>>& array);

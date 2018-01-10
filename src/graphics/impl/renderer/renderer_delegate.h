@@ -9,7 +9,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API RendererDelegate : public Renderer, public Renderer::Delegate {
 public:
     RendererDelegate();

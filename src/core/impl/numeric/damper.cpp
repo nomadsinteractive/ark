@@ -4,7 +4,6 @@
 #include "core/base/clock.h"
 #include "core/util/math.h"
 #include "core/util/bean_utils.h"
-#include "core/impl/numeric/negative.h"
 
 namespace ark {
 
@@ -25,37 +24,38 @@ Damper::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
+/*
+ *      s2 >>>>>> s1 >>>>>> o <<<<<< s1 <<<<<< s2
+ *
+ *      o + a * sin(c) = s1
+ *      a * cos(c) = v
+ *      (s2 - o) ^ 2 = a ^ 2
+ *
+ *      (a * sin(c)) ^ 2 = (s1 - o) ^ 2
+ *      (a * cos(c)) ^ 2 = v ^ 2
+ *
+ *      (s2 - o) ^ 2 = (s1 - o) ^ 2 + v ^ 2
+ *      (s2 + s1 - o * 2) * (s2 - s1) = v ^ 2
+ *      o = (s1 ^ 2 - s2 ^ 2 + v ^ 2) / (s1 - s2) / 2
+ */
+
 sp<Numeric> Damper::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Numeric> t = _t ? _t->build(args) : Ark::instance().clock()->duration();
     float v = BeanUtils::toFloat(_v, args);
     float s1 = BeanUtils::toFloat(_s1, args, 0.0f);
     float s2 = BeanUtils::toFloat(_s2, args, 0.0f);
-    float s0 = s1 - s2;
-    float a = (v * v + s0 * s0) / s0 / 2.0f;
+    float o = (s1 * s1 - s2 * s2 + v * v) / (s1 - s2) / 2.0f;
+    float a = s2 - o;
     float c = v2c(v, a);
-    float o1 = s2 + a;
-    float o2 = s2 - a;
-    float asinc = a * Math::sin(c);
-    float d1 = std::abs(o1 + asinc - s1);
-    float d2 = std::abs(o2 + asinc - s1);
-    float d3 = std::abs(o1 - asinc - s1);
-    float d4 = std::abs(o2 - asinc - s1);
-    const sp<Numeric> duration = c > Math::PI_2 ? t : sp<Numeric>::adopt(new Negative(t));
-    if(d1 <= d2 && d1<= d3 && d1 <= d4)
-        return sp<Numeric>::adopt(new Damper(duration, a, c, o1));
-    if(d2 <= d1 && d2<= d3 && d2 <= d4)
-        return sp<Numeric>::adopt(new Damper(duration, a, c, o2));
-    if(d3 <= d1 && d3<= d2 && d3 <= d4)
-        return sp<Numeric>::adopt(new Damper(duration, a, -c, o1));
-    return sp<Numeric>::adopt(new Damper(duration, a, -c, o2));
+    return std::abs(o + a * Math::sin(c)) < std::abs(o - a * Math::sin(c)) ? sp<Numeric>::adopt(new Damper(t, a, c, o)) : sp<Numeric>::adopt(new Damper(t, a, -c, o));
 }
 
 float Damper::BUILDER::v2c(float v, float a) const
 {
     float k = v / a;
     DCHECK(k >= -1.0 && k <= 1.0f, "Illegal v: %.1f a: %.1f", v, a);
-    return Math::acos(k);
+    return acos(k);
 }
 
 }

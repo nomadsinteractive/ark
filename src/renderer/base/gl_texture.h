@@ -16,7 +16,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API GLTexture : public GLResource {
 public:
     enum Format {

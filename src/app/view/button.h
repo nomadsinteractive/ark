@@ -18,7 +18,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API Button final : public View, public Renderer {
 public:
     Button(const sp<Renderer>& foreground, const sp<Renderer>& background, const sp<Size>& block, Gravity gravity);

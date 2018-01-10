@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import sys
 import getopt
 from os import path
@@ -17,7 +16,8 @@ AUTOBIND_ENUMERATION_PATTERN = re.compile(r'\[\[script::bindings::enumeration\]\
 AUTOBIND_PROPERTY_PATTERN = re.compile(r'\[\[script::bindings::property\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
 AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader\]\]\s+template<typename T>\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;{]*\{')
 AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::auto\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
-AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::(auto|container)\]\]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
+AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container)\]\]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
+AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::class\(([^)]+)\)\]\]\s+class\s+')
 AUTOBIND_META_PATTERN = re.compile(r'\[\[script::bindings::meta\(([^)]+)\([^)]*\)\)\]\]')
 
 BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^\]]*\]\]\s+class\s+[\w\d_]+\s*:\s*public\s+Builder<([^{]+)>\s*\{')
@@ -108,7 +108,7 @@ def gen_body_source(filename, namespaces, modulename, results, buildables):
 {
     const sp<ark::plugin::python::PythonInterpreter>& pi = ark::plugin::python::PythonInterpreter::instance();
     %s
-}''' % (name, '\n    '.join('pi->pyModuleAddType<PyArk%sType, %s>(module, "%s", "%s", Py_TPFLAGS_DEFAULT%s);' % (i, i, modulename, i, '|Py_TPFLAGS_HAVE_GC' if j.is_container else '') for i, j in results.items())))
+}''' % (name, '\n    '.join('pi->pyModuleAddType<PyArk%sType, %s>(module, "%s", "%s", Py_TPFLAGS_DEFAULT%s);' % (i, i, modulename, j.bindings_classname, '|Py_TPFLAGS_HAVE_GC' if j.is_container else '') for i, j in results.items())))
 
     return ('''#include "%s.h"
 
@@ -456,6 +456,7 @@ class GenClass(object):
     def __init__(self, filename, class_name, is_container=False):
         self._filename = filename
         self._classname = class_name
+        self._bindings_classname = class_name
         self._is_container = is_container
         self._methods = []
         self._constants = {}
@@ -463,6 +464,14 @@ class GenClass(object):
     @property
     def classname(self):
         return self._classname
+
+    @property
+    def bindings_classname(self):
+        return self._bindings_classname
+
+    @bindings_classname.setter
+    def bindings_classname(self, v):
+        self._bindings_classname = v
 
     @property
     def methods(self):
@@ -509,20 +518,7 @@ def get_result_class(results, filename, classname):
     return genclass
 
 
-if __name__ == '__main__':
-    opts, paths = getopt.getopt(sys.argv[1:], 'p:n:o:l:m:')
-    params = dict((i.lstrip('-'), j) for i, j in opts)
-    if any(i not in params for i in ['p', 'm']) or len(paths) == 0:
-        print('Usage: %s -p namespace -m modulename [-o output_file] [-l library_path] dir_paths...' % sys.argv[0])
-        sys.exit(0)
-
-    namespaces = params['p'].replace('::', ':').split(':')
-    modulename = params['m']
-    output_file = params['o'] if 'o' in params else None
-    library_path = params['l'] if 'l' in params else None
-    if library_path and library_path not in sys.path:
-        sys.path.append(library_path)
-    import acg
+def main():
     results = {}
     bindables = {'Object'}
 
@@ -532,7 +528,8 @@ if __name__ == '__main__':
         if is_static:
             genmethod = GenStaticMemberMethod(name, args, return_type)
         else:
-            genmethod = GenConstructorMethod(name, args) if genclass.classname == name else GenMemberMethod(name, args, return_type)
+            genmethod = GenConstructorMethod(name, args) if genclass.classname == name else GenMemberMethod(name, args,
+                                                                                                            return_type)
         genclass.add_method(genmethod)
 
     def autoloader(filename, content, main_class, x):
@@ -545,10 +542,14 @@ if __name__ == '__main__':
         name, args, return_type, is_static = GenMethod.split(x)
         genclass.add_method(GenPropertyMethod(name, args, return_type))
 
-    def autoclass(filename, content, m, x):
+    def autoannotation(filename, content, m, x):
         names = [i for i in x[1].split(':', 2)[0].split() if i not in ('ARK_API', 'final')]
         if len(names) == 1:
             results[names[0]] = GenClass(filename, names[0], x[0].strip() == 'container')
+
+    def autoclass(filename, content, main_class, x):
+        genclass = get_result_class(results, filename, main_class)
+        genclass.bindings_classname = x.strip('"')
 
     def autoconstant(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
@@ -569,15 +570,34 @@ if __name__ == '__main__':
                 genclass.add_constant(varname, '%s::%s' % (main_class, varname))
 
     acg.matchHeaderPatterns(paths,
-            {'pattern': AUTOBIND_CLASS_PATTERN, 'callback': autoclass},
-            {'pattern': AUTOBIND_METHOD_PATTERN, 'callback': automethod},
-            {'pattern': AUTOBIND_LOADER_PATTERN, 'callback': autoloader},
-            {'pattern': AUTOBIND_PROPERTY_PATTERN, 'callback': autoproperty},
-            {'pattern': AUTOBIND_CONTANT_PATTERN, 'callback': autoconstant},
-            {'pattern': AUTOBIND_ENUMERATION_PATTERN, 'callback': autoenumeration},
-            {'pattern': AUTOBIND_META_PATTERN, 'callback': autometa},
-            {'pattern': BUILDABLE_PATTERN, 'callback': autobindable}
-        )
-
+                            {'pattern': AUTOBIND_ANNOTATION_PATTERN, 'callback': autoannotation},
+                            {'pattern': AUTOBIND_CLASS_PATTERN, 'callback': autoclass},
+                            {'pattern': AUTOBIND_METHOD_PATTERN, 'callback': automethod},
+                            {'pattern': AUTOBIND_LOADER_PATTERN, 'callback': autoloader},
+                            {'pattern': AUTOBIND_PROPERTY_PATTERN, 'callback': autoproperty},
+                            {'pattern': AUTOBIND_CONTANT_PATTERN, 'callback': autoconstant},
+                            {'pattern': AUTOBIND_ENUMERATION_PATTERN, 'callback': autoenumeration},
+                            {'pattern': AUTOBIND_META_PATTERN, 'callback': autometa},
+                            {'pattern': BUILDABLE_PATTERN, 'callback': autobindable}
+                            )
     acg.write_to_file(output_file and output_file + '.h', gen_header_source(output_file or 'stdout', results))
-    acg.write_to_file(output_file and output_file + '.cpp', gen_body_source(output_file or 'stdout', namespaces, modulename, results, bindables))
+    acg.write_to_file(output_file and output_file + '.cpp',
+                      gen_body_source(output_file or 'stdout', namespaces, modulename, results, bindables))
+
+
+if __name__ == '__main__':
+    opts, paths = getopt.getopt(sys.argv[1:], 'p:n:o:l:m:')
+    params = dict((i.lstrip('-'), j) for i, j in opts)
+    if any(i not in params for i in ['p', 'm']) or len(paths) == 0:
+        print('Usage: %s -p namespace -m modulename [-o output_file] [-l library_path] dir_paths...' % sys.argv[0])
+        sys.exit(0)
+
+    namespaces = params['p'].replace('::', ':').split(':')
+    modulename = params['m']
+    output_file = params['o'] if 'o' in params else None
+    library_path = params['l'] if 'l' in params else None
+    if library_path and library_path not in sys.path:
+        sys.path.append(library_path)
+    import acg
+
+    main()

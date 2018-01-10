@@ -13,7 +13,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API View : public Block {
 public:
     enum State {

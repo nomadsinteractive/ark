@@ -13,7 +13,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API TileMap : public Renderer, Block {
 public:
 // [[script::bindings::auto]]

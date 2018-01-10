@@ -9,7 +9,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API Expectation : public Numeric {
 public:
 //[[script::bindings::auto]]
