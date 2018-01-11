@@ -6,6 +6,7 @@
 #include "core/base/thread.h"
 #include "core/base/thread_pool_executor.h"
 #include "core/base/plugin_manager.h"
+#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/impl/dictionary/dictionary_impl.h"
 #include "core/impl/message_loop/message_loop_default.h"
@@ -63,14 +64,14 @@ private:
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources)
     : _application_resource(applicationResources), _ticker(sp<EngineTicker>::make()),
       _clock(sp<Clock>::make(_ticker)), _executor(sp<ThreadPoolExecutor>::make()), _render_controller(sp<RenderController>::make()),
-      _event_listeners(new EventListenerList()), _string_table(Global<StringTable>())
+      _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK)
 {
     Ark& ark = Ark::instance();
 
     for(int32_t i = 0; i < ark.argc(); i++)
         _argv.push_back(ark.argv()[i]);
 
-    _render_controller->addPreUpdateRequest(_ticker);
+    _render_controller->addPreUpdateRequest(_ticker, sp<BooleanByWeakRef<EngineTicker>>::make(_ticker, 1));
     initMessageLoop();
 }
 
@@ -161,7 +162,6 @@ bool ApplicationContext::onEvent(const Event& event)
 
 void ApplicationContext::addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& expired)
 {
-    DWARN(expired, "Adding an unexpirable prerendering task");
     _render_controller->addPreUpdateRequest(task, expired);
 }
 
@@ -205,6 +205,16 @@ sp<String> ApplicationContext::getString(const String& resid)
 sp<Runnable> ApplicationContext::defer(const sp<Runnable>& task) const
 {
     return sp<DeferedRunnable>::make(_message_loop_application, task);
+}
+
+const Color& ApplicationContext::backgroundColor() const
+{
+    return _background_color;
+}
+
+void ApplicationContext::setBackgroundColor(const Color& backgroundColor)
+{
+    _background_color = backgroundColor;
 }
 
 void ApplicationContext::pause()

@@ -19,5 +19,4 @@ bool EventListenerByScript::onEvent(const Event& event)
     return static_cast<bool>(_script->call(_event_name, args));
 }
 
-
 }

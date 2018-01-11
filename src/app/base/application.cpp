@@ -59,6 +59,7 @@ const sp<ApplicationContext>& Application::context()
 
 void Application::onCreateTask()
 {
+    __thread_init__<THREAD_ID_CORE>();
     _application_delegate->onCreate(*this, _surface);
     _alive = true;
 }

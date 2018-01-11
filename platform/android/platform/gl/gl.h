@@ -1,8 +1,6 @@
 #ifndef ARK_PLATFORMS_ANDROID_PLATFORM_GL_GL_H_
 #define ARK_PLATFORMS_ANDROID_PLATFORM_GL_GL_H_
 
-#include <GLES/glext.h>
-
 #if __ANDROID_API__ < 18
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -13,6 +11,9 @@
 #include <GLES3/gl31.h>
 #include <GLES3/gl3ext.h>
 #endif
+
+#include <GLES/gl.h>
+#include <GLES/glext.h>
 
 namespace ark {
 

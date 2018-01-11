@@ -11,7 +11,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API RenderLayer : public Renderer {
 public:
 // [[script::bindings::auto]]

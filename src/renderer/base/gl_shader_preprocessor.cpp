@@ -112,7 +112,7 @@ void GLShaderPreprocessor::parseDeclarations(GLShaderPreprocessorContext& contex
 
 void GLShaderPreprocessor::preprocess()
 {
-    insertAfter(";", getDeclarations());
+    _source = getDeclarations() + _source;
 }
 
 String GLShaderPreprocessor::process(const GLContext& glContext) const
@@ -143,7 +143,7 @@ String GLShaderPreprocessor::process(const GLContext& glContext) const
 
 void GLShaderPreprocessor::insertPredefinedUniforms(const List<GLUniform>& uniforms)
 {
-    static const std::regex UNIFORM_PATTERN("uniform\\s+[\\w\\d]+\\s+([^;]+);");
+    static const std::regex UNIFORM_PATTERN("uniform\\s+\\w+\\s+(\\w+)(?:\\[\\d+\\])?;");
     std::set<String> names;
     List<String> generated;
     _source.search(UNIFORM_PATTERN, [&names](const std::smatch& m)->bool {
@@ -156,7 +156,8 @@ void GLShaderPreprocessor::insertPredefinedUniforms(const List<GLUniform>& unifo
             generated.push_back(i.declaration());
 
     for(const String& i : generated)
-        _uniform_declarations << i << '\n';
+        if(i.find('[') == String::npos)
+            _uniform_declarations << i << '\n';
 }
 
 uint32_t GLShaderPreprocessor::parseFunctionBody(const String& s, String& body)
@@ -217,6 +218,8 @@ void GLShaderPreprocessor::parseCodeBlock(CodeBlock& codeBlock, GLShaderSource& 
             s = s.substr(4).strip();
             out = true;
         }
+        else if(s.startsWith("in "))
+            s = s.substr(3).strip();
         String type, name;
         Strings::cut(s, type, name, ' ');
         DCHECK(type && name, "Cannot parse function arguments: %s", s.c_str());

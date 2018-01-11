@@ -10,7 +10,7 @@ namespace ark {
 
 class Boundary : public Numeric {
 public:
-    Boundary(const sp<Numeric>& delegate, const sp<Numeric>& boundary, const sp<Runnable>& oncross);
+    Boundary(const sp<Numeric>& delegate, const sp<Expectation>& expectation);
 
     virtual float val() override;
 
@@ -23,16 +23,13 @@ public:
 
     private:
         sp<Builder<Numeric>> _delegate;
-        sp<Builder<Numeric>> _boundary;
-        sp<Builder<Runnable>> _oncross;
+        sp<Builder<Expectation>> _expectation;
 
     };
 
 private:
     sp<Numeric> _delegate;
-    sp<Numeric> _boundary;
-
-    sp<Runnable> _oncross;
+    sp<Expectation> _expectation;
 
     bool _is_greater;
 };

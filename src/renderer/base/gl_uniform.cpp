@@ -7,6 +7,7 @@
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/impl/array/dynamic_array.h"
+#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/util/strings.h"
 
 #include "graphics/impl/flatable/flatable_color4f_array.h"
@@ -90,6 +91,10 @@ void GLUniform::prepare(GraphicsContext&, const sp<GLProgram>& program) const
         DCHECK(_flatable->size() <= sizeof(buf), "Size too large: %d", _flatable->size());
         _flatable->flat(buf);
         switch(_type) {
+        case UNIFORM_I1:
+            DCHECK(_flatable->size() == 4, "Wrong uniform1i size: %d", _flatable->size());
+            uniform.setUniform1i(*reinterpret_cast<int32_t*>(buf));
+            break;
         case UNIFORM_F1:
             DCHECK(_flatable->size() == 4, "Wrong uniform1f size: %d", _flatable->size());
             uniform.setUniform1f(buf[0]);
@@ -99,7 +104,7 @@ void GLUniform::prepare(GraphicsContext&, const sp<GLProgram>& program) const
             uniform.setUniform2f(buf[0], buf[1]);
             break;
         case UNIFORM_F3:
-            DCHECK(_flatable->size() == 12, "Wrong uniform2f size: %d", _flatable->size());
+            DCHECK(_flatable->size() == 12, "Wrong uniform3f size: %d", _flatable->size());
             uniform.setUniform3f(buf[0], buf[1], buf[2]);
             break;
         case UNIFORM_F4:
@@ -125,6 +130,11 @@ String GLUniform::declaration() const
     String t;
     uint32_t s = 0;
     switch(_type) {
+    case UNIFORM_I1V:
+        s = _flatable->size() / 4;
+    case UNIFORM_I1:
+        t = "int";
+        break;
     case UNIFORM_F1V:
         s = _flatable->size() / 4;
     case UNIFORM_F1:
@@ -150,13 +160,13 @@ String GLUniform::declaration() const
     case UNIFORM_MAT4:
         t = "mat4";
     }
-    return s ? Strings::sprintf("uniform %s %s[%d];", t.c_str(), _name.c_str(), s) : Strings::sprintf("uniform %s %s;", t.c_str(), _name.c_str());
+    return s ? Strings::sprintf("uniform %s %s[%d];", t.c_str(), _name.c_str(), s + 1) : Strings::sprintf("uniform %s %s;", t.c_str(), _name.c_str());
 }
 
 void GLUniform::synchronize(const sp<RenderController>& renderController)
 {
     const sp<SynchronizedFlattable> synchronized = sp<SynchronizedFlattable>::make(_flatable, _changed);
-    renderController->addPreUpdateRequest(synchronized);
+    renderController->addPreUpdateRequest(synchronized, sp<BooleanByWeakRef<Flatable>>::make(synchronized, 1));
     _flatable = synchronized;
     _changed = synchronized->notifier();
 }

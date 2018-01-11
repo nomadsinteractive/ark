@@ -12,6 +12,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/color.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/render_controller.h"
@@ -43,7 +44,7 @@ public:
     bool onEvent(const Event& event);
 
 //  [[script::bindings::auto]]
-    void addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& expired);
+    void addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& expired = nullptr);
 //  [[script::bindings::auto]]
     void addEventListener(const sp<EventListener>& eventListener);
 //  [[script::bindings::auto]]
@@ -63,6 +64,11 @@ public:
 
 //  [[script::bindings::auto]]
     sp<Runnable> defer(const sp<Runnable>& task) const;
+
+//  [[script::bindings::property]]
+    const Color& backgroundColor() const;
+//  [[script::bindings::property]]
+    void setBackgroundColor(const Color& backgroundColor);
 
     void pause();
     void resume();
@@ -98,6 +104,8 @@ private:
 
     sp<ResourceLoader> _resource_loader;
     sp<StringTable> _string_table;
+
+    Color _background_color;
 
     friend class Ark;
     friend class Application;

@@ -3,6 +3,7 @@
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
+#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -10,12 +11,14 @@
 namespace ark {
 
 //[[core::class]]
-class ARK_API Size {
+class ARK_API Size : public VV2 {
 public:
     Size();
     Size(float width, float height);
 //  [[script::bindings::auto]]
     Size(const sp<Numeric>& vwidth, const sp<Numeric>& vheight);
+
+    virtual V2 val() override;
 
 //  [[script::bindings::property]]
     float width() const;
@@ -63,6 +66,7 @@ public:
 private:
     sp<Scalar> _width;
     sp<Scalar> _height;
+
 };
 
 }

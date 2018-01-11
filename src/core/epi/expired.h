@@ -9,7 +9,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API Expired : public Boolean {
 public:
 //  [[script::bindings::auto]]

@@ -30,6 +30,10 @@
 
 #include <sys/cdefs.h>
 
+#include <linux/can.h>
+
+#define nl_langinfo(x) (NULL)
+
 __BEGIN_DECLS
 
 enum {

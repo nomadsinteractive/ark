@@ -7,7 +7,9 @@ class Application;
 class ApplicationContext;
 class ApplicationController;
 class ApplicationDelegate;
+class ApplicationManifest;
 class ApplicationResource;
+class Arena;
 class Button;
 class Collider;
 class CollisionCallback;
@@ -18,12 +20,13 @@ class Layout;
 class LayoutParam;
 class MessageLoopThread;
 class Model;
-class Arena;
+class Partition;
 class RendererWithState;
 class ResourceLoader;
 class RigidBody;
 class Surface;
 class SurfaceUpdater;
+class TileMap;
 
 }
 

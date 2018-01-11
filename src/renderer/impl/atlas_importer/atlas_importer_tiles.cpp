@@ -15,6 +15,8 @@ void AtlasImporterTiles::import(Atlas& atlas, const ResourceLoaderContext& /*res
     const uint32_t tileHeight = Documents::ensureAttribute<uint32_t>(manifest, "tile-height");
     const uint32_t marginX = Documents::getAttribute<uint32_t>(manifest, "margin-x", 0);
     const uint32_t marginY = Documents::getAttribute<uint32_t>(manifest, "margin-y", 0);
+    const float pivotX = Documents::getAttribute<float>(manifest, "pivot-x", 0);
+    const float pivotY = Documents::getAttribute<float>(manifest, "pivot-y", 0);
     const uint32_t flowx = marginX + tileWidth;
     const uint32_t flowy = marginY + tileHeight;
     const Rect bounds = Rect::parse(manifest);
@@ -27,7 +29,7 @@ void AtlasImporterTiles::import(Atlas& atlas, const ResourceLoaderContext& /*res
         {
             uint32_t left = bl + j * flowx;
             uint32_t top = bt + i * flowy;
-            atlas.add(type++, left, top, left + tileWidth, top + tileHeight);
+            atlas.add(type++, left, top, left + tileWidth, top + tileHeight, pivotX, pivotY);
         }
 }
 

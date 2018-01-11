@@ -3,6 +3,8 @@
 #include "core/impl/numeric/scalar.h"
 #include "core/util/bean_utils.h"
 
+#include "graphics/base/v2.h"
+
 namespace ark {
 
 Size::Size()
@@ -18,6 +20,11 @@ Size::Size(float width, float height)
 Size::Size(const sp<Numeric>& vwidth, const sp<Numeric>& vheight)
     : _width(sp<Scalar>::make(vwidth)), _height(sp<Scalar>::make(vheight))
 {
+}
+
+V2 Size::val()
+{
+    return V2(_width->val(), _height->val());
 }
 
 float Size::width() const

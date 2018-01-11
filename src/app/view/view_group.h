@@ -19,28 +19,31 @@ class ARK_API ViewGroup : public View, public Renderer, public Renderer::Group, 
 private:
     class Placement {
     public:
-        Placement(const sp<Renderer>& renderer);
-
-        const sp<Renderer>& renderer() const;
-        const sp<ViewGroup>& viewGroup() const;
-        const sp<View>& view() const;
+        Placement(const sp<Renderer>& renderer, bool layoutRequested);
 
         bool isExpired() const;
+        bool layoutRequested() const;
+
+        void updateLayout();
 
         void doPlace(float clientHeight, const sp<Layout>& layout);
-        void doEnd(const Rect& p);
+        void doLayoutEnd(const Rect& p);
 
-        void render(RenderRequest& renderRequest, float x, float y) const;
+        void render(RenderRequest& renderRequest, float x, float y);
 
         bool onEventDispatch(const Event& event, float x, float y);
 
     private:
         float _x, _y;
+        bool _layout_requested;
         sp<Renderer> _renderer;
         sp<View> _view;
         sp<ViewGroup> _view_group;
         sp<RendererDelegate> _renderer_delegate;
         sp<Expired> _expirable;
+
+        float _layout_width;
+        float _layout_height;
     };
 
 public:
@@ -70,6 +73,7 @@ public:
 
 private:
     void doLayout();
+    bool isLayoutNeeded();
 
 private:
     sp<Renderer> _background;
@@ -78,7 +82,7 @@ private:
     ExpirableItemList<Renderer> _renderers;
     List<sp<Placement>> _placments;
 
-    bool _layout_requested;
+//    bool _layout_requested;
 };
 
 }

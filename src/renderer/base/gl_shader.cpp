@@ -152,8 +152,8 @@ bool GLShader::Slot::operator <(const GLShader::Slot& other) const
 }
 
 GLShader::BUILDER::BUILDER(BeanFactory& parent, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _factory(parent), _manifest(doc), _resource_loader_context(resourceLoaderContext), _vertex(Strings::load(doc, "vertex-shader", "@shaders:texture.vert")),
-      _fragment(Strings::load(doc, "fragment-shader", "@shaders:texture.frag")),
+    : _factory(parent), _manifest(doc), _resource_loader_context(resourceLoaderContext), _vertex(Strings::load(doc, "vertex", "@shaders:texture.vert")),
+      _fragment(Strings::load(doc, "fragment", "@shaders:texture.frag")),
       _snippet(parent.getBuilder<GLSnippet>(doc, Constants::Attributes::SNIPPET, false))
 {
 }

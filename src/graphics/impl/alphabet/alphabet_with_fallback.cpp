@@ -25,4 +25,14 @@ void AlphabetWithFallback::draw(const bitmap& image, int32_t x, int32_t y)
         _fallback->draw(image, x, y);
 }
 
+AlphabetWithFallback::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Alphabet>>& delegate, const String& value)
+    : _delegate(delegate), _fallback(factory.ensureBuilder<Alphabet>(value))
+{
+}
+
+sp<Alphabet> AlphabetWithFallback::STYLE::build(const sp<Scope>& args)
+{
+    return sp<AlphabetWithFallback>::make(_delegate->build(args), _fallback->build(args));
+}
+
 }

@@ -10,7 +10,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API Scalar : public Numeric {
 public:
     Scalar(float value);

@@ -44,10 +44,12 @@ uint32_t GLContext::getGLSLVersion() const
     case Ark::OPENGL_43:
     case Ark::OPENGL_44:
     case Ark::OPENGL_45:
+    case Ark::OPENGL_46:
         return static_cast<uint32_t>(_version) * 10;
     default:
         break;
     }
+    FATAL("Unsupported OpenGL version: %d", _version);
     return 110;
 }
 

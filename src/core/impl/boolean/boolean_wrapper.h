@@ -9,7 +9,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API BooleanWrapper : public Boolean {
 public:
     BooleanWrapper(bool value);

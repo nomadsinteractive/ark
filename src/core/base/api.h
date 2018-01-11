@@ -88,6 +88,7 @@ const char* const CLASS = "class";
 const char* const CLOCK = "clock";
 const char* const COLOR = "color";
 const char* const DELEGATE = "delegate";
+const char* const EXPECT = "expect";
 const char* const FILTER = "filter";
 const char* const FOREGROUND = "foreground";
 const char* const EXPIRED = "expired";
@@ -134,8 +135,10 @@ const char* const NINE_PATCH_PATCHES = "patches";
 }
 
 enum THREAD_ID {
-    THREAD_ID_MAIN,
-    THREAD_ID_OPEN_GL
+    THREAD_ID_UNSPECIFIED = 0,
+    THREAD_ID_MAIN = 1,
+    THREAD_ID_CORE = 2,
+    THREAD_ID_OPEN_GL = 3
 };
 
 void ARK_API __fatal__(const char* func, const char* condition, const char* format, ...);
@@ -145,7 +148,7 @@ namespace _internal {
 
 template<THREAD_ID ID> struct ThreadFlag {
     static THREAD_ID& id() {
-        thread_local THREAD_ID _thread_id;
+        thread_local THREAD_ID _thread_id = THREAD_ID_UNSPECIFIED;
         return _thread_id;
     }
 };
@@ -158,7 +161,7 @@ template<THREAD_ID ID> void __thread_init__() {
 
 template<THREAD_ID ID> void __thread_check__(const char* func) {
     if(_internal::ThreadFlag<ID>::id() != ID)
-        __fatal__(func, "<none>", "ThreadId check failed: %d, should be %d", _internal::ThreadFlag<ID>::id(), ID);
+        __fatal__(func, "", "ThreadId check failed: %d, should be %d", _internal::ThreadFlag<ID>::id(), ID);
 }
 
 uint32_t ARK_API __trace__();

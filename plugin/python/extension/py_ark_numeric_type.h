@@ -13,6 +13,9 @@ public:
 
     static PyObject* val(Instance* self, PyObject* args);
     static PyObject* set(Instance* self, PyObject *args);
+    static PyObject* fix(Instance* self, PyObject *args);
+
+    static PyObject* _delegate(Instance* self, PyObject* args);
 
     static PyObject* __add__(Instance* self, PyObject *args);
     static PyObject* __sub__(Instance* self, PyObject *args);

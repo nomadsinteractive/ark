@@ -213,13 +213,13 @@ Ark::Ark(int32_t argc, const char** argv, const String& manfiestSrc)
     NOT_NULL(appAsset);
     const sp<Readable> readable = manfiestSrc ? appAsset->get(manfiestSrc) : nullptr;
     DWARN(!manfiestSrc || readable, "Cannot load application manifest \"%s\"", manfiestSrc.c_str());
-    const document manifest = readable ? Documents::loadFromReadable(readable) : document::make("");
-    const String& assetDir = Documents::getAttribute(manifest, "asset-dir");
-    _asset = sp<ArkAsset>::make(sp<RawAsset>::make(assetDir, appDir), manifest);
-    _application_context = createApplicationContext(manifest);
-    put<RenderEngine>(createRenderEngine(static_cast<GLVersion>(Documents::getAttribute<int32_t>(manifest, "gl-version", 0))));
+    _manifest = readable ? Documents::loadFromReadable(readable) : document::make("");
+    const String& assetDir = Documents::getAttribute(_manifest, "asset-dir");
+    _asset = sp<ArkAsset>::make(sp<RawAsset>::make(assetDir, appDir), _manifest);
+    _application_context = createApplicationContext(_manifest);
+    put<RenderEngine>(createRenderEngine(static_cast<GLVersion>(Documents::getAttribute<int32_t>(_manifest, "gl-version", 0))));
 
-    loadPlugins(manifest);
+    loadPlugins(_manifest);
 }
 
 Ark::~Ark()
@@ -270,6 +270,11 @@ const char** Ark::argv() const
     return _argv;
 }
 
+const document& Ark::manifest() const
+{
+    return _manifest;
+}
+
 sp<Asset> Ark::getAsset(const String& path) const
 {
     return _asset->getAsset(path);
@@ -301,11 +306,11 @@ sp<ApplicationContext> Ark::createApplicationContext(const document& manifest)
     return applicationContext;
 }
 
-sp<RenderEngine> Ark::createRenderEngine(GLVersion type)
+sp<RenderEngine> Ark::createRenderEngine(GLVersion version)
 {
     const sp<RenderViewFactory> renderViewFactory = sp<GLES20RenderViewFactory>::make(_application_context->applicationResource()->glResourceManager());
 
-    switch(type) {
+    switch(version) {
     case AUTO:
     case OPENGL_20:
     case OPENGL_21:
@@ -319,9 +324,10 @@ sp<RenderEngine> Ark::createRenderEngine(GLVersion type)
     case OPENGL_43:
     case OPENGL_44:
     case OPENGL_45:
-        return sp<RenderEngine>::make(type, renderViewFactory);
+    case OPENGL_46:
+        return sp<RenderEngine>::make(version, renderViewFactory);
     }
-    DFATAL("Unknown engine type");
+    DFATAL("Unknown engine type: %d", version);
     return nullptr;
 }
 

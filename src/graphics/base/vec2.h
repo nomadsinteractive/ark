@@ -41,15 +41,15 @@ public:
     float x() const;
 //  [[script::bindings::property]]
     float y() const;
-
 //  [[script::bindings::property]]
     V2 xy() const;
+
 //  [[script::bindings::property]]
     void setX(float x);
 //  [[script::bindings::property]]
     void setY(float y);
-//  [[script::bindings::auto]]
-    void setXY(float x, float y);
+//  [[script::bindings::property]]
+    void setXy(const V2& xy);
 
 //  [[script::bindings::property]]
     sp<Numeric> vx() const;

@@ -26,10 +26,7 @@ public:
 
     void addRenderCommand(const sp<RenderCommand>& renderCommand);
 
-//    void requestUpdate();
-
     sp<RenderCommand> update(RenderRequest& renderRequest);
-
     sp<RenderCommandPipeline> getRenderCommand();
 
 private:

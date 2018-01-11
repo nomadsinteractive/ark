@@ -32,17 +32,6 @@ public:
         sp<Builder<Numeric>> _expression;
     };
 
-//  [[plugin::builder("numeric")]]
-    class NUMERIC_BUILDER : public Builder<Numeric> {
-    public:
-        NUMERIC_BUILDER(BeanFactory& parent, const document& doc);
-
-        virtual sp<Numeric> build(const sp<Scope>& args) override;
-
-    private:
-        sp<Builder<Numeric>> _expression;
-    };
-
 };
 
 }

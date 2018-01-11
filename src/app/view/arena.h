@@ -18,7 +18,6 @@
 namespace ark {
 
 //[[script::bindings::container]]
-//[[core::class]]
 class ARK_API Arena final : public Block, public EventListener, public Renderer, public Renderer::Delegate, public Renderer::Group {
 public:
     Arena(const sp<Renderer>& rootView, const sp<ResourceLoader>& resourceLoader);

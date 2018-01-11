@@ -96,7 +96,7 @@ def typeCompare(t1, t2):
 def write_to_unit(unit_name, header, source):
     names = re.sub(r'[^\d\w_]', '_', unit_name or 'stdout')
     macro = names.upper() + '_H_'
-    write_to_file(unit_name and unit_name + '.h', '#ifndef %s\n#define %s\n\n%s\n\n#endif' %(macro, macro, header))
+    write_to_file(unit_name and unit_name + '.h', '#ifndef %s\n#define %s\n\n%s\n\n#endif' % (macro, macro, header))
     write_to_file(unit_name and unit_name + '.cpp', source)
 
 

@@ -108,19 +108,12 @@ void GLShaderSource::initialize()
             addAttribute(i.second, i.first);
         }
 
-    std::map<String, String> attributes = _fragment._in_declarations._declared;
-    if(_snippet)
-        for(const auto& iter : _attributes)
-            attributes[iter.first] = iter.second.type();
-
     std::set<String> fragmentUsedVars;
     static const std::regex VAR_PATTERN("\\bv_([\\w\\d_]+)\\b");
     _fragment._source.search(VAR_PATTERN, [&fragmentUsedVars](const std::smatch& m)->bool {
         fragmentUsedVars.insert(m[1].str());
         return true;
     });
-
-    List<String> generated;
 
     for(const auto& i : context._vertex_in)
         _vertex._in_declarations.declare(i.first, "a_", Strings::capitalFirst(i.second));
@@ -131,6 +124,12 @@ void GLShaderSource::initialize()
         _fragment._in_declarations.declare(i.first, "v_", n);
     }
 
+    std::map<String, String> attributes = _fragment._in_declarations._declared;
+    if(_snippet)
+        for(const auto& iter : _attributes)
+            attributes[iter.first] = iter.second.type();
+
+    List<String> generated;
     for(const auto& iter : attributes)
     {
         if(!_vertex._in_declarations.has(iter.first) && !_vertex._out_declarations.has(iter.first))
@@ -139,6 +138,7 @@ void GLShaderSource::initialize()
             addAttribute(iter.first, iter.second);
         }
     }
+
     uint32_t mod = _stride % sizeof(GLfloat);
     if(mod != 0)
         _stride += (sizeof(GLfloat) - mod);
@@ -211,7 +211,12 @@ void GLShaderSource::loadPredefinedUniform(BeanFactory& factory, const sp<Scope>
         GLUniform::Type glType = GLUniform::UNIFORM_F1;
         switch (size / length) {
         case 4:
-            glType = length > 1 ? GLUniform::UNIFORM_F1V : GLUniform::UNIFORM_F1;
+            if(type[0] == 'f')
+                glType = length > 1 ? GLUniform::UNIFORM_F1V : GLUniform::UNIFORM_F1;
+            else if(type[0] == 'i')
+                glType = length > 1 ? GLUniform::UNIFORM_I1V : GLUniform::UNIFORM_I1;
+            else
+                FATAL("Unknow type \"%s\"", type.c_str());
             break;
         case 8:
             glType = length > 1 ? GLUniform::UNIFORM_F2V : GLUniform::UNIFORM_F2;

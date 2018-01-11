@@ -14,7 +14,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API Scrollable : public Renderer, public Block {
 public:
     struct ARK_API Params {

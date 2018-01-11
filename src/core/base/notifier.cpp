@@ -19,5 +19,11 @@ void Notifier::notify()
     }
 }
 
+void Notifier::notifyOnce()
+{
+    const sp<Runnable> runnable = std::move(_runnable);
+    if(runnable)
+        runnable->run();
+}
 
 }

@@ -44,10 +44,14 @@ public:
 //  [[script::bindings::property]]
     void setValue(uint32_t value);
 
+//  [[script::bindings::auto]]
+    void assign(const Color& other);
+
     bool operator == (const Color& other) const;
     bool operator != (const Color& other) const;
     const Color& operator =(const Color& other);
 
+    static const Color NONE;
     static const Color WHITE;
     static const Color BLACK;
 

@@ -4,7 +4,7 @@
 #include "core/util/strings.h"
 
 #include "graphics/base/color.h"
-
+#include "renderer/util/gl_debug.h"
 #include "platform/platform.h"
 
 namespace ark {
@@ -51,14 +51,16 @@ GLint GLProgram::getAttribLocation(const String& name)
     return glGetAttribLocation(_id, name.c_str());
 }
 
-GLint GLProgram::getUniformLocation(const String &name)
+GLint GLProgram::getUniformLocation(const String& name)
 {
-    return glGetUniformLocation(_id, name.c_str());
+    GLint location = glGetUniformLocation(_id, name.c_str());
+    DWARN(location != -1, "Undefine uniform \"%s\". It might be optimized out, or something goes wrong.", name.c_str());
+    return location;
 }
 
 const GLProgram::Attribute& GLProgram::getAttribute(const String& name)
 {
-    std::map<String, Attribute>::const_iterator iter = _attributes.find(name);
+    const auto iter = _attributes.find(name);
     if(iter != _attributes.end())
         return iter->second;
     _attributes[name] = getAttribLocation(name);
@@ -67,7 +69,7 @@ const GLProgram::Attribute& GLProgram::getAttribute(const String& name)
 
 const GLProgram::Uniform& GLProgram::getUniform(const String& name)
 {
-    std::map<String, Uniform>::const_iterator iter = _uniforms.find(name);
+    const auto iter = _uniforms.find(name);
     if(iter != _uniforms.end())
         return iter->second;
     _uniforms[name] = getUniformLocation(name);

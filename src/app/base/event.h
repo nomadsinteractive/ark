@@ -11,6 +11,7 @@ class ARK_API Event {
 public:
 //  [[script::bindings::enumeration]]
     enum Action {
+        ACTION_KEY_NONE,
         ACTION_KEY_DOWN,
         ACTION_KEY_UP,
         ACTION_KEY_REPEAT,

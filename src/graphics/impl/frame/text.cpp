@@ -69,13 +69,11 @@ Alphabets::Characters Text::BUILDER::createCharacters(const Atlas& atlas, const 
         const std::wstring::size_type n = utext.find('\n', iter);
         const std::wstring s = utext.substr(iter, n != std::wstring::npos ? n - iter : std::wstring::npos);
         iter = n != std::wstring::npos ? n + 1 : n;
-        if(alphabetLayer)
-            alphabetLayer->prepare(s);
         Alphabets::Characters cs = alphabetLayer ? Alphabets::create(alphabetLayer->alphabet(), s, _text_scale, _letter_spacing, _line_indent, y, width, _line_height, -_line_indent)
                                                  : Alphabets::create(atlas, s, _letter_spacing, _line_indent, y, width, _line_height, -_line_indent);
         for(const sp<RenderObject>& j : cs._render_objects->items())
             characters._render_objects->push_back(j);
-        y += (g_isOriginBottom ? -cs._size->height() : cs._size->height());
+        y -= (g_upDirection * cs._size->height());
     }
     return characters;
 }

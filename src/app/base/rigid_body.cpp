@@ -12,9 +12,14 @@
 
 namespace ark {
 
-RigidBody::RigidBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const sp<Numeric>& rotation)
-    : _type(type), _shape(shape), _position(position), _size(size), _rotation(rotation)
+RigidBody::RigidBody(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const sp<Numeric>& rotation)
+    : _id(id), _type(type), _shape(shape), _position(position), _size(size), _rotation(rotation)
 {
+}
+
+uint32_t RigidBody::id() const
+{
+    return _id;
 }
 
 Collider::BodyType RigidBody::type() const
@@ -27,10 +32,10 @@ Collider::BodyShape RigidBody::shape() const
     return _shape;
 }
 
-V RigidBody::xy() const
+V2 RigidBody::xy() const
 {
     const V pos =_position->val();
-    return V(pos.x(), pos.y());
+    return V2(pos.x(), pos.y());
 }
 
 float RigidBody::width() const

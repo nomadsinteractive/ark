@@ -12,6 +12,10 @@ class _ArkObject:
     pass
 
 
+class Object:
+    pass
+
+
 class Boolean:
     def __init__(self, v):
         self._v = v
@@ -47,6 +51,10 @@ class Numeric:
     def val(self):
         return None
 
+    @property
+    def delegate(self):
+        return None
+
 
 class Expired:
     def __init__(self, v=False):
@@ -73,6 +81,10 @@ class Vec2:
     @property
     def xy(self):
         return self._x, self._y
+
+    @xy.setter
+    def xy(self, val):
+        pass
 
     @y.setter
     def y(self, v):
@@ -156,6 +168,14 @@ class Scalar:
     def __init__(self, x):
         self._x = x
 
+    @property
+    def delegate(self):
+        return None
+
+    @delegate.setter
+    def delegate(self, val):
+        pass
+
     def val(self):
         return self._x
 
@@ -184,6 +204,10 @@ class Algorithm:
 class Clock:
     pass
 
+
+class Expectation:
+    def __init__(self, expectation, onfire):
+        pass
 
 class Event:
 
@@ -435,6 +459,13 @@ class Partition:
 class Color:
     def __init__(self, v):
         pass
+
+    def assign(self, other):
+        pass
+
+    @propertry
+    def value(self):
+        return None
 
 
 class Platform:

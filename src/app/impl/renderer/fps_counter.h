@@ -16,7 +16,7 @@ namespace ark {
 
 class FPSCounter : public Renderer, public Block {
 public:
-    FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<ImageLayer>& imageLayer, const String& message);
+    FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<Characters>& characters, const String& message);
 
     virtual const sp<Size>& size() override;
 
@@ -38,8 +38,7 @@ public:
     };
 
 private:
-    Alphabets::Characters _characters;
-    sp<ImageLayer> _image_layer;
+    sp<Characters> _characters;
     String _message;
 
     uint32_t _frame_rendered;

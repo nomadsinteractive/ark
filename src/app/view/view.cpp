@@ -29,6 +29,9 @@ template<> ARK_API View::State Conversions::to<String, View::State>(const String
 
 template<> ARK_API View::Gravity Conversions::to<String, View::Gravity>(const String& s)
 {
+    if(s == "none")
+        return View::NONE;
+
     uint32_t gravity = View::NONE;
     for(const String& i : s.split('|'))
     {
@@ -47,6 +50,8 @@ template<> ARK_API View::Gravity Conversions::to<String, View::Gravity>(const St
             gravity |= View::CENTER_HORIZONTAL;
         else if(str == "center_vertical")
             gravity |= View::CENTER_VERTICAL;
+        else
+            DFATAL("Unknown gravity value: \"%s\"", i.c_str());
     }
     return static_cast<View::Gravity>(gravity);
 }

@@ -30,6 +30,10 @@ public:
     b2Body* createBody(const b2BodyDef& bodyDef);
     b2Body* createBody(Body::Type type, float x, float y, Shape& shape, float density, float friction);
 
+//  [[script::bindings::meta(absorb())]]
+//  [[script::bindings::meta(expire())]]
+//  [[script::bindings::meta(isExpired())]]
+
 //  [[script::bindings::auto]]
     float toPixelX(float meterX) const;
 //  [[script::bindings::auto]]

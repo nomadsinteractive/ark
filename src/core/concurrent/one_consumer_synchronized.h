@@ -3,6 +3,7 @@
 
 #include <list>
 #include <queue>
+#include <unordered_set>
 
 #include "core/concurrent/internal.h"
 
@@ -51,7 +52,7 @@ private:
         }
     }
 
-private:
+protected:
     Container _synchronized;
     _Stack<Node> _pending;
     _Recycler<Node> _recycler;
@@ -70,6 +71,19 @@ public:
     }
 };
 
+template<typename T> class _UnorderedSetSynchronizer {
+public:
+    static void synchronize(std::unordered_set<T>& unorderedSet, _Node<T>* head) {
+        std::list<T> l;
+        while(head) {
+            l.push_front(head->data());
+            head = head->next();
+        }
+        for(const T& i : l)
+            unorderedSet.insert(i);
+    }
+};
+
 }
 }
 
@@ -83,7 +97,17 @@ public:
         queue.pop();
         return true;
     }
+};
 
+template<typename T> class OCSUnorderedSet : public internal::concurrent::_OneConsumerSynchronized<T, std::unordered_set<T>, internal::concurrent::_UnorderedSetSynchronizer<T>> {
+public:
+    bool containsOrInsert(const T& data) {
+        const auto iter = this->_synchronized.find(data);
+        if(iter != this->_synchronized.end())
+            return true;
+        this->push(data);
+        return false;
+    }
 };
 
 }

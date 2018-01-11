@@ -14,7 +14,6 @@
 namespace ark {
 
 //[[script::bindings::container]]
-//[[core::class]]
 class ARK_API RenderObject : public Block {
 public:
     struct Snapshot {

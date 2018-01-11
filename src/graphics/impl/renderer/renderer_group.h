@@ -10,7 +10,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API RendererGroup : public Renderer, public Renderer::Group {
 public:
     ~RendererGroup();

@@ -31,14 +31,16 @@ array<uint8_t> GLModelPoint::getArrayBuffer(GLResourceManager& resourceManager, 
     const array<uint8_t> preallocated = resourceManager.getPreallocatedArray(len * 4);
 
     uint8_t* buf = preallocated->array();
-    for(const RenderObject::Snapshot& renderObject : renderContext._items) {
-        const Atlas::Item& texCoord = _atlas->at(renderObject._type);
-        const V position = renderObject._position;
-        const Transform::Snapshot& transform = renderObject._transform;
+    for(const RenderObject::Snapshot& i : renderContext._items) {
+        const Atlas::Item& texCoord = _atlas->at(i._type);
+        const V position = i._position;
+        const Transform::Snapshot& transform = i._transform;
+        float halfWidth = i._size.x() / 2;
+        float halfHeight = i._size.y() / 2;
         float tx = position.x() + x;
         float ty = position.y() + y;
-        renderObject._filter->setVaryings(buf, _stride, 1);
-        map(buf, transform, 0.0f, tx, 0.0f, ty, (texCoord.left() + texCoord.right()) / 2, (texCoord.top() + texCoord.bottom()) / 2);
+        i._filter->setVaryings(buf, _stride, 1);
+        map(buf, transform, -halfWidth, tx + halfWidth, -halfHeight, ty + halfHeight, (texCoord.left() + texCoord.right()) / 2, (texCoord.top() + texCoord.bottom()) / 2);
     }
     return preallocated;
 }

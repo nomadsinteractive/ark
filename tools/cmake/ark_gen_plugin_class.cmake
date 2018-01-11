@@ -1,7 +1,5 @@
 macro(_ark_gen_plugin_class_impl NAME TYPE NAME_SPACE FILE_NAME BUILT_IN)
 set(LOCAL_PLUGIN_FILE_NAME ${ARK_GENERATED_FILE_DIRECTORY}/${FILE_NAME})
-set_source_files_properties(${LOCAL_PLUGIN_FILE_NAME}.h PROPERTIES GENERATED true)
-set_source_files_properties(${LOCAL_PLUGIN_FILE_NAME}.cpp PROPERTIES GENERATED true)
 foreach(i IN LISTS ARGN)
 file(GLOB_RECURSE LOCAL_FILES "${i}/*.h")
 list(APPEND FILE_DEPENDS ${LOCAL_FILES})

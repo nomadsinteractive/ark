@@ -51,7 +51,11 @@ static PyNumberMethods PyArkNumeric_tp_as_number = {
     (binaryfunc) PyArkNumericType::__div__,        /* binaryfunc nb_true_divide;         */     /* __div__ */
     0,                                             /* binaryfunc nb_inplace_floor_divide;*/
     (binaryfunc) PyArkNumericType::__idiv__,       /* binaryfunc nb_inplace_true_divide  */    /* __idiv__ */
+};
 
+static PyGetSetDef PyArkNumeric_tp_getseters[] = {
+    {"delegate", (getter) PyArkNumericType::_delegate, nullptr, "delegate"},
+    {NULL}
 };
 
 PyArkNumericType::PyArkNumericType(const String& name, const String& doc, long flags)
@@ -60,13 +64,14 @@ PyArkNumericType::PyArkNumericType(const String& name, const String& doc, long f
     PyTypeObject* pyTypeObject = getPyTypeObject();
     pyTypeObject->tp_methods = PyArkNumeric_methods;
     pyTypeObject->tp_as_number = &PyArkNumeric_tp_as_number;
+    pyTypeObject->tp_getset = PyArkNumeric_tp_getseters;
     pyTypeObject->tp_init = (initproc) __init__;
 }
 
 PyObject* PyArkNumericType::val(Instance* self, PyObject* /*args*/)
 {
     const sp<Numeric>& var = self->unpack<Numeric>();
-    return PyFloat_FromDouble((double) var->val());
+    return PyFloat_FromDouble(static_cast<double>(var->val()));
 }
 
 PyObject* PyArkNumericType::set(Instance* self, PyObject* args)
@@ -75,13 +80,13 @@ PyObject* PyArkNumericType::set(Instance* self, PyObject* args)
     if(!PyArg_ParseTuple(args, "O", &val))
     {
         PyErr_SetString(PyExc_TypeError, "Numeric type needed, but wrong type of argument given");
-        Py_RETURN_NAN;
+        Py_RETURN_NONE;
     }
     const sp<Numeric>& inst = self->unpack<Numeric>();
     if(inst.is<Numeric::Impl>())
     {
         inst.cast<Numeric::Impl>()->set(static_cast<float>(PyFloat_AsDouble(val)));
-        Py_RETURN_NAN;
+        Py_RETURN_NONE;
     }
     if(inst.is<Scalar>())
     {
@@ -92,10 +97,33 @@ PyObject* PyArkNumericType::set(Instance* self, PyObject* args)
             inst.cast<Scalar>()->set(static_cast<float>(PyFloat_AsDouble(val)));
         else
             DFATAL("Cannot cast \"%s\" to Float, Number or ark::Numeric", Py_TYPE(val)->tp_name);
-        Py_RETURN_NAN;
+        Py_RETURN_NONE;
     }
     PyErr_SetString(PyExc_TypeError, "Immutable variable being set");
-    Py_RETURN_NAN;
+    Py_RETURN_NONE;
+}
+
+PyObject* PyArkNumericType::fix(Instance* self, PyObject* /*args*/)
+{
+    const sp<Numeric>& inst = self->unpack<Numeric>();
+    DWARN(inst.is<Scalar>(), "Scalar type needed, calling fix on other types is meaningless");
+    if(inst.is<Scalar>())
+        inst.cast<Scalar>()->fix();
+    Py_RETURN_NONE;
+}
+
+PyObject* PyArkNumericType::_delegate(Instance* self, PyObject* /*args*/)
+{
+    const sp<Numeric>& inst = self->unpack<Numeric>();
+    if(inst.is<Numeric::Impl>())
+        return PyFloat_FromDouble(static_cast<double>(inst->val()));
+
+    if(inst.is<Scalar>())
+    {
+        const sp<Scalar> scalar = inst.cast<Scalar>();
+        return scalar->delegate() ? PythonInterpreter::instance()->fromSharedPtr(scalar->delegate()) : PyFloat_FromDouble(static_cast<double>(scalar->val()));
+    }
+    Py_RETURN_NONE;
 }
 
 PyObject* PyArkNumericType::__add__(Instance* self, PyObject* args)
@@ -183,7 +211,7 @@ PyObject* PyArkNumericType::__idiv__(Instance* self, PyObject* args)
     return reinterpret_cast<PyObject*>(self);
 }
 
-int PyArkNumericType::__init__(Instance* self, PyObject* args, PyObject* kwargs)
+int PyArkNumericType::__init__(Instance* self, PyObject* args, PyObject* /*kwargs*/)
 {
     PyObject* delegate;
     if(!PyArg_ParseTuple(args, "O", &delegate))

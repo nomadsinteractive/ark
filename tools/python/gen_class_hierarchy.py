@@ -7,9 +7,12 @@ import sys
 import re
 import acg
 
-CLASS_PATTERN = re.compile(r'\[\[core::class\]\]\s+class\s+(?:ARK_API\s+)?([\w\d_]+)(?:\s+final)?\s*(:?[^{]+){')
+CLASS_PATTERN = re.compile(r'(\[\[core::class\]\]\s+)?class\s+(ARK_API\s+)?([\w\d_]+)(?:\s+final)?\s*(:?[^{]+){')
 
 INDENT = '\n    '
+
+
+CORE_INTERFACES = ('Numeric', 'Integer', 'GLResource', 'EventListener', 'Renderer', 'Expired', 'Block', 'Boolean', 'Range', 'Runnable')
 
 
 class GenClass:
@@ -30,12 +33,14 @@ def search_for_classes(paths):
     result = []
 
     def match_class(filename, content, main_class, x):
-        class_name = x[0]
-        if x[1].startswith(':'):
-            implements = [k for k in [j[6:].strip() for j in [i.strip() for i in x[1][1:].split(',')] if j.startswith('public')] if not k.startswith('Class<')]
-        else:
-            implements = []
-        result.append(GenClass(class_name, implements, filename))
+        core_class, ark_api, class_name, impls = x
+        if class_name == main_class and not class_name.startswith('_'):
+            if impls.startswith(':'):
+                implements = [k for k in [j[6:].strip() for j in [i.strip() for i in impls[1:].split(',')] if j.startswith('public')] if not k.startswith('Class<')]
+            else:
+                implements = []
+            if ([i for i in implements if i in CORE_INTERFACES] and ark_api) or core_class:
+                result.append(GenClass(class_name, implements, filename))
 
     acg.matchHeaderPatterns(paths,
                             {'pattern': CLASS_PATTERN, 'callback': match_class},

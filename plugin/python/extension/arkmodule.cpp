@@ -1,6 +1,7 @@
 #include "python/extension/arkmodule.h"
 
 #include "core/forwarding.h"
+#include "core/ark.h"
 #include "core/inf/dictionary.h"
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
