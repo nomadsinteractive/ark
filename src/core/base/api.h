@@ -61,7 +61,7 @@
 #   define DWARN(cond, ...) (void (cond))
 #   define DWARN(cond, ...) (void (cond))
 #   define DTRACE(cond) (void (cond))
-#   define DTHREAD_CHECK(threadId) (void (cond))
+#   define DTHREAD_CHECK(threadId) (void (threadId))
 #endif
 
 #define NOT_NULL(x) DCHECK(x, "Null Pointer Exception")
