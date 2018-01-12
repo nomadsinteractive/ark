@@ -22,24 +22,33 @@ AUTOBIND_META_PATTERN = re.compile(r'\[\[script::bindings::meta\(([^)]+)\([^)]*\
 
 BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^\]]*\]\]\s+class\s+[\w\d_]+\s*:\s*public\s+Builder<([^{]+)>\s*\{')
 
-CLASS_DELIMITER = '\n//%s\n\n' % ('-' * 120)
+CLASS_DELIMITER = '\n//%s\n' % ('-' * 120)
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
 TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4')
 
 
 def gen_header_source(filename, output_dir, results, namespaces):
     filedir, name = path.split(filename)
-    delcares = ['\nvoid __init_%s__(PyObject* module);' % name]
+    declares = ['\nvoid __init_%s__(PyObject* module);' % name]
     includes = []
     for k, v in results.items():
-        method_declarations = [i.gen_declaration() for i in v.methods]
-        s = '\n    '.join(i for i in method_declarations if i)
-        delcares.append(CLASS_DELIMITER + acg.format('''class PyArk${class_name}Type : public ark::plugin::python::PyArkType {
+        declares.append(CLASS_DELIMITER)
+        gen_class_header_source(v, declares)
+    return gen_py_binding_h(filename, namespaces, includes, declares)
+
+
+def gen_class_header_source(genclass, declares):
+    method_declarations = [i.gen_declaration() for i in genclass.methods]
+    s = '\n    '.join(i for i in method_declarations if i)
+    declares.append(acg.format('''class PyArk${class_name}Type : public ark::plugin::python::PyArkType {
 public:
     PyArk${class_name}Type(const String& name, const String& doc, long flags);
 
     ${method_declares}
-};''', method_declares=s, class_name=v.classname))
+};''', method_declares=s, class_name=genclass.classname))
+
+
+def gen_py_binding_h(filename, namespaces, includes, declares):
     header_macro = re.sub(r'[^\w\d]', '_', filename).upper()
     return acg.format('''#ifndef PY_${header_macro}_GEN
 #define PY_${header_macro}_GEN
@@ -50,7 +59,8 @@ ${includes}
 
 ${0}
 
-#endif''', acg.wrapByNamespaces(namespaces, '\n'.join(delcares)), header_macro=header_macro, includes='\n'.join(includes))
+#endif''', acg.wrapByNamespaces(namespaces, '\n'.join(declares)), header_macro=header_macro,
+                      includes='\n'.join(includes))
 
 
 def gen_body_source(filename, output_dir, namespaces, modulename, results, buildables):
@@ -58,52 +68,18 @@ def gen_body_source(filename, output_dir, namespaces, modulename, results, build
     includes = []
     lines = []
     for k, genclass in results.items():
-        tp_method_lines = []
-        includes.append('#include "%s"' % genclass.filename)
-
-        if genclass.has_methods():
-            delimeter = CLASS_DELIMITER
-            tp_method_lines.append('PyTypeObject* pyTypeObject = getPyTypeObject();')
-            method_defs = [i.gen_py_method_def(genclass.classname) for i in genclass.methods]
-            methoddeclare = ',\n    '.join(i for i in method_defs if i)
-            if methoddeclare:
-                lines.append(delimeter + 'static PyMethodDef PyArk%s_methods[] = {\n    %s,\n    {NULL}\n};' % (genclass.classname, methoddeclare))
-                delimeter = ''
-                tp_method_lines.append('pyTypeObject->tp_methods = PyArk%s_methods;' % genclass.classname)
-
-            property_defs = genclass.gen_property_defs()
-            if property_defs:
-                propertydeclare = '{"%s", %s, %s, "%s"}'
-                methoddeclare = ',\n    '.join(propertydeclare % tuple(i) for i in property_defs)
-                lines.append(delimeter + 'static PyGetSetDef PyArk%s_getseters[] = {\n    %s,\n    {NULL}\n};' % (genclass.classname, methoddeclare))
-                tp_method_lines.append('pyTypeObject->tp_getset = PyArk%s_getseters;' % genclass.classname)
-
-            for i in genclass.loader_methods():
-                lines.append(acg.format(LOADER_TEMPLATE, classname=genclass.classname, methodname=i.name))
-                tp_method_lines.append('{')
-                tp_method_lines.append('    std::map<TypeId, LoaderFunction>& loader = ensureLoader("%s");' % i.name)
-                for j in buildables:
-                    if j.find('::') == -1:
-                        tp_method_lines.append('    ' + i.gen_loader_statement(genclass.classname, j, i.name))
-                tp_method_lines.append('}')
+        if output_dir is None:
+            lines.append(CLASS_DELIMITER)
+            gen_class_body_source(genclass, includes, lines, buildables)
         else:
-            lines.append('\n' + CLASS_DELIMITER.strip())
-        genclass.gen_py_type_constructor_codes(tp_method_lines)
-        if genclass.constants:
-            tp_method_lines.extend('_constants["%s"] = %s;' % (i, j) for i, j in genclass.constants.items())
-        constructor = acg.format('''PyArk${class_name}Type::PyArk${class_name}Type(const String& name, const String& doc, long flags)
-    : PyArkType(name, doc, flags)
-{${tp_methods}
-}''', class_name=genclass.classname, tp_methods='\n    ' + '\n    '.join(tp_method_lines) if tp_method_lines else '')
-
-        methoddefinition = acg.format('''%s PyArk${class_name}Type::%s(%s)
-{
-    %s
-}''', class_name=genclass.classname)
-
-        lines.append('\n' + constructor)
-        method_definitions = [(i, i.gen_definition(genclass)) for i in genclass.methods]
-        lines.extend('\n' + methoddefinition % (i.gen_py_return(), i.name, i.gen_py_arguments(), j) for i, j in method_definitions if j)
+            filedir, filename = path.split(genclass.filename)
+            filename, fileext = path.splitext(filename)
+            classfilename = 'py_ark_%s_type' % filename
+            classincludes = ['#include "%s.h"\n' % classfilename]
+            classlines = []
+            gen_class_body_source(genclass, classincludes, classlines, buildables)
+            with open(path.join(output_dir, classfilename + '.cpp'), 'wt') as fp:
+                fp.write(gen_py_binding_cpp(name, namespaces, classincludes, classlines))
 
     lines.append('\n' + '''void __init_%s__(PyObject* module)
 {
@@ -111,10 +87,57 @@ def gen_body_source(filename, output_dir, namespaces, modulename, results, build
     %s
 }''' % (name, '\n    '.join('pi->pyModuleAddType<PyArk%sType, %s>(module, "%s", "%s", Py_TPFLAGS_DEFAULT%s);' % (i, i, modulename, j.bindings_classname, '|Py_TPFLAGS_HAVE_GC' if j.is_container else '') for i, j in results.items())))
 
-    return gen_py_binding_source(name, namespaces, includes, lines)
+    return gen_py_binding_cpp(name, namespaces, includes, lines)
 
 
-def gen_py_binding_source(name, namespaces, includes, lines):
+def gen_class_body_source(genclass, includes, lines, buildables):
+    tp_method_lines = []
+    includes.append('#include "%s"' % genclass.filename)
+    if genclass.has_methods():
+        tp_method_lines.append('PyTypeObject* pyTypeObject = getPyTypeObject();')
+        method_defs = [i.gen_py_method_def(genclass.classname) for i in genclass.methods]
+        methoddeclare = ',\n    '.join(i for i in method_defs if i)
+        if methoddeclare:
+            lines.append('\nstatic PyMethodDef PyArk%s_methods[] = {\n    %s,\n    {NULL}\n};' % (
+                genclass.classname, methoddeclare))
+            tp_method_lines.append('pyTypeObject->tp_methods = PyArk%s_methods;' % genclass.classname)
+
+        property_defs = genclass.gen_property_defs()
+        if property_defs:
+            propertydeclare = '{"%s", %s, %s, "%s"}'
+            methoddeclare = ',\n    '.join(propertydeclare % tuple(i) for i in property_defs)
+            lines.append('\nstatic PyGetSetDef PyArk%s_getseters[] = {\n    %s,\n    {NULL}\n};' % (
+            genclass.classname, methoddeclare))
+            tp_method_lines.append('pyTypeObject->tp_getset = PyArk%s_getseters;' % genclass.classname)
+
+        for i in genclass.loader_methods():
+            lines.append(acg.format(LOADER_TEMPLATE, classname=genclass.classname, methodname=i.name))
+            tp_method_lines.append('{')
+            tp_method_lines.append('    std::map<TypeId, LoaderFunction>& loader = ensureLoader("%s");' % i.name)
+            for j in buildables:
+                if j.find('::') == -1:
+                    tp_method_lines.append('    ' + i.gen_loader_statement(genclass.classname, j, i.name))
+            tp_method_lines.append('}')
+
+    genclass.gen_py_type_constructor_codes(tp_method_lines)
+    if genclass.constants:
+        tp_method_lines.extend('_constants["%s"] = %s;' % (i, j) for i, j in genclass.constants.items())
+    constructor = acg.format('''PyArk${class_name}Type::PyArk${class_name}Type(const String& name, const String& doc, long flags)
+    : PyArkType(name, doc, flags)
+{${tp_methods}
+}''', class_name=genclass.classname, tp_methods='\n    ' + '\n    '.join(tp_method_lines) if tp_method_lines else '')
+    methoddefinition = acg.format('''%s PyArk${class_name}Type::%s(%s)
+{
+    %s
+}''', class_name=genclass.classname)
+    lines.append('\n' + constructor)
+    method_definitions = [(i, i.gen_definition(genclass)) for i in genclass.methods]
+    lines.extend(
+        '\n' + methoddefinition % (i.gen_py_return(), i.name, i.gen_py_arguments(), j) for i, j in method_definitions if
+        j)
+
+
+def gen_py_binding_cpp(name, namespaces, includes, lines):
     return ('''#include "%s.h"
 
 #include "core/ark.h"
