@@ -14,7 +14,7 @@ class ARK_API String final {
 public:
     typedef std::string::size_type size_type;
 
-    _CONSTEXPR String() noexcept {}
+    String() noexcept = default;
     String(const String& other) = default;
     String(String&& other) = default;
 
