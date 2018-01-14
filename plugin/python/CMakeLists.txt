@@ -51,10 +51,15 @@ aux_source_directory(impl/adapter LOCAL_SRC_LIST)
 aux_source_directory(impl/duck LOCAL_SRC_LIST)
 aux_source_directory(impl/script LOCAL_SRC_LIST)
 
-ark_add_python_generated_unit(py_ark_bindings ${ARK_SRC_DIR} "src/app src/core src/graphics src/renderer plugin/python/extension" plugin/python/tools/python/gen_py_bindings.py -p ark::plugin::python -m ark -o ${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings -l "${ARK_SRC_DIR}/tools/python" src/app src/core src/graphics src/renderer platform plugin/python/extension)
-if(MSVC)
-    set_source_files_properties(${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cpp PROPERTIES COMPILE_FLAGS /bigobj)
-endif()
+#ark_add_python_generated_unit(py_ark_bindings ${ARK_SRC_DIR} "src/app src/core src/graphics src/renderer plugin/python/extension" plugin/python/tools/python/gen_py_bindings.py -p ark::plugin::python -m ark -o ${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings -l "${ARK_SRC_DIR}/tools/python" src/app src/core src/graphics src/renderer platform plugin/python/extension)
+execute_process(
+    COMMAND python plugin/python/tools/python/gen_py_bindings.py -d ${ARK_GENERATED_FILE_DIRECTORY} -c ${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cmake -p ark::plugin::python -m ark -o ${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings -l "${ARK_SRC_DIR}/tools/python" src/app src/core src/graphics src/renderer platform plugin/python/extension
+    WORKING_DIRECTORY ${ARK_SRC_DIR}
+)
+include(${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cmake)
+#if(MSVC)
+#    set_source_files_properties(${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cpp PROPERTIES COMPILE_FLAGS /bigobj)
+#endif()
 if(NOT ${SYSTEM} STREQUAL "android")
     ark_add_generated_file(_freeze_importlib ark_py_importlib.h ${CMAKE_CURRENT_SOURCE_DIR}/extension extension/_ark_bootstrap.py _ark_bootstrap.py)
 endif()

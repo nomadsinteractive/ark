@@ -15,7 +15,6 @@
 #include "core/util/bean_utils.h"
 #include "core/util/strings.h"
 
-#include "graphics/base/v2.h"
 #include "graphics/impl/vv2/vv2_with_transform.h"
 
 namespace ark {

@@ -21,7 +21,6 @@ public:
 //  [[script::bindings::auto]]
     virtual float val() override;
 
-//  [[script::bindings::auto]]
     void assign(const sp<Scalar>& other);
 //  [[script::bindings::auto]]
     void set(float value);

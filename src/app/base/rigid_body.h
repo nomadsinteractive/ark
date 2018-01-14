@@ -1,12 +1,11 @@
 #ifndef ARK_APP_BASE_RIGID_BODY_H_
 #define ARK_APP_BASE_RIGID_BODY_H_
 
-#include <set>
-
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/v2.h"
 
 #include "app/forwarding.h"
 #include "app/inf/collider.h"

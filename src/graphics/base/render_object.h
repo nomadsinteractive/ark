@@ -2,6 +2,7 @@
 #define ARK_GRAPHICS_BASE_RENDER_OBJECT_H_
 
 #include "core/base/api.h"
+#include "core/base/integer.h"
 #include "core/inf/builder.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"

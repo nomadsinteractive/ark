@@ -5,7 +5,6 @@
 
 #include "core/inf/variable.h"
 
-#include "graphics/base/v2.h"
 #include "graphics/base/size.h"
 
 #include "app/inf/collision_callback.h"

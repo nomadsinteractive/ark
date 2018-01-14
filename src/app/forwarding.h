@@ -14,6 +14,7 @@ class Button;
 class Collider;
 class CollisionCallback;
 class Event;
+class EventDispatcher;
 class EventListener;
 class EventListenerList;
 class Layout;

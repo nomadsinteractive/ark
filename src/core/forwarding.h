@@ -38,6 +38,7 @@ class Executor;
 class Expectation;
 class Expired;
 class Flatable;
+class Function;
 class Future;
 class Interfaces;
 class MemoryPool;
@@ -62,7 +63,6 @@ typedef Dictionary<sp<Readable>> Asset;
 typedef Dictionary<sp<String>> StringBundle;
 
 typedef Variable<float> Numeric;
-typedef Variable<int32_t> Integer;
 typedef Variable<bool> Boolean;
 
 typedef Iterator<int32_t> Range;

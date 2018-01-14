@@ -7,6 +7,7 @@
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/base/v2.h"
 #include "graphics/forwarding.h"
 
 namespace ark {

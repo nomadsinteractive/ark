@@ -37,6 +37,7 @@ class Size;
 class SurfaceController;
 class Vec2;
 class Vec3;
+class Vec4;
 class V2;
 class V3;
 class V4;
