@@ -27,9 +27,7 @@ public:
     static sp<Numeric> truediv(const sp<Integer>& self, const sp<Integer>& rvalue);
 
 //[[script::bindings::classmethod]]
-    static void set(const sp<Integer>& self, int32_t value);
-//[[script::bindings::classmethod]]
-    static void set(const sp<Integer>& self, float value);
+    static void set(const sp<Integer::Impl>& self, int32_t value);
 //[[script::bindings::classmethod]]
     static void set(const sp<Integer>& self, const sp<Integer>& value);
 };

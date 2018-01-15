@@ -361,6 +361,7 @@ class GenMethod(object):
         self._has_keyvalue_arguments = args and self._arguments[-1].type_compare('sp<Scope>')
         self._flags = ('METH_VARARGS|METH_KEYWORDS' if self._has_keyvalue_arguments else 'METH_VARARGS')
         self._calling_type_check = False
+        self._self_argument = None
 
     def gen_py_method_def(self, classname):
         return None
@@ -470,8 +471,12 @@ class GenMethod(object):
         argtypes = [i.split()[0] for i in argdeclare]
         type_checks = []
         if self._calling_type_check:
-            type_checks = [j.gen_type_check('arg%d' % i) for i, j in enumerate(self._arguments)]
-            lines.extend(['if(%s)' % '&&'.join(i or 'true' for i in type_checks), '{'])
+            type_checks = []
+            if self._self_argument:
+                if not self._self_argument.type_compare('sp<%s>' % genclass.classname):
+                    type_checks.append('unpacked.is<%s>()' % acg.getSharedPtrType(self._self_argument.accept_type))
+            type_checks.extend(j.gen_type_check('arg%d' % i) for i, j in enumerate(self._arguments))
+            lines.extend(['if(%s)' % ' && '.join(i or 'true' for i in type_checks), '{'])
         self._gen_convert_args_code(bodylines, argdeclare)
 
         r = acg.stripKeywords(self._return_type, ['virtual', 'const', '&'])
@@ -626,7 +631,10 @@ class GenStaticMethod(GenMethod):
 
 class GenStaticMemberMethod(GenMethod):
     def __init__(self, name, args, return_type):
-        GenMethod.__init__(self, name, args[1:], return_type)
+        GenMethod.__init__(self, name, args, return_type)
+        self._self_argument = self._arguments and self._arguments[0]
+        self._arguments = self._arguments[1:]
+        pass
 
     def gen_py_method_def(self, classname):
         return '{"%s", (PyCFunction) PyArk%sType::%s, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), classname, self._name, self._flags)
@@ -636,34 +644,39 @@ class GenStaticMemberMethod(GenMethod):
 
     @staticmethod
     def overload(m1, m2):
-        return GenOverloadedMethod(m1, m2)
+        try:
+            m1.add_overloaded_method(m2)
+            return m1
+        except AttributeError:
+            return GenOverloadedMethod(m1, m2)
 
 
 class GenOverloadedMethod(GenStaticMemberMethod):
     def __init__(self, m1, m2):
-        super().__init__(m1.name, '', m1.return_type)
-        if len(m1.arguments) != len(m2.arguments) or len(m1.arguments) == 0:
-            print('Overloaded methods(%s, %s) should have equal number of arguments' % (m1, m2))
-        m1._arguments = self._arguments = self._replace_arguments(m1.arguments)
-        m2._arguments = self._replace_arguments(m2.arguments)
-        m1.calling_type_check = True
-        m2.calling_type_check = True
-        self._overloaded = m2
-        self._next_overloaded = m1
+        super().__init__(m1.name, [], m1.return_type)
+        self._arguments = self._replace_arguments(m1.arguments)
+        self._overloaded_methods = []
+        self.add_overloaded_method(m1)
+        self.add_overloaded_method(m2)
 
     def gen_definition_body(self, genclass, lines):
-        self._overloaded.gen_definition_body(genclass, lines)
-        self._next_overloaded.gen_definition_body(genclass, lines)
-        if type(self._next_overloaded) is not GenOverloadedMethod:
-            lines.append('PyErr_SetString(PyExc_TypeError, "Calling overloaded method(%s) failed, no arguments matched");' % self._name)
+        for i in self._overloaded_methods:
+            i.gen_definition_body(genclass, lines)
+        lines.append('PyErr_SetString(PyExc_TypeError, "Calling overloaded method(%s) failed, no arguments matched");' % self._name)
+
+    def add_overloaded_method(self, method):
+        if self._overloaded_methods:
+            m1 = self._overloaded_methods[-1]
+            if len(m1.arguments) != len(method.arguments) or len(method.arguments) == 0:
+                print('Overloaded methods(%s, %s) should have equal number of arguments' % (m1, method))
+                sys.exit(-1)
+        method._arguments = self._replace_arguments(method.arguments)
+        method.calling_type_check = True
+        self._overloaded_methods.append(method)
 
     @staticmethod
     def _replace_arguments(arguments):
         return [GenArgument(i.accept_type, i.default_value, GenArgumentMeta('PyObject*', i.meta.cast_signature, 'O'), i.str()) for i in arguments]
-
-    @staticmethod
-    def _null_func(*args):
-        pass
 
 
 class GenClass(object):
