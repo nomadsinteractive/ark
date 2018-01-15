@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-import sys
 import getopt
-from os import path
+import os
 import re
+import sys
+from os import path
 
-LOADER_TEMPLATE = '''template<typename T> Box PyArk${classname}_${methodname}Function(PyArkType::Instance& inst, const String& id, const sp<Scope>& args) {
+LOADER_TEMPLATE = '''template<typename T> static Box PyArk${classname}_${methodname}Function(PyArkType::Instance& inst, const String& id, const sp<Scope>& args) {
     const sp<T> bean = inst.unpack<${classname}>()->${methodname}<T>(id, args);
     return bean.pack();
 }'''
@@ -18,7 +18,6 @@ AUTOBIND_PROPERTY_PATTERN = re.compile(r'\[\[script::bindings::property\]\]\s+([
 AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader\]\]\s+template<typename T>\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;{]*\{')
 AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod)\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
 AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container)\]\]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
-AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::class\(([^)]+)\)\]\]\s+class\s+')
 AUTOBIND_META_PATTERN = re.compile(r'\[\[script::bindings::meta\(([^)]+)\([^)]*\)\)\]\]')
 
 BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^\]]*\]\]\s+class\s+[\w\d_]+\s*:\s*public\s+Builder<([^{]+)>\s*\{')
@@ -27,19 +26,21 @@ CLASS_DELIMITER = '\n//%s\n' % ('-' * 120)
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
 TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4')
 
+INDENT = '    '
+
 cwd = os.getcwd()
 
 
 def make_abs_path(p):
-    return p if path.isabs(p) else path.join(cwd, p)
+    return (p if path.isabs(p) else path.join(cwd, p)).replace('\\', '/')
 
 
 def gen_cmakelist_source(arguments, paths, output_dir, output_file, results):
     generated_files = [make_abs_path(path.join(output_dir, output_file + i)) for i in ('.h', '.cpp')]
     dependencies = set()
     for k, genclass in results.items():
-        generated_files.append(make_abs_path(path.join(output_dir, genclass.py_type_name + ".h")))
-        generated_files.append(make_abs_path(path.join(output_dir, genclass.py_type_name + ".cpp")))
+        generated_files.append(make_abs_path(path.join(output_dir, genclass.py_type_name + '.h')))
+        generated_files.append(make_abs_path(path.join(output_dir, genclass.py_type_name + '.cpp')))
         dependencies.add(make_abs_path(genclass.filename))
     return acg.format('''set(LOCAL_PY_TYPE_SOURCE_LIST
     %s
@@ -51,9 +52,14 @@ add_custom_command(OUTPUT #{LOCAL_PY_TYPE_SOURCE_LIST}
     COMMAND python ${script_path} ${arguments} ${paths}
     DEPENDS #{LOCAL_PY_TYPE_DEPENDENCY_LIST} ${script_path}
     WORKING_DIRECTORY ${working_dir})
+if(MSVC)
+    foreach(i IN LISTS LOCAL_PY_TYPE_SOURCE_LIST)
+       set_source_files_properties(#{i} PROPERTIES COMPILE_FLAGS /bigobj)
+    endforeach()
+endif()
 list(APPEND LOCAL_GENERATED_SRC_LIST #{LOCAL_PY_TYPE_SOURCE_LIST})
 ''', script_path=make_abs_path(sys.argv[0]),
-                      working_dir=os.getcwd(),
+                      working_dir=os.getcwd().replace('\\', '/'),
                       arguments=' '.join('-%s %s' % (j, k) for j, k in arguments.items() if j != 'c'),
                       paths=' '.join(paths)).replace('#', '$') % ('\n    '.join(sorted(generated_files)),
                                                                   '\n    '.join(sorted(list(dependencies))))
@@ -119,7 +125,7 @@ def gen_body_source(filename, output_dir, namespaces, modulename, results, build
             with open(path.join(output_dir, genclass.py_type_name + '.cpp'), 'wt') as fp:
                 fp.write(gen_py_binding_cpp(genclass.py_type_name, namespaces, classincludes, classlines))
 
-    add_types = '\n    '.join('pi->pyModuleAddType<PyArk%sType, %s>(module, "%s", "%s", Py_TPFLAGS_DEFAULT%s);' % (i, i, modulename, j.type_name, '|Py_TPFLAGS_HAVE_GC' if j.is_container else '') for i, j in results.items())
+    add_types = '\n    '.join('pi->pyModuleAddType<PyArk%sType, %s>(module, "%s", "%s", Py_TPFLAGS_DEFAULT%s);' % (i, i, modulename, j.classname, '|Py_TPFLAGS_HAVE_GC' if j.is_container else '') for i, j in results.items())
     lines.append('\n' + '''void __init_%s__(PyObject* module)
 {
     const sp<ark::plugin::python::PythonInterpreter>& pi = ark::plugin::python::PythonInterpreter::instance();
@@ -152,10 +158,10 @@ def gen_class_body_source(genclass, includes, lines, buildables):
         for i in genclass.loader_methods():
             lines.append(acg.format(LOADER_TEMPLATE, classname=genclass.classname, methodname=i.name))
             tp_method_lines.append('{')
-            tp_method_lines.append('    std::map<TypeId, LoaderFunction>& loader = ensureLoader("%s");' % i.name)
+            tp_method_lines.append(INDENT + 'std::map<TypeId, LoaderFunction>& loader = ensureLoader("%s");' % i.name)
             for j in buildables:
                 if j.find('::') == -1:
-                    tp_method_lines.append('    ' + i.gen_loader_statement(genclass.classname, j, i.name))
+                    tp_method_lines.append(INDENT + i.gen_loader_statement(genclass.classname, j, i.name))
             tp_method_lines.append('}')
 
     genclass.gen_py_type_constructor_codes(tp_method_lines)
@@ -196,8 +202,20 @@ using namespace ark::plugin::python;
 class GenArgumentMeta:
     def __init__(self, typename, castsig, parsetuplesig):
         self._typename = typename
-        self._castsig = castsig
-        self._parse_tuple_sig = parsetuplesig
+        self._cast_signature = castsig
+        self._parse_signature = parsetuplesig
+
+    @property
+    def typename(self):
+        return self._typename
+
+    @property
+    def cast_signature(self):
+        return self._cast_signature
+
+    @property
+    def parse_signature(self):
+        return self._parse_signature
 
 
 class GenConverter:
@@ -213,10 +231,11 @@ class GenConverter:
 
 
 class GenArgument:
-    def __init__(self, accept_type, default_value, meta):
+    def __init__(self, accept_type, default_value, meta, _str):
         self._accept_type = accept_type
         self._default_value = default_value
         self._meta = meta
+        self._str = _str
 
     @property
     def accept_type(self):
@@ -231,13 +250,25 @@ class GenArgument:
         return self._meta
 
     @property
-    def parse_format_units(self):
-        s = self._meta._parse_tuple_sig
+    def typename(self):
+        return self._meta.typename
+
+    @property
+    def parse_signature(self):
+        s = self._meta.parse_signature
         return s if self._default_value is None else '|' + s
 
+    def type_compare(self, typename):
+        return acg.typeCompare(typename, self._str)
+
+    def gen_type_check(self, varname):
+        if self._accept_type in ARK_PY_ARGUMENT_CHECKERS:
+            return ARK_PY_ARGUMENT_CHECKERS[self._accept_type].check(varname)
+        return None
+
     def gen_declare(self, objname, argname):
-        typename = self.meta._castsig
-        if self.meta._typename == self.meta._castsig:
+        typename = self._meta.cast_signature
+        if self.typename == self._meta.cast_signature:
             return '%s %s = %s;' % (typename, objname, argname)
         m = acg.getSharedPtrType(self._accept_type)
         if m == 'Scope':
@@ -259,6 +290,12 @@ class GenArgument:
                 typename, varname, argname, funcname, functype, argname, self._default_value)
         return 'const %s %s = PythonInterpreter::instance()->%s<%s>(%s);' % (typename, varname, funcname, functype, argname)
 
+    def str(self):
+        return self._str
+
+    def __str__(self):
+        return self.str()
+
 
 ARK_PY_ARGUMENTS = (
     (r'const\s+String\s*&?', GenArgumentMeta('const char*', 'const char*', 's')),
@@ -277,20 +314,18 @@ ARK_PY_ARGUMENTS = (
 )
 
 ARK_PY_ARGUMENT_CHECKERS = {
-    'i': GenConverter('PyLong_Check(%s)', 'PyLong_AsLong(%s)'),
-    'f': GenConverter('PyFloat_Check(%s)', '﻿PyFloat_AsDouble(%s)'),
+    'int32_t': GenConverter('PyLong_Check(%s)', 'PyLong_AsLong(%s)'),
+    'float': GenConverter('PyFloat_Check(%s)', '﻿PyFloat_AsDouble(%s)'),
     'O': GenConverter('PyLong_Check(%s)', 'PyLong_AsLong(%s)'),
 }
 
 
 def parse_method_arguments(arguments):
-    declares = {}
     args = []
     for i, j in enumerate(arguments):
         m = None
         for k, l in ARK_PY_ARGUMENTS:
             m = re.match(k, j)
-            typename = l._typename
             if m:
                 default_value = None
                 pos = j.find('=')
@@ -298,21 +333,13 @@ def parse_method_arguments(arguments):
                     default_value = j[pos + 1:].strip()
                     if default_value.endswith('('):
                         default_value += ')'
-                if typename in declares:
-                    declares[typename] = '%s, %sarg%d' % (declares[typename], '*' if typename.endswith('*') else '', i)
-                else:
-                    declares[typename] = '%s arg%d' % (typename, i)
-                if default_value is not None:
-                    declares[typename] += ' = %s' % ('0' if typename in ('uint32_t', 'int32_t', 'float') else 'nullptr')
-                elif not l._parse_tuple_sig:
-                    declares[typename] += ' = kws'
-                accept_type = acg.format(l._castsig, *m.groups())
-                args.append(GenArgument(accept_type, default_value, l))
+                accept_type = acg.format(l._cast_signature, *m.groups())
+                args.append(GenArgument(accept_type, default_value, l, j))
                 break
         if not m:
             print('Undefined method argument: "%s"' % arguments[i])
             sys.exit(-1)
-    return [i + ';' for i in declares.values()], args
+    return args
 
 
 def gen_method_call_arg(i, arg, argtype):
@@ -330,10 +357,10 @@ class GenMethod(object):
     def __init__(self, name, args, return_type):
         self._name = name
         self._return_type = return_type
-        self._arguments = args
-        self._has_keyvalue_arguments = self._arguments and acg.typeCompare('sp<Scope>', self._arguments[-1])
+        self._arguments = parse_method_arguments(args)
+        self._has_keyvalue_arguments = args and self._arguments[-1].type_compare('sp<Scope>')
         self._flags = ('METH_VARARGS|METH_KEYWORDS' if self._has_keyvalue_arguments else 'METH_VARARGS')
-        self._arg_declares = [i.split('=')[0].strip() for i in self._arguments]
+        self._calling_type_check = False
 
     def gen_py_method_def(self, classname):
         return None
@@ -344,13 +371,43 @@ class GenMethod(object):
     def gen_py_arguments(self):
         return 'Instance* self, PyObject* args' + (', PyObject* kws' if self._has_keyvalue_arguments else '')
 
+    def gen_local_var_declarations(self):
+        declares = {}
+        for i, j in enumerate(self._arguments):
+            typename = j.typename
+            if typename in declares:
+                declares[typename] = '%s, %sarg%d' % (declares[typename], '*' if typename.endswith('*') else '', i)
+            else:
+                declares[typename] = '%s arg%d' % (typename, i)
+            if j.default_value is not None:
+                declares[typename] += ' = %s' % ('0' if typename in ('uint32_t', 'int32_t', 'float') else 'nullptr')
+            elif not j.meta._parse_signature:
+                declares[typename] += ' = kws'
+        return [i + ';' for i in declares.values()]
+
     @property
     def name(self):
         return self._name
 
     @property
+    def arguments(self):
+        return self._arguments
+
+    @property
+    def return_type(self):
+        return self._return_type
+
+    @property
     def _err_return_value(self):
         return 'Py_RETURN_NONE'
+
+    @property
+    def calling_type_check(self):
+        return self._calling_type_check
+
+    @calling_type_check.setter
+    def calling_type_check(self, v):
+        self._calling_type_check = v
 
     def _gen_call_statement(self, genclass, argnames):
         return 'unpacked->%s(%s);' % (self._name, argnames)
@@ -366,8 +423,8 @@ class GenMethod(object):
             fromcall = 'toPyObject'
         return 'return PythonInterpreter::instance()->%s(ret);' % fromcall
 
-    def _gen_declare_locals_code(self, lines, declares, args, argdeclare):
-        parse_format = ''.join(i.parse_format_units for i in args)
+    def _gen_parse_tuple_code(self, lines, declares, args):
+        parse_format = ''.join(i.parse_signature for i in args)
         if parse_format.count('|') > 1:
             ts = parse_format.split('|')
             if any(len(i) > 1 for i in ts):
@@ -377,9 +434,8 @@ class GenMethod(object):
         parsestatement = '''%s
     if(!PyArg_ParseTuple(args, "%s", %s))
         %s;
-''' % ('\n    '.join(declares), parse_format, ', '.join('&arg%d' % i for i, j in enumerate(args) if j.meta._parse_tuple_sig), self._err_return_value)
+''' % ('\n    '.join(declares), parse_format, ', '.join('&arg%d' % i for i, j in enumerate(args) if j.meta._parse_signature), self._err_return_value)
         lines.append(parsestatement)
-        lines.append('\n    '.join(argdeclare))
 
     def _need_unpack_statement(self):
         return True
@@ -390,26 +446,50 @@ class GenMethod(object):
     def gen_declaration(self):
         return 'static %s %s(%s);' % (self.gen_py_return(), self._name, self.gen_py_arguments())
 
+    @staticmethod
+    def _gen_convert_args_code(lines, argdeclare):
+        if argdeclare:
+            lines.append('\n    '.join(argdeclare))
+
     def gen_definition(self, genclass):
         lines = []
-        argtypes = []
+
         if len(self._arguments) > 0:
-            declares, args = parse_method_arguments(self._arguments)
-            argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i) for i, j in enumerate(args)]
-            argtypes = [i.split()[0] for i in argdeclare]
-            self._gen_declare_locals_code(lines, declares, args, argdeclare)
+            self._gen_parse_tuple_code(lines, self.gen_local_var_declarations(), self._arguments)
+
         if self._need_unpack_statement():
-            lines.append(acg.format('const sp<${class_name}>& unpacked = self->unpack<${class_name}>();', class_name=genclass._classname))
+            lines.append(acg.format('const sp<${class_name}>& unpacked = self->unpack<${class_name}>();',
+                                    class_name=genclass.classname))
+        self.gen_definition_body(genclass, lines)
+
+        return '\n    '.join(lines)
+
+    def gen_definition_body(self, genclass, lines):
+        bodylines = []
+        argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i) for i, j in enumerate(self._arguments)]
+        argtypes = [i.split()[0] for i in argdeclare]
+        type_checks = []
+        if self._calling_type_check:
+            type_checks = [j.gen_type_check('arg%d' % i) for i, j in enumerate(self._arguments)]
+            lines.extend(['if(%s)' % '&&'.join(i or 'true' for i in type_checks), '{'])
+        self._gen_convert_args_code(bodylines, argdeclare)
+
         r = acg.stripKeywords(self._return_type, ['virtual', 'const', '&'])
-        argnames = ', '.join(gen_method_call_arg(i, j, argtypes[i]) for i, j in enumerate(self._arguments))
+        argnames = ', '.join(gen_method_call_arg(i, j.str(), argtypes[i]) for i, j in enumerate(self._arguments))
         callstatement = self._gen_call_statement(genclass, argnames)
         pyret = 'return 0;' if self.gen_py_return() == 'int' else 'Py_RETURN_NONE;'
         if r != 'void' and r:
             callstatement = '%s ret = %s' % (acg.stripKeywords(self._return_type, ['virtual']), callstatement)
             pyret = self._gen_return_statement(r)
-        lines.append(callstatement)
-        lines.append(pyret)
-        return '\n    '.join(lines)
+        calling_lines = [callstatement, pyret]
+        if self._calling_type_check:
+            nullptr_check = ['obj%d' % i for i, j in enumerate(type_checks) if j is None]
+            if nullptr_check:
+                calling_lines = ['if(%s)' % '&&'.join(nullptr_check), '{'] + [INDENT + i for i in calling_lines] + ['}']
+            lines.extend(INDENT + i for i in bodylines + calling_lines)
+            lines.append('}')
+        else:
+            lines.extend(bodylines + calling_lines)
 
     @staticmethod
     def split(repl):
@@ -468,9 +548,14 @@ class GenPropertyMethod(GenMethod):
     def gen_py_return(self):
         return 'int' if self._is_setter else "PyObject*"
 
-    def _gen_declare_locals_code(self, lines, declares, args, argdeclare):
-        ga = GenArgument(args[0].accept_type, args[0].default_value, GenArgumentMeta('PyObject*', args[0].accept_type, 'O'))
+    def _gen_parse_tuple_code(self, lines, declares, args):
+        meta = GenArgumentMeta('PyObject*', args[0].accept_type, 'O')
+        ga = GenArgument(args[0].accept_type, args[0].default_value, meta, str(args[0]))
         lines.append(ga.gen_declare('obj0', 'value'))
+
+    @staticmethod
+    def _gen_convert_args_code(lines, argdeclare):
+        pass
 
     def gen_py_arguments(self):
         if self._is_setter:
@@ -486,7 +571,7 @@ class GenPropertyMethod(GenMethod):
 
     def _gen_call_statement(self, genclass, argnames):
         lines = ['unpacked->%s(%s);' % (self._name, argnames)]
-        if self._is_setter and genclass.is_container and acg.typeCompare(self._arguments[0], 'Box'):
+        if self._is_setter and genclass.is_container and self._arguments[0].type_compare('Box'):
             lines.append('self->setContainerObject(obj0);')
         return '\n    '.join(lines)
 
@@ -549,15 +634,45 @@ class GenStaticMemberMethod(GenMethod):
     def _gen_call_statement(self, genclass, argnames):
         return '%s::%s(unpacked%s);' % (genclass.classname, self._name, argnames if not argnames else ', ' + argnames)
 
+    @staticmethod
+    def overload(m1, m2):
+        return GenOverloadedMethod(m1, m2)
+
+
+class GenOverloadedMethod(GenStaticMemberMethod):
+    def __init__(self, m1, m2):
+        super().__init__(m1.name, '', m1.return_type)
+        if len(m1.arguments) != len(m2.arguments) or len(m1.arguments) == 0:
+            print('Overloaded methods(%s, %s) should have equal number of arguments' % (m1, m2))
+        m1._arguments = self._arguments = self._replace_arguments(m1.arguments)
+        m2._arguments = self._replace_arguments(m2.arguments)
+        m1.calling_type_check = True
+        m2.calling_type_check = True
+        self._overloaded = m2
+        self._next_overloaded = m1
+
+    def gen_definition_body(self, genclass, lines):
+        self._overloaded.gen_definition_body(genclass, lines)
+        self._next_overloaded.gen_definition_body(genclass, lines)
+        if type(self._next_overloaded) is not GenOverloadedMethod:
+            lines.append('PyErr_SetString(PyExc_TypeError, "Calling overloaded method(%s) failed, no arguments matched");' % self._name)
+
+    @staticmethod
+    def _replace_arguments(arguments):
+        return [GenArgument(i.accept_type, i.default_value, GenArgumentMeta('PyObject*', i.meta.cast_signature, 'O'), i.str()) for i in arguments]
+
+    @staticmethod
+    def _null_func(*args):
+        pass
+
 
 class GenClass(object):
     def __init__(self, filename, class_name, is_container=False):
-        self._py_type_name = 'py_ark_' + acg.camel_case_to_snake_case(class_name)
+        self._py_type_name = 'py_ark_' + acg.camel_case_to_snake_case(class_name) + '_type'
         self._filename = filename
         self._classname = class_name
-        self._type_name = class_name
         self._is_container = is_container
-        self._methods = []
+        self._methods = {}
         self._constants = {}
 
     @property
@@ -565,20 +680,12 @@ class GenClass(object):
         return self._classname
 
     @property
-    def type_name(self):
-        return self._type_name
-
-    @type_name.setter
-    def type_name(self, v):
-        self._type_name = v
-
-    @property
     def py_type_name(self):
         return self._py_type_name
 
     @property
     def methods(self):
-        return self._methods
+        return self._methods.values()
 
     @property
     def constants(self):
@@ -593,7 +700,12 @@ class GenClass(object):
         return self._is_container
 
     def add_method(self, method):
-        self._methods.append(method)
+        try:
+            m = self._methods[method.name]
+            method = type(m).overload(m, method)
+        except KeyError:
+            pass
+        self._methods[method.name] = method
 
     def add_constant(self, name, value):
         self._constants[name] = value
@@ -602,13 +714,13 @@ class GenClass(object):
         return len(self._methods) > 0
 
     def property_methods(self):
-        return [i for i in self._methods if type(i) is GenPropertyMethod]
+        return [i for i in self.methods if type(i) is GenPropertyMethod]
 
     def loader_methods(self):
-        return [i for i in self._methods if type(i) is GenLoaderMethod]
+        return [i for i in self.methods if type(i) is GenLoaderMethod]
 
     def gen_py_type_constructor_codes(self, lines):
-        for i in self._methods:
+        for i in self.methods:
             i.gen_py_type_constructor_codes(lines, self._classname)
 
     def gen_property_defs(self):
@@ -664,10 +776,6 @@ def main(params, paths):
         if len(names) == 1:
             results[names[0]] = GenClass(filename, names[0], x[0].strip() == 'container')
 
-    def autoclass(filename, content, main_class, x):
-        genclass = get_result_class(results, filename, main_class)
-        genclass.type_name = x.strip('"')
-
     def autoconstant(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
         genclass.add_constant(x[0], x[1])
@@ -688,7 +796,6 @@ def main(params, paths):
 
     acg.matchHeaderPatterns(paths,
                             {'pattern': AUTOBIND_ANNOTATION_PATTERN, 'callback': autoannotation},
-                            {'pattern': AUTOBIND_CLASS_PATTERN, 'callback': autoclass},
                             {'pattern': AUTOBIND_METHOD_PATTERN, 'callback': automethod},
                             {'pattern': AUTOBIND_LOADER_PATTERN, 'callback': autoloader},
                             {'pattern': AUTOBIND_PROPERTY_PATTERN, 'callback': autoproperty},

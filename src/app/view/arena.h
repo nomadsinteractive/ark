@@ -46,14 +46,6 @@ public:
         return bean;
     }
 
-//  [[script::bindings::loader]]
-    template<typename T> const sp<T> loadRenderer(const String& name, const sp<Scope>& args = nullptr) {
-        const sp<T> bean = load<T>(name, args);
-        DCHECK(bean.template is<Renderer>(), "Bean \"%s\" is not a renderer", name.c_str());
-        addRenderer(bean.template as<Renderer>());
-        return bean;
-    }
-
 //  [[script::bindings::auto]]
     Box getReference(const String& name);
 
