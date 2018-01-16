@@ -41,6 +41,7 @@ class Flatable;
 class Function;
 class Future;
 class Interfaces;
+class IntegerWrapper;
 class MemoryPool;
 class MessageLoop;
 class NumericExpression;
@@ -62,8 +63,9 @@ class ThreadPoolExecutor;
 typedef Dictionary<sp<Readable>> Asset;
 typedef Dictionary<sp<String>> StringBundle;
 
-typedef Variable<float> Numeric;
 typedef Variable<bool> Boolean;
+typedef Variable<int32_t> Integer;
+typedef Variable<float> Numeric;
 
 typedef Iterator<int32_t> Range;
 

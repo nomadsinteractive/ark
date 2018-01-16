@@ -10,6 +10,20 @@ FIRST_CAP_RE = re.compile('(.)([A-Z][a-z]+)')
 ALL_CAP_RE = re.compile('([a-z0-9])([A-Z])')
 
 
+class HeaderPattern:
+    def __init__(self, pattern, callback):
+        self._pattern = pattern
+        self._callback = callback
+
+    @property
+    def pattern(self):
+        return self._pattern
+
+    @property
+    def callback(self):
+        return self._callback
+
+
 def toCamelName(namespaces):
     return ''.join([i[0].upper() + i[1:] for i in namespaces if i])
 
@@ -56,8 +70,8 @@ def _process_header(filename, *args):
         main_class = findMainClass(content)
         if main_class:
             for j in args:
-                for k in j['pattern'].findall(content):
-                    j['callback'](filename, content, main_class, k)
+                for k in j.pattern.findall(content):
+                    j.callback(filename, content, main_class, k)
 
 
 
@@ -65,12 +79,12 @@ def wrapByNamespaces(namespaces, source):
     return '\n'.join(['namespace %s {' % i for i in namespaces]) + '\n' + source + '\n\n' + '\n'.join(['}'] * len(namespaces))
 
 
-def stripKeywords(statement, keywords):
+def strip_key_words(statement, keywords):
     return ' '.join(i for i in (statement.split() if type(statement) is str else statement) if i and i not in keywords)
 
 
 def getSharedPtrType(typename):
-    t = stripKeywords(typename, ['const']).replace('&', '').strip()
+    t = strip_key_words(typename, ['const']).replace('&', '').strip()
     return t[3:-1] if t.startswith('sp<') and t.endswith('>') else t
 
 
@@ -87,8 +101,8 @@ def get_argument_name(statement):
 
 
 def typeCompare(t1, t2):
-    t1 = stripKeywords(t1, ['static', 'const', 'virtual']).replace('&', '').strip()
-    t2 = stripKeywords(t2, ['static', 'const', 'virtual']).replace('&', '').strip()
+    t1 = strip_key_words(t1, ['static', 'const', 'virtual']).replace('&', '').strip()
+    t2 = strip_key_words(t2, ['static', 'const', 'virtual']).replace('&', '').strip()
     l = min(len(t1), len(t2))
     return t1[:l] == t2[:l]
 

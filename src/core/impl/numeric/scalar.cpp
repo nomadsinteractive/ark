@@ -32,7 +32,6 @@ void Scalar::set(float value)
 {
     _value = value;
     deferedUnref();
-    _delegate = nullptr;
 }
 
 void Scalar::fix()
@@ -40,7 +39,6 @@ void Scalar::fix()
     if(_delegate)
         _value = _delegate->val();
     deferedUnref();
-    _delegate = nullptr;
 }
 
 const sp<Numeric>& Scalar::delegate()
@@ -57,7 +55,7 @@ void Scalar::setDelegate(const sp<Numeric>& delegate)
 
 void Scalar::deferedUnref()
 {
-    Ark::instance().applicationContext()->deferUnref(_delegate);
+    Ark::instance().applicationContext()->deferUnref(std::move(_delegate));
 }
 
 void Scalar::assign(const sp<Scalar>& other)

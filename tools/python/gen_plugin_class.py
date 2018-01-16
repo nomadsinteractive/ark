@@ -6,6 +6,7 @@ import os
 import sys
 import re
 import acg
+from acg import HeaderPattern
 
 BUILDER_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)(?:\("([\w\d\-_]+)"\))?\]\]\s+class\s+([\w\d_]+)\s+:\s+public\s+Builder<([^{]+)>\s+\{')
 DICTIONARY_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)::by-value(?:\("([\w\d\-_]+)"\))?\]\]\s+class\s+([\w\d_]+)\s+:\s+public\s+Builder<([^{]+)>\s+\{')
@@ -236,10 +237,10 @@ def searchForPlugin(paths):
         result.append(Decorator(filename, interface_class, implement_class, main_class, style_name, arguments))
 
     acg.matchHeaderPatterns(paths,
-            {'pattern': BUILDER_PATTERN, 'callback': match_builder},
-            {'pattern': DICTIONARY_PATTERN, 'callback': match_dictionary},
-            {'pattern': FUNCTION_PATTERN, 'callback': match_function},
-            {'pattern': STYLE_PATTERN, 'callback': match_style},
+            HeaderPattern(BUILDER_PATTERN, match_builder),
+            HeaderPattern(DICTIONARY_PATTERN, match_dictionary),
+            HeaderPattern(FUNCTION_PATTERN, match_function),
+            HeaderPattern(STYLE_PATTERN, match_style)
         )
     return result
 

@@ -73,8 +73,9 @@ public:
     void pause();
     void resume();
 
-    template<typename T> void deferUnref(const sp<T>& inst) {
-        _render_controller->deferUnref(inst.pack());
+    template<typename T> void deferUnref(sp<T>&& inst) {
+        const sp<T> s = inst;
+        _render_controller->deferUnref(s.pack());
     }
 
 private:

@@ -56,12 +56,8 @@ public:
     _CONSTEXPR SharedPtr(std::nullptr_t null) noexcept
         : _ptr(null), _interfaces(null) {
     }
-    SharedPtr(const SharedPtr& other) noexcept
-        : _ptr(other._ptr), _interfaces(other._interfaces) {
-    }
-    SharedPtr(SharedPtr&& other) noexcept
-        : _ptr(std::move(other._ptr)), _interfaces(std::move(other._interfaces)) {
-    }
+    SharedPtr(const SharedPtr& other) noexcept = default;
+    SharedPtr(SharedPtr&& other) noexcept = default;
     SharedPtr(const std::shared_ptr<T>& ptr, const std::shared_ptr<Interfaces>& interfaces) noexcept
         : _ptr(ptr), _interfaces(interfaces) {
         addSelfType();
@@ -92,17 +88,8 @@ public:
         return inst;
     }
 
-    const SharedPtr<T>& operator =(const SharedPtr<T>& other) {
-        _ptr = other._ptr;
-        _interfaces = other._interfaces;
-        return *this;
-    }
-
-    const SharedPtr<T>& operator =(SharedPtr<T>&& other) {
-        _ptr = std::move(other._ptr);
-        _interfaces = std::move(other._interfaces);
-        return *this;
-    }
+    SharedPtr<T>& operator =(const SharedPtr<T>& other) = default;
+    SharedPtr<T>& operator =(SharedPtr<T>&& other) = default;
 
     bool operator == (const SharedPtr<T>& sp) const {
         return _ptr == sp._ptr;
