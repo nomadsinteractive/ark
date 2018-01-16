@@ -55,7 +55,8 @@ void Scalar::setDelegate(const sp<Numeric>& delegate)
 
 void Scalar::deferedUnref()
 {
-    Ark::instance().applicationContext()->deferUnref(std::move(_delegate));
+    if(_delegate)
+        Ark::instance().applicationContext()->deferUnref(std::move(_delegate));
 }
 
 void Scalar::assign(const sp<Scalar>& other)

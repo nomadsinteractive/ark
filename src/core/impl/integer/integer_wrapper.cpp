@@ -26,6 +26,13 @@ const sp<Integer>& IntegerWrapper::delegate() const
     return _delegate;
 }
 
+void IntegerWrapper::setDelegate(const sp<Integer>& delegate)
+{
+    NOT_NULL(delegate);
+    deferedUnref();
+    _delegate = delegate;
+}
+
 void IntegerWrapper::set(int32_t value)
 {
     deferedUnref();
@@ -49,7 +56,8 @@ void IntegerWrapper::fix()
 
 void IntegerWrapper::deferedUnref()
 {
-    Ark::instance().applicationContext()->deferUnref(std::move(_delegate));
+    if(_delegate)
+        Ark::instance().applicationContext()->deferUnref(std::move(_delegate));
 }
 
 }

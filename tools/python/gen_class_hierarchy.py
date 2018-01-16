@@ -6,6 +6,7 @@ import os
 import sys
 import re
 import acg
+from acg import HeaderPattern
 
 CLASS_PATTERN = re.compile(r'(\[\[core::class\]\]\s+)?class\s+(ARK_API\s+)?([\w\d_]+)(?:\s+final)?\s*(:?[^{]+){')
 
@@ -42,9 +43,7 @@ def search_for_classes(paths):
             if ([i for i in implements if i in CORE_INTERFACES] and ark_api) or core_class:
                 result.append(GenClass(class_name, implements, filename))
 
-    acg.matchHeaderPatterns(paths,
-                            {'pattern': CLASS_PATTERN, 'callback': match_class},
-                            )
+    acg.matchHeaderPatterns(paths, HeaderPattern(CLASS_PATTERN, match_class))
     return result
 
 

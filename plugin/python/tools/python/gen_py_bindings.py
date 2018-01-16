@@ -15,39 +15,39 @@ LOADER_TEMPLATE = '''template<typename T> static Box PyArk${classname}_${methodn
 
 TP_AS_NUMBER_TEMPLATE = [
     'static PyNumberMethods ${py_class_name}_tp_as_number = {',
-    '    (binaryfunc) ${nb_add},       /* binaryfunc nb_add;                  */ /* __add__ */',
-    '    (binaryfunc) ${nb_subtract},       /* binaryfunc nb_subtract;             */ /* __sub__ */',
-    '    (binaryfunc) ${nb_multiply},       /* binaryfunc nb_multiply;             */ /* __mul__ */',
-    '    0,               /* binaryfunc nb_remainder;                                         */ /* __mod__ */',
-    '    0,               /* binaryfunc nb_divmod;                                            */ /* __divmod__ */',
-    '    0,               /* ternaryfunc nb_power;                                            */ /* __pow__ */',
-    '    (unaryfunc) ${nb_negative},        /* unaryfunc nb_negative;              */ /* __neg__ */',
-    '    0,               /* unaryfunc nb_positive;                                           */ /* __pos__ */',
-    '    0,               /* unaryfunc nb_absolute;                                           */ /* __abs__ */',
-    '    0,               /* inquiry nb_bool;                                                 */ /* __bool__ */',
-    '    0,               /* unaryfunc nb_invert;                                             */ /* __invert__ */',
-    '    0,               /* binaryfunc nb_lshift;                                            */ /* __lshift__ */',
-    '    0,               /* binaryfunc nb_rshift;                                            */ /* __rshift__ */',
-    '    0,               /* binaryfunc nb_and;                                               */ /* __and__ */',
-    '    0,               /* binaryfunc nb_xor;                                               */ /* __xor__ */',
-    '    0,               /* binaryfunc nb_or;                                                */ /* __or__ */',
-    '    (unaryfunc) ${nb_int}, /* unaryfunc nb_int;    */ /* __int__ */',
-    '    0,               /* void *nb_reserved;                                               */',
-    '    (unaryfunc) ${nb_float},       /* unaryfunc nb_float;                */ /* __float__ */',
-    '    (binaryfunc) ${nb_inplace_add},       /* binaryfunc nb_inplace_add          */',
-    '    (binaryfunc) ${nb_inplace_subtract},       /* binaryfunc nb_inplace_subtract     */',
-    '    (binaryfunc) ${nb_inplace_multiply},       /* binaryfunc nb_inplace_multiply     */',
-    '    0,                                              /* binaryfunc nb_inplace_remainder;  */',
-    '    0,                                              /* ternaryfunc nb_inplace_power;     */',
-    '    0,                                              /* binaryfunc nb_inplace_lshift;     */',
-    '    0,                                              /* binaryfunc nb_inplace_rshift;     */',
-    '    0,                                              /* binaryfunc nb_inplace_and;        */',
-    '    0,                                              /* binaryfunc nb_inplace_xor;        */',
-    '    0,                                              /* binaryfunc nb_inplace_or;         */',
-    '    0,                                              /* binaryfunc nb_floor_divide;       */',
-    '    (binaryfunc) ${nb_true_divide},        /* binaryfunc nb_true_divide;         */     /* __div__ */',
-    '    0,                                             /* binaryfunc nb_inplace_floor_divide;*/',
-    '    (binaryfunc) ${nb_inplace_true_divide},       /* binaryfunc nb_inplace_true_divide  */    /* __idiv__ */',
+    '    (binaryfunc) ${nb_add},        /* binaryfunc nb_add;                  */ /* __add__ */',
+    '    (binaryfunc) ${nb_subtract},       /* binaryfunc nb_subtract; */ /* __sub__ */',
+    '    (binaryfunc) ${nb_multiply},       /* binaryfunc nb_multiply; */ /* __mul__ */',
+    '    0,               /* binaryfunc nb_remainder; */ /* __mod__ */',
+    '    0,               /* binaryfunc nb_divmod; */ /* __divmod__ */',
+    '    0,               /* ternaryfunc nb_power; */ /* __pow__ */',
+    '    (unaryfunc) ${nb_negative},        /* unaryfunc nb_negative; */ /* __neg__ */',
+    '    0,               /* unaryfunc nb_positive; */ /* __pos__ */',
+    '    0,               /* unaryfunc nb_absolute; */ /* __abs__ */',
+    '    0,               /* inquiry nb_bool; */ /* __bool__ */',
+    '    0,               /* unaryfunc nb_invert; */ /* __invert__ */',
+    '    0,               /* binaryfunc nb_lshift; */ /* __lshift__ */',
+    '    0,               /* binaryfunc nb_rshift; */ /* __rshift__ */',
+    '    0,               /* binaryfunc nb_and; */ /* __and__ */',
+    '    0,               /* binaryfunc nb_xor; */ /* __xor__ */',
+    '    0,               /* binaryfunc nb_or; */ /* __or__ */',
+    '    (unaryfunc) ${nb_int}, /* unaryfunc nb_int; */ /* __int__ */',
+    '    0,               /* void *nb_reserved; */',
+    '    (unaryfunc) ${nb_float},       /* unaryfunc nb_float; */ /* __float__ */',
+    '    (binaryfunc) ${nb_inplace_add},       /* binaryfunc nb_inplace_add */',
+    '    (binaryfunc) ${nb_inplace_subtract},       /* binaryfunc nb_inplace_subtract */',
+    '    (binaryfunc) ${nb_inplace_multiply},       /* binaryfunc nb_inplace_multiply */',
+    '    0, /* binaryfunc nb_inplace_remainder;  */',
+    '    0, /* ternaryfunc nb_inplace_power;     */',
+    '    0, /* binaryfunc nb_inplace_lshift;     */',
+    '    0, /* binaryfunc nb_inplace_rshift;     */',
+    '    0, /* binaryfunc nb_inplace_and;        */',
+    '    0, /* binaryfunc nb_inplace_xor;        */',
+    '    0, /* binaryfunc nb_inplace_or;         */',
+    '    (binaryfunc) ${nb_floor_divide}, /* binaryfunc nb_floor_divide;       */',
+    '    (binaryfunc) ${nb_true_divide}, /* binaryfunc nb_true_divide;         */ /* __div__ */',
+    '    0, /* binaryfunc nb_inplace_floor_divide;*/',
+    '    (binaryfunc) ${nb_inplace_true_divide}, /* binaryfunc nb_inplace_true_divide  */ /* __idiv__ */',
     '};'
 ]
 
@@ -61,6 +61,7 @@ TP_AS_NUMBER_TEMPLATE_OPERATOR = {
     '+=': 'nb_inplace_add',
     '-=': 'nb_inplace_subtract',
     '*=': 'nb_inplace_multiply',
+    '//': 'nb_floor_divide',
     '/': 'nb_true_divide',
     '/=': 'nb_inplace_true_divide'
 }
@@ -89,6 +90,13 @@ cwd = os.getcwd()
 
 def make_abs_path(p):
     return (p if path.isabs(p) else path.join(cwd, p)).replace('\\', '/')
+
+
+def text_align(lines, text):
+    text_pos = [i.find(text) for i in lines]
+    max_alignment = max(text_pos)
+
+    return [i[:j] + ' ' * (max_alignment - j) + i[j:] if j >= 0 else i for i, j in zip(lines, text_pos)]
 
 
 def gen_cmakelist_source(arguments, paths, output_dir, output_file, results):
@@ -206,7 +214,7 @@ def gen_class_body_source(genclass, includes, lines, buildables):
         operator_defs = genclass.gen_operator_defs()
         if operator_defs:
             lines.append('')
-            lines.extend(operator_defs)
+            lines.extend(text_align(text_align(operator_defs, '/*'), '*/'))
             tp_method_lines.append('pyTypeObject->tp_as_number = &%s_tp_as_number;' % genclass.py_class_name)
 
         property_defs = genclass.gen_property_defs()
@@ -478,7 +486,9 @@ class GenMethod(object):
         return 'unpacked->%s(%s);' % (self._name, argnames)
 
     @staticmethod
-    def _gen_return_statement(return_type):
+    def gen_return_statement(return_type):
+        if return_type == 'void':
+            return None
         m = acg.getSharedPtrType(return_type)
         if m in ('String', 'std::wstring'):
             fromcall = 'template fromType<%s>' % m
@@ -546,10 +556,9 @@ class GenMethod(object):
         r = acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
         argnames = ', '.join(gen_method_call_arg(i, j.str(), argtypes[i]) for i, j in enumerate(self._arguments))
         callstatement = self._gen_call_statement(genclass, argnames)
-        pyret = 'return 0;' if self.gen_py_return() == 'int' else 'Py_RETURN_NONE;'
+        pyret = 'return 0;' if self.gen_py_return() == 'int' else self.gen_return_statement(r) or 'Py_RETURN_NONE;'
         if r != 'void' and r:
             callstatement = '%s ret = %s' % (acg.strip_key_words(self._return_type, ['virtual']), callstatement)
-            pyret = self._gen_return_statement(r)
         calling_lines = [callstatement, pyret]
         if self._calling_type_check:
             nullptr_check = ['obj%d' % i for i, j in enumerate(type_checks) if j is None]
@@ -616,12 +625,16 @@ class GenMetaMethod(GenMethod):
         return None
 
     def gen_py_method_def(self, genclass):
-        return '{"%s", (PyCFunction) PyArkMetaType<%s>::%s, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.classname, self._name, self._flags)
+        return '{"%s", (PyCFunction) PyArkMetaType<%s>::%s, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.binding_classname, self._name, self._flags)
 
 
 class GenPropertyMethod(GenMethod):
-    def __init__(self, name, args, return_type):
+    def __init__(self, name, args, return_type, is_static):
         GenMethod.__init__(self, name, args, return_type)
+        if is_static:
+            self._self_argument = self._arguments and self._arguments[0]
+            self._arguments = self._arguments[1:]
+        self._is_static = is_static
         self._is_setter = name.startswith('set')
         self._property_name = name[3].lower() + name[4:] if self._is_setter else name
 
@@ -642,15 +655,18 @@ class GenPropertyMethod(GenMethod):
             return 'Instance* self, PyObject* value, void* /*closure*/'
         return 'Instance* self, PyObject* args'
 
-    def gen_py_getset_def(self, properties, classname):
+    def gen_py_getset_def(self, properties, genclass):
         property_def = self._ensure_property_def(properties)
         if self._is_setter:
-            property_def[2] = '(setter) PyArk%sType::%s' % (classname, self._name)
+            property_def[2] = '(setter) %s::%s' % (genclass.py_class_name, self._name)
         else:
-            property_def[1] = '(getter) PyArk%sType::%s' % (classname, self._name)
+            property_def[1] = '(getter) %s::%s' % (genclass.py_class_name, self._name)
 
     def _gen_call_statement(self, genclass, argnames):
-        lines = ['unpacked->%s(%s);' % (self._name, argnames)]
+        if self._is_static:
+            lines = ['%s::%s(unpacked%s);' % (genclass.classname, self._name, argnames and ', ' + argnames)]
+        else:
+            lines = ['unpacked->%s(%s);' % (self._name, argnames)]
         if self._is_setter and genclass.is_container and self._arguments[0].type_compare('Box'):
             lines.append('self->setContainerObject(obj0);')
         return '\n    '.join(lines)
@@ -730,7 +746,7 @@ class GenStaticMemberMethod(GenMethod):
 
 class GenOperatorMethod(GenMethod):
     def __init__(self, name, args, return_type, operator):
-        super().__init__(name, args, return_type)
+        GenMethod.__init__(self, name, args, return_type)
         self._self_argument = self._arguments and self._arguments[0]
         self._arguments = self._arguments[1:]
         self._operator = operator
@@ -740,6 +756,12 @@ class GenOperatorMethod(GenMethod):
         if not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
             cast_statement = '.cast<%s>()' % acg.getSharedPtrType(self._self_argument.accept_type)
         return '%s::%s(unpacked%s%s);' % (genclass.classname, self._name, cast_statement, argnames if not argnames else ', ' + argnames)
+
+    def gen_return_statement(self, return_type):
+        if self._operator in ('+=', '-=', '*=', '/='):
+            return '''Py_INCREF(self);
+    return reinterpret_cast<PyObject*>(self);'''
+        return GenMethod.gen_return_statement(return_type)
 
     @staticmethod
     def _gen_convert_args_code(lines, argdeclare):
@@ -760,7 +782,7 @@ def create_overloaded_method_type(base_type):
 
     class GenOverloadedMethod(base_type):
         def __init__(self, m1, m2):
-            super().__init__(m1.name, [], m1.return_type)
+            base_type.__init__(self, m1.name, [], m1.return_type)
             self._arguments = self._replace_arguments(m1.arguments)
             self._overloaded_methods = []
             self.add_overloaded_method(m1)
@@ -871,7 +893,7 @@ class GenClass(object):
     def gen_property_defs(self):
         property_defs = []
         for i in self.property_methods():
-            i.gen_py_getset_def(property_defs, self._classname)
+            i.gen_py_getset_def(property_defs, self)
         return property_defs
 
     def gen_operator_defs(self):
@@ -920,7 +942,6 @@ def main(params, paths):
         genclass = get_result_class(results, filename, main_class)
         operator = x[0]
         name, args, return_type, is_static = GenMethod.split(x[1:])
-        print(operator, name, args, return_type, is_static)
         assert is_static
         genclass.add_method(GenOperatorMethod(name, args, return_type, operator))
 
@@ -936,7 +957,7 @@ def main(params, paths):
     def autoproperty(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
         name, args, return_type, is_static = GenMethod.split(x)
-        genclass.add_method(GenPropertyMethod(name, args, return_type))
+        genclass.add_method(GenPropertyMethod(name, args, return_type, is_static))
 
     def autoannotation(filename, content, m, x):
         names = [i for i in x[1].split(':', 2)[0].split() if i not in ('ARK_API', 'final')]

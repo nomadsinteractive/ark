@@ -16,6 +16,7 @@ public:
     virtual int32_t val() override;
 
     const sp<Integer>& delegate() const;
+    void setDelegate(const sp<Integer>& delegate);
 
     void set(int32_t value);
     void set(const sp<Integer>& delegate);
