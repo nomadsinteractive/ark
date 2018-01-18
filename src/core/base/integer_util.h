@@ -3,6 +3,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/impl/integer/integer_wrapper.h"
 #include "core/types/shared_ptr.h"
@@ -57,6 +58,18 @@ public:
 
 //[[script::bindings::classmethod]]
     static void fix(const sp<Integer>& self);
+
+
+//  [[plugin::builder::by-value]]
+    class DICTIONARY : public Builder<Integer> {
+    public:
+        DICTIONARY(BeanFactory& beanFactory, const String& value);
+
+        virtual sp<Integer> build(const sp<Scope>& args) override;
+
+    private:
+        int32_t _value;
+    };
 };
 
 }

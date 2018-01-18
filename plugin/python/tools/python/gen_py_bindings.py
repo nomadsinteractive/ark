@@ -526,13 +526,12 @@ class GenMethod(object):
         if self.need_unpack_statement():
             lines.append(acg.format('const sp<${class_name}>& unpacked = self->unpack<${class_name}>();',
                                     class_name=genclass.binding_classname))
-        self.gen_definition_body(genclass, lines, self._arguments)
+        self.gen_definition_body(genclass, lines, self._arguments, [None] * len(self._arguments))
 
         return '\n    '.join(lines)
 
-    def gen_definition_body(self, genclass, lines, not_overloaded_args):
+    def gen_definition_body(self, genclass, lines, not_overloaded_args, gen_type_check_args):
         bodylines = []
-        # overloaded_args = [j if not i else None for i, j in zip(not_overloaded_args, self._arguments)]
         args = [(i, j) for i, j in enumerate(not_overloaded_args) if j]
         argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i) for i, j in args]
         self_type_checks = []
@@ -549,7 +548,7 @@ class GenMethod(object):
         if r != 'void' and r:
             callstatement = '%s ret = %s' % (acg.strip_key_words(self._return_type, ['virtual']), callstatement)
         calling_lines = [callstatement] + pyret
-        type_checks = [(i, j.gen_type_check('t')) for i, j, k in zip(range(len(not_overloaded_args)), self._arguments, not_overloaded_args) if not k]
+        type_checks = [(i, j.gen_type_check('t')) for i, j in enumerate(gen_type_check_args) if j]
         nullptr_check = ['obj%d' % i for i, j in type_checks if not j]
         if self_type_checks or nullptr_check:
             nullptr_check = self_type_checks + nullptr_check
@@ -774,7 +773,7 @@ def create_overloaded_method_type(base_type):
             self.add_overloaded_method(m1)
             self.add_overloaded_method(m2)
 
-        def gen_definition_body(self, genclass, lines, arguments):
+        def gen_definition_body(self, genclass, lines, arguments, gen_type_check_args):
             not_overloaded_args = [i for i in self._arguments]
 
             for i in self._overloaded_methods:
@@ -786,10 +785,11 @@ def create_overloaded_method_type(base_type):
             lines.extend(not_overloaded_declar)
             for i in self._overloaded_methods:
                 type_checks = [k.gen_type_check('arg%d' % j) for j, k, l in zip(range(len(i.arguments)), i.arguments, not_overloaded_args) if not l]
-                lines.extend(['if(%s)' % ' && '.join([i for i in type_checks if i] or ['true']), '{'])
+                lines.extend(['if(%s)' % ' && '.join([j for j in type_checks if j] or ['true']), '{'])
                 body_lines = []
-                i.gen_definition_body(genclass, body_lines, [None if i else j for i, j in zip(not_overloaded_args, self._arguments)])
-                lines.extend(INDENT + i for i in body_lines)
+                overloaded_args = [None if j else k for j, k in zip(not_overloaded_args, i.arguments)]
+                i.gen_definition_body(genclass, body_lines, overloaded_args, overloaded_args)
+                lines.extend(INDENT + j for j in body_lines)
                 lines.append('}')
             lines.append('PyErr_SetString(PyExc_TypeError, "Calling overloaded method(%s) failed, no arguments matched");' % self._name)
             lines.append(self._overloaded_methods[0].err_return_value + ';')

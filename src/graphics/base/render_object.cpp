@@ -137,20 +137,19 @@ RenderObject::Snapshot RenderObject::snapshot() const
     return Snapshot(_type->val(), _position->val(), V(_size->width(), _size->height()), _transform->snapshot(), _filter);
 }
 
-RenderObject::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _type(parent.ensureBuilder<Numeric>(doc, Constants::Attributes::TYPE)),
-      _position(parent.getBuilder<Vec>(doc, Constants::Attributes::POSITION)),
-      _size(parent.getBuilder<Size>(doc, Constants::Attributes::SIZE)),
-      _transform(parent.getBuilder<Transform>(doc, Constants::Attributes::TRANSFORM)),
-      _filter(parent.getBuilder<Filter>(doc, Constants::Attributes::FILTER))
+RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
+    : _type(factory.ensureBuilder<Integer>(doc, Constants::Attributes::TYPE)),
+      _position(factory.getBuilder<Vec>(doc, Constants::Attributes::POSITION)),
+      _size(factory.getBuilder<Size>(doc, Constants::Attributes::SIZE)),
+      _transform(factory.getBuilder<Transform>(doc, Constants::Attributes::TRANSFORM)),
+      _filter(factory.getBuilder<Filter>(doc, Constants::Attributes::FILTER))
 {
 }
 
 sp<RenderObject> RenderObject::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<Numeric> type = _type->build(args);
-    DWARN(type, "RenderObject has no type, assuming 0");
-    return sp<RenderObject>::make(type ? static_cast<uint32_t>(type->val()) : 0, _position->build(args), _size->build(args), _transform->build(args), _filter->build(args));
+    const sp<Integer> type = _type->build(args);
+    return sp<RenderObject>::make(type, _position->build(args), _size->build(args), _transform->build(args), _filter->build(args));
 }
 
 RenderObject::EXPIRABLE_DECORATOR::EXPIRABLE_DECORATOR(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value)

@@ -88,7 +88,7 @@ public:
         virtual sp<RenderObject> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Numeric>> _type;
+        sp<Builder<Integer>> _type;
         sp<Builder<Vec>> _position;
         sp<Builder<Size>> _size;
         sp<Builder<Transform>> _transform;

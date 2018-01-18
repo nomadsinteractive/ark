@@ -4,6 +4,7 @@
 #include "core/impl/integer/integer_floor_div.h"
 #include "core/impl/integer/integer_multiply.h"
 #include "core/impl/integer/integer_subtract.h"
+#include "core/util/strings.h"
 
 namespace ark {
 
@@ -120,6 +121,16 @@ void IntegerUtil::fix(const sp<Integer>& self)
     DWARN(iw, "Calling fix on non-IntegerWrapper has no effect.");
     if(iw)
         iw->fix();
+}
+
+IntegerUtil::DICTIONARY::DICTIONARY(BeanFactory& /*beanFactory*/, const String& value)
+    : _value(Strings::parse<int32_t>(value))
+{
+}
+
+sp<Integer> IntegerUtil::DICTIONARY::build(const sp<Scope>& args)
+{
+    return sp<Integer::Impl>::make(_value);
 }
 
 }
