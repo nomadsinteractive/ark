@@ -69,7 +69,7 @@ const sp<RenderObject>& TileMap::getTile(uint32_t rowId, uint32_t colId) const
 int32_t TileMap::getTileType(uint32_t rowId, uint32_t colId) const
 {
     const sp<RenderObject>& renderObject = getTile(rowId, colId);
-    return renderObject ? static_cast<int32_t>(renderObject->type()) : -1;
+    return renderObject ? renderObject->type()->val() : -1;
 }
 
 const sp<RenderObject>& TileMap::getTileByPosition(float x, float y) const

@@ -41,6 +41,33 @@ class Collider:
         return None
 
 
+class Integer:
+    def __init__(self, v):
+        pass
+
+    @property
+    def val(self):
+        return None
+
+    @val.setter
+    def val(self, v):
+        pass
+
+    @property
+    def delegate(self):
+        return None
+
+    @delegate.setter
+    def delegate(self, v):
+        pass
+
+    def set(self, v):
+        pass
+
+    def fix(self):
+        pass
+
+
 class Numeric:
     def __init__(self, v):
         pass
@@ -54,6 +81,10 @@ class Numeric:
     @property
     def delegate(self):
         return None
+
+    @delegate.setter
+    def delegate(self, v):
+        pass
 
 
 class Expired:

@@ -387,7 +387,7 @@ ARK_PY_ARGUMENT_CHECKERS = {
     'int32_t': GenConverter('PyNumber_Check(%s)', 'PyLong_AsLong(%s)'),
     'uint32_t': GenConverter('PyNumber_Check(%s)', 'PyLong_AsLong(%s)'),
     'float': GenConverter('PyNumber_Check(%s)', '﻿PyFloat_AsDouble(%s)'),
-    'O': GenConverter('%s', '%s'),
+    'std::wstring': GenConverter('PyUnicode_Check(%s)', 'PyUnicode_DATA(%s)')
 }
 
 
@@ -432,7 +432,6 @@ class GenMethod(object):
         self._arguments = parse_method_arguments(args)
         self._has_keyvalue_arguments = args and self._arguments[-1].type_compare('sp<Scope>')
         self._flags = ('METH_VARARGS|METH_KEYWORDS' if self._has_keyvalue_arguments else 'METH_VARARGS')
-        self._calling_type_check = False
         self._self_argument = None
 
     def gen_py_method_def(self, genclass):
@@ -474,29 +473,21 @@ class GenMethod(object):
     def err_return_value(self):
         return 'Py_RETURN_NONE'
 
-    @property
-    def calling_type_check(self):
-        return self._calling_type_check
-
-    @calling_type_check.setter
-    def calling_type_check(self, v):
-        self._calling_type_check = v
-
     def _gen_call_statement(self, genclass, argnames):
         return 'unpacked->%s(%s);' % (self._name, argnames)
 
     @staticmethod
     def gen_return_statement(return_type):
         if return_type == 'void':
-            return None
+            return ['Py_RETURN_NONE;']
         m = acg.getSharedPtrType(return_type)
         if m in ('String', 'std::wstring'):
             fromcall = 'template fromType<%s>' % m
         elif m == 'PyObject*':
-            return 'return ret;'
+            return ['return ret;']
         else:
             fromcall = 'toPyObject'
-        return 'return PythonInterpreter::instance()->%s(ret);' % fromcall
+        return ['return PythonInterpreter::instance()->%s(ret);' % fromcall]
 
     def _gen_parse_tuple_code(self, lines, declares, args):
         parse_format = ''.join(i.parse_signature for i in args)
@@ -535,39 +526,35 @@ class GenMethod(object):
         if self.need_unpack_statement():
             lines.append(acg.format('const sp<${class_name}>& unpacked = self->unpack<${class_name}>();',
                                     class_name=genclass.binding_classname))
-        self.gen_definition_body(genclass, lines)
+        self.gen_definition_body(genclass, lines, self._arguments)
 
         return '\n    '.join(lines)
 
-    def gen_definition_body(self, genclass, lines):
+    def gen_definition_body(self, genclass, lines, not_overloaded_args):
         bodylines = []
-        argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i) for i, j in enumerate(self._arguments)]
-        argtypes = [i.split()[0] for i in argdeclare]
-        type_checks = []
-        if self._calling_type_check:
-            self_type_checks = []
-            if self._self_argument:
-                if not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
-                    self_type_checks.append('unpacked.is<%s>()' % acg.getSharedPtrType(self._self_argument.accept_type))
-            type_checks = [j.gen_type_check('arg%d' % i) for i, j in enumerate(self._arguments)]
-            lines.extend(['if(%s)' % ' && '.join(i or 'true' for i in self_type_checks + type_checks), '{'])
+        # overloaded_args = [j if not i else None for i, j in zip(not_overloaded_args, self._arguments)]
+        args = [(i, j) for i, j in enumerate(not_overloaded_args) if j]
+        argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i) for i, j in args]
+        self_type_checks = []
+        if self._self_argument:
+            if not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
+                self_type_checks.append('unpacked.is<%s>()' % acg.getSharedPtrType(self._self_argument.accept_type))
         self._gen_convert_args_code(bodylines, argdeclare)
 
         r = acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
+        argtypes = [i.gen_declare('t', 't').split()[0] for i in self._arguments]
         argnames = ', '.join(gen_method_call_arg(i, j.str(), argtypes[i]) for i, j in enumerate(self._arguments))
         callstatement = self._gen_call_statement(genclass, argnames)
-        pyret = 'return 0;' if self.gen_py_return() == 'int' else self.gen_return_statement(r) or 'Py_RETURN_NONE;'
+        pyret = ['return 0;'] if self.gen_py_return() == 'int' else self.gen_return_statement(r)
         if r != 'void' and r:
             callstatement = '%s ret = %s' % (acg.strip_key_words(self._return_type, ['virtual']), callstatement)
-        calling_lines = [callstatement, pyret]
-        if self._calling_type_check:
-            nullptr_check = ['obj%d' % i for i, j in enumerate(type_checks) if j is None]
-            if nullptr_check:
-                calling_lines = ['if(%s)' % '&&'.join(nullptr_check), '{'] + [INDENT + i for i in calling_lines] + ['}']
-            lines.extend(INDENT + i for i in bodylines + calling_lines)
-            lines.append('}')
-        else:
-            lines.extend(bodylines + calling_lines)
+        calling_lines = [callstatement] + pyret
+        type_checks = [(i, j.gen_type_check('t')) for i, j, k in zip(range(len(not_overloaded_args)), self._arguments, not_overloaded_args) if not k]
+        nullptr_check = ['obj%d' % i for i, j in type_checks if not j]
+        if self_type_checks or nullptr_check:
+            nullptr_check = self_type_checks + nullptr_check
+            calling_lines = ['if(%s)' % ' && '.join(nullptr_check), '{'] + [INDENT + i for i in calling_lines] + ['}']
+        lines.extend(bodylines + calling_lines)
 
     @staticmethod
     def split(repl):
@@ -759,8 +746,7 @@ class GenOperatorMethod(GenMethod):
 
     def gen_return_statement(self, return_type):
         if self._operator in ('+=', '-=', '*=', '/='):
-            return '''Py_INCREF(self);
-    return reinterpret_cast<PyObject*>(self);'''
+            return ['Py_INCREF(self);', 'return reinterpret_cast<PyObject*>(self);']
         return GenMethod.gen_return_statement(return_type)
 
     @staticmethod
@@ -788,9 +774,23 @@ def create_overloaded_method_type(base_type):
             self.add_overloaded_method(m1)
             self.add_overloaded_method(m2)
 
-        def gen_definition_body(self, genclass, lines):
+        def gen_definition_body(self, genclass, lines, arguments):
+            not_overloaded_args = [i for i in self._arguments]
+
             for i in self._overloaded_methods:
-                i.gen_definition_body(genclass, lines)
+                for j, k in enumerate(not_overloaded_args):
+                    if i.arguments[j].accept_type != k.accept_type:
+                        not_overloaded_args[j] = None
+
+            not_overloaded_declar = [j.gen_declare('obj%d' % i, 'arg%d' % i) for i, j in enumerate(not_overloaded_args) if j]
+            lines.extend(not_overloaded_declar)
+            for i in self._overloaded_methods:
+                type_checks = [k.gen_type_check('arg%d' % j) for j, k, l in zip(range(len(i.arguments)), i.arguments, not_overloaded_args) if not l]
+                lines.extend(['if(%s)' % ' && '.join([i for i in type_checks if i] or ['true']), '{'])
+                body_lines = []
+                i.gen_definition_body(genclass, body_lines, [None if i else j for i, j in zip(not_overloaded_args, self._arguments)])
+                lines.extend(INDENT + i for i in body_lines)
+                lines.append('}')
             lines.append('PyErr_SetString(PyExc_TypeError, "Calling overloaded method(%s) failed, no arguments matched");' % self._name)
             lines.append(self._overloaded_methods[0].err_return_value + ';')
 
@@ -801,7 +801,7 @@ def create_overloaded_method_type(base_type):
                     print('Overloaded methods(%s, %s) should have equal number of arguments' % (m1, method))
                     sys.exit(-1)
             method._arguments = self._replace_arguments(method.arguments)
-            method.calling_type_check = True
+            # method.calling_type_check = True
             self._overloaded_methods.append(method)
 
         @staticmethod

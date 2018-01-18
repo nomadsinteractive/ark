@@ -4,6 +4,7 @@
 #include "core/inf/iterator.h"
 #include "core/inf/variable.h"
 #include "core/epi/expired.h"
+#include "core/impl/integer/integer_wrapper.h"
 #include "core/util/bean_utils.h"
 
 #include "graphics/base/filter.h"
@@ -36,14 +37,19 @@ private:
 
 }
 
-RenderObject::RenderObject(uint32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Filter>& filter)
-    : _type(type), _position(position), _size(size), _transform(transform), _filter(Null::toSafe<Filter>(filter))
+RenderObject::RenderObject(int32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Filter>& filter)
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _filter(Null::toSafe<Filter>(filter))
 {
 }
 
-uint32_t RenderObject::type() const
+RenderObject::RenderObject(const sp<Integer>& type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Filter>& filter)
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _filter(Null::toSafe<Filter>(filter))
 {
-    return _integer_type ? static_cast<uint32_t>(_integer_type->val()) : _type;
+}
+
+const sp<Integer> RenderObject::type() const
+{
+    return _type;
 }
 
 const sp<Filter>& RenderObject::filter() const
@@ -71,15 +77,9 @@ const sp<Transform>& RenderObject::transform() const
     return _transform.ensure();
 }
 
-void RenderObject::setType(uint32_t type)
+void RenderObject::setType(int32_t type)
 {
-    _type = type;
-    _integer_type = nullptr;
-}
-
-void RenderObject::setTypeAnimate(const sp<Range>& range, const sp<Expired>& expired)
-{
-    _integer_type = sp<IntegerRange>::make(range, expired);
+    _type->set(type);
 }
 
 float RenderObject::x() const
@@ -134,7 +134,7 @@ const Box& RenderObject::tag() const
 
 RenderObject::Snapshot RenderObject::snapshot() const
 {
-    return Snapshot(type(), _position->val(), V(_size->width(), _size->height()), _transform->snapshot(), _filter);
+    return Snapshot(_type->val(), _position->val(), V(_size->width(), _size->height()), _transform->snapshot(), _filter);
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& parent, const document& doc)

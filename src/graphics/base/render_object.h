@@ -29,14 +29,16 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    RenderObject(uint32_t type, const sp<VV>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Filter>& filter = nullptr);
+    RenderObject(int32_t type, const sp<VV>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Filter>& filter = nullptr);
+//  [[script::bindings::auto]]
+    RenderObject(const sp<Integer>& type, const sp<VV>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Filter>& filter = nullptr);
 
 //  [[script::bindings::meta(absorb())]]
 //  [[script::bindings::meta(expire())]]
 //  [[script::bindings::meta(isExpired())]]
 
 //  [[script::bindings::property]]
-    uint32_t type() const;
+    const sp<Integer> type() const;
 
 //  [[script::bindings::property]]
     virtual const sp<Size>& size() override;
@@ -52,9 +54,7 @@ public:
     float height() const;
 
 //  [[script::bindings::property]]
-    void setType(uint32_t type);
-//  [[script::bindings::auto]]
-    void setTypeAnimate(const sp<Range>& range, const sp<Expired>& expired);
+    void setType(int32_t type);
 
 //  [[script::bindings::property]]
     float x() const;
@@ -109,8 +109,7 @@ public:
     };
 
 private:
-    uint32_t _type;
-    sp<Integer> _integer_type;
+    sp<IntegerWrapper> _type;
 
     SafePtr<VV, Vec> _position;
     SafePtr<Size> _size;

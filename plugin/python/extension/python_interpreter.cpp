@@ -297,6 +297,7 @@ template<> ARK_PLUGIN_PYTHON_API Box PythonInterpreter::toType<Box>(PyObject* ob
 
 template<> ARK_PLUGIN_PYTHON_API float PythonInterpreter::toType<float>(PyObject* object)
 {
+    DCHECK(PyNumber_Check(object), "Cannot cast Python object \"%s\" to float", object->ob_type->tp_name);
     return static_cast<float>(PyFloat_AsDouble(object));
 }
 
@@ -313,6 +314,7 @@ template<> ARK_PLUGIN_PYTHON_API uint32_t PythonInterpreter::toType<uint32_t>(Py
 
 template<> ARK_PLUGIN_PYTHON_API int32_t PythonInterpreter::toType<int32_t>(PyObject* object)
 {
+    DCHECK(PyNumber_Check(object), "Cannot cast Python object \"%s\" to int32_t", object->ob_type->tp_name);
     return static_cast<int32_t>(PyLong_AsLong(object));
 }
 
