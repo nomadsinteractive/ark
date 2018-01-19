@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_IMPL_NUMERIC_ADD_H_
-#define ARK_CORE_IMPL_NUMERIC_ADD_H_
+#ifndef ARK_CORE_IMPL_NUMERIC_NUMERIC_ADD_H_
+#define ARK_CORE_IMPL_NUMERIC_NUMERIC_ADD_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -9,16 +9,16 @@
 
 namespace ark {
 
-class ARK_API Add : public Numeric {
+class NumericAdd : public Numeric {
 public:
-    Add(const sp<Numeric>& a1, const sp<Numeric>& a2);
+    NumericAdd(const sp<Numeric>& a1, const sp<Numeric>& a2);
 
     virtual float val() override;
 
 //  [[plugin::style("add")]]
-    class DECORATOR : public Builder<Numeric> {
+    class STYLE : public Builder<Numeric> {
     public:
-        DECORATOR(BeanFactory& parent, const sp<Builder<Numeric>>& delegate, const String& value);
+        STYLE(BeanFactory& parent, const sp<Builder<Numeric>>& delegate, const String& value);
 
         virtual sp<Numeric> build(const sp<Scope>& args) override;
 

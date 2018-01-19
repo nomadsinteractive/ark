@@ -98,9 +98,9 @@ public:
     };
 
 private:
-    sp<Scalar> _x;
-    sp<Scalar> _y;
-    sp<Scalar> _z;
+    sp<NumericWrapper> _x;
+    sp<NumericWrapper> _y;
+    sp<NumericWrapper> _z;
 
 };
 

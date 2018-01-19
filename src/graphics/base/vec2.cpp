@@ -4,15 +4,11 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/object_pool.h"
-#include "core/impl/numeric/scalar.h"
-#include "core/impl/numeric/negative.h"
-#include "core/impl/numeric/add.h"
-#include "core/impl/numeric/divide.h"
-#include "core/impl/numeric/multiply.h"
-#include "core/impl/numeric/subtract.h"
+#include "core/base/variable_wrapper.h"
 #include "core/impl/numeric/translate.h"
 #include "core/inf/array.h"
 #include "core/util/bean_utils.h"
+#include "core/util/numeric_util.h"
 #include "core/util/strings.h"
 
 #include "graphics/impl/vv2/vv2_with_transform.h"
@@ -20,12 +16,12 @@
 namespace ark {
 
 Vec2::Vec2() noexcept
-    : _x(sp<Scalar>::make(0.0f)), _y(sp<Scalar>::make(0.0f))
+    : _x(sp<NumericWrapper>::make(0.0f)), _y(sp<NumericWrapper>::make(0.0f))
 {
 }
 
 Vec2::Vec2(float x, float y) noexcept
-    : _x(sp<Scalar>::make(x)), _y(sp<Scalar>::make(y))
+    : _x(sp<NumericWrapper>::make(x)), _y(sp<NumericWrapper>::make(y))
 {
 }
 
@@ -35,12 +31,12 @@ Vec2::Vec2(const V2& xy) noexcept
 }
 
 Vec2::Vec2(const sp<Numeric>& xProperty, const sp<Numeric>& yProperty) noexcept
-    : _x(sp<Scalar>::make(xProperty)), _y(sp<Scalar>::make(yProperty))
+    : _x(sp<NumericWrapper>::make(xProperty)), _y(sp<NumericWrapper>::make(yProperty))
 {
 }
 
 Vec2::Vec2(float x, float y, const sp<Numeric>& xProperty, const sp<Numeric>& yProperty) noexcept
-    : _x(sp<Scalar>::make(sp<Translate>::make(xProperty, x))), _y(sp<Scalar>::make(sp<Translate>::make(yProperty, y)))
+    : _x(sp<NumericWrapper>::make(sp<Translate>::make(xProperty, x))), _y(sp<NumericWrapper>::make(sp<Translate>::make(yProperty, y)))
 {
 }
 
@@ -56,27 +52,27 @@ V2 Vec2::val()
 
 Vec2 operator +(const Vec2& lvalue, const Vec2& rvalue)
 {
-    return Vec2(sp<Add>::make(lvalue._x, rvalue._x).cast<Numeric>(), sp<Add>::make(lvalue._y, rvalue._y).cast<Numeric>());
+    return Vec2(NumericUtil::add(lvalue._x, rvalue._x), NumericUtil::add(lvalue._y, rvalue._y));
 }
 
 Vec2 operator -(const Vec2& lvalue, const Vec2& rvalue)
 {
-    return Vec2(sp<Subtract>::make(lvalue._x, rvalue._x).cast<Numeric>(), sp<Subtract>::make(lvalue._y, rvalue._y).cast<Numeric>());
+    return Vec2(NumericUtil::sub(lvalue._x, rvalue._x), NumericUtil::sub(lvalue._y, rvalue._y));
 }
 
 Vec2 operator *(const Vec2& lvalue, const Vec2& rvalue)
 {
-    return Vec2(sp<Multiply>::make(lvalue._x, rvalue._x).cast<Numeric>(), sp<Multiply>::make(lvalue._y, rvalue._y).cast<Numeric>());
+    return Vec2(NumericUtil::mul(lvalue._x, rvalue._x), NumericUtil::mul(lvalue._y, rvalue._y));
 }
 
 Vec2 operator /(const Vec2& lvalue, const Vec2& rvalue)
 {
-    return Vec2(sp<Divide>::make(lvalue._x, rvalue._x).cast<Numeric>(), sp<Divide>::make(lvalue._y, rvalue._y).cast<Numeric>());
+    return Vec2(NumericUtil::truediv(lvalue._x, rvalue._x), NumericUtil::truediv(lvalue._y, rvalue._y));
 }
 
 sp<Vec2> Vec2::negative()
 {
-    return sp<Vec2>::make(0.0f, 0.0f, sp<Negative>::make(_x), sp<Negative>::make(_y));
+    return sp<Vec2>::make(0.0f, 0.0f, NumericUtil::negative(_x), NumericUtil::negative(_y));
 }
 
 float Vec2::x() const
@@ -122,25 +118,25 @@ sp<Numeric> Vec2::vy() const
 
 void Vec2::setVx(const sp<Numeric>& vx) const
 {
-    _x->setDelegate(Null::toSafe<Numeric>(vx));
+    _x->set(vx);
 }
 
 void Vec2::setVy(const sp<Numeric>& vy) const
 {
-    _y->setDelegate(Null::toSafe<Numeric>(vy));
+    _y->set(vy);
 }
 
 void Vec2::assign(const sp<Vec2>& delegate)
 {
     if(delegate)
     {
-        _x->assign(delegate->_x);
-        _y->assign(delegate->_y);
+        _x->set(delegate->_x);
+        _y->set(delegate->_y);
     }
     else
     {
-        _x->assign(nullptr);
-        _y->assign(nullptr);
+        _x->set(nullptr);
+        _y->set(nullptr);
     }
 }
 
@@ -152,7 +148,7 @@ void Vec2::fix()
 
 Vec2 Vec2::translate(const Vec2& translation) const
 {
-    return Vec2(sp<Add>::make(_x, translation._x), sp<Add>::make(_y, translation._y));
+    return Vec2(NumericUtil::add(_x, translation._x), NumericUtil::add(_y, translation._y));
 }
 
 Vec2 Vec2::translate(float x, float y) const

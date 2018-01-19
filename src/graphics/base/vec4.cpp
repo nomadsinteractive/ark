@@ -4,14 +4,10 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/object_pool.h"
-#include "core/impl/numeric/scalar.h"
-#include "core/impl/numeric/negative.h"
-#include "core/impl/numeric/add.h"
-#include "core/impl/numeric/divide.h"
-#include "core/impl/numeric/multiply.h"
-#include "core/impl/numeric/subtract.h"
+#include "core/base/variable_wrapper.h"
 #include "core/impl/numeric/translate.h"
 #include "core/util/bean_utils.h"
+#include "core/util/numeric_util.h"
 #include "core/util/strings.h"
 
 #include "graphics/base/color.h"
@@ -86,17 +82,17 @@ private:
 }
 
 Vec4::Vec4() noexcept
-    : _x(sp<Scalar>::make(0.0f)), _y(sp<Scalar>::make(0.0f)), _z(sp<Scalar>::make(0.0f)), _w(sp<Scalar>::make(0.0f))
+    : _x(sp<NumericWrapper>::make(0.0f)), _y(sp<NumericWrapper>::make(0.0f)), _z(sp<NumericWrapper>::make(0.0f)), _w(sp<NumericWrapper>::make(0.0f))
 {
 }
 
 Vec4::Vec4(float x, float y, float z, float w) noexcept
-    : _x(sp<Scalar>::make(x)), _y(sp<Scalar>::make(y)), _z(sp<Scalar>::make(z)), _w(sp<Scalar>::make(w))
+    : _x(sp<NumericWrapper>::make(x)), _y(sp<NumericWrapper>::make(y)), _z(sp<NumericWrapper>::make(z)), _w(sp<NumericWrapper>::make(w))
 {
 }
 
 Vec4::Vec4(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z, const sp<Numeric>& w) noexcept
-    : _x(sp<Scalar>::make(x)), _y(sp<Scalar>::make(y)), _z(sp<Scalar>::make(z)), _w(sp<Scalar>::make(w))
+    : _x(sp<NumericWrapper>::make(x)), _y(sp<NumericWrapper>::make(y)), _z(sp<NumericWrapper>::make(z)), _w(sp<NumericWrapper>::make(w))
 {
 }
 
@@ -113,27 +109,27 @@ V4 Vec4::val()
 
 Vec4 operator +(const Vec4& lvalue, const Vec4& rvalue)
 {
-    return Vec4(sp<Add>::make(lvalue._x, rvalue._x), sp<Add>::make(lvalue._y, rvalue._y), sp<Add>::make(lvalue._z, rvalue._z), sp<Add>::make(lvalue._w, rvalue._w));
+    return Vec4(NumericUtil::add(lvalue._x, rvalue._x), NumericUtil::add(lvalue._y, rvalue._y), NumericUtil::add(lvalue._z, rvalue._z), NumericUtil::add(lvalue._w, rvalue._w));
 }
 
 Vec4 operator -(const Vec4& lvalue, const Vec4& rvalue)
 {
-    return Vec4(sp<Subtract>::make(lvalue._x, rvalue._x), sp<Subtract>::make(lvalue._y, rvalue._y), sp<Subtract>::make(lvalue._z, rvalue._z), sp<Subtract>::make(lvalue._w, rvalue._w));
+    return Vec4(NumericUtil::sub(lvalue._x, rvalue._x), NumericUtil::sub(lvalue._y, rvalue._y), NumericUtil::sub(lvalue._z, rvalue._z), NumericUtil::sub(lvalue._w, rvalue._w));
 }
 
 Vec4 operator *(const Vec4& lvalue, const Vec4& rvalue)
 {
-    return Vec4(sp<Multiply>::make(lvalue._x, rvalue._x), sp<Multiply>::make(lvalue._y, rvalue._y), sp<Multiply>::make(lvalue._z, rvalue._z), sp<Multiply>::make(lvalue._w, rvalue._w));
+    return Vec4(NumericUtil::mul(lvalue._x, rvalue._x), NumericUtil::mul(lvalue._y, rvalue._y), NumericUtil::mul(lvalue._z, rvalue._z), NumericUtil::mul(lvalue._w, rvalue._w));
 }
 
 Vec4 operator /(const Vec4& lvalue, const Vec4& rvalue)
 {
-    return Vec4(sp<Divide>::make(lvalue._x, rvalue._x), sp<Divide>::make(lvalue._y, rvalue._y), sp<Divide>::make(lvalue._z, rvalue._z), sp<Divide>::make(lvalue._w, rvalue._w));
+    return Vec4(NumericUtil::truediv(lvalue._x, rvalue._x), NumericUtil::truediv(lvalue._y, rvalue._y), NumericUtil::truediv(lvalue._z, rvalue._z), NumericUtil::truediv(lvalue._w, rvalue._w));
 }
 
 sp<Vec4> Vec4::negative()
 {
-    return sp<Vec4>::make(sp<Negative>::make(_x), sp<Negative>::make(_y), sp<Negative>::make(_z), sp<Negative>::make(_w));
+    return sp<Vec4>::make(NumericUtil::negative(_x), NumericUtil::negative(_y), NumericUtil::negative(_z), NumericUtil::negative(_w));
 }
 
 float Vec4::x() const
@@ -198,22 +194,22 @@ sp<Numeric> Vec4::vw() const
 
 void Vec4::setVx(const sp<Numeric>& vx) const
 {
-    _x->setDelegate(Null::toSafe<Numeric>(vx));
+    _x->set(vx);
 }
 
 void Vec4::setVy(const sp<Numeric>& vy) const
 {
-    _y->setDelegate(Null::toSafe<Numeric>(vy));
+    _y->set(vy);
 }
 
 void Vec4::setVz(const sp<Numeric>& vz) const
 {
-    _z->setDelegate(Null::toSafe<Numeric>(vz));
+    _z->set(vz);
 }
 
 void Vec4::setVw(const sp<Numeric>& vw) const
 {
-    _w->setDelegate(Null::toSafe<Numeric>(vw));
+    _w->set(vw);
 }
 
 void Vec4::setDelegate(const sp<VV4>& delegate)
@@ -223,25 +219,25 @@ void Vec4::setDelegate(const sp<VV4>& delegate)
         if(delegate.is<Vec4>())
         {
             const sp<Vec4> vec4 = delegate.cast<Vec4>();
-            _x->assign(vec4->_x);
-            _y->assign(vec4->_y);
-            _z->assign(vec4->_z);
-            _w->assign(vec4->_w);
+            _x->set(vec4->_x);
+            _y->set(vec4->_y);
+            _z->set(vec4->_z);
+            _w->set(vec4->_w);
         }
         else
         {
-            _x->setDelegate(sp<VV4X>::make(delegate));
-            _y->setDelegate(sp<VV4Y>::make(delegate));
-            _z->setDelegate(sp<VV4Z>::make(delegate));
-            _w->setDelegate(sp<VV4W>::make(delegate));
+            _x->set(sp<VV4X>::make(delegate));
+            _y->set(sp<VV4Y>::make(delegate));
+            _z->set(sp<VV4Z>::make(delegate));
+            _w->set(sp<VV4W>::make(delegate));
         }
     }
     else
     {
-        _x->assign(nullptr);
-        _y->assign(nullptr);
-        _z->assign(nullptr);
-        _w->assign(nullptr);
+        _x->set(nullptr);
+        _y->set(nullptr);
+        _z->set(nullptr);
+        _w->set(nullptr);
     }
 }
 

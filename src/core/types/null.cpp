@@ -11,4 +11,10 @@ template<> ARK_API const sp<Numeric>& Null::ptr()
     return inst;
 }
 
+template<> ARK_API const sp<Integer>& Null::ptr()
+{
+    static const sp<Integer> inst = sp<Integer::Const>::make(0.0f);
+    return inst;
+}
+
 }

@@ -17,6 +17,7 @@ template<typename T> class List;
 template<typename T> class SharedPtr;
 template<typename T> class Type;
 template<typename T> class Variable;
+template<typename T> class VariableWrapper;
 template<typename T> class WeakPtr;
 
 
@@ -41,17 +42,14 @@ class Flatable;
 class Function;
 class Future;
 class Interfaces;
-class IntegerWrapper;
 class MemoryPool;
 class MessageLoop;
-class NumericExpression;
 class Object;
 class ObjectPool;
 class Plugin;
 class PluginManager;
 class Readable;
 class Runnable;
-class Scalar;
 class Scope;
 class Script;
 class String;
@@ -66,6 +64,9 @@ typedef Dictionary<sp<String>> StringBundle;
 typedef Variable<bool> Boolean;
 typedef Variable<int32_t> Integer;
 typedef Variable<float> Numeric;
+
+typedef VariableWrapper<float> NumericWrapper;
+typedef VariableWrapper<int32_t> IntegerWrapper;
 
 typedef Iterator<int32_t> Range;
 

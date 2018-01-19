@@ -1,17 +1,17 @@
-#ifndef ARK_CORE_BASE_INTEGER_UTIL_H_
-#define ARK_CORE_BASE_INTEGER_UTIL_H_
+#ifndef ARK_CORE_UTIL_INTEGER_UTIL_H_
+#define ARK_CORE_UTIL_INTEGER_UTIL_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/variable_wrapper.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
-#include "core/impl/integer/integer_wrapper.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
 //[[script::bindings::class("Integer")]]
-class ARK_API IntegerUtil {
+class ARK_API IntegerUtil final {
 public:
 
 //[[script::bindings::constructor]]
@@ -29,6 +29,8 @@ public:
     static void isub(const sp<Integer>& self, const sp<Integer>& rvalue);
 //[[script::bindings::operator(*)]]
     static sp<Integer> mul(const sp<Integer>& self, const sp<Integer>& rvalue);
+//[[script::bindings::operator(%)]]
+    static sp<Integer> mod(const sp<Integer>& self, const sp<Integer>& rvalue);
 //[[script::bindings::operator(*=)]]
     static void imul(const sp<Integer>& self, const sp<Integer>& rvalue);
 //[[script::bindings::operator(/)]]
@@ -39,11 +41,15 @@ public:
     static sp<Integer> negative(const sp<Integer>& self);
 //[[script::bindings::operator(int)]]
     static int32_t toInt32(const sp<Integer>& self);
+//[[script::bindings::operator(float)]]
+    static float toFloat(const sp<Integer>& self);
 
 //[[script::bindings::property]]
     static int32_t val(const sp<Integer>& self);
 //[[script::bindings::property]]
-    static void setVal(const sp<Integer>& self, int32_t value);
+    static void setVal(const sp<Integer::Impl>& self, int32_t value);
+//[[script::bindings::property]]
+    static void setVal(const sp<IntegerWrapper>& self, int32_t value);
 //[[script::bindings::property]]
     static const sp<Integer>& delegate(const sp<Integer>& self);
 //[[script::bindings::property]]

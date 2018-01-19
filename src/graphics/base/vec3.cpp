@@ -4,14 +4,10 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/object_pool.h"
-#include "core/impl/numeric/scalar.h"
-#include "core/impl/numeric/negative.h"
-#include "core/impl/numeric/add.h"
-#include "core/impl/numeric/divide.h"
-#include "core/impl/numeric/multiply.h"
-#include "core/impl/numeric/subtract.h"
+#include "core/base/variable_wrapper.h"
 #include "core/impl/numeric/translate.h"
 #include "core/util/bean_utils.h"
+#include "core/util/numeric_util.h"
 #include "core/util/strings.h"
 
 #include "graphics/base/v3.h"
@@ -70,17 +66,17 @@ private:
 }
 
 Vec3::Vec3() noexcept
-    : _x(sp<Scalar>::make(0.0f)), _y(sp<Scalar>::make(0.0f)), _z(sp<Scalar>::make(0.0f))
+    : _x(sp<NumericWrapper>::make(0.0f)), _y(sp<NumericWrapper>::make(0.0f)), _z(sp<NumericWrapper>::make(0.0f))
 {
 }
 
 Vec3::Vec3(float x, float y, float z) noexcept
-    : _x(sp<Scalar>::make(x)), _y(sp<Scalar>::make(y)), _z(sp<Scalar>::make(z))
+    : _x(sp<NumericWrapper>::make(x)), _y(sp<NumericWrapper>::make(y)), _z(sp<NumericWrapper>::make(z))
 {
 }
 
 Vec3::Vec3(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z) noexcept
-    : _x(sp<Scalar>::make(x)), _y(sp<Scalar>::make(y)), _z(sp<Scalar>::make(z))
+    : _x(sp<NumericWrapper>::make(x)), _y(sp<NumericWrapper>::make(y)), _z(sp<NumericWrapper>::make(z))
 {
 }
 
@@ -97,27 +93,27 @@ V3 Vec3::val()
 
 Vec3 operator +(const Vec3& lvalue, const Vec3& rvalue)
 {
-    return Vec3(sp<Add>::make(lvalue._x, rvalue._x), sp<Add>::make(lvalue._y, rvalue._y), sp<Add>::make(lvalue._z, rvalue._z));
+    return Vec3(NumericUtil::add(lvalue._x, rvalue._x), NumericUtil::add(lvalue._y, rvalue._y), NumericUtil::add(lvalue._z, rvalue._z));
 }
 
 Vec3 operator -(const Vec3& lvalue, const Vec3& rvalue)
 {
-    return Vec3(sp<Subtract>::make(lvalue._x, rvalue._x), sp<Subtract>::make(lvalue._y, rvalue._y), sp<Subtract>::make(lvalue._z, rvalue._z));
+    return Vec3(NumericUtil::sub(lvalue._x, rvalue._x), NumericUtil::sub(lvalue._y, rvalue._y), NumericUtil::sub(lvalue._z, rvalue._z));
 }
 
 Vec3 operator *(const Vec3& lvalue, const Vec3& rvalue)
 {
-    return Vec3(sp<Multiply>::make(lvalue._x, rvalue._x), sp<Multiply>::make(lvalue._y, rvalue._y), sp<Multiply>::make(lvalue._z, rvalue._z));
+    return Vec3(NumericUtil::mul(lvalue._x, rvalue._x), NumericUtil::mul(lvalue._y, rvalue._y), NumericUtil::mul(lvalue._z, rvalue._z));
 }
 
 Vec3 operator /(const Vec3& lvalue, const Vec3& rvalue)
 {
-    return Vec3(sp<Divide>::make(lvalue._x, rvalue._x), sp<Divide>::make(lvalue._y, rvalue._y), sp<Divide>::make(lvalue._z, rvalue._z));
+    return Vec3(NumericUtil::truediv(lvalue._x, rvalue._x), NumericUtil::truediv(lvalue._y, rvalue._y), NumericUtil::truediv(lvalue._z, rvalue._z));
 }
 
 sp<Vec3> Vec3::negative()
 {
-    return sp<Vec3>::make(sp<Negative>::make(_x), sp<Negative>::make(_y), sp<Negative>::make(_z));
+    return sp<Vec3>::make(NumericUtil::negative(_x), NumericUtil::negative(_y), NumericUtil::negative(_z));
 }
 
 float Vec3::x() const
@@ -172,17 +168,17 @@ sp<Vec2> Vec3::vxy() const
 
 void Vec3::setVx(const sp<Numeric>& vx) const
 {
-    _x->setDelegate(Null::toSafe<Numeric>(vx));
+    _x->set(vx);
 }
 
 void Vec3::setVy(const sp<Numeric>& vy) const
 {
-    _y->setDelegate(Null::toSafe<Numeric>(vy));
+    _y->set(vy);
 }
 
 void Vec3::setVz(const sp<Numeric>& vz) const
 {
-    _z->setDelegate(Null::toSafe<Numeric>(vz));
+    _z->set(vz);
 }
 
 void Vec3::setDelegate(const sp<VV3>& delegate)
@@ -192,28 +188,28 @@ void Vec3::setDelegate(const sp<VV3>& delegate)
         if(delegate.is<Vec3>())
         {
             const sp<Vec3> vec3 = delegate.cast<Vec3>();
-            _x->assign(vec3->_x);
-            _y->assign(vec3->_y);
-            _z->assign(vec3->_z);
+            _x->set(vec3->_x);
+            _y->set(vec3->_y);
+            _z->set(vec3->_z);
         }
         else
         {
-            _x->setDelegate(sp<VV3X>::make(delegate));
-            _y->setDelegate(sp<VV3Y>::make(delegate));
-            _z->setDelegate(sp<VV3Z>::make(delegate));
+            _x->set(sp<VV3X>::make(delegate));
+            _y->set(sp<VV3Y>::make(delegate));
+            _z->set(sp<VV3Z>::make(delegate));
         }
     }
     else
     {
-        _x->assign(nullptr);
-        _y->assign(nullptr);
-        _z->assign(nullptr);
+        _x->set(nullptr);
+        _y->set(nullptr);
+        _z->set(nullptr);
     }
 }
 
 Vec3 Vec3::translate(const Vec3& translation) const
 {
-    return Vec3(sp<Add>::make(_x, translation._x), sp<Add>::make(_y, translation._y), sp<Add>::make(_z, translation._z));
+    return Vec3(NumericUtil::add(_x, translation._x), NumericUtil::add(_y, translation._y), NumericUtil::add(_z, translation._z));
 }
 
 Vec3 Vec3::translate(float x, float y, float z) const

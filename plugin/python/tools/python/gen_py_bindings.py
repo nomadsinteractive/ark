@@ -16,9 +16,9 @@ LOADER_TEMPLATE = '''template<typename T> static Box PyArk${classname}_${methodn
 TP_AS_NUMBER_TEMPLATE = [
     'static PyNumberMethods ${py_class_name}_tp_as_number = {',
     '    (binaryfunc) ${nb_add},        /* binaryfunc nb_add;                  */ /* __add__ */',
-    '    (binaryfunc) ${nb_subtract},       /* binaryfunc nb_subtract; */ /* __sub__ */',
-    '    (binaryfunc) ${nb_multiply},       /* binaryfunc nb_multiply; */ /* __mul__ */',
-    '    0,               /* binaryfunc nb_remainder; */ /* __mod__ */',
+    '    (binaryfunc) ${nb_subtract}, /* binaryfunc nb_subtract; */ /* __sub__ */',
+    '    (binaryfunc) ${nb_multiply}, /* binaryfunc nb_multiply; */ /* __mul__ */',
+    '    (binaryfunc) ${nb_remainder}, /* binaryfunc nb_remainder; */ /* __mod__ */',
     '    0,               /* binaryfunc nb_divmod; */ /* __divmod__ */',
     '    0,               /* ternaryfunc nb_power; */ /* __pow__ */',
     '    (unaryfunc) ${nb_negative},        /* unaryfunc nb_negative; */ /* __neg__ */',
@@ -28,9 +28,9 @@ TP_AS_NUMBER_TEMPLATE = [
     '    0,               /* unaryfunc nb_invert; */ /* __invert__ */',
     '    0,               /* binaryfunc nb_lshift; */ /* __lshift__ */',
     '    0,               /* binaryfunc nb_rshift; */ /* __rshift__ */',
-    '    0,               /* binaryfunc nb_and; */ /* __and__ */',
+    '    (binaryfunc) ${nb_and}, /* binaryfunc nb_and; */ /* __and__ */',
     '    0,               /* binaryfunc nb_xor; */ /* __xor__ */',
-    '    0,               /* binaryfunc nb_or; */ /* __or__ */',
+    '    (binaryfunc) ${nb_or}, /* binaryfunc nb_or; */ /* __or__ */',
     '    (unaryfunc) ${nb_int}, /* unaryfunc nb_int; */ /* __int__ */',
     '    0,               /* void *nb_reserved; */',
     '    (unaryfunc) ${nb_float},       /* unaryfunc nb_float; */ /* __float__ */',
@@ -55,7 +55,10 @@ TP_AS_NUMBER_TEMPLATE_OPERATOR = {
     '+': 'nb_add',
     '-': 'nb_subtract',
     '*': 'nb_multiply',
+    '%': 'nb_remainder',
     'neg': 'nb_negative',
+    '&&': 'nb_and',
+    '||': 'nb_or',
     'int': 'nb_int',
     'float': 'nb_float',
     '+=': 'nb_inplace_add',
@@ -509,13 +512,19 @@ class GenMethod(object):
     def gen_py_type_constructor_codes(self, lines, genclass):
         pass
 
+    def gen_self_statement(self, genclass):
+        cast_statement = ''
+        if self._self_argument and not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
+            cast_statement = '.cast<%s>()' % acg.getSharedPtrType(self._self_argument.accept_type)
+        return 'unpacked' + cast_statement
+
     def gen_declaration(self):
         return 'static %s %s(%s);' % (self.gen_py_return(), self._name, self.gen_py_arguments())
 
     @staticmethod
     def _gen_convert_args_code(lines, argdeclare):
         if argdeclare:
-            lines.append('\n    '.join(argdeclare))
+            lines.extend(argdeclare)
 
     def gen_definition(self, genclass):
         lines = []
@@ -632,6 +641,10 @@ class GenPropertyMethod(GenMethod):
         ga = GenArgument(args[0].accept_type, args[0].default_value, meta, str(args[0]))
         lines.append(ga.gen_declare('obj0', 'value'))
 
+    @property
+    def is_static(self):
+        return self._is_static
+
     @staticmethod
     def _gen_convert_args_code(lines, argdeclare):
         pass
@@ -649,10 +662,11 @@ class GenPropertyMethod(GenMethod):
             property_def[1] = '(getter) %s::%s' % (genclass.py_class_name, self._name)
 
     def _gen_call_statement(self, genclass, argnames):
+        self_statement = self.gen_self_statement(genclass)
         if self._is_static:
-            lines = ['%s::%s(unpacked%s);' % (genclass.classname, self._name, argnames and ', ' + argnames)]
+            lines = ['%s::%s(%s%s);' % (genclass.classname, self._name, self_statement, argnames and ', ' + argnames)]
         else:
-            lines = ['unpacked->%s(%s);' % (self._name, argnames)]
+            lines = ['%s->%s(%s);' % (self_statement, self._name, argnames)]
         if self._is_setter and genclass.is_container and self._arguments[0].type_compare('Box'):
             lines.append('self->setContainerObject(obj0);')
         return '\n    '.join(lines)
@@ -665,6 +679,18 @@ class GenPropertyMethod(GenMethod):
         property_def = [snake_property_name, 'nullptr', 'nullptr', self._property_name]
         properties.append(property_def)
         return property_def
+
+    @property
+    def err_return_value(self):
+        return 'return -1'
+
+    @staticmethod
+    def overload(m1, m2):
+        try:
+            m1.add_overloaded_method(m2)
+            return m1
+        except AttributeError:
+            return create_overloaded_method_type(GenPropertyMethod, is_static=m1.is_static)(m1, m2)
 
 
 class GenLoaderMethod(GenMethod):
@@ -716,10 +742,7 @@ class GenStaticMemberMethod(GenMethod):
         return '{"%s", (PyCFunction) %s::%s, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.py_class_name, self._name, self._flags)
 
     def _gen_call_statement(self, genclass, argnames):
-        cast_statement = ''
-        if not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
-            cast_statement = '.cast<%s>()' % acg.getSharedPtrType(self._self_argument.accept_type)
-        return '%s::%s(unpacked%s%s);' % (genclass.classname, self._name, cast_statement, argnames if not argnames else ', ' + argnames)
+        return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
 
     @staticmethod
     def overload(m1, m2):
@@ -738,10 +761,7 @@ class GenOperatorMethod(GenMethod):
         self._operator = operator
 
     def _gen_call_statement(self, genclass, argnames):
-        cast_statement = ''
-        if not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
-            cast_statement = '.cast<%s>()' % acg.getSharedPtrType(self._self_argument.accept_type)
-        return '%s::%s(unpacked%s%s);' % (genclass.classname, self._name, cast_statement, argnames if not argnames else ', ' + argnames)
+        return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
 
     def gen_return_statement(self, return_type):
         if self._operator in ('+=', '-=', '*=', '/='):
@@ -763,11 +783,11 @@ class GenOperatorMethod(GenMethod):
         return self._operator
 
 
-def create_overloaded_method_type(base_type):
+def create_overloaded_method_type(base_type, **kwargs):
 
     class GenOverloadedMethod(base_type):
         def __init__(self, m1, m2):
-            base_type.__init__(self, m1.name, [], m1.return_type)
+            base_type.__init__(self, m1.name, [], m1.return_type, **kwargs)
             self._arguments = self._replace_arguments(m1.arguments)
             self._overloaded_methods = []
             self.add_overloaded_method(m1)
@@ -782,7 +802,7 @@ def create_overloaded_method_type(base_type):
                         not_overloaded_args[j] = None
 
             not_overloaded_declar = [j.gen_declare('obj%d' % i, 'arg%d' % i) for i, j in enumerate(not_overloaded_args) if j]
-            lines.extend(not_overloaded_declar)
+            self._gen_convert_args_code(lines, not_overloaded_declar)
             for i in self._overloaded_methods:
                 type_checks = [k.gen_type_check('arg%d' % j) for j, k, l in zip(range(len(i.arguments)), i.arguments, not_overloaded_args) if not l]
                 lines.extend(['if(%s)' % ' && '.join([j for j in type_checks if j] or ['true']), '{'])

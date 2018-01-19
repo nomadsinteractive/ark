@@ -1,10 +1,10 @@
 #include "graphics/base/render_object.h"
 
 #include "core/base/bean_factory.h"
+#include "core/base/variable_wrapper.h"
 #include "core/inf/iterator.h"
 #include "core/inf/variable.h"
 #include "core/epi/expired.h"
-#include "core/impl/integer/integer_wrapper.h"
 #include "core/util/bean_utils.h"
 
 #include "graphics/base/filter.h"

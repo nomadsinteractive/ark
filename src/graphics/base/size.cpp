@@ -1,6 +1,6 @@
 #include "graphics/base/size.h"
 
-#include "core/impl/numeric/scalar.h"
+#include "core/base/variable_wrapper.h"
 #include "core/util/bean_utils.h"
 
 #include "graphics/base/v2.h"
@@ -8,17 +8,17 @@
 namespace ark {
 
 Size::Size()
-    : _width(sp<Scalar>::make(0.0f)), _height(sp<Scalar>::make(0.0f))
+    : _width(sp<NumericWrapper>::make(0.0f)), _height(sp<NumericWrapper>::make(0.0f))
 {
 }
 
 Size::Size(float width, float height)
-    : _width(sp<Scalar>::make(width)), _height(sp<Scalar>::make(height))
+    : _width(sp<NumericWrapper>::make(width)), _height(sp<NumericWrapper>::make(height))
 {
 }
 
 Size::Size(const sp<Numeric>& vwidth, const sp<Numeric>& vheight)
-    : _width(sp<Scalar>::make(vwidth)), _height(sp<Scalar>::make(vheight))
+    : _width(sp<NumericWrapper>::make(vwidth)), _height(sp<NumericWrapper>::make(vheight))
 {
 }
 

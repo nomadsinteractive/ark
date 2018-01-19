@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_IMPL_NUMERIC_DIVIDE_H_
-#define ARK_CORE_IMPL_NUMERIC_DIVIDE_H_
+#ifndef ARK_CORE_IMPL_NUMERIC_NUMERIC_SUBTRACT_H_
+#define ARK_CORE_IMPL_NUMERIC_NUMERIC_SUBTRACT_H_
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
@@ -9,23 +9,24 @@
 
 namespace ark {
 
-class ARK_API Divide : public Numeric {
+class NumericSubtract : public Numeric {
 public:
-    Divide(const sp<Numeric>& a1, const sp<Numeric>& a2);
+    NumericSubtract(const sp<Numeric>& a1, const sp<Numeric>& a2);
 
     virtual float val() override;
 
-//  [[plugin::style("divide")]]
-    class DECORATOR : public Builder<Numeric> {
+//  [[plugin::style("subtract"]]
+    class STYLE : public Builder<Numeric> {
     public:
-        DECORATOR(BeanFactory& beanFactory, const sp<Builder<Numeric>>& delegate, const String& style);
+        STYLE(BeanFactory& factory, const sp<Builder<Numeric>>& delegate, const String& value);
 
         virtual sp<Numeric> build(const sp<Scope>& args) override;
 
     private:
         sp<Builder<Numeric>> _delegate;
-        sp<Builder<Numeric>> _divide;
+        sp<Builder<Numeric>> _subtract;
     };
+
 
 private:
     sp<Numeric> _a1;

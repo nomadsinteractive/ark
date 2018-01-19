@@ -64,8 +64,8 @@ public:
     };
 
 private:
-    sp<Scalar> _width;
-    sp<Scalar> _height;
+    sp<NumericWrapper> _width;
+    sp<NumericWrapper> _height;
 
 };
 

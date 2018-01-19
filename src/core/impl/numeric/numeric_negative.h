@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_IMPL_NUMERIC_NEGATIVE_H_
-#define ARK_CORE_IMPL_NUMERIC_NEGATIVE_H_
+#ifndef ARK_CORE_IMPL_NUMERIC_NUMERIC_NEGATIVE_H_
+#define ARK_CORE_IMPL_NUMERIC_NUMERIC_NEGATIVE_H_
 
 #include "core/base/api.h"
 #include "core/inf/variable.h"
@@ -8,9 +8,9 @@
 
 namespace ark {
 
-class ARK_API Negative : public Numeric {
+class NumericNegative : public Numeric {
 public:
-    Negative(const sp<Numeric>& a1);
+    NumericNegative(const sp<Numeric>& a1);
 
     virtual float val() override;
 

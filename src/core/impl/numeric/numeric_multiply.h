@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_IMPL_NUMERIC_MULTIPLY_H_
-#define ARK_CORE_IMPL_NUMERIC_MULTIPLY_H_
+#ifndef ARK_CORE_IMPL_NUMERIC_NUMERIC_MULTIPLY_H_
+#define ARK_CORE_IMPL_NUMERIC_NUMERIC_MULTIPLY_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -9,16 +9,16 @@
 
 namespace ark {
 
-class ARK_API Multiply : public Numeric {
+class NumericMultiply : public Numeric {
 public:
-    Multiply(const sp<Numeric>& a1, const sp<Numeric>& a2);
+    NumericMultiply(const sp<Numeric>& a1, const sp<Numeric>& a2);
 
     virtual float val() override;
 
 //  [[plugin::style("multiply")]]
-    class DECORATOR : public Builder<Numeric> {
+    class STYLE : public Builder<Numeric> {
     public:
-        DECORATOR(BeanFactory& beanFactory, const sp<Builder<Numeric>>& delegate, const String& style);
+        STYLE(BeanFactory& beanFactory, const sp<Builder<Numeric>>& delegate, const String& style);
 
         virtual sp<Numeric> build(const sp<Scope>& args) override;
 

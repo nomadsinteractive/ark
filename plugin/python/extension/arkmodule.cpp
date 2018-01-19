@@ -19,7 +19,6 @@
 #include "python/extension/python_interpreter.h"
 #include "python/extension/py_ark_type.h"
 #include "python/extension/py_ark_boolean_type.h"
-#include "python/extension/py_ark_numeric_type.h"
 
 #include "platform/platform.h"
 
@@ -125,7 +124,7 @@ PyObject* initarkmodule()
     const sp<PythonInterpreter>& pythonInterpreter = PythonInterpreter::newInstance();
 
     pythonInterpreter->pyModuleAddType<PyArkBooleanType, Boolean>(module, "ark", "Boolean", Py_TPFLAGS_DEFAULT);
-    pythonInterpreter->pyModuleAddType<PyArkNumericType, Numeric>(module, "ark", "Numeric", Py_TPFLAGS_DEFAULT);
+//    pythonInterpreter->pyModuleAddType<PyArkNumericType, Numeric>(module, "ark", "Numeric", Py_TPFLAGS_DEFAULT);
     __init_py_ark_bindings__(module);
 
     return module;

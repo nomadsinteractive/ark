@@ -122,8 +122,8 @@ public:
     };
 
 private:
-    sp<Scalar> _x;
-    sp<Scalar> _y;
+    sp<NumericWrapper> _x;
+    sp<NumericWrapper> _y;
 
 };
 
