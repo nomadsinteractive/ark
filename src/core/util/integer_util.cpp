@@ -14,7 +14,7 @@ sp<Integer> IntegerUtil::create(const sp<Integer>& value)
     return sp<IntegerWrapper>::make(value);
 }
 
-sp<Integer> IntegerUtil::create(const int32_t value)
+sp<Integer> IntegerUtil::create(int32_t value)
 {
     return sp<IntegerWrapper>::make(value);
 }

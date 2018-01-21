@@ -1,10 +1,11 @@
-#include "core/impl/boolean/boolean_expression.h"
+#include "core/util/boolean_util.h"
 
 #include <regex>
 
 #include "core/base/bean_factory.h"
 #include "core/base/expression.h"
 #include "core/impl/boolean/boolean_and.h"
+#include "core/impl/boolean/boolean_not.h"
 #include "core/impl/boolean/boolean_or.h"
 
 namespace ark {
@@ -130,14 +131,96 @@ Expression::Operator<bool> BooleanOperation::OPS[2] = {
 
 }
 
-BooleanExpression::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
+BooleanUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
     : _expression(Expression::Compiler<bool, BooleanOperation>().compile(factory, value.strip()))
 {
 }
 
-sp<Boolean> BooleanExpression::DICTIONARY::build(const sp<Scope>& args)
+sp<Boolean> BooleanUtil::DICTIONARY::build(const sp<Scope>& args)
 {
     return _expression->build(args);
+}
+
+sp<Boolean> BooleanUtil::create(const sp<Boolean>& value)
+{
+    return sp<BooleanWrapper>::make(value);
+}
+
+sp<Boolean> BooleanUtil::create(bool value)
+{
+    return sp<BooleanWrapper>::make(value);
+}
+
+sp<Boolean> BooleanUtil::__and__(const sp<Boolean>& self, const sp<Boolean>& rvalue)
+{
+    return sp<BooleanAnd>::make(self, rvalue);
+}
+
+sp<Boolean> BooleanUtil::__or__(const sp<Boolean>& self, const sp<Boolean>& rvalue)
+{
+    return sp<BooleanOr>::make(self, rvalue);
+}
+
+sp<Boolean> BooleanUtil::negative(const sp<Boolean>& self)
+{
+    return sp<BooleanNot>::make(self);
+}
+
+bool BooleanUtil::toBool(const sp<Boolean>& self)
+{
+    return self->val();
+}
+
+bool BooleanUtil::val(const sp<Boolean>& self)
+{
+    return self->val();
+}
+
+void BooleanUtil::setVal(const sp<Boolean::Impl>& self, bool value)
+{
+    self->set(value);
+}
+
+void BooleanUtil::setVal(const sp<BooleanWrapper>& self, bool value)
+{
+    self->set(value);
+}
+
+const sp<Boolean>& BooleanUtil::delegate(const sp<Boolean>& self)
+{
+    const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
+    DCHECK(ib, "Must be an BooleanWrapper instance to get its delegate attribute");
+    return ib->delegate();
+}
+
+void BooleanUtil::setDelegate(const sp<Boolean>& self, const sp<Boolean>& delegate)
+{
+    const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
+    DCHECK(ib, "Must be an BooleanWrapper instance to set its delegate attribute");
+    ib->set(delegate);
+}
+
+void BooleanUtil::set(const sp<Boolean::Impl>& self, bool value)
+{
+    self->set(value);
+}
+
+void BooleanUtil::set(const sp<BooleanWrapper>& self, bool value)
+{
+    self->set(value);
+}
+
+void BooleanUtil::set(const sp<BooleanWrapper>& self, const sp<Boolean>& delegate)
+{
+    self->set(delegate);
+}
+
+void BooleanUtil::fix(const sp<Boolean>& self)
+{
+    const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
+    DWARN(ib, "Calling fix on non-BooleanWrapper has no effect.");
+    if(ib)
+        ib->fix();
 }
 
 }

@@ -67,6 +67,7 @@ typedef Variable<float> Numeric;
 
 typedef VariableWrapper<float> NumericWrapper;
 typedef VariableWrapper<int32_t> IntegerWrapper;
+typedef VariableWrapper<bool> BooleanWrapper;
 
 typedef Iterator<int32_t> Range;
 

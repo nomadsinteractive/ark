@@ -24,7 +24,7 @@ TP_AS_NUMBER_TEMPLATE = [
     '    (unaryfunc) ${nb_negative},        /* unaryfunc nb_negative; */ /* __neg__ */',
     '    0,               /* unaryfunc nb_positive; */ /* __pos__ */',
     '    0,               /* unaryfunc nb_absolute; */ /* __abs__ */',
-    '    0,               /* inquiry nb_bool; */ /* __bool__ */',
+    '    (inquiry) ${nb_bool}, /* inquiry nb_bool; */ /* __bool__ */',
     '    0,               /* unaryfunc nb_invert; */ /* __invert__ */',
     '    0,               /* binaryfunc nb_lshift; */ /* __lshift__ */',
     '    0,               /* binaryfunc nb_rshift; */ /* __rshift__ */',
@@ -57,6 +57,7 @@ TP_AS_NUMBER_TEMPLATE_OPERATOR = {
     '*': 'nb_multiply',
     '%': 'nb_remainder',
     'neg': 'nb_negative',
+    'bool': 'nb_bool',
     '&&': 'nb_and',
     '||': 'nb_or',
     'int': 'nb_int',
@@ -88,6 +89,8 @@ TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4')
 
 INDENT = '    '
 
+_just_print_flag = True
+
 cwd = os.getcwd()
 
 
@@ -103,36 +106,55 @@ def text_align(lines, text):
 
 
 def gen_cmakelist_source(arguments, paths, output_dir, output_file, results):
-    generated_files = [make_abs_path(path.join(output_dir, output_file + i)) for i in ('.h', '.cpp')]
-    dependencies = set()
+    output_files = [make_abs_path(path.join(output_dir, output_file + i)) for i in ('.h', '.cpp')]
+    dependencies = []
+    macro_calls = []
     for k, genclass in results.items():
-        generated_files.append(make_abs_path(path.join(output_dir, genclass.py_src_name + '.h')))
-        generated_files.append(make_abs_path(path.join(output_dir, genclass.py_src_name + '.cpp')))
-        dependencies.add(make_abs_path(genclass.filename))
-    return acg.format('''set(LOCAL_PY_TYPE_SOURCE_LIST
-    %s
-)
+        generated_unit = [make_abs_path(path.join(output_dir, genclass.py_src_name + '.h')),
+                          make_abs_path(path.join(output_dir, genclass.py_src_name + '.cpp'))]
+        generated = [genclass.filename, make_abs_path(genclass.filename)] + generated_unit
+        dependencies.extend(generated_unit)
+        macro_calls.append(generated)
+    calls = sorted(['ark_add_py_binding(%s)' % ' '.join(i) for i in macro_calls])
+    arguments_without_d = ' '.join('-%s %s' % (j, k) for j, k in arguments.items() if j not in ('c',))
+    arguments_without_o = ' '.join('-%s %s' % (j, k) for j, k in arguments.items() if j not in ('c', 'o'))
+    return acg.format('''macro(ark_add_py_binding SRC_PATH SRC_ABS_PATH)
+    add_custom_command(OUTPUT #{ARGN}
+        COMMAND python ${script_path} -b ${bindable_paths} ${arguments_without_o} #{SRC_PATH}
+        DEPENDS #{SRC_ABS_PATH} ${script_path}
+        WORKING_DIRECTORY ${working_dir})
+    if(MSVC)
+        foreach(i #{ARGN})
+           set_source_files_properties(#{i} PROPERTIES COMPILE_FLAGS /bigobj)
+        endforeach()
+    endif()
+    list(APPEND LOCAL_GENERATED_SRC_LIST #{ARGN})
+endmacro()
+
 set(LOCAL_PY_TYPE_DEPENDENCY_LIST
     %s
 )
-add_custom_command(OUTPUT #{LOCAL_PY_TYPE_SOURCE_LIST}
-    COMMAND python ${script_path} ${arguments} ${paths}
-    DEPENDS #{LOCAL_PY_TYPE_DEPENDENCY_LIST} ${script_path}
-    WORKING_DIRECTORY ${working_dir})
-if(MSVC)
-    foreach(i IN LISTS LOCAL_PY_TYPE_SOURCE_LIST)
-       set_source_files_properties(#{i} PROPERTIES COMPILE_FLAGS /bigobj)
-    endforeach()
-endif()
-list(APPEND LOCAL_GENERATED_SRC_LIST #{LOCAL_PY_TYPE_SOURCE_LIST})
+
+%s
+
+add_custom_command(OUTPUT ${output_files}
+        COMMAND python ${script_path} ${arguments_without_d} ${paths}
+        DEPENDS #{LOCAL_PY_TYPE_DEPENDENCY_LIST}  ${script_path}
+        WORKING_DIRECTORY ${working_dir})
+list(APPEND LOCAL_GENERATED_SRC_LIST ${output_files})
+
 ''', script_path=make_abs_path(sys.argv[0]),
+                      output_files=' '.join(output_files),
+                      paths=' '.join(paths),
+                      bindable_paths=path.pathsep.join(paths),
                       working_dir=os.getcwd().replace('\\', '/'),
-                      arguments=' '.join('-%s %s' % (j, k) for j, k in arguments.items() if j != 'c'),
-                      paths=' '.join(paths)).replace('#', '$') % ('\n    '.join(sorted(generated_files)),
-                                                                  '\n    '.join(sorted(list(dependencies))))
+                      arguments_without_o=arguments_without_o,
+                      arguments_without_d=arguments_without_d
+                      ).replace('#', '$') % ('\n    '.join(sorted(dependencies)),
+                                             '\n'.join(calls))
 
 
-def gen_header_source(filename, output_dir, results, namespaces):
+def gen_header_source(filename, output_dir, output_file, results, namespaces):
     filedir, name = path.split(filename)
     declares = ['\nvoid __init_%s__(PyObject* module);' % name]
     includes = []
@@ -141,12 +163,13 @@ def gen_header_source(filename, output_dir, results, namespaces):
             declares.append(CLASS_DELIMITER)
             gen_class_header_source(genclass, declares)
         else:
-            local_declares = []
             includes.append('#include "%s.h"' % genclass.py_src_name)
-            gen_class_header_source(genclass, local_declares)
-            hfilepath = path.join(output_dir, genclass.py_src_name + '.h')
-            with open(hfilepath, 'wt') as fp:
-                fp.write(gen_py_binding_h(hfilepath, namespaces, [], local_declares))
+            if output_file is None:
+                local_declares = []
+                gen_class_header_source(genclass, local_declares)
+                hfilepath = path.join(output_dir, genclass.py_src_name + '.h')
+                with open(hfilepath, 'wt') as fp:
+                    fp.write(gen_py_binding_h(hfilepath, namespaces, [], local_declares))
     return gen_py_binding_h(filename, namespaces, includes, declares)
 
 
@@ -176,7 +199,7 @@ ${0}
                       includes='\n'.join(includes))
 
 
-def gen_body_source(filename, output_dir, namespaces, modulename, results, buildables):
+def gen_body_source(filename, output_dir, output_file, namespaces, modulename, results, buildables):
     filedir, name = path.split(filename)
     includes = []
     lines = []
@@ -185,12 +208,13 @@ def gen_body_source(filename, output_dir, namespaces, modulename, results, build
             lines.append(CLASS_DELIMITER)
             gen_class_body_source(genclass, includes, lines, buildables)
         else:
-            classincludes = []
-            classlines = []
             includes.append('#include "%s"' % genclass.filename)
-            gen_class_body_source(genclass, classincludes, classlines, buildables)
-            with open(path.join(output_dir, genclass.py_src_name + '.cpp'), 'wt') as fp:
-                fp.write(gen_py_binding_cpp(genclass.py_src_name, namespaces, classincludes, classlines))
+            if output_file is None:
+                classincludes = []
+                classlines = []
+                gen_class_body_source(genclass, classincludes, classlines, buildables)
+                with open(path.join(output_dir, genclass.py_src_name + '.cpp'), 'wt') as fp:
+                    fp.write(gen_py_binding_cpp(genclass.py_src_name, namespaces, classincludes, classlines))
 
     add_types = '\n    '.join('pi->pyModuleAddType<%s, %s>(module, "%s", "%s", Py_TPFLAGS_DEFAULT%s);' % (i.py_class_name, i.binding_classname, modulename, i.binding_classname, '|Py_TPFLAGS_HAVE_GC' if i.is_container else '') for i in results.values())
     lines.append('\n' + '''void __init_%s__(PyObject* module)
@@ -387,9 +411,9 @@ ARK_PY_ARGUMENTS = (
 )
 
 ARK_PY_ARGUMENT_CHECKERS = {
-    'int32_t': GenConverter('PyNumber_Check(%s)', 'PyLong_AsLong(%s)'),
-    'uint32_t': GenConverter('PyNumber_Check(%s)', 'PyLong_AsLong(%s)'),
-    'float': GenConverter('PyNumber_Check(%s)', '﻿PyFloat_AsDouble(%s)'),
+    'int32_t': GenConverter('PyLong_Check(%s)', 'PyLong_AsLong(%s)'),
+    'uint32_t': GenConverter('PyLong_Check(%s)', 'PyLong_AsLong(%s)'),
+    'float': GenConverter('PyFloat_Check(%s)', '﻿PyFloat_AsDouble(%s)'),
     'std::wstring': GenConverter('PyUnicode_Check(%s)', 'PyUnicode_DATA(%s)')
 }
 
@@ -480,14 +504,18 @@ class GenMethod(object):
         return 'unpacked->%s(%s);' % (self._name, argnames)
 
     @staticmethod
-    def gen_return_statement(return_type):
+    def gen_return_statement(return_type, py_return):
+        if acg.typeCompare(return_type, py_return):
+            return ['return ret;']
+
+        if py_return != 'PyObject*':
+            return ['return static_cast<%s>(ret);' % py_return]
+
         if return_type == 'void':
             return ['Py_RETURN_NONE;']
         m = acg.getSharedPtrType(return_type)
         if m in ('String', 'std::wstring'):
             fromcall = 'template fromType<%s>' % m
-        elif m == 'PyObject*':
-            return ['return ret;']
         else:
             fromcall = 'toPyObject'
         return ['return PythonInterpreter::instance()->%s(ret);' % fromcall]
@@ -553,7 +581,8 @@ class GenMethod(object):
         argtypes = [i.gen_declare('t', 't').split()[0] for i in self._arguments]
         argnames = ', '.join(gen_method_call_arg(i, j.str(), argtypes[i]) for i, j in enumerate(self._arguments))
         callstatement = self._gen_call_statement(genclass, argnames)
-        pyret = ['return 0;'] if self.gen_py_return() == 'int' else self.gen_return_statement(r)
+        py_return = self.gen_py_return()
+        pyret = ['return 0;'] if py_return == 'int' else self.gen_return_statement(r, py_return)
         if r != 'void' and r:
             callstatement = '%s ret = %s' % (acg.strip_key_words(self._return_type, ['virtual']), callstatement)
         calling_lines = [callstatement] + pyret
@@ -760,13 +789,18 @@ class GenOperatorMethod(GenMethod):
         self._arguments = self._arguments[1:]
         self._operator = operator
 
+    def gen_py_return(self):
+        if self._return_type == 'bool':
+            return 'int32_t'
+        return 'PyObject*'
+
     def _gen_call_statement(self, genclass, argnames):
         return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
 
-    def gen_return_statement(self, return_type):
+    def gen_return_statement(self, return_type, py_return):
         if self._operator in ('+=', '-=', '*=', '/='):
             return ['Py_INCREF(self);', 'return reinterpret_cast<PyObject*>(self);']
-        return GenMethod.gen_return_statement(return_type)
+        return GenMethod.gen_return_statement(return_type, py_return)
 
     @staticmethod
     def _gen_convert_args_code(lines, argdeclare):
@@ -904,7 +938,7 @@ class GenClass(object):
         return self.find_methods_by_type(GenOperatorMethod)
 
     def find_methods_by_type(self, method_type):
-        return [i for i in self.methods if type(i) is method_type]
+        return [i for i in self.methods if isinstance(i, method_type)]
 
     def gen_py_type_constructor_codes(self, lines):
         for i in self.methods:
@@ -943,6 +977,7 @@ def main(params, paths):
     output_file = params['o'] if 'o' in params else None
     output_dir = params['d'] if 'd' in params else None
     output_cmakelist = params['c'] if 'c' in params else None
+    bindable_paths = params['b'] if 'b' in params else None
 
     def automethod(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
@@ -1014,15 +1049,21 @@ def main(params, paths):
                             HeaderPattern(AUTOBIND_META_PATTERN, autometa),
                             HeaderPattern(BUILDABLE_PATTERN, autobindable))
 
+    if bindable_paths:
+        acg.matchHeaderPatterns(bindable_paths.split(path.pathsep), HeaderPattern(BUILDABLE_PATTERN, autobindable))
+
     if output_cmakelist:
-        return acg.write_to_file(output_cmakelist if output_cmakelist != 'stdout' else None, gen_cmakelist_source(params, paths, output_dir, output_file or 'stdout', results))
-    acg.write_to_file(output_file and output_file + '.h', gen_header_source(output_file or 'stdout', output_dir, results, namespaces))
-    acg.write_to_file(output_file and output_file + '.cpp',
-                      gen_body_source(output_file or 'stdout', output_dir, namespaces, modulename, results, bindables))
+        return acg.write_to_file(_just_print_flag and output_cmakelist, gen_cmakelist_source(params, paths, output_dir, output_file or 'stdout', results))
+
+    head_src = gen_header_source(output_file or 'stdout', output_dir, output_file, results, namespaces)
+    cpp_src = gen_body_source(output_file or 'stdout', output_dir, output_file, namespaces, modulename, results, bindables)
+    if output_file:
+        acg.write_to_file(_just_print_flag and output_file + '.h', head_src)
+        acg.write_to_file(_just_print_flag and output_file + '.cpp', cpp_src)
 
 
 if __name__ == '__main__':
-    opts, paths = getopt.getopt(sys.argv[1:], 'c:p:n:o:l:m:d:')
+    opts, paths = getopt.getopt(sys.argv[1:], 'b:c:p:n:o:l:m:d:j')
     params = dict((i.lstrip('-'), j) for i, j in opts)
     if any(i not in params for i in ['p', 'm']) or len(paths) == 0:
         print('Usage: %s -p namespace -m modulename [-c cmakefile] [-o output_file] [-l library_path] dir_paths...' % sys.argv[0])
@@ -1034,5 +1075,8 @@ if __name__ == '__main__':
 
     import acg
     from acg import HeaderPattern
+
+    if 'j' in params:
+        _just_print_flag = None
 
     main(params, paths)

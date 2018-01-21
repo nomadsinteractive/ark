@@ -9,12 +9,12 @@ AlphabetWithFallback::AlphabetWithFallback(const sp<Alphabet>& alphabet, const s
 {
 }
 
-bool AlphabetWithFallback::load(uint32_t c, uint32_t& width, uint32_t& height, bool loadGlyph, bool hasFallback)
+bool AlphabetWithFallback::load(uint32_t c, Metrics& metrics, bool loadGlyph, bool hasFallback)
 {
-    _load_success = _alphabet->load(c, width, height, loadGlyph, true);
+    _load_success = _alphabet->load(c, metrics, loadGlyph, true);
     if(_load_success)
         return true;
-    return _fallback->load(c, width, height, loadGlyph, hasFallback);
+    return _fallback->load(c, metrics, loadGlyph, hasFallback);
 }
 
 void AlphabetWithFallback::draw(const bitmap& image, int32_t x, int32_t y)

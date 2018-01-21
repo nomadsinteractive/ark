@@ -17,4 +17,10 @@ template<> ARK_API const sp<Integer>& Null::ptr()
     return inst;
 }
 
+template<> ARK_API const sp<Boolean>& Null::ptr()
+{
+    static const sp<Boolean> inst = sp<Boolean::Const>::make(false);
+    return inst;
+}
+
 }

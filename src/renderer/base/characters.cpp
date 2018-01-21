@@ -72,9 +72,9 @@ sp<Size> Characters::getItemSize(wchar_t c) const
         const sp<Size>& size = item.size();
         return _text_scale == 1.0f ? size : sp<Size>::make(size->width() * _text_scale, size->height() * _text_scale);
     }
-    uint32_t width, height;
-    _alphabet->load(c, width, height, false, false);
-    return sp<Size>::make(width * _text_scale, height * _text_scale);
+    Alphabet::Metrics metrics;
+    _alphabet->load(c, metrics, false, false);
+    return sp<Size>::make(metrics.width * _text_scale, metrics.height * _text_scale);
 }
 
 void Characters::createContent()

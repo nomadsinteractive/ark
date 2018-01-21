@@ -11,7 +11,16 @@ class Alphabet {
 public:
     virtual ~Alphabet() = default;
 
-    virtual bool load(uint32_t c, uint32_t& width, uint32_t& height, bool loadGlyph, bool hasFallback) = 0;
+    struct Metrics {
+        int32_t width;
+        int32_t height;
+        int32_t bitmap_width;
+        int32_t bitmap_height;
+        int32_t bitmap_x;
+        int32_t bitmap_y;
+    };
+
+    virtual bool load(uint32_t c, Metrics& metrics, bool loadGlyph, bool hasFallback) = 0;
     virtual void draw(const bitmap& image, int32_t x, int32_t y) = 0;
 };
 

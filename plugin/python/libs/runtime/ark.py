@@ -16,32 +16,7 @@ class Object:
     pass
 
 
-class Boolean:
-    def __init__(self, v):
-        self._v = v
-
-    def set(self, v):
-        pass
-
-
-class Renderer:
-    pass
-
-
-class Collider:
-
-    BODY_SHAPE_BOX = 0
-    BODY_SHAPE_CIRCLE = 1
-
-    BODY_TYPE_DYNAMIC = 0
-    BODY_TYPE_KINEMATIC = 1
-    BODY_TYPE_STATIC = 2
-
-    def create_body(self, type, shape, position, size):
-        return None
-
-
-class Integer:
+class Var:
     def __init__(self, v):
         pass
 
@@ -67,24 +42,40 @@ class Integer:
     def fix(self):
         pass
 
+    def __int__(self):
+        return 0
 
-class Numeric:
-    def __init__(self, v):
-        pass
+    def __float__(self):
+        return 0.0
 
-    def set(self, v):
-        pass
 
-    def val(self):
+class Renderer:
+    pass
+
+
+class Collider:
+
+    BODY_SHAPE_BOX = 0
+    BODY_SHAPE_CIRCLE = 1
+
+    BODY_TYPE_DYNAMIC = 0
+    BODY_TYPE_KINEMATIC = 1
+    BODY_TYPE_STATIC = 2
+
+    def create_body(self, type, shape, position, size):
         return None
 
-    @property
-    def delegate(self):
-        return None
 
-    @delegate.setter
-    def delegate(self, v):
-        pass
+class Boolean(Var):
+    pass
+
+
+class Integer(Var):
+    pass
+
+
+class Numeric(Var):
+    pass
 
 
 class Expired:
@@ -149,7 +140,7 @@ class Vec2:
 
 class Vec3(Vec2):
     def __init__(self, x, y, z):
-        super().__init__(x, y)
+        Vec2.__init__(self, x, y)
         self._z = z
 
     @property
@@ -171,7 +162,7 @@ class Vec3(Vec2):
 
 class Vec4(Vec3):
     def __init__(self, x, y, z, w):
-        super().__init__(x, y, z)
+        Vec3.__init__(self, x, y, z)
         self._w = w
 
     @property
@@ -193,31 +184,6 @@ class Vec4(Vec3):
 
 class Layer:
     pass
-
-
-class Scalar:
-    def __init__(self, x):
-        self._x = x
-
-    @property
-    def delegate(self):
-        return None
-
-    @delegate.setter
-    def delegate(self, val):
-        pass
-
-    def val(self):
-        return self._x
-
-    def set(self, x):
-        pass
-
-    def fix(self):
-        pass
-
-    def __float__(self):
-        return self._x
 
 
 class Arena:

@@ -51,35 +51,14 @@ aux_source_directory(impl/adapter LOCAL_SRC_LIST)
 aux_source_directory(impl/duck LOCAL_SRC_LIST)
 aux_source_directory(impl/script LOCAL_SRC_LIST)
 
-#ark_add_python_generated_unit(py_ark_bindings ${ARK_SRC_DIR} "src/app src/core src/graphics src/renderer plugin/python/extension" plugin/python/tools/python/gen_py_bindings.py -p ark::plugin::python -m ark -o ${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings -l "${ARK_SRC_DIR}/tools/python" src/app src/core src/graphics src/renderer platform plugin/python/extension)
 execute_process(
     COMMAND python plugin/python/tools/python/gen_py_bindings.py -d ${ARK_GENERATED_FILE_DIRECTORY} -c ${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cmake -p ark::plugin::python -m ark -o ${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings -l "${ARK_SRC_DIR}/tools/python" src/app src/core src/graphics src/renderer platform plugin/python/extension
     WORKING_DIRECTORY ${ARK_SRC_DIR}
 )
 include(${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cmake)
-#if(MSVC)
-#    set_source_files_properties(${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cpp PROPERTIES COMPILE_FLAGS /bigobj)
-#endif()
 if(NOT ${SYSTEM} STREQUAL "android")
     ark_add_generated_file(_freeze_importlib ark_py_importlib.h ${CMAKE_CURRENT_SOURCE_DIR}/extension extension/_ark_bootstrap.py _ark_bootstrap.py)
 endif()
-
-function(gen_py_method_def METHOD_DEF_FILE_NAME NAMESPACES)
-set(LOCAL_GENERATED_FILE_H ${ARK_GENERATED_FILE_DIRECTORY}/${METHOD_DEF_FILE_NAME}.h)
-set(LOCAL_GENERATED_FILE_CPP ${ARK_GENERATED_FILE_DIRECTORY}/${METHOD_DEF_FILE_NAME}.cpp)
-foreach(i IN LISTS ARGN)
-file(GLOB LOCAL_FILES "${ARK_SRC_DIR}/${i}/*.h")
-list(APPEND FILE_DEPENDS ${LOCAL_FILES})
-endforeach()
-add_custom_command(OUTPUT ${LOCAL_GENERATED_FILE_H} ${LOCAL_GENERATED_FILE_CPP}
-    COMMAND python ${ARK_SRC_DIR}/plugin/python/tools/python/gen_py_method_def.py -o ${ARK_GENERATED_FILE_DIRECTORY} -n ${METHOD_DEF_FILE_NAME} -p ${NAMESPACES} ${ARGN}
-    DEPENDS ${ARK_SRC_DIR}/plugin/python/tools/python/gen_py_method_def.py ${FILE_DEPENDS}
-    WORKING_DIRECTORY ${ARK_SRC_DIR})
-list(APPEND LOCAL_GENERATED_SRC_LIST ${LOCAL_GENERATED_FILE_H} ${LOCAL_GENERATED_FILE_CPP})
-set(LOCAL_GENERATED_SRC_LIST ${LOCAL_GENERATED_SRC_LIST} PARENT_SCOPE)
-endfunction(gen_py_method_def)
-
-gen_py_method_def(py_ark_method_def ark::plugin::python plugin/python/extension)
 
 ark_setup_tools(ark_gen_plugin_class)
 ark_gen_plugin_class(python core ark::plugin::python python_plugin impl)

@@ -59,10 +59,12 @@ bool AlphabetLayer::Stub::hasCharacterGlyph(uint32_t c) const
 
 bool AlphabetLayer::Stub::prepare(uint32_t c, bool allowOverflow)
 {
-    uint32_t width, height;
-    if(_alphabet->load(c, width, height, true, false))
+    Alphabet::Metrics metrics;
+    if(_alphabet->load(c, metrics, true, false))
     {
-        DCHECK(width > 0, "Error loading character %d: width = %d, height = %d", c, width, height);
+        int32_t width = metrics.width;
+        int32_t height = metrics.height;
+        DCHECK(width > 0 && height > 0, "Error loading character %d: width = %d, height = %d", c, width, height);
         if(_flowx + width > _atlas->width())
         {
             _flowy += height;

@@ -16,7 +16,7 @@ public:
 //[[script::bindings::constructor]]
     static sp<Numeric> create(const sp<Numeric>& value);
 //[[script::bindings::constructor]]
-    static sp<Numeric> create(const float value);
+    static sp<Numeric> create(float value);
 
 //[[script::bindings::operator(+)]]
     static sp<Numeric> add(const sp<Numeric>& self, const sp<Numeric>& rvalue);
@@ -73,7 +73,7 @@ public:
         sp<Builder<Numeric>> _expression;
     };
 
-//  [[plugin::builder("expression")]]
+//  [[plugin::builder("numeric")]]
     class BUILDER : public Builder<Numeric> {
     public:
         BUILDER(BeanFactory& parent, const document& doc);
@@ -81,7 +81,7 @@ public:
         virtual sp<Numeric> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Numeric>> _expression;
+        sp<Builder<Numeric>> _value;
     };
 
 };

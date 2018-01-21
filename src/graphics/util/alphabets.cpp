@@ -48,9 +48,9 @@ Alphabets::Characters Alphabets::create(Alphabet& alphabet, const std::wstring& 
     for(auto iter = text.begin(); iter != text.end(); ++iter)
     {
         wchar_t c = *iter;
-        uint32_t width, height;
-        alphabet.load(c, width, height, false, false);
-        const sp<Size> size = sp<Size>::make(static_cast<float>(textScale ? width * textScale : width), static_cast<float>(textScale ? height * textScale : height));
+        Alphabet::Metrics metrics;
+        alphabet.load(c, metrics, false, false);
+        const sp<Size> size = sp<Size>::make(static_cast<float>(textScale ? metrics.width * textScale : width), static_cast<float>(textScale ? metrics.height * textScale : metrics.height));
         place(boundary, letterSpacing, lineIndent, size, x, c, flowx, flowy, fontHeight, lineOffset, renderObjects);
     }
     return Characters(renderObjects, sp<Size>::make(flowx - x, flowy - y + (lineHeight == 0 ? fontHeight : lineHeight)));

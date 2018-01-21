@@ -78,13 +78,13 @@ sp<Numeric> NumericUtil::DICTIONARY::build(const sp<Scope>& args)
 }
 
 NumericUtil::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _expression(Expression::Compiler<float, NumericOperation>().compile(parent, Documents::ensureAttribute(doc, Constants::Attributes::VALUE)))
+    : _value(Expression::Compiler<float, NumericOperation>().compile(parent, Documents::ensureAttribute(doc, Constants::Attributes::VALUE)))
 {
 }
 
 sp<Numeric> NumericUtil::BUILDER::build(const sp<Scope>& args)
 {
-    return _expression->build(args);
+    return _value->build(args);
 }
 
 sp<Numeric> NumericUtil::create(const sp<Numeric>& value)
@@ -92,7 +92,7 @@ sp<Numeric> NumericUtil::create(const sp<Numeric>& value)
     return sp<NumericWrapper>::make(value);
 }
 
-sp<Numeric> NumericUtil::create(const float value)
+sp<Numeric> NumericUtil::create(float value)
 {
     return sp<NumericWrapper>::make(value);
 }

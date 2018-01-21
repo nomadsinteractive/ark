@@ -19,8 +19,8 @@ AlphabetTrueType::AlphabetTrueType(const String& src, uint32_t textSize)
     DCHECK(readable, "Font \"%s\" does not exists", src.c_str());
     freetypes->ftNewFaceFromReadable(readable, 0, &_ft_font_face);
     FT_Set_Char_Size(_ft_font_face, FreeTypes::ftF26Dot6(textSize, 0), 0, 96, 0);
-    _base_line_position = FreeTypes::ftCalculateBaseLinePosition(_ft_font_face);
     _line_height_in_pixel = FreeTypes::ftCalculateLineHeight(_ft_font_face);
+    _base_line_position = _line_height_in_pixel + FreeTypes::ftCalculateBaseLinePosition(_ft_font_face);
 }
 
 AlphabetTrueType::~AlphabetTrueType()
@@ -28,7 +28,7 @@ AlphabetTrueType::~AlphabetTrueType()
     FT_Done_Face(_ft_font_face);
 }
 
-bool AlphabetTrueType::load(uint32_t c, uint32_t& width, uint32_t& height, bool loadGlyph, bool hasFallback)
+bool AlphabetTrueType::load(uint32_t c, Metrics& metrics, bool loadGlyph, bool hasFallback)
 {
     FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
     if(hasFallback && !glyphIndex)
@@ -36,8 +36,12 @@ bool AlphabetTrueType::load(uint32_t c, uint32_t& width, uint32_t& height, bool 
     if(FT_Load_Glyph(_ft_font_face, glyphIndex, loadGlyph ? FT_LOAD_RENDER : FT_LOAD_NO_BITMAP) != 0)
         DFATAL("Error loading glyph, character: %d", c);
     FT_GlyphSlot slot = _ft_font_face->glyph;
-    width = slot->advance.x >> 6;
-    height = _line_height_in_pixel;
+    metrics.width = slot->advance.x >> 6;
+    metrics.height = _line_height_in_pixel;
+    metrics.bitmap_width = slot->metrics.width >> 6;
+    metrics.bitmap_height = slot->metrics.height >> 6;
+    metrics.bitmap_x = slot->metrics.horiBearingX >> 6;
+    metrics.bitmap_y = _base_line_position - (slot->metrics.horiBearingY >> 6);
     return true;
 }
 
@@ -45,7 +49,7 @@ void AlphabetTrueType::draw(const bitmap& image, int32_t x, int32_t y)
 {
     FT_GlyphSlot slot = _ft_font_face->glyph;
     DCHECK(slot, "Glyph not loaded");
-    image->draw(slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, x + slot->bitmap_left, y + _line_height_in_pixel + _base_line_position - slot->bitmap_top, slot->bitmap.pitch);
+    image->draw(slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, x + slot->bitmap_left, y + _base_line_position - slot->bitmap_top, slot->bitmap.pitch);
 }
 
 sp<Readable> AlphabetTrueType::getFontResource(const String& name) const

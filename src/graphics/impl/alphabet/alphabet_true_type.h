@@ -16,7 +16,7 @@ public:
     AlphabetTrueType(const String& src, uint32_t textSize);
     ~AlphabetTrueType();
 
-    virtual bool load(uint32_t c, uint32_t& width, uint32_t& height, bool loadGlyph, bool hasFallback) override;
+    virtual bool load(uint32_t c, Metrics& metrics, bool loadGlyph, bool hasFallback) override;
     virtual void draw(const bitmap& image, int32_t x, int32_t y) override;
 
 //[[plugin::builder("true-type")]]

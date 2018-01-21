@@ -15,7 +15,7 @@ public:
         : _variable_impl(nullptr), _delegate(Null::toSafe(delegate)) {
     }
     VariableWrapper(T value)
-        : _variable_impl(new Variable<T>::Impl(value)), _delegate(sp<Variable<T>>::adopt(_variable_impl)) {
+        : _variable_impl(new typename Variable<T>::Impl(value)), _delegate(sp<Variable<T>>::adopt(_variable_impl)) {
     }
     VariableWrapper(const VariableWrapper& other) = default;
     VariableWrapper(VariableWrapper&& other) = default;
@@ -34,7 +34,7 @@ public:
         else
         {
             deferedUnref();
-            _variable_impl = new Variable<T>::Impl(value);
+            _variable_impl = new typename Variable<T>::Impl(value);
             _delegate = sp<Variable<T>>::adopt(_variable_impl);
         }
     }
@@ -57,7 +57,7 @@ private:
     }
 
 private:
-    Variable<T>::Impl* _variable_impl;
+    typename Variable<T>::Impl* _variable_impl;
     sp<Variable<T>> _delegate;
 };
 
