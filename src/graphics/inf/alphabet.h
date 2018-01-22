@@ -20,8 +20,8 @@ public:
         int32_t bitmap_y;
     };
 
-    virtual bool load(uint32_t c, Metrics& metrics, bool loadGlyph, bool hasFallback) = 0;
-    virtual void draw(const bitmap& image, int32_t x, int32_t y) = 0;
+    virtual bool measure(uint32_t c, Metrics& metrics, bool hasFallback) = 0;
+    virtual bool draw(uint32_t c, const bitmap& image, int32_t x, int32_t y) = 0;
 };
 
 }

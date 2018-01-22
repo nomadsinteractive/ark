@@ -49,7 +49,7 @@ Alphabets::Characters Alphabets::create(Alphabet& alphabet, const std::wstring& 
     {
         wchar_t c = *iter;
         Alphabet::Metrics metrics;
-        alphabet.load(c, metrics, false, false);
+        alphabet.measure(c, metrics, false);
         const sp<Size> size = sp<Size>::make(static_cast<float>(textScale ? metrics.width * textScale : width), static_cast<float>(textScale ? metrics.height * textScale : metrics.height));
         place(boundary, letterSpacing, lineIndent, size, x, c, flowx, flowy, fontHeight, lineOffset, renderObjects);
     }

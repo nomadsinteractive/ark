@@ -120,7 +120,7 @@ def gen_cmakelist_source(arguments, paths, output_dir, output_file, results):
     arguments_without_o = ' '.join('-%s %s' % (j, k) for j, k in arguments.items() if j not in ('c', 'o'))
     return acg.format('''macro(ark_add_py_binding SRC_PATH SRC_ABS_PATH)
     add_custom_command(OUTPUT #{ARGN}
-        COMMAND python ${script_path} -b ${bindable_paths} ${arguments_without_o} #{SRC_PATH}
+        COMMAND python ${script_path} -b "${bindable_paths}" ${arguments_without_o} #{SRC_PATH}
         DEPENDS #{SRC_ABS_PATH} ${script_path}
         WORKING_DIRECTORY ${working_dir})
     if(MSVC)

@@ -12,8 +12,8 @@ class AlphabetWithFallback : public Alphabet {
 public:
     AlphabetWithFallback(const sp<Alphabet>& alphabet, const sp<Alphabet>& fallback);
 
-    virtual bool load(uint32_t c, Metrics& metrics, bool loadGlyph, bool hasFallback) override;
-    virtual void draw(const bitmap& image, int32_t x, int32_t y) override;
+    virtual bool measure(uint32_t c, Metrics& metrics, bool hasFallback) override;
+    virtual bool draw(uint32_t c, const bitmap& image, int32_t x, int32_t y) override;
 
 //  [[plugin::style("fallback")]]
     class STYLE : public Builder<Alphabet> {

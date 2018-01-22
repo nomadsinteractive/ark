@@ -28,13 +28,13 @@ AlphabetTrueType::~AlphabetTrueType()
     FT_Done_Face(_ft_font_face);
 }
 
-bool AlphabetTrueType::load(uint32_t c, Metrics& metrics, bool loadGlyph, bool hasFallback)
+bool AlphabetTrueType::measure(uint32_t c, Metrics& metrics, bool hasFallback)
 {
     FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
     if(hasFallback && !glyphIndex)
         return false;
-    if(FT_Load_Glyph(_ft_font_face, glyphIndex, loadGlyph ? FT_LOAD_RENDER : FT_LOAD_NO_BITMAP) != 0)
-        DFATAL("Error loading glyph, character: %d", c);
+    if(FT_Load_Glyph(_ft_font_face, glyphIndex, FT_LOAD_NO_BITMAP) != 0)
+        DFATAL("Error loading metrics, character: %d", c);
     FT_GlyphSlot slot = _ft_font_face->glyph;
     metrics.width = slot->advance.x >> 6;
     metrics.height = _line_height_in_pixel;
@@ -45,11 +45,18 @@ bool AlphabetTrueType::load(uint32_t c, Metrics& metrics, bool loadGlyph, bool h
     return true;
 }
 
-void AlphabetTrueType::draw(const bitmap& image, int32_t x, int32_t y)
+bool AlphabetTrueType::draw(uint32_t c, const bitmap& image, int32_t x, int32_t y)
 {
+    FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
+    if(!glyphIndex)
+        return false;
+    if(FT_Load_Glyph(_ft_font_face, glyphIndex, FT_LOAD_RENDER) != 0)
+        DFATAL("Error loading glyph, character: %d", c);
     FT_GlyphSlot slot = _ft_font_face->glyph;
     DCHECK(slot, "Glyph not loaded");
-    image->draw(slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, x + slot->bitmap_left, y + _base_line_position - slot->bitmap_top, slot->bitmap.pitch);
+//    image->draw(slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, x + slot->bitmap_left, y + _base_line_position - slot->bitmap_top, slot->bitmap.pitch);
+    image->draw(slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, x, y, slot->bitmap.pitch);
+    return true;
 }
 
 sp<Readable> AlphabetTrueType::getFontResource(const String& name) const

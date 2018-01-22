@@ -60,7 +60,7 @@ bool AlphabetLayer::Stub::hasCharacterGlyph(uint32_t c) const
 bool AlphabetLayer::Stub::prepare(uint32_t c, bool allowOverflow)
 {
     Alphabet::Metrics metrics;
-    if(_alphabet->load(c, metrics, true, false))
+    if(_alphabet->measure(c, metrics, false))
     {
         int32_t width = metrics.width;
         int32_t height = metrics.height;
@@ -76,8 +76,9 @@ bool AlphabetLayer::Stub::prepare(uint32_t c, bool allowOverflow)
                     return false;
             }
         }
-        _atlas->add(c, _flowx, _flowy, _flowx + width, _flowy + height);
-        _alphabet->draw(_font_glyph, _flowx, _flowy);
+//        _atlas->add(c, _flowx, _flowy, _flowx + width, _flowy + height);
+        _atlas->add(c, _flowx, _flowy, _flowx + metrics.bitmap_width, _flowy + metrics.bitmap_height);
+        _alphabet->draw(c, _font_glyph, _flowx, _flowy);
         _flowx += width;
     }
     else

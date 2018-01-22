@@ -7,6 +7,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/inf/alphabet.h"
 
 #include "renderer/forwarding.h"
 
@@ -15,7 +16,8 @@ namespace ark {
 class ARK_API Characters {
 public:
 //  [[script::bindings::auto]]
-    Characters(const sp<Layer>& layer, float textScale, float letterSpacing, float lineHeight, float lineIndent);
+    Characters(const sp<Layer>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+    Characters(const sp<Layer>& layer, const sp<ResourceLoaderContext>& resourceLoaderContext, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
     const sp<Layer>& layer() const;
 //  [[script::bindings::property]]
@@ -32,16 +34,17 @@ public:
 //  [[script::bindings::auto]]
     void setBounds(float x, float y, float width, float height);
 
-//[[plugin::builder]]
+//[[plugin::resource-loader]]
     class BUILDER : public Builder<Characters> {
     public:
-        BUILDER(BeanFactory& factory, const document manifest);
+        BUILDER(BeanFactory& factory, const document manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<Characters> build(const sp<Scope>& args) override;
 
     private:
         sp<Builder<Layer>> _layer;
         sp<Builder<String>> _text;
+        sp<ResourceLoaderContext> _resource_loader_context;
 
         float _text_scale;
         float _letter_spacing;
@@ -53,12 +56,13 @@ public:
 private:
     void createContent();
 
-    sp<Size> getItemSize(wchar_t c) const;
+    Alphabet::Metrics getItemMetrics(wchar_t c) const;
 
-    void place(float boundary, wchar_t c, const sp<Size>& itemSize, float& flowx, float& flowy, float& fontHeight);
+    void place(float boundary, wchar_t c, float& flowx, float& flowy, float& fontHeight);
 
 private:
     sp<Layer> _layer;
+    sp<ObjectPool> _object_pool;
 
     List<sp<RenderObject>> _characters;
     std::wstring _text;
