@@ -54,7 +54,6 @@ bool AlphabetTrueType::draw(uint32_t c, const bitmap& image, int32_t x, int32_t 
         DFATAL("Error loading glyph, character: %d", c);
     FT_GlyphSlot slot = _ft_font_face->glyph;
     DCHECK(slot, "Glyph not loaded");
-//    image->draw(slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, x + slot->bitmap_left, y + _base_line_position - slot->bitmap_top, slot->bitmap.pitch);
     image->draw(slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, x, y, slot->bitmap.pitch);
     return true;
 }

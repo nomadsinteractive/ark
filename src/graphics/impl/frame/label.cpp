@@ -8,10 +8,9 @@
 #include "graphics/base/render_object.h"
 #include "graphics/base/layer_context.h"
 #include "graphics/inf/alphabet.h"
+#include "graphics/inf/layer.h"
 
 #include "renderer/base/characters.h"
-#include "renderer/impl/layer/image_layer.h"
-#include "renderer/impl/layer/alphabet_layer.h"
 
 namespace ark {
 

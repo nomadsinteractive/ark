@@ -65,18 +65,19 @@ bool AlphabetLayer::Stub::prepare(uint32_t c, bool allowOverflow)
         int32_t width = metrics.width;
         int32_t height = metrics.height;
         DCHECK(width > 0 && height > 0, "Error loading character %d: width = %d, height = %d", c, width, height);
+        if(_max_glyph_height < metrics.bitmap_height)
+            _max_glyph_height = metrics.bitmap_height;
         if(_flowx + width > _atlas->width())
         {
-            _flowy += height;
-            _flowx = 0;
-            if(_flowy + height > _atlas->height())
-            {
-                DWARN(allowOverflow, "Font image texture (%d, %d) overflow, you may need to create a larger image texture", _atlas->width(), _atlas->height());
-                if(allowOverflow)
-                    return false;
-            }
+            _flowy += _max_glyph_height;
+            _max_glyph_height = _flowx = 0;
         }
-//        _atlas->add(c, _flowx, _flowy, _flowx + width, _flowy + height);
+        if(_flowy + metrics.bitmap_height > _atlas->height())
+        {
+            DWARN(allowOverflow, "Font image texture (%d, %d) overflow, you may need to create a larger image texture", _atlas->width(), _atlas->height());
+            if(allowOverflow)
+                return false;
+        }
         _atlas->add(c, _flowx, _flowy, _flowx + metrics.bitmap_width, _flowy + metrics.bitmap_height);
         _alphabet->draw(c, _font_glyph, _flowx, _flowy);
         _flowx += width;
@@ -100,6 +101,7 @@ bool AlphabetLayer::Stub::checkUnpreparedCharacter(const LayerContext::Snapshot&
 void AlphabetLayer::Stub::reset()
 {
     _flowx = _flowy = 0;
+    _max_glyph_height = 0;
     _atlas->clear();
     _characters.clear();
     memset(_font_glyph->at(0, 0), 0, _font_glyph->width() * _font_glyph->height());

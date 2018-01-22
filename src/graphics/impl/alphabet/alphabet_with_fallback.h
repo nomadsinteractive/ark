@@ -30,7 +30,6 @@ public:
 private:
     sp<Alphabet> _alphabet;
     sp<Alphabet> _fallback;
-    bool _load_success;
 };
 
 }

@@ -13,7 +13,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class Label : public Renderer, public Block {
 public:
     Label(const sp<Characters>& characters);
