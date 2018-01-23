@@ -168,8 +168,7 @@ def gen_header_source(filename, output_dir, output_file, results, namespaces):
                 local_declares = []
                 gen_class_header_source(genclass, local_declares)
                 hfilepath = path.join(output_dir, genclass.py_src_name + '.h')
-                with open(hfilepath, 'wt') as fp:
-                    fp.write(gen_py_binding_h(hfilepath, namespaces, [], local_declares))
+                acg.write_to_file(_just_print_flag and hfilepath, gen_py_binding_h(hfilepath, namespaces, [], local_declares))
     return gen_py_binding_h(filename, namespaces, includes, declares)
 
 
@@ -213,8 +212,8 @@ def gen_body_source(filename, output_dir, output_file, namespaces, modulename, r
                 classincludes = []
                 classlines = []
                 gen_class_body_source(genclass, classincludes, classlines, buildables)
-                with open(path.join(output_dir, genclass.py_src_name + '.cpp'), 'wt') as fp:
-                    fp.write(gen_py_binding_cpp(genclass.py_src_name, namespaces, classincludes, classlines))
+                acg.write_to_file(_just_print_flag and path.join(output_dir, genclass.py_src_name + '.cpp'),
+                                  gen_py_binding_cpp(genclass.py_src_name, namespaces, classincludes, classlines))
 
     add_types = '\n    '.join('pi->pyModuleAddType<%s, %s>(module, "%s", "%s", Py_TPFLAGS_DEFAULT%s);' % (i.py_class_name, i.binding_classname, modulename, i.binding_classname, '|Py_TPFLAGS_HAVE_GC' if i.is_container else '') for i in results.values())
     lines.append('\n' + '''void __init_%s__(PyObject* module)
@@ -321,10 +320,10 @@ class GenConverter:
         self._cast_func = cast_func
 
     def check(self, var):
-        return self._check_func % var
+        return self._check_func.format(var)
 
     def cast(self, var):
-        return self._cast_func % var
+        return self._cast_func.format(var)
 
 
 class GenArgument:
@@ -411,10 +410,10 @@ ARK_PY_ARGUMENTS = (
 )
 
 ARK_PY_ARGUMENT_CHECKERS = {
-    'int32_t': GenConverter('PyLong_Check(%s)', 'PyLong_AsLong(%s)'),
-    'uint32_t': GenConverter('PyLong_Check(%s)', 'PyLong_AsLong(%s)'),
-    'float': GenConverter('PyFloat_Check(%s)', '﻿PyFloat_AsDouble(%s)'),
-    'std::wstring': GenConverter('PyUnicode_Check(%s)', 'PyUnicode_DATA(%s)')
+    'int32_t': GenConverter('(PyLong_Check({0}) || PyFloat_Check({0}))', 'PyLong_AsLong({0})'),
+    'uint32_t': GenConverter('(PyLong_Check({0}) || PyFloat_Check({0}))', 'PyLong_AsLong({0})'),
+    'float': GenConverter('(PyLong_Check({0}) || PyFloat_Check({0}))', '﻿PyFloat_AsDouble({0})'),
+    'std::wstring': GenConverter('PyUnicode_Check({0})', 'PyUnicode_DATA({0})')
 }
 
 
