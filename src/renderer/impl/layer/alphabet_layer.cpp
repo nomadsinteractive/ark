@@ -14,6 +14,8 @@
 #include "renderer/impl/layer/image_layer.h"
 #include "renderer/impl/gl_snippet/gl_snippet_ucolor.h"
 
+#include "renderer/util/gl_debug.h"
+
 namespace ark {
 
 AlphabetLayer::AlphabetLayer(const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -80,7 +82,7 @@ bool AlphabetLayer::Stub::prepare(uint32_t c, bool allowOverflow)
         }
         _atlas->add(c, _flowx, _flowy, _flowx + metrics.bitmap_width, _flowy + metrics.bitmap_height);
         _alphabet->draw(c, _font_glyph, _flowx, _flowy);
-        _flowx += width;
+        _flowx += metrics.bitmap_width;
     }
     else
         DWARN(false, "Error loading character %d", c);

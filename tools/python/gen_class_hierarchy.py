@@ -8,12 +8,12 @@ import re
 import acg
 from acg import HeaderPattern
 
-CLASS_PATTERN = re.compile(r'(\[\[core::class\]\]\s+)?class\s+(ARK_API\s+)?([\w\d_]+)(?:\s+final)?\s*(:?[^{]+){')
+CLASS_PATTERN = re.compile(r'(\[\[core::class\]\]\s+)?([\w<>\s]+)class\s+(ARK_API\s+)?([\w\d_]+)(?:\s+final)?\s*(:?[^{]+){')
 
 INDENT = '\n    '
 
 
-CORE_INTERFACES = ('Numeric', 'Integer', 'GLResource', 'EventListener', 'Renderer', 'Expired', 'Block', 'Boolean', 'Range', 'Runnable')
+CORE_INTERFACES = ('Numeric', 'Integer', 'GLResource', 'EventListener', 'Renderer', 'Expired', 'Block', 'Boolean', 'Range', 'Runnable', 'VV2', 'VV3', 'VV4')
 
 
 class GenClass:
@@ -34,13 +34,13 @@ def search_for_classes(paths):
     result = []
 
     def match_class(filename, content, main_class, x):
-        core_class, ark_api, class_name, impls = x
-        if class_name == main_class and not class_name.startswith('_'):
+        core_class, class_pre, ark_api, class_name, impls = x
+        if class_name == main_class and not class_name.startswith('_') and 'template<' not in class_pre:
             if impls.startswith(':'):
                 implements = [k for k in [j[6:].strip() for j in [i.strip() for i in impls[1:].split(',')] if j.startswith('public')] if not k.startswith('Class<')]
             else:
                 implements = []
-            if ([i for i in implements if i in CORE_INTERFACES] and ark_api) or core_class:
+            if ([i for i in implements if i in CORE_INTERFACES]) or core_class:
                 result.append(GenClass(class_name, implements, filename))
 
     acg.matchHeaderPatterns(paths, HeaderPattern(CLASS_PATTERN, match_class))
@@ -71,9 +71,6 @@ def main():
     namespace = params['s'] if 's' in params else 'ark'
 
     result = search_for_classes(args)
-    file_path = None
-    if output_file:
-        file_dir, file_path = os.path.split(output_file)
 
     includes = '\n'.join(i.include() for i in result)
     src = '''
