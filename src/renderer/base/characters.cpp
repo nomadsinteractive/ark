@@ -75,23 +75,12 @@ Alphabet::Metrics Characters::getItemMetrics(wchar_t c) const
     if(_atlas)
     {
         const Atlas::Item& item = _atlas->at(c);
-        metrics.bitmap_width = metrics.width = static_cast<int32_t>(item.width() * _text_scale);
-        metrics.bitmap_height = metrics.height = static_cast<int32_t>(item.height() * _text_scale);
+        metrics.bitmap_width = metrics.width = static_cast<int32_t>(item.width());
+        metrics.bitmap_height = metrics.height = static_cast<int32_t>(item.height());
         metrics.bitmap_x = metrics.bitmap_y = 0;
     }
     else
-    {
         _alphabet->measure(c, metrics, false);
-        if(_text_scale != 1.0f)
-        {
-            metrics.bitmap_width *= _text_scale;
-            metrics.bitmap_height *= _text_scale;
-            metrics.width *= _text_scale;
-            metrics.height *= _text_scale;
-            metrics.bitmap_x *= _text_scale;
-            metrics.bitmap_y *= _text_scale;
-        }
-    }
     return metrics;
 }
 
@@ -108,22 +97,28 @@ void Characters::createContent()
 void Characters::place(float boundary, wchar_t c, float& flowx, float& flowy, float& fontHeight)
 {
     const Alphabet::Metrics metrics = getItemMetrics(c);
-    const sp<Size> itemSize = _object_pool ? _object_pool->obtain<Size>(metrics.bitmap_width, metrics.bitmap_height)
-                                           : sp<Size>::make(metrics.bitmap_width, metrics.bitmap_height);
+    float bitmapWidth = _text_scale * metrics.bitmap_width;
+    float bitmapHeight = _text_scale * metrics.bitmap_height;
+    float width = _text_scale * metrics.width;
+    float height = _text_scale * metrics.height;
+    float bitmapX = _text_scale * metrics.bitmap_x;
+    float bitmapY = _text_scale * metrics.bitmap_y;
+    const sp<Size> itemSize = _object_pool ? _object_pool->obtain<Size>(bitmapWidth, bitmapHeight)
+                                           : sp<Size>::make(bitmapWidth, bitmapHeight);
     if(fontHeight == 0)
-        fontHeight = static_cast<float>(metrics.height);
+        fontHeight = height;
     else
         flowx += _letter_spacing;
     if(_x != boundary)
     {
-        if(flowx + metrics.width > boundary)
+        if(flowx + width > boundary)
         {
             flowy += (_line_height ? _line_height : (-fontHeight * g_upDirection));
             flowx = _x + _line_indent;
         }
     }
-    _characters.push_back(sp<RenderObject>::make(c, sp<VV::Const>::make(V(flowx + metrics.bitmap_x, flowy + metrics.height - metrics.bitmap_y - metrics.bitmap_height)), itemSize));
-    flowx += metrics.width;
+    _characters.push_back(sp<RenderObject>::make(c, sp<VV::Const>::make(V(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight)), itemSize));
+    flowx += width;
 }
 
 Characters::BUILDER::BUILDER(BeanFactory& factory, const document manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

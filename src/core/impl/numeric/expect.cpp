@@ -28,7 +28,7 @@ float Expect::val()
             return value;
         }
         else
-            stub->_expectation->fireOnce();
+            stub->_expectation->fire();
     }
     return stub->_expectation->val();
 }

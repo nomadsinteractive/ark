@@ -12,12 +12,14 @@ namespace ark {
 class ARK_API Expectation : public Numeric {
 public:
 //[[script::bindings::auto]]
-    Expectation(const sp<Numeric>& expectation, const sp<Runnable>& onfire);
+    Expectation(const sp<Numeric>& expectation, const sp<Runnable>& onfire, bool fireOnce = true);
 
+//[[script::bindings::property]]
     virtual float val() override;
+//[[script::bindings::property]]
+    void setVal(float val);
 
     void fire();
-    void fireOnce();
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Expectation> {
@@ -34,6 +36,7 @@ public:
 private:
     sp<Numeric> _expectation;
     Notifier _onfire;
+    bool _fire_once;
 };
 
 }

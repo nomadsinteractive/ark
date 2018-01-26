@@ -1,11 +1,12 @@
 #include "core/base/expectation.h"
 
+#include "core/util/numeric_util.h"
 #include "core/util/bean_utils.h"
 
 namespace ark {
 
-Expectation::Expectation(const sp<Numeric>& expectation, const sp<Runnable>& onfire)
-    : _expectation(expectation), _onfire(onfire)
+Expectation::Expectation(const sp<Numeric>& expectation, const sp<Runnable>& onfire, bool fireOnce)
+    : _expectation(expectation), _onfire(onfire), _fire_once(fireOnce)
 {
 }
 
@@ -14,14 +15,17 @@ float Expectation::val()
     return _expectation->val();
 }
 
-void Expectation::fire()
+void Expectation::setVal(float val)
 {
-    _onfire.notify();
+    NumericUtil::setVal(_expectation, val);
 }
 
-void Expectation::fireOnce()
+void Expectation::fire()
 {
-    _onfire.notifyOnce();
+    if(_fire_once)
+        _onfire.notifyOnce();
+    else
+        _onfire.notify();
 }
 
 Expectation::DICTIONARY::DICTIONARY(BeanFactory& factory, const String str)

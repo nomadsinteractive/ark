@@ -203,8 +203,17 @@ class Clock:
 
 
 class Expectation:
-    def __init__(self, expectation, onfire):
+    def __init__(self, expectation, onfire, fire_once=True):
         pass
+
+    @property
+    def val(self):
+        return None
+
+    @val.setter
+    def val(self, v):
+        pass
+
 
 class Event:
 

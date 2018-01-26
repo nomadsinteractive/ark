@@ -158,14 +158,17 @@ float NumericUtil::val(const sp<Numeric>& self)
     return self->val();
 }
 
-void NumericUtil::setVal(const sp<Numeric::Impl>& self, float value)
+void NumericUtil::setVal(const sp<Numeric>& self, float value)
 {
-    self->set(value);
-}
-
-void NumericUtil::setVal(const sp<NumericWrapper>& self, float value)
-{
-    self->set(value);
+    const sp<NumericWrapper> nw = self.as<NumericWrapper>();
+    if(nw)
+        nw->set(value);
+    else
+    {
+        const sp<Numeric::Impl> ni = self.as<Numeric::Impl>();
+        DCHECK(ni, "Numeric instance should be either NumericWrapper or Numeric::Impl to be set its value.");
+        ni->set(value);
+    }
 }
 
 const sp<Numeric>& NumericUtil::delegate(const sp<Numeric>& self)

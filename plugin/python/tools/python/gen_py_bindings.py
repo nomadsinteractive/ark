@@ -478,7 +478,12 @@ class GenMethod(object):
             else:
                 declares[typename] = '%s arg%d' % (typename, i)
             if j.default_value is not None:
-                declares[typename] += ' = %s' % ('0' if typename in ('uint32_t', 'int32_t', 'float') else 'nullptr')
+                dmap = {'true': '1', 'false': '0'}
+                if j.typename in ('uint32_t', 'int32_t', 'float'):
+                    dvalue = j.default_value if j.default_value not in dmap else dmap[j.default_value]
+                else:
+                    dvalue = 'nullptr'
+                declares[typename] += ' = %s' % dvalue
             elif not j.meta._parse_signature:
                 declares[typename] += ' = kws'
         return [i + ';' for i in declares.values()]

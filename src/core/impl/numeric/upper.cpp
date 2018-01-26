@@ -14,7 +14,7 @@ float Upper::val()
 {
     float value = _delegate->val();
     if(value > _expectation->val())
-        _expectation->fireOnce();
+        _expectation->fire();
     return value;
 }
 

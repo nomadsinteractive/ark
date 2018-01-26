@@ -42,7 +42,7 @@ private:
         sp<GLTexture> _texture;
         sp<Atlas> _atlas;
         uint32_t _flowx, _flowy;
-        uint32_t _max_glyph_height;
+        int32_t _max_glyph_height;
 
         OCSUnorderedSet<uint32_t> _characters;
     };
