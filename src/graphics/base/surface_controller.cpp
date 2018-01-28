@@ -36,10 +36,11 @@ void SurfaceController::addLayer(const sp<Layer>& layer)
 
 void SurfaceController::addRenderCommand(const sp<RenderCommand>& renderCommand)
 {
-    _render_commands.push(renderCommand);
+//    _render_commands.push(renderCommand);
+    _last_render_command = renderCommand;
 }
 
-sp<RenderCommand> SurfaceController::update(RenderRequest& renderRequest)
+void SurfaceController::update(RenderRequest& renderRequest)
 {
     const sp<RenderCommandPipeline> renderCommand = _object_pool->obtain<RenderCommandPipeline>();
     renderRequest.start(renderCommand);
@@ -47,18 +48,17 @@ sp<RenderCommand> SurfaceController::update(RenderRequest& renderRequest)
     _controls->render(renderRequest, 0, 0);
     _layers->render(renderRequest, 0, 0);
     renderRequest.finish();
-    return renderCommand;
 }
 
-sp<RenderCommandPipeline> SurfaceController::getRenderCommand()
+sp<RenderCommand> SurfaceController::getRenderCommand()
 {
-    std::queue<sp<RenderCommandPipeline>>& synchronized = _render_commands.synchronized();
-    if(!synchronized.empty())
-    {
-        _last_render_command = synchronized.front();
-        synchronized.pop();
-    }
-    _queue_length = synchronized.size();
+//    std::queue<sp<RenderCommandPipeline>>& synchronized = _render_commands.synchronized();
+//    if(!synchronized.empty())
+//    {
+//        _last_render_command = synchronized.front();
+//        synchronized.pop();
+//    }
+//    _queue_length = synchronized.size();
     return _last_render_command;
 }
 

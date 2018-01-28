@@ -26,8 +26,8 @@ public:
 
     void addRenderCommand(const sp<RenderCommand>& renderCommand);
 
-    sp<RenderCommand> update(RenderRequest& renderRequest);
-    sp<RenderCommandPipeline> getRenderCommand();
+    void update(RenderRequest& renderRequest);
+    sp<RenderCommand> getRenderCommand();
 
 private:
     sp<ObjectPool> _object_pool;
