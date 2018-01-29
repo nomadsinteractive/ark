@@ -27,9 +27,9 @@ Damper::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 /*
  *      s2 >>>>>> s1 >>>>>> o <<<<<< s1 <<<<<< s2
  *
- *      o + a * sin(c) = s1
- *      a * cos(c) = v
- *      (s2 - o) ^ 2 = a ^ 2
+ *      o + a * sin(c) = s1         (t = 0)
+ *      a * cos(c) = v              (v = f'(t))
+ *      (s2 - o) ^ 2 = a ^ 2        (0 = f'(t))
  *
  *      (a * sin(c)) ^ 2 = (s1 - o) ^ 2
  *      (a * cos(c)) ^ 2 = v ^ 2
@@ -46,7 +46,7 @@ sp<Numeric> Damper::BUILDER::build(const sp<Scope>& args)
     float s1 = BeanUtils::toFloat(_s1, args, 0.0f);
     float s2 = BeanUtils::toFloat(_s2, args, 0.0f);
     float o = (s1 * s1 - s2 * s2 + v * v) / (s1 - s2) / 2.0f;
-    float a = s2 - o;
+    float a = std::abs(s2 - o);
     float c = v2c(v, a);
     return std::abs(o + a * Math::sin(c)) < std::abs(o - a * Math::sin(c)) ? sp<Numeric>::adopt(new Damper(t, a, c, o)) : sp<Numeric>::adopt(new Damper(t, a, -c, o));
 }

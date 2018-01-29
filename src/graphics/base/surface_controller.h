@@ -3,7 +3,6 @@
 
 #include "core/base/api.h"
 #include "core/base/object_pool.h"
-#include "core/concurrent/one_consumer_synchronized.h"
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
@@ -35,9 +34,7 @@ private:
     sp<RendererGroup> _controls;
     sp<RendererGroup> _layers;
 
-    OCSQueue<sp<RenderCommandPipeline>> _render_commands;
     sp<RenderCommandPipeline> _last_render_command;
-    uint32_t _queue_length;
 };
 
 }
