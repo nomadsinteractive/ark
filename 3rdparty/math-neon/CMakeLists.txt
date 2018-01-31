@@ -31,12 +31,12 @@ set(LOCAL_MATH_NEON_SRC_LIST
 	math_sinfv.c
 	math_sinhf.c
 	math_sqrtf.c
-	math_sqrtfv.c
+#	math_sqrtfv.c
 	math_tanf.c
 	math_tanhf.c
 	math_vec2.c
 	math_vec3.c
-	math_vec4.c
+#	math_vec4.c
 )
 
 add_library(${PROJECT_NAME} STATIC ${LOCAL_MATH_NEON_SRC_LIST})

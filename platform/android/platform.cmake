@@ -1,5 +1,5 @@
 
-#cmake -G "Ninja" -DCMAKE_TOOLCHAIN_FILE=${ARK_SRC_DIR}\platform\android\make\android.toolchain.cmake -DANDROID_NATIVE_API_LEVEL="android-9" -DANDROID_ABI="armeabi-v7a" -DBUILD_SHARED_LIBS="OFF" -DCMAKE_BUILD_TYPE="Debug" ..\..
+#cmake -G "Ninja" -DCMAKE_TOOLCHAIN_FILE=..\${ANDROID_NDK}\android.toolchain.cmake -DANDROID_NATIVE_API_LEVEL="android-18" -DANDROID_ABI="armeabi-v7a with NEON" -DBUILD_SHARED_LIBS="OFF" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_DEBUG_POSFIX="" -DANDROID_STL=gnustl_shared ..\..
 
 add_definitions(-DLOG_TAG="ark")
 add_definitions(-DPY_FORMAT_LONG_LONG="long long")
