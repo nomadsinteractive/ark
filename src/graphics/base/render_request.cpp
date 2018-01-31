@@ -88,7 +88,7 @@ void RenderRequest::Stub::onJobDone()
     if(count == 0)
     {
         NOT_NULL(_render_command_pipe_line);
-        _surface_controller->addRenderCommand(_render_command_pipe_line);
+        _surface_controller->postRenderCommand(_render_command_pipe_line);
         _render_command_pipe_line = nullptr;
     }
 }

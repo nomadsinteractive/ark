@@ -13,28 +13,18 @@ namespace ark {
 
 class ObjectPool {
 private:
-    class Cached {
-    public:
+    struct Cached {
         Cached(size_t size)
             : _ptr(malloc(size)), _interfaces(std::make_shared<Interfaces>()) {
         }
-        Cached(const Cached& other) = delete;
-
         ~Cached() {
             free(_ptr);
         }
 
-        void* ptr() const {
-            return _ptr;
-        }
-
-        const std::shared_ptr<Interfaces>& interfaces() const {
-            return _interfaces;
-        }
-
-    private:
         void* _ptr;
         std::shared_ptr<Interfaces> _interfaces;
+
+        DISALLOW_COPY_AND_ASSIGN(Cached);
     };
 
 public:
@@ -43,17 +33,18 @@ public:
     }
     ObjectPool(const ObjectPool& other) = default;
 
-    template<typename U, typename... Args> sp<U> obtain(Args... args) {
+    template<typename U, typename... Args> sp<U> obtain(Args&&... args) {
         const sp<LockFreeStack<sp<Cached>>>& queue = ensure(Type<U>::id());
         sp<Cached> cached;
 
         if(!queue->pop(cached))
             cached = sp<Cached>::make(sizeof(U));
 
-        new(cached->ptr()) U(std::forward<Args>(args)...);
+        new(cached->_ptr) U(std::forward<Args>(args)...);
 
-        return SharedPtr<U>(reinterpret_cast<U*>(cached->ptr()), cached->interfaces(), [queue, cached] (U* obj) {
+        return SharedPtr<U>(reinterpret_cast<U*>(cached->_ptr), cached->_interfaces, [queue, cached] (U* obj) {
             obj->~U();
+            cached->_interfaces->reset();
             queue->push(cached);
         });
     }
@@ -67,6 +58,7 @@ private:
         return (*_items)[typeId];
     }
 
+private:
     sp<std::unordered_map<TypeId, sp<LockFreeStack<sp<Cached>>>>> _items;
 };
 

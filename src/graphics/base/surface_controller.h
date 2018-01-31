@@ -3,6 +3,7 @@
 
 #include "core/base/api.h"
 #include "core/base/object_pool.h"
+#include "core/concurrent/dual.h"
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
@@ -23,18 +24,18 @@ public:
 // [[script::bindings::auto]]
     void addLayer(const sp<Layer>& layer);
 
-    void addRenderCommand(const sp<RenderCommand>& renderCommand);
+    void postRenderCommand(const sp<RenderCommand>& renderCommand);
 
     void update(RenderRequest& renderRequest);
     sp<RenderCommand> getRenderCommand();
 
 private:
-    sp<ObjectPool> _object_pool;
     sp<RendererGroup> _renderers;
     sp<RendererGroup> _controls;
     sp<RendererGroup> _layers;
 
-    sp<RenderCommandPipeline> _last_render_command;
+    Dual<sp<RenderCommand>> _render_command;
+    ObjectPool _object_pool;
 };
 
 }

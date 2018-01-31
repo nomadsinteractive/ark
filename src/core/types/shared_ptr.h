@@ -69,7 +69,7 @@ public:
     }
 
     template<typename U> SharedPtr(SharedPtr<U>&& ptr) noexcept
-        : _ptr(std::static_pointer_cast<T>(ptr._ptr)), _interfaces(std::move(ptr._interfaces)) {
+        : _ptr(std::move(ptr._ptr)), _interfaces(std::move(ptr._interfaces)) {
         addSelfType();
     }
 

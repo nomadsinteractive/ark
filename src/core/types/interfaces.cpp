@@ -15,4 +15,9 @@ bool Interfaces::isInstance(TypeId id) const
     return _types.find(id) != _types.end();
 }
 
+void Interfaces::reset()
+{
+    _types.clear();
+}
+
 }

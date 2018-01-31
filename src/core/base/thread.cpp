@@ -166,13 +166,14 @@ void Thread::Stub::setEntry(const sp<Runnable>& entry)
         FATAL("Cannot set entry after thread being started");
 }
 
-void Thread::Stub::wait(uint64_t microseconds)
+bool Thread::Stub::wait(uint64_t microseconds)
 {
     std::unique_lock<std::mutex> lk(_mutex);
     if(microseconds > 0)
-        _condition_variable.wait_for(lk, std::chrono::microseconds(microseconds));
+        return _condition_variable.wait_for(lk, std::chrono::microseconds(microseconds)) != std::cv_status::timeout;
     else
         _condition_variable.wait(lk);
+    return true;
 }
 
 void Thread::Stub::notify()

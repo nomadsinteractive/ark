@@ -1,6 +1,8 @@
 #ifndef ARK_CORE_CONCURRENT_DUAL_H_
 #define ARK_CORE_CONCURRENT_DUAL_H_
 
+#include <atomic>
+
 namespace ark {
 
 template<typename T> class Dual {
@@ -8,9 +10,12 @@ public:
     Dual()
         : _swapped(false) {
     }
-
     Dual(const T& h1, const T& h2)
         : _swapped(false), _h1(h1), _h2(h2) {
+    }
+
+    operator const T&() const {
+        return front();
     }
 
     const T* operator ->() const {
@@ -29,8 +34,13 @@ public:
         _swapped = !_swapped;
     }
 
+    void setAndSwap(const T& value) {
+        back() = value;
+        swap();
+    }
+
 private:
-    bool _swapped;
+    std::atomic<bool> _swapped;
     T _h1;
     T _h2;
 };

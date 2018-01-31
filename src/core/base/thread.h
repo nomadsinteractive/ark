@@ -67,7 +67,7 @@ public:
         const sp<Runnable>& entry() const;
         void setEntry(const sp<Runnable>& entry);
 
-        void wait(uint64_t microseconds);
+        bool wait(uint64_t microseconds);
         void notify();
 
     private:

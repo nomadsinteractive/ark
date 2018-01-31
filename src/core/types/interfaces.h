@@ -31,6 +31,7 @@ public:
 
     Box as(TypeId id) const;
     bool isInstance(TypeId id) const;
+    void reset();
 
 private:
     std::map<TypeId, std::shared_ptr<Node>> _types;
