@@ -3,13 +3,16 @@
 #include <algorithm>
 #include <math.h>
 #include <stdlib.h>
+#include <math_neon.h>
+
+#include "core/util/log.h"
 
 namespace ark {
 
-const float Math::PI = 3.14159265358979f;
-const float Math::PIx2 = 3.14159265358979f * 2.0f;
-const float Math::PI_2 = 3.14159265358979f / 2.0f;
-const float Math::PI_4 = 3.14159265358979f / 4.0f;
+const float Math::PI = static_cast<float>(M_PI);
+const float Math::PIx2 = static_cast<float>(M_PI * 2.0f);
+const float Math::PI_2 = static_cast<float>(M_PI_2);
+const float Math::PI_4 = static_cast<float>(M_PI_4);
 
 uint32_t Math::log2(uint32_t value)
 {
@@ -28,71 +31,22 @@ uint32_t Math::log2(uint32_t value)
 
 float Math::sin(float x)
 {
-    if(x > PI)
-        return sin(x - floor((x + PI) / PIx2) * PIx2);
-    else if(x < -PI)
-        return sin(x - floor((x - PI) / PIx2) * PIx2);
-
-    const float B = 4 / PI;
-    const float C = -4 / (PI * PI);
-    const float P = 0.225f;
-
-    float y = B * x + C * x * abs(x);
-    y = P * (y * abs(y) - y) + y;
-    return y;
+    return sinf_neon(x);
 }
 
 float Math::cos(float x)
 {
-    return sin(x + PI_2);
+    return cosf_neon(x);
 }
 
 float Math::acos(float x)
 {
-    float negate = x < 0 ? 1.0f : 0.0f;
-    float ret = -0.0187293f;
-    x = Math::abs<float>(x);
-    ret = ret * x;
-    ret = ret + 0.0742610f;
-    ret = ret * x;
-    ret = ret - 0.2121144f;
-    ret = ret * x;
-    ret = ret + 1.5707288f;
-    ret = ret * Math::sqrt(1.0f - x);
-    ret = ret - 2 * negate * ret;
-    return negate * PI + ret;
+    return acosf_neon(x);
 }
 
-// https://gist.github.com/volkansalma/2972237
-// vs
-// https://math.stackexchange.com/questions/1098487/atan2-faster-approximation
 float Math::atan2(float y, float x)
 {
-	if(x == 0.0f)
-	{
-		if (y > 0.0f) return PI_2;
-		if ( y == 0.0f ) return 0.0f;
-		return -PI_2;
-	}
-/*
-	float atan;
-	float z = y / x;
-    float absz = Math::abs<float>(z);
-	if(absz < 1.0f)
-		return PI_4 * z - z * (absz - 1.0f) * (0.2447f + 0.0663f * absz);
-	atan = PI_2 - z / (z * z + 0.28f);
-	if (y < 0.0f ) return atan - PI;
-	return atan;
-/*/
-	float ax = abs(x), ay = abs(y);
-	float a = std::min(ax, ay) / std::max(ax, ay);
-	float s = a * a;
-	float r = ((-0.0464964749f * s + 0.15931422f) * s - 0.327622764f) * s * a + a;
-	if (ay > ax) r = PI_2 - r;
-	if (x < 0) r = PI - r;
-	if (y < 0) r = -r;
-	return r;
-/**/
+    return atan2f_neon(y, x);
 }
 
 int32_t Math::floor(float x)
@@ -143,13 +97,7 @@ float Math::hypot(float dx, float dy)
 float Math::sqrt(float x)
 {
     DCHECK(x >= 0, "Illegal argument, negative value(%.2f)", x);
-
-    uint32_t i = *(uint32_t*) &x;
-    // adjust bias
-    i  += 127 << 23;
-    // approximation of square root
-    i >>= 1;
-    return *(float*) &i;
+    return sqrtf_neon(x);
 }
 
 float Math::rsqrt(float number)

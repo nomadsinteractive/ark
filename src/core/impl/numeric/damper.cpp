@@ -54,8 +54,8 @@ sp<Numeric> Damper::BUILDER::build(const sp<Scope>& args)
 float Damper::BUILDER::v2c(float v, float a) const
 {
     float k = v / a;
-    DCHECK(k >= -1.0 && k <= 1.0f, "Illegal v: %.1f a: %.1f", v, a);
-    return acos(k);
+    DCHECK(k >= -1.0 && k <= 1.0f, "Illegal v: %.2f a: %.2f", v, a);
+    return Math::acos(k);
 }
 
 }
