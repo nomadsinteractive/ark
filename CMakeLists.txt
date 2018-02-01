@@ -94,7 +94,7 @@ aux_source_directory(src/renderer/gles30/impl/gl_procedure_factory LOCAL_SRC_LIS
 
 aux_source_directory(src/app/base LOCAL_SRC_LIST)
 if(NOT ANDROID)
-aux_source_directory(src/app/impl/application LOCAL_SRC_LIST)
+    aux_source_directory(src/app/impl/application LOCAL_SRC_LIST)
 endif()
 aux_source_directory(src/app/impl/partition LOCAL_SRC_LIST)
 aux_source_directory(src/app/impl/collider LOCAL_SRC_LIST)
@@ -107,9 +107,9 @@ aux_source_directory(src/app/view LOCAL_SRC_LIST)
 
 aux_source_directory(platform/any LOCAL_SRC_LIST)
 
-aux_source_directory(test/base TEST_SRC_LIST)
-aux_source_directory(test/testcase TEST_SRC_LIST)
+list(APPEND LOCAL_INCLUDE_DIRS 3rdparty/glm)
 
+ark_add_denpendency(3rdparty/math-neon OFF math-neon 3rdparty/math-neon)
 ark_add_denpendency(3rdparty/tinyxml2 OFF tinyxml2 3rdparty/tinyxml2)
 ark_add_denpendency(3rdparty/libyaml OFF yaml 3rdparty/libyaml/include)
 ark_compile_definitions(-DYAML_DECLARE_STATIC)
@@ -133,7 +133,7 @@ if(ARK_USE_LIBPNG)
     set(SKIP_INSTALL_ALL ON)
     set(PNG_TESTS OFF)
     set(LIBPNG_INCLUDE_DIR "${ARK_SRC_DIR}/3rdparty/libpng" "${CMAKE_CURRENT_BINARY_DIR}/3rdparty/libpng")
-    set(LIBPNG_LIBRARY png16_static)
+    set(LIBPNG_LIBRARY png_static)
     ark_ensure_dependency(3rdparty/libpng)
     ark_add_denpendency(3rdparty/libpng OFF ${LIBPNG_LIBRARY} ${LIBPNG_INCLUDE_DIR})
     ark_compile_definitions(-DARK_USE_LIBPNG)
@@ -178,11 +178,6 @@ endif()
 
 add_subdirectory(plugin/assimp)
 
-add_custom_command(OUTPUT ${GENERATED_TESTCASE_LAUNCHPAD}
-    COMMAND python ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py ${ARK_SRC_DIR}/test/testcase ${GENERATED_TESTCASE_LAUNCHPAD}
-    DEPENDS ${TEST_SRC_LIST} ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
 ark_setup_tools(ark_gen_string_table)
 ark_setup_tools(ark_gen_plugin_class)
 ark_setup_tools(ark_gen_bootstrap)
@@ -204,6 +199,12 @@ if(ARK_BUILD_STATIC_LIBRARY)
     ark_add_static_library(${PROJECT_NAME}_static ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
     target_compile_definitions(${PROJECT_NAME}_static PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK -DARK_STATIC)
     if(ARK_BUILD_TEST_CASES)
+        aux_source_directory(test/base TEST_SRC_LIST)
+        aux_source_directory(test/testcase TEST_SRC_LIST)
+        add_custom_command(OUTPUT ${GENERATED_TESTCASE_LAUNCHPAD}
+            COMMAND python ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py ${ARK_SRC_DIR}/test/testcase ${GENERATED_TESTCASE_LAUNCHPAD}
+            DEPENDS ${TEST_SRC_LIST} ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
         ark_add_executable(${TESTCASES_EXECUTABLE} ${TEST_SRC_LIST} ${GENERATED_TESTCASE_LAUNCHPAD} ${RUNTIME_STATIC_LIBRARY})
         target_compile_definitions(${TESTCASES_EXECUTABLE} PRIVATE -DARK_STATIC)
     endif()

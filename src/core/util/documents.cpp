@@ -136,7 +136,7 @@ template<> ARK_API String Strings::toString<document>(const document& doc)
     return Documents::toString(doc);
 }
 
-const String& Documents::getAttribute(const document& doc, const String& name, const String& defValue)
+const String Documents::getAttribute(const document& doc, const String& name, const String& defValue)
 {
     const attribute& attr = doc->getAttribute(name);
     return attr ? attr->value() : defValue;
