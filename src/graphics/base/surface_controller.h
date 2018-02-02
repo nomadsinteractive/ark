@@ -24,10 +24,10 @@ public:
 // [[script::bindings::auto]]
     void addLayer(const sp<Layer>& layer);
 
-    void postRenderCommand(const sp<RenderCommand>& renderCommand);
+    void postRenderCommand(const sp<RenderCommandPipeline>& renderCommand);
 
     void update(RenderRequest& renderRequest);
-    sp<RenderCommand> getRenderCommand();
+    sp<RenderCommandPipeline> getRenderCommand();
 
 private:
     sp<RendererGroup> _renderers;
@@ -35,7 +35,7 @@ private:
     sp<RendererGroup> _layers;
 
     ObjectPool _object_pool;
-    Dual<sp<RenderCommand>> _render_command;
+    Dual<sp<RenderCommandPipeline>> _render_command;
 };
 
 }

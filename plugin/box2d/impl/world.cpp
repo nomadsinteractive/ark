@@ -89,7 +89,7 @@ sp<World> World::BUILDER_IMPL1::build(const sp<Scope>& args)
 
 void World::BUILDER_IMPL1::createBody(Body::Type type, const sp<World>& world, const document& manifest, const sp<Scope>& args)
 {
-    const String& ref = Documents::getAttribute(manifest, Constants::Attributes::ID);
+    const String ref = Documents::getAttribute(manifest, Constants::Attributes::ID);
     float density = Documents::getAttribute<float>(manifest, "density", 0);
     float friction = Documents::getAttribute<float>(manifest, "friction", 0.2f);
     const sp<Shape> shape = _parent.ensure<Shape>(manifest, args);

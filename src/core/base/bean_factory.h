@@ -82,15 +82,15 @@ private:
         }
 
         sp<Builder<T>> createBuilder(BeanFactory& factory, const document& doc) const {
-            const String& className = Documents::getAttribute(doc, Constants::Attributes::CLASS);
+            const String className = Documents::getAttribute(doc, Constants::Attributes::CLASS);
             return createBuilder(factory, className, doc);
         }
 
         sp<Builder<T>> createBuilder(BeanFactory& factory, const String& className, const document& doc) const {
-            const String& id = Documents::getAttribute(doc, Constants::Attributes::ID);
-            const String& ref = Documents::getAttribute(doc, Constants::Attributes::REF);
+            const String id = Documents::getAttribute(doc, Constants::Attributes::ID);
+            const String ref = Documents::getAttribute(doc, Constants::Attributes::REF);
             DCHECK(ref.empty() || ref.at(0) != '#', "Reference \"%s\" may not be hard reference", ref.c_str());
-            const String& style = Documents::getAttribute(doc, Constants::Attributes::STYLE);
+            const String style = Documents::getAttribute(doc, Constants::Attributes::STYLE);
             if(className.empty()) {
                 do {
                     if(ref) {
@@ -306,7 +306,7 @@ public:
     }
 
     template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr, bool noNull = true) {
-        const String& attrValue = Documents::getAttribute(doc, attr);
+        const String attrValue = Documents::getAttribute(doc, attr);
         if(attrValue.empty()) {
             const document& child = doc->getChild(attr);
             return child ? createBuilderByDocument<T>(child, noNull) : (noNull ? getNullBuilder<T>() : nullptr);
@@ -374,7 +374,7 @@ public:
 
 private:
     template<typename T> sp<Builder<T>> createBuilderByDocument(const document& doc, bool noNull) {
-        const String& className = Documents::getAttribute(doc, Constants::Attributes::CLASS);
+        const String className = Documents::getAttribute(doc, Constants::Attributes::CLASS);
         return createBuilderByDocument<T>(className, doc, noNull);
     }
 

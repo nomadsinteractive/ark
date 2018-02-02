@@ -33,7 +33,7 @@ const sp<Size>& Label::size()
 
 Label::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
-    const String& cid = Documents::getAttribute(manifest, "characters");
+    const String cid = Documents::getAttribute(manifest, "characters");
     _characters = cid ? factory.ensureBuilder<Characters>(cid) : factory.ensureBuilder<Characters>(manifest);
 }
 

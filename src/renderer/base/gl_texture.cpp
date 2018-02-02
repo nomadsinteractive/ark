@@ -166,7 +166,7 @@ sp<GLTexture> GLTexture::DICTIONARY::build(const sp<Scope>& /*args*/)
 GLTexture::BUILDER::BUILDER(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(doc), _src(Strings::load(doc, Constants::Attributes::SRC, ""))
 {
-    const String& v = Documents::getAttribute(doc, "format");
+    const String v = Documents::getAttribute(doc, "format");
     if(v)
     {
         _format = FORMAT_ALPHA;

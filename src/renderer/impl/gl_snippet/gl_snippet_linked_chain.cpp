@@ -80,8 +80,8 @@ sp<GLSnippet> GLSnippetLinkedChain::BUILDER::build(const sp<Scope>& args)
 
 sp<GLSnippet> GLSnippetLinkedChain::BUILDER::_build(const document& manifest, const sp<Scope>& args)
 {
-    const String& type = Documents::getAttribute(manifest, Constants::Attributes::TYPE);
-    const String& value = Documents::getAttribute(manifest, Constants::Attributes::VALUE);
+    const String type = Documents::getAttribute(manifest, Constants::Attributes::TYPE);
+    const String value = Documents::getAttribute(manifest, Constants::Attributes::VALUE);
     if(type)
         return _factory.ensureBuilderByTypeValue<GLSnippet>(type, value)->build(args);
     return _factory.ensure<GLSnippet>(manifest, args);

@@ -111,7 +111,7 @@ public:
     ArkAsset(const sp<RawAsset>& rawAsset, const document& manifest)
         : _raw_asset(rawAsset) {
         for(const document& i : manifest->children("asset")) {
-            const String& prefix = Documents::getAttribute(i, "prefix");
+            const String prefix = Documents::getAttribute(i, "prefix");
             const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
             _mounts.push_front(Mounted(strip(prefix), createAsset(src)));
         }
