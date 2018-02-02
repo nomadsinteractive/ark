@@ -109,7 +109,7 @@ sp<Atlas> Atlas::BUILDER::build(const sp<Scope>& args)
             uint32_t type = Documents::getAttribute<uint32_t>(i, Constants::Attributes::TYPE, 0);
             if(type == 0)
             {
-                const String& character = Documents::getAttribute(i, "character");
+                const String character = Documents::getAttribute(i, "character");
                 if(character)
                     type = character.at(0);
             }

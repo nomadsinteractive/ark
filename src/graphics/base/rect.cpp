@@ -125,7 +125,7 @@ Rect Rect::parse(const std::map<String, String>& properties)
 
 Rect Rect::parse(const document& manifest)
 {
-    const String& rect = Documents::getAttribute(manifest, Constants::Attributes::RECT);
+    const String rect = Documents::getAttribute(manifest, Constants::Attributes::RECT);
     if(rect)
         return Strings::parse<Rect>(rect);
 

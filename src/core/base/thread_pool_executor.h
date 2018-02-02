@@ -17,42 +17,44 @@ public:
     virtual void execute(const sp<Runnable>& task) override;
 
 private:
-    class Worker {
+    class Worker;
+
+    struct Stub {
+        Stub(uint32_t capacity);
+
+        uint32_t _capacity;
+        std::atomic<uint32_t> _worker_count;
+
+        LockFreeStack<sp<Worker>> _workers;
+        std::mutex _mutex;
+    };
+
+    class Worker : public Runnable {
     public:
-        Worker(const sp<Thread::Stub>& stub);
+        Worker(const sp<Stub>& stub, const sp<Thread::Stub>& threadStub);
         ~Worker();
 
-        bool busy() const;
-        void post(const sp<Runnable>& task) const;
+        bool idle() const;
+        void post(const sp<Runnable>& task);
 
-        sp<Runnable> entry() const;
-
-    private:
-        class Stub : public Runnable {
-        public:
-            Stub(const sp<Thread::Stub>& threadStub);
-
-            virtual void run() override;
-
-            bool busy() const;
-            void post(const sp<Runnable>& task);
-
-        private:
-            sp<Thread::Stub> _thread_stub;
-            OCSQueue<sp<Runnable>> _pendings;
-            bool _busy;
-        };
+        virtual void run() override;
 
     private:
-        sp<Thread::Stub> _thread_stub;
+        void removeSelf();
+
+    private:
         sp<Stub> _stub;
+        sp<Thread::Stub> _thread_stub;
+
+        OCSQueue<sp<Runnable>> _pendings;
+        bool _idle;
+        uint32_t _idled_cycle;
     };
 
     sp<Worker> createWorker();
 
 private:
-    LockFreeStack<sp<Worker>> _workers;
-    uint32_t _capacity;
+    sp<Stub> _stub;
 };
 
 

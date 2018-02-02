@@ -29,7 +29,7 @@ void ResourceLoader::import(const document& manifest, BeanFactory& parent)
     for(const document& i : manifest->children("import"))
     {
         const String id = Documents::getId(i);
-        const String& name = Documents::getAttribute(i, Constants::Attributes::NAME, id);
+        const String name = Documents::getAttribute(i, Constants::Attributes::NAME, id);
         _bean_factory.addPackage(name, parent.ensure<ResourceLoader>(i, Constants::Attributes::SRC)->beanFactory());
     }
 }

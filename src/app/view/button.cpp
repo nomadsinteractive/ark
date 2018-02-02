@@ -86,7 +86,7 @@ sp<Button> Button::BUILDER::build(const sp<Scope>& args)
     const sp<Renderer> foreground = _foreground->build(args);
     const Frame background = _background->build(args);
     const sp<Size> builtSize = _size->build(args);
-    const String& style = Documents::getAttribute(_manifest, Constants::Attributes::STYLE);
+    const String style = Documents::getAttribute(_manifest, Constants::Attributes::STYLE);
     const sp<Size> size = builtSize ? builtSize : background.size();
     const sp<Button> button = sp<Button>::make(foreground, background.renderer(), size, _gravity ? Strings::parse<Gravity>(_gravity) : CENTER);
     loadStatus(button, _manifest, _parent, args);

@@ -79,8 +79,6 @@ public:
     static ARK_API float hypot(float dx, float dy);
 //  [[script::bindings::auto]]
     static ARK_API float sqrt(float number);
-//  [[script::bindings::auto]]
-    static ARK_API float rsqrt(float number);
 
 //  [[script::bindings::auto]]
     static ARK_API V3 quadratic(float a, float b, float c);

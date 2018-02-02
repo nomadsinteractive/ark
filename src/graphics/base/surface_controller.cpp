@@ -26,7 +26,7 @@ void SurfaceController::addLayer(const sp<Layer>& layer)
     _layers->addRenderer(sp<Layer::Renderer>::make(layer));
 }
 
-void SurfaceController::postRenderCommand(const sp<RenderCommand>& renderCommand)
+void SurfaceController::postRenderCommand(const sp<RenderCommandPipeline>& renderCommand)
 {
     _render_command.setAndSwap(renderCommand);
 }
@@ -41,7 +41,7 @@ void SurfaceController::update(RenderRequest& renderRequest)
     renderRequest.finish();
 }
 
-sp<RenderCommand> SurfaceController::getRenderCommand()
+sp<RenderCommandPipeline> SurfaceController::getRenderCommand()
 {
     return _render_command;
 }
