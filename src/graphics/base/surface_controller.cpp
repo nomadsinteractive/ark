@@ -7,7 +7,8 @@
 namespace ark {
 
 SurfaceController::SurfaceController()
-    : _renderers(sp<RendererGroup>::make()), _controls(sp<RendererGroup>::make()), _layers(sp<RendererGroup>::make())
+    : _renderers(sp<RendererGroup>::make()), _controls(sp<RendererGroup>::make()), _layers(sp<RendererGroup>::make()),
+      _render_command(_object_pool.obtain<RenderCommandPipeline>())
 {
 }
 

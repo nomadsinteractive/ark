@@ -34,8 +34,8 @@ private:
     sp<RendererGroup> _controls;
     sp<RendererGroup> _layers;
 
-    Dual<sp<RenderCommand>> _render_command;
     ObjectPool _object_pool;
+    Dual<sp<RenderCommand>> _render_command;
 };
 
 }

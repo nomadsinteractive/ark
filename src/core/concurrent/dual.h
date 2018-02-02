@@ -10,6 +10,9 @@ public:
     Dual()
         : _swapped(false) {
     }
+    Dual(const T& front)
+        : _swapped(false), _h2(front) {
+    }
     Dual(const T& h1, const T& h2)
         : _swapped(false), _h1(h1), _h2(h2) {
     }
