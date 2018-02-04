@@ -161,15 +161,15 @@ public:
 
         ObjectPool pool;
         {
-            sp<B> p1 = pool.allocate<B>();
-            sp<B> p2 = pool.allocate<B>();
-            sp<B> p3 = pool.allocate<B>();
+            sp<B> p1 = pool.obtain<B>();
+            sp<B> p2 = pool.obtain<B>();
+            sp<B> p3 = pool.obtain<B>();
             sp<A> p4 = p3;
             sp<A> p5 = p3.cast<A>();
             sp<A> p6 = p5;
         }
-        sp<B> p4 = pool.allocate<B>();
-        sp<B> p5 = pool.allocate<B>();
+        sp<B> p4 = pool.obtain<B>();
+        sp<B> p5 = pool.obtain<B>();
 
         MemoryPool memoryPool(20);
         void* ap1;

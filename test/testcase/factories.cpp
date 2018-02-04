@@ -13,7 +13,6 @@
 #include "core/inf/variable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/epi/expired.h"
-#include "core/impl/numeric/numeric_expression.h"
 #include "core/types/weak_ptr.h"
 
 #include "graphics/base/vec2.h"

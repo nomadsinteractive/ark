@@ -6,7 +6,6 @@
 #include "core/inf/dictionary.h"
 #include "core/inf/variable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
-#include "core/impl/numeric/numeric_expression.h"
 #include "core/types/null.h"
 #include "core/util/bean_utils.h"
 
