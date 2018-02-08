@@ -41,9 +41,9 @@ public:
             return sp<T>::null();
 
         TypeId typeId = Type<T>::id();
-        sp<T> inst = typeId == _instance->typeId() ? _instance->unpack<T>() : _instance->interfaces()->as(typeId).unpack<T>();
+        sp<T> inst = typeId == _instance->typeId() ? _instance->unpack<T>() : _instance->interfaces()->as(*this, typeId).unpack<T>();
         if(!inst) {
-            const sp<Duck<T>> duck = _instance->interfaces()->as(Type<Duck<T>>::id()).template unpack<Duck<T>>();
+            const sp<Duck<T>> duck = _instance->interfaces()->as(*this, Type<Duck<T>>::id()).template unpack<Duck<T>>();
             if(duck)
                 duck->to(inst);
         }

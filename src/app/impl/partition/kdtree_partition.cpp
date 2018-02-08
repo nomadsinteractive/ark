@@ -58,9 +58,9 @@ void KDTreePartition::removePoint(uint32_t id)
     rebuildIfNeeded();
 }
 
-List<uint32_t> KDTreePartition::within(float x, float y, float radius)
+std::unordered_set<uint32_t> KDTreePartition::within(float x, float y, float radius)
 {
-	List<uint32_t> result;
+	std::unordered_set<uint32_t> result;
 	const float pt[] = {x, y};
 
     std::vector<std::pair<uint32_t, float>> indices_dists;
@@ -68,7 +68,7 @@ List<uint32_t> KDTreePartition::within(float x, float y, float radius)
     _tree->findNeighbors(resultSet, pt, nanoflann::SearchParams());
 
     for(const std::pair<uint32_t, float>& i : indices_dists)
-        result.push_back(i.first);
+        result.insert(i.first);
 
 	return result;
 }

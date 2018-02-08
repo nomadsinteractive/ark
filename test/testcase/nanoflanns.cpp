@@ -101,7 +101,7 @@ public:
             kdtree.removePoint(id);
         }
         uint32_t id = kdtree.addPoint(sp<VV2::Impl>::make(V2(-0.1f, 0.0f)));
-        List<uint32_t> result = kdtree.within(-1.0f, 0.0f, 1.0f);
+        std::unordered_set<uint32_t> result = kdtree.within(-1.0f, 0.0f, 1.0f);
 
         if(result.size() != 1)
             return 1;

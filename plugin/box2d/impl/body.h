@@ -18,7 +18,7 @@ namespace box2d {
 
 class World;
 
-class ARK_PLUGIN_BOX2D_API Body : public Object {
+class ARK_PLUGIN_BOX2D_API Body : public Object, Implements<Body, Object> {
 public:
 //  [[script::bindings::enumeration]]
     enum Type {

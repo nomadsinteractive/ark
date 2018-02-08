@@ -27,9 +27,17 @@ from my_lib_test import my_module as m2
 print(m2)
 
 
-b = _resource_loader.load(ark.Boolean, 'g14')
-if not b:
-    print('Error loading g15')
-b.set(False)
-if b:
-    print('Error setting g15')
+if not ark.Boolean(True):
+    print('Error loading Boolean(True)')
+if ark.Boolean(False):
+    print('Error loading Boolean(False)')
+
+if float(ark.Numeric(0)) != 0:
+    print('Error loading Numeric(0)')
+if float(ark.Numeric(1) + ark.Numeric(2)) != 3:
+    print('Error loading Numeric(1) + Numeric(2)')
+
+if int(ark.Integer(0)) != 0:
+    print('Error loading Integer(0)')
+if int(ark.Integer(1) + ark.Integer(2)) != 3:
+    print('Error loading Integer(1) + Integer(2)')

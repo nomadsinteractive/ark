@@ -35,7 +35,7 @@ public:
     SharedPtr<T> lock() const {
         const std::shared_ptr<T> ptr = _weak_ptr.lock();
         const std::shared_ptr<Interfaces> interfaces = _weak_interfaces.lock();
-        return ptr ? SharedPtr<T>(ptr, interfaces ? interfaces : std::make_shared<Interfaces>()) : nullptr;
+        return ptr ? SharedPtr<T>(ptr, interfaces ? interfaces : std::make_shared<Interfaces>(nullptr)) : nullptr;
     }
 
     SharedPtr<T> ensure() const {

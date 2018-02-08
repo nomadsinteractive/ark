@@ -49,12 +49,12 @@ public:
     int j = 10;
 };
 
-class I : public H {
+class I : public H, ark::Implements<I, H> {
 public:
     int k = 11;
 };
 
-class Node final : public B, public D, public ark::Duck<ark::Numeric>, public ark::Implements<Node, B, D, ark::Duck<ark::Numeric>> {
+class Node final : public B, public D, public ark::Duck<ark::Numeric>, ark::Implements<Node, A, B, D, ark::Duck<ark::Numeric>> {
 public:
     Node() {
     }

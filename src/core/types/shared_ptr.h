@@ -15,40 +15,6 @@
 namespace ark {
 
 template<typename T> class SharedPtr {
-private:
-    template<typename U> class SharedPtrNode : public Interfaces::Node {
-    public:
-        SharedPtrNode(const SharedPtr<U>& ptr)
-            : _ptr(ptr) {
-        }
-
-        virtual Box as(TypeId id) override {
-            return _ptr.interfaces()->as(id);
-        }
-
-    private:
-        SharedPtr<U> _ptr;
-    };
-
-    class WeakPtrNode : public Interfaces::Node {
-    public:
-        WeakPtrNode(Class* clazz, const SharedPtr<T>& ptr)
-            : _class(clazz), _weak_ptr(ptr.ptr()), _weak_interfaces(ptr.interfaces()) {
-        }
-
-        virtual Box as(TypeId id) override {
-            const std::shared_ptr<T> ptr = _weak_ptr.lock();
-            const std::shared_ptr<Interfaces> interfaces = _weak_interfaces.lock();
-            return (ptr && interfaces) ? _class->cast(SharedPtr<T>(ptr, interfaces).pack(), id) : Box();
-        }
-
-    private:
-        Class* _class;
-
-        std::weak_ptr<T> _weak_ptr;
-        std::weak_ptr<Interfaces> _weak_interfaces;
-    };
-
 public:
     _CONSTEXPR SharedPtr() noexcept
         : _ptr(nullptr), _interfaces(nullptr) {
@@ -60,17 +26,13 @@ public:
     SharedPtr(SharedPtr&& other) noexcept = default;
     SharedPtr(const std::shared_ptr<T>& ptr, const std::shared_ptr<Interfaces>& interfaces) noexcept
         : _ptr(ptr), _interfaces(interfaces) {
-        addSelfType();
     }
 
     template<typename U> SharedPtr(const SharedPtr<U>& ptr) noexcept
         : _ptr(std::static_pointer_cast<T>(ptr._ptr)), _interfaces(ptr._interfaces) {
-        addSelfType();
     }
-
     template<typename U> SharedPtr(SharedPtr<U>&& ptr) noexcept
         : _ptr(std::move(ptr._ptr)), _interfaces(std::move(ptr._interfaces)) {
-        addSelfType();
     }
 
     typedef T _PtrType;
@@ -148,23 +110,24 @@ public:
 
     template<typename U> SharedPtr<T>& absorb(const SharedPtr<U>& beingAbsorbed) {
         if(beingAbsorbed.interfaces() != _interfaces) {
-            const std::shared_ptr<Interfaces::Node> node = std::make_shared<SharedPtrNode<U>>(beingAbsorbed);
-            for(const auto iter : beingAbsorbed.interfaces()->_types)
-                if(_interfaces->_types.find(iter.first) == _interfaces->_types.end())
-                    _interfaces->_types[iter.first] = node;
+            const Box box = beingAbsorbed.pack();
+            for(auto i : beingAbsorbed.interfaces()->implements())
+                _interfaces->_attachments[i] = beingAbsorbed.interfaces()->as(box, i);
+            _interfaces->_attachments.insert(beingAbsorbed.interfaces()->_attachments.begin(), beingAbsorbed.interfaces()->_attachments.end());
         }
         return *this;
     }
 
     template<typename U> bool is() const {
-        return _interfaces ? _interfaces->is<U>() : false;
+        return _interfaces ? _interfaces->isInstance<U>() : false;
     }
 
     template<typename U> SharedPtr<U> as() const {
         if(_interfaces) {
-            sp<U> ptr = _interfaces->as<U>();
+            const Box self = pack();
+            sp<U> ptr = _interfaces->as<U>(self);
             if(!ptr) {
-                const sp<Duck<U>> duckType = _interfaces->as<Duck<U>>();
+                const sp<Duck<U>> duckType = _interfaces->as<Duck<U>>(self);
                 if(duckType)
                     duckType->to(ptr);
             }
@@ -179,23 +142,10 @@ public:
 
 private:
     SharedPtr(T* instance) noexcept
-        : _ptr(instance), _interfaces(new Interfaces()) {
-        addWeakType();
+        : _ptr(instance), _interfaces(new Interfaces(Class::getClass<T>())) {
     }
     SharedPtr(T* ptr, const std::shared_ptr<Interfaces>& interfaces, std::function<void(T*)> deleter) noexcept
         : _ptr(ptr, deleter), _interfaces(interfaces) {
-    }
-
-    void addWeakType() {
-        Class* clazz = Class::getClass<T>();
-        const std::shared_ptr<Interfaces::Node> node = std::make_shared<WeakPtrNode>(clazz, *this);
-        for(const TypeId i : clazz->implements())
-            _interfaces->_types[i] = node;
-    }
-
-    void addSelfType() noexcept {
-        if(_interfaces && !_interfaces->is<T>())
-            addWeakType();
     }
 
     template<typename U> friend class SharedPtr;

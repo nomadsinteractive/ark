@@ -182,7 +182,7 @@ void PartitionCollider::RigidBodyImpl::Stub::collision(uint32_t selfId, const Re
     float x = (rect.left() + rect.right()) / 2.0f;
     float y = (rect.top() + rect.bottom()) / 2.0f;
     s->_partition->updatePoint(selfId);
-    const List<uint32_t> results = s->_partition->within(x, y, searchRadius + s->_search_radius);
+    const std::unordered_set<uint32_t> results = s->_partition->within(x, y, searchRadius + s->_search_radius);
     for(uint32_t id : results)
         if(id != selfId)
         {

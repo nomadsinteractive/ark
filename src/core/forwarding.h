@@ -31,6 +31,7 @@ class BeanFactory;
 class Box;
 class ByType;
 class Changed;
+class Class;
 class ClassHierarychyManager;
 class Clock;
 class Document;
@@ -65,9 +66,26 @@ typedef Variable<bool> Boolean;
 typedef Variable<int32_t> Integer;
 typedef Variable<float> Numeric;
 
-typedef VariableWrapper<float> NumericWrapper;
-typedef VariableWrapper<int32_t> IntegerWrapper;
 typedef VariableWrapper<bool> BooleanWrapper;
+/*
+[[core::class]]
+class BooleanWrapper : public Boolean {
+};
+*/
+
+typedef VariableWrapper<int32_t> IntegerWrapper;
+/*
+[[core::class]]
+class IntegerWrapper : public Integer {
+};
+*/
+
+typedef VariableWrapper<float> NumericWrapper;
+/*
+[[core::class]]
+class NumericWrapper : public Numeric {
+};
+*/
 
 typedef Iterator<int32_t> Range;
 

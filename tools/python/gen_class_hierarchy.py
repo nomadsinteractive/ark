@@ -8,12 +8,13 @@ import re
 import acg
 from acg import HeaderPattern
 
-CLASS_PATTERN = re.compile(r'(\[\[core::class\]\]\s+)?([\w<>\s]+)class\s+(ARK_API\s+)?([\w\d_]+)(?:\s+final)?\s*(:?[^{]+){')
+CLASS_PATTERN = re.compile(r'(\[\[core::class\]\])?([\w<>\s]+)class\s+(ARK_API\s+)?([\w\d_]+)(?:\s+final)?\s+(:[^{;]+)?[{;]')
 
 INDENT = '\n    '
 
 
-CORE_INTERFACES = ('Numeric', 'Integer', 'GLResource', 'EventListener', 'Renderer', 'Expired', 'Block', 'Boolean', 'Range', 'Runnable', 'VV2', 'VV3', 'VV4')
+CORE_INTERFACES = ('Numeric', 'Layer', 'Integer', 'GLResource', 'EventListener', 'Renderer', 'Expired', 'Block',
+                   'Boolean', 'Range', 'Runnable', 'VV2', 'VV3', 'VV4')
 
 
 class GenClass:
@@ -35,7 +36,7 @@ def search_for_classes(paths):
 
     def match_class(filename, content, main_class, x):
         core_class, class_pre, ark_api, class_name, impls = x
-        if class_name == main_class and not class_name.startswith('_') and 'template<' not in class_pre:
+        if core_class or (class_name == main_class and not class_name.startswith('_') and 'template<' not in class_pre):
             if impls.startswith(':'):
                 implements = [k for k in [j[6:].strip() for j in [i.strip() for i in impls[1:].split(',')] if j.startswith('public')] if not k.startswith('Class<')]
             else:
@@ -76,6 +77,7 @@ def main():
     src = '''
 #include "core/ark.h"
 #include "core/base/class_manager.h"
+#include "core/base/variable_wrapper.h"
 
 %s
 

@@ -22,7 +22,7 @@ public:
     virtual uint32_t addPoint(const sp<VV>& pos) override;
     virtual void updatePoint(uint32_t id) override;
     virtual void removePoint(uint32_t id) override;
-    virtual List<uint32_t> within(float x, float y, float radius) override;
+    virtual std::unordered_set<uint32_t> within(float x, float y, float radius) override;
 
 public:
 //  [[plugin::builder::by-value("kdtree")]]

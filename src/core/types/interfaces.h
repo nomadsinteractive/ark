@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <map>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -11,30 +13,30 @@
 namespace ark {
 
 class ARK_API Interfaces {
-private:
-    class Node {
-    public:
-        virtual ~Node() = default;
-        virtual Box as(TypeId id) = 0;
-    };
-
 public:
-    Interfaces() = default;
+    Interfaces(Class* clazz);
 
     template<typename T> bool is() const {
+        return is(Type<T>::id());
+    }
+
+    template<typename T> bool isInstance() const {
         return isInstance(Type<T>::id());
     }
 
-    template<typename T> SharedPtr<T> as() const {
-        return as(Type<T>::id()).template unpack<T>();
+    template<typename T> SharedPtr<T> as(const Box& box) const {
+        return as(box, Type<T>::id()).template unpack<T>();
     }
 
-    Box as(TypeId id) const;
+    const std::unordered_set<TypeId>& implements() const;
+    Box as(const Box& box, TypeId id) const;
+    bool is(TypeId id) const;
     bool isInstance(TypeId id) const;
     void reset();
 
 private:
-    std::map<TypeId, std::shared_ptr<Node>> _types;
+    Class* _class;
+    std::map<TypeId, Box> _attachments;
 
     template<typename T> friend class SharedPtr;
 };

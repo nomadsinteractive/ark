@@ -46,8 +46,8 @@ public:
         if(white != Color::WHITE)
             return 6;
 
-        if(Strings::parse<View::Gravity>("?") != View::Gravity::NONE)
-            return 7;
+//        if(Strings::parse<View::Gravity>("?") != View::Gravity::NONE)
+//            return 7;
 
         if(Strings::parse<View::Gravity>("right") != View::Gravity::RIGHT)
             return 8;

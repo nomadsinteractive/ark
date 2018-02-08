@@ -15,7 +15,7 @@ class ObjectPool {
 private:
     struct Cached {
         Cached(size_t size)
-            : _ptr(malloc(size)), _interfaces(std::make_shared<Interfaces>()) {
+            : _ptr(malloc(size)) {
         }
         ~Cached() {
             free(_ptr);
@@ -42,9 +42,12 @@ public:
 
         new(cached->_ptr) U(std::forward<Args>(args)...);
 
+        if(cached->_interfaces)
+            cached->_interfaces->reset();
+        else
+            cached->_interfaces = std::make_shared<Interfaces>(Class::getClass<U>());
         return SharedPtr<U>(reinterpret_cast<U*>(cached->_ptr), cached->_interfaces, [queue, cached] (U* obj) {
             obj->~U();
-            cached->_interfaces->reset();
             queue->push(cached);
         });
     }

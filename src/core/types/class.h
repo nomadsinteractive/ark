@@ -136,11 +136,11 @@ public:
         if(box.typeId() == _id) {
             const sp<T>& ptr = box.unpack<T>();
             return id == Type<T>::id() ? ptr.pack() : _dynamic_down_cast<T, INTERFACES...>(ptr, id);
-        } else if(id == Type<T>::id()) {
-            return _dynamic_up_cast<T, INTERFACES...>(box);
         }
-        FATAL("Wrong type being casted: Cannot cast \"%s\" to \"%s\"", Class::getClass(_id)->name(), Class::getClass(id)->name());
-        return Box();
+        const Box inst = _dynamic_up_cast<T, INTERFACES...>(box);
+        if(id == Type<T>::id())
+            return inst;
+        return _dynamic_down_cast<T, INTERFACES...>(inst.unpack<T>(), id);
     }
 
 private:
