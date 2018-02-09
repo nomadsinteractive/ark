@@ -1,9 +1,10 @@
-#ifndef ARK_GRAPHICS_BASE_FILTER_H_
-#define ARK_GRAPHICS_BASE_FILTER_H_
+#ifndef ARK_RENDERER_BASE_GL_VARIABLES_H_
+#define ARK_RENDERER_BASE_GL_VARIABLES_H_
 
+#include "core/forwarding.h"
+#include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/collection/list.h"
-#include "core/forwarding.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
@@ -13,8 +14,7 @@
 
 namespace ark {
 
-//[[script::bindings::auto]]
-class Filter {
+class ARK_API GLVariables {
 public:
     class Varying {
     public:
@@ -30,13 +30,14 @@ public:
     };
 
 public:
-    Filter(const sp<Numeric>& alpha);
+//[[script::bindings::auto]]
+    GLVariables(const sp<Numeric>& alpha = nullptr);
 
     void addVarying(const Varying& varying);
     void setVaryings(void *buf, uint32_t stride, uint32_t count) const;
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Filter> {
+    class BUILDER : public Builder<GLVariables> {
     private:
         class VaryingBuilder {
         public:
@@ -55,10 +56,10 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Filter> build(const sp<Scope>& args) override;
+        virtual sp<GLVariables> build(const sp<Scope>& args) override;
 
     private:
-        void initVaryings(const sp<Scope>& args);
+        void initVaryings(const sp<GLShader>& shader, const sp<Scope>& args);
 
     private:
         BeanFactory _factory;
@@ -71,11 +72,11 @@ public:
     };
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Filter> {
+    class DICTIONARY : public Builder<GLVariables> {
     public:
         DICTIONARY(BeanFactory& parent, const String& value);
 
-        virtual sp<Filter> build(const sp<Scope>& args) override;
+        virtual sp<GLVariables> build(const sp<Scope>& args) override;
 
     private:
         sp<BUILDER> _delegate;

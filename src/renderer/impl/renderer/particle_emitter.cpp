@@ -72,7 +72,7 @@ ParticleEmitter::Particale::Particale(const sp<Stub>& stub, const document& mani
     _position = factory.getBuilder<Vec>(manifest, Constants::Attributes::POSITION, false);
     _size = factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE, false);
     _transform = factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM);
-    _filter = factory.getBuilder<Filter>(manifest, Constants::Attributes::FILTER);
+    _filter = factory.getBuilder<GLVariables>(manifest, Constants::Attributes::FILTER);
     _expired = factory.ensureBuilder<Boolean>(manifest, Constants::Attributes::EXPIRED);
 }
 
@@ -108,7 +108,7 @@ uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clo
     uint32_t type = _type ? BeanUtils::toInteger(_type, _stub->_arguments) : _stub->_type;
     const sp<Size> size = _size ? _size->build(_stub->_arguments) : _stub->_size;
     const sp<Transform> transform = _transform->build(_stub->_arguments);
-    const sp<Filter> filter = _filter->build(_stub->_arguments);
+    const sp<GLVariables> filter = _filter->build(_stub->_arguments);
     const sp<Numeric> duration = clock->duration();
 
     for(uint32_t i = 0; i < count; i++)

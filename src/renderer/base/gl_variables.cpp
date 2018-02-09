@@ -1,4 +1,4 @@
-#include "graphics/base/filter.h"
+#include "renderer/base/gl_variables.h"
 
 #include "core/base/bean_factory.h"
 #include "core/inf/flatable.h"
@@ -31,17 +31,17 @@ private:
 
 }
 
-Filter::Filter(const sp<Numeric>& alpha)
+GLVariables::GLVariables(const sp<Numeric>& alpha)
     : _alpha(Null::toSafe<Numeric>(alpha))
 {
 }
 
-void Filter::addVarying(const Varying& varying)
+void GLVariables::addVarying(const Varying& varying)
 {
     _varyings.push_back(varying);
 }
 
-void Filter::setVaryings(void* buf, uint32_t stride, uint32_t count) const
+void GLVariables::setVaryings(void* buf, uint32_t stride, uint32_t count) const
 {
     uint8_t* ptr = reinterpret_cast<uint8_t*>(buf);
     for(const Varying& i : _varyings)
@@ -54,7 +54,7 @@ void Filter::setVaryings(void* buf, uint32_t stride, uint32_t count) const
     }
 }
 
-Filter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+GLVariables::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _shader(factory.ensureBuilder<GLShader>(manifest, Constants::Attributes::SHADER)),
       _alpha(factory.getBuilder<Numeric>(manifest, Constants::Attributes::ALPHA, false))
 {
@@ -67,13 +67,14 @@ Filter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     }
 }
 
-sp<Filter> Filter::BUILDER::build(const sp<Scope>& args)
+sp<GLVariables> GLVariables::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<Filter> filter = sp<Filter>::make(_alpha ? _alpha->build(args) : nullptr);
+    const sp<GLVariables> filter = sp<GLVariables>::make(_alpha ? _alpha->build(args) : nullptr);
 
     if(_shader)
     {
-        initVaryings(args);
+        const sp<GLShader> shader = _shader->build(args);
+        initVaryings(shader, args);
         _shader = nullptr;
     }
 
@@ -82,72 +83,68 @@ sp<Filter> Filter::BUILDER::build(const sp<Scope>& args)
     return filter;
 }
 
-void Filter::BUILDER::initVaryings(const sp<Scope>& args)
+void GLVariables::BUILDER::initVaryings(const sp<GLShader>& shader, const sp<Scope>& args)
 {
-    const sp<GLShader> shader = _shader->build(args);
-    if(shader)
+    if(_alpha)
+        _varying_builders.push_back(VaryingBuilder("Alpha", sp<AlphaNumericFlatableBuilder>::make(_alpha)));
+    std::set<String> names;
+    for(VaryingBuilder& i : _varying_builders)
     {
-        if(_alpha)
-            _varying_builders.push_back(VaryingBuilder("Alpha", sp<AlphaNumericFlatableBuilder>::make(_alpha)));
-        std::set<String> names;
-        for(VaryingBuilder& i : _varying_builders)
-        {
-            DCHECK(names.find(i._name) == names.end(), "Attribute name \"%s\" duplicated", i._name.c_str());
-            names.insert(i._name);
-            const GLAttribute& attr = shader->getAttribute(i._name);
-            i._offset = attr.offset();
-        }
+        DCHECK(names.find(i._name) == names.end(), "Duplicated attribute name \"%s\" ", i._name.c_str());
+        names.insert(i._name);
+        const GLAttribute& attr = shader->getAttribute(i._name);
+        i._offset = attr.offset();
     }
 }
 
-static sp<Filter> _create_null_filter()
+static sp<GLVariables> _create_null_filter()
 {
-    const sp<Filter> filter = sp<Filter>::make(nullptr);
+    const sp<GLVariables> filter = sp<GLVariables>::make(nullptr);
     return filter;
 }
 
-template<> ARK_API const sp<Filter>& Null::ptr()
+template<> ARK_API const sp<GLVariables>& Null::ptr()
 {
-    static const sp<Filter> filter = _create_null_filter();
+    static const sp<GLVariables> filter = _create_null_filter();
     return filter;
 }
 
-Filter::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)
-    : _delegate(sp<Filter::BUILDER>::make(parent, Documents::fromProperties(value)))
+GLVariables::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)
+    : _delegate(sp<GLVariables::BUILDER>::make(parent, Documents::fromProperties(value)))
 {
 }
 
-sp<Filter> Filter::DICTIONARY::build(const sp<Scope>& args)
+sp<GLVariables> GLVariables::DICTIONARY::build(const sp<Scope>& args)
 {
     return _delegate->build(args);
 }
 
-Filter::Varying::Varying(uint16_t offset, const sp<Flatable>& flatable)
+GLVariables::Varying::Varying(uint16_t offset, const sp<Flatable>& flatable)
     : _offset(offset), _flatable(flatable)
 {
 }
 
-void Filter::Varying::settle(uint8_t* ptr) const
+void GLVariables::Varying::settle(uint8_t* ptr) const
 {
     _flatable->flat(ptr + _offset);
 }
 
-Filter::BUILDER::VaryingBuilder::VaryingBuilder(const String& name, const sp<Builder<Flatable>>& flatable)
+GLVariables::BUILDER::VaryingBuilder::VaryingBuilder(const String& name, const sp<Builder<Flatable>>& flatable)
     : _name(name), _flatable(flatable), _offset(0)
 {
 }
 
-Filter::BUILDER::VaryingBuilder::VaryingBuilder(const Filter::BUILDER::VaryingBuilder& other)
+GLVariables::BUILDER::VaryingBuilder::VaryingBuilder(const GLVariables::BUILDER::VaryingBuilder& other)
     : _name(other._name), _flatable(other._flatable), _offset(other._offset)
 {
 }
 
-Filter::BUILDER::VaryingBuilder::VaryingBuilder(Filter::BUILDER::VaryingBuilder&& other)
+GLVariables::BUILDER::VaryingBuilder::VaryingBuilder(GLVariables::BUILDER::VaryingBuilder&& other)
     : _name(std::move(other._name)), _flatable(std::move(other._flatable)), _offset(other._offset)
 {
 }
 
-Filter::Varying Filter::BUILDER::VaryingBuilder::build(const sp<Scope>& args) const
+GLVariables::Varying GLVariables::BUILDER::VaryingBuilder::build(const sp<Scope>& args) const
 {
     return Varying(_offset, _flatable->build(args));
 }

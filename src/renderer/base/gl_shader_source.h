@@ -15,7 +15,7 @@
 
 namespace ark {
 
-class ARK_API GLShaderSource {
+class GLShaderSource {
 public:
     GLShaderSource(const String& vertex, const String& fragment, const sp<RenderController>& renderController);
 
@@ -33,6 +33,8 @@ public:
 
     GLShaderPreprocessor& vertex();
     GLShaderPreprocessor& fragment();
+
+    const GLAttribute& getAttribute(const String& name) const;
 
 private:
     void initialize();

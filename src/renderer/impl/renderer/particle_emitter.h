@@ -90,7 +90,7 @@ private:
         sp<Builder<Vec>> _position;
         sp<Builder<Size>> _size;
         sp<Builder<Transform>> _transform;
-        sp<Builder<Filter>> _filter;
+        sp<Builder<GLVariables>> _filter;
         sp<Builder<Boolean>> _expired;
 
         sp<Iteration> _iteration;

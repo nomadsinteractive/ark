@@ -17,21 +17,21 @@ namespace ark {
 class ARK_API RenderObject : public Block {
 public:
     struct Snapshot {
-        Snapshot(uint32_t type, const V& position, const V& size, const Transform::Snapshot& transform, const sp<Filter>& filter);
+        Snapshot(uint32_t type, const V& position, const V& size, const Transform::Snapshot& transform, const sp<GLVariables>& filter);
         Snapshot(const Snapshot& other) = default;
 
         uint32_t _type;
         V _position;
         V _size;
         Transform::Snapshot _transform;
-        sp<Filter> _filter;
+        sp<GLVariables> _filter;
     };
 
 public:
 //  [[script::bindings::auto]]
-    RenderObject(int32_t type, const sp<VV>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Filter>& filter = nullptr);
+    RenderObject(int32_t type, const sp<VV>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<GLVariables>& filter = nullptr);
 //  [[script::bindings::auto]]
-    RenderObject(const sp<Integer>& type, const sp<VV>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Filter>& filter = nullptr);
+    RenderObject(const sp<Integer>& type, const sp<VV>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<GLVariables>& filter = nullptr);
 
 //  [[script::bindings::meta(absorb())]]
 //  [[script::bindings::meta(expire())]]
@@ -46,7 +46,7 @@ public:
 //  [[script::bindings::property]]
     const sp<Transform>& transform() const;
 //  [[script::bindings::property]]
-    const sp<Filter>& filter() const;
+    const sp<GLVariables>& filter() const;
 
 //  [[script::bindings::property]]
     float width() const;
@@ -71,7 +71,7 @@ public:
 //  [[script::bindings::property]]
     void setTransform(const sp<Transform>& transform);
 //  [[script::bindings::property]]
-    void setFilter(const sp<Filter>& filter);
+    void setFilter(const sp<GLVariables>& filter);
 
 //  [[script::bindings::property]]
     void setTag(const Box& tag);
@@ -92,7 +92,7 @@ public:
         sp<Builder<Vec>> _position;
         sp<Builder<Size>> _size;
         sp<Builder<Transform>> _transform;
-        sp<Builder<Filter>> _filter;
+        sp<Builder<GLVariables>> _filter;
     };
 
 //  [[plugin::style("expired")]]
@@ -114,7 +114,7 @@ private:
     SafePtr<VV, Vec> _position;
     SafePtr<Size> _size;
     SafePtr<Transform> _transform;
-    sp<Filter> _filter;
+    sp<GLVariables> _filter;
 
     Box _tag;
 };

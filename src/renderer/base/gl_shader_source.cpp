@@ -86,6 +86,13 @@ GLShaderPreprocessor& GLShaderSource::fragment()
     return _fragment;
 }
 
+const GLAttribute&GLShaderSource::getAttribute(const String& name) const
+{
+    const auto iter = _attributes.find(name);
+    DCHECK(iter != _attributes.end(), "Shader has no attribute \"%s\"", name.c_str());
+    return iter->second;
+}
+
 void GLShaderSource::initialize()
 {
     DCHECK(_preprocessor_context, "GLShaderSource should not be initialized more than once");

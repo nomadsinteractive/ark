@@ -7,7 +7,7 @@
 #include "core/epi/expired.h"
 #include "core/util/bean_utils.h"
 
-#include "graphics/base/filter.h"
+#include "renderer/base/gl_variables.h"
 #include "graphics/base/size.h"
 #include "graphics/base/vec2.h"
 
@@ -37,13 +37,13 @@ private:
 
 }
 
-RenderObject::RenderObject(int32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Filter>& filter)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _filter(Null::toSafe<Filter>(filter))
+RenderObject::RenderObject(int32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<GLVariables>& filter)
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _filter(Null::toSafe<GLVariables>(filter))
 {
 }
 
-RenderObject::RenderObject(const sp<Integer>& type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Filter>& filter)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _filter(Null::toSafe<Filter>(filter))
+RenderObject::RenderObject(const sp<Integer>& type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<GLVariables>& filter)
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _filter(Null::toSafe<GLVariables>(filter))
 {
 }
 
@@ -52,7 +52,7 @@ const sp<Integer> RenderObject::type() const
     return _type;
 }
 
-const sp<Filter>& RenderObject::filter() const
+const sp<GLVariables>& RenderObject::filter() const
 {
     return _filter;
 }
@@ -117,9 +117,9 @@ void RenderObject::setTransform(const sp<Transform>& transform)
     _transform.assign(transform);
 }
 
-void RenderObject::setFilter(const sp<Filter>& filter)
+void RenderObject::setFilter(const sp<GLVariables>& filter)
 {
-    _filter = Null::toSafe<Filter>(filter);
+    _filter = Null::toSafe<GLVariables>(filter);
 }
 
 void RenderObject::setTag(const Box& tag)
@@ -142,7 +142,7 @@ RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
       _position(factory.getBuilder<Vec>(doc, Constants::Attributes::POSITION)),
       _size(factory.getBuilder<Size>(doc, Constants::Attributes::SIZE)),
       _transform(factory.getBuilder<Transform>(doc, Constants::Attributes::TRANSFORM)),
-      _filter(factory.getBuilder<Filter>(doc, Constants::Attributes::FILTER))
+      _filter(factory.getBuilder<GLVariables>(doc, Constants::Attributes::FILTER))
 {
 }
 
@@ -162,7 +162,7 @@ sp<RenderObject> RenderObject::EXPIRABLE_DECORATOR::build(const sp<Scope>& args)
     return _delegate->build(args).absorb(_expired->build(args));
 }
 
-RenderObject::Snapshot::Snapshot(uint32_t type, const V& position, const V& size, const Transform::Snapshot& transform, const sp<Filter>& filter)
+RenderObject::Snapshot::Snapshot(uint32_t type, const V& position, const V& size, const Transform::Snapshot& transform, const sp<GLVariables>& filter)
     : _type(type), _position(position), _size(size), _transform(transform), _filter(filter)
 {
 }

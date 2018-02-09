@@ -4,7 +4,7 @@
 #include "core/util/documents.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/base/filter.h"
+#include "renderer/base/gl_variables.h"
 #include "graphics/base/layer_context.h"
 #include "graphics/base/size.h"
 #include "graphics/base/transform.h"
@@ -54,7 +54,7 @@ GLModelNinePatch::GLModelNinePatch(const sp<GLShader>& shader, const document& m
 
     uint32_t textureWidth = atlas->texture()->width();
     uint32_t textureHeight = atlas->texture()->height();
-    for(const document& node : manifest->children())
+    for(const document& node : manifest->children("render-object"))
     {
         uint32_t type = Documents::getAttribute<uint32_t>(node, Constants::Attributes::TYPE, 0);
         const Rect patches = Documents::ensureAttribute<Rect>(node, Constants::Attributes::NINE_PATCH_PATCHES);
@@ -84,7 +84,7 @@ array<uint8_t> GLModelNinePatch::getArrayBuffer(GLResourceManager& resourceManag
     for(const RenderObject::Snapshot& renderObject : renderContext._items)
     {
         const Transform::Snapshot& transform = renderObject._transform;
-        const sp<Filter>& filter = renderObject._filter;
+        const sp<GLVariables>& filter = renderObject._filter;
         const V& position = renderObject._position;
         Rect paintRect(position.x(), position.y(), position.x() + renderObject._size.x(), position.y() + renderObject._size.y());
         if(!transform.disabled)

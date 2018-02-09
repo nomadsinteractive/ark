@@ -44,6 +44,8 @@ public:
     void bindAttributes(GraphicsContext& graphicsContext) const;
     void bindAttributes(GraphicsContext& graphicsContext, const sp<GLProgram>& program) const;
 
+    const sp<GLShaderSource>& source() const;
+
     const sp<GLProgram>& program() const;
     void setProgram(const sp<GLProgram>& program);
 

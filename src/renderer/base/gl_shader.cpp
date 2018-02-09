@@ -12,7 +12,7 @@
 #include "core/util/strings.h"
 
 #include "graphics/base/color.h"
-#include "graphics/base/filter.h"
+#include "renderer/base/gl_variables.h"
 #include "graphics/impl/flatable/flatable_color3b.h"
 
 #include "renderer/base/gl_shader_source.h"
@@ -103,6 +103,11 @@ void GLShader::bindAttributes(GraphicsContext& /*graphicsContext*/, const sp<GLP
     }
 }
 
+const sp<GLShaderSource>& GLShader::source() const
+{
+    return _source;
+}
+
 const sp<GLProgram>& GLShader::program() const
 {
     return _program;
@@ -131,9 +136,7 @@ uint32_t GLShader::stride() const
 
 const GLAttribute& GLShader::getAttribute(const String& name) const
 {
-    auto iter = _source->_attributes.find(name);
-    DCHECK(iter != _source->_attributes.end(), "Shader has no attribute \"%s\"", name.c_str());
-    return iter->second;
+    return _source->getAttribute(name);
 }
 
 GLShader::Slot::Slot(const String& vertex, const String& fragment)

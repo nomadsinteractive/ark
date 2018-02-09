@@ -431,8 +431,9 @@ class StringBundle:
     pass
 
 
-class Filter:
-    pass
+class GLVariables:
+    def __init__(self, alpha=None):
+        pass
 
 
 class RenderLayer:

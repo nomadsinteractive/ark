@@ -4,7 +4,7 @@
 
 #include "graphics/base/layer_context.h"
 #include "renderer/base/atlas.h"
-#include "graphics/base/filter.h"
+#include "renderer/base/gl_variables.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/size.h"
 #include "graphics/base/vec2.h"

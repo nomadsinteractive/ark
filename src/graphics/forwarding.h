@@ -18,7 +18,7 @@ class Matrix;
 class Model;
 class Layer;
 class LayerContext;
-class Filter;
+class GLVariables;
 class TileMaker;
 class Transform;
 class Transformable;
