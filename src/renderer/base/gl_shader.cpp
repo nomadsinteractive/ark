@@ -12,14 +12,14 @@
 #include "core/util/strings.h"
 
 #include "graphics/base/color.h"
-#include "renderer/base/gl_variables.h"
+#include "renderer/base/varyings.h"
 #include "graphics/impl/flatable/flatable_color3b.h"
 
 #include "renderer/base/gl_shader_source.h"
 #include "renderer/base/gl_program.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/gles20/impl/gl_snippet/bind_attributes.h"
+#include "renderer/util/gl_debug.h"
 
 #include "platform/platform.h"
 
@@ -139,13 +139,13 @@ const GLAttribute& GLShader::getAttribute(const String& name) const
     return _source->getAttribute(name);
 }
 
-GLShader::Slot::Slot(const String& vertex, const String& fragment)
-    : _vertex_shader_hash(Strings::hash(vertex)), _fragment_shader_hash(Strings::hash(fragment))
+sp<Varyings> GLShader::makeVaryings() const
 {
+    return sp<Varyings>::make(*this);
 }
 
-GLShader::Slot::Slot(const GLShader::Slot& other)
-    : _vertex_shader_hash(other._vertex_shader_hash), _fragment_shader_hash(other._fragment_shader_hash)
+GLShader::Slot::Slot(const String& vertex, const String& fragment)
+    : _vertex_shader_hash(Strings::hash(vertex)), _fragment_shader_hash(Strings::hash(fragment))
 {
 }
 

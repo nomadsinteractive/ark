@@ -10,8 +10,9 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/gl_attribute.h"
 #include "renderer/base/gl_shader.h"
-#include "renderer/base/resource_loader_context.h"
 #include "renderer/base/gl_shader_preprocessor.h"
+#include "renderer/base/gl_uniform.h"
+#include "renderer/base/resource_loader_context.h"
 
 namespace ark {
 

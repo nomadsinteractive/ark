@@ -2,12 +2,13 @@
 
 #include "core/inf/array.h"
 
+#include "graphics/base/layer_context.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/vec2.h"
 
-#include "renderer/base/gl_variables.h"
-#include "graphics/base/layer_context.h"
 #include "renderer/base/atlas.h"
+#include "renderer/base/gl_attribute.h"
+#include "renderer/base/varyings.h"
 
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_resource_manager.h"
@@ -39,7 +40,7 @@ array<uint8_t> GLModelPoint::getArrayBuffer(GLResourceManager& resourceManager, 
         float halfHeight = i._size.y() / 2;
         float tx = position.x() + x;
         float ty = position.y() + y;
-        i._filter->setVaryings(buf, _stride, 1);
+        i._varyings.apply(buf, _stride, 1);
         map(buf, transform, -halfWidth, tx + halfWidth, -halfHeight, ty + halfHeight, (texCoord.left() + texCoord.right()) / 2, (texCoord.top() + texCoord.bottom()) / 2);
     }
     return preallocated;

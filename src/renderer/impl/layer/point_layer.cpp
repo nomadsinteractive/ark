@@ -3,8 +3,8 @@
 #include "core/base/bean_factory.h"
 
 #include "graphics/base/render_command_pipeline.h"
-#include "renderer/base/atlas.h"
 
+#include "renderer/base/atlas.h"
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/gl_model/gl_model_point.h"
@@ -12,7 +12,7 @@
 namespace ark {
 
 PointLayer::PointLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _elements(shader, atlas->texture(), sp<GLModelPoint>::make(shader, atlas), resourceLoaderContext)
+    : Layer(resourceLoaderContext->memoryPool()), _elements(shader, atlas->texture(), sp<GLModelPoint>::make(shader, atlas), resourceLoaderContext)
 {
 }
 

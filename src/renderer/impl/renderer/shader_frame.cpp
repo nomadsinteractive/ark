@@ -13,6 +13,7 @@
 #include "renderer/base/gl_program.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/gl_shader.h"
+#include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_command/draw_elements.h"
 #include "renderer/impl/gl_snippet/gl_snippet_textures.h"
 #include "renderer/inf/gl_model.h"
@@ -61,13 +62,13 @@ private:
 }
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _size(size), _elements(shader, nullptr, sp<GLModelShader>::make(size), resourceLoaderContext)
+    : _size(size), _elements(shader, nullptr, sp<GLModelShader>::make(size), resourceLoaderContext), _render_context(resourceLoaderContext->memoryPool())
 {
 }
 
 void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
-    const sp<RenderCommand> renderCommand = _elements.render(_render_context, x, y);
+    const sp<RenderCommand> renderCommand = _elements.render(_render_context.snapshot(), x, y);
     if(renderCommand)
         renderRequest.addRequest(renderCommand);
 }

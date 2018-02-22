@@ -4,11 +4,12 @@
 
 #include "graphics/base/layer_context.h"
 #include "renderer/base/atlas.h"
-#include "renderer/base/gl_variables.h"
+#include "renderer/base/varyings.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/size.h"
 #include "graphics/base/vec2.h"
 
+#include "renderer/base/gl_attribute.h"
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_resource_manager.h"
 
@@ -41,7 +42,7 @@ array<uint8_t> GLModelQuad::getArrayBuffer(GLResourceManager& resourceManager, c
         bool clockwise = transform.isFrontfaceCCW();
         float tx = position.x() + x;
         float ty = position.y() + y;
-        renderObject._filter->setVaryings(buf, _stride, 4);
+        renderObject._varyings.apply(buf, _stride, 4);
         transform.pivot = V(texCoord.pivotX(), texCoord.pivotY());
         if(clockwise ^ g_isOriginBottom)
         {

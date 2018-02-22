@@ -7,8 +7,8 @@
 #include "core/epi/expired.h"
 #include "core/util/bean_utils.h"
 
-#include "renderer/base/gl_variables.h"
 #include "graphics/base/size.h"
+#include "renderer/base/varyings.h"
 #include "graphics/base/vec2.h"
 
 namespace ark {
@@ -37,13 +37,13 @@ private:
 
 }
 
-RenderObject::RenderObject(int32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<GLVariables>& filter)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _filter(Null::toSafe<GLVariables>(filter))
+RenderObject::RenderObject(int32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& filter)
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(filter))
 {
 }
 
-RenderObject::RenderObject(const sp<Integer>& type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<GLVariables>& filter)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _filter(Null::toSafe<GLVariables>(filter))
+RenderObject::RenderObject(const sp<Integer>& type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& filter)
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(filter))
 {
 }
 
@@ -52,9 +52,9 @@ const sp<Integer> RenderObject::type() const
     return _type;
 }
 
-const sp<GLVariables>& RenderObject::filter() const
+const sp<Varyings>& RenderObject::filter() const
 {
-    return _filter;
+    return _varyings;
 }
 
 float RenderObject::width() const
@@ -117,9 +117,9 @@ void RenderObject::setTransform(const sp<Transform>& transform)
     _transform.assign(transform);
 }
 
-void RenderObject::setFilter(const sp<GLVariables>& filter)
+void RenderObject::setFilter(const sp<Varyings>& filter)
 {
-    _filter = Null::toSafe<GLVariables>(filter);
+    _varyings = Null::toSafe<Varyings>(filter);
 }
 
 void RenderObject::setTag(const Box& tag)
@@ -132,9 +132,9 @@ const Box& RenderObject::tag() const
     return _tag;
 }
 
-RenderObject::Snapshot RenderObject::snapshot() const
+RenderObject::Snapshot RenderObject::snapshot(MemoryPool& memoryPool) const
 {
-    return Snapshot(_type->val(), _position->val(), V(_size->width(), _size->height()), _transform->snapshot(), _filter);
+    return Snapshot(_type->val(), _position->val(), V(_size->width(), _size->height()), _transform->snapshot(), _varyings->snapshot(memoryPool));
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
@@ -142,14 +142,14 @@ RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
       _position(factory.getBuilder<Vec>(doc, Constants::Attributes::POSITION)),
       _size(factory.getBuilder<Size>(doc, Constants::Attributes::SIZE)),
       _transform(factory.getBuilder<Transform>(doc, Constants::Attributes::TRANSFORM)),
-      _filter(factory.getBuilder<GLVariables>(doc, Constants::Attributes::FILTER))
+      _varyings(factory.getBuilder<Varyings>(doc, Constants::Attributes::FILTER))
 {
 }
 
 sp<RenderObject> RenderObject::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Integer> type = _type->build(args);
-    return sp<RenderObject>::make(type, _position->build(args), _size->build(args), _transform->build(args), _filter->build(args));
+    return sp<RenderObject>::make(type, _position->build(args), _size->build(args), _transform->build(args), _varyings->build(args));
 }
 
 RenderObject::EXPIRABLE_DECORATOR::EXPIRABLE_DECORATOR(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value)
@@ -162,8 +162,8 @@ sp<RenderObject> RenderObject::EXPIRABLE_DECORATOR::build(const sp<Scope>& args)
     return _delegate->build(args).absorb(_expired->build(args));
 }
 
-RenderObject::Snapshot::Snapshot(uint32_t type, const V& position, const V& size, const Transform::Snapshot& transform, const sp<GLVariables>& filter)
-    : _type(type), _position(position), _size(size), _transform(transform), _filter(filter)
+RenderObject::Snapshot::Snapshot(uint32_t type, const V& position, const V& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings)
+    : _type(type), _position(position), _size(size), _transform(transform), _varyings(varyings)
 {
 }
 

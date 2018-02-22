@@ -5,8 +5,8 @@
 
 namespace ark {
 
-Layer::Layer()
-    : _layer_context(sp<LayerContext>::make())
+Layer::Layer(const sp<MemoryPool>& memoryPool)
+    : _layer_context(sp<LayerContext>::make(memoryPool))
 {
 }
 

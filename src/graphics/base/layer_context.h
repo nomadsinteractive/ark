@@ -20,7 +20,7 @@ public:
     };
 
     struct Snapshot {
-        Snapshot(const LayerContext& layerContext);
+        Snapshot(const LayerContext& layerContext, MemoryPool& memoryPool);
         Snapshot(Snapshot&& other) = default;
 
         std::list<RenderObject::Snapshot> _items;
@@ -29,6 +29,8 @@ public:
     };
 
 public:
+    LayerContext(const sp<MemoryPool>& memoryPool);
+
     void draw(float x, float y, const sp<RenderObject>& renderObject);
     void clear();
 
@@ -36,6 +38,7 @@ public:
 
 private:
     std::list<Item> _items;
+    sp<MemoryPool> _memory_pool;
 
     friend struct Snapshot;
 };

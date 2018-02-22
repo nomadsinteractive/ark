@@ -19,8 +19,8 @@
 namespace ark {
 
 AlphabetLayer::AlphabetLayer(const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _stub(sp<Stub>::make(alphabet, resourceLoaderContext->glResourceManager(), textureWidth, textureHeight)), _resource_loader_context(resourceLoaderContext), _shader(shader),
-      _image_layer(sp<ImageLayer>::make(_shader, _stub->atlas(), _resource_loader_context))
+    : Layer(resourceLoaderContext->memoryPool()), _stub(sp<Stub>::make(alphabet, resourceLoaderContext->glResourceManager(), textureWidth, textureHeight)),
+      _resource_loader_context(resourceLoaderContext), _shader(shader), _image_layer(sp<ImageLayer>::make(_shader, _stub->atlas(), _resource_loader_context))
 {
 }
 

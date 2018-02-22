@@ -76,6 +76,7 @@ public:
     const sp<Executor>& executor() const;
     const sp<RenderController>& renderController() const;
     const sp<GLTextureLoader>& textureLoader() const;
+    const sp<MemoryPool>& memoryPool() const;
     const sp<ObjectPool>& objectPool() const;
 
     template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& expired = nullptr) {
@@ -100,6 +101,7 @@ private:
     sp<Executor> _executor;
     sp<RenderController> _render_controller;
     sp<GLTextureLoader> _texture_loader;
+    sp<MemoryPool> _memory_pool;
     sp<ObjectPool> _object_pool;
 
     sp<Expired::Impl> _context_expired;

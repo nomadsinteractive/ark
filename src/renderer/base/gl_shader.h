@@ -8,9 +8,11 @@
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/forwarding.h"
+
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_attribute.h"
-#include "renderer/base/gl_uniform.h"
+//#include "renderer/base/gl_attribute.h"
+//#include "renderer/base/gl_uniform.h"
 
 namespace ark {
 
@@ -19,7 +21,7 @@ public:
     class ARK_API Slot {
     public:
         Slot(const String& vertex, const String& fragment);
-        Slot(const Slot& other);
+        Slot(const Slot& other) = default;
 
         bool operator <(const Slot& other) const;
 
@@ -57,6 +59,9 @@ public:
 
     const GLAttribute& getAttribute(const String& name) const;
 
+//[[script::bindings::auto]]
+    sp<Varyings> makeVaryings() const;
+
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<GLShader> {
     public:
@@ -72,7 +77,6 @@ public:
         sp<Builder<String>> _vertex;
         sp<Builder<String>> _fragment;
         sp<Builder<GLSnippet>> _snippet;
-
     };
 
 private:

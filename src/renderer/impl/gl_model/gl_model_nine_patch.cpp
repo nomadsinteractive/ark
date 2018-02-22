@@ -4,7 +4,7 @@
 #include "core/util/documents.h"
 #include "core/types/shared_ptr.h"
 
-#include "renderer/base/gl_variables.h"
+#include "renderer/base/varyings.h"
 #include "graphics/base/layer_context.h"
 #include "graphics/base/size.h"
 #include "graphics/base/transform.h"
@@ -12,6 +12,7 @@
 #include "graphics/base/vec2.h"
 
 #include "renderer/base/atlas.h"
+#include "renderer/base/gl_attribute.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_texture.h"
@@ -84,7 +85,7 @@ array<uint8_t> GLModelNinePatch::getArrayBuffer(GLResourceManager& resourceManag
     for(const RenderObject::Snapshot& renderObject : renderContext._items)
     {
         const Transform::Snapshot& transform = renderObject._transform;
-        const sp<GLVariables>& filter = renderObject._filter;
+        const Varyings::Snapshot& varyings = renderObject._varyings;
         const V& position = renderObject._position;
         Rect paintRect(position.x(), position.y(), position.x() + renderObject._size.x(), position.y() + renderObject._size.y());
         if(!transform.disabled)
@@ -92,7 +93,7 @@ array<uint8_t> GLModelNinePatch::getArrayBuffer(GLResourceManager& resourceManag
             paintRect.translate(transform.translate.x() - transform.pivot.x(), transform.translate.y() - transform.pivot.y());
         }
         const Item& ninePatch = _nine_patch_items.at(renderObject._type);
-        filter->setVaryings(buf, _stride, 16);
+        varyings.apply(buf, _stride, 16);
         fillPaintingRect(buf, paintRect, ninePatch, floatStride, x, y);
         buf += (_stride * 4);
     }

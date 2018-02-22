@@ -431,8 +431,11 @@ class StringBundle:
     pass
 
 
-class GLVariables:
-    def __init__(self, alpha=None):
+class Varyings:
+    def __init__(self, shader):
+        pass
+
+    def add(self, name, obj):
         pass
 
 
@@ -478,4 +481,9 @@ class Color:
 class Platform:
     @staticmethod
     def get_user_storage_path(p):
+        return None
+
+
+class GLShader:
+    def make_varyings(self):
         return None

@@ -1,7 +1,7 @@
 #include "renderer/base/graphics_context.h"
 
+#include "core/inf/variable.h"
 #include "core/util/strings.h"
-#include "core/util/log.h"
 
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/gl_program.h"

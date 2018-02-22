@@ -79,4 +79,14 @@ private:
 
 }
 
+namespace std {
+
+template <> struct hash<ark::String> {
+    size_t operator()(const ark::String& str) const {
+        return static_cast<size_t>(str.hash());
+    }
+};
+
+}
+
 #endif
