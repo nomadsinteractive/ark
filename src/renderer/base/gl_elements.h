@@ -71,6 +71,7 @@ private:
     GLBuffer _array_buffer;
 
     sp<ObjectPool> _render_command_pool;
+    sp<MemoryPool> _memory_pool;
     sp<GLSnippet> _gl_snippet;
 };
 

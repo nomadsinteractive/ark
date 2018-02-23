@@ -91,10 +91,7 @@ public:
         if(!_ptr)
             return Box();
         SharedPtr<T>* copy = new SharedPtr<T>(*this);
-        Box box(copy, Type<T>::id(), _interfaces, [] (void* instance) {
-                    SharedPtr<T>* b = reinterpret_cast<SharedPtr<T>*>(instance);
-                    delete b;
-                });
+        Box box(copy, Type<T>::id(), _interfaces, packedBoxDestructor);
         return box;
     }
 
@@ -150,6 +147,11 @@ private:
         : _ptr(ptr, deleter), _interfaces(interfaces) {
     }
 
+    static void packedBoxDestructor(void* inst) {
+        SharedPtr<T>* b = reinterpret_cast<SharedPtr<T>*>(inst);
+        delete b;
+    }
+
     template<typename U> friend class SharedPtr;
 
     friend class MemoryPool;
@@ -158,7 +160,6 @@ private:
 private:
     std::shared_ptr<T> _ptr;
     std::shared_ptr<Interfaces> _interfaces;
-
 };
 
 

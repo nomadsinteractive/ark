@@ -20,7 +20,7 @@ namespace ark {
 GLElements::GLElements(const sp<GLShader>& shader, const sp<GLTexture>& texture, const sp<GLModel>& model, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_manager(resourceLoaderContext->glResourceManager()), _shader(shader), _texture(texture), _model(model), _mode(static_cast<GLenum>(model->mode())),
       _array_buffer(_resource_manager->createGLBuffer(nullptr, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW)),
-      _render_command_pool(resourceLoaderContext->objectPool()),
+      _render_command_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
       _gl_snippet(sp<GLSnippetWrapper>::make(_resource_manager, _shader, _array_buffer, shader->snippet()))
 {
 }
@@ -30,7 +30,7 @@ sp<RenderCommand> GLElements::render(const LayerContext::Snapshot& renderContext
     const GLBuffer indexBuffer = _model->getIndexBuffer(_resource_manager, renderContext);
     if(indexBuffer)
     {
-        const array<uint8_t> buf = _model->getArrayBuffer(_resource_manager, renderContext, x, y);
+        const array<uint8_t> buf = _model->getArrayBuffer(_memory_pool, renderContext, x, y);
         return _render_command_pool->obtain<DrawElements>(GLSnippetContext(_texture, _array_buffer.snapshot(buf), indexBuffer, _mode), _shader, _gl_snippet);
     }
     return nullptr;

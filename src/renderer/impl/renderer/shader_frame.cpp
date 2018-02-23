@@ -28,7 +28,7 @@ public:
         : _size(size) {
     }
 
-    virtual array<uint8_t> getArrayBuffer(GLResourceManager& resourceManager, const LayerContext::Snapshot& /*renderContext*/, float x, float y) override {
+    virtual bytearray getArrayBuffer(MemoryPool& memoryPool, const LayerContext::Snapshot& /*renderContext*/, float x, float y) override {
         float top = g_isOriginBottom ? y + _size->height() : y, bottom = g_isOriginBottom ? y : y + _size->height();
         uint16_t uvtop = g_isOriginBottom ? 0xffff : 0, uvbottom = g_isOriginBottom ? 0 : 0xffff;
         FixedArray<float, 16> buffer({x, bottom, 0, 0, x, top, 0, 0, x + _size->width(), bottom, 0, 0, x + _size->width(), top, 0, 0});
@@ -41,7 +41,7 @@ public:
         ip[23] = uvbottom;
         ip[30] = 0xffff;
         ip[31] = uvtop;
-        const array<uint8_t> preallocated = resourceManager.getPreallocatedArray(64);
+        const bytearray preallocated = memoryPool.allocate(64);
         memcpy(preallocated->array(), buffer.array(), 16 * sizeof(GLfloat));
         return preallocated;
     }

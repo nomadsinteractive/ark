@@ -102,7 +102,7 @@ private:
 }
 
 GLResourceManager::GLResourceManager(const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
-    : _recycler(sp<GLRecycler>::make()), _gl_texture_loader(sp<GLTextureResource>::make(_recycler, bitmapLoader, bitmapBoundsLoader)), _memory_pool(), _tick(0)
+    : _recycler(sp<GLRecycler>::make()), _gl_texture_loader(sp<GLTextureResource>::make(_recycler, bitmapLoader, bitmapBoundsLoader)), _tick(0)
 {
 }
 
@@ -189,11 +189,6 @@ GLBuffer GLResourceManager::createGLBuffer(const sp<Variable<bytearray>>& variab
     return GLBuffer(_recycler, variable, type, usage);
 }
 
-array<uint8_t> GLResourceManager::getPreallocatedArray(uint32_t size)
-{
-    return _memory_pool.allocate(size);
-}
-
 const sp<GLRecycler>& GLResourceManager::recycler() const
 {
     return _recycler;
@@ -211,7 +206,7 @@ GLBuffer GLResourceManager::createStaticBuffer(GLResourceManager::BufferName buf
             DCHECK((bufferLength + 2) % 30 == 0, "Illegal length of nine patch index array.");
             return GLBuffer(_recycler, sp<NinePatchIndexArrayVariable>::make((bufferLength + 2) / 30), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, bufferSize);
         case BUFFER_NAME_POINTS:
-            return GLBuffer(_recycler, sp<PointIndexArrayVariable>::make(static_cast<uint32_t>(bufferLength * 1.4)), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, bufferSize);
+            return GLBuffer(_recycler, sp<PointIndexArrayVariable>::make(static_cast<uint32_t>(bufferLength * 1.4f)), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, bufferSize);
         default:
             break;
     }

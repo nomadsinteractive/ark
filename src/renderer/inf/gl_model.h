@@ -15,7 +15,7 @@ class ARK_API GLModel {
 public:
     virtual ~GLModel() = default;
 
-    virtual array<uint8_t> getArrayBuffer(GLResourceManager& resourceManager, const LayerContext::Snapshot& renderContext, float x, float y) = 0;
+    virtual bytearray getArrayBuffer(MemoryPool& memoryPool, const LayerContext::Snapshot& renderContext, float x, float y) = 0;
     virtual GLBuffer getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext::Snapshot& renderContext) = 0;
 
     virtual uint32_t mode() const = 0;

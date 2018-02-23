@@ -75,11 +75,12 @@ GLModelNinePatch::GLModelNinePatch(const sp<GLShader>& shader, const document& m
     }
 }
 
-array<uint8_t> GLModelNinePatch::getArrayBuffer(GLResourceManager& resourceManager, const LayerContext::Snapshot& renderContext, float x, float y) {
+bytearray GLModelNinePatch::getArrayBuffer(MemoryPool& memoryPool, const LayerContext::Snapshot& renderContext, float x, float y)
+{
     const uint32_t size = renderContext._items.size();
     const uint32_t floatStride = _stride / 4;
     DCHECK(size > 0, "Empty RenderContext");
-    const array<uint8_t> preallocated = resourceManager.getPreallocatedArray(size * 16 * _stride);
+    const bytearray preallocated = memoryPool.allocate(size * 16 * _stride);
     GLfloat* buf = reinterpret_cast<GLfloat*>(preallocated->array());
     memset(buf, 0, preallocated->length());
     for(const RenderObject::Snapshot& renderObject : renderContext._items)
@@ -89,9 +90,8 @@ array<uint8_t> GLModelNinePatch::getArrayBuffer(GLResourceManager& resourceManag
         const V& position = renderObject._position;
         Rect paintRect(position.x(), position.y(), position.x() + renderObject._size.x(), position.y() + renderObject._size.y());
         if(!transform.disabled)
-        {
             paintRect.translate(transform.translate.x() - transform.pivot.x(), transform.translate.y() - transform.pivot.y());
-        }
+
         const Item& ninePatch = _nine_patch_items.at(renderObject._type);
         varyings.apply(buf, _stride, 16);
         fillPaintingRect(buf, paintRect, ninePatch, floatStride, x, y);
@@ -131,6 +131,7 @@ void GLModelNinePatch::fillMesh(float* mesh, Array<float>& xArray, Array<float>&
         for(j = 0; j < xLen; j++) {
             mesh[offset] = xData[j] + x;
             mesh[offset + 1] = yData[i] + y;
+            mesh[offset + 2] = 0;
             mesh += stride;
         }
     }

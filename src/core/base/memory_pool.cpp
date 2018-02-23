@@ -6,23 +6,24 @@
 namespace ark {
 
 MemoryPool::SubBlock::SubBlock(uint32_t subBlockSize)
-    : _preallocated(sp<LockFreeStack<array<uint8_t>>>::make()), _sub_block_size(subBlockSize), _shrink_score(0), _balanced_weight(1.0f)
+    : _preallocated(sp<LockFreeStack<sp<PooledByteArray>>>::make()), _sub_block_size(subBlockSize), _shrink_score(0), _balanced_weight(1.0f)
 {
 }
 
-array<uint8_t> MemoryPool::SubBlock::allocate()
+array<uint8_t> MemoryPool::SubBlock::allocate(uint32_t size)
 {
-    const sp<LockFreeStack<array<uint8_t>>> preallocated = _preallocated;
+    const sp<LockFreeStack<sp<PooledByteArray>>> preallocated = _preallocated;
     bool empty = preallocated->empty();
 
-    array<uint8_t> buf;
+    sp<PooledByteArray> buf;
 
     if(!preallocated->pop(buf))
-        buf = sp<AlignedDynamicArray<uint8_t, uint32_t>>::make(_sub_block_size);
+        buf = sp<PooledByteArray>::make(sp<AlignedDynamicArray<uint8_t, uint32_t>>::make(_sub_block_size));
 
     if(empty)
         _shrink_score += _balanced_weight;
 
+    buf->setLength(size);
     return array<uint8_t>(buf.get(), buf.interfaces(), [buf, preallocated](Array<uint8_t>*) {
             preallocated->push(buf);
         });
@@ -54,7 +55,7 @@ array<uint8_t> MemoryPool::Block::allocate(uint32_t size)
 {
     DCHECK(size > _size_half && size <= _size, "Invalid memory size %d being allocated", size);
     uint32_t subindex = ((size - 1 - _size_half) >> _size_quarter_log2) % SUB_BLOCK_COUNT;
-    return _sub_blocks[subindex]->allocate();
+    return _sub_blocks[subindex]->allocate(size);
 }
 
 void MemoryPool::Block::shrink()
@@ -87,6 +88,26 @@ void MemoryPool::shrink()
 {
     for(const auto& i : _blocks)
         i->shrink();
+}
+
+MemoryPool::PooledByteArray::PooledByteArray(const bytearray& delegate)
+    : _delegate(delegate), _length(0)
+{
+}
+
+uint8_t* MemoryPool::PooledByteArray::array()
+{
+    return _delegate->array();
+}
+
+uint32_t MemoryPool::PooledByteArray::length()
+{
+    return _length;
+}
+
+void MemoryPool::PooledByteArray::setLength(uint32_t length)
+{
+    _length = length;
 }
 
 }

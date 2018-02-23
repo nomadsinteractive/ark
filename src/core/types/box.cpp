@@ -5,8 +5,8 @@
 
 namespace ark {
 
-Box::Box(void* instance, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor&& destructor)
-    : _instance(std::make_shared<Stub>(instance, typeId, interfaces, std::move(destructor)))
+Box::Box(void* instance, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor)
+    : _instance(std::make_shared<Stub>(instance, typeId, interfaces, destructor))
 {
 }
 
@@ -20,7 +20,7 @@ Box::operator bool() const
     return _instance && _instance->ptr() != nullptr;
 }
 
-Box::Stub::Stub(void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor&& destructor)
+Box::Stub::Stub(void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor)
     : _ptr(ptr), _type_id(typeId), _interfaces(interfaces), _destructor(destructor)
 {
 }

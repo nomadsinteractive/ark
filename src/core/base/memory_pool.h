@@ -4,6 +4,7 @@
 #include "core/base/api.h"
 #include "core/concurrent/lock_free_stack.h"
 #include "core/forwarding.h"
+#include "core/inf/array.h"
 #include "core/types/owned_ptr.h"
 #include "core/types/shared_ptr.h"
 
@@ -17,16 +18,30 @@ private:
         BLOCK_SIZE_LOG2 = 6
     };
 
+    class PooledByteArray : public Array<uint8_t> {
+    public:
+        PooledByteArray(const bytearray& delegate);
+
+        virtual uint8_t* array();
+        virtual uint32_t length();
+
+        void setLength(uint32_t length);
+
+    private:
+        bytearray _delegate;
+        uint32_t _length;
+    };
+
     class SubBlock {
     public:
         SubBlock(uint32_t subBlockSize);
 
-        array<uint8_t> allocate();
+        array<uint8_t> allocate(uint32_t size);
 
         void shrink();
 
     private:
-        sp<LockFreeStack<array<uint8_t>>> _preallocated;
+        sp<LockFreeStack<sp<PooledByteArray>>> _preallocated;
         uint32_t _sub_block_size;
         float _shrink_score;
         float _balanced_weight;

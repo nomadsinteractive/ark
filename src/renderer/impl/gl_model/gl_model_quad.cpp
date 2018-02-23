@@ -22,13 +22,12 @@ GLModelQuad::GLModelQuad(const sp<GLShader>& shader, const sp<Atlas>& atlas)
     _tex_coordinate_offset /= 2;
 }
 
-array<uint8_t> GLModelQuad::getArrayBuffer(GLResourceManager& resourceManager, const LayerContext::Snapshot& renderContext, float x, float y)
+bytearray GLModelQuad::getArrayBuffer(MemoryPool& memoryPool, const LayerContext::Snapshot& renderContext, float x, float y)
 {
     uint32_t len = renderContext._items.size() * _stride;
-
     NOT_NULL(len);
 
-    const array<uint8_t> preallocated = resourceManager.getPreallocatedArray(len * 4);
+    const bytearray preallocated = memoryPool.allocate(len * 4);
 
     uint8_t* buf = preallocated->array();
     for(const RenderObject::Snapshot& renderObject : renderContext._items) {

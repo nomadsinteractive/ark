@@ -15,7 +15,7 @@ namespace ark {
 
 class ARK_API Box {
 public:
-    typedef std::function<void(void*)> Destructor;
+    typedef void(*Destructor)(void*);
 
     Box() noexcept = default;
     Box(const Box& other) = default;
@@ -51,11 +51,11 @@ public:
     }
 
 private:
-    Box(void* instance, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor&& destructor);
+    Box(void* instance, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor);
 
     class ARK_API Stub {
     public:
-        Stub(void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor&& destructor);
+        Stub(void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor);
         ~Stub();
 
         void* ptr() const;

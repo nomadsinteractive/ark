@@ -32,6 +32,7 @@ private:
         uint16_t _offset;
         sp<Flatable> _flatable;
     };
+
 public:
     class Snapshot {
     public:

@@ -15,7 +15,7 @@ class GLModelQuad : public GLModel {
 public:
     GLModelQuad(const sp<GLShader>& shader, const sp<Atlas>& atlas);
 
-    virtual array<uint8_t> getArrayBuffer(GLResourceManager& resourceManager, const LayerContext::Snapshot& renderContext, float x, float y) override;
+    virtual bytearray getArrayBuffer(MemoryPool& memoryPool, const LayerContext::Snapshot& renderContext, float x, float y) override;
     virtual GLBuffer getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext::Snapshot& renderContext) override;
 
     virtual uint32_t mode() const override;

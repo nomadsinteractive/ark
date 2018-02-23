@@ -55,8 +55,6 @@ public:
     sp<GLTexture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable);
     GLBuffer createGLBuffer(const sp<Variable<bytearray>>& variable, GLenum type, GLenum usage);
 
-    array<uint8_t> getPreallocatedArray(uint32_t size);
-
     const sp<GLRecycler>& recycler() const;
 
     template<typename T, typename... Args> sp<GLResource> createGLResource(Args&&... args) {
@@ -102,9 +100,7 @@ private:
 
 private:
     sp<GLRecycler> _recycler;
-
     sp<Dictionary<sp<GLTexture>>> _gl_texture_loader;
-    MemoryPool _memory_pool;
 
     LockFreeStack<PreparingGLResource> _preparing_items;
 
