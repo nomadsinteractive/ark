@@ -5,7 +5,7 @@
 
 #include "core/base/api.h"
 #include "core/base/string.h"
-#include "core/base/string_builder.h"
+#include "core/base/string_buffer.h"
 #include "core/collection/list.h"
 #include "core/types/global.h"
 
@@ -68,7 +68,7 @@ private:
 
         String _category;
 
-        StringBuilder _lines;
+        StringBuffer _lines;
         std::map<String, String> _declared;
     };
 
@@ -117,13 +117,13 @@ public:
     ShaderType _type;
     String _source;
 
-    StringBuilder _uniform_declarations;
+    StringBuffer _uniform_declarations;
     std::map<String, String> _annotations;
 
     Declaration _in_declarations;
     Declaration _out_declarations;
 
-    void declare(StringBuilder& sb, const List<std::pair<String, String>>& vars, const String& inType, const String& prefix, std::map<String, String>& declared) const;
+    void declare(StringBuffer& sb, const List<std::pair<String, String>>& vars, const String& inType, const String& prefix, std::map<String, String>& declared) const;
 
 };
 
@@ -139,10 +139,10 @@ public:
     List<GLShaderPreprocessor::Snippet> _vert_snippets;
     List<GLShaderPreprocessor::Snippet> _frag_snippets;
 
-    StringBuilder _vert_main_source;
-    StringBuilder _frag_color_modifier;
-    StringBuilder _frag_procedures;
-    StringBuilder _frag_procedure_calls;
+    StringBuffer _vert_main_source;
+    StringBuffer _frag_color_modifier;
+    StringBuffer _frag_procedures;
+    StringBuffer _frag_procedure_calls;
 
     void addAttribute(const String& name, const String& type, std::map<String, String>& vars, GLShaderSource& source);
     void addVertexSource(const String& source);

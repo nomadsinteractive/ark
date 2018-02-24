@@ -5,7 +5,7 @@
 
 #include "core/base/api.h"
 #include "core/base/string.h"
-#include "core/base/string_builder.h"
+#include "core/base/string_buffer.h"
 #include "core/impl/array/dynamic_array.h"
 #include "core/types/null.h"
 #include "core/util/conversions.h"
@@ -67,7 +67,7 @@ public:
     static String svprintf(const char* format, va_list args);
 
     template<typename T> static String join(const T* data, uint32_t offset, uint32_t length) {
-        StringBuilder sb;
+        StringBuffer sb;
         for(uint32_t i = 0; i < length; i++) {
             if(i != 0)
                 sb << ", ";

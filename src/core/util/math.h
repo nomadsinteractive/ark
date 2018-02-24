@@ -50,10 +50,10 @@ public:
         return val;
     }
 
-    template <typename T> static T twos_complement(T val,
-                      // "allow this template to be instantiated only for unsigned types"
-                      typename std::enable_if<std::is_unsigned<T>::value>::type* = 0) {
-        return -std::uintmax_t(val);
+    template<class T> static typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
+        almostEqual(T x, T y, int32_t ulp) {
+        return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp
+               || std::abs(x - y) < std::numeric_limits<T>::min();
     }
 
     static ARK_API uint32_t log2(uint32_t x);

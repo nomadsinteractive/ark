@@ -92,7 +92,7 @@ GLuint GLProgram::compile(GLenum type, const String& shader_source)
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
         String log(length, ' ');
         glGetShaderInfoLog(shader, length, &length, (GLchar*) log.c_str());
-        StringBuilder sb;
+        StringBuffer sb;
         for(uint32_t i = 0; i <= slen; i++)
             sb << src[i] << '\n';
         DFATAL("%s\n\n%s", log.c_str(), sb.str().c_str());

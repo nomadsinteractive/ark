@@ -4,7 +4,7 @@
 #include <cctype>
 #include <sstream>
 
-#include "core/base/string_builder.h"
+#include "core/base/string_buffer.h"
 #include "core/inf/array.h"
 #include "core/impl/array/dynamic_array.h"
 #include "core/types/shared_ptr.h"
@@ -145,7 +145,7 @@ String String::replace(const std::regex& pattern, const std::function<String(Arr
     std::string str = _str;
     std::smatch match;
 
-    StringBuilder sb;
+    StringBuffer sb;
 
     while(std::regex_search(str, match, pattern))
     {

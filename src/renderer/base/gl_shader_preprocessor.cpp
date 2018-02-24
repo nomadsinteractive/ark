@@ -4,7 +4,7 @@
 
 #include "core/types/global.h"
 
-#include "core/base/string_builder.h"
+#include "core/base/string_buffer.h"
 #include "core/util/strings.h"
 
 #include "renderer/base/gl_context.h"
@@ -63,7 +63,7 @@ void GLShaderPreprocessor::parseDeclarations(GLShaderPreprocessorContext& contex
     if(!_main_block)
         return;
 
-    StringBuilder sb;
+    StringBuffer sb;
     {
         sb << _main_block->_prefix;
         sb << "vec4 ark_" << _main_block->_procedure._name << "(";
@@ -121,7 +121,7 @@ String GLShaderPreprocessor::process(const GLContext& glContext) const
 
     static std::regex var_pattern("\\$\\{([\\w.]+)\\}");
 
-    StringBuilder sb;
+    StringBuffer sb;
     if(_type == SHADER_TYPE_FRAGMENT && glContext.version() >= Ark::OPENGL_30)
     {
         sb << "#define texture2D texture\n";
@@ -178,7 +178,7 @@ void GLShaderPreprocessor::insertAfter(const String& statement, const String& st
 
 String GLShaderPreprocessor::getDeclarations()
 {
-    StringBuilder sb;
+    StringBuffer sb;
     if(_uniform_declarations.dirty())
         sb << '\n' << _uniform_declarations.str();
     if(_in_declarations.dirty())
@@ -189,7 +189,7 @@ String GLShaderPreprocessor::getDeclarations()
     return sb.str();
 }
 
-void GLShaderPreprocessor::declare(StringBuilder& sb, const List<std::pair<String, String>>& vars, const String& inType, const String& prefix, std::map<String, String>& declared) const
+void GLShaderPreprocessor::declare(StringBuffer& sb, const List<std::pair<String, String>>& vars, const String& inType, const String& prefix, std::map<String, String>& declared) const
 {
     for(const auto& i : vars)
     {
@@ -269,8 +269,8 @@ void GLShaderPreprocessorContext::addFragmentColorModifier(const String& modifie
 
 void GLShaderPreprocessorContext::addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure)
 {
-    StringBuilder declareParams;
-    StringBuilder callParams;
+    StringBuffer declareParams;
+    StringBuffer callParams;
     for(const auto& i : ins)
     {
         declareParams << ", ";
@@ -279,7 +279,7 @@ void GLShaderPreprocessorContext::addFragmentProcedure(const String& name, const
         callParams << ", ";
         callParams << "a_" << Strings::capitalFirst(i.second);
     }
-    StringBuilder sb;
+    StringBuffer sb;
     sb << "vec4 ark_" << name << "(vec4 c" << declareParams.str() << ") {\n    " << procedure << "\n}\n\n";
     _frag_snippets.push_back(GLShaderPreprocessor::Snippet(GLShaderPreprocessor::SNIPPET_TYPE_PROCEDURE, sb.str()));
     sb.clear();

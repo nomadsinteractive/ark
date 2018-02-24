@@ -73,7 +73,7 @@ public:
 private:
     std::string _str;
 
-    friend class StringBuilder;
+    friend class StringBuffer;
 
 };
 

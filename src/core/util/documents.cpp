@@ -3,7 +3,7 @@
 #include <fstream>
 #include <tinyxml2.h>
 
-#include "core/base/string_builder.h"
+#include "core/base/string_buffer.h"
 #include "core/inf/readable.h"
 #include "core/util/strings.h"
 
@@ -85,7 +85,7 @@ document Documents::fromProperties(const std::map<String, String>& properties)
     return doc;
 }
 
-void Documents::print(const document& doc, StringBuilder& sb, const String& indent, uint16_t indent_count)
+void Documents::print(const document& doc, StringBuffer& sb, const String& indent, uint16_t indent_count)
 {
     for(uint16_t i = 0; i < indent_count; ++i)
         sb << indent;
@@ -95,7 +95,7 @@ void Documents::print(const document& doc, StringBuilder& sb, const String& inde
         sb << ' ' << attr->name() << "=\"" << attr->value() << '"';
     }
 
-    StringBuilder content;
+    StringBuffer content;
 
     for(const document& node : doc->children()) {
         Documents::print(node, content, indent, indent_count + 1);
@@ -120,7 +120,7 @@ void Documents::print(const document& doc, StringBuilder& sb, const String& inde
 
 String Documents::toString(const document& doc, const String& indent, uint16_t indent_count)
 {
-    StringBuilder sb;
+    StringBuffer sb;
     print(doc, sb, indent, indent_count);
     return sb.str();
 }

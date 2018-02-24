@@ -41,7 +41,7 @@ private:
     void initialize();
 
     void addAttribute(const String& name, const String& type);
-    void insertPredefinedUniforms(const String& source, StringBuilder& sb);
+    void insertPredefinedUniforms(const String& source, StringBuffer& sb);
 
     void loadPredefinedAttribute(const document& manifest);
     GLAttribute getPredefinedAttribute(const String& name, const String& type);

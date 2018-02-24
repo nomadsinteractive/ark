@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "core/base/api.h"
-#include "core/base/string_builder.h"
+#include "core/base/string_buffer.h"
 #include "core/inf/variable.h"
 #include "core/inf/array.h"
 #include "core/util/strings.h"
@@ -98,14 +98,14 @@ template<> ARK_API float Conversions::to<sp<Numeric>, float>(const sp<Numeric>& 
 
 template<> ARK_API String Conversions::to<floatarray, String>(const floatarray& val)
 {
-    StringBuilder sb;
+    StringBuffer sb;
     sb << '[' << Strings::join<float>(val->array(), 0, val->length()) << ']';
     return sb.str();
 }
 
 template<> ARK_API String Conversions::to<indexarray, String>(const indexarray& val)
 {
-    StringBuilder sb;
+    StringBuffer sb;
     sb << '[' << Strings::join<uint16_t>(val->array(), 0, val->length()) << ']';
     return sb.str();
 }

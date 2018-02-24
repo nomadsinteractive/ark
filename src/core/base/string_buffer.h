@@ -7,22 +7,22 @@
 
 namespace ark {
 
-class ARK_API StringBuilder {
+class ARK_API StringBuffer {
 public:
-    StringBuilder();
-    StringBuilder(const String& str);
+    StringBuffer();
+    StringBuffer(const String& str);
 
     String str() const;
     void clear();
     bool dirty() const;
 
-    StringBuilder& operator <<(const String& str);
-    StringBuilder& operator <<(const char* str);
-    StringBuilder& operator <<(int32_t val);
-    StringBuilder& operator <<(char c);
+    StringBuffer& operator <<(const String& str);
+    StringBuffer& operator <<(const char* str);
+    StringBuffer& operator <<(int32_t val);
+    StringBuffer& operator <<(char c);
 
     typedef decltype(std::endl<char, std::char_traits<char>>) TypeEndl;
-    StringBuilder& operator <<(TypeEndl endl);
+    StringBuffer& operator <<(TypeEndl endl);
 
 private:
     std::ostringstream _ss;

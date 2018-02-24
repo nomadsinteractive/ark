@@ -3,7 +3,7 @@
 #include <set>
 #include <regex>
 
-#include "core/base/string_builder.h"
+#include "core/base/string_buffer.h"
 #include "core/base/string_table.h"
 #include "core/inf/array.h"
 #include "core/impl/flatable/flatable_numeric.h"

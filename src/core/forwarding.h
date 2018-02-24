@@ -54,7 +54,7 @@ class Runnable;
 class Scope;
 class Script;
 class String;
-class StringBuilder;
+class StringBuffer;
 class StringTable;
 class Thread;
 class ThreadPoolExecutor;
