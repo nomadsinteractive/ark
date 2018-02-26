@@ -1,5 +1,6 @@
 #include "renderer/impl/gl_model/gl_model_quad.h"
 
+#include "core/base/memory_pool.h"
 #include "core/inf/array.h"
 
 #include "graphics/base/layer_context.h"

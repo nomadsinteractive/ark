@@ -6,7 +6,6 @@
 #include <set>
 
 #include "core/base/api.h"
-#include "core/base/memory_pool.h"
 #include "core/forwarding.h"
 #include "core/types/owned_ptr.h"
 #include "core/types/shared_ptr.h"

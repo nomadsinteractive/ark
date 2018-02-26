@@ -6,35 +6,23 @@
 namespace ark {
 
 SurfaceUpdater::SurfaceUpdater(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController)
-    : _executor(executor), _surface_controller(surfaceController)
+    : _executor(executor), _surface_controller(surfaceController), _render_request_recycler(sp<LockFreeStack<RenderRequest>>::make())
 {
 }
 
 void SurfaceUpdater::requestUpdate()
 {
-    const sp<RenderRequest> renderRequest = obtainRenderRequest();
+    RenderRequest renderRequest = obtainRenderRequest();
     _surface_controller->update(renderRequest);
-    recycleRenderRequest(renderRequest);
 }
 
-sp<RenderRequest> SurfaceUpdater::obtainRenderRequest()
+RenderRequest SurfaceUpdater::obtainRenderRequest()
 {
-    for(auto iter = _render_request_pool.begin(); iter != _render_request_pool.end(); ++iter)
-    {
-        const sp<RenderRequest> renderRequest = *iter;
-        if(renderRequest->isFinished())
-        {
-            _render_request_pool.erase(iter);
-            return renderRequest;
-        }
-    }
-    return sp<RenderRequest>::make(_executor, _surface_controller);
-}
+    RenderRequest renderRequest;
+    if(_render_request_recycler->pop(renderRequest))
+        return renderRequest;
 
-void SurfaceUpdater::recycleRenderRequest(const sp<RenderRequest>& renderRequest)
-{
-    DWARN(_render_request_pool.size() < 32, "RenderRequest pool size too large: %d, maybe something goes wrong?", _render_request_pool.size());
-    _render_request_pool.push_back(renderRequest);
+    return RenderRequest(_executor, _surface_controller, _render_request_recycler);
 }
 
 }

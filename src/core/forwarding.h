@@ -14,6 +14,7 @@ template<typename T> class Duck;
 template<typename T> class Iterator;
 template<typename T> class OwnedPtr;
 template<typename T> class List;
+template<typename T> class LockFreeStack;
 template<typename T> class SharedPtr;
 template<typename T> class Type;
 template<typename T> class Variable;

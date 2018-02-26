@@ -1,5 +1,6 @@
 #include "renderer/impl/gl_model/gl_model_nine_patch.h"
 
+#include "core/base/memory_pool.h"
 #include "core/impl/array/fixed_array.h"
 #include "core/util/documents.h"
 #include "core/types/shared_ptr.h"

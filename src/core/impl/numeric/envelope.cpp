@@ -49,7 +49,7 @@ sp<Boolean> Envelope::buildState()
     {
         const sp<Expectation> expectation = phrase._expectation->build(_stub->_args);
         const sp<Boolean> e = sp<ExpectedExpirable>::make(_stub, expectation);
-        expired = expired ? sp<BooleanOr>::make(expired, e) : e;
+        expired = expired ? sp<Boolean>::adopt(new BooleanOr(expired, e)) : e;
     }
     return Null::toSafe(expired);
 }

@@ -1,6 +1,7 @@
 #include "renderer/impl/renderer/shader_frame.h"
 
 #include "core/base/api.h"
+#include "core/base/memory_pool.h"
 #include "core/impl/array/fixed_array.h"
 #include "core/util/documents.h"
 

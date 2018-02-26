@@ -2,6 +2,8 @@
 #define ARK_CORE_UTIL_MATH_H_
 
 #include <cstdint>
+#include <cmath>
+#include <limits>
 #include <type_traits>
 
 #include "core/base/api.h"

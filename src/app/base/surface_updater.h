@@ -18,15 +18,12 @@ public:
 
     void requestUpdate();
 
-private:
-    sp<RenderRequest> obtainRenderRequest();
-    void recycleRenderRequest(const sp<RenderRequest>& renderRequest);
+    RenderRequest obtainRenderRequest();
 
 private:
     sp<Executor> _executor;
     sp<SurfaceController> _surface_controller;
-
-    std::list<sp<RenderRequest>> _render_request_pool;
+    sp<LockFreeStack<RenderRequest>> _render_request_recycler;
 };
 
 }

@@ -25,7 +25,7 @@ public:
 
     virtual void run() override {
         _delegate = _layer->render(_layer_context_snapshot, _x, _y);
-        _stub->onJobDone();
+        _stub->onJobDone(_stub);
         _stub = nullptr;
     }
 
@@ -41,8 +41,13 @@ private:
 
 }
 
-RenderRequest::RenderRequest(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController)
-    : _executor(executor), _stub(sp<Stub>::make(surfaceController))
+RenderRequest::RenderRequest(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, const sp<LockFreeStack<RenderRequest>>& renderRequestRecycler)
+    : _stub(sp<Stub>::make(executor, surfaceController, renderRequestRecycler))
+{
+}
+
+RenderRequest::RenderRequest(const sp<RenderRequest::Stub>& stub)
+    : _stub(stub)
 {
 }
 
@@ -55,12 +60,7 @@ void RenderRequest::start(const sp<RenderCommandPipeline>& renderCommandPipeline
 
 void RenderRequest::finish()
 {
-    _stub->onJobDone();
-}
-
-bool RenderRequest::isFinished()
-{
-    return !_stub->_render_command_pipe_line;
+    _stub->onJobDone(_stub);
 }
 
 void RenderRequest::addRequest(const sp<RenderCommand>& renderCommand)
@@ -70,18 +70,18 @@ void RenderRequest::addRequest(const sp<RenderCommand>& renderCommand)
 
 void RenderRequest::addBackgroundRequest(const sp<Layer>& layer, float x, float y)
 {
-    const sp<BackgroundRenderCommand> renderCommand = _render_command_pool.obtain<BackgroundRenderCommand>(_stub, layer, x, y);
+    const sp<BackgroundRenderCommand> renderCommand = _stub->_render_command_pool.obtain<BackgroundRenderCommand>(_stub, layer, x, y);
     _stub->_background_renderer_count++;
     _stub->_render_command_pipe_line->add(renderCommand);
-    _executor->execute(renderCommand);
+    _stub->_executor->execute(renderCommand);
 }
 
-RenderRequest::Stub::Stub(const sp<SurfaceController>& surfaceController)
-    : _surface_controller(surfaceController)
+RenderRequest::Stub::Stub(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, const sp<LockFreeStack<RenderRequest>>& renderRequestRecycler)
+    : _executor(executor), _surface_controller(surfaceController), _render_request_recycler(renderRequestRecycler)
 {
 }
 
-void RenderRequest::Stub::onJobDone()
+void RenderRequest::Stub::onJobDone(const sp<Stub>& self)
 {
     int32_t count = --_background_renderer_count;
     DCHECK(count >= 0, "Bad count: %d", count);
@@ -90,6 +90,7 @@ void RenderRequest::Stub::onJobDone()
         NOT_NULL(_render_command_pipe_line);
         _surface_controller->postRenderCommand(_render_command_pipe_line);
         _render_command_pipe_line = nullptr;
+        _render_request_recycler->push(self);
     }
 }
 
