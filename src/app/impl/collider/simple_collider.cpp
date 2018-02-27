@@ -104,28 +104,34 @@ void SimpleCollider::Stub::remove(const RigidBodyImpl& rigidBody)
 
 sp<SimpleCollider::RigidBodyImpl> SimpleCollider::Stub::createRigidBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const sp<SimpleCollider::Stub>& self)
 {
-    const sp<RigidBodyShadow> rigidBodyShadow = sp<RigidBodyShadow>::make(++_rigid_body_base_id, type, shape, position, size);
-    const sp<RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(position, self, rigidBodyShadow);
+    const sp<RigidBodyShadow> rigidBodyShadow = _object_pool.obtain<RigidBodyShadow>(++_rigid_body_base_id, type, shape, position->val(), size);
+    const sp<RigidBodyImpl> rigidBody = _object_pool.obtain<RigidBodyImpl>(position, self, rigidBodyShadow);
     _rigid_bodies[rigidBody->id()] = rigidBodyShadow;
     insert(rigidBody);
     return rigidBody;
 }
 
-const sp<SimpleCollider::RigidBodyShadow>& SimpleCollider::Stub::findRigidBody(uint32_t id) const
+const sp<SimpleCollider::RigidBodyShadow>& SimpleCollider::Stub::ensureRigidBody(uint32_t id) const
 {
     const auto iter = _rigid_bodies.find(id);
     DCHECK(iter != _rigid_bodies.end(), "RigidBody(id = %d) does not exists", id);
     return iter->second;
 }
 
+const sp<SimpleCollider::RigidBodyShadow> SimpleCollider::Stub::findRigidBody(uint32_t id) const
+{
+    const auto iter = _rigid_bodies.find(id);
+    return iter != _rigid_bodies.end() ? iter->second : sp<RigidBodyShadow>();
+}
+
 SimpleCollider::RigidBodyImpl::RigidBodyImpl(const sp<VV>& position, const sp<Stub>& collider, const sp<RigidBodyShadow>& shadow)
-    : RigidBody(shadow->id(), shadow->type(), shadow->shape(), position, shadow->size(), Null::ptr<Numeric>()), _collider(collider), _shadow(shadow)
+    : RigidBody(shadow->id(), shadow->type(), shadow->shape(), position, shadow->size(), Null::ptr<Numeric>()), _collider(collider), _shadow(shadow), _disposed(false)
 {
 }
 
 SimpleCollider::RigidBodyImpl::~RigidBodyImpl()
 {
-    if(_id > 0)
+    if(!_disposed)
         _collider->remove(*this);
 }
 
@@ -153,9 +159,9 @@ void SimpleCollider::RigidBodyImpl::setCollisionCallback(const sp<CollisionCallb
 
 void SimpleCollider::RigidBodyImpl::dispose()
 {
-    DCHECK(_id != 0, "RigidBody has been disposed already.");
+    DCHECK(!_disposed, "RigidBody has been disposed already.");
     _collider->remove(*this);
-    _id = 0;
+    _disposed = true;
 }
 
 void SimpleCollider::RigidBodyImpl::setPosition(const sp<VV>& position)
@@ -180,7 +186,7 @@ void SimpleCollider::RigidBodyImpl::collision(const Rect& rect)
                 iter = candidates.erase(iter);
                 continue;
             }
-            const sp<RigidBodyShadow>& rigidBody = _collider->findRigidBody(id);
+            const sp<RigidBodyShadow>& rigidBody = _collider->ensureRigidBody(id);
             const sp<Size>& size = rigidBody->size();
             const V position = rigidBody->xy();
             const Rect irect(position.x() - size->width() / 2, position.y() - size->height() / 2, position.x() + size->width() / 2, position.y() + size->height() / 2);
@@ -200,7 +206,10 @@ void SimpleCollider::RigidBodyImpl::collision(const Rect& rect)
         for(uint32_t i : contacts)
         {
             if(candidates.find(i) == candidates.end())
-                endContact(_collider->findRigidBody(i));
+            {
+                const sp<RigidBodyShadow> s = _collider->findRigidBody(i);
+                endContact(s ? s : _collider->_object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, Collider::BODY_SHAPE_BOX, V(), nullptr));
+            }
         }
         _contacts = candidates;
     }
@@ -214,8 +223,8 @@ void SimpleCollider::RigidBodyImpl::update()
     _collider->_y_axis_segment.update(_id, pos.y(), _size->height());
 }
 
-SimpleCollider::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& pos, const sp<Size>& size)
-    : RigidBody(id, type, shape, sp<VV::Impl>::make(pos->val()), size, nullptr)
+SimpleCollider::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const V& pos, const sp<Size>& size)
+    : RigidBody(id, type, shape, sp<VV::Impl>::make(pos), size, nullptr)
 {
     _position = static_cast<sp<VV::Impl>>(position());
 }

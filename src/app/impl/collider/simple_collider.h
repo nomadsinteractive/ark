@@ -2,9 +2,9 @@
 #define ARK_APP_IMPL_COLLIDER_SIMPLE_COLLIDER_H_
 
 #include <set>
-#include <vector>
 #include <unordered_map>
 
+#include "core/base/object_pool.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
@@ -40,26 +40,28 @@ public:
     class RigidBodyShadow;
 
 public:
-    class Stub {
-    public:
+    struct Stub {
         Stub();
 
         void insert(const sp<RigidBodyImpl>& rigidObject);
         void remove(const RigidBodyImpl& rigidBody);
 
         sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const sp<Stub>& self);
-        const sp<RigidBodyShadow>& findRigidBody(uint32_t id) const;
+        const sp<RigidBodyShadow>& ensureRigidBody(uint32_t id) const;
+        const sp<RigidBodyShadow> findRigidBody(uint32_t id) const;
 
         StaticSegments _x_axis_segment;
         StaticSegments _y_axis_segment;
 
         std::unordered_map<uint32_t, sp<RigidBodyShadow>> _rigid_bodies;
         uint32_t _rigid_body_base_id;
+
+        ObjectPool _object_pool;
     };
 
     class RigidBodyShadow : public RigidBody {
     public:
-        RigidBodyShadow(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& pos, const sp<Size>& size);
+        RigidBodyShadow(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const V& pos, const sp<Size>& size);
 
         virtual void dispose() override;
         virtual const sp<CollisionCallback>& collisionCallback() const override;
@@ -94,6 +96,7 @@ public:
         sp<RigidBodyShadow> _shadow;
 
         std::set<uint32_t> _contacts;
+        bool _disposed;
     };
 
 private:
