@@ -29,6 +29,10 @@ public:
         return _swapped ? _h1 : _h2;
     }
 
+    T& front() {
+        return _swapped ? _h1 : _h2;
+    }
+
     T& back() {
         return _swapped ? _h2 : _h1;
     }

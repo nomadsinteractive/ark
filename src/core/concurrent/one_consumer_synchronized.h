@@ -5,6 +5,7 @@
 #include <queue>
 #include <unordered_set>
 
+#include "core/concurrent/dual.h"
 #include "core/concurrent/internal.h"
 
 namespace ark {
@@ -24,12 +25,12 @@ public:
     Container& synchronized() {
         if(_pending.head())
             synchronize();
-        return _synchronized;
+        return _collection.front();
     }
 
     Container clear() {
         Container cleared = std::move(synchronized());
-        _synchronized = Container();
+        _collection.setAndSwap(Container());
         _recycler.clear();
         return cleared;
     }
@@ -44,7 +45,9 @@ private:
 
     void synchronize() {
         Node* head = _pending.release();
-        Synchronizer::synchronize(_synchronized, head);
+        _collection.back() = _collection.front();
+        Synchronizer::synchronize(_collection.back(), head);
+        _collection.swap();
         while(head) {
             Node* next = head->next();
             _recycler.put(head);
@@ -53,7 +56,8 @@ private:
     }
 
 protected:
-    Container _synchronized;
+    Dual<Container> _collection;
+
     _Stack<Node> _pending;
     _Recycler<Node> _recycler;
 };
@@ -61,26 +65,20 @@ protected:
 template<typename T> class _QueueSynchronizer {
 public:
     static void synchronize(std::queue<T>& queue, _Node<T>* head) {
-        std::list<T> l;
         while(head) {
-            l.push_front(head->data());
+            queue.push(head->data());
             head = head->next();
         }
-        for(const T& i : l)
-            queue.push(i);
     }
 };
 
 template<typename T> class _UnorderedSetSynchronizer {
 public:
     static void synchronize(std::unordered_set<T>& unorderedSet, _Node<T>* head) {
-        std::list<T> l;
         while(head) {
-            l.push_front(head->data());
+            unorderedSet.insert(head->data());
             head = head->next();
         }
-        for(const T& i : l)
-            unorderedSet.insert(i);
     }
 };
 
@@ -102,8 +100,8 @@ public:
 template<typename T> class OCSUnorderedSet : public internal::concurrent::_OneConsumerSynchronized<T, std::unordered_set<T>, internal::concurrent::_UnorderedSetSynchronizer<T>> {
 public:
     bool containsOrInsert(const T& data) {
-        const auto iter = this->_synchronized.find(data);
-        if(iter != this->_synchronized.end())
+        const auto iter = this->_collection->find(data);
+        if(iter != this->_collection->end())
             return true;
         this->push(data);
         return false;
