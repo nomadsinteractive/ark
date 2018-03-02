@@ -9,6 +9,9 @@
 
 #include "graphics/forwarding.h"
 
+#include "app/base/rigid_body.h"
+#include "app/inf/collider.h"
+
 #include "box2d/api.h"
 #include "box2d/inf/shape.h"
 
@@ -18,20 +21,16 @@ namespace box2d {
 
 class World;
 
-class ARK_PLUGIN_BOX2D_API Body : public Object, Implements<Body, Object> {
-public:
-//  [[script::bindings::enumeration]]
-    enum Type {
-        BODY_TYPE_STATIC = b2_staticBody,
-        BODY_TYPE_KINEMATIC = b2_kinematicBody,
-        BODY_TYPE_DYNAMIC = b2_dynamicBody
-    };
-
+class ARK_PLUGIN_BOX2D_API Body : public Object, public RigidBody, Implements<Body, Object, RigidBody> {
 public:
 //  [[script::bindings::auto]]
-    Body(const sp<World>& world, Body::Type type, float x, float y, Shape& shape, float density, float friction);
-    Body(const sp<World>& world, b2Body* b2Instance);
+    Body(const sp<World>& world, Collider::BodyType type, float x, float y, Shape& shape, float density, float friction);
+    Body(const sp<World>& world, b2Body* body);
     ~Body();
+
+    virtual void dispose() override;
+    virtual const sp<CollisionCallback>& collisionCallback() const override;
+    virtual void setCollisionCallback(const sp<CollisionCallback>& collisionCallback) override;
 
 //  [[script::bindings::auto]]
     const sp<World>& world() const;
@@ -126,9 +125,9 @@ public:
     };
 
 //  [[plugin::style("b2-body")]]
-    class RENDER_OBJECT_DECORATOR : public Builder<RenderObject> {
+    class RENDER_OBJECT_STYLE : public Builder<RenderObject> {
     public:
-        RENDER_OBJECT_DECORATOR(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value);
+        RENDER_OBJECT_STYLE(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value);
 
         virtual sp<RenderObject> build(const sp<Scope>& args) override;
 
@@ -138,10 +137,19 @@ public:
 
     };
 
-private:
-    sp<World> _world;
+    struct Stub {
+        Stub(const sp<World>& world, b2Body* body);
 
-    b2Body* _body;
+        sp<World> _world;
+        b2Body* _body;
+
+        sp<CollisionCallback> _collision_callback;
+    };
+
+private:
+    Body(const sp<Stub>& stub);
+
+    sp<Stub> _stub;
 };
 
 }

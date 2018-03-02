@@ -152,12 +152,12 @@ sp<RenderObject> RenderObject::BUILDER::build(const sp<Scope>& args)
     return sp<RenderObject>::make(type, _position->build(args), _size->build(args), _transform->build(args), _varyings->build(args));
 }
 
-RenderObject::EXPIRABLE_DECORATOR::EXPIRABLE_DECORATOR(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value)
+RenderObject::EXPIRED_STYLE::EXPIRED_STYLE(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value)
     : _delegate(delegate), _expired(parent.ensureBuilder<Expired>(value))
 {
 }
 
-sp<RenderObject> RenderObject::EXPIRABLE_DECORATOR::build(const sp<Scope>& args)
+sp<RenderObject> RenderObject::EXPIRED_STYLE::build(const sp<Scope>& args)
 {
     return _delegate->build(args).absorb(_expired->build(args));
 }

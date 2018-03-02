@@ -21,7 +21,7 @@ class PartitionCollider : public Collider {
 public:
     PartitionCollider(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Partition>& partition);
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size) override;
 
 //  [[plugin::resource-loader("partition")]]
     class BUILDER : public Builder<Collider> {
@@ -45,7 +45,7 @@ public:
 
         void remove(const RigidBodyImpl& rigidBody);
 
-        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const sp<Stub>& self);
+        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<Stub>& self);
         const sp<RigidBodyImpl>& findRigidBody(uint32_t id) const;
 
         std::unordered_map<uint32_t, sp<RigidBodyImpl>> _rigid_bodies;
@@ -55,7 +55,7 @@ public:
 
     class RigidBodyImpl : public RigidBody {
     public:
-        RigidBodyImpl(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const WeakPtr<PartitionCollider::Stub>& stub);
+        RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const WeakPtr<PartitionCollider::Stub>& stub);
         ~RigidBodyImpl();
 
         virtual void dispose() override;

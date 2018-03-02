@@ -59,19 +59,6 @@ public:
 
 }
 
-namespace ark {
-namespace plugin {
-namespace python {
-
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Body::Type>(const Body::Type& value)
-{
-    return PyLong_FromLong(static_cast<long>(value));
-}
-
-}
-}
-}
-
 extern "C" ARK_API Plugin* __ark_box2d_pybindings_initialize__(Ark&);
 
 Plugin* __ark_box2d_pybindings_initialize__(Ark& ark)

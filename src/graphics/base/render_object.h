@@ -98,9 +98,9 @@ public:
     };
 
 //  [[plugin::style("expired")]]
-    class EXPIRABLE_DECORATOR : public Builder<RenderObject> {
+    class EXPIRED_STYLE : public Builder<RenderObject> {
     public:
-        EXPIRABLE_DECORATOR(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value);
+        EXPIRED_STYLE(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value);
 
         virtual sp<RenderObject> build(const sp<Scope>& args) override;
 

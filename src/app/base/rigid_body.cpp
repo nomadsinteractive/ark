@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <iterator>
 
+#include "core/base/string.h"
 #include "core/inf/variable.h"
+#include "core/util/conversions.h"
 
 #include "graphics/base/size.h"
 
@@ -11,8 +13,8 @@
 
 namespace ark {
 
-RigidBody::RigidBody(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const sp<Numeric>& rotation)
-    : _id(id), _type(type), _shape(shape), _position(position), _size(size), _rotation(rotation)
+RigidBody::RigidBody(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<Numeric>& rotation)
+    : _id(id), _type(type), _position(position), _size(size), _rotation(rotation)
 {
 }
 
@@ -24,11 +26,6 @@ uint32_t RigidBody::id() const
 Collider::BodyType RigidBody::type() const
 {
     return _type;
-}
-
-Collider::BodyShape RigidBody::shape() const
-{
-    return _shape;
 }
 
 V2 RigidBody::xy() const
@@ -60,6 +57,18 @@ const sp<Size>& RigidBody::size() const
 const sp<Numeric>& RigidBody::rotation() const
 {
     return _rotation;
+}
+
+template<> ARK_API Collider::BodyType Conversions::to<String, Collider::BodyType>(const String& str)
+{
+    if(str == "static")
+        return Collider::BODY_TYPE_STATIC;
+    if(str == "kinematic")
+        return Collider::BODY_TYPE_KINEMATIC;
+    if(str == "dynamic")
+        return Collider::BODY_TYPE_DYNAMIC;
+    FATAL("Unknow body type \"%s\"", str.c_str());
+    return Collider::BODY_TYPE_STATIC;
 }
 
 }

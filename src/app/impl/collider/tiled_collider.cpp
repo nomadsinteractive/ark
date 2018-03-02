@@ -56,18 +56,18 @@ sp<Collider> TiledCollider::BUILDER::build(const sp<Scope>& args)
     return sp<TiledCollider>::make(_tile_map->build(args), _resource_loader_context);
 }
 
-sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size)
+sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size)
 {
     DCHECK(type != Collider::BODY_TYPE_STATIC, "Cannot create static body in TiledCollider");
     NOT_NULL(position && size);
 
-    const sp<RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(++_rigid_body_base, type, shape, position, size, _tile_map);
+    const sp<RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(++_rigid_body_base, type, position, size, _tile_map);
     rigidBody->setPosition(_resource_loader_context->synchronize<V>(sp<DynamicPosition>::make(rigidBody)));
     return rigidBody;
 }
 
-TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const sp<TileMap>& tileMap)
-    : RigidBody(id, type, shape, position, size, Null::ptr<Numeric>()), _stub(tileMap ? sp<Stub>::make(tileMap, position) : sp<Stub>::null())
+TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<TileMap>& tileMap)
+    : RigidBody(id, type, position, size, Null::ptr<Numeric>()), _stub(tileMap ? sp<Stub>::make(tileMap, position) : sp<Stub>::null())
 {
 }
 
@@ -171,7 +171,7 @@ void TiledCollider::RigidBodyImpl::Stub::collision(const Rect& rect)
 }
 
 TiledCollider::RigidBodyStatic::RigidBodyStatic(uint32_t width, uint32_t height)
-    : RigidBody(0, Collider::BODY_TYPE_STATIC, Collider::BODY_SHAPE_BOX, sp<VV2::Impl>::make(V2()), sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), nullptr)
+    : RigidBody(0, Collider::BODY_TYPE_STATIC, sp<VV2::Impl>::make(V2()), sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), nullptr)
 {
     _position = position();
 }

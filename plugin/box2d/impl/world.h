@@ -10,6 +10,10 @@
 #include "core/types/class.h"
 #include "core/types/shared_ptr.h"
 
+#include "renderer/forwarding.h"
+
+#include "app/inf/collider.h"
+
 #include "box2d/api.h"
 #include "box2d/impl/body.h"
 #include "box2d/inf/shape.h"
@@ -18,17 +22,19 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-class ARK_PLUGIN_BOX2D_API World : public Object, public Runnable, Implements<World, Object, Runnable> {
+class ARK_PLUGIN_BOX2D_API World : public Object, public Runnable, public Collider, Implements<World, Object, Runnable, Collider> {
 public:
     World(const b2Vec2& gravity, float ppmX, float ppmY);
 
     virtual void run() override;
 
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size) override;
+
     const b2World& world() const;
     b2World& world();
 
     b2Body* createBody(const b2BodyDef& bodyDef);
-    b2Body* createBody(Body::Type type, float x, float y, Shape& shape, float density, float friction);
+    b2Body* createBody(Collider::BodyType type, float x, float y, Shape& shape, float density, float friction);
 
 //  [[script::bindings::meta(absorb())]]
 //  [[script::bindings::meta(expire())]]
@@ -44,27 +50,30 @@ public:
 //  [[script::bindings::auto]]
     float toMeterY(float pixelY) const;
 
-//  [[plugin::builder]]
+//  [[plugin::resource-loader]]
     class BUILDER_IMPL1 : public Builder<World> {
     public:
-        BUILDER_IMPL1(BeanFactory& factory, const document& manifest);
+        BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<World> build(const sp<Scope>& args) override;
 
     private:
-        void createBody(Body::Type type, const sp<World>& world, const document& manifest, const sp<Scope>& args);
+        void createBody(Collider::BodyType type, const sp<World>& world, const document& manifest, const sp<Scope>& args);
 
     private:
-        BeanFactory _parent;
+        BeanFactory _factory;
         document _manifest;
+        sp<ResourceLoaderContext> _resource_loader_context;
+
         sp<Builder<Numeric>> _ppmx, _ppmy;
         sp<Builder<Numeric>> _gravity_x, _gravity_y;
+        sp<Builder<Boolean>> _expired;
     };
 
-//  [[plugin::builder("b2World")]]
+//  [[plugin::resource-loader("b2World")]]
     class BUILDER_IMPL2 : public Builder<Object> {
     public:
-        BUILDER_IMPL2(BeanFactory& parent, const document& doc);
+        BUILDER_IMPL2(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<Object> build(const sp<Scope>& args) override;
 

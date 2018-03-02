@@ -60,9 +60,9 @@ sp<Collider> PartitionCollider::BUILDER::build(const sp<Scope>& args)
     return sp<PartitionCollider>::make(_resource_loader_context, _partition->build(args));
 }
 
-sp<RigidBody> PartitionCollider::createBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size)
+sp<RigidBody> PartitionCollider::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size)
 {
-    const sp<RigidBodyImpl> rigidBody = _stub->createRigidBody(type, shape, position, size, _stub);
+    const sp<RigidBodyImpl> rigidBody = _stub->createRigidBody(type, position, size, _stub);
 
     if(type == Collider::BODY_TYPE_DYNAMIC)
     {
@@ -93,10 +93,10 @@ void PartitionCollider::Stub::remove(const RigidBodyImpl& rigidBody)
     _rigid_bodies.erase(iter);
 }
 
-sp<PartitionCollider::RigidBodyImpl> PartitionCollider::Stub::createRigidBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const sp<PartitionCollider::Stub>& self)
+sp<PartitionCollider::RigidBodyImpl> PartitionCollider::Stub::createRigidBody(Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<PartitionCollider::Stub>& self)
 {
     uint32_t id = _partition->addPoint(position);
-    const sp<PartitionCollider::RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(id, type, shape, position, size, self);
+    const sp<PartitionCollider::RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(id, type, position, size, self);
     _rigid_bodies[id] = rigidBody;
     _search_radius = std::max(_search_radius, Math::hypot(size->width(), size->height()));
     return rigidBody;
@@ -109,8 +109,8 @@ const sp<PartitionCollider::RigidBodyImpl>& PartitionCollider::Stub::findRigidBo
     return iter->second;
 }
 
-PartitionCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const WeakPtr<PartitionCollider::Stub>& stub)
-    : RigidBody(id, type, shape, position, size, Null::ptr<Numeric>()), _stub(sp<Stub>::make(stub, position)), _disposed(false)
+PartitionCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const WeakPtr<PartitionCollider::Stub>& stub)
+    : RigidBody(id, type, position, size, Null::ptr<Numeric>()), _stub(sp<Stub>::make(stub, position)), _disposed(false)
 {
 }
 

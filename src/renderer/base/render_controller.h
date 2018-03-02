@@ -2,6 +2,7 @@
 #define ARK_RENDERER_BASE_RENDER_CONTROLLER_H_
 
 #include "core/forwarding.h"
+#include "core/base/api.h"
 #include "core/collection/expirable_item_list.h"
 #include "core/collection/list.h"
 #include "core/types/shared_ptr.h"
@@ -10,7 +11,7 @@
 
 namespace ark {
 
-class RenderController {
+class ARK_API RenderController {
 public:
 
     void addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired);

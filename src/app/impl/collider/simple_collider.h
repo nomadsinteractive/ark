@@ -22,7 +22,7 @@ class SimpleCollider : public Collider {
 public:
     SimpleCollider(const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size) override;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Collider> {
@@ -46,7 +46,7 @@ public:
         void insert(const sp<RigidBodyImpl>& rigidObject);
         void remove(const RigidBodyImpl& rigidBody);
 
-        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const sp<Stub>& self);
+        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<Stub>& self);
         const sp<RigidBodyShadow>& ensureRigidBody(uint32_t id) const;
         const sp<RigidBodyShadow> findRigidBody(uint32_t id) const;
 
@@ -61,7 +61,7 @@ public:
 
     class RigidBodyShadow : public RigidBody {
     public:
-        RigidBodyShadow(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const V& pos, const sp<Size>& size);
+        RigidBodyShadow(uint32_t id, Collider::BodyType type, const V& pos, const sp<Size>& size);
 
         virtual void dispose() override;
         virtual const sp<CollisionCallback>& collisionCallback() const override;

@@ -62,9 +62,9 @@ sp<Collider> SimpleCollider::BUILDER::build(const sp<Scope>& args)
     return sp<SimpleCollider>::make(_resource_loader_context);
 }
 
-sp<RigidBody> SimpleCollider::createBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size)
+sp<RigidBody> SimpleCollider::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size)
 {
-    const sp<RigidBodyImpl> rigidBody = _stub->createRigidBody(type, shape, position, size, _stub);
+    const sp<RigidBodyImpl> rigidBody = _stub->createRigidBody(type, position, size, _stub);
 
     if(type == Collider::BODY_TYPE_DYNAMIC)
     {
@@ -102,9 +102,9 @@ void SimpleCollider::Stub::remove(const RigidBodyImpl& rigidBody)
     _rigid_bodies.erase(iter);
 }
 
-sp<SimpleCollider::RigidBodyImpl> SimpleCollider::Stub::createRigidBody(Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const sp<SimpleCollider::Stub>& self)
+sp<SimpleCollider::RigidBodyImpl> SimpleCollider::Stub::createRigidBody(Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<SimpleCollider::Stub>& self)
 {
-    const sp<RigidBodyShadow> rigidBodyShadow = _object_pool.obtain<RigidBodyShadow>(++_rigid_body_base_id, type, shape, position->val(), size);
+    const sp<RigidBodyShadow> rigidBodyShadow = _object_pool.obtain<RigidBodyShadow>(++_rigid_body_base_id, type, position->val(), size);
     const sp<RigidBodyImpl> rigidBody = _object_pool.obtain<RigidBodyImpl>(position, self, rigidBodyShadow);
     _rigid_bodies[rigidBody->id()] = rigidBodyShadow;
     insert(rigidBody);
@@ -125,7 +125,7 @@ const sp<SimpleCollider::RigidBodyShadow> SimpleCollider::Stub::findRigidBody(ui
 }
 
 SimpleCollider::RigidBodyImpl::RigidBodyImpl(const sp<VV>& position, const sp<Stub>& collider, const sp<RigidBodyShadow>& shadow)
-    : RigidBody(shadow->id(), shadow->type(), shadow->shape(), position, shadow->size(), Null::ptr<Numeric>()), _collider(collider), _shadow(shadow), _disposed(false)
+    : RigidBody(shadow->id(), shadow->type(), position, shadow->size(), Null::ptr<Numeric>()), _collider(collider), _shadow(shadow), _disposed(false)
 {
 }
 
@@ -208,7 +208,7 @@ void SimpleCollider::RigidBodyImpl::collision(const Rect& rect)
             if(candidates.find(i) == candidates.end())
             {
                 const sp<RigidBodyShadow> s = _collider->findRigidBody(i);
-                endContact(s ? s : _collider->_object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, Collider::BODY_SHAPE_BOX, V(), nullptr));
+                endContact(s ? s : _collider->_object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, V(), nullptr));
             }
         }
         _contacts = candidates;
@@ -223,8 +223,8 @@ void SimpleCollider::RigidBodyImpl::update()
     _collider->_y_axis_segment.update(_id, pos.y(), _size->height());
 }
 
-SimpleCollider::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const V& pos, const sp<Size>& size)
-    : RigidBody(id, type, shape, sp<VV::Impl>::make(pos), size, nullptr)
+SimpleCollider::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const V& pos, const sp<Size>& size)
+    : RigidBody(id, type, sp<VV::Impl>::make(pos), size, nullptr)
 {
     _position = static_cast<sp<VV::Impl>>(position());
 }

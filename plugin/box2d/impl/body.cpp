@@ -63,116 +63,156 @@ private:
     sp<Body> _body;
 };
 
+class RigidBodyPosition : public VV {
+public:
+    RigidBodyPosition(const sp<Body::Stub>& stub)
+        : _stub(stub) {
+    }
+
+    virtual V val() override {
+        DCHECK(_stub->_body, "Body has been disposed already");
+        float x = _stub->_world->toPixelX(_stub->_body->GetPosition().x);
+        float y = _stub->_world->toPixelX(_stub->_body->GetPosition().y);
+        return V(x, y);
+    }
+
+private:
+    sp<Body::Stub> _stub;
+};
+
 }
 
-Body::Body(const sp<World>& world, Type type, float x, float y, Shape& shape, float density, float friction)
-    : _world(world), _body(world->createBody(type, x, y, shape, density, friction))
+Body::Body(const sp<World>& world, Collider::BodyType type, float x, float y, Shape& shape, float density, float friction)
+    : Body(sp<Stub>::make(world, world->createBody(type, x, y, shape, density, friction)))
 {
 }
 
 Body::Body(const sp<World>& world, b2Body* body)
-    : _world(world), _body(body)
+    : Body(sp<Stub>::make(world, body))
+{
+}
+
+Body::Body(const sp<Stub>& stub)
+    : RigidBody(reinterpret_cast<uint32_t>(_stub->_body), Collider::BODY_TYPE_DYNAMIC, nullptr, nullptr, nullptr), _stub(stub)
 {
 }
 
 Body::~Body()
 {
-    _world->world().DestroyBody(_body);
+    if(_stub->_body)
+        dispose();
+}
+
+void Body::dispose()
+{
+    DCHECK(_stub->_body, "Body has been disposed already");
+    _stub->_world->world().DestroyBody(_stub->_body);
+    _stub->_body = nullptr;
+}
+
+const sp<CollisionCallback>& Body::collisionCallback() const
+{
+    return _stub->_collision_callback;
+}
+
+void Body::setCollisionCallback(const sp<CollisionCallback>& collisionCallback)
+{
+    _stub->_collision_callback = collisionCallback;
 }
 
 const sp<World>& Body::world() const
 {
-    return _world;
+    return _stub->_world;
 }
 
 float Body::rotation()
 {
-    return _body->GetAngle();
+    return _stub->_body->GetAngle();
 }
 
 void Body::setRotation(float rad)
 {
-    _body->SetTransform(_body->GetWorldCenter(), rad);
+    _stub->_body->SetTransform(_stub->_body->GetWorldCenter(), rad);
 }
 
 float Body::angularVelocity()
 {
-    return _body->GetAngularVelocity();
+    return _stub->_body->GetAngularVelocity();
 }
 
 void Body::setAngularVelocity(float omega)
 {
-    _body->SetAngularVelocity(omega);
+    _stub->_body->SetAngularVelocity(omega);
 }
 
 bool Body::active()
 {
-    return _body->IsActive();
+    return _stub->_body->IsActive();
 }
 
 void Body::setActive(bool active)
 {
-    _body->SetActive(active);
+    _stub->_body->SetActive(active);
 }
 
 bool Body::awake()
 {
-    return _body->IsAwake();
+    return _stub->_body->IsAwake();
 }
 
 void Body::setAwake(bool awake)
 {
-    _body->SetAwake(awake);
+    _stub->_body->SetAwake(awake);
 }
 
 float Body::x() const
 {
-    return _body->GetPosition().x;
+    return _stub->_body->GetPosition().x;
 }
 
 float Body::y() const
 {
-    return _body->GetPosition().y;
+    return _stub->_body->GetPosition().y;
 }
 
 float Body::mass() const
 {
-    return _body->GetMass();
+    return _stub->_body->GetMass();
 }
 
 void Body::applyTorque(float torque)
 {
-    _body->ApplyTorque(torque, true);
+    _stub->_body->ApplyTorque(torque, true);
 }
 
 void Body::applyForce(const sp<VV>& force, const sp<VV>& point)
 {
     const V f = force->val();
     const V p = point->val();
-    _body->ApplyForce(b2Vec2(f.x(), f.y()), b2Vec2(p.x(), p.y()), true);
+    _stub->_body->ApplyForce(b2Vec2(f.x(), f.y()), b2Vec2(p.x(), p.y()), true);
 }
 
 void Body::applyForceToCenter(const sp<VV>& force)
 {
     const V f = force->val();
-    _body->ApplyForceToCenter(b2Vec2(f.x(), f.y()), true);
+    _stub->_body->ApplyForceToCenter(b2Vec2(f.x(), f.y()), true);
 }
 
 void Body::applyLinearImpulse(const sp<VV>& impulse, const sp<VV>& point)
 {
     const V i = impulse->val();
     const V p = point->val();
-    _body->ApplyLinearImpulse(b2Vec2(i.x(), i.y()), b2Vec2(p.x(), p.y()), true);
+    _stub->_body->ApplyLinearImpulse(b2Vec2(i.x(), i.y()), b2Vec2(p.x(), p.y()), true);
 }
 
 void Body::applyAngularImpulse(float impulse)
 {
-    _body->ApplyAngularImpulse(impulse, true);
+    _stub->_body->ApplyAngularImpulse(impulse, true);
 }
 
 b2Body* Body::b2Instance() const
 {
-    return _body;
+    return _stub->_body;
 }
 
 Body::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& parent, const document& doc)
@@ -190,7 +230,7 @@ sp<Body> Body::BUILDER_IMPL1::build(const sp<Scope>& args)
     const sp<World> world = BeanUtils::as<World>(_world, args);
     const sp<Shape> shape = _shape->build(args);
     const V p = _position->build(args)->val();
-    return sp<Body>::make(world, Body::BODY_TYPE_DYNAMIC, p.x(), p.y(), shape, _density, _friction);
+    return sp<Body>::make(world, Collider::BODY_TYPE_DYNAMIC, p.x(), p.y(), shape, _density, _friction);
 }
 
 Body::POSITION_BUILDER::POSITION_BUILDER(BeanFactory& parent, const document& doc)
@@ -217,12 +257,12 @@ sp<Numeric> Body::ROTATION_BUILDER::build(const sp<Scope>& args)
     return sp<_Angle>::make(body);
 }
 
-Body::RENDER_OBJECT_DECORATOR::RENDER_OBJECT_DECORATOR(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value)
+Body::RENDER_OBJECT_STYLE::RENDER_OBJECT_STYLE(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value)
     : _delegate(delegate), _body(parent.ensureBuilder<Object>(value))
 {
 }
 
-sp<RenderObject> Body::RENDER_OBJECT_DECORATOR::build(const sp<Scope>& args)
+sp<RenderObject> Body::RENDER_OBJECT_STYLE::build(const sp<Scope>& args)
 {
     const sp<Body> body = _body->build(args).as<Body>();
     NOT_NULL(body);
@@ -243,19 +283,11 @@ sp<Object> Body::BUILDER_IMPL2::build(const sp<Scope>& args)
     return _delegate.build(args);
 }
 
-}
-}
-
-template<> plugin::box2d::Body::Type Conversions::to<String, plugin::box2d::Body::Type>(const String& str)
+Body::Stub::Stub(const sp<World>& world, b2Body* body)
+    : _world(world), _body(body)
 {
-    if(str == "static")
-        return plugin::box2d::Body::BODY_TYPE_STATIC;
-    if(str == "kinematic")
-        return plugin::box2d::Body::BODY_TYPE_KINEMATIC;
-    if(str == "dynamic")
-        return plugin::box2d::Body::BODY_TYPE_DYNAMIC;
-    FATAL("Unknow body type \"%s\"", str.c_str());
-    return plugin::box2d::Body::BODY_TYPE_STATIC;
 }
 
+}
+}
 }

@@ -16,7 +16,7 @@ class ARK_API RigidBody {
 public:
     virtual ~RigidBody() = default;
 
-    RigidBody(uint32_t id, Collider::BodyType type, Collider::BodyShape shape, const sp<VV>& position, const sp<Size>& size, const sp<Numeric>& rotation);
+    RigidBody(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<Numeric>& rotation);
 
 //  [[script::bindings::auto]]
     virtual void dispose() = 0;
@@ -25,9 +25,6 @@ public:
     uint32_t id() const;
 //  [[script::bindings::property]]
     Collider::BodyType type() const;
-
-//  [[script::bindings::property]]
-    Collider::BodyShape shape() const;
 
 //  [[script::bindings::property]]
     V2 xy() const;
@@ -51,7 +48,6 @@ public:
 protected:
     uint32_t _id;
     Collider::BodyType _type;
-    Collider::BodyShape _shape;
     sp<VV> _position;
     sp<Size> _size;
     sp<Numeric> _rotation;

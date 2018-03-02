@@ -49,7 +49,7 @@ private:
     public:
         sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& expired) {
             const sp<SynchronizedVariable> synchronized = sp<SynchronizedVariable>::make(delegate);
-            const sp<Boolean> s = expired ? expired : sp<Boolean>::adopt(new BooleanByWeakRef<SynchronizedVariable>(synchronized, 0));
+            const sp<Boolean> s = expired ? expired : sp<Boolean>::adopt(new BooleanByWeakRef<SynchronizedVariable>(synchronized, 1));
             _variables.push_back(synchronized, s);
             return synchronized;
         }
