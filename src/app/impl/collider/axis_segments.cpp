@@ -1,45 +1,45 @@
-#include "app/impl/collider/simple_collider.h"
+#include "app/impl/collider/axis_segments.h"
+
+#include "core/base/api.h"
 
 #include <algorithm>
 #include <iterator>
 
-#include "app/impl/collider/static_segments.h"
-
 namespace ark {
 
 
-StaticSegments::Segment::Segment(float position)
+AxisSegments::Segment::Segment(float position)
     : _position(position), _radius(0)
 {
 }
 
-StaticSegments::Segment::Segment(uint32_t rigidBodyId, float position, float radius)
+AxisSegments::Segment::Segment(uint32_t rigidBodyId, float position, float radius)
     : _id(rigidBodyId), _position(position), _radius(radius)
 {
 }
 
-StaticSegments::Segment::Segment(const Segment& other)
+AxisSegments::Segment::Segment(const Segment& other)
     : _id(other._id), _position(other._position), _radius(other._radius)
 {
 }
 
-bool StaticSegments::Segment::operator < (const Segment& other) const
+bool AxisSegments::Segment::operator < (const Segment& other) const
 {
     return _position < other._position;
 }
 
-void StaticSegments::Segment::update(float position, float radius)
+void AxisSegments::Segment::update(float position, float radius)
 {
     _position = position;
     _radius = radius;
 }
 
-StaticSegments::StaticSegments()
+AxisSegments::AxisSegments()
     : _search_radius(0)
 {
 }
 
-void StaticSegments::insert(uint32_t id, float position, float radius)
+void AxisSegments::insert(uint32_t id, float position, float radius)
 {
     if(_search_radius < radius)
         _search_radius = radius;
@@ -49,7 +49,7 @@ void StaticSegments::insert(uint32_t id, float position, float radius)
     _positions[id] = position;
 }
 
-void StaticSegments::update(uint32_t id, float position, float radius)
+void AxisSegments::update(uint32_t id, float position, float radius)
 {
     const Segment segment(id, position, radius);
     auto iter = std::lower_bound(_blocks.begin(), _blocks.end(), segment);
@@ -87,7 +87,7 @@ void StaticSegments::update(uint32_t id, float position, float radius)
     _positions[id] = position;
 }
 
-void StaticSegments::remove(uint32_t id)
+void AxisSegments::remove(uint32_t id)
 {
     const auto iter = findSegmentById(id);
     float radius = iter->_radius;
@@ -97,7 +97,7 @@ void StaticSegments::remove(uint32_t id)
     _positions.erase(id);
 }
 
-std::set<uint32_t> StaticSegments::findCandidates(float p1, float p2)
+std::set<uint32_t> AxisSegments::findCandidates(float p1, float p2)
 {
     if(p1 > p2)
         std::swap(p1, p2);
@@ -112,7 +112,7 @@ std::set<uint32_t> StaticSegments::findCandidates(float p1, float p2)
     return candidates;
 }
 
-void StaticSegments::updateSearchRadius()
+void AxisSegments::updateSearchRadius()
 {
     _search_radius = 0;
     for(auto iter = _blocks.begin(); iter != _blocks.end(); ++iter)
@@ -120,7 +120,7 @@ void StaticSegments::updateSearchRadius()
             _search_radius = iter->_radius;
 }
 
-std::vector<StaticSegments::Segment>::iterator StaticSegments::findSegmentById(uint32_t id)
+std::vector<AxisSegments::Segment>::iterator AxisSegments::findSegmentById(uint32_t id)
 {
     auto piter = _positions.find(id);
     DCHECK(piter != _positions.end(), "RigidBody(%d) not found.", id);

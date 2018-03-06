@@ -1,5 +1,5 @@
-#ifndef ARK_APP_IMPL_COLLIDER_STATIC_SEGMENTS_H_
-#define ARK_APP_IMPL_COLLIDER_STATIC_SEGMENTS_H_
+#ifndef ARK_APP_IMPL_COLLIDER_AXIS_SEGMENTS_H_
+#define ARK_APP_IMPL_COLLIDER_AXIS_SEGMENTS_H_
 
 #include <set>
 #include <unordered_map>
@@ -7,9 +7,9 @@
 
 namespace ark {
 
-class StaticSegments {
+class AxisSegments {
 public:
-    StaticSegments();
+    AxisSegments();
 
     void insert(uint32_t id, float position, float radius);
     void update(uint32_t id, float position, float radius);

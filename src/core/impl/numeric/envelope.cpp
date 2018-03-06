@@ -18,8 +18,12 @@ float Envelope::val()
 {
     while(_expired->val())
     {
-        ++_phrases_iterator;
-        _expired = _phrases_iterator != _stub->_phrases.end() ? buildState() : Null::ptr<Boolean>();
+        if(_phrases_iterator != _stub->_phrases.end())
+            ++_phrases_iterator;
+
+        _expired = Null::ptr<Boolean>();
+        if(_phrases_iterator != _stub->_phrases.end())
+            _expired = buildState();
     }
 
     return _stub->_value->val();

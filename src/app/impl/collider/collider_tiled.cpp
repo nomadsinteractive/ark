@@ -1,4 +1,4 @@
-#include "app/impl/collider/tiled_collider.h"
+#include "app/impl/collider/collider_tiled.h"
 
 #include "core/base/bean_factory.h"
 #include "core/types/null.h"

@@ -1,5 +1,5 @@
-#ifndef ARK_APP_IMPL_COLLIDER_SIMPLE_COLLIDER_H_
-#define ARK_APP_IMPL_COLLIDER_SIMPLE_COLLIDER_H_
+#ifndef ARK_APP_IMPL_COLLIDER_COLLIDER_IMPL_H_
+#define ARK_APP_IMPL_COLLIDER_COLLIDER_IMPL_H_
 
 #include <set>
 #include <unordered_map>
@@ -12,15 +12,15 @@
 
 #include "renderer/forwarding.h"
 
-#include "app/inf/collider.h"
 #include "app/base/rigid_body.h"
-#include "app/impl/collider/static_segments.h"
+#include "app/impl/collider/axis_segments.h"
+#include "app/inf/collider.h"
 
 namespace ark {
 
-class SimpleCollider : public Collider {
+class ColliderImpl : public Collider {
 public:
-    SimpleCollider(const sp<ResourceLoaderContext>& resourceLoaderContext);
+    ColliderImpl(const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size) override;
 
@@ -50,8 +50,8 @@ public:
         const sp<RigidBodyShadow>& ensureRigidBody(uint32_t id) const;
         const sp<RigidBodyShadow> findRigidBody(uint32_t id) const;
 
-        StaticSegments _x_axis_segment;
-        StaticSegments _y_axis_segment;
+        AxisSegments _x_axis_segment;
+        AxisSegments _y_axis_segment;
 
         std::unordered_map<uint32_t, sp<RigidBodyShadow>> _rigid_bodies;
         uint32_t _rigid_body_base_id;
@@ -92,7 +92,7 @@ public:
         void endContact(const sp<RigidBody>& rigidBody);
 
     private:
-        sp<SimpleCollider::Stub> _collider;
+        sp<ColliderImpl::Stub> _collider;
         sp<RigidBodyShadow> _shadow;
 
         std::set<uint32_t> _contacts;
