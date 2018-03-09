@@ -68,10 +68,10 @@ public:
         virtual sp<Numeric> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Numeric>> _expression;
+        sp<Builder<Numeric>> _value;
     };
 
-//  [[plugin::builder("numeric")]]
+//  [[plugin::builder]]
     class BUILDER : public Builder<Numeric> {
     public:
         BUILDER(BeanFactory& parent, const document& doc);

@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #include "core/ark.h"
-#include "core/base/string_builder.h"
+#include "core/base/string_buffer.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/impl/asset/directory_asset.h"
 #include "core/impl/dictionary/xml_directory.h"
@@ -27,7 +27,7 @@ public:
             return -1;
         }
 
-        StringBuilder sb;
+        StringBuffer sb;
         Documents::print(doc, sb);
 
         for(const document& node : doc->children("frame"))

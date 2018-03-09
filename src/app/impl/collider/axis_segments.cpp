@@ -97,7 +97,7 @@ void AxisSegments::remove(uint32_t id)
     _positions.erase(id);
 }
 
-std::set<uint32_t> AxisSegments::findCandidates(float p1, float p2)
+std::set<uint32_t> AxisSegments::findCandidates(float p1, float p2) const
 {
     if(p1 > p2)
         std::swap(p1, p2);

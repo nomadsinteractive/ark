@@ -105,7 +105,7 @@ uint32_t Platform::glPreprocessShader(const String& shader, const char* srcs[], 
 
 void* Platform::dlOpen(const String& name)
 {
-    String dllName = name + String(".dll");
+    const String dllName = name + String(".dll");
     return LoadLibrary(dllName.c_str());
 }
 

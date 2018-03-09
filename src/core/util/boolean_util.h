@@ -55,9 +55,19 @@ public:
         virtual sp<Boolean> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Boolean>> _expression;
+        sp<Builder<Boolean>> _value;
     };
 
+//  [[plugin::builder]]
+    class BUILDER : public Builder<Boolean> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest);
+
+        virtual sp<Boolean> build(const sp<Scope>& args) override;
+
+    private:
+        sp<Builder<Boolean>> _value;
+    };
 };
 
 }

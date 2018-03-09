@@ -131,16 +131,6 @@ Expression::Operator<bool> BooleanOperation::OPS[2] = {
 
 }
 
-BooleanUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-    : _expression(Expression::Compiler<bool, BooleanOperation>().compile(factory, value.strip()))
-{
-}
-
-sp<Boolean> BooleanUtil::DICTIONARY::build(const sp<Scope>& args)
-{
-    return _expression->build(args);
-}
-
 sp<Boolean> BooleanUtil::create(const sp<Boolean>& value)
 {
     return sp<BooleanWrapper>::make(value);
@@ -221,6 +211,25 @@ void BooleanUtil::fix(const sp<Boolean>& self)
     DWARN(ib, "Calling fix on non-BooleanWrapper has no effect.");
     if(ib)
         ib->fix();
+}
+
+BooleanUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
+    : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, value.strip()))
+{
+}
+
+sp<Boolean> BooleanUtil::DICTIONARY::build(const sp<Scope>& args)
+{
+    return _value->build(args);
+}
+
+BooleanUtil::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, Documents::ensureAttribute(manifest, Constants::Attributes::VALUE).strip())) {
+}
+
+sp<Boolean> BooleanUtil::BUILDER::build(const sp<Scope>& args)
+{
+    return _value->build(args);
 }
 
 }

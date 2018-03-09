@@ -12,7 +12,7 @@
 
 #include "graphics/base/v2.h"
 
-#include "app/impl/partition/kdtree_partition.h"
+#include "app/base/kdtree.h"
 
 using namespace std;
 using namespace nanoflann;
@@ -87,7 +87,7 @@ public:
         srand(time(NULL));
         kdtree_demo<float>(10000);
 
-        KDTreePartition kdtree;
+        KDTree kdtree;
         for(int i = 0; i < 100; ++i)
         {
             uint32_t id = kdtree.addPoint(sp<VV2::Impl>::make(V2(Math::randf(), Math::randf())));

@@ -14,6 +14,7 @@
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/epi/expired.h"
 #include "core/types/weak_ptr.h"
+#include "core/util/math.h"
 
 #include "graphics/base/vec2.h"
 #include "graphics/base/transform.h"
@@ -67,17 +68,17 @@ public:
             return 8;
 
         sp<Numeric> g5 = beanFactory.load<Numeric>("g5");
-        if(!g5 || g5->val() != 1.0f)
+        if(!g5 || !Math::almostEqual(g5->val(), 1.0f, 4))
             return 9;
 
         sp<Numeric> g6 = beanFactory.load<Numeric>("g6");
-        if(!g6 || g6->val() != 6.0f)
+        if(!g6 || g6->val() != 5.0f)
             return 10;
 
         const sp<Scope> args = sp<Scope>::make();
         args->put<Numeric>("t", sp<Numeric::Impl>::make(12.0f));
         sp<Numeric> g7 = beanFactory.load<Numeric>("g7", args);
-        if(!g7 || g7->val() != 13.0f)
+        if(!g7 || g7->val() != 12.0f)
             return 11;
 
         sp<Vec2> vertex = beanFactory.load<Vec2>("vertex");
@@ -126,23 +127,23 @@ public:
             return 22;
 
         const sp<Numeric> g9 = beanFactory.load<Numeric>("g9", args);
-        if(!g9 || g9->val() != 16.0f)
+        if(!g9 || g9->val() != 15.0f)
             return 23;
 
         const sp<Numeric> g10 = beanFactory.load<Numeric>("g10", args);
-        if(!g10 || g10->val() != 6.4f)
+        if(!g10 || g10->val() != 6.0f)
             return 24;
 
         const sp<Numeric> g11 = beanFactory.load<Numeric>("g11", args);
-        if(!g11 || g11->val() != 14.4f)
+        if(!g11 || g11->val() != 14.0f)
             return 25;
 
         const sp<Numeric> g12 = beanFactory.load<Numeric>("g12", args);
-        if(!g12 || g12->val() != 30.4f)
+        if(!g12 || g12->val() != 30.0f)
             return 26;
 
         const sp<Numeric> g13 = beanFactory.load<Numeric>("g13");
-        if(!g13 || g13->val() != 4.0f)
+        if(!g13 || !Math::almostEqual(g13->val(), 4.0f, 20))
             return 27;
 
         const sp<Boolean> g14 = beanFactory.load<Boolean>("g14");

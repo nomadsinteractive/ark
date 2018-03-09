@@ -23,18 +23,16 @@ public:
     virtual int launch() override {
         const Global<PluginManager> pluginManager;
         pluginManager->load("ark-box2d");
+        const sp<ResourceLoader> resourceLoader = getResourceLoader();
 
-        const sp<BeanFactory> beanFactory = getBeanFactory();
-        if(!beanFactory)
-            return -1;
-
-        const sp<Object> world = beanFactory->load<Object>("world");
+        const sp<Object> world = resourceLoader->load<Object>("world");
         if(!world.is<Runnable>())
             return 1;
+
         const sp<Runnable> worldRunnable = world.as<Runnable>();
-        const sp<Object> body = beanFactory->load<Object>("body");
-        const sp<Vec2> position = beanFactory->load<Vec2>("position");
-        const sp<Numeric> rotation = beanFactory->load<Numeric>("rotation");
+        const sp<Object> body = resourceLoader->load<Object>("body");
+        const sp<Vec2> position = resourceLoader->load<Vec2>("position");
+        const sp<Numeric> rotation = resourceLoader->load<Numeric>("rotation");
         for(uint32_t i = 0; i < 100; ++i)
         {
             Trace<0, 100> _trace;
@@ -43,7 +41,9 @@ public:
             float y = position->y();
             float angle = rotation->val();
         }
-        return 0;
+        if(position->x() == 0 && rotation->val() == 0 && position->y() < -1000.0f)
+            return 0;
+        return 1;
     }
 };
 

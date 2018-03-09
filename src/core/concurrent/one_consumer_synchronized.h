@@ -65,10 +65,13 @@ protected:
 template<typename T> class _QueueSynchronizer {
 public:
     static void synchronize(std::queue<T>& queue, _Node<T>* head) {
+        std::list<T> list;
         while(head) {
-            queue.push(head->data());
+            list.push_front(head->data());
             head = head->next();
         }
+        for(const T& i : list)
+            queue.push(i);
     }
 };
 

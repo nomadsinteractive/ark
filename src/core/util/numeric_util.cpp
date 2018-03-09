@@ -67,26 +67,6 @@ Expression::Operator<float> NumericOperation::OPS[4] = {
 
 }
 
-NumericUtil::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)
-    : _expression(Expression::Compiler<float, NumericOperation>().compile(parent, value.strip()))
-{
-}
-
-sp<Numeric> NumericUtil::DICTIONARY::build(const sp<Scope>& args)
-{
-    return _expression->build(args);
-}
-
-NumericUtil::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _value(Expression::Compiler<float, NumericOperation>().compile(parent, Documents::ensureAttribute(doc, Constants::Attributes::VALUE)))
-{
-}
-
-sp<Numeric> NumericUtil::BUILDER::build(const sp<Scope>& args)
-{
-    return _value->build(args);
-}
-
 sp<Numeric> NumericUtil::create(const sp<Numeric>& value)
 {
     return sp<NumericWrapper>::make(value);
@@ -206,6 +186,26 @@ void NumericUtil::fix(const sp<Numeric>& self)
     DWARN(iw, "Calling fix on non-NumericWrapper has no effect.");
     if(iw)
         iw->fix();
+}
+
+NumericUtil::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)
+    : _value(Expression::Compiler<float, NumericOperation>().compile(parent, value.strip()))
+{
+}
+
+sp<Numeric> NumericUtil::DICTIONARY::build(const sp<Scope>& args)
+{
+    return _value->build(args);
+}
+
+NumericUtil::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
+    : _value(Expression::Compiler<float, NumericOperation>().compile(parent, Documents::ensureAttribute(doc, Constants::Attributes::VALUE)))
+{
+}
+
+sp<Numeric> NumericUtil::BUILDER::build(const sp<Scope>& args)
+{
+    return _value->build(args);
 }
 
 }

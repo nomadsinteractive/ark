@@ -38,7 +38,7 @@ public:
             while(!cleared.empty())
             {
                 if(cleared.front() != (pos++))
-                    return 2 + pos;
+                    return 3 + pos;
                 cleared.pop();
             }
         }

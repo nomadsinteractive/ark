@@ -15,7 +15,7 @@ public:
     void update(uint32_t id, float position, float radius);
     void remove(uint32_t id);
 
-    std::set<uint32_t> findCandidates(float p1, float p2);
+    std::set<uint32_t> findCandidates(float p1, float p2) const;
 
 private:
     struct Segment {

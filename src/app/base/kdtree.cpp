@@ -62,7 +62,7 @@ struct KDTree::Stub {
 };
 
 KDTree::KDTree()
-    : _updated_count(0)
+    : _stub(new Stub(nanoflann::KDTreeSingleIndexAdaptorParams())), _updated_count(0)
 {
     buildIndex();
 }

@@ -4,6 +4,8 @@
 #include <set>
 #include <unordered_map>
 
+#include <tinyc2.h>
+
 #include "core/base/object_pool.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
@@ -40,21 +42,32 @@ public:
     class RigidBodyShadow;
 
 public:
+    class Axises {
+    public:
+
+        void insert(const RigidBody& rigidBody);
+        void remove(const RigidBody& rigidBody);
+        void update(uint32_t id, const V2& position, const Rect& aabb);
+
+        std::set<uint32_t> findCandidates(const Rect& aabb) const;
+
+    private:
+        AxisSegments _x_axis_segment;
+        AxisSegments _y_axis_segment;
+    };
+
     struct Stub {
         Stub();
 
-        void insert(const sp<RigidBodyImpl>& rigidObject);
         void remove(const RigidBodyImpl& rigidBody);
 
         sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<Stub>& self);
         const sp<RigidBodyShadow>& ensureRigidBody(uint32_t id) const;
         const sp<RigidBodyShadow> findRigidBody(uint32_t id) const;
 
-        AxisSegments _x_axis_segment;
-        AxisSegments _y_axis_segment;
-
         std::unordered_map<uint32_t, sp<RigidBodyShadow>> _rigid_bodies;
         uint32_t _rigid_body_base_id;
+        sp<Axises> _axises;
 
         ObjectPool _object_pool;
     };
@@ -69,9 +82,22 @@ public:
 
         void setPosition(const V& pos);
 
+        void collision(ColliderImpl::Stub& collider, const Rect& aabb);
+
+        bool disposed() const;
+
+    private:
+        void beginContact(const sp<RigidBody>& rigidBody);
+        void endContact(const sp<RigidBody>& rigidBody);
+
     private:
         sp<VV::Impl> _position;
         sp<CollisionCallback> _collision_callback;
+
+        std::set<uint32_t> _contacts;
+        bool _disposed;
+
+        friend class RigidBodyImpl;
     };
 
     class RigidBodyImpl : public RigidBody {
@@ -83,20 +109,16 @@ public:
         virtual const sp<CollisionCallback>& collisionCallback() const override;
         virtual void setCollisionCallback(const sp<CollisionCallback>& collisionCallback) override;
 
+        const sp<RigidBodyShadow>& shadow() const;
+
         void setPosition(const sp<VV>& position);
         void collision(const Rect& rect);
-        void update();
-
-    private:
-        void beginContact(const sp<RigidBody>& rigidBody);
-        void endContact(const sp<RigidBody>& rigidBody);
 
     private:
         sp<ColliderImpl::Stub> _collider;
         sp<RigidBodyShadow> _shadow;
 
         std::set<uint32_t> _contacts;
-        bool _disposed;
     };
 
 private:

@@ -9,14 +9,14 @@
     <numeric id="accelerate" class="accelerate" v="100" a="20" t="1.0"/>
     <numeric id="g4" class="sin" x="0"/>
     <numeric id="g5" class="cos" x="0"/>
-    <numeric id="g6" ref="@g5" style="translation: 5.0"/>
-    <numeric id="g7" ref="@g5" style="translation: $t"/>
-    <numeric id="g8" class="expression" value="3 + 5"/>
-    <numeric id="g9" class="expression" value="3 + @g7"/>
-    <numeric id="g10" class="expression" value="2 * (3 + @g7) / 5.0"/>
-    <numeric id="g11" class="expression" value="@g8 + 2 * (3 + @g7) / 5.0"/>
-    <numeric id="g12" class="expression" value="(@g8 + 2 * (3 + @g7) / 5.0) + (@g8 * 2)"/>
-    <numeric id="g13" class="expression" value="sin(0) + 2 * cos(0) + sqrt(4)"/>
+    <numeric id="g6" ref="@g4" style="translation: 5.0"/>
+    <numeric id="g7" ref="@g4" style="translation: $t"/>
+    <numeric id="g8" value="3 + 5"/>
+    <numeric id="g9" value="3 + @g7"/>
+    <numeric id="g10" value="2 * (3 + @g7) / 5.0"/>
+    <numeric id="g11" value="@g8 + 2 * (3 + @g7) / 5.0"/>
+    <numeric id="g12" value="(@g8 + 2 * (3 + @g7) / 5.0) + (@g8 * 2)"/>
+    <numeric id="g13" value="sin(0) + 2 * cos(0) + sqrt(4)"/>
     <boolean id="g14" value="true"/>
     <boolean id="g15" value="false"/>
     <boolean id="g16" value="@g14 or @g15"/>
@@ -28,13 +28,13 @@
     <vec2 id="v3" x="0" y="@accelerate"/>
     <expirable id="@e1" class="by-timeout" timeout="2s"/>
     <expirable id="e004" ref="@e1"/>
-    <transform id="t1" pivot="@v1"/>
-    <transform id="t2" pivot="@v1" translation="(20, 30)"/>
-    <transform id="t3" pivot="@v1" translation="@v2" scale="(2.0, 2.0)"/>
-    <transform id="t4" pivot="@v1" translation="@v2" scale="(2.0, 2.0)" rotation="@g5"/>
+    <transform id="t1"/>
+    <transform id="t2" translation="(20, 30)"/>
+    <transform id="t3" translation="@v2" scale="(2.0, 2.0)"/>
+    <transform id="t4" translation="@v2" scale="(2.0, 2.0)" rotation="1.0"/>
     <shape id="b2_shape_ball" class="ball" radius="0.5"/>
-    <world id="world" ref="@world" class="b2World" gravity="0, -10" pixel-per-meter="100, 100"/>
-    <body id="body" ref="@body" class="b2Body" world="@world" position="0, 4" shape="@b2_shape_ball"/>
+    <world id="@world" class="b2World" gravity="0, -10" pixel-per-meter="100, 100"/>
+    <body id="@body" class="b2Body" world="@world" position="0, 4" shape="@b2_shape_ball"/>
     <vec2 id="position" class="b2Position" body="@body"/>
     <numeric id="rotation" class="b2Rotation" body="@body"/>
     <audio id="ogg_test" class="ogg" src="test.ogg"/>
