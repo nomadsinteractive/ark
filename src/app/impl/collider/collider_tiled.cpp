@@ -56,7 +56,7 @@ sp<Collider> TiledCollider::BUILDER::build(const sp<Scope>& args)
     return sp<TiledCollider>::make(_tile_map->build(args), _resource_loader_context);
 }
 
-sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size)
+sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform)
 {
     DCHECK(type != Collider::BODY_TYPE_STATIC, "Cannot create static body in TiledCollider");
     NOT_NULL(position && size);

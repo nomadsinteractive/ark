@@ -92,7 +92,7 @@ float RenderObject::y() const
     return _position->val().y();
 }
 
-V RenderObject::xy() const
+V2 RenderObject::xy() const
 {
     return _position->val();
 }

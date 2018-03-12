@@ -63,7 +63,7 @@ public:
 //  [[script::bindings::property]]
     float y() const;
 //  [[script::bindings::property]]
-    V xy() const;
+    V2 xy() const;
 //  [[script::bindings::property]]
     const sp<VV>& position() const;
 //  [[script::bindings::property]]

@@ -25,7 +25,7 @@ void World::run()
     _world.Step(_time_step, _velocity_iterations, _position_iterations);
 }
 
-sp<RigidBody> World::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size)
+sp<RigidBody> World::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform)
 {
     return nullptr;
 }

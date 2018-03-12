@@ -528,7 +528,7 @@ class GenMethod(object):
         parse_format = ''.join(i.parse_signature for i in args)
         if parse_format.count('|') > 1:
             ts = parse_format.split('|')
-            if any(len(i) > 1 for i in ts):
+            if any(len(i) > 1 for i in ts[1:]):
                 print('Illegal default arguments: %s', parse_format)
                 sys.exit(-1)
             parse_format = ts[0] + '|' + ''.join(ts[1:])

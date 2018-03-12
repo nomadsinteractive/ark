@@ -55,14 +55,15 @@ class Renderer:
 
 class Collider:
 
-    BODY_SHAPE_BOX = 0
-    BODY_SHAPE_CIRCLE = 1
+    BODY_SHAPE_AABB = 0
+    BODY_SHAPE_BALL = 1
+    BODY_SHAPE_BOX = 2
 
     BODY_TYPE_DYNAMIC = 0
     BODY_TYPE_KINEMATIC = 1
     BODY_TYPE_STATIC = 2
 
-    def create_body(self, type, shape, position, size):
+    def create_body(self, type, shape, position, size=None, transform=None):
         return None
 
 

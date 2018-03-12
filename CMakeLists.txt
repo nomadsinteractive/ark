@@ -102,6 +102,7 @@ aux_source_directory(src/app/impl/boolean LOCAL_SRC_LIST)
 aux_source_directory(src/app/impl/layout LOCAL_SRC_LIST)
 aux_source_directory(src/app/impl/renderer LOCAL_SRC_LIST)
 aux_source_directory(src/app/impl/vec3 LOCAL_SRC_LIST)
+aux_source_directory(src/app/util LOCAL_SRC_LIST)
 aux_source_directory(src/app/view LOCAL_SRC_LIST)
 
 aux_source_directory(platform/any LOCAL_SRC_LIST)

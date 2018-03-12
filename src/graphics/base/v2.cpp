@@ -4,6 +4,8 @@
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/base/v3.h"
+
 namespace ark {
 
 V2::V2()
@@ -23,6 +25,11 @@ V2::V2(float x, float y, float /*z*/)
 
 V2::V2(const V2& other)
     : _x(other._x), _y(other._y)
+{
+}
+
+V2::V2(const V3& other)
+    : _x(other.x()), _y(other.y())
 {
 }
 

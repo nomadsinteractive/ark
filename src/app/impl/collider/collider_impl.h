@@ -4,8 +4,6 @@
 #include <set>
 #include <unordered_map>
 
-#include <tinyc2.h>
-
 #include "core/base/object_pool.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
@@ -17,6 +15,7 @@
 #include "app/base/rigid_body.h"
 #include "app/impl/collider/axis_segments.h"
 #include "app/inf/collider.h"
+#include "app/util/tinyc2_util.h"
 
 namespace ark {
 
@@ -24,7 +23,7 @@ class ColliderImpl : public Collider {
 public:
     ColliderImpl(const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform) override;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Collider> {
@@ -61,7 +60,7 @@ public:
 
         void remove(const RigidBodyImpl& rigidBody);
 
-        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<Stub>& self);
+        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Stub>& self);
         const sp<RigidBodyShadow>& ensureRigidBody(uint32_t id) const;
         const sp<RigidBodyShadow> findRigidBody(uint32_t id) const;
 
@@ -74,17 +73,18 @@ public:
 
     class RigidBodyShadow : public RigidBody {
     public:
-        RigidBodyShadow(uint32_t id, Collider::BodyType type, const V& pos, const sp<Size>& size);
+        RigidBodyShadow(uint32_t id, Collider::BodyType type, const V& pos, const sp<Size>& size, const sp<Transform>& transform);
 
         virtual void dispose() override;
         virtual const sp<CollisionCallback>& collisionCallback() const override;
         virtual void setCollisionCallback(const sp<CollisionCallback>& collisionCallback) override;
 
+        void makeAABB();
+
         void setPosition(const V& pos);
+        bool disposed() const;
 
         void collision(ColliderImpl::Stub& collider, const Rect& aabb);
-
-        bool disposed() const;
 
     private:
         void beginContact(const sp<RigidBody>& rigidBody);
@@ -92,6 +92,7 @@ public:
 
     private:
         sp<VV::Impl> _position;
+        C2RigidBody _c2_rigid_body;
         sp<CollisionCallback> _collision_callback;
 
         std::set<uint32_t> _contacts;

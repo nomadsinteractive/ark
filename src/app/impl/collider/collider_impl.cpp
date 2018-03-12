@@ -3,9 +3,6 @@
 #include <algorithm>
 #include <iterator>
 
-#define TINYC2_IMPLEMENTATION
-#include <tinyc2.h>
-
 #include "core/types/null.h"
 #include "core/types/weak_ptr.h"
 #include "core/util/log.h"
@@ -66,9 +63,9 @@ sp<Collider> ColliderImpl::BUILDER::build(const sp<Scope>& args)
     return sp<ColliderImpl>::make(_resource_loader_context);
 }
 
-sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size)
+sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform)
 {
-    const sp<RigidBodyImpl> rigidBody = _stub->createRigidBody(type, position, size, _stub);
+    const sp<RigidBodyImpl> rigidBody = _stub->createRigidBody(type, shape, position, size, transform, _stub);
 
     if(type == Collider::BODY_TYPE_DYNAMIC)
     {
@@ -97,10 +94,14 @@ void ColliderImpl::Stub::remove(const RigidBodyImpl& rigidBody)
     _rigid_bodies.erase(iter);
 }
 
-sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<ColliderImpl::Stub>& self)
+sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<ColliderImpl::Stub>& self)
 {
-    const sp<RigidBodyShadow> rigidBodyShadow = _object_pool.obtain<RigidBodyShadow>(++_rigid_body_base_id, type, position->val(), size);
+    const sp<RigidBodyShadow> rigidBodyShadow = _object_pool.obtain<RigidBodyShadow>(++_rigid_body_base_id, type, position->val(), size, transform);
     const sp<RigidBodyImpl> rigidBody = _object_pool.obtain<RigidBodyImpl>(position, self, rigidBodyShadow);
+
+    if(shape == Collider::BODY_SHAPE_AABB)
+        rigidBodyShadow->makeAABB();
+
     _rigid_bodies[rigidBody->id()] = rigidBodyShadow;
     _axises->insert(rigidBody);
     return rigidBody;
@@ -157,10 +158,18 @@ void ColliderImpl::RigidBodyImpl::setPosition(const sp<VV>& position)
     _position = position;
 }
 
-ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const V& pos, const sp<Size>& size)
-    : RigidBody(id, type, sp<VV::Impl>::make(pos), size, nullptr), _disposed(false)
+ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const V& pos, const sp<Size>& size, const sp<Transform>& transform)
+    : RigidBody(id, type, sp<VV::Impl>::make(pos), size, nullptr), _position(static_cast<sp<VV::Impl>>(position())), _c2_rigid_body(_position, transform), _disposed(false)
 {
-    _position = static_cast<sp<VV::Impl>>(position());
+    setPosition(pos);
+}
+
+void ColliderImpl::RigidBodyShadow::makeAABB()
+{
+    DCHECK(_size, "AABB must have size defined");
+    Rect aabb(0, 0, _size->width(), _size->height());
+    aabb.setCenter(0, 0);
+    _c2_rigid_body.makeAABB(aabb);
 }
 
 void ColliderImpl::RigidBodyShadow::dispose()
@@ -198,10 +207,7 @@ void ColliderImpl::RigidBodyShadow::collision(ColliderImpl::Stub& collider, cons
                 continue;
             }
             const sp<RigidBodyShadow>& rigidBody = collider.ensureRigidBody(id);
-            const sp<Size>& size = rigidBody->size();
-            const V position = rigidBody->xy();
-            const Rect irect(position.x() - size->width() / 2, position.y() - size->height() / 2, position.x() + size->width() / 2, position.y() + size->height() / 2);
-            bool overlap = irect.overlap(aabb);
+            int32_t overlap = _c2_rigid_body.collide(rigidBody->_c2_rigid_body);
             if(overlap)
             {
                 auto iter2 = contacts.find(id);
@@ -219,7 +225,7 @@ void ColliderImpl::RigidBodyShadow::collision(ColliderImpl::Stub& collider, cons
             if(candidates.find(i) == candidates.end())
             {
                 const sp<RigidBodyShadow> s = collider.findRigidBody(i);
-                endContact(s ? s : collider._object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, V(), nullptr));
+                endContact(s ? s : collider._object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, V(), nullptr, nullptr));
             }
         }
         _contacts = candidates;

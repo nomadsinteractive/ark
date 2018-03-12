@@ -54,5 +54,5 @@
     <render-object id="c001" type="0" position="100, @c001-fall" size="20, 20"/>
     <render-object id="c002" type="0" position="100, 0" size="200, 40"/>
     <numeric id="c001-fall" class="accelerate" s="400" a="-500"/>
-    <collider id="collider-001" class="simple"/>
+    <collider id="collider-001"/>
 </resources>

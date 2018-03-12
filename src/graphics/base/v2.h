@@ -13,6 +13,7 @@ public:
     V2(float x, float y);
     V2(float x, float y, float z);
     V2(const V2& other);
+    V2(const V3& other);
 
     static V2 identity();
 

@@ -22,7 +22,7 @@ class TiledCollider : public Collider {
 public:
     TiledCollider(const sp<TileMap>& tileMap, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform) override;
 
 //  [[plugin::resource-loader("tiled")]]
     class BUILDER : public Builder<Collider> {

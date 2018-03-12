@@ -30,9 +30,10 @@ private:
             }
 
             void update() {
-                if(_consumed)
+                if(_consumed) {
                     _value = _delegate->val();
-                _consumed = false;
+                    _consumed = false;
+                }
             }
 
             virtual T val() override {

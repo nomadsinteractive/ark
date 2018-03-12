@@ -13,8 +13,9 @@ class ARK_API Collider {
 public:
 //  [[script::bindings::enumeration]]
     enum BodyShape {
-        BODY_SHAPE_BOX,
-        BODY_SHAPE_CIRCLE
+        BODY_SHAPE_AABB,
+        BODY_SHAPE_BALL,
+        BODY_SHAPE_BOX
     };
 
 //  [[script::bindings::enumeration]]
@@ -28,7 +29,7 @@ public:
     virtual ~Collider() = default;
 
 //  [[script::bindings::auto]]
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size) = 0;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr) = 0;
 
 };
 
