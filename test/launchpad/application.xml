@@ -52,7 +52,18 @@
     <vertical-scrollable id="scrollable-001" tile-height="50" height="100" rows="3" tile-maker="$tile_maker" scroller="$scroller"/>
     <string-bundle id="string-bundle-001" class="yaml" path="i18n/${locale}"/>
     <render-object id="c001" type="0" position="100, @c001-fall" size="20, 20"/>
-    <render-object id="c002" type="0" position="100, 0" size="200, 40"/>
+    <render-object id="c002" type="0" position="200, 0" size="400, 40"/>
+    <render-object id="c003" type="0" position="0, @c001-fall" size="40, 40">
+        <transform>
+            <rotation class="linear" s="0" v="3"/>
+        </transform>
+    </render-object>
     <numeric id="c001-fall" class="accelerate" s="400" a="-500"/>
-    <collider id="collider-001"/>
+    <collider id="collider-001">
+        <shape shape-id="0" shape-type="poly">
+            <vertex x="-20" y="-10"/>
+            <vertex x="0" y="20"/>
+            <vertex x="20" y="-10"/>
+        </shape>
+    </collider>
 </resources>

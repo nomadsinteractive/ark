@@ -35,14 +35,14 @@ public:
     virtual void onBeginContact(const sp<RigidBody>& rigidBody) override {
         const V p1 = _render_object->position()->val();
         const V p2 = rigidBody->position()->val();
-        printf("onBeginContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f)\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z());
+        printf("onBeginContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotation()->val());
         _contact_began = true;
     }
 
     virtual void onEndContact(const sp<RigidBody>& rigidBody) override {
         const V p1 = _render_object->xy();
         const V p2 = rigidBody->position()->val();
-        printf("onEndContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f)\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z());
+        printf("onEndContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotation()->val());
         if(_contact_began)
             _contact_ended = true;
     }
@@ -68,18 +68,25 @@ public:
         const sp<Numeric> duration = clock->duration();
         const sp<Collider> collider = resourceLoader->load<Collider>("collider-001");
         const sp<RenderObject> c001 = resourceLoader->load<RenderObject>("c001");
-        const sp<RigidBody> rigidBody = collider->createBody(Collider::BODY_TYPE_DYNAMIC, Collider::BODY_SHAPE_AABB, c001->position(), c001->size());
+        const sp<RigidBody> rigidBody001 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, Collider::BODY_SHAPE_AABB, c001->position(), c001->size());
         const sp<RenderObject> c002 = resourceLoader->load<RenderObject>("c002");
         const sp<RigidBody> rigidBody002 = collider->createBody(Collider::BODY_TYPE_STATIC, Collider::BODY_SHAPE_AABB, c002->position(), c002->size());
+        const sp<RenderObject> c003 = resourceLoader->load<RenderObject>("c003");
+        const sp<RigidBody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, 0, c003->position(), c003->size(), c003->transform());
         const sp<CollisionCallbackImpl> collisionCallbackImpl001 = sp<CollisionCallbackImpl>::make(c001);
-        rigidBody->setCollisionCallback(collisionCallbackImpl001);
-        while(duration->val() < 2.0f) {
+        const sp<CollisionCallbackImpl> collisionCallbackImpl003 = sp<CollisionCallbackImpl>::make(c003);
+        rigidBody001->setCollisionCallback(collisionCallbackImpl001);
+        rigidBody003->setCollisionCallback(collisionCallbackImpl003);
+        while(duration->val() < 3.0f) {
             applicationContext->renderController()->preUpdate();
-            rigidBody->xy();
+            rigidBody001->xy();
+            rigidBody003->xy();
             std::this_thread::sleep_for(std::chrono::milliseconds(16));
         }
         if(!collisionCallbackImpl001->successed())
             return 1;
+        if(!collisionCallbackImpl003->successed())
+            return 2;
         return 0;
     }
 };

@@ -11,8 +11,8 @@
 
 namespace ark {
 
-C2RigidBody::C2RigidBody(const sp<VV2>& position, const sp<Transform>& transform)
-    : _type(C2_AABB), _position(position), _transform(transform)
+C2RigidBody::C2RigidBody(const sp<VV2>& position, const sp<Transform>& transform, bool isStaticBody)
+    : _type(C2_AABB), _position(position), _transform(transform), _is_static_body(isStaticBody)
 {
     memset(&_shape, 0, sizeof(_shape));
 }
@@ -51,22 +51,28 @@ void C2RigidBody::makePoly(const c2Poly& poly)
     c2MakePoly(&_shape.poly);
 }
 
+void C2RigidBody::makeShape(C2_TYPE type, const C2Shape& shape)
+{
+    _type = type;
+    _shape = shape;
+}
+
 int C2RigidBody::collide(const C2RigidBody& other) const
 {
     C2Shape s1, s2;
     c2x x1, x2;
-    updateShape(s1, x1);
-    other.updateShape(s2, x2);
-    return c2Collided(&s1, &x1, _type, &s2, &x2, other._type);
+    const C2Shape& us1 = updateShape(s1, x1);
+    const C2Shape& us2 = other.updateShape(s2, x2);
+    return c2Collided(&us1, &x1, _type, &us2, &x2, other._type);
 }
 
 void C2RigidBody::collideManifold(const C2RigidBody& other, c2Manifold* m) const
 {
     C2Shape s1, s2;
     c2x x1, x2;
-    updateShape(s1, x1);
-    other.updateShape(s2, x2);
-    c2Collide(&s1, &x1, _type, &s2, &x2, other._type, m);
+    const C2Shape& us1 = updateShape(s1, x1);
+    const C2Shape& us2 = other.updateShape(s2, x2);
+    c2Collide(&us1, &x1, _type, &us2, &x2, other._type, m);
 }
 
 const C2Shape& C2RigidBody::shape() const
@@ -84,8 +90,19 @@ const sp<Transform>& C2RigidBody::transform() const
     return _transform;
 }
 
-void C2RigidBody::updateShape(C2Shape& shape, c2x& x) const
+bool C2RigidBody::isStaticBody() const
 {
+    return _is_static_body;
+}
+
+const C2Shape& C2RigidBody::updateShape(C2Shape& shape, c2x& x) const
+{
+    if(_is_static_body)
+    {
+        x = c2xIdentity();
+        return _shape;
+    }
+
     const Transform::Snapshot ts = _transform ? _transform->snapshot() : Transform::Snapshot();
     const V2 pos = _position->val();
     switch(_type)
@@ -112,6 +129,7 @@ void C2RigidBody::updateShape(C2Shape& shape, c2x& x) const
         x.r.s = Math::sin(ts.rotation);
         break;
     }
+    return shape;
 }
 
 }

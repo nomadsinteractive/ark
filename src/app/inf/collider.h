@@ -13,9 +13,9 @@ class ARK_API Collider {
 public:
 //  [[script::bindings::enumeration]]
     enum BodyShape {
-        BODY_SHAPE_AABB,
-        BODY_SHAPE_BALL,
-        BODY_SHAPE_BOX
+        BODY_SHAPE_AABB = -1,
+        BODY_SHAPE_BALL = -2,
+        BODY_SHAPE_BOX = -3
     };
 
 //  [[script::bindings::enumeration]]

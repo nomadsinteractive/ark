@@ -55,9 +55,9 @@ class Renderer:
 
 class Collider:
 
-    BODY_SHAPE_AABB = 0
-    BODY_SHAPE_BALL = 1
-    BODY_SHAPE_BOX = 2
+    BODY_SHAPE_AABB = -1
+    BODY_SHAPE_BALL = -2
+    BODY_SHAPE_BOX = -3
 
     BODY_TYPE_DYNAMIC = 0
     BODY_TYPE_KINEMATIC = 1

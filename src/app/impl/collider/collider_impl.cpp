@@ -48,19 +48,19 @@ private:
 
 }
 
-ColliderImpl::ColliderImpl(const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _stub(sp<Stub>::make()), _resource_loader_context(resourceLoaderContext)
+ColliderImpl::ColliderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _stub(sp<Stub>::make(manifest)), _resource_loader_context(resourceLoaderContext)
 {
 }
 
 ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext)
+    : _manifest(manifest), _resource_loader_context(resourceLoaderContext)
 {
 }
 
 sp<Collider> ColliderImpl::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<ColliderImpl>::make(_resource_loader_context);
+    return sp<ColliderImpl>::make(_manifest, _resource_loader_context);
 }
 
 sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform)
@@ -80,9 +80,10 @@ sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, c
     return rigidBody;
 }
 
-ColliderImpl::Stub::Stub()
+ColliderImpl::Stub::Stub(const document& manifest)
     : _rigid_body_base_id(0), _axises(sp<Axises>::make())
 {
+    loadShapes(manifest);
 }
 
 void ColliderImpl::Stub::remove(const RigidBodyImpl& rigidBody)
@@ -99,8 +100,25 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
     const sp<RigidBodyShadow> rigidBodyShadow = _object_pool.obtain<RigidBodyShadow>(++_rigid_body_base_id, type, position->val(), size, transform);
     const sp<RigidBodyImpl> rigidBody = _object_pool.obtain<RigidBodyImpl>(position, self, rigidBodyShadow);
 
-    if(shape == Collider::BODY_SHAPE_AABB)
+    DWARN(_c2_shapes.find(BODY_SHAPE_AABB) == _c2_shapes.end()
+          && _c2_shapes.find(BODY_SHAPE_BALL) == _c2_shapes.end()
+          && _c2_shapes.find(BODY_SHAPE_BOX) == _c2_shapes.end(), "Default shape being overrided");
+    switch(shape)
+    {
+    case BODY_SHAPE_AABB:
         rigidBodyShadow->makeAABB();
+        break;
+    case BODY_SHAPE_BALL:
+        rigidBodyShadow->makeBall();
+        break;
+    case BODY_SHAPE_BOX:
+        rigidBodyShadow->makeBox();
+        break;
+    default:
+        const auto iter = _c2_shapes.find(shape);
+        DCHECK(iter != _c2_shapes.end(), "Unknow shape: %d", shape);
+        rigidBodyShadow->makeShape(iter->second.first, iter->second.second);
+    }
 
     _rigid_bodies[rigidBody->id()] = rigidBodyShadow;
     _axises->insert(rigidBody);
@@ -118,6 +136,43 @@ const sp<ColliderImpl::RigidBodyShadow> ColliderImpl::Stub::findRigidBody(uint32
 {
     const auto iter = _rigid_bodies.find(id);
     return iter != _rigid_bodies.end() ? iter->second : sp<RigidBodyShadow>();
+}
+
+void ColliderImpl::Stub::loadShapes(const document& manifest)
+{
+    for(const document& i : manifest->children())
+    {
+        int32_t shapeId = Documents::ensureAttribute<int32_t>(i, "shape-id");
+        const String& shapeType = Documents::ensureAttribute(i, "shape-type");
+        C2_TYPE type;
+        C2Shape shape;
+        if(shapeType == "capsule")
+        {
+            type = C2_CAPSULE;
+            shape.capsule.a.x = Documents::ensureAttribute<float>(i, "ax");
+            shape.capsule.a.y = Documents::ensureAttribute<float>(i, "ay");
+            shape.capsule.b.x = Documents::ensureAttribute<float>(i, "bx");
+            shape.capsule.b.y = Documents::ensureAttribute<float>(i, "by");
+            shape.capsule.r = Documents::ensureAttribute<float>(i, "r");
+        }
+        else if(shapeType == "poly")
+        {
+            int32_t c = 0;
+            type = C2_POLY;
+            for(const document& j : i->children())
+            {
+                DCHECK(c < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
+                shape.poly.verts[c].x = Documents::ensureAttribute<float>(j, "x");
+                shape.poly.verts[c].y = Documents::ensureAttribute<float>(j, "y");
+                c++;
+            }
+            shape.poly.count = c;
+            c2MakePoly(&shape.poly);
+        }
+        else
+            DFATAL("Unknow shape type: %s", shapeType.c_str());
+        _c2_shapes[shapeId] = std::make_pair(type, shape);
+    }
 }
 
 ColliderImpl::RigidBodyImpl::RigidBodyImpl(const sp<VV>& position, const sp<Stub>& collider, const sp<RigidBodyShadow>& shadow)
@@ -159,17 +214,40 @@ void ColliderImpl::RigidBodyImpl::setPosition(const sp<VV>& position)
 }
 
 ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const V& pos, const sp<Size>& size, const sp<Transform>& transform)
-    : RigidBody(id, type, sp<VV::Impl>::make(pos), size, nullptr), _position(static_cast<sp<VV::Impl>>(position())), _c2_rigid_body(_position, transform), _disposed(false)
+    : RigidBody(id, type, sp<VV::Impl>::make(pos), size, nullptr), _position(static_cast<sp<VV::Impl>>(position())),
+      _c2_rigid_body(_position, transform, type == Collider::BODY_TYPE_STATIC), _disposed(false)
 {
     setPosition(pos);
 }
 
 void ColliderImpl::RigidBodyShadow::makeAABB()
 {
-    DCHECK(_size, "AABB must have size defined");
-    Rect aabb(0, 0, _size->width(), _size->height());
-    aabb.setCenter(0, 0);
-    _c2_rigid_body.makeAABB(aabb);
+    _c2_rigid_body.makeAABB(makeRigidBodyAABB());
+}
+
+void ColliderImpl::RigidBodyShadow::makeBall()
+{
+    const Rect aabb = makeRigidBodyAABB();
+    float radius = std::min(aabb.width(), aabb.height());
+    DCHECK(radius >= 0, "Radius must greater than 0");
+    _c2_rigid_body.makeCircle(V2((aabb.left() + aabb.right()) / 2.0f, (aabb.top() + aabb.bottom()) / 2.0f), radius);
+}
+
+void ColliderImpl::RigidBodyShadow::makeBox()
+{
+    const Rect aabb = makeRigidBodyAABB();
+    c2Poly box;
+    box.count = 4;
+    box.verts[0] = {aabb.left(), aabb.top()};
+    box.verts[1] = {aabb.left(), aabb.bottom()};
+    box.verts[2] = {aabb.right(), aabb.bottom()};
+    box.verts[3] = {aabb.right(), aabb.top()};
+    _c2_rigid_body.makePoly(box);
+}
+
+void ColliderImpl::RigidBodyShadow::makeShape(C2_TYPE type, const C2Shape& shape)
+{
+    _c2_rigid_body.makeShape(type, shape);
 }
 
 void ColliderImpl::RigidBodyShadow::dispose()
@@ -247,6 +325,20 @@ void ColliderImpl::RigidBodyShadow::endContact(const sp<RigidBody>& rigidBody)
 {
     if(_collision_callback)
         _collision_callback->onEndContact(rigidBody);
+}
+
+Rect ColliderImpl::RigidBodyShadow::makeRigidBodyAABB() const
+{
+    DCHECK(_size, "RigidBody must have size defined");
+    Rect aabb(0, 0, _size->width(), _size->height());
+    if(_c2_rigid_body.isStaticBody())
+    {
+        const V2 pos = _position->val();
+        aabb.setCenter(pos.x(), pos.y());
+    }
+    else
+        aabb.setCenter(0, 0);
+    return aabb;
 }
 
 void ColliderImpl::Axises::insert(const RigidBody& rigidBody)

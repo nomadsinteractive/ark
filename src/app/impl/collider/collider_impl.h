@@ -21,7 +21,7 @@ namespace ark {
 
 class ColliderImpl : public Collider {
 public:
-    ColliderImpl(const sp<ResourceLoaderContext>& resourceLoaderContext);
+    ColliderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform) override;
 
@@ -33,6 +33,7 @@ public:
         virtual sp<Collider> build(const sp<Scope>& args) override;
 
     private:
+        document _manifest;
         sp<ResourceLoaderContext> _resource_loader_context;
 
     };
@@ -56,7 +57,7 @@ public:
     };
 
     struct Stub {
-        Stub();
+        Stub(const document& manifest);
 
         void remove(const RigidBodyImpl& rigidBody);
 
@@ -65,10 +66,15 @@ public:
         const sp<RigidBodyShadow> findRigidBody(uint32_t id) const;
 
         std::unordered_map<uint32_t, sp<RigidBodyShadow>> _rigid_bodies;
+        std::unordered_map<int32_t, std::pair<C2_TYPE, C2Shape>> _c2_shapes;
         uint32_t _rigid_body_base_id;
         sp<Axises> _axises;
 
         ObjectPool _object_pool;
+
+    private:
+        void loadShapes(const document& manifest);
+
     };
 
     class RigidBodyShadow : public RigidBody {
@@ -80,6 +86,9 @@ public:
         virtual void setCollisionCallback(const sp<CollisionCallback>& collisionCallback) override;
 
         void makeAABB();
+        void makeBall();
+        void makeBox();
+        void makeShape(C2_TYPE type, const C2Shape& shape);
 
         void setPosition(const V& pos);
         bool disposed() const;
@@ -89,6 +98,8 @@ public:
     private:
         void beginContact(const sp<RigidBody>& rigidBody);
         void endContact(const sp<RigidBody>& rigidBody);
+
+        Rect makeRigidBodyAABB() const;
 
     private:
         sp<VV::Impl> _position;
