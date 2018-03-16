@@ -34,7 +34,8 @@ public:
             _aabb.setCenter(position.x(), position.y());
             _rigid_body_shadow->setPosition(position);
             _rigid_body_shadow->collision(_collider, _aabb);
-            _collider->_axises->update(_rigid_body_shadow->id(), position, _aabb);
+            if(!_rigid_body_shadow->disposed())
+                _collider->_axises->update(_rigid_body_shadow->id(), position, _aabb);
         }
         return position;
     }
