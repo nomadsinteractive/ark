@@ -11,21 +11,13 @@ namespace ark {
 template<typename T, typename IMPL = T> class SafePtr {
 public:
     SafePtr()
-        : _inst(Null::ptr<T>()), _allocated(false) {
+        : _inst(Null::ptr<T>()), _allocated(std::is_same<T, IMPL>::value) {
     }
     SafePtr(const sp<T>& inst)
-        : _inst(Null::toSafe<T>(inst)), _allocated(inst) {
+        : _inst(Null::toSafe<T>(inst)), _allocated(inst || std::is_same<T, IMPL>::value) {
     }
-    SafePtr(const SafePtr& other)
-        : _inst(other._inst), _allocated(other._allocated) {
-    }
-    SafePtr(SafePtr&& other)
-        : _inst(std::move(other._inst)), _allocated(other._allocated) {
-    }
-
-    explicit operator bool() const {
-        return _allocated;
-    }
+    SafePtr(const SafePtr& other) = default;
+    SafePtr(SafePtr&& other) = default;
 
     T* operator ->() const {
         return _inst.get();
@@ -33,7 +25,7 @@ public:
 
     void assign(const sp<T>& inst) {
         _inst = Null::toSafe<T>(inst);
-        _allocated = static_cast<bool>(inst);
+        _allocated = static_cast<bool>(inst) || std::is_same<T, IMPL>::value;
     }
 
     const sp<T>& ensure() const {

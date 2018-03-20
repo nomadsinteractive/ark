@@ -3,8 +3,8 @@
 #include "core/base/bean_factory.h"
 
 #include "graphics/base/layer_context.h"
-#include "graphics/inf/layer.h"
 #include "graphics/base/render_object.h"
+#include "graphics/inf/layer.h"
 
 namespace ark {
 

@@ -27,6 +27,7 @@ private:
         void updateLayout();
 
         void doPlace(float clientHeight, const sp<Layout>& layout);
+        void doWrapContentPlace(const sp<Layout>& layout, Rect& contentRect) const;
         void doLayoutEnd(const Rect& p);
 
         void render(RenderRequest& renderRequest, float x, float y);
@@ -73,6 +74,7 @@ public:
 
 private:
     void doLayout();
+    void doWrapContentLayout();
     bool isLayoutNeeded();
 
 private:
@@ -82,7 +84,7 @@ private:
     ExpirableItemList<Renderer> _renderers;
     List<sp<Placement>> _placments;
 
-//    bool _layout_requested;
+    friend class Placement;
 };
 
 }

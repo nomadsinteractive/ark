@@ -1,7 +1,8 @@
 #include "renderer/base/resource_loader_context.h"
 
-#include "core/inf/variable.h"
 #include "core/base/memory_pool.h"
+#include "core/inf/variable.h"
+#include "core/util/log.h"
 
 #include "renderer/base/gl_buffer.h"
 #include "renderer/base/gl_texture_loader.h"

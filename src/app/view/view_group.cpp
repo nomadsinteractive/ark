@@ -56,6 +56,23 @@ void ViewGroup::Placement::doPlace(float clientHeight, const sp<Layout>& layout)
     }
 }
 
+void ViewGroup::Placement::doWrapContentPlace(const sp<Layout>& layout, Rect& contentRect) const
+{
+    if(_view)
+    {
+        const sp<LayoutParam>& layoutParam = _view->layoutParam();
+        NOT_NULL(layoutParam);
+        if(layoutParam->display() == LayoutParam::DISPLAY_BLOCK)
+        {
+            const Rect rect = layout->place(layoutParam);
+            contentRect.setLeft(std::min(contentRect.left(), rect.left()));
+            contentRect.setTop(std::min(contentRect.top(), rect.top()));
+            contentRect.setRight(std::max(contentRect.right(), rect.right()));
+            contentRect.setBottom(std::max(contentRect.bottom(), rect.bottom()));
+        }
+    }
+}
+
 void ViewGroup::Placement::doLayoutEnd(const Rect& p)
 {
     if(_view)
@@ -104,6 +121,8 @@ ViewGroup::ViewGroup(const Frame& background, const sp<Layout>& layout, const sp
     : View(!layoutParam && background ? sp<LayoutParam>::make(background.size()) : layoutParam), _background(background.renderer()), _layout(layout)
 {
     DCHECK(!_layout || _layout_param, "Null LayoutParam. This would happen if your ViewGroup has neither background or size defined.");
+    if(layoutParam && background)
+        background.size()->adopt(layoutParam->size());
 }
 
 ViewGroup::~ViewGroup()
@@ -146,6 +165,9 @@ void ViewGroup::doLayout()
 {
     if(_layout)
     {
+        if(_layout_param->isWrapContent())
+            doWrapContentLayout();
+
         _layout->begin(_layout_param);
 
         for(const sp<Placement>& i: _placments)
@@ -158,6 +180,19 @@ void ViewGroup::doLayout()
     else
         for(const sp<Placement>& i : _placments)
             i->updateLayout();
+}
+
+void ViewGroup::doWrapContentLayout()
+{
+    LayoutParam lp(_layout_param);
+    Rect clientRect;
+    _layout->begin(lp);
+    for(const sp<Placement>& i: _placments)
+        i->doWrapContentPlace(_layout, clientRect);
+
+    _layout->end();
+    _layout_param->setContentWidth(clientRect.width());
+    _layout_param->setContentHeight(clientRect.height());
 }
 
 bool ViewGroup::isLayoutNeeded()

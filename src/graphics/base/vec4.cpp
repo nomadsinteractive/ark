@@ -251,10 +251,9 @@ sp<Vec4> Vec4::BUILDER::build(const sp<Scope>& args)
     return sp<Vec4>::make(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
 }
 
-template<> ARK_API const sp<Vec4>& Null::ptr()
+template<> ARK_API const sp<Vec4> Null::ptr()
 {
-    static sp<Vec4> instance = sp<Vec4>::make();
-    return instance;
+    return Ark::instance().obtain<Vec4>();
 }
 
 Vec4::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& str)

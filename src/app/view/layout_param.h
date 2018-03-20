@@ -21,12 +21,16 @@ public:
 
 public:
     LayoutParam(const sp<Size>& size, Display display = DISPLAY_BLOCK);
+    LayoutParam(const LayoutParam& other) = default;
 
     float calcLayoutWidth(float available);
     float calcLayoutHeight(float available);
 
     float contentWidth() const;
+    void setContentWidth(float contentWidth);
+
     float contentHeight() const;
+    void setContentHeight(float contentHeight);
 
     const sp<Size>& size() const;
     const void setSize(const sp<Size>& size);
@@ -38,6 +42,11 @@ public:
 
     const Rect& margins() const;
     Rect& margins();
+
+    bool isWrapContent() const;
+
+    static bool isMatchParent(float unit);
+    static bool isWrapContent(float unit);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<LayoutParam> {
@@ -53,9 +62,6 @@ public:
     };
 
 private:
-    bool isMatchParent(float unit) const;
-    bool isWrapContent(float unit) const;
-
     static const sp<Numeric> getUnit(BeanFactory& beanFactory, const String& value, const sp<Scope>& args);
 
 private:
@@ -63,10 +69,6 @@ private:
 
     Display _display;
     Rect _margins;
-
-    float _content_width;
-    float _content_height;
-
 };
 
 }

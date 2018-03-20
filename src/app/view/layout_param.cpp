@@ -18,40 +18,48 @@ template<> ARK_API LayoutParam::Display Conversions::to<String, LayoutParam::Dis
 }
 
 LayoutParam::LayoutParam(const sp<Size>& size, LayoutParam::Display display)
-    : _size(Null::toSafe(size)), _display(display), _content_width(_size->width()), _content_height(_size->height())
+    : _size(Null::toSafe(size)), _display(display)
 {
 }
 
 float LayoutParam::calcLayoutWidth(float available)
 {
-    _content_width = _size->width();
-    if(isMatchParent(_content_width))
+    if(isMatchParent(_size->width()))
     {
-        _content_width = available - _margins.left() - _margins.right();
+        _size->setWidth(available - _margins.left() - _margins.right());
         return available;
     }
-    return _content_width + _margins.left() + _margins.right();
+    return _size->width() + _margins.left() + _margins.right();
 }
 
 float LayoutParam::calcLayoutHeight(float available)
 {
-    _content_height = _size->height();
-    if(isMatchParent(_content_height))
+    if(isMatchParent(_size->height()))
     {
-        _content_height = available - _margins.top() - _margins.bottom();
+        _size->setHeight(available - _margins.top() - _margins.bottom());
         return available;
     }
-    return _content_height + _margins.top() + _margins.bottom();
+    return _size->height() + _margins.top() + _margins.bottom();
 }
 
 float LayoutParam::contentWidth() const
 {
-    return _content_width;
+    return _size->width();
+}
+
+void LayoutParam::setContentWidth(float contentWidth)
+{
+    _size->setWidth(contentWidth);
 }
 
 float LayoutParam::contentHeight() const
 {
-    return _content_height;
+    return _size->height();
+}
+
+void LayoutParam::setContentHeight(float contentHeight)
+{
+    _size->setHeight(contentHeight);
 }
 
 const sp<Size>& LayoutParam::size() const
@@ -84,14 +92,19 @@ Rect& LayoutParam::margins()
     return _margins;
 }
 
-bool LayoutParam::isMatchParent(float unit) const
+bool LayoutParam::isWrapContent() const
+{
+    return _size->width() == -2.0f || _size->height() == -2.0f;
+}
+
+bool LayoutParam::isMatchParent(float unit)
 {
     return unit == -1.0f;
 }
 
-bool LayoutParam::isWrapContent(float unit) const
+bool LayoutParam::isWrapContent(float unit)
 {
-    return unit == 0;
+    return unit == -2.0f;
 }
 
 sp<Size> LayoutParam::parseSize(BeanFactory& beanFactory, const String& value, const sp<Scope>& args)
@@ -108,10 +121,11 @@ sp<Size> LayoutParam::parseSize(BeanFactory& beanFactory, const String& value, c
 const sp<Numeric> LayoutParam::getUnit(BeanFactory& beanFactory, const String& value, const sp<Scope>& args)
 {
     const static sp<Numeric> MATCH_PARENT = sp<Numeric::Impl>::make(-1.0f);
+    const static sp<Numeric> WRAP_CONTENT = sp<Numeric::Impl>::make(-2.0f);
     if(value == "match_parent")
-        return MATCH_PARENT;
+        return sp<Numeric::Impl>::make(-1.0f);
     if(value == "wrap_content")
-        return Null::ptr<Numeric>();
+        return sp<Numeric::Impl>::make(-2.0f);
     return beanFactory.ensure<Numeric>(value, args);
 }
 

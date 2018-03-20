@@ -1,5 +1,7 @@
 #include "portaudio/impl/audio_player/audio_player_portaudio.h"
 
+#include <algorithm>
+
 #include <portaudio.h>
 #include <pa_ringbuffer.h>
 #include <pa_util.h>
@@ -9,6 +11,7 @@
 #include "core/inf/runnable.h"
 #include "core/inf/readable.h"
 #include "core/base/future.h"
+#include "core/util/log.h"
 
 #include "renderer/base/resource_loader_context.h"
 

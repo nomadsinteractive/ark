@@ -1,5 +1,7 @@
 #include "graphics/base/size.h"
 
+#include "core/ark.h"
+
 #include "core/base/variable_wrapper.h"
 #include "core/util/bean_utils.h"
 
@@ -63,10 +65,15 @@ void Size::assign(const Size& other)
     _height = other._height;
 }
 
-template<> ARK_API const sp<Size>& Null::ptr()
+void Size::adopt(const Size& other)
 {
-    static sp<Size> instance = sp<Size>::make();
-    return instance;
+    _width->set(other._width);
+    _height->set(other._height);
+}
+
+template<> ARK_API const sp<Size> Null::ptr()
+{
+    return Ark::instance().obtain<Size>();
 }
 
 Size::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)

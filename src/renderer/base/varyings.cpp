@@ -1,5 +1,6 @@
 #include "renderer/base/varyings.h"
 
+#include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/base/memory_pool.h"
 #include "core/inf/array.h"
@@ -73,10 +74,9 @@ sp<Varyings> Varyings::BUILDER::build(const sp<Scope>& args)
     return varyings;
 }
 
-template<> ARK_API const sp<Varyings>& Null::ptr()
+template<> ARK_API const sp<Varyings> Null::ptr()
 {
-    static const sp<Varyings> NULL_VARYINGS = sp<Varyings>::make();
-    return NULL_VARYINGS;
+    return Ark::instance().obtain<Varyings>();
 }
 
 Varyings::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)

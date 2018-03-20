@@ -1,5 +1,6 @@
 #include "graphics/base/transform.h"
 
+#include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
 #include "core/types/null.h"
@@ -151,10 +152,9 @@ sp<Transform> Transform::DICTIONARY::build(const sp<Scope>& args)
     return _impl.build(args);
 }
 
-template<> ARK_API const sp<Transform>& Null::ptr()
+template<> ARK_API const sp<Transform> Null::ptr()
 {
-    static const sp<Transform> inst = sp<Transform>::make();
-    return inst;
+    return Ark::instance().obtain<Transform>();
 }
 
 }

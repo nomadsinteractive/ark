@@ -1,5 +1,6 @@
 #include "app/base/application_resource.h"
 
+#include "core/base/string.h"
 #include "core/inf/dictionary.h"
 
 #include "graphics/impl/resource/image_resource.h"

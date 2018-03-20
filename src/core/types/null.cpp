@@ -1,26 +1,24 @@
 #include "core/types/null.h"
 
+#include "core/ark.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-template<> ARK_API const sp<Numeric>& Null::ptr()
+template<> ARK_API const sp<Numeric> Null::ptr()
 {
-    static const sp<Numeric> inst = sp<Numeric::Const>::make(0.0f);
-    return inst;
+    return Ark::instance().obtain<Numeric::Const>(0.0f);
 }
 
-template<> ARK_API const sp<Integer>& Null::ptr()
+template<> ARK_API const sp<Integer> Null::ptr()
 {
-    static const sp<Integer> inst = sp<Integer::Const>::make(0);
-    return inst;
+    return Ark::instance().obtain<Integer::Const>(0);
 }
 
-template<> ARK_API const sp<Boolean>& Null::ptr()
+template<> ARK_API const sp<Boolean> Null::ptr()
 {
-    static const sp<Boolean> inst = sp<Boolean::Const>::make(false);
-    return inst;
+    return Ark::instance().obtain<Boolean::Const>(false);
 }
 
 }

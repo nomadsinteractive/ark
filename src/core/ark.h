@@ -5,6 +5,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/object_pool.h"
 #include "core/base/string.h"
 #include "core/collection/by_type.h"
 #include "core/types/shared_ptr.h"
@@ -53,6 +54,10 @@ public:
         _interfaces.put<T>(item);
     }
 
+    template<typename U, typename... Args> sp<U> obtain(Args&&... args) {
+        return _object_pool.obtain<U, Args...>(std::forward<Args>(args)...);
+    }
+
     sp<BeanFactory> createBeanFactory(const String& src) const;
     sp<BeanFactory> createBeanFactory(const sp<Dictionary<document>>& dictionary) const;
 
@@ -87,8 +92,9 @@ private:
     sp<ApplicationContext> _application_context;
     ByType _interfaces;
 
-
     sp<ArkAsset> _asset;
+
+    ObjectPool _object_pool;
 };
 
 }

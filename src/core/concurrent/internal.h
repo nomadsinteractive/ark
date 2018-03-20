@@ -2,10 +2,11 @@
 #define ARK_CORE_CONCURRENT_INTERNAL_H_
 
 #include <atomic>
+#include <chrono>
 #include <memory>
 #include <stdlib.h>
 
-#include "platform/platform.h"
+#include "core/base/api.h"
 
 namespace ark {
 namespace internal {

@@ -1,5 +1,6 @@
 #include "graphics/base/v4.h"
 
+#include "core/ark.h"
 #include "core/util/conversions.h"
 #include "core/util/strings.h"
 #include "core/types/null.h"
@@ -53,10 +54,9 @@ float V4::dot(const V4& other) const
     return _x * other._x + _y * other._y + _z * other._z + _w * other._w;
 }
 
-template<> ARK_API const sp<VV4>& Null::ptr()
+template<> ARK_API const sp<VV4> Null::ptr()
 {
-    static sp<VV4> instance = sp<VV4::Const>::make(V4());
-    return instance;
+    return Ark::instance().obtain<VV4::Const>(V4());
 }
 
 template<> ARK_API V4 Conversions::to<String, V4>(const String& s)

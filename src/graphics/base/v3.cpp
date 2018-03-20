@@ -1,5 +1,6 @@
 #include "graphics/base/v3.h"
 
+#include "core/ark.h"
 #include "core/inf/variable.h"
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
@@ -54,10 +55,9 @@ V3 V3::cross(const V3& other) const
     return V3(_y * other._z - other._y * _z, _z * other._x - other._z * _x, _x * other._y - other._y * _x);
 }
 
-template<> ARK_API const sp<VV3>& Null::ptr()
+template<> ARK_API const sp<VV3> Null::ptr()
 {
-    static sp<VV3> instance = sp<VV3::Const>::make(V3());
-    return instance;
+    return Ark::instance().obtain<VV3::Const>(V3());
 }
 
 }

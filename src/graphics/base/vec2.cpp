@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/base/object_pool.h"
 #include "core/base/variable_wrapper.h"
@@ -176,10 +177,9 @@ sp<Vec2> Vec2::BUILDER::build(const sp<Scope>& args)
     return sp<Vec2>::make(_x->build(args), _y->build(args));
 }
 
-template<> ARK_API const sp<Vec2>& Null::ptr()
+template<> ARK_API const sp<Vec2> Null::ptr()
 {
-    static sp<Vec2> instance = sp<Vec2>::make();
-    return instance;
+    return Ark::instance().obtain<Vec2>();
 }
 
 Vec2::DICTIONARY::DICTIONARY(BeanFactory& factory, const String str)

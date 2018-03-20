@@ -1,5 +1,6 @@
 #include "graphics/base/v2.h"
 
+#include "core/ark.h"
 #include "core/inf/variable.h"
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
@@ -75,10 +76,9 @@ float V2::dot(const V2& other) const
     return _x * other._x + _y * other._y;
 }
 
-template<> ARK_API const sp<VV2>& Null::ptr()
+template<> ARK_API const sp<VV2> Null::ptr()
 {
-    static sp<VV2> instance = sp<VV2::Const>::make(V2());
-    return instance;
+    return Ark::instance().obtain<VV2::Const>(V2());
 }
 
 
