@@ -4,6 +4,7 @@
 #include <tinyc2.h>
 
 #include "core/util/math.h"
+#include "core/util/log.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/base/transform.h"

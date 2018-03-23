@@ -108,7 +108,7 @@ sp<World> World::BUILDER_IMPL1::build(const sp<Scope>& args)
     const sp<Boolean> expired = _expired->build(args);
     if(expired)
         world.absorb(sp<Expired>::make(expired));
-    _resource_loader_context->renderController()->addPreUpdateRequest(world, expired ? expired : sp<BooleanByWeakRef<World>>::make(world, 1));
+    _resource_loader_context->renderController()->addPreUpdateRequest(world, expired ? expired : sp<Boolean>::adopt(new BooleanByWeakRef<World>(world, 1)));
     return world;
 }
 

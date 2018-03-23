@@ -184,7 +184,7 @@ void ViewGroup::doLayout()
 
 void ViewGroup::doWrapContentLayout()
 {
-    LayoutParam lp(_layout_param);
+    LayoutParam lp(*_layout_param);
     Rect clientRect;
     _layout->begin(lp);
     for(const sp<Placement>& i: _placments)

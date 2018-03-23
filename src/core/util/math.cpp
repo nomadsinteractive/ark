@@ -31,22 +31,22 @@ uint32_t Math::log2(uint32_t value)
 
 float Math::sin(float x)
 {
-    return sinf_neon(x);
+    return sinf_c(x);
 }
 
 float Math::cos(float x)
 {
-    return cosf_neon(x);
+    return cosf_c(x);
 }
 
 float Math::acos(float x)
 {
-    return acosf_neon(x);
+    return acosf_c(x);
 }
 
 float Math::atan2(float y, float x)
 {
-    return atan2f_neon(y, x);
+    return atan2f_c(y, x);
 }
 
 int32_t Math::floor(float x)
@@ -97,7 +97,7 @@ float Math::hypot(float dx, float dy)
 float Math::sqrt(float x)
 {
     DCHECK(x >= 0, "Illegal argument, negative value(%.2f)", x);
-    return sqrtf_neon(x);
+    return sqrtf_c(x);
 }
 
 V3 Math::quadratic(float a, float b, float c)
