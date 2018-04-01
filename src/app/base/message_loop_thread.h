@@ -14,7 +14,7 @@ namespace ark {
 
 class MessageLoopThread : public MessageLoop {
 public:
-    MessageLoopThread(const sp<MessageLoop> messageLoop);
+    MessageLoopThread(const sp<MessageLoop>& messageLoop);
     ~MessageLoopThread();
 
     virtual void post(const sp<Runnable>& task, float delay) override;

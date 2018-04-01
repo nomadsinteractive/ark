@@ -6,7 +6,7 @@
 
 namespace ark {
 
-MessageLoopThread::MessageLoopThread(const sp<MessageLoop> messageLoop)
+MessageLoopThread::MessageLoopThread(const sp<MessageLoop>& messageLoop)
     : _message_loop(messageLoop), _runnable_impl(sp<RunnableImpl>::make(_thread, messageLoop))
 {
     _thread.setEntry(_runnable_impl);

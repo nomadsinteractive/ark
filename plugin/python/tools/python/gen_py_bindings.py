@@ -405,7 +405,7 @@ ARK_PY_ARGUMENTS = (
     (r'(int32_t|int|int8_t)', GenArgumentMeta('int32_t', 'int32_t', 'i')),
     (r'float', GenArgumentMeta('float', 'float', 'f')),
     (r'bool', GenArgumentMeta('int32_t', 'int32_t', 'p')),
-    (r'[^:]+::.+', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
+    (r'[^:]+::.+', GenArgumentMeta('int32_t', 'int32_t', 'i')),
     (r'TypeId', GenArgumentMeta('PyObject*', 'TypeId', 'O')),
 )
 
