@@ -72,7 +72,7 @@ ParticleEmitter::Particale::Particale(const sp<Stub>& stub, const document& mani
     _position = factory.getBuilder<Vec>(manifest, Constants::Attributes::POSITION, false);
     _size = factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE, false);
     _transform = factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM);
-    _filter = factory.getBuilder<Varyings>(manifest, Constants::Attributes::FILTER);
+    _filter = factory.getBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS);
     _expired = factory.ensureBuilder<Boolean>(manifest, Constants::Attributes::EXPIRED);
 }
 

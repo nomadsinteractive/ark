@@ -119,12 +119,12 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
     return arena;
 }
 
-Arena::DECORATOR::DECORATOR(BeanFactory& factory, const sp<Builder<Arena>>& delegate, const String& value)
+Arena::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Arena>>& delegate, const String& value)
     : _delegate(delegate), _expired(factory.ensureBuilder<Expired>(value))
 {
 }
 
-sp<Arena> Arena::DECORATOR::build(const sp<Scope>& args)
+sp<Arena> Arena::STYLE::build(const sp<Scope>& args)
 {
     sp<Arena> bean = _delegate->build(args);
     return bean.absorb<Expired>(_expired->build(args));

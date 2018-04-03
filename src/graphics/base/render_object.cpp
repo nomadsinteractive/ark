@@ -142,7 +142,7 @@ RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
       _position(factory.getBuilder<Vec>(doc, Constants::Attributes::POSITION)),
       _size(factory.getBuilder<Size>(doc, Constants::Attributes::SIZE)),
       _transform(factory.getBuilder<Transform>(doc, Constants::Attributes::TRANSFORM)),
-      _varyings(factory.getBuilder<Varyings>(doc, Constants::Attributes::FILTER))
+      _varyings(factory.getBuilder<Varyings>(doc, Constants::Attributes::VARYINGS))
 {
 }
 

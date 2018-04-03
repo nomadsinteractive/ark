@@ -61,7 +61,7 @@ PyObject* ark_log(PyObject* /*self*/, PyObject* args)
         PyInstance formatted = PyInstance::steal(size > 1 ? PyUnicode_Format(pyContent, varargs) : PyObject_Str(pyContent));
         DCHECK(formatted, "Unsatisfied format: %s", PythonInterpreter::instance()->toString(pyContent).c_str());
         const String content = PythonInterpreter::instance()->toString(formatted);
-        Log::d("Python", content.c_str());
+        Log::log(Log::LOG_LEVEL_DEBUG, "Python", content.c_str());
     }
     Py_RETURN_NONE;
 }

@@ -27,7 +27,7 @@ static bool gQuit = false;
 
 namespace {
 
-class SDLCursor : public Object {
+class SDLCursor : public Object, public Implements<SDLCursor, Object> {
 public:
     SDLCursor(SDL_Cursor* cursor)
         : _cursor(cursor) {

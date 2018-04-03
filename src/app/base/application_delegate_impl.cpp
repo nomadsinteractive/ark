@@ -31,13 +31,14 @@ void ApplicationDelegateImpl::onCreate(ark::Application& application, const sp<a
     ApplicationDelegate::onCreate(application, surface);
 
     const sp<ApplicationContext>& applicationContext = application.context();
-    const sp<ResourceLoader> appResourceLoader = applicationContext->createResourceLoader("application.xml");
+    const sp<ResourceLoader> appResourceLoader = applicationContext->createResourceLoader(Documents::getAttribute(_application_manifest->manifest(), "resource-loader", "application.xml"));
     NOT_NULL(appResourceLoader);
     _script = appResourceLoader->load<Script>("script");
     NOT_NULL(_script);
 
     const sp<Scope> vars = sp<Scope>::make();
     vars->put<ApplicationContext>("_application_context", applicationContext);
+    vars->put<ApplicationController>("_application_controller", application.controller());
     vars->put<ResourceLoader>("_resource_loader", appResourceLoader);
     vars->put<SurfaceController>("_surface_controller", surface->controller());
     vars->put<Size>("_render_resolution", _application_manifest->renderResolution());

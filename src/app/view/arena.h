@@ -80,9 +80,9 @@ public:
     };
 
 //  [[plugin::style("expired")]]
-    class DECORATOR : public Builder<Arena> {
+    class STYLE : public Builder<Arena> {
     public:
-        DECORATOR(BeanFactory& factory, const sp<Builder<Arena>>& delegate, const String& value);
+        STYLE(BeanFactory& factory, const sp<Builder<Arena>>& delegate, const String& value);
 
         virtual sp<Arena> build(const sp<Scope>& args) override;
 
