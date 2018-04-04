@@ -54,6 +54,8 @@ public:
     sp<GLTexture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable);
     GLBuffer createGLBuffer(const sp<Variable<bytearray>>& variable, GLenum type, GLenum usage);
 
+    sp<GLSnippet> createCoreGLSnippet(const sp<GLShader>& shader, const GLBuffer& arrayBuffer) const;
+
     const sp<GLRecycler>& recycler() const;
 
     template<typename T, typename... Args> sp<GLResource> createGLResource(Args&&... args) {

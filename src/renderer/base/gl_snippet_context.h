@@ -1,6 +1,7 @@
 #ifndef ARK_RENDERER_BASE_GL_SNIPPET_CONTEXT_H_
 #define ARK_RENDERER_BASE_GL_SNIPPET_CONTEXT_H_
 
+#include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/color.h"
@@ -12,7 +13,7 @@
 
 namespace ark {
 
-class GLSnippetContext {
+class ARK_API GLSnippetContext {
 public:
     GLSnippetContext(const sp<GLTexture>& texture, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer& indexBuffer, GLenum mode);
     GLSnippetContext(const GLSnippetContext& other) = default;

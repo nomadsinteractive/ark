@@ -6,12 +6,15 @@
 #include "core/types/weak_ptr.h"
 #include "core/util/log.h"
 
-#include "graphics/impl/resource/png_resource.h"
-
 #include "renderer/base/gl_buffer.h"
+#include "renderer/base/gl_context.h"
 #include "renderer/base/gl_recycler.h"
+#include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_texture.h"
+#include "renderer/base/graphics_context.h"
 #include "renderer/impl/resource/gl_texture_resource.h"
+#include "renderer/impl/gl_snippet/gl_snippet_linked_chain.h"
+#include "renderer/inf/gl_snippet.h"
 
 #include "platform/gl/gl.h"
 
@@ -98,6 +101,103 @@ public:
 private:
     uint32_t _object_count;
 };
+
+class GLSnippetWrapper;
+
+class CoreGLSnippet : public GLSnippet {
+public:
+    CoreGLSnippet(GLSnippetWrapper& wrapper, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix);
+
+    virtual void preInitialize(GLShaderSource& source) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) override;
+    virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override;
+    virtual void postDraw(GraphicsContext& graphicsContext) override;
+
+private:
+    sp<GLSnippet> createGLSnippet(GraphicsContext& graphicsContext) const;
+
+private:
+    GLSnippetWrapper& _wrapper;
+    sp<GLSnippet> _delegate;
+
+    sp<GLShader> _shader;
+    GLBuffer _array_buffer;
+};
+
+class GLSnippetWrapper : public GLSnippet {
+public:
+    GLSnippetWrapper(const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix);
+
+    virtual void preInitialize(GLShaderSource& source) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) override;
+    virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override;
+    virtual void postDraw(GraphicsContext& graphicsContext) override;
+
+private:
+    sp<GLSnippet> _delegate;
+
+    friend class CoreGLSnippet;
+};
+
+CoreGLSnippet::CoreGLSnippet(GLSnippetWrapper& wrapper, const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix)
+    : _wrapper(wrapper), _delegate(appendix), _shader(shader), _array_buffer(arrayBuffer)
+{
+}
+
+void CoreGLSnippet::preInitialize(GLShaderSource& source)
+{
+    _wrapper.preInitialize(source);
+}
+
+void CoreGLSnippet::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context)
+{
+    const sp<GLSnippet> delegate = _wrapper._delegate;
+    _wrapper._delegate = createGLSnippet(graphicsContext);
+    _wrapper.preCompile(graphicsContext, context);
+}
+
+void CoreGLSnippet::preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context)
+{
+    const sp<GLSnippet> delegate = _wrapper._delegate;
+    _wrapper._delegate = createGLSnippet(graphicsContext);
+    _wrapper.preDraw(graphicsContext, shader, context);
+}
+
+void CoreGLSnippet::postDraw(GraphicsContext& /*graphicsContext*/)
+{
+    DFATAL("You're not supposed to be here");
+}
+
+sp<GLSnippet> CoreGLSnippet::createGLSnippet(GraphicsContext& graphicsContext) const
+{
+    const sp<GLSnippet> coreGLSnippet = graphicsContext.glContext()->createCoreGLSnippet(graphicsContext.glResourceManager(), _shader, _array_buffer);
+    return _delegate ? sp<GLSnippet>::adopt(new GLSnippetLinkedChain(coreGLSnippet, _delegate)) : coreGLSnippet;
+}
+
+GLSnippetWrapper::GLSnippetWrapper(const sp<GLShader>& shader, const GLBuffer& arrayBuffer, const sp<GLSnippet>& appendix)
+    : _delegate(sp<CoreGLSnippet>::make(*this, shader, arrayBuffer, appendix))
+{
+}
+
+void GLSnippetWrapper::preInitialize(GLShaderSource& source)
+{
+    _delegate->preInitialize(source);
+}
+
+void GLSnippetWrapper::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context)
+{
+    _delegate->preCompile(graphicsContext, context);
+}
+
+void GLSnippetWrapper::preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context)
+{
+    _delegate->preDraw(graphicsContext, shader, context);
+}
+
+void GLSnippetWrapper::postDraw(GraphicsContext& graphicsContext)
+{
+    _delegate->postDraw(graphicsContext);
+}
 
 }
 
@@ -187,6 +287,11 @@ sp<GLTexture> GLResourceManager::createGLTexture(uint32_t width, uint32_t height
 GLBuffer GLResourceManager::createGLBuffer(const sp<Variable<bytearray>>& variable, GLenum type, GLenum usage)
 {
     return GLBuffer(_recycler, variable, type, usage);
+}
+
+sp<GLSnippet> GLResourceManager::createCoreGLSnippet(const sp<GLShader>& shader, const GLBuffer& arrayBuffer) const
+{
+    return sp<GLSnippetWrapper>::make(shader, arrayBuffer, shader->snippet());
 }
 
 const sp<GLRecycler>& GLResourceManager::recycler() const

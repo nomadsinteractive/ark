@@ -217,9 +217,6 @@ endif()
 
 list(APPEND LOCAL_EXPORT_TARGETS ${RUNTIME_SHARED_LIBRARY})
 
-set(ARK_OPENGL_INCLUDE_DIRS ${ARK_SRC_DIR}/3rdparty/glbinding/source/glbinding/include)
-set(ARK_OPENGL_LIBRARIES glbindings)
-
 configure_file(ark-config.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}-config.cmake" @ONLY)
 
 export(TARGETS ${LOCAL_EXPORT_TARGETS} FILE "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}-targets.cmake")

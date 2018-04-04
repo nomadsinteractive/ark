@@ -1,12 +1,10 @@
 #ifndef ARK_RENDERER_IMPL_RENDERER_FRAMEBUFFER_RENDERER_H_
 #define ARK_RENDERER_IMPL_RENDERER_FRAMEBUFFER_RENDERER_H_
 
-#include "core/base/object_pool.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 
 #include "renderer/forwarding.h"

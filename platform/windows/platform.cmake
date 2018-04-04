@@ -3,6 +3,13 @@ ark_add_denpendency(3rdparty/glbinding ON glbinding 3rdparty/glbinding/source/gl
 ark_ensure_dependency(3rdparty/dirent)
 ark_include_directories(3rdparty/dirent/include)
 
+LIST(APPEND ARK_OPENGL_INCLUDE_DIRS
+    ${ARK_SRC_DIR}/3rdparty/glbinding/source/glbinding/include
+    ${PROJECT_BINARY_DIR}/3rdparty/glbinding/source/glbinding/include
+    )
+
+set(ARK_OPENGL_LIBRARIES glbinding)
+
 aux_source_directory(platform/windows/impl LOCAL_SRC_LIST)
 aux_source_directory(platform/windows/impl/runtime LOCAL_RUNTIME_LIBRARY_SRC_LIST)
 
