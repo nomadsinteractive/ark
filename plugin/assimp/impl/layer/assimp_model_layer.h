@@ -42,11 +42,17 @@ public:
     };
 
 private:
+    bytearray loadArrayBuffer(aiMesh* mesh, float scale) const;
+    bytearray loadIndexBuffer(aiMesh* mesh) const;
+    bitmap loadBitmap(const sp<ResourceLoaderContext>& resourceLoaderContext, aiTexture* tex) const;
+
+private:
     sp<GLShader> _shader;
     sp<Assimp::Importer> _importer;
     std::unordered_map<int32_t, sp<aiScene>> _scences;
     GLBuffer _array_buffer;
     GLBuffer _index_buffer;
+    sp<GLTexture> _texture;
     sp<GLSnippet> _snippet;
     ObjectPool _render_command_pool;
 };

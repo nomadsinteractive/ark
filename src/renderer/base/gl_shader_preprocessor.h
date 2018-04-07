@@ -50,6 +50,8 @@ private:
         CodeBlock(const CodeBlock& other) = default;
         CodeBlock(CodeBlock&& other) = default;
 
+        bool hasOutParam(const String& name) const;
+
         String _prefix;
         Procedure _procedure;
         String _suffix;
@@ -112,6 +114,7 @@ private:
     sp<CodeBlock> _main_block;
 
     friend class GLShaderPreprocessorContext;
+    friend class GLShaderSource;
 
 public:
     ShaderType _type;

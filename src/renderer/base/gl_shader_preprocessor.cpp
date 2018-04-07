@@ -248,6 +248,15 @@ GLShaderPreprocessor::CodeBlock::CodeBlock(const String& prefix, const GLShaderP
 {
 }
 
+bool GLShaderPreprocessor::CodeBlock::hasOutParam(const String& name) const
+{
+    const String oName = name.startsWith("v_") ? name : String("v_") + name;
+    for(const auto& i : _procedure._outs)
+        if(i.second == oName)
+            return true;
+    return false;
+}
+
 void GLShaderPreprocessorContext::addAttribute(const String& name, const String& type, std::map<String, String>& vars, GLShaderSource& source)
 {
     if(vars.find(name) == vars.end())

@@ -48,7 +48,7 @@ public:
 //  [[script::bindings::property]]
     const sp<Transform>& transform() const;
 //  [[script::bindings::property]]
-    const sp<Varyings>& filter() const;
+    const sp<Varyings>& varyings() const;
 
 //  [[script::bindings::property]]
     float width() const;

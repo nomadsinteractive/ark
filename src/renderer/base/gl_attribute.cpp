@@ -12,11 +12,6 @@ GLAttribute::GLAttribute(const String& name, const String& type, GLenum glType, 
 {
 }
 
-GLAttribute::GLAttribute(const GLAttribute& other)
-    : _name(other._name), _type(other._type), _gl_type(other._gl_type), _offset(other._offset), _length(other._length), _normalized(other._normalized)
-{
-}
-
 const String& GLAttribute::name() const
 {
     return _name;

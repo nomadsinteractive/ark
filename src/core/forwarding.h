@@ -13,6 +13,7 @@ template<typename T> class Dictionary;
 template<typename T> class Duck;
 template<typename T> class Iterator;
 template<typename T> class OwnedPtr;
+template<typename T> class Loader;
 template<typename T> class List;
 template<typename T> class LockFreeStack;
 template<typename T> class SharedPtr;
@@ -66,6 +67,9 @@ typedef Dictionary<sp<String>> StringBundle;
 typedef Variable<bool> Boolean;
 typedef Variable<int32_t> Integer;
 typedef Variable<float> Numeric;
+
+typedef Loader<Document> DocumentLoader;
+
 
 typedef VariableWrapper<bool> BooleanWrapper;
 /*

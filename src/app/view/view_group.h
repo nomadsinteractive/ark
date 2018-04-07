@@ -3,7 +3,6 @@
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/collection/expirable_item_list.h"
 #include "core/inf/builder.h"
 #include "core/types/class.h"
 
@@ -81,7 +80,6 @@ private:
     sp<Renderer> _background;
     sp<Layout> _layout;
 
-    ExpirableItemList<Renderer> _renderers;
     List<sp<Placement>> _placments;
 
     friend class Placement;

@@ -56,13 +56,13 @@ void Bar::update()
         }
         for(uint32_t i = 0; i < count; ++i)
         {
-            const sp<RenderObject> cell = sp<RenderObject>::make(_boilerplate->type(), sp<Vec>::make(fx, 0.0f), boilerSize, _boilerplate->transform(), _boilerplate->filter());
+            const sp<RenderObject> cell = sp<RenderObject>::make(_boilerplate->type(), sp<Vec>::make(fx, 0.0f), boilerSize, _boilerplate->transform(), _boilerplate->varyings());
             _render_layer->addRenderObject(cell);
             fx += dx;
         }
         if(clip != 0)
         {
-            const sp<RenderObject> cell = sp<RenderObject>::make(_boilerplate->type(), sp<Vec>::make(fx, 0.0f), sp<Size>::make(clip, bph), _boilerplate->transform(), _boilerplate->filter());
+            const sp<RenderObject> cell = sp<RenderObject>::make(_boilerplate->type(), sp<Vec>::make(fx, 0.0f), sp<Size>::make(clip, bph), _boilerplate->transform(), _boilerplate->varyings());
             _render_layer->addRenderObject(cell);
             fx += clip;
         }

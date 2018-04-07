@@ -11,8 +11,6 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
-//#include "renderer/base/gl_attribute.h"
-//#include "renderer/base/gl_uniform.h"
 
 namespace ark {
 

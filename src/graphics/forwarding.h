@@ -12,6 +12,7 @@ class Bounds;
 class Color;
 class Font;
 class Frame;
+class ImageResource;
 class Scrollable;
 class Layer;
 class Matrix;
@@ -48,6 +49,8 @@ typedef sp<Bitmap> bitmap;
 typedef Variable<V2> VV2;
 typedef Variable<V3> VV3;
 typedef Variable<V4> VV4;
+
+typedef Loader<Bitmap> BitmapLoader;
 
 typedef VV2 VV;
 typedef V2 V;

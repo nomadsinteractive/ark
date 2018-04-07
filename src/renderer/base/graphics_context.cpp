@@ -90,9 +90,12 @@ void GraphicsContext::glUpdateMVPMatrix()
 
 void GraphicsContext::glUpdateMVMatrix()
 {
-    const Matrix& mv = _top->mv(_tick);
     const GLProgram::Uniform& uniform = _program->getUniform("u_MVMatrix");
-    uniform.setUniformMatrix4fv(1, GL_FALSE, mv.value(), _tick);
+    if(uniform)
+    {
+        const Matrix& mv = _top->mv(_tick);
+        uniform.setUniformMatrix4fv(1, GL_FALSE, mv.value(), _tick);
+    }
 }
 
 void GraphicsContext::glPushMatrix()

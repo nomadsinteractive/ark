@@ -13,30 +13,6 @@
 
 namespace ark {
 
-namespace {
-
-class IntegerRange : public Integer {
-public:
-    IntegerRange(const sp<Range>& range, const sp<Expired>& expired)
-        : _range(range), _expired(expired) {
-    }
-
-    virtual int32_t val() override {
-        bool hasNext = _range->hasNext();
-        if(hasNext)
-            return _range->next();
-        if(_expired)
-            _expired->expire();
-        return 0;
-    }
-
-private:
-    sp<Range> _range;
-    sp<Expired> _expired;
-};
-
-}
-
 RenderObject::RenderObject(int32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& filter)
     : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(filter))
 {
@@ -52,7 +28,7 @@ const sp<Integer> RenderObject::type() const
     return _type;
 }
 
-const sp<Varyings>& RenderObject::filter() const
+const sp<Varyings>& RenderObject::varyings() const
 {
     return _varyings;
 }

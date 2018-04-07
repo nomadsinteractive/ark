@@ -18,13 +18,17 @@ public:
     const sp<GLResourceManager>& glResourceManager() const;
 
     const sp<Dictionary<document>>& documents() const;
+    const sp<ImageResource>& imageResource() const;
 
     document loadDocument(const String& name) const;
+
     bitmap loadBitmap(const String& name) const;
     bitmap loadBitmapBounds(const String& name) const;
 
+    sp<BitmapLoader> getBitmapLoader(const String& name) const;
+
 private:
-    sp<Dictionary<bitmap>> createImageLoader(bool justDecodeBounds) const;
+    sp<ImageResource> createImageLoader(bool justDecodeBounds) const;
     sp<GLResourceManager> createGLResourceManager() const;
 
 private:
@@ -32,7 +36,7 @@ private:
     sp<Asset> _fonts;
     sp<Dictionary<document>> _documents;
 
-    sp<Dictionary<bitmap>> _bitmap_loader;
+    sp<ImageResource> _bitmap_loader;
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
 
     sp<GLResourceManager> _gl_resources;

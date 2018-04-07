@@ -11,7 +11,7 @@ class GLAttribute {
 public:
     GLAttribute();
     GLAttribute(const String& name, const String& type, GLenum glType, uint32_t length, GLboolean normalized);
-    GLAttribute(const GLAttribute& other);
+    GLAttribute(const GLAttribute& other) = default;
 
     const String& name() const;
     const String& type() const;

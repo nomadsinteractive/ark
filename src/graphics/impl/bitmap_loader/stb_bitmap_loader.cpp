@@ -1,4 +1,4 @@
-#include "graphics/impl/resource/stb_image_resource.h"
+#include "graphics/impl/bitmap_loader/stb_bitmap_loader.h"
 
 #ifdef ARK_USE_STB_IMAGE
 
@@ -66,18 +66,12 @@ private:
 
 }
 
-STBImageResource::STBImageResource(const sp<Asset>& asset, bool justDecodeBounds)
-    : _asset(asset), _just_decode_bounds(justDecodeBounds)
+STBBitmapLoader::STBBitmapLoader(bool justDecodeBounds)
+    : _just_decode_bounds(justDecodeBounds)
 {
 }
 
-bitmap STBImageResource::get(const String& name)
-{
-    const sp<Readable> readable = _asset->get(name);
-    return readable ? load(readable) : nullptr;
-}
-
-bitmap STBImageResource::load(const sp<Readable>& readable)
+bitmap STBBitmapLoader::load(const sp<Readable>& readable)
 {
     stbi_io_callbacks callback;
     callback.read = _stb_read_callback;

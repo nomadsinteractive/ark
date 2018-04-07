@@ -248,6 +248,11 @@ void GLResourceManager::prepare(const sp<GLResource>& resource, PreparingStrateg
     }
 }
 
+void GLResourceManager::prepare(const GLBuffer& buffer, GLResourceManager::PreparingStrategy strategy)
+{
+    prepare(buffer._stub, strategy);
+}
+
 void GLResourceManager::recycle(const sp<GLResource>& resource) const
 {
     _recycler->recycle(resource);
@@ -261,7 +266,7 @@ GLBuffer GLResourceManager::getGLIndexBuffer(GLResourceManager::BufferName buffe
     if(!_static_buffers[bufferName] || _static_buffers[bufferName].length<uint16_t>() < bufferLength)
     {
         _static_buffers[bufferName] = createStaticBuffer(bufferName, bufferLength);
-        prepare(_static_buffers[bufferName]._stub, PS_ONCE_AND_ON_SURFACE_READY);
+        prepare(_static_buffers[bufferName], PS_ONCE_AND_ON_SURFACE_READY);
     }
 
     GLBuffer indexBuffer = _static_buffers[bufferName];

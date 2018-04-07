@@ -133,7 +133,6 @@ ViewGroup::~ViewGroup()
 void ViewGroup::addRenderer(const sp<Renderer>& renderer)
 {
     NOT_NULL(renderer);
-    _renderers.push_back(renderer);
     _placments.push_back(sp<Placement>::make(renderer, static_cast<bool>(_layout)));
 }
 

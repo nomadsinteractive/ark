@@ -1,9 +1,6 @@
 #ifndef ARK_CORE_IMPL_READABLE_FILE_READABLE_H_
 #define ARK_CORE_IMPL_READABLE_FILE_READABLE_H_
 
-#include <stdio.h>
-#include <string>
-
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/inf/readable.h"

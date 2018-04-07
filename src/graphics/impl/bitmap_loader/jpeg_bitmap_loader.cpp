@@ -1,5 +1,4 @@
-#include "graphics/impl/resource/jpeg_resource.h"
-
+#include "graphics/impl/bitmap_loader/jpeg_bitmap_loader.h"
 
 #ifdef ARK_USE_LIBJPEG_TURBO
 
@@ -77,18 +76,12 @@ static void term_source(j_decompress_ptr /*cinfo*/)
 
 }
 
-JPEGResource::JPEGResource(const sp<Asset>& asset, const bool justDecodeBounds)
-    : _asset(asset), _just_decode_bounds(justDecodeBounds)
+JPEGBitmapLoader::JPEGBitmapLoader(bool justDecodeBounds)
+    : _just_decode_bounds(justDecodeBounds)
 {
 }
 
-bitmap JPEGResource::get(const String& name)
-{
-    const sp<Readable> readable = _asset->get(name);
-    return readable ? load(readable) : nullptr;
-}
-
-bitmap JPEGResource::load(const sp<Readable>& readable)
+bitmap JPEGBitmapLoader::load(const sp<Readable>& readable)
 {
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr err_msg = {0};

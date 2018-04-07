@@ -93,7 +93,7 @@ Body::Body(const sp<World>& world, b2Body* body)
 }
 
 Body::Body(const sp<Stub>& stub)
-    : RigidBody(reinterpret_cast<uint32_t>(stub->_body), Collider::BODY_TYPE_DYNAMIC, nullptr, nullptr, nullptr), _stub(stub)
+    : RigidBody((uint32_t) reinterpret_cast<intptr_t>(stub->_body), Collider::BODY_TYPE_DYNAMIC, nullptr, nullptr, nullptr), _stub(stub)
 {
 }
 

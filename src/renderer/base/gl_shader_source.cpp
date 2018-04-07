@@ -86,7 +86,7 @@ GLShaderPreprocessor& GLShaderSource::fragment()
     return _fragment;
 }
 
-const GLAttribute&GLShaderSource::getAttribute(const String& name) const
+const GLAttribute& GLShaderSource::getAttribute(const String& name) const
 {
     const auto iter = _attributes.find(name);
     DCHECK(iter != _attributes.end(), "Shader has no attribute \"%s\"", name.c_str());
@@ -139,7 +139,9 @@ void GLShaderSource::initialize()
     List<String> generated;
     for(const auto& iter : attributes)
     {
-        if(!_vertex._in_declarations.has(iter.first) && !_vertex._out_declarations.has(iter.first))
+        if(!_vertex._in_declarations.has(iter.first)
+                && !_vertex._out_declarations.has(iter.first)
+                && !_vertex._main_block->hasOutParam(iter.first))
         {
             generated.push_back(iter.first);
             addAttribute(iter.first, iter.second);

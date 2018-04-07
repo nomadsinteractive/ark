@@ -46,6 +46,7 @@ public:
     void onDrawFrame(GraphicsContext& graphicsContext);
 
     void prepare(const sp<GLResource>& resource, PreparingStrategy strategy);
+    void prepare(const GLBuffer& buffer, PreparingStrategy strategy);
     void recycle(const sp<GLResource>& resource) const;
 
     GLBuffer getGLIndexBuffer(BufferName bufferName, uint32_t bufferLength);

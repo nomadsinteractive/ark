@@ -1,4 +1,4 @@
-#include "graphics/impl/resource/png_resource.h"
+#include "graphics/impl/bitmap_loader/png_bitmap_loader.h"
 
 #ifdef ARK_USE_LIBPNG
 
@@ -21,18 +21,12 @@ static void _png_readable_read_fn(png_structp png_ptr, png_bytep buffer, png_siz
     readable->read(buffer, size);
 }
 
-PNGResource::PNGResource(const sp<Asset>& asset, bool justDecodeBounds)
-    : _asset(asset), _just_decode_bounds(justDecodeBounds)
+PNGBitmapLoader::PNGBitmapLoader(bool justDecodeBounds)
+    : _just_decode_bounds(justDecodeBounds)
 {
 }
 
-bitmap PNGResource::get(const String& name)
-{
-    const sp<Readable> readable = _asset->get(name);
-    return readable ? load(readable) : nullptr;
-}
-
-bitmap PNGResource::load(const sp<Readable>& readable)
+bitmap PNGBitmapLoader::load(const sp<Readable>& readable)
 {
     png_byte header[8];
 

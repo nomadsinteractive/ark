@@ -114,7 +114,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const sp<Dictionary<
 {
     const sp<BeanFactory> beanFactory = Ark::instance().createBeanFactory(documentDictionary);
     const sp<GLResourceManager> glResourceManager = _application_resource->glResourceManager();
-    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), glResourceManager, _executor, _render_controller);
+    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), _application_resource->imageResource(), glResourceManager, _executor, _render_controller);
     const Global<PluginManager> pluginManager;
     pluginManager->each([&] (const sp<Plugin>& plugin)->bool {
         plugin->loadResourceLoader(beanFactory, documentDictionary, context);
