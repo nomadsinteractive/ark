@@ -9,6 +9,32 @@
 
 namespace ark {
 
+namespace {
+
+class StaticBufferUploader : public GLBuffer::Uploader {
+public:
+    StaticBufferUploader(const sp<Variable<bytearray>>& buffer, size_t size)
+        : _buffer(buffer), _size(size) {
+    }
+
+    virtual size_t size() override {
+        return _size;
+    }
+
+    virtual void upload(GraphicsContext& /*graphicsContext*/, GLenum target, GLsizeiptr size) override {
+        const bytearray buf = _buffer->val();
+        DCHECK(_size <= buf->length(), "Buffer length mismatch");
+        DCHECK(size <= buf->length(), "Buffer overflow");
+        glBufferSubData(target, 0, size, buf->array());
+    }
+
+private:
+    sp<Variable<bytearray>> _buffer;
+    size_t _size;
+};
+
+}
+
 GLBuffer::Recycler::Recycler(GLuint id)
     : _id(id)
 {
@@ -30,8 +56,8 @@ void GLBuffer::Recycler::recycle(GraphicsContext&)
     _id = 0;
 }
 
-GLBuffer::Stub::Stub(const sp<GLRecycler>& recycler, const sp<Variable<bytearray>>& buffer, GLenum type, GLenum usage)
-    : _recycler(recycler), _buffer(buffer), _type(type), _usage(usage), _id(0), _size(0)
+GLBuffer::Stub::Stub(const sp<GLRecycler>& recycler, const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage)
+    : _recycler(recycler), _uploader(uploader), _type(type), _usage(usage), _id(0), _size(0)
 {
 }
 
@@ -56,16 +82,38 @@ uint32_t GLBuffer::Stub::size() const
     return _size;
 }
 
-void GLBuffer::Stub::prepare(const bytearray& array)
+void GLBuffer::Stub::prepare(GraphicsContext& graphicsContext, const bytearray& transientData)
 {
     if(_id == 0)
+    {
         glGenBuffers(1, &_id);
-    if(array) {
+        if(_uploader)
+        {
+            upload(graphicsContext, _uploader);
+            return;
+        }
+    }
+    if(transientData) {
+        uint32_t osize = _size;
         glBindBuffer(_type, _id);
-        _size = array->length();
-        glBufferData(_type, _size, array->array(), _usage);
+        _size = transientData->length();
+        if(osize < transientData->length())
+            glBufferData(_type, _size, transientData->array(), _usage);
+        else
+            glBufferSubData(_type, 0, _size, transientData->array());
         glBindBuffer(_type, 0);
     }
+}
+
+void GLBuffer::Stub::upload(GraphicsContext& graphicsContext, Uploader& uploader)
+{
+    bool recreate = _size < uploader.size();
+    glBindBuffer(_type, _id);
+    _size = uploader.size();
+    if(recreate)
+        glBufferData(_type, _size, nullptr, _usage);
+    uploader.upload(graphicsContext, _type, _size);
+    glBindBuffer(_type, 0);
 }
 
 GLuint GLBuffer::Stub::id()
@@ -73,9 +121,9 @@ GLuint GLBuffer::Stub::id()
     return _id;
 }
 
-void GLBuffer::Stub::prepare(GraphicsContext&)
+void GLBuffer::Stub::prepare(GraphicsContext& graphicsContext)
 {
-    prepare(_buffer ? _buffer->val() : bytearray::null());
+    prepare(graphicsContext, bytearray::null());
 }
 
 void GLBuffer::Stub::recycle(GraphicsContext&)
@@ -98,43 +146,24 @@ uint32_t GLBuffer::Snapshot::id() const
     return _stub->id();
 }
 
-void GLBuffer::Snapshot::prepare(GraphicsContext&) const
+void GLBuffer::Snapshot::prepare(GraphicsContext& graphicsContext) const
 {
-    _stub->prepare(_array);
+    _stub->prepare(graphicsContext, _array);
 }
 
 GLBuffer::GLBuffer(const sp<GLRecycler>& recycler, const sp<Variable<bytearray>>& buffer, GLenum type, GLenum usage, uint32_t size)
-    : _stub(sp<Stub>::make(recycler, buffer, type, usage)), _size(size)
+    : _stub(sp<Stub>::make(recycler, sp<StaticBufferUploader>::make(buffer, size), type, usage)), _size(size)
 {
 }
 
-GLBuffer::GLBuffer(const GLBuffer& other) noexcept
-    : _stub(other._stub), _size(other._size)
-{
-}
-
-GLBuffer::GLBuffer(GLBuffer&& other) noexcept
-    : _stub(std::move(other._stub)), _size(other._size)
+GLBuffer::GLBuffer(const sp<GLRecycler>& recycler, const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage)
+    : _stub(sp<Stub>::make(recycler, uploader, type, usage)), _size(uploader ? uploader->size() : 0)
 {
 }
 
 GLBuffer::GLBuffer() noexcept
     : _stub(nullptr), _size(0)
 {
-}
-
-const GLBuffer& GLBuffer::operator =(const GLBuffer& other) noexcept
-{
-    _stub = other._stub;
-    _size = other._size;
-    return *this;
-}
-
-const GLBuffer& GLBuffer::operator =(GLBuffer&& other) noexcept
-{
-    _stub = std::move(other._stub);
-    _size = other._size;
-    return *this;
 }
 
 void GLBuffer::setSize(uint32_t size)

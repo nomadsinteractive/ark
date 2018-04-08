@@ -1,8 +1,6 @@
 #ifndef ARK_RENDERER_BASE_GL_RESOURCE_MANAGER_H_
 #define ARK_RENDERER_BASE_GL_RESOURCE_MANAGER_H_
 
-#include <list>
-#include <map>
 #include <set>
 
 #include "core/base/api.h"
@@ -53,7 +51,7 @@ public:
 
     sp<GLTexture> loadGLTexture(const String& name);
     sp<GLTexture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable);
-    GLBuffer createGLBuffer(const sp<Variable<bytearray>>& variable, GLenum type, GLenum usage);
+    GLBuffer createGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage);
 
     sp<GLSnippet> createCoreGLSnippet(const sp<GLShader>& shader, const GLBuffer& arrayBuffer) const;
 

@@ -24,7 +24,7 @@ namespace assimp {
 
 class AssimpModelLayer : public Layer {
 public:
-    AssimpModelLayer(const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    AssimpModelLayer(const sp<GLShader>& shader, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual sp<RenderCommand> render(const LayerContext::Snapshot& layerContext, float x, float y) override;
 

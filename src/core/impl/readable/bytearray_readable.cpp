@@ -1,5 +1,7 @@
 #include "core/impl/readable/bytearray_readable.h"
 
+#include <algorithm>
+
 #include "core/inf/array.h"
 
 namespace ark {
@@ -30,6 +32,7 @@ int32_t BytearrayReadable::seek(int32_t position, int32_t whence)
         break;
     }
     DCHECK(_position >= 0 && _position < _bytearray->length(), "Cursor out of bounds: %d", _position);
+    return _position;
 }
 
 int32_t BytearrayReadable::remaining()

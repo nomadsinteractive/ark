@@ -289,9 +289,9 @@ sp<GLTexture> GLResourceManager::createGLTexture(uint32_t width, uint32_t height
     return texture;
 }
 
-GLBuffer GLResourceManager::createGLBuffer(const sp<Variable<bytearray>>& variable, GLenum type, GLenum usage)
+GLBuffer GLResourceManager::createGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage)
 {
-    return GLBuffer(_recycler, variable, type, usage);
+    return GLBuffer(_recycler, uploader, type, usage);
 }
 
 sp<GLSnippet> GLResourceManager::createCoreGLSnippet(const sp<GLShader>& shader, const GLBuffer& arrayBuffer) const
@@ -311,12 +311,12 @@ GLBuffer GLResourceManager::createStaticBuffer(GLResourceManager::BufferName buf
     {
         case BUFFER_NAME_TRANGLES:
             DCHECK(bufferLength % 6 == 0, "Length of index array for triangles should be 6 times of an integer.");
-            return GLBuffer(_recycler, sp<TrianglesIndexArrayVariable>::make(bufferLength / 3), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, bufferSize);
+            return GLBuffer(_recycler, sp<Variable<bytearray>>::adopt(new TrianglesIndexArrayVariable(bufferLength / 3)), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, bufferSize);
         case BUFFER_NAME_NINE_PATCH:
             DCHECK((bufferLength + 2) % 30 == 0, "Illegal length of nine patch index array.");
-            return GLBuffer(_recycler, sp<NinePatchIndexArrayVariable>::make((bufferLength + 2) / 30), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, bufferSize);
+            return GLBuffer(_recycler, sp<Variable<bytearray>>::adopt(new NinePatchIndexArrayVariable((bufferLength + 2) / 30)), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, bufferSize);
         case BUFFER_NAME_POINTS:
-            return GLBuffer(_recycler, sp<PointIndexArrayVariable>::make(static_cast<uint32_t>(bufferLength * 1.4f)), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, bufferSize);
+            return GLBuffer(_recycler, sp<Variable<bytearray>>::adopt(new PointIndexArrayVariable(static_cast<uint32_t>(bufferLength * 1.4f))), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, bufferSize);
         default:
             break;
     }

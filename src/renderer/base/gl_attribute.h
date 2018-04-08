@@ -1,13 +1,14 @@
 #ifndef ARK_RENDERER_BASE_GL_ATTRIBUTE_H_
 #define ARK_RENDERER_BASE_GL_ATTRIBUTE_H_
 
+#include "core/base/api.h"
 #include "core/base/string.h"
 
 #include "platform/gl/gl.h"
 
 namespace ark {
 
-class GLAttribute {
+class ARK_API GLAttribute {
 public:
     GLAttribute();
     GLAttribute(const String& name, const String& type, GLenum glType, uint32_t length, GLboolean normalized);

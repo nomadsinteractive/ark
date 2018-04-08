@@ -15,11 +15,6 @@ BindVertexArray::BindVertexArray(const sp<GLResource>& vertexArray)
 {
 }
 
-void BindVertexArray::preCompile(GraphicsContext& /*graphicsContext*/, GLShaderPreprocessorContext& context)
-{
-//    context._fragment._out_declarations.declare("vec4", "v_", "FragColor");
-
-}
 void BindVertexArray::preDraw(GraphicsContext& graphicsContext, const GLShader& /*shader*/, const GLSnippetContext& context)
 {
     context._array_buffer.prepare(graphicsContext);
@@ -28,6 +23,11 @@ void BindVertexArray::preDraw(GraphicsContext& graphicsContext, const GLShader& 
 
     glBindVertexArray(_vertex_array->id());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context._index_buffer.id());
+}
+
+void BindVertexArray::postDraw(GraphicsContext& /*graphicsContext*/)
+{
+    glBindVertexArray(0);
 }
 
 }

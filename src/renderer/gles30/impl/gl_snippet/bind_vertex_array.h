@@ -13,8 +13,8 @@ class BindVertexArray : public GLSnippet {
 public:
     BindVertexArray(const sp<GLResource>& vertexArray);
 
-    virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) override;
     virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override;
+    virtual void postDraw(GraphicsContext& graphicsContext) override;
 
 private:
     sp<GLResource> _vertex_array;

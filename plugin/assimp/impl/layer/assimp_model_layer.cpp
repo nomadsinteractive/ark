@@ -17,19 +17,44 @@
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_command/draw_elements_3d.h"
 
+#include "assimp/impl/io/ark_io_system.h"
+
 namespace ark {
 namespace plugin {
 namespace assimp {
 
-AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
+namespace {
+
+class AssimpGLBufferUploader : public GLBuffer::Uploader {
+public:
+    AssimpGLBufferUploader(const bytearray& buffer)
+        : _buffer(buffer) {
+    }
+
+    virtual size_t size() override {
+        return _buffer->length();
+    }
+
+    virtual void upload(GraphicsContext& /*graphicsContext*/, GLenum target, GLsizeiptr size) override {
+        glBufferSubData(target, 0, _buffer->length(), _buffer->array());
+    }
+
+private:
+    bytearray _buffer;
+};
+
+}
+
+AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : Layer(resourceLoaderContext->memoryPool()), _shader(shader), _importer(sp<Assimp::Importer>::make())
 {
+    _importer->SetIOHandler(new ArkIOSystem());
     const aiScene* scene = _importer->ReadFile("duck.fbx", aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs);
     const bytearray vertices = loadArrayBuffer(scene->mMeshes[0], 1.5f);
     const bytearray indices = loadIndexBuffer(scene->mMeshes[0]);
     const bitmap tex = loadBitmap(resourceLoaderContext, scene->mTextures[0]);
-    _array_buffer = resourceLoaderContext->glResourceManager()->createGLBuffer(sp<Variable<bytearray>::Const>::make(vertices), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-    _index_buffer = resourceLoaderContext->glResourceManager()->createGLBuffer(sp<Variable<bytearray>::Const>::make(indices), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+    _array_buffer = resourceLoaderContext->glResourceManager()->createGLBuffer(sp<AssimpGLBufferUploader>::make(vertices), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+    _index_buffer = resourceLoaderContext->glResourceManager()->createGLBuffer(sp<AssimpGLBufferUploader>::make(indices), GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     _texture = resourceLoaderContext->glResourceManager()->createGLTexture(tex->width(), tex->height(), sp<Variable<bitmap>::Const>::make(tex));
     _snippet = resourceLoaderContext->glResourceManager()->createCoreGLSnippet(_shader, _array_buffer);
     resourceLoaderContext->glResourceManager()->prepare(_array_buffer, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
@@ -61,8 +86,8 @@ bytearray AssimpModelLayer::loadArrayBuffer(aiMesh* mesh, float scale) const
         fptr[ans] = mesh->mNormals[i].x;
         fptr[ans + 1] = mesh->mNormals[i].y;
         fptr[ans + 2] = mesh->mNormals[i].z;
-        sptr[ats] = mesh->mTextureCoords[0][i].x * 0xffff;
-        sptr[ats + 1] = mesh->mTextureCoords[0][i].y * 0xffff;
+        sptr[ats] = static_cast<uint16_t>(mesh->mTextureCoords[0][i].x * 0xffff);
+        sptr[ats + 1] = static_cast<uint16_t>(mesh->mTextureCoords[0][i].y * 0xffff);
         buf += _shader->stride();
     }
     return s;
@@ -99,7 +124,7 @@ AssimpModelLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifes
 
 sp<Layer> AssimpModelLayer::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<AssimpModelLayer>::make(_shader->build(args), _resource_loader_context);
+    return sp<AssimpModelLayer>::make(_shader->build(args), _manifest, _resource_loader_context);
 }
 
 }
