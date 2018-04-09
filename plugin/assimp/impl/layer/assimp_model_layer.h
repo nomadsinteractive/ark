@@ -52,8 +52,7 @@ private:
     std::unordered_map<int32_t, sp<aiScene>> _scences;
     GLBuffer _array_buffer;
     GLBuffer _index_buffer;
-    sp<GLTexture> _texture;
-    sp<GLSnippet> _snippet;
+    sp<GLSnippetDelegate> _snippet;
     ObjectPool _render_command_pool;
 };
 

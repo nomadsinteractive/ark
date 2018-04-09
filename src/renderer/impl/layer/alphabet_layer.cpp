@@ -159,7 +159,7 @@ AlphabetLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, 
 sp<Layer> AlphabetLayer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<VV4> color = _color ? _color->build(args) : sp<Color>::make(Color::WHITE).cast<VV4>();
-    const sp<GLShader> shader = _shader ? _shader->build(args) : GLShader::fromStringTable("shaders/texture.vert", "shaders/alpha.frag", sp<GLSnippetUColor>::make(color), _resource_loader_context);
+    const sp<GLShader> shader = _shader ? _shader->build(args) : GLShader::fromStringTable("shaders/default.vert", "shaders/alpha.frag", sp<GLSnippetUColor>::make(color), _resource_loader_context);
     return sp<AlphabetLayer>::make(_alphabet->build(args), _texture_width, _texture_height, shader, _resource_loader_context);
 }
 

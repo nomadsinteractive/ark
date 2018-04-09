@@ -51,8 +51,8 @@ uint32_t GLAttribute::size() const
 
 void GLAttribute::setVertexPointer(GLuint location, GLsizei stride) const
 {
-    glVertexAttribPointer(location, _length, _gl_type, _normalized, stride, reinterpret_cast<void*>(_offset));
     glEnableVertexAttribArray(location);
+    glVertexAttribPointer(location, _length, _gl_type, _normalized, stride, reinterpret_cast<void*>(_offset));
 }
 
 

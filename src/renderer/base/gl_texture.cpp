@@ -120,16 +120,16 @@ sp<Bitmap> GLTexture::getBitmap() const
     return _bitmap->val();
 }
 
-void GLTexture::active(const sp<GLProgram>& program, uint32_t texture) const
+void GLTexture::active(const sp<GLProgram>& program, uint32_t id) const
 {
-    glActiveTexture(static_cast<GLenum>(texture));
+    glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + id));
     glBindTexture(GL_TEXTURE_2D, _id);
 
-    uint32_t index = ((uint32_t) texture) - ((uint32_t) GL_TEXTURE0);
     char uniformName[16] = "u_Texture0";
-    uniformName[9] = static_cast<char>('0' + index);
+    uniformName[9] = static_cast<char>('0' + id);
     const GLProgram::Uniform& uTexture = program->getUniform(uniformName);
-    uTexture.setUniform1i(index);
+    DCHECK(uTexture, "Texture %d not declared in shader", id);
+    uTexture.setUniform1i(id);
 }
 
 GLTexture::Recycler::Recycler(uint32_t id)

@@ -126,13 +126,8 @@ void GLProgram::Attribute::setVertexPointer(GLint size, GLenum type, GLboolean n
     glVertexAttribPointer(_location, size, type, normalized, stride, pointer);
 }
 
-GLProgram::Attribute::Attribute(GLuint location)
+GLProgram::Attribute::Attribute(GLint location)
     : _location(location)
-{
-}
-
-GLProgram::Attribute::Attribute(const GLProgram::Attribute& other)
-    : _location(other._location)
 {
 }
 

@@ -43,7 +43,7 @@ public:
 //  [[script::bindings::auto]]
     sp<Bitmap> getBitmap() const;
 
-    void active(const sp<GLProgram>& program, uint32_t texture) const;
+    void active(const sp<GLProgram>& program, uint32_t id) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<GLTexture> {

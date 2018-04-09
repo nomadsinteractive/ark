@@ -29,7 +29,7 @@ private:
     Ark::GLVersion _version;
     std::map<String, String> _annotations;
 
-    sp<GLProcedureFactory> _gl_procedure_factory;
+    sp<GLSnippetFactory> _gl_procedure_factory;
 
     friend class RenderEngine;
 };

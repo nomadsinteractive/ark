@@ -7,8 +7,8 @@
 #include "renderer/base/gl_context.h"
 #include "renderer/inf/render_view_factory.h"
 
-#include "renderer/gles20/impl/gl_procedure_factory/gl_procedure_factory_gles20.h"
-#include "renderer/gles30/impl/gl_procedure_factory/gl_procedure_factory_gles30.h"
+#include "renderer/gles20/impl/gl_snippet_factory/gl_snippet_factory_gles20.h"
+#include "renderer/gles30/impl/gl_snippet_factory/gl_snippet_factory_gles30.h"
 
 #include "platform/gl/gl.h"
 
@@ -52,7 +52,7 @@ void RenderEngine::chooseGLVersion(Ark::GLVersion version)
         annotations["frag.in"] = "varying";
         annotations["frag.out"] = "varying";
         annotations["frag.color"] = "gl_FragColor";
-        _gl_context->_gl_procedure_factory = sp<gles20::GLProcedureFactoryGLES20>::make();
+        _gl_context->_gl_procedure_factory = sp<gles20::GLSnippetFactoryGLES20>::make();
     }
     else
     {
@@ -61,7 +61,7 @@ void RenderEngine::chooseGLVersion(Ark::GLVersion version)
         annotations["frag.in"] = "in";
         annotations["frag.out"] = "out";
         annotations["frag.color"] = "v_FragColor";
-        _gl_context->_gl_procedure_factory = sp<gles30::GLProcedureFactoryGLES30>::make();
+        _gl_context->_gl_procedure_factory = sp<gles30::GLSnippetFactoryGLES30>::make();
     }
     _gl_context->_version = version;
 }

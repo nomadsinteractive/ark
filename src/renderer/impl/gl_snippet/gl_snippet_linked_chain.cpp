@@ -24,7 +24,7 @@ void GLSnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, GLShader
     _next->preCompile(graphicsContext, context);
 }
 
-void GLSnippetLinkedChain::preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context)
+void GLSnippetLinkedChain::preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLDrawingContext& context)
 {
     _delegate->preDraw(graphicsContext, shader, context);
     _next->preDraw(graphicsContext, shader, context);

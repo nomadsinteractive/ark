@@ -14,7 +14,7 @@ public:
     virtual void preInitialize(GLShaderSource& source) {}
 
     virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) {}
-    virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) {}
+    virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLDrawingContext& context) {}
     virtual void postDraw(GraphicsContext& graphicsContext) {}
 };
 

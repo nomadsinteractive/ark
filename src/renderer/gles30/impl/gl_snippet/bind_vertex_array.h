@@ -13,7 +13,7 @@ class BindVertexArray : public GLSnippet {
 public:
     BindVertexArray(const sp<GLResource>& vertexArray);
 
-    virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context) override;
+    virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLDrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 
 private:

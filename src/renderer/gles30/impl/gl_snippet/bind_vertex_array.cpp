@@ -1,7 +1,7 @@
 #include "renderer/gles30/impl/gl_snippet/bind_vertex_array.h"
 
 #include "renderer/base/gl_shader.h"
-#include "renderer/base/gl_snippet_context.h"
+#include "renderer/base/gl_drawing_context.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/graphics_context.h"
 
@@ -15,7 +15,7 @@ BindVertexArray::BindVertexArray(const sp<GLResource>& vertexArray)
 {
 }
 
-void BindVertexArray::preDraw(GraphicsContext& graphicsContext, const GLShader& /*shader*/, const GLSnippetContext& context)
+void BindVertexArray::preDraw(GraphicsContext& graphicsContext, const GLShader& /*shader*/, const GLDrawingContext& context)
 {
     context._array_buffer.prepare(graphicsContext);
     context._index_buffer.prepare(graphicsContext);

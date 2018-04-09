@@ -6,9 +6,9 @@
 namespace ark {
 namespace gles20 {
 
-class GLProcedureFactoryGLES20 : public GLProcedureFactory {
+class GLSnippetFactoryGLES20 : public GLSnippetFactory {
 public:
-    virtual sp<GLSnippet> createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const GLShader& shader, const GLBuffer& arrayBuffer) override;
+    virtual sp<GLSnippet> createCoreGLSnippet(GLResourceManager& glResourceManager, const GLShader& shader, const GLBuffer& arrayBuffer) override;
 };
 
 }

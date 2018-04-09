@@ -8,11 +8,11 @@
 
 namespace ark {
 
-class ARK_API GLProcedureFactory {
+class ARK_API GLSnippetFactory {
 public:
-    virtual ~GLProcedureFactory() = default;
+    virtual ~GLSnippetFactory() = default;
 
-    virtual sp<GLSnippet> createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const GLShader& shader, const GLBuffer& arrayBuffer) = 0;
+    virtual sp<GLSnippet> createCoreGLSnippet(GLResourceManager& glResourceManager, const GLShader& shader, const GLBuffer& arrayBuffer) = 0;
 };
 
 }

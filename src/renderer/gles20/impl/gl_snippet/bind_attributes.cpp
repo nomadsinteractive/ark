@@ -1,13 +1,13 @@
 #include "renderer/gles20/impl/gl_snippet/bind_attributes.h"
 
-#include "renderer/base/gl_snippet_context.h"
+#include "renderer/base/gl_drawing_context.h"
 #include "renderer/base/gl_shader.h"
 #include "renderer/inf/gl_resource.h"
 
 namespace ark {
 namespace gles20 {
 
-void BindAttributes::preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLSnippetContext& context)
+void BindAttributes::preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLDrawingContext& context)
 {
     context._array_buffer.prepare(graphicsContext);
     context._index_buffer.prepare(graphicsContext);

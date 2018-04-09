@@ -27,15 +27,15 @@ public:
 
     class ARK_API Attribute {
     public:
-        Attribute(GLuint location = 0);
-        Attribute(const Attribute& other);
+        Attribute(GLint location = -1);
+        Attribute(const Attribute& other) = default;
 
         GLuint location() const;
 
         void setVertexPointer(GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void * pointer) const;
 
     private:
-        GLuint _location;
+        GLint _location;
     };
 
     class ARK_API Uniform {

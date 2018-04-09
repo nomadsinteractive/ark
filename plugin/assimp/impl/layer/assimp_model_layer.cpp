@@ -12,10 +12,12 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/gl_attribute.h"
 #include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_snippet_delegate.h"
 #include "renderer/base/gl_texture.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_command/draw_elements_3d.h"
+#include "renderer/impl/gl_snippet/gl_snippet_textures.h"
 
 #include "assimp/impl/io/ark_io_system.h"
 
@@ -55,15 +57,17 @@ AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const document& m
     const bitmap tex = loadBitmap(resourceLoaderContext, scene->mTextures[0]);
     _array_buffer = resourceLoaderContext->glResourceManager()->createGLBuffer(sp<AssimpGLBufferUploader>::make(vertices), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
     _index_buffer = resourceLoaderContext->glResourceManager()->createGLBuffer(sp<AssimpGLBufferUploader>::make(indices), GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
-    _texture = resourceLoaderContext->glResourceManager()->createGLTexture(tex->width(), tex->height(), sp<Variable<bitmap>::Const>::make(tex));
-    _snippet = resourceLoaderContext->glResourceManager()->createCoreGLSnippet(_shader, _array_buffer);
+    const sp<GLTexture> texture = resourceLoaderContext->glResourceManager()->createGLTexture(tex->width(), tex->height(), sp<Variable<bitmap>::Const>::make(tex));
+    _snippet = sp<GLSnippetDelegate>::make(_shader, _array_buffer);
+    const sp<GLSnippetTextures> textures = _snippet->link<GLSnippetTextures>();
+    textures->addTexture(0, texture);
     resourceLoaderContext->glResourceManager()->prepare(_array_buffer, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
     resourceLoaderContext->glResourceManager()->prepare(_index_buffer, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
 }
 
 sp<RenderCommand> AssimpModelLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
 {
-    return _render_command_pool.obtain<DrawElements3D>(GLSnippetContext(_texture, _array_buffer.snapshot(nullptr), _index_buffer, GL_TRIANGLES), _shader, _snippet);
+    return _render_command_pool.obtain<DrawElements3D>(GLDrawingContext(_snippet, _array_buffer.snapshot(nullptr), _index_buffer, GL_TRIANGLES), _shader);
 }
 
 bytearray AssimpModelLayer::loadArrayBuffer(aiMesh* mesh, float scale) const

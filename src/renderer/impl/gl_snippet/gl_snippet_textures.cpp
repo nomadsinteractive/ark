@@ -4,7 +4,7 @@
 
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_texture.h"
-#include "renderer/base/gl_snippet_context.h"
+#include "renderer/base/gl_drawing_context.h"
 
 namespace ark {
 
@@ -13,10 +13,10 @@ void GLSnippetTextures::addTexture(uint32_t id, const sp<GLTexture>& texture)
     _textures.push_back(std::pair<uint32_t, sp<GLTexture>>(id, texture));
 }
 
-void GLSnippetTextures::preDraw(GraphicsContext& /*graphicsContext*/, const GLShader& shader, const GLSnippetContext& /*context*/)
+void GLSnippetTextures::preDraw(GraphicsContext& /*graphicsContext*/, const GLShader& shader, const GLDrawingContext& /*context*/)
 {
     for(const auto& i : _textures)
-        i.second->active(shader.program(), static_cast<uint32_t>(GL_TEXTURE0 + i.first));
+        i.second->active(shader.program(), i.first);
 }
 
 GLSnippetTextures::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

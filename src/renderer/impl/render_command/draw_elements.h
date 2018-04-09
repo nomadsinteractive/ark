@@ -6,21 +6,20 @@
 
 #include "graphics/inf/render_command.h"
 
-#include "renderer/base/gl_snippet_context.h"
+#include "renderer/base/gl_drawing_context.h"
 #include "renderer/forwarding.h"
 
 namespace ark {
 
 class ARK_API DrawElements : public RenderCommand {
 public:
-    DrawElements(const GLSnippetContext& context, const sp<GLShader>& shader, const sp<GLSnippet>& procedure);
+    DrawElements(const GLDrawingContext& context, const sp<GLShader>& shader);
 
     virtual void draw(GraphicsContext& graphicsContext) override;
 
 private:
-    GLSnippetContext _context;
+    GLDrawingContext _context;
     sp<GLShader> _shader;
-    sp<GLSnippet> _snippet;
 };
 
 }
