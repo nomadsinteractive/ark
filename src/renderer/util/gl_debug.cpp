@@ -23,7 +23,7 @@ void GLDebug::glSetIdentity(const op<GraphicsContext>& graphicsContext)
 {
     Matrix mvp;
     mvp.setIdentity();
-    graphicsContext->program()->getUniform("u_MVPMatrix").setUniformMatrix4fv(1, GL_FALSE, mvp.value());
+    graphicsContext->program()->getUniform("u_MVP").setUniformMatrix4fv(1, GL_FALSE, mvp.value());
 }
 
 void GLDebug::glTestDraw(const op<GraphicsContext>& graphicsContext, const sp<GLProgram>& program)

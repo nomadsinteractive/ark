@@ -1,6 +1,6 @@
 
-uniform mat4 u_MVPMatrix;
-uniform mat4 u_MVMatrix;
+uniform mat4 u_MVP;
+uniform mat4 u_Model;
 
 uniform vec3 u_LightPos;
 
@@ -9,8 +9,8 @@ uniform vec4 u_AmbientLightColor;
 uniform float u_LightFadingFactor;
 
 vec4 ark_main(vec4 position, vec3 normal, out vec4 v_Color) {
-    vec3 modelViewVertex = vec3(u_MVMatrix * position);
-    vec3 modelViewNormal = vec3(u_MVMatrix * vec4(normal, 0.0));
+    vec3 modelViewVertex = vec3(u_Model * position);
+    vec3 modelViewNormal = vec3(u_Model * vec4(normal, 0.0));
     vec3 lightVector = normalize(u_LightPos - modelViewVertex);
 
     float distance = length(u_LightPos - modelViewVertex) / u_LightFadingFactor;
@@ -18,5 +18,5 @@ vec4 ark_main(vec4 position, vec3 normal, out vec4 v_Color) {
 
     v_Color = min(u_LightColor * diffuse + u_AmbientLightColor, 1.0);
 
-    return u_MVPMatrix * position;
+    return u_MVP * position;
 }

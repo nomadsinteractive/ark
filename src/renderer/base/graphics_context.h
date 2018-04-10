@@ -33,37 +33,26 @@ public:
 
     void glOrtho(float left, float right, float top, float bottom, float near, float far);
     void glUpdateMVPMatrix();
-    void glUpdateMVMatrix();
+    void glUpdateModelMatrix();
 
     void glPushMatrix();
     void glPopMatrix();
-    void translate(float x, float y, float z);
-    void scale(float x, float y, float z);
 
     void glUseProgram(const sp<GLProgram>& program);
-
-    const Matrix& projection() const;
 
 private:
     class MVPMatrix {
     public:
-        MVPMatrix();
-        MVPMatrix(const MVPMatrix& other);
+        MVPMatrix() = default;
+        MVPMatrix(const MVPMatrix& other) = default;
 
-        void translate(float x, float y, float z);
-        void scale(float x, float y, float z);
+        void setVP(const Matrix& vp);
 
-        void setProjection(const Matrix& projection);
+        const Matrix& mvp();
 
-        const Matrix& mvp(uint64_t tick);
-        const Matrix& mv(uint64_t tick);
-
+        const Matrix& model() const;
+        const Matrix& view() const;
         const Matrix& projection() const;
-
-        uint64_t lastModified() const;
-
-    private:
-        void update();
 
     private:
         Matrix _model;
@@ -71,9 +60,7 @@ private:
         Matrix _projection;
 
         Matrix _mvp;
-        Matrix _mv;
-
-        uint64_t _last_modified;
+        Matrix _vp;
     };
 
 private:

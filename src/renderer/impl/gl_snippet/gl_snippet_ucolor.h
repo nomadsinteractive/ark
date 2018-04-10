@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_GLES20_IMPL_GL_SNIPPET_UCOLOR_H_
-#define ARK_RENDERER_GLES20_IMPL_GL_SNIPPET_UCOLOR_H_
+#ifndef ARK_RENDERER_IMPL_GL_SNIPPET_UCOLOR_H_
+#define ARK_RENDERER_IMPL_GL_SNIPPET_UCOLOR_H_
 
 #include "core/forwarding.h"
 #include "core/inf/builder.h"

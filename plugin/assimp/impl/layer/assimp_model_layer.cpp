@@ -16,8 +16,9 @@
 #include "renderer/base/gl_texture.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/impl/render_command/draw_elements_3d.h"
+#include "renderer/impl/render_command/draw_elements.h"
 #include "renderer/impl/gl_snippet/gl_snippet_textures.h"
+#include "renderer/impl/gl_snippet/gl_snippet_update_model_matrix.h"
 
 #include "assimp/impl/io/ark_io_system.h"
 
@@ -61,13 +62,14 @@ AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const document& m
     _snippet = sp<GLSnippetDelegate>::make(_shader, _array_buffer);
     const sp<GLSnippetTextures> textures = _snippet->link<GLSnippetTextures>();
     textures->addTexture(0, texture);
+    _snippet->link<GLSnippetUpdateModelMatrix>();
     resourceLoaderContext->glResourceManager()->prepare(_array_buffer, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
     resourceLoaderContext->glResourceManager()->prepare(_index_buffer, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
 }
 
 sp<RenderCommand> AssimpModelLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
 {
-    return _render_command_pool.obtain<DrawElements3D>(GLDrawingContext(_snippet, _array_buffer.snapshot(nullptr), _index_buffer, GL_TRIANGLES), _shader);
+    return _render_command_pool.obtain<DrawElements>(GLDrawingContext(_snippet, _array_buffer.snapshot(nullptr), _index_buffer, GL_TRIANGLES), _shader);
 }
 
 bytearray AssimpModelLayer::loadArrayBuffer(aiMesh* mesh, float scale) const

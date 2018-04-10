@@ -78,24 +78,23 @@ const sp<GLContext>& GraphicsContext::glContext() const
 
 void GraphicsContext::glOrtho(float left, float right, float top, float bottom, float near, float far)
 {
-    _top->setProjection(Matrix::ortho(left, right, top, bottom, near, far));
+    _top->setVP(Matrix::ortho(left, right, top, bottom, near, far));
 }
 
 void GraphicsContext::glUpdateMVPMatrix()
 {
-    const Matrix& mvp = _top->mvp(_tick);
-    const GLProgram::Uniform& uniform = _program->getUniform("u_MVPMatrix");
+    const Matrix& mvp = _top->mvp();
+    const GLProgram::Uniform& uniform = _program->getUniform("u_MVP");
+    DCHECK(uniform, "Uniform u_MVP not found");
     uniform.setUniformMatrix4fv(1, GL_FALSE, mvp.value(), _tick);
 }
 
-void GraphicsContext::glUpdateMVMatrix()
+void GraphicsContext::glUpdateModelMatrix()
 {
-    const GLProgram::Uniform& uniform = _program->getUniform("u_MVMatrix");
-    if(uniform)
-    {
-        const Matrix& mv = _top->mv(_tick);
-        uniform.setUniformMatrix4fv(1, GL_FALSE, mv.value(), _tick);
-    }
+    const GLProgram::Uniform& uniform = _program->getUniform("u_Model");
+    DCHECK(uniform, "Uniform u_Model not found");
+    const Matrix& model = _top->model();
+    uniform.setUniformMatrix4fv(1, GL_FALSE, model.value(), _tick);
 }
 
 void GraphicsContext::glPushMatrix()
@@ -109,16 +108,6 @@ void GraphicsContext::glPopMatrix()
     DCHECK(_matrix_stack.size(), "Empty matrix stack");
     _matrix_stack.pop();
     _top = &_matrix_stack.top();
-}
-
-void GraphicsContext::translate(float x, float y, float z)
-{
-    _top->translate(x, y, z);
-}
-
-void GraphicsContext::scale(float x, float y, float z)
-{
-    _top->scale(x, y, z);
 }
 
 void GraphicsContext::glUseProgram(const sp<GLProgram>& program)
@@ -136,68 +125,30 @@ const sp<GLProgram>& GraphicsContext::program() const
     return _program;
 }
 
-const Matrix& GraphicsContext::projection() const
+void GraphicsContext::MVPMatrix::setVP(const Matrix& vp)
 {
-    return _top->projection();
+    _vp = vp;
+    _mvp = _vp * _model;
 }
 
-GraphicsContext::MVPMatrix::MVPMatrix()
-    : _last_modified(0)
+const Matrix& GraphicsContext::MVPMatrix::mvp()
 {
-}
-
-GraphicsContext::MVPMatrix::MVPMatrix(const GraphicsContext::MVPMatrix& other)
-    : _model(other._model), _view(other._view), _projection(other._projection), _mvp(other._mvp), _mv(other._mv), _last_modified(other._last_modified)
-{
-}
-
-void GraphicsContext::MVPMatrix::translate(float x, float y, float z)
-{
-    _view.translate(x, y, z);
-    _last_modified = 0;
-}
-
-void GraphicsContext::MVPMatrix::scale(float x, float y, float z)
-{
-    _view.scale(x, y, z);
-    _last_modified = 0;
-}
-
-void GraphicsContext::MVPMatrix::setProjection(const Matrix& projection)
-{
-    _projection = projection;
-    _last_modified = 0;
-}
-
-const Matrix& GraphicsContext::MVPMatrix::mvp(uint64_t tick)
-{
-    if(_last_modified < tick)
-        update();
     return _mvp;
 }
 
-const Matrix& GraphicsContext::MVPMatrix::mv(uint64_t tick)
+const Matrix& GraphicsContext::MVPMatrix::model() const
 {
-    if(_last_modified < tick)
-        update();
-    return _mv;
+    return _model;
+}
+
+const Matrix& GraphicsContext::MVPMatrix::view() const
+{
+    return _view;
 }
 
 const Matrix& GraphicsContext::MVPMatrix::projection() const
 {
     return _projection;
-}
-
-uint64_t GraphicsContext::MVPMatrix::lastModified() const
-{
-    return _last_modified;
-}
-
-void GraphicsContext::MVPMatrix::update()
-{
-    _mv = _view * _model;
-    _mvp = _projection * _mv;
-    _last_modified = 0;
 }
 
 }
