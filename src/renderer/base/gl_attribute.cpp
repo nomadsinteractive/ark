@@ -3,12 +3,12 @@
 namespace ark {
 
 GLAttribute::GLAttribute()
-    : _offset(0), _length(0)
+    : _offset(0), _length(0), _divisor(0)
 {
 }
 
 GLAttribute::GLAttribute(const String& name, const String& type, GLenum glType, uint32_t length, GLboolean normalized)
-    : _name(name), _type(type), _gl_type(glType), _offset(0), _length(length), _normalized(normalized)
+    : _name(name), _type(type), _gl_type(glType), _offset(0), _length(length), _normalized(normalized), _divisor(0)
 {
 }
 
@@ -32,6 +32,16 @@ void GLAttribute::setOffset(uint32_t offset)
     _offset = offset;
 }
 
+uint32_t GLAttribute::divisor() const
+{
+    return _divisor;
+}
+
+void GLAttribute::setDivisor(uint32_t divisor)
+{
+    _divisor = divisor;
+}
+
 uint32_t GLAttribute::length() const
 {
     return _length;
@@ -53,6 +63,8 @@ void GLAttribute::setVertexPointer(GLuint location, GLsizei stride) const
 {
     glEnableVertexAttribArray(location);
     glVertexAttribPointer(location, _length, _gl_type, _normalized, stride, reinterpret_cast<void*>(_offset));
+    if(_divisor)
+        glVertexAttribDivisor(location, _divisor);
 }
 
 

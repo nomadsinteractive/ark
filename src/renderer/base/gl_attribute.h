@@ -20,6 +20,9 @@ public:
     uint32_t offset() const;
     void setOffset(uint32_t offset);
 
+    uint32_t divisor() const;
+    void setDivisor(uint32_t divisor);
+
     uint32_t length() const;
     uint32_t size() const;
 
@@ -33,6 +36,8 @@ private:
     uint32_t _offset;
     uint32_t _length;
     GLboolean _normalized;
+
+    uint32_t _divisor;
 };
 
 }

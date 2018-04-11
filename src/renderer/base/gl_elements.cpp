@@ -9,6 +9,7 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_command/draw_elements.h"
+#include "renderer/impl/render_command/draw_elements_instanced.h"
 #include "renderer/impl/gl_snippet/gl_snippet_active_texture.h"
 #include "renderer/inf/gl_model.h"
 
@@ -31,6 +32,17 @@ sp<RenderCommand> GLElements::render(const LayerContext::Snapshot& renderContext
     {
         const array<uint8_t> buf = _model->getArrayBuffer(_memory_pool, renderContext, x, y);
         return _render_command_pool->obtain<DrawElements>(GLDrawingContext(_snippet, _array_buffer.snapshot(buf), indexBuffer, _mode), _shader);
+    }
+    return nullptr;
+}
+
+sp<RenderCommand> GLElements::renderInstanced(const LayerContext::Snapshot& renderContext, float x, float y)
+{
+    const GLBuffer indexBuffer = _model->getIndexBuffer(_resource_manager, renderContext);
+    if(indexBuffer)
+    {
+        const array<uint8_t> buf = _model->getArrayBuffer(_memory_pool, renderContext, x, y);
+        return _render_command_pool->obtain<DrawElementsInstanced>(GLDrawingContext(_snippet, _array_buffer.snapshot(buf), indexBuffer, _mode), _shader, indexBuffer.length<uint16_t>() / 6);
     }
     return nullptr;
 }

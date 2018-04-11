@@ -19,6 +19,7 @@ public:
     GLElements(const sp<GLShader>& shader, const sp<GLTexture>& texture, const sp<GLModel>& model, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     sp<RenderCommand> render(const LayerContext::Snapshot& renderContext, float x, float y);
+    sp<RenderCommand> renderInstanced(const LayerContext::Snapshot& renderContext, float x, float y);
 
 private:
     sp<GLResourceManager> _resource_manager;

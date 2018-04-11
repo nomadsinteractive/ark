@@ -1,7 +1,6 @@
 #include "renderer/impl/render_command/draw_elements.h"
 
 #include "renderer/base/gl_shader.h"
-#include "renderer/base/gl_texture.h"
 #include "renderer/base/graphics_context.h"
 
 namespace ark {
