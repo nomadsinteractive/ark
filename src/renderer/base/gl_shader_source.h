@@ -24,7 +24,7 @@ public:
 
     sp<GLProgram> makeGLProgram(GraphicsContext& graphicsContext) const;
 
-    void addPredefinedAttribute(const String& name, const String& type, uint32_t scopes = 0);
+    GLAttribute& addPredefinedAttribute(const String& name, const String& type, uint32_t scopes = 0);
     void addUniform(const String& name, GLUniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed);
 
     const sp<GLSnippet>& snippet() const;
@@ -52,10 +52,10 @@ private:
 
     GLShaderPreprocessor _vertex;
     GLShaderPreprocessor _fragment;
-    uint32_t _stride;
     sp<RenderController> _render_controller;
 
     std::map<String, GLAttribute> _attributes;
+    std::map<uint32_t, uint32_t> _stride;
     List<GLUniform> _uniforms;
 
     sp<GLSnippet> _snippet;

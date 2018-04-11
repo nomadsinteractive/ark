@@ -1,6 +1,8 @@
 #ifndef ARK_RENDERER_BASE_GL_SHADER_H_
 #define ARK_RENDERER_BASE_GL_SHADER_H_
 
+#include <map>
+
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/collection/list.h"
@@ -57,6 +59,8 @@ public:
 
     const GLAttribute& getAttribute(const String& name) const;
 
+    void bind(const GLBuffer& buffer, uint32_t divisor = 0);
+
 //[[script::bindings::auto]]
     sp<Varyings> makeVaryings() const;
 
@@ -78,8 +82,12 @@ public:
     };
 
 private:
+    void bindAttributesByDivisor(GraphicsContext& graphicsContext, const sp<GLProgram>& program, uint32_t divisor) const;
+
+private:
     sp<GLShaderSource> _source;
     sp<GLProgram> _program;
+    sp<std::map<uint32_t, GLBuffer>> _array_buffers;
 };
 
 }

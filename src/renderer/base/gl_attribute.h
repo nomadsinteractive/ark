@@ -29,6 +29,9 @@ public:
     void setVertexPointer(GLuint location, GLsizei stride) const;
 
 private:
+    void setVertexPointer(GLuint location, GLsizei stride, uint32_t length, uint32_t offset) const;
+
+private:
     String _name;
     String _type;
     GLenum _gl_type;

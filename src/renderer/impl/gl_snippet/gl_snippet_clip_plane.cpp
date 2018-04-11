@@ -33,7 +33,7 @@ void GLSnippetClipPlane::preCompile(GraphicsContext& graphicsContext, GLShaderPr
         for(const auto& i : _planes)
         {
             const String uName = Strings::sprintf("u_Plane%d", i.first);
-            context.addVertexSource(Strings::sprintf("gl_ClipDistance[%d] = dot(vec4(a_Position, 1.0), %s);", i.first, uName.c_str()));
+            context.addVertexSource(Strings::sprintf("gl_ClipDistance[%d] = dot(a_Position, %s);", i.first, uName.c_str()));
         }
 }
 

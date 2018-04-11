@@ -21,7 +21,7 @@ namespace ark {
 GLShaderSource::GLShaderSource(const String& vertex, const String& fragment, const sp<RenderController>& renderController)
     : _preprocessor_context(new GLShaderPreprocessorContext()),
       _vertex(GLShaderPreprocessor::SHADER_TYPE_VERTEX, vertex),
-      _fragment(GLShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment), _stride(0),
+      _fragment(GLShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment),
       _render_controller(renderController)
 {
 }
@@ -38,13 +38,15 @@ sp<GLProgram> GLShaderSource::makeGLProgram(GraphicsContext& graphicsContext) co
     return sp<GLProgram>::make(glContext->getGLSLVersion(), _vertex.process(glContext), _fragment.process(glContext));
 }
 
-void GLShaderSource::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
+GLAttribute& GLShaderSource::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
 {
     if(_attributes.find(name) == _attributes.end())
         _attributes[name] = getPredefinedAttribute(name, type);
 
     if(scopes & GLShaderPreprocessor::SHADER_TYPE_FRAGMENT)
         _preprocessor_context->_fragment_in.push_back(std::pair<String, String>(type, name));
+
+    return _attributes[name];
 }
 
 void GLShaderSource::addSnippet(const sp<GLSnippet>& snippet)
@@ -148,9 +150,12 @@ void GLShaderSource::initialize()
         }
     }
 
-    uint32_t mod = _stride % sizeof(GLfloat);
-    if(mod != 0)
-        _stride += (sizeof(GLfloat) - mod);
+    for(auto& iter : _stride)
+    {
+        uint32_t mod = iter.second % sizeof(GLfloat);
+        if(mod != 0)
+            iter.second += (sizeof(GLfloat) - mod);
+    }
 
     for(const auto& i : attributes)
     {
@@ -182,8 +187,11 @@ void GLShaderSource::addAttribute(const String& name, const String& type)
         addPredefinedAttribute(name, type);
 
     GLAttribute& attr = _attributes[name];
-    attr.setOffset(_stride);
-    _stride += attr.size();
+    if(_stride.find(attr.divisor()) == _stride.end())
+        _stride[attr.divisor()] = 0;
+    uint32_t& s = _stride[attr.divisor()];
+    attr.setOffset(s);
+    s += attr.size();
 }
 
 void GLShaderSource::addUniform(const String& name, GLUniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed)
@@ -203,7 +211,8 @@ void GLShaderSource::loadPredefinedAttribute(const document& manifest)
         const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
         const String attrName = name.startsWith("a_") ? name.substr(2) : name;
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
-        addPredefinedAttribute(attrName, type);
+        uint32_t divisor = Documents::getAttribute<uint32_t>(i, "divisor", 0);
+        addPredefinedAttribute(attrName, type).setDivisor(divisor);
     }
 }
 

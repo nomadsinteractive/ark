@@ -61,8 +61,26 @@ uint32_t GLAttribute::size() const
 
 void GLAttribute::setVertexPointer(GLuint location, GLsizei stride) const
 {
+    if(_length <= 4)
+        setVertexPointer(location, stride, _length, _offset);
+    else if(_length == 16)
+    {
+        uint32_t offset = size() / 4;
+        for(uint32_t i = 0; i < 4; i++)
+            setVertexPointer(location + i, stride, 4, _offset + offset * i);
+    }
+    else if(_length == 9)
+    {
+        uint32_t offset = size() / 3;
+        for(uint32_t i = 0; i < 3; i++)
+            setVertexPointer(location + i, stride, 3, _offset + offset * i);
+    }
+}
+
+void GLAttribute::setVertexPointer(GLuint location, GLsizei stride, uint32_t length, uint32_t offset) const
+{
     glEnableVertexAttribArray(location);
-    glVertexAttribPointer(location, _length, _gl_type, _normalized, stride, reinterpret_cast<void*>(_offset));
+    glVertexAttribPointer(location, length, _gl_type, _normalized, stride, reinterpret_cast<void*>(offset));
     if(_divisor)
         glVertexAttribDivisor(location, _divisor);
 }
