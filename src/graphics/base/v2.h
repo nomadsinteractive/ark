@@ -21,6 +21,12 @@ public:
     bool operator !=(const V2& other) const;
     const V2& operator =(const V2& other);
 
+    friend V2 operator +(const V2& lvalue, const V2& rvalue);
+    friend V2 operator -(const V2& lvalue, const V2& rvalue);
+    friend V2 operator *(const V2& lvalue, const V2& rvalue);
+    friend V2 operator /(const V2& lvalue, const V2& rvalue);
+
+
     float x() const;
     float y() const;
     float z() const;

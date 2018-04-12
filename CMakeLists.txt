@@ -192,6 +192,8 @@ ark_setup_tools(ark_gen_class_hierarchy)
 
 ark_gen_builtin_plugin_class(ark ark framework_plugin src/core src/graphics src/renderer/base src/renderer/impl)
 ark_gen_plugin_class(app builtin ark application_plugin src/app)
+ark_gen_builtin_plugin_class(gles30 ark::gles30 gles30_plugin src/renderer/gles30)
+
 ark_gen_class_hierarchy(ark ark ${ARK_SRC_DIR}/src core graphics renderer/base renderer/impl app)
 
 ark_gen_string_table(shaders ark::res src/renderer/shaders)

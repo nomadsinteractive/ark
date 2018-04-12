@@ -274,6 +274,8 @@ GLAttribute GLShaderSource::getPredefinedAttribute(const String& name, const Str
         return GLAttribute("a_" + name, type, GL_UNSIGNED_BYTE, 3, GL_TRUE);
     if(type == "uint8")
         return GLAttribute("a_" + name, type, GL_UNSIGNED_BYTE, 1, GL_FALSE);
+    if(type == "mat4")
+        return GLAttribute("a_" + name, type, GL_FLOAT, 16, GL_FALSE);
     DFATAL("Unknown attribute type \"%s\"", type.c_str());
     return GLAttribute();
 }

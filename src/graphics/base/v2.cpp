@@ -56,6 +56,26 @@ const V2& V2::operator =(const V2& other)
     return *this;
 }
 
+V2 operator +(const V2& lvalue, const V2& rvalue)
+{
+    return V2(lvalue.x() + rvalue.x(), lvalue.y() + rvalue.y());
+}
+
+V2 operator -(const V2& lvalue, const V2& rvalue)
+{
+    return V2(lvalue.x() - rvalue.x(), lvalue.y() - rvalue.y());
+}
+
+V2 operator *(const V2& lvalue, const V2& rvalue)
+{
+    return V2(lvalue.x() * rvalue.x(), lvalue.y() * rvalue.y());
+}
+
+V2 operator /(const V2& lvalue, const V2& rvalue)
+{
+    return V2(lvalue.x() / rvalue.x(), lvalue.y() / rvalue.y());
+}
+
 float V2::x() const
 {
     return _x;
