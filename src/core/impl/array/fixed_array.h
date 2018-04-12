@@ -21,7 +21,7 @@ public:
         return _data.size();
     }
 
-    virtual T* array() override {
+    virtual T* buf() override {
         return _data.data();
     }
 

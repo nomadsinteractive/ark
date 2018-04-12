@@ -61,6 +61,7 @@ private:
     sp<GLSnippet> _snippet;
 
     friend class GLShader;
+    friend class GLShaderBindings;
     friend class GLShaderPreprocessorContext;
 
 };

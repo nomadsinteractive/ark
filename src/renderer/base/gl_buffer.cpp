@@ -25,7 +25,7 @@ public:
         const bytearray buf = _buffer->val();
         DCHECK(_size <= buf->length(), "Buffer length mismatch");
         DCHECK(size <= buf->length(), "Buffer overflow");
-        glBufferSubData(target, 0, size, buf->array());
+        glBufferSubData(target, 0, size, buf->buf());
     }
 
 private:
@@ -98,9 +98,9 @@ void GLBuffer::Stub::prepare(GraphicsContext& graphicsContext, const bytearray& 
         glBindBuffer(_type, _id);
         _size = transientData->length();
         if(osize < transientData->length())
-            glBufferData(_type, _size, transientData->array(), _usage);
+            glBufferData(_type, _size, transientData->buf(), _usage);
         else
-            glBufferSubData(_type, 0, _size, transientData->array());
+            glBufferSubData(_type, 0, _size, transientData->buf());
         glBindBuffer(_type, 0);
     }
 }

@@ -99,14 +99,14 @@ template<> ARK_API float Conversions::to<sp<Numeric>, float>(const sp<Numeric>& 
 template<> ARK_API String Conversions::to<floatarray, String>(const floatarray& val)
 {
     StringBuffer sb;
-    sb << '[' << Strings::join<float>(val->array(), 0, val->length()) << ']';
+    sb << '[' << Strings::join<float>(val->buf(), 0, val->length()) << ']';
     return sb.str();
 }
 
 template<> ARK_API String Conversions::to<indexarray, String>(const indexarray& val)
 {
     StringBuffer sb;
-    sb << '[' << Strings::join<uint16_t>(val->array(), 0, val->length()) << ']';
+    sb << '[' << Strings::join<uint16_t>(val->buf(), 0, val->length()) << ']';
     return sb.str();
 }
 

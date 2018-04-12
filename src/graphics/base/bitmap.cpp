@@ -47,7 +47,7 @@ const sp<Array<uint8_t>>& Bitmap::bytes() const
 
 uint8_t* Bitmap::at(uint32_t x, uint32_t y) const
 {
-    return _bytes ? _bytes->array() + y * _row_bytes + x * _channels : nullptr;
+    return _bytes ? _bytes->buf() + y * _row_bytes + x * _channels : nullptr;
 }
 
 void Bitmap::draw(void* buf, uint32_t width, uint32_t height, int32_t x, int32_t y, int32_t stride)

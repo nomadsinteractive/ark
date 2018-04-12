@@ -1,10 +1,10 @@
 #ifndef ARK_RENDERER_BASE_GL_DRAWING_CONTEXT_H_
 #define ARK_RENDERER_BASE_GL_DRAWING_CONTEXT_H_
 
+#include <map>
+
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
-
-#include "graphics/base/color.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/gl_buffer.h"
@@ -15,16 +15,17 @@ namespace ark {
 
 class ARK_API GLDrawingContext {
 public:
-    GLDrawingContext(const sp<GLSnippet>& snippet, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer& indexBuffer, GLenum mode);
+    GLDrawingContext(const sp<GLShaderBindings>& shaderBindings, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer& indexBuffer, GLenum mode);
     GLDrawingContext(const GLDrawingContext& other) = default;
     GLDrawingContext(GLDrawingContext&& other) = default;
 
     void preDraw(GraphicsContext& graphicsContext, const GLShader& shader);
     void postDraw(GraphicsContext& graphicsContext);
 
-    sp<GLSnippet> _snippet;
+    sp<GLShaderBindings> _shader_bindings;
 
     GLBuffer::Snapshot _array_buffer;
+    std::map<uint32_t, GLBuffer::Snapshot> _instanced_array_buffers;
     GLBuffer _index_buffer;
 
     GLenum _mode;

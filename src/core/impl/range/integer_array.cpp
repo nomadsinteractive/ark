@@ -15,9 +15,9 @@ uint32_t IntegerArray::length()
     return _array->length();
 }
 
-int32_t* IntegerArray::array()
+int32_t* IntegerArray::buf()
 {
-    return _array->array();
+    return _array->buf();
 }
 
 bool IntegerArray::hasNext()
@@ -28,7 +28,7 @@ bool IntegerArray::hasNext()
 int32_t IntegerArray::next()
 {
     DCHECK(_iter < _array->length(), "Index out of bounds, _iter = %d, length = %d", _iter, _array->length());
-    return _array->array()[_iter++];
+    return _array->buf()[_iter++];
 }
 
 IntegerArray::DICTIONARY_IMPL1::DICTIONARY_IMPL1(const String& value)

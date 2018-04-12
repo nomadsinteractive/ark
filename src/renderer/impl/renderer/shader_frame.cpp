@@ -33,7 +33,7 @@ public:
         float top = g_isOriginBottom ? y + _size->height() : y, bottom = g_isOriginBottom ? y : y + _size->height();
         uint16_t uvtop = g_isOriginBottom ? 0xffff : 0, uvbottom = g_isOriginBottom ? 0 : 0xffff;
         FixedArray<float, 16> buffer({x, bottom, 0, 0, x, top, 0, 0, x + _size->width(), bottom, 0, 0, x + _size->width(), top, 0, 0});
-        uint16_t* ip = reinterpret_cast<uint16_t*>(buffer.array());
+        uint16_t* ip = reinterpret_cast<uint16_t*>(buffer.buf());
         ip[6] = 0;
         ip[7] = uvbottom;
         ip[14] = 0;
@@ -43,7 +43,7 @@ public:
         ip[30] = 0xffff;
         ip[31] = uvtop;
         const bytearray preallocated = memoryPool.allocate(64);
-        memcpy(preallocated->array(), buffer.array(), 16 * sizeof(GLfloat));
+        memcpy(preallocated->buf(), buffer.buf(), 16 * sizeof(GLfloat));
         return preallocated;
     }
 

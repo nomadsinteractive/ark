@@ -105,7 +105,7 @@ public:
         static std::regex PATTERN("([\\-+\\s\\w\\d_$@.]+)\\s+([><]=?)\\s+([\\-+\\s\\w\\d_$@.]+)");
         const array<String> matches = expr.match(PATTERN);
         DCHECK(matches && matches->length() == 4, "Illegal expression: \"%s\" syntax error", expr.c_str());
-        const String* ptr = matches->array();
+        const String* ptr = matches->buf();
         const sp<Builder<Numeric>> lvalue = factory.ensureBuilder<Numeric>(ptr[1]);
         const String& op = ptr[2];
         const sp<Builder<Numeric>> rvalue = factory.ensureBuilder<Numeric>(ptr[3]);

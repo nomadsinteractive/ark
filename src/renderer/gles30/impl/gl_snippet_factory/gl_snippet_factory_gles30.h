@@ -1,14 +1,14 @@
 #ifndef ARK_RENDERER_GLES30_IMPL_GL_SNIPPET_FACTORY_GL_SNIPPET_FACTORY_GLES30_H_
 #define ARK_RENDERER_GLES30_IMPL_GL_SNIPPET_FACTORY_GL_SNIPPET_FACTORY_GLES30_H_
 
-#include "renderer/inf/gl_procedure_factory.h"
+#include "renderer/inf/gl_snippet_factory.h"
 
 namespace ark {
 namespace gles30 {
 
 class GLSnippetFactoryGLES30 : public GLSnippetFactory {
 public:
-    virtual sp<GLSnippet> createCoreGLSnippet(GLResourceManager& glResourceManager, const GLShader& shader, const GLBuffer& arrayBuffer) override;
+    virtual sp<GLSnippet> createCoreGLSnippet(GLResourceManager& glResourceManager, const GLShader& shader, const sp<GLShaderBindings>& shaderBindings) override;
 };
 
 }

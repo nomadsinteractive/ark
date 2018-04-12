@@ -23,7 +23,7 @@ public:
 
     uint32_t getGLSLVersion() const;
 
-    sp<GLSnippet> createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer) const;
+    sp<GLSnippet> createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const sp<GLShaderBindings>& shaderBindings) const;
 
 private:
     Ark::GLVersion _version;

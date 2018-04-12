@@ -1,6 +1,6 @@
 #include "renderer/base/gl_context.h"
 
-#include "renderer/inf/gl_procedure_factory.h"
+#include "renderer/inf/gl_snippet_factory.h"
 
 namespace ark {
 
@@ -53,10 +53,10 @@ uint32_t GLContext::getGLSLVersion() const
     return 110;
 }
 
-sp<GLSnippet> GLContext::createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer) const
+sp<GLSnippet> GLContext::createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const sp<GLShaderBindings>& shaderBindings) const
 {
     DCHECK(_gl_procedure_factory, "Uninitialized GLContext");
-    return _gl_procedure_factory->createCoreGLSnippet(glResourceManager, shader, arrayBuffer);
+    return _gl_procedure_factory->createCoreGLSnippet(glResourceManager, shader, shaderBindings);
 }
 
 }

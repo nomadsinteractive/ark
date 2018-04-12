@@ -25,7 +25,7 @@ public:
         const std::vector<String> elems = value.split(',');
         const array<sp<Builder<T>>> builders = sp<DynamicArray<sp<Builder<T>>>>::make(elems.size());
         for(uint32_t i = 0; i < elems.size(); i++)
-            builders->array()[i] = factory.getBuilder<Numeric>(elems[i]);
+            builders->buf()[i] = factory.getBuilder<Numeric>(elems[i]);
         return builders;
     }
 

@@ -51,7 +51,7 @@ public:
         stbi_image_free(_array);
     }
 
-    virtual uint8_t* array() override {
+    virtual uint8_t* buf() override {
         return reinterpret_cast<uint8_t*>(_array);
     }
 

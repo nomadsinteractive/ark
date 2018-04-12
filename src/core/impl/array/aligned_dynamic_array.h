@@ -20,7 +20,7 @@ public:
         return _length;
     }
 
-    virtual T* array() override {
+    virtual T* buf() override {
         return _ptr;
     }
 

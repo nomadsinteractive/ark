@@ -82,7 +82,7 @@ bytearray GLModelNinePatch::getArrayBuffer(MemoryPool& memoryPool, const LayerCo
     const uint32_t floatStride = _stride / 4;
     DCHECK(size > 0, "Empty RenderContext");
     const bytearray preallocated = memoryPool.allocate(size * 16 * _stride);
-    GLfloat* buf = reinterpret_cast<GLfloat*>(preallocated->array());
+    GLfloat* buf = reinterpret_cast<GLfloat*>(preallocated->buf());
     memset(buf, 0, preallocated->length());
     for(const RenderObject::Snapshot& renderObject : renderContext._items)
     {
@@ -126,8 +126,8 @@ void GLModelNinePatch::fillMesh(float* mesh, Array<float>& xArray, Array<float>&
 {
     uint32_t i, j;
     uint32_t xLen = xArray.length(), yLen = yArray.length();
-    float* xData = xArray.array();
-    float* yData = yArray.array();
+    float* xData = xArray.buf();
+    float* yData = yArray.buf();
     for(i = 0; i < yLen; i++) {
         for(j = 0; j < xLen; j++) {
             mesh[offset] = xData[j] + x;

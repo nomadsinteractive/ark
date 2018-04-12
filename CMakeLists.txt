@@ -92,6 +92,7 @@ aux_source_directory(src/renderer/gles20/impl/gl_snippet_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/gles30 LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/gles30/impl/gl_snippet LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/gles30/impl/gl_snippet_factory LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/gles30/impl/layer LOCAL_SRC_LIST)
 
 aux_source_directory(src/app/base LOCAL_SRC_LIST)
 if(NOT ANDROID)

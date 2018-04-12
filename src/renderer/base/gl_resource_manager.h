@@ -53,6 +53,8 @@ public:
     sp<GLTexture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable);
     GLBuffer createGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage);
 
+    GLBuffer createDynamicArrayBuffer();
+
     const sp<GLRecycler>& recycler() const;
 
     template<typename T, typename... Args> sp<GLResource> createGLResource(Args&&... args) {

@@ -43,8 +43,6 @@ public:
     Slot preprocess(GraphicsContext& graphicsContext);
 
     void bindUniforms(GraphicsContext& graphicsContext) const;
-    void bindAttributes(GraphicsContext& graphicsContext) const;
-    void bindAttributes(GraphicsContext& graphicsContext, const sp<GLProgram>& program) const;
 
     const sp<GLShaderSource>& source() const;
 
@@ -58,8 +56,6 @@ public:
     uint32_t stride() const;
 
     const GLAttribute& getAttribute(const String& name) const;
-
-    void bind(const GLBuffer& buffer, uint32_t divisor = 0);
 
 //[[script::bindings::auto]]
     sp<Varyings> makeVaryings() const;
@@ -87,7 +83,8 @@ private:
 private:
     sp<GLShaderSource> _source;
     sp<GLProgram> _program;
-    sp<std::map<uint32_t, GLBuffer>> _array_buffers;
+
+    friend class GLShaderBindings;
 };
 
 }

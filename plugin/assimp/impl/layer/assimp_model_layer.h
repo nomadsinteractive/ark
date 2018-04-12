@@ -52,7 +52,7 @@ private:
     std::unordered_map<int32_t, sp<aiScene>> _scences;
     GLBuffer _array_buffer;
     GLBuffer _index_buffer;
-    sp<GLSnippetDelegate> _snippet;
+    sp<GLShaderBindings> _shader_bindings;
     ObjectPool _render_command_pool;
 };
 

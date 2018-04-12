@@ -30,7 +30,7 @@ bytearray GLModelQuad::getArrayBuffer(MemoryPool& memoryPool, const LayerContext
 
     const bytearray preallocated = memoryPool.allocate(len * 4);
 
-    uint8_t* buf = preallocated->array();
+    uint8_t* buf = preallocated->buf();
     for(const RenderObject::Snapshot& renderObject : renderContext._items) {
         const Atlas::Item& texCoord = _atlas->at(renderObject._type);
         Transform::Snapshot transform = renderObject._transform;

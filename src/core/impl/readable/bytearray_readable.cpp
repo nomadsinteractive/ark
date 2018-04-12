@@ -14,7 +14,7 @@ BytearrayReadable::BytearrayReadable(const bytearray& array)
 uint32_t BytearrayReadable::read(void* buffer, uint32_t size)
 {
     uint32_t s = std::min<uint32_t>(size, remaining());
-    memcpy(buffer, _bytearray->array() + _position, s);
+    memcpy(buffer, _bytearray->buf() + _position, s);
     _position += s;
     return s;
 }

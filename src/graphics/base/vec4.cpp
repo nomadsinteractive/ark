@@ -271,7 +271,7 @@ sp<VV4> Vec4::DICTIONARY::build(const sp<Scope>& args)
 {
     if(_xyzw)
     {
-        auto s = _xyzw->array();
+        auto s = _xyzw->buf();
         return sp<Vec4>::make(s[0]->build(args), s[1]->build(args), s[2]->build(args), s[3]->build(args));
     }
     return sp<VV4::Impl>::make(_v4);

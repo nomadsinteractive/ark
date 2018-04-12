@@ -31,8 +31,8 @@ public:
     virtual bytearray val() override {
         const uint32_t bolierPlateLength = _boiler_plate.length();
         bytearray array = sp<DynamicArray<uint8_t>>::make((bolierPlateLength + 2) * _object_count * 2 - 4);
-        uint16_t* buf = reinterpret_cast<uint16_t*>(array->array());
-        uint16_t* src = _boiler_plate.array();
+        uint16_t* buf = reinterpret_cast<uint16_t*>(array->buf());
+        uint16_t* src = _boiler_plate.buf();
         for(uint32_t i = 0; i < _object_count; i ++) {
             for(uint32_t j = 0; j < bolierPlateLength; j ++)
                 buf[j] = static_cast<uint16_t>(src[j] + i * 16);
@@ -59,7 +59,7 @@ public:
     bytearray val() {
         bytearray result = sp<DynamicArray<uint8_t>>::make(_object_count * 12);
 
-        uint16_t* buf = reinterpret_cast<uint16_t*>(result->array());
+        uint16_t* buf = reinterpret_cast<uint16_t*>(result->buf());
         uint32_t idx = 0;
         for(uint32_t i = 0; i < _object_count; i ++) {
             uint16_t offset = static_cast<uint16_t>(i * 4);
@@ -88,7 +88,7 @@ public:
     bytearray val() {
         const bytearray result = sp<DynamicArray<uint8_t>>::make(_object_count * 2);
 
-        uint16_t* buf = reinterpret_cast<uint16_t*>(result->array());
+        uint16_t* buf = reinterpret_cast<uint16_t*>(result->buf());
         uint32_t idx = 0;
         for(uint32_t i = 0; i < _object_count; i ++) {
             uint16_t offset = static_cast<uint16_t>(i);
@@ -197,6 +197,11 @@ GLBuffer GLResourceManager::createGLBuffer(const sp<GLBuffer::Uploader>& uploade
     return GLBuffer(_recycler, uploader, type, usage);
 }
 
+GLBuffer GLResourceManager::createDynamicArrayBuffer()
+{
+    return GLBuffer(_recycler, nullptr, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+}
+
 const sp<GLRecycler>& GLResourceManager::recycler() const
 {
     return _recycler;
@@ -208,7 +213,7 @@ GLBuffer GLResourceManager::createStaticBuffer(GLResourceManager::BufferName buf
     switch(bufferName)
     {
         case BUFFER_NAME_TRANGLES:
-            DCHECK(bufferLength % 6 == 0, "Length of index array for triangles should be 6 times of an integer.");
+            DCHECK(bufferLength % 3 == 0, "Length of index array for triangles should be 3 times of an integer.");
             return GLBuffer(_recycler, sp<Variable<bytearray>>::adopt(new TrianglesIndexArrayVariable(bufferLength / 3)), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, bufferSize);
         case BUFFER_NAME_NINE_PATCH:
             DCHECK((bufferLength + 2) % 30 == 0, "Illegal length of nine patch index array.");

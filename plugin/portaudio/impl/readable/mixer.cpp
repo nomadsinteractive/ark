@@ -16,7 +16,7 @@ uint32_t Mixer::read(void* buffer, uint32_t size)
 {
     uint32_t readSize = 0;
     int16_t* buf = reinterpret_cast<int16_t*>(buffer);
-    int16_t* mixingBuf = _buffer->array();
+    int16_t* mixingBuf = _buffer->buf();
     bool eof = false;
 
     DCHECK(_buffer->length() >= (size / 2), "Out of buffer, length: %d, available: %d", size / 2, _buffer->length());

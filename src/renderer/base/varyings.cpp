@@ -46,7 +46,7 @@ Varyings::Snapshot Varyings::snapshot(MemoryPool& memoryPool) const
         return Snapshot(nullptr);
 
     const bytearray bytes = memoryPool.allocate(_size);
-    uint8_t* ptr = reinterpret_cast<uint8_t*>(bytes->array());
+    uint8_t* ptr = reinterpret_cast<uint8_t*>(bytes->buf());
     for(const auto iter : _varyings)
         iter.second.settle(ptr);
     return bytes;
@@ -122,7 +122,7 @@ void Varyings::Snapshot::apply(void* buf, uint32_t stride, uint32_t count) const
     uint8_t* ptr = reinterpret_cast<uint8_t*>(buf);
     for(uint32_t i = 0; i < count; i++)
     {
-        memcpy(ptr, _bytes->array(), _bytes->length());
+        memcpy(ptr, _bytes->buf(), _bytes->length());
         ptr += stride;
     }
 }

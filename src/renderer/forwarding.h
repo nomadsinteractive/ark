@@ -19,6 +19,7 @@ class GLRecycler;
 class GLResource;
 class GLResourceManager;
 class GLShader;
+class GLShaderBindings;
 class GLShaderPreprocessor;
 class GLShaderPreprocessorContext;
 class GLShaderSource;

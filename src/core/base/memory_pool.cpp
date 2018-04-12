@@ -95,9 +95,9 @@ MemoryPool::PooledByteArray::PooledByteArray(const bytearray& delegate)
 {
 }
 
-uint8_t* MemoryPool::PooledByteArray::array()
+uint8_t* MemoryPool::PooledByteArray::buf()
 {
-    return _delegate->array();
+    return _delegate->buf();
 }
 
 uint32_t MemoryPool::PooledByteArray::length()

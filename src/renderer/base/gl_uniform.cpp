@@ -29,7 +29,7 @@ public:
     }
 
     virtual void flat(void* buf) override {
-        memcpy(buf, _buffer.front()->array(), _size);
+        memcpy(buf, _buffer.front()->buf(), _size);
     }
 
     virtual uint32_t size() override {
@@ -42,7 +42,7 @@ public:
 
     virtual void run() override {
         if(!_changed || _changed->hasChanged()) {
-            _delegate->flat(_buffer.back()->array());
+            _delegate->flat(_buffer.back()->buf());
             _buffer.swap();
             _notifier->change();
         }

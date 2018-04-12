@@ -47,7 +47,7 @@ public:
         const std::vector<String> elems = value.split(',');
         const array<T> values = sp<DynamicArray<T>>::make(elems.size());
         for(uint32_t i = 0; i < elems.size(); i++)
-            values->array()[i] = parse<T>(elems[i]);
+            values->buf()[i] = parse<T>(elems[i]);
         return values;
     }
 

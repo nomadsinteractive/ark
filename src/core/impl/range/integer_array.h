@@ -12,10 +12,10 @@ namespace ark {
 
 class ARK_API IntegerArray : public Array<int32_t>, public Range {
 public:
-    IntegerArray(const sp<Array<int32_t>>& array);
+    IntegerArray(const sp<Array<int32_t>>& buf);
 
     virtual uint32_t length() override;
-    virtual int32_t* array() override;
+    virtual int32_t* buf() override;
 
     virtual bool hasNext() override;
     virtual int32_t next() override;

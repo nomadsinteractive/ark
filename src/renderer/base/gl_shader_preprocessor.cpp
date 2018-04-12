@@ -132,7 +132,7 @@ String GLShaderPreprocessor::process(const GLContext& glContext) const
     annotations.insert(_annotations.begin(), _annotations.end());
 
     sb << _source.replace(var_pattern, [&annotations] (Array<String>& matches)->String {
-        const String& varName = matches.array()[1];
+        const String& varName = matches.buf()[1];
         const auto iter = annotations.find(varName);
         DCHECK(iter != annotations.end(), "Cannot find constant \"%s\" in RenderEngine", varName.c_str());
         return iter->second;

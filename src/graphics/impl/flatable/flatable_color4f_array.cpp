@@ -14,7 +14,7 @@ FlatableColor4fArray::FlatableColor4fArray(const sp<Array<Color>>& colorArray)
 
 void FlatableColor4fArray::flat(void* buf)
 {
-    Color* colors = _color_array->array();
+    Color* colors = _color_array->buf();
     V4* vbuf = reinterpret_cast<V4*>(buf);
     for(uint32_t i = 0; i < _color_array->length(); i++)
         vbuf[i] = colors[i].val();

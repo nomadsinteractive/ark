@@ -63,7 +63,7 @@ template<> ARK_API V4 Conversions::to<String, V4>(const String& s)
 {
     const array<float> val = Strings::toArray<float>(Strings::unwrap(s, '(', ')'));
     DCHECK(val->length() == 4, "Illegal vector4 format \"%s\"", s.c_str());
-    float* ptr = val->array();
+    float* ptr = val->buf();
     return V4(ptr[0], ptr[1], ptr[2], ptr[3]);
 }
 

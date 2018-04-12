@@ -4,6 +4,7 @@
 
 #include "renderer/base/gl_program.h"
 #include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_shader_bindings.h"
 #include "renderer/base/graphics_context.h"
 
 #include "platform/gl/gl.h"
@@ -11,8 +12,8 @@
 namespace ark {
 namespace gles30 {
 
-GLVertexArray::GLVertexArray(const GLShader& shader, const GLBuffer& arrayBuffer)
-    : _id(0), _shader(shader), _array_buffer(arrayBuffer)
+GLVertexArray::GLVertexArray(const sp<GLShaderBindings>& shaderBindings, const GLShader& shader)
+    : _id(0), _shader_bindings(shaderBindings), _shader(shader)
 {
 }
 
@@ -25,10 +26,10 @@ void GLVertexArray::prepare(GraphicsContext& graphicsContext)
 {
     glGenVertexArrays(1, &_id);
     glBindVertexArray(_id);
-    _array_buffer.prepare(graphicsContext);
-    glBindBuffer(GL_ARRAY_BUFFER, _array_buffer.id());
+    _shader_bindings->arrayBuffer().prepare(graphicsContext);
+    glBindBuffer(GL_ARRAY_BUFFER, _shader_bindings->arrayBuffer().id());
     const sp<GLProgram> program = graphicsContext.getGLProgram(_shader);
-    _shader.bindAttributes(graphicsContext, program);
+    _shader_bindings->bindArrayBuffers(graphicsContext, program);
     glBindVertexArray(0);
     LOGD("id = %d", _id);
 }

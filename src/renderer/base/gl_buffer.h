@@ -67,9 +67,13 @@ private:
 public:
     class Snapshot {
     public:
+        Snapshot() = default;
         Snapshot(const sp<Stub>& stub, const bytearray& array);
         Snapshot(const Snapshot& other) = default;
         Snapshot(Snapshot&& other) = default;
+
+        Snapshot& operator =(const Snapshot& other) = default;
+        Snapshot& operator =(Snapshot&& other) = default;
 
         uint32_t id() const;
         void prepare(GraphicsContext& graphicsContext) const;

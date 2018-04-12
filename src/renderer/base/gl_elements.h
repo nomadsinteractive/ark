@@ -32,7 +32,7 @@ private:
 
     sp<ObjectPool> _render_command_pool;
     sp<MemoryPool> _memory_pool;
-    sp<GLSnippetDelegate> _snippet;
+    sp<GLShaderBindings> _shader_bindings;
 };
 
 }

@@ -32,7 +32,7 @@ bytearray GLModelPoint::getArrayBuffer(MemoryPool& memoryPool, const LayerContex
 
     const bytearray preallocated = memoryPool.allocate(len * 4);
 
-    uint8_t* buf = preallocated->array();
+    uint8_t* buf = preallocated->buf();
     for(const RenderObject::Snapshot& i : renderContext._items) {
         const Atlas::Item& texCoord = _atlas->at(i._type);
         const V position = i._position;

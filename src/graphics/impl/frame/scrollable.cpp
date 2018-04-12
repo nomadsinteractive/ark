@@ -42,7 +42,7 @@ void Scrollable::RollingAdapter::roll(const Scrollable::RollingAdapter& rollingV
 {
     int32_t viewRight = rollingView.scrollX() + _params._col_count * tileWidth;
     int32_t viewBottom = rollingView.scrollY() + _params._row_count * tileHeight;
-    sp<Renderer>* tiles = _tiles->array();
+    sp<Renderer>* tiles = _tiles->buf();
     for(int32_t i = 0; i < _params._row_count; i++)
         for(int32_t j = 0; j < _params._col_count; j++)
         {
@@ -58,13 +58,13 @@ void Scrollable::RollingAdapter::roll(const Scrollable::RollingAdapter& rollingV
 const sp<Renderer>& Scrollable::RollingAdapter::getTile(int32_t rowIndex, int32_t colIndex) const
 {
     DCHECK(rowIndex >= 0 && colIndex >= 0 && rowIndex < _params._row_count && colIndex < _params._row_count, "Grid(row:%d, col: %d) out of bounds", rowIndex, colIndex);
-    return _tiles->array()[rowIndex * _params._col_count + colIndex];
+    return _tiles->buf()[rowIndex * _params._col_count + colIndex];
 }
 
 void Scrollable::RollingAdapter::putTile(int32_t rowIndex, int32_t colIndex, const sp<Renderer>& tile)
 {
     DCHECK(rowIndex >= 0 && colIndex >= 0 && rowIndex < _params._row_count && colIndex < _params._row_count, "Grid(row:%d, col: %d) out of bounds", rowIndex, colIndex);
-    _tiles->array()[rowIndex * _params._col_count + colIndex] = tile;
+    _tiles->buf()[rowIndex * _params._col_count + colIndex] = tile;
 }
 
 Scrollable::Scrollable(const sp<VV>& scroller, const sp<TileMaker>& tileMaker, const sp<Size>& size, const Scrollable::Params& params)

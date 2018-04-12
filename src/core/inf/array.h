@@ -10,7 +10,7 @@ public:
     virtual ~Array() = default;
 
     virtual uint32_t length() = 0;
-    virtual T* array() = 0;
+    virtual T* buf() = 0;
 };
 
 }

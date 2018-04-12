@@ -125,7 +125,7 @@ sp<Vec2> PythonInterpreter::toVec2(PyObject* object)
 
 PyObject* PythonInterpreter::fromByteArray(const bytearray& bytes) const
 {
-    return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(bytes->array()), bytes->length());
+    return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(bytes->buf()), bytes->length());
 }
 
 sp<Numeric> PythonInterpreter::toNumeric(PyObject* object)
@@ -144,7 +144,7 @@ sp<Array<Color>> PythonInterpreter::toColorArray(PyObject* object)
     {
         Py_ssize_t size = PyList_Size(object);
         sp<DynamicArray<Color>> colorArray = sp<DynamicArray<Color>>::make(size);
-        Color* ptr = colorArray->array();
+        Color* ptr = colorArray->buf();
         for(Py_ssize_t i = 0; i < size; i++)
         {
             uint32_t value = PyLong_AsUnsignedLong(PyList_GetItem(object, i));

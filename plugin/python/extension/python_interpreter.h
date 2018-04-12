@@ -72,12 +72,12 @@ public:
         Py_ssize_t len = PyList_Size(object);
         const sp<Array<T>> arr = sp<DynamicArray<T>>::make(len);
         for(Py_ssize_t i = 0; i < len; ++i)
-            arr->array()[i] = toCppObject<T>(PyList_GetItem(object, i));
+            arr->buf()[i] = toCppObject<T>(PyList_GetItem(object, i));
         return arr;
     }
 
     template<typename T> PyObject* fromSharedPtr(const sp<Array<T>>& array) {
-        T* ptr = array->array();
+        T* ptr = array->buf();
         uint32_t len = array->length();
         PyObject* pyList = PyList_New(len);
         for(uint32_t i = 0; i < len; i++)

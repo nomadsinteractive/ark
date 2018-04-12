@@ -12,7 +12,7 @@ FlatableMatrixArray::FlatableMatrixArray(const sp<Array<Matrix>>& matrixArray)
 
 void FlatableMatrixArray::flat(void* buf)
 {
-    memcpy(buf, _matrix_array->array(), _matrix_array->length() * 16);
+    memcpy(buf, _matrix_array->buf(), _matrix_array->length() * 16);
 }
 
 uint32_t FlatableMatrixArray::size()

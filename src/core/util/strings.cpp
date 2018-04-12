@@ -52,7 +52,7 @@ public:
         if(args) {
             static const std::regex VAR_PATTERN("\\$\\{?([\\w\\d_]+)\\}?");
             const String replaced = _value->replace(VAR_PATTERN, [&args](Array<String>& groups)->String {
-                const String& a = groups.array()[1];
+                const String& a = groups.buf()[1];
                 const sp<String> replacement = args->get<String>(a);
                 DCHECK(replacement, "Cannot get value by key \"%s\"", a.c_str());
                 return replacement;

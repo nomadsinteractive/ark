@@ -61,11 +61,11 @@ array<array<float>> Generator::noiseMap2d(uint32_t rows, uint32_t cols, float x1
     for(uint32_t i = 0; i < rows; ++i)
     {
         const array<float> t = sp<DynamicArray<float>>::make(cols);
-        float* buf = t->array();
+        float* buf = t->buf();
         float y = y1 + dy * i;
         for(uint32_t j = 0; j < cols; ++j)
             buf[j] = _noise_impl.GetNoise(x1 + dx * j, y);
-        s->array()[i] = t;
+        s->buf()[i] = t;
     }
     return s;
 }

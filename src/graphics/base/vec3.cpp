@@ -245,7 +245,7 @@ Vec3::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& str)
     else
     {
         const array<float> values = Strings::toArray<float>(str);
-        float* ptr = values->array();
+        float* ptr = values->buf();
         _v3 = V3(ptr[0], ptr[1], ptr[2]);
     }
 
@@ -255,7 +255,7 @@ sp<VV3> Vec3::DICTIONARY::build(const sp<Scope>& args)
 {
     if(_xyz)
     {
-        auto s = _xyz->array();
+        auto s = _xyz->buf();
         return sp<Vec3>::make(s[0]->build(args), s[1]->build(args), s[2]->build(args));
     }
     return sp<VV3::Impl>::make(_v3);

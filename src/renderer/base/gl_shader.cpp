@@ -87,28 +87,6 @@ void GLShader::bindUniforms(GraphicsContext& graphicsContext) const
         uniform.prepare(graphicsContext, _program);
 }
 
-void GLShader::bindAttributes(GraphicsContext& graphicsContext) const
-{
-    bindAttributes(graphicsContext, _program);
-}
-
-void GLShader::bindAttributes(GraphicsContext& graphicsContext, const sp<GLProgram>& program) const
-{
-    DCHECK(program && program->id(), "GLProgram unprepared");
-    if(_array_buffers)
-    {
-        for(const auto iter : *_array_buffers)
-        {
-            glBindBuffer(GL_ARRAY_BUFFER, iter.second.id());
-            bindAttributesByDivisor(graphicsContext, program, iter.first);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-        }
-    }
-    else
-        bindAttributesByDivisor(graphicsContext, program, 0);
-
-}
-
 const sp<GLShaderSource>& GLShader::source() const
 {
     return _source;
@@ -145,27 +123,9 @@ const GLAttribute& GLShader::getAttribute(const String& name) const
     return _source->getAttribute(name);
 }
 
-void GLShader::bind(const GLBuffer& buffer, uint32_t divisor)
-{
-    (*_array_buffers)[divisor] = buffer;
-}
-
 sp<Varyings> GLShader::makeVaryings() const
 {
     return sp<Varyings>::make(*this);
-}
-
-void GLShader::bindAttributesByDivisor(GraphicsContext& /*graphicsContext*/, const sp<GLProgram>& program, uint32_t divisor) const
-{
-    for(const auto& i : _source->_attributes)
-    {
-        const GLAttribute& attr = i.second;
-        if(attr.divisor() == divisor)
-        {
-            const GLProgram::Attribute& glAttribute = program->getAttribute(attr.name());
-            attr.setVertexPointer(glAttribute.location(), _source->_stride[divisor]);
-        }
-    }
 }
 
 GLShader::Slot::Slot(const String& vertex, const String& fragment)

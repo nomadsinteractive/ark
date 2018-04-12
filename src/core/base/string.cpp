@@ -151,7 +151,7 @@ String String::replace(const std::regex& pattern, const std::function<String(Arr
     {
         if(!matches)
             matches = sp<DynamicArray<String>>::make(match.size());
-        String* m = matches->array();
+        String* m = matches->buf();
         for(size_type i = 0; i < match.size(); i ++)
             m[i] = match[i].str();
         sb << match.prefix().str();
@@ -194,7 +194,7 @@ array<String> String::match(const std::regex& pattern) const
     if(std::regex_match(_str, match, pattern))
     {
         const sp<Array<String>> matches = sp<DynamicArray<String>>::make(match.size());
-        String* m = matches->array();
+        String* m = matches->buf();
         for(size_type i = 0; i < match.size(); i ++)
             m[i] = match[i].str();
         return matches;

@@ -12,6 +12,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/gl_attribute.h"
 #include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_shader_bindings.h"
 #include "renderer/base/gl_snippet_delegate.h"
 #include "renderer/base/gl_texture.h"
 #include "renderer/base/gl_resource_manager.h"
@@ -39,7 +40,7 @@ public:
     }
 
     virtual void upload(GraphicsContext& /*graphicsContext*/, GLenum target, GLsizeiptr size) override {
-        glBufferSubData(target, 0, _buffer->length(), _buffer->array());
+        glBufferSubData(target, 0, _buffer->length(), _buffer->buf());
     }
 
 private:
@@ -59,23 +60,23 @@ AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const document& m
     _array_buffer = resourceLoaderContext->glResourceManager()->createGLBuffer(sp<AssimpGLBufferUploader>::make(vertices), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
     _index_buffer = resourceLoaderContext->glResourceManager()->createGLBuffer(sp<AssimpGLBufferUploader>::make(indices), GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     const sp<GLTexture> texture = resourceLoaderContext->glResourceManager()->createGLTexture(tex->width(), tex->height(), sp<Variable<bitmap>::Const>::make(tex));
-    _snippet = sp<GLSnippetDelegate>::make(_shader, _array_buffer);
-    const sp<GLSnippetTextures> textures = _snippet->link<GLSnippetTextures>();
+    _shader_bindings = sp<GLShaderBindings>::make(shader, _array_buffer);
+    const sp<GLSnippetTextures> textures = _shader_bindings->snippet()->link<GLSnippetTextures>();
     textures->addTexture(0, texture);
-    _snippet->link<GLSnippetUpdateModelMatrix>();
+    _shader_bindings->snippet()->link<GLSnippetUpdateModelMatrix>();
     resourceLoaderContext->glResourceManager()->prepare(_array_buffer, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
     resourceLoaderContext->glResourceManager()->prepare(_index_buffer, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
 }
 
 sp<RenderCommand> AssimpModelLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
 {
-    return _render_command_pool.obtain<DrawElements>(GLDrawingContext(_snippet, _array_buffer.snapshot(nullptr), _index_buffer, GL_TRIANGLES), _shader);
+    return _render_command_pool.obtain<DrawElements>(GLDrawingContext(_shader_bindings, _array_buffer.snapshot(nullptr), _index_buffer, GL_TRIANGLES), _shader);
 }
 
 bytearray AssimpModelLayer::loadArrayBuffer(aiMesh* mesh, float scale) const
 {
     const bytearray s = sp<DynamicArray<uint8_t>>::make(mesh->mNumVertices * _shader->stride());
-    uint8_t* buf = s->array();
+    uint8_t* buf = s->buf();
     const GLAttribute& aPosition = _shader->getAttribute("Position");
     const GLAttribute& aNormal = _shader->getAttribute("Normal");
     const GLAttribute& aTexCoordinate = _shader->getAttribute("TexCoordinate");
@@ -102,7 +103,7 @@ bytearray AssimpModelLayer::loadArrayBuffer(aiMesh* mesh, float scale) const
 bytearray AssimpModelLayer::loadIndexBuffer(aiMesh* mesh) const
 {
     const bytearray s = sp<DynamicArray<uint8_t>>::make(mesh->mNumFaces * 6);
-    uint16_t* buf = reinterpret_cast<uint16_t*>(s->array());
+    uint16_t* buf = reinterpret_cast<uint16_t*>(s->buf());
     for(uint32_t i = 0; i < mesh->mNumFaces; i ++)
     {
         buf[2] = static_cast<uint16_t>(mesh->mFaces[i].mIndices[0]);
