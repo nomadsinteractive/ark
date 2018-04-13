@@ -30,7 +30,7 @@ public:
         Attribute(GLint location = -1);
         Attribute(const Attribute& other) = default;
 
-        GLuint location() const;
+        GLint location() const;
 
         void setVertexPointer(GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void * pointer) const;
 

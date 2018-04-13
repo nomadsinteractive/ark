@@ -131,7 +131,7 @@ GLProgram::Attribute::Attribute(GLint location)
 {
 }
 
-GLuint GLProgram::Attribute::location() const
+GLint GLProgram::Attribute::location() const
 {
     return _location;
 }

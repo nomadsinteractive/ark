@@ -38,7 +38,6 @@ private:
     sp<GLShaderBindings> _shader_bindings;
 
     GLBuffer _index_buffer;
-    GLBuffer _position_array_buffer;
     GLBuffer _transform_array_buffer;
 
     MemoryPool _memory_pool;

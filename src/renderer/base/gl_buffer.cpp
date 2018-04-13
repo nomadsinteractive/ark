@@ -146,6 +146,11 @@ uint32_t GLBuffer::Snapshot::id() const
     return _stub->id();
 }
 
+GLenum GLBuffer::Snapshot::type() const
+{
+    return _stub->type();
+}
+
 void GLBuffer::Snapshot::prepare(GraphicsContext& graphicsContext) const
 {
     _stub->prepare(graphicsContext, _array);
@@ -164,6 +169,11 @@ GLBuffer::GLBuffer(const sp<GLRecycler>& recycler, const sp<GLBuffer::Uploader>&
 GLBuffer::GLBuffer() noexcept
     : _stub(nullptr), _size(0)
 {
+}
+
+uint32_t GLBuffer::size() const
+{
+    return _size;
 }
 
 void GLBuffer::setSize(uint32_t size)

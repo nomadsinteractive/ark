@@ -76,6 +76,8 @@ public:
         Snapshot& operator =(Snapshot&& other) = default;
 
         uint32_t id() const;
+        GLenum type() const;
+
         void prepare(GraphicsContext& graphicsContext) const;
 
     private:
@@ -100,6 +102,7 @@ public:
         return (_size ? _size : _stub->size()) / sizeof(T);
     }
 
+    uint32_t size() const;
     void setSize(uint32_t size);
 
     GLenum type() const;

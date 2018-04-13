@@ -186,6 +186,8 @@
 
 cmake_minimum_required( VERSION 2.6.3 )
 
+message(WARNING "This toolchain is deprecated. Please consider switching to the one shipped with Android NDK.")
+
 if( DEFINED CMAKE_CROSSCOMPILING )
  # subsequent toolchain loading is not really needed
  return()

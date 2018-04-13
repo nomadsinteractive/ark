@@ -23,23 +23,23 @@ public:
     static GLuint glTestArrayBuffer();
     static void glSetIdentity(const op<GraphicsContext>& graphicsContext);
 
-    template<typename T> static void glDumpBuffer(const sp<GLBuffer>& buffer) {
-        int32_t nBufferSize = glGetBufferSize(buffer->type());
+    template<typename T, typename P> static void glDumpBuffer(const P& buffer) {
+        int32_t nBufferSize = glGetBufferSize(buffer.type());
 
         String data = glDumpBufferData<T>(buffer, nBufferSize);
-        LOGD("buffer-id: %d; size: %d; data: [%s]", buffer->id(), nBufferSize, data.c_str());
+        LOGD("buffer-id: %d; size: %d; data: [%s]", buffer.id(), nBufferSize, data.c_str());
     }
 
-    template<typename T> static String glDumpBufferData(const sp<GLBuffer>& buffer, uint32_t bufferSize) {
+    template<typename T, typename P> static String glDumpBufferData(const P& buffer, uint32_t bufferSize) {
 #ifndef ANDROID
-        T* data = reinterpret_cast<T*>(glMapBuffer(buffer->type(), GL_READ_ONLY));
+        T* data = reinterpret_cast<T*>(glMapBuffer(buffer.type(), GL_READ_ONLY));
         String content = Strings::join<T>(data, 0, bufferSize / sizeof(T));
-        glUnmapBuffer(buffer->type());
+        glUnmapBuffer(buffer.type());
         return content;
 #else
-        T* data = reinterpret_cast<T*>(glMapBufferOES(buffer->type(), static_cast<GLenum>(GL_READ_ONLY)));
+        T* data = reinterpret_cast<T*>(glMapBufferOES(buffer.type(), static_cast<GLenum>(GL_READ_ONLY)));
         String content = Strings::join<T>(data, 0, bufferSize / sizeof(T));
-        glUnmapBufferOES(buffer->type());
+        glUnmapBufferOES(buffer.type());
         return "";
 #endif
     }
