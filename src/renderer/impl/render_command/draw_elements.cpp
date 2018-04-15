@@ -5,8 +5,8 @@
 
 namespace ark {
 
-DrawElements::DrawElements(const GLDrawingContext& context, const sp<GLShader>& shader)
-    : _context(context), _shader(shader)
+DrawElements::DrawElements(const GLDrawingContext& context, const sp<GLShader>& shader, int32_t count)
+    : _context(context), _shader(shader), _count(count)
 {
 }
 
@@ -18,7 +18,7 @@ void DrawElements::draw(GraphicsContext& graphicsContext)
     graphicsContext.glUpdateMVPMatrix();
 
     _context.preDraw(graphicsContext, _shader);
-    glDrawElements(_context._mode, _context._index_buffer.length<uint16_t>(), GL_UNSIGNED_SHORT, 0);
+    glDrawElements(_context._mode, _count, GLIndexType, 0);
     _context.postDraw(graphicsContext);
 }
 

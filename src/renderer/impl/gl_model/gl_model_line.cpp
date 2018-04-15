@@ -23,9 +23,4 @@ GLBuffer GLModelLine::getIndexBuffer(GLResourceManager& glResourceManager, const
     return GLBuffer();
 }
 
-uint32_t GLModelLine::mode() const
-{
-    return static_cast<uint32_t>(GL_TRIANGLE_STRIP);
-}
-
 }

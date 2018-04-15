@@ -8,6 +8,7 @@
 #include "graphics/base/layer_context.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/gl_buffer.h"
 
 namespace ark {
 
@@ -17,8 +18,6 @@ public:
 
     virtual bytearray getArrayBuffer(MemoryPool& memoryPool, const LayerContext::Snapshot& renderContext, float x, float y) = 0;
     virtual GLBuffer getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext::Snapshot& renderContext) = 0;
-
-    virtual uint32_t mode() const = 0;
 };
 
 }

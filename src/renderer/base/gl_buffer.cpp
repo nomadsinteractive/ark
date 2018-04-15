@@ -9,32 +9,6 @@
 
 namespace ark {
 
-namespace {
-
-class StaticBufferUploader : public GLBuffer::Uploader {
-public:
-    StaticBufferUploader(const sp<Variable<bytearray>>& buffer, size_t size)
-        : _buffer(buffer), _size(size) {
-    }
-
-    virtual size_t size() override {
-        return _size;
-    }
-
-    virtual void upload(GraphicsContext& /*graphicsContext*/, GLenum target, GLsizeiptr size) override {
-        const bytearray buf = _buffer->val();
-        DCHECK(_size <= buf->length(), "Buffer length mismatch");
-        DCHECK(size <= buf->length(), "Buffer overflow");
-        glBufferSubData(target, 0, size, buf->buf());
-    }
-
-private:
-    sp<Variable<bytearray>> _buffer;
-    size_t _size;
-};
-
-}
-
 GLBuffer::Recycler::Recycler(GLuint id)
     : _id(id)
 {
@@ -94,6 +68,7 @@ void GLBuffer::Stub::prepare(GraphicsContext& graphicsContext, const bytearray& 
         }
     }
     if(transientData) {
+        DWARN(_usage != GL_STATIC_DRAW, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
         uint32_t osize = _size;
         glBindBuffer(_type, _id);
         _size = transientData->length();
@@ -112,7 +87,7 @@ void GLBuffer::Stub::upload(GraphicsContext& graphicsContext, Uploader& uploader
     _size = uploader.size();
     if(recreate)
         glBufferData(_type, _size, nullptr, _usage);
-    uploader.upload(graphicsContext, _type, _size);
+    uploader.upload(graphicsContext, _type);
     glBindBuffer(_type, 0);
 }
 
@@ -154,11 +129,6 @@ GLenum GLBuffer::Snapshot::type() const
 void GLBuffer::Snapshot::prepare(GraphicsContext& graphicsContext) const
 {
     _stub->prepare(graphicsContext, _array);
-}
-
-GLBuffer::GLBuffer(const sp<GLRecycler>& recycler, const sp<Variable<bytearray>>& buffer, GLenum type, GLenum usage, uint32_t size)
-    : _stub(sp<Stub>::make(recycler, sp<StaticBufferUploader>::make(buffer, size), type, usage)), _size(size)
-{
 }
 
 GLBuffer::GLBuffer(const sp<GLRecycler>& recycler, const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage)

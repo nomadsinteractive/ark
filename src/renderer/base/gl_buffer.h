@@ -19,7 +19,7 @@ public:
         virtual ~Uploader() = default;
 
         virtual size_t size() = 0;
-        virtual void upload(GraphicsContext& graphicsContext, GLenum target, GLsizeiptr size) = 0;
+        virtual void upload(GraphicsContext& graphicsContext, GLenum target) = 0;
     };
 
 private:
@@ -69,11 +69,7 @@ public:
     public:
         Snapshot() = default;
         Snapshot(const sp<Stub>& stub, const bytearray& array);
-        Snapshot(const Snapshot& other) = default;
-        Snapshot(Snapshot&& other) = default;
-
-        Snapshot& operator =(const Snapshot& other) = default;
-        Snapshot& operator =(Snapshot&& other) = default;
+        DEFAULT_COPY_AND_ASSIGN(Snapshot);
 
         uint32_t id() const;
         GLenum type() const;
@@ -87,7 +83,6 @@ public:
     };
 
 public:
-    GLBuffer(const sp<GLRecycler>& recycler, const sp<Variable<bytearray>>& buffer, GLenum type, GLenum usage, uint32_t size);
     GLBuffer(const sp<GLRecycler>& recycler, const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage);
     GLBuffer(const GLBuffer& other) noexcept = default;
     GLBuffer(GLBuffer&& other) noexcept = default;
@@ -99,14 +94,14 @@ public:
     GLBuffer& operator =(GLBuffer&& other) noexcept = default;
 
     template<typename T> uint32_t length() const {
-        return (_size ? _size : _stub->size()) / sizeof(T);
+        return _size / sizeof(T);
     }
 
     uint32_t size() const;
     void setSize(uint32_t size);
 
     GLenum type() const;
-    Snapshot snapshot(const bytearray& array) const;
+    Snapshot snapshot(const bytearray& array = nullptr) const;
 
     GLuint id() const;
     void prepare(GraphicsContext&) const;

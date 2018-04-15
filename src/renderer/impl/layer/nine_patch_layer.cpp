@@ -12,7 +12,7 @@
 namespace ark {
 
 NinePatchLayer::NinePatchLayer(const sp<Atlas>& atlas, const sp<GLShader>& shader, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : Layer(resourceLoaderContext->memoryPool()), _nine_patch_elements(shader, atlas->texture(), sp<GLModelNinePatch>::make(shader, manifest, atlas), resourceLoaderContext)
+    : Layer(resourceLoaderContext->memoryPool()), _nine_patch_elements(shader, atlas->texture(), sp<GLModelNinePatch>::make(shader, manifest, atlas), GL_TRIANGLE_STRIP, resourceLoaderContext)
 {
 }
 

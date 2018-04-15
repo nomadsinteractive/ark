@@ -67,11 +67,6 @@ GLBuffer GLModelQuad::getIndexBuffer(GLResourceManager& glResourceManager, const
     return glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_TRANGLES, renderContext._items.size() * 6);
 }
 
-uint32_t GLModelQuad::mode() const
-{
-    return static_cast<uint32_t>(GL_TRIANGLES);
-}
-
 void GLModelQuad::map(uint8_t*& buf, const Transform::Snapshot& snapshot, float x, float tx, float y, float ty, uint16_t texCoordX, uint16_t texCoordY) const
 {
     GLfloat* fp = reinterpret_cast<GLfloat*>(buf);

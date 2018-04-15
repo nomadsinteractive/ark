@@ -107,11 +107,6 @@ GLBuffer GLModelNinePatch::getIndexBuffer(GLResourceManager& glResourceManager, 
     return size ? glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_NINE_PATCH, size * 30 - 2) : GLBuffer();
 }
 
-uint32_t GLModelNinePatch::mode() const
-{
-    return static_cast<uint32_t>(GL_TRIANGLE_STRIP);
-}
-
 void GLModelNinePatch::fillPaintingRect(float* buf, const Rect& paintRect, const Item& bounds, uint32_t floatStride, float x, float y) const
 {
     const Rect& paddings = bounds.paddings;

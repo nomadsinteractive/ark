@@ -34,7 +34,7 @@ public:
     };
 
 private:
-    GLElements _nine_patch_elements;
+    GLElementsRenderer _nine_patch_elements;
 
 };
 

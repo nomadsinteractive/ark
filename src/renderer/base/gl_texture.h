@@ -19,13 +19,15 @@ namespace ark {
 class ARK_API GLTexture : public GLResource {
 public:
     enum Format {
-        FORMAT_AUTO = 256,
+        FORMAT_AUTO = 0x8000,
         FORMAT_ALPHA = 0,
         FORMAT_RG = 1,
         FORMAT_RGB = 2,
         FORMAT_RGBA = 3,
         FORMAT_SIGNED = 4,
-        FORMAT_INTEGRAL = 8,
+        FORMAT_F16 = 8,
+        FORMAT_F32 = 16,
+        FORMAT_SIZED_MASK = FORMAT_F16 | FORMAT_F32
     };
 
     GLTexture(const sp<GLRecycler>& _recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap, Format format = FORMAT_AUTO);

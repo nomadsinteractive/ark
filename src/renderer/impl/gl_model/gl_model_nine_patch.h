@@ -30,8 +30,6 @@ public:
     virtual bytearray getArrayBuffer(MemoryPool& memoryPool, const LayerContext::Snapshot& renderContext, float x, float y) override;
     virtual GLBuffer getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext::Snapshot& renderContext) override;
 
-    virtual uint32_t mode() const override;
-
 private:
     void fillPaintingRect(float* buf, const Rect& paintRect, const Item& bounds, uint32_t floatStride, float x, float y) const;
     void fillMesh(float* mesh, Array<float>& xArray, Array<float>& yArray, uint32_t stride, uint32_t offset, float x, float y) const;

@@ -22,4 +22,6 @@ public:
 }
 }
 
+#define TESTCASE_VALIDATE(x) if(x) return __LINE__
+
 #endif

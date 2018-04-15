@@ -46,7 +46,7 @@ public:
 
 private:
     sp<Size> _size;
-    GLElements _elements;
+    GLElementsRenderer _elements;
     LayerContext _render_context;
 };
 

@@ -12,7 +12,7 @@
 namespace ark {
 
 ImageLayer::ImageLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : Layer(resourceLoaderContext->memoryPool()), _elements(shader, atlas->texture(), sp<GLModelQuad>::make(shader, atlas), resourceLoaderContext), _atlas(atlas)
+    : Layer(resourceLoaderContext->memoryPool()), _elements(shader, atlas->texture(), sp<GLModelQuad>::make(shader, atlas), GL_TRIANGLES, resourceLoaderContext), _atlas(atlas)
 {
 }
 

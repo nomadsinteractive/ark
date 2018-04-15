@@ -15,7 +15,7 @@ namespace ark {
 
 class ARK_API GLDrawingContext {
 public:
-    GLDrawingContext(const sp<GLShaderBindings>& shaderBindings, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer& indexBuffer, GLenum mode);
+    GLDrawingContext(const sp<GLShaderBindings>& shaderBindings, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer::Snapshot& indexBuffer, GLenum mode);
     GLDrawingContext(const GLDrawingContext& other) = default;
     GLDrawingContext(GLDrawingContext&& other) = default;
 
@@ -26,11 +26,13 @@ public:
 
     GLBuffer::Snapshot _array_buffer;
     std::map<uint32_t, GLBuffer::Snapshot> _instanced_array_buffers;
-    GLBuffer _index_buffer;
+    GLBuffer::Snapshot _index_buffer;
 
     GLenum _mode;
 
 };
+
+const GLenum GLIndexType = sizeof(glindex_t) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
 
 }
 

@@ -17,8 +17,6 @@ public:
     virtual bytearray getArrayBuffer(MemoryPool& memoryPool, const LayerContext::Snapshot& renderContext, float x, float y) override;
     virtual GLBuffer getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext::Snapshot& renderContext) override;
 
-    virtual uint32_t mode() const override;
-
 private:
     sp<Atlas> _atlas;
     uint32_t _tex_coordinate_offset;

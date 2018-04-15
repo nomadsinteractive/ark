@@ -31,7 +31,7 @@ public:
     };
 
 private:
-    GLElements _elements;
+    GLElementsRenderer _elements;
 };
 
 }

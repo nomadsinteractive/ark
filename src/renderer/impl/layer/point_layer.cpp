@@ -12,7 +12,7 @@
 namespace ark {
 
 PointLayer::PointLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : Layer(resourceLoaderContext->memoryPool()), _elements(shader, atlas->texture(), sp<GLModelPoint>::make(shader, atlas), resourceLoaderContext)
+    : Layer(resourceLoaderContext->memoryPool()), _elements(shader, atlas->texture(), sp<GLModelPoint>::make(shader, atlas), GL_POINTS, resourceLoaderContext)
 {
 }
 

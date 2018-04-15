@@ -105,7 +105,13 @@ typedef array<uint16_t> indexarray;
 }
 
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName&) = delete;   \
-  void operator=(const TypeName&) = delete
+    TypeName(const TypeName&) = delete;   \
+    TypeName& operator=(const TypeName&) = delete
+
+#define DEFAULT_COPY_AND_ASSIGN(TypeName) \
+    TypeName(const TypeName&) = default;   \
+    TypeName(TypeName&&) = default;   \
+    TypeName& operator=(const TypeName&) = default;   \
+    TypeName& operator=(TypeName&&) = default
 
 #endif

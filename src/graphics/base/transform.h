@@ -35,6 +35,7 @@ public:
         bool operator !=(const Snapshot& other) const;
 
         void map(float x, float y, float tx, float ty, float& mx, float& my) const;
+        void mapXYZ(float x, float y, float z, float& mx, float& my, float &mz) const;
 
         bool disabled;
         V pivot;

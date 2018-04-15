@@ -67,7 +67,7 @@ sp<RenderCommand> ParticleLayer::render(const LayerContext::Snapshot& renderCont
     for(const RenderObject::Snapshot& i : renderContext._items)
     {
         const Atlas::Item& texCoord = _atlas->at(i._type);
-        const Transform::Snapshot transform = i._transform;
+        Transform::Snapshot transform = i._transform;
         const V& position = i._position;
         float w = i._size.x();
         float h = i._size.y();
@@ -75,15 +75,14 @@ sp<RenderCommand> ParticleLayer::render(const LayerContext::Snapshot& renderCont
         float height = h == 0 ? texCoord.height() : h;
         float tx = position.x() + x;
         float ty = position.y() + y;
-
-        Matrix uTransform = transform.toMatrix();
-        uTransform.translate(tx, ty, 0.0f);
-        uTransform.scale(width, height, 1.0f);
+        transform.translate += V(tx, ty);
+        transform.scale *= V(width, height);
+        const Matrix uTransform = transform.toMatrix();
         memcpy(pTransform, &uTransform, sizeof(uTransform));
         pTransform += 16;
     }
 
-    GLDrawingContext dc(_shader_bindings, _shader_bindings->arrayBuffer().snapshot(pos), _index_buffer, GL_TRIANGLES);
+    GLDrawingContext dc(_shader_bindings, _shader_bindings->arrayBuffer().snapshot(pos), _index_buffer.snapshot(), GL_TRIANGLES);
     dc._instanced_array_buffers[1] = _transform_array_buffer.snapshot(transform);
     return sp<DrawElementsInstanced>::make(dc, _shader_bindings->shader(), renderContext._items.size());
 }

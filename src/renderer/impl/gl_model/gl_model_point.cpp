@@ -52,11 +52,6 @@ GLBuffer GLModelPoint::getIndexBuffer(GLResourceManager& glResourceManager, cons
     return glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_POINTS, renderContext._items.size());
 }
 
-uint32_t GLModelPoint::mode() const
-{
-    return static_cast<uint32_t>(GL_POINTS);
-}
-
 void GLModelPoint::map(uint8_t*& buf, const Transform::Snapshot& snapshot, float x, float tx, float y, float ty, uint16_t texCoordX, uint16_t texCoordY) const
 {
     GLfloat* fp = reinterpret_cast<GLfloat*>(buf);

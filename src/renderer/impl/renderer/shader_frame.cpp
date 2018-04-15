@@ -51,10 +51,6 @@ public:
         return glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_TRANGLES, 6);
     }
 
-    virtual uint32_t mode() const override {
-        return static_cast<uint32_t>(GL_TRIANGLES);
-    }
-
 private:
     sp<Size> _size;
 
@@ -63,7 +59,7 @@ private:
 }
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _size(size), _elements(shader, nullptr, sp<GLModelShader>::make(size), resourceLoaderContext), _render_context(resourceLoaderContext->memoryPool())
+    : _size(size), _elements(shader, nullptr, sp<GLModelShader>::make(size), GL_TRIANGLES, resourceLoaderContext), _render_context(resourceLoaderContext->memoryPool())
 {
 }
 

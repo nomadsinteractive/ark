@@ -15,7 +15,13 @@ public:
 
     bool operator ==(const V3& other) const;
     bool operator !=(const V3& other) const;
-    const V3& operator =(const V3& other);
+
+    V3& operator =(const V3& other) = default;
+
+    friend V3 operator +(const V3& lvalue, const V3& rvalue);
+    friend V3 operator -(const V3& lvalue, const V3& rvalue);
+    friend V3 operator *(const V3& lvalue, const V3& rvalue);
+    friend V3 operator /(const V3& lvalue, const V3& rvalue);
 
     float z() const;
 

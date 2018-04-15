@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_GLES20_BASE_GL_ELEMENTS_H_
-#define ARK_RENDERER_GLES20_BASE_GL_ELEMENTS_H_
+#ifndef ARK_RENDERER_BASE_GL_ELEMENTS_H_
+#define ARK_RENDERER_BASE_GL_ELEMENTS_H_
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -14,12 +14,11 @@
 
 namespace ark {
 
-class ARK_API GLElements {
+class ARK_API GLElementsRenderer {
 public:
-    GLElements(const sp<GLShader>& shader, const sp<GLTexture>& texture, const sp<GLModel>& model, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    GLElementsRenderer(const sp<GLShader>& shader, const sp<GLTexture>& texture, const sp<GLModel>& model, GLenum mode, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     sp<RenderCommand> render(const LayerContext::Snapshot& renderContext, float x, float y);
-    sp<RenderCommand> renderInstanced(const LayerContext::Snapshot& renderContext, float x, float y);
 
 private:
     sp<GLResourceManager> _resource_manager;
