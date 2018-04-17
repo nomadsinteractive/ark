@@ -93,7 +93,7 @@ void RenderObject::setTransform(const sp<Transform>& transform)
     _transform.assign(transform);
 }
 
-void RenderObject::setFilter(const sp<Varyings>& filter)
+void RenderObject::setVaryings(const sp<Varyings>& filter)
 {
     _varyings = Null::toSafe<Varyings>(filter);
 }

@@ -20,6 +20,11 @@ void MessageLoop::scheduleTask(const std::function<bool()>& task, float interval
     schedule(sp<RunnableByFunctionWithExpired>::make(task), interval);
 }
 
+void MessageLoop::scheduleTask(std::function<bool()>&& task, float interval)
+{
+    schedule(sp<RunnableByFunctionWithExpired>::make(std::move(task)), interval);
+}
+
 uint64_t MessageLoop::pollOnce()
 {
     DFATAL("Unimplemented");

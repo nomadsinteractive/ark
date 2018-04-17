@@ -63,7 +63,8 @@ private:
 
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources)
     : _application_resource(applicationResources), _ticker(sp<EngineTicker>::make()),
-      _clock(sp<Clock>::make(_ticker)), _executor(sp<ThreadPoolExecutor>::make()), _render_controller(sp<RenderController>::make()),
+      _clock(sp<Clock>::make(_ticker)), _message_loop_application(sp<MessageLoopThread>::make(sp<MessageLoopDefault>::make(Platform::getSteadyClock()))),
+      _executor(sp<ThreadPoolExecutor>::make(_message_loop_application)), _render_controller(sp<RenderController>::make()),
       _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK)
 {
     Ark& ark = Ark::instance();
@@ -82,7 +83,6 @@ ApplicationContext::~ApplicationContext()
 
 void ApplicationContext::initMessageLoop()
 {
-    _message_loop_application = sp<MessageLoopThread>::make(sp<MessageLoopDefault>::make(Platform::getSteadyClock()));
     _message_loop_application->start();
     Ark::instance().put<MessageLoop>(_message_loop_application);
 }

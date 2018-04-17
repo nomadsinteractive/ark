@@ -56,21 +56,11 @@ uint32_t GLModelLoaderNinePatch::estimateVertexCount(uint32_t renderObjectCount)
     return 16 * renderObjectCount;
 }
 
-void GLModelLoaderNinePatch::load(GLModelBuffer& buf, uint32_t type, const V& size)
+void GLModelLoaderNinePatch::loadVertices(GLModelBuffer& buf, uint32_t type, const V& size)
 {
     const Rect paintRect(0, 0, size.x(), size.y());
-    const Item& ninePatch = _nine_patch_items.at(type);
+    const Item& item = _nine_patch_items.at(type);
 
-    fillPaintingRect(buf, paintRect, ninePatch);
-}
-
-GLBuffer GLModelLoaderNinePatch::getPredefinedIndexBuffer(GLResourceManager& glResourceManager, uint32_t renderObjectCount)
-{
-    return renderObjectCount ? glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_NINE_PATCH, renderObjectCount * 30 - 2) : GLBuffer();
-}
-
-void GLModelLoaderNinePatch::fillPaintingRect(GLModelBuffer& buf, const Rect& paintRect, const Item& item) const
-{
     const Rect& paddings = item.paddings;
     float xData[4] = {paintRect.left(), paintRect.left() + paddings.left(), paintRect.right() - paddings.right(), paintRect.right()};
     float yData[4] = {paintRect.bottom(), paintRect.bottom() - paddings.bottom(), paintRect.top() + paddings.top(), paintRect.top()};
@@ -81,6 +71,11 @@ void GLModelLoaderNinePatch::fillPaintingRect(GLModelBuffer& buf, const Rect& pa
             buf.nextVertex();
         }
     }
+}
+
+GLBuffer GLModelLoaderNinePatch::getPredefinedIndexBuffer(GLResourceManager& glResourceManager, uint32_t renderObjectCount)
+{
+    return renderObjectCount ? glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_NINE_PATCH, renderObjectCount * 30 - 2) : GLBuffer();
 }
 
 GLModelLoaderNinePatch::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

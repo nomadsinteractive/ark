@@ -39,8 +39,8 @@ public:
         return _buffer->length();
     }
 
-    virtual void upload(GraphicsContext& /*graphicsContext*/, GLenum target) override {
-        glBufferSubData(target, 0, _buffer->length(), _buffer->buf());
+    virtual void upload(const GLBuffer::UploadFunc& uploader) override {
+        uploader(_buffer->buf(), _buffer->length());
     }
 
 private:

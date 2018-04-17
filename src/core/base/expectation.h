@@ -12,7 +12,7 @@ namespace ark {
 class ARK_API Expectation : public Numeric {
 public:
 //[[script::bindings::auto]]
-    Expectation(const sp<Numeric>& expectation, const sp<Runnable>& onfire, bool fireOnce = true);
+    Expectation(const sp<Numeric>& expectation, const sp<Runnable>& onfire = nullptr, bool fireOnce = true);
 
 //[[script::bindings::property]]
     virtual float val() override;

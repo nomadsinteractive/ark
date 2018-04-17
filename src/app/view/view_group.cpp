@@ -122,7 +122,8 @@ ViewGroup::ViewGroup(const Frame& background, const sp<Layout>& layout, const sp
 {
     DCHECK(!_layout || _layout_param, "Null LayoutParam. This would happen if your ViewGroup has neither background or size defined.");
     if(layoutParam && background)
-        background.size()->adopt(layoutParam->size());
+        if(background.size() != layoutParam->size())
+            background.size()->adopt(layoutParam->size());
 }
 
 ViewGroup::~ViewGroup()

@@ -13,24 +13,13 @@ namespace ark {
 GLModelBuffer::GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const uint32_t growCapacity, uint32_t stride, int32_t texCoordinateOffset)
     : _resource_loader_context(resourceLoaderContext), _grow_capacity(growCapacity), _stride(stride), _tex_coordinate_offset(texCoordinateOffset), _normal_offset(-1), _tangents_offset(-1), _indice_base(0), _size(stride)
 {
+    NOT_NULL(_grow_capacity);
     grow();
 }
 
 void GLModelBuffer::setPosition(float x, float y, float z)
 {
-    float mx, my, mz;
-    _transform.mapXYZ(x, y, z, mx, my, mz);
-    (*reinterpret_cast<V3*>(_array_buffer_ptr)) = V3(mx, my, mz) + _translate;
-}
-
-void GLModelBuffer::setTexCoordinate(float u, float v)
-{
-    if(_tex_coordinate_offset >= 0)
-    {
-        uint16_t* uv = reinterpret_cast<uint16_t*>(_array_buffer_ptr + _tex_coordinate_offset);
-        uv[0] = static_cast<uint16_t>(u * 0xffff);
-        uv[1] = static_cast<uint16_t>(v * 0xffff);
-    }
+    (*reinterpret_cast<V3*>(_array_buffer_ptr)) = _transform.mapXYZ(V3(x, y, z)) + _translate;
 }
 
 void GLModelBuffer::setTexCoordinate(uint16_t u, uint16_t v)
@@ -55,15 +44,25 @@ void GLModelBuffer::setTangents(const V3& tangents)
         (*reinterpret_cast<V3*>(_array_buffer_ptr + _tangents_offset)) = tangents;
 }
 
+void GLModelBuffer::applyVaryings()
+{
+    if(_array_buffer_ptr < _array_buffer_boundary)
+    {
+        DCHECK(_array_buffer_ptr + _stride <= _array_buffer_boundary, "Varyings buffer out of bounds");
+        _varyings.apply(_array_buffer_ptr, _stride);
+    }
+}
+
 void GLModelBuffer::nextVertex()
 {
     if(_array_buffer_ptr == _array_buffer_boundary)
         grow();
+    else
+        _array_buffer_ptr += _stride;
 
-    _array_buffer_ptr += _stride;
     _size += _stride;
     DCHECK(_array_buffer_ptr <= _array_buffer_boundary, "Array buffer out of bounds");
-    _varyings.apply(_array_buffer_ptr, _stride, 1);
+    applyVaryings();
 }
 
 void GLModelBuffer::writeIndices(glindex_t* indices, glindex_t count)
@@ -84,19 +83,9 @@ void GLModelBuffer::setTranslate(const V3& translate)
 
 void GLModelBuffer::setRenderObject(const RenderObject::Snapshot& renderObject)
 {
-    setTransform(renderObject._transform);
-    setVaryings(renderObject._varyings);
-}
-
-void GLModelBuffer::setTransform(const Transform::Snapshot& transform)
-{
-    _transform = transform;
-}
-
-void GLModelBuffer::setVaryings(const Varyings::Snapshot& varyings)
-{
-    _varyings = varyings;
-    _varyings.apply(_array_buffer_ptr, _stride, 1);
+    _transform = renderObject._transform;
+    _varyings = renderObject._varyings;
+    applyVaryings();
 }
 
 GLBuffer::Snapshot GLModelBuffer::getArrayBufferSnapshot(const GLBuffer& arrayBuffer) const
@@ -115,6 +104,7 @@ void GLModelBuffer::grow()
     _array_buffers.push_back(bytes);
     _array_buffer_ptr = bytes->buf();
     _array_buffer_boundary = _array_buffer_ptr + bytes->length();
+    applyVaryings();
 }
 
 }

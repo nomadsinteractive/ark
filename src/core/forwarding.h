@@ -114,4 +114,10 @@ typedef array<uint16_t> indexarray;
     TypeName& operator=(const TypeName&) = default;   \
     TypeName& operator=(TypeName&&) = default
 
+#define DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(TypeName) \
+    TypeName(const TypeName&) noexcept = default;   \
+    TypeName(TypeName&&) noexcept = default;   \
+    TypeName& operator=(const TypeName&) noexcept = default;   \
+    TypeName& operator=(TypeName&&) noexcept = default
+
 #endif

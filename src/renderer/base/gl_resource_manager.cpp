@@ -34,7 +34,7 @@ public:
         return ((_boiler_plate.length() + 2) * _object_count - 2) * sizeof(glindex_t);
     }
 
-    virtual void upload(GraphicsContext& /*graphicsContext*/, GLenum target) override {
+    virtual void upload(const GLBuffer::UploadFunc& uploader) override {
         const uint32_t bolierPlateLength = _boiler_plate.length();
         bytearray array = sp<DynamicArray<uint8_t>>::make(size());
         glindex_t* buf = reinterpret_cast<glindex_t*>(array->buf());
@@ -49,7 +49,7 @@ public:
             buf += ((bolierPlateLength + 2));
         }
 
-        glBufferSubData(target, 0, array->length(), array->buf());
+        uploader(array->buf(), array->length());
     }
 
 private:
@@ -67,7 +67,7 @@ public:
         return _object_count * 6 * sizeof(glindex_t);
     }
 
-    virtual void upload(GraphicsContext& /*graphicsContext*/, GLenum target) override {
+    virtual void upload(const GLBuffer::UploadFunc& uploader) override {
         bytearray result = sp<DynamicArray<uint8_t>>::make(size());
 
         glindex_t* buf = reinterpret_cast<glindex_t*>(result->buf());
@@ -82,7 +82,7 @@ public:
             buf[idx++] = offset + 3;
             buf[idx++] = offset + 1;
         }
-        glBufferSubData(target, 0, result->length(), result->buf());
+        uploader(result->buf(), result->length());
     }
 
 private:
@@ -100,16 +100,16 @@ public:
         return _object_count * sizeof(glindex_t);
     }
 
-    virtual void upload(GraphicsContext& /*graphicsContext*/, GLenum target) override {
-        const bytearray result = sp<DynamicArray<uint8_t>>::make(_object_count * 2);
+    virtual void upload(const GLBuffer::UploadFunc& uploader) override {
+        const auto result = sp<DynamicArray<glindex_t>>::make(_object_count);
 
-        glindex_t* buf = reinterpret_cast<glindex_t*>(result->buf());
+        glindex_t* buf = result->buf();
         uint32_t idx = 0;
         for(uint32_t i = 0; i < _object_count; i ++) {
             glindex_t offset = static_cast<glindex_t>(i);
             buf[idx++] = offset;
         }
-        glBufferSubData(target, 0, result->length(), result->buf());
+        uploader(result->buf(), result->size());
     }
 
 private:
@@ -187,9 +187,7 @@ GLBuffer GLResourceManager::getGLIndexBuffer(GLResourceManager::BufferName buffe
         prepare(_static_buffers[bufferName], PS_ONCE_AND_ON_SURFACE_READY);
     }
 
-    GLBuffer indexBuffer = _static_buffers[bufferName];
-    indexBuffer.setSize(bufferLength * sizeof(glindex_t));
-    return indexBuffer;
+    return GLBuffer(_static_buffers[bufferName], bufferLength * sizeof(glindex_t));
 }
 
 sp<GLTexture> GLResourceManager::loadGLTexture(const String& name)

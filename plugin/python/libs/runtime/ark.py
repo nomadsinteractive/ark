@@ -204,7 +204,7 @@ class Clock:
 
 
 class Expectation:
-    def __init__(self, expectation, onfire, fire_once=True):
+    def __init__(self, expectation, onfire=None, fire_once=True):
         pass
 
     @property
@@ -287,7 +287,7 @@ class Transform:
 
 
 class RenderObject:
-    def __init__(self, t, pos=None, size=None, transform=None, filter=None):
+    def __init__(self, t, pos=None, size=None, transform=None, varyings=None):
         pass
 
     @property
@@ -315,8 +315,12 @@ class RenderObject:
         return None
 
     @property
-    def filter(self):
+    def varyings(self):
         return None
+
+    @varyings.setter
+    def varyings(self, v):
+        pass
 
     @property
     def xy(self):

@@ -12,7 +12,7 @@ namespace ark {
 
 class ThreadPoolExecutor : public Executor {
 public:
-    ThreadPoolExecutor(uint32_t capacity = 0);
+    ThreadPoolExecutor(const sp<MessageLoop>& messageLoop = nullptr, uint32_t capacity = 0);
 
     virtual void execute(const sp<Runnable>& task) override;
 
@@ -20,8 +20,9 @@ private:
     class Worker;
 
     struct Stub {
-        Stub(uint32_t capacity);
+        Stub(const sp<MessageLoop>& messageLoop, uint32_t capacity);
 
+        sp<MessageLoop> _message_loop;
         uint32_t _capacity;
         std::atomic<uint32_t> _worker_count;
 

@@ -1,9 +1,11 @@
 #include "core/base/thread_pool_executor.h"
 
+#include "core/inf/message_loop.h"
+
 namespace ark {
 
-ThreadPoolExecutor::ThreadPoolExecutor(uint32_t capacity)
-    : _stub(sp<Stub>::make(std::max<uint32_t>(2, capacity ? capacity : std::thread::hardware_concurrency())))
+ThreadPoolExecutor::ThreadPoolExecutor(const sp<MessageLoop>& messageLoop, uint32_t capacity)
+    : _stub(sp<Stub>::make(messageLoop, std::max<uint32_t>(2, capacity ? capacity : std::thread::hardware_concurrency())))
 {
 }
 
@@ -56,7 +58,16 @@ void ThreadPoolExecutor::Worker::run()
         {
             _idle = false;
             _idled_cycle = 0;
-            front->run();
+            try {
+                front->run();
+            }
+            catch(const std::exception& e)
+            {
+                if(_stub->_message_loop)
+                    _stub->_message_loop->postTask([e]() {
+                        FATAL("Unhanlded exception in thread: %s", e.what());
+                    });
+            }
         }
         else
         {
@@ -88,8 +99,8 @@ void ThreadPoolExecutor::Worker::post(const sp<Runnable>& task)
     _thread_stub->notify();
 }
 
-ThreadPoolExecutor::Stub::Stub(uint32_t capacity)
-    : _capacity(capacity), _worker_count(0)
+ThreadPoolExecutor::Stub::Stub(const sp<MessageLoop>& messageLoop, uint32_t capacity)
+    : _message_loop(messageLoop), _capacity(capacity), _worker_count(0)
 {
 }
 

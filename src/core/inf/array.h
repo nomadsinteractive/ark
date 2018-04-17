@@ -11,6 +11,10 @@ public:
 
     virtual uint32_t length() = 0;
     virtual T* buf() = 0;
+
+    size_t size() {
+        return sizeof(T) * this->length();
+    }
 };
 
 }

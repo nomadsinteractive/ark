@@ -24,7 +24,6 @@ public:
     DEFAULT_COPY_AND_ASSIGN(GLModelBuffer);
 
     void setPosition(float x, float y, float z);
-    void setTexCoordinate(float u, float v);
     void setTexCoordinate(uint16_t u, uint16_t v);
     void setNormal(const V3& normal);
     void setTangents(const V3& tangents);
@@ -36,12 +35,11 @@ public:
 
     void setTranslate(const V3& translate);
     void setRenderObject(const RenderObject::Snapshot& renderObject);
-    void setTransform(const Transform::Snapshot& transform);
-    void setVaryings(const Varyings::Snapshot& varyings);
 
     GLBuffer::Snapshot getArrayBufferSnapshot(const GLBuffer& arrayBuffer) const;
 
 private:
+    void applyVaryings();
     void grow();
 
 private:

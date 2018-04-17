@@ -22,9 +22,9 @@ Transform::Transform(const Transform& other)
 {
 }
 
-Transform::Snapshot Transform::snapshot(float px, float py) const
+Transform::Snapshot Transform::snapshot() const
 {
-    Snapshot ss(px, py);
+    Snapshot ss;
     ss.rotation = _rotation->val();
     ss.scale = _scale->val();
     ss.translate = _translation->val();
@@ -68,12 +68,7 @@ const sp<VV>& Transform::identity()
 }
 
 Transform::Snapshot::Snapshot()
-    : disabled(true), rotation(0)
-{
-}
-
-Transform::Snapshot::Snapshot(float px, float py)
-    : disabled(false), pivot(px, py), rotation(0), scale(V::identity())
+    : rotation(0), scale(V::identity())
 {
 }
 
@@ -90,7 +85,6 @@ void Transform::Snapshot::toMatrix(Matrix& matrix) const
     matrix.translate(translate.x(), translate.y(), translate.z());
     matrix.scale(scale.x(), scale.y(), scale.z());
     matrix.rotate(rotation, 0, 0, 1.0f);
-    matrix.translate(-pivot.x(), -pivot.y(), -pivot.z());
 }
 
 bool Transform::Snapshot::isFrontfaceCCW() const
@@ -100,8 +94,7 @@ bool Transform::Snapshot::isFrontfaceCCW() const
 
 bool Transform::Snapshot::operator ==(const Transform::Snapshot& other) const
 {
-    return translate == other.translate && scale == other.scale
-            && rotation == other.rotation && pivot == other.pivot;
+    return translate == other.translate && scale == other.scale && rotation == other.rotation;
 }
 
 bool Transform::Snapshot::operator !=(const Transform::Snapshot& other) const
@@ -111,16 +104,10 @@ bool Transform::Snapshot::operator !=(const Transform::Snapshot& other) const
 
 void Transform::Snapshot::map(float x, float y, float tx, float ty, float& mx, float& my) const
 {
-    if(disabled)
-    {
-        mx = x - pivot.x() + tx;
-        my = y - pivot.y() + ty;
-        return;
-    }
     if(rotation == 0.0f)
     {
-        mx = (x - pivot.x()) * scale.x() + translate.x();
-        my = (y - pivot.y()) * scale.y() + translate.y();
+        mx = x * scale.x() + translate.x();
+        my = y * scale.y() + translate.y();
     }
     else
     {
@@ -132,26 +119,21 @@ void Transform::Snapshot::map(float x, float y, float tx, float ty, float& mx, f
     my += ty;
 }
 
-void Transform::Snapshot::mapXYZ(float x, float y, float z, float& mx, float& my, float& mz) const
+V3 Transform::Snapshot::mapXYZ(const V3& p) const
 {
-    if(disabled)
-    {
-        mx = x - pivot.x();
-        my = y - pivot.y();
-        my = z - pivot.z();
-        return;
-    }
+    float x, y, z;
     if(rotation == 0.0f)
     {
-        mx = (x - pivot.x()) * scale.x() + translate.x();
-        my = (y - pivot.y()) * scale.y() + translate.y();
-        mz = (z - pivot.z()) * scale.z() + translate.z();
+        x = p.x() * scale.x() + translate.x();
+        y = p.y() * scale.y() + translate.y();
+        z = p.z() * scale.z() + translate.z();
     }
     else
     {
-        Matrix matrix = toMatrix();
-        matrix.map(x, y, z, mx, my, mz);
+        const Matrix matrix = toMatrix();
+        matrix.map(p.x(), p.y(), p.z(), x, y, z);
     }
+    return V3(x, y, z);
 }
 
 Transform::BUILDER::BUILDER(BeanFactory& parent, const document& doc)

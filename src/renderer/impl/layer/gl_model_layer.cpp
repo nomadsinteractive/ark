@@ -44,7 +44,7 @@ sp<RenderCommand> GLModelLayer::render(const LayerContext::Snapshot& renderConte
         {
             buf.setRenderObject(i);
             buf.setTranslate(V3(x + i._position.x(), y + i._position.y(), i._position.z()));
-            _model_loader->load(buf, i._type, i._size);
+            _model_loader->loadVertices(buf, i._type, i._size);
         }
         int32_t count = indexBuffer.length<glindex_t>();
         return _resource_loader_context->objectPool()->obtain<DrawElements>(GLDrawingContext(_shader_bindings, buf.getArrayBufferSnapshot(_shader_bindings->arrayBuffer()), indexBuffer.snapshot(), _mode), _shader, count);

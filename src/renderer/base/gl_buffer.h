@@ -21,18 +21,10 @@ public:
         virtual ~Uploader() = default;
 
         virtual size_t size() = 0;
-        virtual void upload(GraphicsContext& graphicsContext, GLenum target) = 0;
-    };
-
-    class ARK_API UploaderV2 {
-    public:
-        virtual ~UploaderV2() = default;
-
-        virtual size_t size() = 0;
         virtual void upload(const UploadFunc& uploader) = 0;
     };
 
-    class ARK_API ByteArrayUploader : public UploaderV2 {
+    class ARK_API ByteArrayUploader : public Uploader {
     public:
         ByteArrayUploader(const bytearray& bytes);
 
@@ -69,11 +61,10 @@ private:
         virtual void prepare(GraphicsContext&) override;
         virtual void recycle(GraphicsContext&) override;
 
-        void prepare(GraphicsContext& graphicsContext, const sp<UploaderV2>& transientUploader);
+        void prepare(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader);
 
     private:
         void upload(GraphicsContext& graphicsContext, Uploader& uploader);
-        void upload(GraphicsContext& graphicsContext, UploaderV2& uploader);
 
     private:
         sp<GLRecycler> _recycler;
@@ -90,7 +81,7 @@ public:
     class Snapshot {
     public:
         Snapshot() = default;
-        Snapshot(const sp<Stub>& stub, const sp<UploaderV2>& uploader);
+        Snapshot(const sp<Stub>& stub, const sp<Uploader>& uploader);
         DEFAULT_COPY_AND_ASSIGN(Snapshot);
 
         uint32_t id() const;
@@ -100,33 +91,28 @@ public:
 
     private:
         sp<Stub> _stub;
-        sp<UploaderV2> _uploader;
+        sp<Uploader> _uploader;
     };
 
 public:
     GLBuffer(const sp<GLRecycler>& recycler, const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage);
-    GLBuffer(const GLBuffer& other) noexcept = default;
-    GLBuffer(GLBuffer&& other) noexcept = default;
+    GLBuffer(const GLBuffer& other, uint32_t size);
     GLBuffer() noexcept;
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(GLBuffer);
 
     explicit operator bool() const;
-
-    GLBuffer& operator =(const GLBuffer& other) noexcept = default;
-    GLBuffer& operator =(GLBuffer&& other) noexcept = default;
 
     template<typename T> uint32_t length() const {
         return _size / sizeof(T);
     }
 
     uint32_t size() const;
-    void setSize(uint32_t size);
 
     GLenum type() const;
-    Snapshot snapshot(const sp<UploaderV2>& uploader = nullptr) const;
+    Snapshot snapshot(const sp<Uploader>& uploader = nullptr) const;
 
     GLuint id() const;
     void prepare(GraphicsContext&) const;
-    void recycle(GraphicsContext&) const;
 
 private:
     sp<Stub> _stub;

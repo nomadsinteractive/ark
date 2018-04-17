@@ -14,7 +14,7 @@ public:
     GLModelLoaderPoint(const sp<Atlas>& atlas);
 
     virtual uint32_t estimateVertexCount(uint32_t renderObjectCount) override;
-    virtual void load(GLModelBuffer& buf, uint32_t type, const V& scale) override;
+    virtual void loadVertices(GLModelBuffer& buf, uint32_t type, const V& scale) override;
 
     virtual GLBuffer getPredefinedIndexBuffer(GLResourceManager& glResourceManager, uint32_t renderObjectCount) override;
 

@@ -73,7 +73,7 @@ public:
 //  [[script::bindings::property]]
     void setTransform(const sp<Transform>& transform);
 //  [[script::bindings::property]]
-    void setFilter(const sp<Varyings>& filter);
+    void setVaryings(const sp<Varyings>& filter);
 
 //  [[script::bindings::property]]
     void setTag(const Box& tag);

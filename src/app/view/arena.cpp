@@ -45,7 +45,7 @@ void Arena::setRendererDelegate(const sp<Renderer>& delegate)
 
 void Arena::render(RenderRequest& renderRequest, float x, float y)
 {
-    NOT_NULL(_view_group);
+    NOT_NULL(_renderer);
     _renderer->render(renderRequest, x, y);
     for(const sp<Renderer>& i : _layers)
         i->render(renderRequest, x, y);
@@ -110,7 +110,13 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
     for(const document& i : _manifest->children())
     {
         if(i->name() == Constants::Attributes::LAYER)
-            arena->addLayer(sp<Layer::Renderer>::make(factory.ensure<Layer>(i, args)));
+        {
+            const sp<Layer> layer = factory.build<Layer>(i, args);
+            if(layer)
+                arena->addLayer(sp<Layer::Renderer>::make(layer));
+            else
+                arena->addLayer(factory.ensure<Renderer>(i, args));
+        }
         else if(i->name() == Constants::Attributes::RENDER_LAYER)
             arena->addRenderer(factory.ensure<RenderLayer>(i, args));
         else

@@ -19,7 +19,9 @@ public:
 
     void postTask(const std::function<void()>& task, float delay = 0);
     void postTask(std::function<void()>&& task, float delay = 0);
+
     void scheduleTask(const std::function<bool()>& task, float interval);
+    void scheduleTask(std::function<bool()>&& task, float interval);
 
 };
 

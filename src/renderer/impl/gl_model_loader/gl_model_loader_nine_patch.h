@@ -29,7 +29,7 @@ public:
     GLModelLoaderNinePatch(const document& manifest, const sp<Atlas>& atlas);
 
     virtual uint32_t estimateVertexCount(uint32_t renderObjectCount) override;
-    virtual void load(GLModelBuffer& buf, uint32_t type, const V& scale) override;
+    virtual void loadVertices(GLModelBuffer& buf, uint32_t type, const V& size) override;
 
     virtual GLBuffer getPredefinedIndexBuffer(GLResourceManager& glResourceManager, uint32_t renderObjectCount) override;
 
@@ -44,9 +44,6 @@ public:
         document _manifest;
         sp<Builder<Atlas>> _atlas;
     };
-
-private:
-    void fillPaintingRect(GLModelBuffer& buf, const Rect& paintRect, const Item& bounds) const;
 
 private:
     sp<Atlas> _atlas;

@@ -23,7 +23,6 @@ public:
     class ARK_API Snapshot {
     public:
         Snapshot();
-        Snapshot(float px, float py);
         Snapshot(const Snapshot& other) = default;
 
         Matrix toMatrix() const;
@@ -35,17 +34,14 @@ public:
         bool operator !=(const Snapshot& other) const;
 
         void map(float x, float y, float tx, float ty, float& mx, float& my) const;
-        void mapXYZ(float x, float y, float z, float& mx, float& my, float &mz) const;
-
-        bool disabled;
-        V pivot;
+        V3 mapXYZ(const V3& p) const;
 
         float rotation;
         V scale;
         V translate;
     };
 
-    Snapshot snapshot(float px = 0, float py = 0) const;
+    Snapshot snapshot() const;
 
 //  [[script::bindings::property]]
     const sp<Numeric>& rotation();

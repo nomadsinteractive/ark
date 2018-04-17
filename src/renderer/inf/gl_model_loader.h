@@ -26,7 +26,8 @@ public:
     }
 
     virtual uint32_t estimateVertexCount(uint32_t renderObjectCount) = 0;
-    virtual void load(GLModelBuffer& buf, uint32_t type, const V& size) = 0;
+
+    virtual void loadVertices(GLModelBuffer& buf, uint32_t type, const V& size) = 0;
 
     virtual GLBuffer getPredefinedIndexBuffer(GLResourceManager& glResourceManager, uint32_t renderObjectCount) {
         return GLBuffer();

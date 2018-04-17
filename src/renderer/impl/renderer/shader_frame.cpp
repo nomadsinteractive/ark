@@ -31,7 +31,7 @@ void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
     const GLBuffer indexBuffer = _resource_manager->getGLIndexBuffer(GLResourceManager::BUFFER_NAME_TRANGLES, 6);
     if(indexBuffer)
     {
-        const sp<GLBuffer::UploaderV2> uploader = _object_pool->obtain<GLBuffer::ByteArrayUploader>(getArrayBuffer(x, y));
+        const sp<GLBuffer::Uploader> uploader = _object_pool->obtain<GLBuffer::ByteArrayUploader>(getArrayBuffer(x, y));
         int32_t count = indexBuffer.length<glindex_t>();
         renderRequest.addRequest(_object_pool->obtain<DrawElements>(GLDrawingContext(_shader_bindings, _array_buffer.snapshot(uploader), indexBuffer.snapshot(), GL_TRIANGLES), _shader, count));
     }

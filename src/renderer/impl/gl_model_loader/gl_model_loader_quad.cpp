@@ -11,7 +11,7 @@ GLModelLoaderQuad::GLModelLoaderQuad(const sp<Atlas>& atlas)
 {
 }
 
-void GLModelLoaderQuad::load(GLModelBuffer& buf, uint32_t type, const V& scale)
+void GLModelLoaderQuad::loadVertices(GLModelBuffer& buf, uint32_t type, const V& scale)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
     float width = scale.x() == 0 ? texCoord.width() : scale.x();

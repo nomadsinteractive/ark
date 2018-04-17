@@ -11,7 +11,7 @@ GLModelLoaderPoint::GLModelLoaderPoint(const sp<Atlas>& atlas)
 {
 }
 
-void GLModelLoaderPoint::load(GLModelBuffer& buf, uint32_t type, const V& scale)
+void GLModelLoaderPoint::loadVertices(GLModelBuffer& buf, uint32_t type, const V& scale)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
     float halfWidth = scale.x() / 2;

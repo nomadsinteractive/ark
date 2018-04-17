@@ -41,6 +41,7 @@ public:
 
     void set(const sp<Variable<T>>& delegate) {
         deferedUnref();
+        DCHECK(delegate.get() != this, "Recursive delegate being set");
         _delegate = Null::toSafe(delegate);
     }
 

@@ -114,17 +114,13 @@ Varyings::Snapshot::Snapshot(const bytearray& bytes)
 {
 }
 
-void Varyings::Snapshot::apply(void* buf, uint32_t stride, uint32_t count) const
+void Varyings::Snapshot::apply(void* buf, uint32_t stride) const
 {
     if(!_bytes)
         return;
 
-    uint8_t* ptr = reinterpret_cast<uint8_t*>(buf);
-    for(uint32_t i = 0; i < count; i++)
-    {
-        memcpy(ptr, _bytes->buf(), _bytes->length());
-        ptr += stride;
-    }
+    DCHECK(_bytes->length() <= stride, "Varyings buffer overflow: stride: %d, varyings size: %d", stride, _bytes->length());
+    memcpy(buf, _bytes->buf(), _bytes->length());
 }
 
 }
