@@ -14,10 +14,7 @@ GLModelLoaderPoint::GLModelLoaderPoint(const sp<Atlas>& atlas)
 void GLModelLoaderPoint::loadVertices(GLModelBuffer& buf, uint32_t type, const V& scale)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
-    float halfWidth = scale.x() / 2;
-    float halfHeight = scale.y() / 2;
-
-    buf.setPosition(-halfWidth, -halfHeight, 0);
+    buf.setPosition(0, 0, 0);
     buf.setTexCoordinate(static_cast<uint16_t>((texCoord.left() + texCoord.right()) / 2), static_cast<uint16_t>((texCoord.top() + texCoord.bottom()) / 2));
     buf.nextVertex();
 }

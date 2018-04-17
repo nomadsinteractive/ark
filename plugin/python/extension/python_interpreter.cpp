@@ -23,6 +23,7 @@
 #include "python/impl/adapter/python_callable_event_listener.h"
 
 #include "python/impl/duck/py_callable_duck_type.h"
+#include "python/impl/duck/py_numeric_duck_type.h"
 #include "python/impl/duck/py_object_duck_type.h"
 
 namespace ark {
@@ -138,6 +139,19 @@ sp<Numeric> PythonInterpreter::toNumeric(PyObject* object)
     return asInterface<Numeric>(object);
 }
 
+sp<Integer> PythonInterpreter::toInteger(PyObject* object)
+{
+    if(PyLong_Check(object))
+        return sp<Integer::Impl>::make(PyLong_AsLong(object));
+    if(PyFloat_Check(object))
+    {
+        DWARN(false, "Casting from float to integer loses precision.");
+        return sp<Integer::Impl>::make(static_cast<float>(PyFloat_AsDouble(object)));
+    }
+
+    return asInterface<Integer>(object);
+}
+
 sp<Array<Color>> PythonInterpreter::toColorArray(PyObject* object)
 {
     if(PyList_Check(object))
@@ -168,7 +182,12 @@ sp<Scope> PythonInterpreter::toScope(PyObject* kws)
             PyObject* item = PyDict_GetItem(kws, key);
             const String sKey = toString(key);
             if(PyFloat_Check(item) || PyLong_Check(item))
-                scope->put<Numeric>(sKey, sp<Numeric::Impl>::make(((float) PyFloat_AsDouble(item))));
+            {
+                const sp<PyInstance> owned = sp<PyInstance>::make(PyInstance::own(item));
+                sp<PyNumericDuckType> pyDuck = sp<PyNumericDuckType>::make(owned);
+                scope->put<PyNumericDuckType>(sKey, pyDuck);
+//                scope->put<Numeric>(sKey, sp<Numeric::Impl>::make(((float) PyFloat_AsDouble(item))));
+            }
             else if(PyBytes_Check(item) || PyUnicode_Check(item))
                 scope->put<String>(sKey, sp<String>::make(toString(item)));
             else if(PyBool_Check(item))

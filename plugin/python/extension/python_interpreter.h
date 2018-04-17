@@ -33,6 +33,7 @@ public:
 
     sp<Array<Color>> toColorArray(PyObject* object);
     sp<Numeric> toNumeric(PyObject* object);
+    sp<Integer> toInteger(PyObject* object);
     sp<Runnable> toRunnable(PyObject* object);
     sp<CollisionCallback> toCollisionCallback(PyObject* object);
     sp<EventListener> toEventListener(PyObject* object);
@@ -175,6 +176,11 @@ private:
 template<> inline sp<Numeric> PythonInterpreter::toSharedPtr<Numeric>(PyObject* object)
 {
     return toNumeric(object);
+}
+
+template<> inline sp<Integer> PythonInterpreter::toSharedPtr<Integer>(PyObject* object)
+{
+    return toInteger(object);
 }
 
 template<> inline sp<Vec2> PythonInterpreter::toSharedPtr<Vec2>(PyObject* object)

@@ -57,6 +57,13 @@ bool Arena::onEvent(const Event& event)
     return _view_group->onEvent(event, 0.0f, 0.0f) || _event_listeners->onEvent(event);
 }
 
+sp<Renderer> Arena::loadRenderer(const String& name, const sp<Scope>& args)
+{
+    const sp<Renderer> renderer = load<Renderer>(name, args);
+    addRenderer(renderer);
+    return renderer;
+}
+
 Box Arena::getReference(const String& name)
 {
     DCHECK(_resource_loader, "Trying to get references on a disposed Arena");
