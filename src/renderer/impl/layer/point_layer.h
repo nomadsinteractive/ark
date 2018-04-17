@@ -2,24 +2,21 @@
 #define ARK_RENDERER_IMPL_LAYER_POINT_LAYER_H_
 
 #include "core/inf/builder.h"
+#include "core/types/shared_ptr.h"
 
-#include "graphics/inf/layer.h"
+#include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_elements.h"
 
 namespace ark {
 
-class PointLayer : public Layer {
+class PointLayer {
 public:
-    PointLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext);
-
-    virtual sp<RenderCommand> render(const LayerContext::Snapshot& layerContext, float x, float y) override;
 
 //  [[plugin::resource-loader("point-layer")]]
     class BUILDER : public Builder<Layer> {
     public:
-        BUILDER(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<Layer> build(const sp<Scope>& args) override;
 
@@ -30,8 +27,6 @@ public:
         sp<Builder<GLShader>> _shader;
     };
 
-private:
-    GLElements _elements;
 };
 
 }

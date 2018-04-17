@@ -1,24 +1,24 @@
-#ifndef ARK_RENDERER_GLES30_IMPL_LAYER_PARTICLE_LAYER_H_
-#define ARK_RENDERER_GLES30_IMPL_LAYER_PARTICLE_LAYER_H_
-
-#include "core/base/memory_pool.h"
+#ifndef ARK_RENDERER_IMPL_LAYER_GL_MODEL_LAYER_H_
+#define ARK_RENDERER_IMPL_LAYER_GL_MODEL_LAYER_H_
 
 #include "graphics/base/layer_context.h"
 #include "graphics/inf/layer.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_buffer.h"
+
+#include "platform/gl/gl.h"
 
 namespace ark {
-namespace gles30 {
 
-class ParticleLayer : public Layer {
+class GLModelLayer : public Layer {
 public:
-    ParticleLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    GLModelLayer(const sp<GLModelLoader>& modelLoader, const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+    const sp<Atlas>& atlas() const;
 
     virtual sp<RenderCommand> render(const LayerContext::Snapshot& layerContext, float x, float y) override;
 
-//  [[plugin::resource-loader("particle-layer")]]
+//  [[plugin::resource-loader("model-layer")]]
     class BUILDER : public Builder<Layer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
@@ -28,22 +28,21 @@ public:
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
         sp<Builder<Atlas>> _atlas;
+        sp<Builder<GLModelLoader>> _model_loader;
         sp<Builder<GLShader>> _shader;
     };
 
 private:
+    sp<GLResourceManager> _resource_manager;
+    sp<GLModelLoader> _model_loader;
+    sp<GLShader> _shader;
     sp<Atlas> _atlas;
+    GLenum _mode;
 
     sp<ResourceLoaderContext> _resource_loader_context;
     sp<GLShaderBindings> _shader_bindings;
-
-    GLBuffer _index_buffer;
-    GLBuffer _transform_array_buffer;
-
-    MemoryPool _memory_pool;
 };
 
-}
 }
 
 #endif

@@ -9,7 +9,7 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/inf/alphabet.h"
 
-#include "renderer/impl/layer/image_layer.h"
+#include "renderer/impl/layer/gl_model_layer.h"
 #include "renderer/impl/layer/alphabet_layer.h"
 
 namespace ark {
@@ -53,8 +53,8 @@ sp<Renderer> Text::BUILDER::build(const sp<Scope>& args)
         const sp<AlphabetLayer>& alphabetLayer = layer.cast<AlphabetLayer>();
         return sp<Text>::make(layer, createCharacters(alphabetLayer->atlas(), text, size, alphabetLayer));
     }
-    DCHECK(layer.is<ImageLayer>(), "Label can only be added to a AlphabetLayer or ImageLayer");
-    return sp<Text>::make(layer, createCharacters(layer.cast<ImageLayer>()->atlas(), text, size, nullptr));
+    DCHECK(layer.is<GLModelLayer>(), "Label can only be added to a AlphabetLayer or ImageLayer");
+    return sp<Text>::make(layer, createCharacters(layer.cast<GLModelLayer>()->atlas(), text, size, nullptr));
 }
 
 Alphabets::Characters Text::BUILDER::createCharacters(const Atlas& atlas, const String& text, const sp<Size>& size, const sp<AlphabetLayer>& alphabetLayer)

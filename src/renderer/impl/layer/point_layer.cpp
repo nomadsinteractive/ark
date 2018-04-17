@@ -2,34 +2,21 @@
 
 #include "core/base/bean_factory.h"
 
-#include "graphics/base/render_command_pipeline.h"
-
-#include "renderer/base/atlas.h"
 #include "renderer/base/gl_shader.h"
-#include "renderer/base/resource_loader_context.h"
-#include "renderer/impl/gl_model/gl_model_point.h"
+#include "renderer/impl/gl_model_loader/gl_model_loader_point.h"
+#include "renderer/impl/layer/gl_model_layer.h"
 
 namespace ark {
 
-PointLayer::PointLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : Layer(resourceLoaderContext->memoryPool()), _elements(shader, atlas->texture(), sp<GLModelPoint>::make(shader, atlas), resourceLoaderContext)
-{
-}
-
-sp<RenderCommand> PointLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
-{
-    return _elements.render(renderContext, x, y);
-}
-
-PointLayer::BUILDER::BUILDER(BeanFactory& parent, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _atlas(parent.ensureBuilder<Atlas>(manifest)),
-      _shader(GLShader::fromDocument(parent, manifest, resourceLoaderContext, "shaders/point.vert", "shaders/point.frag")) {
+PointLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _atlas(factory.ensureBuilder<Atlas>(manifest)),
+      _shader(GLShader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/point.vert", "shaders/point.frag")) {
 }
 
 sp<Layer> PointLayer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Atlas> atlas = _atlas->build(args);
-    return sp<PointLayer>::make(_shader->build(args), atlas, _resource_loader_context);
+    return sp<GLModelLayer>::make(sp<GLModelLoaderPoint>::make(atlas), _shader->build(args), atlas, _resource_loader_context);
 }
 
 }

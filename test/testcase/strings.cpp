@@ -74,7 +74,7 @@ public:
             return 16;
         const std::regex VAR_PATTERN("\\$\\{?([\\w\\d_]+)\\}?");
         if(String("${a}a = $bb.").replace(VAR_PATTERN, [] (Array<String>& groups) {
-            return groups.array()[1];
+            return groups.buf()[1];
         }) != String("aa = bb."))
             return 17;
         return 0;

@@ -36,6 +36,7 @@ public:
     GLShaderPreprocessor& fragment();
 
     const GLAttribute& getAttribute(const String& name) const;
+    const int32_t getAttributeOffset(const String& name) const;
 
 private:
     void initialize();

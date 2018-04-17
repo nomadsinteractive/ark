@@ -5,7 +5,7 @@
 
 namespace ark {
 
-GLDrawingContext::GLDrawingContext(const sp<GLShaderBindings>& shaderBindings, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer& indexBuffer, GLenum mode)
+GLDrawingContext::GLDrawingContext(const sp<GLShaderBindings>& shaderBindings, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer::Snapshot& indexBuffer, GLenum mode)
     : _shader_bindings(shaderBindings), _array_buffer(arrayBuffer), _index_buffer(indexBuffer), _mode(mode)
 {
 }

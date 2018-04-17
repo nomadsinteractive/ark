@@ -49,10 +49,17 @@ bool V2::operator !=(const V2& other) const
     return _x != other._x || _y != other._y;
 }
 
-const V2& V2::operator =(const V2& other)
+V2& V2::operator +=(const V2& other)
 {
-    _x = other._x;
-    _y = other._y;
+    _x += other._x;
+    _y += other._y;
+    return *this;
+}
+
+V2& V2::operator *=(const V2& other)
+{
+    _x *= other._x;
+    _y *= other._y;
     return *this;
 }
 

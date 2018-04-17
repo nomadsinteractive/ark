@@ -40,7 +40,7 @@ class GLProgramsTestCase : public TestCase {
 public:
     virtual int launch() {
         Global<StringTable> stringTable;
-        const sp<String> vert = stringTable->getString("shaders", "texture.vert");
+        const sp<String> vert = stringTable->getString("shaders", "default.vert");
         const sp<String> frag = stringTable->getString("shaders", "texture.frag");
         if(!vert || !frag)
             return -1;

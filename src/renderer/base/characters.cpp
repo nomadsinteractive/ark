@@ -11,7 +11,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/layer/alphabet_layer.h"
-#include "renderer/impl/layer/image_layer.h"
+#include "renderer/impl/layer/gl_model_layer.h"
 
 namespace ark {
 
@@ -29,8 +29,8 @@ Characters::Characters(const sp<Layer>& layer, const sp<ResourceLoaderContext>& 
         _alphabet = _alphabet_layer->alphabet();
     else
     {
-        DCHECK(layer.is<ImageLayer>(), "Character's layer must be either AlphabetLayer or ImageLayer");
-        _atlas = layer.as<ImageLayer>()->atlas();
+        DCHECK(layer.is<GLModelLayer>(), "Character's layer must be either AlphabetLayer or ImageLayer");
+        _atlas = layer.as<GLModelLayer>()->atlas();
     }
 }
 

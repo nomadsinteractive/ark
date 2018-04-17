@@ -78,7 +78,8 @@ private:
     sp<Stub> _stub;
     sp<ResourceLoaderContext> _resource_loader_context;
     sp<GLShader> _shader;
-    sp<ImageLayer> _image_layer;
+    sp<Layer> _layer;
+    sp<Atlas> _atlas;
 };
 
 }

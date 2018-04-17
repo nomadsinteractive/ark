@@ -39,7 +39,7 @@ public:
         return _buffer->length();
     }
 
-    virtual void upload(GraphicsContext& /*graphicsContext*/, GLenum target, GLsizeiptr size) override {
+    virtual void upload(GraphicsContext& /*graphicsContext*/, GLenum target) override {
         glBufferSubData(target, 0, _buffer->length(), _buffer->buf());
     }
 
@@ -70,7 +70,7 @@ AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const document& m
 
 sp<RenderCommand> AssimpModelLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
 {
-    return _render_command_pool.obtain<DrawElements>(GLDrawingContext(_shader_bindings, _array_buffer.snapshot(nullptr), _index_buffer, GL_TRIANGLES), _shader);
+    return _render_command_pool.obtain<DrawElements>(GLDrawingContext(_shader_bindings, _array_buffer.snapshot(), _index_buffer.snapshot(), GL_TRIANGLES), _shader, _index_buffer.length<uint16_t>());
 }
 
 bytearray AssimpModelLayer::loadArrayBuffer(aiMesh* mesh, float scale) const

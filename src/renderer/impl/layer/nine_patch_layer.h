@@ -2,21 +2,16 @@
 #define ARK_RENDERER_IMPL_LAYER_NINE_PATCH_LAYER_H_
 
 #include "core/inf/builder.h"
+#include "core/types/shared_ptr.h"
 
-#include "graphics/inf/layer.h"
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
 
-#include "renderer/base/gl_elements.h"
-
 namespace ark {
 
-class NinePatchLayer : public Layer {
+class NinePatchLayer {
 public:
-    NinePatchLayer(const sp<Atlas>& atlas, const sp<GLShader>& shader, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
-
-    virtual sp<RenderCommand> render(const LayerContext::Snapshot& layerContext, float x, float y) override;
 
 //  [[plugin::resource-loader("nine-patch-layer")]]
     class BUILDER : public Builder<Layer> {
@@ -32,9 +27,6 @@ public:
         sp<Builder<Atlas>> _atlas;
         sp<Builder<GLShader>> _shader;
     };
-
-private:
-    GLElements _nine_patch_elements;
 
 };
 

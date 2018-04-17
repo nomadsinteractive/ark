@@ -36,8 +36,9 @@ private:
 public:
     class Snapshot {
     public:
+        Snapshot() = default;
         Snapshot(const bytearray& bytes);
-        Snapshot(const Snapshot& other) = default;
+        DEFAULT_COPY_AND_ASSIGN(Snapshot);
 
         void apply(void* buf, uint32_t stride, uint32_t count) const;
 

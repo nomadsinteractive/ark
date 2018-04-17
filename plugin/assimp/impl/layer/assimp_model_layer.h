@@ -15,7 +15,6 @@
 #include "graphics/inf/layer.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_elements.h"
 #include "renderer/base/gl_buffer.h"
 
 namespace ark {

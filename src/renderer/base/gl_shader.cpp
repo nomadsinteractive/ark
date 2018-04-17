@@ -123,6 +123,11 @@ const GLAttribute& GLShader::getAttribute(const String& name) const
     return _source->getAttribute(name);
 }
 
+int32_t GLShader::getAttributeOffset(const String& name) const
+{
+    return _source->getAttributeOffset(name);
+}
+
 sp<Varyings> GLShader::makeVaryings() const
 {
     return sp<Varyings>::make(*this);

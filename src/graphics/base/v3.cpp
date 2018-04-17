@@ -32,12 +32,24 @@ bool V3::operator !=(const V3& other) const
     return _x != other._x || _y != other._y || _z != other._z;
 }
 
-const V3& V3::operator =(const V3& other)
+V3 operator +(const V3& lvalue, const V3& rvalue)
 {
-    _x = other._x;
-    _y = other._y;
-    _z = other._z;
-    return *this;
+    return V3(lvalue.x() + rvalue.x(), lvalue.y() + rvalue.y(), lvalue.z() + rvalue.z());
+}
+
+V3 operator -(const V3& lvalue, const V3& rvalue)
+{
+    return V3(lvalue.x() - rvalue.x(), lvalue.y() - rvalue.y(), lvalue.z() - rvalue.z());
+}
+
+V3 operator *(const V3& lvalue, const V3& rvalue)
+{
+    return V3(lvalue.x() * rvalue.x(), lvalue.y() * rvalue.y(), lvalue.z() * rvalue.z());
+}
+
+V3 operator /(const V3& lvalue, const V3& rvalue)
+{
+    return V3(lvalue.x() / rvalue.x(), lvalue.y() / rvalue.y(), lvalue.z() / rvalue.z());
 }
 
 float V3::z() const

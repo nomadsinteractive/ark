@@ -13,8 +13,7 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
-
-#include "renderer/base/gl_elements.h"
+#include "renderer/base/gl_buffer.h"
 
 namespace ark {
 
@@ -35,7 +34,6 @@ public:
         virtual sp<Renderer> build(const sp<Scope>& args) override;
 
     private:
-        BeanFactory _parent;
         document _manifest;
 
         sp<ResourceLoaderContext> _resource_loader_context;
@@ -45,9 +43,19 @@ public:
     };
 
 private:
+    bytearray getArrayBuffer(float x, float y) const;
+
+private:
     sp<Size> _size;
-    GLElements _elements;
-    LayerContext _render_context;
+    sp<GLResourceManager> _resource_manager;
+    sp<GLShader> _shader;
+
+    GLBuffer _array_buffer;
+
+    sp<ObjectPool> _object_pool;
+    sp<MemoryPool> _memory_pool;
+    sp<GLShaderBindings> _shader_bindings;
+
 };
 
 }

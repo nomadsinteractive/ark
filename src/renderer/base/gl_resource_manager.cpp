@@ -1,5 +1,6 @@
 #include "renderer/base/gl_resource_manager.h"
 
+#include "core/inf/array.h"
 #include "core/inf/variable.h"
 #include "core/impl/array/fixed_array.h"
 #include "core/impl/array/dynamic_array.h"
@@ -22,47 +23,57 @@ namespace ark {
 
 namespace {
 
-class NinePatchIndexArrayVariable : public Variable<bytearray> {
+class NinePatchIndexArrayUploader : public GLBuffer::Uploader {
 public:
-    NinePatchIndexArrayVariable(uint32_t objectCount)
+    NinePatchIndexArrayUploader(uint32_t objectCount)
         : _object_count(objectCount), _boiler_plate({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15}) {
+        NOT_NULL(_object_count);
     }
 
-    virtual bytearray val() override {
+    virtual size_t size() override {
+        return ((_boiler_plate.length() + 2) * _object_count - 2) * sizeof(glindex_t);
+    }
+
+    virtual void upload(GraphicsContext& /*graphicsContext*/, GLenum target) override {
         const uint32_t bolierPlateLength = _boiler_plate.length();
-        bytearray array = sp<DynamicArray<uint8_t>>::make((bolierPlateLength + 2) * _object_count * 2 - 4);
-        uint16_t* buf = reinterpret_cast<uint16_t*>(array->buf());
-        uint16_t* src = _boiler_plate.buf();
+        bytearray array = sp<DynamicArray<uint8_t>>::make(size());
+        glindex_t* buf = reinterpret_cast<glindex_t*>(array->buf());
+        glindex_t* src = _boiler_plate.buf();
         for(uint32_t i = 0; i < _object_count; i ++) {
             for(uint32_t j = 0; j < bolierPlateLength; j ++)
-                buf[j] = static_cast<uint16_t>(src[j] + i * 16);
+                buf[j] = static_cast<glindex_t>(src[j] + i * 16);
             if(i + 1 != _object_count) {
-                buf[bolierPlateLength] = static_cast<uint16_t>(15 + i * 16);
-                buf[bolierPlateLength + 1] = static_cast<uint16_t>((i + 1) * 16);
+                buf[bolierPlateLength] = static_cast<glindex_t>(15 + i * 16);
+                buf[bolierPlateLength + 1] = static_cast<glindex_t>((i + 1) * 16);
             }
             buf += ((bolierPlateLength + 2));
         }
-        return array;
+
+        glBufferSubData(target, 0, array->length(), array->buf());
     }
 
 private:
     uint32_t _object_count;
-    FixedArray<uint16_t, 28> _boiler_plate;
+    FixedArray<glindex_t, 28> _boiler_plate;
 };
 
-class TrianglesIndexArrayVariable : public Variable<bytearray> {
+class TrianglesIndexArrayUploader : public GLBuffer::Uploader {
 public:
-    TrianglesIndexArrayVariable(uint32_t objectCount)
+    TrianglesIndexArrayUploader(uint32_t objectCount)
         : _object_count(objectCount) {
     }
 
-    bytearray val() {
-        bytearray result = sp<DynamicArray<uint8_t>>::make(_object_count * 12);
+    virtual size_t size() override {
+        return _object_count * 6 * sizeof(glindex_t);
+    }
 
-        uint16_t* buf = reinterpret_cast<uint16_t*>(result->buf());
+    virtual void upload(GraphicsContext& /*graphicsContext*/, GLenum target) override {
+        bytearray result = sp<DynamicArray<uint8_t>>::make(size());
+
+        glindex_t* buf = reinterpret_cast<glindex_t*>(result->buf());
         uint32_t idx = 0;
         for(uint32_t i = 0; i < _object_count; i ++) {
-            uint16_t offset = static_cast<uint16_t>(i * 4);
+            glindex_t offset = static_cast<glindex_t>(i * 4);
 
             buf[idx++] = offset;
             buf[idx++] = offset + 2;
@@ -70,36 +81,40 @@ public:
             buf[idx++] = offset + 2;
             buf[idx++] = offset + 3;
             buf[idx++] = offset + 1;
-
         }
-        return result;
+        glBufferSubData(target, 0, result->length(), result->buf());
     }
 
 private:
     uint32_t _object_count;
+
 };
 
-class PointIndexArrayVariable : public Variable<bytearray> {
+class PointIndexArrayUploader : public GLBuffer::Uploader {
 public:
-    PointIndexArrayVariable(uint32_t objectCount)
+    PointIndexArrayUploader(uint32_t objectCount)
         : _object_count(objectCount) {
     }
 
-    bytearray val() {
+    virtual size_t size() override {
+        return _object_count * sizeof(glindex_t);
+    }
+
+    virtual void upload(GraphicsContext& /*graphicsContext*/, GLenum target) override {
         const bytearray result = sp<DynamicArray<uint8_t>>::make(_object_count * 2);
 
-        uint16_t* buf = reinterpret_cast<uint16_t*>(result->buf());
+        glindex_t* buf = reinterpret_cast<glindex_t*>(result->buf());
         uint32_t idx = 0;
         for(uint32_t i = 0; i < _object_count; i ++) {
-            uint16_t offset = static_cast<uint16_t>(i);
+            glindex_t offset = static_cast<glindex_t>(i);
             buf[idx++] = offset;
-
         }
-        return result;
+        glBufferSubData(target, 0, result->length(), result->buf());
     }
 
 private:
     uint32_t _object_count;
+
 };
 
 }
@@ -166,14 +181,14 @@ GLBuffer GLResourceManager::getGLIndexBuffer(GLResourceManager::BufferName buffe
     if(!bufferLength)
         return GLBuffer();
 
-    if(!_static_buffers[bufferName] || _static_buffers[bufferName].length<uint16_t>() < bufferLength)
+    if(!_static_buffers[bufferName] || _static_buffers[bufferName].length<glindex_t>() < bufferLength)
     {
         _static_buffers[bufferName] = createStaticBuffer(bufferName, bufferLength);
         prepare(_static_buffers[bufferName], PS_ONCE_AND_ON_SURFACE_READY);
     }
 
     GLBuffer indexBuffer = _static_buffers[bufferName];
-    indexBuffer.setSize(bufferLength * sizeof(uint16_t));
+    indexBuffer.setSize(bufferLength * sizeof(glindex_t));
     return indexBuffer;
 }
 
@@ -209,17 +224,16 @@ const sp<GLRecycler>& GLResourceManager::recycler() const
 
 GLBuffer GLResourceManager::createStaticBuffer(GLResourceManager::BufferName bufferName, uint32_t bufferLength) const
 {
-    const uint32_t bufferSize = bufferLength * sizeof(uint16_t);
     switch(bufferName)
     {
         case BUFFER_NAME_TRANGLES:
             DCHECK(bufferLength % 3 == 0, "Length of index array for triangles should be 3 times of an integer.");
-            return GLBuffer(_recycler, sp<Variable<bytearray>>::adopt(new TrianglesIndexArrayVariable(bufferLength / 3)), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, bufferSize);
+            return GLBuffer(_recycler, sp<TrianglesIndexArrayUploader>::make(bufferLength / 3), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
         case BUFFER_NAME_NINE_PATCH:
             DCHECK((bufferLength + 2) % 30 == 0, "Illegal length of nine patch index array.");
-            return GLBuffer(_recycler, sp<Variable<bytearray>>::adopt(new NinePatchIndexArrayVariable((bufferLength + 2) / 30)), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, bufferSize);
+            return GLBuffer(_recycler, sp<NinePatchIndexArrayUploader>::make((bufferLength + 2) / 30), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
         case BUFFER_NAME_POINTS:
-            return GLBuffer(_recycler, sp<Variable<bytearray>>::adopt(new PointIndexArrayVariable(static_cast<uint32_t>(bufferLength * 1.4f))), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, bufferSize);
+            return GLBuffer(_recycler, sp<PointIndexArrayUploader>::make(static_cast<uint32_t>(bufferLength * 1.4f)), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
         default:
             break;
     }

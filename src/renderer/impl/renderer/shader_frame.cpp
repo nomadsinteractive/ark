@@ -3,80 +3,62 @@
 #include "core/base/api.h"
 #include "core/base/memory_pool.h"
 #include "core/impl/array/fixed_array.h"
-#include "core/util/documents.h"
 
-#include "graphics/base/render_command_pipeline.h"
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
 #include "graphics/base/vec2.h"
 
 #include "renderer/base/gl_buffer.h"
-#include "renderer/base/gl_program.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_command/draw_elements.h"
 #include "renderer/impl/gl_snippet/gl_snippet_textures.h"
-#include "renderer/inf/gl_model.h"
 
 namespace ark {
 
-namespace {
-
-class GLModelShader : public GLModel {
-public:
-    GLModelShader(const sp<Size>& size)
-        : _size(size) {
-    }
-
-    virtual bytearray getArrayBuffer(MemoryPool& memoryPool, const LayerContext::Snapshot& /*renderContext*/, float x, float y) override {
-        float top = g_isOriginBottom ? y + _size->height() : y, bottom = g_isOriginBottom ? y : y + _size->height();
-        uint16_t uvtop = g_isOriginBottom ? 0xffff : 0, uvbottom = g_isOriginBottom ? 0 : 0xffff;
-        FixedArray<float, 16> buffer({x, bottom, 0, 0, x, top, 0, 0, x + _size->width(), bottom, 0, 0, x + _size->width(), top, 0, 0});
-        uint16_t* ip = reinterpret_cast<uint16_t*>(buffer.buf());
-        ip[6] = 0;
-        ip[7] = uvbottom;
-        ip[14] = 0;
-        ip[15] = uvtop;
-        ip[22] = 0xffff;
-        ip[23] = uvbottom;
-        ip[30] = 0xffff;
-        ip[31] = uvtop;
-        const bytearray preallocated = memoryPool.allocate(64);
-        memcpy(preallocated->buf(), buffer.buf(), 16 * sizeof(GLfloat));
-        return preallocated;
-    }
-
-    virtual GLBuffer getIndexBuffer(GLResourceManager& glResourceManager, const LayerContext::Snapshot& /*renderContext*/) override {
-        return glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_TRANGLES, 6);
-    }
-
-    virtual uint32_t mode() const override {
-        return static_cast<uint32_t>(GL_TRIANGLES);
-    }
-
-private:
-    sp<Size> _size;
-
-};
-
-}
-
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _size(size), _elements(shader, nullptr, sp<GLModelShader>::make(size), resourceLoaderContext), _render_context(resourceLoaderContext->memoryPool())
+    : _size(size), _resource_manager(resourceLoaderContext->glResourceManager()), _shader(shader),
+      _array_buffer(_resource_manager->createDynamicArrayBuffer()),
+      _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
+      _shader_bindings(sp<GLShaderBindings>::make(shader, _array_buffer))
 {
 }
 
 void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
-    const sp<RenderCommand> renderCommand = _elements.render(_render_context.snapshot(), x, y);
-    if(renderCommand)
-        renderRequest.addRequest(renderCommand);
+    const GLBuffer indexBuffer = _resource_manager->getGLIndexBuffer(GLResourceManager::BUFFER_NAME_TRANGLES, 6);
+    if(indexBuffer)
+    {
+        const sp<GLBuffer::UploaderV2> uploader = _object_pool->obtain<GLBuffer::ByteArrayUploader>(getArrayBuffer(x, y));
+        int32_t count = indexBuffer.length<glindex_t>();
+        renderRequest.addRequest(_object_pool->obtain<DrawElements>(GLDrawingContext(_shader_bindings, _array_buffer.snapshot(uploader), indexBuffer.snapshot(), GL_TRIANGLES), _shader, count));
+    }
 }
 
 const sp<Size>& ShaderFrame::size()
 {
     return _size;
+}
+
+bytearray ShaderFrame::getArrayBuffer(float x, float y) const
+{
+    float top = y + _size->height(), bottom = y;
+    uint16_t uvtop = 0xffff, uvbottom = 0;
+    FixedArray<float, 16> buffer({x, bottom, 0, 0, x, top, 0, 0, x + _size->width(), bottom, 0, 0, x + _size->width(), top, 0, 0});
+    uint16_t* ip = reinterpret_cast<uint16_t*>(buffer.buf());
+    ip[6] = 0;
+    ip[7] = uvbottom;
+    ip[14] = 0;
+    ip[15] = uvtop;
+    ip[22] = 0xffff;
+    ip[23] = uvbottom;
+    ip[30] = 0xffff;
+    ip[31] = uvtop;
+    const bytearray preallocated = _memory_pool->allocate(64);
+    memcpy(preallocated->buf(), buffer.buf(), 16 * sizeof(GLfloat));
+    return preallocated;
 }
 
 ShaderFrame::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

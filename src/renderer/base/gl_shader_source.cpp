@@ -95,6 +95,12 @@ const GLAttribute& GLShaderSource::getAttribute(const String& name) const
     return iter->second;
 }
 
+const int32_t GLShaderSource::getAttributeOffset(const String& name) const
+{
+    const auto iter = _attributes.find(name);
+    return iter != _attributes.end() ? iter->second.offset() : -1;
+}
+
 void GLShaderSource::initialize()
 {
     DCHECK(_preprocessor_context, "GLShaderSource should not be initialized more than once");

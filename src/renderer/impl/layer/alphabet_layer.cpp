@@ -12,15 +12,15 @@
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/layer/image_layer.h"
+#include "renderer/impl/layer/gl_model_layer.h"
+#include "renderer/impl/gl_model_loader/gl_model_loader_quad.h"
 #include "renderer/impl/gl_snippet/gl_snippet_ucolor.h"
-
-#include "renderer/util/gl_debug.h"
 
 namespace ark {
 
 AlphabetLayer::AlphabetLayer(const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : Layer(resourceLoaderContext->memoryPool()), _stub(sp<Stub>::make(alphabet, resourceLoaderContext->glResourceManager(), textureWidth, textureHeight)),
-      _resource_loader_context(resourceLoaderContext), _shader(shader), _image_layer(sp<ImageLayer>::make(_shader, _stub->atlas(), _resource_loader_context))
+      _resource_loader_context(resourceLoaderContext), _shader(shader), _layer(sp<GLModelLayer>::make(sp<GLModelLoaderQuad>::make(_stub->atlas()), _shader, _stub->atlas(), _resource_loader_context))
 {
 }
 
@@ -28,7 +28,7 @@ sp<RenderCommand> AlphabetLayer::render(const LayerContext::Snapshot& renderCont
 {
     if(_stub->checkUnpreparedCharacter(renderContext))
         _resource_loader_context->glResourceManager()->prepare(_stub, GLResourceManager::PS_ONCE_FORCE);
-    return _image_layer->render(renderContext, x, y);
+    return _layer->render(renderContext, x, y);
 }
 
 const sp<Alphabet>& AlphabetLayer::alphabet() const
@@ -38,7 +38,7 @@ const sp<Alphabet>& AlphabetLayer::alphabet() const
 
 const sp<Atlas>& AlphabetLayer::atlas() const
 {
-    return _image_layer->atlas();
+    return _stub->atlas();
 }
 
 AlphabetLayer::Stub::Stub(const sp<Alphabet>& alphabet, const sp<GLResourceManager>& glResourceManager, uint32_t textureWidth, uint32_t textureHeight)

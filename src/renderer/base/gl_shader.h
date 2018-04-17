@@ -56,6 +56,7 @@ public:
     uint32_t stride() const;
 
     const GLAttribute& getAttribute(const String& name) const;
+    int32_t getAttributeOffset(const String& name) const;
 
 //[[script::bindings::auto]]
     sp<Varyings> makeVaryings() const;

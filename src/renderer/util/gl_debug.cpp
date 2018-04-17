@@ -42,7 +42,7 @@ void GLDebug::glTestDraw(const op<GraphicsContext>& graphicsContext, const sp<GL
 GLuint GLDebug::glTestIndexBuffer()
 {
     GLuint id = 0;
-    const uint16_t indices[] = { 0, 1, 2 };
+    const glindex_t indices[] = { 0, 1, 2 };
     glGenBuffers(1, &id);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6, indices, GL_DYNAMIC_DRAW);

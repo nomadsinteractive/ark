@@ -14,12 +14,33 @@ namespace ark {
 
 class ARK_API GLBuffer {
 public:
+    typedef std::function<void(void*, size_t)> UploadFunc;
+
     class ARK_API Uploader {
     public:
         virtual ~Uploader() = default;
 
         virtual size_t size() = 0;
-        virtual void upload(GraphicsContext& graphicsContext, GLenum target, GLsizeiptr size) = 0;
+        virtual void upload(GraphicsContext& graphicsContext, GLenum target) = 0;
+    };
+
+    class ARK_API UploaderV2 {
+    public:
+        virtual ~UploaderV2() = default;
+
+        virtual size_t size() = 0;
+        virtual void upload(const UploadFunc& uploader) = 0;
+    };
+
+    class ARK_API ByteArrayUploader : public UploaderV2 {
+    public:
+        ByteArrayUploader(const bytearray& bytes);
+
+        virtual size_t size() override;
+        virtual void upload(const UploadFunc& uploader) override;
+
+    private:
+        bytearray _bytes;
     };
 
 private:
@@ -48,10 +69,11 @@ private:
         virtual void prepare(GraphicsContext&) override;
         virtual void recycle(GraphicsContext&) override;
 
-        void prepare(GraphicsContext& graphicsContext, const bytearray& transientData);
+        void prepare(GraphicsContext& graphicsContext, const sp<UploaderV2>& transientUploader);
 
     private:
         void upload(GraphicsContext& graphicsContext, Uploader& uploader);
+        void upload(GraphicsContext& graphicsContext, UploaderV2& uploader);
 
     private:
         sp<GLRecycler> _recycler;
@@ -68,12 +90,8 @@ public:
     class Snapshot {
     public:
         Snapshot() = default;
-        Snapshot(const sp<Stub>& stub, const bytearray& array);
-        Snapshot(const Snapshot& other) = default;
-        Snapshot(Snapshot&& other) = default;
-
-        Snapshot& operator =(const Snapshot& other) = default;
-        Snapshot& operator =(Snapshot&& other) = default;
+        Snapshot(const sp<Stub>& stub, const sp<UploaderV2>& uploader);
+        DEFAULT_COPY_AND_ASSIGN(Snapshot);
 
         uint32_t id() const;
         GLenum type() const;
@@ -82,12 +100,10 @@ public:
 
     private:
         sp<Stub> _stub;
-        bytearray _array;
-
+        sp<UploaderV2> _uploader;
     };
 
 public:
-    GLBuffer(const sp<GLRecycler>& recycler, const sp<Variable<bytearray>>& buffer, GLenum type, GLenum usage, uint32_t size);
     GLBuffer(const sp<GLRecycler>& recycler, const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage);
     GLBuffer(const GLBuffer& other) noexcept = default;
     GLBuffer(GLBuffer&& other) noexcept = default;
@@ -99,14 +115,14 @@ public:
     GLBuffer& operator =(GLBuffer&& other) noexcept = default;
 
     template<typename T> uint32_t length() const {
-        return (_size ? _size : _stub->size()) / sizeof(T);
+        return _size / sizeof(T);
     }
 
     uint32_t size() const;
     void setSize(uint32_t size);
 
     GLenum type() const;
-    Snapshot snapshot(const bytearray& array) const;
+    Snapshot snapshot(const sp<UploaderV2>& uploader = nullptr) const;
 
     GLuint id() const;
     void prepare(GraphicsContext&) const;

@@ -132,6 +132,28 @@ void Transform::Snapshot::map(float x, float y, float tx, float ty, float& mx, f
     my += ty;
 }
 
+void Transform::Snapshot::mapXYZ(float x, float y, float z, float& mx, float& my, float& mz) const
+{
+    if(disabled)
+    {
+        mx = x - pivot.x();
+        my = y - pivot.y();
+        my = z - pivot.z();
+        return;
+    }
+    if(rotation == 0.0f)
+    {
+        mx = (x - pivot.x()) * scale.x() + translate.x();
+        my = (y - pivot.y()) * scale.y() + translate.y();
+        mz = (z - pivot.z()) * scale.z() + translate.z();
+    }
+    else
+    {
+        Matrix matrix = toMatrix();
+        matrix.map(x, y, z, mx, my, mz);
+    }
+}
+
 Transform::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
     : _rotation(parent.getBuilder<Numeric>(doc, "rotation")), _scale(parent.getBuilder<VV>(doc, "scale")), _translation(parent.getBuilder<VV>(doc, Constants::Attributes::TRANSLATION))
 {
