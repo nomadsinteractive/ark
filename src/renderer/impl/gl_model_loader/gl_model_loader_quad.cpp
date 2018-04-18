@@ -17,19 +17,19 @@ void GLModelLoaderQuad::loadVertices(GLModelBuffer& buf, uint32_t type, const V&
     float width = scale.x() == 0 ? texCoord.width() : scale.x();
     float height = scale.y() == 0 ? texCoord.height() : scale.y();
 
-    buf.setPosition(0 - texCoord.pivotX(), 0 - texCoord.pivotY(), 0);
+    buf.setPosition(0 - texCoord.pivotX() * width, 0 - texCoord.pivotY() * height, 0);
     buf.setTexCoordinate(texCoord.left(), texCoord.top());
     buf.nextVertex();
 
-    buf.setPosition(0 - texCoord.pivotX(), height - texCoord.pivotY(), 0);
+    buf.setPosition(0 - texCoord.pivotX() * width, height - texCoord.pivotY() * height, 0);
     buf.setTexCoordinate(texCoord.left(), texCoord.bottom());
     buf.nextVertex();
 
-    buf.setPosition(width - texCoord.pivotX(), 0 - texCoord.pivotY(), 0);
+    buf.setPosition(width - texCoord.pivotX() * width, 0 - texCoord.pivotY() * height, 0);
     buf.setTexCoordinate(texCoord.right(), texCoord.top());
     buf.nextVertex();
 
-    buf.setPosition(width - texCoord.pivotX(), height - texCoord.pivotY(), 0);
+    buf.setPosition(width - texCoord.pivotX() * width, height - texCoord.pivotY() * height, 0);
     buf.setTexCoordinate(texCoord.right(), texCoord.bottom());
     buf.nextVertex();
 }

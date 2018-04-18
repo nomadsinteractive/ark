@@ -28,9 +28,9 @@ void RendererWithPivot::render(RenderRequest& renderRequest, float x, float y)
     if((_pivot & CENTER_VERTICAL) == CENTER_VERTICAL)
         oy = size->height() / -2.0f;
     else if((_pivot & TOP) == TOP)
-        oy = g_isOriginBottom ? -size->height() : 0.0f;
+        oy = (-1.0 - g_upDirection) * size->height() / 2;
     else if((_pivot & BOTTOM) == BOTTOM)
-        oy = g_isOriginBottom ? 0.0f : -size->height();
+        oy = (-1.0 + g_upDirection) * size->height() / 2;
 
     _renderer->render(renderRequest, x + ox, y + oy);
 }

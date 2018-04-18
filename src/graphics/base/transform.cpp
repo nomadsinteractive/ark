@@ -38,7 +38,7 @@ const sp<Numeric>& Transform::rotation()
 
 void Transform::setRotation(const sp<Numeric>& rotate)
 {
-    _rotation.assign(rotate);
+    _rotation = rotate;
 }
 
 const sp<VV>& Transform::scale() const
@@ -58,7 +58,7 @@ const sp<VV>& Transform::translation() const
 
 void Transform::setTranslation(const sp<VV>& translation)
 {
-    _translation.assign(translation);
+    _translation = translation;
 }
 
 const sp<VV>& Transform::identity()

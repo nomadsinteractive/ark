@@ -21,7 +21,7 @@ Characters::Characters(const sp<Layer>& layer, float textScale, float letterSpac
 }
 
 Characters::Characters(const sp<Layer>& layer, const sp<ResourceLoaderContext>& resourceLoaderContext, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : _layer(layer), _object_pool(resourceLoaderContext ? resourceLoaderContext->objectPool() : nullptr), _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(g_isOriginBottom ? -lineHeight : lineHeight),
+    : _layer(layer), _object_pool(resourceLoaderContext ? resourceLoaderContext->objectPool() : nullptr), _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(-g_upDirection * lineHeight),
       _line_indent(lineIndent), _x(0), _y(0), _width(0), _height(0), _size(sp<Size>::make(0.0f, 0.0f))
 {
     _alphabet_layer = layer.as<AlphabetLayer>();

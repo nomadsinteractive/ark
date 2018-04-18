@@ -20,13 +20,9 @@ void AtlasImporterTexturePacker::import(Atlas& atlas, const ResourceLoaderContex
         uint32_t y = Documents::getAttribute<uint32_t>(i, "y", 0);
         uint32_t w = Documents::getAttribute<uint32_t>(i, "w", 0);
         uint32_t h = Documents::getAttribute<uint32_t>(i, "h", 0);
-        uint32_t ox = Documents::getAttribute<uint32_t>(i, "oX", 0);
-        uint32_t oy = Documents::getAttribute<uint32_t>(i, "oY", 0);
-        uint32_t ow = Documents::getAttribute<uint32_t>(i, "oW", w);
-        uint32_t oh = Documents::getAttribute<uint32_t>(i, "oH", h);
         float px = Documents::getAttribute<float>(i, "pX", 0);
         float py = Documents::getAttribute<float>(i, "pY", 0);
-        atlas.add(n, x, y, x + w, y + h, ow * px - ox, g_isOriginBottom ? h - oh * py + oy : oh * py - oy);
+        atlas.add(n, x, y, x + w, y + h, px, 1.0f - py);
     }
 }
 

@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <unordered_map>
+#include <mutex>
 
 #include "core/base/api.h"
 #include "core/concurrent/lock_free_stack.h"
@@ -33,6 +34,7 @@ public:
     }
     ObjectPool(const ObjectPool& other) = default;
 
+//[[ark::threadsafe]]
     template<typename U, typename... Args> sp<U> obtain(Args&&... args) {
         const sp<LockFreeStack<sp<Cached>>>& queue = ensure(Type<U>::id());
         sp<Cached> cached;
@@ -54,15 +56,18 @@ public:
 
 private:
     const sp<LockFreeStack<sp<Cached>>>& ensure(TypeId typeId) {
-        auto iter = _items->find(typeId);
+        const auto iter = _items->find(typeId);
         if(iter != _items->end())
             return iter->second;
+
+        const std::unique_lock<std::mutex> lock(_mutex);
         (*_items)[typeId] = sp<LockFreeStack<sp<Cached>>>::make();
         return (*_items)[typeId];
     }
 
 private:
     sp<std::unordered_map<TypeId, sp<LockFreeStack<sp<Cached>>>>> _items;
+    std::mutex _mutex;
 };
 
 }

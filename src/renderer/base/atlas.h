@@ -64,7 +64,7 @@ public:
     uint16_t halfPixelY() const;
 
     bool has(uint32_t c) const;
-    void add(uint32_t id, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX = 0.0f, float pivotY = 0.0f);
+    void add(uint32_t id, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX = 0, float pivotY = 0);
 
     const Item& at(uint32_t id) const;
     void clear();

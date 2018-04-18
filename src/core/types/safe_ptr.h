@@ -16,21 +16,15 @@ public:
     SafePtr(const sp<T>& inst)
         : _inst(Null::toSafe<T>(inst)), _allocated(inst || std::is_same<T, IMPL>::value) {
     }
-    SafePtr(const SafePtr& other) = default;
-    SafePtr(SafePtr&& other) = default;
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SafePtr);
 
     T* operator ->() const {
         return _inst.get();
     }
 
-    void assign(const sp<T>& inst) {
-        _inst = Null::toSafe<T>(inst);
-        _allocated = static_cast<bool>(inst) || std::is_same<T, IMPL>::value;
-    }
-
     const sp<T>& ensure() const {
         if(!_allocated) {
-            _inst = sp<IMPL>::make(*_inst);
+            _inst = sp<IMPL>::make(_inst);
             _allocated = true;
         }
         return _inst;

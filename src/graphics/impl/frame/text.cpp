@@ -14,8 +14,6 @@
 
 namespace ark {
 
-extern bool g_isOriginBottom;
-
 Text::Text(const sp<Layer>& layer, const Alphabets::Characters& characters)
     : _layer(layer), _characters(characters)
 {

@@ -99,12 +99,6 @@ PyObject* PythonScript::argumentsToTuple(const Script::Arguments& args)
     return tuple;
 }
 
-void PythonScript::handlePythonException()
-{
-    PyErr_Print();
-    PyErr_Clear();
-}
-
 void PythonScript::run(const String& script, const sp<Scope>& vars)
 {
     DCHECK_THREAD_FLAG();
@@ -116,7 +110,7 @@ void PythonScript::run(const String& script, const sp<Scope>& vars)
     PyObject* v = PyRun_StringFlags(script.c_str(), Py_file_input, globals, globals, nullptr);
     if (v == NULL)
     {
-        handlePythonException();
+        PythonInterpreter::instance()->logErr();
         return;
     }
     Py_DECREF(v);
@@ -149,7 +143,7 @@ Box PythonScript::call(const String& function, const Script::Arguments& args)
         }
     }
     if(PyErr_Occurred())
-        handlePythonException();
+        PythonInterpreter::instance()->logErr();
     return r;
 }
 

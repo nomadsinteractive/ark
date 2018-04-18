@@ -186,7 +186,6 @@ sp<Scope> PythonInterpreter::toScope(PyObject* kws)
                 const sp<PyInstance> owned = sp<PyInstance>::make(PyInstance::own(item));
                 sp<PyNumericDuckType> pyDuck = sp<PyNumericDuckType>::make(owned);
                 scope->put<PyNumericDuckType>(sKey, pyDuck);
-//                scope->put<Numeric>(sKey, sp<Numeric::Impl>::make(((float) PyFloat_AsDouble(item))));
             }
             else if(PyBytes_Check(item) || PyUnicode_Check(item))
                 scope->put<String>(sKey, sp<String>::make(toString(item)));
@@ -287,16 +286,15 @@ PyObject* PythonInterpreter::toPyObject(const Box& box)
 void PythonInterpreter::logErr()
 {
 #ifdef ARK_FLAG_DEBUG
-        PyErr_Print();
+    PyErr_Print();
 #else
-        PyObject *ptype, *pvalue, *ptraceback;
-        PyErr_Fetch(&ptype, &pvalue, &ptraceback);
-        const char* pStrErrorMessage = PyUnicode_AsUTF8(pvalue);
-        PyErr_Restore(ptype, pvalue, ptraceback);
-        LOGE("%s", pStrErrorMessage);
+    PyObject *ptype, *pvalue, *ptraceback;
+    PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+    const char* pStrErrorMessage = PyUnicode_AsUTF8(pvalue);
+    PyErr_Restore(ptype, pvalue, ptraceback);
+    LOGE("%s", pStrErrorMessage);
 #endif
-        PyErr_Clear();
-
+    PyErr_Clear();
 }
 
 template<> ARK_PLUGIN_PYTHON_API String PythonInterpreter::toType<String>(PyObject* object)

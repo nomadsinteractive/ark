@@ -10,7 +10,6 @@
 
 namespace ark {
 
-bool g_isOriginBottom = false;
 float g_upDirection = 1.0f;
 
 void __fatal__(const char* func, const char* condition, const char* format, ...)

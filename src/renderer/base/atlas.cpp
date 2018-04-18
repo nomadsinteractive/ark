@@ -78,8 +78,7 @@ Atlas::Item Atlas::makeItem(uint32_t left, uint32_t top, uint32_t right, uint32_
     uint16_t b = unnormalize(bottom, _texture->height());
     float width = static_cast<float>(right - left);
     float height = static_cast<float>(bottom - top);
-    return g_isOriginBottom ? Item(l + _half_pixel_x, b - _half_pixel_y, r - _half_pixel_x, t + _half_pixel_y, width, height, pivotX, pivotY)
-                            : Item(l + _half_pixel_x, t + _half_pixel_y, r - _half_pixel_x, b - _half_pixel_y, width, height, pivotX, pivotY);
+    return Item(l + _half_pixel_x, b - _half_pixel_y, r - _half_pixel_x, t + _half_pixel_y, width, height, pivotX, pivotY);
 }
 
 Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

@@ -50,7 +50,7 @@ void ViewGroup::Placement::doPlace(float clientHeight, const sp<Layout>& layout)
         {
             const Rect& margins = layoutParam->margins();
             const Rect target = layout->place(layoutParam);
-            _y = g_isOriginBottom ? clientHeight - target.top() - margins.top() - layoutParam->contentHeight() : target.top() + margins.top();
+            _y = clientHeight - target.top() - margins.top() - layoutParam->contentHeight();
             _x = target.left() + margins.left();
         }
     }

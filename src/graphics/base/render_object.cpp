@@ -80,17 +80,17 @@ const sp<VV>& RenderObject::position() const
 
 void RenderObject::setPosition(const sp<VV>& position)
 {
-    _position.assign(position);
+    _position = position;
 }
 
 void RenderObject::setSize(const sp<Size>& size)
 {
-    _size.assign(size);
+    _size = size;
 }
 
 void RenderObject::setTransform(const sp<Transform>& transform)
 {
-    _transform.assign(transform);
+    _transform = transform;
 }
 
 void RenderObject::setVaryings(const sp<Varyings>& filter)

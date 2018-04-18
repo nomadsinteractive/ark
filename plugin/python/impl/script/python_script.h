@@ -41,7 +41,6 @@ public:
 private:
     void addScopeToDict(PyObject* dict, const sp<Scope>& scope);
     PyObject* argumentsToTuple(const Arguments& args);
-    void handlePythonException();
 
 private:
     std::wstring _name;

@@ -166,7 +166,6 @@ template<THREAD_ID ID> void __thread_check__(const char* func) {
 
 uint32_t ARK_API __trace__();
 
-extern bool g_isOriginBottom;
 extern float g_upDirection;
 
 }

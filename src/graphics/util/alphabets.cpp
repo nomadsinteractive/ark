@@ -22,7 +22,7 @@ void Alphabets::place(float boundary, float letterSpacing, float lineIndent, con
     {
         fontHeight = size->height();
         if(lineOffset == 0)
-            lineOffset = g_isOriginBottom ? -fontHeight : fontHeight;
+            lineOffset = -g_upDirection * fontHeight;
     }
     else
         flowx += letterSpacing;
@@ -42,7 +42,7 @@ void Alphabets::place(float boundary, float letterSpacing, float lineIndent, con
 Alphabets::Characters Alphabets::create(Alphabet& alphabet, const std::wstring& text, float textScale, float letterSpacing, float x, float y, float width, float lineHeight, float lineIndent)
 {
     float flowx = x, flowy = y, boundary = x + width;
-    float lineOffset = g_isOriginBottom ? -lineHeight : lineHeight;
+    float lineOffset = -g_upDirection * lineHeight;
     float fontHeight = 0;
     const sp<List<sp<RenderObject>>> renderObjects = sp<List<sp<RenderObject>>>::make();
     for(auto iter = text.begin(); iter != text.end(); ++iter)
@@ -59,7 +59,7 @@ Alphabets::Characters Alphabets::create(Alphabet& alphabet, const std::wstring& 
 Alphabets::Characters Alphabets::create(const Atlas& atlas, const std::wstring& text, float letterSpacing, float x, float y, float width, float lineHeight, float lineIndent)
 {
     float flowx = x, flowy = y, boundary = x + width;
-    float lineOffset = g_isOriginBottom ? -lineHeight : lineHeight;
+    float lineOffset = -g_upDirection * lineHeight;
     float fontHeight = 0;
     const sp<List<sp<RenderObject>>> renderObjects = sp<List<sp<RenderObject>>>::make();
     for(auto iter = text.begin(); iter != text.end(); ++iter)
