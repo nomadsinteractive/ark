@@ -19,7 +19,7 @@ RenderObject::RenderObject(int32_t type, const sp<VV>& position, const sp<Size>&
 }
 
 RenderObject::RenderObject(const sp<Integer>& type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& filter)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(filter))
+    : _type(sp<IntegerWrapper>::make(type)), _type_expired(type.as<Expired>()), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(filter))
 {
 }
 
@@ -56,6 +56,13 @@ const sp<Transform>& RenderObject::transform() const
 void RenderObject::setType(int32_t type)
 {
     _type->set(type);
+    _type_expired = nullptr;
+}
+
+void RenderObject::setType(const sp<Integer>& type)
+{
+    _type->set(type);
+    _type_expired = type.as<Expired>();
 }
 
 float RenderObject::x() const
@@ -106,6 +113,11 @@ void RenderObject::setTag(const Box& tag)
 const Box& RenderObject::tag() const
 {
     return _tag;
+}
+
+bool RenderObject::isExpired() const
+{
+    return _type_expired && _type_expired->val();
 }
 
 RenderObject::Snapshot RenderObject::snapshot(MemoryPool& memoryPool) const

@@ -670,22 +670,23 @@ class GenPropertyMethod(GenMethod):
         return 'int' if self._is_setter else "PyObject*"
 
     def _gen_parse_tuple_code(self, lines, declares, args):
-        meta = GenArgumentMeta('PyObject*', args[0].accept_type, 'O')
-        ga = GenArgument(args[0].accept_type, args[0].default_value, meta, str(args[0]))
-        lines.append(ga.gen_declare('obj0', 'value'))
+        pass
 
     @property
     def is_static(self):
         return self._is_static
 
-    @staticmethod
-    def _gen_convert_args_code(lines, argdeclare):
-        pass
+    def _gen_convert_args_code(self, lines, argdeclare):
+        if argdeclare:
+            arg0 = self._arguments[0]
+            meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
+            ga = GenArgument(arg0.accept_type, arg0.default_value, meta, str(arg0))
+            lines.append(ga.gen_declare('obj0', 'arg0'))
 
     def gen_py_arguments(self):
         if self._is_setter:
-            return 'Instance* self, PyObject* value, void* /*closure*/'
-        return 'Instance* self, PyObject* args'
+            return 'Instance* self, PyObject* arg0, void* /*closure*/'
+        return 'Instance* self, PyObject* /*args*/'
 
     def gen_py_getset_def(self, properties, genclass):
         property_def = self._ensure_property_def(properties)
@@ -1061,7 +1062,7 @@ def main(params, paths):
 
     head_src = gen_header_source(output_file or 'stdout', output_dir, output_file, results, namespaces)
     cpp_src = gen_body_source(output_file or 'stdout', output_dir, output_file, namespaces, modulename, results, bindables)
-    if output_file:
+    if output_file or _just_print_flag is None:
         acg.write_to_file(_just_print_flag and output_file + '.h', head_src)
         acg.write_to_file(_just_print_flag and output_file + '.cpp', cpp_src)
 

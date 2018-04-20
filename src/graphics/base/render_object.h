@@ -57,6 +57,8 @@ public:
 
 //  [[script::bindings::property]]
     void setType(int32_t type);
+//  [[script::bindings::property]]
+    void setType(const sp<Integer>& type);
 
 //  [[script::bindings::property]]
     float x() const;
@@ -79,6 +81,8 @@ public:
     void setTag(const Box& tag);
 //  [[script::bindings::property]]
     const Box& tag() const;
+
+    bool isExpired() const;
 
     Snapshot snapshot(MemoryPool& memoryPool) const;
 
@@ -117,6 +121,8 @@ private:
     SafePtr<Size> _size;
     SafePtr<Transform> _transform;
     sp<Varyings> _varyings;
+
+    sp<Boolean> _type_expired;
 
     Box _tag;
 };
