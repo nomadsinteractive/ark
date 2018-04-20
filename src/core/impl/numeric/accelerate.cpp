@@ -1,7 +1,7 @@
 #include "core/impl/numeric/accelerate.h"
 
 #include "core/ark.h"
-#include "core/base/clock.h"
+#include "core/base/duration.h"
 #include "core/util/bean_utils.h"
 
 namespace ark {
@@ -18,14 +18,14 @@ float Accelerate::val()
 }
 
 Accelerate::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _t(factory.getBuilder<Numeric>(manifest, "t", false)), _v(factory.getBuilder<Numeric>(manifest, "v")),
+    : _duration(factory.ensureBuilder<Duration>(manifest)), _v(factory.getBuilder<Numeric>(manifest, "v")),
       _a(factory.ensureBuilder<Numeric>(manifest, "a")), _s(factory.getBuilder<Numeric>(manifest, "s"))
 {
 }
 
 sp<Numeric> Accelerate::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<Numeric>::adopt(new Accelerate(_t ? _t->build(args) : Ark::instance().clock()->duration(), BeanUtils::toFloat(_v, args),
+    return sp<Numeric>::adopt(new Accelerate(_duration->build(args), BeanUtils::toFloat(_v, args),
                                              BeanUtils::toFloat(_a, args), BeanUtils::toFloat(_s, args)));
 }
 

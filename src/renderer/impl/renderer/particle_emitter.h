@@ -49,7 +49,7 @@ public:
 
         sp<ResourceLoaderContext> _resource_loader_context;
 
-        sp<Builder<Clock>> _clock;
+        sp<Clock> _clock;
         sp<Builder<Numeric>> _type;
         sp<Builder<VV>> _position;
         sp<Builder<Size>> _size;

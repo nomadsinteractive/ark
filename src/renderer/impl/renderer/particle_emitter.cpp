@@ -45,7 +45,7 @@ uint64_t ParticleEmitter::emitParticles(uint64_t tick)
 
 ParticleEmitter::BUILDER::BUILDER(BeanFactory& parent, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(parent), _manifest(manifest), _resource_loader_context(resourceLoaderContext),
-      _clock(parent.getBuilder<Clock>(manifest, Constants::Attributes::CLOCK, false)),
+      _clock(Ark::instance().clock()),
       _type(parent.getBuilder<Numeric>(manifest, Constants::Attributes::TYPE, false)),
       _position(parent.getBuilder<VV>(manifest, Constants::Attributes::POSITION)),
       _size(parent.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
@@ -56,7 +56,7 @@ ParticleEmitter::BUILDER::BUILDER(BeanFactory& parent, const document& manifest,
 sp<Renderer> ParticleEmitter::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Stub> stub = sp<Stub>::make(_resource_loader_context, BeanUtils::toInteger(_type, args), _position->build(args), _size->build(args), args);
-    return sp<Renderer>::adopt(new ParticleEmitter(stub, _clock ? _clock->build(args) : Ark::instance().clock(), _render_layer->build(args), _manifest->children(), _factory));
+    return sp<Renderer>::adopt(new ParticleEmitter(stub, _clock, _render_layer->build(args), _manifest->children(), _factory));
 }
 
 ParticleEmitter::Particale::Particale(const sp<Stub>& stub, const document& manifest, BeanFactory& factory)

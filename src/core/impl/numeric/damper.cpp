@@ -1,7 +1,7 @@
 #include "core/impl/numeric/damper.h"
 
 #include "core/ark.h"
-#include "core/base/clock.h"
+#include "core/base/duration.h"
 #include "core/util/math.h"
 #include "core/util/bean_utils.h"
 
@@ -19,7 +19,7 @@ float Damper::val()
 
 
 Damper::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _t(factory.getBuilder<Numeric>(manifest, "t", false)), _v(factory.getBuilder<Numeric>(manifest, "v", false)),
+    : _duration(factory.ensureBuilder<Duration>(manifest)), _v(factory.getBuilder<Numeric>(manifest, "v", false)),
       _s1(factory.ensureBuilder<Numeric>(manifest, "s1")), _s2(factory.ensureBuilder<Numeric>(manifest, "s2"))
 {
 }
@@ -41,7 +41,7 @@ Damper::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Numeric> Damper::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<Numeric> t = _t ? _t->build(args) : Ark::instance().clock()->duration();
+    const sp<Numeric> t = _duration->build(args);
     float v = BeanUtils::toFloat(_v, args);
     float s1 = BeanUtils::toFloat(_s1, args, 0.0f);
     float s2 = BeanUtils::toFloat(_s2, args, 0.0f);

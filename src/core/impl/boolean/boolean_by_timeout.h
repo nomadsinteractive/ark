@@ -10,25 +10,26 @@ namespace ark {
 
 class BooleanByTimeout : public Boolean {
 public:
-    BooleanByTimeout(const sp<Variable<uint64_t>>& ticker, uint64_t timeout);
+    BooleanByTimeout(const sp<Numeric>& ticker, float timeout);
 
     virtual bool val() override;
 
 //  [[plugin::builder("by-timeout")]]
     class BUILDER : public Builder<Boolean> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Boolean> build(const sp<Scope>& args) override;
 
     private:
-        uint64_t _usec;
+        sp<Builder<Duration>> _duration;
+        float _sec;
         sp<Builder<Numeric>> _timeout;
     };
 
 private:
-    sp<Variable<uint64_t>> _ticker;
-    uint64_t _timeout;
+    sp<Numeric> _duration;
+    float _timeout;
 };
 
 }

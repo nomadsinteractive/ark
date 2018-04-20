@@ -3,6 +3,7 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
+#include "core/base/duration.h"
 #include "core/inf/iterator.h"
 #include "core/inf/variable.h"
 
@@ -29,14 +30,14 @@ void MovieclipRenderer::render(RenderRequest& renderRequest, float x, float y)
 }
 
 MovieclipRenderer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _movieclip(factory.ensureBuilder<Movieclip>(manifest, Constants::Attributes::MOVIECLIP)), _duration(factory.getBuilder<Numeric>(manifest, "t", false)),
+    : _movieclip(factory.ensureBuilder<Movieclip>(manifest, Constants::Attributes::MOVIECLIP)), _duration(factory.ensureBuilder<Duration>(manifest)),
       _interval(Documents::getAttribute<Clock::Interval>(manifest, Constants::Attributes::INTERVAL, 1000000 / 24).sec())
 {
 }
 
 sp<Renderer> MovieclipRenderer::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<MovieclipRenderer>::make(_movieclip->build(args), _duration ? _duration->build(args) : Ark::instance().clock()->duration(), _interval);
+    return sp<MovieclipRenderer>::make(_movieclip->build(args), _duration->build(args), _interval);
 }
 
 }

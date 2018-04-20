@@ -188,8 +188,8 @@ void NumericUtil::fix(const sp<Numeric>& self)
         iw->fix();
 }
 
-NumericUtil::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)
-    : _value(Expression::Compiler<float, NumericOperation>().compile(parent, value.strip()))
+NumericUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& manifest)
+    : _value(Expression::Compiler<float, NumericOperation>().compile(factory, manifest.strip()))
 {
 }
 
@@ -198,8 +198,8 @@ sp<Numeric> NumericUtil::DICTIONARY::build(const sp<Scope>& args)
     return _value->build(args);
 }
 
-NumericUtil::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _value(Expression::Compiler<float, NumericOperation>().compile(parent, Documents::ensureAttribute(doc, Constants::Attributes::VALUE)))
+NumericUtil::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _value(Expression::Compiler<float, NumericOperation>().compile(factory, Documents::ensureAttribute(manifest, Constants::Attributes::VALUE)))
 {
 }
 

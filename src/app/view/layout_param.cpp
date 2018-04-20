@@ -120,8 +120,6 @@ sp<Size> LayoutParam::parseSize(BeanFactory& beanFactory, const String& value, c
 
 const sp<Numeric> LayoutParam::getUnit(BeanFactory& beanFactory, const String& value, const sp<Scope>& args)
 {
-    const static sp<Numeric> MATCH_PARENT = sp<Numeric::Impl>::make(-1.0f);
-    const static sp<Numeric> WRAP_CONTENT = sp<Numeric::Impl>::make(-2.0f);
     if(value == "match_parent")
         return sp<Numeric::Impl>::make(-1.0f);
     if(value == "wrap_content")

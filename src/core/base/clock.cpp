@@ -119,7 +119,7 @@ Clock::Clock(const Clock& other)
 }
 
 Clock::Clock()
-    : _ticker(sp<Ticker>::make(Ark::instance().clock()->ticker()))
+    : Clock(Platform::getSteadyClock())
 {
 }
 
@@ -165,14 +165,14 @@ void Clock::resume() const
 
 template<> ARK_API Clock::Interval Conversions::to<String, Clock::Interval>(const String& val)
 {
-    float ratio = 1000000.0f;
+    uint32_t len = val.length();
     if(val.endsWith("ms"))
-        ratio = 1000.0f;
+        return static_cast<uint64_t>(Strings::parse<float>(val.substr(0, len - 2)) * 1000.0f);
     else if(val.endsWith("us"))
-        ratio = 1.0f;
+        return static_cast<uint64_t>(Strings::parse<float>(val.substr(0, len - 2)));
     else if(val.endsWith("s"))
-        ratio = 1000000.0f;
-    return static_cast<uint64_t>(Strings::parse<float>(val) * ratio);
+        return static_cast<uint64_t>(Strings::parse<float>(val.substr(0, len - 1)) * 1000000.0f);
+    return Strings::parse<float>(val) * 1000000.0f;
 }
 
 sp<Clock> Clock::BUILDER::build(const sp<Scope>& /*args*/)

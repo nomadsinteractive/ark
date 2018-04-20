@@ -37,6 +37,7 @@ class Class;
 class ClassHierarychyManager;
 class Clock;
 class Document;
+class Duration;
 class Element;
 class Executor;
 class Expectation;
@@ -93,13 +94,16 @@ class NumericWrapper : public Numeric {
 */
 
 typedef Iterator<int32_t> Range;
+typedef Array<uint8_t>  ByteArray;
+typedef Array<int32_t>  IntArray;
+typedef Array<float>    FloatArray;
 
 typedef uint32_t TypeId;
 typedef sp<Attribute> attribute;
 typedef sp<Element> element;
 typedef sp<Document> document;
-typedef array<uint8_t> bytearray;
-typedef array<float> floatarray;
+typedef sp<ByteArray> bytearray;
+typedef sp<FloatArray> floatarray;
 typedef array<uint16_t> indexarray;
 
 }

@@ -28,7 +28,7 @@ public:
 
     private:
         sp<Builder<Movieclip>> _movieclip;
-        sp<Builder<Numeric>> _duration;
+        sp<Builder<Duration>> _duration;
         float _interval;
     };
 

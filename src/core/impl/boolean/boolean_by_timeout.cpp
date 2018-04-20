@@ -2,44 +2,45 @@
 
 #include "core/ark.h"
 #include "core/base/clock.h"
+#include "core/base/duration.h"
 #include "core/base/bean_factory.h"
 #include "core/util/bean_utils.h"
 #include "core/util/documents.h"
 
 namespace ark {
 
-BooleanByTimeout::BooleanByTimeout(const sp<Variable<uint64_t>>& ticker, uint64_t timeout)
-    : _ticker(ticker), _timeout(ticker->val() + timeout)
+BooleanByTimeout::BooleanByTimeout(const sp<Numeric>& ticker, float timeout)
+    : _duration(ticker), _timeout(ticker->val() + timeout)
 {
 }
 
 bool BooleanByTimeout::val()
 {
-    return _ticker->val() > _timeout;
+    return _duration->val() > _timeout;
 }
 
-BooleanByTimeout::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _usec(0)
+BooleanByTimeout::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _duration(factory.ensureBuilder<Duration>(manifest)), _sec(0)
 {
-    const String& timeout = Documents::ensureAttribute(doc, Constants::Attributes::TIMEOUT);
+    const String& timeout = Documents::ensureAttribute(manifest, Constants::Attributes::TIMEOUT);
     if(timeout.at(0) == '$' || timeout.at(0) == '@')
-        _timeout = parent.ensureBuilder<Numeric>(timeout);
+        _timeout = factory.ensureBuilder<Numeric>(timeout);
     else
     {
-        _usec = Strings::parse<Clock::Interval>(timeout).usec();
-        DCHECK(_usec, "Timeout value must not be zero");
+        _sec = Strings::parse<Clock::Interval>(timeout).sec();
+        DCHECK(_sec, "Timeout value must not be zero");
     }
 }
 
 sp<Boolean> BooleanByTimeout::BUILDER::build(const sp<Scope>& args)
 {
-    if(!_usec)
+    if(_sec == 0)
     {
-        _usec = static_cast<uint64_t>(BeanUtils::toFloat(_timeout, args, 0.0f) * 1000000);
-        DCHECK(_usec, "Timeout value must not be zero");
+        _sec = BeanUtils::toFloat(_timeout, args, 0.0f);
+        DCHECK(_sec > 0, "Timeout value must not be zero");
         _timeout = nullptr;
     }
-    return sp<Boolean>::adopt(new BooleanByTimeout(Ark::instance().clock(), static_cast<uint64_t>(_usec)));
+    return sp<Boolean>::adopt(new BooleanByTimeout(_duration->build(args), _sec));
 }
 
 }

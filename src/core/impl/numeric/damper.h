@@ -25,7 +25,7 @@ public:
         float v2c(float v, float a) const;
 
     private:
-        sp<Builder<Numeric>> _t;
+        sp<Builder<Duration>> _duration;
         sp<Builder<Numeric>> _v;
         sp<Builder<Numeric>> _s1, _s2;
     };

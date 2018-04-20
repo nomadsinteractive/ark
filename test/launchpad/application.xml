@@ -21,6 +21,8 @@
     <boolean id="g15" value="false"/>
     <boolean id="g16" value="@g14 or @g15"/>
     <boolean id="g16" value="@g8 > 1.0 and true"/>
+    <integer id="g17" class="by-array" array="[1, 2, 3]" repeat="restart"/>
+    <integer id="g18" class="by-array" array="[1, 2, 3]" repeat="reverse"/>
     <vec2 id="vertex" x="@linear" y="@accelerate"/>
     <vec2 id="vertex-wrapper" delegate="@vertex"/>
     <vec2 id="v1" x="20" y="30"/>

@@ -24,7 +24,7 @@ public:
 
     private:
         sp<Builder<Range>> _delegate;
-        sp<Builder<Numeric>> _duration;
+        sp<Builder<Duration>> _duration;
         float _interval;
     };
 

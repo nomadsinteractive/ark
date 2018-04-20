@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "core/base/api.h"
+#include "core/base/clock.h"
 #include "core/base/string_buffer.h"
 #include "core/inf/variable.h"
 #include "core/inf/array.h"
@@ -34,6 +35,8 @@ template<> ARK_API int16_t Conversions::to<String, int16_t>(const String& str)
 
 template<> ARK_API float Conversions::to<String, float>(const String& str)
 {
+    if(str.endsWith("s"))
+        return Conversions::to<String, Clock::Interval>(str).sec();
     return static_cast<float>(atof(str.c_str()));
 }
 

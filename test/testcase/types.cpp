@@ -1,6 +1,7 @@
 #include <random>
 #include <vector>
 
+#include "core/base/string.h"
 #include "core/base/object_pool.h"
 #include "core/base/memory_pool.h"
 #include "core/inf/array.h"
@@ -79,80 +80,52 @@ public:
 #endif
 
         const sp<B> node = sp<Node>::make();
-        if(!node.as<Node>() || !node.as<A>() || !node.as<D>())
-            return 1;
-        if(node.as<Node>()->a != 1 || node.as<Node>()->b != 2)
-            return 2;
-        if(node.as<A>()->a != 1 || node.as<A>()->b != 2)
-            return 3;
-
+        TESTCASE_VALIDATE(node.as<Node>() && node.as<A>() && node.as<D>());
+        TESTCASE_VALIDATE(node.as<Node>()->a == 1 && node.as<Node>()->b == 2);
+        TESTCASE_VALIDATE(node.as<A>()->a == 1 && node.as<A>()->b == 2);
         sp<A> a = node;
-        if(!a.as<Node>() || !a.as<A>() || !a.as<D>())
-            return 4;
-        if(a.as<Node>()->a != 1 || a.as<Node>()->b != 2)
-            return 5;
-        if(a->a != 1 || a->b != 2)
-            return 6;
+        TESTCASE_VALIDATE(a.as<Node>() && a.as<A>() && a.as<D>());
+        TESTCASE_VALIDATE(a.as<Node>()->a == 1 && a.as<Node>()->b == 2);
+        TESTCASE_VALIDATE(a->a == 1 && a->b == 2);
 
         sp<E> e = sp<E>::make();
         a.absorb(e);
-        if(!a.is<Node>() || !a.is<A>() || !a.is<D>())
-            return 7;
-        if(a.as<Node>()->a != 1 || a.as<Node>()->b != 2)
-            return 8;
-        if(a->a != 1 || a->b != 2)
-            return 9;
-        if(!e.is<E>())
-            return 10;
-        if(!a.is<E>() || a.as<E>()->i != 9)
-            return 11;
+        TESTCASE_VALIDATE(a.is<Node>() && a.is<A>() && a.is<D>());
+        TESTCASE_VALIDATE(a.as<Node>()->a == 1 && a.as<Node>()->b == 2);
+        TESTCASE_VALIDATE(a->a == 1 && a->b == 2);
+        TESTCASE_VALIDATE(e.is<E>());
+        TESTCASE_VALIDATE(a.is<E>() && a.as<E>()->i == 9);
 
         a.absorb<H>(sp<I>::make());
-        if(!a.is<H>())
-            return 12;
+        TESTCASE_VALIDATE(a.is<H>());
 
         sp<D> d = sp<D>::make();
         d.absorb(a);
-        if(!d.is<D>() || d.as<D>()->g != 7)
-            return 11;
-        if(!d.is<Node>() || d.as<Node>()->h != 8)
-            return 13;
-        if(!d.is<E>() || d.as<E>()->i != 9)
-            return 14;
+        TESTCASE_VALIDATE(d.is<D>() && d.as<D>()->g == 7);
+        TESTCASE_VALIDATE(d.is<Node>() && d.as<Node>()->h == 8);
+        TESTCASE_VALIDATE(d.is<E>() && d.as<E>()->i == 9);
 
         Class* nodeClass = Class::getClass<Node>();
-        if(!nodeClass)
-            return 15;
+        TESTCASE_VALIDATE(nodeClass);
 
-        if(!nodeClass->isInstance(Type<B>::id()))
-            return 16;
+        TESTCASE_VALIDATE(nodeClass->isInstance(Type<B>::id()));
 
         const WeakPtr<B> parent = node;
         const sp<B> locked = parent.lock();
-        if(!locked || locked->a != 1)
-            return 17;
+        TESTCASE_VALIDATE(locked && locked->a == 1);
 
         const sp<Node> n1 = sp<Node>::adopt(new Node());
         const sp<B> castedB = nodeClass->cast(n1.pack(), Type<B>::id()).unpack<B>();
-        if(!castedB && castedB->d != 4)
-            return 18;
+        TESTCASE_VALIDATE(castedB && castedB->d == 4);
 
         const sp<D> castedD = nodeClass->cast(n1.pack(), Type<D>::id()).unpack<D>();
-        if(!castedD && castedD->h != 8)
-            return 19;
+        TESTCASE_VALIDATE(castedD && castedD->h == 8);
 
         typedef Implementation<uint8_t, uint16_t, uint32_t, uint64_t, Implementation<A, B, D>> implements;
-        if(!implements::is<uint8_t>())
-            return 20;
-
-        if(!implements::is<uint16_t>() || !implements::is<uint32_t>() || !implements::is<uint64_t>())
-            return 21;
-
-        if(implements::is<void>())
-            return 22;
-
-        if(!implements::is<A>() || !implements::is<B>() || !implements::is<D>())
-            return 23;
+        TESTCASE_VALIDATE(implements::is<uint8_t>());
+        TESTCASE_VALIDATE(implements::is<uint16_t>() && implements::is<uint32_t>() && implements::is<uint64_t>());
+        TESTCASE_VALIDATE(!implements::is<void>());
+        TESTCASE_VALIDATE(implements::is<A>() && implements::is<B>() && implements::is<D>());
 
         sp<B> nodeB = node;
         Box nb = nodeB.pack();
@@ -178,8 +151,7 @@ public:
             ap1 = a1.get();
         }
         auto a2 = memoryPool.allocate(32);
-        if(a2.get() != ap1)
-            return 24;
+        TESTCASE_VALIDATE(a2.get() == ap1);
         memoryPool.allocate(64);
         memoryPool.allocate(64);
         memoryPool.allocate(19113);
@@ -193,21 +165,17 @@ public:
         for(uint32_t i = 0; i < 1000; i ++) {
             uint32_t desiredLen = static_cast<uint32_t>(dis1(gen));
             const array<uint8_t> buf = memoryPool.allocate(desiredLen);
-            if(desiredLen > buf->length())
-                return -4;
+            TESTCASE_VALIDATE(desiredLen <= buf->length());
             if(dis2(gen))
                 _used.insert(buf);
         }
 
         const Class* renderLayerClass = Class::getClass<RenderLayer>();
-        if(!renderLayerClass->isInstance(Type<Renderer>::id()))
-            return 25;
-        if(String(renderLayerClass->name()) != "RenderLayer")
-            return 26;
+        TESTCASE_VALIDATE(renderLayerClass->isInstance(Type<Renderer>::id()));
+        TESTCASE_VALIDATE(String(renderLayerClass->name()) == "RenderLayer");
 
         const sp<Numeric> duckType = node.as<Numeric>();
-        if(!duckType)
-            return 27;
+        TESTCASE_VALIDATE(duckType);
 
         return 0;
     }

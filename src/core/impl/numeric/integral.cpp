@@ -2,7 +2,7 @@
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
-#include "core/base/clock.h"
+#include "core/base/duration.h"
 #include "core/util/bean_utils.h"
 
 namespace ark {
@@ -23,13 +23,13 @@ float Integral::val()
 }
 
 Integral::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _s(factory.getBuilder<Numeric>(manifest, "s", false)), _t(factory.getBuilder<Numeric>(manifest, "t", false)), _v(factory.ensureBuilder<Numeric>(manifest, "v"))
+    : _duration(factory.ensureBuilder<Duration>(manifest)), _s(factory.getBuilder<Numeric>(manifest, "s", false)), _v(factory.ensureBuilder<Numeric>(manifest, "v"))
 {
 }
 
 sp<Numeric> Integral::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<Numeric>::adopt(new Integral(BeanUtils::toFloat(_s, args), _t ? _t->build(args) : Ark::instance().clock()->duration(), _v->build(args)));
+    return sp<Numeric>::adopt(new Integral(BeanUtils::toFloat(_s, args), _duration->build(args), _v->build(args)));
 }
 
 }

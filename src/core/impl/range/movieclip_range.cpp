@@ -1,8 +1,8 @@
 #include "core/impl/range/movieclip_range.h"
 
-#include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
+#include "core/base/duration.h"
 
 namespace ark {
 
@@ -34,14 +34,14 @@ int32_t MovieclipRange::next()
 }
 
 MovieclipRange::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _delegate(factory.ensureBuilder<Range>(manifest, Constants::Attributes::DELEGATE)), _duration(factory.getBuilder<Numeric>(manifest, "t", false)),
+    : _delegate(factory.ensureBuilder<Range>(manifest, Constants::Attributes::DELEGATE)), _duration(factory.ensureBuilder<Duration>(manifest)),
       _interval(Documents::ensureAttribute<Clock::Interval>(manifest, Constants::Attributes::INTERVAL).sec())
 {
 }
 
 sp<Range> MovieclipRange::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<Range>::adopt(new MovieclipRange(_delegate->build(args), _duration ? _duration->build(args) : Ark::instance().clock()->duration(), _interval));
+    return sp<Range>::adopt(new MovieclipRange(_delegate->build(args), _duration->build(args), _interval));
 }
 
 }

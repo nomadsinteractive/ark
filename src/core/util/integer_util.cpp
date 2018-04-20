@@ -1,5 +1,6 @@
 #include "core/util/integer_util.h"
 
+#include "core/base/bean_factory.h"
 #include "core/base/variable_wrapper.h"
 #include "core/impl/integer/integer_add.h"
 #include "core/impl/integer/integer_floor_div.h"
@@ -142,6 +143,21 @@ IntegerUtil::DICTIONARY::DICTIONARY(BeanFactory& /*beanFactory*/, const String& 
 sp<Integer> IntegerUtil::DICTIONARY::build(const sp<Scope>& args)
 {
     return sp<Integer::Impl>::make(_value);
+}
+
+IntegerUtil::ARRAY_DICTIONARY::ARRAY_DICTIONARY(BeanFactory& factory, const String& value)
+{
+    for(const String i : Strings::unwrap(value,'[', ']').split(','))
+        _array_builders.push_back(factory.ensureBuilder<Integer>(i));
+}
+
+sp<IntArray> IntegerUtil::ARRAY_DICTIONARY::build(const sp<Scope>& args)
+{
+    const sp<IntArray> s = sp<DynamicArray<int32_t>>::make(_array_builders.size());
+    int32_t* buf = s->buf();
+    for(size_t i = 0; i < _array_builders.size(); i++)
+        buf[i] = _array_builders[i]->build(args)->val();
+    return s;
 }
 
 }

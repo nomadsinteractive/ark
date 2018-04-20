@@ -20,7 +20,6 @@ public:
     virtual bool hasNext() override;
     virtual int32_t next() override;
 
-//  [[plugin::builder::by-value]]
     class DICTIONARY_IMPL1 : public Builder<Array<int32_t>> {
     public:
         DICTIONARY_IMPL1(const String& value);

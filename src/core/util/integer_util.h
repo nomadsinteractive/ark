@@ -1,6 +1,8 @@
 #ifndef ARK_CORE_UTIL_INTEGER_UTIL_H_
 #define ARK_CORE_UTIL_INTEGER_UTIL_H_
 
+#include <vector>
+
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/variable_wrapper.h"
@@ -75,6 +77,17 @@ public:
 
     private:
         int32_t _value;
+    };
+
+//  [[plugin::builder::by-value]]
+    class ARRAY_DICTIONARY : public Builder<IntArray> {
+    public:
+        ARRAY_DICTIONARY(BeanFactory& factory, const String& value);
+
+        virtual sp<IntArray> build(const sp<Scope>& args) override;
+
+    private:
+        std::vector<sp<Builder<Integer>>> _array_builders;
     };
 };
 

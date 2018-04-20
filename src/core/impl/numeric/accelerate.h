@@ -21,7 +21,7 @@ public:
         virtual sp<Numeric> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Numeric>> _t;
+        sp<Builder<Duration>> _duration;
         sp<Builder<Numeric>> _v, _a, _s;
     };
 
