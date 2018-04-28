@@ -10,7 +10,7 @@ namespace plugin {
 namespace python {
 
 PythonCallableRunnable::PythonCallableRunnable(const sp<PyInstance>& callable)
-    : Expired(false), _args(PyInstance::own(PyTuple_New(0))), _callable(callable), _not_none_returned(true)
+    : Expired(false), _args(PyInstance::adopt(PyTuple_New(0))), _callable(callable), _not_none_returned(true)
 {
 }
 

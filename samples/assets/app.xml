@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<import name="pre" src="prefab.xml"/>
+
+	<script id="@main" class="python">
+		<library path="asset:///scripts"/>
+		<library path="asset:///scripts/runtime.egg"/>
+	</script>
+</resources>

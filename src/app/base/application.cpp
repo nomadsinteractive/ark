@@ -46,12 +46,12 @@ Application::~Application()
 {
 }
 
-const char* Application::name()
+const char* Application::name() const
 {
     return _application_delegate->name();
 }
 
-const sp<ApplicationContext>& Application::context()
+const sp<ApplicationContext>& Application::context() const
 {
     return _application_context;
 }

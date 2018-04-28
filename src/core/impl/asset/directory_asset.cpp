@@ -1,8 +1,7 @@
 #include "core/impl/asset/directory_asset.h"
 
-#include <stdio.h>
-
 #include "core/impl/readable/file_readable.h"
+#include "core/types/shared_ptr.h"
 
 #include "platform/platform.h"
 
@@ -22,6 +21,14 @@ sp<Readable> DirectoryAsset::get(const String& name)
         DCHECK(fp, "Open file \"%s\" failed", filepath.c_str());
         return sp<FileReadable>::make(fp);
     }
+    return nullptr;
+}
+
+sp<Asset> DirectoryAsset::getAsset(const String& path)
+{
+    const String dirname = Platform::pathJoin(_directory, path);
+    if(Platform::isDirectory(dirname))
+        return sp<DirectoryAsset>::make(dirname);
     return nullptr;
 }
 

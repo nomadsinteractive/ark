@@ -1,7 +1,6 @@
 #include "python/extension/asset_resource.h"
 
-#include "core/inf/dictionary.h"
-#include "core/types/null.h"
+#include "core/inf/asset.h"
 #include "core/util/strings.h"
 
 namespace ark {

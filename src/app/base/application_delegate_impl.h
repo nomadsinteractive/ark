@@ -2,6 +2,7 @@
 #define ARK_APP_BASE_APPLICATION_DELEGATE_IMPL_H_
 
 #include "core/base/api.h"
+#include "core/base/string.h"
 #include "core/forwarding.h"
 
 #include "graphics/forwarding.h"
@@ -21,9 +22,34 @@ public:
     virtual void onPause() override;
     virtual void onResume() override;
 
+    enum ScriptRunOn {
+        SCRIPT_RUN_ON_CREATE,
+        SCRIPT_RUN_ON_PAUSE,
+        SCRIPT_RUN_ON_RESUME,
+        SCRIPT_RUN_ON_EVENT,
+        SCRIPT_RUN_ON_UNHANDLED_EVENT
+    };
+
+private:
+    struct ScriptTag {
+        ScriptTag(ResourceLoader& resourceLoader, const document& manifest, const sp<Scope>& vars);
+
+        void run() const;
+
+        sp<EventListener> makeEventListener() const;
+
+        ScriptRunOn _on;
+        String _function_name;
+        String _source;
+
+        sp<Script> _script;
+        sp<Scope> _vars;
+    };
+
 private:
     sp<ApplicationManifest> _application_manifest;
-    sp<Script> _script;
+    std::list<ScriptTag> _scripts;
+
 };
 
 }

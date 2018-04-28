@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest>
+	<asset prefix="/" src="../assets"/>
+
+	<plugin name="ark-python"/>
+
+	<application name="s03 - Scripts" resource-loader="app.xml">
+		<render-resolution width="540" height="960"/>
+		<script ref="@main" src="main.py"/>
+	</application>
+</manifest>

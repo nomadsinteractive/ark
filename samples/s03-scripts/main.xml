@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<import name="pre" src="prefab.xml"/>
+
+	<label id="label" text="$t" text-scale="0.5" layer="@pre:l002" style="display: block"/>
+	<view id="@root_view" class="view-group" size="540, 960" layout="vertical(center)"/>
+	<arena id="main" view="@root_view">
+		<layer ref="@pre:l001"/>
+		<layer ref="@pre:l002"/>
+		<renderer ref="@pre:fps-counter"/>
+	</arena>
+</resources>

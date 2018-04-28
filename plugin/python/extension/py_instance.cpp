@@ -37,7 +37,7 @@ PyInstance::Instance PyInstance::steal(PyObject* object)
     return Instance(object, false);
 }
 
-PyInstance::Instance PyInstance::own(PyObject* object)
+PyInstance::Instance PyInstance::adopt(PyObject* object)
 {
     Py_XINCREF(object);
     return Instance(object, false);

@@ -38,6 +38,8 @@ public:
     size_type rfind(char c) const;
 
     String strip() const;
+    String lstrip(char c) const;
+    String rstrip(char c) const;
     String substr(size_type start) const;
     String substr(size_type start, size_type end) const;
     String replace(const String& text, const String& replacement) const;

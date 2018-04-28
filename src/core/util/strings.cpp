@@ -98,7 +98,7 @@ sp<Builder<String>> Strings::load(const String& resid)
     return sp<StringBuilderImpl2>::make(resid);
 }
 
-sp<Builder<String> > Strings::load(const document& manifest, const String& attr)
+sp<Builder<String>> Strings::load(const document& manifest, const String& attr)
 {
     return load(Documents::ensureAttribute(manifest, attr));
 }

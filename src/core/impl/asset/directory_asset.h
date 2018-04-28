@@ -3,9 +3,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/string.h"
-#include "core/types/shared_ptr.h"
-
-#include "core/inf/dictionary.h"
+#include "core/inf/asset.h"
 
 namespace ark {
 
@@ -14,9 +12,11 @@ public:
     DirectoryAsset(const String& directory);
 
     virtual sp<Readable> get(const String& name) override;
+    virtual sp<Asset> getAsset(const String& path) override;
 
 private:
     String _directory;
+
 };
 
 }
