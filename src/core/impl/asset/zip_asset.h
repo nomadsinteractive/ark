@@ -5,18 +5,19 @@
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
-#include "core/types/shared_ptr.h"
+#include "core/inf/asset.h"
 #include "core/impl/dictionary/directory.h"
-
-#include "core/inf/dictionary.h"
+#include "core/types/shared_ptr.h"
 
 namespace ark {
 
 class ZipAsset : public Asset {
 public:
     ZipAsset(const sp<Readable>& zipReadable);
+    ZipAsset(const ZipAsset& other) = default;
 
     virtual sp<Readable> get(const String& name) override;
+    virtual sp<Asset> getAsset(const String& path) override;
 
     bool hasEntry(const String& name) const;
 
@@ -41,9 +42,8 @@ public:
         zip_source_t* _zip_source;
     };
 
-
-private:
     sp<Stub> _stub;
+
 };
 
 }

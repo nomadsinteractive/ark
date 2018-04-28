@@ -15,7 +15,9 @@ class ARK_API ApplicationManifest {
 public:
     ApplicationManifest(const document& manifest);
 
+// [[script::bindings::property]]
     const String& name() const;
+// [[script::bindings::property]]
     const sp<Size>& renderResolution() const;
 
     const document& manifest() const;

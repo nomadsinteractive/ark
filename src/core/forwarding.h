@@ -29,6 +29,7 @@ template <typename T> using array = sp<Array<T>>;
 
 class Ark;
 class Attribute;
+class Asset;
 class BeanFactory;
 class Box;
 class ByType;
@@ -62,7 +63,6 @@ class StringTable;
 class Thread;
 class ThreadPoolExecutor;
 
-typedef Dictionary<sp<Readable>> Asset;
 typedef Dictionary<sp<String>> StringBundle;
 
 typedef Variable<bool> Boolean;

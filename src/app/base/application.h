@@ -40,8 +40,8 @@ public:
     void onSurfaceDraw();
     bool onEvent(const Event& event);
 
-    const char* name();
-    const sp<ApplicationContext>& context();
+    const char* name() const;
+    const sp<ApplicationContext>& context() const;
 
     static void __parse_opt__(int32_t argc, const char* argv[]);
 

@@ -1,7 +1,8 @@
 #include "core/impl/dictionary/xml_directory.h"
 
-#include "core/util/documents.h"
+#include "core/inf/asset.h"
 #include "core/types/null.h"
+#include "core/util/documents.h"
 
 namespace ark {
 

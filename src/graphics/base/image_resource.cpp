@@ -1,5 +1,6 @@
 #include "graphics/base/image_resource.h"
 
+#include "core/inf/asset.h"
 #include "core/inf/loader.h"
 #include "core/util/strings.h"
 

@@ -4,6 +4,7 @@
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
+#include "core/inf/asset.h"
 #include "core/inf/readable.h"
 #include "core/util/documents.h"
 #include "core/types/null.h"

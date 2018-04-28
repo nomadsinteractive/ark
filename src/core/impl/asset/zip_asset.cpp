@@ -1,6 +1,7 @@
 #include "core/impl/asset/zip_asset.h"
 
 #include "core/inf/readable.h"
+#include "core/impl/asset/asset_with_prefix.h"
 
 namespace ark {
 
@@ -87,6 +88,11 @@ sp<Readable> ZipAsset::get(const String& name)
     if(zf)
         return sp<ZipFileReadable>::make(_stub, zf);
     return nullptr;
+}
+
+sp<Asset> ZipAsset::getAsset(const String& path)
+{
+    return sp<AssetWithPrefix>::make(sp<ZipAsset>::make(*this), path.endsWith("/") ? path : path + "/");
 }
 
 bool ZipAsset::hasEntry(const String& name) const

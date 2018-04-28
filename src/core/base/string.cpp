@@ -114,6 +114,30 @@ String String::strip() const
     return wsBack < wsFront ? String() : std::string(wsFront, wsBack + 1);
 }
 
+String String::lstrip(char c) const
+{
+    const char* front = _str.c_str();
+    const char* back = front + _str.length() - 1;
+    const char* wsFront = front;
+    while(*wsFront == c)
+        ++wsFront;
+    if(wsFront == front)
+        return *this;
+    return back < wsFront ? String() : String(wsFront);
+}
+
+String String::rstrip(char c) const
+{
+    const char* front = _str.c_str();
+    const char* back = front + _str.length() - 1;
+    const char* wsBack = back;
+    while(wsBack >= front && *wsBack == c)
+        --wsBack;
+    if(wsBack == back)
+        return *this;
+    return wsBack < front ? String() : std::string(front, wsBack + 1);
+}
+
 String String::substr(size_type start) const
 {
     return _str.substr(start);

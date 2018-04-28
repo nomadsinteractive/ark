@@ -25,7 +25,7 @@ public:
 
     static Instance borrow(PyObject* object);
     static Instance steal(PyObject* object);
-    static Instance own(PyObject* object);
+    static Instance adopt(PyObject* object);
 
     operator PyObject*();
     operator bool();

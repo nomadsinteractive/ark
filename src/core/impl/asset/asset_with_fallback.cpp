@@ -15,4 +15,10 @@ sp<Readable> AssetWithFallback::get(const String& name)
     return readable ? readable : _fallback->get(name);
 }
 
+sp<Asset> AssetWithFallback::getAsset(const String& path)
+{
+    const sp<Asset> asset = _delegate->getAsset(path);
+    return asset ? asset : _fallback->getAsset(path);
+}
+
 }

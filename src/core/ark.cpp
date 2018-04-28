@@ -26,11 +26,11 @@ limitations under the License.
 
 #include "core/base/plugin_manager.h"
 #include "core/impl/asset/asset_with_fallback.h"
+#include "core/impl/asset/asset_with_prefix.h"
 #include "core/impl/asset/directory_asset.h"
 #include "core/impl/asset/zip_asset.h"
 #include "core/impl/readable/file_readable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
-#include "core/impl/dictionary/dictionary_with_prefix.h"
 #include "core/impl/dictionary/xml_directory.h"
 #include "core/types/global.h"
 
@@ -64,13 +64,13 @@ public:
     virtual sp<Readable> get(const String& filepath) override {
         String dirname, filename;
         Strings::rcut(filepath, dirname, filename, '/');
-        const sp<Asset> dir = getRawAsset(dirname);
+        const sp<Asset> dir = getAsset(dirname);
         const sp<Readable> resource = dir ? dir->get(filename) : nullptr;
         LOGD("filepath(%s) dirname(%s) ==> dir<%p> asset<%p>", filepath.c_str(), dirname.c_str(), dir.get(), resource.get());
         return resource;
     }
 
-    sp<Asset> getRawAsset(const String& path) {
+    virtual sp<Asset> getAsset(const String& path) override {
         String s = (path.empty() || path == "/") ? "." : path;
         const String assetDir = Platform::pathJoin(_asset_dir, s);
         const sp<Asset> asset = Platform::getAsset(s, Platform::pathJoin(_app_dir, assetDir));
@@ -92,7 +92,7 @@ public:
             if(readable) {
                 const sp<ZipAsset> zip = sp<ZipAsset>::make(readable);
                 const String entryName = filename + "/";
-                return zip->hasEntry(entryName) ? sp<DictionaryWithPrefix<sp<Readable>>>::make(zip, entryName) : nullptr;
+                return zip->hasEntry(entryName) ? sp<AssetWithPrefix>::make(zip, entryName) : nullptr;
             }
             s = dirname;
         } while(!dirname.empty());
@@ -139,7 +139,7 @@ public:
             if(ia)
                 asset = asset ? sp<Asset>::adopt(new AssetWithFallback(asset, ia)) : ia;
         }
-        const sp<Asset> fallback = _raw_asset->getRawAsset(path);
+        const sp<Asset> fallback = _raw_asset->getAsset(path);
         if(fallback)
             return asset ? sp<Asset>::adopt(new AssetWithFallback(asset, fallback)) : fallback;
         DCHECK(asset, "Asset \"%s\" doesn't exists", path.c_str());
@@ -152,18 +152,13 @@ private:
             return sp<DirectoryAsset>::make(src);
         else if(Platform::isFile(src))
             return sp<ZipAsset>::make(sp<FileReadable>::make(src, "rb"));
-        else {
-            const sp<Asset> asset = _raw_asset->getRawAsset(src);
-            DCHECK(asset, "Unknow asset src: %s", src.c_str());
-            return asset;
-        }
-        return nullptr;
+        const sp<Asset> asset = _raw_asset->getAsset(src);
+        DCHECK(asset, "Unknow asset src: %s", src.c_str());
+        return asset;
     }
 
     String strip(const String& path) const {
-        String s = path;
-        while(s.startsWith("/") || s.startsWith("."))
-            s = s.substr(1);
+        String s = path.lstrip('/').lstrip('.');
 
         while(s && !s.endsWith("/"))
             s = s + "/";
@@ -183,10 +178,19 @@ private:
         }
 
         sp<Asset> getAsset(const String& path) const {
-            if(_prefix.empty() || path == _prefix)
+            if(path == _prefix)
                 return _asset;
             if(path.startsWith(_prefix))
-                return sp<DictionaryWithPrefix<sp<Readable>>>::make(_asset, path.substr(_prefix.length()));
+            {
+                const String assetpath = path.substr(_prefix.length());
+                const sp<Asset> asset = _asset->getAsset(assetpath);
+                if(asset)
+                    return asset;
+
+                const sp<Readable> fp = _asset->get(assetpath.rstrip('/'));
+                if(fp)
+                    return sp<ZipAsset>::make(fp);
+            }
             return nullptr;
         }
 
