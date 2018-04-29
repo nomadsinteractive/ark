@@ -38,6 +38,14 @@ public:
         BUILDER _builder;
     };
 
+//  [[plugin::builder::by-value]]
+    class DICTIONARY : public Builder<Duration> {
+    public:
+        DICTIONARY(BeanFactory& factory);
+
+        virtual sp<Duration> build(const sp<Scope>& args) override;
+    };
+
 
 private:
     sp<Numeric> _delegate;

@@ -48,4 +48,13 @@ sp<Numeric> Duration::NUMERIC_BUILDER::build(const sp<Scope>& args)
     return _builder.build(args);
 }
 
+Duration::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/)
+{
+}
+
+sp<Duration> Duration::DICTIONARY::build(const sp<Scope>& /*args*/)
+{
+    return sp<Duration>::make(Ark::instance().clock()->duration());
+}
+
 }

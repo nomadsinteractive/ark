@@ -55,7 +55,13 @@ public:
 
 private:
     sp<Layer> _layer;
-    ExpirableItemList<RenderObject> _render_objects;
+
+    class RenderObjectExpiredChecker {
+    public:
+        static bool isExpired(const RenderObject& obj);
+    };
+
+    ExpirableItemList<RenderObject, RenderObjectExpiredChecker> _render_objects;
 
 };
 

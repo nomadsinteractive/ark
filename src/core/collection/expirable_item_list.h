@@ -18,10 +18,7 @@ public:
     ExpirableItem(const sp<T>& item, const sp<Boolean>& expired)
         : _item(item), _expired(expired) {
     }
-
-    ExpirableItem(const ExpirableItem& other)
-        : _item(other._item), _expired(other._expired) {
-    }
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(ExpirableItem);
 
     const sp<T>& item() const {
         return _item;
@@ -74,20 +71,20 @@ private:
     sp<T> _item;
 };
 
-template<typename T, typename U, typename V> class ExpirableItemIteratorBase : public IteratorBase<V> {
+template<typename T, typename U, typename V, typename W> class ExpirableItemIteratorBase : public IteratorBase<W> {
 public:
-    ExpirableItemIteratorBase(V iterator, T& list)
-        : IteratorBase<V>::IteratorBase(iterator), _list(list) {
+    ExpirableItemIteratorBase(W iterator, T& list)
+        : IteratorBase(iterator), _list(list) {
         moveToNext();
     }
 
-    const ExpirableItemIteratorBase<T, U, V>& operator ++ () {
+    const ExpirableItemIteratorBase<T, U, V, W>& operator ++ () {
         ++(this->_iterator);
         moveToNext();
         return *this;
     }
 
-    const ExpirableItemIteratorBase<T, U, V> operator ++ (int) {
+    const ExpirableItemIteratorBase<T, U, V, W> operator ++ (int) {
         T iter = this->_iterator;
         ++(this->_iterator);
         moveToNext();
@@ -99,7 +96,8 @@ private:
         do {
             if(this->_iterator == _list.end())
                 break;
-            if((*this->_iterator).isExpired())
+            const auto& i = *(this->_iterator);
+            if(i.isExpired() || V::isExpired(i.item()))
                 this->_iterator = _list.erase(this->_iterator);
             else
                 break;
@@ -110,10 +108,10 @@ protected:
     T& _list;
 };
 
-template<typename T, typename U> class ExpirableItemConstIterator : public ExpirableItemIteratorBase<T, U, typename T::const_iterator> {
+template<typename T, typename U, typename V> class ExpirableItemConstIterator : public ExpirableItemIteratorBase<T, U, V, typename T::const_iterator> {
 public:
     ExpirableItemConstIterator(typename T::const_iterator iterator, T& list)
-        : ExpirableItemIteratorBase<T, U, typename T::const_iterator>::ExpirableItemIteratorBase(iterator, list) {
+        : ExpirableItemIteratorBase(iterator, list) {
     }
 
     const sp<U>& operator * () const {
@@ -121,10 +119,10 @@ public:
     }
 };
 
-template<typename T, typename U> class ExpirableItemIterator : public ExpirableItemIteratorBase<T, U, typename T::iterator> {
+template<typename T, typename U, typename V> class ExpirableItemIterator : public ExpirableItemIteratorBase<T, U, V, typename T::iterator> {
 public:
     ExpirableItemIterator(typename T::iterator iterator, T& list)
-        : ExpirableItemIteratorBase<T, U, typename T::iterator>::ExpirableItemIteratorBase(iterator, list) {
+        : ExpirableItemIteratorBase(iterator, list) {
     }
 
     sp<U>& operator * () {
@@ -132,13 +130,22 @@ public:
     }
 };
 
-template<typename T, typename U> class _ExpirableItemList {
+
+template<typename T> class DefaultAdditionalChecker {
+public:
+    _CONSTEXPR static bool isExpired(const T& inst) {
+        return false;
+    }
+};
+
+
+template<typename T, typename U, typename V> class _ExpirableItemList {
 private:
     typedef std::list<U> ItemList;
 
 public:
-    typedef ExpirableItemConstIterator<ItemList, T> const_iterator;
-    typedef ExpirableItemIterator<ItemList, T> iterator;
+    typedef ExpirableItemConstIterator<ItemList, T, V> const_iterator;
+    typedef ExpirableItemIterator<ItemList, T, V> iterator;
 
     template<typename... Args> void push_back(const sp<T>& resource, Args&&... args) {
         _items.push_back(U(resource, std::forward<Args>(args)...));
@@ -182,8 +189,8 @@ private:
     ItemList _items;
 };
 
-template <typename T> using ExpirableItemList = _ExpirableItemList<T, ExpirableItem<T>>;
-template <typename T> using WeakItemList = _ExpirableItemList<T, WeakItem<T>>;
+template <typename T, typename U=DefaultAdditionalChecker<T>> using ExpirableItemList = _ExpirableItemList<T, ExpirableItem<T>, U>;
+template <typename T, typename U=DefaultAdditionalChecker<T>> using WeakItemList = _ExpirableItemList<T, WeakItem<T>, U>;
 
 }
 

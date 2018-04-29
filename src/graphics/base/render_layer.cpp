@@ -64,4 +64,9 @@ sp<Renderer> RenderLayer::BUILDER_IMPL2::build(const sp<Scope>& args)
     return _builder_impl.build(args);
 }
 
+bool RenderLayer::RenderObjectExpiredChecker::isExpired(const RenderObject& obj)
+{
+    return obj.isExpired();
+}
+
 }

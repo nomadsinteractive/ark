@@ -294,6 +294,10 @@ class RenderObject:
     def type(self):
         return 0
 
+    @type.setter
+    def type(self, val):
+        pass
+
     @property
     def position(self):
         return None

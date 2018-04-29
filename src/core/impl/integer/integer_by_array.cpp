@@ -52,7 +52,10 @@ int32_t IntegerByArray::Stub::val()
         if(_position == _array->length())
         {
             if(_repeat == IntegerByArray::REPEAT_NONE)
+            {
                 _position = _array->length() - 1;
+                _step = 0;
+            }
             else if(_repeat == IntegerByArray::REPEAT_RESTART)
                 _position = 0;
             else if(_repeat == IntegerByArray::REPEAT_REVERSE)

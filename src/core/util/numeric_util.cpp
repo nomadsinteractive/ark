@@ -2,11 +2,13 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/expression.h"
+#include "core/impl/builder/builder_by_instance.h"
 #include "core/impl/numeric/numeric_add.h"
 #include "core/impl/numeric/numeric_divide.h"
 #include "core/impl/numeric/numeric_multiply.h"
 #include "core/impl/numeric/numeric_negative.h"
 #include "core/impl/numeric/numeric_subtract.h"
+#include "core/util/strings.h"
 
 namespace ark {
 
@@ -50,8 +52,7 @@ public:
     }
 
     static sp<Builder<Numeric>> eval(BeanFactory& /*factory*/, const String& expr) {
-        FATAL("Illegal expression: \"%s\" syntax error", expr.c_str());
-        return nullptr;
+        return sp<BuilderByInstance<Numeric>>::make(sp<Numeric::Const>::make(Strings::parse<float>(expr)));
     }
 
     static Expression::Operator<float> OPS[4];
