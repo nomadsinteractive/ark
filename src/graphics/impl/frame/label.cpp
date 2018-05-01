@@ -1,13 +1,9 @@
 #include "graphics/impl/frame/label.h"
 
 #include "core/base/bean_factory.h"
-#include "core/util/bean_utils.h"
 #include "core/util/documents.h"
 
-#include "graphics/base/size.h"
-#include "graphics/base/render_object.h"
 #include "graphics/base/layer_context.h"
-#include "graphics/inf/alphabet.h"
 #include "graphics/inf/layer.h"
 
 #include "renderer/base/characters.h"

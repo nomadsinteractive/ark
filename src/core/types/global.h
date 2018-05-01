@@ -8,7 +8,7 @@ namespace ark {
 template<typename T> class Global {
 public:
     Global()
-        : _inst(Ark::instance().global<T>()) {
+        : _inst(Ark::instance().ensure<T>()) {
         NOT_NULL(_inst);
     }
     Global(const Global& other)

@@ -30,11 +30,7 @@ public:
     public:
         Item();
         Item(uint16_t left, uint16_t top, uint16_t right, uint16_t bottom, float width, float height, float pivotX = 0, float pivotY = 0);
-        Item(const Item& other) = default;
-        Item(Item&& other) = default;
-
-        Item& operator=(const Item& other) = default;
-        Item& operator=(Item&& other) = default;
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
 
         const sp<Size>& size() const;
 

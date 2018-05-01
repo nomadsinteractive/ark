@@ -30,7 +30,7 @@ float Between::val()
         if(crossed)
         {
             const sp<Runnable> onCross = std::move(_oncross);
-            Ark::instance().global<MessageLoop>()->post(onCross, 0);
+            Ark::instance().ensure<MessageLoop>()->post(onCross, 0);
         }
     }
     return value;

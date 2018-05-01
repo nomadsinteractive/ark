@@ -7,14 +7,15 @@
 #include "graphics/forwarding.h"
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
-#include "graphics/util/alphabets.h"
+
+#include "renderer/forwarding.h"
 
 namespace ark {
 
 //[[core::class]]
 class Text : public Renderer, public Block {
 public:
-    Text(const sp<Layer>& layer, const Alphabets::Characters& characters);
+    Text(const sp<Characters>& characters);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
@@ -26,24 +27,25 @@ public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Renderer> build(const sp<Scope>& args) override;
-    private:
-        Alphabets::Characters createCharacters(const Atlas& atlas, const String& str, const sp<Size>& size, const sp<AlphabetLayer>& alphabetLayer);
+//    private:
+//        Alphabets::Characters createCharacters(const Atlas& atlas, const String& str, const sp<Size>& size, const sp<AlphabetLayer>& alphabetLayer);
 
     private:
-        float _letter_spacing;
-        float _text_scale;
-        float _paragraph_spacing;
-        float _line_height;
-        float _line_indent;
+//        float _letter_spacing;
+//        float _text_scale;
+//        float _paragraph_spacing;
+//        float _line_height;
+//        float _line_indent;
 
-        sp<Builder<Size>> _size;
-        sp<Builder<String>> _text;
-        sp<Builder<Layer>> _layer;
+//        sp<Builder<Size>> _size;
+//        sp<Builder<String>> _text;
+//        sp<Builder<Layer>> _layer;
+        sp<Builder<Characters>> _characters;
     };
 
 private:
     sp<Layer> _layer;
-    Alphabets::Characters _characters;
+    sp<Characters> _characters;
 
 };
 

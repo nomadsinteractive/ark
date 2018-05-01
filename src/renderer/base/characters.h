@@ -11,13 +11,15 @@
 
 #include "renderer/forwarding.h"
 
+#include "app/forwarding.h"
+
 namespace ark {
 
 class ARK_API Characters {
 public:
 //  [[script::bindings::auto]]
     Characters(const sp<Layer>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
-    Characters(const sp<Layer>& layer, const sp<ResourceLoaderContext>& resourceLoaderContext, float textScale, float letterSpacing, float lineHeight, float lineIndent);
+    Characters(const sp<Layer>& layer, const sp<LayoutParam>& layoutParam, const sp<ObjectPool>& objectPool, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
     const sp<Layer>& layer() const;
 //  [[script::bindings::property]]
@@ -31,9 +33,6 @@ public:
 //  [[script::bindings::property]]
     void setText(const std::wstring& text);
 
-//  [[script::bindings::auto]]
-    void setBounds(float x, float y, float width, float height);
-
 //[[plugin::resource-loader]]
     class BUILDER : public Builder<Characters> {
     public:
@@ -44,7 +43,7 @@ public:
     private:
         sp<Builder<Layer>> _layer;
         sp<Builder<String>> _text;
-        sp<ResourceLoaderContext> _resource_loader_context;
+        sp<ObjectPool> _object_pool;
 
         float _text_scale;
         float _letter_spacing;
@@ -62,6 +61,7 @@ private:
 
 private:
     sp<Layer> _layer;
+    sp<LayoutParam> _layout_param;
     sp<ObjectPool> _object_pool;
 
     List<sp<RenderObject>> _characters;
@@ -71,9 +71,6 @@ private:
     float _letter_spacing;
     float _line_height;
     float _line_indent;
-
-    float _x, _y;
-    float _width, _height;
 
     sp<Alphabet> _alphabet;
     sp<AlphabetLayer> _alphabet_layer;

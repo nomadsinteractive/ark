@@ -71,7 +71,7 @@ bool AlphabetLayer::Stub::prepare(uint32_t c, bool allowOverflow)
             _max_glyph_height = metrics.bitmap_height;
         if(_flowx + width > _atlas->width())
         {
-            _flowy += _max_glyph_height;
+            _flowy += (_max_glyph_height + 1);
             _max_glyph_height = _flowx = 0;
         }
         if(_flowy + metrics.bitmap_height > _atlas->height())
@@ -80,7 +80,7 @@ bool AlphabetLayer::Stub::prepare(uint32_t c, bool allowOverflow)
             if(allowOverflow)
                 return false;
         }
-        _atlas->add(c, _flowx, _flowy, _flowx + metrics.bitmap_width, _flowy + metrics.bitmap_height);
+        _atlas->add(c, _flowx, _flowy, _flowx + metrics.bitmap_width, _flowy + metrics.bitmap_height + 1);
         _alphabet->draw(c, _font_glyph, _flowx, _flowy);
         _flowx += metrics.bitmap_width;
     }

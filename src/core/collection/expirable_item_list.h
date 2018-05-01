@@ -74,7 +74,7 @@ private:
 template<typename T, typename U, typename V, typename W> class ExpirableItemIteratorBase : public IteratorBase<W> {
 public:
     ExpirableItemIteratorBase(W iterator, T& list)
-        : IteratorBase(iterator), _list(list) {
+        : IteratorBase<W>(iterator), _list(list) {
         moveToNext();
     }
 
@@ -111,7 +111,7 @@ protected:
 template<typename T, typename U, typename V> class ExpirableItemConstIterator : public ExpirableItemIteratorBase<T, U, V, typename T::const_iterator> {
 public:
     ExpirableItemConstIterator(typename T::const_iterator iterator, T& list)
-        : ExpirableItemIteratorBase(iterator, list) {
+        : ExpirableItemIteratorBase<T, U, V, typename T::const_iterator>(iterator, list) {
     }
 
     const sp<U>& operator * () const {
@@ -122,7 +122,7 @@ public:
 template<typename T, typename U, typename V> class ExpirableItemIterator : public ExpirableItemIteratorBase<T, U, V, typename T::iterator> {
 public:
     ExpirableItemIterator(typename T::iterator iterator, T& list)
-        : ExpirableItemIteratorBase(iterator, list) {
+        : ExpirableItemIteratorBase<T, U, V, typename T::iterator>(iterator, list) {
     }
 
     sp<U>& operator * () {

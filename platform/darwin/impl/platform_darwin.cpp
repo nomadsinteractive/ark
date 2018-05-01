@@ -11,7 +11,7 @@
 
 #include "core/inf/variable.h"
 #include "core/impl/asset/directory_asset.h"
-#include "core/impl/dictionary/dictionary_with_fallback.h"
+#include "core/impl/asset/asset_with_fallback.h"
 #include "core/impl/dictionary/xml_directory.h"
 #include "core/util/strings.h"
 
@@ -29,7 +29,7 @@ void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* cont
 sp<Asset> Platform::getAsset(const String& path, const String& appPath)
 {
     if(isDirectory(path))
-        return sp<DictionaryWithFallback<sp<Readable>>>::make(sp<DirectoryAsset>::make(appPath), sp<DirectoryAsset>::make(path));
+        return sp<AssetWithFallback>::make(sp<DirectoryAsset>::make(appPath), sp<DirectoryAsset>::make(path));
     if(isDirectory(appPath))
         return sp<DirectoryAsset>::make(appPath);
     return nullptr;

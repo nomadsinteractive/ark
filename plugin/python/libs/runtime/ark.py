@@ -432,12 +432,13 @@ class EventDispatcher:
 
 
 class Characters:
-    def __init__(self):
+    def __init__(self, layer, text_scale=1.0, letter_spacing=0, line_height=0, line_indent=0):
         pass
 
 
 class StringBundle:
-    pass
+    def __init__(self):
+        pass
 
 
 class Varyings:

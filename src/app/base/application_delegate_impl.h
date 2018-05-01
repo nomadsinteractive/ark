@@ -1,6 +1,8 @@
 #ifndef ARK_APP_BASE_APPLICATION_DELEGATE_IMPL_H_
 #define ARK_APP_BASE_APPLICATION_DELEGATE_IMPL_H_
 
+#include <list>
+
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/forwarding.h"

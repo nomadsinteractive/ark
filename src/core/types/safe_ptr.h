@@ -24,7 +24,7 @@ public:
 
     const sp<T>& ensure() const {
         if(!_allocated) {
-            _inst = sp<IMPL>::make(_inst);
+            _inst = sp<IMPL>::make(*_inst);
             _allocated = true;
         }
         return _inst;

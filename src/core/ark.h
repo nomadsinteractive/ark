@@ -46,7 +46,7 @@ public:
         return _interfaces.get<T>();
     }
 
-    template<typename T> const sp<T>& global() {
+    template<typename T> const sp<T>& ensure() {
         return _interfaces.ensure<T>();
     }
 
@@ -55,7 +55,7 @@ public:
     }
 
     template<typename U, typename... Args> sp<U> obtain(Args&&... args) {
-        return _object_pool.obtain<U, Args...>(std::forward<Args>(args)...);
+        return _object_pool->obtain<U, Args...>(std::forward<Args>(args)...);
     }
 
     sp<BeanFactory> createBeanFactory(const String& src) const;
@@ -71,6 +71,8 @@ public:
 
     const sp<Clock>& clock() const;
     const sp<ApplicationContext>& applicationContext() const;
+
+    const sp<ObjectPool>& objectPool() const;
 
 private:
     class ArkAsset;
@@ -94,7 +96,7 @@ private:
 
     sp<ArkAsset> _asset;
 
-    ObjectPool _object_pool;
+    sp<ObjectPool> _object_pool;
 };
 
 }

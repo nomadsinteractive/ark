@@ -44,6 +44,7 @@ sp<String> YAMLStringBundle::get(const String& name)
 void YAMLStringBundle::loadBundle(const String& name)
 {
     const sp<Readable> readable = _resource->get(name + ".yaml");
+    NOT_NULL(readable);
     yaml_parser_t parser;
     if(!yaml_parser_initialize(&parser))
         FATAL("Failed to initialize parser");

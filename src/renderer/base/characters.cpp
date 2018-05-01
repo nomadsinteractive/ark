@@ -1,5 +1,6 @@
 #include "renderer/base/characters.h"
 
+#include "core/ark.h"
 #include "core/inf/array.h"
 #include "core/impl/array/dynamic_array.h"
 #include "core/inf/variable.h"
@@ -16,13 +17,14 @@
 namespace ark {
 
 Characters::Characters(const sp<Layer>& layer, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : Characters(layer, nullptr, textScale, letterSpacing, lineHeight, lineIndent)
+    : Characters(layer, nullptr, nullptr, textScale, letterSpacing, lineHeight, lineIndent)
 {
 }
 
-Characters::Characters(const sp<Layer>& layer, const sp<ResourceLoaderContext>& resourceLoaderContext, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : _layer(layer), _object_pool(resourceLoaderContext ? resourceLoaderContext->objectPool() : nullptr), _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(-g_upDirection * lineHeight),
-      _line_indent(lineIndent), _x(0), _y(0), _width(0), _height(0), _size(sp<Size>::make(0.0f, 0.0f))
+Characters::Characters(const sp<Layer>& layer, const sp<LayoutParam>& layoutParam, const sp<ObjectPool>& objectPool, float textScale, float letterSpacing, float lineHeight, float lineIndent)
+    : _layer(layer), _layout_param(layoutParam), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()),
+      _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(-g_upDirection * lineHeight),
+      _line_indent(lineIndent), _size(_object_pool->obtain<Size>(0.0f, 0.0f))
 {
     _alphabet_layer = layer.as<AlphabetLayer>();
     if(_alphabet_layer)
@@ -61,14 +63,6 @@ void Characters::setText(const std::wstring& text)
     createContent();
 }
 
-void Characters::setBounds(float x, float y, float width, float height)
-{
-    _x = x;
-    _y = y;
-    _width = width;
-    _height = height;
-}
-
 Alphabet::Metrics Characters::getItemMetrics(wchar_t c) const
 {
     Alphabet::Metrics metrics;
@@ -86,12 +80,12 @@ Alphabet::Metrics Characters::getItemMetrics(wchar_t c) const
 
 void Characters::createContent()
 {
-    float flowx = _x, flowy = _y, boundary = _x + _width;
+    float flowx = 0, flowy = 0, boundary = 0;
     float fontHeight = 0;
     for(wchar_t c : _text)
         place(boundary, c, flowx, flowy, fontHeight);
-    _size->setWidth(flowx - _x);
-    _size->setHeight(abs(flowy - _y) + fontHeight);
+    _size->setWidth(flowx);
+    _size->setHeight(abs(flowy) + fontHeight);
 }
 
 void Characters::place(float boundary, wchar_t c, float& flowx, float& flowy, float& fontHeight)
@@ -103,26 +97,25 @@ void Characters::place(float boundary, wchar_t c, float& flowx, float& flowy, fl
     float height = _text_scale * metrics.height;
     float bitmapX = _text_scale * metrics.bitmap_x;
     float bitmapY = _text_scale * metrics.bitmap_y;
-    const sp<Size> itemSize = _object_pool ? _object_pool->obtain<Size>(bitmapWidth, bitmapHeight)
-                                           : sp<Size>::make(bitmapWidth, bitmapHeight);
+    const sp<Size> itemSize = _object_pool->obtain<Size>(bitmapWidth, bitmapHeight);
     if(fontHeight == 0)
         fontHeight = height;
     else
         flowx += _letter_spacing;
-    if(_x != boundary)
+    if(0 != boundary)
     {
         if(flowx + width > boundary)
         {
             flowy += (_line_height ? _line_height : (-fontHeight * g_upDirection));
-            flowx = _x + _line_indent;
+            flowx = _line_indent;
         }
     }
-    _characters.push_back(sp<RenderObject>::make(c, sp<VV::Const>::make(V(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight)), itemSize));
+    _characters.push_back(_object_pool->obtain<RenderObject>(c, sp<VV::Const>::make(V(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight)), itemSize));
     flowx += width;
 }
 
 Characters::BUILDER::BUILDER(BeanFactory& factory, const document manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _layer(factory.ensureBuilder<Layer>(manifest, Constants::Attributes::LAYER)), _text(Strings::load(manifest, Constants::Attributes::TEXT)), _resource_loader_context(resourceLoaderContext),
+    : _layer(factory.ensureBuilder<Layer>(manifest, Constants::Attributes::LAYER)), _text(Strings::load(manifest, Constants::Attributes::TEXT)), _object_pool(resourceLoaderContext->objectPool()),
       _text_scale(Documents::getAttribute<float>(manifest, "text-scale", 1.0f)), _letter_spacing(Documents::getAttribute<float>(manifest, "letter-spacing", 0.0f)),
       _line_height(Documents::getAttribute<float>(manifest, "line-height", 0.0f)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))
 {
@@ -132,7 +125,7 @@ sp<Characters> Characters::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Layer> layer = _layer->build(args);
     const sp<String> text = _text->build(args);
-    const sp<Characters> characters = sp<Characters>::make(layer, _resource_loader_context, _text_scale, _letter_spacing, _line_height, _line_indent);
+    const sp<Characters> characters = sp<Characters>::make(layer, nullptr, _object_pool, _text_scale, _letter_spacing, _line_height, _line_indent);
     if(text)
         characters->setText(Strings::fromUTF8(text));
     return characters;

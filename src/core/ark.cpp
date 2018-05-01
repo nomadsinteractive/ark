@@ -1,5 +1,5 @@
 /**
-Copyright 2011 - 2017 Jason S Taylor
+Copyright 2011 - 2018 Jason S Taylor
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -204,7 +204,7 @@ private:
 };
 
 Ark::Ark(int32_t argc, const char** argv, const String& manfiestSrc)
-    : _argc(argc), _argv(argv)
+    : _argc(argc), _argv(argv), _object_pool(sp<ObjectPool>::make())
 {
     push();
     __ark_bootstrap__();
@@ -297,6 +297,11 @@ const sp<Clock>& Ark::clock() const
 const sp<ApplicationContext>& Ark::applicationContext() const
 {
     return _application_context;
+}
+
+const sp<ObjectPool>& Ark::objectPool() const
+{
+    return _object_pool;
 }
 
 sp<ApplicationContext> Ark::createApplicationContext(const document& manifest)
