@@ -28,11 +28,7 @@ const sp<Size>& Text::size()
 }
 
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-//    : _letter_spacing(Documents::getAttribute<float>(manifest, "letter-spacing", 0)), _text_scale(Documents::getAttribute<float>(manifest, "text-scale", 0)),
-//      _paragraph_spacing(Documents::getAttribute<float>(manifest, "paragraph-spacing", 0)),
-//      _line_height(Documents::getAttribute<float>(manifest, "line-height", 0)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0)),
-//      _size(factory.ensureBuilder<Size>(manifest, Constants::Attributes::SIZE)), _text(Strings::load(manifest, Constants::Attributes::TEXT)),
-//      _layer(factory.ensureBuilder<Layer>(manifest, Constants::Attributes::LAYER))
+    : _text(Strings::load(manifest, Constants::Attributes::TEXT, "")), _layout_param(factory.ensureBuilder<LayoutParam>(manifest))
 {
     const String cid = Documents::getAttribute(manifest, "characters");
     _characters = cid ? factory.ensureBuilder<Characters>(cid) : factory.ensureBuilder<Characters>(manifest);
@@ -40,39 +36,14 @@ Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Renderer> Text::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<Text>::make(_characters->build(args));
-//    const sp<String> text = _text->build(args);
-//    NOT_NULL(_layer);
-//    const sp<Layer> layer = _layer->build(args);
-//    const sp<Size> size = _size->build(args);
-//    if(layer.is<AlphabetLayer>())
-//    {
-//        const sp<AlphabetLayer>& alphabetLayer = layer.cast<AlphabetLayer>();
-//        return sp<Text>::make(layer, createCharacters(alphabetLayer->atlas(), text, size, alphabetLayer));
-//    }
-//    DCHECK(layer.is<GLModelLayer>(), "Label can only be added to a AlphabetLayer or ImageLayer");
-//    return sp<Text>::make(layer, createCharacters(layer.cast<GLModelLayer>()->atlas(), text, size, nullptr));
+    const sp<Characters> chars = _characters->build(args);
+    const sp<LayoutParam> layoutParam = _layout_param->build(args);
+    const sp<String> text = _text->build(args);
+    if(layoutParam)
+        chars->setLayoutParam(layoutParam);
+    if(text)
+        chars->setText(Strings::fromUTF8(text));
+    return sp<Text>::make(chars);
 }
-
-//Alphabets::Characters Text::BUILDER::createCharacters(const Atlas& atlas, const String& text, const sp<Size>& size, const sp<AlphabetLayer>& alphabetLayer)
-//{
-//    float width = size->width();
-//    float y = 0;
-//    Alphabets::Characters characters(sp<List<sp<RenderObject>>>::make(), size);
-//    const std::wstring utext = Strings::fromUTF8(text);
-//    std::wstring::size_type iter = 0;
-//    while(iter != std::wstring::npos)
-//    {
-//        const std::wstring::size_type n = utext.find('\n', iter);
-//        const std::wstring s = utext.substr(iter, n != std::wstring::npos ? n - iter : std::wstring::npos);
-//        iter = n != std::wstring::npos ? n + 1 : n;
-//        Alphabets::Characters cs = alphabetLayer ? Alphabets::create(alphabetLayer->alphabet(), s, _text_scale, _letter_spacing, _line_indent, y, width, _line_height, -_line_indent)
-//                                                 : Alphabets::create(atlas, s, _letter_spacing, _line_indent, y, width, _line_height, -_line_indent);
-//        for(const sp<RenderObject>& j : cs._render_objects->items())
-//            characters._render_objects->push_back(j);
-//        y -= (g_upDirection * cs._size->height());
-//    }
-//    return characters;
-//}
 
 }

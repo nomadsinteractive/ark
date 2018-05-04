@@ -11,6 +11,8 @@
 #include "core/util/strings.h"
 #include "core/types/shared_ptr.h"
 
+#include "app/view/layout_param.h"
+
 namespace ark {
 
 template<> ARK_API uint32_t Conversions::to<String, uint32_t>(const String& str)
@@ -35,6 +37,10 @@ template<> ARK_API int16_t Conversions::to<String, int16_t>(const String& str)
 
 template<> ARK_API float Conversions::to<String, float>(const String& str)
 {
+    if(str == "match_parent")
+        return LayoutParam::MATCH_PARENT;
+    if(str == "wrap_content")
+        return LayoutParam::WRAP_CONTENT;
     if(str.endsWith("s"))
         return Conversions::to<String, Clock::Interval>(str).sec();
     return static_cast<float>(atof(str.c_str()));

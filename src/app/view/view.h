@@ -82,9 +82,8 @@ public:
         virtual sp<Renderer> build(const sp<Scope> &args) override;
 
     private:
-        BeanFactory _bean_factory;
         sp<Builder<Renderer>> _delegate;
-        String _size;
+        sp<Builder<Size>> _size;
     };
 
 //  [[plugin::style("margins")]]

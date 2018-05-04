@@ -10,6 +10,8 @@
 
 #include "renderer/forwarding.h"
 
+#include "app/view/layout_param.h"
+
 namespace ark {
 
 //[[core::class]]
@@ -27,20 +29,11 @@ public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Renderer> build(const sp<Scope>& args) override;
-//    private:
-//        Alphabets::Characters createCharacters(const Atlas& atlas, const String& str, const sp<Size>& size, const sp<AlphabetLayer>& alphabetLayer);
 
     private:
-//        float _letter_spacing;
-//        float _text_scale;
-//        float _paragraph_spacing;
-//        float _line_height;
-//        float _line_indent;
-
-//        sp<Builder<Size>> _size;
-//        sp<Builder<String>> _text;
-//        sp<Builder<Layer>> _layer;
         sp<Builder<Characters>> _characters;
+        sp<Builder<LayoutParam>> _layout_param;
+        sp<Builder<String>> _text;
     };
 
 private:

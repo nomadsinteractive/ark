@@ -8,6 +8,9 @@
 
 namespace ark {
 
+const float LayoutParam::MATCH_PARENT = -1.0f;
+const float LayoutParam::WRAP_CONTENT = -2.0f;
+
 template<> ARK_API LayoutParam::Display Conversions::to<String, LayoutParam::Display>(const String& str)
 {
     if(str == "float")
@@ -94,47 +97,27 @@ Rect& LayoutParam::margins()
 
 bool LayoutParam::isWrapContent() const
 {
-    return _size->width() == -2.0f || _size->height() == -2.0f;
+    return _size->width() == WRAP_CONTENT || _size->height() == WRAP_CONTENT;
 }
 
 bool LayoutParam::isMatchParent(float unit)
 {
-    return unit == -1.0f;
+    return unit == MATCH_PARENT;
 }
 
 bool LayoutParam::isWrapContent(float unit)
 {
-    return unit == -2.0f;
+    return unit == WRAP_CONTENT;
 }
 
-sp<Size> LayoutParam::parseSize(BeanFactory& beanFactory, const String& value, const sp<Scope>& args)
-{
-    const Identifier id = Identifier::parse(value);
-    if(id.isArg() || id.isRef())
-        return beanFactory.ensure<Size>(value, args);
-
-    String width, height;
-    Strings::cut(Strings::unwrap(value, '(', ')'), width, height, ',');
-    return sp<Size>::make(getUnit(beanFactory, width.strip(), args), getUnit(beanFactory, height.strip(), args));
-}
-
-const sp<Numeric> LayoutParam::getUnit(BeanFactory& beanFactory, const String& value, const sp<Scope>& args)
-{
-    if(value == "match_parent")
-        return sp<Numeric::Impl>::make(-1.0f);
-    if(value == "wrap_content")
-        return sp<Numeric::Impl>::make(-2.0f);
-    return beanFactory.ensure<Numeric>(value, args);
-}
-
-LayoutParam::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _bean_factory(parent), _size(Documents::getAttribute(doc, Constants::Attributes::SIZE)), _display(Documents::getAttribute<Display>(doc, "display", LayoutParam::DISPLAY_BLOCK))
+LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE, false)), _display(Documents::getAttribute<Display>(manifest, "display", LayoutParam::DISPLAY_BLOCK))
 {
 }
 
 sp<LayoutParam> LayoutParam::BUILDER::build(const sp<Scope>& args)
 {
-    return _size ? sp<LayoutParam>::make(LayoutParam::parseSize(_bean_factory, _size, args), _display) : nullptr;
+    return _size ? sp<LayoutParam>::make(_size->build(args), _display) : nullptr;
 }
 
 }

@@ -59,7 +59,7 @@ public:
     struct Stub {
         Stub(const document& manifest);
 
-        void remove(const RigidBodyImpl& rigidBody);
+        void remove(const RigidBody& rigidBody);
 
         sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Stub>& self);
         const sp<RigidBodyShadow>& ensureRigidBody(uint32_t id) const;
@@ -93,11 +93,13 @@ public:
         void setPosition(const V& pos);
         bool disposed() const;
 
-        void collision(ColliderImpl::Stub& collider, const Rect& aabb);
+        void collision(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const Rect& aabb);
+
+        void dispose(Stub& stub);
 
     private:
-        void beginContact(const sp<RigidBody>& rigidBody);
-        void endContact(const sp<RigidBody>& rigidBody);
+        void beginContact(const sp<RigidBodyShadow>& self, const sp<RigidBody>& rigidBody);
+        void endContact(const sp<RigidBodyShadow>& self, const sp<RigidBody>& rigidBody);
 
         Rect makeRigidBodyAABB() const;
 
@@ -108,6 +110,7 @@ public:
 
         std::set<uint32_t> _contacts;
         bool _disposed;
+        bool _dispose_requested;
 
         friend class RigidBodyImpl;
     };
@@ -124,7 +127,6 @@ public:
         const sp<RigidBodyShadow>& shadow() const;
 
         void setPosition(const sp<VV>& position);
-        void collision(const Rect& rect);
 
     private:
         sp<ColliderImpl::Stub> _collider;

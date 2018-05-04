@@ -19,9 +19,14 @@ class ARK_API Characters {
 public:
 //  [[script::bindings::auto]]
     Characters(const sp<Layer>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
-    Characters(const sp<Layer>& layer, const sp<LayoutParam>& layoutParam, const sp<ObjectPool>& objectPool, float textScale, float letterSpacing, float lineHeight, float lineIndent);
+    Characters(const sp<Layer>& layer, const sp<ObjectPool>& objectPool, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
+//  [[script::bindings::property]]
     const sp<Layer>& layer() const;
+
+    const sp<LayoutParam>& layoutParam() const;
+    void setLayoutParam(const sp<LayoutParam>& layoutParam);
+
 //  [[script::bindings::property]]
     const List<sp<RenderObject>>& characters() const;
 
@@ -42,7 +47,6 @@ public:
 
     private:
         sp<Builder<Layer>> _layer;
-        sp<Builder<String>> _text;
         sp<ObjectPool> _object_pool;
 
         float _text_scale;

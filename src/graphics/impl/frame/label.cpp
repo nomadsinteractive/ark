@@ -28,6 +28,7 @@ const sp<Size>& Label::size()
 }
 
 Label::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _text(Strings::load(manifest, Constants::Attributes::TEXT, ""))
 {
     const String cid = Documents::getAttribute(manifest, "characters");
     _characters = cid ? factory.ensureBuilder<Characters>(cid) : factory.ensureBuilder<Characters>(manifest);
@@ -35,7 +36,11 @@ Label::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Renderer> Label::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<Label>::make(_characters->build(args));
+    const sp<Characters> chars = _characters->build(args);
+    const sp<String> text = _text->build(args);
+    if(text)
+        chars->setText(Strings::fromUTF8(text));
+    return sp<Label>::make(chars);
 }
 
 }

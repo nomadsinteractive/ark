@@ -89,13 +89,13 @@ public:
 //  [[plugin::builder]]
     class BUILDER : public Builder<RenderObject> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<RenderObject> build(const sp<Scope>& args) override;
 
     private:
         sp<Builder<Integer>> _type;
-        sp<Builder<Vec>> _position;
+        sp<Builder<VV>> _position;
         sp<Builder<Size>> _size;
         sp<Builder<Transform>> _transform;
         sp<Builder<Varyings>> _varyings;

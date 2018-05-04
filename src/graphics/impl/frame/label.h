@@ -29,6 +29,7 @@ public:
 
     private:
         sp<Builder<Characters>> _characters;
+        sp<Builder<String>> _text;
     };
 
 private:

@@ -1,6 +1,18 @@
+"""
+
+This module only servers as a mimic of the Ark runtime library.
+Functionalities are limited or unimplemented.
+
+Use it for:
+1. Autocomplete
+2. Documentation
+3. Unit test(maybe)
+
+"""
+
 
 def logd(*args):
-    pass
+    print(*args)
 
 
 def get_asset(filename):
@@ -82,6 +94,12 @@ class Numeric(Var):
 class Expired:
     def __init__(self, v=False):
         pass
+
+
+class VV2:
+    def __init__(self, x, y):
+        self._x = x
+        self._y = y
 
 
 class Vec2:

@@ -310,14 +310,14 @@ sp<Renderer> View::MARGIN_BOTTOM_DECORATOR::build(const sp<Scope>& args)
 }
 
 View::SIZE_DECORATOR::SIZE_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
-    : _bean_factory(beanFactory), _delegate(delegate), _size(style)
+    : _delegate(delegate), _size(beanFactory.ensureBuilder<Size>(style))
 {
 }
 
 sp<Renderer> View::SIZE_DECORATOR::build(const sp<Scope>& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->layoutParam()->setSize(LayoutParam::parseSize(_bean_factory, _size, args));
+    bindView(renderer)->layoutParam()->setSize(_size->build(args));
     return renderer;
 }
 

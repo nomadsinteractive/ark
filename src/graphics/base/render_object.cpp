@@ -125,12 +125,12 @@ RenderObject::Snapshot RenderObject::snapshot(MemoryPool& memoryPool) const
     return Snapshot(_type->val(), _position->val(), V(_size->width(), _size->height()), _transform->snapshot(), _varyings->snapshot(memoryPool));
 }
 
-RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
-    : _type(factory.ensureBuilder<Integer>(doc, Constants::Attributes::TYPE)),
-      _position(factory.getBuilder<Vec>(doc, Constants::Attributes::POSITION)),
-      _size(factory.getBuilder<Size>(doc, Constants::Attributes::SIZE)),
-      _transform(factory.getBuilder<Transform>(doc, Constants::Attributes::TRANSFORM)),
-      _varyings(factory.getBuilder<Varyings>(doc, Constants::Attributes::VARYINGS))
+RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _type(factory.ensureBuilder<Integer>(manifest, Constants::Attributes::TYPE)),
+      _position(factory.getBuilder<VV>(manifest, Constants::Attributes::POSITION)),
+      _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+      _transform(factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM)),
+      _varyings(factory.getBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS))
 {
 }
 

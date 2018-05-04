@@ -15,12 +15,6 @@ class Range {
 
 /*
 [[script::bindings::auto]]
-class VV2 {
-};
-*/
-
-/*
-[[script::bindings::auto]]
 class VV3 {
 };
 */

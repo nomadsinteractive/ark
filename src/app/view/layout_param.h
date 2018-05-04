@@ -19,6 +19,9 @@ public:
         DISPLAY_ABSOLUTE
     };
 
+    static const float MATCH_PARENT;
+    static const float WRAP_CONTENT;
+
 public:
     LayoutParam(const sp<Size>& size, Display display = DISPLAY_BLOCK);
     LayoutParam(const LayoutParam& other) = default;
@@ -35,8 +38,6 @@ public:
     const sp<Size>& size() const;
     const void setSize(const sp<Size>& size);
 
-    static sp<Size> parseSize(BeanFactory& beanFactory, const String& value, const sp<Scope>& args);
-
     Display display() const;
     void setDisplay(Display display);
 
@@ -51,18 +52,14 @@ public:
 //  [[plugin::builder]]
     class BUILDER : public Builder<LayoutParam> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<LayoutParam> build(const sp<Scope>& args) override;
 
     private:
-        BeanFactory _bean_factory;
-        String _size;
+        sp<Builder<Size>> _size;
         Display _display;
     };
-
-private:
-    static const sp<Numeric> getUnit(BeanFactory& beanFactory, const String& value, const sp<Scope>& args);
 
 private:
     sp<Size> _size;
