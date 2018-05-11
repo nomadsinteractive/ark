@@ -11,12 +11,11 @@ class ARK_API V3 : public V2 {
 public:
     V3();
     V3(float x, float y, float z);
-    V3(const V3& other);
+    V3(const V2& other);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(V3);
 
     bool operator ==(const V3& other) const;
     bool operator !=(const V3& other) const;
-
-    V3& operator =(const V3& other) = default;
 
     friend V3 operator +(const V3& lvalue, const V3& rvalue);
     friend V3 operator -(const V3& lvalue, const V3& rvalue);

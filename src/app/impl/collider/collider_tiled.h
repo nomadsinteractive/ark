@@ -22,7 +22,7 @@ class TiledCollider : public Collider {
 public:
     TiledCollider(const sp<TileMap>& tileMap, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
 
 //  [[plugin::resource-loader("tiled")]]
     class BUILDER : public Builder<Collider> {
@@ -46,8 +46,6 @@ private:
         void setPosition(float x, float y);
 
         virtual void dispose() override;
-        virtual const sp<CollisionCallback>& collisionCallback() const override;
-        virtual void setCollisionCallback(const sp<CollisionCallback>& collisionCallback) override;
 
     private:
         sp<VV2::Impl> _position;
@@ -62,7 +60,6 @@ public:
             void collision(const Rect& rect);
 
             sp<VV2> _position;
-            sp<CollisionCallback> _collision_callback;
 
         private:
             void beginContact(const sp<RigidBody>& rigidBody);
@@ -81,8 +78,6 @@ public:
         RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<TileMap>& tileMap);
 
         virtual void dispose() override;
-        virtual const sp<CollisionCallback>& collisionCallback() const override;
-        virtual void setCollisionCallback(const sp<CollisionCallback>& collisionCallback) override;
 
         void setPosition(const sp<VV>& position);
 

@@ -2,6 +2,7 @@
 #define ARK_CORE_BEAN_FACTORY_H_
 
 #include <map>
+#include <type_traits>
 
 #include "core/base/api.h"
 #include "core/collection/by_type.h"
@@ -310,6 +311,16 @@ public:
         if(attrValue.empty()) {
             const document& child = doc->getChild(attr);
             return child ? createBuilderByDocument<T>(child, noNull) : (noNull ? getNullBuilder<T>() : nullptr);
+        }
+        return getBuilder<T>(attrValue, noNull);
+    }
+
+    template<typename T> sp<Builder<T>> getConcreteClassBuilder(const document& doc, const String& attr, bool noNull = true) {
+        static_assert(!std::is_abstract<T>::value, "Not a concrete class");
+        const String attrValue = Documents::getAttribute(doc, attr);
+        if(attrValue.empty()) {
+            const document& child = doc->getChild(attr);
+            return createBuilderByDocument<T>(child ? child : doc, noNull);
         }
         return getBuilder<T>(attrValue, noNull);
     }

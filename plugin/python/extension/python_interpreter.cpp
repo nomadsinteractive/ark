@@ -353,7 +353,7 @@ template<> ARK_PLUGIN_PYTHON_API V2 PythonInterpreter::toType<V2>(PyObject* obje
             return V2(x, y);
         }
     }
-    DFATAL("V2 object should be either lenth-2 tuple or list. (eg. [0, 0], (1.0, 1.0))");
+    DFATAL("V2 object should be either length-2 tuple or list. (eg. [0, 0], (1.0, 1.0))");
     return V2();
 }
 

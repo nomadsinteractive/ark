@@ -75,7 +75,7 @@ class Collider:
     BODY_TYPE_KINEMATIC = 1
     BODY_TYPE_STATIC = 2
 
-    def create_body(self, type, shape, position, size=None, transform=None):
+    def create_body(self, type, shape, position, size=None, rotate=None):
         return None
 
 
@@ -299,9 +299,49 @@ class Event:
     CODE_KEYBOARD_SPACE = 48
 
 
+class Rotate:
+    def __init__(self, rotation, direction=None):
+        self._rotation = rotation
+        self._direction = direction
+
+    @property
+    def rotation(self):
+        return self._rotation
+
+    @property
+    def direction(self):
+        return self._direction
+
+
 class Transform:
-    def __init__(self, rotation=None, scale=None, translation=None):
-        pass
+    def __init__(self, rotate=None, scale=None, translate=None):
+        self._rotate = rotate
+        self._scale = scale
+        self._translate = translate
+
+    @property
+    def rotate(self):
+        return self._rotate
+
+    @rotate.setter
+    def rotate(self, v):
+        self._rotate = v
+
+    @property
+    def scale(self):
+        return self._scale
+
+    @scale.setter
+    def scale(self, v):
+        self._scale = v
+
+    @property
+    def translate(self):
+        return self._translate
+
+    @translate.setter
+    def translate(self, v):
+        self._translate = v
 
 
 class RenderObject:

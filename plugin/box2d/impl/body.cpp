@@ -7,6 +7,7 @@
 #include "graphics/base/bounds.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/render_object.h"
+#include "graphics/base/rotate.h"
 #include "graphics/base/transform.h"
 #include "graphics/base/vec2.h"
 
@@ -108,16 +109,6 @@ void Body::dispose()
     DCHECK(_stub->_body, "Body has been disposed already");
     _stub->_world->world().DestroyBody(_stub->_body);
     _stub->_body = nullptr;
-}
-
-const sp<CollisionCallback>& Body::collisionCallback() const
-{
-    return _stub->_collision_callback;
-}
-
-void Body::setCollisionCallback(const sp<CollisionCallback>& collisionCallback)
-{
-    _stub->_collision_callback = collisionCallback;
 }
 
 const sp<World>& Body::world() const
@@ -268,7 +259,7 @@ sp<RenderObject> Body::RENDER_OBJECT_STYLE::build(const sp<Scope>& args)
     NOT_NULL(body);
     sp<RenderObject> decorated = _delegate->build(args);
     decorated->setPosition(sp<Vec>::make(sp<_PositionX>::make(body), sp<_PositionY>::make(body)));
-    decorated->transform()->setRotation(sp<_Angle>::make(body));
+    decorated->transform()->setRotate(sp<Rotate>::make(sp<_Angle>::make(body)));
     decorated.absorb(body);
     return decorated;
 }

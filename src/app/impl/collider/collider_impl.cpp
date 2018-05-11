@@ -4,7 +4,6 @@
 #include <iterator>
 
 #include "core/types/null.h"
-#include "core/types/weak_ptr.h"
 #include "core/util/log.h"
 
 #include "graphics/base/rect.h"
@@ -24,15 +23,19 @@ namespace {
 
 class DynamicPosition : public VV2 {
 public:
-    DynamicPosition(const sp<ColliderImpl::Stub>& collider, const sp<ColliderImpl::RigidBodyShadow>& rigidBodyShadow, const sp<VV>& position)
-        : _collider(collider), _rigid_body_shadow(rigidBodyShadow), _position(position), _aabb(0, 0, _rigid_body_shadow->size()->width(), _rigid_body_shadow->size()->height()) {
+    DynamicPosition(const sp<ColliderImpl::Stub>& collider, const sp<VV>& position)
+        : _collider(collider), _position(position) {
+    }
+
+    void setRigidBody(const sp<ColliderImpl::RigidBodyShadow>& rigidBody) {
+        _rigid_body_shadow = rigidBody;
+        _aabb = Rect(0, 0, _rigid_body_shadow->size()->width(), _rigid_body_shadow->size()->height());
     }
 
     virtual V2 val() override {
         const V position = _position->val();
-        if(!_rigid_body_shadow->disposed()) {
+        if(_rigid_body_shadow && !_rigid_body_shadow->disposed()) {
             _aabb.setCenter(position.x(), position.y());
-            _rigid_body_shadow->setPosition(position);
             _rigid_body_shadow->collision(_rigid_body_shadow, _collider, _aabb);
             if(!_rigid_body_shadow->disposed())
                 _collider->_axises->update(_rigid_body_shadow->id(), position, _aabb);
@@ -42,8 +45,8 @@ public:
 
 private:
     sp<ColliderImpl::Stub> _collider;
-    sp<ColliderImpl::RigidBodyShadow> _rigid_body_shadow;
     sp<VV> _position;
+    sp<ColliderImpl::RigidBodyShadow> _rigid_body_shadow;
     Rect _aabb;
 };
 
@@ -64,21 +67,28 @@ sp<Collider> ColliderImpl::BUILDER::build(const sp<Scope>& args)
     return sp<ColliderImpl>::make(_manifest, _resource_loader_context);
 }
 
-sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform)
+sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate)
 {
-    const sp<RigidBodyImpl> rigidBody = _stub->createRigidBody(type, shape, position, size, transform, _stub);
-
+    NOT_NULL(position);
+    NOT_NULL(size);
     if(type == Collider::BODY_TYPE_DYNAMIC)
     {
-        rigidBody->setPosition(_resource_loader_context->synchronize<V>(sp<DynamicPosition>::make(_stub, rigidBody->shadow(), position)));
+        const sp<DynamicPosition> dpos = sp<DynamicPosition>::make(_stub, position);
+        const sp<VV> pos = _resource_loader_context->synchronize<V>(dpos);
+        const sp<RigidBodyImpl> rigidBody = _stub->createRigidBody(type, shape, pos, size, rotate, _stub);
+        dpos->setRigidBody(rigidBody->shadow());
+        return rigidBody;
     }
     else if(type == Collider::BODY_TYPE_KINEMATIC)
     {
+        return _stub->createRigidBody(type, shape, position, size, rotate, _stub);
     }
     else if(type == Collider::BODY_TYPE_STATIC)
     {
+        return _stub->createRigidBody(type, shape, position, size, rotate, _stub);
     }
-    return rigidBody;
+    DFATAL("Unknown BodyType: %d", type);
+    return nullptr;
 }
 
 ColliderImpl::Stub::Stub(const document& manifest)
@@ -96,11 +106,10 @@ void ColliderImpl::Stub::remove(const RigidBody& rigidBody)
     _rigid_bodies.erase(iter);
 }
 
-sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<ColliderImpl::Stub>& self)
+sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<ColliderImpl::Stub>& self)
 {
-    NOT_NULL(position);
-    const sp<RigidBodyShadow> rigidBodyShadow = _object_pool.obtain<RigidBodyShadow>(++_rigid_body_base_id, type, position->val(), size, transform);
-    const sp<RigidBodyImpl> rigidBody = _object_pool.obtain<RigidBodyImpl>(position, self, rigidBodyShadow);
+    const sp<RigidBodyShadow> rigidBodyShadow = _object_pool.obtain<RigidBodyShadow>(++_rigid_body_base_id, type, position, size, rotate);
+    const sp<RigidBodyImpl> rigidBody = _object_pool.obtain<RigidBodyImpl>(self, rigidBodyShadow);
 
     DWARN(_c2_shapes.find(BODY_SHAPE_AABB) == _c2_shapes.end()
           && _c2_shapes.find(BODY_SHAPE_BALL) == _c2_shapes.end()
@@ -122,8 +131,8 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
         rigidBodyShadow->makeShape(iter->second.first, iter->second.second);
     }
 
-    _rigid_bodies[rigidBody->id()] = rigidBodyShadow;
-    _axises->insert(rigidBody);
+    _rigid_bodies[rigidBodyShadow->id()] = rigidBodyShadow;
+    _axises->insert(rigidBodyShadow);
     return rigidBody;
 }
 
@@ -177,24 +186,14 @@ void ColliderImpl::Stub::loadShapes(const document& manifest)
     }
 }
 
-ColliderImpl::RigidBodyImpl::RigidBodyImpl(const sp<VV>& position, const sp<Stub>& collider, const sp<RigidBodyShadow>& shadow)
-    : RigidBody(shadow->id(), shadow->type(), position, shadow->size(), Null::ptr<Numeric>()), _collider(collider), _shadow(shadow)
+ColliderImpl::RigidBodyImpl::RigidBodyImpl(const sp<ColliderImpl::Stub>& collider, const sp<RigidBodyShadow>& shadow)
+    : RigidBody(shadow->_stub), _collider(collider), _shadow(shadow)
 {
 }
 
 ColliderImpl::RigidBodyImpl::~RigidBodyImpl()
 {
     dispose();
-}
-
-const sp<CollisionCallback>& ColliderImpl::RigidBodyImpl::collisionCallback() const
-{
-    return _shadow->collisionCallback();
-}
-
-void ColliderImpl::RigidBodyImpl::setCollisionCallback(const sp<CollisionCallback>& collisionCallback)
-{
-    _shadow->setCollisionCallback(collisionCallback);
 }
 
 const sp<ColliderImpl::RigidBodyShadow>& ColliderImpl::RigidBodyImpl::shadow() const
@@ -207,16 +206,9 @@ void ColliderImpl::RigidBodyImpl::dispose()
     _shadow->dispose(_collider);
 }
 
-void ColliderImpl::RigidBodyImpl::setPosition(const sp<VV>& position)
+ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate)
+    : RigidBody(id, type, position, size, rotate), _c2_rigid_body(position, rotate, type == Collider::BODY_TYPE_STATIC), _disposed(false), _dispose_requested(false)
 {
-    _position = position;
-}
-
-ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const V& pos, const sp<Size>& size, const sp<Transform>& transform)
-    : RigidBody(id, type, sp<VV::Impl>::make(pos), size, nullptr), _position(static_cast<sp<VV::Impl>>(position())),
-      _c2_rigid_body(_position, transform, type == Collider::BODY_TYPE_STATIC), _disposed(false), _dispose_requested(false)
-{
-    setPosition(pos);
 }
 
 void ColliderImpl::RigidBodyShadow::makeAABB()
@@ -254,21 +246,6 @@ void ColliderImpl::RigidBodyShadow::dispose()
     _dispose_requested = true;
 }
 
-const sp<CollisionCallback>& ColliderImpl::RigidBodyShadow::collisionCallback() const
-{
-    return _collision_callback;
-}
-
-void ColliderImpl::RigidBodyShadow::setCollisionCallback(const sp<CollisionCallback>& collisionCallback)
-{
-    _collision_callback = collisionCallback;
-}
-
-void ColliderImpl::RigidBodyShadow::setPosition(const V& pos)
-{
-    _position->set(pos);
-}
-
 void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const Rect& aabb)
 {
     if(_dispose_requested)
@@ -284,7 +261,7 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
         for(auto iter = candidates.begin(); iter != candidates.end();)
         {
             uint32_t id = *iter;
-            if(id == _id)
+            if(id == _stub->_id)
             {
                 iter = candidates.erase(iter);
                 continue;
@@ -295,7 +272,7 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
             {
                 auto iter2 = contacts.find(id);
                 if(iter2 == contacts.end())
-                    beginContact(self, rigidBody);
+                    _stub->beginContact(self, rigidBody);
                 else
                     contacts.erase(iter2);
                 ++iter;
@@ -308,7 +285,7 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
             if(candidates.find(i) == candidates.end())
             {
                 const sp<RigidBodyShadow> s = collider.findRigidBody(i);
-                endContact(self, s ? s : collider._object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, V(), nullptr, nullptr));
+                _stub->endContact(self, s ? s : collider._object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, nullptr, nullptr, nullptr));
             }
         }
         _contacts = candidates;
@@ -329,29 +306,13 @@ bool ColliderImpl::RigidBodyShadow::disposed() const
     return _disposed;
 }
 
-void ColliderImpl::RigidBodyShadow::beginContact(const sp<RigidBodyShadow>& self, const sp<RigidBody>& rigidBody)
-{
-    if(_collision_callback)
-        _collision_callback->onBeginContact(rigidBody);
-    if(rigidBody->collisionCallback())
-        rigidBody->collisionCallback()->onBeginContact(self);
-}
-
-void ColliderImpl::RigidBodyShadow::endContact(const sp<RigidBodyShadow>& self, const sp<RigidBody>& rigidBody)
-{
-    if(_collision_callback)
-        _collision_callback->onEndContact(rigidBody);
-    if(rigidBody->collisionCallback())
-        rigidBody->collisionCallback()->onEndContact(self);
-}
-
 Rect ColliderImpl::RigidBodyShadow::makeRigidBodyAABB() const
 {
-    DCHECK(_size, "RigidBody must have size defined");
-    Rect aabb(0, 0, _size->width(), _size->height());
+    DCHECK(_stub->_size, "RigidBody must have size defined");
+    Rect aabb(0, 0, _stub->_size->width(), _stub->_size->height());
     if(_c2_rigid_body.isStaticBody())
     {
-        const V2 pos = _position->val();
+        const V2 pos = _stub->_position->val();
         aabb.setCenter(pos.x(), pos.y());
     }
     else

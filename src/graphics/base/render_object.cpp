@@ -105,14 +105,14 @@ void RenderObject::setVaryings(const sp<Varyings>& filter)
     _varyings = Null::toSafe<Varyings>(filter);
 }
 
-void RenderObject::setTag(const Box& tag)
-{
-    _tag = tag;
-}
-
 const Box& RenderObject::tag() const
 {
     return _tag;
+}
+
+void RenderObject::setTag(const Box& tag)
+{
+    _tag = tag;
 }
 
 bool RenderObject::isExpired() const

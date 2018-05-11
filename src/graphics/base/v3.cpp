@@ -17,8 +17,8 @@ V3::V3(float x, float y, float z)
 {
 }
 
-V3::V3(const V3& other)
-    : V2(other._x, other._y), _z(other._z)
+V3::V3(const V2& other)
+    : V2(other._x, other._y), _z(0)
 {
 }
 

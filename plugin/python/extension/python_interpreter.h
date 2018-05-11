@@ -49,7 +49,7 @@ public:
         return fromSharedPtr(ptr);
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& iterable, decltype(iterable.begin())*) {
-        return fromIterable<T>(iterable);
+        return fromIterable_sfinae<T>(iterable, nullptr);
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_enum<T>::value>::type*) {
         return fromType<int32_t>(static_cast<int32_t>(value));
@@ -149,11 +149,18 @@ public:
     void logErr();
 
 private:
-    template<typename T> PyObject* fromIterable(const T& iterable) {
-        PyObject* pyList = PyList_New(0);
+    template<typename T> PyObject* fromIterable_sfinae(const T& iterable, decltype(iterable.at(0))*) {
+        PyObject* pyList = PyList_New(nullptr);
         for(const auto& i : iterable)
             PyList_Append(pyList, toPyObject(i));
         return pyList;
+    }
+
+    template<typename T> PyObject* fromIterable_sfinae(const T& iterable, ...) {
+        PyObject* pySet = PySet_New(nullptr);
+        for(const auto& i : iterable)
+            PySet_Add(pySet, toPyObject(i));
+        return pySet;
     }
 
     template<typename T> const sp<T>& toInstance(PyObject* object) {

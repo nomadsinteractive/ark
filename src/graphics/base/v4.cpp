@@ -19,11 +19,6 @@ V4::V4(float x, float y, float z, float w)
 {
 }
 
-V4::V4(const V4& other)
-    : V3(other._x, other._y, other._z), _w(other._w)
-{
-}
-
 bool V4::operator ==(const V4& other) const
 {
     return _x == other._x && _y == other._y && _z == other._z && _w == other._w;
@@ -33,16 +28,6 @@ bool V4::operator !=(const V4& other) const
 {
     return _x != other._x || _y != other._y || _z != other._z || _w != other._w;
 }
-
-const V4& V4::operator =(const V4& other)
-{
-    _x = other._x;
-    _y = other._y;
-    _z = other._z;
-    _w = other._w;
-    return *this;
-}
-
 
 float V4::w() const
 {

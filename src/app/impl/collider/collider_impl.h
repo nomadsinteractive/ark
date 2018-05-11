@@ -8,7 +8,6 @@
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/weak_ptr.h"
 
 #include "renderer/forwarding.h"
 
@@ -23,7 +22,7 @@ class ColliderImpl : public Collider {
 public:
     ColliderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Collider> {
@@ -61,7 +60,7 @@ public:
 
         void remove(const RigidBody& rigidBody);
 
-        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Stub>& self);
+        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Stub>& self);
         const sp<RigidBodyShadow>& ensureRigidBody(uint32_t id) const;
         const sp<RigidBodyShadow> findRigidBody(uint32_t id) const;
 
@@ -79,34 +78,26 @@ public:
 
     class RigidBodyShadow : public RigidBody {
     public:
-        RigidBodyShadow(uint32_t id, Collider::BodyType type, const V& pos, const sp<Size>& size, const sp<Transform>& transform);
+        RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate);
 
         virtual void dispose() override;
-        virtual const sp<CollisionCallback>& collisionCallback() const override;
-        virtual void setCollisionCallback(const sp<CollisionCallback>& collisionCallback) override;
 
         void makeAABB();
         void makeBall();
         void makeBox();
         void makeShape(C2_TYPE type, const C2Shape& shape);
 
-        void setPosition(const V& pos);
         bool disposed() const;
 
         void collision(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const Rect& aabb);
 
-        void dispose(Stub& stub);
+        void dispose(ColliderImpl::Stub& stub);
 
     private:
-        void beginContact(const sp<RigidBodyShadow>& self, const sp<RigidBody>& rigidBody);
-        void endContact(const sp<RigidBodyShadow>& self, const sp<RigidBody>& rigidBody);
-
         Rect makeRigidBodyAABB() const;
 
     private:
-        sp<VV::Impl> _position;
         C2RigidBody _c2_rigid_body;
-        sp<CollisionCallback> _collision_callback;
 
         std::set<uint32_t> _contacts;
         bool _disposed;
@@ -117,22 +108,16 @@ public:
 
     class RigidBodyImpl : public RigidBody {
     public:
-        RigidBodyImpl(const sp<VV>& position, const sp<Stub>& collider, const sp<RigidBodyShadow>& shadow);
+        RigidBodyImpl(const sp<ColliderImpl::Stub>& collider, const sp<RigidBodyShadow>& shadow);
         ~RigidBodyImpl();
 
         virtual void dispose() override;
-        virtual const sp<CollisionCallback>& collisionCallback() const override;
-        virtual void setCollisionCallback(const sp<CollisionCallback>& collisionCallback) override;
 
         const sp<RigidBodyShadow>& shadow() const;
-
-        void setPosition(const sp<VV>& position);
 
     private:
         sp<ColliderImpl::Stub> _collider;
         sp<RigidBodyShadow> _shadow;
-
-        std::set<uint32_t> _contacts;
     };
 
 private:

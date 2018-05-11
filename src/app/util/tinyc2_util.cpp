@@ -3,17 +3,19 @@
 #define TINYC2_IMPLEMENTATION
 #include <tinyc2.h>
 
+#include "core/inf/variable.h"
 #include "core/util/math.h"
 #include "core/util/log.h"
 
 #include "graphics/base/rect.h"
+#include "graphics/base/rotate.h"
 #include "graphics/base/transform.h"
 #include "graphics/base/v2.h"
 
 namespace ark {
 
-C2RigidBody::C2RigidBody(const sp<VV2>& position, const sp<Transform>& transform, bool isStaticBody)
-    : _type(C2_AABB), _position(position), _transform(transform), _is_static_body(isStaticBody)
+C2RigidBody::C2RigidBody(const sp<VV2>& position, const sp<Rotate>& rotate, bool isStaticBody)
+    : _type(C2_AABB), _position(position), _rotate(rotate), _is_static_body(isStaticBody)
 {
     memset(&_shape, 0, sizeof(_shape));
 }
@@ -86,9 +88,9 @@ C2Shape& C2RigidBody::shape()
     return _shape;
 }
 
-const sp<Transform>& C2RigidBody::transform() const
+const sp<Rotate>& C2RigidBody::rotate() const
 {
-    return _transform;
+    return _rotate;
 }
 
 bool C2RigidBody::isStaticBody() const
@@ -104,8 +106,10 @@ const C2Shape& C2RigidBody::updateShape(C2Shape& shape, c2x& x) const
         return _shape;
     }
 
-    const Transform::Snapshot ts = _transform ? _transform->snapshot() : Transform::Snapshot();
     const V2 pos = _position->val();
+    Transform::Snapshot ts;
+    ts.rotate_value = _rotate ? _rotate->rotation()->val() : 0;
+    ts.rotate_direction = _rotate ? _rotate->direction()->val() : V3();
     switch(_type)
     {
     case C2_CIRCLE:
@@ -113,7 +117,7 @@ const C2Shape& C2RigidBody::updateShape(C2Shape& shape, c2x& x) const
         ts.map(_shape.circle.p.x, _shape.circle.p.y, pos.x(), pos.y(), shape.circle.p.x, shape.circle.p.y);
         break;
     case C2_AABB:
-        DCHECK(ts.rotation == 0, "Rotation: %.2f, which is not supported on AABBs", ts.rotation);
+        DCHECK(ts.rotate_value == 0, "Rotation: %.2f, which is not supported on AABBs", ts.rotate_value);
         ts.map(_shape.aabb.min.x, _shape.aabb.min.y, pos.x(), pos.y(), shape.aabb.min.x, shape.aabb.min.y);
         ts.map(_shape.aabb.max.x, _shape.aabb.max.y, pos.x(), pos.y(), shape.aabb.max.x, shape.aabb.max.y);
         break;
@@ -123,11 +127,12 @@ const C2Shape& C2RigidBody::updateShape(C2Shape& shape, c2x& x) const
         ts.map(_shape.capsule.b.x, _shape.capsule.b.y, pos.x(), pos.y(), shape.capsule.b.x, shape.capsule.b.y);
         break;
     case C2_POLY:
+        DWARN(ts.rotate_direction == Rotate::Z_AXIS, "Rotate Direction: (%.2f, %.2f, %.2f). Tinyc2 Only supports z-axis(2D) rotation", ts.rotate_direction.x(), ts.rotate_direction.y(), ts.rotate_direction.z());
         shape.poly = _shape.poly;
         x.p.x = pos.x();
         x.p.y = pos.y();
-        x.r.c = Math::cos(ts.rotation);
-        x.r.s = Math::sin(ts.rotation);
+        x.r.c = Math::cos(ts.rotate_value);
+        x.r.s = Math::sin(ts.rotate_value);
         break;
     }
     return shape;

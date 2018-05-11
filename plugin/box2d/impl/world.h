@@ -28,7 +28,7 @@ public:
 
     virtual void run() override;
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
 
     const b2World& world() const;
     b2World& world();

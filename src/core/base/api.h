@@ -108,6 +108,7 @@ const char* const HEIGHT = "height";
 const char* const REF = "ref";
 const char* const RENDER_OBJECT = "render-object";
 const char* const RENDER_LAYER = "render-layer";
+const char* const ROTATE = "rotate";
 const char* const SHADER = "shader";
 const char* const SIZE = "size";
 const char* const STYLE = "style";

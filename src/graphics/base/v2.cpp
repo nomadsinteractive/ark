@@ -24,11 +24,6 @@ V2::V2(float x, float y, float /*z*/)
 {
 }
 
-V2::V2(const V2& other)
-    : _x(other._x), _y(other._y)
-{
-}
-
 V2::V2(const V3& other)
     : _x(other.x()), _y(other.y())
 {

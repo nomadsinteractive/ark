@@ -23,17 +23,10 @@ class ARK_API ResourceLoaderContext {
 private:
     template<typename T> class Synchronizer : public Runnable, public Boolean {
     private:
-        class SynchronizedVariable : public Variable<T> {
+        class Holder : public Variable<T> {
         public:
-            SynchronizedVariable(const sp<Variable<T>>& delegate)
-                : _delegate(delegate), _value(delegate->val()), _consumed(false) {
-            }
-
-            void update() {
-                if(_consumed) {
-                    _value = _delegate->val();
-                    _consumed = false;
-                }
+            Holder(const T& value)
+                : _value(value), _consumed(false) {
             }
 
             virtual T val() override {
@@ -41,31 +34,48 @@ private:
                 return _value;
             }
 
-        private:
-            sp<Variable<T>> _delegate;
             T _value;
             bool _consumed;
         };
 
+        class Updater {
+        public:
+            Updater(const sp<Variable<T>>& delegate, const sp<Holder>& holder)
+                : _delegate(delegate), _holder(holder) {
+            }
+
+            void update() const {
+                if(_holder->_consumed) {
+                    _holder->_value = _delegate->val();
+                    _holder->_consumed = false;
+                }
+            }
+
+        private:
+            sp<Variable<T>> _delegate;
+            sp<Holder> _holder;
+        };
+
     public:
         sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& expired) {
-            const sp<SynchronizedVariable> synchronized = sp<SynchronizedVariable>::make(delegate);
-            const sp<Boolean> s = expired ? expired : sp<Boolean>::adopt(new BooleanByWeakRef<SynchronizedVariable>(synchronized, 1));
-            _variables.push_back(synchronized, s);
-            return synchronized;
+            const sp<Holder> holder = sp<Holder>::make(delegate->val());
+            const sp<Updater> updater = sp<Updater>::make(delegate, holder);
+            const sp<Boolean> s = expired ? expired : sp<Boolean>::adopt(new BooleanByWeakRef<Holder>(holder, 1));
+            _updaters.push_back(updater, s);
+            return holder;
         }
 
         virtual bool val() override {
-            return _variables.size() == 0;
+            return _updaters.size() == 0;
         }
 
         virtual void run() override {
-            for(SynchronizedVariable& i : _variables)
+            for(const Updater& i : _updaters)
                 i.update();
         }
 
     private:
-        ExpirableItemList<SynchronizedVariable> _variables;
+        ExpirableItemList<Updater> _updaters;
     };
 
 public:

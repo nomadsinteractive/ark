@@ -9,36 +9,38 @@
 #include "core/util/bean_utils.h"
 
 #include "graphics/base/matrix.h"
+#include "graphics/base/rotate.h"
 
 namespace ark {
 
-Transform::Transform(const sp<Numeric>& rotate, const sp<VV>& scale, const sp<VV>& translation)
-    : _rotation(rotate), _scale(scale ? scale : identity()), _translation(translation)
+Transform::Transform(const sp<Rotate>& rotate, const sp<VV>& scale, const sp<VV>& translation)
+    : _rotate(rotate), _scale(scale ? scale : identity()), _translation(translation)
 {
 }
 
 Transform::Transform(const Transform& other)
-    :  _rotation(other._rotation), _scale(other._scale), _translation(other._translation)
+    :  _rotate(other._rotate), _scale(other._scale), _translation(other._translation)
 {
 }
 
 Transform::Snapshot Transform::snapshot() const
 {
     Snapshot ss;
-    ss.rotation = _rotation->val();
+    ss.rotate_value = _rotate->rotation()->val();
+    ss.rotate_direction = _rotate->direction()->val();
     ss.scale = _scale->val();
     ss.translate = _translation->val();
     return ss;
 }
 
-const sp<Numeric>& Transform::rotation()
+const sp<Rotate>& Transform::rotate()
 {
-    return _rotation.ensure();
+    return _rotate.ensure();
 }
 
-void Transform::setRotation(const sp<Numeric>& rotate)
+void Transform::setRotate(const sp<Rotate>& rotate)
 {
-    _rotation = rotate;
+    _rotate = rotate;
 }
 
 const sp<VV>& Transform::scale() const
@@ -68,7 +70,7 @@ const sp<VV>& Transform::identity()
 }
 
 Transform::Snapshot::Snapshot()
-    : rotation(0), scale(V::identity())
+    : rotate_value(0), rotate_direction(Rotate::Z_AXIS), scale(V::identity())
 {
 }
 
@@ -84,7 +86,7 @@ void Transform::Snapshot::toMatrix(Matrix& matrix) const
     matrix.setIdentity();
     matrix.translate(translate.x(), translate.y(), translate.z());
     matrix.scale(scale.x(), scale.y(), scale.z());
-    matrix.rotate(rotation, 0, 0, 1.0f);
+    matrix.rotate(rotate_value, rotate_direction.x(), rotate_direction.y(), rotate_direction.z());
 }
 
 bool Transform::Snapshot::isFrontfaceCCW() const
@@ -94,7 +96,7 @@ bool Transform::Snapshot::isFrontfaceCCW() const
 
 bool Transform::Snapshot::operator ==(const Transform::Snapshot& other) const
 {
-    return translate == other.translate && scale == other.scale && rotation == other.rotation;
+    return translate == other.translate && scale == other.scale && rotate_value == other.rotate_value && rotate_direction == other.rotate_direction;
 }
 
 bool Transform::Snapshot::operator !=(const Transform::Snapshot& other) const
@@ -104,7 +106,7 @@ bool Transform::Snapshot::operator !=(const Transform::Snapshot& other) const
 
 void Transform::Snapshot::map(float x, float y, float tx, float ty, float& mx, float& my) const
 {
-    if(rotation == 0.0f)
+    if(rotate_value == 0.0f)
     {
         mx = x * scale.x() + translate.x();
         my = y * scale.y() + translate.y();
@@ -122,7 +124,7 @@ void Transform::Snapshot::map(float x, float y, float tx, float ty, float& mx, f
 V3 Transform::Snapshot::mapXYZ(const V3& p) const
 {
     float x, y, z;
-    if(rotation == 0.0f)
+    if(rotate_value == 0.0f)
     {
         x = p.x() * scale.x() + translate.x();
         y = p.y() * scale.y() + translate.y();
@@ -136,14 +138,15 @@ V3 Transform::Snapshot::mapXYZ(const V3& p) const
     return V3(x, y, z);
 }
 
-Transform::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _rotation(parent.getBuilder<Numeric>(doc, "rotation")), _scale(parent.getBuilder<VV>(doc, "scale")), _translation(parent.getBuilder<VV>(doc, Constants::Attributes::TRANSLATION))
+Transform::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _rotate(factory.getConcreteClassBuilder<Rotate>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<VV>(manifest, "scale")),
+      _translation(factory.getBuilder<VV>(manifest, Constants::Attributes::TRANSLATION))
 {
 }
 
 sp<Transform> Transform::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<Transform>::make(_rotation->build(args), _scale->build(args), _translation->build(args));
+    return sp<Transform>::make(_rotate->build(args), _scale->build(args), _translation->build(args));
 }
 
 Transform::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)

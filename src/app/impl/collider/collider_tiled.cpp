@@ -56,7 +56,7 @@ sp<Collider> TiledCollider::BUILDER::build(const sp<Scope>& args)
     return sp<TiledCollider>::make(_tile_map->build(args), _resource_loader_context);
 }
 
-sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform)
+sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& /*rotate*/)
 {
     DCHECK(type != Collider::BODY_TYPE_STATIC, "Cannot create static body in TiledCollider");
     NOT_NULL(position && size);
@@ -67,20 +67,16 @@ sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, 
 }
 
 TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<TileMap>& tileMap)
-    : RigidBody(id, type, position, size, Null::ptr<Numeric>()), _stub(tileMap ? sp<Stub>::make(tileMap, position) : sp<Stub>::null())
+    : RigidBody(id, type, position, size, Null::ptr<Rotate>()), _stub(tileMap ? sp<Stub>::make(tileMap, position) : sp<Stub>::null())
 {
 }
 
 void TiledCollider::RigidBodyImpl::Stub::beginContact(const sp<RigidBody>& rigidBody)
 {
-    if(_collision_callback)
-        _collision_callback->onBeginContact(rigidBody);
 }
 
 void TiledCollider::RigidBodyImpl::Stub::endContact(const sp<RigidBody>& rigidBody)
 {
-    if(_collision_callback)
-        _collision_callback->onEndContact(rigidBody);
 }
 
 void TiledCollider::RigidBodyImpl::Stub::updateRigidBodyStatic(uint32_t id, float tileWidth, float tileHeight, uint32_t colCount)
@@ -96,23 +92,13 @@ const sp<TiledCollider::RigidBodyImpl::Stub>& TiledCollider::RigidBodyImpl::stub
     return _stub;
 }
 
-const sp<CollisionCallback>& TiledCollider::RigidBodyImpl::collisionCallback() const
-{
-    return _stub->_collision_callback;
-}
-
-void TiledCollider::RigidBodyImpl::setCollisionCallback(const sp<CollisionCallback>& collisionCallback)
-{
-    _stub->_collision_callback = collisionCallback;
-}
-
 void TiledCollider::RigidBodyImpl::dispose()
 {
 }
 
 void TiledCollider::RigidBodyImpl::setPosition(const sp<VV>& position)
 {
-    _position = position;
+    stub()->_position = position;
 }
 
 V2 TiledCollider::RigidBodyImpl::xy() const
@@ -178,7 +164,7 @@ TiledCollider::RigidBodyStatic::RigidBodyStatic(uint32_t width, uint32_t height)
 
 void TiledCollider::RigidBodyStatic::setId(uint32_t id)
 {
-    _id = id;
+    _stub->_id = id;
 }
 
 void TiledCollider::RigidBodyStatic::setPosition(float x, float y)
@@ -188,17 +174,6 @@ void TiledCollider::RigidBodyStatic::setPosition(float x, float y)
 
 void TiledCollider::RigidBodyStatic::dispose()
 {
-}
-
-const sp<CollisionCallback>& TiledCollider::RigidBodyStatic::collisionCallback() const
-{
-    DFATAL("Invaild property");
-    return sp<CollisionCallback>::null();
-}
-
-void TiledCollider::RigidBodyStatic::setCollisionCallback(const sp<CollisionCallback>& collisionCallback)
-{
-    DFATAL("Invaild property");
 }
 
 }

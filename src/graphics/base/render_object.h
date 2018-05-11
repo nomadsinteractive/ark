@@ -78,9 +78,9 @@ public:
     void setVaryings(const sp<Varyings>& filter);
 
 //  [[script::bindings::property]]
-    void setTag(const Box& tag);
-//  [[script::bindings::property]]
     const Box& tag() const;
+//  [[script::bindings::property]]
+    void setTag(const Box& tag);
 
     bool isExpired() const;
 

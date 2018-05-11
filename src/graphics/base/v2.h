@@ -12,15 +12,14 @@ public:
     V2();
     V2(float x, float y);
     V2(float x, float y, float z);
-    V2(const V2& other);
     V2(const V3& other);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(V2);
 
     static V2 identity();
 
     bool operator ==(const V2& other) const;
     bool operator !=(const V2& other) const;
 
-    V2& operator =(const V2& other) = default;
     V2& operator +=(const V2& other);
     V2& operator *=(const V2& other);
 

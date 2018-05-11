@@ -10,14 +10,14 @@
 #include "core/types/safe_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/v2.h"
+#include "graphics/base/v3.h"
 
 namespace ark {
 
 class ARK_API Transform {
 public:
 //  [[script::bindings::auto]]
-    Transform(const sp<Numeric>& rotation = nullptr, const sp<VV>& scale = nullptr, const sp<VV>& translation = nullptr);
+    Transform(const sp<Rotate>& rotate = nullptr, const sp<VV>& scale = nullptr, const sp<VV>& translation = nullptr);
     Transform(const Transform& other);
 
     class ARK_API Snapshot {
@@ -36,7 +36,8 @@ public:
         void map(float x, float y, float tx, float ty, float& mx, float& my) const;
         V3 mapXYZ(const V3& p) const;
 
-        float rotation;
+        float rotate_value;
+        V3 rotate_direction;
         V scale;
         V translate;
     };
@@ -44,9 +45,9 @@ public:
     Snapshot snapshot() const;
 
 //  [[script::bindings::property]]
-    const sp<Numeric>& rotation();
+    const sp<Rotate>& rotate();
 //  [[script::bindings::property]]
-    void setRotation(const sp<Numeric>& rotation);
+    void setRotate(const sp<Rotate>& rotate);
 
 //  [[script::bindings::property]]
     const sp<VV>& scale() const;
@@ -61,12 +62,12 @@ public:
 //  [[plugin::builder]]
     class BUILDER : public Builder<Transform> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Transform> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Numeric>> _rotation;
+        sp<Builder<Rotate>> _rotate;
         sp<Builder<VV>> _scale;
         sp<Builder<VV>> _translation;
 
@@ -88,7 +89,7 @@ private:
     static const sp<VV>& identity();
 
 private:
-    SafePtr<Numeric, Numeric::Impl> _rotation;
+    SafePtr<Rotate> _rotate;
     sp<VV> _scale;
     SafePtr<VV, VV::Impl> _translation;
 

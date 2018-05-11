@@ -29,8 +29,6 @@ public:
     ~Body();
 
     virtual void dispose() override;
-    virtual const sp<CollisionCallback>& collisionCallback() const override;
-    virtual void setCollisionCallback(const sp<CollisionCallback>& collisionCallback) override;
 
 //  [[script::bindings::auto]]
     const sp<World>& world() const;
@@ -142,8 +140,6 @@ public:
 
         sp<World> _world;
         b2Body* _body;
-
-        sp<CollisionCallback> _collision_callback;
     };
 
 private:
