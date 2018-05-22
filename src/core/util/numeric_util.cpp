@@ -8,7 +8,9 @@
 #include "core/impl/numeric/numeric_multiply.h"
 #include "core/impl/numeric/numeric_negative.h"
 #include "core/impl/numeric/numeric_subtract.h"
+#include "core/impl/variable/variable_op2.h"
 #include "core/util/strings.h"
+#include "core/util/operators.h"
 
 namespace ark {
 
@@ -132,6 +134,36 @@ int32_t NumericUtil::toInt32(const sp<Numeric>& self)
 float NumericUtil::toFloat(const sp<Numeric>& self)
 {
     return self->val();
+}
+
+sp<Boolean> NumericUtil::gt(const sp<Numeric>& self, const sp<Numeric>& other)
+{
+    return sp<VariableOP2<float, Operators::GT<float>>>::make(self, other);
+}
+
+sp<Boolean> NumericUtil::ge(const sp<Numeric>& self, const sp<Numeric>& other)
+{
+    return sp<VariableOP2<float, Operators::GE<float>>>::make(self, other);
+}
+
+sp<Boolean> NumericUtil::lt(const sp<Numeric>& self, const sp<Numeric>& other)
+{
+    return sp<VariableOP2<float, Operators::LT<float>>>::make(self, other);
+}
+
+sp<Boolean> NumericUtil::le(const sp<Numeric>& self, const sp<Numeric>& other)
+{
+    return sp<VariableOP2<float, Operators::LE<float>>>::make(self, other);
+}
+
+sp<Boolean> NumericUtil::eq(const sp<Numeric>& self, const sp<Numeric>& other)
+{
+    return sp<VariableOP2<float, Operators::EQ<float>>>::make(self, other);
+}
+
+sp<Boolean> NumericUtil::ne(const sp<Numeric>& self, const sp<Numeric>& other)
+{
+    return sp<VariableOP2<float, Operators::NE<float>>>::make(self, other);
 }
 
 float NumericUtil::val(const sp<Numeric>& self)

@@ -11,14 +11,14 @@
 namespace ark {
 
 //[[core::class]]
-class ARK_API Size : public VV2 {
+class ARK_API Size : public Vec {
 public:
     Size();
     Size(float width, float height);
 //  [[script::bindings::auto]]
     Size(const sp<Numeric>& vwidth, const sp<Numeric>& vheight);
 
-    virtual V2 val() override;
+    virtual V val() override;
 
 //  [[script::bindings::property]]
     float width() const;

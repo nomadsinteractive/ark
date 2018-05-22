@@ -31,9 +31,9 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    RenderObject(int32_t type, const sp<VV>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& filter = nullptr);
+    RenderObject(int32_t type, const sp<Vec>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& filter = nullptr);
 //  [[script::bindings::auto]]
-    RenderObject(const sp<Integer>& type, const sp<VV>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& filter = nullptr);
+    RenderObject(const sp<Integer>& type, const sp<Vec>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& filter = nullptr);
 
 //  [[script::bindings::meta(absorb())]]
 //  [[script::bindings::meta(expire())]]
@@ -67,9 +67,9 @@ public:
 //  [[script::bindings::property]]
     V2 xy() const;
 //  [[script::bindings::property]]
-    const sp<VV>& position() const;
+    const sp<Vec>& position() const;
 //  [[script::bindings::property]]
-    void setPosition(const sp<VV>& position);
+    void setPosition(const sp<Vec>& position);
 //  [[script::bindings::property]]
     void setSize(const sp<Size>& size);
 //  [[script::bindings::property]]
@@ -95,7 +95,7 @@ public:
 
     private:
         sp<Builder<Integer>> _type;
-        sp<Builder<VV>> _position;
+        sp<Builder<Vec>> _position;
         sp<Builder<Size>> _size;
         sp<Builder<Transform>> _transform;
         sp<Builder<Varyings>> _varyings;
@@ -117,7 +117,7 @@ public:
 private:
     sp<IntegerWrapper> _type;
 
-    SafePtr<VV, Vec> _position;
+    SafePtr<Vec, VecImpl> _position;
     SafePtr<Size> _size;
     SafePtr<Transform> _transform;
     sp<Varyings> _varyings;

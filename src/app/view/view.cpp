@@ -6,7 +6,6 @@
 #include "core/util/dictionaries.h"
 
 #include "graphics/base/bounds.h"
-#include "graphics/base/vec2.h"
 #include "graphics/base/render_object.h"
 #include "graphics/impl/renderer/renderer_by_render_object.h"
 

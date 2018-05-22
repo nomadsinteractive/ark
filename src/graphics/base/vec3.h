@@ -54,8 +54,6 @@ public:
     sp<Numeric> vy() const;
 //  [[script::bindings::property]]
     sp<Numeric> vz() const;
-//  [[script::bindings::property]]
-    sp<Vec2> vxy() const;
 
 //  [[script::bindings::property]]
     void setVx(const sp<Numeric>& vx) const;

@@ -1,7 +1,7 @@
 #include "core/util/integer_util.h"
 
 #include "core/base/bean_factory.h"
-#include "core/base/variable_wrapper.h"
+#include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/integer/integer_add.h"
 #include "core/impl/integer/integer_floor_div.h"
 #include "core/impl/integer/integer_multiply.h"

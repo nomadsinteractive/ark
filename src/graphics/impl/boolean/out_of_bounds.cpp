@@ -7,7 +7,7 @@
 
 namespace ark {
 
-OutOfBounds::OutOfBounds(const sp<Bounds>& bounds, const sp<VV>& position)
+OutOfBounds::OutOfBounds(const sp<Bounds>& bounds, const sp<Vec>& position)
     : _bounds(bounds), _position(position)
 {
     NOT_NULL(bounds);
@@ -16,12 +16,12 @@ OutOfBounds::OutOfBounds(const sp<Bounds>& bounds, const sp<VV>& position)
 
 bool OutOfBounds::val()
 {
-    const V p = _position->val();
-    return !_bounds->ptin(p.x(), p.y());
+    const V pt = _position->val();
+    return !_bounds->ptin(pt);
 }
 
 OutOfBounds::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _bounds(parent.ensureBuilder<Bounds>(doc, Constants::Attributes::BOUNDS)), _position(parent.ensureBuilder<VV>(doc, Constants::Attributes::POSITION))
+    : _bounds(parent.ensureBuilder<Bounds>(doc, Constants::Attributes::BOUNDS)), _position(parent.ensureBuilder<Vec>(doc, Constants::Attributes::POSITION))
 {
 }
 

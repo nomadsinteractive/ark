@@ -13,7 +13,7 @@
 
 namespace ark {
 
-Transform::Transform(const sp<Rotate>& rotate, const sp<VV>& scale, const sp<VV>& translation)
+Transform::Transform(const sp<Rotate>& rotate, const sp<Vec>& scale, const sp<Vec>& translation)
     : _rotate(rotate), _scale(scale ? scale : identity()), _translation(translation)
 {
 }
@@ -43,29 +43,29 @@ void Transform::setRotate(const sp<Rotate>& rotate)
     _rotate = rotate;
 }
 
-const sp<VV>& Transform::scale() const
+const sp<Vec>& Transform::scale() const
 {
     return _scale;
 }
 
-void Transform::setScale(const sp<VV>& scale)
+void Transform::setScale(const sp<Vec>& scale)
 {
     _scale = scale;
 }
 
-const sp<VV>& Transform::translation() const
+const sp<Vec>& Transform::translation() const
 {
     return _translation.ensure();
 }
 
-void Transform::setTranslation(const sp<VV>& translation)
+void Transform::setTranslation(const sp<Vec>& translation)
 {
     _translation = translation;
 }
 
-const sp<VV>& Transform::identity()
+const sp<Vec>& Transform::identity()
 {
-    static sp<VV> IDENTITY = sp<VV::Const>::make(V::identity());
+    static sp<Vec> IDENTITY = sp<Vec::Const>::make(V::identity());
     return IDENTITY;
 }
 
@@ -139,8 +139,8 @@ V3 Transform::Snapshot::mapXYZ(const V3& p) const
 }
 
 Transform::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _rotate(factory.getConcreteClassBuilder<Rotate>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<VV>(manifest, "scale")),
-      _translation(factory.getBuilder<VV>(manifest, Constants::Attributes::TRANSLATION))
+    : _rotate(factory.getConcreteClassBuilder<Rotate>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec>(manifest, "scale")),
+      _translation(factory.getBuilder<Vec>(manifest, Constants::Attributes::TRANSLATION))
 {
 }
 

@@ -37,7 +37,7 @@ class RendererGroup;
 class Rotate;
 class Size;
 class SurfaceController;
-class Vec2;
+class Vec2Impl;
 class Vec3;
 class Vec4;
 class V2;
@@ -45,17 +45,18 @@ class V3;
 class V4;
 class Viewport;
 
-typedef Iterator<sp<Renderer>> Movieclip;
 typedef sp<Bitmap> bitmap;
-typedef Variable<V2> VV2;
+
+typedef Variable<V2> Vec2;
 typedef Variable<V3> VV3;
 typedef Variable<V4> VV4;
 
 typedef Loader<Bitmap> BitmapLoader;
 
-typedef VV2 VV;
-typedef V2 V;
 typedef Vec2 Vec;
+typedef V2 V;
+typedef Vec2Impl VecImpl;
+const uint32_t DIMENSIONS = 2;
 
 }
 

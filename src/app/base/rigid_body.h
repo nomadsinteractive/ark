@@ -2,6 +2,7 @@
 #define ARK_APP_BASE_RIGID_BODY_H_
 
 #include "core/base/api.h"
+#include "core/inf/builder.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
 
@@ -17,7 +18,7 @@ namespace ark {
 class ARK_API RigidBody {
 public:
     struct Stub {
-        Stub(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate);
+        Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate);
 
         void beginContact(const sp<RigidBody>& rigidBody);
         void endContact(const sp<RigidBody>& rigidBody);
@@ -25,10 +26,11 @@ public:
         void beginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody);
         void endContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody);
 
-        uint32_t _id;
+        int32_t _id;
         Collider::BodyType _type;
-        sp<VV> _position;
+        sp<Vec> _position;
         sp<Size> _size;
+        sp<Size> _render_object_size;
         sp<Rotate> _rotate;
 
         sp<CollisionCallback> _collision_callback;
@@ -39,14 +41,16 @@ public:
 public:
     virtual ~RigidBody() = default;
 
-    RigidBody(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate);
+    RigidBody(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate);
     RigidBody(const sp<Stub>& stub);
 
 //  [[script::bindings::auto]]
     virtual void dispose() = 0;
+//  [[script::bindings::auto]]
+    virtual void bind(const sp<RenderObject>& renderObject);
 
 //  [[script::bindings::property]]
-    uint32_t id() const;
+    int32_t id() const;
 //  [[script::bindings::property]]
     Collider::BodyType type() const;
 
@@ -61,7 +65,7 @@ public:
     float height() const;
 
 //  [[script::bindings::property]]
-    const sp<VV>& position() const;
+    const sp<Vec>& position() const;
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 //  [[script::bindings::property]]
@@ -78,6 +82,19 @@ public:
     void setCollisionCallback(const sp<CollisionCallback>& collisionCallback);
 
     const sp<Stub>& stub() const;
+
+//  [[plugin::style("rigid-body")]]
+    class RIGID_BODY_STYLE : public Builder<RenderObject> {
+    public:
+        RIGID_BODY_STYLE(BeanFactory& factory, const sp<Builder<RenderObject>>& delegate, const String& value);
+
+        virtual sp<RenderObject> build(const sp<Scope>& args) override;
+
+    private:
+        sp<Builder<RenderObject>> _delegate;
+        sp<Builder<RigidBody>> _rigid_body;
+
+    };
 
 protected:
     sp<Stub> _stub;

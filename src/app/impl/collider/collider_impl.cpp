@@ -16,14 +16,15 @@
 #include "app/base/application_context.h"
 #include "app/base/rigid_body.h"
 #include "app/inf/collision_callback.h"
+#include "app/inf/tracker.h"
 
 namespace ark {
 
 namespace {
 
-class DynamicPosition : public VV2 {
+class DynamicPosition : public Vec2 {
 public:
-    DynamicPosition(const sp<ColliderImpl::Stub>& collider, const sp<VV>& position)
+    DynamicPosition(const sp<ColliderImpl::Stub>& collider, const sp<Vec>& position)
         : _collider(collider), _position(position) {
     }
 
@@ -35,46 +36,43 @@ public:
     virtual V2 val() override {
         const V position = _position->val();
         if(_rigid_body_shadow && !_rigid_body_shadow->disposed()) {
-            _aabb.setCenter(position.x(), position.y());
-            _rigid_body_shadow->collision(_rigid_body_shadow, _collider, _aabb);
-            if(!_rigid_body_shadow->disposed())
-                _collider->_axises->update(_rigid_body_shadow->id(), position, _aabb);
+            _rigid_body_shadow->collision(_rigid_body_shadow, _collider, position, _aabb);
         }
         return position;
     }
 
 private:
     sp<ColliderImpl::Stub> _collider;
-    sp<VV> _position;
+    sp<Vec> _position;
     sp<ColliderImpl::RigidBodyShadow> _rigid_body_shadow;
     Rect _aabb;
 };
 
 }
 
-ColliderImpl::ColliderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _stub(sp<Stub>::make(manifest)), _resource_loader_context(resourceLoaderContext)
+ColliderImpl::ColliderImpl(const sp<Tracker>& tracker, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _stub(sp<Stub>::make(tracker, manifest)), _resource_loader_context(resourceLoaderContext)
 {
 }
 
 ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _manifest(manifest), _resource_loader_context(resourceLoaderContext)
+    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _tracker(factory.ensureBuilder<Tracker>(manifest, "tracker"))
 {
 }
 
 sp<Collider> ColliderImpl::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<ColliderImpl>::make(_manifest, _resource_loader_context);
+    return sp<ColliderImpl>::make(_tracker->build(args), _manifest, _resource_loader_context);
 }
 
-sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate)
+sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate)
 {
     NOT_NULL(position);
     NOT_NULL(size);
     if(type == Collider::BODY_TYPE_DYNAMIC)
     {
         const sp<DynamicPosition> dpos = sp<DynamicPosition>::make(_stub, position);
-        const sp<VV> pos = _resource_loader_context->synchronize<V>(dpos);
+        const sp<Vec> pos = _resource_loader_context->synchronize<V>(dpos);
         const sp<RigidBodyImpl> rigidBody = _stub->createRigidBody(type, shape, pos, size, rotate, _stub);
         dpos->setRigidBody(rigidBody->shadow());
         return rigidBody;
@@ -91,24 +89,28 @@ sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, c
     return nullptr;
 }
 
-ColliderImpl::Stub::Stub(const document& manifest)
-    : _rigid_body_base_id(0), _axises(sp<Axises>::make())
+ColliderImpl::Stub::Stub(const sp<Tracker>& tracker, const document& manifest)
+    : _tracker(tracker), _rigid_body_base_id(0)/*, _axises(sp<Axises>::make())*/
 {
     loadShapes(manifest);
 }
 
 void ColliderImpl::Stub::remove(const RigidBody& rigidBody)
 {
-    _axises->remove(rigidBody);
+//    _axises->remove(rigidBody);
+    _tracker->remove(rigidBody.id());
     const auto iter = _rigid_bodies.find(rigidBody.id());
     DCHECK(iter != _rigid_bodies.end(), "RigidBody(%d) not found", rigidBody.id());
     LOGD("Removing RigidBody(%d)", rigidBody.id());
     _rigid_bodies.erase(iter);
 }
 
-sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<ColliderImpl::Stub>& self)
+sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<ColliderImpl::Stub>& self)
 {
-    const sp<RigidBodyShadow> rigidBodyShadow = _object_pool.obtain<RigidBodyShadow>(++_rigid_body_base_id, type, position, size, rotate);
+    uint32_t rigidBodyId = ++_rigid_body_base_id;
+    float s = std::max(size->width(), size->height());
+    const sp<Vec> dp = _tracker->create(rigidBodyId, position, sp<Vec::Const>::make(V(s, s)));
+    const sp<RigidBodyShadow> rigidBodyShadow = _object_pool.obtain<RigidBodyShadow>(rigidBodyId, type, dp, size, rotate);
     const sp<RigidBodyImpl> rigidBody = _object_pool.obtain<RigidBodyImpl>(self, rigidBodyShadow);
 
     DWARN(_c2_shapes.find(BODY_SHAPE_AABB) == _c2_shapes.end()
@@ -132,18 +134,18 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
     }
 
     _rigid_bodies[rigidBodyShadow->id()] = rigidBodyShadow;
-    _axises->insert(rigidBodyShadow);
+//    _axises->insert(rigidBodyShadow);
     return rigidBody;
 }
 
-const sp<ColliderImpl::RigidBodyShadow>& ColliderImpl::Stub::ensureRigidBody(uint32_t id) const
+const sp<ColliderImpl::RigidBodyShadow>& ColliderImpl::Stub::ensureRigidBody(int32_t id) const
 {
     const auto iter = _rigid_bodies.find(id);
     DCHECK(iter != _rigid_bodies.end(), "RigidBody(id = %d) does not exists", id);
     return iter->second;
 }
 
-const sp<ColliderImpl::RigidBodyShadow> ColliderImpl::Stub::findRigidBody(uint32_t id) const
+const sp<ColliderImpl::RigidBodyShadow> ColliderImpl::Stub::findRigidBody(int32_t id) const
 {
     const auto iter = _rigid_bodies.find(id);
     return iter != _rigid_bodies.end() ? iter->second : sp<RigidBodyShadow>();
@@ -151,7 +153,7 @@ const sp<ColliderImpl::RigidBodyShadow> ColliderImpl::Stub::findRigidBody(uint32
 
 void ColliderImpl::Stub::loadShapes(const document& manifest)
 {
-    for(const document& i : manifest->children())
+    for(const document& i : manifest->children("shape"))
     {
         int32_t shapeId = Documents::ensureAttribute<int32_t>(i, "shape-id");
         const String& shapeType = Documents::ensureAttribute(i, "shape-type");
@@ -206,7 +208,7 @@ void ColliderImpl::RigidBodyImpl::dispose()
     _shadow->dispose(_collider);
 }
 
-ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate)
+ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate)
     : RigidBody(id, type, position, size, rotate), _c2_rigid_body(position, rotate, type == Collider::BODY_TYPE_STATIC), _disposed(false), _dispose_requested(false)
 {
 }
@@ -246,7 +248,7 @@ void ColliderImpl::RigidBodyShadow::dispose()
     _dispose_requested = true;
 }
 
-void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const Rect& aabb)
+void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const V& position, const Rect& aabb)
 {
     if(_dispose_requested)
     {
@@ -254,10 +256,11 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
         return;
     }
 
-    std::set<uint32_t> candidates = collider._axises->findCandidates(aabb);
+//    std::set<uint32_t> candidates = collider._axises->findCandidates(aabb);
+    std::unordered_set<int32_t> candidates = collider._tracker->search(position, V(aabb.width(), aabb.height()));
     if(candidates.size())
     {
-        std::set<uint32_t> contacts = _contacts;
+        std::unordered_set<int32_t> contacts = _contacts;
         for(auto iter = candidates.begin(); iter != candidates.end();)
         {
             uint32_t id = *iter;
@@ -320,36 +323,36 @@ Rect ColliderImpl::RigidBodyShadow::makeRigidBodyAABB() const
     return aabb;
 }
 
-void ColliderImpl::Axises::insert(const RigidBody& rigidBody)
-{
-    const V position = rigidBody.position()->val();
-    const sp<Size>& size = rigidBody.size();
-    _x_axis_segment.insert(rigidBody.id(), position.x(), size->width() / 2);
-    _y_axis_segment.insert(rigidBody.id(), position.y(), size->height() / 2);
-}
+//void ColliderImpl::Axises::insert(const RigidBody& rigidBody)
+//{
+//    const V position = rigidBody.position()->val();
+//    const sp<Size>& size = rigidBody.size();
+//    _x_axis_segment.insert(rigidBody.id(), position.x(), size->width() / 2);
+//    _y_axis_segment.insert(rigidBody.id(), position.y(), size->height() / 2);
+//}
 
-void ColliderImpl::Axises::remove(const RigidBody& rigidBody)
-{
-    _x_axis_segment.remove(rigidBody.id());
-    _y_axis_segment.remove(rigidBody.id());
-}
+//void ColliderImpl::Axises::remove(const RigidBody& rigidBody)
+//{
+//    _x_axis_segment.remove(rigidBody.id());
+//    _y_axis_segment.remove(rigidBody.id());
+//}
 
-void ColliderImpl::Axises::update(uint32_t id, const V2& position, const Rect& aabb)
-{
-    _x_axis_segment.update(id, position.x(), aabb.width());
-    _y_axis_segment.update(id, position.y(), aabb.height());
-}
+//void ColliderImpl::Axises::update(uint32_t id, const V2& position, const Rect& aabb)
+//{
+//    _x_axis_segment.update(id, position.x(), aabb.width());
+//    _y_axis_segment.update(id, position.y(), aabb.height());
+//}
 
-std::set<uint32_t> ColliderImpl::Axises::findCandidates(const Rect& aabb) const
-{
-    std::set<uint32_t> candidates;
-    const std::set<uint32_t> x = _x_axis_segment.findCandidates(aabb.left(), aabb.right());
-    if(x.size())
-    {
-        const std::set<uint32_t> y = _y_axis_segment.findCandidates(aabb.top(), aabb.bottom());
-        std::set_intersection(x.begin(), x.end(), y.begin(), y.end(), std::inserter(candidates, candidates.begin()));
-    }
-    return candidates;
-}
+//std::set<uint32_t> ColliderImpl::Axises::findCandidates(const Rect& aabb) const
+//{
+//    std::set<uint32_t> candidates;
+//    const std::set<uint32_t> x = _x_axis_segment.findCandidates(aabb.left(), aabb.right());
+//    if(x.size())
+//    {
+//        const std::set<uint32_t> y = _y_axis_segment.findCandidates(aabb.top(), aabb.bottom());
+//        std::set_intersection(x.begin(), x.end(), y.begin(), y.end(), std::inserter(candidates, candidates.begin()));
+//    }
+//    return candidates;
+//}
 
 }

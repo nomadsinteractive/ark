@@ -14,24 +14,17 @@ namespace box2d {
 
 class Ball : public Shape {
 public:
-    Ball(float radius);
 
-    virtual void apply(b2Body* body, float density, float friction) override;
+    virtual void apply(b2Body* body, const sp<Size>& size, float density, float friction) override;
 
-//  [[plugin::builder("ball")]]
+//  [[plugin::builder::by-value("ball")]]
     class BUILDER : public Builder<Shape> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER();
 
         virtual sp<Shape> build(const sp<Scope>& args) override;
 
-    private:
-        sp<Builder<Numeric>> _radius;
-
     };
-
-private:
-    float _radius;
 };
 
 }

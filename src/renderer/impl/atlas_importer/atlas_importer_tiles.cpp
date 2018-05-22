@@ -17,6 +17,7 @@ void AtlasImporterTiles::import(Atlas& atlas, const ResourceLoaderContext& /*res
     const uint32_t marginY = Documents::getAttribute<uint32_t>(manifest, "margin-y", 0);
     const float pivotX = Documents::getAttribute<float>(manifest, "pivot-x", 0);
     const float pivotY = Documents::getAttribute<float>(manifest, "pivot-y", 0);
+    DWARN(pivotX >= 0 && pivotX <= 1.0f && pivotY >= 0 && pivotY <= 1.0f, "Pivot(%.2f, %.2f) out of tiles", pivotX, pivotY);
     const uint32_t flowx = marginX + tileWidth;
     const uint32_t flowy = marginY + tileHeight;
     const Rect bounds = Rect::parse(manifest);

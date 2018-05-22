@@ -7,12 +7,12 @@
 #include "graphics/base/size.h"
 #include "graphics/base/render_layer.h"
 #include "graphics/base/render_object.h"
-#include "graphics/base/vec2.h"
 #include "graphics/base/v2.h"
+#include "graphics/util/vec2_util.h"
 
 namespace ark {
 
-Bar::Bar(const sp<Layer>& layer, const sp<RenderObject>& bottom, const sp<RenderObject>& bolierplate, const sp<RenderObject>& top, const sp<VV>& direction, const sp<Size>& size)
+Bar::Bar(const sp<Layer>& layer, const sp<RenderObject>& bottom, const sp<RenderObject>& bolierplate, const sp<RenderObject>& top, const sp<Vec>& direction, const sp<Size>& size)
     : _bottom(bottom), _boilerplate(bolierplate), _top(top), _direction(direction), _size(size), _render_layer(sp<RenderLayer>::make(layer)), _bar_width(0), _bar_height(0)
 {
 }
@@ -56,13 +56,13 @@ void Bar::update()
         }
         for(uint32_t i = 0; i < count; ++i)
         {
-            const sp<RenderObject> cell = sp<RenderObject>::make(_boilerplate->type(), sp<Vec>::make(fx, 0.0f), boilerSize, _boilerplate->transform(), _boilerplate->varyings());
+            const sp<RenderObject> cell = sp<RenderObject>::make(_boilerplate->type(), Vec2Util::create(fx, 0.0f), boilerSize, _boilerplate->transform(), _boilerplate->varyings());
             _render_layer->addRenderObject(cell);
             fx += dx;
         }
         if(clip != 0)
         {
-            const sp<RenderObject> cell = sp<RenderObject>::make(_boilerplate->type(), sp<Vec>::make(fx, 0.0f), sp<Size>::make(clip, bph), _boilerplate->transform(), _boilerplate->varyings());
+            const sp<RenderObject> cell = sp<RenderObject>::make(_boilerplate->type(), Vec2Util::create(fx, 0.0f), sp<Size>::make(clip, bph), _boilerplate->transform(), _boilerplate->varyings());
             _render_layer->addRenderObject(cell);
             fx += clip;
         }
@@ -80,7 +80,7 @@ Bar::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
       _bottom(parent.getBuilder<RenderObject>(doc, "bottom")),
       _top(parent.getBuilder<RenderObject>(doc, "top")),
       _boilerplate(parent.ensureBuilder<RenderObject>(doc, "boilerplate")),
-      _direction(parent.ensureBuilder<VV>(doc, "direction"))
+      _direction(parent.ensureBuilder<Vec>(doc, "direction"))
 {
 }
 

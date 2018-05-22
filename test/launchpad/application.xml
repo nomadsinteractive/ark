@@ -67,5 +67,6 @@
             <vertex x="0" y="20"/>
             <vertex x="20" y="-10"/>
         </shape>
+        <tracker id="@tracker-001" class="grid" cell="60"/>
     </collider>
 </resources>

@@ -39,8 +39,6 @@ class RenderViewFactory;
 class ResourceLoaderContext;
 class Atlas;
 
-typedef uint16_t glindex_t;
-
 }
 
 #endif

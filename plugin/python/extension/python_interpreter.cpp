@@ -9,7 +9,6 @@
 #include "core/util/log.h"
 
 #include "graphics/base/color.h"
-#include "graphics/base/vec2.h"
 #include "graphics/base/vec3.h"
 
 #include "app/base/event.h"
@@ -93,37 +92,6 @@ std::wstring PythonInterpreter::toWString(PyObject* object)
     return L"";
 }
 
-sp<Vec2> PythonInterpreter::toVec2(PyObject* object)
-{
-    if(PyTuple_Check(object))
-    {
-        if(PyTuple_Size(object) == 2)
-        {
-            float x = 0, y = 0;
-            if(PyArg_ParseTuple(object, "ff", &x, &y))
-                return sp<Vec2>::make(x, y);
-        }
-        else
-            PyErr_SetString(PyExc_ValueError, "Vertex object should have 2 float values");
-    }
-    else if(PyList_Check(object))
-    {
-        if(PyList_Size(object) == 2)
-        {
-            float x = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 0)));
-            float y = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 1)));
-            return sp<Vec2>::make(x, y);
-        }
-        else
-            PyErr_SetString(PyExc_ValueError, "Vertex object should have 2 float values");
-    }
-
-    if(isInstance<Vec2>(object))
-        return toInstance<Vec2>(object);
-
-    return nullptr;
-}
-
 PyObject* PythonInterpreter::fromByteArray(const bytearray& bytes) const
 {
     return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(bytes->buf()), bytes->length());
@@ -146,7 +114,7 @@ sp<Integer> PythonInterpreter::toInteger(PyObject* object)
     if(PyFloat_Check(object))
     {
         DWARN(false, "Casting from float to integer loses precision.");
-        return sp<Integer::Impl>::make(static_cast<float>(PyFloat_AsDouble(object)));
+        return sp<Integer::Impl>::make(static_cast<int32_t>(PyFloat_AsDouble(object)));
     }
 
     return asInterface<Integer>(object);
@@ -383,10 +351,10 @@ template<> ARK_PLUGIN_PYTHON_API Color PythonInterpreter::toType<Color>(PyObject
     return Color();
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Vec2>(const Vec2& value)
-{
-    return PythonInterpreter::instance()->pyNewObject<Vec2>(sp<Vec2>::make(value));
-}
+//template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Vec2>(const Vec2& value)
+//{
+//    return PythonInterpreter::instance()->pyNewObject<Vec2>(sp<Vec2>::make(value));
+//}
 
 template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Vec3>(const Vec3& value)
 {

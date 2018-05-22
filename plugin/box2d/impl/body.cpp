@@ -3,13 +3,15 @@
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
 #include "core/util/bean_utils.h"
+#include "core/util/numeric_util.h"
+#include "core/util/log.h"
 
 #include "graphics/base/bounds.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/rotate.h"
 #include "graphics/base/transform.h"
-#include "graphics/base/vec2.h"
+#include "graphics/util/vec2_util.h"
 
 #include "impl/world.h"
 
@@ -19,52 +21,22 @@ namespace box2d {
 
 namespace {
 
-class _PositionX : public Numeric {
+class RigidBodyRotation : public Numeric {
 public:
-    _PositionX(const sp<Body>& body)
-        : _world(body->world()), _body(body) {
+    RigidBodyRotation(const sp<Body::Stub>& stub)
+        : _stub(stub) {
     }
 
     virtual float val() override {
-        return _world->toPixelX(_body->b2Instance()->GetPosition().x);
+        DCHECK(_stub->_body, "Body has been disposed already");
+        return _stub->_body->GetAngle();
     }
 
 private:
-    sp<World> _world;
-    sp<Body> _body;
+    sp<Body::Stub> _stub;
 };
 
-class _PositionY : public Numeric {
-public:
-    _PositionY(const sp<Body>& body)
-        : _world(body->world()), _body(body) {
-    }
-
-    virtual float val() override {
-        return _world->toPixelY(_body->b2Instance()->GetPosition().y);
-    }
-
-private:
-    sp<World> _world;
-    sp<Body> _body;
-};
-
-class _Angle : public Numeric {
-public:
-    _Angle(const sp<Body>& body)
-        : _world(body->world()), _body(body) {
-    }
-
-    virtual float val() override {
-        return _body->b2Instance()->GetAngle();
-    }
-
-private:
-    sp<World> _world;
-    sp<Body> _body;
-};
-
-class RigidBodyPosition : public VV {
+class RigidBodyPosition : public Vec {
 public:
     RigidBodyPosition(const sp<Body::Stub>& stub)
         : _stub(stub) {
@@ -72,8 +44,23 @@ public:
 
     virtual V val() override {
         DCHECK(_stub->_body, "Body has been disposed already");
-        float x = _stub->_world->toPixelX(_stub->_body->GetPosition().x);
-        float y = _stub->_world->toPixelX(_stub->_body->GetPosition().y);
+        return V(_stub->_body->GetPosition().x, _stub->_body->GetPosition().y);
+    }
+
+private:
+    sp<Body::Stub> _stub;
+};
+
+class RenderObjectPosition : public Vec {
+public:
+    RenderObjectPosition(const sp<Body::Stub>& stub)
+        : _stub(stub) {
+    }
+
+    virtual V val() override {
+        DCHECK(_stub->_body, "Body has been disposed already");
+        float x = _stub->_world.toPixelX(_stub->_body->GetPosition().x);
+        float y = _stub->_world.toPixelY(_stub->_body->GetPosition().y);
         return V(x, y);
     }
 
@@ -83,35 +70,35 @@ private:
 
 }
 
-Body::Body(const sp<World>& world, Collider::BodyType type, float x, float y, Shape& shape, float density, float friction)
-    : Body(sp<Stub>::make(world, world->createBody(type, x, y, shape, density, friction)))
+Body::Body(const World& world, Collider::BodyType type, float x, float y, const sp<Size>& size, Shape& shape, float density, float friction)
+    : Body(sp<Stub>::make(world, world.createBody(type, x, y, size, shape, density, friction)), type, size)
 {
 }
 
-Body::Body(const sp<World>& world, b2Body* body)
-    : Body(sp<Stub>::make(world, body))
+void Body::bind(const sp<RenderObject>& renderObject)
 {
+    float ppmx = world().toPixelX(1.0f);
+    float ppmy = world().toPixelY(1.0f);
+    renderObject->setPosition(sp<RenderObjectPosition>::make(_stub));
+    renderObject->setSize(sp<Size>::make(NumericUtil::mul(size()->vwidth(), sp<Numeric::Const>::make(ppmx)),
+                                         NumericUtil::mul(size()->vheight(), sp<Numeric::Const>::make(ppmy))));
+    renderObject->transform()->setRotate(rotate());
 }
 
-Body::Body(const sp<Stub>& stub)
-    : RigidBody((uint32_t) reinterpret_cast<intptr_t>(stub->_body), Collider::BODY_TYPE_DYNAMIC, nullptr, nullptr, nullptr), _stub(stub)
+Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Size>& size)
+    : RigidBody((int32_t) reinterpret_cast<intptr_t>(stub->_body), type,
+                sp<RigidBodyPosition>::make(stub),
+                size,
+                sp<Rotate>::make(sp<RigidBodyRotation>::make(stub))), _stub(stub)
 {
-}
-
-Body::~Body()
-{
-    if(_stub->_body)
-        dispose();
 }
 
 void Body::dispose()
 {
-    DCHECK(_stub->_body, "Body has been disposed already");
-    _stub->_world->world().DestroyBody(_stub->_body);
-    _stub->_body = nullptr;
+    _stub->dispose();
 }
 
-const sp<World>& Body::world() const
+const World& Body::world() const
 {
     return _stub->_world;
 }
@@ -134,6 +121,17 @@ float Body::angularVelocity()
 void Body::setAngularVelocity(float omega)
 {
     _stub->_body->SetAngularVelocity(omega);
+}
+
+V2 Body::linearVelocity() const
+{
+    const b2Vec2 velocity = _stub->_body->GetLinearVelocity();
+    return V2(velocity.x, velocity.y);
+}
+
+void Body::setLinearVelocity(const V2& velocity)
+{
+    _stub->_body->SetLinearVelocity(b2Vec2(velocity.x(), velocity.y()));
 }
 
 bool Body::active()
@@ -176,24 +174,19 @@ void Body::applyTorque(float torque)
     _stub->_body->ApplyTorque(torque, true);
 }
 
-void Body::applyForce(const sp<VV>& force, const sp<VV>& point)
+void Body::applyForce(const V2& force, const V2& point)
 {
-    const V f = force->val();
-    const V p = point->val();
-    _stub->_body->ApplyForce(b2Vec2(f.x(), f.y()), b2Vec2(p.x(), p.y()), true);
+    _stub->_body->ApplyForce(b2Vec2(force.x(), force.y()), b2Vec2(point.x(), point.y()), true);
 }
 
-void Body::applyForceToCenter(const sp<VV>& force)
+void Body::applyForceToCenter(const V2& force)
 {
-    const V f = force->val();
-    _stub->_body->ApplyForceToCenter(b2Vec2(f.x(), f.y()), true);
+    _stub->_body->ApplyForceToCenter(b2Vec2(force.x(), force.y()), true);
 }
 
-void Body::applyLinearImpulse(const sp<VV>& impulse, const sp<VV>& point)
+void Body::applyLinearImpulse(const V2& impulse, const V2& point)
 {
-    const V i = impulse->val();
-    const V p = point->val();
-    _stub->_body->ApplyLinearImpulse(b2Vec2(i.x(), i.y()), b2Vec2(p.x(), p.y()), true);
+    _stub->_body->ApplyLinearImpulse(b2Vec2(impulse.x(), impulse.y()), b2Vec2(point.x(), point.y()), true);
 }
 
 void Body::applyAngularImpulse(float impulse)
@@ -201,17 +194,13 @@ void Body::applyAngularImpulse(float impulse)
     _stub->_body->ApplyAngularImpulse(impulse, true);
 }
 
-b2Body* Body::b2Instance() const
-{
-    return _stub->_body;
-}
-
-Body::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& parent, const document& doc)
-    : _world(parent.ensureBuilder<Object>(doc, "world")),
-      _shape(parent.ensureBuilder<Shape>(doc, "shape")),
-      _position(parent.ensureBuilder<VV>(doc, Constants::Attributes::POSITION)),
-      _density(Documents::getAttribute<float>(doc, "density", 1.0f)),
-      _friction(Documents::getAttribute<float>(doc, "friction", 0.2f))
+Body::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest)
+    : _world(factory.ensureBuilder<Object>(manifest, "world")),
+      _shape(factory.ensureBuilder<Shape>(manifest, "shape")),
+      _position(factory.ensureBuilder<Vec>(manifest, Constants::Attributes::POSITION)),
+      _size(factory.ensureBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+      _density(Documents::getAttribute<float>(manifest, "density", 1.0f)),
+      _friction(Documents::getAttribute<float>(manifest, "friction", 0.2f))
 {
     DCHECK(_world, "Illegal world object");
 }
@@ -221,47 +210,7 @@ sp<Body> Body::BUILDER_IMPL1::build(const sp<Scope>& args)
     const sp<World> world = BeanUtils::as<World>(_world, args);
     const sp<Shape> shape = _shape->build(args);
     const V p = _position->build(args)->val();
-    return sp<Body>::make(world, Collider::BODY_TYPE_DYNAMIC, p.x(), p.y(), shape, _density, _friction);
-}
-
-Body::POSITION_BUILDER::POSITION_BUILDER(BeanFactory& parent, const document& doc)
-    : _body(parent.ensureBuilder<Object>(doc, "body"))
-{
-}
-
-sp<Vec> Body::POSITION_BUILDER::build(const sp<Scope>& args)
-{
-    const sp<Body> body = _body->build(args).as<Body>();
-    DCHECK(body, "Illegal body object");
-    return sp<Vec>::make(sp<_PositionX>::make(body), sp<_PositionY>::make(body));
-}
-
-Body::ROTATION_BUILDER::ROTATION_BUILDER(BeanFactory& parent, const document& doc)
-    : _body(parent.ensureBuilder<Object>(doc, "body"))
-{
-}
-
-sp<Numeric> Body::ROTATION_BUILDER::build(const sp<Scope>& args)
-{
-    const sp<Body> body = _body->build(args).as<Body>();
-    DCHECK(body, "Illegal body object");
-    return sp<_Angle>::make(body);
-}
-
-Body::RENDER_OBJECT_STYLE::RENDER_OBJECT_STYLE(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value)
-    : _delegate(delegate), _body(parent.ensureBuilder<Object>(value))
-{
-}
-
-sp<RenderObject> Body::RENDER_OBJECT_STYLE::build(const sp<Scope>& args)
-{
-    const sp<Body> body = _body->build(args).as<Body>();
-    NOT_NULL(body);
-    sp<RenderObject> decorated = _delegate->build(args);
-    decorated->setPosition(sp<Vec>::make(sp<_PositionX>::make(body), sp<_PositionY>::make(body)));
-    decorated->transform()->setRotate(sp<Rotate>::make(sp<_Angle>::make(body)));
-    decorated.absorb(body);
-    return decorated;
+    return sp<Body>::make(world, Collider::BODY_TYPE_DYNAMIC, p.x(), p.y(), _size->build(args), shape, _density, _friction);
 }
 
 Body::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& parent, const document& doc)
@@ -274,9 +223,23 @@ sp<Object> Body::BUILDER_IMPL2::build(const sp<Scope>& args)
     return _delegate.build(args);
 }
 
-Body::Stub::Stub(const sp<World>& world, b2Body* body)
+Body::Stub::Stub(const World& world, b2Body* body)
     : _world(world), _body(body)
 {
+}
+
+Body::Stub::~Stub()
+{
+    if(_body)
+        dispose();
+}
+
+void Body::Stub::dispose()
+{
+    DCHECK(_body, "Body has been disposed already");
+    LOGD("id = %d", reinterpret_cast<int32_t>(_body));
+    _world.world().DestroyBody(_body);
+    _body = nullptr;
 }
 
 }

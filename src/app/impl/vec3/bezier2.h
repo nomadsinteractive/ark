@@ -15,7 +15,7 @@ namespace ark {
 
 class Bezier2 : public VV3 {
 public:
-    Bezier2(const sp<Numeric>& t, const sp<Numeric>& v, const sp<VV2>& p1, const sp<VV2>& p2, const sp<VV2>& p3, const sp<Runnable>& onarrival);
+    Bezier2(const sp<Numeric>& t, const sp<Numeric>& v, const sp<Vec2>& p1, const sp<Vec2>& p2, const sp<Vec2>& p3, const sp<Runnable>& onarrival);
 
     virtual V3 val() override;
 
@@ -29,7 +29,7 @@ public:
     private:
         sp<Builder<Numeric>> _t;
         sp<Builder<Numeric>> _v;
-        sp<Builder<VV2>> _p1, _p2, _p3;
+        sp<Builder<Vec2>> _p1, _p2, _p3;
         sp<Builder<Runnable>> _on_arrival;
         sp<ResourceLoaderContext> _resource_loader_context;
 
@@ -41,7 +41,7 @@ private:
 private:
     sp<Numeric> _t;
     sp<Numeric> _v;
-    sp<VV2> _p1, _p2, _p3;
+    sp<Vec2> _p1, _p2, _p3;
     sp<Runnable> _on_arrival;
 
     V2 _last;

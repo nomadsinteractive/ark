@@ -16,7 +16,7 @@ namespace {
 struct Adapter {
 
     struct Point {
-        Point(uint32_t id, const sp<VV>& position)
+        Point(uint32_t id, const sp<Vec>& position)
             : _id(id), _position(position) {
             update();
         }
@@ -29,7 +29,7 @@ struct Adapter {
         }
 
         uint32_t _id;
-        sp<VV> _position;
+        sp<Vec> _position;
         float _v[2];
     };
 
@@ -67,7 +67,7 @@ KDTree::KDTree()
     buildIndex();
 }
 
-uint32_t KDTree::addPoint(const sp<VV>& pos)
+uint32_t KDTree::addPoint(const sp<Vec>& pos)
 {
     rebuildIfNeeded();
     if(_id_recycler.size() > 0)

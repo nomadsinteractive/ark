@@ -58,6 +58,11 @@ V2& V2::operator *=(const V2& other)
     return *this;
 }
 
+V2 V2::operator -() const
+{
+    return V2(-_x, -_y);
+}
+
 V2 operator +(const V2& lvalue, const V2& rvalue)
 {
     return V2(lvalue.x() + rvalue.x(), lvalue.y() + rvalue.y());
@@ -98,10 +103,16 @@ float V2::dot(const V2& other) const
     return _x * other._x + _y * other._y;
 }
 
-template<> ARK_API const sp<VV2> Null::ptr()
+const float& V2::operator[](int32_t p) const
 {
-    return Ark::instance().obtain<VV2::Const>(V2());
+    DCHECK(p >=0, "Index out bounds: %d", p);
+    return reinterpret_cast<const float*>(this)[p];
 }
 
+float& V2::operator[](int32_t p)
+{
+    DCHECK(p >=0, "Index out bounds: %d", p);
+    return reinterpret_cast<float*>(this)[p];
+}
 
 }

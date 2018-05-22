@@ -7,7 +7,6 @@
 #include "core/base/object.h"
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
-#include "core/types/class.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -15,7 +14,6 @@
 #include "app/inf/collider.h"
 
 #include "box2d/api.h"
-#include "box2d/impl/body.h"
 #include "box2d/inf/shape.h"
 
 namespace ark {
@@ -25,16 +23,16 @@ namespace box2d {
 class ARK_PLUGIN_BOX2D_API World : public Object, public Runnable, public Collider, Implements<World, Object, Runnable, Collider> {
 public:
     World(const b2Vec2& gravity, float ppmX, float ppmY);
+    DEFAULT_COPY_AND_ASSIGN(World);
 
     virtual void run() override;
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
 
-    const b2World& world() const;
-    b2World& world();
+    b2World& world() const;
 
-    b2Body* createBody(const b2BodyDef& bodyDef);
-    b2Body* createBody(Collider::BodyType type, float x, float y, Shape& shape, float density, float friction);
+    b2Body* createBody(const b2BodyDef& bodyDef) const;
+    b2Body* createBody(Collider::BodyType type, float x, float y, const sp<Size>& size, Shape& shape, float density, float friction) const;
 
 //  [[script::bindings::meta(absorb())]]
 //  [[script::bindings::meta(expire())]]
@@ -71,25 +69,46 @@ public:
     };
 
 //  [[plugin::resource-loader("b2World")]]
-    class BUILDER_IMPL2 : public Builder<Object> {
+    class BUILDER_IMPL2 : public Builder<Collider> {
     public:
         BUILDER_IMPL2(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Object> build(const sp<Scope>& args) override;
+        virtual sp<Collider> build(const sp<Scope>& args) override;
 
     private:
         BUILDER_IMPL1 _delegate;
     };
 
 private:
-    float _ppm_x;
-    float _ppm_y;
+    struct BodyManifest {
+        BodyManifest();
+        BodyManifest(const sp<Shape> shape, float density, float friction);
 
-    float _time_step;
-    int32_t _velocity_iterations;
-    int32_t _position_iterations;
+        sp<Shape> shape;
+        float density;
+        float friction;
+    };
 
-    b2World _world;
+    struct Stub : public Runnable {
+        Stub(const b2Vec2& gravity, float ppmX, float ppmY);
+
+        virtual void run() override;
+
+        float _ppm_x;
+        float _ppm_y;
+
+        float _time_step;
+        int32_t _velocity_iterations;
+        int32_t _position_iterations;
+
+        b2World _world;
+        std::unordered_map<int32_t, BodyManifest> _body_manifests;
+    };
+
+private:
+    const sp<Stub> _stub;
+
+    friend class BUILDER_IMPL1;
 };
 
 }

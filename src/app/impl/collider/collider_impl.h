@@ -1,7 +1,7 @@
 #ifndef ARK_APP_IMPL_COLLIDER_COLLIDER_IMPL_H_
 #define ARK_APP_IMPL_COLLIDER_COLLIDER_IMPL_H_
 
-#include <set>
+#include <unordered_set>
 #include <unordered_map>
 
 #include "core/base/object_pool.h"
@@ -11,6 +11,7 @@
 
 #include "renderer/forwarding.h"
 
+#include "app/forwarding.h"
 #include "app/base/rigid_body.h"
 #include "app/impl/collider/axis_segments.h"
 #include "app/inf/collider.h"
@@ -20,9 +21,9 @@ namespace ark {
 
 class ColliderImpl : public Collider {
 public:
-    ColliderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    ColliderImpl(const sp<Tracker>& tracker, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Collider> {
@@ -34,6 +35,7 @@ public:
     private:
         document _manifest;
         sp<ResourceLoaderContext> _resource_loader_context;
+        sp<Builder<Tracker>> _tracker;
 
     };
 
@@ -41,33 +43,35 @@ public:
     class RigidBodyShadow;
 
 public:
-    class Axises {
-    public:
+//    class Axises {
+//    public:
 
-        void insert(const RigidBody& rigidBody);
-        void remove(const RigidBody& rigidBody);
-        void update(uint32_t id, const V2& position, const Rect& aabb);
+//        void insert(const RigidBody& rigidBody);
+//        void remove(const RigidBody& rigidBody);
+//        void update(uint32_t id, const V2& position, const Rect& aabb);
 
-        std::set<uint32_t> findCandidates(const Rect& aabb) const;
+//        std::set<uint32_t> findCandidates(const Rect& aabb) const;
 
-    private:
-        AxisSegments _x_axis_segment;
-        AxisSegments _y_axis_segment;
-    };
+//    private:
+//        AxisSegments _x_axis_segment;
+//        AxisSegments _y_axis_segment;
+//    };
 
     struct Stub {
-        Stub(const document& manifest);
+        Stub(const sp<Tracker>& tracker, const document& manifest);
 
         void remove(const RigidBody& rigidBody);
 
-        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Stub>& self);
-        const sp<RigidBodyShadow>& ensureRigidBody(uint32_t id) const;
-        const sp<RigidBodyShadow> findRigidBody(uint32_t id) const;
+        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Stub>& self);
+        const sp<RigidBodyShadow>& ensureRigidBody(int32_t id) const;
+        const sp<RigidBodyShadow> findRigidBody(int32_t id) const;
 
-        std::unordered_map<uint32_t, sp<RigidBodyShadow>> _rigid_bodies;
+        sp<Tracker> _tracker;
+
+        std::unordered_map<int32_t, sp<RigidBodyShadow>> _rigid_bodies;
         std::unordered_map<int32_t, std::pair<C2_TYPE, C2Shape>> _c2_shapes;
-        uint32_t _rigid_body_base_id;
-        sp<Axises> _axises;
+        int32_t _rigid_body_base_id;
+//        sp<Axises> _axises;
 
         ObjectPool _object_pool;
 
@@ -78,7 +82,7 @@ public:
 
     class RigidBodyShadow : public RigidBody {
     public:
-        RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate);
+        RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate);
 
         virtual void dispose() override;
 
@@ -89,7 +93,7 @@ public:
 
         bool disposed() const;
 
-        void collision(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const Rect& aabb);
+        void collision(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const V& position, const Rect& aabb);
 
         void dispose(ColliderImpl::Stub& stub);
 
@@ -99,7 +103,7 @@ public:
     private:
         C2RigidBody _c2_rigid_body;
 
-        std::set<uint32_t> _contacts;
+        std::unordered_set<int32_t> _contacts;
         bool _disposed;
         bool _dispose_requested;
 

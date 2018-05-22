@@ -28,12 +28,16 @@ public:
     friend V2 operator *(const V2& lvalue, const V2& rvalue);
     friend V2 operator /(const V2& lvalue, const V2& rvalue);
 
+    V2 operator -() const;
 
     float x() const;
     float y() const;
     float z() const;
 
     float dot(const V2& other) const;
+
+    const float& operator[](int32_t p) const;
+    float& operator[](int32_t p);
 
 private:
     float _x;

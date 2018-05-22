@@ -79,6 +79,17 @@ class Collider:
         return None
 
 
+class Tracker:
+    def create(self, id, position, aabb):
+        return position
+
+    def remove(self, id):
+        pass
+
+    def search(self, position, aabb):
+        return None
+
+
 class Boolean(Var):
     pass
 
@@ -94,12 +105,6 @@ class Numeric(Var):
 class Expired:
     def __init__(self, v=False):
         pass
-
-
-class VV2:
-    def __init__(self, x, y):
-        self._x = x
-        self._y = y
 
 
 class Vec2:
@@ -297,6 +302,26 @@ class Event:
     CODE_KEYBOARD_BACKSPACE = 46
     CODE_KEYBOARD_TAB = 47
     CODE_KEYBOARD_SPACE = 48
+
+    @property
+    def action(self):
+        return self.ACTION_KEY_DOWN
+
+    @property
+    def code(self):
+        return self.CODE_NONE
+
+    @property
+    def x(self):
+        return 0
+
+    @property
+    def y(self):
+        return 0
+
+    @property
+    def timestamp(self):
+        return 0
 
 
 class Rotate:
@@ -524,10 +549,6 @@ class Expried:
 
     def expire(self):
         pass
-
-
-class Range:
-    pass
 
 
 class Partition:

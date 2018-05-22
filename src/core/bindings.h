@@ -9,12 +9,6 @@ class StringBundle {
 
 /*
 [[script::bindings::auto]]
-class Range {
-};
-*/
-
-/*
-[[script::bindings::auto]]
 class VV3 {
 };
 */

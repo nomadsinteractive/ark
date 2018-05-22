@@ -4,7 +4,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/object_pool.h"
-#include "core/base/variable_wrapper.h"
+#include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/numeric/translate.h"
 #include "core/util/bean_utils.h"
 #include "core/util/numeric_util.h"

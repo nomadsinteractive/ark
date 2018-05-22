@@ -14,14 +14,14 @@ namespace box2d {
 
 class Arc : public Shape {
 public:
-    Arc(float radius, uint32_t sampleCount, float a, float b);
+    Arc(uint32_t sampleCount, float a, float b);
 
-    virtual void apply(b2Body* body, float density, float friction) override;
+    virtual void apply(b2Body* body, const sp<Size>& size, float density, float friction) override;
 
 //  [[plugin::builder("arc")]]
     class BUILDER : public Builder<Shape> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Shape> build(const sp<Scope>& args) override;
 
@@ -34,7 +34,6 @@ public:
     };
 
 private:
-    float _radius;
     uint32_t _sample_count;
     float _a, _b;
 };

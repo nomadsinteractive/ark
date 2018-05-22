@@ -14,7 +14,7 @@
 
 namespace ark {
 
-Bezier2::Bezier2(const sp<Numeric>& t, const sp<Numeric>& v, const sp<VV2>& p1, const sp<VV2>& p2, const sp<VV2>& p3, const sp<Runnable>& onarrival)
+Bezier2::Bezier2(const sp<Numeric>& t, const sp<Numeric>& v, const sp<Vec2>& p1, const sp<Vec2>& p2, const sp<Vec2>& p3, const sp<Runnable>& onarrival)
     : _t(t), _v(v), _p1(p1), _p2(p2), _p3(p3), _on_arrival(onarrival), _last(p1->val()), _last_t(0), _p(0)
 {
 }
@@ -61,7 +61,7 @@ V2 Bezier2::interpolate(const V2& p1, const V2& p2, float t)
 
 Bezier2::BUILDER::BUILDER(BeanFactory& parent, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _t(parent.getBuilder<Numeric>(manifest, "t", false)), _v(parent.ensureBuilder<Numeric>(manifest, "v")),
-      _p1(parent.ensureBuilder<VV2>(manifest, "p1")), _p2(parent.ensureBuilder<VV2>(manifest, "p2")), _p3(parent.ensureBuilder<VV2>(manifest, "p3")),
+      _p1(parent.ensureBuilder<Vec2>(manifest, "p1")), _p2(parent.ensureBuilder<Vec2>(manifest, "p2")), _p3(parent.ensureBuilder<Vec2>(manifest, "p3")),
       _on_arrival(parent.getBuilder<Runnable>(manifest, "onarrival")), _resource_loader_context(resourceLoaderContext)
 {
 }

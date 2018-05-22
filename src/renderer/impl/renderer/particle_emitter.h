@@ -20,12 +20,12 @@ namespace ark {
 class ParticleEmitter : public Renderer {
 private:
     struct Stub {
-        Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Scope>& arguments);
+        Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t type, const sp<Vec>& position, const sp<Size>& size, const sp<Scope>& arguments);
 
         sp<Scope> _arguments;
 
         uint32_t _type;
-        SafePtr<VV> _position;
+        SafePtr<Vec> _position;
         sp<Size> _size;
 
         sp<ObjectPool> _object_pool;
@@ -51,7 +51,7 @@ public:
 
         sp<Clock> _clock;
         sp<Builder<Numeric>> _type;
-        sp<Builder<VV>> _position;
+        sp<Builder<Vec>> _position;
         sp<Builder<Size>> _size;
         sp<Builder<RenderLayer>> _render_layer;
 

@@ -22,7 +22,7 @@ class TiledCollider : public Collider {
 public:
     TiledCollider(const sp<TileMap>& tileMap, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
 
 //  [[plugin::resource-loader("tiled")]]
     class BUILDER : public Builder<Collider> {
@@ -48,18 +48,18 @@ private:
         virtual void dispose() override;
 
     private:
-        sp<VV2::Impl> _position;
+        sp<Vec2::Impl> _position;
     };
 
 public:
     class RigidBodyImpl : public RigidBody {
     public:
         struct Stub {
-            Stub(const sp<TileMap>& tileMap, const sp<VV2>& position);
+            Stub(const sp<TileMap>& tileMap, const sp<Vec2>& position);
 
             void collision(const Rect& rect);
 
-            sp<VV2> _position;
+            sp<Vec2> _position;
 
         private:
             void beginContact(const sp<RigidBody>& rigidBody);
@@ -75,11 +75,11 @@ public:
         };
 
     public:
-        RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<TileMap>& tileMap);
+        RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<TileMap>& tileMap);
 
         virtual void dispose() override;
 
-        void setPosition(const sp<VV>& position);
+        void setPosition(const sp<Vec>& position);
 
         V2 xy() const;
 

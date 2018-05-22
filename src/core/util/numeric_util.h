@@ -3,7 +3,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/base/variable_wrapper.h"
+#include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
@@ -40,6 +40,19 @@ public:
     static int32_t toInt32(const sp<Numeric>& self);
 //[[script::bindings::operator(float)]]
     static float toFloat(const sp<Numeric>& self);
+
+//[[script::bindings::operator(>)]]
+    static sp<Boolean> gt(const sp<Numeric>& self, const sp<Numeric>& other);
+//[[script::bindings::operator(>=)]]
+    static sp<Boolean> ge(const sp<Numeric>& self, const sp<Numeric>& other);
+//[[script::bindings::operator(<)]]
+    static sp<Boolean> lt(const sp<Numeric>& self, const sp<Numeric>& other);
+//[[script::bindings::operator(<=)]]
+    static sp<Boolean> le(const sp<Numeric>& self, const sp<Numeric>& other);
+//[[script::bindings::operator(==)]]
+    static sp<Boolean> eq(const sp<Numeric>& self, const sp<Numeric>& other);
+//[[script::bindings::operator(!=)]]
+    static sp<Boolean> ne(const sp<Numeric>& self, const sp<Numeric>& other);
 
 //[[script::bindings::property]]
     static float val(const sp<Numeric>& self);

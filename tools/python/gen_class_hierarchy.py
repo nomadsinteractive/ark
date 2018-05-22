@@ -14,7 +14,7 @@ INDENT = '\n    '
 
 
 CORE_INTERFACES = ('Numeric', 'Layer', 'Integer', 'GLResource', 'EventListener', 'Renderer', 'Expired', 'Block',
-                   'Boolean', 'Range', 'Runnable', 'VV2', 'VV3', 'VV4')
+                   'Boolean', 'Runnable', 'Vec2', 'VV3', 'VV4')
 
 
 class GenClass:
@@ -77,7 +77,7 @@ def main():
     src = '''
 #include "core/ark.h"
 #include "core/base/class_manager.h"
-#include "core/base/variable_wrapper.h"
+#include "core/impl/variable/variable_wrapper.h"
 
 %s
 

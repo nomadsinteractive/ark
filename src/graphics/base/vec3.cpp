@@ -5,14 +5,13 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/base/object_pool.h"
-#include "core/base/variable_wrapper.h"
+#include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/numeric/translate.h"
 #include "core/util/bean_utils.h"
 #include "core/util/numeric_util.h"
 #include "core/util/strings.h"
 
 #include "graphics/base/v3.h"
-#include "graphics/base/vec2.h"
 
 namespace ark {
 
@@ -160,11 +159,6 @@ sp<Numeric> Vec3::vy() const
 sp<Numeric> Vec3::vz() const
 {
     return _z;
-}
-
-sp<Vec2> Vec3::vxy() const
-{
-    return sp<Vec2>::make(_x, _y);
 }
 
 void Vec3::setVx(const sp<Numeric>& vx) const

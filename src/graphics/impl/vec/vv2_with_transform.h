@@ -8,15 +8,15 @@
 
 namespace ark {
 
-class VV2WithTransform : public VV2 {
+class Vec2WithTransform : public Vec2 {
 public:
-    VV2WithTransform(const sp<VV2>& delegate, const sp<VV2>& org, const sp<Transform>& transform);
+    Vec2WithTransform(const sp<Vec2>& delegate, const sp<Vec2>& org, const sp<Transform>& transform);
 
     virtual V2 val() override;
 
 private:
-    const sp<VV2> _delegate;
-    const sp<VV2> _org;
+    const sp<Vec2> _delegate;
+    const sp<Vec2> _org;
     const sp<Transform> _transform;
 };
 

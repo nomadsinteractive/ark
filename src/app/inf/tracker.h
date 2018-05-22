@@ -7,6 +7,7 @@
 #include "core/base/api.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/v3.h"
 
 #include "app/forwarding.h"
 
@@ -17,7 +18,7 @@ public:
     virtual ~Tracker() = default;
 
 //  [[script::bindings::auto]]
-    virtual sp<VV> create(int32_t id, const sp<VV>& position, const sp<VV>& aabb) = 0;
+    virtual sp<Vec> create(int32_t id, const sp<Vec>& position, const sp<Vec>& aabb) = 0;
 //  [[script::bindings::auto]]
     virtual void remove(int32_t id) = 0;
 

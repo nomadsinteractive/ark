@@ -18,7 +18,7 @@ union C2Shape {
 
 class C2RigidBody {
 public:
-    C2RigidBody(const sp<VV2>& position, const sp<Rotate>& rotate, bool isStaticBody);
+    C2RigidBody(const sp<Vec2>& position, const sp<Rotate>& rotate, bool isStaticBody);
     C2RigidBody(const C2RigidBody& other) = default;
 
     void makeAABB(const Rect& aabb);
@@ -43,7 +43,7 @@ private:
 private:
     C2_TYPE _type;
     C2Shape _shape;
-    sp<VV2> _position;
+    sp<Vec2> _position;
     sp<Rotate> _rotate;
     bool _is_static_body;
 };

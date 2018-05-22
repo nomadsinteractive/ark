@@ -17,7 +17,7 @@ namespace ark {
 class ARK_API Transform {
 public:
 //  [[script::bindings::auto]]
-    Transform(const sp<Rotate>& rotate = nullptr, const sp<VV>& scale = nullptr, const sp<VV>& translation = nullptr);
+    Transform(const sp<Rotate>& rotate = nullptr, const sp<Vec>& scale = nullptr, const sp<Vec>& translation = nullptr);
     Transform(const Transform& other);
 
     class ARK_API Snapshot {
@@ -50,14 +50,14 @@ public:
     void setRotate(const sp<Rotate>& rotate);
 
 //  [[script::bindings::property]]
-    const sp<VV>& scale() const;
+    const sp<Vec>& scale() const;
 //  [[script::bindings::property]]
-    void setScale(const sp<VV>& scale);
+    void setScale(const sp<Vec>& scale);
 
 //  [[script::bindings::property]]
-    const sp<VV>& translation() const;
+    const sp<Vec>& translation() const;
 //  [[script::bindings::property]]
-    void setTranslation(const sp<VV>& translation);
+    void setTranslation(const sp<Vec>& translation);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Transform> {
@@ -68,8 +68,8 @@ public:
 
     private:
         sp<Builder<Rotate>> _rotate;
-        sp<Builder<VV>> _scale;
-        sp<Builder<VV>> _translation;
+        sp<Builder<Vec>> _scale;
+        sp<Builder<Vec>> _translation;
 
     };
 
@@ -86,12 +86,12 @@ public:
     };
 
 private:
-    static const sp<VV>& identity();
+    static const sp<Vec>& identity();
 
 private:
     SafePtr<Rotate> _rotate;
-    sp<VV> _scale;
-    SafePtr<VV, VV::Impl> _translation;
+    sp<Vec> _scale;
+    SafePtr<Vec, Vec::Impl> _translation;
 
 };
 

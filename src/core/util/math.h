@@ -19,12 +19,18 @@ public:
     }
 
     template<typename T> static bool between(T a1, T a2, T val) {
-        return (a1 <= val && val <= a2) || (a2 <= val && val <= a1);
+        return a1 <= a2 ? (a1 <= val && val <= a2) : (a2 <= val && val <= a1);
+    }
+
+    template<typename T> static T divmod(T value, T mod, T& remainder) {
+        T quot = static_cast<int32_t>(value /  mod);
+        remainder = value - quot * mod;
+        return quot;
     }
 
     template<typename T> static T mod(T value, T mod) {
         DCHECK(mod >= 1, "Argument mod's value must be greater than one");
-        T v = value - ((int32_t) value) / ((int32_t) mod) * T(mod);
+        T v = value - static_cast<int32_t>(value /  mod) * T(mod);
         return v >= 0 ? v : v + mod;
     }
 

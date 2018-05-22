@@ -12,7 +12,5 @@ def main():
         root_view.add_renderer(_application.arena.load(ark.Renderer, 'label', t='Hello World %d' % i))
 
 
-
-
 if __name__ == '__main__':
     main()

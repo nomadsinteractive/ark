@@ -40,7 +40,6 @@ public:
     String toString(PyObject* object, const char* encoding = nullptr, const char* error = nullptr);
     std::wstring toWString(PyObject* object);
     sp<Scope> toScope(PyObject* kws);
-    sp<Vec2> toVec2(PyObject* object);
 
     template<typename T> PyObject* toPyObject(const T& obj) {
         return toPyObject_sfinae<T>(obj, nullptr);
@@ -129,6 +128,9 @@ public:
     }
 
     template<typename T> PyObject* pyNewObject(const sp<T>& object) {
+        TypeId typeId = object.interfaces()->typeId();
+        if(_type_by_id.find(typeId) != _type_by_id.end())
+            return toPyObject(object.interfaces()->as(object.pack(), typeId));
         return getPyArkType<T>()->create(object.pack());
     }
 
@@ -188,11 +190,6 @@ template<> inline sp<Numeric> PythonInterpreter::toSharedPtr<Numeric>(PyObject* 
 template<> inline sp<Integer> PythonInterpreter::toSharedPtr<Integer>(PyObject* object)
 {
     return toInteger(object);
-}
-
-template<> inline sp<Vec2> PythonInterpreter::toSharedPtr<Vec2>(PyObject* object)
-{
-    return toVec2(object);
 }
 
 template<> inline sp<Runnable> PythonInterpreter::toSharedPtr<Runnable>(PyObject* object)

@@ -13,6 +13,7 @@
 #include "app/inf/collider.h"
 
 #include "box2d/api.h"
+#include "box2d/impl/world.h"
 #include "box2d/inf/shape.h"
 
 namespace ark {
@@ -24,14 +25,51 @@ class World;
 class ARK_PLUGIN_BOX2D_API Body : public Object, public RigidBody, Implements<Body, Object, RigidBody> {
 public:
 //  [[script::bindings::auto]]
-    Body(const sp<World>& world, Collider::BodyType type, float x, float y, Shape& shape, float density, float friction);
-    Body(const sp<World>& world, b2Body* body);
-    ~Body();
+    Body(const World& world, Collider::BodyType type, float x, float y, const sp<Size>& size, Shape& shape, float density, float friction);
 
+    virtual void bind(const sp<RenderObject>& renderObject) override;
     virtual void dispose() override;
 
+    const World& world() const;
+
+/*
 //  [[script::bindings::auto]]
-    const sp<World>& world() const;
+    virtual void dispose() = 0;
+//  [[script::bindings::auto]]
+    virtual void bind(const sp<RenderObject>& renderObject);
+
+//  [[script::bindings::property]]
+    int32_t id() const;
+//  [[script::bindings::property]]
+    Collider::BodyType type() const;
+
+//  [[script::bindings::property]]
+    V xy() const;
+//  [[script::bindings::property]]
+    V3 xyz() const;
+
+//  [[script::bindings::property]]
+    float width() const;
+//  [[script::bindings::property]]
+    float height() const;
+
+//  [[script::bindings::property]]
+    const sp<Vec>& position() const;
+//  [[script::bindings::property]]
+    const sp<Size>& size() const;
+//  [[script::bindings::property]]
+    const sp<Rotate>& rotate() const;
+
+//  [[script::bindings::property]]
+    const Box& tag() const;
+//  [[script::bindings::property]]
+    void setTag(const Box& box) const;
+
+//  [[script::bindings::property]]
+    const sp<CollisionCallback>& collisionCallback() const;
+//  [[script::bindings::property]]
+    void setCollisionCallback(const sp<CollisionCallback>& collisionCallback);
+*/
 
 //  [[script::bindings::property]]
     float rotation();
@@ -42,6 +80,11 @@ public:
     float angularVelocity();
 //  [[script::bindings::property]]
     void setAngularVelocity(float omega);
+
+//  [[script::bindings::property]]
+    V2 linearVelocity() const;
+//  [[script::bindings::property]]
+    void setLinearVelocity(const V2& velocity);
 
 //  [[script::bindings::property]]
     bool active();
@@ -63,27 +106,26 @@ public:
 //  [[script::bindings::auto]]
     void applyTorque(float torque);
 //  [[script::bindings::auto]]
-    void applyForce(const sp<VV>& force, const sp<VV>& point);
+    void applyForce(const V2& force, const V2& point);
 //  [[script::bindings::auto]]
-    void applyForceToCenter(const sp<VV>& force);
+    void applyForceToCenter(const V2& force);
 //  [[script::bindings::auto]]
-    void applyLinearImpulse(const sp<VV>& impulse, const sp<VV>& point);
+    void applyLinearImpulse(const V2& impulse, const V2& point);
 //  [[script::bindings::auto]]
     void applyAngularImpulse(float impulse);
-
-    b2Body* b2Instance() const;
 
 //  [[plugin::builder]]
     class BUILDER_IMPL1 : public Builder<Body> {
     public:
-        BUILDER_IMPL1(BeanFactory& parent, const document& doc);
+        BUILDER_IMPL1(BeanFactory& factory, const document& manifest);
 
         virtual sp<Body> build(const sp<Scope>& args) override;
 
     private:
         sp<Builder<Object>> _world;
         sp<Builder<Shape>> _shape;
-        sp<Builder<VV>> _position;
+        sp<Builder<Vec>> _position;
+        sp<Builder<Size>> _size;
         float _density;
         float _friction;
 
@@ -100,50 +142,18 @@ public:
         BUILDER_IMPL1 _delegate;
     };
 
-//  [[plugin::builder("b2Position")]]
-    class POSITION_BUILDER : public Builder<Vec> {
-    public:
-        POSITION_BUILDER(BeanFactory& parent, const document& doc);
-
-        virtual sp<Vec> build(const sp<Scope>& args) override;
-
-    private:
-        sp<Builder<Object>> _body;
-    };
-
-//  [[plugin::builder("b2Rotation")]]
-    class ROTATION_BUILDER : public Builder<Numeric> {
-    public:
-        ROTATION_BUILDER(BeanFactory& parent, const document& doc);
-
-        virtual sp<Numeric> build(const sp<Scope>& args) override;
-
-    private:
-        sp<Builder<Object>> _body;
-    };
-
-//  [[plugin::style("b2-body")]]
-    class RENDER_OBJECT_STYLE : public Builder<RenderObject> {
-    public:
-        RENDER_OBJECT_STYLE(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value);
-
-        virtual sp<RenderObject> build(const sp<Scope>& args) override;
-
-    private:
-        sp<Builder<RenderObject>> _delegate;
-        sp<Builder<Object>> _body;
-
-    };
-
     struct Stub {
-        Stub(const sp<World>& world, b2Body* body);
+        Stub(const World& world, b2Body* body);
+        ~Stub();
 
-        sp<World> _world;
+        void dispose();
+
+        World _world;
         b2Body* _body;
     };
 
 private:
-    Body(const sp<Stub>& stub);
+    Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Size>& size);
 
     sp<Stub> _stub;
 };

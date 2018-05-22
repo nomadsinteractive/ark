@@ -14,24 +14,18 @@ namespace box2d {
 
 class Box : public Shape {
 public:
-    Box(float width, float height);
 
-    virtual void apply(b2Body* body, float density, float friction) override;
+    virtual void apply(b2Body* body, const sp<Size>& size, float density, float friction) override;
 
-//  [[plugin::builder("box")]]
+//  [[plugin::builder::by-value("box")]]
     class BUILDER : public Builder<Shape> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER();
 
         virtual sp<Shape> build(const sp<Scope>& args) override;
 
-    private:
-        sp<Builder<Size>> _size;
-
     };
 
-private:
-    float _width, _height;
 };
 
 }

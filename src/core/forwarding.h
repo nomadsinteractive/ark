@@ -93,7 +93,6 @@ class NumericWrapper : public Numeric {
 };
 */
 
-typedef Iterator<int32_t> Range;
 typedef Array<uint8_t>  ByteArray;
 typedef Array<int32_t>  IntArray;
 typedef Array<float>    FloatArray;
@@ -104,7 +103,9 @@ typedef sp<Element> element;
 typedef sp<Document> document;
 typedef sp<ByteArray> bytearray;
 typedef sp<FloatArray> floatarray;
-typedef array<uint16_t> indexarray;
+
+typedef uint16_t glindex_t;
+typedef array<glindex_t> indexarray;
 
 }
 

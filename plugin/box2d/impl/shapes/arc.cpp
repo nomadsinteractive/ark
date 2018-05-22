@@ -4,18 +4,24 @@
 #include "core/inf/variable.h"
 #include "core/util/math.h"
 
+#include "graphics/base/size.h"
+
 namespace ark {
 namespace plugin {
 namespace box2d {
 
-Arc::Arc(float radius, uint32_t sampleCount, float a, float b)
-    : _radius(radius), _sample_count(sampleCount), _a(a), _b(b)
+Arc::Arc(uint32_t sampleCount, float a, float b)
+    : _sample_count(sampleCount), _a(a), _b(b)
 {
 }
 
-void Arc::apply(b2Body* body, float density, float friction)
+void Arc::apply(b2Body* body, const sp<Size>& size, float density, float friction)
 {
     b2ChainShape shape;
+
+    DWARN(size->width() == size->height(), "RigidBody size: (%.2f, %.2f) is not a circle", size->width(), size->height());
+
+    float radius = (size->width() + size->height()) / 4.0f;
 
     if(_b < _a)
         _b += 360.0f;
@@ -26,7 +32,7 @@ void Arc::apply(b2Body* body, float density, float friction)
     for(uint32_t i = 0; i <= _sample_count; i ++)
     {
         float degree = da + step * i;
-        vecs[i].Set(Math::cos(degree) * _radius, Math::sin(degree) * _radius);
+        vecs[i].Set(Math::cos(degree) * radius, Math::sin(degree) * radius);
     }
     shape.CreateChain(vecs, _sample_count + 1);
     delete[] vecs;
@@ -38,21 +44,19 @@ void Arc::apply(b2Body* body, float density, float friction)
     body->CreateFixture(&fixtureDef);
 }
 
-Arc::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _radius(parent.ensureBuilder<Numeric>(doc, "radius")),
-      _sample_count(parent.ensureBuilder<Numeric>(doc, "sample-count")),
-      _a(parent.ensureBuilder<Numeric>(doc, "a")),
-      _b(parent.ensureBuilder<Numeric>(doc, "b"))
+Arc::BUILDER::BUILDER(BeanFactory& parent, const document& manifest)
+    : _sample_count(parent.ensureBuilder<Numeric>(manifest, "sample-count")),
+      _a(parent.ensureBuilder<Numeric>(manifest, "a")),
+      _b(parent.ensureBuilder<Numeric>(manifest, "b"))
 {
 }
 
 sp<Shape> Arc::BUILDER::build(const sp<Scope>& args)
 {
-    float radius = _radius->build(args)->val();
     uint32_t sampleCount = static_cast<uint32_t>(_sample_count->build(args)->val());
     float a = _a->build(args)->val();
     float b = _b->build(args)->val();
-    return sp<Arc>::make(radius, sampleCount, a, b);
+    return sp<Arc>::make(sampleCount, a, b);
 }
 
 }

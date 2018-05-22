@@ -1,24 +1,25 @@
 #include "graphics/base/render_object.h"
 
 #include "core/base/bean_factory.h"
-#include "core/base/variable_wrapper.h"
+#include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/iterator.h"
 #include "core/inf/variable.h"
 #include "core/epi/expired.h"
 #include "core/util/bean_utils.h"
 
 #include "graphics/base/size.h"
+#include "graphics/impl/vec/vec2_impl.h"
+
 #include "renderer/base/varyings.h"
-#include "graphics/base/vec2.h"
 
 namespace ark {
 
-RenderObject::RenderObject(int32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& filter)
+RenderObject::RenderObject(int32_t type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& filter)
     : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(filter))
 {
 }
 
-RenderObject::RenderObject(const sp<Integer>& type, const sp<VV>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& filter)
+RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& filter)
     : _type(sp<IntegerWrapper>::make(type)), _type_expired(type.as<Expired>()), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(filter))
 {
 }
@@ -80,12 +81,12 @@ V2 RenderObject::xy() const
     return _position->val();
 }
 
-const sp<VV>& RenderObject::position() const
+const sp<Vec>& RenderObject::position() const
 {
     return _position.ensure();
 }
 
-void RenderObject::setPosition(const sp<VV>& position)
+void RenderObject::setPosition(const sp<Vec>& position)
 {
     _position = position;
 }
@@ -127,7 +128,7 @@ RenderObject::Snapshot RenderObject::snapshot(MemoryPool& memoryPool) const
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _type(factory.ensureBuilder<Integer>(manifest, Constants::Attributes::TYPE)),
-      _position(factory.getBuilder<VV>(manifest, Constants::Attributes::POSITION)),
+      _position(factory.getBuilder<Vec>(manifest, Constants::Attributes::POSITION)),
       _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _transform(factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM)),
       _varyings(factory.getBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS))

@@ -6,9 +6,7 @@
 
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
-#include "graphics/base/vec2.h"
-
-#include "renderer/base/gl_buffer.h"
+#include "graphics/impl/vec/vec2_impl.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_shader_bindings.h"

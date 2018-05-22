@@ -3,19 +3,18 @@
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
 
+#include "graphics/base/size.h"
+
 namespace ark {
 namespace plugin {
 namespace box2d {
 
-Ball::Ball(float radius)
-    : _radius(radius)
-{
-}
-
-void Ball::apply(b2Body* body, float density, float friction)
+void Ball::apply(b2Body* body, const sp<Size>& size, float density, float friction)
 {
     b2CircleShape shape;
-    shape.m_radius = _radius;
+
+    DWARN(size->width() == size->height(), "RigidBody size: (%.2f, %.2f) is not a circle", size->width(), size->height());
+    shape.m_radius = (size->width() + size->height()) / 4.0f;
 
     b2FixtureDef fixtureDef;
     fixtureDef.shape = &shape;
@@ -24,14 +23,13 @@ void Ball::apply(b2Body* body, float density, float friction)
     body->CreateFixture(&fixtureDef);
 }
 
-Ball::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _radius(parent.ensureBuilder<Numeric>(doc, "radius"))
+Ball::BUILDER::BUILDER()
 {
 }
 
 sp<Shape> Ball::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<Ball>::make(_radius->build(args)->val());
+    return sp<Ball>::make();
 }
 
 }

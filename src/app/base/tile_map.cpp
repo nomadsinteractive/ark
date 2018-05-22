@@ -12,7 +12,7 @@
 
 namespace ark {
 
-TileMap::TileMap(const sp<Layer>& layer, const sp<VV>& scroller, uint32_t width, uint32_t height, uint32_t tileWidth, uint32_t tileHeight)
+TileMap::TileMap(const sp<Layer>& layer, const sp<Vec>& scroller, uint32_t width, uint32_t height, uint32_t tileWidth, uint32_t tileHeight)
     : _layer(layer), _size(sp<Size>::make(static_cast<float>(width), static_cast<float>(height))), _scroller(scroller),
       _tile_size(sp<Size>::make(static_cast<float>(tileWidth), static_cast<float>(tileHeight))),
       _tile_width(tileWidth), _tile_height(tileHeight), _col_count(width / tileWidth), _row_count(height / tileHeight)

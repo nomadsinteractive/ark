@@ -16,7 +16,7 @@ namespace ark {
 class ARK_API TileMap : public Renderer, Block {
 public:
 // [[script::bindings::auto]]
-    TileMap(const sp<Layer>& layer, const sp<VV>& scroller, uint32_t width, uint32_t height, uint32_t tileWidth, uint32_t tileHeight);
+    TileMap(const sp<Layer>& layer, const sp<Vec>& scroller, uint32_t width, uint32_t height, uint32_t tileWidth, uint32_t tileHeight);
     ~TileMap();
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
@@ -45,7 +45,7 @@ public:
 private:
     sp<Layer> _layer;
     sp<Size> _size;
-    SafePtr<VV> _scroller;
+    SafePtr<Vec> _scroller;
 
     sp<Size> _tile_size;
 

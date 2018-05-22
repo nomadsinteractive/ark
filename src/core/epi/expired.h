@@ -13,6 +13,7 @@ class ARK_API Expired : public Boolean {
 public:
 //  [[script::bindings::auto]]
     Expired(bool expired = false);
+//  [[script::bindings::auto]]
     Expired(const sp<Boolean>& delegate);
 
     virtual bool val() override;

@@ -7,7 +7,7 @@
 
 namespace ark {
 
-FlatableV2f::FlatableV2f(const sp<VV2>& vv2)
+FlatableV2f::FlatableV2f(const sp<Vec2>& vv2)
     : _vv2(vv2)
 {
 }
@@ -28,7 +28,7 @@ uint32_t FlatableV2f::length()
 }
 
 FlatableV2f::BUILDER::BUILDER(BeanFactory& parent, const String& value)
-    : _vv2(parent.ensureBuilder<VV2>(value))
+    : _vv2(parent.ensureBuilder<Vec2>(value))
 {
 }
 

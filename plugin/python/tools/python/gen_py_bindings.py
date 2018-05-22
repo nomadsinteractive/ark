@@ -70,6 +70,15 @@ TP_AS_NUMBER_TEMPLATE_OPERATOR = {
     '/=': 'nb_inplace_true_divide'
 }
 
+RICH_COMPARE_OPS = {
+    '<': 'Py_LT',
+    '<=': 'Py_LE',
+    '==': 'Py_EQ',
+    '!=': 'Py_NE',
+    '>': 'Py_GT',
+    '>=': 'Py_GE'
+}
+
 ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+\]\])*'
 AUTOBIND_CONTANT_PATTERN = re.compile(r'\[\[script::bindings::constant\(([\w\d_]+)\s*=\s*([^;\r\n]*)\)\]\]')
 AUTOBIND_ENUMERATION_PATTERN = re.compile(r'\[\[script::bindings::enumeration\]\]\s*enum\s+(\w+)\s*\{([^}]+)};')
@@ -85,7 +94,7 @@ BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^\]]*\]
 
 CLASS_DELIMITER = '\n//%s\n' % ('-' * 120)
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
-TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4')
+TYPE_DEFINED_OBJ = ('V', 'V2', 'V3', 'V4')
 
 INDENT = '    '
 
@@ -242,6 +251,11 @@ def gen_class_body_source(genclass, includes, lines, buildables):
             lines.append('')
             lines.extend(text_align(text_align(operator_defs, '/*'), '*/'))
             tp_method_lines.append('pyTypeObject->tp_as_number = &%s_tp_as_number;' % genclass.py_class_name)
+
+        rich_compare_defs = genclass.gen_rich_compare_defs()
+        if rich_compare_defs:
+            lines.extend(rich_compare_defs)
+            tp_method_lines.append('pyTypeObject->tp_richcompare = reinterpret_cast<richcmpfunc>(%s_tp_richcompare);' % genclass.py_class_name)
 
         property_defs = genclass.gen_property_defs()
         if property_defs:
@@ -822,6 +836,34 @@ class GenOperatorMethod(GenMethod):
         return self._operator
 
 
+class GenRichCompareMethod(GenMethod):
+    def __init__(self, name, args, return_type, operator):
+        GenMethod.__init__(self, name, args, return_type)
+        self._self_argument = self._arguments and self._arguments[0]
+        self._arguments = self._arguments[1:]
+        self._operator = operator
+
+    def gen_py_return(self):
+        return 'PyObject*'
+
+    def _gen_call_statement(self, genclass, argnames):
+        return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
+
+    @staticmethod
+    def _gen_convert_args_code(lines, argdeclare):
+        pass
+
+    def _gen_parse_tuple_code(self, lines, declares, args):
+        if args:
+            meta = GenArgumentMeta('PyObject*', args[0].accept_type, 'O')
+            ga = GenArgument(args[0].accept_type, args[0].default_value, meta, str(args[0]))
+            lines.append(ga.gen_declare('obj0', 'args'))
+
+    @property
+    def operator(self):
+        return self._operator
+
+
 def create_overloaded_method_type(base_type, **kwargs):
 
     class GenOverloadedMethod(base_type):
@@ -942,6 +984,9 @@ class GenClass(object):
     def operator_methods(self):
         return self.find_methods_by_type(GenOperatorMethod)
 
+    def rich_compare_methods(self):
+        return self.find_methods_by_type(GenRichCompareMethod)
+
     def find_methods_by_type(self, method_type):
         return [i for i in self.methods if isinstance(i, method_type)]
 
@@ -964,6 +1009,32 @@ class GenClass(object):
             args.update((j, methods_dict[i] if i in methods_dict else '0') for i, j in TP_AS_NUMBER_TEMPLATE_OPERATOR.items())
             operator_defs.extend(acg.format(i, **args) for i in TP_AS_NUMBER_TEMPLATE)
         return operator_defs
+
+    def gen_rich_compare_defs(self):
+        rich_compare_defs = []
+        rich_compare_methods = self.rich_compare_methods()
+        if rich_compare_methods:
+            cases = []
+            for i in rich_compare_methods:
+                try:
+                    cases.append('    case %s:' % RICH_COMPARE_OPS[i.operator])
+                    cases.append('        return PythonInterpreter::instance()->toPyObject(%s::%s(unpacked, obj0));' % (self._classname, i.name))
+                except KeyError:
+                    pass
+            rich_compare_defs.extend([
+                '',
+                'static PyObject* %s_tp_richcompare (PyArkType::Instance* self, PyObject* args, int op) {' % self._py_class_name,
+                '    const sp<%s>& unpacked = self->unpack<%s>();' % (self._binding_classname, self._binding_classname),
+                '    const sp<%s> obj0 = PythonInterpreter::instance()->toSharedPtr<%s>(args);' % (self._binding_classname, self._binding_classname),
+                '    switch(op) {'] + cases +
+                [
+                '    default:',
+                '        break;',
+                '    }',
+                '    return Py_NotImplemented;',
+                '}',
+            ])
+        return rich_compare_defs
 
 
 def get_result_class(results, filename, classname):
@@ -1003,7 +1074,10 @@ def main(params, paths):
         operator = x[0]
         name, args, return_type, is_static = GenMethod.split(x[1:])
         assert is_static
-        genclass.add_method(GenOperatorMethod(name, args, return_type, operator))
+        if operator in RICH_COMPARE_OPS:
+            genclass.add_method(GenRichCompareMethod(name, args, return_type, operator))
+        else:
+            genclass.add_method(GenOperatorMethod(name, args, return_type, operator))
 
     def autoclass(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)

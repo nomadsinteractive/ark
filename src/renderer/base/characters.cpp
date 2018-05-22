@@ -122,7 +122,7 @@ void Characters::place(float boundary, wchar_t c, float& flowx, float& flowy, fl
             flowx = _line_indent;
         }
     }
-    _characters.push_back(_object_pool->obtain<RenderObject>(c, _object_pool->obtain<VV::Const>(V(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight)), itemSize));
+    _characters.push_back(_object_pool->obtain<RenderObject>(c, _object_pool->obtain<Vec::Const>(V(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight)), itemSize));
     flowx += width;
 }
 

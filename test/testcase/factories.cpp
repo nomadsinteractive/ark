@@ -18,6 +18,7 @@
 
 #include "graphics/base/vec2.h"
 #include "graphics/base/transform.h"
+#include "graphics/base/rotate.h"
 
 #include "app/base/application_context.h"
 #include "app/base/resource_loader.h"
@@ -98,7 +99,7 @@ public:
         TESTCASE_VALIDATE(t3 && t3->scale()->val().x() == 2.0f && t3->scale()->val().y() == 2.0f);
 
         sp<Transform> t4 = beanFactory.load<Transform>("t4");
-        TESTCASE_VALIDATE(t4 && t4->rotation()->val() == 1.0f);
+        TESTCASE_VALIDATE(t4 && t4->rotate()->rotation()->val() == 1.0f);
 
         const sp<Expired> e004 = beanFactory.load<Expired>("e004");
         const sp<Expired> e004Copy = beanFactory.load<Expired>("e004");

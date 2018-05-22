@@ -2,7 +2,7 @@
 
 #include "core/ark.h"
 
-#include "core/base/variable_wrapper.h"
+#include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
 
 #include "graphics/base/v2.h"
@@ -24,9 +24,9 @@ Size::Size(const sp<Numeric>& vwidth, const sp<Numeric>& vheight)
 {
 }
 
-V2 Size::val()
+V Size::val()
 {
-    return V2(_width->val(), _height->val());
+    return V(_width->val(), _height->val());
 }
 
 float Size::width() const

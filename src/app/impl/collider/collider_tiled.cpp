@@ -21,7 +21,7 @@ namespace ark {
 
 namespace {
 
-class DynamicPosition : public VV2 {
+class DynamicPosition : public Vec2 {
 public:
     DynamicPosition(const sp<TiledCollider::RigidBodyImpl>& rigidBody)
         : _body_stub(rigidBody->stub()), _bounds(0, 0, rigidBody->size()->width(), rigidBody->size()->height()) {
@@ -56,7 +56,7 @@ sp<Collider> TiledCollider::BUILDER::build(const sp<Scope>& args)
     return sp<TiledCollider>::make(_tile_map->build(args), _resource_loader_context);
 }
 
-sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, const sp<VV>& position, const sp<Size>& size, const sp<Rotate>& /*rotate*/)
+sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& /*rotate*/)
 {
     DCHECK(type != Collider::BODY_TYPE_STATIC, "Cannot create static body in TiledCollider");
     NOT_NULL(position && size);
@@ -66,7 +66,7 @@ sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, 
     return rigidBody;
 }
 
-TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<VV>& position, const sp<Size>& size, const sp<TileMap>& tileMap)
+TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<TileMap>& tileMap)
     : RigidBody(id, type, position, size, Null::ptr<Rotate>()), _stub(tileMap ? sp<Stub>::make(tileMap, position) : sp<Stub>::null())
 {
 }
@@ -96,7 +96,7 @@ void TiledCollider::RigidBodyImpl::dispose()
 {
 }
 
-void TiledCollider::RigidBodyImpl::setPosition(const sp<VV>& position)
+void TiledCollider::RigidBodyImpl::setPosition(const sp<Vec>& position)
 {
     stub()->_position = position;
 }
@@ -106,7 +106,7 @@ V2 TiledCollider::RigidBodyImpl::xy() const
     return _stub->_position->val();
 }
 
-TiledCollider::RigidBodyImpl::Stub::Stub(const sp<TileMap>& tileMap, const sp<VV2>& position)
+TiledCollider::RigidBodyImpl::Stub::Stub(const sp<TileMap>& tileMap, const sp<Vec2>& position)
     : _position(position), _tile_map(tileMap), _rigid_body_static(sp<RigidBodyStatic>::make(tileMap->tileWidth(), tileMap->tileHeight()))
 {
 }
@@ -157,7 +157,7 @@ void TiledCollider::RigidBodyImpl::Stub::collision(const Rect& rect)
 }
 
 TiledCollider::RigidBodyStatic::RigidBodyStatic(uint32_t width, uint32_t height)
-    : RigidBody(0, Collider::BODY_TYPE_STATIC, sp<VV2::Impl>::make(V2()), sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), nullptr)
+    : RigidBody(0, Collider::BODY_TYPE_STATIC, sp<Vec2::Impl>::make(V2()), sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), nullptr)
 {
     _position = position();
 }

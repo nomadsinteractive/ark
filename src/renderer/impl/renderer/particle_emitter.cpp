@@ -11,8 +11,9 @@
 
 #include "graphics/base/render_layer.h"
 #include "graphics/base/render_object.h"
-#include "graphics/base/vec2.h"
 #include "graphics/base/v2.h"
+#include "graphics/impl/vec/vec_with_translation.h"
+#include "graphics/impl/vec/vec2_impl.h"
 
 #include "renderer/base/resource_loader_context.h"
 
@@ -47,7 +48,7 @@ ParticleEmitter::BUILDER::BUILDER(BeanFactory& parent, const document& manifest,
     : _factory(parent), _manifest(manifest), _resource_loader_context(resourceLoaderContext),
       _clock(Ark::instance().clock()),
       _type(parent.getBuilder<Numeric>(manifest, Constants::Attributes::TYPE, false)),
-      _position(parent.getBuilder<VV>(manifest, Constants::Attributes::POSITION)),
+      _position(parent.getBuilder<Vec>(manifest, Constants::Attributes::POSITION)),
       _size(parent.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _render_layer(parent.ensureBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER))
 {
@@ -135,11 +136,11 @@ uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clo
 sp<Vec> ParticleEmitter::Particale::makePosition(ObjectPool& objectPool, float x, float y) const
 {
     if(_position)
-        return objectPool.obtain<Vec>(_position->build(_stub->_arguments)->translate(objectPool, x, y));
-    return objectPool.obtain<Vec>(x, y);
+        return objectPool.obtain<VecWithTranslation<V>>(_position->build(_stub->_arguments), V(x, y));
+    return objectPool.obtain<VecImpl>(x, y);
 }
 
-ParticleEmitter::Stub::Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t type, const sp<VV>& position, const sp<Size>& size, const sp<Scope>& arguments)
+ParticleEmitter::Stub::Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t type, const sp<Vec>& position, const sp<Size>& size, const sp<Scope>& arguments)
     : _arguments(sp<Scope>::make(arguments)), _type(type), _position(position), _size(size),
       _object_pool(resourceLoaderContext->objectPool())
 {

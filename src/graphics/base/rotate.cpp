@@ -2,7 +2,7 @@
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
-#include "core/base/variable_wrapper.h"
+#include "core/impl/variable/variable_wrapper.h"
 #include "core/types/null.h"
 
 #include "graphics/base/v3.h"

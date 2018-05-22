@@ -1,7 +1,9 @@
-#ifndef ARK_PLUGIN_BOX2D_IMPL_SHAPE_H_
-#define ARK_PLUGIN_BOX2D_IMPL_SHAPE_H_
+#ifndef ARK_PLUGIN_BOX2D_INF_SHAPE_H_
+#define ARK_PLUGIN_BOX2D_INF_SHAPE_H_
 
 #include <Box2D/Box2D.h>
+
+#include "graphics/base/size.h"
 
 namespace ark {
 namespace plugin {
@@ -12,7 +14,7 @@ class Shape {
 public:
     virtual ~Shape() = default;
 
-    virtual void apply(b2Body* body, float density, float friction) = 0;
+    virtual void apply(b2Body* body, const sp<Size>& size, float density, float friction) = 0;
 
 };
 

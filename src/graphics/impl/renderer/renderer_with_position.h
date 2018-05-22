@@ -12,7 +12,7 @@ namespace ark {
 
 class RendererWithPosition : public Renderer {
 public:
-    RendererWithPosition(const sp<Renderer>& renderer, const sp<VV>& position);
+    RendererWithPosition(const sp<Renderer>& renderer, const sp<Vec>& position);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
@@ -25,12 +25,12 @@ public:
 
     private:
         sp<Builder<Renderer>> _delegate;
-        sp<Builder<VV>> _position;
+        sp<Builder<Vec>> _position;
     };
 
 private:
     sp<Renderer> _renderer;
-    sp<VV> _position;
+    sp<Vec> _position;
 
 };
 

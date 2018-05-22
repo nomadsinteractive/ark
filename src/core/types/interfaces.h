@@ -28,6 +28,7 @@ public:
         return as(box, Type<T>::id()).template unpack<T>();
     }
 
+    TypeId typeId() const;
     const std::unordered_set<TypeId>& implements() const;
     Box as(const Box& box, TypeId id) const;
     bool is(TypeId id) const;

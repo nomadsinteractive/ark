@@ -17,7 +17,7 @@ namespace python {
 
 class PythonInterpreter;
 
-class ARK_PLUGIN_PYTHON_API PythonScript : public Script {
+class ARK_PLUGIN_PYTHON_API PythonScript : public Script, public Implements<PythonScript, Script> {
 public:
     PythonScript(const String& name, const document& libraries);
     ~PythonScript();

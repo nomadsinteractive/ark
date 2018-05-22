@@ -18,7 +18,7 @@ public:
     KDTree();
 
 //  [[script::bindings::auto]]
-    uint32_t addPoint(const sp<VV>& pos);
+    uint32_t addPoint(const sp<Vec>& pos);
 //  [[script::bindings::auto]]
     void updatePoint(uint32_t id);
 //  [[script::bindings::auto]]
