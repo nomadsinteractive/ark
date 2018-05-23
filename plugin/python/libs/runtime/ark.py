@@ -333,6 +333,10 @@ class Rotate:
     def rotation(self):
         return self._rotation
 
+    @rotation.setter
+    def rotation(self, v):
+        self._rotation = v
+
     @property
     def direction(self):
         return self._direction

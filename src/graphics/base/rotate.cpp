@@ -12,7 +12,7 @@ namespace ark {
 const V3 Rotate::Z_AXIS = V3(0, 0, 1.0f);
 
 Rotate::Rotate(const sp<Numeric>& rotation, const sp<VV3>& direction)
-    : _rotation(sp<NumericWrapper>::make(rotation)), _direction(direction ? direction : sp<VV3::Const>::make(Z_AXIS))
+    : _rotation(sp<NumericWrapper>::make(rotation)), _direction(direction ? direction : static_cast<sp<VV3>>(sp<VV3::Const>::make(Z_AXIS)))
 {
 }
 
