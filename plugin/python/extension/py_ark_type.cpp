@@ -104,7 +104,7 @@ void PyArkType::doInitConstants()
     for(auto iter = _constants.begin(); iter != _constants.end(); ++iter)
     {
         const String& name = iter->first;
-        uint32_t value = iter->second;
+        int32_t value = iter->second;
         PyDict_SetItemString(_py_type_object.tp_dict, name.c_str(), PyLong_FromLong(value));
     }
 }

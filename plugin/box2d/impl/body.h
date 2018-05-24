@@ -149,6 +149,7 @@ public:
         void dispose();
 
         World _world;
+        int32_t _id;
         b2Body* _body;
     };
 
