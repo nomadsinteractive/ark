@@ -8,6 +8,7 @@
 #include "core/impl/numeric/numeric_multiply.h"
 #include "core/impl/numeric/numeric_negative.h"
 #include "core/impl/numeric/numeric_subtract.h"
+#include "core/impl/numeric/chase.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/strings.h"
 #include "core/util/operators.h"
@@ -219,6 +220,11 @@ void NumericUtil::fix(const sp<Numeric>& self)
     DWARN(iw, "Calling fix on non-NumericWrapper has no effect.");
     if(iw)
         iw->fix();
+}
+
+sp<Numeric> NumericUtil::chase(const sp<Numeric>& duration, const sp<Numeric>& target, float s0, float eta)
+{
+    return sp<Chase>::make(duration, target, s0, eta);
 }
 
 NumericUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& manifest)

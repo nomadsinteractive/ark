@@ -1,5 +1,7 @@
-#ifndef ARK_PLUGIN_BOX2D_IMPL_SHAPES_ARC_H_
-#define ARK_PLUGIN_BOX2D_IMPL_SHAPES_ARC_H_
+#ifndef ARK_PLUGIN_BOX2D_IMPL_SHAPES_POLYGON_H_
+#define ARK_PLUGIN_BOX2D_IMPL_SHAPES_POLYGON_H_
+
+#include <vector>
 
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
@@ -12,13 +14,13 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-class Arc : public Shape {
+class Polygon : public Shape {
 public:
-    Arc(uint32_t sampleCount, float a, float b);
+    Polygon(const std::vector<V2>& vertices);
 
     virtual void apply(b2Body* body, const sp<Size>& size, float density, float friction) override;
 
-//  [[plugin::builder("arc")]]
+//  [[plugin::builder("polygon")]]
     class BUILDER : public Builder<Shape> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
@@ -26,15 +28,12 @@ public:
         virtual sp<Shape> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Numeric>> _sample_count;
-        sp<Builder<Numeric>> _a;
-        sp<Builder<Numeric>> _b;
+        std::vector<V2> _vertices;
 
     };
 
 private:
-    uint32_t _sample_count;
-    float _a, _b;
+    std::vector<V2> _vertices;
 };
 
 }

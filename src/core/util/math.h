@@ -93,6 +93,8 @@ public:
 //  [[script::bindings::auto]]
     static ARK_API V2 projectile(float dx, float dy, float v, float g, uint32_t sid);
 
+    static void vibrate(float s0, float v0, float s1, float v1, float& o, float& a, float& t0, float& t1);
+
     static ARK_API const float PI;
     static ARK_API const float PIx2;
     static ARK_API const float PI_2;

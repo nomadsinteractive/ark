@@ -101,6 +101,10 @@ class Integer(Var):
 class Numeric(Var):
     pass
 
+    @staticmethod
+    def chase(duration, target, s0, eta):
+        return None
+
 
 class Expired:
     def __init__(self, v=False):

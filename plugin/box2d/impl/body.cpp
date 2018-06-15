@@ -21,10 +21,10 @@ namespace box2d {
 
 namespace {
 
-class RigidBodyRotation : public Numeric {
+class DynamicBodyRotation : public Numeric {
 public:
-    RigidBodyRotation(const sp<Body::Stub>& stub)
-        : _stub(stub) {
+    DynamicBodyRotation(const sp<Body::Stub>& stub, const sp<Numeric>& delegate)
+        : _stub(stub), _delegate(delegate) {
     }
 
     virtual float val() override {
@@ -32,23 +32,23 @@ public:
         return _stub->_body->GetAngle();
     }
 
-private:
     sp<Body::Stub> _stub;
+    sp<Numeric> _delegate;
 };
 
-class RigidBodyPosition : public Vec {
+class DynamicBodyPosition : public Vec {
 public:
-    RigidBodyPosition(const sp<Body::Stub>& stub)
-        : _stub(stub) {
+    DynamicBodyPosition(const sp<Body::Stub>& stub, const sp<Vec>& delegate)
+        : _stub(stub)/*, _delegate(delegate)*/ {
     }
 
     virtual V val() override {
-        DCHECK(_stub->_body, "Body has been disposed already");
+        DCHECK(_stub->_body, "Body has been disposed");
         return V(_stub->_body->GetPosition().x, _stub->_body->GetPosition().y);
     }
 
-private:
     sp<Body::Stub> _stub;
+    sp<Vec> _delegate;
 };
 
 class RenderObjectPosition : public Vec {
@@ -64,33 +64,76 @@ public:
         return V(x, y);
     }
 
+    sp<Body::Stub> _stub;
+};
+
+
+class KinematicBodyPosition : public Vec {
+public:
+    KinematicBodyPosition(const sp<Body::Stub>& stub, const sp<Vec>& delegate)
+        : _stub(stub), _delegate(delegate) {
+    }
+
+    virtual V val() override {
+        DCHECK(_stub->_body, "Body has been disposed");
+        V pos = _delegate->val();
+        return V(_stub->_world.toPixelX(pos.x()), _stub->_world.toPixelY(pos.y()));
+    }
+
 private:
     sp<Body::Stub> _stub;
+    sp<Vec> _delegate;
+};
+
+class KinematicRotation : public Numeric {
+public:
+    KinematicRotation(const sp<Body::Stub>& stub, const sp<Numeric>& delegate)
+        : _stub(stub), _delegate(delegate) {
+    }
+
+    virtual float val() override {
+        float rotation = _delegate->val();
+        _stub->_body->SetTransform(_stub->_body->GetWorldCenter(), rotation);
+        return rotation;
+    }
+
+private:
+    sp<Body::Stub> _stub;
+    sp<Numeric> _delegate;
 };
 
 }
 
-Body::Body(const World& world, Collider::BodyType type, float x, float y, const sp<Size>& size, Shape& shape, float density, float friction)
-    : Body(sp<Stub>::make(world, world.createBody(type, x, y, size, shape, density, friction)), type, size)
+Body::Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotation, Shape& shape, float density, float friction)
+    : Body(sp<Stub>::make(world, world.createBody(type, position->val(), size, shape, density, friction)), type, position, size, rotation)
 {
+}
+
+Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotation)
+    : RigidBody(stub->_id, type,
+                sp<DynamicBodyPosition>::make(stub, position),
+                size,
+                sp<Rotate>::make(sp<DynamicBodyRotation>::make(stub, rotation))), _stub(stub)
+{
+    _stub->_callback = callback();
 }
 
 void Body::bind(const sp<RenderObject>& renderObject)
 {
     float ppmx = world().toPixelX(1.0f);
     float ppmy = world().toPixelY(1.0f);
-    renderObject->setPosition(sp<RenderObjectPosition>::make(_stub));
-    renderObject->setSize(sp<Size>::make(NumericUtil::mul(size()->vwidth(), sp<Numeric::Const>::make(ppmx)),
-                                         NumericUtil::mul(size()->vheight(), sp<Numeric::Const>::make(ppmy))));
-    renderObject->transform()->setRotate(rotate());
-}
-
-Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Size>& size)
-    : RigidBody(stub->_id, type,
-                sp<RigidBodyPosition>::make(stub),
-                size,
-                sp<Rotate>::make(sp<RigidBodyRotation>::make(stub))), _stub(stub)
-{
+    if(type() == Collider::BODY_TYPE_KINEMATIC)
+    {
+        const sp<Numeric> rotation = rotate() ? NumericUtil::delegate(rotate()->rotation()).cast<DynamicBodyRotation>()->_delegate : sp<Numeric>::null();
+        renderObject->transform()->rotate()->setRotation(sp<KinematicRotation>::make(_stub, rotation));
+    }
+    else
+    {
+        renderObject->setPosition(sp<RenderObjectPosition>::make(_stub));
+        renderObject->setSize(sp<Size>::make(NumericUtil::mul(size()->vwidth(), sp<Numeric::Const>::make(ppmx)),
+                                             NumericUtil::mul(size()->vheight(), sp<Numeric::Const>::make(ppmy))));
+        renderObject->transform()->setRotate(rotate());
+    }
 }
 
 void Body::dispose()
@@ -134,6 +177,16 @@ void Body::setLinearVelocity(const V2& velocity)
     _stub->_body->SetLinearVelocity(b2Vec2(velocity.x(), velocity.y()));
 }
 
+float Body::gravityScale() const
+{
+    return _stub->_body->GetGravityScale();
+}
+
+void Body::setGravityScale(float scale)
+{
+    _stub->_body->SetGravityScale(scale);
+}
+
 bool Body::active()
 {
     return _stub->_body->IsActive();
@@ -169,29 +222,29 @@ float Body::mass() const
     return _stub->_body->GetMass();
 }
 
-void Body::applyTorque(float torque)
+void Body::applyTorque(float torque, bool wake)
 {
-    _stub->_body->ApplyTorque(torque, true);
+    _stub->_body->ApplyTorque(torque, wake);
 }
 
-void Body::applyForce(const V2& force, const V2& point)
+void Body::applyForce(const V2& force, const V2& point, bool wake)
 {
-    _stub->_body->ApplyForce(b2Vec2(force.x(), force.y()), b2Vec2(point.x(), point.y()), true);
+    _stub->_body->ApplyForce(b2Vec2(force.x(), force.y()), b2Vec2(point.x(), point.y()), wake);
 }
 
-void Body::applyForceToCenter(const V2& force)
+void Body::applyForceToCenter(const V2& force, bool wake)
 {
-    _stub->_body->ApplyForceToCenter(b2Vec2(force.x(), force.y()), true);
+    _stub->_body->ApplyForceToCenter(b2Vec2(force.x(), force.y()), wake);
 }
 
-void Body::applyLinearImpulse(const V2& impulse, const V2& point)
+void Body::applyLinearImpulse(const V2& impulse, const V2& point, bool wake)
 {
-    _stub->_body->ApplyLinearImpulse(b2Vec2(impulse.x(), impulse.y()), b2Vec2(point.x(), point.y()), true);
+    _stub->_body->ApplyLinearImpulse(b2Vec2(impulse.x(), impulse.y()), b2Vec2(point.x(), point.y()), wake);
 }
 
-void Body::applyAngularImpulse(float impulse)
+void Body::applyAngularImpulse(float impulse, bool wake)
 {
-    _stub->_body->ApplyAngularImpulse(impulse, true);
+    _stub->_body->ApplyAngularImpulse(impulse, wake);
 }
 
 Body::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest)
@@ -209,8 +262,8 @@ sp<Body> Body::BUILDER_IMPL1::build(const sp<Scope>& args)
 {
     const sp<World> world = BeanUtils::as<World>(_world, args);
     const sp<Shape> shape = _shape->build(args);
-    const V p = _position->build(args)->val();
-    return sp<Body>::make(world, Collider::BODY_TYPE_DYNAMIC, p.x(), p.y(), _size->build(args), shape, _density, _friction);
+    const sp<Vec> position = _position->build(args);
+    return sp<Body>::make(world, Collider::BODY_TYPE_DYNAMIC, position, _size->build(args), nullptr, shape, _density, _friction);
 }
 
 Body::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& parent, const document& doc)
@@ -224,8 +277,9 @@ sp<Object> Body::BUILDER_IMPL2::build(const sp<Scope>& args)
 }
 
 Body::Stub::Stub(const World& world, b2Body* body)
-    : _world(world), _id(world.genRigidBodyId()), _body(body)
+    : _id(world.genRigidBodyId()), _world(world), _body(body)
 {
+    body->SetUserData(this);
 }
 
 Body::Stub::~Stub()
@@ -238,6 +292,7 @@ void Body::Stub::dispose()
 {
     DCHECK(_body, "Body has been disposed already");
     LOGD("id = %d", _id);
+    _body->SetUserData(nullptr);
     _world.world().DestroyBody(_body);
     _body = nullptr;
 }

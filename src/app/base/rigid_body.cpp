@@ -90,17 +90,22 @@ void RigidBody::setTag(const Box& box) const
 
 const sp<CollisionCallback>& RigidBody::collisionCallback() const
 {
-    return _stub->_collision_callback;
+    return _stub->_callback->_collision_callback;
 }
 
 void RigidBody::setCollisionCallback(const sp<CollisionCallback>& collisionCallback)
 {
-    _stub->_collision_callback = collisionCallback;
+    _stub->_callback->_collision_callback = collisionCallback;
 }
 
 const sp<RigidBody::Stub>& RigidBody::stub() const
 {
     return _stub;
+}
+
+const sp<RigidBody::Callback>& RigidBody::callback() const
+{
+    return _stub->_callback;
 }
 
 template<> ARK_API Collider::BodyType Conversions::to<String, Collider::BodyType>(const String& str)
@@ -115,33 +120,33 @@ template<> ARK_API Collider::BodyType Conversions::to<String, Collider::BodyType
     return Collider::BODY_TYPE_STATIC;
 }
 
-RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate)
-    : _id(id), _type(type), _position(position), _size(size), _rotate(rotate)
+RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Callback>& callback)
+    : _id(id), _type(type), _position(position), _size(size), _rotate(rotate), _callback(callback ? callback : sp<Callback>::make())
 {
 }
 
-void RigidBody::Stub::beginContact(const sp<RigidBody>& rigidBody)
+void RigidBody::Callback::onBeginContact(const sp<RigidBody>& rigidBody)
 {
     if(_collision_callback)
         _collision_callback->onBeginContact(rigidBody);
 }
 
-void RigidBody::Stub::endContact(const sp<RigidBody>& rigidBody)
+void RigidBody::Callback::onEndContact(const sp<RigidBody>& rigidBody)
 {
     if(_collision_callback)
         _collision_callback->onEndContact(rigidBody);
 }
 
-void RigidBody::Stub::beginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody)
+void RigidBody::Callback::onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody)
 {
-    beginContact(rigidBody);
-    rigidBody->stub()->beginContact(self);
+    onBeginContact(rigidBody);
+    rigidBody->callback()->onBeginContact(self);
 }
 
-void RigidBody::Stub::endContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody)
+void RigidBody::Callback::onEndContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody)
 {
-    endContact(rigidBody);
-    rigidBody->stub()->endContact(self);
+    onEndContact(rigidBody);
+    rigidBody->callback()->onEndContact(self);
 }
 
 RigidBody::RIGID_BODY_STYLE::RIGID_BODY_STYLE(BeanFactory& factory, const sp<Builder<RenderObject>>& delegate, const String& value)

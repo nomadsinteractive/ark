@@ -1,6 +1,7 @@
 #include "box2d/impl/world.h"
 
 #include "core/util/bean_utils.h"
+#include "core/util/log.h"
 
 #include "graphics/base/bounds.h"
 #include "graphics/base/rotate.h"
@@ -9,14 +10,44 @@
 
 #include "renderer/base/resource_loader_context.h"
 
-#include "box2d/impl/body.h"
+#include "app/inf/collision_callback.h"
 
+#include "box2d/impl/body.h"
 #include "box2d/impl/shapes/ball.h"
 #include "box2d/impl/shapes/box.h"
+
 
 namespace ark {
 namespace plugin {
 namespace box2d {
+
+namespace {
+
+class RigidBodyImpl : public RigidBody {
+public:
+    RigidBodyImpl(const sp<Stub>& stub)
+        : RigidBody(stub) {
+    }
+
+    virtual void dispose() override {
+        _stub = nullptr;
+    }
+
+    static sp<RigidBodyImpl> obtain(ObjectPool& objectPool, const Body::Stub& body) {
+        Collider::BodyType bodyType = (body._body->GetType() == b2_staticBody) ?
+                                      Collider::BODY_TYPE_STATIC :
+                                      (body._body->GetType() == b2_kinematicBody ? Collider::BODY_TYPE_KINEMATIC : Collider::BODY_TYPE_DYNAMIC);
+        const b2Vec2& position = body._body->GetPosition();
+        float rotation = body._body->GetTransform().q.GetAngle();
+        const sp<Vec> p = objectPool.obtain<Vec::Const>(V(position.x, position.y));
+        const sp<Rotate> rotate = objectPool.obtain<Rotate>(objectPool.obtain<Numeric::Const>(rotation));
+        const sp<RigidBody::Stub> stub = objectPool.obtain<RigidBody::Stub>(body._id, bodyType, p, nullptr, rotate);
+        return objectPool.obtain<RigidBodyImpl>(stub);
+    }
+
+};
+
+}
 
 World::World(const b2Vec2& gravity, float ppmX, float ppmY)
     : _stub(sp<Stub>::make(gravity, ppmX, ppmY))
@@ -25,6 +56,7 @@ World::World(const b2Vec2& gravity, float ppmX, float ppmY)
     _stub->_body_manifests[Collider::BODY_SHAPE_AABB] = box;
     _stub->_body_manifests[Collider::BODY_SHAPE_BALL] = BodyManifest(sp<Ball>::make(), 1.0f, 0.2f);
     _stub->_body_manifests[Collider::BODY_SHAPE_BOX] = box;
+    _stub->_world.SetContactListener(&_stub->_contact_listener);
 }
 
 void World::run()
@@ -36,9 +68,8 @@ sp<RigidBody> World::createBody(Collider::BodyType type, int32_t shape, const sp
 {
     const auto iter = _stub->_body_manifests.find(shape);
     DCHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-id: %d not found", shape);
-    const V pos = position->val();
     const BodyManifest& manifest = iter->second;
-    const sp<Body> body = sp<Body>::make(*this, type, pos.x(), pos.y(), size, manifest.shape, manifest.density, manifest.friction);
+    const sp<Body> body = sp<Body>::make(*this, type, position, size, rotate ? rotate->rotation() : sp<Numeric>::null(), manifest.shape, manifest.density, manifest.friction);
     if(rotate)
         body->setRotation(rotate->rotation()->val());
     return body;
@@ -54,7 +85,7 @@ b2Body* World::createBody(const b2BodyDef& bodyDef) const
     return _stub->_world.CreateBody(&bodyDef);
 }
 
-b2Body* World::createBody(Collider::BodyType type, float x, float y, const sp<Size>& size, Shape& shape, float density, float friction) const
+b2Body* World::createBody(Collider::BodyType type, const V& position, const sp<Size>& size, Shape& shape, float density, float friction) const
 {
     b2BodyDef bodyDef;
     switch(type)
@@ -72,7 +103,7 @@ b2Body* World::createBody(Collider::BodyType type, float x, float y, const sp<Si
         DFATAL("Illegal collider BodyType: %d", type);
         break;
     }
-    bodyDef.position.Set(x, y);
+    bodyDef.position.Set(position.x(), position.y());
     b2Body* body = createBody(bodyDef);
 
     DWARN(type != Collider::BODY_TYPE_STATIC || density == 0, "Static body with density %.2f, which usually has no effect", density);
@@ -159,6 +190,46 @@ World::BodyManifest::BodyManifest()
 World::BodyManifest::BodyManifest(const sp<Shape> shape, float density, float friction)
     : shape(shape), density(density), friction(friction)
 {
+}
+
+void World::ContactListenerImpl::BeginContact(b2Contact* contact)
+{
+    Body::Stub* body1 = reinterpret_cast<Body::Stub*>(contact->GetFixtureA()->GetBody()->GetUserData());
+    Body::Stub* body2 = reinterpret_cast<Body::Stub*>(contact->GetFixtureB()->GetBody()->GetUserData());
+    if(body1 && body2)
+    {
+        if(body1->_contacts.find(body2->_id) == body1->_contacts.end())
+        {
+            body1->_contacts.insert(body2->_id);
+            body1->_callback->onBeginContact(RigidBodyImpl::obtain(_object_pool, *body2));
+        }
+        if(body2->_contacts.find(body1->_id) == body2->_contacts.end())
+        {
+            body2->_contacts.insert(body1->_id);
+            body2->_callback->onBeginContact(RigidBodyImpl::obtain(_object_pool, *body1));
+        }
+    }
+}
+
+void World::ContactListenerImpl::EndContact(b2Contact* contact)
+{
+    Body::Stub* body1 = reinterpret_cast<Body::Stub*>(contact->GetFixtureA()->GetBody()->GetUserData());
+    Body::Stub* body2 = reinterpret_cast<Body::Stub*>(contact->GetFixtureB()->GetBody()->GetUserData());
+    if(body1 && body2)
+    {
+        const auto it1 = body1->_contacts.find(body2->_id);
+        if(it1 != body1->_contacts.end())
+        {
+            body1->_contacts.erase(it1);
+            body1->_callback->onEndContact(RigidBodyImpl::obtain(_object_pool, *body2));
+        }
+        const auto it2 = body2->_contacts.find(body1->_id);
+        if(it2 != body2->_contacts.end())
+        {
+            body2->_contacts.erase(it2);
+            body2->_callback->onEndContact(RigidBodyImpl::obtain(_object_pool, *body1));
+        }
+    }
 }
 
 }

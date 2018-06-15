@@ -31,7 +31,6 @@ public:
     static const sp<PythonInterpreter>& instance();
     static const sp<PythonInterpreter>& newInstance();
 
-    sp<Array<Color>> toColorArray(PyObject* object);
     sp<Numeric> toNumeric(PyObject* object);
     sp<Integer> toInteger(PyObject* object);
     sp<Runnable> toRunnable(PyObject* object);
@@ -39,6 +38,7 @@ public:
     sp<EventListener> toEventListener(PyObject* object);
     String toString(PyObject* object, const char* encoding = nullptr, const char* error = nullptr);
     std::wstring toWString(PyObject* object);
+    sp<Vec2> toVec2(PyObject* object);
     sp<Scope> toScope(PyObject* kws);
 
     template<typename T> PyObject* toPyObject(const T& obj) {
@@ -205,6 +205,11 @@ template<> inline sp<CollisionCallback> PythonInterpreter::toSharedPtr<Collision
 template<> inline sp<EventListener> PythonInterpreter::toSharedPtr<EventListener>(PyObject* object)
 {
     return toEventListener(object);
+}
+
+template<> inline sp<Vec2> PythonInterpreter::toSharedPtr<Vec2>(PyObject* object)
+{
+    return toVec2(object);
 }
 
 template<> inline PyObject* PythonInterpreter::fromSharedPtr<Array<uint8_t>>(const bytearray& bytes)

@@ -1,11 +1,9 @@
 #ifndef ARK_CORE_IMPL_NUMERIC_ABS_H_
 #define ARK_CORE_IMPL_NUMERIC_ABS_H_
 
-#include "core/ark.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
-#include "core/types/weak_ptr.h"
-#include "core/base/clock.h"
+#include "core/types/shared_ptr.h"
 
 namespace ark {
 

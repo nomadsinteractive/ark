@@ -40,7 +40,7 @@ uint64_t MessageLoopDefault::pollOnce()
     while(_tasks.size() > 0)
     {
         const Task& front = _tasks.front();
-        if(front.nextFireTick() <= tick + 1000)
+        if(front.nextFireTick() <= tick)
         {
             Task nextTask = front;
             _tasks.pop_front();

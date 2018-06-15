@@ -121,7 +121,49 @@ V2 Math::projectile(float dx, float dy, float v, float g, uint32_t sid)
 		return V2(0, 0);
 	float vx = ::sqrt(vx2);
 	float vy = ::sqrt(v * v - vx2);
-	return V2(dx > 0 ? vx : -vx, g < 0 ? vy : -vy);
+    return V2(dx > 0 ? vx : -vx, g < 0 ? vy : -vy);
+}
+
+/**
+ *
+ * s0 = a * sin(t0) + o
+ * s1 = a * sin(t1) + o
+ * v0 = a * cos(t0)
+ * v1 = a * cos(t1)
+ *
+ * (s0 - o) ^ 2 + v0 ^ 2 = a ^ 2
+ * (s1 - o) ^ 2 + v1 ^ 2 = a ^ 2
+ *
+ * (s0 - s1) * (s0 + s1 - 2 * o) + v0 ^ 2 - v1 ^ 2 = 0
+ * s0 + s1 - 2 * o = (v1 ^ 2 - v0 ^ 2) / (s0 - s1)
+ * o = (s0 + s1 - (v1 ^ 2 - v0 ^ 2) / (s0 - s1)) / 2
+ *
+ */
+void Math::vibrate(float s0, float v0, float s1, float v1, float& o, float& a, float& t0, float& t1)
+{
+    if(s0 == s1)
+    {
+        t0 = t1 = 0;
+        o = s0;
+        a = 1.0f;
+        return;
+    }
+
+    DCHECK(s0 != s1, "Same vibration point %.2f %.2f", s0, s1);
+    o = (s0 + s1 - (v1 * v1 - v0 * v0) / (s0 - s1)) / 2.0f;
+    a = sqrt((s0 - o) * (s0 - o) + v0 * v0);
+    t0 = acos(std::min(1.0f, std::abs(v0 / a)));
+    t1 = acos(std::min(1.0f, std::abs(v1 / a)));
+
+    float sx0 = a * sin(t0);
+    if(std::abs(sx0 - s0 + o) > std::abs(-sx0 - s0 + o))
+        t0 = -t0;
+    float sx1 = a * sin(t1);
+    if(std::abs(sx1 - s1 + o) > std::abs(-sx1 - s1 + o))
+        t1 = -t1;
+
+    if(t0 == t1)
+        t0 -= (v0 == 0 ? PI : PIx2);
 }
 
 }

@@ -20,7 +20,7 @@ RenderObject::RenderObject(int32_t type, const sp<Vec>& position, const sp<Size>
 }
 
 RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& filter)
-    : _type(sp<IntegerWrapper>::make(type)), _type_expired(type.as<Expired>()), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(filter))
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(filter)), _type_expired(type.as<Expired>())
 {
 }
 

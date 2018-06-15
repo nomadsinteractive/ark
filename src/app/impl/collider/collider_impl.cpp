@@ -263,7 +263,7 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
         std::unordered_set<int32_t> contacts = _contacts;
         for(auto iter = candidates.begin(); iter != candidates.end();)
         {
-            uint32_t id = *iter;
+            int32_t id = *iter;
             if(id == _stub->_id)
             {
                 iter = candidates.erase(iter);
@@ -275,7 +275,7 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
             {
                 auto iter2 = contacts.find(id);
                 if(iter2 == contacts.end())
-                    _stub->beginContact(self, rigidBody);
+                    _stub->_callback->onBeginContact(self, rigidBody);
                 else
                     contacts.erase(iter2);
                 ++iter;
@@ -283,12 +283,12 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
             else
                 iter = candidates.erase(iter);
         }
-        for(uint32_t i : contacts)
+        for(int32_t i : contacts)
         {
             if(candidates.find(i) == candidates.end())
             {
                 const sp<RigidBodyShadow> s = collider.findRigidBody(i);
-                _stub->endContact(self, s ? s : collider._object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, nullptr, nullptr, nullptr));
+                _stub->_callback->onEndContact(self, s ? s : collider._object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, nullptr, nullptr, nullptr));
             }
         }
         _contacts = candidates;

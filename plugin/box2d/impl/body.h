@@ -25,7 +25,7 @@ class World;
 class ARK_PLUGIN_BOX2D_API Body : public Object, public RigidBody, Implements<Body, Object, RigidBody> {
 public:
 //  [[script::bindings::auto]]
-    Body(const World& world, Collider::BodyType type, float x, float y, const sp<Size>& size, Shape& shape, float density, float friction);
+    Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotation, Shape& shape, float density, float friction);
 
     virtual void bind(const sp<RenderObject>& renderObject) override;
     virtual void dispose() override;
@@ -87,6 +87,11 @@ public:
     void setLinearVelocity(const V2& velocity);
 
 //  [[script::bindings::property]]
+    float gravityScale() const;
+//  [[script::bindings::property]]
+    void setGravityScale(float scale);
+
+//  [[script::bindings::property]]
     bool active();
 //  [[script::bindings::property]]
     void setActive(bool active);
@@ -104,15 +109,15 @@ public:
     float mass() const;
 
 //  [[script::bindings::auto]]
-    void applyTorque(float torque);
+    void applyTorque(float torque, bool wake = true);
 //  [[script::bindings::auto]]
-    void applyForce(const V2& force, const V2& point);
+    void applyForce(const V2& force, const V2& point, bool wake = true);
 //  [[script::bindings::auto]]
-    void applyForceToCenter(const V2& force);
+    void applyForceToCenter(const V2& force, bool wake = true);
 //  [[script::bindings::auto]]
-    void applyLinearImpulse(const V2& impulse, const V2& point);
+    void applyLinearImpulse(const V2& impulse, const V2& point, bool wake = true);
 //  [[script::bindings::auto]]
-    void applyAngularImpulse(float impulse);
+    void applyAngularImpulse(float impulse, bool wake = true);
 
 //  [[plugin::builder]]
     class BUILDER_IMPL1 : public Builder<Body> {
@@ -148,13 +153,17 @@ public:
 
         void dispose();
 
-        World _world;
         int32_t _id;
+        World _world;
         b2Body* _body;
+
+        sp<RigidBody::Callback> _callback;
+
+        std::unordered_set<int32_t> _contacts;
     };
 
 private:
-    Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Size>& size);
+    Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotation);
 
     sp<Stub> _stub;
 };

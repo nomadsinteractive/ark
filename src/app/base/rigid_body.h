@@ -17,14 +17,22 @@ namespace ark {
 //[[script::bindings::container]]
 class ARK_API RigidBody {
 public:
-    struct Stub {
-        Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate);
+    class ARK_API Callback {
+    public:
+        void onBeginContact(const sp<RigidBody>& rigidBody);
+        void onEndContact(const sp<RigidBody>& rigidBody);
 
-        void beginContact(const sp<RigidBody>& rigidBody);
-        void endContact(const sp<RigidBody>& rigidBody);
+        void onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody);
+        void onEndContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody);
 
-        void beginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody);
-        void endContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody);
+    private:
+        sp<CollisionCallback> _collision_callback;
+
+        friend class RigidBody;
+    };
+
+    struct ARK_API Stub {
+        Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Callback>& callback = nullptr);
 
         int32_t _id;
         Collider::BodyType _type;
@@ -33,7 +41,7 @@ public:
         sp<Size> _render_object_size;
         sp<Rotate> _rotate;
 
-        sp<CollisionCallback> _collision_callback;
+        sp<Callback> _callback;
 
         Box _tag;
     };
@@ -82,6 +90,7 @@ public:
     void setCollisionCallback(const sp<CollisionCallback>& collisionCallback);
 
     const sp<Stub>& stub() const;
+    const sp<Callback>& callback() const;
 
 //  [[plugin::style("rigid-body")]]
     class RIGID_BODY_STYLE : public Builder<RenderObject> {

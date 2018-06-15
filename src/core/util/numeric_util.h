@@ -73,6 +73,9 @@ public:
 //[[script::bindings::classmethod]]
     static void fix(const sp<Numeric>& self);
 
+//[[script::bindings::auto]]
+    static sp<Numeric> chase(const sp<Numeric>& duration, const sp<Numeric>& target, float s0, float eta);
+
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Numeric> {
     public:

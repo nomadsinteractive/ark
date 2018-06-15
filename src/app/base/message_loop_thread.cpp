@@ -1,8 +1,8 @@
 #include "app/base/message_loop_thread.h"
 
-#include <algorithm>
+#include "core/inf/variable.h"
 
-#include "core/util/math.h"
+#include "platform/platform.h"
 
 namespace ark {
 
@@ -65,7 +65,7 @@ Thread& MessageLoopThread::thread()
 }
 
 MessageLoopThread::RunnableImpl::RunnableImpl(const Thread& thread, const sp<MessageLoop>& messageLoop)
-    : _thread(thread), _message_loop(messageLoop)
+    : _thread(thread), _message_loop(messageLoop), _ticker(Platform::getSteadyClock())
 {
 }
 
@@ -77,7 +77,10 @@ void MessageLoopThread::RunnableImpl::run()
             _thread.wait(100000);
 
         uint64_t microsec = _message_loop->pollOnce();
-        _thread.wait(std::max<uint64_t>(2000, microsec));
+        uint64_t now = _ticker->val();
+        do {
+            _thread.wait(1000);
+        } while((_ticker->val() - now) < microsec);
     }
 }
 

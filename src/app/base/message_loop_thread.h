@@ -39,6 +39,7 @@ private:
     private:
         Thread _thread;
         sp<MessageLoop> _message_loop;
+        sp<Variable<uint64_t>> _ticker;
     };
 
 private:

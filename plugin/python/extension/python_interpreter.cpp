@@ -10,6 +10,7 @@
 
 #include "graphics/base/color.h"
 #include "graphics/base/vec3.h"
+#include "graphics/util/vec2_util.h"
 
 #include "app/base/event.h"
 
@@ -92,6 +93,17 @@ std::wstring PythonInterpreter::toWString(PyObject* object)
     return L"";
 }
 
+sp<Vec2> PythonInterpreter::toVec2(PyObject* object)
+{
+    if(PyTuple_Check(object))
+    {
+        PyObject* x, *y;
+        if(PyArg_ParseTuple(object, "OO", &x, &y))
+            return Vec2Util::create(toNumeric(x), toNumeric(y));
+    }
+    return asInterface<Vec2>(object);
+}
+
 PyObject* PythonInterpreter::fromByteArray(const bytearray& bytes) const
 {
     return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(bytes->buf()), bytes->length());
@@ -118,23 +130,6 @@ sp<Integer> PythonInterpreter::toInteger(PyObject* object)
     }
 
     return asInterface<Integer>(object);
-}
-
-sp<Array<Color>> PythonInterpreter::toColorArray(PyObject* object)
-{
-    if(PyList_Check(object))
-    {
-        Py_ssize_t size = PyList_Size(object);
-        sp<DynamicArray<Color>> colorArray = sp<DynamicArray<Color>>::make(size);
-        Color* ptr = colorArray->buf();
-        for(Py_ssize_t i = 0; i < size; i++)
-        {
-            uint32_t value = PyLong_AsUnsignedLong(PyList_GetItem(object, i));
-            ptr[i] = Color(value);
-        }
-        return colorArray;
-    }
-    return nullptr;
 }
 
 sp<Scope> PythonInterpreter::toScope(PyObject* kws)
@@ -311,17 +306,10 @@ template<> ARK_PLUGIN_PYTHON_API V2 PythonInterpreter::toType<V2>(PyObject* obje
         if(PyArg_ParseTuple(object, "ff", &x, &y))
             return V2(x, y);
     }
-    if(PyList_Check(object))
-    {
-        uint32_t len = PyObject_Length(object);
-        if(len == 2)
-        {
-            float x = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 0)));
-            float y = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 1)));
-            return V2(x, y);
-        }
-    }
-    DFATAL("V2 object should be either length-2 tuple or list. (eg. [0, 0], (1.0, 1.0))");
+    const sp<Vec2> vec2 = toVec2(object);
+    if(vec2)
+        return vec2->val();
+    DFATAL("V2 object should be either Vec2 or length-2 tuple (eg. (1.0, 1.0))");
     return V2();
 }
 
@@ -335,19 +323,7 @@ template<> ARK_PLUGIN_PYTHON_API Color PythonInterpreter::toType<Color>(PyObject
         if(PyArg_ParseTuple(object, "fff|f", &r, &g, &b, &a))
             return Color(r, g, b, a);
     }
-    if(PyList_Check(object))
-    {
-        uint32_t len = PyObject_Length(object);
-        if(len >= 3)
-        {
-            float r = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 0)));
-            float g = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 1)));
-            float b = static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 2)));
-            float a = len > 3 ? static_cast<float>(PyFloat_AsDouble(PyList_GetItem(object, 3))) : 1.0f;
-            return Color(r, g, b, a);
-        }
-    }
-    DFATAL("Color object should be either int or float array. (eg. 0xffffffff or (1.0, 1.0, 1.0, 1.0))");
+    DFATAL("Color object should be either int or length-4 float tuple. (eg. 0xffffffff or (1.0, 1.0, 1.0, 1.0))");
     return Color();
 }
 

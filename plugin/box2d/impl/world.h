@@ -5,6 +5,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/object.h"
+#include "core/base/object_pool.h"
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
 #include "core/types/shared_ptr.h"
@@ -33,7 +34,7 @@ public:
     b2World& world() const;
 
     b2Body* createBody(const b2BodyDef& bodyDef) const;
-    b2Body* createBody(Collider::BodyType type, float x, float y, const sp<Size>& size, Shape& shape, float density, float friction) const;
+    b2Body* createBody(Collider::BodyType type, const V& position, const sp<Size>& size, Shape& shape, float density, float friction) const;
 
     int32_t genRigidBodyId() const;
 
@@ -92,6 +93,15 @@ private:
         float friction;
     };
 
+    class ContactListenerImpl : public b2ContactListener {
+    public:
+        virtual void BeginContact(b2Contact* contact);
+        virtual void EndContact(b2Contact* contact);
+
+    private:
+        ObjectPool _object_pool;
+    };
+
     struct Stub : public Runnable {
         Stub(const b2Vec2& gravity, float ppmX, float ppmY);
 
@@ -107,10 +117,12 @@ private:
 
         b2World _world;
         std::unordered_map<int32_t, BodyManifest> _body_manifests;
+
+        ContactListenerImpl _contact_listener;
     };
 
 private:
-    const sp<Stub> _stub;
+    sp<Stub> _stub;
 
     friend class BUILDER_IMPL1;
 };
