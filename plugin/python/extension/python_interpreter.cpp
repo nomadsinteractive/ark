@@ -250,6 +250,9 @@ void PythonInterpreter::logErr()
 {
 #ifdef ARK_FLAG_DEBUG
     PyErr_Print();
+    PyObject* ferr = PySys_GetObject("stderr");
+    PyObject* ret = ferr ? PyObject_CallMethod(ferr, "flush", NULL) : NULL;
+    Py_XDECREF(ret);
 #else
     PyObject *ptype, *pvalue, *ptraceback;
     PyErr_Fetch(&ptype, &pvalue, &ptraceback);
