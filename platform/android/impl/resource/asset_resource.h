@@ -3,10 +3,9 @@
 
 #include <android/asset_manager.h>
 
+#include "core/inf/asset.h"
 #include "core/inf/readable.h"
-#include "core/inf/dictionary.h"
 #include "core/base/string.h"
-#include "core/types/shared_ptr.h"
 
 namespace ark {
 namespace platform {
@@ -16,7 +15,8 @@ class AssetResource : public Asset {
 public:
     AssetResource(AAssetManager* assetManager, const String& dirname);
 
-    sp<Readable> get(const String& name) override;
+    virtual sp<Readable> get(const String& name) override;
+    virtual sp<Asset> getAsset(const String& path) override;
 
 private:
     AAssetManager* _asset_manager;

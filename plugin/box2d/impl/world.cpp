@@ -81,6 +81,11 @@ b2Body* World::createBody(Collider::BodyType type, float x, float y, const sp<Si
     return body;
 }
 
+int32_t World::genRigidBodyId() const
+{
+    return ++_stub->_rigid_body_id_base;
+}
+
 float World::toPixelX(float meter) const
 {
     return _stub->_ppm_x * meter;
@@ -137,7 +142,7 @@ sp<Collider> World::BUILDER_IMPL2::build(const sp<Scope>& args)
 }
 
 World::Stub::Stub(const b2Vec2& gravity, float ppmX, float ppmY)
-    : _ppm_x(ppmX), _ppm_y(ppmY), _time_step(1.0f / 60.0f), _velocity_iterations(6), _position_iterations(2), _world(gravity)
+    : _ppm_x(ppmX), _ppm_y(ppmY), _time_step(1.0f / 60.0f), _velocity_iterations(6), _position_iterations(2), _rigid_body_id_base(0), _world(gravity)
 {
 }
 

@@ -27,12 +27,15 @@ public:
 
     virtual void run() override;
 
+//  [[script::bindings::auto]]
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
 
     b2World& world() const;
 
     b2Body* createBody(const b2BodyDef& bodyDef) const;
     b2Body* createBody(Collider::BodyType type, float x, float y, const sp<Size>& size, Shape& shape, float density, float friction) const;
+
+    int32_t genRigidBodyId() const;
 
 //  [[script::bindings::meta(absorb())]]
 //  [[script::bindings::meta(expire())]]
@@ -100,6 +103,7 @@ private:
         float _time_step;
         int32_t _velocity_iterations;
         int32_t _position_iterations;
+        int32_t _rigid_body_id_base;
 
         b2World _world;
         std::unordered_map<int32_t, BodyManifest> _body_manifests;

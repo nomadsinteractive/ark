@@ -86,7 +86,7 @@ void Body::bind(const sp<RenderObject>& renderObject)
 }
 
 Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Size>& size)
-    : RigidBody((int32_t) reinterpret_cast<intptr_t>(stub->_body), type,
+    : RigidBody(stub->_id, type,
                 sp<RigidBodyPosition>::make(stub),
                 size,
                 sp<Rotate>::make(sp<RigidBodyRotation>::make(stub))), _stub(stub)
@@ -224,7 +224,7 @@ sp<Object> Body::BUILDER_IMPL2::build(const sp<Scope>& args)
 }
 
 Body::Stub::Stub(const World& world, b2Body* body)
-    : _world(world), _body(body)
+    : _world(world), _id(world.genRigidBodyId()), _body(body)
 {
 }
 
@@ -237,7 +237,7 @@ Body::Stub::~Stub()
 void Body::Stub::dispose()
 {
     DCHECK(_body, "Body has been disposed already");
-    LOGD("id = %d", reinterpret_cast<int32_t>(_body));
+    LOGD("id = %d", _id);
     _world.world().DestroyBody(_body);
     _body = nullptr;
 }

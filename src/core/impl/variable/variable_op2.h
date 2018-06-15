@@ -9,7 +9,7 @@
 
 namespace ark {
 
-template<typename P, typename OP2, typename T = std::result_of<OP2(P, P)>::type> class VariableOP2 : public Variable<T> {
+template<typename P, typename OP2, typename T = typename std::result_of<OP2(P, P)>::type> class VariableOP2 : public Variable<T> {
 public:
     typedef sp<Variable<P>> VType;
 

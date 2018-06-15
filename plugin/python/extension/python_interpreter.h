@@ -152,14 +152,14 @@ public:
 
 private:
     template<typename T> PyObject* fromIterable_sfinae(const T& iterable, decltype(iterable.at(0))*) {
-        PyObject* pyList = PyList_New(nullptr);
+        PyObject* pyList = PyList_New(0);
         for(const auto& i : iterable)
             PyList_Append(pyList, toPyObject(i));
         return pyList;
     }
 
     template<typename T> PyObject* fromIterable_sfinae(const T& iterable, ...) {
-        PyObject* pySet = PySet_New(nullptr);
+        PyObject* pySet = PySet_New(0);
         for(const auto& i : iterable)
             PySet_Add(pySet, toPyObject(i));
         return pySet;

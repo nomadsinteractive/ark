@@ -88,7 +88,7 @@ public:
     std::map<TypeId, LoaderFunction>& ensureLoader(const String& name);
 
 protected:
-    std::map<String, uint32_t> _constants;
+    std::map<String, int32_t> _constants;
     std::map<String, std::map<TypeId, LoaderFunction>> _loaders;
 
 private:

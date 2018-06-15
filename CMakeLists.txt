@@ -217,7 +217,7 @@ if(ARK_BUILD_STATIC_LIBRARY)
     endif()
 endif()
 
-if(ARK_BUILD_SAMPLES)
+if(ARK_BUILD_SAMPLES AND NOT ANDROID)
     ark_add_executable(ark-launcher samples/src/main.cpp)
     target_link_libraries(ark-launcher PRIVATE ${ARK_LIBRARIES})
 endif()
