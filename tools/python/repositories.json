@@ -75,7 +75,7 @@
     {
         "url": "https://github.com/assimp/assimp.git",
         "name": "assimp",
-        "tag": "v4.0.1"
+        "tag": "v4.1.0"
     },
     {
         "url": "https://github.com/ruslo/polly.git",
