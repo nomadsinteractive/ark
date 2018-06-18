@@ -10,6 +10,7 @@
 
 #include "renderer/base/resource_loader_context.h"
 
+#include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
 
 #include "box2d/impl/body.h"
@@ -196,17 +197,18 @@ void World::ContactListenerImpl::BeginContact(b2Contact* contact)
 {
     Body::Stub* body1 = reinterpret_cast<Body::Stub*>(contact->GetFixtureA()->GetBody()->GetUserData());
     Body::Stub* body2 = reinterpret_cast<Body::Stub*>(contact->GetFixtureB()->GetBody()->GetUserData());
+    const V normal = V(contact->GetManifold()->localNormal.x, contact->GetManifold()->localNormal.y);
     if(body1 && body2)
     {
         if(body1->_contacts.find(body2->_id) == body1->_contacts.end())
         {
             body1->_contacts.insert(body2->_id);
-            body1->_callback->onBeginContact(RigidBodyImpl::obtain(_object_pool, *body2));
+            body1->_callback->onBeginContact(RigidBodyImpl::obtain(_object_pool, *body2), CollisionManifold(normal));
         }
         if(body2->_contacts.find(body1->_id) == body2->_contacts.end())
         {
             body2->_contacts.insert(body1->_id);
-            body2->_callback->onBeginContact(RigidBodyImpl::obtain(_object_pool, *body1));
+            body2->_callback->onBeginContact(RigidBodyImpl::obtain(_object_pool, *body1), CollisionManifold(-normal));
         }
     }
 }

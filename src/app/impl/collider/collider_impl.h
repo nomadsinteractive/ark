@@ -43,20 +43,6 @@ public:
     class RigidBodyShadow;
 
 public:
-//    class Axises {
-//    public:
-
-//        void insert(const RigidBody& rigidBody);
-//        void remove(const RigidBody& rigidBody);
-//        void update(uint32_t id, const V2& position, const Rect& aabb);
-
-//        std::set<uint32_t> findCandidates(const Rect& aabb) const;
-
-//    private:
-//        AxisSegments _x_axis_segment;
-//        AxisSegments _y_axis_segment;
-//    };
-
     struct Stub {
         Stub(const sp<Tracker>& tracker, const document& manifest);
 
@@ -71,8 +57,6 @@ public:
         std::unordered_map<int32_t, sp<RigidBodyShadow>> _rigid_bodies;
         std::unordered_map<int32_t, std::pair<C2_TYPE, C2Shape>> _c2_shapes;
         int32_t _rigid_body_base_id;
-//        sp<Axises> _axises;
-
         ObjectPool _object_pool;
 
     private:

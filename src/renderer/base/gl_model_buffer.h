@@ -36,6 +36,8 @@ public:
     void setTranslate(const V3& translate);
     void setRenderObject(const RenderObject::Snapshot& renderObject);
 
+    const Transform::Snapshot& transform() const;
+
     GLBuffer::Snapshot getArrayBufferSnapshot(const GLBuffer& arrayBuffer) const;
 
 private:

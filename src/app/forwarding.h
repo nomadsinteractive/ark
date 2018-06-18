@@ -13,6 +13,7 @@ class Arena;
 class Button;
 class Collider;
 class CollisionCallback;
+class CollisionManifold;
 class Event;
 class EventDispatcher;
 class EventListener;

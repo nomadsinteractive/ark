@@ -15,13 +15,16 @@ class CollisionCallbackPythonAdapter : public CollisionCallback, Implements<Coll
 public:
     CollisionCallbackPythonAdapter(const PyInstance& callback);
 
-    virtual void onBeginContact(const sp<RigidBody>& rigidBody) override;
+    virtual void onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold) override;
     virtual void onEndContact(const sp<RigidBody>& rigidBody) override;
 
 private:
     PyInstance _on_begin_contact;
     PyInstance _on_end_contact;
-    PyInstance _args;
+    PyInstance _args1;
+    PyInstance _args2;
+
+    sp<CollisionManifold> _collision_manifold;
 
 };
 

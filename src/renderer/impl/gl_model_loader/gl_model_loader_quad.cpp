@@ -1,5 +1,7 @@
 #include "renderer/impl/gl_model_loader/gl_model_loader_quad.h"
 
+#include "core/util/math.h"
+
 #include "renderer/base/atlas.h"
 #include "renderer/base/gl_model_buffer.h"
 #include "renderer/base/gl_resource_manager.h"
@@ -21,14 +23,26 @@ void GLModelLoaderQuad::loadVertices(GLModelBuffer& buf, uint32_t type, const V&
     buf.setTexCoordinate(texCoord.left(), texCoord.top());
     buf.nextVertex();
 
-    buf.setPosition(0 - texCoord.pivotX() * width, height - texCoord.pivotY() * height, 0);
-    buf.setTexCoordinate(texCoord.left(), texCoord.bottom());
-    buf.nextVertex();
+    if(buf.transform().isFrontfaceCCW())
+    {
+        buf.setPosition(0 - texCoord.pivotX() * width, height - texCoord.pivotY() * height, 0);
+        buf.setTexCoordinate(texCoord.left(), texCoord.bottom());
+        buf.nextVertex();
 
-    buf.setPosition(width - texCoord.pivotX() * width, 0 - texCoord.pivotY() * height, 0);
-    buf.setTexCoordinate(texCoord.right(), texCoord.top());
-    buf.nextVertex();
+        buf.setPosition(width - texCoord.pivotX() * width, 0 - texCoord.pivotY() * height, 0);
+        buf.setTexCoordinate(texCoord.right(), texCoord.top());
+        buf.nextVertex();
+    }
+    else
+    {
+        buf.setPosition(width - texCoord.pivotX() * width, 0 - texCoord.pivotY() * height, 0);
+        buf.setTexCoordinate(texCoord.right(), texCoord.top());
+        buf.nextVertex();
 
+        buf.setPosition(0 - texCoord.pivotX() * width, height - texCoord.pivotY() * height, 0);
+        buf.setTexCoordinate(texCoord.left(), texCoord.bottom());
+        buf.nextVertex();
+    }
     buf.setPosition(width - texCoord.pivotX() * width, height - texCoord.pivotY() * height, 0);
     buf.setTexCoordinate(texCoord.right(), texCoord.bottom());
     buf.nextVertex();

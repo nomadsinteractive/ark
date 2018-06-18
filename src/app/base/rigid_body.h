@@ -19,11 +19,13 @@ class ARK_API RigidBody {
 public:
     class ARK_API Callback {
     public:
-        void onBeginContact(const sp<RigidBody>& rigidBody);
+        void onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold);
         void onEndContact(const sp<RigidBody>& rigidBody);
 
-        void onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody);
+        void onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody, const CollisionManifold& manifold);
         void onEndContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody);
+
+        bool hasCallback() const;
 
     private:
         sp<CollisionCallback> _collision_callback;
@@ -63,7 +65,7 @@ public:
     Collider::BodyType type() const;
 
 //  [[script::bindings::property]]
-    V xy() const;
+    V2 xy() const;
 //  [[script::bindings::property]]
     V3 xyz() const;
 

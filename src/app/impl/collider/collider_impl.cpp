@@ -14,6 +14,7 @@
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/base/application_context.h"
+#include "app/base/collision_manifold.h"
 #include "app/base/rigid_body.h"
 #include "app/inf/collision_callback.h"
 #include "app/inf/tracker.h"
@@ -97,7 +98,6 @@ ColliderImpl::Stub::Stub(const sp<Tracker>& tracker, const document& manifest)
 
 void ColliderImpl::Stub::remove(const RigidBody& rigidBody)
 {
-//    _axises->remove(rigidBody);
     _tracker->remove(rigidBody.id());
     const auto iter = _rigid_bodies.find(rigidBody.id());
     DCHECK(iter != _rigid_bodies.end(), "RigidBody(%d) not found", rigidBody.id());
@@ -134,7 +134,6 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
     }
 
     _rigid_bodies[rigidBodyShadow->id()] = rigidBodyShadow;
-//    _axises->insert(rigidBodyShadow);
     return rigidBody;
 }
 
@@ -256,7 +255,6 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
         return;
     }
 
-//    std::set<uint32_t> candidates = collider._axises->findCandidates(aabb);
     std::unordered_set<int32_t> candidates = collider._tracker->search(position, V(aabb.width(), aabb.height()));
     if(candidates.size())
     {
@@ -270,12 +268,13 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
                 continue;
             }
             const sp<RigidBodyShadow>& rigidBody = collider.ensureRigidBody(id);
-            int32_t overlap = _c2_rigid_body.collide(rigidBody->_c2_rigid_body);
-            if(overlap)
+            c2Manifold manifold;
+            _c2_rigid_body.collideManifold(rigidBody->_c2_rigid_body, &manifold);
+            if(manifold.count > 0)
             {
                 auto iter2 = contacts.find(id);
                 if(iter2 == contacts.end())
-                    _stub->_callback->onBeginContact(self, rigidBody);
+                    _stub->_callback->onBeginContact(self, rigidBody, CollisionManifold(V(manifold.normal.x, manifold.normal.y)));
                 else
                     contacts.erase(iter2);
                 ++iter;
@@ -322,37 +321,5 @@ Rect ColliderImpl::RigidBodyShadow::makeRigidBodyAABB() const
         aabb.setCenter(0, 0);
     return aabb;
 }
-
-//void ColliderImpl::Axises::insert(const RigidBody& rigidBody)
-//{
-//    const V position = rigidBody.position()->val();
-//    const sp<Size>& size = rigidBody.size();
-//    _x_axis_segment.insert(rigidBody.id(), position.x(), size->width() / 2);
-//    _y_axis_segment.insert(rigidBody.id(), position.y(), size->height() / 2);
-//}
-
-//void ColliderImpl::Axises::remove(const RigidBody& rigidBody)
-//{
-//    _x_axis_segment.remove(rigidBody.id());
-//    _y_axis_segment.remove(rigidBody.id());
-//}
-
-//void ColliderImpl::Axises::update(uint32_t id, const V2& position, const Rect& aabb)
-//{
-//    _x_axis_segment.update(id, position.x(), aabb.width());
-//    _y_axis_segment.update(id, position.y(), aabb.height());
-//}
-
-//std::set<uint32_t> ColliderImpl::Axises::findCandidates(const Rect& aabb) const
-//{
-//    std::set<uint32_t> candidates;
-//    const std::set<uint32_t> x = _x_axis_segment.findCandidates(aabb.left(), aabb.right());
-//    if(x.size())
-//    {
-//        const std::set<uint32_t> y = _y_axis_segment.findCandidates(aabb.top(), aabb.bottom());
-//        std::set_intersection(x.begin(), x.end(), y.begin(), y.end(), std::inserter(candidates, candidates.begin()));
-//    }
-//    return candidates;
-//}
 
 }

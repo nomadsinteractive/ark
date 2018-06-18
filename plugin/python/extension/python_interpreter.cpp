@@ -278,6 +278,17 @@ template<> ARK_PLUGIN_PYTHON_API Box PythonInterpreter::toType<Box>(PyObject* ob
     return sp<PyInstance>::make(PyInstance::adopt(object)).pack();
 }
 
+template<> ARK_PLUGIN_PYTHON_API bool PythonInterpreter::toType<bool>(PyObject* object)
+{
+    if(PyBool_Check(object))
+        return object == Py_True;
+    if(PyLong_Check(object))
+        return PyLong_AsLong(object) != 0;
+    const sp<Boolean> b = PythonInterpreter::instance()->asInterface<Boolean>(object);
+    DCHECK(b, "Casting %s to bool failed", Py_TYPE(object)->tp_name);
+    return b->val();
+}
+
 template<> ARK_PLUGIN_PYTHON_API float PythonInterpreter::toType<float>(PyObject* object)
 {
     DCHECK(PyNumber_Check(object), "Cannot cast Python object \"%s\" to float", object->ob_type->tp_name);
@@ -329,11 +340,6 @@ template<> ARK_PLUGIN_PYTHON_API Color PythonInterpreter::toType<Color>(PyObject
     DFATAL("Color object should be either int or length-4 float tuple. (eg. 0xffffffff or (1.0, 1.0, 1.0, 1.0))");
     return Color();
 }
-
-//template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Vec2>(const Vec2& value)
-//{
-//    return PythonInterpreter::instance()->pyNewObject<Vec2>(sp<Vec2>::make(value));
-//}
 
 template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Vec3>(const Vec3& value)
 {

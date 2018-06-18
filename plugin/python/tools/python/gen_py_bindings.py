@@ -373,7 +373,7 @@ class GenArgument:
 
     def gen_type_check(self, varname):
         if self._accept_type in ARK_PY_ARGUMENT_CHECKERS:
-            return ARK_PY_ARGUMENT_CHECKERS[self._accept_type].check(varname)
+            return "%s && %s" % (varname, ARK_PY_ARGUMENT_CHECKERS[self._accept_type].check(varname))
         return None
 
     def gen_declare(self, objname, argname):
@@ -418,12 +418,13 @@ ARK_PY_ARGUMENTS = (
     (r'(uint32_t|unsigned int|uint8_t)', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
     (r'(int32_t|int|int8_t)', GenArgumentMeta('int32_t', 'int32_t', 'i')),
     (r'float', GenArgumentMeta('float', 'float', 'f')),
-    (r'bool', GenArgumentMeta('int32_t', 'int32_t', 'p')),
+    (r'bool', GenArgumentMeta('bool', 'bool', 'p')),
     (r'[^:]+::.+', GenArgumentMeta('int32_t', 'int32_t', 'i')),
     (r'TypeId', GenArgumentMeta('PyObject*', 'TypeId', 'O')),
 )
 
 ARK_PY_ARGUMENT_CHECKERS = {
+    'bool': GenConverter('(PyLong_Check({0}) || PyBool_Check({0}))', 'PyLong_AsLong({0}) != 0'),
     'int32_t': GenConverter('(PyLong_Check({0}) || PyFloat_Check({0}))', 'PyLong_AsLong({0})'),
     'uint32_t': GenConverter('(PyLong_Check({0}) || PyFloat_Check({0}))', 'PyLong_AsLong({0})'),
     'float': GenConverter('(PyLong_Check({0}) || PyFloat_Check({0}))', '﻿PyFloat_AsDouble({0})'),
@@ -460,8 +461,8 @@ def gen_method_call_arg(i, arg, argtype):
         arg = arg[0:pos]
     targettype = ' '.join(arg.split()[:-1])
     equals = acg.typeCompare(targettype, argtype)
-    if targettype == 'bool':
-        return 'obj%d != 0' % i
+    # if targettype == 'bool':
+    #     return 'obj%d != 0' % i
     return 'obj%d' % i if equals or '<' in argtype else 'static_cast<%s>(obj%d)' % (targettype, i)
 
 
@@ -495,6 +496,10 @@ class GenMethod(object):
                 dmap = {'true': '1', 'false': '0'}
                 if j.typename in ('uint32_t', 'int32_t', 'float'):
                     dvalue = j.default_value if j.default_value not in dmap else dmap[j.default_value]
+                elif typename == 'PyObject*' and j.accept_type == 'bool':
+                    dvalue = 'Py_True' if j.default_value == 'true' else 'Py_False'
+                elif typename == 'bool' and j.accept_type == 'bool':
+                    dvalue = 'true' if j.default_value == 'true' else 'false'
                 else:
                     dvalue = 'nullptr'
                 declares[typename] += ' = %s' % dvalue

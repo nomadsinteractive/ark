@@ -12,6 +12,7 @@
 #include "graphics/base/v3.h"
 #include "graphics/base/render_object.h"
 
+#include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
 
 namespace ark {
@@ -43,7 +44,7 @@ Collider::BodyType RigidBody::type() const
     return _stub->_type;
 }
 
-V RigidBody::xy() const
+V2 RigidBody::xy() const
 {
     return _stub->_position->val();
 }
@@ -125,10 +126,10 @@ RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec>& positi
 {
 }
 
-void RigidBody::Callback::onBeginContact(const sp<RigidBody>& rigidBody)
+void RigidBody::Callback::onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
 {
     if(_collision_callback)
-        _collision_callback->onBeginContact(rigidBody);
+        _collision_callback->onBeginContact(rigidBody, manifold);
 }
 
 void RigidBody::Callback::onEndContact(const sp<RigidBody>& rigidBody)
@@ -137,16 +138,21 @@ void RigidBody::Callback::onEndContact(const sp<RigidBody>& rigidBody)
         _collision_callback->onEndContact(rigidBody);
 }
 
-void RigidBody::Callback::onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody)
+void RigidBody::Callback::onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
 {
-    onBeginContact(rigidBody);
-    rigidBody->callback()->onBeginContact(self);
+    onBeginContact(rigidBody, manifold);
+    rigidBody->callback()->onBeginContact(self, CollisionManifold(-manifold.normal()));
 }
 
 void RigidBody::Callback::onEndContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody)
 {
     onEndContact(rigidBody);
     rigidBody->callback()->onEndContact(self);
+}
+
+bool RigidBody::Callback::hasCallback() const
+{
+    return static_cast<bool>(_collision_callback);
 }
 
 RigidBody::RIGID_BODY_STYLE::RIGID_BODY_STYLE(BeanFactory& factory, const sp<Builder<RenderObject>>& delegate, const String& value)

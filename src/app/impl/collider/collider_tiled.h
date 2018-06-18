@@ -38,9 +38,9 @@ public:
     };
 
 private:
-    class RigidBodyStatic : public RigidBody {
+    class RigidBodyTile : public RigidBody {
     public:
-        RigidBodyStatic(uint32_t width, uint32_t height);
+        RigidBodyTile(uint32_t width, uint32_t height);
 
         void setId(uint32_t id);
         void setPosition(float x, float y);
@@ -54,41 +54,20 @@ private:
 public:
     class RigidBodyImpl : public RigidBody {
     public:
-        struct Stub {
-            Stub(const sp<TileMap>& tileMap, const sp<Vec2>& position);
-
-            void collision(const Rect& rect);
-
-            sp<Vec2> _position;
-
-        private:
-            void beginContact(const sp<RigidBody>& rigidBody);
-            void endContact(const sp<RigidBody>& rigidBody);
-
-            void updateRigidBodyStatic(uint32_t id, float tileWidth, float tileHeight, uint32_t colCount);
-
-        private:
-            sp<TileMap> _tile_map;
-            std::set<uint32_t> _contacts;
-            sp<RigidBodyStatic> _rigid_body_static;
-            Rect _last_collision;
-        };
-
-    public:
         RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<TileMap>& tileMap);
 
         virtual void dispose() override;
 
-        void setPosition(const sp<Vec>& position);
-
-        V2 xy() const;
-
         void collision(const Rect& rect);
 
-        const sp<Stub>& stub() const;
+    private:
+        void updateRigidBodyTile(uint32_t id, float tileWidth, float tileHeight, uint32_t colCount);
 
     private:
-        sp<Stub> _stub;
+        sp<TileMap> _tile_map;
+        sp<RigidBodyTile> _rigid_body_tile;
+
+        std::set<uint32_t> _contacts;
     };
 
 private:

@@ -88,6 +88,11 @@ void GLModelBuffer::setRenderObject(const RenderObject::Snapshot& renderObject)
     applyVaryings();
 }
 
+const Transform::Snapshot& GLModelBuffer::transform() const
+{
+    return _transform;
+}
+
 GLBuffer::Snapshot GLModelBuffer::getArrayBufferSnapshot(const GLBuffer& arrayBuffer) const
 {
     if(_array_buffers.size() == 1)
