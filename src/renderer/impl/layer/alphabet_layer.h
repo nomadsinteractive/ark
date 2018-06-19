@@ -1,9 +1,6 @@
 #ifndef ARK_RENDERER_IMPL_LAYER_ALPHABET_LAYER_H_
 #define ARK_RENDERER_IMPL_LAYER_ALPHABET_LAYER_H_
 
-#include "core/base/string.h"
-#include "core/concurrent/lock_free_stack.h"
-#include "core/concurrent/one_consumer_synchronized.h"
 #include "core/inf/builder.h"
 
 #include "graphics/forwarding.h"
@@ -16,25 +13,23 @@ namespace ark {
 
 class AlphabetLayer : public Layer {
 private:
-    class Stub : public GLResource {
+    class Stub {
     public:
         Stub(const sp<Alphabet>& alphabet, const sp<GLResourceManager>& glResourceManager, uint32_t textureWidth, uint32_t textureHeight);
 
         const sp<Alphabet>& alphabet() const;
         const sp<Atlas>& atlas() const;
 
-        bool hasCharacterGlyph(uint32_t c) const;
         bool prepare(uint32_t c, bool allowOverflow);
         bool checkUnpreparedCharacter(const LayerContext::Snapshot& renderContext);
 
         void reset();
 
-        virtual uint32_t id() override;
-        virtual void prepare(GraphicsContext& graphicsContext) override;
-        virtual void recycle(GraphicsContext& graphicsContext) override;
+        void doPrepare(const LayerContext::Snapshot& renderContext, bool allowReset);
+        void prepareTexture(GLResourceManager& glResourceManager) const;
 
     private:
-        void doPrepare(const std::unordered_set<uint32_t>& characters, bool allowReset);
+        bool hasCharacterGlyph(uint32_t c) const;
 
     private:
         sp<Alphabet> _alphabet;
@@ -44,7 +39,7 @@ private:
         uint32_t _flowx, _flowy;
         int32_t _max_glyph_height;
 
-        OCSUnorderedSet<uint32_t> _characters;
+        std::unordered_set<uint32_t> _characters;
     };
 
 public:

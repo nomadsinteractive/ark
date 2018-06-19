@@ -1,6 +1,7 @@
 #include "renderer/impl/layer/alphabet_layer.h"
 
 #include "core/util/documents.h"
+#include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
 #include "graphics/base/layer_context.h"
@@ -27,7 +28,10 @@ AlphabetLayer::AlphabetLayer(const sp<Alphabet>& alphabet, uint32_t textureWidth
 sp<RenderCommand> AlphabetLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
 {
     if(_stub->checkUnpreparedCharacter(renderContext))
-        _resource_loader_context->glResourceManager()->prepare(_stub, GLResourceManager::PS_ONCE_FORCE);
+    {
+        _stub->doPrepare(renderContext, true);
+        _stub->prepareTexture(_resource_loader_context->glResourceManager());
+    }
     return _layer->render(renderContext, x, y);
 }
 
@@ -76,7 +80,7 @@ bool AlphabetLayer::Stub::prepare(uint32_t c, bool allowOverflow)
         }
         if(_flowy + metrics.bitmap_height > _atlas->height())
         {
-            DWARN(allowOverflow, "Font image texture (%d, %d) overflow, you may need to create a larger image texture", _atlas->width(), _atlas->height());
+            DWARN(allowOverflow, "TODO: Font image texture (%d, %d) overflow, you may need to create a larger image texture", _atlas->width(), _atlas->height());
             if(allowOverflow)
                 return false;
         }
@@ -94,7 +98,8 @@ bool AlphabetLayer::Stub::checkUnpreparedCharacter(const LayerContext::Snapshot&
     bool updateNeeded = false;
     for(const RenderObject::Snapshot& i : renderContext._items)
     {
-        bool contains = _characters.containsOrInsert(i._type);
+        bool contains = _characters.find(i._type) != _characters.end();
+        _characters.insert(i._type);
         updateNeeded = updateNeeded || !contains;
     }
     return updateNeeded;
@@ -109,36 +114,25 @@ void AlphabetLayer::Stub::reset()
     memset(_font_glyph->at(0, 0), 0, _font_glyph->width() * _font_glyph->height());
 }
 
-uint32_t AlphabetLayer::Stub::id()
+void AlphabetLayer::Stub::doPrepare(const LayerContext::Snapshot& renderContext, bool allowReset)
 {
-    return _texture->id();
-}
-
-void AlphabetLayer::Stub::prepare(GraphicsContext& graphicsContext)
-{
-    doPrepare(_characters.synchronized(), true);
-    _texture->prepare(graphicsContext);
-}
-
-void AlphabetLayer::Stub::recycle(GraphicsContext& graphicsContext)
-{
-    _texture->recycle(graphicsContext);
-}
-
-void AlphabetLayer::Stub::doPrepare(const std::unordered_set<uint32_t>& characters, bool allowReset)
-{
-    for(uint32_t c : characters)
+    for(uint32_t c : _characters)
     {
         if(!hasCharacterGlyph(c))
         {
             if(!prepare(c, allowReset))
             {
-                const std::unordered_set<uint32_t> obtained = std::move(characters);
                 reset();
-                return doPrepare(obtained, false);
+                checkUnpreparedCharacter(renderContext);
+                return doPrepare(renderContext, false);
             }
         }
     }
+}
+
+void AlphabetLayer::Stub::prepareTexture(GLResourceManager& glResourceManager) const
+{
+    glResourceManager.prepare(_texture, GLResourceManager::PS_ONCE_FORCE);
 }
 
 const sp<Atlas>& AlphabetLayer::Stub::atlas() const
