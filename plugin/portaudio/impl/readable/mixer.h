@@ -1,6 +1,8 @@
 #ifndef ARK_PLUGIN_PORTAUDIO_IMPL_READABLE_MIXER_H_
 #define ARK_PLUGIN_PORTAUDIO_IMPL_READABLE_MIXER_H_
 
+#include <vector>
+
 #include "core/concurrent/lock_free_stack.h"
 #include "core/inf/array.h"
 #include "core/inf/readable.h"
@@ -26,7 +28,7 @@ private:
     public:
         Source(const sp<Readable>& readable, uint32_t weight);
 
-        uint32_t mix(int16_t* in, int16_t* out, uint32_t size, uint32_t totalWeight, bool mixing);
+        size_t accumulate(int16_t* in, int32_t *out, size_t size) const;
         uint32_t weight() const;
 
         const sp<Future>& future() const;
@@ -39,11 +41,18 @@ private:
     };
 
 private:
+    void ensureToneMapRange(int32_t value);
+
+private:
     LockFreeStack<sp<Source>> _sources;
 
     array<int16_t> _buffer;
+    array<int32_t> _buffer_hdr;
+
     uint32_t _total_weight;
 
+    static const int32_t TONE_MAP_WEIGHT_ONE = 32768;
+    std::vector<int16_t> _tone_map;
 };
 
 }

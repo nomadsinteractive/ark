@@ -151,7 +151,7 @@ public:
         _items.push_back(U(resource, std::forward<Args>(args)...));
     }
 
-    uint32_t size() const {
+    size_t size() const {
         return _items.size();
     }
 

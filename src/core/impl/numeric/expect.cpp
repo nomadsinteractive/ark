@@ -35,7 +35,7 @@ float Expect::val()
 
 Expect::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
     : _delegate(factory.ensureBuilder<Numeric>(doc, Constants::Attributes::DELEGATE)),
-      _expectation(factory.ensureBuilder<Expectation>(doc, Constants::Attributes::EXPECT))
+      _expectation(factory.ensureBuilder<Expectation>(doc, Constants::Attributes::EXPECTATION))
 {
 }
 
