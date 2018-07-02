@@ -49,6 +49,11 @@ float Math::atan2(float y, float x)
     return atan2f_c(y, x);
 }
 
+float Math::tanh(float x)
+{
+    return tanhf_c(x);
+}
+
 int32_t Math::floor(float x)
 {
     return (int32_t) x;

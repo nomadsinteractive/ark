@@ -38,6 +38,7 @@ static PyObject* ark_getAssetResource(PyObject* self, PyObject* args);
 static PyObject* ark_isDirectory(PyObject* self, PyObject* args);
 static PyObject* ark_isFile(PyObject* self, PyObject* args);
 static PyObject* ark_dirSeparator(PyObject* self, PyObject* args);
+static PyObject* ark_trace_(PyObject* self, PyObject* args);
 
 PyMethodDef ARK_METHODS[] =
 {
@@ -47,6 +48,7 @@ PyMethodDef ARK_METHODS[] =
     {"is_directory",  ark_isDirectory, METH_VARARGS, "isDirectory"},
     {"is_file",  ark_isFile, METH_VARARGS, "isFile"},
     {"dir_separator",  ark_dirSeparator, METH_VARARGS, "dir_separator"},
+    {"__trace__",  ark_trace_, METH_VARARGS, "__trace__"},
     {NULL, NULL, 0, NULL}
 };
 
@@ -107,6 +109,12 @@ PyObject* ark_isFile(PyObject* /*self*/, PyObject* args)
 PyObject* ark_dirSeparator(PyObject* /*self*/, PyObject* /*args*/)
 {
     return PythonInterpreter::instance()->fromType<String>(String(1, Platform::dirSeparator()));
+}
+
+PyObject* ark_trace_(PyObject* /*self*/, PyObject* /*args*/)
+{
+    __trace__();
+    Py_RETURN_NONE;
 }
 
 PyObject* initarkmodule()

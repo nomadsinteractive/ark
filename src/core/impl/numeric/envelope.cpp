@@ -31,7 +31,7 @@ float Envelope::val()
 
 Envelope::Phrase::Phrase(BeanFactory& factory, const document& manifest)
     : _value(factory.ensureBuilder<Numeric>(manifest)), _expired(factory.getBuilder<Boolean>(manifest, Constants::Attributes::EXPIRED, false)),
-      _expectation(factory.getBuilder<Expectation>(manifest, Constants::Attributes::EXPECT, false))
+      _expectation(factory.getBuilder<Expectation>(manifest, Constants::Attributes::EXPECTATION, false))
 {
 }
 

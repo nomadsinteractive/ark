@@ -11,7 +11,7 @@
 #include "core/types/global.h"
 #include "core/util/strings.h"
 
-#include "graphics/base/vec2.h"
+#include "graphics/base/v3.h"
 
 #include "platform/platform.h"
 
@@ -37,11 +37,13 @@ public:
         {
             Trace<0, 100> _trace;
             worldRunnable->run();
-            float x = position->x();
-            float y = position->y();
+            const V p = position->val();
+            float x = p.x();
+            float y = p.y();
             float angle = rotation->val();
         }
-        if(position->x() == 0 && rotation->val() == 0 && position->y() < -1000.0f)
+        const V p = position->val();
+        if(p.x() == 0 && rotation->val() == 0 && p.y() < -1000.0f)
             return 0;
         return 1;
     }

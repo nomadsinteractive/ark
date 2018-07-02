@@ -584,3 +584,7 @@ class Platform:
 class GLShader:
     def make_varyings(self):
         return None
+
+
+def __trace__():
+    pass

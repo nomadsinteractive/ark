@@ -76,6 +76,9 @@ public:
 //  [[script::bindings::auto]]
     static ARK_API float atan2(float y, float x);
 
+//  [[script::bindings::auto]]
+    static ARK_API float tanh(float x);
+
     static ARK_API int32_t floor(float x);
     static ARK_API int32_t round(float x);
 

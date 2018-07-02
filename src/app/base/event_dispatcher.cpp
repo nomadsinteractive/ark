@@ -112,7 +112,10 @@ bool EventDispatcher::MotionEventListener::onEvent(const EventDispatcher& dispat
     else if(action == Event::ACTION_UP)
     {
         if(_on_click && Math::hypot(event.x() - _pressed_x, event.y() - _pressed_y) < dispatcher.motionClickRange())
-            return _on_click->onEvent(event);
+        {
+            if(_on_click->onEvent(event))
+                return true;
+        }
         if(_on_up)
             _on_up->onEvent(event);
     }

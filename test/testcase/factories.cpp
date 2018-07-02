@@ -16,7 +16,6 @@
 #include "core/types/weak_ptr.h"
 #include "core/util/math.h"
 
-#include "graphics/base/vec2.h"
 #include "graphics/base/transform.h"
 #include "graphics/base/rotate.h"
 
@@ -73,20 +72,20 @@ public:
         sp<Numeric> g7 = beanFactory.load<Numeric>("g7", args);
         TESTCASE_VALIDATE(g7 && g7->val() == 12.0f);
 
-        sp<Vec2> vertex = beanFactory.load<Vec2>("vertex");
-        TESTCASE_VALIDATE(vertex && vertex->x() == 100.0f && vertex->y() == 110.0f);
+        const sp<Vec2> vertex = beanFactory.load<Vec2>("vertex");
+        TESTCASE_VALIDATE(vertex && vertex->val().x() == 100.0f && vertex->val().y() == 110.0f);
 
         Class* clazz = Class::getClass<Vec2>();
         TESTCASE_VALIDATE(clazz);
 
-        sp<Vec2> v1 = beanFactory.load<Vec2>("v1");
-        TESTCASE_VALIDATE(v1 && v1->x() == 20 && v1->y() == 30);
+        const sp<Vec2> v1 = beanFactory.load<Vec2>("v1");
+        TESTCASE_VALIDATE(v1 && v1->val().x() == 20 && v1->val().y() == 30);
 
-        sp<Vec2> v2 = beanFactory.load<Vec2>("v2");
-        TESTCASE_VALIDATE(v2 && v2->x() == 100 && v2->y() == 30);
+        const sp<Vec2> v2 = beanFactory.load<Vec2>("v2");
+        TESTCASE_VALIDATE(v2 && v2->val().x() == 100 && v2->val().y() == 30);
 
-        sp<Vec2> v3 = beanFactory.load<Vec2>("v3");
-        TESTCASE_VALIDATE(v3 && v3->x() == 0 && v3->y() == 110);
+        const sp<Vec2> v3 = beanFactory.load<Vec2>("v3");
+        TESTCASE_VALIDATE(v3 && v3->val().x() == 0 && v3->val().y() == 110);
 
 //        const sp<Transform> t1 = beanFactory.load<Transform>("t1");
 //        if(!t1 || t1->pivot()->val().x() != 20.0f || t1->pivot()->val().y() != 30.0f)

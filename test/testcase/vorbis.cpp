@@ -32,7 +32,7 @@ public:
         const sp<Readable> oggTest2 = resourceLoader->load<Readable>("ogg_test");
         const sp<AudioPlayer> audioPlayer = resourceLoader->load<AudioPlayer>("audio_player");
         const sp<Future> f1 = audioPlayer->play(oggTest1);
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
         const sp<Future> f2 = audioPlayer->play(oggTest2);
         while(!f1->isDone() || !f2->isDone())
             std::this_thread::sleep_for(std::chrono::milliseconds(100));

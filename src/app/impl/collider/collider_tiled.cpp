@@ -100,7 +100,7 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
     int32_t eRowId = static_cast<int32_t>(rect.bottom() / _tile_map->tileHeight()) - (rect.bottom() < 0 ? 1 : 0);
 
     for(int32_t col = bColId; col <= eColId; col ++)
-        for(int32_t row = bRowId; row < eRowId; row ++)
+        for(int32_t row = bRowId; row <= eRowId; row ++)
             if(col >= 0 && row >= 0 && col < _tile_map->colCount() && row < _tile_map->rowCount())
             {
                 const sp<RenderObject>& tile = _tile_map->getTile(row, col);

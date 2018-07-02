@@ -20,7 +20,7 @@ float Upper::val()
 
 Upper::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _delegate(factory.ensureBuilder<Numeric>(manifest, Constants::Attributes::DELEGATE)),
-      _expectation(factory.ensureBuilder<Expectation>(manifest, Constants::Attributes::EXPECT))
+      _expectation(factory.ensureBuilder<Expectation>(manifest, Constants::Attributes::EXPECTATION))
 {
 }
 

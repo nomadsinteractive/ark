@@ -2,9 +2,8 @@
 
 #include "app/base/collision_manifold.h"
 
-#include "python/extension/python_interpreter.h"
-
 #include "python/api.h"
+#include "python/extension/python_interpreter.h"
 
 namespace ark {
 namespace plugin {
@@ -33,6 +32,8 @@ void CollisionCallbackPythonAdapter::onBeginContact(const sp<RigidBody>& rigidBo
         if(!ret)
             PythonInterpreter::instance()->logErr();
 
+        Py_INCREF(Py_None);
+        Py_INCREF(Py_None);
         PyTuple_SetItem(_args2, 0, Py_None);
         PyTuple_SetItem(_args2, 1, Py_None);
 
@@ -51,6 +52,7 @@ void CollisionCallbackPythonAdapter::onEndContact(const sp<RigidBody>& rigidBody
         if(!ret)
             PythonInterpreter::instance()->logErr();
 
+        Py_INCREF(Py_None);
         PyTuple_SetItem(_args1, 0, Py_None);
 
         Py_XDECREF(ret);
