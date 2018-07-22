@@ -17,9 +17,7 @@ Text::Text(const sp<Characters>& characters)
 
 void Text::render(RenderRequest& /*pipeline*/, float x, float y)
 {
-    const sp<LayerContext>& renderContext = _characters->layer()->layerContext();
-    for(const sp<RenderObject>& i : _characters->characters())
-        renderContext->draw(x, y, i);
+    _characters->renderRequest(V2(x, y));
 }
 
 const sp<Size>& Text::size()

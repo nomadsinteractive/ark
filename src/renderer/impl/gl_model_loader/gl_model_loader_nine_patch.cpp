@@ -1,11 +1,18 @@
 #include "renderer/impl/gl_model_loader/gl_model_loader_nine_patch.h"
 
 #include "core/dom/document.h"
+#include "core/impl/array/fixed_array.h"
+
+#include "graphics/base/render_context.h"
 
 #include "renderer/base/atlas.h"
+#include "renderer/base/gl_drawing_context.h"
 #include "renderer/base/gl_model_buffer.h"
 #include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/gl_shader_bindings.h"
 #include "renderer/base/gl_texture.h"
+#include "renderer/base/resource_loader_context.h"
+#include "renderer/util/gl_index_buffers.h"
 
 namespace ark {
 
@@ -51,12 +58,15 @@ GLModelLoaderNinePatch::GLModelLoaderNinePatch(const document& manifest, const s
     }
 }
 
-uint32_t GLModelLoaderNinePatch::estimateVertexCount(uint32_t renderObjectCount)
+void GLModelLoaderNinePatch::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext)
 {
-    return 16 * renderObjectCount;
+    DCHECK(layerContext._items.size() > 0, "LayerContext has no RenderObjects");
+
+    buf.vertices().setGrowCapacity(16 * layerContext._items.size());
+    buf.indices() = GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_NINE_PATCH, layerContext._items.size());
 }
 
-void GLModelLoaderNinePatch::loadVertices(GLModelBuffer& buf, uint32_t type, const V& size)
+void GLModelLoaderNinePatch::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& size)
 {
     const Rect paintRect(0, 0, size.x(), size.y());
     const Item& item = _nine_patch_items.at(type);
@@ -66,16 +76,11 @@ void GLModelLoaderNinePatch::loadVertices(GLModelBuffer& buf, uint32_t type, con
     float yData[4] = {paintRect.bottom(), paintRect.bottom() - paddings.bottom(), paintRect.top() + paddings.top(), paintRect.top()};
     for(uint32_t i = 0; i < 4; i++) {
         for(uint32_t j = 0; j < 4; j++) {
+            buf.nextVertex();
             buf.setPosition(xData[j], yData[i], 0);
             buf.setTexCoordinate(item._x[j], item._y[i]);
-            buf.nextVertex();
         }
     }
-}
-
-GLBuffer GLModelLoaderNinePatch::getPredefinedIndexBuffer(GLResourceManager& glResourceManager, uint32_t renderObjectCount)
-{
-    return renderObjectCount ? glResourceManager.getGLIndexBuffer(GLResourceManager::BUFFER_NAME_NINE_PATCH, renderObjectCount * 30 - 2) : GLBuffer();
 }
 
 GLModelLoaderNinePatch::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

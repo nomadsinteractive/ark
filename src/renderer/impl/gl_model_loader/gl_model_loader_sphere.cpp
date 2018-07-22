@@ -39,12 +39,17 @@ GLModelLoaderSphere::GLModelLoaderSphere(const sp<Atlas>& atlas, uint32_t sample
     }
 }
 
-uint32_t GLModelLoaderSphere::estimateVertexCount(uint32_t renderObjectCount)
+void GLModelLoaderSphere::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext)
 {
-    return renderObjectCount * _vertex_count;
+    buf.vertices().setGrowCapacity(layerContext._items.size() * _vertex_count);
 }
 
-void GLModelLoaderSphere::loadVertices(GLModelBuffer& buf, uint32_t type, const V& size)
+//uint32_t GLModelLoaderSphere::estimateVertexCount(uint32_t renderObjectCount)
+//{
+//    return renderObjectCount * _vertex_count;
+//}
+
+void GLModelLoaderSphere::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& size)
 {
     float* elements = _vertices_boiler_plate->buf();
     const Atlas::Item& item = _atlas->at(type);
@@ -53,9 +58,9 @@ void GLModelLoaderSphere::loadVertices(GLModelBuffer& buf, uint32_t type, const 
         buf.setPosition(elements[0], elements[1], elements[2]);
         uint16_t u = item.left() + static_cast<uint16_t>((item.right() - item.left()) * elements[3]);
         uint16_t v = item.top() + static_cast<uint16_t>((item.bottom() - item.top()) * elements[4]);
+        buf.nextVertex();
         buf.setTexCoordinate(u, v);
         buf.setNormal(V3(elements[0], elements[1], elements[2]));
-        buf.nextVertex();
     }
     buf.writeIndices(_indices_boiler_plate->buf(), _indices_boiler_plate->length());
 }

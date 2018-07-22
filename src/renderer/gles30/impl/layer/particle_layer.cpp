@@ -12,15 +12,16 @@
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_command/draw_elements_instanced.h"
+#include "renderer/util/gl_index_buffers.h"
 
 namespace ark {
 namespace gles30 {
 
 ParticleLayer::ParticleLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : Layer(resourceLoaderContext->memoryPool()), _atlas(atlas), _resource_loader_context(resourceLoaderContext),
-      _shader_bindings(sp<GLShaderBindings>::make(shader, resourceLoaderContext->glResourceManager()->createDynamicArrayBuffer())),
-      _index_buffer(resourceLoaderContext->glResourceManager()->getGLIndexBuffer(GLResourceManager::BUFFER_NAME_TRANGLES, 6)),
-      _transform_array_buffer(resourceLoaderContext->glResourceManager()->createDynamicArrayBuffer())
+      _shader_bindings(sp<GLShaderBindings>::make(shader, resourceLoaderContext->glResourceManager()->makeDynamicArrayBuffer())),
+      _index_buffer(GLIndexBuffers::makeGLBufferSnapshot(resourceLoaderContext->glResourceManager(), GLBuffer::NAME_QUADS, 1)),
+      _transform_array_buffer(resourceLoaderContext->glResourceManager()->makeDynamicArrayBuffer())
 {
     _shader_bindings->setInstancedArrayBuffer(1, _transform_array_buffer);
 }
@@ -83,7 +84,7 @@ sp<RenderCommand> ParticleLayer::render(const LayerContext::Snapshot& renderCont
         pTransform += 16;
     }
 
-    GLDrawingContext dc(_shader_bindings, _shader_bindings->arrayBuffer().snapshot(_resource_loader_context->objectPool()->obtain<GLBuffer::ByteArrayUploader>(pos)), _index_buffer.snapshot(), GL_TRIANGLES);
+    GLDrawingContext dc(_shader_bindings, _shader_bindings->arrayBuffer().snapshot(_resource_loader_context->objectPool()->obtain<GLBuffer::ByteArrayUploader>(pos)), _index_buffer, GL_TRIANGLES);
     dc._instanced_array_buffers[1] = _transform_array_buffer.snapshot(_resource_loader_context->objectPool()->obtain<GLBuffer::ByteArrayUploader>(transform));
     return sp<DrawElementsInstanced>::make(dc, _shader_bindings->shader(), renderContext._items.size());
 }

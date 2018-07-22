@@ -13,14 +13,13 @@ namespace ark {
 
 class ARK_API DrawElements : public RenderCommand {
 public:
-    DrawElements(const GLDrawingContext& context, const sp<GLShader>& shader, int32_t count);
+    DrawElements(GLDrawingContext context, const sp<GLShader>& shader);
 
     virtual void draw(GraphicsContext& graphicsContext) override;
 
 private:
     GLDrawingContext _context;
     sp<GLShader> _shader;
-    int32_t _count;
 };
 
 }

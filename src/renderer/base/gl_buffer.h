@@ -1,6 +1,8 @@
 #ifndef ARK_RENDERER_BASE_GL_BUFFER_H_
 #define ARK_RENDERER_BASE_GL_BUFFER_H_
 
+#include <vector>
+
 #include "core/base/api.h"
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
@@ -24,6 +26,8 @@ public:
         virtual void upload(const UploadFunc& uploader) = 0;
     };
 
+    typedef std::function<sp<Uploader>(size_t)> UploadMakerFunc;
+
     class ARK_API ByteArrayUploader : public Uploader {
     public:
         ByteArrayUploader(const bytearray& bytes);
@@ -33,6 +37,18 @@ public:
 
     private:
         bytearray _bytes;
+    };
+
+    class ARK_API ByteArrayListUploader : public Uploader {
+    public:
+        ByteArrayListUploader(const std::vector<bytearray>& bytesList);
+
+        virtual size_t size() override;
+        virtual void upload(const UploadFunc& uploader) override;
+
+    private:
+        std::vector<bytearray> _bytes_list;
+        size_t _size;
     };
 
 private:
@@ -55,7 +71,7 @@ private:
 
         GLenum type() const;
         GLenum usage() const;
-        uint32_t size() const;
+        size_t size() const;
 
         virtual GLuint id() override;
         virtual void prepare(GraphicsContext&) override;
@@ -74,49 +90,100 @@ private:
         GLenum _usage;
 
         GLuint _id;
-        uint32_t _size;
+        size_t _size;
     };
 
 public:
+    enum Name {
+        NAME_NONE = -1,
+        NAME_QUADS,
+        NAME_NINE_PATCH,
+        NAME_POINTS,
+        NAME_COUNT
+    };
+
     class Snapshot {
     public:
         Snapshot() = default;
+        Snapshot(const sp<Stub>& stub);
+        Snapshot(const sp<Stub>& stub, size_t size);
         Snapshot(const sp<Stub>& stub, const sp<Uploader>& uploader);
-        DEFAULT_COPY_AND_ASSIGN(Snapshot);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
         uint32_t id() const;
         GLenum type() const;
+
+        template<typename T> size_t length() const {
+            return _size / sizeof(T);
+        }
+        size_t size() const;
 
         void prepare(GraphicsContext& graphicsContext) const;
 
     private:
         sp<Stub> _stub;
         sp<Uploader> _uploader;
+        size_t _size;
+    };
+
+    class Builder {
+    public:
+        Builder(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t stride, size_t growCapacity);
+
+        template<typename T> void write(const T& value, size_t offset = 0) {
+            DCHECK(sizeof(T) + offset <= _stride, "Stride overflow: sizeof(value) = %d, offset = %d", sizeof(value), offset);
+            memcpy(_ptr + offset, &value, sizeof(T));
+        }
+
+        void setGrowCapacity(size_t growCapacity);
+
+        void apply(const bytearray& buf);
+        void next();
+
+        GLBuffer::Snapshot snapshot(const GLBuffer& buffer) const;
+
+        size_t stride() const;
+        size_t size() const;
+
+    private:
+        void grow();
+
+    private:
+        sp<MemoryPool> _memory_pool;
+        sp<ObjectPool> _object_pool;
+
+        size_t _stride;
+        size_t _grow_capacity;
+
+        uint8_t* _ptr;
+        uint8_t* _boundary;
+        std::vector<bytearray> _buffers;
+
+        size_t _size;
     };
 
 public:
-    GLBuffer(const sp<GLRecycler>& recycler, const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage);
-    GLBuffer(const GLBuffer& other, uint32_t size);
+    GLBuffer(const sp<GLRecycler>& recycler, const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage) noexcept;
     GLBuffer() noexcept;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(GLBuffer);
 
     explicit operator bool() const;
 
-    template<typename T> uint32_t length() const {
-        return _size / sizeof(T);
+    template<typename T> size_t length() const {
+        return _stub->size() / sizeof(T);
     }
-
-    uint32_t size() const;
+    size_t size() const;
 
     GLenum type() const;
-    Snapshot snapshot(const sp<Uploader>& uploader = nullptr) const;
+    Snapshot snapshot(const sp<Uploader>& uploader) const;
+    Snapshot snapshot(size_t size) const;
+    Snapshot snapshot() const;
 
     GLuint id() const;
     void prepare(GraphicsContext&) const;
 
 private:
     sp<Stub> _stub;
-    uint32_t _size;
 
     friend class GLResourceManager;
 };

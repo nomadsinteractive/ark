@@ -5,6 +5,7 @@
 #include "core/impl/array/dynamic_array.h"
 #include "core/inf/variable.h"
 
+#include "graphics/base/render_context.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/size.h"
 #include "graphics/base/v2.h"
@@ -24,7 +25,7 @@ Characters::Characters(const sp<Layer>& layer, float textScale, float letterSpac
 }
 
 Characters::Characters(const sp<Layer>& layer, const sp<ObjectPool>& objectPool, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : _layer(layer), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()),
+    : _layer(layer), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()), _render_context(layer->layerContext()->makeRenderContext()),
       _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(-g_upDirection * lineHeight),
       _line_indent(lineIndent), _size(_object_pool->obtain<Size>(0.0f, 0.0f))
 {
@@ -75,6 +76,11 @@ void Characters::setText(const std::wstring& text)
     createContent();
 }
 
+void Characters::renderRequest(const V2& position)
+{
+    _render_context->renderRequest(position);
+}
+
 Alphabet::Metrics Characters::getItemMetrics(wchar_t c) const
 {
     Alphabet::Metrics metrics;
@@ -98,6 +104,10 @@ void Characters::createContent()
         place(boundary, c, flowx, flowy, fontHeight);
     _size->setWidth(flowx);
     _size->setHeight(abs(flowy) + fontHeight);
+
+    _render_context->clear();
+    for(const sp<RenderObject>& i : _characters)
+        _render_context->addRenderObject(i);
 }
 
 void Characters::place(float boundary, wchar_t c, float& flowx, float& flowy, float& fontHeight)

@@ -28,10 +28,8 @@ private:
 public:
     GLModelLoaderNinePatch(const document& manifest, const sp<Atlas>& atlas);
 
-    virtual uint32_t estimateVertexCount(uint32_t renderObjectCount) override;
-    virtual void loadVertices(GLModelBuffer& buf, uint32_t type, const V& size) override;
-
-    virtual GLBuffer getPredefinedIndexBuffer(GLResourceManager& glResourceManager, uint32_t renderObjectCount) override;
+    virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext) override;
+    virtual void loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& size) override;
 
 //  [[plugin::builder("nine-patch")]]
     class BUILDER : public Builder<GLModelLoader> {

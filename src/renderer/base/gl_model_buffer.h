@@ -14,13 +14,14 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/gl_buffer.h"
+#include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/varyings.h"
 
 namespace ark {
 
 class ARK_API GLModelBuffer {
 public:
-    GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const uint32_t growCapacity, uint32_t stride, int32_t texCoordinateOffset);
+    GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const size_t growCapacity, uint32_t stride, int32_t texCoordinateOffset);
     DEFAULT_COPY_AND_ASSIGN(GLModelBuffer);
 
     void setPosition(float x, float y, float z);
@@ -30,41 +31,41 @@ public:
 
     void nextVertex();
 
-    void writeIndices(glindex_t* indices, glindex_t count);
-    void updateIndicesBase();
+    void writeIndices(const glindex_t* indices, glindex_t count);
+
+    void nextModel();
 
     void setTranslate(const V3& translate);
     void setRenderObject(const RenderObject::Snapshot& renderObject);
 
     const Transform::Snapshot& transform() const;
 
-    GLBuffer::Snapshot getArrayBufferSnapshot(const GLBuffer& arrayBuffer) const;
+    const GLBuffer::Builder& vertices() const;
+    GLBuffer::Builder& vertices();
+
+    const GLBuffer::Snapshot& indices() const;
+    GLBuffer::Snapshot& indices();
 
 private:
     void applyVaryings();
-    void grow();
 
 private:
-    sp<ResourceLoaderContext> _resource_loader_context;
-    uint32_t _grow_capacity;
-    std::vector<bytearray> _array_buffers;
-    uint8_t* _array_buffer_ptr;
-    uint8_t* _array_buffer_boundary;
-    std::vector<glindex_t> _indices;
+    GLBuffer::Builder _vertices;
+    GLBuffer::Snapshot _indices;
 
-    uint32_t _stride;
+    std::vector<glindex_t> _index_buffer;
 
     int32_t _tex_coordinate_offset;
     int32_t _normal_offset;
     int32_t _tangents_offset;
 
     glindex_t _indice_base;
-    uint32_t _size;
 
     Transform::Snapshot _transform;
     V3 _translate;
 
     Varyings::Snapshot _varyings;
+
 };
 
 }

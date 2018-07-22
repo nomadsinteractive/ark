@@ -1,9 +1,10 @@
 #ifndef ARK_GRAPHICS_BASE_LAYER_CONTEXT_H_
 #define ARK_GRAPHICS_BASE_LAYER_CONTEXT_H_
 
-#include <list>
+#include <vector>
 
 #include "core/base/api.h"
+#include "core/collection/expirable_item_list.h"
 
 #include "graphics/base/render_object.h"
 
@@ -13,7 +14,7 @@ class LayerContext {
 public:
     struct Item {
         Item(float x, float y, const sp<RenderObject>& renderObject);
-        Item(const Item& other) = default;
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
 
         float x, y;
         sp<RenderObject> _render_object;
@@ -23,7 +24,8 @@ public:
         Snapshot(const LayerContext& layerContext, MemoryPool& memoryPool);
         Snapshot(Snapshot&& other) = default;
 
-        std::list<RenderObject::Snapshot> _items;
+        std::vector<RenderObject::Snapshot> _items;
+        bool _dirty;
 
         DISALLOW_COPY_AND_ASSIGN(Snapshot);
     };
@@ -34,11 +36,16 @@ public:
     void draw(float x, float y, const sp<RenderObject>& renderObject);
     void clear();
 
+    sp<RenderContext> makeRenderContext();
+
     Snapshot snapshot() const;
 
 private:
-    std::list<Item> _items;
+    std::vector<Item> _items;
+    WeakRefList<RenderContext> _render_contexts;
+
     sp<MemoryPool> _memory_pool;
+    size_t _last_rendered_count;
 
     friend struct Snapshot;
 };

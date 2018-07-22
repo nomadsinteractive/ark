@@ -7,6 +7,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/layer_context.h"
 #include "graphics/inf/alphabet.h"
 
 #include "renderer/forwarding.h"
@@ -38,6 +39,8 @@ public:
 //  [[script::bindings::property]]
     void setText(const std::wstring& text);
 
+    void renderRequest(const V2& position);
+
 //[[plugin::resource-loader]]
     class BUILDER : public Builder<Characters> {
     public:
@@ -67,6 +70,7 @@ private:
     sp<Layer> _layer;
     sp<LayoutParam> _layout_param;
     sp<ObjectPool> _object_pool;
+    sp<RenderContext> _render_context;
 
     List<sp<RenderObject>> _characters;
     std::wstring _text;

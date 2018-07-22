@@ -6,6 +6,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/layer_context.h"
+#include "graphics/inf/layer.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/gl_buffer.h"
@@ -25,15 +26,10 @@ public:
         return _mode;
     }
 
-    virtual uint32_t estimateVertexCount(uint32_t renderObjectCount) = 0;
+    virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext) = 0;
+    virtual void loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& size) = 0;
 
-    virtual void loadVertices(GLModelBuffer& buf, uint32_t type, const V& size) = 0;
-
-    virtual GLBuffer getPredefinedIndexBuffer(GLResourceManager& glResourceManager, uint32_t renderObjectCount) {
-        return GLBuffer();
-    }
-
-private:
+protected:
     GLenum _mode;
 };
 

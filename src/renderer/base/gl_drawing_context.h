@@ -29,6 +29,7 @@ public:
     GLBuffer::Snapshot _index_buffer;
 
     GLenum _mode;
+    GLsizei _count;
 
 };
 

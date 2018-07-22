@@ -18,7 +18,7 @@ public:
 
     virtual sp<RenderCommand> render(const LayerContext::Snapshot& layerContext, float x, float y) override;
 
-//  [[plugin::resource-loader("model-layer")]]
+//  [[plugin::resource-loader]]
     class BUILDER : public Builder<Layer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
@@ -37,7 +37,6 @@ private:
     sp<GLModelLoader> _model_loader;
     sp<GLShader> _shader;
     sp<Atlas> _atlas;
-    GLenum _mode;
 
     sp<ResourceLoaderContext> _resource_loader_context;
     sp<GLShaderBindings> _shader_bindings;

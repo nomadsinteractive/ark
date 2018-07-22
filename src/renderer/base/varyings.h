@@ -40,9 +40,6 @@ public:
         Snapshot(const bytearray& bytes);
         DEFAULT_COPY_AND_ASSIGN(Snapshot);
 
-        void apply(void* buf, uint32_t stride) const;
-
-    private:
         bytearray _bytes;
     };
 

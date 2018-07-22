@@ -59,7 +59,7 @@ public:
         return _items;
     }
 
-    uint32_t size() const {
+    size_t size() const {
         return _items.size();
     }
 

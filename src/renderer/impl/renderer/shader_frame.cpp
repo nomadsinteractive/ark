@@ -7,18 +7,21 @@
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
 #include "graphics/impl/vec/vec2_impl.h"
+
+#include "renderer/base/gl_buffer.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_command/draw_elements.h"
 #include "renderer/impl/gl_snippet/gl_snippet_textures.h"
+#include "renderer/util/gl_index_buffers.h"
 
 namespace ark {
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _size(size), _resource_manager(resourceLoaderContext->glResourceManager()), _shader(shader),
-      _array_buffer(_resource_manager->createDynamicArrayBuffer()),
+      _array_buffer(_resource_manager->makeDynamicArrayBuffer()),
       _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
       _shader_bindings(sp<GLShaderBindings>::make(shader, _array_buffer))
 {
@@ -26,13 +29,9 @@ ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<GLShader>& shader, const
 
 void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
-    const GLBuffer indexBuffer = _resource_manager->getGLIndexBuffer(GLResourceManager::BUFFER_NAME_TRANGLES, 6);
-    if(indexBuffer)
-    {
-        const sp<GLBuffer::Uploader> uploader = _object_pool->obtain<GLBuffer::ByteArrayUploader>(getArrayBuffer(x, y));
-        int32_t count = indexBuffer.length<glindex_t>();
-        renderRequest.addRequest(_object_pool->obtain<DrawElements>(GLDrawingContext(_shader_bindings, _array_buffer.snapshot(uploader), indexBuffer.snapshot(), GL_TRIANGLES), _shader, count));
-    }
+    const GLBuffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(_resource_manager, GLBuffer::NAME_QUADS, 1);
+    const sp<GLBuffer::Uploader> uploader = _object_pool->obtain<GLBuffer::ByteArrayUploader>(getArrayBuffer(x, y));
+    renderRequest.addRequest(_object_pool->obtain<DrawElements>(GLDrawingContext(_shader_bindings, _array_buffer.snapshot(uploader), indexBuffer, GL_TRIANGLES), _shader));
 }
 
 const sp<Size>& ShaderFrame::size()

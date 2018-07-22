@@ -16,7 +16,7 @@ PointLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, con
 sp<Layer> PointLayer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Atlas> atlas = _atlas->build(args);
-    return sp<GLModelLayer>::make(sp<GLModelLoaderPoint>::make(atlas), _shader->build(args), atlas, _resource_loader_context);
+    return sp<GLModelLayer>::make(sp<GLModelLoaderPoint>::make(), _shader->build(args), atlas, _resource_loader_context);
 }
 
 }

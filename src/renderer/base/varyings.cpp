@@ -43,7 +43,7 @@ void Varyings::add(const String& name, const sp<Numeric>& var)
 Varyings::Snapshot Varyings::snapshot(MemoryPool& memoryPool) const
 {
     if(!_size)
-        return Snapshot(nullptr);
+        return Snapshot();
 
     const bytearray bytes = memoryPool.allocate(_size);
     uint8_t* ptr = reinterpret_cast<uint8_t*>(bytes->buf());
@@ -112,15 +112,6 @@ Varyings::BUILDER::VaryingBuilder::VaryingBuilder(const String& name, const sp<B
 Varyings::Snapshot::Snapshot(const bytearray& bytes)
     : _bytes(bytes)
 {
-}
-
-void Varyings::Snapshot::apply(void* buf, uint32_t stride) const
-{
-    if(!_bytes)
-        return;
-
-    DCHECK(_bytes->length() <= stride, "Varyings buffer overflow: stride: %d, varyings size: %d", stride, _bytes->length());
-    memcpy(buf, _bytes->buf(), _bytes->length());
 }
 
 }

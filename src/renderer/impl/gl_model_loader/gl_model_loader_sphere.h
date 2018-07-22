@@ -13,8 +13,8 @@ class GLModelLoaderSphere : public GLModelLoader {
 public:
     GLModelLoaderSphere(const sp<Atlas>& atlas, uint32_t sampleCount);
 
-    virtual uint32_t estimateVertexCount(uint32_t renderObjectCount) override;
-    virtual void loadVertices(GLModelBuffer& buf, uint32_t type, const V& size) override;
+    virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext) override;
+    virtual void loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& size) override;
 
 private:
     void buildVertex(float*& buffer, float lng, float lat) const;
@@ -27,6 +27,9 @@ private:
     uint32_t _vertex_count;
     floatarray _vertices_boiler_plate;
     indexarray _indices_boiler_plate;
+
+    // GLModelLoader interface
+public:
 };
 
 }

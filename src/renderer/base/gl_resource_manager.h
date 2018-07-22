@@ -24,13 +24,6 @@ public:
     GLResourceManager(const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader);
     ~GLResourceManager();
 
-    enum BufferName {
-        BUFFER_NAME_TRANGLES = 0,
-        BUFFER_NAME_NINE_PATCH,
-        BUFFER_NAME_POINTS,
-        BUFFER_NAME_COUNT
-    };
-
     enum PreparingStrategy {
         PS_ONCE,
         PS_ONCE_FORCE,
@@ -47,13 +40,12 @@ public:
     void prepare(const GLBuffer& buffer, PreparingStrategy strategy);
     void recycle(const sp<GLResource>& resource) const;
 
-    GLBuffer getGLIndexBuffer(BufferName bufferName, uint32_t bufferLength);
-
     sp<GLTexture> loadGLTexture(const String& name);
     sp<GLTexture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable);
-    GLBuffer createGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage);
 
-    GLBuffer createDynamicArrayBuffer();
+    GLBuffer makeGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage) const;
+    GLBuffer makeDynamicArrayBuffer() const;
+    GLBuffer::Snapshot makeGLBufferSnapshot(GLBuffer::Name name, const GLBuffer::UploadMakerFunc& maker, size_t size);
 
     const sp<GLRecycler>& recycler() const;
 
@@ -94,7 +86,6 @@ private:
     };
 
 private:
-    GLBuffer createStaticBuffer(BufferName bufferName, uint32_t bufferLength) const;
     void doRecycling(GraphicsContext& graphicsContext);
     void doSurfaceReady(GraphicsContext& graphicsContext);
 
@@ -105,9 +96,11 @@ private:
     LockFreeStack<PreparingGLResource> _preparing_items;
 
     std::set<ExpirableGLResource> _on_surface_ready_items;
-    GLBuffer _static_buffers[BUFFER_NAME_COUNT];
+    GLBuffer _shared_buffers[GLBuffer::NAME_COUNT];
 
     uint32_t _tick;
+
+//    friend class GLBuffer::Shared;
 };
 
 }

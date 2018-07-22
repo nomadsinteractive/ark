@@ -6,6 +6,7 @@
 #include "core/inf/builder.h"
 #include "core/types/class.h"
 
+#include "graphics/base/layer_context.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
 
@@ -33,7 +34,7 @@ public:
 //  [[plugin::builder]]
     class BUILDER_IMPL1 : public Builder<RenderLayer> {
     public:
-        BUILDER_IMPL1(BeanFactory& parent, const document& doc);
+        BUILDER_IMPL1(BeanFactory& factory, const document& doc);
 
         virtual sp<RenderLayer> build(const sp<Scope>& args) override;
 
@@ -55,14 +56,7 @@ public:
 
 private:
     sp<Layer> _layer;
-
-    class RenderObjectExpiredChecker {
-    public:
-        static bool isExpired(const RenderObject& obj);
-    };
-
-    ExpirableItemList<RenderObject, RenderObjectExpiredChecker> _render_objects;
-
+    sp<RenderContext> _render_context;
 };
 
 }

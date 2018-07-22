@@ -16,7 +16,7 @@ ImageLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, con
 sp<Layer> ImageLayer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Atlas> atlas = _atlas->build(args);
-    return sp<GLModelLayer>::make(sp<GLModelLoaderQuad>::make(atlas), _shader->build(args), atlas, _resource_loader_context);
+    return sp<GLModelLayer>::make(sp<GLModelLoaderQuad>::make(), _shader->build(args), atlas, _resource_loader_context);
 }
 
 }

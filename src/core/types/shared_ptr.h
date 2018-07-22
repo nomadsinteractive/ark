@@ -22,8 +22,7 @@ public:
     _CONSTEXPR SharedPtr(std::nullptr_t null) noexcept
         : _ptr(null), _interfaces(null) {
     }
-    SharedPtr(const SharedPtr& other) noexcept = default;
-    SharedPtr(SharedPtr&& other) noexcept = default;
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SharedPtr);
     SharedPtr(const std::shared_ptr<T>& ptr, const std::shared_ptr<Interfaces>& interfaces) noexcept
         : _ptr(ptr), _interfaces(interfaces) {
     }
@@ -49,9 +48,6 @@ public:
         static SharedPtr<T> inst = nullptr;
         return inst;
     }
-
-    SharedPtr<T>& operator =(const SharedPtr<T>& other) = default;
-    SharedPtr<T>& operator =(SharedPtr<T>&& other) = default;
 
     bool operator == (const SharedPtr<T>& sp) const {
         return _ptr == sp._ptr;

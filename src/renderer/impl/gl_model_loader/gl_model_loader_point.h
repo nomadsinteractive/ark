@@ -11,27 +11,24 @@ namespace ark {
 
 class GLModelLoaderPoint : public GLModelLoader {
 public:
-    GLModelLoaderPoint(const sp<Atlas>& atlas);
+    GLModelLoaderPoint();
 
-    virtual uint32_t estimateVertexCount(uint32_t renderObjectCount) override;
-    virtual void loadVertices(GLModelBuffer& buf, uint32_t type, const V& scale) override;
+    virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext) override;
+    virtual void loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& scale) override;
 
-    virtual GLBuffer getPredefinedIndexBuffer(GLResourceManager& glResourceManager, uint32_t renderObjectCount) override;
-
-//  [[plugin::builder("point")]]
+//  [[plugin::builder::by-value("point")]]
     class BUILDER : public Builder<GLModelLoader> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest);
+        BUILDER();
 
         virtual sp<GLModelLoader> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Atlas>> _atlas;
+        sp<ResourceLoaderContext> _resource_loader_context;
     };
 
 private:
-    sp<Atlas> _atlas;
-
+    sp<GLResourceManager> _resource_manager;
 };
 
 }

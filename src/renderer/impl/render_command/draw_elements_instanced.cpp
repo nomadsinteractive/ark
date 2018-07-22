@@ -19,7 +19,7 @@ void DrawElementsInstanced::draw(GraphicsContext& graphicsContext)
 
     graphicsContext.glUpdateMVPMatrix();
     _context.preDraw(graphicsContext, _shader);
-    glDrawElementsInstanced(_context._mode, 6, GLIndexType, nullptr, _count);
+    glDrawElementsInstanced(_context._mode, _context._count, GLIndexType, nullptr, _count);
     _context.postDraw(graphicsContext);
 }
 

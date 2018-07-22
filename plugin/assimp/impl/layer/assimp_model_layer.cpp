@@ -57,8 +57,8 @@ AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const document& m
     const bytearray vertices = loadArrayBuffer(scene->mMeshes[0], 1.5f);
     const bytearray indices = loadIndexBuffer(scene->mMeshes[0]);
     const bitmap tex = loadBitmap(resourceLoaderContext, scene->mTextures[0]);
-    _array_buffer = resourceLoaderContext->glResourceManager()->createGLBuffer(sp<AssimpGLBufferUploader>::make(vertices), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-    _index_buffer = resourceLoaderContext->glResourceManager()->createGLBuffer(sp<AssimpGLBufferUploader>::make(indices), GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    _array_buffer = resourceLoaderContext->glResourceManager()->makeGLBuffer(sp<AssimpGLBufferUploader>::make(vertices), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+    _index_buffer = resourceLoaderContext->glResourceManager()->makeGLBuffer(sp<AssimpGLBufferUploader>::make(indices), GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     const sp<GLTexture> texture = resourceLoaderContext->glResourceManager()->createGLTexture(tex->width(), tex->height(), sp<Variable<bitmap>::Const>::make(tex));
     _shader_bindings = sp<GLShaderBindings>::make(shader, _array_buffer);
     const sp<GLSnippetTextures> textures = _shader_bindings->snippet()->link<GLSnippetTextures>();
@@ -70,7 +70,7 @@ AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const document& m
 
 sp<RenderCommand> AssimpModelLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
 {
-    return _render_command_pool.obtain<DrawElements>(GLDrawingContext(_shader_bindings, _array_buffer.snapshot(), _index_buffer.snapshot(), GL_TRIANGLES), _shader, _index_buffer.length<uint16_t>());
+    return _render_command_pool.obtain<DrawElements>(GLDrawingContext(_shader_bindings, _array_buffer.snapshot(), _index_buffer.snapshot(), GL_TRIANGLES), _shader);
 }
 
 bytearray AssimpModelLayer::loadArrayBuffer(aiMesh* mesh, float scale) const

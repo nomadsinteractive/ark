@@ -39,9 +39,7 @@ void FPSCounter::render(RenderRequest& /*renderRequest*/, float x, float y)
         _last_refresh = duration;
         _frame_rendered = 0;
     }
-    const sp<LayerContext>& renderContext = _characters->layer()->layerContext();
-    for(const sp<RenderObject>& i : _characters->characters())
-        renderContext->draw(x, y, i);
+    _characters->renderRequest(V2(x, y));
 }
 
 void FPSCounter::updateFPS(float fps)

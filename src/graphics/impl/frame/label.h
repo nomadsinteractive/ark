@@ -5,6 +5,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/layer_context.h"
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 
@@ -34,7 +35,6 @@ public:
 
 private:
     sp<Characters> _characters;
-
 };
 
 }

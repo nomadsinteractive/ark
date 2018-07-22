@@ -4,43 +4,42 @@
 
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_command_pipeline.h"
+#include "graphics/base/render_context.h"
 #include "graphics/inf/layer.h"
 
 namespace ark {
 
 RenderLayer::RenderLayer(const sp<Layer>& layer)
-    : _layer(layer)
+    : _layer(layer), _render_context(layer->layerContext()->makeRenderContext())
 {
 }
 
 void RenderLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
 {
-    const sp<LayerContext>& renderContext = _layer->layerContext();
-    for(const sp<RenderObject>& i : _render_objects)
-        renderContext->draw(x, y, i);
+    _render_context->renderRequest(V2(x, y));
 }
 
 void RenderLayer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& expired)
 {
     NOT_NULL(renderObject);
-    _render_objects.push_back(renderObject, expired ? expired : renderObject.as<Expired>().cast<Boolean>());
+    _render_context->addRenderObject(renderObject, expired);
 }
 
 void RenderLayer::removeRenderObject(const sp<RenderObject>& renderObject)
 {
-    _render_objects.remove(renderObject);
+    _render_context->removeRenderObject(renderObject);
 }
 
 void RenderLayer::clear()
 {
-    _render_objects.clear();
+    _render_context->clear();
 }
 
-RenderLayer::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& parent, const document& doc)
-    : _layer(parent.ensureBuilder<Layer>(doc, Constants::Attributes::LAYER))
+RenderLayer::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& doc)
+    : _layer(factory.ensureBuilder<Layer>(doc, Constants::Attributes::LAYER))
 {
     for(const document& i : doc->children(Constants::Attributes::RENDER_OBJECT))
-        _render_objects.push_back(parent.ensureBuilder<RenderObject>(i));
+        _render_objects.push_back(factory.ensureBuilder<RenderObject>(i));
 }
 
 sp<RenderLayer> RenderLayer::BUILDER_IMPL1::build(const sp<Scope>& args)
@@ -62,11 +61,6 @@ RenderLayer::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& parent, const document& d
 sp<Renderer> RenderLayer::BUILDER_IMPL2::build(const sp<Scope>& args)
 {
     return _builder_impl.build(args);
-}
-
-bool RenderLayer::RenderObjectExpiredChecker::isExpired(const RenderObject& obj)
-{
-    return obj.isExpired();
 }
 
 }
