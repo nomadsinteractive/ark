@@ -16,8 +16,7 @@ namespace ark {
 class ARK_API GLDrawingContext {
 public:
     GLDrawingContext(const sp<GLShaderBindings>& shaderBindings, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer::Snapshot& indexBuffer, GLenum mode);
-    GLDrawingContext(const GLDrawingContext& other) = default;
-    GLDrawingContext(GLDrawingContext&& other) = default;
+    DEFAULT_COPY_AND_ASSIGN(GLDrawingContext);
 
     void preDraw(GraphicsContext& graphicsContext, const GLShader& shader);
     void postDraw(GraphicsContext& graphicsContext);

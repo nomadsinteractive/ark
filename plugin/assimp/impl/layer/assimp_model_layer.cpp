@@ -64,8 +64,6 @@ AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const document& m
     const sp<GLSnippetTextures> textures = _shader_bindings->snippet()->link<GLSnippetTextures>();
     textures->addTexture(0, texture);
     _shader_bindings->snippet()->link<GLSnippetUpdateModelMatrix>();
-    resourceLoaderContext->glResourceManager()->prepare(_array_buffer, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
-    resourceLoaderContext->glResourceManager()->prepare(_index_buffer, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
 }
 
 sp<RenderCommand> AssimpModelLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)

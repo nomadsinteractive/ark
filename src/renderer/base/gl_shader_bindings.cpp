@@ -27,11 +27,6 @@ const GLBuffer& GLShaderBindings::arrayBuffer() const
     return _array_buffer;
 }
 
-GLBuffer& GLShaderBindings::arrayBuffer()
-{
-    return _array_buffer;
-}
-
 void GLShaderBindings::setInstancedArrayBuffer(uint32_t divisor, const GLBuffer& buffer)
 {
     DCHECK(divisor, "Cannot bind non-instanced array buffer to instanced array buffers");
@@ -42,14 +37,11 @@ void GLShaderBindings::bindArrayBuffers(GraphicsContext& graphicsContext, GLProg
 {
     DCHECK(program.id(), "GLProgram unprepared");
     bindAttributesByDivisor(graphicsContext, program, 0);
-    if(_instanced_array_buffers.size())
+    for(const auto iter : _instanced_array_buffers)
     {
-        for(const auto iter : _instanced_array_buffers)
-        {
-            glBindBuffer(GL_ARRAY_BUFFER, iter.second.id());
-            bindAttributesByDivisor(graphicsContext, program, iter.first);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-        }
+        glBindBuffer(GL_ARRAY_BUFFER, iter.second.id());
+        bindAttributesByDivisor(graphicsContext, program, iter.first);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 }
 

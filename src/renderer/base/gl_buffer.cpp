@@ -200,39 +200,6 @@ void GLBuffer::prepare(GraphicsContext& graphicsContext) const
     _stub->prepare(graphicsContext);
 }
 
-GLBuffer::ByteArrayUploader::ByteArrayUploader(const bytearray& bytes)
-    : _bytes(bytes)
-{
-}
-
-size_t GLBuffer::ByteArrayUploader::size()
-{
-    return _bytes->length();
-}
-
-void GLBuffer::ByteArrayUploader::upload(const GLBuffer::UploadFunc& uploader)
-{
-    uploader(_bytes->buf(), _bytes->length());
-}
-
-GLBuffer::ByteArrayListUploader::ByteArrayListUploader(const std::vector<bytearray>& bytesList)
-    : _bytes_list(bytesList), _size(0)
-{
-    for(const bytearray& i : _bytes_list)
-        _size += i->length();
-}
-
-size_t GLBuffer::ByteArrayListUploader::size()
-{
-    return _size;
-}
-
-void GLBuffer::ByteArrayListUploader::upload(const GLBuffer::UploadFunc& uploader)
-{
-    for(const bytearray& i : _bytes_list)
-        uploader(i->buf(), i->length());
-}
-
 GLBuffer::Builder::Builder(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t stride, size_t growCapacity)
     : _memory_pool(memoryPool), _object_pool(objectPool), _stride(stride), _grow_capacity(growCapacity), _ptr(nullptr), _boundary(nullptr), _size(0)
 {

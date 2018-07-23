@@ -43,7 +43,7 @@ public:
     sp<GLTexture> loadGLTexture(const String& name);
     sp<GLTexture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable);
 
-    GLBuffer makeGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage) const;
+    GLBuffer makeGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage);
     GLBuffer makeDynamicArrayBuffer() const;
     GLBuffer::Snapshot makeGLBufferSnapshot(GLBuffer::Name name, const GLBuffer::UploadMakerFunc& maker, size_t size);
 

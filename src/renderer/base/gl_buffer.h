@@ -28,28 +28,49 @@ public:
 
     typedef std::function<sp<Uploader>(size_t)> UploadMakerFunc;
 
-    class ARK_API ByteArrayUploader : public Uploader {
+    template<typename T> class ArrayUploader : public Uploader {
     public:
-        ByteArrayUploader(const bytearray& bytes);
+        ArrayUploader(const sp<Array<T>>& array)
+            : _array(array) {
+        }
 
-        virtual size_t size() override;
-        virtual void upload(const UploadFunc& uploader) override;
+        virtual size_t size() override {
+            return _array->size();
+        }
+        virtual void upload(const UploadFunc& uploader) override {
+            uploader(_array->buf(), _array->size());
+        }
 
     private:
-        bytearray _bytes;
+        sp<Array<T>> _array;
     };
 
-    class ARK_API ByteArrayListUploader : public Uploader {
+    template<typename T> class ArrayListUploader : public Uploader {
     public:
-        ByteArrayListUploader(const std::vector<bytearray>& bytesList);
+        ArrayListUploader(std::vector<sp<Array<T>>> arrayList)
+            : _array_list(std::move(arrayList)), _size(0) {
+            for(const auto& i : _array_list)
+                _size += i->length();
+        }
 
-        virtual size_t size() override;
-        virtual void upload(const UploadFunc& uploader) override;
+        virtual size_t size() override {
+            return _size;
+        }
+        virtual void upload(const UploadFunc& uploader) override {
+            for(const auto& i : _array_list)
+                uploader(i->buf(), i->size());
+        }
 
     private:
-        std::vector<bytearray> _bytes_list;
+        std::vector<bytearray> _array_list;
         size_t _size;
     };
+
+    typedef ArrayUploader<uint8_t> ByteArrayUploader;
+    typedef ArrayListUploader<uint8_t> ByteArrayListUploader;
+
+    typedef ArrayUploader<glindex_t> IndexArrayUploader;
+    typedef ArrayListUploader<glindex_t> IndexArrayListUploader;
 
 private:
     class Recycler : public GLResource {

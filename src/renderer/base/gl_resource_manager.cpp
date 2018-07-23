@@ -94,9 +94,11 @@ sp<GLTexture> GLResourceManager::createGLTexture(uint32_t width, uint32_t height
     return texture;
 }
 
-GLBuffer GLResourceManager::makeGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage) const
+GLBuffer GLResourceManager::makeGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage)
 {
-    return GLBuffer(_recycler, uploader, type, usage);
+    GLBuffer buffer(_recycler, uploader, type, usage);
+    prepare(buffer, PS_ONCE_AND_ON_SURFACE_READY);
+    return buffer;
 }
 
 GLBuffer GLResourceManager::makeDynamicArrayBuffer() const
@@ -107,7 +109,7 @@ GLBuffer GLResourceManager::makeDynamicArrayBuffer() const
 GLBuffer::Snapshot GLResourceManager::makeGLBufferSnapshot(GLBuffer::Name name, const GLBuffer::UploadMakerFunc& maker, size_t size)
 {
     if(name == GLBuffer::NAME_NONE)
-        return makeGLBuffer(nullptr, GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW).snapshot(maker(size));
+        return GLBuffer(_recycler, nullptr, GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW).snapshot(maker(size));
 
     GLBuffer& shared = _shared_buffers[name];
     if(!shared || shared.size() < size)

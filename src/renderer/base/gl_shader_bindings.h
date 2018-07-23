@@ -20,7 +20,6 @@ public:
     const sp<GLSnippetDelegate>& snippet() const;
 
     const GLBuffer& arrayBuffer() const;
-    GLBuffer& arrayBuffer();
 
     void setInstancedArrayBuffer(uint32_t divisor, const GLBuffer& buffer);
 
