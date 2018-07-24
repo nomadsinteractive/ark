@@ -66,6 +66,23 @@ public:
         size_t _size;
     };
 
+    template<typename T> class VectorUploader : public Uploader {
+    public:
+        VectorUploader(std::vector<T> vector)
+            : _vector(std::move(vector)) {
+        }
+
+        virtual size_t size() override {
+            return _vector.size() * sizeof(T);
+        }
+        virtual void upload(const UploadFunc& uploader) override {
+            uploader(&_vector[0], _vector.size() * sizeof(T));
+        }
+
+    private:
+        std::vector<T> _vector;
+    };
+
     typedef ArrayUploader<uint8_t> ByteArrayUploader;
     typedef ArrayListUploader<uint8_t> ByteArrayListUploader;
 
@@ -161,7 +178,7 @@ public:
         void apply(const bytearray& buf);
         void next();
 
-        GLBuffer::Snapshot snapshot(const GLBuffer& buffer) const;
+        sp<Uploader> makeUploader() const;
 
         size_t stride() const;
         size_t size() const;

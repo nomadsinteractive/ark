@@ -63,7 +63,7 @@ void GLModelLoaderNinePatch::start(GLModelBuffer& buf, GLResourceManager& resour
     DCHECK(layerContext._items.size() > 0, "LayerContext has no RenderObjects");
 
     buf.vertices().setGrowCapacity(16 * layerContext._items.size());
-    buf.indices() = GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_NINE_PATCH, layerContext._items.size());
+    buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_NINE_PATCH, layerContext._items.size()));
 }
 
 void GLModelLoaderNinePatch::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& size)

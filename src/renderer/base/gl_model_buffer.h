@@ -44,7 +44,7 @@ public:
     GLBuffer::Builder& vertices();
 
     const GLBuffer::Snapshot& indices() const;
-    GLBuffer::Snapshot& indices();
+    void setIndices(GLBuffer::Snapshot indices);
 
 private:
     void applyVaryings();

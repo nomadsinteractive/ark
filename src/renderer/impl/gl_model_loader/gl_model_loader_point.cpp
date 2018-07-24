@@ -17,7 +17,7 @@ GLModelLoaderPoint::GLModelLoaderPoint()
 void GLModelLoaderPoint::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size());
-    buf.indices() = GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_POINTS, layerContext._items.size());
+    buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_POINTS, layerContext._items.size()));
 }
 
 void GLModelLoaderPoint::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& scale)

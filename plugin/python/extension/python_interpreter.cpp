@@ -30,6 +30,24 @@ namespace ark {
 namespace plugin {
 namespace python {
 
+namespace {
+
+class PyNumeric : public Numeric {
+public:
+    PyNumeric(PyObject* attr)
+        : _attr(PyInstance::steal(attr)) {
+    }
+
+    virtual float val() override {
+        return static_cast<float>(PyFloat_AsDouble(_attr.instance()));
+    }
+
+private:
+    PyInstance _attr;
+};
+
+}
+
 sp<PythonInterpreter> PythonInterpreter::_INSTANCE;
 
 sp<Runnable> PythonInterpreter::toRunnable(PyObject* object)
@@ -116,7 +134,15 @@ sp<Numeric> PythonInterpreter::toNumeric(PyObject* object)
     if(PyFloat_Check(object))
         return sp<Numeric::Impl>::make(static_cast<float>(PyFloat_AsDouble(object)));
 
-    return asInterface<Numeric>(object);
+    sp<Numeric> arkInstance = asInterface<Numeric>(object);
+    if(arkInstance)
+        return arkInstance;
+
+    PyObject* val = PyObject_GetAttrString(object, "val");
+    if(val != Py_None)
+        return sp<PyNumeric>::make(val);
+    Py_XDECREF(val);
+    return nullptr;
 }
 
 sp<Integer> PythonInterpreter::toInteger(PyObject* object)
@@ -144,7 +170,9 @@ sp<Scope> PythonInterpreter::toScope(PyObject* kws)
             PyObject* key = PyList_GetItem(keys, i);
             PyObject* item = PyDict_GetItem(kws, key);
             const String sKey = toString(key);
-            if(PyFloat_Check(item) || PyLong_Check(item))
+            if(isPyArkTypeObject(Py_TYPE(item)))
+                scope->put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
+            else if(PyFloat_Check(item) || PyLong_Check(item) || PyObject_HasAttrString(item, "val"))
             {
                 const sp<PyInstance> owned = sp<PyInstance>::make(PyInstance::adopt(item));
                 sp<PyNumericDuckType> pyDuck = sp<PyNumericDuckType>::make(owned);
@@ -161,8 +189,6 @@ sp<Scope> PythonInterpreter::toScope(PyObject* kws)
                 pyDuck.absorb<PyGarbageCollector>(sp<PyGarbageCollector>::make(owned));
                 scope->put<PyCallableDuckType>(sKey, pyDuck);
             }
-            else if(isPyArkTypeObject(Py_TYPE(item)))
-                scope->put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
             else
             {
                 const sp<PyInstance> owned = sp<PyInstance>::make(PyInstance::adopt(item));

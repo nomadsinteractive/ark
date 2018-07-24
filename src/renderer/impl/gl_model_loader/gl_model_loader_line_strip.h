@@ -12,17 +12,20 @@ namespace ark {
 
 class GLModelLoaderLineStrip : public GLModelLoader {
 public:
-    GLModelLoaderLineStrip();
+    GLModelLoaderLineStrip(const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext) override;
     virtual void loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& scale) override;
 
-//  [[plugin::builder::by-value("line-strip")]]
+//  [[plugin::resource-loader::by-value("line-strip")]]
     class BUILDER : public Builder<GLModelLoader> {
     public:
-        BUILDER();
+        BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<GLModelLoader> build(const sp<Scope>& args) override;
+
+    private:
+        sp<ResourceLoaderContext> _resource_loader_context;
 
     };
 

@@ -4,6 +4,7 @@
 #include "core/base/expression.h"
 #include "core/impl/builder/builder_by_instance.h"
 #include "core/impl/numeric/numeric_add.h"
+#include "core/impl/numeric/numeric_depends.h"
 #include "core/impl/numeric/numeric_divide.h"
 #include "core/impl/numeric/numeric_multiply.h"
 #include "core/impl/numeric/numeric_negative.h"
@@ -220,6 +221,11 @@ void NumericUtil::fix(const sp<Numeric>& self)
     DWARN(iw, "Calling fix on non-NumericWrapper has no effect.");
     if(iw)
         iw->fix();
+}
+
+sp<Numeric> NumericUtil::depends(const sp<Numeric>& self, const sp<Numeric>& depends)
+{
+    return sp<NumericDepends>::make(self, depends);
 }
 
 sp<Numeric> NumericUtil::chase(const sp<Numeric>& duration, const sp<Numeric>& target, float s0, float eta)

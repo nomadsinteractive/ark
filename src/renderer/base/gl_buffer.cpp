@@ -74,6 +74,7 @@ void GLBuffer::Stub::prepare(GraphicsContext& graphicsContext, const sp<Uploader
     {
         DWARN(_usage != GL_STATIC_DRAW, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
         upload(graphicsContext, transientUploader);
+        _uploader = transientUploader;
     }
 }
 
@@ -231,10 +232,11 @@ void GLBuffer::Builder::next()
     DCHECK(_ptr <= _boundary, "Array buffer out of bounds");
 }
 
-GLBuffer::Snapshot GLBuffer::Builder::snapshot(const GLBuffer& buffer) const
+sp<GLBuffer::Uploader> GLBuffer::Builder::makeUploader() const
 {
-    return _buffers.size() == 1 ? buffer.snapshot(_object_pool->obtain<GLBuffer::ByteArrayUploader>(_buffers[0])) :
-                                  buffer.snapshot(_object_pool->obtain<GLBuffer::ByteArrayListUploader>(_buffers));
+    if(_buffers.size() == 1)
+        return _object_pool->obtain<GLBuffer::ByteArrayUploader>(_buffers[0]);
+    return _object_pool->obtain<GLBuffer::ByteArrayListUploader>(_buffers);
 }
 
 size_t GLBuffer::Builder::stride() const

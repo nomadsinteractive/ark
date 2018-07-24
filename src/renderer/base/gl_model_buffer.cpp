@@ -96,9 +96,9 @@ const GLBuffer::Snapshot& GLModelBuffer::indices() const
     return _indices;
 }
 
-GLBuffer::Snapshot& GLModelBuffer::indices()
+void GLModelBuffer::setIndices(GLBuffer::Snapshot indices)
 {
-    return _indices;
+    _indices = std::move(indices);
 }
 
 }

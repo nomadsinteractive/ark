@@ -19,7 +19,7 @@ GLModelLoaderQuad::GLModelLoaderQuad()
 void GLModelLoaderQuad::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(4 * layerContext._items.size());
-    buf.indices() = GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_QUADS, layerContext._items.size());
+    buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_QUADS, layerContext._items.size()));
 }
 
 void GLModelLoaderQuad::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& scale)

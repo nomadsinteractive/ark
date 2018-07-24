@@ -46,7 +46,7 @@ sp<RenderCommand> GLModelLayer::render(const LayerContext::Snapshot& renderConte
             buf.setTranslate(V3(x + i._position.x(), y + i._position.y(), i._position.z()));
             _model_loader->loadModel(buf, atlas, i._type, i._size);
         }
-        GLDrawingContext drawingContext(_shader_bindings, buf.vertices().snapshot(_shader_bindings->arrayBuffer()), buf.indices(), _model_loader->mode());
+        GLDrawingContext drawingContext(_shader_bindings, _shader_bindings->arrayBuffer().snapshot(buf.vertices().makeUploader()), buf.indices(), _model_loader->mode());
         return _resource_loader_context->objectPool()->obtain<DrawElements>(std::move(drawingContext), _shader);
     }
     return nullptr;

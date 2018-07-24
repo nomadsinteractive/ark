@@ -5,6 +5,7 @@
 #include "core/inf/variable.h"
 
 #include "python/extension/py_instance.h"
+#include "python/extension/python_interpreter.h"
 
 namespace ark {
 namespace plugin {
@@ -22,8 +23,7 @@ void PyNumericDuckType::to(sp<Integer>& inst)
 
 void PyNumericDuckType::to(sp<Numeric>& inst)
 {
-
-    inst = sp<Numeric::Impl>::make(PyFloat_AsDouble(_instance->instance()));
+    inst = PythonInterpreter::instance()->toNumeric(_instance->instance());
 }
 
 }
