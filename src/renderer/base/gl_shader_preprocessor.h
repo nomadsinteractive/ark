@@ -10,6 +10,7 @@
 #include "core/types/global.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/gl_attribute.h"
 #include "renderer/base/render_engine.h"
 
 namespace ark {
@@ -132,6 +133,8 @@ public:
 
 class GLShaderPreprocessorContext {
 public:
+    std::map<String, GLAttribute> _attributes;
+
     List<std::pair<String, String>> _vertex_in;
     List<std::pair<String, String>> _vertex_out;
 

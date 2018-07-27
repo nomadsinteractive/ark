@@ -7,18 +7,20 @@
 #include "graphics/base/v3.h"
 
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/base/gl_shader_bindings.h"
 
 namespace ark {
 
-GLModelBuffer::GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const size_t growCapacity, uint32_t stride, int32_t texCoordinateOffset)
-    : _vertices(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), stride, growCapacity),
-      _tex_coordinate_offset(texCoordinateOffset), _normal_offset(-1), _tangents_offset(-1), _indice_base(0)
+GLModelBuffer::GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<GLShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride, int32_t texCoordinateOffset)
+    : _shader_bindings(shaderBindings), _vertices(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), stride, instanceCount),
+      _instanced_buffer_builders(shaderBindings->makeInstancedBufferBuilders(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), instanceCount)),
+      _tex_coordinate_offset(texCoordinateOffset), _normal_offset(-1), _tangents_offset(-1), _indice_base(0), _is_instanced(false)
 {
 }
 
 void GLModelBuffer::setPosition(float x, float y, float z)
 {
-    _vertices.write<V3>(_transform.mapXYZ(V3(x, y, z)) + _translate, 0);
+    _vertices.write<V3>(_is_instanced ? V3(x, y, z) : _transform.mapXYZ(V3(x, y, z)) + _translate, 0);
 }
 
 void GLModelBuffer::setTexCoordinate(uint16_t u, uint16_t v)
@@ -51,12 +53,6 @@ void GLModelBuffer::nextVertex()
 {
     _vertices.next();
     applyVaryings();
-}
-
-void GLModelBuffer::writeIndices(const glindex_t* indices, glindex_t count)
-{
-    for(glindex_t i = 0; i < count; i++)
-        _index_buffer.push_back(indices[i] + _indice_base);
 }
 
 void GLModelBuffer::nextModel()
@@ -99,6 +95,34 @@ const GLBuffer::Snapshot& GLModelBuffer::indices() const
 void GLModelBuffer::setIndices(GLBuffer::Snapshot indices)
 {
     _indices = std::move(indices);
+}
+
+bool GLModelBuffer::isInstanced() const
+{
+    return _is_instanced;
+}
+
+void GLModelBuffer::setIsInstanced(bool isInstanced)
+{
+    _is_instanced = isInstanced;
+}
+
+GLBuffer::Builder& GLModelBuffer::getInstancedArrayBuilder(uint32_t divisor)
+{
+    auto iter = _instanced_buffer_builders.find(divisor);
+    DCHECK(iter != _instanced_buffer_builders.end(), "No instance buffer builder(%d) found", divisor);
+    return iter->second;
+}
+
+std::vector<std::pair<uint32_t, GLBuffer::Snapshot>> GLModelBuffer::makeInstancedBufferSnapshots() const
+{
+    std::vector<std::pair<uint32_t, GLBuffer::Snapshot>> snapshots;
+    DCHECK(_instanced_buffer_builders.size() == _shader_bindings->_instanced_arrays.size(), "Instanced buffer size mismatch: %d, %d", _instanced_buffer_builders.size(), _shader_bindings->_instanced_arrays.size());
+
+    for(const std::pair<uint32_t, GLBuffer>& i : _shader_bindings->_instanced_arrays)
+        snapshots.emplace_back(i.first, i.second.snapshot(_instanced_buffer_builders.at(i.first).makeUploader()));
+
+    return snapshots;
 }
 
 }

@@ -2,10 +2,11 @@
 #define ARK_CORE_BASE_LIBRARY_H_
 
 #include <functional>
+#include <unordered_map>
 
 #include "core/base/callable.h"
-#include "core/collection/by_name.h"
 #include "core/forwarding.h"
+#include "core/types/shared_ptr.h"
 #include "core/util/strings.h"
 
 namespace ark {
@@ -27,28 +28,13 @@ private:
     };
 
 public:
-    Library() {
-    }
-    Library(const Library& other)
-        : _callables(other._callables) {
-    }
-    Library(Library&& other)
-        : _callables(std::move(other._callables)){
-    }
-
-    const Library& operator = (const Library& other) {
-        _callables = other._callables;
-        return *this;
-    }
-
-    const Library& operator = (Library&& other) {
-        _callables = std::move(other._callables);
-        return *this;
-    }
+    Library() = default;
+    DEFAULT_COPY_AND_ASSIGN(Library);
 
     template<typename T> const sp<Callable<T>>& getCallable(const String& name) const {
         Function<T> func;
-        return _callables.get<Callable<T>>(func.name(name));
+        const auto iter = _callables.find(func.name(name));
+        return iter != _callables.end() ? iter->second.unpack<Callable<T>>() : sp<Callable<T>>::null();
     }
 
     template<typename T> void addCallable(const String& name, const std::function<T>& func) {
@@ -57,11 +43,11 @@ public:
 
     template<typename T> void addCallable(const String& name, const sp<Callable<T>>& callable) {
         Function<T> func;
-        _callables.put<Callable<T>>(func.name(name), callable);
+        _callables.insert(std::make_pair(func.name(name), callable.pack()));
     }
 
 private:
-    ByName _callables;
+    std::unordered_map<String, Box> _callables;
 };
 
 }

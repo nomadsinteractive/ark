@@ -43,7 +43,7 @@ public:
             *box = ptr.pack();
         }
 
-        template<typename T> bool typeCheck() {
+        template<typename T> bool typeCheck() const {
             return box && box->typeId() == Type<T>::id();
         }
 

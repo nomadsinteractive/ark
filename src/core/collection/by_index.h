@@ -10,16 +10,8 @@ namespace ark {
 
 template<typename T> class ByIndex {
 public:
-    ByIndex() {
-    }
-
-    ByIndex(const ByIndex& other)
-        : _items(other._items) {
-    }
-
-    ByIndex(ByIndex&& other)
-        : _items(std::move(other._items)) {
-    }
+    ByIndex() = default;
+    DEFAULT_COPY_AND_ASSIGN(ByIndex);
 
     void add(uint32_t index, const T& item) {
         _items[index] = item;

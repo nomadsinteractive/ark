@@ -1,7 +1,7 @@
 #ifndef ARK_RENDERER_BASE_GL_DRAWING_CONTEXT_H_
 #define ARK_RENDERER_BASE_GL_DRAWING_CONTEXT_H_
 
-#include <map>
+#include <vector>
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -24,7 +24,8 @@ public:
     sp<GLShaderBindings> _shader_bindings;
 
     GLBuffer::Snapshot _array_buffer;
-    std::map<uint32_t, GLBuffer::Snapshot> _instanced_array_buffers;
+    std::vector<std::pair<uint32_t, GLBuffer::Snapshot>> _instanced_array_snapshots;
+
     GLBuffer::Snapshot _index_buffer;
 
     GLenum _mode;

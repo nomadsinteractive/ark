@@ -14,26 +14,26 @@ namespace ark {
 
 class ARK_API GLShaderBindings {
 public:
-    GLShaderBindings(const sp<GLShader>& shader, const GLBuffer& arrayBuffer);
+    GLShaderBindings(GLResourceManager& resourceManager, const sp<GLShader>& shader);
 
     const sp<GLShader>& shader() const;
     const sp<GLSnippetDelegate>& snippet() const;
 
     const GLBuffer& arrayBuffer() const;
 
-    void setInstancedArrayBuffer(uint32_t divisor, const GLBuffer& buffer);
-
     void bindArrayBuffers(GraphicsContext& graphicsContext, GLProgram& program) const;
 
-private:
-    void bindAttributesByDivisor(GraphicsContext& /*graphicsContext*/, GLProgram& program, uint32_t divisor) const;
+    std::map<uint32_t, GLBuffer::Builder> makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const;
 
 private:
     sp<GLShader> _shader;
     sp<GLSnippetDelegate> _snippet;
 
     GLBuffer _array_buffer;
-    std::map<uint32_t, GLBuffer> _instanced_array_buffers;
+    sp<GLShaderInput> _shader_input;
+    std::vector<std::pair<uint32_t, GLBuffer>> _instanced_arrays;
+
+    friend class GLModelBuffer;
 };
 
 }

@@ -89,6 +89,14 @@ void GraphicsContext::glUpdateMVPMatrix()
     uniform.setUniformMatrix4fv(1, GL_FALSE, mvp.value(), _tick);
 }
 
+void GraphicsContext::glUpdateVPMatrix()
+{
+    const Matrix& vp = _top->vp();
+    const GLProgram::Uniform& uniform = _program->getUniform("u_VP");
+    DCHECK(uniform, "Uniform u_VP not found");
+    uniform.setUniformMatrix4fv(1, GL_FALSE, vp.value(), _tick);
+}
+
 void GraphicsContext::glUpdateModelMatrix()
 {
     const GLProgram::Uniform& uniform = _program->getUniform("u_Model");
@@ -131,9 +139,14 @@ void GraphicsContext::MVPMatrix::setVP(const Matrix& vp)
     _mvp = _vp * _model;
 }
 
-const Matrix& GraphicsContext::MVPMatrix::mvp()
+const Matrix& GraphicsContext::MVPMatrix::mvp() const
 {
     return _mvp;
+}
+
+const Matrix& GraphicsContext::MVPMatrix::vp() const
+{
+    return _vp;
 }
 
 const Matrix& GraphicsContext::MVPMatrix::model() const

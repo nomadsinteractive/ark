@@ -33,6 +33,7 @@ public:
 
     void glOrtho(float left, float right, float top, float bottom, float near, float far);
     void glUpdateMVPMatrix();
+    void glUpdateVPMatrix();
     void glUpdateModelMatrix();
 
     void glPushMatrix();
@@ -48,7 +49,8 @@ private:
 
         void setVP(const Matrix& vp);
 
-        const Matrix& mvp();
+        const Matrix& mvp() const;
+        const Matrix& vp() const;
 
         const Matrix& model() const;
         const Matrix& view() const;

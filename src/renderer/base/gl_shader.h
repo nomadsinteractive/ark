@@ -32,8 +32,7 @@ public:
 
 public:
     GLShader(const sp<GLShaderSource>& source);
-    GLShader(const GLShader& other) = default;
-    GLShader(GLShader&& other) = default;
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(GLShader);
 
     static sp<Builder<GLShader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag");
     static sp<GLShader> fromStringTable(const String& vertex = "shaders/default.vert", const String& fragment = "shaders/texture.frag", const sp<GLSnippet>& snippet = nullptr, const sp<ResourceLoaderContext>& resourceLoaderContext = nullptr);
@@ -53,10 +52,10 @@ public:
 
     const sp<GLProgram>& makeGLProgram(GraphicsContext& graphicsContext);
 
+//[[deprecated]]
     uint32_t stride() const;
 
-    const GLAttribute& getAttribute(const String& name) const;
-    int32_t getAttributeOffset(const String& name) const;
+    const GLAttribute& getAttribute(const String& name, uint32_t divisor = 0) const;
 
 //[[script::bindings::auto]]
     sp<Varyings> makeVaryings() const;

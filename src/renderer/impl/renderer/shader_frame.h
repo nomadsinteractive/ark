@@ -50,12 +50,10 @@ private:
     sp<GLResourceManager> _resource_manager;
     sp<GLShader> _shader;
 
-    GLBuffer _array_buffer;
-
     sp<ObjectPool> _object_pool;
     sp<MemoryPool> _memory_pool;
     sp<GLShaderBindings> _shader_bindings;
-
+    GLBuffer _array_buffer;
 };
 
 }

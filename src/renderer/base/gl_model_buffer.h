@@ -2,6 +2,7 @@
 #define ARK_RENDERER_BASE_GL_MODEL_BUFFER_H_
 
 #include <vector>
+#include <map>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -21,7 +22,7 @@ namespace ark {
 
 class ARK_API GLModelBuffer {
 public:
-    GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const size_t growCapacity, uint32_t stride, int32_t texCoordinateOffset);
+    GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<GLShaderBindings>& shaderBindings, size_t renderObjectCount, uint32_t stride, int32_t texCoordinateOffset);
     DEFAULT_COPY_AND_ASSIGN(GLModelBuffer);
 
     void setPosition(float x, float y, float z);
@@ -30,9 +31,6 @@ public:
     void setTangents(const V3& tangents);
 
     void nextVertex();
-
-    void writeIndices(const glindex_t* indices, glindex_t count);
-
     void nextModel();
 
     void setTranslate(const V3& translate);
@@ -46,14 +44,23 @@ public:
     const GLBuffer::Snapshot& indices() const;
     void setIndices(GLBuffer::Snapshot indices);
 
+    bool isInstanced() const;
+    void setIsInstanced(bool isInstanced);
+
+    GLBuffer::Builder& getInstancedArrayBuilder(uint32_t divisor);
+
+    std::vector<std::pair<uint32_t, GLBuffer::Snapshot>> makeInstancedBufferSnapshots() const;
+
 private:
     void applyVaryings();
 
 private:
-    GLBuffer::Builder _vertices;
-    GLBuffer::Snapshot _indices;
+    sp<GLShaderBindings> _shader_bindings;
 
-    std::vector<glindex_t> _index_buffer;
+    GLBuffer::Builder _vertices;
+    std::map<uint32_t, GLBuffer::Builder> _instanced_buffer_builders;
+
+    GLBuffer::Snapshot _indices;
 
     int32_t _tex_coordinate_offset;
     int32_t _normal_offset;
@@ -66,6 +73,7 @@ private:
 
     Varyings::Snapshot _varyings;
 
+    bool _is_instanced;
 };
 
 }

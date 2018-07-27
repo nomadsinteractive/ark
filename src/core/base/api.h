@@ -75,6 +75,9 @@
 namespace ark {
 
 namespace Constants {
+
+const size_t npos = std::numeric_limits<size_t>::max();
+
 namespace Attributes {
 
 const char* const ID = "id";

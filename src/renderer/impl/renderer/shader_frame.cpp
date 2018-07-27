@@ -21,9 +21,9 @@ namespace ark {
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _size(size), _resource_manager(resourceLoaderContext->glResourceManager()), _shader(shader),
-      _array_buffer(_resource_manager->makeDynamicArrayBuffer()),
       _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
-      _shader_bindings(sp<GLShaderBindings>::make(shader, _array_buffer))
+      _shader_bindings(sp<GLShaderBindings>::make(_resource_manager, shader)),
+      _array_buffer(_shader_bindings->arrayBuffer())
 {
 }
 

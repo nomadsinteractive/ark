@@ -22,7 +22,7 @@ GLShaderSource::GLShaderSource(const String& vertex, const String& fragment, con
     : _preprocessor_context(new GLShaderPreprocessorContext()),
       _vertex(GLShaderPreprocessor::SHADER_TYPE_VERTEX, vertex),
       _fragment(GLShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment),
-      _render_controller(renderController)
+      _render_controller(renderController), _input(sp<GLShaderInput>::make())
 {
 }
 
@@ -40,13 +40,14 @@ sp<GLProgram> GLShaderSource::makeGLProgram(GraphicsContext& graphicsContext) co
 
 GLAttribute& GLShaderSource::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
 {
-    if(_attributes.find(name) == _attributes.end())
-        _attributes[name] = getPredefinedAttribute(name, type);
+    std::map<String, GLAttribute>& attributes = _preprocessor_context->_attributes;
+    if(attributes.find(name) == attributes.end())
+        attributes[name] = getPredefinedAttribute(name, type);
 
     if(scopes & GLShaderPreprocessor::SHADER_TYPE_FRAGMENT)
         _preprocessor_context->_fragment_in.push_back(std::pair<String, String>(type, name));
 
-    return _attributes[name];
+    return attributes[name];
 }
 
 void GLShaderSource::addSnippet(const sp<GLSnippet>& snippet)
@@ -88,17 +89,14 @@ GLShaderPreprocessor& GLShaderSource::fragment()
     return _fragment;
 }
 
-const GLAttribute& GLShaderSource::getAttribute(const String& name) const
+const GLAttribute& GLShaderSource::getAttribute(const String& name, uint32_t divisor) const
 {
-    const auto iter = _attributes.find(name);
-    DCHECK(iter != _attributes.end(), "Shader has no attribute \"%s\"", name.c_str());
-    return iter->second;
+    return _input->getStream(divisor).getAttribute(name);
 }
 
-const int32_t GLShaderSource::getAttributeOffset(const String& name) const
+const sp<GLShaderInput>& GLShaderSource::input() const
 {
-    const auto iter = _attributes.find(name);
-    return iter != _attributes.end() ? iter->second.offset() : -1;
+    return _input;
 }
 
 void GLShaderSource::initialize()
@@ -141,7 +139,7 @@ void GLShaderSource::initialize()
 
     std::map<String, String> attributes = _fragment._in_declarations._declared;
     if(_snippet)
-        for(const auto& iter : _attributes)
+        for(const auto& iter : context._attributes)
             attributes[iter.first] = iter.second.type();
 
     List<String> generated;
@@ -156,12 +154,8 @@ void GLShaderSource::initialize()
         }
     }
 
-    for(auto& iter : _stride)
-    {
-        uint32_t mod = iter.second % sizeof(GLfloat);
-        if(mod != 0)
-            iter.second += (sizeof(GLfloat) - mod);
-    }
+    for(auto iter : _input->_streams)
+        iter.second.align();
 
     for(const auto& i : attributes)
     {
@@ -189,15 +183,12 @@ void GLShaderSource::initialize()
 
 void GLShaderSource::addAttribute(const String& name, const String& type)
 {
-    if(_attributes.find(name) == _attributes.end())
+    if(_preprocessor_context->_attributes.find(name) == _preprocessor_context->_attributes.end())
         addPredefinedAttribute(name, type);
 
-    GLAttribute& attr = _attributes[name];
-    if(_stride.find(attr.divisor()) == _stride.end())
-        _stride[attr.divisor()] = 0;
-    uint32_t& s = _stride[attr.divisor()];
-    attr.setOffset(s);
-    s += attr.size();
+    GLAttribute& attr = _preprocessor_context->_attributes[name];
+
+    _input->addAttribute(name, attr);
 }
 
 void GLShaderSource::addUniform(const String& name, GLUniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed)
@@ -215,6 +206,8 @@ void GLShaderSource::loadPredefinedAttribute(const document& manifest)
     for(const document& i : manifest->children("attribute"))
     {
         const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
+        DCHECK(!name.empty(), "Empty name");
+        DWARN(isupper(name[0]) || name.startsWith("a_"), "GLAttribute name \"%s\" should be capital first or started with a_", name.c_str());
         const String attrName = name.startsWith("a_") ? name.substr(2) : name;
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         uint32_t divisor = Documents::getAttribute<uint32_t>(i, "divisor", 0);

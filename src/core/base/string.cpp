@@ -37,18 +37,6 @@ String::~String()
 {
 }
 
-const String& String::operator =(const String& other)
-{
-    _str = other._str;
-    return *this;
-}
-
-const String& String::operator =(String&& other)
-{
-    _str = std::move(other._str);
-    return *this;
-}
-
 const String& String::operator =(const char* other)
 {
     _str = other;

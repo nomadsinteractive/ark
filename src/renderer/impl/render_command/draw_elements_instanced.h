@@ -13,7 +13,7 @@ namespace ark {
 
 class ARK_API DrawElementsInstanced : public RenderCommand {
 public:
-    DrawElementsInstanced(const GLDrawingContext& context, const sp<GLShader>& shader, int32_t count);
+    DrawElementsInstanced(GLDrawingContext context, const sp<GLShader>& shader, int32_t count);
 
     virtual void draw(GraphicsContext& graphicsContext) override;
 

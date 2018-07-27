@@ -17,7 +17,7 @@ void GLDrawingContext::preDraw(GraphicsContext& graphicsContext, const GLShader&
     DCHECK(_array_buffer.id(), "Invaild GL Array Buffer");
     DCHECK(_index_buffer.id(), "Invaild GL Index Buffer");
 
-    for(const auto& iter : _instanced_array_buffers)
+    for(const auto& iter : _instanced_array_snapshots)
     {
         iter.second.prepare(graphicsContext);
         DCHECK(iter.second.id(), "Invaild GL Instanced Array Buffer: %d", iter.first);

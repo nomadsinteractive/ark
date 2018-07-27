@@ -115,17 +115,12 @@ const sp<GLProgram>& GLShader::makeGLProgram(GraphicsContext& graphicsContext)
 
 uint32_t GLShader::stride() const
 {
-    return _source->_stride[0];
+    return _source->_input->getStream(0).stride();
 }
 
-const GLAttribute& GLShader::getAttribute(const String& name) const
+const GLAttribute& GLShader::getAttribute(const String& name, uint32_t divisor) const
 {
-    return _source->getAttribute(name);
-}
-
-int32_t GLShader::getAttributeOffset(const String& name) const
-{
-    return _source->getAttributeOffset(name);
+    return _source->getAttribute(name, divisor);
 }
 
 sp<Varyings> GLShader::makeVaryings() const

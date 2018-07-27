@@ -10,6 +10,7 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/gl_attribute.h"
 #include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_shader_input.h"
 #include "renderer/base/gl_shader_preprocessor.h"
 #include "renderer/base/gl_uniform.h"
 #include "renderer/base/resource_loader_context.h"
@@ -35,8 +36,9 @@ public:
     GLShaderPreprocessor& vertex();
     GLShaderPreprocessor& fragment();
 
-    const GLAttribute& getAttribute(const String& name) const;
-    const int32_t getAttributeOffset(const String& name) const;
+    const GLAttribute& getAttribute(const String& name, uint32_t divisor = 0) const;
+
+    const sp<GLShaderInput>& input() const;
 
 private:
     void initialize();
@@ -53,10 +55,10 @@ private:
 
     GLShaderPreprocessor _vertex;
     GLShaderPreprocessor _fragment;
-    sp<RenderController> _render_controller;
 
-    std::map<String, GLAttribute> _attributes;
-    std::map<uint32_t, uint32_t> _stride;
+    sp<RenderController> _render_controller;
+    sp<GLShaderInput> _input;
+
     List<GLUniform> _uniforms;
 
     sp<GLSnippet> _snippet;

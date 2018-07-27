@@ -21,6 +21,7 @@ class GLResource;
 class GLResourceManager;
 class GLShader;
 class GLShaderBindings;
+class GLShaderInput;
 class GLShaderPreprocessor;
 class GLShaderPreprocessorContext;
 class GLShaderSource;

@@ -18,11 +18,7 @@ public:
     typedef void(*Destructor)(void*);
 
     Box() noexcept = default;
-    Box(const Box& other) = default;
-    Box(Box&& other) = default;
-
-    Box& operator =(const Box& other) = default;
-    Box& operator =(Box&& other) = default;
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Box);
 
     explicit operator bool() const;
 

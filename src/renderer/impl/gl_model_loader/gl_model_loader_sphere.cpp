@@ -46,6 +46,7 @@ void GLModelLoaderSphere::start(GLModelBuffer& buf, GLResourceManager& resourceM
 {
     buf.vertices().setGrowCapacity(layerContext._items.size() * _vertex_count);
     buf.setIndices(_instance_index.snapshot());
+    buf.setIsInstanced(true);
 }
 
 void GLModelLoaderSphere::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& size)
@@ -55,7 +56,7 @@ void GLModelLoaderSphere::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint
     for(uint32_t i = 0; i < _vertex_count; i++)
     {
         buf.nextVertex();
-        buf.setPosition(elements[0] * size.x() + 480, elements[1] * size.x() + 270, elements[2] * size.x());
+        buf.setPosition(elements[0], elements[1], elements[2]);
         uint16_t u = item.left() + static_cast<uint16_t>((item.right() - item.left()) * elements[3]);
         uint16_t v = item.top() + static_cast<uint16_t>((item.bottom() - item.top()) * elements[4]);
         buf.setTexCoordinate(u, v);

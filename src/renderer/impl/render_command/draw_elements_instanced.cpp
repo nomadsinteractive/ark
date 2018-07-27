@@ -7,8 +7,8 @@
 
 namespace ark {
 
-DrawElementsInstanced::DrawElementsInstanced(const GLDrawingContext& context, const sp<GLShader>& shader, int32_t count)
-    : _context(context), _shader(shader), _count(count)
+DrawElementsInstanced::DrawElementsInstanced(GLDrawingContext context, const sp<GLShader>& shader, int32_t count)
+    : _context(std::move(context)), _shader(shader), _count(count)
 {
 }
 
@@ -17,7 +17,7 @@ void DrawElementsInstanced::draw(GraphicsContext& graphicsContext)
     _shader->use(graphicsContext);
     _shader->bindUniforms(graphicsContext);
 
-    graphicsContext.glUpdateMVPMatrix();
+    graphicsContext.glUpdateVPMatrix();
     _context.preDraw(graphicsContext, _shader);
     glDrawElementsInstanced(_context._mode, _context._count, GLIndexType, nullptr, _count);
     _context.postDraw(graphicsContext);

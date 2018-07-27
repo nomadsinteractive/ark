@@ -167,6 +167,7 @@ public:
     class Builder {
     public:
         Builder(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t stride, size_t growCapacity);
+        DEFAULT_COPY_AND_ASSIGN(Builder);
 
         template<typename T> void write(const T& value, size_t offset = 0) {
             DCHECK(sizeof(T) + offset <= _stride, "Stride overflow: sizeof(value) = %d, offset = %d", sizeof(value), offset);

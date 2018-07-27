@@ -34,7 +34,7 @@ void GLShaderPreprocessor::parseMainFunction(GLShaderSource& shader)
 {
     if(_source.find("void main()") != String::npos)
     {
-        DWARN(false, "Shader which contains main function will not be preprocessed by ark shader preprocessor. Try to replace it with \"vec4 ark_main(vec2 position, ...)\" for better flexibilty and compatibilty");
+        DWARN(false, "Shader which contains main function will not be preprocessed by ark shader preprocessor. Try to replace it with \"vec4 ark_main(vec4 position, ...)\" for better flexibilty and compatibilty");
         return;
     }
 
@@ -145,7 +145,7 @@ void GLShaderPreprocessor::insertPredefinedUniforms(const List<GLUniform>& unifo
 {
     static const std::regex UNIFORM_PATTERN("uniform\\s+\\w+\\s+(\\w+)(?:\\[\\d+\\])?;");
     std::set<String> names;
-    List<String> generated;
+    std::vector<String> generated;
     _source.search(UNIFORM_PATTERN, [&names](const std::smatch& m)->bool {
         names.insert(m[1].str());
         return true;

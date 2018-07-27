@@ -12,7 +12,7 @@ class ARK_API GLAttribute {
 public:
     GLAttribute();
     GLAttribute(const String& name, const String& type, GLenum glType, uint32_t length, GLboolean normalized);
-    GLAttribute(const GLAttribute& other) = default;
+    DEFAULT_COPY_AND_ASSIGN(GLAttribute);
 
     const String& name() const;
     const String& type() const;

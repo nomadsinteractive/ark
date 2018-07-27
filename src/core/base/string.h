@@ -15,8 +15,7 @@ public:
     typedef std::string::size_type size_type;
 
     String() = default;
-    String(const String& other) = default;
-    String(String&& other) = default;
+    DEFAULT_COPY_AND_ASSIGN(String);
 
     String(const char* s);
     String(size_type length, char fill);
@@ -24,8 +23,6 @@ public:
     String(std::string&& str);
     ~String();
 
-    const String& operator =(const String& other);
-    const String& operator =(String&& other);
     const String& operator =(const char* other);
 
     char at(size_type i) const;
