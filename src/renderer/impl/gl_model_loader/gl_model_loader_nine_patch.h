@@ -15,14 +15,14 @@ namespace ark {
 class GLModelLoaderNinePatch : public GLModelLoader {
 private:
     struct Item {
-        Item(const Rect& bounds, const Rect& stretching, uint32_t textureWidth, uint32_t textureHeight);
+        Item(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight);
         Item(const Item& other) = default;
         Item() = default;
 
         uint16_t _x[4];
         uint16_t _y[4];
 
-        Rect paddings;
+        Rect _paddings;
     };
 
 public:

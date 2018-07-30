@@ -105,6 +105,18 @@ class Numeric(Var):
     def chase(duration, target, s0, eta):
         return None
 
+    def __add__(self, other):
+        return None
+
+    def __mul__(self, other):
+        return None
+
+    def __sub__(self, other):
+        return None
+
+    def __truediv__(self, other):
+        return None
+
 
 class Expired:
     def __init__(self, v=False):
@@ -218,6 +230,10 @@ class Arena:
     @staticmethod
     def load(clz, name, **kwargs):
         return _ArkObject()
+
+    @property
+    def references(self):
+        return None
 
 
 class Algorithm:
@@ -477,7 +493,7 @@ class Size:
 
 
 class TileMap:
-    def __init__(self, layer, scroller, w, h, tw, th):
+    def __init__(self, layer, w, h, tw, th):
         pass
 
     def set_tile(self, row_id, col_id, obj):
@@ -501,6 +517,22 @@ class TileMap:
     @property
     def col_count(self):
         return 0
+
+    @property
+    def position(self):
+        return None
+
+    @position.setter
+    def position(self, val):
+        pass
+
+    @property
+    def scroller(self):
+        return None
+
+    @scroller.setter
+    def scroller(self, val):
+        pass
 
 
 class Function:

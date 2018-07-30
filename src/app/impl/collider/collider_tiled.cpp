@@ -89,15 +89,20 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
     if(!callback()->hasCallback())
         return;
 
+    const V position = _tile_map->position()->val();
+    float left = rect.left() - position.x();
+    float right = rect.right() - position.x();
+    float top = rect.top() - position.y();
+    float bottom = rect.bottom() - position.y();
     std::set<uint32_t> candidates = _contacts;
     std::set<uint32_t> contacts;
     float tileWidth = static_cast<float>(_tile_map->tileWidth());
     float tileHeight = static_cast<float>(_tile_map->tileHeight());
 
-    int32_t bColId = static_cast<int32_t>(rect.left() / _tile_map->tileWidth()) - (rect.left() < 0 ? 1 : 0);
-    int32_t eColId = static_cast<int32_t>(rect.right() / _tile_map->tileWidth()) - (rect.right() < 0 ? 1 : 0);
-    int32_t bRowId = static_cast<int32_t>(rect.top() / _tile_map->tileHeight()) - (rect.top() < 0 ? 1 : 0);
-    int32_t eRowId = static_cast<int32_t>(rect.bottom() / _tile_map->tileHeight()) - (rect.bottom() < 0 ? 1 : 0);
+    int32_t bColId = static_cast<int32_t>(left / _tile_map->tileWidth()) - (left < 0 ? 1 : 0);
+    int32_t eColId = static_cast<int32_t>(right / _tile_map->tileWidth()) - (right < 0 ? 1 : 0);
+    int32_t bRowId = static_cast<int32_t>(top / _tile_map->tileHeight()) - (top < 0 ? 1 : 0);
+    int32_t eRowId = static_cast<int32_t>(bottom / _tile_map->tileHeight()) - (bottom < 0 ? 1 : 0);
 
     for(int32_t col = bColId; col <= eColId; col ++)
         for(int32_t row = bRowId; row <= eRowId; row ++)

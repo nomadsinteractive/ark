@@ -75,6 +75,8 @@ public:
 
 //[[script::bindings::classmethod]]
     static sp<Numeric> depends(const sp<Numeric>& self, const sp<Numeric>& depends);
+//[[script::bindings::classmethod]]
+    static sp<Numeric> boundary(const sp<Numeric>& self, const sp<Numeric>& boundary);
 
 //[[script::bindings::auto]]
     static sp<Numeric> chase(const sp<Numeric>& duration, const sp<Numeric>& target, float s0, float eta);

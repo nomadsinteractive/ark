@@ -22,6 +22,7 @@ public:
         return _inst.get();
     }
 
+//[[deprecated]]
     const sp<T>& ensure() const {
         if(!_allocated) {
             _inst = sp<IMPL>::make(*_inst);

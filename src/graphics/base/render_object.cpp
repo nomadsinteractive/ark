@@ -14,13 +14,13 @@
 
 namespace ark {
 
-RenderObject::RenderObject(int32_t type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& filter)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(filter))
+RenderObject::RenderObject(int32_t type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(varyings))
 {
 }
 
-RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& filter)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(filter)), _type_expired(type.as<Expired>())
+RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(varyings)), _type_expired(type.as<Expired>())
 {
 }
 
@@ -131,7 +131,7 @@ RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
       _position(factory.getBuilder<Vec>(manifest, Constants::Attributes::POSITION)),
       _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _transform(factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM)),
-      _varyings(factory.getBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS))
+      _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS))
 {
 }
 
@@ -141,8 +141,8 @@ sp<RenderObject> RenderObject::BUILDER::build(const sp<Scope>& args)
     return sp<RenderObject>::make(type, _position->build(args), _size->build(args), _transform->build(args), _varyings->build(args));
 }
 
-RenderObject::EXPIRED_STYLE::EXPIRED_STYLE(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value)
-    : _delegate(delegate), _expired(parent.ensureBuilder<Expired>(value))
+RenderObject::EXPIRED_STYLE::EXPIRED_STYLE(BeanFactory& factory, const sp<Builder<RenderObject>>& delegate, const String& value)
+    : _delegate(delegate), _expired(factory.ensureBuilder<Expired>(value))
 {
 }
 

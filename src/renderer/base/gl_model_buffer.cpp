@@ -64,7 +64,6 @@ void GLModelBuffer::setRenderObject(const RenderObject::Snapshot& renderObject)
 {
     _transform = renderObject._transform;
     _varyings = renderObject._varyings;
-    applyVaryings();
 }
 
 const Transform::Snapshot& GLModelBuffer::transform() const

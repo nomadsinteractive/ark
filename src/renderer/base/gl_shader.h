@@ -43,6 +43,7 @@ public:
 
     void bindUniforms(GraphicsContext& graphicsContext) const;
 
+    const sp<GLShaderInput>& input() const;
     const sp<GLShaderSource>& source() const;
 
     const sp<GLProgram>& program() const;

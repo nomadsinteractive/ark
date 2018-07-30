@@ -49,8 +49,8 @@ public:
 //  [[script::bindings::auto]]
     sp<Renderer> loadRenderer(const String& name, const sp<Scope>& args = nullptr);
 
-//  [[script::bindings::auto]]
-    Box getReference(const String& name);
+//  [[script::bindings::property]]
+    const sp<Scope>& refs() const;
 
 //  [[script::bindings::auto]]
     void addEventListener(const sp<EventListener>& eventListener);

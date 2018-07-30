@@ -4,7 +4,6 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/collection/list.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
@@ -19,14 +18,10 @@ private:
     class Varying {
     public:
         Varying(uint16_t offset, const sp<Flatable>& flatable);
-        Varying(const Varying& other) = default;
-        Varying(Varying&& other) = default;
         Varying();
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Varying);
 
-        Varying& operator =(const Varying& other) = default;
-        Varying& operator =(Varying&& other) = default;
-
-        void settle(uint8_t* ptr) const;
+        void apply(uint8_t* ptr) const;
 
     private:
         uint16_t _offset;
@@ -74,11 +69,9 @@ public:
         virtual sp<Varyings> build(const sp<Scope>& args) override;
 
     private:
-
-    private:
         BeanFactory _factory;
         sp<Builder<GLShader>> _shader;
-        List<VaryingBuilder> _varying_builders;
+        std::vector<VaryingBuilder> _varying_builders;
     };
 
 //  [[plugin::builder::by-value]]

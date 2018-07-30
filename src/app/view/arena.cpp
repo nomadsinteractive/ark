@@ -64,10 +64,10 @@ sp<Renderer> Arena::loadRenderer(const String& name, const sp<Scope>& args)
     return renderer;
 }
 
-Box Arena::getReference(const String& name)
+const sp<Scope>& Arena::refs() const
 {
     DCHECK(_resource_loader, "Trying to get references on a disposed Arena");
-    return _resource_loader->getReference(name);
+    return _resource_loader->beanFactory().references();
 }
 
 void Arena::addEventListener(const sp<EventListener>& eventListener)

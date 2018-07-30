@@ -44,7 +44,7 @@ bool RenderContext::takeSnapshot(LayerContext::Snapshot& output, MemoryPool& mem
             ++renderedCount;
             RenderObject::Snapshot snapshot = i->snapshot(memoryPool);
             snapshot._position = V(snapshot._position.x() + _position.x(), snapshot._position.y() + _position.y(), snapshot._position.z());
-            output._items.push_back(snapshot);
+            output._items.push_back(std::move(snapshot));
         }
     bool dirty = renderedCount != _last_rendered_count;
     _last_rendered_count = renderedCount;

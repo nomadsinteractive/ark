@@ -83,6 +83,7 @@ ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+\]\])*'
 AUTOBIND_CONTANT_PATTERN = re.compile(r'\[\[script::bindings::constant\(([\w\d_]+)\s*=\s*([^;\r\n]*)\)\]\]')
 AUTOBIND_ENUMERATION_PATTERN = re.compile(r'\[\[script::bindings::enumeration\]\]\s*enum\s+(\w+)\s*\{([^}]+)};')
 AUTOBIND_PROPERTY_PATTERN = re.compile(r'\[\[script::bindings::property\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
+AUTOBIND_GETPROP_PATTERN = re.compile(r'\[\[script::bindings::getprop\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
 AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader\]\]\s+template<typename T>\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;{]*\{')
 AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor)\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
 AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
@@ -245,6 +246,12 @@ def gen_class_body_source(genclass, includes, lines, buildables):
             lines.append('\nstatic PyMethodDef %s_methods[] = {\n    %s,\n    {NULL}\n};' % (
                 genclass.py_class_name, methoddeclare))
             tp_method_lines.append('pyTypeObject->tp_methods = %s_methods;' % genclass.py_class_name)
+
+        getprop_methods = genclass.getprop_methods()
+        if getprop_methods:
+            if len(getprop_methods) > 1:
+                print("WARNING: at least two getprop methods defined in %s, which is probably not right", genclass.classname)
+            tp_method_lines.append('pyTypeObject->tp_getattro = (getattrofunc) %s;' % getprop_methods[0].name)
 
         operator_defs = genclass.gen_operator_defs()
         if operator_defs:
@@ -424,11 +431,11 @@ ARK_PY_ARGUMENTS = (
 )
 
 ARK_PY_ARGUMENT_CHECKERS = {
-    'bool': GenConverter('(PyLong_Check({0}) || PyBool_Check({0}))', 'PyLong_AsLong({0}) != 0'),
-    'int32_t': GenConverter('(PyLong_Check({0}) || PyFloat_Check({0}))', 'PyLong_AsLong({0})'),
-    'uint32_t': GenConverter('(PyLong_Check({0}) || PyFloat_Check({0}))', 'PyLong_AsLong({0})'),
-    'float': GenConverter('(PyLong_Check({0}) || PyFloat_Check({0}))', '﻿PyFloat_AsDouble({0})'),
-    'std::wstring': GenConverter('PyUnicode_Check({0})', 'PyUnicode_DATA({0})')
+    'bool': GenConverter('(PyLong_CheckExact({0}) || PyBool_Check({0}))', 'PyLong_AsLong({0}) != 0'),
+    'int32_t': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', 'PyLong_AsLong({0})'),
+    'uint32_t': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', 'PyLong_AsLong({0})'),
+    'float': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', '﻿PyFloat_AsDouble({0})'),
+    'std::wstring': GenConverter('PyUnicode_CheckExact({0})', 'PyUnicode_DATA({0})')
 }
 
 
@@ -746,6 +753,28 @@ class GenPropertyMethod(GenMethod):
             return create_overloaded_method_type(GenPropertyMethod, is_static=m1.is_static)(m1, m2)
 
 
+class GenGetPropMethod(GenMethod):
+    def __init__(self, name, args, return_type):
+        GenMethod.__init__(self, name, args, return_type)
+
+    def _gen_parse_tuple_code(self, lines, declares, args):
+        pass
+
+    def _gen_convert_args_code(self, lines, argdeclare):
+        if argdeclare:
+            arg0 = self._arguments[0]
+            meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
+            ga = GenArgument(arg0.accept_type, arg0.default_value, meta, str(arg0))
+            lines.append(ga.gen_declare('obj0', 'arg0'))
+
+    def gen_py_arguments(self):
+        return 'Instance* self, PyObject* arg0'
+
+    def _gen_call_statement(self, genclass, argnames):
+        self_statement = self.gen_self_statement(genclass)
+        return '%s->%s(%s);' % (self_statement, self._name, argnames)
+
+
 class GenLoaderMethod(GenMethod):
     def __init__(self, name, args):
         GenMethod.__init__(self, name, ['TypeId typeId'] + args, 'PyObject*')
@@ -992,6 +1021,9 @@ class GenClass(object):
     def rich_compare_methods(self):
         return self.find_methods_by_type(GenRichCompareMethod)
 
+    def getprop_methods(self):
+        return self.find_methods_by_type(GenGetPropMethod)
+
     def find_methods_by_type(self, method_type):
         return [i for i in self.methods if isinstance(i, method_type)]
 
@@ -1098,6 +1130,11 @@ def main(params, paths):
         name, args, return_type, is_static = GenMethod.split(x)
         genclass.add_method(GenPropertyMethod(name, args, return_type, is_static))
 
+    def autogetprop(filename, content, main_class, x):
+        genclass = get_result_class(results, filename, main_class)
+        name, args, return_type, is_static = GenMethod.split(x)
+        genclass.add_method(GenGetPropMethod(name, args, return_type))
+
     def autoannotation(filename, content, m, x):
         names = [i for i in x[1].split(':', 2)[0].split() if i not in ('ARK_API', 'final')]
         if len(names) == 1:
@@ -1128,6 +1165,7 @@ def main(params, paths):
                             HeaderPattern(AUTOBIND_CLASS_PATTERN, autoclass),
                             HeaderPattern(AUTOBIND_LOADER_PATTERN, autoloader),
                             HeaderPattern(AUTOBIND_PROPERTY_PATTERN, autoproperty),
+                            HeaderPattern(AUTOBIND_GETPROP_PATTERN, autogetprop),
                             HeaderPattern(AUTOBIND_CONTANT_PATTERN, autoconstant),
                             HeaderPattern(AUTOBIND_ENUMERATION_PATTERN, autoenumeration),
                             HeaderPattern(AUTOBIND_META_PATTERN, autometa),

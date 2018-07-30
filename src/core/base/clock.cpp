@@ -165,14 +165,14 @@ void Clock::resume() const
 
 template<> ARK_API Clock::Interval Conversions::to<String, Clock::Interval>(const String& val)
 {
-    uint32_t len = val.length();
+    size_t len = val.length();
     if(val.endsWith("ms"))
         return static_cast<uint64_t>(Strings::parse<float>(val.substr(0, len - 2)) * 1000.0f);
     else if(val.endsWith("us"))
         return static_cast<uint64_t>(Strings::parse<float>(val.substr(0, len - 2)));
     else if(val.endsWith("s"))
         return static_cast<uint64_t>(Strings::parse<float>(val.substr(0, len - 1)) * 1000000.0f);
-    return Strings::parse<float>(val) * 1000000.0f;
+    return static_cast<uint64_t>(Strings::parse<float>(val) * 1000000.0f);
 }
 
 sp<Clock> Clock::BUILDER::build(const sp<Scope>& /*args*/)

@@ -104,6 +104,11 @@ void Vec2Util::setX(const sp<Vec2>& self, float x)
     ensureImpl(self)->x()->set(x);
 }
 
+void Vec2Util::setX(const sp<Vec2>& self, const sp<Numeric>& x)
+{
+    ensureImpl(self)->x()->set(x);
+}
+
 float Vec2Util::y(const sp<Vec2>& self)
 {
     const sp<Vec2Impl> impl = self.as<Vec2Impl>();
@@ -111,6 +116,11 @@ float Vec2Util::y(const sp<Vec2>& self)
 }
 
 void Vec2Util::setY(const sp<Vec2>& self, float y)
+{
+    ensureImpl(self)->y()->set(y);
+}
+
+void Vec2Util::setY(const sp<Vec2>& self, const sp<Numeric>& y)
 {
     ensureImpl(self)->y()->set(y);
 }

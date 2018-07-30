@@ -31,9 +31,9 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    RenderObject(int32_t type, const sp<Vec>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& filter = nullptr);
+    RenderObject(int32_t type, const sp<Vec>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
 //  [[script::bindings::auto]]
-    RenderObject(const sp<Integer>& type, const sp<Vec>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& filter = nullptr);
+    RenderObject(const sp<Integer>& type, const sp<Vec>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
 
 //  [[script::bindings::meta(absorb())]]
 //  [[script::bindings::meta(expire())]]
@@ -104,7 +104,7 @@ public:
 //  [[plugin::style("expired")]]
     class EXPIRED_STYLE : public Builder<RenderObject> {
     public:
-        EXPIRED_STYLE(BeanFactory& parent, const sp<Builder<RenderObject>>& delegate, const String& value);
+        EXPIRED_STYLE(BeanFactory& factory, const sp<Builder<RenderObject>>& delegate, const String& value);
 
         virtual sp<RenderObject> build(const sp<Scope>& args) override;
 

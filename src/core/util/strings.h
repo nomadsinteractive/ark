@@ -27,7 +27,7 @@ public:
     static void rcut(const String& str, String& left, String& right, char sep);
 
     static void parentheses(const String& expr, String& lvalue, String& remaining);
-    static uint32_t parentheses(const String& expr, uint32_t start, char open = '(', char close = ')');
+    static size_t parentheses(const String& expr, size_t start, char open = '(', char close = ')');
 
     static bool parseNameValuePair(const String& expr, char equal, String& name, String& value);
 

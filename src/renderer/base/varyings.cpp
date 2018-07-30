@@ -29,7 +29,7 @@ Varyings::Varyings()
 
 void Varyings::addVarying(const String& name, const sp<Flatable>& flatable)
 {
-    DCHECK(_varyings.find(name) == _varyings.end(), "Shader variable \"%s\" already exists", name.c_str());
+    DCHECK(_varyings.find(name) == _varyings.end(), "Varying \"%s\" already exists", name.c_str());
     uint32_t offset = _shader_source->input()->getAttributeOffset(name);
     _varyings[name] = Varying(offset, flatable);
     _size = std::max<size_t>(offset + flatable->size(), _size);
@@ -48,24 +48,29 @@ Varyings::Snapshot Varyings::snapshot(MemoryPool& memoryPool) const
     const bytearray bytes = memoryPool.allocate(_size);
     uint8_t* ptr = reinterpret_cast<uint8_t*>(bytes->buf());
     for(const auto iter : _varyings)
-        iter.second.settle(ptr);
+        iter.second.apply(ptr);
     return bytes;
 }
 
 Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _shader(factory.ensureBuilder<GLShader>(manifest, Constants::Attributes::SHADER))
 {
-    for(const document& i : manifest->children("attribute"))
+    for(const document& i : manifest->children("varying"))
     {
         const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
         const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
-        _varying_builders.push_back(VaryingBuilder(name, factory.ensureBuilderByTypeValue<Flatable>(type, value)));
+        _varying_builders.emplace_back(name, factory.ensureBuilderByTypeValue<Flatable>(type, value));
     }
+
+    if(_varying_builders.size() > 0)
+        _shader = factory.ensureBuilder<GLShader>(manifest, Constants::Attributes::SHADER);
 }
 
 sp<Varyings> Varyings::BUILDER::build(const sp<Scope>& args)
 {
+    if(!_shader)
+        return nullptr;
+
     const sp<GLShader> shader = _shader->build(args);
     const sp<Varyings> varyings = sp<Varyings>::make(shader);
 
@@ -99,7 +104,7 @@ Varyings::Varying::Varying()
 {
 }
 
-void Varyings::Varying::settle(uint8_t* ptr) const
+void Varyings::Varying::apply(uint8_t* ptr) const
 {
     _flatable->flat(ptr + _offset);
 }

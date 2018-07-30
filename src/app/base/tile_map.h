@@ -2,6 +2,7 @@
 #define ARK_APP_BASE_TILE_MAP_H_
 
 #include "core/base/api.h"
+#include "core/inf/variable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
@@ -16,7 +17,7 @@ namespace ark {
 class ARK_API TileMap : public Renderer, Block {
 public:
 // [[script::bindings::auto]]
-    TileMap(const sp<Layer>& layer, const sp<Vec>& scroller, uint32_t width, uint32_t height, uint32_t tileWidth, uint32_t tileHeight);
+    TileMap(const sp<Layer>& layer, uint32_t width, uint32_t height, uint32_t tileWidth, uint32_t tileHeight);
     ~TileMap();
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
@@ -42,10 +43,21 @@ public:
 // [[script::bindings::property]]
     uint32_t rowCount() const;
 
+// [[script::bindings::property]]
+    const sp<Vec>& position() const;
+// [[script::bindings::property]]
+    void setPosition(const sp<Vec>& position);
+
+// [[script::bindings::property]]
+    const sp<Vec>& scroller() const;
+// [[script::bindings::property]]
+    void setScroller(const sp<Vec>& scroller);
+
 private:
     sp<Layer> _layer;
     sp<Size> _size;
-    SafePtr<Vec> _scroller;
+    SafePtr<Vec, Vec::Impl> _position;
+    SafePtr<Vec, Vec::Impl> _scroller;
 
     sp<Size> _tile_size;
 

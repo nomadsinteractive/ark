@@ -150,18 +150,18 @@ void Strings::rcut(const String& str, String& left, String& right, char sep)
 
 void Strings::parentheses(const String& expr, String& lvalue, String& remaining)
 {
-    uint32_t pos = parentheses(expr, 0);
+    size_t pos = parentheses(expr, 0);
     lvalue = expr.substr(1, pos);
     remaining = expr.substr(pos + 1).strip();
 }
 
-uint32_t Strings::parentheses(const String& expr, uint32_t start, char open, char close)
+size_t Strings::parentheses(const String& expr, size_t start, char open, char close)
 {
     DCHECK(expr.length() > start, "Illegal expression: unexpected end");
     DCHECK(expr.at(start) == open, "Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
-    uint32_t size = expr.length();
-    uint32_t count = 1;
-    for(uint32_t i = start + 1; i < size; i++)
+    size_t size = expr.length();
+    int32_t count = 1;
+    for(size_t i = start + 1; i < size; i++)
     {
         char c = expr.at(i);
         if(c == open)

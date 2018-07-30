@@ -16,21 +16,21 @@
 
 namespace ark {
 
-GLModelLoaderNinePatch::Item::Item(const Rect& bounds, const Rect& stretching, uint32_t textureWidth, uint32_t textureHeight)
-    : paddings(stretching)
+GLModelLoaderNinePatch::Item::Item(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
+    : _paddings(patches)
 {
     _x[0] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left()), textureWidth);
-    _x[1] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left() + stretching.left()), textureWidth);
-    _x[2] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left() + stretching.right()), textureWidth);
+    _x[1] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left() + patches.left()), textureWidth);
+    _x[2] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left() + patches.right()), textureWidth);
     _x[3] = Atlas::unnormalize(static_cast<uint32_t>(bounds.right()), textureWidth);
 
     _y[0] = Atlas::unnormalize(static_cast<uint32_t>(bounds.top()), textureHeight);
-    _y[1] = Atlas::unnormalize(static_cast<uint32_t>(bounds.top() + stretching.top()), textureHeight);
-    _y[2] = Atlas::unnormalize(static_cast<uint32_t>(bounds.top() + stretching.bottom()), textureHeight);
+    _y[1] = Atlas::unnormalize(static_cast<uint32_t>(bounds.top() + patches.top()), textureHeight);
+    _y[2] = Atlas::unnormalize(static_cast<uint32_t>(bounds.top() + patches.bottom()), textureHeight);
     _y[3] = Atlas::unnormalize(static_cast<uint32_t>(bounds.bottom()), textureHeight);
 
-    paddings.setRight(bounds.width() - stretching.right());
-    paddings.setBottom(bounds.height() - stretching.bottom());
+    _paddings.setRight(bounds.width() - patches.right());
+    _paddings.setBottom(bounds.height() - patches.bottom());
 }
 
 GLModelLoaderNinePatch::GLModelLoaderNinePatch(const document& manifest, const sp<Atlas>& atlas)
@@ -71,9 +71,9 @@ void GLModelLoaderNinePatch::loadModel(GLModelBuffer& buf, const Atlas& atlas, u
     const Rect paintRect(0, 0, size.x(), size.y());
     const Item& item = _nine_patch_items.at(type);
 
-    const Rect& paddings = item.paddings;
+    const Rect& paddings = item._paddings;
     float xData[4] = {paintRect.left(), paintRect.left() + paddings.left(), paintRect.right() - paddings.right(), paintRect.right()};
-    float yData[4] = {paintRect.bottom(), paintRect.bottom() - paddings.bottom(), paintRect.top() + paddings.top(), paintRect.top()};
+    float yData[4] = {paintRect.bottom(), paintRect.bottom() - paddings.top(), paintRect.top() + paddings.bottom(), paintRect.top()};
     for(uint32_t i = 0; i < 4; i++) {
         for(uint32_t j = 0; j < 4; j++) {
             buf.nextVertex();

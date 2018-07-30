@@ -56,7 +56,7 @@ public:
         uint32_t     priority;
         Evaluator    evaluator;
 
-        uint32_t isMatch(const String& expr, uint32_t o) const {
+        size_t isMatch(const String& expr, size_t o) const {
             const char* c = op;
             while(*c)
                 if(*c != expr.at(o++))
@@ -149,8 +149,8 @@ public:
                 return s;
             }
 
-            uint32_t size = expr.length();
-            for(uint32_t i = 1; i < size; i ++) {
+            size_t size = expr.length();
+            for(size_t i = 1; i < size; i ++) {
                 char c = expr.at(i);
                 if(isspace(c))
                     continue;
@@ -158,7 +158,7 @@ public:
                     i = Strings::parentheses(expr, i) + 1;
                 else {
                     for(const Operator<T>& iter : OP::OPS) {
-                        uint32_t c = iter.isMatch(expr, i);
+                        size_t c = iter.isMatch(expr, i);
                         if(c) {
                             op = iter;
                             lvalue = expr.substr(0, i).strip();
@@ -172,12 +172,12 @@ public:
         }
 
         void opExpect(const String& expr, Operator<T>& op, String& rvalue) const {
-            uint32_t size = expr.length();
-            for(uint32_t i = 0; i < size; i ++) {
+            size_t size = expr.length();
+            for(size_t i = 0; i < size; i ++) {
                 if(isspace(expr.at(i)))
                     continue;
                 for(const Operator<T>& iter : OP::OPS) {
-                    uint32_t c = iter.isMatch(expr, i);
+                    size_t c = iter.isMatch(expr, i);
                     if(c) {
                         op = iter;
                         rvalue = expr.substr(c).strip();

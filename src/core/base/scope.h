@@ -25,9 +25,10 @@ public:
         put(name, object.pack());
     }
 
+//  [[script::bindings::getprop]]
     virtual Box get(const String& name) override;
-    void put(const String& name, const Box& value);
 
+    void put(const String& name, const Box& value);
     void remove(const String& name);
 
     const std::map<String, Box>& variables() const;

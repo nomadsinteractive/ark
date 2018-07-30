@@ -45,8 +45,8 @@ public:
         return _builder_caches.ensure<BuilderCache<T>>()->getBuilder(_bean_factory, id)->build(args);
     }
 
-//  [[script::bindings::auto]]
-    Box getReference(const String& name) const;
+//  [[script::bindings::property]]
+    const sp<Scope>& refs() const;
 
     void import(const document& manifest, BeanFactory& beanFactory);
 

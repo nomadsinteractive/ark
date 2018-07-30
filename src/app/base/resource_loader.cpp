@@ -20,9 +20,9 @@ ResourceLoader::~ResourceLoader()
     LOGD("");
 }
 
-Box ResourceLoader::getReference(const String& name) const
+const sp<Scope>& ResourceLoader::refs() const
 {
-    return _bean_factory.references()->get(name);
+    return _bean_factory.references();
 }
 
 void ResourceLoader::import(const document& manifest, BeanFactory& parent)

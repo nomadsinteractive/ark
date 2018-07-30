@@ -46,9 +46,13 @@ public:
 //[[script::bindings::property]]
     static void setX(const sp<Vec2>& self, float x);
 //[[script::bindings::property]]
+    static void setX(const sp<Vec2>& self, const sp<Numeric>& x);
+//[[script::bindings::property]]
     static float y(const sp<Vec2>& self);
 //[[script::bindings::property]]
     static void setY(const sp<Vec2>& self, float y);
+//[[script::bindings::property]]
+    static void setY(const sp<Vec2>& self, const sp<Numeric>& y);
 //[[script::bindings::property]]
     static sp<Numeric> vx(const sp<Vec2>& self);
 //[[script::bindings::property]]
