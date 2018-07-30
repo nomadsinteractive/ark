@@ -30,7 +30,7 @@ Varyings::Varyings()
 void Varyings::addVarying(const String& name, const sp<Flatable>& flatable)
 {
     DCHECK(_varyings.find(name) == _varyings.end(), "Shader variable \"%s\" already exists", name.c_str());
-    uint32_t offset = _shader_source->getAttribute(name).offset();
+    uint32_t offset = _shader_source->input()->getAttributeOffset(name);
     _varyings[name] = Varying(offset, flatable);
     _size = std::max<size_t>(offset + flatable->size(), _size);
 }

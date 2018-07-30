@@ -120,7 +120,7 @@ uint32_t GLShader::stride() const
 
 const GLAttribute& GLShader::getAttribute(const String& name, uint32_t divisor) const
 {
-    return _source->getAttribute(name, divisor);
+    return _source->input()->getAttribute(name, divisor);
 }
 
 sp<Varyings> GLShader::makeVaryings() const

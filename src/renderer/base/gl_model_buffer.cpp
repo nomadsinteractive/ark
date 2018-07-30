@@ -11,10 +11,10 @@
 
 namespace ark {
 
-GLModelBuffer::GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<GLShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride, int32_t texCoordinateOffset)
+GLModelBuffer::GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<GLShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
     : _shader_bindings(shaderBindings), _vertices(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), stride, instanceCount),
       _instanced_buffer_builders(shaderBindings->makeInstancedBufferBuilders(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), instanceCount)),
-      _tex_coordinate_offset(texCoordinateOffset), _normal_offset(-1), _tangents_offset(-1), _indice_base(0), _is_instanced(false)
+      _indice_base(0), _is_instanced(false)
 {
 }
 
@@ -25,23 +25,18 @@ void GLModelBuffer::setPosition(float x, float y, float z)
 
 void GLModelBuffer::setTexCoordinate(uint16_t u, uint16_t v)
 {
-    if(_tex_coordinate_offset >= 0)
-    {
-        const uint16_t uv[2] = {u, v};
-        _vertices.write(uv, _tex_coordinate_offset);
-    }
+    const uint16_t uv[2] = {u, v};
+    _vertices.write(uv, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_TEX_COORDINATE);
 }
 
 void GLModelBuffer::setNormal(const V3& normal)
 {
-    if(_normal_offset > 0)
-        _vertices.write(normal, _normal_offset);
+    _vertices.write(normal, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_NORMAL);
 }
 
-void GLModelBuffer::setTangents(const V3& tangents)
+void GLModelBuffer::setTangents(const V3& tangent)
 {
-    if(_tangents_offset > 0)
-        _vertices.write(tangents, _tangents_offset);
+    _vertices.write(tangent, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_TANGENT);
 }
 
 void GLModelBuffer::applyVaryings()

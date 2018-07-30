@@ -22,7 +22,7 @@ namespace ark {
 
 class ARK_API GLModelBuffer {
 public:
-    GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<GLShaderBindings>& shaderBindings, size_t renderObjectCount, uint32_t stride, int32_t texCoordinateOffset);
+    GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<GLShaderBindings>& shaderBindings, size_t renderObjectCount, uint32_t stride);
     DEFAULT_COPY_AND_ASSIGN(GLModelBuffer);
 
     void setPosition(float x, float y, float z);
@@ -61,10 +61,6 @@ private:
     std::map<uint32_t, GLBuffer::Builder> _instanced_buffer_builders;
 
     GLBuffer::Snapshot _indices;
-
-    int32_t _tex_coordinate_offset;
-    int32_t _normal_offset;
-    int32_t _tangents_offset;
 
     glindex_t _indice_base;
 

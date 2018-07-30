@@ -174,6 +174,11 @@ public:
             memcpy(_ptr + offset, &value, sizeof(T));
         }
 
+        template<typename T> void write(const T& value, const int32_t* offsets, int32_t name) {
+            if(offsets[name] >= 0)
+                write<T>(value, offsets[name]);
+        }
+
         void setGrowCapacity(size_t growCapacity);
 
         void apply(const bytearray& buf);

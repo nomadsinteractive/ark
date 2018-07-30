@@ -40,7 +40,7 @@ sp<RenderCommand> GLModelLayer::render(const LayerContext::Snapshot& renderConte
 {
     if(renderContext._items.size() > 0)
     {
-        GLModelBuffer buf(_resource_loader_context, _shader_bindings, renderContext._items.size(), _shader->stride(), _shader->getAttribute("TexCoordinate").offset());
+        GLModelBuffer buf(_resource_loader_context, _shader_bindings, renderContext._items.size(), _shader->stride());
         const Atlas& atlas = *_atlas;
         _model_loader->start(buf, _resource_manager, renderContext);
 

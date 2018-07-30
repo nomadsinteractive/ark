@@ -46,6 +46,16 @@ const GLShaderInput::Stream& GLShaderInput::getStream(uint32_t divisor) const
     return iter->second;
 }
 
+const GLAttribute&GLShaderInput::getAttribute(const String& name, uint32_t divisor) const
+{
+    return getStream(divisor).getAttribute(name);
+}
+
+int32_t GLShaderInput::getAttributeOffset(const String& name, uint32_t divisor) const
+{
+    return getStream(divisor).getAttributeOffset(name);
+}
+
 GLShaderInput::Stream::Stream()
     : _divisor(0), _stride(0)
 {
@@ -66,14 +76,9 @@ const std::unordered_map<String, GLAttribute>& GLShaderInput::Stream::attributes
     return _attributes;
 }
 
-bool GLShaderInput::Stream::hasAttribute(const String& name) const
-{
-    return _attributes.find(name) != _attributes.end();
-}
-
 void GLShaderInput::Stream::addAttribute(String name, GLAttribute attribute)
 {
-    DCHECK(!hasAttribute(name), "Attribute \"%s\" has been added already", name.c_str());
+    DCHECK(_attributes.find(name) == _attributes.end(), "Attribute \"%s\" has been added already", name.c_str());
     attribute.setOffset(_stride);
     _stride += attribute.size();
     _attributes.insert(std::make_pair(std::move(name), std::move(attribute)));
@@ -84,6 +89,12 @@ const GLAttribute& GLShaderInput::Stream::getAttribute(const String& name) const
     const auto iter = _attributes.find(name);
     DCHECK(iter != _attributes.end(), "Stream(%d) has no attribute \"%s\"", name.c_str());
     return iter->second;
+}
+
+int32_t GLShaderInput::Stream::getAttributeOffset(const String& name) const
+{
+    const auto iter = _attributes.find(name);
+    return iter != _attributes.end() ? iter->second.offset() : -1;
 }
 
 void GLShaderInput::Stream::align()

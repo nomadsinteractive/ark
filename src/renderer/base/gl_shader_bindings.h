@@ -14,12 +14,29 @@ namespace ark {
 
 class ARK_API GLShaderBindings {
 public:
+    enum AttributeName {
+        ATTRIBUTE_NAME_TEX_COORDINATE,
+        ATTRIBUTE_NAME_NORMAL,
+        ATTRIBUTE_NAME_TANGENT,
+        ATTRIBUTE_NAME_COUNT
+    };
+
+    struct Attributes {
+        Attributes(const GLShaderInput& shader);
+
+        int32_t _offsets[ATTRIBUTE_NAME_COUNT];
+    };
+
+
+public:
     GLShaderBindings(GLResourceManager& resourceManager, const sp<GLShader>& shader);
 
     const sp<GLShader>& shader() const;
     const sp<GLSnippetDelegate>& snippet() const;
 
     const GLBuffer& arrayBuffer() const;
+
+    const Attributes& attributes() const;
 
     void bindArrayBuffers(GraphicsContext& graphicsContext, GLProgram& program) const;
 
@@ -28,6 +45,7 @@ public:
 private:
     sp<GLShader> _shader;
     sp<GLSnippetDelegate> _snippet;
+    Attributes _attributes;
 
     GLBuffer _array_buffer;
     sp<GLShaderInput> _shader_input;

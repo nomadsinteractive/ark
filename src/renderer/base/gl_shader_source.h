@@ -36,8 +36,6 @@ public:
     GLShaderPreprocessor& vertex();
     GLShaderPreprocessor& fragment();
 
-    const GLAttribute& getAttribute(const String& name, uint32_t divisor = 0) const;
-
     const sp<GLShaderInput>& input() const;
 
 private:

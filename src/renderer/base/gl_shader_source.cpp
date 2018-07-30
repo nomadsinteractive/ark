@@ -89,11 +89,6 @@ GLShaderPreprocessor& GLShaderSource::fragment()
     return _fragment;
 }
 
-const GLAttribute& GLShaderSource::getAttribute(const String& name, uint32_t divisor) const
-{
-    return _input->getStream(divisor).getAttribute(name);
-}
-
 const sp<GLShaderInput>& GLShaderSource::input() const
 {
     return _input;

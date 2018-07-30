@@ -54,7 +54,7 @@ public:
 
 //[[deprecated]]
     uint32_t stride() const;
-
+//[[deprecated]]
     const GLAttribute& getAttribute(const String& name, uint32_t divisor = 0) const;
 
 //[[script::bindings::auto]]

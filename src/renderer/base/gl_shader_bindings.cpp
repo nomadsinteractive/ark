@@ -9,7 +9,7 @@
 namespace ark {
 
 GLShaderBindings::GLShaderBindings(GLResourceManager& resourceManager, const sp<GLShader>& shader)
-    : _shader(shader), _snippet(sp<GLSnippetDelegate>::make(shader)), _array_buffer(resourceManager.makeDynamicArrayBuffer()),
+    : _shader(shader), _snippet(sp<GLSnippetDelegate>::make(shader)), _attributes(shader->source()->input()), _array_buffer(resourceManager.makeDynamicArrayBuffer()),
       _shader_input(_shader->source()->input()), _instanced_arrays(_shader_input->makeInstancedArrays(resourceManager))
 {
 }
@@ -27,6 +27,11 @@ const sp<GLSnippetDelegate>& GLShaderBindings::snippet() const
 const GLBuffer& GLShaderBindings::arrayBuffer() const
 {
     return _array_buffer;
+}
+
+const GLShaderBindings::Attributes&GLShaderBindings::attributes() const
+{
+    return _attributes;
 }
 
 void GLShaderBindings::bindArrayBuffers(GraphicsContext& graphicsContext, GLProgram& program) const
@@ -50,6 +55,13 @@ std::map<uint32_t, GLBuffer::Builder> GLShaderBindings::makeInstancedBufferBuild
         builders.insert(std::make_pair(i.first, GLBuffer::Builder(memoryPool, objectPool, stream.stride(), instanceCount / i.first)));
     }
     return builders;
+}
+
+GLShaderBindings::Attributes::Attributes(const GLShaderInput& input)
+{
+    _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = input.getAttributeOffset("TexCoordinate");
+    _offsets[ATTRIBUTE_NAME_NORMAL] = input.getAttributeOffset("Normal");
+    _offsets[ATTRIBUTE_NAME_TANGENT] = input.getAttributeOffset("Tangent");
 }
 
 }

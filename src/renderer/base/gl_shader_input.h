@@ -23,10 +23,10 @@ public:
         uint32_t stride() const;
 
         const std::unordered_map<String, GLAttribute>& attributes() const;
-
-        bool hasAttribute(const String& name) const;
         void addAttribute(String name, GLAttribute attribute);
+
         const GLAttribute& getAttribute(const String& name) const;
+        int32_t getAttributeOffset(const String& name) const;
 
         void align();
 
@@ -46,6 +46,10 @@ public:
     std::vector<std::pair<uint32_t, GLBuffer>> makeInstancedArrays(GLResourceManager& resourceManager) const;
 
     const GLShaderInput::Stream& getStream(uint32_t divisor) const;
+
+    const GLAttribute& getAttribute(const String& name, uint32_t divisor = 0) const;
+    int32_t getAttributeOffset(const String& name, uint32_t divisor = 0) const;
+
 
 private:
     std::map<uint32_t, Stream> _streams;

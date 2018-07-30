@@ -1,4 +1,15 @@
 
+option(ARK_FORCE_STATIC_VCRT "Force /MT for static VC runtimes" OFF)
+if(ARK_FORCE_STATIC_VCRT)
+  foreach(flag_var
+      CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
+      CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO)
+    if(${flag_var} MATCHES "/MD")
+      string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+    endif()
+  endforeach()
+endif()
+
 ark_add_denpendency(3rdparty/glbinding ON glbinding 3rdparty/glbinding/source/glbinding/include)
 ark_ensure_dependency(3rdparty/dirent)
 ark_include_directories(3rdparty/dirent/include)
