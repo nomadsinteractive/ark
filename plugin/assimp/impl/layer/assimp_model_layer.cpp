@@ -60,7 +60,8 @@ AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const document& m
     _array_buffer = resourceLoaderContext->glResourceManager()->makeGLBuffer(sp<AssimpGLBufferUploader>::make(vertices), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
     _index_buffer = resourceLoaderContext->glResourceManager()->makeGLBuffer(sp<AssimpGLBufferUploader>::make(indices), GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
     const sp<GLTexture> texture = resourceLoaderContext->glResourceManager()->createGLTexture(tex->width(), tex->height(), sp<Variable<bitmap>::Const>::make(tex));
-    _shader_bindings = sp<GLShaderBindings>::make(shader, _array_buffer);
+//    _shader_bindings = sp<GLShaderBindings>::make(shader, _array_buffer);
+    _shader_bindings = sp<GLShaderBindings>::make(resourceLoaderContext->glResourceManager(), shader);
     const sp<GLSnippetTextures> textures = _shader_bindings->snippet()->link<GLSnippetTextures>();
     textures->addTexture(0, texture);
     _shader_bindings->snippet()->link<GLSnippetUpdateModelMatrix>();

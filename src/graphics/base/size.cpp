@@ -10,23 +10,23 @@
 namespace ark {
 
 Size::Size()
-    : _width(sp<NumericWrapper>::make(0.0f)), _height(sp<NumericWrapper>::make(0.0f))
+    : _width(sp<NumericWrapper>::make(0.0f)), _height(sp<NumericWrapper>::make(0.0f)), _depth(sp<NumericWrapper>::make(0.0f))
 {
 }
 
-Size::Size(float width, float height)
-    : _width(sp<NumericWrapper>::make(width)), _height(sp<NumericWrapper>::make(height))
+Size::Size(float width, float height, float depth)
+    : _width(sp<NumericWrapper>::make(width)), _height(sp<NumericWrapper>::make(height)), _depth(sp<NumericWrapper>::make(depth))
 {
 }
 
-Size::Size(const sp<Numeric>& vwidth, const sp<Numeric>& vheight)
-    : _width(sp<NumericWrapper>::make(vwidth)), _height(sp<NumericWrapper>::make(vheight))
+Size::Size(const sp<Numeric>& width, const sp<Numeric>& height, const sp<Numeric>& depth)
+    : _width(sp<NumericWrapper>::make(width)), _height(sp<NumericWrapper>::make(height)), _depth(sp<NumericWrapper>::make(depth))
 {
 }
 
-V Size::val()
+V3 Size::val()
 {
-    return V(_width->val(), _height->val());
+    return V3(_width->val(), _height->val(), _depth->val());
 }
 
 float Size::width() const
@@ -76,20 +76,21 @@ template<> ARK_API const sp<Size> Null::ptr()
     return Ark::instance().obtain<Size>();
 }
 
-Size::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)
+Size::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
 {
-    BeanUtils::parse(parent, value, _width, _height);
+    BeanUtils::split(factory, value, _width, _height, _depth);
 }
 
 sp<Size> Size::DICTIONARY::build(const sp<Scope>& args)
 {
-    return sp<Size>::make(_width->build(args), _height->build(args));
+    return sp<Size>::make(_width->build(args), _height->build(args), _depth->build(args));
 }
 
-Size::BUILDER::BUILDER(BeanFactory& parent, const document& manifest)
-    : _size(parent.getBuilder<Size>(manifest, Constants::Attributes::SIZE, false)),
-      _width(_size ? sp<Builder<Numeric>>::null() : parent.getBuilder<Numeric>(manifest, Constants::Attributes::WIDTH)),
-      _height(_size ? sp<Builder<Numeric>>::null() : parent.getBuilder<Numeric>(manifest, Constants::Attributes::HEIGHT))
+Size::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE, false)),
+      _width(_size ? sp<Builder<Numeric>>::null() : factory.getBuilder<Numeric>(manifest, Constants::Attributes::WIDTH)),
+      _height(_size ? sp<Builder<Numeric>>::null() : factory.getBuilder<Numeric>(manifest, Constants::Attributes::HEIGHT)),
+      _depth(_size ? sp<Builder<Numeric>>::null() : factory.getBuilder<Numeric>(manifest, Constants::Attributes::DEPTH))
 {
 }
 
@@ -97,7 +98,7 @@ sp<Size> Size::BUILDER::build(const sp<Scope>& args)
 {
     if(_size)
         return _size->build(args);
-    return sp<Size>::make(_width->build(args), _height->build(args));
+    return sp<Size>::make(_width->build(args), _height->build(args), _depth->build(args));
 }
 
 }

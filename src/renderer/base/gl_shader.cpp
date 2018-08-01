@@ -143,10 +143,10 @@ bool GLShader::Slot::operator <(const GLShader::Slot& other) const
     return _vertex_shader_hash < other._vertex_shader_hash || (_vertex_shader_hash == other._vertex_shader_hash && _fragment_shader_hash < other._fragment_shader_hash);
 }
 
-GLShader::BUILDER::BUILDER(BeanFactory& parent, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _factory(parent), _manifest(doc), _resource_loader_context(resourceLoaderContext), _vertex(Strings::load(doc, "vertex", "@shaders:default.vert")),
-      _fragment(Strings::load(doc, "fragment", "@shaders:texture.frag")),
-      _snippet(parent.getBuilder<GLSnippet>(doc, Constants::Attributes::SNIPPET, false))
+GLShader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _vertex(Strings::load(manifest, "vertex", "@shaders:default.vert")),
+      _fragment(Strings::load(manifest, "fragment", "@shaders:texture.frag")),
+      _snippet(factory.getBuilder<GLSnippet>(manifest, Constants::Attributes::SNIPPET, false))
 {
 }
 

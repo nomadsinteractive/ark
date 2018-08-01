@@ -108,6 +108,7 @@ const char* const SRC = "src";
 const char* const RECT = "rect";
 const char* const WIDTH = "width";
 const char* const HEIGHT = "height";
+const char* const DEPTH = "depth";
 const char* const REF = "ref";
 const char* const RENDER_OBJECT = "render-object";
 const char* const RENDER_LAYER = "render-layer";

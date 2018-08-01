@@ -38,8 +38,8 @@ public:
 
         float rotate_value;
         V3 rotate_direction;
-        V scale;
-        V translate;
+        V3 scale;
+        V3 translate;
     };
 
     Snapshot snapshot() const;
@@ -84,9 +84,6 @@ public:
         BUILDER _impl;
 
     };
-
-private:
-    static const sp<Vec>& identity();
 
 private:
     SafePtr<Rotate> _rotate;

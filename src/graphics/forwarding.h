@@ -39,7 +39,7 @@ class Rotate;
 class Size;
 class SurfaceController;
 class Vec2Impl;
-class Vec3;
+class Vec3Impl;
 class Vec4;
 class V2;
 class V3;
@@ -49,7 +49,7 @@ class Viewport;
 typedef sp<Bitmap> bitmap;
 
 typedef Variable<V2> Vec2;
-typedef Variable<V3> VV3;
+typedef Variable<V3> Vec3;
 typedef Variable<V4> VV4;
 
 typedef Loader<Bitmap> BitmapLoader;

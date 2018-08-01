@@ -15,8 +15,6 @@ public:
     V2(const V3& other);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(V2);
 
-    static V2 identity();
-
     bool operator ==(const V2& other) const;
     bool operator !=(const V2& other) const;
 

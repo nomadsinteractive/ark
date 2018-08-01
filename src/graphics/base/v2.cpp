@@ -29,11 +29,6 @@ V2::V2(const V3& other)
 {
 }
 
-V2 V2::identity()
-{
-    return V2(1.0f, 1.0f);
-}
-
 bool V2::operator ==(const V2& other) const
 {
     return _x == other._x && _y == other._y;

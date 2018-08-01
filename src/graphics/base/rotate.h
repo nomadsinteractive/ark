@@ -12,7 +12,7 @@ namespace ark {
 class ARK_API Rotate {
 public:
 //  [[script::bindings::auto]]
-    Rotate(const sp<Numeric>& rotation, const sp<VV3>& direction = nullptr);
+    Rotate(const sp<Numeric>& rotation, const sp<Vec3>& direction = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotate);
 
 //  [[script::bindings::property]]
@@ -23,9 +23,9 @@ public:
     void setRotation(const sp<Numeric>& rotation);
 
 //  [[script::bindings::property]]
-    const sp<VV3>& direction() const;
+    const sp<Vec3>& direction() const;
 //  [[script::bindings::property]]
-    void setDirection(const sp<VV3>& direction);
+    void setDirection(const sp<Vec3>& direction);
 
     static const V3 Z_AXIS;
 
@@ -42,7 +42,7 @@ public:
 
 private:
     sp<NumericWrapper> _rotation;
-    sp<VV3> _direction;
+    sp<Vec3> _direction;
 
 };
 

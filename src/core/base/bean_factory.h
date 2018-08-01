@@ -383,6 +383,11 @@ public:
 
     const sp<Scope>& references() const;
 
+    template<typename T> sp<Builder<T>> getNullBuilder() const {
+        static const sp<Builder<T>> nb = sp<NullBuilder<T>>::make();
+        return nb;
+    }
+
 private:
     template<typename T> sp<Builder<T>> createBuilderByDocument(const document& doc, bool noNull) {
         const String className = Documents::getAttribute(doc, Constants::Attributes::CLASS);
@@ -442,11 +447,6 @@ private:
         DCHECK(name, "Empty package name");
         auto iter = _packages.find(name);
         return iter == _packages.end() ? sp<BeanFactory>::null() : iter->second;
-    }
-
-    template<typename T> sp<Builder<T>> getNullBuilder() const {
-        static const sp<Builder<T>> nb = sp<NullBuilder<T>>::make();
-        return nb;
     }
 
 private:

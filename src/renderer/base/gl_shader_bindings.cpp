@@ -29,6 +29,11 @@ const GLBuffer& GLShaderBindings::arrayBuffer() const
     return _array_buffer;
 }
 
+const std::vector<std::pair<uint32_t, GLBuffer>>& GLShaderBindings::instancedArrays() const
+{
+    return _instanced_arrays;
+}
+
 const GLShaderBindings::Attributes&GLShaderBindings::attributes() const
 {
     return _attributes;

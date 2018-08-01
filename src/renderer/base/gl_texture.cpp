@@ -128,7 +128,6 @@ void GLTexture::active(const sp<GLProgram>& program, uint32_t id) const
     char uniformName[16] = "u_Texture0";
     uniformName[9] = static_cast<char>('0' + id);
     const GLProgram::Uniform& uTexture = program->getUniform(uniformName);
-    DCHECK(uTexture, "Texture %d not declared in shader", id);
     uTexture.setUniform1i(id);
 }
 

@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_BASE_VEC2_IMPL_H_
-#define ARK_GRAPHICS_BASE_VEC2_IMPL_H_
+#ifndef ARK_GRAPHICS_IMPL_VEC_VEC2_IMPL_H_
+#define ARK_GRAPHICS_IMPL_VEC_VEC2_IMPL_H_
 
 #include "core/base/api.h"
 #include "core/forwarding.h"

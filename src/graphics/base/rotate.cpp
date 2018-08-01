@@ -11,8 +11,8 @@ namespace ark {
 
 const V3 Rotate::Z_AXIS = V3(0, 0, 1.0f);
 
-Rotate::Rotate(const sp<Numeric>& rotation, const sp<VV3>& direction)
-    : _rotation(sp<NumericWrapper>::make(rotation)), _direction(direction ? direction : static_cast<sp<VV3>>(sp<VV3::Const>::make(Z_AXIS)))
+Rotate::Rotate(const sp<Numeric>& rotation, const sp<Vec3>& direction)
+    : _rotation(sp<NumericWrapper>::make(rotation)), _direction(direction ? direction : static_cast<sp<Vec3>>(sp<Vec3::Const>::make(Z_AXIS)))
 {
 }
 
@@ -31,19 +31,19 @@ void Rotate::setRotation(const sp<Numeric>& rotation)
     _rotation->set(rotation);
 }
 
-const sp<VV3>& Rotate::direction() const
+const sp<Vec3>& Rotate::direction() const
 {
     return _direction;
 }
 
-void Rotate::setDirection(const sp<VV3>& direction)
+void Rotate::setDirection(const sp<Vec3>& direction)
 {
     _direction = direction;
 }
 
 template<> ARK_API const sp<Rotate> Null::ptr()
 {
-    return Ark::instance().obtain<Rotate>(Null::ptr<Numeric>(), Ark::instance().obtain<VV3::Const>(Rotate::Z_AXIS));
+    return Ark::instance().obtain<Rotate>(Null::ptr<Numeric>(), Ark::instance().obtain<Vec3::Const>(Rotate::Z_AXIS));
 }
 
 Rotate::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

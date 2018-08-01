@@ -42,11 +42,10 @@ GLModelLoaderSphere::GLModelLoaderSphere(const sp<ResourceLoaderContext>& resour
     }
 }
 
-void GLModelLoaderSphere::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext)
+void GLModelLoaderSphere::start(GLModelBuffer& buf, GLResourceManager& /*resourceManager*/, const LayerContext::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size() * _vertex_count);
     buf.setIndices(_instance_index.snapshot());
-    buf.setIsInstanced(true);
 }
 
 void GLModelLoaderSphere::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& size)
@@ -68,9 +67,9 @@ void GLModelLoaderSphere::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint
 
 void GLModelLoaderSphere::buildVertex(float*& buffer, float lng, float lat) const
 {
-    float r = Math::cos(lat);
+    float r = Math::cos(lat) / 2.0f;
     float px = r * Math::sin(lng);
-    float py = Math::sin(lat);
+    float py = Math::sin(lat) / 2.0f;
     float pz = r * Math::cos(lng);
     (*buffer++) = px;
     (*buffer++) = py;

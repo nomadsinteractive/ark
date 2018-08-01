@@ -30,7 +30,7 @@ void Expectation::fire()
 
 Expectation::DICTIONARY::DICTIONARY(BeanFactory& factory, const String str)
 {
-    BeanUtils::parse(factory, str, _expectation, _onfire);
+    BeanUtils::split(factory, str, _expectation, _onfire);
 }
 
 sp<Expectation> Expectation::DICTIONARY::build(const sp<Scope>& args)

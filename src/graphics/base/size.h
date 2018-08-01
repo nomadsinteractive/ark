@@ -11,14 +11,14 @@
 namespace ark {
 
 //[[core::class]]
-class ARK_API Size : public Vec {
+class ARK_API Size : public Vec3 {
 public:
     Size();
-    Size(float width, float height);
+    Size(float width, float height, float depth = 0);
 //  [[script::bindings::auto]]
-    Size(const sp<Numeric>& vwidth, const sp<Numeric>& vheight);
+    Size(const sp<Numeric>& width, const sp<Numeric>& height, const sp<Numeric>& depth = nullptr);
 
-    virtual V val() override;
+    virtual V3 val() override;
 
 //  [[script::bindings::property]]
     float width() const;
@@ -42,7 +42,7 @@ public:
 //  [[plugin::builder]]
     class BUILDER : public Builder<Size> {
     public:
-        BUILDER(BeanFactory& parent, const document& manifest);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Size> build(const sp<Scope>& args) override;
 
@@ -50,25 +50,26 @@ public:
         sp<Builder<Size>> _size;
         sp<Builder<Numeric>> _width;
         sp<Builder<Numeric>> _height;
-
+        sp<Builder<Numeric>> _depth;
     };
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Size> {
     public:
-        DICTIONARY(BeanFactory& parent, const String& value);
+        DICTIONARY(BeanFactory& factory, const String& value);
 
         virtual sp<Size> build(const sp<Scope>& args) override;
 
     private:
         sp<Builder<Numeric>> _width;
         sp<Builder<Numeric>> _height;
+        sp<Builder<Numeric>> _depth;
     };
 
 private:
     sp<NumericWrapper> _width;
     sp<NumericWrapper> _height;
-
+    sp<NumericWrapper> _depth;
 };
 
 }

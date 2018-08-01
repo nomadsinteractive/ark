@@ -256,25 +256,20 @@ template<> ARK_API const sp<Vec4> Null::ptr()
     return Ark::instance().obtain<Vec4>();
 }
 
-Vec4::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& str)
+Vec4::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
 {
-    if(str.find('@') != String::npos || str.find('$') != String::npos)
-    {
-        _xyzw = BeanUtils::split<Numeric>(parent, str);
-        DCHECK(_xyzw->length() == 4, "Index out of range");
-    }
+    _is_color = !str.empty() && str.at(0) == '#';
+    if(_is_color)
+        _v4 = Strings::parse<Color>(str).val();
     else
-        _v4 = str.at(0) == '#' ? Strings::parse<Color>(str).val() : Strings::parse<V4>(str);
+        BeanUtils::split(factory, str, _x, _y, _z);
 }
 
 sp<VV4> Vec4::DICTIONARY::build(const sp<Scope>& args)
 {
-    if(_xyzw)
-    {
-        auto s = _xyzw->buf();
-        return sp<Vec4>::make(s[0]->build(args), s[1]->build(args), s[2]->build(args), s[3]->build(args));
-    }
-    return sp<VV4::Impl>::make(_v4);
+    if(_is_color)
+        return sp<VV4::Impl>::make(_v4);
+    return sp<Vec4>::make(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
 }
 
 }

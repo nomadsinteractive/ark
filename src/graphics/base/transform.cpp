@@ -14,7 +14,7 @@
 namespace ark {
 
 Transform::Transform(const sp<Rotate>& rotate, const sp<Vec>& scale, const sp<Vec>& translation)
-    : _rotate(rotate), _scale(scale ? scale : identity()), _translation(translation)
+    : _rotate(rotate), _scale(scale), _translation(translation)
 {
 }
 
@@ -28,7 +28,7 @@ Transform::Snapshot Transform::snapshot() const
     Snapshot ss;
     ss.rotate_value = _rotate->rotation()->val();
     ss.rotate_direction = _rotate->direction()->val();
-    ss.scale = _scale->val();
+    ss.scale = _scale ? V3(_scale->val()) : V3(1.0f, 1.0f, 1.0f);
     ss.translate = _translation->val();
     return ss;
 }
@@ -63,14 +63,8 @@ void Transform::setTranslation(const sp<Vec>& translation)
     _translation = translation;
 }
 
-const sp<Vec>& Transform::identity()
-{
-    static sp<Vec> IDENTITY = sp<Vec::Const>::make(V::identity());
-    return IDENTITY;
-}
-
 Transform::Snapshot::Snapshot()
-    : rotate_value(0), rotate_direction(Rotate::Z_AXIS), scale(V::identity())
+    : rotate_value(0), rotate_direction(Rotate::Z_AXIS), scale(V3(1.0f, 1.0f, 1.0f))
 {
 }
 

@@ -45,7 +45,6 @@ public:
     void setIndices(GLBuffer::Snapshot indices);
 
     bool isInstanced() const;
-    void setIsInstanced(bool isInstanced);
 
     GLBuffer::Builder& getInstancedArrayBuilder(uint32_t divisor);
 

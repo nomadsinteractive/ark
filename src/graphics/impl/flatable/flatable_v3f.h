@@ -11,7 +11,7 @@ namespace ark {
 
 class FlatableVec3 : public Flatable {
 public:
-    FlatableVec3(const sp<VV3>& vv3);
+    FlatableVec3(const sp<Vec3>& vv3);
 
     virtual void flat(void* buf) override;
     virtual uint32_t size() override;
@@ -25,11 +25,11 @@ public:
         virtual sp<Flatable> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<VV3>> _vv3;
+        sp<Builder<Vec3>> _vv3;
     };
 
 private:
-    sp<VV3> _vv3;
+    sp<Vec3> _vv3;
 
 };
 

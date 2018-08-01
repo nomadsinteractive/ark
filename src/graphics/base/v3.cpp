@@ -67,9 +67,4 @@ V3 V3::cross(const V3& other) const
     return V3(_y * other._z - other._y * _z, _z * other._x - other._z * _x, _x * other._y - other._y * _x);
 }
 
-template<> ARK_API const sp<VV3> Null::ptr()
-{
-    return Ark::instance().obtain<VV3::Const>(V3());
-}
-
 }

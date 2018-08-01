@@ -64,7 +64,7 @@ public:
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<GLShader> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<GLShader> build(const sp<Scope>& args) override;
 

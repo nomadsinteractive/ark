@@ -35,6 +35,7 @@ public:
     const sp<GLSnippetDelegate>& snippet() const;
 
     const GLBuffer& arrayBuffer() const;
+    const std::vector<std::pair<uint32_t, GLBuffer>>& instancedArrays() const;
 
     const Attributes& attributes() const;
 

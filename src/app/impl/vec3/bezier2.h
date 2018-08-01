@@ -13,7 +13,7 @@
 
 namespace ark {
 
-class Bezier2 : public VV3 {
+class Bezier2 : public Vec3 {
 public:
     Bezier2(const sp<Numeric>& t, const sp<Numeric>& v, const sp<Vec2>& p1, const sp<Vec2>& p2, const sp<Vec2>& p3, const sp<Runnable>& onarrival);
 

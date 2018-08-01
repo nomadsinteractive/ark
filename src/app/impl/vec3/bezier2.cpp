@@ -7,7 +7,7 @@
 
 #include "core/util/math.h"
 
-#include "graphics/base/vec3.h"
+#include "graphics/impl/vec/vec3_impl.h"
 
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/render_controller.h"
@@ -68,9 +68,9 @@ Bezier2::BUILDER::BUILDER(BeanFactory& parent, const document& manifest, const s
 
 sp<Vec3> Bezier2::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<VV3> vv3 = sp<Bezier2>::make(_t ? _t->build(args) : Ark::instance().clock()->duration(), _v->build(args), _p1->build(args), _p2->build(args), _p3->build(args), _on_arrival->build(args));
-    const sp<VV3> synchronized = _resource_loader_context->synchronize<V3>(vv3);
-    return sp<Vec3>::make(synchronized);
+    const sp<Vec3> vv3 = sp<Bezier2>::make(_t ? _t->build(args) : Ark::instance().clock()->duration(), _v->build(args), _p1->build(args), _p2->build(args), _p3->build(args), _on_arrival->build(args));
+    const sp<Vec3> synchronized = _resource_loader_context->synchronize<V3>(vv3);
+    return synchronized;
 }
 
 }

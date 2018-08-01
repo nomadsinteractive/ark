@@ -42,7 +42,7 @@ sp<Numeric> Clamp::BUILDER::build(const sp<Scope>& args)
 Clamp::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Numeric>>& delegate, const String& style)
     : _delegate(delegate)
 {
-    BeanUtils::parse<Numeric, Numeric, Runnable>(factory, style, _min, _max, _notifier);
+    BeanUtils::split<Numeric, Numeric, Runnable>(factory, style, _min, _max, _notifier);
 }
 
 sp<Numeric> Clamp::STYLE::build(const sp<Scope>& args)

@@ -94,9 +94,9 @@ public:
         virtual sp<VV4> build(const sp<Scope>& args) override;
 
     private:
-        array<sp<Builder<Numeric>>> _xyzw;
+        sp<Builder<Numeric>> _x, _y, _z, _w;
         V4 _v4;
-
+        bool _is_color;
     };
 
 private:

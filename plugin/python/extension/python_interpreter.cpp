@@ -9,7 +9,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/color.h"
-#include "graphics/base/vec3.h"
+#include "graphics/impl/vec/vec3_impl.h"
 #include "graphics/util/vec2_util.h"
 
 #include "app/base/event.h"
@@ -365,11 +365,6 @@ template<> ARK_PLUGIN_PYTHON_API Color PythonInterpreter::toType<Color>(PyObject
     }
     DFATAL("Color object should be either int or length-4 float tuple. (eg. 0xffffffff or (1.0, 1.0, 1.0, 1.0))");
     return Color();
-}
-
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Vec3>(const Vec3& value)
-{
-    return PythonInterpreter::instance()->pyNewObject<Vec3>(sp<Vec3>::make(value));
 }
 
 template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<int32_t>(const int32_t& value)

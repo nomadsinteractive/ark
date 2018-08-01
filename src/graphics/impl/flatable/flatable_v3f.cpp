@@ -7,7 +7,7 @@
 
 namespace ark {
 
-FlatableVec3::FlatableVec3(const sp<VV3>& vv3)
+FlatableVec3::FlatableVec3(const sp<Vec3>& vv3)
     : _vv3(vv3)
 {
 }
@@ -28,7 +28,7 @@ uint32_t FlatableVec3::length()
 }
 
 FlatableVec3::BUILDER::BUILDER(BeanFactory& parent, const String& value)
-    : _vv3(parent.ensureBuilder<VV3>(value))
+    : _vv3(parent.ensureBuilder<Vec3>(value))
 {
 }
 

@@ -14,7 +14,7 @@ namespace ark {
 GLModelBuffer::GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<GLShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
     : _shader_bindings(shaderBindings), _vertices(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), stride, instanceCount),
       _instanced_buffer_builders(shaderBindings->makeInstancedBufferBuilders(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), instanceCount)),
-      _indice_base(0), _is_instanced(false)
+      _indice_base(0), _is_instanced(shaderBindings->instancedArrays().size() > 0)
 {
 }
 
@@ -94,11 +94,6 @@ void GLModelBuffer::setIndices(GLBuffer::Snapshot indices)
 bool GLModelBuffer::isInstanced() const
 {
     return _is_instanced;
-}
-
-void GLModelBuffer::setIsInstanced(bool isInstanced)
-{
-    _is_instanced = isInstanced;
 }
 
 GLBuffer::Builder& GLModelBuffer::getInstancedArrayBuilder(uint32_t divisor)

@@ -141,8 +141,8 @@ float World::toMeterY(float pixelY) const
 World::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _expired(factory.getBuilder<Boolean>(manifest, Constants::Attributes::EXPIRED))
 {
-    BeanUtils::parse<Numeric, Numeric>(factory, manifest, "pixel-per-meter", _ppmx, _ppmy);
-    BeanUtils::parse<Numeric, Numeric>(factory, manifest, "gravity", _gravity_x, _gravity_y);
+    BeanUtils::split<Numeric, Numeric>(factory, manifest, "pixel-per-meter", _ppmx, _ppmy);
+    BeanUtils::split<Numeric, Numeric>(factory, manifest, "gravity", _gravity_x, _gravity_y);
 }
 
 sp<World> World::BUILDER_IMPL1::build(const sp<Scope>& args)
