@@ -20,7 +20,7 @@ class ARK_API GLTexture : public GLResource {
 public:
     enum Format {
         FORMAT_AUTO = 0x8000,
-        FORMAT_ALPHA = 0,
+        FORMAT_R = 0,
         FORMAT_RG = 1,
         FORMAT_RGB = 2,
         FORMAT_RGBA = 3,
@@ -42,7 +42,7 @@ public:
 //  [[script::bindings::property]]
     uint32_t height() const;
 
-//  [[script::bindings::auto]]
+//  [[script::bindings::property]]
     sp<Bitmap> getBitmap() const;
 
     void active(const sp<GLProgram>& program, uint32_t id) const;

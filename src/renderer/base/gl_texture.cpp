@@ -19,15 +19,15 @@
 namespace ark {
 
 static GLenum getTextureInternalFormat(GLTexture::Format format, const Bitmap& bitmap) {
-    const GLenum formats[] = {GL_R8, GL_R8_SNORM, GL_R16, GL_R16_SNORM,
-                              GL_RG8, GL_RG8_SNORM, GL_RG16, GL_RG16_SNORM,
-                              GL_RGB8, GL_RGB8_SNORM, GL_RGB16, GL_RGB16_SNORM,
-                              GL_RGBA8, GL_RGBA8_SNORM, GL_RGBA16, GL_RGBA16_SNORM};
+    const GLenum formats[] = {GL_R8, GL_R8_SNORM, GL_R16, GL_R16_SNORM, GL_R8, GL_R8, GL_R16F, GL_R16F,
+                              GL_RG8, GL_RG8_SNORM, GL_RG16, GL_RG16_SNORM, GL_RG16F, GL_RG16F, GL_RG16F, GL_RG16F,
+                              GL_RGB8, GL_RGB8_SNORM, GL_RGB16, GL_RGB16_SNORM, GL_RGB16F, GL_RGB16F, GL_RGB16F, GL_RGB16F,
+                              GL_RGBA8, GL_RGBA8_SNORM, GL_RGBA16, GL_RGBA16_SNORM, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F};
     uint32_t signedOffset = (format & GLTexture::FORMAT_SIGNED) == GLTexture::FORMAT_SIGNED ? 1 : 0;
     uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
-    uint32_t channel4 = (bitmap.channels() - 1) * 4;
-    DCHECK(byteCount <= 2, "Unsupported color depth: %d", byteCount * 8);
-    return format == GLTexture::FORMAT_AUTO ? formats[channel4] : formats[channel4 + (byteCount - 1) * 2 + signedOffset];
+    uint32_t channel8 = (bitmap.channels() - 1) * 8;
+    DCHECK(byteCount > 0 && byteCount <= 4, "Unsupported color depth: %d", byteCount * 8);
+    return formats[channel8 + (byteCount - 1) * 2 + signedOffset];
 }
 
 static GLenum getTextureFormat(GLTexture::Format format, uint8_t channels) {
@@ -43,7 +43,7 @@ static GLenum getPixelFormat(GLTexture::Format format, const Bitmap& bitmap) {
         return flagSigned ? GL_BYTE : GL_UNSIGNED_BYTE;
     if(byteCount == 2)
         return flagSigned ? GL_SHORT: GL_UNSIGNED_SHORT;
-    return flagSigned ? GL_INT : GL_UNSIGNED_INT;
+    return flagSigned ? GL_INT : GL_FLOAT;
 }
 
 GLTexture::GLTexture(const sp<GLRecycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<sp<Bitmap>>>& bitmap, Format format)
@@ -168,11 +168,11 @@ GLTexture::BUILDER::BUILDER(BeanFactory& factory, const document& doc, const sp<
     const String v = Documents::getAttribute(doc, "format");
     if(v)
     {
-        _format = FORMAT_ALPHA;
+        _format = FORMAT_R;
         for(const String& format : v.toLower().split('|'))
         {
-            if(format == "alpha")
-                _format = static_cast<Format>(_format | GLTexture::FORMAT_ALPHA);
+            if(format == "r")
+                _format = static_cast<Format>(_format | GLTexture::FORMAT_R);
             else if(format == "rg")
                 _format = static_cast<Format>(_format | GLTexture::FORMAT_RG);
             else if(format == "rgb")

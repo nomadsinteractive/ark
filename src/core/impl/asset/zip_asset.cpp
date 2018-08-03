@@ -21,9 +21,8 @@ public:
         return static_cast<uint32_t>(zip_fread(_zip_file, buffer, bufferSize));
     }
 
-    virtual int32_t seek(int32_t /*position*/, int32_t /*whence*/) override {
-        DFATAL("Unimplemented");
-        return 0;
+    virtual int32_t seek(int32_t position, int32_t whence) override {
+        return zip_fseek(_zip_file, position, whence);
     }
 
     virtual int32_t remaining() override {

@@ -1,9 +1,10 @@
 #ifndef ARK_RENDERER_IMPL_GL_SNIPPET_TEXTURES_H_
 #define ARK_RENDERER_IMPL_GL_SNIPPET_TEXTURES_H_
 
+#include <vector>
+
 #include "core/base/api.h"
 #include "core/inf/builder.h"
-#include "core/collection/list.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/inf/gl_snippet.h"
@@ -25,12 +26,12 @@ public:
         virtual sp<GLSnippet> build(const sp<Scope>& args) override;
 
     private:
-        List<std::pair<uint32_t, sp<Builder<GLTexture>>>> _textures;
+        std::vector<std::pair<uint32_t, sp<Builder<GLTexture>>>> _textures;
 
     };
 
 private:
-    List<std::pair<uint32_t, sp<GLTexture>>> _textures;
+    std::vector<std::pair<uint32_t, sp<GLTexture>>> _textures;
 };
 
 }

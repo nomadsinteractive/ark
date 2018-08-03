@@ -42,12 +42,12 @@ static int _stb_eof_callback(void *user)
     return static_cast<int>(u->_eof);
 }
 
-class STBImageArray : public Array<uint8_t> {
+class STBImageByteArray : public Array<uint8_t> {
 public:
-    STBImageArray(stbi_uc* array, uint32_t length)
+    STBImageByteArray(void* array, uint32_t length)
         : _array(array), _length(length) {
     }
-    ~STBImageArray() {
+    ~STBImageByteArray() {
         stbi_image_free(_array);
     }
 
@@ -60,7 +60,7 @@ public:
     }
 
 private:
-    stbi_uc* _array;
+    void* _array;
     uint32_t _length;
 };
 
@@ -88,11 +88,14 @@ bitmap STBBitmapLoader::load(const sp<Readable>& readable)
         return bitmap::make(width, height, 0, channels);
     }
 
-    stbi_uc* bytes = stbi_load_from_callbacks(&callback, &user, &width, &height, &channels, 0);
+    uint32_t componentSize = stbi_is_hdr_from_callbacks(&callback, &user) ? 4 : 1;
+    readable->seek(0, SEEK_SET);
+    void* bytes = componentSize == 1 ? reinterpret_cast<void*>(stbi_load_from_callbacks(&callback, &user, &width, &height, &channels, 0))
+                                     : reinterpret_cast<void*>(stbi_loadf_from_callbacks(&callback, &user, &width, &height, &channels, 0));
     DCHECK(bytes, "stbi_load_from_callbacks failure: %s", stbi_failure_reason());
 
-    uint32_t stride = width * channels;
-    return bitmap::make(width, height, stride, static_cast<uint8_t>(channels), sp<STBImageArray>::make(bytes, stride * height));
+    uint32_t stride = width * channels * componentSize;
+    return bitmap::make(width, height, stride, static_cast<uint8_t>(channels), sp<STBImageByteArray>::make(bytes, stride * height));
 }
 
 }

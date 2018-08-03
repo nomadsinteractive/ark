@@ -123,8 +123,7 @@ set(ZLIB_INCLUDE_DIR ${ARK_SRC_DIR}/3rdparty/zlib ${CMAKE_CURRENT_BINARY_DIR}/3r
 set(ZLIB_VERSION_STRING "1.2.8")
 set(ZLIB_LIBRARY zlibstatic)
 
-ark_add_denpendency(3rdparty/libzip OFF zipstatic ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/libzip 3rdparty/libzip/lib)
-add_definitions(-DZIP_STATIC)
+ark_add_denpendency(3rdparty/libzip OFF zip ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/libzip 3rdparty/libzip/lib)
 
 set(GLM_TEST_ENABLE OFF)
 ark_ensure_dependency(3rdparty/glm)
@@ -158,6 +157,7 @@ if(ARK_USE_STB_IMAGE)
     ark_compile_definitions(-DARK_USE_STB_IMAGE)
 endif()
 
+set(FREETYPE_NO_DIST ON)
 ark_add_denpendency(3rdparty/freetype OFF freetype ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/freetype/include/freetype2 3rdparty/freetype/include)
 
 add_subdirectory(plugin/python)

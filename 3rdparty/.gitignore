@@ -1,4 +1,12 @@
-# Ignore everything in this directory
-*
-# Except this file
-!.gitignore
+dirent
+glbinding
+libjpeg-turbo
+libyaml
+SDL2
+tinyheaders
+zlib
+freetype
+glm
+libpng
+stb
+tinyxml2
