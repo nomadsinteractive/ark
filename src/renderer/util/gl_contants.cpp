@@ -1,5 +1,7 @@
 #include "renderer/util/gl_contants.h"
 
+#include "graphics/base/bitmap.h"
+
 namespace ark {
 
 GLConstants::GLConstants()
@@ -18,6 +20,37 @@ GLenum GLConstants::getEnum(const String& name, GLenum defValue)
 {
     const auto iter = _constants.find(name);
     return iter != _constants.end() ? iter->second : defValue;
+}
+
+GLenum GLConstants::getTextureInternalFormat(GLTexture::Format format, const Bitmap& bitmap)
+{
+    const GLenum formats[] = {GL_R8, GL_R8_SNORM, GL_R16, GL_R16_SNORM, GL_R8, GL_R8, GL_R16F, GL_R16F,
+                              GL_RG8, GL_RG8_SNORM, GL_RG16, GL_RG16_SNORM, GL_RG16F, GL_RG16F, GL_RG16F, GL_RG16F,
+                              GL_RGB8, GL_RGB8_SNORM, GL_RGB16, GL_RGB16_SNORM, GL_RGB16F, GL_RGB16F, GL_RGB16F, GL_RGB16F,
+                              GL_RGBA8, GL_RGBA8_SNORM, GL_RGBA16, GL_RGBA16_SNORM, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F};
+    uint32_t signedOffset = (format & GLTexture::FORMAT_SIGNED) == GLTexture::FORMAT_SIGNED ? 1 : 0;
+    uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
+    uint32_t channel8 = (bitmap.channels() - 1) * 8;
+    DCHECK(byteCount > 0 && byteCount <= 4, "Unsupported color depth: %d", byteCount * 8);
+    return formats[channel8 + (byteCount - 1) * 2 + signedOffset];
+}
+
+GLenum GLConstants::getTextureFormat(GLTexture::Format format, uint8_t channels)
+{
+    const GLenum formatByChannels[] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
+    DCHECK(channels < 5, "Unknown bitmap format: (channels = %d)", static_cast<uint32_t>(channels));
+    return format == GLTexture::FORMAT_AUTO ? formatByChannels[channels - 1] : formatByChannels[static_cast<uint32_t>(format & GLTexture::FORMAT_RGBA)];
+}
+
+GLenum GLConstants::getPixelFormat(GLTexture::Format format, const Bitmap& bitmap)
+{
+    bool flagSigned = (format & GLTexture::FORMAT_SIGNED) == GLTexture::FORMAT_SIGNED;
+    uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
+    if(byteCount == 1)
+        return flagSigned ? GL_BYTE : GL_UNSIGNED_BYTE;
+    if(byteCount == 2)
+        return flagSigned ? GL_SHORT: GL_UNSIGNED_SHORT;
+    return flagSigned ? GL_INT : GL_FLOAT;
 }
 
 void GLConstants::initConstants()

@@ -54,7 +54,7 @@ PyMethodDef ARK_METHODS[] =
 
 PyObject* ark_log(PyObject* /*self*/, PyObject* args)
 {
-    uint32_t size = PyTuple_Size(args);
+    size_t size = PyTuple_Size(args);
     if(size)
     {
         PyInstance pyContent = PyInstance::borrow(PyTuple_GetItem(args, 0));

@@ -1,6 +1,9 @@
 #ifndef ARK_CORE_INF_VARIABLE_H_
 #define ARK_CORE_INF_VARIABLE_H_
 
+#include "core/forwarding.h"
+#include "core/base/string.h"
+
 namespace ark {
 
 template<typename T> class Variable {
@@ -11,6 +14,7 @@ public:
 
     class Impl;
     class Const;
+    class Get;
 };
 
 template<typename T> class Variable<T>::Impl : public Variable<T> {
@@ -49,6 +53,21 @@ public:
 
 private:
     T _value;
+};
+
+template<typename T> class Variable<T>::Get : public Variable<T> {
+public:
+    Get(const sp<Dictionary<T>>& dictionary, const String& name)
+        : _dictionary(dictionary), _name(name) {
+    }
+
+    virtual T val() override {
+        return _dictionary->get(_name);
+    }
+
+private:
+    sp<Dictionary<T>> _dictionary;
+    String _name;
 };
 
 }

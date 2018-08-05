@@ -30,7 +30,7 @@ public:
         FORMAT_SIZED_MASK = FORMAT_F16 | FORMAT_F32
     };
 
-    GLTexture(const sp<GLRecycler>& _recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap, Format format = FORMAT_AUTO);
+    GLTexture(const sp<GLRecycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap, Format format = FORMAT_AUTO);
     ~GLTexture();
 
     virtual uint32_t id() override;
@@ -96,6 +96,8 @@ private:
 
     friend class BUILDER;
     friend class DICTIONARY;
+
+    friend class GLCubemap;
 
 private:
     sp<GLRecycler> _recycler;

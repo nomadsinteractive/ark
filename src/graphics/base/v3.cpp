@@ -64,7 +64,7 @@ float V3::dot(const V3& other) const
 
 V3 V3::cross(const V3& other) const
 {
-    return V3(_y * other._z - other._y * _z, _z * other._x - other._z * _x, _x * other._y - other._y * _x);
+    return V3(_y * other._z - other._y * _z, _z * other._x - other._z * _x, _x * other._y - other._x * _y);
 }
 
 }

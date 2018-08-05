@@ -1,6 +1,7 @@
 #include "core/util/numeric_util.h"
 
 #include "core/base/bean_factory.h"
+#include "core/base/clock.h"
 #include "core/base/expression.h"
 #include "core/impl/builder/builder_by_instance.h"
 #include "core/impl/numeric/max.h"
@@ -11,7 +12,7 @@
 #include "core/impl/numeric/numeric_multiply.h"
 #include "core/impl/numeric/numeric_negative.h"
 #include "core/impl/numeric/numeric_subtract.h"
-#include "core/impl/numeric/chase.h"
+#include "core/impl/numeric/stalker.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/strings.h"
 #include "core/util/operators.h"
@@ -235,9 +236,9 @@ sp<Numeric> NumericUtil::boundary(const sp<Numeric>& self, const sp<Numeric>& a2
     return self->val() < a2->val() ? sp<Numeric>::adopt(new Min(self, a2)) : sp<Numeric>::adopt(new Max(self, a2));
 }
 
-sp<Numeric> NumericUtil::chase(const sp<Numeric>& duration, const sp<Numeric>& target, float s0, float eta)
+sp<Numeric> NumericUtil::makeStalker(const sp<Numeric>& self, float s0, float eta, const sp<Numeric>& duration)
 {
-    return sp<Chase>::make(duration, target, s0, eta);
+    return sp<Stalker>::make(duration ? duration : Ark::instance().clock()->duration(), self, s0, eta);
 }
 
 NumericUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& manifest)

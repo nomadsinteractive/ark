@@ -59,7 +59,11 @@ void GLModelLoaderSphere::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint
         uint16_t u = item.left() + static_cast<uint16_t>((item.right() - item.left()) * elements[3]);
         uint16_t v = item.top() + static_cast<uint16_t>((item.bottom() - item.top()) * elements[4]);
         buf.setTexCoordinate(u, v);
-        buf.setNormal(V3(elements[0], elements[1], elements[2]));
+
+        const V3 normal(elements[0], elements[1], elements[2]);
+        const V3 tangent = abs(normal.x()) < 0.25f ? normal.cross(V3(1.0f, 0.0f, 0.0f)) : normal.cross(V3(0.0f, 1.0f, 0.0f));
+        buf.setNormal(normal);
+        buf.setTangent(tangent);
         elements += 5;
     }
     buf.nextModel();

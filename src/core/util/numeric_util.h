@@ -77,9 +77,8 @@ public:
     static sp<Numeric> depends(const sp<Numeric>& self, const sp<Numeric>& depends);
 //[[script::bindings::classmethod]]
     static sp<Numeric> boundary(const sp<Numeric>& self, const sp<Numeric>& boundary);
-
-//[[script::bindings::auto]]
-    static sp<Numeric> chase(const sp<Numeric>& duration, const sp<Numeric>& target, float s0, float eta);
+//[[script::bindings::classmethod]]
+    static sp<Numeric> makeStalker(const sp<Numeric>& self, float s0, float eta, const sp<Numeric>& duration = nullptr);
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Numeric> {

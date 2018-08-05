@@ -10,6 +10,7 @@ class GLAttribute;
 class GLBuffer;
 class GLConstants;
 class GLContext;
+class GLCubemap;
 class GLModelLoader;
 class GLModelBuffer;
 class GLFramebuffer;

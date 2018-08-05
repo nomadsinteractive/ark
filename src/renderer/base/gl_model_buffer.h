@@ -28,7 +28,7 @@ public:
     void setPosition(float x, float y, float z);
     void setTexCoordinate(uint16_t u, uint16_t v);
     void setNormal(const V3& normal);
-    void setTangents(const V3& tangents);
+    void setTangent(const V3& tangents);
 
     void nextVertex();
     void nextModel();

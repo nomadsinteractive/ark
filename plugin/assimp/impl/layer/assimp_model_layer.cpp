@@ -117,7 +117,7 @@ bitmap AssimpModelLayer::loadBitmap(const sp<ResourceLoaderContext>& resourceLoa
 {
     if(tex->mHeight == 0)
     {
-        const sp<BitmapLoader> bitmapLoader = resourceLoaderContext->imageResource()->getLoader(tex->achFormatHint);
+        const sp<BitmapLoader> bitmapLoader = resourceLoaderContext->images()->getLoader(tex->achFormatHint);
         return bitmapLoader->load(sp<BytearrayReadable>::make(sp<PreallocatedArray<uint8_t>>::make(reinterpret_cast<uint8_t*>(tex->pcData), tex->mWidth)));
     }
     return bitmap::make(tex->mWidth, tex->mHeight, tex->mWidth * 4, 4, sp<PreallocatedArray<uint8_t>>::make(reinterpret_cast<uint8_t*>(tex->pcData), tex->mWidth * tex->mHeight * 4));

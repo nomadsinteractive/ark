@@ -290,6 +290,7 @@ else(EXPAT_LIBRARIES AND EXPAT_INCLUDE_DIRS)
     endif(UNIX)
     add_python_extension(pyexpat
         SOURCES pyexpat.c
+                expat/loadlibrary.c
                 expat/xmlparse.c
                 expat/xmlrole.c
                 expat/xmltok.c

@@ -52,7 +52,7 @@
     {
         "url": "https://github.com/python/cpython.git",
         "name": "Python",
-        "tag": "v3.6.1"
+        "tag": "v3.6.4"
     },
     {
         "url": "https://github.com/python-cmake-buildsystem/python-cmake-buildsystem.git",

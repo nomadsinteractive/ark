@@ -5,6 +5,10 @@
 
 #include "core/base/string.h"
 
+#include "graphics/forwarding.h"
+
+#include "renderer/base/gl_texture.h"
+
 #include "platform/gl/gl.h"
 
 namespace ark {
@@ -15,6 +19,10 @@ public:
 
     GLenum getEnum(const String& name);
     GLenum getEnum(const String& name, GLenum defValue);
+
+    static GLenum getTextureInternalFormat(GLTexture::Format format, const Bitmap& bitmap);
+    static GLenum getTextureFormat(GLTexture::Format format, uint8_t channels);
+    static GLenum getPixelFormat(GLTexture::Format format, const Bitmap& bitmap);
 
 private:
     void initConstants();

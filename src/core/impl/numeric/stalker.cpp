@@ -1,4 +1,4 @@
-#include "core/impl/numeric/chase.h"
+#include "core/impl/numeric/stalker.h"
 
 #include <algorithm>
 
@@ -7,14 +7,14 @@
 
 namespace ark {
 
-Chase::Chase(const sp<Numeric>& t, const sp<Numeric>& target, float s0, float eta)
+Stalker::Stalker(const sp<Numeric>& t, const sp<Numeric>& target, float s0, float eta)
     : _t(t), _target(target), _c(t->val()), _eta(eta)
 {
     DCHECK(eta > 0, "ETA should greater than zero: %.2f", eta);
     doChase(s0, 0, target->val());
 }
 
-float Chase::val()
+float Stalker::val()
 {
     float t0 = _t->val();
     float t = _t_modifier * std::min(_eta, t0 - _c) + _t0;
@@ -31,7 +31,7 @@ float Chase::val()
     return s;
 }
 
-void Chase::doChase(float s0, float v0, float target)
+void Stalker::doChase(float s0, float v0, float target)
 {
     float t1;
     Math::vibrate(s0, v0, target, 0, _o, _a, _t0, t1);

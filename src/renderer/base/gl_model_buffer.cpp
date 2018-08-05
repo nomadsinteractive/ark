@@ -34,7 +34,7 @@ void GLModelBuffer::setNormal(const V3& normal)
     _vertices.write(normal, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_NORMAL);
 }
 
-void GLModelBuffer::setTangents(const V3& tangent)
+void GLModelBuffer::setTangent(const V3& tangent)
 {
     _vertices.write(tangent, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_TANGENT);
 }

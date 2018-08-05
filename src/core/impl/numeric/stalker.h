@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_IMPL_NUMERIC_CHASE_H_
-#define ARK_CORE_IMPL_NUMERIC_CHASE_H_
+#ifndef ARK_CORE_IMPL_NUMERIC_STALKER_H_
+#define ARK_CORE_IMPL_NUMERIC_STALKER_H_
 
 #include "core/forwarding.h"
 #include "core/inf/variable.h"
@@ -7,9 +7,9 @@
 
 namespace ark {
 
-class Chase : public Numeric {
+class Stalker : public Numeric {
 public:
-    Chase(const sp<Numeric>& t, const sp<Numeric>& target, float s0, float eta);
+    Stalker(const sp<Numeric>& t, const sp<Numeric>& target, float s0, float eta);
 
     virtual float val() override;
 
