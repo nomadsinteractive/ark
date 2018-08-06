@@ -125,6 +125,7 @@ String GLShaderPreprocessor::process(const GLContext& glContext) const
     if(_type == SHADER_TYPE_FRAGMENT && glContext.version() >= Ark::OPENGL_30)
     {
         sb << "#define texture2D texture\n";
+        sb << "#define textureCube texture\n";
         sb << "";
     }
 

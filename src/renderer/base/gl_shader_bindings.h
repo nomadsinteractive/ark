@@ -30,6 +30,7 @@ public:
 
 public:
     GLShaderBindings(GLResourceManager& resourceManager, const sp<GLShader>& shader);
+    GLShaderBindings(GLResourceManager& resourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer);
 
     const sp<GLShader>& shader() const;
     const sp<GLSnippetDelegate>& snippet() const;

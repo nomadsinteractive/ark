@@ -17,8 +17,8 @@
 
 namespace ark {
 
-GLCubemap::GLCubemap(const sp<GLRecycler>& recycler, uint32_t width, uint32_t height, const std::vector<sp<Variable<bitmap>>>& bitmaps, GLTexture::Format format)
-    : _recycler(recycler), _id(0), _width(width), _height(height), _bitmaps(bitmaps), _format(format)
+GLCubemap::GLCubemap(const sp<GLRecycler>& recycler, const std::vector<sp<Variable<bitmap>>>& bitmaps, GLTexture::Format format)
+    : _recycler(recycler), _id(0), _bitmaps(bitmaps), _format(format)
 {
     setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MIN_FILTER), static_cast<int32_t>(GL_LINEAR));
     setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MAG_FILTER), static_cast<int32_t>(GL_LINEAR));
@@ -62,8 +62,8 @@ void GLCubemap::prepare(GraphicsContext& /*graphicsContext*/)
         GLenum format = GLConstants::getTextureFormat(_format, channels);
         GLenum pixelFormat = bitmap ? GLConstants::getPixelFormat(_format, bitmap) : GL_UNSIGNED_BYTE;
         GLenum internalFormat = bitmap ? GLConstants::getTextureInternalFormat(_format, bitmap) : GL_RGBA8;
-        glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0, (GLint) internalFormat, static_cast<int32_t>(_width), static_cast<int32_t>(_height), 0, format, pixelFormat, bitmap ? bitmap->at(0, 0) : nullptr);
-        LOGD("GLCubemap Uploaded, id = %d, width = %d, height = %d%s", _id, _width, _height, bitmap ? "" : ", bitmap: nullptr");
+        glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0, (GLint) internalFormat, static_cast<int32_t>(bitmap->width()), static_cast<int32_t>(bitmap->height()), 0, format, pixelFormat, bitmap ? bitmap->at(0, 0) : nullptr);
+        LOGD("GLCubemap Uploaded, id = %d, width = %d, height = %d%s", _id, bitmap->width(), bitmap->height(), bitmap ? "" : ", bitmap: nullptr");
     }
     for(const auto i : _tex_parameters)
         glTexParameteri(GL_TEXTURE_CUBE_MAP, static_cast<GLenum>(i.first), static_cast<GLint>(i.second));
@@ -79,16 +79,6 @@ void GLCubemap::recycle(GraphicsContext& /*graphicsContext*/)
 uint32_t GLCubemap::id()
 {
     return _id;
-}
-
-uint32_t GLCubemap::width() const
-{
-    return _width;
-}
-
-uint32_t GLCubemap::height() const
-{
-    return _height;
 }
 
 void GLCubemap::active(const sp<GLProgram>& program, uint32_t id) const
@@ -112,13 +102,14 @@ GLCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, cons
 sp<GLCubemap> GLCubemap::BUILDER::build(const sp<Scope>& args)
 {
     std::vector<sp<Variable<bitmap>>> bitmaps;
-    const sp<Size> size = _size->build(args);
     for(size_t i = 0; i < 6; ++i)
     {
         const String src = _srcs[i]->build(args);
         bitmaps.push_back(sp<typename Variable<bitmap>::Get>::make(_resource_loader_context->images(), src));
     }
-    return sp<GLCubemap>::make(_resource_loader_context->glResourceManager()->recycler(), static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), bitmaps, _format);
+    const sp<GLCubemap> cubemap = sp<GLCubemap>::make(_resource_loader_context->glResourceManager()->recycler(), bitmaps, _format);
+    _resource_loader_context->glResourceManager()->prepare(cubemap, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
+    return cubemap;
 }
 
 }

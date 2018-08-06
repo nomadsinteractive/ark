@@ -17,15 +17,12 @@ namespace ark {
 
 class ARK_API GLCubemap : public GLResource {
 public:
-    GLCubemap(const sp<GLRecycler>& recycler, uint32_t width, uint32_t height, const std::vector<sp<Variable<bitmap>>>& bitmaps, GLTexture::Format format = GLTexture::FORMAT_AUTO);
+    GLCubemap(const sp<GLRecycler>& recycler, const std::vector<sp<Variable<bitmap>>>& bitmaps, GLTexture::Format format = GLTexture::FORMAT_AUTO);
     ~GLCubemap();
 
     virtual uint32_t id() override;
     virtual void prepare(GraphicsContext& graphicsContext) override;
     virtual void recycle(GraphicsContext&) override;
-
-    uint32_t width() const;
-    uint32_t height() const;
 
     void active(const sp<GLProgram>& program, uint32_t id) const;
 
@@ -57,8 +54,6 @@ private:
     sp<GLRecycler> _recycler;
 
     uint32_t _id;
-    uint32_t _width;
-    uint32_t _height;
     std::vector<sp<Variable<bitmap>>> _bitmaps;
     GLTexture::Format _format;
 

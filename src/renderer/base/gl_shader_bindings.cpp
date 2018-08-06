@@ -9,7 +9,12 @@
 namespace ark {
 
 GLShaderBindings::GLShaderBindings(GLResourceManager& resourceManager, const sp<GLShader>& shader)
-    : _shader(shader), _snippet(sp<GLSnippetDelegate>::make(shader)), _attributes(shader->source()->input()), _array_buffer(resourceManager.makeDynamicArrayBuffer()),
+    : GLShaderBindings(resourceManager, shader, resourceManager.makeDynamicArrayBuffer())
+{
+}
+
+GLShaderBindings::GLShaderBindings(GLResourceManager& resourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer)
+    : _shader(shader), _snippet(sp<GLSnippetDelegate>::make(shader)), _attributes(shader->source()->input()), _array_buffer(arrayBuffer),
       _shader_input(_shader->source()->input()), _instanced_arrays(_shader_input->makeInstancedArrays(resourceManager))
 {
 }

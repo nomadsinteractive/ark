@@ -90,6 +90,7 @@ const char* const BOUNDS = "bounds";
 const char* const CLASS = "class";
 const char* const CLOCK = "clock";
 const char* const COLOR = "color";
+const char* const CUBEMAP = "cubemap";
 const char* const DELEGATE = "delegate";
 const char* const EXPECTATION = "expectation";
 const char* const VARYINGS = "varyings";

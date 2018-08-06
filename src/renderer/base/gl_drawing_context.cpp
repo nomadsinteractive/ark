@@ -8,6 +8,7 @@ namespace ark {
 GLDrawingContext::GLDrawingContext(const sp<GLShaderBindings>& shaderBindings, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer::Snapshot& indexBuffer, GLenum mode)
     : _shader_bindings(shaderBindings), _array_buffer(arrayBuffer), _index_buffer(indexBuffer), _mode(mode), _count(indexBuffer.length<glindex_t>())
 {
+    DWARN(_shader_bindings->arrayBuffer().id() == arrayBuffer.id(), "GLShaderBinding's ArrayBuffer: %d, which is not the same as GLDrawingContext's ArrayBuffer snapshot: %d", _shader_bindings->arrayBuffer().id(), arrayBuffer.id());
 }
 
 void GLDrawingContext::preDraw(GraphicsContext& graphicsContext, const GLShader& shader)

@@ -508,4 +508,14 @@ bool Strings::isVariableName(const String& name, bool allowDash)
     return true;
 }
 
+Strings::BUILDER::BUILDER(BeanFactory& /*factory*/, const String& value)
+    : _delegate(Strings::load(value))
+{
+}
+
+sp<String> Strings::BUILDER::build(const sp<Scope>& args)
+{
+    return _delegate->build(args);
+}
+
 }

@@ -1,10 +1,7 @@
 #include "renderer/impl/gl_snippet/gl_snippet_active_texture.h"
 
-#include "core/base/bean_factory.h"
-
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_texture.h"
-#include "renderer/base/gl_drawing_context.h"
 
 namespace ark {
 

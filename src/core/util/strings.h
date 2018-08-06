@@ -7,7 +7,8 @@
 #include "core/base/string.h"
 #include "core/base/string_buffer.h"
 #include "core/impl/array/dynamic_array.h"
-#include "core/types/null.h"
+#include "core/inf/builder.h"
+#include "core/types/shared_ptr.h"
 #include "core/util/conversions.h"
 
 namespace ark {
@@ -82,6 +83,17 @@ public:
     static bool isArgument(const String& value);
     static bool isVariableCharacter(char c, bool allowDash = true);
     static bool isVariableName(const String& name, bool allowDash = true);
+
+//  [[plugin::builder::by-value]]
+    class BUILDER : public Builder<String> {
+    public:
+        BUILDER(BeanFactory& factory, const String& value);
+
+        virtual sp<String> build(const sp<Scope>& args) override;
+
+    private:
+        sp<Builder<String>> _delegate;
+    };
 
 };
 

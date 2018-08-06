@@ -299,7 +299,7 @@ public:
             return noNull ? getNullBuilder<T>() : nullptr;
 
         const Identifier f = Identifier::parse(id);
-        if(f.isRef())
+        if(!std::is_same<T, String>::value && f.isRef())
             return findBuilderById<T>(f, noNull);
         if(f.isArg())
             return sp<BuilderByArguments<T>>::make(f.arg(), _references);
@@ -349,6 +349,13 @@ public:
         DCHECK(builder, "Counld not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
         return builder;
     }
+
+    template<typename T> sp<Builder<T>> ensureConcreteClassBuilder(const document& doc, const String& attr) {
+        const sp<Builder<T>> builder = getConcreteClassBuilder<T>(doc, attr, false);
+        DCHECK(builder, "Counld not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
+        return builder;
+    }
+
 
     template<typename T> sp<Builder<T>> ensureBuilderByTypeValue(const String& type, const String& value) {
         const sp<Builder<T>> builder = createBuilderByTypeValue<T>(type, value, false);

@@ -28,7 +28,6 @@ GLModelLayer::GLModelLayer(const sp<GLModelLoader>& modelLoader, const sp<GLShad
 {
     if(atlas->texture())
         _shader_bindings->snippet()->link<GLSnippetActiveTexture>(atlas->texture());
-
 }
 
 const sp<Atlas>& GLModelLayer::atlas() const

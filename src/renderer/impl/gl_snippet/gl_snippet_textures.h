@@ -15,6 +15,7 @@ class ARK_API GLSnippetTextures : public GLSnippet {
 public:
 
     void addTexture(uint32_t id, const sp<GLTexture>& texture);
+    void addCubemap(uint32_t id, const sp<GLCubemap>& cubemap);
 
     virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLDrawingContext& context) override;
 
@@ -27,11 +28,12 @@ public:
 
     private:
         std::vector<std::pair<uint32_t, sp<Builder<GLTexture>>>> _textures;
-
+        std::vector<std::pair<uint32_t, sp<Builder<GLCubemap>>>> _cubemaps;
     };
 
 private:
     std::vector<std::pair<uint32_t, sp<GLTexture>>> _textures;
+    std::vector<std::pair<uint32_t, sp<GLCubemap>>> _cubemaps;
 };
 
 }
