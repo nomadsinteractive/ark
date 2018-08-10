@@ -26,13 +26,13 @@ public:
         virtual sp<GLSnippet> build(const sp<Scope>& args) override;
 
     private:
-        List<std::pair<uint32_t, sp<Builder<VV4>>>> _planes;
+        List<std::pair<uint32_t, sp<Builder<Vec4>>>> _planes;
     };
 
 private:
     bool _enabled;
 
-    List<std::pair<uint32_t, sp<VV4>>> _planes;
+    List<std::pair<uint32_t, sp<Vec4>>> _planes;
 
     friend class BUILDER;
 };

@@ -9,7 +9,7 @@
 
 namespace ark {
 
-GLSnippetUColor::GLSnippetUColor(const sp<VV4>& color)
+GLSnippetUColor::GLSnippetUColor(const sp<Vec4>& color)
     : _color(color)
 {
 }
@@ -25,7 +25,7 @@ void GLSnippetUColor::preCompile(GraphicsContext& graphicsContext, GLShaderPrepr
 }
 
 GLSnippetUColor::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-    : _color(factory.ensureBuilder<VV4>(value))
+    : _color(factory.ensureBuilder<Vec4>(value))
 {
 }
 

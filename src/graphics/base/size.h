@@ -28,11 +28,17 @@ public:
     float height() const;
 //  [[script::bindings::property]]
     void setHeight(float height);
+//  [[script::bindings::property]]
+    float depth() const;
+//  [[script::bindings::property]]
+    void setDepth(float depth);
 
 //  [[script::bindings::property]]
     const sp<Numeric> vwidth() const;
 //  [[script::bindings::property]]
     const sp<Numeric> vheight() const;
+//  [[script::bindings::property]]
+    const sp<Numeric> vdepth() const;
 
 //  [[script::bindings::auto]]
     void assign(const Size& other);

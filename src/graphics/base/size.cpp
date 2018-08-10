@@ -49,6 +49,16 @@ void Size::setHeight(float height)
     _height->set(height);
 }
 
+float Size::depth() const
+{
+    return _depth->val();
+}
+
+void Size::setDepth(float depth)
+{
+    _depth->set(depth);
+}
+
 const sp<Numeric> Size::vwidth() const
 {
     return _width;
@@ -59,16 +69,23 @@ const sp<Numeric> Size::vheight() const
     return _height;
 }
 
+const sp<Numeric> Size::vdepth() const
+{
+    return _depth;
+}
+
 void Size::assign(const Size& other)
 {
     _width = other._width;
     _height = other._height;
+    _depth = other._depth;
 }
 
 void Size::adopt(const Size& other)
 {
     _width->set(other._width);
     _height->set(other._height);
+    _depth->set(other._depth);
 }
 
 template<> ARK_API const sp<Size> Null::ptr()

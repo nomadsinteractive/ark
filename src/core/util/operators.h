@@ -47,6 +47,33 @@ public:
         }
     };
 
+    template<typename T> class Add {
+    public:
+        T operator()(T v1, T v2) {
+            return v1 + v2;
+        }
+    };
+
+    template<typename T> class Sub {
+    public:
+        T operator()(T v1, T v2) {
+            return v1 - v2;
+        }
+    };
+
+    template<typename T> class Mul {
+    public:
+        T operator()(T v1, T v2) {
+            return v1 * v2;
+        }
+    };
+
+    template<typename T> class Div {
+    public:
+        T operator()(T v1, T v2) {
+            return v1 / v2;
+        }
+    };
 };
 
 }

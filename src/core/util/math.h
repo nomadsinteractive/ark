@@ -75,6 +75,8 @@ public:
     static ARK_API float acos(float x);
 //  [[script::bindings::auto]]
     static ARK_API float atan2(float y, float x);
+//  [[script::bindings::auto]]
+    static ARK_API float radians(float degree);
 
 //  [[script::bindings::auto]]
     static ARK_API float tanh(float x);

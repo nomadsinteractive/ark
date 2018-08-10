@@ -8,7 +8,7 @@
 
 namespace ark {
 
-FlatableColor3b::FlatableColor3b(const sp<VV4>& color)
+FlatableColor3b::FlatableColor3b(const sp<Vec4>& color)
     : _color(color)
 {
 }
@@ -34,7 +34,7 @@ uint32_t FlatableColor3b::length()
 }
 
 FlatableColor3b::BUILDER::BUILDER(BeanFactory& parent, const String& value)
-    : _color(parent.ensureBuilder<VV4>(value))
+    : _color(parent.ensureBuilder<Vec4>(value))
 {
 }
 

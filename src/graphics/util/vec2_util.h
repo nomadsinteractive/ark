@@ -19,13 +19,13 @@ public:
     static sp<Vec2> create(float x, float y);
 
 //[[script::bindings::operator(+)]]
-    static sp<Vec2> add(const sp<Vec2>& self, const sp<Vec2>& rvalue);
+    static sp<Vec2> add(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
 //[[script::bindings::operator(-)]]
-    static sp<Vec2> sub(const sp<Vec2>& self, const sp<Vec2>& rvalue);
+    static sp<Vec2> sub(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
 //[[script::bindings::operator(*)]]
-    static sp<Vec2> mul(const sp<Vec2>& self, const sp<Vec2>& rvalue);
+    static sp<Vec2> mul(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
 //[[script::bindings::operator(/)]]
-    static sp<Vec2> truediv(const sp<Vec2>& self, const sp<Vec2>& rvalue);
+    static sp<Vec2> truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
 //[[script::bindings::operator(//)]]
     static sp<Vec2> floordiv(const sp<Vec2>& self, const sp<Vec2>& rvalue);
 //[[script::bindings::operator(neg)]]

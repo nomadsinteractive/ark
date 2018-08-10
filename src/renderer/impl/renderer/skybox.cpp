@@ -14,7 +14,7 @@
 #include "renderer/base/gl_shader_bindings.h"
 #include "renderer/base/gl_snippet_delegate.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/impl/gl_snippet/gl_snippet_active_cubemap.h"
+#include "renderer/impl/gl_snippet/gl_snippet_active_texture.h"
 #include "renderer/util/gl_index_buffers.h"
 
 namespace ark {
@@ -43,12 +43,12 @@ private:
 }
 
 
-Skybox::Skybox(const sp<Size>& size, const sp<GLShader>& shader, const sp<GLCubemap>& cubemap, const sp<ResourceLoaderContext>& resourceLoaderContext)
+Skybox::Skybox(const sp<Size>& size, const sp<GLShader>& shader, const sp<GLTexture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _size(size), _resource_manager(resourceLoaderContext->glResourceManager()), _shader(shader),
       _shader_bindings(sp<GLShaderBindings>::make(_resource_manager, shader, _resource_manager->makeGLBuffer(sp<GLBuffer::ByteArrayUploader>::make(getArrayBuffer()), GL_ARRAY_BUFFER, GL_STATIC_DRAW))),
       _object_pool(resourceLoaderContext->objectPool())
 {
-    _shader_bindings->snippet()->link<GLSnippetActiveCubemap>(cubemap);
+    _shader_bindings->snippet()->link<GLSnippetActiveTexture>(texture);
 }
 
 void Skybox::render(RenderRequest& renderRequest, float x, float y)
@@ -67,33 +67,33 @@ bytearray Skybox::getArrayBuffer() const
     static float vertices[] = {
         -1.0f,  1.0f, -1.0f,
         -1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
          1.0f,  1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
 
         -1.0f, -1.0f,  1.0f,
         -1.0f, -1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
         -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
 
          1.0f, -1.0f, -1.0f,
          1.0f, -1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
          1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f,
 
         -1.0f, -1.0f,  1.0f,
         -1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
          1.0f, -1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
 
         -1.0f,  1.0f, -1.0f,
          1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f,  1.0f,
         -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
 
+        -1.0f, -1.0f,  1.0f,
         -1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f
+         1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f, -1.0f
     };
     return sp<PreallocatedArray<uint8_t>>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
 }
@@ -101,15 +101,14 @@ bytearray Skybox::getArrayBuffer() const
 Skybox::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _size(factory.ensureBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _shader(GLShader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/skybox.vert", "shaders/skybox.frag")),
-      _cubemap(factory.ensureConcreteClassBuilder<GLCubemap>(manifest, Constants::Attributes::CUBEMAP))
+      _texture(factory.ensureBuilder<GLTexture>(manifest, Constants::Attributes::TEXTURE))
 {
 }
 
 sp<Renderer> Skybox::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Size> size = _size->build(args);
-    const sp<GLShader> shader = _shader->build(args);
-    return sp<Skybox>::make(size, shader, _cubemap->build(args), _resource_loader_context);
+    return sp<Skybox>::make(size, _shader->build(args), _texture->build(args), _resource_loader_context);
 }
 
 }

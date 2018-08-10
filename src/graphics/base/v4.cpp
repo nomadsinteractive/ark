@@ -29,19 +29,39 @@ bool V4::operator !=(const V4& other) const
     return _x != other._x || _y != other._y || _z != other._z || _w != other._w;
 }
 
+V4 operator +(const V4& lvalue, const V4& rvalue)
+{
+    return V4(lvalue._x + rvalue._x, lvalue._y + rvalue._y, lvalue._z + rvalue._z, lvalue._w + rvalue._w);
+}
+
+V4 operator -(const V4& lvalue, const V4& rvalue)
+{
+    return V4(lvalue._x - rvalue._x, lvalue._y - rvalue._y, lvalue._z - rvalue._z, lvalue._w - rvalue._w);
+}
+
+V4 operator *(const V4& lvalue, const V4& rvalue)
+{
+    return V4(lvalue._x * rvalue._x, lvalue._y * rvalue._y, lvalue._z * rvalue._z, lvalue._w * rvalue._w);
+}
+
+V4 operator /(const V4& lvalue, const V4& rvalue)
+{
+    return V4(lvalue._x / rvalue._x, lvalue._y / rvalue._y, lvalue._z / rvalue._z, lvalue._w / rvalue._w);
+}
+
 float V4::w() const
 {
     return _w;
 }
 
+V4 V4::operator -() const
+{
+    return V4(-_x, -_y, -_z, -_w);
+}
+
 float V4::dot(const V4& other) const
 {
     return _x * other._x + _y * other._y + _z * other._z + _w * other._w;
-}
-
-template<> ARK_API const sp<VV4> Null::ptr()
-{
-    return Ark::instance().obtain<VV4::Const>(V4());
 }
 
 template<> ARK_API V4 Conversions::to<String, V4>(const String& s)

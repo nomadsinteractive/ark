@@ -1,20 +1,16 @@
 #include "graphics/impl/vec/vec3_impl.h"
 
-#include <algorithm>
-
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
-#include "core/util/numeric_util.h"
-#include "core/util/strings.h"
 
 #include "graphics/base/v3.h"
 
 namespace ark {
 
 Vec3Impl::Vec3Impl() noexcept
-    : _x(sp<NumericWrapper>::make(0.0f)), _y(sp<NumericWrapper>::make(0.0f)), _z(sp<NumericWrapper>::make(0.0f))
+    : Vec3Impl(0, 0, 0)
 {
 }
 

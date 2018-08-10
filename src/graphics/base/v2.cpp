@@ -60,22 +60,22 @@ V2 V2::operator -() const
 
 V2 operator +(const V2& lvalue, const V2& rvalue)
 {
-    return V2(lvalue.x() + rvalue.x(), lvalue.y() + rvalue.y());
+    return V2(lvalue._x + rvalue._x, lvalue._y + rvalue._y);
 }
 
 V2 operator -(const V2& lvalue, const V2& rvalue)
 {
-    return V2(lvalue.x() - rvalue.x(), lvalue.y() - rvalue.y());
+    return V2(lvalue._x - rvalue._x, lvalue._y - rvalue._y);
 }
 
 V2 operator *(const V2& lvalue, const V2& rvalue)
 {
-    return V2(lvalue.x() * rvalue.x(), lvalue.y() * rvalue.y());
+    return V2(lvalue._x * rvalue._x, lvalue._y * rvalue._y);
 }
 
 V2 operator /(const V2& lvalue, const V2& rvalue)
 {
-    return V2(lvalue.x() / rvalue.x(), lvalue.y() / rvalue.y());
+    return V2(lvalue._x / rvalue._x, lvalue._y / rvalue._y);
 }
 
 float V2::x() const

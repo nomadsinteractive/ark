@@ -14,7 +14,7 @@ namespace ark {
 
 class GLSnippetUColor : public GLSnippet {
 public:
-    GLSnippetUColor(const sp<VV4>& color);
+    GLSnippetUColor(const sp<Vec4>& color);
 
     virtual void preInitialize(GLShaderSource& source) override;
     virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) override;
@@ -27,12 +27,12 @@ public:
         virtual sp<GLSnippet> build(const sp<Scope>&) override;
 
     private:
-        sp<Builder<VV4>> _color;
+        sp<Builder<Vec4>> _color;
 
     };
 
 private:
-    sp<VV4> _color;
+    sp<Vec4> _color;
 
 };
 

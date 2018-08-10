@@ -3,27 +3,30 @@
 
 #include <type_traits>
 
-#include "core/inf/variable.h"
-#include "core/types/shared_ptr.h"
-
-
 namespace ark {
 
-template<typename P, typename OP2, typename T = typename std::result_of<OP2(P, P)>::type> class VariableOP2 : public Variable<T> {
+template<typename P, typename OP2, typename LVType, typename RVType, typename OPType = typename std::result_of<OP2(P, P)>::type> class VariableOP2 : public Variable<OPType> {
 public:
-    typedef sp<Variable<P>> VType;
-
-    VariableOP2(const VType& p1, const VType& p2)
+    VariableOP2(const LVType& p1, const RVType& p2)
         : _p1(p1), _p2(p2) {
     }
 
-    virtual T val() override {
-        return _op2(_p1->val(), _p2->val());
+    virtual OPType val() override {
+        return _op2(_val_sfinae(_p1, nullptr), _val_sfinae(_p2, nullptr));
     }
 
 private:
-    VType _p1;
-    VType _p2;
+    template<typename T> static P _val_sfinae(const T& p, decltype(p->val())* /*args*/) {
+        return static_cast<P>(p->val());
+    }
+
+    template<typename T> static P _val_sfinae(const T& p, ...) {
+        return static_cast<P>(p);
+    }
+
+private:
+    LVType _p1;
+    RVType _p2;
     OP2 _op2;
 };
 

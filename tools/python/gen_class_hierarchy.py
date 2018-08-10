@@ -14,7 +14,7 @@ INDENT = '\n    '
 
 
 CORE_INTERFACES = ('Numeric', 'Layer', 'Integer', 'GLResource', 'EventListener', 'Renderer', 'Expired', 'Block',
-                   'Boolean', 'Runnable', 'Vec2', 'Vec3', 'VV4')
+                   'Boolean', 'Runnable', 'Vec2', 'Vec3', 'Vec4')
 
 
 class GenClass:

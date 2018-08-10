@@ -7,10 +7,4 @@ class StringBundle {
 };
 */
 
-/*
-[[script::bindings::auto]]
-class VV4 {
-};
-*/
-
 #endif

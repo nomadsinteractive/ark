@@ -19,13 +19,13 @@ public:
     static sp<Vec3> create(float x, float y, float z);
 
 //[[script::bindings::operator(+)]]
-    static sp<Vec3> add(const sp<Vec3>& self, const sp<Vec3>& rvalue);
+    static sp<Vec3> add(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //[[script::bindings::operator(-)]]
-    static sp<Vec3> sub(const sp<Vec3>& self, const sp<Vec3>& rvalue);
+    static sp<Vec3> sub(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //[[script::bindings::operator(*)]]
-    static sp<Vec3> mul(const sp<Vec3>& self, const sp<Vec3>& rvalue);
+    static sp<Vec3> mul(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //[[script::bindings::operator(/)]]
-    static sp<Vec3> truediv(const sp<Vec3>& self, const sp<Vec3>& rvalue);
+    static sp<Vec3> truediv(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //[[script::bindings::operator(//)]]
     static sp<Vec3> floordiv(const sp<Vec3>& self, const sp<Vec3>& rvalue);
 //[[script::bindings::operator(neg)]]
@@ -35,7 +35,7 @@ public:
     static sp<Vec3> transform(const sp<Vec3>& self, const sp<Transform>& transform, const sp<Vec3>& org);
 
 //[[script::bindings::property]]
-    static V3 val(const sp<Vec3>& self);
+    static V3 xyz(const sp<Vec3>& self);
 //[[script::bindings::property]]
     static V2 xy(const sp<Vec3>& self);
 //[[script::bindings::property]]

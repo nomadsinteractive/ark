@@ -11,20 +11,12 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/gl_texture.h"
-#include "renderer/inf/gl_resource.h"
 
 namespace ark {
 
-class ARK_API GLCubemap : public GLResource {
+class ARK_API GLCubemap : public GLTexture {
 public:
-    GLCubemap(const sp<GLRecycler>& recycler, const std::vector<sp<Variable<bitmap>>>& bitmaps, GLTexture::Format format = GLTexture::FORMAT_AUTO);
-    ~GLCubemap();
-
-    virtual uint32_t id() override;
-    virtual void prepare(GraphicsContext& graphicsContext) override;
-    virtual void recycle(GraphicsContext&) override;
-
-    void active(const sp<GLProgram>& program, uint32_t id) const;
+    GLCubemap(const sp<GLRecycler>& recycler, const sp<Size>& size, GLTexture::Format format, GLTexture::Feature features, std::vector<sp<Variable<bitmap>>> bitmaps);
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<GLCubemap> {
@@ -41,26 +33,25 @@ public:
         sp<Builder<Size>> _size;
         sp<Builder<String>> _srcs[6];
         GLTexture::Format _format;
+        GLTexture::Feature _features;
     };
 
+//  [[plugin::resource-loader("cubemap")]]
+    class BUILDER_IMPL1 : public Builder<GLTexture> {
+    public:
+        BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+        virtual sp<GLTexture> build(const sp<Scope>& args) override;
+
+    private:
+        BUILDER _delegate;
+    };
+
+protected:
+    virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) override;
+
 private:
-    void setTexParameters(const document& doc);
-    void setTexParameter(uint32_t name, int32_t value);
-    void setTexFormat(GLTexture::Format format);
-
-    friend class BUILDER;
-
-private:
-    sp<GLRecycler> _recycler;
-
-    uint32_t _id;
     std::vector<sp<Variable<bitmap>>> _bitmaps;
-    GLTexture::Format _format;
-
-    std::map<uint32_t, int32_t> _tex_parameters;
-
-    Global<GLConstants> _gl_constants;
-
 };
 
 }

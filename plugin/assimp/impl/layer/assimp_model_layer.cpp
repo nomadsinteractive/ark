@@ -18,7 +18,6 @@
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_command/draw_elements.h"
-#include "renderer/impl/gl_snippet/gl_snippet_textures.h"
 #include "renderer/impl/gl_snippet/gl_snippet_update_model_matrix.h"
 
 #include "assimp/impl/io/ark_io_system.h"
@@ -62,8 +61,8 @@ AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const document& m
     const sp<GLTexture> texture = resourceLoaderContext->glResourceManager()->createGLTexture(tex->width(), tex->height(), sp<Variable<bitmap>::Const>::make(tex));
 //    _shader_bindings = sp<GLShaderBindings>::make(shader, _array_buffer);
     _shader_bindings = sp<GLShaderBindings>::make(resourceLoaderContext->glResourceManager(), shader);
-    const sp<GLSnippetTextures> textures = _shader_bindings->snippet()->link<GLSnippetTextures>();
-    textures->addTexture(0, texture);
+//    const sp<GLSnippetTextures> textures = _shader_bindings->snippet()->link<GLSnippetTextures>();
+//    textures->addTexture(0, texture);
     _shader_bindings->snippet()->link<GLSnippetUpdateModelMatrix>();
 }
 

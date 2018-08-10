@@ -1,28 +1,60 @@
-#include "renderer/util/gl_contants.h"
+#include "renderer/util/gl_util.h"
+
+#include <unordered_map>
+
+#include "core/types/global.h"
 
 #include "graphics/base/bitmap.h"
 
+#include "renderer/base/gl_texture.h"
+
 namespace ark {
 
-GLConstants::GLConstants()
-{
-    initConstants();
+namespace {
+
+struct GLConstants {
+    GLConstants() {
+        _enums["nearest"] = GL_NEAREST;
+        _enums["linear"] = GL_LINEAR;
+        _enums["texture_mag_filter"] = GL_TEXTURE_MAG_FILTER;
+        _enums["texture_min_filter"] = GL_TEXTURE_MIN_FILTER;
+        _enums["texture_wrap_s"] = GL_TEXTURE_WRAP_S;
+        _enums["texture_wrap_t"] = GL_TEXTURE_WRAP_T;
+        _enums["texture_wrap_r"] = GL_TEXTURE_WRAP_R;
+        _enums["clamp_to_edge"] = GL_CLAMP_TO_EDGE;
+        _enums["clamp_to_border"] = GL_CLAMP_TO_BORDER;
+        _enums["mirrored_repeat"] = GL_MIRRORED_REPEAT;
+        _enums["repeat"] = GL_REPEAT;
+        _enums["mirror_clamp_to_edge"] = GL_MIRROR_CLAMP_TO_EDGE;
+
+        _enums["rgba"] = GL_RGBA;
+        _enums["rgb"] = GL_RGB;
+        _enums["alpha"] = GL_ALPHA;
+        _enums["rg"] = GL_RG;
+    }
+
+    std::unordered_map<String, GLenum> _enums;
+};
+
 }
 
-GLenum GLConstants::getEnum(const String &name)
+
+GLenum GLUtil::getEnum(const String &name)
 {
-    const auto iter = _constants.find(name);
-    DCHECK(iter != _constants.end(), "Bad GLenum name \"%s\"", name.c_str());
+    const Global<GLConstants> constants;
+    const auto iter = constants->_enums.find(name);
+    DCHECK(iter != constants->_enums.end(), "Bad GLenum name \"%s\"", name.c_str());
     return iter->second;
 }
 
-GLenum GLConstants::getEnum(const String& name, GLenum defValue)
+GLenum GLUtil::getEnum(const String& name, GLenum defValue)
 {
-    const auto iter = _constants.find(name);
-    return iter != _constants.end() ? iter->second : defValue;
+    const Global<GLConstants> constants;
+    const auto iter = constants->_enums.find(name);
+    return iter != constants->_enums.end() ? iter->second : defValue;
 }
 
-GLenum GLConstants::getTextureInternalFormat(GLTexture::Format format, const Bitmap& bitmap)
+GLenum GLUtil::getTextureInternalFormat(int32_t format, const Bitmap& bitmap)
 {
     const GLenum formats[] = {GL_R8, GL_R8_SNORM, GL_R16, GL_R16_SNORM, GL_R8, GL_R8, GL_R16F, GL_R16F,
                               GL_RG8, GL_RG8_SNORM, GL_RG16, GL_RG16_SNORM, GL_RG16F, GL_RG16F, GL_RG16F, GL_RG16F,
@@ -35,14 +67,14 @@ GLenum GLConstants::getTextureInternalFormat(GLTexture::Format format, const Bit
     return formats[channel8 + (byteCount - 1) * 2 + signedOffset];
 }
 
-GLenum GLConstants::getTextureFormat(GLTexture::Format format, uint8_t channels)
+GLenum GLUtil::getTextureFormat(int32_t format, uint8_t channels)
 {
     const GLenum formatByChannels[] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
     DCHECK(channels < 5, "Unknown bitmap format: (channels = %d)", static_cast<uint32_t>(channels));
     return format == GLTexture::FORMAT_AUTO ? formatByChannels[channels - 1] : formatByChannels[static_cast<uint32_t>(format & GLTexture::FORMAT_RGBA)];
 }
 
-GLenum GLConstants::getPixelFormat(GLTexture::Format format, const Bitmap& bitmap)
+GLenum GLUtil::getPixelFormat(int32_t format, const Bitmap& bitmap)
 {
     bool flagSigned = (format & GLTexture::FORMAT_SIGNED) == GLTexture::FORMAT_SIGNED;
     uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
@@ -51,27 +83,6 @@ GLenum GLConstants::getPixelFormat(GLTexture::Format format, const Bitmap& bitma
     if(byteCount == 2)
         return flagSigned ? GL_SHORT: GL_UNSIGNED_SHORT;
     return flagSigned ? GL_INT : GL_FLOAT;
-}
-
-void GLConstants::initConstants()
-{
-    _constants["nearest"] = GL_NEAREST;
-    _constants["linear"] = GL_LINEAR;
-    _constants["texture_mag_filter"] = GL_TEXTURE_MAG_FILTER;
-    _constants["texture_min_filter"] = GL_TEXTURE_MIN_FILTER;
-    _constants["texture_wrap_s"] = GL_TEXTURE_WRAP_S;
-    _constants["texture_wrap_t"] = GL_TEXTURE_WRAP_T;
-    _constants["texture_wrap_r"] = GL_TEXTURE_WRAP_R;
-    _constants["clamp_to_edge"] = GL_CLAMP_TO_EDGE;
-    _constants["clamp_to_border"] = GL_CLAMP_TO_BORDER;
-    _constants["mirrored_repeat"] = GL_MIRRORED_REPEAT;
-    _constants["repeat"] = GL_REPEAT;
-    _constants["mirror_clamp_to_edge"] = GL_MIRROR_CLAMP_TO_EDGE;
-
-    _constants["rgba"] = GL_RGBA;
-    _constants["rgb"] = GL_RGB;
-    _constants["alpha"] = GL_ALPHA;
-    _constants["rg"] = GL_RG;
 }
 
 }

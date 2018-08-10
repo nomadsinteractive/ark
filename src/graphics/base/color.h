@@ -13,7 +13,7 @@
 namespace ark {
 
 //[[core::class]]
-class ARK_API Color : public VV4, public Changed {
+class ARK_API Color : public Vec4, public Changed {
 public:
     Color();
 //  [[script::bindings::auto]]

@@ -49,8 +49,8 @@ public:
 
     const sp<GLRecycler>& recycler() const;
 
-    template<typename T, typename... Args> sp<GLResource> createGLResource(Args&&... args) {
-        const sp<GLResource> res = sp<T>::make(std::forward<Args>(args)...);
+    template<typename T, typename... Args> sp<T> createGLResource(Args&&... args) {
+        const sp<T> res = sp<T>::make(std::forward<Args>(args)...);
         prepare(res, PS_ONCE_AND_ON_SURFACE_READY);
         return res;
     }
@@ -99,8 +99,6 @@ private:
     GLBuffer _shared_buffers[GLBuffer::NAME_COUNT];
 
     uint32_t _tick;
-
-//    friend class GLBuffer::Shared;
 };
 
 }

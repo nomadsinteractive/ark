@@ -34,27 +34,32 @@ bool V3::operator !=(const V3& other) const
 
 V3 operator +(const V3& lvalue, const V3& rvalue)
 {
-    return V3(lvalue.x() + rvalue.x(), lvalue.y() + rvalue.y(), lvalue.z() + rvalue.z());
+    return V3(lvalue._x + rvalue._x, lvalue._y + rvalue._y, lvalue._z + rvalue._z);
 }
 
 V3 operator -(const V3& lvalue, const V3& rvalue)
 {
-    return V3(lvalue.x() - rvalue.x(), lvalue.y() - rvalue.y(), lvalue.z() - rvalue.z());
+    return V3(lvalue._x - rvalue._x, lvalue._y - rvalue._y, lvalue._z - rvalue._z);
 }
 
 V3 operator *(const V3& lvalue, const V3& rvalue)
 {
-    return V3(lvalue.x() * rvalue.x(), lvalue.y() * rvalue.y(), lvalue.z() * rvalue.z());
+    return V3(lvalue._x * rvalue._x, lvalue._y * rvalue._y, lvalue._z * rvalue._z);
 }
 
 V3 operator /(const V3& lvalue, const V3& rvalue)
 {
-    return V3(lvalue.x() / rvalue.x(), lvalue.y() / rvalue.y(), lvalue.z() / rvalue.z());
+    return V3(lvalue._x / rvalue._x, lvalue._y / rvalue._y, lvalue._z / rvalue._z);
 }
 
 float V3::z() const
 {
     return _z;
+}
+
+V3 V3::operator -() const
+{
+    return V3(-_x, -_y, -_z);
 }
 
 float V3::dot(const V3& other) const

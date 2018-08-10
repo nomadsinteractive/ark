@@ -7,20 +7,45 @@
 #include "core/types/weak_ptr.h"
 #include "core/util/log.h"
 
+#include "graphics/base/bitmap.h"
+#include "graphics/base/size.h"
+
 #include "renderer/base/gl_buffer.h"
 #include "renderer/base/gl_context.h"
 #include "renderer/base/gl_recycler.h"
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_snippet_delegate.h"
-#include "renderer/base/gl_texture.h"
+#include "renderer/base/gl_texture_default.h"
 #include "renderer/base/graphics_context.h"
-#include "renderer/impl/resource/gl_texture_resource.h"
 #include "renderer/inf/gl_snippet.h"
 #include "renderer/util/gl_index_buffers.h"
 
 #include "platform/gl/gl.h"
 
 namespace ark {
+
+namespace {
+
+class GLTextureResource : public Dictionary<sp<GLTexture>> {
+public:
+    GLTextureResource(const sp<GLRecycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
+        : _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader)
+    {
+    }
+
+    virtual sp<GLTexture> get(const String& name) override {
+        const bitmap bitmapBounds = _bitmap_bounds_loader->get(name);
+        DCHECK(bitmapBounds, "Texture resource \"%s\" not found", name.c_str());
+        return sp<GLTextureDefault>::make(_recycler, sp<Size>::make(bitmapBounds->width(), bitmapBounds->height()), GLTexture::FORMAT_AUTO, GLTexture::FEATURE_DEFAULT, sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
+    }
+private:
+    sp<GLRecycler> _recycler;
+
+    sp<Dictionary<bitmap>> _bitmap_loader;
+    sp<Dictionary<bitmap>> _bitmap_bounds_loader;
+};
+
+}
 
 GLResourceManager::GLResourceManager(const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
     : _recycler(sp<GLRecycler>::make()), _gl_texture_loader(sp<GLTextureResource>::make(_recycler, bitmapLoader, bitmapBoundsLoader)), _tick(0)
@@ -89,7 +114,7 @@ sp<GLTexture> GLResourceManager::loadGLTexture(const String& name)
 
 sp<GLTexture> GLResourceManager::createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable)
 {
-    sp<GLTexture> texture = sp<GLTexture>::make(_recycler, width, height, bitmapVariable);
+    sp<GLTexture> texture = sp<GLTextureDefault>::make(_recycler, sp<Size>::make(width, height), GLTexture::FORMAT_AUTO, GLTexture::FEATURE_DEFAULT, bitmapVariable);
     prepare(texture, PS_ONCE_AND_ON_SURFACE_READY);
     return texture;
 }

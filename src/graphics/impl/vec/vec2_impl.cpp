@@ -13,7 +13,7 @@
 namespace ark {
 
 Vec2Impl::Vec2Impl() noexcept
-    : _x(sp<NumericWrapper>::make(0.0f)), _y(sp<NumericWrapper>::make(0.0f))
+    : Vec2Impl(0, 0)
 {
 }
 

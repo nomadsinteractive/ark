@@ -49,6 +49,11 @@ float Math::atan2(float y, float x)
     return atan2f_c(y, x);
 }
 
+float Math::radians(float degree)
+{
+    return degree / 180.0f * PI;
+}
+
 float Math::tanh(float x)
 {
     return tanhf_c(x);

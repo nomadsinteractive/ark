@@ -2,14 +2,11 @@
 
 #include "core/ark.h"
 #include "core/impl/variable/variable_wrapper.h"
+#include "core/impl/variable/variable_op2.h"
+#include "core/util/operators.h"
 
 #include "graphics/impl/vec/vec3_impl.h"
-#include "graphics/impl/vec/vec_add.h"
-#include "graphics/impl/vec/vec_div.h"
-#include "graphics/impl/vec/vec_mul.h"
 #include "graphics/impl/vec/vec_neg.h"
-#include "graphics/impl/vec/vec_sub.h"
-#include "graphics/impl/vec/vv2_with_transform.h"
 
 namespace ark {
 
@@ -42,24 +39,24 @@ sp<Vec3> Vec3Util::create(float x, float y, float z)
     return sp<Vec3Impl>::make(x, y, z);
 }
 
-sp<Vec3> Vec3Util::add(const sp<Vec3>& self, const sp<Vec3>& rvalue)
+sp<Vec3> Vec3Util::add(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
-    return sp<VecAdd<V3>>::make(self, rvalue);
+    return sp<VariableOP2<V3, Operators::Add<V3>, sp<Vec3>, sp<Vec3>>>::make(lvalue, rvalue);
 }
 
-sp<Vec3> Vec3Util::sub(const sp<Vec3>& self, const sp<Vec3>& rvalue)
+sp<Vec3> Vec3Util::sub(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
-    return sp<VecSub<V3>>::make(self, rvalue);
+    return sp<VariableOP2<V3, Operators::Sub<V3>, sp<Vec3>, sp<Vec3>>>::make(lvalue, rvalue);
 }
 
-sp<Vec3> Vec3Util::mul(const sp<Vec3>& self, const sp<Vec3>& rvalue)
+sp<Vec3> Vec3Util::mul(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
-    return sp<VecMul<V3>>::make(self, rvalue);
+    return sp<VariableOP2<V3, Operators::Mul<V3>, sp<Vec3>, sp<Vec3>>>::make(lvalue, rvalue);
 }
 
-sp<Vec3> Vec3Util::truediv(const sp<Vec3>& self, const sp<Vec3>& rvalue)
+sp<Vec3> Vec3Util::truediv(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
-    return sp<VecDiv<V3>>::make(self, rvalue);
+    return sp<VariableOP2<V3, Operators::Div<V3>, sp<Vec3>, sp<Vec3>>>::make(lvalue, rvalue);
 }
 
 sp<Vec3> Vec3Util::floordiv(const sp<Vec3>& self, const sp<Vec3>& rvalue)
@@ -79,7 +76,7 @@ sp<Vec3> Vec3Util::transform(const sp<Vec3>& self, const sp<Transform>& transfor
     return nullptr;
 }
 
-V3 Vec3Util::val(const sp<Vec3>& self)
+V3 Vec3Util::xyz(const sp<Vec3>& self)
 {
     return self->val();
 }

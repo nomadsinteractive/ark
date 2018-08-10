@@ -15,17 +15,18 @@
 #include "renderer/base/gl_texture_loader.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/util/gl_contants.h"
+#include "renderer/util/gl_util.h"
 
 namespace ark {
 
-GLTexture::GLTexture(const sp<GLRecycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<sp<Bitmap>>>& bitmap, Format format)
-    : _recycler(recycler), _id(0), _width(width), _height(height), _bitmap(bitmap), _format(format)
+GLTexture::GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, Format format, Feature features)
+    : _recycler(recycler), _id(0), _size(size), _target(target), _format(format), _features(features)
 {
-    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MIN_FILTER), static_cast<int32_t>(GL_LINEAR));
+    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MIN_FILTER), static_cast<int32_t>((_features & GLTexture::FEATURE_MIPMAPS) ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
     setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MAG_FILTER), static_cast<int32_t>(GL_LINEAR));
     setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_S), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
     setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_T), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
+    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_R), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
 }
 
 GLTexture::~GLTexture()
@@ -37,7 +38,7 @@ GLTexture::~GLTexture()
 void GLTexture::setTexParameters(const document& doc)
 {
     for(const document& i : doc->children("parameter"))
-        _tex_parameters[static_cast<uint32_t>(_gl_constants->getEnum(Documents::ensureAttribute(i, Constants::Attributes::NAME)))] = static_cast<int32_t>(_gl_constants->getEnum(Documents::ensureAttribute(i, Constants::Attributes::VALUE)));
+        _tex_parameters[static_cast<uint32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::NAME)))] = static_cast<int32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::VALUE)));
 }
 
 void GLTexture::setTexParameter(uint32_t name, int32_t value)
@@ -45,25 +46,19 @@ void GLTexture::setTexParameter(uint32_t name, int32_t value)
     _tex_parameters[name] = value;
 }
 
-void GLTexture::setTexFormat(GLTexture::Format format)
+void GLTexture::prepare(GraphicsContext& graphicsContext)
 {
-    _format = format;
-}
-
-void GLTexture::prepare(GraphicsContext& /*graphicsContext*/)
-{
-    const sp<Bitmap> bitmap = _bitmap ? _bitmap->val() : sp<Bitmap>::null();
     if(_id == 0)
         glGenTextures(1, &_id);
-    glBindTexture(GL_TEXTURE_2D, _id);
-    uint8_t channels = bitmap ? bitmap->channels() : 4;
-    GLenum format = GLConstants::getTextureFormat(_format, channels);
-    GLenum pixelFormat = bitmap ? GLConstants::getPixelFormat(_format, bitmap) : GL_UNSIGNED_BYTE;
-    GLenum internalFormat = bitmap ? GLConstants::getTextureInternalFormat(_format, bitmap) : GL_RGBA8;
-    glTexImage2D(GL_TEXTURE_2D, 0, (GLint) internalFormat, static_cast<int32_t>(_width), static_cast<int32_t>(_height), 0, format, pixelFormat, bitmap ? bitmap->at(0, 0) : nullptr);
+
+    glBindTexture(static_cast<GLenum>(_target), _id);
+    doPrepareTexture(graphicsContext, _id);
+
+    if(_features & FEATURE_MIPMAPS)
+        glGenerateMipmap(static_cast<GLenum>(_target));
+
     for(const auto i : _tex_parameters)
-        glTexParameteri(GL_TEXTURE_2D, static_cast<GLenum>(i.first), static_cast<GLint>(i.second));
-    LOGD("Uploaded, id = %d, width = %d, height = %d%s", _id, _width, _height, bitmap ? "" : ", bitmap: nullptr");
+        glTexParameteri(static_cast<GLenum>(_target), static_cast<GLenum>(i.first), static_cast<GLint>(i.second));
 }
 
 void GLTexture::recycle(GraphicsContext& /*graphicsContext*/)
@@ -78,30 +73,35 @@ uint32_t GLTexture::id()
     return _id;
 }
 
-uint32_t GLTexture::width() const
+int32_t GLTexture::width() const
 {
-    return _width;
+    return static_cast<int32_t>(_size->width());
 }
 
-uint32_t GLTexture::height() const
+int32_t GLTexture::height() const
 {
-    return _height;
+    return static_cast<int32_t>(_size->height());
 }
 
-sp<Bitmap> GLTexture::getBitmap() const
+int32_t GLTexture::depth() const
 {
-    return _bitmap->val();
+    return static_cast<int32_t>(_size->depth());
 }
 
-void GLTexture::active(const sp<GLProgram>& program, uint32_t id) const
+const sp<Size>& GLTexture::size() const
 {
-    glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + id));
-    glBindTexture(GL_TEXTURE_2D, _id);
+    return _size;
+}
+
+void GLTexture::active(GLProgram& program, uint32_t name)
+{
+    glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + name));
+    glBindTexture(static_cast<GLenum>(_target), _id);
 
     char uniformName[16] = "u_Texture0";
-    uniformName[9] = static_cast<char>('0' + id);
-    const GLProgram::Uniform& uTexture = program->getUniform(uniformName);
-    uTexture.setUniform1i(id);
+    uniformName[9] = static_cast<char>('0' + name);
+    const GLProgram::Uniform& uTexture = program.getUniform(uniformName);
+    uTexture.setUniform1i(name);
 }
 
 GLTexture::Recycler::Recycler(uint32_t id)
@@ -125,37 +125,6 @@ void GLTexture::Recycler::recycle(GraphicsContext&)
     _id = 0;
 }
 
-GLTexture::DICTIONARY::DICTIONARY(BeanFactory& /*parent*/, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _src(value)
-{
-}
-
-sp<GLTexture> GLTexture::DICTIONARY::build(const sp<Scope>& /*args*/)
-{
-    return _resource_loader_context->textureLoader()->get(_src);
-}
-
-GLTexture::BUILDER::BUILDER(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(doc), _src(Strings::load(doc, Constants::Attributes::SRC, "")),
-      _format(Documents::getAttribute<GLTexture::Format>(doc, "format", FORMAT_AUTO))
-{
-}
-
-sp<GLTexture> GLTexture::BUILDER::build(const sp<Scope>& args)
-{
-    const String src = _src->build(args);
-    if(src)
-    {
-        const sp<GLTexture> texture = _resource_loader_context->textureLoader()->get(src);
-        texture->setTexParameters(_manifest);
-        texture->setTexFormat(_format);
-        return texture;
-    }
-    const sp<Size> size = _factory.ensure<Size>(_manifest, args);
-    return _resource_loader_context->glResourceManager()->createGLTexture(static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), nullptr);
-}
-
-
 template<> ARK_API GLTexture::Format Conversions::to<String, GLTexture::Format>(const String& str)
 {
     if(str)
@@ -173,11 +142,29 @@ template<> ARK_API GLTexture::Format Conversions::to<String, GLTexture::Format>(
                 format = static_cast<GLTexture::Format>(format | GLTexture::FORMAT_RGBA);
             else if(i == "signed")
                 format = static_cast<GLTexture::Format>(format | GLTexture::FORMAT_SIGNED);
-            DFATAL("Unknow texture format: %s", i.c_str());
+            else
+                DFATAL("Unknow texture format: %s", i.c_str());
         }
         return format;
     }
     return GLTexture::FORMAT_AUTO;
+}
+
+template<> ARK_API GLTexture::Feature Conversions::to<String, GLTexture::Feature>(const String& str)
+{
+    if(str)
+    {
+        GLTexture::Feature feature = GLTexture::FEATURE_DEFAULT;
+        for(const String& i : str.toLower().split('|'))
+        {
+            if(i == "mipmaps")
+                feature = static_cast<GLTexture::Feature>(feature | GLTexture::FEATURE_MIPMAPS);
+            else
+                DFATAL("Unknow texture feature: %s", i.c_str());
+        }
+        return feature;
+    }
+    return GLTexture::FEATURE_DEFAULT;
 }
 
 }

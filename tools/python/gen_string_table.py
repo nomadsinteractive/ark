@@ -77,7 +77,7 @@ public:
     virtual sp<String> get(const String& name) override;
 
 private:
-    std::map<String, sp<String>> _items;
+    std::unordered_map<String, sp<String>> _items;
 
 };
 ''', classname=classname)
@@ -85,10 +85,9 @@ private:
     header = acg.format('''#ifndef ${macro}
 #define ${macro}
 
-#include <map>
+#include <unordered_map>
 
 #include "core/inf/dictionary.h"
-#include "core/types/null.h"
 
 ${classdeclare}
 

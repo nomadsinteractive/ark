@@ -37,7 +37,7 @@ public:
     const float& operator[](int32_t p) const;
     float& operator[](int32_t p);
 
-private:
+protected:
     float _x;
     float _y;
 

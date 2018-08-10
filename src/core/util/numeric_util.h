@@ -19,19 +19,35 @@ public:
     static sp<Numeric> create(float value);
 
 //[[script::bindings::operator(+)]]
-    static sp<Numeric> add(const sp<Numeric>& self, const sp<Numeric>& rvalue);
+    static sp<Numeric> add(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
+//[[script::bindings::operator(+)]]
+    static sp<Numeric> add(const sp<Numeric>& lvalue, float rvalue);
+//[[script::bindings::operator(+)]]
+    static sp<Numeric> add(float lvalue, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(+=)]]
     static void iadd(const sp<Numeric>& self, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(-)]]
-    static sp<Numeric> sub(const sp<Numeric>& self, const sp<Numeric>& rvalue);
+    static sp<Numeric> sub(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
+//[[script::bindings::operator(-)]]
+    static sp<Numeric> sub(const sp<Numeric>& lvalue, float rvalue);
+//[[script::bindings::operator(-)]]
+    static sp<Numeric> sub(float lvalue, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(-=)]]
     static void isub(const sp<Numeric>& self, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(*)]]
-    static sp<Numeric> mul(const sp<Numeric>& self, const sp<Numeric>& rvalue);
+    static sp<Numeric> mul(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
+//[[script::bindings::operator(*)]]
+    static sp<Numeric> mul(const sp<Numeric>& lvalue, float rvalue);
+//[[script::bindings::operator(*)]]
+    static sp<Numeric> mul(float lvalue, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(*=)]]
     static void imul(const sp<Numeric>& self, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(/)]]
-    static sp<Numeric> truediv(const sp<Numeric>& self, const sp<Numeric>& rvalue);
+    static sp<Numeric> truediv(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
+//[[script::bindings::operator(/)]]
+    static sp<Numeric> truediv(const sp<Numeric>& lvalue, float rvalue);
+//[[script::bindings::operator(/)]]
+    static sp<Numeric> truediv(float lvalue, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(//)]]
     static sp<Numeric> floordiv(const sp<Numeric>& self, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(neg)]]
@@ -77,6 +93,9 @@ public:
     static sp<Numeric> depends(const sp<Numeric>& self, const sp<Numeric>& depends);
 //[[script::bindings::classmethod]]
     static sp<Numeric> boundary(const sp<Numeric>& self, const sp<Numeric>& boundary);
+//[[script::bindings::classmethod]]
+    static sp<Numeric> expect(const sp<Numeric>& self, const sp<Expectation>& expectation);
+
 //[[script::bindings::classmethod]]
     static sp<Numeric> makeStalker(const sp<Numeric>& self, float s0, float eta, const sp<Numeric>& duration = nullptr);
 

@@ -16,12 +16,8 @@ namespace ark {
 class RenderRequest {
 public:
     RenderRequest(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, const sp<LockFreeStack<RenderRequest>>& renderRequestRecycler);
-    RenderRequest(const RenderRequest& other) = default;
-    RenderRequest(RenderRequest&& other) = default;
     RenderRequest() = default;
-
-    RenderRequest& operator =(const RenderRequest& other) = default;
-    RenderRequest& operator =(RenderRequest&& other) = default;
+    DEFAULT_COPY_AND_ASSIGN(RenderRequest);
 
     void start(const sp<RenderCommandPipeline>& renderCommandPipeline);
     void finish();

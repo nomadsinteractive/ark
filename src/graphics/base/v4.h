@@ -16,7 +16,13 @@ public:
     bool operator ==(const V4& other) const;
     bool operator !=(const V4& other) const;
 
+    friend V4 operator +(const V4& lvalue, const V4& rvalue);
+    friend V4 operator -(const V4& lvalue, const V4& rvalue);
+    friend V4 operator *(const V4& lvalue, const V4& rvalue);
+    friend V4 operator /(const V4& lvalue, const V4& rvalue);
+
     float w() const;
+    V4 operator -() const;
 
     float dot(const V4& other) const;
 

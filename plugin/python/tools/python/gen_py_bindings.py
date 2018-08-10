@@ -70,6 +70,8 @@ TP_AS_NUMBER_TEMPLATE_OPERATOR = {
     '/=': 'nb_inplace_true_divide'
 }
 
+NO_STATIC_OPS = {'neg', 'int', 'float', '+=', '-=', '*=', '/='}
+
 RICH_COMPARE_OPS = {
     '<': 'Py_LT',
     '<=': 'Py_LE',
@@ -383,7 +385,7 @@ class GenArgument:
             return "%s && %s" % (varname, ARK_PY_ARGUMENT_CHECKERS[self._accept_type].check(varname))
         return None
 
-    def gen_declare(self, objname, argname):
+    def gen_declare(self, objname, argname, extract_cast=False):
         typename = self._meta.cast_signature
         if self.typename == self._meta.cast_signature:
             return '%s %s = %s;' % (typename, objname, argname)
@@ -398,7 +400,7 @@ class GenArgument:
         if m in TYPE_DEFINED_SP:
             return self._gen_var_declare(m, objname, 'toSharedPtr', m[0].upper() + m[1:], argname)
         if m != self._accept_type:
-            return self._gen_var_declare('sp<%s>' % m, objname, 'toSharedPtr', m, argname)
+            return self._gen_var_declare('sp<%s>' % m, objname, 'asInterface' if extract_cast else 'toSharedPtr', m, argname)
         return self._gen_var_declare(typename, objname, 'toType', typename, argname)
 
     def _gen_var_declare(self, typename, varname, funcname, functype, argname):
@@ -597,10 +599,10 @@ class GenMethod(object):
 
         return '\n    '.join(lines)
 
-    def gen_definition_body(self, genclass, lines, not_overloaded_args, gen_type_check_args):
+    def gen_definition_body(self, genclass, lines, not_overloaded_args, gen_type_check_args, exact_cast=False):
         bodylines = []
         args = [(i, j) for i, j in enumerate(not_overloaded_args) if j]
-        argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i) for i, j in args]
+        argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i, exact_cast) for i, j in args]
         self_type_checks = []
         if self._self_argument:
             if not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
@@ -838,8 +840,9 @@ class GenStaticMemberMethod(GenMethod):
 class GenOperatorMethod(GenMethod):
     def __init__(self, name, args, return_type, operator):
         GenMethod.__init__(self, name, args, return_type)
-        self._self_argument = self._arguments and self._arguments[0]
-        self._arguments = self._arguments[1:]
+        self._is_static = operator not in NO_STATIC_OPS
+        self._self_argument = None if self._is_static else self._arguments and self._arguments[0]
+        self._arguments = self._arguments if self._is_static else self._arguments[1:]
         self._operator = operator
 
     def gen_py_return(self):
@@ -847,7 +850,19 @@ class GenOperatorMethod(GenMethod):
             return 'int32_t'
         return 'PyObject*'
 
+    def need_unpack_statement(self):
+        return not self._is_static
+
+    def gen_py_arguments(self):
+        arglen = len(self._arguments)
+        args = ['PyObject* arg%d' % i for i in range(arglen)]
+        if self._is_static:
+            return ', '.join(args)
+        return ', '.join(['Instance* self'] + args)
+
     def _gen_call_statement(self, genclass, argnames):
+        if self._is_static:
+            return '%s::%s(%s);' % (genclass.classname, self._name, argnames)
         return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
 
     def gen_return_statement(self, return_type, py_return):
@@ -855,19 +870,29 @@ class GenOperatorMethod(GenMethod):
             return ['Py_INCREF(self);', 'return reinterpret_cast<PyObject*>(self);']
         return GenMethod.gen_return_statement(return_type, py_return)
 
-    @staticmethod
-    def _gen_convert_args_code(lines, argdeclare):
-        pass
+    # @staticmethod
+    # def _gen_convert_args_code(lines, argdeclare):
+    #     pass
 
     def _gen_parse_tuple_code(self, lines, declares, args):
-        if args:
-            meta = GenArgumentMeta('PyObject*', args[0].accept_type, 'O')
-            ga = GenArgument(args[0].accept_type, args[0].default_value, meta, str(args[0]))
-            lines.append(ga.gen_declare('obj0', 'args'))
+        pass
+        # if args:
+        #     for i, j in enumerate(args):
+        #         meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
+        #         ga = GenArgument(j.accept_type, j.default_value, meta, str(i))
+        #         lines.append(ga.gen_declare('obj%d' % i, 'arg%d' % i))
 
     @property
     def operator(self):
         return self._operator
+
+    @staticmethod
+    def overload(m1, m2):
+        try:
+            m1.add_overloaded_method(m2)
+            return m1
+        except AttributeError:
+            return create_overloaded_method_type(GenOperatorMethod, operator=m1.operator)(m1, m2)
 
 
 class GenRichCompareMethod(GenMethod):
@@ -913,7 +938,7 @@ def create_overloaded_method_type(base_type, **kwargs):
 
             for i in self._overloaded_methods:
                 for j, k in enumerate(not_overloaded_args):
-                    if i.arguments[j].accept_type != k.accept_type:
+                    if k and i.arguments[j].accept_type != k.accept_type:
                         not_overloaded_args[j] = None
 
             not_overloaded_declar = [j.gen_declare('obj%d' % i, 'arg%d' % i) for i, j in enumerate(not_overloaded_args) if j]
@@ -923,7 +948,7 @@ def create_overloaded_method_type(base_type, **kwargs):
                 lines.extend(['if(%s)' % ' && '.join([j for j in type_checks if j] or ['true']), '{'])
                 body_lines = []
                 overloaded_args = [None if j else k for j, k in zip(not_overloaded_args, i.arguments)]
-                i.gen_definition_body(genclass, body_lines, overloaded_args, overloaded_args)
+                i.gen_definition_body(genclass, body_lines, overloaded_args, overloaded_args, True)
                 lines.extend(INDENT + j for j in body_lines)
                 lines.append('}')
             lines.append('PyErr_SetString(PyExc_TypeError, "Calling overloaded method(%s) failed, no arguments matched");' % self._name)

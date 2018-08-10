@@ -24,10 +24,12 @@ public:
 
     float z() const;
 
+    V3 operator -() const;
+
     float dot(const V3& other) const;
     V3 cross(const V3& other) const;
 
-private:
+protected:
     float _z;
 
     friend class V4;

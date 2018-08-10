@@ -40,7 +40,7 @@ class Size;
 class SurfaceController;
 class Vec2Impl;
 class Vec3Impl;
-class Vec4;
+class Vec4Impl;
 class V2;
 class V3;
 class V4;
@@ -50,7 +50,7 @@ typedef sp<Bitmap> bitmap;
 
 typedef Variable<V2> Vec2;
 typedef Variable<V3> Vec3;
-typedef Variable<V4> VV4;
+typedef Variable<V4> Vec4;
 
 typedef Loader<Bitmap> BitmapLoader;
 

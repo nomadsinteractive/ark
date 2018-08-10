@@ -144,7 +144,7 @@ AlphabetLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, 
     : _resource_loader_context(resourceLoaderContext),
       _alphabet(factory.ensureBuilder<Alphabet>(manifest, Constants::Attributes::ALPHABET)),
       _shader(factory.getBuilder<GLShader>(manifest, Constants::Attributes::SHADER, false)),
-      _color(factory.getBuilder<VV4>(manifest, Constants::Attributes::TEXT_COLOR, false)),
+      _color(factory.getBuilder<Vec4>(manifest, Constants::Attributes::TEXT_COLOR, false)),
       _texture_width(Documents::getAttribute<uint32_t>(manifest, "texture-width", 256)),
       _texture_height(Documents::getAttribute<uint32_t>(manifest, "texture-height", 256))
 {
@@ -152,7 +152,7 @@ AlphabetLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, 
 
 sp<Layer> AlphabetLayer::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<VV4> color = _color ? _color->build(args) : sp<Color>::make(Color::WHITE).cast<VV4>();
+    const sp<Vec4> color = _color ? _color->build(args) : sp<Color>::make(Color::WHITE).cast<Vec4>();
     const sp<GLShader> shader = _shader ? _shader->build(args) : GLShader::fromStringTable("shaders/default.vert", "shaders/alpha.frag", sp<GLSnippetUColor>::make(color), _resource_loader_context);
     return sp<AlphabetLayer>::make(_alphabet->build(args), _texture_width, _texture_height, shader, _resource_loader_context);
 }

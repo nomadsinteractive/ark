@@ -59,7 +59,7 @@ GLSnippetClipPlane::BUILDER::BUILDER(BeanFactory& factory, const document& manif
         uint32_t id = Documents::getAttribute<uint32_t>(i, Constants::Attributes::NAME, defid++);
         if(defid <= id)
             defid = id + 1;
-        _planes.push_back(std::pair<uint32_t, sp<Builder<VV4>>>(id, factory.ensureBuilder<VV4>(i, Constants::Attributes::VALUE)));
+        _planes.push_back(std::pair<uint32_t, sp<Builder<Vec4>>>(id, factory.ensureBuilder<Vec4>(i, Constants::Attributes::VALUE)));
     }
 }
 
@@ -67,7 +67,7 @@ sp<GLSnippet> GLSnippetClipPlane::BUILDER::build(const sp<Scope>& args)
 {
     const sp<GLSnippetClipPlane> snippet = sp<GLSnippetClipPlane>::make();
     for(const auto& i : _planes)
-        snippet->_planes.push_back(std::pair<uint32_t, sp<VV4>>(i.first, i.second->build(args)));
+        snippet->_planes.push_back(std::pair<uint32_t, sp<Vec4>>(i.first, i.second->build(args)));
     return snippet;
 }
 

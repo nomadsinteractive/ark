@@ -2,13 +2,11 @@
 
 #include "core/ark.h"
 #include "core/impl/variable/variable_wrapper.h"
+#include "core/impl/variable/variable_op2.h"
+#include "core/util/operators.h"
 
 #include "graphics/impl/vec/vec2_impl.h"
-#include "graphics/impl/vec/vec_add.h"
-#include "graphics/impl/vec/vec_div.h"
-#include "graphics/impl/vec/vec_mul.h"
 #include "graphics/impl/vec/vec_neg.h"
-#include "graphics/impl/vec/vec_sub.h"
 #include "graphics/impl/vec/vv2_with_transform.h"
 
 namespace ark {
@@ -42,24 +40,24 @@ sp<Vec2> Vec2Util::create(float x, float y)
     return sp<Vec2Impl>::make(x, y);
 }
 
-sp<Vec2> Vec2Util::add(const sp<Vec2>& self, const sp<Vec2>& rvalue)
+sp<Vec2> Vec2Util::add(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VecAdd<V2>>::make(self, rvalue);
+    return sp<VariableOP2<V2, Operators::Add<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
 }
 
-sp<Vec2> Vec2Util::sub(const sp<Vec2>& self, const sp<Vec2>& rvalue)
+sp<Vec2> Vec2Util::sub(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VecSub<V2>>::make(self, rvalue);
+    return sp<VariableOP2<V2, Operators::Sub<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
 }
 
-sp<Vec2> Vec2Util::mul(const sp<Vec2>& self, const sp<Vec2>& rvalue)
+sp<Vec2> Vec2Util::mul(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VecMul<V2>>::make(self, rvalue);
+    return sp<VariableOP2<V2, Operators::Mul<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
 }
 
-sp<Vec2> Vec2Util::truediv(const sp<Vec2>& self, const sp<Vec2>& rvalue)
+sp<Vec2> Vec2Util::truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VecDiv<V2>>::make(self, rvalue);
+    return sp<VariableOP2<V2, Operators::Div<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::floordiv(const sp<Vec2>& self, const sp<Vec2>& rvalue)
