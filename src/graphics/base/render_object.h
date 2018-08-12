@@ -63,7 +63,15 @@ public:
 //  [[script::bindings::property]]
     float x() const;
 //  [[script::bindings::property]]
+    void setX(float x);
+//  [[script::bindings::property]]
+    void setX(const sp<Numeric>& x);
+//  [[script::bindings::property]]
     float y() const;
+//  [[script::bindings::property]]
+    void setY(float y);
+//  [[script::bindings::property]]
+    void setY(const sp<Numeric>& y);
 //  [[script::bindings::property]]
     V2 xy() const;
 //  [[script::bindings::property]]
@@ -117,7 +125,7 @@ public:
 private:
     sp<IntegerWrapper> _type;
 
-    SafePtr<Vec, VecImpl> _position;
+    sp<Vec> _position;
     SafePtr<Size> _size;
     SafePtr<Transform> _transform;
     sp<Varyings> _varyings;

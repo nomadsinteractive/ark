@@ -34,7 +34,7 @@ public:
     template<typename T> const sp<Callable<T>>& getCallable(const String& name) const {
         Function<T> func;
         const auto iter = _callables.find(func.name(name));
-        return iter != _callables.end() ? iter->second.unpack<Callable<T>>() : sp<Callable<T>>::null();
+        return iter != _callables.end() ? iter->second.template unpack<Callable<T>>() : sp<Callable<T>>::null();
     }
 
     template<typename T> void addCallable(const String& name, const std::function<T>& func) {

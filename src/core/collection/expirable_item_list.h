@@ -16,7 +16,7 @@ public:
     template<typename T> class IsExpired {
     public:
         IsExpired(const sp<T>& item)
-            : _expired(item.as<Expired>()) {
+            : _expired(item.template as<Expired>()) {
         }
         IsExpired(const sp<T>& item, const sp<Boolean>& expired)
             : _expired(expired) {
@@ -103,7 +103,7 @@ protected:
 template<typename T, typename U> class ExpirableItemConstIterator : public ExpirableItemIteratorBase<T, typename T::const_iterator> {
 public:
     ExpirableItemConstIterator(T& list, typename T::const_iterator iterator)
-        : ExpirableItemIteratorBase(list, iterator) {
+        : ExpirableItemIteratorBase<T, typename T::const_iterator>(list, iterator) {
     }
 
     const sp<U>& operator * () const {
@@ -114,7 +114,7 @@ public:
 template<typename T, typename U> class ExpirableItemIterator : public ExpirableItemIteratorBase<T, typename T::iterator> {
 public:
     ExpirableItemIterator(T& list, typename T::iterator iterator)
-        : ExpirableItemIteratorBase(list, iterator) {
+        : ExpirableItemIteratorBase<T, typename T::iterator>(list, iterator) {
     }
 
     sp<U>& operator * () {

@@ -1,10 +1,8 @@
 #ifndef ARK_CORE_API_H_
 #define ARK_CORE_API_H_
 
-#include <map>
-
+#include <limits>
 #include <stdint.h>
-#include <string>
 
 #include "core/forwarding.h"
 

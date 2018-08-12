@@ -36,14 +36,14 @@ void StringTable::addStringBundle(const String& name, const sp<StringBundle>& st
 
 const sp<StringBundle>& StringTable::getStringBundle(const String& name)
 {
-    auto iter = _string_bundle_by_name.find(name);
-    DCHECK(iter != _string_bundle_by_name.end(), "String table \"%s\" does not exists", name.c_str());
-    return iter->second;
+    const auto iter = _string_bundle_by_name.find(name);
+    return iter != _string_bundle_by_name.end() ? iter->second : sp<StringBundle>::null();
 }
 
 sp<String> StringTable::getString(const String& stringTableName, const String& stringName)
 {
-    const sp<String> str = getStringBundle(stringTableName)->get(stringName);
+    const sp<StringBundle>& sb = getStringBundle(stringTableName);
+    const sp<String> str = sb ? sb->get(stringName) : sp<String>::null();
     DCHECK(str, "String resource \"%s/%s\" does not exists", stringTableName.c_str(), stringName.c_str());
     return str;
 }

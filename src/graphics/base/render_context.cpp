@@ -20,7 +20,11 @@ void RenderContext::addRenderObject(const sp<RenderObject>& renderObject)
 
 void RenderContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& expired)
 {
-    _items.push_back(renderObject, expired);
+    if(expired)
+        _items.push_back(renderObject, expired);
+    else
+        _items.push_back(renderObject, renderObject.as<Expired>());
+
     _last_rendered_count = -1;
 }
 

@@ -34,7 +34,8 @@ public:
     };
 
     GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
-    ~GLTexture();
+    GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, const document& manifest);
+    virtual ~GLTexture();
 
     virtual uint32_t id() override;
     virtual void prepare(GraphicsContext& graphicsContext) override;

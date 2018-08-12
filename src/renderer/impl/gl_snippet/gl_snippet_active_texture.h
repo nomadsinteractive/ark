@@ -1,6 +1,8 @@
 #ifndef ARK_RENDERER_IMPL_GL_SNIPPET_ACTIVE_TEXTURE_H_
 #define ARK_RENDERER_IMPL_GL_SNIPPET_ACTIVE_TEXTURE_H_
 
+#include <vector>
+
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 

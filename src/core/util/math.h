@@ -59,7 +59,7 @@ public:
     }
 
     template<class T> static typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
-        almostEqual(T x, T y, int32_t ulp) {
+        almostEqual(T x, T y, int32_t ulp = 4) {
         return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp
                || std::abs(x - y) < std::numeric_limits<T>::min();
     }

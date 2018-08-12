@@ -1,5 +1,5 @@
 #ifndef ARK_GRAPHICS_IMPL_VV2_VV2_WITH_TRANSFORM_H_
-#define ARK_GRAPHICS_IMPL_VEC_VEC_WITH_TRANSFORM_H_
+#define ARK_GRAPHICS_IMPL_VV2_VV2_WITH_TRANSFORM_H_
 
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"

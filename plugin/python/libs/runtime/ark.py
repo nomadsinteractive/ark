@@ -99,10 +99,13 @@ class Integer(Var):
 
 
 class Numeric(Var):
-    pass
+    def __init__(self, val):
+        Var.__init__(self, val)
 
-    @staticmethod
-    def chase(duration, target, s0, eta):
+    def expect(self, expectation):
+        return None
+
+    def make_stalker(self, s0, eta):
         return None
 
     def __add__(self, other):

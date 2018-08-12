@@ -44,6 +44,7 @@ class Vec4Impl;
 class V2;
 class V3;
 class V4;
+class Vec2Util;
 class Viewport;
 
 typedef sp<Bitmap> bitmap;
@@ -57,6 +58,8 @@ typedef Loader<Bitmap> BitmapLoader;
 typedef Vec2 Vec;
 typedef V2 V;
 typedef Vec2Impl VecImpl;
+typedef Vec2Util VecUtil;
+
 const uint32_t DIMENSIONS = 2;
 
 }

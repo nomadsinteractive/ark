@@ -35,7 +35,6 @@ private:
     void degenerate(glindex_t*& buffer, glindex_t index) const;
 
 private:
-    uint32_t _sample_count;
     uint32_t _vertex_count;
     floatarray _vertices_boiler_plate;
     indexarray _indices_boiler_plate;

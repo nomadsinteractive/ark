@@ -6,21 +6,22 @@
 #include "core/inf/variable.h"
 #include "core/epi/expired.h"
 #include "core/util/bean_utils.h"
+#include "core/util/numeric_util.h"
 
 #include "graphics/base/size.h"
-#include "graphics/impl/vec/vec2_impl.h"
+#include "graphics/util/vec2_util.h"
 
 #include "renderer/base/varyings.h"
 
 namespace ark {
 
 RenderObject::RenderObject(int32_t type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(varyings))
+    : _type(sp<IntegerWrapper>::make(type)), _position(Null::toSafe<Vec>(position)), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(varyings))
 {
 }
 
 RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(varyings)), _type_expired(type.as<Expired>())
+    : _type(sp<IntegerWrapper>::make(type)), _position(Null::toSafe<Vec>(position)), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(varyings)), _type_expired(type.as<Expired>())
 {
 }
 
@@ -71,9 +72,29 @@ float RenderObject::x() const
     return _position->val().x();
 }
 
+void RenderObject::setX(float x)
+{
+    VecUtil::setX(_position, x);
+}
+
+void RenderObject::setX(const sp<Numeric>& x)
+{
+    VecUtil::setX(_position, x);
+}
+
 float RenderObject::y() const
 {
     return _position->val().y();
+}
+
+void RenderObject::setY(float y)
+{
+    VecUtil::setY(_position, y);
+}
+
+void RenderObject::setY(const sp<Numeric>& y)
+{
+    VecUtil::setY(_position, y);
 }
 
 V2 RenderObject::xy() const
@@ -83,7 +104,7 @@ V2 RenderObject::xy() const
 
 const sp<Vec>& RenderObject::position() const
 {
-    return _position.ensure();
+    return _position;
 }
 
 void RenderObject::setPosition(const sp<Vec>& position)

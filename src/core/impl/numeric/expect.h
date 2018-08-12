@@ -46,7 +46,6 @@ private:
         sp<Expectation> _expectation;
 
         float _delta;
-        float _epsilon;
     };
 
 private:

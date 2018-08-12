@@ -1,6 +1,8 @@
 #ifndef ARK_GRAPHICS_BASE_MATRIX_H_
 #define ARK_GRAPHICS_BASE_MATRIX_H_
 
+#include <string.h>
+
 #include "core/base/api.h"
 
 #include "graphics/forwarding.h"

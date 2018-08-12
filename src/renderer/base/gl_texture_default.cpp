@@ -54,9 +54,9 @@ GLTextureDefault::BUILDER::BUILDER(BeanFactory& factory, const document& manifes
 
 sp<GLTexture> GLTextureDefault::BUILDER::build(const sp<Scope>& args)
 {
-    const String src = _src->build(args);
+    const sp<String> src = _src->build(args);
     if(src)
-       return _resource_loader_context->textureLoader()->get(src);
+       return _resource_loader_context->textureLoader()->get(*src);
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
     const sp<GLTexture> texture = _resource_loader_context->glResourceManager()->createGLResource<GLTextureDefault>(_resource_loader_context->glResourceManager()->recycler(), size, _format, _features, nullptr);

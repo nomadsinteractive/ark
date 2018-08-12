@@ -20,13 +20,19 @@
 namespace ark {
 
 GLTexture::GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, Format format, Feature features)
-    : _recycler(recycler), _id(0), _size(size), _target(target), _format(format), _features(features)
+    : _recycler(recycler), _size(size), _target(target), _format(format), _features(features), _id(0)
 {
     setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MIN_FILTER), static_cast<int32_t>((_features & GLTexture::FEATURE_MIPMAPS) ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
     setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MAG_FILTER), static_cast<int32_t>(GL_LINEAR));
     setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_S), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
     setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_T), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
     setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_R), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
+}
+
+GLTexture::GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, const document& manifest)
+    : GLTexture(recycler, size, target, Documents::getAttribute<GLTexture::Format>(manifest, "format", FORMAT_AUTO), Documents::getAttribute<GLTexture::Feature>(manifest, "feature", FEATURE_DEFAULT))
+{
+    setTexParameters(manifest);
 }
 
 GLTexture::~GLTexture()

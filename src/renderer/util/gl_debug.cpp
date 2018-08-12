@@ -103,7 +103,7 @@ void GLDebug::glDumpBitmapToPngFile(const Bitmap* bitmap, const char* filename)
         if(info_ptr != NULL && !setjmp(png_jmpbuf(png_ptr)))
         {
             /* Set image attributes. */
-            size_t x, y;
+            uint32_t x, y;
 
             int colorType = pixel_size == 1 ? PNG_COLOR_TYPE_GRAY : (pixel_size == 3 ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA);
             png_set_IHDR(png_ptr,

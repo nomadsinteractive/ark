@@ -22,7 +22,7 @@ float Expect::val()
     {
         float value = stub->_delegate->val();
         float delta = stub->_expectation->val() - value;
-        if(Math::signEquals(delta, stub->_delta) && std::abs(delta) > stub->_epsilon)
+        if(Math::signEquals(delta, stub->_delta) && !Math::almostEqual(0.0f, delta))
         {
             stub->_delta = delta;
             return value;
@@ -55,7 +55,7 @@ sp<Numeric> Expect::STYLE::build(const sp<Scope>& args)
 }
 
 Expect::Stub::Stub(const sp<Numeric>& delegate, const sp<Expectation>& expectation)
-    : _delegate(delegate), _expectation(expectation), _delta(_expectation->val() - _delegate->val()), _epsilon(std::abs(_delta) / 100.0f)
+    : _delegate(delegate), _expectation(expectation), _delta(_expectation->val() - _delegate->val())
 {
 }
 

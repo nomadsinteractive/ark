@@ -5,6 +5,7 @@ add_definitions(-DLOG_TAG="ark")
 add_definitions(-DPY_FORMAT_LONG_LONG="long long")
 add_definitions(-DHAVE_MALLOC)
 add_definitions(-DGL_GLEXT_PROTOTYPES=1)
+add_definitions(-DXML_DEV_URANDOM)
 
 set(PTHREADS OFF)
 
