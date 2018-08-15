@@ -43,7 +43,7 @@ float Color::red() const
 void Color::setRed(float red)
 {
     _color._x = red;
-    _changed = true;
+    change();
 }
 
 float Color::green() const
@@ -54,7 +54,7 @@ float Color::green() const
 void Color::setGreen(float green)
 {
     _color._y = green;
-    _changed = true;
+    change();
 }
 
 float Color::blue() const
@@ -65,7 +65,7 @@ float Color::blue() const
 void Color::setBlue(float blue)
 {
     _color._z = blue;
-    _changed = true;
+    change();
 }
 
 float Color::alpha() const
@@ -76,7 +76,7 @@ float Color::alpha() const
 void Color::setAlpha(float alpha)
 {
     _color._w = alpha;
-    _changed = true;
+    change();
 }
 
 uint32_t Color::value() const
@@ -92,13 +92,13 @@ uint32_t Color::value() const
 void Color::setValue(uint32_t value)
 {
     _color = V4((value >> 24) / 255.0f, ((value >> 16) & 0xff) / 255.0f, ((value >> 8) & 0xff) / 255.0f, (value & 0xff) / 255.0f);
-    _changed = true;
+    change();
 }
 
 void Color::assign(const Color& other)
 {
     _color = other._color;
-    _changed = true;
+    change();
 }
 
 bool Color::operator ==(const Color& other) const

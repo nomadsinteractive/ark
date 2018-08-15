@@ -46,17 +46,25 @@ public:
 //[[script::bindings::property]]
     static void setX(const sp<Vec3>& self, float x);
 //[[script::bindings::property]]
+    static void setX(const sp<Vec3>& self, const sp<Numeric>& x);
+//[[script::bindings::property]]
     static float y(const sp<Vec3>& self);
 //[[script::bindings::property]]
     static void setY(const sp<Vec3>& self, float y);
 //[[script::bindings::property]]
-    static sp<Numeric> vx(const sp<Vec3>& self);
+    static void setY(const sp<Vec3>& self, const sp<Numeric>& y);
 //[[script::bindings::property]]
-    static void setVx(const sp<Vec3>& self, const sp<Numeric>& x);
+    static float z(const sp<Vec3>& self);
+//[[script::bindings::property]]
+    static void setZ(const sp<Vec3>& self, float z);
+//[[script::bindings::property]]
+    static void setZ(const sp<Vec3>& self, const sp<Numeric>& z);
+//[[script::bindings::property]]
+    static sp<Numeric> vx(const sp<Vec3>& self);
 //[[script::bindings::property]]
     static sp<Numeric> vy(const sp<Vec3>& self);
 //[[script::bindings::property]]
-    static void setVy(const sp<Vec3>& self, const sp<Numeric>& y);
+    static sp<Numeric> vz(const sp<Vec3>& self);
 
 //[[script::bindings::classmethod]]
     static void fix(const sp<Vec3>& self);

@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <math_neon.h>
 
+#include "core/impl/numeric/sine.h"
+#include "core/impl/numeric/cosine.h"
+
 #include "core/util/log.h"
 
 namespace ark {
@@ -34,9 +37,19 @@ float Math::sin(float x)
     return sinf_c(x);
 }
 
+sp<Numeric> Math::sin(const sp<Numeric>& x)
+{
+    return sp<Sine>::make(x);
+}
+
 float Math::cos(float x)
 {
     return cosf_c(x);
+}
+
+sp<Numeric> Math::cos(const sp<Numeric>& x)
+{
+    return sp<Cosine>::make(x);
 }
 
 float Math::acos(float x)

@@ -18,7 +18,6 @@
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_command/draw_elements.h"
-#include "renderer/impl/gl_snippet/gl_snippet_update_model_matrix.h"
 
 #include "assimp/impl/io/ark_io_system.h"
 
@@ -49,7 +48,7 @@ private:
 }
 
 AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : Layer(resourceLoaderContext->memoryPool()), _shader(shader), _importer(sp<Assimp::Importer>::make())
+    : Layer(shader->camera(), resourceLoaderContext->memoryPool()), _shader(shader), _importer(sp<Assimp::Importer>::make())
 {
     _importer->SetIOHandler(new ArkIOSystem());
     const aiScene* scene = _importer->ReadFile("duck.fbx", aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs);
@@ -63,12 +62,12 @@ AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const document& m
     _shader_bindings = sp<GLShaderBindings>::make(resourceLoaderContext->glResourceManager(), shader);
 //    const sp<GLSnippetTextures> textures = _shader_bindings->snippet()->link<GLSnippetTextures>();
 //    textures->addTexture(0, texture);
-    _shader_bindings->snippet()->link<GLSnippetUpdateModelMatrix>();
+//    _shader_bindings->snippet()->link<GLSnippetUpdateModelMatrix>();
 }
 
 sp<RenderCommand> AssimpModelLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
 {
-    return _render_command_pool.obtain<DrawElements>(GLDrawingContext(_shader_bindings, _array_buffer.snapshot(), _index_buffer.snapshot(), GL_TRIANGLES), _shader);
+    return _render_command_pool.obtain<DrawElements>(GLDrawingContext(_shader_bindings, renderContext._camera, _array_buffer.snapshot(), _index_buffer.snapshot(), GL_TRIANGLES), _shader);
 }
 
 bytearray AssimpModelLayer::loadArrayBuffer(aiMesh* mesh, float scale) const

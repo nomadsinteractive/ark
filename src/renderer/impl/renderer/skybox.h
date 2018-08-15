@@ -38,9 +38,6 @@ public:
     };
 
 private:
-    bytearray getArrayBuffer() const;
-
-private:
     sp<Size> _size;
     sp<GLResourceManager> _resource_manager;
     sp<GLShader> _shader;

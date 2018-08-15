@@ -1,8 +1,6 @@
 #ifndef ARK_RENDERER_BASE_GL_SHADER_H_
 #define ARK_RENDERER_BASE_GL_SHADER_H_
 
-#include <map>
-
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/collection/list.h"
@@ -31,7 +29,7 @@ public:
     };
 
 public:
-    GLShader(const sp<GLShaderSource>& source);
+    GLShader(const sp<GLShaderSource>& source, const sp<Camera>& camera);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(GLShader);
 
     static sp<Builder<GLShader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag");
@@ -45,6 +43,8 @@ public:
 
     const sp<GLShaderInput>& input() const;
     const sp<GLShaderSource>& source() const;
+
+    const sp<Camera>& camera() const;
 
     const sp<GLProgram>& program() const;
     void setProgram(const sp<GLProgram>& program);
@@ -76,16 +76,15 @@ public:
         sp<Builder<String>> _vertex;
         sp<Builder<String>> _fragment;
         sp<Builder<GLSnippet>> _snippet;
+        sp<Builder<Camera>> _camera;
     };
 
 private:
-    void bindAttributesByDivisor(GraphicsContext& graphicsContext, const sp<GLProgram>& program, uint32_t divisor) const;
-
-private:
     sp<GLShaderSource> _source;
+    sp<Camera> _camera;
+
     sp<GLProgram> _program;
 
-    friend class GLShaderBindings;
 };
 
 }

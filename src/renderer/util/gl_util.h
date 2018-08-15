@@ -17,6 +17,8 @@ public:
     static GLenum getTextureInternalFormat(int32_t format, const Bitmap& bitmap);
     static GLenum getTextureFormat(int32_t format, uint8_t channels);
     static GLenum getPixelFormat(int32_t format, const Bitmap& bitmap);
+
+    static bytearray makeUnitCubeVertices();
 };
 
 }

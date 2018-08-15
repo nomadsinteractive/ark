@@ -45,9 +45,10 @@ public:
         _delegate = Null::toSafe(delegate);
     }
 
-    void fix() {
-        if(!_variable_impl)
-            set(_delegate->val());
+    T fix() {
+        T val = _delegate->val();
+        set(val);
+        return val;
     }
 
 private:

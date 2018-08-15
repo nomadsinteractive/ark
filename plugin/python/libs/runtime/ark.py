@@ -65,6 +65,20 @@ class Renderer:
     pass
 
 
+class Camera:
+    def __init__(self):
+        pass
+
+    def ortho(self, left, right, top, bottom, near, far):
+        pass
+
+    def perspective(self, fov, aspect, near, far):
+        pass
+
+    def look_at(self, position, target, up):
+        pass
+
+
 class Collider:
 
     BODY_SHAPE_AABB = -1
@@ -159,17 +173,9 @@ class Vec2:
     def vx(self):
         return self._x
 
-    @vx.setter
-    def vx(self, v):
-        pass
-
     @property
     def vy(self):
         return self._y
-
-    @vy.setter
-    def vy(self, v):
-        pass
 
     def transform(self, transform, org):
         return self._x, self._y
@@ -198,9 +204,9 @@ class Vec3(Vec2):
     def vz(self):
         return self._z
 
-    @vz.setter
-    def vz(self, v):
-        pass
+    @property
+    def xyz(self):
+        return None
 
 
 class Vec4(Vec3):

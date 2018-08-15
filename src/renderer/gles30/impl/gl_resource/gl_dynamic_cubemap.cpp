@@ -17,47 +17,11 @@
 #include "renderer/base/gl_texture.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/util/gl_index_buffers.h"
-#include "renderer/util/gl_debug.h"
+#include "renderer/util/gl_util.h"
 
 #include "platform/gl/gl.h"
 
 namespace ark {
-
-static bytearray getArrayBuffer()
-{
-    static float vertices[] = {
-        -1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-
-         1.0f, -1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f, -1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f,  1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f, -1.0f
-    };
-    return sp<PreallocatedArray<uint8_t>>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
-}
 
 extern uint32_t g_GLViewportWidth;
 extern uint32_t g_GLViewportHeight;
@@ -100,7 +64,7 @@ void GLDynamicCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uint32
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    GLBuffer arrayBuffer(_recycler, sp<GLBuffer::ArrayUploader<uint8_t>>::make(getArrayBuffer()), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+    GLBuffer arrayBuffer(_recycler, sp<GLBuffer::ArrayUploader<uint8_t>>::make(GLUtil::makeUnitCubeVertices()), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
     arrayBuffer.prepare(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer.id());
     glEnableVertexAttribArray(0);

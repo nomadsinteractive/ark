@@ -102,6 +102,11 @@ void Vec3Util::setX(const sp<Vec3>& self, float x)
     ensureImpl(self)->x()->set(x);
 }
 
+void Vec3Util::setX(const sp<Vec3>& self, const sp<Numeric>& x)
+{
+    ensureImpl(self)->x()->set(x);
+}
+
 float Vec3Util::y(const sp<Vec3>& self)
 {
     const sp<Vec3Impl> impl = self.as<Vec3Impl>();
@@ -113,15 +118,31 @@ void Vec3Util::setY(const sp<Vec3>& self, float y)
     ensureImpl(self)->y()->set(y);
 }
 
+void Vec3Util::setY(const sp<Vec3>& self, const sp<Numeric>& y)
+{
+    ensureImpl(self)->y()->set(y);
+}
+
+float Vec3Util::z(const sp<Vec3>& self)
+{
+    const sp<Vec3Impl> impl = self.as<Vec3Impl>();
+    return impl ? impl->z()->val() : self->val().z();
+}
+
+void Vec3Util::setZ(const sp<Vec3>& self, float z)
+{
+    ensureImpl(self)->z()->set(z);
+}
+
+void Vec3Util::setZ(const sp<Vec3>& self, const sp<Numeric>& z)
+{
+    ensureImpl(self)->z()->set(z);
+}
+
 sp<Numeric> Vec3Util::vx(const sp<Vec3>& self)
 {
     const sp<Vec3Impl> impl = self.as<Vec3Impl>();
     return impl ? static_cast<sp<Numeric>>(impl->x()) : static_cast<sp<Numeric>>(sp<_Vec3Numeric>::make(self, 0));
-}
-
-void Vec3Util::setVx(const sp<Vec3>& self, const sp<Numeric>& x)
-{
-    ensureImpl(self)->x()->set(x);
 }
 
 sp<Numeric> Vec3Util::vy(const sp<Vec3>& self)
@@ -130,9 +151,10 @@ sp<Numeric> Vec3Util::vy(const sp<Vec3>& self)
     return impl ? static_cast<sp<Numeric>>(impl->y()) : static_cast<sp<Numeric>>(sp<_Vec3Numeric>::make(self, 1));
 }
 
-void Vec3Util::setVy(const sp<Vec3>& self, const sp<Numeric>& y)
+sp<Numeric> Vec3Util::vz(const sp<Vec3>& self)
 {
-    ensureImpl(self)->y()->set(y);
+    const sp<Vec3Impl> impl = self.as<Vec3Impl>();
+    return impl ? static_cast<sp<Numeric>>(impl->z()) : static_cast<sp<Numeric>>(sp<_Vec3Numeric>::make(self, 2));
 }
 
 void Vec3Util::fix(const sp<Vec3>& self)

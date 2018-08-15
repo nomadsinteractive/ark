@@ -353,6 +353,21 @@ template<> ARK_PLUGIN_PYTHON_API V2 PythonInterpreter::toType<V2>(PyObject* obje
     return V2();
 }
 
+template<> ARK_PLUGIN_PYTHON_API V3 PythonInterpreter::toType<V3>(PyObject* object)
+{
+    if(PyTuple_Check(object))
+    {
+        float x, y, z;
+        if(PyArg_ParseTuple(object, "fff", &x, &y, &z))
+            return V2(x, y, z);
+    }
+    const sp<Vec3> vec3 = asInterface<Vec3>(object);
+    if(vec3)
+        return vec3->val();
+    DFATAL("V3 object should be either Vec3 or length-3 tuple (eg. (1.0, 1.0, 1.0))");
+    return V3();
+}
+
 template<> ARK_PLUGIN_PYTHON_API Color PythonInterpreter::toType<Color>(PyObject* object)
 {
     if(PyLong_Check(object))

@@ -6,6 +6,7 @@
 #include "core/base/api.h"
 #include "core/collection/expirable_item_list.h"
 
+#include "graphics/base/camera.h"
 #include "graphics/base/render_object.h"
 
 namespace ark {
@@ -24,6 +25,7 @@ public:
         Snapshot(const LayerContext& layerContext, MemoryPool& memoryPool);
         Snapshot(Snapshot&& other) = default;
 
+        Camera::Snapshot _camera;
         std::vector<RenderObject::Snapshot> _items;
         bool _dirty;
 
@@ -31,7 +33,7 @@ public:
     };
 
 public:
-    LayerContext(const sp<MemoryPool>& memoryPool);
+    LayerContext(const sp<Camera>& camera, const sp<MemoryPool>& memoryPool);
 
     void draw(float x, float y, const sp<RenderObject>& renderObject);
     void clear();
@@ -44,6 +46,7 @@ private:
     std::vector<Item> _items;
     WeakRefList<RenderContext> _render_contexts;
 
+    sp<Camera> _camera;
     sp<MemoryPool> _memory_pool;
     size_t _last_rendered_count;
 

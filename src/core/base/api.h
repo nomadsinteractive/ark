@@ -85,6 +85,7 @@ const char* const ATLAS = "atlas";
 const char* const BACKGROUND = "background";
 const char* const BOUNDARY = "boundary";
 const char* const BOUNDS = "bounds";
+const char* const CAMERA = "camera";
 const char* const CLASS = "class";
 const char* const CLOCK = "clock";
 const char* const COLOR = "color";

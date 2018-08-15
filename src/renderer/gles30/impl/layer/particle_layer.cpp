@@ -18,7 +18,7 @@ namespace ark {
 namespace gles30 {
 
 ParticleLayer::ParticleLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : Layer(resourceLoaderContext->memoryPool()), _atlas(atlas), _resource_loader_context(resourceLoaderContext),
+    : Layer(shader->camera(), resourceLoaderContext->memoryPool()), _atlas(atlas), _resource_loader_context(resourceLoaderContext),
       _shader_bindings(sp<GLShaderBindings>::make(resourceLoaderContext->glResourceManager(), shader)),
       _index_buffer(GLIndexBuffers::makeGLBufferSnapshot(resourceLoaderContext->glResourceManager(), GLBuffer::NAME_QUADS, 1)),
       _transform_array_buffer(resourceLoaderContext->glResourceManager()->makeDynamicArrayBuffer())
@@ -84,7 +84,7 @@ sp<RenderCommand> ParticleLayer::render(const LayerContext::Snapshot& renderCont
         pTransform += 16;
     }
 
-    GLDrawingContext dc(_shader_bindings, _shader_bindings->arrayBuffer().snapshot(_resource_loader_context->objectPool()->obtain<GLBuffer::ByteArrayUploader>(pos)), _index_buffer, GL_TRIANGLES);
+    GLDrawingContext dc(_shader_bindings, renderContext._camera, _shader_bindings->arrayBuffer().snapshot(_resource_loader_context->objectPool()->obtain<GLBuffer::ByteArrayUploader>(pos)), _index_buffer, GL_TRIANGLES);
 //    dc._instanced_array_buffers[1] = _transform_array_buffer.snapshot(_resource_loader_context->objectPool()->obtain<GLBuffer::ByteArrayUploader>(transform));
     return sp<DrawElementsInstanced>::make(dc, _shader_bindings->shader(), renderContext._items.size());
 }

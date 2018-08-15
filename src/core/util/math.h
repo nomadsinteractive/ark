@@ -69,7 +69,11 @@ public:
 //  [[script::bindings::auto]]
     static ARK_API float sin(float x);
 //  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> sin(const sp<Numeric>& x);
+//  [[script::bindings::auto]]
     static ARK_API float cos(float x);
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> cos(const sp<Numeric>& x);
 
 //  [[script::bindings::auto]]
     static ARK_API float acos(float x);

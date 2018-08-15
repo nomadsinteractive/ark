@@ -22,7 +22,7 @@
 namespace ark {
 
 GLModelLayer::GLModelLayer(const sp<GLModelLoader>& modelLoader, const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : Layer(resourceLoaderContext->memoryPool()),
+    : Layer(shader->camera(), resourceLoaderContext->memoryPool()),
       _resource_manager(resourceLoaderContext->glResourceManager()), _model_loader(modelLoader), _shader(shader), _atlas(atlas),
       _resource_loader_context(resourceLoaderContext), _shader_bindings(sp<GLShaderBindings>::make(_resource_manager, shader))
 {
@@ -58,7 +58,7 @@ sp<RenderCommand> GLModelLayer::render(const LayerContext::Snapshot& renderConte
                 sBuilder.write(matrix);
             }
         }
-        GLDrawingContext drawingContext(_shader_bindings, _shader_bindings->arrayBuffer().snapshot(buf.vertices().makeUploader()), buf.indices(), _model_loader->mode());
+        GLDrawingContext drawingContext(_shader_bindings, renderContext._camera, _shader_bindings->arrayBuffer().snapshot(buf.vertices().makeUploader()), buf.indices(), _model_loader->mode());
         if(buf.isInstanced())
         {
             drawingContext._instanced_array_snapshots = buf.makeInstancedBufferSnapshots();

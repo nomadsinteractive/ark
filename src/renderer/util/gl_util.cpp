@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 #include "core/types/global.h"
+#include "core/impl/array/preallocated_array.h"
 
 #include "graphics/base/bitmap.h"
 
@@ -83,6 +84,42 @@ GLenum GLUtil::getPixelFormat(int32_t format, const Bitmap& bitmap)
     if(byteCount == 2)
         return flagSigned ? GL_SHORT: GL_UNSIGNED_SHORT;
     return flagSigned ? GL_INT : GL_FLOAT;
+}
+
+bytearray GLUtil::makeUnitCubeVertices()
+{
+    static float vertices[] = {
+        -1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f, -1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f, -1.0f
+    };
+    return sp<PreallocatedArray<uint8_t>>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
 }
 
 }

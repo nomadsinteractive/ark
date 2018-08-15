@@ -1,12 +1,14 @@
 #include "renderer/base/gl_drawing_context.h"
 
+#include "graphics/base/camera.h"
+
 #include "renderer/base/gl_shader_bindings.h"
 #include "renderer/base/gl_snippet_delegate.h"
 
 namespace ark {
 
-GLDrawingContext::GLDrawingContext(const sp<GLShaderBindings>& shaderBindings, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer::Snapshot& indexBuffer, GLenum mode)
-    : _shader_bindings(shaderBindings), _array_buffer(arrayBuffer), _index_buffer(indexBuffer), _mode(mode), _count(indexBuffer.length<glindex_t>())
+GLDrawingContext::GLDrawingContext(const sp<GLShaderBindings>& shaderBindings, const Camera::Snapshot& camera, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer::Snapshot& indexBuffer, GLenum mode)
+    : _shader_bindings(shaderBindings), _camera(camera), _array_buffer(arrayBuffer), _index_buffer(indexBuffer), _mode(mode), _count(indexBuffer.length<glindex_t>())
 {
     DWARN(_shader_bindings->arrayBuffer().id() == arrayBuffer.id(), "GLShaderBinding's ArrayBuffer: %d, which is not the same as GLDrawingContext's ArrayBuffer snapshot: %d", _shader_bindings->arrayBuffer().id(), arrayBuffer.id());
 }

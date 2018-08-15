@@ -64,7 +64,6 @@ void GLES20RenderView::initialize(uint32_t width, uint32_t height)
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 #endif
 
-    _graphics_context->glOrtho(_viewport.left(), _viewport.right(), _viewport.top(), _viewport.bottom(), _viewport.near(), _viewport.far());
     _graphics_context->onSurfaceReady();
 }
 

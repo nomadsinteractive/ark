@@ -30,7 +30,7 @@ void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
     const GLBuffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(_resource_manager, GLBuffer::NAME_QUADS, 1);
     const sp<GLBuffer::Uploader> uploader = _object_pool->obtain<GLBuffer::ByteArrayUploader>(getArrayBuffer(x, y));
-    renderRequest.addRequest(_object_pool->obtain<DrawElements>(GLDrawingContext(_shader_bindings, _array_buffer.snapshot(uploader), indexBuffer, GL_TRIANGLES), _shader));
+    renderRequest.addRequest(_object_pool->obtain<DrawElements>(GLDrawingContext(_shader_bindings, _shader->camera()->snapshop(), _array_buffer.snapshot(uploader), indexBuffer, GL_TRIANGLES), _shader));
 }
 
 const sp<Size>& ShaderFrame::size()

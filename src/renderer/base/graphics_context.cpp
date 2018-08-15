@@ -3,6 +3,8 @@
 #include "core/inf/variable.h"
 #include "core/util/strings.h"
 
+#include "graphics/base/camera.h"
+
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/gl_program.h"
 #include "renderer/base/render_engine.h"
@@ -14,8 +16,6 @@ namespace ark {
 GraphicsContext::GraphicsContext(const sp<GLContext>& glContext, const sp<GLResourceManager>& glResources)
     : _gl_context(glContext), _gl_resource_manager(glResources), _steady_clock(Platform::getSteadyClock())
 {
-    _matrix_stack.push(MVPMatrix());
-    _top = &_matrix_stack.top();
 }
 
 GraphicsContext::~GraphicsContext()
@@ -76,46 +76,14 @@ const sp<GLContext>& GraphicsContext::glContext() const
     return _gl_context;
 }
 
-void GraphicsContext::glOrtho(float left, float right, float top, float bottom, float near, float far)
+void GraphicsContext::glUpdateMVPMatrix(const Matrix& matrix)
 {
-    _top->setVP(Matrix::ortho(left, right, top, bottom, near, far));
+    glUpdateMatrix("u_MVP", matrix);
 }
 
-void GraphicsContext::glUpdateMVPMatrix()
+void GraphicsContext::glUpdateVPMatrix(const Matrix& matrix)
 {
-    const Matrix& mvp = _top->mvp();
-    const GLProgram::Uniform& uniform = _program->getUniform("u_MVP");
-    DCHECK(uniform, "Uniform u_MVP not found");
-    uniform.setUniformMatrix4fv(1, GL_FALSE, mvp.value(), _tick);
-}
-
-void GraphicsContext::glUpdateVPMatrix()
-{
-    const Matrix& vp = _top->vp();
-    const GLProgram::Uniform& uniform = _program->getUniform("u_VP");
-    DCHECK(uniform, "Uniform u_VP not found");
-    uniform.setUniformMatrix4fv(1, GL_FALSE, vp.value(), _tick);
-}
-
-void GraphicsContext::glUpdateModelMatrix()
-{
-    const GLProgram::Uniform& uniform = _program->getUniform("u_Model");
-    DCHECK(uniform, "Uniform u_Model not found");
-    const Matrix& model = _top->model();
-    uniform.setUniformMatrix4fv(1, GL_FALSE, model.value(), _tick);
-}
-
-void GraphicsContext::glPushMatrix()
-{
-    _matrix_stack.push(MVPMatrix(*_top));
-    _top = &_matrix_stack.top();
-}
-
-void GraphicsContext::glPopMatrix()
-{
-    DCHECK(_matrix_stack.size(), "Empty matrix stack");
-    _matrix_stack.pop();
-    _top = &_matrix_stack.top();
+    glUpdateMatrix("u_VP", matrix);
 }
 
 void GraphicsContext::glUseProgram(const sp<GLProgram>& program)
@@ -133,35 +101,11 @@ const sp<GLProgram>& GraphicsContext::program() const
     return _program;
 }
 
-void GraphicsContext::MVPMatrix::setVP(const Matrix& vp)
+void GraphicsContext::glUpdateMatrix(const String& name, const Matrix& matrix)
 {
-    _vp = vp;
-    _mvp = _vp * _model;
-}
-
-const Matrix& GraphicsContext::MVPMatrix::mvp() const
-{
-    return _mvp;
-}
-
-const Matrix& GraphicsContext::MVPMatrix::vp() const
-{
-    return _vp;
-}
-
-const Matrix& GraphicsContext::MVPMatrix::model() const
-{
-    return _model;
-}
-
-const Matrix& GraphicsContext::MVPMatrix::view() const
-{
-    return _view;
-}
-
-const Matrix& GraphicsContext::MVPMatrix::projection() const
-{
-    return _projection;
+    const GLProgram::Uniform& uniform = _program->getUniform(name);
+    DCHECK(uniform, "Uniform %s not found", name.c_str());
+    uniform.setUniformMatrix4fv(1, GL_FALSE, matrix.value(), _tick);
 }
 
 }

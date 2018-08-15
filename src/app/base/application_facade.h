@@ -14,10 +14,14 @@ class ARK_API ApplicationFacade {
 public:
     ApplicationFacade(Application& app, const Surface& surface, const sp<ApplicationManifest>& manifest);
 
+//  [[script::bindings::property]]
+    const sp<Clock>& clock() const;
 // [[script::bindings::property]]
     const sp<ApplicationContext>& context() const;
 // [[script::bindings::property]]
     const sp<ApplicationController>& controller() const;
+// [[script::bindings::property]]
+    const sp<Camera>& camera() const;
 // [[script::bindings::property]]
     const sp<ApplicationManifest>& manifest() const;
 
@@ -35,6 +39,7 @@ private:
     sp<ApplicationContext> _context;
     sp<ApplicationController> _controller;
     sp<SurfaceController> _surface_controller;
+
     sp<ApplicationManifest> _manifest;
 
     sp<Arena> _arena;

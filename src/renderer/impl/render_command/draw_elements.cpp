@@ -15,7 +15,7 @@ void DrawElements::draw(GraphicsContext& graphicsContext)
     _shader->use(graphicsContext);
     _shader->bindUniforms(graphicsContext);
 
-    graphicsContext.glUpdateMVPMatrix();
+    graphicsContext.glUpdateMVPMatrix(_context._camera._vp);
 
     _context.preDraw(graphicsContext, _shader);
     glDrawElements(_context._mode, _context._count, GLIndexType, 0);

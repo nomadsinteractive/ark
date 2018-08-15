@@ -9,8 +9,8 @@ LayerContext::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
 {
 }
 
-LayerContext::LayerContext(const sp<MemoryPool>& memoryPool)
-    : _memory_pool(memoryPool), _last_rendered_count(-1)
+LayerContext::LayerContext(const sp<Camera>& camera, const sp<MemoryPool>& memoryPool)
+    : _camera(camera), _memory_pool(memoryPool), _last_rendered_count(-1)
 {
 }
 
@@ -38,7 +38,7 @@ LayerContext::Snapshot LayerContext::snapshot() const
 }
 
 LayerContext::Snapshot::Snapshot(const LayerContext& layerContext, MemoryPool& memoryPool)
-    : _dirty(layerContext._items.size() != layerContext._last_rendered_count)
+    : _dirty(layerContext._items.size() != layerContext._last_rendered_count), _camera(layerContext._camera->snapshop())
 {
     for(const LayerContext::Item& i : layerContext._items)
     {

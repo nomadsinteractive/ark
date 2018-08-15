@@ -11,6 +11,7 @@
 #include "core/util/documents.h"
 #include "core/util/strings.h"
 
+#include "graphics/base/camera.h"
 #include "graphics/base/color.h"
 #include "renderer/base/varyings.h"
 #include "graphics/impl/flatable/flatable_color3b.h"
@@ -30,13 +31,14 @@ namespace {
 class GLShaderBuilderImpl : public Builder<GLShader> {
 public:
     GLShaderBuilderImpl(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& vertexSrc, const String& fragmentSrc)
-        : _factory(factory), _manifest(doc), _resource_loader_context(resourceLoaderContext), _vertex_src(vertexSrc), _fragment_src(fragmentSrc) {
+        : _factory(factory), _manifest(doc), _resource_loader_context(resourceLoaderContext), _vertex_src(vertexSrc), _fragment_src(fragmentSrc),
+          _camera(factory.getBuilder<Camera>(doc, Constants::Attributes::CAMERA)) {
     }
 
     virtual sp<GLShader> build(const sp<Scope>& args) override {
         const sp<GLShaderSource> source = sp<GLShaderSource>::make(_vertex_src, _fragment_src, _resource_loader_context->renderController());
         source->loadPredefinedParam(_factory, args, _manifest);
-        return sp<GLShader>::make(source);
+        return sp<GLShader>::make(source, _camera->build(args));
     }
 
 private:
@@ -45,12 +47,14 @@ private:
     sp<ResourceLoaderContext> _resource_loader_context;
 
     String _vertex_src, _fragment_src;
+
+    sp<Builder<Camera>> _camera;
 };
 
 }
 
-GLShader::GLShader(const sp<GLShaderSource>& source)
-    : _source(source)
+GLShader::GLShader(const sp<GLShaderSource>& source, const sp<Camera>& camera)
+    : _source(source), _camera(camera ? camera : Camera::getMainCamera())
 {
     _source->initialize();
 }
@@ -68,7 +72,7 @@ sp<GLShader> GLShader::fromStringTable(const String& vertex, const String& fragm
     const sp<GLShaderSource> source = sp<GLShaderSource>::make(stringTable->getString(vertex), stringTable->getString(fragment), resourceLoaderContext->renderController());
     if(snippet)
         source->addSnippet(snippet);
-    return sp<GLShader>::make(source);
+    return sp<GLShader>::make(source, nullptr);
 }
 
 void GLShader::use(GraphicsContext& graphicsContext)
@@ -95,6 +99,11 @@ const sp<GLShaderInput>& GLShader::input() const
 const sp<GLShaderSource>& GLShader::source() const
 {
     return _source;
+}
+
+const sp<Camera>& GLShader::camera() const
+{
+    return _camera;
 }
 
 const sp<GLProgram>& GLShader::program() const
@@ -146,7 +155,8 @@ bool GLShader::Slot::operator <(const GLShader::Slot& other) const
 GLShader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _vertex(Strings::load(manifest, "vertex", "@shaders:default.vert")),
       _fragment(Strings::load(manifest, "fragment", "@shaders:texture.frag")),
-      _snippet(factory.getBuilder<GLSnippet>(manifest, Constants::Attributes::SNIPPET, false))
+      _snippet(factory.getBuilder<GLSnippet>(manifest, Constants::Attributes::SNIPPET, false)),
+      _camera(factory.getBuilder<Camera>(manifest, Constants::Attributes::CAMERA))
 {
 }
 
@@ -156,7 +166,7 @@ sp<GLShader> GLShader::BUILDER::build(const sp<Scope>& args)
     source->loadPredefinedParam(_factory, args, _manifest);
     if(_snippet)
         source->addSnippet(_snippet->build(args));
-    return sp<GLShader>::make(source);
+    return sp<GLShader>::make(source, _camera->build(args));
 }
 
 }

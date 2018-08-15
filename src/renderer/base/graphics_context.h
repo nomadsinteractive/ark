@@ -8,7 +8,7 @@
 #include "core/types/shared_ptr.h"
 #include "core/types/weak_ptr.h"
 
-#include "graphics/base/matrix.h"
+#include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/gl_shader.h"
@@ -26,44 +26,18 @@ public:
 
     const sp<GLProgram>& getGLProgram(GLShader& shader);
 
-    const sp<GLResourceManager>& glResourceManager() const;
     const sp<GLContext>& glContext() const;
+    const sp<Camera>& camera() const;
+    const sp<GLResourceManager>& glResourceManager() const;
 
     const sp<GLProgram>& program() const;
 
-    void glOrtho(float left, float right, float top, float bottom, float near, float far);
-    void glUpdateMVPMatrix();
-    void glUpdateVPMatrix();
-    void glUpdateModelMatrix();
+    void glUpdateMatrix(const String& name, const Matrix& matrix);
 
-    void glPushMatrix();
-    void glPopMatrix();
+    void glUpdateMVPMatrix(const Matrix& matrix);
+    void glUpdateVPMatrix(const Matrix& matrix);
 
     void glUseProgram(const sp<GLProgram>& program);
-
-private:
-    class MVPMatrix {
-    public:
-        MVPMatrix() = default;
-        MVPMatrix(const MVPMatrix& other) = default;
-
-        void setVP(const Matrix& vp);
-
-        const Matrix& mvp() const;
-        const Matrix& vp() const;
-
-        const Matrix& model() const;
-        const Matrix& view() const;
-        const Matrix& projection() const;
-
-    private:
-        Matrix _model;
-        Matrix _view;
-        Matrix _projection;
-
-        Matrix _mvp;
-        Matrix _vp;
-    };
 
 private:
     sp<GLContext> _gl_context;
@@ -74,8 +48,6 @@ private:
     sp<GLProgram> _program;
 
     std::map<GLShader::Slot, WeakPtr<GLProgram>> _gl_prepared_programs;
-    std::stack<MVPMatrix> _matrix_stack;
-    MVPMatrix* _top;
 
     uint64_t _tick;
 

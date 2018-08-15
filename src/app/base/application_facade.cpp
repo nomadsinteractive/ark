@@ -2,6 +2,7 @@
 
 #include "core/epi/expired.h"
 
+#include "graphics/base/camera.h"
 #include "graphics/base/surface_controller.h"
 
 #include "app/base/application.h"
@@ -16,6 +17,11 @@ ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface, c
 {
 }
 
+const sp<Clock>& ApplicationFacade::clock() const
+{
+    return _context->clock();
+}
+
 const sp<ApplicationContext>& ApplicationFacade::context() const
 {
     return _context;
@@ -24,6 +30,11 @@ const sp<ApplicationContext>& ApplicationFacade::context() const
 const sp<ApplicationController>& ApplicationFacade::controller() const
 {
     return _controller;
+}
+
+const sp<Camera>& ApplicationFacade::camera() const
+{
+    return Camera::getMainCamera();
 }
 
 const sp<ApplicationManifest>& ApplicationFacade::manifest() const

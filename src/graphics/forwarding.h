@@ -9,6 +9,7 @@ class Alphabet;
 class Bitmap;
 class Block;
 class Bounds;
+class Camera;
 class Color;
 class Font;
 class Frame;

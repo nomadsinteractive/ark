@@ -55,10 +55,8 @@ public:
     virtual void run() override;
 
 private:
-    uint64_t& tick();
-
-private:
     sp<Variable<uint64_t>> _ticker;
+    uint64_t _tick;
 };
 
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources)
@@ -240,24 +238,19 @@ void ApplicationContext::waitForFinish()
 }
 
 ApplicationContext::EngineTicker::EngineTicker()
-    : _ticker(Platform::getSteadyClock())
+    : _ticker(Platform::getSteadyClock()), _tick(0)
 {
 }
 
 uint64_t ApplicationContext::EngineTicker::val()
 {
-    return tick();
+    DTHREAD_CHECK(THREAD_ID_CORE);
+    return _tick;
 }
 
 void ApplicationContext::EngineTicker::run()
 {
-    tick() = _ticker->val();
-}
-
-uint64_t& ApplicationContext::EngineTicker::tick()
-{
-    thread_local uint64_t TICK = 0;
-    return TICK;
+    _tick = _ticker->val();
 }
 
 }

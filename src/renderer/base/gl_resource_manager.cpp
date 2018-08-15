@@ -36,8 +36,9 @@ public:
     virtual sp<GLTexture> get(const String& name) override {
         const bitmap bitmapBounds = _bitmap_bounds_loader->get(name);
         DCHECK(bitmapBounds, "Texture resource \"%s\" not found", name.c_str());
-        return sp<GLTextureDefault>::make(_recycler, sp<Size>::make(bitmapBounds->width(), bitmapBounds->height()), GLTexture::FORMAT_AUTO, GLTexture::FEATURE_DEFAULT, sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
+        return sp<GLTextureDefault>::make(_recycler, sp<Size>::make(static_cast<float>(bitmapBounds->width()), static_cast<float>(bitmapBounds->height())), GLTexture::FORMAT_AUTO, GLTexture::FEATURE_DEFAULT, sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
     }
+
 private:
     sp<GLRecycler> _recycler;
 
@@ -114,7 +115,7 @@ sp<GLTexture> GLResourceManager::loadGLTexture(const String& name)
 
 sp<GLTexture> GLResourceManager::createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable)
 {
-    sp<GLTexture> texture = sp<GLTextureDefault>::make(_recycler, sp<Size>::make(width, height), GLTexture::FORMAT_AUTO, GLTexture::FEATURE_DEFAULT, bitmapVariable);
+    sp<GLTexture> texture = sp<GLTextureDefault>::make(_recycler, sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), GLTexture::FORMAT_AUTO, GLTexture::FEATURE_DEFAULT, bitmapVariable);
     prepare(texture, PS_ONCE_AND_ON_SURFACE_READY);
     return texture;
 }

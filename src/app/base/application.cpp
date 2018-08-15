@@ -7,6 +7,7 @@
 #include "core/types/global.h"
 #include "core/util/log.h"
 
+#include "graphics/base/camera.h"
 #include "graphics/base/viewport.h"
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/inf/render_view.h"
@@ -40,6 +41,7 @@ Application::Application(const sp<ApplicationDelegate>& applicationDelegate, con
       , _viewport(viewport), _width(width), _height(height), _alive(false)
 {
     g_upDirection = _viewport.top() < _viewport.bottom() ? 1.0f : -1.0f;
+    Camera::getMainCamera()->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), viewport.near(), viewport.far());
 }
 
 Application::~Application()

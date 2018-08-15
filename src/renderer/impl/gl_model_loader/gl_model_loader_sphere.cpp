@@ -35,8 +35,8 @@ GLModelLoaderSphere::GLModelLoaderSphere(const sp<ResourceLoaderContext>& resour
             degenerate(indices, offset);
         (*indices++) = offset;
         for(uint32_t j = 1; j < sampleCount; ++j) {
-            (*indices++) = static_cast<glindex_t>(offset + j);
             (*indices++) = static_cast<glindex_t>(offset + j + sampleCount + 1);
+            (*indices++) = static_cast<glindex_t>(offset + j);
         }
         (*indices++) = (glindex_t) (offset + sampleCount);
     }

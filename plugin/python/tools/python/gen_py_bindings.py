@@ -423,6 +423,7 @@ ARK_PY_ARGUMENTS = (
     (r'Box\s*&', GenArgumentMeta('PyObject*', 'Box', 'O')),
     (r'sp<([^>]+|[\w\d_]+<[\w\d_]+>)>\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
     (r'(document|element|attribute)\s*&', GenArgumentMeta('PyObject*', '${0}', 'O')),
+    (r'V3', GenArgumentMeta('V3', 'V3', 'O')),
     (r'([^>]+|[\w\d_]+<[\w\d_]+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
     (r'(uint32_t|unsigned int|uint8_t)', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
     (r'(int32_t|int|int8_t)', GenArgumentMeta('int32_t', 'int32_t', 'i')),
@@ -436,7 +437,8 @@ ARK_PY_ARGUMENT_CHECKERS = {
     'bool': GenConverter('(PyLong_CheckExact({0}) || PyBool_Check({0}))', 'PyLong_AsLong({0}) != 0'),
     'int32_t': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', 'PyLong_AsLong({0})'),
     'uint32_t': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', 'PyLong_AsLong({0})'),
-    'float': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', '﻿PyFloat_AsDouble({0})'),
+    'float': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', 'PyFloat_AsDouble({0})'),
+    'V3': GenConverter('PyTuple_CheckExact({0})', '{0}'),
     'std::wstring': GenConverter('PyUnicode_CheckExact({0})', 'PyUnicode_DATA({0})')
 }
 
@@ -801,6 +803,14 @@ class GenMemberMethod(GenMethod):
     def gen_py_method_def(self, genclass):
         return '{"%s", (PyCFunction) %s::%s, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.py_class_name, self._name, self._flags)
 
+    @staticmethod
+    def overload(m1, m2):
+        try:
+            m1.add_overloaded_method(m2)
+            return m1
+        except AttributeError:
+            return create_overloaded_method_type(GenMemberMethod)(m1, m2)
+
 
 class GenStaticMethod(GenMethod):
     def __init__(self, name, args, return_type):
@@ -814,6 +824,14 @@ class GenStaticMethod(GenMethod):
 
     def _gen_call_statement(self, genclass, argnames):
         return '%s::%s(%s);' % (genclass.classname, self._name, argnames)
+
+    @staticmethod
+    def overload(m1, m2):
+        try:
+            m1.add_overloaded_method(m2)
+            return m1
+        except AttributeError:
+            return create_overloaded_method_type(GenStaticMethod)(m1, m2)
 
 
 class GenStaticMemberMethod(GenMethod):
@@ -870,17 +888,8 @@ class GenOperatorMethod(GenMethod):
             return ['Py_INCREF(self);', 'return reinterpret_cast<PyObject*>(self);']
         return GenMethod.gen_return_statement(return_type, py_return)
 
-    # @staticmethod
-    # def _gen_convert_args_code(lines, argdeclare):
-    #     pass
-
     def _gen_parse_tuple_code(self, lines, declares, args):
         pass
-        # if args:
-        #     for i, j in enumerate(args):
-        #         meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
-        #         ga = GenArgument(j.accept_type, j.default_value, meta, str(i))
-        #         lines.append(ga.gen_declare('obj%d' % i, 'arg%d' % i))
 
     @property
     def operator(self):

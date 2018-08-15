@@ -23,9 +23,7 @@ Matrix::Matrix(const Matrix& other)
 
 const Matrix Matrix::operator *(const Matrix& right) const
 {
-    Matrix mat4;
-    mat4.matrix<glm::mat4>() = matrix<glm::mat4>() * right.matrix<glm::mat4>();
-    return mat4;
+    return Matrix(matrix<glm::mat4>() * right.matrix<glm::mat4>());
 }
 
 const Matrix& Matrix::operator =(const Matrix& other)

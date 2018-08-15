@@ -14,7 +14,7 @@ namespace ark {
 //[[core::class]]
 class ARK_API Layer {
 public:
-    Layer(const sp<MemoryPool>& memoryPool);
+    Layer(const sp<Camera>& camera, const sp<MemoryPool>& memoryPool);
     virtual ~Layer() = default;
 
     const sp<LayerContext>& layerContext() const;

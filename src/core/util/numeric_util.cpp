@@ -255,12 +255,13 @@ void NumericUtil::set(const sp<NumericWrapper>& self, const sp<Numeric>& delegat
     self->set(delegate);
 }
 
-void NumericUtil::fix(const sp<Numeric>& self)
+float NumericUtil::fix(const sp<Numeric>& self)
 {
     const sp<NumericWrapper> iw = self.as<NumericWrapper>();
     DWARN(iw, "Calling fix on non-NumericWrapper has no effect.");
     if(iw)
-        iw->fix();
+        return iw->fix();
+    return 0;
 }
 
 sp<Numeric> NumericUtil::depends(const sp<Numeric>& self, const sp<Numeric>& depends)

@@ -87,7 +87,7 @@ public:
     static void set(const sp<NumericWrapper>& self, const sp<Numeric>& delegate);
 
 //[[script::bindings::classmethod]]
-    static void fix(const sp<Numeric>& self);
+    static float fix(const sp<Numeric>& self);
 
 //[[script::bindings::classmethod]]
     static sp<Numeric> depends(const sp<Numeric>& self, const sp<Numeric>& depends);
