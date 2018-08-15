@@ -81,8 +81,6 @@ const sp<RenderObject>& TileMap::getTileByPosition(float x, float y) const
 void TileMap::setTile(uint32_t rowId, uint32_t colId, const sp<RenderObject>& renderObject)
 {
     DCHECK(rowId < _row_count && colId < _col_count, "Invaild tile id:(%d, %d), tile map size(%d, %d)", rowId, colId, _row_count, _col_count);
-    if(renderObject)
-        renderObject->setSize(_tile_size);
     _tiles[rowId * _col_count + colId] = renderObject;
 }
 

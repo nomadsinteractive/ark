@@ -7,6 +7,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/color.h"
 #include "graphics/base/v4.h"
 
 namespace ark {
@@ -48,7 +49,8 @@ public:
 
     private:
         sp<Builder<Numeric>> _x, _y, _z, _w;
-        V4 _color;
+        bool _is_color;
+        Color _color;
     };
 
 private:

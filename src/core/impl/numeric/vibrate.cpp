@@ -11,7 +11,7 @@ Vibrate::Vibrate(const sp<Numeric>& t, float a, float c, float o)
 
 float Vibrate::val()
 {
-    return Math::sin(_t->val() + _c) + _o;
+    return _a * Math::sin(_t->val() + _c) + _o;
 }
 
 }

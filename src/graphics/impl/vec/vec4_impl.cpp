@@ -5,6 +5,8 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
 
+#include "graphics/base/color.h"
+
 namespace ark {
 
 Vec4Impl::Vec4Impl() noexcept
@@ -74,12 +76,18 @@ sp<Vec4Impl> Vec4Impl::BUILDER::build(const sp<Scope>& args)
 }
 
 Vec4Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
+    : _is_color(str.startsWith("#"))
 {
-    BeanUtils::split(factory, str, _x, _y, _z, _w);
+    if(_is_color)
+        _color = Strings::parse<Color>(str);
+    else
+        BeanUtils::split(factory, str, _x, _y, _z, _w);
 }
 
 sp<Vec4> Vec4Impl::DICTIONARY::build(const sp<Scope>& args)
 {
+    if(_is_color)
+        return sp<Color>::make(_color);
     return sp<Vec4Impl>::make(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
 }
 

@@ -139,20 +139,26 @@ public:
                 {
                     Event::Code code = static_cast<Event::Code>(Event::CODE_MOUSE_BUTTON_LEFT + event.button.button - SDL_BUTTON_LEFT);
                     Event e(event.type == SDL_MOUSEBUTTONDOWN ? Event::ACTION_DOWN : Event::ACTION_UP, event.button.x, event.button.y, event.button.timestamp, code);
-                    _application.onEvent(e);
+                    _application.onEvent(e, true);
                     break;
                 }
             case SDL_MOUSEMOTION:
                 {
                     Event e(Event::ACTION_MOVE, event.motion.x, event.motion.y, event.motion.timestamp);
-                    _application.onEvent(e);
+                    _application.onEvent(e, true);
+                    break;
+                }
+            case SDL_MOUSEWHEEL:
+                {
+                    Event e(Event::ACTION_WHEEL, event.wheel.x, event.wheel.y, event.wheel.timestamp);
+                    _application.onEvent(e, false);
                     break;
                 }
             case SDL_KEYDOWN:
             case SDL_KEYUP:
                 {
                     Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_KEYDOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), event.key.timestamp, sdlScanCodeToEventCode(event.key.keysym.scancode));
-                    _application.onEvent(e);
+                    _application.onEvent(e, false);
                     break;
                 }
             case SDL_WINDOWEVENT:

@@ -18,6 +18,7 @@ public:
         ACTION_DOWN,
         ACTION_UP,
         ACTION_MOVE,
+        ACTION_WHEEL,
         ACTION_BACK_PRESSED,
         ACTION_CANCEL
     };
