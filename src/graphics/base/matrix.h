@@ -9,7 +9,7 @@
 
 namespace ark {
 
-class Matrix {
+class ARK_API Matrix {
 public:
     Matrix();
     Matrix(const Matrix& other);

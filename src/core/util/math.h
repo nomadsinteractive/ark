@@ -58,6 +58,10 @@ public:
         return val;
     }
 
+    template<typename T> bool ispow2(T n) {
+        return n && !(n & (n - 1));
+    }
+
     template<class T> static typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
         almostEqual(T x, T y, int32_t ulp = 4) {
         return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp

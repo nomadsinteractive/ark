@@ -32,7 +32,7 @@ void GLCubemap::doPrepareTexture(GraphicsContext& /*graphicsContext*/, uint32_t 
         GLenum pixelFormat = bitmap ? GLUtil::getPixelFormat(_format, bitmap) : GL_UNSIGNED_BYTE;
         GLenum internalFormat = bitmap ? GLUtil::getTextureInternalFormat(_format, bitmap) : GL_RGBA8;
         glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0, (GLint) internalFormat, static_cast<int32_t>(bitmap->width()), static_cast<int32_t>(bitmap->height()), 0, format, pixelFormat, bitmap ? bitmap->at(0, 0) : nullptr);
-        LOGD("GLCubemap Uploaded, id = %d, width = %d, height = %d%s", _id, bitmap->width(), bitmap->height(), bitmap ? "" : ", bitmap: nullptr");
+        LOGD("GLCubemap Uploaded, id = %d, width = %d, height = %d%s", id, bitmap->width(), bitmap->height(), bitmap ? "" : ", bitmap: nullptr");
     }
 }
 

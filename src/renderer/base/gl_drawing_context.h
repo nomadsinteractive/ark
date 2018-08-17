@@ -37,8 +37,6 @@ public:
 
 };
 
-const GLenum GLIndexType = sizeof(glindex_t) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
-
 }
 
 #endif

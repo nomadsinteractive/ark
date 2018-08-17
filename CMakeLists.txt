@@ -181,6 +181,8 @@ endif()
 
 add_subdirectory(plugin/assimp)
 
+add_subdirectory(plugin/pbr)
+
 ark_setup_tools(ark_gen_string_table)
 ark_setup_tools(ark_gen_plugin_class)
 ark_setup_tools(ark_gen_bootstrap)

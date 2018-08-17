@@ -100,14 +100,14 @@ void YAMLStringBundle::loadBundle(const String& name)
     yaml_parser_delete(&parser);
 }
 
-YAMLStringBundle::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& doc)
-    : _path(Strings::load(doc, Constants::Attributes::PATH))
+YAMLStringBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _src(factory.ensureBuilder<String>(manifest, Constants::Attributes::SRC))
 {
 }
 
 sp<StringBundle> YAMLStringBundle::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<YAMLStringBundle>::make(Ark::instance().getAsset(_path->build(args)));
+    return sp<YAMLStringBundle>::make(Ark::instance().getAsset(_src->build(args)));
 }
 
 }

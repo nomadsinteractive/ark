@@ -4,10 +4,17 @@
 
 #include "core/types/global.h"
 #include "core/impl/array/preallocated_array.h"
+#include "core/util/math.h"
 
 #include "graphics/base/bitmap.h"
+#include "graphics/base/matrix.h"
 
+#include "renderer/base/gl_buffer.h"
+#include "renderer/base/gl_program.h"
+#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_texture.h"
+#include "renderer/util/gl_index_buffers.h"
 
 namespace ark {
 
@@ -39,6 +46,8 @@ struct GLConstants {
 
 }
 
+extern uint32_t g_GLViewportWidth;
+extern uint32_t g_GLViewportHeight;
 
 GLenum GLUtil::getEnum(const String &name)
 {
@@ -120,6 +129,70 @@ bytearray GLUtil::makeUnitCubeVertices()
          1.0f, -1.0f, -1.0f
     };
     return sp<PreallocatedArray<uint8_t>>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
+}
+
+void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, GLResourceManager& resourceManager, GLShader& shader, GLTexture& texture, int32_t width, int32_t height)
+{
+    uint32_t captureFBO, captureRBO;
+    glGenFramebuffers(1, &captureFBO);
+    glGenRenderbuffers(1, &captureRBO);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+
+    for (uint32_t i = 0; i < 6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+
+    const Matrix captureProjection = Matrix::perspective(Math::radians(90.0f), 1.0f, 0.1f, 10.0f);
+    const Matrix captureViews[] = {
+        Matrix::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 1.0f,  0.0f,  0.0f), V3(0.0f, -1.0f,  0.0f)),
+        Matrix::lookAt(V3(0.0f, 0.0f, 0.0f), V3(-1.0f,  0.0f,  0.0f), V3(0.0f, -1.0f,  0.0f)),
+        Matrix::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 0.0f,  1.0f,  0.0f), V3(0.0f,  0.0f,  1.0f)),
+        Matrix::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 0.0f, -1.0f,  0.0f), V3(0.0f,  0.0f, -1.0f)),
+        Matrix::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 0.0f,  0.0f,  1.0f), V3(0.0f, -1.0f,  0.0f)),
+        Matrix::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 0.0f,  0.0f, -1.0f), V3(0.0f, -1.0f,  0.0f))
+    };
+
+    shader.use(graphicsContext);
+    shader.program()->getUniform("u_Projection").setUniformMatrix4fv(1, GL_FALSE, captureProjection.value());
+    texture.prepare(graphicsContext);
+    texture.active(shader.program(), 0);
+
+    uint32_t vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    GLBuffer arrayBuffer(resourceManager.recycler(), sp<GLBuffer::ArrayUploader<uint8_t>>::make(GLUtil::makeUnitCubeVertices()), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+    arrayBuffer.prepare(graphicsContext);
+    glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer.id());
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, 0);
+
+    const GLBuffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_QUADS, 6);
+    indexBuffer.prepare(graphicsContext);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.id());
+
+    glViewport(0, 0, width, height);
+    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+    for (uint32_t i = 0; i < 6; ++i)
+    {
+        shader.program()->getUniform("u_View").setUniformMatrix4fv(1, GL_FALSE, captureViews[i].value());
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, id, 0);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDrawElements(GL_TRIANGLES, 36, GLIndexType, 0);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindVertexArray(0);
+
+    glDeleteVertexArrays(1, &vao);
+    glDeleteFramebuffers(1, &captureFBO);
+    glDeleteRenderbuffers(1, &captureRBO);
+
+    glViewport(0, 0, g_GLViewportWidth, g_GLViewportHeight);
 }
 
 }

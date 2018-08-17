@@ -3,7 +3,6 @@
 #include "core/util/documents.h"
 
 #include "renderer/base/atlas.h"
-#include "renderer/base/gl_texture.h"
 #include "renderer/base/resource_loader_context.h"
 
 namespace ark {

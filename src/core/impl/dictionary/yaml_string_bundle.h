@@ -20,12 +20,12 @@ public:
 //  [[plugin::builder("yaml")]]
     class BUILDER : public Builder<StringBundle> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& doc);
 
         virtual sp<StringBundle> build(const sp<Scope>& args);
 
     private:
-        sp<Builder<String>> _path;
+        sp<Builder<String>> _src;
     };
 
 private:
