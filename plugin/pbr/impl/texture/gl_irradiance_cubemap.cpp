@@ -1,6 +1,8 @@
 #include "impl/texture/gl_irradiance_cubemap.h"
 
-#include "core/util/math.h"
+#include <cmft/cubemapfilter.h>
+
+#include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
@@ -13,16 +15,6 @@
 
 #include "platform/gl/gl.h"
 
-#ifndef M_PI
-#define M_PI ark::Math::PI
-#endif
-
-#ifndef M_SQRT2
-#define M_SQRT2 1.4142135623f
-#endif
-
-#include "sh.hpp"
-
 namespace ark {
 
 GLIrradianceCubemap::GLIrradianceCubemap(const sp<GLResourceManager>& resourceManager, Format format, Feature features, const sp<GLShader>& shader, const sp<GLTexture>& texture, const sp<Size>& size)
@@ -32,40 +24,45 @@ GLIrradianceCubemap::GLIrradianceCubemap(const sp<GLResourceManager>& resourceMa
 
 void GLIrradianceCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id)
 {
-    uint32_t s = static_cast<uint32_t>(_size->width() * 2);
-    uint32_t n = s / 2;
+    DCHECK(_size->width() == _size->height(), "Cubemap should be square, but (%.2f, %.2f) provided", _size->width(), _size->height());
 
-    bitmap s1 = bitmap::make(_texture->width(), _texture->height(), _texture->width() * 3 * sizeof(GLfloat), 3);
-    bitmap d1 = bitmap::make(n, n, n * 3 * sizeof(GLfloat), 3);
+    cmft::Image input;
+    cmft::imageCreate(input, _texture->width(), _texture->height(), 0, 1, 1, cmft::TextureFormat::RGBA32F);
 
     if(!_texture->id())
         _texture->prepare(graphicsContext);
 
     glBindTexture(GL_TEXTURE_2D, _texture->id());
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, s1->at(0, 0));
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, input.m_data);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    if(s1->width() != s || s1->height() != s)
-        s1 = s1->resize(s, s);
+    uint32_t n = static_cast<uint32_t>(_size->width());
 
-    sht<float> T1(n, s1->channels());
-    T1.S.set(reinterpret_cast<const float*>(s1->at(0, 0)), s);
-    T1.ana();
-    T1.F.diffuse();
-    T1.F.get(reinterpret_cast<float*>(d1->at(0, 0)), n);
+    cmft::Image output;
+    cmft::imageCreate(output, n, n, 0, 1, 6, cmft::TextureFormat::RGBA32F);
+    cmft::imageToCubemap(input);
+    cmft::imageIrradianceFilterSh(output, n, input);
 
-    const bitmap s2 = d1->crop(0, 0, n / 2, n / 2);
-    const bitmap d2 = bitmap::make(n, n, n * 3 * sizeof(GLfloat), 3);
+    cmft::Image faceList[6];
+    cmft::imageFaceListFromCubemap(faceList, output);
 
-    sht<float> T2(s2->width(), s2->channels());
-    T2.F.set(reinterpret_cast<const float*>(s2->at(0, 0)), s2->width());
-    T2.syn();
-    T2.S.get(reinterpret_cast<float*>(d2->at(0, 0)));
+    const uint32_t imageFaceIndices[6] = {4, 5, 2, 3, 1, 0};
 
-    GLTextureDefault texture(_resource_manager->recycler(), _size, _format, _features, sp<Variable<bitmap>::Const>::make(d2));
-    texture.prepare(graphicsContext);
+    Bitmap::Util::rotate<float>(reinterpret_cast<float*>(faceList[2].m_data), n, n, 4, 270);
+    Bitmap::Util::hvflip<float>(reinterpret_cast<float*>(faceList[3].m_data), n, n, 4);
+    Bitmap::Util::hflip<float>(reinterpret_cast<float*>(faceList[3].m_data), n, n, 4);
 
-    GLUtil::renderCubemap(graphicsContext, id, _resource_manager, _shader, texture, n, n);
+    for(uint32_t i = 0; i < 6; ++i)
+    {
+        GLenum format = GL_RGBA;
+        GLenum pixelFormat = GL_FLOAT;
+        GLenum internalFormat = GL_RGB16F;
+        glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0, (GLint) internalFormat, static_cast<int32_t>(n), static_cast<int32_t>(n), 0, format, pixelFormat, faceList[imageFaceIndices[i]].m_data);
+        LOGD("GLCubemap Uploaded, id = %d, width = %d, height = %d", id, n, n);
+    }
+
+    cmft::imageUnload(input);
+    cmft::imageUnload(output);
 }
 
 GLIrradianceCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

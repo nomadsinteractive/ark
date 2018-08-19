@@ -42,6 +42,11 @@ float Event::y() const
     return _y;
 }
 
+V2 Event::xy() const
+{
+    return V2(_x, _y);
+}
+
 uint32_t Event::timestamp() const
 {
     return _timestamp;

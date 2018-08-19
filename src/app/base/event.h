@@ -4,6 +4,7 @@
 #include "core/base/api.h"
 
 #include "graphics/base/rect.h"
+#include "graphics/base/v2.h"
 
 namespace ark {
 
@@ -91,6 +92,8 @@ public:
     float x() const;
 //  [[script::bindings::property]]
     float y() const;
+//  [[script::bindings::property]]
+    V2 xy() const;
 
 //  [[script::bindings::property]]
     uint32_t timestamp() const;

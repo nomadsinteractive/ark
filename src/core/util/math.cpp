@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include <math_neon.h>
 
-#include "core/impl/numeric/sine.h"
+#include "core/impl/numeric/max.h"
+#include "core/impl/numeric/min.h"
 #include "core/impl/numeric/cosine.h"
+#include "core/impl/numeric/sine.h"
 
 #include "core/util/log.h"
 
@@ -50,6 +52,16 @@ float Math::cos(float x)
 sp<Numeric> Math::cos(const sp<Numeric>& x)
 {
     return sp<Cosine>::make(x);
+}
+
+sp<Numeric> Math::min(const sp<Numeric>& a1, const sp<Numeric>& a2)
+{
+    return sp<Min>::make(a1, a2);
+}
+
+sp<Numeric> Math::max(const sp<Numeric>& a1, const sp<Numeric>& a2)
+{
+    return sp<Max>::make(a1, a2);
 }
 
 float Math::acos(float x)

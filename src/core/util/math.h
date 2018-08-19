@@ -80,6 +80,11 @@ public:
     static ARK_API sp<Numeric> cos(const sp<Numeric>& x);
 
 //  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> min(const sp<Numeric>& a1, const sp<Numeric>& a2);
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> max(const sp<Numeric>& a1, const sp<Numeric>& a2);
+
+//  [[script::bindings::auto]]
     static ARK_API float acos(float x);
 //  [[script::bindings::auto]]
     static ARK_API float atan2(float y, float x);

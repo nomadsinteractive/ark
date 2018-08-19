@@ -465,6 +465,14 @@ class Math:
         return 0
 
     @staticmethod
+    def max(a, b):
+        return 0
+
+    @staticmethod
+    def min(a, b):
+        return 0
+
+    @staticmethod
     def sqrt(x):
         return 0
 

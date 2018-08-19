@@ -41,7 +41,6 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
     const sp<Scope> vars = sp<Scope>::make();
     const sp<ApplicationFacade> applicationFacade = sp<ApplicationFacade>::make(application, surface, _application_manifest);
     vars->put<ApplicationFacade>("_application", applicationFacade);
-    vars->put<ApplicationContext>("_application_context", applicationContext);
     vars->put<ApplicationController>("_application_controller", application.controller());
     vars->put<ResourceLoader>("_resource_loader", appResourceLoader);
     vars->put<SurfaceController>("_surface_controller", surface->controller());

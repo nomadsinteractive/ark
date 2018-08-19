@@ -117,11 +117,6 @@
         "tag": "master"
     },
     {
-        "url": "https://github.com/rlk/sht.git",
-        "name": "sht",
-        "tag": "master"
-    },
-    {
         "url": "https://github.com/dariomanesku/cmft.git",
         "name": "cmft",
         "tag": "master"

@@ -32,10 +32,66 @@ public:
 
     uint8_t* at(uint32_t x, uint32_t y) const;
 
-    bitmap resize(uint32_t width, uint32_t height) const;
-    bitmap crop(uint32_t x, uint32_t y, uint32_t width, uint32_t height) const;
+    Bitmap resize(uint32_t width, uint32_t height) const;
+    Bitmap crop(uint32_t x, uint32_t y, uint32_t width, uint32_t height) const;
 
     void draw(void* buf, uint32_t width, uint32_t height, int32_t x, int32_t y, int32_t stride);
+
+    class Util {
+    public:
+        template<typename T> static void rotate(T* data, uint32_t width, uint32_t height, uint8_t channels, int32_t degrees) {
+            DCHECK(width == height, "Can only rotate squares");
+            if(degrees == 90)
+                hvflip<T>(data, width, height, channels);
+            else if(degrees == 180)
+                vflip(data, width, height, channels);
+            else if(degrees = 270) {
+                hflip<T>(data, width, height, channels);
+                hvflip<T>(data, width, height, channels);
+            } else
+                DCHECK(degrees == 0, "Unsupported rotation angle: %d", degrees);
+        }
+
+        template<typename T> static void hflip(T* data, uint32_t width, uint32_t height, uint8_t channels) {
+            for(uint32_t i = 0; i < height; ++i)
+                for(uint32_t j = 0; j < width / 2; ++j) {
+                    T* r1 = data + (width * i + j) * channels;
+                    T* r2 = data + (width * i + width - j - 1) * channels;
+                    for(uint8_t k = 0; k < channels; ++k)
+                        swap(r1[k], r2[k]);
+                }
+        }
+
+        template<typename T> static void vflip(T* data, uint32_t width, uint32_t height, uint8_t channels) {
+            for(uint32_t i = 0; i < height / 2; ++i) {
+                T* r1 = data + width * i * channels;
+                T* r2 = data + width * (height - i - 1) * channels;
+                if(r1 != r2)
+                    for(uint32_t j = 0; j < width; ++j) {
+                        T* c1 = r1 + j * channels;
+                        T* c2 = r2 + j * channels;
+                        for(uint8_t k = 0; k < channels; ++k)
+                            swap(c1[k], c2[k]);
+                    }
+            }
+        }
+
+        template<typename T> static void hvflip(T* data, uint32_t width, uint32_t height, uint8_t channels) {
+            for(uint32_t i = 0; i < height; ++i)
+                for(uint32_t j = i + 1; j < width; ++j) {
+                    T* r1 = data + (width * i + j) * channels;
+                    T* r2 = data + (width * j + i) * channels;
+                    for(uint8_t k = 0; k < channels; ++k)
+                        swap(r1[k], r2[k]);
+                }
+        }
+
+        template<typename T> static void swap(T& a1, T& a2) {
+            T tmp = a1;
+            a1 = a2;
+            a2 = tmp;
+        }
+    };
 
 private:
     uint32_t _width;

@@ -61,6 +61,56 @@ void ApplicationFacade::setArena(const sp<Arena>& arena)
     _context->addEventListener(_arena);
 }
 
+sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name)
+{
+    return _context->createResourceLoader(name);
+}
+
+const List<String>& ApplicationFacade::argv() const
+{
+    return _context->argv();
+}
+
+void ApplicationFacade::addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& expired)
+{
+    _context->addPreRenderTask(task, expired);
+}
+
+void ApplicationFacade::addEventListener(const sp<EventListener>& eventListener)
+{
+    _context->addEventListener(eventListener);
+}
+
+void ApplicationFacade::setDefaultEventListener(const sp<EventListener>& eventListener)
+{
+    _context->setDefaultEventListener(eventListener);
+}
+
+void ApplicationFacade::post(const sp<Runnable>& task, float delay)
+{
+    _context->post(task, delay);
+}
+
+void ApplicationFacade::schedule(const sp<Runnable>& task, float interval)
+{
+    _context->schedule(task, interval);
+}
+
+void ApplicationFacade::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)
+{
+    _context->addStringBundle(name, stringBundle);
+}
+
+sp<String> ApplicationFacade::getString(const String& resid)
+{
+    return _context->getString(resid);
+}
+
+sp<Runnable> ApplicationFacade::defer(const sp<Runnable>& task) const
+{
+    return _context->defer(task);
+}
+
 const Color& ApplicationFacade::backgroundColor() const
 {
     return _context->backgroundColor();

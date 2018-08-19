@@ -26,7 +26,6 @@ public:
     ApplicationContext(const sp<ApplicationResource>& applicationResource);
     ~ApplicationContext();
 
-//  [[script::bindings::auto]]
     sp<ResourceLoader> createResourceLoader(const String& name);
     sp<ResourceLoader> createResourceLoader(const String& name, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
@@ -36,38 +35,26 @@ public:
 
     const sp<Executor>& executor() const;
 
-//  [[script::bindings::property]]
     const List<String>& argv() const;
-//  [[script::bindings::property]]
     const sp<Clock>& clock() const;
 
     bool onEvent(const Event& event);
 
-//  [[script::bindings::auto]]
     void addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& expired = nullptr);
-//  [[script::bindings::auto]]
     void addEventListener(const sp<EventListener>& eventListener);
-//  [[script::bindings::auto]]
     void setDefaultEventListener(const sp<EventListener>& eventListener);
 
-//  [[script::bindings::auto]]
     virtual void post(const sp<Runnable>& task, float delay = 0.0f) override;
-//  [[script::bindings::auto]]
     virtual void schedule(const sp<Runnable>& task, float interval) override;
 
     virtual uint64_t pollOnce() override;
 
-//  [[script::bindings::auto]]
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
-//  [[script::bindings::auto]]
     sp<String> getString(const String& resid);
 
-//  [[script::bindings::auto]]
     sp<Runnable> defer(const sp<Runnable>& task) const;
 
-//  [[script::bindings::property]]
     const Color& backgroundColor() const;
-//  [[script::bindings::property]]
     void setBackgroundColor(const Color& backgroundColor);
 
     void pause();

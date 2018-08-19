@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.0)
 include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
 
 ark_ensure_dependency(3rdparty/cmft)
-ark_ensure_dependency(3rdparty/sht)
 
 list(APPEND LOCAL_LIBS ${ARK_LIBRARIES})
 
@@ -17,7 +16,6 @@ list(APPEND LOCAL_INCLUDE_DIRS ${ARK_PLUGIN_DIR})
 list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
 
 ark_include_directories(${ARK_OPENGL_INCLUDE_DIRS})
-ark_include_directories(3rdparty/sht)
 ark_include_directories(3rdparty/cmft/include)
 ark_include_directories(3rdparty/cmft/dependency)
 
