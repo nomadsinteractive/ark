@@ -47,9 +47,19 @@ V3 operator *(const V3& lvalue, const V3& rvalue)
     return V3(lvalue._x * rvalue._x, lvalue._y * rvalue._y, lvalue._z * rvalue._z);
 }
 
+V3 operator *(const V3& lvalue, float rvalue)
+{
+    return V3(lvalue._x * rvalue, lvalue._y * rvalue, lvalue._z * rvalue);
+}
+
 V3 operator /(const V3& lvalue, const V3& rvalue)
 {
     return V3(lvalue._x / rvalue._x, lvalue._y / rvalue._y, lvalue._z / rvalue._z);
+}
+
+V3 operator /(const V3& lvalue, float rvalue)
+{
+    return V3(lvalue._x / rvalue, lvalue._y / rvalue, lvalue._z / rvalue);
 }
 
 float V3::z() const

@@ -21,7 +21,7 @@ Matrix::Matrix(const Matrix& other)
     memcpy(_value, other._value, sizeof(_value));
 }
 
-const Matrix Matrix::operator *(const Matrix& right) const
+Matrix Matrix::operator *(const Matrix& right) const
 {
     return Matrix(matrix<glm::mat4>() * right.matrix<glm::mat4>());
 }

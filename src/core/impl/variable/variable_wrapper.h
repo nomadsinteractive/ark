@@ -11,10 +11,10 @@ namespace ark {
 
 template<typename T> class VariableWrapper final : public Variable<T> {
 public:
-    VariableWrapper(const sp<Variable<T>>& delegate)
+    VariableWrapper(const sp<Variable<T>>& delegate) noexcept
         : _variable_impl(nullptr), _delegate(Null::toSafe(delegate)) {
     }
-    VariableWrapper(T value)
+    VariableWrapper(T value) noexcept
         : _variable_impl(new typename Variable<T>::Impl(value)), _delegate(sp<Variable<T>>::adopt(_variable_impl)) {
     }
     VariableWrapper(const VariableWrapper& other) = default;

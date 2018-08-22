@@ -89,7 +89,7 @@ void Mixer::ensureToneMapRange(int32_t value)
         int32_t newSize = divmod * TONE_MAP_WEIGHT_ONE + (remainder ? TONE_MAP_WEIGHT_ONE : 0);
         _tone_map.resize(newSize);
 
-        for(int32_t i = size; i < _tone_map.size(); ++i)
+        for(size_t i = size; i < _tone_map.size(); ++i)
             _tone_map[i] = static_cast<int16_t>(Math::tanh(static_cast<float>(i) / TONE_MAP_WEIGHT_ONE) * TONE_MAP_WEIGHT_ONE);
     }
 }

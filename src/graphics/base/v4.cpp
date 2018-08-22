@@ -44,9 +44,19 @@ V4 operator *(const V4& lvalue, const V4& rvalue)
     return V4(lvalue._x * rvalue._x, lvalue._y * rvalue._y, lvalue._z * rvalue._z, lvalue._w * rvalue._w);
 }
 
+V4 operator *(const V4& lvalue, float rvalue)
+{
+    return V4(lvalue._x * rvalue, lvalue._y * rvalue, lvalue._z * rvalue, lvalue._w * rvalue);
+}
+
 V4 operator /(const V4& lvalue, const V4& rvalue)
 {
     return V4(lvalue._x / rvalue._x, lvalue._y / rvalue._y, lvalue._z / rvalue._z, lvalue._w / rvalue._w);
+}
+
+V4 operator /(const V4& lvalue, float rvalue)
+{
+    return V4(lvalue._x / rvalue, lvalue._y / rvalue, lvalue._z / rvalue, lvalue._w / rvalue);
 }
 
 float V4::w() const

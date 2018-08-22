@@ -49,7 +49,7 @@ private:
 
 
 Skybox::Skybox(const sp<Size>& size, const sp<GLShader>& shader, const sp<GLTexture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _size(size), _resource_manager(resourceLoaderContext->glResourceManager()), _shader(shader),
+    : _size(size), _resource_manager(resourceLoaderContext->glResourceManager()), _shader(shader), _index_buffer(GLIndexBuffers::makeGLBufferSnapshot(_resource_manager, GLBuffer::NAME_QUADS, 6)),
       _shader_bindings(sp<GLShaderBindings>::make(_resource_manager, shader, _resource_manager->makeGLBuffer(sp<GLBuffer::ByteArrayUploader>::make(GLUtil::makeUnitCubeVertices()), GL_ARRAY_BUFFER, GL_STATIC_DRAW))),
       _object_pool(resourceLoaderContext->objectPool())
 {
@@ -58,10 +58,9 @@ Skybox::Skybox(const sp<Size>& size, const sp<GLShader>& shader, const sp<GLText
 
 void Skybox::render(RenderRequest& renderRequest, float x, float y)
 {
-    const GLBuffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(_resource_manager, GLBuffer::NAME_QUADS, 6);
     const Matrix view = _shader->camera()->view();
     const Matrix projection = _shader->camera()->projection();
-    renderRequest.addRequest(_object_pool->obtain<RenderCommandSkybox>(GLDrawingContext(_shader_bindings, _shader->camera()->snapshop(), _shader_bindings->arrayBuffer().snapshot(), indexBuffer, GL_TRIANGLES), _shader, view, projection));
+    renderRequest.addRequest(_object_pool->obtain<RenderCommandSkybox>(GLDrawingContext(_shader_bindings, _shader->camera()->snapshop(), _shader_bindings->arrayBuffer().snapshot(), _index_buffer, GL_TRIANGLES), _shader, view, projection));
 }
 
 const sp<Size>& Skybox::size()

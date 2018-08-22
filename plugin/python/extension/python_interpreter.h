@@ -116,15 +116,20 @@ public:
         return PyObject_IsInstance(object, getPyArkType<T>()->getPyObject()) != 0;
     }
 
-    template<typename T> const sp<T> asInterface(PyObject* object) {
+    template<typename T> const sp<T> asInterface(PyObject* object, bool alert = true) {
         PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyObject_Type(object));
         if(isPyArkTypeObject(pyType)) {
             PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);
             const sp<T> s = instance->box->as<T>();
-            DCHECK(s, "Casting \"%s\" to class \"%s\" failed", pyType->tp_name, Class::getClass<T>()->name());
+            DCHECK(!alert || s, "Casting \"%s\" to class \"%s\" failed", pyType->tp_name, Class::getClass<T>()->name());
             return s;
         }
+        DCHECK(!alert, "Casting \"%s\" to class \"%s\" failed", pyType->tp_name, Class::getClass<T>()->name());
         return nullptr;
+    }
+
+    template<typename T> const sp<T> asInterfaceOrNull(PyObject* object) {
+        return asInterface<T>(object, false);
     }
 
     template<typename T> PyObject* pyNewObject(const sp<T>& object) {

@@ -61,16 +61,16 @@ public:
         }
     };
 
-    template<typename T> class Mul {
+    template<typename T, typename P = T> class Mul {
     public:
-        T operator()(T v1, T v2) {
+        auto operator()(T v1, P v2)->decltype(v1 * v2) {
             return v1 * v2;
         }
     };
 
-    template<typename T> class Div {
+    template<typename T, typename P = T> class Div {
     public:
-        T operator()(T v1, T v2) {
+        auto operator()(T v1, P v2)->decltype(v1 / v2) {
             return v1 / v2;
         }
     };

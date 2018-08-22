@@ -42,22 +42,22 @@ sp<Vec2> Vec2Util::create(float x, float y)
 
 sp<Vec2> Vec2Util::add(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VariableOP2<V2, Operators::Add<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<V2, V2, Operators::Add<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::sub(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VariableOP2<V2, Operators::Sub<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<V2, V2, Operators::Sub<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::mul(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VariableOP2<V2, Operators::Mul<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<V2, V2, Operators::Mul<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VariableOP2<V2, Operators::Div<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<V2, V2, Operators::Div<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::floordiv(const sp<Vec2>& self, const sp<Vec2>& rvalue)

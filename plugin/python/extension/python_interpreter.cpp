@@ -359,7 +359,7 @@ template<> ARK_PLUGIN_PYTHON_API V3 PythonInterpreter::toType<V3>(PyObject* obje
     {
         float x, y, z;
         if(PyArg_ParseTuple(object, "fff", &x, &y, &z))
-            return V2(x, y, z);
+            return V3(x, y, z);
     }
     const sp<Vec3> vec3 = asInterface<Vec3>(object);
     if(vec3)

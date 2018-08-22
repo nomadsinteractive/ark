@@ -14,7 +14,7 @@ public:
     Matrix();
     Matrix(const Matrix& other);
 
-    const Matrix operator *(const Matrix& right) const;
+    Matrix operator *(const Matrix& right) const;
 
     const Matrix& operator =(const Matrix& other);
 

@@ -14,7 +14,7 @@ INDENT = '\n    '
 
 
 CORE_INTERFACES = ('Numeric', 'Layer', 'Integer', 'GLResource', 'EventListener', 'Renderer', 'Expired', 'Block',
-                   'Boolean', 'Runnable', 'Vec2', 'Vec3', 'Vec4')
+                   'Boolean', 'Runnable', 'Vec2', 'Vec3', 'Vec4', 'Mat3')
 
 
 class GenClass:
@@ -49,15 +49,20 @@ def search_for_classes(paths):
 
 
 def generate_bootstrap_func(func_name, classinfos):
+
+    interfaces = ['classManager.addClass<%s>("%s");' % (i, i) for i in CORE_INTERFACES]
+
     return '''void __ark_bootstrap_%s_class_hierarchy__()
 {
     ark::ClassManager& classManager = ark::ClassManager::instance();
 
     %s
 
+    %s
+
     classManager.updateHierarchy();
 }
-''' % (func_name, INDENT.join([i.add_class() for i in classinfos]))
+''' % (func_name, INDENT.join(interfaces), INDENT.join([i.add_class() for i in classinfos]))
 
 
 def main():

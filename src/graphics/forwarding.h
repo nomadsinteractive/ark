@@ -17,6 +17,7 @@ class ImageResource;
 class Scrollable;
 class Layer;
 class Matrix;
+class Mat3Impl;
 class Model;
 class Layer;
 class LayerContext;
@@ -24,7 +25,6 @@ class Varyings;
 class TileMaker;
 class Transform;
 class Transformable;
-class Rect;
 class Rect;
 class RenderCommand;
 class RenderCommandPipeline;
@@ -48,7 +48,15 @@ class V4;
 class Vec2Util;
 class Viewport;
 
+template<uint32_t S> class Mat;
+
 typedef sp<Bitmap> bitmap;
+
+typedef Mat<3> M3;
+typedef Mat<4> M4;
+
+typedef Variable<M3> Mat3;
+typedef Variable<M4> Mat4;
 
 typedef Variable<V2> Vec2;
 typedef Variable<V3> Vec3;

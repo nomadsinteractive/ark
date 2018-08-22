@@ -25,7 +25,7 @@ public:
     }
 
     virtual sp<Numeric> build(const sp<Scope>& args) override {
-        return sp<VariableOP2<float, OP, sp<Numeric>, sp<Numeric>>>::make(_a1->build(args), _a2->build(args));
+        return sp<VariableOP2<float, float, OP, sp<Numeric>, sp<Numeric>>>::make(_a1->build(args), _a2->build(args));
     }
 
 private:
@@ -84,17 +84,17 @@ sp<Numeric> NumericUtil::create(float value)
 
 sp<Numeric> NumericUtil::add(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
 {
-    return sp<VariableOP2<float, Operators::Add<float>, sp<Numeric>, sp<Numeric>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, float, Operators::Add<float>, sp<Numeric>, sp<Numeric>>>::make(lvalue, rvalue);
 }
 
 sp<Numeric> NumericUtil::add(const sp<Numeric>& lvalue, float rvalue)
 {
-    return sp<VariableOP2<float, Operators::Add<float>, sp<Numeric>, float>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, float, Operators::Add<float>, sp<Numeric>, float>>::make(lvalue, rvalue);
 }
 
 sp<Numeric> NumericUtil::add(float lvalue, const sp<Numeric>& rvalue)
 {
-    return sp<VariableOP2<float, Operators::Add<float>, float, sp<Numeric>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, float, Operators::Add<float>, float, sp<Numeric>>>::make(lvalue, rvalue);
 }
 
 void NumericUtil::iadd(const sp<Numeric>& self, const sp<Numeric>& rvalue)
@@ -104,17 +104,17 @@ void NumericUtil::iadd(const sp<Numeric>& self, const sp<Numeric>& rvalue)
 
 sp<Numeric> NumericUtil::sub(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
 {
-    return sp<VariableOP2<float, Operators::Sub<float>, sp<Numeric>, sp<Numeric>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, float, Operators::Sub<float>, sp<Numeric>, sp<Numeric>>>::make(lvalue, rvalue);
 }
 
 sp<Numeric> NumericUtil::sub(const sp<Numeric>& lvalue, float rvalue)
 {
-    return sp<VariableOP2<float, Operators::Sub<float>, sp<Numeric>, float>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, float, Operators::Sub<float>, sp<Numeric>, float>>::make(lvalue, rvalue);
 }
 
 sp<Numeric> NumericUtil::sub(float lvalue, const sp<Numeric>& rvalue)
 {
-    return sp<VariableOP2<float, Operators::Sub<float>, float, sp<Numeric>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, float, Operators::Sub<float>, float, sp<Numeric>>>::make(lvalue, rvalue);
 }
 
 void NumericUtil::isub(const sp<Numeric>& self, const sp<Numeric>& rvalue)
@@ -124,17 +124,17 @@ void NumericUtil::isub(const sp<Numeric>& self, const sp<Numeric>& rvalue)
 
 sp<Numeric> NumericUtil::mul(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
 {
-    return sp<VariableOP2<float, Operators::Mul<float>, sp<Numeric>, sp<Numeric>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, float, Operators::Mul<float>, sp<Numeric>, sp<Numeric>>>::make(lvalue, rvalue);
 }
 
 sp<Numeric> NumericUtil::mul(const sp<Numeric>& lvalue, float rvalue)
 {
-    return sp<VariableOP2<float, Operators::Mul<float>, sp<Numeric>, float>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, float, Operators::Mul<float>, sp<Numeric>, float>>::make(lvalue, rvalue);
 }
 
 sp<Numeric> NumericUtil::mul(float lvalue, const sp<Numeric>& rvalue)
 {
-    return sp<VariableOP2<float, Operators::Mul<float>, float, sp<Numeric>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, float, Operators::Mul<float>, float, sp<Numeric>>>::make(lvalue, rvalue);
 }
 
 void NumericUtil::imul(const sp<Numeric>& self, const sp<Numeric>& rvalue)
@@ -144,17 +144,17 @@ void NumericUtil::imul(const sp<Numeric>& self, const sp<Numeric>& rvalue)
 
 sp<Numeric> NumericUtil::truediv(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
 {
-    return sp<VariableOP2<float, Operators::Div<float>, sp<Numeric>, sp<Numeric>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, float, Operators::Div<float>, sp<Numeric>, sp<Numeric>>>::make(lvalue, rvalue);
 }
 
 sp<Numeric> NumericUtil::truediv(const sp<Numeric>& lvalue, float rvalue)
 {
-    return sp<VariableOP2<float, Operators::Div<float>, sp<Numeric>, float>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, float, Operators::Div<float>, sp<Numeric>, float>>::make(lvalue, rvalue);
 }
 
 sp<Numeric> NumericUtil::truediv(float lvalue, const sp<Numeric>& rvalue)
 {
-    return sp<VariableOP2<float, Operators::Div<float>, float, sp<Numeric>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, float, Operators::Div<float>, float, sp<Numeric>>>::make(lvalue, rvalue);
 }
 
 sp<Numeric> NumericUtil::floordiv(const sp<Numeric>& self, const sp<Numeric>& rvalue)
@@ -180,32 +180,32 @@ float NumericUtil::toFloat(const sp<Numeric>& self)
 
 sp<Boolean> NumericUtil::gt(const sp<Numeric>& self, const sp<Numeric>& other)
 {
-    return sp<VariableOP2<float, Operators::GT<float>, sp<Numeric>, sp<Numeric>>>::make(self, other);
+    return sp<VariableOP2<float, float, Operators::GT<float>, sp<Numeric>, sp<Numeric>>>::make(self, other);
 }
 
 sp<Boolean> NumericUtil::ge(const sp<Numeric>& self, const sp<Numeric>& other)
 {
-    return sp<VariableOP2<float, Operators::GE<float>, sp<Numeric>, sp<Numeric>>>::make(self, other);
+    return sp<VariableOP2<float, float, Operators::GE<float>, sp<Numeric>, sp<Numeric>>>::make(self, other);
 }
 
 sp<Boolean> NumericUtil::lt(const sp<Numeric>& self, const sp<Numeric>& other)
 {
-    return sp<VariableOP2<float, Operators::LT<float>, sp<Numeric>, sp<Numeric>>>::make(self, other);
+    return sp<VariableOP2<float, float, Operators::LT<float>, sp<Numeric>, sp<Numeric>>>::make(self, other);
 }
 
 sp<Boolean> NumericUtil::le(const sp<Numeric>& self, const sp<Numeric>& other)
 {
-    return sp<VariableOP2<float, Operators::LE<float>, sp<Numeric>, sp<Numeric>>>::make(self, other);
+    return sp<VariableOP2<float, float, Operators::LE<float>, sp<Numeric>, sp<Numeric>>>::make(self, other);
 }
 
 sp<Boolean> NumericUtil::eq(const sp<Numeric>& self, const sp<Numeric>& other)
 {
-    return sp<VariableOP2<float, Operators::EQ<float>, sp<Numeric>, sp<Numeric>>>::make(self, other);
+    return sp<VariableOP2<float, float, Operators::EQ<float>, sp<Numeric>, sp<Numeric>>>::make(self, other);
 }
 
 sp<Boolean> NumericUtil::ne(const sp<Numeric>& self, const sp<Numeric>& other)
 {
-    return sp<VariableOP2<float, Operators::NE<float>, sp<Numeric>, sp<Numeric>>>::make(self, other);
+    return sp<VariableOP2<float, float, Operators::NE<float>, sp<Numeric>, sp<Numeric>>>::make(self, other);
 }
 
 float NumericUtil::val(const sp<Numeric>& self)

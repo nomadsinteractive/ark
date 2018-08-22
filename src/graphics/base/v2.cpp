@@ -73,9 +73,19 @@ V2 operator *(const V2& lvalue, const V2& rvalue)
     return V2(lvalue._x * rvalue._x, lvalue._y * rvalue._y);
 }
 
+V2 operator *(const V2& lvalue, float rvalue)
+{
+    return V2(lvalue._x * rvalue, lvalue._y * rvalue);
+}
+
 V2 operator /(const V2& lvalue, const V2& rvalue)
 {
     return V2(lvalue._x / rvalue._x, lvalue._y / rvalue._y);
+}
+
+V2 operator /(const V2& lvalue, float rvalue)
+{
+    return V2(lvalue._x / rvalue, lvalue._y / rvalue);
 }
 
 float V2::x() const

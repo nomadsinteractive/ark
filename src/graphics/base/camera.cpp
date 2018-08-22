@@ -140,7 +140,7 @@ const sp<Camera>& Camera::getMainCamera()
 
 void Camera::updateViewProjection()
 {
-    _vp = sp<Holder<Matrix>>::make(sp<VariableOP2<Matrix, Operators::Mul<Matrix>, sp<Variable<Matrix>>,
+    _vp = sp<Holder<Matrix>>::make(sp<VariableOP2<Matrix, Matrix, Operators::Mul<Matrix>, sp<Variable<Matrix>>,
                                    sp<Variable<Matrix>>>>::make(_projection->_delegate, _view->_delegate), _dirty->toBoolean());
 }
 

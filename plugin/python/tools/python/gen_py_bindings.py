@@ -400,7 +400,7 @@ class GenArgument:
         if m in TYPE_DEFINED_SP:
             return self._gen_var_declare(m, objname, 'toSharedPtr', m[0].upper() + m[1:], argname)
         if m != self._accept_type:
-            return self._gen_var_declare('sp<%s>' % m, objname, 'asInterface' if extract_cast else 'toSharedPtr', m, argname)
+            return self._gen_var_declare('sp<%s>' % m, objname, 'asInterfaceOrNull' if extract_cast else 'toSharedPtr', m, argname)
         return self._gen_var_declare(typename, objname, 'toType', typename, argname)
 
     def _gen_var_declare(self, typename, varname, funcname, functype, argname):
@@ -423,6 +423,7 @@ ARK_PY_ARGUMENTS = (
     (r'Box\s*&', GenArgumentMeta('PyObject*', 'Box', 'O')),
     (r'sp<([^>]+|[\w\d_]+<[\w\d_]+>)>\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
     (r'(document|element|attribute)\s*&', GenArgumentMeta('PyObject*', '${0}', 'O')),
+    (r'V2', GenArgumentMeta('V2', 'V2', 'O')),
     (r'V3', GenArgumentMeta('V3', 'V3', 'O')),
     (r'([^>]+|[\w\d_]+<[\w\d_]+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
     (r'(uint32_t|unsigned int|uint8_t)', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
@@ -438,7 +439,8 @@ ARK_PY_ARGUMENT_CHECKERS = {
     'int32_t': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', 'PyLong_AsLong({0})'),
     'uint32_t': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', 'PyLong_AsLong({0})'),
     'float': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', 'PyFloat_AsDouble({0})'),
-    'V3': GenConverter('PyTuple_CheckExact({0})', '{0}'),
+    'V2': GenConverter('(PyTuple_CheckExact({0}) && PyObject_Length({0}) == 2)', '{0}'),
+    'V3': GenConverter('(PyTuple_CheckExact({0}) && PyObject_Length({0}) == 3)', '{0}'),
     'std::wstring': GenConverter('PyUnicode_CheckExact({0})', 'PyUnicode_DATA({0})')
 }
 
@@ -892,6 +894,10 @@ class GenOperatorMethod(GenMethod):
         pass
 
     @property
+    def err_return_value(self):
+        return 'Py_RETURN_NOTIMPLEMENTED'
+
+    @property
     def operator(self):
         return self._operator
 
@@ -950,18 +956,21 @@ def create_overloaded_method_type(base_type, **kwargs):
                     if k and i.arguments[j].accept_type != k.accept_type:
                         not_overloaded_args[j] = None
 
-            not_overloaded_declar = [j.gen_declare('obj%d' % i, 'arg%d' % i) for i, j in enumerate(not_overloaded_args) if j]
+            not_overloaded_names = ['obj%d' % i for i, j in enumerate(not_overloaded_args) if j]
+            not_overloaded_declar = [j.gen_declare('obj%d' % i, 'arg%d' % i, True) for i, j in enumerate(not_overloaded_args) if j]
             self._gen_convert_args_code(lines, not_overloaded_declar)
             for i in self._overloaded_methods:
                 type_checks = [k.gen_type_check('arg%d' % j) for j, k, l in zip(range(len(i.arguments)), i.arguments, not_overloaded_args) if not l]
-                lines.extend(['if(%s)' % ' && '.join([j for j in type_checks if j] or ['true']), '{'])
+                lines.extend(['if(%s)' % ' && '.join(([j for j in type_checks if j] + not_overloaded_names) or ['true']), '{'])
                 body_lines = []
                 overloaded_args = [None if j else k for j, k in zip(not_overloaded_args, i.arguments)]
                 i.gen_definition_body(genclass, body_lines, overloaded_args, overloaded_args, True)
                 lines.extend(INDENT + j for j in body_lines)
                 lines.append('}')
-            lines.append('PyErr_SetString(PyExc_TypeError, "Calling overloaded method(%s) failed, no arguments matched");' % self._name)
-            lines.append(self._overloaded_methods[0].err_return_value + ';')
+            return_type = self._overloaded_methods[0].err_return_value
+            if return_type != 'Py_RETURN_NOTIMPLEMENTED':
+                lines.append('PyErr_SetString(PyExc_TypeError, "Calling overloaded method(%s) failed, no arguments matched");' % self._name)
+            lines.append(return_type + ';')
 
         def add_overloaded_method(self, method):
             if self._overloaded_methods:

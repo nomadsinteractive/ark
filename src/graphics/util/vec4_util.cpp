@@ -41,22 +41,22 @@ sp<Vec4> Vec4Util::create(float x, float y, float z, float w)
 
 sp<Vec4> Vec4Util::add(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
 {
-    return sp<VariableOP2<V4, Operators::Add<V4>, sp<Vec4>, sp<Vec4>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<V4, V4, Operators::Add<V4>, sp<Vec4>, sp<Vec4>>>::make(lvalue, rvalue);
 }
 
 sp<Vec4> Vec4Util::sub(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
 {
-    return sp<VariableOP2<V4, Operators::Sub<V4>, sp<Vec4>, sp<Vec4>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<V4, V4, Operators::Sub<V4>, sp<Vec4>, sp<Vec4>>>::make(lvalue, rvalue);
 }
 
 sp<Vec4> Vec4Util::mul(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
 {
-    return sp<VariableOP2<V4, Operators::Mul<V4>, sp<Vec4>, sp<Vec4>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<V4, V4, Operators::Mul<V4>, sp<Vec4>, sp<Vec4>>>::make(lvalue, rvalue);
 }
 
 sp<Vec4> Vec4Util::truediv(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
 {
-    return sp<VariableOP2<V4, Operators::Div<V4>, sp<Vec4>, sp<Vec4>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<V4, V4, Operators::Div<V4>, sp<Vec4>, sp<Vec4>>>::make(lvalue, rvalue);
 }
 
 sp<Vec4> Vec4Util::floordiv(const sp<Vec4>& self, const sp<Vec4>& rvalue)

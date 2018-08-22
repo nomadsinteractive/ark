@@ -1,5 +1,7 @@
 #include "graphics/util/vec3_util.h"
 
+#include <glm/glm.hpp>
+
 #include "core/ark.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
@@ -27,6 +29,37 @@ private:
     int32_t _dim;
 };
 
+class Vec3Cross : public Vec3 {
+public:
+    Vec3Cross(const sp<Vec3>& a, const sp<Vec3>& b)
+        : _a(a), _b(b) {
+    }
+
+    virtual V3 val() override {
+        return _a->val().cross(_b->val());
+    }
+
+private:
+    sp<Vec3> _a;
+    sp<Vec3> _b;
+};
+
+class Vec3Normalize : public Vec3 {
+public:
+    Vec3Normalize(const sp<Vec3>& delegate)
+        : _delegate(delegate) {
+    }
+
+    virtual V3 val() override {
+        const V3 v = _delegate->val();
+        glm::vec3 normalized = glm::normalize(glm::vec3(v.x(), v.y(), v.z()));
+        return V3(normalized.x, normalized.y, normalized.z);
+    }
+
+private:
+    sp<Vec3> _delegate;
+};
+
 }
 
 sp<Vec3> Vec3Util::create(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z)
@@ -41,22 +74,32 @@ sp<Vec3> Vec3Util::create(float x, float y, float z)
 
 sp<Vec3> Vec3Util::add(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
-    return sp<VariableOP2<V3, Operators::Add<V3>, sp<Vec3>, sp<Vec3>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<V3, V3, Operators::Add<V3>, sp<Vec3>, sp<Vec3>>>::make(lvalue, rvalue);
 }
 
 sp<Vec3> Vec3Util::sub(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
-    return sp<VariableOP2<V3, Operators::Sub<V3>, sp<Vec3>, sp<Vec3>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<V3, V3, Operators::Sub<V3>, sp<Vec3>, sp<Vec3>>>::make(lvalue, rvalue);
 }
 
 sp<Vec3> Vec3Util::mul(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
-    return sp<VariableOP2<V3, Operators::Mul<V3>, sp<Vec3>, sp<Vec3>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<V3, V3, Operators::Mul<V3>, sp<Vec3>, sp<Vec3>>>::make(lvalue, rvalue);
+}
+
+sp<Vec3> Vec3Util::mul(const sp<Vec3>& lvalue, const V3& rvalue)
+{
+    return sp<VariableOP2<V3, V3, Operators::Mul<V3>, sp<Vec3>, V3>>::make(lvalue, rvalue);
+}
+
+sp<Vec3> Vec3Util::mul(const sp<Vec3>& lvalue, float rvalue)
+{
+    return sp<VariableOP2<V3, float, Operators::Mul<V3, float>, sp<Vec3>, float>>::make(lvalue, rvalue);
 }
 
 sp<Vec3> Vec3Util::truediv(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
-    return sp<VariableOP2<V3, Operators::Div<V3>, sp<Vec3>, sp<Vec3>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<V3, V3, Operators::Div<V3>, sp<Vec3>, sp<Vec3>>>::make(lvalue, rvalue);
 }
 
 sp<Vec3> Vec3Util::floordiv(const sp<Vec3>& self, const sp<Vec3>& rvalue)
@@ -68,12 +111,6 @@ sp<Vec3> Vec3Util::floordiv(const sp<Vec3>& self, const sp<Vec3>& rvalue)
 sp<Vec3> Vec3Util::negative(const sp<Vec3>& self)
 {
     return sp<VecNeg<V3>>::make(self);
-}
-
-sp<Vec3> Vec3Util::transform(const sp<Vec3>& self, const sp<Transform>& transform, const sp<Vec3>& org)
-{
-    FATAL("Unimplemented");
-    return nullptr;
 }
 
 V3 Vec3Util::xyz(const sp<Vec3>& self)
@@ -160,6 +197,21 @@ sp<Numeric> Vec3Util::vz(const sp<Vec3>& self)
 void Vec3Util::fix(const sp<Vec3>& self)
 {
     ensureImpl(self)->fix();
+}
+
+sp<Vec3> Vec3Util::cross(const sp<Vec3>& self, const sp<Vec3>& other)
+{
+    return sp<Vec3Cross>::make(self, other);
+}
+
+sp<Vec3> Vec3Util::cross(const sp<Vec3>& self, const V3& other)
+{
+    return sp<Vec3Cross>::make(self, sp<Vec3::Const>::make(other));
+}
+
+sp<Vec3> Vec3Util::normalize(const sp<Vec3>& self)
+{
+    return sp<Vec3Normalize>::make(self);
 }
 
 sp<Vec3Impl> Vec3Util::ensureImpl(const sp<Vec3>& self)

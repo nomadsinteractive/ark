@@ -3,7 +3,7 @@ import ark
 
 def main():
     ark.logd("I'm here")
-    resource_loader = _application_context.create_resource_loader('main.xml')
+    resource_loader = _application.create_resource_loader('main.xml')
     _application.arena = resource_loader.load(ark.Arena, 'main')
 
     root_view = resource_loader.get_reference('root_view')

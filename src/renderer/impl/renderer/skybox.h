@@ -41,6 +41,7 @@ private:
     sp<Size> _size;
     sp<GLResourceManager> _resource_manager;
     sp<GLShader> _shader;
+    GLBuffer::Snapshot _index_buffer;
 
     sp<GLShaderBindings> _shader_bindings;
     sp<ObjectPool> _object_pool;

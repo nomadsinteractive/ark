@@ -24,15 +24,16 @@ public:
     static sp<Vec3> sub(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //[[script::bindings::operator(*)]]
     static sp<Vec3> mul(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
+//[[script::bindings::operator(*)]]
+    static sp<Vec3> mul(const sp<Vec3>& lvalue, const V3& rvalue);
+//[[script::bindings::operator(*)]]
+    static sp<Vec3> mul(const sp<Vec3>& lvalue, float rvalue);
 //[[script::bindings::operator(/)]]
     static sp<Vec3> truediv(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //[[script::bindings::operator(//)]]
     static sp<Vec3> floordiv(const sp<Vec3>& self, const sp<Vec3>& rvalue);
 //[[script::bindings::operator(neg)]]
     static sp<Vec3> negative(const sp<Vec3>& self);
-
-//[[script::bindings::classmethod]]
-    static sp<Vec3> transform(const sp<Vec3>& self, const sp<Transform>& transform, const sp<Vec3>& org);
 
 //[[script::bindings::property]]
     static V3 xyz(const sp<Vec3>& self);
@@ -68,6 +69,13 @@ public:
 
 //[[script::bindings::classmethod]]
     static void fix(const sp<Vec3>& self);
+//[[script::bindings::classmethod]]
+    static sp<Vec3> cross(const sp<Vec3>& self, const sp<Vec3>& other);
+//[[script::bindings::classmethod]]
+    static sp<Vec3> cross(const sp<Vec3>& self, const V3& other);
+//[[script::bindings::classmethod]]
+    static sp<Vec3> normalize(const sp<Vec3>& self);
+
 
 private:
     static sp<Vec3Impl> ensureImpl(const sp<Vec3>& self);

@@ -183,6 +183,18 @@ class Vec2:
     def fix(self):
         pass
 
+    def __add__(self, other):
+        return None
+
+    def __sub__(self, other):
+        return None
+
+    def __mul__(self, other):
+        return None
+
+    def __truediv__(self, other):
+        return None
+
     def __str__(self):
         return '(%.1f, %.1f)' % (self._x, self._y)
 
@@ -208,6 +220,12 @@ class Vec3(Vec2):
     def xyz(self):
         return None
 
+    def cross(self, other):
+        return None
+
+    def normalize(self):
+        return None
+
 
 class Vec4(Vec3):
     def __init__(self, x, y, z, w):
@@ -229,6 +247,14 @@ class Vec4(Vec3):
     @vw.setter
     def vw(self, v):
         pass
+
+
+class Mat3:
+    def __init__(self, t=None, b=None, n=None):
+        pass
+
+    def __mul__(self, other):
+        return None
 
 
 class Layer:
