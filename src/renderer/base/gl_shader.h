@@ -37,11 +37,8 @@ public:
 
     void use(GraphicsContext& graphicsContext);
 
-    Slot preprocess(GraphicsContext& graphicsContext);
-
     void bindUniforms(GraphicsContext& graphicsContext) const;
 
-    const sp<GLShaderInput>& input() const;
     const sp<GLShaderSource>& source() const;
 
     const sp<Camera>& camera() const;
@@ -51,15 +48,10 @@ public:
 
     const sp<GLSnippet>& snippet() const;
 
-    const sp<GLProgram>& makeGLProgram(GraphicsContext& graphicsContext);
-
 //[[deprecated]]
     uint32_t stride() const;
 //[[deprecated]]
     const GLAttribute& getAttribute(const String& name, uint32_t divisor = 0) const;
-
-//[[script::bindings::auto]]
-    sp<Varyings> makeVaryings() const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<GLShader> {
@@ -78,6 +70,9 @@ public:
         sp<Builder<GLSnippet>> _snippet;
         sp<Builder<Camera>> _camera;
     };
+private:
+    const sp<GLProgram>& makeGLProgram(GraphicsContext& graphicsContext);
+    Slot preprocess(GraphicsContext& graphicsContext);
 
 private:
     sp<GLShaderSource> _source;
@@ -85,6 +80,7 @@ private:
 
     sp<GLProgram> _program;
 
+    friend class GraphicsContext;
 };
 
 }

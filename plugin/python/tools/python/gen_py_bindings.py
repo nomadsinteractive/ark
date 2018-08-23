@@ -536,6 +536,10 @@ class GenMethod(object):
     def err_return_value(self):
         return 'Py_RETURN_NONE'
 
+    @property
+    def check_argument_type(self):
+        return True
+
     def _gen_call_statement(self, genclass, argnames):
         return 'unpacked->%s(%s);' % (self._name, argnames)
 
@@ -873,6 +877,10 @@ class GenOperatorMethod(GenMethod):
     def need_unpack_statement(self):
         return not self._is_static
 
+    @property
+    def check_argument_type(self):
+        return False
+
     def gen_py_arguments(self):
         arglen = len(self._arguments)
         args = ['PyObject* arg%d' % i for i in range(arglen)]
@@ -956,8 +964,9 @@ def create_overloaded_method_type(base_type, **kwargs):
                     if k and i.arguments[j].accept_type != k.accept_type:
                         not_overloaded_args[j] = None
 
+            m0 = self._overloaded_methods[0]
             not_overloaded_names = ['obj%d' % i for i, j in enumerate(not_overloaded_args) if j and j.default_value is None]
-            not_overloaded_declar = [j.gen_declare('obj%d' % i, 'arg%d' % i, True) for i, j in enumerate(not_overloaded_args) if j]
+            not_overloaded_declar = [j.gen_declare('obj%d' % i, 'arg%d' % i, not m0.check_argument_type) for i, j in enumerate(not_overloaded_args) if j]
             self._gen_convert_args_code(lines, not_overloaded_declar)
             for i in self._overloaded_methods:
                 type_checks = [k.gen_type_check('arg%d' % j) for j, k, l in zip(range(len(i.arguments)), i.arguments, not_overloaded_args) if not l]
@@ -967,8 +976,8 @@ def create_overloaded_method_type(base_type, **kwargs):
                 i.gen_definition_body(genclass, body_lines, overloaded_args, overloaded_args, True)
                 lines.extend(INDENT + j for j in body_lines)
                 lines.append('}')
-            return_type = self._overloaded_methods[0].err_return_value
-            if return_type != 'Py_RETURN_NOTIMPLEMENTED':
+            return_type = m0.err_return_value
+            if m0.check_argument_type:
                 lines.append('PyErr_SetString(PyExc_TypeError, "Calling overloaded method(%s) failed, no arguments matched");' % self._name)
             lines.append(return_type + ';')
 

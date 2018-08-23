@@ -11,6 +11,7 @@
 #include "core/impl/numeric/numeric_negative.h"
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/variable/variable_op2.h"
+#include "core/impl/variable/variable_ternary.h"
 #include "core/util/strings.h"
 #include "core/util/operators.h"
 
@@ -277,6 +278,11 @@ sp<Numeric> NumericUtil::boundary(const sp<Numeric>& self, const sp<Numeric>& a2
 sp<Numeric> NumericUtil::expect(const sp<Numeric>& self, const sp<Expectation>& expectation)
 {
     return sp<Expect>::make(self, expectation);
+}
+
+sp<Numeric> NumericUtil::ternary(const sp<Numeric>& self, const sp<Boolean>& condition, const sp<Numeric>& other)
+{
+    return sp<VariableTernary<float>>::make(condition, self, other);
 }
 
 sp<Numeric> NumericUtil::makeStalker(const sp<Numeric>& self, float s0, float eta, const sp<Numeric>& duration)

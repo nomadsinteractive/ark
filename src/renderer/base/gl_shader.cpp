@@ -91,11 +91,6 @@ void GLShader::bindUniforms(GraphicsContext& graphicsContext) const
         uniform.prepare(graphicsContext, _program);
 }
 
-const sp<GLShaderInput>& GLShader::input() const
-{
-    return _source->_input;
-}
-
 const sp<GLShaderSource>& GLShader::source() const
 {
     return _source;
@@ -135,11 +130,6 @@ uint32_t GLShader::stride() const
 const GLAttribute& GLShader::getAttribute(const String& name, uint32_t divisor) const
 {
     return _source->input()->getAttribute(name, divisor);
-}
-
-sp<Varyings> GLShader::makeVaryings() const
-{
-    return sp<Varyings>::make(*this);
 }
 
 GLShader::Slot::Slot(const String& vertex, const String& fragment)

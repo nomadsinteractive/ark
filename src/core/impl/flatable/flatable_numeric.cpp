@@ -13,6 +13,8 @@ FlatableNumeric::FlatableNumeric(const sp<Numeric>& numeric)
 void FlatableNumeric::flat(void* buf)
 {
     float value = _numeric->val();
+    if(value != 1.0f)
+        printf("v = %.2f\n", value);
     *reinterpret_cast<float*>(buf) = value;
 }
 

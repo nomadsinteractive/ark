@@ -1,7 +1,7 @@
 #ifndef ARK_APP_BASE_RESOURCE_LOADER_H_
 #define ARK_APP_BASE_RESOURCE_LOADER_H_
 
-#include <map>
+#include <unordered_map>
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
@@ -31,7 +31,7 @@ private:
         }
 
     private:
-        std::map<String, sp<Builder<T>>> _builders;
+        std::unordered_map<String, sp<Builder<T>>> _builders;
     };
 
 public:

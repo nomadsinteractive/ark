@@ -30,7 +30,8 @@ Varyings::Varyings()
 void Varyings::addVarying(const String& name, const sp<Flatable>& flatable)
 {
     DCHECK(_varyings.find(name) == _varyings.end(), "Varying \"%s\" already exists", name.c_str());
-    uint32_t offset = _shader_source->input()->getAttributeOffset(name);
+    int32_t offset = _shader_source->input()->getAttributeOffset(name);
+    DCHECK(offset >= 0, "Illegal Varying, name: \"%s\", offset: %d", name.c_str(), offset);
     _varyings[name] = Varying(offset, flatable);
     _size = std::max<size_t>(offset + flatable->size(), _size);
 }
@@ -94,9 +95,10 @@ sp<Varyings> Varyings::DICTIONARY::build(const sp<Scope>& args)
     return _delegate->build(args);
 }
 
-Varyings::Varying::Varying(uint16_t offset, const sp<Flatable>& flatable)
+Varyings::Varying::Varying(int32_t offset, const sp<Flatable>& flatable)
     : _offset(offset), _flatable(flatable)
 {
+    DCHECK(offset >= 0, "Invail varying offset: %d", offset);
 }
 
 Varyings::Varying::Varying()

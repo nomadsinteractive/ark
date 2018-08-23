@@ -17,14 +17,14 @@ class ARK_API Varyings {
 private:
     class Varying {
     public:
-        Varying(uint16_t offset, const sp<Flatable>& flatable);
+        Varying(int32_t offset, const sp<Flatable>& flatable);
         Varying();
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Varying);
 
         void apply(uint8_t* ptr) const;
 
     private:
-        uint16_t _offset;
+        int32_t _offset;
         sp<Flatable> _flatable;
     };
 

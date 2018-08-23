@@ -28,7 +28,7 @@ class Object:
     pass
 
 
-class Var:
+class _Var:
     def __init__(self, v):
         pass
 
@@ -104,22 +104,25 @@ class Tracker:
         return None
 
 
-class Boolean(Var):
+class Boolean(_Var):
     pass
 
 
-class Integer(Var):
+class Integer(_Var):
     pass
 
 
-class Numeric(Var):
+class Numeric(_Var):
     def __init__(self, val):
-        Var.__init__(self, val)
+        _Var.__init__(self, val)
 
     def expect(self, expectation):
         return None
 
     def make_stalker(self, s0, eta):
+        return None
+
+    def ternary(self, condition, _else):
         return None
 
     def __add__(self, other):
@@ -133,6 +136,9 @@ class Numeric(Var):
 
     def __truediv__(self, other):
         return None
+
+    def __cmp__(self, other):
+        return 0
 
 
 class Expired:
