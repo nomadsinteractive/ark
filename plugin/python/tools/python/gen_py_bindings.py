@@ -956,7 +956,7 @@ def create_overloaded_method_type(base_type, **kwargs):
                     if k and i.arguments[j].accept_type != k.accept_type:
                         not_overloaded_args[j] = None
 
-            not_overloaded_names = ['obj%d' % i for i, j in enumerate(not_overloaded_args) if j]
+            not_overloaded_names = ['obj%d' % i for i, j in enumerate(not_overloaded_args) if j and j.default_value is None]
             not_overloaded_declar = [j.gen_declare('obj%d' % i, 'arg%d' % i, True) for i, j in enumerate(not_overloaded_args) if j]
             self._gen_convert_args_code(lines, not_overloaded_declar)
             for i in self._overloaded_methods:
