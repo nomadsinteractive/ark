@@ -9,11 +9,11 @@
 #include "core/util/bean_utils.h"
 
 #include "graphics/base/matrix.h"
-#include "graphics/base/rotate.h"
+#include "graphics/base/rotation.h"
 
 namespace ark {
 
-Transform::Transform(const sp<Rotate>& rotate, const sp<Vec>& scale, const sp<Vec>& translation)
+Transform::Transform(const sp<Rotation>& rotate, const sp<Vec>& scale, const sp<Vec>& translation)
     : _rotate(rotate), _scale(scale), _translation(translation)
 {
 }
@@ -26,19 +26,19 @@ Transform::Transform(const Transform& other)
 Transform::Snapshot Transform::snapshot() const
 {
     Snapshot ss;
-    ss.rotate_value = _rotate->rotation()->val();
+    ss.rotate_value = _rotate->radians();
     ss.rotate_direction = _rotate->direction()->val();
     ss.scale = _scale ? V3(_scale->val()) : V3(1.0f, 1.0f, 1.0f);
     ss.translate = _translation->val();
     return ss;
 }
 
-const sp<Rotate>& Transform::rotate()
+const sp<Rotation>& Transform::rotate()
 {
     return _rotate.ensure();
 }
 
-void Transform::setRotate(const sp<Rotate>& rotate)
+void Transform::setRotate(const sp<Rotation>& rotate)
 {
     _rotate = rotate;
 }
@@ -64,7 +64,7 @@ void Transform::setTranslation(const sp<Vec>& translation)
 }
 
 Transform::Snapshot::Snapshot()
-    : rotate_value(0), rotate_direction(Rotate::Z_AXIS), scale(V3(1.0f, 1.0f, 1.0f))
+    : rotate_value(0), rotate_direction(Rotation::Z_AXIS), scale(V3(1.0f, 1.0f, 1.0f))
 {
 }
 
@@ -133,7 +133,7 @@ V3 Transform::Snapshot::mapXYZ(const V3& p) const
 }
 
 Transform::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _rotate(factory.getConcreteClassBuilder<Rotate>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec>(manifest, "scale")),
+    : _rotate(factory.getConcreteClassBuilder<Rotation>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec>(manifest, "scale")),
       _translation(factory.getBuilder<Vec>(manifest, Constants::Attributes::TRANSLATION))
 {
 }

@@ -25,7 +25,7 @@ set(RUNTIME_STATIC_LIBRARY ${PROJECT_NAME}_static)
 set(TESTCASES_EXECUTABLE ${PROJECT_NAME}-testcases)
 set(GENERATED_TESTCASE_LAUNCHPAD ${ARK_GENERATED_FILE_DIRECTORY}/testcase_launchpad.cpp)
 
-set(ARK_INCLUDE_DIRS ${ARK_SRC_DIR} ${ARK_SRC_DIR}/src ${ARK_SRC_DIR}/platform/${SYSTEM})
+set(ARK_INCLUDE_DIRS ${ARK_SRC_DIR} ${ARK_SRC_DIR}/src ${ARK_SRC_DIR}/platform/${SYSTEM} ${ARK_SRC_DIR}/platform/any)
 set(ARK_LIBRARIES ${RUNTIME_SHARED_LIBRARY})
 set(ARK_STATIC_LIBRARIES ${RUNTIME_STATIC_LIBRARY})
 
@@ -108,6 +108,7 @@ aux_source_directory(src/app/util LOCAL_SRC_LIST)
 aux_source_directory(src/app/view LOCAL_SRC_LIST)
 
 aux_source_directory(platform/any LOCAL_SRC_LIST)
+ark_include_directories(platform/any)
 
 list(APPEND LOCAL_INCLUDE_DIRS 3rdparty/glm)
 
@@ -182,7 +183,9 @@ endif()
 
 add_subdirectory(plugin/assimp)
 
+if(NOT ANDROID)
 add_subdirectory(plugin/pbr)
+endif()
 
 ark_setup_tools(ark_gen_string_table)
 ark_setup_tools(ark_gen_plugin_class)

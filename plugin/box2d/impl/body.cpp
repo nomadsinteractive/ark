@@ -9,7 +9,7 @@
 #include "graphics/base/bounds.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/render_object.h"
-#include "graphics/base/rotate.h"
+#include "graphics/base/rotation.h"
 #include "graphics/base/transform.h"
 #include "graphics/util/vec2_util.h"
 
@@ -113,26 +113,22 @@ Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& positio
     : RigidBody(stub->_id, type,
                 sp<DynamicBodyPosition>::make(stub, position),
                 size,
-                sp<Rotate>::make(sp<DynamicBodyRotation>::make(stub, rotation))), _stub(stub)
+                sp<Rotation>::make(sp<DynamicBodyRotation>::make(stub, rotation))), _stub(stub)
 {
     _stub->_callback = callback();
 }
 
 void Body::bind(const sp<RenderObject>& renderObject)
 {
-    float ppmx = world().toPixelX(1.0f);
-    float ppmy = world().toPixelY(1.0f);
     if(type() == Collider::BODY_TYPE_KINEMATIC)
     {
-        const sp<Numeric> rotation = rotate() ? NumericUtil::delegate(rotate()->rotation()).cast<DynamicBodyRotation>()->_delegate : sp<Numeric>::null();
-        renderObject->transform()->rotate()->setRotation(sp<KinematicRotation>::make(_stub, rotation));
+        const sp<Numeric> r = rotation() ? rotation()->value()->delegate().cast<DynamicBodyRotation>()->_delegate : sp<Numeric>::null();
+        renderObject->transform()->rotate()->setRadians(sp<KinematicRotation>::make(_stub, r));
     }
     else
     {
         renderObject->setPosition(sp<RenderObjectPosition>::make(_stub));
-        renderObject->setSize(sp<Size>::make(NumericUtil::mul(size()->vwidth(), sp<Numeric::Const>::make(ppmx)),
-                                             NumericUtil::mul(size()->vheight(), sp<Numeric::Const>::make(ppmy))));
-        renderObject->transform()->setRotate(rotate());
+        renderObject->transform()->setRotate(rotation());
     }
 }
 
@@ -146,12 +142,12 @@ const World& Body::world() const
     return _stub->_world;
 }
 
-float Body::rotation()
+float Body::angle()
 {
     return _stub->_body->GetAngle();
 }
 
-void Body::setRotation(float rad)
+void Body::setAngle(float rad)
 {
     _stub->_body->SetTransform(_stub->_body->GetWorldCenter(), rad);
 }

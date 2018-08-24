@@ -137,8 +137,14 @@ class Numeric(_Var):
     def __truediv__(self, other):
         return None
 
-    def __cmp__(self, other):
-        return 0
+    def __gt__(self, other):
+        return False
+
+    def __lt__(self, other):
+        return False
+
+    def __eq__(self, other):
+        return False
 
 
 class Expired:
@@ -386,9 +392,9 @@ class Event:
         return 0
 
 
-class Rotate:
-    def __init__(self, rotation, direction=None):
-        self._rotation = rotation
+class Rotation:
+    def __init__(self, value, direction=None):
+        self._value = value
         self._direction = direction
 
     @property

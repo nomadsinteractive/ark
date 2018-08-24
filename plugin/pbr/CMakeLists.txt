@@ -8,12 +8,17 @@ ark_ensure_dependency(3rdparty/cmft)
 list(APPEND LOCAL_LIBS ${ARK_LIBRARIES})
 
 list(APPEND LOCAL_INCLUDE_DIRS .)
-list(APPEND LOCAL_INCLUDE_DIRS ${ARK_SRC_DIR})
-list(APPEND LOCAL_INCLUDE_DIRS ${ARK_SRC_DIR}/src)
+ark_include_directories(${ARK_INCLUDE_DIRS})
 
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_PLUGIN_DIR})
 
 list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
+
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    add_definitions(-D__i386__)
+else()
+    add_definitions(-D__amd64__)
+endif()
 
 ark_include_directories(${ARK_OPENGL_INCLUDE_DIRS})
 ark_include_directories(3rdparty/cmft/include)

@@ -1,10 +1,11 @@
 #include "box2d/impl/world.h"
 
+#include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
 #include "core/util/log.h"
 
 #include "graphics/base/bounds.h"
-#include "graphics/base/rotate.h"
+#include "graphics/base/rotation.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/v2.h"
 
@@ -41,7 +42,7 @@ public:
         const b2Vec2& position = body._body->GetPosition();
         float rotation = body._body->GetTransform().q.GetAngle();
         const sp<Vec> p = objectPool.obtain<Vec::Const>(V(position.x, position.y));
-        const sp<Rotate> rotate = objectPool.obtain<Rotate>(objectPool.obtain<Numeric::Const>(rotation));
+        const sp<Rotation> rotate = objectPool.obtain<Rotation>(objectPool.obtain<Numeric::Const>(rotation));
         const sp<RigidBody::Stub> stub = objectPool.obtain<RigidBody::Stub>(body._id, bodyType, p, nullptr, rotate);
         return objectPool.obtain<RigidBodyImpl>(stub);
     }
@@ -65,14 +66,14 @@ void World::run()
     _stub->run();
 }
 
-sp<RigidBody> World::createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate)
+sp<RigidBody> World::createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotation>& rotate)
 {
     const auto iter = _stub->_body_manifests.find(shape);
     DCHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-id: %d not found", shape);
     const BodyManifest& manifest = iter->second;
-    const sp<Body> body = sp<Body>::make(*this, type, position, size, rotate ? rotate->rotation() : sp<Numeric>::null(), manifest.shape, manifest.density, manifest.friction);
+    const sp<Body> body = sp<Body>::make(*this, type, position, size, rotate ? rotate->value().cast<Numeric>() : sp<Numeric>::null(), manifest.shape, manifest.density, manifest.friction);
     if(rotate)
-        body->setRotation(rotate->rotation()->val());
+        body->setAngle(rotate->radians());
     return body;
 }
 

@@ -121,5 +121,5 @@ JNIEXPORT jboolean JNICALL Java_com_nomads_ark_JNILib_onEvent(JNIEnv* env, jobje
             DFATAL("Unrecognized action code: %d", action);
             break;
     }
-    return _application->onEvent(Event(s, x, y, timestamp));
+    return _application->onEvent(Event(s, x, y, timestamp), true);
 }

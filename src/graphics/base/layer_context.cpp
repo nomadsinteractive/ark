@@ -38,7 +38,7 @@ LayerContext::Snapshot LayerContext::snapshot() const
 }
 
 LayerContext::Snapshot::Snapshot(const LayerContext& layerContext, MemoryPool& memoryPool)
-    : _dirty(layerContext._items.size() != layerContext._last_rendered_count), _camera(layerContext._camera->snapshop())
+    : _camera(layerContext._camera->snapshop()), _dirty(layerContext._items.size() != layerContext._last_rendered_count)
 {
     for(const LayerContext::Item& i : layerContext._items)
     {

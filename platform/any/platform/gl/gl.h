@@ -1,10 +1,7 @@
 #ifndef _PLATFORM_GL_H
 #define _PLATFORM_GL_H
 
-#include <glbinding/gl/gl.h>
-#include <glbinding/Binding.h>
-
-using namespace gl;
+#include "platform/gl/_gl_internal.h"
 
 namespace ark {
 

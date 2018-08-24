@@ -57,8 +57,6 @@ public:
     const sp<Vec>& position() const;
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
-//  [[script::bindings::property]]
-    const sp<Rotate>& rotate() const;
 
 //  [[script::bindings::property]]
     const Box& tag() const;
@@ -72,9 +70,9 @@ public:
 */
 
 //  [[script::bindings::property]]
-    float rotation();
+    float angle();
 //  [[script::bindings::property]]
-    void setRotation(float rad);
+    void setAngle(float rad);
 
 //  [[script::bindings::property]]
     float angularVelocity();

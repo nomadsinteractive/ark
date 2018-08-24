@@ -5,6 +5,7 @@
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
+#include "core/inf/array.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"

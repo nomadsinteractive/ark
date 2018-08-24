@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_BASE_ROTATE_H_
-#define ARK_GRAPHICS_BASE_ROTATE_H_
+#ifndef ARK_GRAPHICS_BASE_ROTATION_H_
+#define ARK_GRAPHICS_BASE_ROTATION_H_
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
@@ -9,39 +9,41 @@
 
 namespace ark {
 
-class ARK_API Rotate {
+class ARK_API Rotation {
 public:
 //  [[script::bindings::auto]]
-    Rotate(const sp<Numeric>& rotation, const sp<Vec3>& direction = nullptr);
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotate);
+    Rotation(const sp<Numeric>& value, const sp<Vec3>& direction = nullptr);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotation);
 
 //  [[script::bindings::property]]
-    sp<Numeric> rotation() const;
+    float radians() const;
 //  [[script::bindings::property]]
-    void setRotation(float rotation);
+    void setRadians(float radians);
 //  [[script::bindings::property]]
-    void setRotation(const sp<Numeric>& rotation);
+    void setRadians(const sp<Numeric>& radians);
 
 //  [[script::bindings::property]]
     const sp<Vec3>& direction() const;
 //  [[script::bindings::property]]
     void setDirection(const sp<Vec3>& direction);
 
+    const sp<NumericWrapper>& value() const;
+
     static const V3 Z_AXIS;
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Rotate> {
+    class BUILDER : public Builder<Rotation> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Rotate> build(const sp<Scope>& args) override;
+        virtual sp<Rotation> build(const sp<Scope>& args) override;
 
     private:
         sp<Builder<Numeric>> _rotation;
     };
 
 private:
-    sp<NumericWrapper> _rotation;
+    sp<NumericWrapper> _value;
     sp<Vec3> _direction;
 
 };

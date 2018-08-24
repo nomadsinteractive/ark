@@ -21,6 +21,8 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
+class Body;
+
 class ARK_PLUGIN_BOX2D_API World : public Object, public Runnable, public Collider, Implements<World, Object, Runnable, Collider> {
 public:
     World(const b2Vec2& gravity, float ppmX, float ppmY);
@@ -29,14 +31,12 @@ public:
     virtual void run() override;
 
 //  [[script::bindings::auto]]
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotation>& rotate) override;
 
     b2World& world() const;
 
     b2Body* createBody(const b2BodyDef& bodyDef) const;
     b2Body* createBody(Collider::BodyType type, const V& position, const sp<Size>& size, Shape& shape, float density, float friction) const;
-
-    int32_t genRigidBodyId() const;
 
 //  [[script::bindings::meta(absorb())]]
 //  [[script::bindings::meta(expire())]]
@@ -121,10 +121,13 @@ private:
         ContactListenerImpl _contact_listener;
     };
 
+    int32_t genRigidBodyId() const;
+
 private:
     sp<Stub> _stub;
 
     friend class BUILDER_IMPL1;
+    friend class Body;
 };
 
 }

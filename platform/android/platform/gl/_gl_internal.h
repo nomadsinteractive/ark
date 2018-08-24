@@ -33,7 +33,6 @@ static const GLenum GL_RGBA16_SNORM = 0x8F9B;
 static const GLenum GL_POINT_SPRITE = 0x8861;
 static const GLenum GL_PROGRAM_POINT_SIZE = 0x8642;
 
-
 }
 
 #endif
