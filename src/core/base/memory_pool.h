@@ -23,7 +23,7 @@ private:
         PooledByteArray(const bytearray& delegate);
 
         virtual uint8_t* buf();
-        virtual uint32_t length();
+        virtual size_t length();
 
         void setLength(uint32_t length);
 

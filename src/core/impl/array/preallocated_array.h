@@ -8,11 +8,11 @@ namespace ark {
 
 template<typename T> class PreallocatedArray : public Array<T> {
 public:
-    PreallocatedArray(T* data, uint32_t length)
+    PreallocatedArray(T* data, size_t length)
         : _data(data), _length(length) {
     }
 
-    virtual uint32_t length() override {
+    virtual size_t length() override {
         return _length;
     }
 
@@ -22,7 +22,7 @@ public:
 
 private:
     T* _data;
-    uint32_t _length;
+    size_t _length;
 };
 
 }

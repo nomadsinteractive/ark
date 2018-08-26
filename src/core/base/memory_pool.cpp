@@ -100,7 +100,7 @@ uint8_t* MemoryPool::PooledByteArray::buf()
     return _delegate->buf();
 }
 
-uint32_t MemoryPool::PooledByteArray::length()
+size_t MemoryPool::PooledByteArray::length()
 {
     return _length;
 }

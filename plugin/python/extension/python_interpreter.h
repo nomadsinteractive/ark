@@ -78,9 +78,9 @@ public:
 
     template<typename T> PyObject* fromSharedPtr(const sp<Array<T>>& array) {
         T* ptr = array->buf();
-        uint32_t len = array->length();
+        size_t len = array->length();
         PyObject* pyList = PyList_New(len);
-        for(uint32_t i = 0; i < len; i++)
+        for(size_t i = 0; i < len; i++)
             PyList_SetItem(pyList, i, toPyObject<T>(ptr[i]));
         return pyList;
     }
@@ -90,8 +90,6 @@ public:
     template<typename T> T toType(PyObject* object);
     template<typename T> PyObject* fromType(const T& value);
     template<typename T> sp<T> toSharedPtr(PyObject* object) {
-        if(object == Py_None)
-            return nullptr;
         return asInterface<T>(object);
     }
     template<typename T> PyObject* fromSharedPtr(const sp<T>& object) {
@@ -117,6 +115,9 @@ public:
     }
 
     template<typename T> const sp<T> asInterface(PyObject* object, bool alert = true) {
+        if(object == Py_None)
+            return nullptr;
+
         PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyObject_Type(object));
         if(isPyArkTypeObject(pyType)) {
             PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);

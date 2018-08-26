@@ -9,7 +9,7 @@ template<typename T> class Array {
 public:
     virtual ~Array() = default;
 
-    virtual uint32_t length() = 0;
+    virtual size_t length() = 0;
     virtual T* buf() = 0;
 
     size_t size() {

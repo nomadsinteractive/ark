@@ -90,7 +90,7 @@ b2Body* World::createBody(const b2BodyDef& bodyDef) const
 b2Body* World::createBody(Collider::BodyType type, const V& position, const sp<Size>& size, Shape& shape, float density, float friction) const
 {
     b2BodyDef bodyDef;
-    switch(type)
+    switch(type & Collider::BODY_TYPE_MASK)
     {
     case Collider::BODY_TYPE_DYNAMIC:
         bodyDef.type = b2_dynamicBody;

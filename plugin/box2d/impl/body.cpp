@@ -21,9 +21,9 @@ namespace box2d {
 
 namespace {
 
-class DynamicBodyRotation : public Numeric {
+class _RigidBodyRotation : public Numeric {
 public:
-    DynamicBodyRotation(const sp<Body::Stub>& stub, const sp<Numeric>& delegate)
+    _RigidBodyRotation(const sp<Body::Stub>& stub, const sp<Numeric>& delegate)
         : _stub(stub), _delegate(delegate) {
     }
 
@@ -36,9 +36,9 @@ public:
     sp<Numeric> _delegate;
 };
 
-class DynamicBodyPosition : public Vec {
+class _RigidBodyPosition : public Vec {
 public:
-    DynamicBodyPosition(const sp<Body::Stub>& stub, const sp<Vec>& delegate)
+    _RigidBodyPosition(const sp<Body::Stub>& stub, const sp<Vec>& delegate)
         : _stub(stub)/*, _delegate(delegate)*/ {
     }
 
@@ -64,30 +64,13 @@ public:
         return V(x, y);
     }
 
-    sp<Body::Stub> _stub;
-};
-
-
-class KinematicBodyPosition : public Vec {
-public:
-    KinematicBodyPosition(const sp<Body::Stub>& stub, const sp<Vec>& delegate)
-        : _stub(stub), _delegate(delegate) {
-    }
-
-    virtual V val() override {
-        DCHECK(_stub->_body, "Body has been disposed");
-        V pos = _delegate->val();
-        return V(_stub->_world.toPixelX(pos.x()), _stub->_world.toPixelY(pos.y()));
-    }
-
 private:
     sp<Body::Stub> _stub;
-    sp<Vec> _delegate;
 };
 
-class KinematicRotation : public Numeric {
+class ManualRotation : public Numeric {
 public:
-    KinematicRotation(const sp<Body::Stub>& stub, const sp<Numeric>& delegate)
+    ManualRotation(const sp<Body::Stub>& stub, const sp<Numeric>& delegate)
         : _stub(stub), _delegate(delegate) {
     }
 
@@ -111,25 +94,23 @@ Body::Body(const World& world, Collider::BodyType type, const sp<Vec>& position,
 
 Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotation)
     : RigidBody(stub->_id, type,
-                sp<DynamicBodyPosition>::make(stub, position),
+                sp<_RigidBodyPosition>::make(stub, position),
                 size,
-                sp<Rotation>::make(sp<DynamicBodyRotation>::make(stub, rotation))), _stub(stub)
+                sp<Rotation>::make(sp<_RigidBodyRotation>::make(stub, rotation))), _stub(stub)
 {
     _stub->_callback = callback();
 }
 
 void Body::bind(const sp<RenderObject>& renderObject)
 {
-    if(type() == Collider::BODY_TYPE_KINEMATIC)
+    renderObject->setPosition(sp<RenderObjectPosition>::make(_stub));
+    if(type() & Collider::BODY_FLAG_MANUAL_ROTATION)
     {
-        const sp<Numeric> r = rotation() ? rotation()->value()->delegate().cast<DynamicBodyRotation>()->_delegate : sp<Numeric>::null();
-        renderObject->transform()->rotate()->setRadians(sp<KinematicRotation>::make(_stub, r));
+        const sp<Numeric> r = rotation() ? rotation()->value()->delegate().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>::null();
+        renderObject->transform()->rotate()->setRadians(sp<ManualRotation>::make(_stub, r));
     }
     else
-    {
-        renderObject->setPosition(sp<RenderObjectPosition>::make(_stub));
         renderObject->transform()->setRotate(rotation());
-    }
 }
 
 void Body::dispose()
@@ -137,9 +118,9 @@ void Body::dispose()
     _stub->dispose();
 }
 
-const World& Body::world() const
+b2Body* Body::body() const
 {
-    return _stub->_world;
+    return _stub->_body;
 }
 
 float Body::angle()
@@ -241,6 +222,11 @@ void Body::applyLinearImpulse(const V2& impulse, const V2& point, bool wake)
 void Body::applyAngularImpulse(float impulse, bool wake)
 {
     _stub->_body->ApplyAngularImpulse(impulse, wake);
+}
+
+void Body::setTransform(const V2& position, float angle)
+{
+    _stub->_body->SetTransform(b2Vec2(position.x(), position.y()), angle);
 }
 
 Body::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest)

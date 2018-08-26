@@ -7,7 +7,7 @@ namespace ark {
 
 template<typename T> class DynamicArray : public Array<T> {
 public:
-    DynamicArray(uint32_t length)
+    DynamicArray(size_t length)
         : _data(new T[length]), _length(length) {
     }
 
@@ -21,7 +21,7 @@ public:
         delete[] _data;
     }
 
-    virtual uint32_t length() override {
+    virtual size_t length() override {
         return _length;
     }
 
@@ -31,7 +31,7 @@ public:
 
 private:
     T* _data;
-    uint32_t _length;
+    size_t _length;
 };
 
 }

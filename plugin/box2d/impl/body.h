@@ -30,7 +30,7 @@ public:
     virtual void bind(const sp<RenderObject>& renderObject) override;
     virtual void dispose() override;
 
-    const World& world() const;
+    b2Body* body() const;
 
 /*
 //  [[script::bindings::auto]]
@@ -57,6 +57,8 @@ public:
     const sp<Vec>& position() const;
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
+//  [[script::bindings::property]]
+    const sp<Rotation>& rotation() const;
 
 //  [[script::bindings::property]]
     const Box& tag() const;
@@ -117,6 +119,9 @@ public:
 //  [[script::bindings::auto]]
     void applyAngularImpulse(float impulse, bool wake = true);
 
+//  [[script::bindings::auto]]
+    void setTransform(const V2& position, float angle);
+
 //  [[plugin::builder]]
     class BUILDER_IMPL1 : public Builder<Body> {
     public:
@@ -164,6 +169,8 @@ private:
     Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotation);
 
     sp<Stub> _stub;
+
+    friend class World;
 };
 
 }

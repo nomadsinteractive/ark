@@ -89,6 +89,8 @@ class Collider:
     BODY_TYPE_KINEMATIC = 1
     BODY_TYPE_STATIC = 2
 
+    BODY_FLAG_MANUAL_ROTATION = 4
+
     def create_body(self, type, shape, position, size=None, rotate=None):
         return None
 
@@ -666,11 +668,6 @@ class Color:
 class Platform:
     @staticmethod
     def get_user_storage_path(p):
-        return None
-
-
-class GLShader:
-    def make_varyings(self):
         return None
 
 

@@ -17,7 +17,7 @@ public:
         std::copy(list.begin(), list.begin() + std::min(LEN, list.size()), _data.begin());
     }
 
-    virtual uint32_t length() override {
+    virtual size_t length() override {
         return _data.size();
     }
 

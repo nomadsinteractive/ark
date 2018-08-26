@@ -319,10 +319,11 @@ using namespace ark::plugin::python;
 
 
 class GenArgumentMeta:
-    def __init__(self, typename, castsig, parsetuplesig):
+    def __init__(self, typename, castsig, parsetuplesig, is_base_type=False):
         self._typename = typename
         self._cast_signature = castsig
         self._parse_signature = parsetuplesig
+        self._is_base_type = is_base_type
 
     @property
     def typename(self):
@@ -335,6 +336,10 @@ class GenArgumentMeta:
     @property
     def parse_signature(self):
         return self._parse_signature
+
+    @property
+    def is_base_type(self):
+        return self._is_base_type
 
 
 class GenConverter:
@@ -387,6 +392,8 @@ class GenArgument:
 
     def gen_declare(self, objname, argname, extract_cast=False):
         typename = self._meta.cast_signature
+        if self._meta.is_base_type:
+            return '%s %s = static_cast<%s>(%s);' % (typename, objname, typename, argname)
         if self.typename == self._meta.cast_signature:
             return '%s %s = %s;' % (typename, objname, argname)
         m = acg.getSharedPtrType(self._accept_type)
@@ -423,13 +430,13 @@ ARK_PY_ARGUMENTS = (
     (r'Box\s*&', GenArgumentMeta('PyObject*', 'Box', 'O')),
     (r'sp<([^>]+|[\w\d_]+<[\w\d_]+>)>\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
     (r'(document|element|attribute)\s*&', GenArgumentMeta('PyObject*', '${0}', 'O')),
-    (r'V2', GenArgumentMeta('V2', 'V2', 'O')),
-    (r'V3', GenArgumentMeta('V3', 'V3', 'O')),
+    (r'V2', GenArgumentMeta('PyObject*', 'V2', 'O')),
+    (r'V3', GenArgumentMeta('PyObject*', 'V3', 'O')),
     (r'([^>]+|[\w\d_]+<[\w\d_]+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
     (r'(uint32_t|unsigned int|uint8_t)', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
     (r'(int32_t|int|int8_t)', GenArgumentMeta('int32_t', 'int32_t', 'i')),
     (r'float', GenArgumentMeta('float', 'float', 'f')),
-    (r'bool', GenArgumentMeta('bool', 'bool', 'p')),
+    (r'bool', GenArgumentMeta('int32_t', 'bool', 'p', True)),
     (r'[^:]+::.+', GenArgumentMeta('int32_t', 'int32_t', 'i')),
     (r'TypeId', GenArgumentMeta('PyObject*', 'TypeId', 'O')),
 )

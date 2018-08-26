@@ -44,7 +44,7 @@ static int _stb_eof_callback(void *user)
 
 class STBImageByteArray : public Array<uint8_t> {
 public:
-    STBImageByteArray(void* array, uint32_t length)
+    STBImageByteArray(void* array, size_t length)
         : _array(array), _length(length) {
     }
     ~STBImageByteArray() {
@@ -55,13 +55,13 @@ public:
         return reinterpret_cast<uint8_t*>(_array);
     }
 
-    virtual uint32_t length() override {
+    virtual size_t length() override {
         return _length;
     }
 
 private:
     void* _array;
-    uint32_t _length;
+    size_t _length;
 };
 
 }

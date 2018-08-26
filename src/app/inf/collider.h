@@ -20,9 +20,13 @@ public:
 
 //  [[script::bindings::enumeration]]
     enum BodyType {
-        BODY_TYPE_DYNAMIC,
-        BODY_TYPE_KINEMATIC,
-        BODY_TYPE_STATIC
+        BODY_TYPE_DYNAMIC = 0,
+        BODY_TYPE_KINEMATIC = 1,
+        BODY_TYPE_STATIC = 2,
+        BODY_TYPE_MASK = 3,
+
+        BODY_FLAG_MANUAL_POSITION = 4,
+        BODY_FLAG_MANUAL_ROTATION = 8
     };
 
 public:
