@@ -18,7 +18,7 @@ namespace ark {
 
 class ARK_API GLProgram : public GLResource {
 public:
-    GLProgram(uint32_t version, const String& vertexShader, const String& fragmentShader);
+    GLProgram(const sp<GLRecycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader);
     ~GLProgram();
 
     virtual uint32_t id() override;
@@ -60,7 +60,20 @@ public:
         mutable uint64_t _last_modified;
     };
 
-    void glColor(const Color& color);
+    class ARK_API Shader {
+    public:
+        Shader(const sp<GLRecycler>& recycler, uint32_t version, GLenum type, const String& source);
+        ~Shader();
+
+        uint32_t id();
+
+    private:
+        GLuint compile(uint32_t version, GLenum type, const String& source);
+
+    private:
+        sp<GLRecycler> _recycler;
+        uint32_t _id;
+    };
 
     GLint getAttribLocation(const String& name);
     GLint getUniformLocation(const String& name);
@@ -69,20 +82,23 @@ public:
     const Uniform& getUniform(const String& name);
 
     void use() const;
+    void validate(GraphicsContext& graphicsContext) const;
 
 private:
-    GLuint compile(GLenum type, const String& shader_source);
-    void dispose();
+    String getInformationLog() const;
 
 private:
+    sp<GLRecycler> _recycler;
+
     uint32_t _version;
 
-    String _vertex_shader;
-    String _fragment_shader;
+    String _vertex_source;
+    String _fragment_source;
 
     GLuint _id;
-    GLuint _vertex_shader_id;
-    GLuint _fragment_shader_id;
+
+    sp<GLProgram::Shader> _vertex_shader;
+    sp<GLProgram::Shader> _fragment_shader;
 
     std::map<String, Attribute> _attributes;
     std::map<String, Uniform> _uniforms;

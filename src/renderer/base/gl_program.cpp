@@ -4,19 +4,29 @@
 #include "core/util/strings.h"
 
 #include "graphics/base/color.h"
+
+#include "renderer/base/gl_recycler.h"
+#include "renderer/base/graphics_context.h"
 #include "renderer/util/gl_debug.h"
+
 #include "platform/platform.h"
 
 namespace ark {
 
-GLProgram::GLProgram(uint32_t version, const String& vertexShader, const String& fragmentShader)
-    : _version(version), _vertex_shader(vertexShader), _fragment_shader(fragmentShader), _id(0), _vertex_shader_id(0), _fragment_shader_id(0)
+GLProgram::GLProgram(const sp<GLRecycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader)
+    : _recycler(recycler), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _id(0)
 {
 }
 
 GLProgram::~GLProgram()
 {
-    dispose();
+    if(_id)
+    {
+        _recycler->recycle(_id, [](uint32_t id) {
+            glDeleteProgram(id);
+        });
+        LOGD("glDeleteProgram(%d)", _id);
+    }
 }
 
 uint32_t GLProgram::id()
@@ -24,26 +34,35 @@ uint32_t GLProgram::id()
     return _id;
 }
 
-void GLProgram::prepare(GraphicsContext& /*graphicsContext*/)
+void GLProgram::prepare(GraphicsContext& graphicsContext)
 {
-    _vertex_shader_id = compile(GL_VERTEX_SHADER, _vertex_shader);
-    _fragment_shader_id = compile(GL_FRAGMENT_SHADER, _fragment_shader);
+    _vertex_shader = graphicsContext.makeShader(_version, GL_VERTEX_SHADER, _vertex_source);
+    _fragment_shader = graphicsContext.makeShader(_version, GL_FRAGMENT_SHADER, _fragment_source);
     _id = glCreateProgram();
-    glAttachShader(_id, _vertex_shader_id);
-    glAttachShader(_id, _fragment_shader_id);
+    glAttachShader(_id, _vertex_shader->id());
+    glAttachShader(_id, _fragment_shader->id());
     glLinkProgram(_id);
-    LOGD("GLProgram[%d]: vertex-shader: %d, fragment-shader: %d", _id, _vertex_shader_id, _fragment_shader_id);
+    glDetachShader(_id, _vertex_shader->id());
+    glDetachShader(_id, _fragment_shader->id());
+
+    GLboolean linkstatus = GL_FALSE;
+    glGetProgramiv(_id, GL_LINK_STATUS, &linkstatus);
+    DCHECK(linkstatus, "Program link failed: %s", getInformationLog().c_str());
+    LOGD("GLProgram[%d]: vertex-shader: %d, fragment-shader: %d", _id, _vertex_shader->id(), _fragment_shader->id());
 }
 
 void GLProgram::recycle(GraphicsContext& /*graphicsContext*/)
 {
-    dispose();
-}
+    LOGD("glDeleteProgram(%d)", _id);
+    if(_id)
+        glDeleteProgram(_id);
+    _id = 0;
 
-void GLProgram::glColor(const Color& color)
-{
-    const GLProgram::Uniform& uColor = getUniform("u_Color");
-    uColor.setUniform4f(color.red(), color.green(), color.blue(), color.alpha());
+    _vertex_shader = nullptr;
+    _fragment_shader = nullptr;
+
+    _attributes.clear();
+    _uniforms.clear();
 }
 
 GLint GLProgram::getAttribLocation(const String& name)
@@ -76,48 +95,28 @@ const GLProgram::Uniform& GLProgram::getUniform(const String& name)
     return _uniforms[name];
 }
 
-GLuint GLProgram::compile(GLenum type, const String& shader_source)
+String GLProgram::getInformationLog() const
 {
-    const String versionSrc = shader_source.startsWith("#version ") ? "" : Platform::glShaderVersionDeclaration(_version);
-    GLuint shader = glCreateShader(type);
-    const GLchar* src[16] = {versionSrc.c_str()};
-    uint32_t slen = Platform::glPreprocessShader(shader_source, &src[1], 15);
-    glShaderSource(shader, slen + 1, src, nullptr);
-    glCompileShader(shader);
-    GLint compiled;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-    if(!compiled)
-    {
-        GLint length;
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-        String log(length, ' ');
-        glGetShaderInfoLog(shader, length, &length, (GLchar*) log.c_str());
-        StringBuffer sb;
-        for(uint32_t i = 0; i <= slen; i++)
-            sb << src[i] << '\n';
-        DFATAL("%s\n\n%s", log.c_str(), sb.str().c_str());
-        return 0;
-    }
-    return shader;
-}
+    GLint length = 0;
+    glGetProgramiv(_id, GL_INFO_LOG_LENGTH, &length);
 
-void GLProgram::dispose()
-{
-    LOGD("GLProgram[%d]: vertex-shader: %d, fragment-shader: %d", _id, _vertex_shader_id, _fragment_shader_id);
-    if(_vertex_shader_id)
-        glDeleteShader(_vertex_shader_id);
-    if(_fragment_shader_id)
-        glDeleteShader(_fragment_shader_id);
-    if(_id)
-        glDeleteProgram(_id);
-    _vertex_shader_id = _fragment_shader_id = _id = 0;
-    _attributes.clear();
-    _uniforms.clear();
+    String log(length, 0);
+    glGetProgramInfoLog(_id, log.length(), &length, (GLchar*) log.c_str());
+    return log;
 }
 
 void GLProgram::use() const
 {
     glUseProgram(_id);
+}
+
+void GLProgram::validate(GraphicsContext& /*graphicsContext*/) const
+{
+    glValidateProgram(_id);
+
+    GLboolean validatestatus;
+    glGetProgramiv(_id, GL_VALIDATE_STATUS, &validatestatus);
+    DCHECK(validatestatus, "GLProgram validate failed: %s", getInformationLog().c_str());
 }
 
 void GLProgram::Attribute::setVertexPointer(GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer) const
@@ -199,4 +198,48 @@ void GLProgram::Uniform::setUniformMatrix4fv(GLsizei count, GLboolean transpose,
         _last_modified = timestamp;
     }
 }
+
+GLProgram::Shader::Shader(const sp<GLRecycler>& recycler, uint32_t version, GLenum type, const String& source)
+    : _recycler(recycler), _id(compile(version, type, source))
+{
+}
+
+GLProgram::Shader::~Shader()
+{
+    LOGD("glDeleteShader(%d)", _id);
+    _recycler->recycle(_id, [](uint32_t id) {
+        glDeleteShader(id);
+    });
+}
+
+uint32_t GLProgram::Shader::id()
+{
+    return _id;
+}
+
+GLuint GLProgram::Shader::compile(uint32_t version, GLenum type, const String& source)
+{
+    const String versionSrc = source.startsWith("#version ") ? "" : Platform::glShaderVersionDeclaration(version);
+    GLuint id = glCreateShader(type);
+    const GLchar* src[16] = {versionSrc.c_str()};
+    uint32_t slen = Platform::glPreprocessShader(source, &src[1], 15);
+    glShaderSource(id, slen + 1, src, nullptr);
+    glCompileShader(id);
+    GLint compiled;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &compiled);
+    if(!compiled)
+    {
+        GLint length;
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+        String log(length, ' ');
+        glGetShaderInfoLog(id, length, &length, (GLchar*) log.c_str());
+        StringBuffer sb;
+        for(uint32_t i = 0; i <= slen; i++)
+            sb << src[i] << '\n';
+        DFATAL("%s\n\n%s", log.c_str(), sb.str().c_str());
+        return 0;
+    }
+    return id;
+}
+
 }

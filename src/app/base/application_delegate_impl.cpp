@@ -75,14 +75,14 @@ void ApplicationDelegateImpl::onPause()
 {
     for(const auto& i: _scripts)
         if(i._on == SCRIPT_RUN_ON_PAUSE)
-        i.run();
+            i.run();
 }
 
 void ApplicationDelegateImpl::onResume()
 {
     for(const auto& i: _scripts)
         if(i._on == SCRIPT_RUN_ON_RESUME)
-        i.run();
+            i.run();
 }
 
 ApplicationDelegateImpl::ScriptTag::ScriptTag(ResourceLoader& resourceLoader, const document& manifest, const sp<Scope>& vars)

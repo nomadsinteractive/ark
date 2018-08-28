@@ -11,6 +11,7 @@
 
 #include "renderer/base/gl_context.h"
 #include "renderer/base/gl_program.h"
+#include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/impl/gl_snippet/gl_snippet_linked_chain.h"
 #include "renderer/base/gl_shader_preprocessor.h"
@@ -35,7 +36,7 @@ void GLShaderSource::loadPredefinedParam(BeanFactory& factory, const sp<Scope>& 
 sp<GLProgram> GLShaderSource::makeGLProgram(GraphicsContext& graphicsContext) const
 {
     const sp<GLContext>& glContext = graphicsContext.glContext();
-    return sp<GLProgram>::make(glContext->getGLSLVersion(), _vertex.process(glContext), _fragment.process(glContext));
+    return sp<GLProgram>::make(graphicsContext.glResourceManager()->recycler(), glContext->getGLSLVersion(), _vertex.process(glContext), _fragment.process(glContext));
 }
 
 GLAttribute& GLShaderSource::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
@@ -56,7 +57,7 @@ void GLShaderSource::addSnippet(const sp<GLSnippet>& snippet)
     _snippet = _snippet ? sp<GLSnippet>::adopt(new GLSnippetLinkedChain(_snippet, snippet)) : snippet;
 }
 
-GLShader::Slot GLShaderSource::preprocess(GraphicsContext& graphicsContext)
+void GLShaderSource::preprocess(GraphicsContext& graphicsContext)
 {
     if(_preprocessor_context)
     {
@@ -76,7 +77,6 @@ GLShader::Slot GLShaderSource::preprocess(GraphicsContext& graphicsContext)
 
         _preprocessor_context.reset();
     }
-    return GLShader::Slot(_vertex._source, _fragment._source);
 }
 
 GLShaderPreprocessor& GLShaderSource::vertex()
@@ -92,6 +92,11 @@ GLShaderPreprocessor& GLShaderSource::fragment()
 const sp<GLShaderInput>& GLShaderSource::input() const
 {
     return _input;
+}
+
+const List<GLUniform>& GLShaderSource::uniforms() const
+{
+    return _uniforms;
 }
 
 void GLShaderSource::initialize()

@@ -65,7 +65,7 @@ private:
 
         bool isExpired() const;
 
-        void prepare(GraphicsContext& graphicsContext, bool force) const;
+        void prepare(GraphicsContext& graphicsContext) const;
         void recycle(GraphicsContext& graphicsContext) const;
 
         bool operator < (const ExpirableGLResource& other) const;

@@ -68,7 +68,10 @@ void GLResourceManager::onDrawFrame(GraphicsContext& graphicsContext)
     for(const PreparingGLResource& resource : _preparing_items.clear())
         if(!resource._resource.isExpired())
         {
-            resource._resource.prepare(graphicsContext, resource._strategy == PS_ONCE_FORCE);
+            if(resource._strategy == PS_ONCE_FORCE && resource._resource.resource()->id() != 0)
+                resource._resource.recycle(graphicsContext);
+
+            resource._resource.prepare(graphicsContext);
             if(resource._strategy == PS_ONCE_AND_ON_SURFACE_READY)
                 _on_surface_ready_items.insert(resource._resource);
         }
@@ -170,11 +173,11 @@ void GLResourceManager::doRecycling(GraphicsContext& graphicsContext)
 
 void GLResourceManager::doSurfaceReady(GraphicsContext& graphicsContext)
 {
-    for(const ExpirableGLResource& resource :_on_surface_ready_items)
+    for(const ExpirableGLResource& resource : _on_surface_ready_items)
         resource.recycle(graphicsContext);
 
-    for(const ExpirableGLResource& resource :_on_surface_ready_items)
-        resource.prepare(graphicsContext, true);
+    for(const ExpirableGLResource& resource : _on_surface_ready_items)
+        resource.prepare(graphicsContext);
 }
 
 GLResourceManager::ExpirableGLResource::ExpirableGLResource(const sp<GLResource>& resource)
@@ -195,9 +198,9 @@ bool GLResourceManager::ExpirableGLResource::isExpired() const
     return _resource.unique();
 }
 
-void GLResourceManager::ExpirableGLResource::prepare(GraphicsContext& graphicsContext, bool force) const
+void GLResourceManager::ExpirableGLResource::prepare(GraphicsContext& graphicsContext) const
 {
-    if(force || !_resource->id())
+    if(_resource->id() == 0)
         _resource->prepare(graphicsContext);
 }
 

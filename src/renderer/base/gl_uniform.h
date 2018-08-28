@@ -38,6 +38,7 @@ public:
     void prepare(GraphicsContext& gc, const sp<GLProgram>& program) const;
 
     String declaration() const;
+    void notify() const;
 
 private:
     void synchronize(const sp<RenderController>& renderController);
@@ -46,7 +47,7 @@ private:
     String _name;
     Type _type;
     sp<Flatable> _flatable;
-    sp<Changed> _changed;
+    sp<Changed> _notifier;
 };
 
 }

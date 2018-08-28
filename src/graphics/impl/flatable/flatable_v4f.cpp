@@ -8,14 +8,14 @@
 
 namespace ark {
 
-FlatableV4f::FlatableV4f(const sp<Vec4>& Vec4)
-    : _Vec4(Vec4)
+FlatableV4f::FlatableV4f(const sp<Vec4>& vec4)
+    : _vec4(vec4)
 {
 }
 
 void FlatableV4f::flat(void* buf)
 {
-    (*reinterpret_cast<V4*>(buf)) = _Vec4->val();
+    (*reinterpret_cast<V4*>(buf)) = _vec4->val();
 }
 
 uint32_t FlatableV4f::size()
@@ -29,13 +29,13 @@ uint32_t FlatableV4f::length()
 }
 
 FlatableV4f::BUILDER::BUILDER(BeanFactory& parent, const String& value)
-    : _Vec4(parent.ensureBuilder<Vec4>(value))
+    : _vec4(parent.ensureBuilder<Vec4>(value))
 {
 }
 
 sp<Flatable> FlatableV4f::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<FlatableV4f>::make(_Vec4->build(args));
+    return sp<FlatableV4f>::make(_vec4->build(args));
 }
 
 }

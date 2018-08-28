@@ -18,10 +18,8 @@ namespace ark {
 class ARK_API GLDebug {
 public:
     static int32_t glGetBufferSize(GLenum target);
-    static void glTestDraw(const op<GraphicsContext>& graphicsContext, const sp<GLProgram>& program);
     static GLuint glTestIndexBuffer();
     static GLuint glTestArrayBuffer();
-    static void glSetIdentity(const op<GraphicsContext>& graphicsContext);
 
     template<typename T, typename P> static void glDumpBuffer(const P& buffer) {
         int32_t nBufferSize = glGetBufferSize(buffer.type());

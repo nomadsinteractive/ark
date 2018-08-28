@@ -19,26 +19,6 @@ int32_t GLDebug::glGetBufferSize(GLenum target)
     return nBufferSize;
 }
 
-void GLDebug::glSetIdentity(const op<GraphicsContext>& graphicsContext)
-{
-    Matrix mvp;
-    mvp.setIdentity();
-    graphicsContext->program()->getUniform("u_MVP").setUniformMatrix4fv(1, GL_FALSE, mvp.value());
-}
-
-void GLDebug::glTestDraw(const op<GraphicsContext>& graphicsContext, const sp<GLProgram>& program)
-{
-    const GLfloat gTriangleVertices[] = { 0.0f, 0.5f, 0.5f, -0.5f, -0.5f, -0.5f };
-    graphicsContext->glUseProgram(program);
-    const GLProgram::Attribute& aPosition = program->getAttribute("a_Position");
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    aPosition.setVertexPointer(2, GL_FLOAT, GL_FALSE, 0, gTriangleVertices);
-
-    glSetIdentity(graphicsContext);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-}
-
 GLuint GLDebug::glTestIndexBuffer()
 {
     GLuint id = 0;

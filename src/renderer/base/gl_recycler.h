@@ -12,6 +12,9 @@ namespace ark {
 class ARK_API GLRecycler {
 public:
     void recycle(const sp<GLResource>& resource);
+
+    void recycle(uint32_t id, std::function<void(uint32_t)> recycler);
+
     void doRecycling(GraphicsContext& graphicsContext);
 
 private:

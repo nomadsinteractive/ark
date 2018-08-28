@@ -65,7 +65,7 @@ private:
 }
 
 GLUniform::GLUniform(const String& name, GLUniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed, const sp<RenderController>& renderController)
-    : _name(name), _type(type), _flatable(flatable), _changed(changed)
+    : _name(name), _type(type), _flatable(flatable), _notifier(changed)
 {
     DWARN(renderController, "Initialize GLUniform \"%s\" without RenderController, which might cause multithreading concurrency problems", name.c_str());
     if(renderController)
@@ -73,7 +73,7 @@ GLUniform::GLUniform(const String& name, GLUniform::Type type, const sp<Flatable
 }
 
 GLUniform::GLUniform(const GLUniform& other)
-    : _name(other._name), _type(other._type), _flatable(other._flatable), _changed(other._changed)
+    : _name(other._name), _type(other._type), _flatable(other._flatable), _notifier(other._notifier)
 {
 }
 
@@ -84,7 +84,7 @@ const String& GLUniform::name() const
 
 void GLUniform::prepare(GraphicsContext&, const sp<GLProgram>& program) const
 {
-    if(!_changed || _changed->hasChanged())
+    if(!_notifier || _notifier->hasChanged())
     {
         const GLProgram::Uniform& uniform = program->getUniform(_name);
         float buf[1024];
@@ -163,12 +163,17 @@ String GLUniform::declaration() const
     return s ? Strings::sprintf("uniform %s %s[%d];", t.c_str(), _name.c_str(), s + 1) : Strings::sprintf("uniform %s %s;", t.c_str(), _name.c_str());
 }
 
+void GLUniform::notify() const
+{
+    _notifier->change();
+}
+
 void GLUniform::synchronize(const sp<RenderController>& renderController)
 {
-    const sp<SynchronizedFlattable> synchronized = sp<SynchronizedFlattable>::make(_flatable, _changed);
+    const sp<SynchronizedFlattable> synchronized = sp<SynchronizedFlattable>::make(_flatable, _notifier);
     renderController->addPreUpdateRequest(synchronized, sp<BooleanByWeakRef<Flatable>>::make(synchronized, 1));
     _flatable = synchronized;
-    _changed = synchronized->notifier();
+    _notifier = synchronized->notifier();
 }
 
 }

@@ -3,31 +3,17 @@
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/collection/list.h"
 #include "core/inf/builder.h"
-#include "core/types/null.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/inf/gl_resource.h"
 
 namespace ark {
 
 class ARK_API GLShader {
-public:
-    class ARK_API Slot {
-    public:
-        Slot(const String& vertex, const String& fragment);
-        Slot(const Slot& other) = default;
-
-        bool operator <(const Slot& other) const;
-
-    private:
-        uint32_t _vertex_shader_hash;
-        uint32_t _fragment_shader_hash;
-    };
-
 public:
     GLShader(const sp<GLShaderSource>& source, const sp<Camera>& camera);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(GLShader);
@@ -44,9 +30,13 @@ public:
     const sp<Camera>& camera() const;
 
     const sp<GLProgram>& program() const;
-    void setProgram(const sp<GLProgram>& program);
+    const sp<GLProgram>& getGLProgram(GraphicsContext& graphicsContext);
 
     const sp<GLSnippet>& snippet() const;
+
+    void glUpdateMVPMatrix(GraphicsContext& graphicsContext, const Matrix& matrix) const;
+    void glUpdateVPMatrix(GraphicsContext& graphicsContext, const Matrix& matrix) const;
+    void glUpdateMatrix(GraphicsContext& graphicsContext, const String& name, const Matrix& matrix) const;
 
 //[[deprecated]]
     uint32_t stride() const;
@@ -70,17 +60,22 @@ public:
         sp<Builder<GLSnippet>> _snippet;
         sp<Builder<Camera>> _camera;
     };
-private:
-    const sp<GLProgram>& makeGLProgram(GraphicsContext& graphicsContext);
-    Slot preprocess(GraphicsContext& graphicsContext);
 
 private:
-    sp<GLShaderSource> _source;
+    struct Stub : public GLResource {
+        Stub(const sp<GLShaderSource>& source);
+
+        virtual uint32_t id() override;
+        virtual void prepare(GraphicsContext& graphicsContext) override;
+        virtual void recycle(GraphicsContext& graphicsContext) override;
+
+        sp<GLProgram> _program;
+        sp<GLShaderSource> _source;
+    };
+
+private:
+    sp<Stub> _stub;
     sp<Camera> _camera;
-
-    sp<GLProgram> _program;
-
-    friend class GraphicsContext;
 };
 
 }

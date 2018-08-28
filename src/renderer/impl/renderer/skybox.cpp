@@ -32,8 +32,8 @@ public:
         _shader->use(graphicsContext);
         _shader->bindUniforms(graphicsContext);
         _context.preDraw(graphicsContext, _shader);
-        graphicsContext.glUpdateMatrix("u_View", _view);
-        graphicsContext.glUpdateMatrix("u_Projection", _projection);
+        _shader->glUpdateMatrix(graphicsContext, "u_View", _view);
+        _shader->glUpdateMatrix(graphicsContext, "u_Projection", _projection);
         glDrawElements(_context._mode, _context._count, GLIndexType, 0);
         _context.postDraw(graphicsContext);
     }

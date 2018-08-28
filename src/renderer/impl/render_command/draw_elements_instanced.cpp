@@ -17,7 +17,7 @@ void DrawElementsInstanced::draw(GraphicsContext& graphicsContext)
     _shader->use(graphicsContext);
     _shader->bindUniforms(graphicsContext);
 
-    graphicsContext.glUpdateVPMatrix(_context._camera._vp);
+    _shader->glUpdateVPMatrix(graphicsContext, _context._camera._vp);
 
     _context.preDraw(graphicsContext, _shader);
     glDrawElementsInstanced(_context._mode, _context._count, GLIndexType, nullptr, _count);

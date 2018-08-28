@@ -649,10 +649,6 @@ class Expried:
         pass
 
 
-class Partition:
-    pass
-
-
 class Color:
     def __init__(self, v):
         pass

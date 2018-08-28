@@ -33,39 +33,6 @@ void GraphicsContext::onDrawFrame()
     _gl_resource_manager->onDrawFrame(*this);
 }
 
-const sp<GLProgram>& GraphicsContext::getGLProgram(GLShader& shader)
-{
-    if(shader.program())
-    {
-        if(shader.program()->id() == 0)
-            shader.program()->prepare(*this);
-        return shader.program();
-    }
-
-    const GLShader::Slot slot = shader.preprocess(*this);
-
-    const auto iter = _gl_prepared_programs.find(slot);
-    if(iter != _gl_prepared_programs.end())
-    {
-        const sp<GLProgram> program = iter->second.lock();
-        if(program)
-        {
-            if(program->id() == 0)
-                program->prepare(*this);
-            shader.setProgram(program);
-            return shader.program();
-        }
-        else
-            _gl_prepared_programs.erase(iter);
-    }
-
-    const sp<GLProgram>& program = shader.makeGLProgram(*this);
-    _gl_resource_manager->prepare(program, GLResourceManager::PS_ON_SURFACE_READY);
-    program->prepare(*this);
-    _gl_prepared_programs[slot] = program;
-    return program;
-}
-
 const sp<GLResourceManager>& GraphicsContext::glResourceManager() const
 {
     return _gl_resource_manager;
@@ -76,36 +43,34 @@ const sp<GLContext>& GraphicsContext::glContext() const
     return _gl_context;
 }
 
-void GraphicsContext::glUpdateMVPMatrix(const Matrix& matrix)
-{
-    glUpdateMatrix("u_MVP", matrix);
-}
+//void GraphicsContext::glUseProgram(const sp<GLProgram>& program)
+//{
+//    DCHECK(program && program->id(), "Illegal program used");
+//    if(_program != program)
+//    {
+//        _program = program;
+//        program->use();
+//    }
+//}
 
-void GraphicsContext::glUpdateVPMatrix(const Matrix& matrix)
+sp<GLProgram::Shader> GraphicsContext::makeShader(uint32_t version, GLenum type, const String& source)
 {
-    glUpdateMatrix("u_VP", matrix);
-}
-
-void GraphicsContext::glUseProgram(const sp<GLProgram>& program)
-{
-    DCHECK(program && program->id(), "Illegal program used");
-    if(_program != program)
+    const auto iter = _shaders[type].find(source);
+    if(iter != _shaders[type].end())
     {
-        _program = program;
-        program->use();
+        const sp<GLProgram::Shader> shader = iter->second.lock();
+        if(shader)
+            return shader;
     }
+
+    const sp<GLProgram::Shader> shader = sp<GLProgram::Shader>::make(_gl_resource_manager->recycler(), version, type, source);
+    _shaders[type][source] = shader;
+    return shader;
 }
 
-const sp<GLProgram>& GraphicsContext::program() const
+uint64_t GraphicsContext::tick() const
 {
-    return _program;
-}
-
-void GraphicsContext::glUpdateMatrix(const String& name, const Matrix& matrix)
-{
-    const GLProgram::Uniform& uniform = _program->getUniform(name);
-    DCHECK(uniform, "Uniform %s not found", name.c_str());
-    uniform.setUniformMatrix4fv(1, GL_FALSE, matrix.value(), _tick);
+    return _tick;
 }
 
 }

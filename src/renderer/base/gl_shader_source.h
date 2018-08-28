@@ -31,12 +31,13 @@ public:
     const sp<GLSnippet>& snippet() const;
     void addSnippet(const sp<GLSnippet>& snippet);
 
-    GLShader::Slot preprocess(GraphicsContext& graphicsContext);
+    void preprocess(GraphicsContext& graphicsContext);
 
     GLShaderPreprocessor& vertex();
     GLShaderPreprocessor& fragment();
 
     const sp<GLShaderInput>& input() const;
+    const List<GLUniform>& uniforms() const;
 
 private:
     void initialize();

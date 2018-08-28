@@ -16,8 +16,9 @@
 #include "renderer/base/varyings.h"
 #include "graphics/impl/flatable/flatable_color3b.h"
 
-#include "renderer/base/gl_shader_source.h"
 #include "renderer/base/gl_program.h"
+#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/gl_shader_source.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/util/gl_debug.h"
@@ -54,9 +55,9 @@ private:
 }
 
 GLShader::GLShader(const sp<GLShaderSource>& source, const sp<Camera>& camera)
-    : _source(source), _camera(camera ? camera : Camera::getMainCamera())
+    : _stub(sp<Stub>::make(source)), _camera(camera ? camera : Camera::getMainCamera())
 {
-    _source->initialize();
+    _stub->_source->initialize();
 }
 
 sp<Builder<GLShader>> GLShader::fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment)
@@ -77,23 +78,18 @@ sp<GLShader> GLShader::fromStringTable(const String& vertex, const String& fragm
 
 void GLShader::use(GraphicsContext& graphicsContext)
 {
-    graphicsContext.glUseProgram(graphicsContext.getGLProgram(*this));
-}
-
-GLShader::Slot GLShader::preprocess(GraphicsContext& graphicsContext)
-{
-    return _source->preprocess(graphicsContext);
+    getGLProgram(graphicsContext)->use();
 }
 
 void GLShader::bindUniforms(GraphicsContext& graphicsContext) const
 {
-    for(const GLUniform& uniform : _source->_uniforms)
-        uniform.prepare(graphicsContext, _program);
+    for(const GLUniform& uniform : _stub->_source->_uniforms)
+        uniform.prepare(graphicsContext, _stub->_program);
 }
 
 const sp<GLShaderSource>& GLShader::source() const
 {
-    return _source;
+    return _stub->_source;
 }
 
 const sp<Camera>& GLShader::camera() const
@@ -103,43 +99,55 @@ const sp<Camera>& GLShader::camera() const
 
 const sp<GLProgram>& GLShader::program() const
 {
-    return _program;
-}
-
-void GLShader::setProgram(const sp<GLProgram>& program)
-{
-    _program = program;
+    return _stub->_program;
 }
 
 const sp<GLSnippet>& GLShader::snippet() const
 {
-    return _source->snippet();
+    return _stub->_source->snippet();
 }
 
-const sp<GLProgram>& GLShader::makeGLProgram(GraphicsContext& graphicsContext)
+void GLShader::glUpdateMVPMatrix(GraphicsContext& graphicsContext, const Matrix& matrix) const
 {
-    _program = _source->makeGLProgram(graphicsContext);
-    return _program;
+    glUpdateMatrix(graphicsContext, "u_MVP", matrix);
+}
+
+void GLShader::glUpdateVPMatrix(GraphicsContext& graphicsContext, const Matrix& matrix) const
+{
+    glUpdateMatrix(graphicsContext, "u_VP", matrix);
+}
+
+void GLShader::glUpdateMatrix(GraphicsContext& graphicsContext, const String& name, const Matrix& matrix) const
+{
+    const GLProgram::Uniform& uniform = _stub->_program->getUniform(name);
+    DCHECK(uniform, "Uniform %s not found", name.c_str());
+    uniform.setUniformMatrix4fv(1, GL_FALSE, matrix.value(), graphicsContext.tick());
+}
+
+const sp<GLProgram>& GLShader::getGLProgram(GraphicsContext& graphicsContext)
+{
+    if(_stub->_program)
+    {
+        if(_stub->id() == 0)
+            _stub->prepare(graphicsContext);
+        return _stub->_program;
+    }
+
+    _stub->_source->preprocess(graphicsContext);
+    _stub->_program = _stub->_source->makeGLProgram(graphicsContext);
+    graphicsContext.glResourceManager()->prepare(_stub, GLResourceManager::PS_ON_SURFACE_READY);
+    _stub->prepare(graphicsContext);
+    return _stub->_program;
 }
 
 uint32_t GLShader::stride() const
 {
-    return _source->_input->getStream(0).stride();
+    return _stub->_source->_input->getStream(0).stride();
 }
 
 const GLAttribute& GLShader::getAttribute(const String& name, uint32_t divisor) const
 {
-    return _source->input()->getAttribute(name, divisor);
-}
-
-GLShader::Slot::Slot(const String& vertex, const String& fragment)
-    : _vertex_shader_hash(Strings::hash(vertex)), _fragment_shader_hash(Strings::hash(fragment))
-{
-}
-
-bool GLShader::Slot::operator <(const GLShader::Slot& other) const
-{
-    return _vertex_shader_hash < other._vertex_shader_hash || (_vertex_shader_hash == other._vertex_shader_hash && _fragment_shader_hash < other._fragment_shader_hash);
+    return _stub->_source->input()->getAttribute(name, divisor);
 }
 
 GLShader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -157,6 +165,32 @@ sp<GLShader> GLShader::BUILDER::build(const sp<Scope>& args)
     if(_snippet)
         source->addSnippet(_snippet->build(args));
     return sp<GLShader>::make(source, _camera->build(args));
+}
+
+GLShader::Stub::Stub(const sp<GLShaderSource>& source)
+    : _source(source)
+{
+}
+
+uint32_t GLShader::Stub::id()
+{
+    NOT_NULL(_program);
+    return _program->id();
+}
+
+void GLShader::Stub::prepare(GraphicsContext& graphicsContext)
+{
+    NOT_NULL(_program);
+    for(const GLUniform& i : _source->uniforms())
+        i.notify();
+
+    _program->prepare(graphicsContext);
+}
+
+void GLShader::Stub::recycle(GraphicsContext& graphicsContext)
+{
+    NOT_NULL(_program);
+    _program->recycle(graphicsContext);
 }
 
 }

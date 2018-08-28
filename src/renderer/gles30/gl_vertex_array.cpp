@@ -2,10 +2,7 @@
 
 #include "core/util/log.h"
 
-#include "renderer/base/gl_program.h"
-#include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_shader_bindings.h"
-#include "renderer/base/graphics_context.h"
 
 #include "platform/gl/gl.h"
 
@@ -28,7 +25,7 @@ void GLVertexArray::prepare(GraphicsContext& graphicsContext)
     glBindVertexArray(_id);
     _shader_bindings->arrayBuffer().prepare(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, _shader_bindings->arrayBuffer().id());
-    const sp<GLProgram> program = graphicsContext.getGLProgram(_shader);
+    const sp<GLProgram>& program = _shader.getGLProgram(graphicsContext);
     _shader_bindings->bindArrayBuffers(graphicsContext, program);
     glBindVertexArray(0);
     LOGD("id = %d", _id);
