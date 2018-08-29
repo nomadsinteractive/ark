@@ -46,7 +46,7 @@ private:
     void synchronize() {
         Node* head = _pending.release();
         _collection.back() = _collection.front();
-        Synchronizer::synchronize(_collection.back(), head);
+        Synchronizer::append(_collection.back(), head);
         _collection.swap();
         while(head) {
             Node* next = head->next();
@@ -64,7 +64,7 @@ protected:
 
 template<typename T> class _QueueSynchronizer {
 public:
-    static void synchronize(std::queue<T>& queue, _Node<T>* head) {
+    static void append(std::queue<T>& queue, _Node<T>* head) {
         std::list<T> list;
         while(head) {
             list.push_front(head->data());
@@ -77,7 +77,7 @@ public:
 
 template<typename T> class _UnorderedSetSynchronizer {
 public:
-    static void synchronize(std::unordered_set<T>& unorderedSet, _Node<T>* head) {
+    static void append(std::unordered_set<T>& unorderedSet, _Node<T>* head) {
         while(head) {
             unorderedSet.insert(head->data());
             head = head->next();

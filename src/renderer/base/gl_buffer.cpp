@@ -34,7 +34,7 @@ void GLBuffer::Recycler::recycle(GraphicsContext&)
 }
 
 GLBuffer::Stub::Stub(const sp<GLRecycler>& recycler, const sp<Uploader>& uploader, GLenum type, GLenum usage)
-    : _recycler(recycler), _uploader(uploader), _type(type), _usage(usage), _id(0), _size(0)
+    : _recycler(recycler), _uploader(uploader), _type(type), _usage(usage), _id(0), _size(_uploader ? _uploader->size() : 0)
 {
 }
 
@@ -80,11 +80,13 @@ void GLBuffer::Stub::prepare(GraphicsContext& graphicsContext, const sp<Uploader
 
 void GLBuffer::Stub::upload(GraphicsContext& /*graphicsContext*/, GLBuffer::Uploader& uploader)
 {
-    size_t uploadSize = uploader.size();
     glBindBuffer(_type, _id);
-    if(_size < uploadSize)
-        glBufferData(_type, uploadSize, nullptr, _usage);
-    _size = uploadSize;
+    GLint bufsize = 0;
+    glGetBufferParameteriv(_type, GL_BUFFER_SIZE, &bufsize);
+
+    _size = uploader.size();
+    if(static_cast<size_t>(bufsize) < _size)
+        glBufferData(_type, _size, nullptr, _usage);
     GLintptr offset = 0;
     const UploadFunc func = [&offset, this](void* data, size_t size) {
         NOT_NULL(data);
@@ -127,7 +129,7 @@ GLBuffer::Snapshot::Snapshot(const sp<GLBuffer::Stub>& stub, size_t size)
 }
 
 GLBuffer::Snapshot::Snapshot(const sp<GLBuffer::Stub>& stub, const sp<Uploader>& uploader)
-    : _stub(stub), _uploader(uploader), _size(uploader ? uploader->size() : stub->size())
+    : _stub(stub), _uploader(uploader), _size(uploader->size())
 {
 }
 

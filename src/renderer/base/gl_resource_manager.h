@@ -45,7 +45,7 @@ public:
 
     GLBuffer makeGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage);
     GLBuffer makeDynamicArrayBuffer() const;
-    GLBuffer::Snapshot makeGLBufferSnapshot(GLBuffer::Name name, const GLBuffer::UploadMakerFunc& maker, size_t size);
+    GLBuffer::Snapshot makeGLBufferSnapshot(GLBuffer::Name name, const GLBuffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size);
 
     const sp<GLRecycler>& recycler() const;
 

@@ -135,7 +135,7 @@ GLBuffer GLResourceManager::makeDynamicArrayBuffer() const
     return GLBuffer(_recycler, nullptr, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 }
 
-GLBuffer::Snapshot GLResourceManager::makeGLBufferSnapshot(GLBuffer::Name name, const GLBuffer::UploadMakerFunc& maker, size_t size)
+GLBuffer::Snapshot GLResourceManager::makeGLBufferSnapshot(GLBuffer::Name name, const GLBuffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size)
 {
     if(name == GLBuffer::NAME_NONE)
         return GLBuffer(_recycler, nullptr, GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW).snapshot(maker(size));
@@ -143,10 +143,9 @@ GLBuffer::Snapshot GLResourceManager::makeGLBufferSnapshot(GLBuffer::Name name, 
     GLBuffer& shared = _shared_buffers[name];
     if(!shared || shared.size() < size)
     {
-        const sp<GLBuffer::Uploader> uploader = maker(size);
-        NOT_NULL(uploader);
+        const sp<GLBuffer::Uploader> uploader = maker(reservedObjectCount);
+        DCHECK(uploader && uploader->size() >= size, "Making GLBuffer::Uploader failed, object-count: %d, uploader-size: %d, required-size: %d", reservedObjectCount, uploader ? uploader->size() : 0, size);
         shared = makeGLBuffer(uploader, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
-        prepare(shared, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
     }
     return shared.snapshot(size);
 }

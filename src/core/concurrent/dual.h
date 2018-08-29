@@ -41,7 +41,7 @@ public:
         _swapped = !_swapped;
     }
 
-    void setAndSwap(const T& value) {
+    void store(const T& value) {
         back() = value;
         swap();
     }
