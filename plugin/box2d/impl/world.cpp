@@ -74,6 +74,17 @@ sp<RigidBody> World::createBody(Collider::BodyType type, int32_t shape, const sp
     const sp<Body> body = sp<Body>::make(*this, type, position, size, rotate ? rotate->value().cast<Numeric>() : sp<Numeric>::null(), manifest.shape, manifest.density, manifest.friction);
     if(rotate)
         body->setAngle(rotate->radians());
+
+    if(manifest.category || manifest.mask || manifest.group)
+    {
+        b2Filter filter;
+        filter.categoryBits = manifest.category;
+        filter.maskBits = manifest.mask;
+        filter.groupIndex = manifest.group;
+        for(b2Fixture* fixture = body->body()->GetFixtureList(); fixture; fixture = fixture->GetNext())
+            fixture->SetFilterData(filter);
+    }
+
     return body;
 }
 
@@ -152,11 +163,12 @@ sp<World> World::BUILDER_IMPL1::build(const sp<Scope>& args)
     const sp<World> world = sp<World>::make(gravity, BeanUtils::toFloat(_ppmx, args), BeanUtils::toFloat(_ppmy, args));
     for(const document& i : _manifest->children("rigid-body"))
     {
-        BodyManifest bodyManifest;
-        bodyManifest.shape = _factory.ensure<Shape>(i, "shape", args);
-        bodyManifest.density = Documents::getAttribute<float>(i, "density", 1.0f);
-        bodyManifest.friction = Documents::getAttribute<float>(i, "friction", 0.2f);
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
+
+        BodyManifest bodyManifest(_factory.ensure<Shape>(i, "shape", args), Documents::getAttribute<float>(i, "density", 1.0f), Documents::getAttribute<float>(i, "friction", 0.2f));
+        bodyManifest.category = Documents::getAttribute<uint16_t>(i, "category", 0);
+        bodyManifest.mask = Documents::getAttribute<uint16_t>(i, "mask", 0);
+        bodyManifest.group = Documents::getAttribute<int16_t>(i, "group", 0);
         world->_stub->_body_manifests[type] = bodyManifest;
     }
     const sp<Boolean> expired = _expired->build(args);
@@ -185,12 +197,12 @@ void World::Stub::run()
 }
 
 World::BodyManifest::BodyManifest()
-    : density(0), friction(0)
+    : density(0), friction(0), category(0), mask(0), group(0)
 {
 }
 
-World::BodyManifest::BodyManifest(const sp<Shape> shape, float density, float friction)
-    : shape(shape), density(density), friction(friction)
+World::BodyManifest::BodyManifest(const sp<Shape>& shape, float density, float friction)
+    : shape(shape), density(density), friction(friction), category(0), mask(0), group(0)
 {
 }
 

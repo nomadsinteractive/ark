@@ -86,11 +86,15 @@ public:
 private:
     struct BodyManifest {
         BodyManifest();
-        BodyManifest(const sp<Shape> shape, float density, float friction);
+        BodyManifest(const sp<Shape>& shape, float density, float friction);
 
         sp<Shape> shape;
         float density;
         float friction;
+
+        uint16_t category;
+        uint16_t mask;
+        int16_t group;
     };
 
     class ContactListenerImpl : public b2ContactListener {
