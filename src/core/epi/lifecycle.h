@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_EPI_EXPIRED_H_
-#define ARK_CORE_EPI_EXPIRED_H_
+#ifndef ARK_CORE_EPI_LIFECYCLE_H_
+#define ARK_CORE_EPI_LIFECYCLE_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -9,12 +9,12 @@
 
 namespace ark {
 
-class ARK_API Expired : public Boolean {
+class ARK_API Lifecycle : public Boolean {
 public:
 //  [[script::bindings::auto]]
-    Expired(bool expired = false);
+    Lifecycle(bool expired = false);
 //  [[script::bindings::auto]]
-    Expired(const sp<Boolean>& delegate);
+    Lifecycle(const sp<Boolean>& delegate);
 
     virtual bool val() override;
 
@@ -23,23 +23,12 @@ public:
 //  [[script::bindings::auto]]
     void expire();
 
-//  [[plugin::builder]]
-    class BUILDER : public Builder<Expired> {
-    public:
-        BUILDER(BeanFactory& parent, const document& doc);
-
-        virtual sp<Expired> build(const sp<Scope>& args) override;
-
-    private:
-        sp<Builder<Boolean>> _delegate;
-    };
-
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Expired> {
+    class DICTIONARY : public Builder<Lifecycle> {
     public:
         DICTIONARY(BeanFactory& parent, const String& value);
 
-        virtual sp<Expired> build(const sp<Scope>& args);
+        virtual sp<Lifecycle> build(const sp<Scope>& args);
 
     private:
         bool _expired;

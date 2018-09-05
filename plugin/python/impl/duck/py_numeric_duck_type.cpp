@@ -18,12 +18,12 @@ PyNumericDuckType::PyNumericDuckType(const sp<PyInstance>& inst)
 
 void PyNumericDuckType::to(sp<Integer>& inst)
 {
-    inst = sp<Integer::Impl>::make(PyLong_AsLong(_instance->instance()));
+    inst = sp<Integer::Impl>::make(PyLong_AsLong(_instance->object()));
 }
 
 void PyNumericDuckType::to(sp<Numeric>& inst)
 {
-    inst = PythonInterpreter::instance()->toNumeric(_instance->instance());
+    inst = PythonInterpreter::instance()->toNumeric(_instance->object());
 }
 
 }

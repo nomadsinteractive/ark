@@ -21,7 +21,7 @@ public:
 
     private:
         sp<Builder<Renderer>> _delegate;
-        sp<Builder<Expired>> _expired;
+        sp<Builder<Lifecycle>> _expired;
     };
 
 };

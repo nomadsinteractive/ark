@@ -1,6 +1,8 @@
 #ifndef ARK_PLUGIN_BOX2D_IMPL_WORLD_H_
 #define ARK_PLUGIN_BOX2D_IMPL_WORLD_H_
 
+#include <unordered_map>
+
 #include <Box2D/Box2D.h>
 
 #include "core/base/bean_factory.h"
@@ -15,13 +17,11 @@
 #include "app/inf/collider.h"
 
 #include "box2d/api.h"
-#include "box2d/inf/shape.h"
+#include "box2d/forwarding.h"
 
 namespace ark {
 namespace plugin {
 namespace box2d {
-
-class Body;
 
 class ARK_PLUGIN_BOX2D_API World : public Object, public Runnable, public Collider, Implements<World, Object, Runnable, Collider> {
 public:
@@ -51,6 +51,8 @@ public:
     float toMeterX(float pixelX) const;
 //  [[script::bindings::auto]]
     float toMeterY(float pixelY) const;
+
+    void track(const sp<Joint>& joint) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER_IMPL1 : public Builder<World> {
@@ -106,6 +108,18 @@ private:
         ObjectPool _object_pool;
     };
 
+    class DestructionListenerImpl : public b2DestructionListener {
+    public:
+        virtual void SayGoodbye(b2Joint* joint) override;
+        virtual void SayGoodbye(b2Fixture* fixture) override;
+
+        void track(const sp<Joint>& joint);
+        void untrack(const sp<Joint>& joint);
+
+    private:
+        std::unordered_map<b2Joint*, WeakPtr<Joint>> _joints;
+    };
+
     struct Stub : public Runnable {
         Stub(const b2Vec2& gravity, float ppmX, float ppmY);
 
@@ -123,6 +137,7 @@ private:
         std::unordered_map<int32_t, BodyManifest> _body_manifests;
 
         ContactListenerImpl _contact_listener;
+        DestructionListenerImpl _destruction_listener;
     };
 
     int32_t genRigidBodyId() const;

@@ -309,7 +309,7 @@ def gen_py_binding_cpp(name, namespaces, includes, lines):
 #include "python/extension/arkmodule.h"
 #include "python/extension/python_interpreter.h"
 #include "python/extension/py_ark_meta_type.h"
-#include "python/extension/wrapper.h"
+#include "python/extension/py_container.h"
 
 %s
 
@@ -393,7 +393,7 @@ class GenArgument:
     def gen_declare(self, objname, argname, extract_cast=False):
         typename = self._meta.cast_signature
         if self._meta.is_base_type:
-            return '%s %s = static_cast<%s>(%s);' % (typename, objname, typename, argname)
+            return '%s %s = %s;' % (typename, objname, gen_cast_call(typename, argname))
         if self.typename == self._meta.cast_signature:
             return '%s %s = %s;' % (typename, objname, argname)
         m = acg.getSharedPtrType(self._accept_type)
@@ -481,9 +481,13 @@ def gen_method_call_arg(i, arg, argtype):
         arg = arg[0:pos]
     targettype = ' '.join(arg.split()[:-1])
     equals = acg.typeCompare(targettype, argtype)
-    # if targettype == 'bool':
-    #     return 'obj%d != 0' % i
-    return 'obj%d' % i if equals or '<' in argtype else 'static_cast<%s>(obj%d)' % (targettype, i)
+    return 'obj%d' % i if equals or '<' in argtype else gen_cast_call(targettype, 'obj%d' % i)
+
+
+def gen_cast_call(targettype, name):
+    if targettype == 'bool':
+        return '%s != 0' % name
+    return 'static_cast<%s>(%s)' % (targettype, name)
 
 
 class GenMethod(object):
@@ -556,7 +560,7 @@ class GenMethod(object):
             return ['return ret;']
 
         if py_return != 'PyObject*':
-            return ['return static_cast<%s>(ret);' % py_return]
+            return ['return %s;' % gen_cast_call(py_return, 'ret')]
 
         if return_type == 'void':
             return ['Py_RETURN_NONE;']
@@ -744,8 +748,8 @@ class GenPropertyMethod(GenMethod):
             lines = ['%s::%s(%s%s);' % (genclass.classname, self._name, self_statement, argnames and ', ' + argnames)]
         else:
             lines = ['%s->%s(%s);' % (self_statement, self._name, argnames)]
-        if self._is_setter and genclass.is_container and self._arguments[0].type_compare('Box'):
-            lines.append('self->setContainerObject(obj0);')
+        if self._is_setter and genclass.is_container:
+            lines.append('self->addObjectToContainer(obj0);')
         return '\n    '.join(lines)
 
     def _ensure_property_def(self, properties):
@@ -1196,8 +1200,8 @@ def main(params, paths):
 
     def autoannotation(filename, content, m, x):
         names = [i for i in x[1].split(':', 2)[0].split() if i not in ('ARK_API', 'final')]
-        if len(names) == 1:
-            results[names[0]] = GenClass(filename, names[0], x[0].strip() == 'container')
+        if len(names) >= 1:
+            results[names[-1]] = GenClass(filename, names[-1], x[0].strip() == 'container')
 
     def autoconstant(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)

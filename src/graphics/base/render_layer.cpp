@@ -48,7 +48,7 @@ sp<RenderLayer> RenderLayer::BUILDER_IMPL1::build(const sp<Scope>& args)
     for(const sp<Builder<RenderObject>>& i : _render_objects)
     {
         const sp<RenderObject> renderObject = i->build(args);
-        renderLayer->addRenderObject(renderObject, renderObject.as<Expired>());
+        renderLayer->addRenderObject(renderObject, renderObject.as<Lifecycle>());
     }
     return renderLayer;
 }

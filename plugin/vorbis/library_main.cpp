@@ -1,9 +1,4 @@
-#include "core/base/plugin.h"
-
-#include "core/ark.h"
 #include "core/base/api.h"
-#include "core/base/plugin_manager.h"
-#include "core/types/shared_ptr.h"
 
 #include "generated/vorbis_plugin.h"
 

@@ -45,7 +45,7 @@ void GLProgram::prepare(GraphicsContext& graphicsContext)
     glDetachShader(_id, _vertex_shader->id());
     glDetachShader(_id, _fragment_shader->id());
 
-    GLboolean linkstatus = GL_FALSE;
+    GLint linkstatus = 0;
     glGetProgramiv(_id, GL_LINK_STATUS, &linkstatus);
     DCHECK(linkstatus, "Program link failed: %s", getInformationLog().c_str());
     LOGD("GLProgram[%d]: vertex-shader: %d, fragment-shader: %d", _id, _vertex_shader->id(), _fragment_shader->id());
@@ -114,7 +114,7 @@ void GLProgram::validate(GraphicsContext& /*graphicsContext*/) const
 {
     glValidateProgram(_id);
 
-    GLboolean validatestatus;
+    GLint validatestatus = 0;
     glGetProgramiv(_id, GL_VALIDATE_STATUS, &validatestatus);
     DCHECK(validatestatus, "GLProgram validate failed: %s", getInformationLog().c_str());
 }

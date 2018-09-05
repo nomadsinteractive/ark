@@ -17,6 +17,7 @@
 #include "python/api.h"
 #include "python/extension/python_interpreter.h"
 #include "python/extension/py_garbage_collector.h"
+#include "python/extension/reference_manager.h"
 
 #include "python/impl/adapter/collision_callback_python_adapter.h"
 #include "python/impl/adapter/python_callable_runnable.h"
@@ -39,7 +40,7 @@ public:
     }
 
     virtual float val() override {
-        return static_cast<float>(PyFloat_AsDouble(_attr.instance()));
+        return static_cast<float>(PyFloat_AsDouble(_attr.object()));
     }
 
 private:
@@ -56,7 +57,7 @@ sp<Runnable> PythonInterpreter::toRunnable(PyObject* object)
         return toInstance<Runnable>(object);
 
     if(PyCallable_Check(object))
-        return sp<PythonCallableRunnable>::make(sp<PyInstance>::make(PyInstance::adopt(object)));
+        return sp<PythonCallableRunnable>::make(PyInstance::adopt(object));
 
     return asInterface<Runnable>(object);
 }
@@ -69,7 +70,7 @@ sp<CollisionCallback> PythonInterpreter::toCollisionCallback(PyObject* object)
 sp<EventListener> PythonInterpreter::toEventListener(PyObject* object)
 {
     if(PyCallable_Check(object))
-        return sp<PythonCallableEventListener>::make(sp<PyInstance>::make(PyInstance::adopt(object)));
+        return sp<PythonCallableEventListener>::make(PyInstance::adopt(object));
 
     return asInterface<EventListener>(object);
 }
@@ -174,7 +175,7 @@ sp<Scope> PythonInterpreter::toScope(PyObject* kws)
                 scope->put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
             else if(PyFloat_Check(item) || PyLong_Check(item) || PyObject_HasAttrString(item, "val"))
             {
-                const sp<PyInstance> owned = sp<PyInstance>::make(PyInstance::adopt(item));
+                const sp<PyInstance> owned = PyInstance::adopt(item);
                 sp<PyNumericDuckType> pyDuck = sp<PyNumericDuckType>::make(owned);
                 scope->put<PyNumericDuckType>(sKey, pyDuck);
             }
@@ -184,14 +185,14 @@ sp<Scope> PythonInterpreter::toScope(PyObject* kws)
                 scope->put<Boolean>(sKey, sp<Boolean::Impl>::make(PyObject_IsTrue(item) != 0));
             else if(PyCallable_Check(item))
             {
-                const sp<PyInstance> owned = sp<PyInstance>::make(PyInstance::adopt(item));
+                const sp<PyInstance> owned = PyInstance::adopt(item);
                 sp<PyCallableDuckType> pyDuck = sp<PyCallableDuckType>::make(owned);
-                pyDuck.absorb<PyGarbageCollector>(sp<PyGarbageCollector>::make(owned));
+                pyDuck.absorb<PyGarbageCollector>(sp<PyGarbageCollectorImpl>::make(owned));
                 scope->put<PyCallableDuckType>(sKey, pyDuck);
             }
             else
             {
-                const sp<PyInstance> owned = sp<PyInstance>::make(PyInstance::adopt(item));
+                const sp<PyInstance> owned = PyInstance::adopt(item);
                 scope->put<PyObjectDuckType>(sKey, sp<PyObjectDuckType>::make(owned));
             }
         }
@@ -227,6 +228,11 @@ std::wstring PythonInterpreter::pyUnicodeToWString(PyObject* unicode)
     return std::wstring(buf.begin(), buf.end());
 }
 
+const sp<ReferenceManager>& PythonInterpreter::referenceManager() const
+{
+    return _reference_manager;
+}
+
 const sp<PythonInterpreter>& PythonInterpreter::instance()
 {
     return _INSTANCE;
@@ -236,6 +242,11 @@ const sp<PythonInterpreter>& PythonInterpreter::newInstance()
 {
     _INSTANCE = sp<PythonInterpreter>::make();
     return _INSTANCE;
+}
+
+PythonInterpreter::PythonInterpreter()
+    : _reference_manager(sp<ReferenceManager>::make())
+{
 }
 
 bool PythonInterpreter::isPyArkTypeObject(void* pyTypeObject)
@@ -264,7 +275,11 @@ PyObject* PythonInterpreter::toPyObject(const Box& box)
         Py_RETURN_NONE;
 
     if(box.typeId() == Type<PyInstance>::id())
-        return box.as<PyInstance>()->instance();
+    {
+        PyObject* object = box.as<PyInstance>()->object();
+        Py_XINCREF(object);
+        return object;
+    }
 
     auto iter = _type_by_id.find(box.typeId());
     DCHECK(iter != _type_by_id.end(), "Unknow box type");
@@ -301,7 +316,7 @@ template<> ARK_PLUGIN_PYTHON_API std::wstring PythonInterpreter::toType<std::wst
 
 template<> ARK_PLUGIN_PYTHON_API Box PythonInterpreter::toType<Box>(PyObject* object)
 {
-    return sp<PyInstance>::make(PyInstance::adopt(object)).pack();
+    return PyInstance::adopt(object).pack();
 }
 
 template<> ARK_PLUGIN_PYTHON_API bool PythonInterpreter::toType<bool>(PyObject* object)

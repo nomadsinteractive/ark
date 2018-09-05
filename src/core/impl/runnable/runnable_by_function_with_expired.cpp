@@ -3,7 +3,7 @@
 namespace ark {
 
 RunnableByFunctionWithExpired::RunnableByFunctionWithExpired(const std::function<bool()>& function)
-    : Expired(false), _function(function)
+    : Lifecycle(false), _function(function)
 {
 }
 

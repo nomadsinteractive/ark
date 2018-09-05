@@ -28,7 +28,7 @@ private:
         Task(const Task& task);
 
         const sp<Runnable>& entry() const;
-        const sp<Expired>& expirable() const;
+        const sp<Lifecycle>& expirable() const;
 
         uint64_t nextFireTick() const;
         uint32_t interval() const;
@@ -36,7 +36,7 @@ private:
 
     private:
         sp<Runnable> _entry;
-        sp<Expired> _expirable;
+        sp<Lifecycle> _expirable;
         uint64_t _next_fire_tick;
         uint32_t _interval;
     };

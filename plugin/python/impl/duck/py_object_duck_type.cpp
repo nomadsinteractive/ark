@@ -21,12 +21,12 @@ void PyObjectDuckType::to(sp<CollisionCallback>& inst)
 
 void PyObjectDuckType::to(sp<Array<Color>>& inst)
 {
-    inst = PythonInterpreter::instance()->toArray<Color>(_instance->instance());
+    inst = PythonInterpreter::instance()->toArray<Color>(_instance->object());
 }
 
 void PyObjectDuckType::to(sp<Array<int32_t>>& inst)
 {
-    inst = PythonInterpreter::instance()->toArray<int32_t>(_instance->instance());
+    inst = PythonInterpreter::instance()->toArray<int32_t>(_instance->object());
 }
 
 }

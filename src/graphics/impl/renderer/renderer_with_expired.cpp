@@ -5,14 +5,14 @@
 namespace ark {
 
 RendererWithExpired::DECORATOR::DECORATOR(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& value)
-    : _delegate(delegate), _expired(factory.ensureBuilder<Expired>(value))
+    : _delegate(delegate), _expired(factory.ensureBuilder<Lifecycle>(value))
 {
 }
 
 sp<Renderer> RendererWithExpired::DECORATOR::build(const sp<Scope>& args)
 {
     sp<Renderer> bean = _delegate->build(args);
-    return bean.absorb<Expired>(_expired->build(args));
+    return bean.absorb<Lifecycle>(_expired->build(args));
 }
 
 }

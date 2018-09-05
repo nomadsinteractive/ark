@@ -1,4 +1,4 @@
-#include "python/extension/wrapper.h"
+#include "python/extension/py_container.h"
 
 #include "python/extension/py_garbage_collector.h"
 #include "python/extension/py_instance.h"
@@ -7,12 +7,12 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-int Wrapper::traverse(visitproc visit, void* arg)
+int PyContainer::traverse(visitproc visit, void* arg)
 {
     if(_instances)
-        Py_VISIT(_instances->instance());
+        Py_VISIT(_instances->object());
 
-    for(auto iter = _garbage_collectors.begin(); iter != _garbage_collectors.end(); ++iter)
+    for(auto iter = _garbage_collectors.begin(); iter != _garbage_collectors.end();)
     {
         const sp<PyGarbageCollector> gc = (*iter).lock();
         if(!gc)
@@ -22,6 +22,7 @@ int Wrapper::traverse(visitproc visit, void* arg)
                 break;
             continue;
         }
+        ++iter;
         int r = gc->traverse(visit, arg);
         if(r)
             return r;
@@ -29,10 +30,10 @@ int Wrapper::traverse(visitproc visit, void* arg)
     return 0;
 }
 
-int Wrapper::clear()
+int PyContainer::clear()
 {
     if(_instances)
-        Py_XDECREF(_instances->release());
+        _instances->deref();
 
     while(!_garbage_collectors.empty())
     {
@@ -48,12 +49,12 @@ int Wrapper::clear()
     return 0;
 }
 
-void Wrapper::addCollector(const WeakPtr<PyGarbageCollector>& collector)
+void PyContainer::addCollector(const WeakPtr<PyGarbageCollector>& collector)
 {
     _garbage_collectors.push_back(collector);
 }
 
-void Wrapper::setPyInstance(const sp<PyInstance>& pyInstance)
+void PyContainer::setPyInstance(const sp<PyInstance>& pyInstance)
 {
     _instances = pyInstance;
 }

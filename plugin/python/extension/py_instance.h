@@ -3,49 +3,39 @@
 
 #include <Python.h>
 
+#include "core/forwarding.h"
+
 namespace ark {
 namespace plugin {
 namespace python {
 
 class PyInstance {
 public:
-    struct Instance {
-    public:
-        Instance(PyObject* object, bool isBorrowedReference);
-        Instance(const Instance& other);
-
-        PyObject* _object;
-        bool _is_borrowed_reference;
-    };
-
-public:
-    PyInstance(const PyInstance& other);
-    PyInstance(const Instance& instance);
+    PyInstance(const PyInstance& other) = delete;
+    PyInstance(PyInstance&& other);
     ~PyInstance();
 
-    static Instance borrow(PyObject* object);
-    static Instance steal(PyObject* object);
-    static Instance adopt(PyObject* object);
+    static PyInstance borrow(PyObject* object);
+    static PyInstance steal(PyObject* object);
+
+    static sp<PyInstance> adopt(PyObject* object);
 
     operator PyObject*();
     operator bool();
 
-    PyObject* instance();
+    PyObject* object();
     PyObject* type();
     const char* name();
 
     bool hasAttr(const char* name) const;
-    PyObject* getAttr(const char* name) const;
-    PyObject* getAttr(PyObject* name) const;
-    void setAttr(const char* name, PyObject* attr);
-    int setAttr(PyObject* name, PyObject* attr);
+    sp<PyInstance> getAttr(const char* name) const;
 
     PyObject* call(PyObject* args);
 
     bool isCallable();
-    long hash();
 
     PyObject* release();
+    void deref();
 
 private:
     PyInstance(PyObject* object, bool isBorrowedReference);

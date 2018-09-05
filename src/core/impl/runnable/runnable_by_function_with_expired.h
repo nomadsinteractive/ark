@@ -4,14 +4,13 @@
 #include <functional>
 
 #include "core/inf/runnable.h"
-#include "core/epi/expired.h"
+#include "core/epi/lifecycle.h"
 #include "core/types/class.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-//[[core::class]]
-class RunnableByFunctionWithExpired : public Runnable, public Expired {
+class RunnableByFunctionWithExpired : public Runnable, public Lifecycle {
 public:
     RunnableByFunctionWithExpired(const std::function<bool()>& function);
 

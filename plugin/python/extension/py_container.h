@@ -8,6 +8,8 @@
 #include "core/types/weak_ptr.h"
 #include "core/types/shared_ptr.h"
 
+#include "python/api.h"
+
 namespace ark {
 namespace plugin {
 namespace python {
@@ -15,7 +17,7 @@ namespace python {
 class PyGarbageCollector;
 class PyInstance;
 
-class Wrapper {
+class ARK_PLUGIN_PYTHON_API PyContainer {
 public:
 
     int traverse(visitproc visit, void* args);

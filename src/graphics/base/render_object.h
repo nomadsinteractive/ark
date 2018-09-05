@@ -118,7 +118,7 @@ public:
 
     private:
         sp<Builder<RenderObject>> _delegate;
-        sp<Builder<Expired>> _expired;
+        sp<Builder<Lifecycle>> _expired;
 
     };
 

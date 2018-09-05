@@ -1,5 +1,5 @@
-#ifndef ARK_TEST_BASE_REF_COUNT_H_
-#define ARK_TEST_BASE_REF_COUNT_H_
+#ifndef ARK_TEST_BASE_REF_COUNTER_H_
+#define ARK_TEST_BASE_REF_COUNTER_H_
 
 #include <stdint.h>
 
@@ -7,14 +7,14 @@
 
 namespace ark {
 
-template<typename T> class RefCount {
+template<typename T> class RefCounter {
 public:
-    RefCount() {
+    RefCounter() {
         REF_COUNT ++;
         LOGD("RefCount: %d", REF_COUNT);
     }
 
-    ~RefCount() {
+    ~RefCounter() {
         REF_COUNT --;
         LOGD("RefCount: %d", REF_COUNT);
     }
@@ -27,7 +27,7 @@ private:
     static uint32_t REF_COUNT;
 };
 
-template<typename T> uint32_t RefCount<T>::REF_COUNT = 0;
+template<typename T> uint32_t RefCounter<T>::REF_COUNT = 0;
 
 }
 

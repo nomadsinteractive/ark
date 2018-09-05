@@ -13,6 +13,7 @@
 #include "app/inf/collider.h"
 
 #include "box2d/api.h"
+#include "box2d/forwarding.h"
 #include "box2d/impl/world.h"
 #include "box2d/inf/shape.h"
 
@@ -20,8 +21,7 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-class World;
-
+//[[script::bindings::container]]
 class ARK_PLUGIN_BOX2D_API Body : public Object, public RigidBody, Implements<Body, Object, RigidBody> {
 public:
 //  [[script::bindings::auto]]

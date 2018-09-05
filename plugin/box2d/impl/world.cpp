@@ -2,6 +2,7 @@
 
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
+#include "core/util/boolean_util.h"
 #include "core/util/log.h"
 
 #include "graphics/base/bounds.h"
@@ -15,9 +16,9 @@
 #include "app/inf/collision_callback.h"
 
 #include "box2d/impl/body.h"
+#include "box2d/impl/joint.h"
 #include "box2d/impl/shapes/ball.h"
 #include "box2d/impl/shapes/box.h"
-
 
 namespace ark {
 namespace plugin {
@@ -59,6 +60,7 @@ World::World(const b2Vec2& gravity, float ppmX, float ppmY)
     _stub->_body_manifests[Collider::BODY_SHAPE_BALL] = BodyManifest(sp<Ball>::make(), 1.0f, 0.2f);
     _stub->_body_manifests[Collider::BODY_SHAPE_BOX] = box;
     _stub->_world.SetContactListener(&_stub->_contact_listener);
+    _stub->_world.SetDestructionListener(&_stub->_destruction_listener);
 }
 
 void World::run()
@@ -150,6 +152,11 @@ float World::toMeterY(float pixelY) const
     return pixelY / _stub->_ppm_y;
 }
 
+void World::track(const sp<Joint>& joint) const
+{
+    _stub->_destruction_listener.track(joint);
+}
+
 World::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _expired(factory.getBuilder<Boolean>(manifest, Constants::Attributes::EXPIRED))
 {
@@ -172,7 +179,7 @@ sp<World> World::BUILDER_IMPL1::build(const sp<Scope>& args)
         world->_stub->_body_manifests[type] = bodyManifest;
     }
     const sp<Boolean> expired = _expired->build(args);
-    _resource_loader_context->renderController()->addPreUpdateRequest(world->_stub, expired ? expired : sp<Boolean>::adopt(new BooleanByWeakRef<World::Stub>(world->_stub, 1)));
+    _resource_loader_context->renderController()->addPreUpdateRequest(world->_stub, expired ? expired : BooleanUtil::__or__(_resource_loader_context->disposed(), sp<Boolean>::adopt(new BooleanByWeakRef<World::Stub>(world->_stub, 1))));
     return world;
 }
 
@@ -245,6 +252,35 @@ void World::ContactListenerImpl::EndContact(b2Contact* contact)
             body2->_callback->onEndContact(RigidBodyImpl::obtain(_object_pool, *body1));
         }
     }
+}
+
+void World::DestructionListenerImpl::SayGoodbye(b2Joint* joint)
+{
+    auto iter = _joints.find(joint);
+    if(iter != _joints.end())
+    {
+        const sp<Joint> obj = iter->second.lock();
+        if(obj)
+            obj->clear();
+
+        _joints.erase(iter);
+    }
+}
+
+void World::DestructionListenerImpl::SayGoodbye(b2Fixture* fixture)
+{
+}
+
+void World::DestructionListenerImpl::track(const sp<Joint>& joint)
+{
+    _joints[joint->object()] = joint;
+}
+
+void World::DestructionListenerImpl::untrack(const sp<Joint>& joint)
+{
+    auto iter = _joints.find(joint->object());
+    if(iter != _joints.end())
+        _joints.erase(iter);
 }
 
 }

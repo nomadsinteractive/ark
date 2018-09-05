@@ -1,7 +1,7 @@
 #ifndef ARK_RENDERER_BASE_RESOURCE_LOADER_CONTEXT_H_
 #define ARK_RENDERER_BASE_RESOURCE_LOADER_CONTEXT_H_
 
-#include <map>
+#include <unordered_map>
 
 #include "core/forwarding.h"
 #include "core/collection/expirable_item_list.h"
@@ -91,6 +91,7 @@ public:
     const sp<GLTextureLoader>& textureLoader() const;
     const sp<MemoryPool>& memoryPool() const;
     const sp<ObjectPool>& objectPool() const;
+    sp<Boolean> disposed() const;
 
     template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& expired = nullptr) {
         return getSynchronizer<T>()->synchronize(delegate, expired);
@@ -102,7 +103,7 @@ private:
         if(iter == _synchronizers.end()) {
             const sp<Synchronizer<T>> synchronizer = sp<Synchronizer<T>>::make();
             _synchronizers.emplace(Type<T>::id(), synchronizer);
-            _render_controller->addPreUpdateRequest(synchronizer, _context_expired);
+            _render_controller->addPreUpdateRequest(synchronizer, _disposed);
             return synchronizer;
         }
         return iter->second;
@@ -118,8 +119,8 @@ private:
     sp<MemoryPool> _memory_pool;
     sp<ObjectPool> _object_pool;
 
-    sp<Expired::Impl> _context_expired;
-    std::map<TypeId, sp<Runnable>> _synchronizers;
+    sp<Boolean::Impl> _disposed;
+    std::unordered_map<TypeId, sp<Runnable>> _synchronizers;
 
 };
 

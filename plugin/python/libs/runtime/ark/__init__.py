@@ -20,6 +20,10 @@ def get_asset(filename):
         return fp.read()
 
 
+def get_ref_manager():
+    return None
+
+
 class _ArkObject:
     pass
 
@@ -149,8 +153,8 @@ class Numeric(_Var):
         return False
 
 
-class Expired:
-    def __init__(self, v=False):
+class Lifecycle:
+    def __init__(self, disposed=False):
         pass
 
 

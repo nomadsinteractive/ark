@@ -12,20 +12,24 @@
 #include "core/types/class.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/forwarding.h"
+
 #include "python/api.h"
 #include "python/forwarding.h"
-#include "python/extension/wrapper.h"
+#include "python/extension/py_container.h"
 
 namespace ark {
 namespace plugin {
 namespace python {
+
+class PyGarbageCollector;
 
 class ARK_PLUGIN_PYTHON_API PyArkType {
 public:
     typedef struct {
         PyObject_HEAD
         Box* box;
-        Wrapper* wrapper;
+        PyContainer* container;
         PyObject* weakreflist;
 
         template<typename T> const sp<T>& unpack() const {
@@ -47,17 +51,31 @@ public:
             return box && box->typeId() == Type<T>::id();
         }
 
-        Wrapper* getWrapper() {
-            if(wrapper)
-                return wrapper;
+        PyContainer* getContainer() {
+            if(container)
+                return container;
             if(PyObject_IS_GC(reinterpret_cast<PyObject*>(this)))
-                wrapper = new Wrapper();
-            return wrapper;
+                container = new PyContainer();
+            return container;
         }
 
-        void setContainerObject(const Box& object) {
+        template<typename T> void addObjectToContainer(const sp<T>& object) {
+            const sp<PyGarbageCollector> gc = object.as<PyGarbageCollector>();
+            if(gc) {
+                PyContainer* gcContainer = getContainer();
+                DCHECK(gcContainer, "Object doesnot support GC");
+                gcContainer->addCollector(gc);
+            }
+        }
+
+        void addObjectToContainer(float /*object*/) {
+        }
+        void addObjectToContainer(const V2& /*object*/) {
+        }
+
+        void addObjectToContainer(const Box& object) {
             DCHECK(object.typeId() == Type<PyInstance>::id(), "Object is not a PyInstance");
-            Wrapper* gcContainer = getWrapper();
+            PyContainer* gcContainer = getContainer();
             DCHECK(gcContainer, "Object doesnot support GC");
             gcContainer->setPyInstance(object.as<PyInstance>());
         }

@@ -13,13 +13,22 @@ namespace python {
 
 class PyGarbageCollector {
 public:
-    PyGarbageCollector(const sp<PyInstance>& garbage);
+    virtual ~PyGarbageCollector() = default;
 
-    int traverse(visitproc visit, void* arg);
-    int clear();
+    virtual int traverse(visitproc visit, void* arg) = 0;
+    virtual int clear() = 0;
+};
+
+class PyGarbageCollectorImpl : public PyGarbageCollector {
+public:
+    PyGarbageCollectorImpl(const sp<PyInstance>& garbage);
+
+    virtual int traverse(visitproc visit, void* arg) override;
+    virtual int clear() override;
 
 private:
     sp<PyInstance> _garbage;
+
 };
 
 }

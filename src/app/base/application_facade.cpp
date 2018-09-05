@@ -1,6 +1,6 @@
 #include "app/base/application_facade.h"
 
-#include "core/epi/expired.h"
+#include "core/epi/lifecycle.h"
 
 #include "graphics/base/camera.h"
 #include "graphics/base/surface_controller.h"
@@ -50,12 +50,12 @@ const sp<Arena>& ApplicationFacade::arena() const
 void ApplicationFacade::setArena(const sp<Arena>& arena)
 {
     if(_arena)
-        _arena.as<Expired>()->expire();
+        _arena.as<Lifecycle>()->expire();
 
     NOT_NULL(arena);
-    DWARN(!arena.is<Expired>(), "Application main arena's lifecycle should be managed by application itself");
+    DWARN(!arena.is<Lifecycle>(), "Application main arena's lifecycle should be managed by application itself");
     _arena = arena;
-    _arena.absorb<Expired>(sp<Expired>::make());
+    _arena.absorb<Lifecycle>(sp<Lifecycle>::make());
 
     _surface_controller->addRenderer(_arena);
     _context->addEventListener(_arena);

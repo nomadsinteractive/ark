@@ -15,7 +15,7 @@
 namespace ark {
 
 ViewGroup::Placement::Placement(const sp<Renderer>& renderer, bool layoutRequested)
-    : _x(0), _y(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _view_group(renderer.as<ViewGroup>()), _renderer_delegate(renderer.as<RendererDelegate>()), _expirable(renderer.as<Expired>())
+    : _x(0), _y(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _view_group(renderer.as<ViewGroup>()), _renderer_delegate(renderer.as<RendererDelegate>()), _expirable(renderer.as<Lifecycle>())
 {
     NOT_NULL(renderer);
 }

@@ -40,7 +40,7 @@ private:
         sp<View> _view;
         sp<ViewGroup> _view_group;
         sp<RendererDelegate> _renderer_delegate;
-        sp<Expired> _expirable;
+        sp<Lifecycle> _expirable;
 
         float _layout_width;
         float _layout_height;

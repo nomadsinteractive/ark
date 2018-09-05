@@ -6,7 +6,7 @@ namespace plugin {
 namespace python {
 
 class PyInstance;
-class Wrapper;
+class PyContainer;
 
 }
 }

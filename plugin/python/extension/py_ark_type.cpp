@@ -12,12 +12,12 @@ namespace python {
 
 static int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args)
 {
-    return self->wrapper ? self->wrapper->traverse(visitor, args) : 0;
+    return self->container ? self->container->traverse(visitor, args) : 0;
 }
 
 static int __clear__(PyArkType::Instance* self)
 {
-    return self->wrapper ? self->wrapper->clear() : 0;
+    return self->container ? self->container->clear() : 0;
 }
 
 PyArkType::PyArkType(const String& name, const String& doc, long flags)
@@ -86,7 +86,7 @@ PyObject* PyArkType::_py_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
     PyObject* obj = PyType_GenericNew(type, args, kwds);
     Instance* self = reinterpret_cast<Instance*>(obj);
-    self->wrapper = nullptr;
+    self->container = nullptr;
     self->weakreflist = nullptr;
     return obj;
 }
@@ -112,7 +112,7 @@ void PyArkType::doInitConstants()
 void PyArkType::_py_dealloc(Instance* self)
 {
     delete self->box;
-    delete self->wrapper;
+    delete self->container;
 
     if (self->weakreflist)
         PyObject_ClearWeakRefs(reinterpret_cast<PyObject*>(self));
@@ -126,8 +126,8 @@ PyObject* PyArkType::wrap(Instance& inst, const Box& box, const sp<Scope>& args)
     if(args)
     {
         Instance* beanInst = reinterpret_cast<Instance*>(bean);
-        Wrapper* beanWrapper = beanInst->getWrapper();
-        Wrapper* wrapper = beanWrapper ? beanWrapper : inst.getWrapper();
+        PyContainer* beanWrapper = beanInst->getContainer();
+        PyContainer* wrapper = beanWrapper ? beanWrapper : inst.getContainer();
         NOT_NULL(wrapper);
         for(auto iter = args->variables().begin(); iter != args->variables().end(); ++iter)
         {

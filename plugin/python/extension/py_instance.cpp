@@ -1,24 +1,24 @@
 #include "python/extension/py_instance.h"
 
+#include "core/types/shared_ptr.h"
+
+#include "extension/python_interpreter.h"
+#include "extension/reference_manager.h"
+
 namespace ark {
 namespace plugin {
 namespace python {
 
-PyInstance::PyInstance(const PyInstance& other)
-    : _object(other._object), _is_borrowed_reference(other._is_borrowed_reference)
-{
-    if(!_is_borrowed_reference)
-        Py_XINCREF(_object);
-}
-
-PyInstance::PyInstance(const PyInstance::Instance& instance)
-    : _object(instance._object), _is_borrowed_reference(instance._is_borrowed_reference)
-{
-}
 
 PyInstance::PyInstance(PyObject* object, bool isBorrowedReference)
     : _object(object), _is_borrowed_reference(isBorrowedReference)
 {
+}
+
+PyInstance::PyInstance(PyInstance&& other)
+    : _object(other._object), _is_borrowed_reference(other._is_borrowed_reference)
+{
+    other._object = nullptr;
 }
 
 PyInstance::~PyInstance()
@@ -27,23 +27,25 @@ PyInstance::~PyInstance()
         Py_XDECREF(_object);
 }
 
-PyInstance::Instance PyInstance::borrow(PyObject* object)
+PyInstance PyInstance::borrow(PyObject* object)
 {
-    return Instance(object, true);
+    return PyInstance(object, true);
 }
 
-PyInstance::Instance PyInstance::steal(PyObject* object)
+PyInstance PyInstance::steal(PyObject* object)
 {
-    return Instance(object, false);
+    return PyInstance(object, false);
 }
 
-PyInstance::Instance PyInstance::adopt(PyObject* object)
+sp<PyInstance> PyInstance::adopt(PyObject* object)
 {
     Py_XINCREF(object);
-    return Instance(object, false);
+    const sp<PyInstance> ref = sp<PyInstance>::adopt(new PyInstance(object, false));
+    PythonInterpreter::instance()->referenceManager()->track(ref);
+    return ref;
 }
 
-PyObject* PyInstance::instance()
+PyObject* PyInstance::object()
 {
     return _object;
 }
@@ -73,24 +75,11 @@ bool PyInstance::hasAttr(const char* name) const
     return PyObject_HasAttrString(_object, name) != 0;
 }
 
-PyObject* PyInstance::getAttr(const char* name) const
+sp<PyInstance> PyInstance::getAttr(const char* name) const
 {
-    return PyObject_GetAttrString(_object, name);
-}
-
-PyObject* PyInstance::getAttr(PyObject* name) const
-{
-    return PyObject_GetAttr(_object, name);
-}
-
-void PyInstance::setAttr(const char* name, PyObject* attr)
-{
-    PyObject_SetAttrString(_object, name, attr);
-}
-
-int PyInstance::setAttr(PyObject* name, PyObject* attr)
-{
-    return PyObject_SetAttr(_object, name, attr);
+    const sp<PyInstance> attr = sp<PyInstance>::make(PyInstance::steal(PyObject_GetAttrString(_object, name)));
+    PythonInterpreter::instance()->referenceManager()->track(attr);
+    return attr;
 }
 
 PyObject* PyInstance::call(PyObject* args)
@@ -103,11 +92,6 @@ bool PyInstance::isCallable()
     return PyCallable_Check(_object) != 0;
 }
 
-long PyInstance::hash()
-{
-    return PyObject_Hash(_object);
-}
-
 PyObject* PyInstance::release()
 {
     PyObject* obj = _object;
@@ -115,14 +99,9 @@ PyObject* PyInstance::release()
     return obj;
 }
 
-PyInstance::Instance::Instance(PyObject* object, bool isBorrowedReference)
-    : _object(object), _is_borrowed_reference(isBorrowedReference)
+void PyInstance::deref()
 {
-}
-
-PyInstance::Instance::Instance(const PyInstance::Instance& other)
-    : _object(other._object), _is_borrowed_reference(other._is_borrowed_reference)
-{
+    Py_XDECREF(release());
 }
 
 }

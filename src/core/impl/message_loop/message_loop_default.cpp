@@ -1,6 +1,6 @@
 #include "core/impl/message_loop/message_loop_default.h"
 
-#include "core/epi/expired.h"
+#include "core/epi/lifecycle.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/util/log.h"
@@ -46,7 +46,7 @@ uint64_t MessageLoopDefault::pollOnce()
             _tasks.pop_front();
             if(nextTask.interval())
             {
-                const sp<Expired>& expirable = nextTask.expirable();
+                const sp<Lifecycle>& expirable = nextTask.expirable();
                 if(!expirable || !expirable->val())
                 {
                     nextTask.setNextFireTick(tick + nextTask.interval());
@@ -79,7 +79,7 @@ void MessageLoopDefault::requestNextTask(const Task& task)
 }
 
 MessageLoopDefault::Task::Task(const sp<Runnable>& entry, uint64_t nextFireTick, uint32_t interval)
-    : _entry(entry), _expirable(entry.as<Expired>()), _next_fire_tick(nextFireTick), _interval(interval)
+    : _entry(entry), _expirable(entry.as<Lifecycle>()), _next_fire_tick(nextFireTick), _interval(interval)
 {
 }
 
@@ -93,7 +93,7 @@ const sp<Runnable>& MessageLoopDefault::Task::entry() const
     return _entry;
 }
 
-const sp<Expired>& MessageLoopDefault::Task::expirable() const
+const sp<Lifecycle>& MessageLoopDefault::Task::expirable() const
 {
     return _expirable;
 }

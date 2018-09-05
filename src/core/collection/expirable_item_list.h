@@ -4,7 +4,7 @@
 #include <list>
 
 #include "core/inf/variable.h"
-#include "core/epi/expired.h"
+#include "core/epi/lifecycle.h"
 #include "core/collection/iterable.h"
 #include "core/types/shared_ptr.h"
 
@@ -16,7 +16,7 @@ public:
     template<typename T> class IsExpired {
     public:
         IsExpired(const sp<T>& item)
-            : _expired(item.template as<Expired>()) {
+            : _expired(item.template as<Lifecycle>()) {
         }
         IsExpired(const sp<T>& item, const sp<Boolean>& expired)
             : _expired(expired) {

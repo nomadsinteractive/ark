@@ -2,7 +2,7 @@
 #define ARK_PLUGIN_PYTHON_EXTENSION_PY_ARK_META_TYPE_H_
 
 #include "core/ark.h"
-#include "core/epi/expired.h"
+#include "core/epi/lifecycle.h"
 
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
@@ -22,9 +22,9 @@ public:
         PyObject* arg1;
         if(PyArg_ParseTuple(args, "O", &arg1)) {
             sp<T>& ptr = self->unpack<T>();
-            if(PythonInterpreter::instance()->isInstance<Expired>(arg1)) {
+            if(PythonInterpreter::instance()->isInstance<Lifecycle>(arg1)) {
                 typename PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(arg1);
-                ptr.absorb(instance->unpack<Expired>());
+                ptr.absorb(instance->unpack<Lifecycle>());
             }
         }
         Py_INCREF(self);
@@ -33,8 +33,8 @@ public:
 
     static PyObject* expire(typename PyArkType::Instance* self, PyObject* /*args*/) {
         const sp<T>& ptr = self->unpack<T>();
-        if(ptr.template is<Expired>()) {
-            const sp<Expired> m = ptr.template as<Expired>();
+        if(ptr.template is<Lifecycle>()) {
+            const sp<Lifecycle> m = ptr.template as<Lifecycle>();
             if(m)
                 m->expire();
         }
@@ -43,8 +43,8 @@ public:
 
     static PyObject* isExpired(typename PyArkType::Instance* self, PyObject* /*args*/) {
         const sp<T>& ptr = self->unpack<T>();
-        if(ptr.template is<Expired>()) {
-            const sp<Expired> m = ptr.template as<Expired>();
+        if(ptr.template is<Lifecycle>()) {
+            const sp<Lifecycle> m = ptr.template as<Lifecycle>();
             if(m && m->val())
                 Py_RETURN_TRUE;
         }

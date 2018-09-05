@@ -91,7 +91,7 @@ public:
 
     private:
         sp<Builder<Arena>> _delegate;
-        sp<Builder<Expired>> _expired;
+        sp<Builder<Lifecycle>> _expired;
     };
 
 private:

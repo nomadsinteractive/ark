@@ -13,14 +13,14 @@ namespace ark {
 ResourceLoaderContext::ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<ImageResource>& imageResource, const sp<GLResourceManager>& glResourceManager, const sp<Executor>& executor, const sp<RenderController>& renderController)
     : _documents(documents), _images(imageResource), _gl_resource_manager(glResourceManager), _executor(executor), _render_controller(renderController),
       _texture_loader(sp<GLTextureLoader>::make(glResourceManager)), _memory_pool(sp<MemoryPool>::make()), _object_pool(sp<ObjectPool>::make()),
-      _context_expired(sp<Expired::Impl>::make(false))
+      _disposed(sp<Boolean::Impl>::make(false))
 {
 }
 
 ResourceLoaderContext::~ResourceLoaderContext()
 {
     LOGD("");
-    _context_expired->set(true);
+    _disposed->set(true);
 }
 
 const sp<Dictionary<document>>& ResourceLoaderContext::documents() const
@@ -61,6 +61,11 @@ const sp<MemoryPool>& ResourceLoaderContext::memoryPool() const
 const sp<ObjectPool>& ResourceLoaderContext::objectPool() const
 {
     return _object_pool;
+}
+
+sp<Boolean> ResourceLoaderContext::disposed() const
+{
+    return _disposed;
 }
 
 }

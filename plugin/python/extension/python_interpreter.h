@@ -20,16 +20,21 @@
 
 #include "python/api.h"
 #include "python/extension/py_ark_type.h"
+#include "python/extension/py_instance.h"
 
 namespace ark {
 namespace plugin {
 namespace python {
+
+class ReferenceManager;
 
 class ARK_PLUGIN_PYTHON_API PythonInterpreter {
 public:
 
     static const sp<PythonInterpreter>& instance();
     static const sp<PythonInterpreter>& newInstance();
+
+    PythonInterpreter();
 
     sp<Numeric> toNumeric(PyObject* object);
     sp<Integer> toInteger(PyObject* object);
@@ -83,6 +88,11 @@ public:
         for(size_t i = 0; i < len; i++)
             PyList_SetItem(pyList, i, toPyObject<T>(ptr[i]));
         return pyList;
+    }
+    PyObject* fromSharedPtr(const sp<PyInstance>& inst) {
+        PyObject* obj = inst->object();
+        Py_XINCREF(obj);
+        return obj;
     }
 
     PyObject* fromByteArray(const bytearray& bytes) const;
@@ -154,20 +164,25 @@ public:
 
     PyObject* toPyObject(const Box& box);
 
+    const sp<ReferenceManager>& referenceManager() const;
+
     void logErr();
 
 private:
-    template<typename T> PyObject* fromIterable_sfinae(const T& iterable, decltype(iterable.at(0))*) {
-        PyObject* pyList = PyList_New(0);
-        for(const auto& i : iterable)
-            PyList_Append(pyList, toPyObject(i));
+    template<typename T> PyObject* fromIterable_sfinae(const T& list, decltype(list.at(0))*) {
+        PyObject* pyList = PyList_New(list.size());
+        for(size_t i = 0; i < list.size(); ++i)
+            PyList_SetItem(pyList, i, toPyObject(list.at(i)));
         return pyList;
     }
 
     template<typename T> PyObject* fromIterable_sfinae(const T& iterable, ...) {
         PyObject* pySet = PySet_New(0);
-        for(const auto& i : iterable)
-            PySet_Add(pySet, toPyObject(i));
+        for(const auto& i : iterable) {
+            PyObject* obj = toPyObject(i);
+            PySet_Add(pySet, obj);
+            Py_XDECREF(obj);
+        }
         return pySet;
     }
 
@@ -180,10 +195,11 @@ private:
 
     std::wstring pyUnicodeToWString(PyObject* unicode);
 
-
 private:
     std::map<TypeId, PyArkType*> _type_by_id;
     std::map<void*, PyArkType*> _type_by_py_object;
+
+    sp<ReferenceManager> _reference_manager;
 
     static sp<PythonInterpreter> _INSTANCE;
 };

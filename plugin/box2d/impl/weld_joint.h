@@ -9,23 +9,19 @@
 #include "graphics/forwarding.h"
 
 #include "box2d/api.h"
+#include "box2d/forwarding.h"
 
 namespace ark {
 namespace plugin {
 namespace box2d {
 
-class World;
-class Body;
-
 class ARK_PLUGIN_BOX2D_API WeldJoint : public Object, Implements<Object> {
 public:
 //  [[script::bindings::auto]]
     WeldJoint(const sp<World>& world, const Body& b1, const Body& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected = false, float frequencyHz = 0, float dampingRatio = 0);
-    ~WeldJoint();
 
 private:
-    sp<World> _world;
-    b2WeldJoint* _joint;
+    sp<Joint> _joint;
 
 };
 

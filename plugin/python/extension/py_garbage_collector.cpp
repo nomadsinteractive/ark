@@ -8,25 +8,20 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-PyGarbageCollector::PyGarbageCollector(const sp<PyInstance>& garbage)
+PyGarbageCollectorImpl::PyGarbageCollectorImpl(const sp<PyInstance>& garbage)
     : _garbage(garbage)
 {
 }
 
-int PyGarbageCollector::traverse(visitproc visit, void* arg)
+int PyGarbageCollectorImpl::traverse(visitproc visit, void* arg)
 {
-    if (_garbage)
-    {
-        int vret = visit(_garbage->instance(), arg);
-        if(vret != 0)
-            return vret;
-    }
+    Py_VISIT(_garbage->object());
     return 0;
 }
 
-int PyGarbageCollector::clear()
+int PyGarbageCollectorImpl::clear()
 {
-    Py_XDECREF(_garbage->release());
+    _garbage->deref();
     _garbage = nullptr;
     return 0;
 }
