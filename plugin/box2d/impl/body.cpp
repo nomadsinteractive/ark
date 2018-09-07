@@ -101,6 +101,11 @@ Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& positio
     _stub->_callback = callback();
 }
 
+Body::Body(const sp<Body::Stub>& stub, const sp<RigidBody::Stub>& rigidbody)
+    : RigidBody(rigidbody), _stub(stub)
+{
+}
+
 void Body::bind(const sp<RenderObject>& renderObject)
 {
     renderObject->setPosition(sp<RenderObjectPosition>::make(_stub));

@@ -77,16 +77,19 @@ sp<EventListener> PythonInterpreter::toEventListener(PyObject* object)
 
 String PythonInterpreter::toString(PyObject* object, const char* encoding, const char* error)
 {
-    if(PyUnicode_Check(object))
-        return unicodeToUTF8String(object, encoding, error);
-    else if (PyBytes_Check(object))
-        return PyBytes_AS_STRING(object);
-    else
+    if(object)
     {
-        PyObject* str = PyObject_Str(object);
-        const String r = unicodeToUTF8String(str, encoding, error);
-        Py_DECREF(str);
-        return r;
+        if(PyUnicode_Check(object))
+            return unicodeToUTF8String(object, encoding, error);
+        else if (PyBytes_Check(object))
+            return PyBytes_AS_STRING(object);
+        else
+        {
+            PyObject* str = PyObject_Str(object);
+            const String r = unicodeToUTF8String(str, encoding, error);
+            Py_DECREF(str);
+            return r;
+        }
     }
     return "";
 }
@@ -164,9 +167,9 @@ sp<Scope> PythonInterpreter::toScope(PyObject* kws)
     if(kws)
     {
         PyObject* keys = PyDict_Keys(kws);
-        const uint32_t size = PyList_Size(keys);
+        const Py_ssize_t size = PyList_Size(keys);
         const sp<Scope> scope = sp<Scope>::make();
-        for(uint32_t i = 0; i < size; i ++)
+        for(Py_ssize_t i = 0; i < size; i ++)
         {
             PyObject* key = PyList_GetItem(keys, i);
             PyObject* item = PyDict_GetItem(kws, key);
@@ -285,6 +288,11 @@ PyObject* PythonInterpreter::toPyObject(const Box& box)
     DCHECK(iter != _type_by_id.end(), "Unknow box type");
 
     return iter->second->create(box);
+}
+
+bool PythonInterpreter::isPyObject(TypeId type) const
+{
+    return (type == Type<PyInstance>::id()) || _type_by_id.find(type) != _type_by_id.end();
 }
 
 void PythonInterpreter::logErr()

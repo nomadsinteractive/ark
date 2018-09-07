@@ -24,8 +24,26 @@ namespace box2d {
 //[[script::bindings::container]]
 class ARK_PLUGIN_BOX2D_API Body : public Object, public RigidBody, Implements<Body, Object, RigidBody> {
 public:
+    struct Stub {
+        Stub(const World& world, b2Body* body);
+        ~Stub();
+
+        void dispose();
+
+        int32_t _id;
+        World _world;
+        b2Body* _body;
+
+        sp<RigidBody::Callback> _callback;
+
+        std::unordered_set<int32_t> _contacts;
+    };
+
+public:
 //  [[script::bindings::auto]]
     Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotation, Shape& shape, float density, float friction);
+    Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotation);
+    Body(const sp<Stub>& stub, const sp<RigidBody::Stub>& rigidbody);
 
     virtual void bind(const sp<RenderObject>& renderObject) override;
     virtual void dispose() override;
@@ -150,24 +168,7 @@ public:
         BUILDER_IMPL1 _delegate;
     };
 
-    struct Stub {
-        Stub(const World& world, b2Body* body);
-        ~Stub();
-
-        void dispose();
-
-        int32_t _id;
-        World _world;
-        b2Body* _body;
-
-        sp<RigidBody::Callback> _callback;
-
-        std::unordered_set<int32_t> _contacts;
-    };
-
 private:
-    Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotation);
-
     sp<Stub> _stub;
 
     friend class World;

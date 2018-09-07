@@ -15,6 +15,11 @@ TypeId Box::typeId() const
     return _instance ? _instance->typeId() : 0;
 }
 
+Box Box::toConcrete() const
+{
+    return _instance->_interfaces->as(*this, _instance->_interfaces->typeId());
+}
+
 Box::operator bool() const
 {
     return _instance && _instance->ptr() != nullptr;

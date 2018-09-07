@@ -26,7 +26,8 @@ void CollisionCallbackPythonAdapter::onBeginContact(const sp<RigidBody>& rigidBo
         *_collision_manifold = manifold;
 
         PyObject* args = PyTuple_New(2);
-        PyTuple_SetItem(args, 0, PythonInterpreter::instance()->fromSharedPtr<RigidBody>(rigidBody));
+
+        PyTuple_SetItem(args, 0, toPyObject(rigidBody));
         PyTuple_SetItem(args, 1, PythonInterpreter::instance()->fromSharedPtr<CollisionManifold>(_collision_manifold));
 
         PyObject* ret = _on_begin_contact->call(args);
@@ -45,7 +46,7 @@ void CollisionCallbackPythonAdapter::onEndContact(const sp<RigidBody>& rigidBody
     if(_on_end_contact)
     {
         PyObject* args = PyTuple_New(1);
-        PyTuple_SetItem(args, 0, PythonInterpreter::instance()->fromSharedPtr<RigidBody>(rigidBody));
+        PyTuple_SetItem(args, 0, toPyObject(rigidBody));
 
         PyObject* ret = _on_end_contact->call(args);
         if(ret)
@@ -71,6 +72,14 @@ int CollisionCallbackPythonAdapter::clear()
     _on_end_contact->deref();
     _on_end_contact = nullptr;
     return 0;
+}
+
+PyObject* CollisionCallbackPythonAdapter::toPyObject(const sp<RigidBody>& rigidBody) const
+{
+    TypeId concreteTypeId = rigidBody.interfaces()->typeId();
+    if(PythonInterpreter::instance()->isPyObject(concreteTypeId))
+        return PythonInterpreter::instance()->toPyObject(rigidBody.pack().toConcrete());
+    return PythonInterpreter::instance()->fromSharedPtr<RigidBody>(rigidBody);
 }
 
 }

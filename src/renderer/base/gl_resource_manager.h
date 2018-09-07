@@ -74,8 +74,7 @@ private:
         sp<GLResource> _resource;
     };
 
-    class PreparingGLResource {
-    public:
+    struct PreparingGLResource {
         PreparingGLResource(const ExpirableGLResource& resource, PreparingStrategy strategy);
         PreparingGLResource(const PreparingGLResource& other);
 
@@ -83,6 +82,10 @@ private:
         PreparingStrategy _strategy;
 
         bool operator < (const PreparingGLResource& other) const;
+    };
+
+    struct SharedBuffer {
+        GLBuffer _buffers[GLBuffer::NAME_COUNT];
     };
 
 private:
@@ -94,9 +97,9 @@ private:
     sp<Dictionary<sp<GLTexture>>> _gl_texture_loader;
 
     LockFreeStack<PreparingGLResource> _preparing_items;
+    LockFreeStack<sp<SharedBuffer>> _shared_buffers;
 
     std::set<ExpirableGLResource> _on_surface_ready_items;
-    GLBuffer _shared_buffers[GLBuffer::NAME_COUNT];
 
     uint32_t _tick;
 };

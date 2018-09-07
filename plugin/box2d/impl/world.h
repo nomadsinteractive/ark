@@ -105,6 +105,9 @@ private:
         virtual void EndContact(b2Contact* contact);
 
     private:
+        sp<Body> obtain(void* data);
+
+    private:
         ObjectPool _object_pool;
     };
 

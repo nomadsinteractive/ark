@@ -289,12 +289,6 @@ class Arena:
         return None
 
 
-class Algorithm:
-    @staticmethod
-    def atan2(y, x):
-        return 0
-
-
 class Clock:
     pass
 
@@ -405,11 +399,11 @@ class Rotation:
 
     @property
     def rotation(self):
-        return self._rotation
+        return self._value
 
     @rotation.setter
     def rotation(self, v):
-        self._rotation = v
+        self._value = v
 
     @property
     def direction(self):

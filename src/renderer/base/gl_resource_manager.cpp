@@ -65,15 +65,15 @@ void GLResourceManager::onSurfaceReady(GraphicsContext& graphicsContext)
 
 void GLResourceManager::onDrawFrame(GraphicsContext& graphicsContext)
 {
-    for(const PreparingGLResource& resource : _preparing_items.clear())
-        if(!resource._resource.isExpired())
+    for(const PreparingGLResource& i : _preparing_items.clear())
+        if(!i._resource.isExpired())
         {
-            if(resource._strategy == PS_ONCE_FORCE && resource._resource.resource()->id() != 0)
-                resource._resource.recycle(graphicsContext);
+            if(i._strategy == PS_ONCE_FORCE && i._resource.resource()->id() != 0)
+                i._resource.recycle(graphicsContext);
 
-            resource._resource.prepare(graphicsContext);
-            if(resource._strategy == PS_ONCE_AND_ON_SURFACE_READY)
-                _on_surface_ready_items.insert(resource._resource);
+            i._resource.prepare(graphicsContext);
+            if(i._strategy == PS_ONCE_AND_ON_SURFACE_READY)
+                _on_surface_ready_items.insert(i._resource);
         }
 
     uint32_t m = (++_tick) % 301;
@@ -140,13 +140,19 @@ GLBuffer::Snapshot GLResourceManager::makeGLBufferSnapshot(GLBuffer::Name name, 
     if(name == GLBuffer::NAME_NONE)
         return GLBuffer(_recycler, nullptr, GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW).snapshot(maker(size));
 
-    GLBuffer& shared = _shared_buffers[name];
+    sp<SharedBuffer> sb;
+    if(!_shared_buffers.pop(sb))
+        sb = sp<SharedBuffer>::make();
+
+    GLBuffer& shared = sb->_buffers[name];
     if(!shared || shared.size() < size)
     {
         const sp<GLBuffer::Uploader> uploader = maker(reservedObjectCount);
         DCHECK(uploader && uploader->size() >= size, "Making GLBuffer::Uploader failed, object-count: %d, uploader-size: %d, required-size: %d", reservedObjectCount, uploader ? uploader->size() : 0, size);
         shared = makeGLBuffer(uploader, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
     }
+    _shared_buffers.push(sb);
+
     return shared.snapshot(size);
 }
 

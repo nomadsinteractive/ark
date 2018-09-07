@@ -23,8 +23,8 @@ public:
         : _ptr(null), _interfaces(null) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SharedPtr);
-    SharedPtr(const std::shared_ptr<T>& ptr, const std::shared_ptr<Interfaces>& interfaces) noexcept
-        : _ptr(ptr), _interfaces(interfaces) {
+    SharedPtr(std::shared_ptr<T> ptr, std::shared_ptr<Interfaces> interfaces) noexcept
+        : _ptr(std::move(ptr)), _interfaces(std::move(interfaces)) {
     }
 
     template<typename U> SharedPtr(const SharedPtr<U>& ptr) noexcept
@@ -38,6 +38,10 @@ public:
 
     static SharedPtr<T> adopt(T* instance) {
         return SharedPtr<T>(instance);
+    }
+
+    static SharedPtr<T> borrow(T* instance) {
+        return SharedPtr<T>(instance, nullptr, [](T*) {});
     }
 
     template<typename... Args> static SharedPtr<T> make(Args&&... args) {
@@ -99,7 +103,7 @@ public:
         return _interfaces;
     }
 
-    template<typename U> const SharedPtr<U> cast() const {
+    template<typename U> SharedPtr<U> cast() const {
         return SharedPtr<U>(std::static_pointer_cast<U>(_ptr), _interfaces);
     }
 
@@ -139,8 +143,8 @@ private:
     SharedPtr(T* instance) noexcept
         : _ptr(instance), _interfaces(new Interfaces(Class::getClass<T>())) {
     }
-    SharedPtr(T* ptr, const std::shared_ptr<Interfaces>& interfaces, std::function<void(T*)> deleter) noexcept
-        : _ptr(ptr, deleter), _interfaces(interfaces) {
+    SharedPtr(T* ptr, std::shared_ptr<Interfaces> interfaces, std::function<void(T*)> deleter) noexcept
+        : _ptr(ptr, std::move(deleter)), _interfaces(std::move(interfaces)) {
     }
 
     static void packedBoxDestructor(void* inst) {
@@ -169,7 +173,7 @@ public:
         DFATAL("Illegal SharedPtr<void> class instance creation");
     }
 
-    SharedPtr(const std::shared_ptr<void>&, const std::shared_ptr<Interfaces>&) {
+    SharedPtr(std::shared_ptr<void>, std::shared_ptr<Interfaces>) {
         DFATAL("Illegal SharedPtr<void> class instance creation");
     }
 
@@ -181,7 +185,7 @@ public:
         return false;
     }
 
-    template<typename U> const SharedPtr<U> cast() const {
+    template<typename U> SharedPtr<U> cast() const {
         return SharedPtr<U>();
     }
 

@@ -23,6 +23,9 @@ public:
     virtual int clear() override;
 
 private:
+    PyObject* toPyObject(const sp<RigidBody>& rigidBody) const;
+
+private:
     sp<PyInstance> _on_begin_contact;
     sp<PyInstance> _on_end_contact;
 

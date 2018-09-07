@@ -16,12 +16,12 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(WeakPtr);
 
     SharedPtr<T> lock() const {
-        const std::shared_ptr<T> ptr = _weak_ptr.lock();
+        std::shared_ptr<T> ptr = _weak_ptr.lock();
         if(!ptr)
             return nullptr;
 
-        const std::shared_ptr<Interfaces> interfaces = _weak_interfaces.lock();
-        return SharedPtr<T>(ptr, interfaces ? interfaces : std::make_shared<Interfaces>(nullptr));
+        std::shared_ptr<Interfaces> interfaces = _weak_interfaces.lock();
+        return SharedPtr<T>(std::move(ptr), std::move(interfaces ? interfaces : std::make_shared<Interfaces>(nullptr)));
     }
 
     SharedPtr<T> ensure() const {

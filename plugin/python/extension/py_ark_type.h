@@ -60,7 +60,7 @@ public:
         }
 
         template<typename T> void addObjectToContainer(const sp<T>& object) {
-            const sp<PyGarbageCollector> gc = object.as<PyGarbageCollector>();
+            const sp<PyGarbageCollector> gc = object.template as<PyGarbageCollector>();
             if(gc) {
                 PyContainer* gcContainer = getContainer();
                 DCHECK(gcContainer, "Object doesnot support GC");

@@ -24,34 +24,6 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-namespace {
-
-class RigidBodyImpl : public RigidBody {
-public:
-    RigidBodyImpl(const sp<Stub>& stub)
-        : RigidBody(stub) {
-    }
-
-    virtual void dispose() override {
-        _stub = nullptr;
-    }
-
-    static sp<RigidBodyImpl> obtain(ObjectPool& objectPool, const Body::Stub& body) {
-        Collider::BodyType bodyType = (body._body->GetType() == b2_staticBody) ?
-                                      Collider::BODY_TYPE_STATIC :
-                                      (body._body->GetType() == b2_kinematicBody ? Collider::BODY_TYPE_KINEMATIC : Collider::BODY_TYPE_DYNAMIC);
-        const b2Vec2& position = body._body->GetPosition();
-        float rotation = body._body->GetTransform().q.GetAngle();
-        const sp<Vec> p = objectPool.obtain<Vec::Const>(V(position.x, position.y));
-        const sp<Rotation> rotate = objectPool.obtain<Rotation>(objectPool.obtain<Numeric::Const>(rotation));
-        const sp<RigidBody::Stub> stub = objectPool.obtain<RigidBody::Stub>(body._id, bodyType, p, nullptr, rotate);
-        return objectPool.obtain<RigidBodyImpl>(stub);
-    }
-
-};
-
-}
-
 World::World(const b2Vec2& gravity, float ppmX, float ppmY)
     : _stub(sp<Stub>::make(gravity, ppmX, ppmY))
 {
@@ -121,8 +93,6 @@ b2Body* World::createBody(Collider::BodyType type, const V& position, const sp<S
     bodyDef.position.Set(position.x(), position.y());
     b2Body* body = createBody(bodyDef);
 
-    DWARN(type != Collider::BODY_TYPE_STATIC || density == 0, "Static body with density %.2f, which usually has no effect", density);
-    DWARN(type != Collider::BODY_TYPE_KINEMATIC || density == 0, "Kinematic body with density %.2f, which usually has no effect", density);
     shape.apply(body, size, density, friction);
     return body;
 }
@@ -223,12 +193,12 @@ void World::ContactListenerImpl::BeginContact(b2Contact* contact)
         if(body1->_contacts.find(body2->_id) == body1->_contacts.end())
         {
             body1->_contacts.insert(body2->_id);
-            body1->_callback->onBeginContact(RigidBodyImpl::obtain(_object_pool, *body2), CollisionManifold(normal));
+            body1->_callback->onBeginContact(obtain(body2), CollisionManifold(normal));
         }
         if(body2->_contacts.find(body1->_id) == body2->_contacts.end())
         {
             body2->_contacts.insert(body1->_id);
-            body2->_callback->onBeginContact(RigidBodyImpl::obtain(_object_pool, *body1), CollisionManifold(-normal));
+            body2->_callback->onBeginContact(obtain(body1), CollisionManifold(-normal));
         }
     }
 }
@@ -243,15 +213,29 @@ void World::ContactListenerImpl::EndContact(b2Contact* contact)
         if(it1 != body1->_contacts.end())
         {
             body1->_contacts.erase(it1);
-            body1->_callback->onEndContact(RigidBodyImpl::obtain(_object_pool, *body2));
+            body1->_callback->onEndContact(obtain(body2));
         }
         const auto it2 = body2->_contacts.find(body1->_id);
         if(it2 != body2->_contacts.end())
         {
             body2->_contacts.erase(it2);
-            body2->_callback->onEndContact(RigidBodyImpl::obtain(_object_pool, *body1));
+            body2->_callback->onEndContact(obtain(body1));
         }
     }
+}
+
+sp<Body> World::ContactListenerImpl::obtain(void* data)
+{
+    Body::Stub* body = reinterpret_cast<Body::Stub*>(data);
+    Collider::BodyType bodyType = (body->_body->GetType() == b2_staticBody) ?
+                Collider::BODY_TYPE_STATIC :
+                (body->_body->GetType() == b2_kinematicBody ? Collider::BODY_TYPE_KINEMATIC : Collider::BODY_TYPE_DYNAMIC);
+    const b2Vec2& position = body->_body->GetPosition();
+    float rotation = body->_body->GetTransform().q.GetAngle();
+    const sp<Vec> p = _object_pool.obtain<Vec::Const>(V(position.x, position.y));
+    const sp<Rotation> rotate = _object_pool.obtain<Rotation>(_object_pool.obtain<Numeric::Const>(rotation));
+    const sp<RigidBody::Stub> stub = _object_pool.obtain<RigidBody::Stub>(body->_id, bodyType, p, nullptr, rotate);
+    return _object_pool.obtain<Body>(sp<Body::Stub>::borrow(body), stub);
 }
 
 void World::DestructionListenerImpl::SayGoodbye(b2Joint* joint)

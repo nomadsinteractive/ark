@@ -105,7 +105,7 @@ template<typename... INTERFACES> std::unordered_set<TypeId> _make_types() {
 
 template<typename T, typename U = void, typename... INTERFACES> Box _dynamic_down_cast(const sp<T>& ptr, TypeId id) {
     if(Type<U>::id() == id) {
-        const sp<U>& casted = ptr.template cast<U>();
+        const sp<U> casted = ptr.template cast<U>();
         return casted.pack();
     }
     Class* clazz = Class::getClass(Type<U>::id());

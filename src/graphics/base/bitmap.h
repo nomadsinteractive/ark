@@ -45,7 +45,7 @@ public:
                 hvflip<T>(data, width, height, channels);
             else if(degrees == 180)
                 vflip(data, width, height, channels);
-            else if(degrees = 270) {
+            else if(degrees == 270) {
                 hflip<T>(data, width, height, channels);
                 hvflip<T>(data, width, height, channels);
             } else

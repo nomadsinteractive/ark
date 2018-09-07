@@ -163,6 +163,7 @@ public:
     PyArkType* ensurePyArkType(PyObject* pyObject);
 
     PyObject* toPyObject(const Box& box);
+    bool isPyObject(TypeId type) const;
 
     const sp<ReferenceManager>& referenceManager() const;
 

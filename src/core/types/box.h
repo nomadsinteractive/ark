@@ -46,6 +46,8 @@ public:
         return inst;
     }
 
+    Box toConcrete() const;
+
 private:
     Box(void* instance, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor);
 
@@ -74,6 +76,8 @@ private:
         std::shared_ptr<Interfaces> _interfaces;
 
         Destructor _destructor;
+
+        friend class Box;
     };
 
 private:
