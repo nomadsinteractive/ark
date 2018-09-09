@@ -112,10 +112,10 @@ void Body::bind(const sp<RenderObject>& renderObject)
     if(type() & Collider::BODY_FLAG_MANUAL_ROTATION)
     {
         const sp<Numeric> r = rotation() ? rotation()->value()->delegate().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>::null();
-        renderObject->transform()->rotate()->setRadians(sp<ManualRotation>::make(_stub, r));
+        renderObject->transform()->rotation()->setRadians(sp<ManualRotation>::make(_stub, r));
     }
     else
-        renderObject->transform()->setRotate(rotation());
+        renderObject->transform()->setRotation(rotation());
 }
 
 void Body::dispose()

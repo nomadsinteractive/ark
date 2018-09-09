@@ -32,7 +32,7 @@ sp<Layout> LayoutDictionary::DICTIONARY::build(const sp<Scope>& /*args*/)
         return sp<GravityLayout>::make(_gravity);
     if(_layout == "frame")
         return sp<FrameLayout>::make();
-    DFATAL("Invaild layout value: \"%s\"", _layout.c_str());
+    DFATAL("Invaild layout value: \"%s\", possible values are [\"vertical\", \"horizontal\", \"gravity\", \"frame\"]", _layout.c_str());
     return nullptr;
 }
 

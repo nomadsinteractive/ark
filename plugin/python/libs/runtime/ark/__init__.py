@@ -411,18 +411,18 @@ class Rotation:
 
 
 class Transform:
-    def __init__(self, rotate=None, scale=None, translate=None):
-        self._rotate = rotate
+    def __init__(self, rotation=None, scale=None, translate=None):
+        self._rotation = rotation
         self._scale = scale
         self._translate = translate
 
     @property
-    def rotate(self):
-        return self._rotate
+    def rotation(self):
+        return self._rotation
 
-    @rotate.setter
-    def rotate(self, v):
-        self._rotate = v
+    @rotation.setter
+    def rotation(self, v):
+        self._rotation = v
 
     @property
     def scale(self):

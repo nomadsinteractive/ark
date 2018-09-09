@@ -17,6 +17,7 @@ TileMap::TileMap(const sp<Layer>& layer, uint32_t width, uint32_t height, uint32
       _tile_size(sp<Size>::make(static_cast<float>(tileWidth), static_cast<float>(tileHeight))),
       _tile_width(tileWidth), _tile_height(tileHeight), _col_count(width / tileWidth), _row_count(height / tileHeight)
 {
+    NOT_NULL(_layer);
     _tiles = new sp<RenderObject>[_col_count * _row_count];
 }
 

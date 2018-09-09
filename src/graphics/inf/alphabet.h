@@ -3,8 +3,6 @@
 
 #include "graphics/forwarding.h"
 
-#include "graphics/forwarding.h"
-
 namespace ark {
 
 class Alphabet {

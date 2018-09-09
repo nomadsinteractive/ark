@@ -22,11 +22,6 @@ const sp<Clock>& ApplicationFacade::clock() const
     return _context->clock();
 }
 
-const sp<ApplicationContext>& ApplicationFacade::context() const
-{
-    return _context;
-}
-
 const sp<ApplicationController>& ApplicationFacade::controller() const
 {
     return _controller;

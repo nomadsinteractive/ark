@@ -33,12 +33,12 @@ Transform::Snapshot Transform::snapshot() const
     return ss;
 }
 
-const sp<Rotation>& Transform::rotate()
+const sp<Rotation>& Transform::rotation()
 {
     return _rotate.ensure();
 }
 
-void Transform::setRotate(const sp<Rotation>& rotate)
+void Transform::setRotation(const sp<Rotation>& rotate)
 {
     _rotate = rotate;
 }

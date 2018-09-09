@@ -30,7 +30,7 @@ RigidBody::RigidBody(const sp<RigidBody::Stub>& stub)
 void RigidBody::bind(const sp<RenderObject>& renderObject)
 {
     renderObject->setPosition(position());
-    renderObject->transform()->setRotate(rotation());
+    renderObject->transform()->setRotation(rotation());
 }
 
 int32_t RigidBody::id() const
