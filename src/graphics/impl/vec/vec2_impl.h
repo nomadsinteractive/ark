@@ -43,7 +43,7 @@ public:
 //  [[plugin::builder::by-value]]
     class VV2_DICTIONARY : public Builder<Vec2> {
     public:
-        VV2_DICTIONARY(BeanFactory& factory, const String str);
+        VV2_DICTIONARY(BeanFactory& factory, const String& str);
 
         virtual sp<Vec2> build(const sp<Scope>& args) override;
 

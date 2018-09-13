@@ -69,6 +69,16 @@ class Renderer:
     pass
 
 
+class ResourceLoader:
+
+    def load(self, type_class, type_id: str, **kwargs):
+        return None
+
+    @property
+    def refs(self):
+        return None
+
+
 class Camera:
     def __init__(self):
         pass
@@ -96,17 +106,6 @@ class Collider:
     BODY_FLAG_MANUAL_ROTATION = 4
 
     def create_body(self, type, shape, position, size=None, rotate=None):
-        return None
-
-
-class Tracker:
-    def create(self, id, position, aabb):
-        return position
-
-    def remove(self, id):
-        pass
-
-    def search(self, position, aabb):
         return None
 
 
@@ -155,6 +154,9 @@ class Numeric(_Var):
 
 class Lifecycle:
     def __init__(self, disposed=False):
+        pass
+
+    def dispose(self):
         pass
 
 
@@ -443,7 +445,7 @@ class Transform:
 
 class RenderObject:
     def __init__(self, t, pos=None, size=None, transform=None, varyings=None):
-        pass
+        self._transform = transform
 
     @property
     def type(self):
@@ -470,8 +472,12 @@ class RenderObject:
         return 0
 
     @property
-    def transform(self):
-        return None
+    def transform(self) -> Transform:
+        return self._transform
+
+    @transform.setter
+    def transform(self, transform):
+        self._transform = transform
 
     @property
     def varyings(self):

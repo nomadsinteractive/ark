@@ -92,13 +92,13 @@ void ApplicationContext::initResourceLoader(const document& manifest)
     _resource_loader->import(manifest, _resource_loader->beanFactory());
 }
 
-sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name)
+sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const sp<Scope>& args)
 {
     DCHECK(_resource_loader, "Application ResourceLoader has not been initialized.");
-    return _resource_loader->beanFactory().ensure<ResourceLoader>(name);
+    return _resource_loader->beanFactory().ensure<ResourceLoader>(name, args);
 }
 
-sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const sp<ResourceLoaderContext>& resourceLoaderContext)
+sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Scope>& args)
 {
     const document doc = name ? _application_resource->loadDocument(name) : sp<Document>::make("");
     DCHECK(doc, "Resource \"%s\" not found", name.c_str());

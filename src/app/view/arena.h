@@ -18,7 +18,7 @@
 namespace ark {
 
 //[[script::bindings::container]]
-class ARK_API Arena final : public Block, public EventListener, public Renderer, public Renderer::Delegate, public Renderer::Group {
+class ARK_API Arena final : public Block, public EventListener, public Renderer, public Renderer::Group {
 public:
     Arena(const sp<Renderer>& rootView, const sp<ResourceLoader>& resourceLoader);
     ~Arena();
@@ -32,8 +32,6 @@ public:
 
 //  [[script::bindings::auto]]
     virtual void addRenderer(const sp<Renderer>& renderer) override;
-//  [[script::bindings::auto]]
-    virtual void setRendererDelegate(const sp<Renderer>& delegate) override;
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
     virtual bool onEvent(const Event& event) override;

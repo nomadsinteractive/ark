@@ -70,7 +70,7 @@ Vec4Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Vec4Impl> Vec4Impl::BUILDER::build(const sp<Scope>& args)
+sp<Vec4> Vec4Impl::BUILDER::build(const sp<Scope>& args)
 {
     return sp<Vec4Impl>::make(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
 }

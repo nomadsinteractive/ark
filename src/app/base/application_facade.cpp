@@ -45,7 +45,7 @@ const sp<Arena>& ApplicationFacade::arena() const
 void ApplicationFacade::setArena(const sp<Arena>& arena)
 {
     if(_arena)
-        _arena.as<Lifecycle>()->expire();
+        _arena.as<Lifecycle>()->dispose();
 
     NOT_NULL(arena);
     DWARN(!arena.is<Lifecycle>(), "Application main arena's lifecycle should be managed by application itself");
@@ -56,9 +56,9 @@ void ApplicationFacade::setArena(const sp<Arena>& arena)
     _context->addEventListener(_arena);
 }
 
-sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name)
+sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name, const sp<Scope>& args)
 {
-    return _context->createResourceLoader(name);
+    return _context->createResourceLoader(name, args);
 }
 
 const List<String>& ApplicationFacade::argv() const

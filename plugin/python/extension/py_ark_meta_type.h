@@ -36,7 +36,7 @@ public:
         if(ptr.template is<Lifecycle>()) {
             const sp<Lifecycle> m = ptr.template as<Lifecycle>();
             if(m)
-                m->expire();
+                m->dispose();
         }
         Py_RETURN_NONE;
     }
@@ -69,18 +69,6 @@ public:
             if(ptr.template is<Renderer::Group>()) {
                 const sp<Renderer::Group> rendererGroup = ptr.template as<Renderer::Group>();
                 rendererGroup->addRenderer(PythonInterpreter::instance()->asInterface<Renderer>(arg1));
-            }
-        }
-        Py_RETURN_NONE;
-    }
-
-    static PyObject* setRendererDelegate(typename PyArkType::Instance* self, PyObject* args) {
-        PyObject* arg1;
-        if(PyArg_ParseTuple(args, "O", &arg1)) {
-            const sp<T>& ptr = self->unpack<T>();
-            if(ptr.template is<Renderer::Delegate>()) {
-                const sp<Renderer::Delegate> renderDelegate = ptr.template as<Renderer::Delegate>();
-                renderDelegate->setRendererDelegate(PythonInterpreter::instance()->asInterface<Renderer>(arg1));
             }
         }
         Py_RETURN_NONE;

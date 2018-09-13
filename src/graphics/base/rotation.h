@@ -31,7 +31,7 @@ public:
 
     static const V3 Z_AXIS;
 
-//  [[plugin::builder]]
+//[[plugin::builder]]
     class BUILDER : public Builder<Rotation> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
@@ -41,6 +41,18 @@ public:
     private:
         sp<Builder<Numeric>> _rotation;
     };
+
+//  [[plugin::builder::by-value]]
+    class DICTIONARY : public Builder<Rotation> {
+    public:
+        DICTIONARY(BeanFactory& factory, const String& str);
+
+        virtual sp<Rotation> build(const sp<Scope>& args) override;
+
+    private:
+        sp<Builder<Numeric>> _rotation;
+    };
+
 
 private:
     sp<NumericWrapper> _value;

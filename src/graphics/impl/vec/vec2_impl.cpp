@@ -64,7 +64,7 @@ void Vec2Impl::fix()
     _y->fix();
 }
 
-Vec2Impl::VV2_DICTIONARY::VV2_DICTIONARY(BeanFactory& factory, const String str)
+Vec2Impl::VV2_DICTIONARY::VV2_DICTIONARY(BeanFactory& factory, const String& str)
 {
     BeanUtils::split<Numeric, Numeric>(factory, str, _x, _y);
 }

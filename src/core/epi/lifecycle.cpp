@@ -1,37 +1,32 @@
 #include "core/epi/lifecycle.h"
 
 #include "core/base/bean_factory.h"
-#include "core/inf/variable.h"
+#include "core/impl/variable/variable_wrapper.h"
 
 namespace ark {
 
-Lifecycle::Lifecycle(bool expired)
-    : _expired(expired)
+Lifecycle::Lifecycle(bool disposed)
+    : _disposed(sp<BooleanWrapper>::make(disposed))
 {
 }
 
-Lifecycle::Lifecycle(const sp<Boolean>& delegate)
-    : _expired(false), _delegate(delegate)
+Lifecycle::Lifecycle(const sp<Boolean>& disposed)
+    : _disposed(sp<BooleanWrapper>::make(disposed))
 {
 }
 
 bool Lifecycle::val()
 {
-    return expired();
+    return _disposed->val();
 }
 
-bool Lifecycle::expired() const
+void Lifecycle::dispose()
 {
-    return _expired || (_delegate && _delegate->val());
-}
-
-void Lifecycle::expire()
-{
-    _expired = true;
+    _disposed->set(true);
 }
 
 Lifecycle::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)
-    : _expired(value == "true")
+    : _disposed(value == "true")
 {
     if(value && (value.at(0) == '@' || value.at(0) == '$'))
         _delegate = parent.ensureBuilder<Boolean>(value);
@@ -39,7 +34,7 @@ Lifecycle::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)
 
 sp<Lifecycle> Lifecycle::DICTIONARY::build(const sp<Scope>& args)
 {
-    return _delegate ? sp<Lifecycle>::make(_delegate->build(args)) : sp<Lifecycle>::make(_expired);
+    return _delegate ? sp<Lifecycle>::make(_delegate->build(args)) : sp<Lifecycle>::make(_disposed);
 }
 
 }

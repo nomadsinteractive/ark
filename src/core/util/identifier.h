@@ -27,6 +27,8 @@ public:
     const String& ref() const;
     const String& val() const;
 
+    String toString() const;
+
     bool isRef() const;
     bool isArg() const;
     bool isVal() const;

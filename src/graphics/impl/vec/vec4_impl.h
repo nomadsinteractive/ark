@@ -30,11 +30,11 @@ public:
     void fix();
 
 //  [[plugin::builder("vec4")]]
-    class BUILDER : public Builder<Vec4Impl> {
+    class BUILDER : public Builder<Vec4> {
     public:
         BUILDER(BeanFactory& parent, const document& manifest);
 
-        virtual sp<Vec4Impl> build(const sp<Scope>& args) override;
+        virtual sp<Vec4> build(const sp<Scope>& args) override;
 
     private:
         sp<Builder<Numeric>> _x, _y, _z, _w;

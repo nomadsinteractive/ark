@@ -53,6 +53,19 @@ const String& Identifier::val() const
     return _type == ID_TYPE_VALUE ? _value : String::null();
 }
 
+String Identifier::toString() const
+{
+    StringBuffer sb;
+    if(_type == ID_TYPE_ARGUMENT)
+        sb << '$';
+    else if(_type == ID_TYPE_REFERENCE)
+        sb << '@';
+    if(_package)
+        sb << _package << ':';
+    sb << _value;
+    return sb.str();
+}
+
 bool Identifier::isRef() const
 {
     return _type == ID_TYPE_REFERENCE;

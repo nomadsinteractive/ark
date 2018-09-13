@@ -11,7 +11,7 @@ namespace ark {
 
 class ARK_API RendererDelegate : public Renderer, public Renderer::Delegate {
 public:
-    RendererDelegate();
+    RendererDelegate() = default;
     RendererDelegate(const sp<Renderer>& delegate);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
@@ -19,17 +19,6 @@ public:
     virtual void setRendererDelegate(const sp<Renderer>& delegate) override;
 
     const sp<Renderer>& delegate() const;
-
-//  [[plugin::builder("renderer-delegate")]]
-    class BUILDER : public Builder<Renderer> {
-    public:
-        BUILDER(BeanFactory& beanFactory, const document& manifest);
-
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-    };
 
 private:
     sp<Renderer> _delegate;

@@ -37,7 +37,7 @@ void GLCubemap::doPrepareTexture(GraphicsContext& /*graphicsContext*/, uint32_t 
 }
 
 GLCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _size(factory.getConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+    : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _format(Documents::getAttribute<GLTexture::Format>(manifest, "format", GLTexture::FORMAT_AUTO)),
       _features(Documents::getAttribute<GLTexture::Feature>(manifest, "feature", GLTexture::FEATURE_DEFAULT))
 {

@@ -10,8 +10,8 @@ namespace ark {
 
 template<typename T> class BuilderBySoftRef : public Builder<T> {
 public:
-    BuilderBySoftRef(const String& name, const WeakPtr<Scope>& references, const sp<Builder<T>>& delegate)
-        : _name(name), _references(references), _delegate(delegate) {
+    BuilderBySoftRef(const String& name, const WeakPtr<Scope>& references, sp<Builder<T>> delegate)
+        : _name(name), _references(references), _delegate(std::move(delegate)) {
     }
 
     virtual sp<T> build(const sp<Scope>& args) override {

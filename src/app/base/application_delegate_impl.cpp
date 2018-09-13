@@ -35,7 +35,7 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
     ApplicationDelegate::onCreate(application, surface);
 
     const sp<ApplicationContext>& applicationContext = application.context();
-    const sp<ResourceLoader> appResourceLoader = applicationContext->createResourceLoader(Documents::getAttribute(_application_manifest->manifest(), "resource-loader", "application.xml"));
+    const sp<ResourceLoader> appResourceLoader = applicationContext->createResourceLoader(Documents::getAttribute(_application_manifest->manifest(), "resource-loader", "application.xml"), nullptr);
     NOT_NULL(appResourceLoader);
 
     const sp<Scope> vars = sp<Scope>::make();

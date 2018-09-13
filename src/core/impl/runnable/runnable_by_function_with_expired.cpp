@@ -1,5 +1,7 @@
 #include "core/impl/runnable/runnable_by_function_with_expired.h"
 
+#include "core/impl/variable/variable_wrapper.h"
+
 namespace ark {
 
 RunnableByFunctionWithExpired::RunnableByFunctionWithExpired(const std::function<bool()>& function)
@@ -9,8 +11,8 @@ RunnableByFunctionWithExpired::RunnableByFunctionWithExpired(const std::function
 
 void RunnableByFunctionWithExpired::run()
 {
-    if(!_expired)
-        _expired = !_function();
+    if(!_disposed->val())
+        _disposed->set(!_function());
 }
 
 }

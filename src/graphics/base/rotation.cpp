@@ -52,11 +52,21 @@ template<> ARK_API const sp<Rotation> Null::ptr()
 }
 
 Rotation::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _rotation(factory.getBuilder<Numeric>(manifest, "rotation"))
+    : _rotation(factory.getBuilder<Numeric>(manifest, Constants::Attributes::ROTATION))
 {
 }
 
 sp<Rotation> Rotation::BUILDER::build(const sp<Scope>& args)
+{
+    return sp<Rotation>::make(_rotation->build(args));
+}
+
+Rotation::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
+    : _rotation(factory.getBuilder<Numeric>(str))
+{
+}
+
+sp<Rotation> Rotation::DICTIONARY::build(const sp<Scope>& args)
 {
     return sp<Rotation>::make(_rotation->build(args));
 }

@@ -6,28 +6,22 @@
 #include "core/types/null.h"
 #include "core/util/documents.h"
 #include "core/util/math.h"
-#include "core/util/bean_utils.h"
 
 #include "graphics/base/matrix.h"
 #include "graphics/base/rotation.h"
 
 namespace ark {
 
-Transform::Transform(const sp<Rotation>& rotate, const sp<Vec>& scale, const sp<Vec>& translation)
-    : _rotate(rotate), _scale(scale), _translation(translation)
-{
-}
-
-Transform::Transform(const Transform& other)
-    :  _rotate(other._rotate), _scale(other._scale), _translation(other._translation)
+Transform::Transform(const sp<Rotation>& rotation, const sp<Vec>& scale, const sp<Vec>& translation)
+    : _rotation(Null::toSafe<Rotation>(rotation)), _scale(scale), _translation(Null::toSafe<Vec>(translation))
 {
 }
 
 Transform::Snapshot Transform::snapshot() const
 {
     Snapshot ss;
-    ss.rotate_value = _rotate->radians();
-    ss.rotate_direction = _rotate->direction()->val();
+    ss.rotate_value = _rotation->radians();
+    ss.rotate_direction = _rotation->direction()->val();
     ss.scale = _scale ? V3(_scale->val()) : V3(1.0f, 1.0f, 1.0f);
     ss.translate = _translation->val();
     return ss;
@@ -35,12 +29,12 @@ Transform::Snapshot Transform::snapshot() const
 
 const sp<Rotation>& Transform::rotation()
 {
-    return _rotate.ensure();
+    return _rotation;
 }
 
 void Transform::setRotation(const sp<Rotation>& rotate)
 {
-    _rotate = rotate;
+    _rotation = rotate;
 }
 
 const sp<Vec>& Transform::scale() const
@@ -55,7 +49,7 @@ void Transform::setScale(const sp<Vec>& scale)
 
 const sp<Vec>& Transform::translation() const
 {
-    return _translation.ensure();
+    return _translation;
 }
 
 void Transform::setTranslation(const sp<Vec>& translation)
@@ -133,14 +127,14 @@ V3 Transform::Snapshot::mapXYZ(const V3& p) const
 }
 
 Transform::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _rotate(factory.getConcreteClassBuilder<Rotation>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec>(manifest, "scale")),
+    : _rotation(factory.getBuilder<Rotation>(manifest, Constants::Attributes::ROTATION)), _scale(factory.getBuilder<Vec>(manifest, "scale")),
       _translation(factory.getBuilder<Vec>(manifest, Constants::Attributes::TRANSLATION))
 {
 }
 
 sp<Transform> Transform::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<Transform>::make(_rotate->build(args), _scale->build(args), _translation->build(args));
+    return sp<Transform>::make(_rotation->build(args), _scale->build(args), _translation->build(args));
 }
 
 Transform::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)

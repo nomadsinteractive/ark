@@ -15,7 +15,8 @@ PyGarbageCollectorImpl::PyGarbageCollectorImpl(const sp<PyInstance>& garbage)
 
 int PyGarbageCollectorImpl::traverse(visitproc visit, void* arg)
 {
-    Py_VISIT(_garbage->object());
+    if(_garbage)
+        Py_VISIT(_garbage->object());
     return 0;
 }
 

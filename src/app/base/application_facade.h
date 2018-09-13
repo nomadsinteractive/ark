@@ -29,7 +29,7 @@ public:
     void setArena(const sp<Arena>& arena);
 
 //  [[script::bindings::auto]]
-    sp<ResourceLoader> createResourceLoader(const String& name);
+    sp<ResourceLoader> createResourceLoader(const String& name, const sp<Scope>& args = nullptr);
 
 //  [[script::bindings::property]]
     const List<String>& argv() const;

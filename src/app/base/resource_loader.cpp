@@ -51,9 +51,9 @@ ResourceLoader::BUILDER::BUILDER(BeanFactory& parent, const document& doc, const
 {
 }
 
-sp<ResourceLoader> ResourceLoader::BUILDER::build(const sp<Scope>& /*args*/)
+sp<ResourceLoader> ResourceLoader::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<ResourceLoader> resourceLoader = _application_context->createResourceLoader(_src);
+    const sp<ResourceLoader> resourceLoader = _application_context->createResourceLoader(_src, args);
     resourceLoader->import(_manifest, _parent);
     return resourceLoader;
 }
@@ -63,9 +63,9 @@ ResourceLoader::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& v
 {
 }
 
-sp<ResourceLoader> ResourceLoader::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<ResourceLoader> ResourceLoader::DICTIONARY::build(const sp<Scope>& args)
 {
-    return _application_context->createResourceLoader(_src, nullptr);
+    return _application_context->createResourceLoader(_src, nullptr, args);
 }
 
 }

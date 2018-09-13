@@ -26,8 +26,8 @@ public:
     ApplicationContext(const sp<ApplicationResource>& applicationResource);
     ~ApplicationContext();
 
-    sp<ResourceLoader> createResourceLoader(const String& name);
-    sp<ResourceLoader> createResourceLoader(const String& name, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    sp<ResourceLoader> createResourceLoader(const String& name, const sp<Scope>& args);
+    sp<ResourceLoader> createResourceLoader(const String& name, const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Scope>& args);
 
     const sp<ApplicationResource>& applicationResource() const;
     const sp<GLResourceManager>& glResourceManager() const;

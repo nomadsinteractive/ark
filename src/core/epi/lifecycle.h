@@ -12,16 +12,14 @@ namespace ark {
 class ARK_API Lifecycle : public Boolean {
 public:
 //  [[script::bindings::auto]]
-    Lifecycle(bool expired = false);
+    Lifecycle(bool disposed = false);
 //  [[script::bindings::auto]]
-    Lifecycle(const sp<Boolean>& delegate);
+    Lifecycle(const sp<Boolean>& disposed);
 
     virtual bool val() override;
 
 //  [[script::bindings::auto]]
-    bool expired() const;
-//  [[script::bindings::auto]]
-    void expire();
+    void dispose();
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Lifecycle> {
@@ -31,13 +29,12 @@ public:
         virtual sp<Lifecycle> build(const sp<Scope>& args);
 
     private:
-        bool _expired;
+        bool _disposed;
         sp<Builder<Boolean>> _delegate;
     };
 
 protected:
-    bool _expired;
-    sp<Boolean> _delegate;
+    sp<BooleanWrapper> _disposed;
 
 };
 

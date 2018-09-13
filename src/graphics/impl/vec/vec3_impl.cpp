@@ -63,7 +63,7 @@ Vec3Impl::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
 {
 }
 
-sp<Vec3Impl> Vec3Impl::BUILDER::build(const sp<Scope>& args)
+sp<Vec3> Vec3Impl::BUILDER::build(const sp<Scope>& args)
 {
     return sp<Vec3Impl>::make(_x->build(args), _y->build(args), _z->build(args));
 }

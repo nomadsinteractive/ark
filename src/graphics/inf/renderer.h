@@ -19,7 +19,6 @@ public:
 //  [[script::bindings::meta(expire())]]
 //  [[script::bindings::meta(isExpired())]]
 //  [[script::bindings::meta(size())]]
-//  [[script::bindings::meta(setRendererDelegate())]]
 
     class ARK_API Group {
     public:

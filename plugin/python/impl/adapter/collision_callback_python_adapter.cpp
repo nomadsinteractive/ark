@@ -60,8 +60,10 @@ void CollisionCallbackPythonAdapter::onEndContact(const sp<RigidBody>& rigidBody
 
 int CollisionCallbackPythonAdapter::traverse(visitproc visit, void* arg)
 {
-    Py_VISIT(_on_begin_contact->object());
-    Py_VISIT(_on_end_contact->object());
+    if(_on_begin_contact)
+        Py_VISIT(_on_begin_contact->object());
+    if(_on_end_contact)
+        Py_VISIT(_on_end_contact->object());
     return 0;
 }
 

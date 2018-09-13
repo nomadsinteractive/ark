@@ -100,7 +100,7 @@ private:
                             if(f.package().empty() && (f.ref() == id || ref == id))
                                 break;
                             const sp<Builder<T>> builder = factory.findBuilderById<T>(f, true);
-                            return decorateBuilder(factory, builder, style);
+                            return wrapBuilder(decorateBuilder(factory, builder, style), id);
                         }
                         if(f.isArg())
                             return decorateBuilder(factory, sp<BuilderByArguments<T>>::make(f.arg(), _references), style);
@@ -122,13 +122,13 @@ private:
             return wrapBuilder(decorateBuilder(factory, builder, style), id);
         }
 
-        sp<Builder<T>> wrapBuilder(const sp<Builder<T>>& builder, const String& id) const {
+        sp<Builder<T>> wrapBuilder(sp<Builder<T>> builder, const String& id) const {
             if(id.empty())
                 return builder;
             if(id.at(0) == '@')
-                return sp<Builder<T>>::adopt(new BuilderBySoftRef<T>(id.substr(1), _references, builder));
+                return sp<Builder<T>>::adopt(new BuilderBySoftRef<T>(id.substr(1), _references, std::move(builder)));
             if(id.at(0) == '#')
-                return sp<Builder<T>>::adopt(new BuilderByHardRef<T>(id.substr(1), _references, builder));
+                return sp<Builder<T>>::adopt(new BuilderByHardRef<T>(id.substr(1), _references, std::move(builder)));
             return builder;
         }
 
@@ -240,7 +240,7 @@ public:
     template<typename T> sp<Builder<T>> findBuilderById(const Identifier& id, bool noNull) {
         if(id.package()) {
             const sp<BeanFactory>& factory = getPackage(id.package());
-            DCHECK(noNull || factory, "BeanFactory \"%s\" not found");
+            DCHECK(noNull || factory, "Id: \"%s\"'s package \"%s\" not found", id.toString().c_str(), id.package().c_str());
             return factory ? factory->findBuilder<T>(id.ref(), noNull) : (noNull ? getNullBuilder<T>() : nullptr);
         }
         return findBuilder<T>(id.ref(), noNull);

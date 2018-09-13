@@ -36,13 +36,6 @@ void Arena::addRenderer(const sp<Renderer>& renderer)
     _view_group->addRenderer(renderer);
 }
 
-void Arena::setRendererDelegate(const sp<Renderer>& delegate)
-{
-    DCHECK(delegate.is<ViewGroup>(), "Arena's renderer delegate must be ViewGroup");
-    _renderer = delegate;
-    _view_group = delegate.as<ViewGroup>();
-}
-
 void Arena::render(RenderRequest& renderRequest, float x, float y)
 {
     NOT_NULL(_renderer);
@@ -82,7 +75,9 @@ void Arena::addLayer(const sp<Renderer>& layer)
 
 void Arena::setView(const sp<Renderer>& view)
 {
-    setRendererDelegate(view);
+    DCHECK(view.is<ViewGroup>(), "Arena's renderer delegate must be ViewGroup");
+    _renderer = view;
+    _view_group = view.as<ViewGroup>();
 }
 
 const sp<ViewGroup>& Arena::view() const
