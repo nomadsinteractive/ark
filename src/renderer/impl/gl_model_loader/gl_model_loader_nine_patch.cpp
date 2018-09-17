@@ -40,7 +40,7 @@ GLModelLoaderNinePatch::GLModelLoaderNinePatch(const document& manifest, const s
     uint32_t textureHeight = atlas->texture()->height();
     for(const document& node : manifest->children("render-object"))
     {
-        uint32_t type = Documents::getAttribute<uint32_t>(node, Constants::Attributes::TYPE, 0);
+        int32_t type = Documents::getAttribute<int32_t>(node, Constants::Attributes::TYPE, 0);
         const Rect patches = Documents::ensureAttribute<Rect>(node, Constants::Attributes::NINE_PATCH_PATCHES);
         bool hasBounds = atlas->has(type);
         if(hasBounds)
@@ -48,12 +48,12 @@ GLModelLoaderNinePatch::GLModelLoaderNinePatch(const document& manifest, const s
             const Atlas::Item& item = atlas->at(type);
             const Rect r(item.left() * textureWidth / 65536.0f - 0.5f, item.bottom() * textureHeight / 65536.0f - 0.5f,
                          item.right() * textureWidth / 65536.0f + 0.5f, item.top() * textureHeight / 65536.0f + 0.5f);
-            _nine_patch_items.make(type, r, patches, textureWidth, textureHeight);
+            _nine_patch_items.emplace(type, r, patches, textureWidth, textureHeight);
         }
         else
         {
             const Rect r = Rect::parse(node);
-            _nine_patch_items.make(type, r, patches, textureWidth, textureHeight);
+            _nine_patch_items.emplace(type, r, patches, textureWidth, textureHeight);
         }
     }
 }

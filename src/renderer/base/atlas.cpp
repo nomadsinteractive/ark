@@ -45,12 +45,12 @@ uint16_t Atlas::halfPixelY() const
     return _half_pixel_y;
 }
 
-bool Atlas::has(uint32_t c) const
+bool Atlas::has(int32_t c) const
 {
     return _atlas->has(c);
 }
 
-void Atlas::add(uint32_t id, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX, float pivotY)
+void Atlas::add(int32_t id, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX, float pivotY)
 {
     _atlas->add(id, makeItem(left, top, right, bottom, pivotX, pivotY));
 }
@@ -58,6 +58,14 @@ void Atlas::add(uint32_t id, uint32_t left, uint32_t top, uint32_t right, uint32
 const Atlas::Item& Atlas::at(uint32_t id) const
 {
     return _allow_default_item ? (has(id) ? _atlas->at(id) : _default_item) : _atlas->at(id);
+}
+
+void Atlas::getOriginalPosition(uint32_t id, Rect& position) const
+{
+    const Atlas::Item& item = at(id);
+    float nw = _texture->width() / 65536.0f;
+    float nh = _texture->height() / 65536.0f;
+    position = Rect((item.left() - _half_pixel_x) * nw, (item.bottom() - _half_pixel_y) * nh, (item.right() + _half_pixel_x) * nw, (item.top() + _half_pixel_y) * nh);
 }
 
 void Atlas::clear()
@@ -100,7 +108,7 @@ sp<Atlas> Atlas::BUILDER::build(const sp<Scope>& args)
     {
         if(i->name() == "import")
         {
-            const sp<Atlas::Importer> importer = _factory.ensure<Atlas::Importer>(i, Constants::Attributes::TYPE, args);
+            const sp<Atlas::Importer> importer = _factory.ensure<Atlas::Importer>(i, Constants::Attributes::CLASS, args);
             importer->import(atlas, _resource_loader_context, i);
         }
         else

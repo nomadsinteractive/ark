@@ -14,7 +14,7 @@ void AtlasImporterTexturePacker::import(Atlas& atlas, const ResourceLoaderContex
     DCHECK(src, "Cannot load %s", path.c_str());
     for(const document& i : src->children())
     {
-        uint32_t n = Documents::ensureAttribute<uint32_t>(i, "n");
+        int32_t n = Documents::ensureAttribute<int32_t>(i, "n");
         uint32_t x = Documents::getAttribute<uint32_t>(i, "x", 0);
         uint32_t y = Documents::getAttribute<uint32_t>(i, "y", 0);
         uint32_t w = Documents::getAttribute<uint32_t>(i, "w", 0);

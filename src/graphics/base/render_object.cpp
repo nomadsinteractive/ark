@@ -172,7 +172,7 @@ sp<RenderObject> RenderObject::EXPIRED_STYLE::build(const sp<Scope>& args)
     return _delegate->build(args).absorb(_expired->build(args));
 }
 
-RenderObject::Snapshot::Snapshot(uint32_t type, const V& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings)
+RenderObject::Snapshot::Snapshot(int32_t type, const V& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings)
     : _type(type), _position(position), _size(size), _transform(transform), _varyings(varyings)
 {
 }

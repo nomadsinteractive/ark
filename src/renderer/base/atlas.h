@@ -59,10 +59,12 @@ public:
     uint16_t halfPixelX() const;
     uint16_t halfPixelY() const;
 
-    bool has(uint32_t c) const;
-    void add(uint32_t id, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX = 0, float pivotY = 0);
+    bool has(int32_t c) const;
+    void add(int32_t id, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX = 0, float pivotY = 0);
 
     const Item& at(uint32_t id) const;
+    void getOriginalPosition(uint32_t id, Rect& position) const;
+
     void clear();
 
     static uint16_t unnormalize(uint32_t x, uint32_t s);

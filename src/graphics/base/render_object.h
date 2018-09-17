@@ -19,10 +19,10 @@ namespace ark {
 class ARK_API RenderObject : public Block {
 public:
     struct Snapshot {
-        Snapshot(uint32_t type, const V& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
+        Snapshot(int32_t type, const V& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
         Snapshot(const Snapshot& other) = default;
 
-        uint32_t _type;
+        int32_t _type;
         V _position;
         V3 _size;
         Transform::Snapshot _transform;

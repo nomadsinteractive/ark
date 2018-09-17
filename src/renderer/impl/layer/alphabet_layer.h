@@ -20,7 +20,7 @@ private:
         const sp<Alphabet>& alphabet() const;
         const sp<Atlas>& atlas() const;
 
-        bool prepare(uint32_t c, bool allowOverflow);
+        bool prepare(int32_t c, bool allowOverflow);
         bool checkUnpreparedCharacter(const LayerContext::Snapshot& renderContext);
 
         void reset();
@@ -39,7 +39,7 @@ private:
         uint32_t _flowx, _flowy;
         int32_t _max_glyph_height;
 
-        std::unordered_set<uint32_t> _characters;
+        std::unordered_set<int32_t> _characters;
     };
 
 public:

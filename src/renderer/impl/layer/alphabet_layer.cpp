@@ -63,7 +63,7 @@ bool AlphabetLayer::Stub::hasCharacterGlyph(uint32_t c) const
     return _atlas->at(c).width() != 0;
 }
 
-bool AlphabetLayer::Stub::prepare(uint32_t c, bool allowOverflow)
+bool AlphabetLayer::Stub::prepare(int32_t c, bool allowOverflow)
 {
     Alphabet::Metrics metrics;
     if(_alphabet->measure(c, metrics, false))
@@ -116,7 +116,7 @@ void AlphabetLayer::Stub::reset()
 
 void AlphabetLayer::Stub::doPrepare(const LayerContext::Snapshot& renderContext, bool allowReset)
 {
-    for(uint32_t c : _characters)
+    for(int32_t c : _characters)
     {
         if(!hasCharacterGlyph(c))
         {
