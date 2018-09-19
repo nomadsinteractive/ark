@@ -12,8 +12,8 @@
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
-#include "core/util/strings.h"
 #include "core/util/operators.h"
+#include "core/util/strings.h"
 
 namespace ark {
 
@@ -162,6 +162,21 @@ sp<Numeric> NumericUtil::floordiv(const sp<Numeric>& self, const sp<Numeric>& rv
 {
     FATAL("Unimplemented");
     return nullptr;
+}
+
+sp<Numeric> NumericUtil::mod(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
+{
+    return sp<VariableOP2<float, float, Operators::Mod<float>, sp<Numeric>, sp<Numeric>>>::make(lvalue, rvalue);
+}
+
+sp<Numeric> NumericUtil::mod(const sp<Numeric>& lvalue, float rvalue)
+{
+    return sp<VariableOP2<float, float, Operators::Mod<float>, sp<Numeric>, float>>::make(lvalue, rvalue);
+}
+
+sp<Numeric> NumericUtil::mod(float lvalue, const sp<Numeric>& rvalue)
+{
+    return sp<VariableOP2<float, float, Operators::Mod<float>, float, sp<Numeric>>>::make(lvalue, rvalue);
 }
 
 sp<Numeric> NumericUtil::negative(const sp<Numeric>& self)

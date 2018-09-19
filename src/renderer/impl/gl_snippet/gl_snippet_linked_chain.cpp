@@ -43,14 +43,18 @@ GLSnippetLinkedChain::DICTIONARY::DICTIONARY(BeanFactory& factory, const String&
 
 sp<GLSnippet> GLSnippetLinkedChain::DICTIONARY::build(const sp<Scope>& args)
 {
-    std::vector<String> l = Strings::unwrap(_value, '[', ']').split(',');
+    const std::vector<String> l = Strings::unwrap(_value, '[', ']').split(',');
     DCHECK(l.size() > 0, "Empty list");
     if(l.size() == 1)
-        return _factory.ensure<GLSnippet>(l[0]);
+    {
+        const sp<Builder<GLSnippet>> builder = _factory.ensureBuilder<GLSnippet>(l.at(0), false);
+        DCHECK(builder, "Cannot build \"%s\"", l.at(0).c_str());
+        return builder->build(args);
+    }
 
-    sp<GLSnippetLinkedChain> chain = sp<GLSnippetLinkedChain>::make(_factory.ensure<GLSnippet>(l[0], args), _factory.ensure<GLSnippet>(l[1], args));
+    sp<GLSnippetLinkedChain> chain = sp<GLSnippetLinkedChain>::make(_factory.ensure<GLSnippet>(l.at(0), args), _factory.ensure<GLSnippet>(l.at(1), args));
     for(uint32_t i = 2; i < l.size(); i++)
-        chain = sp<GLSnippetLinkedChain>::make(chain, _factory.ensure<GLSnippet>(l[i], args));
+        chain = sp<GLSnippetLinkedChain>::make(chain, _factory.ensure<GLSnippet>(l.at(i), args));
     return chain;
 }
 

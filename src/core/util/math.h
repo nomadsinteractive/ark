@@ -29,9 +29,8 @@ public:
     }
 
     template<typename T> static T mod(T value, T mod) {
-        DCHECK(mod >= 1, "Argument mod's value must be greater than one");
         T v = value - static_cast<int32_t>(value /  mod) * T(mod);
-        return v >= 0 ? v : v + mod;
+        return signEquals(v, mod) ? v : v + mod;
     }
 
     template<typename T> static T modFloor(T value, T mod) {

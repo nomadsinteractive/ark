@@ -50,6 +50,12 @@ public:
     static sp<Numeric> truediv(float lvalue, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(//)]]
     static sp<Numeric> floordiv(const sp<Numeric>& self, const sp<Numeric>& rvalue);
+//[[script::bindings::operator(%)]]
+    static sp<Numeric> mod(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
+//[[script::bindings::operator(%)]]
+    static sp<Numeric> mod(const sp<Numeric>& lvalue, float rvalue);
+//[[script::bindings::operator(%)]]
+    static sp<Numeric> mod(float lvalue, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(neg)]]
     static sp<Numeric> negative(const sp<Numeric>& self);
 //[[script::bindings::operator(int)]]

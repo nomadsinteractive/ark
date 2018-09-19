@@ -43,9 +43,9 @@ private:
             return builder;
         }
 
-        sp<Builder<T>> createValueBuilder(BeanFactory& factory, const String& value) const {
+        sp<Builder<T>> createValueBuilder(BeanFactory& factory, const String& value, bool useDefaultFactory) const {
             const sp<Builder<T>> builder = createValueBuilder(factory, value, value);
-            return builder || !_default_dictionary_factory ? builder : _default_dictionary_factory(factory, value);
+            return builder || !_default_dictionary_factory || !useDefaultFactory ? builder : _default_dictionary_factory(factory, value);
         }
 
         sp<Builder<T>> createValueBuilder(BeanFactory& factory, const String& type, const String& value) const {
@@ -61,25 +61,25 @@ private:
         }
 
         void addBuilderFactory(const String& id, std::function<sp<Builder<T>>(BeanFactory&, const document&)> builderFactory) {
-            _builders[id] = builderFactory;
+            _builders[id] = std::move(builderFactory);
         }
 
         void addBuilderDecorator(const String& style, std::function<sp<Builder<T>>(BeanFactory&, const sp<Builder<T>>&, const String&)> builderDecorator) {
-            _decorators[style] = builderDecorator;
+            _decorators[style] = std::move(builderDecorator);
         }
 
-        void setDefaultBuilderFactory(std::function<sp<Builder<T>>(BeanFactory&, const document&)>&& builderFactory) {
+        void setDefaultBuilderFactory(std::function<sp<Builder<T>>(BeanFactory&, const document&)> builderFactory) {
             DCHECK(!_default_builder_factory, "Overriding existing Builder factory");
             _default_builder_factory = std::move(builderFactory);
         }
 
         void addDictionaryFactory(const String& value, std::function<sp<Builder<T>>(BeanFactory&, const String&)> dictionaryFactory) {
-            _values[value] = dictionaryFactory;
+            _values[value] = std::move(dictionaryFactory);
         }
 
         void setDictionaryFactory(std::function<sp<Builder<T>>(BeanFactory&, const String&)> defaultDictionaryFactory) {
             DCHECK(!_default_dictionary_factory, "Overriding existing Dictionary factory");
-            _default_dictionary_factory = defaultDictionaryFactory;
+            _default_dictionary_factory = std::move(defaultDictionaryFactory);
         }
 
         sp<Builder<T>> createBuilder(BeanFactory& factory, const document& doc) const {
@@ -181,9 +181,9 @@ public:
             return worker ? worker->createBuilder(factory, className, doc) : nullptr;
         }
 
-        template<typename T> sp<Builder<T>> createValueBuilder(BeanFactory& factory, const String& value) const {
+        template<typename T> sp<Builder<T>> createValueBuilder(BeanFactory& factory, const String& value, bool useDefaultFactory = true) const {
             const sp<Worker<T>>& worker = _workers.get<Worker<T>>();
-            return worker ? worker->createValueBuilder(factory, value) : nullptr;
+            return worker ? worker->createValueBuilder(factory, value, useDefaultFactory) : nullptr;
         }
 
         template<typename T> sp<Builder<T>> createValueBuilder(BeanFactory& factory, const String& type, const String& value) const {
@@ -284,7 +284,7 @@ public:
         return obj;
     }
 
-    template<typename T> sp<Builder<T>> getBuilder(const String& id, bool noNull = true) {
+    template<typename T> sp<Builder<T>> getBuilder(const String& id, bool noNull = true, bool useDefaultFactory = true) {
         if(id.empty())
             return noNull ? getNullBuilder<T>() : nullptr;
 
@@ -293,16 +293,16 @@ public:
             return findBuilderById<T>(f, noNull);
         if(f.isArg())
             return sp<BuilderByArguments<T>>::make(f.arg(), _references);
-        return createBuilderByValue<T>(id, noNull);
+        return createBuilderByValue<T>(id, noNull, useDefaultFactory);
     }
 
-    template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr, bool noNull = true) {
+    template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr, bool noNull = true, bool useDefaultFactory = true) {
         const String attrValue = Documents::getAttribute(doc, attr);
         if(attrValue.empty()) {
             const document& child = doc->getChild(attr);
             return child ? createBuilderByDocument<T>(child, noNull) : (noNull ? getNullBuilder<T>() : nullptr);
         }
-        return getBuilder<T>(attrValue, noNull);
+        return getBuilder<T>(attrValue, noNull, useDefaultFactory);
     }
 
     template<typename T> sp<Builder<T>> getConcreteClassBuilder(const document& doc, const String& attr, bool noNull = true) {
@@ -315,9 +315,9 @@ public:
         return getBuilder<T>(attrValue, noNull);
     }
 
-    template<typename T> sp<Builder<T>> ensureBuilder(const String& id) {
+    template<typename T> sp<Builder<T>> ensureBuilder(const String& id, bool useDefaultFactory = true) {
         DCHECK(id, "Empty value being built");
-        const sp<Builder<T>> builder = getBuilder<T>(id, false);
+        const sp<Builder<T>> builder = getBuilder<T>(id, false, useDefaultFactory);
         DCHECK(builder, "Could find builder \"%s\"", id.c_str());
         return builder;
     }
@@ -328,8 +328,8 @@ public:
         return builder;
     }
 
-    template<typename T> sp<Builder<T>> ensureBuilder(const document& doc, const String& attr) {
-        const sp<Builder<T>> builder = getBuilder<T>(doc, attr, false);
+    template<typename T> sp<Builder<T>> ensureBuilder(const document& doc, const String& attr, bool useDefaultFactory = true) {
+        const sp<Builder<T>> builder = getBuilder<T>(doc, attr, false, useDefaultFactory);
         DCHECK(builder, "Counld not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
         return builder;
     }
@@ -385,9 +385,9 @@ private:
         return noNull ? getNullBuilder<T>() : nullptr;
     }
 
-    template<typename T> sp<Builder<T>> createBuilderByValue(const String& value, bool noNull) {
+    template<typename T> sp<Builder<T>> createBuilderByValue(const String& value, bool noNull, bool useDefaultFactory) {
         for(Factory& i : _factories->items()) {
-            const sp<Builder<T>> builder = i.createValueBuilder<T>(*this, value);
+            const sp<Builder<T>> builder = i.createValueBuilder<T>(*this, value, useDefaultFactory);
             if(builder)
                 return builder;
         }

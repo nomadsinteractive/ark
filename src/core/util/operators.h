@@ -1,6 +1,8 @@
 #ifndef ARK_CORE_UTIL_OPERATORS_H_
 #define ARK_CORE_UTIL_OPERATORS_H_
 
+#include "core/util/math.h"
+
 namespace ark {
 
 class Operators {
@@ -72,6 +74,13 @@ public:
     public:
         auto operator()(T v1, P v2)->decltype(v1 / v2) {
             return v1 / v2;
+        }
+    };
+
+    template<typename T, typename P = T> class Mod {
+    public:
+        auto operator()(T v1, P v2)->decltype(v1 / v2) {
+            return Math::mod(v1, v2);
         }
     };
 
