@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <math_neon.h>
 
+#include "core/impl/numeric/abs.h"
 #include "core/impl/numeric/max.h"
 #include "core/impl/numeric/min.h"
 #include "core/impl/numeric/cosine.h"
@@ -32,6 +33,16 @@ uint32_t Math::log2(uint32_t value)
     value |= value >> 8;
     value |= value >> 16;
     return tab32[(uint32_t) (value * 0x07C4ACDD) >> 27];
+}
+
+float Math::abs(float x)
+{
+    return x > 0 ? x : -x;
+}
+
+sp<Numeric> Math::abs(const sp<Numeric>& x)
+{
+    return sp<Abs>::make(x);
 }
 
 float Math::sin(float x)

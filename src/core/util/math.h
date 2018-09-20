@@ -14,10 +14,6 @@ namespace ark {
 class Math {
 public:
 
-    template<typename T> static T abs(T x) {
-        return x > 0 ? x : -x;
-    }
-
     template<typename T> static bool between(T a1, T a2, T val) {
         return a1 <= a2 ? (a1 <= val && val <= a2) : (a2 <= val && val <= a1);
     }
@@ -68,6 +64,12 @@ public:
     }
 
     static ARK_API uint32_t log2(uint32_t x);
+
+
+//  [[script::bindings::auto]]
+    static ARK_API float abs(float x);
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> abs(const sp<Numeric>& x);
 
 //  [[script::bindings::auto]]
     static ARK_API float sin(float x);
