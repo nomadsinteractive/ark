@@ -37,14 +37,14 @@ sp<String> YAMLStringBundle::get(const String& name)
 
     std::map<String, sp<String>>& bundle = _bundle[package];
     const auto iter1 = bundle.find(nodename);
-    DCHECK(iter1 != bundle.end(), "\"%s\" not found", nodename.c_str());
-    return iter1->second;
+    DWARN(iter1 != bundle.end(), "YAML node \"%s\" not found", nodename.c_str());
+    return iter1 != bundle.end() ? iter1->second : sp<String>::make("[" + name + "]");
 }
 
 void YAMLStringBundle::loadBundle(const String& name)
 {
     const sp<Readable> readable = _resource->get(name + ".yaml");
-    NOT_NULL(readable);
+    DCHECK(readable, "Unable to load %s.yaml", name.c_str());
     yaml_parser_t parser;
     if(!yaml_parser_initialize(&parser))
         FATAL("Failed to initialize parser");

@@ -5,7 +5,7 @@
 
 	<layer id="@l001" class="image-layer">
 		<atlas src="alphabet.png">
-			<import type="characters" characters="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890/.(),- "
+			<import class="characters" characters="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890/.(),- "
 						  font-width="32" font-height="64"/>
 		</atlas>
 	</layer>

@@ -501,6 +501,10 @@ class RenderObject:
 class Math:
 
     @staticmethod
+    def abs(x):
+        return x
+
+    @staticmethod
     def sin(x):
         return 0
 
