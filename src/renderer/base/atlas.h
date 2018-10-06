@@ -62,8 +62,8 @@ public:
     bool has(int32_t c) const;
     void add(int32_t id, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX = 0, float pivotY = 0);
 
-    const Item& at(uint32_t id) const;
-    void getOriginalPosition(uint32_t id, Rect& position) const;
+    const Item& at(int32_t id) const;
+    void getOriginalPosition(int32_t id, Rect& position) const;
 
     void clear();
 

@@ -131,7 +131,7 @@ bool View::fireOnPush()
     if(_on_push)
         _on_push->run();
     _state = static_cast<State>(_state | STATE_PUSHING);
-    return static_cast<bool>(_on_push);
+    return _on_push || _on_click;
 }
 
 bool View::fireOnRelease()

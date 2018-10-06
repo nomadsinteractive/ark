@@ -55,12 +55,12 @@ void Atlas::add(int32_t id, uint32_t left, uint32_t top, uint32_t right, uint32_
     _atlas->add(id, makeItem(left, top, right, bottom, pivotX, pivotY));
 }
 
-const Atlas::Item& Atlas::at(uint32_t id) const
+const Atlas::Item& Atlas::at(int32_t id) const
 {
     return _allow_default_item ? (has(id) ? _atlas->at(id) : _default_item) : _atlas->at(id);
 }
 
-void Atlas::getOriginalPosition(uint32_t id, Rect& position) const
+void Atlas::getOriginalPosition(int32_t id, Rect& position) const
 {
     const Atlas::Item& item = at(id);
     float nw = _texture->width() / 65536.0f;
