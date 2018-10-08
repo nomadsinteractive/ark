@@ -9,6 +9,10 @@ namespace ark {
 namespace plugin {
 namespace python {
 
+static Py_hash_t __hash__(PyArkType::Instance* self)
+{
+    return reinterpret_cast<Py_hash_t>(self->box->ptr());
+}
 
 static int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args)
 {
@@ -20,7 +24,7 @@ static int __clear__(PyArkType::Instance* self)
     return self->container ? self->container->clear() : 0;
 }
 
-PyArkType::PyArkType(const String& name, const String& doc, long flags)
+PyArkType::PyArkType(const String& name, const String& doc, unsigned long flags)
     : _name(name), _doc(doc) {
     PyTypeObject pyType = {
         PyVarObject_HEAD_INIT(NULL, 0)
@@ -30,15 +34,12 @@ PyArkType::PyArkType(const String& name, const String& doc, long flags)
     memset(&pyType.tp_itemsize, 0, sizeof(PyTypeObject) - offsetof(PyTypeObject, tp_itemsize));
     pyType.tp_flags = flags;
     pyType.tp_doc = _doc.c_str();
-    pyType.tp_new = (newfunc) _py_new;
-    pyType.tp_init = (initproc) _py_init;
-    pyType.tp_dealloc = (destructor) _py_dealloc;
-    pyType.tp_weaklistoffset = offsetof(Instance, weakreflist);
     if((flags & Py_TPFLAGS_HAVE_GC) != 0)
     {
-        pyType.tp_traverse = (traverseproc) __traverse__;
-        pyType.tp_clear = (inquiry) __clear__;
+        pyType.tp_traverse = reinterpret_cast<traverseproc>(__traverse__);
+        pyType.tp_clear = reinterpret_cast<inquiry>(__clear__);
     }
+    pyType.tp_base = __basetype__();
 
     _py_type_object = pyType;
     Py_INCREF(&_py_type_object);
@@ -61,7 +62,7 @@ PyTypeObject* PyArkType::getPyTypeObject()
 
 PyObject* PyArkType::create(const Box& box)
 {
-    Instance* self = reinterpret_cast<Instance*>(_py_type_object.tp_new(&_py_type_object, 0, 0));
+    Instance* self = reinterpret_cast<Instance*>(_py_type_object.tp_new(&_py_type_object, nullptr, nullptr));
     self->box = new Box(box);
     return reinterpret_cast<PyObject*>(self);
 }
@@ -117,7 +118,7 @@ void PyArkType::_py_dealloc(Instance* self)
     if (self->weakreflist)
         PyObject_ClearWeakRefs(reinterpret_cast<PyObject*>(self));
 
-    Py_TYPE(self)->tp_free((PyObject*)self);
+    Py_TYPE(self)->tp_free(reinterpret_cast<PyObject*>(self));
 }
 
 PyObject* PyArkType::wrap(Instance& inst, const Box& box, const sp<Scope>& args) const
@@ -139,7 +140,59 @@ PyObject* PyArkType::wrap(Instance& inst, const Box& box, const sp<Scope>& args)
     return bean;
 }
 
-int PyArkType::_py_init(Instance* self, PyObject* args, PyObject* kwds)
+PyTypeObject* PyArkType::__basetype__()
+{
+    static PyMethodDef PyArkType_methods[] = {
+        {"absorb", reinterpret_cast<PyCFunction>(__absorb__), METH_VARARGS, nullptr},
+        {"dispose", reinterpret_cast<PyCFunction>(__dispose__), METH_VARARGS, nullptr},
+        {nullptr, nullptr, 0, nullptr}
+    };
+
+    static PyTypeObject ark_basetype = {
+        PyVarObject_HEAD_INIT(nullptr, 0)
+        "ark.Type",
+        sizeof(PyArkType::Instance),
+        0,
+        reinterpret_cast<destructor>(_py_dealloc),          /* tp_dealloc */
+        nullptr,                                            /* tp_print */
+        nullptr,                                            /* tp_getattr */
+        nullptr,                                            /* tp_setattr */
+        nullptr,                                            /* tp_reserved */
+        nullptr,                                            /* tp_repr */
+        nullptr,                                            /* tp_as_number */
+        nullptr,                                            /* tp_as_sequence */
+        nullptr,                                            /* tp_as_mapping */
+        reinterpret_cast<hashfunc>(__hash__),               /* tp_hash */
+        nullptr,                                            /* tp_call */
+        nullptr,                                            /* tp_str */
+        nullptr,                                            /* tp_getattro */
+        nullptr,                                            /* tp_setattro */
+        nullptr,                                            /* tp_as_buffer */
+        Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,           /* tp_flags */
+        "ark.Type",                                         /* tp_doc */
+        nullptr,                                            /* tp_traverse */
+        nullptr,                                            /* tp_clear */
+        nullptr,                                            /* tp_richcompare */
+        offsetof(Instance, weakreflist),                    /* tp_weaklistoffset */
+        nullptr,                                            /* tp_iter */
+        nullptr,                                            /* tp_iternext */
+        PyArkType_methods,                                 /* tp_methods */
+        nullptr,                                            /* tp_members */
+        nullptr,                                            /* tp_getset */
+        nullptr,                                            /* tp_base */
+        nullptr,                                            /* tp_dict */
+        nullptr,                                            /* tp_descr_get */
+        nullptr,                                            /* tp_descr_set */
+        0,                                                  /* tp_dictoffset */
+        reinterpret_cast<initproc>(_py_init),               /* tp_init */
+        nullptr,                                            /* tp_alloc */
+        reinterpret_cast<newfunc>(_py_new)                  /* tp_new */
+    };
+
+    return &ark_basetype;
+}
+
+int PyArkType::_py_init(Instance* /*self*/, PyObject* /*args*/, PyObject* /*kwds*/)
 {
     return 0;
 }

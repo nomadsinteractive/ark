@@ -83,7 +83,7 @@ public:
     } Instance;
 
 public:
-    PyArkType(const String& name, const String& doc, long flags);
+    PyArkType(const String& name, const String& doc, unsigned long flags);
 
     template<typename T> int ready() {
         _type_id = Type<T>::id();
@@ -119,6 +119,11 @@ private:
     static void _py_dealloc(Instance* self);
 
     PyObject* wrap(Instance& inst, const Box& box, const sp<Scope>& args) const;
+
+    static PyTypeObject* __basetype__();
+
+    static PyObject* __absorb__(Instance* self, PyObject* args, PyObject* kwargs);
+    static PyObject* __dispose__(Instance* self, PyObject* args, PyObject* kwargs);
 
 private:
     String _name;

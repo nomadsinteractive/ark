@@ -20,6 +20,11 @@ Box Box::toConcrete() const
     return _instance->_interfaces->as(*this, _instance->_interfaces->typeId());
 }
 
+void* Box::ptr() const
+{
+    return _instance ? _instance->ptr() : nullptr;
+}
+
 Box::operator bool() const
 {
     return _instance && _instance->ptr() != nullptr;

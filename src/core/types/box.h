@@ -48,6 +48,8 @@ public:
 
     Box toConcrete() const;
 
+    void* ptr() const;
+
 private:
     Box(void* instance, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor);
 
