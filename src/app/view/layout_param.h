@@ -36,7 +36,7 @@ public:
     void setContentHeight(float contentHeight);
 
     const sp<Size>& size() const;
-    const void setSize(const sp<Size>& size);
+    void setSize(const sp<Size>& size);
 
     Display display() const;
     void setDisplay(Display display);

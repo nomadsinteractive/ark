@@ -108,12 +108,8 @@ public:
     }
 
     template<typename U> SharedPtr<T>& absorb(const SharedPtr<U>& beingAbsorbed) {
-        if(beingAbsorbed.interfaces() != _interfaces) {
-            const Box box = beingAbsorbed.pack();
-            for(auto i : beingAbsorbed.interfaces()->implements())
-                _interfaces->_attachments[i] = beingAbsorbed.interfaces()->as(box, i);
-            _interfaces->_attachments.insert(beingAbsorbed.interfaces()->_attachments.begin(), beingAbsorbed.interfaces()->_attachments.end());
-        }
+        if(beingAbsorbed.interfaces() != _interfaces)
+            _interfaces->absorb(beingAbsorbed.pack());
         return *this;
     }
 

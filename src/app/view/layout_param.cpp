@@ -70,7 +70,7 @@ const sp<Size>& LayoutParam::size() const
     return _size;
 }
 
-const void LayoutParam::setSize(const sp<Size>& size)
+void LayoutParam::setSize(const sp<Size>& size)
 {
     _size = size;
 }

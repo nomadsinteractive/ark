@@ -11,6 +11,13 @@ Interfaces::Interfaces(Class* clazz)
     NOT_NULL(_class);
 }
 
+void Interfaces::absorb(const Box& other)
+{
+    for(auto i : other.interfaces()->implements())
+        _attachments[i] = other.interfaces()->as(other, i);
+    _attachments.insert(other.interfaces()->_attachments.begin(), other.interfaces()->_attachments.end());
+}
+
 TypeId Interfaces::typeId() const
 {
     return _class->id();

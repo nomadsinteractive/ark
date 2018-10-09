@@ -114,13 +114,13 @@ private:
 
     const std::map<TypeId, LoaderFunction>& getLoader(const String& name) const;
 
-    static PyObject* _py_new(PyTypeObject *type, PyObject *args, PyObject *kwds);
-    static int _py_init(Instance* self, PyObject* args, PyObject* kwds);
-    static void _py_dealloc(Instance* self);
-
     PyObject* wrap(Instance& inst, const Box& box, const sp<Scope>& args) const;
 
-    static PyTypeObject* __basetype__();
+    static PyTypeObject* basetype();
+
+    static PyObject* __new__(PyTypeObject *type, PyObject *args, PyObject *kwds);
+    static int __init__(Instance* self, PyObject* args, PyObject* kwds);
+    static void __dealloc__(Instance* self);
 
     static PyObject* __absorb__(Instance* self, PyObject* args, PyObject* kwargs);
     static PyObject* __dispose__(Instance* self, PyObject* args, PyObject* kwargs);

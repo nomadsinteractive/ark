@@ -25,21 +25,21 @@ public:
     TypeId typeId() const;
 
     template<typename T> const sp<T>& unpack() const {
-        return _instance ? _instance->unpack<T>() : sp<T>::null();
+        return _stub ? _stub->unpack<T>() : sp<T>::null();
     }
 
     template<typename T> sp<T>& unpack() {
-        return _instance ? _instance->unpack<T>() : sp<T>::null();
+        return _stub ? _stub->unpack<T>() : sp<T>::null();
     }
 
     template<typename T> sp<T> as() const {
-        if(!_instance)
+        if(!_stub)
             return sp<T>::null();
 
         TypeId typeId = Type<T>::id();
-        sp<T> inst = typeId == _instance->typeId() ? _instance->unpack<T>() : _instance->interfaces()->as(*this, typeId).unpack<T>();
+        sp<T> inst = typeId == _stub->typeId() ? _stub->unpack<T>() : _stub->interfaces()->as(*this, typeId).unpack<T>();
         if(!inst) {
-            const sp<Duck<T>> duck = _instance->interfaces()->as(*this, Type<Duck<T>>::id()).template unpack<Duck<T>>();
+            const sp<Duck<T>> duck = _stub->interfaces()->as(*this, Type<Duck<T>>::id()).template unpack<Duck<T>>();
             if(duck)
                 duck->to(inst);
         }
@@ -49,6 +49,7 @@ public:
     Box toConcrete() const;
 
     void* ptr() const;
+    const std::shared_ptr<Interfaces>& interfaces() const;
 
 private:
     Box(void* instance, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor);
@@ -83,7 +84,7 @@ private:
     };
 
 private:
-    std::shared_ptr<Stub> _instance;
+    std::shared_ptr<Stub> _stub;
 
     template<typename T> friend class SharedPtr;
 };
