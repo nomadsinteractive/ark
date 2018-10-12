@@ -66,7 +66,7 @@ void GLModelLoaderNinePatch::start(GLModelBuffer& buf, GLResourceManager& resour
     buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_NINE_PATCH, layerContext._items.size()));
 }
 
-void GLModelLoaderNinePatch::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& size)
+void GLModelLoaderNinePatch::loadModel(GLModelBuffer& buf, const Atlas& atlas, int32_t type, const V& size)
 {
     const Rect paintRect(0, 0, size.x(), size.y());
     const Item& item = _nine_patch_items.at(type);

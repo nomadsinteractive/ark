@@ -15,24 +15,27 @@ class AlphabetLayer : public Layer {
 private:
     class Stub {
     public:
-        Stub(const sp<Alphabet>& alphabet, const sp<GLResourceManager>& glResourceManager, uint32_t textureWidth, uint32_t textureHeight);
+        Stub(const sp<Alphabet>& alphabet, const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<GLShader>& shader, uint32_t textureWidth, uint32_t textureHeight);
 
         const sp<Alphabet>& alphabet() const;
         const sp<Atlas>& atlas() const;
 
-        bool prepare(int32_t c, bool allowOverflow);
+        sp<RenderCommand> render(const LayerContext::Snapshot& renderContext, float x, float y) const;
+
         bool checkUnpreparedCharacter(const LayerContext::Snapshot& renderContext);
 
         void reset();
 
-        void doPrepare(const LayerContext::Snapshot& renderContext, bool allowReset);
-        void prepareTexture(GLResourceManager& glResourceManager) const;
+        bool prepare(const LayerContext::Snapshot& renderContext, bool allowReset);
+        void prepareTexture() const;
 
     private:
-        bool hasCharacterGlyph(uint32_t c) const;
+        bool hasCharacterGlyph(int32_t c) const;
+        bool prepareOne(int32_t c);
 
     private:
         sp<Alphabet> _alphabet;
+        sp<GLResourceManager> _resource_manager;
         bitmap _font_glyph;
         sp<GLTexture> _texture;
         sp<Atlas> _atlas;
@@ -40,6 +43,9 @@ private:
         int32_t _max_glyph_height;
 
         std::unordered_set<int32_t> _characters;
+        sp<Layer> _layer;
+
+        friend class AlphabetLayer;
     };
 
 public:
@@ -48,7 +54,6 @@ public:
     virtual sp<RenderCommand> render(const LayerContext::Snapshot& layerContext, float x, float y) override;
 
     const sp<Alphabet>& alphabet() const;
-    const sp<Atlas>& atlas() const;
 
 //  [[plugin::resource-loader("alphabet-layer")]]
     class BUILDER : public Builder<Layer> {
@@ -73,7 +78,6 @@ private:
     sp<Stub> _stub;
     sp<ResourceLoaderContext> _resource_loader_context;
     sp<GLShader> _shader;
-    sp<Layer> _layer;
     sp<Atlas> _atlas;
 };
 

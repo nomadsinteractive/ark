@@ -22,7 +22,7 @@ void GLModelLoaderQuad::start(GLModelBuffer& buf, GLResourceManager& resourceMan
     buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_QUADS, layerContext._items.size()));
 }
 
-void GLModelLoaderQuad::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& scale)
+void GLModelLoaderQuad::loadModel(GLModelBuffer& buf, const Atlas& atlas, int32_t type, const V& scale)
 {
     const Atlas::Item& texCoord = atlas.at(type);
     float width = scale.x() == 0 ? texCoord.width() : scale.x();
@@ -61,7 +61,7 @@ GLModelLoaderQuad::BUILDER::BUILDER()
 {
 }
 
-sp<GLModelLoader> GLModelLoaderQuad::BUILDER::build(const sp<Scope>& args)
+sp<GLModelLoader> GLModelLoaderQuad::BUILDER::build(const sp<Scope>& /*args*/)
 {
     return sp<GLModelLoaderQuad>::make();
 }

@@ -116,10 +116,10 @@ sp<GLTexture> GLResourceManager::loadGLTexture(const String& name)
     return texture;
 }
 
-sp<GLTexture> GLResourceManager::createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable)
+sp<GLTexture> GLResourceManager::createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, PreparingStrategy ps)
 {
     sp<GLTexture> texture = sp<GLTextureDefault>::make(_recycler, sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), GLTexture::FORMAT_AUTO, GLTexture::FEATURE_DEFAULT, bitmapVariable);
-    prepare(texture, PS_ONCE_AND_ON_SURFACE_READY);
+    prepare(texture, ps);
     return texture;
 }
 

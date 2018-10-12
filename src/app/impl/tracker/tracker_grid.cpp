@@ -66,13 +66,13 @@ TrackerGrid::Stub::Stub(const V& cell)
 
 void TrackerGrid::Stub::remove(int32_t id)
 {
-    for(uint32_t i = 0; i < DIMENSIONS; i++)
+    for(int32_t i = 0; i < DIMENSIONS; i++)
         _axes[i].remove(id);
 }
 
 void TrackerGrid::Stub::create(int32_t id, const V& position, const V& size)
 {
-    for(uint32_t i = 0; i < DIMENSIONS; i++)
+    for(int32_t i = 0; i < DIMENSIONS; i++)
     {
         float p = position[i];
         float s = size[i];
@@ -82,7 +82,7 @@ void TrackerGrid::Stub::create(int32_t id, const V& position, const V& size)
 
 void TrackerGrid::Stub::update(int32_t id, const V& position, const V& size)
 {
-    for(uint32_t i = 0; i < DIMENSIONS; i++)
+    for(int32_t i = 0; i < DIMENSIONS; i++)
     {
         float p = position[i];
         float s = size[i];
@@ -93,7 +93,7 @@ void TrackerGrid::Stub::update(int32_t id, const V& position, const V& size)
 std::unordered_set<int32_t> TrackerGrid::Stub::search(const V& position, const V& size) const
 {
     std::unordered_set<int32_t> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
-    for(uint32_t i = 1; i < DIMENSIONS && !candidates.empty(); i++)
+    for(int32_t i = 1; i < DIMENSIONS && !candidates.empty(); i++)
     {
         const std::unordered_set<int32_t> s1 = std::move(candidates);
         const std::unordered_set<int32_t> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);

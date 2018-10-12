@@ -21,7 +21,7 @@ namespace ark {
 class ARK_API Button final : public View, public Renderer {
 public:
     Button(const sp<Renderer>& foreground, const sp<Renderer>& background, const sp<Size>& block, Gravity gravity);
-    ~Button();
+    ~Button() override;
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
@@ -42,7 +42,7 @@ public:
 //  [[plugin::builder]]
     class BUILDER : public Builder<Button> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Button> build(const sp<Scope>& args) override;
 
@@ -50,7 +50,7 @@ public:
         void loadStatus(const sp<Button>& button, const document& doc, BeanFactory& args, const sp<Scope>&);
 
     private:
-        BeanFactory _parent;
+        BeanFactory _factory;
         document _manifest;
         sp<Builder<Renderer>> _foreground, _background;
         sp<Builder<Size>> _size;

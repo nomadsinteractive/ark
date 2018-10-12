@@ -45,7 +45,7 @@ void GLModelLoaderLineStrip::start(GLModelBuffer& buf, GLResourceManager& resour
         buf.setIndices(_ibo.snapshot());
 }
 
-void GLModelLoaderLineStrip::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& scale)
+void GLModelLoaderLineStrip::loadModel(GLModelBuffer& buf, const Atlas& atlas, int32_t type, const V& scale)
 {
     if(type)
     {

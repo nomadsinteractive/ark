@@ -41,7 +41,7 @@ public:
     void recycle(const sp<GLResource>& resource) const;
 
     sp<GLTexture> loadGLTexture(const String& name);
-    sp<GLTexture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable);
+    sp<GLTexture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, PreparingStrategy ps = PS_ONCE_AND_ON_SURFACE_READY);
 
     GLBuffer makeGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage);
     GLBuffer makeDynamicArrayBuffer() const;

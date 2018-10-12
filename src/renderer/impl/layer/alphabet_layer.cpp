@@ -20,8 +20,8 @@
 namespace ark {
 
 AlphabetLayer::AlphabetLayer(const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : Layer(shader->camera(), resourceLoaderContext->memoryPool()), _stub(sp<Stub>::make(alphabet, resourceLoaderContext->glResourceManager(), textureWidth, textureHeight)),
-      _resource_loader_context(resourceLoaderContext), _shader(shader), _layer(sp<GLModelLayer>::make(sp<GLModelLoaderQuad>::make(), _shader, _stub->atlas(), _resource_loader_context))
+    : Layer(shader->camera(), resourceLoaderContext->memoryPool()), _stub(sp<Stub>::make(alphabet, resourceLoaderContext, shader, textureWidth, textureHeight)),
+      _resource_loader_context(resourceLoaderContext), _shader(shader)
 {
 }
 
@@ -29,10 +29,16 @@ sp<RenderCommand> AlphabetLayer::render(const LayerContext::Snapshot& renderCont
 {
     if(_stub->checkUnpreparedCharacter(renderContext))
     {
-        _stub->doPrepare(renderContext, true);
-        _stub->prepareTexture(_resource_loader_context->glResourceManager());
+        while(!_stub->prepare(renderContext, true))
+        {
+            uint32_t width = _stub->_font_glyph->width() * 2;
+            uint32_t height = _stub->_font_glyph->height() * 2;
+            LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _stub->_characters.size());
+            _stub = sp<Stub>::make(_stub->_alphabet, _resource_loader_context, _shader, width, height);
+        }
+        _stub->prepareTexture();
     }
-    return _layer->render(renderContext, x, y);
+    return _stub->render(renderContext, x, y);
 }
 
 const sp<Alphabet>& AlphabetLayer::alphabet() const
@@ -40,15 +46,10 @@ const sp<Alphabet>& AlphabetLayer::alphabet() const
     return _stub->alphabet();
 }
 
-const sp<Atlas>& AlphabetLayer::atlas() const
-{
-    return _stub->atlas();
-}
-
-AlphabetLayer::Stub::Stub(const sp<Alphabet>& alphabet, const sp<GLResourceManager>& glResourceManager, uint32_t textureWidth, uint32_t textureHeight)
-    : _alphabet(alphabet), _font_glyph(bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1))),
-      _texture(glResourceManager->createGLTexture(textureWidth, textureHeight, sp<Variable<bitmap>::Impl>::make(_font_glyph))),
-      _atlas(sp<Atlas>::make(_texture, true))
+AlphabetLayer::Stub::Stub(const sp<Alphabet>& alphabet, const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<GLShader>& shader, uint32_t textureWidth, uint32_t textureHeight)
+    : _alphabet(alphabet), _resource_manager(resourceLoaderContext->glResourceManager()), _font_glyph(bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1))),
+      _texture(_resource_manager->createGLTexture(textureWidth, textureHeight, sp<Variable<bitmap>::Impl>::make(_font_glyph), GLResourceManager::PS_ON_SURFACE_READY)),
+      _atlas(sp<Atlas>::make(_texture, true)), _layer(sp<GLModelLayer>::make(sp<GLModelLoaderQuad>::make(), shader, _atlas, resourceLoaderContext))
 {
     reset();
 }
@@ -58,12 +59,12 @@ const sp<Alphabet>& AlphabetLayer::Stub::alphabet() const
     return _alphabet;
 }
 
-bool AlphabetLayer::Stub::hasCharacterGlyph(uint32_t c) const
+bool AlphabetLayer::Stub::hasCharacterGlyph(int32_t c) const
 {
-    return _atlas->at(c).width() != 0;
+    return _atlas->has(c);
 }
 
-bool AlphabetLayer::Stub::prepare(int32_t c, bool allowOverflow)
+bool AlphabetLayer::Stub::prepareOne(int32_t c)
 {
     Alphabet::Metrics metrics;
     if(_alphabet->measure(c, metrics, false))
@@ -79,11 +80,8 @@ bool AlphabetLayer::Stub::prepare(int32_t c, bool allowOverflow)
             _max_glyph_height = _flowx = 0;
         }
         if(_flowy + metrics.bitmap_height > _atlas->height())
-        {
-            DWARN(allowOverflow, "TODO: Font image texture (%d, %d) overflow, you may need to create a larger image texture", _atlas->width(), _atlas->height());
-            if(allowOverflow)
-                return false;
-        }
+            return false;
+
         _atlas->add(c, _flowx, _flowy, _flowx + metrics.bitmap_width, _flowy + metrics.bitmap_height + 1);
         _alphabet->draw(c, _font_glyph, _flowx, _flowy);
         _flowx += metrics.bitmap_width;
@@ -98,9 +96,11 @@ bool AlphabetLayer::Stub::checkUnpreparedCharacter(const LayerContext::Snapshot&
     bool updateNeeded = false;
     for(const RenderObject::Snapshot& i : renderContext._items)
     {
-        bool contains = _characters.find(i._type) != _characters.end();
-        _characters.insert(i._type);
-        updateNeeded = updateNeeded || !contains;
+        if(_characters.find(i._type) == _characters.end())
+        {
+            _characters.insert(i._type);
+            updateNeeded = true;
+        }
     }
     return updateNeeded;
 }
@@ -114,30 +114,37 @@ void AlphabetLayer::Stub::reset()
     memset(_font_glyph->at(0, 0), 0, _font_glyph->width() * _font_glyph->height());
 }
 
-void AlphabetLayer::Stub::doPrepare(const LayerContext::Snapshot& renderContext, bool allowReset)
+bool AlphabetLayer::Stub::prepare(const LayerContext::Snapshot& renderContext, bool allowReset)
 {
     for(int32_t c : _characters)
     {
-        if(!hasCharacterGlyph(c))
+        if(!hasCharacterGlyph(c) && !prepareOne(c))
         {
-            if(!prepare(c, allowReset))
+            if(allowReset)
             {
                 reset();
                 checkUnpreparedCharacter(renderContext);
-                return doPrepare(renderContext, false);
+                return prepare(renderContext, false);
             }
+            return false;
         }
     }
+    return true;
 }
 
-void AlphabetLayer::Stub::prepareTexture(GLResourceManager& glResourceManager) const
+void AlphabetLayer::Stub::prepareTexture() const
 {
-    glResourceManager.prepare(_texture, GLResourceManager::PS_ONCE_FORCE);
+    _resource_manager->prepare(_texture, GLResourceManager::PS_ONCE_FORCE);
 }
 
 const sp<Atlas>& AlphabetLayer::Stub::atlas() const
 {
     return _atlas;
+}
+
+sp<RenderCommand> AlphabetLayer::Stub::render(const LayerContext::Snapshot& renderContext, float x, float y) const
+{
+    return _layer->render(renderContext, x, y);
 }
 
 AlphabetLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

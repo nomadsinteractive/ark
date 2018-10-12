@@ -23,7 +23,7 @@ public:
 //  [[plugin::builder("render-object")]]
     class BUILDER : public Builder<Renderer> {
     public:
-        BUILDER(BeanFactory& parent, const document& manifest);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Renderer> build(const sp<Scope>& args) override;
 

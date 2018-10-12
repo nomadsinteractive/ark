@@ -25,8 +25,8 @@ const sp<Size>& RendererByRenderObject::size()
     return _render_object->size();
 }
 
-RendererByRenderObject::BUILDER::BUILDER(BeanFactory& parent, const document& manifest)
-    : _render_object(parent.ensureBuilder<RenderObject>(manifest)), _layer(parent.ensureBuilder<Layer>(manifest, Constants::Attributes::LAYER))
+RendererByRenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _render_object(factory.ensureBuilder<RenderObject>(manifest)), _layer(factory.ensureBuilder<Layer>(manifest, Constants::Attributes::LAYER))
 {
 }
 

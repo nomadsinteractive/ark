@@ -72,12 +72,12 @@ bool Button::fireOnRelease()
     return View::fireOnRelease();
 }
 
-Button::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _parent(parent), _manifest(doc),
-      _foreground(parent.getBuilder<Renderer>(doc, Constants::Attributes::FOREGROUND)),
-      _background(parent.getBuilder<Renderer>(doc, Constants::Attributes::BACKGROUND)),
-      _size(parent.getBuilder<Size>(doc, Constants::Attributes::SIZE)),
-      _gravity(Documents::getAttribute(doc, Constants::Attributes::GRAVITY))
+Button::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _factory(factory), _manifest(manifest),
+      _foreground(factory.getBuilder<Renderer>(manifest, Constants::Attributes::FOREGROUND)),
+      _background(factory.getBuilder<Renderer>(manifest, Constants::Attributes::BACKGROUND)),
+      _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+      _gravity(Documents::getAttribute(manifest, Constants::Attributes::GRAVITY))
 {
 }
 
@@ -89,9 +89,9 @@ sp<Button> Button::BUILDER::build(const sp<Scope>& args)
     const String style = Documents::getAttribute(_manifest, Constants::Attributes::STYLE);
     const sp<Size> size = builtSize ? builtSize : background.size();
     const sp<Button> button = sp<Button>::make(foreground, background.renderer(), size, _gravity ? Strings::parse<Gravity>(_gravity) : CENTER);
-    loadStatus(button, _manifest, _parent, args);
+    loadStatus(button, _manifest, _factory, args);
     if(style)
-        _parent.decorate<Renderer>(sp<BuilderByInstance<Renderer>>::make(button), style)->build(args);
+        _factory.decorate<Renderer>(sp<BuilderByInstance<Renderer>>::make(button), style)->build(args);
     return button;
 }
 

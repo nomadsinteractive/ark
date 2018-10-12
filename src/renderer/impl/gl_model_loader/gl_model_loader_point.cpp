@@ -20,7 +20,7 @@ void GLModelLoaderPoint::start(GLModelBuffer& buf, GLResourceManager& resourceMa
     buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_POINTS, layerContext._items.size()));
 }
 
-void GLModelLoaderPoint::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& scale)
+void GLModelLoaderPoint::loadModel(GLModelBuffer& buf, const Atlas& atlas, int32_t type, const V& scale)
 {
     const Atlas::Item& texCoord = atlas.at(type);
     buf.nextVertex();

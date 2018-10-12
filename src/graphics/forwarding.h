@@ -69,7 +69,7 @@ typedef V2 V;
 typedef Vec2Impl VecImpl;
 typedef Vec2Util VecUtil;
 
-const uint32_t DIMENSIONS = 2;
+const int32_t DIMENSIONS = 2;
 
 }
 

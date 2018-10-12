@@ -48,7 +48,7 @@ void GLModelLoaderSphere::start(GLModelBuffer& buf, GLResourceManager& /*resourc
     buf.setIndices(_instance_index.snapshot());
 }
 
-void GLModelLoaderSphere::loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& size)
+void GLModelLoaderSphere::loadModel(GLModelBuffer& buf, const Atlas& atlas, int32_t type, const V& size)
 {
     float* elements = _vertices_boiler_plate->buf();
     const Atlas::Item& item = atlas.at(type);

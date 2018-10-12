@@ -20,9 +20,9 @@ class EventListener;
 class EventListenerList;
 class Layout;
 class LayoutParam;
+class LayoutHierarchy;
 class MessageLoopThread;
 class Model;
-class Partition;
 class RendererWithState;
 class ResourceLoader;
 class RigidBody;
@@ -30,6 +30,8 @@ class Surface;
 class SurfaceUpdater;
 class TileMap;
 class Tracker;
+class View;
+class ViewGroup;
 
 }
 

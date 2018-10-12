@@ -144,6 +144,7 @@ enum THREAD_ID {
     THREAD_ID_OPEN_GL = 3
 };
 
+[[noreturn]]
 void ARK_API __fatal__(const char* func, const char* condition, const char* format, ...);
 void ARK_API __warning__(const char* func, const char* format, ...);
 

@@ -14,16 +14,12 @@ namespace ark {
 class Frame final : public Renderer, public Block {
 public:
     Frame() = default;
-    Frame(const Frame& other) = default;
-    Frame(Frame&& other) = default;
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Frame);
     Frame(const sp<Renderer>& renderer);
     Frame(const sp<Renderer>& renderer, const sp<Block>& block);
     Frame(const sp<RenderObject>& renderObject, const sp<Layer>& layer);
 
     explicit operator bool() const;
-
-    Frame& operator =(const Frame& other) = default;
-    Frame& operator =(Frame&& other) = default;
 
     const sp<Renderer>& renderer() const;
 

@@ -14,7 +14,7 @@ public:
     GLModelLoaderPoint();
 
     virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext) override;
-    virtual void loadModel(GLModelBuffer& buf, const Atlas& atlas, uint32_t type, const V& scale) override;
+    virtual void loadModel(GLModelBuffer& buf, const Atlas& atlas, int32_t type, const V& scale) override;
 
 //  [[plugin::builder::by-value("point")]]
     class BUILDER : public Builder<GLModelLoader> {
