@@ -48,7 +48,7 @@ public:
         const sp<GLSnippet> snippet = sp<GLSnippetTest>::make();
         const sp<GLShaderSource> source = sp<GLShaderSource>::make(vert, frag, nullptr);
         source->addSnippet(snippet);
-        const GLShader shader(source);
+        const GLShader shader(source, nullptr);
 
         puts(source->vertex()._source.c_str());
         puts("---------------------------------------------------------------------");

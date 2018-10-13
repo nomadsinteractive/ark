@@ -1,12 +1,12 @@
 #include "core/types/shared_ptr.h"
 
 #include "test/base/test_case.h"
-#include "test/base/ref_count.h"
+#include "test/base/ref_counter.h"
 
 namespace ark {
 namespace unittest {
 
-class TestA : public RefCount<TestA> {
+class TestA : public RefCounter<TestA> {
 public:
     TestA() {}
     ~TestA() {

@@ -57,7 +57,7 @@ public:
         const sp<Numeric::Impl> scroller = sp<Numeric::Impl>::make(0.0f);
         args->put<Numeric>("scroller", scroller);
         args->put<TileMaker>("tile_maker", tileMaker);
-        const sp<Renderer> scrollable = beanFactory->load<Renderer>("scrollable-001", args);
+        const sp<Renderer> scrollable = beanFactory->build<Renderer>("@scrollable-001", args);
         int32_t errorCode, errorBase = 1;
         errorCode = checkScrollable(scrollable, NAN, 0.0f, 50.0f, NAN, errorBase);
         if(errorCode)

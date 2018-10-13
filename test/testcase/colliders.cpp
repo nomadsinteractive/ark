@@ -2,7 +2,7 @@
 #include <thread>
 
 #include "test/base/test_case.h"
-#include "test/base/ref_count.h"
+#include "test/base/ref_counter.h"
 
 #include "core/ark.h"
 #include "core/base/clock.h"
@@ -12,7 +12,7 @@
 
 #include "graphics/base/rect.h"
 #include "graphics/base/render_object.h"
-#include "graphics/base/rotate.h"
+#include "graphics/base/rotation.h"
 #include "graphics/base/v2.h"
 
 #include "app/base/application_context.h"
@@ -27,7 +27,7 @@ namespace unittest {
 
 namespace {
 
-class CollisionCallbackImpl : public CollisionCallback, public RefCount<CollisionCallbackImpl> {
+class CollisionCallbackImpl : public CollisionCallback, public RefCounter<CollisionCallbackImpl> {
 public:
     CollisionCallbackImpl(const sp<RenderObject>& renderObject)
         : _render_object(renderObject), _contact_began(false), _contact_ended(false) {
@@ -36,14 +36,14 @@ public:
     virtual void onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold) override {
         const V p1 = _render_object->position()->val();
         const V p2 = rigidBody->position()->val();
-        printf("onBeginContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotate()->rotation()->val());
+        printf("onBeginContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotation()->radians());
         _contact_began = true;
     }
 
     virtual void onEndContact(const sp<RigidBody>& rigidBody) override {
         const V p1 = _render_object->xy();
         const V p2 = rigidBody->position()->val();
-        printf("onEndContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotate()->rotation()->val());
+        printf("onEndContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotation()->radians());
         if(_contact_began)
             _contact_ended = true;
     }
@@ -74,7 +74,7 @@ public:
         const sp<RenderObject> c002 = resourceLoader->load<RenderObject>("c002");
         const sp<RigidBody> rigidBody002 = collider->createBody(Collider::BODY_TYPE_STATIC, Collider::BODY_SHAPE_AABB, c002->position(), c002->size());
         const sp<RenderObject> c003 = resourceLoader->load<RenderObject>("c003");
-        const sp<RigidBody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, 0, c003->position(), c003->size(), c003->transform()->rotate());
+        const sp<RigidBody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, 0, c003->position(), c003->size(), c003->transform()->rotation());
         const sp<CollisionCallbackImpl> collisionCallbackImpl001 = sp<CollisionCallbackImpl>::make(c001);
         const sp<CollisionCallbackImpl> collisionCallbackImpl003 = sp<CollisionCallbackImpl>::make(c003);
         rigidBody001->setCollisionCallback(collisionCallbackImpl001);

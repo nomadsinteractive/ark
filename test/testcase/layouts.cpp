@@ -26,7 +26,7 @@ public:
             return -1;
 
         {
-            const sp<Layout> layout = beanFactory->load<Layout>("layout-001");
+            const sp<Layout> layout = beanFactory->build<Layout>("@layout-001");
             layout->begin(_client_layout_param);
             Rect r01 = layout->place(_layout_param);
             layout->end();
@@ -36,7 +36,7 @@ public:
                 return 2;
         }
         {
-            const sp<Layout> layout = beanFactory->load<Layout>("layout-002");
+            const sp<Layout> layout = beanFactory->build<Layout>("@layout-002");
             layout->begin(_client_layout_param);
             Rect r01 = layout->place(_layout_param);
             layout->end();
@@ -46,7 +46,7 @@ public:
                 return 4;
         }
         {
-            const sp<Layout> layout = beanFactory->load<Layout>("layout-003");
+            const sp<Layout> layout = beanFactory->build<Layout>("@layout-003");
             layout->begin(_client_layout_param);
             Rect r01 = layout->place(_layout_param);
             layout->end();
@@ -56,43 +56,43 @@ public:
                 return 6;
         }
         {
-            const sp<Layout> layout = beanFactory->load<Layout>("layout-004");
+            const sp<Layout> layout = beanFactory->build<Layout>("@layout-004");
             int r = testLayout(layout, 7, 20.0f, 40.0f, 40.0f, 40.0f, 60.0f, 40.0f);
             if(r != 0)
                 return r;
         }
         {
-            const sp<Layout> layout = beanFactory->load<Layout>("layout-005");
+            const sp<Layout> layout = beanFactory->build<Layout>("@layout-005");
             int r = testLayout(layout, 13, 0.0f, 0.0f, 20.0f, 0.0f, 40.0f, 0.0f);
             if(r != 0)
                 return r;
         }
         {
-            const sp<Layout> layout = beanFactory->load<Layout>("layout-006");
+            const sp<Layout> layout = beanFactory->build<Layout>("@layout-006");
             int r = testLayout(layout, 19, 40.0f, 80.0f, 60.0f, 80.0f, 80.0f, 80.0f);
             if(r != 0)
                 return r;
         }
         {
-            const sp<Layout> layout = beanFactory->load<Layout>("layout-007");
+            const sp<Layout> layout = beanFactory->build<Layout>("@layout-007");
             int r = testLayout(layout, 25, 40.0f, 20.0f, 40.0f, 40.0f, 40.0f, 60.0f);
             if(r != 0)
                 return r;
         }
         {
-            const sp<Layout> layout = beanFactory->load<Layout>("layout-008");
+            const sp<Layout> layout = beanFactory->build<Layout>("@layout-008");
             int r = testLayout(layout, 31, 0.0f, 40.0f, 0.0f, 60.0f, 0.0f, 80.0f);
             if(r != 0)
                 return r;
         }
         {
-            const sp<Layout> layout = beanFactory->load<Layout>("layout-009");
+            const sp<Layout> layout = beanFactory->build<Layout>("@layout-009");
             int r = testLayout(layout, 37, 80.0f, 0.0f, 80.0f, 20.0f, 80.0f, 40.0f);
             if(r != 0)
                 return r;
         }
         {
-            const sp<Layout> layout = beanFactory->load<Layout>("layout-010");
+            const sp<Layout> layout = beanFactory->build<Layout>("@layout-010");
             int r = testLayout(layout, 43, 15.0f, 15.0f, 65.0f, 15.0f, 15.0f, 65.0f);
             if(r != 0)
                 return r;

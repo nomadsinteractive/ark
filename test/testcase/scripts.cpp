@@ -27,7 +27,7 @@ public:
         Global<PluginManager> pluginManager;
         pluginManager->load("ark-python");
 
-        const sp<ResourceLoader> resourceLoader = Ark::instance().applicationContext()->createResourceLoader("application.xml");
+        const sp<ResourceLoader> resourceLoader = Ark::instance().applicationContext()->createResourceLoader("application.xml", nullptr);
         if(!resourceLoader)
             return -1;
 

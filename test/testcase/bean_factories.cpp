@@ -10,7 +10,7 @@
 #include "core/util/bean_utils.h"
 
 #include "test/base/test_case.h"
-#include "test/base/ref_count.h"
+#include "test/base/ref_counter.h"
 
 #include "platform/platform.h"
 
@@ -19,7 +19,7 @@ namespace unittest {
 
 namespace {
 
-class BuilderImpl1 : public Builder<uint8_t>, public RefCount<BuilderImpl1> {
+class BuilderImpl1 : public Builder<uint8_t>, public RefCounter<BuilderImpl1> {
 public:
     ~BuilderImpl1() {
     }
@@ -29,14 +29,14 @@ public:
     }
 };
 
-class BuilderImpl2 : public Builder<uint16_t>, public RefCount<BuilderImpl2> {
+class BuilderImpl2 : public Builder<uint16_t>, public RefCounter<BuilderImpl2> {
 public:
     virtual sp<uint16_t> build(const sp<Scope>& /*args*/) override {
         return sp<uint16_t>::make(2);
     }
 };
 
-class BuilderImpl3 : public Builder<uint32_t>, public RefCount<BuilderImpl3> {
+class BuilderImpl3 : public Builder<uint32_t>, public RefCounter<BuilderImpl3> {
 public:
     virtual sp<uint32_t> build(const sp<Scope>& /*args*/) override {
         return sp<uint32_t>::make(3);
@@ -75,7 +75,7 @@ public:
 
 class BeanFactoriesTestCase : public TestCase {
 public:
-    virtual int launch() {
+    virtual int launch() override {
         {
             const sp<BeanFactory> beanFactory = sp<BeanFactory>::make();
             BeanFactory::Factory factory(beanFactory->references(), sp<DictionaryImpl>::make());
@@ -87,11 +87,11 @@ public:
             factory.addDictionaryFactory<uint32_t>([](BeanFactory& factory, const String& value) {return sp<ValueDictionaryImpl<uint32_t>>::make(factory, value);});;
             beanFactory->add(factory);
             beanFactory->addPackage("self", beanFactory);
-            if((*beanFactory->load<uint8_t>("a").get()) != 1)
+            if((*beanFactory->build<uint8_t>("@a").get()) != 1)
                 return 1;
-            if((*beanFactory->load<uint16_t>("a").get()) != 2)
+            if((*beanFactory->build<uint16_t>("@a").get()) != 2)
                 return 2;
-            if((*beanFactory->load<uint32_t>("a").get()) != 3)
+            if((*beanFactory->build<uint32_t>("@a").get()) != 3)
                 return 3;
             if((*beanFactory->build<uint8_t>("1").get()) != 1)
                 return 4;
@@ -99,7 +99,7 @@ public:
                 return 5;
             if((*beanFactory->build<uint32_t>("3").get()) != 3)
                 return 6;
-            if((*beanFactory->load<uint32_t>("self:1").get()) != 3)
+            if((*beanFactory->build<uint32_t>("@self:1").get()) != 3)
                 return 7;
             if((*beanFactory->build<uint8_t>("@self:1").get()) != 1)
                 return 8;

@@ -9,7 +9,7 @@
 #include "core/inf/runnable.h"
 #include "core/concurrent/lock_free_stack.h"
 #include "core/concurrent/one_consumer_synchronized.h"
-#include "core/epi/expired.h"
+#include "core/epi/lifecycle.h"
 #include "core/impl/message_loop/message_loop_default.h"
 #include "core/types/shared_ptr.h"
 
@@ -84,13 +84,13 @@ public:
         sp<RunnableImpl> task = sp<RunnableImpl>::make("a");
         sp<RunnableImpl> task1 = sp<RunnableImpl>::make("b");
         sp<RunnableImpl> task2 = sp<RunnableImpl>::make("c");
-        sp<Expired> expirable = sp<Expired>::make();
+        sp<Lifecycle> expirable = sp<Lifecycle>::make();
 
         bool flag1 = true, flag2 = true, flag3 = true;
         messageLoopThread->post(task, 0.2f);
         messageLoopThread->schedule(task1, 0.3f);
         messageLoopThread->schedule(task2.absorb(expirable), 0.3f);
-        expirable->expire();
+        expirable->dispose();
         std::this_thread::sleep_for(std::chrono::seconds(1));
         messageLoopThread->terminate();
         messageLoopThread->thread().join();
