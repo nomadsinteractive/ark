@@ -266,7 +266,7 @@ PyArkType* PythonInterpreter::getPyArkType(PyObject* pyObject)
 
 PyArkType* PythonInterpreter::ensurePyArkType(PyObject* pyObject)
 {
-    NOT_NULL(pyObject);
+    DASSERT(pyObject);
     PyArkType* type = getPyArkType(pyObject);
     DCHECK(type, "Object \"%s\" is not a PyArkType instance", Py_TYPE(pyObject)->tp_name);
     return type;

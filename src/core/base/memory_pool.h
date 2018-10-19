@@ -1,11 +1,13 @@
 #ifndef ARK_CORE_BASE_MEMORY_POOL_H_
 #define ARK_CORE_BASE_MEMORY_POOL_H_
 
+#include <atomic>
+#include <vector>
+
+#include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/concurrent/lock_free_stack.h"
-#include "core/forwarding.h"
 #include "core/inf/array.h"
-#include "core/types/owned_ptr.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -14,65 +16,65 @@ class ARK_API MemoryPool {
 private:
     enum {
         MAX_BLOCK_COUNT = 18,
-        SUB_BLOCK_COUNT = 4,
-        BLOCK_SIZE_LOG2 = 6
+        BLOCK_SIZE_BASE_LOG2 = 4,
+        SUB_BLOCK_BITS = 2,
+        SUB_BLOCK_COUNT = SUB_BLOCK_BITS << 1,
+        PAGE_TTL_INCREMENT = 4
     };
 
-    class PooledByteArray : public Array<uint8_t> {
+    class Slot : public Array<uint8_t> {
     public:
-        PooledByteArray(const bytearray& delegate);
+        Slot(size_t size);
 
         virtual uint8_t* buf();
         virtual size_t length();
 
-        void setLength(uint32_t length);
+        void setLength(size_t length);
 
     private:
         bytearray _delegate;
-        uint32_t _length;
+        size_t _length;
     };
 
-    class SubBlock {
-    public:
-        SubBlock(uint32_t subBlockSize);
+    struct Page {
+        Page(size_t size, int32_t ttl);
 
-        array<uint8_t> allocate(uint32_t size);
+        sp<Slot> obtain(size_t size);
+        void recycle(sp<Slot> slot);
 
-        void shrink();
-
-    private:
-        sp<LockFreeStack<sp<PooledByteArray>>> _preallocated;
-        uint32_t _sub_block_size;
-        float _shrink_score;
-        float _balanced_weight;
+        std::vector<sp<Slot>> _slots;
+        size_t _size;
+        int32_t _ttl;
     };
 
     class Block {
     public:
-        Block(uint32_t sizeLog2);
+        Block(size_t pageSize, int32_t pageTtl);
 
-        array<uint8_t> allocate(uint32_t size);
-        void shrink();
+        sp<Slot> obtain(size_t size);
+        void recycle(sp<Slot> slot);
 
     private:
-        uint32_t _size;
-        uint32_t _size_half;
-        uint32_t _size_quarter_log2;
-        op<SubBlock> _sub_blocks[SUB_BLOCK_COUNT];
+        sp<Page> lockPage();
+
+    private:
+        LockFreeStack<sp<Page>> _pages;
+        size_t _page_size;
+
+        std::atomic<int32_t> _page_ttl;
     };
 
 public:
-    MemoryPool(uint32_t shrinkCycle = 200);
+    MemoryPool();
 
-    array<uint8_t> allocate(uint32_t size);
-
-private:
-    void shrink();
+    array<uint8_t> allocate(size_t size);
 
 private:
-    std::unique_ptr<Block> _blocks[MAX_BLOCK_COUNT];
-    uint32_t _allocation_tick;
-    uint32_t _shrink_cycle;
+    size_t getBlockId(size_t size);
+    size_t findmsb(size_t size) const;
+
+private:
+    std::shared_ptr<Block> _blocks_v2[MAX_BLOCK_COUNT * SUB_BLOCK_COUNT];
 };
 
 }

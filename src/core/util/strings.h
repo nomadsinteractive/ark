@@ -44,7 +44,7 @@ public:
 
     template<typename T> static array<T> toArray(const String& str, char open = '(', char close = ')') {
         const String value = Strings::unwrap(str.strip(), open, close);
-        NOT_NULL(value);
+        DASSERT(value);
         const std::vector<String> elems = value.split(',');
         const array<T> values = sp<DynamicArray<T>>::make(elems.size());
         for(size_t i = 0; i < elems.size(); i++)

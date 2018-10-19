@@ -18,10 +18,10 @@ namespace ark {
 ViewGroup::ViewGroup(const Frame& background, const sp<Layout>& layout, const sp<LayoutParam>& layoutParam)
     : View(!layoutParam && background ? sp<LayoutParam>::make(background.size()) : layoutParam), _background(background.renderer()), _layout_hierarchy(sp<LayoutHierarchy>::make(layout))
 {
-    DCHECK(!layout || layoutParam, "Null LayoutParam. This would happen if your ViewGroup has neither background or size defined.");
-    if(layoutParam && background)
-        if(background.size() != layoutParam->size())
-            background.size()->adopt(layoutParam->size());
+    DCHECK(!layout || _layout_param, "Null LayoutParam. This would happen if your ViewGroup has neither background or size defined.");
+    if(_layout_param && background)
+        if(background.size() != _layout_param->size())
+            background.size()->adopt(_layout_param->size());
 }
 
 ViewGroup::~ViewGroup()

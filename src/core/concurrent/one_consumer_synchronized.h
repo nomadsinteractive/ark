@@ -30,7 +30,7 @@ public:
 
     Container clear() {
         Container cleared = std::move(synchronized());
-        _collection.setAndSwap(Container());
+        _collection.store(Container());
         _recycler.clear();
         return cleared;
     }

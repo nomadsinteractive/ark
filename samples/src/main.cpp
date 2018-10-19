@@ -21,7 +21,7 @@ int main(int argc, const char* argv[])
     try {
         const Ark ark(argc, argv, "manifest.xml");
         const document appManifest = ark.manifest()->getChild("application");
-        NOT_NULL(appManifest);
+        DASSERT(appManifest);
         const sp<ApplicationManifest> applicationManifest = sp<ApplicationManifest>::make(appManifest);
         const sp<Size>& renderResolution = applicationManifest->renderResolution();
         const Viewport viewport(0, 0, renderResolution->width(), renderResolution->height(), 0, renderResolution->width());

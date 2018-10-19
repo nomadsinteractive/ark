@@ -62,7 +62,7 @@
 #   define DTHREAD_CHECK(threadId) (void (threadId))
 #endif
 
-#define NOT_NULL(x) DCHECK(x, "Null Pointer Exception")
+#define DASSERT(x) DCHECK(x, "Assertion failed")
 
 #ifdef ARK_USE_CONSTEXPR
 #   define _CONSTEXPR   constexpr

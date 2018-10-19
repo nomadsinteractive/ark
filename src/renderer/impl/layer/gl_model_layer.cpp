@@ -35,7 +35,7 @@ const sp<Atlas>& GLModelLayer::atlas() const
     return _atlas;
 }
 
-sp<RenderCommand> GLModelLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
+sp<RenderCommand> GLModelLayer::render(const Layer::Snapshot& renderContext, float x, float y)
 {
     if(renderContext._items.size() > 0)
     {

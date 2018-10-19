@@ -6,7 +6,7 @@ namespace ark {
 
 void EventListenerList::addEventListener(const sp<EventListener>& eventListener)
 {
-    NOT_NULL(eventListener);
+    DASSERT(eventListener);
     _event_listeners.push_back(eventListener);
 }
 

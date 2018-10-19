@@ -8,7 +8,7 @@ namespace ark {
 Interfaces::Interfaces(Class* clazz)
     : _class(clazz)
 {
-    NOT_NULL(_class);
+    DASSERT(_class);
 }
 
 void Interfaces::absorb(const Box& other)

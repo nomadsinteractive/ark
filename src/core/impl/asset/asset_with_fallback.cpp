@@ -5,8 +5,8 @@ namespace ark {
 AssetWithFallback::AssetWithFallback(const sp<Asset>& delegate, const sp<Asset>& fallback)
     : _delegate(delegate), _fallback(fallback)
 {
-    NOT_NULL(_delegate);
-    NOT_NULL(_fallback);
+    DASSERT(_delegate);
+    DASSERT(_fallback);
 }
 
 sp<Readable> AssetWithFallback::get(const String& name)

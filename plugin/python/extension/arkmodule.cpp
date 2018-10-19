@@ -60,7 +60,7 @@ PyObject* ark_log(PyObject* /*self*/, PyObject* args)
     if(size)
     {
         PyInstance pyContent = PyInstance::borrow(PyTuple_GetItem(args, 0));
-        NOT_NULL(pyContent);
+        DASSERT(pyContent);
         PyInstance varargs = PyInstance::steal(PyTuple_GetSlice(args, 1, size));
         PyInstance formatted = PyInstance::steal(size > 1 ? PyUnicode_Format(pyContent, varargs) : PyObject_Str(pyContent));
         DCHECK(formatted, "Unsatisfied format: %s", PythonInterpreter::instance()->toString(pyContent).c_str());

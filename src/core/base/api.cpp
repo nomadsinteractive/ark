@@ -31,7 +31,6 @@ void __warning__(const char* func, const char* format, ...)
     Log::w(func, str.c_str());
 }
 
-
 uint32_t __trace__()
 {
     LOGD(">>>__TRACE HERE___<<<");

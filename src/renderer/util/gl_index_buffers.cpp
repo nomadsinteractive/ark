@@ -8,7 +8,7 @@ namespace ark {
 
 GLIndexBuffers::NinePatch::NinePatch(size_t objectCount)
     : _object_count(objectCount), _boiler_plate({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15}) {
-    NOT_NULL(_object_count);
+    DASSERT(_object_count);
 }
 
 size_t GLIndexBuffers::NinePatch::size()

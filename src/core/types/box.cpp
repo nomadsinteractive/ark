@@ -17,7 +17,7 @@ TypeId Box::typeId() const
 
 Box Box::toConcrete() const
 {
-    NOT_NULL(_stub);
+    DASSERT(_stub);
     return _stub->_interfaces->as(*this, _stub->_interfaces->typeId());
 }
 
@@ -28,7 +28,7 @@ void* Box::ptr() const
 
 const std::shared_ptr<Interfaces>& Box::interfaces() const
 {
-    NOT_NULL(_stub);
+    DASSERT(_stub);
     return _stub->_interfaces;
 }
 

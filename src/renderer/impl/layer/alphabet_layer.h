@@ -20,13 +20,13 @@ private:
         const sp<Alphabet>& alphabet() const;
         const sp<Atlas>& atlas() const;
 
-        sp<RenderCommand> render(const LayerContext::Snapshot& renderContext, float x, float y) const;
+        sp<RenderCommand> render(const Layer::Snapshot& renderContext, float x, float y) const;
 
-        bool checkUnpreparedCharacter(const LayerContext::Snapshot& renderContext);
+        bool checkUnpreparedCharacter(const Layer::Snapshot& renderContext);
 
         void reset();
 
-        bool prepare(const LayerContext::Snapshot& renderContext, bool allowReset);
+        bool prepare(const Layer::Snapshot& renderContext, bool allowReset);
         void prepareTexture() const;
 
     private:
@@ -51,7 +51,7 @@ private:
 public:
     AlphabetLayer(const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual sp<RenderCommand> render(const LayerContext::Snapshot& layerContext, float x, float y) override;
+    virtual sp<RenderCommand> render(const Layer::Snapshot& layerContext, float x, float y) override;
 
     const sp<Alphabet>& alphabet() const;
 

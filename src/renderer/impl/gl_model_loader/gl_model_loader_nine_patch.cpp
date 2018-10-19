@@ -58,7 +58,7 @@ GLModelLoaderNinePatch::GLModelLoaderNinePatch(const document& manifest, const s
     }
 }
 
-void GLModelLoaderNinePatch::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext)
+void GLModelLoaderNinePatch::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
 {
     DCHECK(layerContext._items.size() > 0, "LayerContext has no RenderObjects");
 

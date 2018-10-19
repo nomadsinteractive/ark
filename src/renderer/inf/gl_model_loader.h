@@ -26,7 +26,7 @@ public:
         return _mode;
     }
 
-    virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext) = 0;
+    virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) = 0;
     virtual void loadModel(GLModelBuffer& buf, const Atlas& atlas, int32_t type, const V& size) = 0;
 
 protected:

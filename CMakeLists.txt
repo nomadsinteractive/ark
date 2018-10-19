@@ -6,7 +6,7 @@ include(CMakeDependentOption)
 
 option(ARK_BUILD_SHARED_PLUGINS "Build dynamic link library plugins for ARK runtimes" ON)
 option(ARK_BUILD_STATIC_LIBRARY "Build static library" OFF)
-CMAKE_DEPENDENT_OPTION(ARK_BUILD_TEST_CASES "Build testcases" ON "ARK_BUILD_STATIC_LIBRARY" OFF)
+CMAKE_DEPENDENT_OPTION(ARK_TEST_ENABLE "Build testcases" ON "ARK_BUILD_STATIC_LIBRARY" OFF)
 option(ARK_BUILD_SAMPLES "Build samples" ON)
 
 option(ARK_DOWNLOAD_DEPENDENCIES "Download dependency libraries automatically" ON)
@@ -209,7 +209,7 @@ target_compile_definitions(${RUNTIME_SHARED_LIBRARY} PRIVATE -DARK_FLAG_BUILDING
 if(ARK_BUILD_STATIC_LIBRARY)
     ark_add_static_library(${PROJECT_NAME}_static ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
     target_compile_definitions(${PROJECT_NAME}_static PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK -DARK_STATIC)
-    if(ARK_BUILD_TEST_CASES)
+    if(ARK_TEST_ENABLE)
         aux_source_directory(test/base TEST_SRC_LIST)
         aux_source_directory(test/testcase TEST_SRC_LIST)
         add_custom_command(OUTPUT ${GENERATED_TESTCASE_LAUNCHPAD}

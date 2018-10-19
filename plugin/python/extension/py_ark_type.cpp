@@ -109,7 +109,7 @@ PyObject* PyArkType::wrap(Instance& inst, const Box& box, const sp<Scope>& args)
         Instance* beanInst = reinterpret_cast<Instance*>(bean);
         PyContainer* beanWrapper = beanInst->getContainer();
         PyContainer* wrapper = beanWrapper ? beanWrapper : inst.getContainer();
-        NOT_NULL(wrapper);
+        DASSERT(wrapper);
         for(auto iter = args->variables().begin(); iter != args->variables().end(); ++iter)
         {
             const sp<PyGarbageCollector> collector = iter->second.as<PyGarbageCollector>();

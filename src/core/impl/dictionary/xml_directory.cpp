@@ -8,7 +8,7 @@ namespace ark {
 
 XMLDirectory::XMLDirectory(const sp<Asset>& resource)
     : _resource(resource) {
-    NOT_NULL(_resource);
+    DASSERT(_resource);
 }
 
 document XMLDirectory::get(const String& name) {

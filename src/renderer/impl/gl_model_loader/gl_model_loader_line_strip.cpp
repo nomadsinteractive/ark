@@ -13,7 +13,7 @@ GLModelLoaderLineStrip::GLModelLoaderLineStrip(const sp<ResourceLoaderContext>& 
 {
 }
 
-void GLModelLoaderLineStrip::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext)
+void GLModelLoaderLineStrip::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size());
 

@@ -16,7 +16,7 @@ GLModelLoaderQuad::GLModelLoaderQuad()
 {
 }
 
-void GLModelLoaderQuad::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext)
+void GLModelLoaderQuad::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(4 * layerContext._items.size());
     buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_QUADS, layerContext._items.size()));

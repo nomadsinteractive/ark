@@ -195,7 +195,7 @@ void ApplicationContext::addStringBundle(const String& name, const sp<StringBund
 
 sp<String> ApplicationContext::getString(const String& resid)
 {
-    NOT_NULL(resid);
+    DASSERT(resid);
     const Identifier id = resid.at(0) == '@' ? Identifier::parse(resid, Identifier::FORMAT_URL) : Identifier::parseRef(resid);
     return _string_table->getString(id.package(), id.ref());
 }

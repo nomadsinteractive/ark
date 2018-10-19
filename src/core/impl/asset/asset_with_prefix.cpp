@@ -5,7 +5,7 @@ namespace ark {
 AssetWithPrefix::AssetWithPrefix(const sp<Asset>& delegate, const String& prefix)
     : _delegate(delegate), _prefix(prefix)
 {
-    NOT_NULL(_delegate);
+    DASSERT(_delegate);
 }
 
 sp<Readable> AssetWithPrefix::get(const String& name)

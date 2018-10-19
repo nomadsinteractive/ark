@@ -36,7 +36,7 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
 
     const sp<ApplicationContext>& applicationContext = application.context();
     const sp<ResourceLoader> appResourceLoader = applicationContext->createResourceLoader(Documents::getAttribute(_application_manifest->manifest(), "resource-loader", "application.xml"), nullptr);
-    NOT_NULL(appResourceLoader);
+    DASSERT(appResourceLoader);
 
     const sp<Scope> vars = sp<Scope>::make();
     const sp<ApplicationFacade> applicationFacade = sp<ApplicationFacade>::make(application, surface, _application_manifest);
@@ -102,7 +102,7 @@ ApplicationDelegateImpl::ScriptTag::ScriptTag(ResourceLoader& resourceLoader, co
 
 void ApplicationDelegateImpl::ScriptTag::run() const
 {
-    NOT_NULL(_script);
+    DASSERT(_script);
     if(_source)
         _script->run(_source, _vars);
     if(_function_name)

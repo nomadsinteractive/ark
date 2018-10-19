@@ -20,7 +20,7 @@ public:
         sp<T> inst = reference->get<T>(_name);
         if(!inst) {
             inst = _delegate->build(args);
-            NOT_NULL(inst);
+            DASSERT(inst);
             reference->put<T>(_name, inst);
             _delegate = nullptr;
         }

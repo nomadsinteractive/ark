@@ -53,7 +53,7 @@ GLAttribute& GLShaderSource::addPredefinedAttribute(const String& name, const St
 
 void GLShaderSource::addSnippet(const sp<GLSnippet>& snippet)
 {
-    NOT_NULL(snippet);
+    DASSERT(snippet);
     _snippet = _snippet ? sp<GLSnippet>::adopt(new GLSnippetLinkedChain(_snippet, snippet)) : snippet;
 }
 

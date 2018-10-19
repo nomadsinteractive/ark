@@ -11,13 +11,13 @@ namespace ark {
 RendererByRenderObject::RendererByRenderObject(const sp<RenderObject>& renderObject, const sp<Layer>& layer)
     : _render_object(renderObject), _layer(layer)
 {
-    NOT_NULL(_render_object);
-    NOT_NULL(_layer);
+    DASSERT(_render_object);
+    DASSERT(_layer);
 }
 
 void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, float x, float y)
 {
-    _layer->layerContext()->draw(x, y, _render_object);
+    _layer->draw(x, y, _render_object);
 }
 
 const sp<Size>& RendererByRenderObject::size()

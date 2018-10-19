@@ -54,7 +54,7 @@ void HorizontalScrollable::ensureTile(Tile<sp<Renderer>>& tile, int32_t position
     if(tile.position() != position)
     {
         const sp<Renderer> renderer = _tile_maker->makeTile(position, 0);
-        NOT_NULL(renderer);
+        DASSERT(renderer);
         tile.setPosition(position);
         tile.renderer() = renderer;
     }

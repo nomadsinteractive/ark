@@ -39,7 +39,7 @@ void RenderContext::clear()
     _items.clear();
 }
 
-bool RenderContext::takeSnapshot(LayerContext::Snapshot& output, MemoryPool& memoryPool)
+bool RenderContext::takeSnapshot(Layer::Snapshot& output, MemoryPool& memoryPool)
 {
     size_t renderedCount = 0;
     if(_render_requested)

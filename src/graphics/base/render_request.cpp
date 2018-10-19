@@ -14,8 +14,8 @@ namespace {
 class BackgroundRenderCommand : public RenderCommand, public Runnable {
 public:
     BackgroundRenderCommand(const sp<RenderRequest::Stub>& stub, const sp<Layer>& layer, float x, float y)
-        : _stub(stub), _layer(layer), _layer_context_snapshot(layer->layerContext()->snapshot()), _x(x), _y(y) {
-        layer->layerContext()->clear();
+        : _stub(stub), _layer(layer), _layer_snapshot(layer->snapshot()), _x(x), _y(y) {
+        layer->clear();
     }
 
     virtual void draw(GraphicsContext& graphicsContext) override {
@@ -24,7 +24,7 @@ public:
     }
 
     virtual void run() override {
-        _delegate = _layer->render(_layer_context_snapshot, _x, _y);
+        _delegate = _layer->render(_layer_snapshot, _x, _y);
         _stub->onJobDone(_stub);
         _stub = nullptr;
     }
@@ -32,7 +32,7 @@ public:
 private:
     sp<RenderRequest::Stub> _stub;
     sp<Layer> _layer;
-    LayerContext::Snapshot _layer_context_snapshot;
+    Layer::Snapshot _layer_snapshot;
     float _x;
     float _y;
 
@@ -87,7 +87,7 @@ void RenderRequest::Stub::onJobDone(const sp<Stub>& self)
     DCHECK(count >= 0, "Bad count: %d", count);
     if(count == 0)
     {
-        NOT_NULL(_render_command_pipe_line);
+        DASSERT(_render_command_pipe_line);
         _surface_controller->postRenderCommand(_render_command_pipe_line);
         _render_command_pipe_line = nullptr;
         _render_request_recycler->push(self);

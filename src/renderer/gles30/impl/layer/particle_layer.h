@@ -16,7 +16,7 @@ class ParticleLayer : public Layer {
 public:
     ParticleLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual sp<RenderCommand> render(const LayerContext::Snapshot& layerContext, float x, float y) override;
+    virtual sp<RenderCommand> render(const Layer::Snapshot& layerContext, float x, float y) override;
 
 //  [[plugin::resource-loader("particle-layer")]]
     class BUILDER : public Builder<Layer> {

@@ -8,8 +8,8 @@ namespace ark {
 GLSnippetLinkedChain::GLSnippetLinkedChain(const sp<GLSnippet>& delegate, const sp<GLSnippet>& next)
     : _delegate(delegate), _next(next)
 {
-    NOT_NULL(delegate);
-    NOT_NULL(next);
+    DASSERT(delegate);
+    DASSERT(next);
 }
 
 void GLSnippetLinkedChain::preInitialize(GLShaderSource& source)

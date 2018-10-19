@@ -1,16 +1,13 @@
 #ifndef ARK_GRAPHICS_BASE_LAYER_CONTEXT_H_
 #define ARK_GRAPHICS_BASE_LAYER_CONTEXT_H_
 
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/collection/expirable_item_list.h"
 
-#include "graphics/base/camera.h"
 #include "graphics/base/render_object.h"
 
 namespace ark {
-
+/*
 class LayerContext {
 public:
     struct Item {
@@ -21,17 +18,6 @@ public:
         sp<RenderObject> _render_object;
     };
 
-    struct Snapshot {
-        Snapshot(const LayerContext& layerContext, MemoryPool& memoryPool);
-        Snapshot(Snapshot&& other) = default;
-
-        Camera::Snapshot _camera;
-        std::vector<RenderObject::Snapshot> _items;
-        bool _dirty;
-
-        DISALLOW_COPY_AND_ASSIGN(Snapshot);
-    };
-
 public:
     LayerContext(const sp<Camera>& camera, const sp<MemoryPool>& memoryPool);
 
@@ -39,8 +25,6 @@ public:
     void clear();
 
     sp<RenderContext> makeRenderContext();
-
-    Snapshot snapshot() const;
 
 private:
     std::vector<Item> _items;
@@ -51,8 +35,9 @@ private:
     size_t _last_rendered_count;
 
     friend struct Snapshot;
+    friend class Layer;
 };
-
+*/
 }
 
 #endif

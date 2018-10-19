@@ -13,7 +13,7 @@ class GLModelLoaderQuad : public GLModelLoader {
 public:
     GLModelLoaderQuad();
 
-    virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext) override;
+    virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) override;
     virtual void loadModel(GLModelBuffer& buf, const Atlas& atlas, int32_t type, const V& scale) override;
 
 //  [[plugin::builder::by-value("quad")]]

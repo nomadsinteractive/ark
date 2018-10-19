@@ -214,7 +214,7 @@ Ark::Ark(int32_t argc, const char** argv, const String& manfiestSrc)
     Strings::rcut(Platform::getExecutablePath(), appDir, appFilename, Platform::dirSeparator());
 
     const sp<Asset> appAsset = Platform::getAsset(".", appDir);
-    NOT_NULL(appAsset);
+    DASSERT(appAsset);
     const sp<Readable> readable = manfiestSrc ? appAsset->get(manfiestSrc) : nullptr;
     DWARN(!manfiestSrc || readable, "Cannot load application manifest \"%s\"", manfiestSrc.c_str());
     _manifest = readable ? Documents::loadFromReadable(readable) : document::make("");
@@ -240,7 +240,7 @@ Ark::~Ark()
 
 Ark& Ark::instance()
 {
-    NOT_NULL(_instance);
+    DASSERT(_instance);
     return *_instance;
 }
 

@@ -10,7 +10,7 @@
 namespace ark {
 
 RenderLayer::RenderLayer(const sp<Layer>& layer)
-    : _layer(layer), _render_context(layer->layerContext()->makeRenderContext())
+    : _layer(layer), _render_context(layer->makeRenderContext())
 {
 }
 
@@ -21,7 +21,7 @@ void RenderLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
 
 void RenderLayer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& expired)
 {
-    NOT_NULL(renderObject);
+    DASSERT(renderObject);
     _render_context->addRenderObject(renderObject, expired);
 }
 

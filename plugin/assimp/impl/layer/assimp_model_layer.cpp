@@ -65,7 +65,7 @@ AssimpModelLayer::AssimpModelLayer(const sp<GLShader>& shader, const document& m
 //    _shader_bindings->snippet()->link<GLSnippetUpdateModelMatrix>();
 }
 
-sp<RenderCommand> AssimpModelLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
+sp<RenderCommand> AssimpModelLayer::render(const Layer::Snapshot& renderContext, float x, float y)
 {
     return _render_command_pool.obtain<DrawElements>(GLDrawingContext(_shader_bindings, renderContext._camera, _array_buffer.snapshot(), _index_buffer.snapshot(), GL_TRIANGLES), _shader);
 }

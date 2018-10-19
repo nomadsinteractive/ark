@@ -10,7 +10,7 @@ namespace ark {
 Duration::Duration(const sp<Numeric>& delegate)
     : _delegate(delegate)
 {
-    NOT_NULL(delegate);
+    DASSERT(delegate);
 }
 
 float Duration::val()

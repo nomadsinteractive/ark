@@ -26,7 +26,7 @@ ParticleLayer::ParticleLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas,
 //    _shader_bindings->setInstancedArrayBuffer(1, _transform_array_buffer);
 }
 
-sp<RenderCommand> ParticleLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
+sp<RenderCommand> ParticleLayer::render(const Layer::Snapshot& renderContext, float x, float y)
 {
     if(renderContext._items.size() == 0)
         return nullptr;

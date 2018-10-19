@@ -47,7 +47,7 @@ void ApplicationFacade::setArena(const sp<Arena>& arena)
     if(_arena)
         _arena.as<Lifecycle>()->dispose();
 
-    NOT_NULL(arena);
+    DASSERT(arena);
     DWARN(!arena.is<Lifecycle>(), "Application main arena's lifecycle should be managed by application itself");
     _arena = arena;
     _arena.absorb<Lifecycle>(sp<Lifecycle>::make());

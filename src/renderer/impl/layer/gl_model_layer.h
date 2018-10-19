@@ -16,7 +16,7 @@ public:
 
     const sp<Atlas>& atlas() const;
 
-    virtual sp<RenderCommand> render(const LayerContext::Snapshot& layerContext, float x, float y) override;
+    virtual sp<RenderCommand> render(const Layer::Snapshot& layerContext, float x, float y) override;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Layer> {

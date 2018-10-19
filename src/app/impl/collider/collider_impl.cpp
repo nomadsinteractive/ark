@@ -68,8 +68,8 @@ sp<Collider> ColliderImpl::BUILDER::build(const sp<Scope>& args)
 
 sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotation>& rotate)
 {
-    NOT_NULL(position);
-    NOT_NULL(size);
+    DASSERT(position);
+    DASSERT(size);
     if(type == Collider::BODY_TYPE_DYNAMIC)
     {
         const sp<DynamicPosition> dpos = sp<DynamicPosition>::make(_stub, position);

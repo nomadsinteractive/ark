@@ -10,7 +10,7 @@ ApplicationManifest::ApplicationManifest(const document& manifest)
     : _name(Documents::ensureAttribute(manifest, Constants::Attributes::NAME)), _manifest(manifest)
 {
     const document& s = manifest->getChild("render-resolution");
-    NOT_NULL(s);
+    DASSERT(s);
     _render_resolution = sp<Size>::make(Documents::ensureAttribute<float>(s, Constants::Attributes::WIDTH), Documents::ensureAttribute<float>(s, Constants::Attributes::HEIGHT));
 }
 

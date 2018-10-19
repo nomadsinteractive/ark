@@ -466,7 +466,7 @@ String Strings::svprintf(const char* format, va_list args)
 
 String Strings::stripReference(const String& id)
 {
-    NOT_NULL(id);
+    DASSERT(id);
     return isVariableCharacter(id.at(0)) ? id : id.substr(1);
 }
 

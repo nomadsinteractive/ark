@@ -61,7 +61,10 @@ std::unordered_set<int32_t> TrackerGrid::search(const V& position, const V& size
 TrackerGrid::Stub::Stub(const V& cell)
 {
     for(int32_t i = 0; i < DIMENSIONS; i++)
+    {
         _axes[i]._stride = static_cast<int32_t>(cell[i]);
+        DASSERT(_axes[i]._stride > 0);
+    }
 }
 
 void TrackerGrid::Stub::remove(int32_t id)

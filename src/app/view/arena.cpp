@@ -26,19 +26,19 @@ Arena::~Arena()
 
 const sp<Size>& Arena::size()
 {
-    NOT_NULL(_view_group);
+    DASSERT(_view_group);
     return _view_group->size();
 }
 
 void Arena::addRenderer(const sp<Renderer>& renderer)
 {
-    NOT_NULL(_view_group);
+    DASSERT(_view_group);
     _view_group->addRenderer(renderer);
 }
 
 void Arena::render(RenderRequest& renderRequest, float x, float y)
 {
-    NOT_NULL(_renderer);
+    DASSERT(_renderer);
     _renderer->render(renderRequest, x, y);
     for(const sp<Renderer>& i : _layers)
         i->render(renderRequest, x, y);
@@ -46,7 +46,7 @@ void Arena::render(RenderRequest& renderRequest, float x, float y)
 
 bool Arena::onEvent(const Event& event)
 {
-    NOT_NULL(_view_group);
+    DASSERT(_view_group);
     return _view_group->onEvent(event, 0.0f, 0.0f) || _event_listeners->onEvent(event);
 }
 

@@ -89,7 +89,7 @@ void GLBuffer::Stub::upload(GraphicsContext& /*graphicsContext*/, GLBuffer::Uplo
         glBufferData(_type, _size, nullptr, _usage);
     GLintptr offset = 0;
     const UploadFunc func = [&offset, this](void* data, size_t size) {
-        NOT_NULL(data);
+        DASSERT(data);
         DCHECK(offset + size <= _size, "GLBuffer data overflow");
         glBufferSubData(_type, offset, size, data);
         offset += size;

@@ -17,7 +17,7 @@ TileMap::TileMap(const sp<Layer>& layer, uint32_t width, uint32_t height, uint32
       _tile_size(sp<Size>::make(static_cast<float>(tileWidth), static_cast<float>(tileHeight))),
       _tile_width(tileWidth), _tile_height(tileHeight), _col_count(width / tileWidth), _row_count(height / tileHeight)
 {
-    NOT_NULL(_layer);
+    DASSERT(_layer);
     _tiles = new sp<RenderObject>[_col_count * _row_count];
 }
 
@@ -40,7 +40,6 @@ void TileMap::render(RenderRequest& /*renderRequest*/, float x, float y)
     int32_t colIdEnd = std::min<int32_t>(_col_count, static_cast<int32_t>(cx / _tile_width));
 
     float ox = (sx == fx ? 0 : sx - fx) - _tile_width / 2.0f, oy = (sy == fy ? 0 : sy - fy) - _tile_height / 2.0f;
-    const sp<LayerContext>& layerContext = _layer->layerContext();
     for(int32_t i = rowIdStart; i < rowIdEnd; i++)
     {
         if(i >= 0)
@@ -51,7 +50,7 @@ void TileMap::render(RenderRequest& /*renderRequest*/, float x, float y)
                 {
                     const sp<RenderObject>& renderObject = _tiles[i * _col_count + j];
                     if(renderObject)
-                        layerContext->draw(x + (j - colIdStart) * _tile_width - ox, y + dy, renderObject);
+                        _layer->draw(x + (j - colIdStart) * _tile_width - ox, y + dy, renderObject);
                 }
         }
     }

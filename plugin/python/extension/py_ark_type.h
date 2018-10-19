@@ -43,7 +43,7 @@ public:
         }
 
         template<typename T> void pack(const sp<T>& ptr) {
-            NOT_NULL(box);
+            DASSERT(box);
             *box = ptr.pack();
         }
 

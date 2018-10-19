@@ -7,7 +7,7 @@ namespace ark {
 BooleanNot::BooleanNot(const sp<Boolean>& delegate)
     : _delegate(delegate)
 {
-    NOT_NULL(_delegate);
+    DASSERT(_delegate);
 }
 
 bool BooleanNot::val()

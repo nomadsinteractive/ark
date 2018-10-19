@@ -18,7 +18,7 @@ LayoutHierarchy::Slot::Slot(const sp<Renderer>& renderer, bool layoutRequested)
     : _x(0), _y(0), _layout_width(0), _layout_height(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _view_group(renderer.as<ViewGroup>()),
       _renderer_delegate(renderer.as<RendererDelegate>()), _expirable(renderer.as<Lifecycle>())
 {
-    NOT_NULL(renderer);
+    DASSERT(renderer);
 }
 
 bool LayoutHierarchy::Slot::isExpired() const
@@ -46,7 +46,7 @@ void LayoutHierarchy::Slot::doPlace(float clientHeight, const sp<Layout>& layout
     if(_view)
     {
         const sp<LayoutParam>& layoutParam = _view->layoutParam();
-        NOT_NULL(layoutParam);
+        DASSERT(layoutParam);
         if(layoutParam->display() == LayoutParam::DISPLAY_BLOCK)
         {
             const Rect& margins = layoutParam->margins();
@@ -62,7 +62,7 @@ void LayoutHierarchy::Slot::doWrapContentPlace(const sp<Layout>& layout, Rect& c
     if(_view)
     {
         const sp<LayoutParam>& layoutParam = _view->layoutParam();
-        NOT_NULL(layoutParam);
+        DASSERT(layoutParam);
         if(layoutParam->display() == LayoutParam::DISPLAY_BLOCK)
         {
             const Rect rect = layout->place(layoutParam);
@@ -192,7 +192,7 @@ void LayoutHierarchy::doWrapContentLayout(LayoutParam& layoutParam)
 
 void LayoutHierarchy::addRenderer(const sp<Renderer>& renderer)
 {
-    NOT_NULL(renderer);
+    DASSERT(renderer);
     _slots.push_back(sp<LayoutHierarchy::Slot>::make(renderer, static_cast<bool>(_layout)));
 }
 

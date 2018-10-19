@@ -25,7 +25,7 @@ AlphabetLayer::AlphabetLayer(const sp<Alphabet>& alphabet, uint32_t textureWidth
 {
 }
 
-sp<RenderCommand> AlphabetLayer::render(const LayerContext::Snapshot& renderContext, float x, float y)
+sp<RenderCommand> AlphabetLayer::render(const Layer::Snapshot& renderContext, float x, float y)
 {
     if(_stub->checkUnpreparedCharacter(renderContext))
     {
@@ -91,7 +91,7 @@ bool AlphabetLayer::Stub::prepareOne(int32_t c)
     return true;
 }
 
-bool AlphabetLayer::Stub::checkUnpreparedCharacter(const LayerContext::Snapshot& renderContext)
+bool AlphabetLayer::Stub::checkUnpreparedCharacter(const Layer::Snapshot& renderContext)
 {
     bool updateNeeded = false;
     for(const RenderObject::Snapshot& i : renderContext._items)
@@ -114,7 +114,7 @@ void AlphabetLayer::Stub::reset()
     memset(_font_glyph->at(0, 0), 0, _font_glyph->width() * _font_glyph->height());
 }
 
-bool AlphabetLayer::Stub::prepare(const LayerContext::Snapshot& renderContext, bool allowReset)
+bool AlphabetLayer::Stub::prepare(const Layer::Snapshot& renderContext, bool allowReset)
 {
     for(int32_t c : _characters)
     {
@@ -142,7 +142,7 @@ const sp<Atlas>& AlphabetLayer::Stub::atlas() const
     return _atlas;
 }
 
-sp<RenderCommand> AlphabetLayer::Stub::render(const LayerContext::Snapshot& renderContext, float x, float y) const
+sp<RenderCommand> AlphabetLayer::Stub::render(const Layer::Snapshot& renderContext, float x, float y) const
 {
     return _layer->render(renderContext, x, y);
 }

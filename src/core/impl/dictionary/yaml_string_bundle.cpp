@@ -23,7 +23,7 @@ static int _yaml_read_handler(void* data, unsigned char* buffer, size_t size, si
 YAMLStringBundle::YAMLStringBundle(const sp<Asset>& resource)
     : _resource(resource)
 {
-    NOT_NULL(_resource);
+    DASSERT(_resource);
 }
 
 sp<String> YAMLStringBundle::get(const String& name)

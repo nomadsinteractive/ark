@@ -5,7 +5,8 @@
 #include "core/collection/expirable_item_list.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/layer_context.h"
+#include "graphics/base/v2.h"
+#include "graphics/inf/layer.h"
 
 namespace ark {
 
@@ -21,7 +22,7 @@ public:
 
     void clear();
 
-    bool takeSnapshot(LayerContext::Snapshot& output, MemoryPool& memoryPool);
+    bool takeSnapshot(Layer::Snapshot& output, MemoryPool& memoryPool);
 
 private:
     class RenderObjectVaildator {

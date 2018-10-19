@@ -42,7 +42,7 @@ GLModelLoaderSphere::GLModelLoaderSphere(const sp<ResourceLoaderContext>& resour
     }
 }
 
-void GLModelLoaderSphere::start(GLModelBuffer& buf, GLResourceManager& /*resourceManager*/, const LayerContext::Snapshot& layerContext)
+void GLModelLoaderSphere::start(GLModelBuffer& buf, GLResourceManager& /*resourceManager*/, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size() * _vertex_count);
     buf.setIndices(_instance_index.snapshot());

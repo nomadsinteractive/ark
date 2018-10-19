@@ -25,7 +25,7 @@ Characters::Characters(const sp<Layer>& layer, float textScale, float letterSpac
 }
 
 Characters::Characters(const sp<Layer>& layer, const sp<ObjectPool>& objectPool, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : _layer(layer), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()), _render_context(layer->layerContext()->makeRenderContext()),
+    : _layer(layer), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()), _render_context(layer->makeRenderContext()),
       _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(-g_upDirection * lineHeight),
       _line_indent(lineIndent), _size(_object_pool->obtain<Size>(0.0f, 0.0f))
 {

@@ -14,7 +14,7 @@ GLModelLoaderPoint::GLModelLoaderPoint()
 {
 }
 
-void GLModelLoaderPoint::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const LayerContext::Snapshot& layerContext)
+void GLModelLoaderPoint::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size());
     buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_POINTS, layerContext._items.size()));

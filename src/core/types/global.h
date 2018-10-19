@@ -9,7 +9,7 @@ template<typename T> class Global {
 public:
     Global()
         : _inst(Ark::instance().ensure<T>()) {
-        NOT_NULL(_inst);
+        DASSERT(_inst);
     }
     Global(const Global& other)
         : _inst(other._inst) {

@@ -14,7 +14,7 @@ MessageLoopDefault::MessageLoopDefault(const sp<Variable<uint64_t>>& ticker)
 
 void MessageLoopDefault::post(const sp<Runnable>& task, float delay)
 {
-    NOT_NULL(task);
+    DASSERT(task);
     if(delay != 0)
     {
         uint64_t tick = _ticker->val();
@@ -27,7 +27,7 @@ void MessageLoopDefault::post(const sp<Runnable>& task, float delay)
 
 void MessageLoopDefault::schedule(const sp<Runnable>& task, float interval)
 {
-    NOT_NULL(task);
+    DASSERT(task);
     _scheduled.push(Task(task, 0, (uint32_t) (interval * 1000000)));
 }
 

@@ -174,13 +174,13 @@ GLShader::Stub::Stub(const sp<GLShaderSource>& source)
 
 uint32_t GLShader::Stub::id()
 {
-    NOT_NULL(_program);
+    DASSERT(_program);
     return _program->id();
 }
 
 void GLShader::Stub::prepare(GraphicsContext& graphicsContext)
 {
-    NOT_NULL(_program);
+    DASSERT(_program);
     for(const GLUniform& i : _source->uniforms())
         i.notify();
 
@@ -189,7 +189,7 @@ void GLShader::Stub::prepare(GraphicsContext& graphicsContext)
 
 void GLShader::Stub::recycle(GraphicsContext& graphicsContext)
 {
-    NOT_NULL(_program);
+    DASSERT(_program);
     _program->recycle(graphicsContext);
 }
 

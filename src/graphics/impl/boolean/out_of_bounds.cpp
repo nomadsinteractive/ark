@@ -10,8 +10,8 @@ namespace ark {
 OutOfBounds::OutOfBounds(const sp<Bounds>& bounds, const sp<Vec>& position)
     : _bounds(bounds), _position(position)
 {
-    NOT_NULL(bounds);
-    NOT_NULL(position);
+    DASSERT(bounds);
+    DASSERT(position);
 }
 
 bool OutOfBounds::val()

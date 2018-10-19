@@ -74,12 +74,12 @@ public:
     }
 
     operator T&() const {
-        NOT_NULL(_ptr.get());
+        DASSERT(_ptr.get());
         return *_ptr.get();
     }
 
     T& operator *() const {
-        NOT_NULL(_ptr.get());
+        DASSERT(_ptr.get());
         return *_ptr.get();
     }
 

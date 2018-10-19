@@ -8,8 +8,8 @@ namespace ark {
 RendererWithVisibility::RendererWithVisibility(const sp<Renderer>& renderer, const sp<Boolean>& visibility)
     : _renderer(renderer), _visibility(visibility)
 {
-    NOT_NULL(_renderer);
-    NOT_NULL(_visibility);
+    DASSERT(_renderer);
+    DASSERT(_visibility);
 }
 
 void RendererWithVisibility::render(RenderRequest& renderRequest, float x, float y)

@@ -37,19 +37,19 @@ const sp<Renderer>& Frame::renderer() const
 
 void Frame::render(RenderRequest& renderRequest, float x, float y)
 {
-    NOT_NULL(_block);
+    DASSERT(_block);
     _renderer->render(renderRequest, x, y);
 }
 
 const sp<Size>& Frame::size()
 {
-    NOT_NULL(_block);
+    DASSERT(_block);
     return _block->size();
 }
 
 const sp<Size>& Frame::size() const
 {
-    NOT_NULL(_block);
+    DASSERT(_block);
     return _block->size();
 }
 
