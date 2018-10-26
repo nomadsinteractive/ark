@@ -41,7 +41,7 @@ void Frame::render(RenderRequest& renderRequest, float x, float y)
     _renderer->render(renderRequest, x, y);
 }
 
-const sp<Size>& Frame::size()
+const SafePtr<Size>& Frame::size()
 {
     DASSERT(_block);
     return _block->size();

@@ -1,13 +1,15 @@
 #ifndef ARK_RENDERER_BASE_CHARACTERS_H_
 #define ARK_RENDERER_BASE_CHARACTERS_H_
 
+#include <vector>
+
 #include "core/base/api.h"
-#include "core/collection/list.h"
 #include "core/inf/builder.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/layer_context.h"
+#include "graphics/base/metrics.h"
 #include "graphics/inf/alphabet.h"
 
 #include "renderer/forwarding.h"
@@ -29,10 +31,10 @@ public:
     void setLayoutParam(const sp<LayoutParam>& layoutParam);
 
 //  [[script::bindings::property]]
-    const List<sp<RenderObject>>& characters() const;
+    const std::vector<sp<RenderObject>>& characters() const;
 
 //  [[script::bindings::property]]
-    const sp<Size>& size() const;
+    const SafePtr<Size>& size() const;
 
 //  [[script::bindings::property]]
     const std::wstring& text() const;
@@ -62,7 +64,7 @@ public:
 private:
     void createContent();
 
-    Alphabet::Metrics getItemMetrics(wchar_t c) const;
+    Metrics getItemMetrics(wchar_t c) const;
 
     void place(float boundary, wchar_t c, float& flowx, float& flowy, float& fontHeight);
 
@@ -70,9 +72,9 @@ private:
     sp<Layer> _layer;
     sp<LayoutParam> _layout_param;
     sp<ObjectPool> _object_pool;
-    sp<RenderContext> _render_context;
+    sp<LayerContext> _layer_context;
 
-    List<sp<RenderObject>> _characters;
+    std::vector<sp<RenderObject>> _characters;
     std::wstring _text;
 
     float _text_scale;
@@ -80,12 +82,9 @@ private:
     float _line_height;
     float _line_indent;
 
-    sp<Alphabet> _alphabet;
-    sp<AlphabetLayer> _alphabet_layer;
+    sp<GLModel> _model;
 
-    sp<Atlas> _atlas;
-
-    sp<Size> _size;
+    SafePtr<Size> _size;
 };
 
 }

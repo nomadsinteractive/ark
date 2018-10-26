@@ -5,7 +5,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/render_layer.h"
-#include "graphics/inf/layer.h"
+#include "graphics/base/layer.h"
 
 #include "app/base/application_context.h"
 #include "app/impl/event_listener/event_listener_list.h"
@@ -24,7 +24,7 @@ Arena::~Arena()
     LOGD("");
 }
 
-const sp<Size>& Arena::size()
+const SafePtr<Size>& Arena::size()
 {
     DASSERT(_view_group);
     return _view_group->size();
@@ -115,7 +115,7 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
         {
             const sp<Layer> layer = factory.build<Layer>(i, args);
             if(layer)
-                arena->addLayer(sp<Layer::Renderer>::make(layer));
+                arena->addLayer(layer);
             else
                 arena->addLayer(factory.ensure<Renderer>(i, args));
         }

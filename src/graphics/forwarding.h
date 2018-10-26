@@ -28,7 +28,6 @@ class Transformable;
 class Rect;
 class RenderCommand;
 class RenderCommandPipeline;
-class RenderContext;
 class RenderObject;
 class RenderView;
 class RenderLayer;

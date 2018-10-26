@@ -8,7 +8,7 @@
 #include "graphics/base/size.h"
 #include "graphics/base/v2.h"
 #include "graphics/base/layer_context.h"
-#include "graphics/inf/layer.h"
+#include "graphics/base/layer.h"
 
 namespace ark {
 
@@ -56,7 +56,7 @@ void TileMap::render(RenderRequest& /*renderRequest*/, float x, float y)
     }
 }
 
-const sp<Size>& TileMap::size()
+const SafePtr<Size>& TileMap::size()
 {
     return _size;
 }
@@ -106,7 +106,7 @@ uint32_t TileMap::rowCount() const
 
 const sp<Vec>& TileMap::position() const
 {
-    return _position.ensure();
+    return _position;
 }
 
 void TileMap::setPosition(const sp<Vec>& position)
@@ -116,7 +116,7 @@ void TileMap::setPosition(const sp<Vec>& position)
 
 const sp<Vec>& TileMap::scroller() const
 {
-    return _scroller.ensure();
+    return _scroller;
 }
 
 void TileMap::setScroller(const sp<Vec>& scroller)

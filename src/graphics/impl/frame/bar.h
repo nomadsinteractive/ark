@@ -2,8 +2,8 @@
 #define ARK_GRAPHICS_IMPL_FRAME_BAR_H_
 
 #include "core/inf/builder.h"
-#include "core/collection/list.h"
-#include "core/types/class.h"
+#include "core/types/safe_ptr.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/inf/renderer.h"
 #include "graphics/inf/block.h"
@@ -17,7 +17,7 @@ public:
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
-    virtual const sp<Size>& size() override;
+    virtual const SafePtr<Size>& size() override;
 
 //  [[plugin::builder("bar")]]
     class BUILDER : public Builder<Renderer> {
@@ -41,7 +41,7 @@ private:
     sp<RenderObject> _boilerplate;
     sp<RenderObject> _top;
     sp<Vec> _direction;
-    sp<Size> _size;
+    SafePtr<Size> _size;
 
     sp<RenderLayer> _render_layer;
     float _bar_width;

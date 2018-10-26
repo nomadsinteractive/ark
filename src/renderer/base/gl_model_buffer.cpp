@@ -18,23 +18,38 @@ GLModelBuffer::GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderCont
 {
 }
 
-void GLModelBuffer::setPosition(float x, float y, float z)
+void GLModelBuffer::writePosition(const V3& position)
 {
-    _vertices.write<V3>(_is_instanced ? V3(x, y, z) : _transform.mapXYZ(V3(x, y, z)) + _translate, 0);
+    _vertices.write<V3>(_is_instanced ? position : _transform.mapXYZ(position) + _translate, 0);
 }
 
-void GLModelBuffer::setTexCoordinate(uint16_t u, uint16_t v)
+void GLModelBuffer::writePosition(float x, float y, float z)
+{
+    writePosition(V3(x, y, z));
+}
+
+void GLModelBuffer::writeTexCoordinate(uint16_t u, uint16_t v)
 {
     const uint16_t uv[2] = {u, v};
     _vertices.write(uv, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_TEX_COORDINATE);
 }
 
-void GLModelBuffer::setNormal(const V3& normal)
+void GLModelBuffer::writeNormal(float x, float y, float z)
+{
+    writeNormal(V3(x, y, z));
+}
+
+void GLModelBuffer::writeNormal(const V3& normal)
 {
     _vertices.write(normal, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_NORMAL);
 }
 
-void GLModelBuffer::setTangent(const V3& tangent)
+void GLModelBuffer::writeTangent(float x, float y, float z)
+{
+    writeTangent(V3(x, y, z));
+}
+
+void GLModelBuffer::writeTangent(const V3& tangent)
 {
     _vertices.write(tangent, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_TANGENT);
 }

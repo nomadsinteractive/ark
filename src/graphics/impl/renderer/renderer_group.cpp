@@ -5,7 +5,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/render_layer.h"
-#include "graphics/inf/layer.h"
+#include "graphics/base/layer.h"
 
 namespace ark {
 
@@ -32,7 +32,7 @@ void RendererGroup::loadGroup(const document& manifest, BeanFactory& factory, co
     {
         if(i->name() == Constants::Attributes::LAYER)
         {
-            const sp<Renderer> layer = sp<Layer::Renderer>::make(factory.ensure<Layer>(i, args));
+            const sp<Renderer> layer = factory.ensure<Layer>(i, args);
             const String style = Documents::getAttribute(i, Constants::Attributes::STYLE);
             addRenderer(style ? factory.decorate<Renderer>(sp<BuilderByInstance<Renderer>>::make(layer), style)->build(args) : layer);
         }

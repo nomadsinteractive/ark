@@ -1,8 +1,8 @@
 #ifndef ARK_RENDERER_IMPL_RENDERER_SKYBOX_H_
 #define ARK_RENDERER_IMPL_RENDERER_SKYBOX_H_
 
-#include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/inf/block.h"
@@ -20,7 +20,7 @@ public:
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
-    virtual const sp<Size>& size() override;
+    virtual const SafePtr<Size>& size() override;
 
 //  [[plugin::resource-loader("skybox")]]
     class BUILDER : public Builder<Renderer> {
@@ -38,7 +38,7 @@ public:
     };
 
 private:
-    sp<Size> _size;
+    SafePtr<Size> _size;
     sp<GLResourceManager> _resource_manager;
     sp<GLShader> _shader;
     GLBuffer::Snapshot _index_buffer;

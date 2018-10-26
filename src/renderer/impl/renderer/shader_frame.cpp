@@ -33,7 +33,7 @@ void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
     renderRequest.addRequest(_object_pool->obtain<DrawElements>(GLDrawingContext(_shader_bindings, _shader->camera()->snapshop(), _array_buffer.snapshot(uploader), indexBuffer, GL_TRIANGLES), _shader));
 }
 
-const sp<Size>& ShaderFrame::size()
+const SafePtr<Size>& ShaderFrame::size()
 {
     return _size;
 }

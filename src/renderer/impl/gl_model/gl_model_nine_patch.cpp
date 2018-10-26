@@ -1,9 +1,9 @@
-#include "renderer/impl/gl_model_loader/gl_model_loader_nine_patch.h"
+#include "renderer/impl/gl_model/gl_model_nine_patch.h"
 
 #include "core/dom/document.h"
 #include "core/impl/array/fixed_array.h"
 
-#include "graphics/base/render_context.h"
+#include "graphics/base/layer_context.h"
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/gl_drawing_context.h"
@@ -16,7 +16,7 @@
 
 namespace ark {
 
-GLModelLoaderNinePatch::Item::Item(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
+GLModelNinePatch::Item::Item(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
     : _paddings(patches)
 {
     _x[0] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left()), textureWidth);
@@ -33,11 +33,11 @@ GLModelLoaderNinePatch::Item::Item(const Rect& bounds, const Rect& patches, uint
     _paddings.setBottom(bounds.height() - patches.bottom());
 }
 
-GLModelLoaderNinePatch::GLModelLoaderNinePatch(const document& manifest, const sp<Atlas>& atlas)
-    : GLModelLoader(GL_TRIANGLE_STRIP), _atlas(atlas)
+GLModelNinePatch::GLModelNinePatch(const document& manifest, const sp<Atlas>& atlas)
+    : GLModel(GL_TRIANGLE_STRIP), _atlas(atlas)
 {
-    uint32_t textureWidth = atlas->texture()->width();
-    uint32_t textureHeight = atlas->texture()->height();
+    uint32_t textureWidth = static_cast<uint32_t>(_atlas->texture()->width());
+    uint32_t textureHeight = static_cast<uint32_t>(_atlas->texture()->height());
     for(const document& node : manifest->children("render-object"))
     {
         int32_t type = Documents::getAttribute<int32_t>(node, Constants::Attributes::TYPE, 0);
@@ -58,7 +58,12 @@ GLModelLoaderNinePatch::GLModelLoaderNinePatch(const document& manifest, const s
     }
 }
 
-void GLModelLoaderNinePatch::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
+void GLModelNinePatch::initialize(GLShaderBindings& bindings)
+{
+    bindings.bindGLTexture(_atlas->texture());
+}
+
+void GLModelNinePatch::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
 {
     DCHECK(layerContext._items.size() > 0, "LayerContext has no RenderObjects");
 
@@ -66,7 +71,7 @@ void GLModelLoaderNinePatch::start(GLModelBuffer& buf, GLResourceManager& resour
     buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_NINE_PATCH, layerContext._items.size()));
 }
 
-void GLModelLoaderNinePatch::loadModel(GLModelBuffer& buf, const Atlas& atlas, int32_t type, const V& size)
+void GLModelNinePatch::load(GLModelBuffer& buf, int32_t type, const V& size)
 {
     const Rect paintRect(0, 0, size.x(), size.y());
     const Item& item = _nine_patch_items.at(type);
@@ -77,20 +82,20 @@ void GLModelLoaderNinePatch::loadModel(GLModelBuffer& buf, const Atlas& atlas, i
     for(uint32_t i = 0; i < 4; i++) {
         for(uint32_t j = 0; j < 4; j++) {
             buf.nextVertex();
-            buf.setPosition(xData[j], yData[i], 0);
-            buf.setTexCoordinate(item._x[j], item._y[i]);
+            buf.writePosition(xData[j], yData[i], 0);
+            buf.writeTexCoordinate(item._x[j], item._y[i]);
         }
     }
 }
 
-GLModelLoaderNinePatch::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+GLModelNinePatch::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _manifest(manifest), _atlas(factory.ensureBuilder<Atlas>(manifest))
 {
 }
 
-sp<GLModelLoader> GLModelLoaderNinePatch::BUILDER::build(const sp<Scope>& args)
+sp<GLModel> GLModelNinePatch::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<GLModelLoaderNinePatch>::make(_manifest, _atlas->build(args));
+    return sp<GLModelNinePatch>::make(_manifest, _atlas->build(args));
 }
 
 }

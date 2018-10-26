@@ -28,7 +28,7 @@ AlphabetTrueType::~AlphabetTrueType()
     FT_Done_Face(_ft_font_face);
 }
 
-bool AlphabetTrueType::measure(uint32_t c, Metrics& metrics, bool hasFallback)
+bool AlphabetTrueType::measure(int32_t c, Metrics& metrics, bool hasFallback)
 {
     FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
     if(hasFallback && !glyphIndex)

@@ -25,10 +25,14 @@ public:
     GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<GLShaderBindings>& shaderBindings, size_t renderObjectCount, uint32_t stride);
     DEFAULT_COPY_AND_ASSIGN(GLModelBuffer);
 
-    void setPosition(float x, float y, float z);
-    void setTexCoordinate(uint16_t u, uint16_t v);
-    void setNormal(const V3& normal);
-    void setTangent(const V3& tangents);
+    void writePosition(const V3& position);
+    void writePosition(float x, float y, float z);
+    void writeNormal(float x, float y, float z);
+    void writeNormal(const V3& normal);
+    void writeTangent(float x, float y, float z);
+    void writeTangent(const V3& tangents);
+
+    void writeTexCoordinate(uint16_t u, uint16_t v);
 
     void nextVertex();
     void nextModel();

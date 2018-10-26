@@ -1,10 +1,11 @@
 #include "graphics/impl/renderer/renderer_by_render_object.h"
 
 #include "core/base/bean_factory.h"
+#include "core/types/safe_ptr.h"
 
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
-#include "graphics/inf/layer.h"
+#include "graphics/base/layer.h"
 
 namespace ark {
 
@@ -13,6 +14,8 @@ RendererByRenderObject::RendererByRenderObject(const sp<RenderObject>& renderObj
 {
     DASSERT(_render_object);
     DASSERT(_layer);
+    if(!_render_object->size())
+        _layer->measure(_render_object->type()->val(), _render_object->size().ensure());
 }
 
 void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, float x, float y)
@@ -20,7 +23,7 @@ void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, float x, f
     _layer->draw(x, y, _render_object);
 }
 
-const sp<Size>& RendererByRenderObject::size()
+const SafePtr<Size>& RendererByRenderObject::size()
 {
     return _render_object->size();
 }

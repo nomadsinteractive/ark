@@ -19,6 +19,11 @@ V4::V4(float x, float y, float z, float w)
 {
 }
 
+V4::V4(const std::initializer_list<float>& values)
+{
+    initialize(values, 4);
+}
+
 bool V4::operator ==(const V4& other) const
 {
     return _x == other._x && _y == other._y && _z == other._z && _w == other._w;

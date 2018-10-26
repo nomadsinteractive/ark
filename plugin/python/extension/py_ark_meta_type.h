@@ -3,6 +3,7 @@
 
 #include "core/ark.h"
 #include "core/epi/lifecycle.h"
+#include "core/types/safe_ptr.h"
 
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
@@ -55,7 +56,7 @@ public:
         const sp<T>& ptr = self->unpack<T>();
         if(ptr.template is<Block>()) {
             sp<Block> block = ptr.template as<Block>();
-            const sp<Size>& size = block->size();
+            const SafePtr<Size>& size = block->size();
             if(size)
                 return PythonInterpreter::instance()->pyNewObject<Size>(size);
         }

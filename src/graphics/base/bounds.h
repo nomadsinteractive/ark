@@ -2,7 +2,7 @@
 #define ARK_GRAPHICS_BASE_BOUNDS_H_
 
 #include "core/base/api.h"
-#include "core/inf/builder.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/inf/block.h"
@@ -20,11 +20,11 @@ public:
 //  [[script::bindings::property]]
     const sp<Vec>& center() const;
 //  [[script::bindings::property]]
-    virtual const sp<Size>& size() override;
+    virtual const SafePtr<Size>& size() override;
 
 private:
     sp<Vec> _center;
-    sp<Size> _size;
+    SafePtr<Size> _size;
 
 };
 

@@ -2,42 +2,46 @@
 #define ARK_GRAPHICS_BASE_LAYER_CONTEXT_H_
 
 #include "core/base/api.h"
-#include "core/collection/expirable_item_list.h"
+#include "core/collection/list_with_lifecycle.h"
 
-#include "graphics/base/render_object.h"
+#include "graphics/forwarding.h"
+#include "graphics/base/v2.h"
+#include "graphics/base/layer.h"
 
 namespace ark {
-/*
+
 class LayerContext {
 public:
-    struct Item {
-        Item(float x, float y, const sp<RenderObject>& renderObject);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
+    LayerContext();
 
-        float x, y;
-        sp<RenderObject> _render_object;
-    };
+    void renderRequest(const V2& position);
 
-public:
-    LayerContext(const sp<Camera>& camera, const sp<MemoryPool>& memoryPool);
+    void addRenderObject(const sp<RenderObject>& renderObject);
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& lifecylce);
+    void removeRenderObject(const sp<RenderObject>& renderObject);
 
-    void draw(float x, float y, const sp<RenderObject>& renderObject);
     void clear();
 
-    sp<RenderContext> makeRenderContext();
+    bool takeSnapshot(Layer::Snapshot& output, MemoryPool& memoryPool);
 
 private:
-    std::vector<Item> _items;
-    WeakRefList<RenderContext> _render_contexts;
+    class RenderObjectVaildator {
+    public:
+        RenderObjectVaildator(const sp<RenderObject>& obj, const sp<Boolean>& disposed);
 
-    sp<Camera> _camera;
-    sp<MemoryPool> _memory_pool;
+        bool operator ()(const sp<RenderObject>& obj) const;
+
+    private:
+        sp<Boolean> _disposed;
+    };
+
+private:
     size_t _last_rendered_count;
-
-    friend struct Snapshot;
-    friend class Layer;
+    bool _render_requested;
+    V2 _position;
+    ListWithValidator<RenderObject, RenderObjectVaildator> _items;
 };
-*/
+
 }
 
 #endif

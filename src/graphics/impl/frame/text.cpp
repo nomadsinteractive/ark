@@ -1,10 +1,11 @@
 #include "graphics/impl/frame/text.h"
 
 #include "core/base/bean_factory.h"
+#include "core/types/safe_ptr.h"
 #include "core/util/documents.h"
 
 #include "graphics/base/layer_context.h"
-#include "graphics/inf/layer.h"
+#include "graphics/base/layer.h"
 
 #include "renderer/base/characters.h"
 
@@ -20,9 +21,9 @@ void Text::render(RenderRequest& /*pipeline*/, float x, float y)
     _characters->renderRequest(V2(x, y));
 }
 
-const sp<Size>& Text::size()
+const SafePtr<Size>& Text::size()
 {
-    return _characters->size();
+    return _size;
 }
 
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

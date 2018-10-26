@@ -1,10 +1,11 @@
-#ifndef ARK_CORE_COLLECTION_EXPIRABLE_ITEM_LIST_H_
-#define ARK_CORE_COLLECTION_EXPIRABLE_ITEM_LIST_H_
+#ifndef ARK_CORE_COLLECTION_LIST_WITH_LIFECYCLE_H_
+#define ARK_CORE_COLLECTION_LIST_WITH_LIFECYCLE_H_
 
 #include <list>
 
-#include "core/inf/variable.h"
+#include "core/forwarding.h"
 #include "core/epi/lifecycle.h"
+#include "core/inf/variable.h"
 #include "core/collection/iterable.h"
 #include "core/types/shared_ptr.h"
 
@@ -13,24 +14,23 @@ namespace ark {
 class Validator {
 public:
 
-    template<typename T> class IsExpired {
+    template<typename T> class IsDisposed {
     public:
-        IsExpired(const sp<T>& item)
-            : _expired(item.template as<Lifecycle>()) {
+        IsDisposed(const sp<T>& item)
+            : _disposed(item.template as<Lifecycle>()) {
         }
-        IsExpired(const sp<T>& item, const sp<Boolean>& expired)
-            : _expired(expired) {
+        IsDisposed(const sp<T>& /*item*/, const sp<Boolean>& disposed)
+            : _disposed(disposed) {
         }
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(IsExpired);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(IsDisposed);
 
         bool operator()(const sp<T>& /*item*/) const {
-            return _expired && _expired->val();
+            return _disposed && _disposed->val();
         }
 
     private:
-        sp<Boolean> _expired;
+        sp<Boolean> _disposed;
     };
-
 
     template<typename T> class IsUnique {
     public:
@@ -45,12 +45,12 @@ public:
 
 
 template<typename T, typename V> struct _ItemWithValidator {
-    _ItemWithValidator(const sp<T>& item, V validator)
-        : _item(item), _validator(validator) {
+    _ItemWithValidator(sp<T> item, V validator)
+        : _item(std::move(item)), _validator(std::move(validator)) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(_ItemWithValidator);
 
-    bool isExpired() const {
+    bool isDisposed() const {
         return _validator(_item);
     }
 
@@ -89,7 +89,7 @@ private:
             if(this->_iterator == _list.end())
                 break;
             const auto& i = *(this->_iterator);
-            if(i.isExpired())
+            if(i.isDisposed())
                 this->_iterator = _list.erase(this->_iterator);
             else
                 break;
@@ -98,17 +98,6 @@ private:
 
 protected:
     T& _list;
-};
-
-template<typename T, typename U> class ExpirableItemConstIterator : public ExpirableItemIteratorBase<T, typename T::const_iterator> {
-public:
-    ExpirableItemConstIterator(T& list, typename T::const_iterator iterator)
-        : ExpirableItemIteratorBase<T, typename T::const_iterator>(list, iterator) {
-    }
-
-    const sp<U>& operator * () const {
-        return (*this->_iterator)._item;
-    }
 };
 
 template<typename T, typename U> class ExpirableItemIterator : public ExpirableItemIteratorBase<T, typename T::iterator> {
@@ -129,7 +118,6 @@ private:
     typedef std::list<_Item> _List;
 
 public:
-    typedef ExpirableItemConstIterator<_List, T> const_iterator;
     typedef ExpirableItemIterator<_List, T> iterator;
 
     template<typename... Args> void push_back(const sp<T>& item, Args&&... args) {
@@ -154,14 +142,6 @@ public:
         }
     }
 
-    const const_iterator begin() const {
-        return const_iterator(_items, _items.begin());
-    }
-
-    const const_iterator end() const {
-        return const_iterator(_items, _items.end());
-    }
-
     iterator begin() {
         return iterator(_items, _items.begin());
     }
@@ -171,10 +151,10 @@ public:
     }
 
 private:
-    mutable _List _items;
+    _List _items;
 };
 
-template <typename T> using ExpirableItemList = ListWithValidator<T, typename Validator::IsExpired<T>>;
+template <typename T> using ListWithLifecycle = ListWithValidator<T, typename Validator::IsDisposed<T>>;
 template <typename T> using WeakRefList = ListWithValidator<T, typename Validator::IsUnique<T>>;
 
 }

@@ -24,7 +24,7 @@ public:
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
-    virtual const sp<Size>& size() override;
+    virtual const SafePtr<Size>& size() override;
 
 //  [[plugin::resource-loader("shader-frame")]]
     class BUILDER : public Builder<Renderer> {
@@ -46,7 +46,7 @@ private:
     bytearray getArrayBuffer(float x, float y) const;
 
 private:
-    sp<Size> _size;
+    SafePtr<Size> _size;
     sp<GLResourceManager> _resource_manager;
     sp<GLShader> _shader;
 

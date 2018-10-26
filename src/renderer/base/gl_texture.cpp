@@ -99,10 +99,20 @@ const sp<Size>& GLTexture::size() const
     return _size;
 }
 
+uint32_t GLTexture::target() const
+{
+    return _target;
+}
+
 void GLTexture::active(GLProgram& program, uint32_t name)
 {
+    active(program, _target, _id, name);
+}
+
+void GLTexture::active(GLProgram& program, uint32_t target, uint32_t id, uint32_t name)
+{
     glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + name));
-    glBindTexture(static_cast<GLenum>(_target), _id);
+    glBindTexture(static_cast<GLenum>(target), id);
 
     char uniformName[16] = "u_Texture0";
     uniformName[9] = static_cast<char>('0' + name);

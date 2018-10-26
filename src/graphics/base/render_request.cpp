@@ -5,7 +5,7 @@
 
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/base/surface_controller.h"
-#include "graphics/inf/layer.h"
+#include "graphics/base/layer.h"
 
 namespace ark {
 
@@ -13,9 +13,8 @@ namespace {
 
 class BackgroundRenderCommand : public RenderCommand, public Runnable {
 public:
-    BackgroundRenderCommand(const sp<RenderRequest::Stub>& stub, const sp<Layer>& layer, float x, float y)
-        : _stub(stub), _layer(layer), _layer_snapshot(layer->snapshot()), _x(x), _y(y) {
-        layer->clear();
+    BackgroundRenderCommand(const Layer& layer, const sp<RenderRequest::Stub>& stub, float x, float y)
+        : _layer_snapshot(layer.snapshot()), _stub(stub), _x(x), _y(y) {
     }
 
     virtual void draw(GraphicsContext& graphicsContext) override {
@@ -24,15 +23,14 @@ public:
     }
 
     virtual void run() override {
-        _delegate = _layer->render(_layer_snapshot, _x, _y);
+        _delegate = _layer_snapshot.render(_x, _y);
         _stub->onJobDone(_stub);
         _stub = nullptr;
     }
 
 private:
-    sp<RenderRequest::Stub> _stub;
-    sp<Layer> _layer;
     Layer::Snapshot _layer_snapshot;
+    sp<RenderRequest::Stub> _stub;
     float _x;
     float _y;
 
@@ -68,9 +66,9 @@ void RenderRequest::addRequest(const sp<RenderCommand>& renderCommand)
     _stub->_render_command_pipe_line->add(renderCommand);
 }
 
-void RenderRequest::addBackgroundRequest(const sp<Layer>& layer, float x, float y)
+void RenderRequest::addBackgroundRequest(const Layer& layer, float x, float y)
 {
-    const sp<BackgroundRenderCommand> renderCommand = _stub->_render_command_pool.obtain<BackgroundRenderCommand>(_stub, layer, x, y);
+    const sp<BackgroundRenderCommand> renderCommand = _stub->_render_command_pool.obtain<BackgroundRenderCommand>(layer, _stub, x, y);
     _stub->_background_renderer_count++;
     _stub->_render_command_pipe_line->add(renderCommand);
     _stub->_executor->execute(renderCommand);

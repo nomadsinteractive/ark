@@ -42,6 +42,9 @@ public:
 
     void bindArrayBuffers(GraphicsContext& graphicsContext, GLProgram& program) const;
 
+    void bindGLTexture(const sp<GLTexture>& texture, uint32_t name = 0) const;
+    void bindGLTexture(const sp<GLResource>& texture, uint32_t target, uint32_t name) const;
+
     std::map<uint32_t, GLBuffer::Builder> makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const;
 
 private:

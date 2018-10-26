@@ -97,6 +97,7 @@ const char* const EXPIRED = "expired";
 const char* const GRAVITY = "gravity";
 const char* const LAYOUT = "layout";
 const char* const LAYER = "layer";
+const char* const MODEL = "model";
 const char* const NAME = "name";
 const char* const INTERVAL = "interval";
 const char* const POSITION = "position";

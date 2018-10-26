@@ -39,7 +39,7 @@ public:
     View(const sp<Size>& size);
     virtual ~View() = default;
 
-    virtual const sp<Size>& size() override;
+    virtual const SafePtr<Size>& size() override;
 
     const sp<LayoutParam>& layoutParam() const;
     void setLayoutParam(const sp<LayoutParam>& layoutParam);

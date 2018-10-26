@@ -1,38 +1,57 @@
-#ifndef ARK_CORE_TYPES_LAZY_PTR_H_
-#define ARK_CORE_TYPES_LAZY_PTR_H_
-
-#include <functional>
+#ifndef ARK_CORE_TYPES_SAFE_PTR_H_
+#define ARK_CORE_TYPES_SAFE_PTR_H_
 
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-template<typename T, typename IMPL = T> class SafePtr {
+template<typename T> class SafePtr {
 public:
-    SafePtr()
-        : _inst(Null::ptr<T>()), _allocated(std::is_same<T, IMPL>::value) {
+    SafePtr() noexcept
+        : _inst(Null::ptr<T>()), _allocated(false) {
     }
-    SafePtr(const sp<T>& inst)
-        : _inst(Null::toSafe<T>(inst)), _allocated(inst || std::is_same<T, IMPL>::value) {
+    SafePtr(const sp<T>& inst) noexcept
+        : _inst(Null::toSafe<T>(inst)), _allocated(static_cast<bool>(inst)) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SafePtr);
+
+    typedef T _PtrType;
+
+    explicit operator bool() const {
+        return _allocated;
+    }
+
+    SafePtr& operator =(const sp<T>& other) noexcept {
+        _allocated = static_cast<bool>(other);
+        _inst = Null::toSafe<T>(other);
+        return *this;
+    }
+    SafePtr& operator =(sp<T>&& other) noexcept {
+        _allocated = static_cast<bool>(other);
+        _inst = _allocated ? std::move(other) : Null::ptr<T>();
+        return *this;
+    }
+
+    bool operator != (const sp<T>& other) const {
+        return _inst != other._inst;
+    }
 
     T* operator ->() const {
         return _inst.get();
     }
 
-//[[deprecated]]
+    operator const sp<T>&() const {
+        return _inst;
+    }
+
     const sp<T>& ensure() const {
-        if(!_allocated) {
-            _inst = sp<IMPL>::make(*_inst);
-            _allocated = true;
-        }
+        _allocated = true;
         return _inst;
     }
 
 private:
-    mutable sp<T> _inst;
+    sp<T> _inst;
     mutable bool _allocated;
 };
 

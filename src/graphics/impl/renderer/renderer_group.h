@@ -3,7 +3,7 @@
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/collection/expirable_item_list.h"
+#include "core/collection/list_with_lifecycle.h"
 #include "core/inf/builder.h"
 
 #include "graphics/inf/renderer.h"
@@ -32,7 +32,7 @@ public:
     };
 
 private:
-    ExpirableItemList<Renderer> _items;
+    ListWithLifecycle<Renderer> _items;
 
 };
 

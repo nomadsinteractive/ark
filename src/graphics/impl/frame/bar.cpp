@@ -23,7 +23,7 @@ void Bar::render(RenderRequest& renderRequest, float x, float y)
     _render_layer->render(renderRequest, x, y);
 }
 
-const sp<Size>& Bar::size()
+const SafePtr<Size>& Bar::size()
 {
     return _size;
 }

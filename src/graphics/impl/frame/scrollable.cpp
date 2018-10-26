@@ -93,7 +93,7 @@ void Scrollable::render(RenderRequest& renderRequest, float x, float y)
         }
 }
 
-const sp<Size>& Scrollable::size()
+const SafePtr<Size>& Scrollable::size()
 {
     return _size;
 }

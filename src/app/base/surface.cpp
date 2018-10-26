@@ -6,7 +6,7 @@
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/impl/renderer/renderer_group.h"
 #include "graphics/inf/render_view.h"
-#include "graphics/inf/layer.h"
+#include "graphics/base/layer.h"
 
 #include "renderer/base/render_controller.h"
 

@@ -9,7 +9,7 @@ AlphabetWithFallback::AlphabetWithFallback(const sp<Alphabet>& alphabet, const s
 {
 }
 
-bool AlphabetWithFallback::measure(uint32_t c, Metrics& metrics, bool hasFallback)
+bool AlphabetWithFallback::measure(int32_t c, Metrics& metrics, bool hasFallback)
 {
     if(_alphabet->measure(c, metrics, true))
         return true;

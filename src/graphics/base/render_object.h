@@ -35,7 +35,6 @@ public:
 //  [[script::bindings::auto]]
     RenderObject(const sp<Integer>& type, const sp<Vec>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
 
-//  [[script::bindings::meta(absorb())]]
 //  [[script::bindings::meta(expire())]]
 //  [[script::bindings::meta(isExpired())]]
 
@@ -43,12 +42,12 @@ public:
     const sp<Integer> type() const;
 
 //  [[script::bindings::property]]
-    virtual const sp<Size>& size() override;
+    virtual const SafePtr<Size>& size() override;
 
 //  [[script::bindings::property]]
-    const sp<Transform>& transform() const;
+    const SafePtr<Transform>& transform() const;
 //  [[script::bindings::property]]
-    const sp<Varyings>& varyings() const;
+    const SafePtr<Varyings>& varyings() const;
 
 //  [[script::bindings::property]]
     float width() const;
@@ -75,7 +74,7 @@ public:
 //  [[script::bindings::property]]
     V2 xy() const;
 //  [[script::bindings::property]]
-    const sp<Vec>& position() const;
+    const SafePtr<Vec>& position() const;
 //  [[script::bindings::property]]
     void setPosition(const sp<Vec>& position);
 //  [[script::bindings::property]]
@@ -83,14 +82,14 @@ public:
 //  [[script::bindings::property]]
     void setTransform(const sp<Transform>& transform);
 //  [[script::bindings::property]]
-    void setVaryings(const sp<Varyings>& filter);
+    void setVaryings(const sp<Varyings>& varyings);
 
 //  [[script::bindings::property]]
     const Box& tag() const;
 //  [[script::bindings::property]]
     void setTag(const Box& tag);
 
-    bool isExpired() const;
+    bool isDisposed() const;
 
     Snapshot snapshot(MemoryPool& memoryPool) const;
 
@@ -125,12 +124,12 @@ public:
 private:
     sp<IntegerWrapper> _type;
 
-    sp<Vec> _position;
+    SafePtr<Vec> _position;
     SafePtr<Size> _size;
     SafePtr<Transform> _transform;
-    sp<Varyings> _varyings;
+    SafePtr<Varyings> _varyings;
 
-    sp<Boolean> _type_expired;
+    sp<Boolean> _type_disposed;
 
     Box _tag;
 };

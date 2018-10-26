@@ -38,7 +38,7 @@ list(APPEND LOCAL_LIBS assimp)
 
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(impl/io LOCAL_SRC_LIST)
-aux_source_directory(impl/layer LOCAL_SRC_LIST)
+aux_source_directory(impl/gl_model LOCAL_SRC_LIST)
 
 ark_setup_tools(ark_gen_plugin_class)
 ark_gen_plugin_class(assimp core ark::plugin::assimp assimp_plugin impl)

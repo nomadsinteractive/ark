@@ -65,7 +65,7 @@ View::View(const sp<Size>& size)
 {
 }
 
-const sp<Size>& View::size()
+const SafePtr<Size>& View::size()
 {
     return _layout_param->size();
 }

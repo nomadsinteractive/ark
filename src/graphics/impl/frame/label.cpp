@@ -4,7 +4,7 @@
 #include "core/util/documents.h"
 
 #include "graphics/base/layer_context.h"
-#include "graphics/inf/layer.h"
+#include "graphics/base/layer.h"
 
 #include "renderer/base/characters.h"
 
@@ -20,7 +20,7 @@ void Label::render(RenderRequest& /*pipeline*/, float x, float y)
     _characters->renderRequest(V2(x, y));
 }
 
-const sp<Size>& Label::size()
+const SafePtr<Size>& Label::size()
 {
     return _characters->size();
 }

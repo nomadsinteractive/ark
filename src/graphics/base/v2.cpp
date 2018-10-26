@@ -29,6 +29,11 @@ V2::V2(const V3& other)
 {
 }
 
+V2::V2(const std::initializer_list<float>& values)
+{
+    initialize(values, 2);
+}
+
 bool V2::operator ==(const V2& other) const
 {
     return _x == other._x && _y == other._y;
@@ -118,6 +123,17 @@ float& V2::operator[](int32_t p)
 {
     DCHECK(p >=0, "Index out bounds: %d", p);
     return reinterpret_cast<float*>(this)[p];
+}
+
+void V2::initialize(const std::initializer_list<float>& values, size_t len)
+{
+    DASSERT(values.size() <= len);
+
+    memset(this, 0, sizeof(float) * len);
+
+    int32_t idx = 0;
+    for(float i : values)
+        (*this)[idx++] = i;
 }
 
 }

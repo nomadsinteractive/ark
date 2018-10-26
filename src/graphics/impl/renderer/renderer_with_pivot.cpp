@@ -2,6 +2,7 @@
 
 #include "core/inf/variable.h"
 #include "core/base/bean_factory.h"
+#include "core/types/safe_ptr.h"
 
 #include "graphics/base/v2.h"
 #include "graphics/base/size.h"

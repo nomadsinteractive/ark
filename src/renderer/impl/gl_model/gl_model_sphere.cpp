@@ -1,17 +1,18 @@
-#include "renderer/impl/gl_model_loader/gl_model_loader_sphere.h"
+#include "renderer/impl/gl_model/gl_model_sphere.h"
 
 #include "core/util/math.h"
 #include "core/util/log.h"
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/gl_model_buffer.h"
+#include "renderer/base/gl_shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/util/gl_index_buffers.h"
 
 namespace ark {
 
-GLModelLoaderSphere::GLModelLoaderSphere(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t sampleCount)
-    : GLModelLoader(GL_TRIANGLE_STRIP), _vertex_count((sampleCount * 2 + 1) * (sampleCount + 1)),
+GLModelSphere::GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas, uint32_t sampleCount)
+    : GLModel(GL_TRIANGLE_STRIP), _atlas(atlas), _vertex_count((sampleCount * 2 + 1) * (sampleCount + 1)),
       _vertices_boiler_plate(sp<DynamicArray<float>>::make(_vertex_count * (3 + 2))),
       _indices_boiler_plate(sp<DynamicArray<glindex_t>>::make(4 * sampleCount * sampleCount + 2 * (sampleCount * 2 - 1))),
       _instance_index(resourceLoaderContext->glResourceManager()->makeGLBuffer(sp<GLBuffer::IndexArrayUploader>::make(_indices_boiler_plate), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW))
@@ -42,34 +43,39 @@ GLModelLoaderSphere::GLModelLoaderSphere(const sp<ResourceLoaderContext>& resour
     }
 }
 
-void GLModelLoaderSphere::start(GLModelBuffer& buf, GLResourceManager& /*resourceManager*/, const Layer::Snapshot& layerContext)
+void GLModelSphere::initialize(GLShaderBindings& bindings)
+{
+    bindings.bindGLTexture(_atlas->texture());
+}
+
+void GLModelSphere::start(GLModelBuffer& buf, GLResourceManager& /*resourceManager*/, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size() * _vertex_count);
     buf.setIndices(_instance_index.snapshot());
 }
 
-void GLModelLoaderSphere::loadModel(GLModelBuffer& buf, const Atlas& atlas, int32_t type, const V& size)
+void GLModelSphere::load(GLModelBuffer& buf, int32_t type, const V& size)
 {
     float* elements = _vertices_boiler_plate->buf();
-    const Atlas::Item& item = atlas.at(type);
+    const Atlas::Item& item = _atlas->at(type);
     for(uint32_t i = 0; i < _vertex_count; i++)
     {
         buf.nextVertex();
-        buf.setPosition(elements[0], elements[1], elements[2]);
+        buf.writePosition(elements[0], elements[1], elements[2]);
         uint16_t u = item.left() + static_cast<uint16_t>((item.right() - item.left()) * elements[3]);
         uint16_t v = item.top() + static_cast<uint16_t>((item.bottom() - item.top()) * elements[4]);
-        buf.setTexCoordinate(u, v);
+        buf.writeTexCoordinate(u, v);
 
         const V3 normal(elements[0], elements[1], elements[2]);
         const V3 tangent = abs(normal.x()) < 0.25f ? normal.cross(V3(1.0f, 0.0f, 0.0f)) : normal.cross(V3(0.0f, 1.0f, 0.0f));
-        buf.setNormal(normal);
-        buf.setTangent(tangent);
+        buf.writeNormal(normal);
+        buf.writeTangent(tangent);
         elements += 5;
     }
     buf.nextModel();
 }
 
-void GLModelLoaderSphere::buildVertex(float*& buffer, float lng, float lat) const
+void GLModelSphere::buildVertex(float*& buffer, float lng, float lat) const
 {
     float r = Math::cos(lat) / 2.0f;
     float px = r * Math::sin(lng);
@@ -80,7 +86,7 @@ void GLModelLoaderSphere::buildVertex(float*& buffer, float lng, float lat) cons
     (*buffer++) = pz;
 }
 
-void GLModelLoaderSphere::buildTexture(float*& buffer, float lng, float lat) const
+void GLModelSphere::buildTexture(float*& buffer, float lng, float lat) const
 {
     float x = (float) (lng / Math::PI / 2);
     float y = (float) (lat / Math::PI);
@@ -88,21 +94,22 @@ void GLModelLoaderSphere::buildTexture(float*& buffer, float lng, float lat) con
     (*buffer++) = y;
 }
 
-void GLModelLoaderSphere::degenerate(glindex_t*& buffer, glindex_t index) const
+void GLModelSphere::degenerate(glindex_t*& buffer, glindex_t index) const
 {
     uint16_t d = *(buffer - 1);
     (*buffer++) = d;
     (*buffer++) = index;
 }
 
-GLModelLoaderSphere::BUILDER::BUILDER(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _sample_count(Documents::getAttribute(manifest, "sample-count", 10)), _resource_loader_context(resourceLoaderContext)
+GLModelSphere::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _atlas(factory.ensureBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)), _sample_count(Documents::getAttribute(manifest, "sample-count", 10)),
+      _resource_loader_context(resourceLoaderContext)
 {
 }
 
-sp<GLModelLoader> GLModelLoaderSphere::BUILDER::build(const sp<Scope>& /*args*/)
+sp<GLModel> GLModelSphere::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<GLModelLoaderSphere>::make(_resource_loader_context, _sample_count);
+    return sp<GLModelSphere>::make(_resource_loader_context, _atlas->build(args), _sample_count);
 }
 
 }

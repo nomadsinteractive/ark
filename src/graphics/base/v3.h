@@ -12,6 +12,7 @@ public:
     V3();
     V3(float x, float y, float z);
     V3(const V2& other);
+    V3(const std::initializer_list<float>& values);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(V3);
 
     bool operator ==(const V3& other) const;

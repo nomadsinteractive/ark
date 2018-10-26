@@ -18,7 +18,7 @@ public:
         int32_t bitmap_y;
     };
 
-    virtual bool measure(uint32_t c, Metrics& metrics, bool hasFallback) = 0;
+    virtual bool measure(int32_t c, Metrics& metrics, bool hasFallback) = 0;
     virtual bool draw(uint32_t c, const bitmap& image, int32_t x, int32_t y) = 0;
 };
 

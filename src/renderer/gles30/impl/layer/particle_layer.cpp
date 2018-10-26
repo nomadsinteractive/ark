@@ -16,9 +16,9 @@
 
 namespace ark {
 namespace gles30 {
-
+/*
 ParticleLayer::ParticleLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : Layer(shader->camera(), resourceLoaderContext->memoryPool()), _atlas(atlas), _resource_loader_context(resourceLoaderContext),
+    : Layer(shader->camera(), resourceLoaderContext->memoryPool(), nullptr), _atlas(atlas), _resource_loader_context(resourceLoaderContext),
       _shader_bindings(sp<GLShaderBindings>::make(resourceLoaderContext->glResourceManager(), shader)),
       _index_buffer(GLIndexBuffers::makeGLBufferSnapshot(resourceLoaderContext->glResourceManager(), GLBuffer::NAME_QUADS, 1)),
       _transform_array_buffer(resourceLoaderContext->glResourceManager()->makeDynamicArrayBuffer())
@@ -99,6 +99,6 @@ sp<Layer> ParticleLayer::BUILDER::build(const sp<Scope>& args)
     const sp<Atlas> atlas = _atlas->build(args);
     return sp<ParticleLayer>::make(_shader->build(args), atlas, _resource_loader_context);
 }
-
+*/
 }
 }

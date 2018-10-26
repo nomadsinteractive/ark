@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_BASE_ATLAS_H_
-#define ARK_GRAPHICS_BASE_ATLAS_H_
+#ifndef ARK_RENDERER_BASE_ATLAS_H_
+#define ARK_RENDERER_BASE_ATLAS_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"

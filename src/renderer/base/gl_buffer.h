@@ -106,7 +106,7 @@ private:
     class Stub : public GLResource {
     public:
         Stub(const sp<GLRecycler>& recycler, const sp<Uploader>& uploader, GLenum type, GLenum usage);
-        ~Stub();
+        ~Stub() override;
 
         GLenum type() const;
         GLenum usage() const;

@@ -22,7 +22,7 @@ public:
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 // [[script::bindings::property]]
-    virtual const sp<Size>& size() override;
+    virtual const SafePtr<Size>& size() override;
 
 // [[script::bindings::auto]]
     const sp<RenderObject>& getTile(uint32_t rowId, uint32_t colId) const;
@@ -55,9 +55,9 @@ public:
 
 private:
     sp<Layer> _layer;
-    sp<Size> _size;
-    SafePtr<Vec, Vec::Impl> _position;
-    SafePtr<Vec, Vec::Impl> _scroller;
+    SafePtr<Size> _size;
+    SafePtr<Vec> _position;
+    SafePtr<Vec> _scroller;
 
     sp<Size> _tile_size;
 

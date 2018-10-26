@@ -2,9 +2,10 @@
 
 #include "core/base/bean_factory.h"
 
+#include "graphics/base/layer.h"
+
 #include "renderer/base/gl_shader.h"
-#include "renderer/impl/gl_model_loader/gl_model_loader_nine_patch.h"
-#include "renderer/impl/layer/gl_model_layer.h"
+#include "renderer/impl/gl_model/gl_model_nine_patch.h"
 
 namespace ark {
 
@@ -18,7 +19,7 @@ sp<Layer> NinePatchLayer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Atlas> atlas = _atlas->build(args);
     const sp<GLShader> shader = _shader->build(args);
-    return sp<GLModelLayer>::make(sp<GLModelLoaderNinePatch>::make(_manifest, atlas), shader, atlas, _resource_loader_context);
+    return sp<Layer>::make(sp<GLModelNinePatch>::make(_manifest, atlas), shader, _resource_loader_context);
 }
 
 }

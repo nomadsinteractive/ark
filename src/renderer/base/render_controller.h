@@ -3,7 +3,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/collection/expirable_item_list.h"
+#include "core/collection/list_with_lifecycle.h"
 #include "core/collection/list.h"
 #include "core/types/shared_ptr.h"
 
@@ -20,7 +20,7 @@ public:
     void deferUnref(const Box& box);
 
 private:
-    ExpirableItemList<Runnable> _on_pre_update_request;
+    ListWithLifecycle<Runnable> _on_pre_update_request;
 
     List<Box> _defered_instances;
 };

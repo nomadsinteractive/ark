@@ -1,31 +1,34 @@
-#ifndef ARK_RENDERER_IMPL_GL_MODEL_LOADER_GL_MODEL_LOADER_SPHERE_H_
-#define ARK_RENDERER_IMPL_GL_MODEL_LOADER_GL_MODEL_LOADER_SPHERE_H_
+#ifndef ARK_RENDERER_IMPL_GL_MODEL_GL_MODEL_SPHERE_H_
+#define ARK_RENDERER_IMPL_GL_MODEL_GL_MODEL_SPHERE_H_
 
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/gl_buffer.h"
-#include "renderer/inf/gl_model_loader.h"
+#include "renderer/inf/gl_model.h"
 
 namespace ark {
 
-class GLModelLoaderSphere : public GLModelLoader {
+class GLModelSphere : public GLModel {
 public:
-    GLModelLoaderSphere(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t sampleCount);
+    GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas, uint32_t sampleCount);
 
+    virtual void initialize(GLShaderBindings& bindings) override;
     virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) override;
-    virtual void loadModel(GLModelBuffer& buf, const Atlas& atlas, int32_t type, const V& size) override;
+    virtual void load(GLModelBuffer& buf, int32_t type, const V& size) override;
 
 //  [[plugin::resource-loader("sphere")]]
-    class BUILDER : public Builder<GLModelLoader> {
+    class BUILDER : public Builder<GLModel> {
     public:
-        BUILDER(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<GLModelLoader> build(const sp<Scope>& args) override;
+        virtual sp<GLModel> build(const sp<Scope>& args) override;
 
     private:
+        sp<Builder<Atlas>> _atlas;
         uint32_t _sample_count;
+
         sp<ResourceLoaderContext> _resource_loader_context;
     };
 
@@ -35,6 +38,8 @@ private:
     void degenerate(glindex_t*& buffer, glindex_t index) const;
 
 private:
+    sp<Atlas> _atlas;
+
     uint32_t _vertex_count;
     floatarray _vertices_boiler_plate;
     indexarray _indices_boiler_plate;

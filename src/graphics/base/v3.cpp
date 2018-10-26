@@ -22,6 +22,11 @@ V3::V3(const V2& other)
 {
 }
 
+V3::V3(const std::initializer_list<float>& values)
+{
+    initialize(values, 3);
+}
+
 bool V3::operator ==(const V3& other) const
 {
     return _x == other._x && _y == other._y && _z == other._z;

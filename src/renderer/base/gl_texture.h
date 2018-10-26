@@ -35,7 +35,7 @@ public:
 
     GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
     GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, const document& manifest);
-    virtual ~GLTexture();
+    virtual ~GLTexture() override;
 
     virtual uint32_t id() override;
     virtual void prepare(GraphicsContext& graphicsContext) override;
@@ -51,7 +51,10 @@ public:
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 
+    uint32_t target() const;
+
     void active(GLProgram& program, uint32_t name);
+    static void active(GLProgram& program, uint32_t target, uint32_t id, uint32_t name);
 
     class Recycler : public GLResource {
     public:

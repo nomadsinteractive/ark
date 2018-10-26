@@ -2,9 +2,8 @@
 #define ARK_APP_VIEW_LAYOUT_PARAM_H_
 
 #include "core/base/api.h"
-#include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
-#include "core/types/shared_ptr.h"
+#include "core/types/safe_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/rect.h"
@@ -35,7 +34,7 @@ public:
     float contentHeight() const;
     void setContentHeight(float contentHeight);
 
-    const sp<Size>& size() const;
+    const SafePtr<Size>& size() const;
     void setSize(const sp<Size>& size);
 
     Display display() const;
@@ -62,7 +61,7 @@ public:
     };
 
 private:
-    sp<Size> _size;
+    SafePtr<Size> _size;
 
     Display _display;
     Rect _margins;

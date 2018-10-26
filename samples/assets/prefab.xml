@@ -10,7 +10,7 @@
 				font-width="32" font-height="64"/>
 	</atlas>
 	<layer id="@l001" class="image-layer" atlas="@alphabets"/>
-	<layer id="@l002" class="alphabet-layer" alphabet="@a001" text-color="#ffffffff"/>
+	<layer id="@l002" class="text-layer" alphabet="@a001" text-color="#ffffffff"/>
 	<layer id="@l003" class="image-layer" atlas="@blocks"/>
 	<renderer id="fps-counter" class="fps-counter" layer="@l001" message="%.2f / 60"/>
 </resources>

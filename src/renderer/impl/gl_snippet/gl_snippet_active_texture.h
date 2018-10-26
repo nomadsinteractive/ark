@@ -11,9 +11,21 @@
 namespace ark {
 
 class ARK_API GLSnippetActiveTexture : public GLSnippet {
+private:
+    struct Texture {
+        Texture(const sp<GLTexture>& texture, uint32_t name);
+        Texture(const sp<GLResource>& texture, uint32_t target, uint32_t name);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Texture);
+
+        sp<GLResource> resource;
+        uint32_t target;
+        uint32_t name;
+    };
+
 public:
     GLSnippetActiveTexture();
     GLSnippetActiveTexture(const sp<GLTexture>& texture, uint32_t name = 0);
+    GLSnippetActiveTexture(const sp<GLResource>& texture, uint32_t target, uint32_t name);
 
     virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLDrawingContext& context) override;
 
@@ -29,7 +41,7 @@ public:
     };
 
 private:
-    std::vector<std::pair<uint32_t, sp<GLTexture>>> _textures;
+    std::vector<Texture> _textures;
 
     friend class BUILDER;
 };

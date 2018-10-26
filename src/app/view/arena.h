@@ -2,7 +2,7 @@
 #define ARK_APP_VIEW_STAGE_H_
 
 #include "core/base/api.h"
-#include "core/collection/expirable_item_list.h"
+#include "core/collection/list_with_lifecycle.h"
 #include "core/inf/builder.h"
 #include "core/types/owned_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -21,14 +21,13 @@ namespace ark {
 class ARK_API Arena final : public Block, public EventListener, public Renderer, public Renderer::Group {
 public:
     Arena(const sp<Renderer>& rootView, const sp<ResourceLoader>& resourceLoader);
-    ~Arena();
+    ~Arena() override;
 
-//  [[script::bindings::meta(absorb())]]
 //  [[script::bindings::meta(expire())]]
 //  [[script::bindings::meta(isExpired())]]
 
 //  [[script::bindings::property]]
-    virtual const sp<Size>& size() override;
+    virtual const SafePtr<Size>& size() override;
 
 //  [[script::bindings::auto]]
     virtual void addRenderer(const sp<Renderer>& renderer) override;
@@ -97,7 +96,7 @@ private:
     sp<Renderer> _renderer;
     sp<ViewGroup> _view_group;
     sp<ResourceLoader> _resource_loader;
-    ExpirableItemList<Renderer> _layers;
+    ListWithLifecycle<Renderer> _layers;
 
 };
 

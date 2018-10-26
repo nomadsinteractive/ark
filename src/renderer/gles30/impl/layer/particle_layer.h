@@ -4,21 +4,20 @@
 #include "core/base/memory_pool.h"
 
 #include "graphics/base/layer_context.h"
-#include "graphics/inf/layer.h"
+#include "graphics/base/layer.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/gl_buffer.h"
 
 namespace ark {
 namespace gles30 {
-
+/*
 class ParticleLayer : public Layer {
 public:
     ParticleLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual sp<RenderCommand> render(const Layer::Snapshot& layerContext, float x, float y) override;
 
-//  [[plugin::resource-loader("particle-layer")]]
     class BUILDER : public Builder<Layer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
@@ -42,7 +41,7 @@ private:
 
     MemoryPool _memory_pool;
 };
-
+*/
 }
 }
 

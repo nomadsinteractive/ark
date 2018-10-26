@@ -2,9 +2,10 @@
 
 #include "core/base/bean_factory.h"
 
+#include "graphics/base/layer.h"
+
 #include "renderer/base/gl_shader.h"
-#include "renderer/impl/gl_model_loader/gl_model_loader_point.h"
-#include "renderer/impl/layer/gl_model_layer.h"
+#include "renderer/impl/gl_model/gl_model_point.h"
 
 namespace ark {
 
@@ -16,7 +17,7 @@ PointLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, con
 sp<Layer> PointLayer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Atlas> atlas = _atlas->build(args);
-    return sp<GLModelLayer>::make(sp<GLModelLoaderPoint>::make(), _shader->build(args), atlas, _resource_loader_context);
+    return sp<Layer>::make(sp<GLModelPoint>::make(atlas), _shader->build(args), _resource_loader_context);
 }
 
 }

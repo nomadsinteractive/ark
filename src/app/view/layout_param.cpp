@@ -65,7 +65,7 @@ void LayoutParam::setContentHeight(float contentHeight)
     _size->setHeight(contentHeight);
 }
 
-const sp<Size>& LayoutParam::size() const
+const SafePtr<Size>& LayoutParam::size() const
 {
     return _size;
 }

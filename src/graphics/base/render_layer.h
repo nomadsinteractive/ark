@@ -1,7 +1,7 @@
 #ifndef ARK_GRAPHICS_BASE_RENDER_LAYER_H_
 #define ARK_GRAPHICS_BASE_RENDER_LAYER_H_
 
-#include "core/collection/expirable_item_list.h"
+#include "core/collection/list_with_lifecycle.h"
 #include "core/collection/list.h"
 #include "core/inf/builder.h"
 #include "core/types/class.h"
@@ -17,14 +17,13 @@ public:
 // [[script::bindings::auto]]
     RenderLayer(const sp<Layer>& layer);
 
-//  [[script::bindings::meta(absorb())]]
 //  [[script::bindings::meta(expire())]]
 //  [[script::bindings::meta(isExpired())]]
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
 // [[script::bindings::auto]]
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& expirable = sp<Boolean>::null());
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = sp<Boolean>::null());
 // [[script::bindings::auto]]
     void removeRenderObject(const sp<RenderObject>& renderObject);
 
@@ -56,7 +55,7 @@ public:
 
 private:
     sp<Layer> _layer;
-    sp<RenderContext> _render_context;
+    sp<LayerContext> _layer_context;
 };
 
 }

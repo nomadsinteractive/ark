@@ -11,6 +11,7 @@ class ARK_API V4 : public V3 {
 public:
     V4();
     V4(float x, float y, float z, float w);
+    V4(const std::initializer_list<float>& values);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(V4);
 
     bool operator ==(const V4& other) const;

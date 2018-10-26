@@ -4,13 +4,14 @@
 namespace ark {
 
 class AlphabetLayer;
+class Atlas;
 class Characters;
 class DrawElements;
 class GLAttribute;
 class GLBuffer;
 class GLContext;
 class GLCubemap;
-class GLModelLoader;
+class GLModel;
 class GLModelBuffer;
 class GLFramebuffer;
 class GLModel;
@@ -37,7 +38,6 @@ class RenderEngine;
 class RenderController;
 class RenderViewFactory;
 class ResourceLoaderContext;
-class Atlas;
 
 }
 

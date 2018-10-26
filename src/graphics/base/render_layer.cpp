@@ -4,35 +4,35 @@
 
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_command_pipeline.h"
-#include "graphics/base/render_context.h"
-#include "graphics/inf/layer.h"
+#include "graphics/base/layer_context.h"
+#include "graphics/base/layer.h"
 
 namespace ark {
 
 RenderLayer::RenderLayer(const sp<Layer>& layer)
-    : _layer(layer), _render_context(layer->makeRenderContext())
+    : _layer(layer), _layer_context(layer->makeContext())
 {
 }
 
 void RenderLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
 {
-    _render_context->renderRequest(V2(x, y));
+    _layer_context->renderRequest(V2(x, y));
 }
 
-void RenderLayer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& expired)
+void RenderLayer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed)
 {
     DASSERT(renderObject);
-    _render_context->addRenderObject(renderObject, expired);
+    _layer_context->addRenderObject(renderObject, disposed);
 }
 
 void RenderLayer::removeRenderObject(const sp<RenderObject>& renderObject)
 {
-    _render_context->removeRenderObject(renderObject);
+    _layer_context->removeRenderObject(renderObject);
 }
 
 void RenderLayer::clear()
 {
-    _render_context->clear();
+    _layer_context->clear();
 }
 
 RenderLayer::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& doc)

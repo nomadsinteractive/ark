@@ -5,15 +5,15 @@
 #include "core/impl/array/dynamic_array.h"
 #include "core/inf/variable.h"
 
-#include "graphics/base/render_context.h"
+#include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/size.h"
 #include "graphics/base/v2.h"
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/inf/gl_model.h"
 #include "renderer/impl/layer/alphabet_layer.h"
-#include "renderer/impl/layer/gl_model_layer.h"
 
 #include "app/view/layout_param.h"
 
@@ -25,18 +25,10 @@ Characters::Characters(const sp<Layer>& layer, float textScale, float letterSpac
 }
 
 Characters::Characters(const sp<Layer>& layer, const sp<ObjectPool>& objectPool, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : _layer(layer), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()), _render_context(layer->makeRenderContext()),
+    : _layer(layer), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()), _layer_context(layer->makeContext()),
       _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(-g_upDirection * lineHeight),
-      _line_indent(lineIndent), _size(_object_pool->obtain<Size>(0.0f, 0.0f))
+      _line_indent(lineIndent), _model(layer->model()), _size(_object_pool->obtain<Size>(0.0f, 0.0f))
 {
-    _alphabet_layer = layer.as<AlphabetLayer>();
-    if(_alphabet_layer)
-        _alphabet = _alphabet_layer->alphabet();
-    else
-    {
-        DCHECK(layer.is<GLModelLayer>(), "Character's layer must be either AlphabetLayer or ImageLayer");
-        _atlas = layer.as<GLModelLayer>()->atlas();
-    }
 }
 
 const sp<Layer>& Characters::layer() const
@@ -54,12 +46,12 @@ void Characters::setLayoutParam(const sp<LayoutParam>& layoutParam)
     _layout_param = layoutParam;
 }
 
-const List<sp<RenderObject>>& Characters::characters() const
+const std::vector<sp<RenderObject>>& Characters::characters() const
 {
     return _characters;
 }
 
-const sp<Size>& Characters::size() const
+const SafePtr<Size>& Characters::size() const
 {
     return _size;
 }
@@ -78,22 +70,21 @@ void Characters::setText(const std::wstring& text)
 
 void Characters::renderRequest(const V2& position)
 {
-    _render_context->renderRequest(position);
+    _layer_context->renderRequest(position);
 }
 
-Alphabet::Metrics Characters::getItemMetrics(wchar_t c) const
+Metrics Characters::getItemMetrics(wchar_t c) const
 {
-    Alphabet::Metrics metrics;
-    if(_atlas)
-    {
-        const Atlas::Item& item = _atlas->at(c);
-        metrics.bitmap_width = metrics.width = static_cast<int32_t>(item.width());
-        metrics.bitmap_height = metrics.height = static_cast<int32_t>(item.height());
-        metrics.bitmap_x = metrics.bitmap_y = 0;
-    }
-    else
-        _alphabet->measure(c, metrics, false);
-    return metrics;
+//    if(_model)
+        return _model->measure(c);
+
+//    Alphabet::Metrics metrics;
+//    _alphabet->measure(c, metrics, false);
+//    return {
+//        {static_cast<float>(metrics.width), static_cast<float>(metrics.height)},
+//        {static_cast<float>(metrics.bitmap_width), static_cast<float>(metrics.bitmap_height)},
+//        {static_cast<float>(metrics.bitmap_x), static_cast<float>(metrics.bitmap_y)}
+//    };
 }
 
 void Characters::createContent()
@@ -105,20 +96,20 @@ void Characters::createContent()
     _size->setWidth(flowx);
     _size->setHeight(abs(flowy) + fontHeight);
 
-    _render_context->clear();
+    _layer_context->clear();
     for(const sp<RenderObject>& i : _characters)
-        _render_context->addRenderObject(i);
+        _layer_context->addRenderObject(i);
 }
 
 void Characters::place(float boundary, wchar_t c, float& flowx, float& flowy, float& fontHeight)
 {
-    const Alphabet::Metrics metrics = getItemMetrics(c);
-    float bitmapWidth = _text_scale * metrics.bitmap_width;
-    float bitmapHeight = _text_scale * metrics.bitmap_height;
-    float width = _text_scale * metrics.width;
-    float height = _text_scale * metrics.height;
-    float bitmapX = _text_scale * metrics.bitmap_x;
-    float bitmapY = _text_scale * metrics.bitmap_y;
+    const Metrics metrics = getItemMetrics(c);
+    float bitmapWidth = _text_scale * metrics.size.x();
+    float bitmapHeight = _text_scale * metrics.size.y();
+    float width = _text_scale * metrics.bounds.x();
+    float height = _text_scale * metrics.bounds.y();
+    float bitmapX = _text_scale * metrics.xyz.x();
+    float bitmapY = _text_scale * metrics.xyz.y();
     const sp<Size> itemSize = _object_pool->obtain<Size>(bitmapWidth, bitmapHeight);
     if(fontHeight == 0)
         fontHeight = height;
@@ -128,7 +119,7 @@ void Characters::place(float boundary, wchar_t c, float& flowx, float& flowy, fl
     {
         if(flowx + width > boundary)
         {
-            flowy += (_line_height ? _line_height : (-fontHeight * g_upDirection));
+            flowy += (_line_height == 0 ? _line_height : (-fontHeight * g_upDirection));
             flowx = _line_indent;
         }
     }

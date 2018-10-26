@@ -21,7 +21,7 @@ public:
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
-    virtual const sp<Size>& size() override;
+    virtual const SafePtr<Size>& size() override;
 
 //  [[plugin::builder("text")]]
     class BUILDER : public Builder<Renderer> {
@@ -39,7 +39,7 @@ public:
 private:
     sp<Layer> _layer;
     sp<Characters> _characters;
-
+    SafePtr<Size> _size;
 };
 
 }

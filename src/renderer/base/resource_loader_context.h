@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "core/forwarding.h"
-#include "core/collection/expirable_item_list.h"
+#include "core/collection/list_with_lifecycle.h"
 #include "core/base/api.h"
 #include "core/base/object_pool.h"
 #include "core/inf/runnable.h"
@@ -75,7 +75,7 @@ private:
         }
 
     private:
-        ExpirableItemList<Updater> _updaters;
+        ListWithLifecycle<Updater> _updaters;
     };
 
 public:

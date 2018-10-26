@@ -4,6 +4,7 @@
 #include "core/base/api.h"
 #include "core/concurrent/dual.h"
 #include "core/inf/builder.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -54,7 +55,7 @@ public:
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
-    virtual const sp<Size>& size() override;
+    virtual const SafePtr<Size>& size() override;
 
     void initialize();
 
@@ -87,7 +88,7 @@ private:
     Dual<RollingAdapter> _rolling_view;
     sp<Vec> _scroller;
     sp<TileMaker> _tile_maker;
-    sp<Size> _size;
+    SafePtr<Size> _size;
     int32_t _scroll_x;
     int32_t _scroll_y;
 

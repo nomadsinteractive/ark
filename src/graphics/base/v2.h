@@ -13,6 +13,7 @@ public:
     V2(float x, float y);
     V2(float x, float y, float z);
     V2(const V3& other);
+    V2(const std::initializer_list<float>& values);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(V2);
 
     bool operator ==(const V2& other) const;
@@ -38,6 +39,9 @@ public:
 
     const float& operator[](int32_t p) const;
     float& operator[](int32_t p);
+
+protected:
+    void initialize(const std::initializer_list<float>& values, size_t len);
 
 protected:
     float _x;

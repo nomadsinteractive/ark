@@ -7,7 +7,6 @@
 #include "graphics/base/frame.h"
 #include "graphics/base/render_layer.h"
 #include "graphics/base/size.h"
-#include "graphics/impl/renderer/renderer_delegate.h"
 
 #include "app/base/event.h"
 #include "app/inf/layout.h"
@@ -21,7 +20,7 @@ ViewGroup::ViewGroup(const Frame& background, const sp<Layout>& layout, const sp
     DCHECK(!layout || _layout_param, "Null LayoutParam. This would happen if your ViewGroup has neither background or size defined.");
     if(_layout_param && background)
         if(background.size() != _layout_param->size())
-            background.size()->adopt(_layout_param->size());
+            background.size()->adopt(static_cast<sp<Size>>(_layout_param->size()));
 }
 
 ViewGroup::~ViewGroup()

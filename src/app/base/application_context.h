@@ -4,7 +4,7 @@
 #include <map>
 
 #include "core/base/api.h"
-#include "core/collection/expirable_item_list.h"
+#include "core/collection/list_with_lifecycle.h"
 #include "core/collection/list.h"
 #include "core/forwarding.h"
 #include "core/inf/message_loop.h"

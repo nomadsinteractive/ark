@@ -14,7 +14,6 @@
 #include "renderer/base/gl_shader_bindings.h"
 #include "renderer/base/gl_snippet_delegate.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/impl/gl_snippet/gl_snippet_active_texture.h"
 #include "renderer/util/gl_index_buffers.h"
 #include "renderer/util/gl_util.h"
 
@@ -34,7 +33,7 @@ public:
         _context.preDraw(graphicsContext, _shader);
         _shader->glUpdateMatrix(graphicsContext, "u_View", _view);
         _shader->glUpdateMatrix(graphicsContext, "u_Projection", _projection);
-        glDrawElements(_context._mode, _context._count, GLIndexType, 0);
+        glDrawElements(_context._mode, _context._count, GLIndexType, nullptr);
         _context.postDraw(graphicsContext);
     }
 
@@ -53,7 +52,7 @@ Skybox::Skybox(const sp<Size>& size, const sp<GLShader>& shader, const sp<GLText
       _shader_bindings(sp<GLShaderBindings>::make(_resource_manager, shader, _resource_manager->makeGLBuffer(sp<GLBuffer::ByteArrayUploader>::make(GLUtil::makeUnitCubeVertices()), GL_ARRAY_BUFFER, GL_STATIC_DRAW))),
       _object_pool(resourceLoaderContext->objectPool())
 {
-    _shader_bindings->snippet()->link<GLSnippetActiveTexture>(texture);
+    _shader_bindings->bindGLTexture(texture);
 }
 
 void Skybox::render(RenderRequest& renderRequest, float x, float y)
@@ -63,7 +62,7 @@ void Skybox::render(RenderRequest& renderRequest, float x, float y)
     renderRequest.addRequest(_object_pool->obtain<RenderCommandSkybox>(GLDrawingContext(_shader_bindings, _shader->camera()->snapshop(), _shader_bindings->arrayBuffer().snapshot(), _index_buffer, GL_TRIANGLES), _shader, view, projection));
 }
 
-const sp<Size>& Skybox::size()
+const SafePtr<Size>& Skybox::size()
 {
     return _size;
 }

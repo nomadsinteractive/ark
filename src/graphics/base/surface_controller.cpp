@@ -2,7 +2,7 @@
 
 #include "graphics/base/render_request.h"
 #include "graphics/impl/renderer/renderer_group.h"
-#include "graphics/inf/layer.h"
+#include "graphics/base/layer.h"
 
 namespace ark {
 
@@ -24,7 +24,7 @@ void SurfaceController::addControl(const sp<Renderer>& control)
 
 void SurfaceController::addLayer(const sp<Layer>& layer)
 {
-    _layers->addRenderer(sp<Layer::Renderer>::make(layer));
+    _layers->addRenderer(layer);
 }
 
 void SurfaceController::postRenderCommand(const sp<RenderCommandPipeline>& renderCommand)

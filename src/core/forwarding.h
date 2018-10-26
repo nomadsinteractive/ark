@@ -16,6 +16,7 @@ template<typename T> class OwnedPtr;
 template<typename T> class Loader;
 template<typename T> class List;
 template<typename T> class LockFreeStack;
+template<typename T> class SafePtr;
 template<typename T> class SharedPtr;
 template<typename T, typename U> class Table;
 template<typename T> class Type;

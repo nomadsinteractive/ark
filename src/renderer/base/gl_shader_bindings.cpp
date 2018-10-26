@@ -5,6 +5,7 @@
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_shader_source.h"
 #include "renderer/base/gl_snippet_delegate.h"
+#include "renderer/impl/gl_snippet/gl_snippet_active_texture.h"
 
 namespace ark {
 
@@ -48,12 +49,22 @@ void GLShaderBindings::bindArrayBuffers(GraphicsContext& graphicsContext, GLProg
 {
     DCHECK(program.id(), "GLProgram unprepared");
     _shader_input->bind(graphicsContext, program, 0);
-    for(const auto iter : _instanced_arrays)
+    for(const auto& i : _instanced_arrays)
     {
-        glBindBuffer(GL_ARRAY_BUFFER, iter.second.id());
-        _shader_input->bind(graphicsContext, program, iter.first);
+        glBindBuffer(GL_ARRAY_BUFFER, i.second.id());
+        _shader_input->bind(graphicsContext, program, i.first);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
+}
+
+void GLShaderBindings::bindGLTexture(const sp<GLTexture>& texture, uint32_t name) const
+{
+    _snippet->link<GLSnippetActiveTexture>(texture, name);
+}
+
+void GLShaderBindings::bindGLTexture(const sp<GLResource>& texture, uint32_t target, uint32_t name) const
+{
+    _snippet->link<GLSnippetActiveTexture>(texture, target, name);
 }
 
 std::map<uint32_t, GLBuffer::Builder> GLShaderBindings::makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const

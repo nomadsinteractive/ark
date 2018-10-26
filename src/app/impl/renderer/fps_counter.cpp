@@ -8,7 +8,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/layer_context.h"
-#include "graphics/inf/layer.h"
+#include "graphics/base/layer.h"
 
 #include "renderer/base/characters.h"
 
@@ -22,7 +22,7 @@ FPSCounter::FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<C
 {
 }
 
-const sp<Size>& FPSCounter::size()
+const SafePtr<Size>& FPSCounter::size()
 {
     return _characters->size();
 }

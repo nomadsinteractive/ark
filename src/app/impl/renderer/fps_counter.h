@@ -3,7 +3,7 @@
 
 #include "core/base/string.h"
 #include "core/inf/builder.h"
-#include "core/types/class.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
@@ -17,7 +17,7 @@ class FPSCounter : public Renderer, public Block {
 public:
     FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<Characters>& characters, const String& message);
 
-    virtual const sp<Size>& size() override;
+    virtual const SafePtr<Size>& size() override;
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 

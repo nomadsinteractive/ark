@@ -16,12 +16,12 @@
 namespace ark {
 
 RenderObject::RenderObject(int32_t type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
-    : _type(sp<IntegerWrapper>::make(type)), _position(Null::toSafe<Vec>(position)), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(varyings))
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings)
 {
 }
 
 RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
-    : _type(sp<IntegerWrapper>::make(type)), _position(Null::toSafe<Vec>(position)), _size(size), _transform(transform), _varyings(Null::toSafe<Varyings>(varyings)), _type_expired(type.as<Lifecycle>())
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _type_disposed(type.as<Lifecycle>())
 {
 }
 
@@ -30,7 +30,7 @@ const sp<Integer> RenderObject::type() const
     return _type;
 }
 
-const sp<Varyings>& RenderObject::varyings() const
+const SafePtr<Varyings>& RenderObject::varyings() const
 {
     return _varyings;
 }
@@ -45,26 +45,26 @@ float RenderObject::height() const
     return _size->height();
 }
 
-const sp<Size>& RenderObject::size()
+const SafePtr<Size>& RenderObject::size()
 {
-    return _size.ensure();
+    return _size;
 }
 
-const sp<Transform>& RenderObject::transform() const
+const SafePtr<Transform>& RenderObject::transform() const
 {
-    return _transform.ensure();
+    return _transform;
 }
 
 void RenderObject::setType(int32_t type)
 {
     _type->set(type);
-    _type_expired = nullptr;
+    _type_disposed = nullptr;
 }
 
 void RenderObject::setType(const sp<Integer>& type)
 {
     _type->set(type);
-    _type_expired = type.as<Lifecycle>();
+    _type_disposed = type.as<Lifecycle>();
 }
 
 float RenderObject::x() const
@@ -102,7 +102,7 @@ V2 RenderObject::xy() const
     return _position->val();
 }
 
-const sp<Vec>& RenderObject::position() const
+const SafePtr<Vec>& RenderObject::position() const
 {
     return _position;
 }
@@ -122,9 +122,9 @@ void RenderObject::setTransform(const sp<Transform>& transform)
     _transform = transform;
 }
 
-void RenderObject::setVaryings(const sp<Varyings>& filter)
+void RenderObject::setVaryings(const sp<Varyings>& varyings)
 {
-    _varyings = Null::toSafe<Varyings>(filter);
+    _varyings = varyings;
 }
 
 const Box& RenderObject::tag() const
@@ -137,9 +137,9 @@ void RenderObject::setTag(const Box& tag)
     _tag = tag;
 }
 
-bool RenderObject::isExpired() const
+bool RenderObject::isDisposed() const
 {
-    return _type_expired && _type_expired->val();
+    return _type_disposed && _type_disposed->val();
 }
 
 RenderObject::Snapshot RenderObject::snapshot(MemoryPool& memoryPool) const
