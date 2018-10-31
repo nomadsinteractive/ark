@@ -1,6 +1,7 @@
 #include "app/view/layout_hierarchy.h"
 
 #include "core/epi/lifecycle.h"
+#include "core/epi/visibility.h"
 
 #include "graphics/base/size.h"
 #include "graphics/inf/renderer.h"
@@ -16,14 +17,14 @@ namespace ark {
 
 LayoutHierarchy::Slot::Slot(const sp<Renderer>& renderer, bool layoutRequested)
     : _x(0), _y(0), _layout_width(0), _layout_height(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _view_group(renderer.as<ViewGroup>()),
-      _renderer_delegate(renderer.as<RendererDelegate>()), _expirable(renderer.as<Lifecycle>())
+      _renderer_delegate(renderer.as<RendererDelegate>()), _lifecycle(renderer.as<Lifecycle>()), _visibility(renderer.as<Visibility>())
 {
     DASSERT(renderer);
 }
 
 bool LayoutHierarchy::Slot::isExpired() const
 {
-    return _expirable && _expirable->val();
+    return _lifecycle && _lifecycle->isDisposed();
 }
 
 bool LayoutHierarchy::Slot::layoutRequested() const
@@ -96,7 +97,7 @@ void LayoutHierarchy::Slot::render(RenderRequest& renderRequest, float x, float 
 
 bool LayoutHierarchy::Slot::onEventDispatch(const Event& event, float x, float y)
 {
-    if(_view)
+    if(_view && (!_visibility || _visibility->visible()))
     {
         const sp<LayoutParam>& layoutParam = _view->layoutParam();
         const Rect target(x + _x, y + _y, x + _x + layoutParam->contentWidth(), y + _y + layoutParam->contentHeight());

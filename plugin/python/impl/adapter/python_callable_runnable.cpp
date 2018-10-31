@@ -10,7 +10,7 @@ namespace plugin {
 namespace python {
 
 PythonCallableRunnable::PythonCallableRunnable(const sp<PyInstance>& callable)
-    : Lifecycle(false), _args(PyInstance::steal(PyTuple_New(0))), _callable(callable), _not_none_returned(true)
+    : Lifecycle(false), _args(PyInstance::steal(PyTuple_New(0))), _callable(callable)
 {
 }
 
@@ -21,18 +21,12 @@ void PythonCallableRunnable::run()
     PyObject* ret = _callable->call(_args);
     if(ret)
     {
-        _not_none_returned = ret != Py_None;
-        _disposed->set(_not_none_returned ? PyObject_IsTrue(ret) == 0 : false);
+        DWARN(ret != Py_None, "'None' returned, which is ambiguous. Better returning True or False instead.");
+        _disposed->set(ret != Py_None ? PyObject_IsTrue(ret) == 0 : false);
         Py_DECREF(ret);
     }
     else
         PythonInterpreter::instance()->logErr();
-}
-
-bool PythonCallableRunnable::val()
-{
-    DWARN(_not_none_returned, "'None' returned, which is ambiguous. Better returning True or False instead.");
-    return _disposed->val();
 }
 
 }

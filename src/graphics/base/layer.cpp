@@ -88,7 +88,7 @@ Layer::Layer(const sp<GLModel>& model, const sp<GLShader>& shader, const sp<Reso
 
 void Layer::draw(float x, float y, const sp<RenderObject>& renderObject)
 {
-    _stub->_items.push_back(Item(x, y, renderObject));
+    _stub->_items.emplace_back(x, y, renderObject);
 }
 
 const sp<GLModel>& Layer::model() const

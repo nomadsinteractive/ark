@@ -54,6 +54,16 @@ void GLModelBuffer::writeTangent(const V3& tangent)
     _vertices.write(tangent, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_TANGENT);
 }
 
+void GLModelBuffer::writeBitangent(float x, float y, float z)
+{
+    writeBitangent(V3(x, y, z));
+}
+
+void GLModelBuffer::writeBitangent(const V3& bitangent)
+{
+    _vertices.write(bitangent, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_BITANGENT);
+}
+
 void GLModelBuffer::applyVaryings()
 {
     _vertices.apply(_varyings._bytes);

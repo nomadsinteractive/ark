@@ -2,7 +2,7 @@
 #define ARK_GRAPHICS_BASE_LAYER_CONTEXT_H_
 
 #include "core/base/api.h"
-#include "core/collection/list_with_lifecycle.h"
+#include "core/collection/filtered_list.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v2.h"
@@ -17,7 +17,7 @@ public:
     void renderRequest(const V2& position);
 
     void addRenderObject(const sp<RenderObject>& renderObject);
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& lifecylce);
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Lifecycle>& lifecylce);
     void removeRenderObject(const sp<RenderObject>& renderObject);
 
     void clear();
@@ -25,21 +25,21 @@ public:
     bool takeSnapshot(Layer::Snapshot& output, MemoryPool& memoryPool);
 
 private:
-    class RenderObjectVaildator {
+    class RenderObjectFilter {
     public:
-        RenderObjectVaildator(const sp<RenderObject>& obj, const sp<Boolean>& disposed);
+        RenderObjectFilter(const sp<RenderObject>& renderObject, const sp<Lifecycle>& disposed);
 
-        bool operator ()(const sp<RenderObject>& obj) const;
+         FilterAction operator()(const sp<RenderObject>& renderObject) const;
 
     private:
-        sp<Boolean> _disposed;
+        sp<Lifecycle> _lifecycle;
     };
 
 private:
     size_t _last_rendered_count;
     bool _render_requested;
     V2 _position;
-    ListWithValidator<RenderObject, RenderObjectVaildator> _items;
+    FilteredList<RenderObject, RenderObjectFilter> _items;
 };
 
 }

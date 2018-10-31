@@ -74,12 +74,12 @@ ParticleEmitter::Particale::Particale(const sp<Stub>& stub, const document& mani
     _size = factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE, false);
     _transform = factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM);
     _filter = factory.getBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS);
-    _expired = factory.ensureBuilder<Boolean>(manifest, Constants::Attributes::EXPIRED);
+    _lifecycle = factory.ensureBuilder<Lifecycle>(manifest, Constants::Attributes::EXPIRED);
 }
 
 ParticleEmitter::Particale::Particale(const ParticleEmitter::Particale& other)
     : _stub(other._stub), _type(other._type), _position(other._position), _size(other._size), _transform(other._transform),
-      _filter(other._filter), _expired(other._expired), _iteration(other._iteration), _interval(other._interval), last_emit_tick(other.last_emit_tick)
+      _filter(other._filter), _lifecycle(other._lifecycle), _iteration(other._iteration), _interval(other._interval), last_emit_tick(other.last_emit_tick)
 {
 }
 
@@ -123,12 +123,12 @@ uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clo
         _x += dx;
         _y += dy;
         const sp<Vec> position = makePosition(_stub->_object_pool, _x , _y);
-        const sp<Boolean> expired = _expired->build(_stub->_arguments);
+        const sp<Lifecycle> lifecycle = _lifecycle->build(_stub->_arguments);
         const sp<RenderObject> renderObject = _stub->_object_pool->obtain<RenderObject>(
                     type, position,
                     size, transform, filter);
-        DWARN(expired, "You're creating particles that will NEVER expire, is that what you really want?");
-        renderLayer->addRenderObject(renderObject, expired);
+        DWARN(lifecycle, "You're creating particles that will NEVER die, is that what you really want?");
+        renderLayer->addRenderObject(renderObject, lifecycle);
     }
     return last_emit_tick + _interval;
 }

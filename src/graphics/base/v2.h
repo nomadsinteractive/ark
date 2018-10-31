@@ -1,6 +1,8 @@
 #ifndef ARK_GRAPHICS_BASE_V2_H_
 #define ARK_GRAPHICS_BASE_V2_H_
 
+#include <initializer_list>
+
 #include "core/base/api.h"
 
 #include "graphics/forwarding.h"

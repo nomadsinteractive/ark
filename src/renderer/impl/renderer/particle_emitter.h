@@ -91,7 +91,7 @@ private:
         sp<Builder<Size>> _size;
         sp<Builder<Transform>> _transform;
         sp<Builder<Varyings>> _filter;
-        sp<Builder<Boolean>> _expired;
+        sp<Builder<Lifecycle>> _lifecycle;
 
         sp<Iteration> _iteration;
 

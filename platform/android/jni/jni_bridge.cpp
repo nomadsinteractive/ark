@@ -57,7 +57,7 @@ JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onCreate(JNIEnv* env, jobject 
     
     _ark = sp<Ark>::make(0, nullptr, "manifest.xml");
     const document appManifest = _ark->manifest()->getChild("application");
-    NOT_NULL(appManifest);
+    DASSERT(appManifest);
     const sp<ApplicationManifest> applicationManifest = sp<ApplicationManifest>::make(appManifest);
     const sp<Size>& renderResolution = applicationManifest->renderResolution();
     Viewport viewport(0.0f, 0.0f, renderResolution->width(), renderResolution->height(), 0.0f, renderResolution->width());

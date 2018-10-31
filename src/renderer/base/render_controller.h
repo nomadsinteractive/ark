@@ -3,7 +3,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/collection/list_with_lifecycle.h"
+#include "core/collection/filtered_list.h"
 #include "core/collection/list.h"
 #include "core/types/shared_ptr.h"
 

@@ -1,7 +1,7 @@
 #ifndef ARK_GRAPHICS_BASE_RENDER_LAYER_H_
 #define ARK_GRAPHICS_BASE_RENDER_LAYER_H_
 
-#include "core/collection/list_with_lifecycle.h"
+#include "core/collection/filtered_list.h"
 #include "core/collection/list.h"
 #include "core/inf/builder.h"
 #include "core/types/class.h"
@@ -23,7 +23,7 @@ public:
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
 // [[script::bindings::auto]]
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = sp<Boolean>::null());
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Lifecycle>& lifecycle = sp<Lifecycle>::null());
 // [[script::bindings::auto]]
     void removeRenderObject(const sp<RenderObject>& renderObject);
 
@@ -45,7 +45,7 @@ public:
 //  [[plugin::builder("render-layer")]]
     class BUILDER_IMPL2 : public Builder<Renderer> {
     public:
-        BUILDER_IMPL2(BeanFactory& parent, const document& doc);
+        BUILDER_IMPL2(BeanFactory& factory, const document& manifest);
 
         virtual sp<Renderer> build(const sp<Scope>& args) override;
 

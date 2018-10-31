@@ -16,7 +16,7 @@ public:
     Callable(const std::function<R(Args...)>& callable)
         : _callable(callable) {
     }
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Callable);
+    DEFAULT_COPY_AND_ASSIGN(Callable);
 
     template<typename... Params> R call(Params&&... params) const {
         return _callable(std::forward<Params>(params)...);

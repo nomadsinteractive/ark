@@ -12,25 +12,25 @@ namespace ark {
 
 class RendererWithVisibility : public Renderer {
 public:
-    RendererWithVisibility(const sp<Renderer>& renderer, const sp<Boolean>& visibility);
+    RendererWithVisibility(const sp<Renderer>& renderer, const sp<Visibility>& visibility);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
 //  [[plugin::style("visibility")]]
-    class DECORATOR : public Builder<Renderer> {
+    class STYLE : public Builder<Renderer> {
     public:
-        DECORATOR(BeanFactory& parent, const sp<Builder<Renderer>>& delegate, const String& value);
+        STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& value);
 
         virtual sp<Renderer> build(const sp<Scope>& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;
-        sp<Builder<Boolean>> _visibility;
+        sp<Builder<Visibility>> _visibility;
     };
 
 private:
     sp<Renderer> _renderer;
-    sp<Boolean> _visibility;
+    sp<Visibility> _visibility;
 
 };
 

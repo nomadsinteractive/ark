@@ -46,7 +46,7 @@ public:
         const sp<T>& ptr = self->unpack<T>();
         if(ptr.template is<Lifecycle>()) {
             const sp<Lifecycle> m = ptr.template as<Lifecycle>();
-            if(m && m->val())
+            if(m && m->isDisposed())
                 Py_RETURN_TRUE;
         }
         Py_RETURN_FALSE;

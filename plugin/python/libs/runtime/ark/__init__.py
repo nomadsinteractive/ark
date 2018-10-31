@@ -669,6 +669,19 @@ class Color:
         return None
 
 
+class Visibility:
+    def __init__(self, visible):
+        self._visible = visible
+
+    @property
+    def visible(self):
+        return self._visible
+
+    @visible.setter
+    def visible(self, v):
+        self._visible = v
+
+
 class Platform:
     @staticmethod
     def get_user_storage_path(p):

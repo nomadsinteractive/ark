@@ -86,12 +86,12 @@ void GLBuffer::Stub::upload(GraphicsContext& /*graphicsContext*/, GLBuffer::Uplo
 
     _size = uploader.size();
     if(static_cast<size_t>(bufsize) < _size)
-        glBufferData(_type, _size, nullptr, _usage);
-    GLintptr offset = 0;
+        glBufferData(_type, static_cast<GLsizeiptr>(_size), nullptr, _usage);
+    size_t offset = 0;
     const UploadFunc func = [&offset, this](void* data, size_t size) {
         DASSERT(data);
         DCHECK(offset + size <= _size, "GLBuffer data overflow");
-        glBufferSubData(_type, offset, size, data);
+        glBufferSubData(_type, static_cast<GLsizeiptr>(offset), static_cast<GLsizeiptr>(size), data);
         offset += size;
     };
     uploader.upload(func);
@@ -170,7 +170,7 @@ size_t GLBuffer::size() const
 
 GLBuffer::operator bool() const
 {
-    return !!_stub;
+    return static_cast<bool>(_stub);
 }
 
 GLenum GLBuffer::type() const

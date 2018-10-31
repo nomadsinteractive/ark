@@ -19,10 +19,10 @@ void RenderLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
     _layer_context->renderRequest(V2(x, y));
 }
 
-void RenderLayer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed)
+void RenderLayer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Lifecycle>& lifecycle)
 {
     DASSERT(renderObject);
-    _layer_context->addRenderObject(renderObject, disposed);
+    _layer_context->addRenderObject(renderObject, lifecycle);
 }
 
 void RenderLayer::removeRenderObject(const sp<RenderObject>& renderObject)
@@ -53,8 +53,8 @@ sp<RenderLayer> RenderLayer::BUILDER_IMPL1::build(const sp<Scope>& args)
     return renderLayer;
 }
 
-RenderLayer::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& parent, const document& doc)
-    : _builder_impl(parent, doc)
+RenderLayer::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& factory, const document& manifest)
+    : _builder_impl(factory, manifest)
 {
 }
 

@@ -129,7 +129,7 @@ private:
     SafePtr<Transform> _transform;
     SafePtr<Varyings> _varyings;
 
-    sp<Boolean> _type_disposed;
+    sp<Lifecycle> _type_lifecycle;
 
     Box _tag;
 };

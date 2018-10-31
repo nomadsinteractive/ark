@@ -26,7 +26,6 @@ public:
         Snapshot(const Snapshot& other) = default;
 
         Matrix toMatrix() const;
-        void toMatrix(Matrix& matrix) const;
 
         bool isFrontfaceCCW() const;
 

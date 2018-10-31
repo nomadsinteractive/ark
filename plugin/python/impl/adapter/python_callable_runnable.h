@@ -18,12 +18,9 @@ public:
 
     virtual void run() override;
 
-    virtual bool val() override;
-
 private:
     PyInstance _args;
     sp<PyInstance> _callable;
-    bool _not_none_returned;
 
 };
 

@@ -83,6 +83,7 @@ GLShaderBindings::Attributes::Attributes(const GLShaderInput& input)
     _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = input.getAttributeOffset("TexCoordinate");
     _offsets[ATTRIBUTE_NAME_NORMAL] = input.getAttributeOffset("Normal");
     _offsets[ATTRIBUTE_NAME_TANGENT] = input.getAttributeOffset("Tangent");
+    _offsets[ATTRIBUTE_NAME_BITANGENT] = input.getAttributeOffset("Bitangent");
 }
 
 }

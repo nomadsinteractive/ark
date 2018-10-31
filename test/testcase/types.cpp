@@ -144,7 +144,7 @@ public:
         sp<B> p4 = pool.obtain<B>();
         sp<B> p5 = pool.obtain<B>();
 
-        MemoryPool memoryPool(20);
+        MemoryPool memoryPool;
         void* ap1;
         {
             auto a1 = memoryPool.allocate(32);

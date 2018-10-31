@@ -65,16 +65,10 @@ Transform::Snapshot::Snapshot()
 Matrix Transform::Snapshot::toMatrix() const
 {
     Matrix matrix;
-    toMatrix(matrix);
-    return matrix;
-}
-
-void Transform::Snapshot::toMatrix(Matrix& matrix) const
-{
-    matrix.setIdentity();
     matrix.translate(translate.x(), translate.y(), translate.z());
     matrix.scale(scale.x(), scale.y(), scale.z());
     matrix.rotate(rotate_value, rotate_direction.x(), rotate_direction.y(), rotate_direction.z());
+    return matrix;
 }
 
 bool Transform::Snapshot::isFrontfaceCCW() const

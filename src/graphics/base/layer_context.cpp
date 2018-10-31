@@ -1,5 +1,7 @@
 #include "graphics/base/layer_context.h"
 
+#include "core/epi/lifecycle.h"
+
 namespace ark {
 
 LayerContext::LayerContext()
@@ -18,7 +20,7 @@ void LayerContext::addRenderObject(const sp<RenderObject>& renderObject)
     addRenderObject(renderObject, renderObject.as<Lifecycle>());
 }
 
-void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& lifecycle)
+void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Lifecycle>& lifecycle)
 {
     if(lifecycle)
         _items.push_back(renderObject, lifecycle);
@@ -56,14 +58,14 @@ bool LayerContext::takeSnapshot(Layer::Snapshot& output, MemoryPool& memoryPool)
     return dirty;
 }
 
-LayerContext::RenderObjectVaildator::RenderObjectVaildator(const sp<RenderObject>& /*obj*/, const sp<Boolean>& disposed)
-    : _disposed(disposed)
+LayerContext::RenderObjectFilter::RenderObjectFilter(const sp<RenderObject>& /*renderObject*/, const sp<Lifecycle>& disposed)
+    : _lifecycle(disposed)
 {
 }
 
-bool LayerContext::RenderObjectVaildator::operator ()(const sp<RenderObject>& obj) const
+FilterAction LayerContext::RenderObjectFilter::operator()(const sp<RenderObject>& renderObject) const
 {
-    return (_disposed && _disposed->val()) || obj->isDisposed();
+    return (_lifecycle && _lifecycle->isDisposed()) || renderObject->isDisposed() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
 }
 
 }

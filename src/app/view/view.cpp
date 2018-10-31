@@ -225,7 +225,7 @@ sp<View> bindView(sp<Renderer>& decorated)
         return view;
 
     const sp<Block> block = decorated.as<Block>();
-    const sp<View> decoratedView = sp<View>::make(block ? block->size() : sp<Size>::null());
+    const sp<View> decoratedView = sp<View>::make(block ? static_cast<const sp<Size>&>(block->size()) : sp<Size>::null());
     decorated.absorb(decoratedView);
     return decoratedView;
 }

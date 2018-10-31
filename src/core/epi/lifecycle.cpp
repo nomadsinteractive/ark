@@ -15,9 +15,14 @@ Lifecycle::Lifecycle(const sp<Boolean>& disposed)
 {
 }
 
-bool Lifecycle::val()
+bool Lifecycle::isDisposed() const
 {
     return _disposed->val();
+}
+
+sp<Boolean> Lifecycle::toBoolean() const
+{
+    return _disposed;
 }
 
 void Lifecycle::dispose()

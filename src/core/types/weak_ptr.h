@@ -30,6 +30,14 @@ public:
         return ptr;
     }
 
+    bool expired() const {
+        return _weak_ptr.expired();
+    }
+
+    long useCount() const {
+        return _weak_ptr.use_count();
+    }
+
 private:
     std::weak_ptr<T> _weak_ptr;
     std::weak_ptr<Interfaces> _weak_interfaces;

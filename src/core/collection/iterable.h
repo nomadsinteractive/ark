@@ -46,7 +46,7 @@ protected:
 template<typename T> class IteratorBase {
 public:
     IteratorBase(T iterator)
-        : _iterator(iterator) {
+        : _iterator(std::move(iterator)) {
     }
 
     bool operator == (const IteratorBase<T>& other) {

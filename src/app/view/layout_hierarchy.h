@@ -41,9 +41,10 @@ private:
         sp<View> _view;
         sp<ViewGroup> _view_group;
         sp<RendererDelegate> _renderer_delegate;
-        sp<Lifecycle> _expirable;
-
+        sp<Lifecycle> _lifecycle;
+        sp<Visibility> _visibility;
     };
+
 public:
     LayoutHierarchy(const sp<Layout>& layout);
 

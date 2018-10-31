@@ -30,7 +30,9 @@ public:
     void writeNormal(float x, float y, float z);
     void writeNormal(const V3& normal);
     void writeTangent(float x, float y, float z);
-    void writeTangent(const V3& tangents);
+    void writeTangent(const V3& tangent);
+    void writeBitangent(float x, float y, float z);
+    void writeBitangent(const V3& bitangent);
 
     void writeTexCoordinate(uint16_t u, uint16_t v);
 

@@ -30,6 +30,8 @@ GLModelAssimp::GLModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderCont
         const aiScene* scene = _importer->ReadFile(src.c_str(), aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs);
         _models[type] = sp<Mesh>::make(scene->mMeshes[0]);
     }
+
+    _importer->FreeScene();
 //    const bytearray vertices = loadMesh(scene->mMeshes[0], 1.5f);
 //    const bytearray indices = loadIndexBuffer(scene->mMeshes[0]);
 //    const bitmap tex = loadBitmap(resourceLoaderContext, scene->mTextures[0]);

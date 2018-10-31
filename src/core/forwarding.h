@@ -64,6 +64,7 @@ class StringBuffer;
 class StringTable;
 class Thread;
 class ThreadPoolExecutor;
+class Visibility;
 
 typedef Dictionary<sp<String>> StringBundle;
 

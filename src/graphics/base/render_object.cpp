@@ -21,7 +21,7 @@ RenderObject::RenderObject(int32_t type, const sp<Vec>& position, const sp<Size>
 }
 
 RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _type_disposed(type.as<Lifecycle>())
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _type_lifecycle(type.as<Lifecycle>())
 {
 }
 
@@ -58,13 +58,13 @@ const SafePtr<Transform>& RenderObject::transform() const
 void RenderObject::setType(int32_t type)
 {
     _type->set(type);
-    _type_disposed = nullptr;
+    _type_lifecycle = nullptr;
 }
 
 void RenderObject::setType(const sp<Integer>& type)
 {
     _type->set(type);
-    _type_disposed = type.as<Lifecycle>();
+    _type_lifecycle = type.as<Lifecycle>();
 }
 
 float RenderObject::x() const
@@ -139,7 +139,7 @@ void RenderObject::setTag(const Box& tag)
 
 bool RenderObject::isDisposed() const
 {
-    return _type_disposed && _type_disposed->val();
+    return _type_lifecycle && _type_lifecycle->isDisposed();
 }
 
 RenderObject::Snapshot RenderObject::snapshot(MemoryPool& memoryPool) const

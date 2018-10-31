@@ -9,14 +9,16 @@
 
 namespace ark {
 
-class ARK_API Lifecycle : public Boolean {
+class ARK_API Lifecycle {
 public:
 //  [[script::bindings::auto]]
     Lifecycle(bool disposed = false);
 //  [[script::bindings::auto]]
     Lifecycle(const sp<Boolean>& disposed);
 
-    virtual bool val() override;
+    sp<Boolean> toBoolean() const;
+
+    bool isDisposed() const;
 
 //  [[script::bindings::auto]]
     void dispose();

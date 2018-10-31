@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "core/collection/list_with_lifecycle.h"
+#include "core/collection/filtered_list.h"
 #include "core/types/class.h"
 #include "core/types/shared_ptr.h"
 

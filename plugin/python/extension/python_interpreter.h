@@ -50,7 +50,7 @@ public:
         return toPyObject_sfinae<T>(obj, nullptr);
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& ptr, typename T::_PtrType*) {
-        return fromSharedPtr(static_cast<typename sp<T::_PtrType>>(ptr));
+        return fromSharedPtr(static_cast<sp<typename T::_PtrType>>(ptr));
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& iterable, decltype(iterable.begin())*) {
         return fromIterable_sfinae<T>(iterable, nullptr);
