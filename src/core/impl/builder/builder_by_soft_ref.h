@@ -2,6 +2,7 @@
 #define ARK_CORE_IMPL_BUILDER_BUILDER_BY_SOFT_REF_H_
 
 #include "core/base/scope.h"
+#include "core/base/string.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/weak_ptr.h"

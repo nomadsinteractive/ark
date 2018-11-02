@@ -5,7 +5,6 @@
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/impl/array/dynamic_array.h"
 #include "core/types/null.h"
 #include "core/util/documents.h"
 
@@ -60,7 +59,7 @@ private:
         }
     }
 
-    template<typename... Args> static void doSplit(BeanFactory& /*beanFactory*/, std::list<String>& elems) {
+    template<typename... Args> static void doSplit(BeanFactory& /*beanFactory*/, std::list<String>& /*elems*/) {
     }
 };
 

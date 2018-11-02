@@ -2,6 +2,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/util/strings.h"
+#include "core/util/identifier.h"
 
 namespace ark {
 
@@ -47,13 +48,14 @@ sp<GLSnippet> GLSnippetLinkedChain::DICTIONARY::build(const sp<Scope>& args)
     DCHECK(l.size() > 0, "Empty list");
     if(l.size() == 1)
     {
-        const sp<Builder<GLSnippet>> builder = _factory.ensureBuilder<GLSnippet>(l.at(0), false);
-        DCHECK(builder, "Cannot build \"%s\"", l.at(0).c_str());
+        const Identifier id = Identifier::parse(l.at(0));
+        const sp<Builder<GLSnippet>> builder = id.isVal() ? _factory.ensureBuilderByTypeValue<GLSnippet>(id.val(), id.val()) : _factory.ensureBuilder<GLSnippet>(l.at(0));
+        DCHECK(builder, "Cannot build \"%s\"", id.toString().c_str());
         return builder->build(args);
     }
 
     sp<GLSnippetLinkedChain> chain = sp<GLSnippetLinkedChain>::make(_factory.ensure<GLSnippet>(l.at(0), args), _factory.ensure<GLSnippet>(l.at(1), args));
-    for(uint32_t i = 2; i < l.size(); i++)
+    for(size_t i = 2; i < l.size(); i++)
         chain = sp<GLSnippetLinkedChain>::make(chain, _factory.ensure<GLSnippet>(l.at(i), args));
     return chain;
 }

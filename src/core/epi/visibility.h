@@ -31,8 +31,7 @@ public:
         virtual sp<Visibility> build(const sp<Scope>& args);
 
     private:
-        bool _visible;
-        sp<Builder<Boolean>> _delegate;
+        sp<Builder<Boolean>> _visible;
     };
 
 protected:

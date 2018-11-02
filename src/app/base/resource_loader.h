@@ -25,7 +25,7 @@ private:
             const auto iter = _builders.find(id.ref());
             if(iter != _builders.end())
                 return iter->second;
-            const sp<Builder<T>> builder = factory.findBuilderById<T>(id, true);
+            const sp<Builder<T>> builder = factory.createBuilderById<T>(id, true);
             _builders[id.ref()] = builder;
             return builder;
         }

@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-#include "core/collection/list_with_lifecycle.h"
+#include "core/collection/filtered_list.h"
 #include "core/concurrent/lock_free_stack.h"
 #include "core/epi/lifecycle.h"
 

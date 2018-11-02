@@ -39,7 +39,7 @@ public:
 
         const sp<Lifecycle> e1 = beanFactory.build<Lifecycle>("@e1");
 
-        TESTCASE_VALIDATE(e1 && e1->val() == 0.0f);
+        TESTCASE_VALIDATE(e1 && !e1->isDisposed());
 
         we1 = e1;
 
@@ -47,7 +47,7 @@ public:
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
 
-        TESTCASE_VALIDATE(e1->val());
+        TESTCASE_VALIDATE(e1->isDisposed());
 
         sp<Numeric> g1 = beanFactory.build<Numeric>("25.0");
         TESTCASE_VALIDATE(g1 && g1->val() == 25.0f);
@@ -143,8 +143,8 @@ public:
 
         }
 
-        const sp<Lifecycle> Lifecycle = we1.lock();
-        TESTCASE_VALIDATE(!Lifecycle);
+        const sp<Lifecycle> lifecycle = we1.lock();
+        TESTCASE_VALIDATE(!lifecycle);
 
         return 0;
     }

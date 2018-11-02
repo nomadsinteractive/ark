@@ -7,6 +7,7 @@
 #include "core/base/plugin_manager.h"
 #include "core/inf/variable.h"
 #include "core/impl/builder/builder_by_instance.h"
+#include "core/impl/builder/builder_by_arguments.h"
 #include "core/types/global.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/strings.h"
@@ -94,11 +95,26 @@ public:
         }
 
     private:
+        V getVariableBuilder(BeanFactory& factory, const String& expr) const {
+            const char* str = expr.c_str();
+            if(expr.length() > 2 && Strings::isVariableName(str + 1)) {
+                if(*str == '@')
+                    return factory.ensureBuilder<N>(expr);
+                if(*str == '$')
+                    return sp<BuilderByArguments<N>>::make(factory, str + 1);
+            }
+            return nullptr;
+        }
+
+
         V toPhrase(const String& expr, BeanFactory& factory, bool compilePhrase = false) const {
             if(OP::isConstant(expr))
                 return sp<BuilderByInstance<N>>::make(sp<typename N::Impl>::make(Strings::parse<T>(expr)));
-            if(isBuildable(expr))
-                return factory.ensureBuilder<N>(expr);
+
+            const V vBuilder = getVariableBuilder(factory, expr);
+            if(vBuilder)
+                return vBuilder;
+
             String func, params;
             if(Strings::splitFunction(expr, func, params)) {
                 const Global<PluginManager> pluginManager;
@@ -190,9 +206,6 @@ public:
         }
 
     };
-
-private:
-    static bool isBuildable(const String& expr);
 
 };
 

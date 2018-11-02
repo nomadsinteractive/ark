@@ -31,15 +31,13 @@ void Visibility::setVisible(bool visible)
 }
 
 Visibility::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-    : _visible(value == "true")
+    : _visible(factory.ensureBuilder<Boolean>(value))
 {
-    if(value && (value.at(0) == '@' || value.at(0) == '$'))
-        _delegate = factory.ensureBuilder<Boolean>(value);
 }
 
 sp<Visibility> Visibility::DICTIONARY::build(const sp<Scope>& args)
 {
-    return _delegate ? sp<Visibility>::make(_delegate->build(args)) : sp<Visibility>::make(_visible);
+    return sp<Visibility>::make(_visible->build(args));
 }
 
 }
