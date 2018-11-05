@@ -9,6 +9,39 @@ namespace ark {
 namespace plugin {
 namespace python {
 
+static PyObject* __richcmp__(PyArkType::Instance* obj1, PyArkType::Instance* obj2, int op)
+{
+    Py_hash_t hash1 = reinterpret_cast<Py_hash_t>(obj1->box->ptr());
+    Py_hash_t hash2 = reinterpret_cast<Py_hash_t>(obj2->box->ptr());
+
+//    Py_RETURN_RICHCOMPARE(hash1, hash2, op);
+
+    switch(op)
+    {
+    case Py_LT:
+        if(hash1 < hash2)
+            Py_RETURN_TRUE;
+    case Py_LE:
+        if(hash1 <= hash2)
+            Py_RETURN_TRUE;
+    case Py_EQ:
+        if(hash1 == hash2)
+            Py_RETURN_TRUE;
+    case Py_NE:
+        if(hash1 != hash2)
+            Py_RETURN_TRUE;
+    case Py_GT:
+        if(hash1 > hash2)
+            Py_RETURN_TRUE;
+    case Py_GE:
+        if(hash1 >= hash2)
+            Py_RETURN_TRUE;
+    default:
+        DFATAL("Unsupported operator %d", op);
+    }
+    Py_RETURN_FALSE;
+}
+
 static Py_hash_t __hash__(PyArkType::Instance* self)
 {
     return reinterpret_cast<Py_hash_t>(self->box->ptr());
@@ -152,7 +185,7 @@ PyTypeObject* PyArkType::basetype()
         "ark.Type",                                         /* tp_doc */
         nullptr,                                            /* tp_traverse */
         nullptr,                                            /* tp_clear */
-        nullptr,                                            /* tp_richcompare */
+        reinterpret_cast<richcmpfunc>(__richcmp__),         /* tp_richcompare */
         offsetof(Instance, weakreflist),                    /* tp_weaklistoffset */
         nullptr,                                            /* tp_iter */
         nullptr,                                            /* tp_iternext */

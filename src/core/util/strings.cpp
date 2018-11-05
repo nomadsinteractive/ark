@@ -12,7 +12,7 @@
 #include "core/inf/array.h"
 #include "core/inf/builder.h"
 #include "core/inf/readable.h"
-#include "core/impl/builder/builder_by_arguments.h"
+#include "core/impl/builder/builder_by_argument.h"
 #include "core/types/global.h"
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
@@ -249,7 +249,7 @@ bool utf8ToUtf16(wchar_t* dest, size_t& destLen, const char* src, size_t maxSrcL
         if(c < 0x80)   // 0-127, US-ASCII (single byte)
         {
             if(dest)
-                dest[destPos] = (wchar_t)c;
+                dest[destPos] = static_cast<wchar_t>(c);
             ++destPos;
             continue;
         }
@@ -278,7 +278,7 @@ bool utf8ToUtf16(wchar_t* dest, size_t& destLen, const char* src, size_t maxSrcL
         if(value < 0x10000)
         {
             if(dest)
-                dest[destPos] = (wchar_t)value;
+                dest[destPos] = static_cast<wchar_t>(value);
             ++destPos;
         }
         else
@@ -288,8 +288,8 @@ bool utf8ToUtf16(wchar_t* dest, size_t& destLen, const char* src, size_t maxSrcL
                 break;
             if(dest)
             {
-                dest[destPos + 0] = (wchar_t)(0xD800 + (value >> 10));
-                dest[destPos + 1] = (wchar_t)(0xDC00 + (value & 0x3FF));
+                dest[destPos + 0] = static_cast<wchar_t>(0xD800 + (value >> 10));
+                dest[destPos + 1] = static_cast<wchar_t>(0xDC00 + (value & 0x3FF));
             }
             destPos += 2;
         }

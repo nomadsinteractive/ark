@@ -52,11 +52,11 @@ public:
     const std::shared_ptr<Interfaces>& interfaces() const;
 
 private:
-    Box(void* instance, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor);
+    Box(void* instance, void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor);
 
     class ARK_API Stub {
     public:
-        Stub(void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor);
+        Stub(void* instance, void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor);
         ~Stub();
 
         void* ptr() const;
@@ -65,15 +65,16 @@ private:
 
         template<typename T> const sp<T>& unpack() const {
             DCHECK(_type_id == Type<T>::id(), "Wrong type being unpacked");
-            return _ptr ? *reinterpret_cast<sp<T>*>(_ptr) : sp<T>::null();
+            return _shared_ptr ? *reinterpret_cast<sp<T>*>(_shared_ptr) : sp<T>::null();
         }
 
         template<typename T> sp<T>& unpack() {
             DCHECK(_type_id == Type<T>::id(), "Wrong type being unpacked");
-            return _ptr ? *reinterpret_cast<sp<T>*>(_ptr) : sp<T>::null();
+            return _shared_ptr ? *reinterpret_cast<sp<T>*>(_shared_ptr) : sp<T>::null();
         }
 
     private:
+        void* _shared_ptr;
         void* _ptr;
         TypeId _type_id;
         std::shared_ptr<Interfaces> _interfaces;

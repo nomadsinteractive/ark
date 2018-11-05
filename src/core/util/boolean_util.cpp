@@ -104,6 +104,13 @@ public:
     static sp<Builder<Boolean>> eval(BeanFactory& factory, const String& expr) {
         static std::regex PATTERN("([\\-+\\s\\w\\d_$@.]+)\\s+([><]=?)\\s+([\\-+\\s\\w\\d_$@.]+)");
         const array<String> matches = expr.match(PATTERN);
+        if(!matches) {
+            const Identifier id = Identifier::parse(expr);
+            if(id.isRef())
+                return factory.getBuilderByRef<Boolean>(id.ref());
+            if(id.isArg())
+                return factory.getBuilderByArg<Boolean>(id.arg());
+        }
         DCHECK(matches && matches->length() == 4, "Illegal expression: \"%s\" syntax error", expr.c_str());
         const String* ptr = matches->buf();
         const sp<Builder<Numeric>> lvalue = factory.ensureBuilder<Numeric>(ptr[1]);
@@ -125,8 +132,8 @@ public:
 };
 
 Expression::Operator<bool> BooleanOperation::OPS[2] = {
-    {"and", 2, BooleanOperation::booleanAnd},
-    {"or", 1, BooleanOperation::booleanOr}
+    {"&&", 2, BooleanOperation::booleanAnd},
+    {"||", 1, BooleanOperation::booleanOr}
 };
 
 }

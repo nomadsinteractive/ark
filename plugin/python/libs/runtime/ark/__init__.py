@@ -15,6 +15,10 @@ def logd(*args):
     print(*args)
 
 
+def logw(*args):
+    print(*args)
+
+
 def get_asset(filename):
     with open(filename, 'rt') as fp:
         return fp.read()
@@ -564,6 +568,9 @@ class TileMap:
 
     def set_tile(self, row_id, col_id, obj):
         pass
+
+    def get_tile(self, row, col):
+        return None
 
     def get_tile_type(self, row, col):
         return 0

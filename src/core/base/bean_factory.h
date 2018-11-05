@@ -9,7 +9,7 @@
 #include "core/dom/document.h"
 #include "core/inf/builder.h"
 #include "core/inf/dictionary.h"
-#include "core/impl/builder/builder_by_arguments.h"
+#include "core/impl/builder/builder_by_argument.h"
 #include "core/impl/builder/builder_by_hard_ref.h"
 #include "core/impl/builder/builder_by_instance.h"
 #include "core/impl/builder/builder_by_soft_ref.h"
@@ -99,11 +99,11 @@ private:
                         if(f.isRef()) {
                             if(f.package().empty() && (f.ref() == id || ref == id))
                                 break;
-                            const sp<Builder<T>> builder = factory.createBuilderById<T>(f, true);
+                            const sp<Builder<T>> builder = factory.createBuilderByRef<T>(f);
                             return wrapBuilder(decorateBuilder(factory, builder, style), id);
                         }
                         if(f.isArg())
-                            return decorateBuilder(factory, sp<BuilderByArguments<T>>::make(factory, f), style);
+                            return decorateBuilder(factory, factory.getBuilderByArg<T>(f), style);
                     }
                     return createBuilderInternal(factory, doc->name(), style, id, doc);
                 } while(false);
@@ -237,13 +237,16 @@ public:
     BeanFactory(BeanFactory&& other) = default;
     ~BeanFactory();
 
-    template<typename T> sp<Builder<T>> createBuilderById(const Identifier& id, bool noNull) {
+    template<typename T> sp<Builder<T>> createBuilderByRef(const Identifier& id) {
+        sp<Builder<T>> builder;
         if(id.package()) {
             const sp<BeanFactory>& factory = getPackage(id.package());
-            DCHECK(noNull || factory, "Id: \"%s\"'s package \"%s\" not found", id.toString().c_str(), id.package().c_str());
-            return factory ? factory->createBuilderByRef<T>(id.ref(), noNull) : (noNull ? getNullBuilder<T>() : nullptr);
+            DCHECK(factory, "Id: \"%s\"'s package \"%s\" not found", id.toString().c_str(), id.package().c_str());
+            builder = factory ? factory->getBuilderByRef<T>(id.ref()) : nullptr;
         }
-        return createBuilderByRef<T>(id.ref(), noNull);
+        else
+            builder = getBuilderByRef<T>(id.ref());
+        return builder ? builder : createBuilderByValue<T>(id.toString(), true);
     }
 
     template<typename T> sp<T> build(const String& value, const sp<Scope>& args = nullptr) {
@@ -290,9 +293,9 @@ public:
 
         const Identifier f = Identifier::parse(id);
         if(!std::is_same<T, String>::value && f.isRef())
-            return createBuilderById<T>(f, noNull);
+            return createBuilderByRef<T>(f);
         if(f.isArg())
-            return sp<BuilderByArguments<T>>::make(*this, f);
+            return getBuilderByArg<T>(f);
         return createBuilderByValue<T>(id, noNull);
     }
 
@@ -313,6 +316,28 @@ public:
             return createBuilderByDocument<T>(child ? child : doc, noNull);
         }
         return getBuilder<T>(attrValue, noNull);
+    }
+
+    template<typename T> sp<Builder<T>> getBuilderByArg(const String& argname) {
+        return sp<BuilderByArgument<T>>::make(_references, argname);
+    }
+
+    template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id) {
+        DCHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
+        return sp<BuilderByArgument<T>>::make(_references, id.arg(), createBuilderByValue<T>(id.toString(), false));
+    }
+
+    template<typename T> sp<Builder<T>> getBuilderByRef(const String& refid) {
+        const sp<T> inst = _references->get<T>(refid);
+        if(inst)
+            return sp<BuilderByInstance<T>>::make(inst);
+
+        for(const Factory& i : _factories->items()) {
+            const sp<Builder<T>> builder = i.findBuilder<T>(refid, *this);
+            if(builder)
+                return builder;
+        }
+        return nullptr;
     }
 
     template<typename T> sp<Builder<T>> ensureBuilder(const String& id) {
@@ -403,19 +428,6 @@ private:
         return noNull ? getNullBuilder<T>() : nullptr;
     }
 
-    template<typename T> sp<Builder<T>> createBuilderByRef(const String& refid, bool noNull) {
-        const sp<T> inst = _references->get<T>(refid);
-        if(inst)
-            return sp<BuilderByInstance<T>>::make(inst);
-
-        for(const Factory& i : _factories->items()) {
-            const sp<Builder<T>> builder = i.findBuilder<T>(refid, *this);
-            if(builder)
-                return builder;
-        }
-        return noNull ? getNullBuilder<T>() : nullptr;
-    }
-
     template<typename T> sp<Builder<T>> decorate(const sp<Builder<T>>& builder, const String& style, const String& value) {
         for(const Factory& i : _factories->items()) {
             const sp<Builder<T>> f = i.decorate<T>(*this, builder, style, value);
@@ -435,8 +447,6 @@ private:
     sp<Scope> _references;
     sp<List<Factory>> _factories;
     std::map<String, sp<BeanFactory>> _packages;
-
-    template<typename T> friend class BuilderByArguments;
 };
 
 }

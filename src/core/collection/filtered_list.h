@@ -55,13 +55,13 @@ public:
 
 template<typename T, typename Filter> class FilteredList {
 private:
-    template<typename T> struct ItemWithFilter {
-        ItemWithFilter(sp<T> item, Filter filter)
+    struct Item {
+        Item(sp<T> item, Filter filter)
             : _item(std::move(item)), _filter(std::move(filter)) {
         }
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(ItemWithFilter);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
 
-        bool operator < (const ItemWithFilter& other) const {
+        bool operator < (const Item& other) const {
             return _item < other._item;
         }
 
@@ -70,8 +70,7 @@ private:
     };
 
 private:
-    typedef ItemWithFilter<T> _Item;
-    typedef std::list<_Item> _List;
+    typedef std::list<Item> _List;
 
 public:
     template<typename U> class Iterator : public IteratorBase<U> {
@@ -120,7 +119,7 @@ public:
     typedef Iterator<typename _List::iterator> iterator;
 
     template<typename... Args> void push_back(const sp<T>& item, Args&&... args) {
-        _items.push_back(ItemWithFilter<T>(item, Filter(item, std::forward<Args>(args)...)));
+        _items.push_back(Item(item, Filter(item, std::forward<Args>(args)...)));
     }
 
     size_t size() const {
@@ -133,7 +132,7 @@ public:
 
     void remove(const sp<T>& item) {
         for(auto iter = _items.begin(); iter != _items.end(); ++iter) {
-            const _Item& i = *iter;
+            const Item& i = *iter;
             if(i._item == item) {
                 _items.erase(iter);
                 break;

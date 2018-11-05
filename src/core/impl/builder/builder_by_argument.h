@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_IMPL_BUILDER_BUILDER_BY_ARGUMENTS_H_
-#define ARK_CORE_IMPL_BUILDER_BUILDER_BY_ARGUMENTS_H_
+#ifndef ARK_CORE_IMPL_BUILDER_BUILDER_BY_ARGUMENT_H_
+#define ARK_CORE_IMPL_BUILDER_BUILDER_BY_ARGUMENT_H_
 
 #include "core/base/scope.h"
 #include "core/base/string.h"
@@ -10,14 +10,10 @@
 
 namespace ark {
 
-template<typename T> class BuilderByArguments : public Builder<T> {
+template<typename T> class BuilderByArgument : public Builder<T> {
 public:
-    BuilderByArguments(BeanFactory& factory, const String& name)
-        : _references(factory.references()), _name(name) {
-    }
-    BuilderByArguments(BeanFactory& factory, const Identifier& id)
-        : _references(factory.references()), _name(id.arg()), _fallback(factory.createBuilderByValue<T>(id.toString(), false)) {
-        DCHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
+    BuilderByArgument(const WeakPtr<Scope>& references, const String& name, const sp<Builder<T>> fallback = nullptr)
+        : _references(references), _name(name), _fallback(std::move(fallback)) {
     }
 
     virtual sp<T> build(const sp<Scope>& args) override {

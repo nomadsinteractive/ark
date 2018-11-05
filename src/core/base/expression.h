@@ -7,7 +7,7 @@
 #include "core/base/plugin_manager.h"
 #include "core/inf/variable.h"
 #include "core/impl/builder/builder_by_instance.h"
-#include "core/impl/builder/builder_by_arguments.h"
+#include "core/impl/builder/builder_by_argument.h"
 #include "core/types/global.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/strings.h"
@@ -101,11 +101,10 @@ public:
                 if(*str == '@')
                     return factory.ensureBuilder<N>(expr);
                 if(*str == '$')
-                    return sp<BuilderByArguments<N>>::make(factory, str + 1);
+                    return factory.getBuilderByArg<N>(str + 1);
             }
             return nullptr;
         }
-
 
         V toPhrase(const String& expr, BeanFactory& factory, bool compilePhrase = false) const {
             if(OP::isConstant(expr))

@@ -90,8 +90,8 @@ public:
     Box pack() const {
         if(!_ptr)
             return Box();
-        SharedPtr<T>* copy = new SharedPtr<T>(*this);
-        Box box(copy, Type<T>::id(), _interfaces, packedBoxDestructor);
+        SharedPtr<T>* instance = new SharedPtr<T>(*this);
+        Box box(instance, instance->get(), Type<T>::id(), _interfaces, packedBoxDestructor);
         return box;
     }
 

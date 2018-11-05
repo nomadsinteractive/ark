@@ -32,7 +32,9 @@ namespace python {
 
 class PyContainer;
 
-static PyObject* ark_log(PyObject* self, PyObject* args);
+static PyObject* ark_log(Log::LogLevel level, PyObject* args);
+static PyObject* ark_logd(PyObject* self, PyObject* args);
+static PyObject* ark_logw(PyObject* self, PyObject* args);
 static PyObject* ark_getAsset(PyObject* self, PyObject* args);
 static PyObject* ark_getAssetResource(PyObject* self, PyObject* args);
 static PyObject* ark_isDirectory(PyObject* self, PyObject* args);
@@ -43,7 +45,8 @@ static PyObject* ark_trace_(PyObject* self, PyObject* args);
 
 PyMethodDef ARK_METHODS[] =
 {
-    {"logd",  ark_log, METH_VARARGS, "LOGD"},
+    {"logd",  ark_logd, METH_VARARGS, "LOG_DEBUG"},
+    {"logw",  ark_logw, METH_VARARGS, "LOG_WARN"},
     {"get_asset",  ark_getAsset, METH_VARARGS, "getAsset"},
     {"get_asset_resource",  ark_getAssetResource, METH_VARARGS, "getAssetResource"},
     {"is_directory",  ark_isDirectory, METH_VARARGS, "isDirectory"},
@@ -54,7 +57,7 @@ PyMethodDef ARK_METHODS[] =
     {NULL, NULL, 0, NULL}
 };
 
-PyObject* ark_log(PyObject* /*self*/, PyObject* args)
+PyObject* ark_log(Log::LogLevel level, PyObject* args)
 {
     size_t size = PyTuple_Size(args);
     if(size)
@@ -65,9 +68,19 @@ PyObject* ark_log(PyObject* /*self*/, PyObject* args)
         PyInstance formatted = PyInstance::steal(size > 1 ? PyUnicode_Format(pyContent, varargs) : PyObject_Str(pyContent));
         DCHECK(formatted, "Unsatisfied format: %s", PythonInterpreter::instance()->toString(pyContent).c_str());
         const String content = PythonInterpreter::instance()->toString(formatted);
-        Log::log(Log::LOG_LEVEL_DEBUG, "Python", content.c_str());
+        Log::log(level, "Python", content.c_str());
     }
     Py_RETURN_NONE;
+}
+
+PyObject* ark_logd(PyObject* /*self*/, PyObject* args)
+{
+    return ark_log(Log::LOG_LEVEL_DEBUG, args);
+}
+
+PyObject* ark_logw(PyObject* /*self*/, PyObject* args)
+{
+    return ark_log(Log::LOG_LEVEL_WARNING, args);
 }
 
 PyObject* ark_getAsset(PyObject* /*self*/, PyObject* args)
