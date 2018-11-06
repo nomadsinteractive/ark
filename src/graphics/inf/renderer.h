@@ -26,12 +26,6 @@ public:
         virtual void addRenderer(const sp<Renderer>& drawable) = 0;
     };
 
-    class ARK_API Delegate {
-    public:
-        virtual ~Delegate() = default;
-
-        virtual void setRendererDelegate(const sp<Renderer>& delegate) = 0;
-    };
 };
 
 }

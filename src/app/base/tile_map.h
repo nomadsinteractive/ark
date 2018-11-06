@@ -34,6 +34,9 @@ public:
     void setTile(uint32_t rowId, uint32_t colId, const sp<RenderObject>& renderObject);
 
 // [[script::bindings::property]]
+    void clear();
+
+// [[script::bindings::property]]
     uint32_t tileWidth() const;
 // [[script::bindings::property]]
     uint32_t tileHeight() const;

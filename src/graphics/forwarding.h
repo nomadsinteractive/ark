@@ -33,7 +33,6 @@ class RenderView;
 class RenderLayer;
 class RenderRequest;
 class Renderer;
-class RendererDelegate;
 class RendererGroup;
 class Rotation;
 class Size;

@@ -566,6 +566,9 @@ class TileMap:
     def __init__(self, layer, w, h, tw, th):
         pass
 
+    def clear(self):
+        pass
+
     def set_tile(self, row_id, col_id, obj):
         pass
 

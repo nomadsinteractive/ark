@@ -8,8 +8,6 @@
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 
-#include "graphics/impl/renderer/renderer_delegate.h"
-
 #include "python/extension/python_interpreter.h"
 #include "python/extension/py_ark_type.h"
 

@@ -4,6 +4,7 @@
 #include "core/impl/builder/builder_by_instance.h"
 #include "core/types/null.h"
 #include "core/util/documents.h"
+#include "core/util/log.h"
 
 #include "graphics/base/frame.h"
 #include "graphics/base/size.h"

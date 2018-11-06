@@ -5,7 +5,6 @@
 
 #include "graphics/base/size.h"
 #include "graphics/inf/renderer.h"
-#include "graphics/impl/renderer/renderer_delegate.h"
 
 #include "app/base/event.h"
 #include "app/inf/layout.h"
@@ -17,7 +16,7 @@ namespace ark {
 
 LayoutHierarchy::Slot::Slot(const sp<Renderer>& renderer, bool layoutRequested)
     : _x(0), _y(0), _layout_width(0), _layout_height(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _view_group(renderer.as<ViewGroup>()),
-      _renderer_delegate(renderer.as<RendererDelegate>()), _lifecycle(renderer.as<Lifecycle>()), _visibility(renderer.as<Visibility>())
+      _lifecycle(renderer.as<Lifecycle>()), _visibility(renderer.as<Visibility>())
 {
     DASSERT(renderer);
 }
@@ -104,14 +103,7 @@ bool LayoutHierarchy::Slot::onEventDispatch(const Event& event, float x, float y
         const Event viewEvent(event.action(), event.x() - _x - x, event.y() - _y - y, event.timestamp(), event.code());
         if(_view_group)
             return _view_group->dispatchEvent(viewEvent, event.ptin(target)) || _view_group->onEvent(event, target.left(), target.top());
-        else if(_renderer_delegate)
-        {
-            const sp<ViewGroup> viewGroup = _renderer_delegate->delegate().as<ViewGroup>();
-            if(viewGroup)
-                return viewGroup->dispatchEvent(viewEvent, event.ptin(target)) || viewGroup->onEvent(event, target.left(), target.top());
-        }
-        else
-            return _view->dispatchEvent(viewEvent, event.ptin(target));
+        return _view->dispatchEvent(viewEvent, event.ptin(target));
     }
     return false;
 }

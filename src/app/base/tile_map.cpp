@@ -84,6 +84,12 @@ void TileMap::setTile(uint32_t rowId, uint32_t colId, const sp<RenderObject>& re
     _tiles[rowId * _col_count + colId] = renderObject;
 }
 
+void TileMap::clear()
+{
+    delete[] _tiles;
+    _tiles = new sp<RenderObject>[_col_count * _row_count];
+}
+
 uint32_t TileMap::tileWidth() const
 {
     return _tile_width;

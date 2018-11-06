@@ -4,6 +4,7 @@
 #include "core/inf/runnable.h"
 #include "core/util/conversions.h"
 #include "core/util/dictionaries.h"
+#include "core/util/log.h"
 
 #include "graphics/base/bounds.h"
 #include "graphics/base/render_object.h"
@@ -196,13 +197,20 @@ bool View::dispatchEvent(const Event& event, bool ptin)
     {
     case View::STATE_DEFAULT:
         if(ptin)
-            fireOnEnter();
-        break;
+        {
+            if(event.action() == Event::ACTION_MOVE)
+                fireOnEnter();
+        }
+        else
+            break;
     case View::STATE_PUSHING:
     case View::STATE_MOVING:
     case View::STATE_MOVING_PUSHING:
         if(!ptin)
-            fireOnLeave();
+        {
+            if(event.action() == Event::ACTION_MOVE)
+                fireOnLeave();
+        }
         else if(event.action() == Event::ACTION_UP && !fireOnRelease() && fireOnClick())
             return true;
         else if(event.action() == Event::ACTION_DOWN && fireOnPush())
