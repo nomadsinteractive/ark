@@ -25,12 +25,14 @@
 #define ARK_DEPRECATED(message)
 #endif
 
-#ifndef ARK_STATIC
-#ifdef ARK_FLAG_BUILDING_FRAMEWORK
-#   define ARK_API ARK_API_EXPORT_DECLARATION
-#else
-#   define ARK_API ARK_API_IMPORT_DECLARATION
-#endif
+#ifndef ARK_BUILD_STATIC
+#   ifdef ARK_FLAG_BUILDING_FRAMEWORK
+#       define ARK_API ARK_API_EXPORT_DECLARATION
+#   elif defined(ARK_FLAG_BUILDING_PLUGIN) && defined(ARK_BUILD_STATIC_PLUGINS)
+#       define ARK_API
+#   else
+#       define ARK_API ARK_API_IMPORT_DECLARATION
+#   endif
 #else
 #   define ARK_API
 #endif

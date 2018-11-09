@@ -25,7 +25,6 @@
 
 using namespace ark;
 
-
 namespace ark {
 namespace plugin {
 namespace python {
@@ -43,8 +42,7 @@ static PyObject* ark_getRefManager(PyObject* self, PyObject* args);
 static PyObject* ark_dirSeparator(PyObject* self, PyObject* args);
 static PyObject* ark_trace_(PyObject* self, PyObject* args);
 
-PyMethodDef ARK_METHODS[] =
-{
+static PyMethodDef ARK_METHODS[] = {
     {"logd",  ark_logd, METH_VARARGS, "LOG_DEBUG"},
     {"logw",  ark_logw, METH_VARARGS, "LOG_WARN"},
     {"get_asset",  ark_getAsset, METH_VARARGS, "getAsset"},
@@ -54,7 +52,7 @@ PyMethodDef ARK_METHODS[] =
     {"dir_separator",  ark_dirSeparator, METH_VARARGS, "dir_separator"},
     {"get_ref_manager",  ark_getRefManager, METH_VARARGS, "get_ref_manager"},
     {"__trace__",  ark_trace_, METH_VARARGS, "__trace__"},
-    {NULL, NULL, 0, NULL}
+    {nullptr, nullptr, 0, nullptr}
 };
 
 PyObject* ark_log(Log::LogLevel level, PyObject* args)
