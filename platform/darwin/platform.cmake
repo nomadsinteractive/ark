@@ -2,7 +2,7 @@ find_package(OpenGL REQUIRED)
 list(APPEND LOCAL_LIBS ${OPENGL_gl_LIBRARY})
 list(APPEND LOCAL_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
 
-ark_add_denpendency(3rdparty/glbinding ON glbinding 3rdparty/glbinding/source/glbinding/include)
+ark_add_denpendency(3rdparty/glbinding glbinding 3rdparty/glbinding/source/glbinding/include)
 
 list(APPEND ARK_OPENGL_INCLUDE_DIRS
     ${ARK_SRC_DIR}/3rdparty/glbinding/source/glbinding/include

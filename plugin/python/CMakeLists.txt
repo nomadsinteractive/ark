@@ -15,25 +15,21 @@ set(BUILD_WININST OFF)
 
 set(BUILD_STATIC ON)
 
-if(ARK_BUILD_SHARED_PLUGINS)
-    set(BUILD_SHARED ON)
-else()
-    set(BUILD_SHARED OFF)
-endif()
-
-if(ARK_BUILD_SHARED_PLUGINS)
-    list(APPEND ARK_PYTHON_LIBRARIES libpython-shared)
-else()
-    list(APPEND ARK_PYTHON_LIBRARIES libpython-static)
-endif()
-
 include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
+
+if(ARK_BUILD_STATIC_PLUGINS)
+    set(BUILD_SHARED OFF)
+    ark_compile_definitions(-DPy_NO_ENABLE_SHARED)
+    list(APPEND ARK_PYTHON_LIBRARIES libpython-static)
+else()
+    set(BUILD_SHARED ON)
+    list(APPEND ARK_PYTHON_LIBRARIES libpython-shared)
+endif()
 
 ark_ensure_dependency(3rdparty/Python)
 add_subdirectory(3rdparty/python-cmake-buildsystem)
 
-list(APPEND LOCAL_LIBS ${ARK_LIBRARIES})
-list(APPEND LOCAL_LIBS ${ARK_PYTHON_LIBRARIES})
+ark_link_libraries(${ARK_PYTHON_LIBRARIES})
 
 get_filename_component(PLUGIN_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
 
@@ -56,7 +52,7 @@ execute_process(
     WORKING_DIRECTORY ${ARK_SRC_DIR}
 )
 include(${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cmake)
-if(NOT ${SYSTEM} STREQUAL "android")
+if(NOT ANDROID)
     ark_add_generated_file(_freeze_importlib ark_py_importlib.h ${CMAKE_CURRENT_SOURCE_DIR}/extension extension/_ark_bootstrap.py _ark_bootstrap.py)
 endif()
 
@@ -64,8 +60,10 @@ ark_setup_tools(ark_gen_plugin_class)
 ark_gen_plugin_class(python core ark::plugin::python python_plugin impl)
 
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_PYTHON_INCLUDE_DIR})
-ark_add_shared_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
+ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DARK_FLAG_BUILDING_PLUGIN_PYTHON)
+
+ark_export_dependency_libraries(${PROJECT_NAME} ${ARK_PYTHON_LIBRARIES} ${ARK_PYTHON_PATCH_LIBS})
 
 ark_unset_local_variables()
 

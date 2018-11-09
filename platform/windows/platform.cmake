@@ -10,7 +10,7 @@ if(ARK_FORCE_STATIC_VCRT)
   endforeach()
 endif()
 
-ark_add_denpendency(3rdparty/glbinding ON glbinding 3rdparty/glbinding/source/glbinding/include)
+ark_add_denpendency(3rdparty/glbinding glbinding 3rdparty/glbinding/source/glbinding/include)
 ark_ensure_dependency(3rdparty/dirent)
 ark_include_directories(3rdparty/dirent/include)
 

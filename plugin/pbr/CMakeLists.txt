@@ -5,13 +5,10 @@ include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
 
 ark_ensure_dependency(3rdparty/cmft)
 
-list(APPEND LOCAL_LIBS ${ARK_LIBRARIES})
-
 list(APPEND LOCAL_INCLUDE_DIRS .)
 ark_include_directories(${ARK_INCLUDE_DIRS})
 
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_PLUGIN_DIR})
-
 list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -41,4 +38,4 @@ list(APPEND LOCAL_SRC_LIST
 ark_setup_tools(gen_plugin_class)
 ark_gen_plugin_class(pbr builtin ark::plugin::pbr pbr_plugin impl)
 
-ark_add_shared_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
+ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})

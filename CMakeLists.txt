@@ -4,30 +4,31 @@ cmake_minimum_required(VERSION 3.0)
 
 include(CMakeDependentOption)
 
-option(ARK_BUILD_SHARED_PLUGINS "Build dynamic link library plugins for ARK runtimes" ON)
-option(ARK_BUILD_STATIC_LIBRARY "Build static library" OFF)
-CMAKE_DEPENDENT_OPTION(ARK_TEST_ENABLE "Build testcases" ON "ARK_BUILD_STATIC_LIBRARY" OFF)
-option(ARK_BUILD_SAMPLES "Build samples" ON)
-
-option(ARK_DOWNLOAD_DEPENDENCIES "Download dependency libraries automatically" ON)
-option(ARK_USE_LIBJPEG_TURBO "Use libjpeg-turbo decoding library" ${WIN32})
-option(ARK_USE_LIBPNG "Use libpng decoding library" ON)
-option(ARK_USE_STB_IMAGE "Use stb image decoding library" ON)
-
 set(ARK_SRC_DIR ${PROJECT_SOURCE_DIR})
 set(ARK_TOOLS_DIR ${ARK_SRC_DIR}/tools/cmake)
 set(ARK_PLUGIN_DIR ${ARK_SRC_DIR}/plugin)
 
 include(${ARK_TOOLS_DIR}/core.cmake)
 
-set(RUNTIME_SHARED_LIBRARY ${PROJECT_NAME})
-set(RUNTIME_STATIC_LIBRARY ${PROJECT_NAME}_static)
+option(ARK_BUILD_STATIC_LIBRARY "Build static library" OFF)
+CMAKE_DEPENDENT_OPTION(ARK_TEST_ENABLE "Build testcases" ON "ARK_BUILD_STATIC_LIBRARY" OFF)
+option(ARK_BUILD_SAMPLES "Build samples" ON)
+
+option(ARK_DOWNLOAD_DEPENDENCIES "Download dependency libraries automatically" ON)
+
+ark_compile_definition_option(ARK_BUILD_STATIC_PLUGINS "Build static plugin libraries" OFF)
+ark_compile_definition_option(ARK_USE_LIBJPEG_TURBO "Use libjpeg-turbo decoding library" ${WIN32})
+ark_compile_definition_option(ARK_USE_LIBPNG "Use libpng decoding library" ON)
+ark_compile_definition_option(ARK_USE_STB_IMAGE "Use stb image decoding library" ON)
+
+set(ARK_RUNTIME_SHARED_LIBRARY ${PROJECT_NAME})
+set(ARK_RUNTIME_STATIC_LIBRARY ${PROJECT_NAME}_static)
 set(TESTCASES_EXECUTABLE ${PROJECT_NAME}-testcases)
 set(GENERATED_TESTCASE_LAUNCHPAD ${ARK_GENERATED_FILE_DIRECTORY}/testcase_launchpad.cpp)
 
 set(ARK_INCLUDE_DIRS ${ARK_SRC_DIR} ${ARK_SRC_DIR}/src ${ARK_SRC_DIR}/platform/${SYSTEM} ${ARK_SRC_DIR}/platform/any)
-set(ARK_LIBRARIES ${RUNTIME_SHARED_LIBRARY})
-set(ARK_STATIC_LIBRARIES ${RUNTIME_STATIC_LIBRARY})
+set(ARK_LIBRARIES ${ARK_RUNTIME_SHARED_LIBRARY})
+set(ARK_STATIC_LIBRARIES ${ARK_RUNTIME_STATIC_LIBRARY})
 
 list(APPEND LOCAL_INCLUDE_DIRS .)
 list(APPEND LOCAL_INCLUDE_DIRS src)
@@ -111,18 +112,18 @@ ark_include_directories(platform/any)
 
 list(APPEND LOCAL_INCLUDE_DIRS 3rdparty/glm)
 
-ark_add_denpendency(3rdparty/math-neon OFF math-neon 3rdparty/math-neon)
-ark_add_denpendency(3rdparty/tinyxml2 OFF tinyxml2 3rdparty/tinyxml2)
-ark_add_denpendency(3rdparty/libyaml OFF yaml 3rdparty/libyaml/include)
+ark_add_denpendency(3rdparty/math-neon math-neon 3rdparty/math-neon)
+ark_add_denpendency(3rdparty/tinyxml2 tinyxml2 3rdparty/tinyxml2)
+ark_add_denpendency(3rdparty/libyaml yaml 3rdparty/libyaml/include)
 ark_compile_definitions(-DYAML_DECLARE_STATIC)
-ark_add_denpendency(3rdparty/zlib OFF zlibstatic ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/zlib 3rdparty/zlib)
+ark_add_denpendency(3rdparty/zlib zlibstatic ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/zlib 3rdparty/zlib)
 
 set(ZLIB_ROOT ${ARK_SRC_DIR}/3rdparty/zlib)
 set(ZLIB_INCLUDE_DIR ${ARK_SRC_DIR}/3rdparty/zlib ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/zlib)
 set(ZLIB_VERSION_STRING "1.2.8")
 set(ZLIB_LIBRARY zlibstatic)
 
-ark_add_denpendency(3rdparty/libzip OFF zip ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/libzip 3rdparty/libzip/lib)
+ark_add_denpendency(3rdparty/libzip zip ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/libzip 3rdparty/libzip/lib)
 
 set(GLM_TEST_ENABLE OFF)
 ark_ensure_dependency(3rdparty/glm)
@@ -138,31 +139,26 @@ if(ARK_USE_LIBPNG)
     set(LIBPNG_INCLUDE_DIR "${ARK_SRC_DIR}/3rdparty/libpng" "${CMAKE_CURRENT_BINARY_DIR}/3rdparty/libpng")
     set(LIBPNG_LIBRARY png_static)
     ark_ensure_dependency(3rdparty/libpng)
-    ark_add_denpendency(3rdparty/libpng OFF ${LIBPNG_LIBRARY} ${LIBPNG_INCLUDE_DIR})
-    ark_compile_definitions(-DARK_USE_LIBPNG)
+    ark_add_denpendency(3rdparty/libpng ${LIBPNG_LIBRARY} ${LIBPNG_INCLUDE_DIR})
 endif()
 
 if(ARK_USE_LIBJPEG_TURBO)
     set(ENABLE_SHARED OFF)
     set(WITH_CRT_DLL ON)
     ark_ensure_dependency(3rdparty/libjpeg-turbo)
-    ark_add_denpendency(3rdparty/libjpeg-turbo OFF turbojpeg-static 3rdparty/libjpeg-turbo ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/libjpeg-turbo)
-    ark_compile_definitions(-DARK_USE_LIBJPEG_TURBO)
+    ark_add_denpendency(3rdparty/libjpeg-turbo turbojpeg-static 3rdparty/libjpeg-turbo ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/libjpeg-turbo)
 endif()
 
 if(ARK_USE_STB_IMAGE)
     ark_ensure_dependency(3rdparty/stb)
     list(APPEND LOCAL_INCLUDE_DIRS 3rdparty/stb)
-    ark_compile_definitions(-DARK_USE_STB_IMAGE)
 endif()
 
 set(FREETYPE_NO_DIST ON)
-ark_add_denpendency(3rdparty/freetype OFF freetype ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/freetype/include/freetype2 3rdparty/freetype/include)
+ark_add_denpendency(3rdparty/freetype freetype ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/freetype/include/freetype2 3rdparty/freetype/include)
 
 add_subdirectory(plugin/python)
-ark_add_export(ark-python ${ARK_PYTHON_LIBRARIES} ${ARK_PYTHON_PATCH_LIBS})
 add_subdirectory(plugin/box2d)
-ark_add_export(ark-box2d)
 add_subdirectory(plugin/vorbis)
 add_subdirectory(plugin/portaudio)
 add_subdirectory(plugin/noise)
@@ -171,12 +167,12 @@ if(NOT ANDROID)
 if(${BUILD_SHARED_LIBS})
     set(SDL_SHARED ON)
     set(SDL_STATIC OFF)
-    ark_add_denpendency(3rdparty/SDL2 ON SDL2 3rdparty/SDL2/include)
+    ark_add_denpendency(3rdparty/SDL2 SDL2 3rdparty/SDL2/include)
 else()
     set(SDL_SHARED OFF)
     set(SDL_STATIC ON)
     add_definitions(-DHAVE_LIBC)
-    ark_add_denpendency(3rdparty/SDL2 OFF SDL2-static 3rdparty/SDL2/include)
+    ark_add_denpendency(3rdparty/SDL2 SDL2-static 3rdparty/SDL2/include)
 endif()
 endif()
 
@@ -200,14 +196,19 @@ ark_gen_class_hierarchy(ark ark ${ARK_SRC_DIR}/src core graphics renderer/base r
 ark_gen_string_table(shaders ark::res src/renderer/shaders)
 ark_gen_bootstrap(ark_bootstrap)
 
-list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
+ark_include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-ark_add_shared_library(${RUNTIME_SHARED_LIBRARY} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST} ${LOCAL_RUNTIME_LIBRARY_SRC_LIST} ${LOCAL_RES_LIST})
-target_compile_definitions(${RUNTIME_SHARED_LIBRARY} PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK)
+list(APPEND LOCAL_SHARED_LIBRARY_DEPENDENCIES ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST} ${LOCAL_RUNTIME_LIBRARY_SRC_LIST} ${LOCAL_RES_LIST})
+if(ARK_BUILD_STATIC_PLUGINS)
+    list(APPEND LOCAL_SHARED_LIBRARY_DEPENDENCIES ${ARK_DEPENDENCY_LIBRARIES})
+endif()
+ark_add_shared_library(${ARK_RUNTIME_SHARED_LIBRARY} ${LOCAL_SHARED_LIBRARY_DEPENDENCIES})
+target_compile_definitions(${ARK_RUNTIME_SHARED_LIBRARY} PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK)
 
 if(ARK_BUILD_STATIC_LIBRARY)
-    ark_add_static_library(${PROJECT_NAME}_static ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
-    target_compile_definitions(${PROJECT_NAME}_static PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK -DARK_STATIC)
+    ark_add_static_library(${ARK_RUNTIME_STATIC_LIBRARY} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
+    target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK)
+    target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PUBLIC -DARK_BUILD_STATIC)
     if(ARK_TEST_ENABLE)
         aux_source_directory(test/base TEST_SRC_LIST)
         aux_source_directory(test/testcase TEST_SRC_LIST)
@@ -215,8 +216,8 @@ if(ARK_BUILD_STATIC_LIBRARY)
             COMMAND python ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py ${ARK_SRC_DIR}/test/testcase ${GENERATED_TESTCASE_LAUNCHPAD}
             DEPENDS ${TEST_SRC_LIST} ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-        ark_add_executable(${TESTCASES_EXECUTABLE} ${TEST_SRC_LIST} ${GENERATED_TESTCASE_LAUNCHPAD} ${RUNTIME_STATIC_LIBRARY})
-        target_compile_definitions(${TESTCASES_EXECUTABLE} PRIVATE -DARK_STATIC)
+        ark_add_executable(${TESTCASES_EXECUTABLE} ${TEST_SRC_LIST} ${GENERATED_TESTCASE_LAUNCHPAD} ${ARK_RUNTIME_STATIC_LIBRARY} ${ARK_DEPENDENCY_LIBRARIES})
+        target_compile_definitions(${TESTCASES_EXECUTABLE} PRIVATE -DARK_BUILD_STATIC)
     endif()
 endif()
 
@@ -225,11 +226,15 @@ if(ARK_BUILD_SAMPLES AND NOT ANDROID)
     target_link_libraries(ark-launcher PRIVATE ${ARK_LIBRARIES})
 endif()
 
-list(APPEND LOCAL_EXPORT_TARGETS ${RUNTIME_SHARED_LIBRARY})
-
 configure_file(ark-config.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}-config.cmake" @ONLY)
-
-export(TARGETS ${LOCAL_EXPORT_TARGETS} FILE "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}-targets.cmake")
+message(${ARK_LIBRARIES} ${ARK_STATIC_LIBRARIES} ${ARK_DEPENDENCY_LIBRARIES})
+if(ARK_BUILD_STATIC_LIBRARY)
+    list(APPEND LOCAL_ARK_EXPORTS ${ARK_LIBRARIES} ${ARK_STATIC_LIBRARIES} ${ARK_DEPENDENCY_LIBRARIES})
+    list(REMOVE_DUPLICATES LOCAL_ARK_EXPORTS)
+    export(TARGETS ${LOCAL_ARK_EXPORTS} FILE "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}-targets.cmake")
+else()
+    export(TARGETS ${ARK_LIBRARIES} FILE "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}-targets.cmake")
+endif()
 
 if(WIN32 AND NOT CYGWIN)
   set(DEF_INSTALL_CMAKE_DIR CMake)
@@ -238,7 +243,7 @@ else()
 endif()
 set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation directory for CMake files")
 
-install(TARGETS ${RUNTIME_SHARED_LIBRARY}
+install(TARGETS ${ARK_RUNTIME_SHARED_LIBRARY}
         EXPORT  ark-targets
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
