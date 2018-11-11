@@ -59,7 +59,7 @@ String Platform::getExecutablePath()
 
 String Platform::getUserStoragePath(const String& path)
 {
-    return Strings::sprintf("%s/Library/Application Support", getenv("HOME"), path.c_str());
+    return Strings::sprintf("%s/Library/Application Support/%s", getenv("HOME"), path.c_str());
 }
 
 void Platform::glInitialize()

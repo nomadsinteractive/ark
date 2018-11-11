@@ -1,4 +1,4 @@
-#include "renderer/impl/render_view/gles20_render_view.h"
+#include "renderer/impl/render_view/render_view_opengl.h"
 
 #include "core/util/math.h"
 #include "core/util/log.h"
@@ -16,35 +16,35 @@ namespace ark {
 uint32_t g_GLViewportWidth = 0;
 uint32_t g_GLViewportHeight = 0;
 
-GLES20RenderView::GLES20RenderView(const sp<GLContext>& glContext, const sp<GLResourceManager>& glResourceManager, const Viewport& viewport)
+RenderViewOpenGL::RenderViewOpenGL(const sp<GLContext>& glContext, const sp<GLResourceManager>& glResourceManager, const Viewport& viewport)
     : _graphics_context(new GraphicsContext(glContext, glResourceManager)), _viewport(viewport)
 {
 }
 
-GLES20RenderView::~GLES20RenderView()
+RenderViewOpenGL::~RenderViewOpenGL()
 {
 }
 
-void GLES20RenderView::onSurfaceCreated()
+void RenderViewOpenGL::onSurfaceCreated()
 {
     GLDebug::glPrintString("GL Version:", GL_VERSION);
     GLDebug::glPrintInteger("Max Uniform Components", GL_MAX_VERTEX_UNIFORM_COMPONENTS);
     GLDebug::glPrintInteger("Max Uniform Vectors", GL_MAX_VERTEX_UNIFORM_VECTORS);
 }
 
-void GLES20RenderView::onSurfaceChanged(uint32_t width, uint32_t height)
+void RenderViewOpenGL::onSurfaceChanged(uint32_t width, uint32_t height)
 {
     _graphics_context.reset(new GraphicsContext(_graphics_context->glContext(), _graphics_context->glResourceManager()));
     initialize(width, height);
 }
 
-void GLES20RenderView::onRenderFrame(const sp<RenderCommand>& renderCommand)
+void RenderViewOpenGL::onRenderFrame(const sp<RenderCommand>& renderCommand)
 {
     _graphics_context->onDrawFrame();
     renderCommand->draw(_graphics_context);
 }
 
-void GLES20RenderView::initialize(uint32_t width, uint32_t height)
+void RenderViewOpenGL::initialize(uint32_t width, uint32_t height)
 {
     LOGD("Width: %d, Height: %d, Viewport (%.1f, %.1f, %.1f, %.1f)", width, height, _viewport.left(), _viewport.top(), _viewport.right(), _viewport.bottom());
 

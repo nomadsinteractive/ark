@@ -42,7 +42,6 @@ void Stalker::doChase(float s0, float v0, float target, float dt)
 
     float eta = t1 - _t0;
     _t_modifier = eta / (_eta - dt);
-    LOGD("m = %.2f", _eta - dt);
 }
 
 }

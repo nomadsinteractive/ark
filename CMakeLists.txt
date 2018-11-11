@@ -208,7 +208,7 @@ target_compile_definitions(${ARK_RUNTIME_SHARED_LIBRARY} PRIVATE -DARK_FLAG_BUIL
 if(ARK_BUILD_STATIC_LIBRARY)
     ark_add_static_library(${ARK_RUNTIME_STATIC_LIBRARY} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
     target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK)
-    target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PUBLIC -DARK_BUILD_STATIC)
+    target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PUBLIC -DARK_BUILD_STATIC -DARK_BUILD_STATIC_PLUGINS)
     if(ARK_TEST_ENABLE)
         aux_source_directory(test/base TEST_SRC_LIST)
         aux_source_directory(test/testcase TEST_SRC_LIST)

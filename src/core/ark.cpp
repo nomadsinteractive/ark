@@ -35,7 +35,7 @@ limitations under the License.
 #include "core/types/global.h"
 
 #include "renderer/base/render_engine.h"
-#include "renderer/impl/render_view_factory/gles20_render_view_factory.h"
+#include "renderer/impl/render_view_factory/render_view_factory_opengl.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_resource.h"
@@ -317,7 +317,7 @@ sp<ApplicationContext> Ark::createApplicationContext(const document& manifest)
 
 sp<RenderEngine> Ark::createRenderEngine(GLVersion version)
 {
-    const sp<RenderViewFactory> renderViewFactory = sp<GLES20RenderViewFactory>::make(_application_context->applicationResource()->glResourceManager());
+    const sp<RenderViewFactory> renderViewFactory = sp<RenderViewFactoryOpenGL>::make(_application_context->applicationResource()->glResourceManager());
 
     switch(version) {
     case AUTO:

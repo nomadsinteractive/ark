@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_GLES20_IMPL_RENDER_VIEW_GLES20_RENDER_VIEW_H_
-#define ARK_RENDERER_GLES20_IMPL_RENDER_VIEW_GLES20_RENDER_VIEW_H_
+#ifndef ARK_RENDERER_IMPL_RENDER_VIEW_RENDER_VIEW_OPENGL_H_
+#define ARK_RENDERER_IMPL_RENDER_VIEW_RENDER_VIEW_OPENGL_H_
 
 #include "core/types/owned_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -12,10 +12,10 @@
 
 namespace ark {
 
-class GLES20RenderView : public RenderView {
+class RenderViewOpenGL : public RenderView {
 public:
-    GLES20RenderView(const sp<GLContext>& glContext, const sp<GLResourceManager>& glResources, const Viewport& viewport);
-    ~GLES20RenderView();
+    RenderViewOpenGL(const sp<GLContext>& glContext, const sp<GLResourceManager>& glResources, const Viewport& viewport);
+    ~RenderViewOpenGL();
 
     virtual void onSurfaceCreated() override;
     virtual void onSurfaceChanged(uint32_t width, uint32_t height) override;

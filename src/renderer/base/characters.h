@@ -1,6 +1,7 @@
 #ifndef ARK_RENDERER_BASE_CHARACTERS_H_
 #define ARK_RENDERER_BASE_CHARACTERS_H_
 
+#include <string>
 #include <vector>
 
 #include "core/base/api.h"
