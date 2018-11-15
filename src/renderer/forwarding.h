@@ -36,7 +36,7 @@ class GraphicsContext;
 class RenderLayer;
 class RenderEngine;
 class RenderController;
-class RenderViewFactory;
+class RendererFactory;
 class ResourceLoaderContext;
 
 }

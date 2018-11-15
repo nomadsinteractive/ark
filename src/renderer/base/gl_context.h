@@ -21,17 +21,16 @@ public:
     const std::map<String, String>& annotations() const;
     std::map<String, String>& annotations();
 
-    uint32_t getGLSLVersion() const;
-
+    void setGLSnippetFactory(sp<GLSnippetFactory> snippetfactory);
     sp<GLSnippet> createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const sp<GLShaderBindings>& shaderBindings) const;
+
+    uint32_t getGLSLVersion() const;
 
 private:
     Ark::GLVersion _version;
     std::map<String, String> _annotations;
 
     sp<GLSnippetFactory> _gl_procedure_factory;
-
-    friend class RenderEngine;
 };
 
 }

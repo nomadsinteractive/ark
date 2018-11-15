@@ -87,7 +87,6 @@ macro(ark_add_plugin_library name)
     endif()
 endmacro()
 
-
 macro(ark_enable_debug_flag)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DARK_FLAG_DEBUG")
 endmacro()

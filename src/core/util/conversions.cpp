@@ -3,6 +3,7 @@
 #include <string>
 #include <stdlib.h>
 
+#include "core/ark.h"
 #include "core/base/api.h"
 #include "core/base/clock.h"
 #include "core/base/string_buffer.h"
@@ -44,6 +45,17 @@ template<> ARK_API float Conversions::to<String, float>(const String& str)
     if(str.endsWith("s"))
         return Conversions::to<String, Clock::Interval>(str).sec();
     return static_cast<float>(atof(str.c_str()));
+}
+
+template<> ARK_API Ark::GLVersion Conversions::to<String, Ark::GLVersion>(const String& str)
+{
+    const String glversion = str.toLower();
+    if(glversion.startsWith("opengl_"))
+        return static_cast<Ark::GLVersion>(atoi(glversion.c_str() + 7));
+    if(glversion.startsWith("vulkan_"))
+        return static_cast<Ark::GLVersion>(atoi(glversion.c_str() + 7) + 100);
+    WARN(false, "Unknow GLVersion: \"%s, supported GLVersions are [\"opengl_21\", \"opengl_46\", \"vulkan_11\", ...]", str.c_str());
+    return Ark::AUTO;
 }
 
 template<> ARK_API String Conversions::to<uint32_t, String>(const uint32_t& val)

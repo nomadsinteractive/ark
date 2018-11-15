@@ -16,10 +16,10 @@ public:
         return _id;
     }
 
-    virtual void prepare(GraphicsContext& graphicsContext) override {
+    virtual void prepare(GraphicsContext& /*graphicsContext*/) override {
     }
 
-    virtual void recycle(GraphicsContext& graphicsContext) override {
+    virtual void recycle(GraphicsContext& /*graphicsContext*/) override {
         _recycler(_id);
     }
 
@@ -42,10 +42,8 @@ void GLRecycler::recycle(uint32_t id, std::function<void (uint32_t)> recycler)
 
 void GLRecycler::doRecycling(GraphicsContext& graphicsContext)
 {
-    for(const sp<GLResource>& resource : _items)
+    for(const sp<GLResource>& resource : _items.clear())
         resource->recycle(graphicsContext);
-
-    _items.clear();
 }
 
 }

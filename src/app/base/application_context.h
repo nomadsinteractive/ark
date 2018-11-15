@@ -80,7 +80,7 @@ private:
     List<String> _argv;
 
     sp<ApplicationResource> _application_resource;
-    sp<RenderViewFactory> _render_view_factory;
+    sp<RendererFactory> _render_view_factory;
     sp<EngineTicker> _ticker;
     sp<Clock> _clock;
     sp<MessageLoopThread> _message_loop_application;

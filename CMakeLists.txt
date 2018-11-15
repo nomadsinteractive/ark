@@ -1,6 +1,6 @@
 project(ark)
 set(ARK_VERSION "0.9.4")
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.7)
 
 include(CMakeDependentOption)
 
@@ -20,6 +20,9 @@ ark_compile_definition_option(ARK_BUILD_STATIC_PLUGINS "Build static plugin libr
 ark_compile_definition_option(ARK_USE_LIBJPEG_TURBO "Use libjpeg-turbo decoding library" ${WIN32})
 ark_compile_definition_option(ARK_USE_LIBPNG "Use libpng decoding library" ON)
 ark_compile_definition_option(ARK_USE_STB_IMAGE "Use stb image decoding library" ON)
+
+ark_compile_definition_option(ARK_USE_OPEN_GL "Use OpenGL rendering library" ON)
+ark_compile_definition_option(ARK_USE_VULKAN  "Use Vulkan rendering library" OFF)
 
 set(ARK_RUNTIME_SHARED_LIBRARY ${PROJECT_NAME})
 set(ARK_RUNTIME_STATIC_LIBRARY ${PROJECT_NAME}_static)
@@ -80,18 +83,17 @@ aux_source_directory(src/renderer/impl/render_command LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/gl_model LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/gl_snippet LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/layer LOCAL_SRC_LIST)
-aux_source_directory(src/renderer/impl/render_view LOCAL_SRC_LIST)
-aux_source_directory(src/renderer/impl/render_view_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/util LOCAL_SRC_LIST)
 
-aux_source_directory(src/renderer/gles20/impl/gl_snippet LOCAL_SRC_LIST)
-aux_source_directory(src/renderer/gles20/impl/gl_snippet_factory LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/opengl/render_view LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/opengl/renderer_factory LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/opengl/es20/gl_snippet LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/opengl/es20/gl_snippet_factory LOCAL_SRC_LIST)
 
-aux_source_directory(src/renderer/gles30 LOCAL_SRC_LIST)
-aux_source_directory(src/renderer/gles30/impl/gl_resource LOCAL_SRC_LIST)
-aux_source_directory(src/renderer/gles30/impl/gl_snippet LOCAL_SRC_LIST)
-aux_source_directory(src/renderer/gles30/impl/gl_snippet_factory LOCAL_SRC_LIST)
-aux_source_directory(src/renderer/gles30/impl/layer LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/opengl/es30/gl_resource LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/opengl/es30/gl_snippet LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/opengl/es30/gl_snippet_factory LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/opengl/es30/layer LOCAL_SRC_LIST)
 
 aux_source_directory(src/app/base LOCAL_SRC_LIST)
 if(NOT ANDROID)
@@ -188,8 +190,14 @@ ark_setup_tools(ark_gen_bootstrap)
 ark_setup_tools(ark_gen_class_hierarchy)
 
 ark_gen_builtin_plugin_class(ark ark framework_plugin src/core src/graphics src/renderer/base src/renderer/impl)
+
+ark_gen_plugin_class(opengl builtin ark::opengl opengl_plugin src/renderer/opengl/es30)
+
+if(ARK_USE_VULKAN)
+    include(src/renderer/vulkan/include.cmake)
+endif()
+
 ark_gen_plugin_class(app builtin ark application_plugin src/app)
-ark_gen_builtin_plugin_class(gles30 ark::gles30 gles30_plugin src/renderer/gles30)
 
 ark_gen_class_hierarchy(ark ark ${ARK_SRC_DIR}/src core graphics renderer/base renderer/impl app)
 

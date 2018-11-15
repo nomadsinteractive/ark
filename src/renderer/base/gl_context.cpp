@@ -14,6 +14,11 @@ Ark::GLVersion GLContext::version() const
     return _version;
 }
 
+void GLContext::setVersion(Ark::GLVersion version)
+{
+    _version = version;
+}
+
 const std::map<String, String>& GLContext::annotations() const
 {
     return _annotations;
@@ -51,6 +56,11 @@ uint32_t GLContext::getGLSLVersion() const
     }
     FATAL("Unsupported OpenGL version: %d", _version);
     return 110;
+}
+
+void GLContext::setGLSnippetFactory(sp<GLSnippetFactory> snippetfactory)
+{
+    _gl_procedure_factory = std::move(snippetfactory);
 }
 
 sp<GLSnippet> GLContext::createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<GLShader>& shader, const sp<GLShaderBindings>& shaderBindings) const

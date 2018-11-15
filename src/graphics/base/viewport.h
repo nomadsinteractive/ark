@@ -3,6 +3,15 @@
 
 #include "graphics/base/rect.h"
 
+// thanks for reminding me the good old days programming in MSDOS
+#ifdef near
+#undef near
+#endif
+
+#ifdef far
+#undef far
+#endif
+
 namespace ark {
 
 class ARK_API Viewport : public Rect {

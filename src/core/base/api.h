@@ -144,7 +144,7 @@ enum THREAD_ID {
     THREAD_ID_UNSPECIFIED = 0,
     THREAD_ID_MAIN = 1,
     THREAD_ID_CORE = 2,
-    THREAD_ID_OPEN_GL = 3
+    THREAD_ID_RENDERER = 3
 };
 
 [[noreturn]]

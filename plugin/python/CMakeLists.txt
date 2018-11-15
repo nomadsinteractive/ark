@@ -59,7 +59,7 @@ endif()
 ark_setup_tools(ark_gen_plugin_class)
 ark_gen_plugin_class(python core ark::plugin::python python_plugin impl)
 
-list(APPEND LOCAL_INCLUDE_DIRS ${ARK_PYTHON_INCLUDE_DIR})
+ark_include_directories(${ARK_PYTHON_INCLUDE_DIR})
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DARK_FLAG_BUILDING_PLUGIN_PYTHON)
 

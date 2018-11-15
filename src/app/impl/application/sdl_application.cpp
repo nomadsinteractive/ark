@@ -2,6 +2,11 @@
 
 #include <SDL.h>
 #include <SDL_opengl.h>
+#include <SDL_syswm.h>
+
+#ifdef ARK_USE_VULKAN
+#include <SDL_vulkan.h>
+#endif
 
 #include "core/base/clock.h"
 #include "core/base/object.h"
@@ -218,6 +223,11 @@ private:
 
 }
 
+#ifdef _WIN32
+    HINSTANCE gInstance;
+    HWND gWnd;
+#endif
+
 SDLApplication::SDLApplication(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport, uint32_t windowFlag)
     : Application(applicationDelegate, applicationContext, width, height, viewport), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex())
       , _message_loop_rendering(sp<MessageLoopDefault>::make(Platform::getSteadyClock())), _controller(sp<SDLApplicationController>::make())
@@ -263,11 +273,25 @@ int SDLApplication::run()
         DFATAL(SDL_GetError());
     }
 
+    SDL_SysWMinfo wmInfo;
+    SDL_VERSION(&wmInfo.version);
+
+    //We will get to that later
+    auto result = SDL_GetWindowWMInfo(_main_window, &wmInfo);
+    DASSERT(result);
+#ifdef _WIN32
+    gInstance = wmInfo.info.win.hinstance;
+    gWnd = wmInfo.info.win.window;
+#endif
+
+
+#ifndef ARK_USE_VULKAN
     /* Create our opengl context and attach it to our window */
     SDL_GLContext maincontext = SDL_GL_CreateContext(_main_window);
 
     /* This makes our buffer swap syncronized with the monitor's vertical refresh */
     SDL_GL_SetSwapInterval(1);
+#endif
 
     onCreate();
     onSurfaceCreated();
@@ -279,14 +303,18 @@ int SDLApplication::run()
     {
         _message_loop_rendering->pollOnce();
         onSurfaceDraw();
+#ifndef ARK_USE_VULKAN
         SDL_GL_SwapWindow(_main_window);
+#endif
         SDL_Delay(1);
     }
 
     onDestroy();
 
     /* Delete our opengl context, destroy our window, and shutdown SDL */
+#ifndef ARK_USE_VULKAN
     SDL_GL_DeleteContext(maincontext);
+#endif
     SDL_DestroyWindow(_main_window);
 
     SDL_DestroyCond(_cond);

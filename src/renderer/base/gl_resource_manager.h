@@ -31,6 +31,9 @@ public:
         PS_ONCE_AND_ON_SURFACE_READY
     };
 
+    const sp<Dictionary<bitmap>>& bitmapLoader() const;
+    const sp<Dictionary<bitmap>>& bitmapBoundsLoader() const;
+
     void onSurfaceReady(GraphicsContext& graphicsContext);
     void onSurfaceDestroy(GraphicsContext& graphicsContext);
 
@@ -93,6 +96,9 @@ private:
     void doSurfaceReady(GraphicsContext& graphicsContext);
 
 private:
+    sp<Dictionary<bitmap>> _bitmap_loader;
+    sp<Dictionary<bitmap>> _bitmap_bounds_loader;
+
     sp<GLRecycler> _recycler;
     sp<Dictionary<sp<GLTexture>>> _gl_texture_loader;
 

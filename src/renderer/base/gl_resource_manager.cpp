@@ -49,12 +49,23 @@ private:
 }
 
 GLResourceManager::GLResourceManager(const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
-    : _recycler(sp<GLRecycler>::make()), _gl_texture_loader(sp<GLTextureResource>::make(_recycler, bitmapLoader, bitmapBoundsLoader)), _tick(0)
+    : _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader),
+      _recycler(sp<GLRecycler>::make()), _gl_texture_loader(sp<GLTextureResource>::make(_recycler, bitmapLoader, bitmapBoundsLoader)), _tick(0)
 {
 }
 
 GLResourceManager::~GLResourceManager()
 {
+}
+
+const sp<Dictionary<bitmap>>& GLResourceManager::bitmapLoader() const
+{
+    return _bitmap_loader;
+}
+
+const sp<Dictionary<bitmap>>& GLResourceManager::bitmapBoundsLoader() const
+{
+    return _bitmap_bounds_loader;
 }
 
 void GLResourceManager::onSurfaceReady(GraphicsContext& graphicsContext)

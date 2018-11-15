@@ -19,7 +19,7 @@ public:
 
     void onSurfaceCreated();
     void onSurfaceChanged(uint32_t width, uint32_t height);
-    void onRenderFrame();
+    void onRenderFrame(const Color& backgroundColor);
 
     void scheduleUpdate(const sp<ApplicationContext>& applicationContext, uint32_t fps);
 

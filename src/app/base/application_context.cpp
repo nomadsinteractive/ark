@@ -16,7 +16,7 @@
 
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/inf/render_view_factory.h"
+#include "renderer/inf/renderer_factory.h"
 
 #include "app/base/application_resource.h"
 #include "app/base/message_loop_thread.h"

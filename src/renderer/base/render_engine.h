@@ -2,7 +2,6 @@
 #define ARK_RENDERER_INF_RENDER_ENGINE_H_
 
 #include "core/ark.h"
-#include "core/base/string.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -13,19 +12,15 @@ namespace ark {
 
 class RenderEngine {
 public:
-    RenderEngine(Ark::GLVersion version, const sp<RenderViewFactory>& renderViewFactory);
+    RenderEngine(Ark::GLVersion version, const sp<RendererFactory>& rendererFactory);
 
     void initialize();
     sp<RenderView> createRenderView(const Viewport& viewport) const;
 
 private:
-    void chooseGLVersion(Ark::GLVersion version);
+    sp<RendererFactory> _renderer_factory;
 
-private:
     sp<GLContext> _gl_context;
-
-    sp<RenderViewFactory> _render_view_factory;
-
 };
 
 }

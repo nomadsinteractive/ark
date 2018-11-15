@@ -26,3 +26,9 @@ aux_source_directory(platform/windows/impl/runtime LOCAL_RUNTIME_LIBRARY_SRC_LIS
 set_source_files_properties(${ARK_GENERATED_FILE_DIRECTORY}/framework_plugin.cpp PROPERTIES COMPILE_FLAGS /bigobj)
 
 set(CMAKE_SHARED_LINKER_FLAGS "/NODEFAULTLIB:python36_d.lib /NODEFAULTLIB:python36.lib /NODEFAULTLIB:python3.lib")
+
+if(ARK_USE_VULKAN)
+    ark_compile_definitions(-DVK_USE_PLATFORM_WIN32_KHR)
+endif()
+
+ark_compile_definitions(-DNOMINMAX)

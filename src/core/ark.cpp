@@ -35,7 +35,8 @@ limitations under the License.
 #include "core/types/global.h"
 
 #include "renderer/base/render_engine.h"
-#include "renderer/impl/render_view_factory/render_view_factory_opengl.h"
+#include "renderer/opengl/renderer_factory/renderer_factory_opengl.h"
+#include "renderer/vulkan/renderer_factory/renderer_factory_vulkan.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_resource.h"
@@ -221,7 +222,7 @@ Ark::Ark(int32_t argc, const char** argv, const String& manfiestSrc)
     const String& assetDir = Documents::getAttribute(_manifest, "asset-dir");
     _asset = sp<ArkAsset>::make(sp<RawAsset>::make(assetDir, appDir), _manifest);
     _application_context = createApplicationContext(_manifest);
-    put<RenderEngine>(createRenderEngine(static_cast<GLVersion>(Documents::getAttribute<int32_t>(_manifest, "gl-version", 0))));
+    put<RenderEngine>(createRenderEngine(Documents::getAttribute<GLVersion>(_manifest, "gl-version", AUTO)));
 
     loadPlugins(_manifest);
 }
@@ -317,8 +318,6 @@ sp<ApplicationContext> Ark::createApplicationContext(const document& manifest)
 
 sp<RenderEngine> Ark::createRenderEngine(GLVersion version)
 {
-    const sp<RenderViewFactory> renderViewFactory = sp<RenderViewFactoryOpenGL>::make(_application_context->applicationResource()->glResourceManager());
-
     switch(version) {
     case AUTO:
     case OPENGL_20:
@@ -334,7 +333,9 @@ sp<RenderEngine> Ark::createRenderEngine(GLVersion version)
     case OPENGL_44:
     case OPENGL_45:
     case OPENGL_46:
-        return sp<RenderEngine>::make(version, renderViewFactory);
+        return sp<RenderEngine>::make(version, sp<RendererFactoryOpenGL>::make(_application_context->applicationResource()->glResourceManager()));
+    case VULKAN_11:
+        return sp<RenderEngine>::make(version, sp<vulkan::RendererFactoryVulkan>::make(_application_context->applicationResource()->glResourceManager()));
     }
     DFATAL("Unknown engine type: %d", version);
     return nullptr;

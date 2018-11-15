@@ -9,7 +9,6 @@
 #include "app/base/surface.h"
 
 #include "platform/platform.h"
-#include "platform/gl/gl.h"
 
 namespace ark {
 
@@ -44,11 +43,7 @@ void ApplicationDelegate::onSurfaceChanged(uint32_t /*width*/, uint32_t /*height
 
 void ApplicationDelegate::onSurfaceDraw()
 {
-    const Color& backgroundColor = _application_context->backgroundColor();
-    glClearColor(backgroundColor.red(), backgroundColor.green(), backgroundColor.blue(), backgroundColor.alpha());
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    _surface->onRenderFrame();
+    _surface->onRenderFrame(_application_context->backgroundColor());
 }
 
 bool ApplicationDelegate::onEvent(const Event& event)

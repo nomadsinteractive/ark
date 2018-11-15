@@ -14,7 +14,7 @@ public:
 
     virtual void onSurfaceCreated() = 0;
     virtual void onSurfaceChanged(uint32_t width, uint32_t height) = 0;
-    virtual void onRenderFrame(const sp<RenderCommand>& renderCommand) = 0;
+    virtual void onRenderFrame(const Color& backgroundColor, const sp<RenderCommand>& renderCommand) = 0;
 
 };
 
