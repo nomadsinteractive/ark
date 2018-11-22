@@ -18,7 +18,7 @@
 #include "renderer/base/gl_texture_default.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/inf/gl_snippet.h"
-#include "renderer/util/gl_index_buffers.h"
+#include "renderer/opengl/util/gl_index_buffers.h"
 
 #include "platform/gl/gl.h"
 

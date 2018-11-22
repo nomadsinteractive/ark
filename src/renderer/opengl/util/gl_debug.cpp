@@ -1,4 +1,4 @@
-#include "renderer/util/gl_debug.h"
+#include "renderer/opengl/util/gl_debug.h"
 
 #include <png.h>
 #include <stdio.h>

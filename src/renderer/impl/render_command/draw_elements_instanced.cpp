@@ -3,7 +3,7 @@
 #include "renderer/base/gl_drawing_context.h"
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/graphics_context.h"
-#include "renderer/util/gl_debug.h"
+#include "renderer/opengl/util/gl_debug.h"
 
 namespace ark {
 

@@ -2,7 +2,7 @@
 
 #include "renderer/base/gl_recycler.h"
 #include "renderer/base/gl_texture.h"
-#include "renderer/util/gl_debug.h"
+#include "renderer/opengl/util/gl_debug.h"
 
 #include "platform/gl/gl.h"
 

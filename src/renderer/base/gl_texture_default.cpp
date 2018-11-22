@@ -15,7 +15,7 @@
 #include "renderer/base/gl_texture_loader.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/util/gl_util.h"
+#include "renderer/opengl/util/gl_util.h"
 
 namespace ark {
 

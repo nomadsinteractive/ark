@@ -15,7 +15,7 @@
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_texture_default.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/util/gl_util.h"
+#include "renderer/opengl/util/gl_util.h"
 
 #include "platform/gl/gl.h"
 

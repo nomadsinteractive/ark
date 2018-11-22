@@ -21,7 +21,7 @@
 #include "renderer/base/gl_shader_source.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/util/gl_debug.h"
+#include "renderer/opengl/util/gl_debug.h"
 
 #include "platform/platform.h"
 

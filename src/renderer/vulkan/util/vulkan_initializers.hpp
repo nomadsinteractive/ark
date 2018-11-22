@@ -327,7 +327,7 @@ namespace vks
 			VkDescriptorSet dstSet,
 			VkDescriptorType type,
 			uint32_t binding,
-			VkDescriptorBufferInfo* bufferInfo,
+            const VkDescriptorBufferInfo* bufferInfo,
 			uint32_t descriptorCount = 1)
 		{
 			VkWriteDescriptorSet writeDescriptorSet {};
@@ -344,7 +344,7 @@ namespace vks
 			VkDescriptorSet dstSet,
 			VkDescriptorType type,
 			uint32_t binding,
-			VkDescriptorImageInfo *imageInfo,
+            const VkDescriptorImageInfo *imageInfo,
 			uint32_t descriptorCount = 1)
 		{
 			VkWriteDescriptorSet writeDescriptorSet {};

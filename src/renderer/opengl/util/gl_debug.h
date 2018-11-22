@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_UTIL_GL_DEBUG_H_
-#define ARK_RENDERER_UTIL_GL_DEBUG_H_
+#ifndef ARK_RENDERER_OPENGL_UTIL_GL_DEBUG_H_
+#define ARK_RENDERER_OPENGL_UTIL_GL_DEBUG_H_
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"

@@ -14,7 +14,7 @@
 #include "renderer/base/resource_loader_context.h"
 
 #include "renderer/inf/gl_resource.h"
-#include "renderer/util/gl_debug.h"
+#include "renderer/opengl/util/gl_debug.h"
 
 namespace ark {
 

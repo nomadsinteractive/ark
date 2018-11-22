@@ -5,7 +5,7 @@
 #include "renderer/base/gl_model_buffer.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/gl_shader_bindings.h"
-#include "renderer/util/gl_index_buffers.h"
+#include "renderer/opengl/util/gl_index_buffers.h"
 
 namespace ark {
 

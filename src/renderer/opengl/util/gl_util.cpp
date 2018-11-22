@@ -1,4 +1,4 @@
-#include "renderer/util/gl_util.h"
+#include "renderer/opengl/util/gl_util.h"
 
 #include <unordered_map>
 
@@ -14,7 +14,7 @@
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/gl_shader.h"
 #include "renderer/base/gl_texture.h"
-#include "renderer/util/gl_index_buffers.h"
+#include "renderer/opengl/util/gl_index_buffers.h"
 
 namespace ark {
 

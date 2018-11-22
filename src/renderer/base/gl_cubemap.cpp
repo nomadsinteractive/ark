@@ -13,7 +13,7 @@
 #include "renderer/base/gl_recycler.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/util/gl_util.h"
+#include "renderer/opengl/util/gl_util.h"
 
 namespace ark {
 

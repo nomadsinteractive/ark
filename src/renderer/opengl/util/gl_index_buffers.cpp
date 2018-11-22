@@ -1,4 +1,4 @@
-#include "renderer/util/gl_index_buffers.h"
+#include "renderer/opengl/util/gl_index_buffers.h"
 
 #include "core/impl/array/dynamic_array.h"
 

@@ -83,17 +83,16 @@ aux_source_directory(src/renderer/impl/render_command LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/gl_model LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/gl_snippet LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/layer LOCAL_SRC_LIST)
-aux_source_directory(src/renderer/util LOCAL_SRC_LIST)
 
 aux_source_directory(src/renderer/opengl/render_view LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/renderer_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/es20/gl_snippet LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/es20/gl_snippet_factory LOCAL_SRC_LIST)
-
 aux_source_directory(src/renderer/opengl/es30/gl_resource LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/es30/gl_snippet LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/es30/gl_snippet_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/es30/layer LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/opengl/util LOCAL_SRC_LIST)
 
 aux_source_directory(src/app/base LOCAL_SRC_LIST)
 if(NOT ANDROID)
