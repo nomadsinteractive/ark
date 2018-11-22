@@ -44,16 +44,16 @@ uint64_t MessageLoopDefault::pollOnce()
         {
             Task nextTask = front;
             _tasks.pop_front();
+            nextTask.entry()->run();
             if(nextTask.interval())
             {
-                const sp<Lifecycle>& expirable = nextTask.expirable();
-                if(!expirable || !expirable->isDisposed())
+                const sp<Lifecycle>& lifecycle = nextTask.expirable();
+                if(!lifecycle || !lifecycle->isDisposed())
                 {
                     nextTask.setNextFireTick(tick + nextTask.interval());
                     requestNextTask(nextTask);
                 }
             }
-            nextTask.entry()->run();
             tick = _ticker->val();
         }
         else

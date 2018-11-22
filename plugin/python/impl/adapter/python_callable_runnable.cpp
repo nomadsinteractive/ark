@@ -39,7 +39,7 @@ PythonCallableRunnable::Result::Result()
 bool PythonCallableRunnable::Result::val()
 {
     DWARN(_function_result != FUNCTION_RESULT_NONE, "'None' returned, which is ambiguous. Better returning True or False instead.");
-    return _function_result == FUNCTION_RESULT_TRUE;
+    return _function_result != FUNCTION_RESULT_TRUE;
 
 }
 
