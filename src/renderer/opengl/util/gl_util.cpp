@@ -12,7 +12,7 @@
 #include "renderer/base/gl_buffer.h"
 #include "renderer/base/gl_program.h"
 #include "renderer/base/gl_resource_manager.h"
-#include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_pipeline.h"
 #include "renderer/base/gl_texture.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
 
@@ -131,7 +131,7 @@ bytearray GLUtil::makeUnitCubeVertices()
     return sp<PreallocatedArray<uint8_t>>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
 }
 
-void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, GLResourceManager& resourceManager, GLShader& shader, GLTexture& texture, int32_t width, int32_t height)
+void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, GLResourceManager& resourceManager, GLPipeline& shader, GLTexture& texture, int32_t width, int32_t height)
 {
     uint32_t captureFBO, captureRBO;
     glGenFramebuffers(1, &captureFBO);

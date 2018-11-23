@@ -23,7 +23,7 @@ public:
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
         sp<Builder<Alphabet>> _alphabet;
-        sp<Builder<GLShader>> _shader;
+        sp<Builder<GLPipeline>> _shader;
         sp<Builder<Vec4>> _color;
 
         uint32_t _texture_width, _texture_height;

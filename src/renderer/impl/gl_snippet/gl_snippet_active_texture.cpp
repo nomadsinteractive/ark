@@ -1,6 +1,6 @@
 #include "renderer/impl/gl_snippet/gl_snippet_active_texture.h"
 
-#include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_pipeline.h"
 #include "renderer/base/gl_texture.h"
 
 namespace ark {
@@ -19,7 +19,7 @@ GLSnippetActiveTexture::GLSnippetActiveTexture(const sp<GLResource>& texture, ui
     _textures.emplace_back(texture, target, name);
 }
 
-void GLSnippetActiveTexture::preDraw(GraphicsContext& /*graphicsContext*/, const GLShader& shader, const GLDrawingContext& /*context*/)
+void GLSnippetActiveTexture::preDraw(GraphicsContext& /*graphicsContext*/, const GLPipeline& shader, const GLDrawingContext& /*context*/)
 {
     for(const auto& i : _textures)
         GLTexture::active(shader.program(), i.target, i.resource->id(), i.name);

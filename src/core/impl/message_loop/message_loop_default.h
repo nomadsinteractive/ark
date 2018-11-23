@@ -25,7 +25,7 @@ private:
     class Task {
     public:
         Task(const sp<Runnable>& entry, uint64_t nextFireTick, uint32_t interval);
-        Task(const Task& task);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Task);
 
         const sp<Runnable>& entry() const;
         const sp<Lifecycle>& expirable() const;
@@ -36,7 +36,7 @@ private:
 
     private:
         sp<Runnable> _entry;
-        sp<Lifecycle> _expirable;
+        sp<Lifecycle> _lifecycle;
         uint64_t _next_fire_tick;
         uint32_t _interval;
     };

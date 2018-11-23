@@ -1,10 +1,10 @@
 #include "renderer/impl/gl_snippet/gl_snippet_point_size.h"
 
-#include "renderer/base/gl_shader_source.h"
+#include "renderer/base/pipeline_layout.h"
 
 namespace ark {
 
-void GLSnippetPointSize::preInitialize(GLShaderSource& source)
+void GLSnippetPointSize::preInitialize(PipelineLayout& source)
 {
     source.addPredefinedAttribute("PointSize", "float");
 }

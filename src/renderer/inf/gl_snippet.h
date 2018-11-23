@@ -11,10 +11,10 @@ class ARK_API GLSnippet {
 public:
     virtual ~GLSnippet() = default;
 
-    virtual void preInitialize(GLShaderSource& source) {}
+    virtual void preInitialize(PipelineLayout& source) {}
 
     virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) {}
-    virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLDrawingContext& context) {}
+    virtual void preDraw(GraphicsContext& graphicsContext, const GLPipeline& shader, const GLDrawingContext& context) {}
     virtual void postDraw(GraphicsContext& graphicsContext) {}
 };
 

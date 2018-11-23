@@ -1,11 +1,11 @@
 #include "renderer/impl/render_command/draw_elements.h"
 
-#include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_pipeline.h"
 #include "renderer/base/graphics_context.h"
 
 namespace ark {
 
-DrawElements::DrawElements(GLDrawingContext context, const sp<GLShader>& shader)
+DrawElements::DrawElements(GLDrawingContext context, const sp<GLPipeline>& shader)
     : _context(std::move(context)), _shader(shader)
 {
 }

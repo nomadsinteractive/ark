@@ -35,8 +35,14 @@ limitations under the License.
 #include "core/types/global.h"
 
 #include "renderer/base/render_engine.h"
+
+#ifdef ARK_USE_OPEN_GL
 #include "renderer/opengl/renderer_factory/renderer_factory_opengl.h"
+#endif
+
+#ifdef ARK_USE_VULKAN
 #include "renderer/vulkan/renderer_factory/renderer_factory_vulkan.h"
+#endif
 
 #include "app/base/application_context.h"
 #include "app/base/application_resource.h"
@@ -221,8 +227,12 @@ Ark::Ark(int32_t argc, const char** argv, const String& manfiestSrc)
     _manifest = readable ? Documents::loadFromReadable(readable) : document::make("");
     const String& assetDir = Documents::getAttribute(_manifest, "asset-dir");
     _asset = sp<ArkAsset>::make(sp<RawAsset>::make(assetDir, appDir), _manifest);
-    _application_context = createApplicationContext(_manifest);
-    put<RenderEngine>(createRenderEngine(Documents::getAttribute<GLVersion>(_manifest, "gl-version", AUTO)));
+
+    const sp<Asset> asset = _asset->getAsset(".");
+    const sp<ApplicationResource> appResource = sp<ApplicationResource>::make(sp<XMLDirectory>::make(asset), asset);
+
+    const sp<RenderEngine> renderEngine = createRenderEngine(Documents::getAttribute<GLVersion>(_manifest, "renderer", AUTO), appResource);
+    _application_context = createApplicationContext(_manifest, appResource, renderEngine);
 
     loadPlugins(_manifest);
 }
@@ -305,18 +315,16 @@ const sp<ObjectPool>& Ark::objectPool() const
     return _object_pool;
 }
 
-sp<ApplicationContext> Ark::createApplicationContext(const document& manifest)
+sp<ApplicationContext> Ark::createApplicationContext(const document& manifest, const sp<ApplicationResource>& appResource, const sp<RenderEngine>& renderEngine)
 {
     const Global<PluginManager> pluginManager;
-    const sp<Asset> asset = _asset->getAsset(".");
-    const sp<ApplicationResource> applicationResource = sp<ApplicationResource>::make(sp<Dictionary<document>>::adopt(new XMLDirectory(asset)), asset);
-    const sp<ApplicationContext> applicationContext = sp<ApplicationContext>::make(applicationResource);
+    const sp<ApplicationContext> applicationContext = sp<ApplicationContext>::make(appResource, renderEngine);
     pluginManager->addPlugin(sp<ApplicationPlugin>::make(applicationContext));
     applicationContext->initResourceLoader(manifest);
     return applicationContext;
 }
 
-sp<RenderEngine> Ark::createRenderEngine(GLVersion version)
+sp<RenderEngine> Ark::createRenderEngine(GLVersion version, const sp<ApplicationResource>& appResource)
 {
     switch(version) {
     case AUTO:
@@ -333,9 +341,14 @@ sp<RenderEngine> Ark::createRenderEngine(GLVersion version)
     case OPENGL_44:
     case OPENGL_45:
     case OPENGL_46:
-        return sp<RenderEngine>::make(version, sp<RendererFactoryOpenGL>::make(_application_context->applicationResource()->glResourceManager()));
+#ifdef ARK_USE_OPEN_GL
+        return sp<RenderEngine>::make(version, sp<opengl::RendererFactoryOpenGL>::make(appResource->glResourceManager()));
+#endif
     case VULKAN_11:
-        return sp<RenderEngine>::make(version, sp<vulkan::RendererFactoryVulkan>::make(_application_context->applicationResource()->glResourceManager()));
+#ifdef ARK_USE_VULKAN
+        return sp<RenderEngine>::make(version, sp<vulkan::RendererFactoryVulkan>::make(appResource->glResourceManager()));
+#endif
+        break;
     }
     DFATAL("Unknown engine type: %d", version);
     return nullptr;

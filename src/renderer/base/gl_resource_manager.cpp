@@ -13,7 +13,7 @@
 #include "renderer/base/gl_buffer.h"
 #include "renderer/base/gl_context.h"
 #include "renderer/base/gl_recycler.h"
-#include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_pipeline.h"
 #include "renderer/base/gl_snippet_delegate.h"
 #include "renderer/base/gl_texture_default.h"
 #include "renderer/base/graphics_context.h"

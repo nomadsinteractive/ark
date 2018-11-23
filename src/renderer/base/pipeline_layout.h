@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_GL_SHADER_SOURCE_H_
-#define ARK_RENDERER_BASE_GL_SHADER_SOURCE_H_
+#ifndef ARK_RENDERER_BASE_PIPELINE_LAYOUT_H_
+#define ARK_RENDERER_BASE_PIPELINE_LAYOUT_H_
 
 #include <map>
 
@@ -9,17 +9,17 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/gl_attribute.h"
-#include "renderer/base/gl_shader.h"
-#include "renderer/base/gl_shader_input.h"
+#include "renderer/base/gl_pipeline.h"
+#include "renderer/base/pipeline_input.h"
 #include "renderer/base/gl_shader_preprocessor.h"
 #include "renderer/base/gl_uniform.h"
 #include "renderer/base/resource_loader_context.h"
 
 namespace ark {
 
-class GLShaderSource {
+class PipelineLayout {
 public:
-    GLShaderSource(const String& vertex, const String& fragment, const sp<RenderController>& renderController);
+    PipelineLayout(const sp<RenderController>& renderController, const String& vertex, const String& fragment);
 
     void loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
 
@@ -36,8 +36,7 @@ public:
     GLShaderPreprocessor& vertex();
     GLShaderPreprocessor& fragment();
 
-    const sp<GLShaderInput>& input() const;
-    const List<GLUniform>& uniforms() const;
+    const sp<PipelineInput>& input() const;
 
 private:
     void initialize();
@@ -46,9 +45,11 @@ private:
     void insertPredefinedUniforms(const String& source, StringBuffer& sb);
 
     void loadPredefinedAttribute(const document& manifest);
-    GLAttribute getPredefinedAttribute(const String& name, const String& type);
 
     void loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
+
+private:
+    sp<PipelineFactory> _pipeline_factory;
 
     op<GLShaderPreprocessorContext> _preprocessor_context;
 
@@ -56,13 +57,11 @@ private:
     GLShaderPreprocessor _fragment;
 
     sp<RenderController> _render_controller;
-    sp<GLShaderInput> _input;
-
-    List<GLUniform> _uniforms;
+    sp<PipelineInput> _input;
 
     sp<GLSnippet> _snippet;
 
-    friend class GLShader;
+    friend class GLPipeline;
     friend class GLShaderBindings;
     friend class GLShaderPreprocessorContext;
 

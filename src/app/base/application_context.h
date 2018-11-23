@@ -23,13 +23,14 @@ namespace ark {
 
 class ARK_API ApplicationContext : public MessageLoop {
 public:
-    ApplicationContext(const sp<ApplicationResource>& applicationResource);
-    ~ApplicationContext();
+    ApplicationContext(const sp<ApplicationResource>& applicationResource, const sp<RenderEngine>& renderEngine);
+    ~ApplicationContext() override;
 
     sp<ResourceLoader> createResourceLoader(const String& name, const sp<Scope>& args);
     sp<ResourceLoader> createResourceLoader(const String& name, const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Scope>& args);
 
     const sp<ApplicationResource>& applicationResource() const;
+    const sp<RenderEngine>& renderEngine() const;
     const sp<GLResourceManager>& glResourceManager() const;
     const sp<RenderController>& renderController() const;
 
@@ -80,7 +81,7 @@ private:
     List<String> _argv;
 
     sp<ApplicationResource> _application_resource;
-    sp<RendererFactory> _render_view_factory;
+    sp<RenderEngine> _render_engine;
     sp<EngineTicker> _ticker;
     sp<Clock> _clock;
     sp<MessageLoopThread> _message_loop_application;

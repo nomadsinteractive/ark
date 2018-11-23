@@ -28,7 +28,7 @@ void MessageLoopDefault::post(const sp<Runnable>& task, float delay)
 void MessageLoopDefault::schedule(const sp<Runnable>& task, float interval)
 {
     DASSERT(task);
-    _scheduled.push(Task(task, 0, (uint32_t) (interval * 1000000)));
+    _scheduled.push(Task(task, 0, static_cast<uint32_t>(interval * 1000000)));
 }
 
 uint64_t MessageLoopDefault::pollOnce()
@@ -79,12 +79,7 @@ void MessageLoopDefault::requestNextTask(const Task& task)
 }
 
 MessageLoopDefault::Task::Task(const sp<Runnable>& entry, uint64_t nextFireTick, uint32_t interval)
-    : _entry(entry), _expirable(entry.as<Lifecycle>()), _next_fire_tick(nextFireTick), _interval(interval)
-{
-}
-
-MessageLoopDefault::Task::Task(const MessageLoopDefault::Task& task)
-    : _entry(task._entry), _expirable(task._expirable), _next_fire_tick(task._next_fire_tick), _interval(task._interval)
+    : _entry(entry), _lifecycle(entry.as<Lifecycle>()), _next_fire_tick(nextFireTick), _interval(interval)
 {
 }
 
@@ -95,7 +90,7 @@ const sp<Runnable>& MessageLoopDefault::Task::entry() const
 
 const sp<Lifecycle>& MessageLoopDefault::Task::expirable() const
 {
-    return _expirable;
+    return _lifecycle;
 }
 
 uint64_t MessageLoopDefault::Task::nextFireTick() const

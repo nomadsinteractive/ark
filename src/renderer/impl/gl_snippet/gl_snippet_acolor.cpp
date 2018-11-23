@@ -1,10 +1,10 @@
 #include "renderer/impl/gl_snippet/gl_snippet_acolor.h"
 
-#include "renderer/base/gl_shader_source.h"
+#include "renderer/base/pipeline_layout.h"
 
 namespace ark {
 
-void GLSnippetAcolor::preInitialize(GLShaderSource& source)
+void GLSnippetAcolor::preInitialize(PipelineLayout& source)
 {
     source.addPredefinedAttribute("Color", "vec4", GLShaderPreprocessor::SHADER_TYPE_FRAGMENT);
 }

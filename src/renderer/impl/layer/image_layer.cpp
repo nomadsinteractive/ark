@@ -4,14 +4,14 @@
 
 #include "graphics/base/layer.h"
 
-#include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_pipeline.h"
 #include "renderer/impl/gl_model/gl_model_quad.h"
 
 namespace ark {
 
 ImageLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _atlas(factory.ensureBuilder<Atlas>(manifest)),
-      _shader(GLShader::fromDocument(factory, manifest, resourceLoaderContext)) {
+      _shader(GLPipeline::fromDocument(factory, manifest, resourceLoaderContext)) {
 }
 
 sp<Layer> ImageLayer::BUILDER::build(const sp<Scope>& args)

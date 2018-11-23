@@ -53,17 +53,6 @@ VulkanAPI::~VulkanAPI()
     vertexBuffer.destroy();
     indexBuffer.destroy();
 
-//    vkDestroyBuffer(_logical_device, uniformBufferVS.buffer, nullptr);
-//    vkFreeMemory(_logical_device, uniformBufferVS.memory, nullptr);
-
-//    destroyTextureImage(texture);
-//--------------------------------------------------------
-    // Clean up Vulkan resources
-//    _swap_chain.cleanup();
-//    if (descriptorPool != VK_NULL_HANDLE)
-//    {
-//        vkDestroyDescriptorPool(_logical_device, descriptorPool, nullptr);
-//    }
     _render_target->commandPool()->destroyCommandBuffers(_command_buffers.size(), _command_buffers.data());
 
     for (auto& shaderModule : shaderModules)

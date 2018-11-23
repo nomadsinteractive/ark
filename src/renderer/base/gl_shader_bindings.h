@@ -23,17 +23,17 @@ public:
     };
 
     struct Attributes {
-        Attributes(const GLShaderInput& shader);
+        Attributes(const PipelineInput& shader);
 
         int32_t _offsets[ATTRIBUTE_NAME_COUNT];
     };
 
 
 public:
-    GLShaderBindings(GLResourceManager& resourceManager, const sp<GLShader>& shader);
-    GLShaderBindings(GLResourceManager& resourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer);
+    GLShaderBindings(GLResourceManager& resourceManager, const sp<GLPipeline>& shader);
+    GLShaderBindings(GLResourceManager& resourceManager, const sp<GLPipeline>& shader, const GLBuffer& arrayBuffer);
 
-    const sp<GLShader>& shader() const;
+    const sp<GLPipeline>& shader() const;
     const sp<GLSnippetDelegate>& snippet() const;
 
     const GLBuffer& arrayBuffer() const;
@@ -49,12 +49,12 @@ public:
     std::map<uint32_t, GLBuffer::Builder> makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const;
 
 private:
-    sp<GLShader> _shader;
+    sp<GLPipeline> _shader;
     sp<GLSnippetDelegate> _snippet;
     Attributes _attributes;
 
     GLBuffer _array_buffer;
-    sp<GLShaderInput> _shader_input;
+    sp<PipelineInput> _shader_input;
     std::vector<std::pair<uint32_t, GLBuffer>> _instanced_arrays;
 
     friend class GLModelBuffer;

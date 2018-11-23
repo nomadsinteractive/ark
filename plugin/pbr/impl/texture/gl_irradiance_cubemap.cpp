@@ -8,7 +8,7 @@
 #include "graphics/base/size.h"
 
 #include "renderer/base/gl_resource_manager.h"
-#include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_pipeline.h"
 #include "renderer/base/gl_texture_default.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/opengl/util/gl_util.h"
@@ -17,7 +17,7 @@
 
 namespace ark {
 
-GLIrradianceCubemap::GLIrradianceCubemap(const sp<GLResourceManager>& resourceManager, Format format, Feature features, const sp<GLShader>& shader, const sp<GLTexture>& texture, const sp<Size>& size)
+GLIrradianceCubemap::GLIrradianceCubemap(const sp<GLResourceManager>& resourceManager, Format format, Feature features, const sp<GLPipeline>& shader, const sp<GLTexture>& texture, const sp<Size>& size)
     : GLTexture(resourceManager->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), format, features), _resource_manager(resourceManager), _shader(shader), _texture(texture)
 {
 }
@@ -67,7 +67,7 @@ void GLIrradianceCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uin
 
 GLIrradianceCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_manager(resourceLoaderContext->glResourceManager()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _shader(GLShader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/equirectangular.vert", "shaders/equirectangular.frag")),
+      _shader(GLPipeline::fromDocument(factory, manifest, resourceLoaderContext, "shaders/equirectangular.vert", "shaders/equirectangular.frag")),
       _texture(factory.ensureBuilder<GLTexture>(manifest, Constants::Attributes::TEXTURE)),
       _format(Documents::getAttribute<GLTexture::Format>(manifest, "format", FORMAT_AUTO)),
       _features(Documents::getAttribute<GLTexture::Feature>(manifest, "feature", FEATURE_DEFAULT))

@@ -7,7 +7,7 @@
 #include "graphics/impl/flatable/flatable_v4f.h"
 
 #include "renderer/base/gl_context.h"
-#include "renderer/base/gl_shader_source.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/gl_drawing_context.h"
 #include "renderer/base/graphics_context.h"
 
@@ -15,7 +15,7 @@
 
 namespace ark {
 
-void GLSnippetClipPlane::preInitialize(GLShaderSource& source)
+void GLSnippetClipPlane::preInitialize(PipelineLayout& source)
 {
     for(const auto& i : _planes)
     {
@@ -37,7 +37,7 @@ void GLSnippetClipPlane::preCompile(GraphicsContext& graphicsContext, GLShaderPr
         }
 }
 
-void GLSnippetClipPlane::preDraw(GraphicsContext& /*graphicsContext*/, const GLShader& shader, const GLDrawingContext& /*context*/)
+void GLSnippetClipPlane::preDraw(GraphicsContext& /*graphicsContext*/, const GLPipeline& shader, const GLDrawingContext& /*context*/)
 {
     if(_enabled)
         for(const auto& i : _planes)

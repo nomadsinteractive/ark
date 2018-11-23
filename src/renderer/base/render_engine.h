@@ -14,6 +14,8 @@ class RenderEngine {
 public:
     RenderEngine(Ark::GLVersion version, const sp<RendererFactory>& rendererFactory);
 
+    const sp<RendererFactory>& rendererFactory() const;
+
     void initialize();
     sp<RenderView> createRenderView(const Viewport& viewport) const;
 

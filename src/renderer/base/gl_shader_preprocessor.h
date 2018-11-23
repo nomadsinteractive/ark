@@ -94,28 +94,28 @@ public:
 public:
     GLShaderPreprocessor(ShaderType type, const String& source);
 
-    void parseMainFunction(GLShaderSource& shader);
-    void parseDeclarations(GLShaderPreprocessorContext& context, GLShaderSource& shader);
+    void parseMainBlock(PipelineLayout& shader);
+    void parseDeclarations(GLShaderPreprocessorContext& context, PipelineLayout& shader);
     void preprocess();
 
     void addUniform(const String& type, const String& name);
 
     String process(const GLContext& glContext) const;
 
-    void insertPredefinedUniforms(const List<GLUniform>& uniforms);
+    void insertPredefinedUniforms(const std::vector<GLUniform>& uniforms);
 
 private:
-    void parseCodeBlock(CodeBlock& codeBlock, GLShaderSource& shader);
-    uint32_t parseFunctionBody(const String& s, String& body);
+    void parseCodeBlock(CodeBlock& codeBlock, PipelineLayout& shader) const;
+    uint32_t parseFunctionBody(const String& s, String& body) const;
 
-    String getDeclarations();
+    String getDeclarations() const;
     void insertAfter(const String& statement, const String& str);
 
 private:
     sp<CodeBlock> _main_block;
 
     friend class GLShaderPreprocessorContext;
-    friend class GLShaderSource;
+    friend class PipelineLayout;
 
 public:
     ShaderType _type;
@@ -150,12 +150,17 @@ public:
     StringBuffer _frag_procedures;
     StringBuffer _frag_procedure_calls;
 
-    void addAttribute(const String& name, const String& type, std::map<String, String>& vars, GLShaderSource& source);
+    void addAttribute(const String& name, const String& type, std::map<String, String>& vars, PipelineLayout& source);
     void addVertexSource(const String& source);
     void addFragmentColorModifier(const String& modifier);
     void addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure);
 
     void precompile(String& vertSource, String& fragSource);
+
+    GLAttribute& addPredefinedAttribute(const String& name, const String& type, uint32_t scopes);
+
+private:
+    GLAttribute getPredefinedAttribute(const String& name, const String& type);
 
 private:
     void doSnippetPrecompile();

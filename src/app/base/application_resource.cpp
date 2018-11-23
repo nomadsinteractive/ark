@@ -13,13 +13,13 @@
 namespace ark {
 
 ApplicationResource::ApplicationResource(const sp<Dictionary<document>>& documents, const sp<Asset>& images)
-    : _images(images), _documents(documents), _bitmap_loader(createImageLoader(false)), _bitmap_bounds_loader(createImageLoader(true)), _gl_resources(createGLResourceManager())
+    : _images(images), _documents(documents), _bitmap_loader(createImageLoader(false)), _bitmap_bounds_loader(createImageLoader(true)), _resource_manager(createResourceManager())
 {
 }
 
 const sp<GLResourceManager>& ApplicationResource::glResourceManager() const
 {
-    return _gl_resources;
+    return _resource_manager;
 }
 
 const sp<Dictionary<document>>& ApplicationResource::documents() const
@@ -68,7 +68,7 @@ sp<ImageResource> ApplicationResource::createImageLoader(bool justDecodeBounds) 
     return imageResource;
 }
 
-sp<GLResourceManager> ApplicationResource::createGLResourceManager() const
+sp<GLResourceManager> ApplicationResource::createResourceManager() const
 {
     return sp<GLResourceManager>::adopt(new GLResourceManager(_bitmap_loader, _bitmap_bounds_loader));
 }

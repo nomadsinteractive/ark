@@ -59,10 +59,10 @@ private:
     uint64_t _tick;
 };
 
-ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources)
-    : _application_resource(applicationResources), _ticker(sp<EngineTicker>::make()),
+ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources, const sp<RenderEngine>& renderEngine)
+    : _application_resource(applicationResources), _render_engine(renderEngine), _ticker(sp<EngineTicker>::make()),
       _clock(sp<Clock>::make(_ticker)), _message_loop_application(sp<MessageLoopThread>::make(sp<MessageLoopDefault>::make(Platform::getSteadyClock()))),
-      _executor(sp<ThreadPoolExecutor>::make(_message_loop_application)), _render_controller(sp<RenderController>::make()),
+      _executor(sp<ThreadPoolExecutor>::make(_message_loop_application)), _render_controller(sp<RenderController>::make(renderEngine)),
       _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK)
 {
     Ark& ark = Ark::instance();
@@ -126,6 +126,11 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const sp<Dictionary<
 const sp<ApplicationResource>& ApplicationContext::applicationResource() const
 {
     return _application_resource;
+}
+
+const sp<RenderEngine>& ApplicationContext::renderEngine() const
+{
+    return _render_engine;
 }
 
 const sp<GLResourceManager>& ApplicationContext::glResourceManager() const

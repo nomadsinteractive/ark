@@ -1,4 +1,4 @@
-#include "renderer/base/gl_shader_source.h"
+#include "renderer/base/pipeline_layout.h"
 
 #include <regex>
 
@@ -12,52 +12,46 @@
 #include "renderer/base/gl_context.h"
 #include "renderer/base/gl_program.h"
 #include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/gl_shader_preprocessor.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/impl/gl_snippet/gl_snippet_linked_chain.h"
-#include "renderer/base/gl_shader_preprocessor.h"
+#include "renderer/inf/renderer_factory.h"
 
 
 namespace ark {
 
-GLShaderSource::GLShaderSource(const String& vertex, const String& fragment, const sp<RenderController>& renderController)
-    : _preprocessor_context(new GLShaderPreprocessorContext()),
+PipelineLayout::PipelineLayout(const sp<RenderController>& renderController, const String& vertex, const String& fragment)
+    : _pipeline_factory(renderController->renderEngine()->rendererFactory()->createPipelineFactory()), _preprocessor_context(new GLShaderPreprocessorContext()),
       _vertex(GLShaderPreprocessor::SHADER_TYPE_VERTEX, vertex),
       _fragment(GLShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment),
-      _render_controller(renderController), _input(sp<GLShaderInput>::make())
+      _render_controller(renderController), _input(sp<PipelineInput>::make())
 {
 }
 
-void GLShaderSource::loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
+void PipelineLayout::loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
 {
     loadPredefinedUniform(factory, args, manifest);
     loadPredefinedAttribute(manifest);
 }
 
-sp<GLProgram> GLShaderSource::makeGLProgram(GraphicsContext& graphicsContext) const
+sp<GLProgram> PipelineLayout::makeGLProgram(GraphicsContext& graphicsContext) const
 {
     const sp<GLContext>& glContext = graphicsContext.glContext();
     return sp<GLProgram>::make(graphicsContext.glResourceManager()->recycler(), glContext->getGLSLVersion(), _vertex.process(glContext), _fragment.process(glContext));
 }
 
-GLAttribute& GLShaderSource::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
+GLAttribute& PipelineLayout::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
 {
-    std::map<String, GLAttribute>& attributes = _preprocessor_context->_attributes;
-    if(attributes.find(name) == attributes.end())
-        attributes[name] = getPredefinedAttribute(name, type);
-
-    if(scopes & GLShaderPreprocessor::SHADER_TYPE_FRAGMENT)
-        _preprocessor_context->_fragment_in.push_back(std::pair<String, String>(type, name));
-
-    return attributes[name];
+    return _preprocessor_context->addPredefinedAttribute(name, type, scopes);
 }
 
-void GLShaderSource::addSnippet(const sp<GLSnippet>& snippet)
+void PipelineLayout::addSnippet(const sp<GLSnippet>& snippet)
 {
     DASSERT(snippet);
     _snippet = _snippet ? sp<GLSnippet>::adopt(new GLSnippetLinkedChain(_snippet, snippet)) : snippet;
 }
 
-void GLShaderSource::preprocess(GraphicsContext& graphicsContext)
+void PipelineLayout::preprocess(GraphicsContext& graphicsContext)
 {
     if(_preprocessor_context)
     {
@@ -66,8 +60,8 @@ void GLShaderSource::preprocess(GraphicsContext& graphicsContext)
 
         _preprocessor_context->precompile(_vertex._source, _fragment._source);
 
-        _vertex.insertPredefinedUniforms(_uniforms);
-        _fragment.insertPredefinedUniforms(_uniforms);
+        _vertex.insertPredefinedUniforms(_input->uniforms());
+        _fragment.insertPredefinedUniforms(_input->uniforms());
 
         if(graphicsContext.glContext()->version() >= Ark::OPENGL_30)
             _fragment._out_declarations.declare("vec4", "v_", "FragColor");
@@ -79,27 +73,22 @@ void GLShaderSource::preprocess(GraphicsContext& graphicsContext)
     }
 }
 
-GLShaderPreprocessor& GLShaderSource::vertex()
+GLShaderPreprocessor& PipelineLayout::vertex()
 {
     return _vertex;
 }
 
-GLShaderPreprocessor& GLShaderSource::fragment()
+GLShaderPreprocessor& PipelineLayout::fragment()
 {
     return _fragment;
 }
 
-const sp<GLShaderInput>& GLShaderSource::input() const
+const sp<PipelineInput>& PipelineLayout::input() const
 {
     return _input;
 }
 
-const List<GLUniform>& GLShaderSource::uniforms() const
-{
-    return _uniforms;
-}
-
-void GLShaderSource::initialize()
+void PipelineLayout::initialize()
 {
     DCHECK(_preprocessor_context, "GLShaderSource should not be initialized more than once");
 
@@ -108,10 +97,10 @@ void GLShaderSource::initialize()
     if(_snippet)
         _snippet->preInitialize(*this);
 
-    _vertex.parseMainFunction(*this);
-    _fragment.parseMainFunction(*this);
-
+    _vertex.parseMainBlock(*this);
     _vertex.parseDeclarations(context, *this);
+
+    _fragment.parseMainBlock(*this);
     _fragment.parseDeclarations(context, *this);
 
     for(const auto& i : _vertex._in_declarations._declared)
@@ -181,27 +170,23 @@ void GLShaderSource::initialize()
 
 }
 
-void GLShaderSource::addAttribute(const String& name, const String& type)
+void PipelineLayout::addAttribute(const String& name, const String& type)
 {
-    if(_preprocessor_context->_attributes.find(name) == _preprocessor_context->_attributes.end())
-        addPredefinedAttribute(name, type);
-
-    GLAttribute& attr = _preprocessor_context->_attributes[name];
-
+    GLAttribute& attr = addPredefinedAttribute(name, type);
     _input->addAttribute(name, attr);
 }
 
-void GLShaderSource::addUniform(const String& name, GLUniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed)
+void PipelineLayout::addUniform(const String& name, GLUniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed)
 {
-    _uniforms.push_back(GLUniform(name, type, flatable, changed, _render_controller));
+    _input->uniforms().emplace_back(name, type, flatable, changed, _render_controller);
 }
 
-const sp<GLSnippet>& GLShaderSource::snippet() const
+const sp<GLSnippet>& PipelineLayout::snippet() const
 {
     return _snippet;
 }
 
-void GLShaderSource::loadPredefinedAttribute(const document& manifest)
+void PipelineLayout::loadPredefinedAttribute(const document& manifest)
 {
     for(const document& i : manifest->children("attribute"))
     {
@@ -215,7 +200,7 @@ void GLShaderSource::loadPredefinedAttribute(const document& manifest)
     }
 }
 
-void GLShaderSource::loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
+void PipelineLayout::loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
 {
     for(const document& i : manifest->children("uniform"))
     {
@@ -253,30 +238,6 @@ void GLShaderSource::loadPredefinedUniform(BeanFactory& factory, const sp<Scope>
         }
         addUniform(name, glType, flatable, flatable.as<Changed>());
     }
-}
-
-GLAttribute GLShaderSource::getPredefinedAttribute(const String& name, const String& type)
-{
-    if(type == "vec3")
-        return GLAttribute("a_" + name, type, GL_FLOAT, 3, GL_FALSE);
-    if(name == "TexCoordinate")
-        return GLAttribute("a_TexCoordinate", type, GL_UNSIGNED_SHORT, 2, GL_TRUE);
-    if(type == "vec2")
-        return GLAttribute("a_" + name, type, GL_FLOAT, 2, GL_FALSE);
-    if(name == "Position")
-        return GLAttribute("a_Position", type, GL_FLOAT, 3, GL_FALSE);
-    if(type == "float")
-        return GLAttribute("a_" + name, type, GL_FLOAT, 1, GL_FALSE);
-    if(type == "vec4")
-        return GLAttribute("a_" + name, type, GL_FLOAT, 4, GL_FALSE);
-    if(type == "color3b")
-        return GLAttribute("a_" + name, type, GL_UNSIGNED_BYTE, 3, GL_TRUE);
-    if(type == "uint8")
-        return GLAttribute("a_" + name, type, GL_UNSIGNED_BYTE, 1, GL_FALSE);
-    if(type == "mat4")
-        return GLAttribute("a_" + name, type, GL_FLOAT, 16, GL_FALSE);
-    DFATAL("Unknown attribute type \"%s\"", type.c_str());
-    return GLAttribute();
 }
 
 }

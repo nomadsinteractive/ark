@@ -7,7 +7,7 @@
 #include "graphics/base/matrix.h"
 
 #include "renderer/base/atlas.h"
-#include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_pipeline.h"
 #include "renderer/base/gl_shader_bindings.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/resource_loader_context.h"

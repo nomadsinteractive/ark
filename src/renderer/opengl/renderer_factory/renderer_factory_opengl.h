@@ -8,6 +8,7 @@
 #include "renderer/forwarding.h"
 
 namespace ark {
+namespace opengl {
 
 class RendererFactoryOpenGL : public RendererFactory {
 public:
@@ -19,10 +20,14 @@ public:
 
     virtual sp<RenderView> createRenderView(const sp<GLContext>& glContext, const Viewport& viewport) override;
 
+    virtual sp<PipelineFactory> createPipelineFactory() override;
+
 private:
     sp<GLResourceManager> _resource_manager;
+
 };
 
+}
 }
 
 #endif

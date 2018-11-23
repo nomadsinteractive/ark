@@ -20,7 +20,7 @@ namespace ark {
 //[[core::class]]
 class ShaderFrame : public Renderer, public Block {
 public:
-    ShaderFrame(const sp<Size>& size, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    ShaderFrame(const sp<Size>& size, const sp<GLPipeline>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
@@ -39,7 +39,7 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
 
         sp<Builder<Size>> _size;
-        sp<Builder<GLShader>> _shader;
+        sp<Builder<GLPipeline>> _shader;
     };
 
 private:
@@ -48,7 +48,7 @@ private:
 private:
     SafePtr<Size> _size;
     sp<GLResourceManager> _resource_manager;
-    sp<GLShader> _shader;
+    sp<GLPipeline> _shader;
 
     sp<ObjectPool> _object_pool;
     sp<MemoryPool> _memory_pool;

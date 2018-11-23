@@ -9,7 +9,7 @@ namespace ark {
 
 class GLSnippetPointSize : public GLSnippet {
 public:
-    virtual void preInitialize(GLShaderSource& source) override;
+    virtual void preInitialize(PipelineLayout& source) override;
     virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) override;
 
 //  [[plugin::builder::by-value("point-size")]]

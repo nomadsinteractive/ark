@@ -87,8 +87,7 @@ void Application::onCreate()
     __thread_init__<THREAD_ID_MAIN>();
     const Global<StringTable> stringTable;
     stringTable->addStringBundle("asset", sp<AssetStringBundle>::make());
-    const Global<RenderEngine> renderEngine;
-    const sp<RenderView> renderView = renderEngine->createRenderView(_viewport);
+    const sp<RenderView> renderView = _application_context->renderEngine()->createRenderView(_viewport);
     _surface = sp<Surface>::make(renderView);
     _application_context->postTask([this] () {
         onCreateTask();
@@ -144,8 +143,7 @@ void Application::onSurfaceChanged(uint32_t width, uint32_t height)
 {
     LOGD("width = %d, height = %d", width, height);
     DTHREAD_CHECK(THREAD_ID_RENDERER);
-    const Global<RenderEngine> renderEngine;
-    renderEngine->initialize();
+    _application_context->renderEngine()->initialize();
 
     _surface->onSurfaceChanged(width, height);
     _application_delegate->onSurfaceChanged(width, height);

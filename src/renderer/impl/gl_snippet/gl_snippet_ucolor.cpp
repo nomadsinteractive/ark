@@ -4,7 +4,7 @@
 
 #include "graphics/impl/flatable/flatable_v4f.h"
 
-#include "renderer/base/gl_shader_source.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/gl_uniform.h"
 
 namespace ark {
@@ -14,7 +14,7 @@ GLSnippetUColor::GLSnippetUColor(const sp<Vec4>& color)
 {
 }
 
-void GLSnippetUColor::preInitialize(GLShaderSource& source)
+void GLSnippetUColor::preInitialize(PipelineLayout& source)
 {
     source.addUniform("u_Color", GLUniform::UNIFORM_F4, sp<FlatableV4f>::make(_color), _color.as<Changed>());
 }

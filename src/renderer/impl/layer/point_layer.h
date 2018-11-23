@@ -24,7 +24,7 @@ public:
         document _manifest;
         sp<ResourceLoaderContext> _resource_loader_context;
         sp<Builder<Atlas>> _atlas;
-        sp<Builder<GLShader>> _shader;
+        sp<Builder<GLPipeline>> _shader;
     };
 
 };

@@ -12,6 +12,11 @@ RenderEngine::RenderEngine(Ark::GLVersion version, const sp<RendererFactory>& re
         _renderer_factory->setGLVersion(version, _gl_context);
 }
 
+const sp<RendererFactory>& RenderEngine::rendererFactory() const
+{
+    return _renderer_factory;
+}
+
 void RenderEngine::initialize()
 {
     _renderer_factory->initialize(_gl_context);

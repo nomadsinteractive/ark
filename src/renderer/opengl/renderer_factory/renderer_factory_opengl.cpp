@@ -6,6 +6,7 @@
 
 #include "renderer/base/gl_context.h"
 
+#include "renderer/opengl/pipeline_factory/pipeline_factory_opengl.h"
 #include "renderer/opengl/render_view/render_view_opengl.h"
 #include "renderer/opengl/es20/gl_snippet_factory/gl_snippet_factory_gles20.h"
 #include "renderer/opengl/es30/gl_snippet_factory/gl_snippet_factory_gles30.h"
@@ -15,6 +16,7 @@
 #include "platform/gl/gl.h"
 
 namespace ark {
+namespace opengl {
 
 RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<GLResourceManager>& glResources)
     : _resource_manager(glResources)
@@ -70,4 +72,10 @@ sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<GLContext>& glCo
     return sp<RenderView>::adopt(new RenderViewOpenGL(glContext, _resource_manager, viewport));
 }
 
+sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()
+{
+    return sp<PipelineFactoryOpenGL>::make();
+}
+
+}
 }

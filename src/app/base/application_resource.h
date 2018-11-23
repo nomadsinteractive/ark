@@ -29,7 +29,7 @@ public:
 
 private:
     sp<ImageResource> createImageLoader(bool justDecodeBounds) const;
-    sp<GLResourceManager> createGLResourceManager() const;
+    sp<GLResourceManager> createResourceManager() const;
 
 private:
     sp<Asset> _images;
@@ -39,7 +39,7 @@ private:
     sp<ImageResource> _bitmap_loader;
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
 
-    sp<GLResourceManager> _gl_resources;
+    sp<GLResourceManager> _resource_manager;
 };
 
 }

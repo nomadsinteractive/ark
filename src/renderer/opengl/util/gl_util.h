@@ -23,7 +23,7 @@ public:
 
     static bytearray makeUnitCubeVertices();
 
-    static void renderCubemap(GraphicsContext& graphicsContext, uint32_t id, GLResourceManager& resourceManager, GLShader& shader, GLTexture& texture, int32_t width, int32_t height);
+    static void renderCubemap(GraphicsContext& graphicsContext, uint32_t id, GLResourceManager& resourceManager, GLPipeline& shader, GLTexture& texture, int32_t width, int32_t height);
 };
 
 }

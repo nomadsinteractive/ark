@@ -13,7 +13,7 @@ GLSnippetLinkedChain::GLSnippetLinkedChain(const sp<GLSnippet>& delegate, const 
     DASSERT(next);
 }
 
-void GLSnippetLinkedChain::preInitialize(GLShaderSource& source)
+void GLSnippetLinkedChain::preInitialize(PipelineLayout& source)
 {
     _delegate->preInitialize(source);
     _next->preInitialize(source);
@@ -25,7 +25,7 @@ void GLSnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, GLShader
     _next->preCompile(graphicsContext, context);
 }
 
-void GLSnippetLinkedChain::preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLDrawingContext& context)
+void GLSnippetLinkedChain::preDraw(GraphicsContext& graphicsContext, const GLPipeline& shader, const GLDrawingContext& context)
 {
     _delegate->preDraw(graphicsContext, shader, context);
     _next->preDraw(graphicsContext, shader, context);

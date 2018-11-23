@@ -57,7 +57,6 @@ public:
 
 private:
     void generateQuad();
-//    void loadTexture();
 
     void buildCommandBuffers();
 

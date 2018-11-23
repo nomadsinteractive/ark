@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_GL_SHADER_H_
-#define ARK_RENDERER_BASE_GL_SHADER_H_
+#ifndef ARK_RENDERER_BASE_GL_PIPELINE_H_
+#define ARK_RENDERER_BASE_GL_PIPELINE_H_
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
@@ -13,19 +13,19 @@
 
 namespace ark {
 
-class ARK_API GLShader {
+class ARK_API GLPipeline {
 public:
-    GLShader(const sp<GLShaderSource>& source, const sp<Camera>& camera);
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(GLShader);
+    GLPipeline(const sp<PipelineLayout>& source, const sp<Camera>& camera);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(GLPipeline);
 
-    static sp<Builder<GLShader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag");
-    static sp<GLShader> fromStringTable(const String& vertex = "shaders/default.vert", const String& fragment = "shaders/texture.frag", const sp<GLSnippet>& snippet = nullptr, const sp<ResourceLoaderContext>& resourceLoaderContext = nullptr);
+    static sp<Builder<GLPipeline>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag");
+    static sp<GLPipeline> fromStringTable(const String& vertex = "shaders/default.vert", const String& fragment = "shaders/texture.frag", const sp<GLSnippet>& snippet = nullptr, const sp<ResourceLoaderContext>& resourceLoaderContext = nullptr);
 
     void use(GraphicsContext& graphicsContext);
 
     void bindUniforms(GraphicsContext& graphicsContext) const;
 
-    const sp<GLShaderSource>& source() const;
+    const sp<PipelineInput>& input() const;
 
     const sp<Camera>& camera() const;
 
@@ -40,15 +40,13 @@ public:
 
 //[[deprecated]]
     uint32_t stride() const;
-//[[deprecated]]
-    const GLAttribute& getAttribute(const String& name, uint32_t divisor = 0) const;
 
 //  [[plugin::resource-loader]]
-    class BUILDER : public Builder<GLShader> {
+    class BUILDER : public Builder<GLPipeline> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<GLShader> build(const sp<Scope>& args) override;
+        virtual sp<GLPipeline> build(const sp<Scope>& args) override;
 
     private:
         BeanFactory _factory;
@@ -63,14 +61,16 @@ public:
 
 private:
     struct Stub : public GLResource {
-        Stub(const sp<GLShaderSource>& source);
+        Stub(const sp<PipelineLayout>& source);
 
         virtual uint32_t id() override;
         virtual void prepare(GraphicsContext& graphicsContext) override;
         virtual void recycle(GraphicsContext& graphicsContext) override;
 
         sp<GLProgram> _program;
-        sp<GLShaderSource> _source;
+        sp<PipelineLayout> _pipeline_factory;
+        sp<PipelineInput> _input;
+        sp<GLSnippet> _snippet;
     };
 
 private:

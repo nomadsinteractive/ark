@@ -1,8 +1,9 @@
-#ifndef ARK_RENDERER_BASE_GL_SHADER_INPUT_H_
-#define ARK_RENDERER_BASE_GL_SHADER_INPUT_H_
+#ifndef ARK_RENDERER_BASE_PIPELINE_INPUT_H_
+#define ARK_RENDERER_BASE_PIPELINE_INPUT_H_
 
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -12,7 +13,7 @@
 
 namespace ark {
 
-class GLShaderInput {
+class PipelineInput {
 public:
     class Stream {
     public:
@@ -38,23 +39,28 @@ public:
     };
 
 public:
-    GLShaderInput() = default;
+    PipelineInput() = default;
+
+    const std::vector<GLUniform>& uniforms() const;
+    std::vector<GLUniform>& uniforms();
 
     void addAttribute(String name, GLAttribute attribute);
     void bind(GraphicsContext& graphicsContext, GLProgram& program, uint32_t divisor) const;
 
     std::vector<std::pair<uint32_t, GLBuffer>> makeInstancedArrays(GLResourceManager& resourceManager) const;
 
-    const GLShaderInput::Stream& getStream(uint32_t divisor) const;
+    const PipelineInput::Stream& getStream(uint32_t divisor) const;
 
     const GLAttribute& getAttribute(const String& name, uint32_t divisor = 0) const;
     int32_t getAttributeOffset(const String& name, uint32_t divisor = 0) const;
 
 
 private:
+    std::vector<GLUniform> _uniforms;
+
     std::map<uint32_t, Stream> _streams;
 
-    friend class GLShaderSource;
+    friend class PipelineLayout;
 };
 
 }

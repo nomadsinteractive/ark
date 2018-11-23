@@ -1,13 +1,13 @@
 #include "renderer/impl/render_command/draw_elements_instanced.h"
 
 #include "renderer/base/gl_drawing_context.h"
-#include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_pipeline.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/opengl/util/gl_debug.h"
 
 namespace ark {
 
-DrawElementsInstanced::DrawElementsInstanced(GLDrawingContext context, const sp<GLShader>& shader, int32_t count)
+DrawElementsInstanced::DrawElementsInstanced(GLDrawingContext context, const sp<GLPipeline>& shader, int32_t count)
     : _context(std::move(context)), _shader(shader), _count(count)
 {
 }

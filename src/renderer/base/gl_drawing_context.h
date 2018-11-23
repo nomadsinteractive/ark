@@ -21,7 +21,7 @@ public:
     GLDrawingContext(const sp<GLShaderBindings>& shaderBindings, const Camera::Snapshot& camera, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer::Snapshot& indexBuffer, GLenum mode);
     DEFAULT_COPY_AND_ASSIGN(GLDrawingContext);
 
-    void preDraw(GraphicsContext& graphicsContext, const GLShader& shader);
+    void preDraw(GraphicsContext& graphicsContext, const GLPipeline& shader);
     void postDraw(GraphicsContext& graphicsContext);
 
     sp<GLShaderBindings> _shader_bindings;

@@ -8,7 +8,7 @@
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/gl_drawing_context.h"
 #include "renderer/base/gl_model_buffer.h"
-#include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_pipeline.h"
 #include "renderer/base/gl_shader_bindings.h"
 #include "renderer/inf/gl_model.h"
 #include "renderer/impl/render_command/draw_elements.h"
@@ -16,7 +16,7 @@
 
 namespace ark {
 
-Layer::Stub::Stub(const sp<GLModel>& model, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
+Layer::Stub::Stub(const sp<GLModel>& model, const sp<GLPipeline>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _model(model), _shader(shader), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
       _resource_manager(resourceLoaderContext->glResourceManager()), _shader_bindings(sp<GLShaderBindings>::make(resourceLoaderContext->glResourceManager(), shader)),
       _last_rendered_count(0)
@@ -81,7 +81,7 @@ sp<RenderCommand> Layer::Snapshot::render(float x, float y) const
     return nullptr;
 }
 
-Layer::Layer(const sp<GLModel>& model, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
+Layer::Layer(const sp<GLModel>& model, const sp<GLPipeline>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _stub(sp<Stub>::make(model, shader, resourceLoaderContext))
 {
 }
@@ -122,7 +122,7 @@ void Layer::render(RenderRequest& renderRequest, float x, float y)
 
 Layer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _model(factory.ensureBuilder<GLModel>(manifest, Constants::Attributes::MODEL)),
-      _shader(GLShader::fromDocument(factory, manifest, resourceLoaderContext)) {
+      _shader(GLPipeline::fromDocument(factory, manifest, resourceLoaderContext)) {
 }
 
 sp<Layer> Layer::BUILDER::build(const sp<Scope>& args)

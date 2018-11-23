@@ -78,8 +78,8 @@ public:
 private:
     class ArkAsset;
 
-    sp<ApplicationContext> createApplicationContext(const document& manifest);
-    sp<RenderEngine> createRenderEngine(GLVersion type);
+    sp<ApplicationContext> createApplicationContext(const document& manifest, const sp<ApplicationResource>& resource, const sp<RenderEngine>& renderEngine);
+    sp<RenderEngine> createRenderEngine(GLVersion version, const sp<ApplicationResource>& appResource);
 
     void loadPlugins(const document& manifest) const;
 

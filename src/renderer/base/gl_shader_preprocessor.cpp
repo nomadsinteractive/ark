@@ -8,7 +8,7 @@
 #include "core/util/strings.h"
 
 #include "renderer/base/gl_context.h"
-#include "renderer/base/gl_shader_source.h"
+#include "renderer/base/pipeline_layout.h"
 
 #define VAR_PATTERN "\\s+([\\w\\d]+)\\s+(?:a_|v_)([\\w\\d_]+);"
 
@@ -30,7 +30,7 @@ GLShaderPreprocessor::GLShaderPreprocessor(ShaderType type, const String& source
 {
 }
 
-void GLShaderPreprocessor::parseMainFunction(GLShaderSource& shader)
+void GLShaderPreprocessor::parseMainBlock(PipelineLayout& shader)
 {
     if(_source.find("void main()") != String::npos)
     {
@@ -55,7 +55,7 @@ void GLShaderPreprocessor::parseMainFunction(GLShaderSource& shader)
     parseCodeBlock(_main_block, shader);
 }
 
-void GLShaderPreprocessor::parseDeclarations(GLShaderPreprocessorContext& context, GLShaderSource& shader)
+void GLShaderPreprocessor::parseDeclarations(GLShaderPreprocessorContext& context, PipelineLayout& shader)
 {
     _in_declarations.parse(_source, _type == SHADER_TYPE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
     _out_declarations.parse(_source, _OUT_PATTERN);
@@ -142,7 +142,7 @@ String GLShaderPreprocessor::process(const GLContext& glContext) const
     return sb.str();
 }
 
-void GLShaderPreprocessor::insertPredefinedUniforms(const List<GLUniform>& uniforms)
+void GLShaderPreprocessor::insertPredefinedUniforms(const std::vector<GLUniform>& uniforms)
 {
     static const std::regex UNIFORM_PATTERN("uniform\\s+\\w+\\s+(\\w+)(?:\\[\\d+\\])?;");
     std::set<String> names;
@@ -161,7 +161,7 @@ void GLShaderPreprocessor::insertPredefinedUniforms(const List<GLUniform>& unifo
             _uniform_declarations << i << '\n';
 }
 
-uint32_t GLShaderPreprocessor::parseFunctionBody(const String& s, String& body)
+uint32_t GLShaderPreprocessor::parseFunctionBody(const String& s, String& body) const
 {
     String::size_type pos = s.find('{');
     DCHECK(pos != String::npos, "Cannot parse function body: %s", s.c_str());
@@ -177,7 +177,7 @@ void GLShaderPreprocessor::insertAfter(const String& statement, const String& st
         _source.insert(pos + 1, str);
 }
 
-String GLShaderPreprocessor::getDeclarations()
+String GLShaderPreprocessor::getDeclarations() const
 {
     StringBuffer sb;
     if(_uniform_declarations.dirty())
@@ -207,7 +207,7 @@ void GLShaderPreprocessor::declare(StringBuffer& sb, const List<std::pair<String
     }
 }
 
-void GLShaderPreprocessor::parseCodeBlock(CodeBlock& codeBlock, GLShaderSource& shader)
+void GLShaderPreprocessor::parseCodeBlock(CodeBlock& codeBlock, PipelineLayout& shader) const
 {
     const std::vector<String> params = codeBlock._procedure._params.split(',');
     for(auto iter = params.begin(); iter != params.end(); ++iter)
@@ -258,7 +258,7 @@ bool GLShaderPreprocessor::CodeBlock::hasOutParam(const String& name) const
     return false;
 }
 
-void GLShaderPreprocessorContext::addAttribute(const String& name, const String& type, std::map<String, String>& vars, GLShaderSource& source)
+void GLShaderPreprocessorContext::addAttribute(const String& name, const String& type, std::map<String, String>& vars, PipelineLayout& source)
 {
     if(vars.find(name) == vars.end())
     {
@@ -301,6 +301,41 @@ void GLShaderPreprocessorContext::precompile(String& vertSource, String& fragSou
 {
     doSnippetPrecompile();
     doPrecompile(vertSource, fragSource);
+}
+
+GLAttribute& GLShaderPreprocessorContext::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
+{
+    if(_attributes.find(name) == _attributes.end())
+        _attributes[name] = getPredefinedAttribute(name, type);
+
+    if(scopes & GLShaderPreprocessor::SHADER_TYPE_FRAGMENT)
+        _fragment_in.push_back(std::pair<String, String>(type, name));
+
+    return _attributes[name];
+}
+
+GLAttribute GLShaderPreprocessorContext::getPredefinedAttribute(const String& name, const String& type)
+{
+    if(type == "vec3")
+        return GLAttribute("a_" + name, type, GL_FLOAT, 3, GL_FALSE);
+    if(name == "TexCoordinate")
+        return GLAttribute("a_TexCoordinate", type, GL_UNSIGNED_SHORT, 2, GL_TRUE);
+    if(type == "vec2")
+        return GLAttribute("a_" + name, type, GL_FLOAT, 2, GL_FALSE);
+    if(name == "Position")
+        return GLAttribute("a_Position", type, GL_FLOAT, 3, GL_FALSE);
+    if(type == "float")
+        return GLAttribute("a_" + name, type, GL_FLOAT, 1, GL_FALSE);
+    if(type == "vec4")
+        return GLAttribute("a_" + name, type, GL_FLOAT, 4, GL_FALSE);
+    if(type == "color3b")
+        return GLAttribute("a_" + name, type, GL_UNSIGNED_BYTE, 3, GL_TRUE);
+    if(type == "uint8")
+        return GLAttribute("a_" + name, type, GL_UNSIGNED_BYTE, 1, GL_FALSE);
+    if(type == "mat4")
+        return GLAttribute("a_" + name, type, GL_FLOAT, 16, GL_FALSE);
+    DFATAL("Unknown attribute type \"%s\"", type.c_str());
+    return GLAttribute();
 }
 
 void GLShaderPreprocessorContext::doSnippetPrecompile()

@@ -16,7 +16,7 @@ class GLSnippetUColor : public GLSnippet {
 public:
     GLSnippetUColor(const sp<Vec4>& color);
 
-    virtual void preInitialize(GLShaderSource& source) override;
+    virtual void preInitialize(PipelineLayout& source) override;
     virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) override;
 
 //  [[plugin::builder::by-value("ucolor")]]

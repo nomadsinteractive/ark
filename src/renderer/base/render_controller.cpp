@@ -5,6 +5,16 @@
 
 namespace ark {
 
+RenderController::RenderController(const sp<RenderEngine>& renderEngine)
+    : _render_engine(renderEngine)
+{
+}
+
+const sp<RenderEngine>& RenderController::renderEngine() const
+{
+    return _render_engine;
+}
+
 void RenderController::addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired)
 {
     if(expired)

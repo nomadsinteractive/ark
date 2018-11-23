@@ -5,7 +5,7 @@
 namespace ark {
 namespace gles20 {
 
-sp<GLSnippet> GLSnippetFactoryGLES20::createCoreGLSnippet(GLResourceManager& /*glResourceManager*/, const GLShader& /*shader*/, const sp<GLShaderBindings>& /*shaderBindings*/)
+sp<GLSnippet> GLSnippetFactoryGLES20::createCoreGLSnippet(GLResourceManager& /*glResourceManager*/, const GLPipeline& /*shader*/, const sp<GLShaderBindings>& /*shaderBindings*/)
 {
     return sp<BindAttributes>::make();
 }

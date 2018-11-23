@@ -27,7 +27,7 @@ public:
     GLSnippetActiveTexture(const sp<GLTexture>& texture, uint32_t name = 0);
     GLSnippetActiveTexture(const sp<GLResource>& texture, uint32_t target, uint32_t name);
 
-    virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLDrawingContext& context) override;
+    virtual void preDraw(GraphicsContext& graphicsContext, const GLPipeline& shader, const GLDrawingContext& context) override;
 
 //  [[plugin::builder("textures")]]
     class BUILDER : public Builder<GLSnippet> {

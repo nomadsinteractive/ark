@@ -12,11 +12,11 @@ class CoreGLSnippet;
 
 class ARK_API GLSnippetDelegate : public GLSnippet {
 public:
-    GLSnippetDelegate(const sp<GLShader>& shader);
+    GLSnippetDelegate(const sp<GLPipeline>& shader);
 
-    virtual void preInitialize(GLShaderSource& source) override;
+    virtual void preInitialize(PipelineLayout& source) override;
     virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) override;
-    virtual void preDraw(GraphicsContext& graphicsContext, const GLShader& shader, const GLDrawingContext& context) override;
+    virtual void preDraw(GraphicsContext& graphicsContext, const GLPipeline& shader, const GLDrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 
     void link(const sp<GLSnippet>& snippet);

@@ -4,14 +4,14 @@
 
 #include "graphics/base/layer.h"
 
-#include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_pipeline.h"
 #include "renderer/impl/gl_model/gl_model_point.h"
 
 namespace ark {
 
 PointLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _atlas(factory.ensureBuilder<Atlas>(manifest)),
-      _shader(GLShader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/point.vert", "shaders/point.frag")) {
+      _shader(GLPipeline::fromDocument(factory, manifest, resourceLoaderContext, "shaders/point.vert", "shaders/point.frag")) {
 }
 
 sp<Layer> PointLayer::BUILDER::build(const sp<Scope>& args)

@@ -10,7 +10,7 @@
 
 #include "renderer/base/gl_buffer.h"
 #include "renderer/base/gl_resource_manager.h"
-#include "renderer/base/gl_shader.h"
+#include "renderer/base/gl_pipeline.h"
 #include "renderer/base/gl_shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_command/draw_elements.h"
@@ -18,7 +18,7 @@
 
 namespace ark {
 
-ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
+ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<GLPipeline>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _size(size), _resource_manager(resourceLoaderContext->glResourceManager()), _shader(shader),
       _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
       _shader_bindings(sp<GLShaderBindings>::make(_resource_manager, shader)),
@@ -59,14 +59,14 @@ bytearray ShaderFrame::getArrayBuffer(float x, float y) const
 
 ShaderFrame::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _size(factory.ensureBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _shader(GLShader::fromDocument(factory, manifest, resourceLoaderContext))
+      _shader(GLPipeline::fromDocument(factory, manifest, resourceLoaderContext))
 {
 }
 
 sp<Renderer> ShaderFrame::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Size> size = _size->build(args);
-    const sp<GLShader> shader = _shader->build(args);
+    const sp<GLPipeline> shader = _shader->build(args);
     return sp<ShaderFrame>::make(size, shader, _resource_loader_context);
 }
 

@@ -29,12 +29,12 @@ public:
     struct Snapshot;
 
     struct Stub {
-        Stub(const sp<GLModel>& model, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        Stub(const sp<GLModel>& model, const sp<GLPipeline>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         sp<RenderCommand> render(const Snapshot& snapshot, float x, float y);
 
         sp<GLModel> _model;
-        sp<GLShader> _shader;
+        sp<GLPipeline> _shader;
         sp<ResourceLoaderContext> _resource_loader_context;
 
         sp<MemoryPool> _memory_pool;
@@ -61,7 +61,7 @@ public:
     };
 
 public:
-    Layer(const sp<GLModel>& model, const sp<GLShader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    Layer(const sp<GLModel>& model, const sp<GLPipeline>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
@@ -84,7 +84,7 @@ public:
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
         sp<Builder<GLModel>> _model;
-        sp<Builder<GLShader>> _shader;
+        sp<Builder<GLPipeline>> _shader;
     };
 
 private:

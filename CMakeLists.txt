@@ -84,6 +84,7 @@ aux_source_directory(src/renderer/impl/gl_model LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/gl_snippet LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/layer LOCAL_SRC_LIST)
 
+aux_source_directory(src/renderer/opengl/pipeline_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/render_view LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/renderer_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/es20/gl_snippet LOCAL_SRC_LIST)

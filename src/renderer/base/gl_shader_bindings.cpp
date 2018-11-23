@@ -2,25 +2,25 @@
 
 #include "renderer/base/gl_program.h"
 #include "renderer/base/gl_resource_manager.h"
-#include "renderer/base/gl_shader.h"
-#include "renderer/base/gl_shader_source.h"
+#include "renderer/base/gl_pipeline.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/gl_snippet_delegate.h"
 #include "renderer/impl/gl_snippet/gl_snippet_active_texture.h"
 
 namespace ark {
 
-GLShaderBindings::GLShaderBindings(GLResourceManager& resourceManager, const sp<GLShader>& shader)
+GLShaderBindings::GLShaderBindings(GLResourceManager& resourceManager, const sp<GLPipeline>& shader)
     : GLShaderBindings(resourceManager, shader, resourceManager.makeDynamicArrayBuffer())
 {
 }
 
-GLShaderBindings::GLShaderBindings(GLResourceManager& resourceManager, const sp<GLShader>& shader, const GLBuffer& arrayBuffer)
-    : _shader(shader), _snippet(sp<GLSnippetDelegate>::make(shader)), _attributes(shader->source()->input()), _array_buffer(arrayBuffer),
-      _shader_input(_shader->source()->input()), _instanced_arrays(_shader_input->makeInstancedArrays(resourceManager))
+GLShaderBindings::GLShaderBindings(GLResourceManager& resourceManager, const sp<GLPipeline>& shader, const GLBuffer& arrayBuffer)
+    : _shader(shader), _snippet(sp<GLSnippetDelegate>::make(shader)), _attributes(shader->input()), _array_buffer(arrayBuffer),
+      _shader_input(_shader->input()), _instanced_arrays(_shader_input->makeInstancedArrays(resourceManager))
 {
 }
 
-const sp<GLShader>& GLShaderBindings::shader() const
+const sp<GLPipeline>& GLShaderBindings::shader() const
 {
     return _shader;
 }
@@ -72,13 +72,13 @@ std::map<uint32_t, GLBuffer::Builder> GLShaderBindings::makeInstancedBufferBuild
     std::map<uint32_t, GLBuffer::Builder> builders;
     for(const std::pair<uint32_t, GLBuffer>& i : _instanced_arrays)
     {
-        const GLShaderInput::Stream& stream = _shader_input->getStream(i.first);
+        const PipelineInput::Stream& stream = _shader_input->getStream(i.first);
         builders.insert(std::make_pair(i.first, GLBuffer::Builder(memoryPool, objectPool, stream.stride(), instanceCount / i.first)));
     }
     return builders;
 }
 
-GLShaderBindings::Attributes::Attributes(const GLShaderInput& input)
+GLShaderBindings::Attributes::Attributes(const PipelineInput& input)
 {
     _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = input.getAttributeOffset("TexCoordinate");
     _offsets[ATTRIBUTE_NAME_NORMAL] = input.getAttributeOffset("Normal");

@@ -9,7 +9,7 @@
 namespace ark {
 namespace gles30 {
 
-GLVertexArray::GLVertexArray(const sp<GLShaderBindings>& shaderBindings, const GLShader& shader)
+GLVertexArray::GLVertexArray(const sp<GLShaderBindings>& shaderBindings, const GLPipeline& shader)
     : _id(0), _shader_bindings(shaderBindings), _shader(shader)
 {
 }

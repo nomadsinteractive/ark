@@ -40,7 +40,7 @@ public:
 
 public:
 //[[script::bindings::auto]]
-    Varyings(const GLShader& shader);
+    Varyings(const GLPipeline& shader);
     Varyings();
 
     void addVarying(const String& name, const sp<Flatable>& flatable);
@@ -70,7 +70,7 @@ public:
 
     private:
         BeanFactory _factory;
-        sp<Builder<GLShader>> _shader;
+        sp<Builder<GLPipeline>> _shader;
         std::vector<VaryingBuilder> _varying_builders;
     };
 
@@ -86,7 +86,7 @@ public:
     };
 
 private:
-    sp<GLShaderSource> _shader_source;
+    sp<PipelineInput> _pipeline_input;
     std::unordered_map<String, Varying> _varyings;
     size_t _size;
 };

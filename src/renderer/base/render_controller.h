@@ -9,10 +9,15 @@
 
 #include "graphics/forwarding.h"
 
+#include "renderer/forwarding.h"
+
 namespace ark {
 
 class ARK_API RenderController {
 public:
+    RenderController(const sp<RenderEngine>& renderEngine);
+
+    const sp<RenderEngine>& renderEngine() const;
 
     void addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired);
 
@@ -20,8 +25,9 @@ public:
     void deferUnref(const Box& box);
 
 private:
-    ListWithLifecycle<Runnable> _on_pre_update_request;
+    sp<RenderEngine> _render_engine;
 
+    ListWithLifecycle<Runnable> _on_pre_update_request;
     List<Box> _defered_instances;
 };
 

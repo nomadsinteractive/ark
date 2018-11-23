@@ -13,7 +13,7 @@ GLDrawingContext::GLDrawingContext(const sp<GLShaderBindings>& shaderBindings, c
     DWARN(_shader_bindings->arrayBuffer().id() == arrayBuffer.id(), "GLShaderBinding's ArrayBuffer: %d, which is not the same as GLDrawingContext's ArrayBuffer snapshot: %d", _shader_bindings->arrayBuffer().id(), arrayBuffer.id());
 }
 
-void GLDrawingContext::preDraw(GraphicsContext& graphicsContext, const GLShader& shader)
+void GLDrawingContext::preDraw(GraphicsContext& graphicsContext, const GLPipeline& shader)
 {
     _array_buffer.prepare(graphicsContext);
     _index_buffer.prepare(graphicsContext);
