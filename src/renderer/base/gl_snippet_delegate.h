@@ -15,7 +15,7 @@ public:
     GLSnippetDelegate(const sp<GLPipeline>& shader);
 
     virtual void preInitialize(PipelineLayout& source) override;
-    virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context) override;
     virtual void preDraw(GraphicsContext& graphicsContext, const GLPipeline& shader, const GLDrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 

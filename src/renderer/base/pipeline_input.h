@@ -44,6 +44,9 @@ public:
     const std::vector<GLUniform>& uniforms() const;
     std::vector<GLUniform>& uniforms();
 
+    const std::map<uint32_t, Stream>& streams() const;
+    std::map<uint32_t, Stream>& streams();
+
     void addAttribute(String name, GLAttribute attribute);
     void bind(GraphicsContext& graphicsContext, GLProgram& program, uint32_t divisor) const;
 

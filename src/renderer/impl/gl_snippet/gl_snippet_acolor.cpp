@@ -6,12 +6,12 @@ namespace ark {
 
 void GLSnippetAcolor::preInitialize(PipelineLayout& source)
 {
-    source.addPredefinedAttribute("Color", "vec4", GLShaderPreprocessor::SHADER_TYPE_FRAGMENT);
+    source.addAttribute("Color", "vec4", GLShaderPreprocessor::SHADER_TYPE_FRAGMENT);
 }
 
-void GLSnippetAcolor::preCompile(GraphicsContext& /*graphicsContext*/, GLShaderPreprocessorContext& context)
+void GLSnippetAcolor::preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context)
 {
-    context.addFragmentColorModifier("v_Color");
+    context._fragment.addModifier("v_Color");
 }
 
 sp<GLSnippet> GLSnippetAcolor::DICTIONARY::build(const sp<Scope>& args)

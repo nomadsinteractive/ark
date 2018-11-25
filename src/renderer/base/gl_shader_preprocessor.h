@@ -27,34 +27,33 @@ private:
 
     struct Snippet {
         Snippet(SnippetType type, const String& src);
-        Snippet(const Snippet& other) = default;
-        Snippet(Snippet&& other) = default;
+        DEFAULT_COPY_AND_ASSIGN(Snippet);
 
         SnippetType _type;
         String _src;
     };
 
-    struct Procedure {
-        Procedure(const String& name, const String& params, const String& body);
-        Procedure(const Procedure& other) = default;
-        Procedure(Procedure&& other) = default;
+    struct Function {
+        Function(const String& name, const String& params, const String& body);
+        DEFAULT_COPY_AND_ASSIGN(Function);
 
         String _name;
         String _params;
         String _body;
-        List<std::pair<String, String>> _ins;
-        List<std::pair<String, String>> _outs;
+        std::vector<std::pair<String, String>> _ins;
+        std::vector<std::pair<String, String>> _outs;
     };
 
     struct CodeBlock {
-        CodeBlock(const String& prefix, const Procedure& procedure, const String& suffix);
-        CodeBlock(const CodeBlock& other) = default;
-        CodeBlock(CodeBlock&& other) = default;
+        CodeBlock(const String& prefix, const Function& procedure, const String& suffix);
+        DEFAULT_COPY_AND_ASSIGN(CodeBlock);
+
+        void parse(PipelineLayout& pipelineLayout);
 
         bool hasOutParam(const String& name) const;
 
         String _prefix;
-        Procedure _procedure;
+        Function _function;
         String _suffix;
     };
 
@@ -77,6 +76,7 @@ private:
 
 public:
     enum ShaderType {
+        SHADER_TYPE_NONE,
         SHADER_TYPE_VERTEX,
         SHADER_TYPE_FRAGMENT
     };
@@ -91,21 +91,36 @@ public:
     static std::regex _OUT_PATTERN;
     static std::regex _IN_OUT_PATTERN;
 
+    class Preprocessor {
+    public:
+        Preprocessor();
+        Preprocessor(ShaderType type, String source);
+        DEFAULT_COPY_AND_ASSIGN(Preprocessor);
+
+        String process(const GLContext& glContext) const;
+
+    private:
+        ShaderType _type;
+        String _source;
+    };
+
 public:
     GLShaderPreprocessor(ShaderType type, const String& source);
 
-    void parseMainBlock(PipelineLayout& shader);
-    void parseDeclarations(GLShaderPreprocessorContext& context, PipelineLayout& shader);
-    void preprocess();
+    void addSource(const String& source);
+    void addModifier(const String& modifier);
+
+    void parse(PipelineBuildingContext& context, PipelineLayout& shader);
+
+    Preprocessor preprocess();
 
     void addUniform(const String& type, const String& name);
-
-    String process(const GLContext& glContext) const;
 
     void insertPredefinedUniforms(const std::vector<GLUniform>& uniforms);
 
 private:
-    void parseCodeBlock(CodeBlock& codeBlock, PipelineLayout& shader) const;
+    void parseMainBlock(PipelineLayout& shader);
+    void parseDeclarations(PipelineBuildingContext& context, PipelineLayout& pipelineLayout);
     uint32_t parseFunctionBody(const String& s, String& body) const;
 
     String getDeclarations() const;
@@ -114,7 +129,7 @@ private:
 private:
     sp<CodeBlock> _main_block;
 
-    friend class GLShaderPreprocessorContext;
+    friend class PipelineBuildingContext;
     friend class PipelineLayout;
 
 public:
@@ -122,17 +137,25 @@ public:
     String _source;
 
     StringBuffer _uniform_declarations;
-    std::map<String, String> _annotations;
 
     Declaration _in_declarations;
     Declaration _out_declarations;
 
-    void declare(StringBuffer& sb, const List<std::pair<String, String>>& vars, const String& inType, const String& prefix, std::map<String, String>& declared) const;
+    std::vector<Snippet> _snippets;
 
 };
 
-class GLShaderPreprocessorContext {
+class PipelineBuildingContext {
 public:
+    PipelineBuildingContext(PipelineLayout& pipelineLayout, const String& vertex, const String& fragment);
+
+    void initialize();
+
+    PipelineLayout& _pipeline_layout;
+
+    GLShaderPreprocessor _vertex;
+    GLShaderPreprocessor _fragment;
+
     std::map<String, GLAttribute> _attributes;
 
     List<std::pair<String, String>> _vertex_in;
@@ -142,25 +165,21 @@ public:
 
     std::map<String, String> _vert_in_declared;
 
-    List<GLShaderPreprocessor::Snippet> _vert_snippets;
-    List<GLShaderPreprocessor::Snippet> _frag_snippets;
-
     StringBuffer _vert_main_source;
     StringBuffer _frag_color_modifier;
     StringBuffer _frag_procedures;
     StringBuffer _frag_procedure_calls;
 
-    void addAttribute(const String& name, const String& type, std::map<String, String>& vars, PipelineLayout& source);
-    void addVertexSource(const String& source);
-    void addFragmentColorModifier(const String& modifier);
     void addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure);
 
-    void precompile(String& vertSource, String& fragSource);
+    void preCompile();
+
+    void addAttribute(const String& name, const String& type);
 
     GLAttribute& addPredefinedAttribute(const String& name, const String& type, uint32_t scopes);
 
 private:
-    GLAttribute getPredefinedAttribute(const String& name, const String& type);
+    GLAttribute makePredefinedAttribute(const String& name, const String& type);
 
 private:
     void doSnippetPrecompile();

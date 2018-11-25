@@ -10,7 +10,7 @@
 
 namespace ark {
 
-class ThreadPoolExecutor : public Executor {
+class ThreadPoolExecutor final : public Executor {
 public:
     ThreadPoolExecutor(const sp<MessageLoop>& messageLoop = nullptr, uint32_t capacity = 0);
 
@@ -33,7 +33,7 @@ private:
     class Worker : public Runnable {
     public:
         Worker(const sp<Stub>& stub, const sp<Thread::Stub>& threadStub);
-        ~Worker();
+        ~Worker() override;
 
         bool idle() const;
         void post(const sp<Runnable>& task);

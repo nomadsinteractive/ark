@@ -14,7 +14,7 @@ public:
     CoreGLSnippet(GLSnippetDelegate& wrapper, const sp<GLPipeline>& shader);
 
     virtual void preInitialize(PipelineLayout& source) override;
-    virtual void preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context) override;
     virtual void preDraw(GraphicsContext& graphicsContext, const GLPipeline& shader, const GLDrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 
@@ -36,7 +36,7 @@ void CoreGLSnippet::preInitialize(PipelineLayout& source)
     _wrapper.preInitialize(source);
 }
 
-void CoreGLSnippet::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context)
+void CoreGLSnippet::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context)
 {
     _wrapper.preCompile(graphicsContext, context);
 }
@@ -69,7 +69,7 @@ void GLSnippetDelegate::preInitialize(PipelineLayout& source)
     _core->preInitialize(source);
 }
 
-void GLSnippetDelegate::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context)
+void GLSnippetDelegate::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context)
 {
     _core->preCompile(graphicsContext, context);
 }

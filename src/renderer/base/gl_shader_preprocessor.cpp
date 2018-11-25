@@ -30,6 +30,22 @@ GLShaderPreprocessor::GLShaderPreprocessor(ShaderType type, const String& source
 {
 }
 
+void GLShaderPreprocessor::addSource(const String& source)
+{
+    _snippets.emplace_back(SNIPPET_TYPE_SOURCE, source);
+}
+
+void GLShaderPreprocessor::addModifier(const String& modifier)
+{
+    _snippets.emplace_back(SNIPPET_TYPE_MULTIPLY, modifier);
+}
+
+void GLShaderPreprocessor::parse(PipelineBuildingContext& context, PipelineLayout& shader)
+{
+    parseMainBlock(shader);
+    parseDeclarations(context, shader);
+}
+
 void GLShaderPreprocessor::parseMainBlock(PipelineLayout& shader)
 {
     if(_source.find("void main()") != String::npos)
@@ -46,16 +62,16 @@ void GLShaderPreprocessor::parseMainBlock(PipelineLayout& shader)
         const String remaining = m.suffix().str();
         String body;
         prefixStart = parseFunctionBody(remaining, body);
-        _main_block = sp<CodeBlock>::make(prefix, Procedure("main", m[1].str(), body.strip()), remaining.substr(prefixStart));
+        _main_block = sp<CodeBlock>::make(prefix, Function("main", m[1].str(), body.strip()), remaining.substr(prefixStart));
         return false;
     });
 
     DCHECK(_main_block, "Undefined ark_main in shader");
 
-    parseCodeBlock(_main_block, shader);
+    _main_block->parse(shader);
 }
 
-void GLShaderPreprocessor::parseDeclarations(GLShaderPreprocessorContext& context, PipelineLayout& shader)
+void GLShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context, PipelineLayout& pipelineLayout)
 {
     _in_declarations.parse(_source, _type == SHADER_TYPE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
     _out_declarations.parse(_source, _OUT_PATTERN);
@@ -66,22 +82,22 @@ void GLShaderPreprocessor::parseDeclarations(GLShaderPreprocessorContext& contex
     StringBuffer sb;
     {
         sb << _main_block->_prefix;
-        sb << "vec4 ark_" << _main_block->_procedure._name << "(";
-        const auto begin = _main_block->_procedure._ins.begin();
-        for(auto iter = begin; iter != _main_block->_procedure._ins.end(); ++iter)
+        sb << "vec4 ark_" << _main_block->_function._name << "(";
+        const auto begin = _main_block->_function._ins.begin();
+        for(auto iter = begin; iter != _main_block->_function._ins.end(); ++iter)
         {
             if(iter != begin)
                 sb << ", ";
             sb << iter->first << " " << iter->second;
         }
-        sb << ") {\n    " << _main_block->_procedure._body << "\n}" << _main_block->_suffix;
+        sb << ") {\n    " << _main_block->_function._body << "\n}" << _main_block->_suffix;
     }
 
     const String outVar = _type == SHADER_TYPE_VERTEX ? "gl_Position" : ANNOTATION_FRAG_COLOR;
     sb << "\n\nvoid main() {\n    " << outVar << " = ark_main(";
 
-    const auto begin = _main_block->_procedure._ins.begin();
-    for(auto iter = begin; iter != _main_block->_procedure._ins.end(); ++iter)
+    const auto begin = _main_block->_function._ins.begin();
+    for(auto iter = begin; iter != _main_block->_function._ins.end(); ++iter)
     {
         if(iter != begin)
             sb << ", ";
@@ -94,52 +110,34 @@ void GLShaderPreprocessor::parseDeclarations(GLShaderPreprocessorContext& contex
 
     if(_type == SHADER_TYPE_VERTEX)
     {
-        for(const auto& i : _main_block->_procedure._ins)
+        for(const auto& i : _main_block->_function._ins)
             context._vertex_in.push_back(i);
 
-        for(const std::pair<String, String>& i : _main_block->_procedure._outs)
+        for(const std::pair<String, String>& i : _main_block->_function._outs)
             context._vertex_out.push_back(i);
 
         for(const auto& i : context._vertex_in)
-            context.addAttribute(Strings::capitalFirst(i.second), i.first, context._vert_in_declared, shader);
+        {
+            const String name = Strings::capitalFirst(i.second);
+            const String type = i.first;
+            if(context._vert_in_declared.find(name) == context._vert_in_declared.end())
+            {
+                context._vert_in_declared[name] = type;
+                context.addAttribute(name, type);
+            }
+        }
     }
     else if(_type == SHADER_TYPE_FRAGMENT)
     {
-        for(const std::pair<String, String>& i : _main_block->_procedure._ins)
+        for(const std::pair<String, String>& i : _main_block->_function._ins)
             context._fragment_in.push_back(i);
     }
 }
 
-void GLShaderPreprocessor::preprocess()
+GLShaderPreprocessor::Preprocessor GLShaderPreprocessor::preprocess()
 {
     _source = getDeclarations() + _source;
-}
-
-String GLShaderPreprocessor::process(const GLContext& glContext) const
-{
-    DCHECK(glContext.version() > 0, "Unintialized GLContext");
-
-    static std::regex var_pattern("\\$\\{([\\w.]+)\\}");
-
-    StringBuffer sb;
-    if(_type == SHADER_TYPE_FRAGMENT && glContext.version() >= Ark::OPENGL_30)
-    {
-        sb << "#define texture2D texture\n";
-        sb << "#define textureCube texture\n";
-        sb << "";
-    }
-
-    std::map<String, String> annotations = glContext.annotations();
-    annotations.insert(_annotations.begin(), _annotations.end());
-
-    sb << _source.replace(var_pattern, [&annotations] (Array<String>& matches)->String {
-        const String& varName = matches.buf()[1];
-        const auto iter = annotations.find(varName);
-        DCHECK(iter != annotations.end(), "Cannot find constant \"%s\" in RenderEngine", varName.c_str());
-        return iter->second;
-    });
-
-    return sb.str();
+    return Preprocessor(_type, _source);
 }
 
 void GLShaderPreprocessor::insertPredefinedUniforms(const std::vector<GLUniform>& uniforms)
@@ -190,29 +188,26 @@ String GLShaderPreprocessor::getDeclarations() const
     return sb.str();
 }
 
-void GLShaderPreprocessor::declare(StringBuffer& sb, const List<std::pair<String, String>>& vars, const String& inType, const String& prefix, std::map<String, String>& declared) const
+GLShaderPreprocessor::Snippet::Snippet(GLShaderPreprocessor::SnippetType type, const String& src)
+    : _type(type), _src(src)
 {
-    for(const auto& i : vars)
-    {
-        const String name = Strings::capitalFirst(i.second);
-        const String& type = i.first;
-        const auto iter = declared.find(name);
-        if(iter != declared.end())
-        {
-            DCHECK(iter->second == type, "Declared type \"\" and variable type \"\" mismatch", iter->second.c_str(), type.c_str());
-            return;
-        }
-        sb << inType << " " << type << " " << prefix << name << ";\n";
-        declared[name] = type;
-    }
 }
 
-void GLShaderPreprocessor::parseCodeBlock(CodeBlock& codeBlock, PipelineLayout& shader) const
+GLShaderPreprocessor::Function::Function(const String& name, const String& params, const String& body)
+    : _name(name), _params(params), _body(body)
 {
-    const std::vector<String> params = codeBlock._procedure._params.split(',');
-    for(auto iter = params.begin(); iter != params.end(); ++iter)
+}
+
+GLShaderPreprocessor::CodeBlock::CodeBlock(const String& prefix, const GLShaderPreprocessor::Function& procedure, const String& suffix)
+    : _prefix(prefix), _function(procedure), _suffix(suffix)
+{
+}
+
+void GLShaderPreprocessor::CodeBlock::parse(PipelineLayout& pipelineLayout)
+{
+    for(const String& i : _function._params.split(','))
     {
-        String s = (*iter).strip();
+        String s = i.strip();
         bool out = false;
         if(s.startsWith("out "))
         {
@@ -225,59 +220,98 @@ void GLShaderPreprocessor::parseCodeBlock(CodeBlock& codeBlock, PipelineLayout& 
         Strings::cut(s, type, name, ' ');
         DCHECK(type && name, "Cannot parse function arguments: %s", s.c_str());
         if(out)
-            codeBlock._procedure._outs.push_back(std::pair<String, String>(type, name));
+            _function._outs.push_back(std::pair<String, String>(type, name));
         else
         {
-            codeBlock._procedure._ins.push_back(std::pair<String, String>(type, name));
-            shader.addPredefinedAttribute(Strings::capitalFirst(name), type);
+            _function._ins.push_back(std::pair<String, String>(type, name));
+            pipelineLayout.addAttribute(Strings::capitalFirst(name), type);
         }
     }
-}
-
-GLShaderPreprocessor::Snippet::Snippet(GLShaderPreprocessor::SnippetType type, const String& src)
-    : _type(type), _src(src)
-{
-}
-
-GLShaderPreprocessor::Procedure::Procedure(const String& name, const String& params, const String& body)
-    : _name(name), _params(params), _body(body)
-{
-}
-
-GLShaderPreprocessor::CodeBlock::CodeBlock(const String& prefix, const GLShaderPreprocessor::Procedure& procedure, const String& suffix)
-    : _prefix(prefix), _procedure(procedure), _suffix(suffix)
-{
 }
 
 bool GLShaderPreprocessor::CodeBlock::hasOutParam(const String& name) const
 {
     const String oName = name.startsWith("v_") ? name : String("v_") + name;
-    for(const auto& i : _procedure._outs)
+    for(const auto& i : _function._outs)
         if(i.second == oName)
             return true;
     return false;
 }
 
-void GLShaderPreprocessorContext::addAttribute(const String& name, const String& type, std::map<String, String>& vars, PipelineLayout& source)
+PipelineBuildingContext::PipelineBuildingContext(PipelineLayout& pipelineLayout, const String& vertex, const String& fragment)
+    : _pipeline_layout(pipelineLayout), _vertex(GLShaderPreprocessor::SHADER_TYPE_VERTEX, vertex), _fragment(GLShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment)
 {
-    if(vars.find(name) == vars.end())
+}
+
+void PipelineBuildingContext::initialize()
+{
+    _vertex.parse(*this, _pipeline_layout);
+    _fragment.parse(*this, _pipeline_layout);
+
+    for(const auto& i : _vertex._in_declarations._declared)
+        if(_vert_in_declared.find(i.first) == _vert_in_declared.end())
+        {
+            _vert_in_declared[i.first] = i.second;
+            addAttribute(i.second, i.first);
+        }
+
+    std::set<String> fragmentUsedVars;
+    static const std::regex varPattern("\\bv_([\\w\\d_]+)\\b");
+    _fragment._source.search(varPattern, [&fragmentUsedVars](const std::smatch& m)->bool {
+        fragmentUsedVars.insert(m[1].str());
+        return true;
+    });
+
+    for(const auto& i : _vertex_in)
+        _vertex._in_declarations.declare(i.first, "a_", Strings::capitalFirst(i.second));
+    for(const auto& i : _fragment_in)
     {
-        vars[name] = type;
-        source.addAttribute(name, type);
+        const String n = Strings::capitalFirst(i.second);
+        fragmentUsedVars.insert(n);
+        _fragment._in_declarations.declare(i.first, "v_", n);
     }
+
+    std::map<String, String> attributes = _fragment._in_declarations._declared;
+    if(_pipeline_layout._snippet)
+        for(const auto& i : _attributes)
+            attributes[i.first] = i.second.type();
+
+    std::vector<String> generated;
+    for(const auto& i : attributes)
+    {
+        if(!_vertex._in_declarations.has(i.first)
+                && !_vertex._out_declarations.has(i.first)
+                && !_vertex._main_block->hasOutParam(i.first))
+        {
+            generated.push_back(i.first);
+            addAttribute(i.first, i.second);
+        }
+    }
+
+    for(auto iter : _pipeline_layout._input->streams())
+        iter.second.align();
+
+    for(const auto& i : attributes)
+    {
+        if(fragmentUsedVars.find(i.first) != fragmentUsedVars.end())
+            _fragment._in_declarations.declare(i.second, "v_", i.first);
+    }
+
+    for(const String& i : generated)
+    {
+        _vertex._in_declarations.declare(attributes[i], "a_", i);
+        if(fragmentUsedVars.find(i) != fragmentUsedVars.end())
+        {
+            _vertex._out_declarations.declare(attributes[i], "v_", i);
+            _vert_main_source << "v_" << i << " = " << "a_" << i << ";\n";
+        }
+    }
+
+    for(const auto& i : _vertex_out)
+        _vertex._out_declarations.declare(i.first, "", i.second);
 }
 
-void GLShaderPreprocessorContext::addVertexSource(const String& source)
-{
-    _vert_snippets.push_back(GLShaderPreprocessor::Snippet(GLShaderPreprocessor::SNIPPET_TYPE_SOURCE, source));
-}
-
-void GLShaderPreprocessorContext::addFragmentColorModifier(const String& modifier)
-{
-    _frag_snippets.push_back(GLShaderPreprocessor::Snippet(GLShaderPreprocessor::SNIPPET_TYPE_MULTIPLY, modifier));
-}
-
-void GLShaderPreprocessorContext::addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure)
+void PipelineBuildingContext::addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure)
 {
     StringBuffer declareParams;
     StringBuffer callParams;
@@ -291,30 +325,36 @@ void GLShaderPreprocessorContext::addFragmentProcedure(const String& name, const
     }
     StringBuffer sb;
     sb << "vec4 ark_" << name << "(vec4 c" << declareParams.str() << ") {\n    " << procedure << "\n}\n\n";
-    _frag_snippets.push_back(GLShaderPreprocessor::Snippet(GLShaderPreprocessor::SNIPPET_TYPE_PROCEDURE, sb.str()));
+    _fragment._snippets.emplace_back(GLShaderPreprocessor::SNIPPET_TYPE_PROCEDURE, sb.str());
     sb.clear();
     sb << "\n    " << GLShaderPreprocessor::ANNOTATION_FRAG_COLOR << " = ark_" << name << '(' << GLShaderPreprocessor::ANNOTATION_FRAG_COLOR << callParams.str() << ");";
-    _frag_snippets.push_back(GLShaderPreprocessor::Snippet(GLShaderPreprocessor::SNIPPET_TYPE_PROCEDURE_CALL, sb.str()));
+    _fragment._snippets.emplace_back(GLShaderPreprocessor::SNIPPET_TYPE_PROCEDURE_CALL, sb.str());
 }
 
-void GLShaderPreprocessorContext::precompile(String& vertSource, String& fragSource)
+void PipelineBuildingContext::preCompile()
 {
     doSnippetPrecompile();
-    doPrecompile(vertSource, fragSource);
+    doPrecompile(_vertex._source, _fragment._source);
 }
 
-GLAttribute& GLShaderPreprocessorContext::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
+void PipelineBuildingContext::addAttribute(const String& name, const String& type)
+{
+    GLAttribute& attr = addPredefinedAttribute(name, type, 0);
+    _pipeline_layout._input->addAttribute(name, attr);
+}
+
+GLAttribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
 {
     if(_attributes.find(name) == _attributes.end())
-        _attributes[name] = getPredefinedAttribute(name, type);
+        _attributes[name] = makePredefinedAttribute(name, type);
 
-    if(scopes & GLShaderPreprocessor::SHADER_TYPE_FRAGMENT)
+    if(scopes == GLShaderPreprocessor::SHADER_TYPE_FRAGMENT)
         _fragment_in.push_back(std::pair<String, String>(type, name));
 
     return _attributes[name];
 }
 
-GLAttribute GLShaderPreprocessorContext::getPredefinedAttribute(const String& name, const String& type)
+GLAttribute PipelineBuildingContext::makePredefinedAttribute(const String& name, const String& type)
 {
     if(type == "vec3")
         return GLAttribute("a_" + name, type, GL_FLOAT, 3, GL_FALSE);
@@ -338,9 +378,9 @@ GLAttribute GLShaderPreprocessorContext::getPredefinedAttribute(const String& na
     return GLAttribute();
 }
 
-void GLShaderPreprocessorContext::doSnippetPrecompile()
+void PipelineBuildingContext::doSnippetPrecompile()
 {
-    for(const GLShaderPreprocessor::Snippet& i : _vert_snippets)
+    for(const GLShaderPreprocessor::Snippet& i : _vertex._snippets)
     {
         switch(i._type)
         {
@@ -352,7 +392,7 @@ void GLShaderPreprocessorContext::doSnippetPrecompile()
         }
     }
 
-    for(const GLShaderPreprocessor::Snippet& i : _frag_snippets)
+    for(const GLShaderPreprocessor::Snippet& i : _fragment._snippets)
     {
         switch(i._type)
         {
@@ -371,7 +411,7 @@ void GLShaderPreprocessorContext::doSnippetPrecompile()
     }
 }
 
-void GLShaderPreprocessorContext::doPrecompile(String& vertSource, String& fragSource)
+void PipelineBuildingContext::doPrecompile(String& vertSource, String& fragSource)
 {
     if(_frag_color_modifier.dirty())
     {
@@ -397,7 +437,7 @@ void GLShaderPreprocessorContext::doPrecompile(String& vertSource, String& fragS
     }
 }
 
-void GLShaderPreprocessorContext::insertBefore(String& src, const String& statement, const String& str)
+void PipelineBuildingContext::insertBefore(String& src, const String& statement, const String& str)
 {
     String::size_type pos = src.find(statement);
     if(pos != String::npos)
@@ -443,6 +483,42 @@ bool GLShaderPreprocessor::Declaration::has(const String& name) const
 String GLShaderPreprocessor::Declaration::str() const
 {
     return _lines.str();
+}
+
+GLShaderPreprocessor::Preprocessor::Preprocessor()
+    : _type(SHADER_TYPE_NONE)
+{
+}
+
+GLShaderPreprocessor::Preprocessor::Preprocessor(GLShaderPreprocessor::ShaderType type, String source)
+    : _type(type), _source(std::move(source))
+{
+}
+
+String GLShaderPreprocessor::Preprocessor::process(const GLContext& glContext) const
+{
+    DCHECK(glContext.version() > 0, "Unintialized GLContext");
+
+    static std::regex var_pattern("\\$\\{([\\w.]+)\\}");
+
+    StringBuffer sb;
+    if(_type == SHADER_TYPE_FRAGMENT && glContext.version() >= Ark::OPENGL_30)
+    {
+        sb << "#define texture2D texture\n";
+        sb << "#define textureCube texture\n";
+        sb << "";
+    }
+
+    const std::map<String, String>& annotations = glContext.annotations();
+
+    sb << _source.replace(var_pattern, [&annotations] (Array<String>& matches)->String {
+        const String& varName = matches.buf()[1];
+        const auto iter = annotations.find(varName);
+        DCHECK(iter != annotations.end(), "Cannot find constant \"%s\" in RenderEngine", varName.c_str());
+        return iter->second;
+    });
+
+    return sb.str();
 }
 
 }

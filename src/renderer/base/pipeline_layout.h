@@ -25,45 +25,39 @@ public:
 
     sp<GLProgram> makeGLProgram(GraphicsContext& graphicsContext) const;
 
-    GLAttribute& addPredefinedAttribute(const String& name, const String& type, uint32_t scopes = 0);
+    GLAttribute& addAttribute(const String& name, const String& type, uint32_t scopes = 0);
     void addUniform(const String& name, GLUniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed);
 
     const sp<GLSnippet>& snippet() const;
     void addSnippet(const sp<GLSnippet>& snippet);
 
-    void preprocess(GraphicsContext& graphicsContext);
-
-    GLShaderPreprocessor& vertex();
-    GLShaderPreprocessor& fragment();
+    void preCompile(GraphicsContext& graphicsContext);
 
     const sp<PipelineInput>& input() const;
 
 private:
     void initialize();
 
-    void addAttribute(const String& name, const String& type);
     void insertPredefinedUniforms(const String& source, StringBuffer& sb);
 
     void loadPredefinedAttribute(const document& manifest);
-
     void loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
 
 private:
     sp<PipelineFactory> _pipeline_factory;
-
-    op<GLShaderPreprocessorContext> _preprocessor_context;
-
-    GLShaderPreprocessor _vertex;
-    GLShaderPreprocessor _fragment;
-
     sp<RenderController> _render_controller;
     sp<PipelineInput> _input;
+    op<PipelineBuildingContext> _preprocessor_context;
 
     sp<GLSnippet> _snippet;
 
+    GLShaderPreprocessor::Preprocessor _vertex;
+    GLShaderPreprocessor::Preprocessor _fragment;
+
     friend class GLPipeline;
     friend class GLShaderBindings;
-    friend class GLShaderPreprocessorContext;
+    friend class PipelineBuildingContext;
+    friend class GLShaderPreprocessor;
 
 };
 

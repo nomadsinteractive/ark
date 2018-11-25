@@ -24,7 +24,7 @@ void GLSnippetClipPlane::preInitialize(PipelineLayout& source)
     }
 }
 
-void GLSnippetClipPlane::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context)
+void GLSnippetClipPlane::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context)
 {
     _enabled = graphicsContext.glContext()->version() >= Ark::OPENGL_30;
 
@@ -33,7 +33,7 @@ void GLSnippetClipPlane::preCompile(GraphicsContext& graphicsContext, GLShaderPr
         for(const auto& i : _planes)
         {
             const String uName = Strings::sprintf("u_Plane%d", i.first);
-            context.addVertexSource(Strings::sprintf("gl_ClipDistance[%d] = dot(a_Position, %s);", i.first, uName.c_str()));
+            context._vertex.addSource(Strings::sprintf("gl_ClipDistance[%d] = dot(a_Position, %s);", i.first, uName.c_str()));
         }
 }
 

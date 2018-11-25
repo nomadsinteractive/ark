@@ -17,6 +17,16 @@ std::vector<GLUniform>& PipelineInput::uniforms()
     return _uniforms;
 }
 
+const std::map<uint32_t, PipelineInput::Stream>& PipelineInput::streams() const
+{
+    return _streams;
+}
+
+std::map<uint32_t, PipelineInput::Stream>& PipelineInput::streams()
+{
+    return _streams;
+}
+
 void PipelineInput::addAttribute(String name, GLAttribute attribute)
 {
     if(_streams.find(attribute.divisor()) == _streams.end())

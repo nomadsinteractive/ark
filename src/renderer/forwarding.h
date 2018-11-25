@@ -25,7 +25,7 @@ class GLPipeline;
 class GLShaderBindings;
 class PipelineInput;
 class GLShaderPreprocessor;
-class GLShaderPreprocessorContext;
+class PipelineBuildingContext;
 class PipelineLayout;
 class GLSnippet;
 class GLSnippetDelegate;

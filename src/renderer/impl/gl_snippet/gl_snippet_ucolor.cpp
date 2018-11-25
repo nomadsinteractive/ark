@@ -19,9 +19,9 @@ void GLSnippetUColor::preInitialize(PipelineLayout& source)
     source.addUniform("u_Color", GLUniform::UNIFORM_F4, sp<FlatableV4f>::make(_color), _color.as<Changed>());
 }
 
-void GLSnippetUColor::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context)
+void GLSnippetUColor::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context)
 {
-    context.addFragmentColorModifier("u_Color");
+    context._fragment.addModifier("u_Color");
 }
 
 GLSnippetUColor::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)

@@ -134,7 +134,7 @@ const sp<GLProgram>& GLPipeline::getGLProgram(GraphicsContext& graphicsContext)
         return _stub->_program;
     }
 
-    _stub->_pipeline_factory->preprocess(graphicsContext);
+    _stub->_pipeline_factory->preCompile(graphicsContext);
     _stub->_program = _stub->_pipeline_factory->makeGLProgram(graphicsContext);
     graphicsContext.glResourceManager()->prepare(_stub, GLResourceManager::PS_ON_SURFACE_READY);
     _stub->prepare(graphicsContext);

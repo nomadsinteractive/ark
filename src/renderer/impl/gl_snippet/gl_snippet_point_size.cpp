@@ -6,12 +6,12 @@ namespace ark {
 
 void GLSnippetPointSize::preInitialize(PipelineLayout& source)
 {
-    source.addPredefinedAttribute("PointSize", "float");
+    source.addAttribute("PointSize", "float");
 }
 
-void GLSnippetPointSize::preCompile(GraphicsContext& graphicsContext, GLShaderPreprocessorContext& context)
+void GLSnippetPointSize::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context)
 {
-    context.addVertexSource("gl_PointSize = a_PointSize;");
+    context._vertex.addSource("gl_PointSize = a_PointSize;");
 }
 
 sp<GLSnippet> GLSnippetPointSize::DICTIONARY::build(const sp<Scope>& /*args*/)
