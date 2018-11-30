@@ -8,11 +8,11 @@
 #include "graphics/base/rect.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/gl_model.h"
+#include "renderer/inf/render_model.h"
 
 namespace ark {
 
-class GLModelNinePatch : public GLModel {
+class GLModelNinePatch : public RenderModel {
 private:
     struct Item {
         Item(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight);
@@ -28,16 +28,16 @@ private:
 public:
     GLModelNinePatch(const document& manifest, const sp<Atlas>& atlas);
 
-    virtual void initialize(GLShaderBindings& bindings) override;
+    virtual void initialize(ShaderBindings& bindings) override;
     virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) override;
     virtual void load(GLModelBuffer& buf, int32_t type, const V& size) override;
 
 //  [[plugin::builder("nine-patch")]]
-    class BUILDER : public Builder<GLModel> {
+    class BUILDER : public Builder<RenderModel> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<GLModel> build(const sp<Scope>& args) override;
+        virtual sp<RenderModel> build(const sp<Scope>& args) override;
 
     private:
         document _manifest;

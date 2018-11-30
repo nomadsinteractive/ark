@@ -1,20 +1,20 @@
 #include "renderer/impl/gl_model/gl_model_quad.h"
 
 #include "renderer/base/atlas.h"
-#include "renderer/base/gl_drawing_context.h"
+#include "renderer/base/drawing_context.h"
 #include "renderer/base/gl_model_buffer.h"
 #include "renderer/base/gl_resource_manager.h"
-#include "renderer/base/gl_shader_bindings.h"
+#include "renderer/base/shader_bindings.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
 
 namespace ark {
 
 GLModelQuad::GLModelQuad(const sp<Atlas>& atlas)
-    : GLModel(GL_TRIANGLES), _atlas(atlas)
+    : RenderModel(RENDER_MODE_TRIANGLES), _atlas(atlas)
 {
 }
 
-void GLModelQuad::initialize(GLShaderBindings& bindings)
+void GLModelQuad::initialize(ShaderBindings& bindings)
 {
     bindings.bindGLTexture(_atlas->texture());
 }
@@ -71,7 +71,7 @@ GLModelQuad::BUILDER::BUILDER(BeanFactory& factory, const document manifest)
 {
 }
 
-sp<GLModel> GLModelQuad::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> GLModelQuad::BUILDER::build(const sp<Scope>& args)
 {
     return sp<GLModelQuad>::make(_atlas->build(args));
 }

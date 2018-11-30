@@ -37,7 +37,7 @@ void RenderViewOpenGL::onSurfaceCreated()
 
 void RenderViewOpenGL::onSurfaceChanged(uint32_t width, uint32_t height)
 {
-    _graphics_context.reset(new GraphicsContext(_graphics_context->glContext(), _graphics_context->glResourceManager()));
+    _graphics_context.reset(new GraphicsContext(_graphics_context->glContext(), _graphics_context->resourceManager()));
     initialize(width, height);
 }
 

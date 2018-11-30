@@ -4,7 +4,7 @@
 
 namespace ark {
 
-sp<GLTexture> NoiseTextureResource::get(const String& name)
+sp<Texture> NoiseTextureResource::get(const String& name)
 {
 //    return _resource_manager->createGLTexture(512, 256);
     return nullptr;

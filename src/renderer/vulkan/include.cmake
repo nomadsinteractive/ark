@@ -12,6 +12,7 @@ ark_link_libraries(${Vulkan_LIBRARIES})
 
 aux_source_directory(src/renderer/vulkan/base LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/vulkan/gl_snippet_factory LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/vulkan/pipeline_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/vulkan/render_view LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/vulkan/renderer_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/vulkan/util LOCAL_SRC_LIST)

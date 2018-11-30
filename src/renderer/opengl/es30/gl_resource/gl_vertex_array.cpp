@@ -2,14 +2,15 @@
 
 #include "core/util/log.h"
 
-#include "renderer/base/gl_shader_bindings.h"
+#include "renderer/base/shader_bindings.h"
+#include "renderer/opengl/base/gl_pipeline.h"
 
 #include "platform/gl/gl.h"
 
 namespace ark {
 namespace gles30 {
 
-GLVertexArray::GLVertexArray(const sp<GLShaderBindings>& shaderBindings, const GLPipeline& shader)
+GLVertexArray::GLVertexArray(const sp<ShaderBindings>& shaderBindings, const Shader& shader)
     : _id(0), _shader_bindings(shaderBindings), _shader(shader)
 {
 }
@@ -25,8 +26,8 @@ void GLVertexArray::prepare(GraphicsContext& graphicsContext)
     glBindVertexArray(_id);
     _shader_bindings->arrayBuffer().prepare(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, _shader_bindings->arrayBuffer().id());
-    const sp<GLProgram>& program = _shader.getGLProgram(graphicsContext);
-    _shader_bindings->bindArrayBuffers(graphicsContext, program);
+    const sp<Pipeline> pipeline = _shader.getPipeline(graphicsContext);
+    pipeline->bind(graphicsContext, _shader_bindings);
     glBindVertexArray(0);
     LOGD("id = %d", _id);
 }

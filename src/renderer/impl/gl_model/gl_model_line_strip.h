@@ -6,24 +6,24 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/gl_buffer.h"
-#include "renderer/inf/gl_model.h"
+#include "renderer/inf/render_model.h"
 
 namespace ark {
 
-class GLModelLineStrip : public GLModel {
+class GLModelLineStrip : public RenderModel {
 public:
     GLModelLineStrip(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas);
 
-    virtual void initialize(GLShaderBindings& bindings) override;
+    virtual void initialize(ShaderBindings& bindings) override;
     virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) override;
     virtual void load(GLModelBuffer& buf, int32_t type, const V& scale) override;
 
 //  [[plugin::resource-loader("line-strip")]]
-    class BUILDER : public Builder<GLModel> {
+    class BUILDER : public Builder<RenderModel> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<GLModel> build(const sp<Scope>& args) override;
+        virtual sp<RenderModel> build(const sp<Scope>& args) override;
 
     private:
         sp<Builder<Atlas>> _atlas;

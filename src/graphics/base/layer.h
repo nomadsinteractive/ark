@@ -29,21 +29,22 @@ public:
     struct Snapshot;
 
     struct Stub {
-        Stub(const sp<GLModel>& model, const sp<GLPipeline>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        Stub(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         sp<RenderCommand> render(const Snapshot& snapshot, float x, float y);
 
-        sp<GLModel> _model;
-        sp<GLPipeline> _shader;
+        sp<RenderModel> _model;
+        sp<Shader> _shader;
         sp<ResourceLoaderContext> _resource_loader_context;
 
         sp<MemoryPool> _memory_pool;
         sp<GLResourceManager> _resource_manager;
-        sp<GLShaderBindings> _shader_bindings;
+        sp<ShaderBindings> _shader_bindings;
 
         std::vector<Item> _items;
         WeakRefList<LayerContext> _layer_contexts;
         size_t _last_rendered_count;
+
     };
 
     struct Snapshot {
@@ -61,13 +62,13 @@ public:
     };
 
 public:
-    Layer(const sp<GLModel>& model, const sp<GLPipeline>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    Layer(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
     void draw(float x, float y, const sp<RenderObject>& renderObject);
 
-    const sp<GLModel>& model() const;
+    const sp<RenderModel>& model() const;
 
     Snapshot snapshot() const;
     sp<LayerContext> makeContext();
@@ -83,13 +84,12 @@ public:
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
-        sp<Builder<GLModel>> _model;
-        sp<Builder<GLPipeline>> _shader;
+        sp<Builder<RenderModel>> _model;
+        sp<Builder<Shader>> _shader;
     };
 
 private:
     sp<Stub> _stub;
-
 };
 
 }

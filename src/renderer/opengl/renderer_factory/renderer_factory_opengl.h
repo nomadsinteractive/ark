@@ -15,11 +15,8 @@ public:
     RendererFactoryOpenGL(const sp<GLResourceManager>& glResources);
 
     virtual void initialize(GLContext& glContext) override;
-
-    virtual void setGLVersion(Ark::GLVersion version, GLContext& glContext) override;
-
+    virtual void setGLVersion(Ark::RendererVersion version, GLContext& glContext) override;
     virtual sp<RenderView> createRenderView(const sp<GLContext>& glContext, const Viewport& viewport) override;
-
     virtual sp<PipelineFactory> createPipelineFactory() override;
 
 private:

@@ -9,18 +9,18 @@
 #include "graphics/base/rect.h"
 #include "graphics/base/size.h"
 
-#include "renderer/base/gl_texture.h"
+#include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
 
 namespace ark {
 
-Atlas::Atlas(const sp<GLTexture>& texture, bool allowDefaultItem)
+Atlas::Atlas(const sp<Texture>& texture, bool allowDefaultItem)
     : _texture(texture), _half_pixel_x(static_cast<uint16_t>(32768 / texture->width())), _half_pixel_y(static_cast<uint16_t>(32768 / texture->height())),
       _atlas(new ByIndex<Item>()), _allow_default_item(allowDefaultItem)
 {
 }
 
-const sp<GLTexture>& Atlas::texture() const
+const sp<Texture>& Atlas::texture() const
 {
     return _texture;
 }
@@ -91,7 +91,7 @@ Atlas::Item Atlas::makeItem(uint32_t left, uint32_t top, uint32_t right, uint32_
 
 Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(factory), _manifest(manifest), _atlas(factory.getBuilder<Atlas>(manifest, Constants::Attributes::ATLAS, false)),
-      _texture(factory.getBuilder<GLTexture>(manifest, Constants::Attributes::SRC)),
+      _texture(factory.getBuilder<Texture>(manifest, Constants::Attributes::SRC)),
       _resource_loader_context(resourceLoaderContext)
 {
 }
@@ -101,7 +101,7 @@ sp<Atlas> Atlas::BUILDER::build(const sp<Scope>& args)
     if(_atlas)
         return _atlas->build(args);
 
-    const sp<GLTexture> texture = _texture->build(args);
+    const sp<Texture> texture = _texture->build(args);
     DCHECK(texture, "Build atlas or texture from \"%s\" failed", Documents::toString(_manifest).c_str());
     const sp<Atlas> atlas = sp<Atlas>::make(_texture->build(args));
     for(const document& i : _manifest->children())

@@ -83,7 +83,7 @@ private:
     float _line_height;
     float _line_indent;
 
-    sp<GLModel> _model;
+    sp<RenderModel> _model;
 
     SafePtr<Size> _size;
 };

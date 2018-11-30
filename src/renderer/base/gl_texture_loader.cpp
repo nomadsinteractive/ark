@@ -9,13 +9,13 @@ GLTextureLoader::GLTextureLoader(const sp<GLResourceManager>& resources)
 {
 }
 
-sp<GLTexture> GLTextureLoader::get(const String& name)
+sp<Texture> GLTextureLoader::get(const String& name)
 {
     auto iter = _textures.find(name);
     if(iter != _textures.end())
         return iter->second;
 
-    const sp<GLTexture> texture = _resource_manager->loadGLTexture(name);
+    const sp<Texture> texture = _resource_manager->loadGLTexture(name);
     _textures[name] = texture;
     return _textures[name];
 }

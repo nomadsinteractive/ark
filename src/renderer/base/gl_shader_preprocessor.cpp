@@ -10,7 +10,7 @@
 #include "renderer/base/gl_context.h"
 #include "renderer/base/pipeline_layout.h"
 
-#define VAR_PATTERN "\\s+([\\w\\d]+)\\s+(?:a_|v_)([\\w\\d_]+);"
+#define VAR_PATTERN "\\s+(int|uint8|float|vec2|vec3|vec4|mat3|mat4|sampler2D)\\s+(?:a_|v_|u_)([\\w\\d_]+);"
 
 namespace ark {
 
@@ -23,6 +23,7 @@ const char* GLShaderPreprocessor::ANNOTATION_FRAG_COLOR = "${frag.color}";
 std::regex GLShaderPreprocessor::_IN_PATTERN("(?:attribute|in)" VAR_PATTERN);
 std::regex GLShaderPreprocessor::_OUT_PATTERN("(?:varying|out)" VAR_PATTERN);
 std::regex GLShaderPreprocessor::_IN_OUT_PATTERN("(?:varying|in)" VAR_PATTERN);
+std::regex GLShaderPreprocessor::_UNIFORM_PATTERN("uniform" VAR_PATTERN);
 
 GLShaderPreprocessor::GLShaderPreprocessor(ShaderType type, const String& source)
     : _type(type), _source(source), _in_declarations(type == SHADER_TYPE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
@@ -43,10 +44,10 @@ void GLShaderPreprocessor::addModifier(const String& modifier)
 void GLShaderPreprocessor::parse(PipelineBuildingContext& context, PipelineLayout& shader)
 {
     parseMainBlock(shader);
-    parseDeclarations(context, shader);
+    parseDeclarations(context);
 }
 
-void GLShaderPreprocessor::parseMainBlock(PipelineLayout& shader)
+void GLShaderPreprocessor::parseMainBlock(PipelineLayout& pipelineLayout)
 {
     if(_source.find("void main()") != String::npos)
     {
@@ -68,10 +69,10 @@ void GLShaderPreprocessor::parseMainBlock(PipelineLayout& shader)
 
     DCHECK(_main_block, "Undefined ark_main in shader");
 
-    _main_block->parse(shader);
+    _main_block->parse(pipelineLayout);
 }
 
-void GLShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context, PipelineLayout& pipelineLayout)
+void GLShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
 {
     _in_declarations.parse(_source, _type == SHADER_TYPE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
     _out_declarations.parse(_source, _OUT_PATTERN);
@@ -140,7 +141,7 @@ GLShaderPreprocessor::Preprocessor GLShaderPreprocessor::preprocess()
     return Preprocessor(_type, _source);
 }
 
-void GLShaderPreprocessor::insertPredefinedUniforms(const std::vector<GLUniform>& uniforms)
+void GLShaderPreprocessor::insertPredefinedUniforms(const std::vector<Uniform>& uniforms)
 {
     static const std::regex UNIFORM_PATTERN("uniform\\s+\\w+\\s+(\\w+)(?:\\[\\d+\\])?;");
     std::set<String> names;
@@ -150,7 +151,7 @@ void GLShaderPreprocessor::insertPredefinedUniforms(const std::vector<GLUniform>
         return true;
     });
 
-    for(const GLUniform& i : uniforms)
+    for(const Uniform& i : uniforms)
         if(names.find(i.name()) == names.end() && _source.find(i.name()) != String::npos)
             generated.push_back(i.declaration());
 

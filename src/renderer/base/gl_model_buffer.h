@@ -22,7 +22,7 @@ namespace ark {
 
 class ARK_API GLModelBuffer {
 public:
-    GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<GLShaderBindings>& shaderBindings, size_t renderObjectCount, uint32_t stride);
+    GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t renderObjectCount, uint32_t stride);
     DEFAULT_COPY_AND_ASSIGN(GLModelBuffer);
 
     void writePosition(const V3& position);
@@ -60,7 +60,7 @@ private:
     void applyVaryings();
 
 private:
-    sp<GLShaderBindings> _shader_bindings;
+    sp<ShaderBindings> _shader_bindings;
 
     GLBuffer::Builder _vertices;
     std::map<uint32_t, GLBuffer::Builder> _instanced_buffer_builders;

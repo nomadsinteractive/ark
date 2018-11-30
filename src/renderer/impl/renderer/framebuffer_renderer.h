@@ -13,7 +13,7 @@ namespace ark {
 
 class FrameBufferRenderer : public Renderer {
 public:
-    FrameBufferRenderer(const sp<Renderer>& delegate, const sp<GLTexture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    FrameBufferRenderer(const sp<Renderer>& delegate, const sp<Texture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
@@ -28,7 +28,7 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
 
         sp<Builder<Renderer>> _delegate;
-        sp<Builder<GLTexture>> _texture;
+        sp<Builder<Texture>> _texture;
     };
 
 private:

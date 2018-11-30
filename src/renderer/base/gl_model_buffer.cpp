@@ -7,11 +7,11 @@
 #include "graphics/base/v3.h"
 
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/gl_shader_bindings.h"
+#include "renderer/base/shader_bindings.h"
 
 namespace ark {
 
-GLModelBuffer::GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<GLShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
+GLModelBuffer::GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
     : _shader_bindings(shaderBindings), _vertices(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), stride, instanceCount),
       _instanced_buffer_builders(shaderBindings->makeInstancedBufferBuilders(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), instanceCount)),
       _indice_base(0), _is_instanced(shaderBindings->instancedArrays().size() > 0)
@@ -31,7 +31,7 @@ void GLModelBuffer::writePosition(float x, float y, float z)
 void GLModelBuffer::writeTexCoordinate(uint16_t u, uint16_t v)
 {
     const uint16_t uv[2] = {u, v};
-    _vertices.write(uv, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_TEX_COORDINATE);
+    _vertices.write(uv, _shader_bindings->attributes()._offsets, ShaderBindings::ATTRIBUTE_NAME_TEX_COORDINATE);
 }
 
 void GLModelBuffer::writeNormal(float x, float y, float z)
@@ -41,7 +41,7 @@ void GLModelBuffer::writeNormal(float x, float y, float z)
 
 void GLModelBuffer::writeNormal(const V3& normal)
 {
-    _vertices.write(normal, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_NORMAL);
+    _vertices.write(normal, _shader_bindings->attributes()._offsets, ShaderBindings::ATTRIBUTE_NAME_NORMAL);
 }
 
 void GLModelBuffer::writeTangent(float x, float y, float z)
@@ -51,7 +51,7 @@ void GLModelBuffer::writeTangent(float x, float y, float z)
 
 void GLModelBuffer::writeTangent(const V3& tangent)
 {
-    _vertices.write(tangent, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_TANGENT);
+    _vertices.write(tangent, _shader_bindings->attributes()._offsets, ShaderBindings::ATTRIBUTE_NAME_TANGENT);
 }
 
 void GLModelBuffer::writeBitangent(float x, float y, float z)
@@ -61,7 +61,7 @@ void GLModelBuffer::writeBitangent(float x, float y, float z)
 
 void GLModelBuffer::writeBitangent(const V3& bitangent)
 {
-    _vertices.write(bitangent, _shader_bindings->attributes()._offsets, GLShaderBindings::ATTRIBUTE_NAME_BITANGENT);
+    _vertices.write(bitangent, _shader_bindings->attributes()._offsets, ShaderBindings::ATTRIBUTE_NAME_BITANGENT);
 }
 
 void GLModelBuffer::applyVaryings()

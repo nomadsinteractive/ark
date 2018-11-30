@@ -12,8 +12,8 @@
 #include "graphics/base/size.h"
 
 #include "renderer/base/gl_resource_manager.h"
-#include "renderer/base/gl_pipeline.h"
-#include "renderer/base/gl_texture_default.h"
+#include "renderer/base/shader.h"
+#include "renderer/opengl/base/gl_texture.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/opengl/util/gl_util.h"
 
@@ -40,8 +40,8 @@ struct OpenCLContext {
 
 }
 
-GLRadianceCubemap::GLRadianceCubemap(const sp<GLResourceManager>& resourceManager, Format format, Feature features, const sp<GLTexture>& texture, const sp<Size>& size)
-    : GLTexture(resourceManager->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), format, features), _resource_manager(resourceManager), _texture(texture)
+GLRadianceCubemap::GLRadianceCubemap(const sp<GLResourceManager>& resourceManager, Format format, Feature features, const sp<Texture>& texture, const sp<Size>& size)
+    : Texture(resourceManager->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), format, features), _resource_manager(resourceManager), _texture(texture)
 {
 }
 
@@ -93,14 +93,14 @@ void GLRadianceCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uint3
 }
 
 GLRadianceCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_manager(resourceLoaderContext->glResourceManager()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _texture(factory.ensureBuilder<GLTexture>(manifest, Constants::Attributes::TEXTURE)),
-      _format(Documents::getAttribute<GLTexture::Format>(manifest, "format", FORMAT_AUTO)),
-      _features(Documents::getAttribute<GLTexture::Feature>(manifest, "feature", FEATURE_DEFAULT))
+    : _resource_manager(resourceLoaderContext->resourceManager()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+      _texture(factory.ensureBuilder<Texture>(manifest, Constants::Attributes::TEXTURE)),
+      _format(Documents::getAttribute<Texture::Format>(manifest, "format", FORMAT_AUTO)),
+      _features(Documents::getAttribute<Texture::Feature>(manifest, "feature", FEATURE_DEFAULT))
 {
 }
 
-sp<GLTexture> GLRadianceCubemap::BUILDER::build(const sp<Scope>& args)
+sp<Texture> GLRadianceCubemap::BUILDER::build(const sp<Scope>& args)
 {
     return _resource_manager->createGLResource<GLRadianceCubemap>(_resource_manager, _format, _features, _texture->build(args), _size->build(args));
 }

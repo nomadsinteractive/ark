@@ -39,12 +39,12 @@ public:
 
     void onDrawFrame(GraphicsContext& graphicsContext);
 
-    void prepare(const sp<GLResource>& resource, PreparingStrategy strategy);
+    void prepare(const sp<RenderResource>& resource, PreparingStrategy strategy);
     void prepare(const GLBuffer& buffer, PreparingStrategy strategy);
-    void recycle(const sp<GLResource>& resource) const;
+    void recycle(const sp<RenderResource>& resource) const;
 
-    sp<GLTexture> loadGLTexture(const String& name);
-    sp<GLTexture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, PreparingStrategy ps = PS_ONCE_AND_ON_SURFACE_READY);
+    sp<Texture> loadGLTexture(const String& name);
+    sp<Texture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, PreparingStrategy ps = PS_ONCE_AND_ON_SURFACE_READY);
 
     GLBuffer makeGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage);
     GLBuffer makeDynamicArrayBuffer() const;
@@ -61,10 +61,10 @@ public:
 private:
     class ExpirableGLResource {
     public:
-        ExpirableGLResource(const sp<GLResource>& resource);
+        ExpirableGLResource(const sp<RenderResource>& resource);
         ExpirableGLResource(const ExpirableGLResource& other);
 
-        const sp<GLResource>& resource() const;
+        const sp<RenderResource>& resource() const;
 
         bool isExpired() const;
 
@@ -74,7 +74,7 @@ private:
         bool operator < (const ExpirableGLResource& other) const;
 
     private:
-        sp<GLResource> _resource;
+        sp<RenderResource> _resource;
     };
 
     struct PreparingGLResource {
@@ -100,7 +100,7 @@ private:
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
 
     sp<GLRecycler> _recycler;
-    sp<Dictionary<sp<GLTexture>>> _gl_texture_loader;
+    sp<Dictionary<sp<Texture>>> _gl_texture_loader;
 
     LockFreeStack<PreparingGLResource> _preparing_items;
     LockFreeStack<sp<SharedBuffer>> _shared_buffers;

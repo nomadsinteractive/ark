@@ -371,11 +371,11 @@ namespace vks
 			size_t size = strlen(shaderCode);
 			assert(size > 0);
 
-			VkShaderModule shaderModule;
+            VkShaderModule shaderModule;
 			VkShaderModuleCreateInfo moduleCreateInfo;
 			moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 			moduleCreateInfo.pNext = NULL;
-			moduleCreateInfo.codeSize = 3 * sizeof(uint32_t) + size + 1;
+            moduleCreateInfo.codeSize = 3 * sizeof(uint32_t) + size + 1;
 			moduleCreateInfo.pCode = (uint32_t*)malloc(moduleCreateInfo.codeSize);
 			moduleCreateInfo.flags = 0;
 

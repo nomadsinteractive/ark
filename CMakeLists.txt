@@ -79,12 +79,13 @@ aux_source_directory(src/graphics/util LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/base LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/atlas_importer LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/renderer LOCAL_SRC_LIST)
-aux_source_directory(src/renderer/impl/render_command LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/gl_model LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/gl_snippet LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/layer LOCAL_SRC_LIST)
 
+aux_source_directory(src/renderer/opengl/base LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/pipeline_factory LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/opengl/render_command LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/render_view LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/renderer_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/es20/gl_snippet LOCAL_SRC_LIST)
@@ -191,7 +192,7 @@ ark_setup_tools(ark_gen_class_hierarchy)
 
 ark_gen_builtin_plugin_class(ark ark framework_plugin src/core src/graphics src/renderer/base src/renderer/impl)
 
-ark_gen_plugin_class(opengl builtin ark::opengl opengl_plugin src/renderer/opengl/es30)
+ark_gen_plugin_class(opengl builtin ark::opengl opengl_plugin src/renderer/opengl)
 
 if(ARK_USE_VULKAN)
     include(src/renderer/vulkan/include.cmake)

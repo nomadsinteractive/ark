@@ -25,7 +25,7 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
 
         sp<Builder<Atlas>> _atlas;
-        sp<Builder<GLPipeline>> _shader;
+        sp<Builder<Shader>> _shader;
     };
 
 };

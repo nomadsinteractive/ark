@@ -6,11 +6,11 @@
 #include "graphics/inf/alphabet.h"
 
 #include "renderer/base/atlas.h"
-#include "renderer/base/gl_drawing_context.h"
+#include "renderer/base/drawing_context.h"
 #include "renderer/base/gl_model_buffer.h"
-#include "renderer/base/gl_texture.h"
+#include "renderer/base/texture.h"
 #include "renderer/base/gl_resource_manager.h"
-#include "renderer/base/gl_shader_bindings.h"
+#include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/gl_model/gl_model_quad.h"
 
@@ -113,11 +113,11 @@ void GLModelText::Stub::recycle(GraphicsContext& /*graphicsContext*/)
 }
 
 GLModelText::GLModelText(GLResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
-    : GLModel(GL_TRIANGLES), _stub(sp<Stub>::make(resourceManager, alphabet, textureWidth, textureHeight))
+    : RenderModel(RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(resourceManager, alphabet, textureWidth, textureHeight))
 {
 }
 
-void GLModelText::initialize(GLShaderBindings& bindings)
+void GLModelText::initialize(ShaderBindings& bindings)
 {
     bindings.bindGLTexture(_stub, static_cast<uint32_t>(GL_TEXTURE_2D), 0);
 }
@@ -161,9 +161,9 @@ GLModelText::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, co
 {
 }
 
-sp<GLModel> GLModelText::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> GLModelText::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<GLModelText>::make(_resource_loader_context->glResourceManager(), _alphabet->build(args), _texture_width, _texture_height);
+    return sp<GLModelText>::make(_resource_loader_context->resourceManager(), _alphabet->build(args), _texture_width, _texture_height);
 }
 
 }

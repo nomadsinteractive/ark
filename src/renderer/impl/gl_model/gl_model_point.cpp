@@ -1,20 +1,20 @@
 #include "renderer/impl/gl_model/gl_model_point.h"
 
 #include "renderer/base/atlas.h"
-#include "renderer/base/gl_drawing_context.h"
+#include "renderer/base/drawing_context.h"
 #include "renderer/base/gl_model_buffer.h"
 #include "renderer/base/gl_resource_manager.h"
-#include "renderer/base/gl_shader_bindings.h"
+#include "renderer/base/shader_bindings.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
 
 namespace ark {
 
 GLModelPoint::GLModelPoint(const sp<Atlas>& atlas)
-    : GLModel(GL_POINTS), _atlas(atlas)
+    : RenderModel(RENDER_MODE_POINTS), _atlas(atlas)
 {
 }
 
-void GLModelPoint::initialize(GLShaderBindings& bindings)
+void GLModelPoint::initialize(ShaderBindings& bindings)
 {
     bindings.bindGLTexture(_atlas->texture());
 }
@@ -38,7 +38,7 @@ GLModelPoint::BUILDER::BUILDER(BeanFactory& factory, const document manifest)
 {
 }
 
-sp<GLModel> GLModelPoint::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> GLModelPoint::BUILDER::build(const sp<Scope>& args)
 {
     return sp<GLModelPoint>::make(_atlas->build(args));
 }

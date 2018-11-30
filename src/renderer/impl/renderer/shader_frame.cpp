@@ -10,18 +10,18 @@
 
 #include "renderer/base/gl_buffer.h"
 #include "renderer/base/gl_resource_manager.h"
-#include "renderer/base/gl_pipeline.h"
-#include "renderer/base/gl_shader_bindings.h"
+#include "renderer/base/shader.h"
+#include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/impl/render_command/draw_elements.h"
+#include "renderer/opengl/render_command/draw_elements.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
 
 namespace ark {
 
-ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<GLPipeline>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _size(size), _resource_manager(resourceLoaderContext->glResourceManager()), _shader(shader),
+ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _size(size), _resource_manager(resourceLoaderContext->resourceManager()), _shader(shader),
       _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
-      _shader_bindings(sp<GLShaderBindings>::make(_resource_manager, shader)),
+      _shader_bindings(sp<ShaderBindings>::make(_resource_manager, shader)),
       _array_buffer(_shader_bindings->arrayBuffer())
 {
 }
@@ -30,7 +30,7 @@ void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
     const GLBuffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(_resource_manager, GLBuffer::NAME_QUADS, 1);
     const sp<GLBuffer::Uploader> uploader = _object_pool->obtain<GLBuffer::ByteArrayUploader>(getArrayBuffer(x, y));
-    renderRequest.addRequest(_object_pool->obtain<DrawElements>(GLDrawingContext(_shader_bindings, _shader->camera()->snapshop(), _array_buffer.snapshot(uploader), indexBuffer, GL_TRIANGLES), _shader));
+    renderRequest.addRequest(_object_pool->obtain<opengl::DrawElements>(DrawingContext(_shader_bindings, _shader->camera()->snapshop(), _array_buffer.snapshot(uploader), indexBuffer), _shader, GL_TRIANGLES));
 }
 
 const SafePtr<Size>& ShaderFrame::size()
@@ -59,14 +59,14 @@ bytearray ShaderFrame::getArrayBuffer(float x, float y) const
 
 ShaderFrame::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _size(factory.ensureBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _shader(GLPipeline::fromDocument(factory, manifest, resourceLoaderContext))
+      _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext))
 {
 }
 
 sp<Renderer> ShaderFrame::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Size> size = _size->build(args);
-    const sp<GLPipeline> shader = _shader->build(args);
+    const sp<Shader> shader = _shader->build(args);
     return sp<ShaderFrame>::make(size, shader, _resource_loader_context);
 }
 

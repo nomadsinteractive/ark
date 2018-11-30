@@ -13,9 +13,9 @@
 #include "renderer/base/gl_buffer.h"
 #include "renderer/base/gl_context.h"
 #include "renderer/base/gl_recycler.h"
-#include "renderer/base/gl_pipeline.h"
+#include "renderer/base/shader.h"
 #include "renderer/base/gl_snippet_delegate.h"
-#include "renderer/base/gl_texture_default.h"
+#include "renderer/opengl/base/gl_texture.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/inf/gl_snippet.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
@@ -26,17 +26,17 @@ namespace ark {
 
 namespace {
 
-class GLTextureResource : public Dictionary<sp<GLTexture>> {
+class GLTextureResource : public Dictionary<sp<Texture>> {
 public:
     GLTextureResource(const sp<GLRecycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
         : _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader)
     {
     }
 
-    virtual sp<GLTexture> get(const String& name) override {
+    virtual sp<Texture> get(const String& name) override {
         const bitmap bitmapBounds = _bitmap_bounds_loader->get(name);
         DCHECK(bitmapBounds, "Texture resource \"%s\" not found", name.c_str());
-        return sp<GLTextureDefault>::make(_recycler, sp<Size>::make(static_cast<float>(bitmapBounds->width()), static_cast<float>(bitmapBounds->height())), GLTexture::FORMAT_AUTO, GLTexture::FEATURE_DEFAULT, sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
+        return sp<GLTexture>::make(_recycler, sp<Size>::make(static_cast<float>(bitmapBounds->width()), static_cast<float>(bitmapBounds->height())), Texture::FORMAT_AUTO, Texture::FEATURE_DEFAULT, sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
     }
 
 private:
@@ -94,7 +94,7 @@ void GLResourceManager::onDrawFrame(GraphicsContext& graphicsContext)
         _recycler->doRecycling(graphicsContext);
 }
 
-void GLResourceManager::prepare(const sp<GLResource>& resource, PreparingStrategy strategy)
+void GLResourceManager::prepare(const sp<RenderResource>& resource, PreparingStrategy strategy)
 {
     switch(strategy)
     {
@@ -114,22 +114,22 @@ void GLResourceManager::prepare(const GLBuffer& buffer, GLResourceManager::Prepa
     prepare(buffer._stub, strategy);
 }
 
-void GLResourceManager::recycle(const sp<GLResource>& resource) const
+void GLResourceManager::recycle(const sp<RenderResource>& resource) const
 {
     _recycler->recycle(resource);
 }
 
-sp<GLTexture> GLResourceManager::loadGLTexture(const String& name)
+sp<Texture> GLResourceManager::loadGLTexture(const String& name)
 {
-    const sp<GLTexture> texture = _gl_texture_loader->get(name);
+    const sp<Texture> texture = _gl_texture_loader->get(name);
     DCHECK(texture, "Texture \"%s\" not loaded", name.c_str());
     prepare(texture, PS_ONCE_AND_ON_SURFACE_READY);
     return texture;
 }
 
-sp<GLTexture> GLResourceManager::createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, PreparingStrategy ps)
+sp<Texture> GLResourceManager::createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, PreparingStrategy ps)
 {
-    sp<GLTexture> texture = sp<GLTextureDefault>::make(_recycler, sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), GLTexture::FORMAT_AUTO, GLTexture::FEATURE_DEFAULT, bitmapVariable);
+    sp<Texture> texture = sp<GLTexture>::make(_recycler, sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), Texture::FORMAT_AUTO, Texture::FEATURE_DEFAULT, bitmapVariable);
     prepare(texture, ps);
     return texture;
 }
@@ -196,7 +196,7 @@ void GLResourceManager::doSurfaceReady(GraphicsContext& graphicsContext)
         resource.prepare(graphicsContext);
 }
 
-GLResourceManager::ExpirableGLResource::ExpirableGLResource(const sp<GLResource>& resource)
+GLResourceManager::ExpirableGLResource::ExpirableGLResource(const sp<RenderResource>& resource)
     : _resource(resource) {
 }
 
@@ -204,7 +204,7 @@ GLResourceManager::ExpirableGLResource::ExpirableGLResource(const GLResourceMana
     : _resource(other._resource) {
 }
 
-const sp<GLResource>& GLResourceManager::ExpirableGLResource::resource() const
+const sp<RenderResource>& GLResourceManager::ExpirableGLResource::resource() const
 {
     return _resource;
 }

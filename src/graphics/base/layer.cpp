@@ -6,19 +6,18 @@
 #include "graphics/base/size.h"
 
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/gl_drawing_context.h"
+#include "renderer/base/drawing_context.h"
 #include "renderer/base/gl_model_buffer.h"
-#include "renderer/base/gl_pipeline.h"
-#include "renderer/base/gl_shader_bindings.h"
-#include "renderer/inf/gl_model.h"
-#include "renderer/impl/render_command/draw_elements.h"
-#include "renderer/impl/render_command/draw_elements_instanced.h"
+#include "renderer/base/shader.h"
+#include "renderer/base/shader_bindings.h"
+#include "renderer/inf/render_model.h"
+#include "renderer/inf/pipeline_factory.h"
 
 namespace ark {
 
-Layer::Stub::Stub(const sp<GLModel>& model, const sp<GLPipeline>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
+Layer::Stub::Stub(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _model(model), _shader(shader), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
-      _resource_manager(resourceLoaderContext->glResourceManager()), _shader_bindings(sp<GLShaderBindings>::make(resourceLoaderContext->glResourceManager(), shader)),
+      _resource_manager(resourceLoaderContext->resourceManager()), _shader_bindings(sp<ShaderBindings>::make(resourceLoaderContext->resourceManager(), shader)),
       _last_rendered_count(0)
 {
     _model->initialize(_shader_bindings);
@@ -70,18 +69,18 @@ sp<RenderCommand> Layer::Snapshot::render(float x, float y) const
                 sBuilder.write(matrix);
             }
         }
-        GLDrawingContext drawingContext(_stub->_shader_bindings, _camera, _stub->_shader_bindings->arrayBuffer().snapshot(buf.vertices().makeUploader()), buf.indices(), _stub->_model->mode());
+        DrawingContext drawingContext(_stub->_shader_bindings, _camera, _stub->_shader_bindings->arrayBuffer().snapshot(buf.vertices().makeUploader()), buf.indices());
         if(buf.isInstanced())
         {
             drawingContext._instanced_array_snapshots = buf.makeInstancedBufferSnapshots();
-            return _stub->_resource_loader_context->objectPool()->obtain<DrawElementsInstanced>(std::move(drawingContext), _stub->_shader, _items.size());
+            return _stub->_shader->pipelineFactory()->buildRenderCommand(_stub->_resource_loader_context->objectPool(), std::move(drawingContext), _stub->_shader, _stub->_model->mode(), _items.size());
         }
-        return _stub->_resource_loader_context->objectPool()->obtain<DrawElements>(std::move(drawingContext), _stub->_shader);
+        return _stub->_shader->pipelineFactory()->buildRenderCommand(_stub->_resource_loader_context->objectPool(), std::move(drawingContext), _stub->_shader, _stub->_model->mode(), 0);
     }
     return nullptr;
 }
 
-Layer::Layer(const sp<GLModel>& model, const sp<GLPipeline>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
+Layer::Layer(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _stub(sp<Stub>::make(model, shader, resourceLoaderContext))
 {
 }
@@ -91,7 +90,7 @@ void Layer::draw(float x, float y, const sp<RenderObject>& renderObject)
     _stub->_items.emplace_back(x, y, renderObject);
 }
 
-const sp<GLModel>& Layer::model() const
+const sp<RenderModel>& Layer::model() const
 {
     return _stub->_model;
 }
@@ -121,8 +120,8 @@ void Layer::render(RenderRequest& renderRequest, float x, float y)
 }
 
 Layer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _model(factory.ensureBuilder<GLModel>(manifest, Constants::Attributes::MODEL)),
-      _shader(GLPipeline::fromDocument(factory, manifest, resourceLoaderContext)) {
+    : _resource_loader_context(resourceLoaderContext), _model(factory.ensureBuilder<RenderModel>(manifest, Constants::Attributes::MODEL)),
+      _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext)) {
 }
 
 sp<Layer> Layer::BUILDER::build(const sp<Scope>& args)

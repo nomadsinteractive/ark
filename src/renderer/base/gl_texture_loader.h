@@ -6,20 +6,20 @@
 #include "core/types/shared_ptr.h"
 #include "core/inf/dictionary.h"
 
-#include "renderer/base/gl_texture.h"
+#include "renderer/base/texture.h"
 
 namespace ark {
 
-class GLTextureLoader : public Dictionary<sp<GLTexture>> {
+class GLTextureLoader : public Dictionary<sp<Texture>> {
 public:
     GLTextureLoader(const sp<GLResourceManager>& resources);
 
-    virtual sp<GLTexture> get(const String& name) override;
+    virtual sp<Texture> get(const String& name) override;
 
 private:
     sp<GLResourceManager> _resource_manager;
 
-    std::map<String, sp<GLTexture>> _textures;
+    std::map<String, sp<Texture>> _textures;
 };
 
 }

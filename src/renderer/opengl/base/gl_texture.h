@@ -12,20 +12,20 @@
 #include "graphics/inf/block.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_texture.h"
+#include "renderer/base/texture.h"
 
 namespace ark {
 
-class ARK_API GLTextureDefault : public GLTexture {
+class ARK_API GLTexture : public Texture {
 public:
-    GLTextureDefault(const sp<GLRecycler>& recycler, const sp<Size>& size, Format format, Feature features, const sp<Variable<sp<Bitmap>>>& bitmap);
+    GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, Format format, Feature features, const sp<Variable<sp<Bitmap>>>& bitmap);
 
 //  [[plugin::resource-loader("texture")]]
-    class BUILDER : public Builder<GLTexture> {
+    class BUILDER : public Builder<Texture> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<GLTexture> build(const sp<Scope>& args) override;
+        virtual sp<Texture> build(const sp<Scope>& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
@@ -38,11 +38,11 @@ public:
     };
 
 //  [[plugin::resource-loader::by-value("texture")]]
-    class DICTIONARY : public Builder<GLTexture> {
+    class DICTIONARY : public Builder<Texture> {
     public:
         DICTIONARY(BeanFactory& parent, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<GLTexture> build(const sp<Scope>& args) override;
+        virtual sp<Texture> build(const sp<Scope>& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;

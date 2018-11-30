@@ -10,10 +10,10 @@
 #include "renderer/base/gl_framebuffer.h"
 #include "renderer/base/gl_recycler.h"
 #include "renderer/base/gl_resource_manager.h"
-#include "renderer/base/gl_texture.h"
+#include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
 
-#include "renderer/inf/gl_resource.h"
+#include "renderer/inf/render_resource.h"
 #include "renderer/opengl/util/gl_debug.h"
 
 namespace ark {
@@ -50,11 +50,11 @@ public:
 
 }
 
-FrameBufferRenderer::FrameBufferRenderer(const sp<Renderer>& delegate, const sp<GLTexture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _delegate(delegate), _fbo(sp<GLFramebuffer>::make(resourceLoaderContext->glResourceManager()->recycler(), texture)),
+FrameBufferRenderer::FrameBufferRenderer(const sp<Renderer>& delegate, const sp<Texture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _delegate(delegate), _fbo(sp<GLFramebuffer>::make(resourceLoaderContext->resourceManager()->recycler(), texture)),
       _pre_draw(sp<PreDrawElementsToFBO>::make(_fbo)), _post_draw(sp<PostDrawElementsToFBO>::make())
 {
-    resourceLoaderContext->glResourceManager()->prepare(_fbo, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
+    resourceLoaderContext->resourceManager()->prepare(_fbo, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
 }
 
 void FrameBufferRenderer::render(RenderRequest& renderRequest, float x, float y)
@@ -66,14 +66,14 @@ void FrameBufferRenderer::render(RenderRequest& renderRequest, float x, float y)
 
 FrameBufferRenderer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _delegate(factory.ensureBuilder<Renderer>(manifest, Constants::Attributes::DELEGATE)),
-      _texture(factory.ensureBuilder<GLTexture>(manifest, "texture"))
+      _texture(factory.ensureBuilder<Texture>(manifest, "texture"))
 {
 }
 
 sp<Renderer> FrameBufferRenderer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Renderer> delegate = _delegate->build(args);
-    const sp<GLTexture> texture = _texture->build(args);
+    const sp<Texture> texture = _texture->build(args);
     return sp<FrameBufferRenderer>::make(delegate, texture, _resource_loader_context);
 }
 

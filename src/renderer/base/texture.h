@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_GL_TEXTURE_H_
-#define ARK_RENDERER_BASE_GL_TEXTURE_H_
+#ifndef ARK_RENDERER_BASE_TEXTURE_H_
+#define ARK_RENDERER_BASE_TEXTURE_H_
 
 #include <unordered_map>
 
@@ -11,11 +11,11 @@
 #include "graphics/inf/block.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/gl_resource.h"
+#include "renderer/inf/render_resource.h"
 
 namespace ark {
 
-class ARK_API GLTexture : public GLResource {
+class ARK_API Texture : public RenderResource {
 public:
     enum Format {
         FORMAT_AUTO = 0x8000,
@@ -33,9 +33,9 @@ public:
         FEATURE_MIPMAPS
     };
 
-    GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
-    GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, const document& manifest);
-    virtual ~GLTexture() override;
+    Texture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
+    Texture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, const document& manifest);
+    virtual ~Texture() override;
 
     virtual uint32_t id() override;
     virtual void prepare(GraphicsContext& graphicsContext) override;
@@ -53,10 +53,9 @@ public:
 
     uint32_t target() const;
 
-    void active(GLProgram& program, uint32_t name);
-    static void active(GLProgram& program, uint32_t target, uint32_t id, uint32_t name);
+    void active(Pipeline& pipeline, uint32_t name);
 
-    class Recycler : public GLResource {
+    class Recycler : public RenderResource {
     public:
         Recycler(uint32_t id);
 

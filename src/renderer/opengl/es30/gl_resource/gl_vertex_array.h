@@ -4,15 +4,15 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/base/gl_buffer.h"
-#include "renderer/base/gl_pipeline.h"
-#include "renderer/inf/gl_resource.h"
+#include "renderer/base/shader.h"
+#include "renderer/inf/render_resource.h"
 
 namespace ark {
 namespace gles30 {
 
-class GLVertexArray : public GLResource {
+class GLVertexArray : public RenderResource {
 public:
-    GLVertexArray(const sp<GLShaderBindings>& shaderBindings, const GLPipeline& shader);
+    GLVertexArray(const sp<ShaderBindings>& shaderBindings, const Shader& shader);
 
     virtual uint32_t id() override;
     virtual void prepare(GraphicsContext& graphicsContext) override;
@@ -21,8 +21,8 @@ public:
 private:
     uint32_t _id;
 
-    sp<GLShaderBindings> _shader_bindings;
-    GLPipeline _shader;
+    sp<ShaderBindings> _shader_bindings;
+    Shader _shader;
 };
 
 }

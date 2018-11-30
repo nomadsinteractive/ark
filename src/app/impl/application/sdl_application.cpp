@@ -1,12 +1,16 @@
 #include "app/impl/application/sdl_application.h"
 
 #include <SDL.h>
+
+#ifdef ARK_USE_OPEN_GL
 #include <SDL_opengl.h>
-#include <SDL_syswm.h>
+#endif
 
 #ifdef ARK_USE_VULKAN
 #include <SDL_vulkan.h>
 #endif
+
+#include <SDL_syswm.h>
 
 #include "core/base/clock.h"
 #include "core/base/object.h"
@@ -19,8 +23,11 @@
 #include "graphics/base/surface_controller.h"
 #include "graphics/inf/render_view.h"
 
+#include "renderer/base/render_engine.h"
+
 #include "app/base/application_context.h"
 #include "app/base/application_controller.h"
+#include "app/base/application_manifest.h"
 #include "app/base/surface.h"
 
 #include "platform/platform.h"
@@ -231,16 +238,8 @@ private:
 SDLApplication::SDLApplication(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport, uint32_t windowFlag)
     : Application(applicationDelegate, applicationContext, width, height, viewport), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex())
       , _message_loop_rendering(sp<MessageLoopDefault>::make(Platform::getSteadyClock())), _controller(sp<SDLApplicationController>::make())
-      , _show_cursor(windowFlag & WINDOW_FLAG_SHOW_CURSOR), _window_flag(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN)
+      , _show_cursor(windowFlag & WINDOW_FLAG_SHOW_CURSOR), _window_flag(toSDLWindowFlag(applicationContext, windowFlag))
 {
-    if(windowFlag & WINDOW_FLAG_FULL_SCREEN)
-        _window_flag |= SDL_WINDOW_FULLSCREEN;
-    if(windowFlag & WINDOW_FLAG_FULL_SCREEN_WINDOWED)
-        _window_flag |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-    if(windowFlag & WINDOW_FLAG_MAXINIZED)
-        _window_flag |= SDL_WINDOW_MAXIMIZED;
-    if(windowFlag & WINDOW_FLAG_RESIZABLE)
-        _window_flag |= SDL_WINDOW_RESIZABLE;
 }
 
 int SDLApplication::run()
@@ -285,13 +284,12 @@ int SDLApplication::run()
 #endif
 
 
-#ifndef ARK_USE_VULKAN
     /* Create our opengl context and attach it to our window */
-    SDL_GLContext maincontext = SDL_GL_CreateContext(_main_window);
+    SDL_GLContext maincontext = _use_open_gl ? SDL_GL_CreateContext(_main_window) : nullptr;
 
     /* This makes our buffer swap syncronized with the monitor's vertical refresh */
-    SDL_GL_SetSwapInterval(1);
-#endif
+    if(_use_open_gl)
+        SDL_GL_SetSwapInterval(1);
 
     onCreate();
     onSurfaceCreated();
@@ -303,18 +301,17 @@ int SDLApplication::run()
     {
         _message_loop_rendering->pollOnce();
         onSurfaceDraw();
-#ifndef ARK_USE_VULKAN
-        SDL_GL_SwapWindow(_main_window);
-#endif
+        if(_use_open_gl)
+            SDL_GL_SwapWindow(_main_window);
         SDL_Delay(1);
     }
 
     onDestroy();
 
     /* Delete our opengl context, destroy our window, and shutdown SDL */
-#ifndef ARK_USE_VULKAN
-    SDL_GL_DeleteContext(maincontext);
-#endif
+    if(_use_open_gl)
+        SDL_GL_DeleteContext(maincontext);
+
     SDL_DestroyWindow(_main_window);
 
     SDL_DestroyCond(_cond);
@@ -335,6 +332,25 @@ void SDLApplication::onSurfaceChanged()
     int32_t w, h;
     SDL_GetWindowSize(_main_window, &w, &h);
     Application::onSurfaceChanged(_width = w, _height = h);
+}
+
+uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicationContext, uint32_t appWindowFlag)
+{
+    Ark::RendererVersion version = applicationContext->renderEngine()->version();
+
+    uint32_t windowFlag = SDL_WINDOW_SHOWN;
+    if(appWindowFlag & WINDOW_FLAG_FULL_SCREEN)
+        windowFlag |= SDL_WINDOW_FULLSCREEN;
+    if(appWindowFlag & WINDOW_FLAG_FULL_SCREEN_WINDOWED)
+        windowFlag |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+    if(appWindowFlag & WINDOW_FLAG_MAXINIZED)
+        windowFlag |= SDL_WINDOW_MAXIMIZED;
+    if(appWindowFlag & WINDOW_FLAG_RESIZABLE)
+        windowFlag |= SDL_WINDOW_RESIZABLE;
+
+    _use_open_gl = version != Ark::VULKAN_11;
+    windowFlag |= (_use_open_gl ? SDL_WINDOW_OPENGL : SDL_WINDOW_VULKAN);
+    return windowFlag;
 }
 
 }

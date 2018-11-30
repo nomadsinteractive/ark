@@ -19,7 +19,7 @@ namespace plugin {
 namespace assimp {
 
 GLModelAssimp::GLModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest)
-    : GLModel(GL_TRIANGLES), _importer(sp<Assimp::Importer>::make())
+    : RenderModel(RenderModel::RENDER_MODE_TRIANGLES), _importer(sp<Assimp::Importer>::make())
 {
     _importer->SetIOHandler(new ArkIOSystem());
 
@@ -38,14 +38,14 @@ GLModelAssimp::GLModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderCont
 //    _array_buffer = resourceLoaderContext->glResourceManager()->makeGLBuffer(sp<AssimpGLBufferUploader>::make(vertices), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 //    _index_buffer = resourceLoaderContext->glResourceManager()->makeGLBuffer(sp<AssimpGLBufferUploader>::make(indices), GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 //    const sp<GLTexture> texture = resourceLoaderContext->glResourceManager()->createGLTexture(tex->width(), tex->height(), sp<Variable<bitmap>::Const>::make(tex));
-//    _shader_bindings = sp<GLShaderBindings>::make(shader, _array_buffer);
-//    _shader_bindings = sp<GLShaderBindings>::make(resourceLoaderContext->glResourceManager(), shader);
+//    _shader_bindings = sp<ShaderBindings>::make(shader, _array_buffer);
+//    _shader_bindings = sp<ShaderBindings>::make(resourceLoaderContext->glResourceManager(), shader);
 //    const sp<GLSnippetTextures> textures = _shader_bindings->snippet()->link<GLSnippetTextures>();
 //    textures->addTexture(0, texture);
 //    _shader_bindings->snippet()->link<GLSnippetUpdateModelMatrix>();
 }
 
-void GLModelAssimp::initialize(GLShaderBindings& bindings)
+void GLModelAssimp::initialize(ShaderBindings& bindings)
 {
 }
 
@@ -71,7 +71,7 @@ GLModelAssimp::BUILDER::BUILDER(const document& manifest, const sp<ResourceLoade
     : _resource_loader_context(resourceLoaderContext), _manifest(manifest) {
 }
 
-sp<GLModel> GLModelAssimp::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> GLModelAssimp::BUILDER::build(const sp<Scope>& args)
 {
     return sp<GLModelAssimp>::make(_resource_loader_context, _manifest);
 }

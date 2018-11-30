@@ -7,11 +7,11 @@
 #include "graphics/base/matrix.h"
 
 #include "renderer/base/atlas.h"
-#include "renderer/base/gl_pipeline.h"
-#include "renderer/base/gl_shader_bindings.h"
+#include "renderer/base/shader.h"
+#include "renderer/base/shader_bindings.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/impl/render_command/draw_elements_instanced.h"
+#include "renderer/opengl/render_command/draw_elements_instanced.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
 
 namespace ark {
@@ -19,7 +19,7 @@ namespace gles30 {
 /*
 ParticleLayer::ParticleLayer(const sp<GLShader>& shader, const sp<Atlas>& atlas, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : Layer(shader->camera(), resourceLoaderContext->memoryPool(), nullptr), _atlas(atlas), _resource_loader_context(resourceLoaderContext),
-      _shader_bindings(sp<GLShaderBindings>::make(resourceLoaderContext->glResourceManager(), shader)),
+      _shader_bindings(sp<ShaderBindings>::make(resourceLoaderContext->glResourceManager(), shader)),
       _index_buffer(GLIndexBuffers::makeGLBufferSnapshot(resourceLoaderContext->glResourceManager(), GLBuffer::NAME_QUADS, 1)),
       _transform_array_buffer(resourceLoaderContext->glResourceManager()->makeDynamicArrayBuffer())
 {

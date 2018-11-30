@@ -12,17 +12,19 @@ namespace ark {
 
 class RenderEngine {
 public:
-    RenderEngine(Ark::GLVersion version, const sp<RendererFactory>& rendererFactory);
+    RenderEngine(Ark::RendererVersion version, const sp<RendererFactory>& rendererFactory);
 
+    Ark::RendererVersion version() const;
     const sp<RendererFactory>& rendererFactory() const;
 
     void initialize();
+
     sp<RenderView> createRenderView(const Viewport& viewport) const;
 
 private:
     sp<RendererFactory> _renderer_factory;
 
-    sp<GLContext> _gl_context;
+    sp<GLContext> _render_context;
 };
 
 }

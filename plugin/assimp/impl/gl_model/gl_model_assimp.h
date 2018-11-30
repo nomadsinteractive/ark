@@ -15,26 +15,26 @@
 #include "graphics/base/layer.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/gl_model.h"
+#include "renderer/inf/render_model.h"
 
 namespace ark {
 namespace plugin {
 namespace assimp {
 
-class GLModelAssimp : public GLModel {
+class GLModelAssimp : public RenderModel {
 public:
     GLModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest);
 
-    virtual void initialize(GLShaderBindings& bindings) override;
+    virtual void initialize(ShaderBindings& bindings) override;
     virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) override;
     virtual void load(GLModelBuffer& buf, int32_t type, const V& scale) override;
 
 //  [[plugin::resource-loader("assimp")]]
-    class BUILDER : public Builder<GLModel> {
+    class BUILDER : public Builder<RenderModel> {
     public:
         BUILDER(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<GLModel> build(const sp<Scope>& args) override;
+        virtual sp<RenderModel> build(const sp<Scope>& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;

@@ -6,23 +6,28 @@
 
 #include "graphics/inf/render_command.h"
 
-#include "renderer/base/gl_drawing_context.h"
+#include "renderer/base/drawing_context.h"
 #include "renderer/forwarding.h"
 
+#include "platform/gl/gl.h"
+
 namespace ark {
+namespace opengl {
 
 class ARK_API DrawElementsInstanced : public RenderCommand {
 public:
-    DrawElementsInstanced(GLDrawingContext context, const sp<GLPipeline>& shader, int32_t count);
+    DrawElementsInstanced(DrawingContext context, const sp<Shader>& shader, GLenum mode, int32_t count);
 
     virtual void draw(GraphicsContext& graphicsContext) override;
 
 private:
-    GLDrawingContext _context;
-    sp<GLPipeline> _shader;
+    DrawingContext _context;
+    sp<Shader> _shader;
+    GLenum _mode;
     int32_t _count;
 };
 
+}
 }
 
 #endif

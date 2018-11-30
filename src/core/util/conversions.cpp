@@ -47,13 +47,13 @@ template<> ARK_API float Conversions::to<String, float>(const String& str)
     return static_cast<float>(atof(str.c_str()));
 }
 
-template<> ARK_API Ark::GLVersion Conversions::to<String, Ark::GLVersion>(const String& str)
+template<> ARK_API Ark::RendererVersion Conversions::to<String, Ark::RendererVersion>(const String& str)
 {
     const String glversion = str.toLower();
     if(glversion.startsWith("opengl_"))
-        return static_cast<Ark::GLVersion>(atoi(glversion.c_str() + 7));
+        return static_cast<Ark::RendererVersion>(atoi(glversion.c_str() + 7));
     if(glversion.startsWith("vulkan_"))
-        return static_cast<Ark::GLVersion>(atoi(glversion.c_str() + 7) + 100);
+        return static_cast<Ark::RendererVersion>(atoi(glversion.c_str() + 7) + 100);
     WARN(false, "Unknow GLVersion: \"%s, supported GLVersions are [\"opengl_21\", \"opengl_46\", \"vulkan_11\", ...]", str.c_str());
     return Ark::AUTO;
 }

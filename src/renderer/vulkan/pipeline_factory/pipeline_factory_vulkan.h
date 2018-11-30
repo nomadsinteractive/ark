@@ -1,29 +1,28 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_PIPELINE_FACTORY_H_
-#define ARK_RENDERER_VULKAN_BASE_PIPELINE_FACTORY_H_
+#ifndef ARK_RENDERER_VULKAN_PIPELINE_FACTORY_PIPELINE_FACTORY_VULKAN_H_
+#define ARK_RENDERER_VULKAN_PIPELINE_FACTORY_PIPELINE_FACTORY_VULKAN_H_
 
 #include <vector>
-
-#include <glm/glm.hpp>
 
 #include <vulkan/vulkan.h>
 
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-
+#include "renderer/inf/pipeline_factory.h"
 #include "renderer/vulkan/forward.h"
-#include "renderer/vulkan/base/vulkan_api.h"
-#include "renderer/vulkan/util/vulkan_buffer.hpp"
 
 namespace ark {
 namespace vulkan {
 
-class PipelineFactory {
+class PipelineFactoryVulkan : public PipelineFactory {
 public:
-    PipelineFactory(const sp<GLResourceManager>& resourceManager, const sp<RenderTarget>& renderTarget);
-    ~PipelineFactory();
+    PipelineFactoryVulkan(const sp<GLResourceManager>& resourceManager);
+    ~PipelineFactoryVulkan() override;
 
-    sp<Pipeline> build();
+    sp<Pipeline> build(const sp<RenderTarget>& renderTarget);
+
+    virtual sp<ark::Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout) override;
+    virtual sp<RenderCommand> buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode renderMode, int32_t count) override;
 
     sp<Buffer> _buffer;
     sp<Texture> _texture;
@@ -53,19 +52,13 @@ private:
         std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
     } vertices;
 
-    struct {
-        glm::mat4 projection;
-        glm::mat4 model;
-        glm::vec4 viewPos;
-        float lodBias = 0.0f;
-    } uboVS;
-
     std::vector<VkCommandBuffer> _command_buffers;
 
     VkClearColorValue defaultClearColor = { { 0, 0, 0.2f, 1.0f } };
     struct {
         VkPipeline solid;
     } pipelines;
+
 };
 
 }

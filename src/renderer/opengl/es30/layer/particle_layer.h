@@ -34,7 +34,7 @@ private:
     sp<Atlas> _atlas;
 
     sp<ResourceLoaderContext> _resource_loader_context;
-    sp<GLShaderBindings> _shader_bindings;
+    sp<ShaderBindings> _shader_bindings;
 
     GLBuffer::Snapshot _index_buffer;
     GLBuffer _transform_array_buffer;

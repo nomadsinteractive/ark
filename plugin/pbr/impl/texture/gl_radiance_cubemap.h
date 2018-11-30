@@ -6,28 +6,28 @@
 
 #include "graphics/forwarding.h"
 
-#include "renderer/base/gl_texture.h"
+#include "renderer/base/texture.h"
 
 namespace ark {
 
-class GLRadianceCubemap : public GLTexture {
+class GLRadianceCubemap : public Texture {
 public:
-    GLRadianceCubemap(const sp<GLResourceManager>& resourceManager, Format format, Feature features, const sp<GLTexture>& texture, const sp<Size>& size);
+    GLRadianceCubemap(const sp<GLResourceManager>& resourceManager, Format format, Feature features, const sp<Texture>& texture, const sp<Size>& size);
 
 //  [[plugin::resource-loader("radiance-cubemap")]]
-    class BUILDER : public Builder<GLTexture> {
+    class BUILDER : public Builder<Texture> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<GLTexture> build(const sp<Scope>& args) override;
+        virtual sp<Texture> build(const sp<Scope>& args) override;
 
     private:
         sp<GLResourceManager> _resource_manager;
         document _manifest;
         sp<Builder<Size>> _size;
-        sp<Builder<GLTexture>> _texture;
-        GLTexture::Format _format;
-        GLTexture::Feature _features;
+        sp<Builder<Texture>> _texture;
+        Texture::Format _format;
+        Texture::Feature _features;
     };
 
 protected:
@@ -35,7 +35,7 @@ protected:
 
 private:
     sp<GLResourceManager> _resource_manager;
-    sp<GLTexture> _texture;
+    sp<Texture> _texture;
 
 };
 

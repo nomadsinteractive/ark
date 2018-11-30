@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_GL_RESOURCE_H_
-#define ARK_RENDERER_BASE_GL_RESOURCE_H_
+#ifndef ARK_RENDERER_INF_RENDER_RESOURCE_H_
+#define ARK_RENDERER_INF_RENDER_RESOURCE_H_
 
 #include "core/base/api.h"
 
@@ -7,9 +7,9 @@
 
 namespace ark {
 
-class ARK_API GLResource {
+class ARK_API RenderResource {
 public:
-    virtual ~GLResource() = default;
+    virtual ~RenderResource() = default;
 
     virtual uint32_t id() = 0;
     virtual void prepare(GraphicsContext& graphicsContext) = 0;

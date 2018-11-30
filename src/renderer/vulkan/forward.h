@@ -9,9 +9,11 @@ class CommandPool;
 class Device;
 class Instance;
 class Pipeline;
-class PipelineFactory;
 class RenderTarget;
 class Texture;
+class VulkanAPI;
+
+class PipelineFactoryVulkan;
 
 }
 }

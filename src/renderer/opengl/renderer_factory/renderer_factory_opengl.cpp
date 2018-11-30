@@ -35,13 +35,13 @@ void RendererFactoryOpenGL::initialize(GLContext& glContext)
         glGetIntegerv(GL_MAJOR_VERSION, &glMajorVersion);
         glGetIntegerv(GL_MINOR_VERSION, &glMinorVersion);
         if(glMajorVersion != 0)
-            setGLVersion(static_cast<Ark::GLVersion>(glMajorVersion * 10 + glMinorVersion), glContext);
+            setGLVersion(static_cast<Ark::RendererVersion>(glMajorVersion * 10 + glMinorVersion), glContext);
         else
             setGLVersion(Ark::OPENGL_20, glContext);
     }
 }
 
-void RendererFactoryOpenGL::setGLVersion(Ark::GLVersion version, GLContext& glContext)
+void RendererFactoryOpenGL::setGLVersion(Ark::RendererVersion version, GLContext& glContext)
 {
     DCHECK(version != Ark::AUTO, "Cannot set OpenGL version to \"auto\" manually.");
     LOGD("Choose GLVersion = %d", version);

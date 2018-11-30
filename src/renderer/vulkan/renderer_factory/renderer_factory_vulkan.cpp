@@ -8,6 +8,7 @@
 
 #include "renderer/vulkan/render_view/render_view_vulkan.h"
 #include "renderer/vulkan/gl_snippet_factory/gl_snippet_factory_vulkan.h"
+#include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
 
 #include "generated/vulkan_plugin.h"
 
@@ -32,7 +33,7 @@ void RendererFactoryVulkan::initialize(GLContext& glContext)
     setGLVersion(Ark::VULKAN_11, glContext);
 }
 
-void RendererFactoryVulkan::setGLVersion(Ark::GLVersion version, GLContext& glContext)
+void RendererFactoryVulkan::setGLVersion(Ark::RendererVersion version, GLContext& glContext)
 {
     DCHECK(version != Ark::AUTO, "Cannot set Vulkan version to \"auto\" manually.");
     LOGD("Choose GLVersion = %d", version);
@@ -51,6 +52,11 @@ void RendererFactoryVulkan::setGLVersion(Ark::GLVersion version, GLContext& glCo
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<GLContext>& glContext, const Viewport& viewport)
 {
     return sp<RenderViewVulkan>::make(_vulkan_api, glContext, _resource_manager, viewport);
+}
+
+sp<ark::PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
+{
+    return sp<PipelineFactoryVulkan>::make(_resource_manager);
 }
 
 }

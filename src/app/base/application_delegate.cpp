@@ -6,11 +6,27 @@
 
 #include "app/base/application.h"
 #include "app/base/application_context.h"
+#include "app/base/application_manifest.h"
 #include "app/base/surface.h"
 
 #include "platform/platform.h"
 
 namespace ark {
+
+ApplicationDelegate::ApplicationDelegate(const sp<ApplicationManifest>& applicationManifest)
+    : _application_manifest(applicationManifest)
+{
+}
+
+const sp<ApplicationManifest>& ApplicationDelegate::manifest() const
+{
+    return _application_manifest;
+}
+
+const char* ApplicationDelegate::name()
+{
+    return _application_manifest->name().c_str();
+}
 
 void ApplicationDelegate::onCreate(Application& application, const sp<Surface>& surface)
 {

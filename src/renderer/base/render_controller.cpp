@@ -3,6 +3,9 @@
 #include "core/inf/runnable.h"
 #include "core/util/log.h"
 
+#include "renderer/base/render_engine.h"
+#include "renderer/inf/renderer_factory.h"
+
 namespace ark {
 
 RenderController::RenderController(const sp<RenderEngine>& renderEngine)
@@ -13,6 +16,11 @@ RenderController::RenderController(const sp<RenderEngine>& renderEngine)
 const sp<RenderEngine>& RenderController::renderEngine() const
 {
     return _render_engine;
+}
+
+sp<PipelineFactory> RenderController::createPipelineFactory() const
+{
+    return _render_engine->rendererFactory()->createPipelineFactory();
 }
 
 void RenderController::addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired)

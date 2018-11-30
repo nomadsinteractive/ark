@@ -2,8 +2,8 @@
 
 #include "renderer/base/gl_buffer.h"
 #include "renderer/base/gl_context.h"
-#include "renderer/base/gl_drawing_context.h"
-#include "renderer/base/gl_pipeline.h"
+#include "renderer/base/drawing_context.h"
+#include "renderer/base/shader.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/impl/gl_snippet/gl_snippet_linked_chain.h"
 
@@ -11,22 +11,22 @@ namespace ark {
 
 class CoreGLSnippet : public GLSnippet {
 public:
-    CoreGLSnippet(GLSnippetDelegate& wrapper, const sp<GLPipeline>& shader);
+    CoreGLSnippet(GLSnippetDelegate& wrapper, const sp<Shader>& shader);
 
     virtual void preInitialize(PipelineLayout& source) override;
     virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context) override;
-    virtual void preDraw(GraphicsContext& graphicsContext, const GLPipeline& shader, const GLDrawingContext& context) override;
+    virtual void preDraw(GraphicsContext& graphicsContext, const Shader& shader, const DrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 
 private:
-    sp<GLSnippet> createGLSnippet(GraphicsContext& graphicsContext, const GLDrawingContext& context) const;
+    sp<GLSnippet> createGLSnippet(GraphicsContext& graphicsContext, const DrawingContext& context) const;
 
 private:
     GLSnippetDelegate& _wrapper;
-    sp<GLPipeline> _shader;
+    sp<Shader> _shader;
 };
 
-CoreGLSnippet::CoreGLSnippet(GLSnippetDelegate& wrapper, const sp<GLPipeline>& shader)
+CoreGLSnippet::CoreGLSnippet(GLSnippetDelegate& wrapper, const sp<Shader>& shader)
     : _wrapper(wrapper), _shader(shader)
 {
 }
@@ -41,7 +41,7 @@ void CoreGLSnippet::preCompile(GraphicsContext& graphicsContext, PipelineBuildin
     _wrapper.preCompile(graphicsContext, context);
 }
 
-void CoreGLSnippet::preDraw(GraphicsContext& graphicsContext, const GLPipeline& shader, const GLDrawingContext& context)
+void CoreGLSnippet::preDraw(GraphicsContext& graphicsContext, const Shader& shader, const DrawingContext& context)
 {
     const sp<GLSnippet> delegate = _wrapper._core;
     _wrapper._core = createGLSnippet(graphicsContext, context);
@@ -53,13 +53,13 @@ void CoreGLSnippet::postDraw(GraphicsContext& /*graphicsContext*/)
     DFATAL("You're not supposed to be here");
 }
 
-sp<GLSnippet> CoreGLSnippet::createGLSnippet(GraphicsContext& graphicsContext, const GLDrawingContext& context) const
+sp<GLSnippet> CoreGLSnippet::createGLSnippet(GraphicsContext& graphicsContext, const DrawingContext& context) const
 {
-    const sp<GLSnippet> coreGLSnippet = graphicsContext.glContext()->createCoreGLSnippet(graphicsContext.glResourceManager(), _shader, context._shader_bindings);
+    const sp<GLSnippet> coreGLSnippet = graphicsContext.glContext()->createCoreGLSnippet(graphicsContext.resourceManager(), _shader, context._shader_bindings);
     return _shader->snippet() ? sp<GLSnippet>::adopt(new GLSnippetLinkedChain(coreGLSnippet, _shader->snippet())) : coreGLSnippet;
 }
 
-GLSnippetDelegate::GLSnippetDelegate(const sp<GLPipeline>& shader)
+GLSnippetDelegate::GLSnippetDelegate(const sp<Shader>& shader)
     : _core(sp<CoreGLSnippet>::make(*this, shader))
 {
 }
@@ -74,7 +74,7 @@ void GLSnippetDelegate::preCompile(GraphicsContext& graphicsContext, PipelineBui
     _core->preCompile(graphicsContext, context);
 }
 
-void GLSnippetDelegate::preDraw(GraphicsContext& graphicsContext, const GLPipeline& shader, const GLDrawingContext& context)
+void GLSnippetDelegate::preDraw(GraphicsContext& graphicsContext, const Shader& shader, const DrawingContext& context)
 {
     _core->preDraw(graphicsContext, shader, context);
     if(_delegate)

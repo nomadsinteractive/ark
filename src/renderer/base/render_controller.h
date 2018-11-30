@@ -18,6 +18,7 @@ public:
     RenderController(const sp<RenderEngine>& renderEngine);
 
     const sp<RenderEngine>& renderEngine() const;
+    sp<PipelineFactory> createPipelineFactory() const;
 
     void addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired);
 

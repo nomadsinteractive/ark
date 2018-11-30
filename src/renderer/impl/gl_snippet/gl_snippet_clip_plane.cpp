@@ -8,7 +8,7 @@
 
 #include "renderer/base/gl_context.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/gl_drawing_context.h"
+#include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
 
 #include "platform/gl/gl.h"
@@ -20,7 +20,7 @@ void GLSnippetClipPlane::preInitialize(PipelineLayout& source)
     for(const auto& i : _planes)
     {
         const String uName = Strings::sprintf("u_Plane%d", i.first);
-        source.addUniform(uName, GLUniform::UNIFORM_F4, sp<FlatableV4f>::make(i.second), i.second.as<Changed>());
+        source.addUniform(uName, Uniform::UNIFORM_F4, sp<FlatableV4f>::make(i.second), i.second.as<Changed>());
     }
 }
 
@@ -37,7 +37,7 @@ void GLSnippetClipPlane::preCompile(GraphicsContext& graphicsContext, PipelineBu
         }
 }
 
-void GLSnippetClipPlane::preDraw(GraphicsContext& /*graphicsContext*/, const GLPipeline& shader, const GLDrawingContext& /*context*/)
+void GLSnippetClipPlane::preDraw(GraphicsContext& /*graphicsContext*/, const Shader& shader, const DrawingContext& /*context*/)
 {
     if(_enabled)
         for(const auto& i : _planes)

@@ -10,10 +10,10 @@
 #include "graphics/base/matrix.h"
 
 #include "renderer/base/gl_buffer.h"
-#include "renderer/base/gl_program.h"
+#include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/base/gl_resource_manager.h"
-#include "renderer/base/gl_pipeline.h"
-#include "renderer/base/gl_texture.h"
+#include "renderer/base/shader.h"
+#include "renderer/base/texture.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
 
 namespace ark {
@@ -70,7 +70,7 @@ GLenum GLUtil::getTextureInternalFormat(int32_t format, const Bitmap& bitmap)
                               GL_RG8, GL_RG8_SNORM, GL_RG16, GL_RG16_SNORM, GL_RG16F, GL_RG16F, GL_RG16F, GL_RG16F,
                               GL_RGB8, GL_RGB8_SNORM, GL_RGB16, GL_RGB16_SNORM, GL_RGB16F, GL_RGB16F, GL_RGB16F, GL_RGB16F,
                               GL_RGBA8, GL_RGBA8_SNORM, GL_RGBA16, GL_RGBA16_SNORM, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F};
-    uint32_t signedOffset = (format & GLTexture::FORMAT_SIGNED) == GLTexture::FORMAT_SIGNED ? 1 : 0;
+    uint32_t signedOffset = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED ? 1 : 0;
     uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
     uint32_t channel8 = (bitmap.channels() - 1) * 8;
     DCHECK(byteCount > 0 && byteCount <= 4, "Unsupported color depth: %d", byteCount * 8);
@@ -81,12 +81,12 @@ GLenum GLUtil::getTextureFormat(int32_t format, uint8_t channels)
 {
     const GLenum formatByChannels[] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
     DCHECK(channels < 5, "Unknown bitmap format: (channels = %d)", static_cast<uint32_t>(channels));
-    return format == GLTexture::FORMAT_AUTO ? formatByChannels[channels - 1] : formatByChannels[static_cast<uint32_t>(format & GLTexture::FORMAT_RGBA)];
+    return format == Texture::FORMAT_AUTO ? formatByChannels[channels - 1] : formatByChannels[static_cast<uint32_t>(format & Texture::FORMAT_RGBA)];
 }
 
 GLenum GLUtil::getPixelFormat(int32_t format, const Bitmap& bitmap)
 {
-    bool flagSigned = (format & GLTexture::FORMAT_SIGNED) == GLTexture::FORMAT_SIGNED;
+    bool flagSigned = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED;
     uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
     if(byteCount == 1)
         return flagSigned ? GL_BYTE : GL_UNSIGNED_BYTE;
@@ -131,7 +131,7 @@ bytearray GLUtil::makeUnitCubeVertices()
     return sp<PreallocatedArray<uint8_t>>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
 }
 
-void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, GLResourceManager& resourceManager, GLPipeline& shader, GLTexture& texture, int32_t width, int32_t height)
+void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, GLResourceManager& resourceManager, Shader& shader, Texture& texture, int32_t width, int32_t height)
 {
     uint32_t captureFBO, captureRBO;
     glGenFramebuffers(1, &captureFBO);
@@ -156,9 +156,11 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, GLReso
     };
 
     shader.use(graphicsContext);
-    shader.program()->getUniform("u_Projection").setUniformMatrix4fv(1, GL_FALSE, captureProjection.value());
+
+    const sp<GLPipeline> glPipeline = shader.pipeline();
+    glPipeline->getUniform("u_Projection").setUniformMatrix4fv(1, GL_FALSE, captureProjection.value());
     texture.prepare(graphicsContext);
-    texture.active(shader.program(), 0);
+    texture.active(shader.pipeline(), 0);
 
     uint32_t vao;
     glGenVertexArrays(1, &vao);
@@ -178,7 +180,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, GLReso
     glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
     for (uint32_t i = 0; i < 6; ++i)
     {
-        shader.program()->getUniform("u_View").setUniformMatrix4fv(1, GL_FALSE, captureViews[i].value());
+        glPipeline->getUniform("u_View").setUniformMatrix4fv(1, GL_FALSE, captureViews[i].value());
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, id, 0);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

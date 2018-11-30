@@ -16,7 +16,7 @@ public:
 
     virtual void initialize(GLContext& glContext) = 0;
 
-    virtual void setGLVersion(Ark::GLVersion version, GLContext& glContext) = 0;
+    virtual void setGLVersion(Ark::RendererVersion version, GLContext& glContext) = 0;
 
     virtual sp<RenderView> createRenderView(const sp<GLContext>& glContext, const Viewport& viewport) = 0;
     virtual sp<PipelineFactory> createPipelineFactory() = 0;

@@ -18,7 +18,6 @@ class ARK_API ApplicationDelegateImpl : public ApplicationDelegate {
 public:
     ApplicationDelegateImpl(const sp<ApplicationManifest>& applicationManifest);
 
-    virtual const char* name() override;
     virtual void onCreate(Application& application, const sp<Surface>& surface) override;
 
     virtual void onPause() override;
@@ -49,7 +48,6 @@ private:
     };
 
 private:
-    sp<ApplicationManifest> _application_manifest;
     std::list<ScriptTag> _scripts;
 
 };

@@ -1,20 +1,20 @@
 #include "renderer/impl/gl_model/gl_model_line_strip.h"
 
 #include "renderer/base/atlas.h"
-#include "renderer/base/gl_drawing_context.h"
+#include "renderer/base/drawing_context.h"
 #include "renderer/base/gl_model_buffer.h"
-#include "renderer/base/gl_shader_bindings.h"
+#include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
 
 namespace ark {
 
 GLModelLineStrip::GLModelLineStrip(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas)
-    : GLModel(GL_TRIANGLE_STRIP), _atlas(atlas), _ibo(resourceLoaderContext->glResourceManager()->makeGLBuffer(nullptr, GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW))
+    : RenderModel(RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas), _ibo(resourceLoaderContext->resourceManager()->makeGLBuffer(nullptr, GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW))
 {
 }
 
-void GLModelLineStrip::initialize(GLShaderBindings& bindings)
+void GLModelLineStrip::initialize(ShaderBindings& bindings)
 {
     bindings.bindGLTexture(_atlas->texture());
 }
@@ -74,7 +74,7 @@ GLModelLineStrip::BUILDER::BUILDER(BeanFactory& factory, const document& manifes
 {
 }
 
-sp<GLModel> GLModelLineStrip::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> GLModelLineStrip::BUILDER::build(const sp<Scope>& args)
 {
     return sp<GLModelLineStrip>::make(_resource_loader_context, _atlas->build(args));
 }

@@ -11,9 +11,9 @@
 
 namespace ark {
 
-class NoiseTextureResource : public Dictionary<sp<GLTexture>> {
+class NoiseTextureResource : public Dictionary<sp<Texture>> {
 public:
-    virtual sp<GLTexture> get(const String& name) override;
+    virtual sp<Texture> get(const String& name) override;
 
 
 private:

@@ -10,29 +10,35 @@
 
 #include "renderer/forwarding.h"
 
-#include "platform/gl/gl.h"
-
 namespace ark {
 
-class ARK_API GLModel {
+class ARK_API RenderModel {
 public:
-    GLModel(GLenum mode)
+    enum Mode {
+        RENDER_MODE_LINES,
+        RENDER_MODE_POINTS,
+        RENDER_MODE_TRIANGLES,
+        RENDER_MODE_TRIANGLE_STRIP,
+        RENDER_MODE_COUNT,
+    };
+
+    RenderModel(Mode mode)
         : _mode(mode) {
     }
-    virtual ~GLModel() = default;
+    virtual ~RenderModel() = default;
 
-    GLenum mode() const {
+    Mode mode() const {
         return _mode;
     }
 
-    virtual void initialize(GLShaderBindings& bindings) = 0;
+    virtual void initialize(ShaderBindings& bindings) = 0;
     virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) = 0;
     virtual void load(GLModelBuffer& buf, int32_t type, const V& size) = 0;
 
     virtual Metrics measure(int32_t type) { return Metrics(); }
 
 protected:
-    GLenum _mode;
+    Mode _mode;
 };
 
 }

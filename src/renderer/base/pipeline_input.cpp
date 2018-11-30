@@ -2,17 +2,17 @@
 
 #include "core/base/string.h"
 
-#include "renderer/base/gl_program.h"
+#include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/base/gl_resource_manager.h"
 
 namespace ark {
 
-const std::vector<GLUniform>& PipelineInput::uniforms() const
+const std::vector<Uniform>& PipelineInput::uniforms() const
 {
     return _uniforms;
 }
 
-std::vector<GLUniform>& PipelineInput::uniforms()
+std::vector<Uniform>& PipelineInput::uniforms()
 {
     return _uniforms;
 }
@@ -45,18 +45,6 @@ std::vector<std::pair<uint32_t, GLBuffer>> PipelineInput::makeInstancedArrays(GL
             instancedArrays.push_back(std::make_pair(divisor, resourceManager.makeDynamicArrayBuffer()));
     }
     return instancedArrays;
-}
-
-void PipelineInput::bind(GraphicsContext&, GLProgram& program, uint32_t divisor) const
-{
-    const auto iter = _streams.find(divisor);
-    DCHECK(iter != _streams.end(), "Shader has no %d divided attribute stream", divisor);
-    const Stream& stream = iter->second;
-    for(auto iter : stream.attributes())
-    {
-        const GLProgram::Attribute& glAttribute = program.getAttribute(iter.second.name());
-        iter.second.setVertexPointer(glAttribute.location(), stream.stride());
-    }
 }
 
 const PipelineInput::Stream& PipelineInput::getStream(uint32_t divisor) const

@@ -1,7 +1,7 @@
 #include "renderer/base/gl_framebuffer.h"
 
 #include "renderer/base/gl_recycler.h"
-#include "renderer/base/gl_texture.h"
+#include "renderer/base/texture.h"
 #include "renderer/opengl/util/gl_debug.h"
 
 #include "platform/gl/gl.h"
@@ -28,7 +28,7 @@ void GLFramebuffer::Recycler::recycle(GraphicsContext&)
     _id = 0;
 }
 
-GLFramebuffer::GLFramebuffer(const sp<GLRecycler>& recycler, const sp<GLTexture>& texture)
+GLFramebuffer::GLFramebuffer(const sp<GLRecycler>& recycler, const sp<Texture>& texture)
     : _recycler(recycler), _texture(texture), _id(0)
 {
 }
@@ -68,7 +68,7 @@ void GLFramebuffer::recycle(GraphicsContext&)
     _id = 0;
 }
 
-const sp<GLTexture>& GLFramebuffer::texture() const
+const sp<Texture>& GLFramebuffer::texture() const
 {
     return _texture;
 }

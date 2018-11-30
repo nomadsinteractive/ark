@@ -1,12 +1,12 @@
 #include "renderer/base/gl_recycler.h"
 
-#include "renderer/inf/gl_resource.h"
+#include "renderer/inf/render_resource.h"
 
 namespace ark {
 
 namespace {
 
-class GLRecyclerFunction : public GLResource {
+class GLRecyclerFunction : public RenderResource {
 public:
     GLRecyclerFunction(uint32_t id, std::function<void(uint32_t)> recycler)
         : _id(id), _recycler(std::move(recycler)) {
@@ -30,7 +30,7 @@ private:
 
 }
 
-void GLRecycler::recycle(const sp<GLResource>& resource)
+void GLRecycler::recycle(const sp<RenderResource>& resource)
 {
     _items.push(resource);
 }
@@ -42,7 +42,7 @@ void GLRecycler::recycle(uint32_t id, std::function<void (uint32_t)> recycler)
 
 void GLRecycler::doRecycling(GraphicsContext& graphicsContext)
 {
-    for(const sp<GLResource>& resource : _items.clear())
+    for(const sp<RenderResource>& resource : _items.clear())
         resource->recycle(graphicsContext);
 }
 

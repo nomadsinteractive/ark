@@ -12,7 +12,7 @@ class ARK_API GLSnippetFactory {
 public:
     virtual ~GLSnippetFactory() = default;
 
-    virtual sp<GLSnippet> createCoreGLSnippet(GLResourceManager& glResourceManager, const GLPipeline& shader, const sp<GLShaderBindings>& shaderBindings) = 0;
+    virtual sp<GLSnippet> createCoreGLSnippet(GLResourceManager& glResourceManager, const Shader& shader, const sp<ShaderBindings>& shaderBindings) = 0;
 };
 
 }

@@ -17,7 +17,7 @@ namespace ark {
 
 class ARK_API Atlas {
 public:
-    Atlas(const sp<GLTexture>& texture, bool allowDefaultItem = false);
+    Atlas(const sp<Texture>& texture, bool allowDefaultItem = false);
 
     class ARK_API Importer {
     public:
@@ -52,7 +52,7 @@ public:
         float _pivot_x, _pivot_y;
     };
 
-    const sp<GLTexture>& texture() const;
+    const sp<Texture>& texture() const;
     uint32_t width() const;
     uint32_t height() const;
 
@@ -80,14 +80,14 @@ public:
         BeanFactory _factory;
         document _manifest;
         sp<Builder<Atlas>> _atlas;
-        sp<Builder<GLTexture>> _texture;
+        sp<Builder<Texture>> _texture;
         sp<ResourceLoaderContext> _resource_loader_context;
     };
 private:
     Item makeItem(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX, float pivotY) const;
 
 private:
-    sp<GLTexture> _texture;
+    sp<Texture> _texture;
     uint16_t _half_pixel_x, _half_pixel_y;
 
     op<ByIndex<Item>> _atlas;

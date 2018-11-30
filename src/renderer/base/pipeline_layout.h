@@ -8,12 +8,12 @@
 #include "core/collection/list.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_attribute.h"
-#include "renderer/base/gl_pipeline.h"
 #include "renderer/base/pipeline_input.h"
+#include "renderer/base/gl_attribute.h"
 #include "renderer/base/gl_shader_preprocessor.h"
-#include "renderer/base/gl_uniform.h"
+#include "renderer/base/uniform.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/base/shader.h"
 
 namespace ark {
 
@@ -23,10 +23,10 @@ public:
 
     void loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
 
-    sp<GLProgram> makeGLProgram(GraphicsContext& graphicsContext) const;
-
     GLAttribute& addAttribute(const String& name, const String& type, uint32_t scopes = 0);
-    void addUniform(const String& name, GLUniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed);
+    void addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed);
+
+    const sp<RenderController>& renderController() const;
 
     const sp<GLSnippet>& snippet() const;
     void addSnippet(const sp<GLSnippet>& snippet);
@@ -34,6 +34,8 @@ public:
     void preCompile(GraphicsContext& graphicsContext);
 
     const sp<PipelineInput>& input() const;
+    const GLShaderPreprocessor::Preprocessor& vertex() const;
+    const GLShaderPreprocessor::Preprocessor& fragment() const;
 
 private:
     void initialize();
@@ -44,7 +46,6 @@ private:
     void loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
 
 private:
-    sp<PipelineFactory> _pipeline_factory;
     sp<RenderController> _render_controller;
     sp<PipelineInput> _input;
     op<PipelineBuildingContext> _preprocessor_context;
@@ -54,8 +55,8 @@ private:
     GLShaderPreprocessor::Preprocessor _vertex;
     GLShaderPreprocessor::Preprocessor _fragment;
 
-    friend class GLPipeline;
-    friend class GLShaderBindings;
+    friend class Shader;
+    friend class ShaderBindings;
     friend class PipelineBuildingContext;
     friend class GLShaderPreprocessor;
 

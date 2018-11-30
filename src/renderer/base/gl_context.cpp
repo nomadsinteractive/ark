@@ -4,17 +4,17 @@
 
 namespace ark {
 
-GLContext::GLContext(Ark::GLVersion version)
+GLContext::GLContext(Ark::RendererVersion version)
     : _version(version)
 {
 }
 
-Ark::GLVersion GLContext::version() const
+Ark::RendererVersion GLContext::version() const
 {
     return _version;
 }
 
-void GLContext::setVersion(Ark::GLVersion version)
+void GLContext::setVersion(Ark::RendererVersion version)
 {
     _version = version;
 }
@@ -63,7 +63,7 @@ void GLContext::setGLSnippetFactory(sp<GLSnippetFactory> snippetfactory)
     _gl_procedure_factory = std::move(snippetfactory);
 }
 
-sp<GLSnippet> GLContext::createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<GLPipeline>& shader, const sp<GLShaderBindings>& shaderBindings) const
+sp<GLSnippet> GLContext::createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings) const
 {
     DCHECK(_gl_procedure_factory, "Uninitialized GLContext");
     return _gl_procedure_factory->createCoreGLSnippet(glResourceManager, shader, shaderBindings);

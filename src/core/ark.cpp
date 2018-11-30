@@ -231,7 +231,7 @@ Ark::Ark(int32_t argc, const char** argv, const String& manfiestSrc)
     const sp<Asset> asset = _asset->getAsset(".");
     const sp<ApplicationResource> appResource = sp<ApplicationResource>::make(sp<XMLDirectory>::make(asset), asset);
 
-    const sp<RenderEngine> renderEngine = createRenderEngine(Documents::getAttribute<GLVersion>(_manifest, "renderer", AUTO), appResource);
+    const sp<RenderEngine> renderEngine = createRenderEngine(Documents::getAttribute<RendererVersion>(_manifest, "renderer", AUTO), appResource);
     _application_context = createApplicationContext(_manifest, appResource, renderEngine);
 
     loadPlugins(_manifest);
@@ -324,7 +324,7 @@ sp<ApplicationContext> Ark::createApplicationContext(const document& manifest, c
     return applicationContext;
 }
 
-sp<RenderEngine> Ark::createRenderEngine(GLVersion version, const sp<ApplicationResource>& appResource)
+sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, const sp<ApplicationResource>& appResource)
 {
     switch(version) {
     case AUTO:

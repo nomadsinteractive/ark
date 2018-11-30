@@ -13,21 +13,21 @@ namespace ark {
 
 class GLContext {
 public:
-    GLContext(Ark::GLVersion version);
+    GLContext(Ark::RendererVersion version);
 
-    Ark::GLVersion version() const;
-    void setVersion(Ark::GLVersion version);
+    Ark::RendererVersion version() const;
+    void setVersion(Ark::RendererVersion version);
 
     const std::map<String, String>& annotations() const;
     std::map<String, String>& annotations();
 
     void setGLSnippetFactory(sp<GLSnippetFactory> snippetfactory);
-    sp<GLSnippet> createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<GLPipeline>& shader, const sp<GLShaderBindings>& shaderBindings) const;
+    sp<GLSnippet> createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings) const;
 
     uint32_t getGLSLVersion() const;
 
 private:
-    Ark::GLVersion _version;
+    Ark::RendererVersion _version;
     std::map<String, String> _annotations;
 
     sp<GLSnippetFactory> _gl_procedure_factory;

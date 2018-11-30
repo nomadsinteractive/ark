@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_GL_UNIFORM_H_
-#define ARK_RENDERER_BASE_GL_UNIFORM_H_
+#ifndef ARK_RENDERER_BASE_UNIFORM_H_
+#define ARK_RENDERER_BASE_UNIFORM_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -13,7 +13,7 @@
 
 namespace ark {
 
-class GLUniform {
+class Uniform {
 public:
     enum Type {
         UNIFORM_I1,
@@ -30,12 +30,14 @@ public:
         UNIFORM_MAT4V,
     };
 
-    GLUniform(const String& name, Type type, const sp<Flatable>& flatable, const sp<Changed>& changed, const sp<RenderController>& renderController);
-    GLUniform(const GLUniform& other);
+    Uniform(const String& name, Type type, const sp<Flatable>& flatable, const sp<Changed>& changed, const sp<RenderController>& renderController);
+    Uniform(const Uniform& other);
 
     const String& name() const;
+    Type type() const;
+    const sp<Flatable>& flatable() const;
 
-    void prepare(GraphicsContext& gc, const sp<GLProgram>& program) const;
+    void prepare(GraphicsContext& graphicsContext, Pipeline& pipeline) const;
 
     String declaration() const;
     void notify() const;

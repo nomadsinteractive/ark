@@ -40,7 +40,7 @@ public:
 
 public:
 //[[script::bindings::auto]]
-    Varyings(const GLPipeline& shader);
+    Varyings(const Shader& shader);
     Varyings();
 
     void addVarying(const String& name, const sp<Flatable>& flatable);
@@ -70,7 +70,7 @@ public:
 
     private:
         BeanFactory _factory;
-        sp<Builder<GLPipeline>> _shader;
+        sp<Builder<Shader>> _shader;
         std::vector<VaryingBuilder> _varying_builders;
     };
 

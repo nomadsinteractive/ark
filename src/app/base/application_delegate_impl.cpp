@@ -20,13 +20,8 @@
 namespace ark {
 
 ApplicationDelegateImpl::ApplicationDelegateImpl(const sp<ApplicationManifest>& applicationManifest)
-    : _application_manifest(applicationManifest)
+    : ApplicationDelegate(applicationManifest)
 {
-}
-
-const char* ApplicationDelegateImpl::name()
-{
-    return _application_manifest->name().c_str();
 }
 
 void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surface>& surface)

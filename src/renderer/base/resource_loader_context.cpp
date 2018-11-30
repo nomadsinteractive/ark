@@ -33,7 +33,7 @@ const sp<ImageResource>& ResourceLoaderContext::images() const
     return _images;
 }
 
-const sp<GLResourceManager>& ResourceLoaderContext::glResourceManager() const
+const sp<GLResourceManager>& ResourceLoaderContext::resourceManager() const
 {
     return _gl_resource_manager;
 }

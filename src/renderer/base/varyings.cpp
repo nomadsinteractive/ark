@@ -11,13 +11,13 @@
 
 #include "graphics/base/rect.h"
 
-#include "renderer/base/gl_pipeline.h"
+#include "renderer/base/shader.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/varyings.h"
 
 namespace ark {
 
-Varyings::Varyings(const GLPipeline& shader)
+Varyings::Varyings(const Shader& shader)
     : _pipeline_input(shader.input()), _size(0)
 {
 }
@@ -64,7 +64,7 @@ Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     }
 
     if(_varying_builders.size() > 0)
-        _shader = factory.ensureBuilder<GLPipeline>(manifest, Constants::Attributes::SHADER);
+        _shader = factory.ensureBuilder<Shader>(manifest, Constants::Attributes::SHADER);
 }
 
 sp<Varyings> Varyings::BUILDER::build(const sp<Scope>& args)
@@ -72,7 +72,7 @@ sp<Varyings> Varyings::BUILDER::build(const sp<Scope>& args)
     if(!_shader)
         return nullptr;
 
-    const sp<GLPipeline> shader = _shader->build(args);
+    const sp<Shader> shader = _shader->build(args);
     const sp<Varyings> varyings = sp<Varyings>::make(shader);
 
     for(const VaryingBuilder& i : _varying_builders)

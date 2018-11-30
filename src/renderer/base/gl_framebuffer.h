@@ -4,13 +4,13 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/gl_resource.h"
+#include "renderer/inf/render_resource.h"
 
 namespace ark {
 
-class GLFramebuffer : public GLResource {
+class GLFramebuffer : public RenderResource {
 private:
-    class Recycler : public GLResource {
+    class Recycler : public RenderResource {
     public:
         Recycler(uint32_t id);
 
@@ -23,7 +23,7 @@ private:
     };
 
 public:
-    GLFramebuffer(const sp<GLRecycler>& recycler, const sp<GLTexture>& texture);
+    GLFramebuffer(const sp<GLRecycler>& recycler, const sp<Texture>& texture);
     ~GLFramebuffer();
 
     virtual uint32_t id() override;
@@ -31,11 +31,11 @@ public:
     virtual void prepare(GraphicsContext& graphicsContext) override;
     virtual void recycle(GraphicsContext& /*graphicsContext*/) override;
 
-    const sp<GLTexture>& texture() const;
+    const sp<Texture>& texture() const;
 
 private:
     sp<GLRecycler> _recycler;
-    sp<GLTexture> _texture;
+    sp<Texture> _texture;
 
     uint32_t _id;
 };

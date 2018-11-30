@@ -5,11 +5,16 @@
 
 namespace ark {
 
-RenderEngine::RenderEngine(Ark::GLVersion version, const sp<RendererFactory>& rendererFactory)
-    : _renderer_factory(rendererFactory), _gl_context(sp<GLContext>::make(version))
+RenderEngine::RenderEngine(Ark::RendererVersion version, const sp<RendererFactory>& rendererFactory)
+    : _renderer_factory(rendererFactory), _render_context(sp<GLContext>::make(version))
 {
     if(version != Ark::AUTO)
-        _renderer_factory->setGLVersion(version, _gl_context);
+        _renderer_factory->setGLVersion(version, _render_context);
+}
+
+Ark::RendererVersion RenderEngine::version() const
+{
+    return _render_context->version();
 }
 
 const sp<RendererFactory>& RenderEngine::rendererFactory() const
@@ -19,12 +24,12 @@ const sp<RendererFactory>& RenderEngine::rendererFactory() const
 
 void RenderEngine::initialize()
 {
-    _renderer_factory->initialize(_gl_context);
+    _renderer_factory->initialize(_render_context);
 }
 
 sp<RenderView> RenderEngine::createRenderView(const Viewport& viewport) const
 {
-    return _renderer_factory->createRenderView(_gl_context, viewport);
+    return _renderer_factory->createRenderView(_render_context, viewport);
 }
 
 }

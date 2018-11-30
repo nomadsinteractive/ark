@@ -6,7 +6,7 @@
 #include "graphics/base/camera.h"
 
 #include "renderer/base/gl_resource_manager.h"
-#include "renderer/base/gl_program.h"
+#include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/base/render_engine.h"
 
 #include "platform/platform.h"
@@ -33,7 +33,7 @@ void GraphicsContext::onDrawFrame()
     _gl_resource_manager->onDrawFrame(*this);
 }
 
-const sp<GLResourceManager>& GraphicsContext::glResourceManager() const
+const sp<GLResourceManager>& GraphicsContext::resourceManager() const
 {
     return _gl_resource_manager;
 }
@@ -41,31 +41,6 @@ const sp<GLResourceManager>& GraphicsContext::glResourceManager() const
 const sp<GLContext>& GraphicsContext::glContext() const
 {
     return _gl_context;
-}
-
-//void GraphicsContext::glUseProgram(const sp<GLProgram>& program)
-//{
-//    DCHECK(program && program->id(), "Illegal program used");
-//    if(_program != program)
-//    {
-//        _program = program;
-//        program->use();
-//    }
-//}
-
-sp<GLProgram::Shader> GraphicsContext::makeShader(uint32_t version, GLenum type, const String& source)
-{
-    const auto iter = _shaders[type].find(source);
-    if(iter != _shaders[type].end())
-    {
-        const sp<GLProgram::Shader> shader = iter->second.lock();
-        if(shader)
-            return shader;
-    }
-
-    const sp<GLProgram::Shader> shader = sp<GLProgram::Shader>::make(_gl_resource_manager->recycler(), version, type, source);
-    _shaders[type][source] = shader;
-    return shader;
 }
 
 uint64_t GraphicsContext::tick() const

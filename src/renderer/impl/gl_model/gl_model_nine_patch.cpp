@@ -6,11 +6,11 @@
 #include "graphics/base/layer_context.h"
 
 #include "renderer/base/atlas.h"
-#include "renderer/base/gl_drawing_context.h"
+#include "renderer/base/drawing_context.h"
 #include "renderer/base/gl_model_buffer.h"
 #include "renderer/base/gl_resource_manager.h"
-#include "renderer/base/gl_shader_bindings.h"
-#include "renderer/base/gl_texture.h"
+#include "renderer/base/shader_bindings.h"
+#include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
 
@@ -34,7 +34,7 @@ GLModelNinePatch::Item::Item(const Rect& bounds, const Rect& patches, uint32_t t
 }
 
 GLModelNinePatch::GLModelNinePatch(const document& manifest, const sp<Atlas>& atlas)
-    : GLModel(GL_TRIANGLE_STRIP), _atlas(atlas)
+    : RenderModel(RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas)
 {
     uint32_t textureWidth = static_cast<uint32_t>(_atlas->texture()->width());
     uint32_t textureHeight = static_cast<uint32_t>(_atlas->texture()->height());
@@ -58,7 +58,7 @@ GLModelNinePatch::GLModelNinePatch(const document& manifest, const sp<Atlas>& at
     }
 }
 
-void GLModelNinePatch::initialize(GLShaderBindings& bindings)
+void GLModelNinePatch::initialize(ShaderBindings& bindings)
 {
     bindings.bindGLTexture(_atlas->texture());
 }
@@ -93,7 +93,7 @@ GLModelNinePatch::BUILDER::BUILDER(BeanFactory& factory, const document& manifes
 {
 }
 
-sp<GLModel> GLModelNinePatch::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> GLModelNinePatch::BUILDER::build(const sp<Scope>& args)
 {
     return sp<GLModelNinePatch>::make(_manifest, _atlas->build(args));
 }

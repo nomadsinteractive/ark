@@ -5,14 +5,14 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/gl_model.h"
-#include "renderer/inf/gl_resource.h"
+#include "renderer/inf/render_model.h"
+#include "renderer/inf/render_resource.h"
 
 namespace ark {
 
-class GLModelText : public GLModel {
+class GLModelText : public RenderModel {
 private:
-    class Stub : public GLResource {
+    class Stub : public RenderResource {
     public:
         Stub(GLResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
 
@@ -32,9 +32,9 @@ private:
     private:
         sp<Alphabet> _alphabet;
         bitmap _font_glyph;
-        sp<GLTexture> _texture;
+        sp<Texture> _texture;
         sp<Atlas> _atlas;
-        sp<GLModel> _delegate;
+        sp<RenderModel> _delegate;
 
         uint32_t _flowx, _flowy;
         int32_t _max_glyph_height;
@@ -47,17 +47,17 @@ private:
 public:
     GLModelText(GLResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
 
-    virtual void initialize(GLShaderBindings& bindings) override;
+    virtual void initialize(ShaderBindings& bindings) override;
     virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) override;
     virtual void load(GLModelBuffer& buf, int32_t type, const V& scale) override;
     virtual Metrics measure(int32_t type) override;
 
 //  [[plugin::resource-loader("text")]]
-    class BUILDER : public Builder<GLModel> {
+    class BUILDER : public Builder<RenderModel> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<GLModel> build(const sp<Scope>& args) override;
+        virtual sp<RenderModel> build(const sp<Scope>& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;

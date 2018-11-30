@@ -29,7 +29,7 @@ public:
     void render();
 
     static void checkResult(VkResult result);
-    static VkPipelineShaderStageCreateInfo loadShader(VkDevice device, std::string fileName, VkShaderStageFlagBits stage);
+    static VkPipelineShaderStageCreateInfo loadShaderSPIR(VkDevice device, std::string fileName, VkShaderStageFlagBits stage);
 
     struct Vertex {
         float pos[3];
@@ -37,17 +37,6 @@ public:
         float normal[3];
     };
 
-    // For simplicity we use the same uniform block layout as in the shader:
-    //
-    //	layout(set = 0, binding = 0) uniform UBO
-    //	{
-    //		mat4 projectionMatrix;
-    //		mat4 modelMatrix;
-    //		mat4 viewMatrix;
-    //	} ubo;
-    //
-    // This way we can just memcopy the ubo data to the ubo
-    // Note: You should use data types that align with the GPU in order to avoid manual padding (vec4, mat4)
     struct {
         glm::mat4 projection;
         glm::mat4 model;
@@ -71,12 +60,9 @@ private:
     sp<Instance> _instance;
     sp<Device> _device;
     sp<RenderTarget> _render_target;
-    sp<PipelineFactory> _pipeline_factory;
+    sp<PipelineFactoryVulkan> _pipeline_factory;
     sp<Pipeline> _pipeline;
     sp<Buffer> _uniforms;
-
-    VkDevice _logical_device;
-    VkQueue _queue;
 
     std::vector<VkCommandBuffer> _command_buffers;
 
@@ -96,6 +82,9 @@ private:
     vks::Buffer indexBuffer;
 
     VkClearColorValue defaultClearColor = { { 0, 0, 0.2f, 1.0f } };
+
+    friend class RendererFactoryVulkan;
+    friend class PipelineFactoryVulkan;
 };
 
 }

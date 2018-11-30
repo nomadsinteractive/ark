@@ -41,14 +41,13 @@ public:
 public:
     PipelineInput() = default;
 
-    const std::vector<GLUniform>& uniforms() const;
-    std::vector<GLUniform>& uniforms();
+    const std::vector<Uniform>& uniforms() const;
+    std::vector<Uniform>& uniforms();
 
     const std::map<uint32_t, Stream>& streams() const;
     std::map<uint32_t, Stream>& streams();
 
     void addAttribute(String name, GLAttribute attribute);
-    void bind(GraphicsContext& graphicsContext, GLProgram& program, uint32_t divisor) const;
 
     std::vector<std::pair<uint32_t, GLBuffer>> makeInstancedArrays(GLResourceManager& resourceManager) const;
 
@@ -57,10 +56,8 @@ public:
     const GLAttribute& getAttribute(const String& name, uint32_t divisor = 0) const;
     int32_t getAttributeOffset(const String& name, uint32_t divisor = 0) const;
 
-
 private:
-    std::vector<GLUniform> _uniforms;
-
+    std::vector<Uniform> _uniforms;
     std::map<uint32_t, Stream> _streams;
 
     friend class PipelineLayout;

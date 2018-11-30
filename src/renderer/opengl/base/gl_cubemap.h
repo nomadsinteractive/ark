@@ -10,13 +10,13 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_texture.h"
+#include "renderer/base/texture.h"
 
 namespace ark {
 
-class ARK_API GLCubemap : public GLTexture {
+class ARK_API GLCubemap : public Texture {
 public:
-    GLCubemap(const sp<GLRecycler>& recycler, const sp<Size>& size, GLTexture::Format format, GLTexture::Feature features, std::vector<sp<Variable<bitmap>>> bitmaps);
+    GLCubemap(const sp<GLRecycler>& recycler, const sp<Size>& size, Texture::Format format, Texture::Feature features, std::vector<sp<Variable<bitmap>>> bitmaps);
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<GLCubemap> {
@@ -32,16 +32,16 @@ public:
         document _manifest;
         sp<Builder<Size>> _size;
         sp<Builder<String>> _srcs[6];
-        GLTexture::Format _format;
-        GLTexture::Feature _features;
+        Texture::Format _format;
+        Texture::Feature _features;
     };
 
 //  [[plugin::resource-loader("cubemap")]]
-    class BUILDER_IMPL1 : public Builder<GLTexture> {
+    class BUILDER_IMPL1 : public Builder<Texture> {
     public:
         BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<GLTexture> build(const sp<Scope>& args) override;
+        virtual sp<Texture> build(const sp<Scope>& args) override;
 
     private:
         BUILDER _delegate;

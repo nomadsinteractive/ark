@@ -90,6 +90,7 @@ public:
     static std::regex _IN_PATTERN;
     static std::regex _OUT_PATTERN;
     static std::regex _IN_OUT_PATTERN;
+    static std::regex _UNIFORM_PATTERN;
 
     class Preprocessor {
     public:
@@ -114,13 +115,11 @@ public:
 
     Preprocessor preprocess();
 
-    void addUniform(const String& type, const String& name);
-
-    void insertPredefinedUniforms(const std::vector<GLUniform>& uniforms);
+    void insertPredefinedUniforms(const std::vector<Uniform>& uniforms);
 
 private:
-    void parseMainBlock(PipelineLayout& shader);
-    void parseDeclarations(PipelineBuildingContext& context, PipelineLayout& pipelineLayout);
+    void parseMainBlock(PipelineLayout& pipelineLayout);
+    void parseDeclarations(PipelineBuildingContext& context);
     uint32_t parseFunctionBody(const String& s, String& body) const;
 
     String getDeclarations() const;

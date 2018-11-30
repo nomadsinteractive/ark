@@ -7,7 +7,7 @@
 
 #include "graphics/base/bitmap.h"
 #include "graphics/base/matrix.h"
-#include "renderer/base/gl_program.h"
+#include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/base/graphics_context.h"
 
 namespace ark {

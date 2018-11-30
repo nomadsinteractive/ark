@@ -9,7 +9,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/gl_resource.h"
+#include "renderer/inf/render_resource.h"
 
 #include "platform/gl/gl.h"
 
@@ -91,7 +91,7 @@ public:
     typedef ArrayListUploader<glindex_t> IndexArrayListUploader;
 
 private:
-    class Recycler : public GLResource {
+    class Recycler : public RenderResource {
     public:
         Recycler(GLuint id);
 
@@ -103,7 +103,7 @@ private:
         GLuint _id;
     };
 
-    class Stub : public GLResource {
+    class Stub : public RenderResource {
     public:
         Stub(const sp<GLRecycler>& recycler, const sp<Uploader>& uploader, GLenum type, GLenum usage);
         ~Stub() override;

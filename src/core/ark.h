@@ -18,7 +18,7 @@ namespace ark {
 
 class ARK_API Ark {
 public:
-    enum GLVersion {
+    enum RendererVersion {
         AUTO = 0,
         OPENGL_20 = 20,
         OPENGL_21 = 21,
@@ -79,7 +79,7 @@ private:
     class ArkAsset;
 
     sp<ApplicationContext> createApplicationContext(const document& manifest, const sp<ApplicationResource>& resource, const sp<RenderEngine>& renderEngine);
-    sp<RenderEngine> createRenderEngine(GLVersion version, const sp<ApplicationResource>& appResource);
+    sp<RenderEngine> createRenderEngine(RendererVersion version, const sp<ApplicationResource>& appResource);
 
     void loadPlugins(const document& manifest) const;
 

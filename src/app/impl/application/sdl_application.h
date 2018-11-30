@@ -22,6 +22,9 @@ public:
     void onSurfaceChanged();
 
 private:
+    uint32_t toSDLWindowFlag(const sp<ApplicationContext>& applicationContext, uint32_t appWindowFlag);
+
+private:
     SDL_Window* _main_window;
     SDL_cond* _cond;
     SDL_mutex* _lock;
@@ -32,6 +35,7 @@ private:
     bool _show_cursor;
     uint32_t _window_flag;
 
+    bool _use_open_gl;
 };
 
 }
