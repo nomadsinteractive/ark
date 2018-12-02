@@ -19,9 +19,13 @@ def logw(*args):
     print(*args)
 
 
-def get_asset(filename):
+def load_asset(filename):
     with open(filename, 'rt') as fp:
         return fp.read()
+
+
+def open_asset(filename):
+    return load_asset(filename)
 
 
 def get_ref_manager():
@@ -67,6 +71,11 @@ class _Var:
 
     def __float__(self):
         return 0.0
+
+
+class AudioPlayer:
+    def play(self, source):
+        pass
 
 
 class Renderer:

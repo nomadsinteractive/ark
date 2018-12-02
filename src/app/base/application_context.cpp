@@ -111,15 +111,18 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const sp<Dictionary<document>>& documentDictionary, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
     const sp<BeanFactory> beanFactory = Ark::instance().createBeanFactory(documentDictionary);
-    const sp<GLResourceManager> glResourceManager = _application_resource->glResourceManager();
-    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), _application_resource->imageResource(), glResourceManager, _executor, _render_controller);
+    const sp<GLResourceManager> resourceManager = _application_resource->resourceManager();
+    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), _application_resource->imageResource(), resourceManager, _executor, _render_controller);
+
     const Global<PluginManager> pluginManager;
     pluginManager->each([&] (const sp<Plugin>& plugin)->bool {
         plugin->loadResourceLoader(beanFactory, documentDictionary, context);
         return true;
     });
+
     if(_resource_loader)
         beanFactory->extend(_resource_loader->beanFactory());
+
     return sp<ResourceLoader>::make(beanFactory);
 }
 
@@ -135,12 +138,17 @@ const sp<RenderEngine>& ApplicationContext::renderEngine() const
 
 const sp<GLResourceManager>& ApplicationContext::glResourceManager() const
 {
-    return _application_resource->glResourceManager();
+    return _application_resource->resourceManager();
 }
 
 const sp<RenderController>& ApplicationContext::renderController() const
 {
     return _render_controller;
+}
+
+const sp<ResourceLoader>& ApplicationContext::resourceLoader() const
+{
+    return _resource_loader;
 }
 
 const sp<Executor>& ApplicationContext::executor() const

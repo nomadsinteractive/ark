@@ -1,5 +1,8 @@
 #include "vorbis/impl/readable/ogg_decoder_readable.h"
 
+#include "core/ark.h"
+#include "core/base/bean_factory.h"
+
 #include "core/impl/readable/file_readable.h"
 #include "core/util/strings.h"
 
@@ -7,8 +10,8 @@ namespace ark {
 namespace plugin {
 namespace vorbis {
 
-OggDecoderReadable::OggDecoderReadable(const sp<Readable>& delegate)
-    : _delegate(delegate), _raw_size(delegate->remaining())
+OggDecoderReadable::OggDecoderReadable(const sp<Readable>& source)
+    : _source(source), _raw_size(source->remaining())
 {
     ov_callbacks callbacks = {
         _read_callback,
@@ -61,7 +64,7 @@ int32_t OggDecoderReadable::remaining()
 
 const sp<Readable>& OggDecoderReadable::delegate() const
 {
-    return _delegate;
+    return _source;
 }
 
 uint32_t OggDecoderReadable::rawSize() const
@@ -87,15 +90,15 @@ long OggDecoderReadable::_tell_callback(void* datasource)
     return oggDecoder->rawSize() - oggDecoder->delegate()->remaining();
 }
 
-OggDecoderReadable::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& doc)
-    : _src(Strings::load(doc, Constants::Attributes::SRC))
+OggDecoderReadable::BUILDER::BUILDER(BeanFactory& factory, const String& src)
+    : _src(factory.ensureBuilder<String>(src))
 {
 }
 
 sp<Readable> OggDecoderReadable::BUILDER::build(const sp<Scope>& args)
 {
-    String src = _src->build(args);
-    return sp<OggDecoderReadable>::make(sp<FileReadable>::make(src, "rb"));
+    const String src = _src->build(args);
+    return sp<OggDecoderReadable>::make(Ark::instance().openAsset(src));
 }
 
 }

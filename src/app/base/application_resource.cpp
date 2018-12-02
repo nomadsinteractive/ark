@@ -17,7 +17,7 @@ ApplicationResource::ApplicationResource(const sp<Dictionary<document>>& documen
 {
 }
 
-const sp<GLResourceManager>& ApplicationResource::glResourceManager() const
+const sp<GLResourceManager>& ApplicationResource::resourceManager() const
 {
     return _resource_manager;
 }

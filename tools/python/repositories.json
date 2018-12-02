@@ -120,5 +120,10 @@
         "url": "https://github.com/dariomanesku/cmft.git",
         "name": "cmft",
         "tag": "master"
+    },
+    {
+        "url": "https://github.com/KhronosGroup/glslang.git",
+        "name": "glslang",
+        "tag": "7.10.2984"
     }
 ]

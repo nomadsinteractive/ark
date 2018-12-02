@@ -98,6 +98,7 @@ BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^\]]*\]
 CLASS_DELIMITER = '\n//%s\n' % ('-' * 120)
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
 TYPE_DEFINED_OBJ = ('V', 'V2', 'V3', 'V4')
+ARK_CORE_BUILDABLES = {'AudioPlayer', 'Object'}
 
 INDENT = '    '
 
@@ -1146,7 +1147,7 @@ def get_result_class(results, filename, classname):
 
 def main(params, paths):
     results = {}
-    bindables = {'Object'}
+    bindables = set(ARK_CORE_BUILDABLES)
 
     namespaces = params['p'].replace('::', ':').split(':')
     modulename = params['m']

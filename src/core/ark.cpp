@@ -124,7 +124,7 @@ public:
         }
     }
 
-    sp<Readable> getResource(const String& name) {
+    sp<Readable> open(const String& name) {
         String pathname = name;
         while(pathname.startsWith("/") || pathname.startsWith("."))
             pathname = pathname.substr(1);
@@ -225,16 +225,15 @@ Ark::Ark(int32_t argc, const char** argv, const String& manfiestSrc)
     const sp<Readable> readable = manfiestSrc ? appAsset->get(manfiestSrc) : nullptr;
     DWARN(!manfiestSrc || readable, "Cannot load application manifest \"%s\"", manfiestSrc.c_str());
     _manifest = readable ? Documents::loadFromReadable(readable) : document::make("");
-    const String& assetDir = Documents::getAttribute(_manifest, "asset-dir");
+    const String assetDir = Documents::getAttribute(_manifest, "asset-dir");
     _asset = sp<ArkAsset>::make(sp<RawAsset>::make(assetDir, appDir), _manifest);
+
+    loadPlugins(_manifest);
 
     const sp<Asset> asset = _asset->getAsset(".");
     const sp<ApplicationResource> appResource = sp<ApplicationResource>::make(sp<XMLDirectory>::make(asset), asset);
-
     const sp<RenderEngine> renderEngine = createRenderEngine(Documents::getAttribute<RendererVersion>(_manifest, "renderer", AUTO), appResource);
     _application_context = createApplicationContext(_manifest, appResource, renderEngine);
-
-    loadPlugins(_manifest);
 }
 
 Ark::~Ark()
@@ -295,9 +294,9 @@ sp<Asset> Ark::getAsset(const String& path) const
     return _asset->getAsset(path);
 }
 
-sp<Readable> Ark::getResource(const String& path) const
+sp<Readable> Ark::openAsset(const String& path) const
 {
-    return _asset->getResource(path);
+    return _asset->open(path);
 }
 
 const sp<Clock>& Ark::clock() const
@@ -342,11 +341,11 @@ sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, const sp<Appli
     case OPENGL_45:
     case OPENGL_46:
 #ifdef ARK_USE_OPEN_GL
-        return sp<RenderEngine>::make(version, sp<opengl::RendererFactoryOpenGL>::make(appResource->glResourceManager()));
+        return sp<RenderEngine>::make(version, sp<opengl::RendererFactoryOpenGL>::make(appResource->resourceManager()));
 #endif
     case VULKAN_11:
 #ifdef ARK_USE_VULKAN
-        return sp<RenderEngine>::make(version, sp<vulkan::RendererFactoryVulkan>::make(appResource->glResourceManager()));
+        return sp<RenderEngine>::make(version, sp<vulkan::RendererFactoryVulkan>::make(appResource->resourceManager()));
 #endif
         break;
     }

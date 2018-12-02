@@ -14,7 +14,7 @@ namespace vorbis {
 class OggDecoderReadable : public Readable {
 public:
     OggDecoderReadable(const sp<Readable>& delegate);
-    ~OggDecoderReadable();
+    ~OggDecoderReadable() override;
 
     virtual uint32_t read(void* buffer, uint32_t length) override;
     virtual int32_t seek(int32_t position, int32_t whence) override;
@@ -23,11 +23,10 @@ public:
     const sp<Readable>& delegate() const;
     uint32_t rawSize() const;
 
-
-//  [[plugin::builder("ogg")]]
+//[[plugin::builder::by-value("ogg")]]
     class BUILDER : public Builder<Readable> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const String& src);
 
         virtual sp<Readable> build(const sp<Scope>& args) override;
 
@@ -42,7 +41,7 @@ private:
     static long _tell_callback(void* datasource);
 
 private:
-    sp<Readable> _delegate;
+    sp<Readable> _source;
 
     OggVorbis_File _ogg_file;
     uint32_t _raw_size;

@@ -7,6 +7,7 @@
 
 namespace ark {
 
+//[[script::bindings::auto]]
 class ARK_API Readable {
 public:
     virtual ~Readable() = default;

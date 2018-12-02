@@ -15,7 +15,7 @@ class ARK_API ApplicationResource {
 public:
     ApplicationResource(const sp<Dictionary<document>>& documents, const sp<Asset>& images);
 
-    const sp<GLResourceManager>& glResourceManager() const;
+    const sp<GLResourceManager>& resourceManager() const;
 
     const sp<Dictionary<document>>& documents() const;
     const sp<ImageResource>& imageResource() const;

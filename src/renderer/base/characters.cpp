@@ -75,16 +75,7 @@ void Characters::renderRequest(const V2& position)
 
 Metrics Characters::getItemMetrics(wchar_t c) const
 {
-//    if(_model)
-        return _model->measure(c);
-
-//    Alphabet::Metrics metrics;
-//    _alphabet->measure(c, metrics, false);
-//    return {
-//        {static_cast<float>(metrics.width), static_cast<float>(metrics.height)},
-//        {static_cast<float>(metrics.bitmap_width), static_cast<float>(metrics.bitmap_height)},
-//        {static_cast<float>(metrics.bitmap_x), static_cast<float>(metrics.bitmap_y)}
-//    };
+    return _model->measure(c);
 }
 
 void Characters::createContent()

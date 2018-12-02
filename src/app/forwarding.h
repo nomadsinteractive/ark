@@ -10,6 +10,7 @@ class ApplicationDelegate;
 class ApplicationManifest;
 class ApplicationResource;
 class Arena;
+class AudioPlayer;
 class Button;
 class Collider;
 class CollisionCallback;

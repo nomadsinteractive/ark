@@ -82,11 +82,11 @@ bool Mixer::empty() const
 void Mixer::ensureToneMapRange(int32_t value)
 {
     int32_t size = _tone_map.size();
-    if(value > size)
+    if(value >= size)
     {
         int32_t remainder;
         int32_t divmod = Math::divmod(value, TONE_MAP_WEIGHT_ONE, remainder);
-        int32_t newSize = divmod * TONE_MAP_WEIGHT_ONE + (remainder ? TONE_MAP_WEIGHT_ONE : 0);
+        int32_t newSize = (divmod + 1) * TONE_MAP_WEIGHT_ONE /*+ (remainder ? TONE_MAP_WEIGHT_ONE : 0)*/;
         _tone_map.resize(newSize);
 
         for(size_t i = size; i < _tone_map.size(); ++i)

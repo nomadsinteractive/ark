@@ -33,7 +33,7 @@ public:
     const sp<RenderEngine>& renderEngine() const;
     const sp<GLResourceManager>& glResourceManager() const;
     const sp<RenderController>& renderController() const;
-
+    const sp<ResourceLoader>& resourceLoader() const;
     const sp<Executor>& executor() const;
 
     const List<String>& argv() const;

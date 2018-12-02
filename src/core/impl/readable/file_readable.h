@@ -11,7 +11,7 @@ class ARK_API FileReadable : public Readable {
 public:
     FileReadable(const String& file_path, const String& mode);
     FileReadable(FILE* fp);
-    ~FileReadable();
+    ~FileReadable() override;
 
     virtual uint32_t read(void* buffer, uint32_t length) override;
     virtual int32_t seek(int32_t position, int32_t whence) override;
