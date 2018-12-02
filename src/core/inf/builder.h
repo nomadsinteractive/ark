@@ -10,6 +10,15 @@ public:
     virtual ~Builder() = default;
 
     virtual sp<T> build(const sp<Scope>& args) = 0;
+
+    class Null;
+};
+
+template<typename T> class Builder<T>::Null final : public Builder<T> {
+public:
+    virtual sp<T> build(const sp<Scope>& /*args*/) {
+        return nullptr;
+    }
 };
 
 }

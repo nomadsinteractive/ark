@@ -111,7 +111,7 @@ bool LayoutParam::isWrapContent(float unit)
 }
 
 LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE, false)), _display(Documents::getAttribute<Display>(manifest, "display", LayoutParam::DISPLAY_BLOCK))
+    : _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)), _display(Documents::getAttribute<Display>(manifest, "display", LayoutParam::DISPLAY_BLOCK))
 {
 }
 

@@ -90,7 +90,7 @@ Atlas::Item Atlas::makeItem(uint32_t left, uint32_t top, uint32_t right, uint32_
 }
 
 Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _factory(factory), _manifest(manifest), _atlas(factory.getBuilder<Atlas>(manifest, Constants::Attributes::ATLAS, false)),
+    : _factory(factory), _manifest(manifest), _atlas(factory.getBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)),
       _texture(factory.getBuilder<Texture>(manifest, Constants::Attributes::SRC)),
       _resource_loader_context(resourceLoaderContext)
 {
@@ -129,18 +129,13 @@ sp<Atlas> Atlas::BUILDER::build(const sp<Scope>& args)
 }
 
 Atlas::Item::Item()
-    : _left(0), _top(0), _right(0), _bottom(0), _size(Null::ptr<Size>()), _pivot_x(0), _pivot_y(0)
+    : _left(0), _top(0), _right(0), _bottom(0), _pivot_x(0), _pivot_y(0)
 {
 }
 
 Atlas::Item::Item(uint16_t left, uint16_t top, uint16_t right, uint16_t bottom, float width, float height, float pivotX, float pivotY)
     : _left(left), _top(top), _right(right), _bottom(bottom), _size(sp<Size>::make(width, height)), _pivot_x(pivotX), _pivot_y(pivotY)
 {
-}
-
-const sp<Size>& Atlas::Item::size() const
-{
-    return _size;
 }
 
 uint16_t Atlas::Item::left() const

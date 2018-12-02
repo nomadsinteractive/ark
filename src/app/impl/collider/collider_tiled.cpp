@@ -68,7 +68,7 @@ sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, 
 }
 
 TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<TileMap>& tileMap)
-    : RigidBody(id, type, position, size, Null::ptr<Rotation>()), _tile_map(tileMap), _rigid_body_tile(sp<RigidBodyTile>::make(tileMap->tileWidth(), tileMap->tileHeight()))
+    : RigidBody(id, type, position, size, Null::toSafe<Rotation>(nullptr)), _tile_map(tileMap), _rigid_body_tile(sp<RigidBodyTile>::make(tileMap->tileWidth(), tileMap->tileHeight()))
 {
 }
 

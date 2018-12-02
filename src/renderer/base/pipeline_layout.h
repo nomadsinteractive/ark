@@ -5,7 +5,7 @@
 
 #include "core/base/api.h"
 #include "core/base/string.h"
-#include "core/collection/list.h"
+#include "core/types/owned_ptr.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/pipeline_input.h"

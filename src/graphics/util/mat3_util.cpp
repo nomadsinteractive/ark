@@ -148,7 +148,7 @@ sp<Mat3Impl> Mat3Util::ensureImpl(const sp<Mat3>& self)
     return impl;
 }
 
-template<> ARK_API const sp<Mat3> Null::ptr()
+template<> ARK_API sp<Mat3> Null::ptr()
 {
     return Ark::instance().obtain<Mat3Impl>();
 }

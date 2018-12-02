@@ -29,7 +29,8 @@ public:
     private:
         sp<Builder<Layer>> _layer;
         sp<Builder<Size>> _size;
-        sp<Builder<RenderObject>> _bottom, _top, _boilerplate;
+        SafePtr<Builder<RenderObject>> _bottom, _top;
+        sp<Builder<RenderObject>> _boilerplate;
         sp<Builder<Vec>> _direction;
     };
 

@@ -2,12 +2,10 @@
 #define ARK_APP_VIEW_BUTTON_H_
 
 #include "core/base/api.h"
-#include "core/base/bean_factory.h"
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
-#include "core/inf/runnable.h"
-#include "core/types/class.h"
-#include "core/types/weak_ptr.h"
+#include "core/types/safe_ptr.h"
+#include "core/types/owned_ptr.h"
 
 #include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
@@ -52,8 +50,8 @@ public:
     private:
         BeanFactory _factory;
         document _manifest;
-        sp<Builder<Renderer>> _foreground, _background;
-        sp<Builder<Size>> _size;
+        SafePtr<Builder<Renderer>> _foreground, _background;
+        SafePtr<Builder<Size>> _size;
         String _gravity;
     };
 

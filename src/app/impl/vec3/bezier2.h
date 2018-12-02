@@ -4,6 +4,7 @@
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -30,7 +31,7 @@ public:
         sp<Builder<Numeric>> _t;
         sp<Builder<Numeric>> _v;
         sp<Builder<Vec2>> _p1, _p2, _p3;
-        sp<Builder<Runnable>> _on_arrival;
+        SafePtr<Builder<Runnable>> _on_arrival;
         sp<ResourceLoaderContext> _resource_loader_context;
 
     };

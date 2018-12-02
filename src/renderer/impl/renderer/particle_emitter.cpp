@@ -47,7 +47,7 @@ uint64_t ParticleEmitter::emitParticles(uint64_t tick)
 ParticleEmitter::BUILDER::BUILDER(BeanFactory& parent, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(parent), _manifest(manifest), _resource_loader_context(resourceLoaderContext),
       _clock(Ark::instance().clock()),
-      _type(parent.getBuilder<Numeric>(manifest, Constants::Attributes::TYPE, false)),
+      _type(parent.getBuilder<Numeric>(manifest, Constants::Attributes::TYPE)),
       _position(parent.getBuilder<Vec>(manifest, Constants::Attributes::POSITION)),
       _size(parent.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _render_layer(parent.ensureBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER))
@@ -69,9 +69,9 @@ ParticleEmitter::Particale::Particale(const sp<Stub>& stub, const document& mani
     _interval = Documents::ensureAttribute<Clock::Interval>(manifest, Constants::Attributes::INTERVAL).usec();
     DCHECK(_interval, "Interval must be greater than 0");
 
-    _type = factory.getBuilder<Numeric>(manifest, Constants::Attributes::TYPE, false);
-    _position = factory.getBuilder<Vec>(manifest, Constants::Attributes::POSITION, false);
-    _size = factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE, false);
+    _type = factory.getBuilder<Numeric>(manifest, Constants::Attributes::TYPE);
+    _position = factory.getBuilder<Vec>(manifest, Constants::Attributes::POSITION);
+    _size = factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE);
     _transform = factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM);
     _filter = factory.getBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS);
     _lifecycle = factory.ensureBuilder<Lifecycle>(manifest, Constants::Attributes::EXPIRED);

@@ -11,7 +11,7 @@ namespace ark {
 
 AlphabetSystem::BUILDER::BUILDER(BeanFactory& factory, const document manifest)
     : _text_size(Documents::getAttribute<uint32_t>(manifest, Constants::Attributes::TEXT_SIZE, 24)),
-      _lang(factory.getBuilder<String>(manifest, "lang", false))
+      _lang(factory.getBuilder<String>(manifest, "lang"))
 {
 }
 

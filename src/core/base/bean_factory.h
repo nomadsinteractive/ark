@@ -246,23 +246,23 @@ public:
         }
         else
             builder = getBuilderByRef<T>(id.ref());
-        return builder ? builder : createBuilderByValue<T>(id.toString(), true);
+        return builder ? builder : createBuilderByValue<T>(id.toString());
     }
 
     template<typename T> sp<T> build(const String& value, const sp<Scope>& args = nullptr) {
-        return getBuilder<T>(value, true)->build(args);
+        return buildSafe<T>(getBuilder<T>(value), args);
     }
 
     template<typename T> sp<T> build(const String& type, const String& value, const sp<Scope>& args = nullptr) {
-        return createBuilderByTypeValue<T>(type, value, true)->build(args);
+        return buildSafe<T>(createBuilderByTypeValue<T>(type, value), args);
     }
 
     template<typename T> sp<T> build(const document& doc, const sp<Scope>& args = nullptr) {
-        return createBuilderByDocument<T>(doc, true)->build(args);
+        return buildSafe<T>(createBuilderByDocument<T>(doc), args);
     }
 
     template<typename T> sp<T> build(const document& doc, const String& attr, const sp<Scope>& args = nullptr) {
-        return getBuilder<T>(doc, attr, true)->build(args);
+        return buildSafe<T>(getBuilder<T>(doc, attr), args);
     }
 
     template<typename T> sp<T> ensure(const String& value, const sp<Scope>& args = nullptr) {
@@ -287,35 +287,35 @@ public:
         return obj;
     }
 
-    template<typename T> sp<Builder<T>> getBuilder(const String& id, bool noNull = true) {
+    template<typename T> sp<Builder<T>> getBuilder(const String& id) {
         if(id.empty())
-            return noNull ? getNullBuilder<T>() : nullptr;
+            return nullptr;
 
         const Identifier f = Identifier::parse(id);
         if(!std::is_same<T, String>::value && f.isRef())
             return createBuilderByRef<T>(f);
         if(f.isArg())
             return getBuilderByArg<T>(f);
-        return createBuilderByValue<T>(id, noNull);
+        return createBuilderByValue<T>(id);
     }
 
-    template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr, bool noNull = true) {
+    template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr) {
         const String attrValue = Documents::getAttribute(doc, attr);
         if(attrValue.empty()) {
             const document& child = doc->getChild(attr);
-            return child ? createBuilderByDocument<T>(child, noNull) : (noNull ? getNullBuilder<T>() : nullptr);
+            return child ? createBuilderByDocument<T>(child) : nullptr;
         }
-        return getBuilder<T>(attrValue, noNull);
+        return getBuilder<T>(attrValue);
     }
 
-    template<typename T> sp<Builder<T>> getConcreteClassBuilder(const document& doc, const String& attr, bool noNull = true) {
+    template<typename T> sp<Builder<T>> getConcreteClassBuilder(const document& doc, const String& attr) {
         static_assert(!std::is_abstract<T>::value, "Not a concrete class");
         const String attrValue = Documents::getAttribute(doc, attr);
         if(attrValue.empty()) {
             const document& child = doc->getChild(attr);
-            return createBuilderByDocument<T>(child ? child : doc, noNull);
+            return createBuilderByDocument<T>(child ? child : doc);
         }
-        return getBuilder<T>(attrValue, noNull);
+        return getBuilder<T>(attrValue);
     }
 
     template<typename T> sp<Builder<T>> getBuilderByArg(const String& argname) {
@@ -324,7 +324,7 @@ public:
 
     template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id) {
         DCHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
-        return sp<BuilderByArgument<T>>::make(_references, id.arg(), createBuilderByValue<T>(id.toString(), false));
+        return sp<BuilderByArgument<T>>::make(_references, id.arg(), createBuilderByValue<T>(id.toString()));
     }
 
     template<typename T> sp<Builder<T>> getBuilderByRef(const String& refid) {
@@ -342,31 +342,31 @@ public:
 
     template<typename T> sp<Builder<T>> ensureBuilder(const String& id) {
         DCHECK(id, "Empty value being built");
-        const sp<Builder<T>> builder = getBuilder<T>(id, false);
+        const sp<Builder<T>> builder = getBuilder<T>(id);
         DCHECK(builder, "Could find builder \"%s\"", id.c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureBuilder(const document& doc) {
-        const sp<Builder<T>> builder = createBuilderByDocument<T>(doc, false);
+        const sp<Builder<T>> builder = createBuilderByDocument<T>(doc);
         DCHECK(builder, "Counld not build from \"%s\"", Documents::toString(doc).c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureBuilder(const document& doc, const String& attr) {
-        const sp<Builder<T>> builder = getBuilder<T>(doc, attr, false);
+        const sp<Builder<T>> builder = getBuilder<T>(doc, attr);
         DCHECK(builder, "Counld not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureConcreteClassBuilder(const document& doc, const String& attr) {
-        const sp<Builder<T>> builder = getConcreteClassBuilder<T>(doc, attr, false);
+        const sp<Builder<T>> builder = getConcreteClassBuilder<T>(doc, attr);
         DCHECK(builder, "Counld not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureBuilderByTypeValue(const String& type, const String& value) {
-        const sp<Builder<T>> builder = createBuilderByTypeValue<T>(type, value, false);
+        const sp<Builder<T>> builder = createBuilderByTypeValue<T>(type, value);
         DCHECK(builder, "Counld not build \"%s\" with value \"%s\"", type.c_str(), value.c_str());
         return builder;
     }
@@ -396,36 +396,36 @@ public:
     }
 
 private:
-    template<typename T> sp<Builder<T>> createBuilderByDocument(const document& doc, bool noNull) {
+    template<typename T> sp<Builder<T>> createBuilderByDocument(const document& doc) {
         const String className = Documents::getAttribute(doc, Constants::Attributes::CLASS);
-        return createBuilderByDocument<T>(className, doc, noNull);
+        return createBuilderByDocument<T>(className, doc);
     }
 
-    template<typename T> sp<Builder<T>> createBuilderByDocument(const String& className, const document& doc, bool noNull) {
+    template<typename T> sp<Builder<T>> createBuilderByDocument(const String& className, const document& doc) {
         for(const Factory& i : _factories->items()) {
             const sp<Builder<T>> builder = i.createBuilder<T>(className, doc, *this);
             if(builder)
                 return builder;
         }
-        return noNull ? getNullBuilder<T>() : nullptr;
+        return nullptr;
     }
 
-    template<typename T> sp<Builder<T>> createBuilderByValue(const String& value, bool noNull) {
+    template<typename T> sp<Builder<T>> createBuilderByValue(const String& value) {
         for(const Factory& i : _factories->items()) {
             const sp<Builder<T>> builder = i.createValueBuilder<T>(*this, value);
             if(builder)
                 return builder;
         }
-        return noNull ? getNullBuilder<T>() : nullptr;
+        return nullptr;
     }
 
-    template<typename T> sp<Builder<T>> createBuilderByTypeValue(const String& type, const String& value, bool noNull) {
+    template<typename T> sp<Builder<T>> createBuilderByTypeValue(const String& type, const String& value) {
         for(const Factory& i : _factories->items()) {
             const sp<Builder<T>> builder = i.createValueBuilder<T>(*this, type, value);
             if(builder)
                 return builder;
         }
-        return noNull ? getNullBuilder<T>() : nullptr;
+        return nullptr;
     }
 
     template<typename T> sp<Builder<T>> decorate(const sp<Builder<T>>& builder, const String& style, const String& value) {
@@ -441,6 +441,10 @@ private:
         DCHECK(name, "Empty package name");
         auto iter = _packages.find(name);
         return iter == _packages.end() ? sp<BeanFactory>::null() : iter->second;
+    }
+
+    template<typename T> sp<T> buildSafe(const sp<Builder<T>>& builder, const sp<Scope>& args) {
+        return builder ? builder->build(args) : nullptr;
     }
 
 private:

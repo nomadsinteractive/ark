@@ -102,10 +102,10 @@ public:
 
     private:
         sp<Builder<Integer>> _type;
-        sp<Builder<Vec>> _position;
-        sp<Builder<Size>> _size;
-        sp<Builder<Transform>> _transform;
-        sp<Builder<Varyings>> _varyings;
+        SafePtr<Builder<Vec>> _position;
+        SafePtr<Builder<Size>> _size;
+        SafePtr<Builder<Transform>> _transform;
+        SafePtr<Builder<Varyings>> _varyings;
     };
 
 //  [[plugin::style("expired")]]

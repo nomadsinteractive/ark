@@ -46,7 +46,7 @@ const sp<NumericWrapper>& Rotation::value() const
     return _value;
 }
 
-template<> ARK_API const sp<Rotation> Null::ptr()
+template<> ARK_API sp<Rotation> Null::ptr()
 {
     return Ark::instance().obtain<Rotation>(Null::ptr<Numeric>(), Ark::instance().obtain<Vec3::Const>(Rotation::Z_AXIS));
 }

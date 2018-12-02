@@ -4,6 +4,7 @@
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -36,10 +37,6 @@ public:
 
     const sp<GLSnippet>& snippet() const;
 
-//    void glUpdateMVPMatrix(GraphicsContext& graphicsContext, const Matrix& matrix) const;
-//    void glUpdateVPMatrix(GraphicsContext& graphicsContext, const Matrix& matrix) const;
-//    void glUpdateMatrix(GraphicsContext& graphicsContext, const String& name, const Matrix& matrix) const;
-
 //[[deprecated]]
     uint32_t stride() const;
 
@@ -58,7 +55,7 @@ public:
         sp<Builder<String>> _vertex;
         sp<Builder<String>> _fragment;
         sp<Builder<GLSnippet>> _snippet;
-        sp<Builder<Camera>> _camera;
+        SafePtr<Builder<Camera>> _camera;
     };
 
 private:

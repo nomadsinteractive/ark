@@ -141,7 +141,7 @@ sp<Transform> Transform::DICTIONARY::build(const sp<Scope>& args)
     return _impl.build(args);
 }
 
-template<> ARK_API const sp<Transform> Null::ptr()
+template<> ARK_API sp<Transform> Null::ptr()
 {
     return Ark::instance().obtain<Transform>();
 }

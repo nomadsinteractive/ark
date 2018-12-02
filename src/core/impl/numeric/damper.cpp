@@ -19,7 +19,7 @@ float Damper::val()
 
 
 Damper::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _duration(factory.ensureBuilder<Duration>(manifest)), _v(factory.getBuilder<Numeric>(manifest, "v", false)),
+    : _duration(factory.ensureBuilder<Duration>(manifest)), _v(factory.getBuilder<Numeric>(manifest, "v")),
       _s1(factory.ensureBuilder<Numeric>(manifest, "s1")), _s2(factory.ensureBuilder<Numeric>(manifest, "s2"))
 {
 }

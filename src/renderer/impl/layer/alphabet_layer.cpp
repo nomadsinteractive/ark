@@ -12,8 +12,8 @@ namespace ark {
 AlphabetLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext),
       _alphabet(factory.ensureBuilder<Alphabet>(manifest, Constants::Attributes::ALPHABET)),
-      _shader(factory.getBuilder<Shader>(manifest, Constants::Attributes::SHADER, false)),
-      _color(factory.getBuilder<Vec4>(manifest, Constants::Attributes::TEXT_COLOR, false)),
+      _shader(factory.getBuilder<Shader>(manifest, Constants::Attributes::SHADER)),
+      _color(factory.getBuilder<Vec4>(manifest, Constants::Attributes::TEXT_COLOR)),
       _texture_width(Documents::getAttribute<uint32_t>(manifest, "texture-width", 256)),
       _texture_height(Documents::getAttribute<uint32_t>(manifest, "texture-height", 256))
 {

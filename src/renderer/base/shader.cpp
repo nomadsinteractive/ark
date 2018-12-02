@@ -7,6 +7,7 @@
 #include "core/base/string_table.h"
 #include "core/inf/array.h"
 #include "core/impl/flatable/flatable_numeric.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/global.h"
 #include "core/util/documents.h"
 #include "core/util/strings.h"
@@ -52,7 +53,7 @@ private:
 
     String _vertex_src, _fragment_src;
 
-    sp<Builder<Camera>> _camera;
+    SafePtr<Builder<Camera>> _camera;
 };
 
 }
@@ -66,7 +67,7 @@ Shader::Shader(const sp<PipelineLayout>& source, const sp<Camera>& camera)
 sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment)
 {
     const Global<StringTable> stringTable;
-    const sp<Builder<Shader>> shader = factory.getBuilder<Shader>(doc, Constants::Attributes::SHADER, false);
+    const sp<Builder<Shader>> shader = factory.getBuilder<Shader>(doc, Constants::Attributes::SHADER);
     return shader ? shader : sp<Builder<Shader>>::adopt(new GLShaderBuilderImpl(factory, doc, resourceLoaderContext, stringTable->getString(defVertex), stringTable->getString(defFragment)));
 }
 
@@ -157,7 +158,7 @@ uint32_t Shader::stride() const
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _vertex(Strings::load(manifest, "vertex", "@shaders:default.vert")),
       _fragment(Strings::load(manifest, "fragment", "@shaders:texture.frag")),
-      _snippet(factory.getBuilder<GLSnippet>(manifest, Constants::Attributes::SNIPPET, false)),
+      _snippet(factory.getBuilder<GLSnippet>(manifest, Constants::Attributes::SNIPPET)),
       _camera(factory.getBuilder<Camera>(manifest, Constants::Attributes::CAMERA))
 {
 }

@@ -10,6 +10,7 @@
 #include "core/base/object_pool.h"
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -70,7 +71,7 @@ public:
 
         sp<Builder<Numeric>> _ppmx, _ppmy;
         sp<Builder<Numeric>> _gravity_x, _gravity_y;
-        sp<Builder<Boolean>> _expired;
+        SafePtr<Builder<Boolean>> _expired;
     };
 
 //  [[plugin::resource-loader("b2World")]]

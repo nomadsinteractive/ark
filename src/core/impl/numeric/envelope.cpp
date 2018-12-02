@@ -21,7 +21,7 @@ float Envelope::val()
         if(_phrases_iterator != _stub->_phrases.end())
             ++_phrases_iterator;
 
-        _expired = Null::ptr<Boolean>();
+        _expired = Null::toSafe<Boolean>(nullptr);
         if(_phrases_iterator != _stub->_phrases.end())
             _expired = buildState();
     }
@@ -30,8 +30,8 @@ float Envelope::val()
 }
 
 Envelope::Phrase::Phrase(BeanFactory& factory, const document& manifest)
-    : _value(factory.ensureBuilder<Numeric>(manifest)), _expired(factory.getBuilder<Boolean>(manifest, Constants::Attributes::EXPIRED, false)),
-      _expectation(factory.getBuilder<Expectation>(manifest, Constants::Attributes::EXPECTATION, false))
+    : _value(factory.ensureBuilder<Numeric>(manifest)), _expired(factory.getBuilder<Boolean>(manifest, Constants::Attributes::EXPIRED)),
+      _expectation(factory.getBuilder<Expectation>(manifest, Constants::Attributes::EXPECTATION))
 {
 }
 

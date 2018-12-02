@@ -59,10 +59,10 @@ V2 Bezier2::interpolate(const V2& p1, const V2& p2, float t)
     return V2((p2x - p1x) * t + p1x, (p2y - p1y) * t + p1y);
 }
 
-Bezier2::BUILDER::BUILDER(BeanFactory& parent, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _t(parent.getBuilder<Numeric>(manifest, "t", false)), _v(parent.ensureBuilder<Numeric>(manifest, "v")),
-      _p1(parent.ensureBuilder<Vec2>(manifest, "p1")), _p2(parent.ensureBuilder<Vec2>(manifest, "p2")), _p3(parent.ensureBuilder<Vec2>(manifest, "p3")),
-      _on_arrival(parent.getBuilder<Runnable>(manifest, "onarrival")), _resource_loader_context(resourceLoaderContext)
+Bezier2::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _t(factory.getBuilder<Numeric>(manifest, "t")), _v(factory.ensureBuilder<Numeric>(manifest, "v")),
+      _p1(factory.ensureBuilder<Vec2>(manifest, "p1")), _p2(factory.ensureBuilder<Vec2>(manifest, "p2")), _p3(factory.ensureBuilder<Vec2>(manifest, "p3")),
+      _on_arrival(factory.getBuilder<Runnable>(manifest, "onarrival")), _resource_loader_context(resourceLoaderContext)
 {
 }
 

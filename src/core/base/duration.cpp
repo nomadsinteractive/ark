@@ -19,9 +19,9 @@ float Duration::val()
 }
 
 Duration::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _clock(factory.getBuilder<Clock>(manifest, Constants::Attributes::CLOCK, false)),
-      _delegate(factory.getBuilder<Numeric>(manifest, "t", false)),
-      _util(factory.getBuilder<Numeric>(manifest, "util", false))
+    : _clock(factory.getBuilder<Clock>(manifest, Constants::Attributes::CLOCK)),
+      _delegate(factory.getBuilder<Numeric>(manifest, "t")),
+      _util(factory.getBuilder<Numeric>(manifest, "util"))
 {
     DWARN(!(_clock && _delegate), "Clock will be ommited since \"t\" is specified");
 }

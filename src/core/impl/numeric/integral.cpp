@@ -23,7 +23,7 @@ float Integral::val()
 }
 
 Integral::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _duration(factory.ensureBuilder<Duration>(manifest)), _s(factory.getBuilder<Numeric>(manifest, "s", false)), _v(factory.ensureBuilder<Numeric>(manifest, "v"))
+    : _duration(factory.ensureBuilder<Duration>(manifest)), _s(factory.getBuilder<Numeric>(manifest, "s")), _v(factory.ensureBuilder<Numeric>(manifest, "v"))
 {
 }
 

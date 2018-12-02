@@ -80,7 +80,7 @@ sp<Varyings> Varyings::BUILDER::build(const sp<Scope>& args)
     return varyings;
 }
 
-template<> ARK_API const sp<Varyings> Null::ptr()
+template<> ARK_API sp<Varyings> Null::ptr()
 {
     return Ark::instance().obtain<Varyings>();
 }

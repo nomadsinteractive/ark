@@ -6,7 +6,7 @@
 namespace ark {
 
 Randf::Randf(const sp<Numeric>& b)
-    : _a(Null::ptr<Numeric>()), _b(b)
+    : _b(b)
 {
 }
 

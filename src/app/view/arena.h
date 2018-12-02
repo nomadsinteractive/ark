@@ -5,8 +5,8 @@
 #include "core/collection/filtered_list.h"
 #include "core/inf/builder.h"
 #include "core/types/owned_ptr.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/weak_ptr.h"
 
 #include "graphics/forwarding.h"
 
@@ -72,8 +72,8 @@ public:
     private:
         BeanFactory _factory;
         document _manifest;
-        sp<Builder<ResourceLoader>> _resource_loader;
-        sp<Builder<Layout>> _layout;
+        SafePtr<Builder<ResourceLoader>> _resource_loader;
+        SafePtr<Builder<Layout>> _layout;
         sp<Builder<LayoutParam>> _layout_param;
         String _background;
         String _view;

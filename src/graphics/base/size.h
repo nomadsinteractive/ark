@@ -4,6 +4,7 @@
 #include "core/base/api.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -54,9 +55,9 @@ public:
 
     private:
         sp<Builder<Size>> _size;
-        sp<Builder<Numeric>> _width;
-        sp<Builder<Numeric>> _height;
-        sp<Builder<Numeric>> _depth;
+        SafePtr<Builder<Numeric>> _width;
+        SafePtr<Builder<Numeric>> _height;
+        SafePtr<Builder<Numeric>> _depth;
     };
 
 //  [[plugin::builder::by-value]]

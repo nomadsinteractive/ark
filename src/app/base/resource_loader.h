@@ -6,6 +6,7 @@
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/collection/by_type.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 #include "core/forwarding.h"
 
@@ -25,13 +26,13 @@ private:
             const auto iter = _builders.find(id.ref());
             if(iter != _builders.end())
                 return iter->second;
-            const sp<Builder<T>> builder = factory.createBuilderByRef<T>(id);
+            const SafePtr<Builder<T>> builder = factory.createBuilderByRef<T>(id);
             _builders[id.ref()] = builder;
             return builder;
         }
 
     private:
-        std::unordered_map<String, sp<Builder<T>>> _builders;
+        std::unordered_map<String, SafePtr<Builder<T>>> _builders;
     };
 
 public:

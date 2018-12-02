@@ -9,7 +9,6 @@
 #include "core/types/box.h"
 #include "core/types/class.h"
 #include "core/types/interfaces.h"
-#include "core/types/owned_ptr.h"
 #include "core/types/type.h"
 
 namespace ark {

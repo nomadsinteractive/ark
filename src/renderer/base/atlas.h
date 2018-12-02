@@ -6,7 +6,9 @@
 #include "core/base/bean_factory.h"
 #include "core/collection/by_index.h"
 #include "core/inf/builder.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
+#include "core/types/owned_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/rect.h"
@@ -48,7 +50,7 @@ public:
     private:
         uint16_t _left, _top;
         uint16_t _right, _bottom;
-        sp<Size> _size;
+        SafePtr<Size> _size;
         float _pivot_x, _pivot_y;
     };
 
@@ -80,7 +82,7 @@ public:
         BeanFactory _factory;
         document _manifest;
         sp<Builder<Atlas>> _atlas;
-        sp<Builder<Texture>> _texture;
+        SafePtr<Builder<Texture>> _texture;
         sp<ResourceLoaderContext> _resource_loader_context;
     };
 private:

@@ -5,6 +5,7 @@
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/v2.h"
@@ -36,8 +37,8 @@ public:
         virtual sp<Vec2> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Numeric>> _x;
-        sp<Builder<Numeric>> _y;
+        SafePtr<Builder<Numeric>> _x;
+        SafePtr<Builder<Numeric>> _y;
     };
 
 //  [[plugin::builder::by-value]]

@@ -3,6 +3,7 @@
 
 #include "core/forwarding.h"
 #include "core/inf/variable.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -20,7 +21,7 @@ public:
     static sp<Numeric> rand(const sp<Numeric>& a, const sp<Numeric>& b);
 
 private:
-    sp<Numeric> _a;
+    SafePtr<Numeric> _a;
     sp<Numeric> _b;
 };
 

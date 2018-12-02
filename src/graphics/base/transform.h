@@ -66,9 +66,9 @@ public:
         virtual sp<Transform> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Rotation>> _rotation;
-        sp<Builder<Vec>> _scale;
-        sp<Builder<Vec>> _translation;
+        SafePtr<Builder<Rotation>> _rotation;
+        SafePtr<Builder<Vec>> _scale;
+        SafePtr<Builder<Vec>> _translation;
 
     };
 

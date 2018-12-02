@@ -3,6 +3,7 @@
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -39,7 +40,7 @@ public:
         virtual sp<Rotation> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Numeric>> _rotation;
+        SafePtr<Builder<Numeric>> _rotation;
     };
 
 //  [[plugin::builder::by-value]]
@@ -50,7 +51,7 @@ public:
         virtual sp<Rotation> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Numeric>> _rotation;
+        SafePtr<Builder<Numeric>> _rotation;
     };
 
 

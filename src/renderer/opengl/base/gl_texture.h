@@ -1,12 +1,10 @@
 #ifndef ARK_RENDERER_BASE_GL_TEXTURE_DEFAULT_H_
 #define ARK_RENDERER_BASE_GL_TEXTURE_DEFAULT_H_
 
-#include <map>
-
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
-#include "core/types/global.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/inf/block.h"
@@ -16,7 +14,7 @@
 
 namespace ark {
 
-class ARK_API GLTexture : public Texture {
+class GLTexture : public Texture {
 public:
     GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, Format format, Feature features, const sp<Variable<sp<Bitmap>>>& bitmap);
 
@@ -32,7 +30,7 @@ public:
 
         BeanFactory _factory;
         document _manifest;
-        sp<Builder<String>> _src;
+        SafePtr<Builder<String>> _src;
         Format _format;
         Feature _features;
     };

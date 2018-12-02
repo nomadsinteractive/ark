@@ -149,7 +149,7 @@ sp<Vec4Impl> Vec4Util::ensureImpl(const sp<Vec4>& self)
     return impl;
 }
 
-template<> ARK_API const sp<Vec4> Null::ptr()
+template<> ARK_API sp<Vec4> Null::ptr()
 {
     return Ark::instance().obtain<Vec4Impl>();
 }

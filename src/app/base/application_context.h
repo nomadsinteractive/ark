@@ -4,12 +4,12 @@
 #include <map>
 
 #include "core/base/api.h"
-#include "core/collection/filtered_list.h"
 #include "core/collection/list.h"
 #include "core/forwarding.h"
 #include "core/inf/message_loop.h"
 #include "core/inf/runnable.h"
 #include "core/types/shared_ptr.h"
+#include "core/types/owned_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/color.h"

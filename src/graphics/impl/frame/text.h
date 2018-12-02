@@ -2,6 +2,7 @@
 #define ARK_GRAPHICS_IMPL_FRAME_TEXT_H_
 
 #include "core/inf/builder.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -33,7 +34,7 @@ public:
     private:
         sp<Builder<Characters>> _characters;
         sp<Builder<LayoutParam>> _layout_param;
-        sp<Builder<String>> _text;
+        SafePtr<Builder<String>> _text;
     };
 
 private:

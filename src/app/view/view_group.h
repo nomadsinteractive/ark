@@ -5,6 +5,7 @@
 #include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
 #include "core/types/class.h"
+#include "core/types/safe_ptr.h"
 
 #include "graphics/inf/renderer.h"
 #include "graphics/base/frame.h"
@@ -36,8 +37,8 @@ public:
         BeanFactory _factory;
         document _manifest;
 
-        sp<Builder<Layout>> _layout;
-        sp<Builder<Renderer>> _background;
+        SafePtr<Builder<Layout>> _layout;
+        SafePtr<Builder<Renderer>> _background;
         sp<Builder<LayoutParam>> _layout_param;
     };
 

@@ -9,7 +9,7 @@ namespace ark {
 template<typename T> class SafePtr {
 public:
     SafePtr() noexcept
-        : _inst(Null::ptr<T>()), _allocated(false) {
+        : _inst(Null::toSafe<T>(nullptr)), _allocated(false) {
     }
     SafePtr(const sp<T>& inst) noexcept
         : _inst(Null::toSafe<T>(inst)), _allocated(static_cast<bool>(inst)) {
@@ -29,7 +29,7 @@ public:
     }
     SafePtr& operator =(sp<T>&& other) noexcept {
         _allocated = static_cast<bool>(other);
-        _inst = _allocated ? std::move(other) : Null::ptr<T>();
+        _inst = _allocated ? std::move(other) : Null::toSafe<T>(nullptr);
         return *this;
     }
 

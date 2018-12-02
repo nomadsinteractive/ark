@@ -6,17 +6,17 @@
 
 namespace ark {
 
-template<> ARK_API const sp<Numeric> Null::ptr()
+template<> ARK_API sp<Numeric> Null::ptr()
 {
     return Ark::instance().obtain<Numeric::Const>(0.0f);
 }
 
-template<> ARK_API const sp<Integer> Null::ptr()
+template<> ARK_API sp<Integer> Null::ptr()
 {
     return Ark::instance().obtain<Integer::Const>(0);
 }
 
-template<> ARK_API const sp<Boolean> Null::ptr()
+template<> ARK_API sp<Boolean> Null::ptr()
 {
     return Ark::instance().obtain<Boolean::Const>(false);
 }

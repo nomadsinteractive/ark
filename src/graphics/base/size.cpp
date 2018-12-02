@@ -88,7 +88,7 @@ void Size::adopt(const Size& other)
     _depth->set(other._depth);
 }
 
-template<> ARK_API const sp<Size> Null::ptr()
+template<> ARK_API sp<Size> Null::ptr()
 {
     return Ark::instance().obtain<Size>();
 }
@@ -104,7 +104,7 @@ sp<Size> Size::DICTIONARY::build(const sp<Scope>& args)
 }
 
 Size::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE, false)),
+    : _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _width(_size ? sp<Builder<Numeric>>::null() : factory.getBuilder<Numeric>(manifest, Constants::Attributes::WIDTH)),
       _height(_size ? sp<Builder<Numeric>>::null() : factory.getBuilder<Numeric>(manifest, Constants::Attributes::HEIGHT)),
       _depth(_size ? sp<Builder<Numeric>>::null() : factory.getBuilder<Numeric>(manifest, Constants::Attributes::DEPTH))

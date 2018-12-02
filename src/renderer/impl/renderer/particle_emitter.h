@@ -51,8 +51,8 @@ public:
 
         sp<Clock> _clock;
         sp<Builder<Numeric>> _type;
-        sp<Builder<Vec>> _position;
-        sp<Builder<Size>> _size;
+        SafePtr<Builder<Vec>> _position;
+        SafePtr<Builder<Size>> _size;
         sp<Builder<RenderLayer>> _render_layer;
 
     };
@@ -89,8 +89,8 @@ private:
         sp<Builder<Numeric>> _type;
         sp<Builder<Vec>> _position;
         sp<Builder<Size>> _size;
-        sp<Builder<Transform>> _transform;
-        sp<Builder<Varyings>> _filter;
+        SafePtr<Builder<Transform>> _transform;
+        SafePtr<Builder<Varyings>> _filter;
         sp<Builder<Lifecycle>> _lifecycle;
 
         sp<Iteration> _iteration;
