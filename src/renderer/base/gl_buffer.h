@@ -119,7 +119,7 @@ private:
         void prepare(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader);
 
     private:
-        void upload(GraphicsContext& graphicsContext, Uploader& uploader);
+        void doUpload(GraphicsContext& graphicsContext, Uploader& uploader);
 
     private:
         sp<GLRecycler> _recycler;

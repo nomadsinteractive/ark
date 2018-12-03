@@ -66,19 +66,19 @@ void GLBuffer::Stub::prepare(GraphicsContext& graphicsContext, const sp<Uploader
         glGenBuffers(1, &_id);
         if(_uploader && !transientUploader)
         {
-            upload(graphicsContext, _uploader);
+            doUpload(graphicsContext, _uploader);
             return;
         }
     }
     if(transientUploader)
     {
         DWARN(_usage != GL_STATIC_DRAW, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
-        upload(graphicsContext, transientUploader);
+        doUpload(graphicsContext, transientUploader);
         _uploader = transientUploader;
     }
 }
 
-void GLBuffer::Stub::upload(GraphicsContext& /*graphicsContext*/, GLBuffer::Uploader& uploader)
+void GLBuffer::Stub::doUpload(GraphicsContext& /*graphicsContext*/, GLBuffer::Uploader& uploader)
 {
     glBindBuffer(_type, _id);
     GLint bufsize = 0;

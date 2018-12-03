@@ -17,8 +17,8 @@ public:
     _Node(_Node<T>* next)
         : _next(next) {
     }
-    _Node(const T& data, _Node<T>* next)
-        : _data(data), _next(next) {
+    _Node(T data, _Node<T>* next)
+        : _data(std::move(data)), _next(next) {
     }
 
     const T& data() const {
@@ -42,9 +42,9 @@ public:
         return this;
     }
 
-    static _Node<T>* alloc(const T& data, _Node<T>* next = nullptr) {
+    static _Node<T>* alloc(T data, _Node<T>* next = nullptr) {
         void* ptr = malloc(sizeof(_Node));
-        return new(ptr) _Node(data, next);
+        return new(ptr) _Node(std::move(data), next);
     }
 
     _Node<T>* dispose() {
