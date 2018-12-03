@@ -10,7 +10,7 @@ class Device;
 class Instance;
 class Pipeline;
 class RenderTarget;
-class Texture;
+class VKTexture;
 class VulkanAPI;
 
 class PipelineFactoryVulkan;

@@ -13,7 +13,7 @@
 
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/shader.h"
-#include "renderer/opengl/base/gl_texture.h"
+#include "renderer/opengl/base/gl_texture_2d.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/opengl/util/gl_util.h"
 

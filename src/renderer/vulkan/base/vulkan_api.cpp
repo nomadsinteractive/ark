@@ -21,7 +21,7 @@
 #include "renderer/vulkan/base/instance.h"
 #include "renderer/vulkan/base/pipeline.h"
 #include "renderer/vulkan/base/render_target.h"
-#include "renderer/vulkan/base/texture.h"
+#include "renderer/vulkan/base/vk_texture.h"
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vulkan_debug.h"
@@ -96,7 +96,7 @@ void VulkanAPI::initialize(GLContext& /*glContext*/)
     generateQuad();
 
     _pipeline_factory = sp<PipelineFactoryVulkan>::make(_resource_manager);
-    _pipeline_factory->_texture = sp<Texture>::make(_resource_manager, _render_target->commandPool());
+    _pipeline_factory->_texture = sp<VKTexture>::make(_resource_manager, _render_target->commandPool());
     _pipeline_factory->_buffer = _uniforms;
     _pipeline = _pipeline_factory->build(_render_target);
 

@@ -1,4 +1,4 @@
-#include "renderer/opengl/base/gl_texture.h"
+#include "renderer/opengl/base/gl_texture_2d.h"
 
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
@@ -19,12 +19,12 @@
 
 namespace ark {
 
-GLTexture::GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, Format format, Feature features, const sp<Variable<sp<Bitmap>>>& bitmap)
+GLTexture2D::GLTexture2D(const sp<GLRecycler>& recycler, const sp<Size>& size, Format format, Feature features, const sp<Variable<sp<Bitmap>>>& bitmap)
     : Texture(recycler, size, static_cast<uint32_t>(GL_TEXTURE_2D), format, features), _bitmap(bitmap)
 {
 }
 
-void GLTexture::doPrepareTexture(GraphicsContext& /*graphicsContext*/, uint32_t id)
+void GLTexture2D::doPrepareTexture(GraphicsContext& /*graphicsContext*/, uint32_t id)
 {
     const sp<Bitmap> bitmap = _bitmap ? _bitmap->val() : sp<Bitmap>::null();
     uint8_t channels = bitmap ? bitmap->channels() : 4;
@@ -35,31 +35,31 @@ void GLTexture::doPrepareTexture(GraphicsContext& /*graphicsContext*/, uint32_t 
     LOGD("Uploaded, id = %d, width = %d, height = %d%s", _id, width(), height(), bitmap ? "" : ", bitmap: nullptr");
 }
 
-GLTexture::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext)
+GLTexture2D::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _src(value)
 {
 }
 
-sp<Texture> GLTexture::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<Texture> GLTexture2D::DICTIONARY::build(const sp<Scope>& /*args*/)
 {
     return _resource_loader_context->textureLoader()->get(_src);
 }
 
-GLTexture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+GLTexture2D::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, Constants::Attributes::SRC)),
       _format(Documents::getAttribute<Texture::Format>(manifest, "format", FORMAT_AUTO)),
       _features(Documents::getAttribute<Texture::Feature>(manifest, "feature", FEATURE_DEFAULT))
 {
 }
 
-sp<Texture> GLTexture::BUILDER::build(const sp<Scope>& args)
+sp<Texture> GLTexture2D::BUILDER::build(const sp<Scope>& args)
 {
     const sp<String> src = _src->build(args);
     if(src)
        return _resource_loader_context->textureLoader()->get(*src);
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
-    const sp<Texture> texture = _resource_loader_context->resourceManager()->createGLResource<GLTexture>(_resource_loader_context->resourceManager()->recycler(), size, _format, _features, nullptr);
+    const sp<Texture> texture = _resource_loader_context->resourceManager()->createGLResource<GLTexture2D>(_resource_loader_context->resourceManager()->recycler(), size, _format, _features, nullptr);
     texture->setTexParameters(_manifest);
     return texture;
 }

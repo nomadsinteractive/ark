@@ -8,7 +8,7 @@
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/inf/block.h"
+#include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/inf/render_resource.h"

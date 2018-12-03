@@ -14,9 +14,9 @@
 
 namespace ark {
 
-class GLTexture : public Texture {
+class GLTexture2D : public Texture {
 public:
-    GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, Format format, Feature features, const sp<Variable<sp<Bitmap>>>& bitmap);
+    GLTexture2D(const sp<GLRecycler>& recycler, const sp<Size>& size, Format format, Feature features, const sp<Variable<sp<Bitmap>>>& bitmap);
 
 //  [[plugin::resource-loader("texture")]]
     class BUILDER : public Builder<Texture> {

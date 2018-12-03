@@ -8,7 +8,7 @@
 #include "renderer/vulkan/base/device.h"
 #include "renderer/vulkan/base/pipeline.h"
 #include "renderer/vulkan/base/render_target.h"
-#include "renderer/vulkan/base/texture.h"
+#include "renderer/vulkan/base/vk_texture.h"
 #include "renderer/vulkan/base/vulkan_api.h"
 
 namespace ark {

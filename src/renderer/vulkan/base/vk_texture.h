@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_TEXTURE_H_
-#define ARK_RENDERER_VULKAN_BASE_TEXTURE_H_
+#ifndef ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_H_
+#define ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_H_
 
 #include <vulkan/vulkan.h>
 
@@ -12,10 +12,10 @@
 namespace ark {
 namespace vulkan {
 
-class Texture {
+class VKTexture {
 public:
-    Texture(const sp<GLResourceManager>& resourceManager, const sp<CommandPool>& commandPool);
-    ~Texture();
+    VKTexture(const sp<GLResourceManager>& resourceManager, const sp<CommandPool>& commandPool);
+    ~VKTexture();
 
     const VkDescriptorImageInfo& descriptor() const;
 

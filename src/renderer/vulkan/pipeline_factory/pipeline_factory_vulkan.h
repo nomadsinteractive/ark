@@ -25,7 +25,7 @@ public:
     virtual sp<RenderCommand> buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode renderMode, int32_t count) override;
 
     sp<Buffer> _buffer;
-    sp<Texture> _texture;
+    sp<VKTexture> _texture;
 
 private:
     void setupVertexDescriptions();

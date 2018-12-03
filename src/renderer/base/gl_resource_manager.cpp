@@ -15,7 +15,7 @@
 #include "renderer/base/gl_recycler.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/gl_snippet_delegate.h"
-#include "renderer/opengl/base/gl_texture.h"
+#include "renderer/opengl/base/gl_texture_2d.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/inf/gl_snippet.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
@@ -36,7 +36,7 @@ public:
     virtual sp<Texture> get(const String& name) override {
         const bitmap bitmapBounds = _bitmap_bounds_loader->get(name);
         DCHECK(bitmapBounds, "Texture resource \"%s\" not found", name.c_str());
-        return sp<GLTexture>::make(_recycler, sp<Size>::make(static_cast<float>(bitmapBounds->width()), static_cast<float>(bitmapBounds->height())), Texture::FORMAT_AUTO, Texture::FEATURE_DEFAULT, sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
+        return sp<GLTexture2D>::make(_recycler, sp<Size>::make(static_cast<float>(bitmapBounds->width()), static_cast<float>(bitmapBounds->height())), Texture::FORMAT_AUTO, Texture::FEATURE_DEFAULT, sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
     }
 
 private:
@@ -129,7 +129,7 @@ sp<Texture> GLResourceManager::loadGLTexture(const String& name)
 
 sp<Texture> GLResourceManager::createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, PreparingStrategy ps)
 {
-    sp<Texture> texture = sp<GLTexture>::make(_recycler, sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), Texture::FORMAT_AUTO, Texture::FEATURE_DEFAULT, bitmapVariable);
+    sp<Texture> texture = sp<GLTexture2D>::make(_recycler, sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), Texture::FORMAT_AUTO, Texture::FEATURE_DEFAULT, bitmapVariable);
     prepare(texture, ps);
     return texture;
 }

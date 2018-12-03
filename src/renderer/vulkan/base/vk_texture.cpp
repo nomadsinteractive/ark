@@ -1,4 +1,4 @@
-#include "renderer/vulkan/base/texture.h"
+#include "renderer/vulkan/base/vk_texture.h"
 
 #include "core/base/string.h"
 #include "core/inf/dictionary.h"
@@ -14,13 +14,13 @@
 namespace ark {
 namespace vulkan {
 
-Texture::Texture(const sp<GLResourceManager>& resourceManager, const sp<CommandPool>& commandPool)
+VKTexture::VKTexture(const sp<GLResourceManager>& resourceManager, const sp<CommandPool>& commandPool)
     : _resource_manager(resourceManager), _command_pool(commandPool), _device(commandPool->device())
 {
     loadTexture();
 }
 
-Texture::~Texture()
+VKTexture::~VKTexture()
 {
     vkDestroyImageView(_command_pool->device()->logicalDevice(), _descriptor.imageView, nullptr);
     vkDestroyImage(_device->logicalDevice(), _image, nullptr);
@@ -28,12 +28,12 @@ Texture::~Texture()
     vkFreeMemory(_device->logicalDevice(), _memory, nullptr);
 }
 
-const VkDescriptorImageInfo& Texture::descriptor() const
+const VkDescriptorImageInfo& VKTexture::descriptor() const
 {
     return _descriptor;
 }
 
-void Texture::loadTexture()
+void VKTexture::loadTexture()
 {
     const String filename = "texture.png";
     VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
