@@ -2,6 +2,8 @@
 
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
+
+#include "renderer/opengl/base/gl_texture.h"
 #include "renderer/opengl/base/gl_pipeline.h"
 
 namespace ark {
@@ -47,7 +49,7 @@ sp<GLSnippet> GLSnippetActiveTexture::BUILDER::build(const sp<Scope>& args)
 }
 
 GLSnippetActiveTexture::Slot::Slot(const sp<Texture>& texture, uint32_t name)
-    : Slot(texture, texture->target(), name)
+    : Slot(texture, static_cast<sp<GLTexture>>(texture->resource())->target(), name)
 {
 }
 

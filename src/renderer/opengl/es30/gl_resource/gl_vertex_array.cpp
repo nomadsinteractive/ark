@@ -20,7 +20,7 @@ uint32_t GLVertexArray::id()
     return _id;
 }
 
-void GLVertexArray::prepare(GraphicsContext& graphicsContext)
+void GLVertexArray::upload(GraphicsContext& graphicsContext)
 {
     glGenVertexArrays(1, &_id);
     glBindVertexArray(_id);
@@ -32,11 +32,14 @@ void GLVertexArray::prepare(GraphicsContext& graphicsContext)
     LOGD("id = %d", _id);
 }
 
-void GLVertexArray::recycle(GraphicsContext& /*graphicsContext*/)
+RenderResource::Recycler GLVertexArray::recycle()
 {
-    LOGD("Deleting GLVertexArray[%d]", _id);
-    glDeleteVertexArrays(1, &_id);
+    uint32_t id = _id;
     _id = 0;
+    return [id](GraphicsContext&) {
+        LOGD("Deleting GLVertexArray[%d]", id);
+        glDeleteVertexArrays(1, &id);
+    };
 }
 
 }

@@ -81,7 +81,7 @@ void GLModelText::Stub::clear()
     memset(_font_glyph->at(0, 0), 0, _font_glyph->width() * _font_glyph->height());
 }
 
-bool GLModelText::Stub::prepare(const Layer::Snapshot& renderContext, bool allowReset)
+bool GLModelText::Stub::upload(const Layer::Snapshot& renderContext, bool allowReset)
 {
     for(int32_t c : _characters)
     {
@@ -91,7 +91,7 @@ bool GLModelText::Stub::prepare(const Layer::Snapshot& renderContext, bool allow
             {
                 clear();
                 checkUnpreparedCharacter(renderContext);
-                return prepare(renderContext, false);
+                return upload(renderContext, false);
             }
             return false;
         }
@@ -104,12 +104,14 @@ uint32_t GLModelText::Stub::id()
     return _texture->id();
 }
 
-void GLModelText::Stub::prepare(GraphicsContext& /*graphicsContext*/)
+void GLModelText::Stub::upload(GraphicsContext& /*graphicsContext*/)
 {
 }
 
-void GLModelText::Stub::recycle(GraphicsContext& /*graphicsContext*/)
+RenderResource::Recycler GLModelText::Stub::recycle()
 {
+    return [](GraphicsContext&) {
+    };
 }
 
 GLModelText::GLModelText(GLResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
@@ -126,7 +128,7 @@ void GLModelText::start(GLModelBuffer& buf, GLResourceManager& resourceManager, 
 {
     if(_stub->checkUnpreparedCharacter(layerContext))
     {
-        while(!_stub->prepare(layerContext, true))
+        while(!_stub->upload(layerContext, true))
         {
             uint32_t width = _stub->_font_glyph->width() * 2;
             uint32_t height = _stub->_font_glyph->height() * 2;

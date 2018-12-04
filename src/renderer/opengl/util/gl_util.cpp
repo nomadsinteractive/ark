@@ -14,6 +14,8 @@
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
+
+#include "renderer/opengl/base/gl_texture.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
 
 namespace ark {
@@ -159,8 +161,11 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, GLReso
 
     const sp<GLPipeline> glPipeline = shader.pipeline();
     glPipeline->getUniform("u_Projection").setUniformMatrix4fv(1, GL_FALSE, captureProjection.value());
-    texture.prepare(graphicsContext);
-    texture.active(shader.pipeline(), 0);
+    texture.upload(graphicsContext);
+
+    const sp<GLTexture> resource = texture.resource();
+    shader.pipeline()->activeTexture(texture, resource->target(), 0);
+//    texture.active(shader.pipeline(), 0);
 
     uint32_t vao;
     glGenVertexArrays(1, &vao);

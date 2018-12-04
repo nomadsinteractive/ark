@@ -6,13 +6,13 @@
 
 #include "graphics/forwarding.h"
 
-#include "renderer/base/texture.h"
+#include "renderer/opengl/base/gl_texture.h"
 
 namespace ark {
 
-class GLDynamicCubemap : public Texture {
+class GLDynamicCubemap : public GLTexture {
 public:
-    GLDynamicCubemap(const sp<GLResourceManager>& resourceManager, Format format, Feature features, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size);
+    GLDynamicCubemap(const sp<GLResourceManager>& resourceManager, const sp<Texture::Parameters>& parameters, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size);
 
 //  [[plugin::resource-loader("dynamic-cubemap")]]
     class BUILDER : public Builder<Texture> {
@@ -27,8 +27,7 @@ public:
         sp<Builder<Size>> _size;
         sp<Builder<Shader>> _shader;
         sp<Builder<Texture>> _texture;
-        Texture::Format _format;
-        Texture::Feature _features;
+        sp<Texture::Parameters> _parameters;
     };
 
 protected:

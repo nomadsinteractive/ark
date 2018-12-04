@@ -10,20 +10,20 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/texture.h"
+#include "renderer/opengl/base/gl_texture.h"
 
 namespace ark {
 
-class ARK_API GLCubemap : public Texture {
+class ARK_API GLCubemap : public GLTexture {
 public:
-    GLCubemap(const sp<GLRecycler>& recycler, const sp<Size>& size, Texture::Format format, Texture::Feature features, std::vector<sp<Variable<bitmap>>> bitmaps);
+    GLCubemap(const sp<GLRecycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, std::vector<sp<Variable<bitmap>>> bitmaps);
 
-//  [[plugin::resource-loader]]
-    class BUILDER : public Builder<GLCubemap> {
+//  [[plugin::resource-loader("cubemap")]]
+    class BUILDER : public Builder<Texture> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<GLCubemap> build(const sp<Scope>& args) override;
+        virtual sp<Texture> build(const sp<Scope>& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
@@ -32,19 +32,7 @@ public:
         document _manifest;
         sp<Builder<Size>> _size;
         sp<Builder<String>> _srcs[6];
-        Texture::Format _format;
-        Texture::Feature _features;
-    };
-
-//  [[plugin::resource-loader("cubemap")]]
-    class BUILDER_IMPL1 : public Builder<Texture> {
-    public:
-        BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
-
-        virtual sp<Texture> build(const sp<Scope>& args) override;
-
-    private:
-        BUILDER _delegate;
+        sp<Texture::Parameters> _parameters;
     };
 
 protected:

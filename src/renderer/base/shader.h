@@ -63,8 +63,8 @@ private:
         Stub(const sp<PipelineLayout>& pipelineLayout);
 
         virtual uint32_t id() override;
-        virtual void prepare(GraphicsContext& graphicsContext) override;
-        virtual void recycle(GraphicsContext& graphicsContext) override;
+        virtual void upload(GraphicsContext& graphicsContext) override;
+        virtual Recycler recycle() override;
 
         sp<Pipeline> _pipeline;
         sp<PipelineFactory> _pipeline_factory;

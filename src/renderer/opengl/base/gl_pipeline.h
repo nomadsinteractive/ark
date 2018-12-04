@@ -23,8 +23,8 @@ public:
     ~GLPipeline() override;
 
     virtual uint32_t id() override;
-    virtual void prepare(GraphicsContext& graphicsContext) override;
-    virtual void recycle(GraphicsContext& graphicsContext) override;
+    virtual void upload(GraphicsContext& graphicsContext) override;
+    virtual Recycler recycle() override;
 
     virtual void use() override;
     virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) override;

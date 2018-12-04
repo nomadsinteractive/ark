@@ -10,13 +10,7 @@ namespace ark {
 
 class ARK_API GLResource : public RenderResource {
 public:
-    GLResource();
     virtual ~GLResource() = default;
-
-    uint32_t id() const;
-
-protected:
-    uint32_t _id;
 };
 
 }

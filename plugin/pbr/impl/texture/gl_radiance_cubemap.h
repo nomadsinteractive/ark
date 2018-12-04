@@ -6,13 +6,13 @@
 
 #include "graphics/forwarding.h"
 
-#include "renderer/base/texture.h"
+#include "renderer/opengl/base/gl_texture.h"
 
 namespace ark {
 
-class GLRadianceCubemap : public Texture {
+class GLRadianceCubemap : public GLTexture {
 public:
-    GLRadianceCubemap(const sp<GLResourceManager>& resourceManager, Format format, Feature features, const sp<Texture>& texture, const sp<Size>& size);
+    GLRadianceCubemap(const sp<GLResourceManager>& resourceManager, const sp<Texture::Parameters>& parameters, const sp<Texture>& texture, const sp<Size>& size);
 
 //  [[plugin::resource-loader("radiance-cubemap")]]
     class BUILDER : public Builder<Texture> {
@@ -26,8 +26,7 @@ public:
         document _manifest;
         sp<Builder<Size>> _size;
         sp<Builder<Texture>> _texture;
-        Texture::Format _format;
-        Texture::Feature _features;
+        sp<Texture::Parameters> _parameters;
     };
 
 protected:

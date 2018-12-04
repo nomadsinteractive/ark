@@ -6,19 +6,20 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/inf/render_resource.h"
 
 namespace ark {
 
 class ARK_API GLRecycler {
 public:
-    void recycle(const sp<RenderResource>& resource);
 
-    void recycle(uint32_t id, std::function<void(uint32_t)> recycler);
+    void recycle(RenderResource& resource);
+    void recycle(RenderResource::Recycler recycler);
 
     void doRecycling(GraphicsContext& graphicsContext);
 
 private:
-    LockFreeStack<sp<RenderResource>> _items;
+    LockFreeStack<RenderResource::Recycler> _recyclers;
 };
 
 }

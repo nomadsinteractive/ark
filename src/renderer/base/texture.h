@@ -33,13 +33,24 @@ public:
         FEATURE_MIPMAPS
     };
 
-    Texture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
-    Texture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, const document& manifest);
+    struct ARK_API Parameters {
+        Parameters(Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
+        Parameters(const document& doc);
+
+        void setTexParameter(uint32_t name, int32_t value);
+
+        Format _format;
+        Feature _features;
+
+        std::unordered_map<uint32_t, int32_t> _tex_parameters;
+    };
+
+    Texture(const sp<Size>& size, const sp<RenderResource>& resource);
     virtual ~Texture() override;
 
     virtual uint32_t id() override;
-    virtual void prepare(GraphicsContext& graphicsContext) override;
-    virtual void recycle(GraphicsContext&) override;
+    virtual void upload(GraphicsContext& graphicsContext) override;
+    virtual Recycler recycle() override;
 
 //  [[script::bindings::property]]
     int32_t width() const;
@@ -51,36 +62,11 @@ public:
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 
-    uint32_t target() const;
+    const sp<RenderResource>& resource() const;
 
-    void active(Pipeline& pipeline, uint32_t name);
-
-    class Recycler : public RenderResource {
-    public:
-        Recycler(uint32_t id);
-
-        virtual uint32_t id() override;
-        virtual void prepare(GraphicsContext&) override;
-        virtual void recycle(GraphicsContext&) override;
-
-    private:
-        uint32_t _id;
-    };
-
-    void setTexParameters(const document& doc);
-    void setTexParameter(uint32_t name, int32_t value);
-
-protected:
-    virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) = 0;
-
-    sp<GLRecycler> _recycler;
+private:
     sp<Size> _size;
-    uint32_t _target;
-    Format _format;
-    Feature _features;
-
-    uint32_t _id;
-    std::unordered_map<uint32_t, int32_t> _tex_parameters;
+    sp<RenderResource> _resource;
 };
 
 }

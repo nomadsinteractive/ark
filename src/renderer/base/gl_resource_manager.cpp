@@ -36,7 +36,10 @@ public:
     virtual sp<Texture> get(const String& name) override {
         const bitmap bitmapBounds = _bitmap_bounds_loader->get(name);
         DCHECK(bitmapBounds, "Texture resource \"%s\" not found", name.c_str());
-        return sp<GLTexture2D>::make(_recycler, sp<Size>::make(static_cast<float>(bitmapBounds->width()), static_cast<float>(bitmapBounds->height())), Texture::FORMAT_AUTO, Texture::FEATURE_DEFAULT, sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
+        const sp<Texture::Parameters> params = sp<Texture::Parameters>::make();
+        const sp<Size> size = sp<Size>::make(static_cast<float>(bitmapBounds->width()), static_cast<float>(bitmapBounds->height()));
+        const sp<GLTexture2D> texture = sp<GLTexture2D>::make(_recycler, size, params, sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
+        return sp<Texture>::make(size, texture);
     }
 
 private:
@@ -129,7 +132,9 @@ sp<Texture> GLResourceManager::loadGLTexture(const String& name)
 
 sp<Texture> GLResourceManager::createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, PreparingStrategy ps)
 {
-    sp<Texture> texture = sp<GLTexture2D>::make(_recycler, sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), Texture::FORMAT_AUTO, Texture::FEATURE_DEFAULT, bitmapVariable);
+    const sp<Size> size = sp<Size>::make(static_cast<float>(width), static_cast<float>(height));
+    const sp<GLTexture2D> texture2d = sp<GLTexture2D>::make(_recycler, size, sp<Texture::Parameters>::make(), bitmapVariable);
+    const sp<Texture> texture = sp<Texture>::make(size, texture2d);
     prepare(texture, ps);
     return texture;
 }
@@ -217,12 +222,12 @@ bool GLResourceManager::ExpirableGLResource::isExpired() const
 void GLResourceManager::ExpirableGLResource::prepare(GraphicsContext& graphicsContext) const
 {
     if(_resource->id() == 0)
-        _resource->prepare(graphicsContext);
+        _resource->upload(graphicsContext);
 }
 
 void GLResourceManager::ExpirableGLResource::recycle(GraphicsContext& graphicsContext) const
 {
-    _resource->recycle(graphicsContext);
+    _resource->recycle()(graphicsContext);
 }
 
 bool GLResourceManager::ExpirableGLResource::operator <(const GLResourceManager::ExpirableGLResource& other) const

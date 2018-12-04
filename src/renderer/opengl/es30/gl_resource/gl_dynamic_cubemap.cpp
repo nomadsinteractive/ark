@@ -4,13 +4,16 @@
 
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/shader.h"
+#include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/base/texture.h"
+
 #include "renderer/opengl/util/gl_util.h"
 
 namespace ark {
 
-GLDynamicCubemap::GLDynamicCubemap(const sp<GLResourceManager>& resourceManager, Format format, Feature features, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size)
-    : Texture(resourceManager->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), format, features), _resource_manager(resourceManager), _shader(shader), _texture(texture)
+GLDynamicCubemap::GLDynamicCubemap(const sp<GLResourceManager>& resourceManager, const sp<Texture::Parameters>& parameters, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size)
+    : GLTexture(resourceManager->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), parameters), _resource_manager(resourceManager), _shader(shader), _texture(texture)
 {
 }
 
@@ -23,14 +26,15 @@ GLDynamicCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifes
     : _resource_manager(resourceLoaderContext->resourceManager()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/equirectangular.vert", "shaders/equirectangular.frag")),
       _texture(factory.ensureBuilder<Texture>(manifest, Constants::Attributes::TEXTURE)),
-      _format(Documents::getAttribute<Texture::Format>(manifest, "format", FORMAT_AUTO)),
-      _features(Documents::getAttribute<Texture::Feature>(manifest, "feature", FEATURE_DEFAULT))
+      _parameters(sp<Texture::Parameters>::make(manifest))
 {
 }
 
 sp<Texture> GLDynamicCubemap::BUILDER::build(const sp<Scope>& args)
 {
-    return _resource_manager->createGLResource<GLDynamicCubemap>(_resource_manager, _format, _features, _shader->build(args), _texture->build(args), _size->build(args));
+    const sp<Size> size = _size->build(args);
+    const sp<GLDynamicCubemap> cubemap = sp<GLDynamicCubemap>::make(_resource_manager, _parameters, _shader->build(args), _texture->build(args), size);
+    return _resource_manager->createGLResource<Texture>(size, cubemap);
 }
 
 }

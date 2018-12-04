@@ -17,8 +17,8 @@
 
 namespace ark {
 
-GLIrradianceCubemap::GLIrradianceCubemap(const sp<GLResourceManager>& resourceManager, Format format, Feature features, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size)
-    : Texture(resourceManager->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), format, features), _resource_manager(resourceManager), _shader(shader), _texture(texture)
+GLIrradianceCubemap::GLIrradianceCubemap(const sp<GLResourceManager>& resourceManager, const sp<Texture::Parameters>& params, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size)
+    : GLTexture(resourceManager->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), params), _resource_manager(resourceManager), _shader(shader), _texture(texture)
 {
 }
 
@@ -30,7 +30,7 @@ void GLIrradianceCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uin
     cmft::imageCreate(input, _texture->width(), _texture->height(), 0, 1, 1, cmft::TextureFormat::RGBA32F);
 
     if(!_texture->id())
-        _texture->prepare(graphicsContext);
+        _texture->upload(graphicsContext);
 
     glBindTexture(GL_TEXTURE_2D, _texture->id());
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, input.m_data);
@@ -69,14 +69,15 @@ GLIrradianceCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& mani
     : _resource_manager(resourceLoaderContext->resourceManager()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/equirectangular.vert", "shaders/equirectangular.frag")),
       _texture(factory.ensureBuilder<Texture>(manifest, Constants::Attributes::TEXTURE)),
-      _format(Documents::getAttribute<Texture::Format>(manifest, "format", FORMAT_AUTO)),
-      _features(Documents::getAttribute<Texture::Feature>(manifest, "feature", FEATURE_DEFAULT))
+      _parameters(sp<Texture::Parameters>::make(manifest))
 {
 }
 
 sp<Texture> GLIrradianceCubemap::BUILDER::build(const sp<Scope>& args)
 {
-    return _resource_manager->createGLResource<GLIrradianceCubemap>(_resource_manager, _format, _features, _shader->build(args), _texture->build(args), _size->build(args));
+    const sp<Size> size = _size->build(args);
+    const sp<GLIrradianceCubemap> cubemap = sp<GLIrradianceCubemap>::make(_resource_manager, _parameters, _shader->build(args), _texture->build(args), _size->build(args));
+    return _resource_manager->createGLResource<Texture>(size, cubemap);
 }
 
 }

@@ -12,27 +12,6 @@
 
 namespace ark {
 
-GLBuffer::Recycler::Recycler(GLuint id)
-    : _id(id)
-{
-}
-
-uint32_t GLBuffer::Recycler::id()
-{
-    return _id;
-}
-
-void GLBuffer::Recycler::prepare(GraphicsContext&)
-{
-}
-
-void GLBuffer::Recycler::recycle(GraphicsContext&)
-{
-    LOGD("Deleting GLBuffer[%d]", _id);
-    glDeleteBuffers(1, &_id);
-    _id = 0;
-}
-
 GLBuffer::Stub::Stub(const sp<GLRecycler>& recycler, const sp<Uploader>& uploader, GLenum type, GLenum usage)
     : _recycler(recycler), _uploader(uploader), _type(type), _usage(usage), _id(0), _size(_uploader ? _uploader->size() : 0)
 {
@@ -41,7 +20,7 @@ GLBuffer::Stub::Stub(const sp<GLRecycler>& recycler, const sp<Uploader>& uploade
 GLBuffer::Stub::~Stub()
 {
     if(_id > 0)
-        _recycler->recycle(sp<Recycler>::make(_id));
+        _recycler->recycle(*this);
 }
 
 GLenum GLBuffer::Stub::type() const
@@ -59,7 +38,7 @@ size_t GLBuffer::Stub::size() const
     return _size;
 }
 
-void GLBuffer::Stub::prepare(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader)
+void GLBuffer::Stub::upload(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader)
 {
     if(_id == 0)
     {
@@ -103,20 +82,31 @@ GLuint GLBuffer::Stub::id()
     return _id;
 }
 
-void GLBuffer::Stub::prepare(GraphicsContext& graphicsContext)
+void GLBuffer::Stub::upload(GraphicsContext& graphicsContext)
 {
-    prepare(graphicsContext, nullptr);
+    upload(graphicsContext, nullptr);
 }
 
-void GLBuffer::Stub::recycle(GraphicsContext&)
+RenderResource::Recycler GLBuffer::Stub::recycle()
 {
-    if(_id != 0) {
-        LOGD("Deleting GLBuffer[%d]", _id);
-        glDeleteBuffers(1, &_id);
-        _id = 0;
-    }
+    uint32_t id = _id;
+    _id = 0;
     _size = 0;
+    return [id](GraphicsContext&) {
+        LOGD("Deleting GLBuffer[%d]", id);
+        glDeleteBuffers(1, &id);
+    };
 }
+
+//void GLBuffer::Stub::recycle(GraphicsContext&)
+//{
+//    if(_id != 0) {
+//        LOGD("Deleting GLBuffer[%d]", _id);
+//        glDeleteBuffers(1, &_id);
+//        _id = 0;
+//    }
+//    _size = 0;
+//}
 
 GLBuffer::Snapshot::Snapshot(const sp<GLBuffer::Stub>& stub)
     : _stub(stub), _size(stub->size())
@@ -150,7 +140,7 @@ size_t GLBuffer::Snapshot::size() const
 
 void GLBuffer::Snapshot::prepare(GraphicsContext& graphicsContext) const
 {
-    _stub->prepare(graphicsContext, _uploader);
+    _stub->upload(graphicsContext, _uploader);
 }
 
 GLBuffer::GLBuffer(const sp<GLRecycler>& recycler, const sp<Uploader>& uploader, GLenum type, GLenum usage) noexcept
@@ -200,7 +190,7 @@ GLuint GLBuffer::id() const
 
 void GLBuffer::prepare(GraphicsContext& graphicsContext) const
 {
-    _stub->prepare(graphicsContext);
+    _stub->upload(graphicsContext);
 }
 
 GLBuffer::Builder::Builder(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t stride, size_t growCapacity)

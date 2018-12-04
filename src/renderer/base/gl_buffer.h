@@ -91,18 +91,6 @@ public:
     typedef ArrayListUploader<glindex_t> IndexArrayListUploader;
 
 private:
-    class Recycler : public RenderResource {
-    public:
-        Recycler(GLuint id);
-
-        virtual uint32_t id() override;
-        virtual void prepare(GraphicsContext&) override;
-        virtual void recycle(GraphicsContext&) override;
-
-    private:
-        GLuint _id;
-    };
-
     class Stub : public RenderResource {
     public:
         Stub(const sp<GLRecycler>& recycler, const sp<Uploader>& uploader, GLenum type, GLenum usage);
@@ -113,10 +101,10 @@ private:
         size_t size() const;
 
         virtual GLuint id() override;
-        virtual void prepare(GraphicsContext&) override;
-        virtual void recycle(GraphicsContext&) override;
+        virtual void upload(GraphicsContext&) override;
+        virtual Recycler recycle() override;
 
-        void prepare(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader);
+        void upload(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader);
 
     private:
         void doUpload(GraphicsContext& graphicsContext, Uploader& uploader);

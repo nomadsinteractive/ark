@@ -19,11 +19,11 @@ private:
         void reset(GLResourceManager& resourceManager, uint32_t textureWidth, uint32_t textureHeight);
 
         bool checkUnpreparedCharacter(const Layer::Snapshot& renderContext);
-        bool prepare(const Layer::Snapshot& renderContext, bool allowReset);
+        bool upload(const Layer::Snapshot& renderContext, bool allowReset);
 
         virtual uint32_t id() override;
-        virtual void prepare(GraphicsContext& graphicsContext) override;
-        virtual void recycle(GraphicsContext& graphicsContext) override;
+        virtual void upload(GraphicsContext& graphicsContext) override;
+        virtual Recycler recycle() override;
 
     private:
         bool prepareOne(int32_t c);

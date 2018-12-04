@@ -15,12 +15,14 @@
 #include "renderer/base/gl_texture_loader.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/base/texture.h"
+
 #include "renderer/opengl/util/gl_util.h"
 
 namespace ark {
 
-GLTexture2D::GLTexture2D(const sp<GLRecycler>& recycler, const sp<Size>& size, Format format, Feature features, const sp<Variable<sp<Bitmap>>>& bitmap)
-    : Texture(recycler, size, static_cast<uint32_t>(GL_TEXTURE_2D), format, features), _bitmap(bitmap)
+GLTexture2D::GLTexture2D(const sp<GLRecycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Variable<bitmap>>& bitmap)
+    : GLTexture(recycler, size, static_cast<uint32_t>(GL_TEXTURE_2D), parameters), _bitmap(bitmap)
 {
 }
 
@@ -28,11 +30,11 @@ void GLTexture2D::doPrepareTexture(GraphicsContext& /*graphicsContext*/, uint32_
 {
     const sp<Bitmap> bitmap = _bitmap ? _bitmap->val() : sp<Bitmap>::null();
     uint8_t channels = bitmap ? bitmap->channels() : 4;
-    GLenum format = GLUtil::getTextureFormat(_format, channels);
-    GLenum pixelFormat = bitmap ? GLUtil::getPixelFormat(_format, bitmap) : GL_UNSIGNED_BYTE;
-    GLenum internalFormat = bitmap ? GLUtil::getTextureInternalFormat(_format, bitmap) : GL_RGBA8;
+    GLenum format = GLUtil::getTextureFormat(_parameters->_format, channels);
+    GLenum pixelFormat = bitmap ? GLUtil::getPixelFormat(_parameters->_format, bitmap) : GL_UNSIGNED_BYTE;
+    GLenum internalFormat = bitmap ? GLUtil::getTextureInternalFormat(_parameters->_format, bitmap) : GL_RGBA8;
     glTexImage2D(GL_TEXTURE_2D, 0, (GLint) internalFormat, width(), height(), 0, format, pixelFormat, bitmap ? bitmap->at(0, 0) : nullptr);
-    LOGD("Uploaded, id = %d, width = %d, height = %d%s", _id, width(), height(), bitmap ? "" : ", bitmap: nullptr");
+    LOGD("Uploaded, id = %d, width = %d, height = %d%s", id, width(), height(), bitmap ? "" : ", bitmap: nullptr");
 }
 
 GLTexture2D::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -47,8 +49,7 @@ sp<Texture> GLTexture2D::DICTIONARY::build(const sp<Scope>& /*args*/)
 
 GLTexture2D::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, Constants::Attributes::SRC)),
-      _format(Documents::getAttribute<Texture::Format>(manifest, "format", FORMAT_AUTO)),
-      _features(Documents::getAttribute<Texture::Feature>(manifest, "feature", FEATURE_DEFAULT))
+      _parameters(sp<Texture::Parameters>::make(manifest))
 {
 }
 
@@ -59,9 +60,9 @@ sp<Texture> GLTexture2D::BUILDER::build(const sp<Scope>& args)
        return _resource_loader_context->textureLoader()->get(*src);
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
-    const sp<Texture> texture = _resource_loader_context->resourceManager()->createGLResource<GLTexture2D>(_resource_loader_context->resourceManager()->recycler(), size, _format, _features, nullptr);
-    texture->setTexParameters(_manifest);
-    return texture;
+    const sp<GLRecycler> recycler = _resource_loader_context->resourceManager()->recycler();
+    const sp<GLTexture> texture = sp<GLTexture2D>::make(recycler, size, _parameters, nullptr);
+    return _resource_loader_context->resourceManager()->createGLResource<Texture>(size, texture);
 }
 
 }

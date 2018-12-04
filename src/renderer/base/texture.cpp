@@ -18,64 +18,28 @@
 
 namespace ark {
 
-Texture::Texture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, Format format, Feature features)
-    : _recycler(recycler), _size(size), _target(target), _format(format), _features(features), _id(0)
+Texture::Texture(const sp<Size>& size, const sp<RenderResource>& resource)
+    : _size(size), _resource(resource)
 {
-    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MIN_FILTER), static_cast<int32_t>((_features & Texture::FEATURE_MIPMAPS) ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
-    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MAG_FILTER), static_cast<int32_t>(GL_LINEAR));
-    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_S), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
-    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_T), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
-    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_R), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
-}
-
-Texture::Texture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, const document& manifest)
-    : Texture(recycler, size, target, Documents::getAttribute<Texture::Format>(manifest, "format", FORMAT_AUTO), Documents::getAttribute<Texture::Feature>(manifest, "feature", FEATURE_DEFAULT))
-{
-    setTexParameters(manifest);
 }
 
 Texture::~Texture()
 {
-    if(_id > 0)
-        _recycler->recycle(sp<Recycler>::make(_id));
 }
 
-void Texture::setTexParameters(const document& doc)
+void Texture::upload(GraphicsContext& graphicsContext)
 {
-    for(const document& i : doc->children("parameter"))
-        _tex_parameters[static_cast<uint32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::NAME)))] = static_cast<int32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::VALUE)));
+    _resource->upload(graphicsContext);
 }
 
-void Texture::setTexParameter(uint32_t name, int32_t value)
+RenderResource::Recycler Texture::recycle()
 {
-    _tex_parameters[name] = value;
-}
-
-void Texture::prepare(GraphicsContext& graphicsContext)
-{
-    if(_id == 0)
-        glGenTextures(1, &_id);
-
-    glBindTexture(static_cast<GLenum>(_target), _id);
-    doPrepareTexture(graphicsContext, _id);
-
-    if(_features & FEATURE_MIPMAPS)
-        glGenerateMipmap(static_cast<GLenum>(_target));
-
-    for(const auto& i : _tex_parameters)
-        glTexParameteri(static_cast<GLenum>(_target), static_cast<GLenum>(i.first), static_cast<GLint>(i.second));
-}
-
-void Texture::recycle(GraphicsContext& /*graphicsContext*/)
-{
-    LOGD("Deleting GLTexture[%d]", _id);
-    glDeleteTextures(1, &_id);
-    _id = 0;
+    return _resource->recycle();
 }
 
 uint32_t Texture::id()
 {
-    return _id;
+    return _resource->id();
 }
 
 int32_t Texture::width() const
@@ -98,35 +62,9 @@ const sp<Size>& Texture::size() const
     return _size;
 }
 
-uint32_t Texture::target() const
+const sp<RenderResource>& Texture::resource() const
 {
-    return _target;
-}
-
-void Texture::active(Pipeline& pipeline, uint32_t name)
-{
-    pipeline.activeTexture(*this, _target, name);
-}
-
-Texture::Recycler::Recycler(uint32_t id)
-    : _id(id)
-{
-}
-
-uint32_t Texture::Recycler::id()
-{
-    return _id;
-}
-
-void Texture::Recycler::prepare(GraphicsContext&)
-{
-}
-
-void Texture::Recycler::recycle(GraphicsContext&)
-{
-    LOGD("Deleting GLTexture[%d]", _id);
-    glDeleteTextures(1, &_id);
-    _id = 0;
+    return _resource;
 }
 
 template<> ARK_API Texture::Format Conversions::to<String, Texture::Format>(const String& str)
@@ -169,6 +107,28 @@ template<> ARK_API Texture::Feature Conversions::to<String, Texture::Feature>(co
         return feature;
     }
     return Texture::FEATURE_DEFAULT;
+}
+
+Texture::Parameters::Parameters(Format format, Texture::Feature features)
+    : _format(format), _features(features)
+{
+    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MIN_FILTER), static_cast<int32_t>((features & Texture::FEATURE_MIPMAPS) ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
+    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MAG_FILTER), static_cast<int32_t>(GL_LINEAR));
+    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_S), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
+    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_T), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
+    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_R), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
+}
+
+Texture::Parameters::Parameters(const document& manifest)
+    : Parameters(Documents::getAttribute<Texture::Format>(manifest, "format", FORMAT_AUTO), Documents::getAttribute<Texture::Feature>(manifest, "feature", FEATURE_DEFAULT))
+{
+    for(const document& i : manifest->children("parameter"))
+        _tex_parameters[static_cast<uint32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::NAME)))] = static_cast<int32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::VALUE)));
+}
+
+void Texture::Parameters::setTexParameter(uint32_t name, int32_t value)
+{
+    _tex_parameters[name] = value;
 }
 
 }

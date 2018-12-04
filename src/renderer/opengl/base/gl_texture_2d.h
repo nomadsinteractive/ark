@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_GL_TEXTURE_DEFAULT_H_
-#define ARK_RENDERER_BASE_GL_TEXTURE_DEFAULT_H_
+#ifndef ARK_RENDERER_BASE_GL_TEXTURE_2D_H_
+#define ARK_RENDERER_BASE_GL_TEXTURE_2D_H_
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
@@ -12,11 +12,13 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
 
+#include "renderer/opengl/base/gl_texture.h"
+
 namespace ark {
 
-class GLTexture2D : public Texture {
+class GLTexture2D : public GLTexture {
 public:
-    GLTexture2D(const sp<GLRecycler>& recycler, const sp<Size>& size, Format format, Feature features, const sp<Variable<sp<Bitmap>>>& bitmap);
+    GLTexture2D(const sp<GLRecycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Variable<bitmap>>& bitmap);
 
 //  [[plugin::resource-loader("texture")]]
     class BUILDER : public Builder<Texture> {
@@ -31,8 +33,7 @@ public:
         BeanFactory _factory;
         document _manifest;
         SafePtr<Builder<String>> _src;
-        Format _format;
-        Feature _features;
+        sp<Texture::Parameters> _parameters;
     };
 
 //  [[plugin::resource-loader::by-value("texture")]]

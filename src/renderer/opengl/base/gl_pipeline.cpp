@@ -31,10 +31,11 @@ GLPipeline::~GLPipeline()
 {
     if(_id)
     {
-        _recycler->recycle(_id, [](uint32_t id) {
+        uint32_t id = _id;
+        _recycler->recycle([id](GraphicsContext&) {
+            LOGD("glDeleteProgram(%d)", id);
             glDeleteProgram(id);
         });
-        LOGD("glDeleteProgram(%d)", _id);
     }
 }
 
@@ -43,7 +44,7 @@ uint32_t GLPipeline::id()
     return _id;
 }
 
-void GLPipeline::prepare(GraphicsContext& graphicsContext)
+void GLPipeline::upload(GraphicsContext& graphicsContext)
 {
     _vertex_shader = makeShader(graphicsContext, _version, GL_VERTEX_SHADER, _vertex_source);
     _fragment_shader = makeShader(graphicsContext, _version, GL_FRAGMENT_SHADER, _fragment_source);
@@ -60,11 +61,9 @@ void GLPipeline::prepare(GraphicsContext& graphicsContext)
     LOGD("GLProgram[%d]: vertex-shader: %d, fragment-shader: %d", _id, _vertex_shader->id(), _fragment_shader->id());
 }
 
-void GLPipeline::recycle(GraphicsContext& /*graphicsContext*/)
+RenderResource::Recycler GLPipeline::recycle()
 {
-    LOGD("glDeleteProgram(%d)", _id);
-    if(_id)
-        glDeleteProgram(_id);
+    uint32_t id = _id;
     _id = 0;
 
     _vertex_shader = nullptr;
@@ -72,6 +71,11 @@ void GLPipeline::recycle(GraphicsContext& /*graphicsContext*/)
 
     _attributes.clear();
     _uniforms.clear();
+
+    return [id](GraphicsContext&) {
+        LOGD("glDeleteProgram(%d)", id);
+        glDeleteProgram(id);
+    };
 }
 
 void GLPipeline::bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings)
@@ -306,8 +310,9 @@ GLPipeline::Shader::Shader(const sp<GLRecycler>& recycler, uint32_t version, GLe
 
 GLPipeline::Shader::~Shader()
 {
-    LOGD("glDeleteShader(%d)", _id);
-    _recycler->recycle(_id, [](uint32_t id) {
+    uint32_t id = _id;
+    _recycler->recycle([id](GraphicsContext&) {
+        LOGD("glDeleteShader(%d)", id);
         glDeleteShader(id);
     });
 }

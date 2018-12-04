@@ -15,8 +15,8 @@ public:
     GLVertexArray(const sp<ShaderBindings>& shaderBindings, const Shader& shader);
 
     virtual uint32_t id() override;
-    virtual void prepare(GraphicsContext& graphicsContext) override;
-    virtual void recycle(GraphicsContext& graphicsContext) override;
+    virtual void upload(GraphicsContext& graphicsContext) override;
+    virtual Recycler recycle() override;
 
 private:
     uint32_t _id;

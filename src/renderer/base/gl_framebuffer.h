@@ -9,27 +9,14 @@
 namespace ark {
 
 class GLFramebuffer : public RenderResource {
-private:
-    class Recycler : public RenderResource {
-    public:
-        Recycler(uint32_t id);
-
-        virtual uint32_t id() override;
-        virtual void prepare(GraphicsContext&) override;
-        virtual void recycle(GraphicsContext&) override;
-
-    private:
-        uint32_t _id;
-    };
-
 public:
     GLFramebuffer(const sp<GLRecycler>& recycler, const sp<Texture>& texture);
     ~GLFramebuffer();
 
     virtual uint32_t id() override;
 
-    virtual void prepare(GraphicsContext& graphicsContext) override;
-    virtual void recycle(GraphicsContext& /*graphicsContext*/) override;
+    virtual void upload(GraphicsContext& graphicsContext) override;
+    virtual Recycler recycle() override;
 
     const sp<Texture>& texture() const;
 

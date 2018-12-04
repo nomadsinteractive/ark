@@ -139,14 +139,14 @@ const sp<Pipeline>& Shader::getPipeline(GraphicsContext& graphicsContext)
     if(_stub->_pipeline)
     {
         if(_stub->id() == 0)
-            _stub->prepare(graphicsContext);
+            _stub->upload(graphicsContext);
         return _stub->_pipeline;
     }
 
     _stub->_pipeline_layout->preCompile(graphicsContext);
     _stub->_pipeline = _stub->_pipeline_factory->buildPipeline(graphicsContext, _stub->_pipeline_layout);
     graphicsContext.resourceManager()->prepare(_stub, GLResourceManager::PS_ON_SURFACE_READY);
-    _stub->prepare(graphicsContext);
+    _stub->upload(graphicsContext);
     return _stub->_pipeline;
 }
 
@@ -183,19 +183,19 @@ uint32_t Shader::Stub::id()
     return _pipeline->id();
 }
 
-void Shader::Stub::prepare(GraphicsContext& graphicsContext)
+void Shader::Stub::upload(GraphicsContext& graphicsContext)
 {
     DASSERT(_pipeline);
     for(const Uniform& i : _input->uniforms())
         i.notify();
 
-    _pipeline->prepare(graphicsContext);
+    _pipeline->upload(graphicsContext);
 }
 
-void Shader::Stub::recycle(GraphicsContext& graphicsContext)
+RenderResource::Recycler Shader::Stub::recycle()
 {
     DASSERT(_pipeline);
-    _pipeline->recycle(graphicsContext);
+    return _pipeline->recycle();
 }
 
 }
