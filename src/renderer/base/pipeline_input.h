@@ -9,7 +9,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_attribute.h"
+#include "renderer/base/attribute.h"
 
 namespace ark {
 
@@ -23,10 +23,10 @@ public:
 
         uint32_t stride() const;
 
-        const std::unordered_map<String, GLAttribute>& attributes() const;
-        void addAttribute(String name, GLAttribute attribute);
+        const std::unordered_map<String, Attribute>& attributes() const;
+        void addAttribute(String name, Attribute attribute);
 
-        const GLAttribute& getAttribute(const String& name) const;
+        const Attribute& getAttribute(const String& name) const;
         int32_t getAttributeOffset(const String& name) const;
 
         void align();
@@ -35,7 +35,7 @@ public:
         uint32_t _divisor;
         uint32_t _stride;
 
-        std::unordered_map<String, GLAttribute> _attributes;
+        std::unordered_map<String, Attribute> _attributes;
     };
 
 public:
@@ -47,13 +47,13 @@ public:
     const std::map<uint32_t, Stream>& streams() const;
     std::map<uint32_t, Stream>& streams();
 
-    void addAttribute(String name, GLAttribute attribute);
+    void addAttribute(String name, Attribute attribute);
 
     std::vector<std::pair<uint32_t, GLBuffer>> makeInstancedArrays(GLResourceManager& resourceManager) const;
 
     const PipelineInput::Stream& getStream(uint32_t divisor) const;
 
-    const GLAttribute& getAttribute(const String& name, uint32_t divisor = 0) const;
+    const Attribute& getAttribute(const String& name, uint32_t divisor = 0) const;
     int32_t getAttributeOffset(const String& name, uint32_t divisor = 0) const;
 
 private:

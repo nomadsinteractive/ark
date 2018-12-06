@@ -1,14 +1,14 @@
 #include "core/dom/document.h"
 
 #include "core/collection/iterable.h"
-#include "core/dom/attribute.h"
+#include "core/dom/dom_attribute.h"
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
 Document::Document(const String& name)
-    : Element(name)
+    : DOMElement(name)
 {
 }
 

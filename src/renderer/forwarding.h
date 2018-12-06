@@ -8,7 +8,7 @@ class Atlas;
 class Characters;
 class Pipeline;
 class PipelineFactory;
-class GLAttribute;
+class Attribute;
 class GLBuffer;
 class GLContext;
 class GLCubemap;

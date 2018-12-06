@@ -32,7 +32,7 @@ void PipelineLayout::loadPredefinedParam(BeanFactory& factory, const sp<Scope>& 
     loadPredefinedAttribute(manifest);
 }
 
-GLAttribute& PipelineLayout::addAttribute(const String& name, const String& type, uint32_t scopes)
+Attribute& PipelineLayout::addAttribute(const String& name, const String& type, uint32_t scopes)
 {
     return _preprocessor_context->addPredefinedAttribute(name, type, scopes);
 }

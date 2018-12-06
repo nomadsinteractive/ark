@@ -340,11 +340,11 @@ void PipelineBuildingContext::preCompile()
 
 void PipelineBuildingContext::addAttribute(const String& name, const String& type)
 {
-    GLAttribute& attr = addPredefinedAttribute(name, type, 0);
+    Attribute& attr = addPredefinedAttribute(name, type, 0);
     _pipeline_layout._input->addAttribute(name, attr);
 }
 
-GLAttribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
+Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
 {
     if(_attributes.find(name) == _attributes.end())
         _attributes[name] = makePredefinedAttribute(name, type);
@@ -355,28 +355,28 @@ GLAttribute& PipelineBuildingContext::addPredefinedAttribute(const String& name,
     return _attributes[name];
 }
 
-GLAttribute PipelineBuildingContext::makePredefinedAttribute(const String& name, const String& type)
+Attribute PipelineBuildingContext::makePredefinedAttribute(const String& name, const String& type)
 {
     if(type == "vec3")
-        return GLAttribute("a_" + name, type, GL_FLOAT, 3, GL_FALSE);
+        return Attribute("a_" + name, type, GL_FLOAT, 3, false);
     if(name == "TexCoordinate")
-        return GLAttribute("a_TexCoordinate", type, GL_UNSIGNED_SHORT, 2, GL_TRUE);
+        return Attribute("a_TexCoordinate", type, GL_UNSIGNED_SHORT, 2, true);
     if(type == "vec2")
-        return GLAttribute("a_" + name, type, GL_FLOAT, 2, GL_FALSE);
+        return Attribute("a_" + name, type, GL_FLOAT, 2, false);
     if(name == "Position")
-        return GLAttribute("a_Position", type, GL_FLOAT, 3, GL_FALSE);
+        return Attribute("a_Position", type, GL_FLOAT, 3, false);
     if(type == "float")
-        return GLAttribute("a_" + name, type, GL_FLOAT, 1, GL_FALSE);
+        return Attribute("a_" + name, type, GL_FLOAT, 1, false);
     if(type == "vec4")
-        return GLAttribute("a_" + name, type, GL_FLOAT, 4, GL_FALSE);
+        return Attribute("a_" + name, type, GL_FLOAT, 4, false);
     if(type == "color3b")
-        return GLAttribute("a_" + name, type, GL_UNSIGNED_BYTE, 3, GL_TRUE);
+        return Attribute("a_" + name, type, GL_UNSIGNED_BYTE, 3, false);
     if(type == "uint8")
-        return GLAttribute("a_" + name, type, GL_UNSIGNED_BYTE, 1, GL_FALSE);
+        return Attribute("a_" + name, type, GL_UNSIGNED_BYTE, 1, false);
     if(type == "mat4")
-        return GLAttribute("a_" + name, type, GL_FLOAT, 16, GL_FALSE);
+        return Attribute("a_" + name, type, GL_FLOAT, 16, false);
     DFATAL("Unknown attribute type \"%s\"", type.c_str());
-    return GLAttribute();
+    return Attribute();
 }
 
 void PipelineBuildingContext::doSnippetPrecompile()

@@ -5,11 +5,11 @@
 
 #include "core/base/api.h"
 #include "core/collection/list.h"
-#include "core/dom/element.h"
+#include "core/dom/dom_element.h"
 
 namespace ark {
 
-class ARK_API Document : public Element {
+class ARK_API Document : public DOMElement {
 public:
 //  [[script::bindings::auto]]
     Document(const String& name);
@@ -24,13 +24,13 @@ public:
 //  [[script::bindings::property]]
     const List<attribute>& attributes() const;
 //  [[script::bindings::auto]]
-    const sp<Attribute>& getAttribute(const String& name) const;
+    const sp<DOMAttribute>& getAttribute(const String& name) const;
 //  [[script::bindings::auto]]
     void setAttribute(const String& name, const String& value);
 //  [[script::bindings::auto]]
-    void addAttribute(const sp<Attribute>& attr);
-
+    void addAttribute(const sp<DOMAttribute>& attr);
 */
+
 //  [[script::bindings::auto]]
     const document& getChild(const String& name) const;
 //  [[script::bindings::auto]]

@@ -10,7 +10,7 @@
 #include "core/types/global.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_attribute.h"
+#include "renderer/base/attribute.h"
 #include "renderer/base/render_engine.h"
 
 namespace ark {
@@ -155,7 +155,7 @@ public:
     GLShaderPreprocessor _vertex;
     GLShaderPreprocessor _fragment;
 
-    std::map<String, GLAttribute> _attributes;
+    std::map<String, Attribute> _attributes;
 
     List<std::pair<String, String>> _vertex_in;
     List<std::pair<String, String>> _vertex_out;
@@ -175,10 +175,10 @@ public:
 
     void addAttribute(const String& name, const String& type);
 
-    GLAttribute& addPredefinedAttribute(const String& name, const String& type, uint32_t scopes);
+    Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t scopes);
 
 private:
-    GLAttribute makePredefinedAttribute(const String& name, const String& type);
+    Attribute makePredefinedAttribute(const String& name, const String& type);
 
 private:
     void doSnippetPrecompile();

@@ -9,7 +9,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/pipeline_input.h"
-#include "renderer/base/gl_attribute.h"
+#include "renderer/base/attribute.h"
 #include "renderer/base/gl_shader_preprocessor.h"
 #include "renderer/base/uniform.h"
 #include "renderer/base/resource_loader_context.h"
@@ -23,7 +23,7 @@ public:
 
     void loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
 
-    GLAttribute& addAttribute(const String& name, const String& type, uint32_t scopes = 0);
+    Attribute& addAttribute(const String& name, const String& type, uint32_t scopes = 0);
     void addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed);
 
     const sp<RenderController>& renderController() const;

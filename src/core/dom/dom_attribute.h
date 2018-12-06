@@ -7,12 +7,12 @@
 
 namespace ark {
 
-class ARK_API Attribute {
+class ARK_API DOMAttribute {
 public:
-    Attribute();
-    Attribute(const String& name);
+    DOMAttribute();
+    DOMAttribute(const String& name);
 //  [[script::bindings::auto]]
-    Attribute(const String& name, const String& value);
+    DOMAttribute(const String& name, const String& value);
 
 //  [[script::bindings::property]]
     const String& name() const;

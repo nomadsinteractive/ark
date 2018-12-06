@@ -27,7 +27,7 @@ std::map<uint32_t, PipelineInput::Stream>& PipelineInput::streams()
     return _streams;
 }
 
-void PipelineInput::addAttribute(String name, GLAttribute attribute)
+void PipelineInput::addAttribute(String name, Attribute attribute)
 {
     if(_streams.find(attribute.divisor()) == _streams.end())
         _streams[attribute.divisor()] = Stream(attribute.divisor());
@@ -54,7 +54,7 @@ const PipelineInput::Stream& PipelineInput::getStream(uint32_t divisor) const
     return iter->second;
 }
 
-const GLAttribute&PipelineInput::getAttribute(const String& name, uint32_t divisor) const
+const Attribute&PipelineInput::getAttribute(const String& name, uint32_t divisor) const
 {
     return getStream(divisor).getAttribute(name);
 }
@@ -79,12 +79,12 @@ uint32_t PipelineInput::Stream::stride() const
     return _stride;
 }
 
-const std::unordered_map<String, GLAttribute>& PipelineInput::Stream::attributes() const
+const std::unordered_map<String, Attribute>& PipelineInput::Stream::attributes() const
 {
     return _attributes;
 }
 
-void PipelineInput::Stream::addAttribute(String name, GLAttribute attribute)
+void PipelineInput::Stream::addAttribute(String name, Attribute attribute)
 {
     DCHECK(_attributes.find(name) == _attributes.end(), "Attribute \"%s\" has been added already", name.c_str());
     attribute.setOffset(_stride);
@@ -92,7 +92,7 @@ void PipelineInput::Stream::addAttribute(String name, GLAttribute attribute)
     _attributes.insert(std::make_pair(std::move(name), std::move(attribute)));
 }
 
-const GLAttribute& PipelineInput::Stream::getAttribute(const String& name) const
+const Attribute& PipelineInput::Stream::getAttribute(const String& name) const
 {
     const auto iter = _attributes.find(name);
     DCHECK(iter != _attributes.end(), "Stream(%d) has no attribute \"%s\"", name.c_str());
