@@ -48,13 +48,13 @@ void GLModelSphere::initialize(ShaderBindings& bindings)
     bindings.bindGLTexture(_atlas->texture());
 }
 
-void GLModelSphere::start(GLModelBuffer& buf, GLResourceManager& /*resourceManager*/, const Layer::Snapshot& layerContext)
+void GLModelSphere::start(ModelBuffer& buf, GLResourceManager& /*resourceManager*/, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size() * _vertex_count);
     buf.setIndices(_instance_index.snapshot());
 }
 
-void GLModelSphere::load(GLModelBuffer& buf, int32_t type, const V& size)
+void GLModelSphere::load(ModelBuffer& buf, int32_t type, const V& size)
 {
     float* elements = _vertices_boiler_plate->buf();
     const Atlas::Item& item = _atlas->at(type);

@@ -4,35 +4,28 @@
 #include "core/base/api.h"
 #include "core/base/string.h"
 
-#include "platform/gl/gl.h"
-
 namespace ark {
 
 class ARK_API Attribute {
 public:
     enum Type {
-        TYPE_I1,
-        TYPE_I2,
-        TYPE_I3,
-        TYPE_I4,
-        TYPE_UI1,
-        TYPE_UI2,
-        TYPE_UI3,
-        TYPE_UI4,
-        TYPE_F1,
-        TYPE_F2,
-        TYPE_F3,
-        TYPE_F4,
-        TYPE_MAT3,
-        TYPE_MAT4
+        TYPE_BYTE,
+        TYPE_FLOAT,
+        TYPE_INTEGER,
+        TYPE_SHORT,
+        TYPE_UBYTE,
+        TYPE_USHORT,
+        TYPE_COUNT
     };
 
     Attribute();
-    Attribute(const String& name, const String& type, GLenum glType, uint32_t length, bool normalized);
+    Attribute(const String& name, Type type, const String& declareType, uint32_t length, bool normalized);
     DEFAULT_COPY_AND_ASSIGN(Attribute);
 
     const String& name() const;
-    const String& type() const;
+    Type type() const;
+
+    const String& declareType() const;
 
     uint32_t offset() const;
     void setOffset(uint32_t offset);
@@ -43,15 +36,12 @@ public:
     uint32_t length() const;
     uint32_t size() const;
 
-    void setVertexPointer(GLint location, GLsizei stride) const;
-
-private:
-    void setVertexPointer(GLint location, GLsizei stride, uint32_t length, uint32_t offset, bool normalized, uint32_t divisor) const;
+    bool normalized() const;
 
 private:
     String _name;
-    String _type;
-    GLenum _gl_type;
+    Type _type;
+    String _declare_type;
 
     uint32_t _offset;
     uint32_t _length;

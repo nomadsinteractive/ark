@@ -4,9 +4,9 @@
 
 #include "renderer/base/drawing_context.h"
 
-#include "renderer/vulkan/base/buffer.h"
+#include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/device.h"
-#include "renderer/vulkan/base/pipeline.h"
+#include "renderer/vulkan/base/vk_pipeline.h"
 #include "renderer/vulkan/base/render_target.h"
 #include "renderer/vulkan/base/vk_texture.h"
 #include "renderer/vulkan/base/vulkan_api.h"
@@ -24,7 +24,7 @@ PipelineFactoryVulkan::~PipelineFactoryVulkan()
         vkDestroyDescriptorPool(_device->logicalDevice(), descriptorPool, nullptr);
 }
 
-sp<Pipeline> PipelineFactoryVulkan::build(const sp<RenderTarget>& renderTarget)
+sp<VKPipeline> PipelineFactoryVulkan::build(const sp<RenderTarget>& renderTarget)
 {
     _render_target = renderTarget;
     _device = renderTarget->device();
@@ -34,7 +34,7 @@ sp<Pipeline> PipelineFactoryVulkan::build(const sp<RenderTarget>& renderTarget)
     preparePipelines();
     setupDescriptorSet();
 
-    return sp<Pipeline>::make(_render_target, pipelineLayout, descriptorSetLayout, descriptorSet, pipelines.solid);
+    return sp<VKPipeline>::make(_render_target, pipelineLayout, descriptorSetLayout, descriptorSet, pipelines.solid);
 }
 
 sp<ark::Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout)

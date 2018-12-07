@@ -58,14 +58,16 @@ public:
     const GLUniform& getUniform(const String& name);
 
 private:
-    class Attribute {
+    class GLAttribute {
     public:
-        Attribute(GLint location = -1);
-        Attribute(const Attribute& other) = default;
+        GLAttribute(GLint location = -1);
+        GLAttribute(const GLAttribute& other) = default;
 
-        GLint location() const;
+        void bind(const Attribute& attribute, GLsizei stride) const;
 
-        void setVertexPointer(GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void * pointer) const;
+    private:
+        void setVertexPointer(const Attribute& attribute, GLint location, GLsizei stride, uint32_t length, uint32_t offset) const;
+
 
     private:
         GLint _location;
@@ -91,7 +93,7 @@ private:
     sp<Shader> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum type, const String& source) const;
 
     GLint getAttribLocation(const String& name);
-    const Attribute& getAttribute(const String& name);
+    const GLAttribute& getAttribute(const String& name);
 
     GLint getUniformLocation(const String& name);
 
@@ -110,7 +112,7 @@ private:
     sp<GLPipeline::Shader> _vertex_shader;
     sp<GLPipeline::Shader> _fragment_shader;
 
-    std::map<String, Attribute> _attributes;
+    std::map<String, GLAttribute> _attributes;
     std::map<String, GLUniform> _uniforms;
 
 };

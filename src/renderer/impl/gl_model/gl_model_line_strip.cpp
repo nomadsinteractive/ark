@@ -44,7 +44,7 @@ std::vector<glindex_t> GLModelLineStrip::makeIndices(const Layer::Snapshot& laye
     return indices;
 }
 
-void GLModelLineStrip::start(GLModelBuffer& buf, GLResourceManager& /*resourceManager*/, const Layer::Snapshot& layerContext)
+void GLModelLineStrip::start(ModelBuffer& buf, GLResourceManager& /*resourceManager*/, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size());
 
@@ -57,7 +57,7 @@ void GLModelLineStrip::start(GLModelBuffer& buf, GLResourceManager& /*resourceMa
         buf.setIndices(_ibo.snapshot());
 }
 
-void GLModelLineStrip::load(GLModelBuffer& buf, int32_t type, const V& /*scale*/)
+void GLModelLineStrip::load(ModelBuffer& buf, int32_t type, const V& /*scale*/)
 {
     if(type)
     {

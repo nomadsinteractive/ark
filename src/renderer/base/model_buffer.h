@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_GL_MODEL_BUFFER_H_
-#define ARK_RENDERER_BASE_GL_MODEL_BUFFER_H_
+#ifndef ARK_RENDERER_BASE_MODEL_BUFFER_H_
+#define ARK_RENDERER_BASE_MODEL_BUFFER_H_
 
 #include <vector>
 #include <map>
@@ -20,10 +20,10 @@
 
 namespace ark {
 
-class ARK_API GLModelBuffer {
+class ARK_API ModelBuffer {
 public:
-    GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t renderObjectCount, uint32_t stride);
-    DEFAULT_COPY_AND_ASSIGN(GLModelBuffer);
+    ModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t renderObjectCount, uint32_t stride);
+    DEFAULT_COPY_AND_ASSIGN(ModelBuffer);
 
     void writePosition(const V3& position);
     void writePosition(float x, float y, float z);

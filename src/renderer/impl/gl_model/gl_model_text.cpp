@@ -124,7 +124,7 @@ void GLModelText::initialize(ShaderBindings& bindings)
     bindings.bindGLTexture(_stub, static_cast<uint32_t>(GL_TEXTURE_2D), 0);
 }
 
-void GLModelText::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
+void GLModelText::start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
 {
     if(_stub->checkUnpreparedCharacter(layerContext))
     {
@@ -140,7 +140,7 @@ void GLModelText::start(GLModelBuffer& buf, GLResourceManager& resourceManager, 
     _stub->_delegate->start(buf, resourceManager, layerContext);
 }
 
-void GLModelText::load(GLModelBuffer& buf, int32_t type, const V& scale)
+void GLModelText::load(ModelBuffer& buf, int32_t type, const V& scale)
 {
     _stub->_delegate->load(buf, type, scale);
 }

@@ -26,8 +26,8 @@ public:
     GLModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest);
 
     virtual void initialize(ShaderBindings& bindings) override;
-    virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) override;
-    virtual void load(GLModelBuffer& buf, int32_t type, const V& scale) override;
+    virtual void start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) override;
+    virtual void load(ModelBuffer& buf, int32_t type, const V& scale) override;
 
 //  [[plugin::resource-loader("assimp")]]
     class BUILDER : public Builder<RenderModel> {
@@ -55,7 +55,7 @@ private:
         Mesh(const aiMesh* mesh);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mesh);
 
-        void load(GLModelBuffer& buf) const;
+        void load(ModelBuffer& buf) const;
 
     private:
         bytearray loadIndices(const aiMesh* mesh) const;

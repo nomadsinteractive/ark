@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_BUFFER_H_
-#define ARK_RENDERER_VULKAN_BASE_BUFFER_H_
+#ifndef ARK_RENDERER_VULKAN_BASE_VK_BUFFER_H_
+#define ARK_RENDERER_VULKAN_BASE_VK_BUFFER_H_
 
 #include <vulkan/vulkan.h>
 
@@ -11,12 +11,12 @@
 namespace ark {
 namespace vulkan {
 
-class Buffer {
+class VKBuffer {
 public:
-    Buffer(const sp<Device>& device, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size);
-    ~Buffer();
+    VKBuffer(const sp<Device>& device, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size);
+    ~VKBuffer();
 
-    DISALLOW_COPY_AND_ASSIGN(Buffer);
+    DISALLOW_COPY_AND_ASSIGN(VKBuffer);
 
     void* map(VkDeviceSize _size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
     void unmap(void* mapped);

@@ -11,124 +11,124 @@
 
 namespace ark {
 
-GLModelBuffer::GLModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
+ModelBuffer::ModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
     : _shader_bindings(shaderBindings), _vertices(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), stride, instanceCount),
       _instanced_buffer_builders(shaderBindings->makeInstancedBufferBuilders(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), instanceCount)),
       _indice_base(0), _is_instanced(shaderBindings->instancedArrays().size() > 0)
 {
 }
 
-void GLModelBuffer::writePosition(const V3& position)
+void ModelBuffer::writePosition(const V3& position)
 {
     _vertices.write<V3>(_is_instanced ? position : _transform.mapXYZ(position) + _translate, 0);
 }
 
-void GLModelBuffer::writePosition(float x, float y, float z)
+void ModelBuffer::writePosition(float x, float y, float z)
 {
     writePosition(V3(x, y, z));
 }
 
-void GLModelBuffer::writeTexCoordinate(uint16_t u, uint16_t v)
+void ModelBuffer::writeTexCoordinate(uint16_t u, uint16_t v)
 {
     const uint16_t uv[2] = {u, v};
     _vertices.write(uv, _shader_bindings->attributes()._offsets, ShaderBindings::ATTRIBUTE_NAME_TEX_COORDINATE);
 }
 
-void GLModelBuffer::writeNormal(float x, float y, float z)
+void ModelBuffer::writeNormal(float x, float y, float z)
 {
     writeNormal(V3(x, y, z));
 }
 
-void GLModelBuffer::writeNormal(const V3& normal)
+void ModelBuffer::writeNormal(const V3& normal)
 {
     _vertices.write(normal, _shader_bindings->attributes()._offsets, ShaderBindings::ATTRIBUTE_NAME_NORMAL);
 }
 
-void GLModelBuffer::writeTangent(float x, float y, float z)
+void ModelBuffer::writeTangent(float x, float y, float z)
 {
     writeTangent(V3(x, y, z));
 }
 
-void GLModelBuffer::writeTangent(const V3& tangent)
+void ModelBuffer::writeTangent(const V3& tangent)
 {
     _vertices.write(tangent, _shader_bindings->attributes()._offsets, ShaderBindings::ATTRIBUTE_NAME_TANGENT);
 }
 
-void GLModelBuffer::writeBitangent(float x, float y, float z)
+void ModelBuffer::writeBitangent(float x, float y, float z)
 {
     writeBitangent(V3(x, y, z));
 }
 
-void GLModelBuffer::writeBitangent(const V3& bitangent)
+void ModelBuffer::writeBitangent(const V3& bitangent)
 {
     _vertices.write(bitangent, _shader_bindings->attributes()._offsets, ShaderBindings::ATTRIBUTE_NAME_BITANGENT);
 }
 
-void GLModelBuffer::applyVaryings()
+void ModelBuffer::applyVaryings()
 {
     _vertices.apply(_varyings._bytes);
 }
 
-void GLModelBuffer::nextVertex()
+void ModelBuffer::nextVertex()
 {
     _vertices.next();
     applyVaryings();
 }
 
-void GLModelBuffer::nextModel()
+void ModelBuffer::nextModel()
 {
     _indice_base = static_cast<glindex_t>(_vertices.size() / _vertices.stride());
 }
 
-void GLModelBuffer::setTranslate(const V3& translate)
+void ModelBuffer::setTranslate(const V3& translate)
 {
     _translate = translate;
 }
 
-void GLModelBuffer::setRenderObject(const RenderObject::Snapshot& renderObject)
+void ModelBuffer::setRenderObject(const RenderObject::Snapshot& renderObject)
 {
     _transform = renderObject._transform;
     _varyings = renderObject._varyings;
 }
 
-const Transform::Snapshot& GLModelBuffer::transform() const
+const Transform::Snapshot& ModelBuffer::transform() const
 {
     return _transform;
 }
 
-const GLBuffer::Builder& GLModelBuffer::vertices() const
+const GLBuffer::Builder& ModelBuffer::vertices() const
 {
     return _vertices;
 }
 
-GLBuffer::Builder& GLModelBuffer::vertices()
+GLBuffer::Builder& ModelBuffer::vertices()
 {
     return _vertices;
 }
 
-const GLBuffer::Snapshot& GLModelBuffer::indices() const
+const GLBuffer::Snapshot& ModelBuffer::indices() const
 {
     return _indices;
 }
 
-void GLModelBuffer::setIndices(GLBuffer::Snapshot indices)
+void ModelBuffer::setIndices(GLBuffer::Snapshot indices)
 {
     _indices = std::move(indices);
 }
 
-bool GLModelBuffer::isInstanced() const
+bool ModelBuffer::isInstanced() const
 {
     return _is_instanced;
 }
 
-GLBuffer::Builder& GLModelBuffer::getInstancedArrayBuilder(uint32_t divisor)
+GLBuffer::Builder& ModelBuffer::getInstancedArrayBuilder(uint32_t divisor)
 {
     auto iter = _instanced_buffer_builders.find(divisor);
     DCHECK(iter != _instanced_buffer_builders.end(), "No instance buffer builder(%d) found", divisor);
     return iter->second;
 }
 
-std::vector<std::pair<uint32_t, GLBuffer::Snapshot>> GLModelBuffer::makeInstancedBufferSnapshots() const
+std::vector<std::pair<uint32_t, GLBuffer::Snapshot>> ModelBuffer::makeInstancedBufferSnapshots() const
 {
     std::vector<std::pair<uint32_t, GLBuffer::Snapshot>> snapshots;
     DCHECK(_instanced_buffer_builders.size() == _shader_bindings->_instanced_arrays.size(), "Instanced buffer size mismatch: %d, %d", _instanced_buffer_builders.size(), _shader_bindings->_instanced_arrays.size());

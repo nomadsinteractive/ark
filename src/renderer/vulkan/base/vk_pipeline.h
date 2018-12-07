@@ -12,10 +12,10 @@
 namespace ark {
 namespace vulkan {
 
-class Pipeline {
+class VKPipeline {
 public:
-    Pipeline(const sp<RenderTarget>& renderTarget, VkPipelineLayout layout, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet descriptorSet, VkPipeline pipeline);
-    ~Pipeline();
+    VKPipeline(const sp<RenderTarget>& renderTarget, VkPipelineLayout layout, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet descriptorSet, VkPipeline pipeline);
+    ~VKPipeline();
 
     VkPipeline pipeline() const;
     VkPipelineLayout layout() const;

@@ -4,11 +4,11 @@
 namespace ark {
 namespace vulkan {
 
-class Buffer;
+class VKBuffer;
 class CommandPool;
 class Device;
 class Instance;
-class Pipeline;
+class VKPipeline;
 class RenderTarget;
 class VKTexture;
 class VulkanAPI;

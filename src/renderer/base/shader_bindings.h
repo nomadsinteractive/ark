@@ -55,7 +55,7 @@ private:
     sp<PipelineInput> _pipeline_input;
     std::vector<std::pair<uint32_t, GLBuffer>> _instanced_arrays;
 
-    friend class GLModelBuffer;
+    friend class ModelBuffer;
 };
 
 }

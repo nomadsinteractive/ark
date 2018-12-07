@@ -63,7 +63,7 @@ void GLModelNinePatch::initialize(ShaderBindings& bindings)
     bindings.bindGLTexture(_atlas->texture());
 }
 
-void GLModelNinePatch::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
+void GLModelNinePatch::start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
 {
     DCHECK(layerContext._items.size() > 0, "LayerContext has no RenderObjects");
 
@@ -71,7 +71,7 @@ void GLModelNinePatch::start(GLModelBuffer& buf, GLResourceManager& resourceMana
     buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_NINE_PATCH, layerContext._items.size()));
 }
 
-void GLModelNinePatch::load(GLModelBuffer& buf, int32_t type, const V& size)
+void GLModelNinePatch::load(ModelBuffer& buf, int32_t type, const V& size)
 {
     const Rect paintRect(0, 0, size.x(), size.y());
     const Item& item = _nine_patch_items.at(type);

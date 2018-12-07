@@ -15,11 +15,11 @@
 #include "renderer/base/gl_context.h"
 #include "renderer/base/gl_resource_manager.h"
 
-#include "renderer/vulkan/base/buffer.h"
+#include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/command_pool.h"
 #include "renderer/vulkan/base/device.h"
 #include "renderer/vulkan/base/instance.h"
-#include "renderer/vulkan/base/pipeline.h"
+#include "renderer/vulkan/base/vk_pipeline.h"
 #include "renderer/vulkan/base/render_target.h"
 #include "renderer/vulkan/base/vk_texture.h"
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
@@ -90,7 +90,7 @@ void VulkanAPI::initialize(GLContext& /*glContext*/)
     _device = sp<Device>::make(_instance, _instance->physicalDevices()[0]);
     _render_target = sp<RenderTarget>::make(_device);
 
-    _uniforms = sp<Buffer>::make(_device, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(uboVS));
+    _uniforms = sp<VKBuffer>::make(_device, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(uboVS));
 
     updateUniformBuffers();
     generateQuad();

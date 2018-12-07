@@ -49,11 +49,11 @@ void GLModelAssimp::initialize(ShaderBindings& bindings)
 {
 }
 
-void GLModelAssimp::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
+void GLModelAssimp::start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
 {
 }
 
-void GLModelAssimp::load(GLModelBuffer& buf, int32_t type, const V& scale)
+void GLModelAssimp::load(ModelBuffer& buf, int32_t type, const V& scale)
 {
 }
 
@@ -97,7 +97,7 @@ GLModelAssimp::Mesh::Mesh(const aiMesh* mesh)
     }
 }
 
-void GLModelAssimp::Mesh::load(GLModelBuffer& buf) const
+void GLModelAssimp::Mesh::load(ModelBuffer& buf) const
 {
     V3* vertices = _vertices->buf();
     V3* normals = _normals ? _normals->buf() : nullptr;

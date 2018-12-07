@@ -19,13 +19,13 @@ void GLModelQuad::initialize(ShaderBindings& bindings)
     bindings.bindGLTexture(_atlas->texture());
 }
 
-void GLModelQuad::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
+void GLModelQuad::start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(4 * layerContext._items.size());
     buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_QUADS, layerContext._items.size()));
 }
 
-void GLModelQuad::load(GLModelBuffer& buf, int32_t type, const V& scale)
+void GLModelQuad::load(ModelBuffer& buf, int32_t type, const V& scale)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
     float width = scale.x() == 0 ? texCoord.width() : scale.x();

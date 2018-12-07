@@ -19,13 +19,13 @@ void GLModelPoint::initialize(ShaderBindings& bindings)
     bindings.bindGLTexture(_atlas->texture());
 }
 
-void GLModelPoint::start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
+void GLModelPoint::start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size());
     buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_POINTS, layerContext._items.size()));
 }
 
-void GLModelPoint::load(GLModelBuffer& buf, int32_t type, const V& scale)
+void GLModelPoint::load(ModelBuffer& buf, int32_t type, const V& scale)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
     buf.nextVertex();

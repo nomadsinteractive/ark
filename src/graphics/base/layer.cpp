@@ -51,7 +51,7 @@ sp<RenderCommand> Layer::Snapshot::render(float x, float y) const
 {
     if(_items.size() > 0)
     {
-        GLModelBuffer buf(_stub->_resource_loader_context, _stub->_shader_bindings, _items.size(), _stub->_shader->stride());
+        ModelBuffer buf(_stub->_resource_loader_context, _stub->_shader_bindings, _items.size(), _stub->_shader->stride());
         _stub->_model->start(buf, _stub->_resource_manager, *this);
 
         for(const auto& i : _items)

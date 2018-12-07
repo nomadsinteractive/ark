@@ -1,11 +1,11 @@
-#include "renderer/vulkan/base/buffer.h"
+#include "renderer/vulkan/base/vk_buffer.h"
 
 #include "renderer/vulkan/base/vulkan_api.h"
 
 namespace ark {
 namespace vulkan {
 
-Buffer::Buffer(const sp<Device>& device, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size)
+VKBuffer::VKBuffer(const sp<Device>& device, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size)
     : _device(device), usageFlags(usageFlags), memoryPropertyFlags(memoryPropertyFlags)
 {
     // Create the buffer handle
@@ -29,37 +29,37 @@ Buffer::Buffer(const sp<Device>& device, VkBufferUsageFlags usageFlags, VkMemory
     bind();
 }
 
-Buffer::~Buffer()
+VKBuffer::~VKBuffer()
 {
     destroy();
 }
 
-void* Buffer::map(VkDeviceSize size, VkDeviceSize offset)
+void* VKBuffer::map(VkDeviceSize size, VkDeviceSize offset)
 {
     void* mapped = nullptr;
     VulkanAPI::checkResult(vkMapMemory(_device->logicalDevice(), _memory, offset, size, 0, &mapped));
     return mapped;
 }
 
-void Buffer::unmap(void* mapped)
+void VKBuffer::unmap(void* mapped)
 {
     DASSERT(mapped);
     vkUnmapMemory(_device->logicalDevice(), _memory);
 }
 
-VkResult Buffer::bind(VkDeviceSize offset)
+VkResult VKBuffer::bind(VkDeviceSize offset)
 {
     return vkBindBufferMemory(_device->logicalDevice(), _buffer, _memory, offset);
 }
 
-void Buffer::setupDescriptor(VkDeviceSize size, VkDeviceSize offset)
+void VKBuffer::setupDescriptor(VkDeviceSize size, VkDeviceSize offset)
 {
     _descriptor.offset = offset;
     _descriptor.buffer = _buffer;
     _descriptor.range = size;
 }
 
-void Buffer::upload(void* data, VkDeviceSize size)
+void VKBuffer::upload(void* data, VkDeviceSize size)
 {
     void* mapped = map();
     memcpy(mapped, data, size);
@@ -68,7 +68,7 @@ void Buffer::upload(void* data, VkDeviceSize size)
     unmap(mapped);
 }
 
-VkResult Buffer::flush(VkDeviceSize size, VkDeviceSize offset)
+VkResult VKBuffer::flush(VkDeviceSize size, VkDeviceSize offset)
 {
     VkMappedMemoryRange mappedRange = {};
     mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -78,7 +78,7 @@ VkResult Buffer::flush(VkDeviceSize size, VkDeviceSize offset)
     return vkFlushMappedMemoryRanges(_device->logicalDevice(), 1, &mappedRange);
 }
 
-VkResult Buffer::invalidate(VkDeviceSize size, VkDeviceSize offset)
+VkResult VKBuffer::invalidate(VkDeviceSize size, VkDeviceSize offset)
 {
     VkMappedMemoryRange mappedRange = {};
     mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -88,12 +88,12 @@ VkResult Buffer::invalidate(VkDeviceSize size, VkDeviceSize offset)
     return vkInvalidateMappedMemoryRanges(_device->logicalDevice(), 1, &mappedRange);
 }
 
-const VkDescriptorBufferInfo&Buffer::descriptor() const
+const VkDescriptorBufferInfo&VKBuffer::descriptor() const
 {
     return _descriptor;
 }
 
-void Buffer::destroy()
+void VKBuffer::destroy()
 {
     if (_buffer)
         vkDestroyBuffer(_device->logicalDevice(), _buffer, nullptr);

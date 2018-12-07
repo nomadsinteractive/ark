@@ -155,8 +155,8 @@ void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const PipelineInput&
     const PipelineInput::Stream& stream = input.getStream(divisor);
     for(auto iter : stream.attributes())
     {
-        const GLPipeline::Attribute& glAttribute = getAttribute(iter.second.name());
-        iter.second.setVertexPointer(glAttribute.location(), stream.stride());
+        const GLPipeline::GLAttribute& glAttribute = getAttribute(iter.second.name());
+        glAttribute.bind(iter.second, stream.stride());
     }
 }
 
@@ -172,7 +172,7 @@ GLint GLPipeline::getUniformLocation(const String& name)
     return location;
 }
 
-const GLPipeline::Attribute& GLPipeline::getAttribute(const String& name)
+const GLPipeline::GLAttribute& GLPipeline::getAttribute(const String& name)
 {
     const auto iter = _attributes.find(name);
     if(iter != _attributes.end())
@@ -223,20 +223,38 @@ void GLPipeline::use()
     glUseProgram(_id);
 }
 
-void GLPipeline::Attribute::setVertexPointer(GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer) const
-{
-    glEnableVertexAttribArray(_location);
-    glVertexAttribPointer(_location, size, type, normalized, stride, pointer);
-}
-
-GLPipeline::Attribute::Attribute(GLint location)
+GLPipeline::GLAttribute::GLAttribute(GLint location)
     : _location(location)
 {
 }
 
-GLint GLPipeline::Attribute::location() const
+void GLPipeline::GLAttribute::bind(const Attribute& attribute, GLsizei stride) const
 {
-    return _location;
+    DWARN(_location >= 0, "Attribute \"%s\" location: %d", attribute.name().c_str(), _location);
+    if(attribute.length() <= 4)
+        setVertexPointer(attribute, _location, stride, attribute.length(), attribute.offset());
+    else if(attribute.length() == 16)
+    {
+        uint32_t offset = attribute.size() / 4;
+        for(int32_t i = 0; i < 4; i++)
+            setVertexPointer(attribute, _location + i, stride, 4, attribute.offset() + offset * i);
+    }
+    else if(attribute.length() == 9)
+    {
+        uint32_t offset = attribute.size() / 3;
+        for(int32_t i = 0; i < 3; i++)
+            setVertexPointer(attribute, _location + i, stride, 3, attribute.offset() + offset * i);
+    }
+}
+
+void GLPipeline::GLAttribute::setVertexPointer(const Attribute& attribute, GLint location, GLsizei stride, uint32_t length, uint32_t offset) const
+{
+    static const GLenum glTypes[Attribute::TYPE_COUNT] = {GL_BYTE, GL_FLOAT, GL_UNSIGNED_INT, GL_SHORT, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT};
+
+    glEnableVertexAttribArray(location);
+    glVertexAttribPointer(location, length, glTypes[attribute.type()], attribute.normalized() ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<void*>(offset));
+    if(attribute.divisor())
+        glVertexAttribDivisor(location, attribute.divisor());
 }
 
 GLPipeline::GLUniform::GLUniform(GLint location)

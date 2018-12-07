@@ -15,8 +15,8 @@ public:
     GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas, uint32_t sampleCount);
 
     virtual void initialize(ShaderBindings& bindings) override;
-    virtual void start(GLModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) override;
-    virtual void load(GLModelBuffer& buf, int32_t type, const V& size) override;
+    virtual void start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) override;
+    virtual void load(ModelBuffer& buf, int32_t type, const V& size) override;
 
 //  [[plugin::resource-loader("sphere")]]
     class BUILDER : public Builder<RenderModel> {

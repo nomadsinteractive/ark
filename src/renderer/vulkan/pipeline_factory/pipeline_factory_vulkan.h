@@ -19,12 +19,12 @@ public:
     PipelineFactoryVulkan(const sp<GLResourceManager>& resourceManager);
     ~PipelineFactoryVulkan() override;
 
-    sp<Pipeline> build(const sp<RenderTarget>& renderTarget);
+    sp<VKPipeline> build(const sp<RenderTarget>& renderTarget);
 
     virtual sp<ark::Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout) override;
     virtual sp<RenderCommand> buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode renderMode, int32_t count) override;
 
-    sp<Buffer> _buffer;
+    sp<VKBuffer> _buffer;
     sp<VKTexture> _texture;
 
 private:

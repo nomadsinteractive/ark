@@ -61,8 +61,8 @@ private:
     sp<Device> _device;
     sp<RenderTarget> _render_target;
     sp<PipelineFactoryVulkan> _pipeline_factory;
-    sp<Pipeline> _pipeline;
-    sp<Buffer> _uniforms;
+    sp<VKPipeline> _pipeline;
+    sp<VKBuffer> _uniforms;
 
     std::vector<VkCommandBuffer> _command_buffers;
 

@@ -13,7 +13,7 @@ class GLBuffer;
 class GLContext;
 class GLCubemap;
 class RenderModel;
-class GLModelBuffer;
+class ModelBuffer;
 class GLFramebuffer;
 class RenderModel;
 class GLSnippetFactory;
