@@ -4,7 +4,7 @@
 #include "core/inf/variable.h"
 #include "core/util/log.h"
 
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 #include "renderer/base/gl_texture_loader.h"
 #include "renderer/base/render_controller.h"
 

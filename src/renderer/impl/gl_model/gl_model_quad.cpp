@@ -2,7 +2,7 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
-#include "renderer/base/gl_model_buffer.h"
+#include "renderer/base/model_buffer.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
@@ -22,7 +22,7 @@ void GLModelQuad::initialize(ShaderBindings& bindings)
 void GLModelQuad::start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(4 * layerContext._items.size());
-    buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_QUADS, layerContext._items.size()));
+    buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, Buffer::NAME_QUADS, layerContext._items.size()));
 }
 
 void GLModelQuad::load(ModelBuffer& buf, int32_t type, const V& scale)

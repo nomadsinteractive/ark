@@ -7,7 +7,7 @@
 
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/drawing_context.h"
-#include "renderer/base/gl_model_buffer.h"
+#include "renderer/base/model_buffer.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/inf/render_model.h"
@@ -61,7 +61,7 @@ sp<RenderCommand> Layer::Snapshot::render(float x, float y) const
             _stub->_model->load(buf, i._type, i._size);
             if(buf.isInstanced())
             {
-                GLBuffer::Builder& sBuilder = buf.getInstancedArrayBuilder(1);
+                Buffer::Builder& sBuilder = buf.getInstancedArrayBuilder(1);
                 sBuilder.next();
                 Matrix matrix = i._transform.toMatrix();
                 matrix.translate(i._position.x(), i._position.y(), i._position.z());

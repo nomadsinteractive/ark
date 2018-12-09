@@ -3,7 +3,7 @@
 
 #include "core/types/shared_ptr.h"
 
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 #include "renderer/base/shader.h"
 #include "renderer/inf/render_resource.h"
 

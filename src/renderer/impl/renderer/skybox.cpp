@@ -5,7 +5,7 @@
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
 
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 #include "renderer/opengl/base/gl_cubemap.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
@@ -51,8 +51,8 @@ private:
 
 
 Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _size(size), _resource_manager(resourceLoaderContext->resourceManager()), _shader(shader), _index_buffer(GLIndexBuffers::makeGLBufferSnapshot(_resource_manager, GLBuffer::NAME_QUADS, 6)),
-      _shader_bindings(sp<ShaderBindings>::make(_resource_manager, shader, _resource_manager->makeGLBuffer(sp<GLBuffer::ByteArrayUploader>::make(GLUtil::makeUnitCubeVertices()), GL_ARRAY_BUFFER, GL_STATIC_DRAW))),
+    : _size(size), _resource_manager(resourceLoaderContext->resourceManager()), _shader(shader), _index_buffer(GLIndexBuffers::makeGLBufferSnapshot(_resource_manager, Buffer::NAME_QUADS, 6)),
+      _shader_bindings(sp<ShaderBindings>::make(_resource_manager, shader, _resource_manager->makeGLBuffer(sp<Buffer::ByteArrayUploader>::make(GLUtil::makeUnitCubeVertices()), GL_ARRAY_BUFFER, GL_STATIC_DRAW))),
       _object_pool(resourceLoaderContext->objectPool())
 {
     _shader_bindings->bindGLTexture(texture);

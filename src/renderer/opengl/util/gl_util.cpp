@@ -9,7 +9,7 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/matrix.h"
 
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 #include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/shader.h"
@@ -165,19 +165,18 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, GLReso
 
     const sp<GLTexture> resource = texture.resource();
     shader.pipeline()->activeTexture(texture, resource->target(), 0);
-//    texture.active(shader.pipeline(), 0);
 
     uint32_t vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    GLBuffer arrayBuffer(resourceManager.recycler(), sp<GLBuffer::ArrayUploader<uint8_t>>::make(GLUtil::makeUnitCubeVertices()), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-    arrayBuffer.prepare(graphicsContext);
+    Buffer arrayBuffer(resourceManager.recycler(), sp<Buffer::ArrayUploader<uint8_t>>::make(GLUtil::makeUnitCubeVertices()), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+    arrayBuffer.upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer.id());
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, 0);
 
-    const GLBuffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(resourceManager, GLBuffer::NAME_QUADS, 6);
+    const Buffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(resourceManager, Buffer::NAME_QUADS, 6);
     indexBuffer.prepare(graphicsContext);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.id());
 

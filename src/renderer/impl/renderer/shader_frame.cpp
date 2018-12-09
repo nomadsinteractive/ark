@@ -8,7 +8,7 @@
 #include "graphics/base/size.h"
 #include "graphics/impl/vec/vec2_impl.h"
 
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
@@ -28,8 +28,8 @@ ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const s
 
 void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
-    const GLBuffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(_resource_manager, GLBuffer::NAME_QUADS, 1);
-    const sp<GLBuffer::Uploader> uploader = _object_pool->obtain<GLBuffer::ByteArrayUploader>(getArrayBuffer(x, y));
+    const Buffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(_resource_manager, Buffer::NAME_QUADS, 1);
+    const sp<Buffer::Uploader> uploader = _object_pool->obtain<Buffer::ByteArrayUploader>(getArrayBuffer(x, y));
     renderRequest.addRequest(_object_pool->obtain<opengl::DrawElements>(DrawingContext(_shader_bindings, _shader->camera()->snapshop(), _array_buffer.snapshot(uploader), indexBuffer), _shader, GL_TRIANGLES));
 }
 

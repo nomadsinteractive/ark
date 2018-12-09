@@ -1,4 +1,4 @@
-#include "renderer/base/gl_model_buffer.h"
+#include "renderer/base/model_buffer.h"
 
 #include "core/inf/array.h"
 #include "core/base/memory_pool.h"
@@ -96,22 +96,22 @@ const Transform::Snapshot& ModelBuffer::transform() const
     return _transform;
 }
 
-const GLBuffer::Builder& ModelBuffer::vertices() const
+const Buffer::Builder& ModelBuffer::vertices() const
 {
     return _vertices;
 }
 
-GLBuffer::Builder& ModelBuffer::vertices()
+Buffer::Builder& ModelBuffer::vertices()
 {
     return _vertices;
 }
 
-const GLBuffer::Snapshot& ModelBuffer::indices() const
+const Buffer::Snapshot& ModelBuffer::indices() const
 {
     return _indices;
 }
 
-void ModelBuffer::setIndices(GLBuffer::Snapshot indices)
+void ModelBuffer::setIndices(Buffer::Snapshot indices)
 {
     _indices = std::move(indices);
 }
@@ -121,19 +121,19 @@ bool ModelBuffer::isInstanced() const
     return _is_instanced;
 }
 
-GLBuffer::Builder& ModelBuffer::getInstancedArrayBuilder(uint32_t divisor)
+Buffer::Builder& ModelBuffer::getInstancedArrayBuilder(uint32_t divisor)
 {
     auto iter = _instanced_buffer_builders.find(divisor);
     DCHECK(iter != _instanced_buffer_builders.end(), "No instance buffer builder(%d) found", divisor);
     return iter->second;
 }
 
-std::vector<std::pair<uint32_t, GLBuffer::Snapshot>> ModelBuffer::makeInstancedBufferSnapshots() const
+std::vector<std::pair<uint32_t, Buffer::Snapshot>> ModelBuffer::makeInstancedBufferSnapshots() const
 {
-    std::vector<std::pair<uint32_t, GLBuffer::Snapshot>> snapshots;
+    std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots;
     DCHECK(_instanced_buffer_builders.size() == _shader_bindings->_instanced_arrays.size(), "Instanced buffer size mismatch: %d, %d", _instanced_buffer_builders.size(), _shader_bindings->_instanced_arrays.size());
 
-    for(const std::pair<uint32_t, GLBuffer>& i : _shader_bindings->_instanced_arrays)
+    for(const std::pair<uint32_t, Buffer>& i : _shader_bindings->_instanced_arrays)
         snapshots.emplace_back(i.first, i.second.snapshot(_instanced_buffer_builders.at(i.first).makeUploader()));
 
     return snapshots;

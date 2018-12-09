@@ -7,7 +7,7 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
-#include "renderer/base/gl_model_buffer.h"
+#include "renderer/base/model_buffer.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/shader_bindings.h"

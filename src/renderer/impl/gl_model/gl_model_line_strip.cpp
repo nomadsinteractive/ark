@@ -2,7 +2,7 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
-#include "renderer/base/gl_model_buffer.h"
+#include "renderer/base/model_buffer.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
@@ -51,7 +51,7 @@ void GLModelLineStrip::start(ModelBuffer& buf, GLResourceManager& /*resourceMana
     if(layerContext._dirty)
     {
         const std::vector<glindex_t> indices = makeIndices(layerContext);
-        buf.setIndices(_ibo.snapshot(sp<GLBuffer::VectorUploader<glindex_t>>::make(std::move(indices))));
+        buf.setIndices(_ibo.snapshot(sp<Buffer::VectorUploader<glindex_t>>::make(std::move(indices))));
     }
     else
         buf.setIndices(_ibo.snapshot());

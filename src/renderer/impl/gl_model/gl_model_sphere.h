@@ -5,7 +5,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 #include "renderer/inf/render_model.h"
 
 namespace ark {
@@ -44,7 +44,7 @@ private:
     floatarray _vertices_boiler_plate;
     indexarray _indices_boiler_plate;
 
-    GLBuffer _instance_index;
+    Buffer _instance_index;
 };
 
 }

@@ -5,7 +5,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 #include "renderer/inf/render_model.h"
 
 namespace ark {
@@ -37,7 +37,7 @@ private:
 private:
     sp<Atlas> _atlas;
 
-    GLBuffer _ibo;
+    Buffer _ibo;
 };
 
 }

@@ -7,7 +7,7 @@
 
 namespace ark {
 
-DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const Camera::Snapshot& camera, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer::Snapshot& indexBuffer)
+DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const Camera::Snapshot& camera, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer)
     : _shader_bindings(shaderBindings), _camera(camera), _array_buffer(arrayBuffer), _index_buffer(indexBuffer), _count(indexBuffer.length<glindex_t>())
 {
     DWARN(_shader_bindings->arrayBuffer().id() == arrayBuffer.id(), "GLShaderBinding's ArrayBuffer: %d, which is not the same as GLDrawingContext's ArrayBuffer snapshot: %d", _shader_bindings->arrayBuffer().id(), arrayBuffer.id());

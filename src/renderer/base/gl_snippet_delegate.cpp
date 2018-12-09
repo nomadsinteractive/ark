@@ -1,6 +1,6 @@
 #include "renderer/base/gl_snippet_delegate.h"
 
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 #include "renderer/base/gl_context.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/shader.h"

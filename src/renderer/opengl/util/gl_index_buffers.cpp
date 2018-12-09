@@ -7,16 +7,12 @@
 namespace ark {
 
 GLIndexBuffers::NinePatch::NinePatch(size_t objectCount)
-    : _object_count(objectCount), _boiler_plate({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15}) {
+    : Uploader(((28 + 2) * objectCount - 2) * sizeof(glindex_t)), _object_count(objectCount),
+      _boiler_plate({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15}) {
     DASSERT(_object_count);
 }
 
-size_t GLIndexBuffers::NinePatch::size()
-{
-    return ((_boiler_plate.length() + 2) * _object_count - 2) * sizeof(glindex_t);
-}
-
-void GLIndexBuffers::NinePatch::upload(const GLBuffer::UploadFunc& uploader)
+void GLIndexBuffers::NinePatch::upload(const Buffer::UploadFunc& uploader)
 {
     const size_t bolierPlateLength = _boiler_plate.length();
     bytearray array = sp<DynamicArray<uint8_t>>::make(size());
@@ -35,22 +31,17 @@ void GLIndexBuffers::NinePatch::upload(const GLBuffer::UploadFunc& uploader)
     uploader(array->buf(), array->length());
 }
 
-GLBuffer::UploadMakerFunc GLIndexBuffers::NinePatch::maker()
+Buffer::UploadMakerFunc GLIndexBuffers::NinePatch::maker()
 {
-    return [](size_t objectCount)->sp<GLBuffer::Uploader> { return sp<NinePatch>::make(objectCount); };
+    return [](size_t objectCount)->sp<Buffer::Uploader> { return sp<NinePatch>::make(objectCount); };
 }
 
 GLIndexBuffers::Quads::Quads(size_t objectCount)
-    : _object_count(objectCount)
+    : Uploader(objectCount * 6 * sizeof(glindex_t)), _object_count(objectCount)
 {
 }
 
-size_t GLIndexBuffers::Quads::size()
-{
-    return _object_count * 6 * sizeof(glindex_t);
-}
-
-void GLIndexBuffers::Quads::upload(const GLBuffer::UploadFunc& uploader)
+void GLIndexBuffers::Quads::upload(const Buffer::UploadFunc& uploader)
 {
     bytearray result = sp<DynamicArray<uint8_t>>::make(size());
 
@@ -69,22 +60,17 @@ void GLIndexBuffers::Quads::upload(const GLBuffer::UploadFunc& uploader)
     uploader(result->buf(), result->length());
 }
 
-GLBuffer::UploadMakerFunc GLIndexBuffers::Quads::maker()
+Buffer::UploadMakerFunc GLIndexBuffers::Quads::maker()
 {
-    return [](size_t objectCount)->sp<GLBuffer::Uploader> { return sp<Quads>::make(objectCount); };
+    return [](size_t objectCount)->sp<Buffer::Uploader> { return sp<Quads>::make(objectCount); };
 }
 
 GLIndexBuffers::Points::Points(size_t objectCount)
-    : _object_count(objectCount)
+    : Uploader(objectCount * sizeof(glindex_t)), _object_count(objectCount)
 {
 }
 
-size_t GLIndexBuffers::Points::size()
-{
-    return _object_count * sizeof(glindex_t);
-}
-
-void GLIndexBuffers::Points::upload(const GLBuffer::UploadFunc& uploader)
+void GLIndexBuffers::Points::upload(const Buffer::UploadFunc& uploader)
 {
     const auto result = sp<DynamicArray<glindex_t>>::make(_object_count);
 
@@ -97,27 +83,27 @@ void GLIndexBuffers::Points::upload(const GLBuffer::UploadFunc& uploader)
     uploader(result->buf(), result->size());
 }
 
-GLBuffer::UploadMakerFunc GLIndexBuffers::Points::maker()
+Buffer::UploadMakerFunc GLIndexBuffers::Points::maker()
 {
-    return [](size_t objectCount)->sp<GLBuffer::Uploader> { return sp<Points>::make(objectCount); };
+    return [](size_t objectCount)->sp<Buffer::Uploader> { return sp<Points>::make(objectCount); };
 }
 
-GLBuffer::Snapshot GLIndexBuffers::makeGLBufferSnapshot(GLResourceManager& resourceManager, GLBuffer::Name name, size_t objectCount)
+Buffer::Snapshot GLIndexBuffers::makeGLBufferSnapshot(GLResourceManager& resourceManager, Buffer::Name name, size_t objectCount)
 {
     const size_t warningLimit = 10000;
     DWARN(objectCount < warningLimit, "Object count(%d) exceeding warning limit(%d). You can make the limit larger if you're sure what you're doing", objectCount, warningLimit);
     switch(name)
     {
-    case GLBuffer::NAME_NINE_PATCH:
+    case Buffer::NAME_NINE_PATCH:
         return resourceManager.makeGLBufferSnapshot(name, NinePatch::maker(), objectCount * 2, (objectCount * 30 - 2) * sizeof(glindex_t));
-    case GLBuffer::NAME_POINTS:
+    case Buffer::NAME_POINTS:
         return resourceManager.makeGLBufferSnapshot(name, Points::maker(), objectCount * 2, objectCount * sizeof(glindex_t));
-    case GLBuffer::NAME_QUADS:
+    case Buffer::NAME_QUADS:
         return resourceManager.makeGLBufferSnapshot(name, Quads::maker(), objectCount * 2, objectCount * 6 * sizeof(glindex_t));
     default:
         DFATAL("Unknown GLBufferName %d", name);
     }
-    return GLBuffer::Snapshot();
+    return Buffer::Snapshot();
 }
 
 }

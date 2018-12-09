@@ -13,7 +13,7 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 
 namespace ark {
 
@@ -53,7 +53,7 @@ private:
     sp<ObjectPool> _object_pool;
     sp<MemoryPool> _memory_pool;
     sp<ShaderBindings> _shader_bindings;
-    GLBuffer _array_buffer;
+    Buffer _array_buffer;
 };
 
 }

@@ -24,7 +24,7 @@ void GLVertexArray::upload(GraphicsContext& graphicsContext)
 {
     glGenVertexArrays(1, &_id);
     glBindVertexArray(_id);
-    _shader_bindings->arrayBuffer().prepare(graphicsContext);
+    _shader_bindings->arrayBuffer().upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, _shader_bindings->arrayBuffer().id());
     const sp<Pipeline> pipeline = _shader.getPipeline(graphicsContext);
     pipeline->bind(graphicsContext, _shader_bindings);

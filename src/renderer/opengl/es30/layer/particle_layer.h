@@ -7,7 +7,7 @@
 #include "graphics/base/layer.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 
 namespace ark {
 namespace gles30 {

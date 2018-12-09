@@ -6,7 +6,7 @@
 #include "graphics/base/render_request.h"
 #include "graphics/base/render_command_pipeline.h"
 
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 #include "renderer/base/gl_framebuffer.h"
 #include "renderer/base/gl_recycler.h"
 #include "renderer/base/gl_resource_manager.h"

@@ -9,7 +9,7 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/image_resource.h"
 
-#include "renderer/base/gl_model_buffer.h"
+#include "renderer/base/model_buffer.h"
 #include "renderer/base/resource_loader_context.h"
 
 #include "assimp/impl/io/ark_io_system.h"

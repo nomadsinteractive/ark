@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_GL_BUFFER_H_
-#define ARK_RENDERER_BASE_GL_BUFFER_H_
+#ifndef ARK_RENDERER_BASE_BUFFER_H_
+#define ARK_RENDERER_BASE_BUFFER_H_
 
 #include <vector>
 
@@ -15,16 +15,20 @@
 
 namespace ark {
 
-class ARK_API GLBuffer {
+class ARK_API Buffer {
 public:
     typedef std::function<void(void*, size_t)> UploadFunc;
 
     class ARK_API Uploader {
     public:
+        Uploader(size_t size);
         virtual ~Uploader() = default;
 
-        virtual size_t size() = 0;
+        size_t size() const;
         virtual void upload(const UploadFunc& uploader) = 0;
+
+    protected:
+        size_t _size;
     };
 
     typedef std::function<sp<Uploader>(size_t)> UploadMakerFunc;
@@ -32,12 +36,9 @@ public:
     template<typename T> class ArrayUploader : public Uploader {
     public:
         ArrayUploader(const sp<Array<T>>& array)
-            : _array(array) {
+            : Uploader(array->size()), _array(array) {
         }
 
-        virtual size_t size() override {
-            return _array->size();
-        }
         virtual void upload(const UploadFunc& uploader) override {
             uploader(_array->buf(), _array->size());
         }
@@ -49,14 +50,11 @@ public:
     template<typename T> class ArrayListUploader : public Uploader {
     public:
         ArrayListUploader(std::vector<sp<Array<T>>> arrayList)
-            : _array_list(std::move(arrayList)), _size(0) {
+            : Uploader(0), _array_list(std::move(arrayList)) {
             for(const auto& i : _array_list)
                 _size += i->length();
         }
 
-        virtual size_t size() override {
-            return _size;
-        }
         virtual void upload(const UploadFunc& uploader) override {
             for(const auto& i : _array_list)
                 uploader(i->buf(), i->size());
@@ -64,18 +62,14 @@ public:
 
     private:
         std::vector<bytearray> _array_list;
-        size_t _size;
     };
 
     template<typename T> class VectorUploader : public Uploader {
     public:
         VectorUploader(std::vector<T> vector)
-            : _vector(std::move(vector)) {
+            : Uploader(vector.size() * sizeof(T)), _vector(std::move(vector)) {
         }
 
-        virtual size_t size() override {
-            return _vector.size() * sizeof(T);
-        }
         virtual void upload(const UploadFunc& uploader) override {
             uploader(&_vector[0], _vector.size() * sizeof(T));
         }
@@ -96,8 +90,6 @@ private:
         Stub(const sp<GLRecycler>& recycler, const sp<Uploader>& uploader, GLenum type, GLenum usage);
         ~Stub() override;
 
-        GLenum type() const;
-        GLenum usage() const;
         size_t size() const;
 
         virtual GLuint id() override;
@@ -138,7 +130,6 @@ public:
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
         uint32_t id() const;
-        GLenum type() const;
 
         template<typename T> size_t length() const {
             return _size / sizeof(T);
@@ -196,24 +187,20 @@ public:
     };
 
 public:
-    GLBuffer(const sp<GLRecycler>& recycler, const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage) noexcept;
-    GLBuffer() noexcept;
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(GLBuffer);
+    Buffer(const sp<GLRecycler>& recycler, const sp<Buffer::Uploader>& uploader, GLenum type, GLenum usage) noexcept;
+    Buffer() noexcept;
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Buffer);
 
     explicit operator bool() const;
 
-    template<typename T> size_t length() const {
-        return _stub->size() / sizeof(T);
-    }
     size_t size() const;
 
-    GLenum type() const;
     Snapshot snapshot(const sp<Uploader>& uploader) const;
     Snapshot snapshot(size_t size) const;
     Snapshot snapshot() const;
 
     GLuint id() const;
-    void prepare(GraphicsContext&) const;
+    void upload(GraphicsContext&) const;
 
 private:
     sp<Stub> _stub;

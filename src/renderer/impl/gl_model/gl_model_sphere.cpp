@@ -4,7 +4,7 @@
 #include "core/util/log.h"
 
 #include "renderer/base/atlas.h"
-#include "renderer/base/gl_model_buffer.h"
+#include "renderer/base/model_buffer.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
@@ -15,7 +15,7 @@ GLModelSphere::GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderCont
     : RenderModel(RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas), _vertex_count((sampleCount * 2 + 1) * (sampleCount + 1)),
       _vertices_boiler_plate(sp<DynamicArray<float>>::make(_vertex_count * (3 + 2))),
       _indices_boiler_plate(sp<DynamicArray<glindex_t>>::make(4 * sampleCount * sampleCount + 2 * (sampleCount * 2 - 1))),
-      _instance_index(resourceLoaderContext->resourceManager()->makeGLBuffer(sp<GLBuffer::IndexArrayUploader>::make(_indices_boiler_plate), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW))
+      _instance_index(resourceLoaderContext->resourceManager()->makeGLBuffer(sp<Buffer::IndexArrayUploader>::make(_indices_boiler_plate), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW))
 {
     float* vertices = _vertices_boiler_plate->buf();
     float step = Math::PI / sampleCount;

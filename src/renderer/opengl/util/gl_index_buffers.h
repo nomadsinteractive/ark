@@ -3,54 +3,51 @@
 
 #include "core/impl/array/fixed_array.h"
 
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 
 namespace ark {
 
 class GLIndexBuffers {
 public:
 
-    class NinePatch : public GLBuffer::Uploader {
+    class NinePatch : public Buffer::Uploader {
     public:
         NinePatch(size_t objectCount);
 
-        virtual size_t size() override;
-        virtual void upload(const GLBuffer::UploadFunc& uploader) override;
+        virtual void upload(const Buffer::UploadFunc& uploader) override;
 
-        static GLBuffer::UploadMakerFunc maker();
+        static Buffer::UploadMakerFunc maker();
 
     private:
         size_t _object_count;
         FixedArray<glindex_t, 28> _boiler_plate;
     };
 
-    class Quads : public GLBuffer::Uploader {
+    class Quads : public Buffer::Uploader {
     public:
         Quads(size_t objectCount);
 
-        virtual size_t size() override;
-        virtual void upload(const GLBuffer::UploadFunc& uploader) override;
+        virtual void upload(const Buffer::UploadFunc& uploader) override;
 
-        static GLBuffer::UploadMakerFunc maker();
+        static Buffer::UploadMakerFunc maker();
 
     private:
         size_t _object_count;
     };
 
-    class Points : public GLBuffer::Uploader {
+    class Points : public Buffer::Uploader {
     public:
         Points(size_t objectCount);
 
-        virtual size_t size() override;
-        virtual void upload(const GLBuffer::UploadFunc& uploader) override;
+        virtual void upload(const Buffer::UploadFunc& uploader) override;
 
-        static GLBuffer::UploadMakerFunc maker();
+        static Buffer::UploadMakerFunc maker();
 
     private:
         size_t _object_count;
     };
 
-    static GLBuffer::Snapshot makeGLBufferSnapshot(GLResourceManager& resourceManager, GLBuffer::Name name, size_t objectCount);
+    static Buffer::Snapshot makeGLBufferSnapshot(GLResourceManager& resourceManager, Buffer::Name name, size_t objectCount);
 
 
 };

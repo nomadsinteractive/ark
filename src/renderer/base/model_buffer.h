@@ -14,7 +14,7 @@
 #include "graphics/base/v3.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 #include "renderer/base/gl_resource_manager.h"
 #include "renderer/base/varyings.h"
 
@@ -44,17 +44,17 @@ public:
 
     const Transform::Snapshot& transform() const;
 
-    const GLBuffer::Builder& vertices() const;
-    GLBuffer::Builder& vertices();
+    const Buffer::Builder& vertices() const;
+    Buffer::Builder& vertices();
 
-    const GLBuffer::Snapshot& indices() const;
-    void setIndices(GLBuffer::Snapshot indices);
+    const Buffer::Snapshot& indices() const;
+    void setIndices(Buffer::Snapshot indices);
 
     bool isInstanced() const;
 
-    GLBuffer::Builder& getInstancedArrayBuilder(uint32_t divisor);
+    Buffer::Builder& getInstancedArrayBuilder(uint32_t divisor);
 
-    std::vector<std::pair<uint32_t, GLBuffer::Snapshot>> makeInstancedBufferSnapshots() const;
+    std::vector<std::pair<uint32_t, Buffer::Snapshot>> makeInstancedBufferSnapshots() const;
 
 private:
     void applyVaryings();
@@ -62,10 +62,10 @@ private:
 private:
     sp<ShaderBindings> _shader_bindings;
 
-    GLBuffer::Builder _vertices;
-    std::map<uint32_t, GLBuffer::Builder> _instanced_buffer_builders;
+    Buffer::Builder _vertices;
+    std::map<uint32_t, Buffer::Builder> _instanced_buffer_builders;
 
-    GLBuffer::Snapshot _indices;
+    Buffer::Snapshot _indices;
 
     glindex_t _indice_base;
 

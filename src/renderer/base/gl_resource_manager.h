@@ -12,7 +12,7 @@
 
 #include "graphics/forwarding.h"
 
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 #include "renderer/forwarding.h"
 
 #include "platform/gl/gl.h"
@@ -40,15 +40,15 @@ public:
     void onDrawFrame(GraphicsContext& graphicsContext);
 
     void prepare(const sp<RenderResource>& resource, PreparingStrategy strategy);
-    void prepare(const GLBuffer& buffer, PreparingStrategy strategy);
+    void prepare(const Buffer& buffer, PreparingStrategy strategy);
     void recycle(const sp<RenderResource>& resource) const;
 
     sp<Texture> loadGLTexture(const String& name);
     sp<Texture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, PreparingStrategy ps = PS_ONCE_AND_ON_SURFACE_READY);
 
-    GLBuffer makeGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage);
-    GLBuffer makeDynamicArrayBuffer() const;
-    GLBuffer::Snapshot makeGLBufferSnapshot(GLBuffer::Name name, const GLBuffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size);
+    Buffer makeGLBuffer(const sp<Buffer::Uploader>& uploader, GLenum type, GLenum usage);
+    Buffer makeDynamicArrayBuffer() const;
+    Buffer::Snapshot makeGLBufferSnapshot(Buffer::Name name, const Buffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size);
 
     const sp<GLRecycler>& recycler() const;
 
@@ -88,7 +88,7 @@ private:
     };
 
     struct SharedBuffer {
-        GLBuffer _buffers[GLBuffer::NAME_COUNT];
+        Buffer _buffers[Buffer::NAME_COUNT];
     };
 
 private:

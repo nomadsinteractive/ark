@@ -10,7 +10,7 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 
 namespace ark {
 
@@ -41,7 +41,7 @@ private:
     SafePtr<Size> _size;
     sp<GLResourceManager> _resource_manager;
     sp<Shader> _shader;
-    GLBuffer::Snapshot _index_buffer;
+    Buffer::Snapshot _index_buffer;
 
     sp<ShaderBindings> _shader_bindings;
     sp<ObjectPool> _object_pool;

@@ -9,7 +9,7 @@ class Characters;
 class Pipeline;
 class PipelineFactory;
 class Attribute;
-class GLBuffer;
+class Buffer;
 class GLContext;
 class GLCubemap;
 class RenderModel;

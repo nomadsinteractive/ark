@@ -10,13 +10,13 @@
 #include "graphics/base/matrix.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 
 namespace ark {
 
 class ARK_API DrawingContext {
 public:
-    DrawingContext(const sp<ShaderBindings>& shaderBindings, const Camera::Snapshot& camera, const GLBuffer::Snapshot& arrayBuffer, const GLBuffer::Snapshot& indexBuffer);
+    DrawingContext(const sp<ShaderBindings>& shaderBindings, const Camera::Snapshot& camera, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
     void preDraw(GraphicsContext& graphicsContext, const Shader& shader);
@@ -25,10 +25,10 @@ public:
     sp<ShaderBindings> _shader_bindings;
 
     Camera::Snapshot _camera;
-    GLBuffer::Snapshot _array_buffer;
-    std::vector<std::pair<uint32_t, GLBuffer::Snapshot>> _instanced_array_snapshots;
+    Buffer::Snapshot _array_buffer;
+    std::vector<std::pair<uint32_t, Buffer::Snapshot>> _instanced_array_snapshots;
 
-    GLBuffer::Snapshot _index_buffer;
+    Buffer::Snapshot _index_buffer;
 
     int32_t _count;
 

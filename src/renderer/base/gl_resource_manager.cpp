@@ -10,7 +10,7 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
 
-#include "renderer/base/gl_buffer.h"
+#include "renderer/base/buffer.h"
 #include "renderer/base/gl_context.h"
 #include "renderer/base/gl_recycler.h"
 #include "renderer/base/shader.h"
@@ -112,7 +112,7 @@ void GLResourceManager::prepare(const sp<RenderResource>& resource, PreparingStr
     }
 }
 
-void GLResourceManager::prepare(const GLBuffer& buffer, GLResourceManager::PreparingStrategy strategy)
+void GLResourceManager::prepare(const Buffer& buffer, GLResourceManager::PreparingStrategy strategy)
 {
     prepare(buffer._stub, strategy);
 }
@@ -139,31 +139,31 @@ sp<Texture> GLResourceManager::createGLTexture(uint32_t width, uint32_t height, 
     return texture;
 }
 
-GLBuffer GLResourceManager::makeGLBuffer(const sp<GLBuffer::Uploader>& uploader, GLenum type, GLenum usage)
+Buffer GLResourceManager::makeGLBuffer(const sp<Buffer::Uploader>& uploader, GLenum type, GLenum usage)
 {
-    GLBuffer buffer(_recycler, uploader, type, usage);
+    Buffer buffer(_recycler, uploader, type, usage);
     prepare(buffer, PS_ONCE_AND_ON_SURFACE_READY);
     return buffer;
 }
 
-GLBuffer GLResourceManager::makeDynamicArrayBuffer() const
+Buffer GLResourceManager::makeDynamicArrayBuffer() const
 {
-    return GLBuffer(_recycler, nullptr, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
+    return Buffer(_recycler, nullptr, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 }
 
-GLBuffer::Snapshot GLResourceManager::makeGLBufferSnapshot(GLBuffer::Name name, const GLBuffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size)
+Buffer::Snapshot GLResourceManager::makeGLBufferSnapshot(Buffer::Name name, const Buffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size)
 {
-    if(name == GLBuffer::NAME_NONE)
-        return GLBuffer(_recycler, nullptr, GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW).snapshot(maker(size));
+    if(name == Buffer::NAME_NONE)
+        return Buffer(_recycler, nullptr, GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW).snapshot(maker(size));
 
     sp<SharedBuffer> sb;
     if(!_shared_buffers.pop(sb))
         sb = sp<SharedBuffer>::make();
 
-    GLBuffer& shared = sb->_buffers[name];
+    Buffer& shared = sb->_buffers[name];
     if(!shared || shared.size() < size)
     {
-        const sp<GLBuffer::Uploader> uploader = maker(reservedObjectCount);
+        const sp<Buffer::Uploader> uploader = maker(reservedObjectCount);
         DCHECK(uploader && uploader->size() >= size, "Making GLBuffer::Uploader failed, object-count: %d, uploader-size: %d, required-size: %d", reservedObjectCount, uploader ? uploader->size() : 0, size);
         shared = makeGLBuffer(uploader, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
     }
