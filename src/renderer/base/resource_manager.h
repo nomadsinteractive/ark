@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_GL_RESOURCE_MANAGER_H_
-#define ARK_RENDERER_BASE_GL_RESOURCE_MANAGER_H_
+#ifndef ARK_RENDERER_BASE_RESOURCE_MANAGER_H_
+#define ARK_RENDERER_BASE_RESOURCE_MANAGER_H_
 
 #include <set>
 
@@ -19,16 +19,16 @@
 
 namespace ark {
 
-class ARK_API GLResourceManager {
+class ARK_API ResourceManager {
 public:
-    GLResourceManager(const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader);
-    ~GLResourceManager();
+    ResourceManager(const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader);
+    ~ResourceManager();
 
-    enum PreparingStrategy {
-        PS_ONCE,
-        PS_ONCE_FORCE,
-        PS_ON_SURFACE_READY,
-        PS_ONCE_AND_ON_SURFACE_READY
+    enum UploadStrategy {
+        US_ONCE,
+        US_ONCE_FORCE,
+        US_ON_SURFACE_READY,
+        US_ONCE_AND_ON_SURFACE_READY
     };
 
     const sp<Dictionary<bitmap>>& bitmapLoader() const;
@@ -39,32 +39,33 @@ public:
 
     void onDrawFrame(GraphicsContext& graphicsContext);
 
-    void prepare(const sp<RenderResource>& resource, PreparingStrategy strategy);
-    void prepare(const Buffer& buffer, PreparingStrategy strategy);
-    void recycle(const sp<RenderResource>& resource) const;
+    void upload(const sp<Resource>& resource, UploadStrategy strategy);
+
+    void prepare(const Buffer& buffer, UploadStrategy strategy);
+    void recycle(const sp<Resource>& resource) const;
 
     sp<Texture> loadGLTexture(const String& name);
-    sp<Texture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, PreparingStrategy ps = PS_ONCE_AND_ON_SURFACE_READY);
+    sp<Texture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, UploadStrategy ps = US_ONCE_AND_ON_SURFACE_READY);
 
-    Buffer makeGLBuffer(const sp<Buffer::Uploader>& uploader, GLenum type, GLenum usage);
-    Buffer makeDynamicArrayBuffer() const;
-    Buffer::Snapshot makeGLBufferSnapshot(Buffer::Name name, const Buffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size);
+//    Buffer makeBuffer(const sp<Buffer::Uploader>& uploader, Buffer::Type type, Buffer::Usage usage);
+//    Buffer makeDynamicArrayBuffer() const;
+//    Buffer::Snapshot makeBufferSnapshot(Buffer::Name name, const Buffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size);
 
-    const sp<GLRecycler>& recycler() const;
+    const sp<Recycler>& recycler() const;
 
     template<typename T, typename... Args> sp<T> createGLResource(Args&&... args) {
         const sp<T> res = sp<T>::make(std::forward<Args>(args)...);
-        prepare(res, PS_ONCE_AND_ON_SURFACE_READY);
+        upload(res, US_ONCE_AND_ON_SURFACE_READY);
         return res;
     }
 
 private:
     class ExpirableGLResource {
     public:
-        ExpirableGLResource(const sp<RenderResource>& resource);
+        ExpirableGLResource(const sp<Resource>& resource);
         ExpirableGLResource(const ExpirableGLResource& other);
 
-        const sp<RenderResource>& resource() const;
+        const sp<Resource>& resource() const;
 
         bool isExpired() const;
 
@@ -74,15 +75,15 @@ private:
         bool operator < (const ExpirableGLResource& other) const;
 
     private:
-        sp<RenderResource> _resource;
+        sp<Resource> _resource;
     };
 
     struct PreparingGLResource {
-        PreparingGLResource(const ExpirableGLResource& resource, PreparingStrategy strategy);
+        PreparingGLResource(const ExpirableGLResource& resource, UploadStrategy strategy);
         PreparingGLResource(const PreparingGLResource& other);
 
         ExpirableGLResource _resource;
-        PreparingStrategy _strategy;
+        UploadStrategy _strategy;
 
         bool operator < (const PreparingGLResource& other) const;
     };
@@ -99,7 +100,7 @@ private:
     sp<Dictionary<bitmap>> _bitmap_loader;
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
 
-    sp<GLRecycler> _recycler;
+    sp<Recycler> _recycler;
     sp<Dictionary<sp<Texture>>> _gl_texture_loader;
 
     LockFreeStack<PreparingGLResource> _preparing_items;
@@ -108,6 +109,8 @@ private:
     std::set<ExpirableGLResource> _on_surface_ready_items;
 
     uint32_t _tick;
+
+    friend class RenderController;
 };
 
 }

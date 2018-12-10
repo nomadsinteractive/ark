@@ -17,7 +17,7 @@ GLSnippetActiveTexture::GLSnippetActiveTexture(const sp<Texture>& texture, uint3
     _textures.emplace_back(texture, name);
 }
 
-GLSnippetActiveTexture::GLSnippetActiveTexture(const sp<RenderResource>& texture, uint32_t target, uint32_t name)
+GLSnippetActiveTexture::GLSnippetActiveTexture(const sp<Resource>& texture, uint32_t target, uint32_t name)
 {
     _textures.emplace_back(texture, target, name);
 }
@@ -53,7 +53,7 @@ GLSnippetActiveTexture::Slot::Slot(const sp<Texture>& texture, uint32_t name)
 {
 }
 
-GLSnippetActiveTexture::Slot::Slot(const sp<RenderResource>& texture, uint32_t target, uint32_t name)
+GLSnippetActiveTexture::Slot::Slot(const sp<Resource>& texture, uint32_t target, uint32_t name)
     : resource(texture), target(target), name(name)
 {
 }

@@ -17,7 +17,7 @@
 #include "renderer/base/varyings.h"
 #include "graphics/impl/flatable/flatable_color3b.h"
 
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
@@ -145,7 +145,7 @@ const sp<Pipeline>& Shader::getPipeline(GraphicsContext& graphicsContext)
 
     _stub->_pipeline_layout->preCompile(graphicsContext);
     _stub->_pipeline = _stub->_pipeline_factory->buildPipeline(graphicsContext, _stub->_pipeline_layout);
-    graphicsContext.resourceManager()->prepare(_stub, GLResourceManager::PS_ON_SURFACE_READY);
+    graphicsContext.resourceManager()->upload(_stub, ResourceManager::US_ON_SURFACE_READY);
     _stub->upload(graphicsContext);
     return _stub->_pipeline;
 }
@@ -192,7 +192,7 @@ void Shader::Stub::upload(GraphicsContext& graphicsContext)
     _pipeline->upload(graphicsContext);
 }
 
-RenderResource::Recycler Shader::Stub::recycle()
+Resource::RecycleFunc Shader::Stub::recycle()
 {
     DASSERT(_pipeline);
     return _pipeline->recycle();

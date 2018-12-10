@@ -39,7 +39,6 @@ public:
 
 private:
     SafePtr<Size> _size;
-    sp<GLResourceManager> _resource_manager;
     sp<Shader> _shader;
     Buffer::Snapshot _index_buffer;
 

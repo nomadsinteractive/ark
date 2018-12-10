@@ -8,7 +8,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model_buffer.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
@@ -63,12 +63,12 @@ void GLModelNinePatch::initialize(ShaderBindings& bindings)
     bindings.bindGLTexture(_atlas->texture());
 }
 
-void GLModelNinePatch::start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
+void GLModelNinePatch::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)
 {
     DCHECK(layerContext._items.size() > 0, "LayerContext has no RenderObjects");
 
     buf.vertices().setGrowCapacity(16 * layerContext._items.size());
-    buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(resourceManager, Buffer::NAME_NINE_PATCH, layerContext._items.size()));
+    buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(renderController, Buffer::NAME_NINE_PATCH, layerContext._items.size()));
 }
 
 void GLModelNinePatch::load(ModelBuffer& buf, int32_t type, const V& size)

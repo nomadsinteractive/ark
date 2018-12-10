@@ -5,7 +5,9 @@
 #include "core/util/log.h"
 
 #include "renderer/base/gl_context.h"
+#include "renderer/base/resource_manager.h"
 
+#include "renderer/opengl/base/gl_buffer.h"
 #include "renderer/opengl/pipeline_factory/pipeline_factory_opengl.h"
 #include "renderer/opengl/render_view/render_view_opengl.h"
 #include "renderer/opengl/es20/gl_snippet_factory/gl_snippet_factory_gles20.h"
@@ -18,7 +20,7 @@
 namespace ark {
 namespace opengl {
 
-RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<GLResourceManager>& glResources)
+RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<ResourceManager>& glResources)
     : _resource_manager(glResources)
 {
     const Global<PluginManager> pluginManager;
@@ -70,6 +72,11 @@ void RendererFactoryOpenGL::setGLVersion(Ark::RendererVersion version, GLContext
 sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<GLContext>& glContext, const Viewport& viewport)
 {
     return sp<RenderView>::adopt(new RenderViewOpenGL(glContext, _resource_manager, viewport));
+}
+
+sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader)
+{
+    return sp<GLBuffer>::make(type, usage, _resource_manager->recycler(), uploader);
 }
 
 sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()

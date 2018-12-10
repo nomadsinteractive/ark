@@ -49,7 +49,7 @@ public:
 
     void addAttribute(String name, Attribute attribute);
 
-    std::vector<std::pair<uint32_t, Buffer>> makeInstancedArrays(GLResourceManager& resourceManager) const;
+    std::vector<std::pair<uint32_t, Buffer>> makeInstancedArrays(RenderController& renderController) const;
 
     const PipelineInput::Stream& getStream(uint32_t divisor) const;
 

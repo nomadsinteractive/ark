@@ -15,14 +15,14 @@ DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const C
 
 void DrawingContext::preDraw(GraphicsContext& graphicsContext, const Shader& shader)
 {
-    _array_buffer.prepare(graphicsContext);
-    _index_buffer.prepare(graphicsContext);
+    _array_buffer.upload(graphicsContext);
+    _index_buffer.upload(graphicsContext);
     DCHECK(_array_buffer.id(), "Invaild GL Array Buffer");
     DCHECK(_index_buffer.id(), "Invaild GL Index Buffer");
 
     for(const auto& iter : _instanced_array_snapshots)
     {
-        iter.second.prepare(graphicsContext);
+        iter.second.upload(graphicsContext);
         DCHECK(iter.second.id(), "Invaild GL Instanced Array Buffer: %d", iter.first);
     }
 

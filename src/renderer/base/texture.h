@@ -11,11 +11,11 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/render_resource.h"
+#include "renderer/inf/resource.h"
 
 namespace ark {
 
-class ARK_API Texture : public RenderResource {
+class ARK_API Texture : public Resource {
 public:
     enum Format {
         FORMAT_AUTO = 0x8000,
@@ -45,12 +45,12 @@ public:
         std::unordered_map<uint32_t, int32_t> _tex_parameters;
     };
 
-    Texture(const sp<Size>& size, const sp<RenderResource>& resource);
+    Texture(const sp<Size>& size, const sp<Resource>& resource);
     virtual ~Texture() override;
 
     virtual uint32_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual Recycler recycle() override;
+    virtual RecycleFunc recycle() override;
 
 //  [[script::bindings::property]]
     int32_t width() const;
@@ -62,11 +62,11 @@ public:
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 
-    const sp<RenderResource>& resource() const;
+    const sp<Resource>& resource() const;
 
 private:
     sp<Size> _size;
-    sp<RenderResource> _resource;
+    sp<Resource> _resource;
 };
 
 }

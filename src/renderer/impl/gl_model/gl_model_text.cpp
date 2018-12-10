@@ -9,23 +9,23 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model_buffer.h"
 #include "renderer/base/texture.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/gl_model/gl_model_quad.h"
 
 namespace ark {
 
-GLModelText::Stub::Stub(GLResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
+GLModelText::Stub::Stub(ResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
     : _alphabet(alphabet)
 {
     reset(resourceManager, textureWidth, textureHeight);
 }
 
-void GLModelText::Stub::reset(GLResourceManager& resourceManager, uint32_t textureWidth, uint32_t textureHeight)
+void GLModelText::Stub::reset(ResourceManager& resourceManager, uint32_t textureWidth, uint32_t textureHeight)
 {
     _font_glyph = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1));
-    _texture = resourceManager.createGLTexture(textureWidth, textureHeight, sp<Variable<bitmap>::Const>::make(_font_glyph), GLResourceManager::PS_ON_SURFACE_READY);
+    _texture = resourceManager.createGLTexture(textureWidth, textureHeight, sp<Variable<bitmap>::Const>::make(_font_glyph), ResourceManager::US_ON_SURFACE_READY);
     _atlas = sp<Atlas>::make(_texture, true);
     _delegate = sp<GLModelQuad>::make(_atlas);
     clear();
@@ -108,13 +108,13 @@ void GLModelText::Stub::upload(GraphicsContext& /*graphicsContext*/)
 {
 }
 
-RenderResource::Recycler GLModelText::Stub::recycle()
+Resource::RecycleFunc GLModelText::Stub::recycle()
 {
     return [](GraphicsContext&) {
     };
 }
 
-GLModelText::GLModelText(GLResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
+GLModelText::GLModelText(ResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
     : RenderModel(RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(resourceManager, alphabet, textureWidth, textureHeight))
 {
 }
@@ -124,7 +124,7 @@ void GLModelText::initialize(ShaderBindings& bindings)
     bindings.bindGLTexture(_stub, static_cast<uint32_t>(GL_TEXTURE_2D), 0);
 }
 
-void GLModelText::start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
+void GLModelText::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)
 {
     if(_stub->checkUnpreparedCharacter(layerContext))
     {
@@ -133,11 +133,11 @@ void GLModelText::start(ModelBuffer& buf, GLResourceManager& resourceManager, co
             uint32_t width = _stub->_font_glyph->width() * 2;
             uint32_t height = _stub->_font_glyph->height() * 2;
             LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _stub->_characters.size());
-            _stub->reset(resourceManager, width, height);
+            _stub->reset(renderController.resourceManager(), width, height);
         }
-        resourceManager.prepare(_stub->_texture, GLResourceManager::PS_ONCE_FORCE);
+        renderController.resourceManager()->upload(_stub->_texture, ResourceManager::US_ONCE_FORCE);
     }
-    _stub->_delegate->start(buf, resourceManager, layerContext);
+    _stub->_delegate->start(buf, renderController, layerContext);
 }
 
 void GLModelText::load(ModelBuffer& buf, int32_t type, const V& scale)

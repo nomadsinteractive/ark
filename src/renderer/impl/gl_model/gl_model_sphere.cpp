@@ -15,7 +15,7 @@ GLModelSphere::GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderCont
     : RenderModel(RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas), _vertex_count((sampleCount * 2 + 1) * (sampleCount + 1)),
       _vertices_boiler_plate(sp<DynamicArray<float>>::make(_vertex_count * (3 + 2))),
       _indices_boiler_plate(sp<DynamicArray<glindex_t>>::make(4 * sampleCount * sampleCount + 2 * (sampleCount * 2 - 1))),
-      _instance_index(resourceLoaderContext->resourceManager()->makeGLBuffer(sp<Buffer::IndexArrayUploader>::make(_indices_boiler_plate), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW))
+      _instance_index(resourceLoaderContext->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC, sp<Buffer::IndexArrayUploader>::make(_indices_boiler_plate)))
 {
     float* vertices = _vertices_boiler_plate->buf();
     float step = Math::PI / sampleCount;
@@ -48,7 +48,7 @@ void GLModelSphere::initialize(ShaderBindings& bindings)
     bindings.bindGLTexture(_atlas->texture());
 }
 
-void GLModelSphere::start(ModelBuffer& buf, GLResourceManager& /*resourceManager*/, const Layer::Snapshot& layerContext)
+void GLModelSphere::start(ModelBuffer& buf, RenderController& /*renderController*/, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size() * _vertex_count);
     buf.setIndices(_instance_index.snapshot());

@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_IMPL_RESOURCE_IMAGE_RESOURCE_H_
-#define ARK_GRAPHICS_IMPL_RESOURCE_IMAGE_RESOURCE_H_
+#ifndef ARK_GRAPHICS_BASE_IMAGE_ASSET_H_
+#define ARK_GRAPHICS_BASE_IMAGE_ASSET_H_
 
 #include <map>
 
@@ -11,9 +11,9 @@
 
 namespace ark {
 
-class ARK_API ImageResource : public Dictionary<bitmap> {
+class ARK_API ImageAsset : public Dictionary<bitmap> {
 public:
-    ImageResource(const sp<Asset>& asset, const sp<BitmapLoader>& defaultLoader);
+    ImageAsset(const sp<Asset>& asset, const sp<BitmapLoader>& defaultLoader);
 
     virtual bitmap get(const String& name) override;
 

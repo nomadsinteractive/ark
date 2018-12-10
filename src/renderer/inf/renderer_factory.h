@@ -7,6 +7,7 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/buffer.h"
 
 namespace ark {
 
@@ -18,6 +19,7 @@ public:
 
     virtual void setGLVersion(Ark::RendererVersion version, GLContext& glContext) = 0;
 
+    virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) = 0;
     virtual sp<RenderView> createRenderView(const sp<GLContext>& glContext, const Viewport& viewport) = 0;
     virtual sp<PipelineFactory> createPipelineFactory() = 0;
 };

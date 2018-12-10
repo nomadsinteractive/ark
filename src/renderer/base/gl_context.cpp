@@ -63,7 +63,7 @@ void GLContext::setGLSnippetFactory(sp<GLSnippetFactory> snippetfactory)
     _gl_procedure_factory = std::move(snippetfactory);
 }
 
-sp<GLSnippet> GLContext::createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings) const
+sp<GLSnippet> GLContext::createCoreGLSnippet(const sp<ResourceManager>& glResourceManager, const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings) const
 {
     DCHECK(_gl_procedure_factory, "Uninitialized GLContext");
     return _gl_procedure_factory->createCoreGLSnippet(glResourceManager, shader, shaderBindings);

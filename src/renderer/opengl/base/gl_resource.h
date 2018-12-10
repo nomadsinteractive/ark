@@ -4,11 +4,11 @@
 #include "core/base/api.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/render_resource.h"
+#include "renderer/inf/resource.h"
 
 namespace ark {
 
-class ARK_API GLResource : public RenderResource {
+class ARK_API GLResource : public Resource {
 public:
     virtual ~GLResource() = default;
 };

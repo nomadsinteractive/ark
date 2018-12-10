@@ -21,7 +21,7 @@ namespace vulkan {
 
 class VulkanAPI {
 public:
-    VulkanAPI(const sp<GLResourceManager>& resourceManager);
+    VulkanAPI(const sp<ResourceManager>& resourceManager);
     ~VulkanAPI();
 
     void initialize(GLContext& glContext);
@@ -56,7 +56,7 @@ private:
     uint32_t getMemoryTypeIndex(uint32_t typeBits, VkMemoryPropertyFlags properties) const;
 
 private:
-    sp<GLResourceManager> _resource_manager;
+    sp<ResourceManager> _resource_manager;
     sp<Instance> _instance;
     sp<Device> _device;
     sp<RenderTarget> _render_target;

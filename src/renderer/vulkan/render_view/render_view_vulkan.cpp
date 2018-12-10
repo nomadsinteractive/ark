@@ -13,7 +13,7 @@
 namespace ark {
 namespace vulkan {
 
-RenderViewVulkan::RenderViewVulkan(const sp<VulkanAPI>& vulkanApi, const sp<GLContext>& glContext, const sp<GLResourceManager>& glResourceManager, const Viewport& viewport)
+RenderViewVulkan::RenderViewVulkan(const sp<VulkanAPI>& vulkanApi, const sp<GLContext>& glContext, const sp<ResourceManager>& glResourceManager, const Viewport& viewport)
     : _vulkan_api(vulkanApi), _graphics_context(new GraphicsContext(glContext, glResourceManager)), _viewport(viewport)
 {
 }

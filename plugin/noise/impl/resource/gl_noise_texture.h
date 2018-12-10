@@ -17,7 +17,7 @@ public:
 
 
 private:
-    sp<GLResourceManager> _resource_manager;
+    sp<ResourceManager> _resource_manager;
     sp<Executor> _thread_executor;
 };
 

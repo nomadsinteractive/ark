@@ -15,10 +15,10 @@ class ARK_API ApplicationResource {
 public:
     ApplicationResource(const sp<Dictionary<document>>& documents, const sp<Asset>& images);
 
-    const sp<GLResourceManager>& resourceManager() const;
+    const sp<ResourceManager>& resourceManager() const;
 
     const sp<Dictionary<document>>& documents() const;
-    const sp<ImageResource>& imageResource() const;
+    const sp<ImageAsset>& imageResource() const;
 
     document loadDocument(const String& name) const;
 
@@ -28,18 +28,18 @@ public:
     sp<BitmapLoader> getBitmapLoader(const String& name) const;
 
 private:
-    sp<ImageResource> createImageLoader(bool justDecodeBounds) const;
-    sp<GLResourceManager> createResourceManager() const;
+    sp<ImageAsset> createImageLoader(bool justDecodeBounds) const;
+    sp<ResourceManager> createResourceManager() const;
 
 private:
     sp<Asset> _images;
     sp<Asset> _fonts;
     sp<Dictionary<document>> _documents;
 
-    sp<ImageResource> _bitmap_loader;
+    sp<ImageAsset> _bitmap_loader;
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
 
-    sp<GLResourceManager> _resource_manager;
+    sp<ResourceManager> _resource_manager;
 };
 
 }

@@ -6,24 +6,24 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/inf/render_model.h"
-#include "renderer/inf/render_resource.h"
+#include "renderer/inf/resource.h"
 
 namespace ark {
 
 class GLModelText : public RenderModel {
 private:
-    class Stub : public RenderResource {
+    class Stub : public Resource {
     public:
-        Stub(GLResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
+        Stub(ResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
 
-        void reset(GLResourceManager& resourceManager, uint32_t textureWidth, uint32_t textureHeight);
+        void reset(ResourceManager& resourceManager, uint32_t textureWidth, uint32_t textureHeight);
 
         bool checkUnpreparedCharacter(const Layer::Snapshot& renderContext);
         bool upload(const Layer::Snapshot& renderContext, bool allowReset);
 
         virtual uint32_t id() override;
         virtual void upload(GraphicsContext& graphicsContext) override;
-        virtual Recycler recycle() override;
+        virtual RecycleFunc recycle() override;
 
     private:
         bool prepareOne(int32_t c);
@@ -45,10 +45,10 @@ private:
     };
 
 public:
-    GLModelText(GLResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
+    GLModelText(ResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
 
     virtual void initialize(ShaderBindings& bindings) override;
-    virtual void start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) override;
+    virtual void start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext) override;
     virtual void load(ModelBuffer& buf, int32_t type, const V& scale) override;
     virtual Metrics measure(int32_t type) override;
 

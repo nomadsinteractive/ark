@@ -10,18 +10,17 @@
 #include "renderer/base/texture.h"
 
 #include "renderer/opengl/base/gl_resource.h"
-#include "renderer/inf/render_resource.h"
 
 namespace ark {
 
 class ARK_API GLTexture : public GLResource {
 public:
-    GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, const sp<Texture::Parameters>& parameters);
+    GLTexture(const sp<Recycler>& recycler, const sp<Size>& size, uint32_t target, const sp<Texture::Parameters>& parameters);
     virtual ~GLTexture() override;
 
     virtual uint32_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual Recycler recycle() override;
+    virtual RecycleFunc recycle() override;
 
     int32_t width() const;
     int32_t height() const;
@@ -31,7 +30,7 @@ public:
 protected:
     virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) = 0;
 
-    sp<GLRecycler> _recycler;
+    sp<Recycler> _recycler;
     sp<Size> _size;
     uint32_t _target;
     sp<Texture::Parameters> _parameters;

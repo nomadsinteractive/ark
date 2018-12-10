@@ -8,12 +8,12 @@
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/gl_framebuffer.h"
-#include "renderer/base/gl_recycler.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/recycler.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
 
-#include "renderer/inf/render_resource.h"
+#include "renderer/inf/resource.h"
 #include "renderer/opengl/util/gl_debug.h"
 
 namespace ark {
@@ -54,7 +54,7 @@ FrameBufferRenderer::FrameBufferRenderer(const sp<Renderer>& delegate, const sp<
     : _delegate(delegate), _fbo(sp<GLFramebuffer>::make(resourceLoaderContext->resourceManager()->recycler(), texture)),
       _pre_draw(sp<PreDrawElementsToFBO>::make(_fbo)), _post_draw(sp<PostDrawElementsToFBO>::make())
 {
-    resourceLoaderContext->resourceManager()->prepare(_fbo, GLResourceManager::PS_ONCE_AND_ON_SURFACE_READY);
+    resourceLoaderContext->resourceManager()->upload(_fbo, ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
 }
 
 void FrameBufferRenderer::render(RenderRequest& renderRequest, float x, float y)

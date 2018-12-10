@@ -6,19 +6,19 @@
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/image_resource.h"
+#include "graphics/base/image_asset.h"
 #include "graphics/base/size.h"
 
 #include "renderer/opengl/base/gl_pipeline.h"
-#include "renderer/base/gl_recycler.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/recycler.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/texture.h"
 #include "renderer/opengl/util/gl_util.h"
 
 namespace ark {
 
-GLCubemap::GLCubemap(const sp<GLRecycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, std::vector<sp<Variable<bitmap>>> bitmaps)
+GLCubemap::GLCubemap(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, std::vector<sp<Variable<bitmap>>> bitmaps)
     : GLTexture(recycler, size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), parameters), _bitmaps(std::move(bitmaps))
 {
 }

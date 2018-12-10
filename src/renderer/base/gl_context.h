@@ -22,7 +22,7 @@ public:
     std::map<String, String>& annotations();
 
     void setGLSnippetFactory(sp<GLSnippetFactory> snippetfactory);
-    sp<GLSnippet> createCoreGLSnippet(const sp<GLResourceManager>& glResourceManager, const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings) const;
+    sp<GLSnippet> createCoreGLSnippet(const sp<ResourceManager>& glResourceManager, const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings) const;
 
     uint32_t getGLSLVersion() const;
 

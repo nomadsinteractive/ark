@@ -12,15 +12,16 @@ namespace opengl {
 
 class RendererFactoryOpenGL : public RendererFactory {
 public:
-    RendererFactoryOpenGL(const sp<GLResourceManager>& glResources);
+    RendererFactoryOpenGL(const sp<ResourceManager>& glResources);
 
     virtual void initialize(GLContext& glContext) override;
     virtual void setGLVersion(Ark::RendererVersion version, GLContext& glContext) override;
+    virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) override;
     virtual sp<RenderView> createRenderView(const sp<GLContext>& glContext, const Viewport& viewport) override;
     virtual sp<PipelineFactory> createPipelineFactory() override;
 
 private:
-    sp<GLResourceManager> _resource_manager;
+    sp<ResourceManager> _resource_manager;
 
 };
 

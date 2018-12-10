@@ -14,10 +14,10 @@ class ARK_API GLSnippetActiveTexture : public GLSnippet {
 private:
     struct Slot {
         Slot(const sp<Texture>& texture, uint32_t name);
-        Slot(const sp<RenderResource>& texture, uint32_t target, uint32_t name);
+        Slot(const sp<Resource>& texture, uint32_t target, uint32_t name);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Slot);
 
-        sp<RenderResource> resource;
+        sp<Resource> resource;
         uint32_t target;
         uint32_t name;
     };
@@ -25,7 +25,7 @@ private:
 public:
     GLSnippetActiveTexture();
     GLSnippetActiveTexture(const sp<Texture>& texture, uint32_t name = 0);
-    GLSnippetActiveTexture(const sp<RenderResource>& texture, uint32_t target, uint32_t name);
+    GLSnippetActiveTexture(const sp<Resource>& texture, uint32_t target, uint32_t name);
 
     virtual void preDraw(GraphicsContext& graphicsContext, const Shader& shader, const DrawingContext& context) override;
 

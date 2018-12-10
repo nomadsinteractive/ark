@@ -10,7 +10,7 @@
 namespace ark {
 
 GLModelLineStrip::GLModelLineStrip(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas)
-    : RenderModel(RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas), _ibo(resourceLoaderContext->resourceManager()->makeGLBuffer(nullptr, GL_ELEMENT_ARRAY_BUFFER, GL_DYNAMIC_DRAW))
+    : RenderModel(RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas), _ibo(resourceLoaderContext->renderController()->makeIndexBuffer())
 {
 }
 
@@ -44,7 +44,7 @@ std::vector<glindex_t> GLModelLineStrip::makeIndices(const Layer::Snapshot& laye
     return indices;
 }
 
-void GLModelLineStrip::start(ModelBuffer& buf, GLResourceManager& /*resourceManager*/, const Layer::Snapshot& layerContext)
+void GLModelLineStrip::start(ModelBuffer& buf, RenderController& /*renderController*/, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size());
 

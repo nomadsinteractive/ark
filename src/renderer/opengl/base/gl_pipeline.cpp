@@ -8,8 +8,8 @@
 #include "graphics/base/color.h"
 #include "graphics/base/matrix.h"
 
-#include "renderer/base/gl_recycler.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/recycler.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/shader_bindings.h"
@@ -22,7 +22,7 @@
 
 namespace ark {
 
-GLPipeline::GLPipeline(const sp<GLRecycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader)
+GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader)
     : _recycler(recycler), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _id(0)
 {
 }
@@ -61,7 +61,7 @@ void GLPipeline::upload(GraphicsContext& graphicsContext)
     LOGD("GLProgram[%d]: vertex-shader: %d, fragment-shader: %d", _id, _vertex_shader->id(), _fragment_shader->id());
 }
 
-RenderResource::Recycler GLPipeline::recycle()
+Resource::RecycleFunc GLPipeline::recycle()
 {
     uint32_t id = _id;
     _id = 0;
@@ -132,7 +132,7 @@ void GLPipeline::bindUniform(GraphicsContext& /*graphicsContext*/, const Uniform
     }
 }
 
-void GLPipeline::activeTexture(RenderResource& texture, uint32_t target, uint32_t name)
+void GLPipeline::activeTexture(Resource& texture, uint32_t target, uint32_t name)
 {
     glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + name));
     glBindTexture(static_cast<GLenum>(target), texture.id());
@@ -321,7 +321,7 @@ void GLPipeline::GLUniform::setUniformMatrix4fv(GLsizei count, GLboolean transpo
     }
 }
 
-GLPipeline::Shader::Shader(const sp<GLRecycler>& recycler, uint32_t version, GLenum type, const String& source)
+GLPipeline::Shader::Shader(const sp<Recycler>& recycler, uint32_t version, GLenum type, const String& source)
     : _recycler(recycler), _id(compile(version, type, source))
 {
 }

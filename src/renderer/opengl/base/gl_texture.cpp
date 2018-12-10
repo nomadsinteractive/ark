@@ -9,8 +9,8 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
 
-#include "renderer/base/gl_recycler.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/recycler.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/gl_texture_loader.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
@@ -18,7 +18,7 @@
 
 namespace ark {
 
-GLTexture::GLTexture(const sp<GLRecycler>& recycler, const sp<Size>& size, uint32_t target, const sp<Texture::Parameters>& parameters)
+GLTexture::GLTexture(const sp<Recycler>& recycler, const sp<Size>& size, uint32_t target, const sp<Texture::Parameters>& parameters)
     : _recycler(recycler), _size(size), _target(target), _parameters(parameters), _id(0)
 {
 }
@@ -44,7 +44,7 @@ void GLTexture::upload(GraphicsContext& graphicsContext)
         glTexParameteri(static_cast<GLenum>(_target), static_cast<GLenum>(i.first), static_cast<GLint>(i.second));
 }
 
-RenderResource::Recycler GLTexture::recycle()
+Resource::RecycleFunc GLTexture::recycle()
 {
     uint32_t id = _id;
     _id = 0;

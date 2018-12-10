@@ -9,8 +9,8 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
 
-#include "renderer/base/gl_recycler.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/recycler.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/gl_texture_loader.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
@@ -18,7 +18,7 @@
 
 namespace ark {
 
-Texture::Texture(const sp<Size>& size, const sp<RenderResource>& resource)
+Texture::Texture(const sp<Size>& size, const sp<Resource>& resource)
     : _size(size), _resource(resource)
 {
 }
@@ -32,7 +32,7 @@ void Texture::upload(GraphicsContext& graphicsContext)
     _resource->upload(graphicsContext);
 }
 
-RenderResource::Recycler Texture::recycle()
+Resource::RecycleFunc Texture::recycle()
 {
     return _resource->recycle();
 }
@@ -62,7 +62,7 @@ const sp<Size>& Texture::size() const
     return _size;
 }
 
-const sp<RenderResource>& Texture::resource() const
+const sp<Resource>& Texture::resource() const
 {
     return _resource;
 }

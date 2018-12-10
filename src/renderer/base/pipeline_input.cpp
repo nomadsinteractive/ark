@@ -3,7 +3,7 @@
 #include "core/base/string.h"
 
 #include "renderer/opengl/base/gl_pipeline.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/render_controller.h"
 
 namespace ark {
 
@@ -35,14 +35,14 @@ void PipelineInput::addAttribute(String name, Attribute attribute)
     _streams[attribute.divisor()].addAttribute(std::move(name), std::move(attribute));
 }
 
-std::vector<std::pair<uint32_t, Buffer>> PipelineInput::makeInstancedArrays(GLResourceManager& resourceManager) const
+std::vector<std::pair<uint32_t, Buffer>> PipelineInput::makeInstancedArrays(RenderController& renderController) const
 {
     std::vector<std::pair<uint32_t, Buffer>> instancedArrays;
     for(auto iter : _streams)
     {
         uint32_t divisor = iter.first;
         if(divisor != 0)
-            instancedArrays.push_back(std::make_pair(divisor, resourceManager.makeDynamicArrayBuffer()));
+            instancedArrays.push_back(std::make_pair(divisor, renderController.makeVertexBuffer()));
     }
     return instancedArrays;
 }

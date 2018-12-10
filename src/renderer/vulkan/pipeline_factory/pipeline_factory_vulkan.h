@@ -16,7 +16,7 @@ namespace vulkan {
 
 class PipelineFactoryVulkan : public PipelineFactory {
 public:
-    PipelineFactoryVulkan(const sp<GLResourceManager>& resourceManager);
+    PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager);
     ~PipelineFactoryVulkan() override;
 
     sp<VKPipeline> build(const sp<RenderTarget>& renderTarget);
@@ -36,7 +36,7 @@ private:
     void preparePipelines();
 
 private:
-    sp<GLResourceManager> _resource_manager;
+    sp<ResourceManager> _resource_manager;
     sp<RenderTarget> _render_target;
     sp<Device> _device;
 

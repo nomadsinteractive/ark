@@ -1,111 +1,28 @@
 #include "renderer/base/buffer.h"
 
-#include "core/inf/array.h"
-#include "core/inf/variable.h"
 #include "core/base/memory_pool.h"
 #include "core/base/object_pool.h"
-#include "core/types/null.h"
-#include "core/util/log.h"
-
-#include "renderer/base/gl_recycler.h"
-#include "renderer/base/gl_resource_manager.h"
 
 namespace ark {
 
-Buffer::Stub::Stub(const sp<GLRecycler>& recycler, const sp<Uploader>& uploader, GLenum type, GLenum usage)
-    : _recycler(recycler), _uploader(uploader), _type(type), _usage(usage), _id(0), _size(_uploader ? _uploader->size() : 0)
+Buffer::Snapshot::Snapshot(const sp<Delegate>& stub)
+    : _delegate(stub), _size(stub->size())
 {
 }
 
-Buffer::Stub::~Stub()
-{
-    if(_id > 0)
-        _recycler->recycle(*this);
-}
-
-size_t Buffer::Stub::size() const
-{
-    return _size;
-}
-
-void Buffer::Stub::upload(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader)
-{
-    if(_id == 0)
-    {
-        glGenBuffers(1, &_id);
-        if(_uploader && !transientUploader)
-        {
-            doUpload(graphicsContext, _uploader);
-            return;
-        }
-    }
-    if(transientUploader)
-    {
-        DWARN(_usage != GL_STATIC_DRAW, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
-        doUpload(graphicsContext, transientUploader);
-        _uploader = transientUploader;
-    }
-}
-
-void Buffer::Stub::doUpload(GraphicsContext& /*graphicsContext*/, Buffer::Uploader& uploader)
-{
-    glBindBuffer(_type, _id);
-    GLint bufsize = 0;
-    glGetBufferParameteriv(_type, GL_BUFFER_SIZE, &bufsize);
-
-    _size = uploader.size();
-    if(static_cast<size_t>(bufsize) < _size)
-        glBufferData(_type, static_cast<GLsizeiptr>(_size), nullptr, _usage);
-    size_t offset = 0;
-    const UploadFunc func = [&offset, this](void* data, size_t size) {
-        DASSERT(data);
-        DCHECK(offset + size <= _size, "GLBuffer data overflow");
-        glBufferSubData(_type, static_cast<GLsizeiptr>(offset), static_cast<GLsizeiptr>(size), data);
-        offset += size;
-    };
-    uploader.upload(func);
-    glBindBuffer(_type, 0);
-}
-
-GLuint Buffer::Stub::id()
-{
-    return _id;
-}
-
-void Buffer::Stub::upload(GraphicsContext& graphicsContext)
-{
-    upload(graphicsContext, nullptr);
-}
-
-RenderResource::Recycler Buffer::Stub::recycle()
-{
-    uint32_t id = _id;
-    _id = 0;
-    _size = 0;
-    return [id](GraphicsContext&) {
-        LOGD("Deleting GLBuffer[%d]", id);
-        glDeleteBuffers(1, &id);
-    };
-}
-
-Buffer::Snapshot::Snapshot(const sp<Buffer::Stub>& stub)
-    : _stub(stub), _size(stub->size())
+Buffer::Snapshot::Snapshot(const sp<Delegate>& stub, size_t size)
+    : _delegate(stub), _size(size)
 {
 }
 
-Buffer::Snapshot::Snapshot(const sp<Buffer::Stub>& stub, size_t size)
-    : _stub(stub), _size(size)
-{
-}
-
-Buffer::Snapshot::Snapshot(const sp<Buffer::Stub>& stub, const sp<Uploader>& uploader)
-    : _stub(stub), _uploader(uploader), _size(uploader->size())
+Buffer::Snapshot::Snapshot(const sp<Delegate>& stub, const sp<Uploader>& uploader)
+    : _delegate(stub), _uploader(uploader), _size(uploader->size())
 {
 }
 
 uint32_t Buffer::Snapshot::id() const
 {
-    return _stub->id();
+    return _delegate->id();
 }
 
 size_t Buffer::Snapshot::size() const
@@ -113,54 +30,54 @@ size_t Buffer::Snapshot::size() const
     return _size;
 }
 
-void Buffer::Snapshot::prepare(GraphicsContext& graphicsContext) const
+void Buffer::Snapshot::upload(GraphicsContext& graphicsContext) const
 {
-    _stub->upload(graphicsContext, _uploader);
+    _delegate->reload(graphicsContext, _uploader);
 }
 
-Buffer::Buffer(const sp<GLRecycler>& recycler, const sp<Uploader>& uploader, GLenum type, GLenum usage) noexcept
-    : _stub(sp<Stub>::make(recycler, uploader, type, usage))
+Buffer::Buffer(const sp<Buffer::Delegate>& delegate)
+    : _delegate(delegate)
 {
 }
 
 Buffer::Buffer() noexcept
-    : _stub(nullptr)
+    : _delegate(nullptr)
 {
 }
 
 size_t Buffer::size() const
 {
-    return _stub->size();
+    return _delegate->size();
 }
 
 Buffer::operator bool() const
 {
-    return static_cast<bool>(_stub);
+    return static_cast<bool>(_delegate);
 }
 
 Buffer::Snapshot Buffer::snapshot(const sp<Uploader>& uploader) const
 {
-    return Snapshot(_stub, uploader);
+    return Snapshot(_delegate, uploader);
 }
 
 Buffer::Snapshot Buffer::snapshot(size_t size) const
 {
-    return Snapshot(_stub, size);
+    return Snapshot(_delegate, size);
 }
 
 Buffer::Snapshot Buffer::snapshot() const
 {
-    return Snapshot(_stub);
+    return Snapshot(_delegate);
 }
 
-GLuint Buffer::id() const
+uint32_t Buffer::id() const
 {
-    return _stub->id();
+    return _delegate->id();
 }
 
 void Buffer::upload(GraphicsContext& graphicsContext) const
 {
-    _stub->upload(graphicsContext);
+    _delegate->upload(graphicsContext);
 }
 
 Buffer::Builder::Builder(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t stride, size_t growCapacity)
@@ -228,6 +145,16 @@ Buffer::Uploader::Uploader(size_t size)
 }
 
 size_t Buffer::Uploader::size() const
+{
+    return _size;
+}
+
+Buffer::Delegate::Delegate(size_t size)
+    : _size(size)
+{
+}
+
+size_t Buffer::Delegate::size() const
 {
     return _size;
 }

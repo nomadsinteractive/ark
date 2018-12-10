@@ -11,13 +11,13 @@ namespace gles30 {
 
 class BindVertexArray : public GLSnippet {
 public:
-    BindVertexArray(const sp<RenderResource>& vertexArray);
+    BindVertexArray(const sp<Resource>& vertexArray);
 
     virtual void preDraw(GraphicsContext& graphicsContext, const Shader& shader, const DrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 
 private:
-    sp<RenderResource> _vertex_array;
+    sp<Resource> _vertex_array;
 
 };
 

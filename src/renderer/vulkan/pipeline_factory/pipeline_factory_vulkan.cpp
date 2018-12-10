@@ -14,7 +14,7 @@
 namespace ark {
 namespace vulkan {
 
-PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<GLResourceManager>& resourceManager)
+PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager)
     : _resource_manager(resourceManager) {
 }
 

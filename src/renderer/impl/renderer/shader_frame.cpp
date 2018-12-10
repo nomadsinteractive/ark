@@ -9,7 +9,7 @@
 #include "graphics/impl/vec/vec2_impl.h"
 
 #include "renderer/base/buffer.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
@@ -19,16 +19,16 @@
 namespace ark {
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _size(size), _resource_manager(resourceLoaderContext->resourceManager()), _shader(shader),
+    : _size(size), _render_controller(resourceLoaderContext->renderController()), _shader(shader),
       _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
-      _shader_bindings(sp<ShaderBindings>::make(_resource_manager, shader)),
+      _shader_bindings(sp<ShaderBindings>::make(_render_controller, shader)),
       _array_buffer(_shader_bindings->arrayBuffer())
 {
 }
 
 void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
-    const Buffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(_resource_manager, Buffer::NAME_QUADS, 1);
+    const Buffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(_render_controller, Buffer::NAME_QUADS, 1);
     const sp<Buffer::Uploader> uploader = _object_pool->obtain<Buffer::ByteArrayUploader>(getArrayBuffer(x, y));
     renderRequest.addRequest(_object_pool->obtain<opengl::DrawElements>(DrawingContext(_shader_bindings, _shader->camera()->snapshop(), _array_buffer.snapshot(uploader), indexBuffer), _shader, GL_TRIANGLES));
 }

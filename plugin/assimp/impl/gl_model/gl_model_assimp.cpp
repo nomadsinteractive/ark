@@ -7,7 +7,7 @@
 #include "core/util/documents.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/image_resource.h"
+#include "graphics/base/image_asset.h"
 
 #include "renderer/base/model_buffer.h"
 #include "renderer/base/resource_loader_context.h"
@@ -49,7 +49,7 @@ void GLModelAssimp::initialize(ShaderBindings& bindings)
 {
 }
 
-void GLModelAssimp::start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext)
+void GLModelAssimp::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)
 {
 }
 
@@ -57,7 +57,7 @@ void GLModelAssimp::load(ModelBuffer& buf, int32_t type, const V& scale)
 {
 }
 
-bitmap GLModelAssimp::loadBitmap(const sp<ImageResource>& imageResource, const aiTexture* tex) const
+bitmap GLModelAssimp::loadBitmap(const sp<ImageAsset>& imageResource, const aiTexture* tex) const
 {
     if(tex->mHeight == 0)
     {

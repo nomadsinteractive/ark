@@ -38,7 +38,7 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
 
         sp<MemoryPool> _memory_pool;
-        sp<GLResourceManager> _resource_manager;
+        sp<RenderController> _render_controller;
         sp<ShaderBindings> _shader_bindings;
 
         std::vector<Item> _items;

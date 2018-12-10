@@ -10,7 +10,7 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/render_resource.h"
+#include "renderer/inf/resource.h"
 
 namespace ark {
 
@@ -59,12 +59,12 @@ public:
     };
 
 private:
-    struct Stub : public RenderResource {
+    struct Stub : public Resource {
         Stub(const sp<PipelineLayout>& pipelineLayout);
 
         virtual uint32_t id() override;
         virtual void upload(GraphicsContext& graphicsContext) override;
-        virtual Recycler recycle() override;
+        virtual RecycleFunc recycle() override;
 
         sp<Pipeline> _pipeline;
         sp<PipelineFactory> _pipeline_factory;

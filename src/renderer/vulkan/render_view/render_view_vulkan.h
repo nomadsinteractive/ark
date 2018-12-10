@@ -17,7 +17,7 @@ class VulkanAPI;
 
 class RenderViewVulkan : public RenderView {
 public:
-    RenderViewVulkan(const sp<VulkanAPI>& vulkanApi, const sp<GLContext>& glContext, const sp<GLResourceManager>& glResources, const Viewport& viewport);
+    RenderViewVulkan(const sp<VulkanAPI>& vulkanApi, const sp<GLContext>& glContext, const sp<ResourceManager>& glResources, const Viewport& viewport);
 
     virtual void onSurfaceCreated() override;
     virtual void onSurfaceChanged(uint32_t width, uint32_t height) override;

@@ -79,13 +79,13 @@ private:
     };
 
 public:
-    ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<ImageResource>& images, const sp<GLResourceManager>& resourceManager, const sp<Executor>& executor, const sp<RenderController>& renderController);
+    ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<ImageAsset>& images, const sp<ResourceManager>& resourceManager, const sp<Executor>& executor, const sp<RenderController>& renderController);
     ~ResourceLoaderContext();
 
     const sp<Dictionary<document>>& documents() const;
-    const sp<ImageResource>& images() const;
+    const sp<ImageAsset>& images() const;
 
-    const sp<GLResourceManager>& resourceManager() const;
+    const sp<ResourceManager>& resourceManager() const;
     const sp<Executor>& executor() const;
     const sp<RenderController>& renderController() const;
     const sp<GLTextureLoader>& textureLoader() const;
@@ -111,8 +111,8 @@ private:
 
 private:
     sp<Dictionary<document>> _documents;
-    sp<ImageResource> _images;
-    sp<GLResourceManager> _gl_resource_manager;
+    sp<ImageAsset> _images;
+    sp<ResourceManager> _gl_resource_manager;
     sp<Executor> _executor;
     sp<RenderController> _render_controller;
     sp<GLTextureLoader> _texture_loader;

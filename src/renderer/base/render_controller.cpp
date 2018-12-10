@@ -4,12 +4,13 @@
 #include "core/util/log.h"
 
 #include "renderer/base/render_engine.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/inf/renderer_factory.h"
 
 namespace ark {
 
-RenderController::RenderController(const sp<RenderEngine>& renderEngine)
-    : _render_engine(renderEngine)
+RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<ResourceManager>& resourceManager)
+    : _render_engine(renderEngine), _resource_manager(resourceManager)
 {
 }
 
@@ -18,9 +19,52 @@ const sp<RenderEngine>& RenderController::renderEngine() const
     return _render_engine;
 }
 
+const sp<ResourceManager>& RenderController::resourceManager() const
+{
+    return _resource_manager;
+}
+
 sp<PipelineFactory> RenderController::createPipelineFactory() const
 {
     return _render_engine->rendererFactory()->createPipelineFactory();
+}
+
+Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) const
+{
+    return makeBuffer(Buffer::TYPE_VERTEX, usage, uploader);
+}
+
+Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) const
+{
+    return makeBuffer(Buffer::TYPE_INDEX, usage, uploader);
+}
+
+Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) const
+{
+    Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage, uploader));
+    _resource_manager->prepare(buffer, ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
+    return buffer;
+}
+
+Buffer::Snapshot RenderController::makeBufferSnapshot(Buffer::Name name, const Buffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size) const
+{
+    if(name == Buffer::NAME_NONE)
+        return makeIndexBuffer().snapshot(maker(size));
+
+    sp<ResourceManager::SharedBuffer> sb;
+    if(!_resource_manager->_shared_buffers.pop(sb))
+        sb = sp<ResourceManager::SharedBuffer>::make();
+
+    Buffer& shared = sb->_buffers[name];
+    if(!shared || shared.size() < size)
+    {
+        const sp<Buffer::Uploader> uploader = maker(reservedObjectCount);
+        DCHECK(uploader && uploader->size() >= size, "Making GLBuffer::Uploader failed, object-count: %d, uploader-size: %d, required-size: %d", reservedObjectCount, uploader ? uploader->size() : 0, size);
+        shared = makeIndexBuffer(Buffer::USAGE_STATIC, uploader);
+    }
+    _resource_manager->_shared_buffers.push(sb);
+
+    return shared.snapshot(size);
 }
 
 void RenderController::addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired)

@@ -11,7 +11,7 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
 
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/shader.h"
 #include "renderer/opengl/base/gl_texture_2d.h"
 #include "renderer/base/resource_loader_context.h"
@@ -41,7 +41,7 @@ struct OpenCLContext {
 
 }
 
-GLRadianceCubemap::GLRadianceCubemap(const sp<GLResourceManager>& resourceManager, const sp<Texture::Parameters>& parameters, const sp<Texture>& texture, const sp<Size>& size)
+GLRadianceCubemap::GLRadianceCubemap(const sp<ResourceManager>& resourceManager, const sp<Texture::Parameters>& parameters, const sp<Texture>& texture, const sp<Size>& size)
     : GLTexture(resourceManager->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), parameters), _resource_manager(resourceManager), _texture(texture)
 {
 }

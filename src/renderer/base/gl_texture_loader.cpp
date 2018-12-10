@@ -1,10 +1,10 @@
 #include "renderer/base/gl_texture_loader.h"
 
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 
 namespace ark {
 
-GLTextureLoader::GLTextureLoader(const sp<GLResourceManager>& resources)
+GLTextureLoader::GLTextureLoader(const sp<ResourceManager>& resources)
     : _resource_manager(resources)
 {
 }

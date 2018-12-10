@@ -10,13 +10,14 @@
 #include "graphics/base/matrix.h"
 
 #include "renderer/base/buffer.h"
-#include "renderer/opengl/base/gl_pipeline.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
 
-#include "renderer/opengl/base/gl_texture.h"
+#include "renderer/opengl/base/gl_buffer.h"
+#include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/opengl/util/gl_index_buffers.h"
+#include "renderer/opengl/base/gl_texture.h"
 
 namespace ark {
 
@@ -133,7 +134,7 @@ bytearray GLUtil::makeUnitCubeVertices()
     return sp<PreallocatedArray<uint8_t>>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
 }
 
-void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, GLResourceManager& resourceManager, Shader& shader, Texture& texture, int32_t width, int32_t height)
+void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, RenderController& renderController, Shader& shader, Texture& texture, int32_t width, int32_t height)
 {
     uint32_t captureFBO, captureRBO;
     glGenFramebuffers(1, &captureFBO);
@@ -170,14 +171,14 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, GLReso
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    Buffer arrayBuffer(resourceManager.recycler(), sp<Buffer::ArrayUploader<uint8_t>>::make(GLUtil::makeUnitCubeVertices()), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+    Buffer arrayBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<Buffer::ArrayUploader<uint8_t>>::make(GLUtil::makeUnitCubeVertices()));
     arrayBuffer.upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer.id());
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, 0);
 
-    const Buffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(resourceManager, Buffer::NAME_QUADS, 6);
-    indexBuffer.prepare(graphicsContext);
+    const Buffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(renderController, Buffer::NAME_QUADS, 6);
+    indexBuffer.upload(graphicsContext);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.id());
 
     glViewport(0, 0, width, height);

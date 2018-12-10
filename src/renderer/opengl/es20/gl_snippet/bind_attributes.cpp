@@ -3,7 +3,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
-#include "renderer/inf/render_resource.h"
+#include "renderer/inf/resource.h"
 
 #include "renderer/opengl/base/gl_pipeline.h"
 

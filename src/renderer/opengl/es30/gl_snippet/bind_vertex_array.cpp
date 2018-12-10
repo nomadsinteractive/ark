@@ -2,7 +2,7 @@
 
 #include "renderer/base/shader.h"
 #include "renderer/base/drawing_context.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/graphics_context.h"
 
 #include "renderer/opengl/es30/gl_resource/gl_vertex_array.h"
@@ -10,7 +10,7 @@
 namespace ark {
 namespace gles30 {
 
-BindVertexArray::BindVertexArray(const sp<RenderResource>& vertexArray)
+BindVertexArray::BindVertexArray(const sp<Resource>& vertexArray)
     : _vertex_array(vertexArray)
 {
 }

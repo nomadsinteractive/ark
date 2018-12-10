@@ -14,7 +14,7 @@
 #include "core/inf/runnable.h"
 #include "core/types/global.h"
 
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/renderer_factory.h"
 
@@ -62,7 +62,7 @@ private:
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources, const sp<RenderEngine>& renderEngine)
     : _application_resource(applicationResources), _render_engine(renderEngine), _ticker(sp<EngineTicker>::make()),
       _clock(sp<Clock>::make(_ticker)), _message_loop_application(sp<MessageLoopThread>::make(sp<MessageLoopDefault>::make(Platform::getSteadyClock()))),
-      _executor(sp<ThreadPoolExecutor>::make(_message_loop_application)), _render_controller(sp<RenderController>::make(renderEngine)),
+      _executor(sp<ThreadPoolExecutor>::make(_message_loop_application)), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->resourceManager())),
       _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK)
 {
     Ark& ark = Ark::instance();
@@ -111,7 +111,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const sp<Dictionary<document>>& documentDictionary, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
     const sp<BeanFactory> beanFactory = Ark::instance().createBeanFactory(documentDictionary);
-    const sp<GLResourceManager> resourceManager = _application_resource->resourceManager();
+    const sp<ResourceManager> resourceManager = _application_resource->resourceManager();
     const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), _application_resource->imageResource(), resourceManager, _executor, _render_controller);
 
     const Global<PluginManager> pluginManager;
@@ -136,7 +136,7 @@ const sp<RenderEngine>& ApplicationContext::renderEngine() const
     return _render_engine;
 }
 
-const sp<GLResourceManager>& ApplicationContext::glResourceManager() const
+const sp<ResourceManager>& ApplicationContext::resourceManager() const
 {
     return _application_resource->resourceManager();
 }

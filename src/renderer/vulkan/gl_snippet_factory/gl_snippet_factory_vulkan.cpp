@@ -3,12 +3,12 @@
 #include "renderer/opengl/es30/gl_snippet/bind_vertex_array.h"
 #include "renderer/opengl/es30/gl_resource/gl_vertex_array.h"
 
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 
 namespace ark {
 namespace vulkan {
 
-sp<GLSnippet> GLSnippetFactoryVulkan::createCoreGLSnippet(GLResourceManager& glResourceManager, const Shader& shader, const sp<ShaderBindings>& shaderBindings)
+sp<GLSnippet> GLSnippetFactoryVulkan::createCoreGLSnippet(ResourceManager& glResourceManager, const Shader& shader, const sp<ShaderBindings>& shaderBindings)
 {
     return sp<gles30::BindVertexArray>::make(glResourceManager.createGLResource<gles30::GLVertexArray>(shaderBindings, shader));
 }

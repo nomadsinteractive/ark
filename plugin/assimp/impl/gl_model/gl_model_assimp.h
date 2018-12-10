@@ -26,7 +26,7 @@ public:
     GLModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest);
 
     virtual void initialize(ShaderBindings& bindings) override;
-    virtual void start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) override;
+    virtual void start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext) override;
     virtual void load(ModelBuffer& buf, int32_t type, const V& scale) override;
 
 //  [[plugin::resource-loader("assimp")]]
@@ -71,7 +71,7 @@ private:
     };
 
 private:
-    bitmap loadBitmap(const sp<ImageResource>& imageResource, const aiTexture* tex) const;
+    bitmap loadBitmap(const sp<ImageAsset>& imageResource, const aiTexture* tex) const;
 
 private:
     sp<Assimp::Importer> _importer;

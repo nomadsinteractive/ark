@@ -3,12 +3,12 @@
 #include "core/base/string.h"
 #include "core/inf/dictionary.h"
 
-#include "graphics/base/image_resource.h"
+#include "graphics/base/image_asset.h"
 #include "graphics/impl/bitmap_loader/jpeg_bitmap_loader.h"
 #include "graphics/impl/bitmap_loader/png_bitmap_loader.h"
 #include "graphics/impl/bitmap_loader/stb_bitmap_loader.h"
 
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 
 namespace ark {
 
@@ -17,7 +17,7 @@ ApplicationResource::ApplicationResource(const sp<Dictionary<document>>& documen
 {
 }
 
-const sp<GLResourceManager>& ApplicationResource::resourceManager() const
+const sp<ResourceManager>& ApplicationResource::resourceManager() const
 {
     return _resource_manager;
 }
@@ -27,7 +27,7 @@ const sp<Dictionary<document>>& ApplicationResource::documents() const
     return _documents;
 }
 
-const sp<ImageResource>& ApplicationResource::imageResource() const
+const sp<ImageAsset>& ApplicationResource::imageResource() const
 {
     return _bitmap_loader;
 }
@@ -52,12 +52,12 @@ sp<BitmapLoader> ApplicationResource::getBitmapLoader(const String& name) const
     return _bitmap_loader->getLoader(name);
 }
 
-sp<ImageResource> ApplicationResource::createImageLoader(bool justDecodeBounds) const
+sp<ImageAsset> ApplicationResource::createImageLoader(bool justDecodeBounds) const
 {
 #ifdef ARK_USE_STB_IMAGE
-    const sp<ImageResource> imageResource = sp<ImageResource>::make(_images, sp<STBBitmapLoader>::make(justDecodeBounds));
+    const sp<ImageAsset> imageResource = sp<ImageAsset>::make(_images, sp<STBBitmapLoader>::make(justDecodeBounds));
 #else
-    const sp<ImageResource> imageResource = sp<ImageResource>::make(_images, nullptr);
+    const sp<ImageAsset> imageResource = sp<ImageAsset>::make(_images, nullptr);
 #endif
     imageResource->addLoader("png", sp<PNGBitmapLoader>::make(justDecodeBounds));
 #ifdef ARK_USE_LIBJPEG_TURBO
@@ -68,9 +68,9 @@ sp<ImageResource> ApplicationResource::createImageLoader(bool justDecodeBounds) 
     return imageResource;
 }
 
-sp<GLResourceManager> ApplicationResource::createResourceManager() const
+sp<ResourceManager> ApplicationResource::createResourceManager() const
 {
-    return sp<GLResourceManager>::adopt(new GLResourceManager(_bitmap_loader, _bitmap_bounds_loader));
+    return sp<ResourceManager>::adopt(new ResourceManager(_bitmap_loader, _bitmap_bounds_loader));
 }
 
 }

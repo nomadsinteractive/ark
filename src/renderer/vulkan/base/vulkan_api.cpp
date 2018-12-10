@@ -13,7 +13,7 @@
 #include "graphics/base/bitmap.h"
 
 #include "renderer/base/gl_context.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 
 #include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/command_pool.h"
@@ -39,7 +39,7 @@ namespace ark {
 
 namespace vulkan {
 
-VulkanAPI::VulkanAPI(const sp<GLResourceManager>& resourceManager)
+VulkanAPI::VulkanAPI(const sp<ResourceManager>& resourceManager)
     : _resource_manager(resourceManager)
 {
 }

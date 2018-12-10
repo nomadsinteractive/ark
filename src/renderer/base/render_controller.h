@@ -10,15 +10,24 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/buffer.h"
 
 namespace ark {
 
 class ARK_API RenderController {
 public:
-    RenderController(const sp<RenderEngine>& renderEngine);
+    RenderController(const sp<RenderEngine>& renderEngine, const sp<ResourceManager>& resourceManager);
 
     const sp<RenderEngine>& renderEngine() const;
+    const sp<ResourceManager>& resourceManager() const;
+
     sp<PipelineFactory> createPipelineFactory() const;
+
+    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) const;
+    Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Buffer::Uploader>& uploader = nullptr) const;
+    Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Buffer::Uploader>& uploader = nullptr) const;
+
+    Buffer::Snapshot makeBufferSnapshot(Buffer::Name name, const Buffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size) const;
 
     void addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired);
 
@@ -27,6 +36,7 @@ public:
 
 private:
     sp<RenderEngine> _render_engine;
+    sp<ResourceManager> _resource_manager;
 
     ListWithLifecycle<Runnable> _on_pre_update_request;
     List<Box> _defered_instances;

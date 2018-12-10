@@ -14,7 +14,7 @@ public:
     GLModelPoint(const sp<Atlas>& atlas);
 
     virtual void initialize(ShaderBindings& bindings) override;
-    virtual void start(ModelBuffer& buf, GLResourceManager& resourceManager, const Layer::Snapshot& layerContext) override;
+    virtual void start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext) override;
     virtual void load(ModelBuffer& buf, int32_t type, const V& scale) override;
 
 //  [[plugin::builder("point")]]

@@ -5,7 +5,7 @@
 
 #include "graphics/base/camera.h"
 
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/base/render_engine.h"
 
@@ -13,7 +13,7 @@
 
 namespace ark {
 
-GraphicsContext::GraphicsContext(const sp<GLContext>& glContext, const sp<GLResourceManager>& glResources)
+GraphicsContext::GraphicsContext(const sp<GLContext>& glContext, const sp<ResourceManager>& glResources)
     : _gl_context(glContext), _gl_resource_manager(glResources), _steady_clock(Platform::getSteadyClock())
 {
 }
@@ -33,7 +33,7 @@ void GraphicsContext::onDrawFrame()
     _gl_resource_manager->onDrawFrame(*this);
 }
 
-const sp<GLResourceManager>& GraphicsContext::resourceManager() const
+const sp<ResourceManager>& GraphicsContext::resourceManager() const
 {
     return _gl_resource_manager;
 }

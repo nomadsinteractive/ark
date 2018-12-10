@@ -9,7 +9,7 @@
 #include "core/util/documents.h"
 
 #include "renderer/base/gl_context.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/gl_shader_preprocessor.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/impl/gl_snippet/gl_snippet_linked_chain.h"

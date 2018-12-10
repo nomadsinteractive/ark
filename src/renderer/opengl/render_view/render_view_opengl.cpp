@@ -18,7 +18,7 @@ namespace ark {
 uint32_t g_GLViewportWidth = 0;
 uint32_t g_GLViewportHeight = 0;
 
-RenderViewOpenGL::RenderViewOpenGL(const sp<GLContext>& glContext, const sp<GLResourceManager>& glResourceManager, const Viewport& viewport)
+RenderViewOpenGL::RenderViewOpenGL(const sp<GLContext>& glContext, const sp<ResourceManager>& glResourceManager, const Viewport& viewport)
     : _graphics_context(new GraphicsContext(glContext, glResourceManager)), _viewport(viewport)
 {
 }

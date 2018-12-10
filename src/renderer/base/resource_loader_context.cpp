@@ -10,7 +10,8 @@
 
 namespace ark {
 
-ResourceLoaderContext::ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<ImageResource>& imageResource, const sp<GLResourceManager>& glResourceManager, const sp<Executor>& executor, const sp<RenderController>& renderController)
+ResourceLoaderContext::ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<ImageAsset>& imageResource, const sp<ResourceManager>& glResourceManager,
+                                             const sp<Executor>& executor, const sp<RenderController>& renderController)
     : _documents(documents), _images(imageResource), _gl_resource_manager(glResourceManager), _executor(executor), _render_controller(renderController),
       _texture_loader(sp<GLTextureLoader>::make(glResourceManager)), _memory_pool(sp<MemoryPool>::make()), _object_pool(sp<ObjectPool>::make()),
       _disposed(sp<Boolean::Impl>::make(false))
@@ -28,12 +29,12 @@ const sp<Dictionary<document>>& ResourceLoaderContext::documents() const
     return _documents;
 }
 
-const sp<ImageResource>& ResourceLoaderContext::images() const
+const sp<ImageAsset>& ResourceLoaderContext::images() const
 {
     return _images;
 }
 
-const sp<GLResourceManager>& ResourceLoaderContext::resourceManager() const
+const sp<ResourceManager>& ResourceLoaderContext::resourceManager() const
 {
     return _gl_resource_manager;
 }

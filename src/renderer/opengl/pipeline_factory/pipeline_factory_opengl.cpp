@@ -3,7 +3,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/base/graphics_context.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/gl_context.h"
 #include "renderer/base/pipeline_layout.h"
 

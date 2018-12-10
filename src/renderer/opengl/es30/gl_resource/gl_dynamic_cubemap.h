@@ -12,7 +12,7 @@ namespace ark {
 
 class GLDynamicCubemap : public GLTexture {
 public:
-    GLDynamicCubemap(const sp<GLResourceManager>& resourceManager, const sp<Texture::Parameters>& parameters, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size);
+    GLDynamicCubemap(const sp<RenderController>& renderController, const sp<Texture::Parameters>& parameters, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size);
 
 //  [[plugin::resource-loader("dynamic-cubemap")]]
     class BUILDER : public Builder<Texture> {
@@ -22,8 +22,7 @@ public:
         virtual sp<Texture> build(const sp<Scope>& args) override;
 
     private:
-        sp<GLResourceManager> _resource_manager;
-        document _manifest;
+        sp<RenderController> _render_controller;
         sp<Builder<Size>> _size;
         sp<Builder<Shader>> _shader;
         sp<Builder<Texture>> _texture;
@@ -34,7 +33,7 @@ protected:
     virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) override;
 
 private:
-    sp<GLResourceManager> _resource_manager;
+    sp<RenderController> _render_controller;
     sp<Shader> _shader;
     sp<Texture> _texture;
 

@@ -15,14 +15,14 @@ namespace ark {
 
 class ARK_API GraphicsContext {
 public:
-    GraphicsContext(const sp<GLContext>& glContext, const sp<GLResourceManager>& resourceManager);
+    GraphicsContext(const sp<GLContext>& glContext, const sp<ResourceManager>& resourceManager);
     ~GraphicsContext();
 
     void onSurfaceReady();
     void onDrawFrame();
 
     const sp<GLContext>& glContext() const;
-    const sp<GLResourceManager>& resourceManager() const;
+    const sp<ResourceManager>& resourceManager() const;
 
     template<typename T> const sp<T>& attachment() {
         return _attachments.ensure<T>();
@@ -32,7 +32,7 @@ public:
 
 private:
     sp<GLContext> _gl_context;
-    sp<GLResourceManager> _gl_resource_manager;
+    sp<ResourceManager> _gl_resource_manager;
     sp<Variable<uint64_t>> _steady_clock;
 
     ByType _attachments;

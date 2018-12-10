@@ -5,18 +5,18 @@
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/shader.h"
-#include "renderer/inf/render_resource.h"
+#include "renderer/inf/resource.h"
 
 namespace ark {
 namespace gles30 {
 
-class GLVertexArray : public RenderResource {
+class GLVertexArray : public Resource {
 public:
     GLVertexArray(const sp<ShaderBindings>& shaderBindings, const Shader& shader);
 
     virtual uint32_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual Recycler recycle() override;
+    virtual RecycleFunc recycle() override;
 
 private:
     uint32_t _id;

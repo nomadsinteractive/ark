@@ -1,7 +1,7 @@
 #include "renderer/base/shader_bindings.h"
 
 #include "renderer/opengl/base/gl_pipeline.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/gl_snippet_delegate.h"
 #include "renderer/base/shader.h"
@@ -11,14 +11,14 @@
 
 namespace ark {
 
-ShaderBindings::ShaderBindings(GLResourceManager& resourceManager, const sp<Shader>& shader)
-    : ShaderBindings(resourceManager, shader, resourceManager.makeDynamicArrayBuffer())
+ShaderBindings::ShaderBindings(RenderController& renderController, const sp<Shader>& shader)
+    : ShaderBindings(renderController, shader, renderController.makeVertexBuffer())
 {
 }
 
-ShaderBindings::ShaderBindings(GLResourceManager& resourceManager, const sp<Shader>& shader, const Buffer& arrayBuffer)
+ShaderBindings::ShaderBindings(RenderController& renderController, const sp<Shader>& shader, const Buffer& arrayBuffer)
     : _shader(shader), _snippet(sp<GLSnippetDelegate>::make(shader)), _attributes(shader->input()), _array_buffer(arrayBuffer),
-      _pipeline_input(_shader->input()), _instanced_arrays(_pipeline_input->makeInstancedArrays(resourceManager))
+      _pipeline_input(_shader->input()), _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController))
 {
 }
 
@@ -57,7 +57,7 @@ void ShaderBindings::bindGLTexture(const sp<Texture>& texture, uint32_t name) co
     _snippet->link<GLSnippetActiveTexture>(texture, name);
 }
 
-void ShaderBindings::bindGLTexture(const sp<RenderResource>& texture, uint32_t target, uint32_t name) const
+void ShaderBindings::bindGLTexture(const sp<Resource>& texture, uint32_t target, uint32_t name) const
 {
     _snippet->link<GLSnippetActiveTexture>(texture, target, name);
 }

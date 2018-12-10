@@ -10,7 +10,7 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/render_resource.h"
+#include "renderer/inf/resource.h"
 #include "renderer/inf/pipeline.h"
 
 #include "platform/gl/gl.h"
@@ -19,17 +19,17 @@ namespace ark {
 
 class ARK_API GLPipeline : public Pipeline {
 public:
-    GLPipeline(const sp<GLRecycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader);
+    GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader);
     ~GLPipeline() override;
 
     virtual uint32_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual Recycler recycle() override;
+    virtual RecycleFunc recycle() override;
 
     virtual void use() override;
     virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) override;
     virtual void bindUniform(GraphicsContext& graphicsContext, const Uniform& uniform) override;
-    virtual void activeTexture(RenderResource& texture, uint32_t target, uint32_t name) override;
+    virtual void activeTexture(Resource& texture, uint32_t target, uint32_t name) override;
 
     void glUpdateMatrix(GraphicsContext& graphicsContext, const String& name, const Matrix& matrix);
 
@@ -75,7 +75,7 @@ private:
 
     class Shader {
     public:
-        Shader(const sp<GLRecycler>& recycler, uint32_t version, GLenum type, const String& source);
+        Shader(const sp<Recycler>& recycler, uint32_t version, GLenum type, const String& source);
         ~Shader();
 
         uint32_t id();
@@ -84,7 +84,7 @@ private:
         GLuint compile(uint32_t version, GLenum type, const String& source);
 
     private:
-        sp<GLRecycler> _recycler;
+        sp<Recycler> _recycler;
         uint32_t _id;
     };
 
@@ -100,7 +100,7 @@ private:
     void bind(GraphicsContext&, const PipelineInput& input, uint32_t divisor);
 
 private:
-    sp<GLRecycler> _recycler;
+    sp<Recycler> _recycler;
 
     uint32_t _version;
 

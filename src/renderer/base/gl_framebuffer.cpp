@@ -1,6 +1,6 @@
 #include "renderer/base/gl_framebuffer.h"
 
-#include "renderer/base/gl_recycler.h"
+#include "renderer/base/recycler.h"
 #include "renderer/base/texture.h"
 #include "renderer/opengl/util/gl_debug.h"
 
@@ -8,7 +8,7 @@
 
 namespace ark {
 
-GLFramebuffer::GLFramebuffer(const sp<GLRecycler>& recycler, const sp<Texture>& texture)
+GLFramebuffer::GLFramebuffer(const sp<Recycler>& recycler, const sp<Texture>& texture)
     : _recycler(recycler), _texture(texture), _id(0)
 {
 }
@@ -41,7 +41,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-RenderResource::Recycler GLFramebuffer::recycle()
+Resource::RecycleFunc GLFramebuffer::recycle()
 {
     uint32_t id = _id;
     _id = 0;

@@ -8,7 +8,7 @@ namespace gles30 {
 
 class GLSnippetFactoryGLES30 : public GLSnippetFactory {
 public:
-    virtual sp<GLSnippet> createCoreGLSnippet(GLResourceManager& glResourceManager, const Shader& shader, const sp<ShaderBindings>& shaderBindings) override;
+    virtual sp<GLSnippet> createCoreGLSnippet(ResourceManager& glResourceManager, const Shader& shader, const sp<ShaderBindings>& shaderBindings) override;
 };
 
 }

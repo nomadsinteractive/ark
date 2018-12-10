@@ -12,12 +12,12 @@ namespace ark {
 
 class GLTextureLoader : public Dictionary<sp<Texture>> {
 public:
-    GLTextureLoader(const sp<GLResourceManager>& resources);
+    GLTextureLoader(const sp<ResourceManager>& resources);
 
     virtual sp<Texture> get(const String& name) override;
 
 private:
-    sp<GLResourceManager> _resource_manager;
+    sp<ResourceManager> _resource_manager;
 
     std::map<String, sp<Texture>> _textures;
 };

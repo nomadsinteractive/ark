@@ -13,7 +13,7 @@ class Camera;
 class Color;
 class Font;
 class Frame;
-class ImageResource;
+class ImageAsset;
 class Scrollable;
 class Layer;
 class Matrix;

@@ -17,7 +17,7 @@ namespace ark {
 
 Layer::Stub::Stub(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _model(model), _shader(shader), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
-      _resource_manager(resourceLoaderContext->resourceManager()), _shader_bindings(sp<ShaderBindings>::make(resourceLoaderContext->resourceManager(), shader)),
+      _render_controller(resourceLoaderContext->renderController()), _shader_bindings(sp<ShaderBindings>::make(_render_controller, shader)),
       _last_rendered_count(0)
 {
     _model->initialize(_shader_bindings);
@@ -52,7 +52,7 @@ sp<RenderCommand> Layer::Snapshot::render(float x, float y) const
     if(_items.size() > 0)
     {
         ModelBuffer buf(_stub->_resource_loader_context, _stub->_shader_bindings, _items.size(), _stub->_shader->stride());
-        _stub->_model->start(buf, _stub->_resource_manager, *this);
+        _stub->_model->start(buf, _stub->_render_controller, *this);
 
         for(const auto& i : _items)
         {

@@ -15,7 +15,7 @@
 namespace ark {
 namespace vulkan {
 
-RendererFactoryVulkan::RendererFactoryVulkan(const sp<GLResourceManager>& glResources)
+RendererFactoryVulkan::RendererFactoryVulkan(const sp<ResourceManager>& glResources)
     : _resource_manager(glResources), _vulkan_api(sp<VulkanAPI>::make(glResources))
 {
     const Global<PluginManager> pm;
@@ -47,6 +47,11 @@ void RendererFactoryVulkan::setGLVersion(Ark::RendererVersion version, GLContext
     glContext.setGLSnippetFactory(sp<GLSnippetFactoryVulkan>::make());
 
     glContext.setVersion(version);
+}
+
+sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader)
+{
+    return nullptr;
 }
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<GLContext>& glContext, const Viewport& viewport)

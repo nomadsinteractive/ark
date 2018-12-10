@@ -10,8 +10,8 @@
 #include "graphics/base/size.h"
 
 #include "renderer/opengl/base/gl_pipeline.h"
-#include "renderer/base/gl_recycler.h"
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/recycler.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/gl_texture_loader.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
@@ -21,7 +21,7 @@
 
 namespace ark {
 
-GLTexture2D::GLTexture2D(const sp<GLRecycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Variable<bitmap>>& bitmap)
+GLTexture2D::GLTexture2D(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Variable<bitmap>>& bitmap)
     : GLTexture(recycler, size, static_cast<uint32_t>(GL_TEXTURE_2D), parameters), _bitmap(bitmap)
 {
 }
@@ -60,7 +60,7 @@ sp<Texture> GLTexture2D::BUILDER::build(const sp<Scope>& args)
        return _resource_loader_context->textureLoader()->get(*src);
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
-    const sp<GLRecycler> recycler = _resource_loader_context->resourceManager()->recycler();
+    const sp<Recycler> recycler = _resource_loader_context->resourceManager()->recycler();
     const sp<GLTexture> texture = sp<GLTexture2D>::make(recycler, size, _parameters, nullptr);
     return _resource_loader_context->resourceManager()->createGLResource<Texture>(size, texture);
 }

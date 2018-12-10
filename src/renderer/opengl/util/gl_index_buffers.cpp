@@ -2,7 +2,7 @@
 
 #include "core/impl/array/dynamic_array.h"
 
-#include "renderer/base/gl_resource_manager.h"
+#include "renderer/base/render_controller.h"
 
 namespace ark {
 
@@ -88,18 +88,18 @@ Buffer::UploadMakerFunc GLIndexBuffers::Points::maker()
     return [](size_t objectCount)->sp<Buffer::Uploader> { return sp<Points>::make(objectCount); };
 }
 
-Buffer::Snapshot GLIndexBuffers::makeGLBufferSnapshot(GLResourceManager& resourceManager, Buffer::Name name, size_t objectCount)
+Buffer::Snapshot GLIndexBuffers::makeGLBufferSnapshot(RenderController& renderController, Buffer::Name name, size_t objectCount)
 {
     const size_t warningLimit = 10000;
     DWARN(objectCount < warningLimit, "Object count(%d) exceeding warning limit(%d). You can make the limit larger if you're sure what you're doing", objectCount, warningLimit);
     switch(name)
     {
     case Buffer::NAME_NINE_PATCH:
-        return resourceManager.makeGLBufferSnapshot(name, NinePatch::maker(), objectCount * 2, (objectCount * 30 - 2) * sizeof(glindex_t));
+        return renderController.makeBufferSnapshot(name, NinePatch::maker(), objectCount * 2, (objectCount * 30 - 2) * sizeof(glindex_t));
     case Buffer::NAME_POINTS:
-        return resourceManager.makeGLBufferSnapshot(name, Points::maker(), objectCount * 2, objectCount * sizeof(glindex_t));
+        return renderController.makeBufferSnapshot(name, Points::maker(), objectCount * 2, objectCount * sizeof(glindex_t));
     case Buffer::NAME_QUADS:
-        return resourceManager.makeGLBufferSnapshot(name, Quads::maker(), objectCount * 2, objectCount * 6 * sizeof(glindex_t));
+        return renderController.makeBufferSnapshot(name, Quads::maker(), objectCount * 2, objectCount * 6 * sizeof(glindex_t));
     default:
         DFATAL("Unknown GLBufferName %d", name);
     }
