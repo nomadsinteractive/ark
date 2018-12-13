@@ -17,15 +17,12 @@
 #include "renderer/base/varyings.h"
 #include "graphics/impl/flatable/flatable_color3b.h"
 
-#include "renderer/base/resource_manager.h"
-#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/pipeline_factory.h"
-
-#include "renderer/opengl/base/gl_pipeline.h"
-#include "renderer/opengl/util/gl_debug.h"
 
 #include "platform/platform.h"
 
@@ -71,7 +68,7 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& d
     return shader ? shader : sp<Builder<Shader>>::adopt(new GLShaderBuilderImpl(factory, doc, resourceLoaderContext, stringTable->getString(defVertex), stringTable->getString(defFragment)));
 }
 
-sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment, const sp<GLSnippet>& snippet, const sp<ResourceLoaderContext>& resourceLoaderContext)
+sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment, const sp<Snippet>& snippet, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
     const Global<StringTable> stringTable;
     const sp<PipelineLayout> source = sp<PipelineLayout>::make(resourceLoaderContext->renderController(), stringTable->getString(vertex), stringTable->getString(fragment));
@@ -111,28 +108,10 @@ const sp<PipelineFactory>& Shader::pipelineFactory() const
     return _stub->_pipeline_factory;
 }
 
-const sp<GLSnippet>& Shader::snippet() const
+const sp<Snippet>& Shader::snippet() const
 {
     return _stub->_snippet;
 }
-
-//void Shader::glUpdateMVPMatrix(GraphicsContext& graphicsContext, const Matrix& matrix) const
-//{
-//    glUpdateMatrix(graphicsContext, "u_MVP", matrix);
-//}
-
-//void Shader::glUpdateVPMatrix(GraphicsContext& graphicsContext, const Matrix& matrix) const
-//{
-//    glUpdateMatrix(graphicsContext, "u_VP", matrix);
-//}
-
-//void Shader::glUpdateMatrix(GraphicsContext& graphicsContext, const String& name, const Matrix& matrix) const
-//{
-//    const sp<GLPipeline> glPipeline = _stub->_pipeline;
-//    const GLPipeline::GLUniform& uniform = glPipeline->getUniform(name);
-//    DCHECK(uniform, "Uniform %s not found", name.c_str());
-//    uniform.setUniformMatrix4fv(1, GL_FALSE, matrix.value(), graphicsContext.tick());
-//}
 
 const sp<Pipeline>& Shader::getPipeline(GraphicsContext& graphicsContext)
 {
@@ -158,7 +137,7 @@ uint32_t Shader::stride() const
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _vertex(Strings::load(manifest, "vertex", "@shaders:default.vert")),
       _fragment(Strings::load(manifest, "fragment", "@shaders:texture.frag")),
-      _snippet(factory.getBuilder<GLSnippet>(manifest, Constants::Attributes::SNIPPET)),
+      _snippet(factory.getBuilder<Snippet>(manifest, Constants::Attributes::SNIPPET)),
       _camera(factory.getBuilder<Camera>(manifest, Constants::Attributes::CAMERA))
 {
 }

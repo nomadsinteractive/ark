@@ -16,8 +16,9 @@
 
 #include "renderer/opengl/base/gl_buffer.h"
 #include "renderer/opengl/base/gl_pipeline.h"
-#include "renderer/opengl/util/gl_index_buffers.h"
 #include "renderer/opengl/base/gl_texture.h"
+
+#include "renderer/util/index_buffers.h"
 
 namespace ark {
 
@@ -52,7 +53,7 @@ struct GLConstants {
 extern uint32_t g_GLViewportWidth;
 extern uint32_t g_GLViewportHeight;
 
-GLenum GLUtil::getEnum(const String &name)
+GLenum GLUtil::getEnum(const String& name)
 {
     const Global<GLConstants> constants;
     const auto iter = constants->_enums.find(name);
@@ -69,10 +70,10 @@ GLenum GLUtil::getEnum(const String& name, GLenum defValue)
 
 GLenum GLUtil::getTextureInternalFormat(int32_t format, const Bitmap& bitmap)
 {
-    const GLenum formats[] = {GL_R8, GL_R8_SNORM, GL_R16, GL_R16_SNORM, GL_R8, GL_R8, GL_R16F, GL_R16F,
-                              GL_RG8, GL_RG8_SNORM, GL_RG16, GL_RG16_SNORM, GL_RG16F, GL_RG16F, GL_RG16F, GL_RG16F,
-                              GL_RGB8, GL_RGB8_SNORM, GL_RGB16, GL_RGB16_SNORM, GL_RGB16F, GL_RGB16F, GL_RGB16F, GL_RGB16F,
-                              GL_RGBA8, GL_RGBA8_SNORM, GL_RGBA16, GL_RGBA16_SNORM, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F};
+    static const GLenum formats[] = {GL_R8, GL_R8_SNORM, GL_R16, GL_R16_SNORM, GL_R8, GL_R8, GL_R16F, GL_R16F,
+                                     GL_RG8, GL_RG8_SNORM, GL_RG16, GL_RG16_SNORM, GL_RG16F, GL_RG16F, GL_RG16F, GL_RG16F,
+                                     GL_RGB8, GL_RGB8_SNORM, GL_RGB16, GL_RGB16_SNORM, GL_RGB16F, GL_RGB16F, GL_RGB16F, GL_RGB16F,
+                                     GL_RGBA8, GL_RGBA8_SNORM, GL_RGBA16, GL_RGBA16_SNORM, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F};
     uint32_t signedOffset = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED ? 1 : 0;
     uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
     uint32_t channel8 = (bitmap.channels() - 1) * 8;
@@ -96,6 +97,25 @@ GLenum GLUtil::getPixelFormat(int32_t format, const Bitmap& bitmap)
     if(byteCount == 2)
         return flagSigned ? GL_SHORT: GL_UNSIGNED_SHORT;
     return flagSigned ? GL_INT : GL_FLOAT;
+}
+
+sp<Texture::Parameters> GLUtil::getTextureParameters(Texture::Format format, Texture::Feature features)
+{
+    sp<Texture::Parameters> params = sp<Texture::Parameters>::make(format, features);
+    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MIN_FILTER), static_cast<int32_t>((features & Texture::FEATURE_MIPMAPS) ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
+    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MAG_FILTER), static_cast<int32_t>(GL_LINEAR));
+    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_S), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
+    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_T), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
+    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_R), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
+    return params;
+}
+
+sp<Texture::Parameters> GLUtil::getTextureParameters(const document& manifest)
+{
+    sp<Texture::Parameters> params = sp<Texture::Parameters>::make(Documents::getAttribute<Texture::Format>(manifest, "format", Texture::FORMAT_AUTO), Documents::getAttribute<Texture::Feature>(manifest, "feature", Texture::FEATURE_DEFAULT));
+    for(const document& i : manifest->children("parameter"))
+        params->_tex_parameters[static_cast<uint32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::NAME)))] = static_cast<int32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::VALUE)));
+    return params;
 }
 
 bytearray GLUtil::makeUnitCubeVertices()
@@ -165,7 +185,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     texture.upload(graphicsContext);
 
     const sp<GLTexture> resource = texture.resource();
-    shader.pipeline()->activeTexture(texture, resource->target(), 0);
+    shader.pipeline()->activeTexture(texture, texture.type(), 0);
 
     uint32_t vao;
     glGenVertexArrays(1, &vao);
@@ -175,9 +195,9 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     arrayBuffer.upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer.id());
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, nullptr);
 
-    const Buffer::Snapshot indexBuffer = GLIndexBuffers::makeGLBufferSnapshot(renderController, Buffer::NAME_QUADS, 6);
+    const Buffer::Snapshot indexBuffer = IndexBuffers::makeGLBufferSnapshot(renderController, Buffer::NAME_QUADS, 6);
     indexBuffer.upload(graphicsContext);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.id());
 
@@ -189,7 +209,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, id, 0);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDrawElements(GL_TRIANGLES, 36, GLIndexType, 0);
+        glDrawElements(GL_TRIANGLES, 36, GLIndexType, nullptr);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

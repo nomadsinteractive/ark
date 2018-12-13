@@ -26,7 +26,7 @@ GLDynamicCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifes
     : _render_controller(resourceLoaderContext->renderController()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/equirectangular.vert", "shaders/equirectangular.frag")),
       _texture(factory.ensureBuilder<Texture>(manifest, Constants::Attributes::TEXTURE)),
-      _parameters(sp<Texture::Parameters>::make(manifest))
+      _parameters(GLUtil::getTextureParameters(manifest))
 {
 }
 
@@ -34,7 +34,7 @@ sp<Texture> GLDynamicCubemap::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Size> size = _size->build(args);
     const sp<GLDynamicCubemap> cubemap = sp<GLDynamicCubemap>::make(_render_controller, _parameters, _shader->build(args), _texture->build(args), size);
-    return _render_controller->resourceManager()->createGLResource<Texture>(size, cubemap);
+    return _render_controller->resourceManager()->createGLResource<Texture>(size, cubemap, Texture::TYPE_CUBEMAP);
 }
 
 }

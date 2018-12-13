@@ -69,7 +69,7 @@ GLIrradianceCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& mani
     : _resource_manager(resourceLoaderContext->resourceManager()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/equirectangular.vert", "shaders/equirectangular.frag")),
       _texture(factory.ensureBuilder<Texture>(manifest, Constants::Attributes::TEXTURE)),
-      _parameters(sp<Texture::Parameters>::make(manifest))
+      _parameters(GLUtil::getTextureParameters(manifest))
 {
 }
 
@@ -77,7 +77,7 @@ sp<Texture> GLIrradianceCubemap::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Size> size = _size->build(args);
     const sp<GLIrradianceCubemap> cubemap = sp<GLIrradianceCubemap>::make(_resource_manager, _parameters, _shader->build(args), _texture->build(args), _size->build(args));
-    return _resource_manager->createGLResource<Texture>(size, cubemap);
+    return _resource_manager->createGLResource<Texture>(size, cubemap, Texture::TYPE_CUBEMAP);
 }
 
 }

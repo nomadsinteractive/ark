@@ -14,7 +14,7 @@ namespace vulkan {
 
 class VKTexture {
 public:
-    VKTexture(const sp<ResourceManager>& resourceManager, const sp<CommandPool>& commandPool);
+    VKTexture(const sp<ResourceManager>& resourceManager, const sp<VKCommandPool>& commandPool);
     ~VKTexture();
 
     const VkDescriptorImageInfo& descriptor() const;
@@ -24,8 +24,8 @@ private:
 
 private:
     sp<ResourceManager> _resource_manager;
-    sp<CommandPool> _command_pool;
-    sp<Device> _device;
+    sp<VKCommandPool> _command_pool;
+    sp<VKDevice> _device;
 
     VkImage _image;
     VkDeviceMemory _memory;

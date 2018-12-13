@@ -18,17 +18,17 @@ public:
     const sp<ResourceManager>& resourceManager() const;
 
     const sp<Dictionary<document>>& documents() const;
-    const sp<ImageAsset>& imageResource() const;
+    const sp<ImageBundle>& imageResource() const;
 
     document loadDocument(const String& name) const;
 
     bitmap loadBitmap(const String& name) const;
     bitmap loadBitmapBounds(const String& name) const;
 
-    sp<BitmapLoader> getBitmapLoader(const String& name) const;
+//    sp<BitmapLoader> getBitmapLoader(const String& name) const;
 
 private:
-    sp<ImageAsset> createImageLoader(bool justDecodeBounds) const;
+    sp<ImageBundle> createImageLoader(bool justDecodeBounds) const;
     sp<ResourceManager> createResourceManager() const;
 
 private:
@@ -36,7 +36,7 @@ private:
     sp<Asset> _fonts;
     sp<Dictionary<document>> _documents;
 
-    sp<ImageAsset> _bitmap_loader;
+    sp<ImageBundle> _bitmap_loader;
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
 
     sp<ResourceManager> _resource_manager;

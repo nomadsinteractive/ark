@@ -11,7 +11,7 @@
 
 #include "renderer/base/recycler.h"
 #include "renderer/base/resource_manager.h"
-#include "renderer/base/gl_texture_loader.h"
+#include "renderer/base/texture_bundle.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/opengl/util/gl_util.h"

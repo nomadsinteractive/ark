@@ -16,8 +16,6 @@
 #include "renderer/base/texture.h"
 #include "renderer/base/uniform.h"
 
-#include "renderer/opengl/util/gl_debug.h"
-
 #include "platform/platform.h"
 
 namespace ark {
@@ -132,10 +130,11 @@ void GLPipeline::bindUniform(GraphicsContext& /*graphicsContext*/, const Uniform
     }
 }
 
-void GLPipeline::activeTexture(Resource& texture, uint32_t target, uint32_t name)
+void GLPipeline::activeTexture(Resource& texture, Texture::Type type, uint32_t name)
 {
+    static GLenum glTargets[Texture::TYPE_COUNT] = {GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP};
     glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + name));
-    glBindTexture(static_cast<GLenum>(target), texture.id());
+    glBindTexture(glTargets[type], texture.id());
 
     char uniformName[16] = "u_Texture0";
     uniformName[9] = static_cast<char>('0' + name);

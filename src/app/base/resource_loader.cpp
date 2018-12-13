@@ -3,7 +3,7 @@
 #include "core/util/documents.h"
 #include "core/util/log.h"
 
-#include "renderer/base/gl_texture_loader.h"
+#include "renderer/base/texture_bundle.h"
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/base/application_context.h"

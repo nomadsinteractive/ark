@@ -14,7 +14,7 @@
 
 namespace ark {
 
-class ARK_API GLCubemap : public GLTexture {
+class GLCubemap : public GLTexture {
 public:
     GLCubemap(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, std::vector<sp<Variable<bitmap>>> bitmaps);
 

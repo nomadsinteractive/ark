@@ -79,16 +79,16 @@ private:
     };
 
 public:
-    ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<ImageAsset>& images, const sp<ResourceManager>& resourceManager, const sp<Executor>& executor, const sp<RenderController>& renderController);
+    ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<ImageBundle>& images, const sp<ResourceManager>& resourceManager, const sp<Executor>& executor, const sp<RenderController>& renderController);
     ~ResourceLoaderContext();
 
     const sp<Dictionary<document>>& documents() const;
-    const sp<ImageAsset>& images() const;
+    const sp<ImageBundle>& images() const;
 
     const sp<ResourceManager>& resourceManager() const;
     const sp<Executor>& executor() const;
     const sp<RenderController>& renderController() const;
-    const sp<GLTextureLoader>& textureLoader() const;
+    const sp<TextureBundle>& textureLoader() const;
     const sp<MemoryPool>& memoryPool() const;
     const sp<ObjectPool>& objectPool() const;
     sp<Boolean> disposed() const;
@@ -111,11 +111,11 @@ private:
 
 private:
     sp<Dictionary<document>> _documents;
-    sp<ImageAsset> _images;
-    sp<ResourceManager> _gl_resource_manager;
+    sp<ImageBundle> _images;
+    sp<ResourceManager> _resource_manager;
     sp<Executor> _executor;
     sp<RenderController> _render_controller;
-    sp<GLTextureLoader> _texture_loader;
+    sp<TextureBundle> _texture_bundle;
     sp<MemoryPool> _memory_pool;
     sp<ObjectPool> _object_pool;
 

@@ -16,12 +16,12 @@ public:
     virtual ~RendererFactory() = default;
 
     virtual void initialize(GLContext& glContext) = 0;
-
     virtual void setGLVersion(Ark::RendererVersion version, GLContext& glContext) = 0;
 
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) = 0;
-    virtual sp<RenderView> createRenderView(const sp<GLContext>& glContext, const Viewport& viewport) = 0;
     virtual sp<PipelineFactory> createPipelineFactory() = 0;
+    virtual sp<RenderView> createRenderView(const sp<GLContext>& glContext, const Viewport& viewport) = 0;
+    virtual sp<Texture> createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap) = 0;
 };
 
 }

@@ -3,7 +3,7 @@
 #include "graphics/base/camera.h"
 
 #include "renderer/base/shader_bindings.h"
-#include "renderer/base/gl_snippet_delegate.h"
+#include "renderer/base/snippet_delegate.h"
 
 namespace ark {
 

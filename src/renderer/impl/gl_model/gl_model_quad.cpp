@@ -5,7 +5,7 @@
 #include "renderer/base/model_buffer.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/shader_bindings.h"
-#include "renderer/opengl/util/gl_index_buffers.h"
+#include "renderer/util/index_buffers.h"
 
 namespace ark {
 
@@ -22,7 +22,7 @@ void GLModelQuad::initialize(ShaderBindings& bindings)
 void GLModelQuad::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(4 * layerContext._items.size());
-    buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(renderController, Buffer::NAME_QUADS, layerContext._items.size()));
+    buf.setIndices(IndexBuffers::makeGLBufferSnapshot(renderController, Buffer::NAME_QUADS, layerContext._items.size()));
 }
 
 void GLModelQuad::load(ModelBuffer& buf, int32_t type, const V& scale)

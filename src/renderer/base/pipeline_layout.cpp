@@ -12,7 +12,7 @@
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/gl_shader_preprocessor.h"
 #include "renderer/base/graphics_context.h"
-#include "renderer/impl/gl_snippet/gl_snippet_linked_chain.h"
+#include "renderer/impl/snippet/snippet_linked_chain.h"
 #include "renderer/inf/pipeline_factory.h"
 #include "renderer/inf/renderer_factory.h"
 
@@ -37,10 +37,10 @@ Attribute& PipelineLayout::addAttribute(const String& name, const String& type, 
     return _preprocessor_context->addPredefinedAttribute(name, type, scopes);
 }
 
-void PipelineLayout::addSnippet(const sp<GLSnippet>& snippet)
+void PipelineLayout::addSnippet(const sp<Snippet>& snippet)
 {
     DASSERT(snippet);
-    _snippet = _snippet ? sp<GLSnippet>::adopt(new GLSnippetLinkedChain(_snippet, snippet)) : snippet;
+    _snippet = _snippet ? sp<Snippet>::adopt(new SnippetLinkedChain(_snippet, snippet)) : snippet;
 }
 
 void PipelineLayout::preCompile(GraphicsContext& graphicsContext)
@@ -100,7 +100,7 @@ const sp<RenderController>& PipelineLayout::renderController() const
     return _render_controller;
 }
 
-const sp<GLSnippet>& PipelineLayout::snippet() const
+const sp<Snippet>& PipelineLayout::snippet() const
 {
     return _snippet;
 }

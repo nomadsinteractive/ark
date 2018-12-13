@@ -2,6 +2,7 @@
 #define ARK_PLUGIN_PBR_IMPL_TEXTURE_GL_IRRANDIANCE_CUBEMAP_H_
 
 #include "core/forwarding.h"
+#include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"

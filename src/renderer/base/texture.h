@@ -4,8 +4,6 @@
 #include <unordered_map>
 
 #include "core/base/api.h"
-#include "core/base/bean_factory.h"
-#include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -33,9 +31,14 @@ public:
         FEATURE_MIPMAPS
     };
 
+    enum Type {
+        TYPE_2D,
+        TYPE_CUBEMAP,
+        TYPE_COUNT
+    };
+
     struct ARK_API Parameters {
-        Parameters(Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
-        Parameters(const document& doc);
+        Parameters(Format format, Feature features);
 
         void setTexParameter(uint32_t name, int32_t value);
 
@@ -45,12 +48,14 @@ public:
         std::unordered_map<uint32_t, int32_t> _tex_parameters;
     };
 
-    Texture(const sp<Size>& size, const sp<Resource>& resource);
+    Texture(const sp<Size>& size, const sp<Resource>& resource, Type type);
     virtual ~Texture() override;
 
     virtual uint32_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
+
+    Type type() const;
 
 //  [[script::bindings::property]]
     int32_t width() const;
@@ -67,6 +72,7 @@ public:
 private:
     sp<Size> _size;
     sp<Resource> _resource;
+    Type _type;
 };
 
 }

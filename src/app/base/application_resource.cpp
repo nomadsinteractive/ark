@@ -3,7 +3,7 @@
 #include "core/base/string.h"
 #include "core/inf/dictionary.h"
 
-#include "graphics/base/image_asset.h"
+#include "graphics/base/image_bundle.h"
 #include "graphics/impl/bitmap_loader/jpeg_bitmap_loader.h"
 #include "graphics/impl/bitmap_loader/png_bitmap_loader.h"
 #include "graphics/impl/bitmap_loader/stb_bitmap_loader.h"
@@ -27,7 +27,7 @@ const sp<Dictionary<document>>& ApplicationResource::documents() const
     return _documents;
 }
 
-const sp<ImageAsset>& ApplicationResource::imageResource() const
+const sp<ImageBundle>& ApplicationResource::imageResource() const
 {
     return _bitmap_loader;
 }
@@ -47,25 +47,25 @@ bitmap ApplicationResource::loadBitmapBounds(const String& name) const
     return _bitmap_bounds_loader->get(name);
 }
 
-sp<BitmapLoader> ApplicationResource::getBitmapLoader(const String& name) const
-{
-    return _bitmap_loader->getLoader(name);
-}
+//sp<BitmapLoader> ApplicationResource::getBitmapLoader(const String& name) const
+//{
+//    return _bitmap_loader->getLoader(name);
+//}
 
-sp<ImageAsset> ApplicationResource::createImageLoader(bool justDecodeBounds) const
+sp<ImageBundle> ApplicationResource::createImageLoader(bool justDecodeBounds) const
 {
 #ifdef ARK_USE_STB_IMAGE
-    const sp<ImageAsset> imageResource = sp<ImageAsset>::make(_images, sp<STBBitmapLoader>::make(justDecodeBounds));
+    const sp<ImageBundle> imageBundle = sp<ImageBundle>::make(_images, sp<STBBitmapLoader>::make(justDecodeBounds));
 #else
-    const sp<ImageAsset> imageResource = sp<ImageAsset>::make(_images, nullptr);
+    const sp<ImageBundle> imageBundle = sp<ImageBundle>::make(_images, nullptr);
 #endif
-    imageResource->addLoader("png", sp<PNGBitmapLoader>::make(justDecodeBounds));
+    imageBundle->addLoader("png", sp<PNGBitmapLoader>::make(justDecodeBounds));
 #ifdef ARK_USE_LIBJPEG_TURBO
-    const sp<BitmapLoader> jpegResource = sp<JPEGBitmapLoader>::make(justDecodeBounds);
-    imageResource->addLoader("jpg", jpegResource);
-    imageResource->addLoader("jpeg", jpegResource);
+    const sp<BitmapLoader> jpegLoader = sp<JPEGBitmapLoader>::make(justDecodeBounds);
+    imageBundle->addLoader("jpg", jpegLoader);
+    imageBundle->addLoader("jpeg", jpegLoader);
 #endif
-    return imageResource;
+    return imageBundle;
 }
 
 sp<ResourceManager> ApplicationResource::createResourceManager() const

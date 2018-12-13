@@ -3,11 +3,39 @@
 #include "core/inf/runnable.h"
 #include "core/util/log.h"
 
+#include "graphics/base/bitmap.h"
+
 #include "renderer/base/render_engine.h"
 #include "renderer/base/resource_manager.h"
+#include "renderer/base/texture.h"
 #include "renderer/inf/renderer_factory.h"
 
 namespace ark {
+
+namespace {
+
+class GLTextureBundle : public Dictionary<sp<Texture>> {
+public:
+    GLTextureBundle(const sp<RendererFactory>& rendererFactory, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
+        : _renderer_factory(rendererFactory), _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader)
+    {
+    }
+
+    virtual sp<Texture> get(const String& name) override {
+        const bitmap bitmapBounds = _bitmap_bounds_loader->get(name);
+        DCHECK(bitmapBounds, "Texture resource \"%s\" not found", name.c_str());
+        return _renderer_factory->createTexture(_recycler, bitmapBounds->width(), bitmapBounds->height(), sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
+    }
+
+private:
+    sp<RendererFactory> _renderer_factory;
+    sp<Recycler> _recycler;
+
+    sp<Dictionary<bitmap>> _bitmap_loader;
+    sp<Dictionary<bitmap>> _bitmap_bounds_loader;
+};
+
+}
 
 RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<ResourceManager>& resourceManager)
     : _render_engine(renderEngine), _resource_manager(resourceManager)
@@ -29,6 +57,18 @@ sp<PipelineFactory> RenderController::createPipelineFactory() const
     return _render_engine->rendererFactory()->createPipelineFactory();
 }
 
+sp<Dictionary<sp<Texture>>> RenderController::createTextureBundle() const
+{
+    return sp<GLTextureBundle>::make(_render_engine->rendererFactory(), _resource_manager->recycler(), _resource_manager->bitmapLoader(), _resource_manager->bitmapBoundsLoader());
+}
+
+sp<Texture> RenderController::createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap> >& bitmap, ResourceManager::UploadStrategy us)
+{
+    const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(_resource_manager->recycler(), width, height, bitmap);
+    _resource_manager->upload(texture, us);
+    return texture;
+}
+
 Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) const
 {
     return makeBuffer(Buffer::TYPE_VERTEX, usage, uploader);
@@ -42,7 +82,7 @@ Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Buffer::U
 Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) const
 {
     Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage, uploader));
-    _resource_manager->prepare(buffer, ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
+    _resource_manager->uploadBuffer(buffer, ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
     return buffer;
 }
 

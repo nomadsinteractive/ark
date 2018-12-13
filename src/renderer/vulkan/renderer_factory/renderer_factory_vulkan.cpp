@@ -7,7 +7,7 @@
 #include "renderer/base/gl_context.h"
 
 #include "renderer/vulkan/render_view/render_view_vulkan.h"
-#include "renderer/vulkan/gl_snippet_factory/gl_snippet_factory_vulkan.h"
+#include "renderer/vulkan/snippet_factory/snippet_factory_vulkan.h"
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
 
 #include "generated/vulkan_plugin.h"
@@ -15,8 +15,8 @@
 namespace ark {
 namespace vulkan {
 
-RendererFactoryVulkan::RendererFactoryVulkan(const sp<ResourceManager>& glResources)
-    : _resource_manager(glResources), _vulkan_api(sp<VulkanAPI>::make(glResources))
+RendererFactoryVulkan::RendererFactoryVulkan(const sp<ResourceManager>& resourceManager)
+    : _resource_manager(resourceManager), _vulkan_api(sp<VulkanAPI>::make(resourceManager))
 {
     const Global<PluginManager> pm;
     pm->addPlugin(sp<VulkanPlugin>::make());
@@ -44,7 +44,7 @@ void RendererFactoryVulkan::setGLVersion(Ark::RendererVersion version, GLContext
     annotations["frag.in"] = "in";
     annotations["frag.out"] = "out";
     annotations["frag.color"] = "v_FragColor";
-    glContext.setGLSnippetFactory(sp<GLSnippetFactoryVulkan>::make());
+    glContext.setGLSnippetFactory(sp<SnippetFactoryVulkan>::make());
 
     glContext.setVersion(version);
 }
@@ -62,6 +62,11 @@ sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<GLContext>& glCo
 sp<ark::PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
 {
     return sp<PipelineFactoryVulkan>::make(_resource_manager);
+}
+
+sp<Texture> RendererFactoryVulkan::createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap)
+{
+    return nullptr;
 }
 
 }

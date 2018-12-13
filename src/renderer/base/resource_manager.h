@@ -15,8 +15,6 @@
 #include "renderer/base/buffer.h"
 #include "renderer/forwarding.h"
 
-#include "platform/gl/gl.h"
-
 namespace ark {
 
 class ARK_API ResourceManager {
@@ -33,6 +31,7 @@ public:
 
     const sp<Dictionary<bitmap>>& bitmapLoader() const;
     const sp<Dictionary<bitmap>>& bitmapBoundsLoader() const;
+    const sp<Recycler>& recycler() const;
 
     void onSurfaceReady(GraphicsContext& graphicsContext);
     void onSurfaceDestroy(GraphicsContext& graphicsContext);
@@ -41,17 +40,7 @@ public:
 
     void upload(const sp<Resource>& resource, UploadStrategy strategy);
 
-    void prepare(const Buffer& buffer, UploadStrategy strategy);
-    void recycle(const sp<Resource>& resource) const;
-
-    sp<Texture> loadGLTexture(const String& name);
-    sp<Texture> createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, UploadStrategy ps = US_ONCE_AND_ON_SURFACE_READY);
-
-//    Buffer makeBuffer(const sp<Buffer::Uploader>& uploader, Buffer::Type type, Buffer::Usage usage);
-//    Buffer makeDynamicArrayBuffer() const;
-//    Buffer::Snapshot makeBufferSnapshot(Buffer::Name name, const Buffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size);
-
-    const sp<Recycler>& recycler() const;
+    void uploadBuffer(const Buffer& buffer, UploadStrategy strategy);
 
     template<typename T, typename... Args> sp<T> createGLResource(Args&&... args) {
         const sp<T> res = sp<T>::make(std::forward<Args>(args)...);
@@ -101,7 +90,6 @@ private:
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
 
     sp<Recycler> _recycler;
-    sp<Dictionary<sp<Texture>>> _gl_texture_loader;
 
     LockFreeStack<PreparingGLResource> _preparing_items;
     LockFreeStack<sp<SharedBuffer>> _shared_buffers;

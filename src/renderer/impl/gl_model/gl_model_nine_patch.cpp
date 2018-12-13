@@ -12,7 +12,7 @@
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/opengl/util/gl_index_buffers.h"
+#include "renderer/util/index_buffers.h"
 
 namespace ark {
 
@@ -68,7 +68,7 @@ void GLModelNinePatch::start(ModelBuffer& buf, RenderController& renderControlle
     DCHECK(layerContext._items.size() > 0, "LayerContext has no RenderObjects");
 
     buf.vertices().setGrowCapacity(16 * layerContext._items.size());
-    buf.setIndices(GLIndexBuffers::makeGLBufferSnapshot(renderController, Buffer::NAME_NINE_PATCH, layerContext._items.size()));
+    buf.setIndices(IndexBuffers::makeGLBufferSnapshot(renderController, Buffer::NAME_NINE_PATCH, layerContext._items.size()));
 }
 
 void GLModelNinePatch::load(ModelBuffer& buf, int32_t type, const V& size)

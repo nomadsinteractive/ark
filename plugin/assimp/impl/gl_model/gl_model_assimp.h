@@ -71,7 +71,7 @@ private:
     };
 
 private:
-    bitmap loadBitmap(const sp<ImageAsset>& imageResource, const aiTexture* tex) const;
+    bitmap loadBitmap(const sp<ImageBundle>& imageResource, const aiTexture* tex) const;
 
 private:
     sp<Assimp::Importer> _importer;

@@ -39,7 +39,7 @@ public:
 //  [[plugin::resource-loader::by-value("texture")]]
     class DICTIONARY : public Builder<Texture> {
     public:
-        DICTIONARY(BeanFactory& parent, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        DICTIONARY(BeanFactory& factory, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<Texture> build(const sp<Scope>& args) override;
 

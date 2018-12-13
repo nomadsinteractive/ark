@@ -5,7 +5,7 @@
 
 #include "core/types/shared_ptr.h"
 
-#include "renderer/vulkan/base/device.h"
+#include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/util/vulkan_buffer.hpp"
 
 namespace ark {
@@ -13,7 +13,7 @@ namespace vulkan {
 
 class VKBuffer {
 public:
-    VKBuffer(const sp<Device>& device, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size);
+    VKBuffer(const sp<VKDevice>& device, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size);
     ~VKBuffer();
 
     DISALLOW_COPY_AND_ASSIGN(VKBuffer);
@@ -81,7 +81,7 @@ private:
     void destroy();
 
 private:
-    sp<Device> _device;
+    sp<VKDevice> _device;
 
     /** @brief Usage flags to be filled by external source at buffer creation (to query at some later point) */
     VkBufferUsageFlags usageFlags;

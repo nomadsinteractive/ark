@@ -12,7 +12,7 @@
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/opengl/render_command/draw_elements_instanced.h"
-#include "renderer/opengl/util/gl_index_buffers.h"
+#include "renderer/util/index_buffers.h"
 
 namespace ark {
 namespace gles30 {

@@ -28,8 +28,8 @@ public:
 
     const sp<RenderController>& renderController() const;
 
-    const sp<GLSnippet>& snippet() const;
-    void addSnippet(const sp<GLSnippet>& snippet);
+    const sp<Snippet>& snippet() const;
+    void addSnippet(const sp<Snippet>& snippet);
 
     void preCompile(GraphicsContext& graphicsContext);
 
@@ -50,7 +50,7 @@ private:
     sp<PipelineInput> _input;
     op<PipelineBuildingContext> _preprocessor_context;
 
-    sp<GLSnippet> _snippet;
+    sp<Snippet> _snippet;
 
     GLShaderPreprocessor::Preprocessor _vertex;
     GLShaderPreprocessor::Preprocessor _fragment;

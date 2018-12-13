@@ -14,12 +14,12 @@ class GLModelText : public RenderModel {
 private:
     class Stub : public Resource {
     public:
-        Stub(ResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
+        Stub(RenderController& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
 
-        void reset(ResourceManager& resourceManager, uint32_t textureWidth, uint32_t textureHeight);
+        void reset(RenderController& renderController, uint32_t textureWidth, uint32_t textureHeight);
 
         bool checkUnpreparedCharacter(const Layer::Snapshot& renderContext);
-        bool upload(const Layer::Snapshot& renderContext, bool allowReset);
+        bool prepare(const Layer::Snapshot& renderContext, bool allowReset);
 
         virtual uint32_t id() override;
         virtual void upload(GraphicsContext& graphicsContext) override;
@@ -45,7 +45,7 @@ private:
     };
 
 public:
-    GLModelText(ResourceManager& resourceManager, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
+    GLModelText(RenderController& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
 
     virtual void initialize(ShaderBindings& bindings) override;
     virtual void start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext) override;

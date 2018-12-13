@@ -4,14 +4,20 @@
 #include "core/types/global.h"
 #include "core/util/log.h"
 
+#include "graphics/base/bitmap.h"
+#include "graphics/base/size.h"
+
+#include "renderer/base/texture.h"
 #include "renderer/base/gl_context.h"
 #include "renderer/base/resource_manager.h"
 
 #include "renderer/opengl/base/gl_buffer.h"
+#include "renderer/opengl/base/gl_texture_2d.h"
 #include "renderer/opengl/pipeline_factory/pipeline_factory_opengl.h"
 #include "renderer/opengl/render_view/render_view_opengl.h"
-#include "renderer/opengl/es20/gl_snippet_factory/gl_snippet_factory_gles20.h"
-#include "renderer/opengl/es30/gl_snippet_factory/gl_snippet_factory_gles30.h"
+#include "renderer/opengl/es20/snippet_factory/snippet_factory_gles20.h"
+#include "renderer/opengl/es30/snippet_factory/snippet_factory_gles30.h"
+#include "renderer/opengl/util/gl_util.h"
 
 #include "generated/opengl_plugin.h"
 
@@ -55,7 +61,7 @@ void RendererFactoryOpenGL::setGLVersion(Ark::RendererVersion version, GLContext
         annotations["frag.in"] = "varying";
         annotations["frag.out"] = "varying";
         annotations["frag.color"] = "gl_FragColor";
-        glContext.setGLSnippetFactory(sp<gles20::GLSnippetFactoryGLES20>::make());
+        glContext.setGLSnippetFactory(sp<gles20::SnippetFactoryGLES20>::make());
     }
     else
     {
@@ -64,7 +70,7 @@ void RendererFactoryOpenGL::setGLVersion(Ark::RendererVersion version, GLContext
         annotations["frag.in"] = "in";
         annotations["frag.out"] = "out";
         annotations["frag.color"] = "v_FragColor";
-        glContext.setGLSnippetFactory(sp<gles30::GLSnippetFactoryGLES30>::make());
+        glContext.setGLSnippetFactory(sp<gles30::SnippetFactoryGLES30>::make());
     }
     glContext.setVersion(version);
 }
@@ -82,6 +88,13 @@ sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buff
 sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()
 {
     return sp<PipelineFactoryOpenGL>::make();
+}
+
+sp<Texture> RendererFactoryOpenGL::createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap)
+{
+    const sp<Size> size = sp<Size>::make(static_cast<float>(width), static_cast<float>(height));
+    const sp<GLTexture2D> texture2d = sp<GLTexture2D>::make(recycler, size, GLUtil::getTextureParameters(), bitmap);
+    return sp<Texture>::make(size, texture2d, Texture::TYPE_2D);
 }
 
 }

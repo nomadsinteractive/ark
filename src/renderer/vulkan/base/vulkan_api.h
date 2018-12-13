@@ -57,9 +57,9 @@ private:
 
 private:
     sp<ResourceManager> _resource_manager;
-    sp<Instance> _instance;
-    sp<Device> _device;
-    sp<RenderTarget> _render_target;
+    sp<VKInstance> _instance;
+    sp<VKDevice> _device;
+    sp<VKRenderTarget> _render_target;
     sp<PipelineFactoryVulkan> _pipeline_factory;
     sp<VKPipeline> _pipeline;
     sp<VKBuffer> _uniforms;

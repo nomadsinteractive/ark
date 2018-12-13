@@ -12,7 +12,7 @@
 #include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/resource_manager.h"
-#include "renderer/base/gl_texture_loader.h"
+#include "renderer/base/texture_bundle.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/texture.h"
@@ -49,7 +49,7 @@ sp<Texture> GLTexture2D::DICTIONARY::build(const sp<Scope>& /*args*/)
 
 GLTexture2D::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, Constants::Attributes::SRC)),
-      _parameters(sp<Texture::Parameters>::make(manifest))
+      _parameters(GLUtil::getTextureParameters(manifest))
 {
 }
 
@@ -62,7 +62,7 @@ sp<Texture> GLTexture2D::BUILDER::build(const sp<Scope>& args)
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
     const sp<Recycler> recycler = _resource_loader_context->resourceManager()->recycler();
     const sp<GLTexture> texture = sp<GLTexture2D>::make(recycler, size, _parameters, nullptr);
-    return _resource_loader_context->resourceManager()->createGLResource<Texture>(size, texture);
+    return _resource_loader_context->resourceManager()->createGLResource<Texture>(size, texture, Texture::TYPE_2D);
 }
 
 }

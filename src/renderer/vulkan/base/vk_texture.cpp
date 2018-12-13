@@ -7,14 +7,14 @@
 
 #include "renderer/base/resource_manager.h"
 
-#include "renderer/vulkan/base/device.h"
-#include "renderer/vulkan/base/command_pool.h"
+#include "renderer/vulkan/base/vk_device.h"
+#include "renderer/vulkan/base/vk_command_pool.h"
 #include "renderer/vulkan/base/vulkan_api.h"
 
 namespace ark {
 namespace vulkan {
 
-VKTexture::VKTexture(const sp<ResourceManager>& resourceManager, const sp<CommandPool>& commandPool)
+VKTexture::VKTexture(const sp<ResourceManager>& resourceManager, const sp<VKCommandPool>& commandPool)
     : _resource_manager(resourceManager), _command_pool(commandPool), _device(commandPool->device())
 {
     loadTexture();

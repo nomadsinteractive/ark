@@ -96,7 +96,7 @@ void GLRadianceCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uint3
 GLRadianceCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_manager(resourceLoaderContext->resourceManager()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _texture(factory.ensureBuilder<Texture>(manifest, Constants::Attributes::TEXTURE)),
-      _parameters(sp<Texture::Parameters>::make(manifest))
+      _parameters(GLUtil::getTextureParameters(manifest))
 {
 }
 
@@ -104,7 +104,7 @@ sp<Texture> GLRadianceCubemap::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Size> size = _size->build(args);
     const sp<GLRadianceCubemap> cubemap = sp<GLRadianceCubemap>::make(_resource_manager, _parameters, _texture->build(args), size);
-    return _resource_manager->createGLResource<Texture>(size, cubemap);
+    return _resource_manager->createGLResource<Texture>(size, cubemap, Texture::TYPE_CUBEMAP);
 }
 
 }

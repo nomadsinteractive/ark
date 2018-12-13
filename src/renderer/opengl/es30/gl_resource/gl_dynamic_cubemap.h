@@ -2,6 +2,7 @@
 #define ARK_RENDERER_OPENGL_ES30_GL_RESOURCE_GL_DYNAMIC_CUBEMAP_H_
 
 #include "core/forwarding.h"
+#include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"

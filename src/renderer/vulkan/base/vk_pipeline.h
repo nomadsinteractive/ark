@@ -14,7 +14,7 @@ namespace vulkan {
 
 class VKPipeline {
 public:
-    VKPipeline(const sp<RenderTarget>& renderTarget, VkPipelineLayout layout, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet descriptorSet, VkPipeline pipeline);
+    VKPipeline(const sp<VKRenderTarget>& renderTarget, VkPipelineLayout layout, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet descriptorSet, VkPipeline pipeline);
     ~VKPipeline();
 
     VkPipeline pipeline() const;
@@ -22,7 +22,7 @@ public:
     const VkDescriptorSet& descriptorSet() const;
 
 private:
-    sp<RenderTarget> _render_target;
+    sp<VKRenderTarget> _render_target;
 
     VkPipelineLayout _layout;
     VkDescriptorSetLayout _descriptor_set_layout;

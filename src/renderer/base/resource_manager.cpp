@@ -12,49 +12,16 @@
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/gl_context.h"
-#include "renderer/base/recycler.h"
-#include "renderer/base/gl_snippet_delegate.h"
+#include "renderer/base/snippet_delegate.h"
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/recycler.h"
 #include "renderer/base/shader.h"
-#include "renderer/inf/gl_snippet.h"
-
-#include "renderer/opengl/base/gl_texture_2d.h"
-#include "renderer/opengl/util/gl_index_buffers.h"
-
-#include "platform/gl/gl.h"
+#include "renderer/inf/snippet.h"
 
 namespace ark {
 
-namespace {
-
-class GLTextureResource : public Dictionary<sp<Texture>> {
-public:
-    GLTextureResource(const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
-        : _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader)
-    {
-    }
-
-    virtual sp<Texture> get(const String& name) override {
-        const bitmap bitmapBounds = _bitmap_bounds_loader->get(name);
-        DCHECK(bitmapBounds, "Texture resource \"%s\" not found", name.c_str());
-        const sp<Texture::Parameters> params = sp<Texture::Parameters>::make();
-        const sp<Size> size = sp<Size>::make(static_cast<float>(bitmapBounds->width()), static_cast<float>(bitmapBounds->height()));
-        const sp<GLTexture2D> texture = sp<GLTexture2D>::make(_recycler, size, params, sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
-        return sp<Texture>::make(size, texture);
-    }
-
-private:
-    sp<Recycler> _recycler;
-
-    sp<Dictionary<bitmap>> _bitmap_loader;
-    sp<Dictionary<bitmap>> _bitmap_bounds_loader;
-};
-
-}
-
 ResourceManager::ResourceManager(const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
-    : _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader),
-      _recycler(sp<Recycler>::make()), _gl_texture_loader(sp<GLTextureResource>::make(_recycler, bitmapLoader, bitmapBoundsLoader)), _tick(0)
+    : _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _recycler(sp<Recycler>::make()), _tick(0)
 {
 }
 
@@ -113,65 +80,10 @@ void ResourceManager::upload(const sp<Resource>& resource, UploadStrategy strate
     }
 }
 
-void ResourceManager::prepare(const Buffer& buffer, ResourceManager::UploadStrategy strategy)
+void ResourceManager::uploadBuffer(const Buffer& buffer, UploadStrategy strategy)
 {
     upload(buffer._delegate, strategy);
 }
-
-void ResourceManager::recycle(const sp<Resource>& resource) const
-{
-    _recycler->recycle(resource);
-}
-
-sp<Texture> ResourceManager::loadGLTexture(const String& name)
-{
-    const sp<Texture> texture = _gl_texture_loader->get(name);
-    DCHECK(texture, "Texture \"%s\" not loaded", name.c_str());
-    upload(texture, US_ONCE_AND_ON_SURFACE_READY);
-    return texture;
-}
-
-sp<Texture> ResourceManager::createGLTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, UploadStrategy ps)
-{
-    const sp<Size> size = sp<Size>::make(static_cast<float>(width), static_cast<float>(height));
-    const sp<GLTexture2D> texture2d = sp<GLTexture2D>::make(_recycler, size, sp<Texture::Parameters>::make(), bitmapVariable);
-    const sp<Texture> texture = sp<Texture>::make(size, texture2d);
-    upload(texture, ps);
-    return texture;
-}
-
-//Buffer ResourceManager::makeBuffer(const sp<Buffer::Uploader>& uploader, Buffer::Type type, Buffer::Usage usage)
-//{
-//    Buffer buffer(_recycler, uploader, type, usage);
-//    prepare(buffer, US_ONCE_AND_ON_SURFACE_READY);
-//    return buffer;
-//}
-
-//Buffer ResourceManager::makeDynamicArrayBuffer() const
-//{
-//    return Buffer(_recycler, nullptr, Buffer::TYPE_VERTEX, Buffer::USAGE_DYNAMIC);
-//}
-
-//Buffer::Snapshot ResourceManager::makeBufferSnapshot(Buffer::Name name, const Buffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size)
-//{
-//    if(name == Buffer::NAME_NONE)
-//        return Buffer(_recycler, nullptr, Buffer::TYPE_INDEX, Buffer::USAGE_DYNAMIC).snapshot(maker(size));
-
-//    sp<SharedBuffer> sb;
-//    if(!_shared_buffers.pop(sb))
-//        sb = sp<SharedBuffer>::make();
-
-//    Buffer& shared = sb->_buffers[name];
-//    if(!shared || shared.size() < size)
-//    {
-//        const sp<Buffer::Uploader> uploader = maker(reservedObjectCount);
-//        DCHECK(uploader && uploader->size() >= size, "Making GLBuffer::Uploader failed, object-count: %d, uploader-size: %d, required-size: %d", reservedObjectCount, uploader ? uploader->size() : 0, size);
-//        shared = makeBuffer(uploader, Buffer::TYPE_INDEX, Buffer::USAGE_STATIC);
-//    }
-//    _shared_buffers.push(sb);
-
-//    return shared.snapshot(size);
-//}
 
 const sp<Recycler>& ResourceManager::recycler() const
 {

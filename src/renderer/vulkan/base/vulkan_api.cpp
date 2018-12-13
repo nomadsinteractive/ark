@@ -16,11 +16,11 @@
 #include "renderer/base/resource_manager.h"
 
 #include "renderer/vulkan/base/vk_buffer.h"
-#include "renderer/vulkan/base/command_pool.h"
-#include "renderer/vulkan/base/device.h"
-#include "renderer/vulkan/base/instance.h"
+#include "renderer/vulkan/base/vk_command_pool.h"
+#include "renderer/vulkan/base/vk_device.h"
+#include "renderer/vulkan/base/vk_instance.h"
 #include "renderer/vulkan/base/vk_pipeline.h"
-#include "renderer/vulkan/base/render_target.h"
+#include "renderer/vulkan/base/vk_render_target.h"
 #include "renderer/vulkan/base/vk_texture.h"
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
 #include "renderer/vulkan/util/vulkan_tools.h"
@@ -85,10 +85,10 @@ void VulkanAPI::initialize(GLContext& /*glContext*/)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     zoom = -2.5f;
-    _instance = sp<Instance>::make();
+    _instance = sp<VKInstance>::make();
     _instance->initialize();
-    _device = sp<Device>::make(_instance, _instance->physicalDevices()[0]);
-    _render_target = sp<RenderTarget>::make(_device);
+    _device = sp<VKDevice>::make(_instance, _instance->physicalDevices()[0]);
+    _render_target = sp<VKRenderTarget>::make(_device);
 
     _uniforms = sp<VKBuffer>::make(_device, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(uboVS));
 

@@ -20,7 +20,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Shader);
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag");
-    static sp<Shader> fromStringTable(const String& vertex = "shaders/default.vert", const String& fragment = "shaders/texture.frag", const sp<GLSnippet>& snippet = nullptr, const sp<ResourceLoaderContext>& resourceLoaderContext = nullptr);
+    static sp<Shader> fromStringTable(const String& vertex = "shaders/default.vert", const String& fragment = "shaders/texture.frag", const sp<Snippet>& snippet = nullptr, const sp<ResourceLoaderContext>& resourceLoaderContext = nullptr);
 
     void use(GraphicsContext& graphicsContext);
 
@@ -35,7 +35,7 @@ public:
 
     const sp<Pipeline>& getPipeline(GraphicsContext& graphicsContext);
 
-    const sp<GLSnippet>& snippet() const;
+    const sp<Snippet>& snippet() const;
 
 //[[deprecated]]
     uint32_t stride() const;
@@ -54,7 +54,7 @@ public:
 
         sp<Builder<String>> _vertex;
         sp<Builder<String>> _fragment;
-        sp<Builder<GLSnippet>> _snippet;
+        sp<Builder<Snippet>> _snippet;
         SafePtr<Builder<Camera>> _camera;
     };
 
@@ -70,7 +70,7 @@ private:
         sp<PipelineFactory> _pipeline_factory;
         sp<PipelineLayout> _pipeline_layout;
         sp<PipelineInput> _input;
-        sp<GLSnippet> _snippet;
+        sp<Snippet> _snippet;
     };
 
 private:

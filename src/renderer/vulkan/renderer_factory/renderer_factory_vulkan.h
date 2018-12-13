@@ -13,7 +13,7 @@ namespace vulkan {
 
 class RendererFactoryVulkan : public RendererFactory {
 public:
-    RendererFactoryVulkan(const sp<ResourceManager>& glResources);
+    RendererFactoryVulkan(const sp<ResourceManager>& resourceManager);
     ~RendererFactoryVulkan() override;
 
     virtual void initialize(GLContext& glContext) override;
@@ -21,6 +21,7 @@ public:
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) override;
     virtual sp<RenderView> createRenderView(const sp<GLContext>& glContext, const Viewport& viewport) override;
     virtual sp<ark::PipelineFactory> createPipelineFactory() override;
+    virtual sp<Texture> createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap) override;
 
 private:
     sp<ResourceManager> _resource_manager;

@@ -3,11 +3,11 @@
 #include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/gl_snippet_delegate.h"
+#include "renderer/base/snippet_delegate.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
 
-#include "renderer/impl/gl_snippet/gl_snippet_active_texture.h"
+#include "renderer/impl/snippet/snippet_active_texture.h"
 
 namespace ark {
 
@@ -17,7 +17,7 @@ ShaderBindings::ShaderBindings(RenderController& renderController, const sp<Shad
 }
 
 ShaderBindings::ShaderBindings(RenderController& renderController, const sp<Shader>& shader, const Buffer& arrayBuffer)
-    : _shader(shader), _snippet(sp<GLSnippetDelegate>::make(shader)), _attributes(shader->input()), _array_buffer(arrayBuffer),
+    : _shader(shader), _snippet(sp<SnippetDelegate>::make(shader)), _attributes(shader->input()), _array_buffer(arrayBuffer),
       _pipeline_input(_shader->input()), _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController))
 {
 }
@@ -27,7 +27,7 @@ const sp<Shader>& ShaderBindings::shader() const
     return _shader;
 }
 
-const sp<GLSnippetDelegate>& ShaderBindings::snippet() const
+const sp<SnippetDelegate>& ShaderBindings::snippet() const
 {
     return _snippet;
 }
@@ -54,12 +54,12 @@ const ShaderBindings::Attributes& ShaderBindings::attributes() const
 
 void ShaderBindings::bindGLTexture(const sp<Texture>& texture, uint32_t name) const
 {
-    _snippet->link<GLSnippetActiveTexture>(texture, name);
+    _snippet->link<SnippetActiveTexture>(texture, name);
 }
 
-void ShaderBindings::bindGLTexture(const sp<Resource>& texture, uint32_t target, uint32_t name) const
+void ShaderBindings::bindGLTexture(const sp<Resource>& texture, Texture::Type type, uint32_t name) const
 {
-    _snippet->link<GLSnippetActiveTexture>(texture, target, name);
+    _snippet->link<SnippetActiveTexture>(texture, type, name);
 }
 
 std::map<uint32_t, Buffer::Builder> ShaderBindings::makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const

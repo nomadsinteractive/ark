@@ -12,9 +12,9 @@
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
-#include "renderer/base/gl_snippet_delegate.h"
+#include "renderer/base/snippet_delegate.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/opengl/util/gl_index_buffers.h"
+#include "renderer/util/index_buffers.h"
 #include "renderer/opengl/util/gl_util.h"
 
 namespace ark {
@@ -51,7 +51,7 @@ private:
 
 
 Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _size(size), _shader(shader), _index_buffer(GLIndexBuffers::makeGLBufferSnapshot(resourceLoaderContext->renderController(), Buffer::NAME_QUADS, 6)),
+    : _size(size), _shader(shader), _index_buffer(IndexBuffers::makeGLBufferSnapshot(resourceLoaderContext->renderController(), Buffer::NAME_QUADS, 6)),
       _shader_bindings(sp<ShaderBindings>::make(resourceLoaderContext->renderController(), shader, resourceLoaderContext->renderController()->makeVertexBuffer(Buffer::USAGE_STATIC, sp<Buffer::ByteArrayUploader>::make(GLUtil::makeUnitCubeVertices())))),
       _object_pool(resourceLoaderContext->objectPool())
 {

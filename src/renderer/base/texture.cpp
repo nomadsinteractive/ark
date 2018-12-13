@@ -11,15 +11,14 @@
 
 #include "renderer/base/recycler.h"
 #include "renderer/base/resource_manager.h"
-#include "renderer/base/gl_texture_loader.h"
+#include "renderer/base/texture_bundle.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/opengl/util/gl_util.h"
 
 namespace ark {
 
-Texture::Texture(const sp<Size>& size, const sp<Resource>& resource)
-    : _size(size), _resource(resource)
+Texture::Texture(const sp<Size>& size, const sp<Resource>& resource, Type type)
+    : _size(size), _resource(resource), _type(type)
 {
 }
 
@@ -35,6 +34,11 @@ void Texture::upload(GraphicsContext& graphicsContext)
 Resource::RecycleFunc Texture::recycle()
 {
     return _resource->recycle();
+}
+
+Texture::Type Texture::type() const
+{
+    return _type;
 }
 
 uint32_t Texture::id()
@@ -112,18 +116,6 @@ template<> ARK_API Texture::Feature Conversions::to<String, Texture::Feature>(co
 Texture::Parameters::Parameters(Format format, Texture::Feature features)
     : _format(format), _features(features)
 {
-    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MIN_FILTER), static_cast<int32_t>((features & Texture::FEATURE_MIPMAPS) ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
-    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MAG_FILTER), static_cast<int32_t>(GL_LINEAR));
-    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_S), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
-    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_T), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
-    setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_R), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
-}
-
-Texture::Parameters::Parameters(const document& manifest)
-    : Parameters(Documents::getAttribute<Texture::Format>(manifest, "format", FORMAT_AUTO), Documents::getAttribute<Texture::Feature>(manifest, "feature", FEATURE_DEFAULT))
-{
-    for(const document& i : manifest->children("parameter"))
-        _tex_parameters[static_cast<uint32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::NAME)))] = static_cast<int32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::VALUE)));
 }
 
 void Texture::Parameters::setTexParameter(uint32_t name, int32_t value)

@@ -11,6 +11,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
+#include "renderer/base/resource_manager.h"
 
 namespace ark {
 
@@ -22,6 +23,8 @@ public:
     const sp<ResourceManager>& resourceManager() const;
 
     sp<PipelineFactory> createPipelineFactory() const;
+    sp<Dictionary<sp<Texture>>> createTextureBundle() const;
+    sp<Texture> createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, ResourceManager::UploadStrategy us = ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
 
     Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) const;
     Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Buffer::Uploader>& uploader = nullptr) const;

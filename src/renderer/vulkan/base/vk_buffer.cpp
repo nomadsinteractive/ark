@@ -5,7 +5,7 @@
 namespace ark {
 namespace vulkan {
 
-VKBuffer::VKBuffer(const sp<Device>& device, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size)
+VKBuffer::VKBuffer(const sp<VKDevice>& device, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size)
     : _device(device), usageFlags(usageFlags), memoryPropertyFlags(memoryPropertyFlags)
 {
     // Create the buffer handle

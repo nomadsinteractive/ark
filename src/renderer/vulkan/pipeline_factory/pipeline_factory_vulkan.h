@@ -19,7 +19,7 @@ public:
     PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager);
     ~PipelineFactoryVulkan() override;
 
-    sp<VKPipeline> build(const sp<RenderTarget>& renderTarget);
+    sp<VKPipeline> build(const sp<VKRenderTarget>& renderTarget);
 
     virtual sp<ark::Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout) override;
     virtual sp<RenderCommand> buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode renderMode, int32_t count) override;
@@ -37,8 +37,8 @@ private:
 
 private:
     sp<ResourceManager> _resource_manager;
-    sp<RenderTarget> _render_target;
-    sp<Device> _device;
+    sp<VKRenderTarget> _render_target;
+    sp<VKDevice> _device;
 
     VkPipelineLayout pipelineLayout;
     VkDescriptorSetLayout descriptorSetLayout;

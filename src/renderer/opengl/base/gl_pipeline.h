@@ -29,7 +29,7 @@ public:
     virtual void use() override;
     virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) override;
     virtual void bindUniform(GraphicsContext& graphicsContext, const Uniform& uniform) override;
-    virtual void activeTexture(Resource& texture, uint32_t target, uint32_t name) override;
+    virtual void activeTexture(Resource& texture, Texture::Type target, uint32_t name) override;
 
     void glUpdateMatrix(GraphicsContext& graphicsContext, const String& name, const Matrix& matrix);
 
