@@ -17,7 +17,7 @@ public:
     virtual void initialize(GLContext& glContext) override;
     virtual void setGLVersion(Ark::RendererVersion version, GLContext& glContext) override;
 
-    virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) override;
+    virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader) override;
     virtual sp<RenderView> createRenderView(const sp<GLContext>& glContext, const Viewport& viewport) override;
     virtual sp<PipelineFactory> createPipelineFactory() override;
     virtual sp<Texture> createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap) override;

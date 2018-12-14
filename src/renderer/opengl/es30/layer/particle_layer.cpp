@@ -84,8 +84,8 @@ sp<RenderCommand> ParticleLayer::render(const Layer::Snapshot& renderContext, fl
         pTransform += 16;
     }
 
-    GLDrawingContext dc(_shader_bindings, renderContext._camera, _shader_bindings->arrayBuffer().snapshot(_resource_loader_context->objectPool()->obtain<GLBuffer::ByteArrayUploader>(pos)), _index_buffer, GL_TRIANGLES);
-//    dc._instanced_array_buffers[1] = _transform_array_buffer.snapshot(_resource_loader_context->objectPool()->obtain<GLBuffer::ByteArrayUploader>(transform));
+    GLDrawingContext dc(_shader_bindings, renderContext._camera, _shader_bindings->arrayBuffer().snapshot(_resource_loader_context->objectPool()->obtain<GLUploader::ByteArray>(pos)), _index_buffer, GL_TRIANGLES);
+//    dc._instanced_array_buffers[1] = _transform_array_buffer.snapshot(_resource_loader_context->objectPool()->obtain<GLUploader::ByteArray>(transform));
     return sp<DrawElementsInstanced>::make(dc, _shader_bindings->shader(), renderContext._items.size());
 }
 

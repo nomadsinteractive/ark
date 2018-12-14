@@ -37,18 +37,6 @@ public:
         NAME_COUNT
     };
 
-    class ARK_API Uploader {
-    public:
-        Uploader(size_t size);
-        virtual ~Uploader() = default;
-
-        size_t size() const;
-        virtual void upload(const UploadFunc& uploader) = 0;
-
-    protected:
-        size_t _size;
-    };
-
     class ARK_API Delegate : public Resource {
     public:
         Delegate(size_t size);
@@ -61,59 +49,6 @@ public:
     protected:
         size_t _size;
     };
-
-    typedef std::function<sp<Uploader>(size_t)> UploadMakerFunc;
-
-    template<typename T> class ArrayUploader : public Uploader {
-    public:
-        ArrayUploader(const sp<Array<T>>& array)
-            : Uploader(array->size()), _array(array) {
-        }
-
-        virtual void upload(const UploadFunc& uploader) override {
-            uploader(_array->buf(), _array->size());
-        }
-
-    private:
-        sp<Array<T>> _array;
-    };
-
-    template<typename T> class ArrayListUploader : public Uploader {
-    public:
-        ArrayListUploader(std::vector<sp<Array<T>>> arrayList)
-            : Uploader(0), _array_list(std::move(arrayList)) {
-            for(const auto& i : _array_list)
-                _size += i->length();
-        }
-
-        virtual void upload(const UploadFunc& uploader) override {
-            for(const auto& i : _array_list)
-                uploader(i->buf(), i->size());
-        }
-
-    private:
-        std::vector<bytearray> _array_list;
-    };
-
-    template<typename T> class VectorUploader : public Uploader {
-    public:
-        VectorUploader(std::vector<T> vector)
-            : Uploader(vector.size() * sizeof(T)), _vector(std::move(vector)) {
-        }
-
-        virtual void upload(const UploadFunc& uploader) override {
-            uploader(&_vector[0], _vector.size() * sizeof(T));
-        }
-
-    private:
-        std::vector<T> _vector;
-    };
-
-    typedef ArrayUploader<uint8_t> ByteArrayUploader;
-    typedef ArrayListUploader<uint8_t> ByteArrayListUploader;
-
-    typedef ArrayUploader<glindex_t> IndexArrayUploader;
-    typedef ArrayListUploader<glindex_t> IndexArrayListUploader;
 
 public:
     class Snapshot {

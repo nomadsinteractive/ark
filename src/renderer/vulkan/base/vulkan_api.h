@@ -12,7 +12,10 @@
 #include "core/types/owned_ptr.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/graphics_context.h"
+
 #include "renderer/vulkan/forward.h"
+#include "renderer/vulkan/renderer_factory/renderer_factory_vulkan.h"
 #include "renderer/vulkan/util/vulkan_device.hpp"
 #include "renderer/vulkan/util/vulkan_swap_chain.hpp"
 
@@ -21,7 +24,7 @@ namespace vulkan {
 
 class VulkanAPI {
 public:
-    VulkanAPI(const sp<ResourceManager>& resourceManager);
+    VulkanAPI(const sp<ResourceManager>& resourceManager, const sp<RendererFactoryVulkan::Stub>& rendererFactory);
     ~VulkanAPI();
 
     void initialize(GLContext& glContext);
@@ -37,29 +40,29 @@ public:
         float normal[3];
     };
 
-    struct {
+    struct UBO {
         glm::mat4 projection;
         glm::mat4 model;
         glm::vec4 viewPos;
         float lodBias = 0.0f;
-    } uboVS;
+    };
+
+    sp<UBO> _ubo;
 
 private:
-    void generateQuad();
+    void generateQuad(const VKDevice& device);
 
-    void buildCommandBuffers();
+    void buildCommandBuffers(const VKRenderTarget& renderTarget);
 
-    void updateUniformBuffers();
+    void updateUniformBuffers(const VKRenderTarget& renderTarget);
 
-    void draw();
+    void draw(VKRenderTarget& renderTarget);
 
     uint32_t getMemoryTypeIndex(uint32_t typeBits, VkMemoryPropertyFlags properties) const;
 
 private:
     sp<ResourceManager> _resource_manager;
-    sp<VKInstance> _instance;
-    sp<VKDevice> _device;
-    sp<VKRenderTarget> _render_target;
+    sp<RendererFactoryVulkan::Stub> _renderer_factory;
     sp<PipelineFactoryVulkan> _pipeline_factory;
     sp<VKPipeline> _pipeline;
     sp<VKBuffer> _uniforms;
@@ -82,6 +85,8 @@ private:
     vks::Buffer indexBuffer;
 
     VkClearColorValue defaultClearColor = { { 0, 0, 0.2f, 1.0f } };
+
+    GraphicsContext _graphics_context;
 
     friend class RendererFactoryVulkan;
     friend class PipelineFactoryVulkan;

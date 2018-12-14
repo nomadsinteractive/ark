@@ -103,7 +103,7 @@ std::vector<VkCommandBuffer> VKRenderTarget::makeCommandBuffers() const
     return _command_pool->makeCommandBuffers(_swap_chain.imageCount);
 }
 
-uint32_t VKRenderTarget::acquire()
+uint32_t VKRenderTarget::acquire() const
 {
     uint32_t currentBuffer;
     VulkanAPI::checkResult(_swap_chain.acquireNextImage(_semaphore_present_complete, &currentBuffer));

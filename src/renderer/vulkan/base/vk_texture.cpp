@@ -6,6 +6,7 @@
 #include "graphics/base/bitmap.h"
 
 #include "renderer/base/resource_manager.h"
+#include "renderer/base/recycler.h"
 
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
@@ -14,18 +15,42 @@
 namespace ark {
 namespace vulkan {
 
-VKTexture::VKTexture(const sp<ResourceManager>& resourceManager, const sp<VKCommandPool>& commandPool)
-    : _resource_manager(resourceManager), _command_pool(commandPool), _device(commandPool->device())
+VKTexture::VKTexture(const sp<Recycler>& recycler, const sp<ResourceManager>& resourceManager, const sp<VKCommandPool>& commandPool)
+    : _recycler(recycler), _resource_manager(resourceManager), _command_pool(commandPool), _device(commandPool->device())
 {
     loadTexture();
 }
 
 VKTexture::~VKTexture()
 {
-    vkDestroyImageView(_command_pool->device()->logicalDevice(), _descriptor.imageView, nullptr);
-    vkDestroyImage(_device->logicalDevice(), _image, nullptr);
-    vkDestroySampler(_device->logicalDevice(), _descriptor.sampler, nullptr);
-    vkFreeMemory(_device->logicalDevice(), _memory, nullptr);
+    _recycler->recycle(*this);
+}
+
+uint32_t VKTexture::id()
+{
+    return 0;
+}
+
+void VKTexture::upload(GraphicsContext& graphicsContext)
+{
+}
+
+Resource::RecycleFunc VKTexture::recycle()
+{
+    const sp<VKDevice> device = _device;
+    VkDescriptorImageInfo descriptor = _descriptor;
+    VkImage image = _image;
+    VkDeviceMemory memory = _memory;
+
+    _image = VK_NULL_HANDLE;
+    _memory = VK_NULL_HANDLE;
+
+    return [device, descriptor, image, memory](GraphicsContext&) {
+        vkDestroyImageView(device->logicalDevice(), descriptor.imageView, nullptr);
+        vkDestroyImage(device->logicalDevice(), image, nullptr);
+        vkDestroySampler(device->logicalDevice(), descriptor.sampler, nullptr);
+        vkFreeMemory(device->logicalDevice(), memory, nullptr);
+    };
 }
 
 const VkDescriptorImageInfo& VKTexture::descriptor() const

@@ -98,7 +98,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, 
     return _resource_loader->beanFactory().ensure<ResourceLoader>(name, args);
 }
 
-sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Scope>& args)
+sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Scope>& /*args*/)
 {
     const document doc = name ? _application_resource->loadDocument(name) : sp<Document>::make("");
     DCHECK(doc, "Resource \"%s\" not found", name.c_str());

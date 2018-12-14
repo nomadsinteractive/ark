@@ -135,6 +135,9 @@ void Application::onSurfaceCreated()
 {
     LOGD("");
     __thread_init__<THREAD_ID_RENDERER>();
+
+    _application_context->renderEngine()->initialize();
+
     _surface->onSurfaceCreated();
     _application_delegate->onSurfaceCreated(_surface);
 }
@@ -143,7 +146,6 @@ void Application::onSurfaceChanged(uint32_t width, uint32_t height)
 {
     LOGD("width = %d, height = %d", width, height);
     DTHREAD_CHECK(THREAD_ID_RENDERER);
-    _application_context->renderEngine()->initialize();
 
     _surface->onSurfaceChanged(width, height);
     _application_delegate->onSurfaceChanged(width, height);

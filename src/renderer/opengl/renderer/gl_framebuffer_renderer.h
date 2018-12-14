@@ -9,6 +9,8 @@
 
 #include "renderer/forwarding.h"
 
+#include "renderer/opengl/forwarding.h"
+
 namespace ark {
 
 class GLFramebufferRenderer : public Renderer {

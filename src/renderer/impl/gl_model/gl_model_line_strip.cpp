@@ -51,7 +51,7 @@ void GLModelLineStrip::start(ModelBuffer& buf, RenderController& /*renderControl
     if(layerContext._dirty)
     {
         const std::vector<glindex_t> indices = makeIndices(layerContext);
-        buf.setIndices(_ibo.snapshot(sp<Buffer::VectorUploader<glindex_t>>::make(std::move(indices))));
+        buf.setIndices(_ibo.snapshot(sp<Uploader::Vector<glindex_t>>::make(std::move(indices))));
     }
     else
         buf.setIndices(_ibo.snapshot());

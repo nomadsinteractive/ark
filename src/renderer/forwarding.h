@@ -11,10 +11,8 @@ class PipelineFactory;
 class Attribute;
 class Buffer;
 class GLContext;
-class GLCubemap;
 class RenderModel;
 class ModelBuffer;
-class GLFramebuffer;
 class RenderModel;
 class SnippetFactory;
 class Recycler;
@@ -38,6 +36,7 @@ class RenderEngine;
 class RenderController;
 class RendererFactory;
 class ResourceLoaderContext;
+class Uploader;
 
 }
 

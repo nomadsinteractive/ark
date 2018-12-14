@@ -31,7 +31,7 @@ public:
 
     std::vector<VkCommandBuffer> makeCommandBuffers() const;
 
-    uint32_t acquire();
+    uint32_t acquire() const;
     void submit(VkCommandBuffer* commandBuffer);
     void swap(uint32_t currentBuffer);
 

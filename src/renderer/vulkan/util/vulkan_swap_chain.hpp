@@ -460,7 +460,7 @@ public:
 	*
 	* @return VkResult of the image acquisition
 	*/
-	VkResult acquireNextImage(VkSemaphore presentCompleteSemaphore, uint32_t *imageIndex)
+    VkResult acquireNextImage(VkSemaphore presentCompleteSemaphore, uint32_t *imageIndex) const
 	{
 		// By setting timeout to UINT64_MAX we will always wait until the next image has been acquired or an actual error is thrown
 		// With that we don't have to handle VK_NOT_READY

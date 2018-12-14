@@ -15,7 +15,7 @@ GLModelSphere::GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderCont
     : RenderModel(RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas), _vertex_count((sampleCount * 2 + 1) * (sampleCount + 1)),
       _vertices_boiler_plate(sp<DynamicArray<float>>::make(_vertex_count * (3 + 2))),
       _indices_boiler_plate(sp<DynamicArray<glindex_t>>::make(4 * sampleCount * sampleCount + 2 * (sampleCount * 2 - 1))),
-      _instance_index(resourceLoaderContext->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC, sp<Buffer::IndexArrayUploader>::make(_indices_boiler_plate)))
+      _instance_index(resourceLoaderContext->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC, sp<IndexArrayUploader>::make(_indices_boiler_plate)))
 {
     float* vertices = _vertices_boiler_plate->buf();
     float step = Math::PI / sampleCount;

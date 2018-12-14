@@ -12,7 +12,7 @@ IndexBuffers::NinePatch::NinePatch(size_t objectCount)
     DASSERT(_object_count);
 }
 
-void IndexBuffers::NinePatch::upload(const Buffer::UploadFunc& uploader)
+void IndexBuffers::NinePatch::upload(const Uploader::UploadFunc& uploader)
 {
     const size_t bolierPlateLength = _boiler_plate.length();
     bytearray array = sp<DynamicArray<uint8_t>>::make(size());
@@ -31,9 +31,9 @@ void IndexBuffers::NinePatch::upload(const Buffer::UploadFunc& uploader)
     uploader(array->buf(), array->length());
 }
 
-Buffer::UploadMakerFunc IndexBuffers::NinePatch::maker()
+Uploader::MakerFunc IndexBuffers::NinePatch::maker()
 {
-    return [](size_t objectCount)->sp<Buffer::Uploader> { return sp<NinePatch>::make(objectCount); };
+    return [](size_t objectCount)->sp<Uploader> { return sp<NinePatch>::make(objectCount); };
 }
 
 IndexBuffers::Quads::Quads(size_t objectCount)
@@ -41,7 +41,7 @@ IndexBuffers::Quads::Quads(size_t objectCount)
 {
 }
 
-void IndexBuffers::Quads::upload(const Buffer::UploadFunc& uploader)
+void IndexBuffers::Quads::upload(const Uploader::UploadFunc& uploader)
 {
     bytearray result = sp<DynamicArray<uint8_t>>::make(size());
 
@@ -60,9 +60,9 @@ void IndexBuffers::Quads::upload(const Buffer::UploadFunc& uploader)
     uploader(result->buf(), result->length());
 }
 
-Buffer::UploadMakerFunc IndexBuffers::Quads::maker()
+Uploader::MakerFunc IndexBuffers::Quads::maker()
 {
-    return [](size_t objectCount)->sp<Buffer::Uploader> { return sp<Quads>::make(objectCount); };
+    return [](size_t objectCount)->sp<Uploader> { return sp<Quads>::make(objectCount); };
 }
 
 IndexBuffers::Points::Points(size_t objectCount)
@@ -70,7 +70,7 @@ IndexBuffers::Points::Points(size_t objectCount)
 {
 }
 
-void IndexBuffers::Points::upload(const Buffer::UploadFunc& uploader)
+void IndexBuffers::Points::upload(const Uploader::UploadFunc& uploader)
 {
     const auto result = sp<DynamicArray<glindex_t>>::make(_object_count);
 
@@ -83,9 +83,9 @@ void IndexBuffers::Points::upload(const Buffer::UploadFunc& uploader)
     uploader(result->buf(), result->size());
 }
 
-Buffer::UploadMakerFunc IndexBuffers::Points::maker()
+Uploader::MakerFunc IndexBuffers::Points::maker()
 {
-    return [](size_t objectCount)->sp<Buffer::Uploader> { return sp<Points>::make(objectCount); };
+    return [](size_t objectCount)->sp<Uploader> { return sp<Points>::make(objectCount); };
 }
 
 Buffer::Snapshot IndexBuffers::makeGLBufferSnapshot(RenderController& renderController, Buffer::Name name, size_t objectCount)

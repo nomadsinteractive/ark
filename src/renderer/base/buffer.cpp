@@ -3,6 +3,8 @@
 #include "core/base/memory_pool.h"
 #include "core/base/object_pool.h"
 
+#include "renderer/inf/uploader.h"
+
 namespace ark {
 
 Buffer::Snapshot::Snapshot(const sp<Delegate>& stub)
@@ -111,11 +113,11 @@ void Buffer::Builder::next()
     DCHECK(_ptr <= _boundary, "Array buffer out of bounds");
 }
 
-sp<Buffer::Uploader> Buffer::Builder::makeUploader() const
+sp<Uploader> Buffer::Builder::makeUploader() const
 {
     if(_buffers.size() == 1)
-        return _object_pool->obtain<Buffer::ByteArrayUploader>(_buffers[0]);
-    return _object_pool->obtain<Buffer::ByteArrayListUploader>(_buffers);
+        return _object_pool->obtain<ByteArrayUploader>(_buffers[0]);
+    return _object_pool->obtain<ByteArrayListUploader>(_buffers);
 }
 
 size_t Buffer::Builder::stride() const
@@ -139,12 +141,12 @@ void Buffer::Builder::grow()
     _boundary = _ptr + bytes->length();
 }
 
-Buffer::Uploader::Uploader(size_t size)
+Uploader::Uploader(size_t size)
     : _size(size)
 {
 }
 
-size_t Buffer::Uploader::size() const
+size_t Uploader::size() const
 {
     return _size;
 }

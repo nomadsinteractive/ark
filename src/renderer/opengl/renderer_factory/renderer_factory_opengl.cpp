@@ -80,7 +80,7 @@ sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<GLContext>& glCo
     return sp<RenderView>::adopt(new RenderViewOpenGL(glContext, _resource_manager, viewport));
 }
 
-sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader)
+sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader)
 {
     return sp<GLBuffer>::make(type, usage, _resource_manager->recycler(), uploader);
 }

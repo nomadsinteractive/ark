@@ -1,8 +1,6 @@
 #ifndef ARK_RENDERER_OPENGL_ES20_RENDERER_SHADER_FRAME_H_
 #define ARK_RENDERER_OPENGL_ES20_RENDERER_SHADER_FRAME_H_
 
-#include "core/base/bean_factory.h"
-#include "core/collection/list.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"

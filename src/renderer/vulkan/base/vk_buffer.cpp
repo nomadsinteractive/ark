@@ -1,15 +1,17 @@
 #include "renderer/vulkan/base/vk_buffer.h"
 
+#include "renderer/base/recycler.h"
+#include "renderer/inf/uploader.h"
+
 #include "renderer/vulkan/base/vulkan_api.h"
 
 namespace ark {
 namespace vulkan {
 
-VKBuffer::VKBuffer(const sp<VKDevice>& device, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size)
-    : _device(device), usageFlags(usageFlags), memoryPropertyFlags(memoryPropertyFlags)
+VKBuffer::VKBuffer(const sp<VKDevice>& device, const sp<Recycler>& recycler, const sp<Uploader>& uploader, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags)
+    : Buffer::Delegate(uploader->size()), _device(device), _recycler(recycler), _uploader(uploader), _usage_flags(usageFlags), _memory_property_flags(memoryPropertyFlags)
 {
-    // Create the buffer handle
-    VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo(usageFlags, size);
+    const VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo(usageFlags, _size);
     VulkanAPI::checkResult(vkCreateBuffer(_device->logicalDevice(), &bufferCreateInfo, nullptr, &_buffer));
 
     // Create the memory backing up the buffer handle
@@ -21,17 +23,53 @@ VKBuffer::VKBuffer(const sp<VKDevice>& device, VkBufferUsageFlags usageFlags, Vk
     memAlloc.memoryTypeIndex = _device->getMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
     VulkanAPI::checkResult(vkAllocateMemory(_device->logicalDevice(), &memAlloc, nullptr, &_memory));
 
-    _alignment = memReqs.alignment;
-    _size = memAlloc.allocationSize;
-
     setupDescriptor();
-
     bind();
 }
 
 VKBuffer::~VKBuffer()
 {
-    destroy();
+    _recycler->recycle(*this);
+}
+
+uint32_t VKBuffer::id()
+{
+    return 0;
+}
+
+void VKBuffer::upload(GraphicsContext& graphicsContext)
+{
+    reload(graphicsContext, _uploader);
+}
+
+Resource::RecycleFunc VKBuffer::recycle()
+{
+    const sp<VKDevice> device = _device;
+    VkBuffer buffer = _buffer;
+    VkDeviceMemory memory = _memory;
+
+    _buffer = VK_NULL_HANDLE;
+    _memory = VK_NULL_HANDLE;
+
+    return [device, buffer, memory](GraphicsContext&) {
+        if (buffer)
+            vkDestroyBuffer(device->logicalDevice(), buffer, nullptr);
+        if (memory)
+            vkFreeMemory(device->logicalDevice(), memory, nullptr);
+    };
+}
+
+void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& transientUploader)
+{
+    void* mapped = map();
+    size_t offset = 0;
+    transientUploader->upload([mapped, &offset](void* buf, size_t size) {
+        memcpy(reinterpret_cast<int8_t*>(mapped) + offset, buf, size);
+        offset += size;
+    });
+    if((_memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
+        flush();
+    unmap(mapped);
 }
 
 void* VKBuffer::map(VkDeviceSize size, VkDeviceSize offset)
@@ -59,15 +97,6 @@ void VKBuffer::setupDescriptor(VkDeviceSize size, VkDeviceSize offset)
     _descriptor.range = size;
 }
 
-void VKBuffer::upload(void* data, VkDeviceSize size)
-{
-    void* mapped = map();
-    memcpy(mapped, data, size);
-    if((memoryPropertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
-        flush();
-    unmap(mapped);
-}
-
 VkResult VKBuffer::flush(VkDeviceSize size, VkDeviceSize offset)
 {
     VkMappedMemoryRange mappedRange = {};
@@ -88,17 +117,21 @@ VkResult VKBuffer::invalidate(VkDeviceSize size, VkDeviceSize offset)
     return vkInvalidateMappedMemoryRanges(_device->logicalDevice(), 1, &mappedRange);
 }
 
-const VkDescriptorBufferInfo&VKBuffer::descriptor() const
+const VkDescriptorBufferInfo& VKBuffer::descriptor() const
 {
     return _descriptor;
 }
 
 void VKBuffer::destroy()
 {
-    if (_buffer)
-        vkDestroyBuffer(_device->logicalDevice(), _buffer, nullptr);
-    if (_memory)
-        vkFreeMemory(_device->logicalDevice(), _memory, nullptr);
+    const sp<VKDevice> device = _device;
+    VkBuffer buffer = _buffer;
+    VkDeviceMemory memory = _memory;
+
+    if (buffer)
+        vkDestroyBuffer(device->logicalDevice(), buffer, nullptr);
+    if (memory)
+        vkFreeMemory(device->logicalDevice(), memory, nullptr);
 }
 
 }

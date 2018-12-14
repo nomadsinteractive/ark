@@ -5,21 +5,25 @@
 
 #include "core/types/shared_ptr.h"
 
+#include "renderer/base/buffer.h"
+
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/util/vulkan_buffer.hpp"
 
 namespace ark {
 namespace vulkan {
 
-class VKBuffer {
+class VKBuffer : public Buffer::Delegate {
 public:
-    VKBuffer(const sp<VKDevice>& device, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size);
-    ~VKBuffer();
-
+    VKBuffer(const sp<VKDevice>& device, const sp<Recycler>& recycler, const sp<Uploader>& uploader, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags);
+    ~VKBuffer() override;
     DISALLOW_COPY_AND_ASSIGN(VKBuffer);
 
-    void* map(VkDeviceSize _size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
-    void unmap(void* mapped);
+    virtual uint32_t id() override;
+    virtual void upload(GraphicsContext& graphicsContext) override;
+    virtual RecycleFunc recycle() override;
+
+    virtual void reload(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader) override;
 
     /**
     * Attach the allocated memory block to the buffer
@@ -40,27 +44,6 @@ public:
     void setupDescriptor(VkDeviceSize _size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
     /**
-    * Copies the specified data to the mapped buffer
-    *
-    * @param data Pointer to the data to copy
-    * @param size Size of the data to copy in machine units
-    *
-    */
-    void upload(void* data, VkDeviceSize size);
-
-    /**
-    * Flush a memory range of the buffer to make it visible to the device
-    *
-    * @note Only required for non-coherent memory
-    *
-    * @param size (Optional) Size of the memory range to flush. Pass VK_WHOLE_SIZE to flush the complete buffer range.
-    * @param offset (Optional) Byte offset from beginning
-    *
-    * @return VkResult of the flush call
-    */
-    VkResult flush(VkDeviceSize _size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
-
-    /**
     * Invalidate a memory range of the buffer to make it visible to the host
     *
     * @note Only required for non-coherent memory
@@ -75,6 +58,21 @@ public:
     const VkDescriptorBufferInfo& descriptor() const;
 
 private:
+    void* map(VkDeviceSize _size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+    void unmap(void* mapped);
+
+    /**
+    * Flush a memory range of the buffer to make it visible to the device
+    *
+    * @note Only required for non-coherent memory
+    *
+    * @param size (Optional) Size of the memory range to flush. Pass VK_WHOLE_SIZE to flush the complete buffer range.
+    * @param offset (Optional) Byte offset from beginning
+    *
+    * @return VkResult of the flush call
+    */
+    VkResult flush(VkDeviceSize _size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+
     /**
     * Release all Vulkan resources held by this buffer
     */
@@ -82,17 +80,17 @@ private:
 
 private:
     sp<VKDevice> _device;
+    sp<Recycler> _recycler;
+    sp<Uploader> _uploader;
 
     /** @brief Usage flags to be filled by external source at buffer creation (to query at some later point) */
-    VkBufferUsageFlags usageFlags;
+    VkBufferUsageFlags _usage_flags;
     /** @brief Memory propertys flags to be filled by external source at buffer creation (to query at some later point) */
-    VkMemoryPropertyFlags memoryPropertyFlags;
+    VkMemoryPropertyFlags _memory_property_flags;
 
     VkBuffer _buffer;
     VkDeviceMemory _memory = VK_NULL_HANDLE;
     VkDescriptorBufferInfo _descriptor;
-    VkDeviceSize _size = 0;
-    VkDeviceSize _alignment = 0;
 };
 
 }

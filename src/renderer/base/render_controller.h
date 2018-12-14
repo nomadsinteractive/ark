@@ -12,6 +12,7 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
 #include "renderer/base/resource_manager.h"
+#include "renderer/inf/uploader.h"
 
 namespace ark {
 
@@ -26,11 +27,11 @@ public:
     sp<Dictionary<sp<Texture>>> createTextureBundle() const;
     sp<Texture> createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, ResourceManager::UploadStrategy us = ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
 
-    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) const;
-    Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Buffer::Uploader>& uploader = nullptr) const;
-    Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Buffer::Uploader>& uploader = nullptr) const;
+    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader) const;
+    Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr) const;
+    Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr) const;
 
-    Buffer::Snapshot makeBufferSnapshot(Buffer::Name name, const Buffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size) const;
+    Buffer::Snapshot makeBufferSnapshot(Buffer::Name name, const Uploader::MakerFunc& maker, size_t reservedObjectCount, size_t size) const;
 
     void addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired);
 

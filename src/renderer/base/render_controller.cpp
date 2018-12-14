@@ -69,24 +69,24 @@ sp<Texture> RenderController::createTexture(uint32_t width, uint32_t height, con
     return texture;
 }
 
-Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) const
+Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader) const
 {
     return makeBuffer(Buffer::TYPE_VERTEX, usage, uploader);
 }
 
-Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) const
+Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader) const
 {
     return makeBuffer(Buffer::TYPE_INDEX, usage, uploader);
 }
 
-Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Buffer::Uploader>& uploader) const
+Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader) const
 {
     Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage, uploader));
     _resource_manager->uploadBuffer(buffer, ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
     return buffer;
 }
 
-Buffer::Snapshot RenderController::makeBufferSnapshot(Buffer::Name name, const Buffer::UploadMakerFunc& maker, size_t reservedObjectCount, size_t size) const
+Buffer::Snapshot RenderController::makeBufferSnapshot(Buffer::Name name, const Uploader::MakerFunc& maker, size_t reservedObjectCount, size_t size) const
 {
     if(name == Buffer::NAME_NONE)
         return makeIndexBuffer().snapshot(maker(size));
@@ -98,8 +98,8 @@ Buffer::Snapshot RenderController::makeBufferSnapshot(Buffer::Name name, const B
     Buffer& shared = sb->_buffers[name];
     if(!shared || shared.size() < size)
     {
-        const sp<Buffer::Uploader> uploader = maker(reservedObjectCount);
-        DCHECK(uploader && uploader->size() >= size, "Making GLBuffer::Uploader failed, object-count: %d, uploader-size: %d, required-size: %d", reservedObjectCount, uploader ? uploader->size() : 0, size);
+        const sp<Uploader> uploader = maker(reservedObjectCount);
+        DCHECK(uploader && uploader->size() >= size, "Making GLUploader failed, object-count: %d, uploader-size: %d, required-size: %d", reservedObjectCount, uploader ? uploader->size() : 0, size);
         shared = makeIndexBuffer(Buffer::USAGE_STATIC, uploader);
     }
     _resource_manager->_shared_buffers.push(sb);

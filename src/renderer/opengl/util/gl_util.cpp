@@ -191,7 +191,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    Buffer arrayBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<Buffer::ArrayUploader<uint8_t>>::make(GLUtil::makeUnitCubeVertices()));
+    Buffer arrayBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<Uploader::Array<uint8_t>>::make(GLUtil::makeUnitCubeVertices()));
     arrayBuffer.upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer.id());
     glEnableVertexAttribArray(0);

@@ -14,30 +14,28 @@
 namespace ark {
 namespace vulkan {
 
-PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager)
-    : _resource_manager(resourceManager) {
+PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager, const sp<VKRenderTarget>& renderTarget)
+    : _resource_manager(resourceManager), _render_target(renderTarget), _device(renderTarget->device())
+{
+    setupDescriptorPool();
 }
 
 PipelineFactoryVulkan::~PipelineFactoryVulkan()
 {
-    if(_device)
-        vkDestroyDescriptorPool(_device->logicalDevice(), descriptorPool, nullptr);
+    vkDestroyDescriptorPool(_device->logicalDevice(), descriptorPool, nullptr);
 }
 
-sp<VKPipeline> PipelineFactoryVulkan::build(const sp<VKRenderTarget>& renderTarget)
+sp<VKPipeline> PipelineFactoryVulkan::build()
 {
-    _render_target = renderTarget;
-    _device = renderTarget->device();
     setupVertexDescriptions();
     setupDescriptorSetLayout();
-    setupDescriptorPool();
     preparePipelines();
     setupDescriptorSet();
 
     return sp<VKPipeline>::make(_render_target, pipelineLayout, descriptorSetLayout, descriptorSet, pipelines.solid);
 }
 
-sp<ark::Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout)
+sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout)
 {
     return nullptr;
 }

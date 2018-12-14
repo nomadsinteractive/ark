@@ -16,12 +16,12 @@ namespace vulkan {
 
 class PipelineFactoryVulkan : public PipelineFactory {
 public:
-    PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager);
+    PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager, const sp<VKRenderTarget>& renderTarget);
     ~PipelineFactoryVulkan() override;
 
-    sp<VKPipeline> build(const sp<VKRenderTarget>& renderTarget);
+    sp<VKPipeline> build();
 
-    virtual sp<ark::Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout) override;
+    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout) override;
     virtual sp<RenderCommand> buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode renderMode, int32_t count) override;
 
     sp<VKBuffer> _buffer;

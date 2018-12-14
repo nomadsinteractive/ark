@@ -3,11 +3,12 @@
 #include "core/util/log.h"
 
 #include "renderer/base/recycler.h"
+#include "renderer/inf/uploader.h"
 
 namespace ark {
 namespace opengl {
 
-GLBuffer::GLBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Recycler>& recycler, const sp<Buffer::Uploader>& uploader)
+GLBuffer::GLBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Recycler>& recycler, const sp<Uploader>& uploader)
     : Buffer::Delegate(uploader ? uploader->size() : 0), _type(type == Buffer::TYPE_VERTEX ? GL_ARRAY_BUFFER : GL_ELEMENT_ARRAY_BUFFER),
       _usage(usage == Buffer::USAGE_DYNAMIC ? GL_DYNAMIC_DRAW : GL_STATIC_READ), _recycler(recycler), _uploader(uploader), _id(0)
 {
@@ -19,7 +20,7 @@ GLBuffer::~GLBuffer()
         _recycler->recycle(*this);
 }
 
-void GLBuffer::reload(GraphicsContext& graphicsContext, const sp<Buffer::Uploader>& transientUploader)
+void GLBuffer::reload(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader)
 {
     if(_id == 0)
     {
@@ -38,7 +39,7 @@ void GLBuffer::reload(GraphicsContext& graphicsContext, const sp<Buffer::Uploade
     }
 }
 
-void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Buffer::Uploader& uploader)
+void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& uploader)
 {
     glBindBuffer(_type, _id);
     GLint bufsize = 0;
@@ -48,7 +49,7 @@ void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Buffer::Uploader& 
     if(static_cast<size_t>(bufsize) < _size)
         glBufferData(_type, static_cast<GLsizeiptr>(_size), nullptr, _usage);
     size_t offset = 0;
-    const Buffer::UploadFunc func = [&offset, this](void* data, size_t size) {
+    const Uploader::UploadFunc func = [&offset, this](void* data, size_t size) {
         DASSERT(data);
         DCHECK(offset + size <= _size, "GLBuffer data overflow");
         glBufferSubData(_type, static_cast<GLsizeiptr>(offset), static_cast<GLsizeiptr>(size), data);
