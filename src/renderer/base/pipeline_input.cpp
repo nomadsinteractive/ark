@@ -54,7 +54,7 @@ const PipelineInput::Stream& PipelineInput::getStream(uint32_t divisor) const
     return iter->second;
 }
 
-const Attribute&PipelineInput::getAttribute(const String& name, uint32_t divisor) const
+const Attribute& PipelineInput::getAttribute(const String& name, uint32_t divisor) const
 {
     return getStream(divisor).getAttribute(name);
 }
@@ -79,30 +79,31 @@ uint32_t PipelineInput::Stream::stride() const
     return _stride;
 }
 
-const std::unordered_map<String, Attribute>& PipelineInput::Stream::attributes() const
+const std::vector<Attribute>& PipelineInput::Stream::attributes() const
 {
     return _attributes;
 }
 
 void PipelineInput::Stream::addAttribute(String name, Attribute attribute)
 {
-    DCHECK(_attributes.find(name) == _attributes.end(), "Attribute \"%s\" has been added already", name.c_str());
+    DCHECK(_attribute_map.find(name) == _attribute_map.end(), "Attribute \"%s\" has been added already", name.c_str());
     attribute.setOffset(_stride);
     _stride += attribute.size();
-    _attributes.insert(std::make_pair(std::move(name), std::move(attribute)));
+    _attributes.push_back(std::move(attribute));
+    _attribute_map.insert(std::make_pair(std::move(name), &_attributes.back()));
 }
 
 const Attribute& PipelineInput::Stream::getAttribute(const String& name) const
 {
-    const auto iter = _attributes.find(name);
-    DCHECK(iter != _attributes.end(), "Stream(%d) has no attribute \"%s\"", name.c_str());
-    return iter->second;
+    const auto iter = _attribute_map.find(name);
+    DCHECK(iter != _attribute_map.end(), "Stream(%d) has no attribute \"%s\"", name.c_str());
+    return *iter->second;
 }
 
 int32_t PipelineInput::Stream::getAttributeOffset(const String& name) const
 {
-    const auto iter = _attributes.find(name);
-    return iter != _attributes.end() ? iter->second.offset() : -1;
+    const auto iter = _attribute_map.find(name);
+    return iter != _attribute_map.end() ? iter->second->offset() : -1;
 }
 
 void PipelineInput::Stream::align()

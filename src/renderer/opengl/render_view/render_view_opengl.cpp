@@ -29,7 +29,6 @@ RenderViewOpenGL::~RenderViewOpenGL()
 
 void RenderViewOpenGL::onSurfaceCreated()
 {
-    Platform::glInitialize();
     GLDebug::glPrintString("GL Version:", GL_VERSION);
     GLDebug::glPrintInteger("Max Uniform Components", GL_MAX_VERTEX_UNIFORM_COMPONENTS);
     GLDebug::glPrintInteger("Max Uniform Vectors", GL_MAX_VERTEX_UNIFORM_VECTORS);

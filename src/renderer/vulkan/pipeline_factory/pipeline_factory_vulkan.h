@@ -21,30 +21,32 @@ public:
 
     sp<VKPipeline> build();
 
-    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout) override;
+    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& _pipeline_layout) override;
     virtual sp<RenderCommand> buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode renderMode, int32_t count) override;
 
-    sp<VKBuffer> _buffer;
-    sp<VKTexture> _texture;
+    sp<VKBuffer> _ubo;
+    sp<VKTexture2D> _texture;
 
 private:
+    void setupVertexDescriptions(const PipelineInput& input);
     void setupVertexDescriptions();
     void setupDescriptorSetLayout();
     void setupDescriptorPool();
-    void setupDescriptorSet();
 
-    void preparePipelines();
+    VkDescriptorSet setupDescriptorSet();
+    VkPipeline preparePipelines();
+
+    VkFormat getFormat(const Attribute& attribute) const;
 
 private:
     sp<ResourceManager> _resource_manager;
     sp<VKRenderTarget> _render_target;
     sp<VKDevice> _device;
 
-    VkPipelineLayout pipelineLayout;
-    VkDescriptorSetLayout descriptorSetLayout;
+    VkPipelineLayout _pipeline_layout;
+    VkDescriptorSetLayout _descriptor_set_layout;
 
-    VkDescriptorPool descriptorPool;
-    VkDescriptorSet descriptorSet;
+    VkDescriptorPool _descriptor_pool;
 
     struct {
         VkPipelineVertexInputStateCreateInfo inputState;
@@ -53,12 +55,7 @@ private:
     } vertices;
 
     std::vector<VkCommandBuffer> _command_buffers;
-
-    VkClearColorValue defaultClearColor = { { 0, 0, 0.2f, 1.0f } };
-    struct {
-        VkPipeline solid;
-    } pipelines;
-
+    std::unordered_map<String, uint32_t> _location_map;
 };
 
 }

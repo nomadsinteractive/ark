@@ -14,9 +14,9 @@
 namespace ark {
 namespace opengl {
 
-class ARK_API DrawElementsInstanced : public RenderCommand {
+class ARK_API GLDrawElementsInstanced : public RenderCommand {
 public:
-    DrawElementsInstanced(DrawingContext context, const sp<Shader>& shader, GLenum mode, int32_t count);
+    GLDrawElementsInstanced(DrawingContext context, const sp<Shader>& shader, GLenum mode, int32_t count);
 
     virtual void draw(GraphicsContext& graphicsContext) override;
 

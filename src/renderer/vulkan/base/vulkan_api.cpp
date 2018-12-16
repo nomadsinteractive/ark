@@ -4,12 +4,17 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <ShaderLang.h>
+#include <SPIRV/GlslangToSpv.h>
+
 #include "core/base/plugin_manager.h"
 #include "core/inf/array.h"
 #include "core/inf/dictionary.h"
+#include "core/inf/variable.h"
 #include "core/types/global.h"
 #include "core/util/log.h"
 
+#include "graphics/forwarding.h"
 #include "graphics/base/bitmap.h"
 
 #include "renderer/base/gl_context.h"
@@ -22,7 +27,7 @@
 #include "renderer/vulkan/base/vk_instance.h"
 #include "renderer/vulkan/base/vk_pipeline.h"
 #include "renderer/vulkan/base/vk_render_target.h"
-#include "renderer/vulkan/base/vk_texture.h"
+#include "renderer/vulkan/base/vk_texture_2d.h"
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vulkan_debug.h"
@@ -40,6 +45,140 @@ namespace ark {
 
 namespace vulkan {
 
+namespace {
+
+static const TBuiltInResource DefaultTBuiltInResource = {
+    /* .MaxLights = */ 32,
+    /* .MaxClipPlanes = */ 6,
+    /* .MaxTextureUnits = */ 32,
+    /* .MaxTextureCoords = */ 32,
+    /* .MaxVertexAttribs = */ 64,
+    /* .MaxVertexUniformComponents = */ 4096,
+    /* .MaxVaryingFloats = */ 64,
+    /* .MaxVertexTextureImageUnits = */ 32,
+    /* .MaxCombinedTextureImageUnits = */ 80,
+    /* .MaxTextureImageUnits = */ 32,
+    /* .MaxFragmentUniformComponents = */ 4096,
+    /* .MaxDrawBuffers = */ 32,
+    /* .MaxVertexUniformVectors = */ 128,
+    /* .MaxVaryingVectors = */ 8,
+    /* .MaxFragmentUniformVectors = */ 16,
+    /* .MaxVertexOutputVectors = */ 16,
+    /* .MaxFragmentInputVectors = */ 15,
+    /* .MinProgramTexelOffset = */ -8,
+    /* .MaxProgramTexelOffset = */ 7,
+    /* .MaxClipDistances = */ 8,
+    /* .MaxComputeWorkGroupCountX = */ 65535,
+    /* .MaxComputeWorkGroupCountY = */ 65535,
+    /* .MaxComputeWorkGroupCountZ = */ 65535,
+    /* .MaxComputeWorkGroupSizeX = */ 1024,
+    /* .MaxComputeWorkGroupSizeY = */ 1024,
+    /* .MaxComputeWorkGroupSizeZ = */ 64,
+    /* .MaxComputeUniformComponents = */ 1024,
+    /* .MaxComputeTextureImageUnits = */ 16,
+    /* .MaxComputeImageUniforms = */ 8,
+    /* .MaxComputeAtomicCounters = */ 8,
+    /* .MaxComputeAtomicCounterBuffers = */ 1,
+    /* .MaxVaryingComponents = */ 60,
+    /* .MaxVertexOutputComponents = */ 64,
+    /* .MaxGeometryInputComponents = */ 64,
+    /* .MaxGeometryOutputComponents = */ 128,
+    /* .MaxFragmentInputComponents = */ 128,
+    /* .MaxImageUnits = */ 8,
+    /* .MaxCombinedImageUnitsAndFragmentOutputs = */ 8,
+    /* .MaxCombinedShaderOutputResources = */ 8,
+    /* .MaxImageSamples = */ 0,
+    /* .MaxVertexImageUniforms = */ 0,
+    /* .MaxTessControlImageUniforms = */ 0,
+    /* .MaxTessEvaluationImageUniforms = */ 0,
+    /* .MaxGeometryImageUniforms = */ 0,
+    /* .MaxFragmentImageUniforms = */ 8,
+    /* .MaxCombinedImageUniforms = */ 8,
+    /* .MaxGeometryTextureImageUnits = */ 16,
+    /* .MaxGeometryOutputVertices = */ 256,
+    /* .MaxGeometryTotalOutputComponents = */ 1024,
+    /* .MaxGeometryUniformComponents = */ 1024,
+    /* .MaxGeometryVaryingComponents = */ 64,
+    /* .MaxTessControlInputComponents = */ 128,
+    /* .MaxTessControlOutputComponents = */ 128,
+    /* .MaxTessControlTextureImageUnits = */ 16,
+    /* .MaxTessControlUniformComponents = */ 1024,
+    /* .MaxTessControlTotalOutputComponents = */ 4096,
+    /* .MaxTessEvaluationInputComponents = */ 128,
+    /* .MaxTessEvaluationOutputComponents = */ 128,
+    /* .MaxTessEvaluationTextureImageUnits = */ 16,
+    /* .MaxTessEvaluationUniformComponents = */ 1024,
+    /* .MaxTessPatchComponents = */ 120,
+    /* .MaxPatchVertices = */ 32,
+    /* .MaxTessGenLevel = */ 64,
+    /* .MaxViewports = */ 16,
+    /* .MaxVertexAtomicCounters = */ 0,
+    /* .MaxTessControlAtomicCounters = */ 0,
+    /* .MaxTessEvaluationAtomicCounters = */ 0,
+    /* .MaxGeometryAtomicCounters = */ 0,
+    /* .MaxFragmentAtomicCounters = */ 8,
+    /* .MaxCombinedAtomicCounters = */ 8,
+    /* .MaxAtomicCounterBindings = */ 1,
+    /* .MaxVertexAtomicCounterBuffers = */ 0,
+    /* .MaxTessControlAtomicCounterBuffers = */ 0,
+    /* .MaxTessEvaluationAtomicCounterBuffers = */ 0,
+    /* .MaxGeometryAtomicCounterBuffers = */ 0,
+    /* .MaxFragmentAtomicCounterBuffers = */ 1,
+    /* .MaxCombinedAtomicCounterBuffers = */ 1,
+    /* .MaxAtomicCounterBufferSize = */ 16384,
+    /* .MaxTransformFeedbackBuffers = */ 4,
+    /* .MaxTransformFeedbackInterleavedComponents = */ 64,
+    /* .MaxCullDistances = */ 8,
+    /* .MaxCombinedClipAndCullDistances = */ 8,
+    /* .MaxSamples = */ 4,
+    /* .maxMeshOutputVerticesNV = */ 256,
+    /* .maxMeshOutputPrimitivesNV = */ 512,
+    /* .maxMeshWorkGroupSizeX_NV = */ 32,
+    /* .maxMeshWorkGroupSizeY_NV = */ 1,
+    /* .maxMeshWorkGroupSizeZ_NV = */ 1,
+    /* .maxTaskWorkGroupSizeX_NV = */ 32,
+    /* .maxTaskWorkGroupSizeY_NV = */ 1,
+    /* .maxTaskWorkGroupSizeZ_NV = */ 1,
+    /* .maxMeshViewCountNV = */ 4,
+
+    /* .limits = */ {
+        /* .nonInductiveForLoops = */ 1,
+        /* .whileLoops = */ 1,
+        /* .doWhileLoops = */ 1,
+        /* .generalUniformIndexing = */ 1,
+        /* .generalAttributeMatrixVectorIndexing = */ 1,
+        /* .generalVaryingIndexing = */ 1,
+        /* .generalSamplerIndexing = */ 1,
+        /* .generalVariableIndexing = */ 1,
+        /* .generalConstantMatrixVectorIndexing = */ 1,
+    }};
+
+class GLSLLangInitializer {
+public:
+    GLSLLangInitializer()
+        : _languages{EShLangVertex, EShLangFragment}, _built_in_resource(DefaultTBuiltInResource) {
+        glslang::InitializeProcess();
+    }
+    ~GLSLLangInitializer() {
+        glslang::FinalizeProcess();
+    }
+
+    EShLanguage toShLanguage(VulkanAPI::ShaderType type) const {
+        return _languages[type];
+    }
+
+    const TBuiltInResource& builtInResource() const {
+        return _built_in_resource;
+    }
+
+private:
+    EShLanguage _languages[VulkanAPI::SHADER_TYPE_COUNT];
+    TBuiltInResource _built_in_resource;
+
+};
+
+}
+
 VulkanAPI::VulkanAPI(const sp<ResourceManager>& resourceManager, const sp<RendererFactoryVulkan::Stub>& rendererFactory)
     : _ubo(sp<UBO>::make()), _resource_manager(resourceManager), _renderer_factory(rendererFactory), _graphics_context(nullptr, resourceManager)
 {
@@ -49,15 +188,7 @@ VulkanAPI::~VulkanAPI()
 {
     _renderer_factory->_device->waitIdle();
 
-    vertexBuffer.destroy();
-    indexBuffer.destroy();
-
     _renderer_factory->_render_target->commandPool()->destroyCommandBuffers(_command_buffers.size(), _command_buffers.data());
-
-    for (auto& shaderModule : shaderModules)
-    {
-        vkDestroyShaderModule(_renderer_factory->_device->logicalDevice(), shaderModule, nullptr);
-    }
 
 #if defined(_DIRECT2DISPLAY)
 
@@ -91,9 +222,13 @@ void VulkanAPI::initialize(GLContext& /*glContext*/)
     updateUniformBuffers(_renderer_factory->_render_target);
     generateQuad(_renderer_factory->_device);
 
+    const sp<Variable<bitmap>> tex = sp<Variable<bitmap>::Get>::make(_resource_manager->bitmapLoader(), "texture.png");
+
+    const sp<VKTexture2D> texture = sp<VKTexture2D>::make(_resource_manager->recycler(), _renderer_factory->_render_target->commandPool(), tex);
+    texture->upload(_graphics_context);
     _pipeline_factory = sp<PipelineFactoryVulkan>::make(_resource_manager, _renderer_factory->_render_target);
-    _pipeline_factory->_texture = sp<VKTexture>::make(_resource_manager->recycler(), _resource_manager, _renderer_factory->_render_target->commandPool());
-    _pipeline_factory->_buffer = _uniforms;
+    _pipeline_factory->_texture = texture;
+    _pipeline_factory->_ubo = _uniforms;
     _pipeline = _pipeline_factory->build();
 
     buildCommandBuffers(_renderer_factory->_render_target);
@@ -159,8 +294,8 @@ void VulkanAPI::buildCommandBuffers(const VKRenderTarget& renderTarget)
         vkCmdBindPipeline(_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->pipeline());
 
         VkDeviceSize offsets[1] = { 0 };
-        vkCmdBindVertexBuffers(_command_buffers[i], VERTEX_BUFFER_BIND_ID, 1, &vertexBuffer.buffer, offsets);
-        vkCmdBindIndexBuffer(_command_buffers[i], indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindVertexBuffers(_command_buffers[i], VERTEX_BUFFER_BIND_ID, 1, &_vertex_buffer->vkBuffer(), offsets);
+        vkCmdBindIndexBuffer(_command_buffers[i], _index_buffer->vkBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
         vkCmdDrawIndexed(_command_buffers[i], indexCount, 1, 0, 0, 0);
 
@@ -170,7 +305,7 @@ void VulkanAPI::buildCommandBuffers(const VKRenderTarget& renderTarget)
     }
 }
 
-void VulkanAPI::generateQuad(const VKDevice& device)
+void VulkanAPI::generateQuad(const sp<VKDevice>& device)
 {
     // Setup vertices for a single uv-mapped quad made from two triangles
     std::vector<Vertex> vertices =
@@ -187,20 +322,11 @@ void VulkanAPI::generateQuad(const VKDevice& device)
 
     // Create buffers
     // For the sake of simplicity we won't stage the vertex data to the gpu memory
-    // Vertex buffer
-    checkResult(device.createBuffer(
-                        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                        &vertexBuffer,
-                        vertices.size() * sizeof(Vertex),
-                        vertices.data()));
-    // Index buffer
-    checkResult(device.createBuffer(
-                        VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                        &indexBuffer,
-                        indices.size() * sizeof(uint32_t),
-                        indices.data()));
+    _vertex_buffer = sp<VKBuffer>::make(device, _resource_manager->recycler(), sp<Uploader::Vector<Vertex>>::make(std::move(vertices)), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    _vertex_buffer->upload(_graphics_context);
+
+    _index_buffer = sp<VKBuffer>::make(device, _resource_manager->recycler(), sp<Uploader::Vector<uint32_t>>::make(std::move(indices)), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    _index_buffer->upload(_graphics_context);
 }
 
 void VulkanAPI::draw(VKRenderTarget& renderTarget)
@@ -229,6 +355,38 @@ VkPipelineShaderStageCreateInfo VulkanAPI::loadShaderSPIR(VkDevice device, std::
     DASSERT(shaderStage.module != VK_NULL_HANDLE);
 //    shaderModules.push_back(shaderStage.module);
     return shaderStage;
+}
+
+bytearray VulkanAPI::compileSPIR(const String& source, ShaderType shaderType)
+{
+    Global<GLSLLangInitializer> initializer;
+    EShLanguage stage = initializer->toShLanguage(shaderType);
+    glslang::TShader shader(stage);
+    const char* sources[] = {source.c_str()};
+    shader.setStrings(sources, 1);
+
+    std::string messages;
+    if (!shader.parse(&initializer->builtInResource(), 110, false, EShMsgDefault))
+        DFATAL("Compile error: %s", shader.getInfoLog());
+    {
+        glslang::TProgram program;
+        program.addShader(&shader);
+        if (!program.link(EShMsgDefault))
+            DFATAL("Link error: %s", shader.getInfoLog());
+
+        if (program.getIntermediate(stage)) {
+            std::vector<uint32_t> spirv;
+            std::string warningsErrors;
+            spv::SpvBuildLogger logger;
+            glslang::SpvOptions spvOptions;
+            spvOptions.disableOptimizer = false;
+            spvOptions.optimizeSize = false;
+            spvOptions.disassemble = false;
+            spvOptions.validate = true;
+            glslang::GlslangToSpv(*program.getIntermediate(stage), spirv, &logger, &spvOptions);
+        }
+    }
+    return nullptr;
 }
 
 }

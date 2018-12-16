@@ -24,6 +24,12 @@ namespace vulkan {
 
 class VulkanAPI {
 public:
+    enum ShaderType {
+        SHADER_TYPE_VERTEX,
+        SHADER_TYPE_FRAGMENT,
+        SHADER_TYPE_COUNT
+    };
+
     VulkanAPI(const sp<ResourceManager>& resourceManager, const sp<RendererFactoryVulkan::Stub>& rendererFactory);
     ~VulkanAPI();
 
@@ -33,6 +39,8 @@ public:
 
     static void checkResult(VkResult result);
     static VkPipelineShaderStageCreateInfo loadShaderSPIR(VkDevice device, std::string fileName, VkShaderStageFlagBits stage);
+
+    static bytearray compileSPIR(const String& source, ShaderType shaderType);
 
     struct Vertex {
         float pos[3];
@@ -50,7 +58,7 @@ public:
     sp<UBO> _ubo;
 
 private:
-    void generateQuad(const VKDevice& device);
+    void generateQuad(const sp<VKDevice>& device);
 
     void buildCommandBuffers(const VKRenderTarget& renderTarget);
 
@@ -81,8 +89,9 @@ private:
 
     uint32_t indexCount;
 
-    vks::Buffer vertexBuffer;
-    vks::Buffer indexBuffer;
+    sp<VKBuffer> _vertex_buffer;
+    sp<VKBuffer> _index_buffer;
+//    vks::Buffer indexBuffer;
 
     VkClearColorValue defaultClearColor = { { 0, 0, 0.2f, 1.0f } };
 

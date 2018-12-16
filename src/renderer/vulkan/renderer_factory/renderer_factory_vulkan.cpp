@@ -4,7 +4,10 @@
 #include "core/types/global.h"
 #include "core/util/log.h"
 
+#include "graphics/base/size.h"
+
 #include "renderer/base/gl_context.h"
+#include "renderer/base/resource_manager.h"
 
 #include "renderer/vulkan/base/vk_instance.h"
 #include "renderer/vulkan/base/vk_device.h"
@@ -14,6 +17,8 @@
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
 
 #include "renderer/vulkan/base/vulkan_api.h"
+#include "renderer/vulkan/base/vk_buffer.h"
+#include "renderer/vulkan/base/vk_texture_2d.h"
 
 #include "generated/vulkan_plugin.h"
 
@@ -60,9 +65,10 @@ void RendererFactoryVulkan::setGLVersion(Ark::RendererVersion version, GLContext
     glContext.setVersion(version);
 }
 
-sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader)
+sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buffer::Usage /*usage*/, const sp<Uploader>& uploader)
 {
-    return nullptr;
+    static const VkBufferUsageFlags usagesFlags[Buffer::TYPE_COUNT] = {VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_INDEX_BUFFER_BIT};
+    return sp<VKBuffer>::make(_stub->_device, _resource_manager->recycler(), uploader, usagesFlags[type], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<GLContext>& glContext, const Viewport& viewport)
@@ -77,7 +83,9 @@ sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
 
 sp<Texture> RendererFactoryVulkan::createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap)
 {
-    return nullptr;
+    const sp<Size> size = sp<Size>::make(width, height);
+    const sp<VKTexture2D> texture = sp<VKTexture2D>::make(recycler, _stub->_render_target->commandPool(), bitmap);
+    return sp<Texture>::make(size, texture, Texture::TYPE_2D);
 }
 
 }

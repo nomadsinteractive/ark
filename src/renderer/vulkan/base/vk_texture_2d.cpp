@@ -1,7 +1,8 @@
-#include "renderer/vulkan/base/vk_texture.h"
+#include "renderer/vulkan/base/vk_texture_2d.h"
 
 #include "core/base/string.h"
 #include "core/inf/dictionary.h"
+#include "core/inf/variable.h"
 
 #include "graphics/base/bitmap.h"
 
@@ -15,27 +16,27 @@
 namespace ark {
 namespace vulkan {
 
-VKTexture::VKTexture(const sp<Recycler>& recycler, const sp<ResourceManager>& resourceManager, const sp<VKCommandPool>& commandPool)
-    : _recycler(recycler), _resource_manager(resourceManager), _command_pool(commandPool), _device(commandPool->device())
+VKTexture2D::VKTexture2D(const sp<Recycler>& recycler, const sp<VKCommandPool>& commandPool, const sp<Variable<bitmap>>& bitmap)
+    : _recycler(recycler), _command_pool(commandPool), _bitmap(bitmap), _device(commandPool->device())
 {
-    loadTexture();
 }
 
-VKTexture::~VKTexture()
+VKTexture2D::~VKTexture2D()
 {
     _recycler->recycle(*this);
 }
 
-uint32_t VKTexture::id()
+uint32_t VKTexture2D::id()
 {
     return 0;
 }
 
-void VKTexture::upload(GraphicsContext& graphicsContext)
+void VKTexture2D::upload(GraphicsContext& /*graphicsContext*/)
 {
+    doUpload();
 }
 
-Resource::RecycleFunc VKTexture::recycle()
+Resource::RecycleFunc VKTexture2D::recycle()
 {
     const sp<VKDevice> device = _device;
     VkDescriptorImageInfo descriptor = _descriptor;
@@ -53,18 +54,17 @@ Resource::RecycleFunc VKTexture::recycle()
     };
 }
 
-const VkDescriptorImageInfo& VKTexture::descriptor() const
+const VkDescriptorImageInfo& VKTexture2D::descriptor() const
 {
     return _descriptor;
 }
 
-void VKTexture::loadTexture()
+void VKTexture2D::doUpload()
 {
-    const String filename = "texture.png";
     VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
-    VkDevice _logical_device = _device->logicalDevice();
+    VkDevice logicalDevice = _device->logicalDevice();
 
-    const bitmap tex = _resource_manager->bitmapLoader()->get(filename);
+    const bitmap tex = _bitmap->val();
 
     _width = tex->width();
     _height = tex->height();
@@ -100,21 +100,21 @@ void VKTexture::loadTexture()
         // This buffer is used as a transfer source for the buffer copy
         bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
         bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        VulkanAPI::checkResult(vkCreateBuffer(_logical_device, &bufferCreateInfo, nullptr, &stagingBuffer));
+        VulkanAPI::checkResult(vkCreateBuffer(logicalDevice, &bufferCreateInfo, nullptr, &stagingBuffer));
 
         // Get memory requirements for the staging buffer (alignment, memory type bits)
-        vkGetBufferMemoryRequirements(_logical_device, stagingBuffer, &memReqs);
+        vkGetBufferMemoryRequirements(logicalDevice, stagingBuffer, &memReqs);
         memAllocInfo.allocationSize = memReqs.size;
         // Get memory type index for a host visible buffer
         memAllocInfo.memoryTypeIndex = _device->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        VulkanAPI::checkResult(vkAllocateMemory(_logical_device, &memAllocInfo, nullptr, &stagingMemory));
-        VulkanAPI::checkResult(vkBindBufferMemory(_logical_device, stagingBuffer, stagingMemory, 0));
+        VulkanAPI::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &stagingMemory));
+        VulkanAPI::checkResult(vkBindBufferMemory(logicalDevice, stagingBuffer, stagingMemory, 0));
 
         // Copy texture data into host local staging buffer
         uint8_t *data;
-        VulkanAPI::checkResult(vkMapMemory(_logical_device, stagingMemory, 0, memReqs.size, 0, (void **)&data));
+        VulkanAPI::checkResult(vkMapMemory(logicalDevice, stagingMemory, 0, memReqs.size, 0, (void **)&data));
         memcpy(data, tex->bytes()->buf(), tex->bytes()->size());
-        vkUnmapMemory(_logical_device, stagingMemory);
+        vkUnmapMemory(logicalDevice, stagingMemory);
 
         // Setup buffer copy regions for each mip level
         std::vector<VkBufferImageCopy> bufferCopyRegions;
@@ -149,13 +149,13 @@ void VKTexture::loadTexture()
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageCreateInfo.extent = { _width, _height, 1 };
         imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        VulkanAPI::checkResult(vkCreateImage(_logical_device, &imageCreateInfo, nullptr, &_image));
+        VulkanAPI::checkResult(vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &_image));
 
-        vkGetImageMemoryRequirements(_logical_device, _image, &memReqs);
+        vkGetImageMemoryRequirements(logicalDevice, _image, &memReqs);
         memAllocInfo.allocationSize = memReqs.size;
         memAllocInfo.memoryTypeIndex = _device->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        VulkanAPI::checkResult(vkAllocateMemory(_logical_device, &memAllocInfo, nullptr, &_memory));
-        VulkanAPI::checkResult(vkBindImageMemory(_logical_device, _image, _memory, 0));
+        VulkanAPI::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &_memory));
+        VulkanAPI::checkResult(vkBindImageMemory(logicalDevice, _image, _memory, 0));
 
         VkCommandBuffer copyCmd = _command_pool->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
@@ -226,8 +226,8 @@ void VKTexture::loadTexture()
         _command_pool->flushCommandBuffer(copyCmd, true);
 
         // Clean up staging resources
-        vkFreeMemory(_logical_device, stagingMemory, nullptr);
-        vkDestroyBuffer(_logical_device, stagingBuffer, nullptr);
+        vkFreeMemory(logicalDevice, stagingMemory, nullptr);
+        vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
     } else {
         // Copy data to a linear tiled image
 
@@ -246,23 +246,23 @@ void VKTexture::loadTexture()
         imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
         imageCreateInfo.extent = { _width, _height, 1 };
-        VulkanAPI::checkResult(vkCreateImage(_logical_device, &imageCreateInfo, nullptr, &mappableImage));
+        VulkanAPI::checkResult(vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &mappableImage));
 
         // Get memory requirements for this image like size and alignment
-        vkGetImageMemoryRequirements(_logical_device, mappableImage, &memReqs);
+        vkGetImageMemoryRequirements(logicalDevice, mappableImage, &memReqs);
         // Set memory allocation size to required memory size
         memAllocInfo.allocationSize = memReqs.size;
         // Get memory type that can be mapped to host memory
         memAllocInfo.memoryTypeIndex = _device->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        VulkanAPI::checkResult(vkAllocateMemory(_logical_device, &memAllocInfo, nullptr, &mappableMemory));
-        VulkanAPI::checkResult(vkBindImageMemory(_logical_device, mappableImage, mappableMemory, 0));
+        VulkanAPI::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &mappableMemory));
+        VulkanAPI::checkResult(vkBindImageMemory(logicalDevice, mappableImage, mappableMemory, 0));
 
         // Map image memory
         void *data;
-        VulkanAPI::checkResult(vkMapMemory(_logical_device, mappableMemory, 0, memReqs.size, 0, &data));
+        VulkanAPI::checkResult(vkMapMemory(logicalDevice, mappableMemory, 0, memReqs.size, 0, &data));
         // Copy image data of the first mip level into memory
         memcpy(data, tex->bytes()->buf(), tex->bytes()->size());
-        vkUnmapMemory(_logical_device, mappableMemory);
+        vkUnmapMemory(logicalDevice, mappableMemory);
 
         // Linear tiled images don't need to be staged and can be directly used as textures
         _image = mappableImage;
@@ -331,7 +331,7 @@ void VKTexture::loadTexture()
         sampler.anisotropyEnable = VK_FALSE;
     }
     sampler.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-    VulkanAPI::checkResult(vkCreateSampler(_logical_device, &sampler, nullptr, &_descriptor.sampler));
+    VulkanAPI::checkResult(vkCreateSampler(logicalDevice, &sampler, nullptr, &_descriptor.sampler));
 
     // Create image view
     // Textures are not directly accessed by the shaders and
@@ -352,7 +352,7 @@ void VKTexture::loadTexture()
     view.subresourceRange.levelCount = (useStaging) ? _mip_levels : 1;
     // The view will be based on the texture's image
     view.image = _image;
-    VulkanAPI::checkResult(vkCreateImageView(_logical_device, &view, nullptr, &_descriptor.imageView));
+    VulkanAPI::checkResult(vkCreateImageView(logicalDevice, &view, nullptr, &_descriptor.imageView));
 }
 
 }

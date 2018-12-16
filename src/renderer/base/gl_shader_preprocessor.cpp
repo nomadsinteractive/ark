@@ -143,17 +143,21 @@ GLShaderPreprocessor::Preprocessor GLShaderPreprocessor::preprocess()
 
 void GLShaderPreprocessor::insertPredefinedUniforms(const std::vector<Uniform>& uniforms)
 {
-    static const std::regex UNIFORM_PATTERN("uniform\\s+\\w+\\s+(\\w+)(?:\\[\\d+\\])?;");
+//    static const std::regex UNIFORM_PATTERN("uniform\\s+\\w+\\s+(\\w+)(?:\\[\\d+\\])?;");
     std::set<String> names;
     std::vector<String> generated;
-    _source.search(UNIFORM_PATTERN, [&names](const std::smatch& m)->bool {
+    _source.search(_UNIFORM_PATTERN, [this, &names](const std::smatch& m)->bool {
         names.insert(m[1].str());
+        _uniforms.push_back(std::make_pair(m[0].str(), m[1].str()));
         return true;
     });
 
     for(const Uniform& i : uniforms)
         if(names.find(i.name()) == names.end() && _source.find(i.name()) != String::npos)
+        {
             generated.push_back(i.declaration());
+            _uniforms.push_back(std::make_pair("uniform", i.name()));
+        }
 
     for(const String& i : generated)
         if(i.find('[') == String::npos)

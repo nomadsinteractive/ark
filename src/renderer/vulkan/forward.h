@@ -10,7 +10,7 @@ class VKDevice;
 class VKInstance;
 class VKPipeline;
 class VKRenderTarget;
-class VKTexture;
+class VKTexture2D;
 class VulkanAPI;
 
 class PipelineFactoryVulkan;

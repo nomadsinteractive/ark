@@ -23,7 +23,7 @@ public:
 
         uint32_t stride() const;
 
-        const std::unordered_map<String, Attribute>& attributes() const;
+        const std::vector<Attribute>& attributes() const;
         void addAttribute(String name, Attribute attribute);
 
         const Attribute& getAttribute(const String& name) const;
@@ -35,7 +35,8 @@ public:
         uint32_t _divisor;
         uint32_t _stride;
 
-        std::unordered_map<String, Attribute> _attributes;
+        std::vector<Attribute> _attributes;
+        std::unordered_map<String, Attribute*> _attribute_map;
     };
 
 public:

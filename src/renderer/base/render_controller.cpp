@@ -62,7 +62,7 @@ sp<Dictionary<sp<Texture>>> RenderController::createTextureBundle() const
     return sp<GLTextureBundle>::make(_render_engine->rendererFactory(), _resource_manager->recycler(), _resource_manager->bitmapLoader(), _resource_manager->bitmapBoundsLoader());
 }
 
-sp<Texture> RenderController::createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap> >& bitmap, ResourceManager::UploadStrategy us)
+sp<Texture> RenderController::createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap, ResourceManager::UploadStrategy us)
 {
     const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(_resource_manager->recycler(), width, height, bitmap);
     _resource_manager->upload(texture, us);

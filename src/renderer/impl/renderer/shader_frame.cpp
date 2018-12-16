@@ -16,7 +16,7 @@
 #include "renderer/inf/uploader.h"
 #include "renderer/util/index_buffers.h"
 
-#include "renderer/opengl/render_command/draw_elements.h"
+#include "renderer/opengl/render_command/gl_draw_elements.h"
 
 namespace ark {
 
@@ -30,9 +30,9 @@ ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const s
 
 void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
-    const Buffer::Snapshot indexBuffer = IndexBuffers::makeGLBufferSnapshot(_render_controller, Buffer::NAME_QUADS, 1);
+    const Buffer::Snapshot indexBuffer = IndexBuffers::makeBufferSnapshot(_render_controller, Buffer::NAME_QUADS, 1);
     const sp<Uploader> uploader = _object_pool->obtain<ByteArrayUploader>(getArrayBuffer(x, y));
-    renderRequest.addRequest(_object_pool->obtain<opengl::DrawElements>(DrawingContext(_shader_bindings, _shader->camera()->snapshop(), _array_buffer.snapshot(uploader), indexBuffer), _shader, GL_TRIANGLES));
+    renderRequest.addRequest(_object_pool->obtain<opengl::GLDrawElements>(DrawingContext(_shader_bindings, _shader->camera()->snapshop(), _array_buffer.snapshot(uploader), indexBuffer), _shader, GL_TRIANGLES));
 }
 
 const SafePtr<Size>& ShaderFrame::size()

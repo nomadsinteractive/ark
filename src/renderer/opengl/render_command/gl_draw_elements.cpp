@@ -1,4 +1,4 @@
-#include "renderer/opengl/render_command/draw_elements.h"
+#include "renderer/opengl/render_command/gl_draw_elements.h"
 
 #include "renderer/base/shader.h"
 #include "renderer/base/graphics_context.h"
@@ -10,12 +10,12 @@
 namespace ark {
 namespace opengl {
 
-DrawElements::DrawElements(DrawingContext context, const sp<Shader>& shader, GLenum mode)
+GLDrawElements::GLDrawElements(DrawingContext context, const sp<Shader>& shader, GLenum mode)
     : _context(std::move(context)), _shader(shader), _mode(mode)
 {
 }
 
-void DrawElements::draw(GraphicsContext& graphicsContext)
+void GLDrawElements::draw(GraphicsContext& graphicsContext)
 {
     _shader->use(graphicsContext);
     _shader->bindUniforms(graphicsContext);

@@ -8,8 +8,8 @@
 #include "renderer/base/pipeline_layout.h"
 
 #include "renderer/opengl/base/gl_pipeline.h"
-#include "renderer/opengl/render_command/draw_elements.h"
-#include "renderer/opengl/render_command/draw_elements_instanced.h"
+#include "renderer/opengl/render_command/gl_draw_elements.h"
+#include "renderer/opengl/render_command/gl_draw_elements_instanced.h"
 
 namespace ark {
 namespace opengl {
@@ -32,8 +32,8 @@ sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsConte
 sp<RenderCommand> PipelineFactoryOpenGL::buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode mode, int32_t count)
 {
     if(count > 0)
-        return objectPool.obtain<DrawElementsInstanced>(std::move(drawingContext), shader, _models[mode], count);
-    return objectPool.obtain<DrawElements>(std::move(drawingContext), shader, _models[mode]);
+        return objectPool.obtain<GLDrawElementsInstanced>(std::move(drawingContext), shader, _models[mode], count);
+    return objectPool.obtain<GLDrawElements>(std::move(drawingContext), shader, _models[mode]);
 }
 
 }

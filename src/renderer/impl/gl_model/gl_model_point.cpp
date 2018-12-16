@@ -22,7 +22,7 @@ void GLModelPoint::initialize(ShaderBindings& bindings)
 void GLModelPoint::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size());
-    buf.setIndices(IndexBuffers::makeGLBufferSnapshot(renderController, Buffer::NAME_POINTS, layerContext._items.size()));
+    buf.setIndices(IndexBuffers::makeBufferSnapshot(renderController, Buffer::NAME_POINTS, layerContext._items.size()));
 }
 
 void GLModelPoint::load(ModelBuffer& buf, int32_t type, const V& scale)

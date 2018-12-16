@@ -141,6 +141,7 @@ public:
     Declaration _out_declarations;
 
     std::vector<Snippet> _snippets;
+    std::vector<std::pair<String, String>> _uniforms;
 
 };
 

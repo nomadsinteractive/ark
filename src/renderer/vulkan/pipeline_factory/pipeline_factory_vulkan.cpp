@@ -3,12 +3,15 @@
 #include <array>
 
 #include "renderer/base/drawing_context.h"
+#include "renderer/base/pipeline_input.h"
+#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/resource_manager.h"
 
 #include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_pipeline.h"
 #include "renderer/vulkan/base/vk_render_target.h"
-#include "renderer/vulkan/base/vk_texture.h"
+#include "renderer/vulkan/base/vk_texture_2d.h"
 #include "renderer/vulkan/base/vulkan_api.h"
 
 namespace ark {
@@ -18,31 +21,62 @@ PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<ResourceManager>& resource
     : _resource_manager(resourceManager), _render_target(renderTarget), _device(renderTarget->device())
 {
     setupDescriptorPool();
+    VulkanAPI::compileSPIR("", VulkanAPI::SHADER_TYPE_VERTEX);
 }
 
 PipelineFactoryVulkan::~PipelineFactoryVulkan()
 {
-    vkDestroyDescriptorPool(_device->logicalDevice(), descriptorPool, nullptr);
+    vkDestroyDescriptorPool(_device->logicalDevice(), _descriptor_pool, nullptr);
 }
 
 sp<VKPipeline> PipelineFactoryVulkan::build()
 {
     setupVertexDescriptions();
     setupDescriptorSetLayout();
-    preparePipelines();
-    setupDescriptorSet();
 
-    return sp<VKPipeline>::make(_render_target, pipelineLayout, descriptorSetLayout, descriptorSet, pipelines.solid);
+    VkDescriptorSet descriptorSet = setupDescriptorSet();
+    VkPipeline pipeline = preparePipelines();
+
+    return sp<VKPipeline>::make(_resource_manager->recycler(), _render_target, _pipeline_layout, _descriptor_set_layout, descriptorSet, pipeline);
 }
 
 sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout)
 {
+    const sp<PipelineInput>& input = pipelineLayout.input();
+    input->streams();
     return nullptr;
 }
 
 sp<RenderCommand> PipelineFactoryVulkan::buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode renderMode, int32_t count)
 {
     return nullptr;
+}
+
+void PipelineFactoryVulkan::setupVertexDescriptions(const PipelineInput& input)
+{
+    vertices.bindingDescriptions.clear();
+    vertices.attributeDescriptions.clear();
+
+    for(const auto& it1 : input.streams())
+    {
+        uint32_t divsor = it1.first;
+        const PipelineInput::Stream& stream = it1.second;
+        vertices.bindingDescriptions.push_back(vks::initializers::vertexInputBindingDescription(
+                                                   divsor,
+                                                   stream.stride(),
+                                                   divsor == 0 ? VK_VERTEX_INPUT_RATE_VERTEX : VK_VERTEX_INPUT_RATE_INSTANCE));
+
+        uint32_t location = 0;
+        for(const auto& i : stream.attributes())
+        {
+            vertices.attributeDescriptions.push_back(vks::initializers::vertexInputAttributeDescription(
+                                                         divsor,
+                                                         location,
+                                                         getFormat(i),
+                                                         i.offset()));
+            _location_map[i.name()] = (location++);
+        }
+    }
 }
 
 void PipelineFactoryVulkan::setupVertexDescriptions()
@@ -89,8 +123,7 @@ void PipelineFactoryVulkan::setupVertexDescriptions()
 
 void PipelineFactoryVulkan::setupDescriptorSetLayout()
 {
-    std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings =
-    {
+    std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
         // Binding 0 : Vertex shader uniform buffer
         vks::initializers::descriptorSetLayoutBinding(
         VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -108,20 +141,19 @@ void PipelineFactoryVulkan::setupDescriptorSetLayout()
                 setLayoutBindings.data(),
                 static_cast<uint32_t>(setLayoutBindings.size()));
 
-    VulkanAPI::checkResult(vkCreateDescriptorSetLayout(_device->logicalDevice(), &descriptorLayout, nullptr, &descriptorSetLayout));
+    VulkanAPI::checkResult(vkCreateDescriptorSetLayout(_device->logicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
 
     VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
             vks::initializers::pipelineLayoutCreateInfo(
-                &descriptorSetLayout,
+                &_descriptor_set_layout,
                 1);
 
-    VulkanAPI::checkResult(vkCreatePipelineLayout(_device->logicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &pipelineLayout));
+    VulkanAPI::checkResult(vkCreatePipelineLayout(_device->logicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_pipeline_layout));
 }
 
 void PipelineFactoryVulkan::setupDescriptorPool()
 {
-    std::vector<VkDescriptorPoolSize> poolSizes =
-    {
+    std::vector<VkDescriptorPoolSize> poolSizes = {
         vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
         vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
     };
@@ -132,27 +164,28 @@ void PipelineFactoryVulkan::setupDescriptorPool()
                 poolSizes.data(),
                 2);
 
-    VulkanAPI::checkResult(vkCreateDescriptorPool(_device->logicalDevice(), &descriptorPoolInfo, nullptr, &descriptorPool));
+    VulkanAPI::checkResult(vkCreateDescriptorPool(_device->logicalDevice(), &descriptorPoolInfo, nullptr, &_descriptor_pool));
 }
 
-void PipelineFactoryVulkan::setupDescriptorSet()
+VkDescriptorSet PipelineFactoryVulkan::setupDescriptorSet()
 {
+    VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
+
     VkDescriptorSetAllocateInfo allocInfo =
             vks::initializers::descriptorSetAllocateInfo(
-                descriptorPool,
-                &descriptorSetLayout,
+                _descriptor_pool,
+                &_descriptor_set_layout,
                 1);
 
     VulkanAPI::checkResult(vkAllocateDescriptorSets(_device->logicalDevice(), &allocInfo, &descriptorSet));
 
-    std::vector<VkWriteDescriptorSet> writeDescriptorSets =
-    {
+    std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
         // Binding 0 : Vertex shader uniform buffer
         vks::initializers::writeDescriptorSet(
         descriptorSet,
         VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
         0,
-        &_buffer->descriptor()),
+        &_ubo->descriptor()),
         // Binding 1 : Fragment shader texture sampler
         //	Fragment shader: layout (binding = 1) uniform sampler2D samplerColor;
         vks::initializers::writeDescriptorSet(
@@ -163,10 +196,13 @@ void PipelineFactoryVulkan::setupDescriptorSet()
     };
 
     vkUpdateDescriptorSets(_device->logicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+
+    return descriptorSet;
 }
 
-void PipelineFactoryVulkan::preparePipelines()
+VkPipeline PipelineFactoryVulkan::preparePipelines()
 {
+    VkPipeline pipeline = VK_NULL_HANDLE;
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
             vks::initializers::pipelineInputAssemblyStateCreateInfo(
                 VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
@@ -228,7 +264,7 @@ void PipelineFactoryVulkan::preparePipelines()
 
     VkGraphicsPipelineCreateInfo pipelineCreateInfo =
             vks::initializers::pipelineCreateInfo(
-                pipelineLayout,
+                _pipeline_layout,
                 _render_target->renderPass(),
                 0);
 
@@ -243,9 +279,49 @@ void PipelineFactoryVulkan::preparePipelines()
     pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
     pipelineCreateInfo.pStages = shaderStages.data();
 
-    VulkanAPI::checkResult(vkCreateGraphicsPipelines(_device->logicalDevice(), _device->pipelineCache(), 1, &pipelineCreateInfo, nullptr, &pipelines.solid));
+    VulkanAPI::checkResult(vkCreateGraphicsPipelines(_device->logicalDevice(), _device->pipelineCache(), 1, &pipelineCreateInfo, nullptr, &pipeline));
     vkDestroyShaderModule(_device->logicalDevice(), shaderStages[0].module, nullptr);
     vkDestroyShaderModule(_device->logicalDevice(), shaderStages[1].module, nullptr);
+
+    return pipeline;
+}
+
+VkFormat PipelineFactoryVulkan::getFormat(const Attribute& attribute) const
+{
+    if(attribute.type() == Attribute::TYPE_FLOAT)
+    {
+        if(attribute.length() < 5)
+        {
+            const VkFormat formats[4] = {VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT};
+            return formats[attribute.length() - 1];
+        }
+    }
+    else if(attribute.type() == Attribute::TYPE_INTEGER)
+    {
+        if(attribute.length() < 5)
+        {
+            const VkFormat formats[4] = {VK_FORMAT_R32_SINT, VK_FORMAT_R32G32_SINT, VK_FORMAT_R32G32B32_SINT, VK_FORMAT_R32G32B32A32_SINT};
+            return formats[attribute.length() - 1];
+        }
+    }
+    else if(attribute.type() == Attribute::TYPE_SHORT)
+    {
+        if(attribute.length() < 5)
+        {
+            const VkFormat formats[4] = {VK_FORMAT_R16_SINT, VK_FORMAT_R16G16_SINT, VK_FORMAT_R16G16B16_SINT, VK_FORMAT_R16G16B16A16_SINT};
+            return formats[attribute.length() - 1];
+        }
+    }
+    else if(attribute.type() == Attribute::TYPE_USHORT)
+    {
+        if(attribute.length() < 5)
+        {
+            const VkFormat formats[4] = {VK_FORMAT_R16_UINT, VK_FORMAT_R16G16_UINT, VK_FORMAT_R16G16B16_UINT, VK_FORMAT_R16G16B16A16_UINT};
+            return formats[attribute.length() - 1];
+        }
+    }
+    DFATAL("Unsupport type %s, length %d", attribute.declareType().c_str(), attribute.length());
+    return VK_FORMAT_R32G32B32A32_SFLOAT;
 }
 
 }

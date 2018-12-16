@@ -1,4 +1,4 @@
-#include "renderer/opengl/render_command/draw_elements_instanced.h"
+#include "renderer/opengl/render_command/gl_draw_elements_instanced.h"
 
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
@@ -9,12 +9,12 @@
 namespace ark {
 namespace opengl {
 
-DrawElementsInstanced::DrawElementsInstanced(DrawingContext context, const sp<Shader>& shader, GLenum mode, int32_t count)
+GLDrawElementsInstanced::GLDrawElementsInstanced(DrawingContext context, const sp<Shader>& shader, GLenum mode, int32_t count)
     : _context(std::move(context)), _shader(shader), _mode(mode), _count(count)
 {
 }
 
-void DrawElementsInstanced::draw(GraphicsContext& graphicsContext)
+void GLDrawElementsInstanced::draw(GraphicsContext& graphicsContext)
 {
     _shader->use(graphicsContext);
     _shader->bindUniforms(graphicsContext);

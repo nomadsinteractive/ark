@@ -1,9 +1,11 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_H_
-#define ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_H_
+#ifndef ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_2D_H_
+#define ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_2D_H_
 
 #include <vulkan/vulkan.h>
 
 #include "core/types/shared_ptr.h"
+
+#include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/inf/resource.h"
@@ -13,10 +15,10 @@
 namespace ark {
 namespace vulkan {
 
-class VKTexture : public Resource {
+class VKTexture2D : public Resource {
 public:
-    VKTexture(const sp<Recycler>& recycler, const sp<ResourceManager>& resourceManager, const sp<VKCommandPool>& commandPool);
-    ~VKTexture();
+    VKTexture2D(const sp<Recycler>& recycler, const sp<VKCommandPool>& commandPool, const sp<Variable<bitmap>>& bitmap);
+    ~VKTexture2D() override;
 
     virtual uint32_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
@@ -25,12 +27,12 @@ public:
     const VkDescriptorImageInfo& descriptor() const;
 
 private:
-    void loadTexture();
+    void doUpload();
 
 private:
     sp<Recycler> _recycler;
-    sp<ResourceManager> _resource_manager;
     sp<VKCommandPool> _command_pool;
+    sp<Variable<bitmap>> _bitmap;
     sp<VKDevice> _device;
 
     VkImage _image;

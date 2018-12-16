@@ -47,7 +47,7 @@ public:
         size_t _object_count;
     };
 
-    static Buffer::Snapshot makeGLBufferSnapshot(RenderController& renderController, Buffer::Name name, size_t objectCount);
+    static Buffer::Snapshot makeBufferSnapshot(const RenderController& renderController, Buffer::Name name, size_t objectCount);
 
 };
 

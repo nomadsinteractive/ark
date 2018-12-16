@@ -197,7 +197,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, nullptr);
 
-    const Buffer::Snapshot indexBuffer = IndexBuffers::makeGLBufferSnapshot(renderController, Buffer::NAME_QUADS, 6);
+    const Buffer::Snapshot indexBuffer = IndexBuffers::makeBufferSnapshot(renderController, Buffer::NAME_QUADS, 6);
     indexBuffer.upload(graphicsContext);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.id());
 

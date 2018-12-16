@@ -21,6 +21,7 @@
 
 #include "generated/opengl_plugin.h"
 
+#include "platform/platform.h"
 #include "platform/gl/gl.h"
 
 namespace ark {
@@ -36,6 +37,8 @@ RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<ResourceManager>& glResour
 void RendererFactoryOpenGL::initialize(GLContext& glContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
+
+    Platform::glInitialize();
 
     if(glContext.version() == Ark::AUTO)
     {

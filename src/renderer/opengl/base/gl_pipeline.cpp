@@ -152,10 +152,10 @@ void GLPipeline::glUpdateMatrix(GraphicsContext& graphicsContext, const String& 
 void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const PipelineInput& input, uint32_t divisor)
 {
     const PipelineInput::Stream& stream = input.getStream(divisor);
-    for(auto iter : stream.attributes())
+    for(const auto& i : stream.attributes())
     {
-        const GLPipeline::GLAttribute& glAttribute = getAttribute(iter.second.name());
-        glAttribute.bind(iter.second, stream.stride());
+        const GLPipeline::GLAttribute& glAttribute = getAttribute(i.name());
+        glAttribute.bind(i, stream.stride());
     }
 }
 

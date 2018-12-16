@@ -25,6 +25,26 @@ public:
 
     virtual void reload(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader) override;
 
+    const VkBuffer& vkBuffer() const;
+
+    /**
+    * Invalidate a memory range of the buffer to make it visible to the host
+    *
+    * @note Only required for non-coherent memory
+    *
+    * @param size (Optional) Size of the memory range to invalidate. Pass VK_WHOLE_SIZE to invalidate the complete buffer range.
+    * @param offset (Optional) Byte offset from beginning
+    *
+    * @return VkResult of the invalidate call
+    */
+    VkResult invalidate(VkDeviceSize _size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+
+    const VkDescriptorBufferInfo& descriptor() const;
+
+private:
+    void* map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+    void unmap(void* mapped);
+
     /**
     * Attach the allocated memory block to the buffer
     *
@@ -42,24 +62,6 @@ public:
     *
     */
     void setupDescriptor(VkDeviceSize _size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
-
-    /**
-    * Invalidate a memory range of the buffer to make it visible to the host
-    *
-    * @note Only required for non-coherent memory
-    *
-    * @param size (Optional) Size of the memory range to invalidate. Pass VK_WHOLE_SIZE to invalidate the complete buffer range.
-    * @param offset (Optional) Byte offset from beginning
-    *
-    * @return VkResult of the invalidate call
-    */
-    VkResult invalidate(VkDeviceSize _size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
-
-    const VkDescriptorBufferInfo& descriptor() const;
-
-private:
-    void* map(VkDeviceSize _size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
-    void unmap(void* mapped);
 
     /**
     * Flush a memory range of the buffer to make it visible to the device

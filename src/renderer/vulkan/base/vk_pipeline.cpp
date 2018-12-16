@@ -1,5 +1,7 @@
 #include "renderer/vulkan/base/vk_pipeline.h"
 
+#include "renderer/base/recycler.h"
+
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_render_target.h"
 #include "renderer/vulkan/util/vulkan_tools.h"
@@ -7,16 +9,14 @@
 namespace ark {
 namespace vulkan {
 
-VKPipeline::VKPipeline(const sp<VKRenderTarget>& renderTarget, VkPipelineLayout layout, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet descriptorSet, VkPipeline pipeline)
-    : _render_target(renderTarget), _layout(layout), _descriptor_set_layout(descriptorSetLayout), _descriptor_set(descriptorSet), _pipeline(pipeline)
+VKPipeline::VKPipeline(sp<Recycler> recycler, sp<VKRenderTarget> renderTarget, VkPipelineLayout layout, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet descriptorSet, VkPipeline pipeline)
+    : _recycler(std::move(recycler)), _render_target(std::move(renderTarget)), _layout(layout), _descriptor_set_layout(descriptorSetLayout), _descriptor_set(descriptorSet), _pipeline(pipeline)
 {
 }
 
 VKPipeline::~VKPipeline()
 {
-    vkDestroyPipelineLayout(_render_target->device()->logicalDevice(), _layout, nullptr);
-    vkDestroyDescriptorSetLayout(_render_target->device()->logicalDevice(), _descriptor_set_layout, nullptr);
-    vkDestroyPipeline(_render_target->device()->logicalDevice(), _pipeline, nullptr);
+    _recycler->recycle(*this);
 }
 
 VkPipeline VKPipeline::pipeline() const
@@ -32,6 +32,47 @@ VkPipelineLayout VKPipeline::layout() const
 const VkDescriptorSet& VKPipeline::descriptorSet() const
 {
     return _descriptor_set;
+}
+
+uint32_t VKPipeline::id()
+{
+    return 0;
+}
+
+void VKPipeline::upload(GraphicsContext& /*graphicsContext*/)
+{
+}
+
+Resource::RecycleFunc VKPipeline::recycle()
+{
+    const sp<VKDevice> device = _render_target->device();
+
+    VkPipelineLayout layout = _layout;
+    VkDescriptorSetLayout descriptorSetLayout = _descriptor_set_layout;
+    VkPipeline pipeline = _pipeline;
+
+    return [device, layout, descriptorSetLayout, pipeline](GraphicsContext&) {
+        vkDestroyPipelineLayout(device->logicalDevice(), layout, nullptr);
+        vkDestroyDescriptorSetLayout(device->logicalDevice(), descriptorSetLayout, nullptr);
+        vkDestroyPipeline(device->logicalDevice(), pipeline, nullptr);
+    };
+}
+
+void VKPipeline::use()
+{
+}
+
+void VKPipeline::bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings)
+{
+}
+
+void VKPipeline::bindUniform(GraphicsContext& graphicsContext, const Uniform& uniform)
+{
+
+}
+
+void VKPipeline::activeTexture(Resource& texture, Texture::Type type, uint32_t name)
+{
 }
 
 }

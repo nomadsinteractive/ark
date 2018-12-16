@@ -88,7 +88,7 @@ Uploader::MakerFunc IndexBuffers::Points::maker()
     return [](size_t objectCount)->sp<Uploader> { return sp<Points>::make(objectCount); };
 }
 
-Buffer::Snapshot IndexBuffers::makeGLBufferSnapshot(RenderController& renderController, Buffer::Name name, size_t objectCount)
+Buffer::Snapshot IndexBuffers::makeBufferSnapshot(const RenderController& renderController, Buffer::Name name, size_t objectCount)
 {
     const size_t warningLimit = 10000;
     DWARN(objectCount < warningLimit, "Object count(%d) exceeding warning limit(%d). You can make the limit larger if you're sure what you're doing", objectCount, warningLimit);

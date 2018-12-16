@@ -72,6 +72,11 @@ void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& 
     unmap(mapped);
 }
 
+const VkBuffer& VKBuffer::vkBuffer() const
+{
+    return _buffer;
+}
+
 void* VKBuffer::map(VkDeviceSize size, VkDeviceSize offset)
 {
     void* mapped = nullptr;
