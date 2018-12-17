@@ -21,7 +21,6 @@ PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<ResourceManager>& resource
     : _resource_manager(resourceManager), _render_target(renderTarget), _device(renderTarget->device())
 {
     setupDescriptorPool();
-    VulkanAPI::compileSPIR("", VulkanAPI::SHADER_TYPE_VERTEX);
 }
 
 PipelineFactoryVulkan::~PipelineFactoryVulkan()
@@ -35,16 +34,20 @@ sp<VKPipeline> PipelineFactoryVulkan::build()
     setupDescriptorSetLayout();
 
     VkDescriptorSet descriptorSet = setupDescriptorSet();
-    VkPipeline pipeline = preparePipelines();
+    VkPipeline pipeline = createPipeline();
 
     return sp<VKPipeline>::make(_resource_manager->recycler(), _render_target, _pipeline_layout, _descriptor_set_layout, descriptorSet, pipeline);
 }
 
-sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout)
+sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& /*graphicsContext*/, const PipelineLayout& pipelineLayout)
 {
-    const sp<PipelineInput>& input = pipelineLayout.input();
-    input->streams();
-    return nullptr;
+    setupVertexDescriptions(pipelineLayout.input());
+    setupDescriptorSetLayout();
+
+    VkDescriptorSet descriptorSet = setupDescriptorSet();
+    VkPipeline pipeline = createPipeline();
+
+    return sp<VKPipeline>::make(_resource_manager->recycler(), _render_target, _pipeline_layout, _descriptor_set_layout, descriptorSet, pipeline);
 }
 
 sp<RenderCommand> PipelineFactoryVulkan::buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode renderMode, int32_t count)
@@ -57,10 +60,10 @@ void PipelineFactoryVulkan::setupVertexDescriptions(const PipelineInput& input)
     vertices.bindingDescriptions.clear();
     vertices.attributeDescriptions.clear();
 
-    for(const auto& it1 : input.streams())
+    for(const auto& iter : input.streams())
     {
-        uint32_t divsor = it1.first;
-        const PipelineInput::Stream& stream = it1.second;
+        uint32_t divsor = iter.first;
+        const PipelineInput::Stream& stream = iter.second;
         vertices.bindingDescriptions.push_back(vks::initializers::vertexInputBindingDescription(
                                                    divsor,
                                                    stream.stride(),
@@ -200,7 +203,7 @@ VkDescriptorSet PipelineFactoryVulkan::setupDescriptorSet()
     return descriptorSet;
 }
 
-VkPipeline PipelineFactoryVulkan::preparePipelines()
+VkPipeline PipelineFactoryVulkan::createPipeline()
 {
     VkPipeline pipeline = VK_NULL_HANDLE;
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
@@ -212,7 +215,7 @@ VkPipeline PipelineFactoryVulkan::preparePipelines()
     VkPipelineRasterizationStateCreateInfo rasterizationState =
             vks::initializers::pipelineRasterizationStateCreateInfo(
                 VK_POLYGON_MODE_FILL,
-                VK_CULL_MODE_NONE,
+                VK_CULL_MODE_FRONT_BIT,
                 VK_FRONT_FACE_COUNTER_CLOCKWISE,
                 0);
 
@@ -259,8 +262,11 @@ VkPipeline PipelineFactoryVulkan::preparePipelines()
     // Load shaders
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
 
-    shaderStages[0] = VulkanAPI::loadShaderSPIR(_device->logicalDevice(), "texture.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-    shaderStages[1] = VulkanAPI::loadShaderSPIR(_device->logicalDevice(), "texture.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+//    shaderStages[0] = VulkanAPI::loadShaderSPIR(_device->logicalDevice(), "texture.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+//    shaderStages[1] = VulkanAPI::loadShaderSPIR(_device->logicalDevice(), "texture.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+
+    shaderStages[0] = VulkanAPI::loadShader(_device->logicalDevice(), "texture.vert", VulkanAPI::SHADER_TYPE_VERTEX);
+    shaderStages[1] = VulkanAPI::loadShader(_device->logicalDevice(), "texture.frag", VulkanAPI::SHADER_TYPE_FRAGMENT);
 
     VkGraphicsPipelineCreateInfo pipelineCreateInfo =
             vks::initializers::pipelineCreateInfo(

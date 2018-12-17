@@ -21,7 +21,7 @@ class ResourceManager;
 class Shader;
 class ShaderBindings;
 class PipelineInput;
-class GLShaderPreprocessor;
+class ShaderPreprocessor;
 class PipelineBuildingContext;
 class PipelineLayout;
 class Snippet;

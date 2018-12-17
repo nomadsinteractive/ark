@@ -36,8 +36,7 @@ public:
     const String& name() const;
     Type type() const;
     const sp<Flatable>& flatable() const;
-
-    void prepare(GraphicsContext& graphicsContext, Pipeline& pipeline) const;
+    const sp<Changed>& notifier() const;
 
     String declaration() const;
     void notify() const;

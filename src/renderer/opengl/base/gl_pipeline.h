@@ -10,12 +10,14 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/drawing_context.h"
 #include "renderer/inf/resource.h"
 #include "renderer/inf/pipeline.h"
 
 #include "platform/gl/gl.h"
 
 namespace ark {
+namespace opengl {
 
 class ARK_API GLPipeline : public Pipeline {
 public:
@@ -26,9 +28,9 @@ public:
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
 
-    virtual void use() override;
+    virtual void active(GraphicsContext& graphicsContext, const PipelineInput& input) override;
+
     virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) override;
-    virtual void bindUniform(GraphicsContext& graphicsContext, const Uniform& uniform) override;
     virtual void activeTexture(Resource& texture, Texture::Type target, uint32_t name) override;
 
     void glUpdateMatrix(GraphicsContext& graphicsContext, const String& name, const Matrix& matrix);
@@ -98,6 +100,7 @@ private:
     GLint getUniformLocation(const String& name);
 
     void bind(GraphicsContext&, const PipelineInput& input, uint32_t divisor);
+    void bindUniform(GraphicsContext& graphicsContext, const Uniform& uniform);
 
 private:
     sp<Recycler> _recycler;
@@ -117,6 +120,7 @@ private:
 
 };
 
+}
 }
 
 #endif

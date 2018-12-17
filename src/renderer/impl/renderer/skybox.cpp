@@ -28,11 +28,10 @@ public:
     }
 
     virtual void draw(GraphicsContext& graphicsContext) override {
-        _shader->use(graphicsContext);
-        _shader->bindUniforms(graphicsContext);
+        _shader->active(graphicsContext);
         _context.preDraw(graphicsContext, _shader);
 
-        GLPipeline* pipeline = static_cast<GLPipeline*>(_shader->pipeline().get());
+        opengl::GLPipeline* pipeline = static_cast<opengl::GLPipeline*>(_shader->pipeline().get());
         pipeline->glUpdateMatrix(graphicsContext, "u_View", _view);
         pipeline->glUpdateMatrix(graphicsContext, "u_Projection", _projection);
 

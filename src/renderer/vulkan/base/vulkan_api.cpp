@@ -262,7 +262,7 @@ void VulkanAPI::buildCommandBuffers(const VKRenderTarget& renderTarget)
     VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 
     VkClearValue clearValues[2];
-    clearValues[0].color = defaultClearColor;
+    clearValues[0].color = _background_color;
     clearValues[1].depthStencil = { 1.0f, 0 };
 
     VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
@@ -290,8 +290,8 @@ void VulkanAPI::buildCommandBuffers(const VKRenderTarget& renderTarget)
         VkRect2D scissor = vks::initializers::rect2D(renderTarget.width(), renderTarget.height(), 0, 0);
         vkCmdSetScissor(_command_buffers[i], 0, 1, &scissor);
 
-        vkCmdBindDescriptorSets(_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->layout(), 0, 1, &_pipeline->descriptorSet(), 0, nullptr);
-        vkCmdBindPipeline(_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->pipeline());
+        vkCmdBindDescriptorSets(_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->vkPipelineLayout(), 0, 1, &_pipeline->vkDescriptorSet(), 0, nullptr);
+        vkCmdBindPipeline(_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->vkPipeline());
 
         VkDeviceSize offsets[1] = { 0 };
         vkCmdBindVertexBuffers(_command_buffers[i], VERTEX_BUFFER_BIND_ID, 1, &_vertex_buffer->vkBuffer(), offsets);
@@ -351,13 +351,30 @@ VkPipelineShaderStageCreateInfo VulkanAPI::loadShaderSPIR(VkDevice device, std::
 #else
     shaderStage.module = vks::tools::loadShader(fileName.c_str(), device);
 #endif
-    shaderStage.pName = "main"; // todo : make param
+    shaderStage.pName = "main";
     DASSERT(shaderStage.module != VK_NULL_HANDLE);
-//    shaderModules.push_back(shaderStage.module);
     return shaderStage;
 }
 
-bytearray VulkanAPI::compileSPIR(const String& source, ShaderType shaderType)
+VkPipelineShaderStageCreateInfo VulkanAPI::loadShader(VkDevice device, const String& resid, ShaderType stage)
+{
+    const String content = Strings::loadFromReadable(Ark::instance().openAsset(resid));
+    const std::vector<uint32_t> spirv = VulkanAPI::compileSPIR(content, stage);
+    VkShaderModuleCreateInfo moduleCreateInfo{};
+    moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    moduleCreateInfo.codeSize = spirv.size() * sizeof(uint32_t);
+    moduleCreateInfo.pCode = spirv.data();
+
+    VkPipelineShaderStageCreateInfo shaderStage = {};
+    shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    shaderStage.stage = stage == SHADER_TYPE_VERTEX ? VK_SHADER_STAGE_VERTEX_BIT : VK_SHADER_STAGE_FRAGMENT_BIT;
+    checkResult(vkCreateShaderModule(device, &moduleCreateInfo, nullptr, &shaderStage.module));
+    DASSERT(shaderStage.module != VK_NULL_HANDLE);
+    shaderStage.pName = "main";
+    return shaderStage;
+}
+
+std::vector<uint32_t> VulkanAPI::compileSPIR(const String& source, ShaderType shaderType)
 {
     Global<GLSLLangInitializer> initializer;
     EShLanguage stage = initializer->toShLanguage(shaderType);
@@ -365,7 +382,37 @@ bytearray VulkanAPI::compileSPIR(const String& source, ShaderType shaderType)
     const char* sources[] = {source.c_str()};
     shader.setStrings(sources, 1);
 
-    std::string messages;
+    typedef std::map<uint32_t, uint32_t> TPerSetBaseBinding;
+    std::array<std::array<uint32_t, EShLangCount>, glslang::EResCount> baseBinding;
+    std::array<std::array<TPerSetBaseBinding, EShLangCount>, glslang::EResCount> baseBindingForSet;
+    std::array<std::vector<std::string>, EShLangCount> baseResourceSetBinding;
+    std::vector<std::pair<std::string, int32_t>> uniformLocationOverrides;
+
+    int32_t uniformBase = 0;
+
+    // Set IO mapper binding shift values
+    for (int32_t r = 0; r < glslang::EResCount; ++r) {
+        const glslang::TResourceType res = glslang::TResourceType(r);
+
+        // Set base bindings
+        shader.setShiftBinding(res, baseBinding[res][stage]);
+
+        // Set bindings for particular resource sets
+        // TODO: use a range based for loop here, when available in all environments.
+        for (auto i = baseBindingForSet[res][stage].begin();
+             i != baseBindingForSet[res][stage].end(); ++i)
+            shader.setShiftBindingForSet(res, i->second, i->first);
+    }
+    shader.setFlattenUniformArrays(false);
+    shader.setNoStorageFormat(false);
+    shader.setResourceSetBinding(baseResourceSetBinding[stage]);
+
+    shader.setUniformLocationBase(uniformBase);
+
+    shader.setEnvInput(glslang::EShSourceGlsl, stage, glslang::EShClientVulkan, 100);
+    shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_0);
+    shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_0);
+
     if (!shader.parse(&initializer->builtInResource(), 110, false, EShMsgDefault))
         DFATAL("Compile error: %s", shader.getInfoLog());
     {
@@ -376,7 +423,6 @@ bytearray VulkanAPI::compileSPIR(const String& source, ShaderType shaderType)
 
         if (program.getIntermediate(stage)) {
             std::vector<uint32_t> spirv;
-            std::string warningsErrors;
             spv::SpvBuildLogger logger;
             glslang::SpvOptions spvOptions;
             spvOptions.disableOptimizer = false;
@@ -384,9 +430,10 @@ bytearray VulkanAPI::compileSPIR(const String& source, ShaderType shaderType)
             spvOptions.disassemble = false;
             spvOptions.validate = true;
             glslang::GlslangToSpv(*program.getIntermediate(stage), spirv, &logger, &spvOptions);
+            return spirv;
         }
     }
-    return nullptr;
+    return {};
 }
 
 }

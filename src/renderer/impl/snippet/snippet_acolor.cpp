@@ -6,7 +6,7 @@ namespace ark {
 
 void SnippetAcolor::preInitialize(PipelineLayout& source)
 {
-    source.addAttribute("Color", "vec4", GLShaderPreprocessor::SHADER_TYPE_FRAGMENT);
+    source.addAttribute("Color", "vec4", ShaderPreprocessor::SHADER_TYPE_FRAGMENT);
 }
 
 void SnippetAcolor::preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context)

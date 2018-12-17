@@ -17,8 +17,7 @@ GLDrawElements::GLDrawElements(DrawingContext context, const sp<Shader>& shader,
 
 void GLDrawElements::draw(GraphicsContext& graphicsContext)
 {
-    _shader->use(graphicsContext);
-    _shader->bindUniforms(graphicsContext);
+    _shader->active(graphicsContext);
 
     GLPipeline* pipeline = static_cast<GLPipeline*>(_shader->pipeline().get());
     pipeline->glUpdateMatrix(graphicsContext, "u_MVP", _context._camera._vp);

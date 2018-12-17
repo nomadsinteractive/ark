@@ -16,9 +16,13 @@
 #include "renderer/base/texture.h"
 #include "renderer/base/uniform.h"
 
+#include "renderer/opengl/render_command/gl_draw_elements.h"
+#include "renderer/opengl/render_command/gl_draw_elements_instanced.h"
+
 #include "platform/platform.h"
 
 namespace ark {
+namespace opengl {
 
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader)
     : _recycler(recycler), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _id(0)
@@ -74,6 +78,16 @@ Resource::RecycleFunc GLPipeline::recycle()
         LOGD("glDeleteProgram(%d)", id);
         glDeleteProgram(id);
     };
+}
+
+void GLPipeline::active(GraphicsContext& graphicsContext, const PipelineInput& input)
+{
+    glUseProgram(_id);
+    for(const Uniform& uniform : input.uniforms())
+    {
+        if(!uniform.notifier() || uniform.notifier()->hasChanged())
+            bindUniform(graphicsContext, uniform);
+    }
 }
 
 void GLPipeline::bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings)
@@ -215,11 +229,6 @@ sp<GLPipeline::Shader> GLPipeline::makeShader(GraphicsContext& graphicsContext, 
     const sp<Shader> shader = sp<Shader>::make(graphicsContext.resourceManager()->recycler(), version, type, source);
     shaders[type][source] = shader;
     return shader;
-}
-
-void GLPipeline::use()
-{
-    glUseProgram(_id);
 }
 
 GLPipeline::GLAttribute::GLAttribute(GLint location)
@@ -364,4 +373,5 @@ GLuint GLPipeline::Shader::compile(uint32_t version, GLenum type, const String& 
     return id;
 }
 
+}
 }

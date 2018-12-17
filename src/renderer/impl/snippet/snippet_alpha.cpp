@@ -6,7 +6,7 @@ namespace ark {
 
 void SnippetAlpha::preInitialize(PipelineLayout& source)
 {
-    source.addAttribute("Alpha", "float", GLShaderPreprocessor::SHADER_TYPE_FRAGMENT);
+    source.addAttribute("Alpha", "float", ShaderPreprocessor::SHADER_TYPE_FRAGMENT);
 }
 
 void SnippetAlpha::preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context)

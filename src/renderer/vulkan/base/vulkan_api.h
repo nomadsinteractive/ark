@@ -39,8 +39,9 @@ public:
 
     static void checkResult(VkResult result);
     static VkPipelineShaderStageCreateInfo loadShaderSPIR(VkDevice device, std::string fileName, VkShaderStageFlagBits stage);
+    static VkPipelineShaderStageCreateInfo loadShader(VkDevice device, const String& resid, ShaderType stage);
 
-    static bytearray compileSPIR(const String& source, ShaderType shaderType);
+    static std::vector<uint32_t> compileSPIR(const String& source, ShaderType shaderType);
 
     struct Vertex {
         float pos[3];
@@ -93,7 +94,7 @@ private:
     sp<VKBuffer> _index_buffer;
 //    vks::Buffer indexBuffer;
 
-    VkClearColorValue defaultClearColor = { { 0, 0, 0.2f, 1.0f } };
+    VkClearColorValue _background_color = { { 0, 0, 0.2f, 1.0f } };
 
     GraphicsContext _graphics_context;
 

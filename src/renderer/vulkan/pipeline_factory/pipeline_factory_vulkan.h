@@ -21,7 +21,7 @@ public:
 
     sp<VKPipeline> build();
 
-    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& _pipeline_layout) override;
+    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout) override;
     virtual sp<RenderCommand> buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode renderMode, int32_t count) override;
 
     sp<VKBuffer> _ubo;
@@ -34,7 +34,7 @@ private:
     void setupDescriptorPool();
 
     VkDescriptorSet setupDescriptorSet();
-    VkPipeline preparePipelines();
+    VkPipeline createPipeline();
 
     VkFormat getFormat(const Attribute& attribute) const;
 
@@ -54,7 +54,6 @@ private:
         std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
     } vertices;
 
-    std::vector<VkCommandBuffer> _command_buffers;
     std::unordered_map<String, uint32_t> _location_map;
 };
 

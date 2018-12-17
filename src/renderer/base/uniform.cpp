@@ -92,10 +92,9 @@ const sp<Flatable>& Uniform::flatable() const
     return _flatable;
 }
 
-void Uniform::prepare(GraphicsContext& graphicsContext, Pipeline& pipeline) const
+const sp<Changed>& Uniform::notifier() const
 {
-    if(!_notifier || _notifier->hasChanged())
-        pipeline.bindUniform(graphicsContext, *this);
+    return _notifier;
 }
 
 String Uniform::declaration() const

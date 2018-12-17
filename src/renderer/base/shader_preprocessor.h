@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_OPENGL_UTIL_GL_SHADER_PREPROCESSOR_H_
-#define ARK_RENDERER_OPENGL_UTIL_GL_SHADER_PREPROCESSOR_H_
+#ifndef ARK_RENDERER_BASE_SHADER_PREPROCESSOR_H_
+#define ARK_RENDERER_BASE_SHADER_PREPROCESSOR_H_
 
 #include <map>
 
@@ -15,7 +15,7 @@
 
 namespace ark {
 
-class GLShaderPreprocessor {
+class ShaderPreprocessor {
 private:
     enum SnippetType {
         SNIPPET_TYPE_SOURCE,
@@ -106,7 +106,7 @@ public:
     };
 
 public:
-    GLShaderPreprocessor(ShaderType type, const String& source);
+    ShaderPreprocessor(ShaderType type, const String& source);
 
     void addSource(const String& source);
     void addModifier(const String& modifier);
@@ -153,8 +153,8 @@ public:
 
     PipelineLayout& _pipeline_layout;
 
-    GLShaderPreprocessor _vertex;
-    GLShaderPreprocessor _fragment;
+    ShaderPreprocessor _vertex;
+    ShaderPreprocessor _fragment;
 
     std::map<String, Attribute> _attributes;
 

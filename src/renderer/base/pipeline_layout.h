@@ -8,12 +8,12 @@
 #include "core/types/owned_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/pipeline_input.h"
 #include "renderer/base/attribute.h"
-#include "renderer/base/gl_shader_preprocessor.h"
-#include "renderer/base/uniform.h"
+#include "renderer/base/pipeline_input.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader.h"
+#include "renderer/base/shader_preprocessor.h"
+#include "renderer/base/uniform.h"
 
 namespace ark {
 
@@ -34,8 +34,8 @@ public:
     void preCompile(GraphicsContext& graphicsContext);
 
     const sp<PipelineInput>& input() const;
-    const GLShaderPreprocessor::Preprocessor& vertex() const;
-    const GLShaderPreprocessor::Preprocessor& fragment() const;
+    const ShaderPreprocessor::Preprocessor& vertex() const;
+    const ShaderPreprocessor::Preprocessor& fragment() const;
 
 private:
     void initialize();
@@ -52,13 +52,13 @@ private:
 
     sp<Snippet> _snippet;
 
-    GLShaderPreprocessor::Preprocessor _vertex;
-    GLShaderPreprocessor::Preprocessor _fragment;
+    ShaderPreprocessor::Preprocessor _vertex;
+    ShaderPreprocessor::Preprocessor _fragment;
 
     friend class Shader;
     friend class ShaderBindings;
     friend class PipelineBuildingContext;
-    friend class GLShaderPreprocessor;
+    friend class ShaderPreprocessor;
 
 };
 

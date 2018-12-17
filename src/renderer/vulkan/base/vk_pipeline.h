@@ -16,20 +16,20 @@ namespace vulkan {
 
 class VKPipeline : public Pipeline {
 public:
-    VKPipeline(sp<Recycler> recycler, sp<VKRenderTarget> renderTarget, VkPipelineLayout layout, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet descriptorSet, VkPipeline pipeline);
+    VKPipeline(sp<Recycler> recycler, sp<VKRenderTarget> renderTarget, VkPipelineLayout vkPipelineLayout, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet descriptorSet, VkPipeline pipeline);
     ~VKPipeline() override;
 
-    VkPipeline pipeline() const;
-    VkPipelineLayout layout() const;
-    const VkDescriptorSet& descriptorSet() const;
+    VkPipeline vkPipeline() const;
+    VkPipelineLayout vkPipelineLayout() const;
+    const VkDescriptorSet& vkDescriptorSet() const;
 
     virtual uint32_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
 
-    virtual void use() override;
+    virtual void active(GraphicsContext& graphicsContext, const PipelineInput& input) override;
+
     virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) override;
-    virtual void bindUniform(GraphicsContext& graphicsContext, const Uniform& uniform) override;
     virtual void activeTexture(Resource& texture, Texture::Type type, uint32_t name) override;
 
 private:
@@ -40,7 +40,6 @@ private:
     VkDescriptorSetLayout _descriptor_set_layout;
     VkDescriptorSet _descriptor_set;
     VkPipeline _pipeline;
-
 };
 
 }

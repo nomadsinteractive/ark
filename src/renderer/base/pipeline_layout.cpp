@@ -10,7 +10,7 @@
 
 #include "renderer/base/gl_context.h"
 #include "renderer/base/resource_manager.h"
-#include "renderer/base/gl_shader_preprocessor.h"
+#include "renderer/base/shader_preprocessor.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
 #include "renderer/inf/pipeline_factory.h"
@@ -70,12 +70,12 @@ const sp<PipelineInput>& PipelineLayout::input() const
     return _input;
 }
 
-const GLShaderPreprocessor::Preprocessor& PipelineLayout::vertex() const
+const ShaderPreprocessor::Preprocessor& PipelineLayout::vertex() const
 {
     return _vertex;
 }
 
-const GLShaderPreprocessor::Preprocessor& PipelineLayout::fragment() const
+const ShaderPreprocessor::Preprocessor& PipelineLayout::fragment() const
 {
     return _fragment;
 }

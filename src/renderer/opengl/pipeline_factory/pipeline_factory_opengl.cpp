@@ -14,14 +14,6 @@
 namespace ark {
 namespace opengl {
 
-PipelineFactoryOpenGL::PipelineFactoryOpenGL()
-{
-    _models[RenderModel::RENDER_MODE_LINES] = GL_LINES;
-    _models[RenderModel::RENDER_MODE_POINTS] = GL_POINTS;
-    _models[RenderModel::RENDER_MODE_TRIANGLES] = GL_TRIANGLES;
-    _models[RenderModel::RENDER_MODE_TRIANGLE_STRIP] = GL_TRIANGLE_STRIP;
-}
-
 sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout)
 {
     const sp<GLContext>& glContext = graphicsContext.glContext();
@@ -31,9 +23,10 @@ sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsConte
 
 sp<RenderCommand> PipelineFactoryOpenGL::buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode mode, int32_t count)
 {
+    static const GLenum models[RenderModel::RENDER_MODE_COUNT] = {GL_LINES, GL_POINTS, GL_TRIANGLES, GL_TRIANGLE_STRIP};
     if(count > 0)
-        return objectPool.obtain<GLDrawElementsInstanced>(std::move(drawingContext), shader, _models[mode], count);
-    return objectPool.obtain<GLDrawElements>(std::move(drawingContext), shader, _models[mode]);
+        return objectPool.obtain<GLDrawElementsInstanced>(std::move(drawingContext), shader, models[mode], count);
+    return objectPool.obtain<GLDrawElements>(std::move(drawingContext), shader, models[mode]);
 }
 
 }

@@ -19,17 +19,17 @@ VKPipeline::~VKPipeline()
     _recycler->recycle(*this);
 }
 
-VkPipeline VKPipeline::pipeline() const
+VkPipeline VKPipeline::vkPipeline() const
 {
     return _pipeline;
 }
 
-VkPipelineLayout VKPipeline::layout() const
+VkPipelineLayout VKPipeline::vkPipelineLayout() const
 {
     return _layout;
 }
 
-const VkDescriptorSet& VKPipeline::descriptorSet() const
+const VkDescriptorSet& VKPipeline::vkDescriptorSet() const
 {
     return _descriptor_set;
 }
@@ -58,17 +58,12 @@ Resource::RecycleFunc VKPipeline::recycle()
     };
 }
 
-void VKPipeline::use()
+void VKPipeline::active(GraphicsContext& graphicsContext, const PipelineInput& input)
 {
 }
 
 void VKPipeline::bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings)
 {
-}
-
-void VKPipeline::bindUniform(GraphicsContext& graphicsContext, const Uniform& uniform)
-{
-
 }
 
 void VKPipeline::activeTexture(Resource& texture, Texture::Type type, uint32_t name)

@@ -77,15 +77,14 @@ sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment,
     return sp<Shader>::make(source, nullptr);
 }
 
-void Shader::use(GraphicsContext& graphicsContext)
+void Shader::active(GraphicsContext& graphicsContext)
 {
-    getPipeline(graphicsContext)->use();
-}
-
-void Shader::bindUniforms(GraphicsContext& graphicsContext) const
-{
-    for(const Uniform& uniform : _stub->_input->uniforms())
-        uniform.prepare(graphicsContext, _stub->_pipeline);
+    getPipeline(graphicsContext)->active(graphicsContext, _stub->_input);
+//    for(const Uniform& uniform : _stub->_input->uniforms())
+//    {
+//        if(!uniform.notifier() || uniform.notifier()->hasChanged())
+//            _stub->_pipeline->bindUniform(graphicsContext, uniform);
+//    }
 }
 
 const sp<PipelineInput>& Shader::input() const
