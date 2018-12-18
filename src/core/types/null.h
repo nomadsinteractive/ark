@@ -15,7 +15,7 @@ private:
     template<typename T> static sp<T> ptr();
 
     template<typename T> static sp<T> toSafe_sfinae(const sp<T>& p, typename T::Null* /*arg*/) {
-        static sp<typename T::Null> safeNull = sp<typename T::Null>::make();
+        static sp<T> safeNull = sp<typename T::Null>::make();
         return p ? p : safeNull;
     }
 
