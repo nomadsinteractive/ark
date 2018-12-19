@@ -20,7 +20,7 @@ void GLSnippetClipPlane::preInitialize(PipelineLayout& source)
     for(const auto& i : _planes)
     {
         const String uName = Strings::sprintf("u_Plane%d", i.first);
-        source.addUniform(uName, Uniform::UNIFORM_F4, sp<FlatableV4f>::make(i.second), i.second.as<Changed>());
+        source.addUniform(uName, Uniform::TYPE_F4, sp<FlatableV4f>::make(i.second), i.second.as<Changed>());
     }
 }
 

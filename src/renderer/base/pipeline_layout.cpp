@@ -92,7 +92,7 @@ void PipelineLayout::initialize()
 
 void PipelineLayout::addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed)
 {
-    _input->uniforms().emplace_back(name, type, flatable, changed, _render_controller);
+    _input->uniforms().emplace_back(name, type, flatable, changed);
 }
 
 const sp<RenderController>& PipelineLayout::renderController() const
@@ -129,27 +129,27 @@ void PipelineLayout::loadPredefinedUniform(BeanFactory& factory, const sp<Scope>
         const sp<Flatable> flatable = factory.ensure<Flatable>(type, value, args);
         const uint32_t size = flatable->size();
         const uint32_t length = flatable->length();
-        Uniform::Type glType = Uniform::UNIFORM_F1;
+        Uniform::Type glType = Uniform::TYPE_F1;
         switch (size / length) {
         case 4:
             if(type[0] == 'f')
-                glType = length > 1 ? Uniform::UNIFORM_F1V : Uniform::UNIFORM_F1;
+                glType = length > 1 ? Uniform::TYPE_F1V : Uniform::TYPE_F1;
             else if(type[0] == 'i')
-                glType = length > 1 ? Uniform::UNIFORM_I1V : Uniform::UNIFORM_I1;
+                glType = length > 1 ? Uniform::TYPE_I1V : Uniform::TYPE_I1;
             else
                 FATAL("Unknow type \"%s\"", type.c_str());
             break;
         case 8:
-            glType = length > 1 ? Uniform::UNIFORM_F2V : Uniform::UNIFORM_F2;
+            glType = length > 1 ? Uniform::TYPE_F2V : Uniform::TYPE_F2;
             break;
         case 12:
-            glType = length > 1 ? Uniform::UNIFORM_F3V : Uniform::UNIFORM_F3;
+            glType = length > 1 ? Uniform::TYPE_F3V : Uniform::TYPE_F3;
             break;
         case 16:
-            glType = length > 1 ? Uniform::UNIFORM_F4V : Uniform::UNIFORM_F4;
+            glType = length > 1 ? Uniform::TYPE_F4V : Uniform::TYPE_F4;
             break;
         case 64:
-            glType = length > 1 ? Uniform::UNIFORM_MAT4V : Uniform::UNIFORM_MAT4;
+            glType = length > 1 ? Uniform::TYPE_MAT4V : Uniform::TYPE_MAT4;
             break;
         default:
             FATAL("Unknow type \"%s\"", type.c_str());

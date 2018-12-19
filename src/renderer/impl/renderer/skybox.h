@@ -43,6 +43,7 @@ private:
     Buffer::Snapshot _index_buffer;
 
     sp<ShaderBindings> _shader_bindings;
+    sp<MemoryPool> _memory_pool;
     sp<ObjectPool> _object_pool;
 };
 

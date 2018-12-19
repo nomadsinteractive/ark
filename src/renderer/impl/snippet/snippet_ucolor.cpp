@@ -12,9 +12,9 @@ SnippetUColor::SnippetUColor(const sp<Vec4>& color)
 {
 }
 
-void SnippetUColor::preInitialize(PipelineLayout& source)
+void SnippetUColor::preInitialize(PipelineLayout& pipelineLayout)
 {
-    source.addUniform("u_Color", Uniform::UNIFORM_F4, sp<FlatableV4f>::make(_color), _color.as<Changed>());
+    pipelineLayout.addUniform("u_Color", Uniform::TYPE_F4, sp<FlatableV4f>::make(_color), _color.as<Changed>());
 }
 
 void SnippetUColor::preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context)

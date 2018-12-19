@@ -32,13 +32,7 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const Str
 GLPipeline::~GLPipeline()
 {
     if(_id)
-    {
-        uint32_t id = _id;
-        _recycler->recycle([id](GraphicsContext&) {
-            LOGD("glDeleteProgram(%d)", id);
-            glDeleteProgram(id);
-        });
-    }
+        _recycler->recycle(*this);
 }
 
 uint32_t GLPipeline::id()
@@ -80,13 +74,28 @@ Resource::RecycleFunc GLPipeline::recycle()
     };
 }
 
-void GLPipeline::active(GraphicsContext& graphicsContext, const PipelineInput& input)
+void GLPipeline::active(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
 {
     glUseProgram(_id);
-    for(const Uniform& uniform : input.uniforms())
+    const Layer::UBO& ubo = drawingContext._ubo;
+    if(ubo._dirty_flags)
     {
-        if(!uniform.notifier() || uniform.notifier()->hasChanged())
-            bindUniform(graphicsContext, uniform);
+        DASSERT(ubo._buffer);
+        const sp<PipelineInput>& pipelineInput = drawingContext._shader_bindings->pipelineInput();
+        DCHECK(ubo._dirty_flags->length() == pipelineInput->uniforms().size(), "UBO snapshot unmatch");
+        const ShaderBindings::UBOManifest& uboManifest = drawingContext._shader_bindings->uboManifest();
+        DCHECK(ubo._dirty_flags->length() == uboManifest._slots.size(), "UBO snapshot unmatch");
+        for(size_t i = 0; i < pipelineInput->uniforms().size(); ++i)
+        {
+            if(ubo._dirty_flags->buf()[i])
+            {
+                const Uniform& uniform = pipelineInput->uniforms().at(i);
+                uint8_t* buf = ubo._buffer->buf();
+                const auto pair = uboManifest._slots.at(i);
+                bindUniform(reinterpret_cast<float*>(buf + pair.first), pair.second, uniform);
+            }
+        }
+
     }
 }
 
@@ -102,46 +111,51 @@ void GLPipeline::bind(GraphicsContext& graphicsContext, const ShaderBindings& bi
     }
 }
 
-void GLPipeline::bindUniform(GraphicsContext& /*graphicsContext*/, const Uniform& uniform)
+void GLPipeline::bindUniform(float* buf, uint32_t size, const Uniform& uniform)
 {
     const GLPipeline::GLUniform& glUniform = getUniform(uniform.name());
+    switch(uniform.type()) {
+    case Uniform::TYPE_I1:
+        DCHECK(size == 4, "Wrong uniform1i size: %d", size);
+        glUniform.setUniform1i(*reinterpret_cast<int32_t*>(buf));
+        break;
+    case Uniform::TYPE_F1:
+        DCHECK(size == 4, "Wrong uniform1f size: %d", size);
+        glUniform.setUniform1f(buf[0]);
+        break;
+    case Uniform::TYPE_F2:
+        DCHECK(size == 8, "Wrong uniform2f size: %d", size);
+        glUniform.setUniform2f(buf[0], buf[1]);
+        break;
+    case Uniform::TYPE_F3:
+        DCHECK(size == 12, "Wrong uniform3f size: %d", size);
+        glUniform.setUniform3f(buf[0], buf[1], buf[2]);
+        break;
+    case Uniform::TYPE_F4:
+        DCHECK(size == 16, "Wrong uniform4f size: %d", size);
+        glUniform.setUniform4f(buf[0], buf[1], buf[2], buf[3]);
+        break;
+    case Uniform::TYPE_F4V:
+        DCHECK(size % 16 == 0, "Wrong uniform4fv size: %d", size);
+        glUniform.setUniform4fv(size / 16, buf);
+        break;
+    case Uniform::TYPE_MAT4V:
+        DCHECK(size % 64 == 0, "Wrong color4fv size: %d", size);
+        glUniform.setUniformMatrix4fv(size / 64, GL_FALSE, buf);
+        break;
+    default:
+        DFATAL("Unimplemented");
+    }
+}
+
+void GLPipeline::bindUniform(GraphicsContext& /*graphicsContext*/, const Uniform& uniform)
+{
     float buf[1024];
     const sp<Flatable>& flatable = uniform.flatable();
     uint32_t size = flatable->size();
     DCHECK(size <= sizeof(buf), "Size too large: %d", size);
     flatable->flat(buf);
-    switch(uniform.type()) {
-    case Uniform::UNIFORM_I1:
-        DCHECK(flatable->size() == 4, "Wrong uniform1i size: %d", size);
-        glUniform.setUniform1i(*reinterpret_cast<int32_t*>(buf));
-        break;
-    case Uniform::UNIFORM_F1:
-        DCHECK(flatable->size() == 4, "Wrong uniform1f size: %d", size);
-        glUniform.setUniform1f(buf[0]);
-        break;
-    case Uniform::UNIFORM_F2:
-        DCHECK(flatable->size() == 8, "Wrong uniform2f size: %d", size);
-        glUniform.setUniform2f(buf[0], buf[1]);
-        break;
-    case Uniform::UNIFORM_F3:
-        DCHECK(flatable->size() == 12, "Wrong uniform3f size: %d", size);
-        glUniform.setUniform3f(buf[0], buf[1], buf[2]);
-        break;
-    case Uniform::UNIFORM_F4:
-        DCHECK(flatable->size() == 16, "Wrong uniform4f size: %d", size);
-        glUniform.setUniform4f(buf[0], buf[1], buf[2], buf[3]);
-        break;
-    case Uniform::UNIFORM_F4V:
-        DCHECK(flatable->size() % 16 == 0, "Wrong uniform4fv size: %d", size);
-        glUniform.setUniform4fv(flatable->size() / 16, buf);
-        break;
-    case Uniform::UNIFORM_MAT4V:
-        DCHECK(flatable->size() % 64 == 0, "Wrong color4fv size: %d", size);
-        glUniform.setUniformMatrix4fv(flatable->size() / 64, GL_FALSE, buf);
-        break;
-    default:
-        DFATAL("Unimplemented");
-    }
+    bindUniform(buf, size, uniform);
 }
 
 void GLPipeline::activeTexture(Resource& texture, Texture::Type type, uint32_t name)
@@ -166,7 +180,7 @@ void GLPipeline::glUpdateMatrix(GraphicsContext& graphicsContext, const String& 
 void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const PipelineInput& input, uint32_t divisor)
 {
     const PipelineInput::Stream& stream = input.getStream(divisor);
-    for(const auto& i : stream.attributes())
+    for(const auto& i : stream.attributes().values())
     {
         const GLPipeline::GLAttribute& glAttribute = getAttribute(i.name());
         glAttribute.bind(i, stream.stride());

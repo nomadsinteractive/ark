@@ -70,7 +70,7 @@ void PipelineFactoryVulkan::setupVertexDescriptions(const PipelineInput& input)
                                                    divsor == 0 ? VK_VERTEX_INPUT_RATE_VERTEX : VK_VERTEX_INPUT_RATE_INSTANCE));
 
         uint32_t location = 0;
-        for(const auto& i : stream.attributes())
+        for(const auto& i : stream.attributes().values())
         {
             vertices.attributeDescriptions.push_back(vks::initializers::vertexInputAttributeDescription(
                                                          divsor,

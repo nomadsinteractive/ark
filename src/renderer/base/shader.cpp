@@ -1,8 +1,6 @@
 #include "renderer/base/shader.h"
 
-#include <set>
-#include <regex>
-
+#include "core/base/memory_pool.h"
 #include "core/base/string_buffer.h"
 #include "core/base/string_table.h"
 #include "core/inf/array.h"
@@ -21,6 +19,7 @@
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/base/shader_bindings.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/pipeline_factory.h"
 
@@ -55,10 +54,10 @@ private:
 
 }
 
-Shader::Shader(const sp<PipelineLayout>& source, const sp<Camera>& camera)
-    : _stub(sp<Stub>::make(source)), _camera(camera ? camera : Camera::getMainCamera())
+Shader::Shader(const sp<PipelineLayout>& pipelineLayout, const sp<Camera>& camera)
+    : _stub(sp<Stub>::make(pipelineLayout)), _camera(camera ? camera : Camera::getMainCamera())
 {
-    source->initialize();
+    pipelineLayout->initialize();
 }
 
 sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment)
@@ -77,14 +76,9 @@ sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment,
     return sp<Shader>::make(source, nullptr);
 }
 
-void Shader::active(GraphicsContext& graphicsContext)
+void Shader::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    getPipeline(graphicsContext)->active(graphicsContext, _stub->_input);
-//    for(const Uniform& uniform : _stub->_input->uniforms())
-//    {
-//        if(!uniform.notifier() || uniform.notifier()->hasChanged())
-//            _stub->_pipeline->bindUniform(graphicsContext, uniform);
-//    }
+    getPipeline(graphicsContext)->active(graphicsContext, drawingContext);
 }
 
 const sp<PipelineInput>& Shader::input() const

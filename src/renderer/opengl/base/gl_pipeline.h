@@ -28,7 +28,7 @@ public:
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
 
-    virtual void active(GraphicsContext& graphicsContext, const PipelineInput& input) override;
+    virtual void active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
 
     virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) override;
     virtual void activeTexture(Resource& texture, Texture::Type target, uint32_t name) override;
@@ -101,6 +101,7 @@ private:
 
     void bind(GraphicsContext&, const PipelineInput& input, uint32_t divisor);
     void bindUniform(GraphicsContext& graphicsContext, const Uniform& uniform);
+    void bindUniform(float* buf, uint32_t size, const Uniform& uniform);
 
 private:
     sp<Recycler> _recycler;

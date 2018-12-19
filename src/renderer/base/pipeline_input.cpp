@@ -79,31 +79,27 @@ uint32_t PipelineInput::Stream::stride() const
     return _stride;
 }
 
-const std::vector<Attribute>& PipelineInput::Stream::attributes() const
+const Table<String, Attribute>& PipelineInput::Stream::attributes() const
 {
     return _attributes;
 }
 
 void PipelineInput::Stream::addAttribute(String name, Attribute attribute)
 {
-    DCHECK(_attribute_map.find(name) == _attribute_map.end(), "Attribute \"%s\" has been added already", name.c_str());
+    DCHECK(!_attributes.has(name), "Attribute \"%s\" has been added already", name.c_str());
     attribute.setOffset(_stride);
     _stride += attribute.size();
-    _attributes.push_back(std::move(attribute));
-    _attribute_map.insert(std::make_pair(std::move(name), &_attributes.back()));
+    _attributes.push_back(std::move(name), std::move(attribute));
 }
 
 const Attribute& PipelineInput::Stream::getAttribute(const String& name) const
 {
-    const auto iter = _attribute_map.find(name);
-    DCHECK(iter != _attribute_map.end(), "Stream(%d) has no attribute \"%s\"", name.c_str());
-    return *iter->second;
+    return _attributes.at(name);
 }
 
 int32_t PipelineInput::Stream::getAttributeOffset(const String& name) const
 {
-    const auto iter = _attribute_map.find(name);
-    return iter != _attribute_map.end() ? iter->second->offset() : -1;
+    return _attributes.has(name) ? _attributes.at(name).offset() : -1;
 }
 
 void PipelineInput::Stream::align()

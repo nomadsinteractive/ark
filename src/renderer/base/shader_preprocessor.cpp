@@ -77,6 +77,11 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
     _in_declarations.parse(_source, _type == SHADER_TYPE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
     _out_declarations.parse(_source, _OUT_PATTERN);
 
+    _source.search(_UNIFORM_PATTERN, [this](const std::smatch& m)->bool {
+        _uniforms.push_back(m[2].str(), m[1].str());
+        return true;
+    });
+
     if(!_main_block)
         return;
 
@@ -143,25 +148,15 @@ ShaderPreprocessor::Preprocessor ShaderPreprocessor::preprocess()
 
 void ShaderPreprocessor::insertPredefinedUniforms(const std::vector<Uniform>& uniforms)
 {
-//    static const std::regex UNIFORM_PATTERN("uniform\\s+\\w+\\s+(\\w+)(?:\\[\\d+\\])?;");
-    std::set<String> names;
-    std::vector<String> generated;
-    _source.search(_UNIFORM_PATTERN, [this, &names](const std::smatch& m)->bool {
-        names.insert(m[1].str());
-        _uniforms.push_back(std::make_pair(m[0].str(), m[1].str()));
-        return true;
-    });
-
     for(const Uniform& i : uniforms)
-        if(names.find(i.name()) == names.end() && _source.find(i.name()) != String::npos)
+        if(!_uniforms.has(i.name()) && _source.find(i.name()) != String::npos)
         {
-            generated.push_back(i.declaration());
-            _uniforms.push_back(std::make_pair("uniform", i.name()));
-        }
+            _uniforms.push_back(i.name(), "uniform");
 
-    for(const String& i : generated)
-        if(i.find('[') == String::npos)
-            _uniform_declarations << i << '\n';
+            const String declaration = i.declaration();
+            if(declaration.find('[') == String::npos)
+                _uniform_declarations << declaration << '\n';
+        }
 }
 
 uint32_t ShaderPreprocessor::parseFunctionBody(const String& s, String& body) const

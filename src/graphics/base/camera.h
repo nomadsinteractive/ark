@@ -36,7 +36,7 @@ public:
     Matrix view() const;
     Matrix projection() const;
 
-    Snapshot snapshop() const;
+    Snapshot snapshot() const;
 
     static const sp<Camera>& getMainCamera();
 

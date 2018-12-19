@@ -9,40 +9,42 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/resource_loader_context.h"
 
 namespace ark {
 
 class Uniform {
 public:
     enum Type {
-        UNIFORM_I1,
-        UNIFORM_F1,
-        UNIFORM_F2,
-        UNIFORM_F3,
-        UNIFORM_F4,
-        UNIFORM_I1V,
-        UNIFORM_F1V,
-        UNIFORM_F2V,
-        UNIFORM_F3V,
-        UNIFORM_F4V,
-        UNIFORM_MAT4,
-        UNIFORM_MAT4V,
+        TYPE_I1,
+        TYPE_F1,
+        TYPE_F2,
+        TYPE_F3,
+        TYPE_F4,
+        TYPE_I1V,
+        TYPE_F1V,
+        TYPE_F2V,
+        TYPE_F3V,
+        TYPE_F4V,
+        TYPE_MAT3,
+        TYPE_MAT3V,
+        TYPE_MAT4,
+        TYPE_MAT4V,
+        TYPE_SAMPLER2D
     };
 
-    Uniform(const String& name, Type type, const sp<Flatable>& flatable, const sp<Changed>& changed, const sp<RenderController>& renderController);
-    Uniform(const Uniform& other);
+    Uniform(const String& name, Type type, const sp<Flatable>& flatable, const sp<Changed>& changed);
+    DEFAULT_COPY_AND_ASSIGN(Uniform);
 
     const String& name() const;
     Type type() const;
+
+    static Type toType(const String& declaredType);
+
     const sp<Flatable>& flatable() const;
     const sp<Changed>& notifier() const;
 
     String declaration() const;
     void notify() const;
-
-private:
-    void synchronize(const sp<RenderController>& renderController);
 
 private:
     String _name;

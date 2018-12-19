@@ -7,6 +7,7 @@
 #include "core/base/string.h"
 #include "core/base/string_buffer.h"
 #include "core/collection/list.h"
+#include "core/collection/table.h"
 #include "core/types/global.h"
 
 #include "renderer/forwarding.h"
@@ -141,8 +142,7 @@ public:
     Declaration _out_declarations;
 
     std::vector<Snippet> _snippets;
-    std::vector<std::pair<String, String>> _uniforms;
-
+    Table<String, String> _uniforms;
 };
 
 class PipelineBuildingContext {

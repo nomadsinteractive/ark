@@ -16,13 +16,13 @@ namespace ark {
 
 class ARK_API Shader {
 public:
-    Shader(const sp<PipelineLayout>& source, const sp<Camera>& camera);
+    Shader(const sp<PipelineLayout>& pipelineLayout, const sp<Camera>& camera);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Shader);
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag");
     static sp<Shader> fromStringTable(const String& vertex = "shaders/default.vert", const String& fragment = "shaders/texture.frag", const sp<Snippet>& snippet = nullptr, const sp<ResourceLoaderContext>& resourceLoaderContext = nullptr);
 
-    void active(GraphicsContext& graphicsContext);
+    void active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
 
     const sp<PipelineInput>& input() const;
 

@@ -16,7 +16,7 @@ class SnippetUColor : public Snippet {
 public:
     SnippetUColor(const sp<Vec4>& color);
 
-    virtual void preInitialize(PipelineLayout& source) override;
+    virtual void preInitialize(PipelineLayout& pipelineLayout) override;
     virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context) override;
 
 //  [[plugin::builder::by-value("ucolor")]]

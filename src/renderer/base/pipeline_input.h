@@ -2,10 +2,10 @@
 #define ARK_RENDERER_BASE_PIPELINE_INPUT_H_
 
 #include <map>
-#include <unordered_map>
 #include <vector>
 
 #include "core/base/api.h"
+#include "core/collection/table.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -23,7 +23,7 @@ public:
 
         uint32_t stride() const;
 
-        const std::vector<Attribute>& attributes() const;
+        const Table<String, Attribute>& attributes() const;
         void addAttribute(String name, Attribute attribute);
 
         const Attribute& getAttribute(const String& name) const;
@@ -35,8 +35,7 @@ public:
         uint32_t _divisor;
         uint32_t _stride;
 
-        std::vector<Attribute> _attributes;
-        std::unordered_map<String, Attribute*> _attribute_map;
+        Table<String, Attribute> _attributes;
     };
 
 public:

@@ -47,6 +47,15 @@ public:
 
     };
 
+    struct UBO {
+        UBO(const Camera::Snapshot& camera);
+        DEFAULT_COPY_AND_ASSIGN(UBO);
+
+        Camera::Snapshot _camera;
+        bytearray _dirty_flags;
+        bytearray _buffer;
+    };
+
     struct Snapshot {
         Snapshot(const sp<Stub>& stub);
         Snapshot(Snapshot&& other) = default;
@@ -54,7 +63,7 @@ public:
         sp<RenderCommand> render(float x, float y) const;
 
         sp<Stub> _stub;
-        Camera::Snapshot _camera;
+        UBO _ubo;
         std::vector<RenderObject::Snapshot> _items;
         bool _dirty;
 

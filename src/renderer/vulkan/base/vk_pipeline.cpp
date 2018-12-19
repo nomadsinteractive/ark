@@ -58,7 +58,7 @@ Resource::RecycleFunc VKPipeline::recycle()
     };
 }
 
-void VKPipeline::active(GraphicsContext& graphicsContext, const PipelineInput& input)
+void VKPipeline::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
 }
 

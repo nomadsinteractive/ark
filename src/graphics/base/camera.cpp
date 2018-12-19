@@ -60,8 +60,7 @@ public:
     }
 
 private:
-    bool isDirty(V3DirtyChecker& a)
-    {
+    bool isDirty(V3DirtyChecker& a) {
         bool dirty = a.val();
         if(dirty) {
             _dirty->change();
@@ -127,7 +126,7 @@ Matrix Camera::projection() const
     return _projection->val();
 }
 
-Camera::Snapshot Camera::snapshop() const
+Camera::Snapshot Camera::snapshot() const
 {
     return Snapshot(_vp->val());
 }

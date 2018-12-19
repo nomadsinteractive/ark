@@ -29,7 +29,7 @@ Layer::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
 }
 
 Layer::Snapshot::Snapshot(const sp<Stub>& stub)
-    : _stub(stub), _camera(stub->_shader->camera()->snapshop()), _dirty(stub->_items.size() != stub->_last_rendered_count)
+    : _stub(stub), _ubo(stub->_shader_bindings->snapshot(_stub->_memory_pool, _stub->_shader->camera())), _dirty(stub->_items.size() != stub->_last_rendered_count)
 {
     for(const Item& i : stub->_items)
     {
@@ -69,7 +69,7 @@ sp<RenderCommand> Layer::Snapshot::render(float x, float y) const
                 sBuilder.write(matrix);
             }
         }
-        DrawingContext drawingContext(_stub->_shader_bindings, _camera, _stub->_shader_bindings->arrayBuffer().snapshot(buf.vertices().makeUploader()), buf.indices());
+        DrawingContext drawingContext(_stub->_shader_bindings, _ubo, _stub->_shader_bindings->arrayBuffer().snapshot(buf.vertices().makeUploader()), buf.indices());
         if(buf.isInstanced())
         {
             drawingContext._instanced_array_snapshots = buf.makeInstancedBufferSnapshots();
@@ -127,6 +127,11 @@ Layer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp
 sp<Layer> Layer::BUILDER::build(const sp<Scope>& args)
 {
     return sp<Layer>::make(_model->build(args), _shader->build(args), _resource_loader_context);
+}
+
+Layer::UBO::UBO(const Camera::Snapshot& camera)
+    : _camera(camera)
+{
 }
 
 }
