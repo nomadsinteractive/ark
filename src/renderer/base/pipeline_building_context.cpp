@@ -3,16 +3,24 @@
 #include <regex>
 
 #include "core/base/string_buffer.h"
+#include "core/inf/flatable.h"
 #include "core/util/strings.h"
 
 #include "renderer/base/gl_context.h"
 #include "renderer/base/pipeline_layout.h"
+#include "renderer/impl/snippet/snippet_linked_chain.h"
 
 namespace ark {
 
-PipelineBuildingContext::PipelineBuildingContext(PipelineLayout& pipelineLayout, const String& vertex, const String& fragment)
-    : _pipeline_layout(pipelineLayout), _input(pipelineLayout.input()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX, vertex), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment)
+PipelineBuildingContext::PipelineBuildingContext(const String& vertex, const String& fragment)
+    : _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX, vertex), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment)
 {
+}
+
+void PipelineBuildingContext::loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
+{
+    loadPredefinedUniform(factory, args, manifest);
+    loadPredefinedAttribute(manifest);
 }
 
 void PipelineBuildingContext::initialize()
@@ -115,10 +123,15 @@ void PipelineBuildingContext::addAttribute(const String& name, const String& typ
     _input->addAttribute(name, attr);
 }
 
+void PipelineBuildingContext::addSnippet(const sp<Snippet>& snippet)
+{
+    DASSERT(snippet);
+    _snippet = _snippet ? sp<Snippet>::adopt(new SnippetLinkedChain(_snippet, snippet)) : snippet;
+}
+
 void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed)
 {
     _uniforms.push_back(name, Uniform(name, type, flatable, changed));
-    _pipeline_layout.addUniform(name, type, flatable, changed);
 }
 
 Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
@@ -130,6 +143,59 @@ Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, c
         _fragment_in.push_back(std::pair<String, String>(type, name));
 
     return _attributes[name];
+}
+
+void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
+{
+    for(const document& i : manifest->children("attribute"))
+    {
+        const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
+        DCHECK(!name.empty(), "Empty name");
+        DWARN(isupper(name[0]) || name.startsWith("a_"), "GLAttribute name \"%s\" should be capital first or started with a_", name.c_str());
+        const String attrName = name.startsWith("a_") ? name.substr(2) : name;
+        const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
+        uint32_t divisor = Documents::getAttribute<uint32_t>(i, "divisor", 0);
+        addPredefinedAttribute(attrName, type, 0).setDivisor(divisor);
+    }
+}
+
+void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
+{
+    for(const document& i : manifest->children("uniform"))
+    {
+        const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
+        const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
+        const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
+        const sp<Flatable> flatable = factory.ensure<Flatable>(type, value, args);
+        const uint32_t size = flatable->size();
+        const uint32_t length = flatable->length();
+        Uniform::Type glType = Uniform::TYPE_F1;
+        switch (size / length) {
+        case 4:
+            if(type[0] == 'f')
+                glType = length > 1 ? Uniform::TYPE_F1V : Uniform::TYPE_F1;
+            else if(type[0] == 'i')
+                glType = length > 1 ? Uniform::TYPE_I1V : Uniform::TYPE_I1;
+            else
+                FATAL("Unknow type \"%s\"", type.c_str());
+            break;
+        case 8:
+            glType = length > 1 ? Uniform::TYPE_F2V : Uniform::TYPE_F2;
+            break;
+        case 12:
+            glType = length > 1 ? Uniform::TYPE_F3V : Uniform::TYPE_F3;
+            break;
+        case 16:
+            glType = length > 1 ? Uniform::TYPE_F4V : Uniform::TYPE_F4;
+            break;
+        case 64:
+            glType = length > 1 ? Uniform::TYPE_MAT4V : Uniform::TYPE_MAT4;
+            break;
+        default:
+            FATAL("Unknow type \"%s\"", type.c_str());
+        }
+        addUniform(name, glType, flatable, flatable.as<Changed>());
+    }
 }
 
 Attribute PipelineBuildingContext::makePredefinedAttribute(const String& name, const String& type)

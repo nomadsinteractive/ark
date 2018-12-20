@@ -9,11 +9,13 @@
 #include "renderer/opengl/base/gl_cubemap.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/pipeline_input.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/base/ubo.h"
 #include "renderer/util/index_buffers.h"
 #include "renderer/opengl/util/gl_util.h"
 
@@ -61,7 +63,7 @@ void Skybox::render(RenderRequest& renderRequest, float x, float y)
 {
     const Matrix view = _shader->camera()->view();
     const Matrix projection = _shader->camera()->projection();
-    renderRequest.addRequest(_object_pool->obtain<RenderCommandSkybox>(DrawingContext(_shader_bindings, _shader_bindings->snapshot(_memory_pool, _shader->camera()), _shader_bindings->arrayBuffer().snapshot(), _index_buffer), _shader, view, projection));
+    renderRequest.addRequest(_object_pool->obtain<RenderCommandSkybox>(DrawingContext(_shader_bindings, _shader->snapshot(_memory_pool), _shader_bindings->arrayBuffer().snapshot(), _index_buffer), _shader, view, projection));
 }
 
 const SafePtr<Size>& Skybox::size()

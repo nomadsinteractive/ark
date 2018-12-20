@@ -37,6 +37,7 @@ class RenderController;
 class RendererFactory;
 class ResourceLoaderContext;
 class Uploader;
+class UBO;
 
 }
 

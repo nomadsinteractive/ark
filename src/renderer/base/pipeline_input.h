@@ -41,8 +41,10 @@ public:
 public:
     PipelineInput() = default;
 
+    void initialize(std::vector<Uniform> uniform);
+
     const std::vector<Uniform>& uniforms() const;
-    std::vector<Uniform>& uniforms();
+    const sp<UBO>& ubo() const;
 
     const std::map<uint32_t, Stream>& streams() const;
     std::map<uint32_t, Stream>& streams();
@@ -57,7 +59,8 @@ public:
     int32_t getAttributeOffset(const String& name, uint32_t divisor = 0) const;
 
 private:
-    std::vector<Uniform> _uniforms;
+    sp<UBO> _ubo;
+//    std::vector<Uniform> _uniforms;
     std::map<uint32_t, Stream> _streams;
 
     friend class PipelineLayout;

@@ -5,7 +5,6 @@
 
 #include "core/base/api.h"
 #include "core/base/string.h"
-#include "core/types/owned_ptr.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/attribute.h"
@@ -19,17 +18,11 @@ namespace ark {
 
 class PipelineLayout {
 public:
-    PipelineLayout(const sp<RenderController>& renderController, const String& vertex, const String& fragment);
-
-    void loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
-
-    Attribute& addAttribute(const String& name, const String& type, uint32_t scopes = 0);
-    void addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed);
+    PipelineLayout(const sp<RenderController>& renderController, const sp<PipelineBuildingContext>& buildingContext);
 
     const sp<RenderController>& renderController() const;
 
     const sp<Snippet>& snippet() const;
-    void addSnippet(const sp<Snippet>& snippet);
 
     void preCompile(GraphicsContext& graphicsContext);
 
@@ -38,18 +31,13 @@ public:
     const ShaderPreprocessor::Preprocessor& fragment() const;
 
 private:
-    void initialize();
-
-    void insertPredefinedUniforms(const String& source, StringBuffer& sb);
-
-    void loadPredefinedAttribute(const document& manifest);
-    void loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
+    void initialize(const Camera& camera);
 
 private:
     sp<RenderController> _render_controller;
-    sp<PipelineInput> _input;
-    op<PipelineBuildingContext> _preprocessor_context;
+    sp<PipelineBuildingContext> _building_context;
 
+    sp<PipelineInput> _input;
     sp<Snippet> _snippet;
 
     ShaderPreprocessor::Preprocessor _vertex;

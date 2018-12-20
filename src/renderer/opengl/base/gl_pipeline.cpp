@@ -14,6 +14,7 @@
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
+#include "renderer/base/ubo.h"
 #include "renderer/base/uniform.h"
 
 #include "renderer/opengl/render_command/gl_draw_elements.h"
@@ -77,25 +78,22 @@ Resource::RecycleFunc GLPipeline::recycle()
 void GLPipeline::active(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
 {
     glUseProgram(_id);
-    const Layer::UBO& ubo = drawingContext._ubo;
-    if(ubo._dirty_flags)
+    const Layer::UBOSnapshot& uboSnapshot = drawingContext._ubo;
+    if(uboSnapshot._dirty_flags)
     {
-        DASSERT(ubo._buffer);
+        DASSERT(uboSnapshot._buffer);
         const sp<PipelineInput>& pipelineInput = drawingContext._shader_bindings->pipelineInput();
-        DCHECK(ubo._dirty_flags->length() == pipelineInput->uniforms().size(), "UBO snapshot unmatch");
-        const ShaderBindings::UBOManifest& uboManifest = drawingContext._shader_bindings->uboManifest();
-        DCHECK(ubo._dirty_flags->length() == uboManifest._slots.size(), "UBO snapshot unmatch");
-        for(size_t i = 0; i < pipelineInput->uniforms().size(); ++i)
+        const sp<UBO>& ubo = pipelineInput->ubo();
+        for(size_t i = 0; i < ubo->uniforms().size(); ++i)
         {
-            if(ubo._dirty_flags->buf()[i])
+            if(uboSnapshot._dirty_flags->buf()[i])
             {
-                const Uniform& uniform = pipelineInput->uniforms().at(i);
-                uint8_t* buf = ubo._buffer->buf();
-                const auto pair = uboManifest._slots.at(i);
+                const Uniform& uniform = ubo->uniforms().at(i);
+                uint8_t* buf = uboSnapshot._buffer->buf();
+                const auto pair = ubo->_slots.at(i);
                 bindUniform(reinterpret_cast<float*>(buf + pair.first), pair.second, uniform);
             }
         }
-
     }
 }
 

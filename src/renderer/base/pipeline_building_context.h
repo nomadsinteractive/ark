@@ -17,12 +17,15 @@ namespace ark {
 
 class PipelineBuildingContext {
 public:
-    PipelineBuildingContext(PipelineLayout& pipelineLayout, const String& vertex, const String& fragment);
+    PipelineBuildingContext(const String& vertex, const String& fragment);
+
+    void loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
+
 
     void initialize();
 
-    PipelineLayout& _pipeline_layout;
     sp<PipelineInput> _input;
+    sp<Snippet> _snippet;
 
     ShaderPreprocessor _vertex;
     ShaderPreprocessor _fragment;
@@ -47,6 +50,7 @@ public:
     void preCompile();
 
     void addAttribute(const String& name, const String& type);
+    void addSnippet(const sp<Snippet>& snippet);
     void addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed);
 
     Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t scopes);
@@ -54,7 +58,9 @@ public:
 private:
     Attribute makePredefinedAttribute(const String& name, const String& type);
 
-private:
+    void loadPredefinedAttribute(const document& manifest);
+    void loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
+
     void doSnippetPrecompile();
     void doPrecompile(String& vertSource, String& fragSource);
 

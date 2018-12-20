@@ -79,20 +79,20 @@ private:
 }
 
 Camera::Camera()
-    : _view(sp<Holder<Matrix>>::make(sp<Variable<Matrix>::Const>::make(Matrix()), sp<Boolean::Const>::make(false))),
-      _projection(sp<Holder<Matrix>>::make(sp<Variable<Matrix>::Const>::make(Matrix()), sp<Boolean::Const>::make(false))),
+    : _view(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()), sp<Boolean::Const>::make(false))),
+      _projection(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()), sp<Boolean::Const>::make(false))),
       _dirty(sp<Changed>::make(false))
 {
 }
 
 void Camera::ortho(float left, float right, float top, float bottom, float near, float far)
 {
-    _vp = sp<Holder<Matrix>>::make(sp<Variable<Matrix>::Const>::make(Matrix::ortho(left, right, top, bottom, near, far)), sp<Boolean::Const>::make(false));
+    _vp = sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix::ortho(left, right, top, bottom, near, far)), sp<Boolean::Const>::make(false));
 }
 
 void Camera::perspective(float fov, float aspect, float near, float far)
 {
-    _projection = sp<Holder<Matrix>>::make(sp<Variable<Matrix>::Const>::make(Matrix::perspective(fov, aspect, near, far)), sp<Boolean::Const>::make(false));
+    _projection = sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix::perspective(fov, aspect, near, far)), sp<Boolean::Const>::make(false));
     updateViewProjection();
 }
 
@@ -102,7 +102,7 @@ void Camera::lookAt(const V3& position, const V3& target, const V3& up)
     _target = sp<Variable<V3>::Const>::make(target);
     _up = sp<Variable<V3>::Const>::make(up);
 
-    _view = sp<Holder<Matrix>>::make(sp<Variable<Matrix>::Const>::make(Matrix::lookAt(position, target, up)), sp<Boolean::Const>::make(false));
+    _view = sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix::lookAt(position, target, up)), sp<Boolean::Const>::make(false));
     updateViewProjection();
 }
 
@@ -112,7 +112,7 @@ void Camera::lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<V
     _target = target;
     _up = up;
 
-    _view = sp<Holder<Matrix>>::make(sp<FrustumMatrixVariable>::make(position, target, up), sp<DirtyChecker>::make(_dirty, sp<V3DirtyChecker>::make(position), sp<V3DirtyChecker>::make(target), sp<V3DirtyChecker>::make(up)));
+    _view = sp<Holder>::make(sp<FrustumMatrixVariable>::make(position, target, up), sp<DirtyChecker>::make(_dirty, sp<V3DirtyChecker>::make(position), sp<V3DirtyChecker>::make(target), sp<V3DirtyChecker>::make(up)));
     updateViewProjection();
 }
 
@@ -139,13 +139,24 @@ const sp<Camera>& Camera::getMainCamera()
 
 void Camera::updateViewProjection()
 {
-    _vp = sp<Holder<Matrix>>::make(sp<VariableOP2<Matrix, Matrix, Operators::Mul<Matrix>, sp<Variable<Matrix>>,
+    _vp = sp<Holder>::make(sp<VariableOP2<Matrix, Matrix, Operators::Mul<Matrix>, sp<Variable<Matrix>>,
                                    sp<Variable<Matrix>>>>::make(_projection->_delegate, _view->_delegate), _dirty->toBoolean());
 }
 
 Camera::Snapshot::Snapshot(const Matrix& vp)
     : _vp(vp)
 {
+}
+
+Camera::Holder::Holder(const sp<Variable<Matrix> >& delegate, const sp<Boolean>& dirty)
+    : _delegate(delegate), _dirty(sp<Changed>::make(dirty)), _value(delegate->val()) {
+}
+
+Matrix Camera::Holder::val()
+{
+    if(_dirty->hasChanged())
+        _value = _delegate->val();
+    return _value;
 }
 
 }

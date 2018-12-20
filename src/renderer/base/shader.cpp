@@ -11,15 +11,15 @@
 #include "core/util/strings.h"
 
 #include "graphics/base/camera.h"
-#include "graphics/base/color.h"
 #include "renderer/base/varyings.h"
-#include "graphics/impl/flatable/flatable_color3b.h"
 
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader_bindings.h"
+#include "renderer/base/ubo.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/pipeline_factory.h"
 
@@ -37,8 +37,10 @@ public:
     }
 
     virtual sp<Shader> build(const sp<Scope>& args) override {
-        const sp<PipelineLayout> source = sp<PipelineLayout>::make(_render_controller, _vertex_src, _fragment_src);
-        source->loadPredefinedParam(_factory, args, _manifest);
+        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_vertex_src, _fragment_src);
+        buildingContext->loadPredefinedParam(_factory, args, _manifest);
+
+        const sp<PipelineLayout> source = sp<PipelineLayout>::make(_render_controller, buildingContext);
         return sp<Shader>::make(source, _camera->build(args));
     }
 
@@ -57,7 +59,7 @@ private:
 Shader::Shader(const sp<PipelineLayout>& pipelineLayout, const sp<Camera>& camera)
     : _stub(sp<Stub>::make(pipelineLayout)), _camera(camera ? camera : Camera::getMainCamera())
 {
-    pipelineLayout->initialize();
+    pipelineLayout->initialize(_camera);
 }
 
 sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment)
@@ -70,10 +72,17 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& d
 sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment, const sp<Snippet>& snippet, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
     const Global<StringTable> stringTable;
-    const sp<PipelineLayout> source = sp<PipelineLayout>::make(resourceLoaderContext->renderController(), stringTable->getString(vertex), stringTable->getString(fragment));
+    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(stringTable->getString(vertex), stringTable->getString(fragment));
     if(snippet)
-        source->addSnippet(snippet);
-    return sp<Shader>::make(source, nullptr);
+        buildingContext->addSnippet(snippet);
+
+    const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(resourceLoaderContext->renderController(), buildingContext);
+    return sp<Shader>::make(pipelineLayout, nullptr);
+}
+
+Layer::UBOSnapshot Shader::snapshot(MemoryPool& memoryPool) const
+{
+    return _stub->_input->ubo()->snapshot(memoryPool, _camera);
 }
 
 void Shader::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
@@ -137,11 +146,13 @@ Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const s
 
 sp<Shader> Shader::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<PipelineLayout> source = sp<PipelineLayout>::make(_resource_loader_context->renderController(), _vertex->build(args), _fragment->build(args));
-    source->loadPredefinedParam(_factory, args, _manifest);
+    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_vertex->build(args), _fragment->build(args));
+    buildingContext->loadPredefinedParam(_factory, args, _manifest);
     if(_snippet)
-        source->addSnippet(_snippet->build(args));
-    return sp<Shader>::make(source, _camera->build(args));
+        buildingContext->addSnippet(_snippet->build(args));
+
+    const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(_resource_loader_context->renderController(), buildingContext);
+    return sp<Shader>::make(pipelineLayout, _camera->build(args));
 }
 
 Shader::Stub::Stub(const sp<PipelineLayout>& pipelineLayout)

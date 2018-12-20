@@ -41,23 +41,17 @@ public:
     static const sp<Camera>& getMainCamera();
 
 private:
-    template<typename T> class Holder : public Variable<T> {
+    class Holder : public Variable<Matrix> {
     public:
-        Holder(const sp<Variable<T>>& delegate, const sp<Boolean>& dirty)
-            : _delegate(delegate), _dirty(sp<Changed>::make(dirty)), _value(delegate->val()) {
-        }
+        Holder(const sp<Variable<Matrix>>& delegate, const sp<Boolean>& dirty);
 
-        virtual T val() override {
-            if(_dirty->hasChanged())
-                _value = _delegate->val();
-            return _value;
-        }
+        virtual Matrix val() override;
 
     private:
-        sp<Variable<T>> _delegate;
+        sp<Variable<Matrix>> _delegate;
         sp<Changed> _dirty;
 
-        T _value;
+        Matrix _value;
 
         friend class Camera;
     };
@@ -66,10 +60,10 @@ private:
     void updateViewProjection();
 
 private:
-    sp<Holder<Matrix>> _view;
-    sp<Holder<Matrix>> _projection;
+    sp<Holder> _view;
+    sp<Holder> _projection;
 
-    sp<Holder<Matrix>> _vp;
+    sp<Holder> _vp;
 
     sp<Vec3> _position;
     sp<Vec3> _target;

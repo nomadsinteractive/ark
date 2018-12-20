@@ -2,19 +2,24 @@
 
 #include "core/base/string.h"
 
-#include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/base/render_controller.h"
+#include "renderer/base/ubo.h"
 
 namespace ark {
 
-const std::vector<Uniform>& PipelineInput::uniforms() const
+void PipelineInput::initialize(std::vector<Uniform> uniform)
 {
-    return _uniforms;
+    _ubo = sp<UBO>::make(std::move(uniform));
 }
 
-std::vector<Uniform>& PipelineInput::uniforms()
+const std::vector<Uniform>& PipelineInput::uniforms() const
 {
-    return _uniforms;
+    return _ubo->uniforms();
+}
+
+const sp<UBO>& PipelineInput::ubo() const
+{
+    return _ubo;
 }
 
 const std::map<uint32_t, PipelineInput::Stream>& PipelineInput::streams() const
@@ -104,9 +109,9 @@ int32_t PipelineInput::Stream::getAttributeOffset(const String& name) const
 
 void PipelineInput::Stream::align()
 {
-    uint32_t mod = _stride % sizeof(GLfloat);
+    uint32_t mod = _stride % sizeof(float);
     if(mod != 0)
-        _stride += (sizeof(GLfloat) - mod);
+        _stride += (sizeof(float) - mod);
 }
 
 }

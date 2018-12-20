@@ -29,7 +29,7 @@ Layer::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
 }
 
 Layer::Snapshot::Snapshot(const sp<Stub>& stub)
-    : _stub(stub), _ubo(stub->_shader_bindings->snapshot(_stub->_memory_pool, _stub->_shader->camera())), _dirty(stub->_items.size() != stub->_last_rendered_count)
+    : _stub(stub), _ubo(stub->_shader->snapshot(_stub->_memory_pool)), _dirty(stub->_items.size() != stub->_last_rendered_count)
 {
     for(const Item& i : stub->_items)
     {
@@ -129,7 +129,7 @@ sp<Layer> Layer::BUILDER::build(const sp<Scope>& args)
     return sp<Layer>::make(_model->build(args), _shader->build(args), _resource_loader_context);
 }
 
-Layer::UBO::UBO(const Camera::Snapshot& camera)
+Layer::UBOSnapshot::UBOSnapshot(const Camera::Snapshot& camera)
     : _camera(camera)
 {
 }

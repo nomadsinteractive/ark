@@ -13,56 +13,38 @@
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/shader_preprocessor.h"
-#include "renderer/impl/snippet/snippet_linked_chain.h"
 #include "renderer/inf/pipeline_factory.h"
 #include "renderer/inf/renderer_factory.h"
+#include "renderer/inf/snippet.h"
 
 #include "renderer/opengl/base/gl_pipeline.h"
 
 namespace ark {
 
-PipelineLayout::PipelineLayout(const sp<RenderController>& renderController, const String& vertex, const String& fragment)
-    : _render_controller(renderController), _input(sp<PipelineInput>::make()),
-      _preprocessor_context(new PipelineBuildingContext(*this, vertex, fragment))
+PipelineLayout::PipelineLayout(const sp<RenderController>& renderController, const sp<PipelineBuildingContext>& buildingContext)
+    : _render_controller(renderController), _building_context(buildingContext), _input(_building_context->_input), _snippet(buildingContext->_snippet)
 {
-}
-
-void PipelineLayout::loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
-{
-    loadPredefinedUniform(factory, args, manifest);
-    loadPredefinedAttribute(manifest);
-}
-
-Attribute& PipelineLayout::addAttribute(const String& name, const String& type, uint32_t scopes)
-{
-    return _preprocessor_context->addPredefinedAttribute(name, type, scopes);
-}
-
-void PipelineLayout::addSnippet(const sp<Snippet>& snippet)
-{
-    DASSERT(snippet);
-    _snippet = _snippet ? sp<Snippet>::adopt(new SnippetLinkedChain(_snippet, snippet)) : snippet;
 }
 
 void PipelineLayout::preCompile(GraphicsContext& graphicsContext)
 {
-    if(_preprocessor_context)
+    if(_building_context)
     {
         if(_snippet)
-            _snippet->preCompile(graphicsContext, _preprocessor_context);
+            _snippet->preCompile(graphicsContext, _building_context);
 
-        _preprocessor_context->preCompile();
+        _building_context->preCompile();
 
-        _preprocessor_context->_vertex.insertPredefinedUniforms(_input->uniforms());
-        _preprocessor_context->_fragment.insertPredefinedUniforms(_input->uniforms());
+        _building_context->_vertex.insertPredefinedUniforms(_input->uniforms());
+        _building_context->_fragment.insertPredefinedUniforms(_input->uniforms());
 
         if(graphicsContext.glContext()->version() >= Ark::OPENGL_30)
-            _preprocessor_context->_fragment._out_declarations.declare("vec4", "v_", "FragColor");
+            _building_context->_fragment._out_declarations.declare("vec4", "v_", "FragColor");
 
-        _vertex = _preprocessor_context->_vertex.preprocess();
-        _fragment = _preprocessor_context->_fragment.preprocess();
+        _vertex = _building_context->_vertex.preprocess();
+        _fragment = _building_context->_fragment.preprocess();
 
-        _preprocessor_context.reset();
+        _building_context = nullptr;
     }
 }
 
@@ -81,19 +63,20 @@ const ShaderPreprocessor::Preprocessor& PipelineLayout::fragment() const
     return _fragment;
 }
 
-void PipelineLayout::initialize()
+void PipelineLayout::initialize(const Camera& camera)
 {
-    DCHECK(_preprocessor_context, "GLShaderSource should not be initialized more than once");
+    DCHECK(_building_context, "GLShaderSource should not be initialized more than once");
 
     if(_snippet)
-        _snippet->preInitialize(_preprocessor_context);
+        _snippet->preInitialize(_building_context);
 
-    _preprocessor_context->initialize();
-}
+    _building_context->initialize();
 
-void PipelineLayout::addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed)
-{
-    _input->uniforms().emplace_back(name, type, flatable, changed);
+    if(_building_context->_vertex._uniforms.has("MVP"))
+    {
+
+    }
+    _input->initialize(_building_context->_uniforms.values());
 }
 
 const sp<RenderController>& PipelineLayout::renderController() const
@@ -104,59 +87,6 @@ const sp<RenderController>& PipelineLayout::renderController() const
 const sp<Snippet>& PipelineLayout::snippet() const
 {
     return _snippet;
-}
-
-void PipelineLayout::loadPredefinedAttribute(const document& manifest)
-{
-    for(const document& i : manifest->children("attribute"))
-    {
-        const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
-        DCHECK(!name.empty(), "Empty name");
-        DWARN(isupper(name[0]) || name.startsWith("a_"), "GLAttribute name \"%s\" should be capital first or started with a_", name.c_str());
-        const String attrName = name.startsWith("a_") ? name.substr(2) : name;
-        const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
-        uint32_t divisor = Documents::getAttribute<uint32_t>(i, "divisor", 0);
-        addAttribute(attrName, type).setDivisor(divisor);
-    }
-}
-
-void PipelineLayout::loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
-{
-    for(const document& i : manifest->children("uniform"))
-    {
-        const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
-        const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
-        const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
-        const sp<Flatable> flatable = factory.ensure<Flatable>(type, value, args);
-        const uint32_t size = flatable->size();
-        const uint32_t length = flatable->length();
-        Uniform::Type glType = Uniform::TYPE_F1;
-        switch (size / length) {
-        case 4:
-            if(type[0] == 'f')
-                glType = length > 1 ? Uniform::TYPE_F1V : Uniform::TYPE_F1;
-            else if(type[0] == 'i')
-                glType = length > 1 ? Uniform::TYPE_I1V : Uniform::TYPE_I1;
-            else
-                FATAL("Unknow type \"%s\"", type.c_str());
-            break;
-        case 8:
-            glType = length > 1 ? Uniform::TYPE_F2V : Uniform::TYPE_F2;
-            break;
-        case 12:
-            glType = length > 1 ? Uniform::TYPE_F3V : Uniform::TYPE_F3;
-            break;
-        case 16:
-            glType = length > 1 ? Uniform::TYPE_F4V : Uniform::TYPE_F4;
-            break;
-        case 64:
-            glType = length > 1 ? Uniform::TYPE_MAT4V : Uniform::TYPE_MAT4;
-            break;
-        default:
-            FATAL("Unknow type \"%s\"", type.c_str());
-        }
-        addUniform(name, glType, flatable, flatable.as<Changed>());
-    }
 }
 
 }

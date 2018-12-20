@@ -32,16 +32,6 @@ public:
         int32_t _offsets[ATTRIBUTE_NAME_COUNT];
     };
 
-    struct UBOManifest {
-        UBOManifest(const PipelineInput& input);
-
-        bool snapshot(const PipelineInput& input) const;
-
-        std::vector<std::pair<uintptr_t, size_t>> _slots;
-        bytearray _dirty_flags;
-        bytearray _buffer;
-    };
-
 public:
     ShaderBindings(RenderController& renderController, const sp<Shader>& shader);
     ShaderBindings(RenderController& renderController, const sp<Shader>& shader, const Buffer& arrayBuffer);
@@ -53,10 +43,7 @@ public:
     const Buffer& arrayBuffer() const;
     const std::vector<std::pair<uint32_t, Buffer>>& instancedArrays() const;
 
-    Layer::UBO snapshot(MemoryPool& memoryPool, const Camera& camera) const;
     const Attributes& attributes() const;
-
-    const UBOManifest& uboManifest() const;
 
     void bindGLTexture(const sp<Texture>& texture, uint32_t name = 0) const;
     void bindGLTexture(const sp<Resource>& texture, Texture::Type type, uint32_t name) const;
@@ -67,7 +54,6 @@ private:
     sp<Shader> _shader;
     sp<SnippetDelegate> _snippet;
     Attributes _attributes;
-    UBOManifest _ubo_manifest;
 
     Buffer _array_buffer;
     sp<PipelineInput> _pipeline_input;

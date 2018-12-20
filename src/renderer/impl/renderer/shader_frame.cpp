@@ -10,9 +10,11 @@
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/resource_manager.h"
+#include "renderer/base/pipeline_input.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/base/ubo.h"
 #include "renderer/inf/uploader.h"
 #include "renderer/util/index_buffers.h"
 
@@ -32,7 +34,7 @@ void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
     const Buffer::Snapshot indexBuffer = IndexBuffers::makeBufferSnapshot(_render_controller, Buffer::NAME_QUADS, 1);
     const sp<Uploader> uploader = _object_pool->obtain<ByteArrayUploader>(getArrayBuffer(x, y));
-    renderRequest.addRequest(_object_pool->obtain<opengl::GLDrawElements>(DrawingContext(_shader_bindings, _shader_bindings->snapshot(_memory_pool, _shader->camera()), _array_buffer.snapshot(uploader), indexBuffer), _shader, GL_TRIANGLES));
+    renderRequest.addRequest(_object_pool->obtain<opengl::GLDrawElements>(DrawingContext(_shader_bindings, _shader->snapshot(_memory_pool), _array_buffer.snapshot(uploader), indexBuffer), _shader, GL_TRIANGLES));
 }
 
 const SafePtr<Size>& ShaderFrame::size()
