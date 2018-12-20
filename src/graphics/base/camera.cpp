@@ -63,7 +63,7 @@ private:
     bool isDirty(V3DirtyChecker& a) {
         bool dirty = a.val();
         if(dirty) {
-            _dirty->change();
+            _dirty->notify();
             a.reset();
         }
         return dirty;
@@ -116,19 +116,24 @@ void Camera::lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<V
     updateViewProjection();
 }
 
-Matrix Camera::view() const
+const sp<Camera::Holder>& Camera::view() const
 {
-    return _view->val();
+    return _view;
 }
 
-Matrix Camera::projection() const
+const sp<Camera::Holder>& Camera::projection() const
 {
-    return _projection->val();
+    return _projection;
+}
+
+const sp<Camera::Holder>& Camera::vp() const
+{
+    return _vp;
 }
 
 Camera::Snapshot Camera::snapshot() const
 {
-    return Snapshot(_vp->val());
+    return Snapshot(_vp);
 }
 
 const sp<Camera>& Camera::getMainCamera()
@@ -140,21 +145,37 @@ const sp<Camera>& Camera::getMainCamera()
 void Camera::updateViewProjection()
 {
     _vp = sp<Holder>::make(sp<VariableOP2<Matrix, Matrix, Operators::Mul<Matrix>, sp<Variable<Matrix>>,
-                                   sp<Variable<Matrix>>>>::make(_projection->_delegate, _view->_delegate), _dirty->toBoolean());
+                           sp<Variable<Matrix>>>>::make(_projection->_delegate, _view->_delegate), _dirty->toBoolean());
 }
 
-Camera::Snapshot::Snapshot(const Matrix& vp)
-    : _vp(vp)
+Camera::Snapshot::Snapshot(Holder& holder)
 {
+    holder.flat(&_vp);
 }
 
-Camera::Holder::Holder(const sp<Variable<Matrix> >& delegate, const sp<Boolean>& dirty)
-    : _delegate(delegate), _dirty(sp<Changed>::make(dirty)), _value(delegate->val()) {
+Camera::Holder::Holder(const sp<Variable<Matrix>>& delegate, const sp<Boolean>& dirty)
+    : _delegate(delegate), _notifier(sp<Changed>::make(dirty)), _value(delegate->val()) {
 }
 
-Matrix Camera::Holder::val()
+void Camera::Holder::flat(void* buf)
 {
-    if(_dirty->hasChanged())
+    _value = _delegate->val();
+    *reinterpret_cast<Matrix*>(buf) = _value;
+}
+
+uint32_t Camera::Holder::size()
+{
+    return sizeof(Matrix);
+}
+
+uint32_t Camera::Holder::length()
+{
+    return 1;
+}
+
+Matrix Camera::Holder::matrix()
+{
+    if(_notifier->hasChanged())
         _value = _delegate->val();
     return _value;
 }

@@ -15,14 +15,14 @@ public:
     Changed(const sp<Boolean>& delegate);
 
     bool hasChanged();
-    void change();
+    void notify();
 
     const sp<Boolean> toBoolean() const;
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Changed> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Changed> build(const sp<Scope>& args) override;
 
@@ -33,7 +33,7 @@ public:
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Changed> {
     public:
-        DICTIONARY(BeanFactory& parent, const String& value);
+        DICTIONARY(BeanFactory& factory, const String& value);
 
         virtual sp<Changed> build(const sp<Scope>& args);
 

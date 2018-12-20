@@ -15,7 +15,7 @@ Changed::Changed(const sp<Boolean>& delegate)
 {
 }
 
-void Changed::change()
+void Changed::notify()
 {
     _stub->_changed = true;
 }
@@ -30,8 +30,8 @@ bool Changed::hasChanged()
     return _stub->val();
 }
 
-Changed::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _delegate(parent.ensureBuilder<Boolean>(doc))
+Changed::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _delegate(factory.ensureBuilder<Boolean>(manifest))
 {
 }
 
@@ -40,11 +40,11 @@ sp<Changed> Changed::BUILDER::build(const sp<Scope>& args)
     return sp<Changed>::make(_delegate->build(args));
 }
 
-Changed::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)
+Changed::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
     : _changed(value == "true")
 {
     if(value && (value.at(0) == '@' || value.at(0) == '$'))
-        _delegate = parent.ensureBuilder<Boolean>(value);
+        _delegate = factory.ensureBuilder<Boolean>(value);
 }
 
 sp<Changed> Changed::DICTIONARY::build(const sp<Scope>& args)

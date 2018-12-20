@@ -105,7 +105,7 @@ String Uniform::declaration() const
 
 void Uniform::notify() const
 {
-    _notifier->change();
+    _notifier->notify();
 }
 
 }
