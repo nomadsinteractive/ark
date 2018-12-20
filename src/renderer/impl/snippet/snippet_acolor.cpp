@@ -1,12 +1,12 @@
 #include "renderer/impl/snippet/snippet_acolor.h"
 
-#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/pipeline_building_context.h"
 
 namespace ark {
 
-void SnippetAcolor::preInitialize(PipelineLayout& source)
+void SnippetAcolor::preInitialize(PipelineBuildingContext& context)
 {
-    source.addAttribute("Color", "vec4", ShaderPreprocessor::SHADER_TYPE_FRAGMENT);
+    context.addPredefinedAttribute("Color", "vec4", ShaderPreprocessor::SHADER_TYPE_FRAGMENT);
 }
 
 void SnippetAcolor::preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context)

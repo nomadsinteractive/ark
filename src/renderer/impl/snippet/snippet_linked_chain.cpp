@@ -13,10 +13,10 @@ SnippetLinkedChain::SnippetLinkedChain(const sp<Snippet>& delegate, const sp<Sni
     DASSERT(next);
 }
 
-void SnippetLinkedChain::preInitialize(PipelineLayout& source)
+void SnippetLinkedChain::preInitialize(PipelineBuildingContext& context)
 {
-    _delegate->preInitialize(source);
-    _next->preInitialize(source);
+    _delegate->preInitialize(context);
+    _next->preInitialize(context);
 }
 
 void SnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context)

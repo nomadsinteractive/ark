@@ -13,7 +13,7 @@ class CoreGLSnippet : public Snippet {
 public:
     CoreGLSnippet(SnippetDelegate& wrapper, const sp<Shader>& shader);
 
-    virtual void preInitialize(PipelineLayout& source) override;
+    virtual void preInitialize(PipelineBuildingContext& context) override;
     virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context) override;
     virtual void preDraw(GraphicsContext& graphicsContext, const Shader& shader, const DrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
@@ -31,9 +31,9 @@ CoreGLSnippet::CoreGLSnippet(SnippetDelegate& wrapper, const sp<Shader>& shader)
 {
 }
 
-void CoreGLSnippet::preInitialize(PipelineLayout& source)
+void CoreGLSnippet::preInitialize(PipelineBuildingContext& context)
 {
-    _wrapper.preInitialize(source);
+    _wrapper.preInitialize(context);
 }
 
 void CoreGLSnippet::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context)
@@ -64,9 +64,9 @@ SnippetDelegate::SnippetDelegate(const sp<Shader>& shader)
 {
 }
 
-void SnippetDelegate::preInitialize(PipelineLayout& source)
+void SnippetDelegate::preInitialize(PipelineBuildingContext& context)
 {
-    _core->preInitialize(source);
+    _core->preInitialize(context);
 }
 
 void SnippetDelegate::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context)

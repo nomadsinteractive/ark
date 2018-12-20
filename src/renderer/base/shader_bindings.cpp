@@ -131,7 +131,7 @@ bool ShaderBindings::UBOManifest::snapshot(const PipelineInput& input) const
     {
         const Uniform& uniform = uniforms.at(i);
         const sp<Flatable>& flatable = uniform.flatable();
-        dirtyFlags[i] = static_cast<uint8_t>(uniform.notifier()->hasChanged());
+        dirtyFlags[i] = static_cast<uint8_t>(uniform.notifier() ? uniform.notifier()->hasChanged() : true);
         dirty = dirty || dirtyFlags[i];
         if(dirtyFlags[i])
             flatable->flat(_buffer->buf() + offset);

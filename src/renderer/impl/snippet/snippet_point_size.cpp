@@ -1,12 +1,12 @@
 #include "renderer/impl/snippet/snippet_point_size.h"
 
-#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/pipeline_building_context.h"
 
 namespace ark {
 
-void SnippetPointSize::preInitialize(PipelineLayout& source)
+void SnippetPointSize::preInitialize(PipelineBuildingContext& context)
 {
-    source.addAttribute("PointSize", "float");
+    context.addPredefinedAttribute("PointSize", "float", 0);
 }
 
 void SnippetPointSize::preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context)

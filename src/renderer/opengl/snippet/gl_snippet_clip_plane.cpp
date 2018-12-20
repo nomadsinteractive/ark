@@ -6,21 +6,22 @@
 
 #include "graphics/impl/flatable/flatable_v4f.h"
 
-#include "renderer/base/gl_context.h"
-#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/drawing_context.h"
+#include "renderer/base/gl_context.h"
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/pipeline_building_context.h"
+#include "renderer/base/pipeline_layout.h"
 
 #include "platform/gl/gl.h"
 
 namespace ark {
 
-void GLSnippetClipPlane::preInitialize(PipelineLayout& source)
+void GLSnippetClipPlane::preInitialize(PipelineBuildingContext& context)
 {
     for(const auto& i : _planes)
     {
         const String uName = Strings::sprintf("u_Plane%d", i.first);
-        source.addUniform(uName, Uniform::TYPE_F4, sp<FlatableV4f>::make(i.second), i.second.as<Changed>());
+        context.addUniform(uName, Uniform::TYPE_F4, sp<FlatableV4f>::make(i.second), i.second.as<Changed>());
     }
 }
 

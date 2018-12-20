@@ -49,7 +49,7 @@ private:
         CodeBlock(const String& prefix, const Function& procedure, const String& suffix);
         DEFAULT_COPY_AND_ASSIGN(CodeBlock);
 
-        void parse(PipelineLayout& pipelineLayout);
+        void parse(PipelineBuildingContext& buildingContext);
 
         bool hasOutParam(const String& name) const;
 
@@ -112,14 +112,14 @@ public:
     void addSource(const String& source);
     void addModifier(const String& modifier);
 
-    void parse(PipelineBuildingContext& context, PipelineLayout& shader);
+    void parse(PipelineBuildingContext& context);
 
     Preprocessor preprocess();
 
     void insertPredefinedUniforms(const std::vector<Uniform>& uniforms);
 
 private:
-    void parseMainBlock(PipelineLayout& pipelineLayout);
+    void parseMainBlock(PipelineBuildingContext& buildingContext);
     void parseDeclarations(PipelineBuildingContext& context);
     uint32_t parseFunctionBody(const String& s, String& body) const;
 
@@ -143,50 +143,6 @@ public:
 
     std::vector<Snippet> _snippets;
     Table<String, String> _uniforms;
-};
-
-class PipelineBuildingContext {
-public:
-    PipelineBuildingContext(PipelineLayout& pipelineLayout, const String& vertex, const String& fragment);
-
-    void initialize();
-
-    PipelineLayout& _pipeline_layout;
-
-    ShaderPreprocessor _vertex;
-    ShaderPreprocessor _fragment;
-
-    std::map<String, Attribute> _attributes;
-
-    List<std::pair<String, String>> _vertex_in;
-    List<std::pair<String, String>> _vertex_out;
-
-    List<std::pair<String, String>> _fragment_in;
-
-    std::map<String, String> _vert_in_declared;
-
-    StringBuffer _vert_main_source;
-    StringBuffer _frag_color_modifier;
-    StringBuffer _frag_procedures;
-    StringBuffer _frag_procedure_calls;
-
-    void addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure);
-
-    void preCompile();
-
-    void addAttribute(const String& name, const String& type);
-
-    Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t scopes);
-
-private:
-    Attribute makePredefinedAttribute(const String& name, const String& type);
-
-private:
-    void doSnippetPrecompile();
-    void doPrecompile(String& vertSource, String& fragSource);
-
-    void insertBefore(String& src, const String& statement, const String& str);
-
 };
 
 }

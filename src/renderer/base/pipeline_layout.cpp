@@ -9,9 +9,10 @@
 #include "core/util/documents.h"
 
 #include "renderer/base/gl_context.h"
+#include "renderer/base/graphics_context.h"
+#include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/shader_preprocessor.h"
-#include "renderer/base/graphics_context.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
 #include "renderer/inf/pipeline_factory.h"
 #include "renderer/inf/renderer_factory.h"
@@ -85,7 +86,7 @@ void PipelineLayout::initialize()
     DCHECK(_preprocessor_context, "GLShaderSource should not be initialized more than once");
 
     if(_snippet)
-        _snippet->preInitialize(*this);
+        _snippet->preInitialize(_preprocessor_context);
 
     _preprocessor_context->initialize();
 }
@@ -153,7 +154,6 @@ void PipelineLayout::loadPredefinedUniform(BeanFactory& factory, const sp<Scope>
             break;
         default:
             FATAL("Unknow type \"%s\"", type.c_str());
-            break;
         }
         addUniform(name, glType, flatable, flatable.as<Changed>());
     }

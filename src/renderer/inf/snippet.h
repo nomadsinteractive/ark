@@ -11,7 +11,7 @@ class ARK_API Snippet {
 public:
     virtual ~Snippet() = default;
 
-    virtual void preInitialize(PipelineLayout& source) {}
+    virtual void preInitialize(PipelineBuildingContext& context) {}
 
     virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context) {}
     virtual void preDraw(GraphicsContext& graphicsContext, const Shader& shader, const DrawingContext& context) {}

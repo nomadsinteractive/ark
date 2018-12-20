@@ -1,12 +1,12 @@
 #include "renderer/impl/snippet/snippet_alpha.h"
 
-#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/pipeline_building_context.h"
 
 namespace ark {
 
-void SnippetAlpha::preInitialize(PipelineLayout& source)
+void SnippetAlpha::preInitialize(PipelineBuildingContext& context)
 {
-    source.addAttribute("Alpha", "float", ShaderPreprocessor::SHADER_TYPE_FRAGMENT);
+    context.addPredefinedAttribute("Alpha", "float", ShaderPreprocessor::SHADER_TYPE_FRAGMENT);
 }
 
 void SnippetAlpha::preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context)

@@ -11,6 +11,7 @@ namespace ark {
 Uniform::Uniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed)
     : _name(name), _type(type), _flatable(flatable), _notifier(changed)
 {
+    DWARN(changed, "Uniform: %s has no notifier, it's probably not a good idea", _name.c_str());
 }
 
 const String& Uniform::name() const
