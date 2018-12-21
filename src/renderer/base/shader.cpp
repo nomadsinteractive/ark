@@ -82,7 +82,7 @@ sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment,
 
 Layer::UBOSnapshot Shader::snapshot(MemoryPool& memoryPool) const
 {
-    return _stub->_input->ubo()->snapshot(memoryPool, _camera);
+    return _stub->_input->ubo()->snapshot(memoryPool);
 }
 
 void Shader::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)

@@ -8,10 +8,20 @@
 
 namespace ark {
 
+Uniform::Uniform()
+    : _type(TYPE_NONE)
+{
+}
+
 Uniform::Uniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed)
     : _name(name), _type(type), _flatable(flatable), _notifier(changed)
 {
     DWARN(changed, "Uniform: %s has no notifier, it's probably not a good idea", _name.c_str());
+}
+
+ark::Uniform::operator bool() const
+{
+    return _type != TYPE_NONE;
 }
 
 const String& Uniform::name() const
@@ -51,9 +61,19 @@ const sp<Flatable>& Uniform::flatable() const
     return _flatable;
 }
 
+void Uniform::setFlatable(const sp<Flatable>& flatable)
+{
+    _flatable = flatable;
+}
+
 const sp<Changed>& Uniform::notifier() const
 {
     return _notifier;
+}
+
+void Uniform::setNotifier(const sp<Changed>& notifier)
+{
+    _notifier = notifier;
 }
 
 String Uniform::declaration() const
@@ -105,7 +125,8 @@ String Uniform::declaration() const
 
 void Uniform::notify() const
 {
-    _notifier->notify();
+    if(_notifier)
+        _notifier->notify();
 }
 
 }

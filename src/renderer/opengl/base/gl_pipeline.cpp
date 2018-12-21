@@ -137,6 +137,7 @@ void GLPipeline::bindUniform(float* buf, uint32_t size, const Uniform& uniform)
         DCHECK(size % 16 == 0, "Wrong uniform4fv size: %d", size);
         glUniform.setUniform4fv(size / 16, buf);
         break;
+    case Uniform::TYPE_MAT4:
     case Uniform::TYPE_MAT4V:
         DCHECK(size % 64 == 0, "Wrong color4fv size: %d", size);
         glUniform.setUniformMatrix4fv(size / 64, GL_FALSE, buf);

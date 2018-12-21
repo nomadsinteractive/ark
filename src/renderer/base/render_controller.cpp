@@ -10,6 +10,8 @@
 #include "renderer/base/texture.h"
 #include "renderer/inf/renderer_factory.h"
 
+#include "platform/platform.h"
+
 namespace ark {
 
 namespace {
@@ -37,8 +39,24 @@ private:
 
 }
 
+RenderController::Ticker::Ticker()
+    : _ticker(Platform::getSteadyClock()), _tick(0)
+{
+}
+
+uint64_t RenderController::Ticker::val()
+{
+    DTHREAD_CHECK(THREAD_ID_CORE);
+    return _tick;
+}
+
+void RenderController::Ticker::update()
+{
+    _tick = _ticker->val();
+}
+
 RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<ResourceManager>& resourceManager)
-    : _render_engine(renderEngine), _resource_manager(resourceManager)
+    : _render_engine(renderEngine), _resource_manager(resourceManager), _ticker(sp<Ticker>::make())
 {
 }
 
@@ -107,6 +125,11 @@ Buffer::Snapshot RenderController::makeBufferSnapshot(Buffer::Name name, const U
     return shared.snapshot(size);
 }
 
+sp<Variable<uint64_t>> RenderController::ticker() const
+{
+    return _ticker;
+}
+
 void RenderController::addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired)
 {
     if(expired)
@@ -130,6 +153,7 @@ void RenderController::preUpdate()
     }
 #endif
     _defered_instances.clear();
+    _ticker->update();
     for(const sp<Runnable>& runnable : _on_pre_update_request)
         runnable->run();
 }

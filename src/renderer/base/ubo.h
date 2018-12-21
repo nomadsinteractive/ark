@@ -13,7 +13,7 @@ class UBO {
 public:
     UBO(std::vector<Uniform> uniforms);
 
-    Layer::UBOSnapshot snapshot(MemoryPool& memoryPool, const Camera& camera) const;
+    Layer::UBOSnapshot snapshot(MemoryPool& memoryPool) const;
 
     const std::vector<Uniform>& uniforms() const;
 

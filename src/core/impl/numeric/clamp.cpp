@@ -17,12 +17,12 @@ float Clamp::val()
     float t;
     if((t = _min->val()) > v)
     {
-        _notifier.notify();
+        _notifier.update();
         return t;
     }
     if((t = _max->val()) < v)
     {
-        _notifier.notify();
+        _notifier.update();
         return t;
     }
     return v;

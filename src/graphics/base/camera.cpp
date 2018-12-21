@@ -173,6 +173,11 @@ uint32_t Camera::Holder::length()
     return 1;
 }
 
+const sp<Changed>& Camera::Holder::notifier() const
+{
+    return _notifier;
+}
+
 Matrix Camera::Holder::matrix()
 {
     if(_notifier->hasChanged())

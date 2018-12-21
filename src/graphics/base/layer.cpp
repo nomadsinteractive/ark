@@ -129,9 +129,4 @@ sp<Layer> Layer::BUILDER::build(const sp<Scope>& args)
     return sp<Layer>::make(_model->build(args), _shader->build(args), _resource_loader_context);
 }
 
-Layer::UBOSnapshot::UBOSnapshot(const Camera::Snapshot& camera)
-    : _camera(camera)
-{
-}
-
 }

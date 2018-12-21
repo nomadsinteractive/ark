@@ -11,7 +11,9 @@
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
 
-#define VAR_PATTERN "\\s+(int|uint8|float|vec2|vec3|vec4|mat3|mat4|sampler2D)\\s+(?:a_|v_|u_)([\\w\\d_]+);"
+#define VAR_TYPE_PATTERN "\\s+(int|uint8|float|vec2|vec3|vec4|mat3|mat4|sampler2D)\\s+"
+#define ATTRIBUTE_PATTERN VAR_TYPE_PATTERN "(?:a_|v_)([\\w\\d_]+);"
+#define UNIFORM_PATTERN VAR_TYPE_PATTERN "(u_[\\w\\d_]+);"
 
 namespace ark {
 
@@ -21,10 +23,10 @@ const char* ShaderPreprocessor::ANNOTATION_FRAG_IN = "${frag.in}";
 const char* ShaderPreprocessor::ANNOTATION_FRAG_OUT = "${frag.out}";
 const char* ShaderPreprocessor::ANNOTATION_FRAG_COLOR = "${frag.color}";
 
-std::regex ShaderPreprocessor::_IN_PATTERN("(?:attribute|in)" VAR_PATTERN);
-std::regex ShaderPreprocessor::_OUT_PATTERN("(?:varying|out)" VAR_PATTERN);
-std::regex ShaderPreprocessor::_IN_OUT_PATTERN("(?:varying|in)" VAR_PATTERN);
-std::regex ShaderPreprocessor::_UNIFORM_PATTERN("uniform" VAR_PATTERN);
+std::regex ShaderPreprocessor::_IN_PATTERN("(?:attribute|in)" ATTRIBUTE_PATTERN);
+std::regex ShaderPreprocessor::_OUT_PATTERN("(?:varying|out)" ATTRIBUTE_PATTERN);
+std::regex ShaderPreprocessor::_IN_OUT_PATTERN("(?:varying|in)" ATTRIBUTE_PATTERN);
+std::regex ShaderPreprocessor::_UNIFORM_PATTERN("uniform" UNIFORM_PATTERN);
 
 ShaderPreprocessor::ShaderPreprocessor(ShaderType type, const String& source)
     : _type(type), _source(source), _in_declarations(type == SHADER_TYPE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
@@ -158,6 +160,16 @@ void ShaderPreprocessor::insertPredefinedUniforms(const std::vector<Uniform>& un
             if(declaration.find('[') == String::npos)
                 _uniform_declarations << declaration << '\n';
         }
+}
+
+Uniform ShaderPreprocessor::getUniformInput(const String& name, Uniform::Type type) const
+{
+    if(!_uniforms.has(name))
+        return Uniform();
+
+    const String& declaredType = _uniforms.at(name);
+    DCHECK(Uniform::toType(declaredType) == type, "Uniform \"%s\" declared type: %s, but it should be %d", name.c_str(), declaredType.c_str(), type);
+    return Uniform(name, type, nullptr, nullptr);
 }
 
 uint32_t ShaderPreprocessor::parseFunctionBody(const String& s, String& body) const

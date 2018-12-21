@@ -5,6 +5,7 @@
 #include "core/base/api.h"
 #include "core/collection/filtered_list.h"
 #include "core/collection/list.h"
+#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -33,14 +34,32 @@ public:
 
     Buffer::Snapshot makeBufferSnapshot(Buffer::Name name, const Uploader::MakerFunc& maker, size_t reservedObjectCount, size_t size) const;
 
+    sp<Variable<uint64_t>> ticker() const;
+
     void addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired);
 
     void preUpdate();
     void deferUnref(const Box& box);
 
 private:
+    class Ticker : public Variable<uint64_t> {
+    public:
+        Ticker();
+
+        virtual uint64_t val() override;
+
+        void update();
+
+    private:
+        sp<Variable<uint64_t>> _ticker;
+        uint64_t _tick;
+    };
+
+
+private:
     sp<RenderEngine> _render_engine;
     sp<ResourceManager> _resource_manager;
+    sp<Ticker> _ticker;
 
     ListWithLifecycle<Runnable> _on_pre_update_request;
     List<Box> _defered_instances;

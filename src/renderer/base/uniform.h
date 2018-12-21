@@ -15,6 +15,7 @@ namespace ark {
 class Uniform {
 public:
     enum Type {
+        TYPE_NONE,
         TYPE_I1,
         TYPE_F1,
         TYPE_F2,
@@ -32,8 +33,11 @@ public:
         TYPE_SAMPLER2D
     };
 
+    Uniform();
     Uniform(const String& name, Type type, const sp<Flatable>& flatable, const sp<Changed>& changed);
     DEFAULT_COPY_AND_ASSIGN(Uniform);
+
+    explicit operator bool() const;
 
     const String& name() const;
     Type type() const;
@@ -41,7 +45,10 @@ public:
     static Type toType(const String& declaredType);
 
     const sp<Flatable>& flatable() const;
+    void setFlatable(const sp<Flatable>& flatable);
+
     const sp<Changed>& notifier() const;
+    void setNotifier(const sp<Changed>& notifier);
 
     String declaration() const;
     void notify() const;

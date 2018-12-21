@@ -67,9 +67,6 @@ public:
     }
 
 private:
-    class EngineTicker;
-
-private:
     void initMessageLoop();
     void initResourceLoader(const document& manifest);
     sp<ResourceLoader> createResourceLoader(const sp<Dictionary<document>>& documentDictionary, const sp<ResourceLoaderContext>& resourceLoaderContext);
@@ -82,11 +79,10 @@ private:
 
     sp<ApplicationResource> _application_resource;
     sp<RenderEngine> _render_engine;
-    sp<EngineTicker> _ticker;
+    sp<RenderController> _render_controller;
     sp<Clock> _clock;
     sp<MessageLoopThread> _message_loop_application;
     sp<Executor> _executor;
-    sp<RenderController> _render_controller;
 
     op<EventListenerList> _event_listeners;
     sp<EventListener> _default_event_listener;

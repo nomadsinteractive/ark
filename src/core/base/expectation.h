@@ -2,7 +2,7 @@
 #define ARK_CORE_BASE_EXPECTATION_H_
 
 #include "core/base/api.h"
-#include "core/base/notifier.h"
+#include "core/base/observer.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
@@ -35,7 +35,7 @@ public:
 
 private:
     sp<Numeric> _expectation;
-    Notifier _onfire;
+    Observer _observer;
     bool _fire_once;
 };
 

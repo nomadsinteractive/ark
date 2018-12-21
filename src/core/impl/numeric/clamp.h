@@ -2,7 +2,7 @@
 #define ARK_CORE_IMPL_NUMERIC_CLAMP_H_
 
 #include "core/forwarding.h"
-#include "core/base/notifier.h"
+#include "core/base/observer.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
@@ -47,7 +47,7 @@ private:
     sp<Numeric> _delegate;
     sp<Numeric> _min;
     sp<Numeric> _max;
-    Notifier _notifier;
+    Observer _notifier;
 };
 
 }

@@ -72,9 +72,13 @@ void PipelineLayout::initialize(const Camera& camera)
 
     _building_context->initialize();
 
-    if(_building_context->_vertex._uniforms.has("MVP"))
+    Uniform mvp = _building_context->_vertex.getUniformInput("u_MVP", Uniform::TYPE_MAT4);
+    if(mvp)
     {
-
+        const sp<Camera::Holder>& vp = camera.vp();
+        mvp.setFlatable(vp);
+//        mvp.setNotifier(vp->notifier());
+        _building_context->addUniform(std::move(mvp));
     }
     _input->initialize(_building_context->_uniforms.values());
 }

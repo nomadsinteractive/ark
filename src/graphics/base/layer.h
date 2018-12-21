@@ -48,10 +48,6 @@ public:
     };
 
     struct UBOSnapshot {
-        UBOSnapshot(const Camera::Snapshot& camera);
-        DEFAULT_COPY_AND_ASSIGN(UBOSnapshot);
-
-        Camera::Snapshot _camera;
         bytearray _dirty_flags;
         bytearray _buffer;
     };

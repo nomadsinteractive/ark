@@ -134,6 +134,12 @@ void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type,
     _uniforms.push_back(name, Uniform(name, type, flatable, changed));
 }
 
+void PipelineBuildingContext::addUniform(Uniform uniform)
+{
+    String name = uniform.name();
+    _uniforms.push_back(std::move(name), std::move(uniform));
+}
+
 Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
 {
     if(_attributes.find(name) == _attributes.end())

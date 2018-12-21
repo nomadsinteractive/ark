@@ -47,30 +47,16 @@ private:
 
 }
 
-class ApplicationContext::EngineTicker : public Variable<uint64_t>, public Runnable {
-public:
-    EngineTicker();
-
-    virtual uint64_t val() override;
-    virtual void run() override;
-
-private:
-    sp<Variable<uint64_t>> _ticker;
-    uint64_t _tick;
-};
-
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources, const sp<RenderEngine>& renderEngine)
-    : _application_resource(applicationResources), _render_engine(renderEngine), _ticker(sp<EngineTicker>::make()),
-      _clock(sp<Clock>::make(_ticker)), _message_loop_application(sp<MessageLoopThread>::make(sp<MessageLoopDefault>::make(Platform::getSteadyClock()))),
-      _executor(sp<ThreadPoolExecutor>::make(_message_loop_application)), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->resourceManager())),
-      _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK)
+    : _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->resourceManager())),
+      _clock(sp<Clock>::make(_render_controller->ticker())), _message_loop_application(sp<MessageLoopThread>::make(sp<MessageLoopDefault>::make(Platform::getSteadyClock()))),
+      _executor(sp<ThreadPoolExecutor>::make(_message_loop_application)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK)
 {
     Ark& ark = Ark::instance();
 
     for(int32_t i = 0; i < ark.argc(); i++)
         _argv.push_back(ark.argv()[i]);
 
-    _render_controller->addPreUpdateRequest(_ticker, sp<BooleanByWeakRef<EngineTicker>>::make(_ticker, 1));
     initMessageLoop();
 }
 
@@ -248,22 +234,6 @@ void ApplicationContext::dispose()
 void ApplicationContext::waitForFinish()
 {
     _message_loop_application->join();
-}
-
-ApplicationContext::EngineTicker::EngineTicker()
-    : _ticker(Platform::getSteadyClock()), _tick(0)
-{
-}
-
-uint64_t ApplicationContext::EngineTicker::val()
-{
-    DTHREAD_CHECK(THREAD_ID_CORE);
-    return _tick;
-}
-
-void ApplicationContext::EngineTicker::run()
-{
-    _tick = _ticker->val();
 }
 
 }

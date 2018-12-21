@@ -42,9 +42,9 @@ bool UBO::doSnapshot() const
     return dirty;
 }
 
-Layer::UBOSnapshot UBO::snapshot(MemoryPool& memoryPool, const Camera& camera) const
+Layer::UBOSnapshot UBO::snapshot(MemoryPool& memoryPool) const
 {
-    Layer::UBOSnapshot ubo(camera.snapshot());
+    Layer::UBOSnapshot ubo;
     bool dirty = doSnapshot();
     if(dirty)
     {

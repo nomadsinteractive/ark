@@ -13,6 +13,7 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/attribute.h"
 #include "renderer/base/render_engine.h"
+#include "renderer/base/uniform.h"
 
 namespace ark {
 
@@ -117,6 +118,8 @@ public:
     Preprocessor preprocess();
 
     void insertPredefinedUniforms(const std::vector<Uniform>& uniforms);
+
+    Uniform getUniformInput(const String& name, Uniform::Type type) const;
 
 private:
     void parseMainBlock(PipelineBuildingContext& buildingContext);

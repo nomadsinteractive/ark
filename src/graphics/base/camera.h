@@ -22,6 +22,8 @@ public:
         virtual uint32_t size() override;
         virtual uint32_t length() override;
 
+        const sp<Changed>& notifier() const;
+
         Matrix matrix();
 
     private:
