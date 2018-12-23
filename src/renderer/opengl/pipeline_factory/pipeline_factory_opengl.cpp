@@ -14,7 +14,7 @@
 namespace ark {
 namespace opengl {
 
-sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout)
+sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout, const ShaderBindings& /*bindings*/)
 {
     const sp<GLContext>& glContext = graphicsContext.glContext();
     return sp<GLPipeline>::make(graphicsContext.resourceManager()->recycler(), glContext->getGLSLVersion(),

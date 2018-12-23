@@ -40,8 +40,8 @@ public:
         const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_vertex_src, _fragment_src);
         buildingContext->loadPredefinedParam(_factory, args, _manifest);
 
-        const sp<PipelineLayout> source = sp<PipelineLayout>::make(_render_controller, buildingContext);
-        return sp<Shader>::make(source, _camera->build(args));
+        const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(_render_controller, buildingContext);
+        return sp<Shader>::make(pipelineLayout, _camera->build(args));
     }
 
 private:
@@ -87,7 +87,7 @@ Layer::UBOSnapshot Shader::snapshot(MemoryPool& memoryPool) const
 
 void Shader::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    getPipeline(graphicsContext)->active(graphicsContext, drawingContext);
+    getPipeline(graphicsContext, drawingContext._shader_bindings)->active(graphicsContext, drawingContext);
 }
 
 const sp<PipelineInput>& Shader::input() const
@@ -115,7 +115,7 @@ const sp<Snippet>& Shader::snippet() const
     return _stub->_snippet;
 }
 
-const sp<Pipeline>& Shader::getPipeline(GraphicsContext& graphicsContext)
+const sp<Pipeline>& Shader::getPipeline(GraphicsContext& graphicsContext, const ShaderBindings& bindings)
 {
     if(_stub->_pipeline)
     {
@@ -125,7 +125,7 @@ const sp<Pipeline>& Shader::getPipeline(GraphicsContext& graphicsContext)
     }
 
     _stub->_pipeline_layout->preCompile(graphicsContext);
-    _stub->_pipeline = _stub->_pipeline_factory->buildPipeline(graphicsContext, _stub->_pipeline_layout);
+    _stub->_pipeline = _stub->_pipeline_factory->buildPipeline(graphicsContext, _stub->_pipeline_layout, bindings);
     graphicsContext.resourceManager()->upload(_stub, ResourceManager::US_ON_SURFACE_READY);
     _stub->upload(graphicsContext);
     return _stub->_pipeline;

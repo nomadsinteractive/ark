@@ -60,11 +60,6 @@ void ShaderBindings::bindGLTexture(const sp<Texture>& texture, uint32_t name) co
     _snippet->link<SnippetActiveTexture>(texture, name);
 }
 
-void ShaderBindings::bindGLTexture(const sp<Resource>& texture, Texture::Type type, uint32_t name) const
-{
-    _snippet->link<SnippetActiveTexture>(texture, type, name);
-}
-
 std::map<uint32_t, Buffer::Builder> ShaderBindings::makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const
 {
     std::map<uint32_t, Buffer::Builder> builders;

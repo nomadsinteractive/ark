@@ -3,6 +3,7 @@
 #include <regex>
 
 #include "core/base/string_buffer.h"
+#include "core/epi/changed.h"
 #include "core/inf/flatable.h"
 #include "core/util/strings.h"
 

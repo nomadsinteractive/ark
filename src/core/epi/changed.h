@@ -14,8 +14,10 @@ public:
     Changed(bool changed = true);
     Changed(const sp<Boolean>& delegate);
 
-    bool hasChanged();
+    bool dirty() const;
     void notify();
+
+    void set(const sp<Boolean>& dirty);
 
     const sp<Boolean> toBoolean() const;
 

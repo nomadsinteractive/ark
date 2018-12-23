@@ -129,6 +129,8 @@ private:
     String getDeclarations() const;
     void insertAfter(const String& statement, const String& str);
 
+    void addUniform(const String& type, const String& name);
+
 private:
     sp<CodeBlock> _main_block;
 
@@ -146,6 +148,7 @@ public:
 
     std::vector<Snippet> _snippets;
     Table<String, String> _uniforms;
+    std::vector<String> _samplers;
 };
 
 }

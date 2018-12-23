@@ -26,7 +26,6 @@ private:
 public:
     SnippetActiveTexture();
     SnippetActiveTexture(const sp<Texture>& texture, uint32_t name = 0);
-    SnippetActiveTexture(const sp<Resource>& texture, Texture::Type type, uint32_t name);
 
     virtual void preDraw(GraphicsContext& graphicsContext, const Shader& shader, const DrawingContext& context) override;
 

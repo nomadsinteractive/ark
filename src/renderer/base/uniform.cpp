@@ -13,10 +13,9 @@ Uniform::Uniform()
 {
 }
 
-Uniform::Uniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed)
-    : _name(name), _type(type), _flatable(flatable), _notifier(changed)
+Uniform::Uniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& dirty)
+    : _name(name), _type(type), _flatable(flatable), _dirty(dirty)
 {
-    DWARN(changed, "Uniform: %s has no notifier, it's probably not a good idea", _name.c_str());
 }
 
 ark::Uniform::operator bool() const
@@ -66,14 +65,17 @@ void Uniform::setFlatable(const sp<Flatable>& flatable)
     _flatable = flatable;
 }
 
-const sp<Changed>& Uniform::notifier() const
+void Uniform::setObserver(const sp<Boolean>& dirty)
 {
-    return _notifier;
+    if(_dirty)
+        _dirty->set(dirty);
+    else
+        _dirty = sp<Changed>::make(dirty);
 }
 
-void Uniform::setNotifier(const sp<Changed>& notifier)
+bool Uniform::dirty() const
 {
-    _notifier = notifier;
+    return _dirty ? _dirty->dirty() : true;
 }
 
 String Uniform::declaration() const
@@ -125,8 +127,8 @@ String Uniform::declaration() const
 
 void Uniform::notify() const
 {
-    if(_notifier)
-        _notifier->notify();
+    if(_dirty)
+        _dirty->notify();
 }
 
 }

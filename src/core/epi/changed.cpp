@@ -20,12 +20,17 @@ void Changed::notify()
     _stub->_changed = true;
 }
 
+void Changed::set(const sp<Boolean>& dirty)
+{
+    _stub->_delegate = dirty;
+}
+
 const sp<Boolean> Changed::toBoolean() const
 {
     return _stub;
 }
 
-bool Changed::hasChanged()
+bool Changed::dirty() const
 {
     return _stub->val();
 }

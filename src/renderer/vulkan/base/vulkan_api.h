@@ -92,7 +92,6 @@ private:
 
     sp<VKBuffer> _vertex_buffer;
     sp<VKBuffer> _index_buffer;
-//    vks::Buffer indexBuffer;
 
     VkClearColorValue _background_color = { { 0, 0, 0.2f, 1.0f } };
 

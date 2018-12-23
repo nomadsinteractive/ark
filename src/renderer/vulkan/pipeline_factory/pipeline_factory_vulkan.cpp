@@ -39,7 +39,7 @@ sp<VKPipeline> PipelineFactoryVulkan::build()
     return sp<VKPipeline>::make(_resource_manager->recycler(), _render_target, _pipeline_layout, _descriptor_set_layout, descriptorSet, pipeline);
 }
 
-sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& /*graphicsContext*/, const PipelineLayout& pipelineLayout)
+sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& /*graphicsContext*/, const PipelineLayout& pipelineLayout, const ShaderBindings& bindings)
 {
     setupVertexDescriptions(pipelineLayout.input());
     setupDescriptorSetLayout();

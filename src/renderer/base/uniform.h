@@ -34,7 +34,7 @@ public:
     };
 
     Uniform();
-    Uniform(const String& name, Type type, const sp<Flatable>& flatable, const sp<Changed>& changed);
+    Uniform(const String& name, Type type, const sp<Flatable>& flatable, const sp<Changed>& dirty);
     DEFAULT_COPY_AND_ASSIGN(Uniform);
 
     explicit operator bool() const;
@@ -47,8 +47,8 @@ public:
     const sp<Flatable>& flatable() const;
     void setFlatable(const sp<Flatable>& flatable);
 
-    const sp<Changed>& notifier() const;
-    void setNotifier(const sp<Changed>& notifier);
+    void setObserver(const sp<Boolean>& notifier);
+    bool dirty() const;
 
     String declaration() const;
     void notify() const;
@@ -57,7 +57,7 @@ private:
     String _name;
     Type _type;
     sp<Flatable> _flatable;
-    sp<Changed> _notifier;
+    sp<Changed> _dirty;
 };
 
 }

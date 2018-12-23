@@ -2,20 +2,27 @@
 #define ARK_CORE_BASE_OBSERVER_H_
 
 #include "core/forwarding.h"
+#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-class Observer {
+class Observer : public Boolean {
 public:
-    Observer(const sp<Runnable>& handler);
+    Observer(const sp<Runnable>& handler = nullptr, bool oneshot = false);
+
+    virtual bool val() override;
+
+    bool dirty();
 
     void update();
-    void updateOnce();
 
 private:
     sp<Runnable> _handler;
-    bool _notifying;
+    bool _oneshot;
+    bool _updated;
+
+    friend class Notifier;
 };
 
 }

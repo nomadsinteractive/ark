@@ -4,7 +4,6 @@
 #include "core/forwarding.h"
 #include "core/inf/flatable.h"
 #include "core/inf/variable.h"
-#include "core/epi/changed.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/matrix.h"
@@ -16,21 +15,16 @@ class ARK_API Camera {
 public:
     class Holder : public Flatable {
     public:
-        Holder(const sp<Variable<Matrix>>& delegate, const sp<Boolean>& dirty);
+        Holder(const sp<Variable<Matrix>>& delegate);
 
         virtual void flat(void* buf) override;
         virtual uint32_t size() override;
         virtual uint32_t length() override;
 
-        const sp<Changed>& notifier() const;
-
         Matrix matrix();
 
     private:
         sp<Variable<Matrix>> _delegate;
-        sp<Changed> _notifier;
-
-        Matrix _value;
 
         friend class Camera;
     };
@@ -60,6 +54,8 @@ public:
     const sp<Holder>& projection() const;
     const sp<Holder>& vp() const;
 
+    const sp<Notifier>& notifier() const;
+
     Snapshot snapshot() const;
 
     static const sp<Camera>& getMainCamera();
@@ -73,11 +69,7 @@ private:
 
     sp<Holder> _vp;
 
-    sp<Vec3> _position;
-    sp<Vec3> _target;
-    sp<Vec3> _up;
-
-    sp<Changed> _dirty;
+    sp<Notifier> _notifier;
 };
 
 }

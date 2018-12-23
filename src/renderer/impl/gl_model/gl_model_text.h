@@ -35,6 +35,7 @@ private:
         sp<Texture> _texture;
         sp<Atlas> _atlas;
         sp<RenderModel> _delegate;
+        sp<Size> _size;
 
         uint32_t _flowx, _flowy;
         int32_t _max_glyph_height;

@@ -41,7 +41,7 @@ public:
 public:
     PipelineInput() = default;
 
-    void initialize(std::vector<Uniform> uniform);
+    void initialize(const PipelineBuildingContext& buildingContext);
 
     const std::vector<Uniform>& uniforms() const;
     const sp<UBO>& ubo() const;
@@ -60,8 +60,8 @@ public:
 
 private:
     sp<UBO> _ubo;
-//    std::vector<Uniform> _uniforms;
     std::map<uint32_t, Stream> _streams;
+    uint32_t _sampler_count = 0;
 
     friend class PipelineLayout;
 };

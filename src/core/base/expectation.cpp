@@ -6,7 +6,7 @@
 namespace ark {
 
 Expectation::Expectation(const sp<Numeric>& expectation, const sp<Runnable>& onfire, bool fireOnce)
-    : _expectation(expectation), _observer(onfire), _fire_once(fireOnce)
+    : _expectation(expectation), _observer(onfire, fireOnce)
 {
 }
 
@@ -22,10 +22,7 @@ void Expectation::setVal(float val)
 
 void Expectation::fire()
 {
-    if(_fire_once)
-        _observer.updateOnce();
-    else
-        _observer.update();
+    _observer.update();
 }
 
 Expectation::DICTIONARY::DICTIONARY(BeanFactory& factory, const String str)

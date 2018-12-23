@@ -3,6 +3,8 @@
 #include <regex>
 
 #include "core/base/bean_factory.h"
+#include "core/base/notifier.h"
+#include "core/base/observer.h"
 #include "core/dom/document.h"
 #include "core/inf/array.h"
 #include "core/inf/flatable.h"
@@ -75,12 +77,20 @@ void PipelineLayout::initialize(const Camera& camera)
     Uniform mvp = _building_context->_vertex.getUniformInput("u_MVP", Uniform::TYPE_MAT4);
     if(mvp)
     {
-        const sp<Camera::Holder>& vp = camera.vp();
-        mvp.setFlatable(vp);
-//        mvp.setNotifier(vp->notifier());
+        mvp.setFlatable(camera.vp());
+        mvp.setObserver(camera.notifier()->createObserver());
         _building_context->addUniform(std::move(mvp));
     }
-    _input->initialize(_building_context->_uniforms.values());
+
+    Uniform vp = _building_context->_vertex.getUniformInput("u_VP", Uniform::TYPE_MAT4);
+    if(vp)
+    {
+        vp.setFlatable(camera.vp());
+        vp.setObserver(camera.notifier()->createObserver());
+        _building_context->addUniform(std::move(vp));
+    }
+
+    _input->initialize(_building_context);
 }
 
 const sp<RenderController>& PipelineLayout::renderController() const

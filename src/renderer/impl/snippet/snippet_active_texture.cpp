@@ -15,11 +15,6 @@ SnippetActiveTexture::SnippetActiveTexture(const sp<Texture>& texture, uint32_t 
     _textures.emplace_back(texture, name);
 }
 
-SnippetActiveTexture::SnippetActiveTexture(const sp<Resource>& texture, Texture::Type type, uint32_t name)
-{
-    _textures.emplace_back(texture, type, name);
-}
-
 void SnippetActiveTexture::preDraw(GraphicsContext& /*graphicsContext*/, const Shader& shader, const DrawingContext& /*context*/)
 {
     for(const auto& i : _textures)

@@ -3,6 +3,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
+#include "graphics/base/size.h"
 #include "graphics/inf/alphabet.h"
 
 #include "renderer/base/atlas.h"
@@ -17,13 +18,15 @@
 namespace ark {
 
 GLModelText::Stub::Stub(RenderController& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
-    : _alphabet(alphabet)
+    : _alphabet(alphabet), _size(sp<Size>::make())
 {
     reset(renderController, textureWidth, textureHeight);
 }
 
 void GLModelText::Stub::reset(RenderController& renderController, uint32_t textureWidth, uint32_t textureHeight)
 {
+    _size->setWidth(textureWidth);
+    _size->setHeight(textureHeight);
     _font_glyph = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1));
     _texture = renderController.createTexture(textureWidth, textureHeight, sp<Variable<bitmap>::Const>::make(_font_glyph), ResourceManager::US_ON_SURFACE_READY);
     _atlas = sp<Atlas>::make(_texture, true);
@@ -121,7 +124,7 @@ GLModelText::GLModelText(RenderController& renderController, const sp<Alphabet>&
 
 void GLModelText::initialize(ShaderBindings& bindings)
 {
-    bindings.bindGLTexture(_stub, Texture::TYPE_2D, 0);
+    bindings.bindGLTexture(sp<Texture>::make(_stub->_size, _stub, Texture::TYPE_2D));
 }
 
 void GLModelText::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)

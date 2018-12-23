@@ -81,7 +81,7 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
     _out_declarations.parse(_source, _OUT_PATTERN);
 
     _source.search(_UNIFORM_PATTERN, [this](const std::smatch& m)->bool {
-        _uniforms.push_back(m[2].str(), m[1].str());
+        this->addUniform(m[1].str(), m[2].str());
         return true;
     });
 
@@ -154,8 +154,6 @@ void ShaderPreprocessor::insertPredefinedUniforms(const std::vector<Uniform>& un
     for(const Uniform& i : uniforms)
         if(!_uniforms.has(i.name()) && _source.find(i.name()) != String::npos)
         {
-            _uniforms.push_back(i.name(), "uniform");
-
             const String declaration = i.declaration();
             if(declaration.find('[') == String::npos)
                 _uniform_declarations << declaration << '\n';
@@ -186,6 +184,13 @@ void ShaderPreprocessor::insertAfter(const String& statement, const String& str)
     String::size_type pos = _source.find(statement);
     if(pos != String::npos)
         _source.insert(pos + 1, str);
+}
+
+void ShaderPreprocessor::addUniform(const String& type, const String& name)
+{
+    _uniforms.push_back(name, type);
+    if(type.startsWith("sampler"))
+        _samplers.push_back(name);
 }
 
 String ShaderPreprocessor::getDeclarations() const

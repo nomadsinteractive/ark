@@ -36,7 +36,6 @@ public:
 private:
     sp<Numeric> _expectation;
     Observer _observer;
-    bool _fire_once;
 };
 
 }

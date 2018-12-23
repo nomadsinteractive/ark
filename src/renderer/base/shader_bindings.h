@@ -6,6 +6,7 @@
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/layer.h"
@@ -46,7 +47,6 @@ public:
     const Attributes& attributes() const;
 
     void bindGLTexture(const sp<Texture>& texture, uint32_t name = 0) const;
-    void bindGLTexture(const sp<Resource>& texture, Texture::Type type, uint32_t name) const;
 
     std::map<uint32_t, Buffer::Builder> makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const;
 
@@ -58,6 +58,7 @@ private:
     Buffer _array_buffer;
     sp<PipelineInput> _pipeline_input;
     std::vector<std::pair<uint32_t, Buffer>> _instanced_arrays;
+    std::vector<sp<Texture>> _samplers;
 
     friend class ModelBuffer;
 };

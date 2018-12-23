@@ -16,7 +16,7 @@ public:
 
     Matrix operator *(const Matrix& right) const;
 
-    const Matrix& operator =(const Matrix& other);
+    Matrix& operator =(const Matrix& other);
 
     void setIdentity();
     void translate(float x, float y, float z);

@@ -50,7 +50,7 @@ public:
 
     void addAttribute(const String& name, const String& type);
     void addSnippet(const sp<Snippet>& snippet);
-    void addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed);
+    void addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& dirty);
     void addUniform(Uniform uniform);
 
     Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t scopes);

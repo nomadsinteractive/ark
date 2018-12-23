@@ -50,12 +50,13 @@ public:
         return _values[index];
     }
 
-    const U& operator[](size_t index) const {
-        return _values[index];
-    }
-
-    U& operator[](size_t index) {
-        return _values[index];
+    U& operator[](const T& key) {
+        const auto iter = _keys.find(key);
+        if(iter != _keys.end())
+            return _values[iter.second];
+        _keys.insert(std::make_pair<T, size_t>(key, _values.size()));
+        _values.push_back(U());
+        return _values.back();
     }
 
 private:

@@ -2,14 +2,18 @@
 
 #include "core/base/string.h"
 
+#include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/ubo.h"
 
 namespace ark {
 
-void PipelineInput::initialize(std::vector<Uniform> uniform)
+void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
 {
-    _ubo = sp<UBO>::make(std::move(uniform));
+    _ubo = sp<UBO>::make(buildingContext._uniforms.values());
+
+    for(const String& i : buildingContext._fragment._uniforms.values())
+        puts(i.c_str());
 }
 
 const std::vector<Uniform>& PipelineInput::uniforms() const

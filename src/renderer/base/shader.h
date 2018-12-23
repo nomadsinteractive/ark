@@ -33,7 +33,7 @@ public:
     const sp<Pipeline>& pipeline() const;
     const sp<PipelineFactory>& pipelineFactory() const;
 
-    const sp<Pipeline>& getPipeline(GraphicsContext& graphicsContext);
+    const sp<Pipeline>& getPipeline(GraphicsContext& graphicsContext, const ShaderBindings& bindings);
 
     const sp<Snippet>& snippet() const;
 

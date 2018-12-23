@@ -33,7 +33,7 @@ bool UBO::doSnapshot() const
     {
         const Uniform& uniform = _uniforms.at(i);
         const sp<Flatable>& flatable = uniform.flatable();
-        dirtyFlags[i] = static_cast<uint8_t>(uniform.notifier() ? uniform.notifier()->hasChanged() : true);
+        dirtyFlags[i] = static_cast<uint8_t>(uniform.dirty());
         dirty = dirty || dirtyFlags[i];
         if(dirtyFlags[i])
             flatable->flat(_buffer->buf() + offset);

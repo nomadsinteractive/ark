@@ -170,7 +170,6 @@ size_t Strings::parentheses(const String& expr, size_t start, char open, char cl
             return i;
     }
     FATAL("Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
-    return 0;
 }
 
 bool Strings::parseNameValuePair(const String& expr, char equal, String& name, String& value)
