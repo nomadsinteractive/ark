@@ -4,7 +4,7 @@
 #include "renderer/vulkan/util/vulkan_debug.h"
 
 #include "renderer/vulkan/base/vk_instance.h"
-#include "renderer/vulkan/base/vulkan_api.h"
+#include "renderer/vulkan/base/vk_util.h"
 
 namespace ark {
 namespace vulkan {
@@ -17,7 +17,7 @@ VKDevice::VKDevice(const sp<VKInstance>& instance, VkPhysicalDevice physicalDevi
         _vulkan_device->enabledFeatures.samplerAnisotropy = VK_TRUE;
     };
 
-    VulkanAPI::checkResult(_vulkan_device->createLogicalDevice(_vulkan_device->enabledFeatures, _enabled_extensions));
+    VKUtil::checkResult(_vulkan_device->createLogicalDevice(_vulkan_device->enabledFeatures, _enabled_extensions));
 
     // Get a graphics queue from the device
     vkGetDeviceQueue(_vulkan_device->logicalDevice, _vulkan_device->queueFamilyIndices.graphics, 0, &_queue);
@@ -102,7 +102,7 @@ void VKDevice::createPipelineCache()
 {
     VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
     pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-    VulkanAPI::checkResult(vkCreatePipelineCache(_vulkan_device->logicalDevice, &pipelineCacheCreateInfo, nullptr, &_pipeline_cache));
+    VKUtil::checkResult(vkCreatePipelineCache(_vulkan_device->logicalDevice, &pipelineCacheCreateInfo, nullptr, &_pipeline_cache));
 }
 
 }

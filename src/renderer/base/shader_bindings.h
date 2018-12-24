@@ -37,7 +37,7 @@ public:
     ShaderBindings(RenderController& renderController, const sp<Shader>& shader, const Buffer& arrayBuffer);
 
     const sp<Shader>& shader() const;
-    const sp<SnippetDelegate>& snippet() const;
+    const sp<Snippet>& snippet() const;
     const sp<PipelineInput>& pipelineInput() const;
     const std::vector<sp<Texture>>& samplers() const;
 
@@ -52,7 +52,6 @@ public:
 
 private:
     sp<Shader> _shader;
-    sp<SnippetDelegate> _snippet;
     Attributes _attributes;
 
     Buffer _array_buffer;

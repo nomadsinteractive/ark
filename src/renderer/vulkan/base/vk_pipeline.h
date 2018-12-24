@@ -16,7 +16,7 @@ namespace vulkan {
 
 class VKPipeline : public Pipeline {
 public:
-    VKPipeline(sp<Recycler> recycler, sp<VKRenderTarget> renderTarget, VkPipelineLayout vkPipelineLayout, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet descriptorSet, VkPipeline pipeline);
+    VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderTarget>& renderTarget, VkPipelineLayout vkPipelineLayout, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet descriptorSet, VkPipeline pipeline);
     ~VKPipeline() override;
 
     VkPipeline vkPipeline() const;

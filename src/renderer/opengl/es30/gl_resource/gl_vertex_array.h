@@ -1,7 +1,7 @@
 #ifndef ARK_RENDERER_GLES30_GL_VERTEX_ARRAY_H_
 #define ARK_RENDERER_GLES30_GL_VERTEX_ARRAY_H_
 
-#include "core/types/shared_ptr.h"
+#include "core/types/weak_ptr.h"
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/shader.h"
@@ -21,7 +21,7 @@ public:
 private:
     uint32_t _id;
 
-    sp<ShaderBindings> _shader_bindings;
+    WeakPtr<ShaderBindings> _shader_bindings;
 };
 
 }

@@ -110,12 +110,12 @@ const sp<PipelineFactory>& Shader::pipelineFactory() const
     return _stub->_pipeline_factory;
 }
 
-const sp<Snippet>& Shader::snippet() const
+const sp<PipelineLayout>& Shader::pipelineLayout() const
 {
-    return _stub->_snippet;
+    return _stub->_pipeline_layout;
 }
 
-const sp<Pipeline>& Shader::getPipeline(GraphicsContext& graphicsContext, const ShaderBindings& bindings)
+const sp<Pipeline>& Shader::getPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings)
 {
     if(_stub->_pipeline)
     {
@@ -124,7 +124,7 @@ const sp<Pipeline>& Shader::getPipeline(GraphicsContext& graphicsContext, const 
         return _stub->_pipeline;
     }
 
-    _stub->_pipeline_layout->preCompile(graphicsContext);
+    _stub->_pipeline_layout->preCompile(graphicsContext, bindings);
     _stub->_pipeline = _stub->_pipeline_factory->buildPipeline(graphicsContext, _stub->_pipeline_layout, bindings);
     graphicsContext.resourceManager()->upload(_stub, ResourceManager::US_ON_SURFACE_READY);
     _stub->upload(graphicsContext);
@@ -156,7 +156,7 @@ sp<Shader> Shader::BUILDER::build(const sp<Scope>& args)
 }
 
 Shader::Stub::Stub(const sp<PipelineLayout>& pipelineLayout)
-    : _pipeline_factory(pipelineLayout->renderController()->createPipelineFactory()), _pipeline_layout(pipelineLayout), _input(pipelineLayout->input()), _snippet(pipelineLayout->snippet())
+    : _pipeline_factory(pipelineLayout->renderController()->createPipelineFactory()), _pipeline_layout(pipelineLayout), _input(pipelineLayout->input())
 {
 }
 

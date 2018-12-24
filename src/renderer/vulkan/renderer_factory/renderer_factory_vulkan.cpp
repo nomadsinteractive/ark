@@ -16,7 +16,7 @@
 #include "renderer/vulkan/snippet_factory/snippet_factory_vulkan.h"
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
 
-#include "renderer/vulkan/base/vulkan_api.h"
+#include "renderer/vulkan/base/vk_util.h"
 #include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/vk_texture_2d.h"
 
@@ -73,12 +73,12 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buff
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<GLContext>& glContext, const Viewport& viewport)
 {
-    return sp<RenderViewVulkan>::make(sp<VulkanAPI>::make(_resource_manager, _stub), glContext, _resource_manager, viewport);
+    return sp<RenderViewVulkan>::make(sp<VKUtil>::make(_resource_manager, _stub), glContext, _resource_manager, viewport);
 }
 
 sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
 {
-    return sp<PipelineFactoryVulkan>::make(_resource_manager, _stub->_render_target);
+    return sp<PipelineFactoryVulkan>::make(_resource_manager, _stub);
 }
 
 sp<Texture> RendererFactoryVulkan::createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap)

@@ -24,7 +24,7 @@ public:
 
     const sp<Snippet>& snippet() const;
 
-    void preCompile(GraphicsContext& graphicsContext);
+    void preCompile(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings);
 
     const sp<PipelineInput>& input() const;
     const ShaderPreprocessor::Preprocessor& vertex() const;

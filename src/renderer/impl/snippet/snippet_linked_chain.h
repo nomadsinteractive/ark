@@ -14,7 +14,7 @@ public:
     SnippetLinkedChain(const sp<Snippet>& delegate, const sp<Snippet>& next);
 
     virtual void preInitialize(PipelineBuildingContext& context) override;
-    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const sp<ShaderBindings>& shaderBindings) override;
     virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 

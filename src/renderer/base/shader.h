@@ -32,10 +32,9 @@ public:
 
     const sp<Pipeline>& pipeline() const;
     const sp<PipelineFactory>& pipelineFactory() const;
+    const sp<PipelineLayout>& pipelineLayout() const;
 
-    const sp<Pipeline>& getPipeline(GraphicsContext& graphicsContext, const ShaderBindings& bindings);
-
-    const sp<Snippet>& snippet() const;
+    const sp<Pipeline>& getPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings);
 
 //[[deprecated]]
     uint32_t stride() const;
@@ -70,7 +69,6 @@ private:
         sp<PipelineFactory> _pipeline_factory;
         sp<PipelineLayout> _pipeline_layout;
         sp<PipelineInput> _input;
-        sp<Snippet> _snippet;
     };
 
 private:

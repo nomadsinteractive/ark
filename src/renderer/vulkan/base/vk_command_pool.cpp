@@ -1,7 +1,7 @@
 #include "renderer/vulkan/base/vk_command_pool.h"
 
 #include "renderer/vulkan/base/vk_device.h"
-#include "renderer/vulkan/base/vulkan_api.h"
+#include "renderer/vulkan/base/vk_util.h"
 
 namespace ark {
 namespace vulkan {
@@ -13,7 +13,7 @@ VKCommandPool::VKCommandPool(const sp<VKDevice>& device, uint32_t queueNodeIndex
     cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     cmdPoolInfo.queueFamilyIndex = queueNodeIndex;
     cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    VulkanAPI::checkResult(vkCreateCommandPool(_device->logicalDevice(), &cmdPoolInfo, nullptr, &_command_pool));
+    VKUtil::checkResult(vkCreateCommandPool(_device->logicalDevice(), &cmdPoolInfo, nullptr, &_command_pool));
 }
 
 VKCommandPool::~VKCommandPool()
@@ -36,13 +36,13 @@ VkCommandBuffer VKCommandPool::getCommandBuffer(bool begin) const
     cmdBufAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     cmdBufAllocateInfo.commandBufferCount = 1;
 
-    VulkanAPI::checkResult(vkAllocateCommandBuffers(_device->logicalDevice(), &cmdBufAllocateInfo, &cmdBuffer));
+    VKUtil::checkResult(vkAllocateCommandBuffers(_device->logicalDevice(), &cmdBufAllocateInfo, &cmdBuffer));
 
     // If requested, also start the new command buffer
     if (begin)
     {
         VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-        VulkanAPI::checkResult(vkBeginCommandBuffer(cmdBuffer, &cmdBufInfo));
+        VKUtil::checkResult(vkBeginCommandBuffer(cmdBuffer, &cmdBufInfo));
     }
 
     return cmdBuffer;
@@ -57,12 +57,12 @@ VkCommandBuffer VKCommandPool::createCommandBuffer(VkCommandBufferLevel level, b
                 level,
                 1);
 
-    VulkanAPI::checkResult(vkAllocateCommandBuffers(_device->logicalDevice(), &cmdBufAllocateInfo, &cmdBuffer));
+    VKUtil::checkResult(vkAllocateCommandBuffers(_device->logicalDevice(), &cmdBufAllocateInfo, &cmdBuffer));
 
     if(begin)
     {
         VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-        VulkanAPI::checkResult(vkBeginCommandBuffer(cmdBuffer, &cmdBufInfo));
+        VKUtil::checkResult(vkBeginCommandBuffer(cmdBuffer, &cmdBufInfo));
     }
 
     return cmdBuffer;
@@ -78,7 +78,7 @@ std::vector<VkCommandBuffer> VKCommandPool::makeCommandBuffers(uint32_t count) c
                 VK_COMMAND_BUFFER_LEVEL_PRIMARY,
                 count);
 
-    VulkanAPI::checkResult(vkAllocateCommandBuffers(_device->logicalDevice(), &cmdBufAllocateInfo, commandBuffers.data()));
+    VKUtil::checkResult(vkAllocateCommandBuffers(_device->logicalDevice(), &cmdBufAllocateInfo, commandBuffers.data()));
     return commandBuffers;
 }
 
@@ -89,15 +89,15 @@ void VKCommandPool::flushCommandBuffer(VkCommandBuffer commandBuffer, bool free)
         return;
     }
 
-    VulkanAPI::checkResult(vkEndCommandBuffer(commandBuffer));
+    VKUtil::checkResult(vkEndCommandBuffer(commandBuffer));
 
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    VulkanAPI::checkResult(vkQueueSubmit(_device->queue(), 1, &submitInfo, VK_NULL_HANDLE));
-    VulkanAPI::checkResult(vkQueueWaitIdle(_device->queue()));
+    VKUtil::checkResult(vkQueueSubmit(_device->queue(), 1, &submitInfo, VK_NULL_HANDLE));
+    VKUtil::checkResult(vkQueueWaitIdle(_device->queue()));
 
     if (free)
     {

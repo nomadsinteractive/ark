@@ -35,7 +35,8 @@ private:
     sp<ResourceManager> _resource_manager;
     sp<Stub> _stub;
 
-    friend class VulkanAPI;
+    friend class VKUtil;
+    friend class PipelineFactoryVulkan;
 };
 
 }

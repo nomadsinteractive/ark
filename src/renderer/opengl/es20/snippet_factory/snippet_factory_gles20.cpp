@@ -1,13 +1,33 @@
 #include "renderer/opengl/es20/snippet_factory/snippet_factory_gles20.h"
 
-#include "renderer/opengl/es20/snippet/bind_attributes.h"
+#include "renderer/base/drawing_context.h"
+#include "renderer/base/shader.h"
+#include "renderer/inf/pipeline.h"
+#include "renderer/inf/snippet.h"
+
+#include "platform/gl/gl.h"
 
 namespace ark {
 namespace gles20 {
 
+namespace {
+
+class SnippetGLES20 : public Snippet {
+public:
+
+    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
+        glBindBuffer(GL_ARRAY_BUFFER, context._array_buffer.id());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context._index_buffer.id());
+        context.shader()->pipeline()->bind(graphicsContext, context._shader_bindings);
+    }
+
+};
+
+}
+
 sp<Snippet> SnippetFactoryGLES20::createCoreSnippet(ResourceManager& /*glResourceManager*/, const sp<ShaderBindings>& /*shaderBindings*/)
 {
-    return sp<BindAttributes>::make();
+    return sp<SnippetGLES20>::make();
 }
 
 }

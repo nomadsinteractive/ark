@@ -1,16 +1,48 @@
 #include "renderer/opengl/es30/snippet_factory/snippet_factory_gles30.h"
 
-#include "renderer/opengl/es30/snippet/bind_vertex_array.h"
-#include "renderer/opengl/es30/gl_resource/gl_vertex_array.h"
+#include "renderer/inf/snippet.h"
 
 #include "renderer/base/resource_manager.h"
+#include "renderer/base/drawing_context.h"
+#include "renderer/base/pipeline_building_context.h"
+
+#include "renderer/opengl/es30/gl_resource/gl_vertex_array.h"
+
+#include "platform/gl/gl.h"
 
 namespace ark {
 namespace gles30 {
 
-sp<Snippet> SnippetFactoryGLES30::createCoreSnippet(ResourceManager& glResourceManager, const sp<ShaderBindings>& shaderBindings)
+namespace {
+
+class SnippetGLES30 : public Snippet {
+public:
+    SnippetGLES30(const sp<Resource>& vertexArray)
+        : _vertex_array(vertexArray) {
+    }
+
+    virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const sp<ShaderBindings>& /*shaderBindings*/) override {
+        context._fragment._out_declarations.declare("vec4", "v_", "FragColor");
+    }
+
+    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& context) override {
+        glBindVertexArray(_vertex_array->id());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context._index_buffer.id());
+    }
+
+    virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {
+        glBindVertexArray(0);
+    }
+
+private:
+    sp<Resource> _vertex_array;
+};
+
+}
+
+sp<Snippet> SnippetFactoryGLES30::createCoreSnippet(ResourceManager& resourceManager, const sp<ShaderBindings>& shaderBindings)
 {
-    return sp<BindVertexArray>::make(glResourceManager.createGLResource<GLVertexArray>(shaderBindings));
+    return sp<SnippetGLES30>::make(resourceManager.createGLResource<GLVertexArray>(shaderBindings));
 }
 
 }

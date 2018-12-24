@@ -12,20 +12,18 @@
 #include "renderer/vulkan/base/vk_pipeline.h"
 #include "renderer/vulkan/base/vk_render_target.h"
 #include "renderer/vulkan/base/vk_texture_2d.h"
-#include "renderer/vulkan/base/vulkan_api.h"
+#include "renderer/vulkan/base/vk_util.h"
 
 namespace ark {
 namespace vulkan {
 
-PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager, const sp<VKRenderTarget>& renderTarget)
-    : _resource_manager(resourceManager), _render_target(renderTarget), _device(renderTarget->device())
+PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager, const sp<RendererFactoryVulkan::Stub>& renderFactory)
+    : _resource_manager(resourceManager), _render_factory(renderFactory)
 {
-    setupDescriptorPool();
 }
 
 PipelineFactoryVulkan::~PipelineFactoryVulkan()
 {
-    vkDestroyDescriptorPool(_device->logicalDevice(), _descriptor_pool, nullptr);
 }
 
 sp<VKPipeline> PipelineFactoryVulkan::build()
@@ -36,7 +34,7 @@ sp<VKPipeline> PipelineFactoryVulkan::build()
     VkDescriptorSet descriptorSet = setupDescriptorSet();
     VkPipeline pipeline = createPipeline();
 
-    return sp<VKPipeline>::make(_resource_manager->recycler(), _render_target, _pipeline_layout, _descriptor_set_layout, descriptorSet, pipeline);
+    return sp<VKPipeline>::make(_resource_manager->recycler(), _render_factory->_render_target, _pipeline_layout, _descriptor_set_layout, descriptorSet, pipeline);
 }
 
 sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& /*graphicsContext*/, const PipelineLayout& pipelineLayout, const ShaderBindings& bindings)
@@ -47,7 +45,7 @@ sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& /*graphicsCon
     VkDescriptorSet descriptorSet = setupDescriptorSet();
     VkPipeline pipeline = createPipeline();
 
-    return sp<VKPipeline>::make(_resource_manager->recycler(), _render_target, _pipeline_layout, _descriptor_set_layout, descriptorSet, pipeline);
+    return sp<VKPipeline>::make(_resource_manager->recycler(), _render_factory->_render_target, _pipeline_layout, _descriptor_set_layout, descriptorSet, pipeline);
 }
 
 sp<RenderCommand> PipelineFactoryVulkan::buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode renderMode, int32_t count)
@@ -89,7 +87,7 @@ void PipelineFactoryVulkan::setupVertexDescriptions()
     vertices.bindingDescriptions[0] =
             vks::initializers::vertexInputBindingDescription(
                 0,
-                sizeof(VulkanAPI::Vertex),
+                sizeof(VKUtil::Vertex),
                 VK_VERTEX_INPUT_RATE_VERTEX);
 
     // Attribute descriptions
@@ -101,21 +99,21 @@ void PipelineFactoryVulkan::setupVertexDescriptions()
                 0,
                 0,
                 VK_FORMAT_R32G32B32_SFLOAT,
-                offsetof(VulkanAPI::Vertex, pos));
+                offsetof(VKUtil::Vertex, pos));
     // Location 1 : Texture coordinates
     vertices.attributeDescriptions[1] =
             vks::initializers::vertexInputAttributeDescription(
                 0,
                 1,
                 VK_FORMAT_R32G32_SFLOAT,
-                offsetof(VulkanAPI::Vertex, uv));
+                offsetof(VKUtil::Vertex, uv));
     // Location 1 : Vertex normal
     vertices.attributeDescriptions[2] =
             vks::initializers::vertexInputAttributeDescription(
                 0,
                 2,
                 VK_FORMAT_R32G32B32_SFLOAT,
-                offsetof(VulkanAPI::Vertex, normal));
+                offsetof(VKUtil::Vertex, normal));
 
     vertices.inputState = vks::initializers::pipelineVertexInputStateCreateInfo();
     vertices.inputState.vertexBindingDescriptionCount = static_cast<uint32_t>(vertices.bindingDescriptions.size());
@@ -126,6 +124,8 @@ void PipelineFactoryVulkan::setupVertexDescriptions()
 
 void PipelineFactoryVulkan::setupDescriptorSetLayout()
 {
+    const sp<VKDevice> device = _render_factory->_render_target->device();
+
     std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
         // Binding 0 : Vertex shader uniform buffer
         vks::initializers::descriptorSetLayoutBinding(
@@ -144,43 +144,30 @@ void PipelineFactoryVulkan::setupDescriptorSetLayout()
                 setLayoutBindings.data(),
                 static_cast<uint32_t>(setLayoutBindings.size()));
 
-    VulkanAPI::checkResult(vkCreateDescriptorSetLayout(_device->logicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
+    VKUtil::checkResult(vkCreateDescriptorSetLayout(device->logicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
 
     VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
             vks::initializers::pipelineLayoutCreateInfo(
                 &_descriptor_set_layout,
                 1);
 
-    VulkanAPI::checkResult(vkCreatePipelineLayout(_device->logicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_pipeline_layout));
+    VKUtil::checkResult(vkCreatePipelineLayout(device->logicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_pipeline_layout));
 }
 
-void PipelineFactoryVulkan::setupDescriptorPool()
-{
-    std::vector<VkDescriptorPoolSize> poolSizes = {
-        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
-        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
-    };
-
-    VkDescriptorPoolCreateInfo descriptorPoolInfo =
-            vks::initializers::descriptorPoolCreateInfo(
-                static_cast<uint32_t>(poolSizes.size()),
-                poolSizes.data(),
-                2);
-
-    VulkanAPI::checkResult(vkCreateDescriptorPool(_device->logicalDevice(), &descriptorPoolInfo, nullptr, &_descriptor_pool));
-}
 
 VkDescriptorSet PipelineFactoryVulkan::setupDescriptorSet()
 {
+    const sp<VKDevice> device = _render_factory->_render_target->device();
+
     VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
 
     VkDescriptorSetAllocateInfo allocInfo =
             vks::initializers::descriptorSetAllocateInfo(
-                _descriptor_pool,
+                _render_factory->_render_target->descriptorPool(),
                 &_descriptor_set_layout,
                 1);
 
-    VulkanAPI::checkResult(vkAllocateDescriptorSets(_device->logicalDevice(), &allocInfo, &descriptorSet));
+    VKUtil::checkResult(vkAllocateDescriptorSets(device->logicalDevice(), &allocInfo, &descriptorSet));
 
     std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
         // Binding 0 : Vertex shader uniform buffer
@@ -198,13 +185,15 @@ VkDescriptorSet PipelineFactoryVulkan::setupDescriptorSet()
         &_texture->descriptor())								// Pointer to the descriptor image for our texture
     };
 
-    vkUpdateDescriptorSets(_device->logicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+    vkUpdateDescriptorSets(device->logicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 
     return descriptorSet;
 }
 
 VkPipeline PipelineFactoryVulkan::createPipeline()
 {
+    const sp<VKDevice> device = _render_factory->_render_target->device();
+
     VkPipeline pipeline = VK_NULL_HANDLE;
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
             vks::initializers::pipelineInputAssemblyStateCreateInfo(
@@ -265,13 +254,13 @@ VkPipeline PipelineFactoryVulkan::createPipeline()
 //    shaderStages[0] = VulkanAPI::loadShaderSPIR(_device->logicalDevice(), "texture.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
 //    shaderStages[1] = VulkanAPI::loadShaderSPIR(_device->logicalDevice(), "texture.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 
-    shaderStages[0] = VulkanAPI::loadShader(_device->logicalDevice(), "texture.vert", VulkanAPI::SHADER_TYPE_VERTEX);
-    shaderStages[1] = VulkanAPI::loadShader(_device->logicalDevice(), "texture.frag", VulkanAPI::SHADER_TYPE_FRAGMENT);
+    shaderStages[0] = VKUtil::loadShader(device->logicalDevice(), "texture.vert", VKUtil::SHADER_TYPE_VERTEX);
+    shaderStages[1] = VKUtil::loadShader(device->logicalDevice(), "texture.frag", VKUtil::SHADER_TYPE_FRAGMENT);
 
     VkGraphicsPipelineCreateInfo pipelineCreateInfo =
             vks::initializers::pipelineCreateInfo(
                 _pipeline_layout,
-                _render_target->renderPass(),
+                _render_factory->_render_target->renderPass(),
                 0);
 
     pipelineCreateInfo.pVertexInputState = &vertices.inputState;
@@ -285,9 +274,9 @@ VkPipeline PipelineFactoryVulkan::createPipeline()
     pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
     pipelineCreateInfo.pStages = shaderStages.data();
 
-    VulkanAPI::checkResult(vkCreateGraphicsPipelines(_device->logicalDevice(), _device->pipelineCache(), 1, &pipelineCreateInfo, nullptr, &pipeline));
-    vkDestroyShaderModule(_device->logicalDevice(), shaderStages[0].module, nullptr);
-    vkDestroyShaderModule(_device->logicalDevice(), shaderStages[1].module, nullptr);
+    VKUtil::checkResult(vkCreateGraphicsPipelines(device->logicalDevice(), device->pipelineCache(), 1, &pipelineCreateInfo, nullptr, &pipeline));
+    vkDestroyShaderModule(device->logicalDevice(), shaderStages[0].module, nullptr);
+    vkDestroyShaderModule(device->logicalDevice(), shaderStages[1].module, nullptr);
 
     return pipeline;
 }

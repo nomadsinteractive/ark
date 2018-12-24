@@ -8,12 +8,12 @@
 #include "graphics/base/viewport.h"
 
 #include "renderer/base/graphics_context.h"
-#include "renderer/vulkan/base/vulkan_api.h"
+#include "renderer/vulkan/base/vk_util.h"
 
 namespace ark {
 namespace vulkan {
 
-RenderViewVulkan::RenderViewVulkan(const sp<VulkanAPI>& vulkanApi, const sp<GLContext>& glContext, const sp<ResourceManager>& resourceManager, const Viewport& viewport)
+RenderViewVulkan::RenderViewVulkan(const sp<VKUtil>& vulkanApi, const sp<GLContext>& glContext, const sp<ResourceManager>& resourceManager, const Viewport& viewport)
     : _vulkan_api(vulkanApi), _graphics_context(new GraphicsContext(glContext, resourceManager)), _viewport(viewport)
 {
 }

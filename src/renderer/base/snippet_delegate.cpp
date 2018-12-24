@@ -11,41 +11,42 @@ namespace ark {
 
 class CoreGLSnippet : public Snippet {
 public:
-    CoreGLSnippet(SnippetDelegate& wrapper, const sp<Shader>& shader);
+    CoreGLSnippet(SnippetDelegate& wrapper, const sp<Snippet>& snippet);
 
     virtual void preInitialize(PipelineBuildingContext& context) override;
-    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const sp<ShaderBindings>& shaderBindings) override;
     virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 
 private:
-    sp<Snippet> createGLSnippet(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const;
+    sp<Snippet> createCoreSnippet(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const;
 
 private:
     SnippetDelegate& _wrapper;
-    sp<Shader> _shader;
+    sp<Snippet> _snippet;
 };
 
-CoreGLSnippet::CoreGLSnippet(SnippetDelegate& wrapper, const sp<Shader>& shader)
-    : _wrapper(wrapper), _shader(shader)
+CoreGLSnippet::CoreGLSnippet(SnippetDelegate& wrapper, const sp<Snippet>& snippet)
+    : _wrapper(wrapper), _snippet(snippet)
 {
 }
 
 void CoreGLSnippet::preInitialize(PipelineBuildingContext& context)
 {
-    _wrapper.preInitialize(context);
+    if(_snippet)
+        _snippet->preInitialize(context);
 }
 
-void CoreGLSnippet::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context)
-{
-    _wrapper.preCompile(graphicsContext, context);
-}
-
-void CoreGLSnippet::preDraw(GraphicsContext& graphicsContext, const DrawingContext& context)
+void CoreGLSnippet::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const sp<ShaderBindings>& shaderBindings)
 {
     const sp<Snippet> delegate = _wrapper._core;
-    _wrapper._core = createGLSnippet(graphicsContext, context._shader_bindings);
-    _wrapper.preDraw(graphicsContext, context);
+    _wrapper._core = createCoreSnippet(graphicsContext, shaderBindings);
+    _wrapper.preCompile(graphicsContext, context, shaderBindings);
+}
+
+void CoreGLSnippet::preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/)
+{
+    DFATAL("You're not supposed to be here");
 }
 
 void CoreGLSnippet::postDraw(GraphicsContext& /*graphicsContext*/)
@@ -53,14 +54,14 @@ void CoreGLSnippet::postDraw(GraphicsContext& /*graphicsContext*/)
     DFATAL("You're not supposed to be here");
 }
 
-sp<Snippet> CoreGLSnippet::createGLSnippet(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const
+sp<Snippet> CoreGLSnippet::createCoreSnippet(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const
 {
-    const sp<Snippet> coreGLSnippet = graphicsContext.glContext()->createCoreGLSnippet(graphicsContext.resourceManager(), bindings);
-    return _shader->snippet() ? sp<Snippet>::adopt(new SnippetLinkedChain(coreGLSnippet, _shader->snippet())) : coreGLSnippet;
+    const sp<Snippet> coreSnippet = graphicsContext.glContext()->createCoreSnippet(graphicsContext.resourceManager(), bindings);
+    return _snippet ? sp<Snippet>::adopt(new SnippetLinkedChain(coreSnippet, _snippet)) : coreSnippet;
 }
 
-SnippetDelegate::SnippetDelegate(const sp<Shader>& shader)
-    : _core(sp<CoreGLSnippet>::make(*this, shader))
+SnippetDelegate::SnippetDelegate(const sp<Snippet>& snippet)
+    : _core(sp<CoreGLSnippet>::make(*this, snippet))
 {
 }
 
@@ -69,28 +70,24 @@ void SnippetDelegate::preInitialize(PipelineBuildingContext& context)
     _core->preInitialize(context);
 }
 
-void SnippetDelegate::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context)
+void SnippetDelegate::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const sp<ShaderBindings>& shaderBindings)
 {
-    _core->preCompile(graphicsContext, context);
+    _core->preCompile(graphicsContext, context, shaderBindings);
 }
 
 void SnippetDelegate::preDraw(GraphicsContext& graphicsContext, const DrawingContext& context)
 {
     _core->preDraw(graphicsContext, context);
-    if(_delegate)
-        _delegate->preDraw(graphicsContext, context);
 }
 
 void SnippetDelegate::postDraw(GraphicsContext& graphicsContext)
 {
     _core->postDraw(graphicsContext);
-    if(_delegate)
-        _delegate->postDraw(graphicsContext);
 }
 
-void SnippetDelegate::link(const sp<Snippet>& snippet)
-{
-    _delegate = _delegate ? sp<Snippet>::adopt(new SnippetLinkedChain(_delegate, snippet)) : snippet;
-}
+//void SnippetDelegate::link(const sp<Snippet>& snippet)
+//{
+//    _delegate = _delegate ? sp<Snippet>::adopt(new SnippetLinkedChain(_delegate, snippet)) : snippet;
+//}
 
 }

@@ -3,7 +3,7 @@
 #include "renderer/base/recycler.h"
 #include "renderer/inf/uploader.h"
 
-#include "renderer/vulkan/base/vulkan_api.h"
+#include "renderer/vulkan/base/vk_util.h"
 
 namespace ark {
 namespace vulkan {
@@ -12,7 +12,7 @@ VKBuffer::VKBuffer(const sp<VKDevice>& device, const sp<Recycler>& recycler, con
     : Buffer::Delegate(uploader->size()), _device(device), _recycler(recycler), _uploader(uploader), _usage_flags(usageFlags), _memory_property_flags(memoryPropertyFlags)
 {
     const VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo(usageFlags, _size);
-    VulkanAPI::checkResult(vkCreateBuffer(_device->logicalDevice(), &bufferCreateInfo, nullptr, &_buffer));
+    VKUtil::checkResult(vkCreateBuffer(_device->logicalDevice(), &bufferCreateInfo, nullptr, &_buffer));
 
     // Create the memory backing up the buffer handle
     VkMemoryRequirements memReqs;
@@ -21,7 +21,7 @@ VKBuffer::VKBuffer(const sp<VKDevice>& device, const sp<Recycler>& recycler, con
     memAlloc.allocationSize = memReqs.size;
     // Find a memory type index that fits the properties of the buffer
     memAlloc.memoryTypeIndex = _device->getMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
-    VulkanAPI::checkResult(vkAllocateMemory(_device->logicalDevice(), &memAlloc, nullptr, &_memory));
+    VKUtil::checkResult(vkAllocateMemory(_device->logicalDevice(), &memAlloc, nullptr, &_memory));
 
     setupDescriptor();
     bind();
@@ -80,7 +80,7 @@ const VkBuffer& VKBuffer::vkBuffer() const
 void* VKBuffer::map(VkDeviceSize size, VkDeviceSize offset)
 {
     void* mapped = nullptr;
-    VulkanAPI::checkResult(vkMapMemory(_device->logicalDevice(), _memory, offset, size, 0, &mapped));
+    VKUtil::checkResult(vkMapMemory(_device->logicalDevice(), _memory, offset, size, 0, &mapped));
     return mapped;
 }
 

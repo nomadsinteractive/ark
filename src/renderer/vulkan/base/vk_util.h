@@ -22,7 +22,7 @@
 namespace ark {
 namespace vulkan {
 
-class VulkanAPI {
+class VKUtil {
 public:
     enum ShaderType {
         SHADER_TYPE_VERTEX,
@@ -30,8 +30,8 @@ public:
         SHADER_TYPE_COUNT
     };
 
-    VulkanAPI(const sp<ResourceManager>& resourceManager, const sp<RendererFactoryVulkan::Stub>& rendererFactory);
-    ~VulkanAPI();
+    VKUtil(const sp<ResourceManager>& resourceManager, const sp<RendererFactoryVulkan::Stub>& rendererFactory);
+    ~VKUtil();
 
     void initialize(GLContext& glContext);
 

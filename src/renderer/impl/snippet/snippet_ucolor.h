@@ -17,7 +17,6 @@ public:
     SnippetUColor(const sp<Vec4>& color);
 
     virtual void preInitialize(PipelineBuildingContext& context) override;
-    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context) override;
 
 //  [[plugin::builder::by-value("ucolor")]]
     class DICTIONARY : public Builder<Snippet> {

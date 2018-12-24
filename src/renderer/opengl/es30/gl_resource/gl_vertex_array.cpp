@@ -3,7 +3,7 @@
 #include "core/util/log.h"
 
 #include "renderer/base/shader_bindings.h"
-#include "renderer/opengl/base/gl_pipeline.h"
+#include "renderer/inf/pipeline.h"
 
 #include "platform/gl/gl.h"
 
@@ -22,12 +22,13 @@ uint32_t GLVertexArray::id()
 
 void GLVertexArray::upload(GraphicsContext& graphicsContext)
 {
+    const sp<ShaderBindings> bindings = _shader_bindings.ensure();
     glGenVertexArrays(1, &_id);
     glBindVertexArray(_id);
-    _shader_bindings->arrayBuffer().upload(graphicsContext);
-    glBindBuffer(GL_ARRAY_BUFFER, _shader_bindings->arrayBuffer().id());
-    const sp<Pipeline> pipeline = _shader_bindings->shader()->getPipeline(graphicsContext, _shader_bindings);
-    pipeline->bind(graphicsContext, _shader_bindings);
+    bindings->arrayBuffer().upload(graphicsContext);
+    glBindBuffer(GL_ARRAY_BUFFER, bindings->arrayBuffer().id());
+    const sp<Pipeline> pipeline = bindings->shader()->getPipeline(graphicsContext, bindings);
+    pipeline->bind(graphicsContext, bindings);
     glBindVertexArray(0);
     LOGD("id = %d", _id);
 }

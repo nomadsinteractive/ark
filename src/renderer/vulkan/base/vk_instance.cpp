@@ -3,7 +3,7 @@
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vulkan_debug.h"
 
-#include "renderer/vulkan/base/vulkan_api.h"
+#include "renderer/vulkan/base/vk_util.h"
 
 namespace ark {
 namespace vulkan {
@@ -62,15 +62,15 @@ void VKInstance::initialize()
         instanceCreateInfo.ppEnabledLayerNames = vks::debug::validationLayerNames;
 #endif
 
-    VulkanAPI::checkResult(vkCreateInstance(&instanceCreateInfo, nullptr, &_instance));
+    VKUtil::checkResult(vkCreateInstance(&instanceCreateInfo, nullptr, &_instance));
 
     uint32_t gpuCount = 0;
-    VulkanAPI::checkResult(vkEnumeratePhysicalDevices(_instance, &gpuCount, nullptr));
+    VKUtil::checkResult(vkEnumeratePhysicalDevices(_instance, &gpuCount, nullptr));
     DASSERT(gpuCount > 0);
 
     _physical_devices.resize(gpuCount);
 
-    VulkanAPI::checkResult(vkEnumeratePhysicalDevices(_instance, &gpuCount, _physical_devices.data()));
+    VKUtil::checkResult(vkEnumeratePhysicalDevices(_instance, &gpuCount, _physical_devices.data()));
 
 }
 

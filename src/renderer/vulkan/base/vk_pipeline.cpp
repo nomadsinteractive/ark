@@ -9,8 +9,8 @@
 namespace ark {
 namespace vulkan {
 
-VKPipeline::VKPipeline(sp<Recycler> recycler, sp<VKRenderTarget> renderTarget, VkPipelineLayout layout, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet descriptorSet, VkPipeline pipeline)
-    : _recycler(std::move(recycler)), _render_target(std::move(renderTarget)), _layout(layout), _descriptor_set_layout(descriptorSetLayout), _descriptor_set(descriptorSet), _pipeline(pipeline)
+VKPipeline::VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderTarget>& renderTarget, VkPipelineLayout layout, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet descriptorSet, VkPipeline pipeline)
+    : _recycler(recycler), _render_target(renderTarget), _layout(layout), _descriptor_set_layout(descriptorSetLayout), _descriptor_set(descriptorSet), _pipeline(pipeline)
 {
 }
 

@@ -13,11 +13,11 @@
 namespace ark {
 namespace vulkan {
 
-class VulkanAPI;
+class VKUtil;
 
 class RenderViewVulkan : public RenderView {
 public:
-    RenderViewVulkan(const sp<VulkanAPI>& vulkanApi, const sp<GLContext>& glContext, const sp<ResourceManager>& glResources, const Viewport& viewport);
+    RenderViewVulkan(const sp<VKUtil>& vulkanApi, const sp<GLContext>& glContext, const sp<ResourceManager>& glResources, const Viewport& viewport);
 
     virtual void onSurfaceCreated() override;
     virtual void onSurfaceChanged(uint32_t width, uint32_t height) override;
@@ -27,7 +27,7 @@ private:
     void initialize(uint32_t width, uint32_t height);
     
 private:
-    sp<VulkanAPI> _vulkan_api;
+    sp<VKUtil> _vulkan_api;
 
     op<GraphicsContext> _graphics_context;
     Viewport _viewport;

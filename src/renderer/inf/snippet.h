@@ -13,7 +13,7 @@ public:
 
     virtual void preInitialize(PipelineBuildingContext& context) {}
 
-    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context) {}
+    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const sp<ShaderBindings>& shaderBindings) {}
     virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) {}
     virtual void postDraw(GraphicsContext& graphicsContext) {}
 };

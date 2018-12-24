@@ -23,6 +23,8 @@ public:
     uint32_t width() const;
     uint32_t height() const;
 
+    VkDescriptorPool descriptorPool() const;
+
     const sp<VKDevice>& device() const;
 
     const sp<VKCommandPool>& commandPool() const;
@@ -42,6 +44,8 @@ private:
     void setupRenderPass();
     void setupFrameBuffer();
 
+    void setupDescriptorPool();
+
 private:
     sp<VKDevice> _device;
     sp<VKCommandPool> _command_pool;
@@ -57,6 +61,8 @@ private:
 
     VkSubmitInfo _submit_info;
     VkPipelineStageFlags _submit_pipeline_stages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+    VkDescriptorPool _descriptor_pool;
 
     struct
     {

@@ -38,7 +38,7 @@ list(APPEND LOCAL_INCLUDE_DIRS src)
 
 message("Building for ${SYSTEM} - ${CMAKE_BUILD_TYPE}; build-share-libs: ${BUILD_SHARED_LIBS}\nCompiler: ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DARK_FLAG_DEBUG")
+ark_add_debug_flag()
 
 ark_test_big_endian()
 
@@ -86,10 +86,8 @@ aux_source_directory(src/renderer/util LOCAL_SRC_LIST)
 
 aux_source_directory(src/renderer/opengl/base LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/pipeline_factory LOCAL_SRC_LIST)
-aux_source_directory(src/renderer/opengl/es20/snippet LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/es20/snippet_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/es30/gl_resource LOCAL_SRC_LIST)
-aux_source_directory(src/renderer/opengl/es30/snippet LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/es30/snippet_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/es30/layer LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/opengl/renderer LOCAL_SRC_LIST)

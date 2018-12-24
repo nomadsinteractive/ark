@@ -11,7 +11,7 @@
 
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
-#include "renderer/vulkan/base/vulkan_api.h"
+#include "renderer/vulkan/base/vk_util.h"
 
 namespace ark {
 namespace vulkan {
@@ -100,19 +100,19 @@ void VKTexture2D::doUpload()
         // This buffer is used as a transfer source for the buffer copy
         bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
         bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        VulkanAPI::checkResult(vkCreateBuffer(logicalDevice, &bufferCreateInfo, nullptr, &stagingBuffer));
+        VKUtil::checkResult(vkCreateBuffer(logicalDevice, &bufferCreateInfo, nullptr, &stagingBuffer));
 
         // Get memory requirements for the staging buffer (alignment, memory type bits)
         vkGetBufferMemoryRequirements(logicalDevice, stagingBuffer, &memReqs);
         memAllocInfo.allocationSize = memReqs.size;
         // Get memory type index for a host visible buffer
         memAllocInfo.memoryTypeIndex = _device->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        VulkanAPI::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &stagingMemory));
-        VulkanAPI::checkResult(vkBindBufferMemory(logicalDevice, stagingBuffer, stagingMemory, 0));
+        VKUtil::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &stagingMemory));
+        VKUtil::checkResult(vkBindBufferMemory(logicalDevice, stagingBuffer, stagingMemory, 0));
 
         // Copy texture data into host local staging buffer
         uint8_t *data;
-        VulkanAPI::checkResult(vkMapMemory(logicalDevice, stagingMemory, 0, memReqs.size, 0, (void **)&data));
+        VKUtil::checkResult(vkMapMemory(logicalDevice, stagingMemory, 0, memReqs.size, 0, (void **)&data));
         memcpy(data, tex->bytes()->buf(), tex->bytes()->size());
         vkUnmapMemory(logicalDevice, stagingMemory);
 
@@ -149,13 +149,13 @@ void VKTexture2D::doUpload()
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageCreateInfo.extent = { _width, _height, 1 };
         imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        VulkanAPI::checkResult(vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &_image));
+        VKUtil::checkResult(vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &_image));
 
         vkGetImageMemoryRequirements(logicalDevice, _image, &memReqs);
         memAllocInfo.allocationSize = memReqs.size;
         memAllocInfo.memoryTypeIndex = _device->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        VulkanAPI::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &_memory));
-        VulkanAPI::checkResult(vkBindImageMemory(logicalDevice, _image, _memory, 0));
+        VKUtil::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &_memory));
+        VKUtil::checkResult(vkBindImageMemory(logicalDevice, _image, _memory, 0));
 
         VkCommandBuffer copyCmd = _command_pool->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
@@ -246,7 +246,7 @@ void VKTexture2D::doUpload()
         imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
         imageCreateInfo.extent = { _width, _height, 1 };
-        VulkanAPI::checkResult(vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &mappableImage));
+        VKUtil::checkResult(vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &mappableImage));
 
         // Get memory requirements for this image like size and alignment
         vkGetImageMemoryRequirements(logicalDevice, mappableImage, &memReqs);
@@ -254,12 +254,12 @@ void VKTexture2D::doUpload()
         memAllocInfo.allocationSize = memReqs.size;
         // Get memory type that can be mapped to host memory
         memAllocInfo.memoryTypeIndex = _device->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        VulkanAPI::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &mappableMemory));
-        VulkanAPI::checkResult(vkBindImageMemory(logicalDevice, mappableImage, mappableMemory, 0));
+        VKUtil::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &mappableMemory));
+        VKUtil::checkResult(vkBindImageMemory(logicalDevice, mappableImage, mappableMemory, 0));
 
         // Map image memory
         void *data;
-        VulkanAPI::checkResult(vkMapMemory(logicalDevice, mappableMemory, 0, memReqs.size, 0, &data));
+        VKUtil::checkResult(vkMapMemory(logicalDevice, mappableMemory, 0, memReqs.size, 0, &data));
         // Copy image data of the first mip level into memory
         memcpy(data, tex->bytes()->buf(), tex->bytes()->size());
         vkUnmapMemory(logicalDevice, mappableMemory);
@@ -331,7 +331,7 @@ void VKTexture2D::doUpload()
         sampler.anisotropyEnable = VK_FALSE;
     }
     sampler.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-    VulkanAPI::checkResult(vkCreateSampler(logicalDevice, &sampler, nullptr, &_descriptor.sampler));
+    VKUtil::checkResult(vkCreateSampler(logicalDevice, &sampler, nullptr, &_descriptor.sampler));
 
     // Create image view
     // Textures are not directly accessed by the shaders and
@@ -352,7 +352,7 @@ void VKTexture2D::doUpload()
     view.subresourceRange.levelCount = (useStaging) ? _mip_levels : 1;
     // The view will be based on the texture's image
     view.image = _image;
-    VulkanAPI::checkResult(vkCreateImageView(logicalDevice, &view, nullptr, &_descriptor.imageView));
+    VKUtil::checkResult(vkCreateImageView(logicalDevice, &view, nullptr, &_descriptor.imageView));
 }
 
 }

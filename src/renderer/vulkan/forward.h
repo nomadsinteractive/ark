@@ -11,7 +11,7 @@ class VKInstance;
 class VKPipeline;
 class VKRenderTarget;
 class VKTexture2D;
-class VulkanAPI;
+class VKUtil;
 
 class PipelineFactoryVulkan;
 

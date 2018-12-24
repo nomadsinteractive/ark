@@ -5,7 +5,7 @@
 #include "renderer/vulkan/base/vk_device.h"
 
 #include "renderer/vulkan/base/vk_command_pool.h"
-#include "renderer/vulkan/base/vulkan_api.h"
+#include "renderer/vulkan/base/vk_util.h"
 
 namespace ark {
 
@@ -26,10 +26,10 @@ VKRenderTarget::VKRenderTarget(const sp<VKDevice>& device)
     VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
     // Create a semaphore used to synchronize image presentation
     // Ensures that the image is displayed before we start submitting new commands to the queu
-    VulkanAPI::checkResult(vkCreateSemaphore(_device->logicalDevice(), &semaphoreCreateInfo, nullptr, &_semaphore_present_complete));
+    VKUtil::checkResult(vkCreateSemaphore(_device->logicalDevice(), &semaphoreCreateInfo, nullptr, &_semaphore_present_complete));
     // Create a semaphore used to synchronize command submission
     // Ensures that the image is not presented until all commands have been sumbitted and executed
-    VulkanAPI::checkResult(vkCreateSemaphore(_device->logicalDevice(), &semaphoreCreateInfo, nullptr, &_semaphore_render_complete));
+    VKUtil::checkResult(vkCreateSemaphore(_device->logicalDevice(), &semaphoreCreateInfo, nullptr, &_semaphore_render_complete));
 
     // Set up submit info structure
     // Semaphores will stay the same during application lifetime
@@ -48,6 +48,8 @@ VKRenderTarget::VKRenderTarget(const sp<VKDevice>& device)
     setupDepthStencil();
     setupRenderPass();
     setupFrameBuffer();
+
+    setupDescriptorPool();
 }
 
 VKRenderTarget::~VKRenderTarget()
@@ -66,6 +68,8 @@ VKRenderTarget::~VKRenderTarget()
     vkDestroySemaphore(logicalDevice, _semaphore_render_complete, nullptr);
 
     _swap_chain.cleanup();
+
+    vkDestroyDescriptorPool(_device->logicalDevice(), _descriptor_pool, nullptr);
 }
 
 uint32_t VKRenderTarget::width() const
@@ -76,6 +80,11 @@ uint32_t VKRenderTarget::width() const
 uint32_t VKRenderTarget::height() const
 {
     return _height;
+}
+
+VkDescriptorPool VKRenderTarget::descriptorPool() const
+{
+    return _descriptor_pool;
 }
 
 const sp<VKDevice>& VKRenderTarget::device() const
@@ -106,7 +115,7 @@ std::vector<VkCommandBuffer> VKRenderTarget::makeCommandBuffers() const
 uint32_t VKRenderTarget::acquire() const
 {
     uint32_t currentBuffer;
-    VulkanAPI::checkResult(_swap_chain.acquireNextImage(_semaphore_present_complete, &currentBuffer));
+    VKUtil::checkResult(_swap_chain.acquireNextImage(_semaphore_present_complete, &currentBuffer));
     return currentBuffer;
 }
 
@@ -114,12 +123,12 @@ void VKRenderTarget::submit(VkCommandBuffer* commandBuffer)
 {
     _submit_info.pCommandBuffers = commandBuffer;
     _submit_info.commandBufferCount = 1;
-    VulkanAPI::checkResult(vkQueueSubmit(_queue, 1, &_submit_info, VK_NULL_HANDLE));
+    VKUtil::checkResult(vkQueueSubmit(_queue, 1, &_submit_info, VK_NULL_HANDLE));
 }
 
 void VKRenderTarget::swap(uint32_t currentBuffer)
 {
-    VulkanAPI::checkResult(_swap_chain.queuePresent(_queue, currentBuffer, _semaphore_render_complete));
+    VKUtil::checkResult(_swap_chain.queuePresent(_queue, currentBuffer, _semaphore_render_complete));
     vkQueueWaitIdle(_queue);
 }
 
@@ -177,15 +186,15 @@ void VKRenderTarget::setupDepthStencil()
 
     VkMemoryRequirements memReqs;
 
-    VulkanAPI::checkResult(vkCreateImage(_device->logicalDevice(), &image, nullptr, &_depth_stencil.image));
+    VKUtil::checkResult(vkCreateImage(_device->logicalDevice(), &image, nullptr, &_depth_stencil.image));
     vkGetImageMemoryRequirements(_device->logicalDevice(), _depth_stencil.image, &memReqs);
     mem_alloc.allocationSize = memReqs.size;
     mem_alloc.memoryTypeIndex = _device->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    VulkanAPI::checkResult(vkAllocateMemory(_device->logicalDevice(), &mem_alloc, nullptr, &_depth_stencil.mem));
-    VulkanAPI::checkResult(vkBindImageMemory(_device->logicalDevice(), _depth_stencil.image, _depth_stencil.mem, 0));
+    VKUtil::checkResult(vkAllocateMemory(_device->logicalDevice(), &mem_alloc, nullptr, &_depth_stencil.mem));
+    VKUtil::checkResult(vkBindImageMemory(_device->logicalDevice(), _depth_stencil.image, _depth_stencil.mem, 0));
 
     depthStencilView.image = _depth_stencil.image;
-    VulkanAPI::checkResult(vkCreateImageView(_device->logicalDevice(), &depthStencilView, nullptr, &_depth_stencil.view));
+    VKUtil::checkResult(vkCreateImageView(_device->logicalDevice(), &depthStencilView, nullptr, &_depth_stencil.view));
 }
 
 void VKRenderTarget::setupRenderPass()
@@ -257,7 +266,7 @@ void VKRenderTarget::setupRenderPass()
     renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
     renderPassInfo.pDependencies = dependencies.data();
 
-    VulkanAPI::checkResult(vkCreateRenderPass(_device->logicalDevice(), &renderPassInfo, nullptr, &_render_pass));
+    VKUtil::checkResult(vkCreateRenderPass(_device->logicalDevice(), &renderPassInfo, nullptr, &_render_pass));
 }
 
 void VKRenderTarget::setupFrameBuffer()
@@ -282,8 +291,24 @@ void VKRenderTarget::setupFrameBuffer()
     for (uint32_t i = 0; i < _frame_buffers.size(); i++)
     {
         attachments[0] = _swap_chain.buffers[i].view;
-        VulkanAPI::checkResult(vkCreateFramebuffer(_device->logicalDevice(), &frameBufferCreateInfo, nullptr, &_frame_buffers[i]));
+        VKUtil::checkResult(vkCreateFramebuffer(_device->logicalDevice(), &frameBufferCreateInfo, nullptr, &_frame_buffers[i]));
     }
+}
+
+void VKRenderTarget::setupDescriptorPool()
+{
+    std::vector<VkDescriptorPoolSize> poolSizes = {
+        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
+        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
+    };
+
+    VkDescriptorPoolCreateInfo descriptorPoolInfo =
+            vks::initializers::descriptorPoolCreateInfo(
+                static_cast<uint32_t>(poolSizes.size()),
+                poolSizes.data(),
+                2);
+
+    VKUtil::checkResult(vkCreateDescriptorPool(_device->logicalDevice(), &descriptorPoolInfo, nullptr, &_descriptor_pool));
 }
 
 }

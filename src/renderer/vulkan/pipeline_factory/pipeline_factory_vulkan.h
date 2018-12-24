@@ -9,6 +9,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/inf/pipeline_factory.h"
+#include "renderer/vulkan/renderer_factory/renderer_factory_vulkan.h"
 #include "renderer/vulkan/forward.h"
 
 namespace ark {
@@ -16,7 +17,7 @@ namespace vulkan {
 
 class PipelineFactoryVulkan : public PipelineFactory {
 public:
-    PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager, const sp<VKRenderTarget>& renderTarget);
+    PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager, const sp<RendererFactoryVulkan::Stub>& renderFactory);
     ~PipelineFactoryVulkan() override;
 
     sp<VKPipeline> build();
@@ -40,13 +41,14 @@ private:
 
 private:
     sp<ResourceManager> _resource_manager;
-    sp<VKRenderTarget> _render_target;
-    sp<VKDevice> _device;
+    sp<RendererFactoryVulkan::Stub> _render_factory;
+//    sp<VKRenderTarget> _render_target;
+//    sp<VKDevice> _device;
 
     VkPipelineLayout _pipeline_layout;
     VkDescriptorSetLayout _descriptor_set_layout;
 
-    VkDescriptorPool _descriptor_pool;
+//    VkDescriptorPool _descriptor_pool;
 
     struct {
         VkPipelineVertexInputStateCreateInfo inputState;

@@ -87,8 +87,11 @@ macro(ark_add_plugin_library name)
     endif()
 endmacro()
 
-macro(ark_enable_debug_flag)
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DARK_FLAG_DEBUG")
+macro(ark_add_debug_flag)
+    string(FIND "${CMAKE_CXX_FLAGS_DEBUG}" "-DARK_FLAG_DEBUG" LOCAL_POS)
+    if(LOCAL_POS EQUAL -1)
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DARK_FLAG_DEBUG")
+    endif()
 endmacro()
 
 macro(ark_setup_tools name)

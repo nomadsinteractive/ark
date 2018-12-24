@@ -1,4 +1,4 @@
-#include "renderer/vulkan/base/vulkan_api.h"
+#include "renderer/vulkan/base/vk_util.h"
 
 #include <array>
 
@@ -163,7 +163,7 @@ public:
         glslang::FinalizeProcess();
     }
 
-    EShLanguage toShLanguage(VulkanAPI::ShaderType type) const {
+    EShLanguage toShLanguage(VKUtil::ShaderType type) const {
         return _languages[type];
     }
 
@@ -172,19 +172,19 @@ public:
     }
 
 private:
-    EShLanguage _languages[VulkanAPI::SHADER_TYPE_COUNT];
+    EShLanguage _languages[VKUtil::SHADER_TYPE_COUNT];
     TBuiltInResource _built_in_resource;
 
 };
 
 }
 
-VulkanAPI::VulkanAPI(const sp<ResourceManager>& resourceManager, const sp<RendererFactoryVulkan::Stub>& rendererFactory)
+VKUtil::VKUtil(const sp<ResourceManager>& resourceManager, const sp<RendererFactoryVulkan::Stub>& rendererFactory)
     : _ubo(sp<UBO>::make()), _resource_manager(resourceManager), _renderer_factory(rendererFactory), _graphics_context(nullptr, resourceManager)
 {
 }
 
-VulkanAPI::~VulkanAPI()
+VKUtil::~VKUtil()
 {
     _renderer_factory->_device->waitIdle();
 
@@ -212,7 +212,7 @@ VulkanAPI::~VulkanAPI()
 #endif
 }
 
-void VulkanAPI::initialize(GLContext& /*glContext*/)
+void VKUtil::initialize(GLContext& /*glContext*/)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     zoom = -2.5f;
@@ -226,7 +226,7 @@ void VulkanAPI::initialize(GLContext& /*glContext*/)
 
     const sp<VKTexture2D> texture = sp<VKTexture2D>::make(_resource_manager->recycler(), _renderer_factory->_render_target->commandPool(), tex);
     texture->upload(_graphics_context);
-    _pipeline_factory = sp<PipelineFactoryVulkan>::make(_resource_manager, _renderer_factory->_render_target);
+    _pipeline_factory = sp<PipelineFactoryVulkan>::make(_resource_manager, _renderer_factory);
     _pipeline_factory->_texture = texture;
     _pipeline_factory->_ubo = _uniforms;
     _pipeline = _pipeline_factory->build();
@@ -235,14 +235,14 @@ void VulkanAPI::initialize(GLContext& /*glContext*/)
     prepared = true;
 }
 
-void VulkanAPI::render()
+void VKUtil::render()
 {
     if (!prepared)
         return;
     draw(_renderer_factory->_render_target);
 }
 
-void VulkanAPI::updateUniformBuffers(const VKRenderTarget& renderTarget)
+void VKUtil::updateUniformBuffers(const VKRenderTarget& renderTarget)
 {
     _ubo->projection = glm::perspective(glm::radians(60.0f), (float)renderTarget.width() / (float)renderTarget.height(), 0.001f, 256.0f);
     glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, zoom));
@@ -257,7 +257,7 @@ void VulkanAPI::updateUniformBuffers(const VKRenderTarget& renderTarget)
     _uniforms->upload(_graphics_context);
 }
 
-void VulkanAPI::buildCommandBuffers(const VKRenderTarget& renderTarget)
+void VKUtil::buildCommandBuffers(const VKRenderTarget& renderTarget)
 {
     VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 
@@ -305,7 +305,7 @@ void VulkanAPI::buildCommandBuffers(const VKRenderTarget& renderTarget)
     }
 }
 
-void VulkanAPI::generateQuad(const sp<VKDevice>& device)
+void VKUtil::generateQuad(const sp<VKDevice>& device)
 {
     // Setup vertices for a single uv-mapped quad made from two triangles
     std::vector<Vertex> vertices =
@@ -329,19 +329,19 @@ void VulkanAPI::generateQuad(const sp<VKDevice>& device)
     _index_buffer->upload(_graphics_context);
 }
 
-void VulkanAPI::draw(VKRenderTarget& renderTarget)
+void VKUtil::draw(VKRenderTarget& renderTarget)
 {
     uint32_t currentBuffer = renderTarget.acquire();
     renderTarget.submit(&_command_buffers[currentBuffer]);
     renderTarget.swap(currentBuffer);
 }
 
-void VulkanAPI::checkResult(VkResult result)
+void VKUtil::checkResult(VkResult result)
 {
     DCHECK(result == VK_SUCCESS, "Vulkan error: %s", vks::tools::errorString(result).c_str());
 }
 
-VkPipelineShaderStageCreateInfo VulkanAPI::loadShaderSPIR(VkDevice device, std::string fileName, VkShaderStageFlagBits stage)
+VkPipelineShaderStageCreateInfo VKUtil::loadShaderSPIR(VkDevice device, std::string fileName, VkShaderStageFlagBits stage)
 {
     VkPipelineShaderStageCreateInfo shaderStage = {};
     shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -356,10 +356,10 @@ VkPipelineShaderStageCreateInfo VulkanAPI::loadShaderSPIR(VkDevice device, std::
     return shaderStage;
 }
 
-VkPipelineShaderStageCreateInfo VulkanAPI::loadShader(VkDevice device, const String& resid, ShaderType stage)
+VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String& resid, ShaderType stage)
 {
     const String content = Strings::loadFromReadable(Ark::instance().openAsset(resid));
-    const std::vector<uint32_t> spirv = VulkanAPI::compileSPIR(content, stage);
+    const std::vector<uint32_t> spirv = VKUtil::compileSPIR(content, stage);
     VkShaderModuleCreateInfo moduleCreateInfo{};
     moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     moduleCreateInfo.codeSize = spirv.size() * sizeof(uint32_t);
@@ -374,7 +374,7 @@ VkPipelineShaderStageCreateInfo VulkanAPI::loadShader(VkDevice device, const Str
     return shaderStage;
 }
 
-std::vector<uint32_t> VulkanAPI::compileSPIR(const String& source, ShaderType shaderType)
+std::vector<uint32_t> VKUtil::compileSPIR(const String& source, ShaderType shaderType)
 {
     Global<GLSLLangInitializer> initializer;
     EShLanguage stage = initializer->toShLanguage(shaderType);

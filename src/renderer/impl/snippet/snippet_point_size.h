@@ -10,7 +10,6 @@ namespace ark {
 class SnippetPointSize : public Snippet {
 public:
     virtual void preInitialize(PipelineBuildingContext& context) override;
-    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context) override;
 
 //  [[plugin::builder::by-value("point-size")]]
     class DICTIONARY : public Builder<Snippet> {

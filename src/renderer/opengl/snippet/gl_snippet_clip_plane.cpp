@@ -25,7 +25,7 @@ void GLSnippetClipPlane::preInitialize(PipelineBuildingContext& context)
     }
 }
 
-void GLSnippetClipPlane::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context)
+void GLSnippetClipPlane::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const sp<ShaderBindings>& /*shaderBindings*/)
 {
     _enabled = graphicsContext.glContext()->version() >= Ark::OPENGL_30;
 

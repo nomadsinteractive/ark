@@ -16,10 +16,6 @@ PipelineInput::PipelineInput()
 void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
 {
     _ubo = sp<UBO>::make(buildingContext._uniforms.values());
-
-    for(const String& i : buildingContext._fragment._uniforms.values())
-        puts(i.c_str());
-
     _sampler_count = buildingContext._fragment._samplers.size();
 }
 

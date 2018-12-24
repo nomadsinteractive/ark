@@ -12,23 +12,22 @@ class CoreGLSnippet;
 
 class ARK_API SnippetDelegate : public Snippet {
 public:
-    SnippetDelegate(const sp<Shader>& shader);
+    SnippetDelegate(const sp<Snippet>& snippet);
 
     virtual void preInitialize(PipelineBuildingContext& context) override;
-    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const sp<ShaderBindings>& shaderBindings) override;
     virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 
-    void link(const sp<Snippet>& snippet);
-    template<typename T, typename... Args> sp<T> link(Args&&... args) {
-        const sp<T> snippet = sp<T>::make(std::forward<Args>(args)...);
-        link(snippet);
-        return snippet;
-    }
+//    void link(const sp<Snippet>& snippet);
+//    template<typename T, typename... Args> sp<T> link(Args&&... args) {
+//        const sp<T> snippet = sp<T>::make(std::forward<Args>(args)...);
+//        link(snippet);
+//        return snippet;
+//    }
 
 private:
     sp<Snippet> _core;
-    sp<Snippet> _delegate;
 
     friend class CoreGLSnippet;
 };
