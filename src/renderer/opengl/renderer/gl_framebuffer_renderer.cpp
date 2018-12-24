@@ -26,7 +26,7 @@ namespace {
 
 class PreDrawElementsToFBO : public RenderCommand {
 public:
-    PreDrawElementsToFBO(const sp<GLFramebuffer>& fbo)
+    PreDrawElementsToFBO(const sp<opengl::GLFramebuffer>& fbo)
         : _fbo(fbo) {
     }
 
@@ -37,7 +37,7 @@ public:
     }
 
 private:
-    sp<GLFramebuffer> _fbo;
+    sp<opengl::GLFramebuffer> _fbo;
 };
 
 class PostDrawElementsToFBO : public RenderCommand {
@@ -52,7 +52,7 @@ public:
 }
 
 GLFramebufferRenderer::GLFramebufferRenderer(const sp<Renderer>& delegate, const sp<Texture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _delegate(delegate), _fbo(sp<GLFramebuffer>::make(resourceLoaderContext->resourceManager()->recycler(), texture)),
+    : _delegate(delegate), _fbo(sp<opengl::GLFramebuffer>::make(resourceLoaderContext->resourceManager()->recycler(), texture)),
       _pre_draw(sp<PreDrawElementsToFBO>::make(_fbo)), _post_draw(sp<PostDrawElementsToFBO>::make())
 {
     resourceLoaderContext->resourceManager()->upload(_fbo, ResourceManager::US_ONCE_AND_ON_SURFACE_READY);

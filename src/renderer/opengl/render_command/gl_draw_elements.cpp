@@ -18,12 +18,7 @@ GLDrawElements::GLDrawElements(DrawingContext context, const sp<Shader>& shader,
 void GLDrawElements::draw(GraphicsContext& graphicsContext)
 {
     _shader->active(graphicsContext, _context);
-
-//    GLPipeline* pipeline = static_cast<GLPipeline*>(_shader->pipeline().get());
-//    const Camera::Snapshot& camera = _context._ubo._camera;
-//    pipeline->glUpdateMatrix(graphicsContext, "u_MVP", camera._vp);
-
-    _context.preDraw(graphicsContext, _shader);
+    _context.preDraw(graphicsContext);
     glDrawElements(_mode, _context._count, GLIndexType, nullptr);
     _context.postDraw(graphicsContext);
 }

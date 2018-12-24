@@ -30,7 +30,6 @@ public:
     virtual void active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
 
     virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) override;
-    virtual void activeTexture(Resource& texture, Texture::Type type, uint32_t name) override;
 
 private:
     sp<Recycler> _recycler;

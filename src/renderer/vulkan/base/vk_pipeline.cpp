@@ -66,9 +66,5 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const ShaderBindings& bi
 {
 }
 
-void VKPipeline::activeTexture(Resource& texture, Texture::Type type, uint32_t name)
-{
-}
-
 }
 }

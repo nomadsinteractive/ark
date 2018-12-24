@@ -32,7 +32,7 @@ public:
 
 private:
     sp<GLContext> _gl_context;
-    sp<ResourceManager> _gl_resource_manager;
+    sp<ResourceManager> _resource_manager;
     sp<Variable<uint64_t>> _steady_clock;
 
     ByType _attachments;

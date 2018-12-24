@@ -19,8 +19,10 @@ public:
     DrawingContext(const sp<ShaderBindings>& shaderBindings, Layer::UBOSnapshot ubo, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
-    void preDraw(GraphicsContext& graphicsContext, const Shader& shader);
+    void preDraw(GraphicsContext& graphicsContext);
     void postDraw(GraphicsContext& graphicsContext);
+
+    const sp<Shader>& shader() const;
 
     sp<ShaderBindings> _shader_bindings;
 

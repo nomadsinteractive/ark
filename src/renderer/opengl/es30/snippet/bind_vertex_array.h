@@ -12,7 +12,7 @@ class BindVertexArray : public Snippet {
 public:
     BindVertexArray(const sp<Resource>& vertexArray);
 
-    virtual void preDraw(GraphicsContext& graphicsContext, const Shader& shader, const DrawingContext& context) override;
+    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 
 private:

@@ -12,7 +12,7 @@ namespace gles30 {
 
 class GLVertexArray : public Resource {
 public:
-    GLVertexArray(const sp<ShaderBindings>& shaderBindings, const Shader& shader);
+    GLVertexArray(const sp<ShaderBindings>& shaderBindings);
 
     virtual uint32_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
@@ -22,7 +22,6 @@ private:
     uint32_t _id;
 
     sp<ShaderBindings> _shader_bindings;
-    Shader _shader;
 };
 
 }

@@ -8,9 +8,9 @@
 namespace ark {
 namespace gles30 {
 
-sp<Snippet> SnippetFactoryGLES30::createCoreSnippet(ResourceManager& glResourceManager, const Shader& shader, const sp<ShaderBindings>& shaderBindings)
+sp<Snippet> SnippetFactoryGLES30::createCoreSnippet(ResourceManager& glResourceManager, const sp<ShaderBindings>& shaderBindings)
 {
-    return sp<BindVertexArray>::make(glResourceManager.createGLResource<GLVertexArray>(shaderBindings, shader));
+    return sp<BindVertexArray>::make(glResourceManager.createGLResource<GLVertexArray>(shaderBindings));
 }
 
 }

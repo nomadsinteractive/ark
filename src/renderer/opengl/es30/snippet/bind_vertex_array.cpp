@@ -15,7 +15,7 @@ BindVertexArray::BindVertexArray(const sp<Resource>& vertexArray)
 {
 }
 
-void BindVertexArray::preDraw(GraphicsContext& /*graphicsContext*/, const Shader& /*shader*/, const DrawingContext& context)
+void BindVertexArray::preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& context)
 {
     glBindVertexArray(_vertex_array->id());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context._index_buffer.id());

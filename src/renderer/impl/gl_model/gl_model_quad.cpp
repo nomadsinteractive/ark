@@ -16,7 +16,7 @@ GLModelQuad::GLModelQuad(const sp<Atlas>& atlas)
 
 void GLModelQuad::initialize(ShaderBindings& bindings)
 {
-    bindings.bindGLTexture(_atlas->texture());
+    bindings.bindSampler(_atlas->texture());
 }
 
 void GLModelQuad::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)

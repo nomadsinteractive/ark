@@ -45,7 +45,7 @@ GLModelSphere::GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderCont
 
 void GLModelSphere::initialize(ShaderBindings& bindings)
 {
-    bindings.bindGLTexture(_atlas->texture());
+    bindings.bindSampler(_atlas->texture());
 }
 
 void GLModelSphere::start(ModelBuffer& buf, RenderController& /*renderController*/, const Layer::Snapshot& layerContext)

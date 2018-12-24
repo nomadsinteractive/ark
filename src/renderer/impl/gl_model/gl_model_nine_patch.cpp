@@ -60,7 +60,7 @@ GLModelNinePatch::GLModelNinePatch(const document& manifest, const sp<Atlas>& at
 
 void GLModelNinePatch::initialize(ShaderBindings& bindings)
 {
-    bindings.bindGLTexture(_atlas->texture());
+    bindings.bindSampler(_atlas->texture());
 }
 
 void GLModelNinePatch::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)

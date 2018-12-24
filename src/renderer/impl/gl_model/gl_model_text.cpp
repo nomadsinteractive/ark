@@ -124,7 +124,7 @@ GLModelText::GLModelText(RenderController& renderController, const sp<Alphabet>&
 
 void GLModelText::initialize(ShaderBindings& bindings)
 {
-    bindings.bindGLTexture(sp<Texture>::make(_stub->_size, _stub, Texture::TYPE_2D));
+    bindings.bindSampler(sp<Texture>::make(_stub->_size, _stub, Texture::TYPE_2D));
 }
 
 void GLModelText::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)

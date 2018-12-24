@@ -17,6 +17,7 @@
 #include "renderer/base/ubo.h"
 #include "renderer/base/uniform.h"
 
+#include "renderer/opengl/base/gl_resource.h"
 #include "renderer/opengl/render_command/gl_draw_elements.h"
 #include "renderer/opengl/render_command/gl_draw_elements_instanced.h"
 
@@ -95,6 +96,15 @@ void GLPipeline::active(GraphicsContext& /*graphicsContext*/, const DrawingConte
             }
         }
     }
+
+    const std::vector<sp<Texture>>& samplers = drawingContext._shader_bindings->samplers();
+    for(size_t i = 0; i < samplers.size(); ++i)
+    {
+        const sp<Texture>& sampler = samplers.at(i);
+        DWARN(sampler, "Pipeline has unbound sampler at: %d", i);
+        if(sampler)
+            activeTexture(sampler, i);
+    }
 }
 
 void GLPipeline::bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings)
@@ -157,11 +167,12 @@ void GLPipeline::bindUniform(GraphicsContext& /*graphicsContext*/, const Uniform
     bindUniform(buf, size, uniform);
 }
 
-void GLPipeline::activeTexture(Resource& texture, Texture::Type type, uint32_t name)
+void GLPipeline::activeTexture(const Texture& texture, uint32_t name)
 {
     static GLenum glTargets[Texture::TYPE_COUNT] = {GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP};
+    const sp<GLResource> glResource = texture.resource();
     glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + name));
-    glBindTexture(glTargets[type], texture.id());
+    glBindTexture(glTargets[texture.type()], glResource->id());
 
     char uniformName[16] = "u_Texture0";
     uniformName[9] = static_cast<char>('0' + name);

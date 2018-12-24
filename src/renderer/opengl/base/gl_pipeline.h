@@ -31,7 +31,8 @@ public:
     virtual void active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
 
     virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) override;
-    virtual void activeTexture(Resource& texture, Texture::Type target, uint32_t name) override;
+
+    void activeTexture(const Texture& texture, uint32_t name);
 
     void glUpdateMatrix(GraphicsContext& graphicsContext, const String& name, const Matrix& matrix);
 

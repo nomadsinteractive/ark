@@ -31,7 +31,7 @@ public:
 
     virtual void draw(GraphicsContext& graphicsContext) override {
         _shader->active(graphicsContext, _context);
-        _context.preDraw(graphicsContext, _shader);
+        _context.preDraw(graphicsContext);
 
         opengl::GLPipeline* pipeline = static_cast<opengl::GLPipeline*>(_shader->pipeline().get());
         pipeline->glUpdateMatrix(graphicsContext, "u_View", _view);
@@ -56,7 +56,7 @@ Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>
       _shader_bindings(sp<ShaderBindings>::make(resourceLoaderContext->renderController(), shader, resourceLoaderContext->renderController()->makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(GLUtil::makeUnitCubeVertices())))),
       _memory_pool(resourceLoaderContext->memoryPool()), _object_pool(resourceLoaderContext->objectPool())
 {
-    _shader_bindings->bindGLTexture(texture);
+    _shader_bindings->bindSampler(texture);
 }
 
 void Skybox::render(RenderRequest& renderRequest, float x, float y)

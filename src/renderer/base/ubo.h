@@ -15,15 +15,19 @@ public:
 
     Layer::UBOSnapshot snapshot(MemoryPool& memoryPool) const;
 
+    size_t size() const;
     const std::vector<Uniform>& uniforms() const;
 
-    std::vector<Uniform> _uniforms;
     std::vector<std::pair<uintptr_t, size_t>> _slots;
-    bytearray _dirty_flags;
-    bytearray _buffer;
 
 private:
     bool doSnapshot() const;
+
+private:
+    std::vector<Uniform> _uniforms;
+
+    bytearray _dirty_flags;
+    bytearray _buffer;
 };
 
 }

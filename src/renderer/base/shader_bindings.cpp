@@ -1,16 +1,10 @@
 #include "renderer/base/shader_bindings.h"
 
-#include "core/base/memory_pool.h"
-#include "core/inf/flatable.h"
-
-#include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
-
-#include "renderer/impl/snippet/snippet_active_texture.h"
 
 namespace ark {
 
@@ -23,6 +17,7 @@ ShaderBindings::ShaderBindings(RenderController& renderController, const sp<Shad
     : _shader(shader), _snippet(sp<SnippetDelegate>::make(shader)), _attributes(shader->input()), _array_buffer(arrayBuffer),
       _pipeline_input(_shader->input()), _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController))
 {
+    _samplers.resize(_pipeline_input->samplerCount());
 }
 
 const sp<Shader>& ShaderBindings::shader() const
@@ -40,6 +35,11 @@ const sp<PipelineInput>& ShaderBindings::pipelineInput() const
     return _pipeline_input;
 }
 
+const std::vector<sp<Texture>>& ShaderBindings::samplers() const
+{
+    return _samplers;
+}
+
 const Buffer& ShaderBindings::arrayBuffer() const
 {
     return _array_buffer;
@@ -55,9 +55,10 @@ const ShaderBindings::Attributes& ShaderBindings::attributes() const
     return _attributes;
 }
 
-void ShaderBindings::bindGLTexture(const sp<Texture>& texture, uint32_t name) const
+void ShaderBindings::bindSampler(const sp<Texture>& texture, uint32_t name)
 {
-    _snippet->link<SnippetActiveTexture>(texture, name);
+    DCHECK(_samplers.size() > name, "Illegal sampler binding position: %d, sampler count: %d", name, _samplers.size());
+    _samplers[name] = texture;
 }
 
 std::map<uint32_t, Buffer::Builder> ShaderBindings::makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const

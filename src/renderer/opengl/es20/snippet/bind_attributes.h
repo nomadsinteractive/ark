@@ -11,7 +11,7 @@ namespace gles20 {
 class BindAttributes : public Snippet {
 public:
 
-    virtual void preDraw(GraphicsContext& graphicsContext, const Shader& shader, const DrawingContext& context) override;
+    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override;
 
 };
 

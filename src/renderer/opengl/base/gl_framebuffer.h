@@ -4,11 +4,12 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/resource.h"
+#include "renderer/opengl/base/gl_resource.h"
 
 namespace ark {
+namespace opengl {
 
-class GLFramebuffer : public Resource {
+class GLFramebuffer : public GLResource {
 public:
     GLFramebuffer(const sp<Recycler>& recycler, const sp<Texture>& texture);
     ~GLFramebuffer() override;
@@ -27,6 +28,7 @@ private:
     uint32_t _id;
 };
 
+}
 }
 
 #endif

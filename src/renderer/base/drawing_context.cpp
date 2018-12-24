@@ -13,7 +13,7 @@ DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, Layer::
     DWARN(_shader_bindings->arrayBuffer().id() == arrayBuffer.id(), "GLShaderBinding's ArrayBuffer: %d, which is not the same as GLDrawingContext's ArrayBuffer snapshot: %d", _shader_bindings->arrayBuffer().id(), arrayBuffer.id());
 }
 
-void DrawingContext::preDraw(GraphicsContext& graphicsContext, const Shader& shader)
+void DrawingContext::preDraw(GraphicsContext& graphicsContext)
 {
     _array_buffer.upload(graphicsContext);
     _index_buffer.upload(graphicsContext);
@@ -26,12 +26,17 @@ void DrawingContext::preDraw(GraphicsContext& graphicsContext, const Shader& sha
         DCHECK(iter.second.id(), "Invaild GL Instanced Array Buffer: %d", iter.first);
     }
 
-    _shader_bindings->snippet()->preDraw(graphicsContext, shader, *this);
+    _shader_bindings->snippet()->preDraw(graphicsContext, *this);
 }
 
 void DrawingContext::postDraw(GraphicsContext& graphicsContext)
 {
     _shader_bindings->snippet()->postDraw(graphicsContext);
+}
+
+const sp<Shader>& DrawingContext::shader() const
+{
+    return _shader_bindings->shader();
 }
 
 }

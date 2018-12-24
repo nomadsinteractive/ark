@@ -8,9 +8,9 @@
 namespace ark {
 namespace vulkan {
 
-sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(ResourceManager& glResourceManager, const Shader& shader, const sp<ShaderBindings>& shaderBindings)
+sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(ResourceManager& glResourceManager, const sp<ShaderBindings>& shaderBindings)
 {
-    return sp<gles30::BindVertexArray>::make(glResourceManager.createGLResource<gles30::GLVertexArray>(shaderBindings, shader));
+    return sp<gles30::BindVertexArray>::make(glResourceManager.createGLResource<gles30::GLVertexArray>(shaderBindings));
 }
 
 }

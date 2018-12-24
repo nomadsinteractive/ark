@@ -13,7 +13,6 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
-#include "renderer/base/texture.h"
 
 namespace ark {
 
@@ -40,13 +39,14 @@ public:
     const sp<Shader>& shader() const;
     const sp<SnippetDelegate>& snippet() const;
     const sp<PipelineInput>& pipelineInput() const;
+    const std::vector<sp<Texture>>& samplers() const;
 
     const Buffer& arrayBuffer() const;
     const std::vector<std::pair<uint32_t, Buffer>>& instancedArrays() const;
 
     const Attributes& attributes() const;
 
-    void bindGLTexture(const sp<Texture>& texture, uint32_t name = 0) const;
+    void bindSampler(const sp<Texture>& texture, uint32_t name = 0);
 
     std::map<uint32_t, Buffer::Builder> makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const;
 

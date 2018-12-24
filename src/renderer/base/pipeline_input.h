@@ -39,7 +39,7 @@ public:
     };
 
 public:
-    PipelineInput() = default;
+    PipelineInput();
 
     void initialize(const PipelineBuildingContext& buildingContext);
 
@@ -48,6 +48,8 @@ public:
 
     const std::map<uint32_t, Stream>& streams() const;
     std::map<uint32_t, Stream>& streams();
+
+    uint32_t samplerCount() const;
 
     void addAttribute(String name, Attribute attribute);
 
@@ -61,7 +63,7 @@ public:
 private:
     sp<UBO> _ubo;
     std::map<uint32_t, Stream> _streams;
-    uint32_t _sampler_count = 0;
+    uint32_t _sampler_count;
 
     friend class PipelineLayout;
 };

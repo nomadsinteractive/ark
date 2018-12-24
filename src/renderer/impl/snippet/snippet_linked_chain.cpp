@@ -25,10 +25,10 @@ void SnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, PipelineBu
     _next->preCompile(graphicsContext, context);
 }
 
-void SnippetLinkedChain::preDraw(GraphicsContext& graphicsContext, const Shader& shader, const DrawingContext& context)
+void SnippetLinkedChain::preDraw(GraphicsContext& graphicsContext, const DrawingContext& context)
 {
-    _delegate->preDraw(graphicsContext, shader, context);
-    _next->preDraw(graphicsContext, shader, context);
+    _delegate->preDraw(graphicsContext, context);
+    _next->preDraw(graphicsContext, context);
 }
 
 void SnippetLinkedChain::postDraw(GraphicsContext& graphicsContext)

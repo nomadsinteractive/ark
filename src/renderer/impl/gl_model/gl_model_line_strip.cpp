@@ -16,7 +16,7 @@ GLModelLineStrip::GLModelLineStrip(const sp<ResourceLoaderContext>& resourceLoad
 
 void GLModelLineStrip::initialize(ShaderBindings& bindings)
 {
-    bindings.bindGLTexture(_atlas->texture());
+    bindings.bindSampler(_atlas->texture());
 }
 
 std::vector<glindex_t> GLModelLineStrip::makeIndices(const Layer::Snapshot& layerContext)

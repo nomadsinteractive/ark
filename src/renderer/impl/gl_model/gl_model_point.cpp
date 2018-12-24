@@ -16,7 +16,7 @@ GLModelPoint::GLModelPoint(const sp<Atlas>& atlas)
 
 void GLModelPoint::initialize(ShaderBindings& bindings)
 {
-    bindings.bindGLTexture(_atlas->texture());
+    bindings.bindSampler(_atlas->texture());
 }
 
 void GLModelPoint::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)

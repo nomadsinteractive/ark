@@ -7,6 +7,7 @@
 #include "platform/gl/gl.h"
 
 namespace ark {
+namespace opengl {
 
 GLFramebuffer::GLFramebuffer(const sp<Recycler>& recycler, const sp<Texture>& texture)
     : _recycler(recycler), _texture(texture), _id(0)
@@ -56,4 +57,5 @@ const sp<Texture>& GLFramebuffer::texture() const
     return _texture;
 }
 
+}
 }

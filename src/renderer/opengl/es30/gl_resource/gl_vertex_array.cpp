@@ -10,8 +10,8 @@
 namespace ark {
 namespace gles30 {
 
-GLVertexArray::GLVertexArray(const sp<ShaderBindings>& shaderBindings, const Shader& shader)
-    : _id(0), _shader_bindings(shaderBindings), _shader(shader)
+GLVertexArray::GLVertexArray(const sp<ShaderBindings>& shaderBindings)
+    : _id(0), _shader_bindings(shaderBindings)
 {
 }
 
@@ -26,7 +26,7 @@ void GLVertexArray::upload(GraphicsContext& graphicsContext)
     glBindVertexArray(_id);
     _shader_bindings->arrayBuffer().upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, _shader_bindings->arrayBuffer().id());
-    const sp<Pipeline> pipeline = _shader.getPipeline(graphicsContext, _shader_bindings);
+    const sp<Pipeline> pipeline = _shader_bindings->shader()->getPipeline(graphicsContext, _shader_bindings);
     pipeline->bind(graphicsContext, _shader_bindings);
     glBindVertexArray(0);
     LOGD("id = %d", _id);

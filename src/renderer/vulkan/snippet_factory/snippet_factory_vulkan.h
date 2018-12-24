@@ -8,7 +8,7 @@ namespace vulkan {
 
 class SnippetFactoryVulkan : public SnippetFactory {
 public:
-    virtual sp<Snippet> createCoreSnippet(ResourceManager& glResourceManager, const Shader& shader, const sp<ShaderBindings>& shaderBindings) override;
+    virtual sp<Snippet> createCoreSnippet(ResourceManager& glResourceManager, const sp<ShaderBindings>& shaderBindings) override;
 };
 
 }

@@ -8,12 +8,19 @@
 
 namespace ark {
 
+PipelineInput::PipelineInput()
+    : _sampler_count(0)
+{
+}
+
 void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
 {
     _ubo = sp<UBO>::make(buildingContext._uniforms.values());
 
     for(const String& i : buildingContext._fragment._uniforms.values())
         puts(i.c_str());
+
+    _sampler_count = buildingContext._fragment._samplers.size();
 }
 
 const std::vector<Uniform>& PipelineInput::uniforms() const
@@ -34,6 +41,11 @@ const std::map<uint32_t, PipelineInput::Stream>& PipelineInput::streams() const
 std::map<uint32_t, PipelineInput::Stream>& PipelineInput::streams()
 {
     return _streams;
+}
+
+uint32_t PipelineInput::samplerCount() const
+{
+    return _sampler_count;
 }
 
 void PipelineInput::addAttribute(String name, Attribute attribute)
