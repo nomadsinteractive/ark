@@ -28,7 +28,7 @@ public:
     const sp<VKDevice>& device() const;
 
     const sp<VKCommandPool>& commandPool() const;
-    VkRenderPass renderPass() const;
+    VkRenderPass vkRenderPass() const;
     const std::vector<VkFramebuffer>& frameBuffers() const;
 
     std::vector<VkCommandBuffer> makeCommandBuffers() const;

@@ -15,7 +15,7 @@ namespace vulkan {
 
 class VKBuffer : public Buffer::Delegate {
 public:
-    VKBuffer(const sp<VKDevice>& device, const sp<Recycler>& recycler, const sp<Uploader>& uploader, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags);
+    VKBuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, const sp<Uploader>& uploader, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags);
     ~VKBuffer() override;
     DISALLOW_COPY_AND_ASSIGN(VKBuffer);
 
@@ -45,23 +45,7 @@ private:
     void* map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
     void unmap(void* mapped);
 
-    /**
-    * Attach the allocated memory block to the buffer
-    *
-    * @param offset (Optional) Byte offset (from the beginning) for the memory region to bind
-    *
-    * @return VkResult of the bindBufferMemory call
-    */
-    VkResult bind(VkDeviceSize offset = 0);
-
-    /**
-    * Setup the default descriptor for this buffer
-    *
-    * @param size (Optional) Size of the memory range of the descriptor
-    * @param offset (Optional) Byte offset from beginning
-    *
-    */
-    void setupDescriptor(VkDeviceSize _size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+    void bind(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
     /**
     * Flush a memory range of the buffer to make it visible to the device
@@ -75,13 +59,8 @@ private:
     */
     VkResult flush(VkDeviceSize _size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
-    /**
-    * Release all Vulkan resources held by this buffer
-    */
-    void destroy();
-
 private:
-    sp<VKDevice> _device;
+    sp<VKRenderer> _renderer;
     sp<Recycler> _recycler;
     sp<Uploader> _uploader;
 
@@ -90,7 +69,6 @@ private:
     /** @brief Memory propertys flags to be filled by external source at buffer creation (to query at some later point) */
     VkMemoryPropertyFlags _memory_property_flags;
 
-    VkBuffer _buffer;
     VkDeviceMemory _memory = VK_NULL_HANDLE;
     VkDescriptorBufferInfo _descriptor;
 };

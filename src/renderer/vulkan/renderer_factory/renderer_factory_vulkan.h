@@ -25,15 +25,8 @@ public:
     virtual sp<Texture> createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap) override;
 
 private:
-    struct Stub {
-        sp<VKInstance> _instance;
-        sp<VKDevice> _device;
-        sp<VKRenderTarget> _render_target;
-    };
-
-private:
     sp<ResourceManager> _resource_manager;
-    sp<Stub> _stub;
+    sp<VKRenderer> _renderer;
 
     friend class VKUtil;
     friend class PipelineFactoryVulkan;
@@ -41,4 +34,5 @@ private:
 
 }
 }
+
 #endif

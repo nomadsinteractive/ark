@@ -97,7 +97,7 @@ const sp<VKCommandPool>& VKRenderTarget::commandPool() const
     return _command_pool;
 }
 
-VkRenderPass VKRenderTarget::renderPass() const
+VkRenderPass VKRenderTarget::vkRenderPass() const
 {
     return _render_pass;
 }

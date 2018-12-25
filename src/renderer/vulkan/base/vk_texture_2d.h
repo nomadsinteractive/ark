@@ -17,7 +17,7 @@ namespace vulkan {
 
 class VKTexture2D : public Resource {
 public:
-    VKTexture2D(const sp<Recycler>& recycler, const sp<VKCommandPool>& commandPool, const sp<Variable<bitmap>>& bitmap);
+    VKTexture2D(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<Variable<bitmap>>& bitmap);
     ~VKTexture2D() override;
 
     virtual uint32_t id() override;
@@ -31,9 +31,8 @@ private:
 
 private:
     sp<Recycler> _recycler;
-    sp<VKCommandPool> _command_pool;
+    sp<VKRenderer> _renderer;
     sp<Variable<bitmap>> _bitmap;
-    sp<VKDevice> _device;
 
     VkImage _image;
     VkDeviceMemory _memory;

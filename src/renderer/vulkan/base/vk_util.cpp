@@ -26,6 +26,7 @@
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_instance.h"
 #include "renderer/vulkan/base/vk_pipeline.h"
+#include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_render_target.h"
 #include "renderer/vulkan/base/vk_texture_2d.h"
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
@@ -179,16 +180,15 @@ private:
 
 }
 
-VKUtil::VKUtil(const sp<ResourceManager>& resourceManager, const sp<RendererFactoryVulkan::Stub>& rendererFactory)
-    : _ubo(sp<UBO>::make()), _resource_manager(resourceManager), _renderer_factory(rendererFactory), _graphics_context(nullptr, resourceManager)
+VKUtil::VKUtil(const sp<ResourceManager>& resourceManager, const sp<VKRenderer>& renderer)
+    : _ubo(sp<UBO>::make()), _resource_manager(resourceManager), _renderer(renderer), _graphics_context(nullptr, resourceManager)
 {
 }
 
 VKUtil::~VKUtil()
 {
-    _renderer_factory->_device->waitIdle();
-
-    _renderer_factory->_render_target->commandPool()->destroyCommandBuffers(_command_buffers.size(), _command_buffers.data());
+    _renderer->device()->waitIdle();
+    _renderer->commandPool()->destroyCommandBuffers(_command_buffers.size(), _command_buffers.data());
 
 #if defined(_DIRECT2DISPLAY)
 
@@ -217,21 +217,21 @@ void VKUtil::initialize(GLContext& /*glContext*/)
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     zoom = -2.5f;
 
-    _uniforms = sp<VKBuffer>::make(_renderer_factory->_device, _resource_manager->recycler(), sp<Uploader::StandardLayout<UBO>>::make(_ubo), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    _uniforms = sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), sp<Uploader::StandardLayout<UBO>>::make(_ubo), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    updateUniformBuffers(_renderer_factory->_render_target);
-    generateQuad(_renderer_factory->_device);
+    updateUniformBuffers(_renderer->renderTarget());
+    generateQuad();
 
     const sp<Variable<bitmap>> tex = sp<Variable<bitmap>::Get>::make(_resource_manager->bitmapLoader(), "texture.png");
 
-    const sp<VKTexture2D> texture = sp<VKTexture2D>::make(_resource_manager->recycler(), _renderer_factory->_render_target->commandPool(), tex);
+    const sp<VKTexture2D> texture = sp<VKTexture2D>::make(_resource_manager->recycler(), _renderer, tex);
     texture->upload(_graphics_context);
-    _pipeline_factory = sp<PipelineFactoryVulkan>::make(_resource_manager, _renderer_factory);
+    _pipeline_factory = sp<PipelineFactoryVulkan>::make(_resource_manager, _renderer);
     _pipeline_factory->_texture = texture;
     _pipeline_factory->_ubo = _uniforms;
     _pipeline = _pipeline_factory->build();
 
-    buildCommandBuffers(_renderer_factory->_render_target);
+    buildCommandBuffers(_renderer->renderTarget());
     prepared = true;
 }
 
@@ -239,7 +239,7 @@ void VKUtil::render()
 {
     if (!prepared)
         return;
-    draw(_renderer_factory->_render_target);
+    draw(_renderer->renderTarget());
 }
 
 void VKUtil::updateUniformBuffers(const VKRenderTarget& renderTarget)
@@ -266,7 +266,7 @@ void VKUtil::buildCommandBuffers(const VKRenderTarget& renderTarget)
     clearValues[1].depthStencil = { 1.0f, 0 };
 
     VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-    renderPassBeginInfo.renderPass = renderTarget.renderPass();
+    renderPassBeginInfo.renderPass = renderTarget.vkRenderPass();
     renderPassBeginInfo.renderArea.offset.x = 0;
     renderPassBeginInfo.renderArea.offset.y = 0;
     renderPassBeginInfo.renderArea.extent.width = renderTarget.width();
@@ -305,7 +305,7 @@ void VKUtil::buildCommandBuffers(const VKRenderTarget& renderTarget)
     }
 }
 
-void VKUtil::generateQuad(const sp<VKDevice>& device)
+void VKUtil::generateQuad()
 {
     // Setup vertices for a single uv-mapped quad made from two triangles
     std::vector<Vertex> vertices =
@@ -322,10 +322,10 @@ void VKUtil::generateQuad(const sp<VKDevice>& device)
 
     // Create buffers
     // For the sake of simplicity we won't stage the vertex data to the gpu memory
-    _vertex_buffer = sp<VKBuffer>::make(device, _resource_manager->recycler(), sp<Uploader::Vector<Vertex>>::make(std::move(vertices)), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    _vertex_buffer = sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), sp<Uploader::Vector<Vertex>>::make(std::move(vertices)), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     _vertex_buffer->upload(_graphics_context);
 
-    _index_buffer = sp<VKBuffer>::make(device, _resource_manager->recycler(), sp<Uploader::Vector<uint32_t>>::make(std::move(indices)), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    _index_buffer = sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), sp<Uploader::Vector<uint32_t>>::make(std::move(indices)), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     _index_buffer->upload(_graphics_context);
 }
 

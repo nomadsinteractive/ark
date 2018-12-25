@@ -9,6 +9,7 @@ class VKCommandPool;
 class VKDevice;
 class VKInstance;
 class VKPipeline;
+class VKRenderer;
 class VKRenderTarget;
 class VKTexture2D;
 class VKUtil;

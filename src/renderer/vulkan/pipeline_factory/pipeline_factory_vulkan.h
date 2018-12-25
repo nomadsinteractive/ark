@@ -17,7 +17,7 @@ namespace vulkan {
 
 class PipelineFactoryVulkan : public PipelineFactory {
 public:
-    PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager, const sp<RendererFactoryVulkan::Stub>& renderFactory);
+    PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager, const sp<VKRenderer>& renderFactory);
     ~PipelineFactoryVulkan() override;
 
     sp<VKPipeline> build();
@@ -41,9 +41,7 @@ private:
 
 private:
     sp<ResourceManager> _resource_manager;
-    sp<RendererFactoryVulkan::Stub> _render_factory;
-//    sp<VKRenderTarget> _render_target;
-//    sp<VKDevice> _device;
+    sp<VKRenderer> _renderer;
 
     VkPipelineLayout _pipeline_layout;
     VkDescriptorSetLayout _descriptor_set_layout;

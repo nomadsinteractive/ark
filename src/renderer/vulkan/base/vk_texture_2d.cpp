@@ -11,13 +11,14 @@
 
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
+#include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_util.h"
 
 namespace ark {
 namespace vulkan {
 
-VKTexture2D::VKTexture2D(const sp<Recycler>& recycler, const sp<VKCommandPool>& commandPool, const sp<Variable<bitmap>>& bitmap)
-    : _recycler(recycler), _command_pool(commandPool), _bitmap(bitmap), _device(commandPool->device())
+VKTexture2D::VKTexture2D(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<Variable<bitmap>>& bitmap)
+    : _recycler(recycler), _renderer(renderer), _bitmap(bitmap)
 {
 }
 
@@ -38,7 +39,7 @@ void VKTexture2D::upload(GraphicsContext& /*graphicsContext*/)
 
 Resource::RecycleFunc VKTexture2D::recycle()
 {
-    const sp<VKDevice> device = _device;
+    const sp<VKDevice> device = _renderer->device();
     VkDescriptorImageInfo descriptor = _descriptor;
     VkImage image = _image;
     VkDeviceMemory memory = _memory;
@@ -62,7 +63,7 @@ const VkDescriptorImageInfo& VKTexture2D::descriptor() const
 void VKTexture2D::doUpload()
 {
     VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
-    VkDevice logicalDevice = _device->logicalDevice();
+    VkDevice logicalDevice = _renderer->vkLogicalDevice();
 
     const bitmap tex = _bitmap->val();
 
@@ -79,7 +80,7 @@ void VKTexture2D::doUpload()
         // Don't use linear if format is not supported for (linear) shader sampling
         // Get device properites for the requested texture format
         VkFormatProperties formatProperties;
-        vkGetPhysicalDeviceFormatProperties(_device->physicalDevice(), format, &formatProperties);
+        vkGetPhysicalDeviceFormatProperties(_renderer->vkPhysicalDevice(), format, &formatProperties);
         useStaging = !(formatProperties.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
     }
 
@@ -106,7 +107,7 @@ void VKTexture2D::doUpload()
         vkGetBufferMemoryRequirements(logicalDevice, stagingBuffer, &memReqs);
         memAllocInfo.allocationSize = memReqs.size;
         // Get memory type index for a host visible buffer
-        memAllocInfo.memoryTypeIndex = _device->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        memAllocInfo.memoryTypeIndex = _renderer->device()->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         VKUtil::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &stagingMemory));
         VKUtil::checkResult(vkBindBufferMemory(logicalDevice, stagingBuffer, stagingMemory, 0));
 
@@ -153,11 +154,11 @@ void VKTexture2D::doUpload()
 
         vkGetImageMemoryRequirements(logicalDevice, _image, &memReqs);
         memAllocInfo.allocationSize = memReqs.size;
-        memAllocInfo.memoryTypeIndex = _device->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        memAllocInfo.memoryTypeIndex = _renderer->device()->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         VKUtil::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &_memory));
         VKUtil::checkResult(vkBindImageMemory(logicalDevice, _image, _memory, 0));
 
-        VkCommandBuffer copyCmd = _command_pool->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
         // Image memory barriers for the texture image
 
@@ -223,7 +224,7 @@ void VKTexture2D::doUpload()
         // Store current layout for later reuse
         _descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-        _command_pool->flushCommandBuffer(copyCmd, true);
+        _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
 
         // Clean up staging resources
         vkFreeMemory(logicalDevice, stagingMemory, nullptr);
@@ -253,7 +254,7 @@ void VKTexture2D::doUpload()
         // Set memory allocation size to required memory size
         memAllocInfo.allocationSize = memReqs.size;
         // Get memory type that can be mapped to host memory
-        memAllocInfo.memoryTypeIndex = _device->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        memAllocInfo.memoryTypeIndex = _renderer->device()->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         VKUtil::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &mappableMemory));
         VKUtil::checkResult(vkBindImageMemory(logicalDevice, mappableImage, mappableMemory, 0));
 
@@ -270,7 +271,7 @@ void VKTexture2D::doUpload()
         _descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
         // Setup image memory barrier transfer image to shader read layout
-        VkCommandBuffer copyCmd = _command_pool->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
         // The sub resource range describes the regions of the image we will be transition
         VkImageSubresourceRange subresourceRange = {};
@@ -300,7 +301,7 @@ void VKTexture2D::doUpload()
                     0, nullptr,
                     1, &imageMemoryBarrier);
 
-        _command_pool->flushCommandBuffer(copyCmd, true);
+        _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
     }
 
     // Create a texture sampler
@@ -321,9 +322,9 @@ void VKTexture2D::doUpload()
     sampler.maxLod = (useStaging) ? (float)_mip_levels : 0.0f;
     // Enable anisotropic filtering
     // This feature is optional, so we must check if it's supported on the device
-    if (_device->features().samplerAnisotropy) {
+    if (_renderer->device()->features().samplerAnisotropy) {
         // Use max. level of anisotropy for this example
-        sampler.maxAnisotropy = _device->properties().limits.maxSamplerAnisotropy;
+        sampler.maxAnisotropy = _renderer->device()->properties().limits.maxSamplerAnisotropy;
         sampler.anisotropyEnable = VK_TRUE;
     } else {
         // The device does not support anisotropic filtering

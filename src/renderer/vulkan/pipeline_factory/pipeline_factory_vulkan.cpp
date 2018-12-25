@@ -10,6 +10,7 @@
 #include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_pipeline.h"
+#include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_render_target.h"
 #include "renderer/vulkan/base/vk_texture_2d.h"
 #include "renderer/vulkan/base/vk_util.h"
@@ -17,8 +18,8 @@
 namespace ark {
 namespace vulkan {
 
-PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager, const sp<RendererFactoryVulkan::Stub>& renderFactory)
-    : _resource_manager(resourceManager), _render_factory(renderFactory)
+PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager, const sp<VKRenderer>& renderFactory)
+    : _resource_manager(resourceManager), _renderer(renderFactory)
 {
 }
 
@@ -34,7 +35,7 @@ sp<VKPipeline> PipelineFactoryVulkan::build()
     VkDescriptorSet descriptorSet = setupDescriptorSet();
     VkPipeline pipeline = createPipeline();
 
-    return sp<VKPipeline>::make(_resource_manager->recycler(), _render_factory->_render_target, _pipeline_layout, _descriptor_set_layout, descriptorSet, pipeline);
+    return sp<VKPipeline>::make(_resource_manager->recycler(), _renderer->renderTarget(), _pipeline_layout, _descriptor_set_layout, descriptorSet, pipeline);
 }
 
 sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& /*graphicsContext*/, const PipelineLayout& pipelineLayout, const ShaderBindings& bindings)
@@ -45,7 +46,7 @@ sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& /*graphicsCon
     VkDescriptorSet descriptorSet = setupDescriptorSet();
     VkPipeline pipeline = createPipeline();
 
-    return sp<VKPipeline>::make(_resource_manager->recycler(), _render_factory->_render_target, _pipeline_layout, _descriptor_set_layout, descriptorSet, pipeline);
+    return sp<VKPipeline>::make(_resource_manager->recycler(), _renderer->renderTarget(), _pipeline_layout, _descriptor_set_layout, descriptorSet, pipeline);
 }
 
 sp<RenderCommand> PipelineFactoryVulkan::buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode renderMode, int32_t count)
@@ -124,7 +125,7 @@ void PipelineFactoryVulkan::setupVertexDescriptions()
 
 void PipelineFactoryVulkan::setupDescriptorSetLayout()
 {
-    const sp<VKDevice> device = _render_factory->_render_target->device();
+    const sp<VKDevice>& device = _renderer->device();
 
     std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
         // Binding 0 : Vertex shader uniform buffer
@@ -157,13 +158,13 @@ void PipelineFactoryVulkan::setupDescriptorSetLayout()
 
 VkDescriptorSet PipelineFactoryVulkan::setupDescriptorSet()
 {
-    const sp<VKDevice> device = _render_factory->_render_target->device();
+    const sp<VKDevice>& device = _renderer->device();
 
     VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
 
     VkDescriptorSetAllocateInfo allocInfo =
             vks::initializers::descriptorSetAllocateInfo(
-                _render_factory->_render_target->descriptorPool(),
+                _renderer->vkDescriptorPool(),
                 &_descriptor_set_layout,
                 1);
 
@@ -192,7 +193,7 @@ VkDescriptorSet PipelineFactoryVulkan::setupDescriptorSet()
 
 VkPipeline PipelineFactoryVulkan::createPipeline()
 {
-    const sp<VKDevice> device = _render_factory->_render_target->device();
+    const sp<VKDevice>& device = _renderer->device();
 
     VkPipeline pipeline = VK_NULL_HANDLE;
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
@@ -260,7 +261,7 @@ VkPipeline PipelineFactoryVulkan::createPipeline()
     VkGraphicsPipelineCreateInfo pipelineCreateInfo =
             vks::initializers::pipelineCreateInfo(
                 _pipeline_layout,
-                _render_factory->_render_target->renderPass(),
+                _renderer->vkRenderPass(),
                 0);
 
     pipelineCreateInfo.pVertexInputState = &vertices.inputState;

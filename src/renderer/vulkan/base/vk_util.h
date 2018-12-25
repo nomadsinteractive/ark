@@ -30,7 +30,7 @@ public:
         SHADER_TYPE_COUNT
     };
 
-    VKUtil(const sp<ResourceManager>& resourceManager, const sp<RendererFactoryVulkan::Stub>& rendererFactory);
+    VKUtil(const sp<ResourceManager>& resourceManager, const sp<VKRenderer>& renderer);
     ~VKUtil();
 
     void initialize(GLContext& glContext);
@@ -59,7 +59,7 @@ public:
     sp<UBO> _ubo;
 
 private:
-    void generateQuad(const sp<VKDevice>& device);
+    void generateQuad();
 
     void buildCommandBuffers(const VKRenderTarget& renderTarget);
 
@@ -71,7 +71,7 @@ private:
 
 private:
     sp<ResourceManager> _resource_manager;
-    sp<RendererFactoryVulkan::Stub> _renderer_factory;
+    sp<VKRenderer> _renderer;
     sp<PipelineFactoryVulkan> _pipeline_factory;
     sp<VKPipeline> _pipeline;
     sp<VKBuffer> _uniforms;
