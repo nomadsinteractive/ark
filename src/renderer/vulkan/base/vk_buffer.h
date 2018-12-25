@@ -45,6 +45,9 @@ private:
     void* map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
     void unmap(void* mapped);
 
+    void allocateMemory(const VkMemoryRequirements& memReqs);
+    void ensureSize(const Uploader& uploader);
+
     void bind(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
     /**
@@ -71,6 +74,8 @@ private:
 
     VkDeviceMemory _memory = VK_NULL_HANDLE;
     VkDescriptorBufferInfo _descriptor;
+
+    VkMemoryAllocateInfo _memory_allocation_info;
 };
 
 }

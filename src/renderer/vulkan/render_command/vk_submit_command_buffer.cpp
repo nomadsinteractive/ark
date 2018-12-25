@@ -12,9 +12,7 @@ VKSubmitCommandBuffer::VKSubmitCommandBuffer(sp<VKRenderTarget> renderTarget, Vk
 
 void VKSubmitCommandBuffer::draw(GraphicsContext& /*graphicsContext*/)
 {
-    uint32_t currentBuffer = _render_target->acquire();
     _render_target->submit(&_command_buffer);
-    _render_target->swap(currentBuffer);
 }
 
 }

@@ -10,21 +10,9 @@ namespace ark {
 namespace vulkan {
 
 VKBuffer::VKBuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, const sp<Uploader>& uploader, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags)
-    : Buffer::Delegate(uploader ? uploader->size() : 0), _renderer(renderer), _recycler(recycler), _uploader(uploader), _usage_flags(usageFlags), _memory_property_flags(memoryPropertyFlags)
+    : Buffer::Delegate(0), _renderer(renderer), _recycler(recycler), _uploader(uploader), _usage_flags(usageFlags),
+      _memory_property_flags(memoryPropertyFlags), _descriptor{}, _memory_allocation_info(vks::initializers::memoryAllocateInfo())
 {
-    const VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo(usageFlags, _size);
-    VKUtil::checkResult(vkCreateBuffer(_renderer->vkLogicalDevice(), &bufferCreateInfo, nullptr, &_descriptor.buffer));
-
-    // Create the memory backing up the buffer handle
-    VkMemoryRequirements memReqs;
-    VkMemoryAllocateInfo memAlloc = vks::initializers::memoryAllocateInfo();
-    vkGetBufferMemoryRequirements(_renderer->vkLogicalDevice(), _descriptor.buffer, &memReqs);
-    memAlloc.allocationSize = memReqs.size;
-    // Find a memory type index that fits the properties of the buffer
-    memAlloc.memoryTypeIndex = _renderer->device()->getMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
-    VKUtil::checkResult(vkAllocateMemory(_renderer->vkLogicalDevice(), &memAlloc, nullptr, &_memory));
-
-    bind();
 }
 
 VKBuffer::~VKBuffer()
@@ -61,6 +49,8 @@ Resource::RecycleFunc VKBuffer::recycle()
 
 void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& transientUploader)
 {
+    ensureSize(transientUploader);
+
     void* mapped = map();
     size_t offset = 0;
     transientUploader->upload([mapped, &offset](void* buf, size_t size) {
@@ -88,6 +78,35 @@ void VKBuffer::unmap(void* mapped)
 {
     DASSERT(mapped);
     vkUnmapMemory(_renderer->vkLogicalDevice(), _memory);
+}
+
+void VKBuffer::allocateMemory(const VkMemoryRequirements& memReqs)
+{
+    if (_memory)
+        vkFreeMemory(_renderer->vkLogicalDevice(), _memory, nullptr);
+
+    _memory_allocation_info.allocationSize = memReqs.size;
+    _memory_allocation_info.memoryTypeIndex = _renderer->device()->getMemoryType(memReqs.memoryTypeBits, _memory_property_flags);
+    VKUtil::checkResult(vkAllocateMemory(_renderer->vkLogicalDevice(), &_memory_allocation_info, nullptr, &_memory));
+}
+
+void VKBuffer::ensureSize(const Uploader& uploader)
+{
+    if(_size != uploader.size())
+    {
+        _size = uploader.size();
+        if (_descriptor.buffer)
+            vkDestroyBuffer(_renderer->vkLogicalDevice(), _descriptor.buffer, nullptr);
+
+        const VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo(_usage_flags, _size);
+        VKUtil::checkResult(vkCreateBuffer(_renderer->vkLogicalDevice(), &bufferCreateInfo, nullptr, &_descriptor.buffer));
+
+        VkMemoryRequirements memReqs;
+        vkGetBufferMemoryRequirements(_renderer->vkLogicalDevice(), _descriptor.buffer, &memReqs);
+        if(_memory_allocation_info.allocationSize < memReqs.size)
+            allocateMemory(memReqs);
+        bind();
+    }
 }
 
 void VKBuffer::bind(VkDeviceSize size, VkDeviceSize offset)

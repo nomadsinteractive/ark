@@ -4,6 +4,10 @@
 #include <unordered_map>
 
 #include "core/base/api.h"
+#include "core/base/string.h"
+#include "core/base/bean_factory.h"
+#include "core/inf/builder.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -68,6 +72,36 @@ public:
     const sp<Size>& size() const;
 
     const sp<Resource>& resource() const;
+
+public:
+
+//  [[plugin::resource-loader::by-value("texture")]]
+    class DICTIONARY : public Builder<Texture> {
+    public:
+        DICTIONARY(BeanFactory& factory, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+        virtual sp<Texture> build(const sp<Scope>& args) override;
+
+    private:
+        sp<ResourceLoaderContext> _resource_loader_context;
+        String _src;
+    };
+
+//  [[plugin::resource-loader("texture")]]
+    class BUILDER : public Builder<Texture> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+        virtual sp<Texture> build(const sp<Scope>& args) override;
+
+    private:
+        sp<ResourceLoaderContext> _resource_loader_context;
+
+        BeanFactory _factory;
+        document _manifest;
+        SafePtr<Builder<String>> _src;
+        sp<Texture::Parameters> _parameters;
+    };
 
 private:
     sp<Size> _size;

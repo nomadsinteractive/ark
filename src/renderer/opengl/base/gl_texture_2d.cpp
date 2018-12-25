@@ -37,32 +37,4 @@ void GLTexture2D::doPrepareTexture(GraphicsContext& /*graphicsContext*/, uint32_
     LOGD("Uploaded, id = %d, width = %d, height = %d%s", id, width(), height(), bitmap ? "" : ", bitmap: nullptr");
 }
 
-GLTexture2D::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _src(value)
-{
-}
-
-sp<Texture> GLTexture2D::DICTIONARY::build(const sp<Scope>& /*args*/)
-{
-    return _resource_loader_context->textureLoader()->get(_src);
-}
-
-GLTexture2D::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, Constants::Attributes::SRC)),
-      _parameters(GLUtil::getTextureParameters(manifest))
-{
-}
-
-sp<Texture> GLTexture2D::BUILDER::build(const sp<Scope>& args)
-{
-    const sp<String> src = _src->build(args);
-    if(src)
-       return _resource_loader_context->textureLoader()->get(*src);
-
-    const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
-    const sp<Recycler> recycler = _resource_loader_context->resourceManager()->recycler();
-    const sp<GLTexture> texture = sp<GLTexture2D>::make(recycler, size, _parameters, nullptr);
-    return _resource_loader_context->resourceManager()->createGLResource<Texture>(size, texture, Texture::TYPE_2D);
-}
-
 }

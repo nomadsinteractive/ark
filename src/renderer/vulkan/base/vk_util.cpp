@@ -333,7 +333,7 @@ void VKUtil::draw(VKRenderTarget& renderTarget)
 {
     uint32_t currentBuffer = renderTarget.acquire();
     renderTarget.submit(&_command_buffers[currentBuffer]);
-    renderTarget.swap(currentBuffer);
+    renderTarget.swap();
 }
 
 void VKUtil::checkResult(VkResult result)

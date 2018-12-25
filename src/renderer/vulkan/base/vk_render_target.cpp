@@ -17,7 +17,7 @@ namespace ark {
 namespace vulkan {
 
 VKRenderTarget::VKRenderTarget(const sp<VKDevice>& device)
-    : _device(device)
+    : _device(device), _aquired_image_id(0)
 {
     _queue = _device->queue();
     _swap_chain.connect(_device->vkInstance(), _device->physicalDevice(), _device->logicalDevice());
@@ -112,23 +112,25 @@ std::vector<VkCommandBuffer> VKRenderTarget::makeCommandBuffers() const
     return _command_pool->makeCommandBuffers(_swap_chain.imageCount);
 }
 
-uint32_t VKRenderTarget::acquire() const
+uint32_t VKRenderTarget::acquire()
 {
-    uint32_t currentBuffer;
-    VKUtil::checkResult(_swap_chain.acquireNextImage(_semaphore_present_complete, &currentBuffer));
-    return currentBuffer;
+    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    VKUtil::checkResult(_swap_chain.acquireNextImage(_semaphore_present_complete, &_aquired_image_id));
+    return _aquired_image_id;
 }
 
 void VKRenderTarget::submit(VkCommandBuffer* commandBuffer)
 {
+    DTHREAD_CHECK(THREAD_ID_RENDERER);
     _submit_info.pCommandBuffers = commandBuffer;
     _submit_info.commandBufferCount = 1;
     VKUtil::checkResult(vkQueueSubmit(_queue, 1, &_submit_info, VK_NULL_HANDLE));
 }
 
-void VKRenderTarget::swap(uint32_t currentBuffer)
+void VKRenderTarget::swap()
 {
-    VKUtil::checkResult(_swap_chain.queuePresent(_queue, currentBuffer, _semaphore_render_complete));
+    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, _semaphore_render_complete));
     vkQueueWaitIdle(_queue);
 }
 

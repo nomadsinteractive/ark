@@ -123,4 +123,31 @@ void Texture::Parameters::setTexParameter(uint32_t name, int32_t value)
     _tex_parameters[name] = value;
 }
 
+Texture::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _resource_loader_context(resourceLoaderContext), _src(value)
+{
+}
+
+sp<Texture> Texture::DICTIONARY::build(const sp<Scope>& /*args*/)
+{
+    return _resource_loader_context->textureLoader()->get(_src);
+}
+
+
+Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, Constants::Attributes::SRC))
+{
+}
+
+sp<Texture> Texture::BUILDER::build(const sp<Scope>& args)
+{
+    const sp<String> src = _src->build(args);
+    if(src)
+       return _resource_loader_context->textureLoader()->get(*src);
+
+    const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
+    const sp<Recycler> recycler = _resource_loader_context->resourceManager()->recycler();
+    return _resource_loader_context->renderController()->createTexture(static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), nullptr);
+}
+
 }

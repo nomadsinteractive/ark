@@ -31,7 +31,12 @@ void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
 
 void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, const sp<RenderCommand>& renderCommand)
 {
+/*
     _vulkan_api->render();
+/*/
+    _graphics_context->onDrawFrame();
+    renderCommand->draw(_graphics_context);
+/**/
 }
 
 void RenderViewVulkan::initialize(uint32_t width, uint32_t height)

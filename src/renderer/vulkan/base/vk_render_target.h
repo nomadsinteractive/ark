@@ -33,9 +33,9 @@ public:
 
     std::vector<VkCommandBuffer> makeCommandBuffers() const;
 
-    uint32_t acquire() const;
+    uint32_t acquire();
     void submit(VkCommandBuffer* commandBuffer);
-    void swap(uint32_t currentBuffer);
+    void swap();
 
 private:
     void initSwapchain();
@@ -73,6 +73,8 @@ private:
 
     uint32_t _width = 1280;
     uint32_t _height = 720;
+
+    uint32_t _aquired_image_id;
 };
 
 }

@@ -38,9 +38,6 @@ void PipelineLayout::preCompile(GraphicsContext& graphicsContext, const sp<Shade
         _building_context->_vertex.insertPredefinedUniforms(_input->uniforms());
         _building_context->_fragment.insertPredefinedUniforms(_input->uniforms());
 
-//        if(graphicsContext.glContext()->version() >= Ark::OPENGL_30)
-//            _building_context->_fragment._out_declarations.declare("vec4", "v_", "FragColor");
-
         _vertex = _building_context->_vertex.preprocess();
         _fragment = _building_context->_fragment.preprocess();
 
