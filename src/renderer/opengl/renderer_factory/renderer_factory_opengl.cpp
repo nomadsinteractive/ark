@@ -64,7 +64,7 @@ void RendererFactoryOpenGL::setGLVersion(Ark::RendererVersion version, GLContext
         annotations["frag.in"] = "varying";
         annotations["frag.out"] = "varying";
         annotations["frag.color"] = "gl_FragColor";
-        glContext.setGLSnippetFactory(sp<gles20::SnippetFactoryGLES20>::make());
+        glContext.setSnippetFactory(sp<gles20::SnippetFactoryGLES20>::make());
     }
     else
     {
@@ -73,7 +73,7 @@ void RendererFactoryOpenGL::setGLVersion(Ark::RendererVersion version, GLContext
         annotations["frag.in"] = "in";
         annotations["frag.out"] = "out";
         annotations["frag.color"] = "v_FragColor";
-        glContext.setGLSnippetFactory(sp<gles30::SnippetFactoryGLES30>::make());
+        glContext.setSnippetFactory(sp<gles30::SnippetFactoryGLES30>::make());
     }
     glContext.setVersion(version);
 }

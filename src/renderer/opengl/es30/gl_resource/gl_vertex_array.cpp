@@ -4,14 +4,15 @@
 
 #include "renderer/base/shader_bindings.h"
 #include "renderer/inf/pipeline.h"
+#include "renderer/inf/pipeline_factory.h"
 
 #include "platform/gl/gl.h"
 
 namespace ark {
 namespace gles30 {
 
-GLVertexArray::GLVertexArray(const sp<ShaderBindings>& shaderBindings)
-    : _id(0), _shader_bindings(shaderBindings)
+GLVertexArray::GLVertexArray(const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings)
+    : _id(0), _pipeline_factory(pipelineFactory), _shader_bindings(shaderBindings)
 {
 }
 
@@ -27,7 +28,7 @@ void GLVertexArray::upload(GraphicsContext& graphicsContext)
     glBindVertexArray(_id);
     bindings->arrayBuffer().upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, bindings->arrayBuffer().id());
-    const sp<Pipeline> pipeline = bindings->shader()->getPipeline(graphicsContext, bindings);
+    const sp<Pipeline> pipeline = _pipeline_factory->buildPipeline(graphicsContext, bindings);
     pipeline->bind(graphicsContext, bindings);
     glBindVertexArray(0);
     LOGD("id = %d", _id);

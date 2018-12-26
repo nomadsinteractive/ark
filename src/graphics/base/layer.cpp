@@ -94,7 +94,7 @@ sp<RenderCommand> Layer::Snapshot::render(float x, float y) const
                 sBuilder.write(matrix);
             }
         }
-        DrawingContext drawingContext(_stub->_shader_bindings, _ubo, _stub->_shader_bindings->arrayBuffer().snapshot(buf.vertices().makeUploader()), buf.indices(), static_cast<int32_t>(_items.size()));
+        DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, _ubo, _stub->_shader_bindings->arrayBuffer().snapshot(buf.vertices().makeUploader()), buf.indices(), static_cast<int32_t>(_items.size()));
         if(buf.isInstanced())
             drawingContext._instanced_array_snapshots = buf.makeInstancedBufferSnapshots();
         return _stub->_resource_loader_context->objectPool()->obtain<RenderCommandImpl>(std::move(drawingContext), _stub->_shader);

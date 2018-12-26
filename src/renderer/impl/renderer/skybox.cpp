@@ -63,7 +63,7 @@ void Skybox::render(RenderRequest& renderRequest, float x, float y)
 {
     const Matrix view = _shader->camera()->view()->matrix();
     const Matrix projection = _shader->camera()->projection()->matrix();
-    renderRequest.addRequest(_object_pool->obtain<RenderCommandSkybox>(DrawingContext(_shader_bindings, _shader->snapshot(_memory_pool), _shader_bindings->arrayBuffer().snapshot(), _index_buffer, 0), _shader, view, projection));
+    renderRequest.addRequest(_object_pool->obtain<RenderCommandSkybox>(DrawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _shader_bindings->arrayBuffer().snapshot(), _index_buffer, 0), _shader, view, projection));
 }
 
 const SafePtr<Size>& Skybox::size()

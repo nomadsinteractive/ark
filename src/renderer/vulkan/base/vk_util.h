@@ -41,6 +41,9 @@ public:
     static VkPipelineShaderStageCreateInfo loadShaderSPIR(VkDevice device, std::string fileName, VkShaderStageFlagBits stage);
     static VkPipelineShaderStageCreateInfo loadShader(VkDevice device, const String& resid, ShaderType stage);
 
+    static VkFormat getAttributeFormat(const Attribute& attribute);
+
+
     static std::vector<uint32_t> compileSPIR(const String& source, ShaderType shaderType);
 
     struct Vertex {

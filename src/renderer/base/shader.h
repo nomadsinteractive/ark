@@ -12,12 +12,27 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/inf/resource.h"
+#include "renderer/inf/pipeline_factory.h"
 
 namespace ark {
 
 class ARK_API Shader {
 public:
-    Shader(const sp<PipelineLayout>& pipelineLayout, const sp<Camera>& camera);
+    struct Stub : public PipelineFactory {
+        Stub(const sp<PipelineFactory>& pipelineFactory);
+
+//        virtual uint32_t id() override;
+//        virtual void upload(GraphicsContext& graphicsContext) override;
+//        virtual RecycleFunc recycle() override;
+
+        virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& shaderBindings) override;
+
+        sp<Pipeline> _pipeline;
+        sp<PipelineFactory> _pipeline_factory;
+    };
+
+public:
+    Shader(const sp<Stub>& stub, const sp<PipelineLayout>& pipelineLayout, const sp<Camera>& camera);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Shader);
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag");
@@ -34,7 +49,7 @@ public:
     const sp<PipelineFactory>& pipelineFactory() const;
     const sp<PipelineLayout>& pipelineLayout() const;
 
-    const sp<Pipeline>& getPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings);
+    const sp<Pipeline> getPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const;
 
 //[[deprecated]]
     uint32_t stride() const;
@@ -58,21 +73,9 @@ public:
     };
 
 private:
-    struct Stub : public Resource {
-        Stub(const sp<PipelineLayout>& pipelineLayout);
-
-        virtual uint32_t id() override;
-        virtual void upload(GraphicsContext& graphicsContext) override;
-        virtual RecycleFunc recycle() override;
-
-        sp<Pipeline> _pipeline;
-        sp<PipelineFactory> _pipeline_factory;
-        sp<PipelineLayout> _pipeline_layout;
-        sp<PipelineInput> _input;
-    };
-
-private:
     sp<Stub> _stub;
+    sp<PipelineLayout> _pipeline_layout;
+    sp<PipelineInput> _input;
     sp<Camera> _camera;
 };
 

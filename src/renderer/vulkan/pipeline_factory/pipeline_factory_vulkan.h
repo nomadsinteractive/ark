@@ -18,26 +18,25 @@ namespace vulkan {
 class PipelineFactoryVulkan : public PipelineFactory {
 public:
     PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager, const sp<VKRenderer>& renderFactory);
-    ~PipelineFactoryVulkan() override;
 
-    sp<VKPipeline> build();
-
-    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout, const ShaderBindings& bindings) override;
-
-    sp<VKBuffer> _ubo;
-    sp<VKTexture2D> _texture;
+    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& shaderBindings) override;
 
 private:
-    void setupVertexDescriptions(const PipelineInput& input);
-    void setupVertexDescriptions();
+    struct VertexLayout {
+        VkPipelineVertexInputStateCreateInfo inputState;
+        std::vector<VkVertexInputBindingDescription> bindingDescriptions;
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+    };
+
+    void setupVertexDescriptions(const PipelineInput& input, VertexLayout& vertexLayout);
+    void setupVertexDescriptions(VertexLayout& vertexLayout);
+
     void setupDescriptorSetLayout();
-    void setupDescriptorPool();
 
     VkDescriptorSet setupDescriptorSet();
-    VkDescriptorSet setupDescriptorSet(const bytearray& ubo, const ShaderBindings& bindings);
-    VkPipeline createPipeline();
+    VkDescriptorSet setupDescriptorSet(GraphicsContext& graphicsContext, const ShaderBindings& bindings);
 
-    VkFormat getFormat(const Attribute& attribute) const;
+    VkPipeline createPipeline(const VertexLayout& vertexLayout);
 
 private:
     sp<ResourceManager> _resource_manager;
@@ -45,12 +44,6 @@ private:
 
     VkPipelineLayout _pipeline_layout;
     VkDescriptorSetLayout _descriptor_set_layout;
-
-    struct {
-        VkPipelineVertexInputStateCreateInfo inputState;
-        std::vector<VkVertexInputBindingDescription> bindingDescriptions;
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
-    } vertices;
 
     std::unordered_map<String, uint32_t> _location_map;
 };

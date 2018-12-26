@@ -7,8 +7,8 @@
 
 namespace ark {
 
-DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, Layer::UBOSnapshot ubo, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount)
-    : _shader_bindings(shaderBindings), _ubo(std::move(ubo)), _array_buffer(arrayBuffer), _index_buffer(indexBuffer), _count(indexBuffer.length<glindex_t>()), _instance_count(instanceCount)
+DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, Layer::UBOSnapshot ubo, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount)
+    : _shader(shader), _shader_bindings(shaderBindings), _ubo(std::move(ubo)), _array_buffer(arrayBuffer), _index_buffer(indexBuffer), _count(indexBuffer.length<glindex_t>()), _instance_count(instanceCount)
 {
     DWARN(_shader_bindings->arrayBuffer().id() == arrayBuffer.id(), "GLShaderBinding's ArrayBuffer: %d, which is not the same as GLDrawingContext's ArrayBuffer snapshot: %d", _shader_bindings->arrayBuffer().id(), arrayBuffer.id());
 }
@@ -26,17 +26,12 @@ void DrawingContext::preDraw(GraphicsContext& graphicsContext)
         DCHECK(iter.second.id(), "Invaild GL Instanced Array Buffer: %d", iter.first);
     }
 
-    _shader_bindings->snippet()->preDraw(graphicsContext, *this);
+    _shader_bindings->snippet()->preDraw(graphicsContext, _shader, *this);
 }
 
 void DrawingContext::postDraw(GraphicsContext& graphicsContext)
 {
     _shader_bindings->snippet()->postDraw(graphicsContext);
-}
-
-const sp<Shader>& DrawingContext::shader() const
-{
-    return _shader_bindings->shader();
 }
 
 }

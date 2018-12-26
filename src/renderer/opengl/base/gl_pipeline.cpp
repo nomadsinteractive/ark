@@ -28,7 +28,7 @@ namespace ark {
 namespace opengl {
 
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const ShaderBindings& bindings)
-    : _recycler(recycler), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _id(0), _render_command(createRenderCommand(bindings))
+    : _recycler(recycler), _pipeline_input(bindings.pipelineInput()), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _id(0), _render_command(createRenderCommand(bindings))
 {
 }
 
@@ -45,6 +45,9 @@ uint32_t GLPipeline::id()
 
 void GLPipeline::upload(GraphicsContext& graphicsContext)
 {
+    for(const Uniform& i : _pipeline_input->uniforms())
+        i.notify();
+
     _vertex_shader = makeShader(graphicsContext, _version, GL_VERTEX_SHADER, _vertex_source);
     _fragment_shader = makeShader(graphicsContext, _version, GL_FRAGMENT_SHADER, _fragment_source);
     _id = glCreateProgram();

@@ -28,6 +28,8 @@ public:
     template<typename T> class Vector;
     template<typename T> class StandardLayout;
 
+    class Blank;
+
 protected:
     size_t _size;
 };
@@ -90,6 +92,24 @@ public:
 
 private:
     sp<T> _object;
+};
+
+class Uploader::Blank : public Uploader {
+public:
+    Blank(size_t size)
+        : Uploader(size), _memory(new uint8_t[size]) {
+        memset(_memory, 0, _size);
+    }
+    ~Blank() override {
+        delete[] _memory;
+    }
+
+    virtual void upload(const UploadFunc& uploader) override {
+        uploader(_memory, _size);
+    }
+
+private:
+    uint8_t* _memory;
 };
 
 typedef Uploader::Array<uint8_t> ByteArrayUploader;

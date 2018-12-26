@@ -14,20 +14,20 @@ ShaderBindings::ShaderBindings(RenderController& renderController, const sp<Shad
 }
 
 ShaderBindings::ShaderBindings(RenderController& renderController, const sp<Shader>& shader, const Buffer& arrayBuffer)
-    : _shader(shader), _attributes(shader->input()), _array_buffer(arrayBuffer), _pipeline_input(_shader->input()),
+    : _attributes(shader->input()), _array_buffer(arrayBuffer), _pipeline_layout(shader->pipelineLayout()), _pipeline_input(shader->input()),
       _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController)), _render_mode(RenderModel::RENDER_MODE_NONE)
 {
     _samplers.resize(_pipeline_input->samplerCount());
 }
 
-const sp<Shader>& ShaderBindings::shader() const
-{
-    return _shader;
-}
-
 const sp<Snippet>& ShaderBindings::snippet() const
 {
-    return _shader->pipelineLayout()->snippet();
+    return _pipeline_layout->snippet();
+}
+
+const sp<PipelineLayout>& ShaderBindings::pipelineLayout() const
+{
+    return _pipeline_layout;
 }
 
 const sp<PipelineInput>& ShaderBindings::pipelineInput() const

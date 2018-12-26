@@ -13,8 +13,8 @@
 
 namespace ark {
 
-PipelineBuildingContext::PipelineBuildingContext(const String& vertex, const String& fragment)
-    : _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX, vertex), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment)
+PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment)
+    : _shader(sp<Shader::Stub>::make(pipelineFactory)), _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX, vertex), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment)
 {
 }
 

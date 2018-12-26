@@ -37,8 +37,8 @@ public:
     ShaderBindings(RenderController& renderController, const sp<Shader>& shader);
     ShaderBindings(RenderController& renderController, const sp<Shader>& shader, const Buffer& arrayBuffer);
 
-    const sp<Shader>& shader() const;
     const sp<Snippet>& snippet() const;
+    const sp<PipelineLayout>& pipelineLayout() const;
     const sp<PipelineInput>& pipelineInput() const;
     const std::vector<sp<Texture>>& samplers() const;
 
@@ -57,10 +57,11 @@ public:
     std::map<uint32_t, Buffer::Builder> makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const;
 
 private:
-    sp<Shader> _shader;
     Attributes _attributes;
 
     Buffer _array_buffer;
+
+    sp<PipelineLayout> _pipeline_layout;
     sp<PipelineInput> _pipeline_input;
     std::vector<std::pair<uint32_t, Buffer>> _instanced_arrays;
     std::vector<sp<Texture>> _samplers;

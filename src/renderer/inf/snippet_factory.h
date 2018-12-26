@@ -12,7 +12,7 @@ class ARK_API SnippetFactory {
 public:
     virtual ~SnippetFactory() = default;
 
-    virtual sp<Snippet> createCoreSnippet(ResourceManager& resourceManager, const sp<ShaderBindings>& shaderBindings) = 0;
+    virtual sp<Snippet> createCoreSnippet(ResourceManager& resourceManager, const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings) = 0;
 };
 
 }

@@ -61,7 +61,7 @@ void RendererFactoryVulkan::setGLVersion(Ark::RendererVersion version, GLContext
     annotations["frag.in"] = "in";
     annotations["frag.out"] = "out";
     annotations["frag.color"] = "v_FragColor";
-    glContext.setGLSnippetFactory(sp<SnippetFactoryVulkan>::make());
+    glContext.setSnippetFactory(sp<SnippetFactoryVulkan>::make());
 
     glContext.setVersion(version);
 }

@@ -7,8 +7,8 @@
 
 #include "core/types/shared_ptr.h"
 
+#include "renderer/forwarding.h"
 #include "renderer/inf/pipeline.h"
-
 #include "renderer/vulkan/forward.h"
 
 namespace ark {
@@ -16,8 +16,10 @@ namespace vulkan {
 
 class VKPipeline : public Pipeline {
 public:
-    VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderTarget>& renderTarget, VkPipelineLayout vkPipelineLayout, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet descriptorSet, VkPipeline pipeline);
+    VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<ShaderBindings>& shaderBindings);
     ~VKPipeline() override;
+
+    void upload();
 
     VkPipeline vkPipeline() const;
     VkPipelineLayout vkPipelineLayout() const;
@@ -31,14 +33,38 @@ public:
 
     virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) override;
 
+    sp<VKBuffer> _ubo;
+    sp<VKTexture2D> _texture;
+
+private:
+    struct VertexLayout {
+        VkPipelineVertexInputStateCreateInfo inputState;
+        std::vector<VkVertexInputBindingDescription> bindingDescriptions;
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+    };
+
+    void setupVertexDescriptions(const PipelineInput& input, VertexLayout& vertexLayout);
+    void setupVertexDescriptions(VertexLayout& vertexLayout);
+
+    void setupDescriptorSetLayout();
+
+    void setupDescriptorSet();
+    void setupDescriptorSet(GraphicsContext& graphicsContext, const ShaderBindings& bindings);
+
+    void setupPipeline(const VertexLayout& vertexLayout);
+
 private:
     sp<Recycler> _recycler;
-    sp<VKRenderTarget> _render_target;
+    sp<VKRenderer> _renderer;
+    sp<ShaderBindings> _shader_bindings;
 
     VkPipelineLayout _layout;
     VkDescriptorSetLayout _descriptor_set_layout;
     VkDescriptorSet _descriptor_set;
     VkPipeline _pipeline;
+
+    std::unordered_map<String, uint32_t> _location_map;
+
 };
 
 }

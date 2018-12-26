@@ -12,17 +12,19 @@
 #include "renderer/base/shader_preprocessor.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/uniform.h"
+#include "renderer/base/shader.h"
 
 namespace ark {
 
 class PipelineBuildingContext {
 public:
-    PipelineBuildingContext(const String& vertex, const String& fragment);
+    PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment);
 
     void loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
 
     void initialize();
 
+    sp<Shader::Stub> _shader;
     sp<PipelineInput> _input;
     sp<Snippet> _snippet;
 

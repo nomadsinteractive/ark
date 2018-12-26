@@ -15,17 +15,17 @@ namespace {
 class SnippetGLES20 : public Snippet {
 public:
 
-    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
+    virtual void preDraw(GraphicsContext& graphicsContext, Shader& shader, const DrawingContext& context) override {
         glBindBuffer(GL_ARRAY_BUFFER, context._array_buffer.id());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context._index_buffer.id());
-        context.shader()->pipeline()->bind(graphicsContext, context._shader_bindings);
+        shader.pipeline()->bind(graphicsContext, context._shader_bindings);
     }
 
 };
 
 }
 
-sp<Snippet> SnippetFactoryGLES20::createCoreSnippet(ResourceManager& /*glResourceManager*/, const sp<ShaderBindings>& /*shaderBindings*/)
+sp<Snippet> SnippetFactoryGLES20::createCoreSnippet(ResourceManager& /*glResourceManager*/, const sp<PipelineFactory>& /*pipelineFactory*/, const sp<ShaderBindings>& /*shaderBindings*/)
 {
     return sp<SnippetGLES20>::make();
 }

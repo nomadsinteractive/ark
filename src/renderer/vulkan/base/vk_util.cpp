@@ -17,6 +17,7 @@
 #include "graphics/forwarding.h"
 #include "graphics/base/bitmap.h"
 
+#include "renderer/base/attribute.h"
 #include "renderer/base/gl_context.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/inf/uploader.h"
@@ -226,10 +227,10 @@ void VKUtil::initialize(GLContext& /*glContext*/)
 
     const sp<VKTexture2D> texture = sp<VKTexture2D>::make(_resource_manager->recycler(), _renderer, tex);
     texture->upload(_graphics_context);
-    _pipeline_factory = sp<PipelineFactoryVulkan>::make(_resource_manager, _renderer);
-    _pipeline_factory->_texture = texture;
-    _pipeline_factory->_ubo = _uniforms;
-    _pipeline = _pipeline_factory->build();
+    _pipeline = sp<VKPipeline>::make(_resource_manager->recycler(), _renderer, nullptr);
+    _pipeline->_texture = texture;
+    _pipeline->_ubo = _uniforms;
+    _pipeline->upload();
 
     buildCommandBuffers(_renderer->renderTarget());
     prepared = true;
@@ -372,6 +373,44 @@ VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String
     DASSERT(shaderStage.module != VK_NULL_HANDLE);
     shaderStage.pName = "main";
     return shaderStage;
+}
+
+VkFormat VKUtil::getAttributeFormat(const Attribute& attribute)
+{
+    if(attribute.type() == Attribute::TYPE_FLOAT)
+    {
+        if(attribute.length() < 5)
+        {
+            const VkFormat formats[4] = {VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT};
+            return formats[attribute.length() - 1];
+        }
+    }
+    else if(attribute.type() == Attribute::TYPE_INTEGER)
+    {
+        if(attribute.length() < 5)
+        {
+            const VkFormat formats[4] = {VK_FORMAT_R32_SINT, VK_FORMAT_R32G32_SINT, VK_FORMAT_R32G32B32_SINT, VK_FORMAT_R32G32B32A32_SINT};
+            return formats[attribute.length() - 1];
+        }
+    }
+    else if(attribute.type() == Attribute::TYPE_SHORT)
+    {
+        if(attribute.length() < 5)
+        {
+            const VkFormat formats[4] = {VK_FORMAT_R16_SINT, VK_FORMAT_R16G16_SINT, VK_FORMAT_R16G16B16_SINT, VK_FORMAT_R16G16B16A16_SINT};
+            return formats[attribute.length() - 1];
+        }
+    }
+    else if(attribute.type() == Attribute::TYPE_USHORT)
+    {
+        if(attribute.length() < 5)
+        {
+            const VkFormat formats[4] = {VK_FORMAT_R16_UINT, VK_FORMAT_R16G16_UINT, VK_FORMAT_R16G16B16_UINT, VK_FORMAT_R16G16B16A16_UINT};
+            return formats[attribute.length() - 1];
+        }
+    }
+    DFATAL("Unsupport type %s, length %d", attribute.declareType().c_str(), attribute.length());
+    return VK_FORMAT_R32G32B32A32_SFLOAT;
 }
 
 std::vector<uint32_t> VKUtil::compileSPIR(const String& source, ShaderType shaderType)

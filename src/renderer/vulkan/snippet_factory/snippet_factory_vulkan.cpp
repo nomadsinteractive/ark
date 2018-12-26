@@ -5,7 +5,7 @@
 namespace ark {
 namespace vulkan {
 
-sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(ResourceManager& glResourceManager, const sp<ShaderBindings>& shaderBindings)
+sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(ResourceManager& glResourceManager, const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings)
 {
     return nullptr;
 }

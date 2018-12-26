@@ -25,7 +25,7 @@ public:
         context._fragment._out_declarations.declare("vec4", "v_", "FragColor");
     }
 
-    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& context) override {
+    virtual void preDraw(GraphicsContext& /*graphicsContext*/, Shader& /*shader*/, const DrawingContext& context) override {
         glBindVertexArray(_vertex_array->id());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context._index_buffer.id());
     }
@@ -40,9 +40,9 @@ private:
 
 }
 
-sp<Snippet> SnippetFactoryGLES30::createCoreSnippet(ResourceManager& resourceManager, const sp<ShaderBindings>& shaderBindings)
+sp<Snippet> SnippetFactoryGLES30::createCoreSnippet(ResourceManager& resourceManager, const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings)
 {
-    return sp<SnippetGLES30>::make(resourceManager.createGLResource<GLVertexArray>(shaderBindings));
+    return sp<SnippetGLES30>::make(resourceManager.createGLResource<GLVertexArray>(pipelineFactory, shaderBindings));
 }
 
 }

@@ -37,11 +37,11 @@ public:
     }
 
     virtual sp<Shader> build(const sp<Scope>& args) override {
-        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_vertex_src, _fragment_src);
+        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller->createPipelineFactory(), _vertex_src, _fragment_src);
         buildingContext->loadPredefinedParam(_factory, args, _manifest);
 
         const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(_render_controller, buildingContext);
-        return sp<Shader>::make(pipelineLayout, _camera->build(args));
+        return sp<Shader>::make(buildingContext->_shader, pipelineLayout, _camera->build(args));
     }
 
 private:
@@ -56,10 +56,10 @@ private:
 
 }
 
-Shader::Shader(const sp<PipelineLayout>& pipelineLayout, const sp<Camera>& camera)
-    : _stub(sp<Stub>::make(pipelineLayout)), _camera(camera ? camera : Camera::getMainCamera())
+Shader::Shader(const sp<Stub>& stub, const sp<PipelineLayout>& pipelineLayout, const sp<Camera>& camera)
+    : _stub(stub), _pipeline_layout(pipelineLayout), _input(_pipeline_layout->input()), _camera(camera ? camera : Camera::getMainCamera())
 {
-    pipelineLayout->initialize(_camera);
+    _pipeline_layout->initialize(_camera);
 }
 
 sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment)
@@ -72,17 +72,17 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& d
 sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment, const sp<Snippet>& snippet, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
     const Global<StringTable> stringTable;
-    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(stringTable->getString(vertex), stringTable->getString(fragment));
+    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(resourceLoaderContext->renderController()->createPipelineFactory(), stringTable->getString(vertex), stringTable->getString(fragment));
     if(snippet)
         buildingContext->addSnippet(snippet);
 
     const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(resourceLoaderContext->renderController(), buildingContext);
-    return sp<Shader>::make(pipelineLayout, nullptr);
+    return sp<Shader>::make(buildingContext->_shader, pipelineLayout, nullptr);
 }
 
 Layer::UBOSnapshot Shader::snapshot(MemoryPool& memoryPool) const
 {
-    return _stub->_input->ubo()->snapshot(memoryPool);
+    return _input->ubo()->snapshot(memoryPool);
 }
 
 void Shader::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
@@ -92,7 +92,7 @@ void Shader::active(GraphicsContext& graphicsContext, const DrawingContext& draw
 
 const sp<PipelineInput>& Shader::input() const
 {
-    return _stub->_input;
+    return _input;
 }
 
 const sp<Camera>& Shader::camera() const
@@ -112,28 +112,17 @@ const sp<PipelineFactory>& Shader::pipelineFactory() const
 
 const sp<PipelineLayout>& Shader::pipelineLayout() const
 {
-    return _stub->_pipeline_layout;
+    return _pipeline_layout;
 }
 
-const sp<Pipeline>& Shader::getPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings)
+const sp<Pipeline> Shader::getPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const
 {
-    if(_stub->_pipeline)
-    {
-        if(_stub->id() == 0)
-            _stub->upload(graphicsContext);
-        return _stub->_pipeline;
-    }
-
-    _stub->_pipeline_layout->preCompile(graphicsContext, bindings);
-    _stub->_pipeline = _stub->_pipeline_factory->buildPipeline(graphicsContext, _stub->_pipeline_layout, bindings);
-    graphicsContext.resourceManager()->upload(_stub, ResourceManager::US_ON_SURFACE_READY);
-    _stub->upload(graphicsContext);
-    return _stub->_pipeline;
+    return _stub->buildPipeline(graphicsContext, bindings);
 }
 
 uint32_t Shader::stride() const
 {
-    return _stub->_input->getStream(0).stride();
+    return _input->getStream(0).stride();
 }
 
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -146,39 +135,55 @@ Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const s
 
 sp<Shader> Shader::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_vertex->build(args), _fragment->build(args));
+    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_resource_loader_context->renderController()->createPipelineFactory(), _vertex->build(args), _fragment->build(args));
     buildingContext->loadPredefinedParam(_factory, args, _manifest);
     if(_snippet)
         buildingContext->addSnippet(_snippet->build(args));
 
     const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(_resource_loader_context->renderController(), buildingContext);
-    return sp<Shader>::make(pipelineLayout, _camera->build(args));
+    return sp<Shader>::make(buildingContext->_shader, pipelineLayout, _camera->build(args));
 }
 
-Shader::Stub::Stub(const sp<PipelineLayout>& pipelineLayout)
-    : _pipeline_factory(pipelineLayout->renderController()->createPipelineFactory()), _pipeline_layout(pipelineLayout), _input(pipelineLayout->input())
+Shader::Stub::Stub(const sp<PipelineFactory>& pipelineFactory)
+    : _pipeline_factory(pipelineFactory)
 {
 }
 
-uint32_t Shader::Stub::id()
-{
-    DASSERT(_pipeline);
-    return _pipeline->id();
-}
+//uint32_t Shader::Stub::id()
+//{
+//    DASSERT(_pipeline);
+//    return _pipeline->id();
+//}
 
-void Shader::Stub::upload(GraphicsContext& graphicsContext)
-{
-    DASSERT(_pipeline);
-    for(const Uniform& i : _input->uniforms())
-        i.notify();
+//void Shader::Stub::upload(GraphicsContext& graphicsContext)
+//{
+//    DASSERT(_pipeline);
+//    for(const Uniform& i : _input->uniforms())
+//        i.notify();
 
+//    _pipeline->upload(graphicsContext);
+//}
+
+//Resource::RecycleFunc Shader::Stub::recycle()
+//{
+//    DASSERT(_pipeline);
+//    return _pipeline->recycle();
+//}
+
+sp<Pipeline> Shader::Stub::buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& shaderBindings)
+{
+    if(_pipeline)
+    {
+        if(_pipeline->id() == 0)
+            _pipeline->upload(graphicsContext);
+        return _pipeline;
+    }
+
+    shaderBindings->pipelineLayout()->preCompile(graphicsContext, shaderBindings);
+    _pipeline = _pipeline_factory->buildPipeline(graphicsContext, shaderBindings);
+    graphicsContext.resourceManager()->upload(_pipeline, ResourceManager::US_ON_SURFACE_READY);
     _pipeline->upload(graphicsContext);
-}
-
-Resource::RecycleFunc Shader::Stub::recycle()
-{
-    DASSERT(_pipeline);
-    return _pipeline->recycle();
+    return _pipeline;
 }
 
 }

@@ -13,12 +13,13 @@
 namespace ark {
 namespace opengl {
 
-sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout, const ShaderBindings& bindings)
+sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& shaderBindings)
 {
-    DCHECK(bindings.renderMode() != RenderModel::RENDER_MODE_NONE, "Shader has no RenderModel initialized");
+    DCHECK(shaderBindings->renderMode() != RenderModel::RENDER_MODE_NONE, "Shader has no RenderModel initialized");
+    const sp<PipelineLayout>& pipelineLayout = shaderBindings->pipelineLayout();
     const sp<GLContext>& glContext = graphicsContext.glContext();
     return sp<GLPipeline>::make(graphicsContext.resourceManager()->recycler(), glContext->getGLSLVersion(),
-                                pipelineLayout.vertex().process(glContext), pipelineLayout.fragment().process(glContext), bindings);
+                                pipelineLayout->vertex().process(glContext), pipelineLayout->fragment().process(glContext), shaderBindings);
 }
 
 }

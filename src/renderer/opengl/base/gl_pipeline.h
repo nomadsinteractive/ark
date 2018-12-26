@@ -135,6 +135,7 @@ private:
 
 private:
     sp<Recycler> _recycler;
+    sp<PipelineInput> _pipeline_input;
 
     uint32_t _version;
 

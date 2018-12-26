@@ -55,7 +55,7 @@ Resource::RecycleFunc VKTexture2D::recycle()
     };
 }
 
-VkDescriptorImageInfo VKTexture2D::descriptor() const
+const VkDescriptorImageInfo& VKTexture2D::descriptor() const
 {
     return _descriptor;
 }
