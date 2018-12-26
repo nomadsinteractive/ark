@@ -14,8 +14,8 @@ ShaderBindings::ShaderBindings(RenderController& renderController, const sp<Shad
 }
 
 ShaderBindings::ShaderBindings(RenderController& renderController, const sp<Shader>& shader, const Buffer& arrayBuffer)
-    : _shader(shader), _attributes(shader->input()), _array_buffer(arrayBuffer),
-      _pipeline_input(_shader->input()), _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController))
+    : _shader(shader), _attributes(shader->input()), _array_buffer(arrayBuffer), _pipeline_input(_shader->input()),
+      _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController)), _render_mode(RenderModel::RENDER_MODE_NONE)
 {
     _samplers.resize(_pipeline_input->samplerCount());
 }
@@ -38,6 +38,22 @@ const sp<PipelineInput>& ShaderBindings::pipelineInput() const
 const std::vector<sp<Texture>>& ShaderBindings::samplers() const
 {
     return _samplers;
+}
+
+bool ShaderBindings::isDrawInstanced() const
+{
+    return _instanced_arrays.size() > 0;
+}
+
+RenderModel::Mode ShaderBindings::renderMode() const
+{
+    return _render_mode;
+}
+
+void ShaderBindings::setRenderModel(RenderModel& renderModel)
+{
+    renderModel.initialize(*this);
+    _render_mode = renderModel.mode();
 }
 
 const Buffer& ShaderBindings::arrayBuffer() const

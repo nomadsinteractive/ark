@@ -13,6 +13,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
+#include "renderer/inf/render_model.h"
 
 namespace ark {
 
@@ -41,11 +42,16 @@ public:
     const sp<PipelineInput>& pipelineInput() const;
     const std::vector<sp<Texture>>& samplers() const;
 
+    bool isDrawInstanced() const;
+
+    RenderModel::Mode renderMode() const;
+
     const Buffer& arrayBuffer() const;
     const std::vector<std::pair<uint32_t, Buffer>>& instancedArrays() const;
 
     const Attributes& attributes() const;
 
+    void setRenderModel(RenderModel& renderModel);
     void bindSampler(const sp<Texture>& texture, uint32_t name = 0);
 
     std::map<uint32_t, Buffer::Builder> makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const;
@@ -58,6 +64,8 @@ private:
     sp<PipelineInput> _pipeline_input;
     std::vector<std::pair<uint32_t, Buffer>> _instanced_arrays;
     std::vector<sp<Texture>> _samplers;
+
+    RenderModel::Mode _render_mode;
 
     friend class ModelBuffer;
 };

@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_INF_GL_MODEL_H_
-#define ARK_RENDERER_INF_GL_MODEL_H_
+#ifndef ARK_RENDERER_INF_RENDER_MODEL_H_
+#define ARK_RENDERER_INF_RENDER_MODEL_H_
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
@@ -15,6 +15,7 @@ namespace ark {
 class ARK_API RenderModel {
 public:
     enum Mode {
+        RENDER_MODE_NONE,
         RENDER_MODE_LINES,
         RENDER_MODE_POINTS,
         RENDER_MODE_TRIANGLES,

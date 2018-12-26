@@ -16,7 +16,7 @@ namespace ark {
 
 class ARK_API DrawingContext {
 public:
-    DrawingContext(const sp<ShaderBindings>& shaderBindings, Layer::UBOSnapshot ubo, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer);
+    DrawingContext(const sp<ShaderBindings>& shaderBindings, Layer::UBOSnapshot ubo, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
     void preDraw(GraphicsContext& graphicsContext);
@@ -33,7 +33,7 @@ public:
     Buffer::Snapshot _index_buffer;
 
     int32_t _count;
-
+    int32_t _instance_count;
 };
 
 }

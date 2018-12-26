@@ -8,6 +8,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
+#include "renderer/inf/render_model.h"
 
 #include "platform/gl/gl.h"
 
@@ -15,6 +16,8 @@ namespace ark {
 
 class ARK_API GLUtil {
 public:
+    static GLenum toEnum(RenderModel::Mode renderMode);
+
     static GLenum getEnum(const String& name);
     static GLenum getEnum(const String& name, GLenum defValue);
 

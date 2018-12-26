@@ -53,6 +53,13 @@ struct GLConstants {
 extern uint32_t g_GLViewportWidth;
 extern uint32_t g_GLViewportHeight;
 
+GLenum GLUtil::toEnum(RenderModel::Mode renderMode)
+{
+    static const GLenum models[RenderModel::RENDER_MODE_COUNT] = {GL_LINES, GL_POINTS, GL_TRIANGLES, GL_TRIANGLE_STRIP};
+    DCHECK(renderMode > 0 && renderMode < RenderModel::RENDER_MODE_COUNT, "Unknown Mode: %d", renderMode);
+    return models[renderMode - 1];
+}
+
 GLenum GLUtil::getEnum(const String& name)
 {
     const Global<GLConstants> constants;

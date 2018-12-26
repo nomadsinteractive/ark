@@ -58,8 +58,9 @@ Resource::RecycleFunc VKPipeline::recycle()
     };
 }
 
-void VKPipeline::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+sp<RenderCommand> VKPipeline::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
+    return nullptr;
 }
 
 void VKPipeline::bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings)

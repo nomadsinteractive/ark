@@ -10,17 +10,42 @@
 #include "renderer/base/model_buffer.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
+
 #include "renderer/inf/render_model.h"
+#include "renderer/inf/pipeline.h"
 #include "renderer/inf/pipeline_factory.h"
 
 namespace ark {
+
+namespace {
+
+class RenderCommandImpl : public RenderCommand {
+public:
+    RenderCommandImpl(DrawingContext context, const sp<Shader>& shader)
+        : _context(std::move(context)), _shader(shader) {
+    }
+
+    virtual void draw(GraphicsContext& graphicsContext) override {
+        const sp<Pipeline> pipeline = _shader->getPipeline(graphicsContext, _context._shader_bindings);
+        const sp<RenderCommand> renderCommand = pipeline->active(graphicsContext, _context);
+        _context.preDraw(graphicsContext);
+        renderCommand->draw(graphicsContext);
+        _context.postDraw(graphicsContext);
+    }
+
+private:
+    DrawingContext _context;
+    sp<Shader> _shader;
+};
+
+}
 
 Layer::Stub::Stub(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _model(model), _shader(shader), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
       _render_controller(resourceLoaderContext->renderController()), _shader_bindings(sp<ShaderBindings>::make(_render_controller, shader)),
       _last_rendered_count(0)
 {
-    _model->initialize(_shader_bindings);
+    _shader_bindings->setRenderModel(_model);
 }
 
 Layer::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
@@ -69,13 +94,10 @@ sp<RenderCommand> Layer::Snapshot::render(float x, float y) const
                 sBuilder.write(matrix);
             }
         }
-        DrawingContext drawingContext(_stub->_shader_bindings, _ubo, _stub->_shader_bindings->arrayBuffer().snapshot(buf.vertices().makeUploader()), buf.indices());
+        DrawingContext drawingContext(_stub->_shader_bindings, _ubo, _stub->_shader_bindings->arrayBuffer().snapshot(buf.vertices().makeUploader()), buf.indices(), static_cast<int32_t>(_items.size()));
         if(buf.isInstanced())
-        {
             drawingContext._instanced_array_snapshots = buf.makeInstancedBufferSnapshots();
-            return _stub->_shader->pipelineFactory()->buildRenderCommand(_stub->_resource_loader_context->objectPool(), std::move(drawingContext), _stub->_shader, _stub->_model->mode(), _items.size());
-        }
-        return _stub->_shader->pipelineFactory()->buildRenderCommand(_stub->_resource_loader_context->objectPool(), std::move(drawingContext), _stub->_shader, _stub->_model->mode(), 0);
+        return _stub->_resource_loader_context->objectPool()->obtain<RenderCommandImpl>(std::move(drawingContext), _stub->_shader);
     }
     return nullptr;
 }

@@ -23,7 +23,6 @@ public:
     sp<VKPipeline> build();
 
     virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout, const ShaderBindings& bindings) override;
-    virtual sp<RenderCommand> buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode renderMode, int32_t count) override;
 
     sp<VKBuffer> _ubo;
     sp<VKTexture2D> _texture;
@@ -35,6 +34,7 @@ private:
     void setupDescriptorPool();
 
     VkDescriptorSet setupDescriptorSet();
+    VkDescriptorSet setupDescriptorSet(const bytearray& ubo, const ShaderBindings& bindings);
     VkPipeline createPipeline();
 
     VkFormat getFormat(const Attribute& attribute) const;
@@ -45,8 +45,6 @@ private:
 
     VkPipelineLayout _pipeline_layout;
     VkDescriptorSetLayout _descriptor_set_layout;
-
-//    VkDescriptorPool _descriptor_pool;
 
     struct {
         VkPipelineVertexInputStateCreateInfo inputState;

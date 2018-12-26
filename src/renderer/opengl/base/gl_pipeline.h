@@ -8,6 +8,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/inf/render_command.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/drawing_context.h"
@@ -21,14 +22,14 @@ namespace opengl {
 
 class ARK_API GLPipeline : public Pipeline {
 public:
-    GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader);
-    ~GLPipeline() override;
+    GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const ShaderBindings& bindings);
+    virtual ~GLPipeline() override;
 
     virtual uint32_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
 
-    virtual void active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+    virtual sp<RenderCommand> active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
 
     virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) override;
 
@@ -104,6 +105,34 @@ private:
     void bindUniform(GraphicsContext& graphicsContext, const Uniform& uniform);
     void bindUniform(float* buf, uint32_t size, const Uniform& uniform);
 
+    class GLRenderCommand : public RenderCommand {
+    public:
+        GLRenderCommand(GLenum mode);
+        virtual ~GLRenderCommand() = default;
+
+        int32_t _count;
+        int32_t _instance_count;
+
+    protected:
+        GLenum _mode;
+    };
+
+    class GLDrawElements : public GLRenderCommand {
+    public:
+        GLDrawElements(GLenum mode);
+
+        virtual void draw(GraphicsContext& graphicsContext) override;
+    };
+
+    class GLDrawElementsInstanced : public GLRenderCommand {
+    public:
+        GLDrawElementsInstanced(GLenum mode);
+
+        virtual void draw(GraphicsContext& graphicsContext) override;
+    };
+
+    sp<GLRenderCommand> createRenderCommand(const ShaderBindings& bindings) const;
+
 private:
     sp<Recycler> _recycler;
 
@@ -119,6 +148,8 @@ private:
 
     std::map<String, GLAttribute> _attributes;
     std::map<String, GLUniform> _uniforms;
+
+    sp<GLRenderCommand> _render_command;
 
 };
 

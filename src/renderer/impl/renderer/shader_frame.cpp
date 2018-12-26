@@ -34,7 +34,7 @@ void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
     const Buffer::Snapshot indexBuffer = IndexBuffers::makeBufferSnapshot(_render_controller, Buffer::NAME_QUADS, 1);
     const sp<Uploader> uploader = _object_pool->obtain<ByteArrayUploader>(getArrayBuffer(x, y));
-    renderRequest.addRequest(_object_pool->obtain<opengl::GLDrawElements>(DrawingContext(_shader_bindings, _shader->snapshot(_memory_pool), _array_buffer.snapshot(uploader), indexBuffer), _shader, GL_TRIANGLES));
+    renderRequest.addRequest(_object_pool->obtain<opengl::GLDrawElements>(DrawingContext(_shader_bindings, _shader->snapshot(_memory_pool), _array_buffer.snapshot(uploader), indexBuffer, 0), _shader, GL_TRIANGLES));
 }
 
 const SafePtr<Size>& ShaderFrame::size()

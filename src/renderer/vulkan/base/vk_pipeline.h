@@ -27,7 +27,7 @@ public:
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
 
-    virtual void active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+    virtual sp<RenderCommand> active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
 
     virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) override;
 

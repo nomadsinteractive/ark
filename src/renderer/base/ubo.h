@@ -5,6 +5,7 @@
 
 #include "graphics/base/layer.h"
 
+#include "renderer/forwarding.h"
 #include "renderer/base/uniform.h"
 
 namespace ark {

@@ -20,14 +20,15 @@
 #include "renderer/opengl/base/gl_resource.h"
 #include "renderer/opengl/render_command/gl_draw_elements.h"
 #include "renderer/opengl/render_command/gl_draw_elements_instanced.h"
+#include "renderer/opengl/util/gl_util.h"
 
 #include "platform/platform.h"
 
 namespace ark {
 namespace opengl {
 
-GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader)
-    : _recycler(recycler), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _id(0)
+GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const ShaderBindings& bindings)
+    : _recycler(recycler), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _id(0), _render_command(createRenderCommand(bindings))
 {
 }
 
@@ -76,7 +77,7 @@ Resource::RecycleFunc GLPipeline::recycle()
     };
 }
 
-void GLPipeline::active(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
+sp<RenderCommand> GLPipeline::active(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
 {
     glUseProgram(_id);
     const Layer::UBOSnapshot& uboSnapshot = drawingContext._ubo;
@@ -105,6 +106,10 @@ void GLPipeline::active(GraphicsContext& /*graphicsContext*/, const DrawingConte
         if(sampler)
             activeTexture(sampler, i);
     }
+
+    _render_command->_count = drawingContext._count;
+    _render_command->_instance_count = drawingContext._instance_count;
+    return _render_command;
 }
 
 void GLPipeline::bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings)
@@ -155,6 +160,14 @@ void GLPipeline::bindUniform(float* buf, uint32_t size, const Uniform& uniform)
     default:
         DFATAL("Unimplemented");
     }
+}
+
+sp<GLPipeline::GLRenderCommand> GLPipeline::createRenderCommand(const ShaderBindings& bindings) const
+{
+    GLenum mode = GLUtil::toEnum(bindings.renderMode());
+    if(bindings.isDrawInstanced())
+        return sp<GLDrawElementsInstanced>::make(mode);
+    return sp<GLDrawElements>::make(mode);
 }
 
 void GLPipeline::bindUniform(GraphicsContext& /*graphicsContext*/, const Uniform& uniform)
@@ -395,6 +408,31 @@ GLuint GLPipeline::Shader::compile(uint32_t version, GLenum type, const String& 
         return 0;
     }
     return id;
+}
+
+GLPipeline::GLRenderCommand::GLRenderCommand(GLenum mode)
+    : _mode(mode)
+{
+}
+
+GLPipeline::GLDrawElements::GLDrawElements(GLenum mode)
+    : GLRenderCommand(mode)
+{
+}
+
+void GLPipeline::GLDrawElements::draw(GraphicsContext& /*graphicsContext*/)
+{
+    glDrawElements(_mode, _count, GLIndexType, nullptr);
+}
+
+GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode)
+    : GLRenderCommand(mode)
+{
+}
+
+void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& /*graphicsContext*/)
+{
+    glDrawElementsInstanced(_mode, _count, GLIndexType, nullptr, _instance_count);
 }
 
 }

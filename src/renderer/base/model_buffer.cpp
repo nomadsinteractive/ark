@@ -14,7 +14,7 @@ namespace ark {
 ModelBuffer::ModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
     : _shader_bindings(shaderBindings), _vertices(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), stride, instanceCount),
       _instanced_buffer_builders(shaderBindings->makeInstancedBufferBuilders(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), instanceCount)),
-      _indice_base(0), _is_instanced(shaderBindings->instancedArrays().size() > 0)
+      _indice_base(0), _is_instanced(shaderBindings->isDrawInstanced())
 {
 }
 

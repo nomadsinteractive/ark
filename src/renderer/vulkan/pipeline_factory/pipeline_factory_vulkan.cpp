@@ -6,6 +6,8 @@
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/resource_manager.h"
+#include "renderer/base/shader_bindings.h"
+#include "renderer/base/ubo.h"
 
 #include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/vk_device.h"
@@ -40,18 +42,15 @@ sp<VKPipeline> PipelineFactoryVulkan::build()
 
 sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& /*graphicsContext*/, const PipelineLayout& pipelineLayout, const ShaderBindings& bindings)
 {
+    const bytearray ubo = sp<DynamicArray<uint8_t>>::make(bindings.pipelineInput()->ubo()->size());
+
     setupVertexDescriptions(pipelineLayout.input());
     setupDescriptorSetLayout();
 
-    VkDescriptorSet descriptorSet = setupDescriptorSet();
+    VkDescriptorSet descriptorSet = setupDescriptorSet(ubo, bindings);
     VkPipeline pipeline = createPipeline();
 
     return sp<VKPipeline>::make(_resource_manager->recycler(), _renderer->renderTarget(), _pipeline_layout, _descriptor_set_layout, descriptorSet, pipeline);
-}
-
-sp<RenderCommand> PipelineFactoryVulkan::buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode renderMode, int32_t count)
-{
-    return nullptr;
 }
 
 void PipelineFactoryVulkan::setupVertexDescriptions(const PipelineInput& input)
@@ -170,6 +169,7 @@ VkDescriptorSet PipelineFactoryVulkan::setupDescriptorSet()
 
     VKUtil::checkResult(vkAllocateDescriptorSets(device->logicalDevice(), &allocInfo, &descriptorSet));
 
+    const VkDescriptorImageInfo imageDesc = _texture->descriptor();
     std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
         // Binding 0 : Vertex shader uniform buffer
         vks::initializers::writeDescriptorSet(
@@ -183,8 +183,48 @@ VkDescriptorSet PipelineFactoryVulkan::setupDescriptorSet()
         descriptorSet,
         VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,		// The descriptor set will use a combined image sampler (sampler and image could be split)
         1,												// Shader binding point 1
-        &_texture->descriptor())								// Pointer to the descriptor image for our texture
+        &imageDesc)								        // Pointer to the descriptor image for our texture
     };
+
+    vkUpdateDescriptorSets(device->logicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+
+    return descriptorSet;
+}
+
+VkDescriptorSet PipelineFactoryVulkan::setupDescriptorSet(const bytearray& ubo, const ShaderBindings& shaderBindings)
+{
+    const sp<VKDevice>& device = _renderer->device();
+    const sp<VKBuffer> uniform = sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), nullptr, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
+    VkDescriptorSetAllocateInfo allocInfo =
+            vks::initializers::descriptorSetAllocateInfo(
+                _renderer->vkDescriptorPool(),
+                &_descriptor_set_layout, 1);
+
+    VKUtil::checkResult(vkAllocateDescriptorSets(device->logicalDevice(), &allocInfo, &descriptorSet));
+
+    std::vector<VkDescriptorImageInfo> samplerDescriptors;
+    std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
+        // Binding 0 : Vertex shader uniform buffer
+        vks::initializers::writeDescriptorSet(
+        descriptorSet,
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        0,
+        &_ubo->descriptor())
+    };
+
+    uint32_t binding = 0;
+    for(const sp<Texture>& i : shaderBindings.samplers())
+    {
+        const sp<VKTexture2D> texture = i->resource().as<VKTexture2D>();
+        DASSERT(texture);
+        writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
+                                          descriptorSet,
+                                          VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                          ++binding,
+                                          &samplerDescriptors.back()));
+    }
 
     vkUpdateDescriptorSets(device->logicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 

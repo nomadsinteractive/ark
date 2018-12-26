@@ -15,7 +15,6 @@ public:
     virtual ~PipelineFactory() = default;
 
     virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineLayout& pipelineLayout, const ShaderBindings& bindings) = 0;
-    virtual sp<RenderCommand> buildRenderCommand(ObjectPool& objectPool, DrawingContext drawingContext, const sp<Shader>& shader, RenderModel::Mode mode, int32_t count) = 0;
 
 };
 
