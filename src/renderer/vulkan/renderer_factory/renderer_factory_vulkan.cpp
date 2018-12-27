@@ -74,7 +74,7 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buff
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<GLContext>& glContext, const Viewport& viewport)
 {
-    return sp<RenderViewVulkan>::make(sp<VKUtil>::make(_resource_manager, _renderer), glContext, _resource_manager, viewport);
+    return sp<RenderViewVulkan>::make(sp<VKUtil>::make(_resource_manager, _renderer), _renderer, glContext, _resource_manager, viewport);
 }
 
 sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()

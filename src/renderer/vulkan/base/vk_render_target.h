@@ -8,6 +8,8 @@
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/base/viewport.h"
+
 #include "renderer/vulkan/forward.h"
 
 #include "renderer/vulkan/util/vulkan_swap_chain.hpp"
@@ -23,7 +25,9 @@ public:
     uint32_t width() const;
     uint32_t height() const;
 
-    VkDescriptorPool descriptorPool() const;
+    VkDescriptorPool vkDescriptorPool() const;
+    const VkRect2D& vkScissor() const;
+    const VkViewport& vkViewport() const;
 
     const sp<VKDevice>& device() const;
 
@@ -34,8 +38,11 @@ public:
     std::vector<VkCommandBuffer> makeCommandBuffers() const;
 
     uint32_t acquire();
+    uint32_t aquiredImageId() const;
     void submit(VkCommandBuffer* commandBuffer);
     void swap();
+
+    void onSurfaceChanged(uint32_t width, uint32_t height);
 
 private:
     void initSwapchain();
@@ -53,6 +60,9 @@ private:
     VkQueue _queue;
     VulkanSwapChain _swap_chain;
     VkRenderPass _render_pass;
+
+    VkRect2D _scissor;
+    VkViewport _viewport;
 
     std::vector<VkFramebuffer> _frame_buffers;
 

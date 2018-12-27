@@ -9,12 +9,14 @@
 
 #include "renderer/base/graphics_context.h"
 #include "renderer/vulkan/base/vk_util.h"
+#include "renderer/vulkan/base/vk_renderer.h"
+#include "renderer/vulkan/base/vk_render_target.h"
 
 namespace ark {
 namespace vulkan {
 
-RenderViewVulkan::RenderViewVulkan(const sp<VKUtil>& vulkanApi, const sp<GLContext>& glContext, const sp<ResourceManager>& resourceManager, const Viewport& viewport)
-    : _vulkan_api(vulkanApi), _graphics_context(new GraphicsContext(glContext, resourceManager)), _viewport(viewport)
+RenderViewVulkan::RenderViewVulkan(const sp<VKUtil>& vulkanApi, const sp<VKRenderer>& renderer, const sp<GLContext>& glContext, const sp<ResourceManager>& resourceManager, const Viewport& viewport)
+    : _vulkan_api(vulkanApi), _renderer(renderer), _graphics_context(new GraphicsContext(glContext, resourceManager)), _viewport(viewport)
 {
 }
 
@@ -25,8 +27,10 @@ void RenderViewVulkan::onSurfaceCreated()
 
 void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
 {
+    LOGD("Width: %d, Height: %d, Viewport (%.1f, %.1f, %.1f, %.1f)", width, height, _viewport.left(), _viewport.top(), _viewport.right(), _viewport.bottom());
     _graphics_context.reset(new GraphicsContext(_graphics_context->glContext(), _graphics_context->resourceManager()));
-    initialize(width, height);
+
+    _renderer->renderTarget()->onSurfaceChanged(width, height);
 }
 
 void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, const sp<RenderCommand>& renderCommand)
@@ -41,7 +45,6 @@ void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, const sp<Rend
 
 void RenderViewVulkan::initialize(uint32_t width, uint32_t height)
 {
-    LOGD("Width: %d, Height: %d, Viewport (%.1f, %.1f, %.1f, %.1f)", width, height, _viewport.left(), _viewport.top(), _viewport.right(), _viewport.bottom());
 }
 
 }

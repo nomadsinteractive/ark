@@ -17,7 +17,7 @@ namespace ark {
 namespace vulkan {
 
 VKRenderTarget::VKRenderTarget(const sp<VKDevice>& device)
-    : _device(device), _aquired_image_id(0)
+    : _device(device), _aquired_image_id(0), _viewport{}
 {
     _queue = _device->queue();
     _swap_chain.connect(_device->vkInstance(), _device->physicalDevice(), _device->logicalDevice());
@@ -82,9 +82,19 @@ uint32_t VKRenderTarget::height() const
     return _height;
 }
 
-VkDescriptorPool VKRenderTarget::descriptorPool() const
+VkDescriptorPool VKRenderTarget::vkDescriptorPool() const
 {
     return _descriptor_pool;
+}
+
+const VkRect2D& VKRenderTarget::vkScissor() const
+{
+    return _scissor;
+}
+
+const VkViewport& VKRenderTarget::vkViewport() const
+{
+    return _viewport;
 }
 
 const sp<VKDevice>& VKRenderTarget::device() const
@@ -119,6 +129,11 @@ uint32_t VKRenderTarget::acquire()
     return _aquired_image_id;
 }
 
+uint32_t VKRenderTarget::aquiredImageId() const
+{
+    return _aquired_image_id;
+}
+
 void VKRenderTarget::submit(VkCommandBuffer* commandBuffer)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
@@ -132,6 +147,12 @@ void VKRenderTarget::swap()
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, _semaphore_render_complete));
     vkQueueWaitIdle(_queue);
+}
+
+void VKRenderTarget::onSurfaceChanged(uint32_t width, uint32_t height)
+{
+    _scissor = vks::initializers::rect2D(static_cast<int32_t>(width), static_cast<int32_t>(height), 0, 0);
+    _viewport = vks::initializers::viewport(static_cast<float>(width), static_cast<float>(height), 0.0f, static_cast<float>(std::max(width, height)));
 }
 
 void VKRenderTarget::initSwapchain()
