@@ -28,7 +28,8 @@ namespace ark {
 namespace opengl {
 
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const ShaderBindings& bindings)
-    : _recycler(recycler), _pipeline_input(bindings.pipelineInput()), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _id(0), _render_command(createRenderCommand(bindings))
+    : _recycler(recycler), _pipeline_input(bindings.pipelineInput()), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _id(0),
+      _render_command(createRenderCommand(bindings))
 {
 }
 
@@ -115,14 +116,14 @@ sp<RenderCommand> GLPipeline::active(GraphicsContext& /*graphicsContext*/, const
     return _render_command;
 }
 
-void GLPipeline::bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings)
+void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const ShaderBindings& bindings)
 {
     DCHECK(id(), "GLProgram unprepared");
-    bind(graphicsContext, bindings.pipelineInput(), 0);
+    bindBuffer(graphicsContext, bindings.pipelineInput(), 0);
     for(const auto& i : bindings.instancedArrays())
     {
         glBindBuffer(GL_ARRAY_BUFFER, i.second.id());
-        bind(graphicsContext, bindings.pipelineInput(), i.first);
+        bindBuffer(graphicsContext, bindings.pipelineInput(), i.first);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 }
@@ -203,7 +204,7 @@ void GLPipeline::glUpdateMatrix(GraphicsContext& graphicsContext, const String& 
     uniform.setUniformMatrix4fv(1, GL_FALSE, matrix.value(), graphicsContext.tick());
 }
 
-void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const PipelineInput& input, uint32_t divisor)
+void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const PipelineInput& input, uint32_t divisor)
 {
     const PipelineInput::Stream& stream = input.getStream(divisor);
     for(const auto& i : stream.attributes().values())

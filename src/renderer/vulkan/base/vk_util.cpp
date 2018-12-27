@@ -165,8 +165,9 @@ public:
         glslang::FinalizeProcess();
     }
 
-    EShLanguage toShLanguage(VKUtil::ShaderType type) const {
-        return _languages[type];
+    EShLanguage toShLanguage(Shader::Stage stage) const {
+        DCHECK(stage > Shader::STAGE_NONE && stage < Shader::STAGE_COUNT, "Illegal Shader::Stage: %d", stage);
+        return _languages[stage - 1];
     }
 
     const TBuiltInResource& builtInResource() const {
@@ -174,7 +175,7 @@ public:
     }
 
 private:
-    EShLanguage _languages[VKUtil::SHADER_TYPE_COUNT];
+    EShLanguage _languages[Shader::STAGE_COUNT];
     TBuiltInResource _built_in_resource;
 
 };
@@ -227,7 +228,7 @@ void VKUtil::initialize(GLContext& /*glContext*/)
 
     const sp<VKTexture2D> texture = sp<VKTexture2D>::make(_resource_manager->recycler(), _renderer, tex);
     texture->upload(_graphics_context);
-    _pipeline = sp<VKPipeline>::make(_resource_manager->recycler(), _renderer, nullptr);
+    _pipeline = sp<VKPipeline>::make(_resource_manager->recycler(), _renderer, nullptr, std::map<Shader::Stage, String>());
     _pipeline->_texture = texture;
     _pipeline->_ubo = _uniforms;
     _pipeline->upload();
@@ -357,10 +358,15 @@ VkPipelineShaderStageCreateInfo VKUtil::loadShaderSPIR(VkDevice device, std::str
     return shaderStage;
 }
 
-VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String& resid, ShaderType stage)
+VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String& resid, Shader::Stage stage)
 {
     const String content = Strings::loadFromReadable(Ark::instance().openAsset(resid));
-    const std::vector<uint32_t> spirv = VKUtil::compileSPIR(content, stage);
+    return createShader(device, content, stage);
+}
+
+VkPipelineShaderStageCreateInfo VKUtil::createShader(VkDevice device, const String& source, Shader::Stage stage)
+{
+    const std::vector<uint32_t> spirv = VKUtil::compileSPIR(source, stage);
     VkShaderModuleCreateInfo moduleCreateInfo{};
     moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     moduleCreateInfo.codeSize = spirv.size() * sizeof(uint32_t);
@@ -368,7 +374,7 @@ VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String
 
     VkPipelineShaderStageCreateInfo shaderStage = {};
     shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    shaderStage.stage = stage == SHADER_TYPE_VERTEX ? VK_SHADER_STAGE_VERTEX_BIT : VK_SHADER_STAGE_FRAGMENT_BIT;
+    shaderStage.stage = toStage(stage);
     checkResult(vkCreateShaderModule(device, &moduleCreateInfo, nullptr, &shaderStage.module));
     DASSERT(shaderStage.module != VK_NULL_HANDLE);
     shaderStage.pName = "main";
@@ -413,11 +419,18 @@ VkFormat VKUtil::getAttributeFormat(const Attribute& attribute)
     return VK_FORMAT_R32G32B32A32_SFLOAT;
 }
 
-std::vector<uint32_t> VKUtil::compileSPIR(const String& source, ShaderType shaderType)
+VkShaderStageFlagBits VKUtil::toStage(Shader::Stage stage)
 {
-    Global<GLSLLangInitializer> initializer;
-    EShLanguage stage = initializer->toShLanguage(shaderType);
-    glslang::TShader shader(stage);
+    static const VkShaderStageFlagBits vkStages[] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT};
+    DCHECK(stage > Shader::STAGE_NONE && stage < Shader::STAGE_COUNT, "Illegal Shader::Stage: %d", stage);
+    return vkStages[stage - 1];
+}
+
+std::vector<uint32_t> VKUtil::compileSPIR(const String& source, Shader::Stage stage)
+{
+    const Global<GLSLLangInitializer> initializer;
+    EShLanguage esStage = initializer->toShLanguage(stage);
+    glslang::TShader shader(esStage);
     const char* sources[] = {source.c_str()};
     shader.setStrings(sources, 1);
 
@@ -434,25 +447,25 @@ std::vector<uint32_t> VKUtil::compileSPIR(const String& source, ShaderType shade
         const glslang::TResourceType res = glslang::TResourceType(r);
 
         // Set base bindings
-        shader.setShiftBinding(res, baseBinding[res][stage]);
+        shader.setShiftBinding(res, baseBinding[res][esStage]);
 
         // Set bindings for particular resource sets
         // TODO: use a range based for loop here, when available in all environments.
-        for (auto i = baseBindingForSet[res][stage].begin();
-             i != baseBindingForSet[res][stage].end(); ++i)
+        for (auto i = baseBindingForSet[res][esStage].begin();
+             i != baseBindingForSet[res][esStage].end(); ++i)
             shader.setShiftBindingForSet(res, i->second, i->first);
     }
     shader.setFlattenUniformArrays(false);
     shader.setNoStorageFormat(false);
-    shader.setResourceSetBinding(baseResourceSetBinding[stage]);
+    shader.setResourceSetBinding(baseResourceSetBinding[esStage]);
 
     shader.setUniformLocationBase(uniformBase);
 
-    shader.setEnvInput(glslang::EShSourceGlsl, stage, glslang::EShClientVulkan, 100);
+    shader.setEnvInput(glslang::EShSourceGlsl, esStage, glslang::EShClientVulkan, 100);
     shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_0);
     shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_0);
 
-    if (!shader.parse(&initializer->builtInResource(), 110, false, EShMsgDefault))
+    if (!shader.parse(&initializer->builtInResource(), 100, false, EShMsgDefault))
         DFATAL("Compile error: %s", shader.getInfoLog());
     {
         glslang::TProgram program;
@@ -460,7 +473,7 @@ std::vector<uint32_t> VKUtil::compileSPIR(const String& source, ShaderType shade
         if (!program.link(EShMsgDefault))
             DFATAL("Link error: %s", shader.getInfoLog());
 
-        if (program.getIntermediate(stage)) {
+        if (program.getIntermediate(esStage)) {
             std::vector<uint32_t> spirv;
             spv::SpvBuildLogger logger;
             glslang::SpvOptions spvOptions;
@@ -468,7 +481,7 @@ std::vector<uint32_t> VKUtil::compileSPIR(const String& source, ShaderType shade
             spvOptions.optimizeSize = false;
             spvOptions.disassemble = false;
             spvOptions.validate = true;
-            glslang::GlslangToSpv(*program.getIntermediate(stage), spirv, &logger, &spvOptions);
+            glslang::GlslangToSpv(*program.getIntermediate(esStage), spirv, &logger, &spvOptions);
             return spirv;
         }
     }

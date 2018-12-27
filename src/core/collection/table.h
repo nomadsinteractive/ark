@@ -15,20 +15,21 @@ public:
 
     void push_back(T key, U value) {
         size_t index = _values.size();
-        _keys.insert(std::make_pair(std::move(key), index));
+        _indices.insert(std::make_pair(key, index));
+        _keys.push_back(std::move(key));
         _values.push_back(std::move(value));
     }
 
     bool has(const T& key) const {
-        return _keys.find(key) != _keys.end();
+        return _indices.find(key) != _indices.end();
     }
 
     size_t find(const T& key) const {
-        const auto iter = _keys.find(key);
-        return iter != _keys.end() ? iter->second : Constants::npos;
+        const auto iter = _indices.find(key);
+        return iter != _indices.end() ? iter->second : Constants::npos;
     }
 
-    const std::unordered_map<T, size_t>& keys() const {
+    const std::vector<T>& keys() const {
         return _keys;
     }
 
@@ -51,16 +52,71 @@ public:
     }
 
     U& operator[](const T& key) {
-        const auto iter = _keys.find(key);
-        if(iter != _keys.end())
+        const auto iter = _indices.find(key);
+        if(iter != _indices.end())
             return _values[iter.second];
-        _keys.insert(std::make_pair<T, size_t>(key, _values.size()));
+        _indices.insert(std::make_pair<T, size_t>(key, _values.size()));
         _values.push_back(U());
         return _values.back();
     }
 
+    template<typename TIter, typename UIter> struct ZippedIterator {
+        TIter _key_iter;
+        UIter _value_iter;
+
+        ZippedIterator(TIter keyIter, UIter valueIter)
+            : _key_iter(std::move(keyIter)), _value_iter(std::move(valueIter)) {
+        }
+
+        ZippedIterator& operator ++() {
+            ++(this->_key_iter);
+            ++(this->_value_iter);
+            return *this;
+        }
+
+        bool operator == (const ZippedIterator<TIter, UIter>& other) const {
+            bool equal = this->_key_iter == other._key_iter;
+            DCHECK(equal == this->_value_iter == other._value_iter, "Zipped iterator must be both equal or neither");
+            return equal;
+        }
+
+        bool operator != (const ZippedIterator<TIter, UIter>& other) const {
+            return !(*this == other);
+        }
+
+        ZippedIterator operator ++(int) {
+            return ZippedIterator(_key_iter++, _value_iter++);
+        }
+
+        std::pair<T, U> operator *() const {
+            return std::make_pair<T, U>(*_key_iter, *_value_iter);
+        }
+    };
+
+    struct Zipped {
+        const std::vector<T>& _keys;
+        const std::vector<U>& _values;
+
+        Zipped(const std::vector<T>& keys, const std::vector<U>& values)
+            : _keys(keys), _values(values) {
+        }
+
+        ZippedIterator<typename std::vector<T>::const_iterator, typename std::vector<U>::const_iterator> begin() const {
+            return ZippedIterator<typename std::vector<T>::const_iterator, typename std::vector<U>::const_iterator>(_keys.begin(), _values.begin());
+        }
+
+        ZippedIterator<typename std::vector<T>::const_iterator, typename std::vector<U>::const_iterator> end() const {
+            return ZippedIterator<typename std::vector<T>::const_iterator, typename std::vector<U>::const_iterator>(_keys.end(), _values.end());
+        }
+    };
+
+    Zipped items() const {
+        return Zipped(_keys, _values);
+    }
+
 private:
-    std::unordered_map<T, size_t> _keys;
+    std::unordered_map<T, size_t> _indices;
+    std::vector<T> _keys;
     std::vector<U> _values;
 };
 

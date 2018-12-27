@@ -3,8 +3,9 @@
 #include "core/util/log.h"
 
 #include "renderer/base/shader_bindings.h"
-#include "renderer/inf/pipeline.h"
 #include "renderer/inf/pipeline_factory.h"
+
+#include "renderer/opengl/base/gl_pipeline.h"
 
 #include "platform/gl/gl.h"
 
@@ -28,8 +29,8 @@ void GLVertexArray::upload(GraphicsContext& graphicsContext)
     glBindVertexArray(_id);
     bindings->arrayBuffer().upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, bindings->arrayBuffer().id());
-    const sp<Pipeline> pipeline = _pipeline_factory->buildPipeline(graphicsContext, bindings);
-    pipeline->bind(graphicsContext, bindings);
+    const sp<opengl::GLPipeline> pipeline = _pipeline_factory->buildPipeline(graphicsContext, bindings);
+    pipeline->bindBuffer(graphicsContext, bindings);
     glBindVertexArray(0);
     LOGD("id = %d", _id);
 }

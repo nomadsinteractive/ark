@@ -18,12 +18,16 @@ namespace ark {
 
 class ARK_API Shader {
 public:
+    enum Stage {
+        STAGE_NONE,
+        STAGE_VERTEX,
+        STAGE_FRAGMENT,
+        STAGE_COUNT
+    };
+
+public:
     struct Stub : public PipelineFactory {
         Stub(const sp<PipelineFactory>& pipelineFactory);
-
-//        virtual uint32_t id() override;
-//        virtual void upload(GraphicsContext& graphicsContext) override;
-//        virtual RecycleFunc recycle() override;
 
         virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& shaderBindings) override;
 
@@ -49,7 +53,7 @@ public:
     const sp<PipelineFactory>& pipelineFactory() const;
     const sp<PipelineLayout>& pipelineLayout() const;
 
-    const sp<Pipeline> getPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const;
+    const sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const;
 
 //[[deprecated]]
     uint32_t stride() const;

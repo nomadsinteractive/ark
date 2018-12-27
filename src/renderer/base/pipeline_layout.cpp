@@ -50,6 +50,14 @@ const sp<PipelineInput>& PipelineLayout::input() const
     return _input;
 }
 
+std::map<Shader::Stage, String> PipelineLayout::getPreprocessedShaders(const GLContext& glContext) const
+{
+    std::map<Shader::Stage, String> shaders;
+    shaders[Shader::STAGE_VERTEX] = _vertex.process(glContext);
+    shaders[Shader::STAGE_FRAGMENT] = _fragment.process(glContext);
+    return shaders;
+}
+
 const ShaderPreprocessor::Preprocessor& PipelineLayout::vertex() const
 {
     return _vertex;

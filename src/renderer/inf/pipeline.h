@@ -18,8 +18,6 @@ public:
     virtual ~Pipeline() = default;
 
     virtual sp<RenderCommand> active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
-
-    virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) = 0;
 };
 
 }

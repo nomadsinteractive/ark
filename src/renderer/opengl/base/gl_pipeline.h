@@ -31,7 +31,7 @@ public:
 
     virtual sp<RenderCommand> active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
 
-    virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) override;
+    void bindBuffer(GraphicsContext& graphicsContext, const ShaderBindings& bindings);
 
     void activeTexture(const Texture& texture, uint32_t name);
 
@@ -101,7 +101,7 @@ private:
 
     GLint getUniformLocation(const String& name);
 
-    void bind(GraphicsContext&, const PipelineInput& input, uint32_t divisor);
+    void bindBuffer(GraphicsContext&, const PipelineInput& input, uint32_t divisor);
     void bindUniform(GraphicsContext& graphicsContext, const Uniform& uniform);
     void bindUniform(float* buf, uint32_t size, const Uniform& uniform);
 

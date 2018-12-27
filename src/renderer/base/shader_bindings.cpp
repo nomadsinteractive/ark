@@ -8,13 +8,13 @@
 
 namespace ark {
 
-ShaderBindings::ShaderBindings(RenderController& renderController, const sp<Shader>& shader)
+ShaderBindings::ShaderBindings(RenderController& renderController, const Shader& shader)
     : ShaderBindings(renderController, shader, renderController.makeVertexBuffer())
 {
 }
 
-ShaderBindings::ShaderBindings(RenderController& renderController, const sp<Shader>& shader, const Buffer& arrayBuffer)
-    : _attributes(shader->input()), _array_buffer(arrayBuffer), _pipeline_layout(shader->pipelineLayout()), _pipeline_input(shader->input()),
+ShaderBindings::ShaderBindings(RenderController& renderController, const Shader& shader, const Buffer& arrayBuffer)
+    : _attributes(shader.input()), _array_buffer(arrayBuffer), _pipeline_layout(shader.pipelineLayout()), _pipeline_input(shader.input()),
       _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController)), _render_mode(RenderModel::RENDER_MODE_NONE)
 {
     _samplers.resize(_pipeline_input->samplerCount());

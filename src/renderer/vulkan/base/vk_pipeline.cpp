@@ -17,9 +17,10 @@
 namespace ark {
 namespace vulkan {
 
-VKPipeline::VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<ShaderBindings>& shaderBindings)
+VKPipeline::VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<ShaderBindings>& shaderBindings, std::map<Shader::Stage, String> shaders)
     : _recycler(recycler), _renderer(renderer), _shader_bindings(shaderBindings),
-      _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE), _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE)
+      _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE), _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE),
+      _shaders(std::move(shaders))
 {
 }
 
@@ -91,10 +92,6 @@ Resource::RecycleFunc VKPipeline::recycle()
 sp<RenderCommand> VKPipeline::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     return nullptr;
-}
-
-void VKPipeline::bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings)
-{
 }
 
 void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)
@@ -327,13 +324,20 @@ void VKPipeline::setupPipeline(const VertexLayout& vertexLayout)
                 0);
 
     // Load shaders
-    std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
+    std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 
 //    shaderStages[0] = VulkanAPI::loadShaderSPIR(_device->logicalDevice(), "texture.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
 //    shaderStages[1] = VulkanAPI::loadShaderSPIR(_device->logicalDevice(), "texture.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
-
-    shaderStages[0] = VKUtil::loadShader(device->logicalDevice(), "texture.vert", VKUtil::SHADER_TYPE_VERTEX);
-    shaderStages[1] = VKUtil::loadShader(device->logicalDevice(), "texture.frag", VKUtil::SHADER_TYPE_FRAGMENT);
+    if(_shaders.empty())
+    {
+        shaderStages.push_back(VKUtil::loadShader(device->logicalDevice(), "texture.vert", Shader::STAGE_VERTEX));
+        shaderStages.push_back(VKUtil::loadShader(device->logicalDevice(), "texture.frag", Shader::STAGE_FRAGMENT));
+    }
+    else
+    {
+        for(const auto& iter : _shaders)
+            shaderStages.push_back(VKUtil::createShader(device->logicalDevice(), iter.second, iter.first));
+    }
 
     VkGraphicsPipelineCreateInfo pipelineCreateInfo =
             vks::initializers::pipelineCreateInfo(
@@ -353,8 +357,9 @@ void VKPipeline::setupPipeline(const VertexLayout& vertexLayout)
     pipelineCreateInfo.pStages = shaderStages.data();
 
     VKUtil::checkResult(vkCreateGraphicsPipelines(device->logicalDevice(), device->pipelineCache(), 1, &pipelineCreateInfo, nullptr, &_pipeline));
-    vkDestroyShaderModule(device->logicalDevice(), shaderStages[0].module, nullptr);
-    vkDestroyShaderModule(device->logicalDevice(), shaderStages[1].module, nullptr);
+
+    for(const auto& i : shaderStages)
+        vkDestroyShaderModule(device->logicalDevice(), i.module, nullptr);
 }
 
 }

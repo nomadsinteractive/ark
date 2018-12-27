@@ -34,8 +34,8 @@ public:
     };
 
 public:
-    ShaderBindings(RenderController& renderController, const sp<Shader>& shader);
-    ShaderBindings(RenderController& renderController, const sp<Shader>& shader, const Buffer& arrayBuffer);
+    ShaderBindings(RenderController& renderController, const Shader& shader);
+    ShaderBindings(RenderController& renderController, const Shader& shader, const Buffer& arrayBuffer);
 
     const sp<Snippet>& snippet() const;
     const sp<PipelineLayout>& pipelineLayout() const;

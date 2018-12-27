@@ -27,6 +27,9 @@ public:
     void preCompile(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings);
 
     const sp<PipelineInput>& input() const;
+
+    std::map<Shader::Stage, String> getPreprocessedShaders(const GLContext& glContext) const;
+
     const ShaderPreprocessor::Preprocessor& vertex() const;
     const ShaderPreprocessor::Preprocessor& fragment() const;
 

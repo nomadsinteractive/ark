@@ -25,12 +25,8 @@ public:
     SharedPtr(std::shared_ptr<T> ptr, std::shared_ptr<Interfaces> interfaces) noexcept
         : _ptr(std::move(ptr)), _interfaces(std::move(interfaces)) {
     }
-
     template<typename U> SharedPtr(const SharedPtr<U>& ptr) noexcept
         : _ptr(std::static_pointer_cast<T>(ptr._ptr)), _interfaces(ptr._interfaces) {
-    }
-    template<typename U> SharedPtr(SharedPtr<U>&& ptr) noexcept
-        : _ptr(std::move(ptr._ptr)), _interfaces(std::move(ptr._interfaces)) {
     }
 
     typedef T _PtrType;

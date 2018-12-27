@@ -2,7 +2,6 @@
 
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/inf/iterator.h"
 #include "core/inf/variable.h"
 #include "core/epi/lifecycle.h"
 #include "core/util/bean_utils.h"

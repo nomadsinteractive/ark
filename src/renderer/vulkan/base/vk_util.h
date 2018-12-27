@@ -13,6 +13,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/shader.h"
 
 #include "renderer/vulkan/forward.h"
 #include "renderer/vulkan/renderer_factory/renderer_factory_vulkan.h"
@@ -24,12 +25,6 @@ namespace vulkan {
 
 class VKUtil {
 public:
-    enum ShaderType {
-        SHADER_TYPE_VERTEX,
-        SHADER_TYPE_FRAGMENT,
-        SHADER_TYPE_COUNT
-    };
-
     VKUtil(const sp<ResourceManager>& resourceManager, const sp<VKRenderer>& renderer);
     ~VKUtil();
 
@@ -38,13 +33,16 @@ public:
     void render();
 
     static void checkResult(VkResult result);
+
     static VkPipelineShaderStageCreateInfo loadShaderSPIR(VkDevice device, std::string fileName, VkShaderStageFlagBits stage);
-    static VkPipelineShaderStageCreateInfo loadShader(VkDevice device, const String& resid, ShaderType stage);
+    static VkPipelineShaderStageCreateInfo loadShader(VkDevice device, const String& resid, Shader::Stage stage);
+    static VkPipelineShaderStageCreateInfo createShader(VkDevice device, const String& source, Shader::Stage stage);
+
 
     static VkFormat getAttributeFormat(const Attribute& attribute);
+    static VkShaderStageFlagBits toStage(Shader::Stage stage);
 
-
-    static std::vector<uint32_t> compileSPIR(const String& source, ShaderType shaderType);
+    static std::vector<uint32_t> compileSPIR(const String& source, Shader::Stage stage);
 
     struct Vertex {
         float pos[3];

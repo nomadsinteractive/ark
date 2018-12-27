@@ -8,7 +8,9 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/shader.h"
 #include "renderer/inf/pipeline.h"
+
 #include "renderer/vulkan/forward.h"
 
 namespace ark {
@@ -16,7 +18,7 @@ namespace vulkan {
 
 class VKPipeline : public Pipeline {
 public:
-    VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<ShaderBindings>& shaderBindings);
+    VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<ShaderBindings>& shaderBindings, std::map<Shader::Stage, String> shaders);
     ~VKPipeline() override;
 
     void upload();
@@ -30,8 +32,6 @@ public:
     virtual RecycleFunc recycle() override;
 
     virtual sp<RenderCommand> active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-
-    virtual void bind(GraphicsContext& graphicsContext, const ShaderBindings& bindings) override;
 
     sp<VKBuffer> _ubo;
     sp<VKTexture2D> _texture;
@@ -63,6 +63,7 @@ private:
     VkDescriptorSet _descriptor_set;
     VkPipeline _pipeline;
 
+    std::map<Shader::Stage, String> _shaders;
     std::unordered_map<String, uint32_t> _location_map;
 
 };

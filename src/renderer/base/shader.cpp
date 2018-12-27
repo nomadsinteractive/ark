@@ -87,7 +87,7 @@ Layer::UBOSnapshot Shader::snapshot(MemoryPool& memoryPool) const
 
 void Shader::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    getPipeline(graphicsContext, drawingContext._shader_bindings)->active(graphicsContext, drawingContext);
+    buildPipeline(graphicsContext, drawingContext._shader_bindings)->active(graphicsContext, drawingContext);
 }
 
 const sp<PipelineInput>& Shader::input() const
@@ -115,7 +115,7 @@ const sp<PipelineLayout>& Shader::pipelineLayout() const
     return _pipeline_layout;
 }
 
-const sp<Pipeline> Shader::getPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const
+const sp<Pipeline> Shader::buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const
 {
     return _stub->buildPipeline(graphicsContext, bindings);
 }

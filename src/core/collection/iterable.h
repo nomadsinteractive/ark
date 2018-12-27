@@ -49,11 +49,11 @@ public:
         : _iterator(std::move(iterator)) {
     }
 
-    bool operator == (const IteratorBase<T>& other) {
+    bool operator == (const IteratorBase<T>& other) const {
         return _iterator == other._iterator;
     }
 
-    bool operator != (const IteratorBase<T>& other) {
+    bool operator != (const IteratorBase<T>& other) const {
         return _iterator != other._iterator;
     }
 

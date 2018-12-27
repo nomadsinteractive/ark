@@ -11,7 +11,6 @@ template<typename T> class ByIndex;
 template<typename T> class Callable;
 template<typename T> class Dictionary;
 template<typename T> class Duck;
-template<typename T> class Iterator;
 template<typename T> class OwnedPtr;
 template<typename T> class Loader;
 template<typename T> class List;

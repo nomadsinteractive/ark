@@ -5,6 +5,8 @@
 #include "renderer/inf/pipeline.h"
 #include "renderer/inf/snippet.h"
 
+#include "renderer/opengl/base/gl_pipeline.h"
+
 #include "platform/gl/gl.h"
 
 namespace ark {
@@ -18,7 +20,8 @@ public:
     virtual void preDraw(GraphicsContext& graphicsContext, Shader& shader, const DrawingContext& context) override {
         glBindBuffer(GL_ARRAY_BUFFER, context._array_buffer.id());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context._index_buffer.id());
-        shader.pipeline()->bind(graphicsContext, context._shader_bindings);
+        const sp<opengl::GLPipeline> pipeline = shader.pipeline();
+        pipeline->bindBuffer(graphicsContext, context._shader_bindings);
     }
 
 };
