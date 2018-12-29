@@ -20,7 +20,7 @@ public:
     Color(uint32_t value);
     Color(float red, float green, float blue, float alpha);
     Color(float red, float green, float blue);
-    Color(const Color& color);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Color);
 
 //  [[script::bindings::property]]
     float red() const;
@@ -49,7 +49,6 @@ public:
 
     bool operator == (const Color& other) const;
     bool operator != (const Color& other) const;
-    const Color& operator =(const Color& other);
 
     static const Color NONE;
     static const Color WHITE;

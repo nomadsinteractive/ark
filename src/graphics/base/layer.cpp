@@ -119,7 +119,9 @@ const sp<RenderModel>& Layer::model() const
 
 Layer::Snapshot Layer::snapshot() const
 {
-    return Snapshot(_stub);
+    Snapshot snapshot(_stub);
+    _stub->_model->onPostSnapshot(snapshot);
+    return snapshot;
 }
 
 sp<LayerContext> Layer::makeContext()

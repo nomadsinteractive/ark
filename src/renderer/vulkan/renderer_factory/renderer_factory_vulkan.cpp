@@ -85,8 +85,8 @@ sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
 sp<Texture> RendererFactoryVulkan::createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap)
 {
     const sp<Size> size = sp<Size>::make(width, height);
-    const sp<VKTexture2D> texture = sp<VKTexture2D>::make(recycler, _renderer, bitmap);
-    return sp<Texture>::make(size, texture, Texture::TYPE_2D);
+    const sp<VKTexture2D> texture = sp<VKTexture2D>::make(recycler, _renderer, sp<Texture::Parameters>::make(), bitmap);
+    return sp<Texture>::make(size, sp<Variable<sp<Resource>>::Const>::make(texture), Texture::TYPE_2D);
 }
 
 }

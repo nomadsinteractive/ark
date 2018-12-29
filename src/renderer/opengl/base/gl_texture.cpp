@@ -40,8 +40,13 @@ void GLTexture::upload(GraphicsContext& graphicsContext)
     if(_parameters->_features & Texture::FEATURE_MIPMAPS)
         glGenerateMipmap(static_cast<GLenum>(_target));
 
-    for(const auto& i : _parameters->_tex_parameters)
-        glTexParameteri(static_cast<GLenum>(_target), static_cast<GLenum>(i.first), static_cast<GLint>(i.second));
+    static const GLenum glParameters[Texture::PARAMETER_COUNT] = {GL_NEAREST, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, GL_MIRRORED_REPEAT, GL_REPEAT, GL_MIRROR_CLAMP_TO_EDGE};
+
+    glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_MIN_FILTER, static_cast<GLint>(glParameters[_parameters->_min_filter]));
+    glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_MAG_FILTER, static_cast<GLint>(glParameters[_parameters->_mag_filter]));
+    glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_S, static_cast<GLint>(glParameters[_parameters->_wrap_s]));
+    glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_T, static_cast<GLint>(glParameters[_parameters->_wrap_t]));
+    glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_R, static_cast<GLint>(glParameters[_parameters->_wrap_r]));
 }
 
 Resource::RecycleFunc GLTexture::recycle()

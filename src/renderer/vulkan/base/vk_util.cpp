@@ -24,6 +24,7 @@
 
 #include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
+#include "renderer/vulkan/base/vk_command_buffers.h"
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_instance.h"
 #include "renderer/vulkan/base/vk_pipeline.h"
@@ -190,8 +191,6 @@ VKUtil::VKUtil(const sp<ResourceManager>& resourceManager, const sp<VKRenderer>&
 VKUtil::~VKUtil()
 {
     _renderer->device()->waitIdle();
-    _renderer->commandPool()->destroyCommandBuffers(_command_buffers.size(), _command_buffers.data());
-
 #if defined(_DIRECT2DISPLAY)
 
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
@@ -226,13 +225,14 @@ void VKUtil::initialize(GLContext& /*glContext*/)
 
     const sp<Variable<bitmap>> tex = sp<Variable<bitmap>::Get>::make(_resource_manager->bitmapLoader(), "texture.png");
 
-    const sp<VKTexture2D> texture = sp<VKTexture2D>::make(_resource_manager->recycler(), _renderer, tex);
+    const sp<VKTexture2D> texture = sp<VKTexture2D>::make(_resource_manager->recycler(), _renderer, sp<Texture::Parameters>::make(), tex);
     texture->upload(_graphics_context);
     _pipeline = sp<VKPipeline>::make(_resource_manager->recycler(), _renderer, nullptr, std::map<Shader::Stage, String>());
     _pipeline->_texture = texture;
     _pipeline->_ubo = _uniforms;
     _pipeline->upload();
 
+    _command_buffers = sp<VKCommandBuffers>::make(_resource_manager->recycler(), _renderer->renderTarget());
     buildCommandBuffers(_renderer->renderTarget());
     prepared = true;
 }
@@ -276,34 +276,33 @@ void VKUtil::buildCommandBuffers(const VKRenderTarget& renderTarget)
     renderPassBeginInfo.clearValueCount = 2;
     renderPassBeginInfo.pClearValues = clearValues;
 
-    _command_buffers = renderTarget.makeCommandBuffers();
-    for (size_t i = 0; i < _command_buffers.size(); ++i)
+    for (size_t i = 0; i < _command_buffers->commandBuffers().size(); ++i)
     {
         // Set target frame buffer
         renderPassBeginInfo.framebuffer = renderTarget.frameBuffers()[i];
+        const VkCommandBuffer commandBuffer = _command_buffers->commandBuffers()[i];
+        checkResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
 
-        checkResult(vkBeginCommandBuffer(_command_buffers[i], &cmdBufInfo));
-
-        vkCmdBeginRenderPass(_command_buffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         VkViewport viewport = vks::initializers::viewport((float)renderTarget.width(), (float)renderTarget.height(), 0.0f, 1.0f);
-        vkCmdSetViewport(_command_buffers[i], 0, 1, &viewport);
+        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
         VkRect2D scissor = vks::initializers::rect2D(renderTarget.width(), renderTarget.height(), 0, 0);
-        vkCmdSetScissor(_command_buffers[i], 0, 1, &scissor);
+        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-        vkCmdBindDescriptorSets(_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->vkPipelineLayout(), 0, 1, &_pipeline->vkDescriptorSet(), 0, nullptr);
-        vkCmdBindPipeline(_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->vkPipeline());
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->vkPipelineLayout(), 0, 1, &_pipeline->vkDescriptorSet(), 0, nullptr);
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->vkPipeline());
 
         VkDeviceSize offsets[1] = { 0 };
-        vkCmdBindVertexBuffers(_command_buffers[i], VERTEX_BUFFER_BIND_ID, 1, &_vertex_buffer->vkBuffer(), offsets);
-        vkCmdBindIndexBuffer(_command_buffers[i], _index_buffer->vkBuffer(), 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindVertexBuffers(commandBuffer, VERTEX_BUFFER_BIND_ID, 1, &_vertex_buffer->vkBuffer(), offsets);
+        vkCmdBindIndexBuffer(commandBuffer, _index_buffer->vkBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-        vkCmdDrawIndexed(_command_buffers[i], indexCount, 1, 0, 0, 0);
+        vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
 
-        vkCmdEndRenderPass(_command_buffers[i]);
+        vkCmdEndRenderPass(commandBuffer);
 
-        checkResult(vkEndCommandBuffer(_command_buffers[i]));
+        checkResult(vkEndCommandBuffer(commandBuffer));
     }
 }
 
@@ -333,8 +332,8 @@ void VKUtil::generateQuad()
 
 void VKUtil::draw(VKRenderTarget& renderTarget)
 {
-    uint32_t currentBuffer = renderTarget.acquire();
-    renderTarget.submit(&_command_buffers[currentBuffer]);
+    renderTarget.acquire();
+    _command_buffers->submit(_graphics_context);
     renderTarget.swap();
 }
 
@@ -417,6 +416,19 @@ VkFormat VKUtil::getAttributeFormat(const Attribute& attribute)
     }
     DFATAL("Unsupport type %s, length %d", attribute.declareType().c_str(), attribute.length());
     return VK_FORMAT_R32G32B32A32_SFLOAT;
+}
+
+VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, Texture::Format format)
+{
+    static const VkFormat vkFormats[] = {VK_FORMAT_R8_UNORM, VK_FORMAT_R8_SNORM, VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R32_UINT, VK_FORMAT_R32_SINT,
+                                         VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8_SNORM, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R32G32_UINT, VK_FORMAT_R32G32_SINT,
+                                         VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8_SNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R32G32B32_UINT, VK_FORMAT_R32G32B32_SINT,
+                                         VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_SNORM, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R32G32B32A32_UINT, VK_FORMAT_R32G32B32A32_SINT};
+    uint32_t signedOffset = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED ? 1 : 0;
+    uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
+    uint32_t channel8 = (bitmap.channels() - 1) * 8;
+    DCHECK(byteCount > 0 && byteCount <= 4 && byteCount != 3, "Unsupported color depth: %d", byteCount * 8);
+    return vkFormats[channel8 + (byteCount - 1) * 2 + signedOffset];
 }
 
 VkShaderStageFlagBits VKUtil::toStage(Shader::Stage stage)

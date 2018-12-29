@@ -5,6 +5,7 @@ namespace ark {
 namespace vulkan {
 
 class VKBuffer;
+class VKCommandBuffers;
 class VKCommandPool;
 class VKDevice;
 class VKInstance;

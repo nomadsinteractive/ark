@@ -12,24 +12,23 @@ namespace ark {
 
 class GLModelText : public RenderModel {
 private:
-    class Stub : public Resource {
+    class Stub : public Variable<sp<Resource>> {
     public:
-        Stub(RenderController& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
+        Stub(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
 
-        void reset(RenderController& renderController, uint32_t textureWidth, uint32_t textureHeight);
+        void reset(uint32_t textureWidth, uint32_t textureHeight);
 
         bool checkUnpreparedCharacter(const Layer::Snapshot& renderContext);
-        bool prepare(const Layer::Snapshot& renderContext, bool allowReset);
+        bool prepare(const Layer::Snapshot& snapshot, bool allowReset);
 
-        virtual uint32_t id() override;
-        virtual void upload(GraphicsContext& graphicsContext) override;
-        virtual RecycleFunc recycle() override;
+        virtual sp<Resource> val() override;
 
     private:
         bool prepareOne(int32_t c);
         void clear();
 
     private:
+        sp<RenderController> _render_controller;
         sp<Alphabet> _alphabet;
         bitmap _font_glyph;
         sp<Texture> _texture;
@@ -46,10 +45,13 @@ private:
     };
 
 public:
-    GLModelText(RenderController& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
+    GLModelText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
 
     virtual void initialize(ShaderBindings& bindings) override;
-    virtual void start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext) override;
+
+    virtual void onPostSnapshot(const Layer::Snapshot& snapshot) override;
+
+    virtual void start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& snapshot) override;
     virtual void load(ModelBuffer& buf, int32_t type, const V& scale) override;
     virtual Metrics measure(int32_t type) override;
 

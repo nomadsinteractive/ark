@@ -2,12 +2,22 @@
 
 #include "renderer/base/resource_manager.h"
 
+#include "renderer/inf/snippet.h"
+
 namespace ark {
 namespace vulkan {
 
-sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(ResourceManager& glResourceManager, const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings)
+namespace {
+
+class CoreSnippetVulkan : public Snippet {
+
+};
+
+}
+
+sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(ResourceManager& resourceManager, const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings)
 {
-    return nullptr;
+    return sp<CoreSnippetVulkan>::make();
 }
 
 }

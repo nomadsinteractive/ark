@@ -96,8 +96,8 @@ sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()
 sp<Texture> RendererFactoryOpenGL::createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap)
 {
     const sp<Size> size = sp<Size>::make(static_cast<float>(width), static_cast<float>(height));
-    const sp<GLTexture2D> texture2d = sp<GLTexture2D>::make(recycler, size, GLUtil::getTextureParameters(), bitmap);
-    return sp<Texture>::make(size, texture2d, Texture::TYPE_2D);
+    const sp<GLTexture2D> texture2d = sp<GLTexture2D>::make(recycler, size, sp<Texture::Parameters>::make(), bitmap);
+    return sp<Texture>::make(size, sp<Variable<sp<Resource>>::Const>::make(texture2d), Texture::TYPE_2D);
 }
 
 }

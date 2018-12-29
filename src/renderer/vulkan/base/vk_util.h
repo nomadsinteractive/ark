@@ -40,6 +40,7 @@ public:
 
 
     static VkFormat getAttributeFormat(const Attribute& attribute);
+    static VkFormat toTextureFormat(const Bitmap& bitmap, Texture::Format format);
     static VkShaderStageFlagBits toStage(Shader::Stage stage);
 
     static std::vector<uint32_t> compileSPIR(const String& source, Shader::Stage stage);
@@ -77,7 +78,7 @@ private:
     sp<VKPipeline> _pipeline;
     sp<VKBuffer> _uniforms;
 
-    std::vector<VkCommandBuffer> _command_buffers;
+    sp<VKCommandBuffers> _command_buffers;
 
     float zoom = 0;
 

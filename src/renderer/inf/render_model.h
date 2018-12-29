@@ -33,10 +33,12 @@ public:
     }
 
     virtual void initialize(ShaderBindings& bindings) = 0;
-    virtual void start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext) = 0;
+    virtual void start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& snapshot) = 0;
     virtual void load(ModelBuffer& buf, int32_t type, const V& size) = 0;
 
     virtual Metrics measure(int32_t type) { return Metrics(); }
+
+    virtual void onPostSnapshot(const Layer::Snapshot& snapshot) { }
 
 protected:
     Mode _mode;

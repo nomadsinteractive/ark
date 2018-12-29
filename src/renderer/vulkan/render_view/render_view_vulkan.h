@@ -1,9 +1,14 @@
 #ifndef ARK_RENDERER_IMPL_RENDER_VIEW_RENDER_VIEW_OPENGL_H_
 #define ARK_RENDERER_IMPL_RENDER_VIEW_RENDER_VIEW_OPENGL_H_
 
+#include <vector>
+
+#include <vulkan/vulkan.h>
+
 #include "core/types/owned_ptr.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/base/color.h"
 #include "graphics/base/viewport.h"
 #include "graphics/forwarding.h"
 #include "graphics/inf/render_view.h"
@@ -25,7 +30,7 @@ public:
     virtual void onRenderFrame(const Color& backgroundColor, const sp<RenderCommand>& renderCommand) override;
 
 private:
-    void initialize(uint32_t width, uint32_t height);
+    void makeCommandBuffers(GraphicsContext& graphicsContext, uint32_t width, uint32_t height, const Color& backgroundColor);
     
 private:
     sp<VKUtil> _vulkan_api;
@@ -34,6 +39,8 @@ private:
     op<GraphicsContext> _graphics_context;
     Viewport _viewport;
 
+    Color _background_color;
+    sp<VKCommandBuffers> _command_buffers;
 };
 
 }

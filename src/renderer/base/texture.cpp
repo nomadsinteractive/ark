@@ -2,6 +2,7 @@
 
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
+#include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/util/conversions.h"
 #include "core/util/documents.h"
 #include "core/util/log.h"
@@ -17,7 +18,7 @@
 
 namespace ark {
 
-Texture::Texture(const sp<Size>& size, const sp<Resource>& resource, Type type)
+Texture::Texture(const sp<Size>& size, const sp<Variable<sp<Resource>>>& resource, Type type)
     : _size(size), _resource(resource), _type(type)
 {
 }
@@ -28,12 +29,12 @@ Texture::~Texture()
 
 void Texture::upload(GraphicsContext& graphicsContext)
 {
-    _resource->upload(graphicsContext);
+    _resource->val()->upload(graphicsContext);
 }
 
 Resource::RecycleFunc Texture::recycle()
 {
-    return _resource->recycle();
+    return _resource->val()->recycle();
 }
 
 Texture::Type Texture::type() const
@@ -43,7 +44,7 @@ Texture::Type Texture::type() const
 
 uint32_t Texture::id()
 {
-    return _resource->id();
+    return _resource->val()->id();
 }
 
 int32_t Texture::width() const
@@ -66,9 +67,9 @@ const sp<Size>& Texture::size() const
     return _size;
 }
 
-const sp<Resource>& Texture::resource() const
+sp<Resource> Texture::resource() const
 {
-    return _resource;
+    return _resource->val();
 }
 
 template<> ARK_API Texture::Format Conversions::to<String, Texture::Format>(const String& str)
@@ -113,14 +114,49 @@ template<> ARK_API Texture::Feature Conversions::to<String, Texture::Feature>(co
     return Texture::FEATURE_DEFAULT;
 }
 
-Texture::Parameters::Parameters(Format format, Texture::Feature features)
-    : _format(format), _features(features)
+template<> ARK_API Texture::Parameter Conversions::to<String, Texture::Parameter>(const String& str)
 {
+    if(str)
+    {
+        if(str == "nearest")
+            return Texture::PARAMETER_NEAREST;
+        if(str == "linear")
+            return Texture::PARAMETER_LINEAR;
+        if(str == "linear_mipmap")
+            return Texture::PARAMETER_LINEAR_MIPMAP;
+        if(str == "clamp_to_edge")
+            return Texture::PARAMETER_CLAMP_TO_EDGE;
+        if(str == "clamp_to_border")
+            return Texture::PARAMETER_CLAMP_TO_BORDER;
+        if(str == "mirrored_repeat")
+            return Texture::PARAMETER_MIRRORED_REPEAT;
+        if(str == "repeat")
+            return Texture::PARAMETER_REPEAT;
+        if(str == "mirror_clamp_to_edge")
+            return Texture::PARAMETER_MIRROR_CLAMP_TO_EDGE;
+    }
+    DFATAL("Unknow TextureParameter: %s", str.c_str());
+    return Texture::PARAMETER_NEAREST;
 }
 
-void Texture::Parameters::setTexParameter(uint32_t name, int32_t value)
+Texture::Parameters::Parameters(const document& parameters, Format format, Texture::Feature features)
+    : _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
+      _features(parameters ? Documents::getAttribute<Texture::Feature>(parameters, "feature", features) : features),
+      _min_filter((features & Texture::FEATURE_MIPMAPS) ? PARAMETER_LINEAR_MIPMAP : PARAMETER_LINEAR), _mag_filter(PARAMETER_LINEAR),
+      _wrap_s(PARAMETER_CLAMP_TO_EDGE), _wrap_t(PARAMETER_CLAMP_TO_EDGE), _wrap_r(PARAMETER_CLAMP_TO_EDGE)
 {
-    _tex_parameters[name] = value;
+    if(parameters)
+    {
+        _format = Documents::getAttribute<Texture::Format>(parameters, "format", Texture::FORMAT_AUTO);
+        _features = Documents::getAttribute<Texture::Feature>(parameters, "feature", Texture::FEATURE_DEFAULT);
+
+        DictionaryByAttributeName byName(parameters, Constants::Attributes::NAME);
+        _min_filter = Documents::getAttribute(parameters, "min_filter", _min_filter);
+        _mag_filter = Documents::getAttribute(parameters, "mag_filter", _mag_filter);
+        _wrap_s = Documents::getAttribute(parameters, "wrap_s", _wrap_s);
+        _wrap_t = Documents::getAttribute(parameters, "wrap_t", _wrap_t);
+        _wrap_r = Documents::getAttribute(parameters, "wrap_r", _wrap_r);
+    }
 }
 
 Texture::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext)

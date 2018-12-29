@@ -25,8 +25,8 @@ public:
     static GLenum getTextureFormat(int32_t format, uint8_t channels);
     static GLenum getPixelFormat(int32_t format, const Bitmap& bitmap);
 
-    static sp<Texture::Parameters> getTextureParameters(Texture::Format format = Texture::FORMAT_AUTO, Texture::Feature features = Texture::FEATURE_DEFAULT);
-    static sp<Texture::Parameters> getTextureParameters(const document& manifest);
+//    static sp<Texture::Parameters> getTextureParameters(Texture::Format format = Texture::FORMAT_AUTO, Texture::Feature features = Texture::FEATURE_DEFAULT);
+//    static sp<Texture::Parameters> getTextureParameters(const document& manifest);
 
     static bytearray makeUnitCubeVertices();
 

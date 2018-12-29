@@ -8,6 +8,7 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/texture.h"
 #include "renderer/inf/resource.h"
 
 #include "renderer/vulkan/forward.h"
@@ -17,7 +18,7 @@ namespace vulkan {
 
 class VKTexture2D : public Resource {
 public:
-    VKTexture2D(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<Variable<bitmap>>& bitmap);
+    VKTexture2D(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<Texture::Parameters>& parameters, const sp<Variable<bitmap>>& bitmap);
     ~VKTexture2D() override;
 
     virtual uint32_t id() override;
@@ -32,6 +33,7 @@ private:
 private:
     sp<Recycler> _recycler;
     sp<VKRenderer> _renderer;
+    sp<Texture::Parameters> _parameters;
     sp<Variable<bitmap>> _bitmap;
 
     VkImage _image;

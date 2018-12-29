@@ -30,11 +30,6 @@ Color::Color(float red, float green, float blue)
 {
 }
 
-Color::Color(const Color& color)
-    : _color(color._color)
-{
-}
-
 float Color::red() const
 {
     return _color._x;
@@ -109,12 +104,6 @@ bool Color::operator ==(const Color& other) const
 bool Color::operator !=(const Color& other) const
 {
     return _color != other._color;
-}
-
-const Color& Color::operator =(const Color& other)
-{
-    _color = other._color;
-    return *this;
 }
 
 V4 Color::val()

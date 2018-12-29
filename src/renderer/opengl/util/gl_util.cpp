@@ -106,24 +106,24 @@ GLenum GLUtil::getPixelFormat(int32_t format, const Bitmap& bitmap)
     return flagSigned ? GL_INT : GL_FLOAT;
 }
 
-sp<Texture::Parameters> GLUtil::getTextureParameters(Texture::Format format, Texture::Feature features)
-{
-    sp<Texture::Parameters> params = sp<Texture::Parameters>::make(format, features);
-    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MIN_FILTER), static_cast<int32_t>((features & Texture::FEATURE_MIPMAPS) ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
-    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MAG_FILTER), static_cast<int32_t>(GL_LINEAR));
-    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_S), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
-    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_T), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
-    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_R), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
-    return params;
-}
+//sp<Texture::Parameters> GLUtil::getTextureParameters(Texture::Format format, Texture::Feature features)
+//{
+//    sp<Texture::Parameters> params = sp<Texture::Parameters>::make(format, features);
+//    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MIN_FILTER), static_cast<int32_t>((features & Texture::FEATURE_MIPMAPS) ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR));
+//    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_MAG_FILTER), static_cast<int32_t>(GL_LINEAR));
+//    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_S), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
+//    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_T), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
+//    params->setTexParameter(static_cast<uint32_t>(GL_TEXTURE_WRAP_R), static_cast<int32_t>(GL_CLAMP_TO_EDGE));
+//    return params;
+//}
 
-sp<Texture::Parameters> GLUtil::getTextureParameters(const document& manifest)
-{
-    sp<Texture::Parameters> params = sp<Texture::Parameters>::make(Documents::getAttribute<Texture::Format>(manifest, "format", Texture::FORMAT_AUTO), Documents::getAttribute<Texture::Feature>(manifest, "feature", Texture::FEATURE_DEFAULT));
-    for(const document& i : manifest->children("parameter"))
-        params->_tex_parameters[static_cast<uint32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::NAME)))] = static_cast<int32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::VALUE)));
-    return params;
-}
+//sp<Texture::Parameters> GLUtil::getTextureParameters(const document& manifest)
+//{
+//    sp<Texture::Parameters> params = sp<Texture::Parameters>::make(Documents::getAttribute<Texture::Format>(manifest, "format", Texture::FORMAT_AUTO), Documents::getAttribute<Texture::Feature>(manifest, "feature", Texture::FEATURE_DEFAULT));
+//    for(const document& i : manifest->children("parameter"))
+//        params->_tex_parameters[static_cast<uint32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::NAME)))] = static_cast<int32_t>(GLUtil::getEnum(Documents::ensureAttribute(i, Constants::Attributes::VALUE)));
+//    return params;
+//}
 
 bytearray GLUtil::makeUnitCubeVertices()
 {

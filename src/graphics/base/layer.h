@@ -53,7 +53,6 @@ public:
     };
 
     struct Snapshot {
-        Snapshot(const sp<Stub>& stub);
         Snapshot(Snapshot&& other) = default;
 
         sp<RenderCommand> render(float x, float y) const;
@@ -64,6 +63,11 @@ public:
         bool _dirty;
 
         DISALLOW_COPY_AND_ASSIGN(Snapshot);
+
+    private:
+        Snapshot(const sp<Stub>& stub);
+
+        friend class Layer;
     };
 
 public:

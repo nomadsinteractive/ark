@@ -41,18 +41,33 @@ public:
         TYPE_COUNT
     };
 
-    struct ARK_API Parameters {
-        Parameters(Format format, Feature features);
+    enum Parameter {
+        PARAMETER_NEAREST,
+        PARAMETER_LINEAR,
+        PARAMETER_LINEAR_MIPMAP,
+        PARAMETER_CLAMP_TO_EDGE,
+        PARAMETER_CLAMP_TO_BORDER,
+        PARAMETER_MIRRORED_REPEAT,
+        PARAMETER_REPEAT,
+        PARAMETER_MIRROR_CLAMP_TO_EDGE,
+        PARAMETER_COUNT
+    };
 
-        void setTexParameter(uint32_t name, int32_t value);
+    struct ARK_API Parameters {
+        Parameters(const document& parameters = nullptr, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
 
         Format _format;
         Feature _features;
 
-        std::unordered_map<uint32_t, int32_t> _tex_parameters;
+        Parameter _min_filter;
+        Parameter _mag_filter;
+
+        Parameter _wrap_s;
+        Parameter _wrap_t;
+        Parameter _wrap_r;
     };
 
-    Texture(const sp<Size>& size, const sp<Resource>& resource, Type type);
+    Texture(const sp<Size>& size, const sp<Variable<sp<Resource>>>& resource, Type type);
     virtual ~Texture() override;
 
     virtual uint32_t id() override;
@@ -71,7 +86,7 @@ public:
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 
-    const sp<Resource>& resource() const;
+    sp<Resource> resource() const;
 
 public:
 
@@ -105,7 +120,7 @@ public:
 
 private:
     sp<Size> _size;
-    sp<Resource> _resource;
+    sp<Variable<sp<Resource>>> _resource;
     Type _type;
 };
 

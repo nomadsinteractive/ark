@@ -17,18 +17,18 @@
 
 namespace ark {
 
-GLModelText::Stub::Stub(RenderController& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
-    : _alphabet(alphabet), _size(sp<Size>::make())
+GLModelText::Stub::Stub(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
+    : _render_controller(renderController), _alphabet(alphabet), _size(sp<Size>::make())
 {
-    reset(renderController, textureWidth, textureHeight);
+    reset(textureWidth, textureHeight);
 }
 
-void GLModelText::Stub::reset(RenderController& renderController, uint32_t textureWidth, uint32_t textureHeight)
+void GLModelText::Stub::reset(uint32_t textureWidth, uint32_t textureHeight)
 {
     _size->setWidth(textureWidth);
     _size->setHeight(textureHeight);
     _font_glyph = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1));
-    _texture = renderController.createTexture(textureWidth, textureHeight, sp<Variable<bitmap>::Const>::make(_font_glyph), ResourceManager::US_ON_SURFACE_READY);
+    _texture = _render_controller->createTexture(textureWidth, textureHeight, sp<Variable<bitmap>::Const>::make(_font_glyph), ResourceManager::US_ON_SURFACE_READY);
     _atlas = sp<Atlas>::make(_texture, true);
     _delegate = sp<GLModelQuad>::make(_atlas);
     clear();
@@ -84,7 +84,7 @@ void GLModelText::Stub::clear()
     memset(_font_glyph->at(0, 0), 0, _font_glyph->width() * _font_glyph->height());
 }
 
-bool GLModelText::Stub::prepare(const Layer::Snapshot& renderContext, bool allowReset)
+bool GLModelText::Stub::prepare(const Layer::Snapshot& snapshot, bool allowReset)
 {
     for(int32_t c : _characters)
     {
@@ -93,8 +93,8 @@ bool GLModelText::Stub::prepare(const Layer::Snapshot& renderContext, bool allow
             if(allowReset)
             {
                 clear();
-                checkUnpreparedCharacter(renderContext);
-                return prepare(renderContext, false);
+                checkUnpreparedCharacter(snapshot);
+                return prepare(snapshot, false);
             }
             return false;
         }
@@ -102,22 +102,12 @@ bool GLModelText::Stub::prepare(const Layer::Snapshot& renderContext, bool allow
     return true;
 }
 
-uint32_t GLModelText::Stub::id()
+sp<Resource> GLModelText::Stub::val()
 {
-    return _texture->id();
+    return _texture->resource();
 }
 
-void GLModelText::Stub::upload(GraphicsContext& /*graphicsContext*/)
-{
-}
-
-Resource::RecycleFunc GLModelText::Stub::recycle()
-{
-    return [](GraphicsContext&) {
-    };
-}
-
-GLModelText::GLModelText(RenderController& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
+GLModelText::GLModelText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
     : RenderModel(RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(renderController, alphabet, textureWidth, textureHeight))
 {
 }
@@ -127,20 +117,24 @@ void GLModelText::initialize(ShaderBindings& bindings)
     bindings.bindSampler(sp<Texture>::make(_stub->_size, _stub, Texture::TYPE_2D));
 }
 
-void GLModelText::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)
+void GLModelText::onPostSnapshot(const Layer::Snapshot& snapshot)
 {
-    if(_stub->checkUnpreparedCharacter(layerContext))
+    if(_stub->checkUnpreparedCharacter(snapshot))
     {
-        while(!_stub->prepare(layerContext, true))
+        while(!_stub->prepare(snapshot, true))
         {
             uint32_t width = _stub->_font_glyph->width() * 2;
             uint32_t height = _stub->_font_glyph->height() * 2;
             LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _stub->_characters.size());
-            _stub->reset(renderController, width, height);
+            _stub->reset(width, height);
         }
-        renderController.resourceManager()->upload(_stub->_texture, ResourceManager::US_ONCE_FORCE);
+        _stub->_render_controller->resourceManager()->upload(_stub->_texture, ResourceManager::US_ONCE_FORCE);
     }
-    _stub->_delegate->start(buf, renderController, layerContext);
+}
+
+void GLModelText::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& snapshot)
+{
+    _stub->_delegate->start(buf, renderController, snapshot);
 }
 
 void GLModelText::load(ModelBuffer& buf, int32_t type, const V& scale)

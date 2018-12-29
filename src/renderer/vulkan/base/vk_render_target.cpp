@@ -134,7 +134,7 @@ uint32_t VKRenderTarget::aquiredImageId() const
     return _aquired_image_id;
 }
 
-void VKRenderTarget::submit(VkCommandBuffer* commandBuffer)
+void VKRenderTarget::submit(const VkCommandBuffer* commandBuffer)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     _submit_info.pCommandBuffers = commandBuffer;
@@ -152,7 +152,7 @@ void VKRenderTarget::swap()
 void VKRenderTarget::onSurfaceChanged(uint32_t width, uint32_t height)
 {
     _scissor = vks::initializers::rect2D(static_cast<int32_t>(width), static_cast<int32_t>(height), 0, 0);
-    _viewport = vks::initializers::viewport(static_cast<float>(width), static_cast<float>(height), 0.0f, static_cast<float>(std::max(width, height)));
+    _viewport = vks::initializers::viewport(static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f);
 }
 
 void VKRenderTarget::initSwapchain()
@@ -325,11 +325,7 @@ void VKRenderTarget::setupDescriptorPool()
         vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
     };
 
-    VkDescriptorPoolCreateInfo descriptorPoolInfo =
-            vks::initializers::descriptorPoolCreateInfo(
-                static_cast<uint32_t>(poolSizes.size()),
-                poolSizes.data(),
-                2);
+    VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, 2);
 
     VKUtil::checkResult(vkCreateDescriptorPool(_device->logicalDevice(), &descriptorPoolInfo, nullptr, &_descriptor_pool));
 }

@@ -17,8 +17,8 @@
 namespace ark {
 namespace vulkan {
 
-VKTexture2D::VKTexture2D(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<Variable<bitmap>>& bitmap)
-    : _recycler(recycler), _renderer(renderer), _bitmap(bitmap)
+VKTexture2D::VKTexture2D(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<Texture::Parameters>& parameters, const sp<Variable<bitmap>>& bitmap)
+    : _recycler(recycler), _renderer(renderer), _parameters(parameters), _bitmap(bitmap)
 {
 }
 
@@ -62,10 +62,10 @@ const VkDescriptorImageInfo& VKTexture2D::descriptor() const
 
 void VKTexture2D::doUpload()
 {
-    VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
     VkDevice logicalDevice = _renderer->vkLogicalDevice();
 
     const bitmap tex = _bitmap->val();
+    VkFormat format = VKUtil::toTextureFormat(tex, _parameters->_format);
 
     _width = tex->width();
     _height = tex->height();

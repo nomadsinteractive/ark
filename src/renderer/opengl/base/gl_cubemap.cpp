@@ -39,7 +39,7 @@ void GLCubemap::doPrepareTexture(GraphicsContext& /*graphicsContext*/, uint32_t 
 
 GLCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _parameters(GLUtil::getTextureParameters(manifest))
+      _parameters(sp<Texture::Parameters>::make(_manifest))
 {
     BeanUtils::split(factory, manifest, Constants::Attributes::SRC, _srcs[0], _srcs[1], _srcs[2], _srcs[3], _srcs[4], _srcs[5]);
 }
@@ -54,7 +54,7 @@ sp<Texture> GLCubemap::BUILDER::build(const sp<Scope>& args)
     }
     const sp<Size> size = _size->build(args);
     const sp<GLCubemap> cubemap = sp<GLCubemap>::make(_resource_loader_context->resourceManager()->recycler(), size, _parameters, std::move(bitmaps));
-    return _resource_loader_context->resourceManager()->createGLResource<Texture>(size, cubemap, Texture::TYPE_CUBEMAP);
+    return _resource_loader_context->resourceManager()->createGLResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
 }
 
 }

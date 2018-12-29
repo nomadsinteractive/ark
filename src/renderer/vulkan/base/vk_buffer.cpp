@@ -27,7 +27,7 @@ uint32_t VKBuffer::id()
 
 void VKBuffer::upload(GraphicsContext& graphicsContext)
 {
-    reload(graphicsContext, _uploader);
+    reload(graphicsContext, nullptr);
 }
 
 Resource::RecycleFunc VKBuffer::recycle()
@@ -49,17 +49,24 @@ Resource::RecycleFunc VKBuffer::recycle()
 
 void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& transientUploader)
 {
-    ensureSize(transientUploader);
+    const sp<Uploader>& uploader = transientUploader ? transientUploader : _uploader;
+    if(uploader)
+    {
+        ensureSize(uploader);
 
-    void* mapped = map();
-    size_t offset = 0;
-    transientUploader->upload([mapped, &offset](void* buf, size_t size) {
-        memcpy(reinterpret_cast<int8_t*>(mapped) + offset, buf, size);
-        offset += size;
-    });
-    if((_memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
-        flush();
-    unmap(mapped);
+        void* mapped = map();
+        size_t offset = 0;
+        uploader->upload([mapped, &offset](void* buf, size_t size) {
+            memcpy(reinterpret_cast<int8_t*>(mapped) + offset, buf, size);
+            offset += size;
+        });
+        if((_memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
+            flush();
+        unmap(mapped);
+
+        if(transientUploader)
+            _uploader = transientUploader;
+    }
 }
 
 const VkBuffer& VKBuffer::vkBuffer() const

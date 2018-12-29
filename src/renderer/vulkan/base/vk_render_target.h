@@ -39,7 +39,7 @@ public:
 
     uint32_t acquire();
     uint32_t aquiredImageId() const;
-    void submit(VkCommandBuffer* commandBuffer);
+    void submit(const VkCommandBuffer* commandBuffer);
     void swap();
 
     void onSurfaceChanged(uint32_t width, uint32_t height);
