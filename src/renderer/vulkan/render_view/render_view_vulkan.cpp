@@ -25,7 +25,7 @@ RenderViewVulkan::RenderViewVulkan(const sp<VKUtil>& vulkanApi, const sp<VKRende
 
 void RenderViewVulkan::onSurfaceCreated()
 {
-    _vulkan_api->initialize(_graphics_context->glContext());
+//    _vulkan_api->initialize(_graphics_context->glContext());
 }
 
 void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)

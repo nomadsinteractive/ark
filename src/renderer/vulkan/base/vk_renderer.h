@@ -17,7 +17,7 @@ public:
     const sp<VKDevice>& device() const;
     const sp<VKRenderTarget>& renderTarget() const;
 
-    VkDescriptorPool vkDescriptorPool() const;
+//    VkDescriptorPool vkDescriptorPool() const;
     VkDevice vkLogicalDevice() const;
     VkPhysicalDevice vkPhysicalDevice() const;
     VkRenderPass vkRenderPass() const;

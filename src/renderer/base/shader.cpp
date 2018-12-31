@@ -149,27 +149,6 @@ Shader::Stub::Stub(const sp<PipelineFactory>& pipelineFactory)
 {
 }
 
-//uint32_t Shader::Stub::id()
-//{
-//    DASSERT(_pipeline);
-//    return _pipeline->id();
-//}
-
-//void Shader::Stub::upload(GraphicsContext& graphicsContext)
-//{
-//    DASSERT(_pipeline);
-//    for(const Uniform& i : _input->uniforms())
-//        i.notify();
-
-//    _pipeline->upload(graphicsContext);
-//}
-
-//Resource::RecycleFunc Shader::Stub::recycle()
-//{
-//    DASSERT(_pipeline);
-//    return _pipeline->recycle();
-//}
-
 sp<Pipeline> Shader::Stub::buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& shaderBindings)
 {
     if(_pipeline)

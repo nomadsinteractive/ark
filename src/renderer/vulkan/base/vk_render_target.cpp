@@ -5,6 +5,7 @@
 #include "renderer/vulkan/base/vk_device.h"
 
 #include "renderer/vulkan/base/vk_command_pool.h"
+#include "renderer/vulkan/base/vk_descriptor_pool.h"
 #include "renderer/vulkan/base/vk_util.h"
 
 namespace ark {
@@ -17,7 +18,7 @@ namespace ark {
 namespace vulkan {
 
 VKRenderTarget::VKRenderTarget(const sp<VKDevice>& device)
-    : _device(device), _aquired_image_id(0), _viewport{}
+    : _device(device), _viewport{}, _aquired_image_id(0)
 {
     _queue = _device->queue();
     _swap_chain.connect(_device->vkInstance(), _device->physicalDevice(), _device->logicalDevice());
@@ -49,7 +50,7 @@ VKRenderTarget::VKRenderTarget(const sp<VKDevice>& device)
     setupRenderPass();
     setupFrameBuffer();
 
-    setupDescriptorPool();
+//    setupDescriptorPool();
 }
 
 VKRenderTarget::~VKRenderTarget()
@@ -69,7 +70,7 @@ VKRenderTarget::~VKRenderTarget()
 
     _swap_chain.cleanup();
 
-    vkDestroyDescriptorPool(_device->logicalDevice(), _descriptor_pool, nullptr);
+//    vkDestroyDescriptorPool(_device->logicalDevice(), _descriptor_pool, nullptr);
 }
 
 uint32_t VKRenderTarget::width() const
@@ -82,10 +83,10 @@ uint32_t VKRenderTarget::height() const
     return _height;
 }
 
-VkDescriptorPool VKRenderTarget::vkDescriptorPool() const
-{
-    return _descriptor_pool;
-}
+//VkDescriptorPool VKRenderTarget::vkDescriptorPool() const
+//{
+//    return _descriptor_pool;
+//}
 
 const VkRect2D& VKRenderTarget::vkScissor() const
 {
@@ -120,6 +121,21 @@ const std::vector<VkFramebuffer>& VKRenderTarget::frameBuffers() const
 std::vector<VkCommandBuffer> VKRenderTarget::makeCommandBuffers() const
 {
     return _command_pool->makeCommandBuffers(_swap_chain.imageCount);
+}
+
+sp<VKDescriptorPool> VKRenderTarget::makeDescriptorPool(const sp<Recycler>& recycler) const
+{
+    VkDescriptorPool descriptorPool;
+
+    std::vector<VkDescriptorPoolSize> poolSizes = {
+        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, _swap_chain.imageCount),
+        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _swap_chain.imageCount)
+    };
+
+    VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, 2);
+    VKUtil::checkResult(vkCreateDescriptorPool(_device->logicalDevice(), &descriptorPoolInfo, nullptr, &descriptorPool));
+
+    return sp<VKDescriptorPool>::make(recycler, _device, descriptorPool);
 }
 
 uint32_t VKRenderTarget::acquire()
@@ -318,17 +334,17 @@ void VKRenderTarget::setupFrameBuffer()
     }
 }
 
-void VKRenderTarget::setupDescriptorPool()
-{
-    std::vector<VkDescriptorPoolSize> poolSizes = {
-        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
-        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
-    };
+//void VKRenderTarget::setupDescriptorPool()
+//{
+//    std::vector<VkDescriptorPoolSize> poolSizes = {
+//        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
+//        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
+//    };
 
-    VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, 2);
+//    VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, 2);
 
-    VKUtil::checkResult(vkCreateDescriptorPool(_device->logicalDevice(), &descriptorPoolInfo, nullptr, &_descriptor_pool));
-}
+//    VKUtil::checkResult(vkCreateDescriptorPool(_device->logicalDevice(), &descriptorPoolInfo, nullptr, &_descriptor_pool));
+//}
 
 }
 }

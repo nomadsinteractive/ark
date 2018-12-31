@@ -10,6 +10,7 @@
 
 #include "graphics/base/viewport.h"
 
+#include "renderer/forwarding.h"
 #include "renderer/vulkan/forward.h"
 
 #include "renderer/vulkan/util/vulkan_swap_chain.hpp"
@@ -25,7 +26,7 @@ public:
     uint32_t width() const;
     uint32_t height() const;
 
-    VkDescriptorPool vkDescriptorPool() const;
+//    VkDescriptorPool vkDescriptorPool() const;
     const VkRect2D& vkScissor() const;
     const VkViewport& vkViewport() const;
 
@@ -36,6 +37,7 @@ public:
     const std::vector<VkFramebuffer>& frameBuffers() const;
 
     std::vector<VkCommandBuffer> makeCommandBuffers() const;
+    sp<VKDescriptorPool> makeDescriptorPool(const sp<Recycler>& recycler) const;
 
     uint32_t acquire();
     uint32_t aquiredImageId() const;
@@ -51,7 +53,7 @@ private:
     void setupRenderPass();
     void setupFrameBuffer();
 
-    void setupDescriptorPool();
+//    void setupDescriptorPool();
 
 private:
     sp<VKDevice> _device;
@@ -72,7 +74,7 @@ private:
     VkSubmitInfo _submit_info;
     VkPipelineStageFlags _submit_pipeline_stages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
-    VkDescriptorPool _descriptor_pool;
+//    VkDescriptorPool _descriptor_pool;
 
     struct
     {

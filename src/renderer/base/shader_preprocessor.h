@@ -18,64 +18,6 @@
 namespace ark {
 
 class ShaderPreprocessor {
-private:
-    enum SnippetType {
-        SNIPPET_TYPE_SOURCE,
-        SNIPPET_TYPE_PROCEDURE,
-        SNIPPET_TYPE_PROCEDURE_CALL,
-        SNIPPET_TYPE_MULTIPLY,
-        SNIPPET_TYPE_ADD
-    };
-
-    struct Snippet {
-        Snippet(SnippetType type, const String& src);
-        DEFAULT_COPY_AND_ASSIGN(Snippet);
-
-        SnippetType _type;
-        String _src;
-    };
-
-    struct Function {
-        Function(const String& name, const String& params, const String& body);
-        DEFAULT_COPY_AND_ASSIGN(Function);
-
-        String _name;
-        String _params;
-        String _body;
-        std::vector<std::pair<String, String>> _ins;
-        std::vector<std::pair<String, String>> _outs;
-    };
-
-    struct CodeBlock {
-        CodeBlock(const String& prefix, const Function& procedure, const String& suffix);
-        DEFAULT_COPY_AND_ASSIGN(CodeBlock);
-
-        void parse(PipelineBuildingContext& buildingContext);
-
-        bool hasOutParam(const String& name) const;
-
-        String _prefix;
-        Function _function;
-        String _suffix;
-    };
-
-    class Declaration {
-    public:
-        Declaration(const String& category);
-
-        void declare(const String& type, const String& prefix, const String& name);
-        void parse(const String& src, const std::regex& pattern);
-
-        bool dirty() const;
-        bool has(const String& name) const;
-        String str() const;
-
-        String _category;
-
-        StringBuffer _lines;
-        std::map<String, String> _declared;
-    };
-
 public:
     enum ShaderType {
         SHADER_TYPE_NONE,
@@ -107,6 +49,99 @@ public:
         String _source;
     };
 
+    class Declaration {
+    public:
+        Declaration(const String& name, const String& type, const sp<String>& source);
+        DEFAULT_COPY_AND_ASSIGN(Declaration);
+
+        const String& name() const;
+        const String& type() const;
+
+    private:
+        String _name;
+        String _type;
+
+        sp<String> _source;
+    };
+
+private:
+    enum SnippetType {
+        SNIPPET_TYPE_SOURCE,
+        SNIPPET_TYPE_MULTIPLY
+    };
+
+    struct Snippet {
+        Snippet(SnippetType type, const String& src);
+        DEFAULT_COPY_AND_ASSIGN(Snippet);
+
+        SnippetType _type;
+        String _src;
+    };
+
+    class Source {
+    public:
+        Source() = default;
+        Source(String code);
+        DEFAULT_COPY_AND_ASSIGN(Source);
+
+        String str() const;
+
+        void append(const sp<String>& fragment);
+
+        bool search(const std::regex& pattern, const std::function<bool(const std::smatch& match)>& traveller) const;
+        bool contains(const String& str) const;
+
+        void replace(const std::regex& regexp, const std::function<sp<String>(const std::smatch&)>& replacer);
+
+        void insertBefore(const String& statement, const String& str);
+
+    private:
+        std::list<sp<String>> _fragments;
+    };
+
+    struct Function {
+        Function(const String& name, const String& params, const String& body);
+        DEFAULT_COPY_AND_ASSIGN(Function);
+
+        String _name;
+        String _params;
+        String _body;
+        std::vector<std::pair<String, String>> _ins;
+        std::vector<std::pair<String, String>> _outs;
+    };
+
+    struct CodeBlock {
+        CodeBlock(const Function& procedure, const sp<String>& placeHolder);
+        DEFAULT_COPY_AND_ASSIGN(CodeBlock);
+
+        void parse(PipelineBuildingContext& buildingContext);
+
+        void genDefinition();
+        String genOutCall(ShaderType type);
+
+        bool hasOutParam(const String& name) const;
+
+        Function _function;
+        sp<String> _place_hoder;
+    };
+
+    class DeclarationList {
+    public:
+        DeclarationList(const String& category);
+
+        void declare(const String& type, const String& prefix, const String& name);
+        void parse(const Source& src, const std::regex& pattern);
+
+        bool dirty() const;
+        bool has(const String& name) const;
+        String str() const;
+
+        String _category;
+
+        StringBuffer _lines;
+        std::map<String, String> _declared;
+    };
+
 public:
     ShaderPreprocessor(ShaderType type, const String& source);
 
@@ -124,12 +159,12 @@ public:
 private:
     void parseMainBlock(PipelineBuildingContext& buildingContext);
     void parseDeclarations(PipelineBuildingContext& context);
-    uint32_t parseFunctionBody(const String& s, String& body) const;
+    size_t parseFunctionBody(const String& s, String& body) const;
 
     String getDeclarations() const;
-    void insertAfter(const String& statement, const String& str);
 
-    void addUniform(const String& type, const String& name);
+    void addUniform(const String& type, const String& name, const sp<String>& declaration);
+    void addLines(StringBuffer& sb, const std::vector<String>& lines) const;
 
 private:
     sp<CodeBlock> _main_block;
@@ -139,16 +174,22 @@ private:
 
 public:
     ShaderType _type;
-    String _source;
 
-    StringBuffer _uniform_declarations;
+    Source _source;
 
-    Declaration _in_declarations;
-    Declaration _out_declarations;
+    int32_t _version;
+
+    std::vector<String> _macro_defines;
+    std::vector<String> _uniform_declarations;
+
+    DeclarationList _in_declarations;
+    DeclarationList _out_declarations;
 
     std::vector<Snippet> _snippets;
-    Table<String, String> _uniforms;
-    std::vector<String> _samplers;
+    Table<String, Declaration> _uniforms;
+    Table<String, Declaration> _samplers;
+
+    sp<String> _output_var;
 };
 
 }

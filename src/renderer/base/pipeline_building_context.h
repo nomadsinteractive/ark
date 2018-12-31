@@ -43,10 +43,6 @@ public:
 
     StringBuffer _vert_main_source;
     StringBuffer _frag_color_modifier;
-    StringBuffer _frag_procedures;
-    StringBuffer _frag_procedure_calls;
-
-    void addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure);
 
     void preCompile();
 
@@ -64,7 +60,7 @@ private:
     void loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
 
     void doSnippetPrecompile();
-    void doPrecompile(String& vertSource, String& fragSource);
+    void doPrecompile(ShaderPreprocessor& vertex, ShaderPreprocessor& fragment);
 
     void insertBefore(String& src, const String& statement, const String& str);
 

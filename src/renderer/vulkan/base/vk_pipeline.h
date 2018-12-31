@@ -55,8 +55,9 @@ private:
 
 private:
     sp<Recycler> _recycler;
-    sp<VKRenderer> _renderer;
     sp<ShaderBindings> _shader_bindings;
+    sp<VKRenderer> _renderer;
+    sp<VKDescriptorPool> _descriptor_pool;
 
     VkPipelineLayout _layout;
     VkDescriptorSetLayout _descriptor_set_layout;

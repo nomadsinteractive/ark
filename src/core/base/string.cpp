@@ -214,16 +214,32 @@ array<String> String::match(const std::regex& pattern) const
     return nullptr;
 }
 
-void String::search(const std::regex& pattern, const std::function<bool(const std::smatch& match)>& traveller) const
+bool String::search(const std::regex& pattern, const std::function<bool(const std::smatch& match)>& traveller) const
 {
     std::string str = _str;
     std::smatch match;
     while(std::regex_search(str, match, pattern))
     {
         if(!traveller(match))
+            return false;
+        str = match.suffix().str();
+    }
+    return true;
+}
+
+void String::search(const std::regex& pattern, const std::function<bool(const std::smatch&)>& traveller1, const std::function<bool(const String&)>& traveller2) const
+{
+    std::string str = _str;
+    std::smatch match;
+    while(std::regex_search(str, match, pattern))
+    {
+        if(!traveller2(match.prefix().str()))
+            break;
+        if(!traveller1(match))
             break;
         str = match.suffix().str();
     }
+    traveller2(str);
 }
 
 bool String::startsWith(const String& other) const

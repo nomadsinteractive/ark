@@ -53,9 +53,8 @@ void PipelineBuildingContext::initialize()
     }
 
     std::map<String, String> attributes = _fragment._in_declarations._declared;
-//    if(_pipeline_layout._snippet)
-        for(const auto& i : _attributes)
-            attributes[i.first] = i.second.declareType();
+    for(const auto& i : _attributes)
+        attributes[i.first] = i.second.declareType();
 
     std::vector<String> generated;
     for(const auto& i : attributes)
@@ -92,30 +91,10 @@ void PipelineBuildingContext::initialize()
         _vertex._out_declarations.declare(i.first, "", i.second);
 }
 
-void PipelineBuildingContext::addFragmentProcedure(const String& name, const List<std::pair<String, String>>& ins, const String& procedure)
-{
-    StringBuffer declareParams;
-    StringBuffer callParams;
-    for(const auto& i : ins)
-    {
-        declareParams << ", ";
-        declareParams << i.first << ' ' << i.second;
-
-        callParams << ", ";
-        callParams << "a_" << Strings::capitalFirst(i.second);
-    }
-    StringBuffer sb;
-    sb << "vec4 ark_" << name << "(vec4 c" << declareParams.str() << ") {\n    " << procedure << "\n}\n\n";
-    _fragment._snippets.emplace_back(ShaderPreprocessor::SNIPPET_TYPE_PROCEDURE, sb.str());
-    sb.clear();
-    sb << "\n    " << ShaderPreprocessor::ANNOTATION_FRAG_COLOR << " = ark_" << name << '(' << ShaderPreprocessor::ANNOTATION_FRAG_COLOR << callParams.str() << ");";
-    _fragment._snippets.emplace_back(ShaderPreprocessor::SNIPPET_TYPE_PROCEDURE_CALL, sb.str());
-}
-
 void PipelineBuildingContext::preCompile()
 {
     doSnippetPrecompile();
-    doPrecompile(_vertex._source, _fragment._source);
+    doPrecompile(_vertex, _fragment);
 }
 
 void PipelineBuildingContext::addAttribute(const String& name, const String& type)
@@ -250,41 +229,21 @@ void PipelineBuildingContext::doSnippetPrecompile()
         case ShaderPreprocessor::SNIPPET_TYPE_MULTIPLY:
             _frag_color_modifier << " * " << i._src;
             break;
-        case ShaderPreprocessor::SNIPPET_TYPE_PROCEDURE:
-            _frag_procedures << i._src;
-            break;
-        case ShaderPreprocessor::SNIPPET_TYPE_PROCEDURE_CALL:
-            _frag_procedure_calls << i._src;
-            break;
         default:
             break;
         }
     }
 }
 
-void PipelineBuildingContext::doPrecompile(String& vertSource, String& fragSource)
+void PipelineBuildingContext::doPrecompile(ShaderPreprocessor& vertex, ShaderPreprocessor& fragment)
 {
     if(_frag_color_modifier.dirty())
-    {
-        String::size_type pos = fragSource.rfind(';');
-        DCHECK(pos != String::npos, "Cannot find fragment color modifier point, empty fragment shader?");
-        fragSource.insert(pos, _frag_color_modifier.str());
-    }
-
-    if(_frag_procedures.dirty())
-        insertBefore(fragSource, "void main()", _frag_procedures.str());
-
-    if(_frag_procedure_calls.dirty())
-    {
-        String::size_type pos = fragSource.rfind(';');
-        DCHECK(pos != String::npos, "Cannot find fragment color modifier point, empty fragment shader?");
-        fragSource.insert(pos + 1, _frag_procedure_calls.str());
-    }
+        *(fragment._output_var) = *(fragment._output_var) + _frag_color_modifier.str();
 
     if(_vert_main_source.dirty())
     {
         _vert_main_source << "    ";
-        insertBefore(vertSource, "gl_Position =", _vert_main_source.str());
+        vertex._source.insertBefore("gl_Position =", _vert_main_source.str());
     }
 }
 

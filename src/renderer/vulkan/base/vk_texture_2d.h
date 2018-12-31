@@ -25,7 +25,7 @@ public:
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
 
-    const VkDescriptorImageInfo& descriptor() const;
+    const VkDescriptorImageInfo& vkDescriptor() const;
 
 private:
     void doUpload();

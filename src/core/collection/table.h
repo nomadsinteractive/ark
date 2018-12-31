@@ -37,6 +37,10 @@ public:
         return _values;
     }
 
+    size_t size() const {
+        return _indices.size();
+    }
+
     const U& at(const T& key) const {
         size_t index = find(key);
         DCHECK(index != Constants::npos, "Key not found");

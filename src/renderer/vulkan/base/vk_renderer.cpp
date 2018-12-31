@@ -24,11 +24,11 @@ const sp<VKRenderTarget>& VKRenderer::renderTarget() const
     return _render_target;
 }
 
-VkDescriptorPool VKRenderer::vkDescriptorPool() const
-{
-    DCHECK(_render_target, "VKRenderer uninitialized");
-    return _render_target->vkDescriptorPool();
-}
+//VkDescriptorPool VKRenderer::vkDescriptorPool() const
+//{
+//    DCHECK(_render_target, "VKRenderer uninitialized");
+//    return _render_target->vkDescriptorPool();
+//}
 
 VkDevice VKRenderer::vkLogicalDevice() const
 {

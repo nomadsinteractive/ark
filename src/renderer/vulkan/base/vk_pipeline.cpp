@@ -1,12 +1,15 @@
 #include "renderer/vulkan/base/vk_pipeline.h"
 
 #include "renderer/base/recycler.h"
+#include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_input.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/ubo.h"
 #include "renderer/inf/uploader.h"
 
 #include "renderer/vulkan/base/vk_buffer.h"
+#include "renderer/vulkan/base/vk_descriptor_pool.h"
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_render_target.h"
@@ -18,7 +21,7 @@ namespace ark {
 namespace vulkan {
 
 VKPipeline::VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<ShaderBindings>& shaderBindings, std::map<Shader::Stage, String> shaders)
-    : _recycler(recycler), _renderer(renderer), _shader_bindings(shaderBindings),
+    : _recycler(recycler), _shader_bindings(shaderBindings), _renderer(renderer),
       _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE), _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE),
       _shaders(std::move(shaders))
 {
@@ -56,6 +59,7 @@ void VKPipeline::upload()
     setupVertexDescriptions(vertexLayout);
     setupDescriptorSetLayout();
 
+    _descriptor_pool = _renderer->renderTarget()->makeDescriptorPool(sp<Recycler>::make());
     setupDescriptorSet();
     setupPipeline(vertexLayout);
 
@@ -67,6 +71,7 @@ void VKPipeline::upload(GraphicsContext& graphicsContext)
     setupVertexDescriptions(_shader_bindings->pipelineInput(), vertexLayout);
     setupDescriptorSetLayout();
 
+    _descriptor_pool = _renderer->renderTarget()->makeDescriptorPool(graphicsContext.resourceManager()->recycler());
     setupDescriptorSet(graphicsContext, _shader_bindings);
     setupPipeline(vertexLayout);
 }
@@ -199,13 +204,12 @@ void VKPipeline::setupDescriptorSet()
 
     VkDescriptorSetAllocateInfo allocInfo =
             vks::initializers::descriptorSetAllocateInfo(
-                _renderer->vkDescriptorPool(),
+                _descriptor_pool->vkDescriptorPool(),
                 &_descriptor_set_layout,
                 1);
 
     VKUtil::checkResult(vkAllocateDescriptorSets(device->logicalDevice(), &allocInfo, &_descriptor_set));
 
-    const VkDescriptorImageInfo imageDesc = _texture->descriptor();
     std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
         // Binding 0 : Vertex shader uniform buffer
         vks::initializers::writeDescriptorSet(
@@ -219,7 +223,7 @@ void VKPipeline::setupDescriptorSet()
         _descriptor_set,
         VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,		// The descriptor set will use a combined image sampler (sampler and image could be split)
         1,												// Shader binding point 1
-        &imageDesc)								        // Pointer to the descriptor image for our texture
+        &_texture->vkDescriptor())				        // Pointer to the descriptor image for our texture
     };
 
     vkUpdateDescriptorSets(device->logicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
@@ -236,14 +240,13 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Shad
 
     VkDescriptorSetAllocateInfo allocInfo =
             vks::initializers::descriptorSetAllocateInfo(
-                _renderer->vkDescriptorPool(),
+                _descriptor_pool->vkDescriptorPool(),
                 &_descriptor_set_layout, 1);
 
     VKUtil::checkResult(vkAllocateDescriptorSets(device->logicalDevice(), &allocInfo, &_descriptor_set));
 
     std::vector<VkDescriptorImageInfo> samplerDescriptors;
     std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
-        // Binding 0 : Vertex shader uniform buffer
         vks::initializers::writeDescriptorSet(
         _descriptor_set,
         VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -254,13 +257,13 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Shad
     uint32_t binding = 0;
     for(const sp<Texture>& i : shaderBindings.samplers())
     {
-        const sp<VKTexture2D> texture = i->resource().as<VKTexture2D>();
-        DASSERT(texture);
+        const sp<VKTexture2D> texture = i->resource();
+        samplerDescriptors.push_back(texture->vkDescriptor());
         writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                          _descriptor_set,
-                                          VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                                          ++binding,
-                                          &samplerDescriptors.back()));
+                                      _descriptor_set,
+                                      VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                      ++binding,
+                                      &samplerDescriptors.back()));
     }
 
     vkUpdateDescriptorSets(device->logicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);

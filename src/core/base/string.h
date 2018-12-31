@@ -47,7 +47,8 @@ public:
 
     std::vector<String> split(char delim, bool allowEmpty = false) const;
     array<String> match(const std::regex& pattern) const;
-    void search(const std::regex& pattern, const std::function<bool(const std::smatch& match)>& traveller) const;
+    bool search(const std::regex& pattern, const std::function<bool(const std::smatch& match)>& traveller) const;
+    void search(const std::regex& pattern, const std::function<bool(const std::smatch& match)>& traveller1, const std::function<bool(const String& unmatch)>& traveller2) const;
 
     explicit operator bool() const;
 
