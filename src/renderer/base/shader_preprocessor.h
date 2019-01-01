@@ -18,6 +18,9 @@
 namespace ark {
 
 class ShaderPreprocessor {
+private:
+    class Source;
+
 public:
     enum ShaderType {
         SHADER_TYPE_NONE,
@@ -57,6 +60,8 @@ public:
         const String& name() const;
         const String& type() const;
 
+        const sp<String>& source() const;
+
     private:
         String _name;
         String _type;
@@ -64,33 +69,39 @@ public:
         sp<String> _source;
     };
 
+    class DeclarationList {
+    public:
+        DeclarationList(Source& source, const String& descriptor);
+
+        bool has(const String& name) const;
+        const Table<String, Declaration>& vars() const;
+        Table<String, Declaration>& vars();
+
+        void declare(const String& type, const String& prefix, const String& name);
+        void parse(const std::regex& pattern);
+
+    private:
+        Source& _source;
+        String _descriptor;
+
+        Table<String, Declaration> _vars;
+    };
+
 private:
-    enum SnippetType {
-        SNIPPET_TYPE_SOURCE,
-        SNIPPET_TYPE_MULTIPLY
-    };
-
-    struct Snippet {
-        Snippet(SnippetType type, const String& src);
-        DEFAULT_COPY_AND_ASSIGN(Snippet);
-
-        SnippetType _type;
-        String _src;
-    };
-
     class Source {
     public:
         Source() = default;
         Source(String code);
-        DEFAULT_COPY_AND_ASSIGN(Source);
 
         String str() const;
 
-        void append(const sp<String>& fragment);
+        void push_front(const sp<String>& fragment);
+        void push_back(const sp<String>& fragment);
 
         bool search(const std::regex& pattern, const std::function<bool(const std::smatch& match)>& traveller) const;
         bool contains(const String& str) const;
 
+        void replace(const String& str, const String& replacment);
         void replace(const std::regex& regexp, const std::function<sp<String>(const std::smatch&)>& replacer);
 
         void insertBefore(const String& statement, const String& str);
@@ -125,30 +136,13 @@ private:
         sp<String> _place_hoder;
     };
 
-    class DeclarationList {
-    public:
-        DeclarationList(const String& category);
-
-        void declare(const String& type, const String& prefix, const String& name);
-        void parse(const Source& src, const std::regex& pattern);
-
-        bool dirty() const;
-        bool has(const String& name) const;
-        String str() const;
-
-        String _category;
-
-        StringBuffer _lines;
-        std::map<String, String> _declared;
-    };
-
 public:
-    ShaderPreprocessor(ShaderType type, const String& source);
+    ShaderPreprocessor(ShaderType type);
 
     void addSource(const String& source);
     void addModifier(const String& modifier);
 
-    void parse(PipelineBuildingContext& context);
+    void initialize(const String& source, PipelineBuildingContext& context);
 
     Preprocessor preprocess();
 
@@ -157,14 +151,13 @@ public:
     Uniform getUniformInput(const String& name, Uniform::Type type) const;
 
 private:
-    void parseMainBlock(PipelineBuildingContext& buildingContext);
+    void parseMainBlock(const String& source, PipelineBuildingContext& buildingContext);
     void parseDeclarations(PipelineBuildingContext& context);
     size_t parseFunctionBody(const String& s, String& body) const;
 
     String getDeclarations() const;
 
     void addUniform(const String& type, const String& name, const sp<String>& declaration);
-    void addLines(StringBuffer& sb, const std::vector<String>& lines) const;
 
 private:
     sp<CodeBlock> _main_block;
@@ -175,20 +168,21 @@ private:
 public:
     ShaderType _type;
 
-    Source _source;
+    Source _main;
+    Source _uniform_declarations;
+    Source _attribute_declarations;
 
     int32_t _version;
 
     std::vector<String> _macro_defines;
-    std::vector<String> _uniform_declarations;
 
-    DeclarationList _in_declarations;
-    DeclarationList _out_declarations;
+    DeclarationList _ins;
+    DeclarationList _outs;
 
-    std::vector<Snippet> _snippets;
-    Table<String, Declaration> _uniforms;
-    Table<String, Declaration> _samplers;
+    DeclarationList _uniforms;
+    DeclarationList _samplers;
 
+    sp<String> _before_main;
     sp<String> _output_var;
 };
 

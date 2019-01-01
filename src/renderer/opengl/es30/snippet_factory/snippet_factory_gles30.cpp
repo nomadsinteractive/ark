@@ -22,7 +22,9 @@ public:
     }
 
     virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const sp<ShaderBindings>& /*shaderBindings*/) override {
-        context._fragment._out_declarations.declare("vec4", "v_", "FragColor");
+        context._fragment._outs.declare("vec4", "v_", "FragColor");
+        context._fragment._macro_defines.push_back("#define texture2D texture");
+        context._fragment._macro_defines.push_back("#define textureCube texture");
     }
 
     virtual void preDraw(GraphicsContext& /*graphicsContext*/, Shader& /*shader*/, const DrawingContext& context) override {

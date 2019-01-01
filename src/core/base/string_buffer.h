@@ -14,10 +14,10 @@ public:
 
     String str() const;
     void clear();
-    bool dirty() const;
 
     StringBuffer& operator <<(const String& str);
     StringBuffer& operator <<(const char* str);
+    StringBuffer& operator <<(uint32_t val);
     StringBuffer& operator <<(int32_t val);
     StringBuffer& operator <<(char c);
 
@@ -26,7 +26,6 @@ public:
 
 private:
     std::ostringstream _ss;
-    bool _dirty;
 };
 
 }

@@ -14,8 +14,10 @@
 namespace ark {
 
 PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment)
-    : _shader(sp<Shader::Stub>::make(pipelineFactory)), _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX, vertex), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT, fragment)
+    : _shader(sp<Shader::Stub>::make(pipelineFactory)), _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT)
 {
+    _vertex.initialize(vertex, *this);
+    _fragment.initialize(fragment, *this);
 }
 
 void PipelineBuildingContext::loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
@@ -26,41 +28,41 @@ void PipelineBuildingContext::loadPredefinedParam(BeanFactory& factory, const sp
 
 void PipelineBuildingContext::initialize()
 {
-    _vertex.parse(*this);
-    _fragment.parse(*this);
-
-    for(const auto& i : _vertex._in_declarations._declared)
-        if(_vert_in_declared.find(i.first) == _vert_in_declared.end())
+    for(const auto& i : _vertex._ins.vars().values())
+        if(_vert_in_declared.find(i.name()) == _vert_in_declared.end())
         {
-            _vert_in_declared[i.first] = i.second;
-            addAttribute(i.second, i.first);
+            _vert_in_declared[i.name()] = i.type();
+            addAttribute(i.name(), i.type());
         }
 
     std::set<String> fragmentUsedVars;
     static const std::regex varPattern("\\bv_([\\w\\d_]+)\\b");
-    _fragment._source.search(varPattern, [&fragmentUsedVars](const std::smatch& m)->bool {
+    _fragment._main.search(varPattern, [&fragmentUsedVars](const std::smatch& m)->bool {
         fragmentUsedVars.insert(m[1].str());
         return true;
     });
 
     for(const auto& i : _vertex_in)
-        _vertex._in_declarations.declare(i.first, "a_", Strings::capitalFirst(i.second));
+        _vertex._ins.declare(i.first, "a_", Strings::capitalFirst(i.second));
     for(const auto& i : _fragment_in)
     {
         const String n = Strings::capitalFirst(i.second);
         fragmentUsedVars.insert(n);
-        _fragment._in_declarations.declare(i.first, "v_", n);
+        _fragment._ins.declare(i.first, "v_", n);
     }
 
-    std::map<String, String> attributes = _fragment._in_declarations._declared;
+    std::map<String, String> attributes;
+    for(const auto& i : _fragment._ins.vars().values())
+        attributes[i.name()] = i.type();
+
     for(const auto& i : _attributes)
         attributes[i.first] = i.second.declareType();
 
     std::vector<String> generated;
     for(const auto& i : attributes)
     {
-        if(!_vertex._in_declarations.has(i.first)
-                && !_vertex._out_declarations.has(i.first)
+        if(!_vertex._ins.has(i.first)
+                && !_vertex._outs.has(i.first)
                 && !_vertex._main_block->hasOutParam(i.first))
         {
             generated.push_back(i.first);
@@ -74,28 +76,28 @@ void PipelineBuildingContext::initialize()
     for(const auto& i : attributes)
     {
         if(fragmentUsedVars.find(i.first) != fragmentUsedVars.end())
-            _fragment._in_declarations.declare(i.second, "v_", i.first);
+            _fragment._ins.declare(i.second, "v_", i.first);
     }
 
     for(const String& i : generated)
     {
-        _vertex._in_declarations.declare(attributes[i], "a_", i);
+        _vertex._ins.declare(attributes[i], "a_", i);
         if(fragmentUsedVars.find(i) != fragmentUsedVars.end())
         {
-            _vertex._out_declarations.declare(attributes[i], "v_", i);
-            _vert_main_source << "v_" << i << " = " << "a_" << i << ";\n";
+            _vertex._outs.declare(attributes[i], "v_", i);
+            _vertex.addSource(Strings::sprintf("v_%s = a_%s;", i.c_str(), i.c_str()));
         }
     }
 
     for(const auto& i : _vertex_out)
-        _vertex._out_declarations.declare(i.first, "", i.second);
+        _vertex._outs.declare(i.first, "", i.second);
 }
 
-void PipelineBuildingContext::preCompile()
-{
-    doSnippetPrecompile();
-    doPrecompile(_vertex, _fragment);
-}
+//void PipelineBuildingContext::preCompile()
+//{
+//    doSnippetPrecompile();
+//    doPrecompile(_vertex, _fragment);
+//}
 
 void PipelineBuildingContext::addAttribute(const String& name, const String& type)
 {
@@ -208,50 +210,11 @@ Attribute PipelineBuildingContext::makePredefinedAttribute(const String& name, c
     return Attribute();
 }
 
-void PipelineBuildingContext::doSnippetPrecompile()
-{
-    for(const ShaderPreprocessor::Snippet& i : _vertex._snippets)
-    {
-        switch(i._type)
-        {
-        case ShaderPreprocessor::SNIPPET_TYPE_SOURCE:
-            _vert_main_source << i._src << '\n';
-            break;
-        default:
-            break;
-        }
-    }
-
-    for(const ShaderPreprocessor::Snippet& i : _fragment._snippets)
-    {
-        switch(i._type)
-        {
-        case ShaderPreprocessor::SNIPPET_TYPE_MULTIPLY:
-            _frag_color_modifier << " * " << i._src;
-            break;
-        default:
-            break;
-        }
-    }
-}
-
-void PipelineBuildingContext::doPrecompile(ShaderPreprocessor& vertex, ShaderPreprocessor& fragment)
-{
-    if(_frag_color_modifier.dirty())
-        *(fragment._output_var) = *(fragment._output_var) + _frag_color_modifier.str();
-
-    if(_vert_main_source.dirty())
-    {
-        _vert_main_source << "    ";
-        vertex._source.insertBefore("gl_Position =", _vert_main_source.str());
-    }
-}
-
-void PipelineBuildingContext::insertBefore(String& src, const String& statement, const String& str)
-{
-    String::size_type pos = src.find(statement);
-    if(pos != String::npos)
-        src.insert(pos, str);
-}
+//void PipelineBuildingContext::insertBefore(String& src, const String& statement, const String& str)
+//{
+//    String::size_type pos = src.find(statement);
+//    if(pos != String::npos)
+//        src.insert(pos, str);
+//}
 
 }

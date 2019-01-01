@@ -410,7 +410,7 @@ VkFormat VKUtil::getAttributeFormat(const Attribute& attribute)
     {
         if(attribute.length() < 5)
         {
-            const VkFormat formats[4] = {VK_FORMAT_R16_UINT, VK_FORMAT_R16G16_UINT, VK_FORMAT_R16G16B16_UINT, VK_FORMAT_R16G16B16A16_UINT};
+            const VkFormat formats[4] = {VK_FORMAT_R16_UNORM, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16A16_UNORM};
             return formats[attribute.length() - 1];
         }
     }
@@ -478,12 +478,12 @@ std::vector<uint32_t> VKUtil::compileSPIR(const String& source, Shader::Stage st
     shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_0);
 
     if (!shader.parse(&initializer->builtInResource(), 100, false, EShMsgDefault))
-        DFATAL("Compile error: %s", shader.getInfoLog());
+        DFATAL("Compile error: %s\n\n%s", source.c_str(), shader.getInfoLog());
     {
         glslang::TProgram program;
         program.addShader(&shader);
         if (!program.link(EShMsgDefault))
-            DFATAL("Link error: %s", shader.getInfoLog());
+            DFATAL("Link error: %s\n\n%s", source.c_str(), shader.getInfoLog());
 
         if (program.getIntermediate(esStage)) {
             std::vector<uint32_t> spirv;

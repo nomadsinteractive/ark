@@ -41,11 +41,6 @@ public:
 
     std::map<String, String> _vert_in_declared;
 
-    StringBuffer _vert_main_source;
-    StringBuffer _frag_color_modifier;
-
-    void preCompile();
-
     void addAttribute(const String& name, const String& type);
     void addSnippet(const sp<Snippet>& snippet);
     void addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& dirty);
@@ -58,12 +53,6 @@ private:
 
     void loadPredefinedAttribute(const document& manifest);
     void loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
-
-    void doSnippetPrecompile();
-    void doPrecompile(ShaderPreprocessor& vertex, ShaderPreprocessor& fragment);
-
-    void insertBefore(String& src, const String& statement, const String& str);
-
 };
 
 }

@@ -28,33 +28,31 @@ std::regex ShaderPreprocessor::_OUT_PATTERN("(?:varying|out)" ATTRIBUTE_PATTERN)
 std::regex ShaderPreprocessor::_IN_OUT_PATTERN("(?:varying|in)" ATTRIBUTE_PATTERN);
 std::regex ShaderPreprocessor::_UNIFORM_PATTERN("uniform" UNIFORM_PATTERN);
 
-ShaderPreprocessor::ShaderPreprocessor(ShaderType type, const String& source)
-    : _type(type), _source(source), _version(0), _in_declarations(type == SHADER_TYPE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
-      _out_declarations(type == SHADER_TYPE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT)
+ShaderPreprocessor::ShaderPreprocessor(ShaderType type)
+    : _type(type), _version(0), _ins(_attribute_declarations, type == SHADER_TYPE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
+      _outs(_attribute_declarations, type == SHADER_TYPE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
+      _uniforms(_uniform_declarations, "uniform"), _samplers(_uniform_declarations, "uniform"), _before_main(sp<String>::make()), _output_var(sp<String>::make())
 {
 }
 
 void ShaderPreprocessor::addSource(const String& source)
 {
-    _snippets.emplace_back(SNIPPET_TYPE_SOURCE, source);
+    *_before_main = Strings::sprintf("    %s\n", source.c_str());
 }
 
 void ShaderPreprocessor::addModifier(const String& modifier)
 {
-//    *_output_var = Strings::sprintf("%s * %s", _output_var->c_str(), modifier.c_str());
-    _snippets.emplace_back(SNIPPET_TYPE_MULTIPLY, modifier);
+    *_output_var = Strings::sprintf("%s * %s", _output_var->c_str(), modifier.c_str());
 }
 
-void ShaderPreprocessor::parse(PipelineBuildingContext& context)
+void ShaderPreprocessor::initialize(const String& source, PipelineBuildingContext& context)
 {
-    parseMainBlock(context);
+    parseMainBlock(source, context);
     parseDeclarations(context);
 }
 
-void ShaderPreprocessor::parseMainBlock(PipelineBuildingContext& buildingContext)
+void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingContext& buildingContext)
 {
-    const String source = _source.str();
-
     if(source.find("void main()") != String::npos)
     {
         DWARN(false, "Shader which contains main function will not be preprocessed by ark shader preprocessor. Try to replace it with \"vec4 ark_main(vec4 position, ...)\" for better flexibilty and compatibilty");
@@ -63,17 +61,15 @@ void ShaderPreprocessor::parseMainBlock(PipelineBuildingContext& buildingContext
 
     static const std::regex FUNC_PATTERN("vec4\\s+ark_main\\(([^)]*)\\)");
 
-    _source = Source();
-
     source.search(FUNC_PATTERN, [this] (const std::smatch& m)->bool {
         const String prefix = m.prefix().str();
         const String remaining = m.suffix().str();
         String body;
         size_t prefixStart = parseFunctionBody(remaining, body);
         const sp<String> fragment = sp<String>::make();
-        _source.append(sp<String>::make(prefix));
-        _source.append(fragment);
-        _source.append(sp<String>::make(remaining.substr(prefixStart)));
+        _main.push_back(sp<String>::make(prefix));
+        _main.push_back(fragment);
+        _main.push_back(sp<String>::make(remaining.substr(prefixStart)));
         _main_block = sp<CodeBlock>::make(Function("main", m[1].str(), body.strip()), fragment);
         return false;
     });
@@ -85,13 +81,13 @@ void ShaderPreprocessor::parseMainBlock(PipelineBuildingContext& buildingContext
 
 void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
 {
-    _in_declarations.parse(_source, _type == SHADER_TYPE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
-    _out_declarations.parse(_source, _OUT_PATTERN);
+    _ins.parse(_type == SHADER_TYPE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
+    _outs.parse(_OUT_PATTERN);
 
-    _source.replace(_UNIFORM_PATTERN, [this](const std::smatch& m) {
+    _main.replace(_UNIFORM_PATTERN, [this](const std::smatch& m) {
         const sp<String> declaration = sp<String>::make(m.str());
         this->addUniform(m[1].str(), m[2].str(), declaration);
-        return declaration;
+        return nullptr;
     });
 
     if(!_main_block)
@@ -100,16 +96,15 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
     _main_block->genDefinition();
 
     {
-        StringBuffer sb;
-
         const String outVar = _type == SHADER_TYPE_VERTEX ? "gl_Position" : ANNOTATION_FRAG_COLOR;
-        sb << "\n\nvoid main() {\n    " << outVar << " = ";
 
-        _source.append(sp<String>::make(sb.str()));
-        _output_var = sp<String>::make(_main_block->genOutCall(_type));
-        _source.append(_output_var);
+        _main.push_back(sp<String>::make("\n\nvoid main() {\n"));
+        _main.push_back(_before_main);
+        _main.push_back(sp<String>::make(Strings::sprintf("    %s = ", outVar.c_str())));
+        *_output_var = _main_block->genOutCall(_type);
+        _main.push_back(_output_var);
 
-        _source.append(sp<String>::make(";\n}\n\n"));
+        _main.push_back(sp<String>::make(";\n}\n\n"));
     }
 
     if(_type == SHADER_TYPE_VERTEX)
@@ -140,17 +135,21 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
 
 ShaderPreprocessor::Preprocessor ShaderPreprocessor::preprocess()
 {
-    return Preprocessor(_type, getDeclarations() + _source.str());
+    return Preprocessor(_type, getDeclarations() + _main.str());
 }
 
 void ShaderPreprocessor::insertPredefinedUniforms(const std::vector<Uniform>& uniforms)
 {
     for(const Uniform& i : uniforms)
-        if(!_uniforms.has(i.name()) && _source.contains(i.name()))
+        if(!_uniforms.has(i.name()) && _main.contains(i.name()))
         {
-            const String declaration = i.declaration();
-            if(declaration.find('[') == String::npos)
-                _uniform_declarations.push_back(declaration);
+            String type;
+            uint32_t length;
+            sp<String> declaration = sp<String>::make(i.declaration());
+
+            i.toTypeLength(type, length);
+            _uniforms.vars().push_back(i.name(), Declaration(i.name(), type, declaration));
+            _uniform_declarations.push_back(declaration);
         }
 }
 
@@ -159,7 +158,7 @@ Uniform ShaderPreprocessor::getUniformInput(const String& name, Uniform::Type ty
     if(!_uniforms.has(name))
         return Uniform();
 
-    const Declaration& uniform = _uniforms.at(name);
+    const Declaration& uniform = _uniforms.vars().at(name);
     DCHECK(Uniform::toType(uniform.type()) == type, "Uniform \"%s\" declared type: %s, but it should be %d", name.c_str(), uniform.type().c_str(), type);
     return Uniform(name, type, nullptr, nullptr);
 }
@@ -177,42 +176,29 @@ void ShaderPreprocessor::addUniform(const String& type, const String& name, cons
 {
     Declaration uniform(name, type, declaration);
     if(type.startsWith("sampler"))
-        _samplers.push_back(name, std::move(uniform));
+        _samplers.vars().push_back(name, std::move(uniform));
     else
-        _uniforms.push_back(name, std::move(uniform));
-}
-
-void ShaderPreprocessor::addLines(StringBuffer& sb, const std::vector<String>& lines) const
-{
-    if(lines.size())
-    {
-        for(const String& i : lines)
-            sb << i << '\n';
-        sb << '\n';
-    }
+        _uniforms.vars().push_back(name, std::move(uniform));
+    _uniform_declarations.push_back(declaration);
 }
 
 String ShaderPreprocessor::getDeclarations() const
 {
     StringBuffer sb;
-    if(_version)
+    if(_version && !_main.contains("#version "))
         sb << "#version " << _version << '\n';
 
     sb << '\n';
-    addLines(sb, _macro_defines);
-    addLines(sb, _uniform_declarations);
+    if(_macro_defines.size())
+    {
+        for(const String& i : _macro_defines)
+            sb << i << '\n';
+        sb << '\n';
+    }
 
-    if(_in_declarations.dirty())
-        sb << '\n' << _in_declarations.str();
-    const String s = _out_declarations.str();
-    if(_out_declarations.dirty())
-        sb << '\n' << _out_declarations.str();
+    sb << _uniform_declarations.str();
+    sb << _attribute_declarations.str();
     return sb.str();
-}
-
-ShaderPreprocessor::Snippet::Snippet(ShaderPreprocessor::SnippetType type, const String& src)
-    : _type(type), _src(src)
-{
 }
 
 ShaderPreprocessor::Function::Function(const String& name, const String& params, const String& body)
@@ -291,44 +277,46 @@ bool ShaderPreprocessor::CodeBlock::hasOutParam(const String& name) const
     return false;
 }
 
-ShaderPreprocessor::DeclarationList::DeclarationList(const String& category)
-    : _category(category)
+ShaderPreprocessor::DeclarationList::DeclarationList(Source& source, const String& descriptor)
+    : _source(source), _descriptor(descriptor)
 {
 }
 
 void ShaderPreprocessor::DeclarationList::declare(const String& type, const String& prefix, const String& name)
 {
-    const auto iter = _declared.find(name);
-    if(iter == _declared.end())
+    if(!_vars.has(name))
     {
-        _lines << _category << ' ' << type << ' ' << prefix << name << ";\n";
-        _declared[name] = type;
+        const sp<String> declared = sp<String>::make(Strings::sprintf("%s %s %s%s;\n", _descriptor.c_str(), type.c_str(), prefix.c_str(), name.c_str()));
+        _source.push_back(declared);
+
+        _vars.push_back(name, Declaration(name, type, declared));
     }
     else
-        DCHECK(iter->second == type, "Declared type \"\" and variable type \"\" mismatch", iter->second.c_str(), type.c_str());
+        DCHECK(_vars.at(name).type() == type, "Declared type \"\" and variable type \"\" mismatch", _vars.at(name).type().c_str(), type.c_str());
 }
 
-void ShaderPreprocessor::DeclarationList::parse(const Source& src, const std::regex& pattern)
+void ShaderPreprocessor::DeclarationList::parse(const std::regex& pattern)
 {
-    src.search(pattern, [this](const std::smatch& m)->bool {
-        _declared[m[2].str()] = m[1].str();
-        return true;
+    _source.replace(pattern, [this](const std::smatch& m) {
+        const sp<String> declaration = sp<String>::make(m.str());
+        _vars.push_back(m[2].str(), Declaration(m[2].str(), m[1].str(), declaration));
+        return declaration;
     });
-}
-
-bool ShaderPreprocessor::DeclarationList::dirty() const
-{
-    return _lines.dirty();
 }
 
 bool ShaderPreprocessor::DeclarationList::has(const String& name) const
 {
-    return _declared.find(name) != _declared.end();
+    return _vars.has(name);
 }
 
-String ShaderPreprocessor::DeclarationList::str() const
+const Table<String, ShaderPreprocessor::Declaration>& ShaderPreprocessor::DeclarationList::vars() const
 {
-    return _lines.str();
+    return _vars;
+}
+
+Table<String, ShaderPreprocessor::Declaration>& ShaderPreprocessor::DeclarationList::vars()
+{
+    return _vars;
 }
 
 ShaderPreprocessor::Preprocessor::Preprocessor()
@@ -346,25 +334,14 @@ String ShaderPreprocessor::Preprocessor::process(const GLContext& glContext) con
     DCHECK(glContext.version() > 0, "Unintialized GLContext");
 
     static std::regex var_pattern("\\$\\{([\\w.]+)\\}");
-
-    StringBuffer sb;
-    if(_type == SHADER_TYPE_FRAGMENT && glContext.version() >= Ark::OPENGL_30)
-    {
-        sb << "#define texture2D texture\n";
-        sb << "#define textureCube texture\n";
-        sb << "";
-    }
-
     const std::map<String, String>& annotations = glContext.annotations();
 
-    sb << _source.replace(var_pattern, [&annotations] (Array<String>& matches)->String {
+    return _source.replace(var_pattern, [&annotations] (Array<String>& matches)->String {
         const String& varName = matches.buf()[1];
         const auto iter = annotations.find(varName);
         DCHECK(iter != annotations.end(), "Cannot find constant \"%s\" in RenderEngine", varName.c_str());
         return iter->second;
     });
-
-    return sb.str();
 }
 
 ShaderPreprocessor::Source::Source(String code)
@@ -380,7 +357,12 @@ String ShaderPreprocessor::Source::str() const
     return sb.str();
 }
 
-void ShaderPreprocessor::Source::append(const sp<String>& fragment)
+void ShaderPreprocessor::Source::push_front(const sp<String>& fragment)
+{
+    _fragments.push_front(fragment);
+}
+
+void ShaderPreprocessor::Source::push_back(const sp<String>& fragment)
 {
     _fragments.push_back(fragment);
 }
@@ -401,6 +383,12 @@ bool ShaderPreprocessor::Source::contains(const String& str) const
     return false;
 }
 
+void ShaderPreprocessor::Source::replace(const String& str, const String& replacment)
+{
+    for(const sp<String>& i : _fragments)
+        *i = i->replace(str, replacment);
+}
+
 void ShaderPreprocessor::Source::replace(const std::regex& regexp, const std::function<sp<String>(const std::smatch&)>& replacer)
 {
     for(auto iter = _fragments.begin(); iter != _fragments.end(); ++iter)
@@ -408,7 +396,9 @@ void ShaderPreprocessor::Source::replace(const std::regex& regexp, const std::fu
         const sp<String>& fragment = *iter;
         std::vector<sp<String>> inserting;
         fragment->search(regexp, [&inserting, replacer](const std::smatch& match) {
-            inserting.push_back(replacer(match));
+            sp<String> replacement = replacer(match);
+            if(replacement)
+                inserting.push_back(std::move(replacement));
             return true;
         }, [&inserting](const String& unmatch) {
             inserting.push_back(sp<String>::make(unmatch));
@@ -453,6 +443,11 @@ const String& ShaderPreprocessor::Declaration::name() const
 const String& ShaderPreprocessor::Declaration::type() const
 {
     return _type;
+}
+
+const sp<String>& ShaderPreprocessor::Declaration::source() const
+{
+    return _source;
 }
 
 }

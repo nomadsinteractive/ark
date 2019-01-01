@@ -80,7 +80,7 @@ public:
 
         bool operator == (const ZippedIterator<TIter, UIter>& other) const {
             bool equal = this->_key_iter == other._key_iter;
-            DCHECK(equal == this->_value_iter == other._value_iter, "Zipped iterator must be both equal or neither");
+            DCHECK(equal == (this->_value_iter == other._value_iter), "Zipped iterator must be both equal or neither");
             return equal;
         }
 
@@ -93,7 +93,7 @@ public:
         }
 
         std::pair<T, U> operator *() const {
-            return std::make_pair<T, U>(*_key_iter, *_value_iter);
+            return std::pair<T, U>(*_key_iter, *_value_iter);
         }
     };
 
@@ -116,6 +116,13 @@ public:
 
     Zipped items() const {
         return Zipped(_keys, _values);
+    }
+
+    template<typename V> V toMap() const {
+        V map;
+        for(const auto& i : _indices)
+            map[i.first] = _values[i.second];
+        return map;
     }
 
 private:

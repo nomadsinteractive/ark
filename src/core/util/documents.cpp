@@ -96,16 +96,18 @@ void Documents::print(const document& doc, StringBuffer& sb, const String& inden
     }
 
     StringBuffer content;
+    bool dirty = false;
 
     for(const document& node : doc->children()) {
         Documents::print(node, content, indent, indent_count + 1);
         content << std::endl;
+        dirty = true;
     }
 
-    if(doc->value() || content.dirty())
+    if(doc->value() || dirty)
     {
         sb << '>' << doc->value();
-        if(content.dirty())
+        if(dirty)
         {
             sb << std::endl;
             sb << content.str();

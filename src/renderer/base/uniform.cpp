@@ -55,6 +55,52 @@ Uniform::Type Uniform::toType(const String& declaredType)
     return TYPE_F1;
 }
 
+void Uniform::toTypeLength(String& type, uint32_t& length) const
+{
+    switch(_type) {
+    case TYPE_I1V:
+        length = _flatable->size() / 4;
+    case TYPE_I1:
+        type = "int";
+        break;
+    case TYPE_F1V:
+        length = _flatable->size() / 4;
+    case TYPE_F1:
+        type = "float";
+        break;
+    case TYPE_F2V:
+        length = _flatable->size() / 8;
+    case TYPE_F2:
+        type = "vec2";
+        break;
+    case TYPE_F3V:
+        length = _flatable->size() / 12;
+    case TYPE_F3:
+        type = "vec3";
+        break;
+    case TYPE_F4V:
+        length = _flatable->size() / 16;
+    case TYPE_F4:
+        type = "vec4";
+        break;
+    case TYPE_MAT4V:
+        length = _flatable->size() / 64;
+    case TYPE_MAT4:
+        type = "mat4";
+        break;
+    case TYPE_MAT3V:
+        length = _flatable->size() / 36;
+    case TYPE_MAT3:
+        type = "mat3";
+        break;
+    case TYPE_SAMPLER2D:
+        type = "sampler2D";
+        break;
+    default:
+        DFATAL("Unsupported type: %d", _type);
+    }
+}
+
 const sp<Flatable>& Uniform::flatable() const
 {
     return _flatable;
@@ -82,46 +128,7 @@ String Uniform::declaration() const
 {
     String t;
     uint32_t s = 0;
-    switch(_type) {
-    case TYPE_I1V:
-        s = _flatable->size() / 4;
-    case TYPE_I1:
-        t = "int";
-        break;
-    case TYPE_F1V:
-        s = _flatable->size() / 4;
-    case TYPE_F1:
-        t = "float";
-        break;
-    case TYPE_F2V:
-        s = _flatable->size() / 8;
-    case TYPE_F2:
-        t = "vec2";
-        break;
-    case TYPE_F3V:
-        s = _flatable->size() / 12;
-    case TYPE_F3:
-        t = "vec3";
-        break;
-    case TYPE_F4V:
-        s = _flatable->size() / 16;
-    case TYPE_F4:
-        t = "vec4";
-        break;
-    case TYPE_MAT4V:
-        s = _flatable->size() / 64;
-    case TYPE_MAT4:
-        t = "mat4";
-        break;
-    case TYPE_MAT3V:
-        s = _flatable->size() / 36;
-    case TYPE_MAT3:
-        t = "mat3";
-        break;
-    case TYPE_SAMPLER2D:
-        t = "sampler2D";
-        break;
-    }
+    toTypeLength(t, s);
     return s ? Strings::sprintf("uniform %s %s[%d];", t.c_str(), _name.c_str(), s + 1) : Strings::sprintf("uniform %s %s;", t.c_str(), _name.c_str());
 }
 

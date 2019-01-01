@@ -121,6 +121,11 @@ void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline:
             _location_map[i.name()] = (location++);
         }
     }
+    vertexLayout.inputState = vks::initializers::pipelineVertexInputStateCreateInfo();
+    vertexLayout.inputState.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexLayout.bindingDescriptions.size());
+    vertexLayout.inputState.pVertexBindingDescriptions = vertexLayout.bindingDescriptions.data();
+    vertexLayout.inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexLayout.attributeDescriptions.size());
+    vertexLayout.inputState.pVertexAttributeDescriptions = vertexLayout.attributeDescriptions.data();
 }
 
 void VKPipeline::setupVertexDescriptions(VertexLayout& vertexLayout)

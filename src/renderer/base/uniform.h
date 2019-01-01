@@ -44,6 +44,8 @@ public:
 
     static Type toType(const String& declaredType);
 
+    void toTypeLength(String& type, uint32_t& length) const;
+
     const sp<Flatable>& flatable() const;
     void setFlatable(const sp<Flatable>& flatable);
 

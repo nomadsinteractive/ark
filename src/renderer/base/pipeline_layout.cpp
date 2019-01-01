@@ -33,8 +33,6 @@ void PipelineLayout::preCompile(GraphicsContext& graphicsContext, const sp<Shade
     {
         _snippet->preCompile(graphicsContext, _building_context, bindings);
 
-        _building_context->preCompile();
-
         _building_context->_vertex.insertPredefinedUniforms(_input->uniforms());
         _building_context->_fragment.insertPredefinedUniforms(_input->uniforms());
 
