@@ -22,7 +22,7 @@ VKBuffer::~VKBuffer()
 
 uintptr_t VKBuffer::id()
 {
-    return static_cast<uintptr_t>(_descriptor.buffer);
+    return reinterpret_cast<uintptr_t>(_descriptor.buffer);
 }
 
 void VKBuffer::upload(GraphicsContext& graphicsContext)

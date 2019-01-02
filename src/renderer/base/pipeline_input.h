@@ -43,7 +43,7 @@ public:
 
     void initialize(const PipelineBuildingContext& buildingContext);
 
-    const std::vector<Uniform>& uniforms() const;
+    const std::vector<sp<Uniform>>& uniforms() const;
     const sp<UBO>& ubo() const;
 
     const std::map<uint32_t, Stream>& streams() const;

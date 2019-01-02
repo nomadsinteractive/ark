@@ -138,29 +138,35 @@ ShaderPreprocessor::Preprocessor ShaderPreprocessor::preprocess()
     return Preprocessor(_type, getDeclarations() + _main.str());
 }
 
-void ShaderPreprocessor::insertPredefinedUniforms(const std::vector<Uniform>& uniforms)
+void ShaderPreprocessor::setupBindings(const std::vector<sp<Uniform>>& uniforms, int32_t& binding)
 {
-    for(const Uniform& i : uniforms)
-        if(!_uniforms.has(i.name()) && _main.contains(i.name()))
+    int32_t next = binding + 1;
+    for(const sp<Uniform>& i : uniforms)
+        if(_main.contains(i->name()))
         {
-            String type;
-            uint32_t length;
-            sp<String> declaration = sp<String>::make(i.declaration());
+            if(i->binding() == -1)
+                i->setBinding(binding = next);
+            if(!_uniforms.has(i->name()))
+            {
+                String type;
+                uint32_t length;
+                sp<String> declaration = sp<String>::make(i->declaration());
 
-            i.toTypeLength(type, length);
-            _uniforms.vars().push_back(i.name(), Declaration(i.name(), type, declaration));
-            _uniform_declarations.push_back(declaration);
+                i->toTypeLength(type, length);
+                _uniforms.vars().push_back(i->name(), Declaration(i->name(), type, declaration));
+                _uniform_declarations.push_back(declaration);
+            }
         }
 }
 
-Uniform ShaderPreprocessor::getUniformInput(const String& name, Uniform::Type type) const
+sp<Uniform> ShaderPreprocessor::getUniformInput(const String& name, Uniform::Type type) const
 {
     if(!_uniforms.has(name))
-        return Uniform();
+        return nullptr;
 
-    const Declaration& uniform = _uniforms.vars().at(name);
-    DCHECK(Uniform::toType(uniform.type()) == type, "Uniform \"%s\" declared type: %s, but it should be %d", name.c_str(), uniform.type().c_str(), type);
-    return Uniform(name, type, nullptr, nullptr);
+    const Declaration& declaration = _uniforms.vars().at(name);
+    DCHECK(Uniform::toType(declaration.type()) == type, "Uniform \"%s\" declared type: %s, but it should be %d", name.c_str(), declaration.type().c_str(), type);
+    return sp<Uniform>::make(name, type, nullptr, nullptr);
 }
 
 size_t ShaderPreprocessor::parseFunctionBody(const String& s, String& body) const
@@ -353,11 +359,12 @@ String ShaderPreprocessor::Source::str(char endl) const
 {
     StringBuffer sb;
     for(const auto& i : _fragments)
-    {
-        sb << *i;
-        if(endl)
-            sb << endl;
-    }
+        if(i && !i->empty())
+        {
+            sb << *i;
+            if(endl)
+                sb << endl;
+        }
     return sb.str();
 }
 

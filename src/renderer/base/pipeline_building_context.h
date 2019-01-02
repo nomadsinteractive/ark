@@ -24,6 +24,8 @@ public:
 
     void initialize();
 
+    int32_t setupBindings();
+
     sp<Shader::Stub> _shader;
     sp<PipelineInput> _input;
     sp<Snippet> _snippet;
@@ -32,7 +34,7 @@ public:
     ShaderPreprocessor _fragment;
 
     std::map<String, Attribute> _attributes;
-    Table<String, Uniform> _uniforms;
+    Table<String, sp<Uniform>> _uniforms;
 
     List<std::pair<String, String>> _vertex_in;
     List<std::pair<String, String>> _vertex_out;
@@ -43,8 +45,8 @@ public:
 
     void addAttribute(const String& name, const String& type);
     void addSnippet(const sp<Snippet>& snippet);
-    void addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& dirty);
-    void addUniform(Uniform uniform);
+    void addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& dirty, int32_t binding);
+    void addUniform(const sp<Uniform>& uniform);
 
     Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t scopes);
 

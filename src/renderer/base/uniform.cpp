@@ -8,19 +8,9 @@
 
 namespace ark {
 
-Uniform::Uniform()
-    : _type(TYPE_NONE)
+Uniform::Uniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& dirty, int32_t binding)
+    : _name(name), _type(type), _flatable(flatable), _dirty(dirty), _binding(binding)
 {
-}
-
-Uniform::Uniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& dirty)
-    : _name(name), _type(type), _flatable(flatable), _dirty(dirty)
-{
-}
-
-ark::Uniform::operator bool() const
-{
-    return _type != TYPE_NONE;
 }
 
 const String& Uniform::name() const
@@ -31,6 +21,16 @@ const String& Uniform::name() const
 Uniform::Type Uniform::type() const
 {
     return _type;
+}
+
+int32_t Uniform::binding() const
+{
+    return _binding;
+}
+
+void Uniform::setBinding(int32_t binding)
+{
+    _binding = binding;
 }
 
 Uniform::Type Uniform::toType(const String& declaredType)

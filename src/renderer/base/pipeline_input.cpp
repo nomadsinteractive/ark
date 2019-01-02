@@ -19,7 +19,7 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
     _sampler_count = buildingContext._fragment._samplers.vars().size();
 }
 
-const std::vector<Uniform>& PipelineInput::uniforms() const
+const std::vector<sp<Uniform>>& PipelineInput::uniforms() const
 {
     return _ubo->uniforms();
 }

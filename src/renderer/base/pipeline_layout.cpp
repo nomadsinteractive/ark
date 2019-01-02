@@ -33,9 +33,6 @@ void PipelineLayout::preCompile(GraphicsContext& graphicsContext, const sp<Shade
     {
         _snippet->preCompile(graphicsContext, _building_context, bindings);
 
-        _building_context->_vertex.insertPredefinedUniforms(_input->uniforms());
-        _building_context->_fragment.insertPredefinedUniforms(_input->uniforms());
-
         _vertex = _building_context->_vertex.preprocess();
         _fragment = _building_context->_fragment.preprocess();
 
@@ -75,21 +72,23 @@ void PipelineLayout::initialize(const Camera& camera)
 
     _building_context->initialize();
 
-    Uniform mvp = _building_context->_vertex.getUniformInput("u_MVP", Uniform::TYPE_MAT4);
+    sp<Uniform> mvp = _building_context->_vertex.getUniformInput("u_MVP", Uniform::TYPE_MAT4);
     if(mvp)
     {
-        mvp.setFlatable(camera.vp());
-        mvp.setObserver(camera.notifier()->createObserver());
-        _building_context->addUniform(std::move(mvp));
+        mvp->setFlatable(camera.vp());
+        mvp->setObserver(camera.notifier()->createObserver());
+        _building_context->addUniform(mvp);
     }
 
-    Uniform vp = _building_context->_vertex.getUniformInput("u_VP", Uniform::TYPE_MAT4);
+    sp<Uniform> vp = _building_context->_vertex.getUniformInput("u_VP", Uniform::TYPE_MAT4);
     if(vp)
     {
-        vp.setFlatable(camera.vp());
-        vp.setObserver(camera.notifier()->createObserver());
-        _building_context->addUniform(std::move(vp));
+        vp->setFlatable(camera.vp());
+        vp->setObserver(camera.notifier()->createObserver());
+        _building_context->addUniform(vp);
     }
+
+    _building_context->setupBindings();
 
     _input->initialize(_building_context);
 }

@@ -51,7 +51,7 @@ const VkDescriptorSet& VKPipeline::vkDescriptorSet() const
 
 uintptr_t VKPipeline::id()
 {
-    return static_cast<uintptr_t>(_pipeline);
+    return reinterpret_cast<uintptr_t>(_pipeline);
 }
 
 void VKPipeline::upload()
@@ -402,8 +402,8 @@ void VKPipeline::buildCommandBuffers(const Buffer::Snapshot& vertex, const Buffe
 
         VkDeviceSize offsets[1] = { 0 };
 
-        VkBuffer vkVertexBuffer = static_cast<VkBuffer>(vertex.id());
-        VkBuffer vkIndexBuffer = static_cast<VkBuffer>(index.id());
+        VkBuffer vkVertexBuffer = reinterpret_cast<VkBuffer>(vertex.id());
+        VkBuffer vkIndexBuffer = reinterpret_cast<VkBuffer>(index.id());
 
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkVertexBuffer, offsets);
         vkCmdBindIndexBuffer(commandBuffer, vkIndexBuffer, 0, VK_INDEX_TYPE_UINT16);

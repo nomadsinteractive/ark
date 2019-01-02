@@ -144,11 +144,11 @@ public:
 
     void initialize(const String& source, PipelineBuildingContext& context);
 
+    void setupBindings(const std::vector<sp<Uniform>>& uniforms, int32_t& counter);
+
     Preprocessor preprocess();
 
-    void insertPredefinedUniforms(const std::vector<Uniform>& uniforms);
-
-    Uniform getUniformInput(const String& name, Uniform::Type type) const;
+    sp<Uniform> getUniformInput(const String& name, Uniform::Type type) const;
 
 private:
     void parseMainBlock(const String& source, PipelineBuildingContext& buildingContext);

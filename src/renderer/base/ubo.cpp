@@ -7,13 +7,13 @@
 
 namespace ark {
 
-UBO::UBO(std::vector<Uniform> uniforms)
+UBO::UBO(std::vector<sp<Uniform>> uniforms)
     : _uniforms(std::move(uniforms)), _dirty_flags(sp<DynamicArray<uint8_t>>::make(_uniforms.size()))
 {
     size_t size = 0;
     for(const auto& i : _uniforms)
     {
-        size_t s = i.flatable()->size();
+        size_t s = i->flatable()->size();
         _slots.push_back(std::make_pair(size, s));
         size += s;
         DCHECK(size % 4 == 0, "Uniform aligment error, offset: %d", size);
@@ -61,7 +61,7 @@ size_t UBO::size() const
     return _buffer->length();
 }
 
-const std::vector<Uniform>& UBO::uniforms() const
+const std::vector<sp<Uniform>>& UBO::uniforms() const
 {
     return _uniforms;
 }

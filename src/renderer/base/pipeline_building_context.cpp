@@ -93,6 +93,15 @@ void PipelineBuildingContext::initialize()
         _vertex._outs.declare(i.first, "", i.second);
 }
 
+int32_t PipelineBuildingContext::setupBindings()
+{
+    int32_t binding = 0;
+    const std::vector<sp<Uniform>>& uniforms = _uniforms.values();
+    _vertex.setupBindings(uniforms, binding);
+    _fragment.setupBindings(uniforms, binding);
+    return binding;
+}
+
 void PipelineBuildingContext::addAttribute(const String& name, const String& type)
 {
     Attribute& attr = addPredefinedAttribute(name, type, 0);
@@ -105,15 +114,14 @@ void PipelineBuildingContext::addSnippet(const sp<Snippet>& snippet)
     _snippet = _snippet ? sp<Snippet>::adopt(new SnippetLinkedChain(_snippet, snippet)) : snippet;
 }
 
-void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed)
+void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed, int32_t binding)
 {
-    _uniforms.push_back(name, Uniform(name, type, flatable, changed));
+    _uniforms.push_back(name, sp<Uniform>::make(name, type, flatable, changed, binding));
 }
 
-void PipelineBuildingContext::addUniform(Uniform uniform)
+void PipelineBuildingContext::addUniform(const sp<Uniform>& uniform)
 {
-    String name = uniform.name();
-    _uniforms.push_back(std::move(name), std::move(uniform));
+    _uniforms.push_back(uniform->name(), uniform);
 }
 
 Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
@@ -148,6 +156,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
+        int32_t binding = Documents::getAttribute<int32_t>(i, Constants::Attributes::BINDING, -1);
         const sp<Flatable> flatable = factory.ensure<Flatable>(type, value, args);
         const uint32_t size = flatable->size();
         const uint32_t length = flatable->length();
@@ -176,7 +185,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         default:
             FATAL("Unknow type \"%s\"", type.c_str());
         }
-        addUniform(name, glType, flatable, flatable.as<Changed>());
+        addUniform(name, glType, flatable, flatable.as<Changed>(), binding);
     }
 }
 

@@ -27,16 +27,16 @@ public:
             *i.source() = i.source()->replace("uniform ", "    ");
             context._vertex._main.replace(i.name(), "ubo." + i.name());
         }
+        context._vertex._uniform_declarations.push_front(sp<String>::make("layout (binding = 0) uniform UBO {\n"));
+        context._vertex._uniform_declarations.push_back(sp<String>::make("\n} ubo;\n\n"));
 
         context._fragment._outs.declare("vec4", "v_", "FragColor");
 
         setLayoutDescriptor(context._fragment._samplers.vars().values(), sBinding, 1);
+        setLayoutDescriptor(context._fragment._uniforms.vars().values(), sBinding, 0);
 
         setLayoutDescriptor(context._fragment._ins.vars().values(), sLocation, 0);
         setLayoutDescriptor(context._fragment._outs.vars().values(), sLocation, 0);
-
-        context._vertex._uniform_declarations.push_front(sp<String>::make("layout (binding = 0) uniform UBO {\n"));
-        context._vertex._uniform_declarations.push_back(sp<String>::make("\n} ubo;\n\n"));
 
         context._vertex._macro_defines.push_back("#extension GL_ARB_separate_shader_objects : enable");
         context._vertex._macro_defines.push_back("#extension GL_ARB_shading_language_420pack : enable");
@@ -49,7 +49,7 @@ public:
     }
 
 private:
-    void setLayoutDescriptor(const std::vector<ShaderPreprocessor::Declaration>& declarations, const String& descriptor, uint32_t start)
+    uint32_t setLayoutDescriptor(const std::vector<ShaderPreprocessor::Declaration>& declarations, const String& descriptor, uint32_t start)
     {
         uint32_t counter = start;
         for(const ShaderPreprocessor::Declaration& i : declarations)
@@ -58,6 +58,7 @@ private:
             sb << "layout (" << descriptor << " = " << (counter++) << ") " << *i.source();
             *i.source() = sb.str();
         }
+        return counter;
     }
 };
 

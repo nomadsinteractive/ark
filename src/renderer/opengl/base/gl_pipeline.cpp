@@ -93,7 +93,7 @@ sp<RenderCommand> GLPipeline::active(GraphicsContext& /*graphicsContext*/, const
         {
             if(uboSnapshot._dirty_flags->buf()[i])
             {
-                const Uniform& uniform = ubo->uniforms().at(i);
+                const sp<Uniform>& uniform = ubo->uniforms().at(i);
                 uint8_t* buf = uboSnapshot._buffer->buf();
                 const auto pair = ubo->_slots.at(i);
                 bindUniform(reinterpret_cast<float*>(buf + pair.first), pair.second, uniform);
