@@ -31,11 +31,18 @@ public:
         context._fragment._outs.declare("vec4", "v_", "FragColor");
 
         setLayoutDescriptor(context._fragment._samplers.vars().values(), sBinding, 1);
+
         setLayoutDescriptor(context._fragment._ins.vars().values(), sLocation, 0);
         setLayoutDescriptor(context._fragment._outs.vars().values(), sLocation, 0);
 
         context._vertex._uniform_declarations.push_front(sp<String>::make("layout (binding = 0) uniform UBO {\n"));
         context._vertex._uniform_declarations.push_back(sp<String>::make("\n} ubo;\n\n"));
+
+        context._vertex._macro_defines.push_back("#extension GL_ARB_separate_shader_objects : enable");
+        context._vertex._macro_defines.push_back("#extension GL_ARB_shading_language_420pack : enable");
+
+        context._fragment._macro_defines.push_back("#extension GL_ARB_separate_shader_objects : enable");
+        context._fragment._macro_defines.push_back("#extension GL_ARB_shading_language_420pack : enable");
 
         context._fragment._macro_defines.push_back("#define texture2D texture");
         context._fragment._macro_defines.push_back("#define textureCube texture");
@@ -56,7 +63,7 @@ private:
 
 }
 
-sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(ResourceManager& resourceManager, const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings)
+sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(ResourceManager& /*resourceManager*/, const sp<PipelineFactory>& /*pipelineFactory*/, const sp<ShaderBindings>& /*shaderBindings*/)
 {
     return sp<CoreSnippetVulkan>::make();
 }

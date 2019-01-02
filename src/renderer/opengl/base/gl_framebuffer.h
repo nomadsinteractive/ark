@@ -4,17 +4,17 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/opengl/base/gl_resource.h"
+#include "renderer/inf/resource.h"
 
 namespace ark {
 namespace opengl {
 
-class GLFramebuffer : public GLResource {
+class GLFramebuffer : public Resource {
 public:
     GLFramebuffer(const sp<Recycler>& recycler, const sp<Texture>& texture);
     ~GLFramebuffer() override;
 
-    virtual uint32_t id() override;
+    virtual uintptr_t id() override;
 
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;

@@ -42,7 +42,7 @@ Texture::Type Texture::type() const
     return _type;
 }
 
-uint32_t Texture::id()
+uintptr_t Texture::id()
 {
     return _resource->val()->id();
 }

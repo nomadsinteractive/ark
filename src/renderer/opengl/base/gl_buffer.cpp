@@ -59,7 +59,7 @@ void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& uploader
     glBindBuffer(_type, 0);
 }
 
-uint32_t GLBuffer::id()
+uintptr_t GLBuffer::id()
 {
     return _id;
 }

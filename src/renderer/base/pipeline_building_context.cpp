@@ -93,12 +93,6 @@ void PipelineBuildingContext::initialize()
         _vertex._outs.declare(i.first, "", i.second);
 }
 
-//void PipelineBuildingContext::preCompile()
-//{
-//    doSnippetPrecompile();
-//    doPrecompile(_vertex, _fragment);
-//}
-
 void PipelineBuildingContext::addAttribute(const String& name, const String& type)
 {
     Attribute& attr = addPredefinedAttribute(name, type, 0);
@@ -209,12 +203,5 @@ Attribute PipelineBuildingContext::makePredefinedAttribute(const String& name, c
     DFATAL("Unknown attribute type \"%s\"", type.c_str());
     return Attribute();
 }
-
-//void PipelineBuildingContext::insertBefore(String& src, const String& statement, const String& str)
-//{
-//    String::size_type pos = src.find(statement);
-//    if(pos != String::npos)
-//        src.insert(pos, str);
-//}
 
 }

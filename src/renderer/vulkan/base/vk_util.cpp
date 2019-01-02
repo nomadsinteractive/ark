@@ -276,11 +276,11 @@ void VKUtil::buildCommandBuffers(const VKRenderTarget& renderTarget)
     renderPassBeginInfo.clearValueCount = 2;
     renderPassBeginInfo.pClearValues = clearValues;
 
-    for (size_t i = 0; i < _command_buffers->commandBuffers().size(); ++i)
+    for (size_t i = 0; i < _command_buffers->vkCommandBuffers().size(); ++i)
     {
         // Set target frame buffer
         renderPassBeginInfo.framebuffer = renderTarget.frameBuffers()[i];
-        const VkCommandBuffer commandBuffer = _command_buffers->commandBuffers()[i];
+        const VkCommandBuffer commandBuffer = _command_buffers->vkCommandBuffers()[i];
         checkResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
 
         vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -402,7 +402,7 @@ VkFormat VKUtil::getAttributeFormat(const Attribute& attribute)
     {
         if(attribute.length() < 5)
         {
-            const VkFormat formats[4] = {VK_FORMAT_R16_SINT, VK_FORMAT_R16G16_SINT, VK_FORMAT_R16G16B16_SINT, VK_FORMAT_R16G16B16A16_SINT};
+            const VkFormat formats[4] = {VK_FORMAT_R16_SNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R16G16B16A16_SNORM};
             return formats[attribute.length() - 1];
         }
     }

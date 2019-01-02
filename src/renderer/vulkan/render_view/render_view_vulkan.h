@@ -30,7 +30,7 @@ public:
     virtual void onRenderFrame(const Color& backgroundColor, const sp<RenderCommand>& renderCommand) override;
 
 private:
-    void makeCommandBuffers(GraphicsContext& graphicsContext, uint32_t width, uint32_t height, const Color& backgroundColor);
+    void makeCommandBuffers(GraphicsContext& graphicsContext, const Color& backgroundColor);
     
 private:
     sp<VKUtil> _vulkan_api;

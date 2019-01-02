@@ -17,6 +17,7 @@ GLDrawElements::GLDrawElements(DrawingContext context, const sp<Shader>& shader,
 
 void GLDrawElements::draw(GraphicsContext& graphicsContext)
 {
+    _context.upload(graphicsContext);
     _shader->active(graphicsContext, _context);
     _context.preDraw(graphicsContext);
     glDrawElements(_mode, _context._count, GLIndexType, nullptr);

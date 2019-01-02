@@ -25,7 +25,6 @@ RenderViewVulkan::RenderViewVulkan(const sp<VKUtil>& vulkanApi, const sp<VKRende
 
 void RenderViewVulkan::onSurfaceCreated()
 {
-//    _vulkan_api->initialize(_graphics_context->glContext());
 }
 
 void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
@@ -33,8 +32,10 @@ void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
     LOGD("Width: %d, Height: %d, Viewport (%.1f, %.1f, %.1f, %.1f)", width, height, _viewport.left(), _viewport.top(), _viewport.right(), _viewport.bottom());
     _graphics_context.reset(new GraphicsContext(_graphics_context->glContext(), _graphics_context->resourceManager()));
 
+    _vulkan_api->initialize(_graphics_context->glContext());
+
     _renderer->renderTarget()->onSurfaceChanged(width, height);
-    makeCommandBuffers(_graphics_context, width, height, Color::BLACK);
+    makeCommandBuffers(_graphics_context, Color::WHITE);
 }
 
 void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, const sp<RenderCommand>& renderCommand)
@@ -45,34 +46,26 @@ void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, const sp<Rend
     const sp<VKRenderTarget>& renderTarget = _renderer->renderTarget();
     renderTarget->acquire();
     _graphics_context->onDrawFrame();
+
     if(backgroundColor != _background_color)
-        makeCommandBuffers(_graphics_context, renderTarget->width(), renderTarget->height(), backgroundColor);
+        makeCommandBuffers(_graphics_context, backgroundColor);
+
     _command_buffers->submit(_graphics_context);
     renderCommand->draw(_graphics_context);
     renderTarget->swap();
 /**/
 }
 
-void RenderViewVulkan::makeCommandBuffers(GraphicsContext& graphicsContext, uint32_t width, uint32_t height, const Color& backgroundColor)
+void RenderViewVulkan::makeCommandBuffers(GraphicsContext& graphicsContext, const Color& backgroundColor)
 {
+    _renderer->renderTarget()->setBackgroundColor(backgroundColor);
     _background_color = backgroundColor;
 
     VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-    VkClearValue clearValues[2];
-    clearValues[0].color = {{_background_color.red(), _background_color.green(), _background_color.blue(), _background_color.alpha()}};
-    clearValues[1].depthStencil = {1.0f, 0};
-
-    VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-    renderPassBeginInfo.renderPass = _renderer->renderTarget()->vkRenderPass();
-    renderPassBeginInfo.renderArea.offset.x = 0;
-    renderPassBeginInfo.renderArea.offset.y = 0;
-    renderPassBeginInfo.renderArea.extent.width = width;
-    renderPassBeginInfo.renderArea.extent.height = height;
-    renderPassBeginInfo.clearValueCount = 2;
-    renderPassBeginInfo.pClearValues = clearValues;
+    VkRenderPassBeginInfo renderPassBeginInfo = _renderer->renderTarget()->vkRenderPassBeginInfo();
 
     _command_buffers = sp<VKCommandBuffers>::make(graphicsContext.resourceManager()->recycler(), _renderer->renderTarget());
-    const std::vector<VkCommandBuffer>& commandBuffers = _command_buffers->commandBuffers();
+    const std::vector<VkCommandBuffer>& commandBuffers = _command_buffers->vkCommandBuffers();
     for (size_t i = 0; i < commandBuffers.size(); ++i)
     {
         renderPassBeginInfo.framebuffer = _renderer->renderTarget()->frameBuffers()[i];

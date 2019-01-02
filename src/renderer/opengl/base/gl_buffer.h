@@ -15,7 +15,7 @@ public:
     GLBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Recycler>& recycler, const sp<Uploader>& uploader);
     ~GLBuffer() override;
 
-    virtual uint32_t id() override;
+    virtual uintptr_t id() override;
     virtual void upload(GraphicsContext&) override;
     virtual RecycleFunc recycle() override;
 

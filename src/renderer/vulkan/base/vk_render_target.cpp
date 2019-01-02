@@ -2,6 +2,8 @@
 
 #include <array>
 
+#include "graphics/base/color.h"
+
 #include "renderer/vulkan/base/vk_device.h"
 
 #include "renderer/vulkan/base/vk_command_pool.h"
@@ -18,10 +20,13 @@ namespace ark {
 namespace vulkan {
 
 VKRenderTarget::VKRenderTarget(const sp<VKDevice>& device)
-    : _device(device), _viewport{}, _aquired_image_id(0)
+    : _device(device), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0)
 {
     _queue = _device->queue();
     _swap_chain.connect(_device->vkInstance(), _device->physicalDevice(), _device->logicalDevice());
+
+    _clear_values[0].color = {{0, 0, 0, 0}};
+    _clear_values[1].depthStencil = {1.0f, 0};
 
     // Create synchronization objects
     VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
@@ -49,14 +54,12 @@ VKRenderTarget::VKRenderTarget(const sp<VKDevice>& device)
     setupDepthStencil();
     setupRenderPass();
     setupFrameBuffer();
-
-//    setupDescriptorPool();
 }
 
 VKRenderTarget::~VKRenderTarget()
 {
     VkDevice logicalDevice = _device->logicalDevice();
-    vkDestroyRenderPass(logicalDevice, _render_pass, nullptr);
+    vkDestroyRenderPass(logicalDevice, _render_pass_begin_info.renderPass, nullptr);
 
     for(size_t i = 0; i < _frame_buffers.size(); i++)
         vkDestroyFramebuffer(logicalDevice, _frame_buffers[i], nullptr);
@@ -69,8 +72,6 @@ VKRenderTarget::~VKRenderTarget()
     vkDestroySemaphore(logicalDevice, _semaphore_render_complete, nullptr);
 
     _swap_chain.cleanup();
-
-//    vkDestroyDescriptorPool(_device->logicalDevice(), _descriptor_pool, nullptr);
 }
 
 uint32_t VKRenderTarget::width() const
@@ -83,11 +84,6 @@ uint32_t VKRenderTarget::height() const
     return _height;
 }
 
-//VkDescriptorPool VKRenderTarget::vkDescriptorPool() const
-//{
-//    return _descriptor_pool;
-//}
-
 const VkRect2D& VKRenderTarget::vkScissor() const
 {
     return _scissor;
@@ -96,6 +92,11 @@ const VkRect2D& VKRenderTarget::vkScissor() const
 const VkViewport& VKRenderTarget::vkViewport() const
 {
     return _viewport;
+}
+
+const VkRenderPassBeginInfo& VKRenderTarget::vkRenderPassBeginInfo() const
+{
+    return _render_pass_begin_info;
 }
 
 const sp<VKDevice>& VKRenderTarget::device() const
@@ -110,7 +111,7 @@ const sp<VKCommandPool>& VKRenderTarget::commandPool() const
 
 VkRenderPass VKRenderTarget::vkRenderPass() const
 {
-    return _render_pass;
+    return _render_pass_begin_info.renderPass;
 }
 
 const std::vector<VkFramebuffer>& VKRenderTarget::frameBuffers() const
@@ -141,6 +142,7 @@ sp<VKDescriptorPool> VKRenderTarget::makeDescriptorPool(const sp<Recycler>& recy
 uint32_t VKRenderTarget::acquire()
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
+    _submit_queue.clear();
     VKUtil::checkResult(_swap_chain.acquireNextImage(_semaphore_present_complete, &_aquired_image_id));
     return _aquired_image_id;
 }
@@ -150,17 +152,20 @@ uint32_t VKRenderTarget::aquiredImageId() const
     return _aquired_image_id;
 }
 
-void VKRenderTarget::submit(const VkCommandBuffer* commandBuffer)
+void VKRenderTarget::submit(VkCommandBuffer commandBuffer)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
-    _submit_info.pCommandBuffers = commandBuffer;
-    _submit_info.commandBufferCount = 1;
-    VKUtil::checkResult(vkQueueSubmit(_queue, 1, &_submit_info, VK_NULL_HANDLE));
+    _submit_queue.push_back(commandBuffer);
 }
 
 void VKRenderTarget::swap()
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
+
+    _submit_info.pCommandBuffers = _submit_queue.data();
+    _submit_info.commandBufferCount = _submit_queue.size();
+    VKUtil::checkResult(vkQueueSubmit(_queue, 1, &_submit_info, VK_NULL_HANDLE));
+
     VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, _semaphore_render_complete));
     vkQueueWaitIdle(_queue);
 }
@@ -169,6 +174,18 @@ void VKRenderTarget::onSurfaceChanged(uint32_t width, uint32_t height)
 {
     _scissor = vks::initializers::rect2D(static_cast<int32_t>(width), static_cast<int32_t>(height), 0, 0);
     _viewport = vks::initializers::viewport(static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f);
+
+    _render_pass_begin_info.renderArea.offset.x = 0;
+    _render_pass_begin_info.renderArea.offset.y = 0;
+    _render_pass_begin_info.renderArea.extent.width = width;
+    _render_pass_begin_info.renderArea.extent.height = height;
+    _render_pass_begin_info.clearValueCount = 2;
+    _render_pass_begin_info.pClearValues = _clear_values;
+}
+
+void VKRenderTarget::setBackgroundColor(const Color& backgroundColor)
+{
+    _clear_values[0] = {{backgroundColor.red(), backgroundColor.green(), backgroundColor.blue(), backgroundColor.alpha()}};
 }
 
 void VKRenderTarget::initSwapchain()
@@ -305,7 +322,7 @@ void VKRenderTarget::setupRenderPass()
     renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
     renderPassInfo.pDependencies = dependencies.data();
 
-    VKUtil::checkResult(vkCreateRenderPass(_device->logicalDevice(), &renderPassInfo, nullptr, &_render_pass));
+    VKUtil::checkResult(vkCreateRenderPass(_device->logicalDevice(), &renderPassInfo, nullptr, &_render_pass_begin_info.renderPass));
 }
 
 void VKRenderTarget::setupFrameBuffer()
@@ -318,7 +335,7 @@ void VKRenderTarget::setupFrameBuffer()
     VkFramebufferCreateInfo frameBufferCreateInfo = {};
     frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     frameBufferCreateInfo.pNext = nullptr;
-    frameBufferCreateInfo.renderPass = _render_pass;
+    frameBufferCreateInfo.renderPass = _render_pass_begin_info.renderPass;
     frameBufferCreateInfo.attachmentCount = 2;
     frameBufferCreateInfo.pAttachments = attachments;
     frameBufferCreateInfo.width = _width;
@@ -333,18 +350,6 @@ void VKRenderTarget::setupFrameBuffer()
         VKUtil::checkResult(vkCreateFramebuffer(_device->logicalDevice(), &frameBufferCreateInfo, nullptr, &_frame_buffers[i]));
     }
 }
-
-//void VKRenderTarget::setupDescriptorPool()
-//{
-//    std::vector<VkDescriptorPoolSize> poolSizes = {
-//        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
-//        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
-//    };
-
-//    VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, 2);
-
-//    VKUtil::checkResult(vkCreateDescriptorPool(_device->logicalDevice(), &descriptorPoolInfo, nullptr, &_descriptor_pool));
-//}
 
 }
 }

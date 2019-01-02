@@ -74,7 +74,7 @@ uint32_t GLTexture::target() const
     return _target;
 }
 
-uint32_t GLTexture::id()
+uintptr_t GLTexture::id()
 {
     return _id;
 }

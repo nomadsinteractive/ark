@@ -19,13 +19,6 @@ public:
     virtual void preDraw(GraphicsContext& graphicsContext, Shader& shader, const DrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 
-//    void link(const sp<Snippet>& snippet);
-//    template<typename T, typename... Args> sp<T> link(Args&&... args) {
-//        const sp<T> snippet = sp<T>::make(std::forward<Args>(args)...);
-//        link(snippet);
-//        return snippet;
-//    }
-
 private:
     sp<Snippet> _core;
 

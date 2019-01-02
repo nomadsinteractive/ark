@@ -22,7 +22,7 @@ Buffer::Snapshot::Snapshot(const sp<Delegate>& stub, const sp<Uploader>& uploade
 {
 }
 
-uint32_t Buffer::Snapshot::id() const
+uintptr_t Buffer::Snapshot::id() const
 {
     return _delegate->id();
 }
@@ -80,6 +80,11 @@ uint32_t Buffer::id() const
 void Buffer::upload(GraphicsContext& graphicsContext) const
 {
     _delegate->upload(graphicsContext);
+}
+
+const sp<Buffer::Delegate>& Buffer::delegate() const
+{
+    return _delegate;
 }
 
 Buffer::Builder::Builder(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t stride, size_t growCapacity)

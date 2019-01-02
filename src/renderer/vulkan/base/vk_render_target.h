@@ -8,6 +8,7 @@
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/forwarding.h"
 #include "graphics/base/viewport.h"
 
 #include "renderer/forwarding.h"
@@ -30,6 +31,8 @@ public:
     const VkRect2D& vkScissor() const;
     const VkViewport& vkViewport() const;
 
+    const VkRenderPassBeginInfo& vkRenderPassBeginInfo() const;
+
     const sp<VKDevice>& device() const;
 
     const sp<VKCommandPool>& commandPool() const;
@@ -41,10 +44,12 @@ public:
 
     uint32_t acquire();
     uint32_t aquiredImageId() const;
-    void submit(const VkCommandBuffer* commandBuffer);
+
+    void submit(VkCommandBuffer commandBuffer);
     void swap();
 
     void onSurfaceChanged(uint32_t width, uint32_t height);
+    void setBackgroundColor(const Color& backgroundColor);
 
 private:
     void initSwapchain();
@@ -53,28 +58,27 @@ private:
     void setupRenderPass();
     void setupFrameBuffer();
 
-//    void setupDescriptorPool();
-
 private:
     sp<VKDevice> _device;
     sp<VKCommandPool> _command_pool;
 
     VkQueue _queue;
     VulkanSwapChain _swap_chain;
-    VkRenderPass _render_pass;
+
+    VkClearValue _clear_values[2];
+    VkRenderPassBeginInfo _render_pass_begin_info;
 
     VkRect2D _scissor;
     VkViewport _viewport;
 
     std::vector<VkFramebuffer> _frame_buffers;
+    std::vector<VkCommandBuffer> _submit_queue;
 
     VkSemaphore _semaphore_present_complete;
     VkSemaphore _semaphore_render_complete;
 
     VkSubmitInfo _submit_info;
     VkPipelineStageFlags _submit_pipeline_stages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-
-//    VkDescriptorPool _descriptor_pool;
 
     struct
     {

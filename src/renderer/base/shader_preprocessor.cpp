@@ -196,8 +196,8 @@ String ShaderPreprocessor::getDeclarations() const
         sb << '\n';
     }
 
-    sb << _uniform_declarations.str();
-    sb << _attribute_declarations.str();
+    sb << _uniform_declarations.str('\n');
+    sb << _attribute_declarations.str('\n');
     return sb.str();
 }
 
@@ -349,11 +349,15 @@ ShaderPreprocessor::Source::Source(String code)
 {
 }
 
-String ShaderPreprocessor::Source::str() const
+String ShaderPreprocessor::Source::str(char endl) const
 {
     StringBuffer sb;
     for(const auto& i : _fragments)
+    {
         sb << *i;
+        if(endl)
+            sb << endl;
+    }
     return sb.str();
 }
 

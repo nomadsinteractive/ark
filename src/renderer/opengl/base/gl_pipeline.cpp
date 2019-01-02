@@ -16,10 +16,9 @@
 #include "renderer/base/texture.h"
 #include "renderer/base/ubo.h"
 #include "renderer/base/uniform.h"
+#include "renderer/inf/resource.h"
 
-#include "renderer/opengl/base/gl_resource.h"
 #include "renderer/opengl/render_command/gl_draw_elements.h"
-#include "renderer/opengl/render_command/gl_draw_elements_instanced.h"
 #include "renderer/opengl/util/gl_util.h"
 
 #include "platform/platform.h"
@@ -39,7 +38,7 @@ GLPipeline::~GLPipeline()
         _recycler->recycle(*this);
 }
 
-uint32_t GLPipeline::id()
+uintptr_t GLPipeline::id()
 {
     return _id;
 }
@@ -187,9 +186,8 @@ void GLPipeline::bindUniform(GraphicsContext& /*graphicsContext*/, const Uniform
 void GLPipeline::activeTexture(const Texture& texture, uint32_t name)
 {
     static GLenum glTargets[Texture::TYPE_COUNT] = {GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP};
-    const sp<GLResource> glResource = texture.resource();
     glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + name));
-    glBindTexture(glTargets[texture.type()], glResource->id());
+    glBindTexture(glTargets[texture.type()], texture.resource()->id());
 
     char uniformName[16] = "u_Texture0";
     uniformName[9] = static_cast<char>('0' + name);

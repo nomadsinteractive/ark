@@ -15,7 +15,7 @@ public:
 
     virtual ~Resource() = default;
 
-    virtual uint32_t id() = 0;
+    virtual uintptr_t id() = 0;
 
     virtual void upload(GraphicsContext& graphicsContext) = 0;
     virtual RecycleFunc recycle() = 0;

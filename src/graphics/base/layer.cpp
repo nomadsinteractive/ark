@@ -26,6 +26,7 @@ public:
     }
 
     virtual void draw(GraphicsContext& graphicsContext) override {
+        _context.upload(graphicsContext);
         const sp<Pipeline> pipeline = _shader->buildPipeline(graphicsContext, _context._shader_bindings);
         const sp<RenderCommand> renderCommand = pipeline->active(graphicsContext, _context);
         _context.preDraw(graphicsContext);

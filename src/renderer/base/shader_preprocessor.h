@@ -93,7 +93,7 @@ private:
         Source() = default;
         Source(String code);
 
-        String str() const;
+        String str(char endl = 0) const;
 
         void push_front(const sp<String>& fragment);
         void push_back(const sp<String>& fragment);

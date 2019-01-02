@@ -30,6 +30,7 @@ public:
     }
 
     virtual void draw(GraphicsContext& graphicsContext) override {
+        _context.upload(graphicsContext);
         _shader->active(graphicsContext, _context);
         _context.preDraw(graphicsContext);
 

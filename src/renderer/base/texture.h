@@ -70,7 +70,7 @@ public:
     Texture(const sp<Size>& size, const sp<Variable<sp<Resource>>>& resource, Type type);
     virtual ~Texture() override;
 
-    virtual uint32_t id() override;
+    virtual uintptr_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
 

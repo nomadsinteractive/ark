@@ -9,8 +9,27 @@
 namespace ark {
 namespace vulkan {
 
+namespace {
+
+class VKSubmitCommandBuffer final : public RenderCommand {
+public:
+    VKSubmitCommandBuffer(const sp<VKRenderTarget>& renderTarget, VkCommandBuffer commandBuffer)
+        : _render_target(renderTarget), _command_buffer(commandBuffer) {
+    }
+
+    virtual void draw(GraphicsContext& /*graphicsContext*/) override {
+        _render_target->submit(_command_buffer);
+    }
+
+private:
+    sp<VKRenderTarget> _render_target;
+    VkCommandBuffer _command_buffer;
+};
+
+}
+
 VKCommandBuffers::VKCommandBuffers(const sp<Recycler>& recycler, const sp<VKRenderTarget>& renderTarget)
-    : _recycler(recycler), _render_target(renderTarget), _command_buffers(renderTarget->makeCommandBuffers())
+    : _recycler(recycler), _render_target(renderTarget), _command_buffers(renderTarget->makeCommandBuffers()), _render_commands(makeRenderCommands())
 {
 }
 
@@ -23,15 +42,29 @@ VKCommandBuffers::~VKCommandBuffers()
     });
 }
 
-const std::vector<VkCommandBuffer>& VKCommandBuffers::commandBuffers() const
+const std::vector<VkCommandBuffer>& VKCommandBuffers::vkCommandBuffers() const
 {
     return _command_buffers;
+}
+
+const sp<RenderCommand>& VKCommandBuffers::aquire() const
+{
+    uint32_t aquiredImageId = _render_target->aquiredImageId();
+    return _render_commands.at(aquiredImageId);
 }
 
 void VKCommandBuffers::submit(GraphicsContext& /*graphicsContext*/) const
 {
     uint32_t aquiredImageId = _render_target->aquiredImageId();
-    _render_target->submit(&_command_buffers[aquiredImageId]);
+    _render_target->submit(_command_buffers.at(aquiredImageId));
+}
+
+std::vector<sp<RenderCommand>> VKCommandBuffers::makeRenderCommands() const
+{
+    std::vector<sp<RenderCommand>> renderCommands;
+    for(VkCommandBuffer i : _command_buffers)
+        renderCommands.push_back(sp<VKSubmitCommandBuffer>::make(_render_target, i));
+    return renderCommands;
 }
 
 }

@@ -19,7 +19,7 @@ public:
     ~VKBuffer() override;
     DISALLOW_COPY_AND_ASSIGN(VKBuffer);
 
-    virtual uint32_t id() override;
+    virtual uintptr_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
 

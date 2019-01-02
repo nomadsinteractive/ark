@@ -8,6 +8,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/buffer.h"
 #include "renderer/base/shader.h"
 #include "renderer/inf/pipeline.h"
 
@@ -27,7 +28,7 @@ public:
     VkPipelineLayout vkPipelineLayout() const;
     const VkDescriptorSet& vkDescriptorSet() const;
 
-    virtual uint32_t id() override;
+    virtual uintptr_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
 
@@ -53,6 +54,8 @@ private:
 
     void setupPipeline(const VertexLayout& vertexLayout);
 
+    void buildCommandBuffers(const Buffer::Snapshot& vertex, const Buffer::Snapshot& index);
+
 private:
     sp<Recycler> _recycler;
     sp<ShaderBindings> _shader_bindings;
@@ -66,6 +69,8 @@ private:
 
     std::map<Shader::Stage, String> _shaders;
     std::unordered_map<String, uint32_t> _location_map;
+
+    sp<VKCommandBuffers> _command_buffers;
 
 };
 

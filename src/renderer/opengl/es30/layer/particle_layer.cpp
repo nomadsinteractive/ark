@@ -11,7 +11,6 @@
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/opengl/render_command/gl_draw_elements_instanced.h"
 #include "renderer/util/index_buffers.h"
 
 namespace ark {
