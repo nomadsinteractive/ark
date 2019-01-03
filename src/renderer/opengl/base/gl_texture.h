@@ -17,7 +17,7 @@ public:
     GLTexture(const sp<Recycler>& recycler, const sp<Size>& size, uint32_t target, const sp<Texture::Parameters>& parameters);
     virtual ~GLTexture() override;
 
-    virtual uintptr_t id() override;
+    virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
 

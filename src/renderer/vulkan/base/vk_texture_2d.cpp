@@ -27,9 +27,9 @@ VKTexture2D::~VKTexture2D()
     _recycler->recycle(*this);
 }
 
-uintptr_t VKTexture2D::id()
+uint64_t VKTexture2D::id()
 {
-    return reinterpret_cast<uintptr_t>(_image);
+    return static_cast<uint64_t>(_image);
 }
 
 void VKTexture2D::upload(GraphicsContext& /*graphicsContext*/)

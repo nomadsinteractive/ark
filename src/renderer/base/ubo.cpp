@@ -56,6 +56,11 @@ Layer::UBOSnapshot UBO::snapshot(MemoryPool& memoryPool) const
     return ubo;
 }
 
+int32_t UBO::binding() const
+{
+    return _binding;
+}
+
 size_t UBO::size() const
 {
     return _buffer->length();
@@ -64,6 +69,11 @@ size_t UBO::size() const
 const std::vector<sp<Uniform>>& UBO::uniforms() const
 {
     return _uniforms;
+}
+
+const std::vector<std::pair<uintptr_t, size_t>>& UBO::slots() const
+{
+    return _slots;
 }
 
 }

@@ -20,7 +20,7 @@ GLFramebuffer::~GLFramebuffer()
         _recycler->recycle(*this);
 }
 
-uintptr_t GLFramebuffer::id()
+uint64_t GLFramebuffer::id()
 {
     return _id;
 }

@@ -28,7 +28,7 @@ public:
     VkPipelineLayout vkPipelineLayout() const;
     const VkDescriptorSet& vkDescriptorSet() const;
 
-    virtual uintptr_t id() override;
+    virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
 

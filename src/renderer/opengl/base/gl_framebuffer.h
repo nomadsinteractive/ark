@@ -14,7 +14,7 @@ public:
     GLFramebuffer(const sp<Recycler>& recycler, const sp<Texture>& texture);
     ~GLFramebuffer() override;
 
-    virtual uintptr_t id() override;
+    virtual uint64_t id() override;
 
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;

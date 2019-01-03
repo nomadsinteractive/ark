@@ -1,7 +1,7 @@
 #include "renderer/base/pipeline_layout.h"
 
 #include "core/base/bean_factory.h"
-#include "core/base/notifier.h"
+#include "core/epi/notifier.h"
 #include "core/base/observer.h"
 #include "core/dom/document.h"
 #include "core/inf/array.h"

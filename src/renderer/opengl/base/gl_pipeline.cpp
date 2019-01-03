@@ -38,7 +38,7 @@ GLPipeline::~GLPipeline()
         _recycler->recycle(*this);
 }
 
-uintptr_t GLPipeline::id()
+uint64_t GLPipeline::id()
 {
     return _id;
 }
@@ -95,7 +95,7 @@ sp<RenderCommand> GLPipeline::active(GraphicsContext& /*graphicsContext*/, const
             {
                 const sp<Uniform>& uniform = ubo->uniforms().at(i);
                 uint8_t* buf = uboSnapshot._buffer->buf();
-                const auto pair = ubo->_slots.at(i);
+                const auto pair = ubo->slots().at(i);
                 bindUniform(reinterpret_cast<float*>(buf + pair.first), pair.second, uniform);
             }
         }

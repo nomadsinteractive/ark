@@ -17,7 +17,7 @@ GLVertexArray::GLVertexArray(const sp<PipelineFactory>& pipelineFactory, const s
 {
 }
 
-uintptr_t GLVertexArray::id()
+uint64_t GLVertexArray::id()
 {
     return _id;
 }

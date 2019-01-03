@@ -59,7 +59,7 @@ public:
         Snapshot(const sp<Delegate>& stub, const sp<Uploader>& uploader);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
-        uintptr_t id() const;
+        uint64_t id() const;
 
         template<typename T> size_t length() const {
             return _size / sizeof(T);
@@ -129,7 +129,7 @@ public:
     Snapshot snapshot(size_t size) const;
     Snapshot snapshot() const;
 
-    uint32_t id() const;
+    uint64_t id() const;
     void upload(GraphicsContext&) const;
 
     const sp<Delegate>& delegate() const;

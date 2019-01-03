@@ -21,7 +21,7 @@ public:
     VKTexture2D(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<Texture::Parameters>& parameters, const sp<Variable<bitmap>>& bitmap);
     ~VKTexture2D() override;
 
-    virtual uintptr_t id() override;
+    virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
 

@@ -22,7 +22,7 @@ Buffer::Snapshot::Snapshot(const sp<Delegate>& stub, const sp<Uploader>& uploade
 {
 }
 
-uintptr_t Buffer::Snapshot::id() const
+uint64_t Buffer::Snapshot::id() const
 {
     return _delegate->id();
 }
@@ -72,7 +72,7 @@ Buffer::Snapshot Buffer::snapshot() const
     return Snapshot(_delegate);
 }
 
-uint32_t Buffer::id() const
+uint64_t Buffer::id() const
 {
     return _delegate->id();
 }

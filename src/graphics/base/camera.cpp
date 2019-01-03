@@ -1,7 +1,7 @@
 #include "graphics/base/camera.h"
 
-#include "core/base/notifier.h"
 #include "core/base/observer.h"
+#include "core/epi/notifier.h"
 
 #include "core/impl/variable/variable_op2.h"
 #include "core/types/global.h"

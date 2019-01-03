@@ -13,7 +13,7 @@ class GLVertexArray : public Resource {
 public:
     GLVertexArray(const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings);
 
-    virtual uintptr_t id() override;
+    virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual RecycleFunc recycle() override;
 

@@ -20,9 +20,9 @@ VKBuffer::~VKBuffer()
     _recycler->recycle(*this);
 }
 
-uintptr_t VKBuffer::id()
+uint64_t VKBuffer::id()
 {
-    return reinterpret_cast<uintptr_t>(_descriptor.buffer);
+    return static_cast<uint64_t>(_descriptor.buffer);
 }
 
 void VKBuffer::upload(GraphicsContext& graphicsContext)
