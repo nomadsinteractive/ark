@@ -29,7 +29,7 @@ VKTexture2D::~VKTexture2D()
 
 uint64_t VKTexture2D::id()
 {
-    return static_cast<uint64_t>(_image);
+    return (uint64_t)(_image);
 }
 
 void VKTexture2D::upload(GraphicsContext& /*graphicsContext*/)

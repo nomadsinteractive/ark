@@ -24,12 +24,13 @@ public:
         setLayoutDescriptor(context._vertex._ins.vars().values(), sLocation, 0);
         setLayoutDescriptor(context._vertex._outs.vars().values(), sLocation, 0);
 
-        declareUBOStruct(context._vertex, shaderBindings->pipelineInput());
-        declareUBOStruct(context._fragment, shaderBindings->pipelineInput());
+        const sp<PipelineInput>& pipelineInput = shaderBindings->pipelineInput();
+        declareUBOStruct(context._vertex, pipelineInput);
+        declareUBOStruct(context._fragment, pipelineInput);
 
         context._fragment._outs.declare("vec4", "v_", "FragColor");
 
-        setLayoutDescriptor(context._fragment._samplers.vars().values(), sBinding, 1);
+        setLayoutDescriptor(context._fragment._samplers.vars().values(), sBinding, pipelineInput->ubos().size());
 
         setLayoutDescriptor(context._fragment._ins.vars().values(), sLocation, 0);
         setLayoutDescriptor(context._fragment._outs.vars().values(), sLocation, 0);

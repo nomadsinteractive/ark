@@ -10,13 +10,15 @@
 namespace ark {
 
 GLModelQuad::GLModelQuad(const sp<Atlas>& atlas)
-    : RenderModel(RENDER_MODE_TRIANGLES), _atlas(atlas)
+    : _atlas(atlas)
 {
 }
 
-void GLModelQuad::initialize(ShaderBindings& bindings)
+sp<ShaderBindings> GLModelQuad::makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
 {
-    bindings.bindSampler(_atlas->texture());
+    const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_TRIANGLES, renderController, pipelineLayout);
+    bindings->bindSampler(_atlas->texture());
+    return bindings;
 }
 
 void GLModelQuad::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)

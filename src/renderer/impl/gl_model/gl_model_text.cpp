@@ -108,16 +108,18 @@ sp<Resource> GLModelText::Stub::val()
 }
 
 GLModelText::GLModelText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
-    : RenderModel(RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(renderController, alphabet, textureWidth, textureHeight))
+    : _stub(sp<Stub>::make(renderController, alphabet, textureWidth, textureHeight))
 {
 }
 
-void GLModelText::initialize(ShaderBindings& bindings)
+sp<ShaderBindings> GLModelText::makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
 {
-    bindings.bindSampler(sp<Texture>::make(_stub->_size, _stub, Texture::TYPE_2D));
+    const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_TRIANGLES, renderController, pipelineLayout);
+    bindings->bindSampler(sp<Texture>::make(_stub->_size, _stub, Texture::TYPE_2D));
+    return bindings;
 }
 
-void GLModelText::onPostSnapshot(const Layer::Snapshot& snapshot)
+void GLModelText::postSnapshot(const Layer::Snapshot& snapshot)
 {
     if(_stub->checkUnpreparedCharacter(snapshot))
     {

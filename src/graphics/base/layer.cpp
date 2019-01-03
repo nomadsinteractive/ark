@@ -43,10 +43,9 @@ private:
 
 Layer::Stub::Stub(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _model(model), _shader(shader), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
-      _render_controller(resourceLoaderContext->renderController()), _shader_bindings(sp<ShaderBindings>::make(_render_controller, shader)),
+      _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_model->makeShaderBindings(_render_controller, shader->pipelineLayout())),
       _last_rendered_count(0)
 {
-    _shader_bindings->setRenderModel(_model);
 }
 
 Layer::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
@@ -121,7 +120,7 @@ const sp<RenderModel>& Layer::model() const
 Layer::Snapshot Layer::snapshot() const
 {
     Snapshot snapshot(_stub);
-    _stub->_model->onPostSnapshot(snapshot);
+    _stub->_model->postSnapshot(snapshot);
     return snapshot;
 }
 

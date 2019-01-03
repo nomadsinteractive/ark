@@ -10,13 +10,15 @@
 namespace ark {
 
 GLModelPoint::GLModelPoint(const sp<Atlas>& atlas)
-    : RenderModel(RENDER_MODE_POINTS), _atlas(atlas)
+    : _atlas(atlas)
 {
 }
 
-void GLModelPoint::initialize(ShaderBindings& bindings)
+sp<ShaderBindings> GLModelPoint::makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
 {
-    bindings.bindSampler(_atlas->texture());
+    const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_POINTS, renderController, pipelineLayout);
+    bindings->bindSampler(_atlas->texture());
+    return bindings;
 }
 
 void GLModelPoint::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)

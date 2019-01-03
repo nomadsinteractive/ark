@@ -19,7 +19,7 @@ namespace plugin {
 namespace assimp {
 
 GLModelAssimp::GLModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest)
-    : RenderModel(RenderModel::RENDER_MODE_TRIANGLES), _importer(sp<Assimp::Importer>::make())
+    :_importer(sp<Assimp::Importer>::make())
 {
     _importer->SetIOHandler(new ArkIOSystem());
 
@@ -45,8 +45,9 @@ GLModelAssimp::GLModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderCont
 //    _shader_bindings->snippet()->link<GLSnippetUpdateModelMatrix>();
 }
 
-void GLModelAssimp::initialize(ShaderBindings& bindings)
+sp<ShaderBindings> GLModelAssimp::makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
 {
+    return nullptr;
 }
 
 void GLModelAssimp::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)

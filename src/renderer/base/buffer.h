@@ -68,7 +68,7 @@ public:
 
         void upload(GraphicsContext& graphicsContext) const;
 
-//    private:
+    private:
         sp<Delegate> _delegate;
         sp<Uploader> _uploader;
         size_t _size;

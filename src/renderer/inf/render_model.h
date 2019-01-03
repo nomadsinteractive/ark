@@ -23,25 +23,16 @@ public:
         RENDER_MODE_COUNT,
     };
 
-    RenderModel(Mode mode)
-        : _mode(mode) {
-    }
     virtual ~RenderModel() = default;
 
-    Mode mode() const {
-        return _mode;
-    }
-
-    virtual void initialize(ShaderBindings& bindings) = 0;
+    virtual sp<ShaderBindings> makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) = 0;
     virtual void start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& snapshot) = 0;
     virtual void load(ModelBuffer& buf, int32_t type, const V& size) = 0;
 
     virtual Metrics measure(int32_t type) { return Metrics(); }
 
-    virtual void onPostSnapshot(const Layer::Snapshot& snapshot) { }
+    virtual void postSnapshot(const Layer::Snapshot& snapshot) { }
 
-protected:
-    Mode _mode;
 };
 
 }

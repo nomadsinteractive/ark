@@ -3,6 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include "core/epi/notifier.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/base/buffer.h"
@@ -41,6 +42,8 @@ public:
 
     const VkDescriptorBufferInfo& descriptor() const;
 
+    Notifier& notifier();
+
 private:
     void* map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
     void unmap(void* mapped);
@@ -76,6 +79,8 @@ private:
     VkDescriptorBufferInfo _descriptor;
 
     VkMemoryAllocateInfo _memory_allocation_info;
+
+    Notifier _notifier;
 };
 
 }

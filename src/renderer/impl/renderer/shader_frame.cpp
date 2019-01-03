@@ -24,7 +24,7 @@ namespace ark {
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _size(size), _render_controller(resourceLoaderContext->renderController()), _shader(shader),
       _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
-      _shader_bindings(sp<ShaderBindings>::make(_render_controller, shader)),
+      _shader_bindings(sp<ShaderBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, _render_controller, shader->pipelineLayout())),
       _array_buffer(_shader_bindings->arrayBuffer())
 {
 }

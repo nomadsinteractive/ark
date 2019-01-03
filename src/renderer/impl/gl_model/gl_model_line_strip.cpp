@@ -10,13 +10,15 @@
 namespace ark {
 
 GLModelLineStrip::GLModelLineStrip(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas)
-    : RenderModel(RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas), _ibo(resourceLoaderContext->renderController()->makeIndexBuffer())
+    : _atlas(atlas), _ibo(resourceLoaderContext->renderController()->makeIndexBuffer())
 {
 }
 
-void GLModelLineStrip::initialize(ShaderBindings& bindings)
+sp<ShaderBindings> GLModelLineStrip::makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
 {
-    bindings.bindSampler(_atlas->texture());
+    const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_TRIANGLE_STRIP, renderController, pipelineLayout);
+    bindings->bindSampler(_atlas->texture());
+    return bindings;
 }
 
 std::vector<glindex_t> GLModelLineStrip::makeIndices(const Layer::Snapshot& layerContext)

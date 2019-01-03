@@ -34,8 +34,8 @@ public:
     };
 
 public:
-    ShaderBindings(RenderController& renderController, const Shader& shader);
-    ShaderBindings(RenderController& renderController, const Shader& shader, const Buffer& arrayBuffer);
+    ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout);
+    ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout, const Buffer& arrayBuffer);
 
     const sp<Snippet>& snippet() const;
     const sp<PipelineLayout>& pipelineLayout() const;
@@ -51,22 +51,23 @@ public:
 
     const Attributes& attributes() const;
 
-    void setRenderModel(RenderModel& renderModel);
+//    void setRenderModel(RenderModel& renderModel);
     void bindSampler(const sp<Texture>& texture, uint32_t name = 0);
 
     std::map<uint32_t, Buffer::Builder> makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const;
 
 private:
+    RenderModel::Mode _render_mode;
+
     Attributes _attributes;
 
-    Buffer _array_buffer;
+    Buffer _vertex_buffer;
+    Buffer _index_buffer;
 
     sp<PipelineLayout> _pipeline_layout;
     sp<PipelineInput> _pipeline_input;
     std::vector<std::pair<uint32_t, Buffer>> _instanced_arrays;
     std::vector<sp<Texture>> _samplers;
-
-    RenderModel::Mode _render_mode;
 
     friend class ModelBuffer;
 };

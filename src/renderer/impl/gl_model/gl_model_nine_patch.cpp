@@ -34,7 +34,7 @@ GLModelNinePatch::Item::Item(const Rect& bounds, const Rect& patches, uint32_t t
 }
 
 GLModelNinePatch::GLModelNinePatch(const document& manifest, const sp<Atlas>& atlas)
-    : RenderModel(RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas)
+    : _atlas(atlas)
 {
     uint32_t textureWidth = static_cast<uint32_t>(_atlas->texture()->width());
     uint32_t textureHeight = static_cast<uint32_t>(_atlas->texture()->height());
@@ -58,9 +58,11 @@ GLModelNinePatch::GLModelNinePatch(const document& manifest, const sp<Atlas>& at
     }
 }
 
-void GLModelNinePatch::initialize(ShaderBindings& bindings)
+sp<ShaderBindings> GLModelNinePatch::makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
 {
-    bindings.bindSampler(_atlas->texture());
+    const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_TRIANGLE_STRIP, renderController, pipelineLayout);
+    bindings->bindSampler(_atlas->texture());
+    return bindings;
 }
 
 void GLModelNinePatch::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)

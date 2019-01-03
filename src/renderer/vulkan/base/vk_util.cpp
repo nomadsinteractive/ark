@@ -216,6 +216,7 @@ VKUtil::~VKUtil()
 void VKUtil::initialize(GLContext& /*glContext*/)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
+/*
     zoom = -2.5f;
 
     _uniforms = sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), sp<Uploader::StandardLayout<UBO>>::make(_ubo), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -235,6 +236,7 @@ void VKUtil::initialize(GLContext& /*glContext*/)
     _command_buffers = sp<VKCommandBuffers>::make(_resource_manager->recycler(), _renderer->renderTarget());
     buildCommandBuffers(_renderer->renderTarget());
     prepared = true;
+*/
 }
 
 void VKUtil::render()

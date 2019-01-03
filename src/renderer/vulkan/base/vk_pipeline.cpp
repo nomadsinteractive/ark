@@ -24,7 +24,7 @@ namespace vulkan {
 VKPipeline::VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<ShaderBindings>& shaderBindings, std::map<Shader::Stage, String> shaders)
     : _recycler(recycler), _shader_bindings(shaderBindings), _renderer(renderer),
       _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE), _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE),
-      _shaders(std::move(shaders))
+      _shaders(std::move(shaders)), _vertex_observer(createObserver(_shader_bindings->arrayBuffer()))
 {
 }
 
@@ -50,7 +50,7 @@ const VkDescriptorSet& VKPipeline::vkDescriptorSet() const
 
 uint64_t VKPipeline::id()
 {
-    return static_cast<uint64_t>(_pipeline);
+    return (uint64_t)(_pipeline);
 }
 
 void VKPipeline::upload()
@@ -64,6 +64,7 @@ void VKPipeline::upload()
     setupDescriptorSet();
     setupPipeline(vertexLayout);
 
+    _command_buffers = sp<VKCommandBuffers>::make(_recycler, _renderer->renderTarget());
 }
 
 void VKPipeline::upload(GraphicsContext& graphicsContext)
@@ -75,6 +76,8 @@ void VKPipeline::upload(GraphicsContext& graphicsContext)
     _descriptor_pool = _renderer->renderTarget()->makeDescriptorPool(graphicsContext.resourceManager()->recycler());
     setupDescriptorSet(graphicsContext, _shader_bindings);
     setupPipeline(vertexLayout);
+
+    _command_buffers = sp<VKCommandBuffers>::make(_recycler, _renderer->renderTarget());
 }
 
 Resource::RecycleFunc VKPipeline::recycle()
@@ -420,7 +423,6 @@ void VKPipeline::buildCommandBuffers(const Buffer::Snapshot& vertex, const Buffe
 
     VkRenderPassBeginInfo renderPassBeginInfo = renderTarget->vkRenderPassBeginInfo();
 
-    _command_buffers = sp<VKCommandBuffers>::make(_recycler, renderTarget);
     const std::vector<VkCommandBuffer>& commands = _command_buffers->vkCommandBuffers();
     for (size_t i = 0; i < commands.size(); ++i)
     {
@@ -439,8 +441,8 @@ void VKPipeline::buildCommandBuffers(const Buffer::Snapshot& vertex, const Buffe
 
         VkDeviceSize offsets[1] = { 0 };
 
-        VkBuffer vkVertexBuffer = static_cast<VkBuffer>(vertex.id());
-        VkBuffer vkIndexBuffer = static_cast<VkBuffer>(index.id());
+        VkBuffer vkVertexBuffer = (VkBuffer)(vertex.id());
+        VkBuffer vkIndexBuffer = (VkBuffer)(index.id());
 
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkVertexBuffer, offsets);
         vkCmdBindIndexBuffer(commandBuffer, vkIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
@@ -449,6 +451,12 @@ void VKPipeline::buildCommandBuffers(const Buffer::Snapshot& vertex, const Buffe
         vkCmdEndRenderPass(commandBuffer);
         VKUtil::checkResult(vkEndCommandBuffer(commandBuffer));
     }
+}
+
+sp<Observer> VKPipeline::createObserver(const Buffer& buffer) const
+{
+    const sp<VKBuffer> vkBuffer = buffer.delegate();
+    return vkBuffer->notifier().createObserver();
 }
 
 }

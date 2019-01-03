@@ -47,9 +47,9 @@ private:
 public:
     GLModelText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
 
-    virtual void initialize(ShaderBindings& bindings) override;
+    virtual sp<ShaderBindings> makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) override;
 
-    virtual void onPostSnapshot(const Layer::Snapshot& snapshot) override;
+    virtual void postSnapshot(const Layer::Snapshot& snapshot) override;
 
     virtual void start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& snapshot) override;
     virtual void load(ModelBuffer& buf, int32_t type, const V& scale) override;

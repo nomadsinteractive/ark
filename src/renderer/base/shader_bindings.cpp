@@ -8,14 +8,14 @@
 
 namespace ark {
 
-ShaderBindings::ShaderBindings(RenderController& renderController, const Shader& shader)
-    : ShaderBindings(renderController, shader, renderController.makeVertexBuffer())
+ShaderBindings::ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
+    : ShaderBindings(mode, renderController, pipelineLayout, renderController.makeVertexBuffer())
 {
 }
 
-ShaderBindings::ShaderBindings(RenderController& renderController, const Shader& shader, const Buffer& arrayBuffer)
-    : _attributes(shader.input()), _array_buffer(arrayBuffer), _pipeline_layout(shader.pipelineLayout()), _pipeline_input(shader.input()),
-      _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController)), _render_mode(RenderModel::RENDER_MODE_NONE)
+ShaderBindings::ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout, const Buffer& arrayBuffer)
+    : _render_mode(mode), _attributes(pipelineLayout->input()), _vertex_buffer(arrayBuffer), _pipeline_layout(pipelineLayout), _pipeline_input(_pipeline_layout->input()),
+      _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController))
 {
     _samplers.resize(_pipeline_input->samplerCount());
 }
@@ -50,15 +50,15 @@ RenderModel::Mode ShaderBindings::renderMode() const
     return _render_mode;
 }
 
-void ShaderBindings::setRenderModel(RenderModel& renderModel)
-{
-    renderModel.initialize(*this);
-    _render_mode = renderModel.mode();
-}
+//void ShaderBindings::setRenderModel(RenderModel& renderModel)
+//{
+//    renderModel.initialize(*this);
+//    _render_mode = renderModel.mode();
+//}
 
 const Buffer& ShaderBindings::arrayBuffer() const
 {
-    return _array_buffer;
+    return _vertex_buffer;
 }
 
 const std::vector<std::pair<uint32_t, Buffer>>& ShaderBindings::instancedArrays() const

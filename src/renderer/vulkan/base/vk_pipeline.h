@@ -57,6 +57,8 @@ private:
 
     void buildCommandBuffers(const Buffer::Snapshot& vertex, const Buffer::Snapshot& index);
 
+    sp<Observer> createObserver(const Buffer& buffer) const;
+
 private:
     sp<Recycler> _recycler;
     sp<ShaderBindings> _shader_bindings;
@@ -75,6 +77,8 @@ private:
 
     std::vector<sp<VKBuffer>> _ubos;
 
+    sp<Observer> _vertex_observer;
+    sp<Observer> _index_observer;
 };
 
 }

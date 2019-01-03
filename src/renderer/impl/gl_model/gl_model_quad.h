@@ -13,7 +13,8 @@ class GLModelQuad : public RenderModel {
 public:
     GLModelQuad(const sp<Atlas>& atlas);
 
-    virtual void initialize(ShaderBindings& bindings) override;
+    virtual sp<ShaderBindings> makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) override;
+
     virtual void start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext) override;
     virtual void load(ModelBuffer& buf, int32_t type, const V& scale) override;
     virtual Metrics measure(int32_t type) override;

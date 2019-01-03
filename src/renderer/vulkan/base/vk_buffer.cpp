@@ -22,7 +22,7 @@ VKBuffer::~VKBuffer()
 
 uint64_t VKBuffer::id()
 {
-    return static_cast<uint64_t>(_descriptor.buffer);
+    return (uint64_t)(_descriptor.buffer);
 }
 
 void VKBuffer::upload(GraphicsContext& graphicsContext)
@@ -108,6 +108,8 @@ void VKBuffer::ensureSize(const Uploader& uploader)
         const VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo(_usage_flags, _size);
         VKUtil::checkResult(vkCreateBuffer(_renderer->vkLogicalDevice(), &bufferCreateInfo, nullptr, &_descriptor.buffer));
 
+        _notifier.notify();
+
         VkMemoryRequirements memReqs;
         vkGetBufferMemoryRequirements(_renderer->vkLogicalDevice(), _descriptor.buffer, &memReqs);
         if(_memory_allocation_info.allocationSize < memReqs.size)
@@ -146,6 +148,11 @@ VkResult VKBuffer::invalidate(VkDeviceSize size, VkDeviceSize offset)
 const VkDescriptorBufferInfo& VKBuffer::descriptor() const
 {
     return _descriptor;
+}
+
+Notifier& VKBuffer::notifier()
+{
+    return _notifier;
 }
 
 }

@@ -63,7 +63,7 @@ void PipelineInput::addAttribute(String name, Attribute attribute)
     _streams[attribute.divisor()].addAttribute(std::move(name), std::move(attribute));
 }
 
-std::vector<std::pair<uint32_t, Buffer>> PipelineInput::makeInstancedArrays(RenderController& renderController) const
+std::vector<std::pair<uint32_t, Buffer>> PipelineInput::makeInstancedArrays(const RenderController& renderController) const
 {
     std::vector<std::pair<uint32_t, Buffer>> instancedArrays;
     for(auto iter : _streams)

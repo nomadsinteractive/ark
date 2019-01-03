@@ -12,7 +12,7 @@
 namespace ark {
 
 GLModelSphere::GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas, uint32_t sampleCount)
-    : RenderModel(RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas), _vertex_count((sampleCount * 2 + 1) * (sampleCount + 1)),
+    : _atlas(atlas), _vertex_count((sampleCount * 2 + 1) * (sampleCount + 1)),
       _vertices_boiler_plate(sp<DynamicArray<float>>::make(_vertex_count * (3 + 2))),
       _indices_boiler_plate(sp<DynamicArray<glindex_t>>::make(4 * sampleCount * sampleCount + 2 * (sampleCount * 2 - 1))),
       _instance_index(resourceLoaderContext->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC, sp<IndexArrayUploader>::make(_indices_boiler_plate)))
@@ -43,9 +43,11 @@ GLModelSphere::GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderCont
     }
 }
 
-void GLModelSphere::initialize(ShaderBindings& bindings)
+sp<ShaderBindings> GLModelSphere::makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
 {
-    bindings.bindSampler(_atlas->texture());
+    const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_TRIANGLE_STRIP, renderController, pipelineLayout);
+    bindings->bindSampler(_atlas->texture());
+    return bindings;
 }
 
 void GLModelSphere::start(ModelBuffer& buf, RenderController& /*renderController*/, const Layer::Snapshot& layerContext)
