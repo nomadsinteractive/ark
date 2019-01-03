@@ -66,7 +66,7 @@ void Surface::onSurfaceChanged(uint32_t width, uint32_t height)
 
 void Surface::onRenderFrame(const Color& backgroundColor)
 {
-    _render_view->onRenderFrame(backgroundColor, _surface_controller->getRenderCommand());
+    _surface_controller->onRenderFrame(backgroundColor, _render_view);
 }
 
 void Surface::scheduleUpdate(const sp<ApplicationContext>& applicationContext, uint32_t fps)

@@ -48,6 +48,7 @@ private:
     void setupVertexDescriptions(VertexLayout& vertexLayout);
 
     void setupDescriptorSetLayout();
+    void setupDescriptorSetLayout(const PipelineInput& pipelineInput);
 
     void setupDescriptorSet();
     void setupDescriptorSet(GraphicsContext& graphicsContext, const ShaderBindings& bindings);
@@ -71,6 +72,8 @@ private:
     std::unordered_map<String, uint32_t> _location_map;
 
     sp<VKCommandBuffers> _command_buffers;
+
+    std::vector<sp<VKBuffer>> _ubos;
 
 };
 

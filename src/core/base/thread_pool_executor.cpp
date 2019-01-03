@@ -95,7 +95,7 @@ void ThreadPoolExecutor::Worker::removeSelf()
 
 void ThreadPoolExecutor::Worker::post(const sp<Runnable>& task)
 {
-    _pendings.push(task);
+    _pendings.add(task);
     _thread_stub->notify();
 }
 

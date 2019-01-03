@@ -8,8 +8,11 @@
 #include "core/collection/table.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/base/layer.h"
+
 #include "renderer/forwarding.h"
 #include "renderer/base/attribute.h"
+#include "renderer/base/shader.h"
 
 namespace ark {
 
@@ -38,13 +41,49 @@ public:
         Table<String, Attribute> _attributes;
     };
 
+    class UBO {
+    public:
+        UBO(uint32_t binding);
+
+        Layer::UBOSnapshot snapshot(MemoryPool& memoryPool) const;
+
+        void notify() const;
+
+        uint32_t binding() const;
+        size_t size() const;
+
+        const std::vector<sp<Uniform>>& uniforms() const;
+        const std::vector<std::pair<uintptr_t, size_t>>& slots() const;
+
+        void addStage(Shader::Stage stage);
+        const std::set<Shader::Stage>& stages() const;
+
+    private:
+        void initialize();
+
+        void addUniform(const sp<Uniform>& uniform);
+
+        bool doSnapshot(bool force) const;
+
+    private:
+        std::vector<sp<Uniform>> _uniforms;
+        uint32_t _binding;
+
+        std::vector<std::pair<uintptr_t, size_t>> _slots;
+        std::set<Shader::Stage> _stages;
+
+        bytearray _dirty_flags;
+        bytearray _buffer;
+
+        friend class PipelineInput;
+    };
+
 public:
     PipelineInput();
 
     void initialize(const PipelineBuildingContext& buildingContext);
 
-    const std::vector<sp<Uniform>>& uniforms() const;
-    const sp<UBO>& ubo() const;
+    const std::vector<sp<UBO>>& ubos() const;
 
     const std::map<uint32_t, Stream>& streams() const;
     std::map<uint32_t, Stream>& streams();
@@ -61,7 +100,7 @@ public:
     int32_t getAttributeOffset(const String& name, uint32_t divisor = 0) const;
 
 private:
-    sp<UBO> _ubo;
+    std::vector<sp<UBO>> _ubos;
     std::map<uint32_t, Stream> _streams;
     uint32_t _sampler_count;
 

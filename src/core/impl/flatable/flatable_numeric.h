@@ -19,7 +19,7 @@ public:
 //  [[plugin::builder::by-value("float")]]
     class BUILDER : public Builder<Flatable> {
     public:
-        BUILDER(BeanFactory& parent, const String& value);
+        BUILDER(BeanFactory& factory, const String& value);
 
         virtual sp<Flatable> build(const sp<Scope>& args) override;
 

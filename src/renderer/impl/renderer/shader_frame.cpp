@@ -14,7 +14,6 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/ubo.h"
 #include "renderer/inf/uploader.h"
 #include "renderer/util/index_buffers.h"
 

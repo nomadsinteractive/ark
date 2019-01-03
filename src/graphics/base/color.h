@@ -2,7 +2,7 @@
 #define ARK_GRAPHICS_BASE_COLOR_H_
 
 #include "core/base/api.h"
-#include "core/epi/changed.h"
+#include "core/epi/notifier.h"
 #include "core/inf/variable.h"
 #include "core/types/class.h"
 #include "core/types/shared_ptr.h"
@@ -13,7 +13,7 @@
 namespace ark {
 
 //[[core::class]]
-class ARK_API Color : public Vec4, public Changed {
+class ARK_API Color : public Vec4, public Notifier {
 public:
     Color();
 //  [[script::bindings::auto]]

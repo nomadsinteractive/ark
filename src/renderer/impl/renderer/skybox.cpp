@@ -15,8 +15,8 @@
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/ubo.h"
 #include "renderer/util/index_buffers.h"
+
 #include "renderer/opengl/util/gl_util.h"
 
 namespace ark {

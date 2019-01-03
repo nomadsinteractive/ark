@@ -140,23 +140,27 @@ ShaderPreprocessor::Preprocessor ShaderPreprocessor::preprocess()
 
 void ShaderPreprocessor::setupBindings(const std::vector<sp<Uniform>>& uniforms, int32_t& binding)
 {
-    int32_t next = binding + 1;
+    int32_t next = binding;
     for(const sp<Uniform>& i : uniforms)
         if(_main.contains(i->name()))
         {
-            if(i->binding() == -1)
-                i->setBinding(binding = next);
+            if(i->binding() == -1) {
+                next = binding + 1;
+                i->setBinding(binding);
+            }
+
             if(!_uniforms.has(i->name()))
             {
                 String type;
                 uint32_t length;
-                sp<String> declaration = sp<String>::make(i->declaration());
+                sp<String> declaration = sp<String>::make(i->declaration("uniform "));
 
                 i->toTypeLength(type, length);
                 _uniforms.vars().push_back(i->name(), Declaration(i->name(), type, declaration));
                 _uniform_declarations.push_back(declaration);
             }
         }
+    binding = next;
 }
 
 sp<Uniform> ShaderPreprocessor::getUniformInput(const String& name, Uniform::Type type) const

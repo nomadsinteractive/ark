@@ -42,7 +42,7 @@ public:
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag");
     static sp<Shader> fromStringTable(const String& vertex = "shaders/default.vert", const String& fragment = "shaders/texture.frag", const sp<Snippet>& snippet = nullptr, const sp<ResourceLoaderContext>& resourceLoaderContext = nullptr);
 
-    Layer::UBOSnapshot snapshot(MemoryPool& memoryPool) const;
+    std::vector<Layer::UBOSnapshot> snapshot(MemoryPool& memoryPool) const;
 
     void active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
 

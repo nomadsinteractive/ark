@@ -1,10 +1,10 @@
 #include "renderer/base/pipeline_input.h"
 
+#include "core/base/memory_pool.h"
 #include "core/base/string.h"
 
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/ubo.h"
 
 namespace ark {
 
@@ -15,18 +15,29 @@ PipelineInput::PipelineInput()
 
 void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
 {
-    _ubo = sp<UBO>::make(buildingContext._uniforms.values());
+    std::map<int32_t, sp<PipelineInput::UBO>> ubos;
+
+    for(const sp<Uniform>& i : buildingContext._uniforms.values())
+    {
+        DCHECK(i->binding() >= 0, "Uniform %s has unspecified binding", i->name().c_str());
+        sp<PipelineInput::UBO>& ubo = ubos[i->binding()];
+        if(!ubo)
+            ubo = sp<PipelineInput::UBO>::make(i->binding());
+        ubo->addUniform(i);
+    }
+
+    for(auto& i : ubos)
+    {
+        i.second->initialize();
+        _ubos.push_back(std::move(i.second));
+    }
+
     _sampler_count = buildingContext._fragment._samplers.vars().size();
 }
 
-const std::vector<sp<Uniform>>& PipelineInput::uniforms() const
+const std::vector<sp<PipelineInput::UBO>>& PipelineInput::ubos() const
 {
-    return _ubo->uniforms();
-}
-
-const sp<UBO>& PipelineInput::ubo() const
-{
-    return _ubo;
+    return _ubos;
 }
 
 const std::map<uint32_t, PipelineInput::Stream>& PipelineInput::streams() const
@@ -124,6 +135,102 @@ void PipelineInput::Stream::align()
     uint32_t mod = _stride % sizeof(float);
     if(mod != 0)
         _stride += (sizeof(float) - mod);
+}
+
+PipelineInput::UBO::UBO(uint32_t binding)
+    : _binding(binding)
+{
+}
+
+bool PipelineInput::UBO::doSnapshot(bool force) const
+{
+    size_t offset = 0;
+    uint8_t* dirtyFlags = _dirty_flags->buf();
+    bool dirty = false;
+    for(size_t i = 0; i < _uniforms.size(); ++i)
+    {
+        const Uniform& uniform = _uniforms.at(i);
+        const sp<Flatable>& flatable = uniform.flatable();
+        dirtyFlags[i] = static_cast<uint8_t>(force || uniform.dirty());
+        dirty = dirty || dirtyFlags[i];
+        if(dirtyFlags[i])
+            flatable->flat(_buffer->buf() + offset);
+        offset += flatable->size();
+    }
+    return dirty;
+}
+
+Layer::UBOSnapshot PipelineInput::UBO::snapshot(MemoryPool& memoryPool) const
+{
+    Layer::UBOSnapshot ubo;
+    bool dirty = doSnapshot(false);
+    if(dirty)
+    {
+        ubo._dirty_flags = memoryPool.allocate(_dirty_flags->size());
+        memcpy(ubo._dirty_flags->buf(), _dirty_flags->buf(), _dirty_flags->size());
+        ubo._buffer = memoryPool.allocate(_buffer->size());
+        memcpy(ubo._buffer->buf(), _buffer->buf(), _buffer->size());
+    }
+    return ubo;
+}
+
+uint32_t PipelineInput::UBO::binding() const
+{
+    return _binding;
+}
+
+size_t PipelineInput::UBO::size() const
+{
+    return _buffer->length();
+}
+
+void PipelineInput::UBO::notify() const
+{
+    for(const sp<Uniform>& i : _uniforms)
+        i->notify();
+}
+
+const std::vector<sp<Uniform>>& PipelineInput::UBO::uniforms() const
+{
+    return _uniforms;
+}
+
+const std::vector<std::pair<uintptr_t, size_t>>& PipelineInput::UBO::slots() const
+{
+    return _slots;
+}
+
+void PipelineInput::UBO::addStage(Shader::Stage stage)
+{
+    _stages.insert(stage);
+}
+
+const std::set<Shader::Stage>& PipelineInput::UBO::stages() const
+{
+    return _stages;
+}
+
+void PipelineInput::UBO::initialize()
+{
+    size_t size = 0;
+    for(const auto& i : _uniforms)
+    {
+        size_t s = i->flatable()->size();
+        _slots.push_back(std::make_pair(size, s));
+        size += s;
+        DCHECK(size % 4 == 0, "Uniform aligment error, offset: %d", size);
+    }
+    _buffer = sp<DynamicArray<uint8_t>>::make(size);
+    memset(_buffer->buf(), 0, _buffer->size());
+
+    _dirty_flags = (sp<DynamicArray<uint8_t>>::make(_uniforms.size()));
+
+    doSnapshot(true);
+}
+
+void PipelineInput::UBO::addUniform(const sp<Uniform>& uniform)
+{
+    _uniforms.push_back(uniform);
 }
 
 }

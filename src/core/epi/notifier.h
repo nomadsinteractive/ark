@@ -8,6 +8,7 @@ namespace ark {
 
 class ARK_API Notifier {
 public:
+    Notifier();
 
 //  [[script::bindings::auto]]
     void notify();
@@ -15,7 +16,7 @@ public:
     sp<Observer> createObserver(const sp<Runnable>& handler = nullptr, bool oneshot = false);
 
 private:
-    WeakRefList<Observer> _observers;
+    sp<WeakRefList<Observer>> _observers;
 };
 
 

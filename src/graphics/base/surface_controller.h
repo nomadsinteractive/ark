@@ -3,7 +3,7 @@
 
 #include "core/base/api.h"
 #include "core/base/object_pool.h"
-#include "core/concurrent/dual.h"
+#include "core/concurrent/one_consumer_synchronized.h"
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
@@ -27,7 +27,8 @@ public:
     void postRenderCommand(const sp<RenderCommandPipeline>& renderCommand);
 
     void update(RenderRequest& renderRequest);
-    sp<RenderCommandPipeline> getRenderCommand();
+
+    void onRenderFrame(const Color& backgroundColor, RenderView& renderView);
 
 private:
     sp<RendererGroup> _renderers;
@@ -35,7 +36,7 @@ private:
     sp<RendererGroup> _layers;
 
     ObjectPool _object_pool;
-    Dual<sp<RenderCommandPipeline>> _render_command;
+    OCSQueue<sp<RenderCommandPipeline>> _render_commands;
 };
 
 }

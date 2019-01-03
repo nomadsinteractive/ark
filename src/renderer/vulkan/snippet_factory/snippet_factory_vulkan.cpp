@@ -2,6 +2,8 @@
 
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/pipeline_building_context.h"
+#include "renderer/base/pipeline_input.h"
+#include "renderer/base/shader_bindings.h"
 
 #include "renderer/inf/snippet.h"
 
@@ -12,7 +14,7 @@ namespace {
 
 class CoreSnippetVulkan : public Snippet {
 public:
-    virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const sp<ShaderBindings>& /*shaderBindings*/) override {
+    virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const sp<ShaderBindings>& shaderBindings) override {
         context._vertex._version = 450;
         context._fragment._version = 450;
 
@@ -22,18 +24,12 @@ public:
         setLayoutDescriptor(context._vertex._ins.vars().values(), sLocation, 0);
         setLayoutDescriptor(context._vertex._outs.vars().values(), sLocation, 0);
 
-        for(const auto& i : context._vertex._uniforms.vars().values())
-        {
-            *i.source() = i.source()->replace("uniform ", "    ");
-            context._vertex._main.replace(i.name(), "ubo." + i.name());
-        }
-        context._vertex._uniform_declarations.push_front(sp<String>::make("layout (binding = 0) uniform UBO {\n"));
-        context._vertex._uniform_declarations.push_back(sp<String>::make("\n} ubo;\n\n"));
+        declareUBOStruct(context._vertex, shaderBindings->pipelineInput());
+        declareUBOStruct(context._fragment, shaderBindings->pipelineInput());
 
         context._fragment._outs.declare("vec4", "v_", "FragColor");
 
         setLayoutDescriptor(context._fragment._samplers.vars().values(), sBinding, 1);
-        setLayoutDescriptor(context._fragment._uniforms.vars().values(), sBinding, 0);
 
         setLayoutDescriptor(context._fragment._ins.vars().values(), sLocation, 0);
         setLayoutDescriptor(context._fragment._outs.vars().values(), sLocation, 0);
@@ -49,16 +45,41 @@ public:
     }
 
 private:
-    uint32_t setLayoutDescriptor(const std::vector<ShaderPreprocessor::Declaration>& declarations, const String& descriptor, uint32_t start)
-    {
+    uint32_t setLayoutDescriptor(const std::vector<ShaderPreprocessor::Declaration>& declarations, const String& descriptor, uint32_t start) {
         uint32_t counter = start;
-        for(const ShaderPreprocessor::Declaration& i : declarations)
-        {
+        for(const ShaderPreprocessor::Declaration& i : declarations) {
             StringBuffer sb;
             sb << "layout (" << descriptor << " = " << (counter++) << ") " << *i.source();
             *i.source() = sb.str();
         }
         return counter;
+    }
+
+    void declareUBOStruct(ShaderPreprocessor& shader, const PipelineInput& piplineInput) {
+        for(const ShaderPreprocessor::Declaration& i : shader._uniforms.vars().values())
+            *i.source() = "";
+
+        for(const sp<PipelineInput::UBO>& i : piplineInput.ubos())
+            if(hasUBO(shader, i))
+                insertUBOStruct(shader, i);
+    }
+
+    void insertUBOStruct(ShaderPreprocessor& shader, PipelineInput::UBO& ubo) const {
+        StringBuffer sb;
+        sb << "layout (binding = " << ubo.binding() << ") uniform UBO" << ubo.binding() << " {\n";
+        for(const auto& i : ubo.uniforms()) {
+            shader._main.replace(i->name(), Strings::sprintf("ubo%d.%s", ubo.binding(), i->name().c_str()));
+            sb << i->declaration("") << '\n';
+        }
+        sb << "} ubo" << ubo.binding() << ";\n\n";
+        shader._uniform_declarations.push_back(sp<String>::make(sb.str()));
+    }
+
+    bool hasUBO(ShaderPreprocessor& shader, PipelineInput::UBO& ubo) const {
+        for(const auto& i : ubo.uniforms())
+            if(shader._main.contains(i->name()))
+                return true;
+        return false;
     }
 };
 

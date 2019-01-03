@@ -6,7 +6,6 @@
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/shader_bindings.h"
-#include "renderer/base/ubo.h"
 #include "renderer/inf/uploader.h"
 
 #include "renderer/vulkan/base/vk_buffer.h"
@@ -71,7 +70,7 @@ void VKPipeline::upload(GraphicsContext& graphicsContext)
 {
     VertexLayout vertexLayout;
     setupVertexDescriptions(_shader_bindings->pipelineInput(), vertexLayout);
-    setupDescriptorSetLayout();
+    setupDescriptorSetLayout(_shader_bindings->pipelineInput());
 
     _descriptor_pool = _renderer->renderTarget()->makeDescriptorPool(graphicsContext.resourceManager()->recycler());
     setupDescriptorSet(graphicsContext, _shader_bindings);
@@ -207,6 +206,40 @@ void VKPipeline::setupDescriptorSetLayout()
     VKUtil::checkResult(vkCreatePipelineLayout(device->logicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_layout));
 }
 
+void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
+{
+    const sp<VKDevice>& device = _renderer->device();
+
+    std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
+    uint32_t binding = 0;
+    for(const sp<PipelineInput::UBO>& i : pipelineInput.ubos())
+    {
+        VkShaderStageFlags stages = i->stages().empty() ? VK_SHADER_STAGE_ALL : static_cast<VkShaderStageFlags>(0);
+        for(Shader::Stage j : i->stages())
+            stages = static_cast<VkShaderStageFlags>(stages | VKUtil::toStage(j));
+
+        binding = std::max(binding, i->binding());
+        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
+    }
+
+    for(size_t i = 0; i < pipelineInput.samplerCount(); ++i)
+        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, ++binding));
+
+    VkDescriptorSetLayoutCreateInfo descriptorLayout =
+            vks::initializers::descriptorSetLayoutCreateInfo(
+                setLayoutBindings.data(),
+                static_cast<uint32_t>(setLayoutBindings.size()));
+
+    VKUtil::checkResult(vkCreateDescriptorSetLayout(device->logicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
+
+    VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
+            vks::initializers::pipelineLayoutCreateInfo(
+                &_descriptor_set_layout,
+                1);
+
+    VKUtil::checkResult(vkCreatePipelineLayout(device->logicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_layout));
+}
+
 
 void VKPipeline::setupDescriptorSet()
 {
@@ -242,11 +275,6 @@ void VKPipeline::setupDescriptorSet()
 void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const ShaderBindings& shaderBindings)
 {
     const sp<VKDevice>& device = _renderer->device();
-    const sp<Uploader> uploader = sp<Uploader::Blank>::make(shaderBindings.pipelineInput()->ubo()->size());
-    const sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, uploader,
-                                                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-    ubo->upload(graphicsContext);
 
     VkDescriptorSetAllocateInfo allocInfo =
             vks::initializers::descriptorSetAllocateInfo(
@@ -255,16 +283,25 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Shad
 
     VKUtil::checkResult(vkAllocateDescriptorSets(device->logicalDevice(), &allocInfo, &_descriptor_set));
 
-    std::vector<VkDescriptorImageInfo> samplerDescriptors;
-    std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
-        vks::initializers::writeDescriptorSet(
-        _descriptor_set,
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        0,
-        &ubo->descriptor())
-    };
-
+    std::vector<VkWriteDescriptorSet> writeDescriptorSets;
     uint32_t binding = 0;
+
+    for(const sp<PipelineInput::UBO>& i : shaderBindings.pipelineInput()->ubos())
+    {
+        const sp<Uploader> uploader = sp<Uploader::Blank>::make(i->size());
+        const sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, uploader,
+                                                    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        ubo->upload(graphicsContext);
+        _ubos.push_back(ubo);
+        binding = std::max(binding, i->binding());
+        writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
+                                          _descriptor_set,
+                                          VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                          i->binding(),
+                                          &ubo->descriptor()));
+    }
+
+    std::vector<VkDescriptorImageInfo> samplerDescriptors;
     for(const sp<Texture>& i : shaderBindings.samplers())
     {
         const sp<VKTexture2D> texture = i->resource();

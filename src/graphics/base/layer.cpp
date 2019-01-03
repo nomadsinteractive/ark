@@ -55,7 +55,7 @@ Layer::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
 }
 
 Layer::Snapshot::Snapshot(const sp<Stub>& stub)
-    : _stub(stub), _ubo(stub->_shader->snapshot(_stub->_memory_pool)), _dirty(stub->_items.size() != stub->_last_rendered_count)
+    : _stub(stub), _ubos(stub->_shader->snapshot(_stub->_memory_pool)), _dirty(stub->_items.size() != stub->_last_rendered_count)
 {
     for(const Item& i : stub->_items)
     {
@@ -73,7 +73,7 @@ Layer::Snapshot::Snapshot(const sp<Stub>& stub)
     _stub->_items.clear();
 }
 
-sp<RenderCommand> Layer::Snapshot::render(float x, float y) const
+sp<RenderCommand> Layer::Snapshot::render(float x, float y)
 {
     if(_items.size() > 0)
     {
@@ -95,7 +95,7 @@ sp<RenderCommand> Layer::Snapshot::render(float x, float y) const
                 sBuilder.write(matrix);
             }
         }
-        DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, _ubo, _stub->_shader_bindings->arrayBuffer().snapshot(buf.vertices().makeUploader()), buf.indices(), static_cast<int32_t>(_items.size()));
+        DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos), _stub->_shader_bindings->arrayBuffer().snapshot(buf.vertices().makeUploader()), buf.indices(), static_cast<int32_t>(_items.size()));
         if(buf.isInstanced())
             drawingContext._instanced_array_snapshots = buf.makeInstancedBufferSnapshots();
         return _stub->_resource_loader_context->objectPool()->obtain<RenderCommandImpl>(std::move(drawingContext), _stub->_shader);

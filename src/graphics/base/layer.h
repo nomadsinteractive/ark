@@ -55,10 +55,10 @@ public:
     struct Snapshot {
         Snapshot(Snapshot&& other) = default;
 
-        sp<RenderCommand> render(float x, float y) const;
+        sp<RenderCommand> render(float x, float y);
 
         sp<Stub> _stub;
-        UBOSnapshot _ubo;
+        std::vector<UBOSnapshot> _ubos;
         std::vector<RenderObject::Snapshot> _items;
         bool _dirty;
 

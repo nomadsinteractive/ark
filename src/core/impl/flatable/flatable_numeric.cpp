@@ -26,18 +26,18 @@ uint32_t FlatableNumeric::length()
     return 1;
 }
 
-FlatableNumeric::BUILDER::BUILDER(BeanFactory& parent, const String &value)
-    : _numeric(parent.ensureBuilder<Numeric>(value))
+FlatableNumeric::BUILDER::BUILDER(BeanFactory& factory, const String& value)
+    : _numeric(factory.ensureBuilder<Numeric>(value))
 {
 }
 
 sp<Flatable> FlatableNumeric::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Numeric> numeric = _numeric->build(args);
-    const sp<Changed> changed = numeric.as<Changed>();
+    const sp<Notifier> notifier = numeric.as<Notifier>();
     sp<Flatable> flatable = sp<FlatableNumeric>::make(numeric);
-    if(changed)
-        flatable.absorb<Changed>(changed);
+    if(notifier)
+        flatable.absorb<Notifier>(notifier);
     return flatable;
 }
 

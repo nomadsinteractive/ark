@@ -11,10 +11,8 @@
 #include "renderer/base/recycler.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/graphics_context.h"
-#include "renderer/base/pipeline_input.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
-#include "renderer/base/ubo.h"
 #include "renderer/base/uniform.h"
 #include "renderer/inf/resource.h"
 
@@ -45,8 +43,8 @@ uint64_t GLPipeline::id()
 
 void GLPipeline::upload(GraphicsContext& graphicsContext)
 {
-    for(const Uniform& i : _pipeline_input->uniforms())
-        i.notify();
+    for(const sp<PipelineInput::UBO>& i : _pipeline_input->ubos())
+        i->notify();
 
     _vertex_shader = makeShader(graphicsContext, _version, GL_VERTEX_SHADER, _vertex_source);
     _fragment_shader = makeShader(graphicsContext, _version, GL_FRAGMENT_SHADER, _fragment_source);
@@ -80,24 +78,36 @@ Resource::RecycleFunc GLPipeline::recycle()
     };
 }
 
+void GLPipeline::bindUBO(const Layer::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo)
+{
+    for(size_t i = 0; i < ubo->uniforms().size(); ++i)
+    {
+        if(uboSnapshot._dirty_flags->buf()[i])
+        {
+            const sp<Uniform>& uniform = ubo->uniforms().at(i);
+            uint8_t* buf = uboSnapshot._buffer->buf();
+            const auto pair = ubo->slots().at(i);
+            bindUniform(reinterpret_cast<float*>(buf + pair.first), pair.second, uniform);
+        }
+    }
+}
+
 sp<RenderCommand> GLPipeline::active(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
 {
     glUseProgram(_id);
-    const Layer::UBOSnapshot& uboSnapshot = drawingContext._ubo;
-    if(uboSnapshot._dirty_flags)
+    const std::vector<Layer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
+
+    const sp<PipelineInput>& pipelineInput = drawingContext._shader_bindings->pipelineInput();
+    DCHECK(uboSnapshots.size() == pipelineInput->ubos().size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), pipelineInput->ubos().size());
+
+    for(size_t i = 0; i < uboSnapshots.size(); ++i)
     {
-        DASSERT(uboSnapshot._buffer);
-        const sp<PipelineInput>& pipelineInput = drawingContext._shader_bindings->pipelineInput();
-        const sp<UBO>& ubo = pipelineInput->ubo();
-        for(size_t i = 0; i < ubo->uniforms().size(); ++i)
+        const Layer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
+        const sp<PipelineInput::UBO>& ubo = pipelineInput->ubos().at(i);
+        if(uboSnapshot._dirty_flags)
         {
-            if(uboSnapshot._dirty_flags->buf()[i])
-            {
-                const sp<Uniform>& uniform = ubo->uniforms().at(i);
-                uint8_t* buf = uboSnapshot._buffer->buf();
-                const auto pair = ubo->slots().at(i);
-                bindUniform(reinterpret_cast<float*>(buf + pair.first), pair.second, uniform);
-            }
+            DASSERT(uboSnapshot._buffer);
+            bindUBO(uboSnapshot, ubo);
         }
     }
 

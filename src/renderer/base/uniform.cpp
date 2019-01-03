@@ -1,6 +1,7 @@
 #include "renderer/base/uniform.h"
 
-#include "core/epi/changed.h"
+#include "core/base/observer.h"
+#include "core/epi/notifier.h"
 #include "core/inf/array.h"
 #include "core/inf/flatable.h"
 #include "core/inf/variable.h"
@@ -8,8 +9,8 @@
 
 namespace ark {
 
-Uniform::Uniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& dirty, int32_t binding)
-    : _name(name), _type(type), _flatable(flatable), _dirty(dirty), _binding(binding)
+Uniform::Uniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
+    : _name(name), _type(type), _flatable(flatable), _notifier(notifier), _observer(_notifier ? _notifier->createObserver() : sp<Observer>::null()), _binding(binding)
 {
 }
 
@@ -111,31 +112,28 @@ void Uniform::setFlatable(const sp<Flatable>& flatable)
     _flatable = flatable;
 }
 
-void Uniform::setObserver(const sp<Boolean>& dirty)
+void Uniform::setObserver(const sp<Boolean>& observer)
 {
-    if(_dirty)
-        _dirty->set(dirty);
-    else
-        _dirty = sp<Changed>::make(dirty);
+    _observer = observer;
 }
 
 bool Uniform::dirty() const
 {
-    return _dirty ? _dirty->dirty() : true;
+    return _observer ? _observer->val() : true;
 }
 
-String Uniform::declaration() const
+String Uniform::declaration(const String& descriptor) const
 {
     String t;
     uint32_t s = 0;
     toTypeLength(t, s);
-    return s ? Strings::sprintf("uniform %s %s[%d];", t.c_str(), _name.c_str(), s + 1) : Strings::sprintf("uniform %s %s;", t.c_str(), _name.c_str());
+    return s ? Strings::sprintf("%s%s %s[%d];", descriptor.c_str(), t.c_str(), _name.c_str(), s + 1) : Strings::sprintf("%s%s %s;", descriptor.c_str(), t.c_str(), _name.c_str());
 }
 
 void Uniform::notify() const
 {
-    if(_dirty)
-        _dirty->notify();
+    if(_notifier)
+        _notifier->notify();
 }
 
 }

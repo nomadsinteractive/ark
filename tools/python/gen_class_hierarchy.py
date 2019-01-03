@@ -13,7 +13,7 @@ CLASS_PATTERN = re.compile(r'(\[\[core::class\]\])?([\w<>\s]+)class\s+(ARK_API\s
 INDENT = '\n    '
 
 
-CORE_INTERFACES = ('Numeric', 'Integer', 'Resource', 'EventListener', 'Renderer', 'Lifecycle', 'Block',
+CORE_INTERFACES = ('Numeric', 'Integer', 'Resource', 'EventListener', 'Renderer', 'Notifier', 'Block',
                    'Boolean', 'Runnable', 'Vec2', 'Vec3', 'Vec4', 'Mat3')
 
 

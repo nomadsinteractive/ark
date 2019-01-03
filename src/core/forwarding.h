@@ -33,7 +33,6 @@ class Asset;
 class BeanFactory;
 class Box;
 class ByType;
-class Changed;
 class Class;
 class ClassHierarychyManager;
 class Clock;

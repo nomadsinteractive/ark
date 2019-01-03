@@ -3,7 +3,7 @@
 #include <regex>
 
 #include "core/base/string_buffer.h"
-#include "core/epi/changed.h"
+#include "core/epi/notifier.h"
 #include "core/inf/flatable.h"
 #include "core/util/strings.h"
 
@@ -114,9 +114,9 @@ void PipelineBuildingContext::addSnippet(const sp<Snippet>& snippet)
     _snippet = _snippet ? sp<Snippet>::adopt(new SnippetLinkedChain(_snippet, snippet)) : snippet;
 }
 
-void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Changed>& changed, int32_t binding)
+void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
 {
-    _uniforms.push_back(name, sp<Uniform>::make(name, type, flatable, changed, binding));
+    _uniforms.push_back(name, sp<Uniform>::make(name, type, flatable, notifier, binding));
 }
 
 void PipelineBuildingContext::addUniform(const sp<Uniform>& uniform)
@@ -185,7 +185,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         default:
             FATAL("Unknow type \"%s\"", type.c_str());
         }
-        addUniform(name, glType, flatable, flatable.as<Changed>(), binding);
+        addUniform(name, glType, flatable, flatable.as<Notifier>(), binding);
     }
 }
 

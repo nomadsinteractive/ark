@@ -19,7 +19,6 @@
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader_bindings.h"
-#include "renderer/base/ubo.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/pipeline_factory.h"
 
@@ -80,9 +79,12 @@ sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment,
     return sp<Shader>::make(buildingContext->_shader, pipelineLayout, nullptr);
 }
 
-Layer::UBOSnapshot Shader::snapshot(MemoryPool& memoryPool) const
+std::vector<Layer::UBOSnapshot> Shader::snapshot(MemoryPool& memoryPool) const
 {
-    return _input->ubo()->snapshot(memoryPool);
+    std::vector<Layer::UBOSnapshot> uboSnapshot;
+    for(const sp<PipelineInput::UBO>& i : _input->ubos())
+        uboSnapshot.push_back(i->snapshot(memoryPool));
+    return uboSnapshot;
 }
 
 void Shader::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)

@@ -5,7 +5,6 @@
 #include <queue>
 #include <unordered_set>
 
-#include "core/concurrent/dual.h"
 #include "core/concurrent/internal.h"
 
 namespace ark {
@@ -18,21 +17,25 @@ private:
     typedef _Node<T> Node;
 
 public:
-    void push(const T& data) {
+    void add(const T& data) {
         _pending.push(obtain(data));
     }
 
-    Container& synchronized() {
-        if(_pending.head())
-            synchronize();
-        return _collection.front();
+    size_t size() const {
+        return _collection.size();
     }
 
-    Container clear() {
-        Container cleared = std::move(synchronized());
-        _collection.store(Container());
-        _recycler.clear();
-        return cleared;
+    Container& synchronize() {
+        if(_pending.head()) {
+            Node* head = _pending.release();
+            Synchronizer::append(_collection, head);
+            while(head) {
+                Node* next = head->next();
+                _recycler.put(head);
+                head = next;
+            }
+        }
+        return _collection;
     }
 
 private:
@@ -43,20 +46,8 @@ private:
         return Node::alloc(data);
     }
 
-    void synchronize() {
-        Node* head = _pending.release();
-        _collection.back() = _collection.front();
-        Synchronizer::append(_collection.back(), head);
-        _collection.swap();
-        while(head) {
-            Node* next = head->next();
-            _recycler.put(head);
-            head = next;
-        }
-    }
-
-protected:
-    Dual<Container> _collection;
+private:
+    Container _collection;
 
     _Stack<Node> _pending;
     _Recycler<Node> _recycler;
@@ -91,7 +82,7 @@ public:
 template<typename T> class OCSQueue : public internal::concurrent::_OneConsumerSynchronized<T, std::queue<T>, internal::concurrent::_QueueSynchronizer<T>> {
 public:
     bool pop(T& data) {
-        std::queue<T>& queue = this->synchronized();
+        std::queue<T>& queue = this->synchronize();
         if(queue.empty())
             return false;
         data = queue.front();
@@ -106,7 +97,7 @@ public:
         const auto iter = this->_collection->find(data);
         if(iter != this->_collection->end())
             return true;
-        this->push(data);
+        this->add(data);
         return false;
     }
 };

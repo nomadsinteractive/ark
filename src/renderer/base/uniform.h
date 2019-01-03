@@ -33,7 +33,7 @@ public:
         TYPE_SAMPLER2D
     };
 
-    Uniform(const String& name, Type type, const sp<Flatable>& flatable, const sp<Changed>& dirty, int32_t binding = -1);
+    Uniform(const String& name, Type type, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding = -1);
     DEFAULT_COPY_AND_ASSIGN(Uniform);
 
     const String& name() const;
@@ -46,20 +46,21 @@ public:
     const sp<Flatable>& flatable() const;
     void setFlatable(const sp<Flatable>& flatable);
 
-    void setObserver(const sp<Boolean>& notifier);
+    void setObserver(const sp<Boolean>& observer);
     bool dirty() const;
 
     int32_t binding() const;
     void setBinding(int32_t binding);
 
-    String declaration() const;
+    String declaration(const String& descriptor) const;
     void notify() const;
 
 private:
     String _name;
     Type _type;
     sp<Flatable> _flatable;
-    sp<Changed> _dirty;
+    sp<Notifier> _notifier;
+    sp<Boolean> _observer;
     int32_t _binding;
 };
 
