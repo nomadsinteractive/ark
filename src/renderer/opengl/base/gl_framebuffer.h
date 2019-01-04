@@ -16,7 +16,7 @@ public:
 
     virtual uint64_t id() override;
 
-    virtual void upload(GraphicsContext& graphicsContext) override;
+    virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
 
     const sp<Texture>& texture() const;

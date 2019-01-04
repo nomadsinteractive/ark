@@ -29,7 +29,7 @@ GLTexture::~GLTexture()
         _recycler->recycle(*this);
 }
 
-void GLTexture::upload(GraphicsContext& graphicsContext)
+void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
 {
     if(_id == 0)
         glGenTextures(1, &_id);

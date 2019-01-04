@@ -47,7 +47,11 @@ public:
         size_t _object_count;
     };
 
-    static Buffer::Snapshot makeBufferSnapshot(const RenderController& renderController, Buffer::Name name, size_t objectCount);
+    static Buffer::Snapshot snapshot(const Buffer& buffer, ResourceManager& resourceManager, Buffer::Name name, size_t objectCount);
+
+private:
+
+    static Buffer::Snapshot doSnapshot(const Buffer& buffer, ResourceManager& resourceManager, const Uploader::MakerFunc& maker, size_t reservedObjectCount, size_t size);
 
 };
 

@@ -27,7 +27,7 @@ public:
     virtual ~GLPipeline() override;
 
     virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext) override;
+    virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
 
     virtual sp<RenderCommand> active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
@@ -41,7 +41,7 @@ public:
     class ARK_API GLUniform {
     public:
         GLUniform(GLint location = -1);
-        GLUniform(const GLUniform& other);
+        GLUniform(const GLUniform& other) = default;
 
         explicit operator bool() const;
 
@@ -53,11 +53,9 @@ public:
         void setUniform4fv(GLsizei count, GLfloat* value) const;
         void setUniformColor4f(const Color& color) const;
         void setUniformMatrix4fv(GLsizei count, GLboolean transpose, const GLfloat* value) const;
-        void setUniformMatrix4fv(GLsizei count, GLboolean transpose, const GLfloat* value, uint64_t timestamp) const;
 
     private:
         GLint _location;
-        mutable uint64_t _last_modified;
     };
 
     const GLUniform& getUniform(const String& name);

@@ -18,7 +18,7 @@ sp<Texture> TextureBundle::get(const String& name)
 
     const sp<Texture> texture = _delegate->get(name);
     DCHECK(texture, "Texture \"%s\" not loaded", name.c_str());
-    _resource_manager->upload(texture, ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
+    _resource_manager->upload(texture, nullptr, ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
 
     _textures[name] = texture;
     return texture;

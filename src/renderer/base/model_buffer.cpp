@@ -91,6 +91,11 @@ void ModelBuffer::setRenderObject(const RenderObject::Snapshot& renderObject)
     _varyings = renderObject._varyings;
 }
 
+const Buffer& ModelBuffer::indexBuffer() const
+{
+    return _shader_bindings->indexBuffer();
+}
+
 const Transform::Snapshot& ModelBuffer::transform() const
 {
     return _transform;

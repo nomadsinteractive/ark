@@ -33,7 +33,7 @@ sp<Texture> GLDynamicCubemap::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Size> size = _size->build(args);
     const sp<GLDynamicCubemap> cubemap = sp<GLDynamicCubemap>::make(_render_controller, _parameters, _shader->build(args), _texture->build(args), size);
-    return _render_controller->resourceManager()->createGLResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
+    return _render_controller->resourceManager()->createResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
 }
 
 }

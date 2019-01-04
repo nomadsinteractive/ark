@@ -2,9 +2,6 @@
 
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
-#include "core/impl/array/fixed_array.h"
-#include "core/impl/array/dynamic_array.h"
-#include "core/types/weak_ptr.h"
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
@@ -12,16 +9,13 @@
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/gl_context.h"
-#include "renderer/base/snippet_delegate.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/recycler.h"
-#include "renderer/base/shader.h"
-#include "renderer/inf/snippet.h"
 
 namespace ark {
 
 ResourceManager::ResourceManager(const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
-    : _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _recycler(sp<Recycler>::make()), _tick(0)
+    : _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _recycler(sp<Recycler>::make())
 {
 }
 
@@ -48,41 +42,41 @@ void ResourceManager::onSurfaceReady(GraphicsContext& graphicsContext)
 void ResourceManager::onDrawFrame(GraphicsContext& graphicsContext)
 {
     for(const PreparingGLResource& i : _preparing_items.clear())
-        if(!i._resource.isExpired())
+        if(!i._resource.isExpired() || i._strategy == US_RELOAD)
         {
-            if(i._strategy == US_ONCE_FORCE && i._resource.resource()->id() != 0)
+            if(i._strategy == US_RELOAD && i._resource.resource()->id() != 0)
                 i._resource.recycle(graphicsContext);
 
-            i._resource.prepare(graphicsContext);
+            i._resource.upload(graphicsContext);
             if(i._strategy == US_ONCE_AND_ON_SURFACE_READY)
                 _on_surface_ready_items.insert(i._resource);
         }
 
-    uint32_t m = (++_tick) % 301;
-    if(m == 0)
+    uint32_t tick = graphicsContext.tick();
+    if(tick == 0)
         doRecycling(graphicsContext);
-    else if (m == 150)
+    else if (tick == 150)
         _recycler->doRecycling(graphicsContext);
 }
 
-void ResourceManager::upload(const sp<Resource>& resource, UploadStrategy strategy)
+void ResourceManager::upload(const sp<Resource>& resource, const sp<Uploader>& uploader, UploadStrategy strategy)
 {
     switch(strategy)
     {
     case US_ONCE_AND_ON_SURFACE_READY:
     case US_ONCE:
-    case US_ONCE_FORCE:
-        _preparing_items.push(PreparingGLResource(resource, strategy));
+    case US_RELOAD:
+        _preparing_items.push(PreparingGLResource(ExpirableGLResource(resource, uploader), strategy));
         break;
     case US_ON_SURFACE_READY:
-        _on_surface_ready_items.insert(resource);
+        _on_surface_ready_items.insert(ExpirableGLResource(resource, uploader));
         break;
     }
 }
 
-void ResourceManager::uploadBuffer(const Buffer& buffer, UploadStrategy strategy)
+void ResourceManager::uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, UploadStrategy strategy)
 {
-    upload(buffer._delegate, strategy);
+    upload(buffer._delegate, uploader, strategy);
 }
 
 const sp<Recycler>& ResourceManager::recycler() const
@@ -111,15 +105,12 @@ void ResourceManager::doSurfaceReady(GraphicsContext& graphicsContext)
         resource.recycle(graphicsContext);
 
     for(const ExpirableGLResource& resource : _on_surface_ready_items)
-        resource.prepare(graphicsContext);
+        resource.upload(graphicsContext);
 }
 
-ResourceManager::ExpirableGLResource::ExpirableGLResource(const sp<Resource>& resource)
-    : _resource(resource) {
-}
-
-ResourceManager::ExpirableGLResource::ExpirableGLResource(const ResourceManager::ExpirableGLResource& other)
-    : _resource(other._resource) {
+ResourceManager::ExpirableGLResource::ExpirableGLResource(const sp<Resource>& resource, const sp<Uploader>& uploader)
+    : _resource(resource), _uploader(uploader)
+{
 }
 
 const sp<Resource>& ResourceManager::ExpirableGLResource::resource() const
@@ -132,10 +123,9 @@ bool ResourceManager::ExpirableGLResource::isExpired() const
     return _resource.unique();
 }
 
-void ResourceManager::ExpirableGLResource::prepare(GraphicsContext& graphicsContext) const
+void ResourceManager::ExpirableGLResource::upload(GraphicsContext& graphicsContext) const
 {
-    if(_resource->id() == 0)
-        _resource->upload(graphicsContext);
+    _resource->upload(graphicsContext, _uploader);
 }
 
 void ResourceManager::ExpirableGLResource::recycle(GraphicsContext& graphicsContext) const
@@ -150,11 +140,6 @@ bool ResourceManager::ExpirableGLResource::operator <(const ResourceManager::Exp
 
 ResourceManager::PreparingGLResource::PreparingGLResource(const ResourceManager::ExpirableGLResource& resource, ResourceManager::UploadStrategy strategy)
     : _resource(resource), _strategy(strategy)
-{
-}
-
-ResourceManager::PreparingGLResource::PreparingGLResource(const ResourceManager::PreparingGLResource& other)
-    : _resource(other._resource), _strategy(other._strategy)
 {
 }
 

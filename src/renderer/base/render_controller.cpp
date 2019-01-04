@@ -5,6 +5,7 @@
 
 #include "graphics/base/bitmap.h"
 
+#include "renderer/base/recycler.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/texture.h"
@@ -83,7 +84,7 @@ sp<Dictionary<sp<Texture>>> RenderController::createTextureBundle() const
 sp<Texture> RenderController::createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap, ResourceManager::UploadStrategy us)
 {
     const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(_resource_manager->recycler(), width, height, bitmap);
-    _resource_manager->upload(texture, us);
+    _resource_manager->upload(texture, nullptr, us);
     return texture;
 }
 
@@ -99,30 +100,9 @@ Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Uploader>
 
 Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader) const
 {
-    Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage, uploader));
-    _resource_manager->uploadBuffer(buffer, ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
+    Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage));
+    _resource_manager->uploadBuffer(buffer, uploader, uploader ? ResourceManager::US_ONCE_AND_ON_SURFACE_READY : ResourceManager::US_ON_SURFACE_READY);
     return buffer;
-}
-
-Buffer::Snapshot RenderController::makeBufferSnapshot(Buffer::Name name, const Uploader::MakerFunc& maker, size_t reservedObjectCount, size_t size) const
-{
-    if(name == Buffer::NAME_NONE)
-        return makeIndexBuffer().snapshot(maker(size));
-
-    sp<ResourceManager::SharedBuffer> sb;
-    if(!_resource_manager->_shared_buffers.pop(sb))
-        sb = sp<ResourceManager::SharedBuffer>::make();
-
-    Buffer& shared = sb->_buffers[name];
-    if(!shared || shared.size() < size)
-    {
-        const sp<Uploader> uploader = maker(reservedObjectCount);
-        DCHECK(uploader && uploader->size() >= size, "Making GLUploader failed, object-count: %d, uploader-size: %d, required-size: %d", reservedObjectCount, uploader ? uploader->size() : 0, size);
-        shared = makeIndexBuffer(Buffer::USAGE_STATIC, uploader);
-    }
-    _resource_manager->_shared_buffers.push(sb);
-
-    return shared.snapshot(size);
 }
 
 sp<Variable<uint64_t>> RenderController::ticker() const

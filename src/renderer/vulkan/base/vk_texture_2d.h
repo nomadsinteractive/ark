@@ -22,7 +22,7 @@ public:
     ~VKTexture2D() override;
 
     virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext) override;
+    virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
 
     const VkDescriptorImageInfo& vkDescriptor() const;

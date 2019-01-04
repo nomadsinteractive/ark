@@ -76,7 +76,7 @@ void PipelineLayout::initialize(const Camera& camera)
     if(mvp)
     {
         mvp->setFlatable(camera.vp());
-        mvp->setObserver(camera.notifier()->createObserver());
+        mvp->setNotifier(camera.notifier());
         _building_context->addUniform(mvp);
     }
 
@@ -84,7 +84,7 @@ void PipelineLayout::initialize(const Camera& camera)
     if(vp)
     {
         vp->setFlatable(camera.vp());
-        vp->setObserver(camera.notifier()->createObserver());
+        vp->setNotifier(camera.notifier());
         _building_context->addUniform(vp);
     }
 

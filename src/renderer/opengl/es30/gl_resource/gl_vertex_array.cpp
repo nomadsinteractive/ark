@@ -22,13 +22,13 @@ uint64_t GLVertexArray::id()
     return _id;
 }
 
-void GLVertexArray::upload(GraphicsContext& graphicsContext)
+void GLVertexArray::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
 {
     const sp<ShaderBindings> bindings = _shader_bindings.ensure();
     glGenVertexArrays(1, &_id);
     glBindVertexArray(_id);
-    bindings->arrayBuffer().upload(graphicsContext);
-    glBindBuffer(GL_ARRAY_BUFFER, bindings->arrayBuffer().id());
+    bindings->vertexBuffer().upload(graphicsContext);
+    glBindBuffer(GL_ARRAY_BUFFER, bindings->vertexBuffer().id());
     const sp<opengl::GLPipeline> pipeline = _pipeline_factory->buildPipeline(graphicsContext, bindings);
     pipeline->bindBuffer(graphicsContext, bindings);
     glBindVertexArray(0);

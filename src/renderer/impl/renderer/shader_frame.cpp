@@ -25,13 +25,13 @@ ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const s
     : _size(size), _render_controller(resourceLoaderContext->renderController()), _shader(shader),
       _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
       _shader_bindings(sp<ShaderBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, _render_controller, shader->pipelineLayout())),
-      _array_buffer(_shader_bindings->arrayBuffer())
+      _array_buffer(_shader_bindings->vertexBuffer())
 {
 }
 
 void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
-    const Buffer::Snapshot indexBuffer = IndexBuffers::makeBufferSnapshot(_render_controller, Buffer::NAME_QUADS, 1);
+    const Buffer::Snapshot indexBuffer = IndexBuffers::snapshot(_shader_bindings->indexBuffer(), _render_controller->resourceManager(), Buffer::NAME_QUADS, 1);
     const sp<Uploader> uploader = _object_pool->obtain<ByteArrayUploader>(getArrayBuffer(x, y));
     renderRequest.addRequest(_object_pool->obtain<opengl::GLDrawElements>(DrawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _array_buffer.snapshot(uploader), indexBuffer, 0), _shader, GL_TRIANGLES));
 }

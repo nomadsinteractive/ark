@@ -55,7 +55,7 @@ GLFramebufferRenderer::GLFramebufferRenderer(const sp<Renderer>& delegate, const
     : _delegate(delegate), _fbo(sp<opengl::GLFramebuffer>::make(resourceLoaderContext->resourceManager()->recycler(), texture)),
       _pre_draw(sp<PreDrawElementsToFBO>::make(_fbo)), _post_draw(sp<PostDrawElementsToFBO>::make())
 {
-    resourceLoaderContext->resourceManager()->upload(_fbo, ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
+    resourceLoaderContext->resourceManager()->upload(_fbo, nullptr, ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
 }
 
 void GLFramebufferRenderer::render(RenderRequest& renderRequest, float x, float y)

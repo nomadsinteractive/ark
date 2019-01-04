@@ -32,7 +32,7 @@ uint64_t VKTexture2D::id()
     return (uint64_t)(_image);
 }
 
-void VKTexture2D::upload(GraphicsContext& /*graphicsContext*/)
+void VKTexture2D::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& uploader)
 {
     doUpload();
 }

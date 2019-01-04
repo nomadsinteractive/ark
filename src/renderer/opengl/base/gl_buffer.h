@@ -12,14 +12,12 @@ namespace opengl {
 
 class GLBuffer : public Buffer::Delegate {
 public:
-    GLBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Recycler>& recycler, const sp<Uploader>& uploader);
+    GLBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Recycler>& recycler);
     ~GLBuffer() override;
 
     virtual uint64_t id() override;
-    virtual void upload(GraphicsContext&) override;
+    virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
-
-    virtual void reload(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader) override;
 
 private:
     void doUpload(GraphicsContext& graphicsContext, Uploader& uploader);
@@ -29,7 +27,6 @@ private:
     GLenum _usage;
 
     sp<Recycler> _recycler;
-    sp<Uploader> _uploader;
 
     uint32_t _id;
 };

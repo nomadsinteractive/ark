@@ -30,7 +30,6 @@ public:
     };
 
     enum Name {
-        NAME_NONE = -1,
         NAME_QUADS,
         NAME_NINE_PATCH,
         NAME_POINTS,
@@ -39,12 +38,12 @@ public:
 
     class ARK_API Delegate : public Resource {
     public:
-        Delegate(size_t size);
+        Delegate();
         virtual ~Delegate() = default;
 
         size_t size() const;
 
-        virtual void reload(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader) = 0;
+        void reload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader);
 
     protected:
         size_t _size;

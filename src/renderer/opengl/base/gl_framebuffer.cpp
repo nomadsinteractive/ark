@@ -25,13 +25,13 @@ uint64_t GLFramebuffer::id()
     return _id;
 }
 
-void GLFramebuffer::upload(GraphicsContext& graphicsContext)
+void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
 {
     if(_id == 0)
         glGenFramebuffers(1, &_id);
 
     if(!_texture->id())
-        _texture->upload(graphicsContext);
+        _texture->upload(graphicsContext, nullptr);
 
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texture->id(), 0);

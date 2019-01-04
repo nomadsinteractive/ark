@@ -41,7 +41,7 @@ uint64_t GLPipeline::id()
     return _id;
 }
 
-void GLPipeline::upload(GraphicsContext& graphicsContext)
+void GLPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
 {
     for(const sp<PipelineInput::UBO>& i : _pipeline_input->ubos())
         i->notify();
@@ -167,7 +167,7 @@ void GLPipeline::bindUniform(float* buf, uint32_t size, const Uniform& uniform)
         break;
     case Uniform::TYPE_MAT4:
     case Uniform::TYPE_MAT4V:
-        DCHECK(size % 64 == 0, "Wrong color4fv size: %d", size);
+        DCHECK(size % 64 == 0, "Wrong mat4fv size: %d", size);
         glUniform.setUniformMatrix4fv(size / 64, GL_FALSE, buf);
         break;
     default:
@@ -205,11 +205,11 @@ void GLPipeline::activeTexture(const Texture& texture, uint32_t name)
     uTexture.setUniform1i(name);
 }
 
-void GLPipeline::glUpdateMatrix(GraphicsContext& graphicsContext, const String& name, const Matrix& matrix)
+void GLPipeline::glUpdateMatrix(GraphicsContext& /*graphicsContext*/, const String& name, const Matrix& matrix)
 {
     const GLPipeline::GLUniform& uniform = getUniform(name);
     DCHECK(uniform, "Uniform %s not found", name.c_str());
-    uniform.setUniformMatrix4fv(1, GL_FALSE, matrix.value(), graphicsContext.tick());
+    uniform.setUniformMatrix4fv(1, GL_FALSE, matrix.value());
 }
 
 void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const PipelineInput& input, uint32_t divisor)
@@ -315,12 +315,7 @@ void GLPipeline::GLAttribute::setVertexPointer(const Attribute& attribute, GLint
 }
 
 GLPipeline::GLUniform::GLUniform(GLint location)
-    : _location(location), _last_modified(0)
-{
-}
-
-GLPipeline::GLUniform::GLUniform(const GLPipeline::GLUniform& other)
-    : _location(other._location), _last_modified(other._last_modified)
+    : _location(location)
 {
 }
 
@@ -367,15 +362,6 @@ void GLPipeline::GLUniform::setUniformColor4f(const Color& color) const
 void GLPipeline::GLUniform::setUniformMatrix4fv(GLsizei count, GLboolean transpose, const GLfloat* value) const
 {
     glUniformMatrix4fv(_location, count, transpose, value);
-}
-
-void GLPipeline::GLUniform::setUniformMatrix4fv(GLsizei count, GLboolean transpose, const GLfloat* value, uint64_t timestamp) const
-{
-    if(timestamp > _last_modified)
-    {
-        glUniformMatrix4fv(_location, count, transpose, value);
-        _last_modified = timestamp;
-    }
 }
 
 GLPipeline::Shader::Shader(const sp<Recycler>& recycler, uint32_t version, GLenum type, const String& source)

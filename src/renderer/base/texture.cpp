@@ -27,9 +27,9 @@ Texture::~Texture()
 {
 }
 
-void Texture::upload(GraphicsContext& graphicsContext)
+void Texture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
 {
-    _resource->val()->upload(graphicsContext);
+    _resource->val()->upload(graphicsContext, uploader);
 }
 
 Resource::RecycleFunc Texture::recycle()

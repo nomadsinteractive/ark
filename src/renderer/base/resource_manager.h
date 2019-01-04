@@ -24,7 +24,7 @@ public:
 
     enum UploadStrategy {
         US_ONCE,
-        US_ONCE_FORCE,
+        US_RELOAD,
         US_ON_SURFACE_READY,
         US_ONCE_AND_ON_SURFACE_READY
     };
@@ -38,38 +38,39 @@ public:
 
     void onDrawFrame(GraphicsContext& graphicsContext);
 
-    void upload(const sp<Resource>& resource, UploadStrategy strategy);
+    void upload(const sp<Resource>& resource, const sp<Uploader>& uploader, UploadStrategy strategy);
 
-    void uploadBuffer(const Buffer& buffer, UploadStrategy strategy);
+    void uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, UploadStrategy strategy);
 
-    template<typename T, typename... Args> sp<T> createGLResource(Args&&... args) {
+    template<typename T, typename... Args> sp<T> createResource(Args&&... args) {
         const sp<T> res = sp<T>::make(std::forward<Args>(args)...);
-        upload(res, US_ONCE_AND_ON_SURFACE_READY);
+        upload(res, nullptr, US_ONCE_AND_ON_SURFACE_READY);
         return res;
     }
 
 private:
     class ExpirableGLResource {
     public:
-        ExpirableGLResource(const sp<Resource>& resource);
-        ExpirableGLResource(const ExpirableGLResource& other);
+        ExpirableGLResource(const sp<Resource>& resource, const sp<Uploader>& uploader);
+        ExpirableGLResource(const ExpirableGLResource& other) = default;
 
         const sp<Resource>& resource() const;
 
         bool isExpired() const;
 
-        void prepare(GraphicsContext& graphicsContext) const;
+        void upload(GraphicsContext& graphicsContext) const;
         void recycle(GraphicsContext& graphicsContext) const;
 
         bool operator < (const ExpirableGLResource& other) const;
 
     private:
         sp<Resource> _resource;
+        sp<Uploader> _uploader;
     };
 
     struct PreparingGLResource {
         PreparingGLResource(const ExpirableGLResource& resource, UploadStrategy strategy);
-        PreparingGLResource(const PreparingGLResource& other);
+        PreparingGLResource(const PreparingGLResource& other) = default;
 
         ExpirableGLResource _resource;
         UploadStrategy _strategy;
@@ -92,11 +93,7 @@ private:
     sp<Recycler> _recycler;
 
     LockFreeStack<PreparingGLResource> _preparing_items;
-    LockFreeStack<sp<SharedBuffer>> _shared_buffers;
-
     std::set<ExpirableGLResource> _on_surface_ready_items;
-
-    uint32_t _tick;
 
     friend class RenderController;
 };

@@ -112,9 +112,11 @@ void Uniform::setFlatable(const sp<Flatable>& flatable)
     _flatable = flatable;
 }
 
-void Uniform::setObserver(const sp<Boolean>& observer)
+void Uniform::setNotifier(const sp<Notifier>& notifier)
 {
-    _observer = observer;
+    DASSERT(notifier);
+    _notifier = notifier;
+    _observer = _notifier->createObserver();
 }
 
 bool Uniform::dirty() const

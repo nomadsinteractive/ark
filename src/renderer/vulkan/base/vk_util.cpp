@@ -258,7 +258,7 @@ void VKUtil::updateUniformBuffers(const VKRenderTarget& renderTarget)
 
     _ubo->viewPos = glm::vec4(0.0f, 0.0f, -zoom, 0.0f);
 
-    _uniforms->upload(_graphics_context);
+    _uniforms->upload(_graphics_context, nullptr);
 }
 
 void VKUtil::buildCommandBuffers(const VKRenderTarget& renderTarget)
@@ -325,11 +325,11 @@ void VKUtil::generateQuad()
 
     // Create buffers
     // For the sake of simplicity we won't stage the vertex data to the gpu memory
-    _vertex_buffer = sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), sp<Uploader::Vector<Vertex>>::make(std::move(vertices)), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    _vertex_buffer->upload(_graphics_context);
+    _vertex_buffer = sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    _vertex_buffer->upload(_graphics_context, sp<Uploader::Vector<Vertex>>::make(std::move(vertices)));
 
-    _index_buffer = sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), sp<Uploader::Vector<uint32_t>>::make(std::move(indices)), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    _index_buffer->upload(_graphics_context);
+    _index_buffer = sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    _index_buffer->upload(_graphics_context, sp<Uploader::Vector<uint32_t>>::make(std::move(indices)));
 }
 
 void VKUtil::draw(VKRenderTarget& renderTarget)

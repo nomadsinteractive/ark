@@ -8,9 +8,9 @@
 namespace ark {
 namespace opengl {
 
-GLBuffer::GLBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Recycler>& recycler, const sp<Uploader>& uploader)
-    : Buffer::Delegate(uploader ? uploader->size() : 0), _type(type == Buffer::TYPE_VERTEX ? GL_ARRAY_BUFFER : GL_ELEMENT_ARRAY_BUFFER),
-      _usage(usage == Buffer::USAGE_DYNAMIC ? GL_DYNAMIC_DRAW : GL_STATIC_READ), _recycler(recycler), _uploader(uploader), _id(0)
+GLBuffer::GLBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Recycler>& recycler)
+    : _type(type == Buffer::TYPE_VERTEX ? GL_ARRAY_BUFFER : GL_ELEMENT_ARRAY_BUFFER),
+      _usage(usage == Buffer::USAGE_DYNAMIC ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW), _recycler(recycler), _id(0)
 {
 }
 
@@ -18,25 +18,6 @@ GLBuffer::~GLBuffer()
 {
     if(_id > 0)
         _recycler->recycle(*this);
-}
-
-void GLBuffer::reload(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader)
-{
-    if(_id == 0)
-    {
-        glGenBuffers(1, &_id);
-        if(_uploader && !transientUploader)
-        {
-            doUpload(graphicsContext, _uploader);
-            return;
-        }
-    }
-    if(transientUploader)
-    {
-        DWARN(_usage != GL_STATIC_DRAW, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
-        doUpload(graphicsContext, transientUploader);
-        _uploader = transientUploader;
-    }
 }
 
 void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& uploader)
@@ -64,9 +45,16 @@ uint64_t GLBuffer::id()
     return _id;
 }
 
-void GLBuffer::upload(GraphicsContext& graphicsContext)
+void GLBuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
 {
-    reload(graphicsContext, nullptr);
+    if(_id == 0)
+        glGenBuffers(1, &_id);
+
+    if(uploader)
+    {
+        DWARN(_usage != GL_STATIC_DRAW || _size == 0, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
+        doUpload(graphicsContext, uploader);
+    }
 }
 
 Resource::RecycleFunc GLBuffer::recycle()
@@ -75,7 +63,7 @@ Resource::RecycleFunc GLBuffer::recycle()
     _id = 0;
     _size = 0;
     return [id](GraphicsContext&) {
-        LOGD("Deleting GLBuffer[%d]", id);
+        LOGD("Recycling GLBuffer[%d]", id);
         glDeleteBuffers(1, &id);
     };
 }

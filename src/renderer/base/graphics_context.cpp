@@ -12,7 +12,7 @@
 namespace ark {
 
 GraphicsContext::GraphicsContext(const sp<GLContext>& glContext, const sp<ResourceManager>& resourceManager)
-    : _gl_context(glContext), _resource_manager(resourceManager), _steady_clock(Platform::getSteadyClock())
+    : _gl_context(glContext), _resource_manager(resourceManager), _tick(0)
 {
 }
 
@@ -27,7 +27,7 @@ void GraphicsContext::onSurfaceReady()
 
 void GraphicsContext::onDrawFrame()
 {
-    _tick = _steady_clock->val();
+    ++_tick;
     _resource_manager->onDrawFrame(*this);
 }
 
@@ -41,7 +41,7 @@ const sp<GLContext>& GraphicsContext::glContext() const
     return _gl_context;
 }
 
-uint64_t GraphicsContext::tick() const
+uint32_t GraphicsContext::tick() const
 {
     return _tick;
 }

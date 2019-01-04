@@ -30,7 +30,7 @@ void GLIrradianceCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uin
     cmft::imageCreate(input, _texture->width(), _texture->height(), 0, 1, 1, cmft::TextureFormat::RGBA32F);
 
     if(!_texture->id())
-        _texture->upload(graphicsContext);
+        _texture->upload(graphicsContext, nullptr);
 
     glBindTexture(GL_TEXTURE_2D, _texture->id());
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, input.m_data);
@@ -76,7 +76,7 @@ sp<Texture> GLIrradianceCubemap::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Size> size = _size->build(args);
     const sp<GLIrradianceCubemap> cubemap = sp<GLIrradianceCubemap>::make(_resource_manager, _parameters, _shader->build(args), _texture->build(args), _size->build(args));
-    return _resource_manager->createGLResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
+    return _resource_manager->createResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
 }
 
 }

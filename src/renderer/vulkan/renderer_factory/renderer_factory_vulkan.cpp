@@ -66,10 +66,10 @@ void RendererFactoryVulkan::setGLVersion(Ark::RendererVersion version, GLContext
     glContext.setVersion(version);
 }
 
-sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buffer::Usage /*usage*/, const sp<Uploader>& uploader)
+sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buffer::Usage /*usage*/)
 {
     static const VkBufferUsageFlags usagesFlags[Buffer::TYPE_COUNT] = {VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_INDEX_BUFFER_BIT};
-    return sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), uploader, usagesFlags[type], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    return sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), usagesFlags[type], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<GLContext>& glContext, const Viewport& viewport)
@@ -84,7 +84,7 @@ sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
 
 sp<Texture> RendererFactoryVulkan::createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap)
 {
-    const sp<Size> size = sp<Size>::make(width, height);
+    const sp<Size> size = sp<Size>::make(static_cast<float>(width), static_cast<float>(height));
     const sp<VKTexture2D> texture = sp<VKTexture2D>::make(recycler, _renderer, sp<Texture::Parameters>::make(), bitmap);
     return sp<Texture>::make(size, sp<Variable<sp<Resource>>::Const>::make(texture), Texture::TYPE_2D);
 }

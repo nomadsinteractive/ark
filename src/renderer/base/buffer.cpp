@@ -79,7 +79,7 @@ uint64_t Buffer::id() const
 
 void Buffer::upload(GraphicsContext& graphicsContext) const
 {
-    _delegate->upload(graphicsContext);
+    _delegate->upload(graphicsContext, nullptr);
 }
 
 const sp<Buffer::Delegate>& Buffer::delegate() const
@@ -156,14 +156,19 @@ size_t Uploader::size() const
     return _size;
 }
 
-Buffer::Delegate::Delegate(size_t size)
-    : _size(size)
+Buffer::Delegate::Delegate()
+    :_size(0)
 {
 }
 
 size_t Buffer::Delegate::size() const
 {
     return _size;
+}
+
+void Buffer::Delegate::reload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
+{
+    upload(graphicsContext, uploader);
 }
 
 }

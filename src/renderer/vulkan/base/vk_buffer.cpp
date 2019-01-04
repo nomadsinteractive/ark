@@ -9,9 +9,9 @@
 namespace ark {
 namespace vulkan {
 
-VKBuffer::VKBuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, const sp<Uploader>& uploader, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags)
-    : Buffer::Delegate(0), _renderer(renderer), _recycler(recycler), _uploader(uploader), _usage_flags(usageFlags),
-      _memory_property_flags(memoryPropertyFlags), _descriptor{}, _memory_allocation_info(vks::initializers::memoryAllocateInfo())
+VKBuffer::VKBuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags)
+    : _renderer(renderer), _recycler(recycler), _usage_flags(usageFlags), _memory_property_flags(memoryPropertyFlags), _descriptor{},
+      _memory_allocation_info(vks::initializers::memoryAllocateInfo())
 {
 }
 
@@ -25,9 +25,22 @@ uint64_t VKBuffer::id()
     return (uint64_t)(_descriptor.buffer);
 }
 
-void VKBuffer::upload(GraphicsContext& graphicsContext)
+void VKBuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& uploader)
 {
-    reload(graphicsContext, nullptr);
+    if(uploader)
+    {
+        ensureSize(uploader);
+
+        void* mapped = map();
+        size_t offset = 0;
+        uploader->upload([mapped, &offset](void* buf, size_t size) {
+            memcpy(reinterpret_cast<int8_t*>(mapped) + offset, buf, size);
+            offset += size;
+        });
+        if((_memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
+            flush();
+        unmap(mapped);
+    }
 }
 
 Resource::RecycleFunc VKBuffer::recycle()
@@ -45,28 +58,6 @@ Resource::RecycleFunc VKBuffer::recycle()
         if (memory)
             vkFreeMemory(device->logicalDevice(), memory, nullptr);
     };
-}
-
-void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& transientUploader)
-{
-    const sp<Uploader>& uploader = transientUploader ? transientUploader : _uploader;
-    if(uploader)
-    {
-        ensureSize(uploader);
-
-        void* mapped = map();
-        size_t offset = 0;
-        uploader->upload([mapped, &offset](void* buf, size_t size) {
-            memcpy(reinterpret_cast<int8_t*>(mapped) + offset, buf, size);
-            offset += size;
-        });
-        if((_memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
-            flush();
-        unmap(mapped);
-
-        if(transientUploader)
-            _uploader = transientUploader;
-    }
 }
 
 const VkBuffer& VKBuffer::vkBuffer() const

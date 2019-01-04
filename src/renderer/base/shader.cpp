@@ -156,14 +156,14 @@ sp<Pipeline> Shader::Stub::buildPipeline(GraphicsContext& graphicsContext, const
     if(_pipeline)
     {
         if(_pipeline->id() == 0)
-            _pipeline->upload(graphicsContext);
+            _pipeline->upload(graphicsContext, nullptr);
         return _pipeline;
     }
 
     shaderBindings->pipelineLayout()->preCompile(graphicsContext, shaderBindings);
     _pipeline = _pipeline_factory->buildPipeline(graphicsContext, shaderBindings);
-    graphicsContext.resourceManager()->upload(_pipeline, ResourceManager::US_ON_SURFACE_READY);
-    _pipeline->upload(graphicsContext);
+    graphicsContext.resourceManager()->upload(_pipeline, nullptr, ResourceManager::US_ON_SURFACE_READY);
+    _pipeline->upload(graphicsContext, nullptr);
     return _pipeline;
 }
 

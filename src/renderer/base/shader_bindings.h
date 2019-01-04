@@ -35,7 +35,7 @@ public:
 
 public:
     ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout);
-    ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout, const Buffer& arrayBuffer);
+    ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout, const Buffer& vertexBuffer, const Buffer& indexBuffer);
 
     const sp<Snippet>& snippet() const;
     const sp<PipelineLayout>& pipelineLayout() const;
@@ -46,12 +46,13 @@ public:
 
     RenderModel::Mode renderMode() const;
 
-    const Buffer& arrayBuffer() const;
+    const Buffer& vertexBuffer() const;
+    const Buffer& indexBuffer() const;
+
     const std::vector<std::pair<uint32_t, Buffer>>& instancedArrays() const;
 
     const Attributes& attributes() const;
 
-//    void setRenderModel(RenderModel& renderModel);
     void bindSampler(const sp<Texture>& texture, uint32_t name = 0);
 
     std::map<uint32_t, Buffer::Builder> makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const;

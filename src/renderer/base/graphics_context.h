@@ -28,15 +28,14 @@ public:
         return _attachments.ensure<T>();
     }
 
-    uint64_t tick() const;
+    uint32_t tick() const;
 
 private:
     sp<GLContext> _gl_context;
     sp<ResourceManager> _resource_manager;
-    sp<Variable<uint64_t>> _steady_clock;
+    uint32_t _tick;
 
     ByType _attachments;
-    uint64_t _tick;
 
 };
 

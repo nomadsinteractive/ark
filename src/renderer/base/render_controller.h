@@ -32,8 +32,6 @@ public:
     Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr) const;
     Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr) const;
 
-    Buffer::Snapshot makeBufferSnapshot(Buffer::Name name, const Uploader::MakerFunc& maker, size_t reservedObjectCount, size_t size) const;
-
     sp<Variable<uint64_t>> ticker() const;
 
     void addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired);

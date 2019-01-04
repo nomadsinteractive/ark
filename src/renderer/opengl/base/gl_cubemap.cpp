@@ -54,7 +54,7 @@ sp<Texture> GLCubemap::BUILDER::build(const sp<Scope>& args)
     }
     const sp<Size> size = _size->build(args);
     const sp<GLCubemap> cubemap = sp<GLCubemap>::make(_resource_loader_context->resourceManager()->recycler(), size, _parameters, std::move(bitmaps));
-    return _resource_loader_context->resourceManager()->createGLResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
+    return _resource_loader_context->resourceManager()->createResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
 }
 
 }

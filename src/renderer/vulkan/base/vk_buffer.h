@@ -16,15 +16,15 @@ namespace vulkan {
 
 class VKBuffer : public Buffer::Delegate {
 public:
-    VKBuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, const sp<Uploader>& uploader, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags);
+    VKBuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags);
     ~VKBuffer() override;
     DISALLOW_COPY_AND_ASSIGN(VKBuffer);
 
     virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext) override;
+    virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
 
-    virtual void reload(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader) override;
+//    virtual void reload(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader) override;
 
     const VkBuffer& vkBuffer() const;
 
@@ -68,7 +68,6 @@ private:
 private:
     sp<VKRenderer> _renderer;
     sp<Recycler> _recycler;
-    sp<Uploader> _uploader;
 
     /** @brief Usage flags to be filled by external source at buffer creation (to query at some later point) */
     VkBufferUsageFlags _usage_flags;

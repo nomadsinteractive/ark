@@ -24,7 +24,7 @@ namespace vulkan {
 VKPipeline::VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<ShaderBindings>& shaderBindings, std::map<Shader::Stage, String> shaders)
     : _recycler(recycler), _shader_bindings(shaderBindings), _renderer(renderer),
       _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE), _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE),
-      _shaders(std::move(shaders)), _vertex_observer(createObserver(_shader_bindings->arrayBuffer()))
+      _shaders(std::move(shaders)), _vertex_observer(createObserver(_shader_bindings->vertexBuffer()))
 {
 }
 
@@ -67,7 +67,7 @@ void VKPipeline::upload()
     _command_buffers = sp<VKCommandBuffers>::make(_recycler, _renderer->renderTarget());
 }
 
-void VKPipeline::upload(GraphicsContext& graphicsContext)
+void VKPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
 {
     VertexLayout vertexLayout;
     setupVertexDescriptions(_shader_bindings->pipelineInput(), vertexLayout);
@@ -292,9 +292,8 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Shad
     for(const sp<PipelineInput::UBO>& i : shaderBindings.pipelineInput()->ubos())
     {
         const sp<Uploader> uploader = sp<Uploader::Blank>::make(i->size());
-        const sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, uploader,
-                                                    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        ubo->upload(graphicsContext);
+        const sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        ubo->upload(graphicsContext, uploader);
         _ubos.push_back(ubo);
         binding = std::max(binding, i->binding());
         writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(

@@ -70,7 +70,7 @@ void GLModelNinePatch::start(ModelBuffer& buf, RenderController& renderControlle
     DCHECK(layerContext._items.size() > 0, "LayerContext has no RenderObjects");
 
     buf.vertices().setGrowCapacity(16 * layerContext._items.size());
-    buf.setIndices(IndexBuffers::makeBufferSnapshot(renderController, Buffer::NAME_NINE_PATCH, layerContext._items.size()));
+    buf.setIndices(IndexBuffers::snapshot(buf.indexBuffer(), renderController.resourceManager(), Buffer::NAME_NINE_PATCH, layerContext._items.size()));
 }
 
 void GLModelNinePatch::load(ModelBuffer& buf, int32_t type, const V& size)

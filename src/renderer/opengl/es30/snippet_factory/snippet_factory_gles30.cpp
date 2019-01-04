@@ -44,7 +44,7 @@ private:
 
 sp<Snippet> SnippetFactoryGLES30::createCoreSnippet(ResourceManager& resourceManager, const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings)
 {
-    return sp<SnippetGLES30>::make(resourceManager.createGLResource<GLVertexArray>(pipelineFactory, shaderBindings));
+    return sp<SnippetGLES30>::make(resourceManager.createResource<GLVertexArray>(pipelineFactory, shaderBindings));
 }
 
 }

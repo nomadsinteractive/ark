@@ -130,7 +130,7 @@ void GLModelText::postSnapshot(const Layer::Snapshot& snapshot)
             LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _stub->_characters.size());
             _stub->reset(width, height);
         }
-        _stub->_render_controller->resourceManager()->upload(_stub->_texture, ResourceManager::US_ONCE_FORCE);
+        _stub->_render_controller->resourceManager()->upload(_stub->_texture, nullptr, ResourceManager::US_RELOAD);
     }
 }
 

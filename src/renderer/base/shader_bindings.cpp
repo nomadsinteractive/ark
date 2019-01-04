@@ -9,13 +9,13 @@
 namespace ark {
 
 ShaderBindings::ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
-    : ShaderBindings(mode, renderController, pipelineLayout, renderController.makeVertexBuffer())
+    : ShaderBindings(mode, renderController, pipelineLayout, renderController.makeVertexBuffer(), renderController.makeIndexBuffer(Buffer::USAGE_STATIC))
 {
 }
 
-ShaderBindings::ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout, const Buffer& arrayBuffer)
-    : _render_mode(mode), _attributes(pipelineLayout->input()), _vertex_buffer(arrayBuffer), _pipeline_layout(pipelineLayout), _pipeline_input(_pipeline_layout->input()),
-      _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController))
+ShaderBindings::ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout, const Buffer& arrayBuffer, const Buffer& indexBuffer)
+    : _render_mode(mode), _attributes(pipelineLayout->input()), _vertex_buffer(arrayBuffer), _index_buffer(indexBuffer), _pipeline_layout(pipelineLayout),
+      _pipeline_input(_pipeline_layout->input()), _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController))
 {
     _samplers.resize(_pipeline_input->samplerCount());
 }
@@ -50,15 +50,14 @@ RenderModel::Mode ShaderBindings::renderMode() const
     return _render_mode;
 }
 
-//void ShaderBindings::setRenderModel(RenderModel& renderModel)
-//{
-//    renderModel.initialize(*this);
-//    _render_mode = renderModel.mode();
-//}
-
-const Buffer& ShaderBindings::arrayBuffer() const
+const Buffer& ShaderBindings::vertexBuffer() const
 {
     return _vertex_buffer;
+}
+
+const Buffer& ShaderBindings::indexBuffer() const
+{
+    return _index_buffer;
 }
 
 const std::vector<std::pair<uint32_t, Buffer>>& ShaderBindings::instancedArrays() const

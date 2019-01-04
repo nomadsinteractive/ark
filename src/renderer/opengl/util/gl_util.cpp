@@ -188,7 +188,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     const sp<opengl::GLPipeline> glPipeline = shader.pipeline();
     glUseProgram(glPipeline->id());
     glPipeline->getUniform("u_Projection").setUniformMatrix4fv(1, GL_FALSE, captureProjection.value());
-    texture.upload(graphicsContext);
+    texture.upload(graphicsContext, nullptr);
 
     glPipeline->activeTexture(texture, 0);
 
@@ -196,15 +196,16 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    Buffer arrayBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<Uploader::Array<uint8_t>>::make(GLUtil::makeUnitCubeVertices()));
-    arrayBuffer.upload(graphicsContext);
-    glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer.id());
+    Buffer vertexBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<Uploader::Array<uint8_t>>::make(GLUtil::makeUnitCubeVertices()));
+    Buffer indexBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC);
+    vertexBuffer.upload(graphicsContext);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.id());
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, nullptr);
 
-    const Buffer::Snapshot indexBuffer = IndexBuffers::makeBufferSnapshot(renderController, Buffer::NAME_QUADS, 6);
-    indexBuffer.upload(graphicsContext);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.id());
+    const Buffer::Snapshot indexBufferSnapshot = indexBuffer.snapshot(IndexBuffers::Quads::maker()(6));
+    indexBufferSnapshot.upload(graphicsContext);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferSnapshot.id());
 
     glViewport(0, 0, width, height);
     glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);

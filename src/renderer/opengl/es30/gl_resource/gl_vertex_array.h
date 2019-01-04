@@ -14,7 +14,7 @@ public:
     GLVertexArray(const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings);
 
     virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext) override;
+    virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
 
 private:

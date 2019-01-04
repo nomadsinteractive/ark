@@ -42,6 +42,8 @@ public:
     void setTranslate(const V3& translate);
     void setRenderObject(const RenderObject::Snapshot& renderObject);
 
+    const Buffer& indexBuffer() const;
+
     const Transform::Snapshot& transform() const;
 
     const Buffer::Builder& vertices() const;

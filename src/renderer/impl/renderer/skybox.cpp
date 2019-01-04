@@ -53,9 +53,10 @@ private:
 
 
 Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _size(size), _shader(shader), _index_buffer(IndexBuffers::makeBufferSnapshot(resourceLoaderContext->renderController(), Buffer::NAME_QUADS, 6)),
-      _shader_bindings(sp<ShaderBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, resourceLoaderContext->renderController(), shader->pipelineLayout(), resourceLoaderContext->renderController()->makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(GLUtil::makeUnitCubeVertices())))),
-      _memory_pool(resourceLoaderContext->memoryPool()), _object_pool(resourceLoaderContext->objectPool())
+    : _size(size), _shader(shader),
+      _shader_bindings(sp<ShaderBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, resourceLoaderContext->renderController(), shader->pipelineLayout(), resourceLoaderContext->renderController()->makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(GLUtil::makeUnitCubeVertices())), resourceLoaderContext->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC))),
+      _memory_pool(resourceLoaderContext->memoryPool()), _object_pool(resourceLoaderContext->objectPool()),
+      _index_buffer(IndexBuffers::snapshot(_shader_bindings->indexBuffer(), resourceLoaderContext->resourceManager(), Buffer::NAME_QUADS, 6))
 {
     _shader_bindings->bindSampler(texture);
 }
@@ -64,7 +65,7 @@ void Skybox::render(RenderRequest& renderRequest, float x, float y)
 {
     const Matrix view = _shader->camera()->view()->matrix();
     const Matrix projection = _shader->camera()->projection()->matrix();
-    renderRequest.addRequest(_object_pool->obtain<RenderCommandSkybox>(DrawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _shader_bindings->arrayBuffer().snapshot(), _index_buffer, 0), _shader, view, projection));
+    renderRequest.addRequest(_object_pool->obtain<RenderCommandSkybox>(DrawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _shader_bindings->vertexBuffer().snapshot(), _index_buffer, 0), _shader, view, projection));
 }
 
 const SafePtr<Size>& Skybox::size()

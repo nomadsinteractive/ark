@@ -46,7 +46,7 @@ public:
     const sp<Flatable>& flatable() const;
     void setFlatable(const sp<Flatable>& flatable);
 
-    void setObserver(const sp<Boolean>& observer);
+    void setNotifier(const sp<Notifier>& notifier);
     bool dirty() const;
 
     int32_t binding() const;

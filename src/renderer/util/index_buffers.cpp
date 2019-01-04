@@ -88,22 +88,33 @@ Uploader::MakerFunc IndexBuffers::Points::maker()
     return [](size_t objectCount)->sp<Uploader> { return sp<Points>::make(objectCount); };
 }
 
-Buffer::Snapshot IndexBuffers::makeBufferSnapshot(const RenderController& renderController, Buffer::Name name, size_t objectCount)
+Buffer::Snapshot IndexBuffers::snapshot(const Buffer& buffer, ResourceManager& resourceManager, Buffer::Name name, size_t objectCount)
 {
     const size_t warningLimit = 10000;
     DWARN(objectCount < warningLimit, "Object count(%d) exceeding warning limit(%d). You can make the limit larger if you're sure what you're doing", objectCount, warningLimit);
     switch(name)
     {
     case Buffer::NAME_NINE_PATCH:
-        return renderController.makeBufferSnapshot(name, NinePatch::maker(), objectCount * 2, (objectCount * 30 - 2) * sizeof(glindex_t));
+        return doSnapshot(buffer, resourceManager, NinePatch::maker(), objectCount * 2, (objectCount * 30 - 2) * sizeof(glindex_t));
     case Buffer::NAME_POINTS:
-        return renderController.makeBufferSnapshot(name, Points::maker(), objectCount * 2, objectCount * sizeof(glindex_t));
+        return doSnapshot(buffer, resourceManager, Points::maker(), objectCount * 2, objectCount * sizeof(glindex_t));
     case Buffer::NAME_QUADS:
-        return renderController.makeBufferSnapshot(name, Quads::maker(), objectCount * 2, objectCount * 6 * sizeof(glindex_t));
+        return doSnapshot(buffer, resourceManager, Quads::maker(), objectCount * 2, objectCount * 6 * sizeof(glindex_t));
     default:
-        DFATAL("Unknown GLBufferName %d", name);
+        DFATAL("Unknown IndexBufferName %d", name);
     }
     return Buffer::Snapshot();
+}
+
+Buffer::Snapshot IndexBuffers::doSnapshot(const Buffer& buffer, ResourceManager& resourceManager, const Uploader::MakerFunc& maker, size_t reservedObjectCount, size_t size)
+{
+    if(buffer.size() < size)
+    {
+        const sp<Uploader> uploader = maker(reservedObjectCount);
+        DCHECK(uploader && uploader->size() >= size, "Making Uploader failed, object-count: %d, uploader-size: %d, required-size: %d", reservedObjectCount, uploader ? uploader->size() : 0, size);
+        resourceManager.upload(buffer.delegate(), uploader, ResourceManager::US_RELOAD);
+    }
+    return buffer.snapshot(size);
 }
 
 }
