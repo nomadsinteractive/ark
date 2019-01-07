@@ -2,7 +2,6 @@
 
 #include "core/base/api.h"
 #include "core/base/memory_pool.h"
-#include "core/impl/array/fixed_array.h"
 
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
@@ -45,7 +44,7 @@ bytearray ShaderFrame::getArrayBuffer(float x, float y) const
 {
     float top = y + _size->height(), bottom = y;
     uint16_t uvtop = 0xffff, uvbottom = 0;
-    FixedArray<float, 16> buffer({x, bottom, 0, 0, x, top, 0, 0, x + _size->width(), bottom, 0, 0, x + _size->width(), top, 0, 0});
+    Array<float>::Fixed<16> buffer({x, bottom, 0, 0, x, top, 0, 0, x + _size->width(), bottom, 0, 0, x + _size->width(), top, 0, 0});
     uint16_t* ip = reinterpret_cast<uint16_t*>(buffer.buf());
     ip[6] = 0;
     ip[7] = uvbottom;

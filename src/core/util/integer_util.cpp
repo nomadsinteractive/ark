@@ -153,7 +153,7 @@ IntegerUtil::ARRAY_DICTIONARY::ARRAY_DICTIONARY(BeanFactory& factory, const Stri
 
 sp<IntArray> IntegerUtil::ARRAY_DICTIONARY::build(const sp<Scope>& args)
 {
-    const sp<IntArray> s = sp<DynamicArray<int32_t>>::make(_array_builders.size());
+    const sp<IntArray> s = sp<IntArray::Allocated>::make(_array_builders.size());
     int32_t* buf = s->buf();
     for(size_t i = 0; i < _array_builders.size(); i++)
         buf[i] = _array_builders[i]->build(args)->val();

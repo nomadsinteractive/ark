@@ -1,4 +1,4 @@
-#include "renderer/vulkan/base/vk_util.h"
+#include "renderer/vulkan/util/vk_util.h"
 
 #include <array>
 
@@ -18,7 +18,7 @@
 #include "graphics/base/bitmap.h"
 
 #include "renderer/base/attribute.h"
-#include "renderer/base/gl_context.h"
+#include "renderer/base/render_context.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/inf/uploader.h"
 
@@ -183,162 +183,6 @@ private:
 
 }
 
-VKUtil::VKUtil(const sp<ResourceManager>& resourceManager, const sp<VKRenderer>& renderer)
-    : _ubo(sp<UBO>::make()), _resource_manager(resourceManager), _renderer(renderer), _graphics_context(nullptr, resourceManager)
-{
-}
-
-VKUtil::~VKUtil()
-{
-    _renderer->device()->waitIdle();
-#if defined(_DIRECT2DISPLAY)
-
-#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-    wl_shell_surface_destroy(shell_surface);
-    wl_surface_destroy(surface);
-    if (keyboard)
-        wl_keyboard_destroy(keyboard);
-    if (pointer)
-        wl_pointer_destroy(pointer);
-    wl_seat_destroy(seat);
-    wl_shell_destroy(shell);
-    wl_compositor_destroy(compositor);
-    wl_registry_destroy(registry);
-    wl_display_disconnect(display);
-#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-    // todo : android cleanup (if required)
-#elif defined(VK_USE_PLATFORM_XCB_KHR)
-    xcb_destroy_window(connection, window);
-    xcb_disconnect(connection);
-#endif
-}
-
-void VKUtil::initialize(GLContext& /*glContext*/)
-{
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
-/*
-    zoom = -2.5f;
-
-    _uniforms = sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), sp<Uploader::StandardLayout<UBO>>::make(_ubo), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-    updateUniformBuffers(_renderer->renderTarget());
-    generateQuad();
-
-    const sp<Variable<bitmap>> tex = sp<Variable<bitmap>::Get>::make(_resource_manager->bitmapLoader(), "texture.png");
-
-    const sp<VKTexture2D> texture = sp<VKTexture2D>::make(_resource_manager->recycler(), _renderer, sp<Texture::Parameters>::make(), tex);
-    texture->upload(_graphics_context);
-    _pipeline = sp<VKPipeline>::make(_resource_manager->recycler(), _renderer, nullptr, std::map<Shader::Stage, String>());
-    _pipeline->_texture = texture;
-    _pipeline->_ubo = _uniforms;
-    _pipeline->upload();
-
-    _command_buffers = sp<VKCommandBuffers>::make(_resource_manager->recycler(), _renderer->renderTarget());
-    buildCommandBuffers(_renderer->renderTarget());
-    prepared = true;
-*/
-}
-
-void VKUtil::render()
-{
-    if (!prepared)
-        return;
-    draw(_renderer->renderTarget());
-}
-
-void VKUtil::updateUniformBuffers(const VKRenderTarget& renderTarget)
-{
-    _ubo->projection = glm::perspective(glm::radians(60.0f), (float)renderTarget.width() / (float)renderTarget.height(), 0.001f, 256.0f);
-    glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, zoom));
-
-    _ubo->model = viewMatrix * glm::translate(glm::mat4(1.0f), cameraPos);
-    _ubo->model = glm::rotate(_ubo->model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    _ubo->model = glm::rotate(_ubo->model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    _ubo->model = glm::rotate(_ubo->model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-    _ubo->viewPos = glm::vec4(0.0f, 0.0f, -zoom, 0.0f);
-
-    _uniforms->upload(_graphics_context, nullptr);
-}
-
-void VKUtil::buildCommandBuffers(const VKRenderTarget& renderTarget)
-{
-    VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-
-    VkClearValue clearValues[2];
-    clearValues[0].color = _background_color;
-    clearValues[1].depthStencil = { 1.0f, 0 };
-
-    VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-    renderPassBeginInfo.renderPass = renderTarget.vkRenderPass();
-    renderPassBeginInfo.renderArea.offset.x = 0;
-    renderPassBeginInfo.renderArea.offset.y = 0;
-    renderPassBeginInfo.renderArea.extent.width = renderTarget.width();
-    renderPassBeginInfo.renderArea.extent.height = renderTarget.height();
-    renderPassBeginInfo.clearValueCount = 2;
-    renderPassBeginInfo.pClearValues = clearValues;
-
-    for (size_t i = 0; i < _command_buffers->vkCommandBuffers().size(); ++i)
-    {
-        // Set target frame buffer
-        renderPassBeginInfo.framebuffer = renderTarget.frameBuffers()[i];
-        const VkCommandBuffer commandBuffer = _command_buffers->vkCommandBuffers()[i];
-        checkResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
-
-        vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-        VkViewport viewport = vks::initializers::viewport((float)renderTarget.width(), (float)renderTarget.height(), 0.0f, 1.0f);
-        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-        VkRect2D scissor = vks::initializers::rect2D(renderTarget.width(), renderTarget.height(), 0, 0);
-        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->vkPipelineLayout(), 0, 1, &_pipeline->vkDescriptorSet(), 0, nullptr);
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->vkPipeline());
-
-        VkDeviceSize offsets[1] = { 0 };
-        vkCmdBindVertexBuffers(commandBuffer, VERTEX_BUFFER_BIND_ID, 1, &_vertex_buffer->vkBuffer(), offsets);
-        vkCmdBindIndexBuffer(commandBuffer, _index_buffer->vkBuffer(), 0, VK_INDEX_TYPE_UINT32);
-
-        vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
-
-        vkCmdEndRenderPass(commandBuffer);
-
-        checkResult(vkEndCommandBuffer(commandBuffer));
-    }
-}
-
-void VKUtil::generateQuad()
-{
-    // Setup vertices for a single uv-mapped quad made from two triangles
-    std::vector<Vertex> vertices =
-    {
-        { {  1.0f,  1.0f, 0.0f }, { 1.0f, 1.0f },{ 0.0f, 0.0f, 1.0f } },
-        { { -1.0f,  1.0f, 0.0f }, { 0.0f, 1.0f },{ 0.0f, 0.0f, 1.0f } },
-        { { -1.0f, -1.0f, 0.0f }, { 0.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } },
-        { {  1.0f, -1.0f, 0.0f }, { 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } }
-    };
-
-    // Setup indices
-    std::vector<uint32_t> indices = { 0,1,2, 2,3,0 };
-    indexCount = static_cast<uint32_t>(indices.size());
-
-    // Create buffers
-    // For the sake of simplicity we won't stage the vertex data to the gpu memory
-    _vertex_buffer = sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    _vertex_buffer->upload(_graphics_context, sp<Uploader::Vector<Vertex>>::make(std::move(vertices)));
-
-    _index_buffer = sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    _index_buffer->upload(_graphics_context, sp<Uploader::Vector<uint32_t>>::make(std::move(indices)));
-}
-
-void VKUtil::draw(VKRenderTarget& renderTarget)
-{
-    renderTarget.acquire();
-    _command_buffers->submit(_graphics_context);
-    renderTarget.swap();
-}
-
 void VKUtil::checkResult(VkResult result)
 {
     DCHECK(result == VK_SUCCESS, "Vulkan error: %s", vks::tools::errorString(result).c_str());
@@ -429,7 +273,7 @@ VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, Texture::Format format)
     uint32_t signedOffset = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED ? 1 : 0;
     uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
     uint32_t channel8 = (bitmap.channels() - 1) * 8;
-    DCHECK(byteCount > 0 && byteCount <= 4 && byteCount != 3, "Unsupported color depth: %d", byteCount * 8);
+    DCHECK(byteCount > 0 && byteCount <= 4 && byteCount != 3, "Unsupported color-depth: %d", byteCount * 8);
     return vkFormats[channel8 + (byteCount - 1) * 2 + signedOffset];
 }
 
@@ -438,6 +282,13 @@ VkShaderStageFlagBits VKUtil::toStage(Shader::Stage stage)
     static const VkShaderStageFlagBits vkStages[] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT};
     DCHECK(stage > Shader::STAGE_NONE && stage < Shader::STAGE_COUNT, "Illegal Shader::Stage: %d", stage);
     return vkStages[stage - 1];
+}
+
+VkPrimitiveTopology VKUtil::toPrimitiveTopology(RenderModel::Mode mode)
+{
+    static const VkPrimitiveTopology topologies[RenderModel::RENDER_MODE_COUNT] = {VK_PRIMITIVE_TOPOLOGY_LINE_LIST, VK_PRIMITIVE_TOPOLOGY_POINT_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP};
+    DCHECK(mode >= 0 && mode < RenderModel::RENDER_MODE_COUNT, "Unsupported render-mode: %d", mode);
+    return topologies[mode];
 }
 
 std::vector<uint32_t> VKUtil::compileSPIR(const String& source, Shader::Stage stage)
@@ -487,7 +338,8 @@ std::vector<uint32_t> VKUtil::compileSPIR(const String& source, Shader::Stage st
         if (!program.link(EShMsgDefault))
             DFATAL("Link error: %s\n\n%s", source.c_str(), shader.getInfoLog());
 
-        if (program.getIntermediate(esStage)) {
+        glslang::TIntermediate* intermedia = program.getIntermediate(esStage);
+        if (intermedia) {
             std::vector<uint32_t> spirv;
             spv::SpvBuildLogger logger;
             glslang::SpvOptions spvOptions;
@@ -495,7 +347,7 @@ std::vector<uint32_t> VKUtil::compileSPIR(const String& source, Shader::Stage st
             spvOptions.optimizeSize = false;
             spvOptions.disassemble = false;
             spvOptions.validate = true;
-            glslang::GlslangToSpv(*program.getIntermediate(esStage), spirv, &logger, &spvOptions);
+            glslang::GlslangToSpv(*intermedia, spirv, &logger, &spvOptions);
             return spirv;
         }
     }

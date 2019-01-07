@@ -4,7 +4,7 @@
 #include "renderer/inf/uploader.h"
 
 #include "renderer/vulkan/base/vk_renderer.h"
-#include "renderer/vulkan/base/vk_util.h"
+#include "renderer/vulkan/util/vk_util.h"
 
 namespace ark {
 namespace vulkan {
@@ -31,11 +31,10 @@ void VKBuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& 
     {
         ensureSize(uploader);
 
-        void* mapped = map();
-        size_t offset = 0;
-        uploader->upload([mapped, &offset](void* buf, size_t size) {
-            memcpy(reinterpret_cast<int8_t*>(mapped) + offset, buf, size);
-            offset += size;
+        uint8_t* mapped = reinterpret_cast<uint8_t*>(map());
+        uploader->upload([&mapped](void* buf, size_t size) {
+            memcpy(mapped, buf, size);
+            mapped += size;
         });
         if((_memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
             flush();
@@ -49,15 +48,27 @@ Resource::RecycleFunc VKBuffer::recycle()
     VkBuffer buffer = _descriptor.buffer;
     VkDeviceMemory memory = _memory;
 
+    _memory_allocation_info.allocationSize = 0;
+    _size = 0;
     _descriptor.buffer = VK_NULL_HANDLE;
     _memory = VK_NULL_HANDLE;
 
     return [device, buffer, memory](GraphicsContext&) {
         if (buffer)
-            vkDestroyBuffer(device->logicalDevice(), buffer, nullptr);
+            vkDestroyBuffer(device->vkLogicalDevice(), buffer, nullptr);
         if (memory)
-            vkFreeMemory(device->logicalDevice(), memory, nullptr);
+            vkFreeMemory(device->vkLogicalDevice(), memory, nullptr);
     };
+}
+
+void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const bytearray& buf)
+{
+    DCHECK(buf->size() <= size(), "Buffer memory overflow, buffer size: %d, source size: %d", size(), buf->size());
+    void* mapped = map();
+    memcpy(mapped, buf->buf(), buf->size());
+    if((_memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
+        VKUtil::checkResult(flush());
+    unmap(mapped);
 }
 
 const VkBuffer& VKBuffer::vkBuffer() const
@@ -68,6 +79,7 @@ const VkBuffer& VKBuffer::vkBuffer() const
 void* VKBuffer::map(VkDeviceSize size, VkDeviceSize offset)
 {
     void* mapped = nullptr;
+    DCHECK(_memory, "Mapping to NULL memory");
     VKUtil::checkResult(vkMapMemory(_renderer->vkLogicalDevice(), _memory, offset, size, 0, &mapped));
     return mapped;
 }

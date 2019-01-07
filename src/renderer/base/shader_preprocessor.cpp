@@ -7,9 +7,9 @@
 #include "core/base/string_buffer.h"
 #include "core/util/strings.h"
 
-#include "renderer/base/gl_context.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
+#include "renderer/base/render_context.h"
 
 #define VAR_TYPE_PATTERN "\\s+(int|uint8|float|vec2|vec3|vec4|mat3|mat4|sampler2D)\\s+"
 #define ATTRIBUTE_PATTERN VAR_TYPE_PATTERN "(?:a_|v_)([\\w\\d_]+);"
@@ -339,7 +339,7 @@ ShaderPreprocessor::Preprocessor::Preprocessor(ShaderPreprocessor::ShaderType ty
 {
 }
 
-String ShaderPreprocessor::Preprocessor::process(const GLContext& glContext) const
+String ShaderPreprocessor::Preprocessor::process(const RenderContext& glContext) const
 {
     DCHECK(glContext.version() > 0, "Unintialized GLContext");
 

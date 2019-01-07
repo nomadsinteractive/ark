@@ -8,7 +8,7 @@
 #include "core/inf/flatable.h"
 #include "core/util/documents.h"
 
-#include "renderer/base/gl_context.h"
+#include "renderer/base/render_context.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/resource_manager.h"
@@ -45,7 +45,7 @@ const sp<PipelineInput>& PipelineLayout::input() const
     return _input;
 }
 
-std::map<Shader::Stage, String> PipelineLayout::getPreprocessedShaders(const GLContext& glContext) const
+std::map<Shader::Stage, String> PipelineLayout::getPreprocessedShaders(const RenderContext& glContext) const
 {
     std::map<Shader::Stage, String> shaders;
     shaders[Shader::STAGE_VERTEX] = _vertex.process(glContext);

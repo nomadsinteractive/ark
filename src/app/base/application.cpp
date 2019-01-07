@@ -40,8 +40,10 @@ Application::Application(const sp<ApplicationDelegate>& applicationDelegate, con
     : _application_delegate(applicationDelegate), _application_context(applicationContext)
       , _viewport(viewport), _width(width), _height(height), _alive(false)
 {
+    const sp<Camera> mainCamera = sp<Camera>::make(applicationContext->renderEngine()->viewport());
+    Ark::instance().put(mainCamera);
     g_upDirection = _viewport.top() < _viewport.bottom() ? 1.0f : -1.0f;
-    Camera::getMainCamera()->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), viewport.near(), viewport.far());
+    mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), viewport.near(), viewport.far());
 }
 
 Application::~Application()
@@ -136,7 +138,7 @@ void Application::onSurfaceCreated()
     LOGD("");
     __thread_init__<THREAD_ID_RENDERER>();
 
-    _application_context->renderEngine()->initialize();
+    _application_context->renderEngine()->onSurfaceCreated();
 
     _surface->onSurfaceCreated();
     _application_delegate->onSurfaceCreated(_surface);

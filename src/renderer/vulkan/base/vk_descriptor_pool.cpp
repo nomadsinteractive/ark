@@ -18,7 +18,7 @@ VKDescriptorPool::~VKDescriptorPool()
     const sp<VKDevice> device = std::move(_device);
     _descriptor_pool = VK_NULL_HANDLE;
     _recycler->recycle([device, descriptorPool](GraphicsContext&) {
-        vkDestroyDescriptorPool(device->logicalDevice(), descriptorPool, nullptr);
+        vkDestroyDescriptorPool(device->vkLogicalDevice(), descriptorPool, nullptr);
     });
 }
 

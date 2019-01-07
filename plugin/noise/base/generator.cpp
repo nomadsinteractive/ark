@@ -1,6 +1,5 @@
 #include "noise/base/generator.h"
 
-#include "core/impl/array/dynamic_array.h"
 #include "core/inf/array.h"
 
 namespace ark {
@@ -57,10 +56,10 @@ array<array<float>> Generator::noiseMap2d(uint32_t rows, uint32_t cols, float x1
 {
     float dx = (x2 - x1) / cols;
     float dy = (y2 - y1) / rows;
-    const array<array<float>> s = sp<DynamicArray<array<float>>>::make(rows);
+    const array<array<float>> s = sp<Array<array<float>>::Allocated>::make(rows);
     for(uint32_t i = 0; i < rows; ++i)
     {
-        const array<float> t = sp<DynamicArray<float>>::make(cols);
+        const array<float> t = sp<FloatArray::Allocated>::make(cols);
         float* buf = t->buf();
         float y = y1 + dy * i;
         for(uint32_t j = 0; j < cols; ++j)

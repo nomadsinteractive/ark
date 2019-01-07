@@ -67,14 +67,14 @@ private:
 public:
     MemoryPool();
 
-    array<uint8_t> allocate(size_t size);
+    bytearray allocate(size_t size) const;
 
 private:
-    size_t getBlockId(size_t size);
+    size_t getBlockId(size_t size) const;
     size_t findmsb(size_t size) const;
 
 private:
-    std::shared_ptr<Block> _blocks_v2[MAX_BLOCK_COUNT * SUB_BLOCK_COUNT];
+    std::shared_ptr<Block> _blocks[MAX_BLOCK_COUNT * SUB_BLOCK_COUNT];
 };
 
 }

@@ -5,12 +5,12 @@
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include <stb_image_resize.h>
 
-#include "core/impl/array/dynamic_array.h"
+#include "core/inf/array.h"
 
 namespace ark {
 
 Bitmap::Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t channels)
-    : Bitmap(width, height, rowBytes, channels, rowBytes ? sp<DynamicArray<uint8_t>>::make(height * rowBytes) : nullptr)
+    : Bitmap(width, height, rowBytes, channels, rowBytes ? sp<ByteArray::Allocated>::make(height * rowBytes) : nullptr)
 {
 }
 

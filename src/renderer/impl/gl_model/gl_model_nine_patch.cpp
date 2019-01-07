@@ -1,7 +1,6 @@
 #include "renderer/impl/gl_model/gl_model_nine_patch.h"
 
 #include "core/dom/document.h"
-#include "core/impl/array/fixed_array.h"
 
 #include "graphics/base/layer_context.h"
 

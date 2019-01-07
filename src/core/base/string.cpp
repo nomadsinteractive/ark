@@ -6,7 +6,6 @@
 
 #include "core/base/string_buffer.h"
 #include "core/inf/array.h"
-#include "core/impl/array/dynamic_array.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -162,7 +161,7 @@ String String::replace(const std::regex& pattern, const std::function<String(Arr
     while(std::regex_search(str, match, pattern))
     {
         if(!matches)
-            matches = sp<DynamicArray<String>>::make(match.size());
+            matches = sp<Array<String>::Allocated>::make(match.size());
         String* m = matches->buf();
         for(size_type i = 0; i < match.size(); i ++)
             m[i] = match[i].str();
@@ -205,7 +204,7 @@ array<String> String::match(const std::regex& pattern) const
     std::smatch match;
     if(std::regex_match(_str, match, pattern))
     {
-        const sp<Array<String>> matches = sp<DynamicArray<String>>::make(match.size());
+        const sp<Array<String>> matches = sp<Array<String>::Allocated>::make(match.size());
         String* m = matches->buf();
         for(size_type i = 0; i < match.size(); i ++)
             m[i] = match[i].str();

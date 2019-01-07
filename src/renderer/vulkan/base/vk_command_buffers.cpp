@@ -4,7 +4,7 @@
 
 #include "renderer/vulkan/base/vk_command_pool.h"
 #include "renderer/vulkan/base/vk_render_target.h"
-#include "renderer/vulkan/base/vk_util.h"
+#include "renderer/vulkan/util/vk_util.h"
 
 namespace ark {
 namespace vulkan {

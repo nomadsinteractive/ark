@@ -60,10 +60,8 @@ public:
 
     private:
         void initialize();
-
         void addUniform(const sp<Uniform>& uniform);
-
-        bool doSnapshot(bool force) const;
+        void doSnapshot(bool force) const;
 
     private:
         std::vector<sp<Uniform>> _uniforms;

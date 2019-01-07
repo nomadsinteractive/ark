@@ -24,7 +24,7 @@ public:
     virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
 
-//    virtual void reload(GraphicsContext& graphicsContext, const sp<Uploader>& transientUploader) override;
+    void reload(GraphicsContext& graphicsContext, const bytearray& buf);
 
     const VkBuffer& vkBuffer() const;
 
@@ -74,9 +74,9 @@ private:
     /** @brief Memory propertys flags to be filled by external source at buffer creation (to query at some later point) */
     VkMemoryPropertyFlags _memory_property_flags;
 
-    VkDeviceMemory _memory = VK_NULL_HANDLE;
     VkDescriptorBufferInfo _descriptor;
 
+    VkDeviceMemory _memory = VK_NULL_HANDLE;
     VkMemoryAllocateInfo _memory_allocation_info;
 
     Notifier _notifier;

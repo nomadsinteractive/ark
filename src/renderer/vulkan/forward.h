@@ -10,6 +10,8 @@ class VKCommandPool;
 class VKDescriptorPool;
 class VKDevice;
 class VKInstance;
+class VKMemory;
+class VKMemoryFragment;
 class VKPipeline;
 class VKRenderer;
 class VKRenderTarget;

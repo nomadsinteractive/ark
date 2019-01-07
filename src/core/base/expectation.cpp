@@ -6,7 +6,7 @@
 namespace ark {
 
 Expectation::Expectation(const sp<Numeric>& expectation, const sp<Runnable>& onfire, bool fireOnce)
-    : _expectation(expectation), _observer(onfire, fireOnce)
+    : _expectation(expectation), _observer(false, onfire, fireOnce)
 {
 }
 

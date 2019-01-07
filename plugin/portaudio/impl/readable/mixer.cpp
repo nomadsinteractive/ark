@@ -1,7 +1,7 @@
 #include "plugin/portaudio/impl/readable/mixer.h"
 
 #include "core/base/future.h"
-#include "core/impl/array/dynamic_array.h"
+#include "core/inf/array.h"
 #include "core/util/math.h"
 
 namespace ark {
@@ -9,7 +9,7 @@ namespace plugin {
 namespace portaudio {
 
 Mixer::Mixer(uint32_t bufferLength)
-    : _buffer(sp<DynamicArray<int16_t>>::make(bufferLength)), _buffer_hdr(sp<DynamicArray<int32_t>>::make(bufferLength)), _total_weight(0)
+    : _buffer(sp<Array<int16_t>::Allocated>::make(bufferLength)), _buffer_hdr(sp<Array<int32_t>::Allocated>::make(bufferLength)), _total_weight(0)
 {
     ensureToneMapRange(TONE_MAP_WEIGHT_ONE);
 }

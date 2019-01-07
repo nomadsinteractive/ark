@@ -16,24 +16,24 @@ MemoryPool::MemoryPool()
             size_t slotSize = blockSize + (1 << (BLOCK_SIZE_BASE_LOG2 - SUB_BLOCK_BITS + (i ? i - 1 : 0))) * (j + 1);
             size_t blockid = i * SUB_BLOCK_COUNT + j;
             DASSERT(blockid == getBlockId(slotSize));
-            _blocks_v2[blockid] = std::make_shared<Block>(slotSize, 1);
+            _blocks[blockid] = std::make_shared<Block>(slotSize, 1);
         }
     }
 }
 
-array<uint8_t> MemoryPool::allocate(size_t size)
+bytearray MemoryPool::allocate(size_t size) const
 {
     size_t blockId = getBlockId(size);
     DCHECK(blockId < MAX_BLOCK_COUNT * SUB_BLOCK_COUNT, "Cannot allocate memory, size too big %d", size);
-    const std::shared_ptr<Block> block = _blocks_v2[blockId];
+    const std::shared_ptr<Block> block = _blocks[blockId];
     const sp<Slot> slot = block->obtain(size);
-    const array<uint8_t> allocated(slot.get(), slot.interfaces(), [block, slot](Array<uint8_t>*) {
+    const bytearray allocated(slot.get(), slot.interfaces(), [block, slot](ByteArray*) {
             block->recycle(slot);
         });
     return allocated;
 }
 
-size_t MemoryPool::getBlockId(size_t size)
+size_t MemoryPool::getBlockId(size_t size) const
 {
     DASSERT(size > 0);
 

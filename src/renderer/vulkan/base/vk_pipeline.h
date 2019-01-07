@@ -22,8 +22,6 @@ public:
     VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<ShaderBindings>& shaderBindings, std::map<Shader::Stage, String> shaders);
     ~VKPipeline() override;
 
-    void upload();
-
     VkPipeline vkPipeline() const;
     VkPipelineLayout vkPipelineLayout() const;
     const VkDescriptorSet& vkDescriptorSet() const;
@@ -34,9 +32,6 @@ public:
 
     virtual sp<RenderCommand> active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
 
-    sp<VKBuffer> _ubo;
-    sp<VKTexture2D> _texture;
-
 private:
     struct VertexLayout {
         VkPipelineVertexInputStateCreateInfo inputState;
@@ -45,19 +40,16 @@ private:
     };
 
     void setupVertexDescriptions(const PipelineInput& input, VertexLayout& vertexLayout);
-    void setupVertexDescriptions(VertexLayout& vertexLayout);
-
-    void setupDescriptorSetLayout();
     void setupDescriptorSetLayout(const PipelineInput& pipelineInput);
-
-    void setupDescriptorSet();
     void setupDescriptorSet(GraphicsContext& graphicsContext, const ShaderBindings& bindings);
-
     void setupPipeline(const VertexLayout& vertexLayout);
 
     void buildCommandBuffers(const Buffer::Snapshot& vertex, const Buffer::Snapshot& index);
+    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, bool rebuildCommandBuffer);
 
     sp<Observer> createObserver(const Buffer& buffer) const;
+
+    bool isDirty(const bytearray& dirtyFlags) const;
 
 private:
     sp<Recycler> _recycler;
@@ -71,7 +63,6 @@ private:
     VkPipeline _pipeline;
 
     std::map<Shader::Stage, String> _shaders;
-    std::unordered_map<String, uint32_t> _location_map;
 
     sp<VKCommandBuffers> _command_buffers;
 
@@ -79,6 +70,7 @@ private:
 
     sp<Observer> _vertex_observer;
     sp<Observer> _index_observer;
+    std::vector<sp<Observer>> _texture_observers;
 };
 
 }

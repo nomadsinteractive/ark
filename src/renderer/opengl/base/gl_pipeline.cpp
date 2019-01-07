@@ -104,11 +104,7 @@ sp<RenderCommand> GLPipeline::active(GraphicsContext& /*graphicsContext*/, const
     {
         const Layer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
         const sp<PipelineInput::UBO>& ubo = pipelineInput->ubos().at(i);
-        if(uboSnapshot._dirty_flags)
-        {
-            DASSERT(uboSnapshot._buffer);
-            bindUBO(uboSnapshot, ubo);
-        }
+        bindUBO(uboSnapshot, ubo);
     }
 
     const std::vector<sp<Texture>>& samplers = drawingContext._shader_bindings->samplers();

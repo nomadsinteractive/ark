@@ -9,7 +9,7 @@ namespace ark {
 
 class Observer : public Boolean {
 public:
-    Observer(const sp<Runnable>& handler = nullptr, bool oneshot = false);
+    Observer(bool dirty = true, const sp<Runnable>& handler = nullptr, bool oneshot = false);
 
     virtual bool val() override;
 
@@ -20,7 +20,7 @@ public:
 private:
     sp<Runnable> _handler;
     bool _oneshot;
-    bool _updated;
+    bool _dirty;
 
     friend class Notifier;
 };

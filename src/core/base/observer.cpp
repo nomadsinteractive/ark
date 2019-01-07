@@ -4,8 +4,8 @@
 
 namespace ark {
 
-Observer::Observer(const sp<Runnable>& handler, bool oneshot)
-    : _handler(handler), _oneshot(oneshot), _updated(true)
+Observer::Observer(bool dirty, const sp<Runnable>& handler, bool oneshot)
+    : _handler(handler), _oneshot(oneshot), _dirty(dirty)
 {
 }
 
@@ -16,14 +16,14 @@ bool Observer::val()
 
 bool Observer::dirty()
 {
-    bool notified = _updated;
-    _updated = false;
+    bool notified = _dirty;
+    _dirty = false;
     return notified;
 }
 
 void Observer::update()
 {
-    _updated = true;
+    _dirty = true;
     sp<Runnable> handler = std::move(_handler);
     if(handler)
         handler->run();

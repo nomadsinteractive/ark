@@ -15,16 +15,18 @@ public:
     RenderEngine(Ark::RendererVersion version, const sp<RendererFactory>& rendererFactory);
 
     Ark::RendererVersion version() const;
+
+    const Viewport& viewport() const;
     const sp<RendererFactory>& rendererFactory() const;
 
-    void initialize();
+    void onSurfaceCreated();
 
     sp<RenderView> createRenderView(const Viewport& viewport) const;
 
 private:
     sp<RendererFactory> _renderer_factory;
 
-    sp<GLContext> _render_context;
+    sp<RenderContext> _render_context;
 };
 
 }

@@ -15,7 +15,7 @@ namespace ark {
 class ARK_API RenderModel {
 public:
     enum Mode {
-        RENDER_MODE_NONE,
+        RENDER_MODE_NONE = -1,
         RENDER_MODE_LINES,
         RENDER_MODE_POINTS,
         RENDER_MODE_TRIANGLES,

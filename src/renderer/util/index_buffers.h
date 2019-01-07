@@ -1,7 +1,7 @@
 #ifndef ARK_RENDERER_UTIL_INDEX_BUFFERS_H_
 #define ARK_RENDERER_UTIL_INDEX_BUFFERS_H_
 
-#include "core/impl/array/fixed_array.h"
+#include "core/inf/array.h"
 
 #include "renderer/base/buffer.h"
 #include "renderer/inf/uploader.h"
@@ -20,7 +20,7 @@ public:
 
     private:
         size_t _object_count;
-        FixedArray<glindex_t, 28> _boiler_plate;
+        ark::Array<glindex_t>::Fixed<28> _boiler_plate;
     };
 
     class Quads : public Uploader {

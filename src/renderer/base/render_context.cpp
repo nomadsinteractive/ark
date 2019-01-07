@@ -1,35 +1,40 @@
-#include "renderer/base/gl_context.h"
+#include "renderer/base/render_context.h"
 
 #include "renderer/inf/snippet_factory.h"
 
 namespace ark {
 
-GLContext::GLContext(Ark::RendererVersion version)
-    : _version(version)
+RenderContext::RenderContext(Ark::RendererVersion version, const Viewport& viewport)
+    : _version(version), _viewport(viewport)
 {
 }
 
-Ark::RendererVersion GLContext::version() const
+Ark::RendererVersion RenderContext::version() const
 {
     return _version;
 }
 
-void GLContext::setVersion(Ark::RendererVersion version)
+void RenderContext::setVersion(Ark::RendererVersion version)
 {
     _version = version;
 }
 
-const std::map<String, String>& GLContext::annotations() const
+const std::map<String, String>& RenderContext::annotations() const
 {
     return _annotations;
 }
 
-std::map<String, String>& GLContext::annotations()
+std::map<String, String>& RenderContext::annotations()
 {
     return _annotations;
 }
 
-uint32_t GLContext::getGLSLVersion() const
+const Viewport& RenderContext::viewport() const
+{
+    return _viewport;
+}
+
+uint32_t RenderContext::getGLSLVersion() const
 {
     switch(_version) {
     case Ark::OPENGL_20:
@@ -58,12 +63,12 @@ uint32_t GLContext::getGLSLVersion() const
     return 110;
 }
 
-void GLContext::setSnippetFactory(sp<SnippetFactory> snippetfactory)
+void RenderContext::setSnippetFactory(sp<SnippetFactory> snippetfactory)
 {
     _snippet_factory = std::move(snippetfactory);
 }
 
-const sp<SnippetFactory>& GLContext::snippetFactory() const
+const sp<SnippetFactory>& RenderContext::snippetFactory() const
 {
     DCHECK(_snippet_factory, "Uninitialized GLContext");
     return _snippet_factory;

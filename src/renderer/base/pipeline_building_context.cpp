@@ -7,8 +7,8 @@
 #include "core/inf/flatable.h"
 #include "core/util/strings.h"
 
-#include "renderer/base/gl_context.h"
 #include "renderer/base/pipeline_layout.h"
+#include "renderer/base/render_context.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
 
 namespace ark {

@@ -1,6 +1,7 @@
 #include "graphics/base/v4.h"
 
 #include "core/ark.h"
+#include "core/inf/array.h"
 #include "core/util/conversions.h"
 #include "core/util/strings.h"
 #include "core/types/null.h"

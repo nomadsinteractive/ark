@@ -1,7 +1,7 @@
 #include "renderer/vulkan/base/vk_command_pool.h"
 
 #include "renderer/vulkan/base/vk_device.h"
-#include "renderer/vulkan/base/vk_util.h"
+#include "renderer/vulkan/util/vk_util.h"
 
 namespace ark {
 namespace vulkan {
@@ -13,12 +13,12 @@ VKCommandPool::VKCommandPool(const sp<VKDevice>& device, uint32_t queueNodeIndex
     cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     cmdPoolInfo.queueFamilyIndex = queueNodeIndex;
     cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    VKUtil::checkResult(vkCreateCommandPool(_device->logicalDevice(), &cmdPoolInfo, nullptr, &_command_pool));
+    VKUtil::checkResult(vkCreateCommandPool(_device->vkLogicalDevice(), &cmdPoolInfo, nullptr, &_command_pool));
 }
 
 VKCommandPool::~VKCommandPool()
 {
-    vkDestroyCommandPool(_device->logicalDevice(), _command_pool, nullptr);
+    vkDestroyCommandPool(_device->vkLogicalDevice(), _command_pool, nullptr);
 }
 
 const sp<VKDevice>& VKCommandPool::device() const
@@ -36,7 +36,7 @@ VkCommandBuffer VKCommandPool::getCommandBuffer(bool begin) const
     cmdBufAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     cmdBufAllocateInfo.commandBufferCount = 1;
 
-    VKUtil::checkResult(vkAllocateCommandBuffers(_device->logicalDevice(), &cmdBufAllocateInfo, &cmdBuffer));
+    VKUtil::checkResult(vkAllocateCommandBuffers(_device->vkLogicalDevice(), &cmdBufAllocateInfo, &cmdBuffer));
 
     // If requested, also start the new command buffer
     if (begin)
@@ -57,7 +57,7 @@ VkCommandBuffer VKCommandPool::createCommandBuffer(VkCommandBufferLevel level, b
                 level,
                 1);
 
-    VKUtil::checkResult(vkAllocateCommandBuffers(_device->logicalDevice(), &cmdBufAllocateInfo, &cmdBuffer));
+    VKUtil::checkResult(vkAllocateCommandBuffers(_device->vkLogicalDevice(), &cmdBufAllocateInfo, &cmdBuffer));
 
     if(begin)
     {
@@ -78,7 +78,7 @@ std::vector<VkCommandBuffer> VKCommandPool::makeCommandBuffers(uint32_t count) c
                 VK_COMMAND_BUFFER_LEVEL_PRIMARY,
                 count);
 
-    VKUtil::checkResult(vkAllocateCommandBuffers(_device->logicalDevice(), &cmdBufAllocateInfo, commandBuffers.data()));
+    VKUtil::checkResult(vkAllocateCommandBuffers(_device->vkLogicalDevice(), &cmdBufAllocateInfo, commandBuffers.data()));
     return commandBuffers;
 }
 
@@ -96,20 +96,19 @@ void VKCommandPool::flushCommandBuffer(VkCommandBuffer commandBuffer, bool free)
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    VKUtil::checkResult(vkQueueSubmit(_device->queue(), 1, &submitInfo, VK_NULL_HANDLE));
-    VKUtil::checkResult(vkQueueWaitIdle(_device->queue()));
+    VKUtil::checkResult(vkQueueSubmit(_device->vkQueue(), 1, &submitInfo, VK_NULL_HANDLE));
+    VKUtil::checkResult(vkQueueWaitIdle(_device->vkQueue()));
 
     if (free)
     {
-        vkFreeCommandBuffers(_device->logicalDevice(), _command_pool, 1, &commandBuffer);
+        vkFreeCommandBuffers(_device->vkLogicalDevice(), _command_pool, 1, &commandBuffer);
     }
 }
 
 void VKCommandPool::destroyCommandBuffers(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers) const
 {
-    vkFreeCommandBuffers(_device->logicalDevice(), _command_pool, commandBufferCount, pCommandBuffers);
+    vkFreeCommandBuffers(_device->vkLogicalDevice(), _command_pool, commandBufferCount, pCommandBuffers);
 }
-
 
 }
 }

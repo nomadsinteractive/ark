@@ -8,8 +8,8 @@
 #include "graphics/base/size.h"
 
 #include "renderer/base/buffer.h"
-#include "renderer/base/gl_context.h"
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/render_context.h"
 #include "renderer/base/recycler.h"
 
 namespace ark {

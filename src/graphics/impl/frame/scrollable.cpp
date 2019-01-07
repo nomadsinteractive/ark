@@ -1,7 +1,7 @@
 #include "graphics/impl/frame/scrollable.h"
 
 #include "core/base/bean_factory.h"
-#include "core/impl/array/dynamic_array.h"
+#include "core/inf/array.h"
 #include "core/inf/message_loop.h"
 #include "core/inf/variable.h"
 #include "core/util/math.h"
@@ -13,7 +13,7 @@
 namespace ark {
 
 Scrollable::RollingAdapter::RollingAdapter(const Scrollable::Params& params)
-    : _params(params), _tiles(sp<DynamicArray<sp<Renderer>>>::make(params._col_count * params._row_count)), _scroll_x(0), _scroll_y(0)
+    : _params(params), _tiles(sp<Array<sp<Renderer>>::Allocated>::make(params._col_count * params._row_count)), _scroll_x(0), _scroll_y(0)
 {
 }
 

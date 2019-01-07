@@ -4,7 +4,7 @@
 #include "renderer/vulkan/util/vulkan_debug.h"
 
 #include "renderer/vulkan/base/vk_instance.h"
-#include "renderer/vulkan/base/vk_util.h"
+#include "renderer/vulkan/util/vk_util.h"
 
 namespace ark {
 namespace vulkan {
@@ -38,17 +38,17 @@ VkInstance VKDevice::vkInstance() const
     return _instance->vkInstance();
 }
 
-VkPhysicalDevice VKDevice::physicalDevice() const
+VkPhysicalDevice VKDevice::vkPhysicalDevice() const
 {
     return _vulkan_device->physicalDevice;
 }
 
-VkDevice VKDevice::logicalDevice() const
+VkDevice VKDevice::vkLogicalDevice() const
 {
     return _vulkan_device->logicalDevice;
 }
 
-VkQueue VKDevice::queue() const
+VkQueue VKDevice::vkQueue() const
 {
     return _queue;
 }
@@ -73,12 +73,12 @@ const VkPhysicalDeviceMemoryProperties& VKDevice::memoryProperties() const
     return _vulkan_device->memoryProperties;
 }
 
-VkFormat VKDevice::depthFormat() const
+VkFormat VKDevice::vkDepthFormat() const
 {
     return _depth_format;
 }
 
-VkPipelineCache VKDevice::pipelineCache() const
+VkPipelineCache VKDevice::vkPipelineCache() const
 {
     return _pipeline_cache;
 }
@@ -86,16 +86,6 @@ VkPipelineCache VKDevice::pipelineCache() const
 uint32_t VKDevice::getMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32* memTypeFound)
 {
     return _vulkan_device->getMemoryType(typeBits, properties, memTypeFound);
-}
-
-VkResult VKDevice::createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size, VkBuffer* buffer, VkDeviceMemory* memory, void* data) const
-{
-    return _vulkan_device->createBuffer(usageFlags, memoryPropertyFlags, size, buffer, memory, data);
-}
-
-VkResult VKDevice::createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, vks::Buffer* buffer, VkDeviceSize size, void* data) const
-{
-    return _vulkan_device->createBuffer(usageFlags, memoryPropertyFlags, buffer, size, data);
 }
 
 void VKDevice::createPipelineCache()

@@ -15,9 +15,9 @@ void Notifier::notify()
         i->update();
 }
 
-sp<Observer> Notifier::createObserver(const sp<Runnable>& handler, bool oneshot)
+sp<Observer> Notifier::createObserver(bool dirty, const sp<Runnable>& handler, bool oneshot)
 {
-    const sp<Observer> observer = sp<Observer>::make(handler, oneshot);
+    const sp<Observer> observer = sp<Observer>::make(dirty, handler, oneshot);
     _observers->push_back(observer);
     return observer;
 }

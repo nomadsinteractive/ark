@@ -142,35 +142,29 @@ PipelineInput::UBO::UBO(uint32_t binding)
 {
 }
 
-bool PipelineInput::UBO::doSnapshot(bool force) const
+void PipelineInput::UBO::doSnapshot(bool force) const
 {
     size_t offset = 0;
     uint8_t* dirtyFlags = _dirty_flags->buf();
-    bool dirty = false;
     for(size_t i = 0; i < _uniforms.size(); ++i)
     {
         const Uniform& uniform = _uniforms.at(i);
         const sp<Flatable>& flatable = uniform.flatable();
         dirtyFlags[i] = static_cast<uint8_t>(force || uniform.dirty());
-        dirty = dirty || dirtyFlags[i];
         if(dirtyFlags[i])
             flatable->flat(_buffer->buf() + offset);
         offset += flatable->size();
     }
-    return dirty;
 }
 
 Layer::UBOSnapshot PipelineInput::UBO::snapshot(MemoryPool& memoryPool) const
 {
     Layer::UBOSnapshot ubo;
-    bool dirty = doSnapshot(false);
-    if(dirty)
-    {
-        ubo._dirty_flags = memoryPool.allocate(_dirty_flags->size());
-        memcpy(ubo._dirty_flags->buf(), _dirty_flags->buf(), _dirty_flags->size());
-        ubo._buffer = memoryPool.allocate(_buffer->size());
-        memcpy(ubo._buffer->buf(), _buffer->buf(), _buffer->size());
-    }
+    doSnapshot(false);
+    ubo._dirty_flags = memoryPool.allocate(_dirty_flags->size());
+    memcpy(ubo._dirty_flags->buf(), _dirty_flags->buf(), _dirty_flags->size());
+    ubo._buffer = memoryPool.allocate(_buffer->size());
+    memcpy(ubo._buffer->buf(), _buffer->buf(), _buffer->size());
     return ubo;
 }
 
@@ -220,10 +214,10 @@ void PipelineInput::UBO::initialize()
         size += s;
         DCHECK(size % 4 == 0, "Uniform aligment error, offset: %d", size);
     }
-    _buffer = sp<DynamicArray<uint8_t>>::make(size);
+    _buffer = sp<ByteArray::Allocated>::make(size);
     memset(_buffer->buf(), 0, _buffer->size());
 
-    _dirty_flags = (sp<DynamicArray<uint8_t>>::make(_uniforms.size()));
+    _dirty_flags = (sp<ByteArray::Allocated>::make(_uniforms.size()));
 
     doSnapshot(true);
 }

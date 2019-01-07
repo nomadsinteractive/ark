@@ -2,7 +2,6 @@
 
 #include "core/ark.h"
 #include "core/inf/array.h"
-#include "core/impl/array/dynamic_array.h"
 #include "core/inf/variable.h"
 
 #include "graphics/base/layer_context.h"

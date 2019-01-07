@@ -3,6 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include "core/epi/notifier.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -27,6 +28,8 @@ public:
 
     const VkDescriptorImageInfo& vkDescriptor() const;
 
+    Notifier& notifier();
+
 private:
     void doUpload();
 
@@ -41,6 +44,8 @@ private:
     uint32_t _width, _height;
     uint32_t _mip_levels;
     VkDescriptorImageInfo _descriptor;
+
+    Notifier _notifier;
 };
 
 

@@ -9,7 +9,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/forwarding.h"
-#include "core/impl/array/dynamic_array.h"
+#include "core/inf/array.h"
 #include "core/types/box.h"
 #include "core/types/type.h"
 #include "core/types/shared_ptr.h"
@@ -75,7 +75,7 @@ public:
     template<typename T> sp<Array<T>> toArray(PyObject* object) {
         DCHECK(PyList_Check(object), "Object \"\" is not a Python list", Py_TYPE(object)->tp_name);
         Py_ssize_t len = PyList_Size(object);
-        const sp<Array<T>> arr = sp<DynamicArray<T>>::make(len);
+        const sp<Array<T>> arr = sp<typename Array<T>::Allocated>::make(len);
         for(Py_ssize_t i = 0; i < len; ++i)
             arr->buf()[i] = toCppObject<T>(PyList_GetItem(object, i));
         return arr;

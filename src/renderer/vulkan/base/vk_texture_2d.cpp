@@ -12,7 +12,7 @@
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
 #include "renderer/vulkan/base/vk_renderer.h"
-#include "renderer/vulkan/base/vk_util.h"
+#include "renderer/vulkan/util/vk_util.h"
 
 namespace ark {
 namespace vulkan {
@@ -44,20 +44,27 @@ Resource::RecycleFunc VKTexture2D::recycle()
     VkImage image = _image;
     VkDeviceMemory memory = _memory;
 
+    _notifier.notify();
+
     _image = VK_NULL_HANDLE;
     _memory = VK_NULL_HANDLE;
 
     return [device, descriptor, image, memory](GraphicsContext&) {
-        vkDestroyImageView(device->logicalDevice(), descriptor.imageView, nullptr);
-        vkDestroyImage(device->logicalDevice(), image, nullptr);
-        vkDestroySampler(device->logicalDevice(), descriptor.sampler, nullptr);
-        vkFreeMemory(device->logicalDevice(), memory, nullptr);
+        vkDestroyImageView(device->vkLogicalDevice(), descriptor.imageView, nullptr);
+        vkDestroyImage(device->vkLogicalDevice(), image, nullptr);
+        vkDestroySampler(device->vkLogicalDevice(), descriptor.sampler, nullptr);
+        vkFreeMemory(device->vkLogicalDevice(), memory, nullptr);
     };
 }
 
 const VkDescriptorImageInfo& VKTexture2D::vkDescriptor() const
 {
     return _descriptor;
+}
+
+Notifier& VKTexture2D::notifier()
+{
+    return _notifier;
 }
 
 void VKTexture2D::doUpload()

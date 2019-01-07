@@ -7,7 +7,7 @@
 namespace ark {
 
 Clamp::Clamp(const sp<Numeric>& delegate, const sp<Numeric>& min, const sp<Numeric>& max, const sp<Runnable>& notifier)
-    : _delegate(delegate), _min(min), _max(max), _notifier(notifier)
+    : _delegate(delegate), _min(min), _max(max), _notifier(false, notifier)
 {
 }
 

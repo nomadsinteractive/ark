@@ -8,7 +8,7 @@
 
 #include "renderer/vulkan/base/vk_command_pool.h"
 #include "renderer/vulkan/base/vk_descriptor_pool.h"
-#include "renderer/vulkan/base/vk_util.h"
+#include "renderer/vulkan/util/vk_util.h"
 
 namespace ark {
 
@@ -22,8 +22,8 @@ namespace vulkan {
 VKRenderTarget::VKRenderTarget(const sp<VKDevice>& device)
     : _device(device), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0)
 {
-    _queue = _device->queue();
-    _swap_chain.connect(_device->vkInstance(), _device->physicalDevice(), _device->logicalDevice());
+    _queue = _device->vkQueue();
+    _swap_chain.connect(_device->vkInstance(), _device->vkPhysicalDevice(), _device->vkLogicalDevice());
 
     _clear_values[0].color = {{0, 0, 0, 0}};
     _clear_values[1].depthStencil = {1.0f, 0};
@@ -32,10 +32,10 @@ VKRenderTarget::VKRenderTarget(const sp<VKDevice>& device)
     VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
     // Create a semaphore used to synchronize image presentation
     // Ensures that the image is displayed before we start submitting new commands to the queu
-    VKUtil::checkResult(vkCreateSemaphore(_device->logicalDevice(), &semaphoreCreateInfo, nullptr, &_semaphore_present_complete));
+    VKUtil::checkResult(vkCreateSemaphore(_device->vkLogicalDevice(), &semaphoreCreateInfo, nullptr, &_semaphore_present_complete));
     // Create a semaphore used to synchronize command submission
     // Ensures that the image is not presented until all commands have been sumbitted and executed
-    VKUtil::checkResult(vkCreateSemaphore(_device->logicalDevice(), &semaphoreCreateInfo, nullptr, &_semaphore_render_complete));
+    VKUtil::checkResult(vkCreateSemaphore(_device->vkLogicalDevice(), &semaphoreCreateInfo, nullptr, &_semaphore_render_complete));
 
     // Set up submit info structure
     // Semaphores will stay the same during application lifetime
@@ -58,7 +58,7 @@ VKRenderTarget::VKRenderTarget(const sp<VKDevice>& device)
 
 VKRenderTarget::~VKRenderTarget()
 {
-    VkDevice logicalDevice = _device->logicalDevice();
+    VkDevice logicalDevice = _device->vkLogicalDevice();
     vkDestroyRenderPass(logicalDevice, _render_pass_begin_info.renderPass, nullptr);
 
     for(size_t i = 0; i < _frame_buffers.size(); i++)
@@ -133,8 +133,8 @@ sp<VKDescriptorPool> VKRenderTarget::makeDescriptorPool(const sp<Recycler>& recy
         vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _swap_chain.imageCount)
     };
 
-    VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, 2);
-    VKUtil::checkResult(vkCreateDescriptorPool(_device->logicalDevice(), &descriptorPoolInfo, nullptr, &descriptorPool));
+    VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, 1);
+    VKUtil::checkResult(vkCreateDescriptorPool(_device->vkLogicalDevice(), &descriptorPoolInfo, nullptr, &descriptorPool));
 
     return sp<VKDescriptorPool>::make(recycler, _device, descriptorPool);
 }
@@ -163,7 +163,7 @@ void VKRenderTarget::swap()
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
     _submit_info.pCommandBuffers = _submit_queue.data();
-    _submit_info.commandBufferCount = _submit_queue.size();
+    _submit_info.commandBufferCount = static_cast<uint32_t>(_submit_queue.size());
     VKUtil::checkResult(vkQueueSubmit(_queue, 1, &_submit_info, VK_NULL_HANDLE));
 
     VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, _semaphore_render_complete));
@@ -181,11 +181,6 @@ void VKRenderTarget::onSurfaceChanged(uint32_t width, uint32_t height)
     _render_pass_begin_info.renderArea.extent.height = height;
     _render_pass_begin_info.clearValueCount = 2;
     _render_pass_begin_info.pClearValues = _clear_values;
-}
-
-void VKRenderTarget::setBackgroundColor(const Color& backgroundColor)
-{
-    _clear_values[0] = {{backgroundColor.red(), backgroundColor.green(), backgroundColor.blue(), backgroundColor.alpha()}};
 }
 
 void VKRenderTarget::initSwapchain()
@@ -212,7 +207,7 @@ void VKRenderTarget::setupDepthStencil()
     image.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     image.pNext = nullptr;
     image.imageType = VK_IMAGE_TYPE_2D;
-    image.format = _device->depthFormat();
+    image.format = _device->vkDepthFormat();
     image.extent = { _width, _height, 1 };
     image.mipLevels = 1;
     image.arrayLayers = 1;
@@ -231,7 +226,7 @@ void VKRenderTarget::setupDepthStencil()
     depthStencilView.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     depthStencilView.pNext = nullptr;
     depthStencilView.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    depthStencilView.format = _device->depthFormat();
+    depthStencilView.format = _device->vkDepthFormat();
     depthStencilView.flags = 0;
     depthStencilView.subresourceRange = {};
     depthStencilView.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
@@ -242,15 +237,15 @@ void VKRenderTarget::setupDepthStencil()
 
     VkMemoryRequirements memReqs;
 
-    VKUtil::checkResult(vkCreateImage(_device->logicalDevice(), &image, nullptr, &_depth_stencil.image));
-    vkGetImageMemoryRequirements(_device->logicalDevice(), _depth_stencil.image, &memReqs);
+    VKUtil::checkResult(vkCreateImage(_device->vkLogicalDevice(), &image, nullptr, &_depth_stencil.image));
+    vkGetImageMemoryRequirements(_device->vkLogicalDevice(), _depth_stencil.image, &memReqs);
     mem_alloc.allocationSize = memReqs.size;
     mem_alloc.memoryTypeIndex = _device->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    VKUtil::checkResult(vkAllocateMemory(_device->logicalDevice(), &mem_alloc, nullptr, &_depth_stencil.mem));
-    VKUtil::checkResult(vkBindImageMemory(_device->logicalDevice(), _depth_stencil.image, _depth_stencil.mem, 0));
+    VKUtil::checkResult(vkAllocateMemory(_device->vkLogicalDevice(), &mem_alloc, nullptr, &_depth_stencil.mem));
+    VKUtil::checkResult(vkBindImageMemory(_device->vkLogicalDevice(), _depth_stencil.image, _depth_stencil.mem, 0));
 
     depthStencilView.image = _depth_stencil.image;
-    VKUtil::checkResult(vkCreateImageView(_device->logicalDevice(), &depthStencilView, nullptr, &_depth_stencil.view));
+    VKUtil::checkResult(vkCreateImageView(_device->vkLogicalDevice(), &depthStencilView, nullptr, &_depth_stencil.view));
 }
 
 void VKRenderTarget::setupRenderPass()
@@ -259,18 +254,18 @@ void VKRenderTarget::setupRenderPass()
     // Color attachment
     attachments[0].format = _swap_chain.colorFormat;
     attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
-    attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD; //VK_ATTACHMENT_LOAD_OP_CLEAR;
     attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     attachments[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
     // Depth attachment
-    attachments[1].format = _device->depthFormat();
+    attachments[1].format = _device->vkDepthFormat();
     attachments[1].samples = VK_SAMPLE_COUNT_1_BIT;
-    attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD; //VK_ATTACHMENT_LOAD_OP_CLEAR;
     attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_LOAD; //VK_ATTACHMENT_LOAD_OP_CLEAR;
     attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     attachments[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     attachments[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -322,7 +317,7 @@ void VKRenderTarget::setupRenderPass()
     renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
     renderPassInfo.pDependencies = dependencies.data();
 
-    VKUtil::checkResult(vkCreateRenderPass(_device->logicalDevice(), &renderPassInfo, nullptr, &_render_pass_begin_info.renderPass));
+    VKUtil::checkResult(vkCreateRenderPass(_device->vkLogicalDevice(), &renderPassInfo, nullptr, &_render_pass_begin_info.renderPass));
 }
 
 void VKRenderTarget::setupFrameBuffer()
@@ -347,7 +342,7 @@ void VKRenderTarget::setupFrameBuffer()
     for (uint32_t i = 0; i < _frame_buffers.size(); i++)
     {
         attachments[0] = _swap_chain.buffers[i].view;
-        VKUtil::checkResult(vkCreateFramebuffer(_device->logicalDevice(), &frameBufferCreateInfo, nullptr, &_frame_buffers[i]));
+        VKUtil::checkResult(vkCreateFramebuffer(_device->vkLogicalDevice(), &frameBufferCreateInfo, nullptr, &_frame_buffers[i]));
     }
 }
 

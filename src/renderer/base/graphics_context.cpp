@@ -11,7 +11,7 @@
 
 namespace ark {
 
-GraphicsContext::GraphicsContext(const sp<GLContext>& glContext, const sp<ResourceManager>& resourceManager)
+GraphicsContext::GraphicsContext(const sp<RenderContext>& glContext, const sp<ResourceManager>& resourceManager)
     : _gl_context(glContext), _resource_manager(resourceManager), _tick(0)
 {
 }
@@ -36,7 +36,7 @@ const sp<ResourceManager>& GraphicsContext::resourceManager() const
     return _resource_manager;
 }
 
-const sp<GLContext>& GraphicsContext::glContext() const
+const sp<RenderContext>& GraphicsContext::glContext() const
 {
     return _gl_context;
 }

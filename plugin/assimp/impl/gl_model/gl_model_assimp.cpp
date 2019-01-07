@@ -1,8 +1,7 @@
 #include "plugin/assimp/impl/gl_model/gl_model_assimp.h"
 
-#include "core/impl/array/dynamic_array.h"
-#include "core/impl/array/preallocated_array.h"
 #include "core/impl/readable/bytearray_readable.h"
+#include "core/inf/array.h"
 #include "core/inf/loader.h"
 #include "core/util/documents.h"
 
@@ -63,9 +62,9 @@ bitmap GLModelAssimp::loadBitmap(const sp<ImageBundle>& imageResource, const aiT
     if(tex->mHeight == 0)
     {
         const sp<BitmapLoader>& bitmapLoader = imageResource->getLoader(tex->achFormatHint);
-        return bitmapLoader->load(sp<BytearrayReadable>::make(sp<PreallocatedArray<uint8_t>>::make(reinterpret_cast<uint8_t*>(tex->pcData), tex->mWidth)));
+        return bitmapLoader->load(sp<BytearrayReadable>::make(sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(tex->pcData), tex->mWidth)));
     }
-    return bitmap::make(tex->mWidth, tex->mHeight, tex->mWidth * 4, 4, sp<PreallocatedArray<uint8_t>>::make(reinterpret_cast<uint8_t*>(tex->pcData), tex->mWidth * tex->mHeight * 4));
+    return bitmap::make(tex->mWidth, tex->mHeight, tex->mWidth * 4, 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(tex->pcData), tex->mWidth * tex->mHeight * 4));
 }
 
 GLModelAssimp::BUILDER::BUILDER(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -78,10 +77,10 @@ sp<RenderModel> GLModelAssimp::BUILDER::build(const sp<Scope>& args)
 }
 
 GLModelAssimp::Mesh::Mesh(const aiMesh* mesh)
-    : _vertices(sp<DynamicArray<V3>>::make(mesh->mNumVertices)),
-      _normals(mesh->HasNormals() ? sp<DynamicArray<V3>>::make(mesh->mNumVertices) : sp<DynamicArray<V3>>::null()),
-      _tangents(mesh->HasTangentsAndBitangents() ? sp<DynamicArray<std::pair<V3, V3>>>::make(mesh->mNumVertices) : sp<DynamicArray<std::pair<V3, V3>>>::null()),
-      _uvs(sp<DynamicArray<UV>>::make(mesh->mNumVertices)), _indices(loadIndices(mesh))
+    : _vertices(sp<Array<V3>::Allocated>::make(mesh->mNumVertices)),
+      _normals(mesh->HasNormals() ? sp<Array<V3>::Allocated>::make(mesh->mNumVertices) : sp<Array<V3>::Allocated>::null()),
+      _tangents(mesh->HasTangentsAndBitangents() ? sp<Array<std::pair<V3, V3>>::Allocated>::make(mesh->mNumVertices) : sp<Array<std::pair<V3, V3>>::Allocated>::null()),
+      _uvs(sp<Array<UV>::Allocated>::make(mesh->mNumVertices)), _indices(loadIndices(mesh))
 {
     V3* vertices = _vertices->buf();
     V3* normals = _normals ? _normals->buf() : nullptr;
@@ -123,7 +122,7 @@ void GLModelAssimp::Mesh::load(ModelBuffer& buf) const
 
 bytearray GLModelAssimp::Mesh::loadIndices(const aiMesh* mesh) const
 {
-    const bytearray s = sp<DynamicArray<uint8_t>>::make(mesh->mNumFaces * 6);
+    const bytearray s = sp<ByteArray::Allocated>::make(mesh->mNumFaces * 6);
     uint16_t* buf = reinterpret_cast<uint16_t*>(s->buf());
     for(uint32_t i = 0; i < mesh->mNumFaces; i ++)
     {

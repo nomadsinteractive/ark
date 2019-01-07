@@ -10,7 +10,7 @@ class Pipeline;
 class PipelineFactory;
 class Attribute;
 class Buffer;
-class GLContext;
+class RenderContext;
 class RenderModel;
 class ModelBuffer;
 class RenderModel;

@@ -49,7 +49,6 @@ public:
     void swap();
 
     void onSurfaceChanged(uint32_t width, uint32_t height);
-    void setBackgroundColor(const Color& backgroundColor);
 
 private:
     void initSwapchain();

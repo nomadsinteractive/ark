@@ -6,7 +6,7 @@
 
 #include "graphics/base/size.h"
 
-#include "renderer/base/gl_context.h"
+#include "renderer/base/render_context.h"
 #include "renderer/base/resource_manager.h"
 
 #include "renderer/vulkan/base/vk_instance.h"
@@ -16,7 +16,7 @@
 #include "renderer/vulkan/snippet_factory/snippet_factory_vulkan.h"
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
 
-#include "renderer/vulkan/base/vk_util.h"
+#include "renderer/vulkan/util/vk_util.h"
 #include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_texture_2d.h"
@@ -27,7 +27,7 @@ namespace ark {
 namespace vulkan {
 
 RendererFactoryVulkan::RendererFactoryVulkan(const sp<ResourceManager>& resourceManager)
-    : _resource_manager(resourceManager), _renderer(sp<VKRenderer>::make())
+    : _resource_manager(resourceManager), _renderer(sp<VKRenderer>::make(_resource_manager))
 {
     const Global<PluginManager> pm;
     pm->addPlugin(sp<VulkanPlugin>::make());
@@ -37,11 +37,19 @@ RendererFactoryVulkan::~RendererFactoryVulkan()
 {
 }
 
-void RendererFactoryVulkan::initialize(GLContext& glContext)
+sp<RenderContext> RendererFactoryVulkan::initialize(Ark::RendererVersion version)
+{
+    const sp<RenderContext> vkContext = sp<RenderContext>::make(version, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f));
+    if(version != Ark::AUTO)
+        setVersion(version, vkContext);
+    return vkContext;
+}
+
+void RendererFactoryVulkan::onSurfaceCreated(RenderContext& glContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
-    setGLVersion(Ark::VULKAN_11, glContext);
+    setVersion(Ark::VULKAN_11, glContext);
 
     _renderer->_instance = sp<VKInstance>::make();
     _renderer->_instance->initialize();
@@ -50,20 +58,19 @@ void RendererFactoryVulkan::initialize(GLContext& glContext)
     _renderer->_render_target = sp<VKRenderTarget>::make(_renderer->_device);
 }
 
-void RendererFactoryVulkan::setGLVersion(Ark::RendererVersion version, GLContext& glContext)
+void RendererFactoryVulkan::setVersion(Ark::RendererVersion version, RenderContext& vkContext)
 {
-    DCHECK(version != Ark::AUTO, "Cannot set Vulkan version to \"auto\" manually.");
-    LOGD("Choose GLVersion = %d", version);
-    std::map<String, String>& annotations = glContext.annotations();
+    LOGD("Choose Vulkan Version = %d", version);
+    std::map<String, String>& annotations = vkContext.annotations();
 
     annotations["vert.in"] = "in";
     annotations["vert.out"] = "out";
     annotations["frag.in"] = "in";
     annotations["frag.out"] = "out";
     annotations["frag.color"] = "v_FragColor";
-    glContext.setSnippetFactory(sp<SnippetFactoryVulkan>::make());
+    vkContext.setSnippetFactory(sp<SnippetFactoryVulkan>::make());
 
-    glContext.setVersion(version);
+    vkContext.setVersion(version);
 }
 
 sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buffer::Usage /*usage*/)
@@ -72,9 +79,9 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buff
     return sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), usagesFlags[type], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
-sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<GLContext>& glContext, const Viewport& viewport)
+sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderContext>& glContext, const Viewport& viewport)
 {
-    return sp<RenderViewVulkan>::make(sp<VKUtil>::make(_resource_manager, _renderer), _renderer, glContext, _resource_manager, viewport);
+    return sp<RenderViewVulkan>::make(_renderer, glContext, _resource_manager, viewport);
 }
 
 sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()

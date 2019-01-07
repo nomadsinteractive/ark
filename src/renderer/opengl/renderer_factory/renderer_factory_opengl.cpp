@@ -8,7 +8,7 @@
 #include "graphics/base/size.h"
 
 #include "renderer/base/texture.h"
-#include "renderer/base/gl_context.h"
+#include "renderer/base/render_context.h"
 #include "renderer/base/resource_manager.h"
 
 #include "renderer/opengl/base/gl_buffer.h"
@@ -34,7 +34,15 @@ RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<ResourceManager>& glResour
     pluginManager->addPlugin(sp<opengl::OpenglPlugin>::make());
 }
 
-void RendererFactoryOpenGL::initialize(GLContext& glContext)
+sp<RenderContext> RendererFactoryOpenGL::initialize(Ark::RendererVersion version)
+{
+    const sp<RenderContext> renderContext = sp<RenderContext>::make(version, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
+    if(version != Ark::AUTO)
+        setVersion(version, renderContext);
+    return renderContext;
+}
+
+void RendererFactoryOpenGL::onSurfaceCreated(RenderContext& glContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
@@ -46,15 +54,14 @@ void RendererFactoryOpenGL::initialize(GLContext& glContext)
         glGetIntegerv(GL_MAJOR_VERSION, &glMajorVersion);
         glGetIntegerv(GL_MINOR_VERSION, &glMinorVersion);
         if(glMajorVersion != 0)
-            setGLVersion(static_cast<Ark::RendererVersion>(glMajorVersion * 10 + glMinorVersion), glContext);
+            setVersion(static_cast<Ark::RendererVersion>(glMajorVersion * 10 + glMinorVersion), glContext);
         else
-            setGLVersion(Ark::OPENGL_20, glContext);
+            setVersion(Ark::OPENGL_20, glContext);
     }
 }
 
-void RendererFactoryOpenGL::setGLVersion(Ark::RendererVersion version, GLContext& glContext)
+void RendererFactoryOpenGL::setVersion(Ark::RendererVersion version, RenderContext& glContext)
 {
-    DCHECK(version != Ark::AUTO, "Cannot set OpenGL version to \"auto\" manually.");
     LOGD("Choose GLVersion = %d", version);
     std::map<String, String>& annotations = glContext.annotations();
     if(version == Ark::OPENGL_20 || version == Ark::OPENGL_21)
@@ -78,7 +85,7 @@ void RendererFactoryOpenGL::setGLVersion(Ark::RendererVersion version, GLContext
     glContext.setVersion(version);
 }
 
-sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<GLContext>& glContext, const Viewport& viewport)
+sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderContext>& glContext, const Viewport& viewport)
 {
     return sp<RenderView>::adopt(new RenderViewOpenGL(glContext, _resource_manager, viewport));
 }

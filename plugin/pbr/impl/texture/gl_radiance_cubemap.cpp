@@ -3,7 +3,6 @@
 #include <cmft/clcontext.h>
 #include <cmft/cubemapfilter.h>
 
-#include "core/impl/array/preallocated_array.h"
 #include "core/types/global.h"
 #include "core/util/math.h"
 #include "core/util/log.h"

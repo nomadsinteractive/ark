@@ -16,10 +16,13 @@ public:
     void recycle(Resource& resource);
     void recycle(Resource::RecycleFunc recycler);
 
+private:
     void doRecycling(GraphicsContext& graphicsContext);
 
 private:
     LockFreeStack<Resource::RecycleFunc> _recyclers;
+
+    friend class ResourceManager;
 };
 
 }

@@ -1,5 +1,7 @@
 #include "renderer/vulkan/base/vk_pipeline.h"
 
+#include "core/base/observer.h"
+
 #include "renderer/base/buffer.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_input.h"
@@ -16,15 +18,14 @@
 #include "renderer/vulkan/base/vk_render_target.h"
 #include "renderer/vulkan/base/vk_texture_2d.h"
 #include "renderer/vulkan/util/vulkan_tools.h"
-#include "renderer/vulkan/base/vk_util.h"
+#include "renderer/vulkan/util/vk_util.h"
 
 namespace ark {
 namespace vulkan {
 
 VKPipeline::VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<ShaderBindings>& shaderBindings, std::map<Shader::Stage, String> shaders)
-    : _recycler(recycler), _shader_bindings(shaderBindings), _renderer(renderer),
-      _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE), _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE),
-      _shaders(std::move(shaders)), _vertex_observer(createObserver(_shader_bindings->vertexBuffer()))
+    : _recycler(recycler), _shader_bindings(shaderBindings), _renderer(renderer), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE), _descriptor_set(VK_NULL_HANDLE),
+      _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _vertex_observer(createObserver(_shader_bindings->vertexBuffer())), _index_observer(createObserver(_shader_bindings->indexBuffer()))
 {
 }
 
@@ -53,21 +54,7 @@ uint64_t VKPipeline::id()
     return (uint64_t)(_pipeline);
 }
 
-void VKPipeline::upload()
-{
-    VertexLayout vertexLayout;
-
-    setupVertexDescriptions(vertexLayout);
-    setupDescriptorSetLayout();
-
-    _descriptor_pool = _renderer->renderTarget()->makeDescriptorPool(sp<Recycler>::make());
-    setupDescriptorSet();
-    setupPipeline(vertexLayout);
-
-    _command_buffers = sp<VKCommandBuffers>::make(_recycler, _renderer->renderTarget());
-}
-
-void VKPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
+void VKPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
     VertexLayout vertexLayout;
     setupVertexDescriptions(_shader_bindings->pipelineInput(), vertexLayout);
@@ -90,42 +77,68 @@ Resource::RecycleFunc VKPipeline::recycle()
 
     return [device, layout, descriptorSetLayout, pipeline](GraphicsContext&) {
         if(layout)
-            vkDestroyPipelineLayout(device->logicalDevice(), layout, nullptr);
+            vkDestroyPipelineLayout(device->vkLogicalDevice(), layout, nullptr);
         if(descriptorSetLayout)
-            vkDestroyDescriptorSetLayout(device->logicalDevice(), descriptorSetLayout, nullptr);
+            vkDestroyDescriptorSetLayout(device->vkLogicalDevice(), descriptorSetLayout, nullptr);
         if(pipeline)
-            vkDestroyPipeline(device->logicalDevice(), pipeline, nullptr);
+            vkDestroyPipeline(device->vkLogicalDevice(), pipeline, nullptr);
     };
 }
 
-sp<RenderCommand> VKPipeline::active(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
+void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, bool rebuildCommandBuffer)
 {
-    if(!_command_buffers)
+    if(rebuildCommandBuffer)
         buildCommandBuffers(drawingContext._array_buffer, drawingContext._index_buffer);
+
+    const std::vector<Layer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
+    DCHECK(uboSnapshots.size() == _ubos.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), _ubos.size());
+
+    for(size_t i = 0; i < uboSnapshots.size(); ++i)
+    {
+        const Layer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
+        if(rebuildCommandBuffer || isDirty(uboSnapshot._dirty_flags))
+        {
+            const sp<VKBuffer>& ubo = _ubos.at(i);
+            ubo->reload(graphicsContext, uboSnapshot._buffer);
+        }
+    }
+}
+
+sp<RenderCommand> VKPipeline::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+{
+    bool rebuildCommandBuffer = _vertex_observer->dirty() || _index_observer->dirty();
+    for(const sp<Observer>& i : _texture_observers)
+        if(i->dirty())
+        {
+            setupDescriptorSet(graphicsContext, drawingContext._shader_bindings);
+            rebuildCommandBuffer = true;
+            break;
+        }
+
+    bind(graphicsContext, drawingContext, rebuildCommandBuffer);
 
     return _command_buffers->aquire();
 }
 
 void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)
 {
-    for(const auto& iter : input.streams())
+    for(const auto& i : input.streams())
     {
-        uint32_t divsor = iter.first;
-        const PipelineInput::Stream& stream = iter.second;
+        uint32_t divsor = i.first;
+        const PipelineInput::Stream& stream = i.second;
         vertexLayout.bindingDescriptions.push_back(vks::initializers::vertexInputBindingDescription(
                                                    divsor,
                                                    stream.stride(),
                                                    divsor == 0 ? VK_VERTEX_INPUT_RATE_VERTEX : VK_VERTEX_INPUT_RATE_INSTANCE));
 
         uint32_t location = 0;
-        for(const auto& i : stream.attributes().values())
+        for(const auto& j : stream.attributes().values())
         {
             vertexLayout.attributeDescriptions.push_back(vks::initializers::vertexInputAttributeDescription(
                                                          divsor,
-                                                         location,
-                                                         VKUtil::getAttributeFormat(i),
-                                                         i.offset()));
-            _location_map[i.name()] = (location++);
+                                                         location++,
+                                                         VKUtil::getAttributeFormat(j),
+                                                         j.offset()));
         }
     }
     vertexLayout.inputState = vks::initializers::pipelineVertexInputStateCreateInfo();
@@ -133,80 +146,6 @@ void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline:
     vertexLayout.inputState.pVertexBindingDescriptions = vertexLayout.bindingDescriptions.data();
     vertexLayout.inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexLayout.attributeDescriptions.size());
     vertexLayout.inputState.pVertexAttributeDescriptions = vertexLayout.attributeDescriptions.data();
-}
-
-void VKPipeline::setupVertexDescriptions(VertexLayout& vertexLayout)
-{
-    // Binding description
-    vertexLayout.bindingDescriptions.resize(1);
-    vertexLayout.bindingDescriptions[0] =
-            vks::initializers::vertexInputBindingDescription(
-                0,
-                sizeof(VKUtil::Vertex),
-                VK_VERTEX_INPUT_RATE_VERTEX);
-
-    // Attribute descriptions
-    // Describes memory layout and shader positions
-    vertexLayout.attributeDescriptions.resize(3);
-    // Location 0 : Position
-    vertexLayout.attributeDescriptions[0] =
-            vks::initializers::vertexInputAttributeDescription(
-                0,
-                0,
-                VK_FORMAT_R32G32B32_SFLOAT,
-                offsetof(VKUtil::Vertex, pos));
-    // Location 1 : Texture coordinates
-    vertexLayout.attributeDescriptions[1] =
-            vks::initializers::vertexInputAttributeDescription(
-                0,
-                1,
-                VK_FORMAT_R32G32_SFLOAT,
-                offsetof(VKUtil::Vertex, uv));
-    // Location 1 : Vertex normal
-    vertexLayout.attributeDescriptions[2] =
-            vks::initializers::vertexInputAttributeDescription(
-                0,
-                2,
-                VK_FORMAT_R32G32B32_SFLOAT,
-                offsetof(VKUtil::Vertex, normal));
-
-    vertexLayout.inputState = vks::initializers::pipelineVertexInputStateCreateInfo();
-    vertexLayout.inputState.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexLayout.bindingDescriptions.size());
-    vertexLayout.inputState.pVertexBindingDescriptions = vertexLayout.bindingDescriptions.data();
-    vertexLayout.inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexLayout.attributeDescriptions.size());
-    vertexLayout.inputState.pVertexAttributeDescriptions = vertexLayout.attributeDescriptions.data();
-}
-
-void VKPipeline::setupDescriptorSetLayout()
-{
-    const sp<VKDevice>& device = _renderer->device();
-
-    std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
-        // Binding 0 : Vertex shader uniform buffer
-        vks::initializers::descriptorSetLayoutBinding(
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        VK_SHADER_STAGE_VERTEX_BIT,
-        0),
-        // Binding 1 : Fragment shader image sampler
-        vks::initializers::descriptorSetLayoutBinding(
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        VK_SHADER_STAGE_FRAGMENT_BIT,
-        1)
-    };
-
-    VkDescriptorSetLayoutCreateInfo descriptorLayout =
-            vks::initializers::descriptorSetLayoutCreateInfo(
-                setLayoutBindings.data(),
-                static_cast<uint32_t>(setLayoutBindings.size()));
-
-    VKUtil::checkResult(vkCreateDescriptorSetLayout(device->logicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
-
-    VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
-            vks::initializers::pipelineLayoutCreateInfo(
-                &_descriptor_set_layout,
-                1);
-
-    VKUtil::checkResult(vkCreatePipelineLayout(device->logicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_layout));
 }
 
 void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
@@ -233,46 +172,14 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
                 setLayoutBindings.data(),
                 static_cast<uint32_t>(setLayoutBindings.size()));
 
-    VKUtil::checkResult(vkCreateDescriptorSetLayout(device->logicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
+    VKUtil::checkResult(vkCreateDescriptorSetLayout(device->vkLogicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
 
     VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
             vks::initializers::pipelineLayoutCreateInfo(
                 &_descriptor_set_layout,
                 1);
 
-    VKUtil::checkResult(vkCreatePipelineLayout(device->logicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_layout));
-}
-
-
-void VKPipeline::setupDescriptorSet()
-{
-    const sp<VKDevice>& device = _renderer->device();
-
-    VkDescriptorSetAllocateInfo allocInfo =
-            vks::initializers::descriptorSetAllocateInfo(
-                _descriptor_pool->vkDescriptorPool(),
-                &_descriptor_set_layout,
-                1);
-
-    VKUtil::checkResult(vkAllocateDescriptorSets(device->logicalDevice(), &allocInfo, &_descriptor_set));
-
-    std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
-        // Binding 0 : Vertex shader uniform buffer
-        vks::initializers::writeDescriptorSet(
-        _descriptor_set,
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        0,
-        &_ubo->descriptor()),
-        // Binding 1 : Fragment shader texture sampler
-        //	Fragment shader: layout (binding = 1) uniform sampler2D samplerColor;
-        vks::initializers::writeDescriptorSet(
-        _descriptor_set,
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,		// The descriptor set will use a combined image sampler (sampler and image could be split)
-        1,												// Shader binding point 1
-        &_texture->vkDescriptor())				        // Pointer to the descriptor image for our texture
-    };
-
-    vkUpdateDescriptorSets(device->logicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+    VKUtil::checkResult(vkCreatePipelineLayout(device->vkLogicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_layout));
 }
 
 void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const ShaderBindings& shaderBindings)
@@ -284,11 +191,13 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Shad
                 _descriptor_pool->vkDescriptorPool(),
                 &_descriptor_set_layout, 1);
 
-    VKUtil::checkResult(vkAllocateDescriptorSets(device->logicalDevice(), &allocInfo, &_descriptor_set));
+    VKUtil::checkResult(vkResetDescriptorPool(device->vkLogicalDevice(), _descriptor_pool->vkDescriptorPool(), 0));
+    VKUtil::checkResult(vkAllocateDescriptorSets(device->vkLogicalDevice(), &allocInfo, &_descriptor_set));
 
     std::vector<VkWriteDescriptorSet> writeDescriptorSets;
     uint32_t binding = 0;
 
+    _ubos.clear();
     for(const sp<PipelineInput::UBO>& i : shaderBindings.pipelineInput()->ubos())
     {
         const sp<Uploader> uploader = sp<Uploader::Blank>::make(i->size());
@@ -303,19 +212,19 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Shad
                                           &ubo->descriptor()));
     }
 
-    std::vector<VkDescriptorImageInfo> samplerDescriptors;
+    _texture_observers.clear();
     for(const sp<Texture>& i : shaderBindings.samplers())
     {
         const sp<VKTexture2D> texture = i->resource();
-        samplerDescriptors.push_back(texture->vkDescriptor());
+        _texture_observers.push_back(texture->notifier().createObserver(false));
         writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                       _descriptor_set,
                                       VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                       ++binding,
-                                      &samplerDescriptors.back()));
+                                      &texture->vkDescriptor()));
     }
 
-    vkUpdateDescriptorSets(device->logicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+    vkUpdateDescriptorSets(device->vkLogicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 }
 
 void VKPipeline::setupPipeline(const VertexLayout& vertexLayout)
@@ -324,14 +233,14 @@ void VKPipeline::setupPipeline(const VertexLayout& vertexLayout)
 
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
             vks::initializers::pipelineInputAssemblyStateCreateInfo(
-                VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+                VKUtil::toPrimitiveTopology(_shader_bindings->renderMode()),
                 0,
                 VK_FALSE);
 
     VkPipelineRasterizationStateCreateInfo rasterizationState =
             vks::initializers::pipelineRasterizationStateCreateInfo(
                 VK_POLYGON_MODE_FILL,
-                VK_CULL_MODE_FRONT_BIT,
+                VK_CULL_MODE_NONE,
                 VK_FRONT_FACE_COUNTER_CLOCKWISE,
                 0);
 
@@ -377,19 +286,8 @@ void VKPipeline::setupPipeline(const VertexLayout& vertexLayout)
 
     // Load shaders
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
-
-//    shaderStages[0] = VulkanAPI::loadShaderSPIR(_device->logicalDevice(), "texture.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-//    shaderStages[1] = VulkanAPI::loadShaderSPIR(_device->logicalDevice(), "texture.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
-    if(_shaders.empty())
-    {
-        shaderStages.push_back(VKUtil::loadShader(device->logicalDevice(), "texture.vert", Shader::STAGE_VERTEX));
-        shaderStages.push_back(VKUtil::loadShader(device->logicalDevice(), "texture.frag", Shader::STAGE_FRAGMENT));
-    }
-    else
-    {
-        for(const auto& iter : _shaders)
-            shaderStages.push_back(VKUtil::createShader(device->logicalDevice(), iter.second, iter.first));
-    }
+    for(const auto& i : _shaders)
+        shaderStages.push_back(VKUtil::createShader(device->vkLogicalDevice(), i.second, i.first));
 
     VkGraphicsPipelineCreateInfo pipelineCreateInfo =
             vks::initializers::pipelineCreateInfo(
@@ -408,10 +306,10 @@ void VKPipeline::setupPipeline(const VertexLayout& vertexLayout)
     pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
     pipelineCreateInfo.pStages = shaderStages.data();
 
-    VKUtil::checkResult(vkCreateGraphicsPipelines(device->logicalDevice(), device->pipelineCache(), 1, &pipelineCreateInfo, nullptr, &_pipeline));
+    VKUtil::checkResult(vkCreateGraphicsPipelines(device->vkLogicalDevice(), device->vkPipelineCache(), 1, &pipelineCreateInfo, nullptr, &_pipeline));
 
     for(const auto& i : shaderStages)
-        vkDestroyShaderModule(device->logicalDevice(), i.module, nullptr);
+        vkDestroyShaderModule(device->vkLogicalDevice(), i.module, nullptr);
 }
 
 void VKPipeline::buildCommandBuffers(const Buffer::Snapshot& vertex, const Buffer::Snapshot& index)
@@ -428,8 +326,8 @@ void VKPipeline::buildCommandBuffers(const Buffer::Snapshot& vertex, const Buffe
         // Set target frame buffer
         renderPassBeginInfo.framebuffer = renderTarget->frameBuffers()[i];
         const VkCommandBuffer commandBuffer = _command_buffers->vkCommandBuffers()[i];
-        VKUtil::checkResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
 
+        VKUtil::checkResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
         vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         vkCmdSetViewport(commandBuffer, 0, 1, &renderTarget->vkViewport());
@@ -456,6 +354,16 @@ sp<Observer> VKPipeline::createObserver(const Buffer& buffer) const
 {
     const sp<VKBuffer> vkBuffer = buffer.delegate();
     return vkBuffer->notifier().createObserver();
+}
+
+bool VKPipeline::isDirty(const bytearray& dirtyFlags) const
+{
+    size_t size = dirtyFlags->length();
+    uint8_t* buf = dirtyFlags->buf();
+    for(size_t i = 0; i < size; ++i)
+        if(buf[i])
+            return true;
+    return false;
 }
 
 }

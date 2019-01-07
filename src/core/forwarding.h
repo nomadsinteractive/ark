@@ -96,19 +96,22 @@ class NumericWrapper : public Numeric {
 };
 */
 
+typedef uint16_t glindex_t;
+
 typedef Array<uint8_t>  ByteArray;
 typedef Array<int32_t>  IntArray;
+typedef Array<glindex_t>  IndexArray;
 typedef Array<float>    FloatArray;
 
 typedef uint32_t TypeId;
+
 typedef sp<DOMAttribute> attribute;
 typedef sp<DOMElement> element;
 typedef sp<Document> document;
 typedef sp<ByteArray> bytearray;
+typedef sp<IntArray> intarray;
+typedef sp<IndexArray> indexarray;
 typedef sp<FloatArray> floatarray;
-
-typedef uint16_t glindex_t;
-typedef array<glindex_t> indexarray;
 
 }
 

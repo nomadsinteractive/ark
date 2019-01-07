@@ -6,7 +6,6 @@
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/base/string_buffer.h"
-#include "core/impl/array/dynamic_array.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/conversions.h"
@@ -46,7 +45,7 @@ public:
         const String value = Strings::unwrap(str.strip(), open, close);
         DASSERT(value);
         const std::vector<String> elems = value.split(',');
-        const array<T> values = sp<DynamicArray<T>>::make(elems.size());
+        const array<T> values = sp<typename Array<T>::Allocated>::make(elems.size());
         for(size_t i = 0; i < elems.size(); i++)
             values->buf()[i] = parse<T>(elems[i]);
         return values;

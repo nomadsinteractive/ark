@@ -7,6 +7,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/matrix.h"
+#include "graphics/base/viewport.h"
 #include "graphics/base/v3.h"
 
 namespace ark {
@@ -30,8 +31,7 @@ public:
     };
 
 public:
-//  [[script::bindings::auto]]
-    Camera();
+    Camera(const Viewport& target);
 
     struct Snapshot {
         Snapshot(Holder& holder);
@@ -64,6 +64,8 @@ private:
     void updateViewProjection();
 
 private:
+    Viewport _target;
+
     sp<Holder> _view;
     sp<Holder> _projection;
 

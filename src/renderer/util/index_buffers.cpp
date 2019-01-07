@@ -1,6 +1,6 @@
 #include "renderer/util/index_buffers.h"
 
-#include "core/impl/array/dynamic_array.h"
+#include "core/inf/array.h"
 
 #include "renderer/base/render_controller.h"
 
@@ -15,7 +15,7 @@ IndexBuffers::NinePatch::NinePatch(size_t objectCount)
 void IndexBuffers::NinePatch::upload(const Uploader::UploadFunc& uploader)
 {
     const size_t bolierPlateLength = _boiler_plate.length();
-    bytearray array = sp<DynamicArray<uint8_t>>::make(size());
+    bytearray array = sp<ByteArray::Allocated>::make(size());
     glindex_t* buf = reinterpret_cast<glindex_t*>(array->buf());
     glindex_t* src = _boiler_plate.buf();
     for(size_t i = 0; i < _object_count; i ++) {
@@ -43,7 +43,7 @@ IndexBuffers::Quads::Quads(size_t objectCount)
 
 void IndexBuffers::Quads::upload(const Uploader::UploadFunc& uploader)
 {
-    bytearray result = sp<DynamicArray<uint8_t>>::make(size());
+    bytearray result = sp<ByteArray::Allocated>::make(size());
 
     glindex_t* buf = reinterpret_cast<glindex_t*>(result->buf());
     size_t idx = 0;
@@ -72,7 +72,7 @@ IndexBuffers::Points::Points(size_t objectCount)
 
 void IndexBuffers::Points::upload(const Uploader::UploadFunc& uploader)
 {
-    const auto result = sp<DynamicArray<glindex_t>>::make(_object_count);
+    const auto result = sp<IndexArray::Allocated>::make(_object_count);
 
     glindex_t* buf = result->buf();
     size_t idx = 0;
