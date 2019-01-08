@@ -21,7 +21,7 @@ namespace unittest {
 class DOMTestCase : public TestCase {
 public:
     virtual int launch() {
-        const document doc = Documents::loadFromReadable(Ark::instance().getResource("application.xml"));
+        const document doc = Documents::loadFromReadable(Ark::instance().openAsset("application.xml"));
         if(!doc) {
             printf("application.xml not found!\n");
             return -1;

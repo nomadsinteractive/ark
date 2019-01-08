@@ -1,4 +1,4 @@
-#include "renderer/impl/gl_model/gl_model_sphere.h"
+#include "renderer/impl/render_model/render_model_sphere.h"
 
 #include "core/util/math.h"
 #include "core/util/log.h"

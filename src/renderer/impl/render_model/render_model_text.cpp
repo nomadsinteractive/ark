@@ -1,4 +1,4 @@
-#include "renderer/impl/gl_model/gl_model_text.h"
+#include "renderer/impl/render_model/render_model_text.h"
 
 #include "core/util/log.h"
 
@@ -13,7 +13,7 @@
 #include "renderer/base/resource_manager.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/impl/gl_model/gl_model_quad.h"
+#include "renderer/impl/render_model/render_model_quad.h"
 
 namespace ark {
 

@@ -28,18 +28,17 @@ public:
                 return 3;
         }
         {
-            OCSQueue<uint32_t> queue;
-            queue.push(0);
-            queue.push(1);
-            queue.push(2);
+            OCSQueue<size_t> queue;
+            queue.add(0);
+            queue.add(1);
+            queue.add(2);
 
-            std::queue<uint32_t> cleared = queue.clear();
-            uint32_t pos = 0;
-            while(!cleared.empty())
+            size_t size = queue.size();
+            for(size_t i = 0; i < size; ++i)
             {
-                if(cleared.front() != (pos++))
-                    return 3 + pos;
-                cleared.pop();
+                size_t data;
+                TESTCASE_VALIDATE(queue.pop(data));
+                TESTCASE_VALIDATE(data == i);
             }
         }
         return 0;

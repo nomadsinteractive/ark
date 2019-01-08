@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_IMPL_GL_MODEL_GL_MODEL_TEXT_H_
-#define ARK_RENDERER_IMPL_GL_MODEL_GL_MODEL_TEXT_H_
+#ifndef ARK_RENDERER_IMPL_RENDER_MODEL_RENDER_MODEL_TEXT_H_
+#define ARK_RENDERER_IMPL_RENDER_MODEL_RENDER_MODEL_TEXT_H_
 
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"

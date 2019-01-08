@@ -36,7 +36,7 @@ public:
             puts("No script interpreter installed");
             return -1;
         }
-        const sp<Readable> readable = Ark::instance().getResource("hello.py");
+        const sp<Readable> readable = Ark::instance().openAsset("hello.py");
         if(!readable) {
             puts("Cannot find hello.py");
             return -1;

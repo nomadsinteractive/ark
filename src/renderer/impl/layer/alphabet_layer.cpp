@@ -4,7 +4,7 @@
 
 #include "renderer/base/shader.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/impl/gl_model/gl_model_text.h"
+#include "renderer/impl/render_model/render_model_text.h"
 #include "renderer/impl/snippet/snippet_ucolor.h"
 
 namespace ark {

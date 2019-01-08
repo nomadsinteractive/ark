@@ -5,7 +5,7 @@
 #include "graphics/base/layer.h"
 
 #include "renderer/base/shader.h"
-#include "renderer/impl/gl_model/gl_model_quad.h"
+#include "renderer/impl/render_model/render_model_quad.h"
 
 namespace ark {
 

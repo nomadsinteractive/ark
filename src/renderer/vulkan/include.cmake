@@ -19,5 +19,6 @@ aux_source_directory(src/renderer/vulkan/util LOCAL_SRC_LIST)
 
 ark_add_denpendency(src/renderer/vulkan/3rdparty/glslang glslang src/renderer/vulkan/3rdparty/glslang/glslang/Public)
 ark_link_libraries(SPIRV)
+ark_export_dependency_libraries(SPIRV OGLCompiler OSDependent)
 
 ark_gen_plugin_class(vulkan builtin ark::vulkan vulkan_plugin src/renderer/vulkan)

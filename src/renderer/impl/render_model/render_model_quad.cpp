@@ -1,4 +1,4 @@
-#include "renderer/impl/gl_model/gl_model_quad.h"
+#include "renderer/impl/render_model/render_model_quad.h"
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"

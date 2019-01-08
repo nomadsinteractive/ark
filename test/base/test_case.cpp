@@ -12,7 +12,7 @@ namespace unittest {
 
 sp<BeanFactory> TestCase::getBeanFactory() const
 {
-    const document doc = Documents::loadFromReadable(Ark::instance().getResource("application.xml"));
+    const document doc = Documents::loadFromReadable(Ark::instance().openAsset("application.xml"));
     if(!doc) {
         printf("application.xml not found!\n");
         return nullptr;

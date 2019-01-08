@@ -1,4 +1,4 @@
-#include "renderer/impl/gl_model/gl_model_nine_patch.h"
+#include "renderer/impl/render_model/render_model_nine_patch.h"
 
 #include "core/dom/document.h"
 
