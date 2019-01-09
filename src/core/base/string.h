@@ -18,7 +18,6 @@ public:
     DEFAULT_COPY_AND_ASSIGN(String);
 
     String(const char* s);
-    String(size_type length, char fill);
     String(const std::string& str);
     String(std::string&& str);
     ~String();

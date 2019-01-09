@@ -50,7 +50,7 @@ std::map<uint32_t, PipelineInput::Stream>& PipelineInput::streams()
     return _streams;
 }
 
-uint32_t PipelineInput::samplerCount() const
+size_t PipelineInput::samplerCount() const
 {
     return _sampler_count;
 }

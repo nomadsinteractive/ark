@@ -17,30 +17,6 @@
 
 namespace ark {
 
-namespace {
-
-class RenderCommandImpl : public RenderCommand {
-public:
-    RenderCommandImpl(DrawingContext context, const sp<Shader>& shader)
-        : _context(std::move(context)), _shader(shader) {
-    }
-
-    virtual void draw(GraphicsContext& graphicsContext) override {
-        _context.upload(graphicsContext);
-        const sp<Pipeline> pipeline = _shader->buildPipeline(graphicsContext, _context._shader_bindings);
-        const sp<RenderCommand> renderCommand = pipeline->active(graphicsContext, _context);
-        _context.preDraw(graphicsContext);
-        renderCommand->draw(graphicsContext);
-        _context.postDraw(graphicsContext);
-    }
-
-private:
-    DrawingContext _context;
-    sp<Shader> _shader;
-};
-
-}
-
 Layer::Stub::Stub(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _model(model), _shader(shader), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
       _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_model->makeShaderBindings(_render_controller, shader->pipelineLayout())),
@@ -97,7 +73,8 @@ sp<RenderCommand> Layer::Snapshot::render(float x, float y)
         DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos), _stub->_shader_bindings->vertexBuffer().snapshot(buf.vertices().makeUploader()), buf.indices(), static_cast<int32_t>(_items.size()));
         if(buf.isInstanced())
             drawingContext._instanced_array_snapshots = buf.makeInstancedBufferSnapshots();
-        return _stub->_resource_loader_context->objectPool()->obtain<RenderCommandImpl>(std::move(drawingContext), _stub->_shader);
+
+        return drawingContext.toRenderCommand(_stub->_resource_loader_context->objectPool());
     }
     return nullptr;
 }

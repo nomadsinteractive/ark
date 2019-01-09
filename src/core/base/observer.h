@@ -9,7 +9,9 @@ namespace ark {
 
 class Observer : public Boolean {
 public:
-    Observer(bool dirty = true, const sp<Runnable>& handler = nullptr, bool oneshot = false);
+    Observer(const sp<Runnable>& callback, bool oneshot);
+    Observer(bool dirty = true, const sp<Runnable>& callback = nullptr, bool oneshot = false);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Observer);
 
     virtual bool val() override;
 
@@ -18,7 +20,7 @@ public:
     void update();
 
 private:
-    sp<Runnable> _handler;
+    sp<Runnable> _callback;
     bool _oneshot;
     bool _dirty;
 

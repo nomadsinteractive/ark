@@ -23,6 +23,7 @@ PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipe
 void PipelineBuildingContext::loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
 {
     loadPredefinedUniform(factory, args, manifest);
+    loadPredefinedSampler(factory, args, manifest);
     loadPredefinedAttribute(manifest);
 }
 
@@ -186,6 +187,26 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
             FATAL("Unknow type \"%s\"", type.c_str());
         }
         addUniform(name, glType, flatable, flatable.as<Notifier>(), binding);
+    }
+}
+
+void PipelineBuildingContext::loadPredefinedSampler(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
+{
+    char buf[16];
+    uint32_t binding = 0;
+
+    for(const document& i : manifest->children("sampler"))
+    {
+        String name = Documents::getAttribute(i, Constants::Attributes::NAME);
+        const sp<Texture> texture = factory.ensure<Texture>(i, args);
+        if(!name)
+        {
+            std::snprintf(buf, sizeof(buf), "u_Texture%d", binding);
+            name = buf;
+        }
+        DCHECK(!_samplers.has(name), "Sampler \"%s\" redefined", name.c_str());
+        _samplers.push_back(name, texture);
+        binding++;
     }
 }
 

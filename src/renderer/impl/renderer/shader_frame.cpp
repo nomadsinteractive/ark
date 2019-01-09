@@ -8,15 +8,14 @@
 #include "graphics/impl/vec/vec2_impl.h"
 
 #include "renderer/base/buffer.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_input.h"
+#include "renderer/base/resource_loader_context.h"
+#include "renderer/base/resource_manager.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
-#include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/uploader.h"
 #include "renderer/util/index_buffers.h"
-
-#include "renderer/opengl/render_command/gl_draw_elements.h"
 
 namespace ark {
 
@@ -24,15 +23,16 @@ ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const s
     : _size(size), _render_controller(resourceLoaderContext->renderController()), _shader(shader),
       _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
       _shader_bindings(sp<ShaderBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, _render_controller, shader->pipelineLayout())),
-      _array_buffer(_shader_bindings->vertexBuffer())
+      _vertex_buffer(_shader_bindings->vertexBuffer())
 {
 }
 
 void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
     const Buffer::Snapshot indexBuffer = IndexBuffers::snapshot(_shader_bindings->indexBuffer(), _render_controller->resourceManager(), Buffer::NAME_QUADS, 1);
-    const sp<Uploader> uploader = _object_pool->obtain<ByteArrayUploader>(getArrayBuffer(x, y));
-    renderRequest.addRequest(_object_pool->obtain<opengl::GLDrawElements>(DrawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _array_buffer.snapshot(uploader), indexBuffer, 0), _shader, GL_TRIANGLES));
+    const sp<Uploader> uploader = _object_pool->obtain<ByteArrayUploader>(getVertexBuffer(x, y));
+    DrawingContext drawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _vertex_buffer.snapshot(uploader), indexBuffer, 0);
+    renderRequest.addRequest(drawingContext.toRenderCommand(_object_pool));
 }
 
 const SafePtr<Size>& ShaderFrame::size()
@@ -40,7 +40,7 @@ const SafePtr<Size>& ShaderFrame::size()
     return _size;
 }
 
-bytearray ShaderFrame::getArrayBuffer(float x, float y) const
+bytearray ShaderFrame::getVertexBuffer(float x, float y) const
 {
     float top = y + _size->height(), bottom = y;
     uint16_t uvtop = 0xffff, uvbottom = 0;
@@ -54,8 +54,8 @@ bytearray ShaderFrame::getArrayBuffer(float x, float y) const
     ip[23] = uvbottom;
     ip[30] = 0xffff;
     ip[31] = uvtop;
-    const bytearray preallocated = _memory_pool->allocate(64);
-    memcpy(preallocated->buf(), buffer.buf(), 16 * sizeof(GLfloat));
+    const bytearray preallocated = _memory_pool->allocate(buffer.size());
+    memcpy(preallocated->buf(), buffer.buf(), buffer.size());
     return preallocated;
 }
 

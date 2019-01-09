@@ -19,6 +19,7 @@ list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(impl LOCAL_SRC_LIST)
 aux_source_directory(impl/shapes LOCAL_SRC_LIST)
+aux_source_directory(impl/importer LOCAL_SRC_LIST)
 
 ark_setup_tools(ark_gen_plugin_class)
 ark_gen_plugin_class(box2d core ark::plugin::box2d box2d_plugin impl)

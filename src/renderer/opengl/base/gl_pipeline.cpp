@@ -16,7 +16,6 @@
 #include "renderer/base/uniform.h"
 #include "renderer/inf/resource.h"
 
-#include "renderer/opengl/render_command/gl_draw_elements.h"
 #include "renderer/opengl/util/gl_util.h"
 
 #include "platform/platform.h"
@@ -41,7 +40,7 @@ uint64_t GLPipeline::id()
     return _id;
 }
 
-void GLPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
+void GLPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
     for(const sp<PipelineInput::UBO>& i : _pipeline_input->ubos())
         i->notify();
@@ -253,9 +252,11 @@ String GLPipeline::getInformationLog() const
     GLint length = 0;
     glGetProgramiv(_id, GL_INFO_LOG_LENGTH, &length);
 
-    String log(length, 0);
-    glGetProgramInfoLog(_id, log.length(), &length, (GLchar*) log.c_str());
-    return log;
+    size_t len = static_cast<size_t>(length);
+    std::vector<GLchar> infos(len + 1);
+    glGetProgramInfoLog(_id, length, &length, infos.data());
+    infos.back() = 0;
+    return infos.data();
 }
 
 sp<GLPipeline::Shader> GLPipeline::makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum type, const String& source) const
@@ -393,12 +394,15 @@ GLuint GLPipeline::Shader::compile(uint32_t version, GLenum type, const String& 
     {
         GLint length;
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-        String log(length, ' ');
-        glGetShaderInfoLog(id, length, &length, (GLchar*) log.c_str());
+
+        size_t len = static_cast<size_t>(length);
+        std::vector<GLchar> logs(len + 1);
+        glGetShaderInfoLog(id, length, &length, logs.data());
+        logs.back() = 0;
         StringBuffer sb;
         for(uint32_t i = 0; i <= slen; i++)
             sb << src[i] << '\n';
-        DFATAL("%s\n\n%s", log.c_str(), sb.str().c_str());
+        DFATAL("%s\n\n%s", logs.data(), sb.str().c_str());
         return 0;
     }
     return id;

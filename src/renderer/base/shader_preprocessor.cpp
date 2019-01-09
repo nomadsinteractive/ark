@@ -37,7 +37,7 @@ ShaderPreprocessor::ShaderPreprocessor(ShaderType type)
 
 void ShaderPreprocessor::addSource(const String& source)
 {
-    *_before_main = Strings::sprintf("    %s\n", source.c_str());
+    *_before_main = Strings::sprintf("    %s\n%s", source.c_str(), _before_main->c_str());
 }
 
 void ShaderPreprocessor::addModifier(const String& modifier)

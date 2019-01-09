@@ -12,7 +12,7 @@ public:
 
     virtual void import(Atlas& atlas, const ResourceLoaderContext& resourceLoaderContext, const document& manifest) override;
 
-//  [[plugin::builder::by-value("texture-packer")]]
+//  [[plugin::builder::by-value("generic-xml")]]
     class DICTIONARY : public Builder<Atlas::Importer> {
     public:
         DICTIONARY() = default;

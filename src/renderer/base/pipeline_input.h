@@ -86,7 +86,7 @@ public:
     const std::map<uint32_t, Stream>& streams() const;
     std::map<uint32_t, Stream>& streams();
 
-    uint32_t samplerCount() const;
+    size_t samplerCount() const;
 
     void addAttribute(String name, Attribute attribute);
 
@@ -100,7 +100,7 @@ public:
 private:
     std::vector<sp<UBO>> _ubos;
     std::map<uint32_t, Stream> _streams;
-    uint32_t _sampler_count;
+    size_t _sampler_count;
 
     friend class PipelineLayout;
 };

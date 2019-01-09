@@ -35,6 +35,7 @@ public:
 
     std::map<String, Attribute> _attributes;
     Table<String, sp<Uniform>> _uniforms;
+    Table<String, sp<Texture>> _samplers;
 
     List<std::pair<String, String>> _vertex_in;
     List<std::pair<String, String>> _vertex_out;
@@ -55,6 +56,7 @@ private:
 
     void loadPredefinedAttribute(const document& manifest);
     void loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
+    void loadPredefinedSampler(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
 };
 
 }

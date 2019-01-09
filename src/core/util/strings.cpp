@@ -389,10 +389,14 @@ bool wStrToUtf8(const wchar_t* wideStr, size_t maxCount, String& utf8Str)
     if(!utf16ToUtf8(nullptr, destLen, wideStr, maxCount))
         return false;
 
-    utf8Str = String(destLen, 0);
-    DCHECK(utf8Str.length() == destLen, "Cannot allocate %d bytes, out of memory?", destLen);
+    std::vector<char> buf(destLen + 1);
+    buf.back() = 0;
+//    utf8Str = String(destLen, 0);
+//    DCHECK(utf8Str.length() == destLen, "Cannot allocate %d bytes, out of memory?", destLen);
 
-    return utf16ToUtf8(const_cast<char*>(utf8Str.c_str()), destLen, wideStr, maxCount);
+    bool r = utf16ToUtf8(buf.data(), destLen, wideStr, maxCount);
+    utf8Str = buf.data();
+    return r;
 }
 
 bool wStrToUtf8(const std::wstring& wideStr, String& utf8Str)

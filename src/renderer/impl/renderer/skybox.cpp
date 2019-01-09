@@ -21,37 +21,6 @@
 
 namespace ark {
 
-namespace {
-
-class RenderCommandSkybox : public RenderCommand {
-public:
-    RenderCommandSkybox(DrawingContext context, const sp<Shader>& shader, const Matrix& view, const Matrix& projection)
-        : _context(std::move(context)), _shader(shader), _view(view), _projection(projection) {
-    }
-
-    virtual void draw(GraphicsContext& graphicsContext) override {
-        _context.upload(graphicsContext);
-        _shader->active(graphicsContext, _context);
-        _context.preDraw(graphicsContext);
-
-        opengl::GLPipeline* pipeline = static_cast<opengl::GLPipeline*>(_shader->pipeline().get());
-        pipeline->glUpdateMatrix(graphicsContext, "u_View", _view);
-        pipeline->glUpdateMatrix(graphicsContext, "u_Projection", _projection);
-
-        glDrawElements(GL_TRIANGLES, _context._count, GLIndexType, nullptr);
-        _context.postDraw(graphicsContext);
-    }
-
-private:
-    DrawingContext _context;
-    sp<Shader> _shader;
-    Matrix _view;
-    Matrix _projection;
-};
-
-}
-
-
 Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _size(size), _shader(shader),
       _shader_bindings(sp<ShaderBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, resourceLoaderContext->renderController(), shader->pipelineLayout(), resourceLoaderContext->renderController()->makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(GLUtil::makeUnitCubeVertices())), resourceLoaderContext->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC))),
@@ -63,9 +32,8 @@ Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>
 
 void Skybox::render(RenderRequest& renderRequest, float x, float y)
 {
-    const Matrix view = _shader->camera()->view()->matrix();
-    const Matrix projection = _shader->camera()->projection()->matrix();
-    renderRequest.addRequest(_object_pool->obtain<RenderCommandSkybox>(DrawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _shader_bindings->vertexBuffer().snapshot(), _index_buffer, 0), _shader, view, projection));
+    DrawingContext drawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _shader_bindings->vertexBuffer().snapshot(), _index_buffer, 0);
+    renderRequest.addRequest(drawingContext.toRenderCommand(_object_pool));
 }
 
 const SafePtr<Size>& Skybox::size()

@@ -132,7 +132,8 @@ PyObject* ark_isFile(PyObject* /*self*/, PyObject* args)
 
 PyObject* ark_dirSeparator(PyObject* /*self*/, PyObject* /*args*/)
 {
-    return PythonInterpreter::instance()->fromType<String>(String(1, Platform::dirSeparator()));
+    const char ds[2] = {Platform::dirSeparator(), 0};
+    return PythonInterpreter::instance()->fromType<String>(ds);
 }
 
 PyObject* ark_getRefManager(PyObject* /*self*/, PyObject* /*args*/)

@@ -4,8 +4,13 @@
 
 namespace ark {
 
-Observer::Observer(bool dirty, const sp<Runnable>& handler, bool oneshot)
-    : _handler(handler), _oneshot(oneshot), _dirty(dirty)
+Observer::Observer(const sp<Runnable>& callback, bool oneshot)
+    : Observer(true, callback, oneshot)
+{
+}
+
+Observer::Observer(bool dirty, const sp<Runnable>& callback, bool oneshot)
+    : _callback(callback), _oneshot(oneshot), _dirty(dirty)
 {
 }
 
@@ -24,11 +29,11 @@ bool Observer::dirty()
 void Observer::update()
 {
     _dirty = true;
-    sp<Runnable> handler = std::move(_handler);
-    if(handler)
-        handler->run();
+    sp<Runnable> callback = std::move(_callback);
+    if(callback)
+        callback->run();
     if(!_oneshot)
-        _handler = std::move(handler);
+        _callback = std::move(callback);
 }
 
 }

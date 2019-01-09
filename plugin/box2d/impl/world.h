@@ -2,6 +2,7 @@
 #define ARK_PLUGIN_BOX2D_IMPL_WORLD_H_
 
 #include <unordered_map>
+#include <vector>
 
 #include <Box2D/Box2D.h>
 
@@ -25,6 +26,16 @@ namespace plugin {
 namespace box2d {
 
 class ARK_PLUGIN_BOX2D_API World : public Object, public Runnable, public Collider, Implements<World, Object, Runnable, Collider> {
+public:
+
+    class Importer {
+    public:
+        virtual ~Importer() = default;
+
+        virtual void import(World& world) = 0;
+
+    };
+
 public:
     World(const b2Vec2& gravity, float ppmX, float ppmY);
     DEFAULT_COPY_AND_ASSIGN(World);
@@ -69,6 +80,8 @@ public:
         document _manifest;
         sp<ResourceLoaderContext> _resource_loader_context;
 
+        std::vector<sp<Builder<Importer>>> _importers;
+
         sp<Builder<Numeric>> _ppmx, _ppmy;
         sp<Builder<Numeric>> _gravity_x, _gravity_y;
         SafePtr<Builder<Boolean>> _expired;
@@ -85,10 +98,10 @@ public:
         BUILDER_IMPL1 _delegate;
     };
 
-private:
     struct BodyManifest {
         BodyManifest();
         BodyManifest(const sp<Shape>& shape, float density, float friction);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(BodyManifest);
 
         sp<Shape> shape;
         float density;
@@ -99,6 +112,9 @@ private:
         int16_t group;
     };
 
+    void setBodyManifest(int32_t id, const BodyManifest& bodyManifest);
+
+private:
     class ContactListenerImpl : public b2ContactListener {
     public:
         virtual void BeginContact(b2Contact* contact);
@@ -150,6 +166,7 @@ private:
 
     friend class BUILDER_IMPL1;
     friend class Body;
+    friend class Importer;
 };
 
 }

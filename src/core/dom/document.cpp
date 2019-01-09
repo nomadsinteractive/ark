@@ -23,6 +23,13 @@ const document& Document::getChild(const String& name) const
     return document::null();
 }
 
+const document& Document::ensureChild(const String& name) const
+{
+    const document& child = getChild(name);
+    DCHECK(child, "Document has no child \"%s\"", name.c_str());
+    return child;
+}
+
 void Document::addChild(const sp<Document>& doc)
 {
     auto iter = _children_by_name.find(doc->name());

@@ -22,13 +22,6 @@ namespace ark {
 
 class ARK_API BeanFactory {
 private:
-    template<typename T> class NullBuilder : public Builder<T> {
-    public:
-        virtual sp<T> build(const sp<Scope>& /*args*/) override {
-            return nullptr;
-        }
-    };
-
     template<typename T> class Worker {
     public:
         Worker(const WeakPtr<Scope>& references, const sp<Dictionary<document>>& documentById)
@@ -391,7 +384,7 @@ public:
     const sp<Scope>& references() const;
 
     template<typename T> sp<Builder<T>> getNullBuilder() const {
-        static const sp<Builder<T>> nb = sp<NullBuilder<T>>::make();
+        static const sp<Builder<T>> nb = sp<typename Builder<T>::Null>::make();
         return nb;
     }
 

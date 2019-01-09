@@ -127,11 +127,20 @@ void World::track(const sp<Joint>& joint) const
     _stub->_destruction_listener.track(joint);
 }
 
+void World::setBodyManifest(int32_t id, const World::BodyManifest& bodyManifest)
+{
+    DWARN(_stub->_body_manifests.find(id) == _stub->_body_manifests.end(), "Overriding existing body: %d", id);
+    _stub->_body_manifests[id] = bodyManifest;
+}
+
 World::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _expired(factory.getBuilder<Boolean>(manifest, Constants::Attributes::EXPIRED))
 {
     BeanUtils::split<Numeric, Numeric>(factory, manifest, "pixel-per-meter", _ppmx, _ppmy);
     BeanUtils::split<Numeric, Numeric>(factory, manifest, "gravity", _gravity_x, _gravity_y);
+
+    for(const document& i : _manifest->children("import"))
+        _importers.push_back(_factory.ensureBuilder<Importer>(i));
 }
 
 sp<World> World::BUILDER_IMPL1::build(const sp<Scope>& args)
@@ -148,6 +157,13 @@ sp<World> World::BUILDER_IMPL1::build(const sp<Scope>& args)
         bodyManifest.group = Documents::getAttribute<int16_t>(i, "group", 0);
         world->_stub->_body_manifests[type] = bodyManifest;
     }
+
+    for(const sp<Builder<Importer>>& i : _importers)
+    {
+        const sp<Importer> importer = i->build(args);
+        importer->import(world);
+    }
+
     const sp<Boolean> expired = _expired->build(args);
     _resource_loader_context->renderController()->addPreUpdateRequest(world->_stub, expired ? expired : BooleanUtil::__or__(_resource_loader_context->disposed(), sp<Boolean>::adopt(new BooleanByWeakRef<World::Stub>(world->_stub, 1))));
     return world;

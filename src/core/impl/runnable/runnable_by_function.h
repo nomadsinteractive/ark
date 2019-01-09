@@ -9,8 +9,7 @@ namespace ark {
 
 class RunnableByFunction : public Runnable {
 public:
-    RunnableByFunction(const std::function<void()>& function);
-    RunnableByFunction(std::function<void()>&& function);
+    RunnableByFunction(std::function<void()> function);
 
     virtual void run() override;
 

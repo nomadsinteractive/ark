@@ -41,7 +41,7 @@ public:
     };
 
 private:
-    bytearray getArrayBuffer(float x, float y) const;
+    bytearray getVertexBuffer(float x, float y) const;
 
 private:
     SafePtr<Size> _size;
@@ -51,7 +51,7 @@ private:
     sp<ObjectPool> _object_pool;
     sp<MemoryPool> _memory_pool;
     sp<ShaderBindings> _shader_bindings;
-    Buffer _array_buffer;
+    Buffer _vertex_buffer;
 };
 
 }

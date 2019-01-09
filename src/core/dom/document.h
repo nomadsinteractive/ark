@@ -34,6 +34,8 @@ public:
 //  [[script::bindings::auto]]
     const document& getChild(const String& name) const;
 //  [[script::bindings::auto]]
+    const document& ensureChild(const String& name) const;
+//  [[script::bindings::auto]]
     void addChild(const sp<Document>& doc);
 
 //  [[script::bindings::property]]

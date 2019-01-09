@@ -2,12 +2,7 @@
 
 namespace ark {
 
-RunnableByFunction::RunnableByFunction(const std::function<void()>& function)
-    : _function(function)
-{
-}
-
-RunnableByFunction::RunnableByFunction(std::function<void()>&& function)
+RunnableByFunction::RunnableByFunction(std::function<void()> function)
     : _function(std::move(function))
 {
 }

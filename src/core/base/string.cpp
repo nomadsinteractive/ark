@@ -27,11 +27,6 @@ String::String(std::string&& str)
 {
 }
 
-String::String(size_type length, char fill)
-    : _str(length, fill)
-{
-}
-
 String::~String()
 {
 }
