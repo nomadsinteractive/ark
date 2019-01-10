@@ -1,4 +1,4 @@
-#include "plugin/box2d/impl/importer/importer_generic_xml.h"
+#include "plugin/box2d/impl/importer/body_importer_generic_xml.h"
 
 
 #include "core/base/bean_factory.h"

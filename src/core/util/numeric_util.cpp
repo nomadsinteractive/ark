@@ -295,11 +295,6 @@ sp<Numeric> NumericUtil::expect(const sp<Numeric>& self, const sp<Expectation>& 
     return sp<Expect>::make(self, expectation);
 }
 
-sp<Numeric> NumericUtil::ternary(const sp<Numeric>& self, const sp<Boolean>& condition, const sp<Numeric>& other)
-{
-    return sp<VariableTernary<float>>::make(condition, self, other);
-}
-
 sp<Numeric> NumericUtil::makeStalker(const sp<Numeric>& self, float s0, float eta, const sp<Numeric>& duration)
 {
     return sp<Stalker>::make(duration ? duration : Ark::instance().clock()->duration(), self, s0, eta);

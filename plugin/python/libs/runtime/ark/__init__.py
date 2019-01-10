@@ -123,7 +123,11 @@ class Collider:
 
 
 class Boolean(_Var):
-    pass
+    def __init__(self, value):
+        _Var.__init__(self, value)
+
+    def ternary(self, positive, negative):
+        return None
 
 
 class Integer(_Var):
@@ -138,9 +142,6 @@ class Numeric(_Var):
         return None
 
     def make_stalker(self, s0, eta):
-        return None
-
-    def ternary(self, condition, _else):
         return None
 
     def __add__(self, other):

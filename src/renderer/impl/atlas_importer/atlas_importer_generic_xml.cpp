@@ -1,4 +1,4 @@
-#include "renderer/impl/atlas_importer/atlas_importer_texture_packer.h"
+#include "renderer/impl/atlas_importer/atlas_importer_generic_xml.h"
 
 #include "core/util/documents.h"
 
@@ -33,7 +33,5 @@ sp<Atlas::Importer> AtlasImporterTexturePacker::DICTIONARY::build(const sp<Scope
 {
     return sp<AtlasImporterTexturePacker>::make();
 }
-
-
 
 }

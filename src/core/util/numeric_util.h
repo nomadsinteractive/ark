@@ -101,8 +101,6 @@ public:
     static sp<Numeric> boundary(const sp<Numeric>& self, const sp<Numeric>& boundary);
 //[[script::bindings::classmethod]]
     static sp<Numeric> expect(const sp<Numeric>& self, const sp<Expectation>& expectation);
-//[[script::bindings::classmethod]]
-    static sp<Numeric> ternary(const sp<Numeric>& self, const sp<Boolean>& condition, const sp<Numeric>& other);
 
 //[[script::bindings::classmethod]]
     static sp<Numeric> makeStalker(const sp<Numeric>& self, float s0, float eta, const sp<Numeric>& duration = nullptr);
