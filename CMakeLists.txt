@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.7)
 
 include(CMakeDependentOption)
 
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libs")
+
 set(ARK_SRC_DIR ${PROJECT_SOURCE_DIR})
 set(ARK_TOOLS_DIR ${ARK_SRC_DIR}/tools/cmake)
 set(ARK_PLUGIN_DIR ${ARK_SRC_DIR}/plugin)

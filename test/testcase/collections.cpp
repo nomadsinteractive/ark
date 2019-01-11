@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "core/collection/filtered_list.h"
+#include "core/collection/bitwise_trie.h"
 #include "core/concurrent/lock_free_stack.h"
 #include "core/epi/lifecycle.h"
 
@@ -69,6 +70,30 @@ public:
 
         for(uint32_t i : slist.clear())
             std::cout << i << std::endl;
+
+
+        {
+            BitwiseTrie<uint32_t, uint32_t> trie;
+
+            for(uint32_t i = 1; i < 32; ++i)
+                trie.put(i, i);
+
+            for(uint32_t i = 9; i < 16; ++i)
+                trie.put(1 << i, 1 << i);
+
+            for(uint32_t i = 0; i < 16; ++i)
+            {
+                uint32_t key = (1 << i) - 1;
+                uint32_t* val = trie.find(key);
+                printf("key: %d, value: %p(%d)\n", key, val, val ? *val : 0);
+            }
+
+//            trie.put(1, 1);
+//            trie.put(4, 4);
+
+//            uint32_t* val = trie.find(4);
+//            printf("key: %d, value: %p(%d)\n", 1, val, val ? *val : 0);
+        }
 
         return 0;
     }
