@@ -85,14 +85,15 @@ public:
             {
                 uint32_t key = (1 << i) - 1;
                 uint32_t* val = trie.find(key);
-                printf("key: %d, value: %p(%d)\n", key, val, val ? *val : 0);
+                if(key == 0)
+                    TESTCASE_VALIDATE(*val == 1);
+                else if(key < 32)
+                    TESTCASE_VALIDATE(*val == key);
+                else if(key < 512)
+                    TESTCASE_VALIDATE(*val == 512);
+                else
+                    TESTCASE_VALIDATE(*val == key + 1);
             }
-
-//            trie.put(1, 1);
-//            trie.put(4, 4);
-
-//            uint32_t* val = trie.find(4);
-//            printf("key: %d, value: %p(%d)\n", 1, val, val ? *val : 0);
         }
 
         return 0;
