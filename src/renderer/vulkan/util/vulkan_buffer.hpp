@@ -12,9 +12,9 @@
 
 #include <vector>
 
-#include <vulkan/vulkan.h>
-
 #include "vulkan_tools.h"
+
+#include "platform/vulkan/vulkan.h"
 
 namespace vks
 {	

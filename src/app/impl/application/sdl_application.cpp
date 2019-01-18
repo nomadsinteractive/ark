@@ -231,11 +231,6 @@ private:
 
 }
 
-#ifdef _WIN32
-    HINSTANCE gInstance;
-    HWND gWnd;
-#endif
-
 SDLApplication::SDLApplication(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport, uint32_t windowFlag)
     : Application(applicationDelegate, applicationContext, width, height, viewport), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex())
       , _message_loop_rendering(sp<MessageLoopDefault>::make(Platform::getSteadyClock())), _controller(sp<SDLApplicationController>::make())
@@ -281,9 +276,11 @@ int SDLApplication::run()
     DASSERT(result);
 
     RenderContext::Info& info = _application_context->renderEngine()->renderContext()->info();
-#ifdef _WIN32
-    gInstance = wmInfo.info.win.hinstance;
-    gWnd = wmInfo.info.win.window;
+
+#if defined(ARK_PLATFORM_WINDOWS)
+    info.windows.hinstance = wmInfo.info.win.hinstance;
+    info.windows.hdc = wmInfo.info.win.hdc;
+    info.windows.window = wmInfo.info.win.window;
 #elif defined (ARK_PLATFORM_DARWIN)
     info.darwin.window = wmInfo.info.cocoa.window;
 #endif

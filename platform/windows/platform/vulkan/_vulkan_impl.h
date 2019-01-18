@@ -1,0 +1,6 @@
+#ifndef _PLATFORM_WINDOWS_PLATFORM_VULKAN__VULKAN_IMPL_H
+#define _PLATFORM_WINDOWS_PLATFORM_VULKAN__VULKAN_IMPL_H
+
+#include <vulkan/vulkan.h>
+
+#endif

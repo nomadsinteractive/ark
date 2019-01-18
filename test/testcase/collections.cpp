@@ -6,7 +6,7 @@
 
 #include "core/collection/filtered_list.h"
 #include "core/collection/bitwise_trie.h"
-#include "core/concurrent/lock_free_stack.h"
+#include "core/concurrent/lf_stack.h"
 #include "core/epi/lifecycle.h"
 
 #include "test/base/test_case.h"
@@ -64,7 +64,7 @@ public:
             sum += *i.get();
         TESTCASE_VALIDATE(sum == 1);
 
-        LockFreeStack<uint32_t> slist;
+        LFStack<uint32_t> slist;
         slist.push(10);
         slist.push(20);
 
@@ -75,11 +75,14 @@ public:
         {
             BitwiseTrie<uint32_t, uint32_t> trie;
 
-            for(uint32_t i = 1; i < 32; ++i)
+            for(uint32_t i = 0; i < 32; ++i)
                 trie.put(i, i);
 
-            for(uint32_t i = 9; i < 16; ++i)
+            for(uint32_t i = 8; i < 16; ++i)
                 trie.put(1 << i, 1 << i);
+
+            trie.remove(0);
+            trie.remove(256);
 
             for(uint32_t i = 0; i < 16; ++i)
             {

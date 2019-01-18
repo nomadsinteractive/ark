@@ -4,7 +4,7 @@
 #include <list>
 
 #include "core/base/api.h"
-#include "core/concurrent/lock_free_stack.h"
+#include "core/concurrent/lf_stack.h"
 #include "core/forwarding.h"
 #include "core/inf/message_loop.h"
 #include "core/types/shared_ptr.h"
@@ -46,7 +46,7 @@ private:
 private:
     sp<Variable<uint64_t>> _ticker;
     std::list<Task> _tasks;
-    LockFreeStack<Task> _scheduled;
+    LFStack<Task> _scheduled;
 };
 
 }

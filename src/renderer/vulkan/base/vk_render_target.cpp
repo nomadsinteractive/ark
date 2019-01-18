@@ -11,15 +11,12 @@
 #include "renderer/vulkan/base/vk_descriptor_pool.h"
 #include "renderer/vulkan/util/vk_util.h"
 
+#ifdef ARK_PLATFORM_DARWIN
 struct NSView;
 #include "platform/darwin/bridge.h"
+#endif
 
 namespace ark {
-
-#ifdef _WIN32
-    extern HINSTANCE gInstance;
-    extern HWND gWnd;
-#endif
 
 namespace vulkan {
 
@@ -189,12 +186,13 @@ void VKRenderTarget::onSurfaceChanged(uint32_t width, uint32_t height)
 
 void VKRenderTarget::initSwapchain(const RenderContext& renderContext)
 {
+    const RenderContext::Info& info = renderContext.info();
 #if defined(_WIN32)
-    _swap_chain.initSurface(gInstance, gWnd);
+    _swap_chain.initSurface(info.windows.hinstance, info.windows.window);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
     _swap_chain.initSurface(androidApp->window);
 #elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK))
-    _swap_chain.initSurface(getContentView(renderContext.info().darwin.window));
+    _swap_chain.initSurface(getContentView(info.darwin.window));
 #elif defined(_DIRECT2DISPLAY)
     _swap_chain.initSurface(width, height);
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)

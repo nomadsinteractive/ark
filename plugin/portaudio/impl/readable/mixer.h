@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "core/concurrent/lock_free_stack.h"
+#include "core/concurrent/lf_stack.h"
 #include "core/inf/array.h"
 #include "core/inf/readable.h"
 #include "core/types/shared_ptr.h"
@@ -44,7 +44,7 @@ private:
     void ensureToneMapRange(int32_t value);
 
 private:
-    LockFreeStack<sp<Source>> _sources;
+    LFStack<sp<Source>> _sources;
 
     array<int16_t> _buffer;
     array<int32_t> _buffer_hdr;

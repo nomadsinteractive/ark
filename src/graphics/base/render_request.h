@@ -16,7 +16,7 @@ namespace ark {
 class RenderRequest {
 public:
     RenderRequest() = default;
-    RenderRequest(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, LockFreeStack<RenderRequest>& renderRequestRecycler);
+    RenderRequest(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, LFStack<RenderRequest>& renderRequestRecycler);
     DEFAULT_COPY_AND_ASSIGN(RenderRequest);
 
     void start(const sp<RenderCommandPipeline>& renderCommandPipeline);
@@ -27,7 +27,7 @@ public:
 
 public:
     struct Stub {
-        Stub(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, LockFreeStack<RenderRequest>& renderRequestRecycler);
+        Stub(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, LFStack<RenderRequest>& renderRequestRecycler);
 
         void start(const sp<RenderCommandPipeline>& renderCommandPipeline);
         void onJobDone(const sp<Stub>& self);
@@ -38,7 +38,7 @@ public:
         sp<RenderCommandPipeline> _render_command_pipe_line;
         sp<SurfaceController> _surface_controller;
 
-        LockFreeStack<RenderRequest>& _render_request_recycler;
+        LFStack<RenderRequest>& _render_request_recycler;
 
         ObjectPool _object_pool;
         std::atomic<int32_t> _background_renderer_count;

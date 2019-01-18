@@ -6,7 +6,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/concurrent/lock_free_stack.h"
+#include "core/concurrent/lf_stack.h"
 #include "core/inf/array.h"
 #include "core/types/shared_ptr.h"
 
@@ -58,7 +58,7 @@ private:
         sp<Page> lockPage();
 
     private:
-        LockFreeStack<sp<Page>> _pages;
+        LFStack<sp<Page>> _pages;
         size_t _page_size;
 
         std::atomic<int32_t> _page_ttl;

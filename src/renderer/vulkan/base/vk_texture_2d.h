@@ -1,8 +1,6 @@
 #ifndef ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_2D_H_
 #define ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_2D_H_
 
-#include <vulkan/vulkan.h>
-
 #include "core/epi/notifier.h"
 #include "core/types/shared_ptr.h"
 
@@ -13,6 +11,8 @@
 #include "renderer/inf/resource.h"
 
 #include "renderer/vulkan/forward.h"
+
+#include "platform/vulkan/vulkan.h"
 
 namespace ark {
 namespace vulkan {

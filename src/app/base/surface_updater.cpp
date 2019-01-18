@@ -6,7 +6,7 @@
 namespace ark {
 
 SurfaceUpdater::SurfaceUpdater(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController)
-    : _executor(executor), _surface_controller(surfaceController), _render_request_recycler(sp<LockFreeStack<RenderRequest>>::make())
+    : _executor(executor), _surface_controller(surfaceController), _render_request_recycler(sp<LFStack<RenderRequest>>::make())
 {
 }
 

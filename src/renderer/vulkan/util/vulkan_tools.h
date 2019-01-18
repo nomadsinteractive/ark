@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include "vulkan/vulkan.h"
 #include "vulkan_initializers.hpp"
 
 #include <math.h>
@@ -57,12 +56,6 @@
 		assert(res == VK_SUCCESS);																		\
 	}																									\
 }
-#endif
-
-#if defined(__ANDROID__)
-#define ASSET_PATH ""
-#else
-#define ASSET_PATH "./../data/"
 #endif
 
 namespace vks

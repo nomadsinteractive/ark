@@ -7,7 +7,7 @@
 #include "core/forwarding.h"
 #include "core/types/owned_ptr.h"
 #include "core/types/shared_ptr.h"
-#include "core/concurrent/lock_free_stack.h"
+#include "core/concurrent/lf_stack.h"
 #include "core/inf/dictionary.h"
 
 #include "graphics/forwarding.h"
@@ -92,7 +92,7 @@ private:
 
     sp<Recycler> _recycler;
 
-    LockFreeStack<PreparingGLResource> _preparing_items;
+    LFStack<PreparingGLResource> _preparing_items;
     std::set<ExpirableGLResource> _on_surface_ready_items;
 
     friend class RenderController;

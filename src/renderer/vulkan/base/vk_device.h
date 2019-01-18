@@ -3,13 +3,13 @@
 
 #include <vector>
 
-#include <vulkan/vulkan.h>
-
 #include "core/types/owned_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/vulkan/forward.h"
 #include "renderer/vulkan/util/vulkan_device.hpp"
+
+#include "platform/vulkan/vulkan.h"
 
 namespace ark {
 namespace vulkan {

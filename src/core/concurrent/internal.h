@@ -251,6 +251,130 @@ private:
     DISALLOW_COPY_AND_ASSIGN(_Recycler);
 };
 
+
+template<typename Node, typename T> class _ClearIterable {
+private:
+    class Deleter {
+    public:
+        Deleter(Node* node, Node* recycler)
+            : _node(node), _recycler(recycler) {
+        }
+
+        ~Deleter() {
+            Node* iter = _node;
+            while(iter)
+                iter = iter->dispose();
+            iter = _recycler;
+            while(iter)
+                iter = iter->dealloc();
+        }
+
+    private:
+        Node* _node;
+        Node* _recycler;
+    };
+
+public:
+    _ClearIterable(Node* node, Node* recycler)
+        : _node(node), _deleter(std::make_shared<Deleter>(node, recycler)) {
+    }
+    _ClearIterable(const _ClearIterable& other) = default;
+
+    class iterator {
+    public:
+        iterator(Node* node, std::shared_ptr<Deleter>& deleter)
+            : _node(node), _deleter(deleter) {
+        }
+
+        iterator(const iterator& other)
+            : _node(other._node), _deleter(other._deleter) {
+        }
+
+        T& operator *() {
+            return _node->data();
+        }
+
+        const iterator& operator ++ () {
+            _node = _node->next();
+            return *this;
+        }
+
+        const iterator operator ++ (int) {
+            FATAL("Illegal operator called");
+            return nullptr;
+        }
+
+        bool operator != (const iterator& other) const {
+            return _node != other._node;
+        }
+
+        bool operator == (const iterator& other) const {
+            return _node == other._node;
+        }
+
+    private:
+        Node* _node;
+        std::shared_ptr<Deleter> _deleter;
+    };
+
+    class const_iterator {
+    public:
+        const_iterator(const Node* node, std::shared_ptr<Deleter>& deleter)
+            : _node(node), _deleter(deleter) {
+        }
+
+        const_iterator(const const_iterator& other)
+            : _node(other._node), _deleter(other._deleter) {
+        }
+
+        const T& operator *() const {
+            return _node->_data;
+        }
+
+        const const_iterator& operator ++ () {
+            _node = _node->_next;
+            return *this;
+        }
+
+        const const_iterator operator ++ (int) {
+            FATAL("Illegal operator called");
+            return nullptr;
+        }
+
+        bool operator != (const const_iterator& other) const {
+            return _node != other._node;
+        }
+
+        bool operator == (const const_iterator& other) const {
+            return _node == other._node;
+        }
+
+    private:
+        const Node* _node;
+        std::shared_ptr<Deleter> _deleter;
+    };
+
+    iterator begin() {
+        return iterator(_node, _deleter);
+    }
+
+    iterator end() {
+        return iterator(nullptr, _deleter);
+    }
+
+    const_iterator begin() const {
+        return const_iterator(_node, _deleter);
+    }
+
+    const_iterator end() const {
+        return const_iterator(nullptr, _deleter);
+    }
+
+private:
+    Node* _node;
+    std::shared_ptr<Deleter> _deleter;
+};
+
 }
 }
 }

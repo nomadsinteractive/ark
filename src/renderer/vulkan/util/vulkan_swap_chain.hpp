@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <vector>
 
-#include <vulkan/vulkan.h>
+#include "platform/vulkan/vulkan.h"
 
 #include "vulkan_tools.h"
 

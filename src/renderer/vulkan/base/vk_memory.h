@@ -1,13 +1,13 @@
 #ifndef ARK_RENDERER_VULKAN_BASE_VK_MEMORY_H_
 #define ARK_RENDERER_VULKAN_BASE_VK_MEMORY_H_
 
-#include <vulkan/vulkan.h>
-
 #include "core/types/shared_ptr.h"
 
 #include "renderer/inf/resource.h"
 
 #include "renderer/vulkan/forward.h"
+
+#include "platform/vulkan/vulkan.h"
 
 namespace ark {
 namespace vulkan {

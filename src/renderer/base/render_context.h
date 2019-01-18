@@ -3,6 +3,10 @@
 
 #include <map>
 
+#ifdef ARK_PLATFORM_WINDOWS
+#include <windows.h>
+#endif
+
 #include "core/ark.h"
 #include "core/base/string.h"
 #include "core/types/shared_ptr.h"

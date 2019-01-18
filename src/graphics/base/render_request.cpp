@@ -54,7 +54,7 @@ private:
 
 }
 
-RenderRequest::RenderRequest(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, LockFreeStack<RenderRequest>& renderRequestRecycler)
+RenderRequest::RenderRequest(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, LFStack<RenderRequest>& renderRequestRecycler)
     : RenderRequest(sp<Stub>::make(executor, surfaceController, renderRequestRecycler))
 {
 }
@@ -90,7 +90,7 @@ void RenderRequest::addBackgroundRequest(const Layer& layer, float x, float y)
     _stub->_executor->execute(_stub->_object_pool.obtain<RunnableWithCallback>(renderCommand, Observer(_callback, true)));
 }
 
-RenderRequest::Stub::Stub(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, LockFreeStack<RenderRequest>& renderRequestRecycler)
+RenderRequest::Stub::Stub(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, LFStack<RenderRequest>& renderRequestRecycler)
     : _executor(executor), _surface_controller(surfaceController), _render_request_recycler(renderRequestRecycler)
 {
 }

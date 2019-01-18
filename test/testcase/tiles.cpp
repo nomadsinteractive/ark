@@ -93,7 +93,7 @@ private:
         _render_position[1] = p2;
         _render_position[2] = p3;
         _render_position[3] = p4;
-        LockFreeStack<RenderRequest> recycler;
+        LFStack<RenderRequest> recycler;
         RenderRequest pipeline(nullptr, nullptr, recycler);
         scrollable->render(pipeline, 0.0f, 0.0f);
         return _error_code;

@@ -32,7 +32,7 @@ sp<ThreadPoolExecutor::Worker> ThreadPoolExecutor::createWorker()
 }
 
 ThreadPoolExecutor::Worker::Worker(const sp<Stub>& stub, const sp<Thread::Stub>& threadStub)
-    : _stub(stub), _thread_stub(threadStub), _idle(true), _idled_cycle(0)
+    : _stub(stub), _thread_stub(threadStub), _idle(false), _idled_cycle(0)
 {
 }
 
@@ -51,7 +51,6 @@ void ThreadPoolExecutor::Worker::run()
 {
     while(_thread_stub->status() != Thread::THREAD_STATE_TERMINATED)
     {
-        _idle = true;
         _thread_stub->wait(1000);
         sp<Runnable> front;
         if(_pendings.pop(front))
@@ -61,8 +60,7 @@ void ThreadPoolExecutor::Worker::run()
             try {
                 front->run();
             }
-            catch(const std::exception& e)
-            {
+            catch(const std::exception& e) {
                 if(_stub->_message_loop)
                     _stub->_message_loop->postTask([e]() {
                         FATAL("Unhanlded exception in thread: %s", e.what());
@@ -71,6 +69,7 @@ void ThreadPoolExecutor::Worker::run()
         }
         else
         {
+            _idle = true;
             _idled_cycle ++;
             if(_idled_cycle > 2000 && _stub->_worker_count.load(std::memory_order_relaxed) > _stub->_capacity)
                 break;
@@ -95,6 +94,7 @@ void ThreadPoolExecutor::Worker::removeSelf()
 
 void ThreadPoolExecutor::Worker::post(const sp<Runnable>& task)
 {
+    _idle = false;
     _pendings.add(task);
     _thread_stub->notify();
 }

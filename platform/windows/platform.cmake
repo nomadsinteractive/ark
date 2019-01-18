@@ -10,15 +10,22 @@ if(ARK_FORCE_STATIC_VCRT)
   endforeach()
 endif()
 
-ark_add_denpendency(3rdparty/glbinding glbinding 3rdparty/glbinding/source/glbinding/include)
 ark_ensure_dependency(3rdparty/dirent)
 ark_include_directories(3rdparty/dirent/include)
 
-list(APPEND ARK_OPENGL_INCLUDE_DIRS
-    ${ARK_SRC_DIR}/3rdparty/glbinding/source/glbinding/include
-    ${PROJECT_BINARY_DIR}/3rdparty/glbinding/source/glbinding/include
-    )
-set(ARK_OPENGL_LIBRARIES glbinding)
+if(ARK_USE_OPEN_GL)
+    ark_add_denpendency(3rdparty/glbinding glbinding 3rdparty/glbinding/source/glbinding/include)
+
+    list(APPEND ARK_OPENGL_INCLUDE_DIRS
+        ${ARK_SRC_DIR}/3rdparty/glbinding/source/glbinding/include
+        ${PROJECT_BINARY_DIR}/3rdparty/glbinding/source/glbinding/include
+        )
+    set(ARK_OPENGL_LIBRARIES glbinding)
+endif()
+
+if(ARK_USE_VULKAN)
+    ark_find_vulkan()
+endif()
 
 aux_source_directory(platform/windows/impl LOCAL_SRC_LIST)
 aux_source_directory(platform/windows/impl/runtime LOCAL_RUNTIME_LIBRARY_SRC_LIST)
@@ -31,4 +38,5 @@ if(ARK_USE_VULKAN)
     ark_compile_definitions(-DVK_USE_PLATFORM_WIN32_KHR)
 endif()
 
+ark_compile_definitions(-DARK_PLATFORM_WINDOWS)
 ark_compile_definitions(-DNOMINMAX)

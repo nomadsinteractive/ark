@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include <vulkan/vulkan.h>
-
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -13,6 +11,8 @@
 #include "renderer/inf/pipeline.h"
 
 #include "renderer/vulkan/forward.h"
+
+#include "platform/vulkan/vulkan.h"
 
 namespace ark {
 namespace vulkan {

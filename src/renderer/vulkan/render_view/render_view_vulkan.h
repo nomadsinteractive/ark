@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include <vulkan/vulkan.h>
-
 #include "core/types/owned_ptr.h"
 #include "core/types/shared_ptr.h"
 

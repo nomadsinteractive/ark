@@ -2,7 +2,7 @@
 #define ARK_CORE_BASE_THREAD_POOL_EXECUTOR_H_
 
 #include "core/base/thread.h"
-#include "core/concurrent/lock_free_stack.h"
+#include "core/concurrent/lf_stack.h"
 #include "core/concurrent/one_consumer_synchronized.h"
 #include "core/inf/executor.h"
 #include "core/inf/runnable.h"
@@ -26,7 +26,7 @@ private:
         uint32_t _capacity;
         std::atomic<uint32_t> _worker_count;
 
-        LockFreeStack<sp<Worker>> _workers;
+        LFStack<sp<Worker>> _workers;
         std::mutex _mutex;
     };
 

@@ -2,7 +2,7 @@
 #define ARK_RENDERER_BASE_RECYCLER_H_
 
 #include "core/base/api.h"
-#include "core/concurrent/lock_free_stack.h"
+#include "core/concurrent/lf_stack.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -20,7 +20,7 @@ private:
     void doRecycling(GraphicsContext& graphicsContext);
 
 private:
-    LockFreeStack<Resource::RecycleFunc> _recyclers;
+    LFStack<Resource::RecycleFunc> _recyclers;
 
     friend class ResourceManager;
 };

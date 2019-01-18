@@ -219,6 +219,20 @@ macro(ark_ensure_dependency TARGET_DIR)
     endif()
 endmacro()
 
+macro(ark_find_vulkan)
+    find_package(Vulkan)
+
+    if(NOT Vulkan_FOUND)
+        message(FATAL_ERROR "No Vulkan libraries found")
+    else()
+        message("Vulkan include dirs: " ${Vulkan_INCLUDE_DIRS})
+        message("Vulkan libraries: " ${Vulkan_LIBRARIES})
+    endif()
+
+    ark_include_directories(${Vulkan_INCLUDE_DIRS})
+    ark_link_libraries(${Vulkan_LIBRARIES})
+endmacro()
+
 ark_unset_local_variables()
 file(GLOB_RECURSE LOCAL_RES_LIST "*.h" "*.hpp" "*.py" "*.xml" "*.json" "*.md" "*.yaml" "*.glsl" "*.vert" "*.frag" "*.geom" "*.cmake")
 ark_load_platform_specific()

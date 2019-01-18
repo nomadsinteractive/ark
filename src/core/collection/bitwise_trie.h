@@ -1,7 +1,7 @@
 #ifndef ARK_CORE_BITWISE_TRIE_H_
 #define ARK_CORE_BITWISE_TRIE_H_
 
-#include <limits>
+#include <algorithm>
 #include <map>
 #include <unordered_map>
 
@@ -31,8 +31,8 @@ private:
     };
 
     struct Key {
-        Key(KeyType value, uint32_t level = 0)
-            : _mask(1 << (MAX_LEVEL_DEPTH - 1 - level)), _prefix(((std::numeric_limits<KeyType>::max() >> (level + 1)) & value) >> (MAX_LEVEL_DEPTH - 2 - level)), _value(value) {
+        Key(KeyType value, uint32_t level)
+            : _mask(1 << (MAX_LEVEL_DEPTH - 1 - level)), _prefix(value >> (MAX_LEVEL_DEPTH - 1 - level)), _value(value) {
         }
         Key(KeyType mask, KeyType prefix, KeyType value)
             : _mask(mask), _prefix(prefix), _value(value) {
@@ -60,10 +60,10 @@ private:
 
     struct Path {
         Path()
-            : Path(0, nullptr) {
+            : Path(0, 0, nullptr) {
         }
-        Path(KeyType key, Path* upper)
-            : _key(key), _upper(upper), _next{nullptr, nullptr}, _leaf(nullptr) {
+        Path(KeyType key, uint32_t level, Path* upper)
+            : _key(key), _level(level), _upper(upper), _next{nullptr, nullptr}, _leaf(nullptr) {
         }
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Path);
 
@@ -71,16 +71,23 @@ private:
             return _next[0] == nullptr && _next[1] == nullptr;
         }
 
-        const Path* findLeafPath(const Key& key) const {
+        const Path* findLeafPath(const Key& key, uint32_t minEntry = N) const {
             if(isLeaf())
                 return _key >= key._value ? this : nullptr;
 
             uint32_t sig = key._prefix & 1;
-            const Path* next = _next[sig] ? _next[sig] : _next[N];
-            return next ? next->findLeafPath(key.shift()) : nullptr;
+            const Path* next = _next[sig] ? _next[sig] : _next[std::max<uint32_t>(minEntry, sig ? 0 : 1)];
+            return next ? next->findLeafPath(key.shift(), next != _next[sig] ? 0 : minEntry) : nullptr;
+        }
+
+        void removeNode() {
+            _leaf = nullptr;
+            if(_upper)
+                _upper->_next[_upper->_next[0] == this ? 0 : 1] = nullptr;
         }
 
         KeyType _key;
+        uint32_t _level;
 
         Path* _upper;
         Path* _next[2];
@@ -90,16 +97,16 @@ private:
 
     struct LSS {
 
-        Path* ensureNextRoute(KeyType prefix, Path* upper) {
-            uint32_t sig = prefix & 1;
+        Path* ensureNextRoute(const Key& key, uint32_t level, Path* upper) {
+            uint32_t sig = key._prefix & 1;
             if(!upper->_next[sig])
-                upper->_next[sig] = addPath(prefix, upper);
+                upper->_next[sig] = addPath(key, level, upper);
             return upper->_next[sig];
         }
 
-        Path* addPath(KeyType key, Path* upper) {
-            Path& path = _paths[key];
-            path = Path(key, upper);
+        Path* addPath(const Key& key, uint32_t level, Path* upper) {
+            Path& path = _paths[key._prefix];
+            path = Path(key._value, level, upper);
             return &path;
         }
 
@@ -111,9 +118,17 @@ public:
     DEFAULT_COPY_AND_ASSIGN(BitwiseTrie);
 
     U* put(T key, U value) {
-        Path* path = makeLeafPath(&_root, static_cast<KeyType>(key));
+        const Path* s2 = findLeafPath(2);
+        Path* path = makeLeafPath(&_root, Key(static_cast<KeyType>(key), 0), 0);
         U& leaf = _leaves[key];
         leaf = std::move(value);
+        path->_leaf = &leaf;
+        return &leaf;
+    }
+
+    U* ensure(T key) {
+        Path* path = makeLeafPath(&_root, Key(static_cast<KeyType>(key), 0), 0);
+        U& leaf = _leaves[key];
         path->_leaf = &leaf;
         return &leaf;
     }
@@ -123,13 +138,41 @@ public:
         return path ? path->_leaf : nullptr;
     }
 
+    void remove(T keyvalue) {
+        const auto iter = _leaves.find(keyvalue);
+        DWARN(iter != _leaves.end(), "Key \"%d\" does not exist", keyvalue);
+        if(iter != _leaves.end()) {
+            Path* path = const_cast<Path*>(findLeafPath(keyvalue));
+            DASSERT(path && path->_key == keyvalue);
+            do {
+                auto& paths = _lss[path->_level]._paths;
+                KeyType prefix = path->_key == keyvalue ? keyvalue >> (MAX_LEVEL_DEPTH - 1 - path->_level) : path->_key;
+                const auto it2 = paths.find(prefix);
+                DCHECK(it2 != paths.end() && path == &it2->second, "Cannot find prefix %d in level %d", prefix, path->_level);
+                path->removeNode();
+                path = path->_upper;
+                paths.erase(it2);
+            } while(path && path->_upper && path->isLeaf());
+            _leaves.erase(iter);
+        }
+    }
+
+    void clear() {
+        _root = Path();
+        for(uint32_t i = 0; i < MAX_LEVEL_DEPTH; ++i)
+            _lss[i]._paths.clear();
+        _leaves.clear();
+    }
+
 private:
     const Path* findLeafPath(KeyType keyvalue) const {
         uint32_t level;
-        Key key(keyvalue);
+        Key key(keyvalue, 0);
         const Path* path = findLSS(key, level)->findLeafPath(key);
-        if(path)
+        if(path) {
+            DASSERT(path->_leaf);
             return path;
+        }
 
         for(uint32_t i = level; i > 0; --i) {
             const auto& paths = _lss[i - 1]._paths;
@@ -137,7 +180,7 @@ private:
             auto iter = paths.find(key._prefix);
             DCHECK(iter != paths.end(), "No prefix \"%d\" in level %d", key._prefix, level);
             if((++iter) != paths.end())
-                return iter->second.findLeafPath(key);
+                return iter->second.findLeafPath(key, 0);
         }
         return nullptr;
     }
@@ -157,14 +200,30 @@ private:
         return path;
     }
 
-    Path* makeLeafPath(Path* root, KeyType keyvalue) {
-        Key key(keyvalue);
-        Path* path = root;
+    Path* makeLeafPath(Path* upper, Key key, uint32_t level) {
+        Path* path = upper;
 
-        for(size_t i = 0; i < MAX_LEVEL_DEPTH; ++i) {
-            path = _lss[i].ensureNextRoute(key._prefix, path);
-            if(key._prefix && path->isLeaf()) {
-                path->_key = keyvalue;
+        for(size_t i = level; i < MAX_LEVEL_DEPTH; ++i) {
+            path = _lss[i].ensureNextRoute(key, i, path);
+            if(path->isLeaf()) {
+                if(path->_key != key._value) {
+                    Key c(path->_key, i);
+                    U* leaf = path->_leaf;
+
+                    path->_key = key._prefix;
+                    path->_leaf = nullptr;
+
+                    for(size_t j = i + 1; j < MAX_LEVEL_DEPTH; ++j) {
+                        c.shift();
+                        key.shift();
+                        if(c._prefix != key._prefix) {
+                            makeLeafPath(path, c, j)->_leaf = leaf;
+                            return makeLeafPath(path, key, j);
+                        }
+                        path = _lss[j].ensureNextRoute(key, j, path);
+                        path->_key = key._prefix;
+                    }
+                }
                 break;
             }
             key.shift();

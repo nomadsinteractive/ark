@@ -1,8 +1,7 @@
 #ifndef ARK_APP_BASE_SURFACE_UPDATER_H_
 #define ARK_APP_BASE_SURFACE_UPDATER_H_
 
-#include <list>
-
+#include "core/concurrent/lf_stack.h"
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
@@ -23,7 +22,7 @@ public:
 private:
     sp<Executor> _executor;
     sp<SurfaceController> _surface_controller;
-    sp<LockFreeStack<RenderRequest>> _render_request_recycler;
+    sp<LFStack<RenderRequest>> _render_request_recycler;
 };
 
 }

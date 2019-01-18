@@ -1,7 +1,5 @@
 #include "renderer/vulkan/render_view/render_view_vulkan.h"
 
-#include <vulkan/vulkan.h>
-
 #include "core/util/log.h"
 
 #include "graphics/inf/render_command.h"
