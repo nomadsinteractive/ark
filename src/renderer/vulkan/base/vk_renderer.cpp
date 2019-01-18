@@ -13,7 +13,8 @@ VKRenderer::VKRenderer(const sp<ResourceManager>& resourceManager)
 
 VKRenderer::~VKRenderer()
 {
-    _device->waitIdle();
+    if(_device)
+        _device->waitIdle();
 #if defined(_DIRECT2DISPLAY)
 
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)

@@ -45,17 +45,17 @@ sp<RenderContext> RendererFactoryVulkan::initialize(Ark::RendererVersion version
     return vkContext;
 }
 
-void RendererFactoryVulkan::onSurfaceCreated(RenderContext& glContext)
+void RendererFactoryVulkan::onSurfaceCreated(RenderContext& vkContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
-    setVersion(Ark::VULKAN_11, glContext);
+    setVersion(Ark::VULKAN_11, vkContext);
 
     _renderer->_instance = sp<VKInstance>::make();
     _renderer->_instance->initialize();
 
     _renderer->_device = sp<VKDevice>::make(_renderer->_instance, _renderer->_instance->physicalDevices()[0]);
-    _renderer->_render_target = sp<VKRenderTarget>::make(_renderer->_device);
+    _renderer->_render_target = sp<VKRenderTarget>::make(vkContext, _renderer->_device);
 }
 
 void RendererFactoryVulkan::setVersion(Ark::RendererVersion version, RenderContext& vkContext)

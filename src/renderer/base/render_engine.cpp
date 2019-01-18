@@ -25,6 +25,11 @@ const sp<RendererFactory>& RenderEngine::rendererFactory() const
     return _renderer_factory;
 }
 
+const sp<RenderContext>& RenderEngine::renderContext() const
+{
+    return _render_context;
+}
+
 void RenderEngine::onSurfaceCreated()
 {
     _renderer_factory->onSurfaceCreated(_render_context);

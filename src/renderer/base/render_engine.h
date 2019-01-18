@@ -18,6 +18,7 @@ public:
 
     const Viewport& viewport() const;
     const sp<RendererFactory>& rendererFactory() const;
+    const sp<RenderContext>& renderContext() const;
 
     void onSurfaceCreated();
 

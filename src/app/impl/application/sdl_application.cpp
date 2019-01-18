@@ -24,6 +24,7 @@
 #include "graphics/inf/render_view.h"
 
 #include "renderer/base/render_engine.h"
+#include "renderer/base/render_context.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_controller.h"
@@ -278,11 +279,14 @@ int SDLApplication::run()
     //We will get to that later
     auto result = SDL_GetWindowWMInfo(_main_window, &wmInfo);
     DASSERT(result);
+
+    RenderContext::Info& info = _application_context->renderEngine()->renderContext()->info();
 #ifdef _WIN32
     gInstance = wmInfo.info.win.hinstance;
     gWnd = wmInfo.info.win.window;
+#elif defined (ARK_PLATFORM_DARWIN)
+    info.darwin.window = wmInfo.info.cocoa.window;
 #endif
-
 
     /* Create our opengl context and attach it to our window */
     SDL_GLContext maincontext = _use_open_gl ? SDL_GL_CreateContext(_main_window) : nullptr;

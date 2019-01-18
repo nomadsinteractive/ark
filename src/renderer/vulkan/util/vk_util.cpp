@@ -41,11 +41,6 @@
 
 namespace ark {
 
-#ifdef _WIN32
-    extern HINSTANCE gInstance;
-    extern HWND gWnd;
-#endif
-
 namespace vulkan {
 
 namespace {

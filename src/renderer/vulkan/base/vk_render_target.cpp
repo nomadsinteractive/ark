@@ -4,11 +4,15 @@
 
 #include "graphics/base/color.h"
 
-#include "renderer/vulkan/base/vk_device.h"
+#include "renderer/base/render_context.h"
 
+#include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
 #include "renderer/vulkan/base/vk_descriptor_pool.h"
 #include "renderer/vulkan/util/vk_util.h"
+
+struct NSView;
+#include "platform/darwin/bridge.h"
 
 namespace ark {
 
@@ -19,7 +23,7 @@ namespace ark {
 
 namespace vulkan {
 
-VKRenderTarget::VKRenderTarget(const sp<VKDevice>& device)
+VKRenderTarget::VKRenderTarget(const RenderContext& renderContext, sp<VKDevice>& device)
     : _device(device), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0)
 {
     _queue = _device->vkQueue();
@@ -47,7 +51,7 @@ VKRenderTarget::VKRenderTarget(const sp<VKDevice>& device)
     _submit_info.signalSemaphoreCount = 1;
     _submit_info.pSignalSemaphores = &_semaphore_render_complete;
 
-    initSwapchain();
+    initSwapchain(renderContext);
 
     _command_pool = sp<VKCommandPool>::make(_device, _swap_chain.queueNodeIndex);
 
@@ -183,14 +187,14 @@ void VKRenderTarget::onSurfaceChanged(uint32_t width, uint32_t height)
     _render_pass_begin_info.pClearValues = _clear_values;
 }
 
-void VKRenderTarget::initSwapchain()
+void VKRenderTarget::initSwapchain(const RenderContext& renderContext)
 {
 #if defined(_WIN32)
     _swap_chain.initSurface(gInstance, gWnd);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
     _swap_chain.initSurface(androidApp->window);
 #elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK))
-    _swap_chain.initSurface(view);
+    _swap_chain.initSurface(getContentView(renderContext.info().darwin.window));
 #elif defined(_DIRECT2DISPLAY)
     _swap_chain.initSurface(width, height);
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
