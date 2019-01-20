@@ -28,7 +28,6 @@
 
 #include "app/base/application_context.h"
 #include "app/base/application_controller.h"
-#include "app/base/application_manifest.h"
 #include "app/base/surface.h"
 
 #include "platform/platform.h"

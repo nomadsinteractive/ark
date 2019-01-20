@@ -7,7 +7,6 @@ class Application;
 class ApplicationContext;
 class ApplicationController;
 class ApplicationDelegate;
-class ApplicationManifest;
 class ApplicationResource;
 class Arena;
 class AudioPlayer;

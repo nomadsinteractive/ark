@@ -23,35 +23,51 @@ public:
 
     struct Asset {
         String _dir;
-        Table<String, String> _entries;
+
     };
 
     struct Renderer {
+        Renderer();
+
         sp<Size> _resolution;
         Ark::RendererVersion _version;
     };
 
 public:
     Manifest();
+    Manifest(const String& src);
 
     void load(const String& src);
 
 // [[script::bindings::property]]
     const String& name() const;
 
+    const String& appDir() const;
+    const String& assetDir() const;
+
+    const Table<String, String>& assets() const;
+    const std::vector<String>& plugins() const;
+
 // [[script::bindings::property]]
     const sp<Size>& rendererResolution() const;
 
     const Renderer& renderer() const;
 
+    const document& content() const;
+
 private:
     String _name;
 
+    String _asset_dir;
+
+    Table<String, String> _assets;
+    std::vector<String> _plugins;
+
     Application _application;
-    Asset _asset;
     Renderer _renderer;
 
-    std::vector<String> _plugins;
+    document _content;
+
 };
 
 }

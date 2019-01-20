@@ -65,6 +65,7 @@ public:
     }
 
     T* operator ->() const {
+        DASSERT(_ptr.get());
         return _ptr.get();
     }
 

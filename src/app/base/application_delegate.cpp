@@ -1,31 +1,25 @@
 #include "app/base/application_delegate.h"
 
-#include "core/ark.h"
+#include "core/base/manifest.h"
 
 #include "graphics/inf/render_view.h"
 
 #include "app/base/application.h"
 #include "app/base/application_context.h"
-#include "app/base/application_manifest.h"
 #include "app/base/surface.h"
 
 #include "platform/platform.h"
 
 namespace ark {
 
-ApplicationDelegate::ApplicationDelegate(const sp<ApplicationManifest>& applicationManifest)
-    : _application_manifest(applicationManifest)
+ApplicationDelegate::ApplicationDelegate(const sp<Manifest>& manifest)
+    : _manifest(manifest)
 {
-}
-
-const sp<ApplicationManifest>& ApplicationDelegate::manifest() const
-{
-    return _application_manifest;
 }
 
 const char* ApplicationDelegate::name()
 {
-    return _application_manifest->name().c_str();
+    return _manifest->name().c_str();
 }
 
 void ApplicationDelegate::onCreate(Application& application, const sp<Surface>& surface)

@@ -49,6 +49,7 @@ class Future;
 class Interfaces;
 class Lifecycle;
 class Notifier;
+class Manifest;
 class MemoryPool;
 class MessageLoop;
 class Object;

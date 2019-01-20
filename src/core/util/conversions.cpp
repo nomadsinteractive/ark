@@ -54,7 +54,7 @@ template<> ARK_API Ark::RendererVersion Conversions::to<String, Ark::RendererVer
         return static_cast<Ark::RendererVersion>(atoi(glversion.c_str() + 7));
     if(glversion.startsWith("vulkan_"))
         return static_cast<Ark::RendererVersion>(atoi(glversion.c_str() + 7) + 100);
-    WARN(false, "Unknow GLVersion: \"%s, supported GLVersions are [\"opengl_21\", \"opengl_46\", \"vulkan_11\", ...]", str.c_str());
+    WARN(str == "auto", "Unknow GLVersion: \"%s, supported GLVersions are [\"opengl_21\", \"opengl_46\", \"vulkan_11\", ...]", str.c_str());
     return Ark::AUTO;
 }
 

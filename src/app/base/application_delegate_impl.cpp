@@ -1,6 +1,7 @@
 #include "app/base/application_delegate_impl.h"
 
 #include "core/ark.h"
+#include "core/base/manifest.h"
 #include "core/base/scope.h"
 #include "core/inf/script.h"
 #include "core/util/conversions.h"
@@ -11,7 +12,6 @@
 #include "app/base/application.h"
 #include "app/base/application_context.h"
 #include "app/base/application_facade.h"
-#include "app/base/application_manifest.h"
 #include "app/base/resource_loader.h"
 #include "app/base/surface.h"
 #include "app/impl/event_listener/event_listener_by_script.h"
@@ -19,8 +19,8 @@
 
 namespace ark {
 
-ApplicationDelegateImpl::ApplicationDelegateImpl(const sp<ApplicationManifest>& applicationManifest)
-    : ApplicationDelegate(applicationManifest)
+ApplicationDelegateImpl::ApplicationDelegateImpl(const sp<Manifest>& manifest)
+    : ApplicationDelegate(manifest)
 {
 }
 
@@ -30,25 +30,26 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
     ApplicationDelegate::onCreate(application, surface);
 
     const sp<ApplicationContext>& applicationContext = application.context();
-    const sp<ResourceLoader> appResourceLoader = applicationContext->createResourceLoader(Documents::getAttribute(_application_manifest->manifest(), "resource-loader", "application.xml"), nullptr);
+    const document& appManifest = _manifest->content()->getChild("application");
+    DCHECK(appManifest, "Manifest has no <application/> node");
+    const sp<ResourceLoader> appResourceLoader = applicationContext->createResourceLoader(Documents::getAttribute(appManifest, "resource-loader", "application.xml"), nullptr);
     DASSERT(appResourceLoader);
 
     const sp<Scope> vars = sp<Scope>::make();
-    const sp<ApplicationFacade> applicationFacade = sp<ApplicationFacade>::make(application, surface, _application_manifest);
+    const sp<ApplicationFacade> applicationFacade = sp<ApplicationFacade>::make(application, surface, _manifest);
     vars->put<ApplicationFacade>("_application", applicationFacade);
     vars->put<ApplicationController>("_application_controller", application.controller());
     vars->put<ResourceLoader>("_resource_loader", appResourceLoader);
     vars->put<SurfaceController>("_surface_controller", surface->controller());
-    vars->put<Size>("_render_resolution", _application_manifest->renderResolution());
 
-    applicationFacade->setBackgroundColor(Documents::getAttribute<Color>(_application_manifest->manifest(), "background-color", Color::BLACK));
+    applicationFacade->setBackgroundColor(Documents::getAttribute<Color>(appManifest, "background-color", Color::BLACK));
 
-    const sp<Arena> arena = appResourceLoader->beanFactory().build<Arena>(_application_manifest->manifest(), "arena");
+    const sp<Arena> arena = appResourceLoader->beanFactory().build<Arena>(appManifest, "arena");
     if(arena)
         applicationFacade->setArena(arena);
 
     bool defaultEventListenerSet = false;
-    for(const document& i : _application_manifest->manifest()->children("script"))
+    for(const document& i : appManifest->children("script"))
     {
         const ScriptTag script(appResourceLoader, i, vars);
         if(script._on == SCRIPT_RUN_ON_CREATE)

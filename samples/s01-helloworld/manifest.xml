@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest>
 	<asset prefix="/" src="../assets"/>
-	<application name="s01 - Hello World" resource-loader="app.xml">
-		<render-resolution width="960" height="540"/>
+    <renderer version="auto">
+        <resolution width="960" height="540"/>
+    </renderer>
+    <application name="s01 - Hello World" resource-loader="app.xml">
 		<arena>
-			<layer ref="@pre:l001"/>
-			<layer ref="@pre:l002"/>
-			<renderer class="label" text="Hello World" layer="@pre:l002"/>
-			<renderer ref="@pre:fps-counter" style="position:0, 470"/>
+            <layer ref="@pre:l001"/>
+            <layer ref="@pre:l002"/>
+            <renderer class="label" text="Hello World" layer="@pre:l002"/>
+            <renderer ref="@pre:fps-counter" style="position:0, 470"/>
 		</arena>
 	</application>
 </manifest>

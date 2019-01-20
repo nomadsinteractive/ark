@@ -36,7 +36,7 @@ public:
         VULKAN_11 = 111
     };
 
-    Ark(int32_t argc, const char** argv, const String& manfiestSrc = String());
+    Ark(int32_t argc, const char** argv, const Manifest& manifest);
     ~Ark();
 
     static Ark& instance();
@@ -65,8 +65,6 @@ public:
     int32_t argc() const;
     const char** argv() const;
 
-    const document& manifest() const;
-
     sp<Asset> getAsset(const String& path) const;
     sp<Readable> openAsset(const String& path) const;
 
@@ -81,7 +79,7 @@ private:
     sp<ApplicationContext> createApplicationContext(const document& manifest, const sp<ApplicationResource>& resource, const sp<RenderEngine>& renderEngine);
     sp<RenderEngine> createRenderEngine(RendererVersion version, const sp<ApplicationResource>& appResource);
 
-    void loadPlugins(const document& manifest) const;
+    void loadPlugins(const Manifest& manifest) const;
 
 private:
     static Ark* _instance;
@@ -89,8 +87,6 @@ private:
 
     int32_t _argc;
     const char** _argv;
-
-    document _manifest;
 
     sp<ApplicationContext> _application_context;
     ByType _interfaces;

@@ -2,11 +2,9 @@
 #define ARK_APP_BASE_APPLICATION_DELEGATE_H_
 
 #include "core/base/api.h"
-#include "core/types/owned_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/color.h"
 
 #include "app/inf/event_listener.h"
 #include "app/forwarding.h"
@@ -15,10 +13,8 @@ namespace ark {
 
 class ARK_API ApplicationDelegate : public EventListener {
 public:
-    ApplicationDelegate(const sp<ApplicationManifest>& applicationManifest);
+    ApplicationDelegate(const sp<Manifest>& manifest);
     virtual ~ApplicationDelegate() = default;
-
-    const sp<ApplicationManifest>& manifest() const;
 
     virtual const char* name();
 
@@ -34,7 +30,7 @@ public:
     virtual bool onEvent(const Event& event);
 
 protected:
-    sp<ApplicationManifest> _application_manifest;
+    sp<Manifest> _manifest;
 
     sp<ApplicationContext> _application_context;
     sp<RenderView> _render_view;

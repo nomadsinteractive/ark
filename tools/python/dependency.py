@@ -76,6 +76,7 @@ def checkout_specified_branch(repo, branch, target_name, target_dirname, target_
 
 
 def git_clone(dirname, url, name):
+    print("git clone %s %s" % (url, name))
     subprocess.call(['git', 'clone', url, name], cwd=dirname)
 
 
@@ -84,6 +85,7 @@ def git_checkout(target_dir, name):
 
 
 def git_pull(target_dir):
+    print("git pull %s" % target_dir)
     subprocess.call(['git', 'pull'], cwd=target_dir)
 
 

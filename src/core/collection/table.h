@@ -58,8 +58,9 @@ public:
     U& operator[](const T& key) {
         const auto iter = _indices.find(key);
         if(iter != _indices.end())
-            return _values[iter.second];
-        _indices.insert(std::make_pair<T, size_t>(key, _values.size()));
+            return _values[iter->second];
+        _indices.insert(std::make_pair(key, _values.size()));
+        _keys.push_back(key);
         _values.push_back(U());
         return _values.back();
     }

@@ -36,6 +36,20 @@ public:
         return Strings::parse<T>(ensureAttribute(doc, name));
     }
 
+    template<typename T, typename U> static T getList(const U& iterable, const String& valuename) {
+        T list;
+        for(const document& i : iterable)
+            list.push_back(ensureAttribute(i, valuename));
+        return list;
+    }
+
+    template<typename T, typename U> static T getKeyValuePairs(const U& iterable, const String& keyname, const String& valuename) {
+        T pairs;
+        for(const document& i : iterable)
+            pairs[ensureAttribute(i, keyname)] = ensureAttribute(i, valuename);
+        return pairs;
+    }
+
 private:
     Documents();
 };

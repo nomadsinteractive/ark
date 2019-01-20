@@ -1,5 +1,5 @@
 /**
-Copyright 2011 - 2018 Jason S Taylor
+Copyright 2011 - 2019 Jason S Taylor
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ limitations under the License.
 
 #include "core/ark.h"
 
+#include "core/base/manifest.h"
 #include "core/base/plugin_manager.h"
 #include "core/impl/asset/asset_with_fallback.h"
 #include "core/impl/asset/asset_with_prefix.h"
@@ -115,13 +116,10 @@ public:
 
 class Ark::ArkAsset {
 public:
-    ArkAsset(const sp<RawAsset>& rawAsset, const document& manifest)
+    ArkAsset(const sp<RawAsset>& rawAsset, const Table<String, String>& mounts)
         : _raw_asset(rawAsset) {
-        for(const document& i : manifest->children("asset")) {
-            const String prefix = Documents::getAttribute(i, "prefix");
-            const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
-            _mounts.push_front(Mounted(strip(prefix), createAsset(src)));
-        }
+        for(const auto& i : mounts.items())
+            _mounts.push_front(Mounted(strip(i.first), createAsset(i.second)));
     }
 
     sp<Readable> open(const String& name) {
@@ -210,30 +208,20 @@ private:
     sp<RawAsset> _raw_asset;
 };
 
-Ark::Ark(int32_t argc, const char** argv, const String& manfiestSrc)
+Ark::Ark(int32_t argc, const char** argv, const Manifest& manifest)
     : _argc(argc), _argv(argv), _object_pool(sp<ObjectPool>::make())
 {
     push();
     __ark_bootstrap__();
 
-    String appFilename;
-    String appDir;
-    Strings::rcut(Platform::getExecutablePath(), appDir, appFilename, Platform::dirSeparator());
+    _asset = sp<ArkAsset>::make(sp<RawAsset>::make(manifest.assetDir(), manifest.appDir()), manifest.assets());
 
-    const sp<Asset> appAsset = Platform::getAsset(".", appDir);
-    DASSERT(appAsset);
-    const sp<Readable> readable = manfiestSrc ? appAsset->get(manfiestSrc) : nullptr;
-    DWARN(!manfiestSrc || readable, "Cannot load application manifest \"%s\"", manfiestSrc.c_str());
-    _manifest = readable ? Documents::loadFromReadable(readable) : document::make("");
-    const String assetDir = Documents::getAttribute(_manifest, "asset-dir");
-    _asset = sp<ArkAsset>::make(sp<RawAsset>::make(assetDir, appDir), _manifest);
-
-    loadPlugins(_manifest);
+    loadPlugins(manifest);
 
     const sp<Asset> asset = _asset->getAsset(".");
     const sp<ApplicationResource> appResource = sp<ApplicationResource>::make(sp<XMLDirectory>::make(asset), asset);
-    const sp<RenderEngine> renderEngine = createRenderEngine(Documents::getAttribute<RendererVersion>(_manifest, "renderer", AUTO), appResource);
-    _application_context = createApplicationContext(_manifest, appResource, renderEngine);
+    const sp<RenderEngine> renderEngine = createRenderEngine(manifest.renderer()._version, appResource);
+    _application_context = createApplicationContext(manifest.content(), appResource, renderEngine);
 }
 
 Ark::~Ark()
@@ -282,11 +270,6 @@ int32_t Ark::argc() const
 const char** Ark::argv() const
 {
     return _argv;
-}
-
-const document& Ark::manifest() const
-{
-    return _manifest;
 }
 
 sp<Asset> Ark::getAsset(const String& path) const
@@ -353,12 +336,12 @@ sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, const sp<Appli
     return nullptr;
 }
 
-void Ark::loadPlugins(const document& manifest) const
+void Ark::loadPlugins(const Manifest& manifest) const
 {
     const Global<PluginManager> pluginManager;
 
-    for(const document& i : manifest->children("plugin"))
-        pluginManager->load(Documents::ensureAttribute(i, Constants::Attributes::NAME));
+    for(const String& i : manifest.plugins())
+        pluginManager->load(i);
 }
 
 }

@@ -47,11 +47,6 @@ bitmap ApplicationResource::loadBitmapBounds(const String& name) const
     return _bitmap_bounds_loader->get(name);
 }
 
-//sp<BitmapLoader> ApplicationResource::getBitmapLoader(const String& name) const
-//{
-//    return _bitmap_loader->getLoader(name);
-//}
-
 sp<ImageBundle> ApplicationResource::createImageLoader(bool justDecodeBounds) const
 {
 #ifdef ARK_USE_STB_IMAGE
