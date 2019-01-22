@@ -3,7 +3,7 @@
 #include "core/ark.h"
 #include "core/base/clock.h"
 #include "core/base/object_pool.h"
-#include "core/dom/document.h"
+#include "core/dom/dom_document.h"
 #include "core/impl/boolean/boolean_by_timeout.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/bean_utils.h"

@@ -12,27 +12,42 @@
 namespace ark {
 namespace vulkan {
 
-class VKMemory : public Resource {
+class VKMemory {
+private:
+    struct Stub  : public Resource {
+        Stub(const sp<VKDevice>& device, const sp<ResourceManager>& resourceManager, VkDeviceSize size, uint32_t memoryType);
+        ~Stub() override;
+
+        virtual uint64_t id() override;
+        virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
+        virtual RecycleFunc recycle() override;
+
+        sp<VKDevice> _device;
+        sp<ResourceManager> _resource_manager;
+
+        VkDeviceMemory _memory;
+        VkMemoryAllocateInfo _allocation_info;
+    };
+
 public:
-    VKMemory(const sp<VKRenderer>& renderer, VkDeviceSize size, uint32_t memoryType);
-    ~VKMemory() override;
+    VKMemory(const sp<VKDevice>& device, const sp<ResourceManager>& resourceManager, VkDeviceSize size, uint32_t memoryType);
+    VKMemory(const sp<Stub>& stub);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(VKMemory);
 
     VkDeviceSize size() const;
 
-    virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
-    virtual RecycleFunc recycle() override;
+    void upload(GraphicsContext& graphicsContext);
 
     void* map(VkDeviceSize offset, VkDeviceSize size);
     void unmap();
 
     VkDeviceMemory vkMemory() const;
 
-private:
-    sp<VKRenderer> _renderer;
+    VKMemoryPtr begin() const;
+    VKMemoryPtr end() const;
 
-    VkDeviceMemory _memory;
-    VkMemoryAllocateInfo _allocation_info;
+private:
+    sp<Stub> _stub;
 
 };
 

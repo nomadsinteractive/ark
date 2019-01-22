@@ -36,7 +36,7 @@ public:
         VULKAN_11 = 111
     };
 
-    Ark(int32_t argc, const char** argv, const Manifest& manifest);
+    Ark(int32_t argc, const char** argv, const sp<Manifest>& manifest);
     ~Ark();
 
     static Ark& instance();
@@ -65,6 +65,8 @@ public:
     int32_t argc() const;
     const char** argv() const;
 
+    const sp<Manifest>& manifest() const;
+
     sp<Asset> getAsset(const String& path) const;
     sp<Readable> openAsset(const String& path) const;
 
@@ -87,6 +89,8 @@ private:
 
     int32_t _argc;
     const char** _argv;
+
+    sp<Manifest> _manifest;
 
     sp<ApplicationContext> _application_context;
     ByType _interfaces;

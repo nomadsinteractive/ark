@@ -3,7 +3,7 @@
 #include "core/base/bean_factory.h"
 #include "core/epi/notifier.h"
 #include "core/base/observer.h"
-#include "core/dom/document.h"
+#include "core/dom/dom_document.h"
 #include "core/inf/array.h"
 #include "core/inf/flatable.h"
 #include "core/util/documents.h"

@@ -42,6 +42,9 @@ void Manifest::load(const String& src)
                                                    Documents::ensureAttribute<float>(resolution, Constants::Attributes::HEIGHT));
         _renderer._version = Documents::getAttribute<Ark::RendererVersion>(renderer, "version", Ark::AUTO);
     }
+
+    _heap._device_unit_size = toSize(Documents::getAttributeValue(_content, "heap/device/unit-size", "8M"));
+    _heap._host_unit_size = toSize(Documents::getAttributeValue(_content, "heap/host/unit-size", "8M"));
 }
 
 const String& Manifest::name() const
@@ -74,6 +77,11 @@ const sp<Size>& Manifest::rendererResolution() const
     return _renderer._resolution;
 }
 
+const Manifest::Heap& Manifest::heap() const
+{
+    return _heap;
+}
+
 const Manifest::Renderer& Manifest::renderer() const
 {
     return _renderer;
@@ -82,6 +90,16 @@ const Manifest::Renderer& Manifest::renderer() const
 const document& Manifest::content() const
 {
     return _content;
+}
+
+uint32_t Manifest::toSize(const String& sizestr) const
+{
+    const String s = sizestr.toLower();
+    const std::pair<String, uint32_t> suffixs[] = {{"k", 10}, {"kb", 10}, {"m", 20}, {"mb", 20}, {"g", 30}, {"gb", 30}};
+    for(const std::pair<String, uint32_t>& i : suffixs)
+        if(s.endsWith(i.first))
+            return Strings::parse<uint32_t>(s.substr(0, s.length() - i.first.length())) << i.second;
+    return Strings::parse<uint32_t>(s);
 }
 
 Manifest::Renderer::Renderer()

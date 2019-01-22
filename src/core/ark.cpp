@@ -208,20 +208,20 @@ private:
     sp<RawAsset> _raw_asset;
 };
 
-Ark::Ark(int32_t argc, const char** argv, const Manifest& manifest)
-    : _argc(argc), _argv(argv), _object_pool(sp<ObjectPool>::make())
+Ark::Ark(int32_t argc, const char** argv, const sp<Manifest>& manifest)
+    : _argc(argc), _argv(argv), _manifest(manifest), _object_pool(sp<ObjectPool>::make())
 {
     push();
     __ark_bootstrap__();
 
-    _asset = sp<ArkAsset>::make(sp<RawAsset>::make(manifest.assetDir(), manifest.appDir()), manifest.assets());
+    _asset = sp<ArkAsset>::make(sp<RawAsset>::make(manifest->assetDir(), manifest->appDir()), manifest->assets());
 
     loadPlugins(manifest);
 
     const sp<Asset> asset = _asset->getAsset(".");
     const sp<ApplicationResource> appResource = sp<ApplicationResource>::make(sp<XMLDirectory>::make(asset), asset);
-    const sp<RenderEngine> renderEngine = createRenderEngine(manifest.renderer()._version, appResource);
-    _application_context = createApplicationContext(manifest.content(), appResource, renderEngine);
+    const sp<RenderEngine> renderEngine = createRenderEngine(manifest->renderer()._version, appResource);
+    _application_context = createApplicationContext(manifest->content(), appResource, renderEngine);
 }
 
 Ark::~Ark()
@@ -270,6 +270,11 @@ int32_t Ark::argc() const
 const char** Ark::argv() const
 {
     return _argv;
+}
+
+const sp<Manifest>& Ark::manifest() const
+{
+    return _manifest;
 }
 
 sp<Asset> Ark::getAsset(const String& path) const

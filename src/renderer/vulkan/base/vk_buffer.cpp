@@ -4,6 +4,7 @@
 #include "renderer/inf/uploader.h"
 
 #include "renderer/vulkan/base/vk_renderer.h"
+#include "renderer/vulkan/base/vk_heap.h"
 #include "renderer/vulkan/util/vk_util.h"
 
 namespace ark {
@@ -25,50 +26,50 @@ uint64_t VKBuffer::id()
     return (uint64_t)(_descriptor.buffer);
 }
 
-void VKBuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& uploader)
+void VKBuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
 {
     if(uploader)
     {
-        ensureSize(uploader);
+        ensureSize(graphicsContext, uploader);
 
-        uint8_t* mapped = reinterpret_cast<uint8_t*>(map());
+        uint8_t* mapped = reinterpret_cast<uint8_t*>(_memory->map());
         uploader->upload([&mapped](void* buf, size_t size) {
             memcpy(mapped, buf, size);
             mapped += size;
         });
         if((_memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
             flush();
-        unmap(mapped);
+        _memory->unmap();
     }
 }
 
 Resource::RecycleFunc VKBuffer::recycle()
 {
     const sp<VKDevice> device = _renderer->device();
+    const sp<VKHeap> heap = _renderer->heap();
     VkBuffer buffer = _descriptor.buffer;
-    VkDeviceMemory memory = _memory;
+    VKMemoryPtr memory = std::move(_memory);
 
     _memory_allocation_info.allocationSize = 0;
     _size = 0;
     _descriptor.buffer = VK_NULL_HANDLE;
-    _memory = VK_NULL_HANDLE;
 
-    return [device, buffer, memory](GraphicsContext&) {
+    return [device, buffer, heap, memory](GraphicsContext& graphicsContext) {
         if (buffer)
             vkDestroyBuffer(device->vkLogicalDevice(), buffer, nullptr);
         if (memory)
-            vkFreeMemory(device->vkLogicalDevice(), memory, nullptr);
+            heap->recycle(graphicsContext, memory);
     };
 }
 
 void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const bytearray& buf)
 {
     DCHECK(buf->size() <= size(), "Buffer memory overflow, buffer size: %d, source size: %d", size(), buf->size());
-    void* mapped = map();
+    void* mapped = _memory->map();
     memcpy(mapped, buf->buf(), buf->size());
     if((_memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
         VKUtil::checkResult(flush());
-    unmap(mapped);
+    _memory->unmap();
 }
 
 const VkBuffer& VKBuffer::vkBuffer() const
@@ -76,31 +77,14 @@ const VkBuffer& VKBuffer::vkBuffer() const
     return _descriptor.buffer;
 }
 
-void* VKBuffer::map(VkDeviceSize size, VkDeviceSize offset)
+void VKBuffer::allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs)
 {
-    void* mapped = nullptr;
-    DCHECK(_memory, "Mapping to NULL memory");
-    VKUtil::checkResult(vkMapMemory(_renderer->vkLogicalDevice(), _memory, offset, size, 0, &mapped));
-    return mapped;
+    if(_memory)
+        _renderer->heap()->recycle(graphicsContext, _memory);
+    _memory = _renderer->heap()->allocate(graphicsContext, memReqs, _memory_property_flags);
 }
 
-void VKBuffer::unmap(void* mapped)
-{
-    DASSERT(mapped);
-    vkUnmapMemory(_renderer->vkLogicalDevice(), _memory);
-}
-
-void VKBuffer::allocateMemory(const VkMemoryRequirements& memReqs)
-{
-    if (_memory)
-        vkFreeMemory(_renderer->vkLogicalDevice(), _memory, nullptr);
-
-    _memory_allocation_info.allocationSize = memReqs.size;
-    _memory_allocation_info.memoryTypeIndex = _renderer->device()->getMemoryType(memReqs.memoryTypeBits, _memory_property_flags);
-    VKUtil::checkResult(vkAllocateMemory(_renderer->vkLogicalDevice(), &_memory_allocation_info, nullptr, &_memory));
-}
-
-void VKBuffer::ensureSize(const Uploader& uploader)
+void VKBuffer::ensureSize(GraphicsContext& graphicsContext, const Uploader& uploader)
 {
     if(_size != uploader.size())
     {
@@ -116,35 +100,35 @@ void VKBuffer::ensureSize(const Uploader& uploader)
         VkMemoryRequirements memReqs;
         vkGetBufferMemoryRequirements(_renderer->vkLogicalDevice(), _descriptor.buffer, &memReqs);
         if(_memory_allocation_info.allocationSize < memReqs.size)
-            allocateMemory(memReqs);
+            allocateMemory(graphicsContext, memReqs);
         bind();
     }
 }
 
-void VKBuffer::bind(VkDeviceSize size, VkDeviceSize offset)
+void VKBuffer::bind()
 {
-    vkBindBufferMemory(_renderer->vkLogicalDevice(), _descriptor.buffer, _memory, offset);
-    _descriptor.offset = offset;
-    _descriptor.range = size;
+    vkBindBufferMemory(_renderer->vkLogicalDevice(), _descriptor.buffer, _memory.vkMemory(), _memory.offset());
+    _descriptor.offset = 0;
+    _descriptor.range = _size;
 }
 
-VkResult VKBuffer::flush(VkDeviceSize size, VkDeviceSize offset)
+VkResult VKBuffer::flush()
 {
     VkMappedMemoryRange mappedRange = {};
     mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-    mappedRange.memory = _memory;
-    mappedRange.offset = offset;
-    mappedRange.size = size;
+    mappedRange.memory = _memory.vkMemory();
+    mappedRange.offset = 0;
+    mappedRange.size = _size;
     return vkFlushMappedMemoryRanges(_renderer->vkLogicalDevice(), 1, &mappedRange);
 }
 
-VkResult VKBuffer::invalidate(VkDeviceSize size, VkDeviceSize offset)
+VkResult VKBuffer::invalidate()
 {
     VkMappedMemoryRange mappedRange = {};
     mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-    mappedRange.memory = _memory;
-    mappedRange.offset = offset;
-    mappedRange.size = size;
+    mappedRange.memory = _memory.vkMemory();
+    mappedRange.offset = 0;
+    mappedRange.size = _size;
     return vkInvalidateMappedMemoryRanges(_renderer->vkLogicalDevice(), 1, &mappedRange);
 }
 

@@ -23,10 +23,11 @@ public:
     ~ResourceManager();
 
     enum UploadStrategy {
-        US_ONCE,
-        US_RELOAD,
-        US_ON_SURFACE_READY,
-        US_ONCE_AND_ON_SURFACE_READY
+        US_ONCE = 0,
+        US_RELOAD = 1,
+        US_ON_SURFACE_READY = 2,
+        US_ONCE_AND_ON_SURFACE_READY = 3,
+        US_PRIORITY_HIGHT = 4
     };
 
     const sp<Dictionary<bitmap>>& bitmapLoader() const;
@@ -83,6 +84,7 @@ private:
     };
 
 private:
+    void prepare(GraphicsContext& graphicsContext, LFStack<PreparingGLResource>& items);
     void doRecycling(GraphicsContext& graphicsContext);
     void doSurfaceReady(GraphicsContext& graphicsContext);
 
@@ -92,7 +94,8 @@ private:
 
     sp<Recycler> _recycler;
 
-    LFStack<PreparingGLResource> _preparing_items;
+    LFStack<PreparingGLResource> _preparing_items[2];
+
     std::set<ExpirableGLResource> _on_surface_ready_items;
 
     friend class RenderController;

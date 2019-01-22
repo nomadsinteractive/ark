@@ -1,6 +1,6 @@
 #include "renderer/impl/render_model/render_model_nine_patch.h"
 
-#include "core/dom/document.h"
+#include "core/dom/dom_document.h"
 
 #include "graphics/base/layer_context.h"
 

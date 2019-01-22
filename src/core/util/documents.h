@@ -2,7 +2,7 @@
 #define ARK_CORE_UTIL_DOCUMENTS_H_
 
 #include "core/base/api.h"
-#include "core/dom/document.h"
+#include "core/dom/dom_document.h"
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/strings.h"
@@ -49,6 +49,15 @@ public:
             pairs[ensureAttribute(i, keyname)] = ensureAttribute(i, valuename);
         return pairs;
     }
+
+    template<typename T> static T getAttributeValue(const document& doc, const String& path, const T& defValue) {
+        const attribute& attr = findAttribute(doc, path.split('/'));
+        return attr ? Strings::parse<T>(attr->value()) : defValue;
+    }
+
+    static String getAttributeValue(const document& doc, const String& path, const String& defValue = String());
+
+    static attribute findAttribute(const document& doc, const std::vector<String>& paths);
 
 private:
     Documents();

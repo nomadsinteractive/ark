@@ -342,8 +342,8 @@ void VKPipeline::buildCommandBuffers(const Buffer::Snapshot& vertex, const Buffe
         VkBuffer vkIndexBuffer = (VkBuffer)(index.id());
 
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkVertexBuffer, offsets);
-        vkCmdBindIndexBuffer(commandBuffer, vkIndexBuffer, 0, VK_INDEX_TYPE_UINT16);
-        vkCmdDrawIndexed(commandBuffer, index.size() / sizeof(uint16_t), 1, 0, 0, 0);
+        vkCmdBindIndexBuffer(commandBuffer, vkIndexBuffer, 0, kVKIndexType);
+        vkCmdDrawIndexed(commandBuffer, index.size() / sizeof(glindex_t), 1, 0, 0, 0);
 
         vkCmdEndRenderPass(commandBuffer);
         VKUtil::checkResult(vkEndCommandBuffer(commandBuffer));

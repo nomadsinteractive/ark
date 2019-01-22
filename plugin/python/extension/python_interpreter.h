@@ -66,7 +66,7 @@ public:
         return toCppObject_sfinae<T>(obj, nullptr);
     }
     template<typename T> T toCppObject_sfinae(PyObject* obj, typename T::_PtrType*) {
-        return toSharedPtr<sp<typename T::_PtrType>>(obj);
+        return toSharedPtr<typename T::_PtrType>(obj);
     }
     template<typename T> T toCppObject_sfinae(PyObject* obj, ...) {
         return toType<T>(obj);

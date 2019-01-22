@@ -1,6 +1,6 @@
 #include "core/impl/numeric/numeric_sequence.h"
 
-#include "core/dom/document.h"
+#include "core/dom/dom_document.h"
 #include "core/base/bean_factory.h"
 #include "core/util/math.h"
 

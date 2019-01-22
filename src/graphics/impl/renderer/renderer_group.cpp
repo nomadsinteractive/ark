@@ -1,6 +1,6 @@
 #include "graphics/impl/renderer/renderer_group.h"
 
-#include "core/dom/document.h"
+#include "core/dom/dom_document.h"
 #include "core/impl/builder/builder_by_instance.h"
 #include "core/util/log.h"
 

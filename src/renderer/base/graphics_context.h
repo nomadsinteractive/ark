@@ -15,13 +15,13 @@ namespace ark {
 
 class ARK_API GraphicsContext {
 public:
-    GraphicsContext(const sp<RenderContext>& glContext, const sp<ResourceManager>& resourceManager);
+    GraphicsContext(const sp<RenderContext>& renderContext, const sp<ResourceManager>& resourceManager);
     ~GraphicsContext();
 
     void onSurfaceReady();
     void onDrawFrame();
 
-    const sp<RenderContext>& glContext() const;
+    const sp<RenderContext>& renderContext() const;
     const sp<ResourceManager>& resourceManager() const;
 
     template<typename T> const sp<T>& attachment() {
@@ -31,7 +31,7 @@ public:
     uint32_t tick() const;
 
 private:
-    sp<RenderContext> _gl_context;
+    sp<RenderContext> _render_context;
     sp<ResourceManager> _resource_manager;
     uint32_t _tick;
 

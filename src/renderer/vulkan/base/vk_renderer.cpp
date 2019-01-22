@@ -54,6 +54,12 @@ const sp<VKDevice>& VKRenderer::device() const
     return _device;
 }
 
+const sp<VKHeap>&VKRenderer::heap() const
+{
+    DCHECK(_heap, "VKRenderer uninitialized");
+    return _heap;
+}
+
 const sp<VKRenderTarget>& VKRenderer::renderTarget() const
 {
     DCHECK(_render_target, "VKRenderer uninitialized");

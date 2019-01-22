@@ -5,7 +5,7 @@ aux_source_directory(src/renderer/vulkan/renderer_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/vulkan/snippet_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/vulkan/util LOCAL_SRC_LIST)
 
-ark_add_denpendency(src/renderer/vulkan/3rdparty/glslang glslang src/renderer/vulkan/3rdparty/glslang/glslang/Public)
+ark_add_denpendency(${ARK_3RDPARTY_DIR}/glslang glslang ${ARK_3RDPARTY_DIR}/glslang/glslang/Public)
 ark_link_libraries(SPIRV)
 ark_export_dependency_libraries(SPIRV OGLCompiler OSDependent)
 

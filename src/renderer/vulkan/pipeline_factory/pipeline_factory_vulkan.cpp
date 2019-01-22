@@ -17,7 +17,7 @@ PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<ResourceManager>& resource
 
 sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& shaderBindings)
 {
-    std::map<Shader::Stage, String> shaders = shaderBindings->pipelineLayout()->getPreprocessedShaders(graphicsContext.glContext());
+    std::map<Shader::Stage, String> shaders = shaderBindings->pipelineLayout()->getPreprocessedShaders(graphicsContext.renderContext());
     return sp<VKPipeline>::make(_resource_manager->recycler(), _renderer, shaderBindings, std::move(shaders));
 }
 

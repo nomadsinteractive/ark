@@ -17,7 +17,7 @@ sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsConte
 {
     DCHECK(shaderBindings->renderMode() != RenderModel::RENDER_MODE_NONE, "Shader has no RenderModel initialized");
     const sp<PipelineLayout>& pipelineLayout = shaderBindings->pipelineLayout();
-    const sp<RenderContext>& glContext = graphicsContext.glContext();
+    const sp<RenderContext>& glContext = graphicsContext.renderContext();
     return sp<GLPipeline>::make(graphicsContext.resourceManager()->recycler(), glContext->getGLSLVersion(),
                                 pipelineLayout->vertex().process(glContext), pipelineLayout->fragment().process(glContext), shaderBindings);
 }

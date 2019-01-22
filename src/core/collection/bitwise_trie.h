@@ -32,7 +32,7 @@ private:
 
     struct Key {
         Key(KeyType value, uint32_t level)
-            : _mask(1 << (MAX_LEVEL_DEPTH - 1 - level)), _prefix(value >> (MAX_LEVEL_DEPTH - 1 - level)), _value(value) {
+            : _mask(static_cast<KeyType>(1) << (MAX_LEVEL_DEPTH - 1 - level)), _prefix(value >> (MAX_LEVEL_DEPTH - 1 - level)), _value(value) {
         }
         Key(KeyType mask, KeyType prefix, KeyType value)
             : _mask(mask), _prefix(prefix), _value(value) {

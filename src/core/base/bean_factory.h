@@ -6,7 +6,7 @@
 
 #include "core/base/api.h"
 #include "core/collection/by_type.h"
-#include "core/dom/document.h"
+#include "core/dom/dom_document.h"
 #include "core/inf/builder.h"
 #include "core/inf/dictionary.h"
 #include "core/impl/builder/builder_by_argument.h"

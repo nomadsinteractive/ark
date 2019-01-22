@@ -39,9 +39,9 @@ void ResourceManager::onSurfaceReady(GraphicsContext& graphicsContext)
     doSurfaceReady(graphicsContext);
 }
 
-void ResourceManager::onDrawFrame(GraphicsContext& graphicsContext)
+void ResourceManager::prepare(GraphicsContext& graphicsContext, LFStack<PreparingGLResource>& items)
 {
-    for(const PreparingGLResource& i : _preparing_items.clear())
+    for(const PreparingGLResource& i : items.clear())
         if(!i._resource.isExpired() || i._strategy == US_RELOAD)
         {
             if(i._strategy == US_RELOAD && i._resource.resource()->id() != 0)
@@ -51,6 +51,12 @@ void ResourceManager::onDrawFrame(GraphicsContext& graphicsContext)
             if(i._strategy == US_ONCE_AND_ON_SURFACE_READY)
                 _on_surface_ready_items.insert(i._resource);
         }
+}
+
+void ResourceManager::onDrawFrame(GraphicsContext& graphicsContext)
+{
+    prepare(graphicsContext, _preparing_items[1]);
+    prepare(graphicsContext, _preparing_items[0]);
 
     uint32_t tick = graphicsContext.tick();
     if(tick == 0)
@@ -61,12 +67,12 @@ void ResourceManager::onDrawFrame(GraphicsContext& graphicsContext)
 
 void ResourceManager::upload(const sp<Resource>& resource, const sp<Uploader>& uploader, UploadStrategy strategy)
 {
-    switch(strategy)
+    switch(strategy & 3)
     {
     case US_ONCE_AND_ON_SURFACE_READY:
     case US_ONCE:
     case US_RELOAD:
-        _preparing_items.push(PreparingGLResource(ExpirableGLResource(resource, uploader), strategy));
+        _preparing_items[strategy & US_PRIORITY_HIGHT ? 1 : 0].push(PreparingGLResource(ExpirableGLResource(resource, uploader), strategy));
         break;
     case US_ON_SURFACE_READY:
         _on_surface_ready_items.insert(ExpirableGLResource(resource, uploader));

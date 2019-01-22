@@ -58,7 +58,7 @@ public:
             uint32_t level = getLevel(length);
             uint32_t aquired = level;
 
-            length = 1 << level;
+            length = static_cast<SizeType>(1) << level;
 
             if(aquire(aquired, chunk)) {
                 if(aquired != level)
@@ -111,7 +111,7 @@ public:
 
         void split(const Chunk& chunk, uint32_t chunkLevel, uint32_t toLevel) {
             for(uint32_t i = chunkLevel; i != toLevel; --i) {
-                SizeType offset = chunk + (1 << (i - 1));
+                SizeType offset = chunk + (static_cast<SizeType>(1) << (i - 1));
                 push(i - 1, offset);
                 _chunks[offset] = false;
             }
@@ -119,7 +119,7 @@ public:
 
         uint32_t getLevel(SizeType length) const {
             for(uint32_t i = 0; i < sizeof(SizeType) * 8; ++i)
-                if(length <= (1 << i))
+                if(length <= (static_cast<SizeType>(1) << i))
                     return i;
             return 0;
         }
@@ -266,7 +266,7 @@ public:
 
     private:
         bool checkFragments(SizeType size) {
-            uint32_t offset = 0;
+            SizeType offset = 0;
             bool r = true;
             for(const auto& i : _fragments) {
                 DCHECK(offset == i.first, "Fragments are not continuous");
@@ -336,7 +336,7 @@ private:
                 _allocated -= freed;
             }
             else {
-                DCHECK(_next, "We go throught all heaps but find no way to free %p", (intptr_t)(ptr));
+                DCHECK(_next, "We go throught all heaps but find no way to free it");
                 _next->free(ptr);
             }
         }
@@ -359,31 +359,43 @@ private:
     };
 
 public:
+    Heap() = default;
     Heap(MemoryType memory, const sp<Allocator>& allocator)
         : _stub(sp<Stub>::make(std::move(memory), allocator)) {
     }
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Heap);
+
+    explicit operator bool() const {
+        return static_cast<bool>(_stub);
+    }
 
     SizeType allocated() const {
+        DASSERT(_stub);
         return _stub->allocated();
     }
 
     SizeType available() const {
+        DASSERT(_stub);
         return _stub->available();
     }
 
     PtrType allocate(SizeType size) {
+        DASSERT(_stub);
         return _stub->allocate(size);
     }
 
     void free(PtrType ptr) {
+        DASSERT(_stub);
         _stub->free(ptr);
     }
 
     void extend(const Heap& other) {
+        DASSERT(_stub);
         _stub->extend(other._stub);
     }
 
     void extend(MemoryType memory, const sp<Allocator>& allocator) {
+        DASSERT(_stub);
         _stub->extend(sp<Stub>::make(std::move(memory), allocator));
     }
 

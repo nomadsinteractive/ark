@@ -151,4 +151,31 @@ const String& Documents::ensureAttribute(const document& doc, const String& name
     return attr->value();
 }
 
+String Documents::getAttributeValue(const document& doc, const String& path, const String& defValue)
+{
+    const attribute attr = findAttribute(doc, path.split('/'));
+    return attr ? attr->value() : defValue;
+}
+
+attribute Documents::findAttribute(const document& doc, const std::vector<String>& paths)
+{
+    DASSERT(doc);
+    DCHECK(paths.size()> 0, "Empty path");
+    document node = doc;
+    for(size_t i = 0; i < paths.size(); ++i)
+    {
+        const String& name = paths.at(i);
+        document nextNode = node->getChild(name);
+        if(nextNode)
+            node = std::move(nextNode);
+        else
+        {
+            if(i == paths.size() - 1)
+                return node->getAttribute(name);
+            return nullptr;
+        }
+    }
+    return node;
+}
+
 }

@@ -1,0 +1,65 @@
+#include "renderer/vulkan/base/vk_heap.h"
+
+#include "core/ark.h"
+
+#include "core/base/manifest.h"
+#include "core/util/log.h"
+
+#include "renderer/vulkan/base/vk_device.h"
+
+namespace ark {
+namespace vulkan {
+
+VKHeap::VKHeap(const sp<VKDevice>& device, const sp<ResourceManager>& resourceManager)
+    : _device(device), _resource_manager(resourceManager)
+{
+}
+
+VKMemoryPtr VKHeap::allocate(GraphicsContext& graphicsContext, VkDeviceSize size, uint32_t typeIndex)
+{
+    DASSERT(typeIndex < VK_MAX_MEMORY_TYPES);
+
+    if(!_heaps[typeIndex])
+    {
+        const Manifest& manifest = Ark::instance().manifest();
+        _heaps[typeIndex] = HeapType(makeMemory(graphicsContext, manifest.heap()._device_unit_size >> 4, typeIndex), sp<HeapType::L1>::make(sizeof(VkDeviceSize) * 4));
+        _heaps[typeIndex].extend(makeMemory(graphicsContext, manifest.heap()._device_unit_size, typeIndex), sp<HeapType::L2>::make());
+    }
+
+    VKMemoryPtr memory = _heaps[typeIndex].allocate(size);
+
+    if(!memory)
+    {
+        const Manifest& manifest = Ark::instance().manifest();
+        DCHECK(size < manifest.heap()._device_unit_size, "Out of heap memory, allocation size required: %lld, you may change device_unit_size(%d) to a greater value", size, manifest.heap()._device_unit_size);
+        _heaps[typeIndex].extend(makeMemory(graphicsContext, manifest.heap()._device_unit_size, typeIndex), sp<HeapType::L2>::make());
+        return allocate(graphicsContext, size, typeIndex);
+    }
+
+    memory._stub->_size = size;
+    memory._stub->_type_index = typeIndex;
+    return memory;
+}
+
+VKMemoryPtr VKHeap::allocate(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs, VkMemoryPropertyFlags propertyFlags)
+{
+    uint32_t typeIndex = _device->getMemoryType(memReqs.memoryTypeBits, propertyFlags);
+    return allocate(graphicsContext, memReqs.size, typeIndex);
+}
+
+void VKHeap::recycle(GraphicsContext& /*graphicsContext*/, const VKMemoryPtr& ptr)
+{
+    DASSERT(ptr._stub->_type_index < VK_MAX_MEMORY_TYPES);
+    _heaps[ptr._stub->_type_index].free(ptr);
+}
+
+VKMemory VKHeap::makeMemory(GraphicsContext& graphicsContext, VkDeviceSize size, uint32_t typeIndex)
+{
+    VKMemory memory(_device, _resource_manager, size, typeIndex);
+    memory.upload(graphicsContext);
+    LOGD("Creating memory, size: %lld, typeIndex: %d", size, typeIndex);
+    return memory;
+}
+
+}
+}

@@ -28,6 +28,8 @@ public:
     VkFormat vkDepthFormat() const;
     VkPipelineCache vkPipelineCache() const;
 
+    const VkPhysicalDeviceMemoryProperties& vkMemoryProperties() const;
+
     void waitIdle() const;
 
     const VkPhysicalDeviceProperties& properties() const;

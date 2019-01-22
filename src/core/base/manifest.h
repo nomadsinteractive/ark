@@ -26,6 +26,11 @@ public:
 
     };
 
+    struct Heap {
+        uint32_t _host_unit_size;
+        uint32_t _device_unit_size;
+    };
+
     struct Renderer {
         Renderer();
 
@@ -51,9 +56,13 @@ public:
 // [[script::bindings::property]]
     const sp<Size>& rendererResolution() const;
 
+    const Heap& heap() const;
     const Renderer& renderer() const;
 
     const document& content() const;
+
+private:
+    uint32_t toSize(const String& sizestr) const;
 
 private:
     String _name;
@@ -64,6 +73,7 @@ private:
     std::vector<String> _plugins;
 
     Application _application;
+    Heap _heap;
     Renderer _renderer;
 
     document _content;

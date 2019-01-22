@@ -1,7 +1,7 @@
 #include "renderer/base/atlas.h"
 
 #include "core/base/bean_factory.h"
-#include "core/dom/document.h"
+#include "core/dom/dom_document.h"
 #include "core/inf/dictionary.h"
 #include "core/util/math.h"
 #include "core/util/documents.h"

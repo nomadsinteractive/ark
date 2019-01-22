@@ -16,10 +16,11 @@
 #include "renderer/vulkan/snippet_factory/snippet_factory_vulkan.h"
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
 
-#include "renderer/vulkan/util/vk_util.h"
 #include "renderer/vulkan/base/vk_buffer.h"
+#include "renderer/vulkan/base/vk_heap.h"
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_texture_2d.h"
+#include "renderer/vulkan/util/vk_util.h"
 
 #include "generated/vulkan_plugin.h"
 
@@ -55,6 +56,7 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderContext& vkContext)
     _renderer->_instance->initialize();
 
     _renderer->_device = sp<VKDevice>::make(_renderer->_instance, _renderer->_instance->physicalDevices()[0]);
+    _renderer->_heap = sp<VKHeap>::make(_renderer->_device, _resource_manager);
     _renderer->_render_target = sp<VKRenderTarget>::make(vkContext, _renderer->_device);
 }
 

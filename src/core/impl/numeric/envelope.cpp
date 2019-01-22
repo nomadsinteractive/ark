@@ -1,6 +1,6 @@
 #include "core/impl/numeric/envelope.h"
 
-#include "core/dom/document.h"
+#include "core/dom/dom_document.h"
 #include "core/base/expectation.h"
 #include "core/impl/boolean/boolean_or.h"
 #include "core/util/math.h"

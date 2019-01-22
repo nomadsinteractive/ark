@@ -28,7 +28,7 @@ void RenderViewVulkan::onSurfaceCreated()
 void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
 {
     LOGD("Width: %d, Height: %d, Viewport (%.1f, %.1f, %.1f, %.1f)", width, height, _viewport.left(), _viewport.top(), _viewport.right(), _viewport.bottom());
-    _graphics_context.reset(new GraphicsContext(_graphics_context->glContext(), _graphics_context->resourceManager()));
+    _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->resourceManager()));
 
     _renderer->renderTarget()->onSurfaceChanged(width, height);
     _command_buffers = sp<VKCommandBuffers>::make(_graphics_context->resourceManager()->recycler(), _renderer->renderTarget());

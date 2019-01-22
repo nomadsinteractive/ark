@@ -406,7 +406,7 @@ class GenArgument:
         if m in TYPE_DEFINED_OBJ:
             return self._gen_var_declare(m, objname, 'toType', m, argname)
         if m in TYPE_DEFINED_SP:
-            return self._gen_var_declare(m, objname, 'toSharedPtr', m[0].upper() + m[1:], argname)
+            return self._gen_var_declare(m, objname, 'toCppObject', m, argname)
         if m != self._accept_type:
             return self._gen_var_declare('sp<%s>' % m, objname, 'asInterfaceOrNull' if extract_cast else 'toSharedPtr', m, argname)
         return self._gen_var_declare(typename, objname, 'toType', typename, argname)

@@ -27,9 +27,9 @@ void GLSnippetClipPlane::preInitialize(PipelineBuildingContext& context)
 
 void GLSnippetClipPlane::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const sp<ShaderBindings>& /*shaderBindings*/)
 {
-    _enabled = graphicsContext.glContext()->version() >= Ark::OPENGL_30;
+    _enabled = graphicsContext.renderContext()->version() >= Ark::OPENGL_30;
 
-    DWARN(_enabled, "GL_CLIP_PLANE is not supported, GLVersion \"%d\"", graphicsContext.glContext()->version());
+    DWARN(_enabled, "GL_CLIP_PLANE is not supported, GLVersion \"%d\"", graphicsContext.renderContext()->version());
     if(_enabled)
         for(const auto& i : _planes)
         {

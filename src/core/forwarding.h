@@ -37,7 +37,7 @@ class ByType;
 class Class;
 class ClassHierarychyManager;
 class Clock;
-class Document;
+class DOMDocument;
 class DOMAttribute;
 class DOMElement;
 class Duration;
@@ -74,7 +74,7 @@ typedef Variable<bool> Boolean;
 typedef Variable<int32_t> Integer;
 typedef Variable<float> Numeric;
 
-typedef Loader<Document> DocumentLoader;
+typedef Loader<DOMDocument> DocumentLoader;
 
 
 typedef VariableWrapper<bool> BooleanWrapper;
@@ -109,7 +109,7 @@ typedef uint32_t TypeId;
 
 typedef sp<DOMAttribute> attribute;
 typedef sp<DOMElement> element;
-typedef sp<Document> document;
+typedef sp<DOMDocument> document;
 typedef sp<ByteArray> bytearray;
 typedef sp<IntArray> intarray;
 typedef sp<IndexArray> indexarray;

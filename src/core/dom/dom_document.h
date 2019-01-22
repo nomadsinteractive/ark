@@ -9,10 +9,10 @@
 
 namespace ark {
 
-class ARK_API Document : public DOMElement {
+class ARK_API DOMDocument : public DOMElement {
 public:
 //  [[script::bindings::auto]]
-    Document(const String& name);
+    DOMDocument(const String& name);
 /*
 //  [[script::bindings::property]]
     const String& name() const;
@@ -36,7 +36,7 @@ public:
 //  [[script::bindings::auto]]
     const document& ensureChild(const String& name) const;
 //  [[script::bindings::auto]]
-    void addChild(const sp<Document>& doc);
+    void addChild(const sp<DOMDocument>& doc);
 
 //  [[script::bindings::property]]
     const List<document>& children() const;

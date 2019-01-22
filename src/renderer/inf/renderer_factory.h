@@ -17,7 +17,7 @@ public:
 
     virtual sp<RenderContext> initialize(Ark::RendererVersion version) = 0;
 
-    virtual void onSurfaceCreated(RenderContext& glContext) = 0;
+    virtual void onSurfaceCreated(RenderContext& renderContext) = 0;
 
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) = 0;
     virtual sp<PipelineFactory> createPipelineFactory() = 0;

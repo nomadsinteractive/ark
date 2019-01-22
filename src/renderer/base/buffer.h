@@ -116,8 +116,8 @@ public:
     };
 
 public:
-    Buffer(const sp<Delegate>& delegate);
-    Buffer() noexcept;
+    Buffer(const sp<Delegate>& delegate) noexcept;
+    Buffer() noexcept = default;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Buffer);
 
     explicit operator bool() const;
