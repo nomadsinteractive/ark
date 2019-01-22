@@ -14,9 +14,20 @@ endif()
 
 if(ARK_USE_VULKAN)
     ark_compile_definitions(-DVK_USE_PLATFORM_MACOS_MVK)
-endif()
+    ark_include_directories($ENV{VULKAN_SDK}/MoltenVK/include)
 
-ark_include_directories($ENV{VULKAN_SDK}/../MoltenVK/include)
+    find_library(MoltenVK_LIBRARY MoltenVK PATHS $ENV{VULKAN_SDK}/MoltenVK/macOS)
+    if(MoltenVK_LIBRARY EQUAL MoltenVK_LIBRARY-NOTFOUND)
+        message(FATAL_ERROR "MoltenVK library not found")
+    endif()
+    ark_link_libraries(${MoltenVK_LIBRARY})
+
+    find_library(QuartzCore_LIBRARY QuartzCore)
+    ark_link_libraries(${QuartzCore_LIBRARY})
+
+    find_library(Metal_LIBRARY Metal)
+    ark_link_libraries(${Metal_LIBRARY})
+endif()
 
 ark_compile_definitions(-DARK_USE_CONSTEXPR)
 ark_compile_definitions(-DARK_PLATFORM_DARWIN)

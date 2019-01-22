@@ -50,16 +50,16 @@ void VKInstance::initialize()
     instanceCreateInfo.pNext = nullptr;
     instanceCreateInfo.pApplicationInfo = &appInfo;
 
-#ifdef ARK_FLAG_DEBUG
+#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN)
     _extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 #endif
 
     instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(_extensions.size());
     instanceCreateInfo.ppEnabledExtensionNames = _extensions.data();
 
-#ifdef ARK_FLAG_DEBUG
-        instanceCreateInfo.enabledLayerCount = vks::debug::validationLayerCount;
-        instanceCreateInfo.ppEnabledLayerNames = vks::debug::validationLayerNames;
+#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN)
+    instanceCreateInfo.enabledLayerCount = vks::debug::validationLayerCount;
+    instanceCreateInfo.ppEnabledLayerNames = vks::debug::validationLayerNames;
 #endif
 
     VKUtil::checkResult(vkCreateInstance(&instanceCreateInfo, nullptr, &_instance));

@@ -44,6 +44,7 @@ public:
 #ifdef ARK_PLATFORM_DARWIN
             struct {
                 NSWindow* window;
+                void* view;
             } darwin;
 #endif
 #ifdef ARK_PLATFORM_ANDROID

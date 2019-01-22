@@ -192,7 +192,7 @@ void VKRenderTarget::initSwapchain(const RenderContext& renderContext)
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
     _swap_chain.initSurface(androidApp->window);
 #elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK))
-    _swap_chain.initSurface(getContentView(info.darwin.window));
+    _swap_chain.initSurface(info.darwin.view);
 #elif defined(_DIRECT2DISPLAY)
     _swap_chain.initSurface(width, height);
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)

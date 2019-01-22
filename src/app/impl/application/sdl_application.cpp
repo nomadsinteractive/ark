@@ -32,6 +32,9 @@
 
 #include "platform/platform.h"
 
+#ifdef ARK_PLATFORM_DARWIN
+extern "C" void* Cocoa_Mtl_AddMetalView(SDL_Window* window);
+#endif
 
 namespace ark {
 
@@ -258,7 +261,6 @@ int SDLApplication::run()
 
     SDL_ShowCursor(_show_cursor ? SDL_ENABLE : SDL_DISABLE);
 
-    /* Create our window centered at 512x512 resolution */
     _main_window = SDL_CreateWindow(name(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _width, _height, _window_flag);
     if(!_main_window)
     {
@@ -282,6 +284,7 @@ int SDLApplication::run()
     info.windows.window = wmInfo.info.win.window;
 #elif defined (ARK_PLATFORM_DARWIN)
     info.darwin.window = wmInfo.info.cocoa.window;
+    info.darwin.view = Cocoa_Mtl_AddMetalView(_main_window);
 #endif
 
     /* Create our opengl context and attach it to our window */
