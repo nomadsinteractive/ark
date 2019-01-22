@@ -192,7 +192,6 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
 
 void PipelineBuildingContext::loadPredefinedSampler(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
 {
-    char buf[16];
     uint32_t binding = 0;
 
     for(const document& i : manifest->children("sampler"))
@@ -200,10 +199,7 @@ void PipelineBuildingContext::loadPredefinedSampler(BeanFactory& factory, const 
         String name = Documents::getAttribute(i, Constants::Attributes::NAME);
         const sp<Texture> texture = factory.ensure<Texture>(i, args);
         if(!name)
-        {
-            std::snprintf(buf, sizeof(buf), "u_Texture%d", binding);
-            name = buf;
-        }
+            name = Strings::sprintf("u_Texture%d", binding);
         DCHECK(!_samplers.has(name), "Sampler \"%s\" redefined", name.c_str());
         _samplers.push_back(name, texture);
         binding++;
