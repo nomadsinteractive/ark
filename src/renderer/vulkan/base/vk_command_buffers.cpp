@@ -1,5 +1,7 @@
 #include "renderer/vulkan/base/vk_command_buffers.h"
 
+#include "graphics/inf/render_command.h"
+
 #include "renderer/base/recycler.h"
 
 #include "renderer/vulkan/base/vk_command_pool.h"
@@ -38,7 +40,7 @@ VKCommandBuffers::~VKCommandBuffers()
     sp<VKRenderTarget> renderTarget = std::move(_render_target);
     std::vector<VkCommandBuffer> commandBuffers = std::move(_command_buffers);
     _recycler->recycle([renderTarget, commandBuffers](GraphicsContext&) {
-        renderTarget->commandPool()->destroyCommandBuffers(commandBuffers.size(), commandBuffers.data());
+        renderTarget->commandPool()->destroyCommandBuffers(static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
     });
 }
 

@@ -3,21 +3,15 @@
 
 #include <vector>
 
-#include <glm/glm.hpp>
-
 #include "core/ark.h"
-#include "core/types/shared_ptr.h"
-#include "core/types/owned_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/graphics_context.h"
 #include "renderer/base/shader.h"
-#include "renderer/inf/render_model.h"
+#include "renderer/base/texture.h"
 
 #include "renderer/vulkan/forward.h"
-#include "renderer/vulkan/renderer_factory/renderer_factory_vulkan.h"
-#include "renderer/vulkan/util/vulkan_device.hpp"
-#include "renderer/vulkan/util/vulkan_swap_chain.hpp"
+
+#include "platform/vulkan/vulkan.h"
 
 namespace ark {
 namespace vulkan {
@@ -38,47 +32,6 @@ public:
 
     static std::vector<uint32_t> compileSPIR(const String& source, Shader::Stage stage);
 
-private:
-//    void generateQuad();
-
-//    void buildCommandBuffers(const VKRenderTarget& renderTarget);
-
-//    void updateUniformBuffers(const VKRenderTarget& renderTarget);
-
-//    void draw(VKRenderTarget& renderTarget);
-
-//    uint32_t getMemoryTypeIndex(uint32_t typeBits, VkMemoryPropertyFlags properties) const;
-
-//private:
-//    sp<ResourceManager> _resource_manager;
-//    sp<VKRenderer> _renderer;
-//    sp<PipelineFactoryVulkan> _pipeline_factory;
-//    sp<VKPipeline> _pipeline;
-//    sp<VKBuffer> _uniforms;
-
-//    sp<VKCommandBuffers> _command_buffers;
-
-//    float zoom = 0;
-
-//    glm::vec3 rotation = glm::vec3();
-//    glm::vec3 cameraPos = glm::vec3();
-
-//    std::vector<VkShaderModule> shaderModules;
-
-////--------------------------------------------------------------------
-//    bool prepared = false;
-
-//    uint32_t indexCount;
-
-//    sp<VKBuffer> _vertex_buffer;
-//    sp<VKBuffer> _index_buffer;
-
-//    VkClearColorValue _background_color = { { 0, 0, 0.2f, 1.0f } };
-
-//    GraphicsContext _graphics_context;
-
-//    friend class RendererFactoryVulkan;
-//    friend class PipelineFactoryVulkan;
 };
 
 }

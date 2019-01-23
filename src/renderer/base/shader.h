@@ -19,7 +19,7 @@ namespace ark {
 class ARK_API Shader {
 public:
     enum Stage {
-        STAGE_NONE,
+        STAGE_NONE = -1,
         STAGE_VERTEX,
         STAGE_FRAGMENT,
         STAGE_COUNT

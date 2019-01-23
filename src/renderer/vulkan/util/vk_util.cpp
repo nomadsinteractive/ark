@@ -163,7 +163,7 @@ public:
 
     EShLanguage toShLanguage(Shader::Stage stage) const {
         DCHECK(stage > Shader::STAGE_NONE && stage < Shader::STAGE_COUNT, "Illegal Shader::Stage: %d", stage);
-        return _languages[stage - 1];
+        return _languages[stage];
     }
 
     const TBuiltInResource& builtInResource() const {
@@ -276,7 +276,7 @@ VkShaderStageFlagBits VKUtil::toStage(Shader::Stage stage)
 {
     static const VkShaderStageFlagBits vkStages[] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT};
     DCHECK(stage > Shader::STAGE_NONE && stage < Shader::STAGE_COUNT, "Illegal Shader::Stage: %d", stage);
-    return vkStages[stage - 1];
+    return vkStages[stage];
 }
 
 VkPrimitiveTopology VKUtil::toPrimitiveTopology(RenderModel::Mode mode)
