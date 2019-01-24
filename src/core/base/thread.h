@@ -25,12 +25,12 @@ public:
     Thread(const sp<Runnable>& entry = nullptr);
     Thread(const Thread& other);
 
-    void resume();
-    void pause();
-    void terminate();
+    void resume() const;
+    void pause() const;
+    void terminate() const;
 
-    void join();
-    void detach();
+    void join() const;
+    void detach() const;
 
     bool isRunning() const;
     bool isPaused() const;
@@ -46,7 +46,7 @@ public:
         return _stub->wait<T, U>(duration, std::move(pred));
     }
 
-    void signal();
+    void signal() const;
 
     template<typename T> static T& local() {
         thread_local T THREAD_LOCAL;

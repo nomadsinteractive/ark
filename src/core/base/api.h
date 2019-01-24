@@ -136,7 +136,7 @@ const char* const TEXT_SIZE = "text-size";
 
 const char* const ON_CROSS = "oncross";
 
-const char* const NINE_PATCH_PATCHES = "patches";
+const char* const NINE_PATCH_PADDINGS = "paddings";
 
 }
 }

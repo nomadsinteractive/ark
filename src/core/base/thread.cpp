@@ -37,32 +37,32 @@ void Thread::start()
     _stub->start(_stub);
 }
 
-void Thread::signal()
+void Thread::signal() const
 {
     _stub->notify();
 }
 
-void Thread::resume()
+void Thread::resume() const
 {
     _stub->resume();
 }
 
-void Thread::pause()
+void Thread::pause() const
 {
     _stub->pause();
 }
 
-void Thread::terminate()
+void Thread::terminate() const
 {
     _stub->terminate();
 }
 
-void Thread::join()
+void Thread::join() const
 {
     _stub->join();
 }
 
-void Thread::detach()
+void Thread::detach() const
 {
     _stub->detach();
 }

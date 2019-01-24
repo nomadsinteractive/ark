@@ -1,6 +1,7 @@
 #include "renderer/impl/render_model/render_model_nine_patch.h"
 
 #include "core/dom/dom_document.h"
+#include "core/util/documents.h"
 
 #include "graphics/base/layer_context.h"
 
@@ -40,19 +41,18 @@ GLModelNinePatch::GLModelNinePatch(const document& manifest, const sp<Atlas>& at
     for(const document& node : manifest->children("render-object"))
     {
         int32_t type = Documents::getAttribute<int32_t>(node, Constants::Attributes::TYPE, 0);
-        const Rect patches = Documents::ensureAttribute<Rect>(node, Constants::Attributes::NINE_PATCH_PATCHES);
         bool hasBounds = atlas->has(type);
         if(hasBounds)
         {
             const Atlas::Item& item = atlas->at(type);
-            const Rect r(item.left() * textureWidth / 65536.0f - 0.5f, item.bottom() * textureHeight / 65536.0f - 0.5f,
-                         item.right() * textureWidth / 65536.0f + 0.5f, item.top() * textureHeight / 65536.0f + 0.5f);
-            _nine_patch_items.emplace(type, r, patches, textureWidth, textureHeight);
+            const Rect bounds(item.left() * textureWidth / 65536.0f - 0.5f, item.bottom() * textureHeight / 65536.0f - 0.5f,
+                              item.right() * textureWidth / 65536.0f + 0.5f, item.top() * textureHeight / 65536.0f + 0.5f);
+            _nine_patch_items.emplace(type, bounds, getPatches(node, bounds), textureWidth, textureHeight);
         }
         else
         {
-            const Rect r = Rect::parse(node);
-            _nine_patch_items.emplace(type, r, patches, textureWidth, textureHeight);
+            const Rect bounds = Rect::parse(node);
+            _nine_patch_items.emplace(type, bounds, getPatches(node, bounds), textureWidth, textureHeight);
         }
     }
 }
@@ -87,6 +87,12 @@ void GLModelNinePatch::load(ModelBuffer& buf, int32_t type, const V& size)
             buf.writeTexCoordinate(item._x[j], item._y[i]);
         }
     }
+}
+
+Rect GLModelNinePatch::getPatches(const document& doc, const Rect& bounds) const
+{
+    const Rect pad = Documents::ensureAttribute<Rect>(doc, Constants::Attributes::NINE_PATCH_PADDINGS);
+    return Rect(pad.left(), pad.top(), bounds.width() - pad.right(), bounds.height() - pad.bottom());
 }
 
 GLModelNinePatch::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

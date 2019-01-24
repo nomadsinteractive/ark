@@ -47,7 +47,7 @@ private:
 class MessageLoopTestCase : public TestCase {
 public:
     virtual int launch() override {
-        sp<MessageLoopThread> messageLoopThread = sp<MessageLoopThread>::make(sp<MessageLoopDefault>::make(Platform::getSteadyClock()));
+        const sp<MessageLoopThread> messageLoopThread = sp<MessageLoopThread>::make(Platform::getSteadyClock());
         messageLoopThread->start();
         sp<RunnableImpl> task = sp<RunnableImpl>::make("a");
         sp<RunnableImpl> task1 = sp<RunnableImpl>::make("b");

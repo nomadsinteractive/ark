@@ -46,6 +46,9 @@ public:
     };
 
 private:
+    Rect getPatches(const document& doc, const Rect& bounds) const;
+
+private:
     sp<Atlas> _atlas;
     ByIndex<Item> _nine_patch_items;
 };
