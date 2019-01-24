@@ -39,8 +39,8 @@
     <body id="@body" class="b2Body" world="@world" position="0, 4" shape="@b2_shape_ball"/>
     <vec2 id="position" class="b2Position" body="@body"/>
     <numeric id="rotation" class="b2Rotation" body="@body"/>
-    <audio id="ogg_test" class="ogg" src="test.ogg"/>
     <audio-player id="audio_player" class="portaudio"/>
+    <audio-player id="fmod_player" class="fmod"/>
     <layout id="layout-001" class="gravity" gravity="center"/>
     <layout id="layout-002" class="gravity" gravity="left|bottom"/>
     <layout id="layout-003" class="gravity" gravity="right|top"/>

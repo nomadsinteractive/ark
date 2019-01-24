@@ -1,11 +1,11 @@
 #ifndef ARK_PLUGIN_VORBIS_IMPL_READABLE_OGG_DECODER_READABLE_H_
 #define ARK_PLUGIN_VORBIS_IMPL_READABLE_OGG_DECODER_READABLE_H_
 
-#include <vorbis/vorbisfile.h>
-
 #include "core/inf/builder.h"
 #include "core/inf/readable.h"
 #include "core/types/shared_ptr.h"
+
+#include <vorbis/vorbisfile.h>
 
 namespace ark {
 namespace plugin {

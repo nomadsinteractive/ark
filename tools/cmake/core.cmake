@@ -163,14 +163,14 @@ endmacro()
 
 macro(ark_dependency_libraries)
     list(APPEND ARK_DEPENDENCY_LIBRARIES ${ARGN})
+    if(ARK_BUILD_STATIC_LIBRARY)
+        list(APPEND ARK_STATIC_LIBRARIES ${ARGN})
+    endif()
 endmacro()
 
 macro(ark_export_dependency_libraries)
     ark_dependency_libraries(${ARGN})
     ark_export(ARK_DEPENDENCY_LIBRARIES)
-    if(ARK_BUILD_STATIC_LIBRARY)
-        list(APPEND ARK_STATIC_LIBRARIES ${ARGN})
-    endif()
 endmacro()
 
 macro(ark_link_libraries)

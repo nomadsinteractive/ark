@@ -1,12 +1,14 @@
 #include "core/impl/readable/file_readable.h"
 
+#include "core/base/bean_factory.h"
+
 namespace ark {
 
-FileReadable::FileReadable(const String& file_path, const String& mode)
-    : _file_path(file_path)
+FileReadable::FileReadable(const String& filepath, const String& mode)
+    : _filepath(filepath)
 {
-    _fp = fopen(file_path.c_str(), mode.c_str());
-    DCHECK(_fp, "Cannot open file \"%s\" for reading", file_path.c_str());
+    _fp = fopen(filepath.c_str(), mode.c_str());
+    DCHECK(_fp, "Cannot open file \"%s\" for reading", filepath.c_str());
     init();
 }
 
@@ -37,16 +39,21 @@ int32_t FileReadable::remaining()
     return _size - ftell(_fp);
 }
 
-const String &FileReadable::filePath() const
-{
-    return _file_path;
-}
-
 void FileReadable::init()
 {
     fseek(_fp, 0, SEEK_END);
     _size = ftell(_fp);
     fseek(_fp, 0, SEEK_SET);
+}
+
+FileReadable::BUILDER::BUILDER(BeanFactory& factory, const String& src)
+    : _src(factory.ensureBuilder<String>(src))
+{
+}
+
+sp<Readable> FileReadable::BUILDER::build(const sp<Scope>& args)
+{
+    return sp<FileReadable>::make(_src->build(args), "rb");
 }
 
 }

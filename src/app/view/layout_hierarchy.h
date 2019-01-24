@@ -52,7 +52,7 @@ public:
 
     bool isLayoutNeeded();
 
-    void doLayout(LayoutParam& layoutParam);
+    void doLayout(const sp<LayoutParam>& layoutParam);
     void doWrapContentLayout(LayoutParam& layoutParam);
 
     void addRenderer(const sp<Renderer>& renderer);

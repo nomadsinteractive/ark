@@ -20,7 +20,8 @@ public:
     AudioPlayerPortaudio(const sp<Executor>& threadPoolExecutor);
     ~AudioPlayerPortaudio();
 
-    virtual sp<Future> play(const sp<Readable>& source) override;
+    virtual sp<Future> play(const sp<Readable>& source, AudioFormat format, PlayOption options) override;
+    virtual bool isAudioFormatSupported(AudioFormat format) override;
 
 //  [[plugin::resource-loader("portaudio")]]
     class BUILDER : public Builder<AudioPlayer> {

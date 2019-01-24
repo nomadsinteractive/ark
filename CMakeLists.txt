@@ -17,6 +17,8 @@ option(ARK_BUILD_STATIC_LIBRARY "Build static library" OFF)
 CMAKE_DEPENDENT_OPTION(ARK_TEST_ENABLE "Build testcases" ON "ARK_BUILD_STATIC_LIBRARY" OFF)
 option(ARK_BUILD_SAMPLES "Build samples" ON)
 
+option(ARK_BUILD_PLUGIN_FMOD "Build fmod plugin" OFF)
+
 option(ARK_DOWNLOAD_DEPENDENCIES "Download dependency libraries automatically" ON)
 
 ark_compile_definition_option(ARK_BUILD_STATIC_PLUGINS "Build static plugin libraries" OFF)
@@ -110,6 +112,7 @@ aux_source_directory(src/app/impl/layout LOCAL_SRC_LIST)
 aux_source_directory(src/app/impl/renderer LOCAL_SRC_LIST)
 aux_source_directory(src/app/impl/tracker LOCAL_SRC_LIST)
 aux_source_directory(src/app/impl/vec3 LOCAL_SRC_LIST)
+aux_source_directory(src/app/inf LOCAL_SRC_LIST)
 aux_source_directory(src/app/util LOCAL_SRC_LIST)
 aux_source_directory(src/app/view LOCAL_SRC_LIST)
 
@@ -169,6 +172,10 @@ add_subdirectory(plugin/vorbis)
 add_subdirectory(plugin/portaudio)
 add_subdirectory(plugin/noise)
 
+if(ARK_BUILD_PLUGIN_FMOD)
+    add_subdirectory(plugin/fmod)
+endif()
+
 if(NOT ANDROID)
 if(${BUILD_SHARED_LIBS})
     set(SDL_SHARED ON)
@@ -220,7 +227,7 @@ target_compile_definitions(${ARK_RUNTIME_SHARED_LIBRARY} PRIVATE -DARK_FLAG_BUIL
 if(ARK_BUILD_STATIC_LIBRARY)
     ark_add_static_library(${ARK_RUNTIME_STATIC_LIBRARY} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
     target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK)
-    target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PUBLIC -DARK_BUILD_STATIC -DARK_BUILD_STATIC_PLUGINS)
+    target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PUBLIC -DARK_BUILD_STATIC)
     if(ARK_TEST_ENABLE)
         aux_source_directory(test/base TEST_SRC_LIST)
         aux_source_directory(test/testcase TEST_SRC_LIST)

@@ -1,7 +1,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "core/base/bean_factory.h"
-#include "core/dom/document.h"
+#include "core/dom/dom_document.h"
 #include "core/inf/builder.h"
 #include "core/inf/dictionary.h"
 #include "core/inf/variable.h"

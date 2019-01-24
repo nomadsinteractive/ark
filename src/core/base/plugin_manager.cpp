@@ -37,7 +37,7 @@ void PluginManager::each(std::function<bool(const sp<Plugin>&)> visitor) const
 
 void PluginManager::load(const String& name)
 {
-    String symbolName = Strings::sprintf("__%s_initialize__", name.replace("-", "_").c_str());
+    const String symbolName = Strings::sprintf("__%s_initialize__", name.replace("-", "_").c_str());
 #ifdef ARK_BUILD_STATIC_PLUGINS
     const auto iter = _static_plugin_libraries.find(name);
     PluginInitializer func = iter != _static_plugin_libraries.end() ? iter->second : nullptr;

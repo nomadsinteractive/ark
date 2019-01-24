@@ -239,7 +239,7 @@ AudioPlayerPortaudio::~AudioPlayerPortaudio()
 {
 }
 
-sp<Future> AudioPlayerPortaudio::play(const sp<Readable>& source)
+sp<Future> AudioPlayerPortaudio::play(const sp<Readable>& source, AudioFormat format, PlayOption options)
 {
     sp<PortaudioDeviceStream> stream = _pa_stream.lock();
     if(!stream)
@@ -249,6 +249,11 @@ sp<Future> AudioPlayerPortaudio::play(const sp<Readable>& source)
     }
 
     return stream->post(stream, _executor, source, 1);
+}
+
+bool AudioPlayerPortaudio::isAudioFormatSupported(AudioPlayer::AudioFormat format)
+{
+    return format == AUDIO_FORMAT_PCM;
 }
 
 AudioPlayerPortaudio::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& /*doc*/, const sp<ResourceLoaderContext>& resourceLoaderContext)

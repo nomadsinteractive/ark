@@ -149,17 +149,17 @@ bool LayoutHierarchy::isLayoutNeeded()
     return layoutNeeded;
 }
 
-void LayoutHierarchy::doLayout(LayoutParam& layoutParam)
+void LayoutHierarchy::doLayout(const sp<LayoutParam>& layoutParam)
 {
     if(_layout)
     {
-        if(layoutParam.isWrapContent())
+        if(layoutParam->isWrapContent())
             doWrapContentLayout(layoutParam);
 
         _layout->begin(layoutParam);
 
         for(const sp<Slot>& i: _slots)
-            i->doPlace(layoutParam.contentHeight(), _layout);
+            i->doPlace(layoutParam->contentHeight(), _layout);
 
         const Rect p = _layout->end();
         for(const sp<Slot>& i : _slots)

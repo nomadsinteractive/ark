@@ -24,18 +24,22 @@ namespace unittest {
 class VorbisTestCase : public TestCase {
 public:
     virtual int launch() {
-        const Global<PluginManager> pluginManager;
-        pluginManager->load("ark-vorbis");
-        pluginManager->load("ark-portaudio");
         const sp<ResourceLoader> resourceLoader = getResourceLoader();
-        const sp<Readable> oggTest1 = resourceLoader->load<Readable>("ogg_test");
-        const sp<Readable> oggTest2 = resourceLoader->load<Readable>("ogg_test");
-        const sp<AudioPlayer> audioPlayer = resourceLoader->load<AudioPlayer>("audio_player");
-        const sp<Future> f1 = audioPlayer->play(oggTest1);
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        const sp<Future> f2 = audioPlayer->play(oggTest2);
+        const sp<AudioPlayer> portaudioPlayer = resourceLoader->load<AudioPlayer>("audio_player");
+        const sp<Future> f1 = AudioPlayer::play(portaudioPlayer, "test.ogg", AudioPlayer::PLAY_OPTION_DEFAULT);
+        std::this_thread::sleep_for(std::chrono::milliseconds(800));
+        const sp<Future> f2 = AudioPlayer::play(portaudioPlayer, "test.ogg", AudioPlayer::PLAY_OPTION_DEFAULT);
         while(!f1->isDone() || !f2->isDone())
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+
+        const sp<AudioPlayer> fmodPlayer = resourceLoader->load<AudioPlayer>("fmod_player");
+        const sp<Future> f3 = AudioPlayer::play(fmodPlayer, "test.ogg", AudioPlayer::PLAY_OPTION_DEFAULT);
+        std::this_thread::sleep_for(std::chrono::milliseconds(800));
+        const sp<Future> f4 = AudioPlayer::play(fmodPlayer, "test.ogg", AudioPlayer::PLAY_OPTION_DEFAULT);
+        while(!f3->isDone())
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
         return 0;
     }
 };

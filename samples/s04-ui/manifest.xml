@@ -2,10 +2,18 @@
 <manifest>
 	<asset prefix="/" src="../assets"/>
 
-	<plugin name="ark-python"/>
+    <heap>
+        <device unit-size="4M"/>
+        <host unit-size="4M"/>
+    </heap>
+
+    <renderer version="auto">
+        <resolution width="540" height="960"/>
+    </renderer>
 
 	<application name="s04 - UI" resource-loader="app.xml">
-		<render-resolution width="540" height="960"/>
-		<script ref="@main" src="main.py"/>
+        <script ref="@main" src="main.py"/>
 	</application>
+
+    <plugin name="ark-python"/>
 </manifest>
