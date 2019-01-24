@@ -21,10 +21,10 @@
 
 namespace ark {
 
-class ARK_API ApplicationContext : public MessageLoop {
+class ARK_API ApplicationContext {
 public:
     ApplicationContext(const sp<ApplicationResource>& applicationResource, const sp<RenderEngine>& renderEngine);
-    ~ApplicationContext() override;
+    ~ApplicationContext();
 
     sp<ResourceLoader> createResourceLoader(const String& name, const sp<Scope>& args);
     sp<ResourceLoader> createResourceLoader(const String& name, const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Scope>& args);
@@ -36,7 +36,7 @@ public:
     const sp<ResourceLoader>& resourceLoader() const;
     const sp<Executor>& executor() const;
 
-    const List<String>& argv() const;
+    const std::vector<String>& argv() const;
     const sp<Clock>& clock() const;
 
     bool onEvent(const Event& event);
@@ -45,10 +45,11 @@ public:
     void addEventListener(const sp<EventListener>& eventListener);
     void setDefaultEventListener(const sp<EventListener>& eventListener);
 
-    virtual void post(const sp<Runnable>& task, float delay = 0.0f) override;
-    virtual void schedule(const sp<Runnable>& task, float interval) override;
+    void post(const sp<Runnable>& task, float delay = 0.0f);
+    void schedule(const sp<Runnable>& task, float interval);
 
-    virtual uint64_t pollOnce() override;
+    void postTask(std::function<void()> task, float delay = 0);
+    void scheduleTask(std::function<bool()> task, float interval);
 
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
     sp<String> getString(const String& resid);
@@ -75,7 +76,8 @@ private:
     void waitForFinish();
 
 private:
-    List<String> _argv;
+    std::vector<String> _argv;
+    sp<Variable<uint64_t>> _steady_clock;
 
     sp<ApplicationResource> _application_resource;
     sp<RenderEngine> _render_engine;

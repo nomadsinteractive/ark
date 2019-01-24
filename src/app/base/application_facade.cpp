@@ -61,7 +61,7 @@ sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name, c
     return _context->createResourceLoader(name, args);
 }
 
-const List<String>& ApplicationFacade::argv() const
+const std::vector<String>& ApplicationFacade::argv() const
 {
     return _context->argv();
 }

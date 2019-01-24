@@ -2,6 +2,7 @@
 #define ARK_APP_IMPL_APPLICATION_SDL_APPLICATION_H_
 
 #include "core/base/api.h"
+#include "core/forwarding.h"
 
 #include "app/base/application.h"
 #include "app/base/event.h"
@@ -29,7 +30,7 @@ private:
     SDL_cond* _cond;
     SDL_mutex* _lock;
 
-    sp<MessageLoop> _message_loop_rendering;
+    sp<MessageLoopDefault> _message_loop_rendering;
     sp<ApplicationController> _controller;
 
     bool _show_cursor;

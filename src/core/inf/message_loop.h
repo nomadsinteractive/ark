@@ -15,14 +15,10 @@ public:
     virtual void post(const sp<Runnable>& task, float delay) = 0;
     virtual void schedule(const sp<Runnable>& task, float interval) = 0;
 
-    virtual uint64_t pollOnce();
+//    virtual uint64_t pollOnce();
 
-    void postTask(const std::function<void()>& task, float delay = 0);
-    void postTask(std::function<void()>&& task, float delay = 0);
-
-    void scheduleTask(const std::function<bool()>& task, float interval);
-    void scheduleTask(std::function<bool()>&& task, float interval);
-
+    void postTask(std::function<void()> task, float delay = 0);
+    void scheduleTask(std::function<bool()> task, float interval);
 };
 
 }

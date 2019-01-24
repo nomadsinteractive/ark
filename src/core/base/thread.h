@@ -39,7 +39,13 @@ public:
     void setEntry(const sp<Runnable>& entry);
     void start();
 
-    void wait(uint64_t microseconds = 0);
+    template<typename T> bool wait(const T& duration) const {
+        return _stub->wait<T>(duration);
+    }
+    template<typename T, typename U> bool wait(const T& duration, U pred) const {
+        return _stub->wait<T, U>(duration, std::move(pred));
+    }
+
     void signal();
 
     template<typename T> static T& local() {
@@ -67,7 +73,15 @@ public:
         const sp<Runnable>& entry() const;
         void setEntry(const sp<Runnable>& entry);
 
-        bool wait(uint64_t microseconds);
+        template<typename T> bool wait(const T& duration) {
+            std::unique_lock<std::mutex> lk(_mutex);
+            return _condition_variable.wait_for(lk, duration) == std::cv_status::timeout;
+        }
+        template<typename T, typename U> bool wait(const T& duration, U pred) {
+            std::unique_lock<std::mutex> lk(_mutex);
+            return _condition_variable.wait_for(lk, duration, std::move(pred));
+        }
+
         void notify();
 
     private:

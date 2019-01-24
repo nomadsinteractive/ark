@@ -7,36 +7,23 @@
 
 namespace ark {
 
-MessageLoopDefault::MessageLoopDefault(const sp<Variable<uint64_t>>& ticker)
-    : _ticker(ticker)
-{
-}
-
-void MessageLoopDefault::post(const sp<Runnable>& task, float delay)
+void MessageLoopDefault::post(const sp<Runnable>& task, uint64_t nextFireTick)
 {
     DASSERT(task);
-    if(delay != 0)
-    {
-        uint64_t tick = _ticker->val();
-        uint64_t l = static_cast<uint64_t>(delay * 1000000);
-        _scheduled.push(Task(task, tick + l, 0));
-    }
-    else
-        _scheduled.push(Task(task, 0, 0));
+    _scheduled.push(Task(task, nextFireTick, 0));
 }
 
-void MessageLoopDefault::schedule(const sp<Runnable>& task, float interval)
+void MessageLoopDefault::schedule(const sp<Runnable>& task, uint32_t interval)
 {
     DASSERT(task);
-    _scheduled.push(Task(task, 0, static_cast<uint32_t>(interval * 1000000)));
+    _scheduled.push(Task(task, 0, interval));
 }
 
-uint64_t MessageLoopDefault::pollOnce()
+uint64_t MessageLoopDefault::pollOnce(uint64_t tick)
 {
-    for(const Task& task : _scheduled.clear())
-        requestNextTask(task);
+    for(Task& task : _scheduled.clear())
+        requestNextTask(std::move(task));
 
-    uint64_t tick = _ticker->val();
     while(_tasks.size() > 0)
     {
         const Task& front = _tasks.front();
@@ -51,31 +38,28 @@ uint64_t MessageLoopDefault::pollOnce()
                 if(!lifecycle || !lifecycle->isDisposed())
                 {
                     nextTask.setNextFireTick(tick + nextTask.interval());
-                    requestNextTask(nextTask);
+                    requestNextTask(std::move(nextTask));
                 }
             }
-            tick = _ticker->val();
         }
         else
-        {
-            return front.nextFireTick() > tick ? front.nextFireTick() - tick : 0;
-        }
+            return front.nextFireTick();
     }
     return 0;
 }
 
-void MessageLoopDefault::requestNextTask(const Task& task)
+void MessageLoopDefault::requestNextTask(Task task)
 {
     for(auto iter = _tasks.begin(); iter != _tasks.end(); ++iter)
     {
         const Task& i = (*iter);
         if(i.nextFireTick() >= task.nextFireTick())
         {
-            _tasks.insert(iter, task);
+            _tasks.insert(iter, std::move(task));
             return;
         }
     }
-    _tasks.push_back(task);
+    _tasks.push_back(std::move(task));
 }
 
 MessageLoopDefault::Task::Task(const sp<Runnable>& entry, uint64_t nextFireTick, uint32_t interval)

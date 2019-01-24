@@ -49,9 +49,10 @@ bool ThreadPoolExecutor::Worker::idle() const
 
 void ThreadPoolExecutor::Worker::run()
 {
+    const auto duration = std::chrono::milliseconds(1);
     while(_thread_stub->status() != Thread::THREAD_STATE_TERMINATED)
     {
-        _thread_stub->wait(1000);
+        _thread_stub->wait(duration);
         sp<Runnable> front;
         if(_pendings.pop(front))
         {

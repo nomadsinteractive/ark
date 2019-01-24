@@ -235,7 +235,7 @@ private:
 
 SDLApplication::SDLApplication(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport, uint32_t windowFlag)
     : Application(applicationDelegate, applicationContext, width, height, viewport), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex())
-      , _message_loop_rendering(sp<MessageLoopDefault>::make(Platform::getSteadyClock())), _controller(sp<SDLApplicationController>::make())
+      , _message_loop_rendering(sp<MessageLoopDefault>::make()), _controller(sp<SDLApplicationController>::make())
       , _show_cursor(windowFlag & WINDOW_FLAG_SHOW_CURSOR), _window_flag(toSDLWindowFlag(applicationContext, windowFlag))
 {
 }
@@ -272,7 +272,6 @@ int SDLApplication::run()
     SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
 
-    //We will get to that later
     auto result = SDL_GetWindowWMInfo(_main_window, &wmInfo);
     DASSERT(result);
 
@@ -297,12 +296,14 @@ int SDLApplication::run()
     onCreate();
     onSurfaceCreated();
 
-    _message_loop_rendering->schedule(sp<SDLPollEventTask>::make(*this), 0.02f);
+    _message_loop_rendering->schedule(sp<SDLPollEventTask>::make(*this), 20000);
     _surface->scheduleUpdate(_application_context, 60);
+
+    const sp<Variable<uint64_t>> steadyClock = Platform::getSteadyClock();
 
     while(!gQuit)
     {
-        _message_loop_rendering->pollOnce();
+        _message_loop_rendering->pollOnce(steadyClock->val());
         onSurfaceDraw();
         if(_use_open_gl)
             SDL_GL_SwapWindow(_main_window);

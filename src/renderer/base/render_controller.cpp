@@ -40,8 +40,8 @@ private:
 
 }
 
-RenderController::Ticker::Ticker()
-    : _ticker(Platform::getSteadyClock()), _tick(0)
+RenderController::Ticker::Ticker(const sp<Variable<uint64_t>>& ticker)
+    : _ticker(ticker), _tick(0)
 {
 }
 
@@ -56,8 +56,8 @@ void RenderController::Ticker::update()
     _tick = _ticker->val();
 }
 
-RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<ResourceManager>& resourceManager)
-    : _render_engine(renderEngine), _resource_manager(resourceManager), _ticker(sp<Ticker>::make())
+RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<ResourceManager>& resourceManager, const sp<Variable<uint64_t>>& ticker)
+    : _render_engine(renderEngine), _resource_manager(resourceManager), _ticker(sp<Ticker>::make(ticker))
 {
 }
 

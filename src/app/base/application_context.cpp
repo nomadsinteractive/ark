@@ -6,10 +6,7 @@
 #include "core/base/thread.h"
 #include "core/base/thread_pool_executor.h"
 #include "core/base/plugin_manager.h"
-#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
-#include "core/impl/dictionary/dictionary_impl.h"
-#include "core/impl/message_loop/message_loop_default.h"
 #include "core/inf/variable.h"
 #include "core/inf/runnable.h"
 #include "core/types/global.h"
@@ -48,8 +45,8 @@ private:
 }
 
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources, const sp<RenderEngine>& renderEngine)
-    : _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->resourceManager())),
-      _clock(sp<Clock>::make(_render_controller->ticker())), _message_loop_application(sp<MessageLoopThread>::make(sp<MessageLoopDefault>::make(Platform::getSteadyClock()))),
+    : _steady_clock(Platform::getSteadyClock()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->resourceManager(), _steady_clock)),
+      _clock(sp<Clock>::make(_render_controller->ticker())), _message_loop_application(sp<MessageLoopThread>::make(_steady_clock)),
       _executor(sp<ThreadPoolExecutor>::make(_message_loop_application)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK)
 {
     Ark& ark = Ark::instance();
@@ -68,7 +65,6 @@ ApplicationContext::~ApplicationContext()
 void ApplicationContext::initMessageLoop()
 {
     _message_loop_application->start();
-    Ark::instance().put<MessageLoop>(_message_loop_application);
 }
 
 void ApplicationContext::initResourceLoader(const document& manifest)
@@ -142,7 +138,7 @@ const sp<Executor>& ApplicationContext::executor() const
     return _executor;
 }
 
-const List<String>& ApplicationContext::argv() const
+const std::vector<String>& ApplicationContext::argv() const
 {
     return _argv;
 }
@@ -182,9 +178,14 @@ void ApplicationContext::schedule(const sp<Runnable>& task, float interval)
     _message_loop_application->schedule(task, interval);
 }
 
-uint64_t ApplicationContext::pollOnce()
+void ApplicationContext::postTask(std::function<void()> task, float delay)
 {
-    return _message_loop_application->pollOnce();
+    _message_loop_application->postTask(std::move(task), delay);
+}
+
+void ApplicationContext::scheduleTask(std::function<bool()> task, float interval)
+{
+    _message_loop_application->scheduleTask(std::move(task), interval);
 }
 
 void ApplicationContext::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)

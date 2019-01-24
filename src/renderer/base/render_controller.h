@@ -19,7 +19,7 @@ namespace ark {
 
 class ARK_API RenderController {
 public:
-    RenderController(const sp<RenderEngine>& renderEngine, const sp<ResourceManager>& resourceManager);
+    RenderController(const sp<RenderEngine>& renderEngine, const sp<ResourceManager>& resourceManager, const sp<Variable<uint64_t>>& ticker);
 
     const sp<RenderEngine>& renderEngine() const;
     const sp<ResourceManager>& resourceManager() const;
@@ -42,7 +42,7 @@ public:
 private:
     class Ticker : public Variable<uint64_t> {
     public:
-        Ticker();
+        Ticker(const sp<Variable<uint64_t>>& ticker);
 
         virtual uint64_t val() override;
 

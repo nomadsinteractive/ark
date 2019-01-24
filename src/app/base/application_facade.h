@@ -32,7 +32,7 @@ public:
     sp<ResourceLoader> createResourceLoader(const String& name, const sp<Scope>& args = nullptr);
 
 //  [[script::bindings::property]]
-    const List<String>& argv() const;
+    const std::vector<String>& argv() const;
 
 //  [[script::bindings::auto]]
     void addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& expired = nullptr);

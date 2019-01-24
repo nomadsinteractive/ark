@@ -5,30 +5,20 @@
 
 namespace ark {
 
-void MessageLoop::postTask(const std::function<void()>& task, float delay)
-{
-    post(sp<RunnableByFunction>::make(task), delay);
-}
-
-void MessageLoop::postTask(std::function<void()>&& task, float delay)
+void MessageLoop::postTask(std::function<void()> task, float delay)
 {
     post(sp<RunnableByFunction>::make(std::move(task)), delay);
 }
 
-void MessageLoop::scheduleTask(const std::function<bool()>& task, float interval)
-{
-    schedule(sp<RunnableByFunctionWithExpired>::make(task), interval);
-}
-
-void MessageLoop::scheduleTask(std::function<bool()>&& task, float interval)
+void MessageLoop::scheduleTask(std::function<bool()> task, float interval)
 {
     schedule(sp<RunnableByFunctionWithExpired>::make(std::move(task)), interval);
 }
 
-uint64_t MessageLoop::pollOnce()
-{
-    DFATAL("Unimplemented");
-    return 0;
-}
+//uint64_t MessageLoop::pollOnce()
+//{
+//    DFATAL("Unimplemented");
+//    return 0;
+//}
 
 }

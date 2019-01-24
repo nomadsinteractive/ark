@@ -52,6 +52,7 @@ class Notifier;
 class Manifest;
 class MemoryPool;
 class MessageLoop;
+class MessageLoopDefault;
 class Object;
 class ObjectPool;
 class Observer;
