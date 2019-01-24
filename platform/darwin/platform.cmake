@@ -34,9 +34,9 @@ ark_compile_definitions(-DARK_PLATFORM_DARWIN)
 
 aux_source_directory(platform/darwin/impl LOCAL_SRC_LIST)
 
-set(LOCAL_OBJC_SRC_LIST
-    platform/darwin/bridge.h
-    platform/darwin/bridge.m
-)
-add_library(darwin_bridge STATIC ${LOCAL_OBJC_SRC_LIST})
-ark_link_libraries(darwin_bridge)
+#set(LOCAL_OBJC_SRC_LIST
+#    platform/darwin/bridge.h
+#    platform/darwin/bridge.m
+#)
+#add_library(darwin_bridge STATIC ${LOCAL_OBJC_SRC_LIST})
+#ark_link_libraries(darwin_bridge)

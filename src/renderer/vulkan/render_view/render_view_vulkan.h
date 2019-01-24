@@ -7,6 +7,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/color.h"
+#include "renderer/base/graphics_context.h"
 #include "graphics/base/viewport.h"
 #include "graphics/forwarding.h"
 #include "graphics/inf/render_view.h"

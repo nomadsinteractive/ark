@@ -1,5 +1,7 @@
 #include "fmod/impl/audio_player/audio_player_fmod.h"
 
+#include <thread>
+
 #include "core/inf/executor.h"
 #include "core/inf/readable.h"
 #include "core/base/future.h"

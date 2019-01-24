@@ -237,7 +237,7 @@ public:
             return npos;
         }
 
-        SizeType free(SizeType offset) {
+        virtual SizeType free(SizeType offset) override {
             auto iter = _fragments.find(offset);
             DCHECK(iter != _fragments.end(), "Invalid offset(%d) being freed", offset);
 

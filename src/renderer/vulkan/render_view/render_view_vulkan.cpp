@@ -7,7 +7,6 @@
 
 #include "renderer/base/resource_manager.h"
 
-#include "renderer/base/graphics_context.h"
 #include "renderer/vulkan/base/vk_command_buffers.h"
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_render_target.h"

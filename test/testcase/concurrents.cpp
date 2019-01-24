@@ -3,6 +3,7 @@
 #include <list>
 #include <queue>
 #include <random>
+#include <thread>
 
 #include "core/ark.h"
 #include "core/base/string.h"
