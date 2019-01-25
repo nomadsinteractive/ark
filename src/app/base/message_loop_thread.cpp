@@ -74,7 +74,8 @@ void MessageLoopThread::RunnableImpl::run()
 
         uint64_t now = _ticker->val();
         uint64_t nextFireTick = _message_loop->pollOnce(now);
-        _thread.wait(_wait_duration, WaitPredicate(_ticker, nextFireTick));
+        if(now < nextFireTick)
+            _thread.wait(_wait_duration, WaitPredicate(_ticker, nextFireTick));
     }
 }
 

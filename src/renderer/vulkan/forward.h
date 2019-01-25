@@ -10,6 +10,7 @@ class VKCommandPool;
 class VKDescriptorPool;
 class VKDevice;
 class VKHeap;
+class VKGraphicsContext;
 class VKInstance;
 class VKMemory;
 class VKMemoryPtr;

@@ -45,7 +45,7 @@ uint64_t MessageLoopDefault::pollOnce(uint64_t tick)
         else
             return front.nextFireTick();
     }
-    return 0;
+    return tick + 1000;
 }
 
 void MessageLoopDefault::requestNextTask(Task task)

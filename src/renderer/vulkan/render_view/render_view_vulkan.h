@@ -33,12 +33,11 @@ private:
     
 private:
     sp<VKRenderer> _renderer;
+    sp<VKGraphicsContext> _vk_context;
 
     op<GraphicsContext> _graphics_context;
     Viewport _viewport;
 
-    Color _background_color;
-    sp<VKCommandBuffers> _command_buffers;
 };
 
 }

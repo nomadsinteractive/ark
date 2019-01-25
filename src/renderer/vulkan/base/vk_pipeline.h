@@ -44,10 +44,8 @@ private:
     void setupDescriptorSet(GraphicsContext& graphicsContext, const ShaderBindings& bindings);
     void setupPipeline(const VertexLayout& vertexLayout);
 
-    void buildCommandBuffers(const Buffer::Snapshot& vertex, const Buffer::Snapshot& index);
+    void buildCommandBuffer(GraphicsContext& graphicsContext, const Buffer::Snapshot& vertex, const Buffer::Snapshot& index);
     void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, bool rebuildCommandBuffer);
-
-    sp<Observer> createObserver(const Buffer& buffer) const;
 
     bool isDirty(const bytearray& dirtyFlags) const;
 
@@ -64,12 +62,8 @@ private:
 
     std::map<Shader::Stage, String> _shaders;
 
-    sp<VKCommandBuffers> _command_buffers;
-
     std::vector<sp<VKBuffer>> _ubos;
 
-    sp<Observer> _vertex_observer;
-    sp<Observer> _index_observer;
     std::vector<sp<Observer>> _texture_observers;
 };
 

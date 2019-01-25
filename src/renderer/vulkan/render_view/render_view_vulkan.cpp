@@ -8,6 +8,7 @@
 #include "renderer/base/resource_manager.h"
 
 #include "renderer/vulkan/base/vk_command_buffers.h"
+#include "renderer/vulkan/base/vk_graphics_context.h"
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_render_target.h"
 #include "renderer/vulkan/util/vk_util.h"
@@ -30,49 +31,25 @@ void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
     _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->resourceManager()));
 
     _renderer->renderTarget()->onSurfaceChanged(width, height);
-    _command_buffers = sp<VKCommandBuffers>::make(_graphics_context->resourceManager()->recycler(), _renderer->renderTarget());
 
-    makeCommandBuffers(_graphics_context, Color::WHITE);
+    _vk_context = sp<VKGraphicsContext>::make(_renderer);
+    _vk_context->initialize(_graphics_context);
+    _graphics_context->attach<VKGraphicsContext>(_vk_context);
 }
 
 void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, const sp<RenderCommand>& renderCommand)
 {
-    const sp<VKRenderTarget>& renderTarget = _renderer->renderTarget();
-    renderTarget->acquire();
     _graphics_context->onDrawFrame();
 
-    if(backgroundColor != _background_color)
-        makeCommandBuffers(_graphics_context, backgroundColor);
+    const sp<VKRenderTarget>& renderTarget = _renderer->renderTarget();
+    uint32_t imageId = renderTarget->acquire();
 
-    _command_buffers->submit(_graphics_context);
+    _vk_context->begin(imageId, backgroundColor);
     renderCommand->draw(_graphics_context);
+    _vk_context->end();
+
+    _vk_context->submit(_graphics_context);
     renderTarget->swap();
-}
-
-void RenderViewVulkan::makeCommandBuffers(GraphicsContext& /*graphicsContext*/, const Color& backgroundColor)
-{
-    VkClearValue vkClearValues[2];
-    VkClearRect vkClearRect[2] = {{_renderer->renderTarget()->vkScissor(), 0, 1}, {_renderer->renderTarget()->vkScissor(), 0, 1}};
-    vkClearValues[0].color = {{backgroundColor.red(), backgroundColor.green(), backgroundColor.blue(), backgroundColor.alpha()}};
-    vkClearValues[1].depthStencil = {1.0f, 0};
-
-    _background_color = backgroundColor;
-
-    VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-    VkRenderPassBeginInfo renderPassBeginInfo = _renderer->renderTarget()->vkRenderPassBeginInfo();
-
-    const std::vector<VkCommandBuffer>& commandBuffers = _command_buffers->vkCommandBuffers();
-    for (size_t i = 0; i < commandBuffers.size(); ++i)
-    {
-        renderPassBeginInfo.framebuffer = _renderer->renderTarget()->frameBuffers()[i];
-        VKUtil::checkResult(vkBeginCommandBuffer(commandBuffers[i], &cmdBufInfo));
-        VkClearAttachment vkClearAttachments[2] = {{VK_IMAGE_ASPECT_COLOR_BIT, 0, vkClearValues[0]}, {VK_IMAGE_ASPECT_DEPTH_BIT|VK_IMAGE_ASPECT_STENCIL_BIT, 0, vkClearValues[1]}};
-        vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-        vkCmdClearAttachments(commandBuffers[i], 2, vkClearAttachments, 2, vkClearRect);
-        vkCmdSetViewport(commandBuffers[i], 0, 1, &_renderer->renderTarget()->vkViewport());
-        vkCmdEndRenderPass(commandBuffers[i]);
-        VKUtil::checkResult(vkEndCommandBuffer(commandBuffers[i]));
-    }
 }
 
 }

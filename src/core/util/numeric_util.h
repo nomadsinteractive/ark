@@ -108,7 +108,7 @@ public:
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Numeric> {
     public:
-        DICTIONARY(BeanFactory& factory, const String& manifest);
+        DICTIONARY(BeanFactory& factory, const String& expr);
 
         virtual sp<Numeric> build(const sp<Scope>& args) override;
 

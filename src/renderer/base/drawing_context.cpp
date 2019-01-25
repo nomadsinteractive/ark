@@ -23,7 +23,8 @@ public:
         const sp<Pipeline> pipeline = _context._shader->buildPipeline(graphicsContext, _context._shader_bindings);
         const sp<RenderCommand> renderCommand = pipeline->active(graphicsContext, _context);
         _context.preDraw(graphicsContext);
-        renderCommand->draw(graphicsContext);
+        if(renderCommand)
+            renderCommand->draw(graphicsContext);
         _context.postDraw(graphicsContext);
     }
 

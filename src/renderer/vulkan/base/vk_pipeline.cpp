@@ -14,6 +14,7 @@
 #include "renderer/vulkan/base/vk_command_buffers.h"
 #include "renderer/vulkan/base/vk_descriptor_pool.h"
 #include "renderer/vulkan/base/vk_device.h"
+#include "renderer/vulkan/base/vk_graphics_context.h"
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_render_target.h"
 #include "renderer/vulkan/base/vk_texture_2d.h"
@@ -25,7 +26,7 @@ namespace vulkan {
 
 VKPipeline::VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<ShaderBindings>& shaderBindings, std::map<Shader::Stage, String> shaders)
     : _recycler(recycler), _shader_bindings(shaderBindings), _renderer(renderer), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE), _descriptor_set(VK_NULL_HANDLE),
-      _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _vertex_observer(createObserver(_shader_bindings->vertexBuffer())), _index_observer(createObserver(_shader_bindings->indexBuffer()))
+      _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders))
 {
 }
 
@@ -63,8 +64,6 @@ void VKPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*
     _descriptor_pool = _renderer->renderTarget()->makeDescriptorPool(graphicsContext.resourceManager()->recycler());
     setupDescriptorSet(graphicsContext, _shader_bindings);
     setupPipeline(vertexLayout);
-
-    _command_buffers = sp<VKCommandBuffers>::make(_recycler, _renderer->renderTarget());
 }
 
 Resource::RecycleFunc VKPipeline::recycle()
@@ -87,8 +86,7 @@ Resource::RecycleFunc VKPipeline::recycle()
 
 void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, bool rebuildCommandBuffer)
 {
-    if(rebuildCommandBuffer)
-        buildCommandBuffers(drawingContext._array_buffer, drawingContext._index_buffer);
+    buildCommandBuffer(graphicsContext, drawingContext._array_buffer, drawingContext._index_buffer);
 
     const std::vector<Layer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
     DCHECK(uboSnapshots.size() == _ubos.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), _ubos.size());
@@ -106,7 +104,7 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
 
 sp<RenderCommand> VKPipeline::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    bool rebuildCommandBuffer = _vertex_observer->dirty() || _index_observer->dirty();
+    bool rebuildCommandBuffer = false;
     for(const sp<Observer>& i : _texture_observers)
         if(i->dirty())
         {
@@ -117,7 +115,7 @@ sp<RenderCommand> VKPipeline::active(GraphicsContext& graphicsContext, const Dra
 
     bind(graphicsContext, drawingContext, rebuildCommandBuffer);
 
-    return _command_buffers->aquire();
+    return nullptr;
 }
 
 void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)
@@ -240,7 +238,7 @@ void VKPipeline::setupPipeline(const VertexLayout& vertexLayout)
     VkPipelineRasterizationStateCreateInfo rasterizationState =
             vks::initializers::pipelineRasterizationStateCreateInfo(
                 VK_POLYGON_MODE_FILL,
-                VK_CULL_MODE_NONE,
+                VK_CULL_MODE_BACK_BIT,
                 VK_FRONT_FACE_COUNTER_CLOCKWISE,
                 0);
 
@@ -312,48 +310,21 @@ void VKPipeline::setupPipeline(const VertexLayout& vertexLayout)
         vkDestroyShaderModule(device->vkLogicalDevice(), i.module, nullptr);
 }
 
-void VKPipeline::buildCommandBuffers(const Buffer::Snapshot& vertex, const Buffer::Snapshot& index)
+void VKPipeline::buildCommandBuffer(GraphicsContext& graphicsContext, const Buffer::Snapshot& vertex, const Buffer::Snapshot& index)
 {
-    const sp<VKRenderTarget>& renderTarget = _renderer->renderTarget();
+    const sp<VKGraphicsContext>& vkContext = graphicsContext.attachment<VKGraphicsContext>();
 
-    VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
+    VkCommandBuffer commandBuffer = vkContext->vkCommandBuffer();
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _layout, 0, 1, &_descriptor_set, 0, nullptr);
 
-    VkRenderPassBeginInfo renderPassBeginInfo = renderTarget->vkRenderPassBeginInfo();
+    VkBuffer vkVertexBuffer = (VkBuffer)(vertex.id());
+    VkBuffer vkIndexBuffer = (VkBuffer)(index.id());
 
-    const std::vector<VkCommandBuffer>& commands = _command_buffers->vkCommandBuffers();
-    for (size_t i = 0; i < commands.size(); ++i)
-    {
-        // Set target frame buffer
-        renderPassBeginInfo.framebuffer = renderTarget->frameBuffers()[i];
-        const VkCommandBuffer commandBuffer = _command_buffers->vkCommandBuffers()[i];
-
-        VKUtil::checkResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
-        vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-        vkCmdSetViewport(commandBuffer, 0, 1, &renderTarget->vkViewport());
-        vkCmdSetScissor(commandBuffer, 0, 1, &renderTarget->vkScissor());
-
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _layout, 0, 1, &_descriptor_set, 0, nullptr);
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
-
-        VkDeviceSize offsets[1] = { 0 };
-
-        VkBuffer vkVertexBuffer = (VkBuffer)(vertex.id());
-        VkBuffer vkIndexBuffer = (VkBuffer)(index.id());
-
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkVertexBuffer, offsets);
-        vkCmdBindIndexBuffer(commandBuffer, vkIndexBuffer, 0, kVKIndexType);
-        vkCmdDrawIndexed(commandBuffer, index.size() / sizeof(glindex_t), 1, 0, 0, 0);
-
-        vkCmdEndRenderPass(commandBuffer);
-        VKUtil::checkResult(vkEndCommandBuffer(commandBuffer));
-    }
-}
-
-sp<Observer> VKPipeline::createObserver(const Buffer& buffer) const
-{
-    const sp<VKBuffer> vkBuffer = buffer.delegate();
-    return vkBuffer->notifier().createObserver();
+    VkDeviceSize offsets = 0;
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkVertexBuffer, &offsets);
+    vkCmdBindIndexBuffer(commandBuffer, vkIndexBuffer, 0, kVKIndexType);
+    vkCmdDrawIndexed(commandBuffer, index.size() / sizeof(glindex_t), 1, 0, 0, 0);
 }
 
 bool VKPipeline::isDirty(const bytearray& dirtyFlags) const

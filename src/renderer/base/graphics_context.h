@@ -24,6 +24,9 @@ public:
     const sp<RenderContext>& renderContext() const;
     const sp<ResourceManager>& resourceManager() const;
 
+    template<typename T> void attach(const sp<T>& attachment) {
+        _attachments.put<T>(attachment);
+    }
     template<typename T> const sp<T>& attachment() {
         return _attachments.ensure<T>();
     }

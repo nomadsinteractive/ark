@@ -12,7 +12,7 @@
 
 namespace ark {
 
-class ARK_API MessageLoopDefault {
+class MessageLoopDefault {
 public:
     void post(const sp<Runnable>& task, uint64_t nextFireTick);
     void schedule(const sp<Runnable>& task, uint32_t interval);

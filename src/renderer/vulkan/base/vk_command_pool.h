@@ -19,7 +19,6 @@ public:
 
     const sp<VKDevice>& device() const;
 
-    VkCommandBuffer getCommandBuffer(bool begin) const;
     VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, bool begin) const;
     std::vector<VkCommandBuffer> makeCommandBuffers(uint32_t count) const;
 

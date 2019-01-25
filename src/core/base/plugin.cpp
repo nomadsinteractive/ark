@@ -51,7 +51,7 @@ const String& Plugin::name() const
     return _name;
 }
 
-const Library&Plugin::library() const
+const Library& Plugin::library() const
 {
     return _library;
 }

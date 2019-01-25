@@ -1,10 +1,12 @@
 #ifndef ARK_CORE_UTIL_MATH_H_
 #define ARK_CORE_UTIL_MATH_H_
 
+#include <algorithm>
 #include <cstdint>
 #include <cmath>
 #include <limits>
 #include <type_traits>
+#include <vector>
 
 #include "core/base/api.h"
 #include "graphics/base/v3.h"
@@ -53,7 +55,7 @@ public:
         return val;
     }
 
-    template<typename T> bool ispow2(T n) {
+    template<typename T> static bool isPOT(T n) {
         return n && !(n & (n - 1));
     }
 
@@ -61,6 +63,38 @@ public:
         almostEqual(T x, T y, int32_t ulp = 4) {
         return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp
                || std::abs(x - y) < std::numeric_limits<T>::min();
+    }
+
+    template<typename T>
+    typename T::size_type levensteinDistance(const T& source, const T& target) {
+        if (source.size() > target.size()) {
+            return levensteinDistance(target, source);
+        }
+
+        using TSizeType = typename T::size_type;
+        const TSizeType min_size = source.size(), max_size = target.size();
+        std::vector<TSizeType> lev_dist(min_size + 1);
+
+        for (TSizeType i = 0; i <= min_size; ++i) {
+            lev_dist[i] = i;
+        }
+
+        for (TSizeType j = 1; j <= max_size; ++j) {
+            TSizeType previous_diagonal = lev_dist[0], previous_diagonal_save;
+            ++lev_dist[0];
+
+            for (TSizeType i = 1; i <= min_size; ++i) {
+                previous_diagonal_save = lev_dist[i];
+                if (source[i - 1] == target[j - 1]) {
+                    lev_dist[i] = previous_diagonal;
+                } else {
+                    lev_dist[i] = std::min(std::min(lev_dist[i - 1], lev_dist[i]), previous_diagonal) + 1;
+                }
+                previous_diagonal = previous_diagonal_save;
+            }
+        }
+
+        return lev_dist[min_size];
     }
 
     static ARK_API uint32_t log2(uint32_t x);

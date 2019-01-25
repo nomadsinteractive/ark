@@ -26,28 +26,6 @@ const sp<VKDevice>& VKCommandPool::device() const
     return _device;
 }
 
-VkCommandBuffer VKCommandPool::getCommandBuffer(bool begin) const
-{
-    VkCommandBuffer cmdBuffer;
-
-    VkCommandBufferAllocateInfo cmdBufAllocateInfo = {};
-    cmdBufAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    cmdBufAllocateInfo.commandPool = _command_pool;
-    cmdBufAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    cmdBufAllocateInfo.commandBufferCount = 1;
-
-    VKUtil::checkResult(vkAllocateCommandBuffers(_device->vkLogicalDevice(), &cmdBufAllocateInfo, &cmdBuffer));
-
-    // If requested, also start the new command buffer
-    if (begin)
-    {
-        VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-        VKUtil::checkResult(vkBeginCommandBuffer(cmdBuffer, &cmdBufInfo));
-    }
-
-    return cmdBuffer;
-}
-
 VkCommandBuffer VKCommandPool::createCommandBuffer(VkCommandBufferLevel level, bool begin) const
 {
     VkCommandBuffer cmdBuffer;

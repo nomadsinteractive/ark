@@ -97,11 +97,10 @@ public:
     private:
         V getVariableBuilder(BeanFactory& factory, const String& expr) const {
             const char* str = expr.c_str();
-            if(expr.length() > 2 && Strings::isVariableName(str + 1)) {
-                if(*str == '@')
-                    return factory.ensureBuilder<N>(expr);
-                if(*str == '$')
-                    return factory.getBuilderByArg<N>(str + 1);
+            if(expr.length() > 1 && (*str == '@' || *str == '$') && Strings::isVariableName(str + 1)) {
+                const sp<Builder<N>> builder = *str == '@' ? factory.getBuilderByRef<N>(str + 1) : factory.getBuilderByArg<N>(str + 1);
+                DCHECK(builder, "Cannot build \"%s\"", expr.c_str());
+                return builder;
             }
             return nullptr;
         }

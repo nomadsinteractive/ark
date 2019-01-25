@@ -1,7 +1,6 @@
 #ifndef ARK_CORE_BASE_HEAP_H_
 #define ARK_CORE_BASE_HEAP_H_
 
-#include <bitset>
 #include <limits>
 #include <map>
 #include <queue>
@@ -10,6 +9,7 @@
 #include "core/collection/bitwise_trie.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/weak_ptr.h"
+#include "core/util/math.h"
 
 namespace ark {
 
@@ -35,7 +35,7 @@ public:
     public:
         L1(SizeType maxChunkLength)
             : _max_chunk_length(maxChunkLength) {
-            DWARN(std::bitset<sizeof(SizeType) * 8>(_max_chunk_length).count() == 1, "maxChunkLength(%d) should be POT", _max_chunk_length);
+            DWARN(Math::isPOT(maxChunkLength), "maxChunkLength(%d) should be POT", _max_chunk_length);
         }
 
         virtual void initialize(SizeType size) override {

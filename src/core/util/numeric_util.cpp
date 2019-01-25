@@ -300,8 +300,8 @@ sp<Numeric> NumericUtil::makeStalker(const sp<Numeric>& self, float s0, float et
     return sp<Stalker>::make(duration ? duration : Ark::instance().clock()->duration(), self, s0, eta);
 }
 
-NumericUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& manifest)
-    : _value(Expression::Compiler<float, NumericOperation>().compile(factory, manifest.strip()))
+NumericUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
+    : _value(Expression::Compiler<float, NumericOperation>().compile(factory, expr.strip()))
 {
 }
 
