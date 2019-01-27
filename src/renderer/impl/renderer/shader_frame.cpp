@@ -15,23 +15,21 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/inf/uploader.h"
-#include "renderer/util/index_buffers.h"
 
 namespace ark {
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _size(size), _render_controller(resourceLoaderContext->renderController()), _shader(shader),
       _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
-      _shader_bindings(sp<ShaderBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, _render_controller, shader->pipelineLayout())),
-      _vertex_buffer(_shader_bindings->vertexBuffer())
+      _shader_bindings(sp<ShaderBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, _render_controller, shader->pipelineLayout())), _vertex_buffer(_shader_bindings->vertexBuffer()),
+      _index_buffer(resourceLoaderContext->renderController()->getNamedBuffer(NamedBuffer::NAME_QUADS)->snapshot(resourceLoaderContext->renderController()->resourceManager(), 1))
 {
 }
 
 void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
-    const Buffer::Snapshot indexBuffer = IndexBuffers::snapshot(_shader_bindings->indexBuffer(), _render_controller->resourceManager(), Buffer::NAME_QUADS, 1);
     const sp<Uploader> uploader = _object_pool->obtain<ByteArrayUploader>(getVertexBuffer(x, y));
-    DrawingContext drawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _vertex_buffer.snapshot(uploader), indexBuffer, 0);
+    DrawingContext drawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _vertex_buffer.snapshot(uploader), _index_buffer, 0);
     renderRequest.addRequest(drawingContext.toRenderCommand(_object_pool));
 }
 

@@ -63,7 +63,7 @@ public:
             if(aquire(aquired, chunk)) {
                 if(aquired != level)
                     split(chunk, aquired, level);
-                allocated = (1 << level) * kAlignment;
+                allocated = (static_cast<SizeType>(1) << level) * kAlignment;
                 return chunk * kAlignment;
             }
             else {

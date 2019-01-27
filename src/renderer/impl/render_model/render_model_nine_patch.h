@@ -8,6 +8,7 @@
 #include "graphics/base/rect.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/inf/render_model.h"
 
 namespace ark {
@@ -26,23 +27,25 @@ private:
     };
 
 public:
-    GLModelNinePatch(const document& manifest, const sp<Atlas>& atlas);
+    GLModelNinePatch(const RenderController& renderController, const document& manifest, const sp<Atlas>& atlas);
 
     virtual sp<ShaderBindings> makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) override;
+    virtual void postSnapshot(RenderController& renderController, Layer::Snapshot& snapshot) override;
 
     virtual void start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext) override;
     virtual void load(ModelBuffer& buf, int32_t type, const V& size) override;
 
-//  [[plugin::builder("nine-patch")]]
+//  [[plugin::resource-loader("nine-patch")]]
     class BUILDER : public Builder<RenderModel> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest);
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<RenderModel> build(const sp<Scope>& args) override;
 
     private:
         document _manifest;
         sp<Builder<Atlas>> _atlas;
+        sp<ResourceLoaderContext> _resource_loader_context;
     };
 
 private:
@@ -50,6 +53,8 @@ private:
 
 private:
     sp<Atlas> _atlas;
+    sp<NamedBuffer> _index_buffer;
+
     ByIndex<Item> _nine_patch_items;
 };
 

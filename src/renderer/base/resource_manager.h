@@ -12,8 +12,9 @@
 
 #include "graphics/forwarding.h"
 
-#include "renderer/base/buffer.h"
 #include "renderer/forwarding.h"
+#include "renderer/base/buffer.h"
+#include "renderer/inf/uploader.h"
 
 namespace ark {
 
@@ -77,10 +78,6 @@ private:
         UploadStrategy _strategy;
 
         bool operator < (const PreparingGLResource& other) const;
-    };
-
-    struct SharedBuffer {
-        Buffer _buffers[Buffer::NAME_COUNT];
     };
 
 private:

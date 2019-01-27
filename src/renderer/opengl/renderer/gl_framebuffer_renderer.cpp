@@ -7,8 +7,10 @@
 #include "graphics/base/render_command_pipeline.h"
 
 #include "renderer/base/buffer.h"
+#include "renderer/base/graphics_context.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/resource_manager.h"
+#include "renderer/base/render_context.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/resource.h"
@@ -18,9 +20,6 @@
 #include "platform/gl/gl.h"
 
 namespace ark {
-
-extern uint32_t g_GLViewportWidth;
-extern uint32_t g_GLViewportHeight;
 
 namespace {
 
@@ -42,9 +41,11 @@ private:
 
 class PostDrawElementsToFBO : public RenderCommand {
 public:
-    virtual void draw(GraphicsContext& /*graphicsContext*/) override {
+    virtual void draw(GraphicsContext& graphicsContext) override {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, g_GLViewportWidth, g_GLViewportHeight);
+
+        const V2& resolution = graphicsContext.renderContext()->resolution();
+        glViewport(0, 0, static_cast<GLsizei>(resolution.x()), static_cast<GLsizei>(resolution.y()));
     }
 
 };

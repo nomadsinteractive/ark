@@ -7,7 +7,6 @@
 #include "renderer/base/model_buffer.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/util/index_buffers.h"
 
 namespace ark {
 
@@ -48,6 +47,10 @@ sp<ShaderBindings> GLModelSphere::makeShaderBindings(const RenderController& ren
     const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_TRIANGLE_STRIP, renderController, pipelineLayout);
     bindings->bindSampler(_atlas->texture());
     return bindings;
+}
+
+void GLModelSphere::postSnapshot(RenderController& /*renderController*/, Layer::Snapshot& /*snapshot*/)
+{
 }
 
 void GLModelSphere::start(ModelBuffer& buf, RenderController& /*renderController*/, const Layer::Snapshot& layerContext)

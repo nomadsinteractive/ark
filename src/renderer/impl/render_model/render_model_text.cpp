@@ -30,7 +30,7 @@ void GLModelText::Stub::reset(uint32_t textureWidth, uint32_t textureHeight)
     _font_glyph = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1));
     _texture = _render_controller->createTexture(textureWidth, textureHeight, sp<Variable<bitmap>::Const>::make(_font_glyph), ResourceManager::US_ON_SURFACE_READY);
     _atlas = sp<Atlas>::make(_texture, true);
-    _delegate = sp<GLModelQuad>::make(_atlas);
+    _delegate = sp<GLModelQuad>::make(_render_controller, _atlas);
     clear();
 }
 
@@ -119,7 +119,7 @@ sp<ShaderBindings> GLModelText::makeShaderBindings(const RenderController& rende
     return bindings;
 }
 
-void GLModelText::postSnapshot(const Layer::Snapshot& snapshot)
+void GLModelText::postSnapshot(RenderController& renderController, Layer::Snapshot& snapshot)
 {
     if(_stub->checkUnpreparedCharacter(snapshot))
     {
@@ -132,6 +132,7 @@ void GLModelText::postSnapshot(const Layer::Snapshot& snapshot)
         }
         _stub->_render_controller->resourceManager()->upload(_stub->_texture, nullptr, ResourceManager::US_RELOAD);
     }
+    _stub->_delegate->postSnapshot(renderController, snapshot);
 }
 
 void GLModelText::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& snapshot)

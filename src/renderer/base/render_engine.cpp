@@ -20,6 +20,16 @@ const Viewport& RenderEngine::viewport() const
     return _render_context->viewport();
 }
 
+const V2& RenderEngine::resolution() const
+{
+    return _render_context->resolution();
+}
+
+void RenderEngine::setResolution(const V2& resolution)
+{
+    _render_context->setResolution(resolution);
+}
+
 const sp<RendererFactory>& RenderEngine::rendererFactory() const
 {
     return _renderer_factory;

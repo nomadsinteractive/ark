@@ -4,6 +4,7 @@
 
 #include "graphics/base/layer.h"
 
+#include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/impl/render_model/render_model_point.h"
 
@@ -17,7 +18,7 @@ PointLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, con
 sp<Layer> PointLayer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Atlas> atlas = _atlas->build(args);
-    return sp<Layer>::make(sp<GLModelPoint>::make(atlas), _shader->build(args), _resource_loader_context);
+    return sp<Layer>::make(sp<GLModelPoint>::make(_resource_loader_context->renderController(), atlas), _shader->build(args), _resource_loader_context);
 }
 
 }

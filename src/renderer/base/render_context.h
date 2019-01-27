@@ -12,6 +12,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/viewport.h"
+#include "graphics/base/v2.h"
 
 #include "renderer/forwarding.h"
 
@@ -65,6 +66,8 @@ public:
     std::map<String, String>& annotations();
 
     const Viewport& viewport() const;
+    const V2& resolution() const;
+    void setResolution(const V2& resolution);
 
     void setSnippetFactory(sp<SnippetFactory> snippetfactory);
     const sp<SnippetFactory>& snippetFactory() const;
@@ -79,6 +82,7 @@ private:
     std::map<String, String> _annotations;
 
     Viewport _viewport;
+    V2 _resolution;
     sp<SnippetFactory> _snippet_factory;
 
     Info _info;

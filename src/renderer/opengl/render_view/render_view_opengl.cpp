@@ -15,9 +15,6 @@
 
 namespace ark {
 
-uint32_t g_GLViewportWidth = 0;
-uint32_t g_GLViewportHeight = 0;
-
 RenderViewOpenGL::RenderViewOpenGL(const sp<RenderContext>& glContext, const sp<ResourceManager>& glResourceManager, const Viewport& viewport)
     : _graphics_context(new GraphicsContext(glContext, glResourceManager)), _viewport(viewport)
 {
@@ -52,9 +49,6 @@ void RenderViewOpenGL::onRenderFrame(const Color& backgroundColor, const sp<Rend
 void RenderViewOpenGL::initialize(uint32_t width, uint32_t height)
 {
     LOGD("Width: %d, Height: %d, Viewport (%.1f, %.1f, %.1f, %.1f)", width, height, _viewport.left(), _viewport.top(), _viewport.right(), _viewport.bottom());
-
-    g_GLViewportWidth = width;
-    g_GLViewportHeight = height;
 
     glViewport(0, 0, width, height);
     glEnable(GL_CULL_FACE);

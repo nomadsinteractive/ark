@@ -15,8 +15,6 @@ namespace ark {
 
 class ARK_API Buffer {
 public:
-    typedef std::function<void(void*, size_t)> UploadFunc;
-
     enum Type {
         TYPE_VERTEX,
         TYPE_INDEX,
@@ -27,13 +25,6 @@ public:
         USAGE_DYNAMIC,
         USAGE_STATIC,
         USAGE_COUNT
-    };
-
-    enum Name {
-        NAME_QUADS,
-        NAME_NINE_PATCH,
-        NAME_POINTS,
-        NAME_COUNT
     };
 
     class ARK_API Delegate : public Resource {

@@ -9,15 +9,15 @@
 #include "graphics/base/matrix.h"
 
 #include "renderer/base/buffer.h"
+#include "renderer/base/graphics_context.h"
 #include "renderer/base/render_controller.h"
+#include "renderer/base/render_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
 
 #include "renderer/opengl/base/gl_buffer.h"
 #include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/opengl/base/gl_texture.h"
-
-#include "renderer/util/index_buffers.h"
 
 namespace ark {
 
@@ -48,9 +48,6 @@ struct GLConstants {
 };
 
 }
-
-extern uint32_t g_GLViewportWidth;
-extern uint32_t g_GLViewportHeight;
 
 GLenum GLUtil::toEnum(RenderModel::Mode renderMode)
 {
@@ -183,7 +180,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, nullptr);
 
-    const Buffer::Snapshot indexBufferSnapshot = indexBuffer.snapshot(IndexBuffers::Quads::maker()(6));
+    const Buffer::Snapshot indexBufferSnapshot = indexBuffer.snapshot(NamedBuffer::Quads::maker()(6));
     indexBufferSnapshot.upload(graphicsContext);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferSnapshot.id());
 
@@ -205,7 +202,8 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glDeleteFramebuffers(1, &captureFBO);
     glDeleteRenderbuffers(1, &captureRBO);
 
-    glViewport(0, 0, g_GLViewportWidth, g_GLViewportHeight);
+    const V2& resolution = graphicsContext.renderContext()->resolution();
+    glViewport(0, 0, static_cast<GLsizei>(resolution.x()), static_cast<GLsizei>(resolution.y()));
 }
 
 }

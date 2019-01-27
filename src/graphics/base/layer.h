@@ -12,6 +12,8 @@
 #include "graphics/base/render_object.h"
 #include "graphics/inf/renderer.h"
 
+#include "renderer/base/buffer.h"
+
 namespace ark {
 
 //[[script::bindings::auto]]
@@ -60,6 +62,9 @@ public:
         sp<Stub> _stub;
         std::vector<UBOSnapshot> _ubos;
         std::vector<RenderObject::Snapshot> _items;
+
+        Buffer::Snapshot _index_buffer;
+
         bool _dirty;
 
         DISALLOW_COPY_AND_ASSIGN(Snapshot);

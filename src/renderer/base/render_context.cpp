@@ -34,6 +34,16 @@ const Viewport& RenderContext::viewport() const
     return _viewport;
 }
 
+const V2& RenderContext::resolution() const
+{
+    return _resolution;
+}
+
+void RenderContext::setResolution(const V2& resolution)
+{
+    _resolution = resolution;
+}
+
 uint32_t RenderContext::getGLSLVersion() const
 {
     switch(_version) {

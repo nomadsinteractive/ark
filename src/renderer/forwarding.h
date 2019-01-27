@@ -13,6 +13,7 @@ class Buffer;
 class RenderContext;
 class RenderModel;
 class ModelBuffer;
+class NamedBuffer;
 class RenderModel;
 class SnippetFactory;
 class Recycler;

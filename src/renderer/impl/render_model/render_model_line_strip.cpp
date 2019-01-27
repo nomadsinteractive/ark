@@ -5,7 +5,6 @@
 #include "renderer/base/model_buffer.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/util/index_buffers.h"
 
 namespace ark {
 
@@ -19,6 +18,10 @@ sp<ShaderBindings> GLModelLineStrip::makeShaderBindings(const RenderController& 
     const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_TRIANGLE_STRIP, renderController, pipelineLayout);
     bindings->bindSampler(_atlas->texture());
     return bindings;
+}
+
+void GLModelLineStrip::postSnapshot(RenderController& /*renderController*/, Layer::Snapshot& /*snapshot*/)
+{
 }
 
 std::vector<glindex_t> GLModelLineStrip::makeIndices(const Layer::Snapshot& layerContext)

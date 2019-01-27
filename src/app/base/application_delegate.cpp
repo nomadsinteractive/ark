@@ -4,6 +4,8 @@
 
 #include "graphics/inf/render_view.h"
 
+#include "renderer/base/render_engine.h"
+
 #include "app/base/application.h"
 #include "app/base/application_context.h"
 #include "app/base/surface.h"
@@ -47,8 +49,9 @@ void ApplicationDelegate::onSurfaceCreated(const sp<Surface>& surface)
     _render_view = surface->renderView();
 }
 
-void ApplicationDelegate::onSurfaceChanged(uint32_t /*width*/, uint32_t /*height*/)
+void ApplicationDelegate::onSurfaceChanged(uint32_t width, uint32_t height)
 {
+    _application_context->renderEngine()->setResolution(V2(width, height));
 }
 
 void ApplicationDelegate::onSurfaceDraw()

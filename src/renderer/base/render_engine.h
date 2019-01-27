@@ -17,6 +17,9 @@ public:
     Ark::RendererVersion version() const;
 
     const Viewport& viewport() const;
+    const V2& resolution() const;
+    void setResolution(const V2& resolution);
+
     const sp<RendererFactory>& rendererFactory() const;
     const sp<RenderContext>& renderContext() const;
 

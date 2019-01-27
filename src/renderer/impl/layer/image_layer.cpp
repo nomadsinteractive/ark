@@ -5,6 +5,7 @@
 #include "graphics/base/layer.h"
 
 #include "renderer/base/shader.h"
+#include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_model/render_model_quad.h"
 
 namespace ark {
@@ -17,7 +18,7 @@ ImageLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, con
 sp<Layer> ImageLayer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Atlas> atlas = _atlas->build(args);
-    return sp<Layer>::make(sp<GLModelQuad>::make(atlas), _shader->build(args), _resource_loader_context);
+    return sp<Layer>::make(sp<GLModelQuad>::make(_resource_loader_context->renderController(), atlas), _shader->build(args), _resource_loader_context);
 }
 
 }

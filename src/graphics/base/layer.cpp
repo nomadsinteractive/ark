@@ -97,7 +97,7 @@ const sp<RenderModel>& Layer::model() const
 Layer::Snapshot Layer::snapshot() const
 {
     Snapshot snapshot(_stub);
-    _stub->_model->postSnapshot(snapshot);
+    _stub->_model->postSnapshot(_stub->_render_controller, snapshot);
     return snapshot;
 }
 

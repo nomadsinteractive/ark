@@ -59,6 +59,8 @@ void RenderController::Ticker::update()
 RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<ResourceManager>& resourceManager, const sp<Variable<uint64_t>>& ticker)
     : _render_engine(renderEngine), _resource_manager(resourceManager), _ticker(sp<Ticker>::make(ticker))
 {
+    _named_buffers[NamedBuffer::NAME_QUADS] = NamedBuffer::Quads::make(*this);
+    _named_buffers[NamedBuffer::NAME_NINE_PATCH] = NamedBuffer::NinePatch::make(*this);
 }
 
 const sp<RenderEngine>& RenderController::renderEngine() const
@@ -141,6 +143,11 @@ void RenderController::preUpdate()
 void RenderController::deferUnref(const Box& box)
 {
     _defered_instances.push_back(box);
+}
+
+const sp<NamedBuffer>& RenderController::getNamedBuffer(NamedBuffer::Name name) const
+{
+    return _named_buffers[name];
 }
 
 }

@@ -5,6 +5,7 @@
 #include "graphics/base/layer.h"
 
 #include "renderer/base/shader.h"
+#include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_model/render_model_nine_patch.h"
 
 namespace ark {
@@ -19,7 +20,7 @@ sp<Layer> NinePatchLayer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Atlas> atlas = _atlas->build(args);
     const sp<Shader> shader = _shader->build(args);
-    return sp<Layer>::make(sp<GLModelNinePatch>::make(_manifest, atlas), shader, _resource_loader_context);
+    return sp<Layer>::make(sp<GLModelNinePatch>::make(_resource_loader_context->renderController(), _manifest, atlas), shader, _resource_loader_context);
 }
 
 }

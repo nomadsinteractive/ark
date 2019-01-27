@@ -15,7 +15,6 @@
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/util/index_buffers.h"
 
 #include "renderer/opengl/util/gl_util.h"
 
@@ -25,7 +24,7 @@ Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>
     : _size(size), _shader(shader),
       _shader_bindings(sp<ShaderBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, resourceLoaderContext->renderController(), shader->pipelineLayout(), resourceLoaderContext->renderController()->makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(GLUtil::makeUnitCubeVertices())), resourceLoaderContext->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC))),
       _memory_pool(resourceLoaderContext->memoryPool()), _object_pool(resourceLoaderContext->objectPool()),
-      _index_buffer(IndexBuffers::snapshot(_shader_bindings->indexBuffer(), resourceLoaderContext->resourceManager(), Buffer::NAME_QUADS, 6))
+      _index_buffer(resourceLoaderContext->renderController()->getNamedBuffer(NamedBuffer::NAME_QUADS)->snapshot(resourceLoaderContext->renderController()->resourceManager(), 6))
 {
     _shader_bindings->bindSampler(texture);
 }

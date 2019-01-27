@@ -11,9 +11,9 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/buffer.h"
 #include "renderer/base/resource_manager.h"
 #include "renderer/inf/uploader.h"
+#include "renderer/util/named_buffer.h"
 
 namespace ark {
 
@@ -39,6 +39,8 @@ public:
     void preUpdate();
     void deferUnref(const Box& box);
 
+    const sp<NamedBuffer>& getNamedBuffer(NamedBuffer::Name name) const;
+
 private:
     class Ticker : public Variable<uint64_t> {
     public:
@@ -61,6 +63,8 @@ private:
 
     ListWithLifecycle<Runnable> _on_pre_update_request;
     List<Box> _defered_instances;
+
+    sp<NamedBuffer> _named_buffers[NamedBuffer::NAME_COUNT];
 };
 
 }
