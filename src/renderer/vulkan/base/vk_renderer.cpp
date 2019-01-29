@@ -6,11 +6,6 @@
 namespace ark {
 namespace vulkan {
 
-VKRenderer::VKRenderer(const sp<ResourceManager>& resourceManager)
-    : _resource_manager(resourceManager)
-{
-}
-
 VKRenderer::~VKRenderer()
 {
     if(_device)
@@ -35,11 +30,6 @@ VKRenderer::~VKRenderer()
     xcb_destroy_window(connection, window);
     xcb_disconnect(connection);
 #endif
-}
-
-const sp<ResourceManager>& VKRenderer::resourceManager() const
-{
-    return _resource_manager;
 }
 
 const sp<VKCommandPool>& VKRenderer::commandPool() const

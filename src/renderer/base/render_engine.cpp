@@ -45,9 +45,9 @@ void RenderEngine::onSurfaceCreated()
     _renderer_factory->onSurfaceCreated(_render_context);
 }
 
-sp<RenderView> RenderEngine::createRenderView(const Viewport& viewport) const
+sp<RenderView> RenderEngine::createRenderView(const sp<RenderController>& renderController, const Viewport& viewport) const
 {
-    return _renderer_factory->createRenderView(_render_context, viewport);
+    return _renderer_factory->createRenderView(_render_context, renderController, viewport);
 }
 
 }

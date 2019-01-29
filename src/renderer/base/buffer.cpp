@@ -34,7 +34,7 @@ size_t Buffer::Snapshot::size() const
 
 void Buffer::Snapshot::upload(GraphicsContext& graphicsContext) const
 {
-    _delegate->reload(graphicsContext, _uploader);
+    _delegate->upload(graphicsContext, _uploader);
 }
 
 Buffer::Buffer(const sp<Buffer::Delegate>& delegate) noexcept
@@ -159,11 +159,6 @@ Buffer::Delegate::Delegate()
 size_t Buffer::Delegate::size() const
 {
     return _size;
-}
-
-void Buffer::Delegate::reload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
-{
-    upload(graphicsContext, uploader);
 }
 
 }

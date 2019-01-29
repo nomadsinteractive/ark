@@ -79,16 +79,15 @@ private:
     };
 
 public:
-    ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<ImageBundle>& images, const sp<ResourceManager>& resourceManager, const sp<Executor>& executor, const sp<RenderController>& renderController);
+    ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<BitmapBundle>& images, const sp<Executor>& executor, const sp<RenderController>& renderController);
     ~ResourceLoaderContext();
 
     const sp<Dictionary<document>>& documents() const;
-    const sp<ImageBundle>& images() const;
+    const sp<BitmapBundle>& images() const;
 
-    const sp<ResourceManager>& resourceManager() const;
-    const sp<Executor>& executor() const;
     const sp<RenderController>& renderController() const;
-    const sp<TextureBundle>& textureLoader() const;
+    const sp<Executor>& executor() const;
+    const sp<TextureBundle>& textureBundle() const;
     const sp<MemoryPool>& memoryPool() const;
     const sp<ObjectPool>& objectPool() const;
     sp<Boolean> disposed() const;
@@ -111,8 +110,7 @@ private:
 
 private:
     sp<Dictionary<document>> _documents;
-    sp<ImageBundle> _images;
-    sp<ResourceManager> _resource_manager;
+    sp<BitmapBundle> _images;
     sp<Executor> _executor;
     sp<RenderController> _render_controller;
     sp<TextureBundle> _texture_bundle;

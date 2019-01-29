@@ -23,6 +23,7 @@ private:
     LFStack<Resource::RecycleFunc> _recyclers;
 
     friend class ResourceManager;
+    friend class RenderController;
 };
 
 }

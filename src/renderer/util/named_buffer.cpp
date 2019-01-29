@@ -1,7 +1,7 @@
 #include "renderer/util/named_buffer.h"
 
 #include "renderer/base/render_controller.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 
 namespace ark {
 
@@ -15,7 +15,12 @@ const Buffer& NamedBuffer::NamedBuffer::buffer() const
     return _buffer;
 }
 
-Buffer::Snapshot NamedBuffer::NamedBuffer::snapshot(ResourceManager& resourceManager, size_t objectCount)
+void NamedBuffer::reset()
+{
+    _object_count = 0;
+}
+
+Buffer::Snapshot NamedBuffer::NamedBuffer::snapshot(RenderController& resourceManager, size_t objectCount)
 {
     const size_t warningLimit = 10000;
     DWARN(objectCount < warningLimit, "Object count(%d) exceeding warning limit(%d). You can make the limit larger if you're sure what you're doing", objectCount, warningLimit);
@@ -26,7 +31,7 @@ Buffer::Snapshot NamedBuffer::NamedBuffer::snapshot(ResourceManager& resourceMan
         const sp<Uploader> uploader = _maker(objectCount);
         DCHECK(uploader && uploader->size() >= size, "Making Uploader failed, object-count: %d, uploader-size: %d, required-size: %d", objectCount, uploader ? uploader->size() : 0, size);
 
-        resourceManager.upload(_buffer.delegate(), uploader, ResourceManager::US_RELOAD);
+        resourceManager.upload(_buffer.delegate(), uploader, RenderController::US_RELOAD);
     }
     return _buffer.snapshot(size);
 }
@@ -56,7 +61,7 @@ void NamedBuffer::NinePatch::upload(const Uploader::UploadFunc& uploader)
     uploader(array->buf(), array->length());
 }
 
-sp<NamedBuffer> NamedBuffer::NinePatch::make(const RenderController& renderController)
+sp<NamedBuffer> NamedBuffer::NinePatch::make(RenderController& renderController)
 {
     return sp<NamedBuffer>::make(renderController.makeIndexBuffer(Buffer::USAGE_STATIC),
                                                    [](size_t objectCount)->sp<Uploader> { return sp<NinePatch>::make(objectCount); },
@@ -92,7 +97,7 @@ Uploader::MakerFunc NamedBuffer::Quads::maker()
     return [](size_t objectCount)->sp<Uploader> { return sp<Quads>::make(objectCount); };
 }
 
-sp<NamedBuffer> NamedBuffer::Quads::make(const RenderController& renderController)
+sp<NamedBuffer> NamedBuffer::Quads::make(RenderController& renderController)
 {
     return sp<NamedBuffer>::make(renderController.makeIndexBuffer(Buffer::USAGE_STATIC),
                                                    [](size_t objectCount)->sp<Uploader> { return sp<Quads>::make(objectCount); },
@@ -117,7 +122,7 @@ void NamedBuffer::Points::upload(const Uploader::UploadFunc& uploader)
     uploader(result->buf(), result->size());
 }
 
-sp<NamedBuffer> NamedBuffer::Points::make(const RenderController& renderController)
+sp<NamedBuffer> NamedBuffer::Points::make(RenderController& renderController)
 {
     return sp<NamedBuffer>::make(renderController.makeIndexBuffer(Buffer::USAGE_STATIC),
                                                    [](size_t objectCount)->sp<Uploader> { return sp<Points>::make(objectCount); },

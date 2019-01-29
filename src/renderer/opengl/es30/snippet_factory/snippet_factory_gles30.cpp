@@ -2,7 +2,7 @@
 
 #include "renderer/inf/snippet.h"
 
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_building_context.h"
 
@@ -42,7 +42,7 @@ private:
 
 }
 
-sp<Snippet> SnippetFactoryGLES30::createCoreSnippet(ResourceManager& resourceManager, const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings)
+sp<Snippet> SnippetFactoryGLES30::createCoreSnippet(RenderController& resourceManager, const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings)
 {
     return sp<SnippetGLES30>::make(resourceManager.createResource<GLVertexArray>(pipelineFactory, shaderBindings));
 }

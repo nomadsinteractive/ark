@@ -13,7 +13,7 @@ class Camera;
 class Color;
 class Font;
 class Frame;
-class ImageBundle;
+class BitmapBundle;
 class Scrollable;
 class Layer;
 class Matrix;

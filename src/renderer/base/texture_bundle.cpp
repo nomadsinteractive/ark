@@ -1,12 +1,11 @@
 #include "renderer/base/texture_bundle.h"
 
 #include "renderer/base/render_controller.h"
-#include "renderer/base/resource_manager.h"
 
 namespace ark {
 
-TextureBundle::TextureBundle(RenderController& renderController)
-    : _resource_manager(renderController.resourceManager()), _delegate(renderController.createTextureBundle())
+TextureBundle::TextureBundle(const sp<RenderController>& renderController)
+    : _render_controller(renderController), _delegate(_render_controller->createTextureBundle())
 {
 }
 
@@ -18,7 +17,7 @@ sp<Texture> TextureBundle::get(const String& name)
 
     const sp<Texture> texture = _delegate->get(name);
     DCHECK(texture, "Texture \"%s\" not loaded", name.c_str());
-    _resource_manager->upload(texture, nullptr, ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
+    _render_controller->upload(texture, nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY);
 
     _textures[name] = texture;
     return texture;

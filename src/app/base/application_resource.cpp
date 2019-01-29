@@ -3,23 +3,24 @@
 #include "core/base/string.h"
 #include "core/inf/dictionary.h"
 
-#include "graphics/base/image_bundle.h"
+#include "graphics/base/bitmap_bundle.h"
 #include "graphics/impl/bitmap_loader/jpeg_bitmap_loader.h"
 #include "graphics/impl/bitmap_loader/png_bitmap_loader.h"
 #include "graphics/impl/bitmap_loader/stb_bitmap_loader.h"
 
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/recycler.h"
+#include "renderer/base/render_controller.h"
 
 namespace ark {
 
 ApplicationResource::ApplicationResource(const sp<Dictionary<document>>& documents, const sp<Asset>& images)
-    : _images(images), _documents(documents), _bitmap_loader(createImageLoader(false)), _bitmap_bounds_loader(createImageLoader(true)), _resource_manager(createResourceManager())
+    : _images(images), _documents(documents), _bitmap_bundle(createImageLoader(false)), _bitmap_bounds_loader(createImageLoader(true)), _recycler(sp<Recycler>::make())
 {
 }
 
-const sp<ResourceManager>& ApplicationResource::resourceManager() const
+const sp<Recycler>& ApplicationResource::recycler() const
 {
-    return _resource_manager;
+    return _recycler;
 }
 
 const sp<Dictionary<document>>& ApplicationResource::documents() const
@@ -27,9 +28,14 @@ const sp<Dictionary<document>>& ApplicationResource::documents() const
     return _documents;
 }
 
-const sp<ImageBundle>& ApplicationResource::imageResource() const
+const sp<BitmapBundle>& ApplicationResource::bitmapBundle() const
 {
-    return _bitmap_loader;
+    return _bitmap_bundle;
+}
+
+const sp<Dictionary<bitmap>>& ApplicationResource::bitmapBoundsLoader() const
+{
+    return _bitmap_bounds_loader;
 }
 
 document ApplicationResource::loadDocument(const String& name) const
@@ -37,22 +43,12 @@ document ApplicationResource::loadDocument(const String& name) const
     return _documents->get(name);
 }
 
-bitmap ApplicationResource::loadBitmap(const String& name) const
-{
-    return _bitmap_loader->get(name);
-}
-
-bitmap ApplicationResource::loadBitmapBounds(const String& name) const
-{
-    return _bitmap_bounds_loader->get(name);
-}
-
-sp<ImageBundle> ApplicationResource::createImageLoader(bool justDecodeBounds) const
+sp<BitmapBundle> ApplicationResource::createImageLoader(bool justDecodeBounds) const
 {
 #ifdef ARK_USE_STB_IMAGE
-    const sp<ImageBundle> imageBundle = sp<ImageBundle>::make(_images, sp<STBBitmapLoader>::make(justDecodeBounds));
+    const sp<BitmapBundle> imageBundle = sp<BitmapBundle>::make(_images, sp<STBBitmapLoader>::make(justDecodeBounds));
 #else
-    const sp<ImageBundle> imageBundle = sp<ImageBundle>::make(_images, nullptr);
+    const sp<BitmapBundle> imageBundle = sp<BitmapBundle>::make(_images, nullptr);
 #endif
     imageBundle->addLoader("png", sp<PNGBitmapLoader>::make(justDecodeBounds));
 #ifdef ARK_USE_LIBJPEG_TURBO
@@ -61,11 +57,6 @@ sp<ImageBundle> ApplicationResource::createImageLoader(bool justDecodeBounds) co
     imageBundle->addLoader("jpeg", jpegLoader);
 #endif
     return imageBundle;
-}
-
-sp<ResourceManager> ApplicationResource::createResourceManager() const
-{
-    return sp<ResourceManager>::adopt(new ResourceManager(_bitmap_loader, _bitmap_bounds_loader));
 }
 
 }

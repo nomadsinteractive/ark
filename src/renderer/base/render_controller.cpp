@@ -5,9 +5,9 @@
 
 #include "graphics/base/bitmap.h"
 
+#include "renderer/base/graphics_context.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_engine.h"
-#include "renderer/base/resource_manager.h"
 #include "renderer/base/texture.h"
 #include "renderer/inf/renderer_factory.h"
 
@@ -19,20 +19,19 @@ namespace {
 
 class GLTextureBundle : public Dictionary<sp<Texture>> {
 public:
-    GLTextureBundle(const sp<RendererFactory>& rendererFactory, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
-        : _renderer_factory(rendererFactory), _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader)
+    GLTextureBundle(const sp<RendererFactory>& rendererFactory, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
+        : _renderer_factory(rendererFactory), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader)
     {
     }
 
     virtual sp<Texture> get(const String& name) override {
         const bitmap bitmapBounds = _bitmap_bounds_loader->get(name);
         DCHECK(bitmapBounds, "Texture resource \"%s\" not found", name.c_str());
-        return _renderer_factory->createTexture(_recycler, bitmapBounds->width(), bitmapBounds->height(), sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
+        return _renderer_factory->createTexture(bitmapBounds->width(), bitmapBounds->height(), sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
     }
 
 private:
     sp<RendererFactory> _renderer_factory;
-    sp<Recycler> _recycler;
 
     sp<Dictionary<bitmap>> _bitmap_loader;
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
@@ -56,21 +55,106 @@ void RenderController::Ticker::update()
     _tick = _ticker->val();
 }
 
-RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<ResourceManager>& resourceManager, const sp<Variable<uint64_t>>& ticker)
-    : _render_engine(renderEngine), _resource_manager(resourceManager), _ticker(sp<Ticker>::make(ticker))
+RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader, const sp<Variable<uint64_t>>& ticker)
+    : _render_engine(renderEngine), _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _ticker(sp<Ticker>::make(ticker))
 {
     _named_buffers[NamedBuffer::NAME_QUADS] = NamedBuffer::Quads::make(*this);
     _named_buffers[NamedBuffer::NAME_NINE_PATCH] = NamedBuffer::NinePatch::make(*this);
+    _named_buffers[NamedBuffer::NAME_POINTS] = NamedBuffer::Points::make(*this);
+}
+
+void RenderController::reset()
+{
+    DTHREAD_CHECK(THREAD_ID_CORE);
+    for(const sp<NamedBuffer>& i : _named_buffers)
+        i->reset();
+}
+
+void RenderController::onSurfaceReady(GraphicsContext& graphicsContext)
+{
+    doRecycling(graphicsContext);
+    doSurfaceReady(graphicsContext);
+}
+
+void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<PreparingResource>& items)
+{
+    PreparingResource front;
+    while(items.pop(front)) {
+        if(!front._resource.isExpired() || front._strategy == RenderController::US_RELOAD)
+        {
+            if(front._strategy == RenderController::US_RELOAD && front._resource.resource()->id() != 0)
+                front._resource.recycle(graphicsContext);
+
+            front._resource.upload(graphicsContext);
+            if(front._strategy == RenderController::US_ONCE_AND_ON_SURFACE_READY)
+                _on_surface_ready_items.insert(front._resource);
+        }
+    }
+}
+
+void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
+{
+    prepare(graphicsContext, _preparing_items);
+
+    uint32_t tick = graphicsContext.tick();
+    if(tick == 0)
+        doRecycling(graphicsContext);
+    else if (tick == 150)
+        _recycler->doRecycling(graphicsContext);
+}
+
+void RenderController::upload(const sp<Resource>& resource, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy)
+{
+    switch(strategy & 3)
+    {
+    case RenderController::US_ONCE_AND_ON_SURFACE_READY:
+    case RenderController::US_ONCE:
+    case RenderController::US_RELOAD:
+        _preparing_items.push(PreparingResource(ExpirableResource(resource, uploader), strategy));
+        break;
+    case RenderController::US_ON_SURFACE_READY:
+        _on_surface_ready_items.insert(ExpirableResource(resource, uploader));
+        break;
+    }
+}
+
+void RenderController::uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy)
+{
+    upload(buffer._delegate, uploader, strategy);
+}
+
+const sp<Recycler>& RenderController::recycler() const
+{
+    return _recycler;
+}
+
+void RenderController::doRecycling(GraphicsContext& graphicsContext)
+{
+    for(auto iter = _on_surface_ready_items.begin(); iter != _on_surface_ready_items.end();)
+    {
+        const ExpirableResource& resource = *iter;
+        if(resource.isExpired())
+        {
+            resource.recycle(graphicsContext);
+            iter = _on_surface_ready_items.erase(iter);
+        }
+        else
+            ++iter;
+    }
+}
+
+void RenderController::doSurfaceReady(GraphicsContext& graphicsContext)
+{
+    for(const ExpirableResource& resource : _on_surface_ready_items)
+        resource.recycle(graphicsContext);
+
+    for(const ExpirableResource& resource : _on_surface_ready_items)
+        resource.upload(graphicsContext);
 }
 
 const sp<RenderEngine>& RenderController::renderEngine() const
 {
     return _render_engine;
-}
-
-const sp<ResourceManager>& RenderController::resourceManager() const
-{
-    return _resource_manager;
 }
 
 sp<PipelineFactory> RenderController::createPipelineFactory() const
@@ -80,30 +164,30 @@ sp<PipelineFactory> RenderController::createPipelineFactory() const
 
 sp<Dictionary<sp<Texture>>> RenderController::createTextureBundle() const
 {
-    return sp<GLTextureBundle>::make(_render_engine->rendererFactory(), _resource_manager->recycler(), _resource_manager->bitmapLoader(), _resource_manager->bitmapBoundsLoader());
+    return sp<GLTextureBundle>::make(_render_engine->rendererFactory(), _bitmap_loader, _bitmap_bounds_loader);
 }
 
-sp<Texture> RenderController::createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap, ResourceManager::UploadStrategy us)
+sp<Texture> RenderController::createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap, RenderController::UploadStrategy us)
 {
-    const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(_resource_manager->recycler(), width, height, bitmap);
-    _resource_manager->upload(texture, nullptr, us);
+    const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(width, height, bitmap);
+    upload(texture, nullptr, us);
     return texture;
 }
 
-Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader) const
+Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader)
 {
     return makeBuffer(Buffer::TYPE_VERTEX, usage, uploader);
 }
 
-Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader) const
+Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader)
 {
     return makeBuffer(Buffer::TYPE_INDEX, usage, uploader);
 }
 
-Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader) const
+Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader)
 {
     Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage));
-    _resource_manager->uploadBuffer(buffer, uploader, uploader ? ResourceManager::US_ONCE_AND_ON_SURFACE_READY : ResourceManager::US_ON_SURFACE_READY);
+    uploadBuffer(buffer, uploader, uploader ? RenderController::US_ONCE_AND_ON_SURFACE_READY : RenderController::US_ON_SURFACE_READY);
     return buffer;
 }
 
@@ -147,7 +231,48 @@ void RenderController::deferUnref(const Box& box)
 
 const sp<NamedBuffer>& RenderController::getNamedBuffer(NamedBuffer::Name name) const
 {
+    DTHREAD_CHECK(THREAD_ID_CORE);
     return _named_buffers[name];
+}
+
+RenderController::ExpirableResource::ExpirableResource(const sp<Resource>& resource, const sp<Uploader>& uploader)
+    : _resource(resource), _uploader(uploader)
+{
+}
+
+const sp<Resource>& RenderController::ExpirableResource::resource() const
+{
+    return _resource;
+}
+
+bool RenderController::ExpirableResource::isExpired() const
+{
+    return _resource.unique();
+}
+
+void RenderController::ExpirableResource::upload(GraphicsContext& graphicsContext) const
+{
+    _resource->upload(graphicsContext, _uploader);
+}
+
+void RenderController::ExpirableResource::recycle(GraphicsContext& graphicsContext) const
+{
+    _resource->recycle()(graphicsContext);
+}
+
+bool RenderController::ExpirableResource::operator <(const RenderController::ExpirableResource& other) const
+{
+    return _resource < other._resource;
+}
+
+RenderController::PreparingResource::PreparingResource(const RenderController::ExpirableResource& resource, RenderController::UploadStrategy strategy)
+    : _resource(resource), _strategy(strategy)
+{
+}
+
+bool RenderController::PreparingResource::operator <(const RenderController::PreparingResource& other) const
+{
+    return _resource < other._resource;
 }
 
 }

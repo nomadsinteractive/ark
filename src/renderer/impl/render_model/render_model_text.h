@@ -47,12 +47,12 @@ private:
 public:
     GLModelText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
 
-    virtual sp<ShaderBindings> makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) override;
+    virtual sp<ShaderBindings> makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) override;
 
     virtual void postSnapshot(RenderController& renderController, Layer::Snapshot& snapshot) override;
 
-    virtual void start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& snapshot) override;
-    virtual void load(ModelBuffer& buf, int32_t type, const V& scale) override;
+    virtual void start(ModelBuffer& buf, const Layer::Snapshot& snapshot) override;
+    virtual void load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot) override;
     virtual Metrics measure(int32_t type) override;
 
 //  [[plugin::resource-loader("text")]]

@@ -23,7 +23,9 @@ public:
 
     const Buffer& buffer() const;
 
-    Buffer::Snapshot snapshot(ResourceManager& resourceManager, size_t objectCount);
+    void reset();
+
+    Buffer::Snapshot snapshot(RenderController& resourceManager, size_t objectCount);
 
 public:
     class NinePatch : public Uploader {
@@ -32,7 +34,7 @@ public:
 
         virtual void upload(const Uploader::UploadFunc& uploader) override;
 
-        static sp<NamedBuffer> make(const RenderController& renderController);
+        static sp<NamedBuffer> make(RenderController& renderController);
 
     private:
         size_t _object_count;
@@ -46,7 +48,7 @@ public:
         virtual void upload(const Uploader::UploadFunc& uploader) override;
 
         static Uploader::MakerFunc maker();
-        static sp<NamedBuffer> make(const RenderController& renderController);
+        static sp<NamedBuffer> make(RenderController& renderController);
 
     private:
         size_t _object_count;
@@ -58,7 +60,7 @@ public:
 
         virtual void upload(const Uploader::UploadFunc& uploader) override;
 
-        static sp<NamedBuffer> make(const RenderController& renderController);
+        static sp<NamedBuffer> make(RenderController& renderController);
 
     private:
         size_t _object_count;

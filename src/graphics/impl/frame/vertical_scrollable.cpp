@@ -67,8 +67,8 @@ void VerticalScrollable::ensureTile(Tile<sp<Renderer>>& tile, int32_t position)
     }
 }
 
-VerticalScrollable::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _tile_maker(parent.ensureBuilder<TileMaker>(doc, "tile-maker")), _scroller(parent.ensureBuilder<Numeric>(doc, "scroller")),
+VerticalScrollable::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
+    : _tile_maker(factory.ensureBuilder<TileMaker>(doc, "tile-maker")), _scroller(factory.ensureBuilder<Numeric>(doc, "scroller")),
       _height(Documents::ensureAttribute<int32_t>(doc, "height")),
       _tile_height(Documents::ensureAttribute<int32_t>(doc, "tile-height")),
       _rows(Documents::getAttribute<uint32_t>(doc, "rows", 0))

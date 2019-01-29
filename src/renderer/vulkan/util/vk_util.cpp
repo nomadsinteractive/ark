@@ -19,7 +19,7 @@
 
 #include "renderer/base/attribute.h"
 #include "renderer/base/render_context.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/inf/uploader.h"
 
 #include "renderer/vulkan/base/vk_buffer.h"

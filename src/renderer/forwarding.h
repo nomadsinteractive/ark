@@ -18,7 +18,6 @@ class RenderModel;
 class SnippetFactory;
 class Recycler;
 class Resource;
-class ResourceManager;
 class Shader;
 class ShaderBindings;
 class PipelineInput;

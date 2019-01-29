@@ -11,7 +11,7 @@
 #include "renderer/base/render_context.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_building_context.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/shader_preprocessor.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/inf/pipeline_factory.h"

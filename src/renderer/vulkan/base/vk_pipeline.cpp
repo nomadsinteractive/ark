@@ -5,7 +5,7 @@
 #include "renderer/base/buffer.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_input.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/inf/uploader.h"
@@ -61,7 +61,7 @@ void VKPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*
     setupVertexDescriptions(_shader_bindings->pipelineInput(), vertexLayout);
     setupDescriptorSetLayout(_shader_bindings->pipelineInput());
 
-    _descriptor_pool = _renderer->renderTarget()->makeDescriptorPool(graphicsContext.resourceManager()->recycler());
+    _descriptor_pool = _renderer->renderTarget()->makeDescriptorPool(graphicsContext.recycler());
     setupDescriptorSet(graphicsContext, _shader_bindings);
     setupPipeline(vertexLayout);
 }
@@ -102,7 +102,7 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
     }
 }
 
-sp<RenderCommand> VKPipeline::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     bool rebuildCommandBuffer = false;
     for(const sp<Observer>& i : _texture_observers)
@@ -114,8 +114,6 @@ sp<RenderCommand> VKPipeline::active(GraphicsContext& graphicsContext, const Dra
         }
 
     bind(graphicsContext, drawingContext, rebuildCommandBuffer);
-
-    return nullptr;
 }
 
 void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)

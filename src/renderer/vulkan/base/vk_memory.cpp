@@ -1,7 +1,7 @@
 #include "renderer/vulkan/base/vk_memory.h"
 
 #include "renderer/base/recycler.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_memory_ptr.h"
@@ -12,14 +12,14 @@
 namespace ark {
 namespace vulkan {
 
-VKMemory::Stub::Stub(const sp<VKDevice>& device, const sp<ResourceManager>& resourceManager, VkDeviceSize size, uint32_t memoryType)
-    : _device(device), _resource_manager(resourceManager), _memory(VK_NULL_HANDLE), _allocation_info{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, nullptr, size, memoryType}
+VKMemory::Stub::Stub(const sp<VKDevice>& device, const sp<Recycler>& recycler, VkDeviceSize size, uint32_t memoryType)
+    : _device(device), _recycler(recycler), _memory(VK_NULL_HANDLE), _allocation_info{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, nullptr, size, memoryType}
 {
 }
 
 VKMemory::Stub::~Stub()
 {
-    _resource_manager->recycler()->recycle(*this);
+    _recycler->recycle(*this);
 }
 
 uint64_t VKMemory::Stub::id()
@@ -44,8 +44,8 @@ Resource::RecycleFunc VKMemory::Stub::recycle()
     };
 }
 
-VKMemory::VKMemory(const sp<VKDevice>& device, const sp<ResourceManager>& resourceManager, VkDeviceSize size, uint32_t memoryType)
-    : _stub(sp<Stub>::make(device, resourceManager, size, memoryType))
+VKMemory::VKMemory(const sp<VKDevice>& device, const sp<Recycler>& recycler, VkDeviceSize size, uint32_t memoryType)
+    : _stub(sp<Stub>::make(device, recycler, size, memoryType))
 {
 }
 

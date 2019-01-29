@@ -13,12 +13,12 @@ namespace ark {
 
 class TextureBundle : public Dictionary<sp<Texture>> {
 public:
-    TextureBundle(RenderController& renderController);
+    TextureBundle(const sp<RenderController>& renderController);
 
     virtual sp<Texture> get(const String& name) override;
 
 private:
-    sp<ResourceManager> _resource_manager;
+    sp<RenderController> _render_controller;
     sp<Dictionary<sp<Texture>>> _delegate;
 
     std::map<String, sp<Texture>> _textures;

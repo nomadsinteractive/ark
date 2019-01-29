@@ -3,7 +3,7 @@
 #include "graphics/base/color.h"
 
 #include "renderer/base/graphics_context.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 
 #include "renderer/vulkan/base/vk_command_buffers.h"
 #include "renderer/vulkan/base/vk_renderer.h"
@@ -20,7 +20,7 @@ VKGraphicsContext::VKGraphicsContext(const sp<VKRenderer>& renderer)
 
 void VKGraphicsContext::initialize(GraphicsContext& graphicsContext)
 {
-    _command_buffers = sp<VKCommandBuffers>::make(graphicsContext.resourceManager()->recycler(), _renderer->renderTarget());
+    _command_buffers = sp<VKCommandBuffers>::make(graphicsContext.recycler(), _renderer->renderTarget());
 }
 
 void VKGraphicsContext::begin(uint32_t imageId, const Color& backgroundColor)

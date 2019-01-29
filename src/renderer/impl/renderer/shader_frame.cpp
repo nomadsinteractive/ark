@@ -11,7 +11,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/inf/uploader.h"
@@ -22,7 +22,7 @@ ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const s
     : _size(size), _render_controller(resourceLoaderContext->renderController()), _shader(shader),
       _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
       _shader_bindings(sp<ShaderBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, _render_controller, shader->pipelineLayout())), _vertex_buffer(_shader_bindings->vertexBuffer()),
-      _index_buffer(resourceLoaderContext->renderController()->getNamedBuffer(NamedBuffer::NAME_QUADS)->snapshot(resourceLoaderContext->renderController()->resourceManager(), 1))
+      _index_buffer(resourceLoaderContext->renderController()->getNamedBuffer(NamedBuffer::NAME_QUADS)->snapshot(resourceLoaderContext->renderController(), 1))
 {
 }
 

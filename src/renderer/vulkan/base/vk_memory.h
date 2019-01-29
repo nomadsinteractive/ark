@@ -15,7 +15,7 @@ namespace vulkan {
 class VKMemory {
 private:
     struct Stub  : public Resource {
-        Stub(const sp<VKDevice>& device, const sp<ResourceManager>& resourceManager, VkDeviceSize size, uint32_t memoryType);
+        Stub(const sp<VKDevice>& device, const sp<Recycler>& recycler, VkDeviceSize size, uint32_t memoryType);
         ~Stub() override;
 
         virtual uint64_t id() override;
@@ -23,14 +23,14 @@ private:
         virtual RecycleFunc recycle() override;
 
         sp<VKDevice> _device;
-        sp<ResourceManager> _resource_manager;
+        sp<Recycler> _recycler;
 
         VkDeviceMemory _memory;
         VkMemoryAllocateInfo _allocation_info;
     };
 
 public:
-    VKMemory(const sp<VKDevice>& device, const sp<ResourceManager>& resourceManager, VkDeviceSize size, uint32_t memoryType);
+    VKMemory(const sp<VKDevice>& device, const sp<Recycler>& recycler, VkDeviceSize size, uint32_t memoryType);
     VKMemory(const sp<Stub>& stub);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(VKMemory);
 

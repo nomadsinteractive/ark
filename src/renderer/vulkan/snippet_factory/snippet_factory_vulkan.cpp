@@ -1,6 +1,6 @@
 #include "renderer/vulkan/snippet_factory/snippet_factory_vulkan.h"
 
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/shader_bindings.h"
@@ -86,7 +86,7 @@ private:
 
 }
 
-sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(ResourceManager& /*resourceManager*/, const sp<PipelineFactory>& /*pipelineFactory*/, const sp<ShaderBindings>& /*shaderBindings*/)
+sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(RenderController& /*resourceManager*/, const sp<PipelineFactory>& /*pipelineFactory*/, const sp<ShaderBindings>& /*shaderBindings*/)
 {
     return sp<CoreSnippetVulkan>::make();
 }

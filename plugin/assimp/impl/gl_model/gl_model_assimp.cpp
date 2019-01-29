@@ -6,7 +6,7 @@
 #include "core/util/documents.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/image_bundle.h"
+#include "graphics/base/bitmap_bundle.h"
 
 #include "renderer/base/model_buffer.h"
 #include "renderer/base/resource_loader_context.h"
@@ -44,7 +44,7 @@ GLModelAssimp::GLModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderCont
 //    _shader_bindings->snippet()->link<GLSnippetUpdateModelMatrix>();
 }
 
-sp<ShaderBindings> GLModelAssimp::makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
+sp<ShaderBindings> GLModelAssimp::makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
 {
     return nullptr;
 }
@@ -53,15 +53,15 @@ void GLModelAssimp::postSnapshot(RenderController& /*renderController*/, Layer::
 {
 }
 
-void GLModelAssimp::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& layerContext)
+void GLModelAssimp::start(ModelBuffer& buf, const Layer::Snapshot& layerContext)
 {
 }
 
-void GLModelAssimp::load(ModelBuffer& buf, int32_t type, const V& scale)
+void GLModelAssimp::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
 }
 
-bitmap GLModelAssimp::loadBitmap(const sp<ImageBundle>& imageResource, const aiTexture* tex) const
+bitmap GLModelAssimp::loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const
 {
     if(tex->mHeight == 0)
     {

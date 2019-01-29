@@ -5,14 +5,14 @@
 
 #include "graphics/base/camera.h"
 
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 
 #include "platform/platform.h"
 
 namespace ark {
 
-GraphicsContext::GraphicsContext(const sp<RenderContext>& renderContext, const sp<ResourceManager>& resourceManager)
-    : _render_context(renderContext), _resource_manager(resourceManager), _tick(0)
+GraphicsContext::GraphicsContext(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController)
+    : _render_context(renderContext), _render_controller(renderController), _tick(0)
 {
 }
 
@@ -22,18 +22,23 @@ GraphicsContext::~GraphicsContext()
 
 void GraphicsContext::onSurfaceReady()
 {
-    _resource_manager->onSurfaceReady(*this);
+    _render_controller->onSurfaceReady(*this);
 }
 
 void GraphicsContext::onDrawFrame()
 {
     ++_tick;
-    _resource_manager->onDrawFrame(*this);
+    _render_controller->onDrawFrame(*this);
 }
 
-const sp<ResourceManager>& GraphicsContext::resourceManager() const
+const sp<RenderController>& GraphicsContext::renderController() const
 {
-    return _resource_manager;
+    return _render_controller;
+}
+
+const sp<Recycler>& GraphicsContext::recycler() const
+{
+    return _render_controller->recycler();
 }
 
 const sp<RenderContext>& GraphicsContext::renderContext() const

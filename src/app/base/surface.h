@@ -6,13 +6,15 @@
 
 #include "graphics/forwarding.h"
 
+#include "renderer/forwarding.h"
+
 #include "app/forwarding.h"
 
 namespace ark {
 
 class ARK_API Surface {
 public:
-    Surface(const sp<RenderView>& renderView);
+    Surface(const sp<RenderView>& renderView, const sp<RenderController>& renderController);
 
     const sp<RenderView>& renderView() const;
     const sp<SurfaceController>& controller() const;
@@ -24,8 +26,10 @@ public:
     void scheduleUpdate(const sp<ApplicationContext>& applicationContext, uint32_t fps);
 
 private:
-    sp<SurfaceController> _surface_controller;
     sp<RenderView> _render_view;
+    sp<RenderController> _render_controller;
+
+    sp<SurfaceController> _surface_controller;
 
 };
 

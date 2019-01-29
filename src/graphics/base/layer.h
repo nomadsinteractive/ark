@@ -45,6 +45,8 @@ public:
 
         std::vector<Item> _items;
         WeakRefList<LayerContext> _layer_contexts;
+
+        uint32_t _stride;
         size_t _last_rendered_count;
 
     };
@@ -64,8 +66,6 @@ public:
         std::vector<RenderObject::Snapshot> _items;
 
         Buffer::Snapshot _index_buffer;
-
-        bool _dirty;
 
         DISALLOW_COPY_AND_ASSIGN(Snapshot);
 

@@ -160,28 +160,27 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         int32_t binding = Documents::getAttribute<int32_t>(i, Constants::Attributes::BINDING, -1);
         const sp<Flatable> flatable = factory.ensure<Flatable>(type, value, args);
         const uint32_t size = flatable->size();
-        const uint32_t length = flatable->length();
         Uniform::Type glType = Uniform::TYPE_F1;
-        switch (size / length) {
+        switch (size) {
         case 4:
             if(type[0] == 'f')
-                glType = length > 1 ? Uniform::TYPE_F1V : Uniform::TYPE_F1;
+                glType = Uniform::TYPE_F1;
             else if(type[0] == 'i')
-                glType = length > 1 ? Uniform::TYPE_I1V : Uniform::TYPE_I1;
+                glType = Uniform::TYPE_I1;
             else
                 FATAL("Unknow type \"%s\"", type.c_str());
             break;
         case 8:
-            glType = length > 1 ? Uniform::TYPE_F2V : Uniform::TYPE_F2;
+            glType = Uniform::TYPE_F2;
             break;
         case 12:
-            glType = length > 1 ? Uniform::TYPE_F3V : Uniform::TYPE_F3;
+            glType = Uniform::TYPE_F3;
             break;
         case 16:
-            glType = length > 1 ? Uniform::TYPE_F4V : Uniform::TYPE_F4;
+            glType = Uniform::TYPE_F4;
             break;
         case 64:
-            glType = length > 1 ? Uniform::TYPE_MAT4V : Uniform::TYPE_MAT4;
+            glType = Uniform::TYPE_MAT4;
             break;
         default:
             FATAL("Unknow type \"%s\"", type.c_str());

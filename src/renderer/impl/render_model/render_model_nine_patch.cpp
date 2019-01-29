@@ -8,7 +8,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model_buffer.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
@@ -56,7 +56,7 @@ GLModelNinePatch::GLModelNinePatch(const RenderController& renderController, con
     }
 }
 
-sp<ShaderBindings> GLModelNinePatch::makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
+sp<ShaderBindings> GLModelNinePatch::makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
 {
     const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_TRIANGLE_STRIP, renderController, pipelineLayout, renderController.makeVertexBuffer(), _index_buffer->buffer());
     bindings->bindSampler(_atlas->texture());
@@ -65,22 +65,21 @@ sp<ShaderBindings> GLModelNinePatch::makeShaderBindings(const RenderController& 
 
 void GLModelNinePatch::postSnapshot(RenderController& renderController, Layer::Snapshot& snapshot)
 {
-    snapshot._index_buffer = _index_buffer->snapshot(renderController.resourceManager(), snapshot._items.size());
+    snapshot._index_buffer = _index_buffer->snapshot(renderController, snapshot._items.size());
 }
 
-void GLModelNinePatch::start(ModelBuffer& buf, RenderController& /*renderController*/, const Layer::Snapshot& snapshot)
+void GLModelNinePatch::start(ModelBuffer& buf, const Layer::Snapshot& snapshot)
 {
     DCHECK(snapshot._items.size() > 0, "LayerSnapshot has no RenderObjects");
 
     buf.vertices().setGrowCapacity(16 * snapshot._items.size());
-//    buf.setIndices(NamedBuffers::snapshot(buf.indexBuffer(), renderController.resourceManager(), Buffer::NAME_NINE_PATCH, snapshot._items.size()));
     buf.setIndices(snapshot._index_buffer);
 }
 
-void GLModelNinePatch::load(ModelBuffer& buf, int32_t type, const V& size)
+void GLModelNinePatch::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
-    const Rect paintRect(0, 0, size.x(), size.y());
-    const Item& item = _nine_patch_items.at(type);
+    const Rect paintRect(0, 0, snapshot._size.x(), snapshot._size.y());
+    const Item& item = _nine_patch_items.at(snapshot._type);
 
     const Rect& paddings = item._paddings;
     float xData[4] = {paintRect.left(), paintRect.left() + paddings.left(), paintRect.right() - paddings.right(), paintRect.right()};

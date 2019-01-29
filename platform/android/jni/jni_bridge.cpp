@@ -2,7 +2,7 @@
 #include <jni.h>
 
 #include "core/ark.h"
-#include "core/dom/document.h"
+#include "core/base/manifest.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/size.h"
@@ -10,7 +10,6 @@
 #include "util/jni_util.h"
 
 #include "app/base/application_delegate_impl.h"
-#include "app/base/application_manifest.h"
 #include "app/base/event.h"
 
 
@@ -55,13 +54,11 @@ JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onCreate(JNIEnv* env, jobject 
         env->DeleteGlobalRef(gAssetManager);
     gAssetManager = env->NewGlobalRef(assetManager);
     
-    _ark = sp<Ark>::make(0, nullptr, "manifest.xml");
-    const document appManifest = _ark->manifest()->getChild("application");
-    DASSERT(appManifest);
-    const sp<ApplicationManifest> applicationManifest = sp<ApplicationManifest>::make(appManifest);
-    const sp<Size>& renderResolution = applicationManifest->renderResolution();
+	const sp<Manifest> manifest = sp<Manifest>::make("manifest.xml");
+    _ark = sp<Ark>::make(0, nullptr, manifest);
+    const sp<Size>& renderResolution = manifest->rendererResolution();
     Viewport viewport(0.0f, 0.0f, renderResolution->width(), renderResolution->height(), 0.0f, renderResolution->width());
-    _application = sp<AndroidApplication>::make(sp<ApplicationDelegateImpl>::make(applicationManifest), _ark->applicationContext(), (int32_t) (renderResolution->width()), (int32_t) (renderResolution->height()), viewport);
+    _application = sp<AndroidApplication>::make(sp<ApplicationDelegateImpl>::make(manifest), _ark->applicationContext(), (int32_t) (renderResolution->width()), (int32_t) (renderResolution->height()), viewport);
     _application->onCreate();
 }    
 

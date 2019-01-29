@@ -13,7 +13,7 @@ namespace ark {
 
 class GLRadianceCubemap : public GLTexture {
 public:
-    GLRadianceCubemap(const sp<ResourceManager>& resourceManager, const sp<Texture::Parameters>& parameters, const sp<Texture>& texture, const sp<Size>& size);
+    GLRadianceCubemap(const sp<RenderController>& renderController, const sp<Texture::Parameters>& parameters, const sp<Texture>& texture, const sp<Size>& size);
 
 //  [[plugin::resource-loader("radiance-cubemap")]]
     class BUILDER : public Builder<Texture> {
@@ -23,7 +23,7 @@ public:
         virtual sp<Texture> build(const sp<Scope>& args) override;
 
     private:
-        sp<ResourceManager> _resource_manager;
+        sp<RenderController> _render_controller;
         document _manifest;
         sp<Builder<Size>> _size;
         sp<Builder<Texture>> _texture;
@@ -34,7 +34,7 @@ protected:
     virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) override;
 
 private:
-    sp<ResourceManager> _resource_manager;
+    sp<RenderController> _render_controller;
     sp<Texture> _texture;
 
 };

@@ -13,10 +13,10 @@ namespace vulkan {
 
 class VKRenderer {
 public:
-    VKRenderer(const sp<ResourceManager>& resourceManager);
+    VKRenderer() = default;
     ~VKRenderer();
 
-    const sp<ResourceManager>& resourceManager() const;
+    const sp<RenderController>& renderController() const;
 
     const sp<VKCommandPool>& commandPool() const;
     const sp<VKDevice>& device() const;
@@ -28,8 +28,6 @@ public:
     VkRenderPass vkRenderPass() const;
 
 private:
-    sp<ResourceManager> _resource_manager;
-
     sp<VKInstance> _instance;
     sp<VKDevice> _device;
     sp<VKHeap> _heap;

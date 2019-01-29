@@ -1,6 +1,8 @@
 #ifndef ARK_BASE_APP_APPLICATION_FACADE_H_
 #define ARK_BASE_APP_APPLICATION_FACADE_H_
 
+#include <vector>
+
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 

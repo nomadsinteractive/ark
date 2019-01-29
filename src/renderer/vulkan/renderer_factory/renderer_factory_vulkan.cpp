@@ -7,7 +7,7 @@
 #include "graphics/base/size.h"
 
 #include "renderer/base/render_context.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 
 #include "renderer/vulkan/base/vk_instance.h"
 #include "renderer/vulkan/base/vk_device.h"
@@ -27,8 +27,8 @@
 namespace ark {
 namespace vulkan {
 
-RendererFactoryVulkan::RendererFactoryVulkan(const sp<ResourceManager>& resourceManager)
-    : _resource_manager(resourceManager), _renderer(sp<VKRenderer>::make(_resource_manager))
+RendererFactoryVulkan::RendererFactoryVulkan(const sp<Recycler>& recycler)
+    : _recycler(recycler), _renderer(sp<VKRenderer>::make())
 {
     const Global<PluginManager> pm;
     pm->addPlugin(sp<VulkanPlugin>::make());
@@ -56,7 +56,7 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderContext& vkContext)
     _renderer->_instance->initialize();
 
     _renderer->_device = sp<VKDevice>::make(_renderer->_instance, _renderer->_instance->physicalDevices()[0]);
-    _renderer->_heap = sp<VKHeap>::make(_renderer->_device, _resource_manager);
+    _renderer->_heap = sp<VKHeap>::make(_renderer->_device);
     _renderer->_render_target = sp<VKRenderTarget>::make(vkContext, _renderer->_device);
 }
 
@@ -78,23 +78,23 @@ void RendererFactoryVulkan::setVersion(Ark::RendererVersion version, RenderConte
 sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buffer::Usage /*usage*/)
 {
     static const VkBufferUsageFlags usagesFlags[Buffer::TYPE_COUNT] = {VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_INDEX_BUFFER_BIT};
-    return sp<VKBuffer>::make(_renderer, _resource_manager->recycler(), usagesFlags[type], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    return sp<VKBuffer>::make(_renderer, _recycler, usagesFlags[type], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
-sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderContext>& glContext, const Viewport& viewport)
+sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController, const Viewport& viewport)
 {
-    return sp<RenderViewVulkan>::make(_renderer, glContext, _resource_manager, viewport);
+    return sp<RenderViewVulkan>::make(_renderer, renderContext, renderController, viewport);
 }
 
 sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
 {
-    return sp<PipelineFactoryVulkan>::make(_resource_manager, _renderer);
+    return sp<PipelineFactoryVulkan>::make(_recycler, _renderer);
 }
 
-sp<Texture> RendererFactoryVulkan::createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap)
+sp<Texture> RendererFactoryVulkan::createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap)
 {
     const sp<Size> size = sp<Size>::make(static_cast<float>(width), static_cast<float>(height));
-    const sp<VKTexture2D> texture = sp<VKTexture2D>::make(recycler, _renderer, sp<Texture::Parameters>::make(), bitmap);
+    const sp<VKTexture2D> texture = sp<VKTexture2D>::make(_recycler, _renderer, sp<Texture::Parameters>::make(), bitmap);
     return sp<Texture>::make(size, sp<Variable<sp<Resource>>::Const>::make(texture), Texture::TYPE_2D);
 }
 

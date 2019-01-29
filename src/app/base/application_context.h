@@ -31,7 +31,6 @@ public:
 
     const sp<ApplicationResource>& applicationResource() const;
     const sp<RenderEngine>& renderEngine() const;
-    const sp<ResourceManager>& resourceManager() const;
     const sp<RenderController>& renderController() const;
     const sp<ResourceLoader>& resourceLoader() const;
     const sp<Executor>& executor() const;

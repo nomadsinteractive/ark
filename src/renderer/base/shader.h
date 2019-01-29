@@ -44,8 +44,6 @@ public:
 
     std::vector<Layer::UBOSnapshot> snapshot(MemoryPool& memoryPool) const;
 
-    void active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
-
     const sp<PipelineInput>& input() const;
     const sp<Camera>& camera() const;
 
@@ -53,7 +51,7 @@ public:
     const sp<PipelineFactory>& pipelineFactory() const;
     const sp<PipelineLayout>& pipelineLayout() const;
 
-    const sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const;
+    const sp<Pipeline> getPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const;
 
 //[[deprecated]]
     uint32_t stride() const;

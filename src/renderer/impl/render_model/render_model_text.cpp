@@ -10,7 +10,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model_buffer.h"
 #include "renderer/base/texture.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_model/render_model_quad.h"
@@ -28,7 +28,7 @@ void GLModelText::Stub::reset(uint32_t textureWidth, uint32_t textureHeight)
     _size->setWidth(textureWidth);
     _size->setHeight(textureHeight);
     _font_glyph = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1));
-    _texture = _render_controller->createTexture(textureWidth, textureHeight, sp<Variable<bitmap>::Const>::make(_font_glyph), ResourceManager::US_ON_SURFACE_READY);
+    _texture = _render_controller->createTexture(textureWidth, textureHeight, sp<Variable<bitmap>::Const>::make(_font_glyph), RenderController::US_ON_SURFACE_READY);
     _atlas = sp<Atlas>::make(_texture, true);
     _delegate = sp<GLModelQuad>::make(_render_controller, _atlas);
     clear();
@@ -112,7 +112,7 @@ GLModelText::GLModelText(const sp<RenderController>& renderController, const sp<
 {
 }
 
-sp<ShaderBindings> GLModelText::makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
+sp<ShaderBindings> GLModelText::makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
 {
     const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_TRIANGLES, renderController, pipelineLayout);
     bindings->bindSampler(sp<Texture>::make(_stub->_size, _stub, Texture::TYPE_2D));
@@ -130,19 +130,19 @@ void GLModelText::postSnapshot(RenderController& renderController, Layer::Snapsh
             LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _stub->_characters.size());
             _stub->reset(width, height);
         }
-        _stub->_render_controller->resourceManager()->upload(_stub->_texture, nullptr, ResourceManager::US_RELOAD);
+        _stub->_render_controller->upload(_stub->_texture, nullptr, RenderController::US_RELOAD);
     }
     _stub->_delegate->postSnapshot(renderController, snapshot);
 }
 
-void GLModelText::start(ModelBuffer& buf, RenderController& renderController, const Layer::Snapshot& snapshot)
+void GLModelText::start(ModelBuffer& buf, const Layer::Snapshot& snapshot)
 {
-    _stub->_delegate->start(buf, renderController, snapshot);
+    _stub->_delegate->start(buf, snapshot);
 }
 
-void GLModelText::load(ModelBuffer& buf, int32_t type, const V& scale)
+void GLModelText::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
-    _stub->_delegate->load(buf, type, scale);
+    _stub->_delegate->load(buf, snapshot);
 }
 
 Metrics GLModelText::measure(int32_t type)

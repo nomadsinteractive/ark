@@ -16,7 +16,7 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/inf/renderer_factory.h"
@@ -87,11 +87,6 @@ std::vector<Layer::UBOSnapshot> Shader::snapshot(MemoryPool& memoryPool) const
     return uboSnapshot;
 }
 
-void Shader::active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
-{
-    buildPipeline(graphicsContext, drawingContext._shader_bindings)->active(graphicsContext, drawingContext);
-}
-
 const sp<PipelineInput>& Shader::input() const
 {
     return _input;
@@ -117,7 +112,7 @@ const sp<PipelineLayout>& Shader::pipelineLayout() const
     return _pipeline_layout;
 }
 
-const sp<Pipeline> Shader::buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const
+const sp<Pipeline> Shader::getPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const
 {
     return _stub->buildPipeline(graphicsContext, bindings);
 }
@@ -162,7 +157,7 @@ sp<Pipeline> Shader::Stub::buildPipeline(GraphicsContext& graphicsContext, const
 
     shaderBindings->pipelineLayout()->preCompile(graphicsContext, shaderBindings);
     _pipeline = _pipeline_factory->buildPipeline(graphicsContext, shaderBindings);
-    graphicsContext.resourceManager()->upload(_pipeline, nullptr, ResourceManager::US_ON_SURFACE_READY);
+    graphicsContext.renderController()->upload(_pipeline, nullptr, RenderController::US_ON_SURFACE_READY);
     _pipeline->upload(graphicsContext, nullptr);
     return _pipeline;
 }

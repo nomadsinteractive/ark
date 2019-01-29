@@ -15,7 +15,6 @@ public:
 
     virtual void flat(void* buf) override;
     virtual uint32_t size() override;
-    virtual uint32_t length() override;
 
 //  [[plugin::builder::by-value("color4fv")]]
     class BUILDER : public Builder<Flatable> {

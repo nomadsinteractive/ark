@@ -14,12 +14,12 @@ namespace vulkan {
 
 class PipelineFactoryVulkan : public PipelineFactory {
 public:
-    PipelineFactoryVulkan(const sp<ResourceManager>& resourceManager, const sp<VKRenderer>& renderFactory);
+    PipelineFactoryVulkan(const sp<Recycler>& recycler, const sp<VKRenderer>& renderFactory);
 
     virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& shaderBindings) override;
 
 private:
-    sp<ResourceManager> _resource_manager;
+    sp<Recycler> _recycler;
     sp<VKRenderer> _renderer;
 };
 

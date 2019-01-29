@@ -5,6 +5,7 @@
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
+#include "core/inf/flatable.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -13,7 +14,7 @@
 
 namespace ark {
 
-class ARK_API Varyings {
+class ARK_API Varyings : public Flatable {
 private:
     class Varying {
     public:
@@ -42,6 +43,9 @@ public:
 //[[script::bindings::auto]]
     Varyings(const Shader& shader);
     Varyings();
+
+    virtual void flat(void* buf) override;
+    virtual uint32_t size() override;
 
     void addVarying(const String& name, const sp<Flatable>& flatable);
 
@@ -88,7 +92,7 @@ public:
 private:
     sp<PipelineInput> _pipeline_input;
     std::unordered_map<String, Varying> _varyings;
-    size_t _size;
+    uint32_t _size;
 };
 
 }

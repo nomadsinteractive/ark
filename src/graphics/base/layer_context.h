@@ -22,7 +22,7 @@ public:
 
     void clear();
 
-    bool takeSnapshot(Layer::Snapshot& output, MemoryPool& memoryPool);
+    void takeSnapshot(Layer::Snapshot& output, MemoryPool& memoryPool);
 
 private:
     class RenderObjectFilter {
@@ -36,7 +36,6 @@ private:
     };
 
 private:
-    size_t _last_rendered_count;
     bool _render_requested;
     V2 _position;
     FilteredList<RenderObject, RenderObjectFilter> _items;

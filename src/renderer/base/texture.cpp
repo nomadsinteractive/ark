@@ -11,7 +11,7 @@
 #include "graphics/base/size.h"
 
 #include "renderer/base/recycler.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/texture_bundle.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
@@ -166,7 +166,7 @@ Texture::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& value, c
 
 sp<Texture> Texture::DICTIONARY::build(const sp<Scope>& /*args*/)
 {
-    return _resource_loader_context->textureLoader()->get(_src);
+    return _resource_loader_context->textureBundle()->get(_src);
 }
 
 
@@ -179,10 +179,9 @@ sp<Texture> Texture::BUILDER::build(const sp<Scope>& args)
 {
     const sp<String> src = _src->build(args);
     if(src)
-       return _resource_loader_context->textureLoader()->get(*src);
+       return _resource_loader_context->textureBundle()->get(*src);
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
-    const sp<Recycler> recycler = _resource_loader_context->resourceManager()->recycler();
     return _resource_loader_context->renderController()->createTexture(static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), nullptr);
 }
 

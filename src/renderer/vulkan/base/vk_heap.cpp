@@ -5,13 +5,15 @@
 #include "core/base/manifest.h"
 #include "core/util/log.h"
 
+#include "renderer/base/graphics_context.h"
+
 #include "renderer/vulkan/base/vk_device.h"
 
 namespace ark {
 namespace vulkan {
 
-VKHeap::VKHeap(const sp<VKDevice>& device, const sp<ResourceManager>& resourceManager)
-    : _device(device), _resource_manager(resourceManager)
+VKHeap::VKHeap(const sp<VKDevice>& device)
+    : _device(device)
 {
 }
 
@@ -55,7 +57,7 @@ void VKHeap::recycle(GraphicsContext& /*graphicsContext*/, const VKMemoryPtr& pt
 
 VKMemory VKHeap::makeMemory(GraphicsContext& graphicsContext, VkDeviceSize size, uint32_t typeIndex)
 {
-    VKMemory memory(_device, _resource_manager, size, typeIndex);
+    VKMemory memory(_device, graphicsContext.recycler(), size, typeIndex);
     memory.upload(graphicsContext);
     LOGD("Creating memory, size: %lld, typeIndex: %d", size, typeIndex);
     return memory;

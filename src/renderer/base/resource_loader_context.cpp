@@ -10,9 +10,9 @@
 
 namespace ark {
 
-ResourceLoaderContext::ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<ImageBundle>& imageResource, const sp<ResourceManager>& resourceManager,
+ResourceLoaderContext::ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<BitmapBundle>& imageResource,
                                              const sp<Executor>& executor, const sp<RenderController>& renderController)
-    : _documents(documents), _images(imageResource), _resource_manager(resourceManager), _executor(executor), _render_controller(renderController),
+    : _documents(documents), _images(imageResource), _executor(executor), _render_controller(renderController),
       _texture_bundle(sp<TextureBundle>::make(renderController)), _memory_pool(sp<MemoryPool>::make()), _object_pool(sp<ObjectPool>::make()),
       _disposed(sp<Boolean::Impl>::make(false))
 {
@@ -29,14 +29,9 @@ const sp<Dictionary<document>>& ResourceLoaderContext::documents() const
     return _documents;
 }
 
-const sp<ImageBundle>& ResourceLoaderContext::images() const
+const sp<BitmapBundle>& ResourceLoaderContext::images() const
 {
     return _images;
-}
-
-const sp<ResourceManager>& ResourceLoaderContext::resourceManager() const
-{
-    return _resource_manager;
 }
 
 const sp<Executor>& ResourceLoaderContext::executor() const
@@ -49,7 +44,7 @@ const sp<RenderController>& ResourceLoaderContext::renderController() const
     return _render_controller;
 }
 
-const sp<TextureBundle>& ResourceLoaderContext::textureLoader() const
+const sp<TextureBundle>& ResourceLoaderContext::textureBundle() const
 {
     return _texture_bundle;
 }

@@ -5,7 +5,7 @@
 namespace ark {
 
 LayerContext::LayerContext()
-    : _last_rendered_count(0), _render_requested(false)
+    : _render_requested(false)
 {
 }
 
@@ -26,14 +26,11 @@ void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const s
         _items.push_back(renderObject, lifecycle);
     else
         _items.push_back(renderObject, renderObject.as<Lifecycle>());
-
-    _last_rendered_count = -1;
 }
 
 void LayerContext::removeRenderObject(const sp<RenderObject>& renderObject)
 {
     _items.remove(renderObject);
-    _last_rendered_count = -1;
 }
 
 void LayerContext::clear()
@@ -41,7 +38,7 @@ void LayerContext::clear()
     _items.clear();
 }
 
-bool LayerContext::takeSnapshot(Layer::Snapshot& output, MemoryPool& memoryPool)
+void LayerContext::takeSnapshot(Layer::Snapshot& output, MemoryPool& memoryPool)
 {
     size_t renderedCount = 0;
     if(_render_requested)
@@ -52,10 +49,7 @@ bool LayerContext::takeSnapshot(Layer::Snapshot& output, MemoryPool& memoryPool)
             snapshot._position = V(snapshot._position.x() + _position.x(), snapshot._position.y() + _position.y(), snapshot._position.z());
             output._items.push_back(std::move(snapshot));
         }
-    bool dirty = renderedCount != _last_rendered_count;
-    _last_rendered_count = renderedCount;
     _render_requested = false;
-    return dirty;
 }
 
 LayerContext::RenderObjectFilter::RenderObjectFilter(const sp<RenderObject>& /*renderObject*/, const sp<Lifecycle>& disposed)

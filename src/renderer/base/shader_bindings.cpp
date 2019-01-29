@@ -1,6 +1,6 @@
 #include "renderer/base/shader_bindings.h"
 
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/base/shader.h"
@@ -8,12 +8,12 @@
 
 namespace ark {
 
-ShaderBindings::ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
+ShaderBindings::ShaderBindings(RenderModel::Mode mode, RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
     : ShaderBindings(mode, renderController, pipelineLayout, renderController.makeVertexBuffer(), renderController.makeIndexBuffer(Buffer::USAGE_STATIC))
 {
 }
 
-ShaderBindings::ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout, const Buffer& arrayBuffer, const Buffer& indexBuffer)
+ShaderBindings::ShaderBindings(RenderModel::Mode mode, RenderController& renderController, const sp<PipelineLayout>& pipelineLayout, const Buffer& arrayBuffer, const Buffer& indexBuffer)
     : _render_mode(mode), _attributes(pipelineLayout->input()), _vertex_buffer(arrayBuffer), _index_buffer(indexBuffer), _pipeline_layout(pipelineLayout),
       _pipeline_input(_pipeline_layout->input()), _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController))
 {

@@ -46,8 +46,6 @@ public:
 
 //  [[script::bindings::property]]
     const SafePtr<Transform>& transform() const;
-//  [[script::bindings::property]]
-    const SafePtr<Varyings>& varyings() const;
 
 //  [[script::bindings::property]]
     float width() const;

@@ -20,7 +20,7 @@ public:
 //  [[plugin::builder("vertical-scrollable")]]
     class BUILDER : public Builder<Renderer> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& doc);
 
         virtual sp<Renderer> build(const sp<Scope>& args) override;
 

@@ -9,7 +9,7 @@
 #include "renderer/base/buffer.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/recycler.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/render_context.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
@@ -53,10 +53,10 @@ public:
 }
 
 GLFramebufferRenderer::GLFramebufferRenderer(const sp<Renderer>& delegate, const sp<Texture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _delegate(delegate), _fbo(sp<opengl::GLFramebuffer>::make(resourceLoaderContext->resourceManager()->recycler(), texture)),
+    : _delegate(delegate), _fbo(sp<opengl::GLFramebuffer>::make(resourceLoaderContext->renderController()->recycler(), texture)),
       _pre_draw(sp<PreDrawElementsToFBO>::make(_fbo)), _post_draw(sp<PostDrawElementsToFBO>::make())
 {
-    resourceLoaderContext->resourceManager()->upload(_fbo, nullptr, ResourceManager::US_ONCE_AND_ON_SURFACE_READY);
+    resourceLoaderContext->renderController()->upload(_fbo, nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY);
 }
 
 void GLFramebufferRenderer::render(RenderRequest& renderRequest, float x, float y)

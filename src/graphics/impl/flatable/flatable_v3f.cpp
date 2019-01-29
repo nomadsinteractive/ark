@@ -22,11 +22,6 @@ uint32_t FlatableVec3::size()
     return sizeof(V3);
 }
 
-uint32_t FlatableVec3::length()
-{
-    return 1;
-}
-
 FlatableVec3::BUILDER::BUILDER(BeanFactory& parent, const String& value)
     : _vv3(parent.ensureBuilder<Vec3>(value))
 {

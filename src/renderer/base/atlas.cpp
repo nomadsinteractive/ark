@@ -129,13 +129,23 @@ sp<Atlas> Atlas::BUILDER::build(const sp<Scope>& args)
 }
 
 Atlas::Item::Item()
-    : _left(0), _top(0), _right(0), _bottom(0), _pivot_x(0), _pivot_y(0)
+    : _left(0), _top(0), _right(0), _bottom(0)
 {
 }
 
 Atlas::Item::Item(uint16_t left, uint16_t top, uint16_t right, uint16_t bottom, float width, float height, float pivotX, float pivotY)
-    : _left(left), _top(top), _right(right), _bottom(bottom), _size(sp<Size>::make(width, height)), _pivot_x(pivotX), _pivot_y(pivotY)
+    : _left(left), _top(top), _right(right), _bottom(bottom), _size(width, height), _pivot(pivotX, pivotY)
 {
+}
+
+const V2& Atlas::Item::size() const
+{
+    return _size;
+}
+
+const V2& Atlas::Item::pivot() const
+{
+    return _pivot;
 }
 
 uint16_t Atlas::Item::left() const
@@ -160,22 +170,12 @@ uint16_t Atlas::Item::bottom() const
 
 float Atlas::Item::width() const
 {
-    return _size->width();
+    return _size.x();
 }
 
 float Atlas::Item::height() const
 {
-    return _size->height();
-}
-
-float Atlas::Item::pivotX() const
-{
-    return _pivot_x;
-}
-
-float Atlas::Item::pivotY() const
-{
-    return _pivot_y;
+    return _size.y();
 }
 
 }

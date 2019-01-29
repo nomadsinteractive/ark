@@ -28,7 +28,7 @@ public:
 
 }
 
-sp<Snippet> SnippetFactoryGLES20::createCoreSnippet(ResourceManager& /*glResourceManager*/, const sp<PipelineFactory>& /*pipelineFactory*/, const sp<ShaderBindings>& /*shaderBindings*/)
+sp<Snippet> SnippetFactoryGLES20::createCoreSnippet(RenderController& /*glResourceManager*/, const sp<PipelineFactory>& /*pipelineFactory*/, const sp<ShaderBindings>& /*shaderBindings*/)
 {
     return sp<SnippetGLES20>::make();
 }

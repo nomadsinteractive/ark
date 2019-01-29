@@ -9,7 +9,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
 
 namespace ark {

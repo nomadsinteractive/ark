@@ -329,11 +329,11 @@ sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, const sp<Appli
     case OPENGL_45:
     case OPENGL_46:
 #ifdef ARK_USE_OPEN_GL
-        return sp<RenderEngine>::make(version, sp<opengl::RendererFactoryOpenGL>::make(appResource->resourceManager()));
+        return sp<RenderEngine>::make(version, sp<opengl::RendererFactoryOpenGL>::make(appResource->recycler()));
 #endif
     case VULKAN_11:
 #ifdef ARK_USE_VULKAN
-        return sp<RenderEngine>::make(version, sp<vulkan::RendererFactoryVulkan>::make(appResource->resourceManager()));
+        return sp<RenderEngine>::make(version, sp<vulkan::RendererFactoryVulkan>::make(appResource->recycler()));
 #endif
         break;
     }

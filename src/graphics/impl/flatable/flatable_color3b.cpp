@@ -28,11 +28,6 @@ uint32_t FlatableColor3b::size()
     return 3;
 }
 
-uint32_t FlatableColor3b::length()
-{
-    return 1;
-}
-
 FlatableColor3b::BUILDER::BUILDER(BeanFactory& parent, const String& value)
     : _color(parent.ensureBuilder<Vec4>(value))
 {

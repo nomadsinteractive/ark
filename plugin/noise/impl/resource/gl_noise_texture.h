@@ -17,7 +17,7 @@ public:
 
 
 private:
-    sp<ResourceManager> _resource_manager;
+    sp<RenderController> _render_controller;
     sp<Executor> _thread_executor;
 };
 

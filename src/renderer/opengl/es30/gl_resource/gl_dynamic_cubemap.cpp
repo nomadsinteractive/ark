@@ -2,7 +2,7 @@
 
 #include "graphics/base/size.h"
 
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
@@ -13,7 +13,7 @@
 namespace ark {
 
 GLDynamicCubemap::GLDynamicCubemap(const sp<RenderController>& renderController, const sp<Texture::Parameters>& parameters, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size)
-    : GLTexture(renderController->resourceManager()->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), parameters), _render_controller(renderController), _shader(shader), _texture(texture)
+    : GLTexture(renderController->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), parameters), _render_controller(renderController), _shader(shader), _texture(texture)
 {
 }
 
@@ -33,7 +33,7 @@ sp<Texture> GLDynamicCubemap::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Size> size = _size->build(args);
     const sp<GLDynamicCubemap> cubemap = sp<GLDynamicCubemap>::make(_render_controller, _parameters, _shader->build(args), _texture->build(args), size);
-    return _render_controller->resourceManager()->createResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
+    return _render_controller->createResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
 }
 
 }

@@ -9,7 +9,7 @@
 
 #include "renderer/base/texture.h"
 #include "renderer/base/render_context.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 
 #include "renderer/opengl/base/gl_buffer.h"
 #include "renderer/opengl/base/gl_texture_2d.h"
@@ -27,8 +27,8 @@
 namespace ark {
 namespace opengl {
 
-RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<ResourceManager>& glResources)
-    : _resource_manager(glResources)
+RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<Recycler>& recycler)
+    : _recycler(recycler)
 {
     const Global<PluginManager> pluginManager;
     pluginManager->addPlugin(sp<opengl::OpenglPlugin>::make());
@@ -85,14 +85,14 @@ void RendererFactoryOpenGL::setVersion(Ark::RendererVersion version, RenderConte
     glContext.setVersion(version);
 }
 
-sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderContext>& glContext, const Viewport& viewport)
+sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController, const Viewport& viewport)
 {
-    return sp<RenderView>::adopt(new RenderViewOpenGL(glContext, _resource_manager, viewport));
+    return sp<RenderView>::adopt(new RenderViewOpenGL(renderContext, renderController, viewport));
 }
 
 sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buffer::Usage usage)
 {
-    return sp<GLBuffer>::make(type, usage, _resource_manager->recycler());
+    return sp<GLBuffer>::make(type, usage, _recycler);
 }
 
 sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()
@@ -100,10 +100,10 @@ sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()
     return sp<PipelineFactoryOpenGL>::make();
 }
 
-sp<Texture> RendererFactoryOpenGL::createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap)
+sp<Texture> RendererFactoryOpenGL::createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap)
 {
     const sp<Size> size = sp<Size>::make(static_cast<float>(width), static_cast<float>(height));
-    const sp<GLTexture2D> texture2d = sp<GLTexture2D>::make(recycler, size, sp<Texture::Parameters>::make(), bitmap);
+    const sp<GLTexture2D> texture2d = sp<GLTexture2D>::make(_recycler, size, sp<Texture::Parameters>::make(), bitmap);
     return sp<Texture>::make(size, sp<Variable<sp<Resource>>::Const>::make(texture2d), Texture::TYPE_2D);
 }
 

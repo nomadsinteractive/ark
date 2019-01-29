@@ -7,7 +7,7 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
 
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
 #include "renderer/opengl/base/gl_texture_2d.h"
 #include "renderer/base/resource_loader_context.h"
@@ -17,8 +17,8 @@
 
 namespace ark {
 
-GLIrradianceCubemap::GLIrradianceCubemap(const sp<ResourceManager>& resourceManager, const sp<Texture::Parameters>& params, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size)
-    : GLTexture(resourceManager->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), params), _resource_manager(resourceManager), _shader(shader), _texture(texture)
+GLIrradianceCubemap::GLIrradianceCubemap(const sp<RenderController>& renderController, const sp<Texture::Parameters>& params, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size)
+    : GLTexture(renderController->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), params), _render_controller(renderController), _shader(shader), _texture(texture)
 {
 }
 
@@ -66,7 +66,7 @@ void GLIrradianceCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uin
 }
 
 GLIrradianceCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_manager(resourceLoaderContext->resourceManager()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+    : _render_controller(resourceLoaderContext->renderController()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/equirectangular.vert", "shaders/equirectangular.frag")),
       _texture(factory.ensureBuilder<Texture>(manifest, Constants::Attributes::TEXTURE)), _parameters(sp<Texture::Parameters>::make(manifest))
 {
@@ -75,8 +75,8 @@ GLIrradianceCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& mani
 sp<Texture> GLIrradianceCubemap::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Size> size = _size->build(args);
-    const sp<GLIrradianceCubemap> cubemap = sp<GLIrradianceCubemap>::make(_resource_manager, _parameters, _shader->build(args), _texture->build(args), _size->build(args));
-    return _resource_manager->createResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
+    const sp<GLIrradianceCubemap> cubemap = sp<GLIrradianceCubemap>::make(_render_controller, _parameters, _shader->build(args), _texture->build(args), _size->build(args));
+    return _render_controller->createResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
 }
 
 }

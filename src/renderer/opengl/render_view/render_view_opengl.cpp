@@ -15,7 +15,7 @@
 
 namespace ark {
 
-RenderViewOpenGL::RenderViewOpenGL(const sp<RenderContext>& glContext, const sp<ResourceManager>& glResourceManager, const Viewport& viewport)
+RenderViewOpenGL::RenderViewOpenGL(const sp<RenderContext>& glContext, const sp<RenderController>& glResourceManager, const Viewport& viewport)
     : _graphics_context(new GraphicsContext(glContext, glResourceManager)), _viewport(viewport)
 {
 }
@@ -33,7 +33,7 @@ void RenderViewOpenGL::onSurfaceCreated()
 
 void RenderViewOpenGL::onSurfaceChanged(uint32_t width, uint32_t height)
 {
-    _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->resourceManager()));
+    _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->renderController()));
     initialize(width, height);
 }
 

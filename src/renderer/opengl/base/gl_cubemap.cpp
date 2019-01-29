@@ -6,12 +6,12 @@
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/image_bundle.h"
+#include "graphics/base/bitmap_bundle.h"
 #include "graphics/base/size.h"
 
 #include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/base/recycler.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/texture.h"
 #include "renderer/opengl/util/gl_util.h"
@@ -53,8 +53,8 @@ sp<Texture> GLCubemap::BUILDER::build(const sp<Scope>& args)
         bitmaps.push_back(sp<typename Variable<bitmap>::Get>::make(_resource_loader_context->images(), src));
     }
     const sp<Size> size = _size->build(args);
-    const sp<GLCubemap> cubemap = sp<GLCubemap>::make(_resource_loader_context->resourceManager()->recycler(), size, _parameters, std::move(bitmaps));
-    return _resource_loader_context->resourceManager()->createResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
+    const sp<GLCubemap> cubemap = sp<GLCubemap>::make(_resource_loader_context->renderController()->recycler(), size, _parameters, std::move(bitmaps));
+    return _resource_loader_context->renderController()->createResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
 }
 
 }

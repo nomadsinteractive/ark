@@ -9,7 +9,7 @@
 #include "graphics/base/matrix.h"
 
 #include "renderer/base/recycler.h"
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
@@ -91,7 +91,7 @@ void GLPipeline::bindUBO(const Layer::UBOSnapshot& uboSnapshot, const sp<Pipelin
     }
 }
 
-sp<RenderCommand> GLPipeline::active(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
+void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     glUseProgram(_id);
     const std::vector<Layer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
@@ -117,7 +117,7 @@ sp<RenderCommand> GLPipeline::active(GraphicsContext& /*graphicsContext*/, const
 
     _render_command->_count = drawingContext._count;
     _render_command->_instance_count = drawingContext._instance_count;
-    return _render_command;
+    _render_command->draw(graphicsContext);
 }
 
 void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const ShaderBindings& bindings)
@@ -272,7 +272,7 @@ sp<GLPipeline::Shader> GLPipeline::makeShader(GraphicsContext& graphicsContext, 
             return shader;
     }
 
-    const sp<Shader> shader = sp<Shader>::make(graphicsContext.resourceManager()->recycler(), version, type, source);
+    const sp<Shader> shader = sp<Shader>::make(graphicsContext.renderController()->recycler(), version, type, source);
     shaders[type][source] = shader;
     return shader;
 }

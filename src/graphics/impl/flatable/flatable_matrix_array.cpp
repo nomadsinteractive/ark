@@ -20,11 +20,6 @@ uint32_t FlatableMatrixArray::size()
     return _matrix_array->length() * 16;
 }
 
-uint32_t FlatableMatrixArray::length()
-{
-    return _matrix_array->length();
-}
-
 FlatableMatrixArray::BUILDER::BUILDER(BeanFactory& parent, const String& value)
     : _matrix_array(parent.ensureBuilder<Array<Matrix>>(value))
 {

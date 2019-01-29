@@ -10,7 +10,7 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
 
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
 #include "renderer/opengl/base/gl_texture_2d.h"
 #include "renderer/base/resource_loader_context.h"
@@ -40,8 +40,8 @@ struct OpenCLContext {
 
 }
 
-GLRadianceCubemap::GLRadianceCubemap(const sp<ResourceManager>& resourceManager, const sp<Texture::Parameters>& parameters, const sp<Texture>& texture, const sp<Size>& size)
-    : GLTexture(resourceManager->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), parameters), _resource_manager(resourceManager), _texture(texture)
+GLRadianceCubemap::GLRadianceCubemap(const sp<RenderController>& renderController, const sp<Texture::Parameters>& parameters, const sp<Texture>& texture, const sp<Size>& size)
+    : GLTexture(renderController->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), parameters), _render_controller(renderController), _texture(texture)
 {
 }
 
@@ -93,7 +93,7 @@ void GLRadianceCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uint3
 }
 
 GLRadianceCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_manager(resourceLoaderContext->resourceManager()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+    : _render_controller(resourceLoaderContext->renderController()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _texture(factory.ensureBuilder<Texture>(manifest, Constants::Attributes::TEXTURE)), _parameters(sp<Texture::Parameters>::make(manifest))
 {
 }
@@ -101,8 +101,8 @@ GLRadianceCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manife
 sp<Texture> GLRadianceCubemap::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Size> size = _size->build(args);
-    const sp<GLRadianceCubemap> cubemap = sp<GLRadianceCubemap>::make(_resource_manager, _parameters, _texture->build(args), size);
-    return _resource_manager->createResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
+    const sp<GLRadianceCubemap> cubemap = sp<GLRadianceCubemap>::make(_render_controller, _parameters, _texture->build(args), size);
+    return _render_controller->createResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
 }
 
 }

@@ -58,7 +58,7 @@ void CoreGLSnippet::postDraw(GraphicsContext& /*graphicsContext*/)
 
 sp<Snippet> CoreGLSnippet::createCoreSnippet(GraphicsContext& graphicsContext, const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& bindings) const
 {
-    const sp<Snippet> coreSnippet = graphicsContext.renderContext()->snippetFactory()->createCoreSnippet(graphicsContext.resourceManager(), pipelineFactory, bindings);
+    const sp<Snippet> coreSnippet = graphicsContext.renderContext()->snippetFactory()->createCoreSnippet(graphicsContext.renderController(), pipelineFactory, bindings);
     DASSERT(coreSnippet);
     return _snippet ? sp<Snippet>::adopt(new SnippetLinkedChain(coreSnippet, _snippet)) : coreSnippet;
 }

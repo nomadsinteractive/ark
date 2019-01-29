@@ -42,7 +42,7 @@ GLModelSphere::GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderCont
     }
 }
 
-sp<ShaderBindings> GLModelSphere::makeShaderBindings(const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
+sp<ShaderBindings> GLModelSphere::makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
 {
     const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_TRIANGLE_STRIP, renderController, pipelineLayout);
     bindings->bindSampler(_atlas->texture());
@@ -53,16 +53,16 @@ void GLModelSphere::postSnapshot(RenderController& /*renderController*/, Layer::
 {
 }
 
-void GLModelSphere::start(ModelBuffer& buf, RenderController& /*renderController*/, const Layer::Snapshot& layerContext)
+void GLModelSphere::start(ModelBuffer& buf, const Layer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size() * _vertex_count);
     buf.setIndices(_instance_index.snapshot());
 }
 
-void GLModelSphere::load(ModelBuffer& buf, int32_t type, const V& size)
+void GLModelSphere::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
     float* elements = _vertices_boiler_plate->buf();
-    const Atlas::Item& item = _atlas->at(type);
+    const Atlas::Item& item = _atlas->at(snapshot._type);
     for(uint32_t i = 0; i < _vertex_count; i++)
     {
         buf.nextVertex();

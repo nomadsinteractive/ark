@@ -1,4 +1,4 @@
-#include "graphics/base/image_bundle.h"
+#include "graphics/base/bitmap_bundle.h"
 
 #include "core/inf/asset.h"
 #include "core/inf/loader.h"
@@ -6,12 +6,12 @@
 
 namespace ark {
 
-ImageBundle::ImageBundle(const sp<Asset>& asset, const sp<BitmapLoader>& defaultLoader)
+BitmapBundle::BitmapBundle(const sp<Asset>& asset, const sp<BitmapLoader>& defaultLoader)
     : _asset(asset), _default_loader(defaultLoader)
 {
 }
 
-bitmap ImageBundle::get(const String& name)
+bitmap BitmapBundle::get(const String& name)
 {
     String fname, fext;
     Strings::rcut(name, fname, fext, '.');
@@ -22,12 +22,12 @@ bitmap ImageBundle::get(const String& name)
     return getLoader(fext)->load(readable);
 }
 
-void ImageBundle::addLoader(const String& ext, const sp<BitmapLoader>& loader)
+void BitmapBundle::addLoader(const String& ext, const sp<BitmapLoader>& loader)
 {
     _loaders[ext] = loader;
 }
 
-const sp<BitmapLoader>& ImageBundle::getLoader(const String& ext) const
+const sp<BitmapLoader>& BitmapBundle::getLoader(const String& ext) const
 {
     const auto iter = _loaders.find(ext);
     if(iter != _loaders.end())

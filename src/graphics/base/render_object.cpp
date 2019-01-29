@@ -29,11 +29,6 @@ const sp<Integer> RenderObject::type() const
     return _type;
 }
 
-const SafePtr<Varyings>& RenderObject::varyings() const
-{
-    return _varyings;
-}
-
 float RenderObject::width() const
 {
     return _size->width();

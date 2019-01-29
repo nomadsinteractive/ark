@@ -34,8 +34,6 @@ public:
 
         size_t size() const;
 
-        void reload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader);
-
     protected:
         size_t _size;
     };
@@ -128,6 +126,7 @@ private:
     sp<Delegate> _delegate;
 
     friend class ResourceManager;
+    friend class RenderController;
 };
 
 }

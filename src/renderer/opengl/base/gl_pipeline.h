@@ -30,7 +30,7 @@ public:
     virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
 
-    virtual sp<RenderCommand> active(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+    virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
 
     void bindBuffer(GraphicsContext& graphicsContext, const ShaderBindings& bindings);
 

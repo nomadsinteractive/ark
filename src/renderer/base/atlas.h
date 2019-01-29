@@ -12,6 +12,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/rect.h"
+#include "graphics/base/v2.h"
 
 #include "renderer/forwarding.h"
 
@@ -34,7 +35,8 @@ public:
         Item(uint16_t left, uint16_t top, uint16_t right, uint16_t bottom, float width, float height, float pivotX = 0, float pivotY = 0);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
 
-        const sp<Size>& size() const;
+        const V2& size() const;
+        const V2& pivot() const;
 
         uint16_t left() const;
         uint16_t top() const;
@@ -44,14 +46,11 @@ public:
         float width() const;
         float height() const;
 
-        float pivotX() const;
-        float pivotY() const;
-
     private:
         uint16_t _left, _top;
         uint16_t _right, _bottom;
-        SafePtr<Size> _size;
-        float _pivot_x, _pivot_y;
+        V2 _size;
+        V2 _pivot;
     };
 
     const sp<Texture>& texture() const;

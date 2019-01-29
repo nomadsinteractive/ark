@@ -25,12 +25,12 @@ public:
 
     void onSurfaceCreated();
 
-    sp<RenderView> createRenderView(const Viewport& viewport) const;
+    sp<RenderView> createRenderView(const sp<RenderController>& renderController, const Viewport& viewport) const;
 
 private:
     sp<RendererFactory> _renderer_factory;
-
     sp<RenderContext> _render_context;
+
 };
 
 }

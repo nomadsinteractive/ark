@@ -20,7 +20,6 @@ public:
 
         virtual void flat(void* buf) override;
         virtual uint32_t size() override;
-        virtual uint32_t length() override;
 
         Matrix matrix();
 

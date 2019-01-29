@@ -7,6 +7,7 @@
 
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/drawing_context.h"
+#include "renderer/base/pipeline_input.h"
 #include "renderer/base/model_buffer.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
@@ -20,7 +21,7 @@ namespace ark {
 Layer::Stub::Stub(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _model(model), _shader(shader), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
       _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_model->makeShaderBindings(_render_controller, shader->pipelineLayout())),
-      _last_rendered_count(0)
+      _stride(shader->input()->getStream(0).stride()), _last_rendered_count(0)
 {
 }
 
@@ -30,7 +31,7 @@ Layer::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
 }
 
 Layer::Snapshot::Snapshot(const sp<Stub>& stub)
-    : _stub(stub), _ubos(stub->_shader->snapshot(_stub->_memory_pool)), _dirty(stub->_items.size() != stub->_last_rendered_count)
+    : _stub(stub), _ubos(stub->_shader->snapshot(_stub->_memory_pool))
 {
     for(const Item& i : stub->_items)
     {
@@ -39,10 +40,8 @@ Layer::Snapshot::Snapshot(const sp<Stub>& stub)
         _items.push_back(snapshot);
     }
 
-    size_t size = stub->_layer_contexts.size();
     for(const sp<LayerContext>& i : stub->_layer_contexts)
-        _dirty = i->takeSnapshot(*this, stub->_memory_pool) || _dirty;
-    _dirty = _dirty || size != stub->_layer_contexts.size();
+        i->takeSnapshot(*this, stub->_memory_pool);
 
     _stub->_last_rendered_count = _stub->_items.size();
     _stub->_items.clear();
@@ -52,14 +51,14 @@ sp<RenderCommand> Layer::Snapshot::render(float x, float y)
 {
     if(_items.size() > 0)
     {
-        ModelBuffer buf(_stub->_resource_loader_context, _stub->_shader_bindings, _items.size(), _stub->_shader->stride());
-        _stub->_model->start(buf, _stub->_render_controller, *this);
+        ModelBuffer buf(_stub->_resource_loader_context, _stub->_shader_bindings, _items.size(), _stub->_stride);
+        _stub->_model->start(buf, *this);
 
-        for(const auto& i : _items)
+        for(const RenderObject::Snapshot& i : _items)
         {
             buf.setRenderObject(i);
             buf.setTranslate(V3(x + i._position.x(), y + i._position.y(), i._position.z()));
-            _stub->_model->load(buf, i._type, i._size);
+            _stub->_model->load(buf, i);
             if(buf.isInstanced())
             {
                 Buffer::Builder& sBuilder = buf.getInstancedArrayBuilder(1);

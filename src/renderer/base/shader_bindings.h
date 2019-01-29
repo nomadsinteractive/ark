@@ -34,8 +34,8 @@ public:
     };
 
 public:
-    ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout);
-    ShaderBindings(RenderModel::Mode mode, const RenderController& renderController, const sp<PipelineLayout>& pipelineLayout, const Buffer& vertexBuffer, const Buffer& indexBuffer);
+    ShaderBindings(RenderModel::Mode mode, RenderController& renderController, const sp<PipelineLayout>& pipelineLayout);
+    ShaderBindings(RenderModel::Mode mode, RenderController& renderController, const sp<PipelineLayout>& pipelineLayout, const Buffer& vertexBuffer, const Buffer& indexBuffer);
 
     const sp<Snippet>& snippet() const;
     const sp<PipelineLayout>& pipelineLayout() const;

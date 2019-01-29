@@ -27,13 +27,25 @@ Varyings::Varyings()
 {
 }
 
+void Varyings::flat(void* buf)
+{
+    uint8_t* ptr = reinterpret_cast<uint8_t*>(buf);
+    for(const auto& i : _varyings)
+        i.second.apply(ptr);
+}
+
+uint32_t Varyings::size()
+{
+    return _size;
+}
+
 void Varyings::addVarying(const String& name, const sp<Flatable>& flatable)
 {
     DCHECK(_varyings.find(name) == _varyings.end(), "Varying \"%s\" already exists", name.c_str());
     int32_t offset = _pipeline_input->getAttributeOffset(name);
     DCHECK(offset >= 0, "Illegal Varying, name: \"%s\", offset: %d", name.c_str(), offset);
     _varyings[name] = Varying(offset, flatable);
-    _size = std::max<size_t>(offset + flatable->size(), _size);
+    _size = std::max<uint32_t>(offset + flatable->size(), _size);
 }
 
 void Varyings::add(const String& name, const sp<Numeric>& var)

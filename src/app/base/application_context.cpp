@@ -11,7 +11,9 @@
 #include "core/inf/runnable.h"
 #include "core/types/global.h"
 
-#include "renderer/base/resource_manager.h"
+#include "graphics/base/bitmap_bundle.h"
+
+#include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/renderer_factory.h"
 
@@ -45,7 +47,7 @@ private:
 }
 
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources, const sp<RenderEngine>& renderEngine)
-    : _steady_clock(Platform::getSteadyClock()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->resourceManager(), _steady_clock)),
+    : _steady_clock(Platform::getSteadyClock()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->recycler(), applicationResources->bitmapBundle(), applicationResources->bitmapBoundsLoader(), _steady_clock)),
       _clock(sp<Clock>::make(_render_controller->ticker())), _message_loop_application(sp<MessageLoopThread>::make(_steady_clock)),
       _executor(sp<ThreadPoolExecutor>::make(_message_loop_application)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK)
 {
@@ -93,8 +95,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const sp<Dictionary<document>>& documentDictionary, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
     const sp<BeanFactory> beanFactory = Ark::instance().createBeanFactory(documentDictionary);
-    const sp<ResourceManager> resourceManager = _application_resource->resourceManager();
-    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), _application_resource->imageResource(), resourceManager, _executor, _render_controller);
+    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), _application_resource->bitmapBundle(), _executor, _render_controller);
 
     const Global<PluginManager> pluginManager;
     pluginManager->each([&] (const sp<Plugin>& plugin)->bool {
@@ -116,11 +117,6 @@ const sp<ApplicationResource>& ApplicationContext::applicationResource() const
 const sp<RenderEngine>& ApplicationContext::renderEngine() const
 {
     return _render_engine;
-}
-
-const sp<ResourceManager>& ApplicationContext::resourceManager() const
-{
-    return _application_resource->resourceManager();
 }
 
 const sp<RenderController>& ApplicationContext::renderController() const

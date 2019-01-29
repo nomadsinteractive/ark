@@ -5,7 +5,7 @@
 #include "graphics/inf/render_command.h"
 #include "graphics/base/viewport.h"
 
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 
 #include "renderer/vulkan/base/vk_command_buffers.h"
 #include "renderer/vulkan/base/vk_graphics_context.h"
@@ -16,8 +16,8 @@
 namespace ark {
 namespace vulkan {
 
-RenderViewVulkan::RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderContext>& glContext, const sp<ResourceManager>& resourceManager, const Viewport& viewport)
-    : _renderer(renderer), _graphics_context(new GraphicsContext(glContext, resourceManager)), _viewport(viewport)
+RenderViewVulkan::RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderContext>& glContext, const sp<RenderController>& renderController, const Viewport& viewport)
+    : _renderer(renderer), _graphics_context(new GraphicsContext(glContext, renderController)), _viewport(viewport)
 {
 }
 
@@ -28,7 +28,7 @@ void RenderViewVulkan::onSurfaceCreated()
 void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
 {
     LOGD("Width: %d, Height: %d, Viewport (%.1f, %.1f, %.1f, %.1f)", width, height, _viewport.left(), _viewport.top(), _viewport.right(), _viewport.bottom());
-    _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->resourceManager()));
+    _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->renderController()));
 
     _renderer->renderTarget()->onSurfaceChanged(width, height);
 

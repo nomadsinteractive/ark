@@ -19,7 +19,7 @@ private:
     typedef Heap<VKMemory, VkDeviceSize, sizeof(VkDeviceSize)> HeapType;
 
 public:
-    VKHeap(const sp<VKDevice>& device, const sp<ResourceManager>& resourceManager);
+    VKHeap(const sp<VKDevice>& device);
 
     VKMemoryPtr allocate(GraphicsContext& graphicsContext, VkDeviceSize size, uint32_t typeIndex);
     VKMemoryPtr allocate(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs, VkMemoryPropertyFlags propertyFlags);
@@ -31,7 +31,6 @@ private:
 
 private:
     sp<VKDevice> _device;
-    sp<ResourceManager> _resource_manager;
 
     HeapType _heaps[VK_MAX_MEMORY_TYPES];
 

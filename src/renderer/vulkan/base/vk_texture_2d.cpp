@@ -6,7 +6,7 @@
 
 #include "graphics/base/bitmap.h"
 
-#include "renderer/base/resource_manager.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/recycler.h"
 
 #include "renderer/vulkan/base/vk_device.h"

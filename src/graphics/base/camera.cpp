@@ -166,11 +166,6 @@ uint32_t Camera::Holder::size()
     return sizeof(Matrix);
 }
 
-uint32_t Camera::Holder::length()
-{
-    return 1;
-}
-
 Matrix Camera::Holder::matrix()
 {
     return _delegate->val();

@@ -14,22 +14,22 @@ namespace vulkan {
 
 class RendererFactoryVulkan : public RendererFactory {
 public:
-    RendererFactoryVulkan(const sp<ResourceManager>& resourceManager);
+    RendererFactoryVulkan(const sp<Recycler>& recycler);
     ~RendererFactoryVulkan() override;
 
     virtual sp<RenderContext> initialize(Ark::RendererVersion version) override;
     virtual void onSurfaceCreated(RenderContext& glContext) override;
 
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
-    virtual sp<RenderView> createRenderView(const sp<RenderContext>& glContext, const Viewport& viewport) override;
+    virtual sp<RenderView> createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController, const Viewport& viewport) override;
     virtual sp<PipelineFactory> createPipelineFactory() override;
-    virtual sp<Texture> createTexture(const sp<Recycler>& recycler, uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap) override;
+    virtual sp<Texture> createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap) override;
 
 private:
     void setVersion(Ark::RendererVersion version, RenderContext& vkContext);
 
 private:
-    sp<ResourceManager> _resource_manager;
+    sp<Recycler> _recycler;
     sp<VKRenderer> _renderer;
 
     friend class VKUtil;

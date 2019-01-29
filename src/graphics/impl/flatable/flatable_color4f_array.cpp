@@ -25,11 +25,6 @@ uint32_t FlatableColor4fArray::size()
     return _color_array->length() * sizeof(V4);
 }
 
-uint32_t FlatableColor4fArray::length()
-{
-    return _color_array->length();
-}
-
 FlatableColor4fArray::BUILDER::BUILDER(BeanFactory& parent, const String& value)
     : _color_array(parent.ensureBuilder<Array<Color>>(value))
 {
