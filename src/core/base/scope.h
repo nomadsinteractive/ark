@@ -13,9 +13,8 @@ namespace ark {
 class ARK_API Scope : public Dictionary<Box> {
 public:
     Scope() = default;
-    Scope(const Scope& other) = default;
-    Scope(Scope&& other) = default;
-    Scope(const std::map<String, Box>& variables);
+    Scope(std::map<String, Box> variables);
+    DEFAULT_COPY_AND_ASSIGN(Scope);
 
     template<typename T> sp<T> get(const String& name) {
         return get(name).template as<T>();

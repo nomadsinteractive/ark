@@ -19,6 +19,7 @@ public:
     struct Application {
         String _dir;
         String _filename;
+        String _title;
     };
 
     struct Asset {

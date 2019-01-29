@@ -81,7 +81,7 @@ PythonScript::~PythonScript()
 
 void PythonScript::addScopeToDict(PyObject* dict, const sp<Scope>& scope)
 {
-    for(auto iter : scope->variables())
+    for(const auto& iter : scope->variables())
     {
         const String& name = iter.first;
         const Box& box = iter.second;

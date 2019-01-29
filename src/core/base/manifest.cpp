@@ -45,11 +45,13 @@ void Manifest::load(const String& src)
 
     _heap._device_unit_size = toSize(Documents::getAttributeValue(_content, "heap/device/unit-size", "8M"));
     _heap._host_unit_size = toSize(Documents::getAttributeValue(_content, "heap/host/unit-size", "8M"));
+
+    _application._title = Documents::getAttributeValue(_content, "application/title");
 }
 
 const String& Manifest::name() const
 {
-    return _name;
+    return _application._title;
 }
 
 const String& Manifest::appDir() const
