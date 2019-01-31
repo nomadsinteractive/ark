@@ -81,6 +81,11 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buff
     return sp<VKBuffer>::make(_renderer, _recycler, usagesFlags[type], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
+sp<Framebuffer> RendererFactoryVulkan::createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture)
+{
+    return nullptr;
+}
+
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController, const Viewport& viewport)
 {
     return sp<RenderViewVulkan>::make(_renderer, renderContext, renderController, viewport);

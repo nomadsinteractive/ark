@@ -11,8 +11,7 @@ namespace ark {
 namespace vulkan {
 
 VKBuffer::VKBuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags)
-    : _renderer(renderer), _recycler(recycler), _usage_flags(usageFlags), _memory_property_flags(memoryPropertyFlags), _descriptor{},
-      _memory_allocation_info(vks::initializers::memoryAllocateInfo())
+    : _renderer(renderer), _recycler(recycler), _usage_flags(usageFlags), _memory_property_flags(memoryPropertyFlags), _descriptor{}, _memory_requirements{}
 {
 }
 
@@ -50,8 +49,8 @@ Resource::RecycleFunc VKBuffer::recycle()
     VkBuffer buffer = _descriptor.buffer;
     VKMemoryPtr memory = std::move(_memory);
 
-    _memory_allocation_info.allocationSize = 0;
     _size = 0;
+    _memory_requirements.size = 0;
     _descriptor.buffer = VK_NULL_HANDLE;
 
     return [device, buffer, heap, memory](GraphicsContext& graphicsContext) {
@@ -99,8 +98,11 @@ void VKBuffer::ensureSize(GraphicsContext& graphicsContext, const Uploader& uplo
 
         VkMemoryRequirements memReqs;
         vkGetBufferMemoryRequirements(_renderer->vkLogicalDevice(), _descriptor.buffer, &memReqs);
-        if(_memory_allocation_info.allocationSize < memReqs.size)
+        if(_memory_requirements.alignment != memReqs.alignment || _memory_requirements.size != memReqs.size)
+        {
             allocateMemory(graphicsContext, memReqs);
+            _memory_requirements = memReqs;
+        }
         bind();
     }
 }

@@ -20,8 +20,10 @@ public:
         return _items.find(Type<T>::id()) != _items.end();
     }
 
-    template<typename T> void put(const sp<T>& item) {
-        _items[Type<T>::id()] = item.pack();
+    template<typename T> const Box& put(const sp<T>& item) {
+        Box& slot = _items[Type<T>::id()];
+        slot = item.pack();
+        return slot;
     }
 
     template<typename T> const sp<T>& get() const {
@@ -29,17 +31,16 @@ public:
         return iter != _items.end() ? iter->second.template unpack<T>() : sp<T>::null();
     }
 
-    template<typename T> const sp<T>& ensure() {
-        return instance_sfinae<T>(0);
+    template<typename T, typename... Args> const sp<T>& ensure(Args&&... args) {
+        return instance_sfinae<T, Args...>(0, std::forward<Args>(args)...);
     }
 
 private:
-    template<typename T> const sp<T>& instance_sfinae(typename std::enable_if<!std::is_abstract<T>::value && std::is_constructible<T>::value, int>::type) {
+    template<typename T, typename... Args> const sp<T>& instance_sfinae(typename std::enable_if<std::is_constructible<T, Args...>::value, int32_t>::type, Args&&... args) {
         const sp<T>& inst = get<T>();
         if(inst)
             return inst;
-        put<T>(sp<T>::make());
-        return get<T>();
+        return put<T>(sp<T>::make(std::forward<Args>(args)...)).template unpack<T>();
     }
 
     template<typename T> const sp<T>& instance_sfinae(...) {

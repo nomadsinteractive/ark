@@ -7,7 +7,7 @@ BeanFactory::BeanFactory(std::nullptr_t)
 }
 
 BeanFactory::BeanFactory()
-    : _references(sp<Scope>::make()), _factories(sp<List<Factory>>::make()) {
+    : _stub(sp<Stub>::make()) {
 }
 
 BeanFactory::~BeanFactory()
@@ -17,25 +17,32 @@ BeanFactory::~BeanFactory()
 void BeanFactory::add(const BeanFactory::Factory& factory, bool front)
 {
     if(front)
-        _factories->push_front(factory);
+        _stub->_factories.push_front(factory);
     else
-        _factories->push_back(factory);
+        _stub->_factories.push_back(factory);
 }
 
 void BeanFactory::addPackage(const String& name, const BeanFactory& package)
 {
-    _packages[name] = sp<BeanFactory>::make(package);
+    _stub->_packages[name] = sp<BeanFactory>::make(package);
 }
 
 void BeanFactory::extend(const BeanFactory& other)
 {
-    for(const Factory& i : other._factories->items())
-        _factories->push_back(i);
+    for(const Factory& i : other._stub->_factories.items())
+        _stub->_factories.push_back(i);
+}
+
+const sp<BeanFactory>& BeanFactory::getPackage(const String& name) const
+{
+    DCHECK(name, "Empty package name");
+    auto iter = _stub->_packages.find(name);
+    return iter == _stub->_packages.end() ? sp<BeanFactory>::null() : iter->second;
 }
 
 const sp<Scope>& BeanFactory::references() const
 {
-    return _references;
+    return _stub->_references;
 }
 
 BeanFactory::Factory::Factory()
@@ -50,6 +57,11 @@ BeanFactory::Factory::Factory(const WeakPtr<Scope>& references, const sp<Diction
 BeanFactory::Factory::operator bool() const
 {
     return static_cast<bool>(_document_by_id);
+}
+
+BeanFactory::Stub::Stub()
+    : _references(sp<Scope>::make())
+{
 }
 
 }

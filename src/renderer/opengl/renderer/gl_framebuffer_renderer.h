@@ -12,26 +12,13 @@
 #include "renderer/opengl/forwarding.h"
 
 namespace ark {
+namespace opengl {
 
 class GLFramebufferRenderer : public Renderer {
 public:
-    GLFramebufferRenderer(const sp<Renderer>& delegate, const sp<Texture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    GLFramebufferRenderer(const sp<Renderer>& delegate, const sp<GLFramebuffer>& framebuffer);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
-
-//  [[plugin::resource-loader("framebuffer")]]
-    class BUILDER : public Builder<Renderer> {
-    public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
-
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
-
-    private:
-        sp<ResourceLoaderContext> _resource_loader_context;
-
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Texture>> _texture;
-    };
 
 private:
     sp<Renderer> _delegate;
@@ -41,6 +28,7 @@ private:
 
 };
 
+}
 }
 
 #endif

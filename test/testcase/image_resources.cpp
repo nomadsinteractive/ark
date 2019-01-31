@@ -3,6 +3,7 @@
 #include "core/ark.h"
 
 #include "graphics/base/bitmap.h"
+#include "graphics/base/bitmap_bundle.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_resource.h"
@@ -16,7 +17,7 @@ class ImageResourcesTestCase : public TestCase {
 public:
     virtual int launch() {
         const sp<ApplicationResource> applicationResource = Ark::instance().applicationContext()->applicationResource();
-        const bitmap s001 = applicationResource->loadBitmap("s001.png");
+        const bitmap s001 = applicationResource->bitmapBundle()->get("s001.png");
         if(!s001) {
             printf("s001.png not found!\n");
             return -1;
@@ -26,7 +27,7 @@ public:
         if(s001->height() != 256)
             return 2;
 
-        const bitmap s003 = applicationResource->loadBitmap("s003.jpg");
+        const bitmap s003 = applicationResource->bitmapBundle()->get("s003.jpg");
         if(s003->width() != 780)
             return 3;
         if(s003->height() != 460)

@@ -10,7 +10,16 @@
 
 namespace ark {
 
-class ARK_API Scope : public Dictionary<Box> {
+/*
+
+class BoxBundle {
+    [[script::bindings::getprop]]
+    virtual Box get(const String& name) override;
+};
+
+*/
+
+class ARK_API Scope : public BoxBundle {
 public:
     Scope() = default;
     Scope(std::map<String, Box> variables);
@@ -24,7 +33,6 @@ public:
         put(name, object.pack());
     }
 
-//  [[script::bindings::getprop]]
     virtual Box get(const String& name) override;
 
     void put(const String& name, const Box& value);

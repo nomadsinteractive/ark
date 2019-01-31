@@ -5,6 +5,7 @@
 
 #include "graphics/base/bitmap.h"
 
+#include "renderer/base/framebuffer.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_engine.h"
@@ -182,6 +183,13 @@ Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Uploader
 Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader)
 {
     return makeBuffer(Buffer::TYPE_INDEX, usage, uploader);
+}
+
+sp<Framebuffer> RenderController::makeFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture)
+{
+    const sp<Framebuffer> framebuffer = renderEngine()->rendererFactory()->createFramebuffer(renderer, texture);
+    upload(framebuffer->resource(), nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY);
+    return framebuffer;
 }
 
 Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader)

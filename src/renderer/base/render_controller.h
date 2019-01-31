@@ -60,6 +60,8 @@ public:
     Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr);
     Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr);
 
+    sp<Framebuffer> makeFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture);
+
     sp<Variable<uint64_t>> ticker() const;
 
     void addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired);

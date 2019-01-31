@@ -21,8 +21,7 @@ public:
         const String sLocation = "location";
         const String sBinding = "binding";
 
-        setLayoutDescriptor(context._vertex._ins.vars().values(), sLocation, 0);
-        setLayoutDescriptor(context._vertex._outs.vars().values(), sLocation, 0);
+        setLayoutDescriptor(context._vertex._ins, sLocation, 0);
 
         const sp<PipelineInput>& pipelineInput = shaderBindings->pipelineInput();
         declareUBOStruct(context._vertex, pipelineInput);
@@ -30,10 +29,10 @@ public:
 
         context._fragment._outs.declare("vec4", "v_", "FragColor");
 
-        setLayoutDescriptor(context._fragment._samplers.vars().values(), sBinding, pipelineInput->ubos().size());
+        setLayoutDescriptor(context._fragment._samplers, sBinding, pipelineInput->ubos().size());
 
-        setLayoutDescriptor(context._fragment._ins.vars().values(), sLocation, 0);
-        setLayoutDescriptor(context._fragment._outs.vars().values(), sLocation, 0);
+        setLayoutDescriptor(context._vertex._outs, context._fragment._ins, sLocation, 0);
+        setLayoutDescriptor(context._fragment._outs, sLocation, 0);
 
         context._vertex._macro_defines.push_back("#extension GL_ARB_separate_shader_objects : enable");
         context._vertex._macro_defines.push_back("#extension GL_ARB_shading_language_420pack : enable");
@@ -46,12 +45,26 @@ public:
     }
 
 private:
-    uint32_t setLayoutDescriptor(const std::vector<ShaderPreprocessor::Declaration>& declarations, const String& descriptor, uint32_t start) {
+    uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& declarations, const String& descriptor, uint32_t start) {
         uint32_t counter = start;
-        for(const ShaderPreprocessor::Declaration& i : declarations) {
+        for(const ShaderPreprocessor::Declaration& i : declarations.vars().values()) {
             StringBuffer sb;
             sb << "layout (" << descriptor << " = " << (counter++) << ") " << *i.source();
             *i.source() = sb.str();
+        }
+        return counter;
+    }
+
+    uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& ins, const ShaderPreprocessor::DeclarationList& outs, const String& descriptor, uint32_t start) {
+        uint32_t counter = start;
+        DCHECK(ins.vars().size() == outs.vars().size(), "Output/Input mismatch, output and input have different numbers of items: %d vs %s", ins.vars().size(), outs.vars().size());
+        for(const ShaderPreprocessor::Declaration& i : ins.vars().values()) {
+            const String prefix = Strings::sprintf("layout (%s = %d) ", descriptor.c_str(), counter++);
+            *i.source() = prefix + *i.source();
+
+            DCHECK(outs.vars().has(i.name()), "Output/Input mismatch, \"%s\" exists in input but not found in next stage of shader", i.name().c_str());
+            const sp<String>& os = outs.vars().at(i.name()).source();
+            *os = prefix + *os;
         }
         return counter;
     }

@@ -18,7 +18,7 @@
 namespace ark {
 
 //[[script::bindings::container]]
-class ARK_API Arena final : public Block, public EventListener, public Renderer, public Renderer::Group {
+class ARK_API Arena final : public EventListener, public Renderer, public Renderer::Group {
 public:
     Arena(const sp<Renderer>& rootView, const sp<ResourceLoader>& resourceLoader);
     ~Arena() override;
@@ -27,7 +27,7 @@ public:
 //  [[script::bindings::meta(isExpired())]]
 
 //  [[script::bindings::property]]
-    virtual const SafePtr<Size>& size() override;
+    const SafePtr<Size>& size();
 
 //  [[script::bindings::auto]]
     virtual void addRenderer(const sp<Renderer>& renderer) override;
@@ -47,12 +47,12 @@ public:
     sp<Renderer> loadRenderer(const String& name, const sp<Scope>& args = nullptr);
 
 //  [[script::bindings::property]]
-    const sp<Scope>& refs() const;
+    const sp<ResourceLoader>& resourceLoader() const;
 
 //  [[script::bindings::auto]]
     void addEventListener(const sp<EventListener>& eventListener);
 //  [[script::bindings::auto]]
-    void addLayer(const sp<Renderer> &layer);
+    void addLayer(const sp<Renderer>& layer);
 
 //  [[script::bindings::property]]
     void setView(const sp<Renderer>& view);

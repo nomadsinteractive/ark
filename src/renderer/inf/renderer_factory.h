@@ -20,6 +20,7 @@ public:
     virtual void onSurfaceCreated(RenderContext& renderContext) = 0;
 
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) = 0;
+    virtual sp<Framebuffer> createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture) = 0;
     virtual sp<PipelineFactory> createPipelineFactory() = 0;
     virtual sp<RenderView> createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController, const Viewport& viewport) = 0;
     virtual sp<Texture> createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap) = 0;

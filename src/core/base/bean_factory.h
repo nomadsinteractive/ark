@@ -223,6 +223,14 @@ public:
         ByType _workers;
     };
 
+    struct Stub {
+        Stub();
+
+        sp<Scope> _references;
+        List<Factory> _factories;
+        std::map<String, sp<BeanFactory>> _packages;
+    };
+
 public:
     BeanFactory(std::nullptr_t);
     BeanFactory();
@@ -312,20 +320,20 @@ public:
     }
 
     template<typename T> sp<Builder<T>> getBuilderByArg(const String& argname) {
-        return sp<BuilderByArgument<T>>::make(_references, argname);
+        return sp<BuilderByArgument<T>>::make(_stub->_references, argname);
     }
 
     template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id) {
         DCHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
-        return sp<BuilderByArgument<T>>::make(_references, id.arg(), createBuilderByValue<T>(id.toString()));
+        return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), createBuilderByValue<T>(id.toString()));
     }
 
     template<typename T> sp<Builder<T>> getBuilderByRef(const String& refid) {
-        const sp<T> inst = _references->get<T>(refid);
+        const sp<T> inst = _stub->_references->get<T>(refid);
         if(inst)
             return sp<BuilderByInstance<T>>::make(inst);
 
-        for(const Factory& i : _factories->items()) {
+        for(const Factory& i : _stub->_factories.items()) {
             const sp<Builder<T>> builder = i.findBuilder<T>(refid, *this);
             if(builder)
                 return builder;
@@ -380,6 +388,7 @@ public:
     void addPackage(const String& name, const BeanFactory& package);
 
     void extend(const BeanFactory& other);
+    const sp<BeanFactory>& getPackage(const String& name) const;
 
     const sp<Scope>& references() const;
 
@@ -395,7 +404,7 @@ private:
     }
 
     template<typename T> sp<Builder<T>> createBuilderByDocument(const String& className, const document& doc) {
-        for(const Factory& i : _factories->items()) {
+        for(const Factory& i : _stub->_factories.items()) {
             const sp<Builder<T>> builder = i.createBuilder<T>(className, doc, *this);
             if(builder)
                 return builder;
@@ -404,7 +413,7 @@ private:
     }
 
     template<typename T> sp<Builder<T>> createBuilderByValue(const String& value) {
-        for(const Factory& i : _factories->items()) {
+        for(const Factory& i : _stub->_factories.items()) {
             const sp<Builder<T>> builder = i.createValueBuilder<T>(*this, value);
             if(builder)
                 return builder;
@@ -413,7 +422,7 @@ private:
     }
 
     template<typename T> sp<Builder<T>> createBuilderByTypeValue(const String& type, const String& value) {
-        for(const Factory& i : _factories->items()) {
+        for(const Factory& i : _stub->_factories.items()) {
             const sp<Builder<T>> builder = i.createValueBuilder<T>(*this, type, value);
             if(builder)
                 return builder;
@@ -422,7 +431,7 @@ private:
     }
 
     template<typename T> sp<Builder<T>> decorate(const sp<Builder<T>>& builder, const String& style, const String& value) {
-        for(const Factory& i : _factories->items()) {
+        for(const Factory& i : _stub->_factories.items()) {
             const sp<Builder<T>> f = i.decorate<T>(*this, builder, style, value);
             if(f)
                 return f;
@@ -430,20 +439,12 @@ private:
         return builder;
     }
 
-    const sp<BeanFactory>& getPackage(const String& name) const {
-        DCHECK(name, "Empty package name");
-        auto iter = _packages.find(name);
-        return iter == _packages.end() ? sp<BeanFactory>::null() : iter->second;
-    }
-
     template<typename T> sp<T> buildSafe(const sp<Builder<T>>& builder, const sp<Scope>& args) {
         return builder ? builder->build(args) : nullptr;
     }
 
 private:
-    sp<Scope> _references;
-    sp<List<Factory>> _factories;
-    std::map<String, sp<BeanFactory>> _packages;
+    sp<Stub> _stub;
 };
 
 }

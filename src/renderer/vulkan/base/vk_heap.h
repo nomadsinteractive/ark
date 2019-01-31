@@ -21,13 +21,14 @@ private:
 public:
     VKHeap(const sp<VKDevice>& device);
 
-    VKMemoryPtr allocate(GraphicsContext& graphicsContext, VkDeviceSize size, uint32_t typeIndex);
     VKMemoryPtr allocate(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs, VkMemoryPropertyFlags propertyFlags);
 
     void recycle(GraphicsContext& graphicsContext, const VKMemoryPtr& ptr);
 
 private:
     VKMemory makeMemory(GraphicsContext& graphicsContext, VkDeviceSize size, uint32_t typeIndex);
+
+    VKMemoryPtr doAllocate(GraphicsContext& graphicsContext, VkDeviceSize size, VkDeviceSize alignment, uint32_t typeIndex);
 
 private:
     sp<VKDevice> _device;

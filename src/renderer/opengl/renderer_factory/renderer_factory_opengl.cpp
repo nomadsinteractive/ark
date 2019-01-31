@@ -7,13 +7,16 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
 
-#include "renderer/base/texture.h"
+#include "renderer/base/framebuffer.h"
 #include "renderer/base/render_context.h"
 #include "renderer/base/render_controller.h"
+#include "renderer/base/texture.h"
 
 #include "renderer/opengl/base/gl_buffer.h"
+#include "renderer/opengl/base/gl_framebuffer.h"
 #include "renderer/opengl/base/gl_texture_2d.h"
 #include "renderer/opengl/pipeline_factory/pipeline_factory_opengl.h"
+#include "renderer/opengl/renderer/gl_framebuffer_renderer.h"
 #include "renderer/opengl/render_view/render_view_opengl.h"
 #include "renderer/opengl/es20/snippet_factory/snippet_factory_gles20.h"
 #include "renderer/opengl/es30/snippet_factory/snippet_factory_gles30.h"
@@ -93,6 +96,12 @@ sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderContext>& 
 sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buffer::Usage usage)
 {
     return sp<GLBuffer>::make(type, usage, _recycler);
+}
+
+sp<Framebuffer> RendererFactoryOpenGL::createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture)
+{
+    const sp<GLFramebuffer> fbo = sp<GLFramebuffer>::make(_recycler, texture);
+    return sp<Framebuffer>::make(fbo, sp<GLFramebufferRenderer>::make(renderer, fbo));
 }
 
 sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()

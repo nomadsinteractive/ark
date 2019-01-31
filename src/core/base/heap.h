@@ -24,7 +24,7 @@ public:
         virtual ~Allocator() = default;
 
         virtual void initialize(SizeType size) = 0;
-        virtual SizeType allocate(SizeType size, SizeType& allocated) = 0;
+        virtual SizeType allocate(SizeType size, SizeType alignment, SizeType& allocated) = 0;
         virtual SizeType free(SizeType offset) = 0;
     };
 
@@ -49,9 +49,9 @@ public:
 
         }
 
-        virtual SizeType allocate(SizeType size, SizeType& allocated) override {
+        virtual SizeType allocate(SizeType size, SizeType alignment, SizeType& allocated) override {
             SizeType length = size / kAlignment;
-            if(length > _max_chunk_length)
+            if(alignment > kAlignment || length > _max_chunk_length)
                 return npos;
 
             Chunk chunk;
@@ -157,16 +157,38 @@ public:
             Fragment split(const sp<Fragment>& self, SizeType position, SizeType size, L2& l2) {
                 DCHECK(_size >= position + size && _state == FRAGMENT_STATE_UNUSED, "Heap corrupted: size: %d, position: %d, fragment-state: %d, fragment-size: %d", size, position, _state, _size);
 
+                const auto iter = l2._fragments.find(_offset);
+                DCHECK(iter != l2._fragments.end(), "Heap corrupted: Fragment with offset(%d) not found", _offset);
+
                 SizeType remaining = (_size - size - position);
-                if(remaining != 0)
-                    l2.addFragment(FRAGMENT_STATE_UNUSED, _offset + position + size, remaining);
+                if(remaining != 0) {
+                    const auto next = std::next(iter);
+                    if(next == l2._fragments.end() || next->second->_state != FRAGMENT_STATE_UNUSED)
+                        l2.addFragment(FRAGMENT_STATE_UNUSED, _offset + position + size, remaining);
+                    else {
+                        const sp<Fragment>& nextFragment = next->second;
+                        nextFragment->_state = FRAGMENT_STATE_DELETED;
+                        l2.addFragment(FRAGMENT_STATE_UNUSED, _offset + position + size, remaining + nextFragment->_size);
+                        l2._fragments.erase(next);
+                    }
+                }
 
                 if(position == 0) {
                     _size = size;
                     _state = FRAGMENT_STATE_ALLOCATED;
                     return *this;
                 } else {
-                    _size = position;
+                    const auto prev = iter != l2._fragments.begin() ? std::prev(iter) : l2._fragments.end();
+                    if(prev == l2._fragments.end() || prev->second->_state != FRAGMENT_STATE_UNUSED) {
+                        _size = position;
+                    }
+                    else {
+                        const sp<Fragment>& prevFragment = prev->second;
+                        prevFragment->_state = FRAGMENT_STATE_DELETED;
+                        _size = position + prevFragment->_size;
+                        _offset = prevFragment->_offset;
+                        l2._fragments[_offset] = self;
+                    }
                     l2.ensureAllocator(_size).push(self);
                     return *l2.addFragment(FRAGMENT_STATE_ALLOCATED, _offset + position, size);
                 }
@@ -218,14 +240,14 @@ public:
             addFragment(FRAGMENT_STATE_UNUSED, 0, size);
         }
 
-        virtual SizeType allocate(SizeType size, SizeType& allocated) override {
-            FragmentQueue* allocator = _fragment_trie.find(size);
+        virtual SizeType allocate(SizeType size, SizeType alignment, SizeType& allocated) override {
+            FragmentQueue* allocator = _fragment_trie.find(size + (alignment > kAlignment ? alignment : 0));
             while(allocator) {
                 sp<Fragment> fragment;
                 while(!allocator->empty()) {
                     fragment = allocator->pop();
                     if(fragment && fragment->_state == FRAGMENT_STATE_UNUSED) {
-                        Fragment splitted = fragment->split(fragment, findOptimizedPosition(fragment, size), size, *this);
+                        Fragment splitted = fragment->split(fragment, findOptimizedPosition(fragment, size, alignment), size, *this);
                         allocated = splitted._size;
                         return splitted._offset;
                     }
@@ -276,10 +298,10 @@ public:
             return r;
         }
 
-        SizeType findOptimizedPosition(const Fragment& fragment, SizeType size) const {
+        SizeType findOptimizedPosition(const Fragment& fragment, SizeType size, SizeType alignment) const {
             if(size * 8 >= fragment._size)
-                return 0;
-            return size * 3;
+                return align(fragment._offset % alignment, alignment);
+            return align((fragment._offset + size * 3) % alignment, alignment);
         }
 
         sp<Fragment> addFragment(FragmentState state, SizeType offset, SizeType size) {
@@ -319,14 +341,14 @@ private:
             return _size - _allocated + (_next ? _next->available() : 0);
         }
 
-        PtrType allocate(SizeType size) {
+        PtrType allocate(SizeType size, SizeType alignment) {
             SizeType allocated = 0;
-            SizeType offset = _allocator->allocate(align(size), allocated);
+            SizeType offset = _allocator->allocate(align(size, kAlignment), alignment, allocated);
             if(offset != npos) {
                 _allocated += allocated;
                 return _memory.begin() + offset;
             }
-            return _next ? _next->allocate(size) : nullptr;
+            return _next ? _next->allocate(size, alignment) : nullptr;
         }
 
         void free(PtrType ptr) {
@@ -379,9 +401,10 @@ public:
         return _stub->available();
     }
 
-    PtrType allocate(SizeType size) {
+    PtrType allocate(SizeType size, SizeType alignment = kAlignment) {
         DASSERT(_stub);
-        return _stub->allocate(size);
+        DCHECK(alignment >= kAlignment && (alignment % kAlignment) == 0, "Illegal alignment %d", alignment);
+        return _stub->allocate(size, alignment);
     }
 
     void free(PtrType ptr) {
@@ -400,9 +423,9 @@ public:
     }
 
 private:
-    static SizeType align(SizeType size) {
-        SizeType m = size % kAlignment;
-        return m ? size + (kAlignment - m) : size;
+    static SizeType align(SizeType value, SizeType alignment) {
+        SizeType m = value % alignment;
+        return m ? value + (alignment - m) : value;
     }
 
 private:

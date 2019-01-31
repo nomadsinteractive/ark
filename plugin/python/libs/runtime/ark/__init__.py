@@ -91,6 +91,18 @@ class ResourceLoader:
     def refs(self):
         return None
 
+    @property
+    def layers(self):
+        return None
+
+    @property
+    def render_layers(self):
+        return None
+
+    @property
+    def packages(self):
+        return None
+
 
 class Camera:
     def __init__(self):

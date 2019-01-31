@@ -56,50 +56,36 @@ Uniform::Type Uniform::toType(const String& declaredType)
     return TYPE_F1;
 }
 
-void Uniform::toTypeLength(String& type, uint32_t& length) const
+String Uniform::getDeclaredType() const
 {
     switch(_type) {
     case TYPE_I1V:
-        length = _flatable->size() / 4;
     case TYPE_I1:
-        type = "int";
-        break;
+        return "int";
     case TYPE_F1V:
-        length = _flatable->size() / 4;
     case TYPE_F1:
-        type = "float";
-        break;
+        return "float";
     case TYPE_F2V:
-        length = _flatable->size() / 8;
     case TYPE_F2:
-        type = "vec2";
-        break;
+        return "vec2";
     case TYPE_F3V:
-        length = _flatable->size() / 12;
     case TYPE_F3:
-        type = "vec3";
-        break;
+        return "vec3";
     case TYPE_F4V:
-        length = _flatable->size() / 16;
     case TYPE_F4:
-        type = "vec4";
-        break;
+        return "vec4";
     case TYPE_MAT4V:
-        length = _flatable->size() / 64;
     case TYPE_MAT4:
-        type = "mat4";
-        break;
+        return "mat4";
     case TYPE_MAT3V:
-        length = _flatable->size() / 36;
     case TYPE_MAT3:
-        type = "mat3";
-        break;
+        return "mat3";
     case TYPE_SAMPLER2D:
-        type = "sampler2D";
-        break;
+        return "sampler2D";
     default:
-        DFATAL("Unsupported type: %d", _type);
+        break;
     }
+    DFATAL("Unsupported type: %d", _type);
 }
 
 const sp<Flatable>& Uniform::flatable() const
@@ -126,10 +112,8 @@ bool Uniform::dirty() const
 
 String Uniform::declaration(const String& descriptor) const
 {
-    String t;
-    uint32_t s = 0;
-    toTypeLength(t, s);
-    return s ? Strings::sprintf("%s%s %s[%d];", descriptor.c_str(), t.c_str(), _name.c_str(), s + 1) : Strings::sprintf("%s%s %s;", descriptor.c_str(), t.c_str(), _name.c_str());
+    const String t = getDeclaredType();
+    return Strings::sprintf("%s%s %s;", descriptor.c_str(), t.c_str(), _name.c_str());
 }
 
 void Uniform::notify() const

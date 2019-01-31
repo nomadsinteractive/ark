@@ -149,7 +149,7 @@ void GLPipeline::bindUniform(float* buf, uint32_t size, const Uniform& uniform)
         glUniform.setUniform2f(buf[0], buf[1]);
         break;
     case Uniform::TYPE_F3:
-        DCHECK(size == 12, "Wrong uniform3f size: %d", size);
+        DCHECK(size >= 12, "Wrong uniform3f size: %d", size);
         glUniform.setUniform3f(buf[0], buf[1], buf[2]);
         break;
     case Uniform::TYPE_F4:

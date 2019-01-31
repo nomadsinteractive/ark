@@ -78,7 +78,7 @@ std::vector<std::pair<uint32_t, Buffer>> PipelineInput::makeInstancedArrays(Rend
 const PipelineInput::Stream& PipelineInput::getStream(uint32_t divisor) const
 {
     const auto iter = _streams.find(divisor);
-    DCHECK(iter != _streams.end(), "GLShaderInput has no stream(%d)", divisor);
+    DCHECK(iter != _streams.end(), "PipelineInput has no stream(%d)", divisor);
     return iter->second;
 }
 
@@ -144,7 +144,7 @@ PipelineInput::UBO::UBO(uint32_t binding)
 
 void PipelineInput::UBO::doSnapshot(bool force) const
 {
-    size_t offset = 0;
+    uint8_t* buf = _buffer->buf();
     uint8_t* dirtyFlags = _dirty_flags->buf();
     for(size_t i = 0; i < _uniforms.size(); ++i)
     {
@@ -152,8 +152,8 @@ void PipelineInput::UBO::doSnapshot(bool force) const
         const sp<Flatable>& flatable = uniform.flatable();
         dirtyFlags[i] = static_cast<uint8_t>(force || uniform.dirty());
         if(dirtyFlags[i])
-            flatable->flat(_buffer->buf() + offset);
-        offset += flatable->size();
+            flatable->flat(buf);
+        buf += flatable->size();
     }
 }
 

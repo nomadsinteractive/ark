@@ -9,7 +9,6 @@
 #include "graphics/base/bitmap_bundle.h"
 #include "graphics/base/size.h"
 
-#include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"

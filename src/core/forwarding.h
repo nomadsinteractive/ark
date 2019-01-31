@@ -70,6 +70,7 @@ class ThreadPoolExecutor;
 class Visibility;
 
 typedef Dictionary<sp<String>> StringBundle;
+typedef Dictionary<Box> BoxBundle;
 
 typedef Variable<bool> Boolean;
 typedef Variable<int32_t> Integer;

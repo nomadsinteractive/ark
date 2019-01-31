@@ -57,10 +57,10 @@ sp<Renderer> Arena::loadRenderer(const String& name, const sp<Scope>& args)
     return renderer;
 }
 
-const sp<Scope>& Arena::refs() const
+const sp<ResourceLoader>& Arena::resourceLoader() const
 {
-    DCHECK(_resource_loader, "Trying to get references on a disposed Arena");
-    return _resource_loader->beanFactory().references();
+    DCHECK(_resource_loader, "Trying to get ResourceLoader on a disposed Arena");
+    return _resource_loader;
 }
 
 void Arena::addEventListener(const sp<EventListener>& eventListener)

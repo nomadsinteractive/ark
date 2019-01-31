@@ -17,7 +17,13 @@ VKHeap::VKHeap(const sp<VKDevice>& device)
 {
 }
 
-VKMemoryPtr VKHeap::allocate(GraphicsContext& graphicsContext, VkDeviceSize size, uint32_t typeIndex)
+VKMemoryPtr VKHeap::allocate(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs, VkMemoryPropertyFlags propertyFlags)
+{
+    uint32_t typeIndex = _device->getMemoryType(memReqs.memoryTypeBits, propertyFlags);
+    return doAllocate(graphicsContext, memReqs.size, memReqs.alignment, typeIndex);
+}
+
+VKMemoryPtr VKHeap::doAllocate(GraphicsContext& graphicsContext, VkDeviceSize size, VkDeviceSize alignment, uint32_t typeIndex)
 {
     DASSERT(typeIndex < VK_MAX_MEMORY_TYPES);
 
@@ -28,25 +34,19 @@ VKMemoryPtr VKHeap::allocate(GraphicsContext& graphicsContext, VkDeviceSize size
         _heaps[typeIndex].extend(makeMemory(graphicsContext, manifest.heap()._device_unit_size, typeIndex), sp<HeapType::L2>::make());
     }
 
-    VKMemoryPtr memory = _heaps[typeIndex].allocate(size);
+    VKMemoryPtr memory = _heaps[typeIndex].allocate(size, alignment);
 
     if(!memory)
     {
         const Manifest& manifest = Ark::instance().manifest();
         DCHECK(size < manifest.heap()._device_unit_size, "Out of heap memory, allocation size required: %lld, you may change device_unit_size(%d) to a greater value", size, manifest.heap()._device_unit_size);
         _heaps[typeIndex].extend(makeMemory(graphicsContext, manifest.heap()._device_unit_size, typeIndex), sp<HeapType::L2>::make());
-        return allocate(graphicsContext, size, typeIndex);
+        return doAllocate(graphicsContext, size, alignment, typeIndex);
     }
 
     memory._stub->_size = size;
     memory._stub->_type_index = typeIndex;
     return memory;
-}
-
-VKMemoryPtr VKHeap::allocate(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs, VkMemoryPropertyFlags propertyFlags)
-{
-    uint32_t typeIndex = _device->getMemoryType(memReqs.memoryTypeBits, propertyFlags);
-    return allocate(graphicsContext, memReqs.size, typeIndex);
 }
 
 void VKHeap::recycle(GraphicsContext& /*graphicsContext*/, const VKMemoryPtr& ptr)

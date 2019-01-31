@@ -44,7 +44,7 @@ const sp<VKDevice>& VKRenderer::device() const
     return _device;
 }
 
-const sp<VKHeap>&VKRenderer::heap() const
+const sp<VKHeap>& VKRenderer::heap() const
 {
     DCHECK(_heap, "VKRenderer uninitialized");
     return _heap;

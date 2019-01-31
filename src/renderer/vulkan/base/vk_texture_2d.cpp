@@ -32,7 +32,7 @@ uint64_t VKTexture2D::id()
     return (uint64_t)(_image);
 }
 
-void VKTexture2D::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& uploader)
+void VKTexture2D::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& /*uploader*/)
 {
     doUpload();
 }
@@ -181,7 +181,7 @@ void VKTexture2D::doUpload()
         subresourceRange.layerCount = 1;
 
         // Transition the texture image layout to transfer target, so we can safely copy our buffer data to it.
-        VkImageMemoryBarrier imageMemoryBarrier = vks::initializers::imageMemoryBarrier();;
+        VkImageMemoryBarrier imageMemoryBarrier = vks::initializers::imageMemoryBarrier();
         imageMemoryBarrier.image = _image;
         imageMemoryBarrier.subresourceRange = subresourceRange;
         imageMemoryBarrier.srcAccessMask = 0;

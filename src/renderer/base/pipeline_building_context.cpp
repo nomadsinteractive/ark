@@ -13,6 +13,31 @@
 
 namespace ark {
 
+namespace {
+
+class AlignedFlatable : public Flatable {
+public:
+    AlignedFlatable(const sp<Flatable>& delegate, size_t alignedSize)
+        : _delegate(delegate), _aligned_size(alignedSize) {
+        DCHECK(_delegate->size() <= _aligned_size, "Alignment is lesser than delegate's size(%d)", _delegate->size());
+    }
+
+    virtual void flat(void* buf) override {
+        _delegate->flat(buf);
+    }
+
+    virtual uint32_t size() override {
+        return _aligned_size;
+    }
+
+private:
+    sp<Flatable> _delegate;
+
+    size_t _aligned_size;
+};
+
+}
+
 PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment)
     : _shader(sp<Shader::Stub>::make(pipelineFactory)), _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT)
 {
@@ -185,7 +210,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         default:
             FATAL("Unknow type \"%s\"", type.c_str());
         }
-        addUniform(name, glType, flatable, flatable.as<Notifier>(), binding);
+        addUniform(name, glType, glType == Uniform::TYPE_F3 ? sp<Flatable>::adopt(new AlignedFlatable(flatable, 16)) : flatable, flatable.as<Notifier>(), binding);
     }
 }
 

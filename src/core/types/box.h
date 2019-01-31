@@ -28,10 +28,6 @@ public:
         return _stub ? _stub->unpack<T>() : sp<T>::null();
     }
 
-    template<typename T> sp<T>& unpack() {
-        return _stub ? _stub->unpack<T>() : sp<T>::null();
-    }
-
     template<typename T> sp<T> as() const {
         if(!_stub)
             return sp<T>::null();

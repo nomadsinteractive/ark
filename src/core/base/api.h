@@ -111,6 +111,7 @@ const char* const WIDTH = "width";
 const char* const HEIGHT = "height";
 const char* const DEPTH = "depth";
 const char* const REF = "ref";
+const char* const RENDERER = "renderer";
 const char* const RENDER_OBJECT = "render-object";
 const char* const RENDER_LAYER = "render-layer";
 const char* const ROTATION = "rotation";
@@ -172,7 +173,7 @@ template<THREAD_ID ID> void __thread_check__(const char* func) {
         __fatal__(func, "", "ThreadId check failed: %d, should be %d", _internal::ThreadFlag<ID>::id(), ID);
 }
 
-uint32_t ARK_API __trace__();
+void ARK_API __trace__();
 
 extern float g_upDirection;
 

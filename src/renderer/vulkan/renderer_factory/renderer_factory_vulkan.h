@@ -21,6 +21,7 @@ public:
     virtual void onSurfaceCreated(RenderContext& glContext) override;
 
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
+    virtual sp<Framebuffer> createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture) override;
     virtual sp<RenderView> createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController, const Viewport& viewport) override;
     virtual sp<PipelineFactory> createPipelineFactory() override;
     virtual sp<Texture> createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap) override;
@@ -34,6 +35,7 @@ private:
 
     friend class VKUtil;
     friend class PipelineFactoryVulkan;
+
 };
 
 }

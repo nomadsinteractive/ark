@@ -55,7 +55,7 @@ private:
     VkDescriptorBufferInfo _descriptor;
 
     VKMemoryPtr _memory;
-    VkMemoryAllocateInfo _memory_allocation_info;
+    VkMemoryRequirements _memory_requirements;
 
     Notifier _notifier;
 };

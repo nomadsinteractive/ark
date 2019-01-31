@@ -41,6 +41,7 @@ def checkout_specified_tag(repo, tag, target_name, target_dirname, target_dir):
             os.makedirs(target_dirname)
         git_clone(target_dirname, repo['url'], target_name)
     try:
+        print("git describe --tags %s" % target_dir)
         output = subprocess.check_output(['git', 'describe', '--tags'],
                                          cwd=target_dir).decode(_encoding).strip()
     except subprocess.CalledProcessError:

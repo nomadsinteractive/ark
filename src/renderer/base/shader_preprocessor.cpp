@@ -151,13 +151,10 @@ void ShaderPreprocessor::setupBindings(const std::vector<sp<Uniform>>& uniforms,
 
             if(!_uniforms.has(i->name()))
             {
-                String type;
-                uint32_t length;
+                const String type = i->getDeclaredType();
                 sp<String> declaration = sp<String>::make(i->declaration("uniform "));
-
-                i->toTypeLength(type, length);
                 _uniforms.vars().push_back(i->name(), Declaration(i->name(), type, declaration));
-                _uniform_declarations.push_back(declaration);
+                _uniform_declarations.push_back(std::move(declaration));
             }
         }
     binding = next;

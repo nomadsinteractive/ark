@@ -11,7 +11,7 @@
 namespace ark {
 
 ResourceLoader::ResourceLoader(const BeanFactory& beanFactory)
-    : _bean_factory(beanFactory)
+    : _bean_factory(beanFactory), _packages(sp<PackageRefs>::make(beanFactory))
 {
 }
 
@@ -20,9 +20,24 @@ ResourceLoader::~ResourceLoader()
     LOGD("");
 }
 
-const sp<Scope>& ResourceLoader::refs() const
+const sp<BoxBundle> ResourceLoader::refs() const
 {
     return _bean_factory.references();
+}
+
+const sp<BoxBundle> ResourceLoader::layers()
+{
+    return _builder_refs.ensure<BuilderRefs<Layer>>(_bean_factory);
+}
+
+const sp<BoxBundle> ResourceLoader::renderLayers()
+{
+    return _builder_refs.ensure<BuilderRefs<RenderLayer>>(_bean_factory);
+}
+
+const sp<BoxBundle> ResourceLoader::packages()
+{
+    return _packages;
 }
 
 void ResourceLoader::import(const document& manifest, BeanFactory& parent)
@@ -40,13 +55,13 @@ const BeanFactory& ResourceLoader::beanFactory() const
     return _bean_factory;
 }
 
-BeanFactory& ResourceLoader::ResourceLoader::beanFactory()
+BeanFactory& ResourceLoader::beanFactory()
 {
     return _bean_factory;
 }
 
-ResourceLoader::BUILDER::BUILDER(BeanFactory& parent, const document& doc, const sp<ApplicationContext>& applicationContext)
-    : _parent(parent), _application_context(applicationContext), _manifest(doc),
+ResourceLoader::BUILDER::BUILDER(BeanFactory& factory, const document& doc, const sp<ApplicationContext>& applicationContext)
+    : _factory(factory), _application_context(applicationContext), _manifest(doc),
       _src(Documents::ensureAttribute(doc, Constants::Attributes::SRC))
 {
 }
@@ -54,7 +69,7 @@ ResourceLoader::BUILDER::BUILDER(BeanFactory& parent, const document& doc, const
 sp<ResourceLoader> ResourceLoader::BUILDER::build(const sp<Scope>& args)
 {
     const sp<ResourceLoader> resourceLoader = _application_context->createResourceLoader(_src, args);
-    resourceLoader->import(_manifest, _parent);
+    resourceLoader->import(_manifest, _factory);
     return resourceLoader;
 }
 
@@ -66,6 +81,24 @@ ResourceLoader::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& v
 sp<ResourceLoader> ResourceLoader::DICTIONARY::build(const sp<Scope>& args)
 {
     return _application_context->createResourceLoader(_src, nullptr, args);
+}
+
+ResourceLoader::PackageRefs::PackageRefs(const BeanFactory& beanFactory)
+    : _bean_factory(beanFactory)
+{
+}
+
+Box ResourceLoader::PackageRefs::get(const String& name)
+{
+    const auto iter = _packages.find(name);
+    if(iter != _packages.end())
+        return iter->second.pack();
+
+    const sp<BeanFactory>& package = _bean_factory.getPackage(name);
+    DCHECK(package, "ResourceLoader has no package named \"%s\"", name.c_str());
+    const sp<ResourceLoader> resourceLoader = sp<ResourceLoader>::make(package);
+    _packages.insert(std::make_pair(name, resourceLoader));
+    return resourceLoader.pack();
 }
 
 }
