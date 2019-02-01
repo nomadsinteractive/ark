@@ -35,6 +35,7 @@ VKMemoryPtr VKHeap::doAllocate(GraphicsContext& graphicsContext, VkDeviceSize si
     }
 
     VKMemoryPtr memory = _heaps[typeIndex].allocate(size, alignment);
+    DCHECK(memory.offset() % alignment == 0, "Alignment(%d) unsatisfied, size: %d, offset: %d", alignment, size, memory.offset());
 
     if(!memory)
     {

@@ -241,7 +241,8 @@ public:
         }
 
         virtual SizeType allocate(SizeType size, SizeType alignment, SizeType& allocated) override {
-            FragmentQueue* allocator = _fragment_trie.find(size + (alignment > kAlignment ? alignment : 0));
+            SizeType sizeNeeded = size + (alignment > kAlignment ? alignment : 0);
+            FragmentQueue* allocator = _fragment_trie.find(sizeNeeded);
             while(allocator) {
                 sp<Fragment> fragment;
                 while(!allocator->empty()) {
@@ -253,9 +254,9 @@ public:
                     }
                 }
                 _fragment_trie.remove(allocator->_size);
-                allocator = _fragment_trie.find(size);
+                allocator = _fragment_trie.find(sizeNeeded);
             }
-            DWARN(checkFragments(size), "Unallocated candidate block which's in not in Allocator but found in fragments, something might go wrong");
+            DWARN(checkFragments(sizeNeeded), "Unallocated candidate block which's in not in Allocator but found in fragments, something might go wrong");
             return npos;
         }
 
@@ -300,8 +301,8 @@ public:
 
         SizeType findOptimizedPosition(const Fragment& fragment, SizeType size, SizeType alignment) const {
             if(size * 8 >= fragment._size)
-                return align(fragment._offset % alignment, alignment);
-            return align((fragment._offset + size * 3) % alignment, alignment);
+                return align(fragment._offset, alignment) - fragment._offset;
+            return align(fragment._offset + size * 3, alignment) - fragment._offset;
         }
 
         sp<Fragment> addFragment(FragmentState state, SizeType offset, SizeType size) {
