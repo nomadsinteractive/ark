@@ -30,6 +30,7 @@ public:
     virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
 
+    virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
     virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
 
 private:
@@ -45,7 +46,6 @@ private:
     void setupPipeline(const VertexLayout& vertexLayout);
 
     void buildCommandBuffer(GraphicsContext& graphicsContext, const Buffer::Snapshot& vertex, const Buffer::Snapshot& index);
-    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, bool rebuildCommandBuffer);
 
     bool isDirty(const bytearray& dirtyFlags) const;
 

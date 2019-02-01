@@ -84,9 +84,16 @@ Resource::RecycleFunc VKPipeline::recycle()
     };
 }
 
-void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, bool rebuildCommandBuffer)
+void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    buildCommandBuffer(graphicsContext, drawingContext._array_buffer, drawingContext._index_buffer);
+    bool reloadNeeded = false;
+    for(const sp<Observer>& i : _texture_observers)
+        if(i->dirty())
+        {
+            setupDescriptorSet(graphicsContext, drawingContext._shader_bindings);
+            reloadNeeded = true;
+            break;
+        }
 
     const std::vector<Layer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
     DCHECK(uboSnapshots.size() == _ubos.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), _ubos.size());
@@ -94,7 +101,7 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
     for(size_t i = 0; i < uboSnapshots.size(); ++i)
     {
         const Layer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
-        if(rebuildCommandBuffer || isDirty(uboSnapshot._dirty_flags))
+        if(reloadNeeded || isDirty(uboSnapshot._dirty_flags))
         {
             const sp<VKBuffer>& ubo = _ubos.at(i);
             ubo->reload(graphicsContext, uboSnapshot._buffer);
@@ -104,16 +111,7 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
 
 void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    bool rebuildCommandBuffer = false;
-    for(const sp<Observer>& i : _texture_observers)
-        if(i->dirty())
-        {
-            setupDescriptorSet(graphicsContext, drawingContext._shader_bindings);
-            rebuildCommandBuffer = true;
-            break;
-        }
-
-    bind(graphicsContext, drawingContext, rebuildCommandBuffer);
+    buildCommandBuffer(graphicsContext, drawingContext._array_buffer, drawingContext._index_buffer);
 }
 
 void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)

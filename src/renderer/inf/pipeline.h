@@ -17,6 +17,7 @@ class ARK_API Pipeline : public Resource {
 public:
     virtual ~Pipeline() = default;
 
+    virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
     virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
 };
 

@@ -75,7 +75,8 @@ sp<RenderCommand> Layer::Snapshot::render(float x, float y)
 
         return drawingContext.toRenderCommand(_stub->_resource_loader_context->objectPool());
     }
-    return nullptr;
+    DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos));
+    return drawingContext.toRenderCommand(_stub->_resource_loader_context->objectPool());
 }
 
 Layer::Layer(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)

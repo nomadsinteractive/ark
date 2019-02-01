@@ -91,14 +91,14 @@ void GLPipeline::bindUBO(const Layer::UBOSnapshot& uboSnapshot, const sp<Pipelin
     }
 }
 
-void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
 {
-    glUseProgram(_id);
     const std::vector<Layer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
 
     const sp<PipelineInput>& pipelineInput = drawingContext._shader_bindings->pipelineInput();
     DCHECK(uboSnapshots.size() == pipelineInput->ubos().size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), pipelineInput->ubos().size());
 
+    glUseProgram(_id);
     for(size_t i = 0; i < uboSnapshots.size(); ++i)
     {
         const Layer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
@@ -114,7 +114,10 @@ void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& dr
         if(sampler)
             activeTexture(sampler, i);
     }
+}
 
+void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+{
     _render_command->_count = drawingContext._count;
     _render_command->_instance_count = drawingContext._instance_count;
     _render_command->draw(graphicsContext);

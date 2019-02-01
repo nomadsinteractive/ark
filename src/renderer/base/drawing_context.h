@@ -16,6 +16,7 @@ namespace ark {
 
 class ARK_API DrawingContext {
 public:
+    DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<Layer::UBOSnapshot> ubo);
     DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<Layer::UBOSnapshot> ubo, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
@@ -41,9 +42,11 @@ private:
 
 
 private:
-    class RenderCommandImpl;
+    class RenderCommandBind;
+    class RenderCommandDraw;
 
-    friend class RenderCommandImpl;
+    friend class RenderCommandBind;
+    friend class RenderCommandDraw;
 };
 
 }

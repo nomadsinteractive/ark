@@ -12,9 +12,25 @@
 
 namespace ark {
 
-class DrawingContext::RenderCommandImpl : public RenderCommand {
+class DrawingContext::RenderCommandBind : public RenderCommand {
 public:
-    RenderCommandImpl(DrawingContext context)
+    RenderCommandBind(DrawingContext context)
+        : _context(std::move(context)) {
+    }
+
+    virtual void draw(GraphicsContext& graphicsContext) override {
+        const sp<Pipeline> pipeline = _context._shader->getPipeline(graphicsContext, _context._shader_bindings);
+        pipeline->bind(graphicsContext, _context);
+    }
+
+private:
+    DrawingContext _context;
+
+};
+
+class DrawingContext::RenderCommandDraw : public RenderCommand {
+public:
+    RenderCommandDraw(DrawingContext context)
         : _context(std::move(context)) {
     }
 
@@ -24,6 +40,7 @@ public:
         const sp<Pipeline> pipeline = _context._shader->getPipeline(graphicsContext, _context._shader_bindings);
 
         _context.preDraw(graphicsContext);
+        pipeline->bind(graphicsContext, _context);
         pipeline->draw(graphicsContext, _context);
         _context.postDraw(graphicsContext);
     }
@@ -32,6 +49,11 @@ private:
     DrawingContext _context;
 
 };
+
+DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<Layer::UBOSnapshot> ubo)
+    : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _count(0), _instance_count(0)
+{
+}
 
 DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<Layer::UBOSnapshot> ubo, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount)
     : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _array_buffer(arrayBuffer), _index_buffer(indexBuffer), _count(indexBuffer.length<glindex_t>()), _instance_count(instanceCount)
@@ -42,7 +64,9 @@ DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings
 sp<RenderCommand> DrawingContext::toRenderCommand(ObjectPool& objectPool)
 {
     DCHECK(_shader && _shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
-    return objectPool.obtain<RenderCommandImpl>(std::move(*this));
+    if(_count > 0)
+        return objectPool.obtain<RenderCommandDraw>(std::move(*this));
+    return objectPool.obtain<RenderCommandBind>(std::move(*this));
 }
 
 void DrawingContext::upload(GraphicsContext& graphicsContext)

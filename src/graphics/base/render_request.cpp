@@ -19,12 +19,12 @@ public:
     }
 
     virtual void draw(GraphicsContext& graphicsContext) override {
-        if(_delegate)
-            _delegate->draw(graphicsContext);
+        _delegate->draw(graphicsContext);
     }
 
     virtual void run() override {
         _delegate = _layer_snapshot.render(_x, _y);
+        DASSERT(_delegate);
     }
 
 private:
