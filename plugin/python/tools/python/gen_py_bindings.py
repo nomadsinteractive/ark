@@ -566,7 +566,7 @@ class GenMethod(object):
         if return_type == 'void':
             return ['Py_RETURN_NONE;']
         m = acg.getSharedPtrType(return_type)
-        if m in ('String', 'std::wstring'):
+        if m in ('std::wstring',):
             fromcall = 'template fromType<%s>' % m
         else:
             fromcall = 'toPyObject'

@@ -29,7 +29,7 @@ ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const s
 void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
 {
     const sp<Uploader> uploader = _object_pool->obtain<ByteArrayUploader>(getVertexBuffer(x, y));
-    DrawingContext drawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _vertex_buffer.snapshot(uploader), _index_buffer, 0);
+    DrawingContext drawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _vertex_buffer.snapshot(uploader), _index_buffer, 1);
     renderRequest.addRequest(drawingContext.toRenderCommand(_object_pool));
 }
 
@@ -58,7 +58,7 @@ bytearray ShaderFrame::getVertexBuffer(float x, float y) const
 }
 
 ShaderFrame::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _size(factory.ensureBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+    : _resource_loader_context(resourceLoaderContext), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext))
 {
 }

@@ -79,7 +79,7 @@ void DrawingContext::upload(GraphicsContext& graphicsContext)
     for(const auto& iter : _instanced_array_snapshots)
     {
         iter.second.upload(graphicsContext);
-        DCHECK(iter.second.id(), "Invaild GL Instanced Array Buffer: %d", iter.first);
+        DCHECK(iter.second.id(), "Invaild Instanced Array Buffer: %d", iter.first);
     }
 }
 

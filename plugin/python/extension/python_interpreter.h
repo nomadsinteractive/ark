@@ -94,6 +94,11 @@ public:
         Py_XINCREF(obj);
         return obj;
     }
+    PyObject* fromSharedPtr(const sp<String>& inst) {
+        if(inst)
+            return PyUnicode_FromString(inst->c_str());
+        Py_RETURN_NONE;
+    }
 
     PyObject* fromByteArray(const bytearray& bytes) const;
 

@@ -130,4 +130,14 @@ sp<Layer> Layer::BUILDER::build(const sp<Scope>& args)
     return sp<Layer>::make(_model->build(args), _shader->build(args), _resource_loader_context);
 }
 
+Layer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _impl(factory, manifest, resourceLoaderContext)
+{
+}
+
+sp<Renderer> Layer::RENDERER_BUILDER::build(const sp<Scope>& args)
+{
+    return _impl.build(args);
+}
+
 }

@@ -62,13 +62,13 @@ class ArkModuleFinder:
             package = fullname
             if not source:
                 source = asset_path_resource.get_string(module_name + '/__init__.py')
-                if source:
+                if source is not None:
                     path = self.ASSET_PROTOCOL + filepath
                     file_path = self.ASSET_PROTOCOL + filepath
             else:
                 package = '.'.join(fullname.split('.')[0:-1])
                 file_path = self.ASSET_PROTOCOL + filepath + '.py'
-            if source or path:
+            if source is not None or path:
                 return self._create_module_spec(fullname, source, path, package, file_path)
         return None
 

@@ -33,6 +33,8 @@ public:
     const ShaderPreprocessor::Preprocessor& vertex() const;
     const ShaderPreprocessor::Preprocessor& fragment() const;
 
+    const Table<String, sp<Texture>>& samplers() const;
+
 private:
     void initialize(const Camera& camera);
 
@@ -45,6 +47,8 @@ private:
 
     ShaderPreprocessor::Preprocessor _vertex;
     ShaderPreprocessor::Preprocessor _fragment;
+
+    Table<String, sp<Texture>> _samplers;
 
     friend class Shader;
     friend class ShaderBindings;

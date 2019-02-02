@@ -182,7 +182,9 @@ sp<Texture> Texture::BUILDER::build(const sp<Scope>& args)
        return _resource_loader_context->textureBundle()->get(*src);
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
-    return _resource_loader_context->renderController()->createTexture(static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), nullptr);
+    uint32_t width = static_cast<uint32_t>(size->width());
+    uint32_t height = static_cast<uint32_t>(size->height());
+    return _resource_loader_context->renderController()->createTexture(width, height, nullptr);
 }
 
 }

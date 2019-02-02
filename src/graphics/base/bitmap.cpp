@@ -9,8 +9,8 @@
 
 namespace ark {
 
-Bitmap::Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t channels)
-    : Bitmap(width, height, rowBytes, channels, rowBytes ? sp<ByteArray::Allocated>::make(height * rowBytes) : nullptr)
+Bitmap::Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t channels, bool allocate)
+    : Bitmap(width, height, rowBytes, channels, allocate ? sp<ByteArray::Allocated>::make(height * rowBytes) : nullptr)
 {
 }
 
@@ -62,7 +62,7 @@ Bitmap Bitmap::resize(uint32_t w, uint32_t h) const
 {
     uint32_t d = depth();
     DCHECK(d == 1 || d == 4, "Unsupported bitmap depth: %d", d);
-    Bitmap s(w, h, w * _channels * d, _channels);
+    Bitmap s(w, h, w * _channels * d, _channels, true);
     if(d == 1)
         stbir_resize_uint8(_bytes->buf(), _width, _height, _row_bytes, s.at(0, 0), w, h, s.rowBytes(), _channels);
     else if (d == 4)
@@ -74,7 +74,7 @@ Bitmap Bitmap::crop(uint32_t x, uint32_t y, uint32_t w, uint32_t h) const
 {
     DCHECK(x + w <= width() && y + h <= height(), "Cropped image out of bounds. cropped bitmap(%d, %d, %d, %d), image size(%d, %d)", x, y, w, h, width(), height());
     uint32_t d = depth();
-    Bitmap s(w, h, w * _channels * d, _channels);
+    Bitmap s(w, h, w * _channels * d, _channels, true);
     for(uint32_t i = 0; i < h; ++i)
         memcpy(s.at(0, i), at(x, i), s.rowBytes());
     return s;

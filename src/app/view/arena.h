@@ -26,9 +26,6 @@ public:
 //  [[script::bindings::meta(expire())]]
 //  [[script::bindings::meta(isExpired())]]
 
-//  [[script::bindings::property]]
-    const SafePtr<Size>& size();
-
 //  [[script::bindings::auto]]
     virtual void addRenderer(const sp<Renderer>& renderer) override;
 
@@ -93,8 +90,8 @@ public:
 
 private:
     op<EventListenerList> _event_listeners;
-    sp<Renderer> _renderer;
     sp<ViewGroup> _view_group;
+    sp<Renderer> _renderer;
     sp<ResourceLoader> _resource_loader;
     ListWithLifecycle<Renderer> _layers;
 

@@ -9,6 +9,7 @@ class VKCommandBuffers;
 class VKCommandPool;
 class VKDescriptorPool;
 class VKDevice;
+class VKFramebuffer;
 class VKHeap;
 class VKGraphicsContext;
 class VKInstance;

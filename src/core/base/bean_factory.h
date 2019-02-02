@@ -247,7 +247,7 @@ public:
         }
         else
             builder = getBuilderByRef<T>(id.ref());
-        return builder ? builder : createBuilderByValue<T>(id.toString());
+        return builder ? builder : findBuilderByValue<T>(id.toString());
     }
 
     template<typename T> sp<T> build(const String& value, const sp<Scope>& args = nullptr) {
@@ -255,11 +255,11 @@ public:
     }
 
     template<typename T> sp<T> build(const String& type, const String& value, const sp<Scope>& args = nullptr) {
-        return buildSafe<T>(createBuilderByTypeValue<T>(type, value), args);
+        return buildSafe<T>(findBuilderByTypeValue<T>(type, value), args);
     }
 
     template<typename T> sp<T> build(const document& doc, const sp<Scope>& args = nullptr) {
-        return buildSafe<T>(createBuilderByDocument<T>(doc), args);
+        return buildSafe<T>(findBuilderByDocument<T>(doc), args);
     }
 
     template<typename T> sp<T> build(const document& doc, const String& attr, const sp<Scope>& args = nullptr) {
@@ -288,6 +288,23 @@ public:
         return obj;
     }
 
+    template<typename T, typename U> sp<T> buildDecorated(const document& doc, const sp<Scope>& args = nullptr) {
+        const sp<Builder<U>> builder = findBuilderByDocument<U>(doc);
+        if(!builder)
+            return nullptr;
+
+        const String style = Documents::getAttribute(doc, Constants::Attributes::STYLE);
+        if(style)
+            return decorate<T>(sp<typename Builder<T>::template Wrapper<U>>::make(builder), style)->build(args);
+        return builder->build(args);
+    }
+
+    template<typename T, typename U> sp<T> ensureDecorated(const document& doc, const sp<Scope>& args = nullptr) {
+        const sp<T> obj = buildDecorated<T, U>(doc, args);
+        DCHECK(obj, "Counld not build \"%s\"", Documents::toString(doc).c_str());
+        return obj;
+    }
+
     template<typename T> sp<Builder<T>> getBuilder(const String& id) {
         if(id.empty())
             return nullptr;
@@ -297,16 +314,16 @@ public:
             return createBuilderByRef<T>(f);
         if(f.isArg())
             return getBuilderByArg<T>(f);
-        return createBuilderByValue<T>(id);
+        return findBuilderByValue<T>(id);
     }
 
     template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr) {
         const String attrValue = Documents::getAttribute(doc, attr);
         if(attrValue.empty()) {
             const document& child = doc->getChild(attr);
-            return child ? createBuilderByDocument<T>(child) : nullptr;
+            return child ? findBuilderByDocument<T>(child) : nullptr;
         }
-        return getBuilder<T>(attrValue);
+        return ensureBuilder<T>(attrValue);
     }
 
     template<typename T> sp<Builder<T>> getConcreteClassBuilder(const document& doc, const String& attr) {
@@ -314,9 +331,9 @@ public:
         const String attrValue = Documents::getAttribute(doc, attr);
         if(attrValue.empty()) {
             const document& child = doc->getChild(attr);
-            return createBuilderByDocument<T>(child ? child : doc);
+            return findBuilderByDocument<T>(child ? child : doc);
         }
-        return getBuilder<T>(attrValue);
+        return ensureBuilder<T>(attrValue);
     }
 
     template<typename T> sp<Builder<T>> getBuilderByArg(const String& argname) {
@@ -325,7 +342,7 @@ public:
 
     template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id) {
         DCHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
-        return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), createBuilderByValue<T>(id.toString()));
+        return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), findBuilderByValue<T>(id.toString()));
     }
 
     template<typename T> sp<Builder<T>> getBuilderByRef(const String& refid) {
@@ -349,7 +366,7 @@ public:
     }
 
     template<typename T> sp<Builder<T>> ensureBuilder(const document& doc) {
-        const sp<Builder<T>> builder = createBuilderByDocument<T>(doc);
+        const sp<Builder<T>> builder = findBuilderByDocument<T>(doc);
         DCHECK(builder, "Counld not build from \"%s\"", Documents::toString(doc).c_str());
         return builder;
     }
@@ -367,7 +384,7 @@ public:
     }
 
     template<typename T> sp<Builder<T>> ensureBuilderByTypeValue(const String& type, const String& value) {
-        const sp<Builder<T>> builder = createBuilderByTypeValue<T>(type, value);
+        const sp<Builder<T>> builder = findBuilderByTypeValue<T>(type, value);
         DCHECK(builder, "Counld not build \"%s\" with value \"%s\"", type.c_str(), value.c_str());
         return builder;
     }
@@ -398,12 +415,12 @@ public:
     }
 
 private:
-    template<typename T> sp<Builder<T>> createBuilderByDocument(const document& doc) {
+    template<typename T> sp<Builder<T>> findBuilderByDocument(const document& doc) {
         const String className = Documents::getAttribute(doc, Constants::Attributes::CLASS);
-        return createBuilderByDocument<T>(className, doc);
+        return findBuilderByDocument<T>(doc, className);
     }
 
-    template<typename T> sp<Builder<T>> createBuilderByDocument(const String& className, const document& doc) {
+    template<typename T> sp<Builder<T>> findBuilderByDocument(const document& doc, const String& className) {
         for(const Factory& i : _stub->_factories.items()) {
             const sp<Builder<T>> builder = i.createBuilder<T>(className, doc, *this);
             if(builder)
@@ -412,7 +429,7 @@ private:
         return nullptr;
     }
 
-    template<typename T> sp<Builder<T>> createBuilderByValue(const String& value) {
+    template<typename T> sp<Builder<T>> findBuilderByValue(const String& value) {
         for(const Factory& i : _stub->_factories.items()) {
             const sp<Builder<T>> builder = i.createValueBuilder<T>(*this, value);
             if(builder)
@@ -421,7 +438,7 @@ private:
         return nullptr;
     }
 
-    template<typename T> sp<Builder<T>> createBuilderByTypeValue(const String& type, const String& value) {
+    template<typename T> sp<Builder<T>> findBuilderByTypeValue(const String& type, const String& value) {
         for(const Factory& i : _stub->_factories.items()) {
             const sp<Builder<T>> builder = i.createValueBuilder<T>(*this, type, value);
             if(builder)

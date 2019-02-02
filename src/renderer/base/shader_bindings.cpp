@@ -18,6 +18,13 @@ ShaderBindings::ShaderBindings(RenderModel::Mode mode, RenderController& renderC
       _pipeline_input(_pipeline_layout->input()), _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController))
 {
     _samplers.resize(_pipeline_input->samplerCount());
+
+    const Table<String, sp<Texture>>& samplers = _pipeline_layout->samplers();
+    DWARN(_samplers.size() >= samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", samplers.size(), _samplers.size());
+
+    for(size_t i = 0; i < samplers.values().size(); ++i)
+        if(i < _samplers.size())
+            _samplers[i] = samplers.values().at(i);
 }
 
 const sp<Snippet>& ShaderBindings::snippet() const

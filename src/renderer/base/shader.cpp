@@ -28,9 +28,9 @@ namespace ark {
 
 namespace {
 
-class GLShaderBuilderImpl : public Builder<Shader> {
+class ShaderBuilderImpl : public Builder<Shader> {
 public:
-    GLShaderBuilderImpl(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& vertexSrc, const String& fragmentSrc)
+    ShaderBuilderImpl(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& vertexSrc, const String& fragmentSrc)
         : _factory(factory), _manifest(doc), _render_controller(resourceLoaderContext->renderController()), _vertex_src(vertexSrc), _fragment_src(fragmentSrc),
           _camera(factory.getBuilder<Camera>(doc, Constants::Attributes::CAMERA)) {
     }
@@ -65,7 +65,7 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& d
 {
     const Global<StringTable> stringTable;
     const sp<Builder<Shader>> shader = factory.getBuilder<Shader>(doc, Constants::Attributes::SHADER);
-    return shader ? shader : sp<Builder<Shader>>::adopt(new GLShaderBuilderImpl(factory, doc, resourceLoaderContext, stringTable->getString(defVertex), stringTable->getString(defFragment)));
+    return shader ? shader : sp<Builder<Shader>>::adopt(new ShaderBuilderImpl(factory, doc, resourceLoaderContext, stringTable->getString(defVertex), stringTable->getString(defFragment)));
 }
 
 sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment, const sp<Snippet>& snippet, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -115,11 +115,6 @@ const sp<PipelineLayout>& Shader::pipelineLayout() const
 const sp<Pipeline> Shader::getPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const
 {
     return _stub->buildPipeline(graphicsContext, bindings);
-}
-
-uint32_t Shader::stride() const
-{
-    return _input->getStream(0).stride();
 }
 
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

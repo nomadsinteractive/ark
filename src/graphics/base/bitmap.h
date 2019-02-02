@@ -11,7 +11,7 @@ namespace ark {
 class ARK_API Bitmap {
 public:
 //  [[script::bindings::auto]]
-    Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t channels);
+    Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t channels, bool allocate);
     Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t channels, const bytearray& bytes);
     ~Bitmap();
 

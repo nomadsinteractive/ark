@@ -6,6 +6,7 @@
 
 #include "graphics/base/size.h"
 
+#include "renderer/base/framebuffer.h"
 #include "renderer/base/render_context.h"
 #include "renderer/base/render_controller.h"
 
@@ -17,6 +18,8 @@
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
 
 #include "renderer/vulkan/base/vk_buffer.h"
+#include "renderer/vulkan/base/vk_framebuffer.h"
+#include "renderer/vulkan/base/vk_framebuffer_renderer.h"
 #include "renderer/vulkan/base/vk_heap.h"
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_texture_2d.h"
@@ -83,7 +86,8 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buff
 
 sp<Framebuffer> RendererFactoryVulkan::createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture)
 {
-    return nullptr;
+    const sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_recycler, texture);
+    return sp<Framebuffer>::make(fbo, sp<VKFramebufferRenderer>::make(renderer, fbo));
 }
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController, const Viewport& viewport)
@@ -99,7 +103,7 @@ sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
 sp<Texture> RendererFactoryVulkan::createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap)
 {
     const sp<Size> size = sp<Size>::make(static_cast<float>(width), static_cast<float>(height));
-    const sp<VKTexture2D> texture = sp<VKTexture2D>::make(_recycler, _renderer, sp<Texture::Parameters>::make(), bitmap);
+    const sp<VKTexture2D> texture = sp<VKTexture2D>::make(_recycler, _renderer, width, height, sp<Texture::Parameters>::make(), bitmap);
     return sp<Texture>::make(size, sp<Variable<sp<Resource>>::Const>::make(texture), Texture::TYPE_2D);
 }
 

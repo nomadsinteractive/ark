@@ -1,20 +1,11 @@
 #include "renderer/opengl/base/gl_texture_2d.h"
 
-#include "core/inf/array.h"
 #include "core/inf/variable.h"
-#include "core/util/conversions.h"
-#include "core/util/documents.h"
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
 
-#include "renderer/opengl/base/gl_pipeline.h"
-#include "renderer/base/recycler.h"
-#include "renderer/base/render_controller.h"
-#include "renderer/base/texture_bundle.h"
-#include "renderer/base/graphics_context.h"
-#include "renderer/base/resource_loader_context.h"
 #include "renderer/base/texture.h"
 
 #include "renderer/opengl/util/gl_util.h"

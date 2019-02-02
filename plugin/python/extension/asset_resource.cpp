@@ -12,10 +12,10 @@ AssetResource::AssetResource(const sp<Asset>& resource)
 {
 }
 
-String AssetResource::getString(const String& filepath)
+sp<String> AssetResource::getString(const String& filepath)
 {
     const sp<Readable> readable = _asset->get(filepath);
-    return readable ? Strings::loadFromReadable(readable) : "";
+    return readable ? sp<String>::make(Strings::loadFromReadable(readable)) : nullptr;
 }
 
 }

@@ -53,9 +53,6 @@ public:
 
     const sp<Pipeline> getPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const;
 
-//[[deprecated]]
-    uint32_t stride() const;
-
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Shader> {
     public:

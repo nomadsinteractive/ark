@@ -31,17 +31,9 @@ void RendererGroup::loadGroup(const document& manifest, BeanFactory& factory, co
     for(const document& i : manifest->children())
     {
         if(i->name() == Constants::Attributes::LAYER)
-        {
-            const sp<Renderer> layer = factory.ensure<Layer>(i, args);
-            const String style = Documents::getAttribute(i, Constants::Attributes::STYLE);
-            addRenderer(style ? factory.decorate<Renderer>(sp<BuilderByInstance<Renderer>>::make(layer), style)->build(args) : layer);
-        }
+            addRenderer(factory.ensureDecorated<Renderer, Layer>(i));
         else if(i->name() == Constants::Attributes::RENDER_LAYER)
-        {
-            const sp<Renderer> renderLayer = factory.ensure<RenderLayer>(i, args);
-            const String style = Documents::getAttribute(i, Constants::Attributes::STYLE);
-            addRenderer(style ? factory.decorate<Renderer>(sp<BuilderByInstance<Renderer>>::make(renderLayer), style)->build(args) : renderLayer);
-        }
+            addRenderer(factory.ensureDecorated<Renderer, RenderLayer>(i));
         else
             addRenderer(factory.ensure<Renderer>(i, args));
     }

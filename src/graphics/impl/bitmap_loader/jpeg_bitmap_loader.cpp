@@ -111,7 +111,7 @@ bitmap JPEGBitmapLoader::load(const sp<Readable>& readable)
     jpeg_read_header(&cinfo, TRUE);
 
     int32_t row_stride = cinfo.image_width * cinfo.num_components;
-    const bitmap buf = bitmap::make(cinfo.image_width, cinfo.image_height, _just_decode_bounds ? 0 : row_stride, static_cast<uint8_t>(cinfo.num_components));
+    const bitmap buf = bitmap::make(cinfo.image_width, cinfo.image_height, row_stride, static_cast<uint8_t>(cinfo.num_components), !_just_decode_bounds);
 
     if(!_just_decode_bounds)
     {

@@ -102,6 +102,17 @@ public:
         sp<Builder<Shader>> _shader;
     };
 
+//  [[plugin::resource-loader("layer")]]
+    class RENDERER_BUILDER : public Builder<Renderer> {
+    public:
+        RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+        virtual sp<Renderer> build(const sp<Scope>& args) override;
+
+    private:
+        BUILDER _impl;
+    };
+
 private:
     sp<Stub> _stub;
 };

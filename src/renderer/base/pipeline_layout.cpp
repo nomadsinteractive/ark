@@ -23,7 +23,8 @@
 namespace ark {
 
 PipelineLayout::PipelineLayout(const sp<RenderController>& renderController, const sp<PipelineBuildingContext>& buildingContext)
-    : _render_controller(renderController), _building_context(buildingContext), _input(_building_context->_input), _snippet(sp<SnippetDelegate>::make(buildingContext->_snippet))
+    : _render_controller(renderController), _building_context(buildingContext), _input(_building_context->_input), _snippet(sp<SnippetDelegate>::make(buildingContext->_snippet)),
+      _samplers(buildingContext->_samplers)
 {
 }
 
@@ -61,6 +62,11 @@ const ShaderPreprocessor::Preprocessor& PipelineLayout::vertex() const
 const ShaderPreprocessor::Preprocessor& PipelineLayout::fragment() const
 {
     return _fragment;
+}
+
+const Table<String, sp<Texture>>& PipelineLayout::samplers() const
+{
+    return _samplers;
 }
 
 void PipelineLayout::initialize(const Camera& camera)

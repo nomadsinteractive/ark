@@ -13,7 +13,7 @@ public:
     AssetResource(const sp<Asset>& resource);
 
 //  [[script::bindings::auto]]
-    String getString(const String& filepath);
+    sp<String> getString(const String& filepath);
 
 private:
     sp<Asset> _asset;

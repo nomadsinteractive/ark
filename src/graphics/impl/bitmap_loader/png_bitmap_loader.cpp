@@ -90,7 +90,7 @@ bitmap PNGBitmapLoader::load(const sp<Readable>& readable)
     rowbytes += 3 - ((rowbytes - 1) % 4);
 
     // Allocate the image_data as a big block, to be given to opengl
-    const bitmap bitmap =  bitmap::make(temp_width, temp_height, _just_decode_bounds ? 0 : rowbytes, info_ptr->channels);
+    const bitmap bitmap =  bitmap::make(temp_width, temp_height, rowbytes, info_ptr->channels, !_just_decode_bounds);
 
     if(!_just_decode_bounds)
     {

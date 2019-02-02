@@ -85,7 +85,7 @@ bitmap STBBitmapLoader::load(const sp<Readable>& readable)
     {
         int ret = stbi_info_from_callbacks(&callback, &user, &width, &height, &channels);
         DCHECK(ret, "stbi_info_from_callbacks failure: %s", stbi_failure_reason());
-        return bitmap::make(width, height, 0, channels);
+        return bitmap::make(width, height, 0, channels, false);
     }
 
     uint32_t componentSize = stbi_is_hdr_from_callbacks(&callback, &user) ? 4 : 1;

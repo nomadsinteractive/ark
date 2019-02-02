@@ -14,7 +14,7 @@
 namespace ark {
 
 Arena::Arena(const sp<Renderer>& rootView, const sp<ResourceLoader>& resourceLoader)
-    : _event_listeners(new EventListenerList()), _renderer(rootView), _view_group(rootView), _resource_loader(resourceLoader)
+    : _event_listeners(new EventListenerList()), _view_group(rootView), _renderer(rootView), _resource_loader(resourceLoader)
 {
     DCHECK(_view_group, "Arena's renderer delegate must be ViewGroup");
 }
@@ -22,12 +22,6 @@ Arena::Arena(const sp<Renderer>& rootView, const sp<ResourceLoader>& resourceLoa
 Arena::~Arena()
 {
     LOGD("");
-}
-
-const SafePtr<Size>& Arena::size()
-{
-    DASSERT(_view_group);
-    return _view_group->size();
 }
 
 void Arena::addRenderer(const sp<Renderer>& renderer)
@@ -113,14 +107,14 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
     {
         if(i->name() == Constants::Attributes::LAYER)
         {
-            const sp<Layer> layer = factory.build<Layer>(i, args);
+            const sp<Renderer> layer = factory.buildDecorated<Renderer, Layer>(i);
             if(layer)
                 arena->addLayer(layer);
             else
                 arena->addLayer(factory.ensure<Renderer>(i, args));
         }
         else if(i->name() == Constants::Attributes::RENDER_LAYER)
-            arena->addRenderer(factory.ensure<RenderLayer>(i, args));
+            arena->addLayer(factory.ensureDecorated<Renderer, RenderLayer>(i));
         else
             arena->addRenderer(factory.ensure<Renderer>(i, args));
     }
