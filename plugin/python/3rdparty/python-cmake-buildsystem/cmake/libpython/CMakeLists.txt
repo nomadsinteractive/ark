@@ -132,12 +132,11 @@ if(CMAKE_C_COMPILER_ID MATCHES GNU)
     endforeach()
 endif()
 
-#if(WITH_THREAD)
-#    list(APPEND LIBPYTHON_SOURCES
-#        ${SRC_DIR}/Modules/threadmodule.c
-#        ${SRC_DIR}/Python/thread.c
-#    )
-#endif()
+if(WITH_THREAD)
+    list(APPEND LIBPYTHON_SOURCES
+        ${SRC_DIR}/Python/thread.c
+    )
+endif()
 
 if(UNIX OR MINGW)
     set_property(

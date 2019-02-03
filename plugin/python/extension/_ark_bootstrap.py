@@ -56,18 +56,18 @@ class ArkModuleFinder:
         file_path = ''
         path = None
         module_path, module_name = self._parse_resource_path(fullname, filepath)
-        asset_path_resource = self._get_asset_resource(module_path)
-        if asset_path_resource:
-            source = asset_path_resource.get_string(module_name + '.py')
+        asset = self._get_asset_resource(module_path)
+        if asset:
+            source = asset.get_string(module_name + '.py')
             package = fullname
             if not source:
-                source = asset_path_resource.get_string(module_name + '/__init__.py')
+                source = asset.get_string(module_name + '/__init__.py')
                 if source is not None:
                     path = self.ASSET_PROTOCOL + filepath
-                    file_path = self.ASSET_PROTOCOL + filepath
+                    file_path = asset.get_real_path(module_name + '/__init__.py')
             else:
                 package = '.'.join(fullname.split('.')[0:-1])
-                file_path = self.ASSET_PROTOCOL + filepath + '.py'
+                file_path = asset.get_real_path(module_name + '.py')
             if source is not None or path:
                 return self._create_module_spec(fullname, source, path, package, file_path)
         return None
@@ -112,9 +112,9 @@ class ArkModuleFinder:
     def _get_asset_resource(self, asset_path):
         if asset_path in self._asset_resource_cache:
             return self._asset_resource_cache[asset_path]
-        asset_path_resource = self._ark.get_asset_resource(asset_path)
-        self._asset_resource_cache[asset_path] = asset_path_resource
-        return asset_path_resource
+        asset = self._ark.get_asset_resource(asset_path)
+        self._asset_resource_cache[asset_path] = asset
+        return asset
 
 
 def _install(sys_module, _imp_module):

@@ -18,4 +18,9 @@ sp<Asset> AssetWithPrefix::getAsset(const String& path)
     return _delegate->getAsset(_prefix + path);
 }
 
+String AssetWithPrefix::getRealPath(const String& path)
+{
+    return _delegate->getRealPath(_prefix + path);
+}
+
 }

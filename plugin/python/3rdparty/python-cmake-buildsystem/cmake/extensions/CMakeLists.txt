@@ -55,6 +55,32 @@ add_python_extension(atexit SOURCES atexitmodule.c)
 add_python_extension(_md5 SOURCES md5module.c)
 add_python_extension(_sha1 SOURCES sha1module.c)
 
+add_python_extension(_winapi ${MSVC_BUILTIN} SOURCES _winapi.c)
+if(WITH_THREAD)
+    add_python_extension(_thread SOURCES _threadmodule.c)
+endif()
+
+set(CMAKE_ASM_MASM_COMPILE_OBJECT ${CMAKE_ASM_MASM_COMPILER} FORCE)
+
+add_python_extension(_decimal SOURCES
+    _decimal/_decimal.c
+    _decimal/libmpdec/basearith.c
+    _decimal/libmpdec/constants.c
+    _decimal/libmpdec/convolute.c
+    _decimal/libmpdec/context.c
+    _decimal/libmpdec/numbertheory.c
+    _decimal/libmpdec/fnt.c
+    _decimal/libmpdec/difradix2.c
+    _decimal/libmpdec/transpose.c
+    _decimal/libmpdec/sixstep.c
+    _decimal/libmpdec/fourstep.c
+    _decimal/libmpdec/crt.c
+    _decimal/libmpdec/io.c
+    _decimal/libmpdec/memory.c
+    _decimal/libmpdec/mpdecimal.c
+    _decimal/libmpdec/vcdiv64.asm
+    DEFINITIONS CONFIG_64 MASM
+    INCLUDEDIRS ${SRC_DIR}/Modules/_decimal)
 
 set(datetime_SOURCES _datetimemodule.c)
 if(UNIX)

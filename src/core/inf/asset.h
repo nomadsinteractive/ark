@@ -11,6 +11,7 @@ public:
     virtual ~Asset() = default;
 
     virtual sp<Asset> getAsset(const String& path) = 0;
+    virtual String getRealPath(const String& path) = 0;
 };
 
 }

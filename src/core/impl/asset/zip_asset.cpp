@@ -2,6 +2,9 @@
 
 #include "core/inf/readable.h"
 #include "core/impl/asset/asset_with_prefix.h"
+#include "core/util/strings.h"
+
+#include "platform/platform.h"
 
 namespace ark {
 
@@ -52,7 +55,6 @@ static zip_int64_t _local_zip_source_callback(void *userdata, void *data, zip_ui
         stat->size = stub->size();
         return sizeof(zip_stat_t);
     }
-        break;
     case ZIP_SOURCE_OPEN:
         return 0;
     case ZIP_SOURCE_READ:
@@ -75,8 +77,8 @@ static zip_int64_t _local_zip_source_callback(void *userdata, void *data, zip_ui
     return -1;
 }
 
-ZipAsset::ZipAsset(const sp<Readable>& zipReadable)
-    : _stub(sp<Stub>::make(zipReadable))
+ZipAsset::ZipAsset(const sp<Readable>& zipReadable, const String& zipLocation)
+    : _stub(sp<Stub>::make(zipReadable, zipLocation))
 {
 }
 
@@ -94,13 +96,18 @@ sp<Asset> ZipAsset::getAsset(const String& path)
     return sp<AssetWithPrefix>::make(sp<ZipAsset>::make(*this), path.endsWith("/") ? path : path + "/");
 }
 
+String ZipAsset::getRealPath(const String& path)
+{
+    return Strings::sprintf("%s/%s", _stub->location().c_str(), path.c_str());
+}
+
 bool ZipAsset::hasEntry(const String& name) const
 {
     return zip_name_locate(_stub->archive(), name.c_str(), 0) != -1;
 }
 
-ZipAsset::Stub::Stub(const sp<Readable>& zipReadable)
-    : _zip_readable(zipReadable), _size(zipReadable->remaining())
+ZipAsset::Stub::Stub(const sp<Readable>& zipReadable, const String& zipLocation)
+    : _zip_readable(zipReadable), _zip_location(Platform::getRealPath(zipLocation)), _size(zipReadable->remaining())
 {
     zip_error_t error;
     _zip_source = zip_source_function_create(_local_zip_source_callback, this, &error);
@@ -117,6 +124,11 @@ ZipAsset::Stub::~Stub()
 const sp<Readable>& ZipAsset::Stub::readable() const
 {
     return _zip_readable;
+}
+
+const String& ZipAsset::Stub::location() const
+{
+    return _zip_location;
 }
 
 int32_t ZipAsset::Stub::size() const

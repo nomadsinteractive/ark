@@ -85,9 +85,9 @@ public:
         if(asset)
             return asset;
 
-        const sp<Readable> resource = get(path);
-        if(resource)
-            return sp<ZipAsset>::make(resource);
+        const sp<Readable> readable = get(path);
+        if(readable)
+            return sp<ZipAsset>::make(readable, path);
 
         String dirname;
         String filename;
@@ -98,13 +98,20 @@ public:
             filename = filename.empty() ? name : name + "/" + filename;
             const sp<Readable> readable = dirname.empty() ? nullptr : get(dirname);
             if(readable) {
-                const sp<ZipAsset> zip = sp<ZipAsset>::make(readable);
+                const sp<ZipAsset> zip = sp<ZipAsset>::make(readable, dirname);
                 const String entryName = filename + "/";
                 return zip->hasEntry(entryName) ? sp<AssetWithPrefix>::make(zip, entryName) : nullptr;
             }
             s = dirname;
         } while(!dirname.empty());
         return nullptr;
+    }
+
+    virtual String getRealPath(const String& filepath) override {
+        String dirname, filename;
+        Strings::rcut(filepath, dirname, filename, '/');
+        const sp<Asset> dir = getAsset(dirname);
+        return dir ? dir->getRealPath(filename) : String();
     }
 
     String _asset_dir;
@@ -156,7 +163,7 @@ private:
         if(Platform::isDirectory(src))
             return sp<DirectoryAsset>::make(src);
         else if(Platform::isFile(src))
-            return sp<ZipAsset>::make(sp<FileReadable>::make(src, "rb"));
+            return sp<ZipAsset>::make(sp<FileReadable>::make(src, "rb"), src);
         const sp<Asset> asset = _raw_asset->getAsset(src);
         DCHECK(asset, "Unknow asset src: %s", src.c_str());
         return asset;
@@ -194,7 +201,7 @@ private:
 
                 const sp<Readable> fp = _asset->get(assetpath.rstrip('/'));
                 if(fp)
-                    return sp<ZipAsset>::make(fp);
+                    return sp<ZipAsset>::make(fp, assetpath.rstrip('/'));
             }
             return nullptr;
         }

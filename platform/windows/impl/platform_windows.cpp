@@ -59,6 +59,13 @@ String Platform::getExecutablePath()
     return pathbuf;
 }
 
+String Platform::getRealPath(const String& path)
+{
+    char realpath[MAX_PATH];
+    GetFullPathName(path.c_str(), sizeof(realpath), realpath, nullptr);
+    return realpath;
+}
+
 //static int CALLBACK _enumerate_font_callback(CONST LOGFONT* lpelfe, CONST TEXTMETRIC* lpntme, DWORD FontType, LPARAM lParam)
 //{
 //    puts(lpelfe->lfFaceName);

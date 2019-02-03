@@ -18,6 +18,11 @@ sp<String> AssetResource::getString(const String& filepath)
     return readable ? sp<String>::make(Strings::loadFromReadable(readable)) : nullptr;
 }
 
+String AssetResource::getRealPath(const String& filepath)
+{
+    return _asset->getRealPath(filepath);
+}
+
 }
 }
 }

@@ -3,14 +3,14 @@ cmake_minimum_required(VERSION 3.0)
 
 set(SRC_DIR ${ARK_SRC_DIR}/plugin/python/3rdparty/Python)
 
-list(APPEND DISABLED_MODULES "ARRAY" "AUDIOOP" "TESTCAPI" "CTYPES" "CTYPES_TEST" "PWD" "MULTIPROCESSING" "OSSAUDIODEV" "SCPROXY" "SQLITE3" "GRP" "TERMIOS" "MMAP" "MSVCRT" "OSSAUDIODEV")
+list(APPEND DISABLED_MODULES "ARRAY" "AUDIOOP" "TESTCAPI" "CTYPES" "CTYPES_TEST" "PWD" "MULTIPROCESSING" "OSSAUDIODEV" "SCPROXY" "SQLITE3" "GRP" "TERMIOS" "MMAP" "OSSAUDIODEV")
 foreach(i IN LISTS DISABLED_MODULES)
     set(ENABLE_${i} OFF)
 endforeach()
 
 set(BUILD_TESTING OFF)
 set(BUILD_EXTENSIONS_AS_BUILTIN ON)
-set(WITH_THREAD OFF)
+#set(WITH_THREAD ON)
 set(BUILD_WININST OFF)
 
 set(BUILD_STATIC ON)
@@ -53,7 +53,7 @@ execute_process(
 )
 include(${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cmake)
 if(NOT ANDROID)
-    ark_add_generated_file(_freeze_importlib ark_py_importlib.h ${CMAKE_CURRENT_SOURCE_DIR}/extension extension/_ark_bootstrap.py _ark_bootstrap.py)
+    ark_add_generated_file(_freeze_importlib ${CMAKE_CURRENT_SOURCE_DIR}/extension/ark_py_importlib.h ${CMAKE_CURRENT_SOURCE_DIR}/extension extension/_ark_bootstrap.py _ark_bootstrap.py)
 endif()
 
 ark_setup_tools(ark_gen_plugin_class)

@@ -14,6 +14,8 @@ public:
 
 //  [[script::bindings::auto]]
     sp<String> getString(const String& filepath);
+//  [[script::bindings::auto]]
+    String getRealPath(const String& filepath);
 
 private:
     sp<Asset> _asset;

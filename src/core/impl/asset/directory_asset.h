@@ -13,6 +13,7 @@ public:
 
     virtual sp<Readable> get(const String& name) override;
     virtual sp<Asset> getAsset(const String& path) override;
+    virtual String getRealPath(const String& path) override;
 
 private:
     String _directory;

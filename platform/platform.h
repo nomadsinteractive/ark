@@ -24,6 +24,7 @@ public:
     static sp<Alphabet> getSystemAlphabet(const Font& font, const String& lang);
     static String getDefaultFontDirectory();
     static String getExecutablePath();
+    static String getRealPath(const String& path);
 
     static void glInitialize();
 

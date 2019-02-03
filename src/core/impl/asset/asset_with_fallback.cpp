@@ -1,5 +1,7 @@
 #include "core/impl/asset/asset_with_fallback.h"
 
+#include "core/base/string.h"
+
 namespace ark {
 
 AssetWithFallback::AssetWithFallback(const sp<Asset>& delegate, const sp<Asset>& fallback)
@@ -19,6 +21,11 @@ sp<Asset> AssetWithFallback::getAsset(const String& path)
 {
     const sp<Asset> asset = _delegate->getAsset(path);
     return asset ? asset : _fallback->getAsset(path);
+}
+
+String AssetWithFallback::getRealPath(const String& path)
+{
+    return _delegate->getRealPath(path);
 }
 
 }

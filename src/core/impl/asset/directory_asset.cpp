@@ -32,4 +32,9 @@ sp<Asset> DirectoryAsset::getAsset(const String& path)
     return nullptr;
 }
 
+String DirectoryAsset::getRealPath(const String& path)
+{
+    return Platform::isAbsolutePath(path) ? path : Platform::getRealPath(Strings::sprintf("%s/%s", _directory.c_str(), path.c_str()));
+}
+
 }
