@@ -66,7 +66,6 @@ void Vec2Impl::fix()
 
 Vec2Impl::VV2_DICTIONARY::VV2_DICTIONARY(BeanFactory& factory, const String& str)
 {
-    DTRACE(str == "1 - 0.2 * @duration");
     BeanUtils::split<Numeric, Numeric>(factory, str, _x, _y);
 }
 
