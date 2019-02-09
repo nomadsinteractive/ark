@@ -51,6 +51,30 @@ public:
         return values;
     }
 
+    template<typename T> static T split(const String& str, char sep, char open = '(', char close = ')') {
+        T r;
+        int32_t depth = 0;
+        StringBuffer sb;
+        for(char c : str._str) {
+            if(c == sep && depth == 0) {
+                r.push_back(sb.str());
+                sb.clear();
+            }
+            else {
+                if(c == open)
+                    ++depth;
+                else if(c == close)
+                    --depth;
+                sb << c;
+                DCHECK(depth >= 0, "Open close mismatch: %s", str.c_str());
+            }
+        }
+        const String tail = sb.str();
+        if(tail)
+            r.push_back(tail);
+        return r;
+    }
+
     template<typename T> static String toString(const T& value) {
         return Conversions::to<T, String>(value);
     }

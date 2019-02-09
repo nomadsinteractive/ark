@@ -55,14 +55,15 @@ add_python_extension(atexit SOURCES atexitmodule.c)
 add_python_extension(_md5 SOURCES md5module.c)
 add_python_extension(_sha1 SOURCES sha1module.c)
 
-add_python_extension(_winapi ${MSVC_BUILTIN} SOURCES _winapi.c)
+add_python_extension(_winapi
+    REQUIRES WIN32 BUILTIN
+    SOURCES _winapi.c)
+
 if(WITH_THREAD)
     add_python_extension(_thread SOURCES _threadmodule.c)
 endif()
 
-set(CMAKE_ASM_MASM_COMPILE_OBJECT ${CMAKE_ASM_MASM_COMPILER} FORCE)
-
-add_python_extension(_decimal SOURCES
+list(APPEND _decimal_SOURCES
     _decimal/_decimal.c
     _decimal/libmpdec/basearith.c
     _decimal/libmpdec/constants.c
@@ -78,9 +79,18 @@ add_python_extension(_decimal SOURCES
     _decimal/libmpdec/io.c
     _decimal/libmpdec/memory.c
     _decimal/libmpdec/mpdecimal.c
-    _decimal/libmpdec/vcdiv64.asm
-    DEFINITIONS CONFIG_64 MASM
-    INCLUDEDIRS ${SRC_DIR}/Modules/_decimal)
+)
+if(MSVC)
+    set(CMAKE_ASM_MASM_COMPILE_OBJECT ${CMAKE_ASM_MASM_COMPILER} FORCE)
+    set(_decimal_DEFINITIONS MASM)
+    list(APPEND _decimal_SOURCES _decimal/libmpdec/vcdiv64.asm)
+else()
+    set(_decimal_DEFINITIONS ASM)
+endif()
+add_python_extension(_decimal SOURCES
+    ${_decimal_SOURCES}
+    DEFINITIONS CONFIG_64 ${_decimal_DEFINITIONS}
+    INCLUDEDIRS ${SRC_DIR}/Modules/_decimal/libmpdec)
 
 set(datetime_SOURCES _datetimemodule.c)
 if(UNIX)
@@ -131,6 +141,7 @@ add_python_extension(resource REQUIRES UNIX SOURCES resource.c)
 add_python_extension(spwd REQUIRES UNIX HAVE_GETSPNAM HAVE_GETSPENT SOURCES spwdmodule.c)
 add_python_extension(syslog REQUIRES UNIX SOURCES syslogmodule.c)
 add_python_extension(termios REQUIRES UNIX SOURCES termios.c)
+add_python_extension(_posixsubprocess REQUIRES UNIX SOURCES _posixsubprocess.c)
 
 # MacOSX-only extensions
 #add_python_extension(_scproxy

@@ -12,12 +12,14 @@
 
 namespace ark {
 
-class MessageLoopDefault {
+class MessageLoopDefault : public MessageLoop {
 public:
-    void post(const sp<Runnable>& task, uint64_t nextFireTick);
-    void schedule(const sp<Runnable>& task, uint32_t interval);
+    MessageLoopDefault(const sp<Variable<uint64_t>>& clock);
 
-    uint64_t pollOnce(uint64_t tick);
+    virtual void post(const sp<Runnable>& task, float delay) override;
+    virtual void schedule(const sp<Runnable>& task, float interval) override;
+
+    uint64_t pollOnce();
 
 private:
     class Task {
@@ -42,8 +44,11 @@ private:
     void requestNextTask(Task task);
 
 private:
+    sp<Variable<uint64_t>> _clock;
+
     std::list<Task> _tasks;
     LFStack<Task> _scheduled;
+
 };
 
 }

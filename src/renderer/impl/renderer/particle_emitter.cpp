@@ -73,14 +73,8 @@ ParticleEmitter::Particale::Particale(const sp<Stub>& stub, const document& mani
     _position = factory.getBuilder<Vec>(manifest, Constants::Attributes::POSITION);
     _size = factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE);
     _transform = factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM);
-    _filter = factory.getBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS);
+    _varyings = factory.getBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS);
     _lifecycle = factory.ensureBuilder<Lifecycle>(manifest, Constants::Attributes::EXPIRED);
-}
-
-ParticleEmitter::Particale::Particale(const ParticleEmitter::Particale& other)
-    : _stub(other._stub), _type(other._type), _position(other._position), _size(other._size), _transform(other._transform),
-      _filter(other._filter), _lifecycle(other._lifecycle), _iteration(other._iteration), _interval(other._interval), last_emit_tick(other.last_emit_tick)
-{
 }
 
 uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clock, uint64_t tick, const sp<RenderLayer>& renderLayer)
@@ -109,7 +103,7 @@ uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clo
     uint32_t type = _type ? BeanUtils::toInteger(_type, _stub->_arguments) : _stub->_type;
     const sp<Size> size = _size ? _size->build(_stub->_arguments) : _stub->_size;
     const sp<Transform> transform = _transform->build(_stub->_arguments);
-    const sp<Varyings> filter = _filter->build(_stub->_arguments);
+    const sp<Varyings> filter = _varyings->build(_stub->_arguments);
     const sp<Numeric> duration = clock->duration();
 
     for(uint32_t i = 0; i < count; i++)

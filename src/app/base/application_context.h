@@ -8,6 +8,7 @@
 #include "core/forwarding.h"
 #include "core/inf/message_loop.h"
 #include "core/inf/runnable.h"
+#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/owned_ptr.h"
 
@@ -36,6 +37,7 @@ public:
     const sp<Executor>& executor() const;
 
     const std::vector<String>& argv() const;
+
     const sp<Clock>& clock() const;
 
     bool onEvent(const Event& event);
@@ -44,7 +46,7 @@ public:
     void addEventListener(const sp<EventListener>& eventListener);
     void setDefaultEventListener(const sp<EventListener>& eventListener);
 
-    void post(const sp<Runnable>& task, float delay = 0.0f);
+    void post(const sp<Runnable>& task, float delay = 0);
     void schedule(const sp<Runnable>& task, float interval);
 
     void postTask(std::function<void()> task, float delay = 0);
@@ -61,28 +63,40 @@ public:
     void pause();
     void resume();
 
+    void update();
+
+    bool isPaused() const;
+
     template<typename T> void deferUnref(sp<T>&& inst) {
         const sp<T> s = inst;
         _render_controller->deferUnref(s.pack());
     }
 
 private:
-    void initMessageLoop();
     void initResourceLoader(const document& manifest);
     sp<ResourceLoader> createResourceLoader(const sp<Dictionary<document>>& documentDictionary, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    void dispose();
-    void waitForFinish();
+    class Ticker : public Variable<uint64_t> {
+    public:
+        Ticker();
+
+        void update();
+        virtual uint64_t val() override;
+
+    private:
+        sp<Variable<uint64_t>> _steady_clock;
+        uint64_t _val;
+    };
 
 private:
     std::vector<String> _argv;
-    sp<Variable<uint64_t>> _steady_clock;
+    sp<Ticker> _ticker;
 
     sp<ApplicationResource> _application_resource;
     sp<RenderEngine> _render_engine;
     sp<RenderController> _render_controller;
     sp<Clock> _clock;
-    sp<MessageLoopThread> _message_loop_application;
+    sp<MessageLoopDefault> _message_loop_application;
     sp<Executor> _executor;
 
     op<EventListenerList> _event_listeners;
@@ -92,6 +106,7 @@ private:
     sp<StringTable> _string_table;
 
     Color _background_color;
+    bool _paused;
 
     friend class Ark;
     friend class Application;

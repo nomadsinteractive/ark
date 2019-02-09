@@ -41,7 +41,7 @@ private:
 
         ScriptRunOn _on;
         String _function_name;
-        String _source;
+        sp<Asset> _source;
 
         sp<Script> _script;
         sp<Scope> _vars;

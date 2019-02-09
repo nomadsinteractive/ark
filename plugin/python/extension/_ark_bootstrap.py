@@ -98,8 +98,7 @@ class ArkModuleFinder:
 
     def _load_file(self, filepath):
         if self._ark.is_file(filepath):
-            with open(filepath, 'rt') as fp:
-                return fp.read()
+            return self._ark.load_file(filepath, 'rt')
         return None
 
     def _path_join(self, *paths):

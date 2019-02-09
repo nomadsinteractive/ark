@@ -6,6 +6,7 @@
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/base/bean_factory.h"
+#include "core/epi/notifier.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -88,6 +89,8 @@ public:
 
     sp<Resource> resource() const;
 
+    const Notifier& notifier() const;
+
 public:
 
 //  [[plugin::resource-loader::by-value("texture")]]
@@ -122,6 +125,9 @@ private:
     sp<Size> _size;
     sp<Variable<sp<Resource>>> _resource;
     Type _type;
+
+    Notifier _notifier;
+
 };
 
 }

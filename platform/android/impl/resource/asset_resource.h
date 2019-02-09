@@ -11,12 +11,12 @@ namespace ark {
 namespace platform {
 namespace android {
 
-class AssetResource : public Asset {
+class AssetResource : public AssetBundle {
 public:
     AssetResource(AAssetManager* assetManager, const String& dirname);
 
     virtual sp<Readable> get(const String& name) override;
-    virtual sp<Asset> getAsset(const String& path) override;
+    virtual sp<AssetBundle> getAsset(const String& path) override;
 
 private:
     AAssetManager* _asset_manager;

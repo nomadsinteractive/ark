@@ -28,8 +28,6 @@ public:
 
     const VkDescriptorImageInfo& vkDescriptor() const;
 
-    Notifier& notifier();
-
 private:
     void doUpload();
 
@@ -45,7 +43,6 @@ private:
     uint32_t _mip_levels;
     VkDescriptorImageInfo _descriptor;
 
-    Notifier _notifier;
 };
 
 

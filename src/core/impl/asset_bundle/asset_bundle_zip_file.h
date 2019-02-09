@@ -1,23 +1,22 @@
-#ifndef ARK_CORE_IMPL_ASSET_ZIP_ASSET_H_
-#define ARK_CORE_IMPL_ASSET_ZIP_ASSET_H_
+#ifndef ARK_CORE_IMPL_ASSET_BUNDLE_ZIP_FILE_H_
+#define ARK_CORE_IMPL_ASSET_BUNDLE_ZIP_FILE_H_
 
 #include <zip.h>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/string.h"
-#include "core/inf/asset.h"
+#include "core/inf/asset_bundle.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-class ZipAsset : public Asset {
+class AssetBundleZipFile : public AssetBundle {
 public:
-    ZipAsset(const sp<Readable>& zipReadable, const String& zipLocation);
+    AssetBundleZipFile(const sp<Readable>& zipReadable, const String& zipLocation);
 
-    virtual sp<Readable> get(const String& name) override;
-    virtual sp<Asset> getAsset(const String& path) override;
-    virtual String getRealPath(const String& path) override;
+    virtual sp<Asset> get(const String& name) override;
+    virtual sp<AssetBundle> getBundle(const String& path) override;
 
     bool hasEntry(const String& name) const;
 

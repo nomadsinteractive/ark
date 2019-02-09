@@ -26,13 +26,14 @@ limitations under the License.
 
 #include "core/base/manifest.h"
 #include "core/base/plugin_manager.h"
-#include "core/impl/asset/asset_with_fallback.h"
-#include "core/impl/asset/asset_with_prefix.h"
-#include "core/impl/asset/directory_asset.h"
-#include "core/impl/asset/zip_asset.h"
+#include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
+#include "core/impl/asset_bundle/asset_bundle_with_prefix.h"
+#include "core/impl/asset_bundle/asset_bundle_directory.h"
+#include "core/impl/asset_bundle/asset_bundle_zip_file.h"
 #include "core/impl/readable/file_readable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/impl/dictionary/xml_directory.h"
+#include "core/inf/asset.h"
 #include "core/types/global.h"
 
 #include "renderer/base/render_engine.h"
@@ -63,31 +64,31 @@ std::list<Ark*> Ark::_instance_stack;
 
 namespace {
 
-class RawAsset : public Asset {
+class RawAsset : public AssetBundle {
 public:
     RawAsset(const String& assetDir, const String& appDir)
         : _asset_dir(assetDir), _app_dir(appDir) {
     }
 
-    virtual sp<Readable> get(const String& filepath) override {
+    virtual sp<Asset> get(const String& filepath) override {
         String dirname, filename;
         Strings::rcut(filepath, dirname, filename, '/');
-        const sp<Asset> dir = getAsset(dirname);
-        const sp<Readable> resource = dir ? dir->get(filename) : nullptr;
-        LOGD("filepath(%s) dirname(%s) ==> dir<%p> asset<%p>", filepath.c_str(), dirname.c_str(), dir.get(), resource.get());
-        return resource;
+        const sp<AssetBundle> dir = getBundle(dirname);
+        const sp<Asset> asset = dir ? dir->get(filename) : nullptr;
+        LOGD("filepath(%s) dirname(%s) ==> dir<%p> asset<%p>", filepath.c_str(), dirname.c_str(), dir.get(), asset.get());
+        return asset;
     }
 
-    virtual sp<Asset> getAsset(const String& path) override {
+    virtual sp<AssetBundle> getBundle(const String& path) override {
         String s = (path.empty() || path == "/") ? "." : path;
         const String assetDir = Platform::pathJoin(_asset_dir, s);
-        const sp<Asset> asset = Platform::getAsset(s, Platform::pathJoin(_app_dir, assetDir));
-        if(asset)
-            return asset;
+        const sp<AssetBundle> assetBundle = Platform::getAsset(s, Platform::pathJoin(_app_dir, assetDir));
+        if(assetBundle)
+            return assetBundle;
 
-        const sp<Readable> readable = get(path);
-        if(readable)
-            return sp<ZipAsset>::make(readable, path);
+        const sp<Asset> asset = get(path);
+        if(asset)
+            return sp<AssetBundleZipFile>::make(asset->open(), path);
 
         String dirname;
         String filename;
@@ -96,22 +97,15 @@ public:
             String name;
             Strings::rcut(s, dirname, name, '/');
             filename = filename.empty() ? name : name + "/" + filename;
-            const sp<Readable> readable = dirname.empty() ? nullptr : get(dirname);
-            if(readable) {
-                const sp<ZipAsset> zip = sp<ZipAsset>::make(readable, dirname);
+            const sp<Asset> asset = dirname.empty() ? nullptr : get(dirname);
+            if(asset) {
+                const sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(asset->open(), dirname);
                 const String entryName = filename + "/";
-                return zip->hasEntry(entryName) ? sp<AssetWithPrefix>::make(zip, entryName) : nullptr;
+                return zip->hasEntry(entryName) ? sp<AssetBundleWithPrefix>::make(zip, entryName) : nullptr;
             }
             s = dirname;
         } while(!dirname.empty());
         return nullptr;
-    }
-
-    virtual String getRealPath(const String& filepath) override {
-        String dirname, filename;
-        Strings::rcut(filepath, dirname, filename, '/');
-        const sp<Asset> dir = getAsset(dirname);
-        return dir ? dir->getRealPath(filename) : String();
     }
 
     String _asset_dir;
@@ -129,13 +123,13 @@ public:
             _mounts.push_front(Mounted(strip(i.first), createAsset(i.second)));
     }
 
-    sp<Readable> open(const String& name) {
+    sp<Asset> get(const String& name) const {
         String pathname = name;
         while(pathname.startsWith("/") || pathname.startsWith("."))
             pathname = pathname.substr(1);
 
         for(const Mounted& i : _mounts) {
-            const sp<Readable> readable = i.open(pathname);
+            const sp<Asset> readable = i.open(pathname);
             if(readable)
                 return readable;
         }
@@ -143,28 +137,28 @@ public:
         return _raw_asset->get(name);
     }
 
-    sp<Asset> getAsset(const String& path) const {
-        sp<Asset> asset;
+    sp<AssetBundle> getAssetBundle(const String& path) const {
+        sp<AssetBundle> asset;
         const String s = strip(path);
         for(const Mounted& i : _mounts) {
-            const sp<Asset> ia = i.getAsset(s);
+            const sp<AssetBundle> ia = i.getBundle(s);
             if(ia)
-                asset = asset ? sp<Asset>::adopt(new AssetWithFallback(asset, ia)) : ia;
+                asset = asset ? sp<AssetBundle>::adopt(new AssetBundleWithFallback(asset, ia)) : ia;
         }
-        const sp<Asset> fallback = _raw_asset->getAsset(path);
+        const sp<AssetBundle> fallback = _raw_asset->getBundle(path);
         if(fallback)
-            return asset ? sp<Asset>::adopt(new AssetWithFallback(asset, fallback)) : fallback;
+            return asset ? sp<AssetBundle>::adopt(new AssetBundleWithFallback(asset, fallback)) : fallback;
         DCHECK(asset, "Asset \"%s\" doesn't exists", path.c_str());
         return asset;
     }
 
 private:
-    sp<Asset> createAsset(const String& src) {
+    sp<AssetBundle> createAsset(const String& src) {
         if(Platform::isDirectory(src))
-            return sp<DirectoryAsset>::make(src);
+            return sp<AssetBundleDirectory>::make(src);
         else if(Platform::isFile(src))
-            return sp<ZipAsset>::make(sp<FileReadable>::make(src, "rb"), src);
-        const sp<Asset> asset = _raw_asset->getAsset(src);
+            return sp<AssetBundleZipFile>::make(sp<FileReadable>::make(src, "rb"), src);
+        const sp<AssetBundle> asset = _raw_asset->getBundle(src);
         DCHECK(asset, "Unknow asset src: %s", src.c_str());
         return asset;
     }
@@ -179,36 +173,36 @@ private:
 
     class Mounted {
     public:
-        Mounted(const String& prefix, const sp<Asset>& asset)
+        Mounted(const String& prefix, const sp<AssetBundle>& asset)
             : _prefix(prefix), _asset(asset) {
         }
 
-        sp<Readable> open(const String& path) const {
+        sp<Asset> open(const String& path) const {
             if(_prefix.empty() || path.startsWith(_prefix))
                 return _asset->get(path.substr(_prefix.length()));
             return nullptr;
         }
 
-        sp<Asset> getAsset(const String& path) const {
+        sp<AssetBundle> getBundle(const String& path) const {
             if(path == _prefix)
                 return _asset;
             if(path.startsWith(_prefix))
             {
                 const String assetpath = path.substr(_prefix.length());
-                const sp<Asset> asset = _asset->getAsset(assetpath);
+                const sp<AssetBundle> asset = _asset->getBundle(assetpath);
                 if(asset)
                     return asset;
 
-                const sp<Readable> fp = _asset->get(assetpath.rstrip('/'));
+                const sp<Asset> fp = _asset->get(assetpath.rstrip('/'));
                 if(fp)
-                    return sp<ZipAsset>::make(fp, assetpath.rstrip('/'));
+                    return sp<AssetBundleZipFile>::make(fp->open(), Platform::getRealPath(assetpath.rstrip('/')));
             }
             return nullptr;
         }
 
     private:
         String _prefix;
-        sp<Asset> _asset;
+        sp<AssetBundle> _asset;
     };
 
     List<Mounted> _mounts;
@@ -225,7 +219,7 @@ Ark::Ark(int32_t argc, const char** argv, const sp<Manifest>& manifest)
 
     loadPlugins(manifest);
 
-    const sp<Asset> asset = _asset->getAsset(".");
+    const sp<AssetBundle> asset = _asset->getAssetBundle(".");
     const sp<ApplicationResource> appResource = sp<ApplicationResource>::make(sp<XMLDirectory>::make(asset), asset);
     const sp<RenderEngine> renderEngine = createRenderEngine(manifest->renderer()._version, appResource);
     _application_context = createApplicationContext(manifest->content(), appResource, renderEngine);
@@ -284,14 +278,20 @@ const sp<Manifest>& Ark::manifest() const
     return _manifest;
 }
 
+sp<AssetBundle> Ark::getAssetBundle(const String& path) const
+{
+    return _asset->getAssetBundle(path);
+}
+
 sp<Asset> Ark::getAsset(const String& path) const
 {
-    return _asset->getAsset(path);
+    return _asset->get(path);
 }
 
 sp<Readable> Ark::openAsset(const String& path) const
 {
-    return _asset->open(path);
+    const sp<Asset> asset = _asset->get(path);
+    return asset ? asset->open() : sp<Readable>::null();
 }
 
 const sp<Clock>& Ark::clock() const

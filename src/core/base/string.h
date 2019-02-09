@@ -73,6 +73,7 @@ private:
     std::string _str;
 
     friend class StringBuffer;
+    friend class Strings;
 
 };
 

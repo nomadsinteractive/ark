@@ -22,12 +22,24 @@ float Randf::val()
     return Math::randf() * (b - a) + a;
 }
 
-sp<Numeric> Randf::rand(const sp<Numeric>& b)
+sp<Numeric> Randf::randf(const sp<Numeric>& b)
+{
+    Randf rand(b);
+    return sp<Numeric::Const>::make(rand.val());
+}
+
+sp<Numeric> Randf::randf(const sp<Numeric>& a, const sp<Numeric>& b)
+{
+    Randf rand(a, b);
+    return sp<Numeric::Const>::make(rand.val());
+}
+
+sp<Numeric> Randf::randfv(const sp<Numeric>& b)
 {
     return sp<Randf>::make(b);
 }
 
-sp<Numeric> Randf::rand(const sp<Numeric>& a, const sp<Numeric>& b)
+sp<Numeric> Randf::randfv(const sp<Numeric>& a, const sp<Numeric>& b)
 {
     return sp<Randf>::make(a, b);
 }

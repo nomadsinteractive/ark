@@ -29,7 +29,7 @@ public:
     };
 
 public:
-    RenderController(const sp<RenderEngine>& renderEngine, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader, const sp<Variable<uint64_t>>& ticker);
+    RenderController(const sp<RenderEngine>& renderEngine, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader);
 
     void reset();
 
@@ -103,19 +103,6 @@ private:
         bool operator < (const PreparingResource& other) const;
     };
 
-    class Ticker : public Variable<uint64_t> {
-    public:
-        Ticker(const sp<Variable<uint64_t>>& ticker);
-
-        virtual uint64_t val() override;
-
-        void update();
-
-    private:
-        sp<Variable<uint64_t>> _ticker;
-        uint64_t _tick;
-    };
-
 private:
     void prepare(GraphicsContext& graphicsContext, LFQueue<PreparingResource>& items);
     void doRecycling(GraphicsContext& graphicsContext);
@@ -126,8 +113,6 @@ private:
     sp<Recycler> _recycler;
     sp<Dictionary<bitmap>> _bitmap_loader;
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
-
-    sp<Ticker> _ticker;
 
     LFQueue<PreparingResource> _preparing_items;
     std::set<ExpirableResource> _on_surface_ready_items;

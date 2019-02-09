@@ -72,7 +72,7 @@ void ThreadPoolExecutor::Worker::run()
         {
             _idle = true;
             _idled_cycle ++;
-            if(_idled_cycle > 2000 && _stub->_worker_count.load(std::memory_order_relaxed) > _stub->_capacity)
+            if(_idled_cycle > 20000 && _stub->_worker_count.load(std::memory_order_relaxed) > _stub->_capacity)
                 break;
         }
     }

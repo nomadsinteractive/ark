@@ -70,6 +70,7 @@ public:
 
 private:
     sp<Stub> _stub;
+    sp<Texture> _shader_texture;
 };
 
 }

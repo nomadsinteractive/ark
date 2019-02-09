@@ -8,7 +8,7 @@
 namespace ark {
 
 MessageLoopThread::MessageLoopThread(const sp<Variable<uint64_t>>& ticker)
-    : _ticker(ticker), _message_loop(sp<MessageLoopDefault>::make()), _runnable_impl(sp<RunnableImpl>::make(_thread, _message_loop, ticker))
+    : _ticker(ticker), _message_loop(sp<MessageLoopDefault>::make(ticker)), _runnable_impl(sp<RunnableImpl>::make(_thread, _message_loop, ticker))
 {
     _thread.setEntry(_runnable_impl);
 }
@@ -55,6 +55,12 @@ void MessageLoopThread::join()
     _thread.join();
 }
 
+//void MessageLoopThread::pollOnce()
+//{
+//    uint64_t now = _ticker->val();
+//    _runnable_impl->_message_loop->pollOnce(now);
+//}
+
 const Thread& MessageLoopThread::thread() const
 {
     return _thread;
@@ -73,7 +79,7 @@ void MessageLoopThread::RunnableImpl::run()
             _thread.wait(std::chrono::milliseconds(100));
 
         uint64_t now = _ticker->val();
-        uint64_t nextFireTick = _message_loop->pollOnce(now);
+        uint64_t nextFireTick = _message_loop->pollOnce();
         if(now < nextFireTick)
             _thread.wait(_wait_duration, WaitPredicate(_ticker, nextFireTick));
     }

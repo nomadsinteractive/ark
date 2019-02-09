@@ -1,7 +1,8 @@
-#include "core/impl/asset/zip_asset.h"
+#include "core/impl/asset_bundle/asset_bundle_zip_file.h"
 
+#include "core/inf/asset.h"
 #include "core/inf/readable.h"
-#include "core/impl/asset/asset_with_prefix.h"
+#include "core/impl/asset_bundle/asset_bundle_with_prefix.h"
 #include "core/util/strings.h"
 
 #include "platform/platform.h"
@@ -10,13 +11,13 @@ namespace ark {
 
 namespace {
 
-class ZipFileReadable : public Readable {
+class ReadableZipFile : public Readable {
 public:
-    ZipFileReadable(const sp<ZipAsset::Stub>& stub, zip_file_t* zf)
+    ReadableZipFile(const sp<AssetBundleZipFile::Stub>& stub, zip_file_t* zf)
         : _stub(stub), _zip_file(zf){
     }
 
-    ~ZipFileReadable() {
+    ~ReadableZipFile() override {
         zip_fclose(_zip_file);
     }
 
@@ -30,19 +31,39 @@ public:
 
     virtual int32_t remaining() override {
         DFATAL("Unimplemented");
-        return 0;
     }
 
 private:
-    sp<ZipAsset::Stub> _stub;
+    sp<AssetBundleZipFile::Stub> _stub;
     zip_file_t* _zip_file;
+};
+
+class AssetZipEntry : public Asset {
+public:
+    AssetZipEntry(const sp<AssetBundleZipFile::Stub>& stub, const String& location, zip_file_t* zf)
+        : _stub(stub), _location(location), _zip_file(zf){
+    }
+
+    virtual sp<Readable> open() override {
+        return sp<ReadableZipFile>::make(_stub, _zip_file);
+    }
+
+    virtual String location() override {
+        return _location;
+    }
+
+private:
+    sp<AssetBundleZipFile::Stub> _stub;
+    String _location;
+    zip_file_t* _zip_file;
+
 };
 
 }
 
 static zip_int64_t _local_zip_source_callback(void *userdata, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 {
-    ZipAsset::Stub* stub = reinterpret_cast<ZipAsset::Stub*>(userdata);
+    AssetBundleZipFile::Stub* stub = reinterpret_cast<AssetBundleZipFile::Stub*>(userdata);
     switch(cmd)
     {
     case ZIP_SOURCE_TELL:
@@ -77,36 +98,31 @@ static zip_int64_t _local_zip_source_callback(void *userdata, void *data, zip_ui
     return -1;
 }
 
-ZipAsset::ZipAsset(const sp<Readable>& zipReadable, const String& zipLocation)
+AssetBundleZipFile::AssetBundleZipFile(const sp<Readable>& zipReadable, const String& zipLocation)
     : _stub(sp<Stub>::make(zipReadable, zipLocation))
 {
 }
 
-sp<Readable> ZipAsset::get(const String& name)
+sp<Asset> AssetBundleZipFile::get(const String& name)
 {
     zip_int64_t idx = zip_name_locate(_stub->archive(), name.c_str(), 0);
     zip_file_t* zf = idx >= 0 ? zip_fopen_index(_stub->archive(), static_cast<zip_uint64_t>(idx), 0) : nullptr;
     if(zf)
-        return sp<ZipFileReadable>::make(_stub, zf);
+        return sp<AssetZipEntry>::make(_stub, Strings::sprintf("%s/%s", _stub->location().c_str(), name.c_str()), zf);
     return nullptr;
 }
 
-sp<Asset> ZipAsset::getAsset(const String& path)
+sp<AssetBundle> AssetBundleZipFile::getBundle(const String& path)
 {
-    return sp<AssetWithPrefix>::make(sp<ZipAsset>::make(*this), path.endsWith("/") ? path : path + "/");
+    return sp<AssetBundleWithPrefix>::make(sp<AssetBundleZipFile>::make(*this), path.endsWith("/") ? path : path + "/");
 }
 
-String ZipAsset::getRealPath(const String& path)
-{
-    return Strings::sprintf("%s/%s", _stub->location().c_str(), path.c_str());
-}
-
-bool ZipAsset::hasEntry(const String& name) const
+bool AssetBundleZipFile::hasEntry(const String& name) const
 {
     return zip_name_locate(_stub->archive(), name.c_str(), 0) != -1;
 }
 
-ZipAsset::Stub::Stub(const sp<Readable>& zipReadable, const String& zipLocation)
+AssetBundleZipFile::Stub::Stub(const sp<Readable>& zipReadable, const String& zipLocation)
     : _zip_readable(zipReadable), _zip_location(Platform::getRealPath(zipLocation)), _size(zipReadable->remaining())
 {
     zip_error_t error;
@@ -116,37 +132,37 @@ ZipAsset::Stub::Stub(const sp<Readable>& zipReadable, const String& zipLocation)
     DCHECK(_zip_archive, "Zip open error: %s", zip_error_strerror(&error));
 }
 
-ZipAsset::Stub::~Stub()
+AssetBundleZipFile::Stub::~Stub()
 {
     zip_close(_zip_archive);
 }
 
-const sp<Readable>& ZipAsset::Stub::readable() const
+const sp<Readable>& AssetBundleZipFile::Stub::readable() const
 {
     return _zip_readable;
 }
 
-const String& ZipAsset::Stub::location() const
+const String& AssetBundleZipFile::Stub::location() const
 {
     return _zip_location;
 }
 
-int32_t ZipAsset::Stub::size() const
+int32_t AssetBundleZipFile::Stub::size() const
 {
     return _size;
 }
 
-int32_t ZipAsset::Stub::position() const
+int32_t AssetBundleZipFile::Stub::position() const
 {
     return _size - _zip_readable->remaining();
 }
 
-zip_t* ZipAsset::Stub::archive()
+zip_t* AssetBundleZipFile::Stub::archive()
 {
     return _zip_archive;
 }
 
-zip_source_t* ZipAsset::Stub::source()
+zip_source_t* AssetBundleZipFile::Stub::source()
 {
     return _zip_source;
 }

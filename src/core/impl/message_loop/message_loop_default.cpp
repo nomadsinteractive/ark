@@ -7,27 +7,33 @@
 
 namespace ark {
 
-void MessageLoopDefault::post(const sp<Runnable>& task, uint64_t nextFireTick)
+MessageLoopDefault::MessageLoopDefault(const sp<Variable<uint64_t>>& clock)
+    : _clock(clock)
 {
-    DASSERT(task);
-    _scheduled.push(Task(task, nextFireTick, 0));
 }
 
-void MessageLoopDefault::schedule(const sp<Runnable>& task, uint32_t interval)
+void MessageLoopDefault::post(const sp<Runnable>& task, float delay)
 {
     DASSERT(task);
-    _scheduled.push(Task(task, 0, interval));
+    _scheduled.push(Task(task, delay == 0 ? 0 : static_cast<uint64_t>(_clock->val() + delay * 1000000), 0));
 }
 
-uint64_t MessageLoopDefault::pollOnce(uint64_t tick)
+void MessageLoopDefault::schedule(const sp<Runnable>& task, float interval)
 {
+    DASSERT(task);
+    _scheduled.push(Task(task, 0, static_cast<uint32_t>(interval * 1000000)));
+}
+
+uint64_t MessageLoopDefault::pollOnce()
+{
+    uint64_t now = _clock->val();
     for(Task& task : _scheduled.clear())
         requestNextTask(std::move(task));
 
     while(_tasks.size() > 0)
     {
         const Task& front = _tasks.front();
-        if(front.nextFireTick() <= tick)
+        if(front.nextFireTick() <= now)
         {
             Task nextTask = front;
             _tasks.pop_front();
@@ -37,7 +43,7 @@ uint64_t MessageLoopDefault::pollOnce(uint64_t tick)
                 const sp<Lifecycle>& lifecycle = nextTask.expirable();
                 if(!lifecycle || !lifecycle->isDisposed())
                 {
-                    nextTask.setNextFireTick(tick + nextTask.interval());
+                    nextTask.setNextFireTick(now + nextTask.interval());
                     requestNextTask(std::move(nextTask));
                 }
             }
@@ -45,7 +51,7 @@ uint64_t MessageLoopDefault::pollOnce(uint64_t tick)
         else
             return front.nextFireTick();
     }
-    return tick + 1000;
+    return now + 1000;
 }
 
 void MessageLoopDefault::requestNextTask(Task task)

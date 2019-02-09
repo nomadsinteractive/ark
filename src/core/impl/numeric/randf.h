@@ -16,9 +16,13 @@ public:
     virtual float val() override;
 
 //  [[plugin::function("randf")]]
-    static sp<Numeric> rand(const sp<Numeric>& b);
+    static sp<Numeric> randf(const sp<Numeric>& b);
 //  [[plugin::function("randf")]]
-    static sp<Numeric> rand(const sp<Numeric>& a, const sp<Numeric>& b);
+    static sp<Numeric> randf(const sp<Numeric>& a, const sp<Numeric>& b);
+//  [[plugin::function("randfv")]]
+    static sp<Numeric> randfv(const sp<Numeric>& b);
+//  [[plugin::function("randfv")]]
+    static sp<Numeric> randfv(const sp<Numeric>& a, const sp<Numeric>& b);
 
 private:
     SafePtr<Numeric> _a;

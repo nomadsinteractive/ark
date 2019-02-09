@@ -1,7 +1,7 @@
 #ifndef ARK_CORE_PLUGIN_SCRIPT_H_
 #define ARK_CORE_PLUGIN_SCRIPT_H_
 
-#include <list>
+#include <vector>
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
@@ -12,9 +12,9 @@ class ARK_API Script {
 public:
     virtual ~Script() = default;
 
-    typedef std::list<Box> Arguments;
+    typedef std::vector<Box> Arguments;
 
-    virtual void run(const String& script, const sp<Scope>& vars) = 0;
+    virtual void run(const sp<Asset>& script, const sp<Scope>& vars) = 0;
     virtual Box call(const String& function, const Arguments& args) = 0;
 
 };

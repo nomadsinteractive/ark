@@ -300,9 +300,12 @@ public:
         }
 
         SizeType findOptimizedPosition(const Fragment& fragment, SizeType size, SizeType alignment) const {
-            if(size * 8 >= fragment._size)
-                return align(fragment._offset, alignment) - fragment._offset;
-            return align(fragment._offset + size * 3, alignment) - fragment._offset;
+            if(size * 8 < fragment._size) {
+                SizeType p = align(fragment._offset + size * 3, alignment) - fragment._offset;
+                if(fragment._size - p >= size)
+                    return p;
+            }
+            return align(fragment._offset, alignment) - fragment._offset;
         }
 
         sp<Fragment> addFragment(FragmentState state, SizeType offset, SizeType size) {

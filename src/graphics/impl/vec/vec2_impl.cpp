@@ -66,13 +66,15 @@ void Vec2Impl::fix()
 
 Vec2Impl::VV2_DICTIONARY::VV2_DICTIONARY(BeanFactory& factory, const String& str)
 {
+    DTRACE(str == "1 - 0.2 * @duration");
     BeanUtils::split<Numeric, Numeric>(factory, str, _x, _y);
 }
 
 sp<Vec2> Vec2Impl::VV2_DICTIONARY::build(const sp<Scope>& args)
 {
     const sp<Numeric> x = _x->build(args);
-    return sp<Vec2Impl>::make(_x->build(args), _y ? _y->build(args) : x);
+    const sp<Numeric> y = _y->build(args);
+    return sp<Vec2Impl>::make(x, y ? y : x);
 }
 
 Vec2Impl::VV2_BUILDER::VV2_BUILDER(BeanFactory& factory, const document& doc)

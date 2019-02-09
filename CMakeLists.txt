@@ -29,6 +29,7 @@ ark_compile_definition_option(ARK_USE_STB_IMAGE "Use stb image decoding library"
 ark_compile_definition_option(ARK_USE_OPEN_GL "Use OpenGL rendering library" ON)
 ark_compile_definition_option(ARK_USE_VULKAN  "Use Vulkan rendering library" OFF)
 
+set(ARK_SYSTEM_NAME ${SYSTEM} CACHE STRING "Target system name of ARK was built for")
 set(ARK_RUNTIME_SHARED_LIBRARY ${PROJECT_NAME})
 set(ARK_RUNTIME_STATIC_LIBRARY ${PROJECT_NAME}_static)
 set(TESTCASES_EXECUTABLE ${PROJECT_NAME}-testcases)
@@ -42,6 +43,7 @@ list(APPEND LOCAL_INCLUDE_DIRS .)
 list(APPEND LOCAL_INCLUDE_DIRS src)
 
 message("Building for ${SYSTEM} - ${CMAKE_BUILD_TYPE}; build-share-libs: ${BUILD_SHARED_LIBS}\nCompiler: ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
+ark_compile_definitions(-DARK_SYSTEM_NAME="${ARK_SYSTEM_NAME}")
 
 ark_add_debug_flag()
 
@@ -54,6 +56,7 @@ aux_source_directory(src/core/concurrent LOCAL_SRC_LIST)
 aux_source_directory(src/core/dom LOCAL_SRC_LIST)
 aux_source_directory(src/core/epi LOCAL_SRC_LIST)
 aux_source_directory(src/core/impl/asset LOCAL_SRC_LIST)
+aux_source_directory(src/core/impl/asset_bundle LOCAL_SRC_LIST)
 aux_source_directory(src/core/impl/bean_factory LOCAL_SRC_LIST)
 aux_source_directory(src/core/impl/builder LOCAL_SRC_LIST)
 aux_source_directory(src/core/impl/dictionary LOCAL_SRC_LIST)

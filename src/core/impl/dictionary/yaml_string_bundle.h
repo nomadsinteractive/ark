@@ -13,7 +13,7 @@ namespace ark {
 
 class YAMLStringBundle : public StringBundle {
 public:
-    YAMLStringBundle(const sp<Asset>& resource);
+    YAMLStringBundle(const sp<AssetBundle>& resource);
 
     virtual sp<String> get(const String& name);
 
@@ -32,7 +32,7 @@ private:
     void loadBundle(const String& name);
 
 private:
-    sp<Asset> _resource;
+    sp<AssetBundle> _resource;
     std::map<String, std::map<String, sp<String>>> _bundle;
 };
 

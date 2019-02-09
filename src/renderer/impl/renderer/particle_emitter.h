@@ -76,7 +76,7 @@ private:
     class Particale {
     public:
         Particale(const sp<Stub>& stub, const document& doc, BeanFactory& args);
-        Particale(const Particale& other);
+        Particale(const Particale& other) = default;
 
         uint64_t show(float x, float y, const sp<Clock>& clock, uint64_t tick, const sp<RenderLayer>& renderLayer);
 
@@ -90,7 +90,7 @@ private:
         sp<Builder<Vec>> _position;
         sp<Builder<Size>> _size;
         SafePtr<Builder<Transform>> _transform;
-        SafePtr<Builder<Varyings>> _filter;
+        SafePtr<Builder<Varyings>> _varyings;
         sp<Builder<Lifecycle>> _lifecycle;
 
         sp<Iteration> _iteration;

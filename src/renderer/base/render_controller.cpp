@@ -40,24 +40,8 @@ private:
 
 }
 
-RenderController::Ticker::Ticker(const sp<Variable<uint64_t>>& ticker)
-    : _ticker(ticker), _tick(0)
-{
-}
-
-uint64_t RenderController::Ticker::val()
-{
-    DTHREAD_CHECK(THREAD_ID_CORE);
-    return _tick;
-}
-
-void RenderController::Ticker::update()
-{
-    _tick = _ticker->val();
-}
-
-RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader, const sp<Variable<uint64_t>>& ticker)
-    : _render_engine(renderEngine), _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _ticker(sp<Ticker>::make(ticker))
+RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
+    : _render_engine(renderEngine), _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader)
 {
     _named_buffers[NamedBuffer::NAME_QUADS] = NamedBuffer::Quads::make(*this);
     _named_buffers[NamedBuffer::NAME_NINE_PATCH] = NamedBuffer::NinePatch::make(*this);
@@ -199,11 +183,6 @@ Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, cons
     return buffer;
 }
 
-sp<Variable<uint64_t>> RenderController::ticker() const
-{
-    return _ticker;
-}
-
 void RenderController::addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired)
 {
     if(expired)
@@ -227,7 +206,6 @@ void RenderController::preUpdate()
     }
 #endif
     _defered_instances.clear();
-    _ticker->update();
     for(const sp<Runnable>& runnable : _on_pre_update_request)
         runnable->run();
 }

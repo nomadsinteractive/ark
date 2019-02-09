@@ -10,12 +10,12 @@ namespace ark {
 
 class XMLDirectory : public Dictionary<document> {
 public:
-    XMLDirectory(const sp<Asset>& resource);
+    XMLDirectory(const sp<AssetBundle>& resource);
 
     virtual document get(const String& name);
 
 private:
-    sp<Asset> _resource;
+    sp<AssetBundle> _resource;
 };
 
 }

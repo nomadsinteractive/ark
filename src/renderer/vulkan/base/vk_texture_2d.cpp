@@ -44,8 +44,6 @@ Resource::RecycleFunc VKTexture2D::recycle()
     VkImage image = _image;
     VkDeviceMemory memory = _memory;
 
-    _notifier.notify();
-
     _image = VK_NULL_HANDLE;
     _memory = VK_NULL_HANDLE;
 
@@ -60,11 +58,6 @@ Resource::RecycleFunc VKTexture2D::recycle()
 const VkDescriptorImageInfo& VKTexture2D::vkDescriptor() const
 {
     return _descriptor;
-}
-
-Notifier& VKTexture2D::notifier()
-{
-    return _notifier;
 }
 
 void VKTexture2D::doUpload()

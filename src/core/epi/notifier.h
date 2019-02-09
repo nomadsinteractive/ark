@@ -11,9 +11,9 @@ public:
     Notifier();
 
 //  [[script::bindings::auto]]
-    void notify();
+    void notify() const;
 //  [[script::bindings::auto]]
-    sp<Observer> createObserver(bool dirty = true, const sp<Runnable>& handler = nullptr, bool oneshot = false);
+    sp<Observer> createObserver(bool dirty = true, const sp<Runnable>& handler = nullptr, bool oneshot = false) const;
 
 private:
     sp<WeakRefList<Observer>> _observers;

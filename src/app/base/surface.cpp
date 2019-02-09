@@ -19,26 +19,6 @@
 
 namespace ark {
 
-namespace {
-
-class SurfaceControllerUpdateTask : public Runnable {
-public:
-    SurfaceControllerUpdateTask(const sp<RenderController>& renderController, const sp<SurfaceUpdater>& surfaceUpdater)
-        : _render_controller(renderController), _surface_updater(surfaceUpdater) {
-    }
-
-    virtual void run() override {
-        _render_controller->preUpdate();
-        _surface_updater->requestUpdate();
-    }
-
-private:
-    sp<RenderController> _render_controller;
-    sp<SurfaceUpdater> _surface_updater;
-};
-
-}
-
 Surface::Surface(const sp<RenderView>& renderView, const sp<RenderController>& renderController)
     : _render_view(renderView), _render_controller(renderController), _surface_controller(sp<SurfaceController>::make())
 {
@@ -69,10 +49,14 @@ void Surface::onRenderFrame(const Color& backgroundColor)
     _surface_controller->onRenderFrame(backgroundColor, _render_view);
 }
 
+sp<SurfaceUpdater> Surface::makeUpdater(const sp<ApplicationContext>& applicationContext) const
+{
+    return sp<SurfaceUpdater>::make(applicationContext->executor(), _surface_controller, _render_controller);
+}
+
 void Surface::scheduleUpdate(const sp<ApplicationContext>& applicationContext, uint32_t fps)
 {
-    const sp<SurfaceUpdater> surfaceUpdater = sp<SurfaceUpdater>::make(applicationContext->executor(), _surface_controller);
-    applicationContext->schedule(sp<SurfaceControllerUpdateTask>::make(_render_controller, surfaceUpdater), 1.0f / fps);
+    applicationContext->schedule(makeUpdater(applicationContext), 1.0f / fps);
 }
 
 }

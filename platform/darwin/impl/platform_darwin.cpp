@@ -10,8 +10,8 @@
 #include <glbinding/Binding.h>
 
 #include "core/inf/variable.h"
-#include "core/impl/asset/directory_asset.h"
-#include "core/impl/asset/asset_with_fallback.h"
+#include "core/impl/asset_bundle/asset_bundle_directory.h"
+#include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
 #include "core/impl/dictionary/xml_directory.h"
 #include "core/util/strings.h"
 
@@ -26,12 +26,12 @@ void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* cont
     fflush(nullptr);
 }
 
-sp<Asset> Platform::getAsset(const String& path, const String& appPath)
+sp<AssetBundle> Platform::getAsset(const String& path, const String& appPath)
 {
     if(isDirectory(path))
-        return sp<AssetWithFallback>::make(sp<DirectoryAsset>::make(appPath), sp<DirectoryAsset>::make(path));
+        return sp<AssetBundleWithFallback>::make(sp<AssetBundleDirectory>::make(appPath), sp<AssetBundleDirectory>::make(path));
     if(isDirectory(appPath))
-        return sp<DirectoryAsset>::make(appPath);
+        return sp<AssetBundleDirectory>::make(appPath);
     return nullptr;
 }
 
@@ -55,6 +55,18 @@ String Platform::getExecutablePath()
     int r = proc_pidpath (pid, pathbuf, sizeof(pathbuf));
     DCHECK(r > 0, "proc_pidpath() failed. PID %d: %s", pid, strerror(errno));
     return pathbuf;
+}
+
+String Platform::getRealPath(const String& path)
+{
+    if(Platform::isFile(path) || Platform::isDirectory(path))
+    {
+        char buf[PATH_MAX] = {0};
+        char* rp = realpath(path.c_str(), buf);
+        DCHECK(rp, "realpath failed for \"%s\", errno: %d", path.c_str(), errno);
+        return rp;
+    }
+    return path;
 }
 
 String Platform::getUserStoragePath(const String& path)

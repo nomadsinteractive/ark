@@ -13,7 +13,7 @@ namespace ark {
 
 class ARK_API BitmapBundle : public Dictionary<bitmap> {
 public:
-    BitmapBundle(const sp<Asset>& asset, const sp<BitmapLoader>& defaultLoader);
+    BitmapBundle(const sp<AssetBundle>& asset, const sp<BitmapLoader>& defaultLoader);
 
     virtual bitmap get(const String& name) override;
 
@@ -21,7 +21,7 @@ public:
     const sp<BitmapLoader>& getLoader(const String& ext) const;
 
 private:
-    sp<Asset> _asset;
+    sp<AssetBundle> _asset;
 
     std::map<String, sp<BitmapLoader>> _loaders;
     sp<BitmapLoader> _default_loader;

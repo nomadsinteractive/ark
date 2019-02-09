@@ -13,7 +13,7 @@
 
 namespace ark {
 
-ApplicationResource::ApplicationResource(const sp<Dictionary<document>>& documents, const sp<Asset>& images)
+ApplicationResource::ApplicationResource(const sp<Dictionary<document>>& documents, const sp<AssetBundle>& images)
     : _images(images), _documents(documents), _bitmap_bundle(createImageLoader(false)), _bitmap_bounds_loader(createImageLoader(true)), _recycler(sp<Recycler>::make())
 {
 }

@@ -30,7 +30,6 @@ private:
     SDL_cond* _cond;
     SDL_mutex* _lock;
 
-    sp<MessageLoopDefault> _message_loop_rendering;
     sp<ApplicationController> _controller;
 
     bool _show_cursor;

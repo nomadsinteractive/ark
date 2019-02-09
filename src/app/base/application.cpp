@@ -128,9 +128,7 @@ void Application::onDestroy()
     _application_context->resume();
     _application_context->postTask([applicationDelegate, applicationContext] () {
         applicationDelegate->onDestroy();
-        applicationContext->dispose();
     });
-    _application_context->waitForFinish();
 }
 
 void Application::onSurfaceCreated()

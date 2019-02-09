@@ -5,8 +5,8 @@
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/types/null.h"
 #include "core/util/documents.h"
+#include "core/util/strings.h"
 
 #include "core/forwarding.h"
 
@@ -26,8 +26,7 @@ public:
     template<typename... Args> static void split(BeanFactory& beanFactory, const String& str, sp<Builder<Args>>&... args) {
         const String value = Strings::unwrap(str.strip(), '(', ')');
         DCHECK(value, "Empty value being built");
-        const std::vector<String> splited = value.split(',');
-        std::list<String> elems(splited.begin(), splited.end());
+        std::list<String> elems = Strings::split<std::list<String>>(value, ',');
         doSplit<Args...>(beanFactory, elems, args...);
     }
 

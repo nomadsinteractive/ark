@@ -27,6 +27,8 @@ public:
     void terminate();
     void join();
 
+//    void pollOnce();
+
     const Thread& thread() const;
 
 private:
@@ -48,7 +50,7 @@ private:
 
         virtual void run() override;
 
-    private:
+//    private:
         Thread _thread;
         sp<MessageLoopDefault> _message_loop;
         sp<Variable<uint64_t>> _ticker;

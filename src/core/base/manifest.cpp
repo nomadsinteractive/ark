@@ -1,6 +1,7 @@
 #include "core/base/manifest.h"
 
 #include "core/inf/asset.h"
+#include "core/inf/asset_bundle.h"
 #include "core/util/documents.h"
 
 #include "graphics/base/size.h"
@@ -22,12 +23,12 @@ void Manifest::load(const String& src)
 {
     Strings::rcut(Platform::getExecutablePath(), _application._dir, _application._filename, Platform::dirSeparator());
 
-    const sp<ark::Asset> appAsset = Platform::getAsset(".", _application._dir);
+    const sp<ark::AssetBundle> appAsset = Platform::getAsset(".", _application._dir);
     DASSERT(appAsset);
-    const sp<Readable> readable = appAsset->get(src);
-    DCHECK(readable, "Cannot load application manifest \"%s\"", src.c_str());
+    const sp<ark::Asset> asset = appAsset->get(src);
+    DCHECK(asset, "Cannot load application manifest \"%s\"", src.c_str());
 
-    _content = readable ? Documents::loadFromReadable(readable) : document::make("");
+    _content = asset ? Documents::loadFromReadable(asset->open()) : document::make("");
     _asset_dir = Documents::getAttribute(_content, "asset-dir");
     _assets = Documents::getKeyValuePairs<Table<String, String>>(_content->children("asset"), "prefix", Constants::Attributes::SRC);
 

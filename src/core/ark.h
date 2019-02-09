@@ -67,6 +67,7 @@ public:
 
     const sp<Manifest>& manifest() const;
 
+    sp<AssetBundle> getAssetBundle(const String& path) const;
     sp<Asset> getAsset(const String& path) const;
     sp<Readable> openAsset(const String& path) const;
 

@@ -22,7 +22,7 @@ public:
     PythonScript(const String& name, const document& libraries);
     ~PythonScript();
 
-    virtual void run(const String& script, const sp<Scope>& vars) override;
+    virtual void run(const sp<Asset>& script, const sp<Scope>& vars) override;
     virtual Box call(const String& function, const Arguments& args) override;
 
     PyObject* arkModule();

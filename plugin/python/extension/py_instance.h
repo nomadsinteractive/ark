@@ -21,7 +21,7 @@ public:
     static sp<PyInstance> adopt(PyObject* object);
 
     operator PyObject*();
-    operator bool();
+    explicit operator bool();
 
     PyObject* object();
     PyObject* type();

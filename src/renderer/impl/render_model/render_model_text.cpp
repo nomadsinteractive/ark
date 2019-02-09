@@ -42,8 +42,6 @@ bool GLModelText::Stub::prepareOne(int32_t c)
         int32_t width = metrics.width;
         int32_t height = metrics.height;
         DCHECK(width > 0 && height > 0, "Error loading character %d: width = %d, height = %d", c, width, height);
-        if(_max_glyph_height < metrics.bitmap_height)
-            _max_glyph_height = metrics.bitmap_height;
         if(_flowx + width > _atlas->width())
         {
             _flowy += (_max_glyph_height + 1);
@@ -52,6 +50,8 @@ bool GLModelText::Stub::prepareOne(int32_t c)
         if(_flowy + metrics.bitmap_height > _atlas->height())
             return false;
 
+        if(_max_glyph_height < metrics.bitmap_height)
+            _max_glyph_height = metrics.bitmap_height;
         _atlas->add(c, _flowx, _flowy, _flowx + metrics.bitmap_width, _flowy + metrics.bitmap_height + 1);
         _alphabet->draw(c, _font_glyph, _flowx, _flowy);
         _flowx += metrics.bitmap_width;
@@ -115,7 +115,8 @@ GLModelText::GLModelText(const sp<RenderController>& renderController, const sp<
 sp<ShaderBindings> GLModelText::makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
 {
     const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_TRIANGLES, renderController, pipelineLayout);
-    bindings->bindSampler(sp<Texture>::make(_stub->_size, _stub, Texture::TYPE_2D));
+    _shader_texture = sp<Texture>::make(_stub->_size, _stub, Texture::TYPE_2D);
+    bindings->bindSampler(_shader_texture);
     return bindings;
 }
 
@@ -130,7 +131,7 @@ void GLModelText::postSnapshot(RenderController& renderController, Layer::Snapsh
             LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _stub->_characters.size());
             _stub->reset(width, height);
         }
-        _stub->_render_controller->upload(_stub->_texture, nullptr, RenderController::US_RELOAD);
+        _stub->_render_controller->upload(_shader_texture, nullptr, RenderController::US_RELOAD);
     }
     _stub->_delegate->postSnapshot(renderController, snapshot);
 }

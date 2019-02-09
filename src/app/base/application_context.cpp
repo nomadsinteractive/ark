@@ -7,7 +7,7 @@
 #include "core/base/thread_pool_executor.h"
 #include "core/base/plugin_manager.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
-#include "core/inf/variable.h"
+#include "core/impl/message_loop/message_loop_default.h"
 #include "core/inf/runnable.h"
 #include "core/types/global.h"
 
@@ -47,26 +47,19 @@ private:
 }
 
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources, const sp<RenderEngine>& renderEngine)
-    : _steady_clock(Platform::getSteadyClock()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->recycler(), applicationResources->bitmapBundle(), applicationResources->bitmapBoundsLoader(), _steady_clock)),
-      _clock(sp<Clock>::make(_render_controller->ticker())), _message_loop_application(sp<MessageLoopThread>::make(_steady_clock)),
-      _executor(sp<ThreadPoolExecutor>::make(_message_loop_application)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK)
+    : _ticker(sp<Ticker>::make()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->recycler(), applicationResources->bitmapBundle(), applicationResources->bitmapBoundsLoader())),
+      _clock(sp<Clock>::make(_ticker)), _message_loop_application(sp<MessageLoopDefault>::make(_ticker)),
+      _executor(sp<ThreadPoolExecutor>::make(_message_loop_application)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()),
+      _background_color(Color::BLACK), _paused(false)
 {
     Ark& ark = Ark::instance();
 
     for(int32_t i = 0; i < ark.argc(); i++)
         _argv.push_back(ark.argv()[i]);
-
-    initMessageLoop();
 }
 
 ApplicationContext::~ApplicationContext()
 {
-    _message_loop_application->terminate();
-}
-
-void ApplicationContext::initMessageLoop()
-{
-    _message_loop_application->start();
 }
 
 void ApplicationContext::initResourceLoader(const document& manifest)
@@ -213,24 +206,38 @@ void ApplicationContext::setBackgroundColor(const Color& backgroundColor)
 
 void ApplicationContext::pause()
 {
-    if(_message_loop_application->thread().isRunning())
-        _message_loop_application->pause();
+    _paused = true;
 }
 
 void ApplicationContext::resume()
 {
-    if(_message_loop_application->thread().isPaused())
-        _message_loop_application->resume();
+    _paused = false;
 }
 
-void ApplicationContext::dispose()
+void ApplicationContext::update()
 {
-    _message_loop_application->terminate();
+    _ticker->update();
+    _message_loop_application->pollOnce();
 }
 
-void ApplicationContext::waitForFinish()
+bool ApplicationContext::isPaused() const
 {
-    _message_loop_application->join();
+    return _paused;
+}
+
+ApplicationContext::Ticker::Ticker()
+    : _steady_clock(Platform::getSteadyClock()), _val(_steady_clock->val())
+{
+}
+
+void ApplicationContext::Ticker::update()
+{
+    _val = _steady_clock->val();
+}
+
+uint64_t ApplicationContext::Ticker::val()
+{
+    return _val;
 }
 
 }

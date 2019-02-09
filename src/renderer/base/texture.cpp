@@ -30,6 +30,7 @@ Texture::~Texture()
 void Texture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
 {
     _resource->val()->upload(graphicsContext, uploader);
+    _notifier.notify();
 }
 
 Resource::RecycleFunc Texture::recycle()
@@ -70,6 +71,11 @@ const sp<Size>& Texture::size() const
 sp<Resource> Texture::resource() const
 {
     return _resource->val();
+}
+
+const Notifier& Texture::notifier() const
+{
+    return _notifier;
 }
 
 template<> ARK_API Texture::Format Conversions::to<String, Texture::Format>(const String& str)

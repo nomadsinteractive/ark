@@ -1,26 +1,28 @@
 #include "python/extension/asset_resource.h"
 
 #include "core/inf/asset.h"
+#include "core/inf/asset_bundle.h"
 #include "core/util/strings.h"
 
 namespace ark {
 namespace plugin {
 namespace python {
 
-AssetResource::AssetResource(const sp<Asset>& resource)
+AssetResource::AssetResource(const sp<AssetBundle>& resource)
     : _asset(resource)
 {
 }
 
 sp<String> AssetResource::getString(const String& filepath)
 {
-    const sp<Readable> readable = _asset->get(filepath);
-    return readable ? sp<String>::make(Strings::loadFromReadable(readable)) : nullptr;
+    const sp<Asset> asset = _asset->get(filepath);
+    return asset ? sp<String>::make(Strings::loadFromReadable(asset->open())) : nullptr;
 }
 
 String AssetResource::getRealPath(const String& filepath)
 {
-    return _asset->getRealPath(filepath);
+    const sp<Asset> asset = _asset->get(filepath);
+    return asset ? asset->location() : filepath;
 }
 
 }

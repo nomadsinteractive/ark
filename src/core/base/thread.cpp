@@ -161,8 +161,6 @@ void Thread::Stub::setEntry(const sp<Runnable>& entry)
         FATAL("Cannot set entry after thread being started");
 }
 
-
-
 void Thread::Stub::notify()
 {
     _condition_variable.notify_one();

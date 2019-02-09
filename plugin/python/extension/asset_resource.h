@@ -10,7 +10,7 @@ namespace python {
 
 class AssetResource {
 public:
-    AssetResource(const sp<Asset>& resource);
+    AssetResource(const sp<AssetBundle>& resource);
 
 //  [[script::bindings::auto]]
     sp<String> getString(const String& filepath);
@@ -18,7 +18,7 @@ public:
     String getRealPath(const String& filepath);
 
 private:
-    sp<Asset> _asset;
+    sp<AssetBundle> _asset;
 };
 
 }

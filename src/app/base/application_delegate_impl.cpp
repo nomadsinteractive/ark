@@ -90,9 +90,8 @@ ApplicationDelegateImpl::ScriptTag::ScriptTag(ResourceLoader& resourceLoader, co
     const String src = Documents::getAttribute(manifest, Constants::Attributes::SRC);
     if(src)
     {
-        const sp<Readable> readable = Ark::instance().openAsset(src);
-        DCHECK(readable, "Cannot open script \"%s\"", src.c_str());
-        _source = Strings::loadFromReadable(readable);
+        _source = Ark::instance().getAsset(src);
+        DCHECK(_source, "Cannot open script \"%s\"", src.c_str());
     }
 }
 

@@ -5,6 +5,7 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/asset.h"
+#include "core/inf/asset_bundle.h"
 #include "core/inf/readable.h"
 #include "core/util/documents.h"
 #include "core/types/null.h"
@@ -20,7 +21,7 @@ static int _yaml_read_handler(void* data, unsigned char* buffer, size_t size, si
     return 1;
 }
 
-YAMLStringBundle::YAMLStringBundle(const sp<Asset>& resource)
+YAMLStringBundle::YAMLStringBundle(const sp<AssetBundle>& resource)
     : _resource(resource)
 {
     DASSERT(_resource);
@@ -43,12 +44,13 @@ sp<String> YAMLStringBundle::get(const String& name)
 
 void YAMLStringBundle::loadBundle(const String& name)
 {
-    const sp<Readable> readable = _resource->get(name + ".yaml");
-    DCHECK(readable, "Unable to load %s.yaml", name.c_str());
+    const sp<Asset> asset = _resource->get(name + ".yaml");
+    DCHECK(asset, "Unable to load %s.yaml", name.c_str());
     yaml_parser_t parser;
     if(!yaml_parser_initialize(&parser))
         FATAL("Failed to initialize parser");
 
+    const sp<Readable> readable = asset->open();
     yaml_parser_set_input(&parser, _yaml_read_handler, readable.get());
     yaml_parser_set_encoding(&parser, YAML_UTF8_ENCODING);
 
@@ -107,7 +109,7 @@ YAMLStringBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifes
 
 sp<StringBundle> YAMLStringBundle::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<YAMLStringBundle>::make(Ark::instance().getAsset(_src->build(args)));
+    return sp<YAMLStringBundle>::make(Ark::instance().getAssetBundle(_src->build(args)));
 }
 
 }

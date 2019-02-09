@@ -23,6 +23,7 @@ public:
     void onSurfaceChanged(uint32_t width, uint32_t height);
     void onRenderFrame(const Color& backgroundColor);
 
+    sp<SurfaceUpdater> makeUpdater(const sp<ApplicationContext>& applicationContext) const;
     void scheduleUpdate(const sp<ApplicationContext>& applicationContext, uint32_t fps);
 
 private:

@@ -31,6 +31,7 @@ template <typename T> using array = sp<Array<T>>;
 
 class Ark;
 class Asset;
+class AssetBundle;
 class BeanFactory;
 class Box;
 class ByType;

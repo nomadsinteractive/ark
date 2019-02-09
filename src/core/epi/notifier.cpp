@@ -9,13 +9,13 @@ Notifier::Notifier()
 {
 }
 
-void Notifier::notify()
+void Notifier::notify() const
 {
     for(const sp<Observer>& i : *_observers)
         i->update();
 }
 
-sp<Observer> Notifier::createObserver(bool dirty, const sp<Runnable>& handler, bool oneshot)
+sp<Observer> Notifier::createObserver(bool dirty, const sp<Runnable>& handler, bool oneshot) const
 {
     const sp<Observer> observer = sp<Observer>::make(dirty, handler, oneshot);
     _observers->push_back(observer);

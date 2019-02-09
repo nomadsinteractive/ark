@@ -13,7 +13,7 @@ namespace ark {
 
 class ARK_API ApplicationResource {
 public:
-    ApplicationResource(const sp<Dictionary<document>>& documents, const sp<Asset>& images);
+    ApplicationResource(const sp<Dictionary<document>>& documents, const sp<AssetBundle>& images);
 
     const sp<Recycler>& recycler() const;
 
@@ -27,8 +27,8 @@ private:
     sp<BitmapBundle> createImageLoader(bool justDecodeBounds) const;
 
 private:
-    sp<Asset> _images;
-    sp<Asset> _fonts;
+    sp<AssetBundle> _images;
+    sp<AssetBundle> _fonts;
     sp<Dictionary<document>> _documents;
 
     sp<BitmapBundle> _bitmap_bundle;

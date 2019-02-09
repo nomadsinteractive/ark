@@ -3,6 +3,7 @@
 #include "core/base/plugin_manager.h"
 #include "core/base/scope.h"
 #include "core/base/thread.h"
+#include "core/inf/asset.h"
 #include "core/types/null.h"
 #include "core/types/global.h"
 #include "core/util/log.h"
@@ -99,7 +100,7 @@ PyObject* PythonScript::argumentsToTuple(const Script::Arguments& args)
     return tuple;
 }
 
-void PythonScript::run(const String& script, const sp<Scope>& vars)
+void PythonScript::run(const sp<Asset>& script, const sp<Scope>& vars)
 {
     DCHECK_THREAD_FLAG();
     PyObject* m = PyImport_AddModule("__main__");
@@ -107,13 +108,13 @@ void PythonScript::run(const String& script, const sp<Scope>& vars)
 
     PyObject* globals = PyModule_GetDict(m);
     addScopeToDict(globals, vars);
-    PyObject* v = PyRun_StringFlags(script.c_str(), Py_file_input, globals, globals, nullptr);
-    if (v == NULL)
+    PyInstance co = PyInstance::steal(Py_CompileStringExFlags(Strings::loadFromReadable(script->open()).c_str(), script->location().c_str(), Py_file_input, nullptr, -1));
+    PyInstance v = PyInstance::steal(PyEval_EvalCode(co, globals, globals));
+    if (v.object() == nullptr)
     {
         PythonInterpreter::instance()->logErr();
         return;
     }
-    Py_DECREF(v);
 }
 
 Box PythonScript::call(const String& function, const Script::Arguments& args)
