@@ -25,6 +25,7 @@ set(LIBPYTHON_SOURCES
     ${SRC_DIR}/Objects/bytesobject.c
     ${SRC_DIR}/Objects/bytearrayobject.c
     ${SRC_DIR}/Objects/bytes_methods.c
+    ${SRC_DIR}/Objects/call.c
     ${SRC_DIR}/Objects/capsule.c
     ${SRC_DIR}/Objects/cellobject.c
     ${SRC_DIR}/Objects/classobject.c
@@ -76,10 +77,14 @@ set(LIBPYTHON_SOURCES
     ${SRC_DIR}/Parser/tokenizer.c
     ${SRC_DIR}/Python/asdl.c
     ${SRC_DIR}/Python/ast.c
+    ${SRC_DIR}/Python/ast_opt.c
+    ${SRC_DIR}/Python/ast_unparse.c
     ${SRC_DIR}/Python/bltinmodule.c
+    ${SRC_DIR}/Python/bootstrap_hash.c
     ${SRC_DIR}/Python/ceval.c
     ${SRC_DIR}/Python/codecs.c
     ${SRC_DIR}/Python/compile.c
+    ${SRC_DIR}/Python/context.c
     ${SRC_DIR}/Python/dtoa.c
     ${SRC_DIR}/Python/errors.c
 #    ${SRC_DIR}/Python/formatter_string.c
@@ -94,12 +99,14 @@ set(LIBPYTHON_SOURCES
     ${SRC_DIR}/Python/getplatform.c
     ${SRC_DIR}/Python/getversion.c
     ${SRC_DIR}/Python/graminit.c
+    ${SRC_DIR}/Python/hamt.c
     ${SRC_DIR}/Python/import.c
     ${SRC_DIR}/Python/importdl.c
     ${SRC_DIR}/Python/marshal.c
     ${SRC_DIR}/Python/modsupport.c
     ${SRC_DIR}/Python/mysnprintf.c
     ${SRC_DIR}/Python/mystrtoul.c
+    ${SRC_DIR}/Python/pathconfig.c
     ${SRC_DIR}/Python/peephole.c
     ${SRC_DIR}/Python/pyarena.c
     ${SRC_DIR}/Python/pyctype.c
@@ -114,7 +121,7 @@ set(LIBPYTHON_SOURCES
     ${SRC_DIR}/Python/pytime.c
     ${SRC_DIR}/Python/Python-ast.c
     ${SRC_DIR}/Python/pythonrun.c
-    ${SRC_DIR}/Python/random.c
+#    ${SRC_DIR}/Python/random.c
     ${SRC_DIR}/Python/structmember.c
     ${SRC_DIR}/Python/symtable.c
     ${SRC_DIR}/Python/sysmodule.c

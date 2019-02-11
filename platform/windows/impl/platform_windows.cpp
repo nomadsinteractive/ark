@@ -8,8 +8,8 @@
 #include <glbinding/Binding.h>
 
 #include "core/inf/variable.h"
-#include "core/impl/asset/directory_asset.h"
-#include "core/impl/asset/asset_with_fallback.h"
+#include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
+#include "core/impl/asset_bundle/asset_bundle_directory.h"
 #include "core/util/strings.h"
 
 #include "graphics/base/font.h"
@@ -25,12 +25,12 @@ void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* cont
     fflush(nullptr);
 }
 
-sp<Asset> Platform::getAsset(const String& path, const String& appPath)
+sp<AssetBundle> Platform::getAsset(const String& path, const String& appPath)
 {
     if(isDirectory(path))
-        return sp<AssetWithFallback>::make(sp<DirectoryAsset>::make(path), sp<DirectoryAsset>::make(appPath));
+        return sp<AssetBundleWithFallback>::make(sp<AssetBundleDirectory>::make(appPath), sp<AssetBundleDirectory>::make(path));
     if(isDirectory(appPath))
-        return sp<DirectoryAsset>::make(appPath);
+        return sp<AssetBundleDirectory>::make(appPath);
     return nullptr;
 }
 

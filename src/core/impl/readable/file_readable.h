@@ -1,6 +1,7 @@
 #ifndef ARK_CORE_IMPL_READABLE_FILE_READABLE_H_
 #define ARK_CORE_IMPL_READABLE_FILE_READABLE_H_
 
+#include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/inf/builder.h"
 #include "core/inf/readable.h"
@@ -8,7 +9,7 @@
 
 namespace ark {
 
-class FileReadable : public Readable {
+class ARK_API FileReadable : public Readable {
 public:
     FileReadable(const String& filepath, const String& mode);
     FileReadable(FILE* fp);

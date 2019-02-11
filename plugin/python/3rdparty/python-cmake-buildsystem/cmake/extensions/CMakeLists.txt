@@ -87,10 +87,29 @@ if(MSVC)
 else()
     set(_decimal_DEFINITIONS ASM)
 endif()
+
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    list(APPEND _decimal_DEFINITIONS CONFIG_64)
+else()
+    list(APPEND _decimal_DEFINITIONS CONFIG_32)
+endif()
+
 add_python_extension(_decimal SOURCES
     ${_decimal_SOURCES}
-    DEFINITIONS CONFIG_64 ${_decimal_DEFINITIONS}
-    INCLUDEDIRS ${SRC_DIR}/Modules/_decimal/libmpdec)
+    DEFINITIONS ${_decimal_DEFINITIONS}
+    INCLUDEDIRS ${SRC_DIR}/Modules/_decimal)
+
+add_python_extension(_queue SOURCES _queuemodule.c)
+
+add_python_extension(_blake2 SOURCES
+    _blake2/blake2module.c
+    _blake2/blake2b_impl.c
+    _blake2/blake2s_impl.c
+    )
+
+add_python_extension(_sha3 SOURCES
+    _sha3/sha3module.c
+    )
 
 set(datetime_SOURCES _datetimemodule.c)
 if(UNIX)

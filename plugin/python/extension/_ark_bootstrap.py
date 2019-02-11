@@ -5,12 +5,13 @@ Ark module Finder and Loader.
 
 class ArkModuleLoader:
 
-    def __init__(self, source, path, package, name, file_path):
+    def __init__(self, bootstrap, source, path, package, name, filepath):
+        self._bootstrap = bootstrap
         self._source = source
         self._path = path
         self._package = package
         self._name = name
-        self._file_path = file_path
+        self._filepath = filepath
 
     def create_module(self, spec):
         return None
@@ -20,20 +21,22 @@ class ArkModuleLoader:
         if self._path:
             module.__path__ = [self._path]
         if self._source:
-            exec(compile(self._source, self._file_path, 'exec'), module.__dict__)
+            exec(compile(self._source, self._filepath, 'exec'), module.__dict__)
+#            self._bootstrap._call_with_frames_removed(exec, self._source, module.__dict__)
         module.__name__ = self._name
-        module.__file__ = self._file_path
+        module.__file__ = self._filepath
 
 
 class ArkModuleFinder:
 
     ASSET_PROTOCOL = 'asset:///'
 
-    def __init__(self, ark, module_spec_type, ark_asset_loader_type, path):
+    def __init__(self, ark, bootstrap, util, ark_asset_loader_type, path):
         self._ark = ark
+        self._bootstrap = bootstrap
+        self._util = util
         self._ark_asset_loader_type = ark_asset_loader_type
         self._path = path
-        self._module_spec_type = module_spec_type
         self._asset_resource_cache = {}
 
     def find_spec(self, fullname, path, target=None):
@@ -53,8 +56,6 @@ class ArkModuleFinder:
         return None
 
     def find_asset_spec(self, fullname, filepath):
-        file_path = ''
-        path = None
         module_path, module_name = self._parse_resource_path(fullname, filepath)
         asset = self._get_asset_resource(module_path)
         if asset:
@@ -64,35 +65,31 @@ class ArkModuleFinder:
                 source = asset.get_string(module_name + '/__init__.py')
                 if source is not None:
                     path = self.ASSET_PROTOCOL + filepath
-                    file_path = asset.get_real_path(module_name + '/__init__.py')
+                    filepath = asset.get_real_path(module_name + '/__init__.py')
+                    return self._create_module_spec(fullname, source, path, package, filepath)
             else:
                 package = '.'.join(fullname.split('.')[0:-1])
-                file_path = asset.get_real_path(module_name + '.py')
-            if source is not None or path:
-                return self._create_module_spec(fullname, source, path, package, file_path)
+                filepath = asset.get_real_path(module_name + '.py')
+                return self._create_module_spec(fullname, source, None, package, filepath)
         return None
 
     def find_file_spec(self, fullname, filepath):
-        file_path = ''
-        path = None
         source = self._load_file(filepath + '.py')
         package = fullname
         if not source:
             if self._ark.is_directory(filepath):
                 source = self._load_file(self._path_join(filepath, '__init__.py'))
-                path = filepath
-                file_path = filepath
+                if source is not None:
+                    return self._create_module_spec(fullname, source, filepath, package, filepath)
         else:
             package = '.'.join(fullname.split('.')[0:-1])
-            file_path = filepath + '.py'
-        if source or path:
-            return self._create_module_spec(fullname, source, path, package, file_path)
+            return self._create_module_spec(fullname, source, None, package, filepath + '.py')
         return None
 
-    def _create_module_spec(self, fullname, source, path, package, file_path):
-        loader = self._ark_asset_loader_type(source, path, package, fullname, file_path)
-        spec = self._module_spec_type(fullname, loader, origin=file_path)
-        if file_path:
+    def _create_module_spec(self, fullname, source, path, package, filepath):
+        loader = self._ark_asset_loader_type(self._bootstrap, source, path, package, fullname, filepath)
+        spec = self._bootstrap.ModuleSpec(fullname, loader, origin=filepath, is_package=bool(path))
+        if filepath:
             spec.has_location = True
         return spec
 
@@ -119,6 +116,7 @@ class ArkModuleFinder:
 def _install(sys_module, _imp_module):
 
     _bootstrap = _imp_module.init_frozen('_frozen_importlib_org')
+    _util = _imp_module.init_frozen('_frozen_importlib_external')
     _ark = _imp_module.create_builtin(_bootstrap.ModuleSpec('ark', None))
 
     __name__ = _bootstrap.__name__
@@ -126,4 +124,4 @@ def _install(sys_module, _imp_module):
     globals().update(_bootstrap.__dict__)
     _bootstrap._install(sys_module, _imp_module)
     globals().update(_bootstrap.__dict__)
-    sys_module.meta_path.append(ArkModuleFinder(_ark, _bootstrap.ModuleSpec, ArkModuleLoader, _ark.path))
+    sys_module.meta_path.append(ArkModuleFinder(_ark, _bootstrap, _util, ArkModuleLoader, _ark.path))
