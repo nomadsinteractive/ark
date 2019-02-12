@@ -2,6 +2,7 @@
 #define ARK_RENDERER_INF_UPLOADER_H_
 
 #include <functional>
+#include <string.h>
 #include <vector>
 
 #include "core/base/api.h"

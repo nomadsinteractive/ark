@@ -113,16 +113,6 @@ Clock::Clock(const sp<Variable<uint64_t>>& ticker)
 {
 }
 
-Clock::Clock(const Clock& other)
-    : _ticker(other._ticker)
-{
-}
-
-Clock::Clock()
-    : Clock(Platform::getSteadyClock())
-{
-}
-
 uint64_t Clock::val()
 {
     return _ticker->val();
@@ -148,7 +138,7 @@ sp<Numeric> Clock::duration() const
     return sp<ClockDuration>::make(_ticker);
 }
 
-sp<Numeric> Clock::durationUtil(const sp<Numeric>& until) const
+sp<Numeric> Clock::durationUntil(const sp<Numeric>& until) const
 {
     return sp<Min>::make(duration(), until);
 }
@@ -173,11 +163,6 @@ template<> ARK_API Clock::Interval Conversions::to<String, Clock::Interval>(cons
     else if(val.endsWith("s"))
         return static_cast<uint64_t>(Strings::parse<float>(val.substr(0, len - 1)) * 1000000.0f);
     return static_cast<uint64_t>(Strings::parse<float>(val) * 1000000.0f);
-}
-
-sp<Clock> Clock::BUILDER::build(const sp<Scope>& /*args*/)
-{
-    return sp<Clock>::make();
 }
 
 }

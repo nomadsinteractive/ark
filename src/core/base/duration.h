@@ -24,7 +24,7 @@ public:
     private:
         sp<Builder<Clock>> _clock;
         sp<Builder<Numeric>> _delegate;
-        sp<Builder<Numeric>> _util;
+        sp<Builder<Numeric>> _until;
     };
 
 //  [[plugin::builder("duration")]]

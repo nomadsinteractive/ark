@@ -37,7 +37,7 @@ public:
 
     void onSurfaceCreated();
     void onSurfaceChanged(uint32_t width, uint32_t height);
-    void onSurfaceDraw();
+    void onSurfaceUpdate();
     bool onEvent(const Event& event, bool mapViewport);
 
     const char* name() const;
@@ -49,6 +49,7 @@ protected:
     sp<ApplicationDelegate> _application_delegate;
     sp<ApplicationContext> _application_context;
     sp<Surface> _surface;
+    sp<SurfaceUpdater> _surface_updater;
     Viewport _viewport;
     uint32_t _width, _height;
 

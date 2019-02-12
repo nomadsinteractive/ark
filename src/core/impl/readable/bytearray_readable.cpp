@@ -1,6 +1,7 @@
 #include "core/impl/readable/bytearray_readable.h"
 
 #include <algorithm>
+#include <string.h>
 
 #include "core/inf/array.h"
 

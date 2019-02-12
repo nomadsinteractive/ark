@@ -38,9 +38,7 @@ public:
 
 public:
     Clock(const sp<Variable<uint64_t>>& ticker);
-    Clock(const Clock& other);
-//  [[script::bindings::auto]]
-    Clock();
+    Clock(const Clock& other) = default;
 
     virtual uint64_t val() override;
 
@@ -52,21 +50,12 @@ public:
 //  [[script::bindings::auto]]
     sp<Numeric> duration() const;
 //  [[script::bindings::auto]]
-    sp<Numeric> durationUtil(const sp<Numeric>& until) const;
+    sp<Numeric> durationUntil(const sp<Numeric>& until) const;
 
 //  [[script::bindings::auto]]
     void pause() const;
 //  [[script::bindings::auto]]
     void resume() const;
-
-//  [[plugin::builder]]
-    class BUILDER : public Builder<Clock> {
-    public:
-        BUILDER() = default;
-
-        virtual sp<Clock> build(const sp<Scope>& args) override;
-    };
-
 
 private:
     class Ticker;

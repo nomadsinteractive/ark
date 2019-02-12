@@ -31,6 +31,7 @@ public:
 
     virtual int32_t remaining() override {
         DFATAL("Unimplemented");
+        return 0;
     }
 
 private:

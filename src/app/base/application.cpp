@@ -18,6 +18,7 @@
 #include "app/base/application_delegate.h"
 #include "app/base/event.h"
 #include "app/base/surface.h"
+#include "app/base/surface_updater.h"
 
 #include "platform/platform.h"
 
@@ -91,6 +92,7 @@ void Application::onCreate()
     stringTable->addStringBundle("asset", sp<AssetStringBundle>::make());
     const sp<RenderView> renderView = _application_context->renderEngine()->createRenderView(_application_context->renderController(), _viewport);
     _surface = sp<Surface>::make(renderView, _application_context->renderController());
+    _surface_updater = _surface->makeUpdater(_application_context);
     _application_context->postTask([this] () {
         onCreateTask();
     });
@@ -99,7 +101,6 @@ void Application::onCreate()
 void Application::onPause()
 {
     LOGD("");
-    DTHREAD_CHECK(THREAD_ID_MAIN);
     _alive = false;
     _application_context->postTask([this] () {
         onPauseTask();
@@ -110,7 +111,6 @@ void Application::onPause()
 void Application::onResume()
 {
     LOGD("");
-    DTHREAD_CHECK(THREAD_ID_MAIN);
     _application_context->resume();
     _application_context->postTask([this] () {
         onResumeTask();
@@ -121,7 +121,6 @@ void Application::onResume()
 void Application::onDestroy()
 {
     LOGD("");
-    DTHREAD_CHECK(THREAD_ID_MAIN);
     _alive = false;
     const sp<ApplicationDelegate> applicationDelegate = _application_delegate;
     const sp<ApplicationContext> applicationContext = _application_context;
@@ -157,10 +156,14 @@ void Application::onSurfaceChanged(uint32_t width, uint32_t height)
     _height = height;
 }
 
-void Application::onSurfaceDraw()
+void Application::onSurfaceUpdate()
 {
     if(_alive)
+    {
+        _application_context->update();
+        _surface_updater->update();
         _application_delegate->onSurfaceDraw();
+    }
 }
 
 bool Application::onEvent(const Event& event, bool mapViewport)

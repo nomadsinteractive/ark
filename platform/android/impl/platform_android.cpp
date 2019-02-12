@@ -5,7 +5,7 @@
 
 #include <dlfcn.h>
 
-#include "core/impl/asset/directory_asset.h"
+#include "core/impl/asset_bundle/asset_bundle_directory.h"
 #include "core/impl/dictionary/xml_directory.h"
 #include "core/inf/variable.h"
 #include "core/inf/readable.h"
@@ -49,16 +49,16 @@ void Platform::log(Log::LogLevel logLevel, const char* tag, const char* content)
     __android_log_write(logLevel == Log::LOG_LEVEL_WARNING ? ANDROID_LOG_WARN : (logLevel == Log::LOG_LEVEL_DEBUG ? ANDROID_LOG_DEBUG : ANDROID_LOG_ERROR), LOG_TAG, message.c_str());
 }
 
-sp<Asset> Platform::getAsset(const String& path, const String& appPath)
+sp<AssetBundle> Platform::getAsset(const String& path, const String& appPath)
 {
 	if(gAssetManager)
 	{
 		JNIEnv* env = JNIUtil::attachCurrentThread();
 		AAssetManager* am = AAssetManager_fromJava(env, gAssetManager);
 		bool dirExists = directoryExists(am, path);
-		return dirExists ? sp<Asset>::adopt(new AssetResource(am, path)) : nullptr;
+		return dirExists ? sp<AssetBundle>::adopt(new AssetResource(am, path)) : nullptr;
 	}
-    return isDirectory(path) ? sp<Asset>::adopt(new DirectoryAsset(path)) : nullptr;
+    return isDirectory(path) ? sp<AssetBundle>::adopt(new AssetBundleDirectory(path)) : nullptr;
 }
 
 void Platform::glInitialize()
@@ -95,6 +95,11 @@ String Platform::getUserStoragePath(const String& filename)
 		env->DeleteLocalRef(applicationContextClass);
 	}
     return ret;
+}
+
+String Platform::getRealPath(const String& path)
+{
+    return path;
 }
 
 String Platform::getDefaultFontDirectory()

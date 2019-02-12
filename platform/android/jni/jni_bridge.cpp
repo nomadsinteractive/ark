@@ -9,6 +9,7 @@
 
 #include "util/jni_util.h"
 
+#include "app/base/application_context.h"
 #include "app/base/application_delegate_impl.h"
 #include "app/base/event.h"
 
@@ -59,12 +60,13 @@ JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onCreate(JNIEnv* env, jobject 
     const sp<Size>& renderResolution = manifest->rendererResolution();
     Viewport viewport(0.0f, 0.0f, renderResolution->width(), renderResolution->height(), 0.0f, renderResolution->width());
     _application = sp<AndroidApplication>::make(sp<ApplicationDelegateImpl>::make(manifest), _ark->applicationContext(), (int32_t) (renderResolution->width()), (int32_t) (renderResolution->height()), viewport);
-    _application->onCreate();
 }    
 
 JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onSurfaceCreated(JNIEnv* env, jobject obj)
 {
+    _application->onCreate();
     _application->onSurfaceCreated();
+	_ark->applicationContext()->update();
 }
 
 JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onSurfaceChanged(JNIEnv* env, jobject obj, jint width, jint height)
@@ -74,7 +76,7 @@ JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onSurfaceChanged(JNIEnv* env, 
 
 JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onDraw(JNIEnv* env, jobject obj)
 {
-    _application->onSurfaceDraw();
+    _application->onSurfaceUpdate();
 }
 
 JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onPause(JNIEnv* env, jobject obj)

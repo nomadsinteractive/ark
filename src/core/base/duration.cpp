@@ -21,21 +21,21 @@ float Duration::val()
 Duration::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _clock(factory.getBuilder<Clock>(manifest, Constants::Attributes::CLOCK)),
       _delegate(factory.getBuilder<Numeric>(manifest, "t")),
-      _util(factory.getBuilder<Numeric>(manifest, "util"))
+      _until(factory.getBuilder<Numeric>(manifest, "until"))
 {
     DWARN(!(_clock && _delegate), "Clock will be ommited since \"t\" is specified");
 }
 
 sp<Duration> Duration::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<Numeric> util = _util ? _util->build(args) : sp<Numeric>::null();
+    const sp<Numeric> util = _until ? _until->build(args) : sp<Numeric>::null();
     if(_delegate)
     {
         const sp<Numeric> delegate = _delegate->build(args);
         return sp<Duration>::make(util ? sp<Numeric>::adopt(new Min(delegate, util)) : delegate);
     }
     const sp<Clock> clock = _clock ? _clock->build(args) : Ark::instance().clock();
-    return sp<Duration>::make(util ? clock->durationUtil(util) : clock->duration());
+    return sp<Duration>::make(util ? clock->durationUntil(util) : clock->duration());
 }
 
 Duration::NUMERIC_BUILDER::NUMERIC_BUILDER(BeanFactory& factory, const document& manifest)

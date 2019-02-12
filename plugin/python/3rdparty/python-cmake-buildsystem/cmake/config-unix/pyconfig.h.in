@@ -1272,6 +1272,7 @@
 /* Define to empty if the keyword does not work. */
 #cmakedefine volatile
 
+#define _PYTHONFRAMEWORK ""
 
 /* Define the macros needed if on a UnixWare 7.x system. */
 #if defined(__USLC__) && defined(__SCO_VERSION__)

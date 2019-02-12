@@ -84,7 +84,7 @@ void Characters::createContent()
     for(wchar_t c : _text)
         place(boundary, c, flowx, flowy, fontHeight);
     _size->setWidth(flowx);
-    _size->setHeight(abs(flowy) + fontHeight);
+    _size->setHeight(std::abs(flowy) + fontHeight);
 
     _layer_context->clear();
     for(const sp<RenderObject>& i : _characters)

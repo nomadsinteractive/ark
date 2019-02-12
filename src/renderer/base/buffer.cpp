@@ -1,5 +1,7 @@
 #include "renderer/base/buffer.h"
 
+#include <string.h>
+
 #include "core/base/memory_pool.h"
 #include "core/base/object_pool.h"
 

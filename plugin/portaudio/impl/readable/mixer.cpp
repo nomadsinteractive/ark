@@ -1,5 +1,7 @@
 #include "plugin/portaudio/impl/readable/mixer.h"
 
+#include <string.h>
+
 #include "core/base/future.h"
 #include "core/inf/array.h"
 #include "core/util/math.h"

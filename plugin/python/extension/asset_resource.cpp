@@ -16,7 +16,8 @@ AssetResource::AssetResource(const sp<AssetBundle>& resource)
 sp<String> AssetResource::getString(const String& filepath)
 {
     const sp<Asset> asset = _asset->get(filepath);
-    return asset ? sp<String>::make(Strings::loadFromReadable(asset->open())) : nullptr;
+    const sp<Readable> readable = asset ? asset->open() : nullptr;
+    return readable ? sp<String>::make(Strings::loadFromReadable(readable)) : nullptr;
 }
 
 String AssetResource::getRealPath(const String& filepath)

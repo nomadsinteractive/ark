@@ -17,8 +17,6 @@
 
 namespace ark {
 
-static const GLenum GL_READ_ONLY = 0x88B8;
-
 static const GLenum GL_CLAMP_TO_BORDER = 0x812D;
 static const GLenum GL_MIRROR_CLAMP_TO_EDGE = 0x8743;
 static const GLenum GL_R16 = 0x822A;

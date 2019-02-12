@@ -72,7 +72,7 @@ void GLModelSphere::load(ModelBuffer& buf, const RenderObject::Snapshot& snapsho
         buf.writeTexCoordinate(u, v);
 
         const V3 normal(elements[0], elements[1], elements[2]);
-        const V3 tangent = abs(normal.x()) < 0.25f ? normal.cross(V3(1.0f, 0.0f, 0.0f)) : normal.cross(V3(0.0f, 1.0f, 0.0f));
+        const V3 tangent = std::abs(normal.x()) < 0.25f ? normal.cross(V3(1.0f, 0.0f, 0.0f)) : normal.cross(V3(0.0f, 1.0f, 0.0f));
         buf.writeNormal(normal);
         buf.writeTangent(tangent);
         elements += 5;

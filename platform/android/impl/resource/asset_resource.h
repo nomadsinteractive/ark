@@ -3,7 +3,7 @@
 
 #include <android/asset_manager.h>
 
-#include "core/inf/asset.h"
+#include "core/inf/asset_bundle.h"
 #include "core/inf/readable.h"
 #include "core/base/string.h"
 
@@ -15,8 +15,8 @@ class AssetResource : public AssetBundle {
 public:
     AssetResource(AAssetManager* assetManager, const String& dirname);
 
-    virtual sp<Readable> get(const String& name) override;
-    virtual sp<AssetBundle> getAsset(const String& path) override;
+    virtual sp<Asset> get(const String& name) override;
+    virtual sp<AssetBundle> getBundle(const String& path) override;
 
 private:
     AAssetManager* _asset_manager;

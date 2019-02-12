@@ -301,7 +301,6 @@ int SDLApplication::run()
     const sp<SDLPollEventTask> pollevent = sp<SDLPollEventTask>::make(*this);
     _application_context->schedule(pollevent, 0.02f);
 
-    const sp<SurfaceUpdater> updater = _surface->makeUpdater(_application_context);
     while(!gQuit)
     {
         if(_application_context->isPaused())
@@ -310,9 +309,7 @@ int SDLApplication::run()
             pollevent->run();
             continue;
         }
-        _application_context->update();
-        updater->update();
-        onSurfaceDraw();
+        onSurfaceUpdate();
         if(_use_open_gl)
             SDL_GL_SwapWindow(_main_window);
         SDL_Delay(1);

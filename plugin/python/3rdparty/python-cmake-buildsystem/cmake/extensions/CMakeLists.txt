@@ -81,17 +81,20 @@ list(APPEND _decimal_SOURCES
     _decimal/libmpdec/mpdecimal.c
 )
 if(MSVC)
-    set(CMAKE_ASM_MASM_COMPILE_OBJECT ${CMAKE_ASM_MASM_COMPILER} FORCE)
+    enable_language(ASM_MASM)
+    set(CMAKE_ASM_MASM_COMPILE_OBJECT ${CMAKE_ASM_MASM_COMPILER} CACHE INTERNAL "MASM compiler" FORCE)
     set(_decimal_DEFINITIONS MASM)
-    list(APPEND _decimal_SOURCES _decimal/libmpdec/vcdiv64.asm)
 else()
     set(_decimal_DEFINITIONS ASM)
 endif()
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     list(APPEND _decimal_DEFINITIONS CONFIG_64)
+    if(MSVC)
+        list(APPEND _decimal_SOURCES _decimal/libmpdec/vcdiv64.asm)
+    endif()
 else()
-    list(APPEND _decimal_DEFINITIONS CONFIG_32)
+    list(APPEND _decimal_DEFINITIONS CONFIG_32 ANSI)
 endif()
 
 add_python_extension(_decimal SOURCES
