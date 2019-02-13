@@ -2,10 +2,11 @@
 
 #include "core/ark.h"
 #include "core/base/clock.h"
+#include "core/base/manifest.h"
+#include "core/base/plugin_manager.h"
 #include "core/base/string_table.h"
 #include "core/base/thread.h"
 #include "core/base/thread_pool_executor.h"
-#include "core/base/plugin_manager.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/impl/message_loop/message_loop_default.h"
 #include "core/inf/runnable.h"
@@ -48,9 +49,8 @@ private:
 
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources, const sp<RenderEngine>& renderEngine)
     : _ticker(sp<Ticker>::make()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->recycler(), applicationResources->bitmapBundle(), applicationResources->bitmapBoundsLoader())),
-      _clock(sp<Clock>::make(_ticker)), _message_loop_application(sp<MessageLoopDefault>::make(_ticker)),
-      _executor(sp<ThreadPoolExecutor>::make(_message_loop_application)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()),
-      _background_color(Color::BLACK), _paused(false)
+      _clock(sp<Clock>::make(_ticker)), _message_loop(makeMessageLoop()), _executor(sp<ThreadPoolExecutor>::make(_message_loop)), _event_listeners(new EventListenerList()),
+      _string_table(Global<StringTable>()), _background_color(Color::BLACK), _paused(false)
 {
     Ark& ark = Ark::instance();
 
@@ -100,6 +100,17 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const sp<Dictionary<
         beanFactory->extend(_resource_loader->beanFactory());
 
     return sp<ResourceLoader>::make(beanFactory);
+}
+
+sp<MessageLoop> ApplicationContext::makeMessageLoop()
+{
+    const Ark& ark = Ark::instance();
+    if(ark.manifest()->application()._message_loop == Manifest::MESSAGE_LOOP_TYPE_RENDER)
+    {
+        _render_message_loop = sp<MessageLoopDefault>::make(_ticker);
+        return _render_message_loop;
+    }
+    return sp<MessageLoopThread>::make(_ticker);
 }
 
 const sp<ApplicationResource>& ApplicationContext::applicationResource() const
@@ -159,22 +170,22 @@ void ApplicationContext::setDefaultEventListener(const sp<EventListener>& eventL
 
 void ApplicationContext::post(const sp<Runnable>& task, float delay)
 {
-    _message_loop_application->post(task, delay);
+    _message_loop->post(task, delay);
 }
 
 void ApplicationContext::schedule(const sp<Runnable>& task, float interval)
 {
-    _message_loop_application->schedule(task, interval);
+    _message_loop->schedule(task, interval);
 }
 
 void ApplicationContext::postTask(std::function<void()> task, float delay)
 {
-    _message_loop_application->postTask(std::move(task), delay);
+    _message_loop->postTask(std::move(task), delay);
 }
 
 void ApplicationContext::scheduleTask(std::function<bool()> task, float interval)
 {
-    _message_loop_application->scheduleTask(std::move(task), interval);
+    _message_loop->scheduleTask(std::move(task), interval);
 }
 
 void ApplicationContext::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)
@@ -191,7 +202,7 @@ sp<String> ApplicationContext::getString(const String& resid)
 
 sp<Runnable> ApplicationContext::defer(const sp<Runnable>& task) const
 {
-    return sp<DeferedRunnable>::make(_message_loop_application, task);
+    return sp<DeferedRunnable>::make(_message_loop, task);
 }
 
 const Color& ApplicationContext::backgroundColor() const
@@ -207,17 +218,21 @@ void ApplicationContext::setBackgroundColor(const Color& backgroundColor)
 void ApplicationContext::pause()
 {
     _paused = true;
+    _clock->pause();
 }
 
 void ApplicationContext::resume()
 {
     _paused = false;
+    _clock->resume();
 }
 
-void ApplicationContext::update()
+void ApplicationContext::updateRenderState()
 {
+    DTHREAD_CHECK(THREAD_ID_RENDERER);
     _ticker->update();
-    _message_loop_application->pollOnce();
+    if(_render_message_loop)
+        _render_message_loop->pollOnce();
 }
 
 bool ApplicationContext::isPaused() const

@@ -14,8 +14,6 @@ namespace ark {
 namespace platform {
 namespace android {
 
-RenderRequest gRenderRequest;
-
 namespace {
 
 class AndroidApplicationController : public ApplicationController {
@@ -56,13 +54,6 @@ int AndroidApplication::run()
 const sp<ApplicationController>& AndroidApplication::controller()
 {
     return _controller;
-}
-
-void AndroidApplication::onCreate()
-{
-    Application::onCreate();
-
-    _surface->scheduleUpdate(_application_context, 60);
 }
 
 }

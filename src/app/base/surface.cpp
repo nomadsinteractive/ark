@@ -51,12 +51,7 @@ void Surface::onRenderFrame(const Color& backgroundColor)
 
 sp<SurfaceUpdater> Surface::makeUpdater(const sp<ApplicationContext>& applicationContext) const
 {
-    return sp<SurfaceUpdater>::make(applicationContext->executor(), _surface_controller, _render_controller);
-}
-
-void Surface::scheduleUpdate(const sp<ApplicationContext>& applicationContext, uint32_t fps)
-{
-    applicationContext->schedule(makeUpdater(applicationContext), 1.0f / fps);
+    return sp<SurfaceUpdater>::make(applicationContext, _surface_controller, _render_controller);
 }
 
 }

@@ -16,10 +16,16 @@ namespace ark {
 
 class ARK_API Manifest {
 public:
+    enum MessageLoopType {
+        MESSAGE_LOOP_TYPE_CORE,
+        MESSAGE_LOOP_TYPE_RENDER
+    };
+
     struct Application {
         String _dir;
         String _filename;
         String _title;
+        MessageLoopType _message_loop;
     };
 
     struct Asset {
@@ -47,6 +53,8 @@ public:
 
 // [[script::bindings::property]]
     const String& name() const;
+
+    const Application& application() const;
 
     const String& appDir() const;
     const String& assetDir() const;

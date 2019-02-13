@@ -5,20 +5,19 @@
 
 #include "renderer/base/render_controller.h"
 
+#include "app/base/application_context.h"
+
 namespace ark {
 
-SurfaceUpdater::SurfaceUpdater(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, const sp<RenderController>& renderController)
-    : _executor(executor), _surface_controller(surfaceController), _render_controller(renderController), _render_request_recycler(sp<LFStack<RenderRequest>>::make())
+SurfaceUpdater::SurfaceUpdater(const sp<ApplicationContext>& applicationContext, const sp<SurfaceController>& surfaceController, const sp<RenderController>& renderController)
+    : _application_context(applicationContext), _executor(_application_context->executor()), _surface_controller(surfaceController), _render_controller(renderController),
+      _render_request_recycler(sp<LFStack<RenderRequest>>::make())
 {
 }
 
 void SurfaceUpdater::run()
 {
-    update();
-}
-
-void SurfaceUpdater::update()
-{
+    DTHREAD_CHECK(THREAD_ID_CORE);
     _render_controller->preUpdate();
     requestUpdate();
 }

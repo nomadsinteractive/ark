@@ -136,7 +136,6 @@ void Application::onSurfaceCreated()
     __thread_init__<THREAD_ID_RENDERER>();
 
     _application_context->renderEngine()->onSurfaceCreated();
-
     _surface->onSurfaceCreated();
     _application_delegate->onSurfaceCreated(_surface);
 }
@@ -160,10 +159,12 @@ void Application::onSurfaceUpdate()
 {
     if(_alive)
     {
-        _application_context->update();
-        _surface_updater->update();
+        _application_context->post(_surface_updater);
+        _application_context->updateRenderState();
         _application_delegate->onSurfaceDraw();
     }
+    else
+        _application_context->updateRenderState();
 }
 
 bool Application::onEvent(const Event& event, bool mapViewport)

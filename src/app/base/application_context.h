@@ -63,7 +63,7 @@ public:
     void pause();
     void resume();
 
-    void update();
+    void updateRenderState();
 
     bool isPaused() const;
 
@@ -76,6 +76,8 @@ private:
     void initResourceLoader(const document& manifest);
     sp<ResourceLoader> createResourceLoader(const sp<Dictionary<document>>& documentDictionary, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
+    sp<MessageLoop> makeMessageLoop();
+
     class Ticker : public Variable<uint64_t> {
     public:
         Ticker();
@@ -85,7 +87,7 @@ private:
 
     private:
         sp<Variable<uint64_t>> _steady_clock;
-        uint64_t _val;
+        std::atomic<uint64_t> _val;
     };
 
 private:
@@ -96,7 +98,8 @@ private:
     sp<RenderEngine> _render_engine;
     sp<RenderController> _render_controller;
     sp<Clock> _clock;
-    sp<MessageLoopDefault> _message_loop_application;
+    sp<MessageLoopDefault> _render_message_loop;
+    sp<MessageLoop> _message_loop;
     sp<Executor> _executor;
 
     op<EventListenerList> _event_listeners;

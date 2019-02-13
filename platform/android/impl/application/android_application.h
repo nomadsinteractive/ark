@@ -16,17 +16,9 @@ public:
     virtual int run() override;
     virtual const sp<ApplicationController>& controller() override;
 
-    virtual void onCreate() override;
-
 private:
     sp<ApplicationController> _controller;
 
-};
-
-struct RenderRequest {
-    sp<RenderView> _render_view;
-    sp<RenderCommand> _render_command;
-    sp<Runnable> _callback;
 };
 
 }

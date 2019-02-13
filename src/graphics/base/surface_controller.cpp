@@ -1,5 +1,7 @@
 #include "graphics/base/surface_controller.h"
 
+#include <thread>
+
 #include "graphics/base/render_request.h"
 #include "graphics/base/layer.h"
 #include "graphics/impl/renderer/renderer_group.h"
@@ -35,7 +37,7 @@ void SurfaceController::postRenderCommand(const sp<RenderCommandPipeline>& rende
 void SurfaceController::update(RenderRequest& renderRequest)
 {
     size_t size = _render_commands.size();
-    if(size < 6)
+    if(size < 3)
     {
         const sp<RenderCommandPipeline> renderCommand = _object_pool.obtain<RenderCommandPipeline>();
         renderRequest.start(renderCommand);
@@ -44,8 +46,8 @@ void SurfaceController::update(RenderRequest& renderRequest)
         _layers->render(renderRequest, 0, 0);
         renderRequest.finish();
     }
-//    else
-//        DWARN(false, "Frame skipped. RenderCommand size: %d. Rendering thread busy?", size);
+    else
+        DWARN(false, "Frame skipped. RenderCommand size: %d. Rendering thread busy?", size);
 }
 
 void SurfaceController::onRenderFrame(const Color& backgroundColor, RenderView& renderView)

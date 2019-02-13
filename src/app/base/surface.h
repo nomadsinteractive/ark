@@ -24,7 +24,6 @@ public:
     void onRenderFrame(const Color& backgroundColor);
 
     sp<SurfaceUpdater> makeUpdater(const sp<ApplicationContext>& applicationContext) const;
-    void scheduleUpdate(const sp<ApplicationContext>& applicationContext, uint32_t fps);
 
 private:
     sp<RenderView> _render_view;

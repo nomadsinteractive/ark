@@ -295,11 +295,9 @@ int SDLApplication::run()
 
     onCreate();
     onSurfaceCreated();
-
-    _application_context->update();
+    _application_context->updateRenderState();
 
     const sp<SDLPollEventTask> pollevent = sp<SDLPollEventTask>::make(*this);
-    _application_context->schedule(pollevent, 0.02f);
 
     while(!gQuit)
     {
@@ -309,6 +307,7 @@ int SDLApplication::run()
             pollevent->run();
             continue;
         }
+        pollevent->run();
         onSurfaceUpdate();
         if(_use_open_gl)
             SDL_GL_SwapWindow(_main_window);

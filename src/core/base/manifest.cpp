@@ -48,11 +48,24 @@ void Manifest::load(const String& src)
     _heap._host_unit_size = toSize(Documents::getAttributeValue(_content, "heap/host/unit-size", "8M"));
 
     _application._title = Documents::getAttributeValue(_content, "application/title");
+
+    const String messageLoopType = Documents::getAttributeValue(_content, "application/message-loop", "core");
+    if(messageLoopType == "core")
+        _application._message_loop = MESSAGE_LOOP_TYPE_CORE;
+    else if(messageLoopType == "render")
+        _application._message_loop = MESSAGE_LOOP_TYPE_RENDER;
+    else
+        DFATAL("Unknow application message-loop: \"%s\". Should be \"core\" or \"render\"", messageLoopType.c_str());
 }
 
 const String& Manifest::name() const
 {
     return _application._title;
+}
+
+const Manifest::Application& Manifest::application() const
+{
+    return _application;
 }
 
 const String& Manifest::appDir() const

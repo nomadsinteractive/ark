@@ -21,13 +21,8 @@ public:
     virtual void post(const sp<Runnable>& task, float delay) override;
     virtual void schedule(const sp<Runnable>& task, float interval) override;
 
-    void start();
     void pause();
     void resume();
-    void terminate();
-    void join();
-
-//    void pollOnce();
 
     const Thread& thread() const;
 
@@ -50,7 +45,7 @@ private:
 
         virtual void run() override;
 
-//    private:
+    private:
         Thread _thread;
         sp<MessageLoopDefault> _message_loop;
         sp<Variable<uint64_t>> _ticker;
@@ -59,8 +54,6 @@ private:
     };
 
 private:
-    sp<Variable<uint64_t>> _ticker;
-
     Thread _thread;
     sp<MessageLoopDefault> _message_loop;
     sp<RunnableImpl> _runnable_impl;
