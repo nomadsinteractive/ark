@@ -86,6 +86,7 @@ String Uniform::getDeclaredType() const
         break;
     }
     DFATAL("Unsupported type: %d", _type);
+    return "";
 }
 
 const sp<Flatable>& Uniform::flatable() const

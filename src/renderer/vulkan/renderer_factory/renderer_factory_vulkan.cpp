@@ -25,6 +25,8 @@
 #include "renderer/vulkan/base/vk_texture_2d.h"
 #include "renderer/vulkan/util/vk_util.h"
 
+#include "platform/platform.h"
+
 #include "generated/vulkan_plugin.h"
 
 namespace ark {
@@ -54,6 +56,8 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderContext& vkContext)
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
     setVersion(Ark::VULKAN_11, vkContext);
+
+    Platform::vkInitialize();
 
     _renderer->_instance = sp<VKInstance>::make();
     _renderer->_instance->initialize();

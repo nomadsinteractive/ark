@@ -7,13 +7,10 @@ namespace ark {
 
 template<typename T> class Global {
 public:
-    Global()
-        : _inst(Ark::instance().ensure<T>()) {
-        DASSERT(_inst);
+    template<typename... Args> Global(Args&&... args)
+        : _inst(Ark::instance().ensure<T>(std::forward<Args>(args)...)) {
     }
-    Global(const Global& other)
-        : _inst(other._inst) {
-    }
+    Global(const Global& other) = default;
 
     T* operator ->() const {
         return _inst.get();
@@ -24,7 +21,7 @@ public:
     }
 
     operator const T& () const {
-        return _inst;
+        return *_inst;
     }
 
 private:

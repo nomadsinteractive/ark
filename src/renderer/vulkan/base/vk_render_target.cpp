@@ -190,7 +190,7 @@ void VKRenderTarget::initSwapchain(const RenderContext& renderContext)
 #if defined(_WIN32)
     _swap_chain.initSurface(info.windows.hinstance, info.windows.window);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-    _swap_chain.initSurface(androidApp->window);
+    _swap_chain.initSurface(info.android.window);
 #elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK))
     _swap_chain.initSurface(info.darwin.view);
 #elif defined(_DIRECT2DISPLAY)

@@ -9,20 +9,20 @@ namespace plugin {
 namespace python {
 
 AssetResource::AssetResource(const sp<AssetBundle>& resource)
-    : _asset(resource)
+    : _asset_bundle(resource)
 {
 }
 
 sp<String> AssetResource::getString(const String& filepath)
 {
-    const sp<Asset> asset = _asset->get(filepath);
+    const sp<Asset> asset = _asset_bundle->get(filepath);
     const sp<Readable> readable = asset ? asset->open() : nullptr;
     return readable ? sp<String>::make(Strings::loadFromReadable(readable)) : nullptr;
 }
 
 String AssetResource::getRealPath(const String& filepath)
 {
-    const sp<Asset> asset = _asset->get(filepath);
+    const sp<Asset> asset = _asset_bundle->get(filepath);
     return asset ? asset->location() : filepath;
 }
 

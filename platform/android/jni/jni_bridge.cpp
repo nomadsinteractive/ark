@@ -1,24 +1,29 @@
 
 #include <jni.h>
 
+#include <android/native_window.h>
+#include <android/native_window_jni.h> 
+
 #include "core/ark.h"
 #include "core/base/manifest.h"
 #include "core/types/shared_ptr.h"
+#include "core/util/log.h"
 
 #include "graphics/base/size.h"
 
-#include "util/jni_util.h"
+#include "renderer/base/render_engine.h"
+#include "renderer/base/render_context.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_delegate_impl.h"
 #include "app/base/event.h"
 
-
 #include "impl/application/android_application.h"
+#include "util/jni_util.h"
 
 extern "C" {
     JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onCreate(JNIEnv* env, jobject obj, jobject applicationContext, jobject assetManager);
-    JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onSurfaceCreated(JNIEnv* env, jobject obj);
+    JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onSurfaceCreated(JNIEnv* env, jobject obj, jobject surface);
     JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onSurfaceChanged(JNIEnv* env, jobject obj, jint width, jint height);
     JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onDraw(JNIEnv* env, jobject obj);
     JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onPause(JNIEnv* env, jobject obj);
@@ -44,6 +49,8 @@ using namespace ark::platform::android;
 static sp<Ark> _ark;
 static sp<Application> _application;
 
+static ANativeWindow* _window;
+
 
 JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onCreate(JNIEnv* env, jobject obj, jobject applicationContext, jobject assetManager)
 {
@@ -63,8 +70,11 @@ JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onCreate(JNIEnv* env, jobject 
     _application->onCreate();
 }
 
-JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onSurfaceCreated(JNIEnv* env, jobject obj)
+JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onSurfaceCreated(JNIEnv* env, jobject obj, jobject surface)
 {
+	RenderContext::Info& info = _application->context()->renderEngine()->renderContext()->info();
+	_window = ANativeWindow_fromSurface(env, surface);
+	info.android.window = _window;
     _application->onSurfaceCreated();
 	_ark->applicationContext()->updateRenderState();
 }
@@ -92,8 +102,10 @@ JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onResume(JNIEnv* env, jobject 
 JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onDestroy(JNIEnv* env, jobject obj)
 {
     _application->onDestroy();
+	ANativeWindow_release(_window);
     _application = nullptr;
     _ark = nullptr;
+	_window = nullptr;
 }
 
 JNIEXPORT jboolean JNICALL Java_com_nomads_ark_JNILib_onEvent(JNIEnv* env, jobject obj, jint action, jfloat x, jfloat y, jlong timestamp)

@@ -19,6 +19,10 @@
 #include "util/jni_util.h"
 #include "util/font_config.h"
 
+#ifdef ARK_USE_VULKAN
+#include "platform/vulkan/vulkan.h"
+#endif
+
 using namespace ark::platform::android;
 
 namespace ark {
@@ -63,6 +67,13 @@ sp<AssetBundle> Platform::getAsset(const String& path, const String& appPath)
 
 void Platform::glInitialize()
 {
+}
+
+void Platform::vkInitialize()
+{
+#ifdef ARK_USE_VULKAN
+	platform::android::vkInitialize();
+#endif
 }
 
 String Platform::getUserStoragePath(const String& filename)

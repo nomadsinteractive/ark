@@ -32,18 +32,19 @@ package com.nomads.ark;
  */
 
 
-import android.content.Context;
-import android.graphics.PixelFormat;
-import android.opengl.GLSurfaceView;
-import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
-
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.opengles.GL10;
+
+import android.content.Context;
+import android.graphics.PixelFormat;
+import android.opengl.GLSurfaceView;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.View;
 
 /**
  * A simple GLSurfaceView sub-class that demonstrate how to perform
@@ -87,8 +88,11 @@ class GL2JNIView extends GLSurfaceView {
          * format here, using PixelFormat.TRANSLUCENT for GL Surfaces
          * is interpreted as any 32-bit surface with alpha by SurfaceFlinger.
          */
+        
+        SurfaceHolder surfaceHolder = getHolder();
+        
         if (translucent) {
-            this.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+            surfaceHolder.setFormat(PixelFormat.TRANSLUCENT);
         }
 
         setEGLContextClientVersion(EGL_CONTEXT_VERSION);
@@ -107,7 +111,7 @@ class GL2JNIView extends GLSurfaceView {
                              new ConfigChooser(5, 6, 5, 0, depth, stencil) );
 
         /* Set the renderer responsible for frame rendering */
-        setRenderer(new Renderer());
+        setRenderer(new Renderer(surfaceHolder));
         
         setOnTouchListener(new OnTouchListener() {
             @Override
@@ -333,6 +337,11 @@ class GL2JNIView extends GLSurfaceView {
     }
     
     private static class Renderer implements GLSurfaceView.Renderer {
+        private SurfaceHolder mSurfaceHoder;
+        
+        public Renderer(SurfaceHolder surfaceHolder) {
+            mSurfaceHoder = surfaceHolder;
+        }
         
         public void onDrawFrame(GL10 gl) {
             JNILib.onDraw();
@@ -343,7 +352,7 @@ class GL2JNIView extends GLSurfaceView {
         }
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-            JNILib.onSurfaceCreated();
+            JNILib.onSurfaceCreated(mSurfaceHoder.getSurface());
         }
     }
 }

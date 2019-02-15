@@ -1,3 +1,4 @@
+add_definitions(-DPY_FORMAT_LONG_LONG="long long")
 
 aux_source_directory(platform/android/internal LOCAL_PYTHON_PATCH_SRC_LIST)
 

@@ -37,7 +37,7 @@ uint32_t Math::log2(uint32_t value)
 
 float Math::abs(float x)
 {
-    return x > 0 ? x : -x;
+    return fabsf_c(x);
 }
 
 sp<Numeric> Math::abs(const sp<Numeric>& x)

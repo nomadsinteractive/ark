@@ -7,6 +7,11 @@
 #include <windows.h>
 #endif
 
+#ifdef ARK_PLATFORM_ANDROID
+#include <android/native_window.h>
+#include <EGL/egl.h>
+#endif
+
 #include "core/ark.h"
 #include "core/base/string.h"
 #include "core/types/shared_ptr.h"
@@ -38,7 +43,7 @@ public:
 #endif
 #ifdef ARK_PLATFORM_LINUX
             struct {
-                Display *display;           /**< The X11 display */
+                Display* display;           /**< The X11 display */
                 Window window;              /**< The X11 window */
             } x11;
 #endif
@@ -50,7 +55,7 @@ public:
 #endif
 #ifdef ARK_PLATFORM_ANDROID
             struct {
-                ANativeWindow *window;
+                ANativeWindow* window;
                 EGLSurface surface;
             } android;
 #endif

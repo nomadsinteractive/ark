@@ -32,6 +32,10 @@ def get_ref_manager():
     return None
 
 
+def is_debug_build():
+    return True
+
+
 class _ArkObject:
     pass
 

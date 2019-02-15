@@ -18,7 +18,7 @@ public:
     String getRealPath(const String& filepath);
 
 private:
-    sp<AssetBundle> _asset;
+    sp<AssetBundle> _asset_bundle;
 };
 
 }

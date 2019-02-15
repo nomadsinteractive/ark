@@ -38,6 +38,7 @@ static PyObject* ark_logw(PyObject* self, PyObject* args);
 static PyObject* ark_loadAsset(PyObject* self, PyObject* args);
 static PyObject* ark_openAsset(PyObject* self, PyObject* args);
 static PyObject* ark_getAssetResource(PyObject* self, PyObject* args);
+static PyObject* ark_isDebugBuild(PyObject* self, PyObject* args);
 static PyObject* ark_isDirectory(PyObject* self, PyObject* args);
 static PyObject* ark_isFile(PyObject* self, PyObject* args);
 static PyObject* ark_loadFile(PyObject* self, PyObject* args);
@@ -51,6 +52,7 @@ static PyMethodDef ARK_METHODS[] = {
     {"load_asset",  ark_loadAsset, METH_VARARGS, "loadAsset"},
     {"open_asset",  ark_openAsset, METH_VARARGS, "openAsset"},
     {"get_asset_resource",  ark_getAssetResource, METH_VARARGS, "getAssetResource"},
+    {"is_debug_build",  ark_isDebugBuild, METH_VARARGS, "isDebugBuild"},
     {"is_directory",  ark_isDirectory, METH_VARARGS, "isDirectory"},
     {"is_file",  ark_isFile, METH_VARARGS, "isFile"},
     {"load_file",  ark_loadFile, METH_VARARGS, "loadFile"},
@@ -123,6 +125,15 @@ PyObject* ark_isDirectory(PyObject* /*self*/, PyObject* args)
     if(!PyArg_ParseTuple(args, "s", &arg0))
         Py_RETURN_FALSE;
     return PythonInterpreter::instance()->fromType<bool>(Platform::isDirectory(arg0));
+}
+
+PyObject* ark_isDebugBuild(PyObject* /*self*/, PyObject* /*args*/)
+{
+#ifdef ARK_FLAG_DEBUG
+    Py_RETURN_TRUE;
+#else
+    Py_RETURN_FALSE;
+#endif
 }
 
 PyObject* ark_isFile(PyObject* /*self*/, PyObject* args)

@@ -22,7 +22,6 @@ class ArkModuleLoader:
             module.__path__ = [self._path]
         if self._source:
             exec(compile(self._source, self._filepath, 'exec'), module.__dict__)
-#            self._bootstrap._call_with_frames_removed(exec, self._source, module.__dict__)
         module.__name__ = self._name
         module.__file__ = self._filepath
 

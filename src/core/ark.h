@@ -47,8 +47,8 @@ public:
         return _interfaces.get<T>();
     }
 
-    template<typename T> const sp<T>& ensure() {
-        return _interfaces.ensure<T>();
+    template<typename T, typename... Args> const sp<T>& ensure(Args&&... args) {
+        return _interfaces.ensure<T>(std::forward<Args>(args)...);
     }
 
     template<typename T> void put(const sp<T>& item) {
