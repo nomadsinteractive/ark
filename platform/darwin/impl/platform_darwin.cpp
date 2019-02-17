@@ -79,6 +79,10 @@ void Platform::glInitialize()
     glbinding::Binding::initialize(false);
 }
 
+void Platform::vkInitialize()
+{
+}
+
 String Platform::glShaderVersionDeclaration(uint32_t versionCode)
 {
     return Strings::sprintf("#version %d\n", versionCode);

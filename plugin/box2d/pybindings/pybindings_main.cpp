@@ -47,9 +47,15 @@ public:
             __init_py_box2d_bindings__(box2dmodule);
             PyModule_AddObject(arkmodule, "box2d", box2dmodule);
 
-            PyArkType* type = PythonInterpreter::instance()->getPyArkType<Arena>();
+            PyArkType* pyResourceLoaderType = PythonInterpreter::instance()->getPyArkType<ResourceLoader>();
             {
-                std::map<TypeId, PyArkType::LoaderFunction>& loader = type->ensureLoader("load");
+                std::map<TypeId, PyArkType::LoaderFunction>& loader = pyResourceLoaderType->ensureLoader("load");
+                loader[Type<World>::id()] = [](PyArkType::Instance& inst, const String& id, const sp<Scope>& args)->Box { return inst.unpack<ResourceLoader>()->load<World>(id, args).pack(); };
+                loader[Type<Body>::id()] = [](PyArkType::Instance& inst, const String& id, const sp<Scope>& args)->Box { return inst.unpack<ResourceLoader>()->load<Body>(id, args).pack(); };
+            }
+            PyArkType* pyArenaType = PythonInterpreter::instance()->getPyArkType<Arena>();
+            {
+                std::map<TypeId, PyArkType::LoaderFunction>& loader = pyArenaType->ensureLoader("load");
                 loader[Type<World>::id()] = [](PyArkType::Instance& inst, const String& id, const sp<Scope>& args)->Box { return inst.unpack<Arena>()->load<World>(id, args).pack(); };
                 loader[Type<Body>::id()] = [](PyArkType::Instance& inst, const String& id, const sp<Scope>& args)->Box { return inst.unpack<Arena>()->load<Body>(id, args).pack(); };
             }
