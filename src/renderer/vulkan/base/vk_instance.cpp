@@ -50,14 +50,14 @@ void VKInstance::initialize()
     instanceCreateInfo.pNext = nullptr;
     instanceCreateInfo.pApplicationInfo = &appInfo;
 
-#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN)
+#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN) && !defined(ARK_PLATFORM_ANDROID)
     _extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 #endif
 
     instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(_extensions.size());
     instanceCreateInfo.ppEnabledExtensionNames = _extensions.data();
 
-#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN)
+#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN) && !defined(ARK_PLATFORM_ANDROID)
     instanceCreateInfo.enabledLayerCount = vks::debug::validationLayerCount;
     instanceCreateInfo.ppEnabledLayerNames = vks::debug::validationLayerNames;
 #endif

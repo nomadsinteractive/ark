@@ -1,3 +1,4 @@
+#include "impl/platform_android.h"
 #include "platform/platform.h"
 
 #include <android/asset_manager_jni.h>
@@ -9,6 +10,7 @@
 #include "core/impl/dictionary/xml_directory.h"
 #include "core/inf/variable.h"
 #include "core/inf/readable.h"
+#include "core/types/global.h"
 #include "core/util/strings.h"
 
 #include "graphics/base/font.h"
@@ -41,6 +43,32 @@ bool directoryExists(AAssetManager* assetManager, const String& path) {
     return r;
 }
 
+
+PlatformAndroid::PlatformAndroid(android_app* state)
+	: _state(state), _asset_manager(_state->activity->assetManager)
+{
+}
+
+android_app* PlatformAndroid::state()
+{
+	return _state;
+}
+
+sp<AssetBundle> PlatformAndroid::getAssetBundle(const String& path, const String& appPath)
+{
+	bool dirExists = directoryExists(_asset_manager, path);
+	return dirExists ? sp<AssetBundle>::adopt(new AssetResource(_asset_manager, path)) : nullptr;
+}
+
+String PlatformAndroid::getUserStoragePath(const String& filename)
+{
+	if(_state->activity->internalDataPath)
+		return Platform::pathJoin(_state->activity->internalDataPath, filename);
+	if(_state->activity->externalDataPath)
+		return Platform::pathJoin(_state->activity->externalDataPath, filename);
+	return ".";
+}
+
 }
 }
 }
@@ -53,7 +81,7 @@ void Platform::log(Log::LogLevel logLevel, const char* tag, const char* content)
     __android_log_write(logLevel == Log::LOG_LEVEL_WARNING ? ANDROID_LOG_WARN : (logLevel == Log::LOG_LEVEL_DEBUG ? ANDROID_LOG_DEBUG : ANDROID_LOG_ERROR), LOG_TAG, message.c_str());
 }
 
-sp<AssetBundle> Platform::getAsset(const String& path, const String& appPath)
+sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPath)
 {
 	if(gAssetManager)
 	{
@@ -62,7 +90,8 @@ sp<AssetBundle> Platform::getAsset(const String& path, const String& appPath)
 		bool dirExists = directoryExists(am, path);
 		return dirExists ? sp<AssetBundle>::adopt(new AssetResource(am, path)) : nullptr;
 	}
-    return isDirectory(path) ? sp<AssetBundle>::adopt(new AssetBundleDirectory(path)) : nullptr;
+	Global<PlatformAndroid> platformAndroid;
+    return platformAndroid->getAssetBundle(path, appPath);
 }
 
 void Platform::glInitialize()
@@ -78,9 +107,9 @@ void Platform::vkInitialize()
 
 String Platform::getUserStoragePath(const String& filename)
 {
-	String ret = ".";
 	if(gApplicationContext)
 	{
+		String ret = ".";
 		JNIEnv* env = JNIUtil::attachCurrentThread();
 		int pos = filename.find('/');
 		const String path = pos != -1 ? filename.substr(0, pos) : filename;
@@ -104,8 +133,10 @@ String Platform::getUserStoragePath(const String& filename)
 		}
 		env->DeleteLocalRef(jPath);
 		env->DeleteLocalRef(applicationContextClass);
+		return ret;
 	}
-    return ret;
+	Global<PlatformAndroid> platformAndroid;
+    return platformAndroid->getUserStoragePath(filename);
 }
 
 String Platform::getRealPath(const String& path)

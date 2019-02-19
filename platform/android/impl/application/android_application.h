@@ -11,14 +11,13 @@ namespace android {
 
 class AndroidApplication : public Application {
 public:
-    AndroidApplication(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport, android_app* state = nullptr);
+    AndroidApplication(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport);
 
     virtual int run() override;
     virtual const sp<ApplicationController>& controller() override;
 
 private:
     sp<ApplicationController> _controller;
-    android_app* _state;
 };
 
 }

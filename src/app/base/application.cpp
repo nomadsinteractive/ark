@@ -93,7 +93,7 @@ void Application::onCreate()
     const sp<RenderView> renderView = _application_context->renderEngine()->createRenderView(_application_context->renderController(), _viewport);
     _surface = sp<Surface>::make(renderView, _application_context->renderController());
     _surface_updater = _surface->makeUpdater(_application_context);
-    _application_context->postTask([this] () {
+    _application_context->post([this] () {
         onCreateTask();
     });
 }
@@ -102,7 +102,7 @@ void Application::onPause()
 {
     LOGD("");
     _alive = false;
-    _application_context->postTask([this] () {
+    _application_context->post([this] () {
         onPauseTask();
         _application_context->pause();
     });
@@ -112,7 +112,7 @@ void Application::onResume()
 {
     LOGD("");
     _application_context->resume();
-    _application_context->postTask([this] () {
+    _application_context->post([this] () {
         onResumeTask();
         _alive = true;
     });
@@ -125,7 +125,7 @@ void Application::onDestroy()
     const sp<ApplicationDelegate> applicationDelegate = _application_delegate;
     const sp<ApplicationContext> applicationContext = _application_context;
     _application_context->resume();
-    _application_context->postTask([applicationDelegate, applicationContext] () {
+    _application_context->post([applicationDelegate, applicationContext] () {
         applicationDelegate->onDestroy();
     });
 }
@@ -145,7 +145,7 @@ void Application::onSurfaceChanged(uint32_t width, uint32_t height)
     LOGD("width = %d, height = %d", width, height);
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
-    _application_context->postTask([this] () {
+    _application_context->post([this] () {
         _application_context->renderController()->reset();
     });
 
@@ -171,7 +171,7 @@ bool Application::onEvent(const Event& event, bool mapViewport)
 {
     const Event mapped(event.action(), mapViewport ? _viewport.toViewportX(event.x(), _width) : event.x(),
                        mapViewport ? _viewport.toViewportY(event.y(), _height) : event.y(), event.timestamp(), event.code());
-    _application_context->postTask([this, mapped] () {
+    _application_context->post([this, mapped] () {
         onEventTask(mapped);
     });
     return true;

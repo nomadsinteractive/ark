@@ -36,12 +36,14 @@ public:
         VULKAN_11 = 111
     };
 
+    Ark(int32_t argc, const char** argv);
     Ark(int32_t argc, const char** argv, const sp<Manifest>& manifest);
     ~Ark();
 
     static Ark& instance();
 
     void push();
+    void initialize(const sp<Manifest>& manifest);
 
     template<typename T> const sp<T>& query() const {
         return _interfaces.get<T>();
@@ -77,7 +79,7 @@ public:
     const sp<ObjectPool>& objectPool() const;
 
 private:
-    class ArkAsset;
+    class ArkAssetBundle;
 
     sp<ApplicationContext> createApplicationContext(const document& manifest, const sp<ApplicationResource>& resource, const sp<RenderEngine>& renderEngine);
     sp<RenderEngine> createRenderEngine(RendererVersion version, const sp<ApplicationResource>& appResource);
@@ -91,14 +93,13 @@ private:
     int32_t _argc;
     const char** _argv;
 
-    sp<Manifest> _manifest;
-
     sp<ApplicationContext> _application_context;
     ByType _interfaces;
 
-    sp<ArkAsset> _asset;
-
+    sp<ArkAssetBundle> _asset_bundle;
     sp<ObjectPool> _object_pool;
+
+    sp<Manifest> _manifest;
 };
 
 }

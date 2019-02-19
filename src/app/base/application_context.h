@@ -49,8 +49,10 @@ public:
     void post(const sp<Runnable>& task, float delay = 0);
     void schedule(const sp<Runnable>& task, float interval);
 
-    void postTask(std::function<void()> task, float delay = 0);
-    void scheduleTask(std::function<bool()> task, float interval);
+    void post(std::function<void()> task, float delay = 0);
+    void schedule(std::function<bool()> task, float interval);
+
+    void postToRenderer(std::function<void()> task);
 
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
     sp<String> getString(const String& resid);

@@ -25,7 +25,7 @@ void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* cont
     fflush(nullptr);
 }
 
-sp<AssetBundle> Platform::getAsset(const String& path, const String& appPath)
+sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPath)
 {
     if(isDirectory(path))
         return sp<AssetBundleWithFallback>::make(sp<AssetBundleDirectory>::make(appPath), sp<AssetBundleDirectory>::make(path));

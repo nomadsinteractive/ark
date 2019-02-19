@@ -23,7 +23,7 @@ void Manifest::load(const String& src)
 {
     Strings::rcut(Platform::getExecutablePath(), _application._dir, _application._filename, Platform::dirSeparator());
 
-    const sp<ark::AssetBundle> appAsset = Platform::getAsset(".", _application._dir);
+    const sp<ark::AssetBundle> appAsset = Platform::getAssetBundle(".", _application._dir);
     DASSERT(appAsset);
     const sp<ark::Asset> asset = appAsset->get(src);
     DCHECK(asset, "Cannot load application manifest \"%s\"", src.c_str());

@@ -11,6 +11,8 @@
 #include "vulkan_debug.h"
 #include <iostream>
 
+#include "core/util/log.h"
+
 namespace vks
 {
 	namespace debug

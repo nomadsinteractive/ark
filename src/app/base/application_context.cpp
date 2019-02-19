@@ -104,12 +104,11 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const sp<Dictionary<
 
 sp<MessageLoop> ApplicationContext::makeMessageLoop()
 {
+    _render_message_loop = sp<MessageLoopDefault>::make(_ticker);
+
     const Ark& ark = Ark::instance();
     if(ark.manifest()->application()._message_loop == Manifest::MESSAGE_LOOP_TYPE_RENDER)
-    {
-        _render_message_loop = sp<MessageLoopDefault>::make(_ticker);
         return _render_message_loop;
-    }
     return sp<MessageLoopThread>::make(_ticker);
 }
 
@@ -178,14 +177,19 @@ void ApplicationContext::schedule(const sp<Runnable>& task, float interval)
     _message_loop->schedule(task, interval);
 }
 
-void ApplicationContext::postTask(std::function<void()> task, float delay)
+void ApplicationContext::post(std::function<void()> task, float delay)
 {
     _message_loop->postTask(std::move(task), delay);
 }
 
-void ApplicationContext::scheduleTask(std::function<bool()> task, float interval)
+void ApplicationContext::schedule(std::function<bool()> task, float interval)
 {
     _message_loop->scheduleTask(std::move(task), interval);
+}
+
+void ApplicationContext::postToRenderer(std::function<void()> task)
+{
+    _render_message_loop->postTask(std::move(task), 0);
 }
 
 void ApplicationContext::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)
@@ -229,10 +233,8 @@ void ApplicationContext::resume()
 
 void ApplicationContext::updateRenderState()
 {
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
     _ticker->update();
-    if(_render_message_loop)
-        _render_message_loop->pollOnce();
+    _render_message_loop->pollOnce();
 }
 
 bool ApplicationContext::isPaused() const

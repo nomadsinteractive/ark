@@ -20,7 +20,7 @@ public:
 //  [[script::bindings::auto]]
     static String getUserStoragePath(const String& path);
 
-    static sp<AssetBundle> getAsset(const String& path, const String& appPath);
+    static sp<AssetBundle> getAssetBundle(const String& path, const String& appPath);
     static sp<Alphabet> getSystemAlphabet(const Font& font, const String& lang);
     static String getDefaultFontDirectory();
     static String getExecutablePath();

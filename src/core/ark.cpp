@@ -64,9 +64,9 @@ std::list<Ark*> Ark::_instance_stack;
 
 namespace {
 
-class RawAsset : public AssetBundle {
+class RawAssetBundle : public AssetBundle {
 public:
-    RawAsset(const String& assetDir, const String& appDir)
+    RawAssetBundle(const String& assetDir, const String& appDir)
         : _asset_dir(assetDir), _app_dir(appDir) {
     }
 
@@ -82,7 +82,7 @@ public:
     virtual sp<AssetBundle> getBundle(const String& path) override {
         String s = (path.empty() || path == "/") ? "." : path;
         const String assetDir = Platform::pathJoin(_asset_dir, s);
-        const sp<AssetBundle> assetBundle = Platform::getAsset(s, Platform::pathJoin(_app_dir, assetDir));
+        const sp<AssetBundle> assetBundle = Platform::getAssetBundle(s, Platform::pathJoin(_app_dir, assetDir));
         if(assetBundle)
             return assetBundle;
 
@@ -115,10 +115,10 @@ public:
 }
 
 
-class Ark::ArkAsset {
+class Ark::ArkAssetBundle {
 public:
-    ArkAsset(const sp<RawAsset>& rawAsset, const Table<String, String>& mounts)
-        : _raw_asset(rawAsset) {
+    ArkAssetBundle(const sp<RawAssetBundle>& rawAsset, const Table<String, String>& mounts)
+        : _raw_asset_bundle(rawAsset) {
         for(const auto& i : mounts.items())
             _mounts.push_front(Mounted(strip(i.first), createAsset(i.second)));
     }
@@ -134,7 +134,7 @@ public:
                 return readable;
         }
 
-        return _raw_asset->get(name);
+        return _raw_asset_bundle->get(name);
     }
 
     sp<AssetBundle> getAssetBundle(const String& path) const {
@@ -145,7 +145,7 @@ public:
             if(ia)
                 asset = asset ? sp<AssetBundle>::adopt(new AssetBundleWithFallback(asset, ia)) : ia;
         }
-        const sp<AssetBundle> fallback = _raw_asset->getBundle(path);
+        const sp<AssetBundle> fallback = _raw_asset_bundle->getBundle(path);
         if(fallback)
             return asset ? sp<AssetBundle>::adopt(new AssetBundleWithFallback(asset, fallback)) : fallback;
         DCHECK(asset, "Asset \"%s\" doesn't exists", path.c_str());
@@ -158,7 +158,7 @@ private:
             return sp<AssetBundleDirectory>::make(src);
         else if(Platform::isFile(src))
             return sp<AssetBundleZipFile>::make(sp<FileReadable>::make(src, "rb"), src);
-        const sp<AssetBundle> asset = _raw_asset->getBundle(src);
+        const sp<AssetBundle> asset = _raw_asset_bundle->getBundle(src);
         DCHECK(asset, "Unknow asset src: %s", src.c_str());
         return asset;
     }
@@ -206,23 +206,20 @@ private:
     };
 
     List<Mounted> _mounts;
-    sp<RawAsset> _raw_asset;
+    sp<RawAssetBundle> _raw_asset_bundle;
 };
 
-Ark::Ark(int32_t argc, const char** argv, const sp<Manifest>& manifest)
-    : _argc(argc), _argv(argv), _manifest(manifest), _object_pool(sp<ObjectPool>::make())
+Ark::Ark(int32_t argc, const char** argv)
+    : _argc(argc), _argv(argv), _object_pool(sp<ObjectPool>::make())
 {
     push();
     __ark_bootstrap__();
+}
 
-    _asset = sp<ArkAsset>::make(sp<RawAsset>::make(manifest->assetDir(), manifest->appDir()), manifest->assets());
-
-    loadPlugins(manifest);
-
-    const sp<AssetBundle> asset = _asset->getAssetBundle(".");
-    const sp<ApplicationResource> appResource = sp<ApplicationResource>::make(sp<XMLDirectory>::make(asset), asset);
-    const sp<RenderEngine> renderEngine = createRenderEngine(manifest->renderer()._version, appResource);
-    _application_context = createApplicationContext(manifest->content(), appResource, renderEngine);
+Ark::Ark(int32_t argc, const char** argv, const sp<Manifest>& manifest)
+    : Ark(argc, argv)
+{
+    initialize(manifest);
 }
 
 Ark::~Ark()
@@ -239,7 +236,7 @@ Ark::~Ark()
 
 Ark& Ark::instance()
 {
-    DASSERT(_instance);
+    DCHECK(_instance, "Create an Ark instance before using the others");
     return *_instance;
 }
 
@@ -247,6 +244,19 @@ void Ark::push()
 {
     _instance_stack.push_front(_instance);
     _instance = this;
+}
+
+void Ark::initialize(const sp<Manifest>& manifest)
+{
+    _manifest = manifest;
+    _asset_bundle = sp<ArkAssetBundle>::make(sp<RawAssetBundle>::make(manifest->assetDir(), manifest->appDir()), manifest->assets());
+
+    loadPlugins(manifest);
+
+    const sp<AssetBundle> asset = _asset_bundle->getAssetBundle(".");
+    const sp<ApplicationResource> appResource = sp<ApplicationResource>::make(sp<XMLDirectory>::make(asset), asset);
+    const sp<RenderEngine> renderEngine = createRenderEngine(manifest->renderer()._version, appResource);
+    _application_context = createApplicationContext(manifest->content(), appResource, renderEngine);
 }
 
 sp<BeanFactory> Ark::createBeanFactory(const String& src) const
@@ -280,17 +290,17 @@ const sp<Manifest>& Ark::manifest() const
 
 sp<AssetBundle> Ark::getAssetBundle(const String& path) const
 {
-    return _asset->getAssetBundle(path);
+    return _asset_bundle->getAssetBundle(path);
 }
 
 sp<Asset> Ark::getAsset(const String& path) const
 {
-    return _asset->get(path);
+    return _asset_bundle->get(path);
 }
 
 sp<Readable> Ark::openAsset(const String& path) const
 {
-    const sp<Asset> asset = _asset->get(path);
+    const sp<Asset> asset = _asset_bundle->get(path);
     return asset ? asset->open() : sp<Readable>::null();
 }
 
