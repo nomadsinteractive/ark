@@ -65,6 +65,7 @@ void VKTexture2D::doUpload()
     VkDevice logicalDevice = _renderer->vkLogicalDevice();
 
     const bitmap tex = _bitmap ? _bitmap->val() : bitmap::null();
+    const bytearray imagedata = tex ? tex->bytes() : nullptr;
     VkFormat format = tex ? VKUtil::toTextureFormat(tex, _parameters->_format) : VK_FORMAT_R8G8B8A8_UNORM;
 
     DCHECK(!tex || (_width == tex->width() && _height == tex->height()), "Uploading bitmap has different size(%d, %d) compared to Texture's(%d, %d)", tex->width(), tex->height(), _width, _width);
@@ -86,7 +87,7 @@ void VKTexture2D::doUpload()
     VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
     VkMemoryRequirements memReqs = {};
 
-    if (useStaging)
+    if(useStaging)
     {
         // Create optimal tiled target image on the device
         VkImageCreateInfo imageCreateInfo = vks::initializers::imageCreateInfo();
@@ -101,15 +102,12 @@ void VKTexture2D::doUpload()
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageCreateInfo.extent = { _width, _height, 1 };
         imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        VKUtil::checkResult(vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &_image));
+        if(!imagedata)
+            imageCreateInfo.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        vkGetImageMemoryRequirements(logicalDevice, _image, &memReqs);
-        memAllocInfo.allocationSize = memReqs.size;
-        memAllocInfo.memoryTypeIndex = _renderer->device()->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        VKUtil::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &_memory));
-        VKUtil::checkResult(vkBindImageMemory(logicalDevice, _image, _memory, 0));
+        VKUtil::createImage(_renderer->device(), imageCreateInfo, &_image, &_memory);
 
-        if(tex && tex->bytes())
+        if(imagedata)
         {
             // Copy data to an optimal tiled image
             // This loads the texture data into a host local buffer that is copied to the optimal tiled image on the device
@@ -120,7 +118,7 @@ void VKTexture2D::doUpload()
             VkDeviceMemory stagingMemory;
 
             VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo();
-            bufferCreateInfo.size = tex->bytes()->size();
+            bufferCreateInfo.size = imagedata->size();
             // This buffer is used as a transfer source for the buffer copy
             bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
             bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -137,7 +135,7 @@ void VKTexture2D::doUpload()
             // Copy texture data into host local staging buffer
             uint8_t *data;
             VKUtil::checkResult(vkMapMemory(logicalDevice, stagingMemory, 0, memReqs.size, 0, (void **)&data));
-            memcpy(data, tex->bytes()->buf(), tex->bytes()->size());
+            memcpy(data, imagedata->buf(), imagedata->size());
             vkUnmapMemory(logicalDevice, stagingMemory);
 
             // Setup buffer copy regions for each mip level
@@ -157,7 +155,7 @@ void VKTexture2D::doUpload()
 
                 bufferCopyRegions.push_back(bufferCopyRegion);
 
-                offset += static_cast<uint32_t>(tex->bytes()->size());
+                offset += static_cast<uint32_t>(imagedata->size());
             }
 
             VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
@@ -267,7 +265,7 @@ void VKTexture2D::doUpload()
         void *data;
         VKUtil::checkResult(vkMapMemory(logicalDevice, mappableMemory, 0, memReqs.size, 0, &data));
         // Copy image data of the first mip level into memory
-        memcpy(data, tex->bytes()->buf(), tex->bytes()->size());
+        memcpy(data, imagedata->buf(), imagedata->size());
         vkUnmapMemory(logicalDevice, mappableMemory);
 
         // Linear tiled images don't need to be staged and can be directly used as textures
@@ -314,8 +312,8 @@ void VKTexture2D::doUpload()
     // This separates all the sampling information from the texture data. This means you could have multiple sampler objects for the same texture with different settings
     // Note: Similar to the samplers available with OpenGL 3.3
     VkSamplerCreateInfo sampler = vks::initializers::samplerCreateInfo();
-    sampler.magFilter = VK_FILTER_LINEAR;
-    sampler.minFilter = VK_FILTER_LINEAR;
+    sampler.magFilter = _parameters->_mag_filter == Texture::PARAMETER_NEAREST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
+    sampler.minFilter = _parameters->_min_filter == Texture::PARAMETER_NEAREST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
     sampler.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
     sampler.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     sampler.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;

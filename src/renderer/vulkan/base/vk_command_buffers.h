@@ -22,18 +22,12 @@ public:
 
     const std::vector<VkCommandBuffer>& vkCommandBuffers() const;
 
-    const sp<RenderCommand>& aquire() const;
-
     void submit(GraphicsContext& graphicsContext) const;
-
-private:
-    std::vector<sp<RenderCommand>> makeRenderCommands() const;
 
 private:
     sp<Recycler> _recycler;
     sp<VKRenderTarget> _render_target;
     std::vector<VkCommandBuffer> _command_buffers;
-    std::vector<sp<RenderCommand>> _render_commands;
 };
 
 }

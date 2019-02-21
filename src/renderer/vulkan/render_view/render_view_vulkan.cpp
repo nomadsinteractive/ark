@@ -42,14 +42,14 @@ void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, const sp<Rend
     _graphics_context->onDrawFrame();
 
     const sp<VKRenderTarget>& renderTarget = _renderer->renderTarget();
-    uint32_t imageId = renderTarget->acquire();
+    uint32_t imageId = renderTarget->acquire(_vk_context);
 
     _vk_context->begin(imageId, backgroundColor);
     renderCommand->draw(_graphics_context);
     _vk_context->end();
 
     _vk_context->submit(_graphics_context);
-    renderTarget->swap();
+    renderTarget->swap(_vk_context);
 }
 
 }

@@ -217,6 +217,20 @@ VkPipelineShaderStageCreateInfo VKUtil::createShader(VkDevice device, const Stri
     return shaderStage;
 }
 
+void VKUtil::createImage(const VKDevice& device, const VkImageCreateInfo& imageCreateInfo, VkImage* image, VkDeviceMemory* memory, VkMemoryPropertyFlags propertyFlags)
+{
+    VkDevice logicalDevice = device.vkLogicalDevice();
+    checkResult(vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, image));
+
+    VkMemoryRequirements memReqs = {};
+    VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
+    vkGetImageMemoryRequirements(logicalDevice, *image, &memReqs);
+    memAllocInfo.allocationSize = memReqs.size;
+    memAllocInfo.memoryTypeIndex = device.getMemoryType(memReqs.memoryTypeBits, propertyFlags);
+    checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, memory));
+    checkResult(vkBindImageMemory(logicalDevice, *image, *memory, 0));
+}
+
 VkFormat VKUtil::getAttributeFormat(const Attribute& attribute)
 {
     if(attribute.type() == Attribute::TYPE_FLOAT)

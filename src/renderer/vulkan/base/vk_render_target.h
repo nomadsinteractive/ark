@@ -25,7 +25,6 @@ public:
     uint32_t width() const;
     uint32_t height() const;
 
-//    VkDescriptorPool vkDescriptorPool() const;
     const VkRect2D& vkScissor() const;
     const VkViewport& vkViewport() const;
 
@@ -40,11 +39,11 @@ public:
     std::vector<VkCommandBuffer> makeCommandBuffers() const;
     sp<VKDescriptorPool> makeDescriptorPool(const sp<Recycler>& recycler) const;
 
-    uint32_t acquire();
+    uint32_t acquire(VKGraphicsContext& vkContext);
     uint32_t aquiredImageId() const;
 
     void submit(VkCommandBuffer commandBuffer);
-    void swap();
+    void swap(VKGraphicsContext& vkContext);
 
     void onSurfaceChanged(uint32_t width, uint32_t height);
 
@@ -71,11 +70,11 @@ private:
     std::vector<VkFramebuffer> _frame_buffers;
     std::vector<VkCommandBuffer> _submit_queue;
 
-    VkSemaphore _semaphore_present_complete;
-    VkSemaphore _semaphore_render_complete;
+//    VkSemaphore _semaphore_present_complete;
+//    VkSemaphore _semaphore_render_complete;
 
-    VkSubmitInfo _submit_info;
-    VkPipelineStageFlags _submit_pipeline_stages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+//    VkSubmitInfo _submit_info;
+//    VkPipelineStageFlags _submit_pipeline_stages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
     struct
     {
@@ -88,6 +87,8 @@ private:
     uint32_t _height = 720;
 
     uint32_t _aquired_image_id;
+
+    friend class VKGraphicsContext;
 };
 
 }

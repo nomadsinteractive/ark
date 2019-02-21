@@ -9,6 +9,7 @@
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
 #include "renderer/vulkan/base/vk_descriptor_pool.h"
+#include "renderer/vulkan/base/vk_graphics_context.h"
 #include "renderer/vulkan/util/vk_util.h"
 
 #ifdef ARK_PLATFORM_DARWIN
@@ -28,25 +29,6 @@ VKRenderTarget::VKRenderTarget(const RenderContext& renderContext, sp<VKDevice>&
 
     _clear_values[0].color = {{0, 0, 0, 0}};
     _clear_values[1].depthStencil = {1.0f, 0};
-
-    // Create synchronization objects
-    VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
-    // Create a semaphore used to synchronize image presentation
-    // Ensures that the image is displayed before we start submitting new commands to the queu
-    VKUtil::checkResult(vkCreateSemaphore(_device->vkLogicalDevice(), &semaphoreCreateInfo, nullptr, &_semaphore_present_complete));
-    // Create a semaphore used to synchronize command submission
-    // Ensures that the image is not presented until all commands have been sumbitted and executed
-    VKUtil::checkResult(vkCreateSemaphore(_device->vkLogicalDevice(), &semaphoreCreateInfo, nullptr, &_semaphore_render_complete));
-
-    // Set up submit info structure
-    // Semaphores will stay the same during application lifetime
-    // Command buffer submission info is set by each example
-    _submit_info = vks::initializers::submitInfo();
-    _submit_info.pWaitDstStageMask = &_submit_pipeline_stages;
-    _submit_info.waitSemaphoreCount = 1;
-    _submit_info.pWaitSemaphores = &_semaphore_present_complete;
-    _submit_info.signalSemaphoreCount = 1;
-    _submit_info.pSignalSemaphores = &_semaphore_render_complete;
 
     initSwapchain(renderContext);
 
@@ -68,9 +50,6 @@ VKRenderTarget::~VKRenderTarget()
     vkDestroyImageView(logicalDevice, _depth_stencil.view, nullptr);
     vkDestroyImage(logicalDevice, _depth_stencil.image, nullptr);
     vkFreeMemory(logicalDevice, _depth_stencil.mem, nullptr);
-
-    vkDestroySemaphore(logicalDevice, _semaphore_present_complete, nullptr);
-    vkDestroySemaphore(logicalDevice, _semaphore_render_complete, nullptr);
 
     _swap_chain.cleanup();
 }
@@ -140,11 +119,11 @@ sp<VKDescriptorPool> VKRenderTarget::makeDescriptorPool(const sp<Recycler>& recy
     return sp<VKDescriptorPool>::make(recycler, _device, descriptorPool);
 }
 
-uint32_t VKRenderTarget::acquire()
+uint32_t VKRenderTarget::acquire(VKGraphicsContext& vkContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     _submit_queue.clear();
-    VKUtil::checkResult(_swap_chain.acquireNextImage(_semaphore_present_complete, &_aquired_image_id));
+    VKUtil::checkResult(_swap_chain.acquireNextImage(vkContext._semaphore_present_complete, &_aquired_image_id));
     return _aquired_image_id;
 }
 
@@ -159,15 +138,18 @@ void VKRenderTarget::submit(VkCommandBuffer commandBuffer)
     _submit_queue.push_back(commandBuffer);
 }
 
-void VKRenderTarget::swap()
+void VKRenderTarget::swap(VKGraphicsContext& vkContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
-    _submit_info.pCommandBuffers = _submit_queue.data();
-    _submit_info.commandBufferCount = static_cast<uint32_t>(_submit_queue.size());
-    VKUtil::checkResult(vkQueueSubmit(_queue, 1, &_submit_info, VK_NULL_HANDLE));
+    std::vector<VkSubmitInfo>& submitInfos = vkContext.submitInfos();
 
-    VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, _semaphore_render_complete));
+    VkSubmitInfo& submitInfo = submitInfos[0];
+    submitInfo.pCommandBuffers = _submit_queue.data();
+    submitInfo.commandBufferCount = static_cast<uint32_t>(_submit_queue.size());
+    VKUtil::checkResult(vkQueueSubmit(_queue, submitInfos.size(), &submitInfo, VK_NULL_HANDLE));
+
+    VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, vkContext._semaphore_render_complete));
     vkQueueWaitIdle(_queue);
 }
 

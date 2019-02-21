@@ -90,7 +90,7 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buff
 
 sp<Framebuffer> RendererFactoryVulkan::createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture)
 {
-    const sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_recycler, texture);
+    const sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, _recycler, texture);
     return sp<Framebuffer>::make(fbo, sp<VKFramebufferRenderer>::make(renderer, fbo));
 }
 

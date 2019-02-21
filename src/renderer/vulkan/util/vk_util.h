@@ -24,6 +24,7 @@ public:
     static VkPipelineShaderStageCreateInfo loadShader(VkDevice device, const String& resid, Shader::Stage stage);
     static VkPipelineShaderStageCreateInfo createShader(VkDevice device, const String& source, Shader::Stage stage);
 
+    static void createImage(const VKDevice& device, const VkImageCreateInfo& imageCreateInfo, VkImage* image, VkDeviceMemory* memory, VkMemoryPropertyFlags propertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
     static VkFormat getAttributeFormat(const Attribute& attribute);
     static VkFormat toTextureFormat(const Bitmap& bitmap, Texture::Format format);

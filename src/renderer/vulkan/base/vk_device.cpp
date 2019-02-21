@@ -88,7 +88,7 @@ const VkPhysicalDeviceMemoryProperties& VKDevice::vkMemoryProperties() const
     return _vulkan_device->memoryProperties;
 }
 
-uint32_t VKDevice::getMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32* memTypeFound)
+uint32_t VKDevice::getMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32* memTypeFound) const
 {
     return _vulkan_device->getMemoryType(typeBits, properties, memTypeFound);
 }
