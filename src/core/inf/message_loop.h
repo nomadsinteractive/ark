@@ -14,9 +14,6 @@ public:
 
     virtual void post(const sp<Runnable>& task, float delay) = 0;
     virtual void schedule(const sp<Runnable>& task, float interval) = 0;
-
-    void postTask(std::function<void()> task, float delay = 0);
-    void scheduleTask(std::function<bool()> task, float interval);
 };
 
 }

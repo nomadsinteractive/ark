@@ -681,6 +681,9 @@ class RenderLayer:
     def add_render_object(self, obj):
         pass
 
+    def clear(self):
+        pass
+
 
 class Expried:
     def __init__(self, e):

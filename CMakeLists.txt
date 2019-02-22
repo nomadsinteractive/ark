@@ -68,7 +68,6 @@ aux_source_directory(src/core/impl/runnable LOCAL_SRC_LIST)
 aux_source_directory(src/core/impl/boolean LOCAL_SRC_LIST)
 aux_source_directory(src/core/impl/numeric LOCAL_SRC_LIST)
 aux_source_directory(src/core/impl/variable LOCAL_SRC_LIST)
-aux_source_directory(src/core/inf LOCAL_SRC_LIST)
 aux_source_directory(src/core/util LOCAL_SRC_LIST)
 aux_source_directory(src/core/types LOCAL_SRC_LIST)
 

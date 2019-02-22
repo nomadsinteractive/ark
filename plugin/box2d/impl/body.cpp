@@ -176,6 +176,7 @@ bool Body::active()
 
 void Body::setActive(bool active)
 {
+    DCHECK(!_stub->_world.world().IsLocked(), "Cannot set active in the middle of a time step");
     _stub->_body->SetActive(active);
 }
 
@@ -278,6 +279,7 @@ Body::Stub::~Stub()
 void Body::Stub::dispose()
 {
     DCHECK(_body, "Body has been disposed already");
+    DCHECK(!_world.world().IsLocked(), "Cannot destroy body in the middle of a time step");
     LOGD("id = %d", _id);
     _body->SetUserData(nullptr);
     _world.world().DestroyBody(_body);

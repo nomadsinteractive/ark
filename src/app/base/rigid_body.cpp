@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include "core/ark.h"
+
 #include "core/base/bean_factory.h"
 #include "core/base/string.h"
 #include "core/inf/variable.h"
@@ -12,6 +14,7 @@
 #include "graphics/base/v3.h"
 #include "graphics/base/render_object.h"
 
+#include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
 
@@ -128,13 +131,26 @@ RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec>& positi
 void RigidBody::Callback::onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
 {
     if(_collision_callback)
-        _collision_callback->onBeginContact(rigidBody, manifold);
+    {
+        const sp<CollisionCallback> cc = _collision_callback;
+        const sp<RigidBody> rb = rigidBody;
+        const CollisionManifold m = manifold;
+        Ark::instance().applicationContext()->post([=]() {
+            cc->onBeginContact(rb, m);
+        });
+    }
 }
 
 void RigidBody::Callback::onEndContact(const sp<RigidBody>& rigidBody)
 {
     if(_collision_callback)
-        _collision_callback->onEndContact(rigidBody);
+    {
+        const sp<CollisionCallback> cc = _collision_callback;
+        const sp<RigidBody> rb = rigidBody;
+        Ark::instance().applicationContext()->post([=]() {
+            cc->onEndContact(rb);
+        });
+    }
 }
 
 void RigidBody::Callback::onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)

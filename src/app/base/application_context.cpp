@@ -9,6 +9,9 @@
 #include "core/base/thread_pool_executor.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/impl/message_loop/message_loop_default.h"
+#include "core/impl/runnable/runnable_by_function.h"
+#include "core/impl/runnable/runnable_by_function_with_expired.h"
+
 #include "core/inf/runnable.h"
 #include "core/types/global.h"
 
@@ -179,17 +182,17 @@ void ApplicationContext::schedule(const sp<Runnable>& task, float interval)
 
 void ApplicationContext::post(std::function<void()> task, float delay)
 {
-    _message_loop->postTask(std::move(task), delay);
+    _message_loop->post(sp<RunnableByFunction>::make(std::move(task)), delay);
 }
 
 void ApplicationContext::schedule(std::function<bool()> task, float interval)
 {
-    _message_loop->scheduleTask(std::move(task), interval);
+    _message_loop->schedule(sp<RunnableByFunctionWithExpired>::make(std::move(task)), interval);
 }
 
 void ApplicationContext::postToRenderer(std::function<void()> task)
 {
-    _render_message_loop->postTask(std::move(task), 0);
+    _render_message_loop->post(sp<RunnableByFunction>::make(std::move(task)), 0);
 }
 
 void ApplicationContext::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)

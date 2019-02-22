@@ -1,8 +1,27 @@
 #include "core/base/thread_pool_executor.h"
 
+#include "core/base/string.h"
 #include "core/inf/message_loop.h"
 
 namespace ark {
+
+namespace {
+
+class ThrowException : public Runnable {
+public:
+    ThrowException(const String& what)
+        : _what(what) {
+    }
+
+    virtual void run() override {
+        FATAL("Unhanlded exception in thread: %s", _what.c_str());
+    }
+
+private:
+    String _what;
+};
+
+}
 
 ThreadPoolExecutor::ThreadPoolExecutor(const sp<MessageLoop>& messageLoop, uint32_t capacity)
     : _stub(sp<Stub>::make(messageLoop, std::max<uint32_t>(2, capacity ? capacity : std::thread::hardware_concurrency())))
@@ -63,9 +82,7 @@ void ThreadPoolExecutor::Worker::run()
             }
             catch(const std::exception& e) {
                 if(_stub->_message_loop)
-                    _stub->_message_loop->postTask([e]() {
-                        FATAL("Unhanlded exception in thread: %s", e.what());
-                    });
+                    _stub->_message_loop->post(sp<ThrowException>::make(e.what()), 0);
             }
         }
         else

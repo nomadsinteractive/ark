@@ -4,6 +4,7 @@
 #include "core/base/api.h"
 #include "core/inf/builder.h"
 #include "core/types/box.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -38,8 +39,8 @@ public:
 
         int32_t _id;
         Collider::BodyType _type;
-        sp<Vec> _position;
-        sp<Size> _size;
+        SafePtr<Vec> _position;
+        SafePtr<Size> _size;
         sp<Rotation> _rotate;
 
         sp<Callback> _callback;
