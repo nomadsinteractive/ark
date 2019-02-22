@@ -1,6 +1,7 @@
 #include "graphics/base/surface_controller.h"
 
 #include <thread>
+#include <chrono>
 
 #include "graphics/base/render_request.h"
 #include "graphics/base/layer.h"
@@ -52,9 +53,11 @@ void SurfaceController::update(RenderRequest& renderRequest)
 
 void SurfaceController::onRenderFrame(const Color& backgroundColor, RenderView& renderView)
 {
+    const static auto duration = std::chrono::milliseconds(1);
     sp<RenderCommandPipeline> renderCommand;
-    if(_render_commands.pop(renderCommand))
-        renderView.onRenderFrame(backgroundColor, renderCommand);
+    while(!_render_commands.pop(renderCommand))
+        std::this_thread::sleep_for(duration);
+    renderView.onRenderFrame(backgroundColor, renderCommand);
 }
 
 }
