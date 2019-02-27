@@ -90,6 +90,7 @@ const std::vector<String>& Manifest::plugins() const
 
 const sp<Size>& Manifest::rendererResolution() const
 {
+    DCHECK(_renderer._resolution, "RenderResolution undefined in manifest");
     return _renderer._resolution;
 }
 

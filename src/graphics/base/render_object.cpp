@@ -3,7 +3,7 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
-#include "core/epi/lifecycle.h"
+#include "core/epi/disposable.h"
 #include "core/util/bean_utils.h"
 #include "core/util/numeric_util.h"
 
@@ -20,7 +20,7 @@ RenderObject::RenderObject(int32_t type, const sp<Vec>& position, const sp<Size>
 }
 
 RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _type_lifecycle(type.as<Lifecycle>())
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _disposed(type.as<Disposable>())
 {
 }
 
@@ -52,13 +52,13 @@ const SafePtr<Transform>& RenderObject::transform() const
 void RenderObject::setType(int32_t type)
 {
     _type->set(type);
-    _type_lifecycle = nullptr;
+    _disposed = nullptr;
 }
 
 void RenderObject::setType(const sp<Integer>& type)
 {
     _type->set(type);
-    _type_lifecycle = type.as<Lifecycle>();
+    _disposed = type.as<Disposable>();
 }
 
 float RenderObject::x() const
@@ -133,7 +133,7 @@ void RenderObject::setTag(const Box& tag)
 
 bool RenderObject::isDisposed() const
 {
-    return _type_lifecycle && _type_lifecycle->isDisposed();
+    return _disposed && _disposed->isDisposed();
 }
 
 RenderObject::Snapshot RenderObject::snapshot(MemoryPool& memoryPool) const
@@ -157,13 +157,13 @@ sp<RenderObject> RenderObject::BUILDER::build(const sp<Scope>& args)
 }
 
 RenderObject::EXPIRED_STYLE::EXPIRED_STYLE(BeanFactory& factory, const sp<Builder<RenderObject>>& delegate, const String& value)
-    : _delegate(delegate), _expired(factory.ensureBuilder<Lifecycle>(value))
+    : _delegate(delegate), _disposable(factory.ensureBuilder<Disposable>(value))
 {
 }
 
 sp<RenderObject> RenderObject::EXPIRED_STYLE::build(const sp<Scope>& args)
 {
-    return _delegate->build(args).absorb(_expired->build(args));
+    return _delegate->build(args).absorb(_disposable->build(args));
 }
 
 RenderObject::Snapshot::Snapshot(int32_t type, const V& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings)

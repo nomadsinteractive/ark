@@ -295,7 +295,7 @@ bool PythonInterpreter::isPyObject(TypeId type) const
     return (type == Type<PyInstance>::id()) || _type_by_id.find(type) != _type_by_id.end();
 }
 
-void PythonInterpreter::logErr()
+void PythonInterpreter::logErr() const
 {
 #ifdef ARK_FLAG_DEBUG
     PyErr_Print();
@@ -310,6 +310,21 @@ void PythonInterpreter::logErr()
     LOGE("%s", pStrErrorMessage);
 #endif
     PyErr_Clear();
+}
+
+bool PythonInterpreter::exceptErr(PyObject* type) const
+{
+    PyObject* err = PyErr_Occurred();
+    if(err)
+    {
+        if(PyErr_GivenExceptionMatches(err, type))
+        {
+            PyErr_Clear();
+            return true;
+        }
+    }
+    logErr();
+    return false;
 }
 
 template<> ARK_PLUGIN_PYTHON_API String PythonInterpreter::toType<String>(PyObject* object)

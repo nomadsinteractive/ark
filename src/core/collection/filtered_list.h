@@ -4,7 +4,7 @@
 #include <list>
 
 #include "core/forwarding.h"
-#include "core/epi/lifecycle.h"
+#include "core/epi/disposable.h"
 #include "core/inf/variable.h"
 #include "core/collection/iterable.h"
 #include "core/types/shared_ptr.h"
@@ -23,12 +23,12 @@ public:
     template<typename T> class IsDisposed {
     public:
         IsDisposed(const sp<T>& item)
-            : IsDisposed(item, item.template as<Lifecycle>()) {
+            : IsDisposed(item, item.template as<Disposable>()) {
         }
         IsDisposed(const sp<T>& /*item*/, const sp<Boolean>& disposed)
             : _disposed(disposed) {
         }
-        IsDisposed(const sp<T>& /*item*/, const sp<Lifecycle>& lifecycle)
+        IsDisposed(const sp<T>& /*item*/, const sp<Disposable>& lifecycle)
             : _disposed(lifecycle ? lifecycle->toBoolean() : sp<Boolean>::null()) {
         }
 

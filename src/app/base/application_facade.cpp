@@ -1,6 +1,6 @@
 #include "app/base/application_facade.h"
 
-#include "core/epi/lifecycle.h"
+#include "core/epi/disposable.h"
 
 #include "graphics/base/camera.h"
 #include "graphics/base/surface_controller.h"
@@ -45,12 +45,12 @@ const sp<Arena>& ApplicationFacade::arena() const
 void ApplicationFacade::setArena(const sp<Arena>& arena)
 {
     if(_arena)
-        _arena.as<Lifecycle>()->dispose();
+        _arena.as<Disposable>()->dispose();
 
     DASSERT(arena);
-    DWARN(!arena.is<Lifecycle>(), "Application main arena's lifecycle should be managed by application itself");
+    DWARN(!arena.is<Disposable>(), "Application main arena's lifecycle should be managed by application itself");
     _arena = arena;
-    _arena.absorb<Lifecycle>(sp<Lifecycle>::make());
+    _arena.absorb<Disposable>(sp<Disposable>::make());
 
     _surface_controller->addRenderer(_arena);
     _context->addEventListener(_arena);

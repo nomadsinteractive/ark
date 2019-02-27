@@ -85,7 +85,7 @@ public:
 
     private:
         sp<Builder<Arena>> _delegate;
-        sp<Builder<Lifecycle>> _expired;
+        sp<Builder<Disposable>> _expired;
     };
 
 private:

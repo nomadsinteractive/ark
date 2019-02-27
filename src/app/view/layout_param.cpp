@@ -8,8 +8,8 @@
 
 namespace ark {
 
-const float LayoutParam::MATCH_PARENT = -1.0f;
-const float LayoutParam::WRAP_CONTENT = -2.0f;
+const int32_t LayoutParam::MATCH_PARENT = -1;
+const int32_t LayoutParam::WRAP_CONTENT = -2;
 
 template<> ARK_API LayoutParam::Display Conversions::to<String, LayoutParam::Display>(const String& str)
 {
@@ -97,17 +97,17 @@ Rect& LayoutParam::margins()
 
 bool LayoutParam::isWrapContent() const
 {
-    return _size->width() == WRAP_CONTENT || _size->height() == WRAP_CONTENT;
+    return isWrapContent(_size->width()) || isWrapContent(_size->height());
 }
 
 bool LayoutParam::isMatchParent(float unit)
 {
-    return unit == MATCH_PARENT;
+    return static_cast<int32_t>(unit) == MATCH_PARENT;
 }
 
 bool LayoutParam::isWrapContent(float unit)
 {
-    return unit == WRAP_CONTENT;
+    return static_cast<int32_t>(unit) == WRAP_CONTENT;
 }
 
 LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

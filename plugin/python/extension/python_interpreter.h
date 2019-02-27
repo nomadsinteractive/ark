@@ -172,7 +172,8 @@ public:
 
     const sp<ReferenceManager>& referenceManager() const;
 
-    void logErr();
+    void logErr() const;
+    bool exceptErr(PyObject* type) const;
 
 private:
     template<typename T> PyObject* fromIterable_sfinae(const T& list, decltype(list.at(0))*) {

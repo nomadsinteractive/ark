@@ -182,12 +182,15 @@ class Numeric(_Var):
         return False
 
 
-class Lifecycle:
+class Disposable:
     def __init__(self, disposed=False):
         pass
 
     def dispose(self):
         pass
+
+    def is_disposed(self):
+        return False
 
 
 class Vec2:
@@ -583,9 +586,17 @@ class Size:
     def width(self):
         return 0
 
+    @width.setter
+    def width(self, width):
+        pass
+
     @property
     def height(self):
         return 0
+
+    @height.setter
+    def height(self, height):
+        pass
 
 
 class TileMap:
@@ -658,6 +669,14 @@ class EventDispatcher:
 
 class Characters:
     def __init__(self, layer, text_scale=1.0, letter_spacing=0, line_height=0, line_indent=0):
+        pass
+
+    @property
+    def text(self):
+        return None
+
+    @text.setter
+    def text(self, text):
         pass
 
 

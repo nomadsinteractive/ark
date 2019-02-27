@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_EPI_LIFECYCLE_H_
-#define ARK_CORE_EPI_LIFECYCLE_H_
+#ifndef ARK_CORE_EPI_DISPOSABLE_H_
+#define ARK_CORE_EPI_DISPOSABLE_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -9,12 +9,12 @@
 
 namespace ark {
 
-class ARK_API Lifecycle {
+class ARK_API Disposable {
 public:
 //  [[script::bindings::auto]]
-    Lifecycle(bool disposed = false);
+    Disposable(bool disposed = false);
 //  [[script::bindings::auto]]
-    Lifecycle(const sp<Boolean>& disposed);
+    Disposable(const sp<Boolean>& disposed);
 
     sp<Boolean> toBoolean() const;
 
@@ -24,11 +24,11 @@ public:
     void dispose();
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Lifecycle> {
+    class DICTIONARY : public Builder<Disposable> {
     public:
         DICTIONARY(BeanFactory& parent, const String& value);
 
-        virtual sp<Lifecycle> build(const sp<Scope>& args);
+        virtual sp<Disposable> build(const sp<Scope>& args);
 
     private:
         bool _disposed;

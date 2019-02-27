@@ -23,7 +23,7 @@ public:
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
 // [[script::bindings::auto]]
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Lifecycle>& lifecycle = sp<Lifecycle>::null());
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& lifecycle = sp<Disposable>::null());
 // [[script::bindings::auto]]
     void removeRenderObject(const sp<RenderObject>& renderObject);
 

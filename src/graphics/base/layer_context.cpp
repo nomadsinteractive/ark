@@ -1,6 +1,6 @@
 #include "graphics/base/layer_context.h"
 
-#include "core/epi/lifecycle.h"
+#include "core/epi/disposable.h"
 
 namespace ark {
 
@@ -17,15 +17,15 @@ void LayerContext::renderRequest(const V2& position)
 
 void LayerContext::addRenderObject(const sp<RenderObject>& renderObject)
 {
-    addRenderObject(renderObject, renderObject.as<Lifecycle>());
+    addRenderObject(renderObject, renderObject.as<Disposable>());
 }
 
-void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Lifecycle>& lifecycle)
+void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& lifecycle)
 {
     if(lifecycle)
         _items.push_back(renderObject, lifecycle);
     else
-        _items.push_back(renderObject, renderObject.as<Lifecycle>());
+        _items.push_back(renderObject, renderObject.as<Disposable>());
 }
 
 void LayerContext::removeRenderObject(const sp<RenderObject>& renderObject)
@@ -52,7 +52,7 @@ void LayerContext::takeSnapshot(Layer::Snapshot& output, MemoryPool& memoryPool)
     _render_requested = false;
 }
 
-LayerContext::RenderObjectFilter::RenderObjectFilter(const sp<RenderObject>& /*renderObject*/, const sp<Lifecycle>& disposed)
+LayerContext::RenderObjectFilter::RenderObjectFilter(const sp<RenderObject>& /*renderObject*/, const sp<Disposable>& disposed)
     : _lifecycle(disposed)
 {
 }

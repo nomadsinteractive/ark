@@ -74,7 +74,7 @@ ParticleEmitter::Particale::Particale(const sp<Stub>& stub, const document& mani
     _size = factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE);
     _transform = factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM);
     _varyings = factory.getBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS);
-    _lifecycle = factory.ensureBuilder<Lifecycle>(manifest, Constants::Attributes::EXPIRED);
+    _lifecycle = factory.ensureBuilder<Disposable>(manifest, Constants::Attributes::EXPIRED);
 }
 
 uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clock, uint64_t tick, const sp<RenderLayer>& renderLayer)
@@ -117,7 +117,7 @@ uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clo
         _x += dx;
         _y += dy;
         const sp<Vec> position = makePosition(_stub->_object_pool, _x , _y);
-        const sp<Lifecycle> lifecycle = _lifecycle->build(_stub->_arguments);
+        const sp<Disposable> lifecycle = _lifecycle->build(_stub->_arguments);
         const sp<RenderObject> renderObject = _stub->_object_pool->obtain<RenderObject>(
                     type, position,
                     size, transform, filter);

@@ -115,7 +115,7 @@ public:
 
     private:
         sp<Builder<RenderObject>> _delegate;
-        sp<Builder<Lifecycle>> _expired;
+        sp<Builder<Disposable>> _disposable;
 
     };
 
@@ -127,7 +127,7 @@ private:
     SafePtr<Transform> _transform;
     SafePtr<Varyings> _varyings;
 
-    sp<Lifecycle> _type_lifecycle;
+    sp<Disposable> _disposed;
 
     Box _tag;
 };

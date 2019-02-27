@@ -552,6 +552,9 @@ class GenMethod(object):
     def check_argument_type(self):
         return True
 
+    def _gen_body_lines(self, genclass):
+        return []
+
     def _gen_call_statement(self, genclass, argnames):
         return 'unpacked->%s(%s);' % (self._name, argnames)
 
@@ -620,7 +623,7 @@ class GenMethod(object):
         return '\n    '.join(lines)
 
     def gen_definition_body(self, genclass, lines, not_overloaded_args, gen_type_check_args, exact_cast=False):
-        bodylines = []
+        bodylines = self._gen_body_lines(genclass)
         args = [(i, j) for i, j in enumerate(not_overloaded_args) if j]
         argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i, exact_cast) for i, j in args]
         self_type_checks = []
@@ -792,9 +795,13 @@ class GenGetPropMethod(GenMethod):
     def gen_py_arguments(self):
         return 'Instance* self, PyObject* arg0'
 
-    def _gen_call_statement(self, genclass, argnames):
-        self_statement = self.gen_self_statement(genclass)
-        return '%s->%s(%s);' % (self_statement, self._name, argnames)
+    def _gen_body_lines(self, genclass):
+        return ['PyObject* attr = PyObject_GenericGetAttr(reinterpret_cast<PyObject*>(self), arg0);',
+                'if(attr)',
+                '    return attr;',
+                'if(!PythonInterpreter::instance()->exceptErr(PyExc_AttributeError))',
+                '	Py_RETURN_NONE;'
+                '\n']
 
 
 class GenLoaderMethod(GenMethod):

@@ -18,8 +18,8 @@ public:
         DISPLAY_ABSOLUTE
     };
 
-    static const float MATCH_PARENT;
-    static const float WRAP_CONTENT;
+    static const int32_t MATCH_PARENT;
+    static const int32_t WRAP_CONTENT;
 
 public:
     LayoutParam(const sp<Size>& size, Display display = DISPLAY_BLOCK);

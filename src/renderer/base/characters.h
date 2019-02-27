@@ -63,11 +63,29 @@ public:
     };
 
 private:
-    void createContent();
+    void createContent(float boundary);
+    void createContentNoBoundary();
 
     Metrics getItemMetrics(wchar_t c) const;
 
-    void place(float boundary, wchar_t c, float& flowx, float& flowy, float& fontHeight);
+    struct LayoutChar {
+        LayoutChar(wchar_t c, const Metrics& metrics, float widthIntegral, bool isCJK);
+
+        wchar_t _char;
+        Metrics _metrics;
+        float _width_integral;
+        bool _is_cjk;
+    };
+
+    void placeNoBoundary(wchar_t c, float& flowx, float& flowy, float& fontHeight);
+    void place(const std::vector<LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
+    void placeOne(const LayoutChar& layoutChar, float& flowx, float flowy);
+
+    void nextLine(float fontHeight, float& flowx, float& flowy) const;
+
+    std::vector<LayoutChar> getCharacterMetrics(const std::wstring& text) const;
+    bool isCJK(int32_t c) const;
+    bool isWordBreaker(wchar_t c) const;
 
 private:
     sp<Layer> _layer;

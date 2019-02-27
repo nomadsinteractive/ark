@@ -17,7 +17,7 @@ public:
     void renderRequest(const V2& position);
 
     void addRenderObject(const sp<RenderObject>& renderObject);
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Lifecycle>& lifecylce);
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& lifecylce);
     void removeRenderObject(const sp<RenderObject>& renderObject);
 
     void clear();
@@ -27,12 +27,12 @@ public:
 private:
     class RenderObjectFilter {
     public:
-        RenderObjectFilter(const sp<RenderObject>& renderObject, const sp<Lifecycle>& disposed);
+        RenderObjectFilter(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed);
 
          FilterAction operator()(const sp<RenderObject>& renderObject) const;
 
     private:
-        sp<Lifecycle> _lifecycle;
+        sp<Disposable> _lifecycle;
     };
 
 private:

@@ -189,8 +189,8 @@ void RenderController::addPreUpdateRequest(const sp<Runnable>& task, const sp<Bo
         _on_pre_update_request.push_back(task, expired);
     else
     {
-        const sp<Lifecycle> e = task.as<Lifecycle>();
-        DCHECK(e, "Adding an unexpired running task, it's that what you REALLY want?");
+        const sp<Disposable> e = task.as<Disposable>();
+        DCHECK(e, "Adding an undisposable running task, it's that what you REALLY want?");
         _on_pre_update_request.push_back(task, e);
     }
 }

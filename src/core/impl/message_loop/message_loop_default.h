@@ -28,7 +28,7 @@ private:
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Task);
 
         const sp<Runnable>& entry() const;
-        const sp<Lifecycle>& expirable() const;
+        const sp<Disposable>& expirable() const;
 
         uint64_t nextFireTick() const;
         uint32_t interval() const;
@@ -36,7 +36,7 @@ private:
 
     private:
         sp<Runnable> _entry;
-        sp<Lifecycle> _lifecycle;
+        sp<Disposable> _lifecycle;
         uint64_t _next_fire_tick;
         uint32_t _interval;
     };

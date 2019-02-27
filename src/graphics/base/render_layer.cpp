@@ -19,7 +19,7 @@ void RenderLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
     _layer_context->renderRequest(V2(x, y));
 }
 
-void RenderLayer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Lifecycle>& lifecycle)
+void RenderLayer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& lifecycle)
 {
     DASSERT(renderObject);
     _layer_context->addRenderObject(renderObject, lifecycle);
@@ -48,7 +48,7 @@ sp<RenderLayer> RenderLayer::BUILDER_IMPL1::build(const sp<Scope>& args)
     for(const sp<Builder<RenderObject>>& i : _render_objects)
     {
         const sp<RenderObject> renderObject = i->build(args);
-        renderLayer->addRenderObject(renderObject, renderObject.as<Lifecycle>());
+        renderLayer->addRenderObject(renderObject, renderObject.as<Disposable>());
     }
     return renderLayer;
 }
