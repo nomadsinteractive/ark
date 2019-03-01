@@ -36,10 +36,13 @@ public:
         return Strings::parse<T>(ensureAttribute(doc, name));
     }
 
-    template<typename T, typename U> static T getList(const U& iterable, const String& valuename) {
+    template<typename T, typename U> static T getSystemSpecificList(const U& iterable, const String& valuename) {
         T list;
-        for(const document& i : iterable)
-            list.push_back(ensureAttribute(i, valuename));
+        for(const document& i : iterable) {
+            const String& system = getAttribute(i, "for");
+            if(system.empty() || isPlatformSpecific(system))
+                list.push_back(ensureAttribute(i, valuename));
+        }
         return list;
     }
 
@@ -60,6 +63,8 @@ public:
     static attribute findAttribute(const document& doc, const std::vector<String>& paths);
 
 private:
+    static bool isPlatformSpecific(const String& platform);
+
     Documents();
 };
 

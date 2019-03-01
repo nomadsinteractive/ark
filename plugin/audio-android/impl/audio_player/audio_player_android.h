@@ -1,5 +1,7 @@
-#ifndef ARK_PLUGIN_FMOD_IMPL_AUDIO_PLAYER_AUDIO_PLAYER_FMOD_H_
-#define ARK_PLUGIN_FMOD_IMPL_AUDIO_PLAYER_AUDIO_PLAYER_FMOD_H_
+#ifndef ARK_PLUGIN_ANDROID_AUDIO_IMPL_AUDIO_PLAYER_AUDIO_PLAYER_ANDROID_H_
+#define ARK_PLUGIN_ANDROID_AUDIO_IMPL_AUDIO_PLAYER_AUDIO_PLAYER_ANDROID_H_
+
+#include <aaudio/AAudio.h>
 
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
@@ -9,20 +11,19 @@
 
 #include "app/inf/audio_player.h"
 
-#include <fmod.hpp>
 
 namespace ark {
 namespace plugin {
-namespace fmod {
+namespace audio_android {
 
-class AudioPlayerFMOD : public AudioPlayer {
+class AudioPlayerAndroid : public AudioPlayer {
 public:
-    AudioPlayerFMOD(const sp<ResourceLoaderContext>& resourceLoaderContext);
+    AudioPlayerAndroid(const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual sp<Future> play(const sp<Readable>& source, AudioFormat format, PlayOption options) override;
     virtual bool isAudioFormatSupported(AudioFormat format) override;
 
-//  [[plugin::resource-loader("fmod")]]
+//  [[plugin::resource-loader("audio-android")]]
     class BUILDER : public Builder<AudioPlayer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
@@ -47,26 +48,7 @@ public:
     };
 
 private:
-    class FMODSystem : public Runnable {
-    public:
-        FMODSystem();
-        ~FMODSystem() override;
-
-        virtual void run() override;
-
-        FMOD::System* instance() const;
-
-    private:
-        FMOD::System* _instance;
-
-    };
-
-private:
     sp<Executor> _executor;
-
-    sp<FMODSystem> _system;
-
-
 };
 
 }

@@ -256,7 +256,7 @@ bool AudioPlayerPortaudio::isAudioFormatSupported(AudioPlayer::AudioFormat forma
     return format == AUDIO_FORMAT_PCM;
 }
 
-AudioPlayerPortaudio::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& /*doc*/, const sp<ResourceLoaderContext>& resourceLoaderContext)
+AudioPlayerPortaudio::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& /*manifest*/, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext)
 {
 }
@@ -268,6 +268,16 @@ sp<AudioPlayer> AudioPlayerPortaudio::BUILDER::build(const sp<Scope>& /*args*/)
     __portaudio_android_bootstrap__();
 #endif
     return sp<AudioPlayerPortaudio>::make(_resource_loader_context->executor());
+}
+
+AudioPlayerPortaudio::BUILDER_DEFAULT::BUILDER_DEFAULT(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _delegate(factory, manifest, resourceLoaderContext)
+{
+}
+
+sp<AudioPlayer> AudioPlayerPortaudio::BUILDER_DEFAULT::build(const sp<Scope>& args)
+{
+    return _delegate.build(args);
 }
 
 }

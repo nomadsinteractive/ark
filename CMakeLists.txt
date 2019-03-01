@@ -11,7 +11,17 @@ set(ARK_TOOLS_DIR ${ARK_SRC_DIR}/tools/cmake)
 set(ARK_3RDPARTY_DIR ${ARK_SRC_DIR}/3rdparty)
 set(ARK_PLUGIN_DIR ${ARK_SRC_DIR}/plugin)
 
+set(ARK_RUNTIME_SHARED_LIBRARY ${PROJECT_NAME})
+set(ARK_RUNTIME_STATIC_LIBRARY ${PROJECT_NAME}_static)
+set(TESTCASES_EXECUTABLE ${PROJECT_NAME}-testcases)
+set(GENERATED_TESTCASE_LAUNCHPAD ${ARK_GENERATED_FILE_DIRECTORY}/testcase_launchpad.cpp)
+
+set(ARK_INCLUDE_DIRS ${ARK_SRC_DIR} ${ARK_SRC_DIR}/src ${ARK_SRC_DIR}/platform/${SYSTEM} ${ARK_SRC_DIR}/platform/any)
+set(ARK_LIBRARIES ${ARK_RUNTIME_SHARED_LIBRARY})
+set(ARK_STATIC_LIBRARIES ${ARK_RUNTIME_STATIC_LIBRARY})
+
 include(${ARK_TOOLS_DIR}/core.cmake)
+set(ARK_SYSTEM_NAME ${SYSTEM} CACHE STRING "Target system name of ARK was built for")
 
 option(ARK_BUILD_STATIC_LIBRARY "Build static library" OFF)
 CMAKE_DEPENDENT_OPTION(ARK_TEST_ENABLE "Build testcases" ON "ARK_BUILD_STATIC_LIBRARY" OFF)
@@ -29,20 +39,10 @@ ark_compile_definition_option(ARK_USE_STB_IMAGE "Use stb image decoding library"
 ark_compile_definition_option(ARK_USE_OPEN_GL "Use OpenGL rendering library" ON)
 ark_compile_definition_option(ARK_USE_VULKAN  "Use Vulkan rendering library" OFF)
 
-set(ARK_SYSTEM_NAME ${SYSTEM} CACHE STRING "Target system name of ARK was built for")
-set(ARK_RUNTIME_SHARED_LIBRARY ${PROJECT_NAME})
-set(ARK_RUNTIME_STATIC_LIBRARY ${PROJECT_NAME}_static)
-set(TESTCASES_EXECUTABLE ${PROJECT_NAME}-testcases)
-set(GENERATED_TESTCASE_LAUNCHPAD ${ARK_GENERATED_FILE_DIRECTORY}/testcase_launchpad.cpp)
-
-set(ARK_INCLUDE_DIRS ${ARK_SRC_DIR} ${ARK_SRC_DIR}/src ${ARK_SRC_DIR}/platform/${SYSTEM} ${ARK_SRC_DIR}/platform/any)
-set(ARK_LIBRARIES ${ARK_RUNTIME_SHARED_LIBRARY})
-set(ARK_STATIC_LIBRARIES ${ARK_RUNTIME_STATIC_LIBRARY})
-
 list(APPEND LOCAL_INCLUDE_DIRS .)
 list(APPEND LOCAL_INCLUDE_DIRS src)
 
-message("Building for ${SYSTEM} - ${CMAKE_BUILD_TYPE}; build-share-libs: ${BUILD_SHARED_LIBS}\nCompiler: ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
+message("Building for ${ARK_SYSTEM_NAME} - ${CMAKE_BUILD_TYPE}; build-share-libs: ${BUILD_SHARED_LIBS}\nCompiler: ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
 ark_compile_definitions(-DARK_SYSTEM_NAME="${ARK_SYSTEM_NAME}")
 
 ark_add_debug_flag()

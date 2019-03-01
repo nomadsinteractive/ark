@@ -23,6 +23,7 @@ FIND_PATH(FMOD_INCLUDE_DIR "fmod_studio.hpp"
   /opt/csw # Blastwave
   /opt
   DOC "fmod - Headers"
+  CMAKE_FIND_ROOT_PATH_BOTH
 )
 FIND_PATH(FMOD_LL_INCLUDE_DIR "fmod.h"
   PATHS
@@ -38,6 +39,7 @@ FIND_PATH(FMOD_LL_INCLUDE_DIR "fmod.h"
   /opt/csw # Blastwave
   /opt
   DOC "fmod - Headers"
+  CMAKE_FIND_ROOT_PATH_BOTH
 )
 
 IF(MSVC)
@@ -51,44 +53,63 @@ IF(MSVC)
 ELSE()
     SET(FMOD_NAMES fmodstudio)
     SET(FMOD_DBG_NAMES fmodstudioL)
-    SET(FMOD_EVENT_NAMES fmod)
+    SET(FMOD_EVENT_NAMES fmodL)
     SET(FMOD_EVENT_DBG_NAMES fmodL)
 ENDIF()
 
-FIND_LIBRARY(FMOD_LIBRARY NAMES ${FMOD_NAMES}
-  PATHS
-  $ENV{FMOD_HOME}
-  $ENV{FMOD_HOME}/api/studio/lib
-  $ENV{EXTERNLIBS}/fmod/studio/lib
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-  PATH_SUFFIXES lib lib64
-  DOC "fmod - Library"
-)
+IF(ANDROID)
+    FIND_LIBRARY(FMOD_LIBRARY NAMES ${FMOD_NAMES}
+      PATHS
+      $ENV{FMOD_HOME}/api/studio/lib/armeabi-v7a
+      $ENV{EXTERNLIBS}/fmod/studio/lib
+      PATH_SUFFIXES lib lib64
+      DOC "fmod - Library"
+      CMAKE_FIND_ROOT_PATH_BOTH
+    )
 
-FIND_LIBRARY(FMOD_EVENT_LIBRARY NAMES ${FMOD_EVENT_NAMES}
-  PATHS
-  $ENV{FMOD_HOME}
-  $ENV{FMOD_HOME}/api/lowlevel/lib
-  $ENV{EXTERNLIBS}/fmod/lowlevel/lib
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-  PATH_SUFFIXES lib lib64
-  DOC "fmod_event - Library"
-)
-
+    FIND_LIBRARY(FMOD_EVENT_LIBRARY NAMES ${FMOD_EVENT_NAMES}
+      PATHS
+      $ENV{FMOD_HOME}/api/lowlevel/lib/armeabi-v7a
+      $ENV{EXTERNLIBS}/fmod/lowlevel/lib
+      DOC "fmod_event - Library"
+      CMAKE_FIND_ROOT_PATH_BOTH
+    )
+ELSE()
+    FIND_LIBRARY(FMOD_LIBRARY NAMES ${FMOD_NAMES}
+      PATHS
+      $ENV{FMOD_HOME}
+      $ENV{FMOD_HOME}/api/studio/lib
+      $ENV{EXTERNLIBS}/fmod/studio/lib
+      ~/Library/Frameworks
+      /Library/Frameworks
+      /usr/local
+      /usr
+      /sw
+      /opt/local
+      /opt/csw
+      /opt
+      PATH_SUFFIXES lib lib64
+      DOC "fmod - Library"
+      CMAKE_FIND_ROOT_PATH_BOTH
+    )
+    FIND_LIBRARY(FMOD_EVENT_LIBRARY NAMES ${FMOD_EVENT_NAMES}
+      PATHS
+      $ENV{FMOD_HOME}
+      $ENV{FMOD_HOME}/api/lowlevel/lib
+      $ENV{EXTERNLIBS}/fmod/lowlevel/lib
+      ~/Library/Frameworks
+      /Library/Frameworks
+      /usr/local
+      /usr
+      /sw
+      /opt/local
+      /opt/csw
+      /opt
+      PATH_SUFFIXES lib lib64
+      DOC "fmod_event - Library"
+      CMAKE_FIND_ROOT_PATH_BOTH
+    )
+ENDIF()
 
 INCLUDE(FindPackageHandleStandardArgs)
 

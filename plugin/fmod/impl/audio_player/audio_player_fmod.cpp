@@ -157,6 +157,16 @@ FMOD::System* AudioPlayerFMOD::FMODSystem::instance() const
     return _instance;
 }
 
+AudioPlayerFMOD::BUILDER_DEFAULT::BUILDER_DEFAULT(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _delegate(factory, manifest, resourceLoaderContext)
+{
+}
+
+sp<AudioPlayer> AudioPlayerFMOD::BUILDER_DEFAULT::build(const sp<Scope>& args)
+{
+    return _delegate.build(args);
+}
+
 }
 }
 }

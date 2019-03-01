@@ -26,12 +26,24 @@ public:
 //  [[plugin::resource-loader("portaudio")]]
     class BUILDER : public Builder<AudioPlayer> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<AudioPlayer> build(const sp<Scope>& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
+
+    };
+
+//  [[plugin::resource-loader]]
+    class BUILDER_DEFAULT : public Builder<AudioPlayer> {
+    public:
+        BUILDER_DEFAULT(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+        virtual sp<AudioPlayer> build(const sp<Scope>& args) override;
+
+    private:
+        BUILDER _delegate;
 
     };
 

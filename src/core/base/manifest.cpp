@@ -32,7 +32,7 @@ void Manifest::load(const String& src)
     _asset_dir = Documents::getAttribute(_content, "asset-dir");
     _assets = Documents::getKeyValuePairs<Table<String, String>>(_content->children("asset"), "prefix", Constants::Attributes::SRC);
 
-    _plugins = Documents::getList<std::vector<String>>(_content->children("plugin"), Constants::Attributes::NAME);
+    _plugins = Documents::getSystemSpecificList<std::vector<String>>(_content->children("plugin"), Constants::Attributes::NAME);
 
     const document& renderer = _content->getChild("renderer");
     if(renderer)

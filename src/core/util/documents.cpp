@@ -178,4 +178,9 @@ attribute Documents::findAttribute(const document& doc, const std::vector<String
     return node;
 }
 
+bool Documents::isPlatformSpecific(const String& platform)
+{
+    return platform.find(ARK_SYSTEM_NAME) != String::npos;
+}
+
 }
