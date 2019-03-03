@@ -18,7 +18,7 @@ class ARK_API TileMap : public Renderer, Block {
 public:
 // [[script::bindings::auto]]
     TileMap(const sp<Layer>& layer, uint32_t width, uint32_t height, uint32_t tileWidth, uint32_t tileHeight);
-    ~TileMap();
+    ~TileMap() override;
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 // [[script::bindings::property]]
@@ -33,7 +33,7 @@ public:
 // [[script::bindings::auto]]
     void setTile(uint32_t rowId, uint32_t colId, const sp<RenderObject>& renderObject);
 
-// [[script::bindings::property]]
+// [[script::bindings::auto]]
     void clear();
 
 // [[script::bindings::property]]

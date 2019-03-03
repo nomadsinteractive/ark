@@ -10,6 +10,8 @@ class Bitmap;
 class Block;
 class Bounds;
 class Camera;
+class CharacterMaker;
+class CharacterMapper;
 class Color;
 class Font;
 class Frame;

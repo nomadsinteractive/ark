@@ -23,7 +23,7 @@ class ARK_API Characters {
 public:
 //  [[script::bindings::auto]]
     Characters(const sp<Layer>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
-    Characters(const sp<Layer>& layer, const sp<ObjectPool>& objectPool, float textScale, float letterSpacing, float lineHeight, float lineIndent);
+    Characters(const sp<Layer>& layer, const sp<ObjectPool>& objectPool, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
 //  [[script::bindings::property]]
     const sp<Layer>& layer() const;
@@ -53,28 +53,28 @@ public:
 
     private:
         sp<Builder<Layer>> _layer;
+        SafePtr<Builder<CharacterMapper>> _character_mapper;
+        SafePtr<Builder<CharacterMaker>> _character_maker;
         sp<ObjectPool> _object_pool;
 
         float _text_scale;
         float _letter_spacing;
         float _line_height;
         float _line_indent;
-
     };
 
 private:
     void createContent(float boundary);
     void createContentNoBoundary();
 
-    Metrics getItemMetrics(wchar_t c) const;
-
     struct LayoutChar {
-        LayoutChar(wchar_t c, const Metrics& metrics, float widthIntegral, bool isCJK);
+        LayoutChar(int32_t type, const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak);
 
-        wchar_t _char;
+        int32_t _type;
         Metrics _metrics;
         float _width_integral;
         bool _is_cjk;
+        bool _is_word_break;
     };
 
     void placeNoBoundary(wchar_t c, float& flowx, float& flowy, float& fontHeight);
@@ -87,10 +87,16 @@ private:
     bool isCJK(int32_t c) const;
     bool isWordBreaker(wchar_t c) const;
 
+    int32_t toType(wchar_t c) const;
+    sp<RenderObject> makeCharacter(int32_t type, const sp<Vec>& position, const sp<Size>& size) const;
+
 private:
     sp<Layer> _layer;
     sp<LayoutParam> _layout_param;
     sp<ObjectPool> _object_pool;
+    sp<CharacterMapper> _character_mapper;
+    sp<CharacterMaker> _character_maker;
+
     sp<LayerContext> _layer_context;
 
     std::vector<sp<RenderObject>> _characters;
