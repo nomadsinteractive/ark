@@ -1,12 +1,8 @@
 #include "audio-android/impl/audio_player/audio_player_android.h"
 
-#include <thread>
-#include <mutex>
-
 #include "core/inf/executor.h"
 #include "core/inf/readable.h"
 #include "core/base/future.h"
-#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/util/log.h"
 
 #include "renderer/base/resource_loader_context.h"
@@ -19,32 +15,38 @@ namespace audio_android {
 
 namespace {
 
-class PlayingStream : public Runnable {
+class PlayingStream final : public Runnable {
 public:
     PlayingStream(const sp<Future>& future, const sp<Readable>& stream, AudioPlayer::PlayOption playOption)
-        : _future(future), _stream(stream), _play_option(playOption), _audio_stream(nullptr) {
+        : _future(future), _stream(stream), _play_option(playOption) {
     }
 
     virtual void run() override {
-        createPlaybackStream();
+        AAudioStream* audioStream = createPlaybackStream();
+        if(audioStream) {
+            aaudio_result_t result = AAUDIO_OK;
+            aaudio_stream_state_t currentState = AAudioStream_getState(audioStream);
+            aaudio_stream_state_t inputState = currentState;
+            while (result == AAUDIO_OK && currentState !=  AAUDIO_STREAM_STATE_STOPPED && shouldContinue()) {
 
-        aaudio_result_t result = AAUDIO_OK;
-        aaudio_stream_state_t currentState = AAudioStream_getState(_audio_stream);
-        aaudio_stream_state_t inputState = currentState;
-        while (result == AAUDIO_OK && currentState !=  AAUDIO_STREAM_STATE_STOPPED) {
-            result = AAudioStream_waitForStateChange(_audio_stream, inputState, &currentState, 20000000000);
-            inputState = currentState;
+                if(currentState == AAUDIO_STREAM_STATE_DISCONNECTED) {
+                    closeAudioStream(audioStream);
+                    audioStream = createPlaybackStream();
+                    inputState = AAudioStream_getState(audioStream);
+                }
+
+                result = AAudioStream_waitForStateChange(audioStream, inputState, &currentState, 2000000000);
+                inputState = currentState;
+            }
+
+            closeAudioStream(audioStream);
         }
-
-        closeOutputStream();
     }
 
 private:
-    aaudio_data_callback_result_t dataCallback(AAudioStream *stream, void *audioData, int32_t numFrames) {
-        DASSERT(stream == _audio_stream);
-
-        int32_t underrunCount = AAudioStream_getXRunCount(_audio_stream);
-        aaudio_result_t bufferSize = AAudioStream_getBufferSizeInFrames(_audio_stream);
+    aaudio_data_callback_result_t dataCallback(AAudioStream* stream, void* audioData, int32_t numFrames) {
+        int32_t underrunCount = AAudioStream_getXRunCount(stream);
+        aaudio_result_t bufferSize = AAudioStream_getBufferSizeInFrames(stream);
         bool hasUnderrunCountIncreased = false;
         bool shouldChangeBufferSize = false;
 
@@ -79,27 +81,25 @@ private:
             }
         }
 
-        memset(audioData, 0, sizeof(int16_t) * _sample_channels_ * numFrames);
+        uint32_t sizeToRead = static_cast<uint32_t>(sizeof(int16_t) * _sample_channels_ * numFrames);
         if (!_future->isCancelled()) {
-            uint32_t readlen = _stream->read(audioData, sizeof(int16_t) * _sample_channels_ * numFrames);
+            uint32_t readlen = _stream->read(audioData, sizeToRead);
             if(readlen == 0) {
-                _future->cancel();
+                if(_play_option == AudioPlayer::PLAY_OPTION_LOOP_ON)
+                    _stream->seek(SEEK_SET, 0);
+                else
+                    _future->done();
+            }
+            if(sizeToRead > readlen) {
+                memset(static_cast<int8_t*>(audioData) + readlen, 0, sizeToRead - readlen);
             }
         }
 
-        return _future->isCancelled() ? AAUDIO_CALLBACK_RESULT_STOP : AAUDIO_CALLBACK_RESULT_CONTINUE;
+        return shouldContinue() ? AAUDIO_CALLBACK_RESULT_CONTINUE : AAUDIO_CALLBACK_RESULT_STOP;
     }
 
-    void errorCallback(AAudioStream *stream, aaudio_result_t error) {
-        assert(stream == _audio_stream);
+    void errorCallback(AAudioStream* stream, aaudio_result_t error) {
         LOGD("errorCallback result: %s", AAudio_convertResultToText(error));
-
-        aaudio_stream_state_t streamState = AAudioStream_getState(_audio_stream);
-        if (streamState == AAUDIO_STREAM_STATE_DISCONNECTED) {
-            std::function<void(void)> restartStream = std::bind(&PlayingStream::restartStream, this);
-            std::thread streamRestartThread(restartStream);
-            streamRestartThread.detach();
-        }
     }
 
     static aaudio_data_callback_result_t _data_callback(AAudioStream* stream, void* userData, void* audioData, int32_t numFrames) {
@@ -110,50 +110,51 @@ private:
 
     static void _error_callback(AAudioStream* stream, void* userData, aaudio_result_t error) {
         DASSERT(userData);
-        PlayingStream *audioStream = reinterpret_cast<PlayingStream*>(userData);
+        PlayingStream* audioStream = reinterpret_cast<PlayingStream*>(userData);
         audioStream->errorCallback(stream, error);
     }
 
-    void createPlaybackStream() {
+    AAudioStream* createPlaybackStream() {
         AAudioStreamBuilder* builder = createStreamBuilder();
-
+        AAudioStream* audioStream = nullptr;
         if (builder != nullptr) {
-
             setupPlaybackStreamParameters(builder);
 
-            aaudio_result_t result = AAudioStreamBuilder_openStream(builder, &_audio_stream);
+            aaudio_result_t result = AAudioStreamBuilder_openStream(builder, &audioStream);
 
-            if (result == AAUDIO_OK && _audio_stream != nullptr) {
+            if (result == AAUDIO_OK && audioStream != nullptr) {
 
-                if(_sample_format != AAudioStream_getFormat(_audio_stream)) {
+                if(_sample_format != AAudioStream_getFormat(audioStream)) {
                     LOGW("Sample format is not AAUDIO_FORMAT_PCM_I16");
                 }
 
-                _sample_rate = AAudioStream_getSampleRate(_audio_stream);
-                _frames_per_burst = AAudioStream_getFramesPerBurst(_audio_stream);
+                _sample_rate = AAudioStream_getSampleRate(audioStream);
+                _frames_per_burst = AAudioStream_getFramesPerBurst(audioStream);
 
                 // Set the buffer size to the burst size - this will give us the minimum possible latency
-                AAudioStream_setBufferSizeInFrames(_audio_stream, _frames_per_burst);
+                AAudioStream_setBufferSizeInFrames(audioStream, _frames_per_burst);
                 _buf_size_in_frames = _frames_per_burst;
 
                 // Start the stream - the dataCallback function will start being called
-                result = AAudioStream_requestStart(_audio_stream);
+                result = AAudioStream_requestStart(audioStream);
                 if (result != AAUDIO_OK) {
                     LOGE("Error starting stream. %s", AAudio_convertResultToText(result));
                 }
 
                 // Store the underrun count so we can tune the latency in the dataCallback
-                _play_stream_underrun_count = AAudioStream_getXRunCount(_audio_stream);
+                _play_stream_underrun_count = AAudioStream_getXRunCount(audioStream);
 
             } else {
                 LOGE("Failed to create stream. Error: %s", AAudio_convertResultToText(result));
             }
 
             AAudioStreamBuilder_delete(builder);
+            return audioStream;
 
         } else {
             LOGE("Unable to obtain an AAudioStreamBuilder object");
         }
+        return nullptr;
     }
 
     AAudioStreamBuilder* createStreamBuilder() {
@@ -168,7 +169,7 @@ private:
     void setupPlaybackStreamParameters(AAudioStreamBuilder* builder) {
         AAudioStreamBuilder_setDeviceId(builder, AAUDIO_UNSPECIFIED);
         AAudioStreamBuilder_setFormat(builder, _sample_format);
-        AAudioStreamBuilder_setSampleRate(builder, 44100);
+        AAudioStreamBuilder_setSampleRate(builder, _sample_rate);
         AAudioStreamBuilder_setChannelCount(builder, _sample_channels_);
 
         // We request EXCLUSIVE mode since this will give us the lowest possible latency.
@@ -180,34 +181,22 @@ private:
         AAudioStreamBuilder_setErrorCallback(builder, _error_callback, this);
     }
 
-    void restartStream() {
+    void closeAudioStream(AAudioStream* audioStream) {
+        DASSERT(audioStream);
+        LOGE("closeAudioStream");
+        aaudio_result_t result = AAudioStream_requestStop(audioStream);
+        if (result != AAUDIO_OK) {
+            LOGE("Error stopping output stream. %s", AAudio_convertResultToText(result));
+        }
 
-        LOGD("Restarting stream");
-
-        if (_restarting_lock.try_lock()){
-            closeOutputStream();
-            createPlaybackStream();
-            _restarting_lock.unlock();
-        } else {
-            LOGW("Restart stream operation already in progress - ignoring this request");
-            // We were unable to obtain the restarting lock which means the restart operation is currently
-            // active. This is probably because we received successive "stream disconnected" events.
-            // Internal issue b/63087953
+        result = AAudioStream_close(audioStream);
+        if (result != AAUDIO_OK) {
+            LOGE("Error closing output stream. %s", AAudio_convertResultToText(result));
         }
     }
 
-    void closeOutputStream() {
-      if (_audio_stream != nullptr){
-            aaudio_result_t result = AAudioStream_requestStop(_audio_stream);
-            if (result != AAUDIO_OK){
-                LOGE("Error stopping output stream. %s", AAudio_convertResultToText(result));
-            }
-
-            result = AAudioStream_close(_audio_stream);
-            if (result != AAUDIO_OK){
-                LOGE("Error closing output stream. %s", AAudio_convertResultToText(result));
-            }
-        }
+    bool shouldContinue() const {
+        return !_future->isCancelled() && !_future->isDone();
     }
 
 private:
@@ -215,19 +204,14 @@ private:
     sp<Readable> _stream;
     AudioPlayer::PlayOption _play_option;
 
-    int32_t _sample_rate;
+    int32_t _sample_rate = 44100;
     int16_t _sample_channels_ = 2;
     aaudio_format_t _sample_format = AAUDIO_FORMAT_PCM_I16;
-
-    AAudioStream* _audio_stream;
 
     int32_t _play_stream_underrun_count;
     int32_t _buf_size_in_frames;
     int32_t _frames_per_burst;
-    double _current_output_latency_millis = 0;
     int32_t _buffer_size_selection = BUFFER_SIZE_AUTOMATIC;
-
-    std::mutex _restarting_lock;
 };
 
 }
