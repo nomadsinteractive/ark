@@ -1,13 +1,16 @@
 #include "audio-android/impl/audio_player/audio_player_android.h"
 
+#include <oboe/Oboe.h>
+
+#include "core/base/future.h"
 #include "core/inf/executor.h"
 #include "core/inf/readable.h"
-#include "core/base/future.h"
+#include "core/types/owned_ptr.h"
 #include "core/util/log.h"
 
 #include "renderer/base/resource_loader_context.h"
 
-#define BUFFER_SIZE_AUTOMATIC 0
+constexpr int32_t kBufferSizeAutomatic = 0;
 
 namespace ark {
 namespace plugin {
@@ -15,27 +18,27 @@ namespace audio_android {
 
 namespace {
 
-class PlayingStream final : public Runnable {
+class PlayingStreamOboe final : public Runnable, oboe::AudioStreamCallback {
 public:
-    PlayingStream(const sp<Future>& future, const sp<Readable>& stream, AudioPlayer::PlayOption playOption)
+    PlayingStreamOboe(const sp<Future>& future, const sp<Readable>& stream, AudioPlayer::PlayOption playOption)
         : _future(future), _stream(stream), _play_option(playOption) {
     }
 
     virtual void run() override {
-        AAudioStream* audioStream = createPlaybackStream();
+        oboe::AudioStream* audioStream = createPlaybackStream();
         if(audioStream) {
-            aaudio_result_t result = AAUDIO_OK;
-            aaudio_stream_state_t currentState = AAudioStream_getState(audioStream);
-            aaudio_stream_state_t inputState = currentState;
-            while (result == AAUDIO_OK && currentState !=  AAUDIO_STREAM_STATE_STOPPED && shouldContinue()) {
+            oboe::StreamState inputState = audioStream->getState();
+            oboe::StreamState currentState = inputState;
+            oboe::Result result = oboe::Result::OK;
+            while (result == oboe::Result::OK && currentState != oboe::StreamState::Stopped && shouldContinue()) {
 
-                if(currentState == AAUDIO_STREAM_STATE_DISCONNECTED) {
+                if(currentState == oboe::StreamState::Disconnected) {
                     closeAudioStream(audioStream);
                     audioStream = createPlaybackStream();
-                    inputState = AAudioStream_getState(audioStream);
+                    inputState = audioStream->getState();
                 }
 
-                result = AAudioStream_waitForStateChange(audioStream, inputState, &currentState, 2000000000);
+                result = audioStream->waitForStateChange(inputState, &currentState, 2000000000);
                 inputState = currentState;
             }
 
@@ -43,43 +46,18 @@ public:
         }
     }
 
-private:
-    aaudio_data_callback_result_t dataCallback(AAudioStream* stream, void* audioData, int32_t numFrames) {
-        int32_t underrunCount = AAudioStream_getXRunCount(stream);
-        aaudio_result_t bufferSize = AAudioStream_getBufferSizeInFrames(stream);
-        bool hasUnderrunCountIncreased = false;
-        bool shouldChangeBufferSize = false;
+    virtual oboe::DataCallbackResult onAudioReady(oboe::AudioStream* audioStream, void* audioData, int32_t numFrames) override {
+        int32_t bufferSize = audioStream->getBufferSizeInFrames();
 
-        if (underrunCount > _play_stream_underrun_count) {
-            _play_stream_underrun_count = underrunCount;
-            hasUnderrunCountIncreased = true;
+        if (_buffer_size_selection == kBufferSizeAutomatic) {
+            _latency_tuner->tune();
+        } else if (bufferSize != (_buffer_size_selection * _frames_per_burst)) {
+            auto setBufferResult = audioStream->setBufferSizeInFrames(_buffer_size_selection * _frames_per_burst);
+            if (setBufferResult == oboe::Result::OK) bufferSize = setBufferResult.value();
         }
 
-        if (hasUnderrunCountIncreased && _buffer_size_selection == BUFFER_SIZE_AUTOMATIC) {
-
-            /**
-            * This is a buffer size tuning algorithm. If the number of underruns (i.e. instances where
-            * we were unable to supply sufficient data to the stream) has increased since the last callback
-            * we will try to increase the buffer size by the burst size, which will give us more protection
-            * against underruns in future, at the cost of additional latency.
-            */
-            bufferSize += _frames_per_burst; // Increase buffer size by one burst
-            shouldChangeBufferSize = true;
-        } else if (_buffer_size_selection > 0 && (_buffer_size_selection * _frames_per_burst) != bufferSize) {
-            // If the buffer size selection has changed then update it here
-            bufferSize = _buffer_size_selection * _frames_per_burst;
-            shouldChangeBufferSize = true;
-        }
-
-        if (shouldChangeBufferSize) {
-            LOGD("Setting buffer size to %d", bufferSize);
-            bufferSize = AAudioStream_setBufferSizeInFrames(stream, bufferSize);
-            if (bufferSize > 0) {
-                _buf_size_in_frames = bufferSize;
-            } else {
-                LOGE("Error setting buffer size: %s", AAudio_convertResultToText(bufferSize));
-            }
-        }
+        DASSERT(audioStream->getChannelCount() == _sample_channels);
+        DASSERT(audioStream->getFormat() == oboe::AudioFormat::I16);
 
         uint32_t sizeToRead = static_cast<uint32_t>(sizeof(int16_t) * _sample_channels * numFrames);
         if (!_future->isCancelled()) {
@@ -97,103 +75,73 @@ private:
             }
         }
 
-        return shouldContinue() ? AAUDIO_CALLBACK_RESULT_CONTINUE : AAUDIO_CALLBACK_RESULT_STOP;
+        return shouldContinue() ? oboe::DataCallbackResult::Continue : oboe::DataCallbackResult::Stop;
     }
 
-    void errorCallback(AAudioStream* stream, aaudio_result_t error) {
-        LOGD("errorCallback result: %s", AAudio_convertResultToText(error));
+    virtual void onErrorAfterClose(oboe::AudioStream* audioStream, oboe::Result error) override {
+        LOGE(oboe::convertToText(error));
     }
 
-    static aaudio_data_callback_result_t _data_callback(AAudioStream* stream, void* userData, void* audioData, int32_t numFrames) {
-        DASSERT(userData && audioData);
-        PlayingStream* audioStream = reinterpret_cast<PlayingStream*>(userData);
-        return audioStream->dataCallback(stream, audioData, numFrames);
-    }
+private:
+    oboe::AudioStream* createPlaybackStream() {
+        oboe::AudioStream* audioStream = nullptr;
+        oboe::AudioStreamBuilder builder;
+        setupPlaybackStreamParameters(&builder);
 
-    static void _error_callback(AAudioStream* stream, void* userData, aaudio_result_t error) {
-        DASSERT(userData);
-        PlayingStream* audioStream = reinterpret_cast<PlayingStream*>(userData);
-        audioStream->errorCallback(stream, error);
-    }
+        oboe::Result result = builder.openStream(&audioStream);
 
-    AAudioStream* createPlaybackStream() {
-        AAudioStreamBuilder* builder = createStreamBuilder();
-        AAudioStream* audioStream = nullptr;
-        if (builder != nullptr) {
-            setupPlaybackStreamParameters(builder);
+        if (result == oboe::Result::OK && audioStream != nullptr) {
 
-            aaudio_result_t result = AAudioStreamBuilder_openStream(builder, &audioStream);
+            _frames_per_burst = audioStream->getFramesPerBurst();
 
-            if (result == AAUDIO_OK && audioStream != nullptr) {
-
-                if(_sample_format != AAudioStream_getFormat(audioStream)) {
-                    LOGW("Sample format is not AAUDIO_FORMAT_PCM_I16");
-                }
-
-                _sample_rate = AAudioStream_getSampleRate(audioStream);
-                _frames_per_burst = AAudioStream_getFramesPerBurst(audioStream);
-
-                // Set the buffer size to the burst size - this will give us the minimum possible latency
-                AAudioStream_setBufferSizeInFrames(audioStream, _frames_per_burst);
-                _buf_size_in_frames = _frames_per_burst;
-
-                // Start the stream - the dataCallback function will start being called
-                result = AAudioStream_requestStart(audioStream);
-                if (result != AAUDIO_OK) {
-                    LOGE("Error starting stream. %s", AAudio_convertResultToText(result));
-                }
-
-                // Store the underrun count so we can tune the latency in the dataCallback
-                _play_stream_underrun_count = AAudioStream_getXRunCount(audioStream);
-
-            } else {
-                LOGE("Failed to create stream. Error: %s", AAudio_convertResultToText(result));
+            int channelCount = audioStream->getChannelCount();
+            if (channelCount != _sample_channels){
+                LOGW("Requested %d channels but received %d", _sample_channels, channelCount);
             }
 
-            AAudioStreamBuilder_delete(builder);
-            return audioStream;
+            // Set the buffer size to the burst size - this will give us the minimum possible latency
+            audioStream->setBufferSizeInFrames(_frames_per_burst);
 
+            // Create a latency tuner which will automatically tune our buffer size.
+            _latency_tuner.reset(new oboe::LatencyTuner(*audioStream));
+            // Start the stream - the dataCallback function will start being called
+            result = audioStream->requestStart();
+            if (result == oboe::Result::OK) {
+                return audioStream;
+            }
+            LOGE("Error starting stream. %s", oboe::convertToText(result));
         } else {
-            LOGE("Unable to obtain an AAudioStreamBuilder object");
+            LOGE("Failed to create stream. Error: %s", oboe::convertToText(result));
         }
         return nullptr;
     }
 
-    AAudioStreamBuilder* createStreamBuilder() {
-        AAudioStreamBuilder* builder = nullptr;
-        aaudio_result_t result = AAudio_createStreamBuilder(&builder);
-        if(result != AAUDIO_OK) {
-            LOGE("Error creating stream builder: %s", AAudio_convertResultToText(result));
+    void closeAudioStream(oboe::AudioStream* audioStream) const {
+        if (audioStream) {
+            oboe::Result result = audioStream->requestStop();
+            if (result != oboe::Result::OK) {
+                LOGE("Error stopping output stream. %s", oboe::convertToText(result));
+            }
+
+            result = audioStream->close();
+            if (result != oboe::Result::OK) {
+                LOGE("Error closing output stream. %s", oboe::convertToText(result));
+            }
         }
-        return builder;
     }
 
-    void setupPlaybackStreamParameters(AAudioStreamBuilder* builder) {
-        AAudioStreamBuilder_setDeviceId(builder, AAUDIO_UNSPECIFIED);
-        AAudioStreamBuilder_setFormat(builder, _sample_format);
-        AAudioStreamBuilder_setSampleRate(builder, _sample_rate);
-        AAudioStreamBuilder_setChannelCount(builder, _sample_channels);
+    void setupPlaybackStreamParameters(oboe::AudioStreamBuilder* builder) {
+        builder->setAudioApi(_audio_api);
+        builder->setDeviceId(_audio_device_id);
+        builder->setFormat(_sample_format);
+        builder->setSampleRate(_sample_rate);
+        builder->setChannelCount(_sample_channels);
 
         // We request EXCLUSIVE mode since this will give us the lowest possible latency.
         // If EXCLUSIVE mode isn't available the builder will fall back to SHARED mode.
-        AAudioStreamBuilder_setSharingMode(builder, AAUDIO_SHARING_MODE_EXCLUSIVE);
-        AAudioStreamBuilder_setPerformanceMode(builder, AAUDIO_PERFORMANCE_MODE_LOW_LATENCY);
-        AAudioStreamBuilder_setDirection(builder, AAUDIO_DIRECTION_OUTPUT);
-        AAudioStreamBuilder_setDataCallback(builder, _data_callback, this);
-        AAudioStreamBuilder_setErrorCallback(builder, _error_callback, this);
-    }
-
-    void closeAudioStream(AAudioStream* audioStream) {
-        DASSERT(audioStream);
-        aaudio_result_t result = AAudioStream_requestStop(audioStream);
-        if (result != AAUDIO_OK) {
-            LOGE("Error stopping output stream. %s", AAudio_convertResultToText(result));
-        }
-
-        result = AAudioStream_close(audioStream);
-        if (result != AAUDIO_OK) {
-            LOGE("Error closing output stream. %s", AAudio_convertResultToText(result));
-        }
+        builder->setSharingMode(oboe::SharingMode::Exclusive);
+        builder->setPerformanceMode(oboe::PerformanceMode::LowLatency);
+        builder->setCallback(this);
     }
 
     bool shouldContinue() const {
@@ -205,14 +153,18 @@ private:
     sp<Readable> _stream;
     AudioPlayer::PlayOption _play_option;
 
+    oboe::AudioApi _audio_api = oboe::AudioApi::Unspecified;
+    int32_t _audio_device_id = oboe::kUnspecified;
     int32_t _sample_rate = 44100;
     int16_t _sample_channels = 2;
-    aaudio_format_t _sample_format = AAUDIO_FORMAT_PCM_I16;
+    oboe::AudioFormat _sample_format = oboe::AudioFormat::I16;
 
     int32_t _play_stream_underrun_count;
     int32_t _buf_size_in_frames;
     int32_t _frames_per_burst;
-    int32_t _buffer_size_selection = BUFFER_SIZE_AUTOMATIC;
+    int32_t _buffer_size_selection = kBufferSizeAutomatic;
+
+    op<oboe::LatencyTuner> _latency_tuner;
 };
 
 }
@@ -226,7 +178,7 @@ sp<Future> AudioPlayerAndroid::play(const sp<Readable>& source, AudioFormat form
 {
     DASSERT(format == AudioPlayer::AUDIO_FORMAT_PCM);
     const sp<Future> future = sp<Future>::make();
-    sp<PlayingStream> stream = sp<PlayingStream>::make(future, source, options);
+    sp<PlayingStreamOboe> stream = sp<PlayingStreamOboe>::make(future, source, options);
     _executor->execute(stream);
     return future;
 }

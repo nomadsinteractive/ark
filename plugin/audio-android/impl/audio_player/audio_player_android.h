@@ -1,8 +1,6 @@
 #ifndef ARK_PLUGIN_ANDROID_AUDIO_IMPL_AUDIO_PLAYER_AUDIO_PLAYER_ANDROID_H_
 #define ARK_PLUGIN_ANDROID_AUDIO_IMPL_AUDIO_PLAYER_AUDIO_PLAYER_ANDROID_H_
 
-#include <aaudio/AAudio.h>
-
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
 #include "core/types/shared_ptr.h"

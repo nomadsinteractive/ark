@@ -125,5 +125,10 @@
         "url": "https://github.com/KhronosGroup/glslang.git",
         "name": "glslang",
         "tag": "7.10.2984"
+    },
+    {
+        "url": "https://github.com/google/oboe.git",
+        "name": "oboe",
+        "tag": "1.1.1"
     }
 ]
