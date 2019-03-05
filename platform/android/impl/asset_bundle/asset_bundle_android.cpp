@@ -1,4 +1,4 @@
-#include "platform/android/impl/resource/asset_resource.h"
+#include "platform/android/impl/asset_bundle/asset_bundle_android.h"
 
 #include "core/inf/asset.h"
 #include "core/types/shared_ptr.h"
@@ -33,22 +33,20 @@ private:
 
 }
 
-AssetResource::AssetResource(AAssetManager *assetManager, const String& dirname)
+AssetBundleAndroid::AssetBundleAndroid(AAssetManager *assetManager, const String& dirname)
     : _asset_manager(assetManager), _dirname(dirname)
 {
 }
 
-sp<Asset> AssetResource::get(const String& name)
+sp<Asset> AssetBundleAndroid::get(const String& name)
 {
     const String filepath = _dirname == "." ? name : _dirname + "/" + name;
-//    AAsset* asset = AAssetManager_open(_asset_manager, path.c_str(), AASSET_MODE_UNKNOWN);
-//    return asset ? sp<Readable>::adopt(new AssetReadable(asset)) : sp<Readable>::null();
     return sp<AndroidAsset>::make(_asset_manager, filepath);
 }
 
-sp<AssetBundle> AssetResource::getBundle(const String& path)
+sp<AssetBundle> AssetBundleAndroid::getBundle(const String& path)
 {
-    return sp<AssetResource>::make(_asset_manager, _dirname + path);
+    return sp<AssetBundleAndroid>::make(_asset_manager, _dirname + path);
 }
 
 }

@@ -17,9 +17,9 @@
 #include "graphics/impl/alphabet/alphabet_true_type.h"
 #include "graphics/impl/alphabet/alphabet_with_fallback.h"
 
-#include "impl/resource/asset_resource.h"
-#include "util/jni_util.h"
-#include "util/font_config.h"
+#include "platform/android/impl/asset_bundle/asset_bundle_android.h"
+#include "platform/android/util/jni_util.h"
+#include "platform/android/util/font_config.h"
 
 #ifdef ARK_USE_VULKAN
 #include "platform/vulkan/vulkan.h"
@@ -57,7 +57,7 @@ android_app* PlatformAndroid::state()
 sp<AssetBundle> PlatformAndroid::getAssetBundle(const String& path, const String& appPath)
 {
 	bool dirExists = directoryExists(_asset_manager, path);
-	return dirExists ? sp<AssetBundle>::adopt(new AssetResource(_asset_manager, path)) : nullptr;
+	return dirExists ? sp<AssetBundle>::adopt(new AssetBundleAndroid(_asset_manager, path)) : nullptr;
 }
 
 String PlatformAndroid::getUserStoragePath(const String& filename)
@@ -88,7 +88,7 @@ sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPa
 		JNIEnv* env = JNIUtil::attachCurrentThread();
 		AAssetManager* am = AAssetManager_fromJava(env, gAssetManager);
 		bool dirExists = directoryExists(am, path);
-		return dirExists ? sp<AssetBundle>::adopt(new AssetResource(am, path)) : nullptr;
+		return dirExists ? sp<AssetBundle>::adopt(new AssetBundleAndroid(am, path)) : nullptr;
 	}
 	Global<PlatformAndroid> platformAndroid;
     return platformAndroid->getAssetBundle(path, appPath);

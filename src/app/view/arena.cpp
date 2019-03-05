@@ -107,11 +107,11 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
     {
         if(i->name() == Constants::Attributes::LAYER)
         {
-            const sp<Renderer> layer = factory.buildDecorated<Renderer, Layer>(i);
+            const sp<Renderer> layer = factory.build<Renderer>(i, args);
             if(layer)
                 arena->addLayer(layer);
             else
-                arena->addLayer(factory.ensure<Renderer>(i, args));
+                arena->addLayer(factory.ensureDecorated<Renderer, Layer>(i));
         }
         else if(i->name() == Constants::Attributes::RENDER_LAYER)
             arena->addLayer(factory.ensureDecorated<Renderer, RenderLayer>(i));

@@ -315,13 +315,15 @@ class Layer:
 
 
 class Arena:
-    @staticmethod
-    def load(clz, name, **kwargs):
+    def load(self, clz, name, **kwargs):
         return _ArkObject()
 
     @property
-    def references(self):
+    def resource_loader(self):
         return None
+
+    def add_renderer(self, renderer):
+        pass
 
 
 class Clock:

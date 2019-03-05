@@ -11,9 +11,9 @@ namespace ark {
 namespace platform {
 namespace android {
 
-class AssetResource : public AssetBundle {
+class AssetBundleAndroid : public AssetBundle {
 public:
-    AssetResource(AAssetManager* assetManager, const String& dirname);
+    AssetBundleAndroid(AAssetManager* assetManager, const String& dirname);
 
     virtual sp<Asset> get(const String& name) override;
     virtual sp<AssetBundle> getBundle(const String& path) override;

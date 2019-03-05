@@ -81,12 +81,14 @@ private:
             }
         }
 
-        uint32_t sizeToRead = static_cast<uint32_t>(sizeof(int16_t) * _sample_channels_ * numFrames);
+        uint32_t sizeToRead = static_cast<uint32_t>(sizeof(int16_t) * _sample_channels * numFrames);
         if (!_future->isCancelled()) {
             uint32_t readlen = _stream->read(audioData, sizeToRead);
             if(readlen == 0) {
-                if(_play_option == AudioPlayer::PLAY_OPTION_LOOP_ON)
+                if(_play_option == AudioPlayer::PLAY_OPTION_LOOP_ON) {
                     _stream->seek(SEEK_SET, 0);
+                    readlen = _stream->read(audioData, sizeToRead);
+                }
                 else
                     _future->done();
             }
@@ -170,7 +172,7 @@ private:
         AAudioStreamBuilder_setDeviceId(builder, AAUDIO_UNSPECIFIED);
         AAudioStreamBuilder_setFormat(builder, _sample_format);
         AAudioStreamBuilder_setSampleRate(builder, _sample_rate);
-        AAudioStreamBuilder_setChannelCount(builder, _sample_channels_);
+        AAudioStreamBuilder_setChannelCount(builder, _sample_channels);
 
         // We request EXCLUSIVE mode since this will give us the lowest possible latency.
         // If EXCLUSIVE mode isn't available the builder will fall back to SHARED mode.
@@ -183,7 +185,6 @@ private:
 
     void closeAudioStream(AAudioStream* audioStream) {
         DASSERT(audioStream);
-        LOGE("closeAudioStream");
         aaudio_result_t result = AAudioStream_requestStop(audioStream);
         if (result != AAUDIO_OK) {
             LOGE("Error stopping output stream. %s", AAudio_convertResultToText(result));
@@ -205,7 +206,7 @@ private:
     AudioPlayer::PlayOption _play_option;
 
     int32_t _sample_rate = 44100;
-    int16_t _sample_channels_ = 2;
+    int16_t _sample_channels = 2;
     aaudio_format_t _sample_format = AAUDIO_FORMAT_PCM_I16;
 
     int32_t _play_stream_underrun_count;

@@ -1,5 +1,5 @@
 
-#cmake -G "Ninja" -DCMAKE_TOOLCHAIN_FILE=..\${ANDROID_NDK}\android.toolchain.cmake -DANDROID_NATIVE_API_LEVEL="android-18" -DANDROID_ABI="armeabi-v7a with NEON" -DBUILD_SHARED_LIBS="OFF" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_DEBUG_POSFIX="" -DANDROID_STL=gnustl_shared ..\..
+#cmake -G "Ninja" -DCMAKE_TOOLCHAIN_FILE=..\${ANDROID_NDK}\android.toolchain.cmake -DANDROID_NATIVE_API_LEVEL="android-18" -DANDROID_ABI="armeabi-v7a with NEON" -DBUILD_SHARED_LIBS="OFF" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_DEBUG_POSFIX="" -DANDROID_STL=c++_shared ..\..
 
 add_definitions(-DLOG_TAG="ark")
 add_definitions(-DHAVE_MALLOC)
@@ -10,8 +10,8 @@ set(PTHREADS OFF)
 
 aux_source_directory(platform/android/impl LOCAL_SRC_LIST)
 aux_source_directory(platform/android/impl/application LOCAL_SRC_LIST)
+aux_source_directory(platform/android/impl/asset_bundle LOCAL_SRC_LIST)
 aux_source_directory(platform/android/impl/readable LOCAL_SRC_LIST)
-aux_source_directory(platform/android/impl/resource LOCAL_SRC_LIST)
 aux_source_directory(platform/android/util LOCAL_SRC_LIST)
 
 list(APPEND LOCAL_LIBS log android GLESv3)

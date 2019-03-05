@@ -126,7 +126,7 @@ private:
         }
 
         sp<Builder<T>> decorateBuilder(BeanFactory& factory, const sp<Builder<T>>& builder, const String& styles) const {
-            if(styles) {
+            if(styles && builder) {
                 sp<Builder<T>> f = builder;
                 for(const String& style : styles.split(';')) {
                     if(style.at(0) == '@') {

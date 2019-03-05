@@ -12,7 +12,7 @@ namespace android {
 class AssetReadable : public Readable {
 public:
     AssetReadable(AAsset* asset);
-    ~AssetReadable();
+    ~AssetReadable() override;
 
     virtual uint32_t read(void *buffer, uint32_t bufferSize) override;
 	virtual int32_t seek(int32_t position, int32_t whence) override;
