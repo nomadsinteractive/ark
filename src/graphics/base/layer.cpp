@@ -25,26 +25,11 @@ Layer::Stub::Stub(const sp<RenderModel>& model, const sp<Shader>& shader, const 
 {
 }
 
-Layer::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
-    : x(x), y(y), _render_object(renderObject)
-{
-}
-
 Layer::Snapshot::Snapshot(const sp<Stub>& stub)
     : _stub(stub), _ubos(stub->_shader->snapshot(_stub->_memory_pool))
 {
-    for(const Item& i : stub->_items)
-    {
-        RenderObject::Snapshot snapshot = i._render_object->snapshot(stub->_memory_pool);
-        snapshot._position = V(snapshot._position.x() + i.x, snapshot._position.y() + i.y, snapshot._position.z());
-        _items.push_back(snapshot);
-    }
-
     for(const sp<LayerContext>& i : stub->_layer_contexts)
         i->takeSnapshot(*this, stub->_memory_pool);
-
-    _stub->_last_rendered_count = _stub->_items.size();
-    _stub->_items.clear();
 }
 
 sp<RenderCommand> Layer::Snapshot::render(float x, float y)
@@ -82,11 +67,6 @@ sp<RenderCommand> Layer::Snapshot::render(float x, float y)
 Layer::Layer(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _stub(sp<Stub>::make(model, shader, resourceLoaderContext))
 {
-}
-
-void Layer::draw(float x, float y, const sp<RenderObject>& renderObject)
-{
-    _stub->_items.emplace_back(x, y, renderObject);
 }
 
 const sp<RenderModel>& Layer::model() const

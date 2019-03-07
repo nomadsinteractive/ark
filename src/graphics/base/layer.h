@@ -18,15 +18,6 @@ namespace ark {
 
 //[[script::bindings::auto]]
 class ARK_API Layer : public Renderer {
-private:
-    struct Item {
-        Item(float x, float y, const sp<RenderObject>& renderObject);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
-
-        float x, y;
-        sp<RenderObject> _render_object;
-    };
-
 public:
     struct Snapshot;
 
@@ -43,7 +34,6 @@ public:
         sp<RenderController> _render_controller;
         sp<ShaderBindings> _shader_bindings;
 
-        std::vector<Item> _items;
         WeakRefList<LayerContext> _layer_contexts;
 
         uint32_t _stride;
@@ -79,8 +69,6 @@ public:
     Layer(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
-
-    void draw(float x, float y, const sp<RenderObject>& renderObject);
 
     const sp<RenderModel>& model() const;
 

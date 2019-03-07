@@ -7,17 +7,16 @@
 
 #include "graphics/base/size.h"
 #include "graphics/base/v2.h"
-#include "graphics/base/layer_context.h"
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 namespace ark {
 
-TileMap::TileMap(const sp<Layer>& layer, uint32_t width, uint32_t height, uint32_t tileWidth, uint32_t tileHeight)
-    : _layer(layer), _size(sp<Size>::make(static_cast<float>(width), static_cast<float>(height))),
+TileMap::TileMap(const sp<RenderLayer>& layer, uint32_t width, uint32_t height, uint32_t tileWidth, uint32_t tileHeight)
+    : _render_layer(layer), _size(sp<Size>::make(static_cast<float>(width), static_cast<float>(height))),
       _tile_size(sp<Size>::make(static_cast<float>(tileWidth), static_cast<float>(tileHeight))),
       _tile_width(tileWidth), _tile_height(tileHeight), _col_count(width / tileWidth), _row_count(height / tileHeight)
 {
-    DASSERT(_layer);
+    DASSERT(_render_layer);
     _tiles = new sp<RenderObject>[_col_count * _row_count];
 }
 
@@ -50,7 +49,7 @@ void TileMap::render(RenderRequest& /*renderRequest*/, float x, float y)
                 {
                     const sp<RenderObject>& renderObject = _tiles[i * _col_count + j];
                     if(renderObject)
-                        _layer->draw(x + (j - colIdStart) * _tile_width - ox, y + dy, renderObject);
+                        _render_layer->draw(x + (j - colIdStart) * _tile_width - ox, y + dy, renderObject);
                 }
         }
     }
