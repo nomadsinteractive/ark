@@ -65,7 +65,7 @@ sp<Renderer> ViewGroup::BUILDER::build(const sp<Scope>& args)
         const String& name = i->name();
         if(name == Constants::Attributes::RENDER_LAYER)
             viewGroup->addRenderer(_factory.ensure<RenderLayer>(i, args));
-        else
+        else if(name != Constants::Attributes::BACKGROUND)
             viewGroup->addRenderer(_factory.ensure<Renderer>(i, args));
     }
     return viewGroup;

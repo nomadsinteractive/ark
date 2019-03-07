@@ -11,13 +11,24 @@
 namespace ark {
 
 class LayerContext {
+private:
+    struct Item {
+        Item(float x, float y, const sp<RenderObject>& renderObject);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
+
+        float _x, _y;
+        sp<RenderObject> _render_object;
+    };
+
 public:
     LayerContext();
 
     void renderRequest(const V2& position);
 
+    void draw(float x, float y, const sp<RenderObject>& renderObject);
+
     void addRenderObject(const sp<RenderObject>& renderObject);
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& lifecylce);
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed);
     void removeRenderObject(const sp<RenderObject>& renderObject);
 
     void clear();
@@ -29,15 +40,16 @@ private:
     public:
         RenderObjectFilter(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed);
 
-         FilterAction operator()(const sp<RenderObject>& renderObject) const;
+        FilterAction operator()(const sp<RenderObject>& renderObject) const;
 
     private:
-        sp<Disposable> _lifecycle;
+        sp<Disposable> _disposed;
     };
 
 private:
     bool _render_requested;
     V2 _position;
+    std::vector<Item> _transient_items;
     FilteredList<RenderObject, RenderObjectFilter> _items;
 };
 

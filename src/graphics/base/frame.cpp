@@ -20,11 +20,6 @@ Frame::Frame(const sp<Renderer>& renderer, const sp<Block>& block)
 {
 }
 
-Frame::Frame(const sp<RenderObject>& renderObject, const sp<Layer>& layer)
-    : _renderer(sp<RendererByRenderObject>::make(renderObject, layer)), _block(renderObject)
-{
-}
-
 Frame::operator bool() const
 {
     return static_cast<bool>(_renderer);

@@ -17,7 +17,6 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Frame);
     Frame(const sp<Renderer>& renderer);
     Frame(const sp<Renderer>& renderer, const sp<Block>& block);
-    Frame(const sp<RenderObject>& renderObject, const sp<Layer>& layer);
 
     explicit operator bool() const;
 

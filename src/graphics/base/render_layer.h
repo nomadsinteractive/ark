@@ -1,6 +1,8 @@
 #ifndef ARK_GRAPHICS_BASE_RENDER_LAYER_H_
 #define ARK_GRAPHICS_BASE_RENDER_LAYER_H_
 
+#include <vector>
+
 #include "core/collection/filtered_list.h"
 #include "core/collection/list.h"
 #include "core/inf/builder.h"
@@ -22,10 +24,15 @@ public:
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
+    void draw(float x, float y, const sp<RenderObject>& renderObject);
+
 // [[script::bindings::auto]]
     void addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& lifecycle = sp<Disposable>::null());
 // [[script::bindings::auto]]
     void removeRenderObject(const sp<RenderObject>& renderObject);
+
+// [[script::bindings::property]]
+    const sp<Layer>& layer() const;
 
 // [[script::bindings::auto]]
     void clear();
@@ -39,7 +46,7 @@ public:
 
     private:
         sp<Builder<Layer>> _layer;
-        List<sp<Builder<RenderObject>>> _render_objects;
+        std::vector<sp<Builder<RenderObject>>> _render_objects;
     };
 
 //  [[plugin::builder("render-layer")]]

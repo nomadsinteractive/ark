@@ -14,7 +14,7 @@ namespace ark {
 //[[core::class]]
 class RendererByRenderObject : public Renderer, public Block {
 public:
-    RendererByRenderObject(const sp<RenderObject>& renderObject, const sp<Layer>& layer);
+    RendererByRenderObject(const sp<RenderObject>& renderObject, const sp<RenderLayer>& renderLayer);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
@@ -29,12 +29,12 @@ public:
 
     private:
         sp<Builder<RenderObject>> _render_object;
-        sp<Builder<Layer>> _layer;
+        sp<Builder<RenderLayer>> _render_layer;
     };
 
 private:
     sp<RenderObject> _render_object;
-    sp<Layer> _layer;
+    sp<RenderLayer> _render_layer;
 
 };
 

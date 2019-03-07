@@ -19,6 +19,11 @@ void RenderLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
     _layer_context->renderRequest(V2(x, y));
 }
 
+void RenderLayer::draw(float x, float y, const sp<RenderObject>& renderObject)
+{
+    _layer_context->draw(x, y, renderObject);
+}
+
 void RenderLayer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& lifecycle)
 {
     DASSERT(renderObject);
@@ -28,6 +33,11 @@ void RenderLayer::addRenderObject(const sp<RenderObject>& renderObject, const sp
 void RenderLayer::removeRenderObject(const sp<RenderObject>& renderObject)
 {
     _layer_context->removeRenderObject(renderObject);
+}
+
+const sp<Layer>& RenderLayer::layer() const
+{
+    return _layer;
 }
 
 void RenderLayer::clear()
