@@ -8,7 +8,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/inf/resource.h"
@@ -42,7 +42,7 @@ public:
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag");
     static sp<Shader> fromStringTable(const String& vertex = "shaders/default.vert", const String& fragment = "shaders/texture.frag", const sp<Snippet>& snippet = nullptr, const sp<ResourceLoaderContext>& resourceLoaderContext = nullptr);
 
-    std::vector<Layer::UBOSnapshot> snapshot(MemoryPool& memoryPool) const;
+    std::vector<RenderLayer::UBOSnapshot> snapshot(MemoryPool& memoryPool) const;
 
     const sp<PipelineInput>& input() const;
     const sp<Camera>& camera() const;

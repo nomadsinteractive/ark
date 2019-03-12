@@ -2,7 +2,7 @@
 
 #include "core/base/bean_factory.h"
 
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 #include "renderer/base/shader.h"
 #include "renderer/base/resource_loader_context.h"
@@ -15,10 +15,10 @@ ImageLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, con
       _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext)) {
 }
 
-sp<Layer> ImageLayer::BUILDER::build(const sp<Scope>& args)
+sp<RenderLayer> ImageLayer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Atlas> atlas = _atlas->build(args);
-    return sp<Layer>::make(sp<GLModelQuad>::make(_resource_loader_context->renderController(), atlas), _shader->build(args), _resource_loader_context);
+    return sp<RenderLayer>::make(sp<GLModelQuad>::make(_resource_loader_context->renderController(), atlas), _shader->build(args), _resource_loader_context);
 }
 
 }

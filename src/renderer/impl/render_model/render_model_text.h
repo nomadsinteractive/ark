@@ -18,8 +18,8 @@ private:
 
         void reset(uint32_t textureWidth, uint32_t textureHeight);
 
-        bool checkUnpreparedCharacter(const Layer::Snapshot& renderContext);
-        bool prepare(const Layer::Snapshot& snapshot, bool allowReset);
+        bool checkUnpreparedCharacter(const RenderLayer::Snapshot& renderContext);
+        bool prepare(const RenderLayer::Snapshot& snapshot, bool allowReset);
 
         virtual sp<Resource> val() override;
 
@@ -49,9 +49,9 @@ public:
 
     virtual sp<ShaderBindings> makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) override;
 
-    virtual void postSnapshot(RenderController& renderController, Layer::Snapshot& snapshot) override;
+    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
-    virtual void start(ModelBuffer& buf, const Layer::Snapshot& snapshot) override;
+    virtual void start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot) override;
     virtual void load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot) override;
     virtual Metrics measure(int32_t type) override;
 

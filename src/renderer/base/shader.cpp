@@ -79,9 +79,9 @@ sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment,
     return sp<Shader>::make(buildingContext->_shader, pipelineLayout, nullptr);
 }
 
-std::vector<Layer::UBOSnapshot> Shader::snapshot(MemoryPool& memoryPool) const
+std::vector<RenderLayer::UBOSnapshot> Shader::snapshot(MemoryPool& memoryPool) const
 {
-    std::vector<Layer::UBOSnapshot> uboSnapshot;
+    std::vector<RenderLayer::UBOSnapshot> uboSnapshot;
     for(const sp<PipelineInput::UBO>& i : _input->ubos())
         uboSnapshot.push_back(i->snapshot(memoryPool));
     return uboSnapshot;

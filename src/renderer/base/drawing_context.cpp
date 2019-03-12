@@ -50,12 +50,12 @@ private:
 
 };
 
-DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<Layer::UBOSnapshot> ubo)
+DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo)
     : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _count(0), _instance_count(0)
 {
 }
 
-DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<Layer::UBOSnapshot> ubo, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount)
+DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount)
     : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _array_buffer(arrayBuffer), _index_buffer(indexBuffer), _count(indexBuffer.length<glindex_t>()), _instance_count(instanceCount)
 {
     DWARN(_shader_bindings->vertexBuffer().id() == arrayBuffer.id(), "ShaderBinding's VertexBuffer: %d, which is not the same as DrawingContext's ArrayBuffer snapshot: %d", _shader_bindings->vertexBuffer().id(), arrayBuffer.id());

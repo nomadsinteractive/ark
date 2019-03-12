@@ -131,26 +131,13 @@ RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec>& positi
 void RigidBody::Callback::onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
 {
     if(_collision_callback)
-    {
-        const sp<CollisionCallback> cc = _collision_callback;
-        const sp<RigidBody> rb = rigidBody;
-        const CollisionManifold m = manifold;
-        Ark::instance().applicationContext()->post([=]() {
-            cc->onBeginContact(rb, m);
-        });
-    }
+        _collision_callback->onBeginContact(rigidBody, manifold);
 }
 
 void RigidBody::Callback::onEndContact(const sp<RigidBody>& rigidBody)
 {
     if(_collision_callback)
-    {
-        const sp<CollisionCallback> cc = _collision_callback;
-        const sp<RigidBody> rb = rigidBody;
-        Ark::instance().applicationContext()->post([=]() {
-            cc->onEndContact(rb);
-        });
-    }
+        _collision_callback->onEndContact(rigidBody);
 }
 
 void RigidBody::Callback::onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)

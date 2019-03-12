@@ -49,11 +49,11 @@ sp<ShaderBindings> GLModelSphere::makeShaderBindings(RenderController& renderCon
     return bindings;
 }
 
-void GLModelSphere::postSnapshot(RenderController& /*renderController*/, Layer::Snapshot& /*snapshot*/)
+void GLModelSphere::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& /*snapshot*/)
 {
 }
 
-void GLModelSphere::start(ModelBuffer& buf, const Layer::Snapshot& layerContext)
+void GLModelSphere::start(ModelBuffer& buf, const RenderLayer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size() * _vertex_count);
     buf.setIndices(_instance_index.snapshot());

@@ -3,14 +3,15 @@
 
 #include "core/base/api.h"
 #include "core/collection/filtered_list.h"
+#include "core/inf/builder.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v2.h"
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 namespace ark {
 
-class LayerContext {
+class ARK_API LayerContext {
 private:
     struct Item {
         Item(float x, float y, const sp<RenderObject>& renderObject);
@@ -21,19 +22,34 @@ private:
     };
 
 public:
-    LayerContext();
+    LayerContext(const sp<RenderModel>& renderModel);
+
+    const sp<RenderModel>& renderModel() const;
 
     void renderRequest(const V2& position);
 
     void draw(float x, float y, const sp<RenderObject>& renderObject);
 
-    void addRenderObject(const sp<RenderObject>& renderObject);
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed);
+// [[script::bindings::auto]]
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed = sp<Disposable>::null());
+// [[script::bindings::auto]]
     void removeRenderObject(const sp<RenderObject>& renderObject);
-
+// [[script::bindings::auto]]
     void clear();
 
-    void takeSnapshot(Layer::Snapshot& output, MemoryPool& memoryPool);
+    void takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memoryPool);
+
+    class BUILDER : public Builder<LayerContext> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest, bool makeContext);
+
+        virtual sp<LayerContext> build(const sp<Scope>& args) override;
+
+    private:
+        sp<Builder<Layer>> _layer;
+        sp<Builder<RenderLayer>> _render_layer;
+        bool _make_context;
+    };
 
 private:
     class RenderObjectFilter {
@@ -47,6 +63,8 @@ private:
     };
 
 private:
+    sp<RenderModel> _render_model;
+
     bool _render_requested;
     V2 _position;
     std::vector<Item> _transient_items;

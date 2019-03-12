@@ -7,6 +7,7 @@
 #include "core/inf/variable.h"
 #include "core/util/math.h"
 
+#include "graphics/base/layer.h"
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/size.h"
@@ -23,21 +24,16 @@
 
 namespace ark {
 
-Characters::Characters(const sp<Layer>& layer, float textScale, float letterSpacing, float lineHeight, float lineIndent)
+Characters::Characters(const sp<LayerContext>& layer, float textScale, float letterSpacing, float lineHeight, float lineIndent)
     : Characters(layer, nullptr, nullptr, nullptr, textScale, letterSpacing, lineHeight, lineIndent)
 {
 }
 
-Characters::Characters(const sp<Layer>& layer, const sp<ObjectPool>& objectPool, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : _layer(layer), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()), _character_mapper(characterMapper), _character_maker(characterMaker),
-      _layer_context(layer->makeContext()), _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(-g_upDirection * lineHeight),
-      _line_indent(lineIndent), _model(layer->model()), _size(_object_pool->obtain<Size>(0.0f, 0.0f))
+Characters::Characters(const sp<LayerContext>& layerContext, const sp<ObjectPool>& objectPool, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
+    : _layer_context(layerContext), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()), _character_mapper(characterMapper), _character_maker(characterMaker),
+      _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(-g_upDirection * lineHeight),
+      _line_indent(lineIndent), _model(layerContext->renderModel()), _size(_object_pool->obtain<Size>(0.0f, 0.0f))
 {
-}
-
-const sp<Layer>& Characters::layer() const
-{
-    return _layer;
 }
 
 const sp<LayoutParam>& Characters::layoutParam() const
@@ -72,7 +68,7 @@ void Characters::setText(const std::wstring& text)
 
     float boundary = _layout_param ? _layout_param->contentWidth() : 0;
     if(boundary > 0)
-        createContent(boundary);
+        createContentWithBoundary(boundary);
     else
         createContentNoBoundary();
 }
@@ -82,7 +78,7 @@ void Characters::renderRequest(const V2& position)
     _layer_context->renderRequest(position);
 }
 
-void Characters::createContent(float boundary)
+void Characters::createContentWithBoundary(float boundary)
 {
     float flowx = 0, flowy = 0;
     const std::vector<LayoutChar> layoutChars = Characters::getCharacterMetrics(_text);
@@ -218,7 +214,7 @@ bool Characters::isCJK(int32_t c) const
 {
     return c == 0x3005 || Math::between<int32_t>(0x3400, 0x4DBF, c) || Math::between<int32_t>(0x4E00, 0x9FFF, c) ||
            Math::between<int32_t>(0xF900, 0xFAFF, c) || Math::between<int32_t>(0x20000, 0x2A6DF, c) || Math::between<int32_t>(0x2A700, 0x2B73F, c) ||
-            Math::between<int32_t>(0x2B740, 0x2B81F, c) || Math::between<int32_t>(0x2F800, 0x2FA1F, c);
+           Math::between<int32_t>(0x2B740, 0x2B81F, c) || Math::between<int32_t>(0x2F800, 0x2FA1F, c);
 }
 
 bool Characters::isWordBreaker(wchar_t c) const
@@ -237,15 +233,17 @@ sp<RenderObject> Characters::makeCharacter(int32_t type, const sp<Vec>& position
 }
 
 Characters::BUILDER::BUILDER(BeanFactory& factory, const document manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _layer(factory.ensureBuilder<Layer>(manifest, Constants::Attributes::LAYER)), _character_mapper(factory.getBuilder<CharacterMapper>(manifest, "character-mapper")), _character_maker(factory.getBuilder<CharacterMaker>(manifest, "character-maker")),
-      _object_pool(resourceLoaderContext->objectPool()), _text_scale(Documents::getAttribute<float>(manifest, "text-scale", 1.0f)), _letter_spacing(Documents::getAttribute<float>(manifest, "letter-spacing", 0.0f)),
+    : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, true)), _character_mapper(factory.getBuilder<CharacterMapper>(manifest, "character-mapper")),
+      _character_maker(factory.getBuilder<CharacterMaker>(manifest, "character-maker")), _object_pool(resourceLoaderContext->objectPool()),
+      _text_scale(Documents::getAttribute<float>(manifest, "text-scale", 1.0f)), _letter_spacing(Documents::getAttribute<float>(manifest, "letter-spacing", 0.0f)),
       _line_height(Documents::getAttribute<float>(manifest, "line-height", 0.0f)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))
 {
 }
 
 sp<Characters> Characters::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<Characters>::make(_layer->build(args), _object_pool, _character_mapper->build(args), _character_maker->build(args), _text_scale, _letter_spacing, _line_height, _line_indent);
+    return sp<Characters>::make(_layer_context->build(args), _object_pool, _character_mapper->build(args), _character_maker->build(args), _text_scale, _letter_spacing,
+                                _line_height, _line_indent);
 }
 
 Characters::LayoutChar::LayoutChar(int32_t type, const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak)

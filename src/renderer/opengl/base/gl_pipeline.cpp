@@ -77,7 +77,7 @@ Resource::RecycleFunc GLPipeline::recycle()
     };
 }
 
-void GLPipeline::bindUBO(const Layer::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo)
+void GLPipeline::bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo)
 {
     for(size_t i = 0; i < ubo->uniforms().size(); ++i)
     {
@@ -93,7 +93,7 @@ void GLPipeline::bindUBO(const Layer::UBOSnapshot& uboSnapshot, const sp<Pipelin
 
 void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
 {
-    const std::vector<Layer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
+    const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
 
     const sp<PipelineInput>& pipelineInput = drawingContext._shader_bindings->pipelineInput();
     DCHECK(uboSnapshots.size() == pipelineInput->ubos().size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), pipelineInput->ubos().size());
@@ -101,7 +101,7 @@ void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext
     glUseProgram(_id);
     for(size_t i = 0; i < uboSnapshots.size(); ++i)
     {
-        const Layer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
+        const RenderLayer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
         const sp<PipelineInput::UBO>& ubo = pipelineInput->ubos().at(i);
         bindUBO(uboSnapshot, ubo);
     }

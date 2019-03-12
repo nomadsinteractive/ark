@@ -2,7 +2,7 @@
 
 #include "core/base/bean_factory.h"
 
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 #include "renderer/base/shader.h"
 #include "renderer/base/resource_loader_context.h"
@@ -16,11 +16,11 @@ NinePatchLayer::BUILDER::BUILDER(BeanFactory& parent, const document& manifest, 
 {
 }
 
-sp<Layer> NinePatchLayer::BUILDER::build(const sp<Scope>& args)
+sp<RenderLayer> NinePatchLayer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Atlas> atlas = _atlas->build(args);
     const sp<Shader> shader = _shader->build(args);
-    return sp<Layer>::make(sp<GLModelNinePatch>::make(_resource_loader_context->renderController(), _manifest, atlas), shader, _resource_loader_context);
+    return sp<RenderLayer>::make(sp<GLModelNinePatch>::make(_resource_loader_context->renderController(), _manifest, atlas), shader, _resource_loader_context);
 }
 
 }

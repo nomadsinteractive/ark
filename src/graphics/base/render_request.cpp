@@ -6,7 +6,7 @@
 
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/base/surface_controller.h"
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 namespace ark {
 
@@ -14,7 +14,7 @@ namespace {
 
 class BackgroundRenderCommand : public RenderCommand, public Runnable {
 public:
-    BackgroundRenderCommand(const Layer& layer, float x, float y)
+    BackgroundRenderCommand(const RenderLayer& layer, float x, float y)
         : _layer_snapshot(layer.snapshot()), _x(x), _y(y) {
     }
 
@@ -28,7 +28,7 @@ public:
     }
 
 private:
-    Layer::Snapshot _layer_snapshot;
+    RenderLayer::Snapshot _layer_snapshot;
     float _x;
     float _y;
 
@@ -81,7 +81,7 @@ void RenderRequest::addRequest(const sp<RenderCommand>& renderCommand)
     _stub->_render_command_pipe_line->add(renderCommand);
 }
 
-void RenderRequest::addBackgroundRequest(const Layer& layer, float x, float y)
+void RenderRequest::addBackgroundRequest(const RenderLayer& layer, float x, float y)
 {
     const sp<BackgroundRenderCommand> renderCommand = _stub->_object_pool.obtain<BackgroundRenderCommand>(layer, x, y);
     ++(_stub->_background_renderer_count);

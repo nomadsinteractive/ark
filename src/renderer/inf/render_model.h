@@ -5,7 +5,7 @@
 #include "core/forwarding.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 #include "graphics/base/metrics.h"
 #include "graphics/base/render_object.h"
 
@@ -27,9 +27,9 @@ public:
     virtual ~RenderModel() = default;
 
     virtual sp<ShaderBindings> makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) = 0;
-    virtual void postSnapshot(RenderController& renderController, Layer::Snapshot& snapshot) = 0;
+    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) = 0;
 
-    virtual void start(ModelBuffer& buf, const Layer::Snapshot& snapshot) = 0;
+    virtual void start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot) = 0;
     virtual void load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot) = 0;
 
     virtual Metrics measure(int32_t type) { return Metrics(); }

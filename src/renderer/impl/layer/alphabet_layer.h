@@ -14,11 +14,11 @@ class AlphabetLayer {
 public:
 
 //  [[plugin::resource-loader("text-layer")]]
-    class BUILDER : public Builder<Layer> {
+    class BUILDER : public Builder<RenderLayer> {
     public:
         BUILDER(BeanFactory& parent, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        sp<Layer> build(const sp<Scope>& args);
+        sp<RenderLayer> build(const sp<Scope>& args);
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;

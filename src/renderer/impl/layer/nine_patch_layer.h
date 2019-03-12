@@ -14,11 +14,11 @@ class NinePatchLayer {
 public:
 
 //  [[plugin::resource-loader("nine-patch-layer")]]
-    class BUILDER : public Builder<Layer> {
+    class BUILDER : public Builder<RenderLayer> {
     public:
         BUILDER(BeanFactory& parent, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Layer> build(const sp<Scope>& args) override;
+        virtual sp<RenderLayer> build(const sp<Scope>& args) override;
 
     private:
         document _manifest;

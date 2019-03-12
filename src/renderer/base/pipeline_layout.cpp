@@ -1,12 +1,14 @@
 #include "renderer/base/pipeline_layout.h"
 
 #include "core/base/bean_factory.h"
-#include "core/epi/notifier.h"
 #include "core/base/observer.h"
 #include "core/dom/dom_document.h"
+#include "core/epi/notifier.h"
 #include "core/inf/array.h"
 #include "core/inf/flatable.h"
 #include "core/util/documents.h"
+
+#include "graphics/base/camera.h"
 
 #include "renderer/base/render_context.h"
 #include "renderer/base/graphics_context.h"

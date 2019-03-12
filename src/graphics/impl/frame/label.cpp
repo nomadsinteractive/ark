@@ -4,7 +4,7 @@
 #include "core/util/documents.h"
 
 #include "graphics/base/layer_context.h"
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 #include "renderer/base/characters.h"
 
@@ -26,10 +26,10 @@ const SafePtr<Size>& Label::size()
 }
 
 Label::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _text(factory.getBuilder<String>(manifest, Constants::Attributes::TEXT))
+    : _characters(factory.ensureConcreteClassBuilder<Characters>(manifest, "characters")), _text(factory.getBuilder<String>(manifest, Constants::Attributes::TEXT))
 {
-    const String cid = Documents::getAttribute(manifest, "characters");
-    _characters = cid ? factory.ensureBuilder<Characters>(cid) : factory.ensureBuilder<Characters>(manifest);
+//    const String cid = Documents::getAttribute(manifest, "characters");
+//    _characters = cid ? factory.ensureBuilder<Characters>(cid) : factory.ensureBuilder<Characters>(manifest);
 }
 
 sp<Renderer> Label::BUILDER::build(const sp<Scope>& args)

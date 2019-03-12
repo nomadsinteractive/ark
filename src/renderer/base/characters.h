@@ -22,11 +22,8 @@ namespace ark {
 class ARK_API Characters {
 public:
 //  [[script::bindings::auto]]
-    Characters(const sp<Layer>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
-    Characters(const sp<Layer>& layer, const sp<ObjectPool>& objectPool, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
-
-//  [[script::bindings::property]]
-    const sp<Layer>& layer() const;
+    Characters(const sp<LayerContext>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+    Characters(const sp<LayerContext>& layerContext, const sp<ObjectPool>& objectPool, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
     const sp<LayoutParam>& layoutParam() const;
     void setLayoutParam(const sp<LayoutParam>& layoutParam);
@@ -52,7 +49,7 @@ public:
         virtual sp<Characters> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Layer>> _layer;
+        sp<Builder<LayerContext>> _layer_context;
         SafePtr<Builder<CharacterMapper>> _character_mapper;
         SafePtr<Builder<CharacterMaker>> _character_maker;
         sp<ObjectPool> _object_pool;
@@ -64,7 +61,7 @@ public:
     };
 
 private:
-    void createContent(float boundary);
+    void createContentWithBoundary(float boundary);
     void createContentNoBoundary();
 
     struct LayoutChar {
@@ -91,13 +88,11 @@ private:
     sp<RenderObject> makeCharacter(int32_t type, const sp<Vec>& position, const sp<Size>& size) const;
 
 private:
-    sp<Layer> _layer;
+    sp<LayerContext> _layer_context;
     sp<LayoutParam> _layout_param;
     sp<ObjectPool> _object_pool;
     sp<CharacterMapper> _character_mapper;
     sp<CharacterMaker> _character_maker;
-
-    sp<LayerContext> _layer_context;
 
     std::vector<sp<RenderObject>> _characters;
     std::wstring _text;

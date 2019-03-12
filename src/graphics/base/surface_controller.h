@@ -22,7 +22,7 @@ public:
 // [[script::bindings::auto]]
     void addControl(const sp<Renderer>& control);
 // [[script::bindings::auto]]
-    void addLayer(const sp<Layer>& layer);
+    void addLayer(const sp<RenderLayer>& layer);
 
     void postRenderCommand(const sp<RenderCommandPipeline>& renderCommand);
 

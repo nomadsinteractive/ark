@@ -9,7 +9,7 @@
 #include "core/util/bean_utils.h"
 #include "core/util/operators.h"
 
-#include "graphics/base/render_layer.h"
+#include "graphics/base/layer.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/v2.h"
 #include "graphics/impl/vec/vec_with_translation.h"
@@ -21,8 +21,8 @@
 namespace ark {
 
 ParticleEmitter::ParticleEmitter(const sp<Stub>& stub, const sp<Clock>& clock,
-                                 const sp<RenderLayer>& renderLayer, const List<document>& particleDescriptor, BeanFactory& beanFactory)
-    : _stub(stub), _render_layer(renderLayer), _clock(clock), _next_tick(0)
+                                 const sp<LayerContext>& layerContext, const List<document>& particleDescriptor, BeanFactory& beanFactory)
+    : _stub(stub), _layer_context(layerContext), _clock(clock), _next_tick(0)
 {
     for(const document& doc : particleDescriptor)
         _particles.push_back(Particale(_stub, doc, beanFactory));
@@ -40,24 +40,24 @@ uint64_t ParticleEmitter::emitParticles(uint64_t tick)
     uint64_t nextTick = std::numeric_limits<std::uint64_t>::max();
     const V position = _stub->_position->val();
     for(Particale& i : _particles)
-        nextTick = std::min(i.show(position.x(), position.y(), _clock, tick, _render_layer), nextTick);
+        nextTick = std::min(i.show(position.x(), position.y(), _clock, tick, _layer_context), nextTick);
     return nextTick;
 }
 
-ParticleEmitter::BUILDER::BUILDER(BeanFactory& parent, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _factory(parent), _manifest(manifest), _resource_loader_context(resourceLoaderContext),
+ParticleEmitter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext),
       _clock(Ark::instance().clock()),
-      _type(parent.getBuilder<Numeric>(manifest, Constants::Attributes::TYPE)),
-      _position(parent.getBuilder<Vec>(manifest, Constants::Attributes::POSITION)),
-      _size(parent.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _render_layer(parent.ensureBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER))
+      _type(factory.getBuilder<Numeric>(manifest, Constants::Attributes::TYPE)),
+      _position(factory.getBuilder<Vec>(manifest, Constants::Attributes::POSITION)),
+      _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+      _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, false))
 {
 }
 
 sp<Renderer> ParticleEmitter::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Stub> stub = sp<Stub>::make(_resource_loader_context, BeanUtils::toInteger(_type, args), _position->build(args), _size->build(args), args);
-    return sp<Renderer>::adopt(new ParticleEmitter(stub, _clock, _render_layer->build(args), _manifest->children(), _factory));
+    return sp<Renderer>::adopt(new ParticleEmitter(stub, _clock, _layer_context->build(args), _manifest->children(), _factory));
 }
 
 ParticleEmitter::Particale::Particale(const sp<Stub>& stub, const document& manifest, BeanFactory& factory)
@@ -77,7 +77,7 @@ ParticleEmitter::Particale::Particale(const sp<Stub>& stub, const document& mani
     _lifecycle = factory.ensureBuilder<Disposable>(manifest, Constants::Attributes::EXPIRED);
 }
 
-uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clock, uint64_t tick, const sp<RenderLayer>& renderLayer)
+uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clock, uint64_t tick, const sp<LayerContext>& layerContext)
 {
     uint32_t count;
     uint64_t elpased = tick - last_emit_tick;
@@ -122,7 +122,7 @@ uint64_t ParticleEmitter::Particale::show(float x, float y, const sp<Clock>& clo
                     type, position,
                     size, transform, filter);
         DWARN(lifecycle, "You're creating particles that will NEVER die, is that what you really want?");
-        renderLayer->addRenderObject(renderObject, lifecycle);
+        layerContext->addRenderObject(renderObject, lifecycle);
     }
     return last_emit_tick + _interval;
 }

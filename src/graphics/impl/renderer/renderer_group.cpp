@@ -4,8 +4,8 @@
 #include "core/impl/builder/builder_by_instance.h"
 #include "core/util/log.h"
 
-#include "graphics/base/render_layer.h"
 #include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 namespace ark {
 
@@ -30,10 +30,10 @@ void RendererGroup::loadGroup(const document& manifest, BeanFactory& factory, co
 {
     for(const document& i : manifest->children())
     {
-        if(i->name() == Constants::Attributes::LAYER)
-            addRenderer(factory.ensureDecorated<Renderer, Layer>(i));
-        else if(i->name() == Constants::Attributes::RENDER_LAYER)
+        if(i->name() == Constants::Attributes::RENDER_LAYER)
             addRenderer(factory.ensureDecorated<Renderer, RenderLayer>(i));
+        else if(i->name() == Constants::Attributes::LAYER)
+            addRenderer(factory.ensureDecorated<Renderer, Layer>(i));
         else
             addRenderer(factory.ensure<Renderer>(i, args));
     }

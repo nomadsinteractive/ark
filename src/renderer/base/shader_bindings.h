@@ -9,7 +9,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"

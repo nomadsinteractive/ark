@@ -19,12 +19,12 @@ sp<ShaderBindings> GLModelPoint::makeShaderBindings(RenderController& renderCont
     return bindings;
 }
 
-void GLModelPoint::postSnapshot(RenderController& renderController, Layer::Snapshot& snapshot)
+void GLModelPoint::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
 {
     snapshot._index_buffer = _index_buffer->snapshot(renderController, snapshot._items.size());
 }
 
-void GLModelPoint::start(ModelBuffer& buf, const Layer::Snapshot& snapshot)
+void GLModelPoint::start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     buf.vertices().setGrowCapacity(snapshot._items.size());
     buf.setIndices(snapshot._index_buffer);

@@ -310,8 +310,99 @@ class Mat3:
         return None
 
 
+class RenderObject:
+    def __init__(self, t, pos=None, size=None, transform=None, varyings=None):
+        self._transform = transform
+
+    @property
+    def type(self):
+        return 0
+
+    @type.setter
+    def type(self, val):
+        pass
+
+    @property
+    def position(self):
+        return None
+
+    @position.setter
+    def position(self, v):
+        pass
+
+    @property
+    def x(self):
+        return 0
+
+    @property
+    def y(self):
+        return 0
+
+    @property
+    def transform(self) -> Transform:
+        return self._transform
+
+    @transform.setter
+    def transform(self, transform):
+        self._transform = transform
+
+    @property
+    def varyings(self):
+        return None
+
+    @varyings.setter
+    def varyings(self, v):
+        pass
+
+    @property
+    def xy(self):
+        return 0, 0
+
+    def absorb(self, o):
+        pass
+
+    def expire(self):
+        pass
+
+
+class LayerContext:
+
+    def add_render_object(self, render_object: RenderObject, disposed: Disposable):
+        pass
+
+    def remove_render_object(self, render_object: RenderObject):
+        pass
+
+    def clear(self):
+        pass
+
+
+class RenderLayer:
+    @property
+    def context(self):
+        return None
+
+
 class Layer:
-    pass
+    def __init__(self, render_layer: RenderLayer):
+        self._render_layer = render_layer
+
+    @property
+    def renderer(self):
+        return self._render_layer
+
+    @property
+    def context(self):
+        return None
+
+    def add_render_object(self, render_object: RenderObject, disposed: Disposable):
+        pass
+
+    def remove_render_object(self, render_object: RenderObject):
+        pass
+
+    def clear(self):
+        pass
 
 
 class Arena:
@@ -478,61 +569,6 @@ class Transform:
         self._translate = v
 
 
-class RenderObject:
-    def __init__(self, t, pos=None, size=None, transform=None, varyings=None):
-        self._transform = transform
-
-    @property
-    def type(self):
-        return 0
-
-    @type.setter
-    def type(self, val):
-        pass
-
-    @property
-    def position(self):
-        return None
-
-    @position.setter
-    def position(self, v):
-        pass
-
-    @property
-    def x(self):
-        return 0
-
-    @property
-    def y(self):
-        return 0
-
-    @property
-    def transform(self) -> Transform:
-        return self._transform
-
-    @transform.setter
-    def transform(self, transform):
-        self._transform = transform
-
-    @property
-    def varyings(self):
-        return None
-
-    @varyings.setter
-    def varyings(self, v):
-        pass
-
-    @property
-    def xy(self):
-        return 0, 0
-
-    def absorb(self, o):
-        pass
-
-    def expire(self):
-        pass
-
-
 class Math:
 
     @staticmethod
@@ -670,7 +706,7 @@ class EventDispatcher:
 
 
 class Characters:
-    def __init__(self, layer, text_scale=1.0, letter_spacing=0, line_height=0, line_indent=0):
+    def __init__(self, layer_context, text_scale=1.0, letter_spacing=0, line_height=0, line_indent=0):
         pass
 
     @property
@@ -692,17 +728,6 @@ class Varyings:
         pass
 
     def add(self, name, obj):
-        pass
-
-
-class RenderLayer:
-    def __init__(self, layer):
-        pass
-
-    def add_render_object(self, obj):
-        pass
-
-    def clear(self):
         pass
 
 

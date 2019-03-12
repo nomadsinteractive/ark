@@ -61,7 +61,7 @@ bool GLModelText::Stub::prepareOne(int32_t c)
     return true;
 }
 
-bool GLModelText::Stub::checkUnpreparedCharacter(const Layer::Snapshot& renderContext)
+bool GLModelText::Stub::checkUnpreparedCharacter(const RenderLayer::Snapshot& renderContext)
 {
     bool updateNeeded = false;
     for(const RenderObject::Snapshot& i : renderContext._items)
@@ -84,7 +84,7 @@ void GLModelText::Stub::clear()
     memset(_font_glyph->at(0, 0), 0, _font_glyph->width() * _font_glyph->height());
 }
 
-bool GLModelText::Stub::prepare(const Layer::Snapshot& snapshot, bool allowReset)
+bool GLModelText::Stub::prepare(const RenderLayer::Snapshot& snapshot, bool allowReset)
 {
     for(int32_t c : _characters)
     {
@@ -120,7 +120,7 @@ sp<ShaderBindings> GLModelText::makeShaderBindings(RenderController& renderContr
     return bindings;
 }
 
-void GLModelText::postSnapshot(RenderController& renderController, Layer::Snapshot& snapshot)
+void GLModelText::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
 {
     if(_stub->checkUnpreparedCharacter(snapshot))
     {
@@ -136,7 +136,7 @@ void GLModelText::postSnapshot(RenderController& renderController, Layer::Snapsh
     _stub->_delegate->postSnapshot(renderController, snapshot);
 }
 
-void GLModelText::start(ModelBuffer& buf, const Layer::Snapshot& snapshot)
+void GLModelText::start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     _stub->_delegate->start(buf, snapshot);
 }

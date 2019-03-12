@@ -4,15 +4,15 @@
     <renderer version="auto">
         <resolution width="540" height="960"/>
     </renderer>
-	<application name="s02 - Layouts" resource-loader="app.xml">
+	<application title="s02 - Layouts" resource-loader="app.xml">
         <arena>
-			<layer ref="@pre:l001"/>
-			<layer ref="@pre:l002"/>
+			<render-layer ref="@pre:rl001"/>
+			<render-layer ref="@pre:rl002"/>
 			<renderer ref="@pre:fps-counter"/>
 			<view class="view-group" size="540, 960" layout="vertical(center)">
-				<renderer class="label" text="Hello World" text-scale="0.5" layer="@pre:l002" style="display: block"/>
-				<renderer class="label" text="Hello World" text-scale="0.5" layer="@pre:l002" style="display: block; margin-top: 50"/>
-				<renderer class="label" text="Hello World" text-scale="0.5" layer="@pre:l002" style="display: block; margins: 50,0,0,100"/>
+				<renderer class="label" text="Hello World" text-scale="0.5" render-layer="@pre:rl002" style="display: block"/>
+				<renderer class="label" text="Hello World" text-scale="0.5" render-layer="@pre:rl002" style="display: block; margin-top: 50"/>
+				<renderer class="label" text="Hello World" text-scale="0.5" render-layer="@pre:rl002" style="display: block; margins: 50,0,0,100"/>
 			</view>
 		</arena>
 	</application>

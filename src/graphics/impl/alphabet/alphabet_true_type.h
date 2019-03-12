@@ -8,6 +8,7 @@
 #include "core/inf/builder.h"
 
 #include "graphics/inf/alphabet.h"
+#include "graphics/util/freetypes.h"
 
 namespace ark {
 
@@ -34,6 +35,8 @@ private:
     sp<Readable> getFontResource(const String& path) const;
 
 private:
+    sp<FreeTypes> _free_types;
+
     FT_Face _ft_font_face;
     int32_t _base_line_position;
     uint32_t _line_height_in_pixel;

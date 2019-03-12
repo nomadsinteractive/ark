@@ -4,7 +4,7 @@
 #include <chrono>
 
 #include "graphics/base/render_request.h"
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 #include "graphics/impl/renderer/renderer_group.h"
 #include "graphics/inf/render_view.h"
 
@@ -25,7 +25,7 @@ void SurfaceController::addControl(const sp<Renderer>& control)
     _controls->addRenderer(control);
 }
 
-void SurfaceController::addLayer(const sp<Layer>& layer)
+void SurfaceController::addLayer(const sp<RenderLayer>& layer)
 {
     _layers->addRenderer(layer);
 }

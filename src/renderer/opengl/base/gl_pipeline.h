@@ -101,7 +101,7 @@ private:
 
     GLint getUniformLocation(const String& name);
 
-    void bindUBO(const Layer::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo);
+    void bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo);
     void bindBuffer(GraphicsContext&, const PipelineInput& input, uint32_t divisor);
     void bindUniform(GraphicsContext& graphicsContext, const Uniform& uniform);
     void bindUniform(float* buf, uint32_t size, const Uniform& uniform);

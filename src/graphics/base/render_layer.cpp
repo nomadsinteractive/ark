@@ -1,76 +1,130 @@
 #include "graphics/base/render_layer.h"
 
-#include "core/base/bean_factory.h"
+#include "graphics/base/camera.h"
+#include "graphics/base/layer_context.h"
+#include "graphics/base/render_object.h"
+#include "graphics/base/render_request.h"
+#include "graphics/base/size.h"
 
-#include "graphics/base/layer_context.h"
-#include "graphics/base/render_command_pipeline.h"
-#include "graphics/base/layer_context.h"
-#include "graphics/base/layer.h"
+#include "renderer/base/drawing_context.h"
+#include "renderer/base/model_buffer.h"
+#include "renderer/base/pipeline_input.h"
+#include "renderer/base/resource_loader_context.h"
+#include "renderer/base/shader.h"
+#include "renderer/base/shader_bindings.h"
+
+#include "renderer/inf/pipeline.h"
+#include "renderer/inf/pipeline_factory.h"
+#include "renderer/inf/render_model.h"
 
 namespace ark {
 
-RenderLayer::RenderLayer(const sp<Layer>& layer)
-    : _layer(layer), _layer_context(layer->makeContext())
+RenderLayer::Stub::Stub(const sp<RenderModel>& renderModel, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _render_model(renderModel), _shader(shader), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
+      _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_render_model->makeShaderBindings(_render_controller, shader->pipelineLayout())),
+      _layer_context(sp<LayerContext>::make(renderModel)), _stride(shader->input()->getStream(0).stride())
 {
 }
 
-void RenderLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
+RenderLayer::Snapshot::Snapshot(const sp<Stub>& stub)
+    : _stub(stub), _ubos(stub->_shader->snapshot(_stub->_memory_pool))
 {
-    _layer_context->renderRequest(V2(x, y));
+    stub->_layer_context->takeSnapshot(*this, stub->_memory_pool);
+
+    for(const sp<LayerContext>& i : stub->_layer_contexts)
+        i->takeSnapshot(*this, stub->_memory_pool);
 }
 
-void RenderLayer::draw(float x, float y, const sp<RenderObject>& renderObject)
+sp<RenderCommand> RenderLayer::Snapshot::render(float x, float y)
 {
-    _layer_context->draw(x, y, renderObject);
-}
-
-void RenderLayer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& lifecycle)
-{
-    DASSERT(renderObject);
-    _layer_context->addRenderObject(renderObject, lifecycle);
-}
-
-void RenderLayer::removeRenderObject(const sp<RenderObject>& renderObject)
-{
-    _layer_context->removeRenderObject(renderObject);
-}
-
-const sp<Layer>& RenderLayer::layer() const
-{
-    return _layer;
-}
-
-void RenderLayer::clear()
-{
-    _layer_context->clear();
-}
-
-RenderLayer::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& doc)
-    : _layer(factory.ensureBuilder<Layer>(doc, Constants::Attributes::LAYER))
-{
-    for(const document& i : doc->children(Constants::Attributes::RENDER_OBJECT))
-        _render_objects.push_back(factory.ensureBuilder<RenderObject>(i));
-}
-
-sp<RenderLayer> RenderLayer::BUILDER_IMPL1::build(const sp<Scope>& args)
-{
-    const sp<RenderLayer> renderLayer = sp<RenderLayer>::make(_layer->build(args));
-    for(const sp<Builder<RenderObject>>& i : _render_objects)
+    if(_items.size() > 0)
     {
-        const sp<RenderObject> renderObject = i->build(args);
-        renderLayer->addRenderObject(renderObject, renderObject.as<Disposable>());
+        ModelBuffer buf(_stub->_resource_loader_context, _stub->_shader_bindings, _items.size(), _stub->_stride);
+        _stub->_render_model->start(buf, *this);
+
+        for(const RenderObject::Snapshot& i : _items)
+        {
+            buf.setRenderObject(i);
+            buf.setTranslate(V3(x + i._position.x(), y + i._position.y(), i._position.z()));
+            _stub->_render_model->load(buf, i);
+            if(buf.isInstanced())
+            {
+                Buffer::Builder& sBuilder = buf.getInstancedArrayBuilder(1);
+                sBuilder.next();
+                Matrix matrix = i._transform.toMatrix();
+                matrix.translate(i._position.x(), i._position.y(), i._position.z());
+                matrix.scale(i._size.x(), i._size.y(), i._size.z());
+                sBuilder.write(matrix);
+            }
+        }
+        DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos), _stub->_shader_bindings->vertexBuffer().snapshot(buf.vertices().makeUploader()), buf.indices(), static_cast<int32_t>(_items.size()));
+        if(buf.isInstanced())
+            drawingContext._instanced_array_snapshots = buf.makeInstancedBufferSnapshots();
+
+        return drawingContext.toRenderCommand(_stub->_resource_loader_context->objectPool());
     }
-    return renderLayer;
+    DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos));
+    return drawingContext.toRenderCommand(_stub->_resource_loader_context->objectPool());
 }
 
-RenderLayer::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& factory, const document& manifest)
-    : _builder_impl(factory, manifest)
+RenderLayer::RenderLayer(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : RenderLayer(sp<Stub>::make(model, shader, resourceLoaderContext))
 {
 }
 
-sp<Renderer> RenderLayer::BUILDER_IMPL2::build(const sp<Scope>& args)
+RenderLayer::RenderLayer(const sp<RenderLayer::Stub>& stub)
+    : _stub(stub)
 {
-    return _builder_impl.build(args);
+}
+
+const sp<RenderModel>& RenderLayer::model() const
+{
+    return _stub->_render_model;
+}
+
+const sp<LayerContext>& RenderLayer::context() const
+{
+    return _stub->_layer_context;
+}
+
+RenderLayer::Snapshot RenderLayer::snapshot() const
+{
+    Snapshot snapshot(_stub);
+    _stub->_render_model->postSnapshot(_stub->_render_controller, snapshot);
+    return snapshot;
+}
+
+sp<LayerContext> RenderLayer::makeContext() const
+{
+    const sp<LayerContext> layerContext = sp<LayerContext>::make(_stub->_render_model);
+    _stub->_layer_contexts.push_back(layerContext);
+    return layerContext;
+}
+
+void RenderLayer::render(RenderRequest& renderRequest, float x, float y)
+{
+    _stub->_layer_context->renderRequest(V2(x, y));
+    renderRequest.addBackgroundRequest(*this, x, y);
+}
+
+RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _resource_loader_context(resourceLoaderContext), _model(factory.ensureBuilder<RenderModel>(manifest, Constants::Attributes::MODEL)),
+      _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext)) {
+}
+
+sp<RenderLayer> RenderLayer::BUILDER::build(const sp<Scope>& args)
+{
+    return sp<RenderLayer>::make(_model->build(args), _shader->build(args), _resource_loader_context);
+}
+
+RenderLayer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _impl(factory, manifest, resourceLoaderContext)
+{
+}
+
+sp<Renderer> RenderLayer::RENDERER_BUILDER::build(const sp<Scope>& args)
+{
+    return _impl.build(args);
 }
 
 }

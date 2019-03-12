@@ -1,6 +1,6 @@
 #include "renderer/impl/layer/alphabet_layer.h"
 
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 #include "renderer/base/shader.h"
 #include "renderer/base/resource_loader_context.h"
@@ -19,11 +19,11 @@ AlphabetLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, 
 {
 }
 
-sp<Layer> AlphabetLayer::BUILDER::build(const sp<Scope>& args)
+sp<RenderLayer> AlphabetLayer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Vec4> color = _color ? _color->build(args) : sp<Color>::make(Color::WHITE).cast<Vec4>();
     const sp<Shader> shader = _shader ? _shader->build(args) : Shader::fromStringTable("shaders/default.vert", "shaders/alpha.frag", sp<SnippetUColor>::make(color), _resource_loader_context);
-    return sp<Layer>::make(sp<GLModelText>::make(_resource_loader_context->renderController(), _alphabet->build(args), 256, 256), shader, _resource_loader_context);
+    return sp<RenderLayer>::make(sp<GLModelText>::make(_resource_loader_context->renderController(), _alphabet->build(args), 256, 256), shader, _resource_loader_context);
 }
 
 }

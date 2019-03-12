@@ -63,12 +63,12 @@ sp<ShaderBindings> GLModelNinePatch::makeShaderBindings(RenderController& render
     return bindings;
 }
 
-void GLModelNinePatch::postSnapshot(RenderController& renderController, Layer::Snapshot& snapshot)
+void GLModelNinePatch::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
 {
     snapshot._index_buffer = _index_buffer->snapshot(renderController, snapshot._items.size());
 }
 
-void GLModelNinePatch::start(ModelBuffer& buf, const Layer::Snapshot& snapshot)
+void GLModelNinePatch::start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     DCHECK(snapshot._items.size() > 0, "LayerSnapshot has no RenderObjects");
 

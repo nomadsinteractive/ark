@@ -14,11 +14,11 @@ class PointLayer {
 public:
 
 //  [[plugin::resource-loader("point-layer")]]
-    class BUILDER : public Builder<Layer> {
+    class BUILDER : public Builder<RenderLayer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Layer> build(const sp<Scope>& args) override;
+        virtual sp<RenderLayer> build(const sp<Scope>& args) override;
 
     private:
         document _manifest;

@@ -21,7 +21,7 @@ sp<ShaderBindings> GLModelQuad::makeShaderBindings(RenderController& renderContr
     return bindings;
 }
 
-void GLModelQuad::start(ModelBuffer& buf, const Layer::Snapshot& snapshot)
+void GLModelQuad::start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     buf.vertices().setGrowCapacity(4 * snapshot._items.size());
     buf.setIndices(snapshot._index_buffer);
@@ -63,7 +63,7 @@ void GLModelQuad::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
     buf.writeTexCoordinate(texCoord.right(), texCoord.bottom());
 }
 
-void GLModelQuad::postSnapshot(RenderController& renderController, Layer::Snapshot& snapshot)
+void GLModelQuad::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
 {
     snapshot._index_buffer = _index_buffer->snapshot(renderController, snapshot._items.size());
 }

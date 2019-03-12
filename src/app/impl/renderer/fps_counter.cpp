@@ -8,7 +8,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/layer_context.h"
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 #include "renderer/base/characters.h"
 
@@ -49,16 +49,16 @@ void FPSCounter::updateFPS(float fps)
     _characters->setText(Strings::fromUTF8(text));
 }
 
-FPSCounter::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _layer(parent.ensureBuilder<Layer>(doc, Constants::Attributes::LAYER)),
-      _message(Documents::getAttribute(doc, "message", "FPS %.1f")),
-      _interval(Documents::getAttribute<Clock::Interval>(doc, Constants::Attributes::INTERVAL, 2000000).sec())
+FPSCounter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _characters(factory.ensureConcreteClassBuilder<Characters>(manifest, "characters")),
+      _message(Documents::getAttribute(manifest, "message", "FPS %.1f")),
+      _interval(Documents::getAttribute<Clock::Interval>(manifest, Constants::Attributes::INTERVAL, 2000000).sec())
 {
 }
 
 sp<Renderer> FPSCounter::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<FPSCounter>::make(Ark::instance().clock(), _interval, sp<Characters>::make(_layer->build(args), 1.0f, 0.0f, 0.0f, 0.0f), _message);
+    return sp<FPSCounter>::make(Ark::instance().clock(), _interval, _characters->build(args), _message);
 }
 
 }

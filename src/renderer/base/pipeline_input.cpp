@@ -157,9 +157,9 @@ void PipelineInput::UBO::doSnapshot(bool force) const
     }
 }
 
-Layer::UBOSnapshot PipelineInput::UBO::snapshot(MemoryPool& memoryPool) const
+RenderLayer::UBOSnapshot PipelineInput::UBO::snapshot(MemoryPool& memoryPool) const
 {
-    Layer::UBOSnapshot ubo;
+    RenderLayer::UBOSnapshot ubo;
     doSnapshot(false);
     ubo._dirty_flags = memoryPool.allocate(_dirty_flags->size());
     memcpy(ubo._dirty_flags->buf(), _dirty_flags->buf(), _dirty_flags->size());

@@ -32,7 +32,7 @@ private:
     };
 
 public:
-    ParticleEmitter(const sp<Stub>& stub, const sp<Clock>& clock, const sp<RenderLayer>& renderLayer, const List<document>& particleDescriptor, BeanFactory& beanFactory);
+    ParticleEmitter(const sp<Stub>& stub, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const List<document>& particleDescriptor, BeanFactory& beanFactory);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
@@ -53,7 +53,7 @@ public:
         sp<Builder<Numeric>> _type;
         SafePtr<Builder<Vec>> _position;
         SafePtr<Builder<Size>> _size;
-        sp<Builder<RenderLayer>> _render_layer;
+        sp<Builder<LayerContext>> _layer_context;
 
     };
 
@@ -78,7 +78,7 @@ private:
         Particale(const sp<Stub>& stub, const document& doc, BeanFactory& args);
         Particale(const Particale& other) = default;
 
-        uint64_t show(float x, float y, const sp<Clock>& clock, uint64_t tick, const sp<RenderLayer>& renderLayer);
+        uint64_t show(float x, float y, const sp<Clock>& clock, uint64_t tick, const sp<LayerContext>& layerContext);
 
     private:
         sp<Vec> makePosition(ObjectPool& objectPool, float x, float y) const;
@@ -105,7 +105,7 @@ private:
 
 private:
     sp<Stub> _stub;
-    sp<RenderLayer> _render_layer;
+    sp<LayerContext> _layer_context;
     List<Particale> _particles;
     sp<Clock> _clock;
 

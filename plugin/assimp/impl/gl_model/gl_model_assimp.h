@@ -12,7 +12,7 @@
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
 
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/inf/render_model.h"
@@ -26,9 +26,9 @@ public:
     GLModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest);
 
     virtual sp<ShaderBindings> makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) override;
-    virtual void postSnapshot(RenderController& renderController, Layer::Snapshot& snapshot) override;
+    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
-    virtual void start(ModelBuffer& buf, const Layer::Snapshot& layerContext) override;
+    virtual void start(ModelBuffer& buf, const RenderLayer::Snapshot& layerContext) override;
     virtual void load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot) override;
 
 //  [[plugin::resource-loader("assimp")]]

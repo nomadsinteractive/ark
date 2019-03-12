@@ -15,9 +15,9 @@ public:
     GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas, uint32_t sampleCount);
 
     virtual sp<ShaderBindings> makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) override;
-    virtual void postSnapshot(RenderController& renderController, Layer::Snapshot& snapshot) override;
+    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
-    virtual void start(ModelBuffer& buf, const Layer::Snapshot& layerContext) override;
+    virtual void start(ModelBuffer& buf, const RenderLayer::Snapshot& layerContext) override;
     virtual void load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot) override;
 
 //  [[plugin::resource-loader("sphere")]]

@@ -4,8 +4,8 @@
 #include "core/util/bean_utils.h"
 #include "core/util/log.h"
 
-#include "graphics/base/render_layer.h"
 #include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 #include "app/base/application_context.h"
 #include "app/impl/event_listener/event_listener_list.h"
@@ -105,16 +105,16 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
     BeanFactory& factory = resourceLoader->beanFactory();
     for(const document& i : _manifest->children())
     {
-        if(i->name() == Constants::Attributes::LAYER)
+        if(i->name() == Constants::Attributes::RENDER_LAYER)
         {
             const sp<Renderer> layer = factory.build<Renderer>(i, args);
             if(layer)
                 arena->addLayer(layer);
             else
-                arena->addLayer(factory.ensureDecorated<Renderer, Layer>(i));
+                arena->addLayer(factory.ensureDecorated<Renderer, RenderLayer>(i));
         }
-        else if(i->name() == Constants::Attributes::RENDER_LAYER)
-            arena->addLayer(factory.ensureDecorated<Renderer, RenderLayer>(i));
+        else if(i->name() == Constants::Attributes::LAYER)
+            arena->addLayer(factory.ensureDecorated<Renderer, Layer>(i));
         else
             arena->addRenderer(factory.ensure<Renderer>(i, args));
     }

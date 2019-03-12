@@ -20,7 +20,7 @@ sp<ShaderBindings> GLModelLineStrip::makeShaderBindings(RenderController& render
     return bindings;
 }
 
-void GLModelLineStrip::postSnapshot(RenderController& /*renderController*/, Layer::Snapshot& snapshot)
+void GLModelLineStrip::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& snapshot)
 {
     if(_last_rendered_count != snapshot._items.size())
     {
@@ -29,7 +29,7 @@ void GLModelLineStrip::postSnapshot(RenderController& /*renderController*/, Laye
     }
 }
 
-std::vector<glindex_t> GLModelLineStrip::makeIndices(const Layer::Snapshot& layerContext)
+std::vector<glindex_t> GLModelLineStrip::makeIndices(const RenderLayer::Snapshot& layerContext)
 {
     std::vector<glindex_t> indices;
     glindex_t index = 0;
@@ -54,7 +54,7 @@ std::vector<glindex_t> GLModelLineStrip::makeIndices(const Layer::Snapshot& laye
     return indices;
 }
 
-void GLModelLineStrip::start(ModelBuffer& buf, const Layer::Snapshot& snapshot)
+void GLModelLineStrip::start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     buf.vertices().setGrowCapacity(snapshot._items.size());
     buf.setIndices(_indices);

@@ -2,6 +2,8 @@
 
 #include "core/epi/disposable.h"
 
+#include "graphics/base/layer.h"
+
 namespace ark {
 
 LayerContext::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
@@ -9,9 +11,14 @@ LayerContext::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
 {
 }
 
-LayerContext::LayerContext()
-    : _render_requested(false)
+LayerContext::LayerContext(const sp<RenderModel>& renderModel)
+    : _render_model(renderModel), _render_requested(false)
 {
+}
+
+const sp<RenderModel>& LayerContext::renderModel() const
+{
+    return _render_model;
 }
 
 void LayerContext::renderRequest(const V2& position)
@@ -25,14 +32,10 @@ void LayerContext::draw(float x, float y, const sp<RenderObject>& renderObject)
     _transient_items.emplace_back(x, y, renderObject);
 }
 
-void LayerContext::addRenderObject(const sp<RenderObject>& renderObject)
-{
-    addRenderObject(renderObject, renderObject.as<Disposable>());
-}
-
 void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed)
 {
-    _items.push_back(renderObject, disposed);
+    DASSERT(renderObject);
+    _items.push_back(renderObject, disposed ? disposed : renderObject.as<Disposable>());
 }
 
 void LayerContext::removeRenderObject(const sp<RenderObject>& renderObject)
@@ -45,7 +48,7 @@ void LayerContext::clear()
     _items.clear();
 }
 
-void LayerContext::takeSnapshot(Layer::Snapshot& output, MemoryPool& memoryPool)
+void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memoryPool)
 {
     if(_render_requested)
     {
@@ -75,6 +78,23 @@ LayerContext::RenderObjectFilter::RenderObjectFilter(const sp<RenderObject>& /*r
 FilterAction LayerContext::RenderObjectFilter::operator()(const sp<RenderObject>& renderObject) const
 {
     return (_disposed && _disposed->isDisposed()) || renderObject->isDisposed() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+}
+
+LayerContext::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, bool makeContext)
+    : _layer(factory.getBuilder<Layer>(manifest, Constants::Attributes::LAYER)),
+      _render_layer(_layer ? nullptr : factory.getBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER)), _make_context(makeContext)
+{
+    DCHECK(_layer || _render_layer, "RenderObject must be associated with one Layer or RenderLayer");
+}
+
+sp<LayerContext> LayerContext::BUILDER::build(const sp<Scope>& args)
+{
+    if(_layer)
+        return _layer->build(args)->context();
+    const sp<RenderLayer> renderLayer = _render_layer->build(args);
+    if(_make_context)
+        return renderLayer->makeContext();
+    return renderLayer->context();
 }
 
 }

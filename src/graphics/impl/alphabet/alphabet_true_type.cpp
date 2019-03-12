@@ -1,23 +1,23 @@
 #include "graphics/impl/alphabet/alphabet_true_type.h"
 
+#include "core/ark.h"
 #include "core/inf/dictionary.h"
 #include "core/impl/readable/file_readable.h"
 #include "core/util/documents.h"
 #include "core/types/global.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/util/freetypes.h"
 
 #include "platform/platform.h"
 
 namespace ark {
 
 AlphabetTrueType::AlphabetTrueType(const String& src, uint32_t textSize)
+    : _free_types(Ark::instance().ensure<FreeTypes>())
 {
-    const Global<FreeTypes> freetypes;
     const sp<Readable> readable = getFontResource(src);
     DCHECK(readable, "Font \"%s\" does not exists", src.c_str());
-    freetypes->ftNewFaceFromReadable(readable, 0, &_ft_font_face);
+    _free_types->ftNewFaceFromReadable(readable, 0, &_ft_font_face);
     FT_Set_Char_Size(_ft_font_face, FreeTypes::ftF26Dot6(textSize, 0), 0, 96, 0);
     _line_height_in_pixel = FreeTypes::ftCalculateLineHeight(_ft_font_face);
     _base_line_position = _line_height_in_pixel + FreeTypes::ftCalculateBaseLinePosition(_ft_font_face);

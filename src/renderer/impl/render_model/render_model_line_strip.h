@@ -15,9 +15,9 @@ public:
     GLModelLineStrip(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas);
 
     virtual sp<ShaderBindings> makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) override;
-    virtual void postSnapshot(RenderController& renderController, Layer::Snapshot& snapshot) override;
+    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
-    virtual void start(ModelBuffer& buf, const Layer::Snapshot& snapshot) override;
+    virtual void start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot) override;
     virtual void load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot) override;
 
 //  [[plugin::resource-loader("line-strip")]]
@@ -34,7 +34,7 @@ public:
     };
 
 private:
-    std::vector<glindex_t> makeIndices(const Layer::Snapshot& layerContext);
+    std::vector<glindex_t> makeIndices(const RenderLayer::Snapshot& layerContext);
 
 private:
     sp<Atlas> _atlas;

@@ -11,7 +11,7 @@
         <resolution width="540" height="960"/>
     </renderer>
 
-	<application name="s04 - UI" resource-loader="app.xml">
+	<application title="s04 - UI" resource-loader="app.xml">
         <script ref="@main" src="main.py"/>
 	</application>
 

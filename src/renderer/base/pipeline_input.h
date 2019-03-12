@@ -8,7 +8,7 @@
 #include "core/collection/table.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/attribute.h"
@@ -45,7 +45,7 @@ public:
     public:
         UBO(uint32_t binding);
 
-        Layer::UBOSnapshot snapshot(MemoryPool& memoryPool) const;
+        RenderLayer::UBOSnapshot snapshot(MemoryPool& memoryPool) const;
 
         void notify() const;
 

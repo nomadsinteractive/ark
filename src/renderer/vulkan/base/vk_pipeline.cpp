@@ -95,12 +95,12 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
             break;
         }
 
-    const std::vector<Layer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
+    const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
     DCHECK(uboSnapshots.size() == _ubos.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), _ubos.size());
 
     for(size_t i = 0; i < uboSnapshots.size(); ++i)
     {
-        const Layer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
+        const RenderLayer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
         if(reloadNeeded || isDirty(uboSnapshot._dirty_flags))
         {
             const sp<VKBuffer>& ubo = _ubos.at(i);

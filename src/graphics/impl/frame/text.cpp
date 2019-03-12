@@ -5,7 +5,7 @@
 #include "core/util/documents.h"
 
 #include "graphics/base/layer_context.h"
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 
 #include "renderer/base/characters.h"
 

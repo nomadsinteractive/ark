@@ -5,7 +5,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/frame.h"
-#include "graphics/base/render_layer.h"
+#include "graphics/base/layer.h"
 #include "graphics/base/size.h"
 
 #include "app/base/event.h"
@@ -63,8 +63,8 @@ sp<Renderer> ViewGroup::BUILDER::build(const sp<Scope>& args)
     for(const document& i : _manifest->children())
     {
         const String& name = i->name();
-        if(name == Constants::Attributes::RENDER_LAYER)
-            viewGroup->addRenderer(_factory.ensure<RenderLayer>(i, args));
+        if(name == Constants::Attributes::LAYER)
+            viewGroup->addRenderer(_factory.ensure<Layer>(i, args));
         else if(name != Constants::Attributes::BACKGROUND)
             viewGroup->addRenderer(_factory.ensure<Renderer>(i, args));
     }

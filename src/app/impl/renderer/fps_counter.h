@@ -26,12 +26,12 @@ public:
 //  [[plugin::builder("fps-counter")]]
     class BUILDER : public Builder<Renderer> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Renderer> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Layer>> _layer;
+        sp<Builder<Characters>> _characters;
         String _message;
         float _interval;
     };

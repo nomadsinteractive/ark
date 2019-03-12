@@ -23,7 +23,7 @@ public:
     void finish();
 
     void addRequest(const sp<RenderCommand>& renderCommand);
-    void addBackgroundRequest(const Layer& layer, float x, float y);
+    void addBackgroundRequest(const RenderLayer& layer, float x, float y);
 
 public:
     struct Stub {

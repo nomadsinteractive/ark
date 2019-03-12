@@ -2,11 +2,11 @@
 <resources>
 	<import name="pre" src="prefab.xml"/>
 
-	<label id="label" text="$t" text-scale="0.5" layer="@pre:l002" style="display: block"/>
+	<label id="label" text="$t" text-scale="0.5" render-layer="@pre:rl002" style="display: block"/>
 	<view id="@root_view" class="view-group" size="540, 960" layout="vertical(center)"/>
 	<arena id="main" view="@root_view">
-		<layer ref="@pre:l001"/>
-		<layer ref="@pre:l002"/>
+		<render-layer ref="@pre:rl001"/>
+		<render-layer ref="@pre:rl002"/>
 		<renderer ref="@pre:fps-counter"/>
 	</arena>
 </resources>

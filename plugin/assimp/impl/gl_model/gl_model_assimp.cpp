@@ -49,11 +49,11 @@ sp<ShaderBindings> GLModelAssimp::makeShaderBindings(RenderController& renderCon
     return nullptr;
 }
 
-void GLModelAssimp::postSnapshot(RenderController& /*renderController*/, Layer::Snapshot& /*snapshot*/)
+void GLModelAssimp::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& /*snapshot*/)
 {
 }
 
-void GLModelAssimp::start(ModelBuffer& buf, const Layer::Snapshot& layerContext)
+void GLModelAssimp::start(ModelBuffer& buf, const RenderLayer::Snapshot& layerContext)
 {
 }
 

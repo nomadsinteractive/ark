@@ -6,7 +6,7 @@
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
 #include "graphics/base/matrix.h"
 
 #include "renderer/forwarding.h"
@@ -16,8 +16,8 @@ namespace ark {
 
 class ARK_API DrawingContext {
 public:
-    DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<Layer::UBOSnapshot> ubo);
-    DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<Layer::UBOSnapshot> ubo, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount);
+    DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo);
+    DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
     sp<RenderCommand> toRenderCommand(ObjectPool& objectPool);
@@ -25,7 +25,7 @@ public:
     sp<Shader> _shader;
     sp<ShaderBindings> _shader_bindings;
 
-    std::vector<Layer::UBOSnapshot> _ubos;
+    std::vector<RenderLayer::UBOSnapshot> _ubos;
     Buffer::Snapshot _array_buffer;
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> _instanced_array_snapshots;
 
