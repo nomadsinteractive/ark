@@ -157,9 +157,6 @@ class Numeric(_Var):
     def expect(self, expectation):
         return None
 
-    def make_stalker(self, s0, eta):
-        return None
-
     def __add__(self, other):
         return None
 
@@ -180,6 +177,14 @@ class Numeric(_Var):
 
     def __eq__(self, other):
         return False
+
+    @staticmethod
+    def pursue(from_value: float, to_value, duration: float, t=None):
+        return None
+
+    @staticmethod
+    def vibrate(s0: float, v0: float, s1: float, v1: float, duration: float, t=None):
+        return None
 
 
 class Disposable:
@@ -728,17 +733,6 @@ class Varyings:
         pass
 
     def add(self, name, obj):
-        pass
-
-
-class Expried:
-    def __init__(self, e):
-        pass
-
-    def expired(self):
-        return False
-
-    def expire(self):
         pass
 
 

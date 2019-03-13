@@ -10,6 +10,7 @@
 #include "core/impl/numeric/numeric_depends.h"
 #include "core/impl/numeric/numeric_negative.h"
 #include "core/impl/numeric/stalker.h"
+#include "core/impl/numeric/vibrate.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/util/operators.h"
@@ -295,9 +296,19 @@ sp<Numeric> NumericUtil::expect(const sp<Numeric>& self, const sp<Expectation>& 
     return sp<Expect>::make(self, expectation);
 }
 
-sp<Numeric> NumericUtil::makeStalker(const sp<Numeric>& self, float s0, float eta, const sp<Numeric>& duration)
+sp<Numeric> NumericUtil::pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t)
 {
-    return sp<Stalker>::make(duration ? duration : Ark::instance().clock()->duration(), self, s0, eta);
+    return sp<Stalker>::make(t ? t : Ark::instance().clock()->duration(), target, s0, duration);
+}
+
+sp<Numeric> NumericUtil::vibrate(float s0, float v0, float s1, float v1, float duration, const sp<Numeric>& t)
+{
+    DCHECK(duration > 0, "Duration must be greater than zero");
+    float o, a, t0, t1;
+    Math::vibrate(s0, v0, s1, v1, o, a, t0, t1);
+    float multiplier = (t1 - t0) / duration;
+    const sp<Numeric> b = sp<Numeric::Const>::make(t1 - t0);
+    return sp<Vibrate>::make(boundary(mul(t ? t : Ark::instance().clock()->duration(), multiplier), b), a, t0, o);
 }
 
 NumericUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)

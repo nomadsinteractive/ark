@@ -85,9 +85,9 @@ public:
     };
 
 private:
-    sp<Rotation> _rotation;
+    SafePtr<Rotation> _rotation;
     sp<Vec> _scale;
-    sp<Vec> _translation;
+    SafePtr<Vec> _translation;
 
 };
 

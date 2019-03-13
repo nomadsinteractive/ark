@@ -55,14 +55,14 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memor
         for(const Item& i : _transient_items)
         {
             RenderObject::Snapshot snapshot = i._render_object->snapshot(memoryPool);
-            snapshot._position = V(snapshot._position.x() + i._x, snapshot._position.y() + i._y, snapshot._position.z());
+            snapshot._position = snapshot._position + V(i._x, i._y) + _position;
             output._items.push_back(std::move(snapshot));
         }
 
         for(const sp<RenderObject>& i : _items)
         {
             RenderObject::Snapshot snapshot = i->snapshot(memoryPool);
-            snapshot._position = V(snapshot._position.x() + _position.x(), snapshot._position.y() + _position.y(), snapshot._position.z());
+            snapshot._position = snapshot._position + _position;
             output._items.push_back(std::move(snapshot));
         }
     }

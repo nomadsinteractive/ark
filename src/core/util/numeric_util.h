@@ -102,8 +102,10 @@ public:
 //[[script::bindings::classmethod]]
     static sp<Numeric> expect(const sp<Numeric>& self, const sp<Expectation>& expectation);
 
-//[[script::bindings::classmethod]]
-    static sp<Numeric> makeStalker(const sp<Numeric>& self, float s0, float eta, const sp<Numeric>& duration = nullptr);
+//[[script::bindings::auto]]
+    static sp<Numeric> pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t = nullptr);
+//[[script::bindings::auto]]
+    static sp<Numeric> vibrate(float s0, float v0, float s1, float v1, float duration, const sp<Numeric>& t = nullptr);
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Numeric> {

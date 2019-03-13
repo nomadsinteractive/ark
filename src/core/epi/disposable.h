@@ -18,6 +18,7 @@ public:
 
     sp<Boolean> toBoolean() const;
 
+//  [[script::bindings::auto]]
     bool isDisposed() const;
 
 //  [[script::bindings::auto]]

@@ -13,7 +13,7 @@
 namespace ark {
 
 Transform::Transform(const sp<Rotation>& rotation, const sp<Vec>& scale, const sp<Vec>& translation)
-    : _rotation(Null::toSafe<Rotation>(rotation)), _scale(scale), _translation(Null::toSafe<Vec>(translation))
+    : _rotation(rotation), _scale(scale), _translation(translation)
 {
 }
 
