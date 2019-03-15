@@ -336,6 +336,14 @@ class RenderObject:
         pass
 
     @property
+    def tag(self):
+        return None
+
+    @tag.setter
+    def tag(self, tag):
+        pass
+
+    @property
     def x(self):
         return 0
 

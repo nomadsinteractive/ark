@@ -49,8 +49,6 @@ private:
 
 }
 
-sp<PythonInterpreter> PythonInterpreter::_INSTANCE;
-
 sp<Runnable> PythonInterpreter::toRunnable(PyObject* object)
 {
     if(isInstance<Runnable>(object))
@@ -238,13 +236,8 @@ const sp<ReferenceManager>& PythonInterpreter::referenceManager() const
 
 const sp<PythonInterpreter>& PythonInterpreter::instance()
 {
-    return _INSTANCE;
-}
-
-const sp<PythonInterpreter>& PythonInterpreter::newInstance()
-{
-    _INSTANCE = sp<PythonInterpreter>::make();
-    return _INSTANCE;
+    const Global<PythonInterpreter> instance;
+    return static_cast<const sp<PythonInterpreter>&>(instance);
 }
 
 PythonInterpreter::PythonInterpreter()
@@ -339,7 +332,7 @@ template<> ARK_PLUGIN_PYTHON_API std::wstring PythonInterpreter::toType<std::wst
 
 template<> ARK_PLUGIN_PYTHON_API Box PythonInterpreter::toType<Box>(PyObject* object)
 {
-    return PyInstance::adopt(object).pack();
+    return object != Py_None ? PyInstance::adopt(object).pack() : Box();
 }
 
 template<> ARK_PLUGIN_PYTHON_API bool PythonInterpreter::toType<bool>(PyObject* object)

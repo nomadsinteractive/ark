@@ -69,10 +69,13 @@ public:
         }
 
         void addObjectToContainer(const Box& object) {
+            if(!object)
+                return;
+
             DCHECK(object.typeId() == Type<PyInstance>::id(), "Object is not a PyInstance");
             PyContainer* gcContainer = getContainer();
             DCHECK(gcContainer, "Object doesnot support GC");
-            gcContainer->setPyInstance(object.as<PyInstance>());
+            gcContainer->setTag(object.as<PyInstance>());
         }
 
     } Instance;

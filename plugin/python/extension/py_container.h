@@ -24,11 +24,11 @@ public:
     int clear();
 
     void addCollector(const WeakPtr<PyGarbageCollector>& collector);
-    void setPyInstance(const sp<PyInstance>& pyInstance);
+    void setTag(const sp<PyInstance>& pyInstance);
 
 private:
     std::list<WeakPtr<PyGarbageCollector>> _garbage_collectors;
-    sp<PyInstance> _instances;
+    sp<PyInstance> _tag;
 };
 
 }

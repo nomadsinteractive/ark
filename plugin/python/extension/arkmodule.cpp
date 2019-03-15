@@ -46,6 +46,11 @@ static PyObject* ark_getRefManager(PyObject* self, PyObject* args);
 static PyObject* ark_dirSeparator(PyObject* self, PyObject* args);
 static PyObject* ark_trace_(PyObject* self, PyObject* args);
 
+static int __traverse__(PyObject* module, visitproc visitor, void* args)
+{
+    return 0;
+}
+
 static PyMethodDef ARK_METHODS[] = {
     {"logd",  ark_logd, METH_VARARGS, "LOG_DEBUG"},
     {"logw",  ark_logw, METH_VARARGS, "LOG_WARN"},
@@ -177,11 +182,14 @@ PyObject* initarkmodule()
         "ark",          /* name of module */
         "ark module",   /* module documentation, may be NULL */
         -1,             /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
-        ARK_METHODS
+        ARK_METHODS,
+        nullptr,
+        __traverse__,
+        nullptr,
+        nullptr
     };
 
     PyObject* module = PyModule_Create(&cModPyArk);
-    PythonInterpreter::newInstance();
     __init_py_ark_bindings__(module);
     return module;
 }

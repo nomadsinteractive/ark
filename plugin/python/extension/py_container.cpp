@@ -9,8 +9,8 @@ namespace python {
 
 int PyContainer::traverse(visitproc visit, void* arg)
 {
-    if(_instances)
-        Py_VISIT(_instances->object());
+    if(_tag)
+        Py_VISIT(_tag->object());
 
     for(auto iter = _garbage_collectors.begin(); iter != _garbage_collectors.end();)
     {
@@ -32,8 +32,8 @@ int PyContainer::traverse(visitproc visit, void* arg)
 
 int PyContainer::clear()
 {
-    if(_instances)
-        _instances->deref();
+    if(_tag)
+        _tag->deref();
 
     while(!_garbage_collectors.empty())
     {
@@ -54,9 +54,9 @@ void PyContainer::addCollector(const WeakPtr<PyGarbageCollector>& collector)
     _garbage_collectors.push_back(collector);
 }
 
-void PyContainer::setPyInstance(const sp<PyInstance>& pyInstance)
+void PyContainer::setTag(const sp<PyInstance>& pyInstance)
 {
-    _instances = pyInstance;
+    _tag = pyInstance;
 }
 
 }

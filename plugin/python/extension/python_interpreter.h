@@ -32,7 +32,6 @@ class ARK_PLUGIN_PYTHON_API PythonInterpreter {
 public:
 
     static const sp<PythonInterpreter>& instance();
-    static const sp<PythonInterpreter>& newInstance();
 
     PythonInterpreter();
 
@@ -207,8 +206,6 @@ private:
     std::map<void*, PyArkType*> _type_by_py_object;
 
     sp<ReferenceManager> _reference_manager;
-
-    static sp<PythonInterpreter> _INSTANCE;
 };
 
 template<> inline sp<Numeric> PythonInterpreter::toSharedPtr<Numeric>(PyObject* object)
