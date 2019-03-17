@@ -70,12 +70,6 @@ private:
     std::vector<VkFramebuffer> _frame_buffers;
     std::vector<VkCommandBuffer> _submit_queue;
 
-//    VkSemaphore _semaphore_present_complete;
-//    VkSemaphore _semaphore_render_complete;
-
-//    VkSubmitInfo _submit_info;
-//    VkPipelineStageFlags _submit_pipeline_stages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-
     struct
     {
         VkImage image;
@@ -83,8 +77,8 @@ private:
         VkImageView view;
     } _depth_stencil;
 
-    uint32_t _width = 1280;
-    uint32_t _height = 720;
+    uint32_t _width = 0;
+    uint32_t _height = 0;
 
     uint32_t _aquired_image_id;
 

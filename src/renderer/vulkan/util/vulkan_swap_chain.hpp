@@ -16,6 +16,8 @@
 #include <stdio.h>
 #include <vector>
 
+#include "core/base/api.h"
+
 #include "platform/vulkan/vulkan.h"
 
 #include "vulkan_tools.h"
@@ -291,23 +293,16 @@ public:
 		std::vector<VkPresentModeKHR> presentModes(presentModeCount);
 		VK_CHECK_RESULT(fpGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data()));
 
-		VkExtent2D swapchainExtent = {};
-		// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
-		if (surfCaps.currentExtent.width == (uint32_t)-1)
-		{
-			// If the surface size is undefined, the size is set to
-			// the size of the images requested.
-			swapchainExtent.width = *width;
-			swapchainExtent.height = *height;
-		}
-		else
-		{
-			// If the surface size is defined, the swap chain size must match
-			swapchainExtent = surfCaps.currentExtent;
-			*width = surfCaps.currentExtent.width;
-			*height = surfCaps.currentExtent.height;
-		}
+        if (surfCaps.currentExtent.width != (uint32_t)-1)
+        {
+            if(*width == 0)
+                *width = surfCaps.currentExtent.width;
+            if(*height == 0)
+                *height = surfCaps.currentExtent.height;
+        }
 
+        DCHECK(*width && *height, "Undetermined surface size");
+        VkExtent2D swapchainExtent = {*width, *height};
 
 		// Select a present mode for the swapchain
 

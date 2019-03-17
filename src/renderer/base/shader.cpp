@@ -21,6 +21,7 @@
 #include "renderer/base/shader_bindings.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/pipeline_factory.h"
+#include "renderer/inf/pipeline.h"
 
 #include "platform/platform.h"
 

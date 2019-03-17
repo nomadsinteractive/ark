@@ -20,8 +20,6 @@
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/snippet.h"
 
-#include "renderer/opengl/base/gl_pipeline.h"
-
 namespace ark {
 
 PipelineLayout::PipelineLayout(const sp<RenderController>& renderController, const sp<PipelineBuildingContext>& buildingContext)

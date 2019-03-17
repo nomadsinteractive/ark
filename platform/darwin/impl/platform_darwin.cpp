@@ -4,10 +4,15 @@
 #include <limits.h>
 #include <mach-o/dyld.h>
 #include <unistd.h>
-#include <libproc.h>
 
+#ifndef ARK_PLATFORM_IOS
+#include <libproc.h>
+#endif
+
+#ifdef ARK_USE_OPEN_GL
 #include <glbinding/gl/gl.h>
 #include <glbinding/Binding.h>
+#endif
 
 #include "core/inf/variable.h"
 #include "core/impl/asset_bundle/asset_bundle_directory.h"
@@ -26,7 +31,7 @@ void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* cont
     fflush(nullptr);
 }
 
-sp<AssetBundle> Platform::getAsset(const String& path, const String& appPath)
+sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPath)
 {
     if(isDirectory(path))
         return sp<AssetBundleWithFallback>::make(sp<AssetBundleDirectory>::make(appPath), sp<AssetBundleDirectory>::make(path));
@@ -51,9 +56,11 @@ String Platform::getDefaultFontDirectory()
 String Platform::getExecutablePath()
 {
     char pathbuf[PATH_MAX] = {0};
+#ifndef ARK_PLATFORM_IOS
     const pid_t pid = getpid();
     int r = proc_pidpath (pid, pathbuf, sizeof(pathbuf));
     DCHECK(r > 0, "proc_pidpath() failed. PID %d: %s", pid, strerror(errno));
+#endif
     return pathbuf;
 }
 
@@ -76,7 +83,9 @@ String Platform::getUserStoragePath(const String& path)
 
 void Platform::glInitialize()
 {
+#ifdef ARK_USE_OPEN_GL
     glbinding::Binding::initialize(false);
+#endif
 }
 
 void Platform::vkInitialize()

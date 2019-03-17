@@ -30,13 +30,13 @@ VKRenderTarget::VKRenderTarget(const RenderContext& renderContext, sp<VKDevice>&
     _clear_values[0].color = {{0, 0, 0, 0}};
     _clear_values[1].depthStencil = {1.0f, 0};
 
+    _render_pass_begin_info.renderArea.offset.x = 0;
+    _render_pass_begin_info.renderArea.offset.y = 0;
+    _render_pass_begin_info.clearValueCount = 2;
+    _render_pass_begin_info.pClearValues = _clear_values;
+
     initSwapchain(renderContext);
-
     _command_pool = sp<VKCommandPool>::make(_device, _swap_chain.queueNodeIndex);
-
-    setupDepthStencil();
-    setupRenderPass();
-    setupFrameBuffer();
 }
 
 VKRenderTarget::~VKRenderTarget()
@@ -123,7 +123,13 @@ uint32_t VKRenderTarget::acquire(VKGraphicsContext& vkContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     _submit_queue.clear();
-    VKUtil::checkResult(_swap_chain.acquireNextImage(vkContext._semaphore_present_complete, &_aquired_image_id));
+    VkResult result = _swap_chain.acquireNextImage(vkContext._semaphore_present_complete, &_aquired_image_id);
+    if(result == VK_ERROR_OUT_OF_DATE_KHR)
+    {
+        onSurfaceChanged(_width, _height);
+        result = _swap_chain.acquireNextImage(vkContext._semaphore_present_complete, &_aquired_image_id);
+    }
+    VKUtil::checkResult(result);
     return _aquired_image_id;
 }
 
@@ -155,15 +161,18 @@ void VKRenderTarget::swap(VKGraphicsContext& vkContext)
 
 void VKRenderTarget::onSurfaceChanged(uint32_t width, uint32_t height)
 {
-    _scissor = vks::initializers::rect2D(static_cast<int32_t>(width), static_cast<int32_t>(height), 0, 0);
-    _viewport = vks::initializers::viewport(static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f);
+    _width = width;
+    _height = height;
+    _swap_chain.create(&_width, &_height, true);
+    setupDepthStencil();
+    setupRenderPass();
+    setupFrameBuffer();
 
-    _render_pass_begin_info.renderArea.offset.x = 0;
-    _render_pass_begin_info.renderArea.offset.y = 0;
-    _render_pass_begin_info.renderArea.extent.width = width;
-    _render_pass_begin_info.renderArea.extent.height = height;
-    _render_pass_begin_info.clearValueCount = 2;
-    _render_pass_begin_info.pClearValues = _clear_values;
+    _scissor = vks::initializers::rect2D(static_cast<int32_t>(_width), static_cast<int32_t>(_height), 0, 0);
+    _viewport = vks::initializers::viewport(static_cast<float>(_width), static_cast<float>(_height), 0.0f, 1.0f);
+
+    _render_pass_begin_info.renderArea.extent.width = _width;
+    _render_pass_begin_info.renderArea.extent.height = _height;
 }
 
 void VKRenderTarget::initSwapchain(const RenderContext& renderContext)
@@ -182,7 +191,6 @@ void VKRenderTarget::initSwapchain(const RenderContext& renderContext)
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
     _swap_chain.initSurface(connection, window);
 #endif
-    _swap_chain.create(&_width, &_height, true);
 }
 
 void VKRenderTarget::setupDepthStencil()

@@ -331,9 +331,9 @@ if(BUILD_SHARED)
         #      is equivalent to solution implemented in commit http://hg.python.org/cpython/rev/864b983
         #      The property is set here because source file properties can't be in one directory
         #      and used to build a target in an other directory.
-        set_property(
-            SOURCE ${SRC_DIR}/Modules/posixmodule.c
-            APPEND PROPERTY COMPILE_DEFINITIONS WITH_NEXT_FRAMEWORK)
+#        set_property(
+#            SOURCE ${SRC_DIR}/Modules/posixmodule.c
+#            APPEND PROPERTY COMPILE_DEFINITIONS WITH_NEXT_FRAMEWORK)
     endif(APPLE)
     if(WIN32)
         target_link_libraries(libpython-shared version.lib Shlwapi.lib)

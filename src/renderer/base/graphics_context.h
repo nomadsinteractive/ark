@@ -9,7 +9,6 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/opengl/base/gl_pipeline.h"
 
 namespace ark {
 
