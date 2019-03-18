@@ -170,19 +170,18 @@ endif()
 set(FREETYPE_NO_DIST ON)
 ark_add_denpendency(3rdparty/freetype freetype ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/freetype/include/freetype2 3rdparty/freetype/include)
 
-add_subdirectory(plugin/python)
-add_subdirectory(plugin/box2d)
-add_subdirectory(plugin/vorbis)
+ark_add_plugin_directory(python plugin/python)
+ark_add_plugin_directory(box2d plugin/box2d)
+ark_add_plugin_directory(vorbis plugin/vorbis)
 
 if(NOT IOS)
-add_subdirectory(plugin/portaudio)
+    ark_add_plugin_directory(portaudio plugin/portaudio)
 endif()
 
-add_subdirectory(plugin/noise)
-
-if(ARK_BUILD_PLUGIN_FMOD)
-    add_subdirectory(plugin/fmod)
-endif()
+ark_add_plugin_directory(noise plugin/noise)
+ark_add_plugin_directory(fmod plugin/fmod)
+ark_add_plugin_directory(assimp plugin/assimp)
+ark_add_plugin_directory(pbr plugin/pbr)
 
 if(NOT (ANDROID OR IOS))
 if(${BUILD_SHARED_LIBS})
@@ -195,12 +194,6 @@ else()
     add_definitions(-DHAVE_LIBC)
     ark_add_denpendency(3rdparty/SDL2 SDL2-static 3rdparty/SDL2/include)
 endif()
-endif()
-
-add_subdirectory(plugin/assimp)
-
-if(NOT (ANDROID OR IOS))
-add_subdirectory(plugin/pbr)
 endif()
 
 ark_setup_tools(ark_gen_string_table)

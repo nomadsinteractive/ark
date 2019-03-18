@@ -131,7 +131,7 @@ bool LayoutHierarchy::onEvent(const Event& event, float x, float y) const
     return false;
 }
 
-bool LayoutHierarchy::isLayoutNeeded()
+bool LayoutHierarchy::isLayoutNeeded(const LayoutParam& layoutParam)
 {
     bool layoutNeeded = false;
     for(auto iter = _slots.begin(); iter != _slots.end(); ++iter)
@@ -146,28 +146,38 @@ bool LayoutHierarchy::isLayoutNeeded()
         }
         layoutNeeded = layoutNeeded || i->layoutRequested();
     }
+
+    const V3 newLayoutSize = layoutParam.size()->val();
+    if(newLayoutSize != _layout_size)
+    {
+        _layout_size = newLayoutSize;
+        return true;
+    }
     return layoutNeeded;
 }
 
-void LayoutHierarchy::doLayout(const sp<LayoutParam>& layoutParam)
+void LayoutHierarchy::updateLayout(LayoutParam& layoutParam)
 {
-    if(_layout)
+    if(isLayoutNeeded(layoutParam))
     {
-        if(layoutParam->isWrapContent())
-            doWrapContentLayout(layoutParam);
+        if(_layout)
+        {
+            if(layoutParam.isWrapContent())
+                doWrapContentLayout(layoutParam);
 
-        _layout->begin(layoutParam);
+            _layout->begin(layoutParam);
 
-        for(const sp<Slot>& i: _slots)
-            i->doPlace(layoutParam->contentHeight(), _layout);
+            for(const sp<Slot>& i: _slots)
+                i->doPlace(layoutParam.contentHeight(), _layout);
 
-        const Rect p = _layout->end();
-        for(const sp<Slot>& i : _slots)
-            i->doLayoutEnd(p);
+            const Rect p = _layout->end();
+            for(const sp<Slot>& i : _slots)
+                i->doLayoutEnd(p);
+        }
+        else
+            for(const sp<Slot>& i : _slots)
+                i->updateLayout();
     }
-    else
-        for(const sp<Slot>& i : _slots)
-            i->updateLayout();
 }
 
 void LayoutHierarchy::doWrapContentLayout(LayoutParam& layoutParam)

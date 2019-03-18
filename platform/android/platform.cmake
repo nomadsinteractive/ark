@@ -23,4 +23,4 @@ if(ARK_USE_VULKAN)
     aux_source_directory(platform/android/platform/vulkan LOCAL_SRC_LIST)
 endif()
 
-add_subdirectory(plugin/audio-android)
+ark_add_plugin_directory(audio_android plugin/audio-android)

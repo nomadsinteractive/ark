@@ -232,6 +232,7 @@ void Body::applyAngularImpulse(float impulse, bool wake)
 
 void Body::setTransform(const V2& position, float angle)
 {
+    DCHECK(!_stub->_world.world().IsLocked(), "Cannot set transform in the middle of a time step");
     _stub->_body->SetTransform(b2Vec2(position.x(), position.y()), angle);
 }
 

@@ -38,9 +38,7 @@ void ViewGroup::render(RenderRequest& renderRequest, float x, float y)
     if(_background)
         _background->render(renderRequest, x, y);
 
-    if(_layout_hierarchy->isLayoutNeeded())
-        _layout_hierarchy->doLayout(_layout_param);
-
+    _layout_hierarchy->updateLayout(_layout_param);
     _layout_hierarchy->render(renderRequest, x, y);
 }
 

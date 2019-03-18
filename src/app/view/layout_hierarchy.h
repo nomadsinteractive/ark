@@ -7,6 +7,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/v3.h"
 
 #include "app/forwarding.h"
 
@@ -50,16 +51,18 @@ public:
     void render(RenderRequest& renderRequest, float x, float y) const;
     bool onEvent(const Event& event, float x, float y) const;
 
-    bool isLayoutNeeded();
+    void updateLayout(LayoutParam& layoutParam);
 
-    void doLayout(const sp<LayoutParam>& layoutParam);
     void doWrapContentLayout(LayoutParam& layoutParam);
 
     void addRenderer(const sp<Renderer>& renderer);
 
+private:
+    bool isLayoutNeeded(const LayoutParam& layoutParam);
 
 private:
     sp<Layout> _layout;
+    V3 _layout_size;
 
     std::vector<sp<Slot>> _slots;
 };
