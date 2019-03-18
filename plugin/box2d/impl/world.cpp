@@ -6,7 +6,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/bounds.h"
-#include "graphics/base/rotation.h"
+#include "graphics/base/rotate.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/v2.h"
 
@@ -40,7 +40,7 @@ void World::run()
     _stub->run();
 }
 
-sp<RigidBody> World::createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotation>& rotate)
+sp<RigidBody> World::createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate)
 {
     const auto iter = _stub->_body_manifests.find(shape);
     DCHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-id: %d not found", shape);
@@ -249,7 +249,7 @@ sp<Body> World::ContactListenerImpl::obtain(void* data)
     const b2Vec2& position = body->_body->GetPosition();
     float rotation = body->_body->GetTransform().q.GetAngle();
     const sp<Vec> p = _object_pool.obtain<Vec::Const>(V(position.x, position.y));
-    const sp<Rotation> rotate = _object_pool.obtain<Rotation>(_object_pool.obtain<Numeric::Const>(rotation));
+    const sp<Rotate> rotate = _object_pool.obtain<Rotate>(_object_pool.obtain<Numeric::Const>(rotation));
     const sp<RigidBody::Stub> stub = _object_pool.obtain<RigidBody::Stub>(body->_id, bodyType, p, nullptr, rotate);
     return _object_pool.obtain<Body>(sp<Body::Stub>::borrow(body), stub);
 }

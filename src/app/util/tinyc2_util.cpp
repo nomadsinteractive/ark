@@ -8,13 +8,13 @@
 #include "core/util/log.h"
 
 #include "graphics/base/rect.h"
-#include "graphics/base/rotation.h"
+#include "graphics/base/rotate.h"
 #include "graphics/base/transform.h"
 #include "graphics/base/v2.h"
 
 namespace ark {
 
-C2RigidBody::C2RigidBody(const sp<Vec2>& position, const sp<Rotation>& rotate, bool isStaticBody)
+C2RigidBody::C2RigidBody(const sp<Vec2>& position, const sp<Rotate>& rotate, bool isStaticBody)
     : _type(C2_AABB), _position(position), _rotate(rotate), _is_static_body(isStaticBody)
 {
     memset(&_shape, 0, sizeof(_shape));
@@ -88,7 +88,7 @@ C2Shape& C2RigidBody::shape()
     return _shape;
 }
 
-const sp<Rotation>& C2RigidBody::rotate() const
+const sp<Rotate>& C2RigidBody::rotate() const
 {
     return _rotate;
 }
@@ -127,7 +127,7 @@ const C2Shape& C2RigidBody::updateShape(C2Shape& shape, c2x& x) const
         ts.map(_shape.capsule.b.x, _shape.capsule.b.y, pos.x(), pos.y(), shape.capsule.b.x, shape.capsule.b.y);
         break;
     case C2_POLY:
-        DWARN(ts.rotate_direction == Rotation::Z_AXIS, "Rotate Direction: (%.2f, %.2f, %.2f). Tinyc2 Only supports z-axis(2D) rotation", ts.rotate_direction.x(), ts.rotate_direction.y(), ts.rotate_direction.z());
+        DWARN(ts.rotate_direction == Rotate::Z_AXIS, "Rotate Direction: (%.2f, %.2f, %.2f). Tinyc2 Only supports z-axis(2D) rotation", ts.rotate_direction.x(), ts.rotate_direction.y(), ts.rotate_direction.z());
         shape.poly = _shape.poly;
         x.p.x = pos.x();
         x.p.y = pos.y();

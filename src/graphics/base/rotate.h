@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_BASE_ROTATION_H_
-#define ARK_GRAPHICS_BASE_ROTATION_H_
+#ifndef ARK_GRAPHICS_BASE_ROTATE_H_
+#define ARK_GRAPHICS_BASE_ROTATE_H_
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
@@ -10,11 +10,11 @@
 
 namespace ark {
 
-class ARK_API Rotation {
+class ARK_API Rotate {
 public:
 //  [[script::bindings::auto]]
-    Rotation(const sp<Numeric>& value, const sp<Vec3>& direction = nullptr);
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotation);
+    Rotate(const sp<Numeric>& value, const sp<Vec3>& direction = nullptr);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotate);
 
 //  [[script::bindings::property]]
     float radians() const;
@@ -33,22 +33,22 @@ public:
     static const V3 Z_AXIS;
 
 //[[plugin::builder]]
-    class BUILDER : public Builder<Rotation> {
+    class BUILDER : public Builder<Rotate> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Rotation> build(const sp<Scope>& args) override;
+        virtual sp<Rotate> build(const sp<Scope>& args) override;
 
     private:
         SafePtr<Builder<Numeric>> _rotation;
     };
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Rotation> {
+    class DICTIONARY : public Builder<Rotate> {
     public:
         DICTIONARY(BeanFactory& factory, const String& str);
 
-        virtual sp<Rotation> build(const sp<Scope>& args) override;
+        virtual sp<Rotate> build(const sp<Scope>& args) override;
 
     private:
         SafePtr<Builder<Numeric>> _rotation;

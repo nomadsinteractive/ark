@@ -20,7 +20,7 @@
 
 namespace ark {
 
-RigidBody::RigidBody(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotation>& rotate)
+RigidBody::RigidBody(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate)
     : _stub(sp<Stub>::make(id, type, position, size, rotate))
 {
 }
@@ -33,7 +33,7 @@ RigidBody::RigidBody(const sp<RigidBody::Stub>& stub)
 void RigidBody::bind(const sp<RenderObject>& renderObject)
 {
     renderObject->setPosition(position());
-    renderObject->transform()->setRotation(rotation());
+    renderObject->transform()->setRotate(rotate());
 }
 
 int32_t RigidBody::id() const
@@ -76,7 +76,7 @@ const sp<Size>& RigidBody::size() const
     return _stub->_size;
 }
 
-const sp<Rotation>& RigidBody::rotation() const
+const sp<Rotate>& RigidBody::rotate() const
 {
     return _stub->_rotate;
 }
@@ -123,7 +123,7 @@ template<> ARK_API Collider::BodyType Conversions::to<String, Collider::BodyType
     return Collider::BODY_TYPE_STATIC;
 }
 
-RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotation>& rotate, const sp<Callback>& callback)
+RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Callback>& callback)
     : _id(id), _type(type), _position(position), _size(size), _rotate(rotate), _callback(callback ? callback : sp<Callback>::make())
 {
 }

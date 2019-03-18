@@ -41,8 +41,8 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotation, Shape& shape, float density, float friction);
-    Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotation);
+    Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotate, Shape& shape, float density, float friction);
+    Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotate);
     Body(const sp<Stub>& stub, const sp<RigidBody::Stub>& rigidbody);
 
     virtual void bind(const sp<RenderObject>& renderObject) override;
@@ -76,7 +76,7 @@ public:
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 //  [[script::bindings::property]]
-    const sp<Rotation>& rotation() const;
+    const sp<Rotate>& rotate() const;
 
 //  [[script::bindings::property]]
     const Box& tag() const;

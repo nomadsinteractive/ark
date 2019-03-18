@@ -533,7 +533,7 @@ class Event:
         return 0
 
 
-class Rotation:
+class Rotate:
     def __init__(self, value, direction=None):
         self._value = value
         self._direction = direction
@@ -552,18 +552,18 @@ class Rotation:
 
 
 class Transform:
-    def __init__(self, rotation=None, scale=None, translate=None):
-        self._rotation = rotation
+    def __init__(self, rotate=None, scale=None, translate=None):
+        self._rotate = rotate
         self._scale = scale
         self._translate = translate
 
     @property
-    def rotation(self):
-        return self._rotation
+    def rotate(self):
+        return self._rotate
 
-    @rotation.setter
-    def rotation(self, v):
-        self._rotation = v
+    @rotate.setter
+    def rotate(self, v):
+        self._rotate = v
 
     @property
     def scale(self):

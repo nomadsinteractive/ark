@@ -36,7 +36,7 @@ class Layer;
 class RenderRequest;
 class Renderer;
 class RendererGroup;
-class Rotation;
+class Rotate;
 class Size;
 class SurfaceController;
 class Vec2Impl;

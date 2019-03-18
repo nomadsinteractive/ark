@@ -17,7 +17,7 @@ namespace ark {
 class ARK_API Transform {
 public:
 //  [[script::bindings::auto]]
-    Transform(const sp<Rotation>& rotation = nullptr, const sp<Vec>& scale = nullptr, const sp<Vec>& translation = nullptr);
+    Transform(const sp<Rotate>& rotate = nullptr, const sp<Vec>& scale = nullptr, const sp<Vec>& translate = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Transform);
 
     class ARK_API Snapshot {
@@ -44,9 +44,9 @@ public:
     Snapshot snapshot() const;
 
 //  [[script::bindings::property]]
-    const sp<Rotation>& rotation();
+    const sp<Rotate>& rotate();
 //  [[script::bindings::property]]
-    void setRotation(const sp<Rotation>& rotation);
+    void setRotate(const sp<Rotate>& rotate);
 
 //  [[script::bindings::property]]
     const sp<Vec>& scale() const;
@@ -54,9 +54,9 @@ public:
     void setScale(const sp<Vec>& scale);
 
 //  [[script::bindings::property]]
-    const sp<Vec>& translation() const;
+    const sp<Vec>& translate() const;
 //  [[script::bindings::property]]
-    void setTranslation(const sp<Vec>& translation);
+    void setTranslate(const sp<Vec>& translate);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Transform> {
@@ -66,7 +66,7 @@ public:
         virtual sp<Transform> build(const sp<Scope>& args) override;
 
     private:
-        SafePtr<Builder<Rotation>> _rotation;
+        SafePtr<Builder<Rotate>> _rotate;
         SafePtr<Builder<Vec>> _scale;
         SafePtr<Builder<Vec>> _translation;
 
@@ -85,9 +85,9 @@ public:
     };
 
 private:
-    SafePtr<Rotation> _rotation;
+    SafePtr<Rotate> _rotate;
     sp<Vec> _scale;
-    SafePtr<Vec> _translation;
+    SafePtr<Vec> _translate;
 
 };
 

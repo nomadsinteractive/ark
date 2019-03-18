@@ -66,7 +66,7 @@ sp<Collider> ColliderImpl::BUILDER::build(const sp<Scope>& args)
     return sp<ColliderImpl>::make(_tracker->build(args), _manifest, _resource_loader_context);
 }
 
-sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotation>& rotate)
+sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate)
 {
     DASSERT(position);
     DASSERT(size);
@@ -105,7 +105,7 @@ void ColliderImpl::Stub::remove(const RigidBody& rigidBody)
     _rigid_bodies.erase(iter);
 }
 
-sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotation>& rotate, const sp<ColliderImpl::Stub>& self)
+sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<ColliderImpl::Stub>& self)
 {
     uint32_t rigidBodyId = ++_rigid_body_base_id;
     float s = std::max(size->width(), size->height());
@@ -207,7 +207,7 @@ void ColliderImpl::RigidBodyImpl::dispose()
     _shadow->dispose(_collider);
 }
 
-ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotation>& rotate)
+ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate)
     : RigidBody(id, type, position, size, rotate), _c2_rigid_body(position, rotate, type == Collider::BODY_TYPE_STATIC), _disposed(false), _dispose_requested(false)
 {
 }

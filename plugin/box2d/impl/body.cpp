@@ -9,7 +9,7 @@
 #include "graphics/base/bounds.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/render_object.h"
-#include "graphics/base/rotation.h"
+#include "graphics/base/rotate.h"
 #include "graphics/base/transform.h"
 #include "graphics/util/vec2_util.h"
 
@@ -96,7 +96,7 @@ Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& positio
     : RigidBody(stub->_id, type,
                 sp<_RigidBodyPosition>::make(stub, position),
                 size,
-                sp<Rotation>::make(sp<_RigidBodyRotation>::make(stub, rotation))), _stub(stub)
+                sp<Rotate>::make(sp<_RigidBodyRotation>::make(stub, rotation))), _stub(stub)
 {
     _stub->_callback = callback();
 }
@@ -111,11 +111,11 @@ void Body::bind(const sp<RenderObject>& renderObject)
     renderObject->setPosition(sp<RenderObjectPosition>::make(_stub));
     if(type() & Collider::BODY_FLAG_MANUAL_ROTATION)
     {
-        const sp<Numeric> r = rotation() ? rotation()->value()->delegate().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>::null();
-        renderObject->transform()->rotation()->setRadians(sp<ManualRotation>::make(_stub, r));
+        const sp<Numeric> r = rotate() ? rotate()->value()->delegate().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>::null();
+        renderObject->transform()->rotate()->setRadians(sp<ManualRotation>::make(_stub, r));
     }
     else
-        renderObject->transform()->setRotation(rotation());
+        renderObject->transform()->setRotate(rotate());
 }
 
 void Body::dispose()
