@@ -93,14 +93,14 @@ void Characters::createContentWithBoundary(float boundary)
             if(end - begin == 1)
             {
                 placeOne(currentChar, flowx, flowy);
-                if(flowx > boundary)
+                if(flowx > boundary || currentChar._is_line_break)
                     nextLine(fontHeight, flowx, flowy);
             }
             else
             {
                 float beginWidth = begin > 0 ? layoutChars.at(begin - 1)._width_integral : 0;
                 float width = currentChar._width_integral - beginWidth;
-                if(flowx + width > boundary)
+                if(flowx + width > boundary || currentChar._is_line_break)
                     nextLine(fontHeight, flowx, flowy);
                 place(layoutChars, begin, end, flowx, flowy);
             }
@@ -190,12 +190,13 @@ std::vector<Characters::LayoutChar> Characters::getCharacterMetrics(const std::w
     for(wchar_t c : text)
     {
         int32_t type = toType(c);
+        bool isLineBreak = c == '\n';
         const auto iter = mmap.find(c);
         if(iter != mmap.end())
         {
             const std::tuple<Metrics, bool, bool>& val = iter->second;
             integral += _text_scale * std::get<0>(val).bounds.x();
-            metrics.emplace_back(type, std::get<0>(val), integral, std::get<1>(val), std::get<2>(val));
+            metrics.emplace_back(type, std::get<0>(val), integral, std::get<1>(val), std::get<2>(val), isLineBreak);
         }
         else
         {
@@ -204,7 +205,7 @@ std::vector<Characters::LayoutChar> Characters::getCharacterMetrics(const std::w
             bool iswordbreak = isWordBreaker(c);
             integral += _text_scale * m.bounds.x();
             mmap.insert(std::make_pair(c, std::make_tuple(m, iscjk, iswordbreak)));
-            metrics.emplace_back(type, m, integral, iscjk, iswordbreak);
+            metrics.emplace_back(type, m, integral, iscjk, iswordbreak, isLineBreak);
         }
     }
     return metrics;
@@ -246,8 +247,8 @@ sp<Characters> Characters::BUILDER::build(const sp<Scope>& args)
                                 _line_height, _line_indent);
 }
 
-Characters::LayoutChar::LayoutChar(int32_t type, const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak)
-    : _type(type), _metrics(metrics), _width_integral(widthIntegral), _is_cjk(isCJK), _is_word_break(isWordBreak)
+Characters::LayoutChar::LayoutChar(int32_t type, const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak)
+    : _type(type), _metrics(metrics), _width_integral(widthIntegral), _is_cjk(isCJK), _is_word_break(isWordBreak), _is_line_break(isLineBreak)
 {
 }
 

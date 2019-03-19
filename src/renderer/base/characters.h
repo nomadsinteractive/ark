@@ -65,13 +65,14 @@ private:
     void createContentNoBoundary();
 
     struct LayoutChar {
-        LayoutChar(int32_t type, const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak);
+        LayoutChar(int32_t type, const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak);
 
         int32_t _type;
         Metrics _metrics;
         float _width_integral;
         bool _is_cjk;
         bool _is_word_break;
+        bool _is_line_break;
     };
 
     void placeNoBoundary(wchar_t c, float& flowx, float& flowy, float& fontHeight);

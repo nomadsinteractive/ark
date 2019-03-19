@@ -529,6 +529,10 @@ class Event:
         return 0
 
     @property
+    def xy(self):
+        return (0, 0)
+
+    @property
     def timestamp(self):
         return 0
 

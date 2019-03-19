@@ -114,6 +114,8 @@ add_python_extension(_sha3 SOURCES
     _sha3/sha3module.c
     )
 
+add_python_extension(_contextvars ${MSVC_BUILTIN} SOURCES _contextvarsmodule.c)
+
 set(datetime_SOURCES _datetimemodule.c)
 if(UNIX)
   list(APPEND datetime_SOURCES timemodule.c)

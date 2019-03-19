@@ -78,10 +78,9 @@ void GLModelNinePatch::start(ModelBuffer& buf, const RenderLayer::Snapshot& snap
 
 void GLModelNinePatch::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
-    const Rect paintRect(0, 0, snapshot._size.x(), snapshot._size.y());
     const Item& item = _nine_patch_items.at(snapshot._type);
-
     const Rect& paddings = item._paddings;
+    const Rect paintRect(0, 0, std::max(paddings.left() + paddings.right(), snapshot._size.x()), std::max(paddings.top() + paddings.bottom(), snapshot._size.y()));
     float xData[4] = {paintRect.left(), paintRect.left() + paddings.left(), paintRect.right() - paddings.right(), paintRect.right()};
     float yData[4] = {paintRect.bottom(), paintRect.bottom() - paddings.top(), paintRect.top() + paddings.bottom(), paintRect.top()};
     for(uint32_t i = 0; i < 4; i++) {

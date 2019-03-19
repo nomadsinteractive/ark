@@ -5,13 +5,14 @@ Ark module Finder and Loader.
 
 class ArkModuleLoader:
 
-    def __init__(self, bootstrap, source, path, package, name, filepath):
+    def __init__(self, bootstrap, source, path, package, name, filepath, ark_is_debug_build):
         self._bootstrap = bootstrap
         self._source = source
         self._path = path
         self._package = package
         self._name = name
         self._filepath = filepath
+        self._module_executor = self._exec_module_debug if ark_is_debug_build else self._exec_module_release
 
     def create_module(self, spec):
         return None
@@ -21,9 +22,17 @@ class ArkModuleLoader:
         if self._path:
             module.__path__ = [self._path]
         if self._source:
-            exec(compile(self._source, self._filepath, 'exec'), module.__dict__)
+            self._module_executor(self._bootstrap, self._source, self._filepath, module.__dict__)
         module.__name__ = self._name
         module.__file__ = self._filepath
+
+    @staticmethod
+    def _exec_module_debug(bootstrap, source, filepath, module_dict):
+        exec(compile(source, filepath, 'exec'), module_dict)
+
+    @staticmethod
+    def _exec_module_release(bootstrap, source, filepath, module_dict):
+        bootstrap._call_with_frames_removed(exec, source, module_dict)
 
 
 class ArkModuleFinder:
@@ -86,7 +95,7 @@ class ArkModuleFinder:
         return None
 
     def _create_module_spec(self, fullname, source, path, package, filepath):
-        loader = self._ark_asset_loader_type(self._bootstrap, source, path, package, fullname, filepath)
+        loader = self._ark_asset_loader_type(self._bootstrap, source, path, package, fullname, filepath, self._ark.is_debug_build())
         spec = self._bootstrap.ModuleSpec(fullname, loader, origin=filepath, is_package=bool(path))
         if filepath:
             spec.has_location = True
