@@ -41,7 +41,7 @@ public:
 
     virtual const SafePtr<Size>& size() override;
 
-    const sp<LayoutParam>& layoutParam() const;
+    const SafePtr<LayoutParam>& layoutParam() const;
     void setLayoutParam(const sp<LayoutParam>& layoutParam);
 
     State state() const;
@@ -250,7 +250,7 @@ protected:
     virtual bool fireOnMove(const Event& event);
 
 protected:
-    sp<LayoutParam> _layout_param;
+    SafePtr<LayoutParam> _layout_param;
 
     State _state;
     sp<Runnable> _on_enter;

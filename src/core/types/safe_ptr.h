@@ -45,6 +45,10 @@ public:
         return _inst;
     }
 
+    operator T&() const {
+        return *_inst;
+    }
+
     const sp<T>& ensure() const {
         _allocated = true;
         return _inst;

@@ -41,7 +41,7 @@ private:
         sp<Renderer> _renderer;
         sp<View> _view;
         sp<ViewGroup> _view_group;
-        sp<Disposable> _lifecycle;
+        sp<Disposable> _disposed;
         sp<Visibility> _visibility;
     };
 

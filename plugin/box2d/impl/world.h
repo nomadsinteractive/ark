@@ -20,6 +20,7 @@
 
 #include "box2d/api.h"
 #include "box2d/forwarding.h"
+#include "box2d/impl/body_create_info.h"
 
 namespace ark {
 namespace plugin {
@@ -48,7 +49,7 @@ public:
     b2World& world() const;
 
     b2Body* createBody(const b2BodyDef& bodyDef) const;
-    b2Body* createBody(Collider::BodyType type, const V& position, const sp<Size>& size, Shape& shape, float density, float friction) const;
+    b2Body* createBody(Collider::BodyType type, const V& position, const sp<Size>& size, const BodyCreateInfo& createInfo) const;
 
 //  [[script::bindings::meta(expire())]]
 //  [[script::bindings::meta(isExpired())]]
@@ -98,30 +99,13 @@ public:
         BUILDER_IMPL1 _delegate;
     };
 
-    struct BodyManifest {
-        BodyManifest();
-        BodyManifest(const sp<Shape>& shape, float density, float friction);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(BodyManifest);
-
-        sp<Shape> shape;
-        float density;
-        float friction;
-
-        uint16_t category;
-        uint16_t mask;
-        int16_t group;
-    };
-
-    void setBodyManifest(int32_t id, const BodyManifest& bodyManifest);
+    void setBodyManifest(int32_t id, const BodyCreateInfo& bodyManifest);
 
 private:
     class ContactListenerImpl : public b2ContactListener {
     public:
         virtual void BeginContact(b2Contact* contact);
         virtual void EndContact(b2Contact* contact);
-
-    private:
-        sp<Body> obtain(void* data);
 
     private:
         ObjectPool _object_pool;
@@ -153,7 +137,7 @@ private:
         int32_t _rigid_body_id_base;
 
         b2World _world;
-        std::unordered_map<int32_t, BodyManifest> _body_manifests;
+        std::unordered_map<int32_t, BodyCreateInfo> _body_manifests;
 
         ContactListenerImpl _contact_listener;
         DestructionListenerImpl _destruction_listener;

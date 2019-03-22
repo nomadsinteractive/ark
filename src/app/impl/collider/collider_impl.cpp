@@ -78,16 +78,8 @@ sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, c
         dpos->setRigidBody(rigidBody->shadow());
         return rigidBody;
     }
-    else if(type == Collider::BODY_TYPE_KINEMATIC)
-    {
-        return _stub->createRigidBody(type, shape, position, size, rotate, _stub);
-    }
-    else if(type == Collider::BODY_TYPE_STATIC)
-    {
-        return _stub->createRigidBody(type, shape, position, size, rotate, _stub);
-    }
-    DFATAL("Unknown BodyType: %d", type);
-    return nullptr;
+    DCHECK(type == Collider::BODY_TYPE_KINEMATIC || type == Collider::BODY_TYPE_STATIC, "Unknown BodyType: %d", type);
+    return _stub->createRigidBody(type, shape, position, size, rotate, _stub);
 }
 
 ColliderImpl::Stub::Stub(const sp<Tracker>& tracker, const document& manifest)

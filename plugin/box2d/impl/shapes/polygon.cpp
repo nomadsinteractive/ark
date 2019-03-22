@@ -2,9 +2,11 @@
 
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
-#include "core/util/math.h"
 
 #include "graphics/base/size.h"
+#include "graphics/base/v2.h"
+
+#include "box2d/impl/body_create_info.h"
 
 namespace ark {
 namespace plugin {
@@ -15,7 +17,7 @@ Polygon::Polygon(const std::vector<V2>& vertices)
 {
 }
 
-void Polygon::apply(b2Body* body, const sp<Size>& size, float density, float friction)
+void Polygon::apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo)
 {
     b2PolygonShape shape;
     b2Vec2* vecs = new b2Vec2[_vertices.size()];
@@ -24,10 +26,7 @@ void Polygon::apply(b2Body* body, const sp<Size>& size, float density, float fri
     shape.Set(vecs, _vertices.size());
     delete[] vecs;
 
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = &shape;
-    fixtureDef.density = density;
-    fixtureDef.friction = friction;
+    b2FixtureDef fixtureDef = createInfo.toFixtureDef(&shape);
     body->CreateFixture(&fixtureDef);
 }
 

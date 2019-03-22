@@ -122,22 +122,6 @@ class Camera:
         pass
 
 
-class Collider:
-
-    BODY_SHAPE_AABB = -1
-    BODY_SHAPE_BALL = -2
-    BODY_SHAPE_BOX = -3
-
-    BODY_TYPE_DYNAMIC = 0
-    BODY_TYPE_KINEMATIC = 1
-    BODY_TYPE_STATIC = 2
-
-    BODY_FLAG_MANUAL_ROTATION = 4
-
-    def create_body(self, type, shape, position, size=None, rotate=None):
-        return None
-
-
 class Boolean(_Var):
     def __init__(self, value):
         _Var.__init__(self, value)
@@ -777,6 +761,72 @@ class Platform:
     @staticmethod
     def get_user_storage_path(p):
         return None
+
+
+class RigidBody:
+
+    def dispose(self):
+        pass
+
+    def bind(self, render_object: RenderObject):
+        pass
+
+    @property
+    def id(self) -> int:
+        return 0
+
+    @property
+    def type(self) -> int:
+        return 0
+
+    @property
+    def xy(self) -> tuple:
+        return 0, 0
+
+    @property
+    def xyz(self) -> tuple:
+        return 0, 0, 0
+
+    @property
+    def width(self) -> float:
+        return 0
+
+    @property
+    def height(self) -> float:
+        return 0
+
+    @property
+    def collision_callback(self):
+        return None
+
+    @collision_callback.setter
+    def collision_callback(self, collision_callback):
+        pass
+
+    @property
+    def tag(self):
+        return None
+
+    @tag.setter
+    def tag(self, tag):
+        pass
+
+
+class Collider:
+
+    BODY_SHAPE_AABB = -1
+    BODY_SHAPE_BALL = -2
+    BODY_SHAPE_BOX = -3
+
+    BODY_TYPE_DYNAMIC = 0
+    BODY_TYPE_KINEMATIC = 1
+    BODY_TYPE_STATIC = 2
+
+    BODY_FLAG_MANUAL_POSITION = 8
+    BODY_FLAG_MANUAL_ROTATION = 16
+
+    def create_body(self, type, shape, position, size=None, rotate=None, is_sensor=False) -> RigidBody:
+        return RigidBody()
 
 
 def __trace__():

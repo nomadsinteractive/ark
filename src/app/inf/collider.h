@@ -23,10 +23,10 @@ public:
         BODY_TYPE_DYNAMIC = 0,
         BODY_TYPE_KINEMATIC = 1,
         BODY_TYPE_STATIC = 2,
-        BODY_TYPE_MASK = 3,
+        BODY_TYPE_MASK = 7,
 
-        BODY_FLAG_MANUAL_POSITION = 4,
-        BODY_FLAG_MANUAL_ROTATION = 8
+        BODY_FLAG_MANUAL_POSITION = 8,
+        BODY_FLAG_MANUAL_ROTATION = 16
     };
 
 public:

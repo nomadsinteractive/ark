@@ -54,6 +54,8 @@ public:
     };
 
     const sp<Texture>& texture() const;
+    const op<ByIndex<Item>>& items() const;
+
     uint32_t width() const;
     uint32_t height() const;
 
@@ -91,7 +93,7 @@ private:
     sp<Texture> _texture;
     uint16_t _half_pixel_x, _half_pixel_y;
 
-    op<ByIndex<Item>> _atlas;
+    op<ByIndex<Item>> _items;
     bool _allow_default_item;
     Item _default_item;
 

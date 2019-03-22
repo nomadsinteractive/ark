@@ -55,10 +55,10 @@ DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings
 {
 }
 
-DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount)
-    : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _array_buffer(arrayBuffer), _index_buffer(indexBuffer), _count(indexBuffer.length<glindex_t>()), _instance_count(instanceCount)
+DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& vertexBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount)
+    : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _vertex_buffer(vertexBuffer), _index_buffer(indexBuffer), _count(indexBuffer.length<glindex_t>()), _instance_count(instanceCount)
 {
-    DWARN(_shader_bindings->vertexBuffer().id() == arrayBuffer.id(), "ShaderBinding's VertexBuffer: %d, which is not the same as DrawingContext's ArrayBuffer snapshot: %d", _shader_bindings->vertexBuffer().id(), arrayBuffer.id());
+    DWARN(_shader_bindings->vertexBuffer().id() == vertexBuffer.id(), "ShaderBinding's VertexBuffer: %d, which is not the same as DrawingContext's VertexBuffer snapshot: %d", _shader_bindings->vertexBuffer().id(), vertexBuffer.id());
 }
 
 sp<RenderCommand> DrawingContext::toRenderCommand(ObjectPool& objectPool)
@@ -71,9 +71,9 @@ sp<RenderCommand> DrawingContext::toRenderCommand(ObjectPool& objectPool)
 
 void DrawingContext::upload(GraphicsContext& graphicsContext)
 {
-    _array_buffer.upload(graphicsContext);
+    _vertex_buffer.upload(graphicsContext);
     _index_buffer.upload(graphicsContext);
-    DCHECK(_array_buffer.id(), "Invaild VertexBuffer");
+    DCHECK(_vertex_buffer.id(), "Invaild VertexBuffer");
     DCHECK(_index_buffer.id(), "Invaild IndexBuffer");
 
     for(const auto& iter : _instanced_array_snapshots)

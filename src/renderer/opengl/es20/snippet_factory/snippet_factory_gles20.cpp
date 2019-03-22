@@ -18,7 +18,7 @@ class SnippetGLES20 : public Snippet {
 public:
 
     virtual void preDraw(GraphicsContext& graphicsContext, Shader& shader, const DrawingContext& context) override {
-        glBindBuffer(GL_ARRAY_BUFFER, context._array_buffer.id());
+        glBindBuffer(GL_ARRAY_BUFFER, context._vertex_buffer.id());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context._index_buffer.id());
         const sp<opengl::GLPipeline> pipeline = shader.pipeline();
         pipeline->bindBuffer(graphicsContext, context._shader_bindings);

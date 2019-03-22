@@ -104,18 +104,18 @@ void Application::onPause()
     _alive = false;
     _application_context->post([this] () {
         onPauseTask();
-        _application_context->pause();
     });
+    _application_context->pause();
 }
 
 void Application::onResume()
 {
     LOGD("");
-    _application_context->resume();
     _application_context->post([this] () {
         onResumeTask();
         _alive = true;
     });
+    _application_context->resume();
 }
 
 void Application::onDestroy()

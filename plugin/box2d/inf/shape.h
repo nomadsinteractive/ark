@@ -5,6 +5,8 @@
 
 #include "graphics/base/size.h"
 
+#include "box2d/forwarding.h"
+
 namespace ark {
 namespace plugin {
 namespace box2d {
@@ -14,7 +16,7 @@ class Shape {
 public:
     virtual ~Shape() = default;
 
-    virtual void apply(b2Body* body, const sp<Size>& size, float density, float friction) = 0;
+    virtual void apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo) = 0;
 
 };
 

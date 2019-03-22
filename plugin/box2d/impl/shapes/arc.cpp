@@ -6,6 +6,8 @@
 
 #include "graphics/base/size.h"
 
+#include "box2d/impl/body_create_info.h"
+
 namespace ark {
 namespace plugin {
 namespace box2d {
@@ -15,7 +17,7 @@ Arc::Arc(uint32_t sampleCount, float a, float b)
 {
 }
 
-void Arc::apply(b2Body* body, const sp<Size>& size, float density, float friction)
+void Arc::apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo)
 {
     b2ChainShape shape;
 
@@ -37,10 +39,7 @@ void Arc::apply(b2Body* body, const sp<Size>& size, float density, float frictio
     shape.CreateChain(vecs, _sample_count + 1);
     delete[] vecs;
 
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = &shape;
-    fixtureDef.density = density;
-    fixtureDef.friction = friction;
+    b2FixtureDef fixtureDef = createInfo.toFixtureDef(&shape);
     body->CreateFixture(&fixtureDef);
 }
 

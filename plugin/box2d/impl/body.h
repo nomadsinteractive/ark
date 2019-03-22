@@ -41,12 +41,15 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotate, Shape& shape, float density, float friction);
+    Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction, bool isSensor = false);
+    Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo);
     Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotate);
     Body(const sp<Stub>& stub, const sp<RigidBody::Stub>& rigidbody);
 
     virtual void bind(const sp<RenderObject>& renderObject) override;
     virtual void dispose() override;
+
+    static sp<Body> obtain(const sp<Stub>& stub, ObjectPool& objectPool);
 
     b2Body* body() const;
 
@@ -76,7 +79,7 @@ public:
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 //  [[script::bindings::property]]
-    const sp<Rotate>& rotate() const;
+    const sp<Transform>& transform const;
 
 //  [[script::bindings::property]]
     const Box& tag() const;

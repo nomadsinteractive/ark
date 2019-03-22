@@ -2,6 +2,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
+#include "core/types/weak_ptr.h"
 #include "core/util/bean_utils.h"
 #include "core/util/numeric_util.h"
 #include "core/util/log.h"
@@ -87,8 +88,13 @@ private:
 
 }
 
-Body::Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotation, Shape& shape, float density, float friction)
-    : Body(sp<Stub>::make(world, world.createBody(type, position->val(), size, shape, density, friction)), type, position, size, rotation)
+Body::Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction, bool isSensor)
+    : Body(world, type, position, size, rotate, BodyCreateInfo(shape, density, friction, isSensor))
+{
+}
+
+Body::Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo)
+    : Body(sp<Stub>::make(world, world.createBody(type, position->val(), size, createInfo)), type, position, size, rotate)
 {
 }
 
@@ -99,6 +105,7 @@ Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& positio
                 sp<Rotate>::make(sp<_RigidBodyRotation>::make(stub, rotation))), _stub(stub)
 {
     _stub->_callback = callback();
+    _stub->_body->SetUserData(new WeakPtr<Stub>(stub));
 }
 
 Body::Body(const sp<Body::Stub>& stub, const sp<RigidBody::Stub>& rigidbody)
@@ -109,18 +116,30 @@ Body::Body(const sp<Body::Stub>& stub, const sp<RigidBody::Stub>& rigidbody)
 void Body::bind(const sp<RenderObject>& renderObject)
 {
     renderObject->setPosition(sp<RenderObjectPosition>::make(_stub));
+    renderObject->setTransform(transform());
     if(type() & Collider::BODY_FLAG_MANUAL_ROTATION)
     {
-        const sp<Numeric> r = rotate() ? rotate()->value()->delegate().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>::null();
-        renderObject->transform()->rotate()->setRadians(sp<ManualRotation>::make(_stub, r));
+        const sp<Numeric> r = transform()->rotate() ? transform()->rotate()->value()->delegate().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>::null();
+        transform()->rotate()->setRadians(sp<ManualRotation>::make(_stub, r));
     }
-    else
-        renderObject->transform()->setRotate(rotate());
 }
 
 void Body::dispose()
 {
     _stub->dispose();
+}
+
+sp<Body> Body::obtain(const sp<Body::Stub>& stub, ObjectPool& objectPool)
+{
+    Collider::BodyType bodyType = (stub->_body->GetType() == b2_staticBody) ?
+                Collider::BODY_TYPE_STATIC :
+                (stub->_body->GetType() == b2_kinematicBody ? Collider::BODY_TYPE_KINEMATIC : Collider::BODY_TYPE_DYNAMIC);
+    const b2Vec2& position = stub->_body->GetPosition();
+    float rotation = stub->_body->GetTransform().q.GetAngle();
+    const sp<Vec> p = objectPool.obtain<Vec::Const>(V(position.x, position.y));
+    const sp<Rotate> rotate = objectPool.obtain<Rotate>(objectPool.obtain<Numeric::Const>(rotation));
+    const sp<RigidBody::Stub> rigidBodyStub = objectPool.obtain<RigidBody::Stub>(stub->_id, bodyType, p, nullptr, rotate);
+    return objectPool.obtain<Body>(stub, rigidBodyStub);
 }
 
 b2Body* Body::body() const
@@ -268,7 +287,7 @@ sp<Object> Body::BUILDER_IMPL2::build(const sp<Scope>& args)
 Body::Stub::Stub(const World& world, b2Body* body)
     : _id(world.genRigidBodyId()), _world(world), _body(body)
 {
-    body->SetUserData(this);
+//    body->SetUserData(this);
 }
 
 Body::Stub::~Stub()
@@ -281,7 +300,11 @@ void Body::Stub::dispose()
 {
     DCHECK(_body, "Body has been disposed already");
     DCHECK(!_world.world().IsLocked(), "Cannot destroy body in the middle of a time step");
+    WeakPtr<Stub>* stub = reinterpret_cast<WeakPtr<Stub>*>(_body->GetUserData());
+    DASSERT(stub);
+
     LOGD("id = %d", _id);
+    delete  stub;
     _body->SetUserData(nullptr);
     _world.world().DestroyBody(_body);
     _body = nullptr;

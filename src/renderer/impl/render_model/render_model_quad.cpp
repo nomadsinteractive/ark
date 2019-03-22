@@ -31,8 +31,8 @@ void GLModelQuad::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
     const Atlas::Item& texCoord = _atlas->at(snapshot._type);
     const V2& pivot = texCoord.pivot();
-    float width = snapshot._size.x() == 0 ? texCoord.width() : snapshot._size.x();
-    float height = snapshot._size.y() == 0 ? texCoord.height() : snapshot._size.y();
+    float width = static_cast<int32_t>(snapshot._size.x()) == 0 ? texCoord.width() : snapshot._size.x();
+    float height = static_cast<int32_t>(snapshot._size.y()) == 0 ? texCoord.height() : snapshot._size.y();
 
     buf.nextVertex();
     buf.writePosition(0 - pivot.x() * width, 0 - pivot.y() * height, 0);

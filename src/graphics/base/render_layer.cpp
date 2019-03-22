@@ -1,5 +1,8 @@
 #include "graphics/base/render_layer.h"
 
+#include "core/base/observer.h"
+#include "core/epi/notifier.h"
+
 #include "graphics/base/camera.h"
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
@@ -22,7 +25,8 @@ namespace ark {
 RenderLayer::Stub::Stub(const sp<RenderModel>& renderModel, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_model(renderModel), _shader(shader), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
       _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_render_model->makeShaderBindings(_render_controller, shader->pipelineLayout())),
-      _layer_context(sp<LayerContext>::make(renderModel)), _stride(shader->input()->getStream(0).stride())
+      _notifier(sp<Notifier>::make()), _layer_context(sp<LayerContext>::make(renderModel, _notifier)), _dirty(_notifier->createObserver()),
+      _stride(shader->input()->getStream(0).stride())
 {
 }
 
@@ -33,6 +37,8 @@ RenderLayer::Snapshot::Snapshot(const sp<Stub>& stub)
 
     for(const sp<LayerContext>& i : stub->_layer_contexts)
         i->takeSnapshot(*this, stub->_memory_pool);
+
+    _dirty = stub->_dirty->val() || true;
 }
 
 sp<RenderCommand> RenderLayer::Snapshot::render(float x, float y)
@@ -41,23 +47,27 @@ sp<RenderCommand> RenderLayer::Snapshot::render(float x, float y)
     {
         ModelBuffer buf(_stub->_resource_loader_context, _stub->_shader_bindings, _items.size(), _stub->_stride);
         _stub->_render_model->start(buf, *this);
-
-        for(const RenderObject::Snapshot& i : _items)
+        if(_dirty)
         {
-            buf.setRenderObject(i);
-            buf.setTranslate(V3(x + i._position.x(), y + i._position.y(), i._position.z()));
-            _stub->_render_model->load(buf, i);
-            if(buf.isInstanced())
+            for(const RenderObject::Snapshot& i : _items)
             {
-                Buffer::Builder& sBuilder = buf.getInstancedArrayBuilder(1);
-                sBuilder.next();
-                Matrix matrix = i._transform.toMatrix();
-                matrix.translate(i._position.x(), i._position.y(), i._position.z());
-                matrix.scale(i._size.x(), i._size.y(), i._size.z());
-                sBuilder.write(matrix);
+                buf.setRenderObject(i);
+                buf.setTranslate(V3(x + i._position.x(), y + i._position.y(), i._position.z()));
+                _stub->_render_model->load(buf, i);
+                if(buf.isInstanced())
+                {
+                    Buffer::Builder& sBuilder = buf.getInstancedArrayBuilder(1);
+                    sBuilder.next();
+                    Matrix matrix = i._transform.toMatrix();
+                    matrix.translate(i._position.x(), i._position.y(), i._position.z());
+                    matrix.scale(i._size.x(), i._size.y(), i._size.z());
+                    sBuilder.write(matrix);
+                }
             }
         }
-        DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos), _stub->_shader_bindings->vertexBuffer().snapshot(buf.vertices().makeUploader()), buf.indices(), static_cast<int32_t>(_items.size()));
+        const Buffer& vertexBuffer = _stub->_shader_bindings->vertexBuffer();
+        Buffer::Snapshot vertexSnapshot = _dirty ? vertexBuffer.snapshot(buf.vertices().makeUploader()) : vertexBuffer.snapshot();
+        DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos), vertexSnapshot, buf.indices(), static_cast<int32_t>(_items.size()));
         if(buf.isInstanced())
             drawingContext._instanced_array_snapshots = buf.makeInstancedBufferSnapshots();
 
@@ -96,7 +106,7 @@ RenderLayer::Snapshot RenderLayer::snapshot() const
 
 sp<LayerContext> RenderLayer::makeContext() const
 {
-    const sp<LayerContext> layerContext = sp<LayerContext>::make(_stub->_render_model);
+    const sp<LayerContext> layerContext = sp<LayerContext>::make(_stub->_render_model, _stub->_notifier);
     _stub->_layer_contexts.push_back(layerContext);
     return layerContext;
 }

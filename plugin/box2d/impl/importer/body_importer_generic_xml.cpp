@@ -10,7 +10,8 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/resource_loader_context.h"
 
-#include "plugin/box2d/inf/shape.h"
+#include "box2d/impl/body_create_info.h"
+#include "box2d/inf/shape.h"
 
 namespace ark {
 namespace plugin {
@@ -36,10 +37,9 @@ public:
         }
     }
 
-    virtual void apply(b2Body* body, const sp<Size>& size, float density, float friction) override {
+    virtual void apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo) override {
         for(const std::vector<V2>& i : _polygons) {
             b2PolygonShape shape;
-            b2FixtureDef fixtureDef;
 
             std::vector<b2Vec2> vec2s;
             float width = size->width(), height = size->height();
@@ -47,9 +47,8 @@ public:
                 vec2s.push_back(b2Vec2(j.x() * width, j.y() * height));
 
             shape.Set(vec2s.data(), static_cast<int32_t>(vec2s.size()));
-            fixtureDef.shape = &shape;
-            fixtureDef.density = density;
-            fixtureDef.friction = friction;
+
+            b2FixtureDef fixtureDef = createInfo.toFixtureDef(&shape);
             body->CreateFixture(&fixtureDef);
         }
     }
@@ -91,7 +90,7 @@ void ImporterGenericXML::import(World& world)
         const document& friction = fixture->ensureChild("friction");
 
         const sp<ShapePolygon> polygons = sp<ShapePolygon>::make(fixture->ensureChild("polygons"), size);
-        World::BodyManifest bodyManifest(polygons, Strings::parse<float>(density->value()), Strings::parse<float>(friction->value()));
+        BodyCreateInfo bodyManifest(polygons, Strings::parse<float>(density->value()), Strings::parse<float>(friction->value()));
         bodyManifest.category = Strings::parse<uint16_t>(fixture->ensureChild("filter_categoryBits")->value());
         bodyManifest.group = Strings::parse<int16_t>(fixture->ensureChild("filter_groupIndex")->value());
         bodyManifest.mask = Strings::parse<uint16_t>(fixture->ensureChild("filter_maskBits")->value());

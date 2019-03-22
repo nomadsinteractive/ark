@@ -25,10 +25,12 @@ public:
     }
 
     template<typename T> const T& mat() const {
+        DCHECK(sizeof(_value) == sizeof(T), "Matrix size unmatch: %d != %d", sizeof(_value), sizeof(T));
         return *reinterpret_cast<const T*>(_value);
     }
 
     template<typename T> T& mat() {
+        DCHECK(sizeof(_value) == sizeof(T), "Matrix size unmatch: %d != %d", sizeof(_value), sizeof(T));
         return *reinterpret_cast<T*>(_value);
     }
 

@@ -16,7 +16,7 @@ class Arc : public Shape {
 public:
     Arc(uint32_t sampleCount, float a, float b);
 
-    virtual void apply(b2Body* body, const sp<Size>& size, float density, float friction) override;
+    virtual void apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo) override;
 
 //  [[plugin::builder("arc")]]
     class BUILDER : public Builder<Shape> {

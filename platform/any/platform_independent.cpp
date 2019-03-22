@@ -19,7 +19,7 @@ namespace {
 class PlatformSteadyClock : public Variable<uint64_t> {
 public:
     virtual uint64_t val() override {
-        return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+        return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
     }
 
 };

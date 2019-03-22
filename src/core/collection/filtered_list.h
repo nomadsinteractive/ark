@@ -153,7 +153,7 @@ private:
 };
 
 
-template <typename T> using ListWithLifecycle = FilteredList<T, typename ListFilters::IsDisposed<T>>;
+template <typename T> using DisposableItemList = FilteredList<T, typename ListFilters::IsDisposed<T>>;
 template <typename T> using WeakRefList = FilteredList<T, typename ListFilters::IsUnique<T>>;
 
 }

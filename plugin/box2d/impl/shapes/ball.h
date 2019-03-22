@@ -15,7 +15,7 @@ namespace box2d {
 class Ball : public Shape {
 public:
 
-    virtual void apply(b2Body* body, const sp<Size>& size, float density, float friction) override;
+    virtual void apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo) override;
 
 //  [[plugin::builder::by-value("ball")]]
     class BUILDER : public Builder<Shape> {

@@ -1,6 +1,7 @@
 #include "graphics/base/layer_context.h"
 
 #include "core/epi/disposable.h"
+#include "core/epi/notifier.h"
 
 #include "graphics/base/layer.h"
 
@@ -11,8 +12,8 @@ LayerContext::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
 {
 }
 
-LayerContext::LayerContext(const sp<RenderModel>& renderModel)
-    : _render_model(renderModel), _render_requested(false)
+LayerContext::LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier>& notifier)
+    : _render_model(renderModel), _notifier(notifier), _render_requested(false)
 {
 }
 
@@ -35,28 +36,35 @@ void LayerContext::draw(float x, float y, const sp<RenderObject>& renderObject)
 void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed)
 {
     DASSERT(renderObject);
-    _items.push_back(renderObject, disposed ? disposed : renderObject.as<Disposable>());
+    _items.push_back(renderObject, disposed ? disposed : renderObject.as<Disposable>(), _notifier);
+    _notifier->notify();
 }
 
 void LayerContext::removeRenderObject(const sp<RenderObject>& renderObject)
 {
     _items.remove(renderObject);
+    _notifier->notify();
 }
 
 void LayerContext::clear()
 {
     _items.clear();
+    _notifier->notify();
 }
 
 void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memoryPool)
 {
     if(_render_requested)
     {
-        for(const Item& i : _transient_items)
+        if(_transient_items.size() > 0)
         {
-            RenderObject::Snapshot snapshot = i._render_object->snapshot(memoryPool);
-            snapshot._position = snapshot._position + V(i._x, i._y) + _position;
-            output._items.push_back(std::move(snapshot));
+            for(const Item& i : _transient_items)
+            {
+                RenderObject::Snapshot snapshot = i._render_object->snapshot(memoryPool);
+                snapshot._position = snapshot._position + V(i._x, i._y) + _position;
+                output._items.push_back(std::move(snapshot));
+            }
+            _notifier->notify();
         }
 
         for(const sp<RenderObject>& i : _items)
@@ -70,14 +78,19 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memor
     _render_requested = false;
 }
 
-LayerContext::RenderObjectFilter::RenderObjectFilter(const sp<RenderObject>& /*renderObject*/, const sp<Disposable>& disposed)
-    : _disposed(disposed)
+LayerContext::RenderObjectFilter::RenderObjectFilter(const sp<RenderObject>& /*renderObject*/, const sp<Disposable>& disposed, const sp<Notifier>& notifier)
+    : _disposed(disposed), _notifier(notifier)
 {
 }
 
 FilterAction LayerContext::RenderObjectFilter::operator()(const sp<RenderObject>& renderObject) const
 {
-    return (_disposed && _disposed->isDisposed()) || renderObject->isDisposed() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+    if((_disposed && _disposed->isDisposed()) || renderObject->isDisposed())
+    {
+        _notifier->notify();
+        return FILTER_ACTION_REMOVE;
+    }
+    return FILTER_ACTION_NONE;
 }
 
 LayerContext::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, bool makeContext)

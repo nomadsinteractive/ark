@@ -63,16 +63,12 @@ bool GLModelText::Stub::prepareOne(int32_t c)
 
 bool GLModelText::Stub::checkUnpreparedCharacter(const RenderLayer::Snapshot& renderContext)
 {
-    bool updateNeeded = false;
     for(const RenderObject::Snapshot& i : renderContext._items)
     {
-        if(_characters.find(i._type) == _characters.end())
-        {
-            _characters.insert(i._type);
-            updateNeeded = true;
-        }
+        if(!_atlas->has(i._type))
+            return true;
     }
-    return updateNeeded;
+    return false;
 }
 
 void GLModelText::Stub::clear()
@@ -80,20 +76,18 @@ void GLModelText::Stub::clear()
     _flowx = _flowy = 0;
     _max_glyph_height = 0;
     _atlas->clear();
-    _characters.clear();
     memset(_font_glyph->at(0, 0), 0, _font_glyph->width() * _font_glyph->height());
 }
 
 bool GLModelText::Stub::prepare(const RenderLayer::Snapshot& snapshot, bool allowReset)
 {
-    for(int32_t c : _characters)
+    for(const RenderObject::Snapshot& i : snapshot._items)
     {
-        if(!_atlas->has(c) && !prepareOne(c))
+        if(!_atlas->has(i._type) && !prepareOne(i._type))
         {
             if(allowReset)
             {
                 clear();
-                checkUnpreparedCharacter(snapshot);
                 return prepare(snapshot, false);
             }
             return false;
@@ -128,7 +122,7 @@ void GLModelText::postSnapshot(RenderController& renderController, RenderLayer::
         {
             uint32_t width = _stub->_font_glyph->width() * 2;
             uint32_t height = _stub->_font_glyph->height() * 2;
-            LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _stub->_characters.size());
+            LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _stub->_atlas->items()->indices().size());
             _stub->reset(width, height);
         }
         _stub->_render_controller->upload(_shader_texture, nullptr, RenderController::US_RELOAD);

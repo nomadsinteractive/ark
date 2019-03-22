@@ -174,6 +174,8 @@ sp<Scope> PythonInterpreter::toScope(PyObject* kws)
             const String sKey = toString(key);
             if(isPyArkTypeObject(Py_TYPE(item)))
                 scope->put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
+            else if(PyBool_Check(item))
+                scope->put<Boolean>(sKey, sp<Boolean::Const>::make(PyObject_IsTrue(item) != 0));
             else if(PyFloat_Check(item) || PyLong_Check(item) || PyObject_HasAttrString(item, "val"))
             {
                 const sp<PyInstance> owned = PyInstance::adopt(item);
@@ -182,8 +184,6 @@ sp<Scope> PythonInterpreter::toScope(PyObject* kws)
             }
             else if(PyBytes_Check(item) || PyUnicode_Check(item))
                 scope->put<String>(sKey, sp<String>::make(toString(item)));
-            else if(PyBool_Check(item))
-                scope->put<Boolean>(sKey, sp<Boolean::Impl>::make(PyObject_IsTrue(item) != 0));
             else if(PyCallable_Check(item))
             {
                 const sp<PyInstance> owned = PyInstance::adopt(item);

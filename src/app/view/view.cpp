@@ -71,7 +71,7 @@ const SafePtr<Size>& View::size()
     return _layout_param->size();
 }
 
-const sp<LayoutParam>& View::layoutParam() const
+const SafePtr<LayoutParam>& View::layoutParam() const
 {
     return _layout_param;
 }

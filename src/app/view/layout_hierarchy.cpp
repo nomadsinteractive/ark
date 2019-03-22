@@ -16,14 +16,14 @@ namespace ark {
 
 LayoutHierarchy::Slot::Slot(const sp<Renderer>& renderer, bool layoutRequested)
     : _x(0), _y(0), _layout_width(0), _layout_height(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _view_group(renderer.as<ViewGroup>()),
-      _lifecycle(renderer.as<Disposable>()), _visibility(renderer.as<Visibility>())
+      _disposed(renderer.as<Disposable>()), _visibility(renderer.as<Visibility>())
 {
     DASSERT(renderer);
 }
 
 bool LayoutHierarchy::Slot::isExpired() const
 {
-    return _lifecycle && _lifecycle->isDisposed();
+    return _disposed && _disposed->isDisposed();
 }
 
 bool LayoutHierarchy::Slot::layoutRequested() const

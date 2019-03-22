@@ -39,8 +39,6 @@ private:
         uint32_t _flowx, _flowy;
         int32_t _max_glyph_height;
 
-        std::unordered_set<int32_t> _characters;
-
         friend class GLModelText;
     };
 

@@ -32,7 +32,7 @@ public:
     };
 
 private:
-    ListWithLifecycle<Renderer> _items;
+    DisposableItemList<Renderer> _items;
 
 };
 

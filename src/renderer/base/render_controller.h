@@ -117,7 +117,7 @@ private:
     LFQueue<PreparingResource> _preparing_items;
     std::set<ExpirableResource> _on_surface_ready_items;
 
-    ListWithLifecycle<Runnable> _on_pre_update_request;
+    DisposableItemList<Runnable> _on_pre_update_request;
     std::vector<Box> _defered_instances;
 
     sp<NamedBuffer> _named_buffers[NamedBuffer::NAME_COUNT];

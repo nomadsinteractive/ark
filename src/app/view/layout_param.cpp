@@ -1,5 +1,7 @@
 #include "app/view/layout_param.h"
 
+#include "core/ark.h"
+
 #include "core/inf/variable.h"
 #include "core/util/bean_utils.h"
 #include "core/util/strings.h"
@@ -118,6 +120,11 @@ LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<LayoutParam> LayoutParam::BUILDER::build(const sp<Scope>& args)
 {
     return _size ? sp<LayoutParam>::make(_size->build(args), _display) : nullptr;
+}
+
+template<> ARK_API sp<LayoutParam> Null::ptr()
+{
+    return Ark::instance().obtain<LayoutParam>(Ark::instance().obtain<Size>(static_cast<float>(LayoutParam::MATCH_PARENT), static_cast<float>(LayoutParam::MATCH_PARENT)));
 }
 
 }

@@ -14,7 +14,7 @@ public:
     virtual bool onEvent(const Event& event);
 
 private:
-    ListWithLifecycle<EventListener> _event_listeners;
+    DisposableItemList<EventListener> _event_listeners;
 };
 
 }

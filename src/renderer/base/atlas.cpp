@@ -16,13 +16,18 @@ namespace ark {
 
 Atlas::Atlas(const sp<Texture>& texture, bool allowDefaultItem)
     : _texture(texture), _half_pixel_x(static_cast<uint16_t>(32768 / texture->width())), _half_pixel_y(static_cast<uint16_t>(32768 / texture->height())),
-      _atlas(new ByIndex<Item>()), _allow_default_item(allowDefaultItem)
+      _items(new ByIndex<Item>()), _allow_default_item(allowDefaultItem)
 {
 }
 
 const sp<Texture>& Atlas::texture() const
 {
     return _texture;
+}
+
+const op<ByIndex<Atlas::Item>>& Atlas::items() const
+{
+    return _items;
 }
 
 uint32_t Atlas::width() const
@@ -47,17 +52,17 @@ uint16_t Atlas::halfPixelY() const
 
 bool Atlas::has(int32_t c) const
 {
-    return _atlas->has(c);
+    return _items->has(c);
 }
 
 void Atlas::add(int32_t id, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX, float pivotY)
 {
-    _atlas->add(id, makeItem(left, top, right, bottom, pivotX, pivotY));
+    _items->add(id, makeItem(left, top, right, bottom, pivotX, pivotY));
 }
 
 const Atlas::Item& Atlas::at(int32_t id) const
 {
-    return _allow_default_item ? (has(id) ? _atlas->at(id) : _default_item) : _atlas->at(id);
+    return _allow_default_item ? (has(id) ? _items->at(id) : _default_item) : _items->at(id);
 }
 
 void Atlas::getOriginalPosition(int32_t id, Rect& position) const
@@ -70,7 +75,7 @@ void Atlas::getOriginalPosition(int32_t id, Rect& position) const
 
 void Atlas::clear()
 {
-    _atlas.reset(new ByIndex<Item>());
+    _items.reset(new ByIndex<Item>());
 }
 
 uint16_t Atlas::unnormalize(uint32_t x, uint32_t s)

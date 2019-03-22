@@ -33,7 +33,7 @@ RigidBody::RigidBody(const sp<RigidBody::Stub>& stub)
 void RigidBody::bind(const sp<RenderObject>& renderObject)
 {
     renderObject->setPosition(position());
-    renderObject->transform()->setRotate(rotate());
+    renderObject->setTransform(_stub->_transform);
 }
 
 int32_t RigidBody::id() const
@@ -76,9 +76,9 @@ const sp<Size>& RigidBody::size() const
     return _stub->_size;
 }
 
-const sp<Rotate>& RigidBody::rotate() const
+const sp<Transform>& RigidBody::transform() const
 {
-    return _stub->_rotate;
+    return _stub->_transform;
 }
 
 const Box& RigidBody::tag() const
@@ -124,7 +124,7 @@ template<> ARK_API Collider::BodyType Conversions::to<String, Collider::BodyType
 }
 
 RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Callback>& callback)
-    : _id(id), _type(type), _position(position), _size(size), _rotate(rotate), _callback(callback ? callback : sp<Callback>::make())
+    : _id(id), _type(type), _position(position), _size(size), _transform(sp<Transform>::make(rotate)), _callback(callback ? callback : sp<Callback>::make())
 {
 }
 

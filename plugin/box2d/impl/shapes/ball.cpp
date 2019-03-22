@@ -5,21 +5,20 @@
 
 #include "graphics/base/size.h"
 
+#include "box2d/impl/body_create_info.h"
+
 namespace ark {
 namespace plugin {
 namespace box2d {
 
-void Ball::apply(b2Body* body, const sp<Size>& size, float density, float friction)
+void Ball::apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo)
 {
     b2CircleShape shape;
 
     DWARN(size->width() == size->height(), "RigidBody size: (%.2f, %.2f) is not a circle", size->width(), size->height());
     shape.m_radius = (size->width() + size->height()) / 4.0f;
 
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = &shape;
-    fixtureDef.density = density;
-    fixtureDef.friction = friction;
+    b2FixtureDef fixtureDef = createInfo.toFixtureDef(&shape);
     body->CreateFixture(&fixtureDef);
 }
 

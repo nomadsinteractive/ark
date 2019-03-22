@@ -111,7 +111,7 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
 
 void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    buildCommandBuffer(graphicsContext, drawingContext._array_buffer, drawingContext._index_buffer);
+    buildCommandBuffer(graphicsContext, drawingContext._vertex_buffer, drawingContext._index_buffer);
 }
 
 void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)

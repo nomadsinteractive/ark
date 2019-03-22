@@ -27,9 +27,9 @@ namespace box2d {
 World::World(const b2Vec2& gravity, float ppmX, float ppmY)
     : _stub(sp<Stub>::make(gravity, ppmX, ppmY))
 {
-    const BodyManifest box(sp<Box>::make(), 1.0f, 0.2f);
+    const BodyCreateInfo box(sp<Box>::make(), 1.0f, 0.2f);
     _stub->_body_manifests[Collider::BODY_SHAPE_AABB] = box;
-    _stub->_body_manifests[Collider::BODY_SHAPE_BALL] = BodyManifest(sp<Ball>::make(), 1.0f, 0.2f);
+    _stub->_body_manifests[Collider::BODY_SHAPE_BALL] = BodyCreateInfo(sp<Ball>::make(), 1.0f, 0.2f);
     _stub->_body_manifests[Collider::BODY_SHAPE_BOX] = box;
     _stub->_world.SetContactListener(&_stub->_contact_listener);
     _stub->_world.SetDestructionListener(&_stub->_destruction_listener);
@@ -44,8 +44,8 @@ sp<RigidBody> World::createBody(Collider::BodyType type, int32_t shape, const sp
 {
     const auto iter = _stub->_body_manifests.find(shape);
     DCHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-id: %d not found", shape);
-    const BodyManifest& manifest = iter->second;
-    const sp<Body> body = sp<Body>::make(*this, type, position, size, rotate ? rotate->value().cast<Numeric>() : sp<Numeric>::null(), manifest.shape, manifest.density, manifest.friction);
+    const BodyCreateInfo& manifest = iter->second;
+    const sp<Body> body = sp<Body>::make(*this, type, position, size, rotate ? rotate->value().cast<Numeric>() : sp<Numeric>::null(), manifest);
     if(rotate)
         body->setAngle(rotate->radians());
 
@@ -72,7 +72,7 @@ b2Body* World::createBody(const b2BodyDef& bodyDef) const
     return _stub->_world.CreateBody(&bodyDef);
 }
 
-b2Body* World::createBody(Collider::BodyType type, const V& position, const sp<Size>& size, Shape& shape, float density, float friction) const
+b2Body* World::createBody(Collider::BodyType type, const V& position, const sp<Size>& size, const BodyCreateInfo& createInfo) const
 {
     b2BodyDef bodyDef;
     switch(type & Collider::BODY_TYPE_MASK)
@@ -93,7 +93,7 @@ b2Body* World::createBody(Collider::BodyType type, const V& position, const sp<S
     bodyDef.position.Set(position.x(), position.y());
     b2Body* body = createBody(bodyDef);
 
-    shape.apply(body, size, density, friction);
+    createInfo.shape->apply(body, size, createInfo);
     return body;
 }
 
@@ -127,7 +127,7 @@ void World::track(const sp<Joint>& joint) const
     _stub->_destruction_listener.track(joint);
 }
 
-void World::setBodyManifest(int32_t id, const World::BodyManifest& bodyManifest)
+void World::setBodyManifest(int32_t id, const BodyCreateInfo& bodyManifest)
 {
     DWARN(_stub->_body_manifests.find(id) == _stub->_body_manifests.end(), "Overriding existing body: %d", id);
     _stub->_body_manifests[id] = bodyManifest;
@@ -151,11 +151,12 @@ sp<World> World::BUILDER_IMPL1::build(const sp<Scope>& args)
     {
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
 
-        BodyManifest bodyManifest(_factory.ensure<Shape>(i, "shape", args), Documents::getAttribute<float>(i, "density", 1.0f), Documents::getAttribute<float>(i, "friction", 0.2f));
-        bodyManifest.category = Documents::getAttribute<uint16_t>(i, "category", 0);
-        bodyManifest.mask = Documents::getAttribute<uint16_t>(i, "mask", 0);
-        bodyManifest.group = Documents::getAttribute<int16_t>(i, "group", 0);
-        world->_stub->_body_manifests[type] = bodyManifest;
+        BodyCreateInfo bodyCreateInfo(_factory.ensure<Shape>(i, "shape", args), Documents::getAttribute<float>(i, "density", 1.0f),
+                                      Documents::getAttribute<float>(i, "friction", 0.2f), Documents::getAttribute<bool>(i, "is-sensor", false));
+        bodyCreateInfo.category = Documents::getAttribute<uint16_t>(i, "category", 0);
+        bodyCreateInfo.mask = Documents::getAttribute<uint16_t>(i, "mask", 0);
+        bodyCreateInfo.group = Documents::getAttribute<int16_t>(i, "group", 0);
+        world->_stub->_body_manifests[type] = bodyCreateInfo;
     }
 
     for(const sp<Builder<Importer>>& i : _importers)
@@ -189,69 +190,49 @@ void World::Stub::run()
     _world.Step(_time_step, _velocity_iterations, _position_iterations);
 }
 
-World::BodyManifest::BodyManifest()
-    : density(0), friction(0), category(0), mask(0), group(0)
-{
-}
-
-World::BodyManifest::BodyManifest(const sp<Shape>& shape, float density, float friction)
-    : shape(shape), density(density), friction(friction), category(0), mask(0), group(0)
-{
-}
-
 void World::ContactListenerImpl::BeginContact(b2Contact* contact)
 {
-    Body::Stub* body1 = reinterpret_cast<Body::Stub*>(contact->GetFixtureA()->GetBody()->GetUserData());
-    Body::Stub* body2 = reinterpret_cast<Body::Stub*>(contact->GetFixtureB()->GetBody()->GetUserData());
+    WeakPtr<Body::Stub>* d1 = reinterpret_cast<WeakPtr<Body::Stub>*>(contact->GetFixtureA()->GetBody()->GetUserData());
+    WeakPtr<Body::Stub>* d2 = reinterpret_cast<WeakPtr<Body::Stub>*>(contact->GetFixtureB()->GetBody()->GetUserData());
     const V normal = V(contact->GetManifold()->localNormal.x, contact->GetManifold()->localNormal.y);
-    if(body1 && body2)
+    if(d1 && d2)
     {
+        const sp<Body::Stub> body1 = d1->ensure();
+        const sp<Body::Stub> body2 = d2->ensure();
         if(body1->_contacts.find(body2->_id) == body1->_contacts.end())
         {
             body1->_contacts.insert(body2->_id);
-            body1->_callback->onBeginContact(obtain(body2), CollisionManifold(normal));
+            body1->_callback->onBeginContact(Body::obtain(body2, _object_pool), CollisionManifold(normal));
         }
         if(body2->_contacts.find(body1->_id) == body2->_contacts.end())
         {
             body2->_contacts.insert(body1->_id);
-            body2->_callback->onBeginContact(obtain(body1), CollisionManifold(-normal));
+            body2->_callback->onBeginContact(Body::obtain(body1, _object_pool), CollisionManifold(-normal));
         }
     }
 }
 
 void World::ContactListenerImpl::EndContact(b2Contact* contact)
 {
-    Body::Stub* body1 = reinterpret_cast<Body::Stub*>(contact->GetFixtureA()->GetBody()->GetUserData());
-    Body::Stub* body2 = reinterpret_cast<Body::Stub*>(contact->GetFixtureB()->GetBody()->GetUserData());
-    if(body1 && body2)
+    WeakPtr<Body::Stub>* d1 = reinterpret_cast<WeakPtr<Body::Stub>*>(contact->GetFixtureA()->GetBody()->GetUserData());
+    WeakPtr<Body::Stub>* d2 = reinterpret_cast<WeakPtr<Body::Stub>*>(contact->GetFixtureB()->GetBody()->GetUserData());
+    if(d1 && d2)
     {
+        const sp<Body::Stub> body1 = d1->ensure();
+        const sp<Body::Stub> body2 = d2->ensure();
         const auto it1 = body1->_contacts.find(body2->_id);
         if(it1 != body1->_contacts.end())
         {
             body1->_contacts.erase(it1);
-            body1->_callback->onEndContact(obtain(body2));
+            body1->_callback->onEndContact(Body::obtain(body2, _object_pool));
         }
         const auto it2 = body2->_contacts.find(body1->_id);
         if(it2 != body2->_contacts.end())
         {
             body2->_contacts.erase(it2);
-            body2->_callback->onEndContact(obtain(body1));
+            body2->_callback->onEndContact(Body::obtain(body1, _object_pool));
         }
     }
-}
-
-sp<Body> World::ContactListenerImpl::obtain(void* data)
-{
-    Body::Stub* body = reinterpret_cast<Body::Stub*>(data);
-    Collider::BodyType bodyType = (body->_body->GetType() == b2_staticBody) ?
-                Collider::BODY_TYPE_STATIC :
-                (body->_body->GetType() == b2_kinematicBody ? Collider::BODY_TYPE_KINEMATIC : Collider::BODY_TYPE_DYNAMIC);
-    const b2Vec2& position = body->_body->GetPosition();
-    float rotation = body->_body->GetTransform().q.GetAngle();
-    const sp<Vec> p = _object_pool.obtain<Vec::Const>(V(position.x, position.y));
-    const sp<Rotate> rotate = _object_pool.obtain<Rotate>(_object_pool.obtain<Numeric::Const>(rotation));
-    const sp<RigidBody::Stub> stub = _object_pool.obtain<RigidBody::Stub>(body->_id, bodyType, p, nullptr, rotate);
-    return _object_pool.obtain<Body>(sp<Body::Stub>::borrow(body), stub);
 }
 
 void World::DestructionListenerImpl::SayGoodbye(b2Joint* joint)

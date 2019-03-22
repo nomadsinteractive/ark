@@ -22,7 +22,7 @@ private:
     };
 
 public:
-    LayerContext(const sp<RenderModel>& renderModel);
+    LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier>& notifier);
 
     const sp<RenderModel>& renderModel() const;
 
@@ -54,16 +54,18 @@ public:
 private:
     class RenderObjectFilter {
     public:
-        RenderObjectFilter(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed);
+        RenderObjectFilter(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed, const sp<Notifier>& notifier);
 
         FilterAction operator()(const sp<RenderObject>& renderObject) const;
 
     private:
         sp<Disposable> _disposed;
+        sp<Notifier> _notifier;
     };
 
 private:
     sp<RenderModel> _render_model;
+    sp<Notifier> _notifier;
 
     bool _render_requested;
     V2 _position;

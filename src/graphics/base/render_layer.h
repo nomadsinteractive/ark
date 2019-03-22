@@ -34,8 +34,10 @@ private:
         sp<RenderController> _render_controller;
         sp<ShaderBindings> _shader_bindings;
 
+        sp<Notifier> _notifier;
         WeakRefList<LayerContext> _layer_contexts;
         sp<LayerContext> _layer_context;
+        sp<Boolean> _dirty;
 
         uint32_t _stride;
 
@@ -57,6 +59,7 @@ public:
         std::vector<RenderObject::Snapshot> _items;
 
         Buffer::Snapshot _index_buffer;
+        bool _dirty;
 
         DISALLOW_COPY_AND_ASSIGN(Snapshot);
 

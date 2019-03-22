@@ -6,6 +6,7 @@ namespace plugin {
 namespace box2d {
 
 class Body;
+class BodyCreateInfo;
 class Joint;
 class Shape;
 class World;

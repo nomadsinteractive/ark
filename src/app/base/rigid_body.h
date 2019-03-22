@@ -41,7 +41,7 @@ public:
         Collider::BodyType _type;
         SafePtr<Vec> _position;
         SafePtr<Size> _size;
-        sp<Rotate> _rotate;
+        sp<Transform> _transform;
 
         sp<Callback> _callback;
 
@@ -79,7 +79,7 @@ public:
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 //  [[script::bindings::property]]
-    const sp<Rotate>& rotate() const;
+    const sp<Transform>& transform() const;
 
 //  [[script::bindings::property]]
     const Box& tag() const;

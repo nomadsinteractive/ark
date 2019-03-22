@@ -17,7 +17,7 @@ namespace ark {
 class ARK_API DrawingContext {
 public:
     DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo);
-    DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& arrayBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount);
+    DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& vertexBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
     sp<RenderCommand> toRenderCommand(ObjectPool& objectPool);
@@ -26,7 +26,7 @@ public:
     sp<ShaderBindings> _shader_bindings;
 
     std::vector<RenderLayer::UBOSnapshot> _ubos;
-    Buffer::Snapshot _array_buffer;
+    Buffer::Snapshot _vertex_buffer;
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> _instanced_array_snapshots;
 
     Buffer::Snapshot _index_buffer;

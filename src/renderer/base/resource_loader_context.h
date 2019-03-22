@@ -75,7 +75,7 @@ private:
         }
 
     private:
-        ListWithLifecycle<Updater> _updaters;
+        DisposableItemList<Updater> _updaters;
     };
 
 public:

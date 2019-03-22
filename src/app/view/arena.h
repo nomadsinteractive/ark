@@ -93,7 +93,7 @@ private:
     sp<ViewGroup> _view_group;
     sp<Renderer> _renderer;
     sp<ResourceLoader> _resource_loader;
-    ListWithLifecycle<Renderer> _layers;
+    DisposableItemList<Renderer> _layers;
 
 };
 
