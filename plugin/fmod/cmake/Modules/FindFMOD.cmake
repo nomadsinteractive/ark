@@ -44,9 +44,13 @@ FIND_PATH(FMOD_LL_INCLUDE_DIR "fmod.h"
 
 IF(MSVC)
     IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        SET(FMOD_NAMES fmodstudio64_vc)
+        SET(FMOD_DBG_NAMES fmodstudioL64_vc)
         SET(FMOD_EVENT_NAMES fmod64_vc)
         SET(FMOD_EVENT_DBG_NAMES fmod64_vc)
     ELSE()
+        SET(FMOD_NAMES fmodstudio_vc)
+        SET(FMOD_DBG_NAMES fmodstudioL_vc)
         SET(FMOD_EVENT_NAMES fmod_vc)
         SET(FMOD_EVENT_DBG_NAMES fmod_vc)
     ENDIF()

@@ -392,7 +392,7 @@ class Layer:
     def context(self):
         return None
 
-    def add_render_object(self, render_object: RenderObject, disposed: Disposable):
+    def add_render_object(self, render_object: RenderObject, disposed: Disposable = None):
         pass
 
     def remove_render_object(self, render_object: RenderObject):

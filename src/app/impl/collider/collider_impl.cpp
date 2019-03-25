@@ -180,7 +180,7 @@ void ColliderImpl::Stub::loadShapes(const document& manifest)
 }
 
 ColliderImpl::RigidBodyImpl::RigidBodyImpl(const sp<ColliderImpl::Stub>& collider, const sp<RigidBodyShadow>& shadow)
-    : RigidBody(shadow->_stub), _collider(collider), _shadow(shadow)
+    : RigidBody(shadow->stub()), _collider(collider), _shadow(shadow)
 {
 }
 
@@ -251,10 +251,11 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
     if(candidates.size())
     {
         std::unordered_set<int32_t> contacts = _contacts;
+        const Stub& shadowStub = stub();
         for(auto iter = candidates.begin(); iter != candidates.end();)
         {
             int32_t id = *iter;
-            if(id == _stub->_id)
+            if(id == shadowStub._id)
             {
                 iter = candidates.erase(iter);
                 continue;
@@ -266,7 +267,7 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
             {
                 auto iter2 = contacts.find(id);
                 if(iter2 == contacts.end())
-                    _stub->_callback->onBeginContact(self, rigidBody, CollisionManifold(V(manifold.normal.x, manifold.normal.y)));
+                    shadowStub._callback->onBeginContact(self, rigidBody, CollisionManifold(V(manifold.normal.x, manifold.normal.y)));
                 else
                     contacts.erase(iter2);
                 ++iter;
@@ -279,7 +280,7 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
             if(candidates.find(i) == candidates.end())
             {
                 const sp<RigidBodyShadow> s = collider.findRigidBody(i);
-                _stub->_callback->onEndContact(self, s ? s : collider._object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, nullptr, nullptr, nullptr));
+                shadowStub._callback->onEndContact(self, s ? s : collider._object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, nullptr, nullptr, nullptr));
             }
         }
         _contacts = candidates;
@@ -302,11 +303,11 @@ bool ColliderImpl::RigidBodyShadow::disposed() const
 
 Rect ColliderImpl::RigidBodyShadow::makeRigidBodyAABB() const
 {
-    DCHECK(_stub->_size, "RigidBody must have size defined");
-    Rect aabb(0, 0, _stub->_size->width(), _stub->_size->height());
+    DCHECK(stub()->_size, "RigidBody must have size defined");
+    Rect aabb(0, 0, stub()->_size->width(), stub()->_size->height());
     if(_c2_rigid_body.isStaticBody())
     {
-        const V2 pos = _stub->_position->val();
+        const V2 pos = stub()->_position->val();
         aabb.setCenter(pos.x(), pos.y());
     }
     else

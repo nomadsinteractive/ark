@@ -192,45 +192,49 @@ void World::Stub::run()
 
 void World::ContactListenerImpl::BeginContact(b2Contact* contact)
 {
-    WeakPtr<Body::Stub>* d1 = reinterpret_cast<WeakPtr<Body::Stub>*>(contact->GetFixtureA()->GetBody()->GetUserData());
-    WeakPtr<Body::Stub>* d2 = reinterpret_cast<WeakPtr<Body::Stub>*>(contact->GetFixtureB()->GetBody()->GetUserData());
+    Body::Shadow* s1 = reinterpret_cast<Body::Shadow*>(contact->GetFixtureA()->GetBody()->GetUserData());
+    Body::Shadow* s2 = reinterpret_cast<Body::Shadow*>(contact->GetFixtureB()->GetBody()->GetUserData());
     const V normal = V(contact->GetManifold()->localNormal.x, contact->GetManifold()->localNormal.y);
-    if(d1 && d2)
+    if(s1 && s2)
     {
-        const sp<Body::Stub> body1 = d1->ensure();
-        const sp<Body::Stub> body2 = d2->ensure();
+        const sp<Body::Stub> body1 = s1->_body.ensure();
+        const sp<Body::Stub> body2 = s2->_body.ensure();
         if(body1->_contacts.find(body2->_id) == body1->_contacts.end())
         {
             body1->_contacts.insert(body2->_id);
-            body1->_callback->onBeginContact(Body::obtain(body2, _object_pool), CollisionManifold(normal));
+            if(body1->_callback->hasCallback())
+                body1->_callback->onBeginContact(Body::obtain(s2, _object_pool), CollisionManifold(normal));
         }
         if(body2->_contacts.find(body1->_id) == body2->_contacts.end())
         {
             body2->_contacts.insert(body1->_id);
-            body2->_callback->onBeginContact(Body::obtain(body1, _object_pool), CollisionManifold(-normal));
+            if(body2->_callback->hasCallback())
+                body2->_callback->onBeginContact(Body::obtain(s1, _object_pool), CollisionManifold(-normal));
         }
     }
 }
 
 void World::ContactListenerImpl::EndContact(b2Contact* contact)
 {
-    WeakPtr<Body::Stub>* d1 = reinterpret_cast<WeakPtr<Body::Stub>*>(contact->GetFixtureA()->GetBody()->GetUserData());
-    WeakPtr<Body::Stub>* d2 = reinterpret_cast<WeakPtr<Body::Stub>*>(contact->GetFixtureB()->GetBody()->GetUserData());
-    if(d1 && d2)
+    Body::Shadow* s1 = reinterpret_cast<Body::Shadow*>(contact->GetFixtureA()->GetBody()->GetUserData());
+    Body::Shadow* s2 = reinterpret_cast<Body::Shadow*>(contact->GetFixtureB()->GetBody()->GetUserData());
+    if(s1 && s2)
     {
-        const sp<Body::Stub> body1 = d1->ensure();
-        const sp<Body::Stub> body2 = d2->ensure();
+        const sp<Body::Stub> body1 = s1->_body.ensure();
+        const sp<Body::Stub> body2 = s2->_body.ensure();
         const auto it1 = body1->_contacts.find(body2->_id);
         if(it1 != body1->_contacts.end())
         {
             body1->_contacts.erase(it1);
-            body1->_callback->onEndContact(Body::obtain(body2, _object_pool));
+            if(body1->_callback->hasCallback())
+                body1->_callback->onEndContact(Body::obtain(s2, _object_pool));
         }
         const auto it2 = body2->_contacts.find(body1->_id);
         if(it2 != body2->_contacts.end())
         {
             body2->_contacts.erase(it2);
-            body2->_callback->onEndContact(Body::obtain(body1, _object_pool));
+            if(body2->_callback->hasCallback())
+                body2->_callback->onEndContact(Body::obtain(s1, _object_pool));
         }
     }
 }

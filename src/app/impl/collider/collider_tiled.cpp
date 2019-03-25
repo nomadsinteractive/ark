@@ -121,7 +121,8 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
                         updateRigidBodyTile(rigidBodyId, tileWidth, tileHeight, _tile_map->colCount());
                         const V normal(col == bColId ? 1.0f : (col == eColId ? -1.0f : 0.0f),
                                        row == bRowId ? 1.0f : (row == eRowId ? -1.0f : 0.0f));
-                        callback()->onBeginContact(_rigid_body_tile, CollisionManifold(normal));
+                        if(callback()->hasCallback())
+                            callback()->onBeginContact(_rigid_body_tile, CollisionManifold(normal));
                     }
                 }
             }
@@ -144,7 +145,7 @@ TiledCollider::RigidBodyTile::RigidBodyTile(uint32_t width, uint32_t height)
 
 void TiledCollider::RigidBodyTile::setId(uint32_t id)
 {
-    _stub->_id = id;
+    stub()->_id = id;
 }
 
 void TiledCollider::RigidBodyTile::setPosition(float x, float y)

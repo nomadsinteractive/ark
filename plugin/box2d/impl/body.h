@@ -6,6 +6,7 @@
 #include "core/base/object.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
+#include "core/types/weak_ptr.h"
 
 #include "graphics/forwarding.h"
 
@@ -39,6 +40,14 @@ public:
         std::unordered_set<int32_t> _contacts;
     };
 
+    struct Shadow {
+        Shadow(const sp<Stub>& body, const sp<RigidBody::Stub>& rigidBody);
+
+        WeakPtr<Stub> _body;
+        WeakPtr<RigidBody::Stub> _rigid_body;
+        sp<Box> _tag;
+    };
+
 public:
 //  [[script::bindings::auto]]
     Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction, bool isSensor = false);
@@ -49,7 +58,7 @@ public:
     virtual void bind(const sp<RenderObject>& renderObject) override;
     virtual void dispose() override;
 
-    static sp<Body> obtain(const sp<Stub>& stub, ObjectPool& objectPool);
+    static sp<Body> obtain(const Shadow* shadow, ObjectPool& objectPool);
 
     b2Body* body() const;
 

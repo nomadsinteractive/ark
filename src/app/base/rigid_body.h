@@ -35,7 +35,7 @@ public:
     };
 
     struct ARK_API Stub {
-        Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Callback>& callback = nullptr);
+        Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Callback>& callback = nullptr, const sp<Box>& tag = nullptr);
 
         int32_t _id;
         Collider::BodyType _type;
@@ -45,7 +45,7 @@ public:
 
         sp<Callback> _callback;
 
-        Box _tag;
+        sp<Box> _tag;
     };
 
 public:
@@ -107,7 +107,7 @@ public:
 
     };
 
-protected:
+private:
     sp<Stub> _stub;
 };
 

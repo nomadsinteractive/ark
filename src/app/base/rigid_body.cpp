@@ -88,7 +88,7 @@ const Box& RigidBody::tag() const
 
 void RigidBody::setTag(const Box& box) const
 {
-    _stub->_tag = box;
+    *(_stub->_tag) = box;
 }
 
 const sp<CollisionCallback>& RigidBody::collisionCallback() const
@@ -123,26 +123,27 @@ template<> ARK_API Collider::BodyType Conversions::to<String, Collider::BodyType
     return Collider::BODY_TYPE_STATIC;
 }
 
-RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Callback>& callback)
-    : _id(id), _type(type), _position(position), _size(size), _transform(sp<Transform>::make(rotate)), _callback(callback ? callback : sp<Callback>::make())
+RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Callback>& callback, const sp<Box>& tag)
+    : _id(id), _type(type), _position(position), _size(size), _transform(sp<Transform>::make(rotate)), _callback(callback ? callback : sp<Callback>::make()), _tag(tag ? tag : sp<Box>::make())
 {
 }
 
 void RigidBody::Callback::onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
 {
-    if(_collision_callback)
-        _collision_callback->onBeginContact(rigidBody, manifold);
+    DASSERT(_collision_callback);
+    _collision_callback->onBeginContact(rigidBody, manifold);
 }
 
 void RigidBody::Callback::onEndContact(const sp<RigidBody>& rigidBody)
 {
-    if(_collision_callback)
-        _collision_callback->onEndContact(rigidBody);
+    DASSERT(_collision_callback);
+    _collision_callback->onEndContact(rigidBody);
 }
 
 void RigidBody::Callback::onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
 {
-    onBeginContact(rigidBody, manifold);
+    if(_collision_callback)
+        onBeginContact(rigidBody, manifold);
     rigidBody->callback()->onBeginContact(self, CollisionManifold(-manifold.normal()));
 }
 

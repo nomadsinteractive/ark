@@ -105,7 +105,7 @@ Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& positio
                 sp<Rotate>::make(sp<_RigidBodyRotation>::make(stub, rotation))), _stub(stub)
 {
     _stub->_callback = callback();
-    _stub->_body->SetUserData(new WeakPtr<Stub>(stub));
+    _stub->_body->SetUserData(new Shadow(stub, RigidBody::stub()));
 }
 
 Body::Body(const sp<Body::Stub>& stub, const sp<RigidBody::Stub>& rigidbody)
@@ -129,17 +129,23 @@ void Body::dispose()
     _stub->dispose();
 }
 
-sp<Body> Body::obtain(const sp<Body::Stub>& stub, ObjectPool& objectPool)
+sp<Body> Body::obtain(const Shadow* shadow, ObjectPool& objectPool)
 {
-    Collider::BodyType bodyType = (stub->_body->GetType() == b2_staticBody) ?
-                Collider::BODY_TYPE_STATIC :
-                (stub->_body->GetType() == b2_kinematicBody ? Collider::BODY_TYPE_KINEMATIC : Collider::BODY_TYPE_DYNAMIC);
-    const b2Vec2& position = stub->_body->GetPosition();
-    float rotation = stub->_body->GetTransform().q.GetAngle();
-    const sp<Vec> p = objectPool.obtain<Vec::Const>(V(position.x, position.y));
-    const sp<Rotate> rotate = objectPool.obtain<Rotate>(objectPool.obtain<Numeric::Const>(rotation));
-    const sp<RigidBody::Stub> rigidBodyStub = objectPool.obtain<RigidBody::Stub>(stub->_id, bodyType, p, nullptr, rotate);
-    return objectPool.obtain<Body>(stub, rigidBodyStub);
+    const sp<Stub> bodyStub = shadow->_body.ensure();
+    sp<RigidBody::Stub> rigidBodyStub = shadow->_rigid_body.lock();
+    if(!rigidBodyStub)
+    {
+        const Stub& s = bodyStub;
+        Collider::BodyType bodyType = (s._body->GetType() == b2_staticBody) ?
+                    Collider::BODY_TYPE_STATIC :
+                    (s._body->GetType() == b2_kinematicBody ? Collider::BODY_TYPE_KINEMATIC : Collider::BODY_TYPE_DYNAMIC);
+        const b2Vec2& position = s._body->GetPosition();
+        float rotation = s._body->GetTransform().q.GetAngle();
+        const sp<Vec> p = objectPool.obtain<Vec::Const>(V(position.x, position.y));
+        const sp<Rotate> rotate = objectPool.obtain<Rotate>(objectPool.obtain<Numeric::Const>(rotation));
+        rigidBodyStub = objectPool.obtain<RigidBody::Stub>(s._id, bodyType, p, nullptr, rotate, nullptr, shadow->_tag);
+    }
+    return objectPool.obtain<Body>(shadow->_body.ensure(), rigidBodyStub);
 }
 
 b2Body* Body::body() const
@@ -287,7 +293,6 @@ sp<Object> Body::BUILDER_IMPL2::build(const sp<Scope>& args)
 Body::Stub::Stub(const World& world, b2Body* body)
     : _id(world.genRigidBodyId()), _world(world), _body(body)
 {
-//    body->SetUserData(this);
 }
 
 Body::Stub::~Stub()
@@ -300,14 +305,19 @@ void Body::Stub::dispose()
 {
     DCHECK(_body, "Body has been disposed already");
     DCHECK(!_world.world().IsLocked(), "Cannot destroy body in the middle of a time step");
-    WeakPtr<Stub>* stub = reinterpret_cast<WeakPtr<Stub>*>(_body->GetUserData());
-    DASSERT(stub);
+    Shadow* shadow = reinterpret_cast<Shadow*>(_body->GetUserData());
+    DASSERT(shadow);
+    delete  shadow;
 
     LOGD("id = %d", _id);
-    delete  stub;
     _body->SetUserData(nullptr);
     _world.world().DestroyBody(_body);
     _body = nullptr;
+}
+
+Body::Shadow::Shadow(const sp<Body::Stub>& body, const sp<RigidBody::Stub>& rigidBody)
+    : _body(body), _rigid_body(rigidBody), _tag(rigidBody->_tag)
+{
 }
 
 }

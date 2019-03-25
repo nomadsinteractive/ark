@@ -21,7 +21,7 @@ RendererByRenderObject::RendererByRenderObject(const sp<RenderObject>& renderObj
     DASSERT(_render_object);
     DASSERT(layerContext);
     if(!_render_object->size())
-        measure(_render_object->type()->val(), _render_object->size().ensure());
+        measure(_render_object->type()->val(), _render_object->size());
 }
 
 void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, float x, float y)
