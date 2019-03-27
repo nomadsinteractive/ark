@@ -122,14 +122,14 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
 }
 
 Arena::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Arena>>& delegate, const String& value)
-    : _delegate(delegate), _expired(factory.ensureBuilder<Disposable>(value))
+    : _delegate(delegate), _expired(factory.ensureBuilder<Disposed>(value))
 {
 }
 
 sp<Arena> Arena::STYLE::build(const sp<Scope>& args)
 {
     sp<Arena> bean = _delegate->build(args);
-    return bean.absorb<Disposable>(_expired->build(args));
+    return bean.absorb<Disposed>(_expired->build(args));
 }
 
 }

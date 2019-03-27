@@ -2,7 +2,8 @@
 #define ARK_PLUGIN_PYTHON_IMPL_RUNNABLE_PYTHON_CALLABLE_RUNNABLE_H_
 
 #include "core/inf/runnable.h"
-#include "core/epi/disposable.h"
+#include "core/inf/variable.h"
+#include "core/epi/disposed.h"
 #include "core/types/class.h"
 #include "core/types/shared_ptr.h"
 
@@ -12,7 +13,7 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-class PythonCallableRunnable : public Runnable, public Disposable, Implements<PythonCallableRunnable, Runnable, Disposable> {
+class PythonCallableRunnable : public Runnable, public Disposed, Implements<PythonCallableRunnable, Runnable, Disposed> {
 public:
     PythonCallableRunnable(const sp<PyInstance>& callable);
 

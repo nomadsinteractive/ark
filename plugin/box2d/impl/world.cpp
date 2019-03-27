@@ -246,7 +246,7 @@ void World::DestructionListenerImpl::SayGoodbye(b2Joint* joint)
     {
         const sp<Joint> obj = iter->second.lock();
         if(obj)
-            obj->clear();
+            obj->release();
 
         _joints.erase(iter);
     }

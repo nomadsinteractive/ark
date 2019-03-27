@@ -171,14 +171,14 @@ class Numeric(_Var):
         return None
 
 
-class Disposable:
+class Disposed:
     def __init__(self, disposed=False):
         pass
 
     def dispose(self):
         pass
 
-    def is_disposed(self):
+    def __bool__(self):
         return False
 
 
@@ -302,6 +302,7 @@ class Mat3:
 class RenderObject:
     def __init__(self, t, pos=None, size=None, transform=None, varyings=None):
         self._transform = transform
+        self._disposed = Disposed()
 
     @property
     def type(self):
@@ -318,6 +319,10 @@ class RenderObject:
     @position.setter
     def position(self, v):
         pass
+
+    @property
+    def disposed(self) -> Disposed:
+        return self._disposed
 
     @property
     def tag(self):
@@ -358,13 +363,13 @@ class RenderObject:
     def absorb(self, o):
         pass
 
-    def expire(self):
+    def dispose(self):
         pass
 
 
 class LayerContext:
 
-    def add_render_object(self, render_object: RenderObject, disposed: Disposable):
+    def add_render_object(self, render_object: RenderObject, disposed: Disposed):
         pass
 
     def remove_render_object(self, render_object: RenderObject):
@@ -392,7 +397,7 @@ class Layer:
     def context(self):
         return None
 
-    def add_render_object(self, render_object: RenderObject, disposed: Disposable = None):
+    def add_render_object(self, render_object: RenderObject, disposed: Disposed = None):
         pass
 
     def remove_render_object(self, render_object: RenderObject):
@@ -527,11 +532,11 @@ class Rotate:
         self._direction = direction
 
     @property
-    def rotation(self):
+    def radians(self):
         return self._value
 
-    @rotation.setter
-    def rotation(self, v):
+    @radians.setter
+    def radians(self, v):
         self._value = v
 
     @property
@@ -786,6 +791,14 @@ class RigidBody:
     @property
     def xyz(self) -> tuple:
         return 0, 0, 0
+
+    @property
+    def position(self) -> Vec3:
+        return Vec3(0, 0, 0)
+
+    @property
+    def size(self) -> Size:
+        return Size(0, 0)
 
     @property
     def width(self) -> float:

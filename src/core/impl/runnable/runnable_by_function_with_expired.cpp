@@ -5,7 +5,7 @@
 namespace ark {
 
 RunnableByFunctionWithExpired::RunnableByFunctionWithExpired(const std::function<bool()>& function)
-    : Disposable(false), _function(function)
+    : Disposed(false), _function(function)
 {
 }
 

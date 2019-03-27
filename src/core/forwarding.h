@@ -48,7 +48,7 @@ class Flatable;
 class Function;
 class Future;
 class Interfaces;
-class Disposable;
+class Disposed;
 class Notifier;
 class Manifest;
 class MemoryPool;

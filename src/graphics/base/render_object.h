@@ -87,6 +87,12 @@ public:
 //  [[script::bindings::property]]
     void setTag(const Box& tag);
 
+//  [[script::bindings::property]]
+    const SafePtr<Disposed>& disposed() const;
+
+//  [[script::bindings::auto]]
+    void dispose();
+
     bool isDisposed() const;
 
     Snapshot snapshot(MemoryPool& memoryPool) const;
@@ -115,7 +121,7 @@ public:
 
     private:
         sp<Builder<RenderObject>> _delegate;
-        sp<Builder<Disposable>> _disposable;
+        sp<Builder<Disposed>> _disposable;
 
     };
 
@@ -127,7 +133,7 @@ private:
     SafePtr<Transform> _transform;
     SafePtr<Varyings> _varyings;
 
-    sp<Disposable> _disposed;
+    SafePtr<Disposed> _disposed;
 
     Box _tag;
 };

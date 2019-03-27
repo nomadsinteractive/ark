@@ -38,7 +38,7 @@ const sp<LayerContext>& Layer::context() const
     return _layer_context;
 }
 
-void Layer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed)
+void Layer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposed>& disposed)
 {
     _layer_context->addRenderObject(renderObject, disposed);
 }

@@ -23,7 +23,17 @@ b2Joint* Joint::object()
     return _joint;
 }
 
-void Joint::clear()
+void Joint::destroy()
+{
+    DCHECK(!_world || _joint, "Joint has already been destroyed");
+    if(_joint)
+    {
+        _world->world().DestroyJoint(_joint);
+        _joint = nullptr;
+    }
+}
+
+void Joint::release()
 {
     _joint = nullptr;
     _world = nullptr;

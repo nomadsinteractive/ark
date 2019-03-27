@@ -246,7 +246,7 @@ def gen_class_body_source(genclass, includes, lines, buildables):
         method_defs = [i.gen_py_method_def(genclass) for i in genclass.methods]
         methoddeclare = ',\n    '.join(i for i in method_defs if i)
         if methoddeclare:
-            lines.append('\nstatic PyMethodDef %s_methods[] = {\n    %s,\n    {NULL}\n};' % (
+            lines.append('\nstatic PyMethodDef %s_methods[] = {\n    %s,\n    {nullptr}\n};' % (
                 genclass.py_class_name, methoddeclare))
             tp_method_lines.append('pyTypeObject->tp_methods = %s_methods;' % genclass.py_class_name)
 
@@ -271,7 +271,7 @@ def gen_class_body_source(genclass, includes, lines, buildables):
         if property_defs:
             propertydeclare = '{"%s", %s, %s, "%s"}'
             methoddeclare = ',\n    '.join(propertydeclare % tuple(i) for i in property_defs)
-            lines.append('\nstatic PyGetSetDef %s_getseters[] = {\n    %s,\n    {NULL}\n};' % (
+            lines.append('\nstatic PyGetSetDef %s_getseters[] = {\n    %s,\n    {nullptr}\n};' % (
             genclass.py_class_name, methoddeclare))
             tp_method_lines.append('pyTypeObject->tp_getset = %s_getseters;' % genclass.py_class_name)
 
@@ -618,11 +618,12 @@ class GenMethod(object):
         if self.need_unpack_statement():
             lines.append(acg.format('const sp<${class_name}>& unpacked = self->unpack<${class_name}>();',
                                     class_name=genclass.binding_classname))
-        self.gen_definition_body(genclass, lines, self._arguments, [None] * len(self._arguments))
+        self.gen_definition_body(genclass, lines, self._arguments, [None] * len(self._arguments), not self.check_argument_type,
+                                 not self.check_argument_type)
 
         return '\n    '.join(lines)
 
-    def gen_definition_body(self, genclass, lines, not_overloaded_args, gen_type_check_args, exact_cast=False):
+    def gen_definition_body(self, genclass, lines, not_overloaded_args, gen_type_check_args, exact_cast, check_args=False):
         bodylines = self._gen_body_lines(genclass)
         args = [(i, j) for i, j in enumerate(not_overloaded_args) if j]
         argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i, exact_cast) for i, j in args]
@@ -631,6 +632,9 @@ class GenMethod(object):
             if not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
                 self_type_checks.append('unpacked.is<%s>()' % acg.getSharedPtrType(self._self_argument.accept_type))
         self._gen_convert_args_code(bodylines, argdeclare)
+
+        if check_args and args:
+            bodylines.append("if(%s) %s;" % (' || '.join(['!obj%d' % i for i, j in args]), self.err_return_value))
 
         r = acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
         argtypes = [i.gen_declare('t', 't').split()[0] for i in self._arguments]
@@ -887,18 +891,17 @@ class GenOperatorMethod(GenMethod):
         self._self_argument = None if self._is_static else self._arguments and self._arguments[0]
         self._arguments = self._arguments if self._is_static else self._arguments[1:]
         self._operator = operator
+        self._return_int = self._return_type == 'bool'
 
     def gen_py_return(self):
-        if self._return_type == 'bool':
-            return 'int32_t'
-        return 'PyObject*'
+        return 'int32_t' if self._return_int else 'PyObject*'
 
     def need_unpack_statement(self):
         return not self._is_static
 
     @property
     def check_argument_type(self):
-        return False
+        return self._operator not in ('&&', '||')
 
     def gen_py_arguments(self):
         arglen = len(self._arguments)
@@ -922,7 +925,7 @@ class GenOperatorMethod(GenMethod):
 
     @property
     def err_return_value(self):
-        return 'Py_RETURN_NOTIMPLEMENTED'
+        return 'return 0' if self._return_int else 'Py_RETURN_NOTIMPLEMENTED'
 
     @property
     def operator(self):
@@ -975,7 +978,7 @@ def create_overloaded_method_type(base_type, **kwargs):
             self.add_overloaded_method(m1)
             self.add_overloaded_method(m2)
 
-        def gen_definition_body(self, genclass, lines, arguments, gen_type_check_args):
+        def gen_definition_body(self, genclass, lines, arguments, gen_type_check_args, exact_cast, check_args):
             not_overloaded_args = [i for i in self._arguments]
 
             for i in self._overloaded_methods:
@@ -992,7 +995,7 @@ def create_overloaded_method_type(base_type, **kwargs):
                 lines.extend(['if(%s)' % ' && '.join(([j for j in type_checks if j] + not_overloaded_names) or ['true']), '{'])
                 body_lines = []
                 overloaded_args = [None if j else k for j, k in zip(not_overloaded_args, i.arguments)]
-                i.gen_definition_body(genclass, body_lines, overloaded_args, overloaded_args, True)
+                i.gen_definition_body(genclass, body_lines, overloaded_args, overloaded_args, True, False)
                 lines.extend(INDENT + j for j in body_lines)
                 lines.append('}')
             return_type = m0.err_return_value

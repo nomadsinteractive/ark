@@ -1,7 +1,7 @@
 #include "core/impl/integer/integer_by_array.h"
 
 #include "core/base/bean_factory.h"
-#include "core/epi/disposable.h"
+#include "core/epi/disposed.h"
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
 #include "core/util/documents.h"
@@ -89,7 +89,7 @@ sp<Integer> IntegerByArray::BUILDER::build(const sp<Scope>& args)
 {
     sp<IntegerByArray> s = sp<IntegerByArray>::make(_array->build(args), _repeat);
     if(_repeat == IntegerByArray::REPEAT_NONE)
-        s.absorb<Disposable>(sp<Disposable>::make(sp<IntegerByArrayExpired>::make(s->_stub)));
+        s.absorb<Disposed>(sp<Disposed>::make(sp<IntegerByArrayExpired>::make(s->_stub)));
     return s;
 }
 

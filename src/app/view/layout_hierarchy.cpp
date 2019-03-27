@@ -1,6 +1,6 @@
 #include "app/view/layout_hierarchy.h"
 
-#include "core/epi/disposable.h"
+#include "core/epi/disposed.h"
 #include "core/epi/visibility.h"
 
 #include "graphics/base/size.h"
@@ -16,7 +16,7 @@ namespace ark {
 
 LayoutHierarchy::Slot::Slot(const sp<Renderer>& renderer, bool layoutRequested)
     : _x(0), _y(0), _layout_width(0), _layout_height(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _view_group(renderer.as<ViewGroup>()),
-      _disposed(renderer.as<Disposable>()), _visibility(renderer.as<Visibility>())
+      _disposed(renderer.as<Disposed>()), _visibility(renderer.as<Visibility>())
 {
     DASSERT(renderer);
 }

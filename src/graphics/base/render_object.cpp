@@ -3,7 +3,7 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
-#include "core/epi/disposable.h"
+#include "core/epi/disposed.h"
 #include "core/util/bean_utils.h"
 #include "core/util/numeric_util.h"
 
@@ -20,7 +20,7 @@ RenderObject::RenderObject(int32_t type, const sp<Vec>& position, const sp<Size>
 }
 
 RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _disposed(type.as<Disposable>())
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _disposed(type.as<Disposed>())
 {
 }
 
@@ -52,13 +52,14 @@ const SafePtr<Transform>& RenderObject::transform() const
 void RenderObject::setType(int32_t type)
 {
     _type->set(type);
-    _disposed = nullptr;
+    _disposed->set(false);
 }
 
 void RenderObject::setType(const sp<Integer>& type)
 {
     _type->set(type);
-    _disposed = type.as<Disposable>();
+    sp<Disposed> disposed = type.as<Disposed>();
+    _disposed->set(disposed ? disposed->toBoolean() : sp<Boolean>::null());
 }
 
 float RenderObject::x() const
@@ -131,9 +132,25 @@ void RenderObject::setTag(const Box& tag)
     _tag = tag;
 }
 
+const SafePtr<Disposed>& RenderObject::disposed() const
+{
+    return _disposed;
+}
+
+void RenderObject::dispose()
+{
+    _type->set(0);
+    _position = nullptr;
+    _size = nullptr;
+    _transform = nullptr;
+    _varyings = nullptr;
+    _tag = Box();
+    _disposed->dispose();
+}
+
 bool RenderObject::isDisposed() const
 {
-    return _disposed && _disposed->isDisposed();
+    return _disposed->isDisposed();
 }
 
 RenderObject::Snapshot RenderObject::snapshot(MemoryPool& memoryPool) const
@@ -157,7 +174,7 @@ sp<RenderObject> RenderObject::BUILDER::build(const sp<Scope>& args)
 }
 
 RenderObject::EXPIRED_STYLE::EXPIRED_STYLE(BeanFactory& factory, const sp<Builder<RenderObject>>& delegate, const String& value)
-    : _delegate(delegate), _disposable(factory.ensureBuilder<Disposable>(value))
+    : _delegate(delegate), _disposable(factory.ensureBuilder<Disposed>(value))
 {
 }
 

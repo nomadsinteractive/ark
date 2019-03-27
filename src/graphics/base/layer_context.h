@@ -31,7 +31,7 @@ public:
     void draw(float x, float y, const sp<RenderObject>& renderObject);
 
 // [[script::bindings::auto]]
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed = sp<Disposable>::null());
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposed>& disposed = sp<Disposed>::null());
 // [[script::bindings::auto]]
     void removeRenderObject(const sp<RenderObject>& renderObject);
 // [[script::bindings::auto]]
@@ -54,12 +54,12 @@ public:
 private:
     class RenderObjectFilter {
     public:
-        RenderObjectFilter(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed, const sp<Notifier>& notifier);
+        RenderObjectFilter(const sp<RenderObject>& renderObject, const sp<Disposed>& disposed, const sp<Notifier>& notifier);
 
         FilterAction operator()(const sp<RenderObject>& renderObject) const;
 
     private:
-        sp<Disposable> _disposed;
+        sp<Disposed> _disposed;
         sp<Notifier> _notifier;
     };
 

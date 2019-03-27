@@ -4,13 +4,13 @@
 #include <functional>
 
 #include "core/inf/runnable.h"
-#include "core/epi/disposable.h"
+#include "core/epi/disposed.h"
 #include "core/types/class.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-class RunnableByFunctionWithExpired : public Runnable, public Disposable {
+class RunnableByFunctionWithExpired : public Runnable, public Disposed {
 public:
     RunnableByFunctionWithExpired(const std::function<bool()>& function);
 

@@ -183,6 +183,7 @@ V2 Math::projectile(float dx, float dy, float v, float g, uint32_t sid)
  * (s0 - s1) * (s0 + s1 - 2 * o) + v0 ^ 2 - v1 ^ 2 = 0
  * s0 + s1 - 2 * o = (v1 ^ 2 - v0 ^ 2) / (s0 - s1)
  * o = (s0 + s1 - (v1 ^ 2 - v0 ^ 2) / (s0 - s1)) / 2
+ * a ^ 2 = (s0 - 0) ^ 2  + v0 ^ 2
  *
  */
 void Math::vibrate(float s0, float v0, float s1, float v1, float& o, float& a, float& t0, float& t1)

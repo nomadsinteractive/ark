@@ -33,7 +33,7 @@ public:
     const sp<LayerContext>& context() const;
 
 // [[script::bindings::auto]]
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed = sp<Disposable>::null());
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposed>& disposed = sp<Disposed>::null());
 // [[script::bindings::auto]]
     void removeRenderObject(const sp<RenderObject>& renderObject);
 // [[script::bindings::auto]]

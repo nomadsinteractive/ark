@@ -24,6 +24,11 @@ DistanceJoint::DistanceJoint(const sp<World>& world, const Body& b1, const Body&
     world->track(_joint);
 }
 
+void DistanceJoint::destroy()
+{
+    _joint->destroy();
+}
+
 }
 }
 }

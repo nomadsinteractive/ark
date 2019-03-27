@@ -1,6 +1,6 @@
 #include "core/impl/message_loop/message_loop_default.h"
 
-#include "core/epi/disposable.h"
+#include "core/epi/disposed.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/util/log.h"
@@ -40,7 +40,7 @@ uint64_t MessageLoopDefault::pollOnce()
             nextTask.entry()->run();
             if(nextTask.interval())
             {
-                const sp<Disposable>& lifecycle = nextTask.expirable();
+                const sp<Disposed>& lifecycle = nextTask.expirable();
                 if(!lifecycle || !lifecycle->isDisposed())
                 {
                     nextTask.setNextFireTick(now + nextTask.interval());
@@ -69,7 +69,7 @@ void MessageLoopDefault::requestNextTask(Task task)
 }
 
 MessageLoopDefault::Task::Task(const sp<Runnable>& entry, uint64_t nextFireTick, uint32_t interval)
-    : _entry(entry), _lifecycle(entry.as<Disposable>()), _next_fire_tick(nextFireTick), _interval(interval)
+    : _entry(entry), _lifecycle(entry.as<Disposed>()), _next_fire_tick(nextFireTick), _interval(interval)
 {
 }
 
@@ -78,7 +78,7 @@ const sp<Runnable>& MessageLoopDefault::Task::entry() const
     return _entry;
 }
 
-const sp<Disposable>& MessageLoopDefault::Task::expirable() const
+const sp<Disposed>& MessageLoopDefault::Task::expirable() const
 {
     return _lifecycle;
 }

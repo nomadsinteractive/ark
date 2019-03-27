@@ -9,27 +9,27 @@ namespace ark {
 template<typename T> class SafePtr {
 public:
     SafePtr() noexcept
-        : _inst(Null::toSafe<T>(nullptr)), _allocated(false) {
+        : _inst(Null::toSafe<T>(nullptr)), _not_null(false) {
     }
     SafePtr(const sp<T>& inst) noexcept
-        : _inst(Null::toSafe<T>(inst)), _allocated(static_cast<bool>(inst)) {
+        : _inst(Null::toSafe<T>(inst)), _not_null(static_cast<bool>(inst)) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SafePtr);
 
     typedef T _PtrType;
 
     explicit operator bool() const {
-        return _allocated;
+        return _not_null;
     }
 
     SafePtr& operator =(const sp<T>& other) noexcept {
-        _allocated = static_cast<bool>(other);
+        _not_null = static_cast<bool>(other);
         _inst = Null::toSafe<T>(other);
         return *this;
     }
     SafePtr& operator =(sp<T>&& other) noexcept {
-        _allocated = static_cast<bool>(other);
-        _inst = _allocated ? std::move(other) : Null::toSafe<T>(nullptr);
+        _not_null = static_cast<bool>(other);
+        _inst = _not_null ? std::move(other) : Null::toSafe<T>(nullptr);
         return *this;
     }
 
@@ -49,14 +49,13 @@ public:
         return *_inst;
     }
 
-    const sp<T>& ensure() const {
-        _allocated = true;
-        return _inst;
+    T* get() const {
+        return _inst.get();
     }
 
 private:
     sp<T> _inst;
-    mutable bool _allocated;
+    bool _not_null;
 };
 
 }

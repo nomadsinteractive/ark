@@ -22,7 +22,9 @@ public:
         return reinterpret_cast<T*>(_joint);
     }
 
-    void clear();
+    void destroy();
+
+    void release();
 
 private:
     sp<World> _world;

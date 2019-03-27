@@ -31,8 +31,7 @@ public:
     void set(T value) {
         if(_variable_impl)
             _variable_impl->set(value);
-        else
-        {
+        else {
             deferedUnref();
             _variable_impl = new typename Variable<T>::Impl(value);
             _delegate = sp<Variable<T>>::adopt(_variable_impl);

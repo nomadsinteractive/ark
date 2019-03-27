@@ -1,6 +1,6 @@
 #include "graphics/base/layer_context.h"
 
-#include "core/epi/disposable.h"
+#include "core/epi/disposed.h"
 #include "core/epi/notifier.h"
 
 #include "graphics/base/layer.h"
@@ -33,10 +33,10 @@ void LayerContext::draw(float x, float y, const sp<RenderObject>& renderObject)
     _transient_items.emplace_back(x, y, renderObject);
 }
 
-void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposable>& disposed)
+void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposed>& disposed)
 {
     DASSERT(renderObject);
-    _items.push_back(renderObject, disposed ? disposed : renderObject.as<Disposable>(), _notifier);
+    _items.push_back(renderObject, disposed ? disposed : renderObject.as<Disposed>(), _notifier);
     _notifier->notify();
 }
 
@@ -78,15 +78,16 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memor
     _render_requested = false;
 }
 
-LayerContext::RenderObjectFilter::RenderObjectFilter(const sp<RenderObject>& /*renderObject*/, const sp<Disposable>& disposed, const sp<Notifier>& notifier)
+LayerContext::RenderObjectFilter::RenderObjectFilter(const sp<RenderObject>& /*renderObject*/, const sp<Disposed>& disposed, const sp<Notifier>& notifier)
     : _disposed(disposed), _notifier(notifier)
 {
 }
 
 FilterAction LayerContext::RenderObjectFilter::operator()(const sp<RenderObject>& renderObject) const
 {
-    if((_disposed && _disposed->isDisposed()) || renderObject->isDisposed())
+    if(renderObject->isDisposed() || (_disposed && _disposed->isDisposed()))
     {
+        renderObject->dispose();
         _notifier->notify();
         return FILTER_ACTION_REMOVE;
     }

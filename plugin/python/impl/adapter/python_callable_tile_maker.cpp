@@ -24,7 +24,7 @@ sp<Renderer> PythonCallableTileMaker::makeTile(int32_t x, int32_t y)
     PyObject* ret = _callable->call(_args);
     if(ret)
     {
-        const sp<Renderer> renderer = PythonInterpreter::instance()->asInterface<Renderer>(ret);
+        const sp<Renderer> renderer = PythonInterpreter::instance()->toSharedPtr<Renderer>(ret);
         Py_DECREF(ret);
         return renderer;
     }

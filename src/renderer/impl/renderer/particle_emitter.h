@@ -91,7 +91,7 @@ private:
         sp<Builder<Size>> _size;
         SafePtr<Builder<Transform>> _transform;
         SafePtr<Builder<Varyings>> _varyings;
-        sp<Builder<Disposable>> _lifecycle;
+        sp<Builder<Disposed>> _lifecycle;
 
         sp<Iteration> _iteration;
 

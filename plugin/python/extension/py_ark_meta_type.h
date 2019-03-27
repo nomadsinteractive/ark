@@ -2,7 +2,7 @@
 #define ARK_PLUGIN_PYTHON_EXTENSION_PY_ARK_META_TYPE_H_
 
 #include "core/ark.h"
-#include "core/epi/disposable.h"
+#include "core/epi/disposed.h"
 #include "core/types/safe_ptr.h"
 
 #include "graphics/inf/block.h"
@@ -21,9 +21,9 @@ public:
         PyObject* arg1;
         if(PyArg_ParseTuple(args, "O", &arg1)) {
             sp<T>& ptr = self->unpack<T>();
-            if(PythonInterpreter::instance()->isInstance<Disposable>(arg1)) {
+            if(PythonInterpreter::instance()->isInstance<Disposed>(arg1)) {
                 typename PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(arg1);
-                ptr.absorb(instance->unpack<Disposable>());
+                ptr.absorb(instance->unpack<Disposed>());
             }
         }
         Py_INCREF(self);
@@ -32,8 +32,8 @@ public:
 
     static PyObject* expire(typename PyArkType::Instance* self, PyObject* /*args*/) {
         const sp<T>& ptr = self->unpack<T>();
-        if(ptr.template is<Disposable>()) {
-            const sp<Disposable> m = ptr.template as<Disposable>();
+        if(ptr.template is<Disposed>()) {
+            const sp<Disposed> m = ptr.template as<Disposed>();
             if(m)
                 m->dispose();
         }
@@ -42,8 +42,8 @@ public:
 
     static PyObject* isExpired(typename PyArkType::Instance* self, PyObject* /*args*/) {
         const sp<T>& ptr = self->unpack<T>();
-        if(ptr.template is<Disposable>()) {
-            const sp<Disposable> m = ptr.template as<Disposable>();
+        if(ptr.template is<Disposed>()) {
+            const sp<Disposed> m = ptr.template as<Disposed>();
             if(m && m->isDisposed())
                 Py_RETURN_TRUE;
         }

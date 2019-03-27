@@ -20,6 +20,12 @@ public:
 //  [[script::bindings::auto]]
     WeldJoint(const sp<World>& world, const Body& b1, const Body& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected = false, float frequencyHz = 0, float dampingRatio = 0);
 
+//  [[script::bindings::auto]]
+    void release();
+
+//  [[script::bindings::auto]]
+    void destroy();
+
 private:
     sp<Joint> _joint;
 

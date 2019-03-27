@@ -235,7 +235,7 @@ PyObject* PyArkType::__absorb__(PyArkType::Instance* self, PyObject* args, PyObj
 {
     PyObject* arg1;
     if(PyArg_ParseTuple(args, "O", &arg1)) {
-        if(PythonInterpreter::instance()->isInstance<Disposable>(arg1)) {
+        if(PythonInterpreter::instance()->isInstance<Disposed>(arg1)) {
             typename PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(arg1);
             self->box->interfaces()->absorb(*instance->box);
         }
