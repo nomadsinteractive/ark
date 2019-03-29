@@ -6,6 +6,8 @@
 #include "core/impl/integer/integer_floor_div.h"
 #include "core/impl/integer/integer_multiply.h"
 #include "core/impl/integer/integer_subtract.h"
+#include "core/impl/variable/variable_op2.h"
+#include "core/util/operators.h"
 #include "core/util/strings.h"
 
 namespace ark {
@@ -81,6 +83,36 @@ int32_t IntegerUtil::toInt32(const sp<Integer>& self)
 float IntegerUtil::toFloat(const sp<Integer>& self)
 {
     return static_cast<float>(self->val());
+}
+
+sp<Boolean> IntegerUtil::gt(const sp<Integer>& self, const sp<Integer>& other)
+{
+    return sp<VariableOP2<int32_t, int32_t, Operators::GT<int32_t>, sp<Integer>, sp<Integer>>>::make(self, other);
+}
+
+sp<Boolean> IntegerUtil::ge(const sp<Integer>& self, const sp<Integer>& other)
+{
+    return sp<VariableOP2<int32_t, int32_t, Operators::GE<int32_t>, sp<Integer>, sp<Integer>>>::make(self, other);
+}
+
+sp<Boolean> IntegerUtil::lt(const sp<Integer>& self, const sp<Integer>& other)
+{
+    return sp<VariableOP2<int32_t, int32_t, Operators::LT<int32_t>, sp<Integer>, sp<Integer>>>::make(self, other);
+}
+
+sp<Boolean> IntegerUtil::le(const sp<Integer>& self, const sp<Integer>& other)
+{
+    return sp<VariableOP2<int32_t, int32_t, Operators::LE<int32_t>, sp<Integer>, sp<Integer>>>::make(self, other);
+}
+
+sp<Boolean> IntegerUtil::eq(const sp<Integer>& self, const sp<Integer>& other)
+{
+    return sp<VariableOP2<int32_t, int32_t, Operators::EQ<int32_t>, sp<Integer>, sp<Integer>>>::make(self, other);
+}
+
+sp<Boolean> IntegerUtil::ne(const sp<Integer>& self, const sp<Integer>& other)
+{
+    return sp<VariableOP2<int32_t, int32_t, Operators::NE<int32_t>, sp<Integer>, sp<Integer>>>::make(self, other);
 }
 
 int32_t IntegerUtil::val(const sp<Integer>& self)

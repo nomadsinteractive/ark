@@ -69,10 +69,16 @@ int CollisionCallbackPythonAdapter::traverse(visitproc visit, void* arg)
 
 int CollisionCallbackPythonAdapter::clear()
 {
-    _on_begin_contact->deref();
-    _on_begin_contact = nullptr;
-    _on_end_contact->deref();
-    _on_end_contact = nullptr;
+    if(_on_end_contact)
+    {
+        _on_begin_contact->deref();
+        _on_begin_contact = nullptr;
+    }
+    if(_on_end_contact)
+    {
+        _on_end_contact->deref();
+        _on_end_contact = nullptr;
+    }
     return 0;
 }
 

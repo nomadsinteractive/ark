@@ -46,6 +46,19 @@ public:
 //[[script::bindings::operator(float)]]
     static float toFloat(const sp<Integer>& self);
 
+//[[script::bindings::operator(>)]]
+    static sp<Boolean> gt(const sp<Integer>& self, const sp<Integer>& other);
+//[[script::bindings::operator(>=)]]
+    static sp<Boolean> ge(const sp<Integer>& self, const sp<Integer>& other);
+//[[script::bindings::operator(<)]]
+    static sp<Boolean> lt(const sp<Integer>& self, const sp<Integer>& other);
+//[[script::bindings::operator(<=)]]
+    static sp<Boolean> le(const sp<Integer>& self, const sp<Integer>& other);
+//[[script::bindings::operator(==)]]
+    static sp<Boolean> eq(const sp<Integer>& self, const sp<Integer>& other);
+//[[script::bindings::operator(!=)]]
+    static sp<Boolean> ne(const sp<Integer>& self, const sp<Integer>& other);
+
 //[[script::bindings::property]]
     static int32_t val(const sp<Integer>& self);
 //[[script::bindings::property]]

@@ -2,6 +2,7 @@
 #define ARK_APP_INF_COLLIDER_H_
 
 #include "core/base/api.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 

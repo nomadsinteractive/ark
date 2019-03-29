@@ -1,6 +1,7 @@
 #include "python/extension/py_ark_type.h"
 
 #include "core/base/scope.h"
+#include "core/util/log.h"
 
 #include "python/extension/python_interpreter.h"
 #include "python/extension/py_garbage_collector.h"
@@ -11,36 +12,16 @@ namespace python {
 
 static PyObject* __richcmp__(PyArkType::Instance* obj1, PyArkType::Instance* obj2, int op)
 {
+    if(!PythonInterpreter::instance()->isPyArkTypeObject(Py_TYPE(obj2)))
+    {
+        LOGW("Comparing \"%s\" with \"%s\" is not supported", Py_TYPE(obj1)->tp_name, Py_TYPE(obj2)->tp_name);
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+
     Py_hash_t hash1 = reinterpret_cast<Py_hash_t>(obj1->box->ptr());
     Py_hash_t hash2 = reinterpret_cast<Py_hash_t>(obj2->box->ptr());
 
     Py_RETURN_RICHCOMPARE(hash1, hash2, op);
-/*
-    switch(op)
-    {
-    case Py_LT:
-        if(hash1 < hash2)
-            Py_RETURN_TRUE;
-    case Py_LE:
-        if(hash1 <= hash2)
-            Py_RETURN_TRUE;
-    case Py_EQ:
-        if(hash1 == hash2)
-            Py_RETURN_TRUE;
-    case Py_NE:
-        if(hash1 != hash2)
-            Py_RETURN_TRUE;
-    case Py_GT:
-        if(hash1 > hash2)
-            Py_RETURN_TRUE;
-    case Py_GE:
-        if(hash1 >= hash2)
-            Py_RETURN_TRUE;
-    default:
-        DFATAL("Unsupported operator %d", op);
-    }
-    Py_RETURN_FALSE;
-*/
 }
 
 static Py_hash_t __hash__(PyArkType::Instance* self)

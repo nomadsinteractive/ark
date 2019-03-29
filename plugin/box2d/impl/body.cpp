@@ -86,6 +86,22 @@ private:
     sp<Numeric> _delegate;
 };
 
+class BodyDisposer {
+public:
+    BodyDisposer(const World& world, b2Body* body)
+        : _world(world), _body(body) {
+    }
+    ~BodyDisposer() {
+        DCHECK(_body, "Body has been disposed already");
+        DCHECK(!_world.world().IsLocked(), "Cannot destroy body in the middle of a time step");
+        _world.world().DestroyBody(_body);
+    }
+
+private:
+    World _world;
+    b2Body* _body;
+};
+
 }
 
 Body::Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction, bool isSensor)
@@ -304,14 +320,16 @@ Body::Stub::~Stub()
 void Body::Stub::dispose()
 {
     DCHECK(_body, "Body has been disposed already");
-    DCHECK(!_world.world().IsLocked(), "Cannot destroy body in the middle of a time step");
-    Shadow* shadow = reinterpret_cast<Shadow*>(_body->GetUserData());
-    DASSERT(shadow);
-    delete  shadow;
-
     LOGD("id = %d", _id);
+
+    delete reinterpret_cast<Body::Shadow*>(_body->GetUserData());
     _body->SetUserData(nullptr);
-    _world.world().DestroyBody(_body);
+
+    if(_world.world().IsLocked())
+        Ark::instance().applicationContext()->deferUnref(sp<BodyDisposer>::make(_world, _body));
+    else
+        BodyDisposer disposer(_world, _body);
+
     _body = nullptr;
 }
 
