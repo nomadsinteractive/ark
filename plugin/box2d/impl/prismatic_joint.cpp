@@ -9,6 +9,11 @@ namespace plugin {
 namespace box2d {
 
 PrismaticJoint::PrismaticJoint(const sp<World>& world, const Body& b1, const Body& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected)
+    : Joint(world, makeJoint(world->world(), b1, b2, anchorA, anchorB, referenceAngle, collideConnected))
+{
+}
+
+b2Joint*PrismaticJoint::makeJoint(b2World& b2World, const Body& b1, const Body& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected)
 {
     b2PrismaticJointDef jointDef;
     jointDef.bodyA = b1.body();
@@ -17,9 +22,8 @@ PrismaticJoint::PrismaticJoint(const sp<World>& world, const Body& b1, const Bod
     jointDef.localAnchorB = b2Vec2(anchorB.x(), anchorB.y());
     jointDef.referenceAngle = referenceAngle;
     jointDef.collideConnected = collideConnected;
-    b2Joint* joint = world->world().CreateJoint(&jointDef);
-    _joint = sp<Joint>::make(world, joint);
-    world->track(_joint);
+    return b2World.CreateJoint(&jointDef);
+
 }
 
 }

@@ -53,7 +53,7 @@ sp<PyInstance> PyInstance::track(PyObject* object)
 
 PyObject* PyInstance::object()
 {
-    return _object;
+    return _object ? _object : Py_None;
 }
 
 PyInstance::operator bool()

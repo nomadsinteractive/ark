@@ -131,7 +131,7 @@ sp<Vec> ParticleEmitter::Particale::makePosition(ObjectPool& objectPool, float x
 {
     if(_position)
         return objectPool.obtain<VecWithTranslation<V>>(_position->build(_stub->_arguments), V(x, y));
-    return objectPool.obtain<VecImpl>(x, y);
+    return objectPool.obtain<Vec2Impl>(x, y);
 }
 
 ParticleEmitter::Stub::Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t type, const sp<Vec>& position, const sp<Size>& size, const sp<Scope>& arguments)

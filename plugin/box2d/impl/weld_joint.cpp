@@ -9,6 +9,11 @@ namespace plugin {
 namespace box2d {
 
 WeldJoint::WeldJoint(const sp<World>& world, const Body& b1, const Body& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected, float frequencyHz, float dampingRatio)
+    : Joint(world, makeJoint(world->world(), b1, b2, anchorA, anchorB, referenceAngle, collideConnected, frequencyHz, dampingRatio))
+{
+}
+
+b2Joint* WeldJoint::makeJoint(b2World& b2World, const Body& b1, const Body& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected, float frequencyHz, float dampingRatio)
 {
     b2WeldJointDef jointDef;
     jointDef.bodyA = b1.body();
@@ -19,19 +24,7 @@ WeldJoint::WeldJoint(const sp<World>& world, const Body& b1, const Body& b2, con
     jointDef.collideConnected = collideConnected;
     jointDef.frequencyHz = frequencyHz;
     jointDef.dampingRatio = dampingRatio;
-    b2Joint* joint = world->world().CreateJoint(&jointDef);
-    _joint = sp<Joint>::make(world, joint);
-    world->track(_joint);
-}
-
-void WeldJoint::release()
-{
-    _joint->release();
-}
-
-void WeldJoint::destroy()
-{
-    _joint->destroy();
+    return b2World.CreateJoint(&jointDef);
 }
 
 }

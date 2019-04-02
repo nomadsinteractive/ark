@@ -122,7 +122,7 @@ float World::toMeterY(float pixelY) const
     return pixelY / _stub->_ppm_y;
 }
 
-void World::track(const sp<Joint>& joint) const
+void World::track(const sp<Joint::Stub>& joint) const
 {
     _stub->_destruction_listener.track(joint);
 }
@@ -244,7 +244,7 @@ void World::DestructionListenerImpl::SayGoodbye(b2Joint* joint)
     auto iter = _joints.find(joint);
     if(iter != _joints.end())
     {
-        const sp<Joint> obj = iter->second.lock();
+        const sp<Joint::Stub> obj = iter->second.lock();
         if(obj)
             obj->release();
 
@@ -252,20 +252,13 @@ void World::DestructionListenerImpl::SayGoodbye(b2Joint* joint)
     }
 }
 
-void World::DestructionListenerImpl::SayGoodbye(b2Fixture* fixture)
+void World::DestructionListenerImpl::SayGoodbye(b2Fixture* /*fixture*/)
 {
 }
 
-void World::DestructionListenerImpl::track(const sp<Joint>& joint)
+void World::DestructionListenerImpl::track(const sp<Joint::Stub>& joint)
 {
-    _joints[joint->object()] = joint;
-}
-
-void World::DestructionListenerImpl::untrack(const sp<Joint>& joint)
-{
-    auto iter = _joints.find(joint->object());
-    if(iter != _joints.end())
-        _joints.erase(iter);
+    _joints[joint->_joint] = joint;
 }
 
 }

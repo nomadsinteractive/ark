@@ -21,6 +21,7 @@
 #include "box2d/api.h"
 #include "box2d/forwarding.h"
 #include "box2d/impl/body_create_info.h"
+#include "box2d/impl/joint.h"
 
 namespace ark {
 namespace plugin {
@@ -64,7 +65,7 @@ public:
 //  [[script::bindings::auto]]
     float toMeterY(float pixelY) const;
 
-    void track(const sp<Joint>& joint) const;
+    void track(const sp<Joint::Stub>& joint) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER_IMPL1 : public Builder<World> {
@@ -116,11 +117,10 @@ private:
         virtual void SayGoodbye(b2Joint* joint) override;
         virtual void SayGoodbye(b2Fixture* fixture) override;
 
-        void track(const sp<Joint>& joint);
-        void untrack(const sp<Joint>& joint);
+        void track(const sp<Joint::Stub>& joint);
 
     private:
-        std::unordered_map<b2Joint*, WeakPtr<Joint>> _joints;
+        std::unordered_map<b2Joint*, WeakPtr<Joint::Stub>> _joints;
     };
 
     struct Stub : public Runnable {

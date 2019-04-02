@@ -9,6 +9,11 @@ namespace plugin {
 namespace box2d {
 
 DistanceJoint::DistanceJoint(const sp<World>& world, const Body& b1, const Body& b2, const V2& anchorA, const V2& anchorB, float length, bool collideConnected, float frequencyHz, float dampingRatio)
+    : Joint(world, makeJoint(world->world(), b1, b2, anchorA, anchorB, length, collideConnected, frequencyHz, dampingRatio))
+{
+}
+
+b2Joint*DistanceJoint::makeJoint(b2World& b2World, const Body& b1, const Body& b2, const V2& anchorA, const V2& anchorB, float length, bool collideConnected, float frequencyHz, float dampingRatio)
 {
     b2DistanceJointDef jointDef;
     jointDef.bodyA = b1.body();
@@ -19,14 +24,7 @@ DistanceJoint::DistanceJoint(const sp<World>& world, const Body& b1, const Body&
     jointDef.frequencyHz = frequencyHz;
     jointDef.dampingRatio = dampingRatio;
     jointDef.length = length;
-    b2Joint* joint = static_cast<b2DistanceJoint*>(world->world().CreateJoint(&jointDef));
-    _joint = sp<Joint>::make(world, joint);
-    world->track(_joint);
-}
-
-void DistanceJoint::destroy()
-{
-    _joint->destroy();
+    return b2World.CreateJoint(&jointDef);
 }
 
 }

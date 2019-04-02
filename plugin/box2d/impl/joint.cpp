@@ -1,5 +1,9 @@
 #include "box2d/impl/joint.h"
 
+#include "core/ark.h"
+
+#include "app/base/application_context.h"
+
 #include "plugin/box2d/impl/body.h"
 #include "plugin/box2d/impl/world.h"
 
@@ -8,32 +12,50 @@ namespace plugin {
 namespace box2d {
 
 Joint::Joint(const sp<World>& world, b2Joint* joint)
-    : _world(world), _joint(joint)
+    : _stub(sp<Stub>::make(world, joint))
 {
+    world->track(_stub);
 }
 
 Joint::~Joint()
 {
-    if(_joint)
-        _world->world().DestroyJoint(_joint);
+    if(_stub->_world && _stub->_world->world().IsLocked())
+        Ark::instance().applicationContext()->deferUnref(std::move(_stub));
 }
 
-b2Joint* Joint::object()
+void Joint::dispose()
 {
-    return _joint;
+    _stub->dispose();
 }
 
-void Joint::destroy()
+void Joint::release()
+{
+    _stub->release();
+}
+
+Joint::Stub::Stub(const sp<World>& world, b2Joint* joint)
+    : _world(world), _joint(joint)
+{
+}
+
+Joint::Stub::~Stub()
+{
+    if(_joint)
+        dispose();
+}
+
+void Joint::Stub::dispose()
 {
     DCHECK(!_world || _joint, "Joint has already been destroyed");
     if(_joint)
     {
+        DCHECK(!_world->world().IsLocked(), "Cannot destroy joint in the middle of a time step");
         _world->world().DestroyJoint(_joint);
         _joint = nullptr;
     }
 }
 
-void Joint::release()
+void Joint::Stub::release()
 {
     _joint = nullptr;
     _world = nullptr;

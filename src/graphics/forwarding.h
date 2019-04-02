@@ -66,7 +66,6 @@ typedef Loader<Bitmap> BitmapLoader;
 
 typedef Vec2 Vec;
 typedef V2 V;
-typedef Vec2Impl VecImpl;
 typedef Vec2Util VecUtil;
 
 const int32_t DIMENSIONS = 2;

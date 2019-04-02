@@ -273,7 +273,7 @@ PyObject* PythonInterpreter::toPyObject(const Box& box)
     if(box.typeId() == Type<PyInstance>::id())
     {
         PyObject* object = box.as<PyInstance>()->object();
-        Py_XINCREF(object);
+        Py_INCREF(object);
         return object;
     }
 
