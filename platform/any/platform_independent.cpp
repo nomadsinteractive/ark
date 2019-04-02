@@ -4,8 +4,6 @@
 #include <cctype>
 #include <chrono>
 
-#include <dirent.h>
-
 #include "core/base/string.h"
 #include "core/inf/variable.h"
 #include "core/util/strings.h"
@@ -32,21 +30,6 @@ bool PlatformIndependent::isFile(const String& filepath)
     if(stat(filepath.c_str(), &s) == 0)
         return (s.st_mode & S_IFREG) != 0;
     return false;
-}
-
-void PlatformIndependent::listDir(const String& path)
-{
-    DIR* dir = opendir(path.c_str());
-    struct dirent *ent;
-    if(dir)
-    {
-        /* print all the files and directories within directory */
-        while((ent = readdir (dir)) != nullptr)
-            printf ("%s\n", ent->d_name);
-        closedir (dir);
-    }
-    else
-        perror("");
 }
 
 bool PlatformIndependent::isAbsolutePath(const String& path)

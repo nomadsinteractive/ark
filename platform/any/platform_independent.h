@@ -13,8 +13,6 @@ public:
     static bool isDirectory(const String& path);
     static bool isFile(const String& path);
 
-    static void listDir(const String& path);
-
     static char dirSeparator();
     static char pathSeparator();
     static String pathJoin(const String& p1, const String& p2);
