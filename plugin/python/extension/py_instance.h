@@ -17,8 +17,9 @@ public:
 
     static PyInstance borrow(PyObject* object);
     static PyInstance steal(PyObject* object);
+    static PyInstance own(PyObject* object);
 
-    static sp<PyInstance> adopt(PyObject* object);
+    static sp<PyInstance> track(PyObject* object);
 
     operator PyObject*();
     explicit operator bool();
@@ -34,8 +35,7 @@ public:
 
     bool isCallable();
 
-    PyObject* release();
-    void deref();
+    void clear();
 
 private:
     PyInstance(PyObject* object, bool isBorrowedReference);

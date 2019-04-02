@@ -22,7 +22,7 @@ int PyGarbageCollectorImpl::traverse(visitproc visit, void* arg)
 
 int PyGarbageCollectorImpl::clear()
 {
-    _garbage->deref();
+    _garbage->clear();
     _garbage = nullptr;
     return 0;
 }

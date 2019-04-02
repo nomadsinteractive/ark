@@ -37,7 +37,13 @@ PyInstance PyInstance::steal(PyObject* object)
     return PyInstance(object, false);
 }
 
-sp<PyInstance> PyInstance::adopt(PyObject* object)
+PyInstance PyInstance::own(PyObject* object)
+{
+    Py_XINCREF(object);
+    return PyInstance(object, false);
+}
+
+sp<PyInstance> PyInstance::track(PyObject* object)
 {
     Py_XINCREF(object);
     const sp<PyInstance> ref = sp<PyInstance>::adopt(new PyInstance(object, false));
@@ -92,16 +98,14 @@ bool PyInstance::isCallable()
     return PyCallable_Check(_object) != 0;
 }
 
-PyObject* PyInstance::release()
+void PyInstance::clear()
 {
-    PyObject* obj = _object;
-    _object = nullptr;
-    return obj;
-}
-
-void PyInstance::deref()
-{
-    Py_XDECREF(release());
+    if(_object)
+    {
+        DASSERT(_object->ob_refcnt > 0);
+        Py_DECREF(_object);
+        _object = nullptr;
+    }
 }
 
 }

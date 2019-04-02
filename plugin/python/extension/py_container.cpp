@@ -33,7 +33,7 @@ int PyContainer::traverse(visitproc visit, void* arg)
 int PyContainer::clear()
 {
     if(_tag)
-        _tag->deref();
+        _tag->clear();
 
     while(!_garbage_collectors.empty())
     {

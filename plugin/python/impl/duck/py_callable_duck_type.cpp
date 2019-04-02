@@ -86,7 +86,7 @@ PyCallableDuckType::PyCallableDuckType(const sp<PyInstance>& inst)
 
 void PyCallableDuckType::to(sp<Runnable>& inst)
 {
-    inst = sp<PythonCallableRunnable>::make(_instance);
+    inst = sp<PythonCallableRunnable>::make(PyInstance::track(_instance->object()));
 }
 
 void PyCallableDuckType::to(sp<EventListener>& inst)

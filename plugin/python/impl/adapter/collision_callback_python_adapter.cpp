@@ -30,11 +30,15 @@ void CollisionCallbackPythonAdapter::onBeginContact(const sp<RigidBody>& rigidBo
         PyTuple_SetItem(args, 0, toPyObject(rigidBody));
         PyTuple_SetItem(args, 1, PythonInterpreter::instance()->fromSharedPtr<CollisionManifold>(_collision_manifold));
 
-        PyObject* ret = _on_begin_contact->call(args);
-        if(ret)
-            Py_DECREF(ret);
-        else
-            PythonInterpreter::instance()->logErr();
+/* Check again, in case of GC */
+        if(_on_begin_contact)
+        {
+            PyObject* ret = _on_begin_contact->call(args);
+            if(ret)
+                Py_DECREF(ret);
+            else
+                PythonInterpreter::instance()->logErr();
+        }
 
         Py_DECREF(args);
     }
@@ -48,11 +52,15 @@ void CollisionCallbackPythonAdapter::onEndContact(const sp<RigidBody>& rigidBody
         PyObject* args = PyTuple_New(1);
         PyTuple_SetItem(args, 0, toPyObject(rigidBody));
 
-        PyObject* ret = _on_end_contact->call(args);
-        if(ret)
-            Py_DECREF(ret);
-        else
-            PythonInterpreter::instance()->logErr();
+/* Check again, in case of GC */
+        if(_on_end_contact)
+        {
+            PyObject* ret = _on_end_contact->call(args);
+            if(ret)
+                Py_DECREF(ret);
+            else
+                PythonInterpreter::instance()->logErr();
+        }
 
         Py_DECREF(args);
     }
@@ -69,15 +77,15 @@ int CollisionCallbackPythonAdapter::traverse(visitproc visit, void* arg)
 
 int CollisionCallbackPythonAdapter::clear()
 {
-    if(_on_end_contact)
+    if(_on_begin_contact)
     {
-        _on_begin_contact->deref();
-        _on_begin_contact = nullptr;
+        sp<PyInstance> inst = std::move(_on_begin_contact);
+        inst->clear();
     }
     if(_on_end_contact)
     {
-        _on_end_contact->deref();
-        _on_end_contact = nullptr;
+        sp<PyInstance> inst = std::move(_on_end_contact);
+        inst->clear();
     }
     return 0;
 }
