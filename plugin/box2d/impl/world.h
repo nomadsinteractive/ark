@@ -65,6 +65,9 @@ public:
 //  [[script::bindings::auto]]
     float toMeterY(float pixelY) const;
 
+//  [[script::bindings::property]]
+    int32_t bodyCount() const;
+
     void track(const sp<Joint::Stub>& joint) const;
 
 //  [[plugin::resource-loader]]

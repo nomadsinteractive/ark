@@ -43,10 +43,10 @@ void Arc::apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& create
     body->CreateFixture(&fixtureDef);
 }
 
-Arc::BUILDER::BUILDER(BeanFactory& parent, const document& manifest)
-    : _sample_count(parent.ensureBuilder<Numeric>(manifest, "sample-count")),
-      _a(parent.ensureBuilder<Numeric>(manifest, "a")),
-      _b(parent.ensureBuilder<Numeric>(manifest, "b"))
+Arc::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _sample_count(factory.ensureBuilder<Numeric>(manifest, "sample-count")),
+      _a(factory.ensureBuilder<Numeric>(manifest, "a")),
+      _b(factory.ensureBuilder<Numeric>(manifest, "b"))
 {
 }
 

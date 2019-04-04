@@ -14,8 +14,6 @@ namespace ark {
 
 class ARK_API BeanUtils {
 public:
-    static int32_t toInteger(const sp<Builder<Numeric>>& t, const sp<Scope>& args, int32_t defValue = 0);
-
     static float toFloat(BeanFactory& args, const String& value, float defValue = 0);
     static float toFloat(const sp<Builder<Numeric>>& t, const sp<Scope>& args, float defValue = 0);
 

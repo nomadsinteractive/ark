@@ -1,5 +1,7 @@
 #include "graphics/util/vec2_util.h"
 
+#include <algorithm>
+
 #include "core/ark.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
@@ -26,6 +28,22 @@ public:
 private:
     sp<Vec2> _delegate;
     int32_t _dim;
+};
+
+class Vec2Normalize : public Vec2 {
+public:
+    Vec2Normalize(const sp<Vec2>& value)
+        : _value(value) {
+    }
+
+    virtual V2 val() override {
+        V2 val = _value->val();
+        float hypot = std::max(Math::hypot(val.x(), val.y()), 0.000001f);
+        return val / hypot;
+    }
+
+private:
+    sp<Vec2> _value;
 };
 
 }
@@ -55,6 +73,16 @@ sp<Vec2> Vec2Util::mul(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
     return sp<VariableOP2<V2, V2, Operators::Mul<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
 }
 
+sp<Vec2> Vec2Util::mul(const sp<Vec2>& lvalue, float rvalue)
+{
+    return sp<VariableOP2<V2, float, Operators::Mul<V2, float>, sp<Vec2>, float>>::make(lvalue, rvalue);
+}
+
+sp<Vec2> Vec2Util::mul(float lvalue, const sp<Vec2>& rvalue)
+{
+    return sp<VariableOP2<float, V2, Operators::Mul<float, V2>, float, sp<Vec2>>>::make(lvalue, rvalue);
+}
+
 sp<Vec2> Vec2Util::truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
     return sp<VariableOP2<V2, V2, Operators::Div<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
@@ -74,6 +102,11 @@ sp<Vec2> Vec2Util::negative(const sp<Vec2>& self)
 sp<Vec2> Vec2Util::transform(const sp<Vec2>& self, const sp<Transform>& transform, const sp<Vec2>& org)
 {
     return sp<Vec2WithTransform>::make(self, org, transform);
+}
+
+sp<Vec2> Vec2Util::normalize(const sp<Vec2>& self)
+{
+    return sp<Vec2Normalize>::make(self);
 }
 
 V2 Vec2Util::val(const sp<Vec2>& self)

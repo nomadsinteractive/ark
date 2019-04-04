@@ -3,6 +3,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/string.h"
+#include "core/types/shared_ptr.h"
 
 namespace ark {
 
@@ -15,6 +16,7 @@ public:
     class Impl;
     class Const;
     class Get;
+    class Synchronized;
 };
 
 template<typename T> class Variable<T>::Impl : public Variable<T> {
@@ -69,6 +71,26 @@ private:
     sp<Dictionary<T>> _dictionary;
     String _name;
 };
+
+template<typename T> class Variable<T>::Synchronized : public Variable<T> {
+public:
+    Synchronized(const sp<Variable<T>>& delegate, const sp<Boolean>& flag)
+        : _delegate(delegate), _flag(flag), _cached(_delegate->val()) {
+    }
+
+    virtual T val() override {
+        if(_flag->val())
+            _cached = _delegate->val();
+        return _cached;
+    }
+
+private:
+    sp<Variable<T>> _delegate;
+    sp<Boolean> _flag;
+
+    T _cached;
+};
+
 
 }
 

@@ -106,6 +106,26 @@ sp<Runnable> ApplicationFacade::defer(const sp<Runnable>& task) const
     return _context->defer(task);
 }
 
+sp<Numeric> ApplicationFacade::synchronize(const sp<Numeric>& value) const
+{
+    return _context->synchronize(value);
+}
+
+sp<Vec2> ApplicationFacade::synchronize(const sp<Vec2>& value) const
+{
+    return _context->synchronize(value);
+}
+
+sp<Vec3> ApplicationFacade::synchronize(const sp<Vec3>& value) const
+{
+    return _context->synchronize(value);
+}
+
+sp<Vec4> ApplicationFacade::synchronize(const sp<Vec4>& value) const
+{
+    return _context->synchronize(value);
+}
+
 const Color& ApplicationFacade::backgroundColor() const
 {
     return _context->backgroundColor();

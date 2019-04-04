@@ -55,6 +55,14 @@ public:
 
 //  [[script::bindings::auto]]
     sp<Runnable> defer(const sp<Runnable>& task) const;
+//  [[script::bindings::auto]]
+    sp<Numeric> synchronize(const sp<Numeric>& value) const;
+//  [[script::bindings::auto]]
+    sp<Vec2> synchronize(const sp<Vec2>& value) const;
+//  [[script::bindings::auto]]
+    sp<Vec3> synchronize(const sp<Vec3>& value) const;
+//  [[script::bindings::auto]]
+    sp<Vec4> synchronize(const sp<Vec4>& value) const;
 
 //  [[script::bindings::property]]
     const Color& backgroundColor() const;

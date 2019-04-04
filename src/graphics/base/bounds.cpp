@@ -6,7 +6,7 @@
 
 namespace ark {
 
-Bounds::Bounds(const sp<Vec>& position, const sp<Size>& size)
+Bounds::Bounds(const sp<Vec3>& position, const sp<Size>& size)
     : _center(position), _size(size)
 {
 }
@@ -21,7 +21,7 @@ bool Bounds::ptin(const V& pt) const
     return true;
 }
 
-const sp<Vec>& Bounds::center() const
+const sp<Vec3>& Bounds::center() const
 {
     return _center;
 }

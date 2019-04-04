@@ -172,7 +172,7 @@ public:
 //  [[plugin::builder("b2Body")]]
     class BUILDER_IMPL2 : public Builder<Object> {
     public:
-        BUILDER_IMPL2(BeanFactory& parent, const document& doc);
+        BUILDER_IMPL2(BeanFactory& factory, const document& manifest);
 
         virtual sp<Object> build(const sp<Scope>& args) override;
 

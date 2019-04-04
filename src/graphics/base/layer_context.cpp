@@ -61,7 +61,7 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memor
             for(const Item& i : _transient_items)
             {
                 RenderObject::Snapshot snapshot = i._render_object->snapshot(memoryPool);
-                snapshot._position = snapshot._position + V(i._x, i._y) + _position;
+                snapshot._position = snapshot._position + V3(i._x, i._y, 0) + _position;
                 output._items.push_back(std::move(snapshot));
             }
             _notifier->notify();

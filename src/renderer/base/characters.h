@@ -86,7 +86,7 @@ private:
     bool isWordBreaker(wchar_t c) const;
 
     int32_t toType(wchar_t c) const;
-    sp<RenderObject> makeCharacter(int32_t type, const sp<Vec>& position, const sp<Size>& size) const;
+    sp<RenderObject> makeCharacter(int32_t type, const sp<Vec2>& position, const sp<Size>& size) const;
 
 private:
     sp<LayerContext> _layer_context;

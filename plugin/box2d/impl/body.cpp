@@ -12,7 +12,7 @@
 #include "graphics/base/render_object.h"
 #include "graphics/base/rotate.h"
 #include "graphics/base/transform.h"
-#include "graphics/util/vec2_util.h"
+#include "graphics/base/v3.h"
 
 #include "impl/world.h"
 
@@ -52,17 +52,17 @@ public:
     sp<Vec> _delegate;
 };
 
-class RenderObjectPosition : public Vec {
+class RenderObjectPosition : public Vec3 {
 public:
     RenderObjectPosition(const sp<Body::Stub>& stub)
         : _stub(stub) {
     }
 
-    virtual V val() override {
+    virtual V3 val() override {
         DCHECK(_stub->_body, "Body has been disposed already");
         float x = _stub->_world.toPixelX(_stub->_body->GetPosition().x);
         float y = _stub->_world.toPixelY(_stub->_body->GetPosition().y);
-        return V(x, y);
+        return V3(x, y, 0);
     }
 
 private:
@@ -296,8 +296,8 @@ sp<Body> Body::BUILDER_IMPL1::build(const sp<Scope>& args)
     return sp<Body>::make(world, Collider::BODY_TYPE_DYNAMIC, position, _size->build(args), nullptr, shape, _density, _friction);
 }
 
-Body::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& parent, const document& doc)
-    : _delegate(parent, doc)
+Body::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& factory, const document& manifest)
+    : _delegate(factory, manifest)
 {
 }
 

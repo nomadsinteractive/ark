@@ -15,6 +15,9 @@
 #define ATTRIBUTE_PATTERN VAR_TYPE_PATTERN "(?:a_|v_)([\\w\\d_]+);"
 #define UNIFORM_PATTERN VAR_TYPE_PATTERN "(u_[\\w\\d_]+);"
 
+#define INDENT_STR "    "
+
+
 namespace ark {
 
 const char* ShaderPreprocessor::ANNOTATION_VERT_IN = "${vert.in}";
@@ -31,13 +34,19 @@ std::regex ShaderPreprocessor::_UNIFORM_PATTERN("uniform" UNIFORM_PATTERN);
 ShaderPreprocessor::ShaderPreprocessor(ShaderType type)
     : _type(type), _version(0), _ins(_attribute_declarations, type == SHADER_TYPE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
       _outs(_attribute_declarations, type == SHADER_TYPE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
-      _uniforms(_uniform_declarations, "uniform"), _samplers(_uniform_declarations, "uniform"), _before_main(sp<String>::make()), _output_var(sp<String>::make())
+      _uniforms(_uniform_declarations, "uniform"), _samplers(_uniform_declarations, "uniform"), _pre_main(sp<String>::make()),
+      _output_var(sp<String>::make()), _post_main(sp<String>::make())
 {
 }
 
-void ShaderPreprocessor::addSource(const String& source)
+void ShaderPreprocessor::addPreMainSource(const String& source)
 {
-    *_before_main = Strings::sprintf("    %s\n%s", source.c_str(), _before_main->c_str());
+    *_pre_main = Strings::sprintf(INDENT_STR "%s\n%s", source.c_str(), _pre_main->c_str());
+}
+
+void ShaderPreprocessor::addPostMainSource(const String& source)
+{
+    *_post_main = Strings::sprintf("%s\n" INDENT_STR "%s", _post_main->c_str(), source.c_str());
 }
 
 void ShaderPreprocessor::addModifier(const String& modifier)
@@ -96,15 +105,17 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
     _main_block->genDefinition();
 
     {
-        const String outVar = _type == SHADER_TYPE_VERTEX ? "gl_Position" : ANNOTATION_FRAG_COLOR;
+        const String outVar = outputName();
 
         _main.push_back(sp<String>::make("\n\nvoid main() {\n"));
-        _main.push_back(_before_main);
-        _main.push_back(sp<String>::make(Strings::sprintf("    %s = ", outVar.c_str())));
+        _main.push_back(_pre_main);
+        _main.push_back(sp<String>::make(Strings::sprintf(INDENT_STR "%s = ", outVar.c_str())));
         *_output_var = _main_block->genOutCall(_type);
         _main.push_back(_output_var);
+        _main.push_back(sp<String>::make(";"));
+        _main.push_back(_post_main);
 
-        _main.push_back(sp<String>::make(";\n}\n\n"));
+        _main.push_back(sp<String>::make("\n}\n\n"));
     }
 
     if(_type == SHADER_TYPE_VERTEX)
@@ -168,6 +179,11 @@ sp<Uniform> ShaderPreprocessor::getUniformInput(const String& name, Uniform::Typ
     const Declaration& declaration = _uniforms.vars().at(name);
     DCHECK(Uniform::toType(declaration.type()) == type, "Uniform \"%s\" declared type: %s, but it should be %d", name.c_str(), declaration.type().c_str(), type);
     return sp<Uniform>::make(name, type, nullptr, nullptr);
+}
+
+String ShaderPreprocessor::outputName() const
+{
+    return _type == SHADER_TYPE_VERTEX ? "gl_Position" : ANNOTATION_FRAG_COLOR;
 }
 
 size_t ShaderPreprocessor::parseFunctionBody(const String& s, String& body) const

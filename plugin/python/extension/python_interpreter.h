@@ -36,39 +36,15 @@ public:
     PythonInterpreter();
 
     sp<Numeric> toNumeric(PyObject* object);
-    sp<Integer> toInteger(PyObject* object);
-    sp<Runnable> toRunnable(PyObject* object);
-    sp<CollisionCallback> toCollisionCallback(PyObject* object);
-    sp<EventListener> toEventListener(PyObject* object);
     String toString(PyObject* object, const char* encoding = nullptr, const char* error = nullptr);
-    std::wstring toWString(PyObject* object);
-    sp<Vec2> toVec2(PyObject* object);
     sp<Scope> toScope(PyObject* kws);
 
     template<typename T> PyObject* toPyObject(const T& obj) {
         return toPyObject_sfinae<T>(obj, nullptr);
     }
-    template<typename T> PyObject* toPyObject_sfinae(const T& ptr, typename T::_PtrType*) {
-        return fromSharedPtr(static_cast<sp<typename T::_PtrType>>(ptr));
-    }
-    template<typename T> PyObject* toPyObject_sfinae(const T& iterable, decltype(iterable.begin())*) {
-        return fromIterable_sfinae<T>(iterable, nullptr);
-    }
-    template<typename T> PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_enum<T>::value>::type*) {
-        return fromType<int32_t>(static_cast<int32_t>(value));
-    }
-    template<typename T> PyObject* toPyObject_sfinae(const T& value, ...) {
-        return fromType<T>(value);
-    }
 
     template<typename T> T toCppObject(PyObject* obj) {
         return toCppObject_sfinae<T>(obj, nullptr);
-    }
-    template<typename T> T toCppObject_sfinae(PyObject* obj, typename T::_PtrType*) {
-        return toSharedPtr<typename T::_PtrType>(obj);
-    }
-    template<typename T> T toCppObject_sfinae(PyObject* obj, ...) {
-        return toType<T>(obj);
     }
 
     template<typename T> sp<Array<T>> toArray(PyObject* object) {
@@ -168,6 +144,7 @@ public:
 
     PyObject* toPyObject(const Box& box);
     bool isPyObject(TypeId type) const;
+    bool isNoneOrNull(PyObject* pyObject) const;
 
     const sp<ReferenceManager>& referenceManager() const;
 
@@ -197,9 +174,38 @@ private:
         return instance->unpack<T>();
     }
 
+    template<typename T> T toCppObject_sfinae(PyObject* obj, typename T::_PtrType*) {
+        return toSharedPtr<typename T::_PtrType>(obj);
+    }
+    template<typename T> T toCppObject_sfinae(PyObject* obj, ...) {
+        return toType<T>(obj);
+    }
+
+    template<typename T> PyObject* toPyObject_sfinae(const T& ptr, typename T::_PtrType*) {
+        return fromSharedPtr(static_cast<sp<typename T::_PtrType>>(ptr));
+    }
+    template<typename T> PyObject* toPyObject_sfinae(const T& iterable, decltype(iterable.begin())*) {
+        return fromIterable_sfinae<T>(iterable, nullptr);
+    }
+    template<typename T> PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_enum<T>::value>::type*) {
+        return fromType<int32_t>(static_cast<int32_t>(value));
+    }
+    template<typename T> PyObject* toPyObject_sfinae(const T& value, ...) {
+        return fromType<T>(value);
+    }
+
+
+    sp<Vec2> toVec2(PyObject* object);
+    sp<Vec3> toVec3(PyObject* object);
+    sp<Integer> toInteger(PyObject* object);
+    sp<Runnable> toRunnable(PyObject* object);
+    sp<CollisionCallback> toCollisionCallback(PyObject* object);
+    sp<EventListener> toEventListener(PyObject* object);
+
     String unicodeToUTF8String(PyObject* object, const char* encoding, const char* error);
 
     std::wstring pyUnicodeToWString(PyObject* unicode);
+    std::wstring toWString(PyObject* object);
 
 private:
     std::map<TypeId, PyArkType*> _type_by_id;
@@ -236,6 +242,11 @@ template<> inline sp<EventListener> PythonInterpreter::toSharedPtr<EventListener
 template<> inline sp<Vec2> PythonInterpreter::toSharedPtr<Vec2>(PyObject* object)
 {
     return toVec2(object);
+}
+
+template<> inline sp<Vec3> PythonInterpreter::toSharedPtr<Vec3>(PyObject* object)
+{
+    return toVec3(object);
 }
 
 template<> inline PyObject* PythonInterpreter::fromSharedPtr<Array<uint8_t>>(const bytearray& bytes)

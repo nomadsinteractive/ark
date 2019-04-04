@@ -6,14 +6,6 @@
 
 namespace ark {
 
-int32_t BeanUtils::toInteger(const sp<Builder<Numeric>>& t, const sp<Scope>& args, int32_t defValue)
-{
-    if(!t)
-        return defValue;
-    const sp<Numeric> v = t->build(args);
-    return v ? static_cast<int32_t>(v->val()) : defValue;
-}
-
 float BeanUtils::toFloat(BeanFactory& args, const String& value, float defValue)
 {
     if(Strings::isNumeric(value))

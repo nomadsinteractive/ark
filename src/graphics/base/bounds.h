@@ -13,17 +13,18 @@ namespace ark {
 class ARK_API Bounds : public Block {
 public:
 //  [[script::bindings::auto]]
-    Bounds(const sp<Vec>& center, const sp<Size>& size);
+    Bounds(const sp<Vec3>& center, const sp<Size>& size);
 
 //  [[script::bindings::auto]]
     bool ptin(const V& pt) const;
 //  [[script::bindings::property]]
-    const sp<Vec>& center() const;
+    const sp<Vec3>& center() const;
+
 //  [[script::bindings::property]]
     virtual const SafePtr<Size>& size() override;
 
 private:
-    sp<Vec> _center;
+    sp<Vec3> _center;
     SafePtr<Size> _size;
 
 };

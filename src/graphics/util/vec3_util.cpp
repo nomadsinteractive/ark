@@ -60,6 +60,20 @@ private:
     sp<Vec3> _delegate;
 };
 
+class Vec2ToVec3 : public Vec3 {
+public:
+    Vec2ToVec3(const sp<Vec2>& vec2)
+        : _vec2(vec2) {
+    }
+
+    virtual V3 val() override {
+        return _vec2->val();
+    }
+
+private:
+    sp<Vec2> _vec2;
+};
+
 }
 
 sp<Vec3> Vec3Util::create(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z)
@@ -70,6 +84,11 @@ sp<Vec3> Vec3Util::create(const sp<Numeric>& x, const sp<Numeric>& y, const sp<N
 sp<Vec3> Vec3Util::create(float x, float y, float z)
 {
     return sp<Vec3Impl>::make(x, y, z);
+}
+
+sp<Vec3> Vec3Util::create(const sp<Vec2>& vec2)
+{
+    return sp<Vec2ToVec3>::make(vec2);
 }
 
 sp<Vec3> Vec3Util::add(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
@@ -116,6 +135,11 @@ sp<Vec3> Vec3Util::negative(const sp<Vec3>& self)
 V3 Vec3Util::xyz(const sp<Vec3>& self)
 {
     return self->val();
+}
+
+void Vec3Util::setXyz(const sp<Vec3>& self, const V3& xyz)
+{
+    ensureImpl(self)->set(xyz);
 }
 
 V2 Vec3Util::xy(const sp<Vec3>& self)

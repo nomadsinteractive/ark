@@ -176,6 +176,13 @@ sp<Framebuffer> RenderController::makeFramebuffer(const sp<Renderer>& renderer, 
     return framebuffer;
 }
 
+sp<Boolean> RenderController::makeSynchronizeFlag()
+{
+    const sp<SynchronizeFlag> flag = sp<SynchronizeFlag>::make();
+    _synchronize_flags.push_back(flag);
+    return flag;
+}
+
 Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader)
 {
     Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage));
@@ -206,6 +213,10 @@ void RenderController::preUpdate()
     }
 #endif
     _defered_instances.clear();
+
+    for(const sp<SynchronizeFlag>& i : _synchronize_flags)
+        i->reset();
+
     for(const sp<Runnable>& runnable : _on_pre_update_request)
         runnable->run();
 }
@@ -259,6 +270,26 @@ RenderController::PreparingResource::PreparingResource(const RenderController::E
 bool RenderController::PreparingResource::operator <(const RenderController::PreparingResource& other) const
 {
     return _resource < other._resource;
+}
+
+RenderController::SynchronizeFlag::SynchronizeFlag()
+    : _value(false)
+{
+}
+
+bool RenderController::SynchronizeFlag::val()
+{
+    if(_value)
+    {
+        _value = false;
+        return true;
+    }
+    return false;
+}
+
+void RenderController::SynchronizeFlag::reset()
+{
+    _value = true;
 }
 
 }

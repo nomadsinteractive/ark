@@ -122,6 +122,11 @@ float World::toMeterY(float pixelY) const
     return pixelY / _stub->_ppm_y;
 }
 
+int32_t World::bodyCount() const
+{
+    return _stub->_world.GetBodyCount();
+}
+
 void World::track(const sp<Joint::Stub>& joint) const
 {
     _stub->_destruction_listener.track(joint);

@@ -139,7 +139,8 @@ private:
 public:
     ShaderPreprocessor(ShaderType type);
 
-    void addSource(const String& source);
+    void addPreMainSource(const String& source);
+    void addPostMainSource(const String& source);
     void addModifier(const String& modifier);
 
     void initialize(const String& source, PipelineBuildingContext& context);
@@ -149,6 +150,8 @@ public:
     Preprocessor preprocess();
 
     sp<Uniform> getUniformInput(const String& name, Uniform::Type type) const;
+
+    String outputName() const;
 
 private:
     void parseMainBlock(const String& source, PipelineBuildingContext& buildingContext);
@@ -182,8 +185,9 @@ public:
     DeclarationList _uniforms;
     DeclarationList _samplers;
 
-    sp<String> _before_main;
+    sp<String> _pre_main;
     sp<String> _output_var;
+    sp<String> _post_main;
 };
 
 }

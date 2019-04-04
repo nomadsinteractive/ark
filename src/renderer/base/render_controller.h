@@ -62,6 +62,12 @@ public:
 
     sp<Framebuffer> makeFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture);
 
+    sp<Boolean> makeSynchronizeFlag();
+
+    template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate) {
+        return sp<typename Variable<T>::Synchronized>::make(delegate, makeSynchronizeFlag());
+    }
+
     sp<Variable<uint64_t>> ticker() const;
 
     void addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired);
@@ -92,6 +98,18 @@ private:
         sp<Uploader> _uploader;
     };
 
+    class SynchronizeFlag : public Boolean {
+    public:
+        SynchronizeFlag();
+
+        virtual bool val() override;
+
+        void reset();
+
+    private:
+        bool _value;
+    };
+
     struct PreparingResource {
         PreparingResource() = default;
         PreparingResource(const ExpirableResource& resource, RenderController::UploadStrategy strategy);
@@ -119,6 +137,7 @@ private:
 
     DisposableItemList<Runnable> _on_pre_update_request;
     std::vector<Box> _defered_instances;
+    WeakRefList<SynchronizeFlag> _synchronize_flags;
 
     sp<NamedBuffer> _named_buffers[NamedBuffer::NAME_COUNT];
 };

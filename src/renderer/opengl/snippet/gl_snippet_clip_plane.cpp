@@ -34,7 +34,7 @@ void GLSnippetClipPlane::preCompile(GraphicsContext& graphicsContext, PipelineBu
         for(const auto& i : _planes)
         {
             const String uName = Strings::sprintf("u_Plane%d", i.first);
-            context._vertex.addSource(Strings::sprintf("gl_ClipDistance[%d] = dot(a_Position, %s);", i.first, uName.c_str()));
+            context._vertex.addPreMainSource(Strings::sprintf("gl_ClipDistance[%d] = dot(a_Position, %s);", i.first, uName.c_str()));
         }
 }
 

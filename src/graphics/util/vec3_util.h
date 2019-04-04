@@ -17,6 +17,7 @@ public:
     static sp<Vec3> create(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z);
 //[[script::bindings::constructor]]
     static sp<Vec3> create(float x, float y, float z);
+    static sp<Vec3> create(const sp<Vec2>& vec2);
 
 //[[script::bindings::operator(+)]]
     static sp<Vec3> add(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
@@ -37,6 +38,8 @@ public:
 
 //[[script::bindings::property]]
     static V3 xyz(const sp<Vec3>& self);
+//[[script::bindings::property]]
+    static void setXyz(const sp<Vec3>& self, const V3& xyz);
 //[[script::bindings::property]]
     static V2 xy(const sp<Vec3>& self);
 //[[script::bindings::property]]

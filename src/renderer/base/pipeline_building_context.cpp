@@ -111,7 +111,7 @@ void PipelineBuildingContext::initialize()
         if(fragmentUsedVars.find(i) != fragmentUsedVars.end())
         {
             _vertex._outs.declare(attributes[i], "v_", i);
-            _vertex.addSource(Strings::sprintf("v_%s = a_%s;", i.c_str(), i.c_str()));
+            _vertex.addPreMainSource(Strings::sprintf("v_%s = a_%s;", i.c_str(), i.c_str()));
         }
     }
 

@@ -11,6 +11,7 @@
 #include "graphics/base/color.h"
 #include "graphics/impl/vec/vec3_impl.h"
 #include "graphics/util/vec2_util.h"
+#include "graphics/util/vec3_util.h"
 
 #include "app/base/event.h"
 
@@ -124,6 +125,26 @@ sp<Vec2> PythonInterpreter::toVec2(PyObject* object)
     return asInterface<Vec2>(object);
 }
 
+sp<Vec3> PythonInterpreter::toVec3(PyObject* object)
+{
+    if(isNoneOrNull(object))
+        return nullptr;
+
+    if(PyTuple_Check(object))
+    {
+        PyObject* x, *y, *z = nullptr;
+        if(PyArg_ParseTuple(object, "OO|O", &x, &y, &z))
+            return Vec3Util::create(toNumeric(x), toNumeric(y), toNumeric(z));
+    }
+    const sp<Vec3> vec3 = asInterfaceOrNull<Vec3>(object);
+    if(vec3)
+        return vec3;
+
+    const sp<Vec2> vec2 = asInterfaceOrNull<Vec2>(object);
+    DCHECK(vec2, "Cannot cast \"%s\" to Vec3, possible candidates: tuple, Vec3, Vec2", Py_TYPE(object)->tp_name);
+    return Vec3Util::create(vec2);
+}
+
 PyObject* PythonInterpreter::fromByteArray(const bytearray& bytes) const
 {
     return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(bytes->buf()), bytes->length());
@@ -131,6 +152,9 @@ PyObject* PythonInterpreter::fromByteArray(const bytearray& bytes) const
 
 sp<Numeric> PythonInterpreter::toNumeric(PyObject* object)
 {
+    if(isNoneOrNull(object))
+        return nullptr;
+
     if(PyLong_Check(object))
         return sp<Numeric::Impl>::make(static_cast<float>(PyLong_AsLong(object)));
     if(PyFloat_Check(object))
@@ -286,6 +310,11 @@ PyObject* PythonInterpreter::toPyObject(const Box& box)
 bool PythonInterpreter::isPyObject(TypeId type) const
 {
     return (type == Type<PyInstance>::id()) || _type_by_id.find(type) != _type_by_id.end();
+}
+
+bool PythonInterpreter::isNoneOrNull(PyObject* pyObject) const
+{
+    return !pyObject || pyObject == Py_None;
 }
 
 void PythonInterpreter::logErr() const

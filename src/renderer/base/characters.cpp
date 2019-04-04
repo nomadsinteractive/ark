@@ -14,6 +14,7 @@
 #include "graphics/base/v2.h"
 #include "graphics/inf/character_mapper.h"
 #include "graphics/inf/character_maker.h"
+#include "graphics/util/vec3_util.h"
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/resource_loader_context.h"
@@ -228,9 +229,9 @@ int32_t Characters::toType(wchar_t c) const
     return _character_mapper ? _character_mapper->mapCharacter(static_cast<int32_t>(c)) : static_cast<int32_t>(c);
 }
 
-sp<RenderObject> Characters::makeCharacter(int32_t type, const sp<Vec>& position, const sp<Size>& size) const
+sp<RenderObject> Characters::makeCharacter(int32_t type, const sp<Vec2>& position, const sp<Size>& size) const
 {
-    return _character_maker ? _character_maker->makeCharacter(type, position, size) : _object_pool->obtain<RenderObject>(type, position, size);
+    return _character_maker ? _character_maker->makeCharacter(type, position, size) : _object_pool->obtain<RenderObject>(type, Vec3Util::create(position), size);
 }
 
 Characters::BUILDER::BUILDER(BeanFactory& factory, const document manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

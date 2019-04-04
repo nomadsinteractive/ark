@@ -13,6 +13,7 @@
 #include "graphics/base/size.h"
 #include "graphics/base/v3.h"
 #include "graphics/base/render_object.h"
+#include "graphics/util/vec3_util.h"
 
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
@@ -32,7 +33,7 @@ RigidBody::RigidBody(const sp<RigidBody::Stub>& stub)
 
 void RigidBody::bind(const sp<RenderObject>& renderObject)
 {
-    renderObject->setPosition(position());
+    renderObject->setPosition(Vec3Util::create(position()));
     renderObject->setTransform(_stub->_transform);
 }
 

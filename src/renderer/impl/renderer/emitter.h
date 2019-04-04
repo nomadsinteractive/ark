@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_IMPL_RENDERER_PARTICLE_EMITTER_H_
-#define ARK_RENDERER_IMPL_RENDERER_PARTICLE_EMITTER_H_
+#ifndef ARK_RENDERER_IMPL_RENDERER_EMITTER_H_
+#define ARK_RENDERER_IMPL_RENDERER_EMITTER_H_
 
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
@@ -17,14 +17,14 @@
 namespace ark {
 
 //[[core::class]]
-class ParticleEmitter : public Renderer {
+class Emitter : public Renderer {
 private:
     struct Stub {
-        Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, uint32_t type, const sp<Vec>& position, const sp<Size>& size, const sp<Scope>& arguments);
+        Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Integer>& type, const sp<Vec>& position, const sp<Size>& size, const sp<Scope>& arguments);
 
         sp<Scope> _arguments;
 
-        uint32_t _type;
+        SafePtr<Integer> _type;
         SafePtr<Vec> _position;
         sp<Size> _size;
 
@@ -32,11 +32,11 @@ private:
     };
 
 public:
-    ParticleEmitter(const sp<Stub>& stub, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const List<document>& particleDescriptor, BeanFactory& beanFactory);
+    Emitter(const sp<Stub>& stub, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const List<document>& particleDescriptor, BeanFactory& beanFactory);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
-//  [[plugin::resource-loader("particle-emitter")]]
+//  [[plugin::resource-loader("emitter")]]
     class BUILDER : public Builder<Renderer> {
     public:
         BUILDER(BeanFactory& parent, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext);
@@ -50,7 +50,7 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
 
         sp<Clock> _clock;
-        sp<Builder<Numeric>> _type;
+        sp<Builder<Integer>> _type;
         SafePtr<Builder<Vec>> _position;
         SafePtr<Builder<Size>> _size;
         sp<Builder<LayerContext>> _layer_context;
@@ -86,7 +86,7 @@ private:
     private:
         sp<Stub> _stub;
 
-        sp<Builder<Numeric>> _type;
+        sp<Builder<Integer>> _type;
         sp<Builder<Vec>> _position;
         sp<Builder<Size>> _size;
         SafePtr<Builder<Transform>> _transform;

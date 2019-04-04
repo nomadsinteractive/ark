@@ -24,6 +24,10 @@ public:
     static sp<Vec2> sub(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
 //[[script::bindings::operator(*)]]
     static sp<Vec2> mul(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
+//[[script::bindings::operator(*)]]
+    static sp<Vec2> mul(const sp<Vec2>& lvalue, float rvalue);
+//[[script::bindings::operator(*)]]
+    static sp<Vec2> mul(float lvalue, const sp<Vec2>& rvalue);
 //[[script::bindings::operator(/)]]
     static sp<Vec2> truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
 //[[script::bindings::operator(//)]]
@@ -33,6 +37,8 @@ public:
 
 //[[script::bindings::classmethod]]
     static sp<Vec2> transform(const sp<Vec2>& self, const sp<Transform>& transform, const sp<Vec2>& org);
+//[[script::bindings::classmethod]]
+    static sp<Vec2> normalize(const sp<Vec2>& self);
 
 //[[script::bindings::property]]
     static V2 val(const sp<Vec2>& self);

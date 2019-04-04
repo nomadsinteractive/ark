@@ -68,7 +68,7 @@ private:
     sp<Notifier> _notifier;
 
     bool _render_requested;
-    V2 _position;
+    V3 _position;
     std::vector<Item> _transient_items;
     FilteredList<RenderObject, RenderObjectFilter> _items;
 };

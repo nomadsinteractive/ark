@@ -28,6 +28,7 @@ public:
     friend V2 operator -(const V2& lvalue, const V2& rvalue);
     friend V2 operator *(const V2& lvalue, const V2& rvalue);
     friend V2 operator *(const V2& lvalue, float rvalue);
+    friend V2 operator *(float lvalue, const V2& rvalue);
     friend V2 operator /(const V2& lvalue, const V2& rvalue);
     friend V2 operator /(const V2& lvalue, float rvalue);
 

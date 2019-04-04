@@ -19,11 +19,11 @@ namespace ark {
 class ARK_API RenderObject : public Block {
 public:
     struct Snapshot {
-        Snapshot(int32_t type, const V& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
+        Snapshot(int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
         Snapshot(const Snapshot& other) = default;
 
         int32_t _type;
-        V _position;
+        V3 _position;
         V3 _size;
         Transform::Snapshot _transform;
         Varyings::Snapshot _varyings;
@@ -31,9 +31,9 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    RenderObject(int32_t type, const sp<Vec>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
+    RenderObject(int32_t type, const sp<Vec3>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
 //  [[script::bindings::auto]]
-    RenderObject(const sp<Integer>& type, const sp<Vec>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
+    RenderObject(const sp<Integer>& type, const sp<Vec3>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
 
 //  [[script::bindings::meta(expire())]]
 //  [[script::bindings::meta(isExpired())]]
@@ -70,11 +70,21 @@ public:
 //  [[script::bindings::property]]
     void setY(const sp<Numeric>& y);
 //  [[script::bindings::property]]
+    float z() const;
+//  [[script::bindings::property]]
+    void setZ(float z);
+//  [[script::bindings::property]]
+    void setZ(const sp<Numeric>& z);
+
+//  [[script::bindings::property]]
     V2 xy() const;
 //  [[script::bindings::property]]
-    const SafePtr<Vec>& position() const;
+    V3 xyz() const;
+
 //  [[script::bindings::property]]
-    void setPosition(const sp<Vec>& position);
+    const SafePtr<Vec3>& position() const;
+//  [[script::bindings::property]]
+    void setPosition(const sp<Vec3>& position);
 //  [[script::bindings::property]]
     void setSize(const sp<Size>& size);
 //  [[script::bindings::property]]
@@ -106,7 +116,7 @@ public:
 
     private:
         sp<Builder<Integer>> _type;
-        SafePtr<Builder<Vec>> _position;
+        SafePtr<Builder<Vec3>> _position;
         SafePtr<Builder<Size>> _size;
         SafePtr<Builder<Transform>> _transform;
         SafePtr<Builder<Varyings>> _varyings;
@@ -128,7 +138,7 @@ public:
 private:
     sp<IntegerWrapper> _type;
 
-    SafePtr<Vec> _position;
+    SafePtr<Vec3> _position;
     SafePtr<Size> _size;
     SafePtr<Transform> _transform;
     SafePtr<Varyings> _varyings;

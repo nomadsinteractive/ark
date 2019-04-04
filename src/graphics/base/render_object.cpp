@@ -8,18 +8,18 @@
 #include "core/util/numeric_util.h"
 
 #include "graphics/base/size.h"
-#include "graphics/util/vec2_util.h"
+#include "graphics/util/vec3_util.h"
 
 #include "renderer/base/varyings.h"
 
 namespace ark {
 
-RenderObject::RenderObject(int32_t type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
+RenderObject::RenderObject(int32_t type, const sp<Vec3>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
     : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings)
 {
 }
 
-RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
+RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
     : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _disposed(type.as<Disposed>())
 {
 }
@@ -69,12 +69,12 @@ float RenderObject::x() const
 
 void RenderObject::setX(float x)
 {
-    VecUtil::setX(_position, x);
+    Vec3Util::setX(_position, x);
 }
 
 void RenderObject::setX(const sp<Numeric>& x)
 {
-    VecUtil::setX(_position, x);
+    Vec3Util::setX(_position, x);
 }
 
 float RenderObject::y() const
@@ -84,12 +84,27 @@ float RenderObject::y() const
 
 void RenderObject::setY(float y)
 {
-    VecUtil::setY(_position, y);
+    Vec3Util::setY(_position, y);
 }
 
 void RenderObject::setY(const sp<Numeric>& y)
 {
-    VecUtil::setY(_position, y);
+    Vec3Util::setY(_position, y);
+}
+
+float RenderObject::z() const
+{
+    return _position->val().z();
+}
+
+void RenderObject::setZ(float z)
+{
+    Vec3Util::setZ(_position, z);
+}
+
+void RenderObject::setZ(const sp<Numeric>& z)
+{
+    Vec3Util::setZ(_position, z);
 }
 
 V2 RenderObject::xy() const
@@ -97,12 +112,17 @@ V2 RenderObject::xy() const
     return _position->val();
 }
 
-const SafePtr<Vec>& RenderObject::position() const
+V3 RenderObject::xyz() const
+{
+    return _position->val();
+}
+
+const SafePtr<Vec3>& RenderObject::position() const
 {
     return _position;
 }
 
-void RenderObject::setPosition(const sp<Vec>& position)
+void RenderObject::setPosition(const sp<Vec3>& position)
 {
     _position = position;
 }
@@ -160,7 +180,7 @@ RenderObject::Snapshot RenderObject::snapshot(MemoryPool& memoryPool) const
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _type(factory.ensureBuilder<Integer>(manifest, Constants::Attributes::TYPE)),
-      _position(factory.getBuilder<Vec>(manifest, Constants::Attributes::POSITION)),
+      _position(factory.getBuilder<Vec3>(manifest, Constants::Attributes::POSITION)),
       _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _transform(factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM)),
       _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS))
@@ -183,7 +203,7 @@ sp<RenderObject> RenderObject::EXPIRED_STYLE::build(const sp<Scope>& args)
     return _delegate->build(args).absorb(_disposable->build(args));
 }
 
-RenderObject::Snapshot::Snapshot(int32_t type, const V& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings)
+RenderObject::Snapshot::Snapshot(int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings)
     : _type(type), _position(position), _size(size), _transform(transform), _varyings(varyings)
 {
 }
