@@ -15,8 +15,6 @@ public:
 //  [[script::bindings::auto]]
     Disposed(const sp<Boolean>& disposed);
 
-    sp<Boolean> toBoolean() const;
-
     bool isDisposed() const;
 
 //  [[script::bindings::operator(bool)]]
@@ -35,7 +33,12 @@ public:
     static sp<Boolean> __and__(const sp<Boolean>& lvalue, const sp<Disposed>& rvalue);
 
 //  [[script::bindings::auto]]
+    sp<Boolean> toBoolean() const;
+//  [[script::bindings::auto]]
     void dispose();
+
+//  [[script::bindings::auto]]
+    sp<Boolean> observe(const sp<Observer>& observer);
 
 //  [[script::bindings::auto]]
     void set(bool disposed);

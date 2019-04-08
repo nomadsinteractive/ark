@@ -16,25 +16,14 @@
 
 namespace ark {
 
-class ARK_API Button final : public View, public Renderer {
+class Button final : public View, public Renderer {
 public:
     Button(const sp<Renderer>& foreground, const sp<Renderer>& background, const sp<Size>& block, Gravity gravity);
     ~Button() override;
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
-/*
-//  [[script::bindings::property]]
-    virtual const sp<Size>& size() override;
-//  [[script::bindings::property]]
-    const sp<Runnable>& onClick() const;
-//  [[script::bindings::property]]
-    void setOnClick(const sp<Runnable>& onClicked);
-*/
-
-//  [[script::bindings::auto]]
     void setForeground(View::State status, const sp<Renderer>& foreground);
-//  [[script::bindings::auto]]
     void setBackground(View::State status, const sp<Renderer>& background);
 
 //  [[plugin::builder]]

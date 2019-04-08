@@ -4,6 +4,7 @@
 #include "core/impl/boolean/boolean_and.h"
 #include "core/impl/boolean/boolean_not.h"
 #include "core/impl/boolean/boolean_or.h"
+#include "core/impl/variable/variable_observer.h"
 #include "core/impl/variable/variable_wrapper.h"
 
 namespace ark {
@@ -66,6 +67,11 @@ sp<Boolean> Disposed::toBoolean() const
 void Disposed::dispose()
 {
     _disposed->set(true);
+}
+
+sp<Boolean> Disposed::observe(const sp<Observer>& observer)
+{
+    return sp<VariableObserver<bool>>::make(_disposed, observer);
 }
 
 void Disposed::set(bool disposed)

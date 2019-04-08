@@ -31,7 +31,7 @@ public:
     void draw(float x, float y, const sp<RenderObject>& renderObject);
 
 // [[script::bindings::auto]]
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposed>& disposed = sp<Disposed>::null());
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = sp<Boolean>::null());
 // [[script::bindings::auto]]
     void removeRenderObject(const sp<RenderObject>& renderObject);
 // [[script::bindings::auto]]

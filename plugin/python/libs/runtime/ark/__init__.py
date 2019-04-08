@@ -171,12 +171,29 @@ class Numeric(_Var):
         return None
 
 
+class Observer():
+    def __init__(self, callback, oneshot: bool=True):
+        pass
+
+    def dirty(self) -> bool:
+        return False
+
+    def update(self):
+        pass
+
+
 class Disposed:
     def __init__(self, disposed=False):
         pass
 
     def dispose(self):
         pass
+
+    def observe(self, observer: Observer) -> Boolean:
+        return Boolean(False)
+
+    def to_boolean(self) -> Boolean:
+        return Boolean(False)
 
     def __bool__(self):
         return False
@@ -397,7 +414,7 @@ class Layer:
     def context(self):
         return None
 
-    def add_render_object(self, render_object: RenderObject, disposed: Disposed = None):
+    def add_render_object(self, render_object: RenderObject, disposed: Boolean = None):
         pass
 
     def remove_render_object(self, render_object: RenderObject):

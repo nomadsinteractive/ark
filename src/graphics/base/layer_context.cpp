@@ -33,10 +33,10 @@ void LayerContext::draw(float x, float y, const sp<RenderObject>& renderObject)
     _transient_items.emplace_back(x, y, renderObject);
 }
 
-void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Disposed>& disposed)
+void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed)
 {
     DASSERT(renderObject);
-    _items.push_back(renderObject, disposed ? disposed : renderObject.as<Disposed>(), _notifier);
+    _items.push_back(renderObject, disposed ? sp<Disposed>::make(disposed) : renderObject.as<Disposed>(), _notifier);
     _notifier->notify();
 }
 

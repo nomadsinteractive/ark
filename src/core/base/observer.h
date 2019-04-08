@@ -2,21 +2,25 @@
 #define ARK_CORE_BASE_OBSERVER_H_
 
 #include "core/forwarding.h"
+#include "core/base/api.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-class Observer : public Boolean {
+class ARK_API Observer : public Boolean {
 public:
-    Observer(const sp<Runnable>& callback, bool oneshot);
+//  [[script::bindings::auto]]
+    Observer(const sp<Runnable>& callback, bool oneshot = true);
     Observer(bool dirty = true, const sp<Runnable>& callback = nullptr, bool oneshot = false);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Observer);
 
     virtual bool val() override;
 
+//  [[script::bindings::auto]]
     bool dirty();
 
+//  [[script::bindings::auto]]
     void update();
 
 private:

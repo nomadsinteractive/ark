@@ -75,7 +75,7 @@ Emitter::Particale::Particale(const sp<Stub>& stub, const document& manifest, Be
     _size = factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE);
     _transform = factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM);
     _varyings = factory.getBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS);
-    _lifecycle = factory.ensureBuilder<Disposed>(manifest, Constants::Attributes::EXPIRED);
+    _disposed = factory.ensureBuilder<Boolean>(manifest, Constants::Attributes::EXPIRED);
 }
 
 uint64_t Emitter::Particale::show(float x, float y, const sp<Clock>& clock, uint64_t tick, const sp<LayerContext>& layerContext)
@@ -118,10 +118,10 @@ uint64_t Emitter::Particale::show(float x, float y, const sp<Clock>& clock, uint
         _x += dx;
         _y += dy;
         const sp<Vec> position = makePosition(_stub->_object_pool, _x , _y);
-        const sp<Disposed> lifecycle = _lifecycle->build(_stub->_arguments);
+        const sp<Boolean> disposed = _disposed->build(_stub->_arguments);
         const sp<RenderObject> renderObject = _stub->_object_pool->obtain<RenderObject>(type, Vec3Util::create(position), size, transform, filter);
-        DWARN(lifecycle, "You're creating particles that will NEVER die, is that what you really want?");
-        layerContext->addRenderObject(renderObject, lifecycle);
+        DWARN(disposed, "You're creating particles that will NEVER die, is that what you really want?");
+        layerContext->addRenderObject(renderObject, disposed);
     }
     return last_emit_tick + _interval;
 }

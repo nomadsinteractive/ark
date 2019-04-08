@@ -15,7 +15,7 @@
 
 namespace ark {
 
-class ARK_API GLDebug {
+class GLDebug {
 public:
     static int32_t glGetBufferSize(GLenum target);
     static GLuint glTestIndexBuffer();

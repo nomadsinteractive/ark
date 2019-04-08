@@ -14,7 +14,7 @@
 
 namespace ark {
 
-class ARK_API GLUtil {
+class GLUtil {
 public:
     static GLenum toEnum(RenderModel::Mode renderMode);
 

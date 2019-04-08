@@ -21,7 +21,7 @@
 namespace ark {
 namespace opengl {
 
-class ARK_API GLPipeline : public Pipeline {
+class GLPipeline : public Pipeline {
 public:
     GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const ShaderBindings& bindings);
     virtual ~GLPipeline() override;
@@ -39,7 +39,7 @@ public:
 
     void glUpdateMatrix(GraphicsContext& graphicsContext, const String& name, const Matrix& matrix);
 
-    class ARK_API GLUniform {
+    class GLUniform {
     public:
         GLUniform(GLint location = -1);
         GLUniform(const GLUniform& other) = default;
