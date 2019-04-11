@@ -79,8 +79,8 @@ public:
 
     template<typename T> T toType(PyObject* object);
     template<typename T> PyObject* fromType(const T& value);
-    template<typename T> sp<T> toSharedPtr(PyObject* object) {
-        return asInterface<T>(object);
+    template<typename T> sp<T> toSharedPtr(PyObject* object, bool alert = true) {
+        return asInterface<T>(object, alert);
     }
     template<typename T> PyObject* fromSharedPtr(const sp<T>& object) {
         if(!object)
@@ -117,10 +117,6 @@ public:
         }
         DCHECK(!alert, "Casting \"%s\" to class \"%s\" failed", pyType->tp_name, Class::getClass<T>()->name());
         return nullptr;
-    }
-
-    template<typename T> const sp<T> asInterfaceOrNull(PyObject* object) {
-        return asInterface<T>(object, false);
     }
 
     template<typename T> PyObject* pyNewObject(const sp<T>& object) {
@@ -175,7 +171,7 @@ private:
     }
 
     template<typename T> T toCppObject_sfinae(PyObject* obj, typename T::_PtrType*) {
-        return toSharedPtr<typename T::_PtrType>(obj);
+        return toSharedPtr<typename T::_PtrType>(obj, true);
     }
     template<typename T> T toCppObject_sfinae(PyObject* obj, ...) {
         return toType<T>(obj);
@@ -195,8 +191,8 @@ private:
     }
 
 
-    sp<Vec2> toVec2(PyObject* object);
-    sp<Vec3> toVec3(PyObject* object);
+    sp<Vec2> toVec2(PyObject* object, bool alert);
+    sp<Vec3> toVec3(PyObject* object, bool alert);
     sp<Integer> toInteger(PyObject* object);
     sp<Runnable> toRunnable(PyObject* object);
     sp<CollisionCallback> toCollisionCallback(PyObject* object);
@@ -214,39 +210,39 @@ private:
     sp<ReferenceManager> _reference_manager;
 };
 
-template<> inline sp<Numeric> PythonInterpreter::toSharedPtr<Numeric>(PyObject* object)
+template<> inline sp<Numeric> PythonInterpreter::toSharedPtr<Numeric>(PyObject* object, bool alert)
 {
     return toNumeric(object);
 }
 
-template<> inline sp<Integer> PythonInterpreter::toSharedPtr<Integer>(PyObject* object)
+template<> inline sp<Integer> PythonInterpreter::toSharedPtr<Integer>(PyObject* object, bool alert)
 {
     return toInteger(object);
 }
 
-template<> inline sp<Runnable> PythonInterpreter::toSharedPtr<Runnable>(PyObject* object)
+template<> inline sp<Runnable> PythonInterpreter::toSharedPtr<Runnable>(PyObject* object, bool alert)
 {
     return toRunnable(object);
 }
 
-template<> inline sp<CollisionCallback> PythonInterpreter::toSharedPtr<CollisionCallback>(PyObject* object)
+template<> inline sp<CollisionCallback> PythonInterpreter::toSharedPtr<CollisionCallback>(PyObject* object, bool alert)
 {
     return toCollisionCallback(object);
 }
 
-template<> inline sp<EventListener> PythonInterpreter::toSharedPtr<EventListener>(PyObject* object)
+template<> inline sp<EventListener> PythonInterpreter::toSharedPtr<EventListener>(PyObject* object, bool alert)
 {
     return toEventListener(object);
 }
 
-template<> inline sp<Vec2> PythonInterpreter::toSharedPtr<Vec2>(PyObject* object)
+template<> inline sp<Vec2> PythonInterpreter::toSharedPtr<Vec2>(PyObject* object, bool alert)
 {
-    return toVec2(object);
+    return toVec2(object, alert);
 }
 
-template<> inline sp<Vec3> PythonInterpreter::toSharedPtr<Vec3>(PyObject* object)
+template<> inline sp<Vec3> PythonInterpreter::toSharedPtr<Vec3>(PyObject* object, bool alert)
 {
-    return toVec3(object);
+    return toVec3(object, alert);
 }
 
 template<> inline PyObject* PythonInterpreter::fromSharedPtr<Array<uint8_t>>(const bytearray& bytes)

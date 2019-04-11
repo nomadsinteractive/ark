@@ -2,6 +2,7 @@
 #define ARK_CORE_BASE_FUTURE_H_
 
 #include "core/base/api.h"
+#include "core/inf/variable.h"
 
 namespace ark {
 
@@ -20,8 +21,10 @@ public:
 //  [[script::bindings::property]]
     bool isDone() const;
 
+    sp<Boolean> cancelled() const;
+
 private:
-    bool _cancelled;
+    sp<Boolean::Impl> _cancelled;
     bool _done;
 };
 

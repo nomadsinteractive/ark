@@ -32,24 +32,6 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-namespace {
-
-class PyNumeric : public Numeric {
-public:
-    PyNumeric(PyObject* attr)
-        : _attr(PyInstance::steal(attr)) {
-    }
-
-    virtual float val() override {
-        return static_cast<float>(PyFloat_AsDouble(_attr.object()));
-    }
-
-private:
-    PyInstance _attr;
-};
-
-}
-
 sp<Runnable> PythonInterpreter::toRunnable(PyObject* object)
 {
     if(isInstance<Runnable>(object))
@@ -114,7 +96,7 @@ std::wstring PythonInterpreter::toWString(PyObject* object)
     return L"";
 }
 
-sp<Vec2> PythonInterpreter::toVec2(PyObject* object)
+sp<Vec2> PythonInterpreter::toVec2(PyObject* object, bool alert)
 {
     if(PyTuple_Check(object))
     {
@@ -122,10 +104,10 @@ sp<Vec2> PythonInterpreter::toVec2(PyObject* object)
         if(PyArg_ParseTuple(object, "OO", &x, &y))
             return Vec2Util::create(toNumeric(x), toNumeric(y));
     }
-    return asInterface<Vec2>(object);
+    return asInterface<Vec2>(object, alert);
 }
 
-sp<Vec3> PythonInterpreter::toVec3(PyObject* object)
+sp<Vec3> PythonInterpreter::toVec3(PyObject* object, bool alert)
 {
     if(isNoneOrNull(object))
         return nullptr;
@@ -136,11 +118,14 @@ sp<Vec3> PythonInterpreter::toVec3(PyObject* object)
         if(PyArg_ParseTuple(object, "OO|O", &x, &y, &z))
             return Vec3Util::create(toNumeric(x), toNumeric(y), toNumeric(z));
     }
-    const sp<Vec3> vec3 = asInterfaceOrNull<Vec3>(object);
+    const sp<Vec3> vec3 = asInterface<Vec3>(object, false);
     if(vec3)
         return vec3;
 
-    const sp<Vec2> vec2 = asInterfaceOrNull<Vec2>(object);
+    const sp<Vec2> vec2 = asInterface<Vec2>(object, false);
+    if(!vec2 && !alert)
+        return nullptr;
+
     DCHECK(vec2, "Cannot cast \"%s\" to Vec3, possible candidates: tuple, Vec3, Vec2", Py_TYPE(object)->tp_name);
     return Vec3Util::create(vec2);
 }
@@ -160,15 +145,7 @@ sp<Numeric> PythonInterpreter::toNumeric(PyObject* object)
     if(PyFloat_Check(object))
         return sp<Numeric::Impl>::make(static_cast<float>(PyFloat_AsDouble(object)));
 
-    sp<Numeric> arkInstance = asInterface<Numeric>(object);
-    if(arkInstance)
-        return arkInstance;
-
-    PyObject* val = PyObject_GetAttrString(object, "val");
-    if(val != Py_None)
-        return sp<PyNumeric>::make(val);
-    Py_XDECREF(val);
-    return nullptr;
+    return asInterface<Numeric>(object, false);
 }
 
 sp<Integer> PythonInterpreter::toInteger(PyObject* object)
@@ -406,7 +383,7 @@ template<> ARK_PLUGIN_PYTHON_API V2 PythonInterpreter::toType<V2>(PyObject* obje
         if(PyArg_ParseTuple(object, "ff", &x, &y))
             return V2(x, y);
     }
-    const sp<Vec2> vec2 = toVec2(object);
+    const sp<Vec2> vec2 = toVec2(object, true);
     if(vec2)
         return vec2->val();
     DFATAL("V2 object should be either Vec2 or length-2 tuple (eg. (1.0, 1.0))");

@@ -35,6 +35,7 @@ public:
         World _world;
         b2Body* _body;
 
+        SafePtr<Disposed> _disposed;
         sp<RigidBody::Callback> _callback;
 
         std::unordered_set<int32_t> _contacts;
@@ -74,7 +75,7 @@ public:
     Collider::BodyType type() const;
 
 //  [[script::bindings::property]]
-    V xy() const;
+    V2 xy() const;
 //  [[script::bindings::property]]
     V3 xyz() const;
 
@@ -88,12 +89,15 @@ public:
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 //  [[script::bindings::property]]
-    const sp<Transform>& transform const;
+    const sp<Transform>& transform() const;
 
 //  [[script::bindings::property]]
     const Box& tag() const;
 //  [[script::bindings::property]]
     void setTag(const Box& box) const;
+
+//  [[script::bindings::property]]
+    sp<Boolean> disposed() const;
 
 //  [[script::bindings::property]]
     const sp<CollisionCallback>& collisionCallback() const;
@@ -151,6 +155,9 @@ public:
 
 //  [[script::bindings::auto]]
     void setTransform(const V2& position, float angle);
+
+//  [[script::bindings::auto]]
+    sp<Future> applyLinearVelocity(const sp<Vec2>& velocity);
 
 //  [[plugin::builder]]
     class BUILDER_IMPL1 : public Builder<Body> {

@@ -1,6 +1,8 @@
 #include "box2d/impl/body.h"
 
+#include "core/ark.h"
 #include "core/base/bean_factory.h"
+#include "core/base/future.h"
 #include "core/inf/variable.h"
 #include "core/types/weak_ptr.h"
 #include "core/util/bean_utils.h"
@@ -86,6 +88,29 @@ private:
     sp<Numeric> _delegate;
 };
 
+class ManualLinearVelocity : public Runnable {
+public:
+    ManualLinearVelocity(const sp<Body::Stub>& body, const sp<Vec2>& velocity, const sp<Future>& future)
+        : _body(body), _velocity(velocity), _future(future) {
+    }
+
+    virtual void run() override {
+        const V2 v = _velocity->val();
+        if(_body->_body) {
+            _body->_body->SetLinearVelocity(b2Vec2(v.x(), v.y()));
+        } else if(_future) {
+            _future->cancel();
+            _future = nullptr;
+            _body = nullptr;
+        }
+    }
+
+private:
+    sp<Body::Stub> _body;
+    sp<Vec2> _velocity;
+    sp<Future> _future;
+};
+
 class BodyDisposer {
 public:
     BodyDisposer(const World& world, b2Body* body)
@@ -118,7 +143,7 @@ Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& positio
     : RigidBody(stub->_id, type,
                 sp<_RigidBodyPosition>::make(stub, position),
                 size,
-                sp<Rotate>::make(sp<_RigidBodyRotation>::make(stub, rotation))), _stub(stub)
+                sp<Rotate>::make(sp<_RigidBodyRotation>::make(stub, rotation)), stub->_disposed), _stub(stub)
 {
     _stub->_callback = callback();
     _stub->_body->SetUserData(new Shadow(stub, RigidBody::stub()));
@@ -159,7 +184,7 @@ sp<Body> Body::obtain(const Shadow* shadow, ObjectPool& objectPool)
         float rotation = s._body->GetTransform().q.GetAngle();
         const sp<Vec> p = objectPool.obtain<Vec::Const>(V(position.x, position.y));
         const sp<Rotate> rotate = objectPool.obtain<Rotate>(objectPool.obtain<Numeric::Const>(rotation));
-        rigidBodyStub = objectPool.obtain<RigidBody::Stub>(s._id, bodyType, p, nullptr, rotate, nullptr, shadow->_tag);
+        rigidBodyStub = objectPool.obtain<RigidBody::Stub>(s._id, bodyType, p, nullptr, rotate, s._disposed, nullptr, shadow->_tag);
     }
     return objectPool.obtain<Body>(shadow->_body.ensure(), rigidBodyStub);
 }
@@ -277,6 +302,14 @@ void Body::setTransform(const V2& position, float angle)
     _stub->_body->SetTransform(b2Vec2(position.x(), position.y()), angle);
 }
 
+sp<Future> Body::applyLinearVelocity(const sp<Vec2>& velocity)
+{
+    const sp<Future> future = sp<Future>::make();
+    const sp<ManualLinearVelocity> task = sp<ManualLinearVelocity>::make(_stub, velocity, future);
+    Ark::instance().applicationContext()->addPreRenderTask(task, future->cancelled());
+    return future;
+}
+
 Body::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest)
     : _world(factory.ensureBuilder<Object>(manifest, "world")),
       _shape(factory.ensureBuilder<Shape>(manifest, "shape")),
@@ -324,6 +357,7 @@ void Body::Stub::dispose()
 
     delete reinterpret_cast<Body::Shadow*>(_body->GetUserData());
     _body->SetUserData(nullptr);
+    _disposed->dispose();
 
     if(_world.world().IsLocked())
         Ark::instance().applicationContext()->deferUnref(sp<BodyDisposer>::make(_world, _body));
@@ -331,6 +365,7 @@ void Body::Stub::dispose()
         BodyDisposer disposer(_world, _body);
 
     _body = nullptr;
+    _callback = nullptr;
 }
 
 Body::Shadow::Shadow(const sp<Body::Stub>& body, const sp<RigidBody::Stub>& rigidBody)

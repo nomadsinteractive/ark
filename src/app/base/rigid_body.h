@@ -35,13 +35,16 @@ public:
     };
 
     struct ARK_API Stub {
-        Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Callback>& callback = nullptr, const sp<Box>& tag = nullptr);
+        Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed = nullptr,
+             const sp<Callback>& callback = nullptr, const sp<Box>& tag = nullptr);
+        ~Stub();
 
         int32_t _id;
         Collider::BodyType _type;
         SafePtr<Vec> _position;
         SafePtr<Size> _size;
         sp<Transform> _transform;
+        SafePtr<Disposed> _disposed;
 
         sp<Callback> _callback;
 
@@ -51,7 +54,7 @@ public:
 public:
     virtual ~RigidBody() = default;
 
-    RigidBody(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate);
+    RigidBody(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed = nullptr);
     RigidBody(const sp<Stub>& stub);
 
 //  [[script::bindings::auto]]
@@ -85,6 +88,9 @@ public:
     const Box& tag() const;
 //  [[script::bindings::property]]
     void setTag(const Box& box) const;
+
+//  [[script::bindings::property]]
+    sp<Boolean> disposed() const;
 
 //  [[script::bindings::property]]
     const sp<CollisionCallback>& collisionCallback() const;

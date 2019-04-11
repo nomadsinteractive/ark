@@ -408,14 +408,15 @@ class GenArgument:
         if m in TYPE_DEFINED_SP:
             return self._gen_var_declare(m, objname, 'toCppObject', m, argname)
         if m != self._accept_type:
-            return self._gen_var_declare('sp<%s>' % m, objname, 'asInterfaceOrNull' if extract_cast else 'toSharedPtr', m, argname)
+            return self._gen_var_declare('sp<%s>' % m, objname, 'toSharedPtr', m, argname, extract_cast)
         return self._gen_var_declare(typename, objname, 'toType', typename, argname)
 
-    def _gen_var_declare(self, typename, varname, funcname, functype, argname):
+    def _gen_var_declare(self, typename, varname, funcname, functype, argname, extract_cast=False):
+        argappendix = ', false' if extract_cast else ''
         if self._default_value and self._accept_type.startswith('sp<'):
-            return 'const %s %s = %s ? PythonInterpreter::instance()->%s<%s>(%s) : %s;' % (
-                typename, varname, argname, funcname, functype, argname, self._default_value)
-        return 'const %s %s = PythonInterpreter::instance()->%s<%s>(%s);' % (typename, varname, funcname, functype, argname)
+            return 'const %s %s = %s ? PythonInterpreter::instance()->%s<%s>(%s%s) : %s;' % (
+                typename, varname, argname, funcname, functype, argname, argappendix,self._default_value)
+        return 'const %s %s = PythonInterpreter::instance()->%s<%s>(%s%s);' % (typename, varname, funcname, functype, argname, argappendix)
 
     def str(self):
         return self._str

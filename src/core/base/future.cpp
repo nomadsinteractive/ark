@@ -3,12 +3,12 @@
 namespace ark {
 
 Future::Future()
-    : _cancelled(false), _done(false) {
+    : _cancelled(sp<Boolean::Impl>::make(false)), _done(false) {
 }
 
 void Future::cancel()
 {
-    _cancelled = true;
+    _cancelled->set(true);
 }
 
 void Future::done()
@@ -18,12 +18,17 @@ void Future::done()
 
 bool Future::isCancelled() const
 {
-    return _cancelled;
+    return _cancelled->val();
 }
 
 bool Future::isDone() const
 {
     return _done;
+}
+
+sp<Boolean> Future::cancelled() const
+{
+    return _cancelled;
 }
 
 }

@@ -155,9 +155,9 @@ bool ApplicationContext::onEvent(const Event& event)
     return _event_listeners->onEvent(event) || (_default_event_listener && _default_event_listener->onEvent(event));
 }
 
-void ApplicationContext::addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& expired)
+void ApplicationContext::addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& disposed)
 {
-    _render_controller->addPreUpdateRequest(task, expired);
+    _render_controller->addPreUpdateRequest(task, disposed);
 }
 
 void ApplicationContext::addEventListener(const sp<EventListener>& eventListener)

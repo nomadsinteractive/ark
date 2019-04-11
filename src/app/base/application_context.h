@@ -42,7 +42,7 @@ public:
 
     bool onEvent(const Event& event);
 
-    void addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& expired = nullptr);
+    void addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& disposed = nullptr);
     void addEventListener(const sp<EventListener>& eventListener);
     void setDefaultEventListener(const sp<EventListener>& eventListener);
 

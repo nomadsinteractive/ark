@@ -7,6 +7,7 @@
 #include "core/impl/boolean/boolean_and.h"
 #include "core/impl/boolean/boolean_not.h"
 #include "core/impl/boolean/boolean_or.h"
+#include "core/impl/variable/variable_observer.h"
 #include "core/impl/variable/variable_ternary.h"
 
 namespace ark {
@@ -213,9 +214,24 @@ void BooleanUtil::set(const sp<BooleanWrapper>& self, const sp<Boolean>& delegat
     self->set(delegate);
 }
 
+sp<Boolean> BooleanUtil::observe(const sp<Boolean>& self, const sp<Observer>& observer)
+{
+    return sp<VariableObserver<bool>>::make(self, observer);
+}
+
 sp<Numeric> BooleanUtil::ternary(const sp<Boolean>& self, const sp<Numeric>& postive, const sp<Numeric>& negative)
 {
     return sp<VariableTernary<float>>::make(self, postive, negative);
+}
+
+sp<Vec2> BooleanUtil::ternary(const sp<Boolean>& self, const sp<Vec2>& postive, const sp<Vec2>& negative)
+{
+    return sp<VariableTernary<V2>>::make(self, postive, negative);
+}
+
+sp<Vec3> BooleanUtil::ternary(const sp<Boolean>& self, const sp<Vec3>& postive, const sp<Vec3>& negative)
+{
+    return sp<VariableTernary<V3>>::make(self, postive, negative);
 }
 
 void BooleanUtil::fix(const sp<Boolean>& self)

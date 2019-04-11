@@ -1,6 +1,7 @@
 #include "python/extension/py_instance.h"
 
 #include "core/types/shared_ptr.h"
+#include "core/util/log.h"
 
 #include "extension/python_interpreter.h"
 #include "extension/reference_manager.h"
@@ -90,7 +91,15 @@ sp<PyInstance> PyInstance::getAttr(const char* name) const
 
 PyObject* PyInstance::call(PyObject* args)
 {
-    return PyObject_Call(_object, args, nullptr);
+    try {
+        return PyObject_Call(_object, args, nullptr);
+    }
+    catch(const std::exception& e) {
+        PyObject* repr = PyObject_Repr(_object);
+        LOGE("Exception occured while calling method \"%s\"", PythonInterpreter::instance()->toString(repr).c_str());
+        Py_XDECREF(repr);
+        throw e;
+    }
 }
 
 bool PyInstance::isCallable()

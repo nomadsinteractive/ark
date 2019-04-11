@@ -152,9 +152,14 @@ void RenderObject::setTag(const Box& tag)
     _tag = tag;
 }
 
-const SafePtr<Disposed>& RenderObject::disposed() const
+sp<Boolean> RenderObject::disposed() const
 {
-    return _disposed;
+    return _disposed->toBoolean();
+}
+
+void RenderObject::setDisposed(const sp<Boolean>& disposed)
+{
+    _disposed->set(disposed);
 }
 
 void RenderObject::dispose()

@@ -129,6 +129,12 @@ class Boolean(_Var):
     def ternary(self, positive, negative):
         return None
 
+    def __or__(self, other):
+        return None
+
+    def __and__(self, other):
+        return None
+
 
 class Integer(_Var):
     pass
@@ -319,7 +325,7 @@ class Mat3:
 class RenderObject:
     def __init__(self, t, pos=None, size=None, transform=None, varyings=None):
         self._transform = transform
-        self._disposed = Disposed()
+        self._disposed = Boolean(False)
 
     @property
     def type(self):
@@ -338,8 +344,12 @@ class RenderObject:
         pass
 
     @property
-    def disposed(self) -> Disposed:
+    def disposed(self) -> Boolean:
         return self._disposed
+
+    @disposed.setter
+    def disposed(self, disposed: Boolean):
+        pass
 
     @property
     def tag(self):
@@ -787,6 +797,9 @@ class Platform:
 
 class RigidBody:
 
+    def __init__(self):
+        self._disposed = Boolean(False)
+
     def dispose(self):
         pass
 
@@ -824,6 +837,10 @@ class RigidBody:
     @property
     def height(self) -> float:
         return 0
+
+    @property
+    def disposed(self) -> Boolean:
+        return self._disposed
 
     @property
     def collision_callback(self):

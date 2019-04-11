@@ -98,7 +98,9 @@ public:
     void setTag(const Box& tag);
 
 //  [[script::bindings::property]]
-    const SafePtr<Disposed>& disposed() const;
+    sp<Boolean> disposed() const;
+//  [[script::bindings::property]]
+    void setDisposed(const sp<Boolean>& disposed);
 
 //  [[script::bindings::auto]]
     void dispose();
