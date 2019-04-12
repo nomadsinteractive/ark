@@ -2,34 +2,20 @@
 
 #include "core/inf/variable.h"
 #include "core/base/bean_factory.h"
+#include "core/impl/flatable/flatable_by_variable.h"
 
 #include "graphics/base/v3.h"
 
 namespace ark {
 
-FlatableVec3::FlatableVec3(const sp<Vec3>& vv3)
-    : _vv3(vv3)
+FlatableV3f::BUILDER::BUILDER(BeanFactory& factory, const String& value)
+    : _vec3(factory.ensureBuilder<Vec3>(value))
 {
 }
 
-void FlatableVec3::flat(void* buf)
+sp<Flatable> FlatableV3f::BUILDER::build(const sp<Scope>& args)
 {
-    *reinterpret_cast<V3*>(buf) = _vv3->val();
-}
-
-uint32_t FlatableVec3::size()
-{
-    return sizeof(V3);
-}
-
-FlatableVec3::BUILDER::BUILDER(BeanFactory& parent, const String& value)
-    : _vv3(parent.ensureBuilder<Vec3>(value))
-{
-}
-
-sp<Flatable> FlatableVec3::BUILDER::build(const sp<Scope>& args)
-{
-    return sp<FlatableVec3>::make(_vv3->build(args));
+    return sp<FlatableByVariable<V3>>::make(_vec3->build(args));
 }
 
 }

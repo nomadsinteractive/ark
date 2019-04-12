@@ -60,8 +60,7 @@ public:
         class VaryingBuilder {
         public:
             VaryingBuilder(const String& name, const sp<Builder<Flatable>>& flatable);
-            VaryingBuilder(const VaryingBuilder& other) = default;
-            VaryingBuilder(VaryingBuilder&& other) = default;
+            DEFAULT_COPY_AND_ASSIGN(VaryingBuilder);
 
             String _name;
             sp<Builder<Flatable>> _flatable;
@@ -76,17 +75,6 @@ public:
         BeanFactory _factory;
         sp<Builder<Shader>> _shader;
         std::vector<VaryingBuilder> _varying_builders;
-    };
-
-//  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Varyings> {
-    public:
-        DICTIONARY(BeanFactory& parent, const String& value);
-
-        virtual sp<Varyings> build(const sp<Scope>& args) override;
-
-    private:
-        sp<BUILDER> _delegate;
     };
 
 private:

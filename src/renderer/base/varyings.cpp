@@ -6,7 +6,7 @@
 #include "core/inf/array.h"
 #include "core/inf/flatable.h"
 #include "core/inf/variable.h"
-#include "core/impl/flatable/flatable_numeric.h"
+#include "core/impl/flatable/flatable_by_variable.h"
 #include "core/util/bean_utils.h"
 
 #include "graphics/base/rect.h"
@@ -50,7 +50,7 @@ void Varyings::addVarying(const String& name, const sp<Flatable>& flatable)
 
 void Varyings::add(const String& name, const sp<Numeric>& var)
 {
-    addVarying(name, sp<FlatableNumeric>::make(var));
+    addVarying(name, sp<FlatableByVariable<float>>::make(var));
 }
 
 Varyings::Snapshot Varyings::snapshot(MemoryPool& memoryPool) const
@@ -95,16 +95,6 @@ sp<Varyings> Varyings::BUILDER::build(const sp<Scope>& args)
 template<> ARK_API sp<Varyings> Null::ptr()
 {
     return Ark::instance().obtain<Varyings>();
-}
-
-Varyings::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)
-    : _delegate(sp<Varyings::BUILDER>::make(parent, Documents::fromProperties(value)))
-{
-}
-
-sp<Varyings> Varyings::DICTIONARY::build(const sp<Scope>& args)
-{
-    return _delegate->build(args);
 }
 
 Varyings::Varying::Varying(int32_t offset, const sp<Flatable>& flatable)

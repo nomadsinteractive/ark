@@ -1,6 +1,6 @@
 #include "renderer/impl/snippet/snippet_ucolor.h"
 
-#include "graphics/impl/flatable/flatable_v4f.h"
+#include "core/impl/flatable/flatable_by_variable.h"
 
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
@@ -15,7 +15,7 @@ SnippetUColor::SnippetUColor(const sp<Vec4>& color)
 
 void SnippetUColor::preInitialize(PipelineBuildingContext& context)
 {
-    context.addUniform("u_Color", Uniform::TYPE_F4, sp<FlatableV4f>::make(_color), _color.as<Notifier>(), -1);
+    context.addUniform("u_Color", Uniform::TYPE_F4, sp<FlatableByVariable<V4>>::make(_color), _color.as<Notifier>(), -1);
     context._fragment.addModifier("u_Color");
 }
 

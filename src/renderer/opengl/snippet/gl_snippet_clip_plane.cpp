@@ -2,9 +2,10 @@
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
+#include "core/impl/flatable/flatable_by_variable.h"
 #include "core/util/strings.h"
 
-#include "graphics/impl/flatable/flatable_v4f.h"
+#include "graphics/base/v4.h"
 
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
@@ -21,7 +22,7 @@ void GLSnippetClipPlane::preInitialize(PipelineBuildingContext& context)
     for(const auto& i : _planes)
     {
         const String uName = Strings::sprintf("u_Plane%d", i.first);
-        context.addUniform(uName, Uniform::TYPE_F4, sp<FlatableV4f>::make(i.second), i.second.as<Notifier>(), -1);
+        context.addUniform(uName, Uniform::TYPE_F4, sp<FlatableByVariable<V4>>::make(i.second), i.second.as<Notifier>(), -1);
     }
 }
 
