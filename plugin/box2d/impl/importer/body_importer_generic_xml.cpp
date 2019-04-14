@@ -94,6 +94,7 @@ void ImporterGenericXML::import(World& world)
         bodyManifest.category = Strings::parse<uint16_t>(fixture->ensureChild("filter_categoryBits")->value());
         bodyManifest.group = Strings::parse<int16_t>(fixture->ensureChild("filter_groupIndex")->value());
         bodyManifest.mask = Strings::parse<uint16_t>(fixture->ensureChild("filter_maskBits")->value());
+        bodyManifest.is_sensor = fixture->getChild("isSensor") != document::null();
         world.setBodyManifest(id, bodyManifest);
     }
 }
