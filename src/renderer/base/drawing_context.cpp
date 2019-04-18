@@ -76,10 +76,10 @@ void DrawingContext::upload(GraphicsContext& graphicsContext)
     DCHECK(_vertex_buffer.id(), "Invaild VertexBuffer");
     DCHECK(_index_buffer.id(), "Invaild IndexBuffer");
 
-    for(const auto& iter : _instanced_array_snapshots)
+    for(const auto& i : _instanced_array_snapshots)
     {
-        iter.second.upload(graphicsContext);
-        DCHECK(iter.second.id(), "Invaild Instanced Array Buffer: %d", iter.first);
+        i.second.upload(graphicsContext);
+        DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
     }
 }
 

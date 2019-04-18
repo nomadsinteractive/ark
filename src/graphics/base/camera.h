@@ -30,7 +30,8 @@ public:
     };
 
 public:
-    Camera(const Viewport& target);
+//  [[script::bindings::auto]]
+    Camera();
 
     struct Snapshot {
         Snapshot(Holder& holder);
@@ -63,8 +64,6 @@ private:
     void updateViewProjection();
 
 private:
-    Viewport _target;
-
     sp<Holder> _view;
     sp<Holder> _projection;
 

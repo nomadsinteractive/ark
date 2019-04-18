@@ -45,6 +45,15 @@ PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipe
     _fragment.initialize(fragment, *this);
 }
 
+PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment, BeanFactory& factory, const sp<Scope>& args, const document& manifest)
+    : _shader(sp<Shader::Stub>::make(pipelineFactory)), _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT)
+{
+    loadPredefinedParam(factory, args, manifest);
+
+    _vertex.initialize(vertex, *this);
+    _fragment.initialize(fragment, *this);
+}
+
 void PipelineBuildingContext::loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
 {
     loadPredefinedUniform(factory, args, manifest);

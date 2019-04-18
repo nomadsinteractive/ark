@@ -129,6 +129,9 @@ void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const ShaderBindin
     bindBuffer(graphicsContext, bindings.pipelineInput(), 0);
     for(const auto& i : bindings.instancedArrays())
     {
+        if(!i.second.id())
+            i.second.upload(graphicsContext);
+
         glBindBuffer(GL_ARRAY_BUFFER, i.second.id());
         bindBuffer(graphicsContext, bindings.pipelineInput(), i.first);
         glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -78,17 +78,14 @@ private:
 
 }
 
-Camera::Camera(const Viewport& target)
-    : _target(target), _view(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))), _projection(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))),
+Camera::Camera()
+    : _view(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))), _projection(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))),
       _notifier(sp<Notifier>::make())
 {
 }
 
 void Camera::ortho(float left, float right, float top, float bottom, float near, float far)
 {
-    if(_target.top() < _target.bottom())
-        std::swap(top, bottom);
-
     _vp = sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix::ortho(left, right, top, bottom, near * 2 - far, far)));
 }
 

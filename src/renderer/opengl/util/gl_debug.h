@@ -21,14 +21,14 @@ public:
     static GLuint glTestIndexBuffer();
     static GLuint glTestArrayBuffer();
 
-    template<typename T, typename P> static void glDumpBuffer(const P& buffer) {
+    template<typename T, typename P> static void glDumpBuffer(P& buffer) {
         int32_t nBufferSize = glGetBufferSize(buffer.type());
 
         String data = glDumpBufferData<T>(buffer, nBufferSize);
-        LOGD("buffer-id: %d; size: %d; data: [%s]", buffer.id(), nBufferSize, data.c_str());
+        LOGD("buffer-id: %d; size: %d; data: [%s]", static_cast<uint32_t>(buffer.id()), nBufferSize, data.c_str());
     }
 
-    template<typename T, typename P> static String glDumpBufferData(const P& buffer, uint32_t bufferSize) {
+    template<typename T, typename P> static String glDumpBufferData(P& buffer, uint32_t bufferSize) {
 #ifndef ANDROID
         T* data = reinterpret_cast<T*>(glMapBuffer(buffer.type(), GL_READ_ONLY));
         String content = Strings::join<T>(data, 0, bufferSize / sizeof(T));

@@ -39,6 +39,11 @@ void Buffer::Snapshot::upload(GraphicsContext& graphicsContext) const
     _delegate->upload(graphicsContext, _uploader);
 }
 
+const sp<Buffer::Delegate>& Buffer::Snapshot::delegate() const
+{
+    return _delegate;
+}
+
 Buffer::Buffer(const sp<Buffer::Delegate>& delegate) noexcept
     : _delegate(delegate)
 {

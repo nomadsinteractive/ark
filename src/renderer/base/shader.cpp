@@ -37,9 +37,7 @@ public:
     }
 
     virtual sp<Shader> build(const sp<Scope>& args) override {
-        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller->createPipelineFactory(), _vertex_src, _fragment_src);
-        buildingContext->loadPredefinedParam(_factory, args, _manifest);
-
+        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller->createPipelineFactory(), _vertex_src, _fragment_src, _factory, args, _manifest);
         const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(_render_controller, buildingContext);
         return sp<Shader>::make(buildingContext->_shader, pipelineLayout, _camera->build(args));
     }
@@ -128,8 +126,7 @@ Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const s
 
 sp<Shader> Shader::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_resource_loader_context->renderController()->createPipelineFactory(), _vertex->build(args), _fragment->build(args));
-    buildingContext->loadPredefinedParam(_factory, args, _manifest);
+    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_resource_loader_context->renderController()->createPipelineFactory(), _vertex->build(args), _fragment->build(args), _factory, args, _manifest);
     if(_snippet)
         buildingContext->addSnippet(_snippet->build(args));
 

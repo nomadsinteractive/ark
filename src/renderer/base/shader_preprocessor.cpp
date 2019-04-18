@@ -11,7 +11,7 @@
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_context.h"
 
-#define VAR_TYPE_PATTERN "\\s+(int|uint8|float|vec2|vec3|vec4|mat3|mat4|sampler2D)\\s+"
+#define VAR_TYPE_PATTERN "\\s+(int|uint8|float|vec2|vec3|vec4|mat3|mat4|sampler2D|samplerCube)\\s+"
 #define ATTRIBUTE_PATTERN VAR_TYPE_PATTERN "(?:a_|v_)([\\w\\d_]+);"
 #define UNIFORM_PATTERN VAR_TYPE_PATTERN "(u_[\\w\\d_]+);"
 

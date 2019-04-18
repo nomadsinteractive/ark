@@ -56,6 +56,8 @@ public:
 
         void upload(GraphicsContext& graphicsContext) const;
 
+        const sp<Delegate>& delegate() const;
+
     private:
         sp<Delegate> _delegate;
         sp<Uploader> _uploader;
