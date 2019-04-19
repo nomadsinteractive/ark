@@ -31,7 +31,7 @@ public:
     }
 
     virtual void draw(GraphicsContext& /*graphicsContext*/) override {
-        glBindFramebuffer(GL_FRAMEBUFFER, _fbo->id());
+        glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_fbo->id()));
         glViewport(0, 0, static_cast<GLsizei>(_fbo->texture()->width()), static_cast<GLsizei>(_fbo->texture()->height()));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }

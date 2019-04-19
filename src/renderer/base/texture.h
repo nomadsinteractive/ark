@@ -1,8 +1,6 @@
 #ifndef ARK_RENDERER_BASE_TEXTURE_H_
 #define ARK_RENDERER_BASE_TEXTURE_H_
 
-#include <unordered_map>
-
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/base/bean_factory.h"
@@ -68,11 +66,29 @@ public:
         Parameter _wrap_r;
     };
 
-    Texture(const sp<Size>& size, const sp<Variable<sp<Resource>>>& resource, Type type);
+    class ARK_API Delegate : public Resource {
+    public:
+        virtual ~Delegate() = default;
+
+        virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) = 0;
+
+        using Resource::upload;
+        virtual void upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap) = 0;
+    };
+
+    class ARK_API Uploader {
+    public:
+        virtual ~Uploader() = default;
+
+        virtual void upload(GraphicsContext& graphicContext, Delegate& delegate) = 0;
+
+    };
+
+    Texture(const sp<Size>& size, const sp<Variable<sp<Delegate>>>& delegate, Type type);
     virtual ~Texture() override;
 
     virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
+    virtual void upload(GraphicsContext& graphicsContext, const sp<ark::Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
 
     Type type() const;
@@ -87,7 +103,7 @@ public:
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 
-    sp<Resource> resource() const;
+    sp<Delegate> delegate() const;
 
     const Notifier& notifier() const;
 
@@ -121,9 +137,17 @@ public:
         sp<Texture::Parameters> _parameters;
     };
 
+//  [[plugin::resource-loader("image")]]
+    class UPLOADER_BUILDER : public Builder<Texture::Uploader> {
+    public:
+        UPLOADER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+        virtual sp<Texture::Uploader> build(const sp<Scope>& args) override;
+    };
+
 private:
     sp<Size> _size;
-    sp<Variable<sp<Resource>>> _resource;
+    sp<Variable<sp<Delegate>>> _delegate;
     Type _type;
 
     Notifier _notifier;

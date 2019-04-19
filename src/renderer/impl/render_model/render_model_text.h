@@ -5,14 +5,14 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/texture.h"
 #include "renderer/inf/render_model.h"
-#include "renderer/inf/resource.h"
 
 namespace ark {
 
 class GLModelText : public RenderModel {
 private:
-    class Stub : public Variable<sp<Resource>> {
+    class Stub : public Variable<sp<Texture::Delegate>> {
     public:
         Stub(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
 
@@ -21,7 +21,7 @@ private:
         bool checkUnpreparedCharacter(const RenderLayer::Snapshot& renderContext);
         bool prepare(const RenderLayer::Snapshot& snapshot, bool allowReset);
 
-        virtual sp<Resource> val() override;
+        virtual sp<Texture::Delegate> val() override;
 
     private:
         bool prepareOne(int32_t c);

@@ -113,6 +113,8 @@ public:
     static ARK_API float cos(float x);
 //  [[script::bindings::auto]]
     static ARK_API sp<Numeric> cos(const sp<Numeric>& x);
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> atan(const sp<Vec2>& vec);
 
 //  [[script::bindings::auto]]
     static ARK_API sp<Numeric> min(const sp<Numeric>& a1, const sp<Numeric>& a2);

@@ -4,6 +4,7 @@
 
 #include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
+#include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/texture.h"
@@ -13,13 +14,23 @@
 namespace ark {
 
 GLDynamicCubemap::GLDynamicCubemap(const sp<RenderController>& renderController, const sp<Texture::Parameters>& parameters, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size)
-    : GLTexture(renderController->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), parameters), _render_controller(renderController), _shader(shader), _texture(texture)
+    : GLTexture(renderController->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), parameters), _render_controller(renderController), _shader(shader),
+      _shader_bindings(sp<ShaderBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, renderController, _shader->pipelineLayout())), _texture(texture)
+{
+}
+
+bool GLDynamicCubemap::download(GraphicsContext& /*graphicsContext*/, Bitmap& bitmap)
+{
+    return false;
+}
+
+void GLDynamicCubemap::upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap)
 {
 }
 
 void GLDynamicCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id)
 {
-    GLUtil::renderCubemap(graphicsContext, id, _render_controller, _shader, _texture, width(), height());
+    GLUtil::renderCubemap(graphicsContext, id, _render_controller, _shader->getPipeline(graphicsContext, _shader_bindings), _texture, width(), height());
 }
 
 GLDynamicCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -33,7 +44,7 @@ sp<Texture> GLDynamicCubemap::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Size> size = _size->build(args);
     const sp<GLDynamicCubemap> cubemap = sp<GLDynamicCubemap>::make(_render_controller, _parameters, _shader->build(args), _texture->build(args), size);
-    return _render_controller->createResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
+    return _render_controller->createResource<Texture>(size, sp<Variable<sp<Texture::Delegate>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
 }
 
 }

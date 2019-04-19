@@ -30,6 +30,9 @@ public:
         sp<Texture::Parameters> _parameters;
     };
 
+    virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
+    virtual void upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap) override;
+
 protected:
     virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) override;
 

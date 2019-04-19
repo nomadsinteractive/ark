@@ -140,7 +140,7 @@ void VKFramebuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Upload
 
     VKUtil::checkResult(vkCreateRenderPass(device, &renderPassInfo, nullptr, &_render_pass_begin_info.renderPass));
 
-    const sp<VKTexture2D> vkTexture = _texture->resource();
+    const sp<VKTexture2D> vkTexture = _texture->delegate();
 
     VkImageView attachments[2];
     attachments[0] = vkTexture->vkDescriptor().imageView;

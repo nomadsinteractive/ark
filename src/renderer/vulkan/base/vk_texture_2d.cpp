@@ -55,6 +55,15 @@ Resource::RecycleFunc VKTexture2D::recycle()
     };
 }
 
+bool VKTexture2D::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
+{
+    return false;
+}
+
+void VKTexture2D::upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap)
+{
+}
+
 const VkDescriptorImageInfo& VKTexture2D::vkDescriptor() const
 {
     return _descriptor;

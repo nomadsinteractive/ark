@@ -96,9 +96,9 @@ bool GLModelText::Stub::prepare(const RenderLayer::Snapshot& snapshot, bool allo
     return true;
 }
 
-sp<Resource> GLModelText::Stub::val()
+sp<Texture::Delegate> GLModelText::Stub::val()
 {
-    return _texture->resource();
+    return _texture->delegate();
 }
 
 GLModelText::GLModelText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)

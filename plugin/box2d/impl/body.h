@@ -158,6 +158,8 @@ public:
 
 //  [[script::bindings::auto]]
     sp<Future> applyLinearVelocity(const sp<Vec2>& velocity);
+//  [[script::bindings::auto]]
+    sp<Future> applyRotate(const sp<Numeric>& rotate);
 
 //  [[plugin::builder]]
     class BUILDER_IMPL1 : public Builder<Body> {

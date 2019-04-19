@@ -209,7 +209,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Shad
     _texture_observers.clear();
     for(const sp<Texture>& i : shaderBindings.samplers())
     {
-        const sp<VKTexture2D> texture = i->resource();
+        const sp<VKTexture2D> texture = i->delegate();
         _texture_observers.push_back(i->notifier().createObserver(false));
         writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                       _descriptor_set,

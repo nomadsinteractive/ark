@@ -111,6 +111,29 @@ private:
     sp<Future> _future;
 };
 
+class ManualApplyRotate : public Runnable {
+public:
+    ManualApplyRotate(const sp<Body::Stub>& body, const sp<Numeric>& rotate, const sp<Future>& future)
+        : _body(body), _rotate(rotate), _future(future) {
+    }
+
+    virtual void run() override {
+        if(_body->_body) {
+            float rotation = _rotate->val();
+            _body->_body->SetTransform(_body->_body->GetWorldCenter(), rotation);
+        } else if(_future) {
+            _future->cancel();
+            _future = nullptr;
+            _body = nullptr;
+        }
+    }
+
+private:
+    sp<Body::Stub> _body;
+    sp<Numeric> _rotate;
+    sp<Future> _future;
+};
+
 class BodyDisposer {
 public:
     BodyDisposer(const World& world, b2Body* body)
@@ -306,6 +329,14 @@ sp<Future> Body::applyLinearVelocity(const sp<Vec2>& velocity)
 {
     const sp<Future> future = sp<Future>::make();
     const sp<ManualLinearVelocity> task = sp<ManualLinearVelocity>::make(_stub, velocity, future);
+    Ark::instance().applicationContext()->addPreRenderTask(task, future->cancelled());
+    return future;
+}
+
+sp<Future> Body::applyRotate(const sp<Numeric>& rotate)
+{
+    const sp<Future> future = sp<Future>::make();
+    const sp<Runnable> task = sp<ManualApplyRotate>::make(_stub, rotate, future);
     Ark::instance().applicationContext()->addPreRenderTask(task, future->cancelled());
     return future;
 }

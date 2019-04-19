@@ -13,12 +13,19 @@
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/opengl/util/gl_util.h"
 
-#include "platform/gl/gl.h"
-
 namespace ark {
 
-GLIrradianceCubemap::GLIrradianceCubemap(const sp<RenderController>& renderController, const sp<Texture::Parameters>& params, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size)
-    : GLTexture(renderController->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), params), _render_controller(renderController), _shader(shader), _texture(texture)
+GLIrradianceCubemap::GLIrradianceCubemap(const sp<RenderController>& renderController, const sp<Texture::Parameters>& params, const sp<Texture>& texture, const sp<Size>& size)
+    : GLTexture(renderController->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), params), _render_controller(renderController), _texture(texture)
+{
+}
+
+bool GLIrradianceCubemap::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
+{
+    return false;
+}
+
+void GLIrradianceCubemap::upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap)
 {
 }
 
@@ -26,18 +33,19 @@ void GLIrradianceCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uin
 {
     DCHECK(_size->width() == _size->height(), "Cubemap should be square, but (%.2f, %.2f) provided", _size->width(), _size->height());
 
+    uint32_t tw = static_cast<uint32_t>(_texture->width());
+    uint32_t th = static_cast<uint32_t>(_texture->height());
+
     cmft::Image input;
-    cmft::imageCreate(input, _texture->width(), _texture->height(), 0, 1, 1, cmft::TextureFormat::RGBA32F);
+    cmft::imageCreate(input, tw, th, 0, 1, 1, cmft::TextureFormat::RGBA32F);
 
     if(!_texture->id())
         _texture->upload(graphicsContext, nullptr);
 
-    glBindTexture(GL_TEXTURE_2D, _texture->id());
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, input.m_data);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    Bitmap bitmap(tw, th, tw * 4 * sizeof(float), 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(input.m_data), input.m_dataSize));
+    _texture->delegate()->download(graphicsContext, bitmap);
 
     uint32_t n = static_cast<uint32_t>(_size->width());
-
     cmft::Image output;
     cmft::imageCreate(output, n, n, 0, 1, 6, cmft::TextureFormat::RGBA32F);
     cmft::imageToCubemap(input);
@@ -54,10 +62,7 @@ void GLIrradianceCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uin
 
     for(uint32_t i = 0; i < 6; ++i)
     {
-        GLenum format = GL_RGBA;
-        GLenum pixelFormat = GL_FLOAT;
-        GLenum internalFormat = GL_RGB16F;
-        glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0, (GLint) internalFormat, static_cast<int32_t>(n), static_cast<int32_t>(n), 0, format, pixelFormat, faceList[imageFaceIndices[i]].m_data);
+        GLUtil::glTexImage2D(i, static_cast<int32_t>(n), faceList[imageFaceIndices[i]].m_data);
         LOGD("GLCubemap Uploaded, id = %d, width = %d, height = %d", id, n, n);
     }
 
@@ -67,7 +72,6 @@ void GLIrradianceCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uin
 
 GLIrradianceCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_controller(resourceLoaderContext->renderController()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/equirectangular.vert", "shaders/equirectangular.frag")),
       _texture(factory.ensureBuilder<Texture>(manifest, Constants::Attributes::TEXTURE)), _parameters(sp<Texture::Parameters>::make(manifest))
 {
 }
@@ -75,8 +79,8 @@ GLIrradianceCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& mani
 sp<Texture> GLIrradianceCubemap::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Size> size = _size->build(args);
-    const sp<GLIrradianceCubemap> cubemap = sp<GLIrradianceCubemap>::make(_render_controller, _parameters, _shader->build(args), _texture->build(args), _size->build(args));
-    return _render_controller->createResource<Texture>(size, sp<Variable<sp<Resource>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
+    const sp<GLIrradianceCubemap> cubemap = sp<GLIrradianceCubemap>::make(_render_controller, _parameters, _texture->build(args), _size->build(args));
+    return _render_controller->createResource<Texture>(size, sp<Variable<sp<Texture::Delegate>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
 }
 
 }

@@ -16,15 +16,13 @@ class ARK_API Camera {
 public:
     class Holder : public Flatable {
     public:
-        Holder(const sp<Variable<Matrix>>& delegate);
+        Holder(const sp<Variable<Matrix>>& value);
 
         virtual void flat(void* buf) override;
         virtual uint32_t size() override;
 
-        Matrix matrix();
-
     private:
-        sp<Variable<Matrix>> _delegate;
+        sp<Variable<Matrix>> _value;
 
         friend class Camera;
     };

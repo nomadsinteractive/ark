@@ -13,11 +13,13 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/render_context.h"
 #include "renderer/base/shader.h"
+#include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
 
 #include "renderer/opengl/base/gl_buffer.h"
 #include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/opengl/base/gl_texture.h"
+#include "renderer/opengl/util/gl_debug.h"
 
 namespace ark {
 
@@ -138,7 +140,7 @@ bytearray GLUtil::makeUnitCubeVertices()
     return sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
 }
 
-void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, RenderController& renderController, Shader& shader, Texture& texture, int32_t width, int32_t height)
+void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, RenderController& renderController, const sp<Pipeline>& pipeline, Texture& texture, int32_t width, int32_t height)
 {
     uint32_t captureFBO, captureRBO;
     glGenFramebuffers(1, &captureFBO);
@@ -150,7 +152,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
     for (uint32_t i = 0; i < 6; ++i)
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+        ::glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA8, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
 
     const Matrix captureProjection = Matrix::perspective(Math::radians(90.0f), 1.0f, 0.1f, 10.0f);
     const Matrix captureViews[] = {
@@ -162,7 +164,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
         Matrix::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 0.0f,  0.0f, -1.0f), V3(0.0f, -1.0f,  0.0f))
     };
 
-    const sp<opengl::GLPipeline> glPipeline = shader.pipeline();
+    const sp<opengl::GLPipeline> glPipeline = pipeline;
     glUseProgram(glPipeline->id());
     glPipeline->getUniform("u_Projection").setUniformMatrix4fv(1, GL_FALSE, captureProjection.value());
     texture.upload(graphicsContext, nullptr);
@@ -173,9 +175,11 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    Buffer vertexBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<Uploader::Array<uint8_t>>::make(GLUtil::makeUnitCubeVertices()));
-    Buffer indexBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC);
-    vertexBuffer.upload(graphicsContext);
+    Buffer vertexBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC);
+    Buffer indexBuffer = renderController.makeIndexBuffer(Buffer::USAGE_STATIC);
+
+    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(sp<Uploader::Array<uint8_t>>::make(GLUtil::makeUnitCubeVertices()));
+    vertexBufferSnapshot.upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.id());
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, nullptr);
@@ -204,6 +208,11 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
 
     const V2& resolution = graphicsContext.renderContext()->resolution();
     glViewport(0, 0, static_cast<GLsizei>(resolution.x()), static_cast<GLsizei>(resolution.y()));
+}
+
+void GLUtil::glTexImage2D(uint32_t index, int32_t n, void* data)
+{
+    ::glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + index), 0, (GLint) GL_RGBA8, n, n, 0, GL_RGBA, GL_FLOAT, data);
 }
 
 }

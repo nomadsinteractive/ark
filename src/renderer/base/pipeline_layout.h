@@ -38,6 +38,8 @@ public:
 private:
     void initialize(const Camera& camera);
 
+    void addUniform(const String& name, const sp<Flatable>& flatable, const sp<Notifier>& notifier);
+
 private:
     sp<RenderController> _render_controller;
     sp<PipelineBuildingContext> _building_context;

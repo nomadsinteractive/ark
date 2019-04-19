@@ -198,7 +198,7 @@ void GLPipeline::activeTexture(const Texture& texture, uint32_t name)
 {
     static GLenum glTargets[Texture::TYPE_COUNT] = {GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP};
     glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + name));
-    glBindTexture(glTargets[texture.type()], texture.resource()->id());
+    glBindTexture(glTargets[texture.type()], texture.delegate()->id());
 
     char uniformName[16] = "u_Texture0";
     uniformName[9] = static_cast<char>('0' + name);

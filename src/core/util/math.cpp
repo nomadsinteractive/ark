@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <math_neon.h>
 
+#include "core/inf/variable.h"
 #include "core/impl/numeric/abs.h"
 #include "core/impl/numeric/max.h"
 #include "core/impl/numeric/min.h"
@@ -14,6 +15,26 @@
 #include "core/util/log.h"
 
 namespace ark {
+
+namespace {
+
+class AtanVec2 : public Numeric {
+public:
+    AtanVec2(const sp<Vec2>& value)
+        : _value(value) {
+    }
+
+public:
+    virtual float val() override {
+        const V2 val = _value->val();
+        return Math::atan2(val.y(), val.x());
+    }
+
+private:
+    sp<Vec2> _value;
+};
+
+}
 
 const float Math::PI = static_cast<float>(M_PI);
 const float Math::PIx2 = static_cast<float>(M_PI * 2.0f);
@@ -63,6 +84,11 @@ float Math::cos(float x)
 sp<Numeric> Math::cos(const sp<Numeric>& x)
 {
     return sp<Cosine>::make(x);
+}
+
+sp<Numeric> Math::atan(const sp<Vec2>& vec)
+{
+    return sp<AtanVec2>::make(vec);
 }
 
 sp<Numeric> Math::min(const sp<Numeric>& a1, const sp<Numeric>& a2)
