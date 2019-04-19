@@ -14,7 +14,7 @@
 
 namespace ark {
 
-class GLUtil {
+class ARK_API GLUtil {
 public:
     static GLenum toEnum(RenderModel::Mode renderMode);
 
@@ -27,7 +27,9 @@ public:
 
     static bytearray makeUnitCubeVertices();
 
-    static void renderCubemap(GraphicsContext& graphicsContext, uint32_t id, RenderController& renderController, Shader& shader, Texture& texture, int32_t width, int32_t height);
+    static void renderCubemap(GraphicsContext& graphicsContext, uint32_t id, RenderController& renderController, const sp<Pipeline>& pipeline, Texture& texture, int32_t width, int32_t height);
+
+    static void glTexImage2D(uint32_t index, int32_t n, void* data);
 };
 
 }

@@ -1,8 +1,6 @@
 #ifndef ARK_RENDERER_BASE_TEXTURE_H_
 #define ARK_RENDERER_BASE_TEXTURE_H_
 
-#include <unordered_map>
-
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/base/bean_factory.h"
@@ -68,7 +66,14 @@ public:
         Parameter _wrap_r;
     };
 
-    Texture(const sp<Size>& size, const sp<Variable<sp<Resource>>>& resource, Type type);
+    class ARK_API Delegate : public Resource {
+    public:
+        virtual ~Delegate() = default;
+
+        virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) = 0;
+    };
+
+    Texture(const sp<Size>& size, const sp<Variable<sp<Delegate>>>& delegate, Type type);
     virtual ~Texture() override;
 
     virtual uint64_t id() override;
@@ -87,7 +92,7 @@ public:
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 
-    sp<Resource> resource() const;
+    sp<Delegate> delegate() const;
 
     const Notifier& notifier() const;
 
@@ -123,7 +128,7 @@ public:
 
 private:
     sp<Size> _size;
-    sp<Variable<sp<Resource>>> _resource;
+    sp<Variable<sp<Delegate>>> _delegate;
     Type _type;
 
     Notifier _notifier;

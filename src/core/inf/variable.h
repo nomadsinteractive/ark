@@ -13,9 +13,9 @@ public:
 
     virtual T val() = 0;
 
-    class Impl;
     class Const;
     class Get;
+    class Impl;
     class Synchronized;
 };
 
@@ -56,6 +56,7 @@ public:
 private:
     T _value;
 };
+
 
 template<typename T> class Variable<T>::Get : public Variable<T> {
 public:

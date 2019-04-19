@@ -78,25 +78,25 @@ void PipelineLayout::initialize(const Camera& camera)
 
     _building_context->initialize();
 
-    sp<Uniform> mvp = _building_context->_vertex.getUniformInput("u_MVP", Uniform::TYPE_MAT4);
-    if(mvp)
-    {
-        mvp->setFlatable(camera.vp());
-        mvp->setNotifier(camera.notifier());
-        _building_context->addUniform(mvp);
-    }
-
-    sp<Uniform> vp = _building_context->_vertex.getUniformInput("u_VP", Uniform::TYPE_MAT4);
-    if(vp)
-    {
-        vp->setFlatable(camera.vp());
-        vp->setNotifier(camera.notifier());
-        _building_context->addUniform(vp);
-    }
+    addUniform("u_MVP", camera.vp(), camera.notifier());
+    addUniform("u_VP", camera.vp(), camera.notifier());
+    addUniform("u_View", camera.view(), camera.notifier());
+    addUniform("u_Projection", camera.projection(), camera.notifier());
 
     _building_context->setupBindings();
 
     _input->initialize(_building_context);
+}
+
+void PipelineLayout::addUniform(const String& name, const sp<Flatable>& flatable, const sp<Notifier>& notifier)
+{
+    sp<Uniform> uniform = _building_context->_vertex.getUniformInput(name, Uniform::TYPE_MAT4);
+    if(uniform)
+    {
+        uniform->setFlatable(flatable);
+        uniform->setNotifier(notifier);
+        _building_context->addUniform(uniform);
+    }
 }
 
 const sp<RenderController>& PipelineLayout::renderController() const

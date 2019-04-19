@@ -8,11 +8,10 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
-#include "renderer/inf/resource.h"
 
 namespace ark {
 
-class ARK_API GLTexture : public Resource {
+class ARK_API GLTexture : public Texture::Delegate {
 public:
     GLTexture(const sp<Recycler>& recycler, const sp<Size>& size, uint32_t target, const sp<Texture::Parameters>& parameters);
     virtual ~GLTexture() override;

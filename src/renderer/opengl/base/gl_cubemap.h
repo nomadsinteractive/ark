@@ -28,18 +28,19 @@ public:
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
 
-        BeanFactory _factory;
-        document _manifest;
         sp<Builder<Size>> _size;
         sp<Builder<String>> _srcs[6];
         sp<Texture::Parameters> _parameters;
     };
+
+    virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
 
 protected:
     virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) override;
 
 private:
     std::vector<sp<Variable<bitmap>>> _bitmaps;
+
 };
 
 }

@@ -8,7 +8,6 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
-#include "renderer/inf/resource.h"
 
 #include "renderer/vulkan/forward.h"
 
@@ -17,7 +16,7 @@
 namespace ark {
 namespace vulkan {
 
-class VKTexture2D : public Resource {
+class VKTexture2D : public Texture::Delegate {
 public:
     VKTexture2D(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, uint32_t width, uint32_t height, const sp<Texture::Parameters>& parameters, const sp<Variable<bitmap>>& bitmap);
     ~VKTexture2D() override;
@@ -25,6 +24,8 @@ public:
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
+
+    virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
 
     const VkDescriptorImageInfo& vkDescriptor() const;
 

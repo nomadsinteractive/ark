@@ -30,12 +30,15 @@ public:
         sp<Texture::Parameters> _parameters;
     };
 
+    virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
+
 protected:
     virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) override;
 
 private:
     sp<RenderController> _render_controller;
     sp<Texture> _texture;
+
 
 };
 

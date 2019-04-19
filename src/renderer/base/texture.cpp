@@ -18,8 +18,8 @@
 
 namespace ark {
 
-Texture::Texture(const sp<Size>& size, const sp<Variable<sp<Resource>>>& resource, Type type)
-    : _size(size), _resource(resource), _type(type)
+Texture::Texture(const sp<Size>& size, const sp<Variable<sp<Delegate>>>& delegate, Type type)
+    : _size(size), _delegate(delegate), _type(type)
 {
 }
 
@@ -29,13 +29,13 @@ Texture::~Texture()
 
 void Texture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
 {
-    _resource->val()->upload(graphicsContext, uploader);
+    _delegate->val()->upload(graphicsContext, uploader);
     _notifier.notify();
 }
 
 Resource::RecycleFunc Texture::recycle()
 {
-    return _resource->val()->recycle();
+    return _delegate->val()->recycle();
 }
 
 Texture::Type Texture::type() const
@@ -45,7 +45,7 @@ Texture::Type Texture::type() const
 
 uint64_t Texture::id()
 {
-    return _resource->val()->id();
+    return _delegate->val()->id();
 }
 
 int32_t Texture::width() const
@@ -68,9 +68,9 @@ const sp<Size>& Texture::size() const
     return _size;
 }
 
-sp<Resource> Texture::resource() const
+sp<Texture::Delegate> Texture::delegate() const
 {
-    return _resource->val();
+    return _delegate->val();
 }
 
 const Notifier& Texture::notifier() const

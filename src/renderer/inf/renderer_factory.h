@@ -8,6 +8,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
+#include "renderer/base/texture.h"
 
 namespace ark {
 

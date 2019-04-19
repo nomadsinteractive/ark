@@ -113,7 +113,7 @@ sp<Texture> RendererFactoryOpenGL::createTexture(uint32_t width, uint32_t height
 {
     const sp<Size> size = sp<Size>::make(static_cast<float>(width), static_cast<float>(height));
     const sp<GLTexture2D> texture2d = sp<GLTexture2D>::make(_recycler, size, sp<Texture::Parameters>::make(), bitmap);
-    return sp<Texture>::make(size, sp<Variable<sp<Resource>>::Const>::make(texture2d), Texture::TYPE_2D);
+    return sp<Texture>::make(size, sp<Variable<sp<Texture::Delegate>>::Const>::make(texture2d), Texture::TYPE_2D);
 }
 
 }

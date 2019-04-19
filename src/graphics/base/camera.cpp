@@ -1,79 +1,78 @@
 #include "graphics/base/camera.h"
 
-#include "core/base/observer.h"
-#include "core/epi/notifier.h"
+#include "core/ark.h"
 
+#include "core/base/observer.h"
+#include "core/impl/variable/variable_wrapper.h"
+#include "core/epi/notifier.h"
+#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/types/global.h"
 #include "core/util/operators.h"
+
+#include "app/base/application_context.h"
 
 namespace ark {
 
 namespace {
 
-class FrustumMatrixVariable : public Variable<Matrix> {
+class FrustumMatrixVariable : public Variable<Matrix>, public Runnable {
 public:
-    FrustumMatrixVariable(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up, Notifier& notifier)
-        : _position(position), _target(target), _up(up), _observer(notifier.createObserver()) {
+    FrustumMatrixVariable(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up, const sp<Notifier>& notifier)
+        : _position(position), _target(target), _up(up), _notifier(notifier) {
+    }
+
+    virtual void run() override {
+        update();
     }
 
     virtual Matrix val() override {
+        return _matrix;
+    }
+
+private:
+    void update() {
         const V3 position = _position->val();
         const V3 target = _target->val();
         const V3 up = _up->val();
-        if(_observer->dirty())
-            _value = Matrix::lookAt(position, target, up);
-        return _value;
+        if(_p != position || _t != target || _u != up) {
+            _matrix = Matrix::lookAt(position, target, up);
+            _notifier->notify();
+            _p = position;
+            _t = target;
+            _u = up;
+        }
     }
 
 private:
     sp<Vec3> _position;
     sp<Vec3> _target;
     sp<Vec3> _up;
-    Matrix _value;
-    sp<Observer> _observer;
+
+    sp<Notifier> _notifier;
+
+    V3 _p;
+    V3 _t;
+    V3 _u;
+
+    Matrix _matrix;
 };
 
 class MulMatrixVariable : public Variable<Matrix> {
 public:
-    MulMatrixVariable(const sp<Variable<Matrix>>& lvalue, const sp<Variable<Matrix>>& rvalue, Notifier& notifier)
-        : _lvalue(lvalue), _rvalue(rvalue), _observer(notifier.createObserver()) {
+    MulMatrixVariable(const sp<Variable<Matrix>>& lvalue, const sp<Variable<Matrix>>& rvalue)
+        : _lvalue(lvalue), _rvalue(rvalue) {
     }
 
     virtual Matrix val() override {
         const Matrix lvalue = _lvalue->val();
         const Matrix rvalue = _rvalue->val();
-        if(_observer->dirty())
-            _value = lvalue * rvalue;
-        return _value;
+        return lvalue * rvalue;
     }
 
 private:
     sp<Variable<Matrix>> _lvalue;
     sp<Variable<Matrix>> _rvalue;
-    Matrix _value;
-    sp<Observer> _observer;
-};
-
-class V3DirtyChecker : public Vec3 {
-public:
-    V3DirtyChecker(const sp<Vec3>& delegate, const sp<Notifier>& notifier)
-        : _delegate(delegate), _notifier(notifier), _value(delegate->val()) {
-    }
-
-    virtual V3 val() override {
-        const V3 v = _delegate->val();
-        if(_value != v) {
-            _value = v;
-            _notifier->notify();
-        }
-        return _value;
-    }
-
-private:
-    sp<Vec3> _delegate;
-    sp<Notifier> _notifier;
-    V3 _value;
 };
 
 }
@@ -87,6 +86,7 @@ Camera::Camera()
 void Camera::ortho(float left, float right, float top, float bottom, float near, float far)
 {
     _vp = sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix::ortho(left, right, top, bottom, near * 2 - far, far)));
+    _notifier->notify();
 }
 
 void Camera::perspective(float fov, float aspect, float near, float far)
@@ -103,8 +103,9 @@ void Camera::lookAt(const V3& position, const V3& target, const V3& up)
 
 void Camera::lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up)
 {
-    _view = sp<Holder>::make(sp<FrustumMatrixVariable>::make(sp<V3DirtyChecker>::make(position, _notifier), sp<V3DirtyChecker>::make(target, _notifier),
-                                                             sp<V3DirtyChecker>::make(up, _notifier), _notifier));
+    const auto var = sp<FrustumMatrixVariable>::make(position, target, up, _notifier);
+    _view = sp<Holder>::make(var);
+    Ark::instance().applicationContext()->addPreRenderTask(var, sp<BooleanByWeakRef<Runnable>>::make(var, 1));
     updateViewProjection();
 }
 
@@ -141,7 +142,8 @@ const sp<Camera>& Camera::getMainCamera()
 
 void Camera::updateViewProjection()
 {
-    _vp = sp<Holder>::make(sp<MulMatrixVariable>::make(_projection->_delegate, _view->_delegate, _notifier));
+    _vp = sp<Holder>::make(sp<MulMatrixVariable>::make(_projection->_value, _view->_value));
+    _notifier->notify();
 }
 
 Camera::Snapshot::Snapshot(Holder& holder)
@@ -149,23 +151,18 @@ Camera::Snapshot::Snapshot(Holder& holder)
     holder.flat(&_vp);
 }
 
-Camera::Holder::Holder(const sp<Variable<Matrix>>& delegate)
-    : _delegate(delegate) {
+Camera::Holder::Holder(const sp<Variable<Matrix>>& value)
+    : _value(value) {
 }
 
 void Camera::Holder::flat(void* buf)
 {
-    *reinterpret_cast<Matrix*>(buf) = _delegate->val();
+    *reinterpret_cast<Matrix*>(buf) = _value->val();
 }
 
 uint32_t Camera::Holder::size()
 {
     return sizeof(Matrix);
-}
-
-Matrix Camera::Holder::matrix()
-{
-    return _delegate->val();
 }
 
 }
