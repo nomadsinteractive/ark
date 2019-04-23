@@ -98,6 +98,14 @@ const Notifier& Texture::notifier() const
     return _notifier;
 }
 
+template<> ARK_API Texture::Type Conversions::to<String, Texture::Type>(const String& str)
+{
+    if(str == "cubemap")
+        return Texture::TYPE_CUBEMAP;
+    DCHECK(str == "2d", "Unknow texture type: %s", str.c_str());
+    return Texture::TYPE_2D;
+}
+
 template<> ARK_API Texture::Format Conversions::to<String, Texture::Format>(const String& str)
 {
     if(str)
@@ -197,7 +205,8 @@ sp<Texture> Texture::DICTIONARY::build(const sp<Scope>& /*args*/)
 
 
 Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, Constants::Attributes::SRC))
+    : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, Constants::Attributes::SRC)),
+      _uploader(factory.getBuilder<Texture::Uploader>(manifest, "uploader"))
 {
 }
 
@@ -207,19 +216,21 @@ sp<Texture> Texture::BUILDER::build(const sp<Scope>& args)
     if(src)
        return _resource_loader_context->textureBundle()->get(*src);
 
+    Type type = Documents::getAttribute<Type>(_manifest, Constants::Attributes::TYPE, TYPE_2D);
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
     uint32_t width = static_cast<uint32_t>(size->width());
     uint32_t height = static_cast<uint32_t>(size->height());
-    return _resource_loader_context->renderController()->createTexture(width, height, nullptr);
+    return _resource_loader_context->renderController()->createTexture(width, height, _uploader->build(args));
 }
 
-Texture::UPLOADER_BUILDER::UPLOADER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+Texture::UploaderBitmap::UploaderBitmap(const bitmap& bitmap)
+    : _bitmap(bitmap)
 {
 }
 
-sp<Texture::Uploader> Texture::UPLOADER_BUILDER::build(const sp<Scope>& args)
+void Texture::UploaderBitmap::upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
 {
-    return nullptr;
+    delegate.upload(graphicsContext, 0, _bitmap);
 }
 
 }

@@ -9,7 +9,6 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_engine.h"
-#include "renderer/base/texture.h"
 #include "renderer/inf/renderer_factory.h"
 
 #include "platform/platform.h"
@@ -33,23 +32,6 @@ public:
 private:
     sp<Dictionary<bitmap>> _bitmap_loader;
     String _name;
-};
-
-
-class UploaderBitmapVariable : public Texture::Uploader {
-public:
-    UploaderBitmapVariable(const sp<Variable<bitmap>>& bitmapLoader)
-        : _bitmap(bitmapLoader) {
-    }
-
-    virtual void upload(GraphicsContext& graphicContext, Texture::Delegate& delegate) override {
-        const bitmap bitmap = _bitmap->val();
-        DASSERT(bitmap);
-        delegate.upload(graphicContext, 0, bitmap);
-    }
-
-private:
-    sp<Variable<bitmap>> _bitmap;
 };
 
 
@@ -187,9 +169,9 @@ sp<Dictionary<sp<Texture>>> RenderController::createTextureBundle() const
     return sp<GLTextureBundle>::make(_render_engine->rendererFactory(), _bitmap_loader, _bitmap_bounds_loader);
 }
 
-sp<Texture> RenderController::createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap, RenderController::UploadStrategy us)
+sp<Texture> RenderController::createTexture(uint32_t width, uint32_t height, const sp<Texture::Uploader>& uploader, RenderController::UploadStrategy us)
 {
-    const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(width, height, sp<UploaderBitmapVariable>::make(bitmap));
+    const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(width, height, uploader);
     upload(texture, nullptr, us);
     return texture;
 }

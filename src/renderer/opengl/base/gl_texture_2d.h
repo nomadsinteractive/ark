@@ -17,11 +17,8 @@ public:
     virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
     virtual void upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap) override;
 
-protected:
-    virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) override;
-
-private:
-    sp<Texture::Uploader> _uploader;
+//protected:
+//    virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) override;
 
 };
 

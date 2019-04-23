@@ -15,7 +15,7 @@
 namespace ark {
 
 GLTexture2D::GLTexture2D(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
-    : GLTexture(recycler, size, static_cast<uint32_t>(GL_TEXTURE_2D), parameters), _uploader(uploader)
+    : GLTexture(recycler, size, static_cast<uint32_t>(GL_TEXTURE_2D), parameters, uploader)
 {
 }
 
@@ -41,16 +41,9 @@ void GLTexture2D::upload(GraphicsContext& /*graphicContext*/, uint32_t /*index*/
     LOGD("Texture Uploaded, id = %d, width = %d, height = %d", static_cast<uint32_t>(id()), bitmap.width(), bitmap.height());
 }
 
-void GLTexture2D::doPrepareTexture(GraphicsContext& graphicsContext, uint32_t /*id*/)
-{
-    _uploader->upload(graphicsContext, *this);
-//    const sp<Bitmap> bitmap = _uploader ? _uploader->val() : sp<Bitmap>::null();
-//    uint8_t channels = bitmap ? bitmap->channels() : 4;
-//    GLenum format = GLUtil::getTextureFormat(_parameters->_format, channels);
-//    GLenum pixelFormat = bitmap ? GLUtil::getPixelFormat(_parameters->_format, bitmap) : GL_UNSIGNED_BYTE;
-//    GLenum internalFormat = bitmap ? GLUtil::getTextureInternalFormat(_parameters->_format, bitmap) : GL_RGBA8;
-//    glTexImage2D(GL_TEXTURE_2D, 0, (GLint) internalFormat, width(), height(), 0, format, pixelFormat, bitmap ? bitmap->at(0, 0) : nullptr);
-//    LOGD("Uploaded, id = %d, width = %d, height = %d%s", id, width(), height(), bitmap ? "" : ", bitmap: nullptr");
-}
+//void GLTexture2D::doPrepareTexture(GraphicsContext& graphicsContext, uint32_t /*id*/)
+//{
+//    _uploader->upload(graphicsContext, *this);
+//}
 
 }

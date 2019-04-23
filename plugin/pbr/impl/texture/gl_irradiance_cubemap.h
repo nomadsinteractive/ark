@@ -7,11 +7,11 @@
 
 #include "graphics/forwarding.h"
 
-#include "renderer/opengl/base/gl_texture.h"
+#include "renderer/opengl/base/gl_cubemap.h"
 
 namespace ark {
 
-class GLIrradianceCubemap : public GLTexture {
+class GLIrradianceCubemap : public GLCubemap {
 public:
     GLIrradianceCubemap(const sp<RenderController>& renderController, const sp<Texture::Parameters>& params, const sp<Texture>& texture, const sp<Size>& size);
 
@@ -29,16 +29,6 @@ public:
         sp<Builder<Texture>> _texture;
         sp<Texture::Parameters> _parameters;
     };
-
-    virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
-    virtual void upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap) override;
-
-protected:
-    virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) override;
-
-private:
-    sp<RenderController> _render_controller;
-    sp<Texture> _texture;
 
 };
 

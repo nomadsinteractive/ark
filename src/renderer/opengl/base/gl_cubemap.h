@@ -14,9 +14,10 @@
 
 namespace ark {
 
-class GLCubemap : public GLTexture {
+class ARK_API GLCubemap : public GLTexture {
 public:
     GLCubemap(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, std::vector<sp<Variable<bitmap>>> bitmaps);
+    GLCubemap(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader);
 
 //  [[plugin::resource-loader("cubemap")]]
     class BUILDER : public Builder<Texture> {
@@ -36,8 +37,8 @@ public:
     virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
     virtual void upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap) override;
 
-protected:
-    virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) override;
+//protected:
+//    virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) override;
 
 private:
     std::vector<sp<Variable<bitmap>>> _bitmaps;

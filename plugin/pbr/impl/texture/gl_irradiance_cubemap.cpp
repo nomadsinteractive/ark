@@ -9,65 +9,70 @@
 
 #include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
-#include "renderer/opengl/base/gl_texture_2d.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/opengl/util/gl_util.h"
 
 namespace ark {
 
-GLIrradianceCubemap::GLIrradianceCubemap(const sp<RenderController>& renderController, const sp<Texture::Parameters>& params, const sp<Texture>& texture, const sp<Size>& size)
-    : GLTexture(renderController->recycler(), size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), params), _render_controller(renderController), _texture(texture)
-{
-}
+namespace {
 
-bool GLIrradianceCubemap::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
-{
-    return false;
-}
-
-void GLIrradianceCubemap::upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap)
-{
-}
-
-void GLIrradianceCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id)
-{
-    DCHECK(_size->width() == _size->height(), "Cubemap should be square, but (%.2f, %.2f) provided", _size->width(), _size->height());
-
-    uint32_t tw = static_cast<uint32_t>(_texture->width());
-    uint32_t th = static_cast<uint32_t>(_texture->height());
-
-    cmft::Image input;
-    cmft::imageCreate(input, tw, th, 0, 1, 1, cmft::TextureFormat::RGBA32F);
-
-    if(!_texture->id())
-        _texture->upload(graphicsContext, nullptr);
-
-    Bitmap bitmap(tw, th, tw * 4 * sizeof(float), 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(input.m_data), input.m_dataSize));
-    _texture->delegate()->download(graphicsContext, bitmap);
-
-    uint32_t n = static_cast<uint32_t>(_size->width());
-    cmft::Image output;
-    cmft::imageCreate(output, n, n, 0, 1, 6, cmft::TextureFormat::RGBA32F);
-    cmft::imageToCubemap(input);
-    cmft::imageIrradianceFilterSh(output, n, input);
-
-    cmft::Image faceList[6];
-    cmft::imageFaceListFromCubemap(faceList, output);
-
-    const uint32_t imageFaceIndices[6] = {4, 5, 2, 3, 1, 0};
-
-    Bitmap::Util::rotate<float>(reinterpret_cast<float*>(faceList[2].m_data), n, n, 4, 270);
-    Bitmap::Util::hvflip<float>(reinterpret_cast<float*>(faceList[3].m_data), n, n, 4);
-    Bitmap::Util::hflip<float>(reinterpret_cast<float*>(faceList[3].m_data), n, n, 4);
-
-    for(uint32_t i = 0; i < 6; ++i)
-    {
-        GLUtil::glTexImage2D(i, static_cast<int32_t>(n), faceList[imageFaceIndices[i]].m_data);
-        LOGD("GLCubemap Uploaded, id = %d, width = %d, height = %d", id, n, n);
+class TextureUploaderIrradianceCubemap : public Texture::Uploader {
+public:
+    TextureUploaderIrradianceCubemap(const sp<Texture>& texture, const sp<Size>& size)
+        : _texture(texture), _size(size) {
     }
 
-    cmft::imageUnload(input);
-    cmft::imageUnload(output);
+    virtual void upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
+        DCHECK(_size->width() == _size->height(), "Cubemap should be square, but (%.2f, %.2f) provided", _size->width(), _size->height());
+
+        uint32_t tw = static_cast<uint32_t>(_texture->width());
+        uint32_t th = static_cast<uint32_t>(_texture->height());
+
+        cmft::Image input;
+        cmft::imageCreate(input, tw, th, 0, 1, 1, cmft::TextureFormat::RGBA32F);
+
+        if(!_texture->id())
+            _texture->upload(graphicsContext, nullptr);
+
+        Bitmap bitmap(tw, th, tw * 4 * sizeof(float), 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(input.m_data), input.m_dataSize));
+        _texture->delegate()->download(graphicsContext, bitmap);
+
+        uint32_t n = static_cast<uint32_t>(_size->width());
+        cmft::Image output;
+        cmft::imageCreate(output, n, n, 0, 1, 6, cmft::TextureFormat::RGBA32F);
+        cmft::imageToCubemap(input);
+        cmft::imageIrradianceFilterSh(output, n, input);
+
+        cmft::Image faceList[6];
+        cmft::imageFaceListFromCubemap(faceList, output);
+
+        const uint32_t imageFaceIndices[6] = {4, 5, 2, 3, 1, 0};
+
+        Bitmap::Util::rotate<float>(reinterpret_cast<float*>(faceList[2].m_data), n, n, 4, 270);
+        Bitmap::Util::hvflip<float>(reinterpret_cast<float*>(faceList[3].m_data), n, n, 4);
+        Bitmap::Util::hflip<float>(reinterpret_cast<float*>(faceList[3].m_data), n, n, 4);
+
+        for(uint32_t i = 0; i < 6; ++i)
+        {
+            const Bitmap bitmap(n, n, n * 4 * 4, 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(faceList[imageFaceIndices[i]].m_data), faceList[imageFaceIndices[i]].m_dataSize));
+            delegate.upload(graphicsContext, i, bitmap);
+            LOGD("GLCubemap Uploaded, id = %d, width = %d, height = %d", static_cast<int32_t>(delegate.id()), n, n);
+        }
+
+        cmft::imageUnload(input);
+        cmft::imageUnload(output);
+    }
+
+private:
+    sp<Texture> _texture;
+    sp<Size> _size;
+};
+
+}
+
+
+GLIrradianceCubemap::GLIrradianceCubemap(const sp<RenderController>& renderController, const sp<Texture::Parameters>& params, const sp<Texture>& texture, const sp<Size>& size)
+    : GLCubemap(renderController->recycler(), size, params, sp<TextureUploaderIrradianceCubemap>::make(texture, size))
+{
 }
 
 GLIrradianceCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

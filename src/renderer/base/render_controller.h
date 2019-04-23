@@ -14,6 +14,7 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/texture.h"
 #include "renderer/inf/uploader.h"
 #include "renderer/util/named_buffer.h"
 
@@ -54,7 +55,7 @@ public:
 
     sp<PipelineFactory> createPipelineFactory() const;
     sp<Dictionary<sp<Texture>>> createTextureBundle() const;
-    sp<Texture> createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmapVariable, UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
+    sp<Texture> createTexture(uint32_t width, uint32_t height, const sp<Texture::Uploader>& uploader, UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
 
     Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader);
     Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr);

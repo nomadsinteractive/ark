@@ -18,8 +18,8 @@
 
 namespace ark {
 
-GLTexture::GLTexture(const sp<Recycler>& recycler, const sp<Size>& size, uint32_t target, const sp<Texture::Parameters>& parameters)
-    : _recycler(recycler), _size(size), _target(target), _parameters(parameters), _id(0)
+GLTexture::GLTexture(const sp<Recycler>& recycler, const sp<Size>& size, uint32_t target, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
+    : _recycler(recycler), _size(size), _target(target), _parameters(parameters), _uploader(uploader), _id(0)
 {
 }
 
@@ -35,7 +35,8 @@ void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& upl
         glGenTextures(1, &_id);
 
     glBindTexture(static_cast<GLenum>(_target), _id);
-    doPrepareTexture(graphicsContext, _id);
+//    doPrepareTexture(graphicsContext, _id);
+    _uploader->upload(graphicsContext, *this);
 
     if(_parameters->_features & Texture::FEATURE_MIPMAPS)
         glGenerateMipmap(static_cast<GLenum>(_target));
@@ -78,5 +79,10 @@ uint64_t GLTexture::id()
 {
     return _id;
 }
+
+//void GLTexture::doPrepareTexture(GraphicsContext& graphicsContext, uint32_t /*id*/)
+//{
+//    _uploader->upload(graphicsContext, *this);
+//}
 
 }

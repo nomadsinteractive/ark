@@ -73,15 +73,25 @@ public:
         virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) = 0;
 
         using Resource::upload;
-        virtual void upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap) = 0;
+        virtual void upload(GraphicsContext& graphicsContext, uint32_t index, const Bitmap& bitmap) = 0;
     };
 
     class ARK_API Uploader {
     public:
         virtual ~Uploader() = default;
 
-        virtual void upload(GraphicsContext& graphicContext, Delegate& delegate) = 0;
+        virtual void upload(GraphicsContext& graphicsContext, Delegate& delegate) = 0;
 
+    };
+
+    class UploaderBitmap : public Uploader {
+    public:
+        UploaderBitmap(const bitmap& bitmap);
+
+        virtual void upload(GraphicsContext& graphicsContext, Delegate& delegate) override;
+
+    private:
+        bitmap _bitmap;
     };
 
     Texture(const sp<Size>& size, const sp<Variable<sp<Delegate>>>& delegate, Type type);
@@ -134,15 +144,7 @@ public:
         BeanFactory _factory;
         document _manifest;
         SafePtr<Builder<String>> _src;
-        sp<Texture::Parameters> _parameters;
-    };
-
-//  [[plugin::resource-loader("image")]]
-    class UPLOADER_BUILDER : public Builder<Texture::Uploader> {
-    public:
-        UPLOADER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
-
-        virtual sp<Texture::Uploader> build(const sp<Scope>& args) override;
+        SafePtr<Builder<Texture::Uploader>> _uploader;
     };
 
 private:
