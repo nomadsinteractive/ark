@@ -18,6 +18,41 @@ namespace ark {
 
 namespace {
 
+class UploaderBitmapBundle : public Texture::Uploader {
+public:
+    UploaderBitmapBundle(const sp<Dictionary<bitmap>>& bitmapLoader, const String& name)
+        : _bitmap_loader(bitmapLoader), _name(name) {
+    }
+
+    virtual void upload(GraphicsContext& graphicContext, Texture::Delegate& delegate) override {
+        const bitmap bitmap = _bitmap_loader->get(_name);
+        DCHECK(bitmap, "Texture resource \"%s\" not found", _name.c_str());
+        delegate.upload(graphicContext, 0, bitmap);
+    }
+
+private:
+    sp<Dictionary<bitmap>> _bitmap_loader;
+    String _name;
+};
+
+
+class UploaderBitmapVariable : public Texture::Uploader {
+public:
+    UploaderBitmapVariable(const sp<Variable<bitmap>>& bitmapLoader)
+        : _bitmap(bitmapLoader) {
+    }
+
+    virtual void upload(GraphicsContext& graphicContext, Texture::Delegate& delegate) override {
+        const bitmap bitmap = _bitmap->val();
+        DASSERT(bitmap);
+        delegate.upload(graphicContext, 0, bitmap);
+    }
+
+private:
+    sp<Variable<bitmap>> _bitmap;
+};
+
+
 class GLTextureBundle : public Dictionary<sp<Texture>> {
 public:
     GLTextureBundle(const sp<RendererFactory>& rendererFactory, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
@@ -28,7 +63,7 @@ public:
     virtual sp<Texture> get(const String& name) override {
         const bitmap bitmapBounds = _bitmap_bounds_loader->get(name);
         DCHECK(bitmapBounds, "Texture resource \"%s\" not found", name.c_str());
-        return _renderer_factory->createTexture(bitmapBounds->width(), bitmapBounds->height(), sp<Variable<bitmap>::Get>::make(_bitmap_loader, name));
+        return _renderer_factory->createTexture(bitmapBounds->width(), bitmapBounds->height(), sp<UploaderBitmapBundle>::make(_bitmap_loader, name));
     }
 
 private:
@@ -154,7 +189,7 @@ sp<Dictionary<sp<Texture>>> RenderController::createTextureBundle() const
 
 sp<Texture> RenderController::createTexture(uint32_t width, uint32_t height, const sp<Variable<bitmap>>& bitmap, RenderController::UploadStrategy us)
 {
-    const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(width, height, bitmap);
+    const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(width, height, sp<UploaderBitmapVariable>::make(bitmap));
     upload(texture, nullptr, us);
     return texture;
 }

@@ -165,7 +165,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     };
 
     const sp<opengl::GLPipeline> glPipeline = pipeline;
-    glUseProgram(glPipeline->id());
+    glUseProgram(static_cast<GLuint>(glPipeline->id()));
     glPipeline->getUniform("u_Projection").setUniformMatrix4fv(1, GL_FALSE, captureProjection.value());
     texture.upload(graphicsContext, nullptr);
 

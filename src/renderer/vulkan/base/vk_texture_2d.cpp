@@ -17,8 +17,8 @@
 namespace ark {
 namespace vulkan {
 
-VKTexture2D::VKTexture2D(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, uint32_t width, uint32_t height, const sp<Texture::Parameters>& parameters, const sp<Variable<bitmap>>& bitmap)
-    : _recycler(recycler), _renderer(renderer), _width(width), _height(height), _parameters(parameters), _bitmap(bitmap), _image(VK_NULL_HANDLE), _memory(VK_NULL_HANDLE), _descriptor{}
+VKTexture2D::VKTexture2D(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, uint32_t width, uint32_t height, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
+    : _recycler(recycler), _renderer(renderer), _width(width), _height(height), _parameters(parameters), _uploader(uploader), _image(VK_NULL_HANDLE), _memory(VK_NULL_HANDLE), _descriptor{}
 {
 }
 
@@ -32,9 +32,9 @@ uint64_t VKTexture2D::id()
     return (uint64_t)(_image);
 }
 
-void VKTexture2D::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& /*uploader*/)
+void VKTexture2D::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
-    doUpload();
+    _uploader->upload(graphicsContext, *this);
 }
 
 Resource::RecycleFunc VKTexture2D::recycle()
@@ -62,22 +62,10 @@ bool VKTexture2D::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
 
 void VKTexture2D::upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap)
 {
-}
+    const bytearray& imagedata = bitmap.bytes();
+    VkFormat format = VKUtil::toTextureFormat(bitmap, _parameters->_format);
 
-const VkDescriptorImageInfo& VKTexture2D::vkDescriptor() const
-{
-    return _descriptor;
-}
-
-void VKTexture2D::doUpload()
-{
-    VkDevice logicalDevice = _renderer->vkLogicalDevice();
-
-    const bitmap tex = _bitmap ? _bitmap->val() : bitmap::null();
-    const bytearray imagedata = tex ? tex->bytes() : nullptr;
-    VkFormat format = tex ? VKUtil::toTextureFormat(tex, _parameters->_format) : VK_FORMAT_R8G8B8A8_UNORM;
-
-    DCHECK(!tex || (_width == tex->width() && _height == tex->height()), "Uploading bitmap has different size(%d, %d) compared to Texture's(%d, %d)", tex->width(), tex->height(), _width, _width);
+    DCHECK(_width == bitmap.width() && _height == bitmap.height(), "Uploading bitmap has different size(%d, %d) compared to Texture's(%d, %d)", bitmap.width(), bitmap.height(), _width, _width);
     _mip_levels = 1;
 
     // We prefer using staging to copy the texture data to a device local optimal image
@@ -96,6 +84,7 @@ void VKTexture2D::doUpload()
     VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
     VkMemoryRequirements memReqs = {};
 
+    VkDevice logicalDevice = _renderer->vkLogicalDevice();
     if(useStaging)
     {
         // Create optimal tiled target image on the device
@@ -157,8 +146,8 @@ void VKTexture2D::doUpload()
                 bufferCopyRegion.imageSubresource.mipLevel = i;
                 bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
                 bufferCopyRegion.imageSubresource.layerCount = 1;
-                bufferCopyRegion.imageExtent.width = tex->width();
-                bufferCopyRegion.imageExtent.height = tex->height();
+                bufferCopyRegion.imageExtent.width = bitmap.width();
+                bufferCopyRegion.imageExtent.height = bitmap.height();
                 bufferCopyRegion.imageExtent.depth = 1;
                 bufferCopyRegion.bufferOffset = offset;
 
@@ -366,6 +355,11 @@ void VKTexture2D::doUpload()
     // The view will be based on the texture's image
     view.image = _image;
     VKUtil::checkResult(vkCreateImageView(logicalDevice, &view, nullptr, &_descriptor.imageView));
+}
+
+const VkDescriptorImageInfo& VKTexture2D::vkDescriptor() const
+{
+    return _descriptor;
 }
 
 }

@@ -40,6 +40,7 @@ private:
     sp<RenderController> _render_controller;
     sp<Texture> _texture;
 
+
 };
 
 }

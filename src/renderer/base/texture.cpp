@@ -219,7 +219,7 @@ Texture::UPLOADER_BUILDER::UPLOADER_BUILDER(BeanFactory& factory, const document
 
 sp<Texture::Uploader> Texture::UPLOADER_BUILDER::build(const sp<Scope>& args)
 {
-    return ;
+    return nullptr;
 }
 
 }
