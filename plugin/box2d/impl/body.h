@@ -169,7 +169,7 @@ public:
         virtual sp<Body> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Object>> _world;
+        sp<Builder<Collider>> _world;
         sp<Builder<Shape>> _shape;
         sp<Builder<Vec>> _position;
         sp<Builder<Size>> _size;

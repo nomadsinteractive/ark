@@ -45,7 +45,7 @@ private:
     void setupDescriptorSet(GraphicsContext& graphicsContext, const ShaderBindings& bindings);
     void setupPipeline(const VertexLayout& vertexLayout);
 
-    void buildCommandBuffer(GraphicsContext& graphicsContext, const Buffer::Snapshot& vertex, const Buffer::Snapshot& index);
+    void buildCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
 
     bool isDirty(const bytearray& dirtyFlags) const;
 

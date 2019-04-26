@@ -18,4 +18,13 @@ bool EventListenerList::onEvent(const Event& event)
     return false;
 }
 
+EventListenerList::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+{
+}
+
+sp<EventListener> EventListenerList::BUILDER::build(const sp<Scope>& /*args*/)
+{
+    return sp<EventListenerList>::make();
+}
+
 }

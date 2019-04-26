@@ -35,8 +35,8 @@ public:
         return SharedPtr<T>(instance);
     }
 
-    static SharedPtr<T> borrow(T* instance) {
-        return SharedPtr<T>(instance, nullptr, [](T*) {});
+    static SharedPtr<T> borrow(T* instance, std::function<void(T*)> deleter = [](T*) {}) {
+        return SharedPtr<T>(instance, nullptr, std::move(deleter));
     }
 
     template<typename... Args> static SharedPtr<T> make(Args&&... args) {

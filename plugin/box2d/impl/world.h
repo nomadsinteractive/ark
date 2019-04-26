@@ -27,7 +27,7 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-class ARK_PLUGIN_BOX2D_API World : public Object, public Runnable, public Collider, Implements<World, Object, Runnable, Collider> {
+class ARK_PLUGIN_BOX2D_API World : public Runnable, public Collider, Implements<World, Runnable, Collider> {
 public:
 
     class Importer {

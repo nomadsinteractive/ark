@@ -169,7 +169,7 @@ list(APPEND LOCAL_GENERATED_SRC_LIST ${output_files})
 
 def gen_header_source(filename, output_dir, output_file, results, namespaces):
     filedir, name = path.split(filename)
-    declares = ['\nvoid __init_%s__(PyObject* module);' % name]
+    declares = ['\nvoid __init_%s__(PyObject* module);' % name.replace('-', '_')]
     includes = []
     for k, genclass in results.items():
         if output_dir is None:
@@ -233,7 +233,7 @@ def gen_body_source(filename, output_dir, output_file, namespaces, modulename, r
 {
     const sp<ark::plugin::python::PythonInterpreter>& pi = ark::plugin::python::PythonInterpreter::instance();
     %s
-}''' % (name, add_types))
+}''' % (name.replace('-', '_'), add_types))
 
     return gen_py_binding_cpp(name, namespaces, includes, lines)
 

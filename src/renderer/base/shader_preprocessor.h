@@ -160,6 +160,7 @@ private:
 
     String getDeclarations() const;
 
+    void addInclude(const String& source, const String& filepath);
     void addUniform(const String& type, const String& name, const sp<String>& declaration);
 
 private:
@@ -172,6 +173,8 @@ public:
     ShaderType _type;
 
     Source _main;
+
+    Source _includes;
     Source _uniform_declarations;
     Source _attribute_declarations;
 

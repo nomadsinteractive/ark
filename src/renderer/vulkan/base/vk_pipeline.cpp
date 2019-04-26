@@ -111,7 +111,7 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
 
 void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    buildCommandBuffer(graphicsContext, drawingContext._vertex_buffer, drawingContext._index_buffer);
+    buildCommandBuffer(graphicsContext, drawingContext);
 }
 
 void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)
@@ -306,7 +306,7 @@ void VKPipeline::setupPipeline(const VertexLayout& vertexLayout)
         vkDestroyShaderModule(device->vkLogicalDevice(), i.module, nullptr);
 }
 
-void VKPipeline::buildCommandBuffer(GraphicsContext& graphicsContext, const Buffer::Snapshot& vertex, const Buffer::Snapshot& index)
+void VKPipeline::buildCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     const sp<VKGraphicsContext>& vkContext = graphicsContext.attachment<VKGraphicsContext>();
 
@@ -314,13 +314,13 @@ void VKPipeline::buildCommandBuffer(GraphicsContext& graphicsContext, const Buff
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _layout, 0, 1, &_descriptor_set, 0, nullptr);
 
-    VkBuffer vkVertexBuffer = (VkBuffer)(vertex.id());
-    VkBuffer vkIndexBuffer = (VkBuffer)(index.id());
+    VkBuffer vkVertexBuffer = (VkBuffer)(drawingContext._vertex_buffer.id());
+    VkBuffer vkIndexBuffer = (VkBuffer)(drawingContext._index_buffer.id());
 
     VkDeviceSize offsets = 0;
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkVertexBuffer, &offsets);
     vkCmdBindIndexBuffer(commandBuffer, vkIndexBuffer, 0, kVKIndexType);
-    vkCmdDrawIndexed(commandBuffer, index.size() / sizeof(glindex_t), 1, 0, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, drawingContext._index_buffer.size() / sizeof(glindex_t), 1, 0, 0, 0);
 }
 
 bool VKPipeline::isDirty(const bytearray& dirtyFlags) const

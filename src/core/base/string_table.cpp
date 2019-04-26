@@ -40,19 +40,19 @@ const sp<StringBundle>& StringTable::getStringBundle(const String& name)
     return iter != _string_bundle_by_name.end() ? iter->second : sp<StringBundle>::null();
 }
 
-sp<String> StringTable::getString(const String& stringTableName, const String& stringName)
+sp<String> StringTable::getString(const String& stringTableName, const String& stringName, bool alert)
 {
     const sp<StringBundle>& sb = getStringBundle(stringTableName);
     const sp<String> str = sb ? sb->get(stringName) : sp<String>::null();
-    DCHECK(str, "String resource \"%s/%s\" does not exists", stringTableName.c_str(), stringName.c_str());
+    DCHECK(!alert || str, "String resource \"%s/%s\" does not exists", stringTableName.c_str(), stringName.c_str());
     return str;
 }
 
-sp<String> StringTable::getString(const String& name)
+sp<String> StringTable::getString(const String& name, bool alert)
 {
     auto pos = name.find('/');
     DCHECK(pos != String::npos, "The name \"%s\" doest follow [stringtablename/stringname] pattern", name.c_str());
-    return getString(name.substr(0, pos), name.substr(pos + 1));
+    return getString(name.substr(0, pos), name.substr(pos + 1), alert);
 }
 
 }

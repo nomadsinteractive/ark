@@ -71,6 +71,8 @@ public:
     std::map<String, String>& annotations();
 
     const Viewport& viewport() const;
+    void setViewport(const Viewport& viewport);
+
     const V2& resolution() const;
     void setResolution(const V2& resolution);
 

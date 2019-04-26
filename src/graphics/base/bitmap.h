@@ -37,6 +37,8 @@ public:
 
     void draw(void* buf, uint32_t width, uint32_t height, int32_t x, int32_t y, int32_t stride);
 
+    void dump(const String& filename) const;
+
     class Util {
     public:
         template<typename T> static void rotate(T* data, uint32_t width, uint32_t height, uint8_t channels, int32_t degrees) {

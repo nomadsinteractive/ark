@@ -8,6 +8,7 @@
 
 #include "graphics/base/render_layer.h"
 #include "graphics/base/matrix.h"
+#include "graphics/base/rect.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
@@ -16,8 +17,23 @@ namespace ark {
 
 class ARK_API DrawingContext {
 public:
+    struct Parameters {
+        Parameters();
+        Parameters(int32_t instanceCount, uint32_t start, uint32_t end, bool cullFace);
+
+        int32_t _instance_count;
+
+        uint32_t _start;
+        uint32_t _end;
+
+        bool _cull_face;
+        Rect _scissor;
+    };
+
+public:
     DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo);
     DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& vertexBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount);
+    DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& vertexBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount, uint32_t start, uint32_t end);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
     sp<RenderCommand> toRenderCommand(ObjectPool& objectPool);
@@ -31,8 +47,7 @@ public:
 
     Buffer::Snapshot _index_buffer;
 
-    int32_t _count;
-    int32_t _instance_count;
+    Parameters _parameters;
 
 private:
     void upload(GraphicsContext& graphicsContext);

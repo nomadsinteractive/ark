@@ -130,5 +130,16 @@
         "url": "https://github.com/google/oboe.git",
         "name": "oboe",
         "tag": "1.1.1"
+    },
+    {
+        "url": "https://github.com/erincatto/Box2D.git",
+        "name": "Box2D",
+        "tag": "v2.3.1"
+    },
+    {
+        "url": "https://github.com/ocornut/imgui.git",
+        "name": "imgui",
+        "tag": "v1.69"
     }
+
 ]

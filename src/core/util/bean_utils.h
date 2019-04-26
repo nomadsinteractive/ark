@@ -28,8 +28,8 @@ public:
         doSplit<Args...>(beanFactory, elems, args...);
     }
 
-    template<typename T> static sp<T> as(const sp<Builder<Object>>& builder, const sp<Scope>& args) {
-        const sp<Object> object = builder->build(args);
+    template<typename T, typename U> static sp<T> as(const sp<Builder<U>>& builder, const sp<Scope>& args) {
+        const sp<U> object = builder->build(args);
         DCHECK(object && object.is<T>(), "Illegal object");
         return object.as<T>();
     }

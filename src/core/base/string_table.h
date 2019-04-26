@@ -13,8 +13,8 @@ public:
     void addStringBundle(const String& name, const sp<StringBundle>& stringTable);
     const sp<StringBundle>& getStringBundle(const String& name);
 
-    sp<String> getString(const String& stringTableName, const String& stringName);
-    sp<String> getString(const String& name);
+    sp<String> getString(const String& stringTableName, const String& stringName, bool alert = true);
+    sp<String> getString(const String& name, bool alert = true);
 
 private:
     std::map<String, sp<StringBundle>> _string_bundle_by_name;

@@ -23,7 +23,7 @@ public:
     public:
         virtual ~Group() = default;
 
-        virtual void addRenderer(const sp<Renderer>& drawable) = 0;
+        virtual void addRenderer(const sp<Renderer>& renderer) = 0;
     };
 
 };

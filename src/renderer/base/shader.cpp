@@ -31,15 +31,16 @@ namespace {
 
 class ShaderBuilderImpl : public Builder<Shader> {
 public:
-    ShaderBuilderImpl(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& vertexSrc, const String& fragmentSrc)
-        : _factory(factory), _manifest(doc), _render_controller(resourceLoaderContext->renderController()), _vertex_src(vertexSrc), _fragment_src(fragmentSrc),
+    ShaderBuilderImpl(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& vertex, const String& fragment, const sp<Camera>& defaultCamera)
+        : _factory(factory), _manifest(doc), _render_controller(resourceLoaderContext->renderController()), _vertex(vertex), _fragment(fragment), _default_camera(defaultCamera),
           _camera(factory.getBuilder<Camera>(doc, Constants::Attributes::CAMERA)) {
     }
 
     virtual sp<Shader> build(const sp<Scope>& args) override {
-        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller->createPipelineFactory(), _vertex_src, _fragment_src, _factory, args, _manifest);
-        const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(_render_controller, buildingContext);
-        return sp<Shader>::make(buildingContext->_shader, pipelineLayout, _camera->build(args));
+        sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller->createPipelineFactory(), _vertex, _fragment, _factory, args, _manifest);
+        sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(_render_controller, buildingContext);
+        sp<Camera> camera = _camera->build(args);
+        return sp<Shader>::make(buildingContext->_shader, pipelineLayout, camera ? camera : _default_camera);
     }
 
 private:
@@ -47,7 +48,8 @@ private:
     document _manifest;
     sp<RenderController> _render_controller;
 
-    String _vertex_src, _fragment_src;
+    String _vertex, _fragment;
+    sp<Camera> _default_camera;
 
     SafePtr<Builder<Camera>> _camera;
 };
@@ -60,11 +62,11 @@ Shader::Shader(const sp<Stub>& stub, const sp<PipelineLayout>& pipelineLayout, c
     _pipeline_layout->initialize(_camera);
 }
 
-sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment)
+sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment, const sp<Camera>& defaultCamera)
 {
     const Global<StringTable> stringTable;
     const sp<Builder<Shader>> shader = factory.getBuilder<Shader>(doc, Constants::Attributes::SHADER);
-    return shader ? shader : sp<Builder<Shader>>::adopt(new ShaderBuilderImpl(factory, doc, resourceLoaderContext, stringTable->getString(defVertex), stringTable->getString(defFragment)));
+    return shader ? shader : sp<Builder<Shader>>::adopt(new ShaderBuilderImpl(factory, doc, resourceLoaderContext, stringTable->getString(defVertex), stringTable->getString(defFragment), defaultCamera));
 }
 
 sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment, const sp<Snippet>& snippet, const sp<ResourceLoaderContext>& resourceLoaderContext)

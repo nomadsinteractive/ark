@@ -84,7 +84,7 @@ public:
 
     };
 
-    class UploaderBitmap : public Uploader {
+    class ARK_API UploaderBitmap : public Uploader {
     public:
         UploaderBitmap(const bitmap& bitmap);
 

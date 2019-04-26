@@ -35,8 +35,9 @@ void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& upl
         glGenTextures(1, &_id);
 
     glBindTexture(static_cast<GLenum>(_target), _id);
-//    doPrepareTexture(graphicsContext, _id);
-    _uploader->upload(graphicsContext, *this);
+
+    if(_uploader)
+        _uploader->upload(graphicsContext, *this);
 
     if(_parameters->_features & Texture::FEATURE_MIPMAPS)
         glGenerateMipmap(static_cast<GLenum>(_target));

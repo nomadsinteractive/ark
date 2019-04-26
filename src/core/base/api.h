@@ -94,6 +94,7 @@ const char* const CLOCK = "clock";
 const char* const COLOR = "color";
 const char* const DELEGATE = "delegate";
 const char* const EXPECTATION = "expectation";
+const char* const EVENT_LISTENER = "event-listener";
 const char* const VARYINGS = "varyings";
 const char* const FOREGROUND = "foreground";
 const char* const EXPIRED = "expired";

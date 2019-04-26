@@ -342,7 +342,7 @@ sp<Future> Body::applyRotate(const sp<Numeric>& rotate)
 }
 
 Body::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest)
-    : _world(factory.ensureBuilder<Object>(manifest, "world")),
+    : _world(factory.ensureBuilder<Collider>(manifest, "world")),
       _shape(factory.ensureBuilder<Shape>(manifest, "shape")),
       _position(factory.ensureBuilder<Vec>(manifest, Constants::Attributes::POSITION)),
       _size(factory.ensureBuilder<Size>(manifest, Constants::Attributes::SIZE)),

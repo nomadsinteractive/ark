@@ -3,6 +3,7 @@
 
 #include <atomic>
 
+#include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 #include "core/base/object_pool.h"
 
@@ -13,7 +14,7 @@
 
 namespace ark {
 
-class RenderRequest {
+class ARK_API RenderRequest {
 public:
     RenderRequest() = default;
     RenderRequest(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, LFStack<RenderRequest>& renderRequestRecycler);

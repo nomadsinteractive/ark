@@ -52,7 +52,7 @@ public:
 
     virtual V3 val() override {
         const V3 v = _delegate->val();
-        glm::vec3 normalized = glm::normalize(glm::vec3(v.x(), v.y(), v.z()));
+        const glm::vec3 normalized = glm::normalize(glm::vec3(v.x(), v.y(), v.z()));
         return V3(normalized.x, normalized.y, normalized.z);
     }
 

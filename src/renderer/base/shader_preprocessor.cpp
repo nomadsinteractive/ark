@@ -5,6 +5,8 @@
 #include "core/types/global.h"
 
 #include "core/base/string_buffer.h"
+#include "core/base/string_table.h"
+#include "core/types/global.h"
 #include "core/util/strings.h"
 
 #include "renderer/base/pipeline_building_context.h"
@@ -26,6 +28,7 @@ const char* ShaderPreprocessor::ANNOTATION_FRAG_IN = "${frag.in}";
 const char* ShaderPreprocessor::ANNOTATION_FRAG_OUT = "${frag.out}";
 const char* ShaderPreprocessor::ANNOTATION_FRAG_COLOR = "${frag.color}";
 
+static std::regex _INCLUDE_PATTERN("#include\\s*[<\"]([^>\"]+)[>\"]");
 std::regex ShaderPreprocessor::_IN_PATTERN("(?:attribute|in)" ATTRIBUTE_PATTERN);
 std::regex ShaderPreprocessor::_OUT_PATTERN("(?:varying|out)" ATTRIBUTE_PATTERN);
 std::regex ShaderPreprocessor::_IN_OUT_PATTERN("(?:varying|in)" ATTRIBUTE_PATTERN);
@@ -92,6 +95,12 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
 {
     _ins.parse(_type == SHADER_TYPE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
     _outs.parse(_OUT_PATTERN);
+
+    _main.replace(_INCLUDE_PATTERN, [this](const std::smatch& m) {
+        const String filepath = m.str();
+        this->addInclude(m.str(), m[1].str());
+        return nullptr;
+    });
 
     _main.replace(_UNIFORM_PATTERN, [this](const std::smatch& m) {
         const sp<String> declaration = sp<String>::make(m.str());
@@ -219,9 +228,17 @@ String ShaderPreprocessor::getDeclarations() const
         sb << '\n';
     }
 
+    sb << _includes.str('\n');
     sb << _uniform_declarations.str('\n');
     sb << _attribute_declarations.str('\n');
     return sb.str();
+}
+
+void ShaderPreprocessor::addInclude(const String& source, const String& filepath)
+{
+    const Global<StringTable> stringtable;
+    const sp<String> content = stringtable->getString(filepath, false);
+    _includes.push_back(content ? content : sp<String>::make(source));
 }
 
 ShaderPreprocessor::Function::Function(const String& name, const String& params, const String& body)

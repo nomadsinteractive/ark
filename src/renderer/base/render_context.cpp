@@ -34,6 +34,11 @@ const Viewport& RenderContext::viewport() const
     return _viewport;
 }
 
+void RenderContext::setViewport(const Viewport& viewport)
+{
+    _viewport = viewport;
+}
+
 const V2& RenderContext::resolution() const
 {
     return _resolution;

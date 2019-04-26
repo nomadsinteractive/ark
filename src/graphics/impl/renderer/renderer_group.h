@@ -17,8 +17,6 @@ public:
     virtual void addRenderer(const sp<Renderer>& renderer) override;
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
-    void loadGroup(const document& manifest, BeanFactory& factory, const sp<Scope>& args);
-
 //  [[plugin::builder("renderer-group")]]
     class BUILDER : public Builder<Renderer> {
     public:
@@ -27,7 +25,10 @@ public:
         virtual sp<Renderer> build(const sp<Scope>& args) override;
 
     private:
-        BeanFactory _bean_factory;
+        void loadGroup(RendererGroup& rendererGroup, const sp<Scope>& args);
+
+    private:
+        BeanFactory _factory;
         document _manifest;
     };
 

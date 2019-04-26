@@ -2,6 +2,7 @@
 #define ARK_RENDERER_INF_RENDER_ENGINE_H_
 
 #include "core/ark.h"
+#include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -10,7 +11,7 @@
 
 namespace ark {
 
-class RenderEngine {
+class ARK_API RenderEngine {
 public:
     RenderEngine(Ark::RendererVersion version, const sp<RendererFactory>& rendererFactory);
 

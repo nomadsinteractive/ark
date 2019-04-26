@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 
 include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
 
+ark_ensure_dependency(3rdparty/Box2D)
+
 set(BOX2D_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Box2D)
 
 set(BOX2D_BUILD_EXAMPLES OFF CACHE BOOL "")

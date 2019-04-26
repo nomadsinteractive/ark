@@ -23,6 +23,29 @@
 namespace ark {
 namespace opengl {
 
+namespace {
+
+class GLScissor {
+public:
+    GLScissor(const Rect& rect)
+        : _enabled(rect.right() > rect.left() && rect.bottom() >= rect.top()) {
+        if(_enabled) {
+            glEnable(GL_SCISSOR_TEST);
+            glScissor(static_cast<GLint>(rect.left()), static_cast<GLint>(rect.top()), static_cast<GLsizei>(rect.width()), static_cast<GLsizei>(rect.height()));
+        }
+    }
+    ~GLScissor() {
+        if(_enabled)
+            glDisable(GL_SCISSOR_TEST);
+    }
+
+private:
+    bool _enabled;
+};
+
+
+}
+
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const ShaderBindings& bindings)
     : _recycler(recycler), _pipeline_input(bindings.pipelineInput()), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _id(0),
       _render_command(createRenderCommand(bindings))
@@ -118,8 +141,7 @@ void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext
 
 void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    _render_command->_count = drawingContext._count;
-    _render_command->_instance_count = drawingContext._instance_count;
+    _render_command->_parameters = drawingContext._parameters;
     _render_command->draw(graphicsContext);
 }
 
@@ -426,7 +448,13 @@ GLPipeline::GLDrawElements::GLDrawElements(GLenum mode)
 
 void GLPipeline::GLDrawElements::draw(GraphicsContext& /*graphicsContext*/)
 {
-    glDrawElements(_mode, _count, GLIndexType, nullptr);
+    DCHECK(_parameters._end > _parameters._start, "Illegal draw range: (%d, %d)", _parameters._start, _parameters._end);
+    if(_parameters._cull_face)
+        glEnable(GL_CULL_FACE);
+    const GLScissor scissor(_parameters._scissor);
+    glDrawRangeElements(_mode, _parameters._start, _parameters._end - 1, static_cast<GLsizei>(_parameters._end - _parameters._start), GLIndexType, nullptr);
+    if(_parameters._cull_face)
+        glDisable(GL_CULL_FACE);
 }
 
 GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode)
@@ -436,7 +464,12 @@ GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode)
 
 void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& /*graphicsContext*/)
 {
-    glDrawElementsInstanced(_mode, _count, GLIndexType, nullptr, _instance_count);
+    if(_parameters._cull_face)
+        glEnable(GL_CULL_FACE);
+    const GLScissor scissor(_parameters._scissor);
+    glDrawElementsInstanced(_mode, static_cast<GLsizei>(_parameters._end - _parameters._start), GLIndexType, nullptr, _parameters._instance_count);
+    if(_parameters._cull_face)
+        glDisable(GL_CULL_FACE);
 }
 
 }

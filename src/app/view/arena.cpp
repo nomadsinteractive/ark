@@ -105,7 +105,10 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
     BeanFactory& factory = resourceLoader->beanFactory();
     for(const document& i : _manifest->children())
     {
-        if(i->name() == Constants::Attributes::RENDER_LAYER)
+        const String& name = i->name();
+        if(name == Constants::Attributes::EVENT_LISTENER)
+            arena->addEventListener(factory.ensure<EventListener>(i, args));
+        else if(name == Constants::Attributes::RENDER_LAYER)
         {
             const sp<Renderer> layer = factory.build<Renderer>(i, args);
             if(layer)
@@ -113,10 +116,13 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
             else
                 arena->addLayer(factory.ensureDecorated<Renderer, RenderLayer>(i));
         }
-        else if(i->name() == Constants::Attributes::LAYER)
+        else if(name == Constants::Attributes::LAYER)
             arena->addLayer(factory.ensureDecorated<Renderer, Layer>(i));
         else
+        {
+            DWARN(name == Constants::Attributes::RENDERER || name == Constants::Attributes::RENDER_LAYER || name == Constants::Attributes::LAYER || name == Constants::Attributes::VIEW, "[Renderer, RenderLayer, Layer, View] expected, \"%s\" found", name.c_str());
             arena->addRenderer(factory.ensure<Renderer>(i, args));
+        }
     }
     return arena;
 }

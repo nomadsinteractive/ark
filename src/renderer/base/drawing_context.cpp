@@ -51,20 +51,25 @@ private:
 };
 
 DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo)
-    : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _count(0), _instance_count(0)
+    : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo))
 {
 }
 
 DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& vertexBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount)
-    : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _vertex_buffer(vertexBuffer), _index_buffer(indexBuffer), _count(indexBuffer.length<glindex_t>()), _instance_count(instanceCount)
+    : DrawingContext(shader, shaderBindings, std::move(ubo), vertexBuffer, indexBuffer, instanceCount, 0, indexBuffer.length<glindex_t>())
 {
-    DWARN(_shader_bindings->vertexBuffer().id() == vertexBuffer.id(), "ShaderBinding's VertexBuffer: %d, which is not the same as DrawingContext's VertexBuffer snapshot: %d", _shader_bindings->vertexBuffer().id(), vertexBuffer.id());
+}
+
+DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& vertexBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount, uint32_t start, uint32_t end)
+    : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _vertex_buffer(vertexBuffer), _index_buffer(indexBuffer), _parameters(instanceCount, start, end, true)
+{
+    DWARN(_shader_bindings->vertexBuffer().id() == vertexBuffer.id(), "ShaderBinding's VertexBuffer: %lld, which is not the same as DrawingContext's VertexBuffer snapshot: %lld", _shader_bindings->vertexBuffer().id(), vertexBuffer.id());
 }
 
 sp<RenderCommand> DrawingContext::toRenderCommand(ObjectPool& objectPool)
 {
     DCHECK(_shader && _shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
-    if(_count > 0)
+    if(_parameters._start != _parameters._end)
         return objectPool.obtain<RenderCommandDraw>(std::move(*this));
     return objectPool.obtain<RenderCommandBind>(std::move(*this));
 }
@@ -91,6 +96,16 @@ void DrawingContext::preDraw(GraphicsContext& graphicsContext)
 void DrawingContext::postDraw(GraphicsContext& graphicsContext)
 {
     _shader_bindings->snippet()->postDraw(graphicsContext);
+}
+
+DrawingContext::Parameters::Parameters()
+    : _instance_count(0), _start(0), _end(0), _cull_face(true)
+{
+}
+
+DrawingContext::Parameters::Parameters(int32_t instanceCount, uint32_t start, uint32_t end, bool cullFace)
+    : _instance_count(instanceCount), _start(start), _end(end), _cull_face(cullFace), _scissor(0, 0, -1.0f, -1.0f)
+{
 }
 
 }

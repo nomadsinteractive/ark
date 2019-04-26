@@ -182,6 +182,7 @@ ark_add_plugin_directory(noise plugin/noise)
 ark_add_plugin_directory(fmod plugin/fmod)
 ark_add_plugin_directory(assimp plugin/assimp)
 ark_add_plugin_directory(pbr plugin/pbr)
+ark_add_plugin_directory(dear_imgui plugin/dear-imgui)
 
 if(NOT (ANDROID OR IOS))
 if(${BUILD_SHARED_LIBS})

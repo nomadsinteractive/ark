@@ -50,9 +50,8 @@ void RenderViewOpenGL::initialize(uint32_t width, uint32_t height)
 {
     LOGD("Width: %d, Height: %d, Viewport (%.1f, %.1f, %.1f, %.1f)", width, height, _viewport.left(), _viewport.top(), _viewport.right(), _viewport.bottom());
 
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
 
-    glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
 
     glEnable(GL_BLEND);

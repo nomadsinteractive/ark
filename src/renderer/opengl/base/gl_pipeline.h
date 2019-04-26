@@ -111,8 +111,7 @@ private:
         GLRenderCommand(GLenum mode);
         virtual ~GLRenderCommand() = default;
 
-        int32_t _count;
-        int32_t _instance_count;
+        DrawingContext::Parameters _parameters;
 
     protected:
         GLenum _mode;

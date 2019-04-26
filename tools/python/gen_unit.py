@@ -19,7 +19,7 @@ if __name__ == '__main__':
 #define ARK_${macro}_
 
 #endif
-''', macro=macro))
+''', macro=macro.replace('-', '_')))
     if not path.isfile(sys.argv[1] + '.cpp'):
         with open(sys.argv[1] + '.cpp', 'wt') as fp:
             fp.write('')

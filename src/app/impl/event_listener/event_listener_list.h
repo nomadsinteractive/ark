@@ -13,6 +13,15 @@ public:
 
     virtual bool onEvent(const Event& event);
 
+//  [[plugin::builder]]
+    class BUILDER : public Builder<EventListener> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest);
+
+        virtual sp<EventListener> build(const sp<Scope>& args) override;
+
+    };
+
 private:
     DisposableItemList<EventListener> _event_listeners;
 };

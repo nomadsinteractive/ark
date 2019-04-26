@@ -86,15 +86,17 @@ void PipelineBuildingContext::initialize()
         _fragment._ins.declare(i.first, "v_", n);
     }
 
-    std::map<String, String> attributes;
+    Table<String, String> attributes;
     for(const auto& i : _fragment._ins.vars().values())
-        attributes[i.name()] = i.type();
+        if(!attributes.has(i.name()))
+            attributes.push_back(i.name(), i.type());
 
     for(const auto& i : _attributes)
-        attributes[i.first] = i.second.declareType();
+        if(!attributes.has(i.first))
+            attributes.push_back(i.first, i.second.declareType());
 
     std::vector<String> generated;
-    for(const auto& i : attributes)
+    for(const auto& i : attributes.items())
     {
         if(!_vertex._ins.has(i.first)
                 && !_vertex._outs.has(i.first)
@@ -108,7 +110,7 @@ void PipelineBuildingContext::initialize()
     for(auto iter : _input->streams())
         iter.second.align();
 
-    for(const auto& i : attributes)
+    for(const auto& i : attributes.items())
     {
         if(fragmentUsedVars.find(i.first) != fragmentUsedVars.end())
             _fragment._ins.declare(i.second, "v_", i.first);
@@ -116,10 +118,10 @@ void PipelineBuildingContext::initialize()
 
     for(const String& i : generated)
     {
-        _vertex._ins.declare(attributes[i], "a_", i);
+        _vertex._ins.declare(attributes.at(i), "a_", i);
         if(fragmentUsedVars.find(i) != fragmentUsedVars.end())
         {
-            _vertex._outs.declare(attributes[i], "v_", i);
+            _vertex._outs.declare(attributes.at(i), "v_", i);
             _vertex.addPreMainSource(Strings::sprintf("v_%s = a_%s;", i.c_str(), i.c_str()));
         }
     }
@@ -253,8 +255,10 @@ Attribute PipelineBuildingContext::makePredefinedAttribute(const String& name, c
         return Attribute("a_" + name, Attribute::TYPE_FLOAT, type, 1, false);
     if(type == "vec4")
         return Attribute("a_" + name, Attribute::TYPE_FLOAT, type, 4, false);
-    if(type == "color3b")
-        return Attribute("a_" + name, Attribute::TYPE_UBYTE, type, 3, false);
+    if(type == "vec4b")
+        return Attribute("a_" + name, Attribute::TYPE_UBYTE, type, 4, true);
+    if(type == "vec3b")
+        return Attribute("a_" + name, Attribute::TYPE_UBYTE, type, 3, true);
     if(type == "uint8")
         return Attribute("a_" + name, Attribute::TYPE_UBYTE, type, 1, false);
     if(type == "mat4")

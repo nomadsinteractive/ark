@@ -28,7 +28,7 @@ void GLVertexArray::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
     glGenVertexArrays(1, &_id);
     glBindVertexArray(_id);
     bindings->vertexBuffer().upload(graphicsContext);
-    glBindBuffer(GL_ARRAY_BUFFER, bindings->vertexBuffer().id());
+    glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(bindings->vertexBuffer().id()));
     const sp<opengl::GLPipeline> pipeline = _pipeline_factory->buildPipeline(graphicsContext, bindings);
     pipeline->bindBuffer(graphicsContext, bindings);
     glBindVertexArray(0);
