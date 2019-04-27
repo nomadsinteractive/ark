@@ -150,7 +150,7 @@ sp<Pipeline> Shader::Stub::buildPipeline(GraphicsContext& graphicsContext, const
         return _pipeline;
     }
 
-    shaderBindings->pipelineLayout()->preCompile(graphicsContext, shaderBindings);
+    shaderBindings->pipelineLayout()->preCompile(graphicsContext);
     _pipeline = _pipeline_factory->buildPipeline(graphicsContext, shaderBindings);
     graphicsContext.renderController()->upload(_pipeline, nullptr, RenderController::US_ON_SURFACE_READY);
     _pipeline->upload(graphicsContext, nullptr);

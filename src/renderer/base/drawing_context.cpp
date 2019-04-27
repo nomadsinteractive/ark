@@ -60,8 +60,8 @@ DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings
 {
 }
 
-DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& vertexBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount, uint32_t start, uint32_t end)
-    : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _vertex_buffer(vertexBuffer), _index_buffer(indexBuffer), _parameters(instanceCount, start, end, true)
+DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& vertexBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount, uint32_t start, uint32_t count)
+    : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _vertex_buffer(vertexBuffer), _index_buffer(indexBuffer), _parameters(instanceCount, start, count, true)
 {
     DWARN(_shader_bindings->vertexBuffer().id() == vertexBuffer.id(), "ShaderBinding's VertexBuffer: %lld, which is not the same as DrawingContext's VertexBuffer snapshot: %lld", _shader_bindings->vertexBuffer().id(), vertexBuffer.id());
 }
@@ -69,7 +69,7 @@ DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings
 sp<RenderCommand> DrawingContext::toRenderCommand(ObjectPool& objectPool)
 {
     DCHECK(_shader && _shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
-    if(_parameters._start != _parameters._end)
+    if(_parameters._count)
         return objectPool.obtain<RenderCommandDraw>(std::move(*this));
     return objectPool.obtain<RenderCommandBind>(std::move(*this));
 }
@@ -99,12 +99,12 @@ void DrawingContext::postDraw(GraphicsContext& graphicsContext)
 }
 
 DrawingContext::Parameters::Parameters()
-    : _instance_count(0), _start(0), _end(0), _cull_face(true)
+    : _instance_count(0), _start(0), _count(0), _cull_face(true)
 {
 }
 
-DrawingContext::Parameters::Parameters(int32_t instanceCount, uint32_t start, uint32_t end, bool cullFace)
-    : _instance_count(instanceCount), _start(start), _end(end), _cull_face(cullFace), _scissor(0, 0, -1.0f, -1.0f)
+DrawingContext::Parameters::Parameters(int32_t instanceCount, uint32_t start, uint32_t count, bool cullFace)
+    : _instance_count(instanceCount), _start(start), _count(count), _cull_face(cullFace), _scissor(0, 0, -1.0f, -1.0f)
 {
 }
 

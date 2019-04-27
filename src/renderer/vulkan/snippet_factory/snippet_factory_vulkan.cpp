@@ -2,8 +2,9 @@
 
 #include "renderer/base/render_controller.h"
 #include "renderer/base/pipeline_building_context.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/pipeline_input.h"
-#include "renderer/base/shader_bindings.h"
+//#include "renderer/base/shader_bindings.h"
 
 #include "renderer/inf/snippet.h"
 
@@ -14,7 +15,7 @@ namespace {
 
 class CoreSnippetVulkan : public Snippet {
 public:
-    virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const sp<ShaderBindings>& shaderBindings) override {
+    virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override {
         context._vertex._version = 450;
         context._fragment._version = 450;
 
@@ -23,7 +24,7 @@ public:
 
         setLayoutDescriptor(context._vertex._ins, sLocation, 0);
 
-        const sp<PipelineInput>& pipelineInput = shaderBindings->pipelineInput();
+        const sp<PipelineInput>& pipelineInput = pipelineLayout.input();
         declareUBOStruct(context._vertex, pipelineInput);
         declareUBOStruct(context._fragment, pipelineInput);
 
@@ -99,7 +100,7 @@ private:
 
 }
 
-sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(RenderController& /*resourceManager*/, const sp<PipelineFactory>& /*pipelineFactory*/, const sp<ShaderBindings>& /*shaderBindings*/)
+sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(RenderController& /*resourceManager*/, const sp<PipelineFactory>& /*pipelineFactory*/)
 {
     return sp<CoreSnippetVulkan>::make();
 }

@@ -16,12 +16,12 @@ public:
     CoreGLSnippet(SnippetDelegate& wrapper, const sp<Snippet>& snippet);
 
     virtual void preInitialize(PipelineBuildingContext& context) override;
-    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const sp<ShaderBindings>& shaderBindings) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
     virtual void preDraw(GraphicsContext& graphicsContext, Shader& shader, const DrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 
 private:
-    sp<Snippet> createCoreSnippet(GraphicsContext& graphicsContext, const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& bindings) const;
+    sp<Snippet> createCoreSnippet(GraphicsContext& graphicsContext, const sp<PipelineFactory>& pipelineFactory) const;
 
 private:
     SnippetDelegate& _wrapper;
@@ -39,11 +39,11 @@ void CoreGLSnippet::preInitialize(PipelineBuildingContext& context)
         _snippet->preInitialize(context);
 }
 
-void CoreGLSnippet::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const sp<ShaderBindings>& shaderBindings)
+void CoreGLSnippet::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout)
 {
     const sp<Snippet> delegate = _wrapper._core;
-    _wrapper._core = createCoreSnippet(graphicsContext, context._shader, shaderBindings);
-    _wrapper.preCompile(graphicsContext, context, shaderBindings);
+    _wrapper._core = createCoreSnippet(graphicsContext, context._shader);
+    _wrapper.preCompile(graphicsContext, context, pipelineLayout);
 }
 
 void CoreGLSnippet::preDraw(GraphicsContext& /*graphicsContext*/, Shader& shader, const DrawingContext& /*context*/)
@@ -56,9 +56,9 @@ void CoreGLSnippet::postDraw(GraphicsContext& /*graphicsContext*/)
     DFATAL("You're not supposed to be here");
 }
 
-sp<Snippet> CoreGLSnippet::createCoreSnippet(GraphicsContext& graphicsContext, const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& bindings) const
+sp<Snippet> CoreGLSnippet::createCoreSnippet(GraphicsContext& graphicsContext, const sp<PipelineFactory>& pipelineFactory) const
 {
-    const sp<Snippet> coreSnippet = graphicsContext.renderContext()->snippetFactory()->createCoreSnippet(graphicsContext.renderController(), pipelineFactory, bindings);
+    const sp<Snippet> coreSnippet = graphicsContext.renderContext()->snippetFactory()->createCoreSnippet(graphicsContext.renderController(), pipelineFactory);
     DASSERT(coreSnippet);
     return _snippet ? sp<Snippet>::adopt(new SnippetLinkedChain(coreSnippet, _snippet)) : coreSnippet;
 }
@@ -73,9 +73,9 @@ void SnippetDelegate::preInitialize(PipelineBuildingContext& context)
     _core->preInitialize(context);
 }
 
-void SnippetDelegate::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const sp<ShaderBindings>& shaderBindings)
+void SnippetDelegate::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout)
 {
-    _core->preCompile(graphicsContext, context, shaderBindings);
+    _core->preCompile(graphicsContext, context, pipelineLayout);
 }
 
 void SnippetDelegate::preDraw(GraphicsContext& graphicsContext, Shader& shader, const DrawingContext& context)

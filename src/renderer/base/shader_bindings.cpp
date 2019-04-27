@@ -25,6 +25,8 @@ ShaderBindings::ShaderBindings(RenderModel::Mode mode, RenderController& renderC
     for(size_t i = 0; i < samplers.values().size(); ++i)
         if(i < _samplers.size())
             _samplers[i] = samplers.values().at(i);
+
+    pipelineLayout->snippet()->preBind(renderController, *this);
 }
 
 const sp<Snippet>& ShaderBindings::snippet() const
@@ -75,6 +77,16 @@ const std::vector<std::pair<uint32_t, Buffer>>& ShaderBindings::instancedArrays(
 const ShaderBindings::Attributes& ShaderBindings::attributes() const
 {
     return _attributes;
+}
+
+const ByType& ShaderBindings::attachments() const
+{
+    return _attachments;
+}
+
+ByType& ShaderBindings::attachments()
+{
+    return _attachments;
 }
 
 void ShaderBindings::bindSampler(const sp<Texture>& texture, uint32_t name)

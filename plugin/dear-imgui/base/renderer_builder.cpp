@@ -1,15 +1,10 @@
 #include "dear-imgui/base/renderer_builder.h"
 
-#include <functional>
 #include <vector>
 
 #include <imgui.h>
 
-#include "core/base/string.h"
-
 #include "graphics/inf/renderer.h"
-
-#include "dear-imgui/inf/widget.h"
 
 namespace ark {
 namespace plugin {
@@ -82,18 +77,19 @@ private:
 
 };
 
-
 class DemoWindow : public Widget {
 public:
-    DemoWindow()
-        : _open(true) {
+    DemoWindow(std::function<void(bool*)> func)
+        : _func(std::move(func)), _open(true) {
     }
 
     virtual void render() override {
-        ImGui::ShowDemoWindow(&_open);
+        _func(&_open);
     }
 
 private:
+    std::function<void(bool*)> _func;
+
     bool _open;
 };
 
@@ -137,30 +133,60 @@ void RendererBuilder::bulletText(const String& content)
     current()->addWidget(sp<Text>::make(ImGui::BulletText, content));
 }
 
+void RendererBuilder::button(const String& label)
+{
+    addCallback<String>([](const char* s) { return ImGui::Button(s); }, label);
+}
+
+void RendererBuilder::indent(float w)
+{
+    addInvocation<float>(ImGui::Indent, w);
+}
+
+void RendererBuilder::unindent(float w)
+{
+    addInvocation<float>(ImGui::Unindent, w);
+}
+
 void RendererBuilder::text(const String& content)
 {
     current()->addWidget(sp<Text>::make(ImGui::Text, content));
 }
 
+void RendererBuilder::showAboutWindow()
+{
+    current()->addWidget(sp<DemoWindow>::make(ImGui::ShowAboutWindow));
+}
+
+void RendererBuilder::sameLine(float localPosX, float spacingW)
+{
+    addBlock([localPosX, spacingW] { ImGui::SameLine(localPosX, spacingW); });
+}
+
 void RendererBuilder::separator()
 {
-    current()->addWidget(sp<Block>::make(ImGui::Separator));
+    addBlock(ImGui::Separator);
 }
 
 void RendererBuilder::spacing()
 {
-    current()->addWidget(sp<Block>::make(ImGui::Spacing));
+    addBlock(ImGui::Spacing);
 }
 
 void RendererBuilder::showDemoWindow()
 {
-    current()->addWidget(sp<DemoWindow>::make());
+    current()->addWidget(sp<DemoWindow>::make(ImGui::ShowDemoWindow));
 }
 
 sp<Renderer> RendererBuilder::build() const
 {
     DCHECK(_stub->_states.size() == 1, "Builder has uncompleted begin/end states");
     return sp<RendererWidget>::make(_stub->_states.top());
+}
+
+void RendererBuilder::addBlock(std::function<void()> func)
+{
+    current()->addWidget(sp<Block>::make(std::move(func)));
 }
 
 void RendererBuilder::push(const sp<WidgetGroup>& widget)

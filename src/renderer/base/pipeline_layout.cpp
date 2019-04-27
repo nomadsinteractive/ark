@@ -28,11 +28,11 @@ PipelineLayout::PipelineLayout(const sp<RenderController>& renderController, con
 {
 }
 
-void PipelineLayout::preCompile(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings)
+void PipelineLayout::preCompile(GraphicsContext& graphicsContext)
 {
     if(_building_context)
     {
-        _snippet->preCompile(graphicsContext, _building_context, bindings);
+        _snippet->preCompile(graphicsContext, _building_context, *this);
 
         _vertex = _building_context->_vertex.preprocess();
         _fragment = _building_context->_fragment.preprocess();

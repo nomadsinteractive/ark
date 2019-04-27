@@ -448,11 +448,11 @@ GLPipeline::GLDrawElements::GLDrawElements(GLenum mode)
 
 void GLPipeline::GLDrawElements::draw(GraphicsContext& /*graphicsContext*/)
 {
-    DCHECK(_parameters._end > _parameters._start, "Illegal draw range: (%d, %d)", _parameters._start, _parameters._end);
+    DASSERT(_parameters._count);
     if(_parameters._cull_face)
         glEnable(GL_CULL_FACE);
     const GLScissor scissor(_parameters._scissor);
-    glDrawRangeElements(_mode, _parameters._start, _parameters._end - 1, static_cast<GLsizei>(_parameters._end - _parameters._start), GLIndexType, nullptr);
+    glDrawElements(_mode, static_cast<GLsizei>(_parameters._count), GLIndexType, reinterpret_cast<GLvoid*>(_parameters._start * sizeof(glindex_t)));
     if(_parameters._cull_face)
         glDisable(GL_CULL_FACE);
 }
@@ -467,7 +467,7 @@ void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& /*graphicsContex
     if(_parameters._cull_face)
         glEnable(GL_CULL_FACE);
     const GLScissor scissor(_parameters._scissor);
-    glDrawElementsInstanced(_mode, static_cast<GLsizei>(_parameters._end - _parameters._start), GLIndexType, nullptr, _parameters._instance_count);
+    glDrawElementsInstanced(_mode, static_cast<GLsizei>(_parameters._count), GLIndexType, nullptr, _parameters._instance_count);
     if(_parameters._cull_face)
         glDisable(GL_CULL_FACE);
 }

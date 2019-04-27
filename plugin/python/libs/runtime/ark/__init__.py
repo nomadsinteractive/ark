@@ -637,6 +637,10 @@ class Math:
         return 0
 
     @staticmethod
+    def atan(x):
+        return 0
+
+    @staticmethod
     def atan2(dy, dx):
         return 0
 

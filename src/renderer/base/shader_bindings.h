@@ -6,6 +6,7 @@
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
+#include "core/collection/by_type.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -53,6 +54,9 @@ public:
 
     const Attributes& attributes() const;
 
+    const ByType& attachments() const;
+    ByType& attachments();
+
     void bindSampler(const sp<Texture>& texture, uint32_t name = 0);
 
     std::map<uint32_t, Buffer::Builder> makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const;
@@ -69,6 +73,8 @@ private:
     sp<PipelineInput> _pipeline_input;
     std::vector<std::pair<uint32_t, Buffer>> _instanced_arrays;
     std::vector<sp<Texture>> _samplers;
+
+    ByType _attachments;
 
     friend class ModelBuffer;
 };

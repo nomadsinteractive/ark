@@ -19,10 +19,10 @@ void SnippetLinkedChain::preInitialize(PipelineBuildingContext& context)
     _next->preInitialize(context);
 }
 
-void SnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const sp<ShaderBindings>& shaderBindings)
+void SnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout)
 {
-    _delegate->preCompile(graphicsContext, context, shaderBindings);
-    _next->preCompile(graphicsContext, context, shaderBindings);
+    _delegate->preCompile(graphicsContext, context, pipelineLayout);
+    _next->preCompile(graphicsContext, context, pipelineLayout);
 }
 
 void SnippetLinkedChain::preDraw(GraphicsContext& graphicsContext, Shader& shader, const DrawingContext& context)

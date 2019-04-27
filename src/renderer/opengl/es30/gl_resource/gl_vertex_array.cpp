@@ -22,7 +22,7 @@ uint64_t GLVertexArray::id()
     return _id;
 }
 
-void GLVertexArray::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
+void GLVertexArray::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
     const sp<ShaderBindings> bindings = _shader_bindings.ensure();
     glGenVertexArrays(1, &_id);

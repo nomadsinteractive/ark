@@ -162,7 +162,7 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImGuiIO&
                 // Render 'pcmd->ElemCount/3' indexed triangles.
                 // By default the indices ImDrawIdx are 16-bits, you can change them to 32-bits in imconfig.h if your engine doesn't support 16-bits indices.
                 const ImVec2& pos = draw_data->DisplayPos;
-                DrawingContext drawingContext(_shader, drawCommand->_shader_bindings, ubos, vertexBuffer, indexBuffer, static_cast<int32_t>(pcmd->ElemCount / 3), offset, offset + pcmd->ElemCount);
+                DrawingContext drawingContext(_shader, drawCommand->_shader_bindings, ubos, vertexBuffer, indexBuffer, static_cast<int32_t>(pcmd->ElemCount / 3), offset, pcmd->ElemCount);
                 drawingContext._parameters._cull_face = false;
                 drawingContext._parameters._scissor = Rect(pcmd->ClipRect.x - pos.x, io.DisplaySize.y - pcmd->ClipRect.y + pos.y, pcmd->ClipRect.z - pos.x, io.DisplaySize.y - pcmd->ClipRect.w + pos.y);
                 renderRequest.addRequest(sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(_object_pool), drawCommand));
