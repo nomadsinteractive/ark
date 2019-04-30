@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VULKAN_API_H_
-#define ARK_RENDERER_VULKAN_BASE_VULKAN_API_H_
+#ifndef ARK_RENDERER_VULKAN_UTIL_VULKAN_UTIL_H_
+#define ARK_RENDERER_VULKAN_UTIL_VULKAN_UTIL_H_
 
 #include <vector>
 
@@ -8,6 +8,7 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
+#include "renderer/inf/render_model.h"
 
 #include "renderer/vulkan/forward.h"
 

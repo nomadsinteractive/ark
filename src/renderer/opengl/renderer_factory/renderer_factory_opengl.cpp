@@ -5,7 +5,9 @@
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
+#include "graphics/base/camera.h"
 #include "graphics/base/size.h"
+#include "graphics/base/viewport.h"
 
 #include "renderer/base/framebuffer.h"
 #include "renderer/base/render_context.h"
@@ -39,7 +41,7 @@ RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<Recycler>& recycler)
 
 sp<RenderContext> RendererFactoryOpenGL::initialize(Ark::RendererVersion version)
 {
-    const sp<RenderContext> renderContext = sp<RenderContext>::make(version, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
+    const sp<RenderContext> renderContext = sp<RenderContext>::make(version, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f), 1.0f);
     if(version != Ark::AUTO)
         setVersion(version, renderContext);
     return renderContext;

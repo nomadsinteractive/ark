@@ -5,6 +5,7 @@
 #include "renderer/inf/pipeline.h"
 #include "renderer/inf/snippet.h"
 
+#include "renderer/base/shader_bindings.h"
 #include "renderer/opengl/base/gl_pipeline.h"
 
 #include "platform/gl/gl.h"
@@ -16,19 +17,18 @@ namespace {
 
 class SnippetGLES20 : public Snippet {
 public:
-
-    virtual void preDraw(GraphicsContext& graphicsContext, Shader& shader, const DrawingContext& context) override {
+    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
         glBindBuffer(GL_ARRAY_BUFFER, context._vertex_buffer.id());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context._index_buffer.id());
-        const sp<opengl::GLPipeline> pipeline = shader.pipeline();
-        pipeline->bindBuffer(graphicsContext, context._shader_bindings);
+        const sp<opengl::GLPipeline> pipeline = context._shader_bindings->getPipeline(graphicsContext);
+        pipeline->bindBuffer(graphicsContext, context._shader_bindings->pipelineInput(), context._shader_bindings->divisors());
     }
 
 };
 
 }
 
-sp<Snippet> SnippetFactoryGLES20::createCoreSnippet(RenderController& /*glResourceManager*/, const sp<PipelineFactory>& /*pipelineFactory*/)
+sp<Snippet> SnippetFactoryGLES20::createCoreSnippet(RenderController& /*renderController*/)
 {
     return sp<SnippetGLES20>::make();
 }

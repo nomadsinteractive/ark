@@ -84,6 +84,13 @@ void Rect::translate(float x, float y)
     _bottom += y;
 }
 
+void Rect::vflip(float height)
+{
+    std::swap(_top, _bottom);
+    _top = height - _top;
+    _bottom = height - _bottom;
+}
+
 bool Rect::ptin(float x, float y) const
 {
     if(_left <= _right && (x < _left || x > _right))

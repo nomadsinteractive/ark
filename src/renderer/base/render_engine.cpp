@@ -1,5 +1,9 @@
 #include "renderer/base/render_engine.h"
 
+#include "core/types/global.h"
+
+#include "graphics/base/camera.h"
+
 #include "renderer/base/render_context.h"
 #include "renderer/inf/renderer_factory.h"
 
@@ -47,6 +51,9 @@ void RenderEngine::onSurfaceCreated()
 
 sp<RenderView> RenderEngine::createRenderView(const sp<RenderController>& renderController, const Viewport& viewport) const
 {
+    const Global<Camera> mainCamera;
+    mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), viewport.near(), viewport.far(), _render_context->upDirection());
+
     _render_context->setViewport(viewport);
     return _renderer_factory->createRenderView(_render_context, renderController, viewport);
 }

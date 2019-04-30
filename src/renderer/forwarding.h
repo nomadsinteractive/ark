@@ -21,6 +21,7 @@ class Shader;
 class ShaderBindings;
 class PipelineInput;
 class ShaderPreprocessor;
+class PipelineBindings;
 class PipelineBuildingContext;
 class PipelineLayout;
 class Snippet;

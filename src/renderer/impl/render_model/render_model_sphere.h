@@ -14,7 +14,7 @@ class GLModelSphere : public RenderModel {
 public:
     GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas, uint32_t sampleCount);
 
-    virtual sp<ShaderBindings> makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) override;
+    virtual sp<ShaderBindings> makeShaderBindings(const Shader& shader) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
     virtual void start(ModelBuffer& buf, const RenderLayer::Snapshot& layerContext) override;

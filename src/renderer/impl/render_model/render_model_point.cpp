@@ -2,7 +2,9 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/model_buffer.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 
 namespace ark {
@@ -12,10 +14,10 @@ GLModelPoint::GLModelPoint(const RenderController& renderController, const sp<At
 {
 }
 
-sp<ShaderBindings> GLModelPoint::makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
+sp<ShaderBindings> GLModelPoint::makeShaderBindings(const Shader& shader)
 {
-    const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_POINTS, renderController, pipelineLayout, renderController.makeVertexBuffer(), _index_buffer->buffer());
-    bindings->bindSampler(_atlas->texture());
+    const sp<ShaderBindings> bindings = shader.makeBindings(RENDER_MODE_POINTS, shader.renderController()->makeVertexBuffer(), _index_buffer->buffer());
+    bindings->pipelineBindings()->bindSampler(_atlas->texture());
     return bindings;
 }
 

@@ -29,7 +29,7 @@ const sp<ApplicationController>& ApplicationFacade::controller() const
 
 const sp<Camera>& ApplicationFacade::camera() const
 {
-    return Camera::getMainCamera();
+    return Camera::getDefaultCamera();
 }
 
 const sp<Manifest>& ApplicationFacade::manifest() const

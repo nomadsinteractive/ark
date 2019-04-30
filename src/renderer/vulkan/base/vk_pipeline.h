@@ -7,6 +7,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader.h"
 #include "renderer/inf/pipeline.h"
 
@@ -19,7 +20,7 @@ namespace vulkan {
 
 class VKPipeline : public Pipeline {
 public:
-    VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<ShaderBindings>& shaderBindings, std::map<Shader::Stage, String> shaders);
+    VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Shader::Stage, String> shaders);
     ~VKPipeline() override;
 
     VkPipeline vkPipeline() const;
@@ -42,16 +43,17 @@ private:
 
     void setupVertexDescriptions(const PipelineInput& input, VertexLayout& vertexLayout);
     void setupDescriptorSetLayout(const PipelineInput& pipelineInput);
-    void setupDescriptorSet(GraphicsContext& graphicsContext, const ShaderBindings& bindings);
-    void setupPipeline(const VertexLayout& vertexLayout);
+    void setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineBindings& bindings);
+    void setupPipeline(GraphicsContext& graphicsContext, const VertexLayout& vertexLayout);
 
     void buildCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
 
     bool isDirty(const bytearray& dirtyFlags) const;
 
 private:
+    PipelineBindings _bindings;
+
     sp<Recycler> _recycler;
-    sp<ShaderBindings> _shader_bindings;
     sp<VKRenderer> _renderer;
     sp<VKDescriptorPool> _descriptor_pool;
 
@@ -65,6 +67,8 @@ private:
     std::vector<sp<VKBuffer>> _ubos;
 
     std::vector<sp<Observer>> _texture_observers;
+
+    bool _rebind_needed;
 };
 
 }

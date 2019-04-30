@@ -32,6 +32,8 @@ public:
 
     void scale(float xScale, float yScale);
     void translate(float x, float y);
+    void vflip(float height);
+
     bool ptin(float x, float y) const;
     bool overlap(const Rect& other) const;
 

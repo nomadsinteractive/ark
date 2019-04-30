@@ -26,7 +26,6 @@ public:
         uint32_t _start;
         uint32_t _count;
 
-        bool _cull_face;
         Rect _scissor;
     };
 

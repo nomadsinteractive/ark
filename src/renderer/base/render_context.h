@@ -13,6 +13,7 @@
 #endif
 
 #include "core/ark.h"
+#include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/types/shared_ptr.h"
 
@@ -31,7 +32,7 @@ typedef struct _NSWindow NSWindow;
 
 namespace ark {
 
-class RenderContext {
+class ARK_API RenderContext {
 public:
     union Info {
 #ifdef ARK_PLATFORM_WINDOWS
@@ -62,7 +63,7 @@ public:
             uint8_t dummy[64] = {0};
     };
 public:
-    RenderContext(Ark::RendererVersion version, const Viewport& viewport);
+    RenderContext(Ark::RendererVersion version, const Viewport& viewport, float upDirection);
 
     Ark::RendererVersion version() const;
     void setVersion(Ark::RendererVersion version);
@@ -84,15 +85,18 @@ public:
     const Info& info() const;
     Info& info();
 
+    float upDirection() const;
+
 private:
     Ark::RendererVersion _version;
-    std::map<String, String> _annotations;
-
     Viewport _viewport;
-    V2 _resolution;
-    sp<SnippetFactory> _snippet_factory;
+    float _up_direction;
 
     Info _info;
+
+    std::map<String, String> _annotations;
+    sp<SnippetFactory> _snippet_factory;
+    V2 _resolution;
 };
 
 }

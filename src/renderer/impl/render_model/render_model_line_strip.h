@@ -14,7 +14,7 @@ class GLModelLineStrip : public RenderModel {
 public:
     GLModelLineStrip(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas);
 
-    virtual sp<ShaderBindings> makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) override;
+    virtual sp<ShaderBindings> makeShaderBindings(const Shader& shader) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
     virtual void start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot) override;

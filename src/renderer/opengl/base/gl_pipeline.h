@@ -23,7 +23,7 @@ namespace opengl {
 
 class GLPipeline : public Pipeline {
 public:
-    GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const ShaderBindings& bindings);
+    GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const PipelineBindings& bindings);
     virtual ~GLPipeline() override;
 
     virtual uint64_t id() override;
@@ -33,7 +33,7 @@ public:
     virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
     virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
 
-    void bindBuffer(GraphicsContext& graphicsContext, const ShaderBindings& bindings);
+    void bindBuffer(GraphicsContext& graphicsContext, const PipelineInput& input, const std::map<uint32_t, Buffer>& divisors);
 
     void activeTexture(const Texture& texture, uint32_t name);
 
@@ -108,30 +108,31 @@ private:
 
     class GLRenderCommand : public RenderCommand {
     public:
-        GLRenderCommand(GLenum mode);
+        GLRenderCommand(GLenum mode, bool cullFace);
         virtual ~GLRenderCommand() = default;
 
         DrawingContext::Parameters _parameters;
 
     protected:
         GLenum _mode;
+        bool _cull_face;
     };
 
     class GLDrawElements : public GLRenderCommand {
     public:
-        GLDrawElements(GLenum mode);
+        GLDrawElements(GLenum mode, bool cullFace);
 
         virtual void draw(GraphicsContext& graphicsContext) override;
     };
 
     class GLDrawElementsInstanced : public GLRenderCommand {
     public:
-        GLDrawElementsInstanced(GLenum mode);
+        GLDrawElementsInstanced(GLenum mode, bool cullFace);
 
         virtual void draw(GraphicsContext& graphicsContext) override;
     };
 
-    sp<GLRenderCommand> createRenderCommand(const ShaderBindings& bindings) const;
+    sp<GLRenderCommand> createRenderCommand(const PipelineBindings& bindings) const;
 
 private:
     sp<Recycler> _recycler;
@@ -141,6 +142,8 @@ private:
 
     String _vertex_source;
     String _fragment_source;
+
+    bool _cull_face;
 
     GLuint _id;
 

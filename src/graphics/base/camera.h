@@ -39,7 +39,7 @@ public:
     };
 
 //  [[script::bindings::auto]]
-    void ortho(float left, float right, float top, float bottom, float near, float far);
+    void ortho(float left, float right, float top, float bottom, float near, float far, float upDirection = 1.0f);
 //  [[script::bindings::auto]]
     void perspective(float fov, float aspect, float near, float far);
 
@@ -56,7 +56,7 @@ public:
 
     Snapshot snapshot() const;
 
-    static const sp<Camera>& getMainCamera();
+    static const sp<Camera>& getDefaultCamera();
 
 private:
     void updateViewProjection();

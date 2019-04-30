@@ -5,7 +5,6 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/render_controller.h"
 #include "renderer/inf/render_model.h"
 
 namespace ark {
@@ -14,7 +13,7 @@ class GLModelPoint : public RenderModel {
 public:
     GLModelPoint(const RenderController& renderController, const sp<Atlas>& atlas);
 
-    virtual sp<ShaderBindings> makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) override;
+    virtual sp<ShaderBindings> makeShaderBindings(const Shader& shader) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
     virtual void start(ModelBuffer& buf, const RenderLayer::Snapshot& layerContext) override;

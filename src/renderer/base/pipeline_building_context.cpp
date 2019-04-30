@@ -39,14 +39,14 @@ private:
 }
 
 PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment)
-    : _shader(sp<Shader::Stub>::make(pipelineFactory)), _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT)
+    : _pipeline_factory(pipelineFactory), _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT)
 {
     _vertex.initialize(vertex, *this);
     _fragment.initialize(fragment, *this);
 }
 
 PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment, BeanFactory& factory, const sp<Scope>& args, const document& manifest)
-    : _shader(sp<Shader::Stub>::make(pipelineFactory)), _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT)
+    : _pipeline_factory(pipelineFactory), _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT)
 {
     loadPredefinedParam(factory, args, manifest);
 

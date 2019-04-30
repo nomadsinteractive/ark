@@ -4,8 +4,8 @@
 
 namespace ark {
 
-RenderContext::RenderContext(Ark::RendererVersion version, const Viewport& viewport)
-    : _version(version), _viewport(viewport)
+RenderContext::RenderContext(Ark::RendererVersion version, const Viewport& viewport, float upDirection)
+    : _version(version), _viewport(viewport), _up_direction(upDirection)
 {
 }
 
@@ -86,6 +86,11 @@ const RenderContext::Info& RenderContext::info() const
 RenderContext::Info& RenderContext::info()
 {
     return _info;
+}
+
+float RenderContext::upDirection() const
+{
+    return _up_direction;
 }
 
 void RenderContext::setSnippetFactory(sp<SnippetFactory> snippetfactory)

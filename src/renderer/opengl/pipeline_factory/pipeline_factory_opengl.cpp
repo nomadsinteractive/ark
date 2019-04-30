@@ -3,23 +3,23 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_context.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/shader_bindings.h"
 
 #include "renderer/opengl/base/gl_pipeline.h"
 
 namespace ark {
 namespace opengl {
 
-sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& shaderBindings)
+sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
 {
-    DCHECK(shaderBindings->renderMode() != RenderModel::RENDER_MODE_NONE, "Shader has no RenderModel initialized");
-    const sp<PipelineLayout>& pipelineLayout = shaderBindings->pipelineLayout();
-    const sp<RenderContext>& glContext = graphicsContext.renderContext();
-    return sp<GLPipeline>::make(graphicsContext.recycler(), glContext->getGLSLVersion(),
-                                pipelineLayout->vertex().process(glContext), pipelineLayout->fragment().process(glContext), shaderBindings);
+    DCHECK(bindings.mode() != RenderModel::RENDER_MODE_NONE, "Pipeline has no RenderModel initialized");
+    const sp<PipelineLayout>& pipelineLayout = bindings.layout();
+    const sp<RenderContext>& renderContext = graphicsContext.renderContext();
+    return sp<GLPipeline>::make(graphicsContext.recycler(), renderContext->getGLSLVersion(),
+                                pipelineLayout->vertex().process(renderContext), pipelineLayout->fragment().process(renderContext), bindings);
 }
 
 }

@@ -85,7 +85,7 @@ void VKBuffer::allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRe
 
 void VKBuffer::ensureSize(GraphicsContext& graphicsContext, const Uploader& uploader)
 {
-    if(_size != uploader.size())
+    if(_size < uploader.size())
     {
         _size = uploader.size();
         if (_descriptor.buffer)

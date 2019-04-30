@@ -9,8 +9,9 @@
 #include "graphics/base/matrix.h"
 
 #include "renderer/base/recycler.h"
-#include "renderer/base/render_controller.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/uniform.h"
@@ -46,9 +47,9 @@ private:
 
 }
 
-GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const ShaderBindings& bindings)
-    : _recycler(recycler), _pipeline_input(bindings.pipelineInput()), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _id(0),
-      _render_command(createRenderCommand(bindings))
+GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const PipelineBindings& bindings)
+    : _recycler(recycler), _pipeline_input(bindings.input()), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _cull_face(bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK) != PipelineBindings::FLAG_CULL_MODE_NONE),
+      _id(0), _render_command(createRenderCommand(bindings))
 {
 }
 
@@ -145,17 +146,17 @@ void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& dr
     _render_command->draw(graphicsContext);
 }
 
-void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const ShaderBindings& bindings)
+void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineInput& input, const std::map<uint32_t, Buffer>& divisors)
 {
     DCHECK(id(), "GLProgram unprepared");
-    bindBuffer(graphicsContext, bindings.pipelineInput(), 0);
-    for(const auto& i : bindings.instancedArrays())
+    bindBuffer(graphicsContext, input, 0);
+    for(const auto& i : divisors)
     {
         if(!i.second.id())
             i.second.upload(graphicsContext);
 
         glBindBuffer(GL_ARRAY_BUFFER, i.second.id());
-        bindBuffer(graphicsContext, bindings.pipelineInput(), i.first);
+        bindBuffer(graphicsContext, input, i.first);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 }
@@ -198,12 +199,12 @@ void GLPipeline::bindUniform(float* buf, uint32_t size, const Uniform& uniform)
     }
 }
 
-sp<GLPipeline::GLRenderCommand> GLPipeline::createRenderCommand(const ShaderBindings& bindings) const
+sp<GLPipeline::GLRenderCommand> GLPipeline::createRenderCommand(const PipelineBindings& bindings) const
 {
-    GLenum mode = GLUtil::toEnum(bindings.renderMode());
-    if(bindings.isDrawInstanced())
-        return sp<GLDrawElementsInstanced>::make(mode);
-    return sp<GLDrawElements>::make(mode);
+    GLenum mode = GLUtil::toEnum(bindings.mode());
+    if(bindings.hasDivisors())
+        return sp<GLDrawElementsInstanced>::make(mode, _cull_face);
+    return sp<GLDrawElements>::make(mode, _cull_face);
 }
 
 void GLPipeline::bindUniform(GraphicsContext& /*graphicsContext*/, const Uniform& uniform)
@@ -436,39 +437,39 @@ GLuint GLPipeline::Shader::compile(uint32_t version, GLenum type, const String& 
     return id;
 }
 
-GLPipeline::GLRenderCommand::GLRenderCommand(GLenum mode)
-    : _mode(mode)
+GLPipeline::GLRenderCommand::GLRenderCommand(GLenum mode, bool cullFace)
+    : _mode(mode), _cull_face(cullFace)
 {
 }
 
-GLPipeline::GLDrawElements::GLDrawElements(GLenum mode)
-    : GLRenderCommand(mode)
+GLPipeline::GLDrawElements::GLDrawElements(GLenum mode, bool cullFace)
+    : GLRenderCommand(mode, cullFace)
 {
 }
 
 void GLPipeline::GLDrawElements::draw(GraphicsContext& /*graphicsContext*/)
 {
     DASSERT(_parameters._count);
-    if(_parameters._cull_face)
+    if(_cull_face)
         glEnable(GL_CULL_FACE);
     const GLScissor scissor(_parameters._scissor);
     glDrawElements(_mode, static_cast<GLsizei>(_parameters._count), GLIndexType, reinterpret_cast<GLvoid*>(_parameters._start * sizeof(glindex_t)));
-    if(_parameters._cull_face)
+    if(_cull_face)
         glDisable(GL_CULL_FACE);
 }
 
-GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode)
-    : GLRenderCommand(mode)
+GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode, bool cullFace)
+    : GLRenderCommand(mode, cullFace)
 {
 }
 
 void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& /*graphicsContext*/)
 {
-    if(_parameters._cull_face)
+    if(_cull_face)
         glEnable(GL_CULL_FACE);
     const GLScissor scissor(_parameters._scissor);
     glDrawElementsInstanced(_mode, static_cast<GLsizei>(_parameters._count), GLIndexType, nullptr, _parameters._instance_count);
-    if(_parameters._cull_face)
+    if(_cull_face)
         glDisable(GL_CULL_FACE);
 }
 

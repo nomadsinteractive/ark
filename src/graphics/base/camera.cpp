@@ -83,8 +83,11 @@ Camera::Camera()
 {
 }
 
-void Camera::ortho(float left, float right, float top, float bottom, float near, float far)
+void Camera::ortho(float left, float right, float top, float bottom, float near, float far, float upDirection)
 {
+    if(upDirection  < 0)
+        std::swap(top, bottom);
+
     _vp = sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix::ortho(left, right, top, bottom, near * 2 - far, far)));
     _notifier->notify();
 }
@@ -134,9 +137,10 @@ Camera::Snapshot Camera::snapshot() const
     return Snapshot(_vp);
 }
 
-const sp<Camera>& Camera::getMainCamera()
+const sp<Camera>& Camera::getDefaultCamera()
 {
     const Global<Camera> camera;
+    DCHECK(camera->vp(), "Default camera has not been uninitialized");
     return camera;
 }
 

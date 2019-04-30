@@ -22,9 +22,8 @@
 
 namespace ark {
 
-PipelineLayout::PipelineLayout(const sp<RenderController>& renderController, const sp<PipelineBuildingContext>& buildingContext)
-    : _render_controller(renderController), _building_context(buildingContext), _input(_building_context->_input), _snippet(sp<SnippetDelegate>::make(buildingContext->_snippet)),
-      _samplers(buildingContext->_samplers)
+PipelineLayout::PipelineLayout(const sp<PipelineBuildingContext>& buildingContext)
+    : _building_context(buildingContext), _input(_building_context->_input), _snippet(sp<SnippetDelegate>::make(buildingContext->_snippet)), _samplers(buildingContext->_samplers)
 {
 }
 
@@ -97,11 +96,6 @@ void PipelineLayout::addUniform(const String& name, const sp<Flatable>& flatable
         uniform->setNotifier(notifier);
         _building_context->addUniform(uniform);
     }
-}
-
-const sp<RenderController>& PipelineLayout::renderController() const
-{
-    return _render_controller;
 }
 
 const sp<Snippet>& PipelineLayout::snippet() const

@@ -5,6 +5,7 @@
 #include "renderer/base/buffer.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_input.h"
+#include "renderer/base/render_context.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/shader_bindings.h"
@@ -24,9 +25,9 @@
 namespace ark {
 namespace vulkan {
 
-VKPipeline::VKPipeline(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, const sp<ShaderBindings>& shaderBindings, std::map<Shader::Stage, String> shaders)
-    : _recycler(recycler), _shader_bindings(shaderBindings), _renderer(renderer), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE), _descriptor_set(VK_NULL_HANDLE),
-      _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders))
+VKPipeline::VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Shader::Stage, String> shaders)
+    : _bindings(bindings), _recycler(recycler), _renderer(renderer), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE), _descriptor_set(VK_NULL_HANDLE),
+      _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _rebind_needed(true)
 {
 }
 
@@ -58,12 +59,12 @@ uint64_t VKPipeline::id()
 void VKPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
     VertexLayout vertexLayout;
-    setupVertexDescriptions(_shader_bindings->pipelineInput(), vertexLayout);
-    setupDescriptorSetLayout(_shader_bindings->pipelineInput());
+    setupVertexDescriptions(_bindings.input(), vertexLayout);
+    setupDescriptorSetLayout(_bindings.input());
 
     _descriptor_pool = _renderer->renderTarget()->makeDescriptorPool(graphicsContext.recycler());
-    setupDescriptorSet(graphicsContext, _shader_bindings);
-    setupPipeline(vertexLayout);
+    setupDescriptorSet(graphicsContext, _bindings);
+    setupPipeline(graphicsContext, vertexLayout);
 }
 
 Resource::RecycleFunc VKPipeline::recycle()
@@ -86,12 +87,11 @@ Resource::RecycleFunc VKPipeline::recycle()
 
 void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    bool reloadNeeded = false;
     for(const sp<Observer>& i : _texture_observers)
         if(i->dirty())
         {
-            setupDescriptorSet(graphicsContext, drawingContext._shader_bindings);
-            reloadNeeded = true;
+            setupDescriptorSet(graphicsContext, drawingContext._shader_bindings->pipelineBindings());
+            _rebind_needed = true;
             break;
         }
 
@@ -101,12 +101,13 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
     for(size_t i = 0; i < uboSnapshots.size(); ++i)
     {
         const RenderLayer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
-        if(reloadNeeded || isDirty(uboSnapshot._dirty_flags))
+        if(_rebind_needed || isDirty(uboSnapshot._dirty_flags))
         {
             const sp<VKBuffer>& ubo = _ubos.at(i);
             ubo->reload(graphicsContext, uboSnapshot._buffer);
         }
     }
+    _rebind_needed = false;
 }
 
 void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
@@ -176,7 +177,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     VKUtil::checkResult(vkCreatePipelineLayout(device->vkLogicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_layout));
 }
 
-void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const ShaderBindings& shaderBindings)
+void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
 {
     const sp<VKDevice>& device = _renderer->device();
 
@@ -192,7 +193,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Shad
     uint32_t binding = 0;
 
     _ubos.clear();
-    for(const sp<PipelineInput::UBO>& i : shaderBindings.pipelineInput()->ubos())
+    for(const sp<PipelineInput::UBO>& i : bindings.input()->ubos())
     {
         const sp<Uploader> uploader = sp<Uploader::Blank>::make(i->size());
         const sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -207,7 +208,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Shad
     }
 
     _texture_observers.clear();
-    for(const sp<Texture>& i : shaderBindings.samplers())
+    for(const sp<Texture>& i : bindings.samplers())
     {
         const sp<VKTexture2D> texture = i->delegate();
         _texture_observers.push_back(i->notifier().createObserver(false));
@@ -221,20 +222,21 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Shad
     vkUpdateDescriptorSets(device->vkLogicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 }
 
-void VKPipeline::setupPipeline(const VertexLayout& vertexLayout)
+void VKPipeline::setupPipeline(GraphicsContext& graphicsContext, const VertexLayout& vertexLayout)
 {
     const sp<VKDevice>& device = _renderer->device();
 
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
             vks::initializers::pipelineInputAssemblyStateCreateInfo(
-                VKUtil::toPrimitiveTopology(_shader_bindings->renderMode()),
+                VKUtil::toPrimitiveTopology(_bindings.mode()),
                 0,
                 VK_FALSE);
 
+    const VkCullModeFlags cullModeFlags[3] = {VK_CULL_MODE_NONE, VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_BACK_BIT};
     VkPipelineRasterizationStateCreateInfo rasterizationState =
             vks::initializers::pipelineRasterizationStateCreateInfo(
                 VK_POLYGON_MODE_FILL,
-                VK_CULL_MODE_BACK_BIT,
+                cullModeFlags[_bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK)],
                 VK_FRONT_FACE_COUNTER_CLOCKWISE,
                 0);
 
@@ -260,25 +262,28 @@ void VKPipeline::setupPipeline(const VertexLayout& vertexLayout)
                 VK_TRUE,
                 VK_COMPARE_OP_LESS_OR_EQUAL);
 
-    VkPipelineViewportStateCreateInfo viewportState =
-            vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
+    const Viewport& viewport = graphicsContext.renderContext()->viewport();
+    const VkRect2D vkScissors{{0, 0}, {static_cast<uint32_t>(viewport.width()), static_cast<uint32_t>(viewport.height())}};
+    VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
+    viewportState.pScissors = &vkScissors;
+    viewportState.scissorCount = 1;
 
     VkPipelineMultisampleStateCreateInfo multisampleState =
             vks::initializers::pipelineMultisampleStateCreateInfo(
                 VK_SAMPLE_COUNT_1_BIT,
                 0);
 
-    std::vector<VkDynamicState> dynamicStateEnables = {
-        VK_DYNAMIC_STATE_VIEWPORT,
-        VK_DYNAMIC_STATE_SCISSOR
-    };
+    std::vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT };
+
+    if(_bindings.hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK))
+        dynamicStateEnables.push_back(VK_DYNAMIC_STATE_SCISSOR);
+
     VkPipelineDynamicStateCreateInfo dynamicState =
             vks::initializers::pipelineDynamicStateCreateInfo(
                 dynamicStateEnables.data(),
                 static_cast<uint32_t>(dynamicStateEnables.size()),
                 0);
 
-    // Load shaders
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
     for(const auto& i : _shaders)
         shaderStages.push_back(VKUtil::createShader(device->vkLogicalDevice(), i.second, i.first));
@@ -320,7 +325,16 @@ void VKPipeline::buildCommandBuffer(GraphicsContext& graphicsContext, const Draw
     VkDeviceSize offsets = 0;
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkVertexBuffer, &offsets);
     vkCmdBindIndexBuffer(commandBuffer, vkIndexBuffer, 0, kVKIndexType);
-    vkCmdDrawIndexed(commandBuffer, drawingContext._index_buffer.size() / sizeof(glindex_t), 1, 0, 0, 0);
+
+    const Rect& scissor = drawingContext._parameters._scissor;
+    if(scissor.right() > scissor.left() && scissor.bottom() >= scissor.top())
+    {
+        DCHECK(drawingContext._shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "Pipeline has no DYNAMIC_SCISSOR flag set");
+        VkRect2D vkScissor{{static_cast<int32_t>(scissor.left()), static_cast<int32_t>(scissor.top())}, {static_cast<uint32_t>(scissor.width()), static_cast<uint32_t>(scissor.height())}};
+        vkCmdSetScissor(commandBuffer, 0, 1, &vkScissor);
+    }
+
+    vkCmdDrawIndexed(commandBuffer, drawingContext._parameters._count, 1, drawingContext._parameters._start, 0, 0);
 }
 
 bool VKPipeline::isDirty(const bytearray& dirtyFlags) const

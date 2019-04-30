@@ -2,18 +2,17 @@
 
 #include "core/util/log.h"
 
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/inf/pipeline_factory.h"
-
-#include "renderer/opengl/base/gl_pipeline.h"
 
 #include "platform/gl/gl.h"
 
 namespace ark {
 namespace gles30 {
 
-GLVertexArray::GLVertexArray(const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings)
-    : _id(0), _pipeline_factory(pipelineFactory), _shader_bindings(shaderBindings)
+GLVertexArray::GLVertexArray(const sp<opengl::GLPipeline>& pipeline, const ShaderBindings& shaderBindings)
+    : _pipeline(pipeline), _pipeline_bindings(shaderBindings.pipelineBindings()), _vertex(shaderBindings.vertexBuffer()), _divisors(shaderBindings.divisors()), _id(0)
 {
 }
 
@@ -24,13 +23,11 @@ uint64_t GLVertexArray::id()
 
 void GLVertexArray::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
-    const sp<ShaderBindings> bindings = _shader_bindings.ensure();
     glGenVertexArrays(1, &_id);
     glBindVertexArray(_id);
-    bindings->vertexBuffer().upload(graphicsContext);
-    glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(bindings->vertexBuffer().id()));
-    const sp<opengl::GLPipeline> pipeline = _pipeline_factory->buildPipeline(graphicsContext, bindings);
-    pipeline->bindBuffer(graphicsContext, bindings);
+    _vertex.upload(graphicsContext);
+    glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(_vertex.id()));
+    _pipeline->bindBuffer(graphicsContext, _pipeline_bindings->input(), _divisors);
     glBindVertexArray(0);
     LOGD("id = %d", _id);
 }

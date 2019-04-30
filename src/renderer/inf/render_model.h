@@ -26,7 +26,7 @@ public:
 
     virtual ~RenderModel() = default;
 
-    virtual sp<ShaderBindings> makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) = 0;
+    virtual sp<ShaderBindings> makeShaderBindings(const Shader& shader) = 0;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) = 0;
 
     virtual void start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot) = 0;

@@ -44,7 +44,7 @@ GLModelAssimp::GLModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderCont
 //    _shader_bindings->snippet()->link<GLSnippetUpdateModelMatrix>();
 }
 
-sp<ShaderBindings> GLModelAssimp::makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
+sp<ShaderBindings> GLModelAssimp::makeShaderBindings(const Shader& shader)
 {
     return nullptr;
 }

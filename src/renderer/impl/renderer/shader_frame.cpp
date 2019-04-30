@@ -5,11 +5,10 @@
 
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
-#include "graphics/impl/vec/vec2_impl.h"
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/drawing_context.h"
-#include "renderer/base/pipeline_input.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
@@ -19,9 +18,8 @@
 namespace ark {
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _size(size), _render_controller(resourceLoaderContext->renderController()), _shader(shader),
-      _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
-      _shader_bindings(sp<ShaderBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, _render_controller, shader->pipelineLayout())), _vertex_buffer(_shader_bindings->vertexBuffer()),
+    : _size(size), _shader(shader), _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
+      _shader_bindings(shader->makeBindings(RenderModel::RENDER_MODE_TRIANGLES)), _vertex_buffer(_shader_bindings->vertexBuffer()),
       _index_buffer(resourceLoaderContext->renderController()->getNamedBuffer(NamedBuffer::NAME_QUADS)->snapshot(resourceLoaderContext->renderController(), 1))
 {
 }

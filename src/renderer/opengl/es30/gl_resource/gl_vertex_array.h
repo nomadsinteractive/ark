@@ -1,27 +1,30 @@
 #ifndef ARK_RENDERER_GLES30_GL_VERTEX_ARRAY_H_
 #define ARK_RENDERER_GLES30_GL_VERTEX_ARRAY_H_
 
-#include "core/types/weak_ptr.h"
-
+#include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
 #include "renderer/inf/resource.h"
+
+#include "renderer/opengl/base/gl_pipeline.h"
 
 namespace ark {
 namespace gles30 {
 
 class GLVertexArray : public Resource {
 public:
-    GLVertexArray(const sp<PipelineFactory>& pipelineFactory, const sp<ShaderBindings>& shaderBindings);
+    GLVertexArray(const sp<opengl::GLPipeline>& pipeline, const ShaderBindings& shaderBindings);
 
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
 
 private:
-    uint32_t _id;
+    sp<opengl::GLPipeline> _pipeline;
+    sp<PipelineBindings> _pipeline_bindings;
+    Buffer _vertex;
+    sp<std::map<uint32_t, Buffer>> _divisors;
 
-    sp<PipelineFactory> _pipeline_factory;
-    WeakPtr<ShaderBindings> _shader_bindings;
+    uint32_t _id;
 };
 
 }

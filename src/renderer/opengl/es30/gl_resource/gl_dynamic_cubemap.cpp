@@ -5,6 +5,7 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
 
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
@@ -20,19 +21,17 @@ namespace {
 
 class TextureUploaderCubemapRenderer : public Texture::Uploader {
 public:
-    TextureUploaderCubemapRenderer(const sp<RenderController>& renderController, const sp<Shader>& shader, const sp<Texture>& texture, const sp<Size>& size)
-        : _render_controller(renderController), _shader(shader), _shader_bindings(sp<ShaderBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, _render_controller, _shader->pipelineLayout())),
-          _texture(texture), _size(size) {
+    TextureUploaderCubemapRenderer(const sp<RenderController>& renderController, const Shader& shader, const sp<Texture>& texture, const sp<Size>& size)
+        : _render_controller(renderController), _shader_bindings(shader.makeBindings(RenderModel::RENDER_MODE_TRIANGLES)), _texture(texture), _size(size) {
     }
 
     virtual void upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
-        GLUtil::renderCubemap(graphicsContext, static_cast<uint32_t>(delegate.id()), _render_controller, _shader->getPipeline(graphicsContext, _shader_bindings), _texture,
+        GLUtil::renderCubemap(graphicsContext, static_cast<uint32_t>(delegate.id()), _render_controller, _shader_bindings->getPipeline(graphicsContext), _texture,
                               static_cast<int32_t>(_size->width()), static_cast<int32_t>(_size->height()));
     }
 
 private:
     sp<RenderController> _render_controller;
-    sp<Shader> _shader;
     sp<ShaderBindings> _shader_bindings;
     sp<Texture> _texture;
     sp<Size> _size;
@@ -51,7 +50,7 @@ bool GLDynamicCubemap::download(GraphicsContext& /*graphicsContext*/, Bitmap& bi
     return false;
 }
 
-void GLDynamicCubemap::upload(GraphicsContext& graphicsContext, uint32_t index, const Bitmap& bitmap)
+void GLDynamicCubemap::upload(GraphicsContext& /*graphicsContext*/, uint32_t index, const Bitmap& bitmap)
 {
     uint8_t channels = bitmap.channels();
     GLenum format = GLUtil::getTextureFormat(_parameters->_format, channels);
@@ -60,11 +59,6 @@ void GLDynamicCubemap::upload(GraphicsContext& graphicsContext, uint32_t index, 
     glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + index), 0, static_cast<GLint>(internalFormat), static_cast<int32_t>(bitmap.width()), static_cast<int32_t>(bitmap.height()), 0, format, pixelFormat, bitmap.at(0, 0));
     LOGD("GLCubemap Uploaded, id = %d, width = %d, height = %d", static_cast<uint32_t>(id()), bitmap.width(), bitmap.height());
 }
-
-//void GLDynamicCubemap::doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id)
-//{
-//    GLUtil::renderCubemap(graphicsContext, id, _render_controller, _shader->getPipeline(graphicsContext, _shader_bindings), _texture, width(), height());
-//}
 
 GLDynamicCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_controller(resourceLoaderContext->renderController()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),

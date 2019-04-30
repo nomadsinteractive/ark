@@ -11,7 +11,7 @@ namespace opengl {
 class PipelineFactoryOpenGL : public PipelineFactory {
 public:
 
-    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& shaderBindings) override;
+    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings) override;
 
 };
 

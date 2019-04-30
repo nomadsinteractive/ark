@@ -12,6 +12,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
+#include "renderer/base/shader_bindings.h"
 
 #include "app/inf/event_listener.h"
 
@@ -39,14 +40,14 @@ public:
         virtual sp<Renderer> build(const sp<Scope>& args) override;
 
     private:
+        document _manifest;
         sp<ResourceLoaderContext> _resource_loader_context;
         sp<Camera> _camera;
         sp<Builder<Shader>> _shader;
-        document _font;
     };
 
     struct DrawCommand {
-        DrawCommand(Shader& shader, RenderController& renderController, const sp<Texture>& texture, const sp<LFStack<sp<DrawCommand>>>& recycler);
+        DrawCommand(const Shader& shader, const sp<PipelineFactory>& pipelineFactory, RenderController& renderController, const sp<Texture>& texture, const sp<LFStack<sp<DrawCommand>>>& recycler);
 
         Buffer _vertex_buffer;
         Buffer _index_buffer;
@@ -74,6 +75,9 @@ private:
     ObjectPool _object_pool;
 
     sp<LFStack<sp<DrawCommand>>> _draw_commands;
+    sp<PipelineFactory> _bindings;
+
+    bool _vflip;
 };
 
 

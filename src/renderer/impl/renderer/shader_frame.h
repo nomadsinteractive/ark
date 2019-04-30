@@ -45,7 +45,6 @@ private:
 
 private:
     SafePtr<Size> _size;
-    sp<RenderController> _render_controller;
     sp<Shader> _shader;
 
     sp<ObjectPool> _object_pool;

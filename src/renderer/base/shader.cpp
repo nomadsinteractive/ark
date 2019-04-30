@@ -4,7 +4,6 @@
 #include "core/base/string_buffer.h"
 #include "core/base/string_table.h"
 #include "core/inf/array.h"
-#include "core/impl/flatable/flatable_numeric.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/global.h"
 #include "core/util/documents.h"
@@ -14,6 +13,7 @@
 #include "renderer/base/varyings.h"
 
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_controller.h"
@@ -38,9 +38,9 @@ public:
 
     virtual sp<Shader> build(const sp<Scope>& args) override {
         sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller->createPipelineFactory(), _vertex, _fragment, _factory, args, _manifest);
-        sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(_render_controller, buildingContext);
+        sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);
         sp<Camera> camera = _camera->build(args);
-        return sp<Shader>::make(buildingContext->_shader, pipelineLayout, camera ? camera : _default_camera);
+        return sp<Shader>::make(buildingContext->_pipeline_factory, _render_controller, pipelineLayout, camera ? camera : _default_camera);
     }
 
 private:
@@ -56,8 +56,8 @@ private:
 
 }
 
-Shader::Shader(const sp<Stub>& stub, const sp<PipelineLayout>& pipelineLayout, const sp<Camera>& camera)
-    : _stub(stub), _pipeline_layout(pipelineLayout), _input(_pipeline_layout->input()), _camera(camera ? camera : Camera::getMainCamera())
+Shader::Shader(const sp<PipelineFactory> pipelineFactory, const sp<RenderController>& renderController, const sp<PipelineLayout>& pipelineLayout, const sp<Camera>& camera)
+    : _pipeline_factory(pipelineFactory), _render_controller(renderController), _pipeline_layout(pipelineLayout), _input(_pipeline_layout->input()), _camera(camera ? camera : Camera::getDefaultCamera())
 {
     _pipeline_layout->initialize(_camera);
 }
@@ -76,8 +76,8 @@ sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment,
     if(snippet)
         buildingContext->addSnippet(snippet);
 
-    const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(resourceLoaderContext->renderController(), buildingContext);
-    return sp<Shader>::make(buildingContext->_shader, pipelineLayout, nullptr);
+    const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);
+    return sp<Shader>::make(buildingContext->_pipeline_factory, resourceLoaderContext->renderController(), pipelineLayout, nullptr);
 }
 
 std::vector<RenderLayer::UBOSnapshot> Shader::snapshot(MemoryPool& memoryPool) const
@@ -86,6 +86,11 @@ std::vector<RenderLayer::UBOSnapshot> Shader::snapshot(MemoryPool& memoryPool) c
     for(const sp<PipelineInput::UBO>& i : _input->ubos())
         uboSnapshot.push_back(i->snapshot(memoryPool));
     return uboSnapshot;
+}
+
+const sp<PipelineFactory>& Shader::pipelineFactory() const
+{
+    return _pipeline_factory;
 }
 
 const sp<PipelineInput>& Shader::input() const
@@ -98,24 +103,24 @@ const sp<Camera>& Shader::camera() const
     return _camera;
 }
 
-const sp<Pipeline>& Shader::pipeline() const
+const sp<RenderController>& Shader::renderController() const
 {
-    return _stub->_pipeline;
+    return _render_controller;
 }
 
-const sp<PipelineFactory>& Shader::pipelineFactory() const
-{
-    return _stub->_pipeline_factory;
-}
-
-const sp<PipelineLayout>& Shader::pipelineLayout() const
+const sp<PipelineLayout>& Shader::layout() const
 {
     return _pipeline_layout;
 }
 
-const sp<Pipeline> Shader::getPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& bindings) const
+sp<ShaderBindings> Shader::makeBindings(RenderModel::Mode mode) const
 {
-    return _stub->buildPipeline(graphicsContext, bindings);
+    return sp<ShaderBindings>::make(_pipeline_factory, sp<PipelineBindings>::make(mode, _pipeline_layout), _render_controller);
+}
+
+sp<ShaderBindings> Shader::makeBindings(RenderModel::Mode mode, const Buffer& vertex, const Buffer& index) const
+{
+    return sp<ShaderBindings>::make(_pipeline_factory, sp<PipelineBindings>::make(mode, _pipeline_layout), _render_controller, vertex, index);
 }
 
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -132,29 +137,8 @@ sp<Shader> Shader::BUILDER::build(const sp<Scope>& args)
     if(_snippet)
         buildingContext->addSnippet(_snippet->build(args));
 
-    const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(_resource_loader_context->renderController(), buildingContext);
-    return sp<Shader>::make(buildingContext->_shader, pipelineLayout, _camera->build(args));
-}
-
-Shader::Stub::Stub(const sp<PipelineFactory>& pipelineFactory)
-    : _pipeline_factory(pipelineFactory)
-{
-}
-
-sp<Pipeline> Shader::Stub::buildPipeline(GraphicsContext& graphicsContext, const sp<ShaderBindings>& shaderBindings)
-{
-    if(_pipeline)
-    {
-        if(_pipeline->id() == 0)
-            _pipeline->upload(graphicsContext, nullptr);
-        return _pipeline;
-    }
-
-    shaderBindings->pipelineLayout()->preCompile(graphicsContext);
-    _pipeline = _pipeline_factory->buildPipeline(graphicsContext, shaderBindings);
-    graphicsContext.renderController()->upload(_pipeline, nullptr, RenderController::US_ON_SURFACE_READY);
-    _pipeline->upload(graphicsContext, nullptr);
-    return _pipeline;
+    const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);
+    return sp<Shader>::make(buildingContext->_pipeline_factory, _resource_loader_context->renderController(), pipelineLayout, _camera->build(args));
 }
 
 }

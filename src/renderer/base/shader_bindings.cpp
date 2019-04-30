@@ -1,62 +1,51 @@
 #include "renderer/base/shader_bindings.h"
 
-#include "renderer/base/render_controller.h"
+#include "renderer/base/graphics_context.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/snippet_delegate.h"
-#include "renderer/base/shader.h"
-#include "renderer/base/texture.h"
+#include "renderer/base/render_controller.h"
+#include "renderer/inf/snippet.h"
 
 namespace ark {
 
-ShaderBindings::ShaderBindings(RenderModel::Mode mode, RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
-    : ShaderBindings(mode, renderController, pipelineLayout, renderController.makeVertexBuffer(), renderController.makeIndexBuffer(Buffer::USAGE_STATIC))
+ShaderBindings::ShaderBindings(const sp<PipelineFactory>& pipelineFactory, const sp<PipelineBindings>& pipelineBindings, RenderController& renderController)
+    : ShaderBindings(pipelineFactory, pipelineBindings, renderController, renderController.makeVertexBuffer(), renderController.makeIndexBuffer(Buffer::USAGE_STATIC))
 {
 }
 
-ShaderBindings::ShaderBindings(RenderModel::Mode mode, RenderController& renderController, const sp<PipelineLayout>& pipelineLayout, const Buffer& arrayBuffer, const Buffer& indexBuffer)
-    : _render_mode(mode), _attributes(pipelineLayout->input()), _vertex_buffer(arrayBuffer), _index_buffer(indexBuffer), _pipeline_layout(pipelineLayout),
-      _pipeline_input(_pipeline_layout->input()), _instanced_arrays(_pipeline_input->makeInstancedArrays(renderController))
+ShaderBindings::ShaderBindings(const sp<PipelineFactory>& pipelineFactory, const sp<PipelineBindings>& pipelineBindings, RenderController& renderController, const Buffer& vertexBuffer, const Buffer& indexBuffer)
+    : _pipeline_factory(pipelineFactory), _pipeline_bindings(pipelineBindings), _vertex_buffer(vertexBuffer), _index_buffer(indexBuffer), _divisors(makeDivisors(renderController))
 {
-    _samplers.resize(_pipeline_input->samplerCount());
+}
 
-    const Table<String, sp<Texture>>& samplers = _pipeline_layout->samplers();
-    DWARN(_samplers.size() >= samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", samplers.size(), _samplers.size());
+const sp<PipelineFactory>& ShaderBindings::pipelineFactory() const
+{
+    return _pipeline_factory;
+}
 
-    for(size_t i = 0; i < samplers.values().size(); ++i)
-        if(i < _samplers.size())
-            _samplers[i] = samplers.values().at(i);
-
-    pipelineLayout->snippet()->preBind(renderController, *this);
+const sp<PipelineBindings>& ShaderBindings::pipelineBindings() const
+{
+    return _pipeline_bindings;
 }
 
 const sp<Snippet>& ShaderBindings::snippet() const
 {
-    return _pipeline_layout->snippet();
+    return _pipeline_bindings->layout()->snippet();
 }
 
 const sp<PipelineLayout>& ShaderBindings::pipelineLayout() const
 {
-    return _pipeline_layout;
+    return _pipeline_bindings->layout();
 }
 
 const sp<PipelineInput>& ShaderBindings::pipelineInput() const
 {
-    return _pipeline_input;
+    return _pipeline_bindings->input();
 }
 
 const std::vector<sp<Texture>>& ShaderBindings::samplers() const
 {
-    return _samplers;
-}
-
-bool ShaderBindings::isDrawInstanced() const
-{
-    return _instanced_arrays.size() > 0;
-}
-
-RenderModel::Mode ShaderBindings::renderMode() const
-{
-    return _render_mode;
+    return _pipeline_bindings->samplers();
 }
 
 const Buffer& ShaderBindings::vertexBuffer() const
@@ -69,14 +58,9 @@ const Buffer& ShaderBindings::indexBuffer() const
     return _index_buffer;
 }
 
-const std::vector<std::pair<uint32_t, Buffer>>& ShaderBindings::instancedArrays() const
+const sp<std::map<uint32_t, Buffer>>& ShaderBindings::divisors() const
 {
-    return _instanced_arrays;
-}
-
-const ShaderBindings::Attributes& ShaderBindings::attributes() const
-{
-    return _attributes;
+    return _divisors;
 }
 
 const ByType& ShaderBindings::attachments() const
@@ -89,29 +73,41 @@ ByType& ShaderBindings::attachments()
     return _attachments;
 }
 
-void ShaderBindings::bindSampler(const sp<Texture>& texture, uint32_t name)
+sp<Pipeline> ShaderBindings::getPipeline(GraphicsContext& graphicsContext)
 {
-    DCHECK(_samplers.size() > name, "Illegal sampler binding position: %d, sampler count: %d", name, _samplers.size());
-    _samplers[name] = texture;
+    if(!_pipeline)
+    {
+        _pipeline = _pipeline_bindings->getPipeline(graphicsContext, _pipeline_factory);
+        snippet()->preBind(graphicsContext, _pipeline, *this);
+    }
+    return _pipeline;
 }
 
-std::map<uint32_t, Buffer::Builder> ShaderBindings::makeInstancedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const
+std::map<uint32_t, Buffer::Builder> ShaderBindings::makeDividedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const
 {
     std::map<uint32_t, Buffer::Builder> builders;
-    for(const std::pair<uint32_t, Buffer>& i : _instanced_arrays)
+    const sp<PipelineInput>& pipelineInput = _pipeline_bindings->input();
+    for(const std::pair<uint32_t, Buffer>& i : *_divisors)
     {
-        const PipelineInput::Stream& stream = _pipeline_input->getStream(i.first);
+        const PipelineInput::Stream& stream = pipelineInput->getStream(i.first);
         builders.insert(std::make_pair(i.first, Buffer::Builder(memoryPool, objectPool, stream.stride(), instanceCount / i.first)));
     }
     return builders;
 }
 
-ShaderBindings::Attributes::Attributes(const PipelineInput& input)
+sp<std::map<uint32_t, Buffer>> ShaderBindings::makeDivisors(RenderController& renderController) const
 {
-    _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = input.getAttributeOffset("TexCoordinate");
-    _offsets[ATTRIBUTE_NAME_NORMAL] = input.getAttributeOffset("Normal");
-    _offsets[ATTRIBUTE_NAME_TANGENT] = input.getAttributeOffset("Tangent");
-    _offsets[ATTRIBUTE_NAME_BITANGENT] = input.getAttributeOffset("Bitangent");
+    sp<std::map<uint32_t, Buffer>> divisors = sp<std::map<uint32_t, Buffer>>::make();
+    for(auto iter : pipelineInput()->streams())
+    {
+        uint32_t divisor = iter.first;
+        if(divisor != 0)
+        {
+            DCHECK(divisors->find(divisor) == divisors->end(), "Duplicated stream divisor: %d", divisor);
+            divisors->insert(std::make_pair(divisor, renderController.makeVertexBuffer()));
+        }
+    }
+    return divisors;
 }
 
 }

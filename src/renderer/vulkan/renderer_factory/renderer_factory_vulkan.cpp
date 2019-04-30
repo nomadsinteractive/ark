@@ -4,7 +4,9 @@
 #include "core/types/global.h"
 #include "core/util/log.h"
 
+#include "graphics/base/camera.h"
 #include "graphics/base/size.h"
+#include "graphics/base/viewport.h"
 
 #include "renderer/base/framebuffer.h"
 #include "renderer/base/render_context.h"
@@ -29,6 +31,7 @@
 
 #include "generated/vulkan_plugin.h"
 
+
 namespace ark {
 namespace vulkan {
 
@@ -45,7 +48,7 @@ RendererFactoryVulkan::~RendererFactoryVulkan()
 
 sp<RenderContext> RendererFactoryVulkan::initialize(Ark::RendererVersion version)
 {
-    const sp<RenderContext> vkContext = sp<RenderContext>::make(version, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f));
+    const sp<RenderContext> vkContext = sp<RenderContext>::make(version, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), -1.0f);
     if(version != Ark::AUTO)
         setVersion(version, vkContext);
     return vkContext;

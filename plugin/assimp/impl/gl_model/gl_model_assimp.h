@@ -25,7 +25,7 @@ class GLModelAssimp : public RenderModel {
 public:
     GLModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest);
 
-    virtual sp<ShaderBindings> makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout) override;
+    virtual sp<ShaderBindings> makeShaderBindings(const Shader& shader) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
     virtual void start(ModelBuffer& buf, const RenderLayer::Snapshot& layerContext) override;

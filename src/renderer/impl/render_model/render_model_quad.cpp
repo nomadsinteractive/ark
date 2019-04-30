@@ -3,8 +3,10 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model_buffer.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 
 namespace ark {
@@ -14,10 +16,10 @@ GLModelQuad::GLModelQuad(const RenderController& renderController, const sp<Atla
 {
 }
 
-sp<ShaderBindings> GLModelQuad::makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
+sp<ShaderBindings> GLModelQuad::makeShaderBindings(const Shader& shader)
 {
-    const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_TRIANGLES, renderController, pipelineLayout, renderController.makeVertexBuffer(), _index_buffer->buffer());
-    bindings->bindSampler(_atlas->texture());
+    const sp<ShaderBindings> bindings = shader.makeBindings(RENDER_MODE_TRIANGLES, shader.renderController()->makeVertexBuffer(), _index_buffer->buffer());
+    bindings->pipelineBindings()->bindSampler(_atlas->texture());
     return bindings;
 }
 

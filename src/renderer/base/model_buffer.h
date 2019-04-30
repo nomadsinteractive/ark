@@ -56,16 +56,17 @@ public:
 
     Buffer::Builder& getInstancedArrayBuilder(uint32_t divisor);
 
-    std::vector<std::pair<uint32_t, Buffer::Snapshot>> makeInstancedBufferSnapshots() const;
+    std::vector<std::pair<uint32_t, Buffer::Snapshot>> makeDividedBufferSnapshots() const;
 
 private:
     void applyVaryings();
 
 private:
     sp<ShaderBindings> _shader_bindings;
+    sp<PipelineBindings> _pipeline_bindings;
 
     Buffer::Builder _vertices;
-    std::map<uint32_t, Buffer::Builder> _instanced_buffer_builders;
+    std::map<uint32_t, Buffer::Builder> _divided_buffer_builders;
 
     Buffer::Snapshot _indices;
 

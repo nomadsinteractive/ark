@@ -9,10 +9,12 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model_buffer.h"
-#include "renderer/base/texture.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/base/shader_bindings.h"
+#include "renderer/base/shader.h"
+#include "renderer/base/texture.h"
 #include "renderer/impl/render_model/render_model_quad.h"
 
 namespace ark {
@@ -106,11 +108,11 @@ GLModelText::GLModelText(const sp<RenderController>& renderController, const sp<
 {
 }
 
-sp<ShaderBindings> GLModelText::makeShaderBindings(RenderController& renderController, const sp<PipelineLayout>& pipelineLayout)
+sp<ShaderBindings> GLModelText::makeShaderBindings(const Shader& shader)
 {
-    const sp<ShaderBindings> bindings = sp<ShaderBindings>::make(RENDER_MODE_TRIANGLES, renderController, pipelineLayout);
+    const sp<ShaderBindings> bindings = shader.makeBindings(RENDER_MODE_TRIANGLES);
     _shader_texture = sp<Texture>::make(_stub->_size, _stub, Texture::TYPE_2D);
-    bindings->bindSampler(_shader_texture);
+    bindings->pipelineBindings()->bindSampler(_shader_texture);
     return bindings;
 }
 

@@ -25,7 +25,7 @@ public:
 
     int32_t setupBindings();
 
-    sp<Shader::Stub> _shader;
+    sp<PipelineFactory> _pipeline_factory;
     sp<PipelineInput> _input;
     sp<Snippet> _snippet;
 

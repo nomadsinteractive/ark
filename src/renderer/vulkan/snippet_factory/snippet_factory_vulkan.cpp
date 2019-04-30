@@ -100,7 +100,7 @@ private:
 
 }
 
-sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(RenderController& /*resourceManager*/, const sp<PipelineFactory>& /*pipelineFactory*/)
+sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(RenderController& /*resourceManager*/)
 {
     return sp<CoreSnippetVulkan>::make();
 }

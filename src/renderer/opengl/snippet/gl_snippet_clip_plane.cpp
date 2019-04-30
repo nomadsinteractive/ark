@@ -39,7 +39,7 @@ void GLSnippetClipPlane::preCompile(GraphicsContext& graphicsContext, PipelineBu
         }
 }
 
-void GLSnippetClipPlane::preDraw(GraphicsContext& /*graphicsContext*/, Shader& /*shader*/, const DrawingContext& /*context*/)
+void GLSnippetClipPlane::preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/)
 {
     if(_enabled)
         for(const auto& i : _planes)

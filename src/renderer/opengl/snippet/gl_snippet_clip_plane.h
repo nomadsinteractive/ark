@@ -15,7 +15,7 @@ class GLSnippetClipPlane : public Snippet {
 public:
     virtual void preInitialize(PipelineBuildingContext& context) override;
     virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
-    virtual void preDraw(GraphicsContext& graphicsContext, Shader& shader, const DrawingContext& context) override;
+    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override;
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 
 //  [[plugin::builder("clip-plane")]]

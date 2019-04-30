@@ -24,7 +24,7 @@ namespace ark {
 
 RenderLayer::Stub::Stub(const sp<RenderModel>& renderModel, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_model(renderModel), _shader(shader), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
-      _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_render_model->makeShaderBindings(_render_controller, shader->pipelineLayout())),
+      _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_render_model->makeShaderBindings(_shader)),
       _notifier(sp<Notifier>::make()), _layer_context(sp<LayerContext>::make(renderModel, _notifier)), _dirty(_notifier->createObserver()),
       _stride(shader->input()->getStream(0).stride())
 {
@@ -69,7 +69,7 @@ sp<RenderCommand> RenderLayer::Snapshot::render(float x, float y)
         Buffer::Snapshot vertexSnapshot = _dirty ? vertexBuffer.snapshot(buf.vertices().makeUploader()) : vertexBuffer.snapshot();
         DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos), vertexSnapshot, buf.indices(), static_cast<int32_t>(_items.size()));
         if(buf.isInstanced())
-            drawingContext._instanced_array_snapshots = buf.makeInstancedBufferSnapshots();
+            drawingContext._instanced_array_snapshots = buf.makeDividedBufferSnapshots();
 
         return drawingContext.toRenderCommand(_stub->_resource_loader_context->objectPool());
     }

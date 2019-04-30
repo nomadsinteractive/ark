@@ -90,8 +90,6 @@ public:
 
     void addAttribute(String name, Attribute attribute);
 
-    std::vector<std::pair<uint32_t, Buffer>> makeInstancedArrays(RenderController& renderController) const;
-
     const PipelineInput::Stream& getStream(uint32_t divisor) const;
 
     const Attribute& getAttribute(const String& name, uint32_t divisor = 0) const;

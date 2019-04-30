@@ -19,7 +19,7 @@ public:
     }
 
     virtual void draw(GraphicsContext& graphicsContext) override {
-        const sp<Pipeline> pipeline = _context._shader->getPipeline(graphicsContext, _context._shader_bindings);
+        const sp<Pipeline> pipeline = _context._shader_bindings->getPipeline(graphicsContext);
         pipeline->bind(graphicsContext, _context);
     }
 
@@ -37,8 +37,7 @@ public:
     virtual void draw(GraphicsContext& graphicsContext) override {
         _context.upload(graphicsContext);
 
-        const sp<Pipeline> pipeline = _context._shader->getPipeline(graphicsContext, _context._shader_bindings);
-
+        const sp<Pipeline> pipeline = _context._shader_bindings->getPipeline(graphicsContext);
         _context.preDraw(graphicsContext);
         pipeline->bind(graphicsContext, _context);
         pipeline->draw(graphicsContext, _context);
@@ -90,7 +89,7 @@ void DrawingContext::upload(GraphicsContext& graphicsContext)
 
 void DrawingContext::preDraw(GraphicsContext& graphicsContext)
 {
-    _shader_bindings->snippet()->preDraw(graphicsContext, _shader, *this);
+    _shader_bindings->snippet()->preDraw(graphicsContext, *this);
 }
 
 void DrawingContext::postDraw(GraphicsContext& graphicsContext)
@@ -99,12 +98,12 @@ void DrawingContext::postDraw(GraphicsContext& graphicsContext)
 }
 
 DrawingContext::Parameters::Parameters()
-    : _instance_count(0), _start(0), _count(0), _cull_face(true)
+    : _instance_count(0), _start(0), _count(0)
 {
 }
 
 DrawingContext::Parameters::Parameters(int32_t instanceCount, uint32_t start, uint32_t count, bool cullFace)
-    : _instance_count(instanceCount), _start(start), _count(count), _cull_face(cullFace), _scissor(0, 0, -1.0f, -1.0f)
+    : _instance_count(instanceCount), _start(start), _count(count), _scissor(0, 0, -1.0f, -1.0f)
 {
 }
 

@@ -41,9 +41,7 @@ Application::Application(const sp<ApplicationDelegate>& applicationDelegate, con
     : _application_delegate(applicationDelegate), _application_context(applicationContext)
       , _viewport(viewport), _width(width), _height(height), _alive(false)
 {
-    const Global<Camera> mainCamera;
     g_upDirection = _viewport.top() < _viewport.bottom() ? 1.0f : -1.0f;
-    mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), viewport.near(), viewport.far());
 }
 
 Application::~Application()
