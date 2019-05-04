@@ -36,6 +36,9 @@ public:
 //[[script::bindings::operator(neg)]]
     static sp<Vec3> negative(const sp<Vec3>& self);
 
+//[[script::bindings::classmethod]]
+    static void set(const sp<Vec3>& self, const V3& val);
+
 //[[script::bindings::property]]
     static V3 xyz(const sp<Vec3>& self);
 //[[script::bindings::property]]

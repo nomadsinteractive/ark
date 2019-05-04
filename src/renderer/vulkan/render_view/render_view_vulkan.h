@@ -22,7 +22,7 @@ class VKUtil;
 
 class RenderViewVulkan : public RenderView {
 public:
-    RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderContext>& glContext, const sp<RenderController>& glResources, const Viewport& viewport);
+    RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderContext>& renderContext, const sp<RenderController>& renderController);
 
     virtual void onSurfaceCreated() override;
     virtual void onSurfaceChanged(uint32_t width, uint32_t height) override;
@@ -36,8 +36,6 @@ private:
     sp<VKGraphicsContext> _vk_context;
 
     op<GraphicsContext> _graphics_context;
-    Viewport _viewport;
-
 };
 
 }

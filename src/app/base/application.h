@@ -13,16 +13,6 @@ namespace ark {
 
 class ARK_API Application {
 public:
-    enum WindowFlag {
-        WINDOW_FLAG_NONE = 0,
-        WINDOW_FLAG_SHOW_CURSOR = 1,
-        WINDOW_FLAG_RESIZABLE = 2,
-        WINDOW_FLAG_MAXINIZED = 4,
-        WINDOW_FLAG_FULL_SCREEN = 8,
-        WINDOW_FLAG_FULL_SCREEN_WINDOWED = 16,
-    };
-
-public:
     Application(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport);
     virtual ~Application();
 

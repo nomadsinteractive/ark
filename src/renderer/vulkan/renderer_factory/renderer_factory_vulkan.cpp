@@ -97,9 +97,9 @@ sp<Framebuffer> RendererFactoryVulkan::createFramebuffer(const sp<Renderer>& ren
     return sp<Framebuffer>::make(fbo, sp<VKFramebufferRenderer>::make(renderer, fbo));
 }
 
-sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController, const Viewport& viewport)
+sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController)
 {
-    return sp<RenderViewVulkan>::make(_renderer, renderContext, renderController, viewport);
+    return sp<RenderViewVulkan>::make(_renderer, renderContext, renderController);
 }
 
 sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()

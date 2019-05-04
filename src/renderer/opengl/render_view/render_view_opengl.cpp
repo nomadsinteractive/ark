@@ -15,8 +15,8 @@
 
 namespace ark {
 
-RenderViewOpenGL::RenderViewOpenGL(const sp<RenderContext>& glContext, const sp<RenderController>& glResourceManager, const Viewport& viewport)
-    : _graphics_context(new GraphicsContext(glContext, glResourceManager)), _viewport(viewport)
+RenderViewOpenGL::RenderViewOpenGL(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController)
+    : _graphics_context(new GraphicsContext(renderContext, renderController))
 {
 }
 
@@ -48,7 +48,7 @@ void RenderViewOpenGL::onRenderFrame(const Color& backgroundColor, const sp<Rend
 
 void RenderViewOpenGL::initialize(uint32_t width, uint32_t height)
 {
-    LOGD("Width: %d, Height: %d, Viewport (%.1f, %.1f, %.1f, %.1f)", width, height, _viewport.left(), _viewport.top(), _viewport.right(), _viewport.bottom());
+    LOGD("Width: %d, Height: %d", width, height);
 
     glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
 

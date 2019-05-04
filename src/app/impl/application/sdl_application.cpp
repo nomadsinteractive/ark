@@ -13,6 +13,7 @@
 #include <SDL_syswm.h>
 
 #include "core/base/clock.h"
+#include "core/base/manifest.h"
 #include "core/base/object.h"
 #include "core/impl/message_loop/message_loop_default.h"
 #include "core/inf/runnable.h"
@@ -200,6 +201,8 @@ public:
             return static_cast<Event::Code>(Event::CODE_KEYBOARD_A + sc - SDL_SCANCODE_A);
         if(Math::between<SDL_Scancode>(SDL_SCANCODE_F1, SDL_SCANCODE_F12, sc))
             return static_cast<Event::Code>(Event::CODE_KEYBOARD_F1 + sc - SDL_SCANCODE_F1);
+        if(Math::between<SDL_Scancode>(SDL_SCANCODE_1, SDL_SCANCODE_9, sc))
+            return static_cast<Event::Code>(Event::CODE_KEYBOARD_1 + sc - SDL_SCANCODE_1);
         switch(sc) {
         case SDL_SCANCODE_GRAVE:
             return Event::CODE_KEYBOARD_GRAVE;
@@ -221,6 +224,12 @@ public:
             return Event::CODE_KEYBOARD_TAB;
         case SDL_SCANCODE_SPACE:
             return Event::CODE_KEYBOARD_SPACE;
+        case SDL_SCANCODE_0:
+            return Event::CODE_KEYBOARD_0;
+        case SDL_SCANCODE_LSHIFT:
+            return Event::CODE_KEYBOARD_LSHIFT;
+        case SDL_SCANCODE_RSHIFT:
+            return Event::CODE_KEYBOARD_RSHIFT;
         default:
             break;
         }
@@ -235,8 +244,8 @@ private:
 }
 
 SDLApplication::SDLApplication(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport, uint32_t windowFlag)
-    : Application(applicationDelegate, applicationContext, width, height, viewport), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex())
-      , _controller(sp<SDLApplicationController>::make()), _show_cursor(windowFlag & WINDOW_FLAG_SHOW_CURSOR), _window_flag(toSDLWindowFlag(applicationContext, windowFlag))
+    : Application(applicationDelegate, applicationContext, width, height, viewport), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
+      _controller(sp<SDLApplicationController>::make()), _show_cursor(windowFlag & Manifest::WINDOW_FLAG_SHOW_CURSOR), _window_flag(toSDLWindowFlag(applicationContext, windowFlag))
 {
 }
 
@@ -339,8 +348,8 @@ void SDLApplication::onSurfaceChanged()
 {
     int32_t w, h;
     SDL_GetWindowSize(_main_window, &w, &h);
-    _width = w;
-    _height = h;
+    _width = static_cast<uint32_t>(w);
+    _height = static_cast<uint32_t>(h);
     Application::onSurfaceChanged(_width, _height);
 }
 
@@ -349,13 +358,13 @@ uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicati
     Ark::RendererVersion version = applicationContext->renderEngine()->version();
 
     uint32_t windowFlag = SDL_WINDOW_SHOWN;
-    if(appWindowFlag & WINDOW_FLAG_FULL_SCREEN)
+    if(appWindowFlag & Manifest::WINDOW_FLAG_FULL_SCREEN)
         windowFlag |= SDL_WINDOW_FULLSCREEN;
-    if(appWindowFlag & WINDOW_FLAG_FULL_SCREEN_WINDOWED)
+    if(appWindowFlag & Manifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED)
         windowFlag |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-    if(appWindowFlag & WINDOW_FLAG_MAXINIZED)
+    if(appWindowFlag & Manifest::WINDOW_FLAG_MAXINIZED)
         windowFlag |= SDL_WINDOW_MAXIMIZED;
-    if(appWindowFlag & WINDOW_FLAG_RESIZABLE)
+    if(appWindowFlag & Manifest::WINDOW_FLAG_RESIZABLE)
         windowFlag |= SDL_WINDOW_RESIZABLE;
 
     _use_open_gl = version != Ark::VULKAN_11;

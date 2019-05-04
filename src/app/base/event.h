@@ -26,10 +26,7 @@ public:
 //  [[script::bindings::enumeration]]
     enum Code {
         CODE_NONE,
-        CODE_MOUSE_BUTTON_LEFT,
-        CODE_MOUSE_BUTTON_MIDDLE,
-        CODE_MOUSE_BUTTON_RIGHT,
-        CODE_KEYBOARD_A,
+        CODE_KEYBOARD_A = 'a',
         CODE_KEYBOARD_B,
         CODE_KEYBOARD_C,
         CODE_KEYBOARD_D,
@@ -55,6 +52,16 @@ public:
         CODE_KEYBOARD_X,
         CODE_KEYBOARD_Y,
         CODE_KEYBOARD_Z,
+        CODE_KEYBOARD_0 = '0',
+        CODE_KEYBOARD_1,
+        CODE_KEYBOARD_2,
+        CODE_KEYBOARD_3,
+        CODE_KEYBOARD_4,
+        CODE_KEYBOARD_5,
+        CODE_KEYBOARD_6,
+        CODE_KEYBOARD_7,
+        CODE_KEYBOARD_8,
+        CODE_KEYBOARD_9,
         CODE_KEYBOARD_F1,
         CODE_KEYBOARD_F2,
         CODE_KEYBOARD_F3,
@@ -75,8 +82,14 @@ public:
         CODE_KEYBOARD_RETURN,
         CODE_KEYBOARD_ESCAPE,
         CODE_KEYBOARD_BACKSPACE,
-        CODE_KEYBOARD_TAB,
-        CODE_KEYBOARD_SPACE
+        CODE_KEYBOARD_TAB = '\t',
+        CODE_KEYBOARD_SPACE = ' ',
+        CODE_NO_ASCII = 1000,
+        CODE_KEYBOARD_LSHIFT,
+        CODE_KEYBOARD_RSHIFT,
+        CODE_MOUSE_BUTTON_LEFT,
+        CODE_MOUSE_BUTTON_MIDDLE,
+        CODE_MOUSE_BUTTON_RIGHT,
     };
 
     Event(Action action, float x, float y, uint32_t timestamp, Code code = CODE_NONE);
@@ -100,6 +113,8 @@ public:
 
 //  [[script::bindings::property]]
     Event::Code code() const;
+
+    static wchar_t toCharacter(Event::Code code);
 
 private:
     Action _action;

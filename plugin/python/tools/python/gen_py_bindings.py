@@ -118,6 +118,11 @@ def text_align(lines, text):
     return [i[:j] + ' ' * (max_alignment - j) + i[j:] if j >= 0 else i for i, j in zip(lines, text_pos)]
 
 
+def remove_crv(typename):
+    t1 = acg.strip_key_words(typename, ['const', 'volatile']).strip()
+    return (t1[:-1] if t1.endswith('&') else t1).strip()
+
+
 def gen_cmakelist_source(arguments, paths, output_dir, output_file, results):
     output_files = [make_abs_path(path.join(output_dir, output_file + i)) for i in ('.h', '.cpp')]
     dependencies = []
@@ -407,15 +412,16 @@ class GenArgument:
             return self._gen_var_declare(m, objname, 'toType', m, argname)
         if m in TYPE_DEFINED_SP:
             return self._gen_var_declare(m, objname, 'toCppObject', m, argname)
-        if m != self._accept_type:
+        typename = remove_crv(typename)
+        if m != self._accept_type and not typename.startswith('std::'):
             return self._gen_var_declare('sp<%s>' % m, objname, 'toSharedPtr', m, argname, extract_cast)
-        return self._gen_var_declare(typename, objname, 'toType', typename, argname)
+        return self._gen_var_declare(typename, objname, 'toCppObject', typename, argname)
 
     def _gen_var_declare(self, typename, varname, funcname, functype, argname, extract_cast=False):
         argappendix = ', false' if extract_cast else ''
-        if self._default_value and self._accept_type.startswith('sp<'):
+        if self._default_value and (self._accept_type.startswith('sp<') or self._meta.parse_signature == 'O'):
             return 'const %s %s = %s ? PythonInterpreter::instance()->%s<%s>(%s%s) : %s;' % (
-                typename, varname, argname, funcname, functype, argname, argappendix,self._default_value)
+                typename, varname, argname, funcname, functype, argname, argappendix, self._default_value)
         return 'const %s %s = PythonInterpreter::instance()->%s<%s>(%s%s);' % (typename, varname, funcname, functype, argname, argappendix)
 
     def str(self):
@@ -439,8 +445,8 @@ ARK_PY_ARGUMENTS = (
     (r'(int32_t|int|int8_t)', GenArgumentMeta('int32_t', 'int32_t', 'i')),
     (r'float', GenArgumentMeta('float', 'float', 'f')),
     (r'bool', GenArgumentMeta('int32_t', 'bool', 'p', True)),
-    (r'[^:]+::.+', GenArgumentMeta('int32_t', 'int32_t', 'i')),
     (r'TypeId', GenArgumentMeta('PyObject*', 'TypeId', 'O')),
+    (r'([^:]+::.+)', GenArgumentMeta('PyObject*', '${0}', 'O')),
 )
 
 ARK_PY_ARGUMENT_CHECKERS = {
@@ -458,18 +464,22 @@ def parse_method_arguments(arguments):
     args = []
     for i, j in enumerate(arguments):
         m = None
+        argstr = acg.strip_key_words(j, ['const', '&'])
+        default_value = None
+        pos = argstr.find('=')
+        if pos != -1:
+            if not argstr.startswith('sp<Scope>'):
+                default_value = argstr[pos + 1:].strip()
+                if default_value.endswith('('):
+                    default_value += ')'
+            argstr = argstr[:pos - 1].strip()
+        targettype = ' '.join(argstr.split()[:-1])
         for k, l in ARK_PY_ARGUMENTS:
-            argstr = acg.strip_key_words(j, ['const', '&'])
-            m = re.match(k, argstr)
+            m = re.match(k, targettype)
             if m:
-                default_value = None
-                pos = argstr.find('=')
-                if pos != -1 and not argstr.startswith('sp<Scope>'):
-                    default_value = argstr[pos + 1:].strip()
-                    if default_value.endswith('('):
-                        default_value += ')'
-                accept_type = acg.format(l.cast_signature, *m.groups())
-                args.append(GenArgument(accept_type, default_value, l, argstr))
+                cast_signature = acg.format(l.cast_signature, *m.groups())
+                argument_meta = GenArgumentMeta(l.typename, cast_signature, l.parse_signature, l.is_base_type)
+                args.append(GenArgument(cast_signature, default_value, argument_meta, targettype))
                 break
         if not m:
             print('Undefined method argument: "%s"' % arguments[i])
@@ -477,12 +487,12 @@ def parse_method_arguments(arguments):
     return args
 
 
-def gen_method_call_arg(i, arg, argtype):
-    pos = arg.find('=')
-    if pos != -1:
-        arg = arg[0:pos]
-    targettype = ' '.join(arg.split()[:-1])
-    equals = acg.typeCompare(targettype, argtype)
+def gen_method_call_arg(i, targettype, argtype):
+    # pos = arg.find('=')
+    # if pos != -1:
+    #     arg = arg[0:pos]
+    # targettype = ' '.join(arg.split()[:-1])
+    equals = acg.typeCompare(targettype, remove_crv(argtype))
     return 'obj%d' % i if equals or '<' in argtype else gen_cast_call(targettype, 'obj%d' % i)
 
 
@@ -514,6 +524,7 @@ class GenMethod(object):
         declares = {}
         for i, j in enumerate(self._arguments):
             typename = j.typename
+            realtypename = remove_crv(typename)
             if typename in declares:
                 declares[typename] = '%s, %sarg%d' % (declares[typename], '*' if typename.endswith('*') else '', i)
             else:
@@ -522,10 +533,12 @@ class GenMethod(object):
                 dmap = {'true': '1', 'false': '0'}
                 if j.typename in ('uint32_t', 'int32_t', 'float'):
                     dvalue = j.default_value if j.default_value not in dmap else dmap[j.default_value]
-                elif typename == 'PyObject*' and j.accept_type == 'bool':
+                elif realtypename == 'PyObject*' and j.accept_type == 'bool':
                     dvalue = 'Py_True' if j.default_value == 'true' else 'Py_False'
-                elif typename == 'bool' and j.accept_type == 'bool':
+                elif realtypename == 'bool' and j.accept_type == 'bool':
                     dvalue = 'true' if j.default_value == 'true' else 'false'
+                elif realtypename == 'char*' and j.default_value:
+                    dvalue = j.default_value
                 else:
                     dvalue = 'nullptr'
                 declares[typename] += ' = %s' % dvalue

@@ -14,8 +14,8 @@ namespace ark {
 
 class RenderViewOpenGL : public RenderView {
 public:
-    RenderViewOpenGL(const sp<RenderContext>& glContext, const sp<RenderController>& glResources, const Viewport& viewport);
-    ~RenderViewOpenGL();
+    RenderViewOpenGL(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController);
+    ~RenderViewOpenGL() override;
 
     virtual void onSurfaceCreated() override;
     virtual void onSurfaceChanged(uint32_t width, uint32_t height) override;
@@ -26,8 +26,6 @@ private:
     
 private:
     op<GraphicsContext> _graphics_context;
-    Viewport _viewport;
-
 };
 
 }

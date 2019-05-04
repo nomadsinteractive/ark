@@ -22,7 +22,8 @@ int main(int argc, const char* argv[])
         const Ark ark(argc, argv, manifest);
         const sp<Size>& renderResolution = manifest->rendererResolution();
         const Viewport viewport(0, 0, renderResolution->width(), renderResolution->height(), 0, renderResolution->width());
-        SDLApplication app(sp<ApplicationDelegateImpl>::make(manifest), ark.applicationContext(), (int32_t) (renderResolution->width() * scale), (int32_t) (renderResolution->height() * scale), viewport, Application::WINDOW_FLAG_SHOW_CURSOR);
+        SDLApplication app(sp<ApplicationDelegateImpl>::make(manifest), ark.applicationContext(), static_cast<uint32_t>(renderResolution->width() * scale),
+                           static_cast<uint32_t>(renderResolution->height() * scale), viewport, manifest->application()._window_flag);
         return app.run();
     }
     catch(const std::exception& ex)

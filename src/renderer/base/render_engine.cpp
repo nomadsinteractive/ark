@@ -55,7 +55,7 @@ sp<RenderView> RenderEngine::createRenderView(const sp<RenderController>& render
     mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), viewport.near(), viewport.far(), _render_context->upDirection());
 
     _render_context->setViewport(viewport);
-    return _renderer_factory->createRenderView(_render_context, renderController, viewport);
+    return _renderer_factory->createRenderView(_render_context, renderController);
 }
 
 }

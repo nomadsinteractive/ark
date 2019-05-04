@@ -1,5 +1,7 @@
 #include "dear-imgui/base/renderer/renderer_imgui.h"
 
+#include <cctype>
+
 #include <imgui.h>
 
 #include "core/ark.h"
@@ -81,8 +83,8 @@ void RendererImgui::render(RenderRequest& renderRequest, float x, float y)
 {
     ImGuiIO& io = ImGui::GetIO();
 
-    io.DisplaySize.x = _render_engine->resolution().x();
-    io.DisplaySize.y = _render_engine->resolution().y();
+    io.DisplaySize.x = _render_engine->viewport().width();
+    io.DisplaySize.y = _render_engine->viewport().height();
 
     ImGui::NewFrame();
     _renderer_group->render(renderRequest, x, y);
@@ -113,6 +115,25 @@ bool RendererImgui::onEvent(const Event& event)
         return true;
     case Event::ACTION_WHEEL:
         io.MouseWheel = event.y();
+        return true;
+    case Event::ACTION_KEY_DOWN:
+    case Event::ACTION_KEY_UP:
+        switch(event.code())
+        {
+            case Event::CODE_KEYBOARD_LSHIFT:
+            case Event::CODE_KEYBOARD_RSHIFT:
+                io.KeyShift = event.action() == Event::ACTION_KEY_DOWN;
+                return true;
+            default:
+                break;
+        }
+        if(event.action() == Event::ACTION_KEY_DOWN)
+            break;
+    case Event::ACTION_KEY_REPEAT:
+        if(event.code() < Event::CODE_NO_ASCII) {
+            wchar_t c = Event::toCharacter(event.code());
+            io.AddInputCharacter(static_cast<ImWchar>(io.KeyShift ? std::toupper(c) : c));
+        }
         return true;
     default:
         break;
@@ -171,10 +192,12 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImGuiIO&
                 // Render 'pcmd->ElemCount/3' indexed triangles.
                 // By default the indices ImDrawIdx are 16-bits, you can change them to 32-bits in imconfig.h if your engine doesn't support 16-bits indices.
                 const ImVec2& pos = draw_data->DisplayPos;
+                const RenderContext& renderContext = _render_engine->renderContext();
                 DrawingContext drawingContext(_shader, drawCommand->_shader_bindings, ubos, vertexBuffer, indexBuffer, static_cast<int32_t>(pcmd->ElemCount / 3), offset, pcmd->ElemCount);
                 drawingContext._parameters._scissor = Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y);
+                drawingContext._parameters._scissor.scale(renderContext.displayScale().x(), renderContext.displayScale().y());
                 if(_vflip)
-                    drawingContext._parameters._scissor.vflip(_render_engine->viewport().height());
+                    drawingContext._parameters._scissor.vflip(renderContext.resolution().y());
                 renderCommand = sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(_object_pool), drawCommand);
                 renderRequest.addRequest(renderCommand);
             }
@@ -215,6 +238,7 @@ sp<Renderer> RendererImgui::BUILDER::build(const sp<Scope>& args)
             int32_t datasize = readable->remaining();
             void* data = malloc(static_cast<size_t>(datasize));
             readable->read(data, static_cast<uint32_t>(datasize));
+            strncpy(fontConfig.Name, src.c_str(), sizeof(fontConfig.Name));
             io.Fonts->AddFontFromMemoryTTF(data, datasize, fontConfig.SizePixels, &fontConfig);
         }
     }

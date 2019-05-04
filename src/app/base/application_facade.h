@@ -44,6 +44,9 @@ public:
     void setDefaultEventListener(const sp<EventListener>& eventListener);
 
 //  [[script::bindings::auto]]
+    void exit();
+
+//  [[script::bindings::auto]]
     void post(const sp<Runnable>& task, float delay = 0.0f);
 //  [[script::bindings::auto]]
     void schedule(const sp<Runnable>& task, float interval);

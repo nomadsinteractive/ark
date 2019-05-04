@@ -49,7 +49,7 @@ private:
 
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const PipelineBindings& bindings)
     : _recycler(recycler), _pipeline_input(bindings.input()), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _cull_face(bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK) != PipelineBindings::FLAG_CULL_MODE_NONE),
-      _id(0), _render_command(createRenderCommand(bindings))
+      _id(0), _render_command(createRenderCommand(bindings)), _rebind_needed(true)
 {
 }
 
@@ -105,7 +105,7 @@ void GLPipeline::bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<P
 {
     for(size_t i = 0; i < ubo->uniforms().size(); ++i)
     {
-        if(uboSnapshot._dirty_flags->buf()[i])
+        if(uboSnapshot._dirty_flags->buf()[i] || _rebind_needed)
         {
             const sp<Uniform>& uniform = ubo->uniforms().at(i);
             uint8_t* buf = uboSnapshot._buffer->buf();
@@ -113,6 +113,7 @@ void GLPipeline::bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<P
             bindUniform(reinterpret_cast<float*>(buf + pair.first), pair.second, uniform);
         }
     }
+    _rebind_needed = false;
 }
 
 void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)

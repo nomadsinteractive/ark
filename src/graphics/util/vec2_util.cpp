@@ -109,6 +109,11 @@ sp<Vec2> Vec2Util::normalize(const sp<Vec2>& self)
     return sp<Vec2Normalize>::make(self);
 }
 
+void Vec2Util::set(const sp<Vec2>& self, const V2 val)
+{
+    ensureImpl(self)->set(val);
+}
+
 V2 Vec2Util::val(const sp<Vec2>& self)
 {
     return self->val();

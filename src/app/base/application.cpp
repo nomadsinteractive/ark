@@ -38,8 +38,8 @@ public:
 }
 
 Application::Application(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport)
-    : _application_delegate(applicationDelegate), _application_context(applicationContext)
-      , _viewport(viewport), _width(width), _height(height), _alive(false)
+    : _application_delegate(applicationDelegate), _application_context(applicationContext),
+      _viewport(viewport), _width(width), _height(height), _alive(false)
 {
     g_upDirection = _viewport.top() < _viewport.bottom() ? 1.0f : -1.0f;
 }

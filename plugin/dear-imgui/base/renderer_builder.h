@@ -3,12 +3,15 @@
 
 #include <functional>
 #include <stack>
+#include <vector>
 
 #include "core/forwarding.h"
+#include "core/base/observer.h"
 #include "core/base/string.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/v2.h"
 
 #include "dear-imgui/api.h"
 #include "dear-imgui/inf/widget.h"
@@ -32,7 +35,17 @@ public:
 // [[script::bindings::auto]]
     void bulletText(const String& name);
 // [[script::bindings::auto]]
-    void button(const String& label);
+    sp<Observer> button(const String& label, const V2& size = V2());
+// [[script::bindings::auto]]
+    sp<Observer> smallButton(const String& label);
+
+// [[script::bindings::auto]]
+    void checkbox(const String& label, const sp<Boolean>& option);
+// [[script::bindings::auto]]
+    void radioButton(const String& label, const sp<Integer>& option, int32_t group);
+
+// [[script::bindings::auto]]
+    void combo(const String& label, const sp<Integer>& option, const std::vector<String>& items);
 
 // [[script::bindings::auto]]
     void indent(float w = 0);
@@ -47,6 +60,27 @@ public:
     void spacing();
 // [[script::bindings::auto]]
     void text(const String& name);
+
+// [[script::bindings::auto]]
+    void inputFloat(const String& label, const sp<Numeric>& value, float step = 0.0f, float step_fast = 0.0f, const String& format = "%.3f");
+
+// [[script::bindings::auto]]
+    void sliderFloat(const String& label, const sp<Numeric>& value, float v_min, float v_max, const String& format = "%.3f", float power = 1.0f);
+// [[script::bindings::auto]]
+    void sliderFloat2(const String& label, const sp<Vec2>& value, float v_min, float v_max, const String& format = "%.3f", float power = 1.0f);
+// [[script::bindings::auto]]
+    void sliderFloat3(const String& label, const sp<Vec3>& value, float v_min, float v_max, const String& format = "%.3f", float power = 1.0f);
+// [[script::bindings::auto]]
+    void sliderFloat4(const String& label, const sp<Vec4>& value, float v_min, float v_max, const String& format = "%.3f", float power = 1.0f);
+
+// [[script::bindings::auto]]
+    void colorEdit3(const String& label, const sp<Vec3>& value);
+// [[script::bindings::auto]]
+    void colorEdit4(const String& label, const sp<Vec4>& value);
+// [[script::bindings::auto]]
+    void colorPicker3(const String& label, const sp<Vec3>& value);
+// [[script::bindings::auto]]
+    void colorPicker4(const String& label, const sp<Vec4>& value);
 
 // [[script::bindings::auto]]
     void showAboutWindow();
@@ -107,17 +141,19 @@ private:
     public:
         typedef std::function<bool(typename Argument<T>::ArgType)> FuncType;
 
-        Callback(FuncType func, T arg)
-            : _func(std::move(func)), _arg(arg) {
+        Callback(FuncType func, T arg, const sp<Observer>& observer)
+            : _func(std::move(func)), _arg(std::move(arg)), _observer(observer) {
         }
 
         virtual void render() override {
-            _func(_arg());
+            if(_func(_arg()))
+                _observer->update();
         }
 
     private:
         FuncType _func;
         Argument<T> _arg;
+        sp<Observer> _observer;
     };
 
 private:
@@ -127,9 +163,11 @@ private:
         current()->addWidget(sp<Invocation<T>>::make(std::move(func), std::move(arg)));
     }
 
-    template<typename T> void addCallback(std::function<bool(typename Argument<T>::ArgType)> func, T arg) {
-        current()->addWidget(sp<Callback<T>>::make(std::move(func), std::move(arg)));
+    template<typename T> void addCallback(std::function<bool(typename Argument<T>::ArgType)> func, T arg, const sp<Observer>& observer) {
+        current()->addWidget(sp<Callback<T>>::make(std::move(func), std::move(arg), observer));
     }
+
+    void addWidget(const sp<Widget>& widget);
 
     void push(const sp<WidgetGroup>& widget);
     void pop();

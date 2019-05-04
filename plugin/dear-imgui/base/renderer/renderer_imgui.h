@@ -78,6 +78,7 @@ private:
     sp<PipelineFactory> _bindings;
 
     bool _vflip;
+    V2 _viewport_scale;
 };
 
 

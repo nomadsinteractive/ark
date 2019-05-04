@@ -40,6 +40,9 @@ public:
 //[[script::bindings::classmethod]]
     static sp<Vec2> normalize(const sp<Vec2>& self);
 
+//[[script::bindings::classmethod]]
+    static void set(const sp<Vec2>& self, const V2 val);
+
 //[[script::bindings::property]]
     static V2 val(const sp<Vec2>& self);
 //[[script::bindings::property]]

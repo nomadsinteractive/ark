@@ -23,6 +23,9 @@ public:
 //  [[script::bindings::auto]]
     void update();
 
+//  [[script::bindings::auto]]
+    void setCallback(const sp<Runnable>& callback);
+
 private:
     sp<Runnable> _callback;
     bool _oneshot;

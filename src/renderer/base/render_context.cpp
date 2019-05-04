@@ -37,6 +37,7 @@ const Viewport& RenderContext::viewport() const
 void RenderContext::setViewport(const Viewport& viewport)
 {
     _viewport = viewport;
+    _display_scale = V2(_resolution.x() / _viewport.width(), _resolution.y() / _viewport.height());
 }
 
 const V2& RenderContext::resolution() const
@@ -47,6 +48,12 @@ const V2& RenderContext::resolution() const
 void RenderContext::setResolution(const V2& resolution)
 {
     _resolution = resolution;
+    _display_scale = V2(_resolution.x() / _viewport.width(), _resolution.y() / _viewport.height());
+}
+
+const V2& RenderContext::displayScale() const
+{
+    return _display_scale;
 }
 
 uint32_t RenderContext::getGLSLVersion() const

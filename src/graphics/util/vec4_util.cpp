@@ -76,6 +76,11 @@ sp<Vec4> Vec4Util::transform(const sp<Vec4>& self, const sp<Transform>& transfor
     return nullptr;
 }
 
+void Vec4Util::set(const sp<Vec4>& self, const V4& val)
+{
+    ensureImpl(self)->set(val);
+}
+
 V3 Vec4Util::xyz(const sp<Vec4>& self)
 {
     return self->val();

@@ -90,9 +90,9 @@ void RendererFactoryOpenGL::setVersion(Ark::RendererVersion version, RenderConte
     glContext.setVersion(version);
 }
 
-sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController, const Viewport& viewport)
+sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController)
 {
-    return sp<RenderView>::adopt(new RenderViewOpenGL(renderContext, renderController, viewport));
+    return sp<RenderView>::adopt(new RenderViewOpenGL(renderContext, renderController));
 }
 
 sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buffer::Usage usage)

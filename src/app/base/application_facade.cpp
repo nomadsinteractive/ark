@@ -6,6 +6,7 @@
 #include "graphics/base/surface_controller.h"
 
 #include "app/base/application.h"
+#include "app/base/application_controller.h"
 #include "app/base/application_context.h"
 #include "app/base/surface.h"
 #include "app/view/arena.h"
@@ -79,6 +80,11 @@ void ApplicationFacade::addEventListener(const sp<EventListener>& eventListener)
 void ApplicationFacade::setDefaultEventListener(const sp<EventListener>& eventListener)
 {
     _context->setDefaultEventListener(eventListener);
+}
+
+void ApplicationFacade::exit()
+{
+    _controller->exit();
 }
 
 void ApplicationFacade::post(const sp<Runnable>& task, float delay)

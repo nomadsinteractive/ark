@@ -173,6 +173,13 @@ private:
     template<typename T> T toCppObject_sfinae(PyObject* obj, typename T::_PtrType*) {
         return toSharedPtr<typename T::_PtrType>(obj, true);
     }
+    template<typename T> T toCppObject_sfinae(PyObject* obj, decltype(std::declval<T>().push_back(std::declval<typename T::value_type>()))*) {
+        typedef typename T::value_type U;
+        return toCppCollectionObject_sfinae<T, U>(obj, nullptr);
+    }
+    template<typename T> T toCppObject_sfinae(PyObject* obj, typename std::enable_if<std::is_enum<T>::value>::type*) {
+        return static_cast<T>(toType<int32_t>(obj));
+    }
     template<typename T> T toCppObject_sfinae(PyObject* obj, ...) {
         return toType<T>(obj);
     }
@@ -188,6 +195,23 @@ private:
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& value, ...) {
         return fromType<T>(value);
+    }
+
+    template<typename T, typename U> T toCppCollectionObject_sfinae(PyObject* obj, typename std::enable_if<std::is_same<T, std::string>::value || std::is_same<T, std::wstring>::value>::type*) {
+        return toType<T>(obj);
+    }
+    template<typename T, typename U> T toCppCollectionObject_sfinae(PyObject* obj, ...) {
+        T col;
+        Py_ssize_t len = PyObject_Length(obj);
+        DCHECK(len != -1, "Object \"%s\" has no length", Py_TYPE(obj)->tp_name);
+        for(Py_ssize_t i = 0; i < len; ++i) {
+            PyObject* key = PyLong_FromLong(i);
+            PyObject* item = PyObject_GetItem(obj, key);
+            col.push_back(toCppObject<U>(item));
+            Py_XDECREF(item);
+            Py_DECREF(key);
+        }
+        return col;
     }
 
 

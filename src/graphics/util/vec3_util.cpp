@@ -132,6 +132,11 @@ sp<Vec3> Vec3Util::negative(const sp<Vec3>& self)
     return sp<VecNeg<V3>>::make(self);
 }
 
+void Vec3Util::set(const sp<Vec3>& self, const V3& val)
+{
+    ensureImpl(self)->set(val);
+}
+
 V3 Vec3Util::xyz(const sp<Vec3>& self)
 {
     return self->val();

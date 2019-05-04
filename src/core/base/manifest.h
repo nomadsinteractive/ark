@@ -21,11 +21,21 @@ public:
         MESSAGE_LOOP_TYPE_RENDER
     };
 
+    enum WindowFlag {
+        WINDOW_FLAG_NONE = 0,
+        WINDOW_FLAG_SHOW_CURSOR = 1,
+        WINDOW_FLAG_RESIZABLE = 2,
+        WINDOW_FLAG_MAXINIZED = 4,
+        WINDOW_FLAG_FULL_SCREEN = 8,
+        WINDOW_FLAG_FULL_SCREEN_WINDOWED = 16
+    };
+
     struct Application {
         String _dir;
         String _filename;
         String _title;
         MessageLoopType _message_loop;
+        WindowFlag _window_flag;
     };
 
     struct Asset {

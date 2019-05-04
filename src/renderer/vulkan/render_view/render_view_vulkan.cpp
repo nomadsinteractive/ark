@@ -16,8 +16,8 @@
 namespace ark {
 namespace vulkan {
 
-RenderViewVulkan::RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderContext>& glContext, const sp<RenderController>& renderController, const Viewport& viewport)
-    : _renderer(renderer), _graphics_context(new GraphicsContext(glContext, renderController)), _viewport(viewport)
+RenderViewVulkan::RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderContext>& renderContext, const sp<RenderController>& renderController)
+    : _renderer(renderer), _graphics_context(new GraphicsContext(renderContext, renderController))
 {
 }
 
@@ -27,7 +27,7 @@ void RenderViewVulkan::onSurfaceCreated()
 
 void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
 {
-    LOGD("Width: %d, Height: %d, Viewport (%.1f, %.1f, %.1f, %.1f)", width, height, _viewport.left(), _viewport.top(), _viewport.right(), _viewport.bottom());
+    LOGD("Width: %d, Height: %d", width, height);
     _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->renderController()));
 
     _renderer->renderTarget()->onSurfaceChanged(width, height);

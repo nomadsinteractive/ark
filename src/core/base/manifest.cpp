@@ -2,6 +2,7 @@
 
 #include "core/inf/asset.h"
 #include "core/inf/asset_bundle.h"
+#include "core/util/conversions.h"
 #include "core/util/documents.h"
 
 #include "graphics/base/size.h"
@@ -48,6 +49,7 @@ void Manifest::load(const String& src)
     _heap._host_unit_size = toSize(Documents::getAttributeValue(_content, "heap/host/unit-size", "8M"));
 
     _application._title = Documents::getAttributeValue(_content, "application/title");
+    _application._window_flag = Documents::getAttributeValue<WindowFlag>(_content, "application/window-flag", WINDOW_FLAG_SHOW_CURSOR);
 
     const String messageLoopType = Documents::getAttributeValue(_content, "application/message-loop", "core");
     if(messageLoopType == "core")
@@ -122,6 +124,31 @@ uint32_t Manifest::toSize(const String& sizestr) const
 Manifest::Renderer::Renderer()
     : _version(Ark::AUTO)
 {
+}
+
+static Manifest::WindowFlag toOneWindowFlag(const String& val)
+{
+    const String s = val.toLower();
+    if(s == "show_cursor")
+        return Manifest::WINDOW_FLAG_SHOW_CURSOR;
+    if(s == "resizable")
+        return Manifest::WINDOW_FLAG_RESIZABLE;
+    if(s == "maxinized")
+        return Manifest::WINDOW_FLAG_MAXINIZED;
+    if(s == "full_screen")
+        return Manifest::WINDOW_FLAG_FULL_SCREEN;
+    if(s == "full_screen_windowed")
+        return Manifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED;
+    DFATAL("Unknow window flag: %s", val.c_str());
+    return Manifest::WINDOW_FLAG_NONE;
+}
+
+template<> ARK_API Manifest::WindowFlag Conversions::to<String, Manifest::WindowFlag>(const String& val)
+{
+    uint32_t v = Manifest::WINDOW_FLAG_NONE;
+    for(const String& i : val.split('|'))
+        v |= toOneWindowFlag(i);
+    return static_cast<Manifest::WindowFlag>(v);
 }
 
 }

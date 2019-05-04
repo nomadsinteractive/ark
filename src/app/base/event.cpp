@@ -57,4 +57,9 @@ Event::Code Event::code() const
     return _code;
 }
 
+wchar_t Event::toCharacter(Event::Code code)
+{
+    return static_cast<wchar_t>(code);
+}
+
 }

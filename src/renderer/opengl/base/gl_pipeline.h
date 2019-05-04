@@ -154,7 +154,7 @@ private:
     std::map<String, GLUniform> _uniforms;
 
     sp<GLRenderCommand> _render_command;
-
+    bool _rebind_needed;
 };
 
 }
