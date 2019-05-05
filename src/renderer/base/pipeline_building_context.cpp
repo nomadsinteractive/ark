@@ -196,32 +196,32 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         int32_t binding = Documents::getAttribute<int32_t>(i, Constants::Attributes::BINDING, -1);
         const sp<Flatable> flatable = factory.ensure<Flatable>(type, value, args);
         const uint32_t size = flatable->size();
-        Uniform::Type glType = Uniform::TYPE_F1;
+        Uniform::Type uType = Uniform::TYPE_F1;
         switch (size) {
         case 4:
             if(type[0] == 'f')
-                glType = Uniform::TYPE_F1;
+                uType = Uniform::TYPE_F1;
             else if(type[0] == 'i')
-                glType = Uniform::TYPE_I1;
+                uType = Uniform::TYPE_I1;
             else
                 FATAL("Unknow type \"%s\"", type.c_str());
             break;
         case 8:
-            glType = Uniform::TYPE_F2;
+            uType = Uniform::TYPE_F2;
             break;
         case 12:
-            glType = Uniform::TYPE_F3;
+            uType = Uniform::TYPE_F3;
             break;
         case 16:
-            glType = Uniform::TYPE_F4;
+            uType = Uniform::TYPE_F4;
             break;
         case 64:
-            glType = Uniform::TYPE_MAT4;
+            uType = Uniform::TYPE_MAT4;
             break;
         default:
             FATAL("Unknow type \"%s\"", type.c_str());
         }
-        addUniform(name, glType, glType == Uniform::TYPE_F3 ? sp<Flatable>::adopt(new AlignedFlatable(flatable, 16)) : flatable, flatable.as<Notifier>(), binding);
+        addUniform(name, uType, uType == Uniform::TYPE_F3 ? sp<Flatable>::adopt(new AlignedFlatable(flatable, 16)) : flatable, flatable.as<Notifier>(), binding);
     }
 }
 

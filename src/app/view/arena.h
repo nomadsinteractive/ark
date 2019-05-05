@@ -46,6 +46,15 @@ public:
 //  [[script::bindings::property]]
     const sp<ResourceLoader>& resourceLoader() const;
 
+//  [[script::bindings::property]]
+    sp<BoxBundle> refs() const;
+//  [[script::bindings::property]]
+    sp<BoxBundle> layers() const;
+//  [[script::bindings::property]]
+    sp<BoxBundle> renderLayers() const;
+//  [[script::bindings::property]]
+    sp<BoxBundle> packages() const;
+
 //  [[script::bindings::auto]]
     void addEventListener(const sp<EventListener>& eventListener);
 //  [[script::bindings::auto]]

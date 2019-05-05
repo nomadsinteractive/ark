@@ -72,8 +72,7 @@ public:
 
         virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) = 0;
 
-        using Resource::upload;
-        virtual void upload(GraphicsContext& graphicsContext, uint32_t index, const Bitmap& bitmap) = 0;
+        virtual void uploadBitmap(GraphicsContext& graphicsContext, uint32_t index, const Bitmap& bitmap) = 0;
     };
 
     class ARK_API Uploader {

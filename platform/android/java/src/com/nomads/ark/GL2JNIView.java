@@ -32,6 +32,9 @@ package com.nomads.ark;
  */
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
@@ -80,6 +83,28 @@ class GL2JNIView extends GLSurfaceView {
     }
 
     private void init(boolean translucent, int depth, int stencil) {
+        try {
+            InputStreamReader in = new InputStreamReader(getContext().getAssets().open("android.info"), "utf-8");
+            char[] buf = new char[8192];
+            StringBuilder sb = new StringBuilder();
+            int len;
+            while((len = in.read(buf)) > 0) {
+                sb.append(buf, 0, len);
+            }
+            in.close();
+
+            String s = sb.toString();
+            for(String i : s.split("\n")) {
+                final String line = i.trim();
+                final String key = "libraries:";
+                if(line.startsWith("libraries:")) {
+                    for(String j: line.substring(key.length()).split(";"))
+                        System.loadLibrary(j.trim());
+                }
+            }
+        } catch(IOException e) {
+            Log.e(TAG, e.getMessage());
+        }
 
         JNILib.onCreate(getContext(), getContext().getAssets());
         

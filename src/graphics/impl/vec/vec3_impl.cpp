@@ -69,12 +69,14 @@ sp<Vec3> Vec3Impl::BUILDER::build(const sp<Scope>& args)
 }
 
 Vec3Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
+    : _str(str)
 {
     BeanUtils::split(factory, str, _x, _y, _z);
 }
 
 sp<Vec3> Vec3Impl::DICTIONARY::build(const sp<Scope>& args)
 {
+    DCHECK(_x && _y && _z, "Cannot build Vec3 from \"%s\"", _str.c_str());
     return sp<Vec3Impl>::make(_x->build(args), _y->build(args), _z->build(args));
 }
 

@@ -25,13 +25,23 @@ bool GLTexture2D::download(GraphicsContext& /*graphicsContext*/, Bitmap& bitmap)
            static_cast<uint32_t>(_size->width()), static_cast<uint32_t>(_size->height()), bitmap.width(), bitmap.height());
     GLenum textureFormat = GLUtil::getTextureFormat(Texture::FORMAT_AUTO, bitmap.channels());
     GLenum pixelFormat = GLUtil::getPixelFormat(Texture::FORMAT_AUTO, bitmap);
+#ifdef ARK_PLATFORM_ANDROID
+    GLuint fbo;
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _id, 0);
+    glReadPixels(0, 0, bitmap.width(), bitmap.height(), textureFormat, pixelFormat, bitmap.at(0, 0));
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &fbo);
+#else
     glBindTexture(GL_TEXTURE_2D, _id);
     glGetTexImage(GL_TEXTURE_2D, 0, textureFormat, pixelFormat, bitmap.at(0, 0));
     glBindTexture(GL_TEXTURE_2D, 0);
+#endif
     return true;
 }
 
-void GLTexture2D::upload(GraphicsContext& /*graphicContext*/, uint32_t /*index*/, const Bitmap& bitmap)
+void GLTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, uint32_t /*index*/, const Bitmap& bitmap)
 {
     uint8_t channels = bitmap.channels();
     GLenum format = GLUtil::getTextureFormat(_parameters->_format, channels);
@@ -40,10 +50,5 @@ void GLTexture2D::upload(GraphicsContext& /*graphicContext*/, uint32_t /*index*/
     glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(internalFormat), static_cast<int32_t>(bitmap.width()), static_cast<int32_t>(bitmap.height()), 0, format, pixelFormat, bitmap.at(0, 0));
     LOGD("Texture Uploaded, id = %d, width = %d, height = %d", static_cast<uint32_t>(id()), bitmap.width(), bitmap.height());
 }
-
-//void GLTexture2D::doPrepareTexture(GraphicsContext& graphicsContext, uint32_t /*id*/)
-//{
-//    _uploader->upload(graphicsContext, *this);
-//}
 
 }

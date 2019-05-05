@@ -11,6 +11,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/viewport.h"
 
 namespace ark {
 
@@ -51,8 +52,10 @@ public:
     struct Renderer {
         Renderer();
 
-        sp<Size> _resolution;
         Ark::RendererVersion _version;
+        sp<Size> _resolution;
+
+        Viewport toViewport() const;
     };
 
 public:

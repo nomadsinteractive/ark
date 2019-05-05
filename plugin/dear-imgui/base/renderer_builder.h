@@ -160,11 +160,11 @@ private:
     void addBlock(std::function<void(void)> func);
 
     template<typename T> void addInvocation(std::function<void(typename Argument<T>::ArgType)> func, T arg) {
-        current()->addWidget(sp<Invocation<T>>::make(std::move(func), std::move(arg)));
+        addWidget(sp<Invocation<T>>::make(std::move(func), std::move(arg)));
     }
 
     template<typename T> void addCallback(std::function<bool(typename Argument<T>::ArgType)> func, T arg, const sp<Observer>& observer) {
-        current()->addWidget(sp<Callback<T>>::make(std::move(func), std::move(arg), observer));
+        addWidget(sp<Callback<T>>::make(std::move(func), std::move(arg), observer));
     }
 
     void addWidget(const sp<Widget>& widget);

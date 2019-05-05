@@ -15,10 +15,7 @@ public:
     GLTexture2D(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader);
 
     virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
-    virtual void upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap) override;
-
-//protected:
-//    virtual void doPrepareTexture(GraphicsContext& graphicsContext, uint32_t id) override;
+    virtual void uploadBitmap(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap) override;
 
 };
 

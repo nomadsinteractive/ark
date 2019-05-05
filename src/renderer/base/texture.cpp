@@ -28,7 +28,7 @@ public:
 
     virtual void upload(GraphicsContext& graphicContext, Texture::Delegate& delegate) override {
         const sp<Bitmap> bitmap = _bitmap->val();
-        delegate.upload(graphicContext, 0, bitmap);
+        delegate.uploadBitmap(graphicContext, 0, bitmap);
     }
 
 private:
@@ -230,7 +230,7 @@ Texture::UploaderBitmap::UploaderBitmap(const bitmap& bitmap)
 
 void Texture::UploaderBitmap::upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
 {
-    delegate.upload(graphicsContext, 0, _bitmap);
+    delegate.uploadBitmap(graphicsContext, 0, _bitmap);
 }
 
 }

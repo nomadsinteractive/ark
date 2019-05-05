@@ -126,6 +126,12 @@ Manifest::Renderer::Renderer()
 {
 }
 
+Viewport Manifest::Renderer::toViewport() const
+{
+    DASSERT(_resolution);
+    return Viewport(0, 0, _resolution->width(), _resolution->height(), 0, std::max(_resolution->width(), _resolution->height()));
+}
+
 static Manifest::WindowFlag toOneWindowFlag(const String& val)
 {
     const String s = val.toLower();

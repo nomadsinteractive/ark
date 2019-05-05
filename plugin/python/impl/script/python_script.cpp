@@ -67,7 +67,7 @@ PythonScript::PythonScript(const String& name, const document& libraries)
         strncpy(encodings, "utf-8", 8);
         Py_FileSystemDefaultEncoding = encodings;
     }
-    Py_SetProgramName((wchar_t*) (_name.c_str()));
+    Py_SetProgramName(_name.c_str());
     Py_NoSiteFlag = 1;
     Py_InitializeEx(0);
     _ark_module = PyImport_ImportModule("ark");

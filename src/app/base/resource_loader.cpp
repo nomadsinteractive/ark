@@ -20,22 +20,22 @@ ResourceLoader::~ResourceLoader()
     LOGD("");
 }
 
-const sp<BoxBundle> ResourceLoader::refs() const
+sp<BoxBundle> ResourceLoader::refs() const
 {
     return _bean_factory.references();
 }
 
-const sp<BoxBundle> ResourceLoader::layers()
+sp<BoxBundle> ResourceLoader::layers()
 {
     return _builder_refs.ensure<BuilderRefs<Layer>>(_bean_factory);
 }
 
-const sp<BoxBundle> ResourceLoader::renderLayers()
+sp<BoxBundle> ResourceLoader::renderLayers()
 {
     return _builder_refs.ensure<BuilderRefs<RenderLayer>>(_bean_factory);
 }
 
-const sp<BoxBundle> ResourceLoader::packages()
+sp<BoxBundle> ResourceLoader::packages() const
 {
     return _packages;
 }

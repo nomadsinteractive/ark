@@ -48,7 +48,7 @@ public:
 
     private:
         sp<Builder<Numeric>> _x, _y, _z;
-        V3 _v3;
+        String _str;
     };
 
 private:

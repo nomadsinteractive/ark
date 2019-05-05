@@ -72,14 +72,13 @@ public:
     }
 
 //  [[script::bindings::property]]
-    const sp<BoxBundle> refs() const;
+    sp<BoxBundle> refs() const;
 //  [[script::bindings::property]]
-    const sp<BoxBundle> layers();
+    sp<BoxBundle> layers();
 //  [[script::bindings::property]]
-    const sp<BoxBundle> renderLayers();
-
+    sp<BoxBundle> renderLayers();
 //  [[script::bindings::property]]
-    const sp<BoxBundle> packages();
+    sp<BoxBundle> packages() const;
 
     void import(const document& manifest, BeanFactory& beanFactory);
 

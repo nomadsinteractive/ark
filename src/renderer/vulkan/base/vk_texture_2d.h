@@ -26,7 +26,7 @@ public:
     virtual RecycleFunc recycle() override;
 
     virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
-    virtual void upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap) override;
+    virtual void uploadBitmap(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap) override;
 
     const VkDescriptorImageInfo& vkDescriptor() const;
 

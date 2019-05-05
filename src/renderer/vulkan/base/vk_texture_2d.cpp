@@ -60,7 +60,7 @@ bool VKTexture2D::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
     return false;
 }
 
-void VKTexture2D::upload(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap)
+void VKTexture2D::uploadBitmap(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap)
 {
     const bytearray& imagedata = bitmap.bytes();
     VkFormat format = VKUtil::toTextureFormat(bitmap, _parameters->_format);

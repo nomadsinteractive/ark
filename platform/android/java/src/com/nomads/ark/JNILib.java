@@ -18,15 +18,9 @@ package com.nomads.ark;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.opengl.GLSurfaceView;
 import android.view.Surface;
 
 public class JNILib {
-
-    static {
-        System.loadLibrary("ark");
-        System.loadLibrary("nomads-nimbus");
-    }
 
     public static native void onCreate(Context applicationContext, AssetManager assetManager);
 

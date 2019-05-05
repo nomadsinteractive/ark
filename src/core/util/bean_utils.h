@@ -30,8 +30,8 @@ public:
 
     template<typename T, typename U> static sp<T> as(const sp<Builder<U>>& builder, const sp<Scope>& args) {
         const sp<U> object = builder->build(args);
-        DCHECK(object && object.is<T>(), "Illegal object");
-        return object.as<T>();
+        DCHECK(object && object.template is<T>(), "Illegal object");
+        return object.template as<T>();
     }
 
     template<typename T> static sp<T> as(BeanFactory& args, const String& str) {

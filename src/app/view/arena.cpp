@@ -57,6 +57,30 @@ const sp<ResourceLoader>& Arena::resourceLoader() const
     return _resource_loader;
 }
 
+sp<BoxBundle> Arena::refs() const
+{
+    DCHECK(_resource_loader, "Trying to get ResourceLoader on a disposed Arena");
+    return _resource_loader->refs();
+}
+
+sp<BoxBundle> Arena::layers() const
+{
+    DCHECK(_resource_loader, "Trying to get ResourceLoader on a disposed Arena");
+    return _resource_loader->layers();
+}
+
+sp<BoxBundle> Arena::renderLayers() const
+{
+    DCHECK(_resource_loader, "Trying to get ResourceLoader on a disposed Arena");
+    return _resource_loader->renderLayers();
+}
+
+sp<BoxBundle> Arena::packages() const
+{
+    DCHECK(_resource_loader, "Trying to get ResourceLoader on a disposed Arena");
+    return _resource_loader->packages();
+}
+
 void Arena::addEventListener(const sp<EventListener>& eventListener)
 {
     _event_listeners->addEventListener(eventListener);

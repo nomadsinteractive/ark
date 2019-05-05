@@ -243,9 +243,9 @@ private:
 
 }
 
-SDLApplication::SDLApplication(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport, uint32_t windowFlag)
-    : Application(applicationDelegate, applicationContext, width, height, viewport), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
-      _controller(sp<SDLApplicationController>::make()), _show_cursor(windowFlag & Manifest::WINDOW_FLAG_SHOW_CURSOR), _window_flag(toSDLWindowFlag(applicationContext, windowFlag))
+SDLApplication::SDLApplication(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Manifest& manifest)
+    : Application(applicationDelegate, applicationContext, width, height, manifest.renderer().toViewport()), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
+      _controller(sp<SDLApplicationController>::make()), _window_flag(manifest.application()._window_flag)
 {
 }
 
@@ -259,8 +259,6 @@ int SDLApplication::run()
     }
 
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-//    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-//    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
     /* Turn on double buffering with a 24bit Z buffer.
@@ -268,9 +266,9 @@ int SDLApplication::run()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    SDL_ShowCursor(_show_cursor ? SDL_ENABLE : SDL_DISABLE);
+    SDL_ShowCursor((_window_flag & Manifest::WINDOW_FLAG_SHOW_CURSOR) ? SDL_ENABLE : SDL_DISABLE);
 
-    _main_window = SDL_CreateWindow(name(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _width, _height, _window_flag);
+    _main_window = SDL_CreateWindow(name(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, static_cast<int32_t>(_width), static_cast<int32_t>(_height), toSDLWindowFlag(_application_context, _window_flag));
     if(!_main_window)
     {
         /* Die if creation failed */

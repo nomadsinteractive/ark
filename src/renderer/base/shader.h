@@ -17,6 +17,7 @@
 
 namespace ark {
 
+//[[script::bindings::auto]]
 class ARK_API Shader {
 public:
     enum Stage {

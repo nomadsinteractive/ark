@@ -54,7 +54,7 @@ public:
         for(uint32_t i = 0; i < 6; ++i)
         {
             const Bitmap bitmap(n, n, n * 4 * 4, 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(faceList[imageFaceIndices[i]].m_data), faceList[imageFaceIndices[i]].m_dataSize));
-            delegate.upload(graphicsContext, i, bitmap);
+            delegate.uploadBitmap(graphicsContext, i, bitmap);
             LOGD("GLCubemap Uploaded, id = %d, width = %d, height = %d", static_cast<int32_t>(delegate.id()), n, n);
         }
 

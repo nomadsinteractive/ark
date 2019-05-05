@@ -50,7 +50,7 @@ bool GLDynamicCubemap::download(GraphicsContext& /*graphicsContext*/, Bitmap& bi
     return false;
 }
 
-void GLDynamicCubemap::upload(GraphicsContext& /*graphicsContext*/, uint32_t index, const Bitmap& bitmap)
+void GLDynamicCubemap::uploadBitmap(GraphicsContext& /*graphicsContext*/, uint32_t index, const Bitmap& bitmap)
 {
     uint8_t channels = bitmap.channels();
     GLenum format = GLUtil::getTextureFormat(_parameters->_format, channels);
