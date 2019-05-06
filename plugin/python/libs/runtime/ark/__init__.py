@@ -147,6 +147,9 @@ class Numeric(_Var):
     def expect(self, expectation):
         return None
 
+    def integral(self, t=None):
+        return None
+
     def __add__(self, other):
         return None
 
@@ -238,9 +241,17 @@ class Vec2:
     def vx(self):
         return self._x
 
+    @vx.setter
+    def vx(self, vx):
+        pass
+
     @property
     def vy(self):
         return self._y
+
+    @vy.setter
+    def vy(self, vy):
+        pass
 
     def transform(self, transform, org):
         return self._x, self._y
@@ -853,6 +864,10 @@ class RigidBody:
     @collision_callback.setter
     def collision_callback(self, collision_callback):
         pass
+
+    @property
+    def render_object(self) -> RenderObject:
+        return RenderObject(0)
 
     @property
     def tag(self):

@@ -101,6 +101,8 @@ public:
     static sp<Numeric> boundary(const sp<Numeric>& self, const sp<Numeric>& boundary);
 //[[script::bindings::classmethod]]
     static sp<Numeric> expect(const sp<Numeric>& self, const sp<Expectation>& expectation);
+//[[script::bindings::classmethod]]
+    static sp<Numeric> integral(const sp<Numeric>& self, const sp<Numeric>& t = nullptr);
 
 //[[script::bindings::auto]]
     static sp<Numeric> pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t = nullptr);

@@ -35,6 +35,7 @@ void RigidBody::bind(const sp<RenderObject>& renderObject)
 {
     renderObject->setPosition(Vec3Util::create(position()));
     renderObject->setTransform(_stub->_transform);
+    _stub->_render_object = renderObject;
 }
 
 int32_t RigidBody::id() const
@@ -92,6 +93,11 @@ void RigidBody::setTag(const Box& box) const
     *(_stub->_tag) = box;
 }
 
+const sp<RenderObject>& RigidBody::renderObject() const
+{
+    return _stub->_render_object;
+}
+
 sp<Boolean> RigidBody::disposed() const
 {
     return _stub->_disposed->toBoolean();
@@ -141,20 +147,19 @@ RigidBody::Stub::~Stub()
 
 void RigidBody::Callback::onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
 {
-    DASSERT(_collision_callback);
-    _collision_callback->onBeginContact(rigidBody, manifold);
+    if(_collision_callback)
+        _collision_callback->onBeginContact(rigidBody, manifold);
 }
 
 void RigidBody::Callback::onEndContact(const sp<RigidBody>& rigidBody)
 {
-    DASSERT(_collision_callback);
-    _collision_callback->onEndContact(rigidBody);
+    if(_collision_callback)
+        _collision_callback->onEndContact(rigidBody);
 }
 
 void RigidBody::Callback::onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
 {
-    if(_collision_callback)
-        onBeginContact(rigidBody, manifold);
+    onBeginContact(rigidBody, manifold);
     rigidBody->callback()->onBeginContact(self, CollisionManifold(-manifold.normal()));
 }
 

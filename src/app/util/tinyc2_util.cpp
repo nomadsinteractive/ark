@@ -109,7 +109,7 @@ const C2Shape& C2RigidBody::updateShape(C2Shape& shape, c2x& x) const
     const V2 pos = _position->val();
     Transform::Snapshot ts;
     ts.rotate_value = _rotate ? _rotate->radians() : 0;
-    ts.rotate_direction = _rotate ? _rotate->direction()->val() : V3();
+    ts.rotate_direction = _rotate ? _rotate->direction()->val() : Rotate::Z_AXIS;
     switch(_type)
     {
     case C2_CIRCLE:

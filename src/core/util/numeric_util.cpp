@@ -5,6 +5,7 @@
 #include "core/base/expression.h"
 #include "core/impl/builder/builder_by_instance.h"
 #include "core/impl/numeric/expect.h"
+#include "core/impl/numeric/integral.h"
 #include "core/impl/numeric/max.h"
 #include "core/impl/numeric/min.h"
 #include "core/impl/numeric/numeric_depends.h"
@@ -309,6 +310,11 @@ sp<Numeric> NumericUtil::vibrate(float s0, float v0, float s1, float v1, float d
     float multiplier = (t1 - t0) / duration;
     const sp<Numeric> b = sp<Numeric::Const>::make(t1 - t0);
     return sp<Vibrate>::make(boundary(mul(t ? t : Ark::instance().clock()->duration(), multiplier), b), a, t0, o);
+}
+
+sp<Numeric> NumericUtil::integral(const sp<Numeric>& self, const sp<Numeric>& t)
+{
+    return sp<Integral>::make(self, t ? t : Ark::instance().clock()->duration());
 }
 
 NumericUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)

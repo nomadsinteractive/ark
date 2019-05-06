@@ -47,6 +47,7 @@ public:
         SafePtr<Disposed> _disposed;
 
         sp<Callback> _callback;
+        sp<RenderObject> _render_object;
 
         sp<Box> _tag;
     };
@@ -88,6 +89,9 @@ public:
     const Box& tag() const;
 //  [[script::bindings::property]]
     void setTag(const Box& box) const;
+
+//  [[script::bindings::property]]
+    const sp<RenderObject>& renderObject() const;
 
 //  [[script::bindings::property]]
     sp<Boolean> disposed() const;

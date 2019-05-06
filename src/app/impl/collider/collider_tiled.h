@@ -38,9 +38,9 @@ public:
     };
 
 private:
-    class RigidBodyTile : public RigidBody {
+    class RigidBodyShadow : public RigidBody {
     public:
-        RigidBodyTile(uint32_t width, uint32_t height);
+        RigidBodyShadow(uint32_t width, uint32_t height);
 
         void setId(uint32_t id);
         void setPosition(float x, float y);
@@ -61,11 +61,11 @@ public:
         void collision(const Rect& rect);
 
     private:
-        void updateRigidBodyTile(uint32_t id, float tileWidth, float tileHeight, uint32_t colCount);
+        void updateRigidBodyShadow(uint32_t id, float tileWidth, float tileHeight, uint32_t colCount, const sp<RenderObject>& renderObject);
 
     private:
         sp<TileMap> _tile_map;
-        sp<RigidBodyTile> _rigid_body_tile;
+        sp<RigidBodyShadow> _rigid_body_shadow;
 
         std::set<uint32_t> _contacts;
     };
