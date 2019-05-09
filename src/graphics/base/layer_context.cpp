@@ -40,12 +40,6 @@ void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const s
     _notifier->notify();
 }
 
-void LayerContext::removeRenderObject(const sp<RenderObject>& renderObject)
-{
-    _items.remove(renderObject);
-    _notifier->notify();
-}
-
 void LayerContext::clear()
 {
     _items.clear();
@@ -56,16 +50,17 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memor
 {
     if(_render_requested)
     {
-        if(_transient_items.size() > 0)
-        {
-            for(const Item& i : _transient_items)
+        bool notify = false;
+        for(const Item& i : _transient_items)
+            if(!i._render_object->isDisposed())
             {
                 RenderObject::Snapshot snapshot = i._render_object->snapshot(memoryPool);
                 snapshot._position = snapshot._position + V3(i._x, i._y, 0) + _position;
                 output._items.push_back(std::move(snapshot));
+                notify = true;
             }
+        if(notify)
             _notifier->notify();
-        }
 
         for(const sp<RenderObject>& i : _items)
         {

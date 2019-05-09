@@ -29,7 +29,7 @@ void BeanFactory::addPackage(const String& name, const BeanFactory& package)
 
 void BeanFactory::extend(const BeanFactory& other)
 {
-    for(const Factory& i : other._stub->_factories.items())
+    for(const Factory& i : other._stub->_factories)
         _stub->_factories.push_back(i);
 }
 

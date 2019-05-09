@@ -10,6 +10,7 @@
 #include "core/impl/builder/builder_by_argument.h"
 #include "core/types/global.h"
 #include "core/types/shared_ptr.h"
+#include "core/util/operators.h"
 #include "core/util/strings.h"
 
 namespace ark {
@@ -205,6 +206,45 @@ public:
 
     };
 
+};
+
+template<typename T> class NumericOperation {
+public:
+    typedef sp<Builder<Variable<T>>> BuilderType;
+
+    static bool isConstant(const String& expr) {
+        return Strings::isNumeric(expr);
+    }
+
+    static BuilderType add(const BuilderType& a1, const BuilderType& a2) {
+        return sp<Operators::Builder<T, Operators::Add<T>>>::make(a1, a2);
+    }
+
+    static BuilderType subtract(const BuilderType& a1, const BuilderType& a2) {
+        return sp<Operators::Builder<T, Operators::Sub<T>>>::make(a1, a2);
+    }
+
+    static BuilderType multiply(const BuilderType& a1, const BuilderType& a2) {
+        return sp<Operators::Builder<T, Operators::Mul<T>>>::make(a1, a2);
+    }
+
+    static BuilderType divide(const BuilderType& a1, const BuilderType& a2) {
+        return sp<Operators::Builder<T, Operators::Div<T>>>::make(a1, a2);
+    }
+
+    static BuilderType eval(BeanFactory& /*factory*/, const String& expr) {
+        return sp<BuilderByInstance<Variable<T>>>::make(sp<typename Variable<T>::Const>::make(Strings::parse<T>(expr)));
+    }
+
+    static Expression::Operator<T> OPS[4];
+
+};
+
+template<typename T> Expression::Operator<T> NumericOperation<T>::OPS[4] = {
+    {"+", 1, NumericOperation<T>::add},
+    {"-", 1, NumericOperation<T>::subtract},
+    {"*", 2, NumericOperation<T>::multiply},
+    {"/", 2, NumericOperation<T>::divide}
 };
 
 }

@@ -16,7 +16,7 @@
 
 namespace ark {
 
-class ARK_API ViewGroup : public View, public Renderer, public Renderer::Group, Implements<ViewGroup, View, Block, Renderer, Renderer::Group> {
+class ARK_API ViewGroup final : public View, public Renderer, public Renderer::Group, Implements<ViewGroup, View, Block, Renderer, Renderer::Group> {
 public:
     ViewGroup(const Frame& background, const sp<Layout>& layout, const sp<LayoutParam>& layoutParam);
     ~ViewGroup() override;

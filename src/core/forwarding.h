@@ -13,7 +13,6 @@ template<typename T> class Dictionary;
 template<typename T> class Duck;
 template<typename T> class OwnedPtr;
 template<typename T> class Loader;
-template<typename T> class List;
 template<typename T> class LFStack;
 template<typename T> class LFQueue;
 template<typename T> class SafePtr;

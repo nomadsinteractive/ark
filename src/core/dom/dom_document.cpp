@@ -16,9 +16,9 @@ const document& DOMDocument::getChild(const String& name) const
 {
     auto iter = _children_by_name.find(name);
     if(iter != _children_by_name.end()) {
-        const List<document>& list = iter->second;
-        if(!list.isEmpty())
-            return list.items().front();
+        const std::vector<document>& list = iter->second;
+        if(!list.empty())
+            return list.front();
     }
     return document::null();
 }
@@ -35,7 +35,7 @@ void DOMDocument::addChild(const sp<DOMDocument>& doc)
     auto iter = _children_by_name.find(doc->name());
     if(iter != _children_by_name.end())
     {
-        List<document>& list = iter->second;
+        std::vector<document>& list = iter->second;
         list.push_back(doc);
     }
     else
@@ -45,22 +45,18 @@ void DOMDocument::addChild(const sp<DOMDocument>& doc)
     _children.push_back(doc);
 }
 
-const List<document>& DOMDocument::children() const
+const std::vector<document>& DOMDocument::children() const
 {
     return _children;
 }
 
-List<document>& DOMDocument::children(const String& name)
+const std::vector<document>& DOMDocument::children(const String& name)
 {
-    if(_children_by_name.find(name) == _children_by_name.end())
-        return List<document>::emptyList();
-    return _children_by_name.at(name);
-}
-
-void DOMDocument::clear()
-{
-    _children_by_name.clear();
-    _children.clear();
+    static std::vector<document> EMPTY;
+    const auto iter = _children_by_name.find(name);
+    if(iter == _children_by_name.end())
+        return EMPTY;
+    return iter->second;
 }
 
 }

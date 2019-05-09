@@ -2,7 +2,7 @@
 #define ARK_APP_VIEW_STAGE_H_
 
 #include "core/base/api.h"
-#include "core/collection/filtered_list.h"
+#include "core/collection/list.h"
 #include "core/inf/builder.h"
 #include "core/types/owned_ptr.h"
 #include "core/types/safe_ptr.h"

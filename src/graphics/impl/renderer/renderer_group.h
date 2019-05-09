@@ -3,7 +3,7 @@
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/collection/filtered_list.h"
+#include "core/collection/list.h"
 #include "core/inf/builder.h"
 
 #include "graphics/inf/renderer.h"

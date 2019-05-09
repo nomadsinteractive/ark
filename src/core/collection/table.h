@@ -65,32 +65,32 @@ public:
         return _values.back();
     }
 
-    template<typename TIter, typename UIter> struct ZippedIterator {
+    template<typename TIter, typename UIter> struct Iterator {
         TIter _key_iter;
         UIter _value_iter;
 
-        ZippedIterator(TIter keyIter, UIter valueIter)
+        Iterator(TIter keyIter, UIter valueIter)
             : _key_iter(std::move(keyIter)), _value_iter(std::move(valueIter)) {
         }
 
-        ZippedIterator& operator ++() {
+        Iterator& operator ++() {
             ++(this->_key_iter);
             ++(this->_value_iter);
             return *this;
         }
 
-        bool operator == (const ZippedIterator<TIter, UIter>& other) const {
+        bool operator == (const Iterator<TIter, UIter>& other) const {
             bool equal = this->_key_iter == other._key_iter;
             DCHECK(equal == (this->_value_iter == other._value_iter), "Zipped iterator must be both equal or neither");
             return equal;
         }
 
-        bool operator != (const ZippedIterator<TIter, UIter>& other) const {
+        bool operator != (const Iterator<TIter, UIter>& other) const {
             return !(*this == other);
         }
 
-        ZippedIterator operator ++(int) {
-            return ZippedIterator(_key_iter++, _value_iter++);
+        Iterator operator ++(int) {
+            return Iterator(_key_iter++, _value_iter++);
         }
 
         std::pair<T, U> operator *() const {
@@ -98,25 +98,14 @@ public:
         }
     };
 
-    struct Zipped {
-        const std::vector<T>& _keys;
-        const std::vector<U>& _values;
+    typedef Iterator<typename std::vector<T>::const_iterator, typename std::vector<U>::const_iterator> const_iterator;
 
-        Zipped(const std::vector<T>& keys, const std::vector<U>& values)
-            : _keys(keys), _values(values) {
-        }
+    const_iterator begin() const {
+        return const_iterator(_keys.begin(), _values.begin());
+    }
 
-        ZippedIterator<typename std::vector<T>::const_iterator, typename std::vector<U>::const_iterator> begin() const {
-            return ZippedIterator<typename std::vector<T>::const_iterator, typename std::vector<U>::const_iterator>(_keys.begin(), _values.begin());
-        }
-
-        ZippedIterator<typename std::vector<T>::const_iterator, typename std::vector<U>::const_iterator> end() const {
-            return ZippedIterator<typename std::vector<T>::const_iterator, typename std::vector<U>::const_iterator>(_keys.end(), _values.end());
-        }
-    };
-
-    Zipped items() const {
-        return Zipped(_keys, _values);
+    const_iterator end() const {
+        return const_iterator(_keys.end(), _values.end());
     }
 
     template<typename V> V toMap() const {

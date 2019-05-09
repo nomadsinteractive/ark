@@ -13,9 +13,9 @@
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_context.h"
 
-#define VAR_TYPE_PATTERN "\\s+(int|uint8|float|vec2|vec3|vec4|mat3|mat4|sampler2D|samplerCube)\\s+"
-#define ATTRIBUTE_PATTERN VAR_TYPE_PATTERN "(?:a_|v_)([\\w\\d_]+);"
-#define UNIFORM_PATTERN VAR_TYPE_PATTERN "(u_[\\w\\d_]+);"
+#define VAR_TYPE_PATTERN    "\\s+(int|uint8|float|vec2|vec3|vec4|mat3|mat4|sampler2D|samplerCube)\\s+"
+#define ATTRIBUTE_PATTERN   VAR_TYPE_PATTERN "(?:a_|v_)(\\w+);"
+#define UNIFORM_PATTERN     "\\s+(\\w+)\\s+" "(u_\\w+)(?:\\[\\s*(\\d+)\\s*\\])?;"
 
 #define INDENT_STR "    "
 
@@ -29,10 +29,11 @@ const char* ShaderPreprocessor::ANNOTATION_FRAG_OUT = "${frag.out}";
 const char* ShaderPreprocessor::ANNOTATION_FRAG_COLOR = "${frag.color}";
 
 static std::regex _INCLUDE_PATTERN("#include\\s*[<\"]([^>\"]+)[>\"]");
-std::regex ShaderPreprocessor::_IN_PATTERN("(?:attribute|in)" ATTRIBUTE_PATTERN);
-std::regex ShaderPreprocessor::_OUT_PATTERN("(?:varying|out)" ATTRIBUTE_PATTERN);
-std::regex ShaderPreprocessor::_IN_OUT_PATTERN("(?:varying|in)" ATTRIBUTE_PATTERN);
-std::regex ShaderPreprocessor::_UNIFORM_PATTERN("uniform" UNIFORM_PATTERN);
+static std::regex _STRUCT_PATTERN("struct\\s+(\\w+)\\s*\\{[^}]+\\}\\s*;");
+static std::regex _IN_PATTERN("(?:attribute|in)" ATTRIBUTE_PATTERN);
+static std::regex _OUT_PATTERN("(?:varying|out)" ATTRIBUTE_PATTERN);
+static std::regex _IN_OUT_PATTERN("(?:varying|in)" ATTRIBUTE_PATTERN);
+static std::regex _UNIFORM_PATTERN("uniform" UNIFORM_PATTERN);
 
 ShaderPreprocessor::ShaderPreprocessor(ShaderType type)
     : _type(type), _version(0), _ins(_attribute_declarations, type == SHADER_TYPE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
@@ -95,6 +96,12 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
 {
     _ins.parse(_type == SHADER_TYPE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
     _outs.parse(_OUT_PATTERN);
+
+    _main.replace(_STRUCT_PATTERN, [this](const std::smatch& m) {
+        const sp<String> declaration = sp<String>::make(m.str());
+        this->_struct_declarations.push_back(declaration);
+        return nullptr;
+    });
 
     _main.replace(_INCLUDE_PATTERN, [this](const std::smatch& m) {
         const String filepath = m.str();
@@ -162,9 +169,13 @@ void ShaderPreprocessor::setupBindings(const std::vector<sp<Uniform>>& uniforms,
 {
     int32_t next = binding;
     for(const sp<Uniform>& i : uniforms)
-        if(_main.contains(i->name()))
+    {
+        String::size_type pos = i->name().find('[');
+        DCHECK(pos != 0, "Illegal uniform name: %s", i->name().c_str());
+        if(_main.contains(pos == String::npos ? i->name() : i->name().substr(0, pos)))
         {
-            if(i->binding() == -1) {
+            if(i->binding() == -1)
+            {
                 next = binding + 1;
                 i->setBinding(binding);
             }
@@ -174,9 +185,11 @@ void ShaderPreprocessor::setupBindings(const std::vector<sp<Uniform>>& uniforms,
                 const String type = i->getDeclaredType();
                 sp<String> declaration = sp<String>::make(i->declaration("uniform "));
                 _uniforms.vars().push_back(i->name(), Declaration(i->name(), type, declaration));
-                _uniform_declarations.push_back(std::move(declaration));
+                if(pos == String::npos)
+                    _uniform_declarations.push_back(std::move(declaration));
             }
         }
+    }
     binding = next;
 }
 
@@ -229,6 +242,7 @@ String ShaderPreprocessor::getDeclarations() const
     }
 
     sb << _includes.str('\n');
+    sb << _struct_declarations.str('\n');
     sb << _uniform_declarations.str('\n');
     sb << _attribute_declarations.str('\n');
     return sb.str();

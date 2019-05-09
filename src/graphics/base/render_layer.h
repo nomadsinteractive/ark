@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "core/collection/filtered_list.h"
+#include "core/collection/list.h"
 #include "core/inf/duck.h"
 #include "core/types/class.h"
 #include "core/types/shared_ptr.h"

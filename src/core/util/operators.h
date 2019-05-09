@@ -3,6 +3,8 @@
 
 #include "core/util/math.h"
 
+#include "core/impl/variable/variable_op2.h"
+
 namespace ark {
 
 class Operators {
@@ -96,6 +98,23 @@ public:
         auto operator()(T v1, T v2)->decltype(v1 || v2) {
             return v1 || v2;
         }
+    };
+
+    template<typename T, typename OP> class Builder : public ark::Builder<Variable<T>> {
+    public:
+        typedef sp<ark::Builder<Variable<T>>> BuilderType;
+
+        Builder(const BuilderType& a1, const BuilderType& a2)
+            : _a1(a1), _a2(a2) {
+        }
+
+        virtual sp<Variable<T>> build(const sp<Scope>& args) override {
+            return sp<VariableOP2<T, T, OP, sp<Variable<T>>, sp<Variable<T>>>>::make(_a1->build(args), _a2->build(args));
+        }
+
+    private:
+        BuilderType _a1;
+        BuilderType _a2;
     };
 };
 

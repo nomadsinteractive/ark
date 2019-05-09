@@ -43,11 +43,6 @@ void Layer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boole
     _layer_context->addRenderObject(renderObject, disposed);
 }
 
-void Layer::removeRenderObject(const sp<RenderObject>& renderObject)
-{
-    _layer_context->removeRenderObject(renderObject);
-}
-
 void Layer::clear()
 {
     _layer_context->clear();

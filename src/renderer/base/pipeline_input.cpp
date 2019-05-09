@@ -57,9 +57,6 @@ size_t PipelineInput::samplerCount() const
 
 void PipelineInput::addAttribute(String name, Attribute attribute)
 {
-    if(_streams.find(attribute.divisor()) == _streams.end())
-        _streams[attribute.divisor()] = Stream(attribute.divisor());
-
     _streams[attribute.divisor()].addAttribute(std::move(name), std::move(attribute));
 }
 
@@ -81,12 +78,7 @@ int32_t PipelineInput::getAttributeOffset(const String& name, uint32_t divisor) 
 }
 
 PipelineInput::Stream::Stream()
-    : _divisor(0), _stride(0)
-{
-}
-
-PipelineInput::Stream::Stream(uint32_t divisor)
-    : _divisor(divisor), _stride(0)
+    : _stride(0)
 {
 }
 
@@ -115,7 +107,7 @@ const Attribute& PipelineInput::Stream::getAttribute(const String& name) const
 
 int32_t PipelineInput::Stream::getAttributeOffset(const String& name) const
 {
-    return _attributes.has(name) ? _attributes.at(name).offset() : -1;
+    return _attributes.has(name) ? static_cast<int32_t>(_attributes.at(name).offset()) : -1;
 }
 
 void PipelineInput::Stream::align()

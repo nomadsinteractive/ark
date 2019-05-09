@@ -119,7 +119,7 @@ class Ark::ArkAssetBundle {
 public:
     ArkAssetBundle(const sp<RawAssetBundle>& rawAsset, const Table<String, String>& mounts)
         : _raw_asset_bundle(rawAsset) {
-        for(const auto& i : mounts.items())
+        for(const auto& i : mounts)
             _mounts.push_front(Mounted(strip(i.first), createAsset(i.second)));
     }
 
@@ -205,7 +205,7 @@ private:
         sp<AssetBundle> _asset;
     };
 
-    List<Mounted> _mounts;
+    std::list<Mounted> _mounts;
     sp<RawAssetBundle> _raw_asset_bundle;
 };
 

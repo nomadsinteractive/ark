@@ -225,7 +225,7 @@ void RenderController::preUpdate()
     static int i = 0;
     if(i ++ == 600)
     {
-        LOGD("_on_pre_update_request: %d", _on_pre_update_request.size());
+        LOGD("_on_pre_update_request: %d", _on_pre_update_request.items().size());
         i = 0;
     }
 #endif

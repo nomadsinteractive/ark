@@ -1,6 +1,7 @@
 #ifndef ARK_CORE_BEAN_FACTORY_H_
 #define ARK_CORE_BEAN_FACTORY_H_
 
+#include <list>
 #include <type_traits>
 #include <unordered_map>
 
@@ -227,7 +228,7 @@ public:
         Stub();
 
         sp<Scope> _references;
-        List<Factory> _factories;
+        std::list<Factory> _factories;
         std::map<String, sp<BeanFactory>> _packages;
     };
 
@@ -350,7 +351,7 @@ public:
         if(inst)
             return sp<BuilderByInstance<T>>::make(inst);
 
-        for(const Factory& i : _stub->_factories.items()) {
+        for(const Factory& i : _stub->_factories) {
             const sp<Builder<T>> builder = i.findBuilder<T>(refid, *this);
             if(builder)
                 return builder;
@@ -421,7 +422,7 @@ private:
     }
 
     template<typename T> sp<Builder<T>> findBuilderByDocument(const document& doc, const String& className) {
-        for(const Factory& i : _stub->_factories.items()) {
+        for(const Factory& i : _stub->_factories) {
             const sp<Builder<T>> builder = i.createBuilder<T>(className, doc, *this);
             if(builder)
                 return builder;
@@ -430,7 +431,7 @@ private:
     }
 
     template<typename T> sp<Builder<T>> findBuilderByValue(const String& value) {
-        for(const Factory& i : _stub->_factories.items()) {
+        for(const Factory& i : _stub->_factories) {
             const sp<Builder<T>> builder = i.createValueBuilder<T>(*this, value);
             if(builder)
                 return builder;
@@ -439,7 +440,7 @@ private:
     }
 
     template<typename T> sp<Builder<T>> findBuilderByTypeValue(const String& type, const String& value) {
-        for(const Factory& i : _stub->_factories.items()) {
+        for(const Factory& i : _stub->_factories) {
             const sp<Builder<T>> builder = i.createValueBuilder<T>(*this, type, value);
             if(builder)
                 return builder;
@@ -448,7 +449,7 @@ private:
     }
 
     template<typename T> sp<Builder<T>> decorate(const sp<Builder<T>>& builder, const String& style, const String& value) {
-        for(const Factory& i : _stub->_factories.items()) {
+        for(const Factory& i : _stub->_factories) {
             const sp<Builder<T>> f = i.decorate<T>(*this, builder, style, value);
             if(f)
                 return f;

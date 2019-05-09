@@ -2,7 +2,7 @@
 #define ARK_GRAPHICS_BASE_LAYER_CONTEXT_H_
 
 #include "core/base/api.h"
-#include "core/collection/filtered_list.h"
+#include "core/collection/list.h"
 #include "core/inf/builder.h"
 
 #include "graphics/forwarding.h"
@@ -32,8 +32,6 @@ public:
 
 // [[script::bindings::auto]]
     void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = sp<Boolean>::null());
-// [[script::bindings::auto]]
-    void removeRenderObject(const sp<RenderObject>& renderObject);
 // [[script::bindings::auto]]
     void clear();
 
@@ -70,7 +68,7 @@ private:
     bool _render_requested;
     V3 _position;
     std::vector<Item> _transient_items;
-    FilteredList<RenderObject, RenderObjectFilter> _items;
+    List<RenderObject, RenderObjectFilter> _items;
 };
 
 }

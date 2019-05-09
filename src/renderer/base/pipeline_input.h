@@ -21,7 +21,6 @@ public:
     class Stream {
     public:
         Stream();
-        Stream(uint32_t divisor);
         DEFAULT_COPY_AND_ASSIGN(Stream);
 
         uint32_t stride() const;
@@ -35,7 +34,6 @@ public:
         void align();
 
     private:
-        uint32_t _divisor;
         uint32_t _stride;
 
         Table<String, Attribute> _attributes;

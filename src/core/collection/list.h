@@ -3,74 +3,144 @@
 
 #include <list>
 
+#include "core/forwarding.h"
+#include "core/epi/disposed.h"
+#include "core/inf/variable.h"
 #include "core/collection/iterable.h"
+#include "core/types/shared_ptr.h"
 
 namespace ark {
 
-template<typename T> class List : public Iterable<typename std::list<T>> {
+enum FilterAction {
+    FILTER_ACTION_NONE,
+    FILTER_ACTION_SKIP,
+    FILTER_ACTION_REMOVE
+};
+
+class ListFilters {
 public:
-    List()
-        : Iterable<typename std::list<T>>::Iterable(_items) {
-    }
-    List(const List<T>& other)
-        : Iterable<typename std::list<T>>::Iterable(_items), _items(other._items) {
-    }
-    List(List<T>&& other)
-        : Iterable<typename std::list<T>>::Iterable(_items), _items(std::move(other._items)) {
+
+    template<typename T> class IsDisposed {
+    public:
+        IsDisposed(const sp<T>& item)
+            : IsDisposed(item, item.template as<Disposed>()) {
+        }
+        IsDisposed(const sp<T>& /*item*/, const sp<Boolean>& disposed)
+            : _disposed(disposed) {
+        }
+        IsDisposed(const sp<T>& /*item*/, const sp<Disposed>& disposed)
+            : _disposed(disposed ? disposed->toBoolean() : sp<Boolean>::null()) {
+        }
+
+        FilterAction operator()(const sp<T>& /*item*/) const {
+            return _disposed && _disposed->val() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+        }
+
+    private:
+        sp<Boolean> _disposed;
+    };
+
+    template<typename T> class IsUnique {
+    public:
+        IsUnique(const sp<T>& /*item*/) {
+        }
+
+        FilterAction operator()(const sp<T>& item) const {
+            return item.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+        }
+
+    };
+
+};
+
+template<typename T, typename Filter> class List {
+private:
+    struct Item {
+        Item(sp<T> item, Filter filter)
+            : _item(std::move(item)), _filter(std::move(filter)) {
+        }
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
+
+        sp<T> _item;
+        Filter _filter;
+    };
+
+private:
+    typedef std::list<Item> _List;
+
+public:
+    template<typename U> class Iterator : public IteratorBase<U> {
+    public:
+        Iterator(_List& list, U iterator)
+            : IteratorBase<U>(iterator), _list(list) {
+            forward();
+        }
+
+        const Iterator<U>& operator ++() {
+            ++(this->_iterator);
+            forward();
+            return *this;
+        }
+
+        const Iterator<U> operator ++(int) {
+            U iter = this->_iterator;
+            ++(this->_iterator);
+            forward();
+            return iter;
+        }
+
+        sp<T>& operator *() {
+            return (*this->_iterator)._item;
+        }
+
+    private:
+        void forward() {
+            do {
+                if(this->_iterator == _list.end())
+                    break;
+                const auto& i = *(this->_iterator);
+                FilterAction fa = i._filter(i._item);
+                if(fa == FILTER_ACTION_NONE)
+                    break;
+                if(fa == FILTER_ACTION_REMOVE)
+                    this->_iterator = _list.erase(this->_iterator);
+            } while(true);
+        }
+
+    private:
+        _List& _list;
+    };
+
+public:
+    typedef Iterator<typename _List::iterator> iterator;
+
+    template<typename... Args> void push_back(const sp<T>& item, Args&&... args) {
+        _items.emplace_back(item, Filter(item, std::forward<Args>(args)...));
     }
 
-    typedef typename std::list<T>::iterator iterator;
-
-    const List& operator =(const List<T>& other) {
-        _items = other._items;
-        return *this;
-    }
-
-    const List& operator =(List<T>&& other) {
-        _items = std::move(other._items);
-        return *this;
-    }
-
-    void push_front(const T& item) {
-        _items.push_front(item);
-    }
-
-    void push_back(const T& item) {
-        _items.push_back(item);
-    }
-
-    iterator erase(iterator iter) {
-        return _items.erase(iter);
+    const _List& items() const {
+        return _items;
     }
 
     void clear() {
         _items.clear();
     }
 
-    bool isEmpty() const {
-        return _items.size() == 0;
+    iterator begin() {
+        return iterator(_items, _items.begin());
     }
 
-    const std::list<T>& items() const {
-        return _items;
-    }
-
-    std::list<T>& items() {
-        return _items;
-    }
-
-    size_t size() const {
-        return _items.size();
-    }
-
-    static List<T>& emptyList() {
-        static List<T> l;
-        return l;
+    iterator end() {
+        return iterator(_items, _items.end());
     }
 
 private:
-    std::list<T> _items;
+    _List _items;
 };
+
+
+template <typename T> using DisposableItemList = List<T, typename ListFilters::IsDisposed<T>>;
+template <typename T> using WeakRefList = List<T, typename ListFilters::IsUnique<T>>;
 
 }
 

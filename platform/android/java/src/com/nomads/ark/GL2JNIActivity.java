@@ -16,15 +16,43 @@
 
 package com.nomads.ark;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.util.Log;
 
 
 public class GL2JNIActivity extends Activity {
+    private static String TAG = "GL2JNIActivity";
+    
     private GL2JNIView mView;
 
     @Override
     protected void onCreate(Bundle icicle) {
+        Map<String, String> infos = loadInfoMap();
+        String libraries = infos.get("libraries");
+        if(libraries != null) {
+            for(String j : libraries.split(";"))
+                System.loadLibrary(j.trim());
+        }
+        
+        String screenOrientation = infos.get("screen_orientation");
+        if(screenOrientation != null) {
+            if(screenOrientation.equals("sensor_landscape"))
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+            else if(screenOrientation.equals("sensor_portrait"))
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+            else if(screenOrientation.equals("landscape"))
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            else if(screenOrientation.equals("portrait"))
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+
         super.onCreate(icicle);
         mView = new GL2JNIView(getApplication(), false, 16, 0);
         setContentView(mView);
@@ -53,5 +81,33 @@ public class GL2JNIActivity extends Activity {
     @Override
     public void onBackPressed() {
         JNILib.onEvent(10000, 0, 0, System.currentTimeMillis());
+    }
+
+    private Map<String, String> loadInfoMap() {
+        Map<String, String> infos = new HashMap<String, String>();
+        try {
+            InputStreamReader in = new InputStreamReader(getAssets().open("android.info"), "utf-8");
+            char[] buf = new char[8192];
+            StringBuilder sb = new StringBuilder();
+            int len;
+            while((len = in.read(buf)) > 0) {
+                sb.append(buf, 0, len);
+            }
+            in.close();
+
+            String s = sb.toString();
+            for(String i : s.split("\n")) {
+                final String line = i.trim();
+                int pos = line.indexOf(':');
+                if(pos != -1) {
+                    String key = line.substring(0, pos).trim();
+                    String value = line.substring(pos + 1).trim();
+                    infos.put(key, value);
+                }
+            }
+        } catch(IOException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        return infos;
     }
 }

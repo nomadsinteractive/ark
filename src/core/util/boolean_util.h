@@ -77,6 +77,9 @@ public:
         virtual sp<Boolean> build(const sp<Scope>& args) override;
 
     private:
+        String getValue(const document& manifest) const;
+
+    private:
         sp<Builder<Boolean>> _value;
     };
 };

@@ -12,68 +12,11 @@
 #include "core/impl/numeric/numeric_negative.h"
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/numeric/vibrate.h"
-#include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/util/operators.h"
 #include "core/util/strings.h"
 
 namespace ark {
-
-namespace {
-
-template<typename OP> class OperationBuilder : public Builder<Numeric> {
-public:
-    OperationBuilder(const sp<Builder<Numeric>>& a1, const sp<Builder<Numeric>>& a2)
-        : _a1(a1), _a2(a2) {
-    }
-
-    virtual sp<Numeric> build(const sp<Scope>& args) override {
-        return sp<VariableOP2<float, float, OP, sp<Numeric>, sp<Numeric>>>::make(_a1->build(args), _a2->build(args));
-    }
-
-private:
-    sp<Builder<Numeric>> _a1;
-    sp<Builder<Numeric>> _a2;
-};
-
-class NumericOperation {
-public:
-    static bool isConstant(const String& expr) {
-        return Strings::isNumeric(expr);
-    }
-
-    static sp<Builder<Numeric>> add(const sp<Builder<Numeric>>& a1, const sp<Builder<Numeric>>& a2) {
-        return sp<OperationBuilder<Operators::Add<float>>>::make(a1, a2);
-    }
-
-    static sp<Builder<Numeric>> subtract(const sp<Builder<Numeric>>& a1, const sp<Builder<Numeric>>& a2) {
-        return sp<OperationBuilder<Operators::Sub<float>>>::make(a1, a2);
-    }
-
-    static sp<Builder<Numeric>> multiply(const sp<Builder<Numeric>>& a1, const sp<Builder<Numeric>>& a2) {
-        return sp<OperationBuilder<Operators::Mul<float>>>::make(a1, a2);
-    }
-
-    static sp<Builder<Numeric>> divide(const sp<Builder<Numeric>>& a1, const sp<Builder<Numeric>>& a2) {
-        return sp<OperationBuilder<Operators::Div<float>>>::make(a1, a2);
-    }
-
-    static sp<Builder<Numeric>> eval(BeanFactory& /*factory*/, const String& expr) {
-        return sp<BuilderByInstance<Numeric>>::make(sp<Numeric::Const>::make(Strings::parse<float>(expr)));
-    }
-
-    static Expression::Operator<float> OPS[4];
-
-};
-
-Expression::Operator<float> NumericOperation::OPS[4] = {
-    {"+", 1, NumericOperation::add},
-    {"-", 1, NumericOperation::subtract},
-    {"*", 2, NumericOperation::multiply},
-    {"/", 2, NumericOperation::divide}
-};
-
-}
 
 sp<Numeric> NumericUtil::create(const sp<Numeric>& value)
 {
@@ -318,7 +261,7 @@ sp<Numeric> NumericUtil::integral(const sp<Numeric>& self, const sp<Numeric>& t)
 }
 
 NumericUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
-    : _value(Expression::Compiler<float, NumericOperation>().compile(factory, expr.strip()))
+    : _value(Expression::Compiler<float, NumericOperation<float>>().compile(factory, expr.strip()))
 {
 }
 
@@ -328,7 +271,7 @@ sp<Numeric> NumericUtil::DICTIONARY::build(const sp<Scope>& args)
 }
 
 NumericUtil::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _value(Expression::Compiler<float, NumericOperation>().compile(factory, Documents::ensureAttribute(manifest, Constants::Attributes::VALUE)))
+    : _value(Expression::Compiler<float, NumericOperation<float>>().compile(factory, Documents::ensureAttribute(manifest, Constants::Attributes::VALUE)))
 {
 }
 
