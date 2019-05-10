@@ -7,39 +7,39 @@
 namespace ark {
 
 DOMElement::DOMElement()
-    : DOMAttribute(), Iterable(_attributes_map)
+    : DOMAttribute()
 {
 }
 
 DOMElement::DOMElement(const String& name)
-    : DOMAttribute(name), Iterable(_attributes_map)
+    : DOMAttribute(name)
 {
 }
 
 DOMElement::DOMElement(const String& name, const String& value)
-    : DOMAttribute(name, value), Iterable(_attributes_map)
+    : DOMAttribute(name, value)
 {
 }
 
-const List<attribute>& DOMElement::attributes() const
+const std::vector<attribute>& DOMElement::attributes() const
 {
-    return _attributes;
+    return _attributes.values();
 }
 
 const sp<DOMAttribute>& DOMElement::getAttribute(const String& name) const
 {
-    auto iter = _attributes_map.find(name);
-    if(iter != _attributes_map.end())
-        return iter->second;
+    size_t iter = _attributes.find(name);
+    if(iter != Constants::npos)
+        return _attributes.values().at(iter);
     return attribute::null();
 }
 
 void DOMElement::setAttribute(const String& name, const String& value)
 {
-    auto iter = _attributes_map.find(name);
-    if(iter != _attributes_map.end())
+    const sp<DOMAttribute>& attr = getAttribute(name);
+    if(attr)
     {
-        iter->second->setValue(value);
+        attr->setValue(value);
         return;
     }
     addAttribute(attribute::make(name, value));
@@ -47,8 +47,7 @@ void DOMElement::setAttribute(const String& name, const String& value)
 
 void DOMElement::addAttribute(const sp<DOMAttribute>& attr)
 {
-    _attributes_map[attr->name()] = attr;
-    _attributes.push_back(attr);
+    _attributes.push_back(attr->name(), attr);
 }
 
 }

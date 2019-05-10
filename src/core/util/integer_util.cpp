@@ -1,6 +1,7 @@
 #include "core/util/integer_util.h"
 
 #include "core/base/bean_factory.h"
+#include "core/base/expression.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/integer/integer_add.h"
 #include "core/impl/integer/integer_floor_div.h"
@@ -167,19 +168,19 @@ void IntegerUtil::fix(const sp<Integer>& self)
         iw->fix();
 }
 
-IntegerUtil::DICTIONARY::DICTIONARY(BeanFactory& /*beanFactory*/, const String& value)
-    : _value(Strings::parse<int32_t>(value))
+IntegerUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
+    : _value(Expression::Compiler<int32_t, NumericOperation<int32_t>>().compile(factory, expr.strip()))
 {
 }
 
 sp<Integer> IntegerUtil::DICTIONARY::build(const sp<Scope>& args)
 {
-    return sp<Integer::Impl>::make(_value);
+    return _value->build(args);
 }
 
 IntegerUtil::ARRAY_DICTIONARY::ARRAY_DICTIONARY(BeanFactory& factory, const String& value)
 {
-    for(const String i : Strings::unwrap(value,'[', ']').split(','))
+    for(const String& i : Strings::unwrap(value,'[', ']').split(','))
         _array_builders.push_back(factory.ensureBuilder<Integer>(i));
 }
 

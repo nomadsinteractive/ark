@@ -2,9 +2,7 @@
 
 #include "core/forwarding.h"
 #include "core/ark.h"
-#include "core/inf/dictionary.h"
 #include "core/impl/readable/file_readable.h"
-#include "core/types/null.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/log.h"
 #include "core/util/strings.h"
@@ -194,9 +192,9 @@ PyObject* initarkmodule()
     return module;
 }
 
-static List<String> _PYTHON_PATH;
+static std::vector<String> _PYTHON_PATH;
 
-void setPythonPath(const List<String>& paths)
+void setPythonPath(const std::vector<String>& paths)
 {
     _PYTHON_PATH = paths;
 }
@@ -208,7 +206,7 @@ void setPythonPath(const List<String>& paths)
 PyMODINIT_FUNC PyInit_ark(void)
 {
     PyObject* module = ark::plugin::python::initarkmodule();
-    PyObject* path = PyList_New(ark::plugin::python::_PYTHON_PATH.size());
+    PyObject* path = PyList_New(static_cast<Py_ssize_t>(ark::plugin::python::_PYTHON_PATH.size()));
     Py_ssize_t i = 0;
     for(const String& str : ark::plugin::python::_PYTHON_PATH)
         PyList_SetItem(path, i++, PyUnicode_FromString(str.c_str()));

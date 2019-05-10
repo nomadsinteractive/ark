@@ -19,7 +19,7 @@ private:
     public:
         Slot(const sp<Renderer>& renderer, bool layoutRequested);
 
-        bool isExpired() const;
+        bool isDisposed() const;
         bool layoutRequested() const;
 
         void updateLayout();
@@ -65,6 +65,7 @@ private:
     V3 _layout_size;
 
     std::vector<sp<Slot>> _slots;
+    std::vector<sp<Slot>> _incremental;
 };
 
 }

@@ -1,9 +1,10 @@
 #ifndef ARK_RENDERER_IMPL_RENDERER_EMITTER_H_
 #define ARK_RENDERER_IMPL_RENDERER_EMITTER_H_
 
+#include <vector>
+
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
-#include "core/collection/list.h"
 #include "core/inf/builder.h"
 #include "core/types/class.h"
 #include "core/types/safe_ptr.h"
@@ -32,7 +33,7 @@ private:
     };
 
 public:
-    Emitter(const sp<Stub>& stub, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const List<document>& particleDescriptor, BeanFactory& beanFactory);
+    Emitter(const sp<Stub>& stub, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
@@ -70,7 +71,7 @@ private:
         String _name;
         uint32_t _count;
 
-        List<std::pair<String, sp<Builder<Numeric>>>> _numerics;
+        std::vector<std::pair<String, sp<Builder<Numeric>>>> _numerics;
     };
 
     class Particale {
@@ -106,7 +107,7 @@ private:
 private:
     sp<Stub> _stub;
     sp<LayerContext> _layer_context;
-    List<Particale> _particles;
+    std::vector<Particale> _particles;
     sp<Clock> _clock;
 
     uint64_t _next_tick;

@@ -4,7 +4,6 @@
 #include <map>
 
 #include "core/base/api.h"
-#include "core/collection/list.h"
 #include "core/dom/dom_element.h"
 
 namespace ark {
@@ -22,7 +21,7 @@ public:
     void setValue(const String& value);
 
 //  [[script::bindings::property]]
-    const List<attribute>& attributes() const;
+    const std::vector<attribute>& attributes() const;
 //  [[script::bindings::auto]]
     const sp<DOMAttribute>& getAttribute(const String& name) const;
 //  [[script::bindings::auto]]
@@ -39,15 +38,12 @@ public:
     void addChild(const sp<DOMDocument>& doc);
 
 //  [[script::bindings::property]]
-    const List<document>& children() const;
-    List<document>& children(const String& name);
-
-//  [[script::bindings::auto]]
-    void clear();
+    const std::vector<document>& children() const;
+    const std::vector<document>& children(const String& name);
 
 private:
-    std::map<String, List<document>> _children_by_name;
-    List<document> _children;
+    std::map<String, std::vector<document>> _children_by_name;
+    std::vector<document> _children;
 };
 
 }

@@ -21,7 +21,7 @@ LayoutHierarchy::Slot::Slot(const sp<Renderer>& renderer, bool layoutRequested)
     DASSERT(renderer);
 }
 
-bool LayoutHierarchy::Slot::isExpired() const
+bool LayoutHierarchy::Slot::isDisposed() const
 {
     return _disposed && _disposed->isDisposed();
 }
@@ -137,7 +137,7 @@ bool LayoutHierarchy::isLayoutNeeded(const LayoutParam& layoutParam)
     for(auto iter = _slots.begin(); iter != _slots.end(); ++iter)
     {
         const sp<Slot>& i = *iter;
-        if(i->isExpired())
+        if(i->isDisposed())
         {
             iter = _slots.erase(iter);
             if(iter == _slots.end())
@@ -158,6 +158,12 @@ bool LayoutHierarchy::isLayoutNeeded(const LayoutParam& layoutParam)
 
 void LayoutHierarchy::updateLayout(LayoutParam& layoutParam)
 {
+    if(_incremental.size())
+    {
+        for(const sp<Slot>& i : _incremental)
+            _slots.push_back(i);
+        _incremental.clear();
+    }
     if(isLayoutNeeded(layoutParam))
     {
         if(_layout)
@@ -196,7 +202,7 @@ void LayoutHierarchy::doWrapContentLayout(LayoutParam& layoutParam)
 void LayoutHierarchy::addRenderer(const sp<Renderer>& renderer)
 {
     DASSERT(renderer);
-    _slots.push_back(sp<LayoutHierarchy::Slot>::make(renderer, static_cast<bool>(_layout)));
+    _incremental.push_back(sp<LayoutHierarchy::Slot>::make(renderer, static_cast<bool>(_layout)));
 }
 
 }

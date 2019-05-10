@@ -61,7 +61,7 @@ public:
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Boolean> {
     public:
-        DICTIONARY(BeanFactory&, const String& value);
+        DICTIONARY(BeanFactory&, const String& expr);
 
         virtual sp<Boolean> build(const sp<Scope>& args) override;
 
@@ -75,6 +75,9 @@ public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Boolean> build(const sp<Scope>& args) override;
+
+    private:
+        String getValue(const document& manifest) const;
 
     private:
         sp<Builder<Boolean>> _value;

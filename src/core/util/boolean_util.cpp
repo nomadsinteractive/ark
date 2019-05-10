@@ -89,6 +89,20 @@ private:
     sp<Builder<T>> _a2;
 };
 
+class NegativeBooleanBuilder : public Builder<Boolean> {
+public:
+    NegativeBooleanBuilder(const sp<Builder<Boolean>>& a1)
+        : _a1(a1) {
+    }
+
+    virtual sp<Boolean> build(const sp<Scope>& args) override {
+        return BooleanUtil::negative(_a1->build(args));
+    }
+
+private:
+    sp<Builder<Boolean>> _a1;
+};
+
 class BooleanOperation {
 public:
     static bool isConstant(const String& expr) {
@@ -107,6 +121,10 @@ public:
         static std::regex PATTERN("([\\-+\\s\\w\\d_$@.]+)\\s+([><]=?)\\s+([\\-+\\s\\w\\d_$@.]+)");
         const array<String> matches = expr.match(PATTERN);
         if(!matches) {
+            for(const String& i : NEGATIVE_OPS)
+                if(expr.startsWith(i))
+                    return sp<NegativeBooleanBuilder>::make(eval(factory, expr.substr(i.length())));
+
             const Identifier id = Identifier::parse(expr);
             if(id.isRef())
                 return factory.getBuilderByRef<Boolean>(id.ref());
@@ -130,6 +148,7 @@ public:
     }
 
     static Expression::Operator<bool> OPS[2];
+    static String NEGATIVE_OPS[2];
 
 };
 
@@ -137,6 +156,8 @@ Expression::Operator<bool> BooleanOperation::OPS[2] = {
     {"&&", 2, BooleanOperation::booleanAnd},
     {"||", 1, BooleanOperation::booleanOr}
 };
+
+String BooleanOperation::NEGATIVE_OPS[2] = {"!", "not "};
 
 }
 
@@ -242,9 +263,10 @@ void BooleanUtil::fix(const sp<Boolean>& self)
         ib->fix();
 }
 
-BooleanUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-    : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, value.strip()))
+BooleanUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
+    : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, expr.strip()))
 {
+    DCHECK(_value, "Boolean expression compile failed: %s", expr.c_str());
 }
 
 sp<Boolean> BooleanUtil::DICTIONARY::build(const sp<Scope>& args)
@@ -253,12 +275,19 @@ sp<Boolean> BooleanUtil::DICTIONARY::build(const sp<Scope>& args)
 }
 
 BooleanUtil::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, Documents::ensureAttribute(manifest, Constants::Attributes::VALUE).strip())) {
+    : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, getValue(manifest))) {
 }
 
 sp<Boolean> BooleanUtil::BUILDER::build(const sp<Scope>& args)
 {
     return _value->build(args);
+}
+
+String BooleanUtil::BUILDER::getValue(const document& manifest) const
+{
+    DCHECK(!manifest->getAttribute(Constants::Attributes::CLASS), "Document \"%s\" has class named \"%s\", which cannot been built into a Boolean object",
+           Documents::toString(manifest).c_str(), manifest->getAttribute(Constants::Attributes::CLASS)->value().c_str());
+    return Documents::ensureAttribute(manifest, Constants::Attributes::VALUE).strip();
 }
 
 }

@@ -410,9 +410,6 @@ class LayerContext:
     def add_render_object(self, render_object: RenderObject, disposed: Disposed):
         pass
 
-    def remove_render_object(self, render_object: RenderObject):
-        pass
-
     def clear(self):
         pass
 
@@ -436,9 +433,6 @@ class Layer:
         return None
 
     def add_render_object(self, render_object: RenderObject, disposed: Boolean = None):
-        pass
-
-    def remove_render_object(self, render_object: RenderObject):
         pass
 
     def clear(self):

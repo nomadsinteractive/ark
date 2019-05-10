@@ -53,7 +53,7 @@ PythonScript::PythonScript(const String& name, const document& libraries)
             i->name = "_frozen_importlib_org";
         }
     }
-    List<String> paths;
+    std::vector<String> paths;
     for(const document& i : libraries->children("library"))
     {
         const String& v = Documents::ensureAttribute(i, "path");

@@ -6,11 +6,11 @@
 #include "core/base/api.h"
 #include "core/dom/dom_attribute.h"
 #include "core/collection/iterable.h"
-#include "core/collection/list.h"
+#include "core/collection/table.h"
 
 namespace ark {
 
-class ARK_API DOMElement : public DOMAttribute, public Iterable<std::map<String, attribute>> {
+class ARK_API DOMElement : public DOMAttribute {
 public:
     typedef std::map<String, attribute>::iterator Iterator;
 
@@ -27,7 +27,7 @@ public:
     void setValue(const String& value);
 */
 //  [[script::bindings::property]]
-    const List<attribute>& attributes() const;
+    const std::vector<attribute>& attributes() const;
 
 //  [[script::bindings::auto]]
     const sp<DOMAttribute>& getAttribute(const String& name) const;
@@ -37,8 +37,7 @@ public:
     void addAttribute(const sp<DOMAttribute>& attr);
 
 private:
-    std::map<String, attribute> _attributes_map;
-    List<attribute> _attributes;
+    Table<String, attribute> _attributes;
 };
 
 }

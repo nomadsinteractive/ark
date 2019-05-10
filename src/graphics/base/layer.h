@@ -3,7 +3,6 @@
 
 #include <vector>
 
-#include "core/collection/filtered_list.h"
 #include "core/collection/list.h"
 #include "core/inf/builder.h"
 #include "core/types/class.h"
@@ -34,8 +33,6 @@ public:
 
 // [[script::bindings::auto]]
     void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = sp<Boolean>::null());
-// [[script::bindings::auto]]
-    void removeRenderObject(const sp<RenderObject>& renderObject);
 // [[script::bindings::auto]]
     void clear();
 

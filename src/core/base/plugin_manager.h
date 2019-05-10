@@ -3,10 +3,10 @@
 
 #include <functional>
 #include <map>
+#include <vector>
 
 #include "core/base/api.h"
 #include "core/base/plugin.h"
-#include "core/collection/list.h"
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
@@ -35,7 +35,7 @@ public:
     void addPlugin(const sp<Plugin>& plugin);
 
 private:
-    List<sp<Plugin>> _plugins;
+    std::vector<sp<Plugin>> _plugins;
 
 };
 

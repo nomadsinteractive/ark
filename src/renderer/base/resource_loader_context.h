@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "core/forwarding.h"
-#include "core/collection/filtered_list.h"
+#include "core/collection/list.h"
 #include "core/base/api.h"
 #include "core/base/object_pool.h"
 #include "core/inf/runnable.h"

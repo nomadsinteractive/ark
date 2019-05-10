@@ -89,7 +89,7 @@ public:
         virtual sp<Integer> build(const sp<Scope>& args) override;
 
     private:
-        int32_t _value;
+        sp<Builder<Integer>> _value;
     };
 
 //  [[plugin::builder::by-value]]

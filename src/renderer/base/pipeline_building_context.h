@@ -2,10 +2,10 @@
 #define ARK_RENDERER_BASE_PIPELINE_BUILDING_CONTEXT_H_
 
 #include <map>
+#include <vector>
 
 #include "core/base/string.h"
 #include "core/base/string_buffer.h"
-#include "core/collection/list.h"
 #include "core/collection/table.h"
 
 #include "renderer/forwarding.h"
@@ -36,10 +36,10 @@ public:
     Table<String, sp<Uniform>> _uniforms;
     Table<String, sp<Texture>> _samplers;
 
-    List<std::pair<String, String>> _vertex_in;
-    List<std::pair<String, String>> _vertex_out;
+    std::vector<std::pair<String, String>> _vertex_in;
+    std::vector<std::pair<String, String>> _vertex_out;
 
-    List<std::pair<String, String>> _fragment_in;
+    std::vector<std::pair<String, String>> _fragment_in;
 
     std::map<String, String> _vert_in_declared;
 

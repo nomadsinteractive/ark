@@ -2,7 +2,7 @@
 #define ARK_CORE_EPI_NOTIFIER_H_
 
 #include "core/base/api.h"
-#include "core/collection/filtered_list.h"
+#include "core/collection/list.h"
 
 namespace ark {
 

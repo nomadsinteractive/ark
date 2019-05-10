@@ -27,7 +27,6 @@
 		<activity android:name="com.nomads.ark.GL2JNIActivity"
 							android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
 							android:launchMode="singleTask"
-				            android:screenOrientation="sensorPortrait"
 							android:configChanges="orientation|keyboardHidden">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"/>

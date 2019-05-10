@@ -22,7 +22,7 @@
 namespace ark {
 
 Emitter::Emitter(const sp<Stub>& stub, const sp<Clock>& clock,
-                                 const sp<LayerContext>& layerContext, const List<document>& particleDescriptor, BeanFactory& beanFactory)
+                                 const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory)
     : _stub(stub), _layer_context(layerContext), _clock(clock), _next_tick(0)
 {
     for(const document& doc : particleDescriptor)

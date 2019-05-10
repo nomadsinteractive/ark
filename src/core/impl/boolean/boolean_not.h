@@ -14,18 +14,6 @@ public:
 
     virtual bool val() override;
 
-//  [[plugin::builder("not")]]
-    class BUILDER : public Builder<Boolean> {
-    public:
-        BUILDER(BeanFactory& factory, const document& manifest);
-
-        virtual sp<Boolean> build(const sp<Scope>& args) override;
-
-    private:
-        sp<Builder<Boolean>> _delegate;
-
-    };
-
 private:
     sp<Boolean> _delegate;
 

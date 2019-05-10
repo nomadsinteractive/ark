@@ -6,7 +6,6 @@
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/base/string_buffer.h"
-#include "core/collection/list.h"
 #include "core/collection/table.h"
 #include "core/types/global.h"
 
@@ -33,11 +32,6 @@ public:
     static const char* ANNOTATION_FRAG_IN;
     static const char* ANNOTATION_FRAG_OUT;
     static const char* ANNOTATION_FRAG_COLOR;
-
-    static std::regex _IN_PATTERN;
-    static std::regex _OUT_PATTERN;
-    static std::regex _IN_OUT_PATTERN;
-    static std::regex _UNIFORM_PATTERN;
 
     class Preprocessor {
     public:
@@ -175,6 +169,7 @@ public:
     Source _main;
 
     Source _includes;
+    Source _struct_declarations;
     Source _uniform_declarations;
     Source _attribute_declarations;
 

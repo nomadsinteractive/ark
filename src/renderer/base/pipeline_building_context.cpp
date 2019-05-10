@@ -96,7 +96,7 @@ void PipelineBuildingContext::initialize()
             attributes.push_back(i.first, i.second.declareType());
 
     std::vector<String> generated;
-    for(const auto& i : attributes.items())
+    for(const auto& i : attributes)
     {
         if(!_vertex._ins.has(i.first)
                 && !_vertex._outs.has(i.first)
@@ -110,7 +110,7 @@ void PipelineBuildingContext::initialize()
     for(auto iter : _input->streams())
         iter.second.align();
 
-    for(const auto& i : attributes.items())
+    for(const auto& i : attributes)
     {
         if(fragmentUsedVars.find(i.first) != fragmentUsedVars.end())
             _fragment._ins.declare(i.second, "v_", i.first);
