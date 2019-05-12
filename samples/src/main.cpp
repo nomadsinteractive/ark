@@ -4,7 +4,6 @@
 #include "core/base/manifest.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/base/viewport.h"
 #include "graphics/base/size.h"
 
 #include "app/base/application_delegate_impl.h"

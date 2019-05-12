@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_IMPL_NUMERIC_BOUNDARY_H_
-#define ARK_CORE_IMPL_NUMERIC_BOUNDARY_H_
+#ifndef ARK_CORE_IMPL_NUMERIC_APPROACH_H_
+#define ARK_CORE_IMPL_NUMERIC_APPROACH_H_
 
 #include "core/forwarding.h"
 #include "core/epi/notifier.h"
@@ -8,9 +8,9 @@
 
 namespace ark {
 
-class Boundary : public Numeric {
+class Approach : public Numeric {
 public:
-    Boundary(const sp<Numeric>& delegate, const sp<Numeric>& expectation, Notifier notifier);
+    Approach(const sp<Numeric>& delegate, const sp<Numeric>& expectation, Notifier notifier);
 
     virtual float val() override;
 
@@ -20,7 +20,7 @@ private:
 
     Notifier _notifer;
 
-    bool _is_greater;
+    float _delegate_value;
 };
 
 }

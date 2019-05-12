@@ -2,8 +2,7 @@
 #define ARK_CORE_BASE_EXPECTATION_H_
 
 #include "core/base/api.h"
-#include "core/base/observer.h"
-#include "core/inf/builder.h"
+#include "core/epi/notifier.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
@@ -11,31 +10,27 @@ namespace ark {
 
 class ARK_API Expectation : public Numeric {
 public:
-//[[script::bindings::auto]]
-    Expectation(const sp<Numeric>& expectation, const sp<Runnable>& onfire = nullptr, bool fireOnce = true);
+    Expectation(const sp<Numeric>& delegate, const sp<Numeric>& expectation, Notifier notifier);
 
-//[[script::bindings::property]]
     virtual float val() override;
-//[[script::bindings::property]]
-    void setVal(float val);
 
-    void fire();
+    const sp<Numeric>& expectation() const;
 
-//  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Expectation> {
-    public:
-        DICTIONARY(BeanFactory& factory, const String str);
+    const Notifier& notifier() const;
 
-        virtual sp<Expectation> build(const sp<Scope>& args) override;
+//[[script::bindings::auto]]
+    void update();
 
-    private:
-        sp<Builder<Numeric>> _expectation;
-        sp<Builder<Runnable>> _onfire;
-    };
+//[[script::bindings::auto]]
+    const sp<Observer>& addObserver(const sp<Runnable>& callback, bool oneshot = true);
 
 private:
+    sp<Numeric> _delegate;
     sp<Numeric> _expectation;
-    Observer _observer;
+
+    Notifier _notifier;
+
+    std::vector<sp<Observer>> _observers;
 };
 
 }

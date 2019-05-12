@@ -98,9 +98,9 @@ public:
 //[[script::bindings::classmethod]]
     static sp<Numeric> depends(const sp<Numeric>& self, const sp<Numeric>& depends);
 //[[script::bindings::classmethod]]
-    static sp<Numeric> boundary(const sp<Numeric>& self, const sp<Numeric>& boundary);
+    static sp<Expectation> approach(const sp<Numeric>& self, const sp<Numeric>& a1);
 //[[script::bindings::classmethod]]
-    static sp<Numeric> expect(const sp<Numeric>& self, const sp<Expectation>& expectation);
+    static sp<Expectation> boundary(const sp<Numeric>& self, const sp<Numeric>& a1);
 //[[script::bindings::classmethod]]
     static sp<Numeric> integral(const sp<Numeric>& self, const sp<Numeric>& t = nullptr);
 

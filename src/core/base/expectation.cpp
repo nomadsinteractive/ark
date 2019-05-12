@@ -1,38 +1,36 @@
 #include "core/base/expectation.h"
 
-#include "core/util/numeric_util.h"
-#include "core/util/bean_utils.h"
-
 namespace ark {
 
-Expectation::Expectation(const sp<Numeric>& expectation, const sp<Runnable>& onfire, bool fireOnce)
-    : _expectation(expectation), _observer(false, onfire, fireOnce)
+Expectation::Expectation(const sp<Numeric>& delegate, const sp<Numeric>& expectation, Notifier notifier)
+    : _delegate(delegate), _expectation(expectation), _notifier(std::move(notifier))
 {
 }
 
 float Expectation::val()
 {
-    return _expectation->val();
+    return _delegate->val();
 }
 
-void Expectation::setVal(float val)
+const sp<Numeric>& Expectation::expectation() const
 {
-    NumericUtil::setVal(_expectation, val);
+    return _expectation;
 }
 
-void Expectation::fire()
+const Notifier& Expectation::notifier() const
 {
-    _observer.update();
+    return _notifier;
 }
 
-Expectation::DICTIONARY::DICTIONARY(BeanFactory& factory, const String str)
+void Expectation::update()
 {
-    BeanUtils::split(factory, str, _expectation, _onfire);
+    _notifier.notify();
 }
 
-sp<Expectation> Expectation::DICTIONARY::build(const sp<Scope>& args)
+const sp<Observer>& Expectation::addObserver(const sp<Runnable>& callback, bool oneshot)
 {
-    return sp<Expectation>::make(_expectation->build(args), _onfire->build(args));
+    _observers.push_back(_notifier.createObserver(false, callback, oneshot));
+    return _observers.back();
 }
 
 }
