@@ -2,9 +2,11 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
+#include "core/base/expectation.h"
 #include "core/base/expression.h"
 #include "core/impl/builder/builder_by_instance.h"
-#include "core/impl/numeric/expect.h"
+#include "core/impl/numeric/approach.h"
+#include "core/impl/numeric/boundary.h"
 #include "core/impl/numeric/integral.h"
 #include "core/impl/numeric/max.h"
 #include "core/impl/numeric/min.h"
@@ -230,14 +232,18 @@ sp<Numeric> NumericUtil::depends(const sp<Numeric>& self, const sp<Numeric>& dep
     return sp<NumericDepends>::make(self, depends);
 }
 
-sp<Numeric> NumericUtil::boundary(const sp<Numeric>& self, const sp<Numeric>& a2)
+sp<Expectation> NumericUtil::approach(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
-    return self->val() < a2->val() ? sp<Numeric>::adopt(new Min(self, a2)) : sp<Numeric>::adopt(new Max(self, a2));
+    Notifier notifier;
+    const sp<Numeric> approach = sp<Approach>::make(self, a1, notifier);
+    return sp<Expectation>::make(approach, a1, std::move(notifier));
 }
 
-sp<Numeric> NumericUtil::expect(const sp<Numeric>& self, const sp<Expectation>& expectation)
+sp<Expectation> NumericUtil::boundary(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
-    return sp<Expect>::make(self, expectation);
+    Notifier notifier;
+    const sp<Numeric> boundary = sp<Boundary>::make(self, a1, notifier);
+    return sp<Expectation>::make(boundary, a1, std::move(notifier));
 }
 
 sp<Numeric> NumericUtil::pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t)
