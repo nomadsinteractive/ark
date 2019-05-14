@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_IMPL_NUMERIC_BOUNDARY_H_
-#define ARK_CORE_IMPL_NUMERIC_BOUNDARY_H_
+#ifndef ARK_CORE_IMPL_NUMERIC_FENCE_H_
+#define ARK_CORE_IMPL_NUMERIC_FENCE_H_
 
 #include "core/forwarding.h"
 #include "core/epi/notifier.h"
@@ -8,9 +8,9 @@
 
 namespace ark {
 
-class Boundary : public Numeric {
+class Fence : public Numeric {
 public:
-    Boundary(const sp<Numeric>& delegate, const sp<Numeric>& expectation, Notifier notifier);
+    Fence(const sp<Numeric>& delegate, const sp<Numeric>& expectation, Notifier notifier);
 
     virtual float val() override;
 

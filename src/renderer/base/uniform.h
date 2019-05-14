@@ -60,7 +60,7 @@ private:
     Type _type;
     sp<Flatable> _flatable;
     sp<Notifier> _notifier;
-    sp<Boolean> _observer;
+    sp<Boolean> _dirty_flag;
     int32_t _binding;
 };
 

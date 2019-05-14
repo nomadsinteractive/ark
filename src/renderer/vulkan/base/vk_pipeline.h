@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "core/types/shared_ptr.h"
+#include "core/inf/runnable.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
@@ -66,7 +67,7 @@ private:
 
     std::vector<sp<VKBuffer>> _ubos;
 
-    std::vector<sp<Observer>> _texture_observers;
+    std::vector<sp<Boolean>> _texture_observers;
 
     bool _rebind_needed;
 };

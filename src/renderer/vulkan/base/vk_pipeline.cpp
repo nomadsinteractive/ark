@@ -87,8 +87,8 @@ Resource::RecycleFunc VKPipeline::recycle()
 
 void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    for(const sp<Observer>& i : _texture_observers)
-        if(i->dirty())
+    for(const sp<Boolean>& i : _texture_observers)
+        if(i->val())
         {
             setupDescriptorSet(graphicsContext, drawingContext._shader_bindings->pipelineBindings());
             _rebind_needed = true;
@@ -211,7 +211,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     for(const sp<Texture>& i : bindings.samplers())
     {
         const sp<VKTexture2D> texture = i->delegate();
-        _texture_observers.push_back(i->notifier().createObserver(false));
+        _texture_observers.push_back(i->notifier().createDirtyFlag());
         writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                       _descriptor_set,
                                       VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,

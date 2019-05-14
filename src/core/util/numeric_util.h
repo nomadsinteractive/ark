@@ -24,24 +24,18 @@ public:
     static sp<Numeric> add(const sp<Numeric>& lvalue, float rvalue);
 //[[script::bindings::operator(+)]]
     static sp<Numeric> add(float lvalue, const sp<Numeric>& rvalue);
-//[[script::bindings::operator(+=)]]
-    static void iadd(const sp<Numeric>& self, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(-)]]
     static sp<Numeric> sub(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(-)]]
     static sp<Numeric> sub(const sp<Numeric>& lvalue, float rvalue);
 //[[script::bindings::operator(-)]]
     static sp<Numeric> sub(float lvalue, const sp<Numeric>& rvalue);
-//[[script::bindings::operator(-=)]]
-    static void isub(const sp<Numeric>& self, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(*)]]
     static sp<Numeric> mul(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(*)]]
     static sp<Numeric> mul(const sp<Numeric>& lvalue, float rvalue);
 //[[script::bindings::operator(*)]]
     static sp<Numeric> mul(float lvalue, const sp<Numeric>& rvalue);
-//[[script::bindings::operator(*=)]]
-    static void imul(const sp<Numeric>& self, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(/)]]
     static sp<Numeric> truediv(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(/)]]
@@ -96,11 +90,15 @@ public:
     static float fix(const sp<Numeric>& self);
 
 //[[script::bindings::classmethod]]
-    static sp<Numeric> depends(const sp<Numeric>& self, const sp<Numeric>& depends);
-//[[script::bindings::classmethod]]
     static sp<Expectation> approach(const sp<Numeric>& self, const sp<Numeric>& a1);
 //[[script::bindings::classmethod]]
+    static sp<Expectation> atLeast(const sp<Numeric>& self, const sp<Numeric>& a1);
+//[[script::bindings::classmethod]]
+    static sp<Expectation> atMost(const sp<Numeric>& self, const sp<Numeric>& a1);
+//[[script::bindings::classmethod]]
     static sp<Expectation> boundary(const sp<Numeric>& self, const sp<Numeric>& a1);
+//[[script::bindings::classmethod]]
+    static sp<Expectation> fence(const sp<Numeric>& self, const sp<Numeric>& a1);
 //[[script::bindings::classmethod]]
     static sp<Numeric> integral(const sp<Numeric>& self, const sp<Numeric>& t = nullptr);
 

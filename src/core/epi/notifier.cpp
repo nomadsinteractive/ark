@@ -1,11 +1,38 @@
 #include "core/epi/notifier.h"
 
 #include "core/base/observer.h"
+#include "core/inf/runnable.h"
+#include "core/inf/variable.h"
 
 namespace ark {
 
+namespace {
+
+class DirtyFlag : public Boolean, public Runnable {
+public:
+    DirtyFlag(bool dirty)
+        : _dirty(dirty) {
+    }
+
+    virtual void run() override {
+        _dirty = true;
+    }
+
+    virtual bool val() override {
+        bool d = _dirty;
+        _dirty = false;
+        return d;
+    }
+
+private:
+    bool _dirty;
+};
+
+}
+
+
 Notifier::Notifier()
-    : _observers(sp<WeakRefList<Observer>>::make())
+    : _observers(sp<List<Observer, ObserverFilter>>::make())
 {
 }
 
@@ -15,11 +42,31 @@ void Notifier::notify() const
         i->update();
 }
 
-sp<Observer> Notifier::createObserver(bool dirty, const sp<Runnable>& handler, bool oneshot) const
+sp<Observer> Notifier::createObserver(const sp<Runnable>& handler, bool oneshot) const
 {
-    const sp<Observer> observer = sp<Observer>::make(dirty, handler, oneshot);
-    _observers->push_back(observer);
+    const sp<Observer> observer = sp<Observer>::make(handler, oneshot);
+    _observers->push_back(observer, nullptr);
     return observer;
+}
+
+sp<Boolean> Notifier::createDirtyFlag(bool dirty) const
+{
+    const sp<DirtyFlag> dirtyFlag = sp<DirtyFlag>::make(dirty);
+    const sp<Observer> observer = sp<Observer>::make(dirtyFlag, false);
+    _observers->push_back(observer, dirtyFlag);
+    return dirtyFlag;
+}
+
+Notifier::ObserverFilter::ObserverFilter(const sp<Observer>& /*item*/, sp<Boolean> dirtyFlag)
+    : _dirty_flag(std::move(dirtyFlag))
+{
+}
+
+FilterAction Notifier::ObserverFilter::operator()(const sp<Observer>& item) const
+{
+    if(_dirty_flag)
+        return _dirty_flag.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+    return item.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
 }
 
 }

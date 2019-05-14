@@ -6,11 +6,10 @@
 #include "core/base/expression.h"
 #include "core/impl/builder/builder_by_instance.h"
 #include "core/impl/numeric/approach.h"
-#include "core/impl/numeric/boundary.h"
+#include "core/impl/numeric/fence.h"
 #include "core/impl/numeric/integral.h"
 #include "core/impl/numeric/max.h"
 #include "core/impl/numeric/min.h"
-#include "core/impl/numeric/numeric_depends.h"
 #include "core/impl/numeric/numeric_negative.h"
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/numeric/vibrate.h"
@@ -19,6 +18,58 @@
 #include "core/util/strings.h"
 
 namespace ark {
+
+namespace {
+
+class AtLeast : public Numeric {
+public:
+    AtLeast(const sp<Numeric>& delegate, const sp<Numeric>& boundary, Notifier notifier)
+         : _delegate(delegate), _boundary(boundary), _notifer(std::move(notifier)) {
+    }
+
+    virtual float val() override {
+        float value = _delegate->val();
+        float boundary = _boundary->val();
+        if(value < boundary) {
+            _notifer.notify();
+            return boundary;
+        }
+        return value;
+    }
+
+private:
+    sp<Numeric> _delegate;
+    sp<Numeric> _boundary;
+
+    Notifier _notifer;
+};
+
+
+class AtMost : public Numeric {
+public:
+    AtMost(const sp<Numeric>& delegate, const sp<Numeric>& boundary, Notifier notifier)
+         : _delegate(delegate), _boundary(boundary), _notifer(std::move(notifier)) {
+    }
+
+    virtual float val() override {
+        float value = _delegate->val();
+        float boundary = _boundary->val();
+        if(value > boundary) {
+            _notifer.notify();
+            return boundary;
+        }
+        return value;
+    }
+
+private:
+    sp<Numeric> _delegate;
+    sp<Numeric> _boundary;
+
+    Notifier _notifer;
+};
+
+}
+
 
 sp<Numeric> NumericUtil::create(const sp<Numeric>& value)
 {
@@ -45,11 +96,6 @@ sp<Numeric> NumericUtil::add(float lvalue, const sp<Numeric>& rvalue)
     return sp<VariableOP2<float, float, Operators::Add<float>, float, sp<Numeric>>>::make(lvalue, rvalue);
 }
 
-void NumericUtil::iadd(const sp<Numeric>& self, const sp<Numeric>& rvalue)
-{
-    FATAL("Unimplemented");
-}
-
 sp<Numeric> NumericUtil::sub(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
 {
     return sp<VariableOP2<float, float, Operators::Sub<float>, sp<Numeric>, sp<Numeric>>>::make(lvalue, rvalue);
@@ -65,11 +111,6 @@ sp<Numeric> NumericUtil::sub(float lvalue, const sp<Numeric>& rvalue)
     return sp<VariableOP2<float, float, Operators::Sub<float>, float, sp<Numeric>>>::make(lvalue, rvalue);
 }
 
-void NumericUtil::isub(const sp<Numeric>& self, const sp<Numeric>& rvalue)
-{
-    FATAL("Unimplemented");
-}
-
 sp<Numeric> NumericUtil::mul(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
 {
     return sp<VariableOP2<float, float, Operators::Mul<float>, sp<Numeric>, sp<Numeric>>>::make(lvalue, rvalue);
@@ -83,11 +124,6 @@ sp<Numeric> NumericUtil::mul(const sp<Numeric>& lvalue, float rvalue)
 sp<Numeric> NumericUtil::mul(float lvalue, const sp<Numeric>& rvalue)
 {
     return sp<VariableOP2<float, float, Operators::Mul<float>, float, sp<Numeric>>>::make(lvalue, rvalue);
-}
-
-void NumericUtil::imul(const sp<Numeric>& self, const sp<Numeric>& rvalue)
-{
-    FATAL("Unimplemented");
 }
 
 sp<Numeric> NumericUtil::truediv(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
@@ -227,11 +263,6 @@ float NumericUtil::fix(const sp<Numeric>& self)
     return 0;
 }
 
-sp<Numeric> NumericUtil::depends(const sp<Numeric>& self, const sp<Numeric>& depends)
-{
-    return sp<NumericDepends>::make(self, depends);
-}
-
 sp<Expectation> NumericUtil::approach(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
     Notifier notifier;
@@ -239,11 +270,31 @@ sp<Expectation> NumericUtil::approach(const sp<Numeric>& self, const sp<Numeric>
     return sp<Expectation>::make(approach, a1, std::move(notifier));
 }
 
+sp<Expectation> NumericUtil::atLeast(const sp<Numeric>& self, const sp<Numeric>& a1)
+{
+    DASSERT(self && a1);
+    Notifier notifier;
+    return sp<Expectation>::make(sp<AtLeast>::make(self, a1, notifier), a1, std::move(notifier));
+}
+
+sp<Expectation> NumericUtil::atMost(const sp<Numeric>& self, const sp<Numeric>& a1)
+{
+    DASSERT(self && a1);
+    Notifier notifier;
+    return sp<Expectation>::make(sp<AtMost>::make(self, a1, notifier), a1, std::move(notifier));
+}
+
 sp<Expectation> NumericUtil::boundary(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
+    DASSERT(self && a1);
+    return self->val() < a1->val() ? atMost(self, a1) : atLeast(self, a1);
+}
+
+sp<Expectation> NumericUtil::fence(const sp<Numeric>& self, const sp<Numeric>& a1)
+{
+    DASSERT(self && a1);
     Notifier notifier;
-    const sp<Numeric> boundary = sp<Boundary>::make(self, a1, notifier);
-    return sp<Expectation>::make(boundary, a1, std::move(notifier));
+    return sp<Expectation>::make(sp<Fence>::make(self, a1, notifier), a1, std::move(notifier));
 }
 
 sp<Numeric> NumericUtil::pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t)

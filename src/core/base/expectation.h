@@ -22,7 +22,10 @@ public:
     void update();
 
 //[[script::bindings::auto]]
-    const sp<Observer>& addObserver(const sp<Runnable>& callback, bool oneshot = true);
+    sp<Observer> createObserver(const sp<Runnable>& callback, bool oneshot = false);
+
+//[[script::bindings::auto]]
+    const sp<Observer>& addObserver(const sp<Runnable>& callback, bool oneshot = false);
 
 private:
     sp<Numeric> _delegate;

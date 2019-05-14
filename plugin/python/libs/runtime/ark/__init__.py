@@ -82,6 +82,25 @@ class AudioPlayer:
         pass
 
 
+class Observer:
+    def __init__(self, callback, oneshot: bool = True):
+        pass
+
+    def update(self):
+        pass
+
+
+class Expectation:
+    def update(self):
+        pass
+
+    def create_observer(self, callback, oneshot=False) -> Observer:
+        pass
+
+    def add_observer(self, callback, oneshot=False) -> Observer:
+        pass
+
+
 class Renderer:
     pass
 
@@ -144,8 +163,20 @@ class Numeric(_Var):
     def __init__(self, val):
         _Var.__init__(self, val)
 
-    def expect(self, expectation):
-        return None
+    def approach(self, expectation) -> Expectation:
+        return Expectation()
+
+    def at_least(self, least) -> Expectation:
+        return Expectation()
+
+    def at_most(self, most) -> Expectation:
+        return Expectation()
+
+    def boundary(self, boundary) -> Expectation:
+        return Expectation()
+
+    def fence(self, fence) -> Expectation:
+        return Expectation()
 
     def integral(self, t=None):
         return None
@@ -178,17 +209,6 @@ class Numeric(_Var):
     @staticmethod
     def vibrate(s0: float, v0: float, s1: float, v1: float, duration: float, t=None):
         return None
-
-
-class Observer():
-    def __init__(self, callback, oneshot: bool=True):
-        pass
-
-    def dirty(self) -> bool:
-        return False
-
-    def update(self):
-        pass
 
 
 class Disposed:
@@ -453,19 +473,6 @@ class Arena:
 
 class Clock:
     pass
-
-
-class Expectation:
-    def __init__(self, expectation, onfire=None, fire_once=True):
-        pass
-
-    @property
-    def val(self):
-        return None
-
-    @val.setter
-    def val(self, v):
-        pass
 
 
 class Event:

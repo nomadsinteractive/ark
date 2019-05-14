@@ -14,10 +14,24 @@ public:
 //  [[script::bindings::auto]]
     void notify() const;
 //  [[script::bindings::auto]]
-    sp<Observer> createObserver(bool dirty = true, const sp<Runnable>& handler = nullptr, bool oneshot = false) const;
+    sp<Observer> createObserver(const sp<Runnable>& handler, bool oneshot = false) const;
+//  [[script::bindings::auto]]
+    sp<Boolean> createDirtyFlag(bool dirty = false) const;
 
 private:
-    sp<WeakRefList<Observer>> _observers;
+    class ObserverFilter {
+    public:
+        ObserverFilter(const sp<Observer>& /*item*/, sp<Boolean> dirtyFlag);
+
+        FilterAction operator()(const sp<Observer>& item) const;
+
+    private:
+        sp<Boolean> _dirty_flag;
+
+    };
+
+private:
+    sp<List<Observer, ObserverFilter>> _observers;
 };
 
 

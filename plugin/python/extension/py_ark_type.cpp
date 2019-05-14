@@ -1,6 +1,7 @@
 #include "python/extension/py_ark_type.h"
 
 #include "core/base/scope.h"
+#include "core/inf/variable.h"
 #include "core/util/log.h"
 
 #include "python/extension/python_interpreter.h"
@@ -39,6 +40,56 @@ static int __clear__(PyArkType::Instance* self)
     return self->container ? self->container->clear() : 0;
 }
 
+static PyObject* __int__(PyArkType::Instance* self)
+{
+    const sp<Integer> obj = self->box->as<Integer>();
+    DWARN(obj, "Unable to cast \"%s\" to Integer type", Py_TYPE(self)->tp_name);
+    return PythonInterpreter::instance()->toPyObject<int32_t>(obj ? obj->val() : 0);
+}
+
+static PyObject* __float__(PyArkType::Instance* self)
+{
+    const sp<Numeric> obj = self->box->as<Numeric>();
+    DWARN(obj, "Unable to cast \"%s\" to Numeric type", Py_TYPE(self)->tp_name);
+    return PythonInterpreter::instance()->toPyObject<float>(obj ? obj->val() : 0);
+}
+
+static PyNumberMethods PyArkType_tp_as_number = {
+    nullptr,                                       /* binaryfunc nb_add;                  */ /* __add__ */
+    nullptr,                                       /* binaryfunc nb_subtract;             */ /* __sub__ */
+    nullptr,                                       /* binaryfunc nb_multiply;             */ /* __mul__ */
+    nullptr,                                       /* binaryfunc nb_remainder;            */ /* __mod__ */
+    nullptr,                                       /* binaryfunc nb_divmod;               */ /* __divmod__ */
+    nullptr,                                       /* ternaryfunc nb_power;               */ /* __pow__ */
+    nullptr,                                       /* unaryfunc nb_negative;              */ /* __neg__ */
+    nullptr,                                       /* unaryfunc nb_positive;              */ /* __pos__ */
+    nullptr,                                       /* unaryfunc nb_absolute;              */ /* __abs__ */
+    nullptr,                                       /* inquiry nb_bool;                    */ /* __bool__ */
+    nullptr,                                       /* unaryfunc nb_invert;                */ /* __invert__ */
+    nullptr,                                       /* binaryfunc nb_lshift;               */ /* __lshift__ */
+    nullptr,                                       /* binaryfunc nb_rshift;               */ /* __rshift__ */
+    nullptr,                                       /* binaryfunc nb_and;                  */ /* __and__ */
+    nullptr,                                       /* binaryfunc nb_xor;                  */ /* __xor__ */
+    nullptr,                                       /* binaryfunc nb_or;                   */ /* __or__ */
+    (unaryfunc) __int__,                           /* unaryfunc nb_int;                   */ /* __int__ */
+    nullptr,                                       /* void *nb_reserved;                  */
+    (unaryfunc) __float__,                         /* unaryfunc nb_float;                 */ /* __float__ */
+    nullptr,                                       /* binaryfunc nb_inplace_add           */
+    nullptr,                                       /* binaryfunc nb_inplace_subtract      */
+    nullptr,                                       /* binaryfunc nb_inplace_multiply      */
+    nullptr,                                       /* binaryfunc nb_inplace_remainder;    */
+    nullptr,                                       /* ternaryfunc nb_inplace_power;       */
+    nullptr,                                       /* binaryfunc nb_inplace_lshift;       */
+    nullptr,                                       /* binaryfunc nb_inplace_rshift;       */
+    nullptr,                                       /* binaryfunc nb_inplace_and;          */
+    nullptr,                                       /* binaryfunc nb_inplace_xor;          */
+    nullptr,                                       /* binaryfunc nb_inplace_or;           */
+    nullptr,                                       /* binaryfunc nb_floor_divide;         */
+    nullptr,                                       /* binaryfunc nb_true_divide;          */ /* __div__ */
+    nullptr,                                       /* binaryfunc nb_inplace_floor_divide; */
+    nullptr                                        /* binaryfunc nb_inplace_true_divide   */ /* __idiv__ */
+};
+
 PyArkType::PyArkType(const String& name, const String& doc, unsigned long flags)
     : _name(name), _doc(doc) {
     PyTypeObject pyType = {
@@ -54,6 +105,7 @@ PyArkType::PyArkType(const String& name, const String& doc, unsigned long flags)
         pyType.tp_traverse = reinterpret_cast<traverseproc>(__traverse__);
         pyType.tp_clear = reinterpret_cast<inquiry>(__clear__);
     }
+    pyType.tp_as_number = &PyArkType_tp_as_number;
     pyType.tp_base = basetype();
 
     _py_type_object = pyType;

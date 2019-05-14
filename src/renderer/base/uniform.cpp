@@ -11,7 +11,7 @@
 namespace ark {
 
 Uniform::Uniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
-    : _name(name), _type(type), _flatable(flatable), _notifier(notifier), _observer(_notifier ? _notifier->createObserver() : sp<Observer>::null()), _binding(binding)
+    : _name(name), _type(type), _flatable(flatable), _notifier(notifier), _dirty_flag(_notifier ? _notifier->createDirtyFlag() : sp<Boolean>::null()), _binding(binding)
 {
 }
 
@@ -104,12 +104,12 @@ void Uniform::setNotifier(const sp<Notifier>& notifier)
 {
     DASSERT(notifier);
     _notifier = notifier;
-    _observer = _notifier->createObserver();
+    _dirty_flag = _notifier->createDirtyFlag();
 }
 
 bool Uniform::dirty() const
 {
-    return _observer ? _observer->val() : true;
+    return _dirty_flag ? _dirty_flag->val() : true;
 }
 
 String Uniform::declaration(const String& descriptor) const

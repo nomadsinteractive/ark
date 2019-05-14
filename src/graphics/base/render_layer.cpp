@@ -25,8 +25,7 @@ namespace ark {
 RenderLayer::Stub::Stub(const sp<RenderModel>& renderModel, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_model(renderModel), _shader(shader), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
       _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_render_model->makeShaderBindings(_shader)),
-      _notifier(sp<Notifier>::make()), _layer_context(sp<LayerContext>::make(renderModel, _notifier)), _dirty(_notifier->createObserver()),
-      _stride(shader->input()->getStream(0).stride())
+      _notifier(sp<Notifier>::make()), _layer_context(sp<LayerContext>::make(renderModel, _notifier)), _stride(shader->input()->getStream(0).stride())
 {
 }
 
@@ -38,7 +37,7 @@ RenderLayer::Snapshot::Snapshot(const sp<Stub>& stub)
     for(const sp<LayerContext>& i : stub->_layer_contexts)
         i->takeSnapshot(*this, stub->_memory_pool);
 
-    _dirty = stub->_dirty->val() || true;
+    _dirty = true;
 }
 
 sp<RenderCommand> RenderLayer::Snapshot::render(float x, float y)

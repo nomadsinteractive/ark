@@ -37,7 +37,6 @@ private:
         sp<Notifier> _notifier;
         WeakRefList<LayerContext> _layer_contexts;
         sp<LayerContext> _layer_context;
-        sp<Boolean> _dirty;
 
         uint32_t _stride;
 
