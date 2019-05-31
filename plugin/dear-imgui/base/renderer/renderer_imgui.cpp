@@ -12,6 +12,7 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/camera.h"
 #include "graphics/base/render_request.h"
+#include "graphics/base/size.h"
 #include "graphics/inf/render_command.h"
 #include "graphics/impl/renderer/renderer_group.h"
 
@@ -90,7 +91,7 @@ void RendererImgui::render(RenderRequest& renderRequest, float x, float y)
     _renderer_group->render(renderRequest, x, y);
     ImGui::EndFrame();
     ImGui::Render();
-    MyImGuiRenderFunction(renderRequest, io, ImGui::GetDrawData());
+    MyImGuiRenderFunction(renderRequest, ImGui::GetDrawData());
 }
 
 void RendererImgui::addRenderer(const sp<Renderer>& renderer)
@@ -150,7 +151,7 @@ sp<RendererImgui::DrawCommand> RendererImgui::obtainDrawCommand()
     return sp<DrawCommand>::make(_shader, _bindings, _render_controller, _texture, _draw_commands);
 }
 
-void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImGuiIO& io, ImDrawData* draw_data)
+void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawData* draw_data)
 {
     for (int i = 0; i < draw_data->CmdListsCount; i++)
     {
@@ -248,7 +249,7 @@ sp<Renderer> RendererImgui::BUILDER::build(const sp<Scope>& args)
 
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height, &bytesPerPixel);
     const sp<Bitmap> bitmap = sp<Bitmap>::make(width, height, bytesPerPixel * width, 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(pixels), width * height * bytesPerPixel));
-    const sp<Texture> texture = _resource_loader_context->renderController()->createTexture(static_cast<uint32_t>(width), static_cast<uint32_t>(height), sp<Texture::UploaderBitmap>::make(bitmap));
+    const sp<Texture> texture = _resource_loader_context->renderController()->createTexture2D(sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), sp<Texture::UploaderBitmap>::make(bitmap));
 
     return sp<RendererImgui>::make(_resource_loader_context, _shader->build(args), texture);
 }

@@ -15,7 +15,7 @@
 namespace ark {
 
 GLTexture2D::GLTexture2D(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
-    : GLTexture(recycler, size, static_cast<uint32_t>(GL_TEXTURE_2D), parameters, uploader)
+    : GLTexture(recycler, size, static_cast<uint32_t>(GL_TEXTURE_2D), Texture::TYPE_2D, parameters, uploader)
 {
 }
 

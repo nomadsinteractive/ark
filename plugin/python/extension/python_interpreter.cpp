@@ -1,5 +1,6 @@
 #include "python/extension/python_interpreter.h"
 
+#include "core/base/expectation.h"
 #include "core/base/scope.h"
 #include "core/inf/variable.h"
 #include "core/inf/message_loop.h"
@@ -141,9 +142,13 @@ sp<Numeric> PythonInterpreter::toNumeric(PyObject* object)
         return nullptr;
 
     if(PyLong_Check(object))
-        return sp<Numeric::Impl>::make(static_cast<float>(PyLong_AsLong(object)));
+        return sp<Numeric::Const>::make(static_cast<float>(PyLong_AsLong(object)));
     if(PyFloat_Check(object))
-        return sp<Numeric::Impl>::make(static_cast<float>(PyFloat_AsDouble(object)));
+        return sp<Numeric::Const>::make(static_cast<float>(PyFloat_AsDouble(object)));
+
+    const sp<Expectation> expectation = asInterface<Expectation>(object, false);
+    if(expectation)
+        return expectation->toNumeric();
 
     return asInterface<Numeric>(object, false);
 }
@@ -151,11 +156,11 @@ sp<Numeric> PythonInterpreter::toNumeric(PyObject* object)
 sp<Integer> PythonInterpreter::toInteger(PyObject* object)
 {
     if(PyLong_Check(object))
-        return sp<Integer::Impl>::make(PyLong_AsLong(object));
+        return sp<Integer::Const>::make(PyLong_AsLong(object));
     if(PyFloat_Check(object))
     {
         DWARN(false, "Casting from float to integer loses precision.");
-        return sp<Integer::Impl>::make(static_cast<int32_t>(PyFloat_AsDouble(object)));
+        return sp<Integer::Const>::make(static_cast<int32_t>(PyFloat_AsDouble(object)));
     }
 
     return asInterface<Integer>(object);

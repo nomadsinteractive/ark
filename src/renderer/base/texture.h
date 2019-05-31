@@ -68,11 +68,16 @@ public:
 
     class ARK_API Delegate : public Resource {
     public:
+        Delegate(Type type);
         virtual ~Delegate() = default;
 
-        virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) = 0;
+        Type type() const;
 
+        virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) = 0;
         virtual void uploadBitmap(GraphicsContext& graphicsContext, uint32_t index, const Bitmap& bitmap) = 0;
+
+    private:
+        Type _type;
     };
 
     class ARK_API Uploader {
@@ -118,7 +123,7 @@ public:
 
 public:
 
-//  [[plugin::resource-loader::by-value("texture")]]
+//  [[plugin::resource-loader::by-value]]
     class DICTIONARY : public Builder<Texture> {
     public:
         DICTIONARY(BeanFactory& factory, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext);
@@ -130,7 +135,7 @@ public:
         String _src;
     };
 
-//  [[plugin::resource-loader("texture")]]
+//  [[plugin::resource-loader]]
     class BUILDER : public Builder<Texture> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);

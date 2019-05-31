@@ -13,7 +13,7 @@ namespace ark {
 
 class ARK_API GLTexture : public Texture::Delegate {
 public:
-    GLTexture(const sp<Recycler>& recycler, const sp<Size>& size, uint32_t target, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader);
+    GLTexture(const sp<Recycler>& recycler, const sp<Size>& size, uint32_t target, Texture::Type type, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader);
     virtual ~GLTexture() override;
 
     virtual uint64_t id() override;

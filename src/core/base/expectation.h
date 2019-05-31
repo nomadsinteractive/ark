@@ -8,12 +8,13 @@
 
 namespace ark {
 
-class ARK_API Expectation : public Numeric {
+class ARK_API Expectation {
 public:
     Expectation(const sp<Numeric>& delegate, const sp<Numeric>& expectation, Notifier notifier);
 
-    virtual float val() override;
+    sp<Numeric> toNumeric() const;
 
+    const sp<Numeric>& delegate() const;
     const sp<Numeric>& expectation() const;
 
     const Notifier& notifier() const;

@@ -18,8 +18,8 @@
 
 namespace ark {
 
-GLTexture::GLTexture(const sp<Recycler>& recycler, const sp<Size>& size, uint32_t target, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
-    : _recycler(recycler), _size(size), _target(target), _parameters(parameters), _uploader(uploader), _id(0)
+GLTexture::GLTexture(const sp<Recycler>& recycler, const sp<Size>& size, uint32_t target, Texture::Type type, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
+    : Texture::Delegate(type), _recycler(recycler), _size(size), _target(target), _parameters(parameters), _uploader(uploader), _id(0)
 {
 }
 
@@ -80,10 +80,5 @@ uint64_t GLTexture::id()
 {
     return _id;
 }
-
-//void GLTexture::doPrepareTexture(GraphicsContext& graphicsContext, uint32_t /*id*/)
-//{
-//    _uploader->upload(graphicsContext, *this);
-//}
 
 }

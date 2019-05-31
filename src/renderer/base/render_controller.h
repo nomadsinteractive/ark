@@ -54,7 +54,10 @@ public:
 
     sp<PipelineFactory> createPipelineFactory() const;
     sp<Dictionary<sp<Texture>>> createTextureBundle() const;
-    sp<Texture> createTexture(uint32_t width, uint32_t height, const sp<Texture::Uploader>& uploader, UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
+
+
+    sp<Texture> createTexture(const sp<Size>& size, Texture::Type type, const sp<Texture::Uploader>& uploader, RenderController::UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
+    sp<Texture> createTexture2D(const sp<Size>& size, const sp<Texture::Uploader>& uploader, UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
 
     Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader);
     Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr);

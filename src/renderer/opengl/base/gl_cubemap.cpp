@@ -43,11 +43,11 @@ GLCubemap::GLCubemap(const sp<Recycler>& recycler, const sp<Size>& size, const s
 }
 
 GLCubemap::GLCubemap(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
-    : GLTexture(recycler, size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), parameters, uploader)
+    : GLTexture(recycler, size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), Texture::TYPE_CUBEMAP, parameters, uploader)
 {
 }
 
-bool GLCubemap::download(GraphicsContext& /*graphicsContext*/, Bitmap& bitmap)
+bool GLCubemap::download(GraphicsContext& /*graphicsContext*/, Bitmap& /*bitmap*/)
 {
     return false;
 }
@@ -60,26 +60,6 @@ void GLCubemap::uploadBitmap(GraphicsContext& /*graphicContext*/, uint32_t index
     GLenum internalFormat = GLUtil::getTextureInternalFormat(_parameters->_format, bitmap);
     glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + index), 0, static_cast<GLint>(internalFormat), static_cast<int32_t>(bitmap.width()), static_cast<int32_t>(bitmap.height()), 0, format, pixelFormat, bitmap.at(0, 0));
     LOGD("GLCubemap Uploaded, id = %d, width = %d, height = %d", static_cast<uint32_t>(id()), bitmap.width(), bitmap.height());
-}
-
-GLCubemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _parameters(sp<Texture::Parameters>::make(manifest))
-{
-    BeanUtils::split(factory, manifest, Constants::Attributes::SRC, _srcs[0], _srcs[1], _srcs[2], _srcs[3], _srcs[4], _srcs[5]);
-}
-
-sp<Texture> GLCubemap::BUILDER::build(const sp<Scope>& args)
-{
-    std::vector<sp<Variable<bitmap>>> bitmaps;
-    for(size_t i = 0; i < 6; ++i)
-    {
-        const String src = _srcs[i]->build(args);
-        bitmaps.push_back(sp<typename Variable<bitmap>::Get>::make(_resource_loader_context->images(), src));
-    }
-    const sp<Size> size = _size->build(args);
-    const sp<GLCubemap> cubemap = sp<GLCubemap>::make(_resource_loader_context->renderController()->recycler(), size, _parameters, std::move(bitmaps));
-    return _resource_loader_context->renderController()->createResource<Texture>(size, sp<Variable<sp<Texture::Delegate>>::Const>::make(cubemap), Texture::TYPE_CUBEMAP);
 }
 
 }

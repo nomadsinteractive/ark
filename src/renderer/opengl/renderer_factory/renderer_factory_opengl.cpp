@@ -15,6 +15,7 @@
 #include "renderer/base/texture.h"
 
 #include "renderer/opengl/base/gl_buffer.h"
+#include "renderer/opengl/base/gl_cubemap.h"
 #include "renderer/opengl/base/gl_framebuffer.h"
 #include "renderer/opengl/base/gl_texture_2d.h"
 #include "renderer/opengl/pipeline_factory/pipeline_factory_opengl.h"
@@ -111,11 +112,15 @@ sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()
     return sp<PipelineFactoryOpenGL>::make();
 }
 
-sp<Texture> RendererFactoryOpenGL::createTexture(uint32_t width, uint32_t height, const sp<Texture::Uploader>& uploader)
+sp<Texture> RendererFactoryOpenGL::createTexture(const sp<Size>& size, Texture::Type type, const sp<Texture::Uploader>& uploader)
 {
-    const sp<Size> size = sp<Size>::make(static_cast<float>(width), static_cast<float>(height));
-    const sp<GLTexture2D> texture2d = sp<GLTexture2D>::make(_recycler, size, sp<Texture::Parameters>::make(), uploader);
-    return sp<Texture>::make(size, sp<Variable<sp<Texture::Delegate>>::Const>::make(texture2d), Texture::TYPE_2D);
+    sp<Texture::Delegate> delegate;
+    if(type == Texture::TYPE_2D)
+        delegate = sp<GLTexture2D>::make(_recycler, size, sp<Texture::Parameters>::make(), uploader);
+    else if(type == Texture::TYPE_CUBEMAP)
+        delegate = sp<GLCubemap>::make(_recycler, size, sp<Texture::Parameters>::make(), uploader);
+    DCHECK(delegate, "Unsupported TextureType: %d", type);
+    return sp<Texture>::make(size, sp<Variable<sp<Texture::Delegate>>::Const>::make(delegate), type);
 }
 
 }

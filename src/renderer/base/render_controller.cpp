@@ -4,6 +4,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
+#include "graphics/base/size.h"
 
 #include "renderer/base/framebuffer.h"
 #include "renderer/base/graphics_context.h"
@@ -45,7 +46,7 @@ public:
     virtual sp<Texture> get(const String& name) override {
         const bitmap bitmapBounds = _bitmap_bounds_loader->get(name);
         DCHECK(bitmapBounds, "Texture resource \"%s\" not found", name.c_str());
-        return _renderer_factory->createTexture(bitmapBounds->width(), bitmapBounds->height(), sp<UploaderBitmapBundle>::make(_bitmap_loader, name));
+        return _renderer_factory->createTexture(sp<Size>::make(bitmapBounds->width(), bitmapBounds->height()), Texture::TYPE_2D, sp<UploaderBitmapBundle>::make(_bitmap_loader, name));
     }
 
 private:
@@ -169,11 +170,16 @@ sp<Dictionary<sp<Texture>>> RenderController::createTextureBundle() const
     return sp<GLTextureBundle>::make(_render_engine->rendererFactory(), _bitmap_loader, _bitmap_bounds_loader);
 }
 
-sp<Texture> RenderController::createTexture(uint32_t width, uint32_t height, const sp<Texture::Uploader>& uploader, RenderController::UploadStrategy us)
+sp<Texture> RenderController::createTexture(const sp<Size>& size, Texture::Type type, const sp<Texture::Uploader>& uploader, RenderController::UploadStrategy us)
 {
-    const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(width, height, uploader);
+    const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(size, type, uploader);
     upload(texture, nullptr, us);
     return texture;
+}
+
+sp<Texture> RenderController::createTexture2D(const sp<Size>& size, const sp<Texture::Uploader>& uploader, RenderController::UploadStrategy us)
+{
+    return createTexture(size, Texture::TYPE_2D, uploader, us);
 }
 
 Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader)

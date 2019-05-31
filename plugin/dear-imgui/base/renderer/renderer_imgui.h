@@ -61,7 +61,7 @@ public:
     sp<DrawCommand> obtainDrawCommand();
 
 private:
-    void MyImGuiRenderFunction(RenderRequest& renderRequest, ImGuiIO& io, ImDrawData* draw_data);
+    void MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawData* draw_data);
 
 private:
     sp<Shader> _shader;

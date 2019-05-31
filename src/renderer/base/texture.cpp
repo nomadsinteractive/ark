@@ -193,6 +193,16 @@ Texture::Parameters::Parameters(const document& parameters, Format format, Textu
     }
 }
 
+Texture::Delegate::Delegate(Texture::Type type)
+    : _type(type)
+{
+}
+
+Texture::Type Texture::Delegate::type() const
+{
+    return _type;
+}
+
 Texture::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _src(value)
 {
@@ -218,9 +228,7 @@ sp<Texture> Texture::BUILDER::build(const sp<Scope>& args)
 
     Type type = Documents::getAttribute<Type>(_manifest, Constants::Attributes::TYPE, TYPE_2D);
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
-    uint32_t width = static_cast<uint32_t>(size->width());
-    uint32_t height = static_cast<uint32_t>(size->height());
-    return _resource_loader_context->renderController()->createTexture(width, height, _uploader->build(args));
+    return _resource_loader_context->renderController()->createTexture(size, type, _uploader->build(args));
 }
 
 Texture::UploaderBitmap::UploaderBitmap(const bitmap& bitmap)

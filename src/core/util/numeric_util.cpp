@@ -309,7 +309,7 @@ sp<Numeric> NumericUtil::vibrate(float s0, float v0, float s1, float v1, float d
     Math::vibrate(s0, v0, s1, v1, o, a, t0, t1);
     float multiplier = (t1 - t0) / duration;
     const sp<Numeric> b = sp<Numeric::Const>::make(t1 - t0);
-    return sp<Vibrate>::make(boundary(mul(t ? t : Ark::instance().clock()->duration(), multiplier), b), a, t0, o);
+    return sp<Vibrate>::make(boundary(mul(t ? t : Ark::instance().clock()->duration(), multiplier), b)->delegate(), a, t0, o);
 }
 
 sp<Numeric> NumericUtil::integral(const sp<Numeric>& self, const sp<Numeric>& t)

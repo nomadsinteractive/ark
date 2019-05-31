@@ -22,7 +22,7 @@ public:
     virtual sp<Framebuffer> createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture) override;
     virtual sp<RenderView> createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController) override;
     virtual sp<PipelineFactory> createPipelineFactory() override;
-    virtual sp<Texture> createTexture(uint32_t width, uint32_t height, const sp<Texture::Uploader>& uploader) override;
+    virtual sp<Texture> createTexture(const sp<Size>& size, Texture::Type type, const sp<Texture::Uploader>& uploader) override;
 
 private:
     void setVersion(Ark::RendererVersion version, RenderContext& glContext);
