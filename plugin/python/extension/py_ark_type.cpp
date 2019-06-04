@@ -49,7 +49,7 @@ static PyObject* __int__(PyArkType::Instance* self)
 
 static PyObject* __float__(PyArkType::Instance* self)
 {
-    const sp<Numeric> obj = self->box->as<Numeric>();
+    const sp<Numeric> obj = PythonInterpreter::instance()->toNumeric(reinterpret_cast<PyObject*>(self));
     DWARN(obj, "Unable to cast \"%s\" to Numeric type", Py_TYPE(self)->tp_name);
     return PythonInterpreter::instance()->toPyObject<float>(obj ? obj->val() : 0);
 }
