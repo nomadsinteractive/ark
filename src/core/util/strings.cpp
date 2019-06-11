@@ -17,7 +17,7 @@
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/documents.h"
-#include "core/util/identifier.h"
+#include "core/base/identifier.h"
 
 namespace ark {
 

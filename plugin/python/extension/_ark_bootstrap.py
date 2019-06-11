@@ -37,7 +37,7 @@ class ArkModuleLoader:
 
 class ArkModuleFinder:
 
-    ASSET_PROTOCOL = 'asset:///'
+    ASSET_PROTOCOL = 'asset://'
 
     def __init__(self, ark, bootstrap, util, ark_asset_loader_type, path):
         self._ark = ark
@@ -56,10 +56,7 @@ class ArkModuleFinder:
                 if spec:
                     return spec
             else:
-                filepath = self._path_join(i, self._path_join(*paths))
-                spec = self.find_file_spec(fullname, filepath)
-                if spec:
-                    return spec
+                self._ark.logw('No protocol based url "%s" is no longer supported', i)
 
         return None
 
@@ -81,30 +78,12 @@ class ArkModuleFinder:
                 return self._create_module_spec(fullname, source, None, package, filepath)
         return None
 
-    def find_file_spec(self, fullname, filepath):
-        source = self._load_file(filepath + '.py')
-        package = fullname
-        if not source:
-            if self._ark.is_directory(filepath):
-                source = self._load_file(self._path_join(filepath, '__init__.py'))
-                if source is not None:
-                    return self._create_module_spec(fullname, source, filepath, package, filepath)
-        else:
-            package = '.'.join(fullname.split('.')[0:-1])
-            return self._create_module_spec(fullname, source, None, package, filepath + '.py')
-        return None
-
     def _create_module_spec(self, fullname, source, path, package, filepath):
         loader = self._ark_asset_loader_type(self._bootstrap, source, path, package, fullname, filepath, self._ark.is_debug_build())
         spec = self._bootstrap.ModuleSpec(fullname, loader, origin=filepath, is_package=bool(path))
         if filepath:
             spec.has_location = True
         return spec
-
-    def _load_file(self, filepath):
-        if self._ark.is_file(filepath):
-            return self._ark.load_file(filepath, 'rt')
-        return None
 
     def _path_join(self, *paths):
         sep = self._ark.dir_separator()

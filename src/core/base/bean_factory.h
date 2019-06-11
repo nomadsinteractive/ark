@@ -16,7 +16,7 @@
 #include "core/impl/builder/builder_by_soft_ref.h"
 #include "core/base/scope.h"
 #include "core/types/box.h"
-#include "core/util/identifier.h"
+#include "core/base/identifier.h"
 #include "core/util/documents.h"
 
 namespace ark {

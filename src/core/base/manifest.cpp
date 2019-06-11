@@ -31,7 +31,8 @@ void Manifest::load(const String& src)
 
     _content = asset ? Documents::loadFromReadable(asset->open()) : document::make("");
     _asset_dir = Documents::getAttribute(_content, "asset-dir");
-    _assets = Documents::getKeyValuePairs<Table<String, String>>(_content->children("asset"), "prefix", Constants::Attributes::SRC);
+    for(const document& i : _content->children("asset"))
+        _assets.push_back(Asset(i));
 
     _plugins = Documents::getSystemSpecificList<std::vector<String>>(_content->children("plugin"), Constants::Attributes::NAME);
 
@@ -80,7 +81,7 @@ const String& Manifest::assetDir() const
     return _asset_dir;
 }
 
-const Table<String, String>& Manifest::assets() const
+const std::vector<Manifest::Asset>& Manifest::assets() const
 {
     return _assets;
 }
@@ -155,6 +156,12 @@ template<> ARK_API Manifest::WindowFlag Conversions::to<String, Manifest::Window
     for(const String& i : val.split('|'))
         v |= toOneWindowFlag(i);
     return static_cast<Manifest::WindowFlag>(v);
+}
+
+Manifest::Asset::Asset(const document& manifest)
+    : _protocol(Documents::getAttribute(manifest, "protocol")), _root(Documents::getAttribute(manifest, "root", "/")),
+      _src(Documents::getAttribute(manifest, Constants::Attributes::SRC))
+{
 }
 
 }

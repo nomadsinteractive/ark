@@ -1,0 +1,53 @@
+#ifndef ARK_CORE_UTIL_ASSET_BUNDLE_UTIL_H_
+#define ARK_CORE_UTIL_ASSET_BUNDLE_UTIL_H_
+
+#include "core/forwarding.h"
+#include "core/base/string.h"
+#include "core/inf/builder.h"
+#include "core/types/shared_ptr.h"
+
+namespace ark {
+
+//[[script::bindings::class("AssetBundle")]]
+class ARK_API AssetBundleUtil final {
+public:
+
+//[[script::bindings::classmethod]]
+    static sp<Asset> get(const sp<AssetBundle>& self, const String& name);
+//[[script::bindings::classmethod]]
+    static sp<AssetBundle> getBundle(const sp<AssetBundle>& self, const String& path);
+
+//[[script::bindings::classmethod]]
+    static sp<String> getString(const sp<AssetBundle>& self, const String& filepath);
+//[[script::bindings::classmethod]]
+    static String getRealPath(const sp<AssetBundle>& self, const String& filepath);
+
+    static sp<AssetBundle> createBuiltInAssetBundle(const String& assetDir, const String& appDir);
+    static sp<AssetBundle> createFileAssetBundle(const String& filepath);
+
+//  [[plugin::builder::by-value("file")]]
+    class FILE_DICTIONARY : public Builder<AssetBundle> {
+    public:
+        FILE_DICTIONARY(BeanFactory& factory, const String& src);
+
+        virtual sp<AssetBundle> build(const sp<Scope>& args) override;
+
+    private:
+        String _src;
+    };
+
+//  [[plugin::builder::by-value("external")]]
+    class EXTERNAL_DICTIONARY : public Builder<AssetBundle> {
+    public:
+        EXTERNAL_DICTIONARY(BeanFactory& factory, const String& src);
+
+        virtual sp<AssetBundle> build(const sp<Scope>& args) override;
+
+    private:
+        String _src;
+    };
+};
+
+}
+
+#endif

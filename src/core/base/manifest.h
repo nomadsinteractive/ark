@@ -40,8 +40,12 @@ public:
     };
 
     struct Asset {
-        String _dir;
+        String _protocol;
+        String _root;
+        String _src;
 
+        Asset(const document& manifest);
+        DEFAULT_COPY_AND_ASSIGN(Asset);
     };
 
     struct Heap {
@@ -72,7 +76,7 @@ public:
     const String& appDir() const;
     const String& assetDir() const;
 
-    const Table<String, String>& assets() const;
+    const std::vector<Asset>& assets() const;
     const std::vector<String>& plugins() const;
 
 // [[script::bindings::property]]
@@ -91,7 +95,7 @@ private:
 
     String _asset_dir;
 
-    Table<String, String> _assets;
+    std::vector<Asset> _assets;
     std::vector<String> _plugins;
 
     Application _application;

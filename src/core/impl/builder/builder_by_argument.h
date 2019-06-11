@@ -6,7 +6,7 @@
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/weak_ptr.h"
-#include "core/util/identifier.h"
+#include "core/base/identifier.h"
 
 namespace ark {
 

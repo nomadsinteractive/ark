@@ -14,7 +14,6 @@
 #include "app/forwarding.h"
 
 #include "python/extension/py_instance.h"
-#include "python/extension/asset_resource.h"
 #include "python/extension/python_interpreter.h"
 #include "python/extension/py_ark_type.h"
 
@@ -118,7 +117,7 @@ PyObject* ark_getAssetResource(PyObject* /*self*/, PyObject* args)
         Py_RETURN_NONE;
     const sp<AssetBundle> resource = Ark::instance().getAssetBundle(*arg0 ? arg0 : "/");
     if(resource)
-        return PythonInterpreter::instance()->template fromSharedPtr<AssetResource>(sp<AssetResource>::make(resource));
+        return PythonInterpreter::instance()->template fromSharedPtr<AssetBundle>(resource);
     Py_RETURN_NONE;
 }
 

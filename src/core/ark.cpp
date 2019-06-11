@@ -26,15 +26,15 @@ limitations under the License.
 
 #include "core/base/manifest.h"
 #include "core/base/plugin_manager.h"
+#include "core/base/url.h"
 #include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
-#include "core/impl/asset_bundle/asset_bundle_with_prefix.h"
-#include "core/impl/asset_bundle/asset_bundle_directory.h"
 #include "core/impl/asset_bundle/asset_bundle_zip_file.h"
-#include "core/impl/readable/file_readable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
+#include "core/impl/dictionary/dictionary_impl.h"
 #include "core/impl/dictionary/xml_directory.h"
 #include "core/inf/asset.h"
 #include "core/types/global.h"
+#include "core/util/asset_bundle_util.h"
 
 #include "renderer/base/render_engine.h"
 
@@ -62,90 +62,40 @@ namespace ark {
 Ark* Ark::_instance = nullptr;
 std::list<Ark*> Ark::_instance_stack;
 
-namespace {
-
-class RawAssetBundle : public AssetBundle {
-public:
-    RawAssetBundle(const String& assetDir, const String& appDir)
-        : _asset_dir(assetDir), _app_dir(appDir) {
-    }
-
-    virtual sp<Asset> get(const String& filepath) override {
-        String dirname, filename;
-        Strings::rcut(filepath, dirname, filename, '/');
-        const sp<AssetBundle> dir = getBundle(dirname);
-        const sp<Asset> asset = dir ? dir->get(filename) : nullptr;
-        LOGD("filepath(%s) dirname(%s) ==> dir<%p> asset<%p>", filepath.c_str(), dirname.c_str(), dir.get(), asset.get());
-        return asset;
-    }
-
-    virtual sp<AssetBundle> getBundle(const String& path) override {
-        String s = (path.empty() || path == "/") ? "." : path;
-        const String assetDir = Platform::pathJoin(_asset_dir, s);
-        const sp<AssetBundle> assetBundle = Platform::getAssetBundle(s, Platform::pathJoin(_app_dir, assetDir));
-        if(assetBundle)
-            return assetBundle;
-
-        const sp<Asset> asset = get(path);
-        if(asset)
-            return sp<AssetBundleZipFile>::make(asset->open(), path);
-
-        String dirname;
-        String filename;
-
-        do {
-            String name;
-            Strings::rcut(s, dirname, name, '/');
-            filename = filename.empty() ? name : name + "/" + filename;
-            const sp<Asset> asset = dirname.empty() ? nullptr : get(dirname);
-            if(asset) {
-                const sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(asset->open(), dirname);
-                const String entryName = filename + "/";
-                return zip->hasEntry(entryName) ? sp<AssetBundleWithPrefix>::make(zip, entryName) : nullptr;
-            }
-            s = dirname;
-        } while(!dirname.empty());
-        return nullptr;
-    }
-
-    String _asset_dir;
-    String _app_dir;
-};
-
-}
-
 
 class Ark::ArkAssetBundle {
 public:
-    ArkAssetBundle(const sp<RawAssetBundle>& rawAsset, const Table<String, String>& mounts)
-        : _raw_asset_bundle(rawAsset) {
-        for(const auto& i : mounts)
-            _mounts.push_front(Mounted(strip(i.first), createAsset(i.second)));
+    ArkAssetBundle(const sp<AssetBundle>& builtInAssetBundle, BeanFactory& factory, const std::vector<Manifest::Asset>& assets)
+        : _builtin_asset_bundle(builtInAssetBundle) {
+        for(const Manifest::Asset& i : assets) {
+            sp<AssetBundle> assetBundle = createAsset(factory, i);
+            if(assetBundle)
+                _mounts.push_front(Mounted(i, assetBundle));
+        }
     }
 
     sp<Asset> get(const String& name) const {
-        String pathname = name;
-        while(pathname.startsWith("/") || pathname.startsWith("."))
-            pathname = pathname.substr(1);
+        const URL url(name);
 
         for(const Mounted& i : _mounts) {
-            const sp<Asset> readable = i.open(pathname);
+            const sp<Asset> readable = i.open(url);
             if(readable)
                 return readable;
         }
 
-        return _raw_asset_bundle->get(name);
+        return _builtin_asset_bundle->get(name);
     }
 
     sp<AssetBundle> getAssetBundle(const String& path) const {
+        const URL url(path);
         sp<AssetBundle> asset;
-        const String s = strip(path);
+
         for(const Mounted& i : _mounts) {
-            const sp<AssetBundle> ia = i.getBundle(s);
+            const sp<AssetBundle> ia = i.getBundle(url);
             if(ia)
                 asset = asset ? sp<AssetBundle>::adopt(new AssetBundleWithFallback(asset, ia)) : ia;
         }
-        const sp<AssetBundle> fallback = _raw_asset_bundle->getBundle(path);
+        const sp<AssetBundle> fallback = _builtin_asset_bundle->getBundle(path);
         if(fallback)
             return asset ? sp<AssetBundle>::adopt(new AssetBundleWithFallback(asset, fallback)) : fallback;
         DCHECK(asset, "Asset \"%s\" doesn't exists", path.c_str());
@@ -153,60 +103,63 @@ public:
     }
 
 private:
-    sp<AssetBundle> createAsset(const String& src) {
-        if(Platform::isDirectory(src))
-            return sp<AssetBundleDirectory>::make(src);
-        else if(Platform::isFile(src))
-            return sp<AssetBundleZipFile>::make(sp<FileReadable>::make(src, "rb"), src);
-        const sp<AssetBundle> asset = _raw_asset_bundle->getBundle(src);
-        DCHECK(asset, "Unknow asset src: %s", src.c_str());
+    sp<AssetBundle> createAsset(BeanFactory& factory, const Manifest::Asset& manifest) {
+        sp<AssetBundle> asset = manifest._protocol.empty() ? _builtin_asset_bundle->getBundle(manifest._src) :
+                                                             factory.build<AssetBundle>(manifest._protocol, manifest._src);
+        DWARN(asset, "Unable to load AssetBundle, protocol: %s, src: %s", manifest._protocol.c_str(), manifest._src.c_str());
         return asset;
-    }
-
-    String strip(const String& path) const {
-        String s = path.lstrip('/').lstrip('.');
-
-        while(s && !s.endsWith("/"))
-            s = s + "/";
-        return s;
     }
 
     class Mounted {
     public:
-        Mounted(const String& prefix, const sp<AssetBundle>& asset)
-            : _prefix(prefix), _asset(asset) {
+        Mounted(const Manifest::Asset& manifest, const sp<AssetBundle>& asset)
+            : _root(manifest._protocol, manifest._root), _asset_bundle(asset) {
         }
 
-        sp<Asset> open(const String& path) const {
-            if(_prefix.empty() || path.startsWith(_prefix))
-                return _asset->get(path.substr(_prefix.length()));
+        sp<Asset> open(const URL& url) const {
+            String relpath;
+            if(getRelativePath(url, relpath))
+                return _asset_bundle->get(relpath);
             return nullptr;
         }
 
-        sp<AssetBundle> getBundle(const String& path) const {
-            if(path == _prefix)
-                return _asset;
-            if(path.startsWith(_prefix))
-            {
-                const String assetpath = path.substr(_prefix.length());
-                const sp<AssetBundle> asset = _asset->getBundle(assetpath);
+        sp<AssetBundle> getBundle(const URL& url) const {
+            String relpath;
+            if(getRelativePath(url, relpath)) {
+                if(relpath.empty())
+                    return _asset_bundle;
+                const sp<AssetBundle> asset = _asset_bundle->getBundle(relpath);
                 if(asset)
                     return asset;
 
-                const sp<Asset> fp = _asset->get(assetpath.rstrip('/'));
+                const String filename = relpath.rstrip('/');
+                const sp<Asset> fp = _asset_bundle->get(filename);
                 if(fp)
-                    return sp<AssetBundleZipFile>::make(fp->open(), Platform::getRealPath(assetpath.rstrip('/')));
+                    return sp<AssetBundleZipFile>::make(fp->open(), Platform::getRealPath(filename));
             }
             return nullptr;
         }
 
     private:
-        String _prefix;
-        sp<AssetBundle> _asset;
+        bool getRelativePath(const URL& url, String& relpath) const {
+            if(url.protocol() == _root.protocol() || _root.path().empty()) {
+                relpath = url.path();
+                return true;
+            }
+            if(url.protocol().empty() && url.path().startsWith(_root.path())) {
+                relpath = url.path().substr(_root.path().length());
+                return true;
+            }
+            return false;
+        }
+
+    private:
+        URL _root;
+        sp<AssetBundle> _asset_bundle;
     };
 
     std::list<Mounted> _mounts;
-    sp<RawAssetBundle> _raw_asset_bundle;
+    sp<AssetBundle> _builtin_asset_bundle;
 };
 
 Ark::Ark(int32_t argc, const char** argv)
@@ -249,14 +202,15 @@ void Ark::push()
 void Ark::initialize(const sp<Manifest>& manifest)
 {
     _manifest = manifest;
-    _asset_bundle = sp<ArkAssetBundle>::make(sp<RawAssetBundle>::make(manifest->assetDir(), manifest->appDir()), manifest->assets());
 
-    loadPlugins(manifest);
+    loadPlugins(_manifest);
 
-    const sp<AssetBundle> asset = _asset_bundle->getAssetBundle(".");
+    const sp<BeanFactory> factory = createBeanFactory(sp<DictionaryImpl<document>>::make());
+    _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleUtil::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->appDir()), factory, _manifest->assets());
+    const sp<AssetBundle> asset = _asset_bundle->getAssetBundle("/");
     const sp<ApplicationResource> appResource = sp<ApplicationResource>::make(sp<XMLDirectory>::make(asset), asset);
-    const sp<RenderEngine> renderEngine = createRenderEngine(manifest->renderer()._version, appResource);
-    _application_context = createApplicationContext(manifest->content(), appResource, renderEngine);
+    const sp<RenderEngine> renderEngine = createRenderEngine(_manifest->renderer()._version, appResource);
+    _application_context = createApplicationContext(_manifest->content(), appResource, renderEngine);
 }
 
 sp<BeanFactory> Ark::createBeanFactory(const String& src) const

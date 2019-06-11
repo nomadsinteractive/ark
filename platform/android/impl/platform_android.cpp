@@ -43,7 +43,6 @@ bool directoryExists(AAssetManager* assetManager, const String& path) {
     return r;
 }
 
-
 PlatformAndroid::PlatformAndroid(android_app* state)
 	: _state(state), _asset_manager(_state->activity->assetManager)
 {
@@ -137,6 +136,33 @@ String Platform::getUserStoragePath(const String& filename)
 	}
 	Global<PlatformAndroid> platformAndroid;
     return platformAndroid->getUserStoragePath(filename);
+}
+
+String Platform::getExternalStoragePath(const String& path)
+{
+    String ret = ".";
+    if(gApplicationContext)
+    {
+        JNIEnv* env = JNIUtil::attachCurrentThread();
+        jclass applicationContextClass = env->GetObjectClass(gApplicationContext);
+        jmethodID methodID = env->GetMethodID(applicationContextClass, "getExternalFilesDir", "(Ljava/lang/String;)Ljava/io/File;");
+        jobject jFile = env->CallObjectMethod(gApplicationContext, methodID, nullptr);
+        if(jFile)
+        {
+            jclass jFileClass = env->GetObjectClass(jFile);
+            jmethodID getAbsoluteMethodID = env->GetMethodID(jFileClass, "getAbsolutePath", "()Ljava/lang/String;");
+            jstring jAbsolutePath = (jstring) env->CallObjectMethod(jFile, getAbsoluteMethodID);
+            jboolean isCopy = false;
+            const char* buf = env->GetStringUTFChars(jAbsolutePath, &isCopy);
+            ret = pathJoin(buf, path);
+            env->ReleaseStringUTFChars(jAbsolutePath, buf);
+            env->DeleteLocalRef(jFileClass);
+            env->DeleteLocalRef(jFile);
+            env->DeleteLocalRef(jAbsolutePath);
+        }
+        env->DeleteLocalRef(applicationContextClass);
+    }
+    return ret;
 }
 
 String Platform::getRealPath(const String& path)

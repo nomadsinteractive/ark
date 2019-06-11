@@ -4,14 +4,14 @@
 #include <map>
 
 #include "core/inf/dictionary.h"
-#include "core/types/null.h"
 
 namespace ark {
 
 template<typename T> class DictionaryImpl : public Dictionary<T> {
 public:
     virtual T get(const String& name) override {
-        return _map.find(name) == _map.end() ? Null::ptr<T>() : _map.at(name);
+        const auto iter = _map.find(name);
+        return iter == _map.end() ? T() : iter->second;
     }
 
 private:

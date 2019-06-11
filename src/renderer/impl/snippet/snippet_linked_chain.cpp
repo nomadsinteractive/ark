@@ -2,7 +2,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/util/strings.h"
-#include "core/util/identifier.h"
+#include "core/base/identifier.h"
 
 namespace ark {
 

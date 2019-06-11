@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest>
-	<asset prefix="/" src="../assets"/>
+	<asset src="../assets"/>
     <renderer version="auto">
         <resolution width="540" height="960"/>
     </renderer>

@@ -7,8 +7,6 @@
 
 #include "graphics/forwarding.h"
 
-#include "renderer/forwarding.h"
-
 #include "platform/any/platform_independent.h"
 
 namespace ark {
@@ -19,6 +17,8 @@ public:
 
 //  [[script::bindings::auto]]
     static String getUserStoragePath(const String& path);
+//  [[script::bindings::auto]]
+    static String getExternalStoragePath(const String& path);
 
     static sp<AssetBundle> getAssetBundle(const String& path, const String& appPath);
     static sp<Alphabet> getSystemAlphabet(const Font& font, const String& lang);

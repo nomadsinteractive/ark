@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_CORE_IDENTIFIER_H_
-#define ARK_CORE_CORE_IDENTIFIER_H_
+#ifndef ARK_CORE_BASE_IDENTIFIER_H_
+#define ARK_CORE_BASE_IDENTIFIER_H_
 
 #include "core/base/api.h"
 #include "core/base/string.h"

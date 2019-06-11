@@ -46,13 +46,6 @@ public:
         return list;
     }
 
-    template<typename T, typename U> static T getKeyValuePairs(const U& iterable, const String& keyname, const String& valuename) {
-        T pairs;
-        for(const document& i : iterable)
-            pairs[ensureAttribute(i, keyname)] = ensureAttribute(i, valuename);
-        return pairs;
-    }
-
     template<typename T> static T getAttributeValue(const document& doc, const String& path, const T& defValue) {
         const attribute& attr = findAttribute(doc, path.split('/'));
         return attr ? Strings::parse<T>(attr->value()) : defValue;

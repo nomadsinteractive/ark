@@ -44,6 +44,12 @@ String Platform::getUserStoragePath(const String& path)
     return Strings::sprintf("%s\\%s", appPath.c_str(), path.c_str());
 }
 
+String Platform::getExternalStoragePath(const String& path)
+{
+    const String s = path.rstrip('/').rstrip('\\').lstrip('/').lstrip('\\');
+    return s.empty() ? "." : s;
+}
+
 String Platform::getDefaultFontDirectory()
 {
     TCHAR nWindowsDirectory[MAX_PATH];
