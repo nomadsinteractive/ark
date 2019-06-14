@@ -126,8 +126,8 @@ public:
         return getPyArkType<T>()->create(object.pack());
     }
 
-    template<typename T, typename P> void pyModuleAddType(PyObject* module, const char* moduleName, const char* typeName, long flags) {
-        static T pyType(Strings::sprintf("%s.%s", moduleName, typeName), Strings::sprintf("%s.%s Type", moduleName, typeName), flags);
+    template<typename T, typename P> void pyModuleAddType(PyObject* module, const char* moduleName, const char* typeName, PyTypeObject* base, long flags) {
+        static T pyType(Strings::sprintf("%s.%s", moduleName, typeName), Strings::sprintf("%s.%s Type", moduleName, typeName), base, flags);
         int ret = addPyArkType<P>(&pyType);
         DCHECK(!ret, "PyArkType init failed");
         if(!ret)
@@ -163,11 +163,6 @@ private:
             Py_XDECREF(obj);
         }
         return pySet;
-    }
-
-    template<typename T> const sp<T>& toInstance(PyObject* object) {
-        PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);
-        return instance->unpack<T>();
     }
 
     template<typename T> T toCppObject_sfinae(PyObject* obj, typename T::_PtrType*) {

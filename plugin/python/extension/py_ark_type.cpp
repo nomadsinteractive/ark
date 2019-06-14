@@ -90,7 +90,7 @@ static PyNumberMethods PyArkType_tp_as_number = {
     nullptr                                        /* binaryfunc nb_inplace_true_divide   */ /* __idiv__ */
 };
 
-PyArkType::PyArkType(const String& name, const String& doc, unsigned long flags)
+PyArkType::PyArkType(const String& name, const String& doc, PyTypeObject* base, unsigned long flags)
     : _name(name), _doc(doc) {
     PyTypeObject pyType = {
         PyVarObject_HEAD_INIT(NULL, 0)
@@ -106,7 +106,7 @@ PyArkType::PyArkType(const String& name, const String& doc, unsigned long flags)
         pyType.tp_clear = reinterpret_cast<inquiry>(__clear__);
     }
     pyType.tp_as_number = &PyArkType_tp_as_number;
-    pyType.tp_base = basetype();
+    pyType.tp_base = base ? base : basetype();
 
     _py_type_object = pyType;
     Py_INCREF(&_py_type_object);

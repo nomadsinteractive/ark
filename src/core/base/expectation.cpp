@@ -7,9 +7,9 @@ Expectation::Expectation(const sp<Numeric>& delegate, const sp<Numeric>& expecta
 {
 }
 
-sp<Numeric> Expectation::toNumeric() const
+float Expectation::val()
 {
-    return _delegate;
+    return _delegate->val();
 }
 
 const sp<Numeric>& Expectation::delegate() const

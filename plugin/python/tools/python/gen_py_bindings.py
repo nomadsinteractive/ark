@@ -90,6 +90,7 @@ AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader\]\]\s+templa
 AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor)\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
 AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
 AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::class\(([^)]+)\)\]\]')
+AUTOBIND_EXTENDS_PATTERN = re.compile(r'\[\[script::bindings::extends\((\w+)\)\]\]')
 AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container)\]\]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
 AUTOBIND_META_PATTERN = re.compile(r'\[\[script::bindings::meta\(([^)]+)\([^)]*\)\)\]\]')
 
@@ -195,7 +196,7 @@ def gen_class_header_source(genclass, declares):
     s = '\n    '.join(i for i in method_declarations if i)
     declares.append(acg.format('''class ${py_class_name} : public ark::plugin::python::PyArkType {
 public:
-    ${py_class_name}(const String& name, const String& doc, long flags);
+    ${py_class_name}(const String& name, const String& doc, PyTypeObject* base, long flags);
 
     ${method_declares}
 };''', method_declares=s, py_class_name=genclass.py_class_name))
@@ -216,7 +217,29 @@ ${0}
                       includes='\n'.join(includes))
 
 
-def gen_body_source(filename, output_dir, output_file, namespaces, modulename, results, buildables):
+def gen_module_type_declarations(modulename, results):
+    line_pattern = 'pi->pyModuleAddType<%s, %s>(module, "%s", "%s", %s, Py_TPFLAGS_DEFAULT%s);'
+    genclasses = list(results.values())
+    class_names = set(i.binding_classname for i in genclasses)
+    class_declared = set()
+    declarations = []
+
+    while genclasses:
+        i = genclasses[0]
+        genclasses = genclasses[1:]
+        if not i.base_classname or i.base_classname in class_declared:
+            base_type = 'pi->getPyArkType<%s>()->getPyTypeObject()' % i.base_classname if i.base_classname else 'nullptr'
+            declarations.append(line_pattern % (i.py_class_name, i.binding_classname, modulename, i.binding_classname, base_type,
+                                                '|Py_TPFLAGS_HAVE_GC' if i.is_container else ''))
+            class_declared.add(i.binding_classname)
+        else:
+            assert i.base_classname in class_names
+            genclasses.append(i)
+
+    return declarations
+
+
+def gen_body_source(filename, output_dir, output_file, namespaces, modulename, results, buildables, gen_bindingcpp):
     filedir, name = path.split(filename)
     includes = []
     lines = []
@@ -233,7 +256,10 @@ def gen_body_source(filename, output_dir, output_file, namespaces, modulename, r
                 acg.write_to_file(_just_print_flag and path.join(output_dir, genclass.py_src_name + '.cpp'),
                                   gen_py_binding_cpp(genclass.py_src_name, namespaces, classincludes, classlines))
 
-    add_types = '\n    '.join('pi->pyModuleAddType<%s, %s>(module, "%s", "%s", Py_TPFLAGS_DEFAULT%s);' % (i.py_class_name, i.binding_classname, modulename, i.binding_classname, '|Py_TPFLAGS_HAVE_GC' if i.is_container else '') for i in results.values())
+    if not gen_bindingcpp:
+        return None
+
+    add_types = '\n    '.join(gen_module_type_declarations(modulename, results))
     lines.append('\n' + '''void __init_%s__(PyObject* module)
 {
     const sp<ark::plugin::python::PythonInterpreter>& pi = ark::plugin::python::PythonInterpreter::instance();
@@ -292,8 +318,8 @@ def gen_class_body_source(genclass, includes, lines, buildables):
     genclass.gen_py_type_constructor_codes(tp_method_lines)
     if genclass.constants:
         tp_method_lines.extend('_constants["%s"] = %s;' % (i, j) for i, j in genclass.constants.items())
-    constructor = acg.format('''${py_class_name}::${py_class_name}(const String& name, const String& doc, long flags)
-    : PyArkType(name, doc, flags)
+    constructor = acg.format('''${py_class_name}::${py_class_name}(const String& name, const String& doc, PyTypeObject* base, long flags)
+    : PyArkType(name, doc, base, flags)
 {${tp_methods}
 }''', py_class_name=genclass.py_class_name, tp_methods='\n    ' + '\n    '.join(tp_method_lines) if tp_method_lines else '')
     methoddefinition = acg.format('''%s ${py_class_name}::%s(%s)
@@ -488,10 +514,6 @@ def parse_method_arguments(arguments):
 
 
 def gen_method_call_arg(i, targettype, argtype):
-    # pos = arg.find('=')
-    # if pos != -1:
-    #     arg = arg[0:pos]
-    # targettype = ' '.join(arg.split()[:-1])
     equals = acg.typeCompare(targettype, remove_crv(argtype))
     return 'obj%d' % i if equals or '<' in argtype else gen_cast_call(targettype, 'obj%d' % i)
 
@@ -630,7 +652,7 @@ class GenMethod(object):
             self._gen_parse_tuple_code(lines, self.gen_local_var_declarations(), self._arguments)
 
         if self.need_unpack_statement():
-            lines.append(acg.format('const sp<${class_name}>& unpacked = self->unpack<${class_name}>();',
+            lines.append(acg.format('const sp<${class_name}> unpacked = self->as<${class_name}>();',
                                     class_name=genclass.binding_classname))
         self.gen_definition_body(genclass, lines, self._arguments, [None] * len(self._arguments), not self.check_argument_type,
                                  not self.check_argument_type)
@@ -1041,6 +1063,7 @@ class GenClass(object):
         self._filename = filename
         self._classname = class_name
         self._binding_classname = class_name
+        self._base_classname = None
         self._is_container = is_container
         self._methods = {}
         self._constants = {}
@@ -1058,6 +1081,14 @@ class GenClass(object):
         self._py_src_name = 'py_ark_' + acg.camel_case_to_snake_case(v) + '_type'
         self._py_class_name = 'PyArk%sType' % v
         self._binding_classname = v
+
+    @property
+    def base_classname(self):
+        return self._base_classname
+
+    @base_classname.setter
+    def base_classname(self, base_classname):
+        self._base_classname = base_classname
 
     @property
     def py_src_name(self):
@@ -1149,10 +1180,9 @@ class GenClass(object):
             rich_compare_defs.extend([
                 '',
                 'static PyObject* %s_tp_richcompare (PyArkType::Instance* self, PyObject* args, int op) {' % self._py_class_name,
-                '    const sp<%s>& unpacked = self->unpack<%s>();' % (self._binding_classname, self._binding_classname),
+                '    const sp<%s> unpacked = self->as<%s>();' % (self._binding_classname, self._binding_classname),
                 '    const sp<%s> obj0 = PythonInterpreter::instance()->toSharedPtr<%s>(args);' % (self._binding_classname, self._binding_classname),
-                '    switch(op) {'] + cases +
-                [
+                '    switch(op) {'] + cases + [
                 '    default:',
                 '        break;',
                 '    }',
@@ -1208,6 +1238,10 @@ def main(params, paths):
         genclass = get_result_class(results, filename, main_class)
         genclass.binding_classname = x.strip('"')
 
+    def autoextends(filename, content, main_class, x):
+        genclass = get_result_class(results, filename, main_class)
+        genclass.base_classname = x
+
     def autoloader(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
         name, args, return_type, is_static = GenMethod.split(x)
@@ -1251,6 +1285,7 @@ def main(params, paths):
                             HeaderPattern(AUTOBIND_METHOD_PATTERN, automethod),
                             HeaderPattern(AUTOBIND_OPERATOR_PATTERN, autooperator),
                             HeaderPattern(AUTOBIND_CLASS_PATTERN, autoclass),
+                            HeaderPattern(AUTOBIND_EXTENDS_PATTERN, autoextends),
                             HeaderPattern(AUTOBIND_LOADER_PATTERN, autoloader),
                             HeaderPattern(AUTOBIND_PROPERTY_PATTERN, autoproperty),
                             HeaderPattern(AUTOBIND_GETPROP_PATTERN, autogetprop),
@@ -1265,9 +1300,10 @@ def main(params, paths):
     if output_cmakelist:
         return acg.write_to_file(_just_print_flag and output_cmakelist, gen_cmakelist_source(params, paths, output_dir, output_file or 'stdout', results))
 
+    gen_bindingcpp = output_file or _just_print_flag is None
     head_src = gen_header_source(output_file or 'stdout', output_dir, output_file, results, namespaces)
-    cpp_src = gen_body_source(output_file or 'stdout', output_dir, output_file, namespaces, modulename, results, bindables)
-    if output_file or _just_print_flag is None:
+    cpp_src = gen_body_source(output_file or 'stdout', output_dir, output_file, namespaces, modulename, results, bindables, gen_bindingcpp)
+    if gen_bindingcpp:
         acg.write_to_file(_just_print_flag and output_file + '.h', head_src)
         acg.write_to_file(_just_print_flag and output_file + '.cpp', cpp_src)
 

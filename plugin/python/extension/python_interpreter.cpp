@@ -35,9 +35,6 @@ namespace python {
 
 sp<Runnable> PythonInterpreter::toRunnable(PyObject* object)
 {
-    if(isInstance<Runnable>(object))
-        return toInstance<Runnable>(object);
-
     if(PyCallable_Check(object))
         return sp<PythonCallableRunnable>::make(PyInstance::track(object));
 
@@ -145,10 +142,6 @@ sp<Numeric> PythonInterpreter::toNumeric(PyObject* object)
         return sp<Numeric::Const>::make(static_cast<float>(PyLong_AsLong(object)));
     if(PyFloat_Check(object))
         return sp<Numeric::Const>::make(static_cast<float>(PyFloat_AsDouble(object)));
-
-    const sp<Expectation> expectation = asInterface<Expectation>(object, false);
-    if(expectation)
-        return expectation->toNumeric();
 
     return asInterface<Numeric>(object, false);
 }

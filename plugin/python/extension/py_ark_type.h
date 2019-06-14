@@ -2,7 +2,6 @@
 #define ARK_PLUGIN_PYTHON_EXTENSION_EXTENSION_UTIL_H_
 
 #include <map>
-#include <functional>
 
 #include <Python.h>
 
@@ -37,13 +36,10 @@ public:
             return box->unpack<T>();
         }
 
-        template<typename T> void pack(const sp<T>& ptr) {
-            DASSERT(box);
-            *box = ptr.pack();
-        }
-
-        template<typename T> bool typeCheck() const {
-            return box && box->typeId() == Type<T>::id();
+        template<typename T> sp<T> as() const {
+            const sp<T> inst = box->as<T>();
+            DCHECK(inst, "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::getClass<T>()->name());
+            return inst;
         }
 
         PyContainer* getContainer() {
@@ -65,6 +61,7 @@ public:
 
         void addObjectToContainer(float /*object*/) {
         }
+
         void addObjectToContainer(const V2& /*object*/) {
         }
 
@@ -78,10 +75,15 @@ public:
             gcContainer->setTag(object.as<PyInstance>());
         }
 
+    private:
+        template<typename T> bool typeCheck() const {
+            return box && box->typeId() == Type<T>::id();
+        }
+
     } Instance;
 
 public:
-    PyArkType(const String& name, const String& doc, unsigned long flags);
+    PyArkType(const String& name, const String& doc, PyTypeObject* base, unsigned long flags);
 
     template<typename T> int ready() {
         _type_id = Type<T>::id();

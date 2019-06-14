@@ -228,8 +228,8 @@ void NumericUtil::setVal(const sp<Numeric>& self, float value)
 const sp<Numeric>& NumericUtil::delegate(const sp<Numeric>& self)
 {
     const sp<NumericWrapper> nw = self.as<NumericWrapper>();
-    DCHECK(nw, "Must be an NumericWrapper instance to get its delegate attribute");
-    return nw->delegate();
+    DWARN(nw, "Non-NumericWrapper instance has no delegate attribute");
+    return nw ? nw->delegate() : sp<Numeric>::null();
 }
 
 void NumericUtil::setDelegate(const sp<Numeric>& self, const sp<Numeric>& delegate)

@@ -8,11 +8,12 @@
 
 namespace ark {
 
-class ARK_API Expectation {
+//[[script::bindings::extends(Numeric)]]
+class ARK_API Expectation : public Numeric {
 public:
     Expectation(const sp<Numeric>& delegate, const sp<Numeric>& expectation, Notifier notifier);
 
-    sp<Numeric> toNumeric() const;
+    virtual float val() override;
 
     const sp<Numeric>& delegate() const;
     const sp<Numeric>& expectation() const;
@@ -35,6 +36,7 @@ private:
     Notifier _notifier;
 
     std::vector<sp<Observer>> _observers;
+
 };
 
 }
