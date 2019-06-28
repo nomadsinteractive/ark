@@ -32,6 +32,7 @@ class PyContainer;
 static PyObject* ark_log(Log::LogLevel level, PyObject* args);
 static PyObject* ark_logd(PyObject* self, PyObject* args);
 static PyObject* ark_logw(PyObject* self, PyObject* args);
+static PyObject* ark_loge(PyObject* self, PyObject* args);
 static PyObject* ark_loadAsset(PyObject* self, PyObject* args);
 static PyObject* ark_openAsset(PyObject* self, PyObject* args);
 static PyObject* ark_getAssetResource(PyObject* self, PyObject* args);
@@ -51,6 +52,7 @@ static int __traverse__(PyObject* module, visitproc visitor, void* args)
 static PyMethodDef ARK_METHODS[] = {
     {"logd",  ark_logd, METH_VARARGS, "LOG_DEBUG"},
     {"logw",  ark_logw, METH_VARARGS, "LOG_WARN"},
+    {"loge",  ark_loge, METH_VARARGS, "LOG_ERROR"},
     {"load_asset",  ark_loadAsset, METH_VARARGS, "loadAsset"},
     {"open_asset",  ark_openAsset, METH_VARARGS, "openAsset"},
     {"get_asset_resource",  ark_getAssetResource, METH_VARARGS, "getAssetResource"},
@@ -88,6 +90,11 @@ PyObject* ark_logd(PyObject* /*self*/, PyObject* args)
 PyObject* ark_logw(PyObject* /*self*/, PyObject* args)
 {
     return ark_log(Log::LOG_LEVEL_WARNING, args);
+}
+
+PyObject* ark_loge(PyObject* /*self*/, PyObject* args)
+{
+    return ark_log(Log::LOG_LEVEL_ERROR, args);
 }
 
 PyObject* ark_loadAsset(PyObject* /*self*/, PyObject* args)

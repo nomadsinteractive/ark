@@ -19,6 +19,10 @@ def logw(*args):
     print(*args)
 
 
+def loge(*args):
+    print(*args)
+
+
 def load_asset(filename) -> str:
     with open(filename, 'rt') as fp:
         return fp.read()

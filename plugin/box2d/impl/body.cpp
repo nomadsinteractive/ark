@@ -78,6 +78,7 @@ public:
     }
 
     virtual float val() override {
+        DCHECK(_stub->_body, "Body has been disposed already");
         float rotation = _delegate->val();
         _stub->_body->SetTransform(_stub->_body->GetWorldCenter(), rotation);
         return rotation;
