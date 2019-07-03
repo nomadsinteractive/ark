@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest>
+	<asset prefix="/" src="../assets"/>
+
+    <heap>
+        <device unit-size="4M"/>
+        <host unit-size="4M"/>
+    </heap>
+
+    <renderer version="auto">
+        <resolution width="960" height="540"/>
+    </renderer>
+
+	<application title="ImGUI" resource-loader="app.xml" window-flag="show_cursor">
+        <script ref="@main" src="main.py"/>
+	</application>
+
+    <plugin name="ark-python"/>
+	<plugin name="ark-dear-imgui"/>
+	<plugin name="ark-dear-imgui-pybindings"/>
+</manifest>

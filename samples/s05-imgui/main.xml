@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<import name="pre" src="prefab.xml"/>
+	<view id="@root_view" class="view-group" size="960, 540" layout="vertical(left)"/>
+	<texture id="@t001" width="960" height="540"/>
+	<shader id="@s001">
+		<sampler ref="@t001"/>
+	</shader>
+	<renderer id="@imgui" class="imgui">
+		<font src="fonts/Cousine-Regular.ttf" size="14"/>
+		<font src="fonts/DroidSans.ttf" size="14"/>
+	</renderer>
+	<arena id="main" view="@root_view" event-listener="@imgui">
+		<render-layer ref="@pre:rl001"/>
+		<renderer ref="@imgui"/>
+		<renderer ref="@pre:fps-counter"/>
+
+		<event-listener ref="@imgui"/>
+	</arena>
+</resources>
