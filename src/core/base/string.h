@@ -22,7 +22,7 @@ public:
     String(std::string&& str);
     ~String();
 
-    const String& operator =(const char* other);
+    String& operator =(const char* other);
 
     char at(size_type i) const;
     const char* c_str() const;

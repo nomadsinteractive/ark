@@ -26,15 +26,15 @@ void GLModelLineStrip::postSnapshot(RenderController& /*renderController*/, Rend
 {
     if(_last_rendered_count != snapshot._items.size())
     {
-        _indices = _ibo.snapshot(sp<Uploader::Vector<glindex_t>>::make(makeIndices(snapshot)));
+        _indices = _ibo.snapshot(sp<Uploader::Vector<element_index_t>>::make(makeIndices(snapshot)));
         _last_rendered_count = snapshot._items.size();
     }
 }
 
-std::vector<glindex_t> GLModelLineStrip::makeIndices(const RenderLayer::Snapshot& layerContext)
+std::vector<element_index_t> GLModelLineStrip::makeIndices(const RenderLayer::Snapshot& layerContext)
 {
-    std::vector<glindex_t> indices;
-    glindex_t index = 0;
+    std::vector<element_index_t> indices;
+    element_index_t index = 0;
     bool degenerate = false;
     for(const RenderObject::Snapshot& i : layerContext._items)
     {

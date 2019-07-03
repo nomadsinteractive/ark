@@ -23,7 +23,7 @@ public:
 
     void initialize();
 
-    int32_t setupBindings();
+    void setupUniforms();
 
     sp<PipelineFactory> _pipeline_factory;
     sp<PipelineInput> _input;
@@ -45,7 +45,7 @@ public:
 
     void addAttribute(const String& name, const String& type);
     void addSnippet(const sp<Snippet>& snippet);
-    void addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding);
+    void addUniform(const String& name, Uniform::Type type, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding);
     void addUniform(const sp<Uniform>& uniform);
 
     Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t scopes);

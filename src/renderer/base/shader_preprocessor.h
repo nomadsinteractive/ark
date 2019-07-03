@@ -48,17 +48,19 @@ public:
 
     class Declaration {
     public:
-        Declaration(const String& name, const String& type, const sp<String>& source);
+        Declaration(const String& name, const String& type, uint32_t length, const sp<String>& source);
         DEFAULT_COPY_AND_ASSIGN(Declaration);
 
         const String& name() const;
         const String& type() const;
+        uint32_t length() const;
 
         const sp<String>& source() const;
 
     private:
         String _name;
         String _type;
+        uint32_t _length;
 
         sp<String> _source;
     };
@@ -139,7 +141,7 @@ public:
 
     void initialize(const String& source, PipelineBuildingContext& context);
 
-    void setupBindings(const std::vector<sp<Uniform>>& uniforms, int32_t& counter);
+    void setupUniforms(Table<String, sp<Uniform>>& uniforms, int32_t& counter);
 
     Preprocessor preprocess();
 
@@ -152,10 +154,10 @@ private:
     void parseDeclarations(PipelineBuildingContext& context);
     size_t parseFunctionBody(const String& s, String& body) const;
 
-    String getDeclarations() const;
+    String genDeclarations() const;
 
     void addInclude(const String& source, const String& filepath);
-    void addUniform(const String& type, const String& name, const sp<String>& declaration);
+    void addUniform(const String& type, const String& name, uint32_t length, const sp<String>& declaration);
 
 private:
     sp<CodeBlock> _main_block;

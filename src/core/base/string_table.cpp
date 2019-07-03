@@ -43,8 +43,9 @@ const sp<StringBundle>& StringTable::getStringBundle(const String& name)
 sp<String> StringTable::getString(const String& stringTableName, const String& stringName, bool alert)
 {
     const sp<StringBundle>& sb = getStringBundle(stringTableName);
+    DCHECK(!alert || sb, "String bundle \"%s\" does not exist", stringTableName.c_str());
     const sp<String> str = sb ? sb->get(stringName) : sp<String>::null();
-    DCHECK(!alert || str, "String resource \"%s/%s\" does not exists", stringTableName.c_str(), stringName.c_str());
+    DCHECK(!alert || str, "String bundle \"%s\" has no resource \"%s\"", stringTableName.c_str(), stringName.c_str());
     return str;
 }
 

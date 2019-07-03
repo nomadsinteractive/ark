@@ -13,9 +13,10 @@
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_context.h"
 
+#define ARRAY_PATTERN       "(?:\\[\\s*(\\d+)\\s*\\])?"
 #define VAR_TYPE_PATTERN    "\\s+(int|uint8|float|vec2|vec3|vec4|mat3|mat4|sampler2D|samplerCube)\\s+"
-#define ATTRIBUTE_PATTERN   VAR_TYPE_PATTERN "(?:a_|v_)(\\w+);"
-#define UNIFORM_PATTERN     "\\s+(\\w+)\\s+" "(u_\\w+)(?:\\[\\s*(\\d+)\\s*\\])?;"
+#define ATTRIBUTE_PATTERN   VAR_TYPE_PATTERN "(?:a_|v_)(\\w+)" ARRAY_PATTERN ";"
+#define UNIFORM_PATTERN     "\\s+(\\w+)\\s+" "(u_\\w+)" ARRAY_PATTERN ";"
 
 #define INDENT_STR "    "
 
@@ -64,6 +65,11 @@ void ShaderPreprocessor::initialize(const String& source, PipelineBuildingContex
     parseDeclarations(context);
 }
 
+static bool sanitizer(const std::smatch& match) {
+    DWARN(false, match.str().c_str());
+    return false;
+};
+
 void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingContext& buildingContext)
 {
     if(source.find("void main()") != String::npos)
@@ -71,6 +77,8 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
         DWARN(false, "Shader which contains main function will not be preprocessed by ark shader preprocessor. Try to replace it with \"vec4 ark_main(vec4 position, ...)\" for better flexibilty and compatibilty");
         return;
     }
+
+    DWARN(source.search(_IN_PATTERN, sanitizer), "Non-standard attribute declared above, move it into ark_main function's parameters will disable this warning.");
 
     static const std::regex FUNC_PATTERN("vec4\\s+ark_main\\(([^)]*)\\)");
 
@@ -111,7 +119,8 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
 
     _main.replace(_UNIFORM_PATTERN, [this](const std::smatch& m) {
         const sp<String> declaration = sp<String>::make(m.str());
-        this->addUniform(m[1].str(), m[2].str(), declaration);
+        uint32_t length = m[3].str().empty() ? 1 : Strings::parse<uint32_t>(m[3].str());
+        this->addUniform(m[1].str(), m[2].str(), length, declaration);
         return nullptr;
     });
 
@@ -162,13 +171,23 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
 
 ShaderPreprocessor::Preprocessor ShaderPreprocessor::preprocess()
 {
-    return Preprocessor(_type, getDeclarations() + _main.str());
+    return Preprocessor(_type, genDeclarations() + _main.str());
 }
 
-void ShaderPreprocessor::setupBindings(const std::vector<sp<Uniform>>& uniforms, int32_t& binding)
+void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int32_t& binding)
 {
+    for(const auto& iter : _uniforms.vars())
+    {
+        const String& name = iter.first;
+        if(!uniforms.has(name))
+        {
+            const Declaration& declare = iter.second;
+            uniforms.push_back(name, sp<Uniform>::make(name, Uniform::toType(declare.type()), declare.length(), nullptr, nullptr));
+        }
+    }
+
     int32_t next = binding;
-    for(const sp<Uniform>& i : uniforms)
+    for(const sp<Uniform>& i : uniforms.values())
     {
         String::size_type pos = i->name().find('[');
         DCHECK(pos != 0, "Illegal uniform name: %s", i->name().c_str());
@@ -184,7 +203,7 @@ void ShaderPreprocessor::setupBindings(const std::vector<sp<Uniform>>& uniforms,
             {
                 const String type = i->getDeclaredType();
                 sp<String> declaration = sp<String>::make(i->declaration("uniform "));
-                _uniforms.vars().push_back(i->name(), Declaration(i->name(), type, declaration));
+                _uniforms.vars().push_back(i->name(), Declaration(i->name(), type, i->length(), declaration));
                 if(pos == String::npos)
                     _uniform_declarations.push_back(std::move(declaration));
             }
@@ -200,7 +219,7 @@ sp<Uniform> ShaderPreprocessor::getUniformInput(const String& name, Uniform::Typ
 
     const Declaration& declaration = _uniforms.vars().at(name);
     DCHECK(Uniform::toType(declaration.type()) == type, "Uniform \"%s\" declared type: %s, but it should be %d", name.c_str(), declaration.type().c_str(), type);
-    return sp<Uniform>::make(name, type, nullptr, nullptr);
+    return sp<Uniform>::make(name, type, 1, nullptr, nullptr);
 }
 
 String ShaderPreprocessor::outputName() const
@@ -217,9 +236,9 @@ size_t ShaderPreprocessor::parseFunctionBody(const String& s, String& body) cons
     return end + 1;
 }
 
-void ShaderPreprocessor::addUniform(const String& type, const String& name, const sp<String>& declaration)
+void ShaderPreprocessor::addUniform(const String& type, const String& name, uint32_t length, const sp<String>& declaration)
 {
-    Declaration uniform(name, type, declaration);
+    Declaration uniform(name, type, length, declaration);
     if(type.startsWith("sampler"))
         _samplers.vars().push_back(name, std::move(uniform));
     else
@@ -227,7 +246,7 @@ void ShaderPreprocessor::addUniform(const String& type, const String& name, cons
     _uniform_declarations.push_back(declaration);
 }
 
-String ShaderPreprocessor::getDeclarations() const
+String ShaderPreprocessor::genDeclarations() const
 {
     StringBuffer sb;
     if(_version && !_main.contains("#version "))
@@ -343,7 +362,7 @@ void ShaderPreprocessor::DeclarationList::declare(const String& type, const Stri
         const sp<String> declared = sp<String>::make(Strings::sprintf("%s %s %s%s;\n", _descriptor.c_str(), type.c_str(), prefix.c_str(), name.c_str()));
         _source.push_back(declared);
 
-        _vars.push_back(name, Declaration(name, type, declared));
+        _vars.push_back(name, Declaration(name, type, 1, declared));
     }
     else
         DCHECK(_vars.at(name).type() == type, "Declared type \"\" and variable type \"\" mismatch", _vars.at(name).type().c_str(), type.c_str());
@@ -353,7 +372,8 @@ void ShaderPreprocessor::DeclarationList::parse(const std::regex& pattern)
 {
     _source.replace(pattern, [this](const std::smatch& m) {
         const sp<String> declaration = sp<String>::make(m.str());
-        _vars.push_back(m[2].str(), Declaration(m[2].str(), m[1].str(), declaration));
+        uint32_t length = m[3].str().empty() ? 1 : Strings::parse<uint32_t>(m[3].str());
+        _vars.push_back(m[2].str(), Declaration(m[2].str(), m[1].str(), length, declaration));
         return declaration;
     });
 }
@@ -489,8 +509,8 @@ void ShaderPreprocessor::Source::insertBefore(const String& statement, const Str
     }
 }
 
-ShaderPreprocessor::Declaration::Declaration(const String& name, const String& type, const sp<String>& source)
-    : _name(name), _type(type), _source(source)
+ShaderPreprocessor::Declaration::Declaration(const String& name, const String& type, uint32_t length, const sp<String>& source)
+    : _name(name), _type(type), _length(length), _source(source)
 {
 }
 
@@ -502,6 +522,11 @@ const String& ShaderPreprocessor::Declaration::name() const
 const String& ShaderPreprocessor::Declaration::type() const
 {
     return _type;
+}
+
+uint32_t ShaderPreprocessor::Declaration::length() const
+{
+    return _length;
 }
 
 const sp<String>& ShaderPreprocessor::Declaration::source() const

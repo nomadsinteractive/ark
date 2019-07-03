@@ -103,11 +103,12 @@ Resource::RecycleFunc GLPipeline::recycle()
 
 void GLPipeline::bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo)
 {
-    for(size_t i = 0; i < ubo->uniforms().size(); ++i)
+    const std::vector<sp<Uniform>>& uniforms = ubo->uniforms().values();
+    for(size_t i = 0; i < uniforms.size(); ++i)
     {
         if(uboSnapshot._dirty_flags->buf()[i] || _rebind_needed)
         {
-            const sp<Uniform>& uniform = ubo->uniforms().at(i);
+            const sp<Uniform>& uniform = uniforms.at(i);
             uint8_t* buf = uboSnapshot._buffer->buf();
             const auto pair = ubo->slots().at(i);
             bindUniform(reinterpret_cast<float*>(buf + pair.first), pair.second, uniform);
@@ -454,7 +455,7 @@ void GLPipeline::GLDrawElements::draw(GraphicsContext& /*graphicsContext*/)
     if(_cull_face)
         glEnable(GL_CULL_FACE);
     const GLScissor scissor(_parameters._scissor);
-    glDrawElements(_mode, static_cast<GLsizei>(_parameters._count), GLIndexType, reinterpret_cast<GLvoid*>(_parameters._start * sizeof(glindex_t)));
+    glDrawElements(_mode, static_cast<GLsizei>(_parameters._count), GLIndexType, reinterpret_cast<GLvoid*>(_parameters._start * sizeof(element_index_t)));
     if(_cull_face)
         glDisable(GL_CULL_FACE);
 }

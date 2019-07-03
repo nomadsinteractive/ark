@@ -77,6 +77,17 @@ int32_t PipelineInput::getAttributeOffset(const String& name, uint32_t divisor) 
     return getStream(divisor).getAttributeOffset(name);
 }
 
+sp<Uniform> PipelineInput::getUniform(const String& name) const
+{
+    for(const sp<UBO>& i : _ubos)
+    {
+        const auto iter = i->uniforms().find(name);
+        if(iter != i->uniforms().end())
+            return iter->second;
+    }
+    return nullptr;
+}
+
 PipelineInput::Stream::Stream()
     : _stride(0)
 {
@@ -126,14 +137,15 @@ void PipelineInput::UBO::doSnapshot(bool force) const
 {
     uint8_t* buf = _buffer->buf();
     uint8_t* dirtyFlags = _dirty_flags->buf();
-    for(size_t i = 0; i < _uniforms.size(); ++i)
+    const std::vector<sp<Uniform>>& uniforms = _uniforms.values();
+    for(size_t i = 0; i < uniforms.size(); ++i)
     {
-        const Uniform& uniform = _uniforms.at(i);
+        const Uniform& uniform = uniforms.at(i);
         const sp<Flatable>& flatable = uniform.flatable();
         dirtyFlags[i] = static_cast<uint8_t>(force || uniform.dirty());
-        if(dirtyFlags[i])
+        if(dirtyFlags[i] && flatable)
             flatable->flat(buf);
-        buf += flatable->size();
+        buf += uniform.size();
     }
 }
 
@@ -160,11 +172,11 @@ size_t PipelineInput::UBO::size() const
 
 void PipelineInput::UBO::notify() const
 {
-    for(const sp<Uniform>& i : _uniforms)
+    for(const sp<Uniform>& i : _uniforms.values())
         i->notify();
 }
 
-const std::vector<sp<Uniform>>& PipelineInput::UBO::uniforms() const
+const Table<String, sp<Uniform> >& PipelineInput::UBO::uniforms() const
 {
     return _uniforms;
 }
@@ -186,15 +198,15 @@ const std::set<Shader::Stage>& PipelineInput::UBO::stages() const
 
 void PipelineInput::UBO::initialize()
 {
-    size_t size = 0;
-    for(const auto& i : _uniforms)
+    size_t offset = 0;
+    for(const auto& i : _uniforms.values())
     {
-        size_t s = i->flatable()->size();
-        _slots.push_back(std::make_pair(size, s));
-        size += s;
-        DCHECK(size % 4 == 0, "Uniform aligment error, offset: %d", size);
+        size_t s = i->size();
+        _slots.push_back(std::make_pair(offset, s));
+        offset += s;
+        DCHECK(offset % 4 == 0, "Uniform aligment error, offset: %d", offset);
     }
-    _buffer = sp<ByteArray::Allocated>::make(size);
+    _buffer = sp<ByteArray::Allocated>::make(offset);
     memset(_buffer->buf(), 0, _buffer->size());
 
     _dirty_flags = (sp<ByteArray::Allocated>::make(_uniforms.size()));
@@ -204,7 +216,7 @@ void PipelineInput::UBO::initialize()
 
 void PipelineInput::UBO::addUniform(const sp<Uniform>& uniform)
 {
-    _uniforms.push_back(uniform);
+    _uniforms.push_back(uniform->name(), uniform);
 }
 
 }

@@ -10,8 +10,8 @@
 
 namespace ark {
 
-Uniform::Uniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
-    : _name(name), _type(type), _flatable(flatable), _notifier(notifier), _dirty_flag(_notifier ? _notifier->createDirtyFlag() : sp<Boolean>::null()), _binding(binding)
+Uniform::Uniform(const String& name, Uniform::Type type, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
+    : _name(name), _type(type), _length(length), _flatable(flatable), _notifier(notifier), _dirty_flag(_notifier ? _notifier->createDirtyFlag() : sp<Boolean>::null()), _binding(binding)
 {
 }
 
@@ -23,6 +23,20 @@ const String& Uniform::name() const
 Uniform::Type Uniform::type() const
 {
     return _type;
+}
+
+uint32_t Uniform::length() const
+{
+    return _length;
+}
+
+size_t Uniform::size() const
+{
+    const size_t typeSizes[TYPE_COUNT] = {0, 4, 4, 8, 16, 16, 4, 4, 8, 16, 16, 36, 36, 64, 64, 4};
+    size_t s = typeSizes[_type] * _length;
+    DCHECK(!_flatable || _flatable->size() <= s, "Uniform buffer overflow, name: \"%s\", size: %d, flatable size: %d", _name.c_str(), s, _flatable->size());
+    DWARN(!_flatable || _flatable->size() == s, "Uniform buffer size mismatch, name: \"%s\", size: %d, flatable size: %d", _name.c_str(), s, _flatable->size());
+    return _flatable ? _flatable->size() : s;
 }
 
 int32_t Uniform::binding() const

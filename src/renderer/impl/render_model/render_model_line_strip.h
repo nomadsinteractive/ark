@@ -34,7 +34,7 @@ public:
     };
 
 private:
-    std::vector<glindex_t> makeIndices(const RenderLayer::Snapshot& layerContext);
+    std::vector<element_index_t> makeIndices(const RenderLayer::Snapshot& layerContext);
 
 private:
     sp<Atlas> _atlas;

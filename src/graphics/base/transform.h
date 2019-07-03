@@ -27,8 +27,6 @@ public:
 
         Matrix toMatrix() const;
 
-        bool isFrontfaceCCW() const;
-
         bool operator ==(const Snapshot& other) const;
         bool operator !=(const Snapshot& other) const;
 

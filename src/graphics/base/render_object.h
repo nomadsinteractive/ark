@@ -124,19 +124,6 @@ public:
         SafePtr<Builder<Varyings>> _varyings;
     };
 
-//  [[plugin::style("expired")]]
-    class EXPIRED_STYLE : public Builder<RenderObject> {
-    public:
-        EXPIRED_STYLE(BeanFactory& factory, const sp<Builder<RenderObject>>& delegate, const String& value);
-
-        virtual sp<RenderObject> build(const sp<Scope>& args) override;
-
-    private:
-        sp<Builder<RenderObject>> _delegate;
-        sp<Builder<Disposed>> _disposable;
-
-    };
-
 private:
     sp<IntegerWrapper> _type;
 

@@ -116,8 +116,8 @@ private:
 typedef Uploader::Array<uint8_t> ByteArrayUploader;
 typedef Uploader::ArrayList<uint8_t> ByteArrayListUploader;
 
-typedef Uploader::Array<glindex_t> IndexArrayUploader;
-typedef Uploader::ArrayList<glindex_t> IndexArrayListUploader;
+typedef Uploader::Array<element_index_t> IndexArrayUploader;
+typedef Uploader::ArrayList<element_index_t> IndexArrayListUploader;
 
 }
 

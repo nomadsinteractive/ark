@@ -71,11 +71,6 @@ Matrix Transform::Snapshot::toMatrix() const
     return matrix;
 }
 
-bool Transform::Snapshot::isFrontfaceCCW() const
-{
-    return Math::signEquals(scale.x(), scale.y());
-}
-
 bool Transform::Snapshot::operator ==(const Transform::Snapshot& other) const
 {
     return translate == other.translate && scale == other.scale && rotate_value == other.rotate_value && rotate_direction == other.rotate_direction;

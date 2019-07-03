@@ -16,7 +16,7 @@
 
 namespace ark {
 
-class PipelineInput {
+class ARK_API PipelineInput {
 public:
     class Stream {
     public:
@@ -50,7 +50,7 @@ public:
         uint32_t binding() const;
         size_t size() const;
 
-        const std::vector<sp<Uniform>>& uniforms() const;
+        const Table<String, sp<Uniform>>& uniforms() const;
         const std::vector<std::pair<uintptr_t, size_t>>& slots() const;
 
         void addStage(Shader::Stage stage);
@@ -62,7 +62,7 @@ public:
         void doSnapshot(bool force) const;
 
     private:
-        std::vector<sp<Uniform>> _uniforms;
+        Table<String, sp<Uniform>> _uniforms;
         uint32_t _binding;
 
         std::vector<std::pair<uintptr_t, size_t>> _slots;
@@ -92,6 +92,8 @@ public:
 
     const Attribute& getAttribute(const String& name, uint32_t divisor = 0) const;
     int32_t getAttributeOffset(const String& name, uint32_t divisor = 0) const;
+
+    sp<Uniform> getUniform(const String& name) const;
 
 private:
     std::vector<sp<UBO>> _ubos;

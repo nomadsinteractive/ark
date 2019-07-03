@@ -39,7 +39,7 @@ public:
     };
 
 public:
-    class Snapshot {
+    class ARK_API Snapshot {
     public:
         Snapshot() = default;
         Snapshot(const sp<Delegate>& stub);
@@ -64,7 +64,7 @@ public:
         size_t _size;
     };
 
-    class Builder {
+    class ARK_API Builder {
     public:
         Builder(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t stride, size_t growCapacity);
         DEFAULT_COPY_AND_ASSIGN(Builder);

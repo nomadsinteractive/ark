@@ -82,7 +82,7 @@ private:
     void insertUBOStruct(ShaderPreprocessor& shader, PipelineInput::UBO& ubo) const {
         StringBuffer sb;
         sb << "layout (binding = " << ubo.binding() << ") uniform UBO" << ubo.binding() << " {\n";
-        for(const auto& i : ubo.uniforms()) {
+        for(const auto& i : ubo.uniforms().values()) {
             shader._main.replace(i->name(), Strings::sprintf("ubo%d.%s", ubo.binding(), i->name().c_str()));
             sb << i->declaration("") << '\n';
         }
@@ -91,7 +91,7 @@ private:
     }
 
     bool hasUBO(ShaderPreprocessor& shader, PipelineInput::UBO& ubo) const {
-        for(const auto& i : ubo.uniforms())
+        for(const auto& i : ubo.uniforms().values())
             if(shader._main.contains(i->name()))
                 return true;
         return false;

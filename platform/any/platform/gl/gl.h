@@ -5,7 +5,7 @@
 
 namespace ark {
 
-const GLenum GLIndexType = sizeof(glindex_t) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+const GLenum GLIndexType = sizeof(element_index_t) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
 
 }
 

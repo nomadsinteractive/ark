@@ -31,9 +31,7 @@ public:
 
     virtual sp<String> build(const sp<Scope>& /*args*/) override {
         const Global<StringTable> stringTable;
-        const sp<String> s = stringTable->getString(_package, _resid);
-        DCHECK(s, "String resource \"%s\" not found", _package ? Strings::sprintf("%s/%s", _package.c_str(), _resid.c_str()).c_str() : _resid.c_str());
-        return s;
+        return stringTable->getString(_package, _resid);
     }
 
 private:

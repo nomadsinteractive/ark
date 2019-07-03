@@ -82,7 +82,7 @@ void PipelineLayout::initialize(const Camera& camera)
     addUniform("u_View", camera.view(), camera.notifier());
     addUniform("u_Projection", camera.projection(), camera.notifier());
 
-    _building_context->setupBindings();
+    _building_context->setupUniforms();
 
     _input->initialize(_building_context);
 }

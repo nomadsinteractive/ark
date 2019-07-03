@@ -15,7 +15,6 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
-#include "renderer/base/render_controller.h"
 #include "renderer/base/varyings.h"
 
 namespace ark {
@@ -70,7 +69,7 @@ private:
 
     Buffer::Snapshot _indices;
 
-    glindex_t _indice_base;
+    element_index_t _indice_base;
 
     Transform::Snapshot _transform;
     V3 _translate;

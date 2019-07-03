@@ -17,7 +17,7 @@
 
 namespace ark {
 
-GLModelNinePatch::Item::Item(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
+RenderModelNinePatch::Item::Item(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
     : _paddings(patches)
 {
     _x[0] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left()), textureWidth);
@@ -34,7 +34,7 @@ GLModelNinePatch::Item::Item(const Rect& bounds, const Rect& patches, uint32_t t
     _paddings.setBottom(bounds.height() - patches.bottom());
 }
 
-GLModelNinePatch::GLModelNinePatch(const RenderController& renderController, const document& manifest, const sp<Atlas>& atlas)
+RenderModelNinePatch::RenderModelNinePatch(const RenderController& renderController, const document& manifest, const sp<Atlas>& atlas)
     : _atlas(atlas), _index_buffer(renderController.getNamedBuffer(NamedBuffer::NAME_NINE_PATCH))
 {
     uint32_t textureWidth = static_cast<uint32_t>(_atlas->texture()->width());
@@ -58,19 +58,19 @@ GLModelNinePatch::GLModelNinePatch(const RenderController& renderController, con
     }
 }
 
-sp<ShaderBindings> GLModelNinePatch::makeShaderBindings(const Shader& shader)
+sp<ShaderBindings> RenderModelNinePatch::makeShaderBindings(const Shader& shader)
 {
     const sp<ShaderBindings> bindings = shader.makeBindings(RENDER_MODE_TRIANGLE_STRIP, shader.renderController()->makeVertexBuffer(), _index_buffer->buffer());
     bindings->pipelineBindings()->bindSampler(_atlas->texture());
     return bindings;
 }
 
-void GLModelNinePatch::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
+void RenderModelNinePatch::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
 {
     snapshot._index_buffer = _index_buffer->snapshot(renderController, snapshot._items.size());
 }
 
-void GLModelNinePatch::start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot)
+void RenderModelNinePatch::start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     DCHECK(snapshot._items.size() > 0, "LayerSnapshot has no RenderObjects");
 
@@ -78,7 +78,7 @@ void GLModelNinePatch::start(ModelBuffer& buf, const RenderLayer::Snapshot& snap
     buf.setIndices(snapshot._index_buffer);
 }
 
-void GLModelNinePatch::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
+void RenderModelNinePatch::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
     const Item& item = _nine_patch_items.at(snapshot._type);
     const Rect& paddings = item._paddings;
@@ -94,20 +94,20 @@ void GLModelNinePatch::load(ModelBuffer& buf, const RenderObject::Snapshot& snap
     }
 }
 
-Rect GLModelNinePatch::getPatches(const document& doc, const Rect& bounds) const
+Rect RenderModelNinePatch::getPatches(const document& doc, const Rect& bounds) const
 {
     const Rect pad = Documents::ensureAttribute<Rect>(doc, Constants::Attributes::NINE_PATCH_PADDINGS);
     return Rect(pad.left(), pad.top(), bounds.width() - pad.right(), bounds.height() - pad.bottom());
 }
 
-GLModelNinePatch::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+RenderModelNinePatch::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _manifest(manifest), _atlas(factory.ensureBuilder<Atlas>(manifest)), _resource_loader_context(resourceLoaderContext)
 {
 }
 
-sp<RenderModel> GLModelNinePatch::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> RenderModelNinePatch::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<GLModelNinePatch>::make(_resource_loader_context->renderController(), _manifest, _atlas->build(args));
+    return sp<RenderModelNinePatch>::make(_resource_loader_context->renderController(), _manifest, _atlas->build(args));
 }
 
 }

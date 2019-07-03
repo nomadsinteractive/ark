@@ -194,18 +194,7 @@ RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<RenderObject> RenderObject::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<Integer> type = _type->build(args);
-    return sp<RenderObject>::make(type, _position->build(args), _size->build(args), _transform->build(args), _varyings->build(args));
-}
-
-RenderObject::EXPIRED_STYLE::EXPIRED_STYLE(BeanFactory& factory, const sp<Builder<RenderObject>>& delegate, const String& value)
-    : _delegate(delegate), _disposable(factory.ensureBuilder<Disposed>(value))
-{
-}
-
-sp<RenderObject> RenderObject::EXPIRED_STYLE::build(const sp<Scope>& args)
-{
-    return _delegate->build(args).absorb(_disposable->build(args));
+    return sp<RenderObject>::make(_type->build(args), _position->build(args), _size->build(args), _transform->build(args), _varyings->build(args));
 }
 
 RenderObject::Snapshot::Snapshot(int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings)

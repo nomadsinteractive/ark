@@ -55,7 +55,7 @@ DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings
 }
 
 DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& vertexBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount)
-    : DrawingContext(shader, shaderBindings, std::move(ubo), vertexBuffer, indexBuffer, instanceCount, 0, indexBuffer.length<glindex_t>())
+    : DrawingContext(shader, shaderBindings, std::move(ubo), vertexBuffer, indexBuffer, instanceCount, 0, indexBuffer.length<element_index_t>())
 {
 }
 

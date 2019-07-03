@@ -30,14 +30,18 @@ public:
         TYPE_MAT3V,
         TYPE_MAT4,
         TYPE_MAT4V,
-        TYPE_SAMPLER2D
+        TYPE_SAMPLER2D,
+        TYPE_COUNT
     };
 
-    Uniform(const String& name, Type type, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding = -1);
+    Uniform(const String& name, Type type, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding = -1);
     DEFAULT_COPY_AND_ASSIGN(Uniform);
 
     const String& name() const;
     Type type() const;
+    uint32_t length() const;
+
+    size_t size() const;
 
     static Type toType(const String& declaredType);
 
@@ -58,6 +62,7 @@ public:
 private:
     String _name;
     Type _type;
+    uint32_t _length;
     sp<Flatable> _flatable;
     sp<Notifier> _notifier;
     sp<Boolean> _dirty_flag;

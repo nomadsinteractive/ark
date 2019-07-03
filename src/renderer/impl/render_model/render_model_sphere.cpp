@@ -29,18 +29,18 @@ GLModelSphere::GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderCont
         }
     }
 
-    glindex_t* indices = _indices_boiler_plate->buf();
+    element_index_t* indices = _indices_boiler_plate->buf();
     for(uint32_t i = 0; i < sampleCount * 2; i++)
     {
-        glindex_t offset = static_cast<glindex_t>(i * (sampleCount + 1));
+        element_index_t offset = static_cast<element_index_t>(i * (sampleCount + 1));
         if(i != 0)
             degenerate(indices, offset);
         (*indices++) = offset;
         for(uint32_t j = 1; j < sampleCount; ++j) {
-            (*indices++) = static_cast<glindex_t>(offset + j + sampleCount + 1);
-            (*indices++) = static_cast<glindex_t>(offset + j);
+            (*indices++) = static_cast<element_index_t>(offset + j + sampleCount + 1);
+            (*indices++) = static_cast<element_index_t>(offset + j);
         }
-        (*indices++) = (glindex_t) (offset + sampleCount);
+        (*indices++) = (element_index_t) (offset + sampleCount);
     }
 }
 
@@ -101,7 +101,7 @@ void GLModelSphere::buildTexture(float*& buffer, float lng, float lat) const
     (*buffer++) = y;
 }
 
-void GLModelSphere::degenerate(glindex_t*& buffer, glindex_t index) const
+void GLModelSphere::degenerate(element_index_t*& buffer, element_index_t index) const
 {
     uint16_t d = *(buffer - 1);
     (*buffer++) = d;

@@ -20,7 +20,7 @@ sp<RenderLayer> NinePatchLayer::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Atlas> atlas = _atlas->build(args);
     const sp<Shader> shader = _shader->build(args);
-    return sp<RenderLayer>::make(sp<GLModelNinePatch>::make(_resource_loader_context->renderController(), _manifest, atlas), shader, _resource_loader_context);
+    return sp<RenderLayer>::make(sp<RenderModelNinePatch>::make(_resource_loader_context->renderController(), _manifest, atlas), shader, _resource_loader_context);
 }
 
 }

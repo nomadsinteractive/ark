@@ -78,7 +78,7 @@ void ModelBuffer::nextVertex()
 
 void ModelBuffer::nextModel()
 {
-    _indice_base = static_cast<glindex_t>(_vertices.size() / _vertices.stride());
+    _indice_base = static_cast<element_index_t>(_vertices.size() / _vertices.stride());
 }
 
 void ModelBuffer::setTranslate(const V3& translate)

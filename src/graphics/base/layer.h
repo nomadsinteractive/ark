@@ -17,7 +17,7 @@ namespace ark {
 class ARK_API Layer : public Renderer {
 public:
 // [[script::bindings::auto]]
-    Layer(const sp<RenderLayer>& renderer);
+    Layer(const sp<RenderLayer>& renderer = nullptr);
 
 //  [[script::bindings::meta(expire())]]
 //  [[script::bindings::meta(isExpired())]]
@@ -25,6 +25,11 @@ public:
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
     void draw(float x, float y, const sp<RenderObject>& renderObject);
+
+// [[script::bindings::auto]]
+    void attach(const sp<RenderLayer>& renderLayer);
+// [[script::bindings::auto]]
+    void detach();
 
 // [[script::bindings::property]]
     const sp<RenderLayer>& renderer() const;

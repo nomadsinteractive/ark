@@ -100,11 +100,11 @@ class NumericWrapper : public Numeric {
 };
 */
 
-typedef uint16_t glindex_t;
+typedef uint16_t element_index_t;
 
 typedef Array<uint8_t>  ByteArray;
 typedef Array<int32_t>  IntArray;
-typedef Array<glindex_t>  IndexArray;
+typedef Array<element_index_t>  IndexArray;
 typedef Array<float>    FloatArray;
 
 typedef uint32_t TypeId;

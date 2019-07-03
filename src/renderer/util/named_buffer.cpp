@@ -37,7 +37,7 @@ Buffer::Snapshot NamedBuffer::NamedBuffer::snapshot(RenderController& renderCont
 }
 
 NamedBuffer::NinePatch::NinePatch(size_t objectCount)
-    : Uploader(((28 + 2) * objectCount - 2) * sizeof(glindex_t)), _object_count(objectCount),
+    : Uploader(((28 + 2) * objectCount - 2) * sizeof(element_index_t)), _object_count(objectCount),
       _boiler_plate({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15}) {
     DASSERT(_object_count);
 }
@@ -46,14 +46,14 @@ void NamedBuffer::NinePatch::upload(const Uploader::UploadFunc& uploader)
 {
     const size_t bolierPlateLength = _boiler_plate.length();
     bytearray array = sp<ByteArray::Allocated>::make(size());
-    glindex_t* buf = reinterpret_cast<glindex_t*>(array->buf());
-    glindex_t* src = _boiler_plate.buf();
+    element_index_t* buf = reinterpret_cast<element_index_t*>(array->buf());
+    element_index_t* src = _boiler_plate.buf();
     for(size_t i = 0; i < _object_count; i ++) {
         for(size_t j = 0; j < bolierPlateLength; j ++)
-            buf[j] = static_cast<glindex_t>(src[j] + i * 16);
+            buf[j] = static_cast<element_index_t>(src[j] + i * 16);
         if(i + 1 != _object_count) {
-            buf[bolierPlateLength] = static_cast<glindex_t>(15 + i * 16);
-            buf[bolierPlateLength + 1] = static_cast<glindex_t>((i + 1) * 16);
+            buf[bolierPlateLength] = static_cast<element_index_t>(15 + i * 16);
+            buf[bolierPlateLength + 1] = static_cast<element_index_t>((i + 1) * 16);
         }
         buf += ((bolierPlateLength + 2));
     }
@@ -65,11 +65,11 @@ sp<NamedBuffer> NamedBuffer::NinePatch::make(RenderController& renderController)
 {
     return sp<NamedBuffer>::make(renderController.makeIndexBuffer(Buffer::USAGE_STATIC),
                                                    [](size_t objectCount)->sp<Uploader> { return sp<NinePatch>::make(objectCount); },
-                                                   [](size_t objectCount)->size_t { return ((28 + 2) * objectCount - 2) * sizeof(glindex_t); });
+                                                   [](size_t objectCount)->size_t { return ((28 + 2) * objectCount - 2) * sizeof(element_index_t); });
 }
 
 NamedBuffer::Quads::Quads(size_t objectCount)
-    : Uploader(objectCount * 6 * sizeof(glindex_t)), _object_count(objectCount)
+    : Uploader(objectCount * 6 * sizeof(element_index_t)), _object_count(objectCount)
 {
 }
 
@@ -77,10 +77,10 @@ void NamedBuffer::Quads::upload(const Uploader::UploadFunc& uploader)
 {
     bytearray result = sp<ByteArray::Allocated>::make(size());
 
-    glindex_t* buf = reinterpret_cast<glindex_t*>(result->buf());
+    element_index_t* buf = reinterpret_cast<element_index_t*>(result->buf());
     size_t idx = 0;
     for(size_t i = 0; i < _object_count; i ++) {
-        glindex_t offset = static_cast<glindex_t>(i * 4);
+        element_index_t offset = static_cast<element_index_t>(i * 4);
 
         buf[idx++] = offset;
         buf[idx++] = offset + 2;
@@ -101,11 +101,11 @@ sp<NamedBuffer> NamedBuffer::Quads::make(RenderController& renderController)
 {
     return sp<NamedBuffer>::make(renderController.makeIndexBuffer(Buffer::USAGE_STATIC),
                                                    [](size_t objectCount)->sp<Uploader> { return sp<Quads>::make(objectCount); },
-                                                   [](size_t objectCount)->size_t { return objectCount * 6 * sizeof(glindex_t); });
+                                                   [](size_t objectCount)->size_t { return objectCount * 6 * sizeof(element_index_t); });
 }
 
 NamedBuffer::Points::Points(size_t objectCount)
-    : Uploader(objectCount * sizeof(glindex_t)), _object_count(objectCount)
+    : Uploader(objectCount * sizeof(element_index_t)), _object_count(objectCount)
 {
 }
 
@@ -113,10 +113,10 @@ void NamedBuffer::Points::upload(const Uploader::UploadFunc& uploader)
 {
     const auto result = sp<IndexArray::Allocated>::make(_object_count);
 
-    glindex_t* buf = result->buf();
+    element_index_t* buf = result->buf();
     size_t idx = 0;
     for(size_t i = 0; i < _object_count; i ++) {
-        glindex_t offset = static_cast<glindex_t>(i);
+        element_index_t offset = static_cast<element_index_t>(i);
         buf[idx++] = offset;
     }
     uploader(result->buf(), result->size());
@@ -126,7 +126,7 @@ sp<NamedBuffer> NamedBuffer::Points::make(RenderController& renderController)
 {
     return sp<NamedBuffer>::make(renderController.makeIndexBuffer(Buffer::USAGE_STATIC),
                                                    [](size_t objectCount)->sp<Uploader> { return sp<Points>::make(objectCount); },
-                                                   [](size_t objectCount)->size_t { return objectCount * sizeof(glindex_t); });
+                                                   [](size_t objectCount)->size_t { return objectCount * sizeof(element_index_t); });
 }
 
 }

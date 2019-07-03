@@ -10,7 +10,7 @@
 namespace ark {
 
 Layer::Layer(const sp<RenderLayer>& renderer)
-    : _render_layer(renderer), _layer_context(renderer->makeContext())
+    : _render_layer(renderer), _layer_context(renderer ? renderer->makeContext() : sp<LayerContext>::null())
 {
 }
 
@@ -26,6 +26,18 @@ void Layer::render(RenderRequest& /*renderRequest*/, float x, float y)
 void Layer::draw(float x, float y, const sp<RenderObject>& renderObject)
 {
     _layer_context->draw(x, y, renderObject);
+}
+
+void Layer::attach(const sp<RenderLayer>& renderLayer)
+{
+    _render_layer = renderLayer;
+    _layer_context = _render_layer->makeContext();
+}
+
+void Layer::detach()
+{
+    _render_layer = nullptr;
+    _layer_context = nullptr;
 }
 
 const sp<RenderLayer>& Layer::renderer() const

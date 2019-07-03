@@ -28,9 +28,9 @@ const std::vector<attribute>& DOMElement::attributes() const
 
 const sp<DOMAttribute>& DOMElement::getAttribute(const String& name) const
 {
-    size_t iter = _attributes.find(name);
-    if(iter != Constants::npos)
-        return _attributes.values().at(iter);
+    const auto iter = _attributes.find(name);
+    if(iter != _attributes.end())
+        return iter->second;
     return attribute::null();
 }
 

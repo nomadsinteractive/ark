@@ -37,7 +37,7 @@ public:
 private:
     void buildVertex(float*& buffer, float lng, float lat) const;
     void buildTexture(float*& buffer, float lng, float lat) const;
-    void degenerate(glindex_t*& buffer, glindex_t index) const;
+    void degenerate(element_index_t*& buffer, element_index_t index) const;
 
 private:
     sp<Atlas> _atlas;

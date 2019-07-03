@@ -40,26 +40,14 @@ void GLModelQuad::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
     buf.writePosition(0 - pivot.x() * width, 0 - pivot.y() * height, 0);
     buf.writeTexCoordinate(texCoord.left(), texCoord.top());
 
-    if(buf.transform().isFrontfaceCCW())
-    {
-        buf.nextVertex();
-        buf.writePosition(0 - pivot.x() * width, height - pivot.y() * height, 0);
-        buf.writeTexCoordinate(texCoord.left(), texCoord.bottom());
+    buf.nextVertex();
+    buf.writePosition(0 - pivot.x() * width, height - pivot.y() * height, 0);
+    buf.writeTexCoordinate(texCoord.left(), texCoord.bottom());
 
-        buf.nextVertex();
-        buf.writePosition(width - pivot.x() * width, 0 - pivot.y() * height, 0);
-        buf.writeTexCoordinate(texCoord.right(), texCoord.top());
-    }
-    else
-    {
-        buf.nextVertex();
-        buf.writePosition(width - pivot.x() * width, 0 - pivot.y() * height, 0);
-        buf.writeTexCoordinate(texCoord.right(), texCoord.top());
+    buf.nextVertex();
+    buf.writePosition(width - pivot.x() * width, 0 - pivot.y() * height, 0);
+    buf.writeTexCoordinate(texCoord.right(), texCoord.top());
 
-        buf.nextVertex();
-        buf.writePosition(0 - pivot.x() * width, height - pivot.y() * height, 0);
-        buf.writeTexCoordinate(texCoord.left(), texCoord.bottom());
-    }
     buf.nextVertex();
     buf.writePosition(width - pivot.x() * width, height - pivot.y() * height, 0);
     buf.writeTexCoordinate(texCoord.right(), texCoord.bottom());

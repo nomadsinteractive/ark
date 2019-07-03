@@ -32,7 +32,9 @@ option(ARK_BUILD_PLUGIN_FMOD "Build fmod plugin" OFF)
 option(ARK_DOWNLOAD_DEPENDENCIES "Download dependency libraries automatically" ON)
 
 ark_compile_definition_option(ARK_BUILD_STATIC_PLUGINS "Build static plugin libraries" OFF)
-ark_compile_definition_option(ARK_USE_LIBJPEG_TURBO "Use libjpeg-turbo decoding library" ${WIN32})
+if(WIN32)
+    ark_compile_definition_option(ARK_USE_LIBJPEG_TURBO "Use libjpeg-turbo decoding library" OFF)
+endif()
 ark_compile_definition_option(ARK_USE_LIBPNG "Use libpng decoding library" ON)
 ark_compile_definition_option(ARK_USE_STB_IMAGE "Use stb image decoding library" ON)
 

@@ -11,6 +11,7 @@ class Characters;
 class Framebuffer;
 class Pipeline;
 class PipelineFactory;
+class Model;
 class ModelBuffer;
 class NamedBuffer;
 class RenderModel;

@@ -130,13 +130,11 @@ void PipelineBuildingContext::initialize()
         _vertex._outs.declare(i.first, "", i.second);
 }
 
-int32_t PipelineBuildingContext::setupBindings()
+void PipelineBuildingContext::setupUniforms()
 {
     int32_t binding = 0;
-    const std::vector<sp<Uniform>>& uniforms = _uniforms.values();
-    _vertex.setupBindings(uniforms, binding);
-    _fragment.setupBindings(uniforms, binding);
-    return binding;
+    _vertex.setupUniforms(_uniforms, binding);
+    _fragment.setupUniforms(_uniforms, binding);
 }
 
 void PipelineBuildingContext::addAttribute(const String& name, const String& type)
@@ -151,9 +149,9 @@ void PipelineBuildingContext::addSnippet(const sp<Snippet>& snippet)
     _snippet = _snippet ? sp<Snippet>::adopt(new SnippetLinkedChain(_snippet, snippet)) : snippet;
 }
 
-void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
+void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
 {
-    _uniforms.push_back(name, sp<Uniform>::make(name, type, flatable, notifier, binding));
+    _uniforms.push_back(name, sp<Uniform>::make(name, type, length, flatable, notifier, binding));
 }
 
 void PipelineBuildingContext::addUniform(const sp<Uniform>& uniform)
@@ -221,7 +219,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         default:
             FATAL("Unknow type \"%s\"", type.c_str());
         }
-        addUniform(name, uType, uType == Uniform::TYPE_F3 ? sp<Flatable>::adopt(new AlignedFlatable(flatable, 16)) : flatable, flatable.as<Notifier>(), binding);
+        addUniform(name, uType, 1, uType == Uniform::TYPE_F3 ? sp<Flatable>::adopt(new AlignedFlatable(flatable, 16)) : flatable, flatable.as<Notifier>(), binding);
     }
 }
 
@@ -253,6 +251,8 @@ Attribute PipelineBuildingContext::makePredefinedAttribute(const String& name, c
         return Attribute("a_Position", Attribute::TYPE_FLOAT, type, 3, false);
     if(type == "float")
         return Attribute("a_" + name, Attribute::TYPE_FLOAT, type, 1, false);
+    if(type == "int")
+        return Attribute("a_" + name, Attribute::TYPE_INTEGER, type, 1, false);
     if(type == "vec4")
         return Attribute("a_" + name, Attribute::TYPE_FLOAT, type, 4, false);
     if(type == "vec4b")

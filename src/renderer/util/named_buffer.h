@@ -38,7 +38,7 @@ public:
 
     private:
         size_t _object_count;
-        ark::Array<glindex_t>::Fixed<28> _boiler_plate;
+        ark::Array<element_index_t>::Fixed<28> _boiler_plate;
     };
 
     class Quads : public Uploader {

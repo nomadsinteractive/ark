@@ -7,7 +7,7 @@
 
 namespace ark {
 
-const VkIndexType kVKIndexType = sizeof(glindex_t) == 2 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
+const VkIndexType kVKIndexType = sizeof(element_index_t) == 2 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
 
 }
 

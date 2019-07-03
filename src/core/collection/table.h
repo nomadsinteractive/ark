@@ -10,6 +10,73 @@ namespace ark {
 
 template<typename T, typename U> class Table {
 public:
+    struct Iterator {
+        typedef std::pair<std::reference_wrapper<const T>, std::reference_wrapper<const U>> PairType;
+
+        Iterator(const std::vector<T>& keys, const std::vector<U>& values, size_t iterator)
+            : _keys(keys), _values(values), _iterator(iterator), _value(iterator != Constants::npos ? new PairType(_keys.at(_iterator), _values.at(_iterator)) : nullptr) {
+            DCHECK(keys.size() == values.size(), "Zipped iterator must be equal length");
+        }
+        Iterator(Iterator&& other)
+            : _keys(other._keys), _values(other._values), _iterator(other._iterator), _value(other._value) {
+            other._value = nullptr;
+        }
+        DISALLOW_COPY_AND_ASSIGN(Iterator);
+        ~Iterator() {
+            delete _value;
+        }
+
+        Iterator& operator ++() {
+            next();
+            return *this;
+        }
+
+        bool operator == (const Iterator& other) const {
+            return &_keys == &other._keys && &_values == &other._values && _iterator == other._iterator;
+        }
+
+        bool operator != (const Iterator& other) const {
+            return !(*this == other);
+        }
+
+        Iterator operator ++(int) {
+            next();
+            return Iterator(_keys, _values, _iterator - 1);
+        }
+
+        const PairType& operator *() const {
+            DASSERT(_value);
+            return *_value;
+        }
+
+        const PairType* operator ->() const {
+            DASSERT(_value);
+            return _value;
+        }
+
+    private:
+        void next() {
+            DASSERT(_value);
+            DASSERT(_iterator != Constants::npos);
+            DASSERT(_iterator < _keys.size());
+            ++_iterator;
+            if(_iterator == _keys.size())
+                _iterator = Constants::npos;
+            else
+                *_value = PairType(_keys.at(_iterator), _values.at(_iterator));
+        }
+
+    private:
+        const std::vector<T>& _keys;
+        const std::vector<U>& _values;
+
+        size_t _iterator;
+        PairType* _value;
+    };
+
+    typedef Iterator const_iterator;
+
+public:
     Table() = default;
     DEFAULT_COPY_AND_ASSIGN(Table);
 
@@ -22,11 +89,6 @@ public:
 
     bool has(const T& key) const {
         return _indices.find(key) != _indices.end();
-    }
-
-    size_t find(const T& key) const {
-        const auto iter = _indices.find(key);
-        return iter != _indices.end() ? iter->second : Constants::npos;
     }
 
     const std::vector<T>& keys() const {
@@ -42,17 +104,9 @@ public:
     }
 
     const U& at(const T& key) const {
-        size_t index = find(key);
-        DCHECK(index != Constants::npos, "Key not found");
-        DCHECK(index < _values.size(), "Index out of range");
-        return _values[index];
-    }
-
-    U& at(const T& key) {
-        size_t index = find(key);
-        DCHECK(index != Constants::npos, "Key not found");
-        DCHECK(index < _values.size(), "Index out of range");
-        return _values[index];
+        const auto iter = find(key);
+        DCHECK(iter != end(), "Key not found");
+        return iter->second;
     }
 
     U& operator[](const T& key) {
@@ -65,47 +119,17 @@ public:
         return _values.back();
     }
 
-    template<typename TIter, typename UIter> struct Iterator {
-        TIter _key_iter;
-        UIter _value_iter;
-
-        Iterator(TIter keyIter, UIter valueIter)
-            : _key_iter(std::move(keyIter)), _value_iter(std::move(valueIter)) {
-        }
-
-        Iterator& operator ++() {
-            ++(this->_key_iter);
-            ++(this->_value_iter);
-            return *this;
-        }
-
-        bool operator == (const Iterator<TIter, UIter>& other) const {
-            bool equal = this->_key_iter == other._key_iter;
-            DCHECK(equal == (this->_value_iter == other._value_iter), "Zipped iterator must be both equal or neither");
-            return equal;
-        }
-
-        bool operator != (const Iterator<TIter, UIter>& other) const {
-            return !(*this == other);
-        }
-
-        Iterator operator ++(int) {
-            return Iterator(_key_iter++, _value_iter++);
-        }
-
-        std::pair<T, U> operator *() const {
-            return std::pair<T, U>(*_key_iter, *_value_iter);
-        }
-    };
-
-    typedef Iterator<typename std::vector<T>::const_iterator, typename std::vector<U>::const_iterator> const_iterator;
-
     const_iterator begin() const {
-        return const_iterator(_keys.begin(), _values.begin());
+        return const_iterator(_keys, _values, _keys.empty() ? Constants::npos : 0);
     }
 
     const_iterator end() const {
-        return const_iterator(_keys.end(), _values.end());
+        return const_iterator(_keys, _values, Constants::npos);
+    }
+
+    const_iterator find(const T& key) const {
+        const auto iter = _indices.find(key);
+        return iter != _indices.end() ? const_iterator(_keys, _values, iter->second) : end();
     }
 
     template<typename V> V toMap() const {

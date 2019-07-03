@@ -13,7 +13,7 @@
 
 namespace ark {
 
-class GLModelNinePatch : public RenderModel {
+class RenderModelNinePatch : public RenderModel {
 private:
     struct Item {
         Item(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight);
@@ -27,7 +27,7 @@ private:
     };
 
 public:
-    GLModelNinePatch(const RenderController& renderController, const document& manifest, const sp<Atlas>& atlas);
+    RenderModelNinePatch(const RenderController& renderController, const document& manifest, const sp<Atlas>& atlas);
 
     virtual sp<ShaderBindings> makeShaderBindings(const Shader& shader) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;

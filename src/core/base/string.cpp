@@ -31,7 +31,7 @@ String::~String()
 {
 }
 
-const String& String::operator =(const char* other)
+String& String::operator =(const char* other)
 {
     _str = other;
     return *this;
