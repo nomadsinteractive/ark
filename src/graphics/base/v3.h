@@ -18,6 +18,11 @@ public:
     bool operator ==(const V3& other) const;
     bool operator !=(const V3& other) const;
 
+    V3& operator +=(const V3& other);
+    V3& operator -=(const V3& other);
+    V3& operator *=(const V3& other);
+    V3& operator /=(const V3& other);
+
     friend V3 operator +(const V3& lvalue, const V3& rvalue);
     friend V3 operator -(const V3& lvalue, const V3& rvalue);
     friend V3 operator *(const V3& lvalue, const V3& rvalue);

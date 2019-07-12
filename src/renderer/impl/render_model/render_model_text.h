@@ -49,8 +49,8 @@ public:
 
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
-    virtual void start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot) override;
-    virtual void load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot) override;
+    virtual void start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot) override;
+    virtual void load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot) override;
     virtual Metrics measure(int32_t type) override;
 
 //  [[plugin::resource-loader("text")]]

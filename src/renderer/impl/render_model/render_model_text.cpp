@@ -8,7 +8,7 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
-#include "renderer/base/model_buffer.h"
+#include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
@@ -132,12 +132,12 @@ void GLModelText::postSnapshot(RenderController& renderController, RenderLayer::
     _stub->_delegate->postSnapshot(renderController, snapshot);
 }
 
-void GLModelText::start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot)
+void GLModelText::start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     _stub->_delegate->start(buf, snapshot);
 }
 
-void GLModelText::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
+void GLModelText::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
     _stub->_delegate->load(buf, snapshot);
 }

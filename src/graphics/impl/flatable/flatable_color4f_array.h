@@ -11,7 +11,7 @@ namespace ark {
 
 class FlatableColor4fArray : public Flatable {
 public:
-    FlatableColor4fArray(const sp<Array<Color>>& colorArray);
+    FlatableColor4fArray(const sp<ark::Array<Color>>& colorArray);
 
     virtual void flat(void* buf) override;
     virtual uint32_t size() override;
@@ -24,11 +24,11 @@ public:
         virtual sp<Flatable> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Array<Color>>> _color_array;
+        sp<Builder<ark::Array<Color>>> _color_array;
     };
 
 private:
-    sp<Array<Color>> _color_array;
+    sp<ark::Array<Color>> _color_array;
 
 };
 

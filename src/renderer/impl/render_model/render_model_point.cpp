@@ -1,7 +1,7 @@
 #include "renderer/impl/render_model/render_model_point.h"
 
 #include "renderer/base/atlas.h"
-#include "renderer/base/model_buffer.h"
+#include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader.h"
@@ -26,13 +26,13 @@ void GLModelPoint::postSnapshot(RenderController& renderController, RenderLayer:
     snapshot._index_buffer = _index_buffer->snapshot(renderController, snapshot._items.size());
 }
 
-void GLModelPoint::start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot)
+void GLModelPoint::start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     buf.vertices().setGrowCapacity(snapshot._items.size());
     buf.setIndices(snapshot._index_buffer);
 }
 
-void GLModelPoint::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
+void GLModelPoint::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
     const Atlas::Item& texCoord = _atlas->at(snapshot._type);
     buf.nextVertex();

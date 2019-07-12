@@ -22,7 +22,9 @@ public:
     bool operator !=(const V2& other) const;
 
     V2& operator +=(const V2& other);
+    V2& operator -=(const V2& other);
     V2& operator *=(const V2& other);
+    V2& operator /=(const V2& other);
 
     friend V2 operator +(const V2& lvalue, const V2& rvalue);
     friend V2 operator -(const V2& lvalue, const V2& rvalue);

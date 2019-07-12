@@ -12,14 +12,19 @@ LayerContext::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
 {
 }
 
-LayerContext::LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier>& notifier)
-    : _render_model(renderModel), _notifier(notifier), _render_requested(false)
+LayerContext::LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier>& notifier, Layer::Type type)
+    : _render_model(renderModel), _notifier(notifier), _layer_type(type), _render_requested(false)
 {
 }
 
 const sp<RenderModel>& LayerContext::renderModel() const
 {
     return _render_model;
+}
+
+Layer::Type LayerContext::layerType() const
+{
+    return _layer_type;
 }
 
 void LayerContext::renderRequest(const V2& position)
@@ -102,7 +107,7 @@ sp<LayerContext> LayerContext::BUILDER::build(const sp<Scope>& args)
         return _layer->build(args)->context();
     const sp<RenderLayer> renderLayer = _render_layer->build(args);
     if(_make_context)
-        return renderLayer->makeContext();
+        return renderLayer->makeContext(Layer::TYPE_DYNAMIC);
     return renderLayer->context();
 }
 

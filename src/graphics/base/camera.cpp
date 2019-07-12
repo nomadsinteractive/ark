@@ -79,35 +79,41 @@ private:
 
 Camera::Camera()
     : _view(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))), _projection(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))),
-      _notifier(sp<Notifier>::make())
+      _vp(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))), _notifier(sp<Notifier>::make())
 {
 }
 
-void Camera::ortho(float left, float right, float top, float bottom, float near, float far, float upDirection)
+void Camera::ortho(float left, float right, float bottom, float top, float near, float far, float upDirection)
 {
     if(upDirection  < 0)
         std::swap(top, bottom);
 
-    _vp = sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix::ortho(left, right, top, bottom, near * 2 - far, far)));
+    _vp->_value = sp<Variable<Matrix>::Const>::make(Matrix::ortho(left, right, bottom, top, near * 2 - far, far));
     _notifier->notify();
+}
+
+void Camera::frustum(float left, float right, float bottom, float top, float near, float far)
+{
+    _projection->_value = sp<Variable<Matrix>::Const>::make(Matrix::frustum(left, right, bottom, top, near, far));
+    updateViewProjection();
 }
 
 void Camera::perspective(float fov, float aspect, float near, float far)
 {
-    _projection = sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix::perspective(fov, aspect, near * 2 - far, far)));
+    _projection->_value = sp<Variable<Matrix>::Const>::make(Matrix::perspective(fov, aspect, near, far));
     updateViewProjection();
 }
 
 void Camera::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    _view = sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix::lookAt(position, target, up)));
+    _view->_value = sp<Variable<Matrix>::Const>::make(Matrix::lookAt(position, target, up));
     updateViewProjection();
 }
 
 void Camera::lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up)
 {
-    const auto var = sp<FrustumMatrixVariable>::make(position, target, up, _notifier);
-    _view = sp<Holder>::make(var);
+    const sp<FrustumMatrixVariable> var = sp<FrustumMatrixVariable>::make(position, target, up, _notifier);
+    _view->_value = var;
     Ark::instance().applicationContext()->addPreRenderTask(var, sp<BooleanByWeakRef<Runnable>>::make(var, 1));
     updateViewProjection();
 }
@@ -132,11 +138,6 @@ const sp<Notifier>& Camera::notifier() const
     return _notifier;
 }
 
-Camera::Snapshot Camera::snapshot() const
-{
-    return Snapshot(_vp);
-}
-
 const sp<Camera>& Camera::getDefaultCamera()
 {
     const Global<Camera> camera;
@@ -146,13 +147,8 @@ const sp<Camera>& Camera::getDefaultCamera()
 
 void Camera::updateViewProjection()
 {
-    _vp = sp<Holder>::make(sp<MulMatrixVariable>::make(_projection->_value, _view->_value));
+    _vp->_value = sp<MulMatrixVariable>::make(_projection->_value, _view->_value);
     _notifier->notify();
-}
-
-Camera::Snapshot::Snapshot(Holder& holder)
-{
-    holder.flat(&_vp);
 }
 
 Camera::Holder::Holder(const sp<Variable<Matrix>>& value)

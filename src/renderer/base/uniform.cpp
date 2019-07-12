@@ -36,7 +36,7 @@ size_t Uniform::size() const
     size_t s = typeSizes[_type] * _length;
     DCHECK(!_flatable || _flatable->size() <= s, "Uniform buffer overflow, name: \"%s\", size: %d, flatable size: %d", _name.c_str(), s, _flatable->size());
     DWARN(!_flatable || _flatable->size() == s, "Uniform buffer size mismatch, name: \"%s\", size: %d, flatable size: %d", _name.c_str(), s, _flatable->size());
-    return _flatable ? _flatable->size() : s;
+    return s;
 }
 
 int32_t Uniform::binding() const

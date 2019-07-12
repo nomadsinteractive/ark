@@ -4,11 +4,10 @@
 #include <vector>
 
 #include "core/collection/list.h"
-#include "core/inf/duck.h"
-#include "core/types/class.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/layer.h"
 #include "graphics/base/render_object.h"
 #include "graphics/inf/renderer.h"
 
@@ -35,6 +34,7 @@ private:
         sp<ShaderBindings> _shader_bindings;
 
         sp<Notifier> _notifier;
+        sp<Boolean> _dirty;
         WeakRefList<LayerContext> _layer_contexts;
         sp<LayerContext> _layer_context;
 
@@ -48,6 +48,13 @@ public:
         bytearray _buffer;
     };
 
+    enum SnapshotFlag {
+        SNAPSHOT_FLAG_DYNAMIC,
+        SNAPSHOT_FLAG_STATIC_INITIALIZE,
+        SNAPSHOT_FLAG_STATIC_MODIFIED,
+        SNAPSHOT_FLAG_STATIC_REUSE
+    };
+
     struct Snapshot {
         Snapshot(Snapshot&& other) = default;
 
@@ -58,7 +65,8 @@ public:
         std::vector<RenderObject::Snapshot> _items;
 
         Buffer::Snapshot _index_buffer;
-        bool _dirty;
+
+        SnapshotFlag _flag;
 
         DISALLOW_COPY_AND_ASSIGN(Snapshot);
 
@@ -77,10 +85,11 @@ public:
 
     Snapshot snapshot() const;
 
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     const sp<LayerContext>& context() const;
+
 //[[script::bindings::auto]]
-    sp<LayerContext> makeContext() const;
+    sp<LayerContext> makeContext(Layer::Type layerType) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<RenderLayer> {

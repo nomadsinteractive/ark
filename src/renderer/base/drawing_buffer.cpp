@@ -1,4 +1,4 @@
-#include "renderer/base/model_buffer.h"
+#include "renderer/base/drawing_buffer.h"
 
 #include "core/inf/array.h"
 #include "core/base/memory_pool.h"
@@ -12,135 +12,137 @@
 
 namespace ark {
 
-ModelBuffer::ModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
+DrawingBuffer::DrawingBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
     : _shader_bindings(shaderBindings), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), stride, instanceCount),
       _divided_buffer_builders(shaderBindings->makeDividedBufferBuilders(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), instanceCount)),
       _indice_base(0), _is_instanced(_pipeline_bindings->hasDivisors())
 {
 }
 
-void ModelBuffer::writePosition(const V3& position)
+void DrawingBuffer::writePosition(const V3& position)
 {
-    _vertices.write<V3>(_is_instanced ? position : _transform.mapXYZ(position) + _translate, 0);
+    _vertices.write<V3>(position, 0);
 }
 
-void ModelBuffer::writePosition(float x, float y, float z)
+void DrawingBuffer::writePosition(float x, float y, float z)
 {
-    writePosition(V3(x, y, z));
+    const V3 position(x, y, z);
+    _vertices.write<V3>(_is_instanced ? position : (_transform.mapXYZ(position) + _translate), 0);
 }
 
-void ModelBuffer::writeTexCoordinate(uint16_t u, uint16_t v)
+void DrawingBuffer::writeTexCoordinate(uint16_t u, uint16_t v)
 {
     const uint16_t uv[2] = {u, v};
     _vertices.write(uv, _pipeline_bindings->attributes()._offsets, PipelineBindings::ATTRIBUTE_NAME_TEX_COORDINATE);
 }
 
-void ModelBuffer::writeNormal(float x, float y, float z)
+void DrawingBuffer::writeModelId(int32_t modelId)
+{
+    _vertices.write(modelId, _pipeline_bindings->attributes()._offsets, PipelineBindings::ATTRIBUTE_NAME_MODEL_ID);
+}
+
+void DrawingBuffer::writeNormal(float x, float y, float z)
 {
     writeNormal(V3(x, y, z));
 }
 
-void ModelBuffer::writeNormal(const V3& normal)
+void DrawingBuffer::writeNormal(const V3& normal)
 {
     _vertices.write(normal, _pipeline_bindings->attributes()._offsets, PipelineBindings::ATTRIBUTE_NAME_NORMAL);
 }
 
-void ModelBuffer::writeTangent(float x, float y, float z)
+void DrawingBuffer::writeTangent(float x, float y, float z)
 {
     writeTangent(V3(x, y, z));
 }
 
-void ModelBuffer::writeTangent(const V3& tangent)
+void DrawingBuffer::writeTangent(const V3& tangent)
 {
     _vertices.write(tangent, _pipeline_bindings->attributes()._offsets, PipelineBindings::ATTRIBUTE_NAME_TANGENT);
 }
 
-void ModelBuffer::writeBitangent(float x, float y, float z)
+void DrawingBuffer::writeBitangent(float x, float y, float z)
 {
     writeBitangent(V3(x, y, z));
 }
 
-void ModelBuffer::writeBitangent(const V3& bitangent)
+void DrawingBuffer::writeBitangent(const V3& bitangent)
 {
     _vertices.write(bitangent, _pipeline_bindings->attributes()._offsets, PipelineBindings::ATTRIBUTE_NAME_BITANGENT);
 }
 
-void ModelBuffer::applyVaryings()
+void DrawingBuffer::applyVaryings()
 {
-    _vertices.apply(_varyings._bytes);
+    if(_varyings._bytes)
+        _vertices.writeArray(_varyings._bytes);
 }
 
-void ModelBuffer::nextVertex()
+void DrawingBuffer::nextVertex()
 {
     _vertices.next();
     applyVaryings();
 }
 
-void ModelBuffer::nextModel()
+void DrawingBuffer::nextModel()
 {
-    _indice_base = static_cast<element_index_t>(_vertices.size() / _vertices.stride());
+    _indice_base = static_cast<element_index_t>(_vertices.length());
 }
 
-void ModelBuffer::setTranslate(const V3& translate)
+void DrawingBuffer::setTranslate(const V3& translate)
 {
     _translate = translate;
 }
 
-void ModelBuffer::setRenderObject(const RenderObject::Snapshot& renderObject)
+void DrawingBuffer::setRenderObject(const RenderObject::Snapshot& renderObject)
 {
     _transform = renderObject._transform;
     _varyings = renderObject._varyings;
 }
 
-const Buffer& ModelBuffer::indexBuffer() const
+const sp<ShaderBindings>& DrawingBuffer::shaderBindings() const
 {
-    return _shader_bindings->indexBuffer();
+    return _shader_bindings;
 }
 
-const Transform::Snapshot& ModelBuffer::transform() const
-{
-    return _transform;
-}
-
-const Buffer::Builder& ModelBuffer::vertices() const
+const Buffer::Builder& DrawingBuffer::vertices() const
 {
     return _vertices;
 }
 
-Buffer::Builder& ModelBuffer::vertices()
+Buffer::Builder& DrawingBuffer::vertices()
 {
     return _vertices;
 }
 
-const Buffer::Snapshot& ModelBuffer::indices() const
+const Buffer::Snapshot& DrawingBuffer::indices() const
 {
     return _indices;
 }
 
-void ModelBuffer::setIndices(Buffer::Snapshot indices)
+void DrawingBuffer::setIndices(Buffer::Snapshot indices)
 {
     _indices = std::move(indices);
 }
 
-bool ModelBuffer::isInstanced() const
+bool DrawingBuffer::isInstanced() const
 {
     return _is_instanced;
 }
 
-Buffer::Builder& ModelBuffer::getInstancedArrayBuilder(uint32_t divisor)
+Buffer::Builder& DrawingBuffer::getInstancedArrayBuilder(uint32_t divisor)
 {
     auto iter = _divided_buffer_builders.find(divisor);
     DCHECK(iter != _divided_buffer_builders.end(), "No instance buffer builder(%d) found", divisor);
     return iter->second;
 }
 
-std::vector<std::pair<uint32_t, Buffer::Snapshot>> ModelBuffer::makeDividedBufferSnapshots() const
+std::vector<std::pair<uint32_t, Buffer::Snapshot>> DrawingBuffer::makeDividedBufferSnapshots() const
 {
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots;
     DCHECK(_divided_buffer_builders.size() == _shader_bindings->divisors()->size(), "Instanced buffer size mismatch: %d, %d", _divided_buffer_builders.size(), _shader_bindings->divisors()->size());
 
-    for(const std::pair<uint32_t, Buffer>& i : *(_shader_bindings->divisors()))
-        snapshots.emplace_back(i.first, i.second.snapshot(_divided_buffer_builders.at(i.first).makeUploader()));
+    for(const auto& i : *(_shader_bindings->divisors()))
+        snapshots.emplace_back(i.first, _divided_buffer_builders.at(i.first).toSnapshot(i.second));
 
     return snapshots;
 }

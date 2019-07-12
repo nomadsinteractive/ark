@@ -303,8 +303,8 @@ void PythonInterpreter::logErr() const
     PyObject *ptype, *pvalue, *ptraceback;
     PyErr_Fetch(&ptype, &pvalue, &ptraceback);
     const char* pStrErrorMessage = PyUnicode_AsUTF8(pvalue);
-    PyErr_Restore(ptype, pvalue, ptraceback);
     LOGE("%s", pStrErrorMessage);
+    PyErr_Restore(ptype, pvalue, ptraceback);
 #endif
     PyErr_Clear();
 }

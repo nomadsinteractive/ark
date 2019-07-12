@@ -12,7 +12,7 @@
 
 namespace ark {
 
-class Uniform {
+class ARK_API Uniform {
 public:
     enum Type {
         TYPE_NONE,

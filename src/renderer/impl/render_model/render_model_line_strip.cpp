@@ -3,7 +3,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_bindings.h"
-#include "renderer/base/model_buffer.h"
+#include "renderer/base/drawing_buffer.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/resource_loader_context.h"
@@ -17,7 +17,7 @@ GLModelLineStrip::GLModelLineStrip(const sp<ResourceLoaderContext>& resourceLoad
 
 sp<ShaderBindings> GLModelLineStrip::makeShaderBindings(const Shader& shader)
 {
-    const sp<ShaderBindings> bindings = shader.makeBindings(RENDER_MODE_TRIANGLE_STRIP);
+    const sp<ShaderBindings> bindings = shader.makeBindings(RENDER_MODE_TRIANGLE_STRIP, shader.renderController()->makeVertexBuffer(), _ibo);
     bindings->pipelineBindings()->bindSampler(_atlas->texture());
     return bindings;
 }
@@ -56,13 +56,13 @@ std::vector<element_index_t> GLModelLineStrip::makeIndices(const RenderLayer::Sn
     return indices;
 }
 
-void GLModelLineStrip::start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot)
+void GLModelLineStrip::start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     buf.vertices().setGrowCapacity(snapshot._items.size());
     buf.setIndices(_indices);
 }
 
-void GLModelLineStrip::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
+void GLModelLineStrip::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
     if(snapshot._type)
     {

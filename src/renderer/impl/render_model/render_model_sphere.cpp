@@ -4,7 +4,7 @@
 #include "core/util/log.h"
 
 #include "renderer/base/atlas.h"
-#include "renderer/base/model_buffer.h"
+#include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
@@ -46,7 +46,7 @@ GLModelSphere::GLModelSphere(const sp<ResourceLoaderContext>& resourceLoaderCont
 
 sp<ShaderBindings> GLModelSphere::makeShaderBindings(const Shader& shader)
 {
-    const sp<ShaderBindings> bindings = shader.makeBindings(RENDER_MODE_TRIANGLE_STRIP);
+    const sp<ShaderBindings> bindings = shader.makeBindings(RENDER_MODE_TRIANGLE_STRIP, shader.renderController()->makeVertexBuffer(), _instance_index);
     bindings->pipelineBindings()->bindSampler(_atlas->texture());
     return bindings;
 }
@@ -55,13 +55,13 @@ void GLModelSphere::postSnapshot(RenderController& /*renderController*/, RenderL
 {
 }
 
-void GLModelSphere::start(ModelBuffer& buf, const RenderLayer::Snapshot& layerContext)
+void GLModelSphere::start(DrawingBuffer& buf, const RenderLayer::Snapshot& layerContext)
 {
     buf.vertices().setGrowCapacity(layerContext._items.size() * _vertex_count);
     buf.setIndices(_instance_index.snapshot());
 }
 
-void GLModelSphere::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
+void GLModelSphere::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
     float* elements = _vertices_boiler_plate->buf();
     const Atlas::Item& item = _atlas->at(snapshot._type);

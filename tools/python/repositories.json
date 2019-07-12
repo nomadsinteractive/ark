@@ -32,7 +32,7 @@
     {
         "url": "https://github.com/g-truc/glm.git",
         "name": "glm",
-        "tag": "0.9.8.4"
+        "tag": "0.9.9.5"
     },
     {
         "url": "https://github.com/anholt/libepoxy.git",

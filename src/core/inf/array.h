@@ -22,6 +22,7 @@ public:
     class Borrowed;
     template<size_t LEN> class Fixed;
 
+    template<typename U> class Casted;
 };
 
 
@@ -91,6 +92,20 @@ public:
 
 private:
     std::array<T, LEN> _data;
+};
+
+template<typename T> template<typename U> class Array<T>::Casted : public Array<T> {
+public:
+    virtual size_t length() override {
+        return _data->size() / sizeof(U);
+    }
+
+    virtual T* buf() override {
+        return reinterpret_cast<T*>(_data->buf());
+    }
+
+private:
+    sp<Array<U>> _data;
 };
 
 }

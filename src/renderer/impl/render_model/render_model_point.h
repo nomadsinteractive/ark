@@ -16,8 +16,8 @@ public:
     virtual sp<ShaderBindings> makeShaderBindings(const Shader& shader) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
-    virtual void start(ModelBuffer& buf, const RenderLayer::Snapshot& layerContext) override;
-    virtual void load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot) override;
+    virtual void start(DrawingBuffer& buf, const RenderLayer::Snapshot& layerContext) override;
+    virtual void load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot) override;
 
 //  [[plugin::resource-loader("point")]]
     class BUILDER : public Builder<RenderModel> {

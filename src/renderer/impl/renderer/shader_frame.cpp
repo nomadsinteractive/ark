@@ -19,8 +19,8 @@ namespace ark {
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _size(size), _shader(shader), _object_pool(resourceLoaderContext->objectPool()), _memory_pool(resourceLoaderContext->memoryPool()),
-      _shader_bindings(shader->makeBindings(RenderModel::RENDER_MODE_TRIANGLES)), _vertex_buffer(_shader_bindings->vertexBuffer()),
-      _index_buffer(resourceLoaderContext->renderController()->getNamedBuffer(NamedBuffer::NAME_QUADS)->snapshot(resourceLoaderContext->renderController(), 1))
+      _shader_bindings(shader->makeBindings(RenderModel::RENDER_MODE_TRIANGLES, resourceLoaderContext->renderController()->makeVertexBuffer(), resourceLoaderContext->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC))),
+      _vertex_buffer(_shader_bindings->vertexBuffer()), _index_buffer(resourceLoaderContext->renderController()->getNamedBuffer(NamedBuffer::NAME_QUADS)->snapshot(resourceLoaderContext->renderController(), 1))
 {
 }
 

@@ -2,7 +2,7 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
-#include "renderer/base/model_buffer.h"
+#include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
@@ -23,13 +23,13 @@ sp<ShaderBindings> GLModelQuad::makeShaderBindings(const Shader& shader)
     return bindings;
 }
 
-void GLModelQuad::start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot)
+void GLModelQuad::start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     buf.vertices().setGrowCapacity(4 * snapshot._items.size());
     buf.setIndices(snapshot._index_buffer);
 }
 
-void GLModelQuad::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
+void GLModelQuad::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
     const Atlas::Item& texCoord = _atlas->at(snapshot._type);
     const V2& pivot = texCoord.pivot();

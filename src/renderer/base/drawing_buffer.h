@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_MODEL_BUFFER_H_
-#define ARK_RENDERER_BASE_MODEL_BUFFER_H_
+#ifndef ARK_RENDERER_BASE_DRAWING_BUFFER_H_
+#define ARK_RENDERER_BASE_DRAWING_BUFFER_H_
 
 #include <vector>
 #include <map>
@@ -19,10 +19,10 @@
 
 namespace ark {
 
-class ARK_API ModelBuffer {
+class ARK_API DrawingBuffer {
 public:
-    ModelBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t renderObjectCount, uint32_t stride);
-    DEFAULT_COPY_AND_ASSIGN(ModelBuffer);
+    DrawingBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t renderObjectCount, uint32_t stride);
+    DEFAULT_COPY_AND_ASSIGN(DrawingBuffer);
 
     void writePosition(const V3& position);
     void writePosition(float x, float y, float z);
@@ -35,15 +35,15 @@ public:
 
     void writeTexCoordinate(uint16_t u, uint16_t v);
 
+    void writeModelId(int32_t modelId);
+
     void nextVertex();
     void nextModel();
 
     void setTranslate(const V3& translate);
     void setRenderObject(const RenderObject::Snapshot& renderObject);
 
-    const Buffer& indexBuffer() const;
-
-    const Transform::Snapshot& transform() const;
+    const sp<ShaderBindings>& shaderBindings() const;
 
     const Buffer::Builder& vertices() const;
     Buffer::Builder& vertices();

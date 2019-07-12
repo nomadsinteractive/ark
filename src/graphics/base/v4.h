@@ -17,6 +17,11 @@ public:
     bool operator ==(const V4& other) const;
     bool operator !=(const V4& other) const;
 
+    V4& operator +=(const V4& other);
+    V4& operator -=(const V4& other);
+    V4& operator *=(const V4& other);
+    V4& operator /=(const V4& other);
+
     friend V4 operator +(const V4& lvalue, const V4& rvalue);
     friend V4 operator -(const V4& lvalue, const V4& rvalue);
     friend V4 operator *(const V4& lvalue, const V4& rvalue);

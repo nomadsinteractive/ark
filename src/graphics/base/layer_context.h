@@ -8,10 +8,12 @@
 #include "graphics/forwarding.h"
 #include "graphics/base/v2.h"
 #include "graphics/base/render_layer.h"
+#include "graphics/base/layer.h"
 
 namespace ark {
 
-class ARK_API LayerContext {
+//[script::bindings::auto]]
+class LayerContext {
 private:
     struct Item {
         Item(float x, float y, const sp<RenderObject>& renderObject);
@@ -22,17 +24,17 @@ private:
     };
 
 public:
-    LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier>& notifier);
+    LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier>& notifier, Layer::Type type);
 
     const sp<RenderModel>& renderModel() const;
+
+    Layer::Type layerType() const;
 
     void renderRequest(const V2& position);
 
     void draw(float x, float y, const sp<RenderObject>& renderObject);
 
-// [[script::bindings::auto]]
     void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = sp<Boolean>::null());
-// [[script::bindings::auto]]
     void clear();
 
     void takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memoryPool);
@@ -64,6 +66,7 @@ private:
 private:
     sp<RenderModel> _render_model;
     sp<Notifier> _notifier;
+    Layer::Type _layer_type;
 
     bool _render_requested;
     V3 _position;

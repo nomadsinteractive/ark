@@ -60,7 +60,7 @@ DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings
 }
 
 DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& vertexBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount, uint32_t start, uint32_t count)
-    : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _vertex_buffer(vertexBuffer), _index_buffer(indexBuffer), _parameters(instanceCount, start, count, true)
+    : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _vertex_buffer(vertexBuffer), _index_buffer(indexBuffer), _parameters(instanceCount, start, count)
 {
     DWARN(_shader_bindings->vertexBuffer().id() == vertexBuffer.id(), "ShaderBinding's VertexBuffer: %lld, which is not the same as DrawingContext's VertexBuffer snapshot: %lld", _shader_bindings->vertexBuffer().id(), vertexBuffer.id());
 }
@@ -102,7 +102,7 @@ DrawingContext::Parameters::Parameters()
 {
 }
 
-DrawingContext::Parameters::Parameters(int32_t instanceCount, uint32_t start, uint32_t count, bool cullFace)
+DrawingContext::Parameters::Parameters(int32_t instanceCount, uint32_t start, uint32_t count)
     : _instance_count(instanceCount), _start(start), _count(count), _scissor(0, 0, -1.0f, -1.0f)
 {
 }

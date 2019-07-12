@@ -34,7 +34,7 @@ Matrix& Matrix::operator =(const Matrix& other)
 
 void Matrix::setIdentity()
 {
-    matrix<glm::mat4>() = glm::mat4();
+    matrix<glm::mat4>() = glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 }
 
 void Matrix::translate(float x, float y, float z)
@@ -70,14 +70,19 @@ void Matrix::map(const float x, const float y, const float z, float& transformed
     transformedZ = transformed.z;
 }
 
-Matrix Matrix::ortho(float left, float right, float top, float bottom, float near, float far)
+Matrix Matrix::ortho(float left, float right, float bottom, float top, float near, float far)
 {
-    return Matrix(glm::ortho(left, right, top, bottom, near, far));
+    return Matrix(glm::ortho(left, right, bottom, top, near, far));
 }
 
 Matrix Matrix::lookAt(const V3& position, const V3& target, const V3& up)
 {
     return Matrix(glm::lookAt(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z())));
+}
+
+Matrix Matrix::frustum(float left, float right, float bottom, float top, float near, float far)
+{
+    return Matrix(glm::frustum(left, right, bottom, top, near, far));
 }
 
 Matrix Matrix::perspective(float fov, float aspect, float near, float far)

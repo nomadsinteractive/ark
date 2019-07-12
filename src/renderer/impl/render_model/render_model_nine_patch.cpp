@@ -7,7 +7,7 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
-#include "renderer/base/model_buffer.h"
+#include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
@@ -70,7 +70,7 @@ void RenderModelNinePatch::postSnapshot(RenderController& renderController, Rend
     snapshot._index_buffer = _index_buffer->snapshot(renderController, snapshot._items.size());
 }
 
-void RenderModelNinePatch::start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot)
+void RenderModelNinePatch::start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     DCHECK(snapshot._items.size() > 0, "LayerSnapshot has no RenderObjects");
 
@@ -78,7 +78,7 @@ void RenderModelNinePatch::start(ModelBuffer& buf, const RenderLayer::Snapshot& 
     buf.setIndices(snapshot._index_buffer);
 }
 
-void RenderModelNinePatch::load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot)
+void RenderModelNinePatch::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
     const Item& item = _nine_patch_items.at(snapshot._type);
     const Rect& paddings = item._paddings;

@@ -31,15 +31,10 @@ public:
 //  [[script::bindings::auto]]
     Camera();
 
-    struct Snapshot {
-        Snapshot(Holder& holder);
-        DEFAULT_COPY_AND_ASSIGN(Snapshot);
-
-        Matrix _vp;
-    };
-
 //  [[script::bindings::auto]]
-    void ortho(float left, float right, float top, float bottom, float near, float far, float upDirection = 1.0f);
+    void ortho(float left, float right, float bottom, float top, float near, float far, float upDirection = 1.0f);
+//  [[script::bindings::auto]]
+    void frustum(float left, float right, float bottom, float top, float near, float far);
 //  [[script::bindings::auto]]
     void perspective(float fov, float aspect, float near, float far);
 
@@ -54,7 +49,7 @@ public:
 
     const sp<Notifier>& notifier() const;
 
-    Snapshot snapshot() const;
+//    Snapshot snapshot() const;
 
     static const sp<Camera>& getDefaultCamera();
 

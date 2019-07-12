@@ -47,6 +47,8 @@ public:
         Snapshot(const sp<Delegate>& stub, const sp<Uploader>& uploader);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
+        explicit operator bool() const;
+
         uint64_t id() const;
 
         template<typename T> size_t length() const {
@@ -79,18 +81,22 @@ public:
                 write<T>(value, offsets[name]);
         }
 
-        void setGrowCapacity(size_t growCapacity);
+        void writeArray(const bytearray& buf);
 
-        void apply(const bytearray& buf);
+        void append(bytearray buffer);
+
+        void setGrowCapacity(size_t growCapacity);
         void next();
 
-        sp<Uploader> makeUploader() const;
+        Snapshot toSnapshot(const Buffer& buffer) const;
 
         size_t stride() const;
-        size_t size() const;
+        size_t length() const;
 
     private:
         void grow();
+
+        sp<Uploader> makeUploader() const;
 
     private:
         sp<MemoryPool> _memory_pool;

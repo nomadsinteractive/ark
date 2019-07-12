@@ -29,8 +29,8 @@ public:
     virtual sp<ShaderBindings> makeShaderBindings(const Shader& shader) = 0;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) = 0;
 
-    virtual void start(ModelBuffer& buf, const RenderLayer::Snapshot& snapshot) = 0;
-    virtual void load(ModelBuffer& buf, const RenderObject::Snapshot& snapshot) = 0;
+    virtual void start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot) = 0;
+    virtual void load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot) = 0;
 
     virtual Metrics measure(int32_t type) { return Metrics(); }
 

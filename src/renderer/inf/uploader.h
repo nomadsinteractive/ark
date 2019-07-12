@@ -54,7 +54,7 @@ public:
     ArrayList(std::vector<sp<ark::Array<T>>> arrayList)
         : Uploader(0), _array_list(std::move(arrayList)) {
         for(const auto& i : _array_list)
-            _size += i->length();
+            _size += i->size();
     }
 
     virtual void upload(const UploadFunc& uploader) override {
@@ -63,7 +63,7 @@ public:
     }
 
 private:
-    std::vector<bytearray> _array_list;
+    std::vector<sp<ark::Array<T>>> _array_list;
 };
 
 template<typename T> class Uploader::Vector : public Uploader {

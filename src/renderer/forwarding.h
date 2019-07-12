@@ -12,7 +12,7 @@ class Framebuffer;
 class Pipeline;
 class PipelineFactory;
 class Model;
-class ModelBuffer;
+class DrawingBuffer;
 class NamedBuffer;
 class RenderModel;
 class SnippetFactory;

@@ -332,12 +332,16 @@ void GLPipeline::GLAttribute::bind(const Attribute& attribute, GLsizei stride) c
     }
 }
 
-void GLPipeline::GLAttribute::setVertexPointer(const Attribute& attribute, GLint location, GLsizei stride, uint32_t length, uint32_t offset) const
+void GLPipeline::GLAttribute::setVertexPointer(const Attribute& attribute, GLuint location, GLsizei stride, uint32_t length, uint32_t offset) const
 {
-    static const GLenum glTypes[Attribute::TYPE_COUNT] = {GL_BYTE, GL_FLOAT, GL_UNSIGNED_INT, GL_SHORT, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT};
+    static const GLenum glTypes[Attribute::TYPE_COUNT] = {GL_BYTE, GL_FLOAT, GL_INT, GL_SHORT, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT};
 
     glEnableVertexAttribArray(location);
-    glVertexAttribPointer(location, length, glTypes[attribute.type()], attribute.normalized() ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<void*>(offset));
+    if(attribute.type() == Attribute::TYPE_FLOAT || attribute.normalized())
+        glVertexAttribPointer(location, length, glTypes[attribute.type()], attribute.normalized() ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<void*>(offset));
+    else
+        glVertexAttribIPointer(location, length, glTypes[attribute.type()], stride, reinterpret_cast<void*>(offset));
+
     if(attribute.divisor())
         glVertexAttribDivisor(location, attribute.divisor());
 }

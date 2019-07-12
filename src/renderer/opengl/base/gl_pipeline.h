@@ -70,8 +70,7 @@ private:
         void bind(const Attribute& attribute, GLsizei stride) const;
 
     private:
-        void setVertexPointer(const Attribute& attribute, GLint location, GLsizei stride, uint32_t length, uint32_t offset) const;
-
+        void setVertexPointer(const Attribute& attribute, GLuint location, GLsizei stride, uint32_t length, uint32_t offset) const;
 
     private:
         GLint _location;

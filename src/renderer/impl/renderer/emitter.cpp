@@ -10,6 +10,7 @@
 #include "core/util/operators.h"
 
 #include "graphics/base/layer.h"
+#include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/v2.h"
 #include "graphics/impl/vec/vec_with_translation.h"

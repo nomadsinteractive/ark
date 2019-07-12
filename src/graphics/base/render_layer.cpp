@@ -10,7 +10,7 @@
 #include "graphics/base/size.h"
 
 #include "renderer/base/drawing_context.h"
-#include "renderer/base/model_buffer.h"
+#include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader.h"
@@ -24,49 +24,71 @@ namespace ark {
 
 RenderLayer::Stub::Stub(const sp<RenderModel>& renderModel, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_model(renderModel), _shader(shader), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
-      _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_render_model->makeShaderBindings(_shader)),
-      _notifier(sp<Notifier>::make()), _layer_context(sp<LayerContext>::make(renderModel, _notifier)), _stride(shader->input()->getStream(0).stride())
+      _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_render_model->makeShaderBindings(_shader)), _notifier(sp<Notifier>::make()),
+      _dirty(_notifier->createDirtyFlag()), _layer_context(sp<LayerContext>::make(renderModel, _notifier, Layer::TYPE_DYNAMIC)), _stride(shader->input()->getStream(0).stride())
 {
 }
 
 RenderLayer::Snapshot::Snapshot(const sp<Stub>& stub)
-    : _stub(stub), _ubos(stub->_shader->snapshot(_stub->_memory_pool))
+    : _stub(stub)
 {
-    stub->_layer_context->takeSnapshot(*this, stub->_memory_pool);
+    _stub->_layer_context->takeSnapshot(*this, stub->_memory_pool);
+
+    Layer::Type combined = Layer::TYPE_UNSPECIFIED;
 
     for(const sp<LayerContext>& i : stub->_layer_contexts)
+    {
         i->takeSnapshot(*this, stub->_memory_pool);
+        DWARN(combined != Layer::TYPE_STATIC || i->layerType() != Layer::TYPE_DYNAMIC, "Combining static and dynamic layers together leads to low efficiency");
+        if(combined != Layer::TYPE_DYNAMIC)
+            combined = i->layerType();
+    }
 
-    _dirty = true;
+    _stub->_render_model->postSnapshot(_stub->_render_controller, *this);
+
+    _ubos = _stub->_shader->snapshot(_stub->_memory_pool);
+
+    if(combined == Layer::TYPE_DYNAMIC)
+        _flag = SNAPSHOT_FLAG_DYNAMIC;
+    else
+    {
+        bool dirty = _stub->_dirty->val();
+        const Buffer& vbo = _stub->_shader_bindings->vertexBuffer();
+        const Buffer& ibo = _stub->_shader_bindings->indexBuffer();
+        if(vbo.size() == 0 || ibo.size() == 0)
+            _flag = SNAPSHOT_FLAG_STATIC_INITIALIZE;
+        else
+            _flag = dirty ? SNAPSHOT_FLAG_STATIC_MODIFIED : SNAPSHOT_FLAG_STATIC_REUSE;
+    }
 }
 
 sp<RenderCommand> RenderLayer::Snapshot::render(float x, float y)
 {
     if(_items.size() > 0)
     {
-        ModelBuffer buf(_stub->_resource_loader_context, _stub->_shader_bindings, _items.size(), _stub->_stride);
+        DrawingBuffer buf(_stub->_resource_loader_context, _stub->_shader_bindings, _items.size(), _stub->_stride);
         _stub->_render_model->start(buf, *this);
-        if(_dirty)
+
+        for(const RenderObject::Snapshot& i : _items)
         {
-            for(const RenderObject::Snapshot& i : _items)
+            buf.setRenderObject(i);
+            buf.setTranslate(V3(x + i._position.x(), y + i._position.y(), i._position.z()));
+            _stub->_render_model->load(buf, i);
+            if(buf.isInstanced())
             {
-                buf.setRenderObject(i);
-                buf.setTranslate(V3(x + i._position.x(), y + i._position.y(), i._position.z()));
-                _stub->_render_model->load(buf, i);
-                if(buf.isInstanced())
-                {
-                    Buffer::Builder& sBuilder = buf.getInstancedArrayBuilder(1);
-                    sBuilder.next();
-                    Matrix matrix = i._transform.toMatrix();
-                    matrix.translate(i._position.x(), i._position.y(), i._position.z());
-                    matrix.scale(i._size.x(), i._size.y(), i._size.z());
-                    sBuilder.write(matrix);
-                }
+                Buffer::Builder& sBuilder = buf.getInstancedArrayBuilder(1);
+                sBuilder.next();
+                Matrix matrix = i._transform.toMatrix();
+                matrix.translate(i._position.x(), i._position.y(), i._position.z());
+                matrix.scale(i._size.x(), i._size.y(), i._size.z());
+                sBuilder.write(matrix);
             }
         }
-        const Buffer& vertexBuffer = _stub->_shader_bindings->vertexBuffer();
-        Buffer::Snapshot vertexSnapshot = _dirty ? vertexBuffer.snapshot(buf.vertices().makeUploader()) : vertexBuffer.snapshot();
-        DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos), vertexSnapshot, buf.indices(), static_cast<int32_t>(_items.size()));
+
+        DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos),
+                                      buf.vertices().toSnapshot(_stub->_shader_bindings->vertexBuffer()),
+                                      buf.indices(),
+                                      static_cast<int32_t>(_items.size()));
         if(buf.isInstanced())
             drawingContext._instanced_array_snapshots = buf.makeDividedBufferSnapshots();
 
@@ -98,14 +120,12 @@ const sp<LayerContext>& RenderLayer::context() const
 
 RenderLayer::Snapshot RenderLayer::snapshot() const
 {
-    Snapshot snapshot(_stub);
-    _stub->_render_model->postSnapshot(_stub->_render_controller, snapshot);
-    return snapshot;
+    return Snapshot(_stub);
 }
 
-sp<LayerContext> RenderLayer::makeContext() const
+sp<LayerContext> RenderLayer::makeContext(Layer::Type layerType) const
 {
-    const sp<LayerContext> layerContext = sp<LayerContext>::make(_stub->_render_model, _stub->_notifier);
+    const sp<LayerContext> layerContext = sp<LayerContext>::make(_stub->_render_model, _stub->_notifier, layerType);
     _stub->_layer_contexts.push_back(layerContext);
     return layerContext;
 }

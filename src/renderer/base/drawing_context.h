@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_DRAWING_CONTEXT_H_
-#define ARK_RENDERER_BASE_DRAWING_CONTEXT_H_
+#ifndef ARK_RENDERER_BASE_DRAW_CONTEXT_H_
+#define ARK_RENDERER_BASE_DRAW_CONTEXT_H_
 
 #include <vector>
 
@@ -19,7 +19,7 @@ class ARK_API DrawingContext {
 public:
     struct Parameters {
         Parameters();
-        Parameters(int32_t instanceCount, uint32_t start, uint32_t count, bool cullFace);
+        Parameters(int32_t instanceCount, uint32_t start, uint32_t count);
 
         int32_t _instance_count;
 

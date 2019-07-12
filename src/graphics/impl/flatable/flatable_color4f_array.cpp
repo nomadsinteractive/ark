@@ -7,7 +7,7 @@
 
 namespace ark {
 
-FlatableColor4fArray::FlatableColor4fArray(const sp<Array<Color>>& colorArray)
+FlatableColor4fArray::FlatableColor4fArray(const sp<ark::Array<Color>>& colorArray)
     : _color_array(colorArray)
 {
 }
@@ -26,7 +26,7 @@ uint32_t FlatableColor4fArray::size()
 }
 
 FlatableColor4fArray::BUILDER::BUILDER(BeanFactory& parent, const String& value)
-    : _color_array(parent.ensureBuilder<Array<Color>>(value))
+    : _color_array(parent.ensureBuilder<ark::Array<Color>>(value))
 {
 }
 

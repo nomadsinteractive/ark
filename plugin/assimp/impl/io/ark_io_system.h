@@ -11,12 +11,10 @@ class ArkIOSystem : public Assimp::IOSystem {
 public:
 
     virtual bool Exists( const char* pFile) const;
-
     virtual char getOsSeparator() const;
-
     virtual Assimp::IOStream* Open(const char* pFile, const char* pMode = "rb");
-
     virtual void Close(Assimp::IOStream* pFile);
+
 };
 
 }

@@ -3,12 +3,9 @@
 
 #include <vector>
 
-#include "core/collection/list.h"
 #include "core/inf/builder.h"
-#include "core/types/class.h"
+#include "core/types/shared_ptr.h"
 
-#include "graphics/base/layer_context.h"
-#include "graphics/base/render_layer.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
 
@@ -16,8 +13,16 @@ namespace ark {
 
 class ARK_API Layer : public Renderer {
 public:
+//  [[script::bindings::enumeration]]
+    enum Type {
+        TYPE_UNSPECIFIED,
+        TYPE_DYNAMIC,
+        TYPE_STATIC
+    };
+
+public:
 // [[script::bindings::auto]]
-    Layer(const sp<RenderLayer>& renderer = nullptr);
+    Layer(const sp<RenderLayer>& renderLayer = nullptr, Layer::Type type = Layer::TYPE_DYNAMIC);
 
 //  [[script::bindings::meta(expire())]]
 //  [[script::bindings::meta(isExpired())]]
@@ -49,6 +54,7 @@ public:
         virtual sp<Layer> build(const sp<Scope>& args) override;
 
     private:
+        Layer::Type _type;
         sp<Builder<RenderLayer>> _render_layer;
         std::vector<sp<Builder<RenderObject>>> _render_objects;
     };
@@ -63,9 +69,6 @@ public:
     private:
         BUILDER_IMPL1 _builder_impl;
     };
-
-private:
-    Layer(const sp<RenderLayer::Stub>& stub);
 
 private:
     sp<RenderLayer> _render_layer;

@@ -12,7 +12,7 @@
 
 namespace ark {
 
-Transform::Transform(const sp<Rotate>& rotate, const sp<Vec>& scale, const sp<Vec>& translate)
+Transform::Transform(const sp<Rotate>& rotate, const sp<Vec3>& scale, const sp<Vec>& translate)
     : _rotate(rotate), _scale(scale), _translate(translate)
 {
 }
@@ -22,7 +22,7 @@ Transform::Snapshot Transform::snapshot() const
     Snapshot ss;
     ss.rotate_value = _rotate->radians();
     ss.rotate_direction = _rotate->direction()->val();
-    ss.scale = _scale ? V3(_scale->val()) : V3(1.0f, 1.0f, 1.0f);
+    ss.scale = _scale ? _scale->val() : V3(1.0f, 1.0f, 1.0f);
     ss.translate = _translate->val();
     return ss;
 }
@@ -37,12 +37,12 @@ void Transform::setRotate(const sp<Rotate>& rotate)
     _rotate = rotate;
 }
 
-const sp<Vec>& Transform::scale() const
+const sp<Vec3>& Transform::scale() const
 {
     return _scale;
 }
 
-void Transform::setScale(const sp<Vec>& scale)
+void Transform::setScale(const sp<Vec3>& scale)
 {
     _scale = scale;
 }
@@ -116,7 +116,7 @@ V3 Transform::Snapshot::mapXYZ(const V3& p) const
 }
 
 Transform::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _rotate(factory.getBuilder<Rotate>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec>(manifest, "scale")),
+    : _rotate(factory.getBuilder<Rotate>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec3>(manifest, "scale")),
       _translation(factory.getBuilder<Vec>(manifest, Constants::Attributes::TRANSLATION))
 {
 }

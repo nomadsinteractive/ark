@@ -14,21 +14,11 @@ class ArkIOStream : public Assimp::IOStream {
 public:
     ArkIOStream(const sp<Readable>& readable);
 
-    virtual size_t Read(void* pvBuffer,
-        size_t pSize,
-        size_t pCount);
-
-    virtual size_t Write(const void* pvBuffer,
-        size_t pSize,
-        size_t pCount);
-
-    virtual aiReturn Seek(size_t pOffset,
-        aiOrigin pOrigin);
-
+    virtual size_t Read(void* pvBuffer, size_t pSize, size_t pCount);
+    virtual size_t Write(const void* pvBuffer, size_t pSize, size_t pCount);
+    virtual aiReturn Seek(size_t pOffset, aiOrigin pOrigin);
     virtual size_t Tell() const;
-
     virtual size_t FileSize() const;
-
     virtual void Flush();
 
 private:
