@@ -48,6 +48,8 @@ private:
 
 private:
     float _value[16];
+
+    friend class Camera;
 };
 
 }

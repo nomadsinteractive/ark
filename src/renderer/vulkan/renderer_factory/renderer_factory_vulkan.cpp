@@ -91,6 +91,11 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buff
     return sp<VKBuffer>::make(_renderer, _recycler, usagesFlags[type], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
+sp<Camera::Delegate> RendererFactoryVulkan::createCamera()
+{
+    return sp<Camera::DelegateLH_ZO>::make();
+}
+
 sp<Framebuffer> RendererFactoryVulkan::createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture)
 {
     const sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, _recycler, texture);

@@ -101,6 +101,11 @@ sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buff
     return sp<GLBuffer>::make(type, usage, _recycler);
 }
 
+sp<Camera::Delegate> RendererFactoryOpenGL::createCamera()
+{
+    return sp<Camera::DelegateRH_NO>::make();
+}
+
 sp<Framebuffer> RendererFactoryOpenGL::createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture)
 {
     const sp<GLFramebuffer> fbo = sp<GLFramebuffer>::make(_recycler, texture);

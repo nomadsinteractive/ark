@@ -27,6 +27,32 @@ public:
         friend class Camera;
     };
 
+    class Delegate {
+    public:
+        virtual ~Delegate() = default;
+
+        virtual Matrix frustum(float left, float right, float bottom, float top, float near, float far) = 0;
+        virtual Matrix lookAt(const V3& position, const V3& target, const V3& up) = 0;
+        virtual Matrix ortho(float left, float right, float bottom, float top, float near, float far) = 0;
+        virtual Matrix perspective(float fov, float aspect, float near, float far) = 0;
+    };
+
+    class DelegateLH_ZO : public Delegate {
+    public:
+        virtual Matrix frustum(float left, float right, float bottom, float top, float near, float far) override;
+        virtual Matrix lookAt(const V3& position, const V3& target, const V3& up) override;
+        virtual Matrix ortho(float left, float right, float bottom, float top, float near, float far) override;
+        virtual Matrix perspective(float fov, float aspect, float near, float far) override;
+    };
+
+    class DelegateRH_NO : public Delegate {
+    public:
+        virtual Matrix frustum(float left, float right, float bottom, float top, float near, float far) override;
+        virtual Matrix lookAt(const V3& position, const V3& target, const V3& up) override;
+        virtual Matrix ortho(float left, float right, float bottom, float top, float near, float far) override;
+        virtual Matrix perspective(float fov, float aspect, float near, float far) override;
+    };
+
 public:
 //  [[script::bindings::auto]]
     Camera();
@@ -57,6 +83,8 @@ private:
     void updateViewProjection();
 
 private:
+    sp<Delegate> _delegate;
+
     sp<Holder> _view;
     sp<Holder> _projection;
 

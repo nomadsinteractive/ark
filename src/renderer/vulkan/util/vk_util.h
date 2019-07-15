@@ -28,6 +28,7 @@ public:
     static void createImage(const VKDevice& device, const VkImageCreateInfo& imageCreateInfo, VkImage* image, VkDeviceMemory* memory, VkMemoryPropertyFlags propertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
     static VkFormat getAttributeFormat(const Attribute& attribute);
+    static VkFormat toTextureFormat(uint32_t rowBytes, uint32_t width, uint8_t channels, Texture::Format format);
     static VkFormat toTextureFormat(const Bitmap& bitmap, Texture::Format format);
     static VkShaderStageFlagBits toStage(Shader::Stage stage);
     static VkPrimitiveTopology toPrimitiveTopology(RenderModel::Mode mode);

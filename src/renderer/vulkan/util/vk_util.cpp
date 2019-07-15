@@ -265,17 +265,22 @@ VkFormat VKUtil::getAttributeFormat(const Attribute& attribute)
     return VK_FORMAT_R32G32B32A32_SFLOAT;
 }
 
-VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, Texture::Format format)
+VkFormat VKUtil::toTextureFormat(uint32_t rowBytes, uint32_t width, uint8_t channels, Texture::Format format)
 {
     static const VkFormat vkFormats[] = {VK_FORMAT_R8_UNORM, VK_FORMAT_R8_SNORM, VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R32_UINT, VK_FORMAT_R32_SINT,
                                          VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8_SNORM, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R32G32_UINT, VK_FORMAT_R32G32_SINT,
                                          VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8_SNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R32G32B32_UINT, VK_FORMAT_R32G32B32_SINT,
                                          VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_SNORM, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R32G32B32A32_UINT, VK_FORMAT_R32G32B32A32_SINT};
     uint32_t signedOffset = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED ? 1 : 0;
-    uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
-    uint32_t channel8 = (bitmap.channels() - 1) * 8;
+    uint32_t byteCount = rowBytes / width / channels;
+    uint32_t channel8 = (channels - 1) * 8;
     DCHECK(byteCount > 0 && byteCount <= 4 && byteCount != 3, "Unsupported color-depth: %d", byteCount * 8);
     return vkFormats[channel8 + (byteCount - 1) * 2 + signedOffset];
+}
+
+VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, Texture::Format format)
+{
+    return toTextureFormat(bitmap.rowBytes(), bitmap.width(), bitmap.channels(), format);
 }
 
 VkShaderStageFlagBits VKUtil::toStage(Shader::Stage stage)

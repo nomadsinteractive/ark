@@ -5,6 +5,7 @@
 #include "core/base/api.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/camera.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
@@ -21,6 +22,7 @@ public:
     virtual void onSurfaceCreated(RenderContext& renderContext) = 0;
 
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) = 0;
+    virtual sp<Camera::Delegate> createCamera() = 0;
     virtual sp<Framebuffer> createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture) = 0;
     virtual sp<PipelineFactory> createPipelineFactory() = 0;
     virtual sp<RenderView> createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController) = 0;

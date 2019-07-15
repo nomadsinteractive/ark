@@ -1,5 +1,8 @@
 #include "graphics/base/camera.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "core/ark.h"
 
 #include "core/base/observer.h"
@@ -18,8 +21,8 @@ namespace {
 
 class FrustumMatrixVariable : public Variable<Matrix>, public Runnable {
 public:
-    FrustumMatrixVariable(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up, const sp<Notifier>& notifier)
-        : _position(position), _target(target), _up(up), _notifier(notifier) {
+    FrustumMatrixVariable(const sp<Camera::Delegate>& delegate, const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up, const sp<Notifier>& notifier)
+        : _delegate(delegate), _position(position), _target(target), _up(up), _notifier(notifier) {
     }
 
     virtual void run() override {
@@ -36,7 +39,7 @@ private:
         const V3 target = _target->val();
         const V3 up = _up->val();
         if(_p != position || _t != target || _u != up) {
-            _matrix = Matrix::lookAt(position, target, up);
+            _matrix = _delegate->lookAt(position, target, up);
             _notifier->notify();
             _p = position;
             _t = target;
@@ -45,6 +48,8 @@ private:
     }
 
 private:
+    sp<Camera::Delegate> _delegate;
+
     sp<Vec3> _position;
     sp<Vec3> _target;
     sp<Vec3> _up;
@@ -78,8 +83,8 @@ private:
 }
 
 Camera::Camera()
-    : _view(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))), _projection(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))),
-      _vp(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))), _notifier(sp<Notifier>::make())
+    : _delegate(Ark::instance().applicationContext()->renderController()->createCamera()), _view(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))),
+      _projection(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))), _vp(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))), _notifier(sp<Notifier>::make())
 {
 }
 
@@ -88,31 +93,31 @@ void Camera::ortho(float left, float right, float bottom, float top, float near,
     if(upDirection  < 0)
         std::swap(top, bottom);
 
-    _vp->_value = sp<Variable<Matrix>::Const>::make(Matrix::ortho(left, right, bottom, top, near * 2 - far, far));
+    _vp->_value = sp<Variable<Matrix>::Const>::make(_delegate->ortho(left, right, bottom, top, near * 2 - far, far));
     _notifier->notify();
 }
 
 void Camera::frustum(float left, float right, float bottom, float top, float near, float far)
 {
-    _projection->_value = sp<Variable<Matrix>::Const>::make(Matrix::frustum(left, right, bottom, top, near, far));
+    _projection->_value = sp<Variable<Matrix>::Const>::make(_delegate->frustum(left, right, bottom, top, near, far));
     updateViewProjection();
 }
 
 void Camera::perspective(float fov, float aspect, float near, float far)
 {
-    _projection->_value = sp<Variable<Matrix>::Const>::make(Matrix::perspective(fov, aspect, near, far));
+    _projection->_value = sp<Variable<Matrix>::Const>::make(_delegate->perspective(fov, aspect, near, far));
     updateViewProjection();
 }
 
 void Camera::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    _view->_value = sp<Variable<Matrix>::Const>::make(Matrix::lookAt(position, target, up));
+    _view->_value = sp<Variable<Matrix>::Const>::make(_delegate->lookAt(position, target, up));
     updateViewProjection();
 }
 
 void Camera::lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up)
 {
-    const sp<FrustumMatrixVariable> var = sp<FrustumMatrixVariable>::make(position, target, up, _notifier);
+    const sp<FrustumMatrixVariable> var = sp<FrustumMatrixVariable>::make(_delegate, position, target, up, _notifier);
     _view->_value = var;
     Ark::instance().applicationContext()->addPreRenderTask(var, sp<BooleanByWeakRef<Runnable>>::make(var, 1));
     updateViewProjection();
@@ -163,6 +168,46 @@ void Camera::Holder::flat(void* buf)
 uint32_t Camera::Holder::size()
 {
     return sizeof(Matrix);
+}
+
+Matrix Camera::DelegateLH_ZO::frustum(float left, float right, float bottom, float top, float near, float far)
+{
+    return Matrix(glm::frustumLH_ZO(left, right, bottom, top, near, far));
+}
+
+Matrix Camera::DelegateLH_ZO::lookAt(const V3& position, const V3& target, const V3& up)
+{
+    return Matrix(glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), -up.y(), up.z())));
+}
+
+Matrix Camera::DelegateLH_ZO::ortho(float left, float right, float bottom, float top, float near, float far)
+{
+    return Matrix(glm::orthoLH_ZO(left, right, bottom, top, near, far));
+}
+
+Matrix Camera::DelegateLH_ZO::perspective(float fov, float aspect, float near, float far)
+{
+    return Matrix(glm::perspectiveLH_ZO(fov, aspect, near, far));
+}
+
+Matrix Camera::DelegateRH_NO::frustum(float left, float right, float bottom, float top, float near, float far)
+{
+    return Matrix(glm::frustumRH_NO(left, right, bottom, top, near, far));
+}
+
+Matrix Camera::DelegateRH_NO::lookAt(const V3& position, const V3& target, const V3& up)
+{
+    return Matrix(glm::lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z())));
+}
+
+Matrix Camera::DelegateRH_NO::ortho(float left, float right, float bottom, float top, float near, float far)
+{
+    return Matrix(glm::orthoRH_NO(left, right, bottom, top, near, far));
+}
+
+Matrix Camera::DelegateRH_NO::perspective(float fov, float aspect, float near, float far)
+{
+    return Matrix(glm::perspectiveRH_NO(fov, aspect, near, far));
 }
 
 }

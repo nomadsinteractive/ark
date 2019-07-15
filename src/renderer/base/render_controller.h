@@ -11,6 +11,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/camera.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
@@ -52,6 +53,7 @@ public:
 
     const sp<RenderEngine>& renderEngine() const;
 
+    sp<Camera::Delegate> createCamera() const;
     sp<PipelineFactory> createPipelineFactory() const;
     sp<Dictionary<sp<Texture>>> createTextureBundle() const;
 

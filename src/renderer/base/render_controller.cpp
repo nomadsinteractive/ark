@@ -160,6 +160,11 @@ const sp<RenderEngine>& RenderController::renderEngine() const
     return _render_engine;
 }
 
+sp<Camera::Delegate> RenderController::createCamera() const
+{
+    return _render_engine->rendererFactory()->createCamera();
+}
+
 sp<PipelineFactory> RenderController::createPipelineFactory() const
 {
     return _render_engine->rendererFactory()->createPipelineFactory();

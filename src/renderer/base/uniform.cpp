@@ -129,7 +129,9 @@ bool Uniform::dirty() const
 String Uniform::declaration(const String& descriptor) const
 {
     const String t = getDeclaredType();
-    return Strings::sprintf("%s%s %s;", descriptor.c_str(), t.c_str(), _name.c_str());
+    if(_length == 1)
+        return Strings::sprintf("%s%s %s;", descriptor.c_str(), t.c_str(), _name.c_str());
+    return Strings::sprintf("%s%s %s[%d];", descriptor.c_str(), t.c_str(), _name.c_str(), _length);
 }
 
 void Uniform::notify() const

@@ -104,6 +104,21 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, uint32_t /*i
         if(!imagedata)
             imageCreateInfo.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
+        size_t imageDataSize = imagedata ? imagedata->size() : 0;
+
+        VkImageFormatProperties ifp;
+        VkResult r = vkGetPhysicalDeviceImageFormatProperties(_renderer->device()->vkPhysicalDevice(), imageCreateInfo.format, imageCreateInfo.imageType, imageCreateInfo.tiling,
+                                                              imageCreateInfo.usage, imageCreateInfo.flags, &ifp);
+        if(r == VK_ERROR_FORMAT_NOT_SUPPORTED)
+        {
+            if(bitmap.channels() != 4)
+            {
+                DWARN(bitmap.channels() != 4, "Image format is not supported by Vulkan, channesl: %d, converting to RGBA format", bitmap.channels());
+                uint32_t rowBytes = bitmap.rowBytes() / bitmap.channels() * 4;
+                imageDataSize = rowBytes * bitmap.height();
+                format = imageCreateInfo.format = VKUtil::toTextureFormat(rowBytes, bitmap.width(), 4, _parameters->_format);
+            }
+        }
         VKUtil::createImage(_renderer->device(), imageCreateInfo, &_image, &_memory);
 
         if(imagedata)
@@ -117,7 +132,7 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, uint32_t /*i
             VkDeviceMemory stagingMemory;
 
             VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo();
-            bufferCreateInfo.size = imagedata->size();
+            bufferCreateInfo.size = imageDataSize;
             // This buffer is used as a transfer source for the buffer copy
             bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
             bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -132,9 +147,27 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, uint32_t /*i
             VKUtil::checkResult(vkBindBufferMemory(logicalDevice, stagingBuffer, stagingMemory, 0));
 
             // Copy texture data into host local staging buffer
-            uint8_t *data;
+            uint8_t* data;
             VKUtil::checkResult(vkMapMemory(logicalDevice, stagingMemory, 0, memReqs.size, 0, (void **)&data));
-            memcpy(data, imagedata->buf(), imagedata->size());
+
+            if(imageDataSize == imagedata->size())
+                memcpy(data, imagedata->buf(), imageDataSize);
+            else
+            {
+                uint32_t steps = bitmap.width() * bitmap.height();
+                uint32_t pixelBytes = bitmap.rowBytes() / bitmap.width();
+                uint32_t newPixelBytes = imageDataSize / steps;
+                uint32_t padding = newPixelBytes - pixelBytes;
+                uint8_t* it1 = imagedata->buf();
+                uint8_t* it2 = data;
+                for(uint32_t i = 0; i < steps; ++i)
+                {
+                    memcpy(it2, it1, pixelBytes);
+                    memset(it2 + pixelBytes, 0xff, padding);
+                    it1 += pixelBytes;
+                    it2 += newPixelBytes;
+                }
+            }
             vkUnmapMemory(logicalDevice, stagingMemory);
 
             // Setup buffer copy regions for each mip level
@@ -154,7 +187,7 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, uint32_t /*i
 
                 bufferCopyRegions.push_back(bufferCopyRegion);
 
-                offset += static_cast<uint32_t>(imagedata->size());
+                offset += static_cast<uint32_t>(imageDataSize);
             }
 
             VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
