@@ -44,6 +44,22 @@ private:
     bool _enabled;
 };
 
+class GLCullFace {
+public:
+    GLCullFace(bool enabled)
+        : _enabled(enabled) {
+        if(_enabled)
+            glEnable(GL_CULL_FACE);
+    }
+    ~GLCullFace() {
+        if(_enabled)
+            glDisable(GL_CULL_FACE);
+    }
+
+private:
+    bool _enabled;
+};
+
 
 }
 
@@ -456,12 +472,9 @@ GLPipeline::GLDrawElements::GLDrawElements(GLenum mode, bool cullFace)
 void GLPipeline::GLDrawElements::draw(GraphicsContext& /*graphicsContext*/)
 {
     DASSERT(_parameters._count);
-    if(_cull_face)
-        glEnable(GL_CULL_FACE);
+    const GLCullFace cullFace(_cull_face);
     const GLScissor scissor(_parameters._scissor);
     glDrawElements(_mode, static_cast<GLsizei>(_parameters._count), GLIndexType, reinterpret_cast<GLvoid*>(_parameters._start * sizeof(element_index_t)));
-    if(_cull_face)
-        glDisable(GL_CULL_FACE);
 }
 
 GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode, bool cullFace)
@@ -471,12 +484,10 @@ GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode, bool c
 
 void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& /*graphicsContext*/)
 {
-    if(_cull_face)
-        glEnable(GL_CULL_FACE);
+    DASSERT(_parameters._count);
+    const GLCullFace cullFace(_cull_face);
     const GLScissor scissor(_parameters._scissor);
     glDrawElementsInstanced(_mode, static_cast<GLsizei>(_parameters._count), GLIndexType, nullptr, _parameters._instance_count);
-    if(_cull_face)
-        glDisable(GL_CULL_FACE);
 }
 
 }

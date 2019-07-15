@@ -23,9 +23,14 @@ const sp<Clock>& ApplicationFacade::clock() const
     return _context->clock();
 }
 
-const sp<ApplicationController>& ApplicationFacade::controller() const
+const sp<ApplicationController>& ApplicationFacade::applicationController() const
 {
     return _controller;
+}
+
+const sp<SurfaceController>& ApplicationFacade::surfaceController() const
+{
+    return _surface_controller;
 }
 
 const sp<Camera>& ApplicationFacade::camera() const

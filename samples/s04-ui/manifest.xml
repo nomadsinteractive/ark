@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest>
 	<asset src="../assets"/>
-
     <heap>
         <device unit-size="4M"/>
         <host unit-size="4M"/>
     </heap>
-
     <renderer version="auto">
         <resolution width="540" height="960"/>
     </renderer>
-
-	<application title="s04 - UI" resource-loader="app.xml">
+	<resource-loader src="app.xml"/>
+	<application title="s04 - UI">
         <script ref="@main" src="main.py"/>
 	</application>
 

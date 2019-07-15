@@ -81,7 +81,7 @@ public:
 private:
     class ArkAssetBundle;
 
-    sp<ApplicationContext> createApplicationContext(const document& manifest, const sp<ApplicationResource>& resource, const sp<RenderEngine>& renderEngine);
+    sp<ApplicationContext> createApplicationContext(const Manifest& manifest, const sp<ApplicationResource>& resource, const sp<RenderEngine>& renderEngine);
     sp<RenderEngine> createRenderEngine(RendererVersion version, const sp<ApplicationResource>& appResource);
 
     void loadPlugins(const Manifest& manifest) const;

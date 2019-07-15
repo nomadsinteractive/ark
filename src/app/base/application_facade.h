@@ -19,7 +19,9 @@ public:
 //  [[script::bindings::property]]
     const sp<Clock>& clock() const;
 // [[script::bindings::property]]
-    const sp<ApplicationController>& controller() const;
+    const sp<ApplicationController>& applicationController() const;
+// [[script::bindings::property]]
+    const sp<SurfaceController>& surfaceController() const;
 // [[script::bindings::property]]
     const sp<Camera>& camera() const;
 // [[script::bindings::property]]

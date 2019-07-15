@@ -59,6 +59,10 @@ void Manifest::load(const String& src)
         _application._message_loop = MESSAGE_LOOP_TYPE_RENDER;
     else
         DFATAL("Unknow application message-loop: \"%s\". Should be \"core\" or \"render\"", messageLoopType.c_str());
+
+    _resource_loader = _content->getChild("resource-loader");
+    if(!_resource_loader)
+        _resource_loader = sp<DOMDocument>::make("resource-loader");
 }
 
 const String& Manifest::name() const
@@ -110,6 +114,11 @@ const Manifest::Renderer& Manifest::renderer() const
 const document& Manifest::content() const
 {
     return _content;
+}
+
+const document& Manifest::resourceLoader() const
+{
+    return _resource_loader;
 }
 
 uint32_t Manifest::toSize(const String& sizestr) const

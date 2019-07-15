@@ -10,6 +10,12 @@ Use it for:
 
 """
 
+from typing import Callable, List, Type, TypeVar
+
+
+_BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Collider', 'Integer', 'Numeric', 'Layer', 'Vec2', 'Vec3', 'Vec4',
+                           'Renderer', 'RenderLayer', 'RenderObject', 'Rotate', 'Size', 'Transform', 'Varyings')
+
 
 def logd(*args):
     print(*args)
@@ -81,9 +87,129 @@ class _Var:
         return 0.0
 
 
+class ApplicationFacade:
+
+    def __init__(self):
+        self._arena = None
+
+    @property
+    def clock(self) -> 'Clock':
+        return Clock()
+
+    @property
+    def controller(self) -> 'ApplicationController':
+        return ApplicationController()
+
+    @property
+    def camera(self) -> 'Camera':
+        return Camera()
+
+    @property
+    def manifest(self) -> 'Manifest':
+        return Manifest()
+
+    @property
+    def arena(self) -> 'Arena':
+        return self._arena
+
+    @arena.setter
+    def arena(self, arena: 'Arena'):
+        self._arena = arena
+
+    @property
+    def argv(self) -> List[str]:
+        return []
+
+    def create_resource_loader(self, name: str, **kwargs) -> 'ResourceLoader':
+        return ResourceLoader()
+
+    def add_pre_render_task(self, task: Callable, expired: 'Boolean' = None):
+        pass
+
+    def add_event_listener(self, event_listener: Callable[['Event'], bool]):
+        pass
+
+    def set_default_event_listener(self, event_listener: Callable[['Event'], bool]):
+        pass
+
+    def exit(self):
+        pass
+
+    def post(self, task: Callable, delay: float):
+        pass
+
+    def schedule(self, task: Callable, interval: float):
+        pass
+
+
+class ApplicationController:
+
+    SYSTEM_CURSOR_ARROW = 0
+    SYSTEM_CURSOR_IBEAM = 1
+    SYSTEM_CURSOR_WAIT = 2
+    SYSTEM_CURSOR_CROSSHAIR = 3
+    SYSTEM_CURSOR_WAITARROW = 4
+    SYSTEM_CURSOR_SIZENWSE = 5
+    SYSTEM_CURSOR_SIZENESW = 6
+    SYSTEM_CURSOR_SIZEWE = 7
+    SYSTEM_CURSOR_SIZENS = 8
+    SYSTEM_CURSOR_SIZEALL = 9
+    SYSTEM_CURSOR_NO = 10
+    SYSTEM_CURSOR_HAND = 11
+
+    def create_cursor(self, bitmap: 'Bitmap', x: int, y: int):
+        return None
+
+    def create_system_cursor(self, name: int):
+        return None
+
+    def show_cursor(self, cursor):
+        pass
+
+    def hide_cursor(self):
+        pass
+
+    def exit(self):
+        pass
+
+
 class AudioPlayer:
     def play(self, source):
         pass
+
+
+class Bitmap:
+
+    @property
+    def width(self) -> int:
+        return 0
+
+    @property
+    def height(self) -> int:
+        return 0
+
+    @property
+    def depth(self) -> int:
+        return 0
+
+    @property
+    def row_bytes(self) -> int:
+        return 0
+
+    @property
+    def bytes(self):
+        return None
+
+
+class Manifest:
+
+    @property
+    def name(self) -> str:
+        return ''
+
+    @property
+    def renderer_resolution(self) -> 'Size':
+        return Size(0, 0)
 
 
 class Observer:
@@ -111,8 +237,8 @@ class Renderer:
 
 class ResourceLoader:
 
-    def load(self, type_class, type_id: str, **kwargs):
-        return None
+    def load(self, cls: Type[_BUILDABLE_TYPES], type_id: str, **kwargs) -> _BUILDABLE_TYPES:
+        return cls()
 
     @property
     def refs(self):
@@ -403,7 +529,7 @@ class RenderObject:
         return 0
 
     @property
-    def transform(self) -> Transform:
+    def transform(self) -> 'Transform':
         return self._transform
 
     @transform.setter
@@ -464,8 +590,9 @@ class Layer:
 
 
 class Arena:
-    def load(self, clz, name, **kwargs):
-        return _ArkObject()
+
+    def load(self, clz: Type[_BUILDABLE_TYPES], name, **kwargs) -> _BUILDABLE_TYPES:
+        return clz()
 
     @property
     def resource_loader(self):
@@ -476,7 +603,9 @@ class Arena:
 
 
 class Clock:
-    pass
+
+    def duration(self) -> 'Numeric':
+        return Numeric(0)
 
 
 class Event:

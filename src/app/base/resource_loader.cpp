@@ -78,9 +78,9 @@ ResourceLoader::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& v
 {
 }
 
-sp<ResourceLoader> ResourceLoader::DICTIONARY::build(const sp<Scope>& args)
+sp<ResourceLoader> ResourceLoader::DICTIONARY::build(const sp<Scope>& /*args*/)
 {
-    return _application_context->createResourceLoader(_src, nullptr, args);
+    return _application_context->createResourceLoader(_src, nullptr);
 }
 
 ResourceLoader::PackageRefs::PackageRefs(const BeanFactory& beanFactory)

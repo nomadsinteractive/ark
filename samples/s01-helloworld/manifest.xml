@@ -4,7 +4,8 @@
     <renderer version="auto">
         <resolution width="960" height="540"/>
     </renderer>
-    <application title="s01 - Hello World" resource-loader="app.xml">
+	<resource-loader src="app.xml"/>
+    <application title="s01 - Hello World">
 		<arena>
             <render-layer ref="@pre:rl001"/>
             <render-layer ref="@pre:rl002"/>

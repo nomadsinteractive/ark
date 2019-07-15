@@ -27,7 +27,7 @@ public:
     ~ApplicationContext();
 
     sp<ResourceLoader> createResourceLoader(const String& name, const sp<Scope>& args);
-    sp<ResourceLoader> createResourceLoader(const String& name, const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Scope>& args);
+    sp<ResourceLoader> createResourceLoader(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     const sp<ApplicationResource>& applicationResource() const;
     const sp<RenderEngine>& renderEngine() const;
@@ -79,7 +79,7 @@ public:
 
 private:
     void initResourceLoader(const document& manifest);
-    sp<ResourceLoader> createResourceLoader(const sp<Dictionary<document>>& documentDictionary, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    sp<ResourceLoader> createResourceLoaderImpl(const sp<Dictionary<document>>& documentDictionary, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     sp<MessageLoop> makeMessageLoop();
 

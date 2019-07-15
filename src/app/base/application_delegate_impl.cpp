@@ -32,15 +32,12 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
     const sp<ApplicationContext>& applicationContext = application.context();
     const document& appManifest = _manifest->content()->getChild("application");
     DCHECK(appManifest, "Manifest has no <application/> node");
-    const sp<ResourceLoader> appResourceLoader = applicationContext->createResourceLoader(Documents::getAttribute(appManifest, "resource-loader", "application.xml"), nullptr);
+    const sp<ResourceLoader>& appResourceLoader = applicationContext->resourceLoader();
     DASSERT(appResourceLoader);
 
     const sp<Scope> vars = sp<Scope>::make();
     const sp<ApplicationFacade> applicationFacade = sp<ApplicationFacade>::make(application, surface, _manifest);
     vars->put<ApplicationFacade>("_application", applicationFacade);
-    vars->put<ApplicationController>("_application_controller", application.controller());
-    vars->put<ResourceLoader>("_resource_loader", appResourceLoader);
-    vars->put<SurfaceController>("_surface_controller", surface->controller());
 
     applicationFacade->setBackgroundColor(Documents::getAttribute<Color>(appManifest, "background-color", Color::BLACK));
 

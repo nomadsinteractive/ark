@@ -4,7 +4,8 @@
     <renderer version="auto">
         <resolution width="540" height="960"/>
     </renderer>
-	<application title="s03 - Scripts" resource-loader="app.xml">
+	<resource-loader src="app.xml"/>
+	<application title="s03 - Scripts">
 		<script ref="@main" src="main.py"/>
 	</application>
     <plugin name="ark-python"/>

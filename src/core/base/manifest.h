@@ -86,6 +86,7 @@ public:
     const Renderer& renderer() const;
 
     const document& content() const;
+    const document& resourceLoader() const;
 
 private:
     uint32_t toSize(const String& sizestr) const;
@@ -103,7 +104,7 @@ private:
     Renderer _renderer;
 
     document _content;
-
+    document _resource_loader;
 };
 
 }
