@@ -6,7 +6,7 @@ namespace ark {
 
 void Log::d(const char* tag, const char* content)
 {
-#if ARK_FLAG_DEBUG
+#ifdef ARK_FLAG_DEBUG
     log(LOG_LEVEL_DEBUG, tag, content);
 #endif
 }

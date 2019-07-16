@@ -44,9 +44,17 @@ void ResourceLoader::import(const document& manifest, BeanFactory& parent)
 {
     for(const document& i : manifest->children("import"))
     {
-        const String id = Documents::getId(i);
-        const String name = Documents::getAttribute(i, Constants::Attributes::NAME, id);
-        _bean_factory.addPackage(name, parent.ensure<ResourceLoader>(i, Constants::Attributes::SRC)->beanFactory());
+        const String name = Documents::getAttribute(i, Constants::Attributes::NAME, Documents::getId(i));
+        const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
+        const Identifier id(Identifier::parse(src));
+        if(id.isRef())
+        {
+            const sp<BeanFactory>& package = parent.getPackage(id.ref());
+            DCHECK(package, "Package \"%s\" does not exist", src.c_str());
+            _bean_factory.addPackage(name, package);
+        }
+        else
+            _bean_factory.addPackage(name, parent.ensure<ResourceLoader>(src)->beanFactory());
     }
 }
 
@@ -66,7 +74,7 @@ ResourceLoader::BUILDER::BUILDER(BeanFactory& factory, const document& doc, cons
 {
 }
 
-sp<ResourceLoader> ResourceLoader::BUILDER::build(const sp<Scope>& args)
+sp<ResourceLoader> ResourceLoader::BUILDER::build(const sp<Scope>& /*args*/)
 {
     return _application_context->createResourceLoader(_manifest, nullptr);
 }

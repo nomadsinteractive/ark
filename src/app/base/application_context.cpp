@@ -76,7 +76,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, 
     Identifier id(Identifier::parse(name));
     if(id.isVal())
     {
-        document doc = _application_resource->loadDocument(name);
+        const document doc = _application_resource->loadDocument(name);
         DCHECK(doc, "Resource \"%s\" not found", name.c_str());
         return createResourceLoader(doc, nullptr);
     }
@@ -88,7 +88,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const document& mani
     DCHECK(_resource_loader, "Application ResourceLoader has not been initialized");
     const sp<ResourceLoader> resourceLoader = createResourceLoaderImpl(manifest, resourceLoaderContext);
     resourceLoader->beanFactory().extend(_resource_loader->beanFactory());
-    resourceLoader->import(manifest, resourceLoader->beanFactory());
+    resourceLoader->import(manifest, _resource_loader->beanFactory());
     return resourceLoader;
 }
 
