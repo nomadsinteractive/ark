@@ -12,7 +12,7 @@
 
 namespace ark {
 
-//[script::bindings::auto]]
+//[[script::bindings::auto]]
 class LayerContext {
 private:
     struct Item {

@@ -26,6 +26,8 @@ public:
     const sp<Camera>& camera() const;
 // [[script::bindings::property]]
     const sp<Manifest>& manifest() const;
+// [[script::bindings::property]]
+    const sp<ResourceLoader>& resourceLoader() const;
 
 // [[script::bindings::property]]
     const sp<Arena>& arena() const;

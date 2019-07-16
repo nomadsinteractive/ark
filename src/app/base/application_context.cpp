@@ -67,17 +67,32 @@ ApplicationContext::~ApplicationContext()
 
 void ApplicationContext::initResourceLoader(const document& manifest)
 {
-    _resource_loader = createResourceLoader(manifest, nullptr);
+    _resource_loader = createResourceLoaderImpl(manifest, nullptr);
+    _resource_loader->import(manifest, _resource_loader->beanFactory());
 }
 
-sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const sp<Scope>& /*args*/)
+sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const sp<Scope>& args)
 {
-    document doc = _application_resource->loadDocument(name);
-    DCHECK(doc, "Resource \"%s\" not found", name.c_str());
-    return createResourceLoader(doc, nullptr);
+    Identifier id(Identifier::parse(name));
+    if(id.isVal())
+    {
+        document doc = _application_resource->loadDocument(name);
+        DCHECK(doc, "Resource \"%s\" not found", name.c_str());
+        return createResourceLoader(doc, nullptr);
+    }
+    return _resource_loader->beanFactory().build<ResourceLoader>(name, args);
 }
 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+{
+    DCHECK(_resource_loader, "Application ResourceLoader has not been initialized");
+    const sp<ResourceLoader> resourceLoader = createResourceLoaderImpl(manifest, resourceLoaderContext);
+    resourceLoader->beanFactory().extend(_resource_loader->beanFactory());
+    resourceLoader->import(manifest, resourceLoader->beanFactory());
+    return resourceLoader;
+}
+
+sp<ResourceLoader> ApplicationContext::createResourceLoaderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
     const String src = Documents::getAttribute(manifest, Constants::Attributes::SRC);
     document doc = src ? _application_resource->loadDocument(src) : document::null();
@@ -87,13 +102,8 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const document& mani
         for(const document& i : manifest->children())
             doc->addChild(i);
     DCHECK(doc, "Resource \"%s\" not found", src.c_str());
-    const sp<ResourceLoader> resourceLoader = createResourceLoaderImpl(sp<DictionaryByAttributeName>::make(doc, Constants::Attributes::ID), resourceLoaderContext);
-    resourceLoader->import(doc, resourceLoader->beanFactory());
-    return resourceLoader;
-}
 
-sp<ResourceLoader> ApplicationContext::createResourceLoaderImpl(const sp<Dictionary<document>>& documentDictionary, const sp<ResourceLoaderContext>& resourceLoaderContext)
-{
+    const sp<DictionaryByAttributeName> documentDictionary = sp<DictionaryByAttributeName>::make(doc, Constants::Attributes::ID);
     const sp<BeanFactory> beanFactory = Ark::instance().createBeanFactory(documentDictionary);
     const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), _application_resource->bitmapBundle(), _executor, _render_controller);
 
@@ -102,9 +112,6 @@ sp<ResourceLoader> ApplicationContext::createResourceLoaderImpl(const sp<Diction
         plugin->loadResourceLoader(beanFactory, documentDictionary, context);
         return true;
     });
-
-    if(_resource_loader)
-        beanFactory->extend(_resource_loader->beanFactory());
 
     return sp<ResourceLoader>::make(beanFactory);
 }

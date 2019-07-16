@@ -79,7 +79,8 @@ public:
 
 private:
     void initResourceLoader(const document& manifest);
-    sp<ResourceLoader> createResourceLoaderImpl(const sp<Dictionary<document>>& documentDictionary, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+    sp<ResourceLoader> createResourceLoaderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     sp<MessageLoop> makeMessageLoop();
 

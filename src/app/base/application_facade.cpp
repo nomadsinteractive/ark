@@ -43,6 +43,11 @@ const sp<Manifest>& ApplicationFacade::manifest() const
     return _manifest;
 }
 
+const sp<ResourceLoader>& ApplicationFacade::resourceLoader() const
+{
+    return _context->resourceLoader();
+}
+
 const sp<Arena>& ApplicationFacade::arena() const
 {
     return _arena;

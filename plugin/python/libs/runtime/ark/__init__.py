@@ -14,7 +14,7 @@ from typing import Callable, List, Type, TypeVar
 
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Collider', 'Integer', 'Numeric', 'Layer', 'Vec2', 'Vec3', 'Vec4',
-                           'Renderer', 'RenderLayer', 'RenderObject', 'Rotate', 'Size', 'Transform', 'Varyings')
+                           'Renderer', 'RenderLayer', 'RenderObject', 'Rotate', 'Size', 'StringBundle', 'Transform', 'Varyings')
 
 
 def logd(*args):
@@ -97,8 +97,12 @@ class ApplicationFacade:
         return Clock()
 
     @property
-    def controller(self) -> 'ApplicationController':
+    def application_controller(self) -> 'ApplicationController':
         return ApplicationController()
+
+    @property
+    def surface_controller(self) -> 'SurfaceController':
+        return SurfaceController()
 
     @property
     def camera(self) -> 'Camera':
@@ -107,6 +111,10 @@ class ApplicationFacade:
     @property
     def manifest(self) -> 'Manifest':
         return Manifest()
+
+    @property
+    def resource_loader(self) -> 'ResourceLoader':
+        return ResourceLoader()
 
     @property
     def arena(self) -> 'Arena':
@@ -119,6 +127,9 @@ class ApplicationFacade:
     @property
     def argv(self) -> List[str]:
         return []
+
+    def add_string_bundle(self, name: str, string_bundle: 'StringBundle'):
+        pass
 
     def create_resource_loader(self, name: str, **kwargs) -> 'ResourceLoader':
         return ResourceLoader()
@@ -556,21 +567,20 @@ class RenderObject:
 
 
 class LayerContext:
-
-    def add_render_object(self, render_object: RenderObject, disposed: Disposed):
-        pass
-
-    def clear(self):
-        pass
+    pass
 
 
 class RenderLayer:
     @property
-    def context(self):
-        return None
+    def context(self) -> LayerContext:
+        return LayerContext()
 
 
 class Layer:
+    TYPE_UNSPECIFIED = 0
+    TYPE_DYNAMIC = 1
+    TYPE_STATIC = 2
+
     def __init__(self, render_layer: RenderLayer):
         self._render_layer = render_layer
 
@@ -579,8 +589,8 @@ class Layer:
         return self._render_layer
 
     @property
-    def context(self):
-        return None
+    def context(self) -> LayerContext:
+        return LayerContext()
 
     def add_render_object(self, render_object: RenderObject, disposed: Boolean = None):
         pass
@@ -1009,6 +1019,18 @@ class RigidBody:
 
     @tag.setter
     def tag(self, tag):
+        pass
+
+
+class SurfaceController:
+
+    def add_renderer(self, renderer: Renderer):
+        pass
+
+    def add_control(self, renderer: Renderer):
+        pass
+
+    def add_layer(self, render_layer: RenderLayer):
         pass
 
 
