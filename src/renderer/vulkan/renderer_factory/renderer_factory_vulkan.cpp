@@ -116,7 +116,7 @@ sp<Texture> RendererFactoryVulkan::createTexture(const sp<Size>& size, Texture::
 {
     sp<Texture::Delegate> delegate;
     if(type == Texture::TYPE_2D)
-        delegate = sp<VKTexture2D>::make(_recycler, _renderer, size->width(), size->height(), sp<Texture::Parameters>::make(), uploader);
+        delegate = sp<VKTexture2D>::make(_recycler, _renderer, static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), sp<Texture::Parameters>::make(), uploader);
     DCHECK(delegate, "Unsupported TextureType: %d", type);
     return sp<Texture>::make(size, sp<Variable<sp<Texture::Delegate>>::Const>::make(delegate), type);
 }

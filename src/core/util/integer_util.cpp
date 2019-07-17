@@ -134,8 +134,8 @@ void IntegerUtil::setVal(const sp<IntegerWrapper>& self, int32_t value)
 const sp<Integer>& IntegerUtil::delegate(const sp<Integer>& self)
 {
     const sp<IntegerWrapper> iw = self.as<IntegerWrapper>();
-    DCHECK(iw, "Must be an IntegerWrapper instance to get its delegate attribute");
-    return iw->delegate();
+    DWARN(iw, "Non-IntegerWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
+    return iw ? iw->delegate() : sp<Integer>::null();
 }
 
 void IntegerUtil::setDelegate(const sp<Integer>& self, const sp<Integer>& delegate)

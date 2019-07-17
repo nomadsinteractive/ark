@@ -15,17 +15,27 @@ Visibility::Visibility(const sp<Boolean>& visible)
 {
 }
 
-sp<Boolean> Visibility::toBoolean() const
-{
-    return _visible;
-}
-
-bool Visibility::visible() const
+bool Visibility::val()
 {
     return _visible->val();
 }
 
-void Visibility::setVisible(bool visible)
+void Visibility::show()
+{
+    _visible->set(true);
+}
+
+void Visibility::hide()
+{
+    _visible->set(false);
+}
+
+void Visibility::set(bool visible)
+{
+    _visible->set(visible);
+}
+
+void Visibility::set(const sp<Boolean>& visible)
 {
     _visible->set(visible);
 }
@@ -38,6 +48,11 @@ Visibility::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
 sp<Visibility> Visibility::DICTIONARY::build(const sp<Scope>& args)
 {
     return sp<Visibility>::make(_visible->build(args));
+}
+
+template<> ARK_API sp<Visibility> Null::ptr()
+{
+    return Ark::instance().obtain<Visibility>(true);
 }
 
 }

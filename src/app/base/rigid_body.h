@@ -94,7 +94,7 @@ public:
     const sp<RenderObject>& renderObject() const;
 
 //  [[script::bindings::property]]
-    sp<Boolean> disposed() const;
+    const sp<Disposed>& disposed() const;
 
 //  [[script::bindings::property]]
     const sp<CollisionCallback>& collisionCallback() const;

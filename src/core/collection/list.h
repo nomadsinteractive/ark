@@ -29,7 +29,7 @@ public:
             : _disposed(disposed) {
         }
         IsDisposed(const sp<T>& /*item*/, const sp<Disposed>& disposed)
-            : _disposed(disposed ? disposed->toBoolean() : sp<Boolean>::null()) {
+            : _disposed(disposed) {
         }
 
         FilterAction operator()(const sp<T>& /*item*/) const {

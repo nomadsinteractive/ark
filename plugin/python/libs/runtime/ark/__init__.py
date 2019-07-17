@@ -565,6 +565,12 @@ class RenderObject:
     def dispose(self):
         pass
 
+    def show(self):
+        pass
+
+    def hide(self):
+        pass
+
 
 class LayerContext:
     pass

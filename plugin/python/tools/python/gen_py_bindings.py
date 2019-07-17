@@ -227,13 +227,12 @@ def gen_module_type_declarations(modulename, results):
     while genclasses:
         i = genclasses[0]
         genclasses = genclasses[1:]
-        if not i.base_classname or i.base_classname in class_declared:
+        if not i.base_classname or i.base_classname in class_declared or i.base_classname not in class_names:
             base_type = 'pi->getPyArkType<%s>()->getPyTypeObject()' % i.base_classname if i.base_classname else 'nullptr'
             declarations.append(line_pattern % (i.py_class_name, i.binding_classname, modulename, i.binding_classname, base_type,
                                                 '|Py_TPFLAGS_HAVE_GC' if i.is_container else ''))
             class_declared.add(i.binding_classname)
         else:
-            assert i.base_classname in class_names
             genclasses.append(i)
 
     return declarations

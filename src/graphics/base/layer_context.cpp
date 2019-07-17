@@ -41,7 +41,7 @@ void LayerContext::draw(float x, float y, const sp<RenderObject>& renderObject)
 void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed)
 {
     DASSERT(renderObject);
-    _items.push_back(renderObject, disposed ? sp<Disposed>::make(disposed) : renderObject.as<Disposed>(), _notifier);
+    _items.push_back(renderObject, disposed, _notifier);
     _notifier->notify();
 }
 
@@ -64,28 +64,32 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memor
                 output._items.push_back(std::move(snapshot));
                 notify = true;
             }
-        if(notify)
-            _notifier->notify();
 
         for(const sp<RenderObject>& i : _items)
         {
-            RenderObject::Snapshot snapshot = i->snapshot(memoryPool);
-            snapshot._position = snapshot._position + _position;
-            output._items.push_back(std::move(snapshot));
+            if(i->isVisible())
+            {
+                RenderObject::Snapshot snapshot = i->snapshot(memoryPool);
+                snapshot._position = snapshot._position + _position;
+                output._items.push_back(std::move(snapshot));
+            }
         }
+
+        if(notify || _layer_type == Layer::TYPE_DYNAMIC)
+            _notifier->notify();
     }
     _transient_items.clear();
     _render_requested = false;
 }
 
-LayerContext::RenderObjectFilter::RenderObjectFilter(const sp<RenderObject>& /*renderObject*/, const sp<Disposed>& disposed, const sp<Notifier>& notifier)
-    : _disposed(disposed), _notifier(notifier)
+LayerContext::RenderObjectFilter::RenderObjectFilter(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed, const sp<Notifier>& notifier)
+    : _disposed(disposed ? disposed : renderObject.as<Disposed>().cast<Boolean>()), _notifier(notifier)
 {
 }
 
 FilterAction LayerContext::RenderObjectFilter::operator()(const sp<RenderObject>& renderObject) const
 {
-    if(renderObject->isDisposed() || (_disposed && _disposed->isDisposed()))
+    if(renderObject->isDisposed() || (_disposed && _disposed->val()))
     {
         renderObject->dispose();
         _notifier->notify();

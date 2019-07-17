@@ -98,14 +98,25 @@ public:
     void setTag(const Box& tag);
 
 //  [[script::bindings::property]]
-    sp<Boolean> disposed() const;
+    const sp<Disposed>& disposed() const;
 //  [[script::bindings::property]]
     void setDisposed(const sp<Boolean>& disposed);
+
+//  [[script::bindings::property]]
+    const sp<Visibility>& visible() const;
+//  [[script::bindings::property]]
+    void setVisible(const sp<Boolean>& visible);
 
 //  [[script::bindings::auto]]
     void dispose();
 
+//  [[script::bindings::auto]]
+    void show();
+//  [[script::bindings::auto]]
+    void hide();
+
     bool isDisposed() const;
+    bool isVisible() const;
 
     Snapshot snapshot(MemoryPool& memoryPool) const;
 
@@ -133,6 +144,7 @@ private:
     SafePtr<Varyings> _varyings;
 
     SafePtr<Disposed> _disposed;
+    SafePtr<Visibility> _visible;
 
     Box _tag;
 };

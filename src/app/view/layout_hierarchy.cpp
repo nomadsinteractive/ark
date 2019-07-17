@@ -23,7 +23,7 @@ LayoutHierarchy::Slot::Slot(const sp<Renderer>& renderer, bool layoutRequested)
 
 bool LayoutHierarchy::Slot::isDisposed() const
 {
-    return _disposed && _disposed->isDisposed();
+    return _disposed && _disposed->val();
 }
 
 bool LayoutHierarchy::Slot::layoutRequested() const
@@ -96,7 +96,7 @@ void LayoutHierarchy::Slot::render(RenderRequest& renderRequest, float x, float 
 
 bool LayoutHierarchy::Slot::onEventDispatch(const Event& event, float x, float y)
 {
-    if(_view && (!_visibility || _visibility->visible()))
+    if(_view && (!_visibility || _visibility->val()))
     {
         const sp<LayoutParam>& layoutParam = _view->layoutParam();
         const Rect target(x + _x, y + _y, x + _x + layoutParam->contentWidth(), y + _y + layoutParam->contentHeight());

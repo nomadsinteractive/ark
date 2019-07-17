@@ -23,6 +23,7 @@ namespace plugin {
 namespace box2d {
 
 //[[script::bindings::container]]
+//[[script::bindings::extends(RigidBody)]]
 class ARK_PLUGIN_BOX2D_API Body : public Object, public RigidBody, Implements<Body, Object, RigidBody> {
 public:
     struct Stub {
@@ -62,48 +63,6 @@ public:
     static sp<Body> obtain(const Shadow* shadow, ObjectPool& objectPool);
 
     b2Body* body() const;
-
-/*
-//  [[script::bindings::auto]]
-    virtual void dispose() = 0;
-//  [[script::bindings::auto]]
-    virtual void bind(const sp<RenderObject>& renderObject);
-
-//  [[script::bindings::property]]
-    int32_t id() const;
-//  [[script::bindings::property]]
-    Collider::BodyType type() const;
-
-//  [[script::bindings::property]]
-    V2 xy() const;
-//  [[script::bindings::property]]
-    V3 xyz() const;
-
-//  [[script::bindings::property]]
-    float width() const;
-//  [[script::bindings::property]]
-    float height() const;
-
-//  [[script::bindings::property]]
-    const sp<Vec>& position() const;
-//  [[script::bindings::property]]
-    const sp<Size>& size() const;
-//  [[script::bindings::property]]
-    const sp<Transform>& transform() const;
-
-//  [[script::bindings::property]]
-    const Box& tag() const;
-//  [[script::bindings::property]]
-    void setTag(const Box& box) const;
-
-//  [[script::bindings::property]]
-    sp<Boolean> disposed() const;
-
-//  [[script::bindings::property]]
-    const sp<CollisionCallback>& collisionCallback() const;
-//  [[script::bindings::property]]
-    void setCollisionCallback(const sp<CollisionCallback>& collisionCallback);
-*/
 
 //  [[script::bindings::property]]
     float angle();

@@ -41,7 +41,7 @@ uint64_t MessageLoopDefault::pollOnce()
             if(nextTask.interval())
             {
                 const sp<Disposed>& lifecycle = nextTask.expirable();
-                if(!lifecycle || !lifecycle->isDisposed())
+                if(!lifecycle || !lifecycle->val())
                 {
                     nextTask.setNextFireTick(now + nextTask.interval());
                     requestNextTask(std::move(nextTask));

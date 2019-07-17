@@ -209,14 +209,14 @@ void BooleanUtil::setVal(const sp<BooleanWrapper>& self, bool value)
 const sp<Boolean>& BooleanUtil::delegate(const sp<Boolean>& self)
 {
     const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
-    DCHECK(ib, "Must be an BooleanWrapper instance to get its delegate attribute");
-    return ib->delegate();
+    DWARN(ib, "Non-BooleanWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
+    return ib ? ib->delegate() : sp<Boolean>::null();
 }
 
 void BooleanUtil::setDelegate(const sp<Boolean>& self, const sp<Boolean>& delegate)
 {
     const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
-    DCHECK(ib, "Must be an BooleanWrapper instance to set its delegate attribute");
+    DCHECK(ib, "Must be a BooleanWrapper instance to set its delegate attribute");
     ib->set(delegate);
 }
 

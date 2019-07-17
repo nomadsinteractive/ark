@@ -19,59 +19,14 @@ Disposed::Disposed(const sp<Boolean>& disposed)
 {
 }
 
-bool Disposed::isDisposed() const
+bool Disposed::val()
 {
     return _disposed->val();
-}
-
-bool Disposed::__bool__(const sp<Disposed>& self)
-{
-    return self->isDisposed();
-}
-
-sp<Boolean> Disposed::__or__(const sp<Disposed>& lvalue, const sp<Disposed>& rvalue)
-{
-    return sp<BooleanOr>::make(lvalue->toBoolean(), rvalue->toBoolean());
-}
-
-sp<Boolean> Disposed::__or__(const sp<Disposed>& lvalue, const sp<Boolean>& rvalue)
-{
-    return sp<BooleanOr>::make(lvalue->toBoolean(), rvalue);
-}
-
-sp<Boolean> Disposed::__or__(const sp<Boolean>& lvalue, const sp<Disposed>& rvalue)
-{
-    return sp<BooleanOr>::make(lvalue, rvalue->toBoolean());
-}
-
-sp<Boolean> Disposed::__and__(const sp<Disposed>& lvalue, const sp<Disposed>& rvalue)
-{
-    return sp<BooleanAnd>::make(lvalue->toBoolean(), rvalue->toBoolean());
-}
-
-sp<Boolean> Disposed::__and__(const sp<Disposed>& lvalue, const sp<Boolean>& rvalue)
-{
-    return sp<BooleanAnd>::make(lvalue->toBoolean(), rvalue);
-}
-
-sp<Boolean> Disposed::__and__(const sp<Boolean>& lvalue, const sp<Disposed>& rvalue)
-{
-    return sp<BooleanAnd>::make(lvalue, rvalue->toBoolean());
-}
-
-sp<Boolean> Disposed::toBoolean() const
-{
-    return _disposed;
 }
 
 void Disposed::dispose()
 {
     _disposed->set(true);
-}
-
-sp<Boolean> Disposed::observe(const sp<Observer>& observer)
-{
-    return sp<VariableObserver<bool>>::make(_disposed, observer);
 }
 
 void Disposed::set(bool disposed)

@@ -98,9 +98,9 @@ const sp<RenderObject>& RigidBody::renderObject() const
     return _stub->_render_object;
 }
 
-sp<Boolean> RigidBody::disposed() const
+const sp<Disposed>& RigidBody::disposed() const
 {
-    return _stub->_disposed->toBoolean();
+    return _stub->_disposed;
 }
 
 const sp<CollisionCallback>& RigidBody::collisionCallback() const

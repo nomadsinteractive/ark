@@ -14,7 +14,7 @@ RendererWithVisibility::RendererWithVisibility(const sp<Renderer>& renderer, con
 
 void RendererWithVisibility::render(RenderRequest& renderRequest, float x, float y)
 {
-    if(_visibility->visible())
+    if(_visibility->val())
         _renderer->render(renderRequest, x, y);
 }
 

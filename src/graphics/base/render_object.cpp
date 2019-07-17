@@ -4,6 +4,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
 #include "core/epi/disposed.h"
+#include "core/epi/visibility.h"
 #include "core/util/bean_utils.h"
 #include "core/util/numeric_util.h"
 
@@ -58,8 +59,7 @@ void RenderObject::setType(int32_t type)
 void RenderObject::setType(const sp<Integer>& type)
 {
     _type->set(type);
-    sp<Disposed> disposed = type.as<Disposed>();
-    _disposed->set(disposed ? disposed->toBoolean() : sp<Boolean>::null());
+    _disposed->set(type.as<Disposed>());
 }
 
 float RenderObject::x() const
@@ -152,14 +152,24 @@ void RenderObject::setTag(const Box& tag)
     _tag = tag;
 }
 
-sp<Boolean> RenderObject::disposed() const
+const sp<Disposed>& RenderObject::disposed() const
 {
-    return _disposed->toBoolean();
+    return _disposed;
 }
 
 void RenderObject::setDisposed(const sp<Boolean>& disposed)
 {
     _disposed->set(disposed);
+}
+
+const sp<Visibility>& RenderObject::visible() const
+{
+    return _visible;
+}
+
+void RenderObject::setVisible(const sp<Boolean>& visible)
+{
+    _visible->set(visible);
 }
 
 void RenderObject::dispose()
@@ -173,9 +183,24 @@ void RenderObject::dispose()
     _disposed->dispose();
 }
 
+void RenderObject::show()
+{
+    _visible->set(true);
+}
+
+void RenderObject::hide()
+{
+    _visible->set(false);
+}
+
 bool RenderObject::isDisposed() const
 {
-    return _disposed->isDisposed();
+    return _disposed->val();
+}
+
+bool RenderObject::isVisible() const
+{
+    return _visible->val();
 }
 
 RenderObject::Snapshot RenderObject::snapshot(MemoryPool& memoryPool) const

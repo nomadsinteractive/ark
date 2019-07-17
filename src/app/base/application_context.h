@@ -81,6 +81,7 @@ private:
     void initResourceLoader(const document& manifest);
 
     sp<ResourceLoader> createResourceLoaderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    document createResourceLoaderManifest(const document& manifest);
 
     sp<MessageLoop> makeMessageLoop();
 

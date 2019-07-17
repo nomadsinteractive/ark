@@ -4,41 +4,23 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/inf/builder.h"
+#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-class ARK_API Disposed {
+//[[script::bindings::extends(Boolean)]]
+class ARK_API Disposed : public Boolean {
 public:
 //  [[script::bindings::auto]]
     Disposed(bool disposed = false);
 //  [[script::bindings::auto]]
     Disposed(const sp<Boolean>& disposed);
 
-    bool isDisposed() const;
+    virtual bool val() override;
 
-//  [[script::bindings::operator(bool)]]
-    static bool __bool__(const sp<Disposed>& self);
-//  [[script::bindings::operator(||)]]
-    static sp<Boolean> __or__(const sp<Disposed>& lvalue, const sp<Disposed>& rvalue);
-//  [[script::bindings::operator(||)]]
-    static sp<Boolean> __or__(const sp<Disposed>& lvalue, const sp<Boolean>& rvalue);
-//  [[script::bindings::operator(||)]]
-    static sp<Boolean> __or__(const sp<Boolean>& lvalue, const sp<Disposed>& rvalue);
-//  [[script::bindings::operator(&&)]]
-    static sp<Boolean> __and__(const sp<Disposed>& lvalue, const sp<Disposed>& rvalue);
-//  [[script::bindings::operator(&&)]]
-    static sp<Boolean> __and__(const sp<Disposed>& lvalue, const sp<Boolean>& rvalue);
-//  [[script::bindings::operator(&&)]]
-    static sp<Boolean> __and__(const sp<Boolean>& lvalue, const sp<Disposed>& rvalue);
-
-//  [[script::bindings::auto]]
-    sp<Boolean> toBoolean() const;
 //  [[script::bindings::auto]]
     void dispose();
-
-//  [[script::bindings::auto]]
-    sp<Boolean> observe(const sp<Observer>& observer);
 
 //  [[script::bindings::auto]]
     void set(bool disposed);

@@ -44,7 +44,7 @@ public:
         const sp<T>& ptr = self->unpack<T>();
         if(ptr.template is<Disposed>()) {
             const sp<Disposed> m = ptr.template as<Disposed>();
-            if(m && m->isDisposed())
+            if(m && m->val())
                 Py_RETURN_TRUE;
         }
         Py_RETURN_FALSE;

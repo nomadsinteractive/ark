@@ -67,8 +67,9 @@ ApplicationContext::~ApplicationContext()
 
 void ApplicationContext::initResourceLoader(const document& manifest)
 {
+    const document doc = createResourceLoaderManifest(manifest);
     _resource_loader = createResourceLoaderImpl(manifest, nullptr);
-    _resource_loader->import(manifest, _resource_loader->beanFactory());
+    _resource_loader->import(doc, _resource_loader->beanFactory());
 }
 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const sp<Scope>& args)
@@ -94,15 +95,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const document& mani
 
 sp<ResourceLoader> ApplicationContext::createResourceLoaderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
-    const String src = Documents::getAttribute(manifest, Constants::Attributes::SRC);
-    document doc = src ? _application_resource->loadDocument(src) : document::null();
-    if(!doc)
-        doc = manifest;
-    if(manifest && doc != manifest)
-        for(const document& i : manifest->children())
-            doc->addChild(i);
-    DCHECK(doc, "Resource \"%s\" not found", src.c_str());
-
+    const document doc = createResourceLoaderManifest(manifest);
     const sp<DictionaryByAttributeName> documentDictionary = sp<DictionaryByAttributeName>::make(doc, Constants::Attributes::ID);
     const sp<BeanFactory> beanFactory = Ark::instance().createBeanFactory(documentDictionary);
     const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), _application_resource->bitmapBundle(), _executor, _render_controller);
@@ -114,6 +107,15 @@ sp<ResourceLoader> ApplicationContext::createResourceLoaderImpl(const document& 
     });
 
     return sp<ResourceLoader>::make(beanFactory);
+}
+
+document ApplicationContext::createResourceLoaderManifest(const document& manifest)
+{
+    DASSERT(manifest);
+    const String src = Documents::getAttribute(manifest, Constants::Attributes::SRC);
+    const document doc = src ? _application_resource->loadDocument(src) : manifest;
+    DWARN(doc == manifest || manifest->children().size() == 0, "\"%s\" has already specified a ResourceLoader src \"%s\", its content will be ignored", Documents::toString(manifest).c_str(), src.c_str());
+    return doc;
 }
 
 sp<MessageLoop> ApplicationContext::makeMessageLoop()

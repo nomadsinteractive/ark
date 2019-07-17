@@ -9,19 +9,24 @@
 
 namespace ark {
 
-class ARK_API Visibility {
+//[[script::bindings::extends(Boolean)]]
+class ARK_API Visibility : public Boolean {
 public:
 //  [[script::bindings::auto]]
     Visibility(bool visible = false);
 //  [[script::bindings::auto]]
     Visibility(const sp<Boolean>& visible);
 
-    sp<Boolean> toBoolean() const;
+    virtual bool val() override;
 
-//  [[script::bindings::property]]
-    bool visible() const;
-//  [[script::bindings::property]]
-    void setVisible(bool visible);
+//  [[script::bindings::auto]]
+    void show();
+//  [[script::bindings::auto]]
+    void hide();
+//  [[script::bindings::auto]]
+    void set(bool visible);
+//  [[script::bindings::auto]]
+    void set(const sp<Boolean>& visible);
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Visibility> {

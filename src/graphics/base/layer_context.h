@@ -54,12 +54,12 @@ public:
 private:
     class RenderObjectFilter {
     public:
-        RenderObjectFilter(const sp<RenderObject>& renderObject, const sp<Disposed>& disposed, const sp<Notifier>& notifier);
+        RenderObjectFilter(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed, const sp<Notifier>& notifier);
 
         FilterAction operator()(const sp<RenderObject>& renderObject) const;
 
     private:
-        sp<Disposed> _disposed;
+        sp<Boolean> _disposed;
         sp<Notifier> _notifier;
     };
 
