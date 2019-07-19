@@ -1,4 +1,4 @@
-#include "renderer/impl/atlas_importer/atlas_importer_generic_xml.h"
+#include "renderer/impl/importer/atlas_importer_generic_xml.h"
 
 #include "core/util/documents.h"
 

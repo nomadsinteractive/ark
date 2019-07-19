@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_IMPL_ATLAS_IMPORTER_ATLAS_IMPORTER_TILES_H_
-#define ARK_RENDERER_IMPL_ATLAS_IMPORTER_ATLAS_IMPORTER_TILES_H_
+#ifndef ARK_RENDERER_IMPL_IMPORTER_ATLAS_IMPORTER_CHARACTERS_H_
+#define ARK_RENDERER_IMPL_IMPORTER_ATLAS_IMPORTER_CHARACTERS_H_
 
 #include "core/inf/builder.h"
 
@@ -7,12 +7,12 @@
 
 namespace ark {
 
-class AtlasImporterTiles : public Atlas::Importer {
+class AtlasImporterCharacters : public Atlas::Importer {
 public:
 
     virtual void import(Atlas& atlas, const ResourceLoaderContext& resourceLoaderContext, const document& manifest) override;
 
-//  [[plugin::builder::by-value("tiles")]]
+//  [[plugin::builder::by-value("characters")]]
     class DICTIONARY : public Builder<Atlas::Importer> {
     public:
         DICTIONARY() = default;

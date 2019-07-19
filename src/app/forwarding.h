@@ -28,7 +28,6 @@ class ResourceLoader;
 class RigidBody;
 class Surface;
 class SurfaceUpdater;
-class TileMap;
 class Tracker;
 class View;
 class ViewGroup;

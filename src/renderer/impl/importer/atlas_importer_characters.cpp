@@ -1,4 +1,4 @@
-#include "renderer/impl/atlas_importer/atlas_importer_characters.h"
+#include "renderer/impl/importer/atlas_importer_characters.h"
 
 #include "core/util/documents.h"
 

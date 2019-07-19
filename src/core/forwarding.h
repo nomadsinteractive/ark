@@ -11,6 +11,7 @@ template<typename T> class ByIndex;
 template<typename T> class Callable;
 template<typename T> class Dictionary;
 template<typename T> class Duck;
+template<typename T> class Importer;
 template<typename T> class OwnedPtr;
 template<typename T> class Loader;
 template<typename T> class LFStack;
@@ -69,6 +70,7 @@ class Thread;
 class ThreadPoolExecutor;
 class Visibility;
 
+//[[script::bindings::auto]]
 typedef Dictionary<sp<String>> StringBundle;
 typedef Dictionary<Box> BoxBundle;
 
@@ -78,27 +80,9 @@ typedef Variable<float> Numeric;
 
 typedef Loader<DOMDocument> DocumentLoader;
 
-
 typedef VariableWrapper<bool> BooleanWrapper;
-/*
-[[core::class]]
-class BooleanWrapper : public Boolean {
-};
-*/
-
 typedef VariableWrapper<int32_t> IntegerWrapper;
-/*
-[[core::class]]
-class IntegerWrapper : public Integer {
-};
-*/
-
 typedef VariableWrapper<float> NumericWrapper;
-/*
-[[core::class]]
-class NumericWrapper : public Numeric {
-};
-*/
 
 typedef uint16_t element_index_t;
 

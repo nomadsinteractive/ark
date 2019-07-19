@@ -52,23 +52,23 @@ def format(str, *args, **kwargs):
     return re.sub(r'\$\{([^}]+)\}', repl, str)
 
 
-def matchHeaderPatterns(paths, *args):
+def match_header_patterns(paths, find_main_class, *args):
     for src_code_path in paths:
         if os.path.isfile(src_code_path):
-            _process_header(src_code_path, *args)
+            _process_header(src_code_path, find_main_class, *args)
         elif os.path.isdir(src_code_path):
             for dirname, dirnames, filenames in os.walk(src_code_path):
                 for i in [j for j in filenames if j.endswith('.h')]:
                     filename = os.path.join(dirname, i)
-                    _process_header(filename, *args)
+                    _process_header(filename, find_main_class, *args)
 
 
-def _process_header(filename, *args):
+def _process_header(filename, find_main_class, *args):
     with open(filename, 'rt') as fp:
         filename = filename.lstrip(r'.\/').replace('\\', '/')
         content = fp.read()
-        main_class = findMainClass(content)
-        if main_class:
+        main_class = findMainClass(content) if find_main_class else None
+        if main_class or not find_main_class:
             for j in args:
                 for k in j.pattern.findall(content):
                     j.callback(filename, content, main_class, k)

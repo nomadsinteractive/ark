@@ -44,7 +44,7 @@ def search_for_classes(paths):
             if ([i for i in implements if i in CORE_INTERFACES]) or core_class:
                 result.append(GenClass(class_name, implements, filename))
 
-    acg.matchHeaderPatterns(paths, HeaderPattern(CLASS_PATTERN, match_class))
+    acg.match_header_patterns(paths, True, HeaderPattern(CLASS_PATTERN, match_class))
     return result
 
 

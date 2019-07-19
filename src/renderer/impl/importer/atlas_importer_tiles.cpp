@@ -1,4 +1,4 @@
-#include "renderer/impl/atlas_importer/atlas_importer_tiles.h"
+#include "renderer/impl/importer/atlas_importer_tiles.h"
 
 #include "core/util/math.h"
 #include "core/util/documents.h"

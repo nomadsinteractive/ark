@@ -82,7 +82,7 @@ RICH_COMPARE_OPS = {
 }
 
 ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+\]\])*'
-AUTOBIND_CONTANT_PATTERN = re.compile(r'\[\[script::bindings::constant\(([\w\d_]+)\s*=\s*([^;\r\n]*)\)\]\]')
+AUTOBIND_CONSTANT_PATTERN = re.compile(r'\[\[script::bindings::constant\(([\w_]+)\s*=\s*([^;\r\n]*)\)\]\]')
 AUTOBIND_ENUMERATION_PATTERN = re.compile(r'\[\[script::bindings::enumeration\]\]\s*enum\s+(\w+)\s*\{([^}]+)};')
 AUTOBIND_PROPERTY_PATTERN = re.compile(r'\[\[script::bindings::property\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
 AUTOBIND_GETPROP_PATTERN = re.compile(r'\[\[script::bindings::getprop\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
@@ -91,6 +91,7 @@ AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|c
 AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
 AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::class\(([^)]+)\)\]\]')
 AUTOBIND_EXTENDS_PATTERN = re.compile(r'\[\[script::bindings::extends\((\w+)\)\]\]')
+AUTOBIND_TYPEDEF_PATTERN = re.compile(r'\[\[script::bindings::auto\]\]\s+typedef\s+\w[\w<>\s]+\s+(\w+);')
 AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container)\]\]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
 AUTOBIND_META_PATTERN = re.compile(r'\[\[script::bindings::meta\(([^)]+)\([^)]*\)\)\]\]')
 
@@ -1261,6 +1262,9 @@ def main(params, paths):
         if len(names) >= 1:
             results[names[-1]] = GenClass(filename, names[-1], x[0].strip() == 'container')
 
+    def autotypedef(filename, content, m, x):
+        results[x] = GenClass(filename, x, False)
+
     def autoconstant(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
         genclass.add_constant(x[0], x[1])
@@ -1279,22 +1283,26 @@ def main(params, paths):
             if varname:
                 genclass.add_constant(varname, '%s::%s' % (main_class, varname))
 
-    acg.matchHeaderPatterns(paths,
-                            HeaderPattern(AUTOBIND_ANNOTATION_PATTERN, autoannotation),
-                            HeaderPattern(AUTOBIND_METHOD_PATTERN, automethod),
-                            HeaderPattern(AUTOBIND_OPERATOR_PATTERN, autooperator),
-                            HeaderPattern(AUTOBIND_CLASS_PATTERN, autoclass),
-                            HeaderPattern(AUTOBIND_EXTENDS_PATTERN, autoextends),
-                            HeaderPattern(AUTOBIND_LOADER_PATTERN, autoloader),
-                            HeaderPattern(AUTOBIND_PROPERTY_PATTERN, autoproperty),
-                            HeaderPattern(AUTOBIND_GETPROP_PATTERN, autogetprop),
-                            HeaderPattern(AUTOBIND_CONTANT_PATTERN, autoconstant),
-                            HeaderPattern(AUTOBIND_ENUMERATION_PATTERN, autoenumeration),
-                            HeaderPattern(AUTOBIND_META_PATTERN, autometa),
-                            HeaderPattern(BUILDABLE_PATTERN, autobindable))
+    acg.match_header_patterns(paths, True,
+                              HeaderPattern(AUTOBIND_ANNOTATION_PATTERN, autoannotation),
+                              HeaderPattern(AUTOBIND_TYPEDEF_PATTERN, autotypedef),
+                              HeaderPattern(AUTOBIND_METHOD_PATTERN, automethod),
+                              HeaderPattern(AUTOBIND_OPERATOR_PATTERN, autooperator),
+                              HeaderPattern(AUTOBIND_CLASS_PATTERN, autoclass),
+                              HeaderPattern(AUTOBIND_EXTENDS_PATTERN, autoextends),
+                              HeaderPattern(AUTOBIND_LOADER_PATTERN, autoloader),
+                              HeaderPattern(AUTOBIND_PROPERTY_PATTERN, autoproperty),
+                              HeaderPattern(AUTOBIND_GETPROP_PATTERN, autogetprop),
+                              HeaderPattern(AUTOBIND_CONSTANT_PATTERN, autoconstant),
+                              HeaderPattern(AUTOBIND_ENUMERATION_PATTERN, autoenumeration),
+                              HeaderPattern(AUTOBIND_META_PATTERN, autometa),
+                              HeaderPattern(BUILDABLE_PATTERN, autobindable))
+
+    acg.match_header_patterns(paths, False,
+                              HeaderPattern(AUTOBIND_TYPEDEF_PATTERN, autotypedef))
 
     if bindable_paths:
-        acg.matchHeaderPatterns(bindable_paths.split(path.pathsep), HeaderPattern(BUILDABLE_PATTERN, autobindable))
+        acg.match_header_patterns(bindable_paths.split(path.pathsep), True, HeaderPattern(BUILDABLE_PATTERN, autobindable))
 
     if output_cmakelist:
         return acg.write_to_file(_just_print_flag and output_cmakelist, gen_cmakelist_source(params, paths, output_dir, output_file or 'stdout', results))

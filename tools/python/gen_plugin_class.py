@@ -236,7 +236,7 @@ def searchForPlugin(paths):
         arguments = parse_function_arguments(implement_class, content)
         result.append(Decorator(filename, interface_class, implement_class, main_class, style_name, arguments))
 
-    acg.matchHeaderPatterns(paths,
+    acg.match_header_patterns(paths, True,
             HeaderPattern(BUILDER_PATTERN, match_builder),
             HeaderPattern(DICTIONARY_PATTERN, match_dictionary),
             HeaderPattern(FUNCTION_PATTERN, match_function),

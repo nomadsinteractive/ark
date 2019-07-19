@@ -45,6 +45,8 @@ public:
     void insert(size_type pos, const String& str);
 
     std::vector<String> split(char delim, bool allowEmpty = false) const;
+    void split(char delim, bool allowEmpty, const std::function<bool(const String&)>& traveller) const;
+
     array<String> match(const std::regex& pattern) const;
     bool search(const std::regex& pattern, const std::function<bool(const std::smatch& match)>& traveller) const;
     void search(const std::regex& pattern, const std::function<bool(const std::smatch& match)>& traveller1, const std::function<bool(const String& unmatch)>& traveller2) const;

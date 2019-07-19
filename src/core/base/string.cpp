@@ -194,6 +194,19 @@ std::vector<String> String::split(char delim, bool allowEmpty) const
     return elems;
 }
 
+void String::split(char delim, bool allowEmpty, const std::function<bool(const String&)>& traveller) const
+{
+    std::stringstream ss(_str);
+    std::string item;
+    while(std::getline(ss, item, delim))
+    {
+        const String s = String(item).strip();
+        if(allowEmpty || !s.empty())
+            if(!traveller(s))
+                break;
+    }
+}
+
 array<String> String::match(const std::regex& pattern) const
 {
     std::smatch match;
