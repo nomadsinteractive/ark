@@ -24,15 +24,15 @@ const Viewport& RenderEngine::viewport() const
     return _render_context->viewport();
 }
 
-const V2& RenderEngine::resolution() const
-{
-    return _render_context->resolution();
-}
+//const V2& RenderEngine::displayResolution() const
+//{
+//    return _render_context->displayResolution();
+//}
 
-void RenderEngine::setResolution(const V2& resolution)
-{
-    _render_context->setResolution(resolution);
-}
+//void RenderEngine::setDisplayResolution(const V2& resolution)
+//{
+//    _render_context->setDisplayResolution(resolution);
+//}
 
 const sp<RendererFactory>& RenderEngine::rendererFactory() const
 {

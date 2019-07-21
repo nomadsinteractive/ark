@@ -23,7 +23,11 @@
 #include "graphics/base/font.h"
 #include "graphics/impl/alphabet/alphabet_true_type.h"
 
+#include "impl/asset_bundle_darwin.h"
+
 namespace ark {
+
+using namespace platform::darwin;
 
 void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* content)
 {
@@ -33,11 +37,18 @@ void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* cont
 
 sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPath)
 {
+    sp<AssetBundle> bundle = AssetBundleDarwin::exists(path) ? sp<AssetBundle>::adopt(new AssetBundleDarwin(path)) : sp<AssetBundle>::null();
     if(isDirectory(path))
-        return sp<AssetBundleWithFallback>::make(sp<AssetBundleDirectory>::make(appPath), sp<AssetBundleDirectory>::make(path));
+    {
+        const sp<AssetBundle> pathBundle = sp<AssetBundleDirectory>::make(path);
+        bundle = bundle ? sp<AssetBundleWithFallback>::make(bundle, pathBundle).cast<AssetBundle>() : pathBundle;
+    }
     if(isDirectory(appPath))
-        return sp<AssetBundleDirectory>::make(appPath);
-    return nullptr;
+    {
+        const sp<AssetBundle> appPathBundle = sp<AssetBundleDirectory>::make(path);
+        bundle = bundle ? sp<AssetBundleWithFallback>::make(bundle, appPathBundle).cast<AssetBundle>() : appPathBundle;
+    }
+    return bundle;
 }
 
 sp<Alphabet> Platform::getSystemAlphabet(const Font& font, const String& lang)
@@ -81,6 +92,11 @@ String Platform::getUserStoragePath(const String& path)
     return Strings::sprintf("%s/Library/Application Support/%s", getenv("HOME"), path.c_str());
 }
 
+String Platform::getExternalStoragePath(const String& path)
+{
+    return path;
+}
+
 void Platform::glInitialize()
 {
 #ifdef ARK_USE_OPEN_GL
@@ -104,11 +120,14 @@ uint32_t Platform::glPreprocessShader(const String& shader, const char* srcs[], 
     return 1;
 }
 
-void* Platform::dlOpen(const String& name)
+void* Platform::dlOpen(const char* name)
 {
+    if(!name)
+        return dlopen(nullptr, RTLD_LAZY);
+
     String sDirname, sFilename;
     const String sFilePath = getExecutablePath();
-    const String soName = Strings::sprintf("lib%s.dylib", name.c_str());
+    const String soName = Strings::sprintf("lib%s.dylib", name);
     Strings::rcut(sFilePath, sDirname, sFilename, dirSeparator());
     void* library = dlopen(soName.c_str(), RTLD_LAZY);
     if(!library)

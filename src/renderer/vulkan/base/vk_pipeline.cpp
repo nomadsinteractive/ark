@@ -262,8 +262,8 @@ void VKPipeline::setupPipeline(GraphicsContext& graphicsContext, const VertexLay
                 VK_TRUE,
                 VK_COMPARE_OP_LESS_OR_EQUAL);
 
-    const Viewport& viewport = graphicsContext.renderContext()->viewport();
-    const VkRect2D vkScissors{{0, 0}, {static_cast<uint32_t>(viewport.width()), static_cast<uint32_t>(viewport.height())}};
+    const RenderContext::Resolution& displayResolution = graphicsContext.renderContext()->displayResolution();
+    const VkRect2D vkScissors{{0, 0}, {displayResolution.width, displayResolution.height}};
     VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
     viewportState.pScissors = &vkScissors;
     viewportState.scissorCount = 1;

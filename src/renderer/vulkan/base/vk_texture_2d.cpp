@@ -35,7 +35,8 @@ uint64_t VKTexture2D::id()
 
 void VKTexture2D::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
-    _uploader->upload(graphicsContext, *this);
+    if(_uploader)
+        _uploader->upload(graphicsContext, *this);
 }
 
 Resource::RecycleFunc VKTexture2D::recycle()

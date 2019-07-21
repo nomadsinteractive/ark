@@ -206,8 +206,8 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glDeleteFramebuffers(1, &captureFBO);
     glDeleteRenderbuffers(1, &captureRBO);
 
-    const V2& resolution = graphicsContext.renderContext()->resolution();
-    glViewport(0, 0, static_cast<GLsizei>(resolution.x()), static_cast<GLsizei>(resolution.y()));
+    const RenderContext::Resolution& resolution = graphicsContext.renderContext()->displayResolution();
+    glViewport(0, 0, static_cast<GLsizei>(resolution.width), static_cast<GLsizei>(resolution.height));
 }
 
 void GLUtil::glTexImage2D(uint32_t index, int32_t n, void* data)

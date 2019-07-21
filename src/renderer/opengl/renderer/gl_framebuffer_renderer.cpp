@@ -45,8 +45,8 @@ public:
     virtual void draw(GraphicsContext& graphicsContext) override {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        const V2& resolution = graphicsContext.renderContext()->resolution();
-        glViewport(0, 0, static_cast<GLsizei>(resolution.x()), static_cast<GLsizei>(resolution.y()));
+        const RenderContext::Resolution& resolution = graphicsContext.renderContext()->displayResolution();
+        glViewport(0, 0, static_cast<GLsizei>(resolution.width), static_cast<GLsizei>(resolution.height));
     }
 
 };

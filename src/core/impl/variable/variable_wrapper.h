@@ -3,13 +3,14 @@
 
 #include "core/forwarding.h"
 #include "core/ark.h"
+#include "core/types/class.h"
 #include "core/inf/variable.h"
 
 #include "app/base/application_context.h"
 
 namespace ark {
 
-template<typename T> class VariableWrapper final : public Variable<T> {
+template<typename T> class VariableWrapper final : public Variable<T>, public Implements<VariableWrapper<T>, Variable<T>> {
 public:
     VariableWrapper(const sp<Variable<T>>& delegate) noexcept
         : _variable_impl(nullptr), _delegate(Null::toSafe(delegate)) {

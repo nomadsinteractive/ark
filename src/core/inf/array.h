@@ -2,6 +2,7 @@
 #define ARK_CORE_INF_ARRAY_H_
 
 #include <array>
+#include <vector>
 
 #include "core/forwarding.h"
 
@@ -20,6 +21,8 @@ public:
 
     class Allocated;
     class Borrowed;
+    class Vector;
+
     template<size_t LEN> class Fixed;
 
     template<typename U> class Casted;
@@ -72,6 +75,25 @@ public:
 private:
     T* _data;
     size_t _length;
+};
+
+
+template<typename T> class Array<T>::Vector : public Array<T> {
+public:
+    Vector(std::vector<T> data)
+        : _data(std::move(data)) {
+    }
+
+    virtual size_t length() override {
+        return _data.size();
+    }
+
+    virtual T* buf() override {
+        return &_data[0];
+    }
+
+private:
+    std::vector<T> _data;
 };
 
 

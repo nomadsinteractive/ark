@@ -276,9 +276,8 @@ PyObject* PythonInterpreter::toPyObject(const Box& box)
         return object;
     }
 
-    auto iter = _type_by_id.find(box.typeId());
-    DCHECK(iter != _type_by_id.end(), "Unknow box type");
-
+    const auto iter = _type_by_id.find(box.typeId());
+    DCHECK(iter != _type_by_id.end(), "Unknow box type: %s", Class::getClass(box.typeId())->name());
     return iter->second->create(box);
 }
 

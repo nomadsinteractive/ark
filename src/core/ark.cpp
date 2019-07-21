@@ -82,7 +82,6 @@ public:
             if(readable)
                 return readable;
         }
-
         return _builtin_asset_bundle->get(name);
     }
 
@@ -98,7 +97,7 @@ public:
         const sp<AssetBundle> fallback = _builtin_asset_bundle->getBundle(path);
         if(fallback)
             return asset ? sp<AssetBundle>::adopt(new AssetBundleWithFallback(asset, fallback)) : fallback;
-        DCHECK(asset, "Asset \"%s\" doesn't exists", path.c_str());
+        DCHECK(asset, "AssetBundle \"%s\" doesn't exists", path.c_str());
         return asset;
     }
 
@@ -301,14 +300,10 @@ sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, const sp<Appli
     case OPENGL_46:
 #ifdef ARK_USE_OPEN_GL
         return sp<RenderEngine>::make(version, sp<opengl::RendererFactoryOpenGL>::make(appResource->recycler()));
-#else
-        break;
 #endif
     case VULKAN_11:
 #ifdef ARK_USE_VULKAN
         return sp<RenderEngine>::make(version, sp<vulkan::RendererFactoryVulkan>::make(appResource->recycler()));
-#else
-        break;
 #endif
     }
     DFATAL("Unknown engine type: %d", version);

@@ -32,7 +32,7 @@ public:
     static String glShaderVersionDeclaration(uint32_t versionCode);
     static uint32_t glPreprocessShader(const String& shader, const char* srcs[], uint32_t length);
 
-    static void* dlOpen(const String& name);
+    static void* dlOpen(const char* name);
     static void* dlSymbol(void* library, const String& symbolName);
     static void dlClose(void* library);
 

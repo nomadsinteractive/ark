@@ -62,6 +62,12 @@ public:
 #endif
             uint8_t dummy[64] = {0};
     };
+
+    struct Resolution {
+        uint32_t width;
+        uint32_t height;
+    };
+
 public:
     RenderContext(Ark::RendererVersion version, const Viewport& viewport, float upDirection);
 
@@ -74,8 +80,8 @@ public:
     const Viewport& viewport() const;
     void setViewport(const Viewport& viewport);
 
-    const V2& resolution() const;
-    void setResolution(const V2& resolution);
+    const Resolution& displayResolution() const;
+    void setDisplayResolution(const Resolution& displayResolution);
 
     const V2& displayScale() const;
 
@@ -98,7 +104,7 @@ private:
 
     std::map<String, String> _annotations;
     sp<SnippetFactory> _snippet_factory;
-    V2 _resolution;
+    Resolution _display_resolution;
     V2 _display_scale;
 };
 

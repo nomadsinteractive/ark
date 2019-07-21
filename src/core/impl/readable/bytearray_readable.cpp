@@ -28,11 +28,13 @@ int32_t BytearrayReadable::seek(int32_t position, int32_t whence)
         _position = position;
         break;
     case SEEK_CUR:
-    case SEEK_END:
         _position += position;
         break;
+    case SEEK_END:
+        _position = _bytearray->length() + position;
+        break;
     }
-    DCHECK(_position >= 0 && _position < _bytearray->length(), "Cursor out of bounds: %d", _position);
+    DCHECK(_position >= 0 && _position < _bytearray->length(), "Cursor out of bounds: %d, position: %d, whence: %d", _position, position, whence);
     return _position;
 }
 
