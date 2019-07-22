@@ -13,4 +13,5 @@
 	<render-layer id="@rl002" class="text-layer" alphabet="@a001" text-color="#ffffffff"/>
 	<render-layer id="@rl003" class="image-layer" atlas="@blocks"/>
 	<renderer id="fps-counter" class="fps-counter" render-layer="@rl001" message="%.2f / 60"/>
+	<audio-player id="audio_player"/>
 </resources>

@@ -1,4 +1,4 @@
-#include "plugin/portaudio/impl/readable/mixer.h"
+#include "app/util/audio_mixer.h"
 
 #include <string.h>
 
@@ -7,16 +7,14 @@
 #include "core/util/math.h"
 
 namespace ark {
-namespace plugin {
-namespace portaudio {
 
-Mixer::Mixer(uint32_t bufferLength)
+AudioMixer::AudioMixer(uint32_t bufferLength)
     : _buffer(sp<Array<int16_t>::Allocated>::make(bufferLength)), _buffer_hdr(sp<Array<int32_t>::Allocated>::make(bufferLength)), _total_weight(0)
 {
     ensureToneMapRange(TONE_MAP_WEIGHT_ONE);
 }
 
-uint32_t Mixer::read(void* buffer, uint32_t size)
+uint32_t AudioMixer::read(void* buffer, uint32_t size)
 {
     bool eof = false;
     size_t readSize = 0;
@@ -34,16 +32,16 @@ uint32_t Mixer::read(void* buffer, uint32_t size)
         eof = eof || i->future()->isDone();
     }
 
-    int32_t maxValue = 0;
+    uint32_t maxValue = 0;
     for(size_t i = 0; i < readSize / 2; ++i)
     {
-        int32_t absValue = std::abs(bufHdr[i]);
+        uint32_t absValue = static_cast<uint32_t>(std::abs(bufHdr[i]));
         if(absValue > maxValue)
         {
             maxValue = absValue;
             ensureToneMapRange(maxValue);
         }
-        int16_t ldrValue = _tone_map[absValue];
+        int16_t ldrValue = _tone_map.at(absValue);
         out[i] = bufHdr[i] > 0 ? ldrValue : -ldrValue;
     }
 
@@ -56,39 +54,38 @@ uint32_t Mixer::read(void* buffer, uint32_t size)
     return readSize;
 }
 
-int32_t Mixer::seek(int32_t /*position*/, int32_t /*whence*/)
+int32_t AudioMixer::seek(int32_t /*position*/, int32_t /*whence*/)
 {
     DFATAL("Unimplemented");
     return 0;
 }
 
-int32_t Mixer::remaining()
+int32_t AudioMixer::remaining()
 {
     DFATAL("Unimplemented");
     return 0;
 }
 
-sp<Future> Mixer::post(const sp<Readable>& readable, uint32_t weight)
+sp<Future> AudioMixer::post(const sp<Readable>& readable)
 {
-    const sp<Source> source = sp<Source>::make(readable, weight);
+    const sp<Source> source = sp<Source>::make(readable);
     _sources.push(source);
-    _total_weight += weight;
     return source->future();
 }
 
-bool Mixer::empty() const
+bool AudioMixer::empty() const
 {
     return _sources.empty();
 }
 
-void Mixer::ensureToneMapRange(int32_t value)
+void AudioMixer::ensureToneMapRange(uint32_t value)
 {
-    int32_t size = _tone_map.size();
+    size_t size = _tone_map.size();
     if(value >= size)
     {
-        int32_t remainder;
-        int32_t divmod = Math::divmod(value, TONE_MAP_WEIGHT_ONE, remainder);
-        int32_t newSize = (divmod + 1) * TONE_MAP_WEIGHT_ONE /*+ (remainder ? TONE_MAP_WEIGHT_ONE : 0)*/;
+        uint32_t remainder;
+        uint32_t divmod = Math::divmod(value, TONE_MAP_WEIGHT_ONE, remainder);
+        uint32_t newSize = (divmod + 1) * TONE_MAP_WEIGHT_ONE /*+ (remainder ? TONE_MAP_WEIGHT_ONE : 0)*/;
         _tone_map.resize(newSize);
 
         for(size_t i = size; i < _tone_map.size(); ++i)
@@ -96,35 +93,28 @@ void Mixer::ensureToneMapRange(int32_t value)
     }
 }
 
-Mixer::Source::Source(const sp<Readable>& readable, uint32_t weight)
-    : _readable(readable), _weight(weight), _future(sp<Future>::make())
+AudioMixer::Source::Source(const sp<Readable>& readable)
+    : _readable(readable), _future(sp<Future>::make())
 {
 }
 
-size_t Mixer::Source::accumulate(int16_t* in, int32_t* out, size_t size) const
+size_t AudioMixer::Source::accumulate(int16_t* in, int32_t* out, size_t size) const
 {
     size_t readSize = _readable->read(in, size);
     if(readSize > 0 && !_future->isCancelled())
     {
         size_t len = readSize / 2;
-            for(size_t i = 0; i < len; i++)
-                out[i] += in[i];
+        for(size_t i = 0; i < len; i++)
+            out[i] += in[i];
     }
     else
         _future->done();
     return readSize;
 }
 
-uint32_t Mixer::Source::weight() const
-{
-    return _weight;
-}
-
-const sp<Future>&Mixer::Source::future() const
+const sp<Future>& AudioMixer::Source::future() const
 {
     return _future;
 }
 
-}
-}
 }

@@ -176,6 +176,7 @@ ark_add_denpendency(3rdparty/freetype freetype ${CMAKE_CURRENT_BINARY_DIR}/3rdpa
 ark_add_plugin_directory(python plugin/python)
 ark_add_plugin_directory(box2d plugin/box2d)
 ark_add_plugin_directory(vorbis plugin/vorbis)
+ark_add_plugin_directory(miniaudio plugin/miniaudio)
 
 if(NOT IOS)
     ark_add_plugin_directory(portaudio plugin/portaudio)

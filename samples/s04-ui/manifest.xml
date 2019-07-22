@@ -14,4 +14,7 @@
 	</application>
 
     <plugin name="ark-python"/>
+	<plugin name="ark-vorbis"/>
+    <plugin name="ark-miniaudio" for="windows|darwin"/>
+    <plugin name="ark-audio-android" for="android"/>
 </manifest>

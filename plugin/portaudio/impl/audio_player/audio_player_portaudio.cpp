@@ -15,7 +15,7 @@
 
 #include "renderer/base/resource_loader_context.h"
 
-#include "plugin/portaudio/impl/readable/mixer.h"
+#include "app/util/audio_mixer.h"
 
 #define SAMPLE_RATE  (44100)
 #define NUM_CHANNELS    (2)
@@ -78,7 +78,7 @@ public:
         if (PaUtil_InitializeRingBuffer(&_ring_buffer, sizeof(uint16_t), numSamples, _ring_buffer_data) < 0)
             DFATAL("Failed to initialize ring buffer. Size is not power of 2 ??\n");
 
-        _mixer = sp<Mixer>::make(numSamples);
+        _mixer = sp<AudioMixer>::make(numSamples);
     }
     ~PortaudioDeviceStream() {
         if(_stream)
@@ -133,9 +133,9 @@ public:
         return _frame_index;
     }
 
-    sp<Future> post(const sp<PortaudioDeviceStream>& self, const sp<Executor>& executor, const sp<Readable>& source, uint32_t weight) {
+    sp<Future> post(const sp<PortaudioDeviceStream>& self, const sp<Executor>& executor, const sp<Readable>& source) {
         bool empty = _mixer->empty();
-        const sp<Future> future = _mixer->post(source, weight);
+        const sp<Future> future = _mixer->post(source);
         if(empty) {
             const PaError paError = start(self);
             if(paError == paNoError)
@@ -177,7 +177,7 @@ private:
     PaStream* _stream;
     bool _stopped;
 
-    sp<Mixer> _mixer;
+    sp<AudioMixer> _mixer;
 
 };
 
@@ -248,7 +248,7 @@ sp<Future> AudioPlayerPortaudio::play(const sp<Readable>& source, AudioFormat fo
         _pa_stream = stream;
     }
 
-    return stream->post(stream, _executor, source, 1);
+    return stream->post(stream, _executor, source);
 }
 
 bool AudioPlayerPortaudio::isAudioFormatSupported(AudioPlayer::AudioFormat format)

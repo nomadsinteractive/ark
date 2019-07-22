@@ -120,10 +120,16 @@ uint32_t Platform::glPreprocessShader(const String& shader, const char* srcs[], 
     return 1;
 }
 
-void* Platform::dlOpen(const String& name)
+void* Platform::dlOpen(const char* name)
 {
-    const String dllName = name + String(".dll");
-    return LoadLibrary(dllName.c_str());
+    if(name)
+    {
+        const String dllName = Strings::sprintf("%s.dll", name);
+        return LoadLibrary(dllName.c_str());
+    }
+    HMODULE hModule = nullptr;
+    GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCTSTR)Platform::dlOpen, &hModule);
+    return hModule;
 }
 
 void* Platform::dlSymbol(void* library, const String& symbolName)

@@ -140,6 +140,10 @@
         "url": "https://github.com/ocornut/imgui.git",
         "name": "imgui",
         "tag": "v1.69"
+    },
+    {
+        "url": "https://github.com/dr-soft/miniaudio.git",
+        "name": "miniaudio",
+        "tag": "master"
     }
-
 ]

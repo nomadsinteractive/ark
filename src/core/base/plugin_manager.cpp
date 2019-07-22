@@ -48,7 +48,7 @@ void PluginManager::load(const String& name)
     PluginInitializer func = reinterpret_cast<PluginInitializer>(iter != _static_plugin_libraries.end() ? iter->second : nullptr);
     DCHECK(func, "Error loading plugin \"%s\"", name.c_str());
 #else
-    void* library = Platform::dlOpen(name);
+    void* library = Platform::dlOpen(name.c_str());
     DCHECK(library, "Cannot load plugin \"%s\"", name.c_str());
     const String symbolName = Strings::sprintf("__%s_initialize__", name.replace("-", "_").c_str());
     void* symbol = Platform::dlSymbol(library, symbolName.c_str());

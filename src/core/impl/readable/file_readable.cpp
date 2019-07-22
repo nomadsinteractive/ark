@@ -1,5 +1,6 @@
 #include "core/impl/readable/file_readable.h"
 
+#include "core/ark.h"
 #include "core/base/bean_factory.h"
 
 namespace ark {
@@ -53,7 +54,7 @@ FileReadable::BUILDER::BUILDER(BeanFactory& factory, const String& src)
 
 sp<Readable> FileReadable::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<FileReadable>::make(_src->build(args), "rb");
+    return Ark::instance().openAsset(_src->build(args));
 }
 
 }
