@@ -9,19 +9,7 @@
 #include "platform/platform.h"
 
 #ifdef ARK_BUILD_STATIC_PLUGINS
-
-extern "C" ark::Plugin* __ark_assimp_initialize__(ark::Ark&);
-extern "C" ark::Plugin* __ark_fmod_initialize__(ark::Ark& ark);
-extern "C" ark::Plugin* __ark_python_initialize__(ark::Ark& ark);
-extern "C" ark::Plugin* __ark_vorbis_initialize__(ark::Ark& ark);
-
-static const std::map<ark::String, ark::PluginManager::PluginInitializer> _static_plugin_libraries = {
-    {"ark-assimp", __ark_assimp_initialize__},
-//    {"ark-fmod", __ark_fmod_initialize__},
-    {"ark-python", __ark_python_initialize__},
-    {"ark-vorbis", __ark_vorbis_initialize__}
-};
-
+extern std::map<ark::String, ark::PluginManager::PluginInitializer> _ark_static_plugin_initializers;
 #endif
 
 namespace ark {
@@ -44,8 +32,8 @@ void PluginManager::each(const std::function<bool(const sp<Plugin>&)>& visitor) 
 void PluginManager::load(const String& name)
 {
 #ifdef ARK_BUILD_STATIC_PLUGINS
-    const auto iter = _static_plugin_libraries.find(name);
-    PluginInitializer func = reinterpret_cast<PluginInitializer>(iter != _static_plugin_libraries.end() ? iter->second : nullptr);
+    const auto iter = _ark_static_plugin_initializers.find(name);
+    PluginInitializer func = reinterpret_cast<PluginInitializer>(iter != _ark_static_plugin_initializers.end() ? iter->second : nullptr);
     DCHECK(func, "Error loading plugin \"%s\"", name.c_str());
 #else
     void* library = Platform::dlOpen(name.c_str());

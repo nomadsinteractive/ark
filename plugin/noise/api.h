@@ -3,7 +3,7 @@
 
 #include "core/base/api.h"
 
-#ifndef ARK_FLAG_BUILD_SHARED_PLUGIN
+#ifndef ARK_BUILD_STATIC_PLUGINS
     #ifdef ARK_FLAG_BUILDING_PLUGIN_NOISE
     #   define ARK_PLUGIN_NOISE_API ARK_API_EXPORT_DECLARATION
     #else
