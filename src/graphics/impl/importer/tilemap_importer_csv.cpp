@@ -1,24 +1,23 @@
-#include "graphics/impl/importer/tile_map_importer_csv.h"
+#include "graphics/impl/importer/tilemap_importer_csv.h"
 
 #include <unordered_map>
 
 #include "core/util/strings.h"
 
-#include "graphics/base/tile_map.h"
+#include "graphics/base/tilemap.h"
 #include "graphics/base/render_object.h"
 
 #include "renderer/base/resource_loader_context.h"
 
 namespace ark {
 
-void TileMapImporterCsv::import(TileMap& tilemap, const sp<Readable>& src)
+void TilemapImporterCsv::import(Tilemap& tilemap, const sp<Readable>& src)
 {
+    uint32_t rowCount = 0;
     const String content = Strings::loadFromReadable(src);
+    std::unordered_map<int32_t, sp<RenderObject>> renderObjects;
 
     tilemap.clear();
-
-    uint32_t rowCount = 0;
-    std::unordered_map<int32_t, sp<RenderObject>> renderObjects;
 
     for(const String& i : content.split('\n'))
     {
@@ -37,9 +36,9 @@ void TileMapImporterCsv::import(TileMap& tilemap, const sp<Readable>& src)
     DCHECK(rowCount == tilemap.rowCount(), "Insufficient rows, got %d, should be %d", rowCount, tilemap.rowCount());
 }
 
-sp<TileMapImporter> TileMapImporterCsv::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<TilemapImporter> TilemapImporterCsv::DICTIONARY::build(const sp<Scope>& /*args*/)
 {
-    return sp<TileMapImporterCsv>::make();
+    return sp<TilemapImporterCsv>::make();
 }
 
 }

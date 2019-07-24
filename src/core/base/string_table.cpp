@@ -27,6 +27,7 @@ private:
 
 void StringTable::addStringBundle(const String& name, const sp<StringBundle>& stringTable)
 {
+    DASSERT(stringTable);
     const auto iter = _string_bundle_by_name.find(name);
     if(iter != _string_bundle_by_name.end())
         _string_bundle_by_name[name] = sp<MergedStringBundle>::make(iter->second, stringTable);

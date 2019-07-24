@@ -1023,12 +1023,13 @@ def create_overloaded_method_type(base_type, **kwargs):
                         not_overloaded_args[j] = None
 
             m0 = self._overloaded_methods[0]
-            not_overloaded_names = ['obj%d' % i for i, j in enumerate(not_overloaded_args) if j and j.default_value is None]
+            # not_overloaded_names = ['obj%d' % i for i, j in enumerate(not_overloaded_args) if j and j.default_value is None]
             not_overloaded_declar = [j.gen_declare('obj%d' % i, 'arg%d' % i, not m0.check_argument_type) for i, j in enumerate(not_overloaded_args) if j]
             self._gen_convert_args_code(lines, not_overloaded_declar)
             for i in self._overloaded_methods:
                 type_checks = [k.gen_type_check('arg%d' % j) for j, k, l in zip(range(len(i.arguments)), i.arguments, not_overloaded_args) if not l]
-                lines.extend(['if(%s)' % ' && '.join(([j for j in type_checks if j] + not_overloaded_names) or ['true']), '{'])
+                # lines.extend(['if(%s)' % ' && '.join(([j for j in type_checks if j] + not_overloaded_names) or ['true']), '{'])
+                lines.extend(['if(%s)' % ' && '.join(([j for j in type_checks if j]) or ['true']), '{'])
                 body_lines = []
                 overloaded_args = [None if j else k for j, k in zip(not_overloaded_args, i.arguments)]
                 i.gen_definition_body(genclass, body_lines, overloaded_args, overloaded_args, True, False)

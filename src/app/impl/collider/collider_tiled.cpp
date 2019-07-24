@@ -8,7 +8,8 @@
 #include "graphics/base/rect.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/size.h"
-#include "graphics/base/tile_map.h"
+#include "graphics/base/tilemap.h"
+#include "graphics/base/tileset.h"
 #include "graphics/base/v2.h"
 
 #include "renderer/base/resource_loader_context.h"
@@ -42,13 +43,13 @@ private:
 
 }
 
-TiledCollider::TiledCollider(const sp<TileMap>& tileMap, const sp<ResourceLoaderContext>& resourceLoaderContext)
+TiledCollider::TiledCollider(const sp<Tilemap>& tileMap, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _tile_map(tileMap), _resource_loader_context(resourceLoaderContext), _rigid_body_base(0)
 {
 }
 
 TiledCollider::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _tile_map(factory.ensureBuilder<TileMap>(manifest, "tile-map")), _resource_loader_context(resourceLoaderContext)
+    : _tile_map(factory.ensureBuilder<Tilemap>(manifest, "tile-map")), _resource_loader_context(resourceLoaderContext)
 {
 }
 
@@ -67,8 +68,8 @@ sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, 
     return rigidBody;
 }
 
-TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<TileMap>& tileMap)
-    : RigidBody(id, type, position, size, Null::toSafe<Rotate>(nullptr)), _tile_map(tileMap), _rigid_body_shadow(sp<RigidBodyShadow>::make(tileMap->tileWidth(), tileMap->tileHeight()))
+TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Tilemap>& tileMap)
+    : RigidBody(id, type, position, size, Null::toSafe<Rotate>(nullptr)), _tile_map(tileMap), _rigid_body_shadow(sp<RigidBodyShadow>::make(tileMap->tileset()->tileWidth(), tileMap->tileset()->tileHeight()))
 {
 }
 
@@ -97,13 +98,13 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
     float bottom = rect.bottom() - position.y();
     std::set<uint32_t> candidates = _contacts;
     std::set<uint32_t> contacts;
-    float tileWidth = static_cast<float>(_tile_map->tileWidth());
-    float tileHeight = static_cast<float>(_tile_map->tileHeight());
+    float tileWidth = static_cast<float>(_tile_map->tileset()->tileWidth());
+    float tileHeight = static_cast<float>(_tile_map->tileset()->tileHeight());
 
-    int32_t bColId = static_cast<int32_t>(left / _tile_map->tileWidth()) - (left < 0 ? 1 : 0);
-    int32_t eColId = static_cast<int32_t>(right / _tile_map->tileWidth()) - (right < 0 ? 1 : 0);
-    int32_t bRowId = static_cast<int32_t>(top / _tile_map->tileHeight()) - (top < 0 ? 1 : 0);
-    int32_t eRowId = static_cast<int32_t>(bottom / _tile_map->tileHeight()) - (bottom < 0 ? 1 : 0);
+    int32_t bColId = static_cast<int32_t>(left / tileWidth) - (left < 0 ? 1 : 0);
+    int32_t eColId = static_cast<int32_t>(right / tileWidth) - (right < 0 ? 1 : 0);
+    int32_t bRowId = static_cast<int32_t>(top / tileHeight) - (top < 0 ? 1 : 0);
+    int32_t eRowId = static_cast<int32_t>(bottom / tileHeight) - (bottom < 0 ? 1 : 0);
 
     for(int32_t col = bColId; col <= eColId; col ++)
         for(int32_t row = bRowId; row <= eRowId; row ++)

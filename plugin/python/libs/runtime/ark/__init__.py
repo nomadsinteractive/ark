@@ -10,11 +10,11 @@ Use it for:
 
 """
 
-from typing import Callable, List, Type, TypeVar
+from typing import Callable, List, Type, TypeVar, Union
 
 
-_BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Collider', 'Integer', 'Numeric', 'Layer', 'Vec2', 'Vec3', 'Vec4',
-                           'Renderer', 'RenderLayer', 'RenderObject', 'Rotate', 'Size', 'StringBundle', 'Transform', 'Varyings')
+_BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'Numeric', 'Layer', 'Vec2', 'Vec3',
+                           'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotate', 'Size', 'StringBundle', 'TileMapImporter', 'Transform', 'Varyings')
 
 
 def logd(*args):
@@ -835,29 +835,49 @@ class Size:
         pass
 
 
-class TileMap:
-    def __init__(self, layer, w, h, tw, th):
+class TilemapImporter:
+    pass
+
+
+class Tileset:
+    def __init__(self, tile_width: int, tile_height: int):
+        self._tile_width = tile_width
+        self._tile_height = tile_height
+
+    @property
+    def tile_width(self) -> int:
+        return self._tile_width
+
+    @property
+    def tile_height(self) -> int:
+        return self._tile_height
+
+    def add_tile(self, tile_id: int, tile: RenderObject):
         pass
+
+    def get_tile(self, tile_id: int) -> Union[RenderObject, None]:
+        return None
+
+
+class Tilemap:
+    def __init__(self, layer, w, h, tileset: Tileset):
+        self._tileset = tileset
 
     def clear(self):
         pass
 
-    def set_tile(self, row_id, col_id, obj):
+    def set_tile(self, row_id: int, col_id: int, obj: Union[int, RenderObject]):
         pass
 
-    def get_tile(self, row, col):
-        return None
+    def get_tile(self, row: int, col: int) -> RenderObject:
+        return RenderObject(0)
 
-    def get_tile_type(self, row, col):
+    def get_tile_type(self, row: int, col: int) -> int:
         return 0
 
     @property
-    def tile_width(self):
-        return 0
-
-    @property
-    def tile_height(self):
-        return 0
+    def tileset(self) -> Tileset:
+        return self._tileset
 
     @property
     def row_count(self):

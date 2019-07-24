@@ -1,5 +1,5 @@
-#ifndef ARK_APP_BASE_TILE_MAP_H_
-#define ARK_APP_BASE_TILE_MAP_H_
+#ifndef ARK_APP_BASE_TILEMAP_H_
+#define ARK_APP_BASE_TILEMAP_H_
 
 #include "core/base/api.h"
 #include "core/inf/variable.h"
@@ -14,11 +14,11 @@
 
 namespace ark {
 
-class ARK_API TileMap : public Renderer, Block {
+class ARK_API Tilemap : public Renderer, Block {
 public:
 // [[script::bindings::auto]]
-    TileMap(const sp<LayerContext>& layerContext, uint32_t width, uint32_t height, uint32_t tileWidth, uint32_t tileHeight);
-    ~TileMap() override;
+    Tilemap(const sp<LayerContext>& layerContext, uint32_t width, uint32_t height, const sp<Tileset>& tileset);
+    ~Tilemap() override;
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 // [[script::bindings::property]]
@@ -32,14 +32,14 @@ public:
     const sp<RenderObject>& getTileByPosition(float x, float y) const;
 // [[script::bindings::auto]]
     void setTile(uint32_t rowId, uint32_t colId, const sp<RenderObject>& renderObject);
+// [[script::bindings::auto]]
+    void setTile(uint32_t rowId, uint32_t colId, int32_t tileId);
 
 // [[script::bindings::auto]]
     void clear();
 
 // [[script::bindings::property]]
-    uint32_t tileWidth() const;
-// [[script::bindings::property]]
-    uint32_t tileHeight() const;
+    const sp<Tileset>& tileset() const;
 
 // [[script::bindings::property]]
     uint32_t colCount() const;
@@ -59,13 +59,11 @@ public:
 private:
     sp<LayerContext> _layer_context;
     SafePtr<Size> _size;
+    sp<Tileset> _tileset;
+
     SafePtr<Vec> _position;
     SafePtr<Vec> _scroller;
 
-    sp<Size> _tile_size;
-
-    uint32_t _tile_width;
-    uint32_t _tile_height;
     uint32_t _col_count;
     uint32_t _row_count;
 

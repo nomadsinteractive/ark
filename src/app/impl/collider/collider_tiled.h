@@ -20,7 +20,7 @@ namespace ark {
 
 class TiledCollider : public Collider {
 public:
-    TiledCollider(const sp<TileMap>& tileMap, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    TiledCollider(const sp<Tilemap>& tileMap, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
 
@@ -32,7 +32,7 @@ public:
         virtual sp<Collider> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<TileMap>> _tile_map;
+        sp<Builder<Tilemap>> _tile_map;
         sp<ResourceLoaderContext> _resource_loader_context;
 
     };
@@ -54,7 +54,7 @@ private:
 public:
     class RigidBodyImpl : public RigidBody {
     public:
-        RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<TileMap>& tileMap);
+        RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Tilemap>& tileMap);
 
         virtual void dispose() override;
 
@@ -64,14 +64,14 @@ public:
         void updateRigidBodyShadow(uint32_t id, float tileWidth, float tileHeight, uint32_t colCount, const sp<RenderObject>& renderObject);
 
     private:
-        sp<TileMap> _tile_map;
+        sp<Tilemap> _tile_map;
         sp<RigidBodyShadow> _rigid_body_shadow;
 
         std::set<uint32_t> _contacts;
     };
 
 private:
-    sp<TileMap> _tile_map;
+    sp<Tilemap> _tile_map;
     sp<ResourceLoaderContext> _resource_loader_context;
 
     uint32_t _rigid_body_base;

@@ -79,8 +79,10 @@ sp<Vec3> Vec3Impl::DICTIONARY::build(const sp<Scope>& args)
     const sp<Numeric> x = _x->build(args);
     const sp<Numeric> y = _y->build(args);
     const sp<Numeric> z = _z->build(args);
-    DCHECK(x && ((y && z) || (!y && !z)), "Cannot build Vec3 from \"%s\"", _str.c_str());
-    return sp<Vec3Impl>::make(x, y ? y : x, z ? z : x);
+    DCHECK(x, "Cannot build Vec3 from \"%s\"", _str.c_str());
+    if(!y && !z)
+        return sp<Vec3Impl>::make(x, x, x);
+    return sp<Vec3Impl>::make(x, y, z);
 }
 
 }

@@ -39,7 +39,8 @@ class RendererGroup;
 class Rotate;
 class Size;
 class SurfaceController;
-class TileMap;
+class Tilemap;
+class Tileset;
 class Vec2Impl;
 class Vec3Impl;
 class Vec4Impl;
@@ -66,7 +67,9 @@ typedef Variable<V4> Vec4;
 typedef Loader<Bitmap> BitmapLoader;
 
 //[[script::bindings::auto]]
-typedef Importer<TileMap> TileMapImporter;
+typedef Importer<Tilemap> TilemapImporter;
+//[[script::bindings::auto]]
+typedef Importer<Tileset> TilesetImporter;
 
 typedef Vec2 Vec;
 typedef V2 V;

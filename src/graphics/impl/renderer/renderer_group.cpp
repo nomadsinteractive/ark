@@ -15,6 +15,7 @@ RendererGroup::~RendererGroup()
 
 void RendererGroup::addRenderer(const sp<Renderer>& renderer)
 {
+    DASSERT(renderer);
     _items.push_back(renderer);
 }
 
