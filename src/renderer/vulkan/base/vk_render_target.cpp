@@ -14,7 +14,6 @@
 
 #ifdef ARK_PLATFORM_DARWIN
 struct NSView;
-#include "platform/darwin/bridge.h"
 #endif
 
 namespace ark {

@@ -15,7 +15,16 @@ aux_source_directory(impl/audio_player LOCAL_SRC_LIST)
 ark_ensure_dependency(3rdparty/miniaudio)
 ark_include_directories(3rdparty/miniaudio)
 
+if(IOS)
+    add_library(miniaudio STATIC util/miniaudio.m)
+    ark_link_libraries(miniaudio)
+    target_include_directories(miniaudio PRIVATE 3rdparty/miniaudio)
+else()
+    ark_compile_definitions(-DARK_MINIAUDIO_UNIMPLEMENTED)
+endif()
+
 ark_setup_tools(ark_gen_plugin_class)
 ark_gen_plugin_class(miniaudio core ark::plugin::miniaudio miniaudio_plugin impl)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
+ark_export_dependency_libraries(${PROJECT_NAME} miniaudio)

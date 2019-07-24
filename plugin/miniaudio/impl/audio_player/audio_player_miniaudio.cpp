@@ -1,7 +1,11 @@
 #include "miniaudio/impl/audio_player/audio_player_miniaudio.h"
 
+#ifdef ARK_MINIAUDIO_UNIMPLEMENTED
 #define MINIAUDIO_IMPLEMENTATION
+#endif
 #include <miniaudio.h>
+
+#include <thread>
 
 #include "core/base/future.h"
 #include "core/inf/executor.h"
@@ -12,8 +16,6 @@
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/util/audio_mixer.h"
-
-constexpr int32_t kBufferSizeAutomatic = 0;
 
 namespace ark {
 namespace plugin {
