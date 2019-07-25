@@ -17,11 +17,8 @@ else()
     add_definitions(-D__amd64__)
 endif()
 
-ark_include_directories(${ARK_OPENGL_INCLUDE_DIRS})
 ark_include_directories(3rdparty/cmft/include)
 ark_include_directories(3rdparty/cmft/dependency)
-
-list(APPEND LOCAL_LIBS ${ARK_OPENGL_LIBRARIES})
 
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(impl/texture LOCAL_SRC_LIST)
@@ -39,3 +36,4 @@ ark_setup_tools(gen_plugin_class)
 ark_gen_plugin_class(pbr builtin ark::plugin::pbr pbr_plugin impl)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
+ark_export_dependency_libraries(${PROJECT_NAME})

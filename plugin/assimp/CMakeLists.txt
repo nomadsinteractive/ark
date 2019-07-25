@@ -33,10 +33,7 @@ list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/assimp/inclu
 list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
 list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/assimp/include)
 
-list(APPEND LOCAL_INCLUDE_DIRS ${ARK_OPENGL_INCLUDE_DIRS})
-
-list(APPEND LOCAL_LIBS ${ARK_OPENGL_LIBRARIES})
-list(APPEND LOCAL_LIBS assimp)
+ark_link_libraries(assimp)
 
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(impl/io LOCAL_SRC_LIST)

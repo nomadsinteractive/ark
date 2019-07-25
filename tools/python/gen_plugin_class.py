@@ -191,7 +191,7 @@ def output_to_file(output_file, content):
             fp.write(content)
 
 
-def searchForPlugin(paths):
+def search_for_plugins(paths):
     result = []
 
     def match_builder(filename, content, main_class, x):
@@ -302,7 +302,7 @@ if __name__ == '__main__':
     bootstrap_func = params['b'].strip() if 'b' in params else None
     config = parse_app_arguments(params, type=params['t'].strip() if 't' in params else 'core')
 
-    result = searchForPlugin(args)
+    result = search_for_plugins(args)
     file_path = 'stdout'
     if output_file:
         file_dir, file_path = os.path.split(output_file)

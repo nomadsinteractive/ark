@@ -30,4 +30,5 @@ ark_setup_tools(ark_gen_plugin_class)
 ark_gen_plugin_class(fmod core ark::plugin::fmod fmod_plugin impl)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
-ark_export_dependency_libraries(${PROJECT_NAME} ${FMOD_LIBRARIES})
+ark_export_dependency_libraries(${PROJECT_NAME})
+ark_export_dependency_3rdparty_libraries(${FMOD_LIBRARIES})

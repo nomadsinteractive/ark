@@ -28,3 +28,5 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE -DARK_FLAG_BUILDING_PLUGIN_DE
 
 ark_setup_tools(ark_gen_pybindings)
 ark_gen_pybindings(dear-imgui ark::plugin::dear_imgui ark.dear_imgui base pybindings/pybindings_main.cpp ${PROJECT_NAME})
+
+ark_export_dependency_libraries(${PROJECT_NAME})

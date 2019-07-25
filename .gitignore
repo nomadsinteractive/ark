@@ -41,3 +41,4 @@ out
 __pycache__/
 *.py[cod]
 *$py.class
+CMakeLists.txt.user

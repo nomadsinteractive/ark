@@ -12,6 +12,16 @@ if(ARK_USE_OPEN_GL)
     set(ARK_OPENGL_LIBRARIES glbinding)
 endif()
 
+macro(ark_find_and_link_libraries)
+    foreach(i ${ARGN})
+        find_library(${i}_LIBRARY ${i})
+        if(${i}_LIBRARY EQUAL ${i}_LIBRARY-NOTFOUND)
+            message(FATAL_ERROR "Library not found: " ${i})
+        endif()
+        ark_link_libraries(${${i}_LIBRARY})
+    endforeach()
+endmacro()
+
 if(ARK_USE_VULKAN)
     ark_compile_definitions(-DVK_USE_PLATFORM_MACOS_MVK)
     ark_include_directories($ENV{MOLTONVK_HOME}/MoltenVK/include)
@@ -25,18 +35,10 @@ if(ARK_USE_VULKAN)
     endif()
     ark_link_libraries(${MoltenVK_LIBRARY})
 
-    find_library(QuartzCore_LIBRARY QuartzCore)
-    ark_link_libraries(${QuartzCore_LIBRARY})
-
-    find_library(Metal_LIBRARY Metal)
-    ark_link_libraries(${Metal_LIBRARY})
-
-    find_library(IOSurface_LIBRARY IOSurface)
-    ark_link_libraries(${IOSurface_LIBRARY})
+    ark_find_and_link_libraries(QuartzCore Metal IOSurface)
 
     if(IOS)
-        find_library(UIKit_LIBRARY UIKit)
-        ark_link_libraries(${UIKit_LIBRARY})
+        ark_find_and_link_libraries(UIKit AudioToolbox AVFoundation)
     endif()
 endif()
 
@@ -48,10 +50,3 @@ endif()
 ark_compile_definitions(-DARK_PLATFORM_DARWIN)
 
 aux_source_directory(platform/darwin/impl LOCAL_SRC_LIST)
-
-#set(LOCAL_OBJC_SRC_LIST
-#    platform/darwin/bridge.h
-#    platform/darwin/bridge.m
-#)
-#add_library(darwin_bridge STATIC ${LOCAL_OBJC_SRC_LIST})
-#ark_link_libraries(darwin_bridge)
