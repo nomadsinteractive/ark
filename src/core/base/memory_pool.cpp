@@ -27,7 +27,7 @@ bytearray MemoryPool::allocate(size_t size) const
     DCHECK(blockId < MAX_BLOCK_COUNT * SUB_BLOCK_COUNT, "Cannot allocate memory, size too big %d", size);
     const std::shared_ptr<Block> block = _blocks[blockId];
     const sp<Slot> slot = block->obtain(size);
-    const bytearray allocated(slot.get(), slot.interfaces(), [block, slot](ByteArray*) {
+    const bytearray allocated(slot.get(), slot.ensureInterfaces(), [block, slot](ByteArray*) {
             block->recycle(slot);
         });
     return allocated;

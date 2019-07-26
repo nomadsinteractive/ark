@@ -8,6 +8,48 @@
 
 namespace ark {
 
+namespace  {
+
+class LoopReadable : public Readable {
+public:
+    LoopReadable(const sp<Readable>& delegate)
+        : _delegate(delegate) {
+    }
+
+    virtual uint32_t read(void* buffer, uint32_t size) override {
+        uint8_t* buf = reinterpret_cast<uint8_t*>(buffer);
+        uint32_t sizeRead = 0;
+        bool rewinded = false;
+        while(sizeRead < size) {
+            uint32_t sizeToRead = size - sizeRead;
+            uint32_t s = _delegate->read(buf + sizeRead, sizeToRead);
+            sizeRead += s;
+            DCHECK(!rewinded || s > 0, "Failed to read %s bytes after rewinded, empty source?", sizeToRead);
+            if(s < sizeToRead) {
+                _delegate->seek(0, SEEK_SET);
+                rewinded = true;
+            }
+            else
+                rewinded = false;
+        }
+        return sizeRead;
+    }
+
+    virtual int32_t seek(int32_t position, int32_t whence) override {
+        return _delegate->seek(position, whence);
+    }
+
+    virtual int32_t remaining() override {
+        return _delegate->remaining();
+    }
+
+private:
+    sp<Readable> _delegate;
+};
+
+}
+
+
 AudioMixer::AudioMixer(uint32_t bufferLength)
     : _buffer(sp<Array<int16_t>::Allocated>::make(bufferLength)), _buffer_hdr(sp<Array<int32_t>::Allocated>::make(bufferLength)), _total_weight(0)
 {
@@ -24,9 +66,9 @@ uint32_t AudioMixer::read(void* buffer, uint32_t size)
     memset(bufHdr, 0, _buffer_hdr->size());
 
     DCHECK(_buffer->length() >= (size / 2), "Out of buffer, length: %d, available: %d", size / 2, _buffer->length());
-    for(const sp<Source>& i : _sources)
+    for(const sp<Track>& i : _tracks)
     {
-        size_t s = i->accumulate(buf, bufHdr, size);
+        size_t s = i->read(buf, bufHdr, size);
         if(s > readSize)
             readSize = s;
         eof = eof || i->future()->isDone();
@@ -47,9 +89,9 @@ uint32_t AudioMixer::read(void* buffer, uint32_t size)
 
     if(eof)
     {
-        for(const sp<Source>& i : _sources.clear())
+        for(const sp<Track>& i : _tracks.clear())
             if(!i->future()->isDone())
-                _sources.push(i);
+                _tracks.push(i);
     }
     return readSize;
 }
@@ -66,16 +108,16 @@ int32_t AudioMixer::remaining()
     return 0;
 }
 
-sp<Future> AudioMixer::post(const sp<Readable>& readable)
+sp<Future> AudioMixer::addTrack(const sp<Readable>& readable, AudioPlayer::PlayOption option)
 {
-    const sp<Source> source = sp<Source>::make(readable);
-    _sources.push(source);
+    const sp<Track> source = sp<Track>::make(option == AudioPlayer::PLAY_OPTION_LOOP_ON ? sp<LoopReadable>::make(readable).cast<Readable>() : readable);
+    _tracks.push(source);
     return source->future();
 }
 
 bool AudioMixer::empty() const
 {
-    return _sources.empty();
+    return _tracks.empty();
 }
 
 void AudioMixer::ensureToneMapRange(uint32_t value)
@@ -93,12 +135,12 @@ void AudioMixer::ensureToneMapRange(uint32_t value)
     }
 }
 
-AudioMixer::Source::Source(const sp<Readable>& readable)
+AudioMixer::Track::Track(const sp<Readable>& readable)
     : _readable(readable), _future(sp<Future>::make())
 {
 }
 
-size_t AudioMixer::Source::accumulate(int16_t* in, int32_t* out, size_t size) const
+size_t AudioMixer::Track::read(int16_t* in, int32_t* out, size_t size) const
 {
     size_t readSize = _readable->read(in, size);
     if(readSize > 0 && !_future->isCancelled())
@@ -112,7 +154,7 @@ size_t AudioMixer::Source::accumulate(int16_t* in, int32_t* out, size_t size) co
     return readSize;
 }
 
-const sp<Future>& AudioMixer::Source::future() const
+const sp<Future>& AudioMixer::Track::future() const
 {
     return _future;
 }

@@ -26,7 +26,7 @@ public:
         : _ptr(std::move(ptr)), _interfaces(std::move(interfaces)) {
     }
     template<typename U> SharedPtr(const SharedPtr<U>& ptr) noexcept
-        : _ptr(std::static_pointer_cast<T>(ptr._ptr)), _interfaces(ptr._interfaces) {
+        : _ptr(std::static_pointer_cast<T>(ptr._ptr)), _interfaces(ptr.ensureInterfaces()) {
     }
 
     typedef T _PtrType;
@@ -87,7 +87,7 @@ public:
         if(!_ptr)
             return Box();
         SharedPtr<T>* instance = new SharedPtr<T>(*this);
-        Box box(instance, instance->get(), Type<T>::id(), _interfaces, packedBoxDestructor);
+        Box box(instance, instance->get(), Type<T>::id(), ensureInterfaces(), packedBoxDestructor);
         return box;
     }
 
@@ -95,26 +95,29 @@ public:
         return _ptr;
     }
 
-    const std::shared_ptr<Interfaces>& interfaces() const {
+    const std::shared_ptr<Interfaces>& ensureInterfaces() const {
+        if(!_interfaces)
+            _interfaces.reset(new Interfaces(Class::getClass<T>()));
         return _interfaces;
     }
 
     template<typename U> SharedPtr<U> cast() const {
-        return SharedPtr<U>(std::static_pointer_cast<U>(_ptr), _interfaces);
+        return SharedPtr<U>(std::static_pointer_cast<U>(_ptr), ensureInterfaces());
     }
 
     template<typename U> SharedPtr<T>& absorb(const SharedPtr<U>& beingAbsorbed) {
-        if(beingAbsorbed.interfaces() != _interfaces)
+        ensureInterfaces();
+        if(beingAbsorbed._interfaces != _interfaces)
             _interfaces->absorb(beingAbsorbed.pack());
         return *this;
     }
 
     template<typename U> bool is() const {
-        return _interfaces ? _interfaces->isInstance<U>() : false;
+        return _interfaces ? _interfaces->isInstance<U>() : std::is_same<T, U>::value;
     }
 
     template<typename U> SharedPtr<U> as() const {
-        if(_interfaces) {
+        if(_ptr) {
             const Box self = pack();
             sp<U> ptr = _interfaces->as<U>(self);
             if(!ptr) {
@@ -133,7 +136,7 @@ public:
 
 private:
     SharedPtr(T* instance) noexcept
-        : _ptr(instance), _interfaces(new Interfaces(Class::getClass<T>())) {
+        : _ptr(instance) {
     }
     SharedPtr(T* ptr, std::shared_ptr<Interfaces> interfaces, std::function<void(T*)> deleter) noexcept
         : _ptr(ptr, std::move(deleter)), _interfaces(std::move(interfaces)) {
@@ -151,7 +154,7 @@ private:
 
 private:
     std::shared_ptr<T> _ptr;
-    std::shared_ptr<Interfaces> _interfaces;
+    mutable std::shared_ptr<Interfaces> _interfaces;
 };
 
 
