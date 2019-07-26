@@ -133,9 +133,9 @@ public:
         return _frame_index;
     }
 
-    sp<Future> post(const sp<PortaudioDeviceStream>& self, const sp<Executor>& executor, const sp<Readable>& source) {
+    sp<Future> post(const sp<PortaudioDeviceStream>& self, const sp<Executor>& executor, const sp<Readable>& source, AudioPlayer::PlayOption option) {
         bool empty = _mixer->empty();
-        const sp<Future> future = _mixer->post(source);
+        const sp<Future> future = _mixer->addTrack(source, option);
         if(empty) {
             const PaError paError = start(self);
             if(paError == paNoError)
@@ -248,7 +248,7 @@ sp<Future> AudioPlayerPortaudio::play(const sp<Readable>& source, AudioFormat fo
         _pa_stream = stream;
     }
 
-    return stream->post(stream, _executor, source);
+    return stream->post(stream, _executor, source, options);
 }
 
 bool AudioPlayerPortaudio::isAudioFormatSupported(AudioPlayer::AudioFormat format)

@@ -15,6 +15,11 @@ aux_source_directory(impl/audio_player LOCAL_SRC_LIST)
 ark_ensure_dependency(3rdparty/miniaudio)
 ark_include_directories(3rdparty/miniaudio)
 
+if(ANDROID)
+    ark_link_libraries(OpenSLES)
+    ark_export_dependency_libraries(OpenSLES)
+endif()
+
 if(IOS)
     add_library(miniaudio STATIC util/miniaudio.m)
     target_include_directories(miniaudio PRIVATE 3rdparty/miniaudio)

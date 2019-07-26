@@ -92,7 +92,7 @@ int CollisionCallbackPythonAdapter::clear()
 
 PyObject* CollisionCallbackPythonAdapter::toPyObject(const sp<RigidBody>& rigidBody) const
 {
-    TypeId concreteTypeId = rigidBody.interfaces()->typeId();
+    TypeId concreteTypeId = rigidBody.ensureInterfaces()->typeId();
     if(PythonInterpreter::instance()->isPyObject(concreteTypeId))
         return PythonInterpreter::instance()->toPyObject(rigidBody.pack().toConcrete());
     return PythonInterpreter::instance()->fromSharedPtr<RigidBody>(rigidBody);

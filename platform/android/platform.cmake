@@ -14,7 +14,7 @@ aux_source_directory(platform/android/impl/asset_bundle LOCAL_SRC_LIST)
 aux_source_directory(platform/android/impl/readable LOCAL_SRC_LIST)
 aux_source_directory(platform/android/util LOCAL_SRC_LIST)
 
-list(APPEND LOCAL_LIBS log android GLESv3)
+ark_link_libraries(log android GLESv3)
 
 add_library(pthread platform/android/impl/dummy_pthread.cpp)
 

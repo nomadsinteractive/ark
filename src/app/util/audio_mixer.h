@@ -8,6 +8,8 @@
 #include "core/inf/readable.h"
 #include "core/types/shared_ptr.h"
 
+#include "app/inf/audio_player.h"
+
 namespace ark {
 
 class ARK_API AudioMixer : public Readable {
@@ -18,16 +20,15 @@ public:
     virtual int32_t seek(int32_t position, int32_t whence) override;
     virtual int32_t remaining() override;
 
-    sp<Future> post(const sp<Readable>& readable);
+    sp<Future> addTrack(const sp<Readable>& readable, AudioPlayer::PlayOption option);
     bool empty() const;
 
 private:
-    class Source {
+    class Track {
     public:
-        Source(const sp<Readable>& readable);
+        Track(const sp<Readable>& readable);
 
-        size_t accumulate(int16_t* in, int32_t *out, size_t size) const;
-        uint32_t weight() const;
+        size_t read(int16_t* in, int32_t *out, size_t size) const;
 
         const sp<Future>& future() const;
 
@@ -41,7 +42,7 @@ private:
     void ensureToneMapRange(uint32_t value);
 
 private:
-    LFStack<sp<Source>> _sources;
+    LFStack<sp<Track>> _tracks;
 
     array<int16_t> _buffer;
     array<int32_t> _buffer_hdr;

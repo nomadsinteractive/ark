@@ -120,9 +120,9 @@ public:
     }
 
     template<typename T> PyObject* pyNewObject(const sp<T>& object) {
-        TypeId typeId = object.interfaces()->typeId();
+        TypeId typeId = object.ensureInterfaces()->typeId();
         if(_type_by_id.find(typeId) != _type_by_id.end())
-            return toPyObject(object.interfaces()->as(object.pack(), typeId));
+            return toPyObject(object.ensureInterfaces()->as(object.pack(), typeId));
         return getPyArkType<T>()->create(object.pack());
     }
 

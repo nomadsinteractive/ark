@@ -114,7 +114,7 @@ sp<Future> AudioPlayerMiniAudio::play(const sp<Readable>& source, AudioFormat fo
         _device = device;
     }
 
-    const sp<Future> future = device->_audio_mixer->post(source);
+    const sp<Future> future = device->_audio_mixer->addTrack(source, options);
 
     if(newRequest)
         _executor->execute(device);
