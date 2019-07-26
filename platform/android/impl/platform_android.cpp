@@ -210,9 +210,12 @@ uint32_t Platform::glPreprocessShader(const String& shader, const char* srcs[], 
     return 2;
 }
 
-void* Platform::dlOpen(const String& name)
+void* Platform::dlOpen(const char* name)
 {
-    String soName = Strings::sprintf("lib%s.so", name.c_str());
+    if(!name)
+        return dlopen(nullptr, RTLD_LAZY);
+
+    String soName = Strings::sprintf("lib%s.so", name);
     return dlopen(soName.c_str(), RTLD_LAZY);
 }
 
