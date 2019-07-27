@@ -102,7 +102,7 @@ PyObject* ark_loadAsset(PyObject* /*self*/, PyObject* args)
     const char* arg0;
     if(!PyArg_ParseTuple(args, "s", &arg0))
         Py_RETURN_NONE;
-    const sp<Readable> readable = Ark::instance().openAsset(arg0);
+    const sp<Readable> readable = Ark::instance().tryOpenAsset(arg0);
     if(readable)
         return PythonInterpreter::instance()->fromType<String>(Strings::loadFromReadable(readable));
     Py_RETURN_NONE;
@@ -113,7 +113,7 @@ PyObject* ark_openAsset(PyObject* /*self*/, PyObject* args)
     const char* arg0;
     if(!PyArg_ParseTuple(args, "s", &arg0))
         Py_RETURN_NONE;
-    const sp<Readable> readable = Ark::instance().openAsset(arg0);
+    const sp<Readable> readable = Ark::instance().tryOpenAsset(arg0);
     return PythonInterpreter::instance()->fromSharedPtr<Readable>(readable);
 }
 

@@ -12,7 +12,7 @@ namespace assimp {
 
 bool ArkIOSystem::Exists(const char* pFile) const
 {
-    const sp<Readable> fp = Ark::instance().openAsset(pFile);
+    const sp<Readable> fp = Ark::instance().tryOpenAsset(pFile);
     return static_cast<bool>(fp);
 }
 
@@ -26,7 +26,7 @@ IOStream* ArkIOSystem::Open(const char* pFile, const char* pMode)
     const String mode = pMode;
     if(mode == "r" || mode == "rb")
     {
-        const sp<Readable> fp = Ark::instance().openAsset(pFile);
+        const sp<Readable> fp = Ark::instance().tryOpenAsset(pFile);
         return new ArkIOStream(fp);
     }
     return nullptr;

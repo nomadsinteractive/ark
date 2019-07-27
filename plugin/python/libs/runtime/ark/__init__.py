@@ -14,7 +14,8 @@ from typing import Callable, List, Type, TypeVar, Union
 
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'Numeric', 'Layer', 'Vec2', 'Vec3',
-                           'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotate', 'Size', 'StringBundle', 'TileMapImporter', 'Transform', 'Varyings')
+                           'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotate', 'Size', 'StringBundle', 'Tilemap', 'TilemapImporter', 'Tileset',
+                           'TilesetImporter', 'Transform', 'Varyings')
 
 
 def logd(*args):
@@ -185,7 +186,11 @@ class ApplicationController:
 
 
 class AudioPlayer:
-    def play(self, source):
+    PLAY_OPTION_DEFAULT = -1
+    PLAY_OPTION_LOOP_OFF = 0
+    PLAY_OPTION_LOOP_ON = 1
+
+    def play(self, source: Union[str, 'Readable'], options: int = PLAY_OPTION_DEFAULT):
         pass
 
 
@@ -814,6 +819,10 @@ class Math:
         return 0, 0
 
 
+class Readable:
+    pass
+
+
 class Size:
     def __init__(self, w, h):
         pass
@@ -858,6 +867,9 @@ class Tileset:
     def get_tile(self, tile_id: int) -> Union[RenderObject, None]:
         return None
 
+    def load(self, src: Union[Readable, str]):
+        pass
+
 
 class Tilemap:
     def __init__(self, layer, w, h, tileset: Tileset):
@@ -901,6 +913,9 @@ class Tilemap:
 
     @scroller.setter
     def scroller(self, val):
+        pass
+
+    def load(self, src: Union[Readable, str]):
         pass
 
 

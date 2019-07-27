@@ -63,7 +63,7 @@ sp<Readable> AlphabetTrueType::getFontResource(const String& name) const
     const String path = Platform::pathJoin(Platform::getDefaultFontDirectory(), name);
     if(Platform::isFile(path))
         return sp<FileReadable>::make(path, "rb");
-    return Ark::instance().openAsset(name);
+    return Ark::instance().tryOpenAsset(name);
 }
 
 AlphabetTrueType::BUILDER::BUILDER(BeanFactory& /*factory*/, const document manifest)

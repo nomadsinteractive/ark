@@ -254,6 +254,13 @@ sp<Asset> Ark::getAsset(const String& path) const
 sp<Readable> Ark::openAsset(const String& path) const
 {
     const sp<Asset> asset = _asset_bundle->get(path);
+    DCHECK(asset, "Cannot open asset \"%s\"", path.c_str());
+    return asset->open();
+}
+
+sp<Readable> Ark::tryOpenAsset(const String& path) const
+{
+    const sp<Asset> asset = _asset_bundle->get(path);
     return asset ? asset->open() : sp<Readable>::null();
 }
 

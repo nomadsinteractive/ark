@@ -31,7 +31,6 @@ class AssetStringBundle : public StringBundle {
 public:
     virtual sp<String> get(const String& name) override {
         const sp<Readable> readable = Ark::instance().openAsset(name);
-        DCHECK(readable, "Cannot load resource \"%s\"", name.c_str());
         return sp<String>::make(Strings::loadFromReadable(readable));
     }
 };

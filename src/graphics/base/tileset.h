@@ -13,22 +13,25 @@ namespace ark {
 
 class ARK_API Tileset {
 public:
-// [[script::bindings::auto]]
+//  [[script::bindings::auto]]
     Tileset(uint32_t tileWidth, uint32_t tileHeight, const sp<TilesetImporter>& importer = nullptr);
 
-// [[script::bindings::property]]
+//  [[script::bindings::property]]
     uint32_t tileWidth() const;
-// [[script::bindings::property]]
+//  [[script::bindings::property]]
     uint32_t tileHeight() const;
 
-// [[script::bindings::auto]]
+//  [[script::bindings::auto]]
     void addTile(int32_t id, const sp<RenderObject>& tile);
-// [[script::bindings::auto]]
+//  [[script::bindings::auto]]
     const sp<RenderObject>& getTile(int32_t id) const;
 
-// [[script::bindings::auto]]
+//  [[script::bindings::auto]]
     void load(const sp<Readable>& readable);
+//  [[script::bindings::auto]]
+    void load(const String& src);
 
+//  [[plugin::builder]]
     class BUILDER : public Builder<Tileset> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);

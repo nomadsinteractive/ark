@@ -1,5 +1,7 @@
 #include "graphics/base/tileset.h"
 
+#include "core/ark.h"
+#include "core/inf/asset.h"
 #include "core/inf/importer.h"
 #include "core/util/documents.h"
 
@@ -39,6 +41,11 @@ void Tileset::load(const sp<Readable>& readable)
 {
     DASSERT(_importer);
     _importer->import(*this, readable);
+}
+
+void Tileset::load(const String& src)
+{
+    load(Ark::instance().openAsset(src));
 }
 
 Tileset::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
