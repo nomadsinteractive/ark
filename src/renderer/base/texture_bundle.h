@@ -9,17 +9,25 @@
 
 #include "renderer/base/texture.h"
 
+#include "renderer/base/texture.h"
+
 namespace ark {
 
-class TextureBundle : public Dictionary<sp<Texture>> {
+class TextureBundle {
 public:
     TextureBundle(const sp<RenderController>& renderController);
 
-    virtual sp<Texture> get(const String& name) override;
+    const sp<Texture>& getTexture(const String& src);
+    const sp<Texture>& createTexture(const String& src, const sp<Texture::Parameters>& parameters);
+
+private:
+    sp<Texture> doCreateTexture(const String& src, const sp<Texture::Parameters>& parameters) const;
 
 private:
     sp<RenderController> _render_controller;
-    sp<Dictionary<sp<Texture>>> _delegate;
+    sp<RendererFactory> _renderer_factory;
+    sp<Dictionary<bitmap>> _bitmap_loader;
+    sp<Dictionary<bitmap>> _bitmap_bounds_loader;
 
     std::map<String, sp<Texture>> _textures;
 };

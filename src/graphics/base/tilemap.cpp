@@ -91,7 +91,7 @@ void Tilemap::setTile(uint32_t rowId, uint32_t colId, const sp<RenderObject>& re
 void Tilemap::setTile(uint32_t rowId, uint32_t colId, int32_t tileId)
 {
     const sp<RenderObject>& tile = _tileset->getTile(tileId);
-    DCHECK(tile, "TileId %d does not exist");
+    DCHECK(tile, "TileId %d does not exist", tileId);
     setTile(rowId, colId, tile);
 }
 

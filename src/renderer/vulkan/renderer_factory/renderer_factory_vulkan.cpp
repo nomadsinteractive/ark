@@ -112,13 +112,13 @@ sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
     return sp<PipelineFactoryVulkan>::make(_recycler, _renderer);
 }
 
-sp<Texture> RendererFactoryVulkan::createTexture(const sp<Size>& size, Texture::Type type, const sp<Texture::Uploader>& uploader)
+sp<Texture> RendererFactoryVulkan::createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
 {
     sp<Texture::Delegate> delegate;
-    if(type == Texture::TYPE_2D)
-        delegate = sp<VKTexture2D>::make(_recycler, _renderer, static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), sp<Texture::Parameters>::make(), uploader);
-    DCHECK(delegate, "Unsupported TextureType: %d", type);
-    return sp<Texture>::make(size, sp<Variable<sp<Texture::Delegate>>::Const>::make(delegate), type);
+    if(parameters->_type == Texture::TYPE_2D)
+        delegate = sp<VKTexture2D>::make(_recycler, _renderer, static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), parameters, uploader);
+    DCHECK(delegate, "Unsupported TextureType: %d", parameters->_type);
+    return sp<Texture>::make(size, sp<Variable<sp<Texture::Delegate>>::Const>::make(delegate), parameters);
 }
 
 }

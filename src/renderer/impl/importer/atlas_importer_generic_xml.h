@@ -10,12 +10,12 @@ namespace ark {
 class AtlasImporterTexturePacker : public Atlas::Importer {
 public:
 
-    virtual void import(Atlas& atlas, const ResourceLoaderContext& resourceLoaderContext, const document& manifest) override;
+    virtual void import(Atlas& atlas, const document& manifest) override;
 
-//  [[plugin::builder::by-value("generic-xml")]]
-    class DICTIONARY : public Builder<Atlas::Importer> {
+//  [[plugin::builder("generic-xml")]]
+    class BUILDER : public Builder<Atlas::Importer> {
     public:
-        DICTIONARY() = default;
+        BUILDER() = default;
 
         virtual sp<Atlas::Importer> build(const sp<Scope>& args) override;
     };

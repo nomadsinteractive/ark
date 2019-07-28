@@ -49,13 +49,13 @@ TiledCollider::TiledCollider(const sp<Tilemap>& tileMap, const sp<ResourceLoader
 }
 
 TiledCollider::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _tile_map(factory.ensureBuilder<Tilemap>(manifest, "tile-map")), _resource_loader_context(resourceLoaderContext)
+    : _tilemap(factory.ensureBuilder<Tilemap>(manifest, "tilemap")), _resource_loader_context(resourceLoaderContext)
 {
 }
 
 sp<Collider> TiledCollider::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<TiledCollider>::make(_tile_map->build(args), _resource_loader_context);
+    return sp<TiledCollider>::make(_tilemap->build(args), _resource_loader_context);
 }
 
 sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& /*rotate*/)

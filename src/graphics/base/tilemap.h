@@ -15,6 +15,7 @@
 
 namespace ark {
 
+//[[script::bindings::extends(Renderer)]]
 class ARK_API Tilemap : public Renderer, Block {
 public:
 // [[script::bindings::auto]]

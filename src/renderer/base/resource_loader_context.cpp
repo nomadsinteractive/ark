@@ -10,9 +10,9 @@
 
 namespace ark {
 
-ResourceLoaderContext::ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<BitmapBundle>& imageResource,
+ResourceLoaderContext::ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<BitmapBundle>& bitmapBundle,
                                              const sp<Executor>& executor, const sp<RenderController>& renderController)
-    : _documents(documents), _images(imageResource), _executor(executor), _render_controller(renderController),
+    : _documents(documents), _images(bitmapBundle), _executor(executor), _render_controller(renderController),
       _texture_bundle(sp<TextureBundle>::make(renderController)), _memory_pool(sp<MemoryPool>::make()), _object_pool(sp<ObjectPool>::make()),
       _disposed(sp<Boolean::Impl>::make(false))
 {

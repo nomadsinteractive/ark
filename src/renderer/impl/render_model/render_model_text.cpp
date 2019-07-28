@@ -111,7 +111,7 @@ GLModelText::GLModelText(const sp<RenderController>& renderController, const sp<
 sp<ShaderBindings> GLModelText::makeShaderBindings(const Shader& shader)
 {
     const sp<ShaderBindings> bindings = shader.makeBindings(RENDER_MODE_TRIANGLES);
-    _shader_texture = sp<Texture>::make(_stub->_size, _stub, Texture::TYPE_2D);
+    _shader_texture = sp<Texture>::make(_stub->_size, _stub, sp<Texture::Parameters>::make(Texture::TYPE_2D));
     bindings->pipelineBindings()->bindSampler(_shader_texture);
     return bindings;
 }

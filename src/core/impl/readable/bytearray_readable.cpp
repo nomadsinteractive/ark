@@ -34,7 +34,7 @@ int32_t BytearrayReadable::seek(int32_t position, int32_t whence)
         _position = _bytearray->length() + position;
         break;
     }
-    DCHECK(_position >= 0 && _position < _bytearray->length(), "Cursor out of bounds: %d, position: %d, whence: %d", _position, position, whence);
+    DCHECK(_position >= 0 && _position <= _bytearray->length(), "Cursor out of bounds: %d, position: %d, whence: %d", _position, position, whence);
     return _position;
 }
 

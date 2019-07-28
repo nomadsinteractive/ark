@@ -32,7 +32,7 @@ public:
         virtual sp<Collider> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Tilemap>> _tile_map;
+        sp<Builder<Tilemap>> _tilemap;
         sp<ResourceLoaderContext> _resource_loader_context;
 
     };

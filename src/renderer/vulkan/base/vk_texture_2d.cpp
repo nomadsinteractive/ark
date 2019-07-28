@@ -345,8 +345,8 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, uint32_t /*i
     // This separates all the sampling information from the texture data. This means you could have multiple sampler objects for the same texture with different settings
     // Note: Similar to the samplers available with OpenGL 3.3
     VkSamplerCreateInfo sampler = vks::initializers::samplerCreateInfo();
-    sampler.magFilter = _parameters->_mag_filter == Texture::PARAMETER_NEAREST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
-    sampler.minFilter = _parameters->_min_filter == Texture::PARAMETER_NEAREST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
+    sampler.magFilter = _parameters->_mag_filter == Texture::CONSTANT_NEAREST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
+    sampler.minFilter = _parameters->_min_filter == Texture::CONSTANT_NEAREST ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
     sampler.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
     sampler.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     sampler.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;

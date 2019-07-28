@@ -248,7 +248,19 @@ class Expectation:
 
 
 class Renderer:
-    pass
+
+    def add_renderer(self, renderer: 'Renderer'):
+        pass
+
+    def dispose(self):
+        pass
+
+    @property
+    def size(self) -> 'Size':
+        return Size(0, 0)
+
+    def translate(self, position: Union[tuple, 'Vec2']) -> 'Renderer':
+        return self
 
 
 class ResourceLoader:
@@ -871,7 +883,7 @@ class Tileset:
         pass
 
 
-class Tilemap:
+class Tilemap(Renderer):
     def __init__(self, layer, w, h, tileset: Tileset):
         self._tileset = tileset
 

@@ -55,10 +55,8 @@ public:
 
     sp<Camera::Delegate> createCamera() const;
     sp<PipelineFactory> createPipelineFactory() const;
-    sp<Dictionary<sp<Texture>>> createTextureBundle() const;
 
-
-    sp<Texture> createTexture(const sp<Size>& size, Texture::Type type, const sp<Texture::Uploader>& uploader, RenderController::UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
+    sp<Texture> createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader, RenderController::UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
     sp<Texture> createTexture2D(const sp<Size>& size, const sp<Texture::Uploader>& uploader, UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
 
     Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader);
@@ -145,6 +143,8 @@ private:
     WeakRefList<SynchronizeFlag> _synchronize_flags;
 
     sp<NamedBuffer> _named_buffers[NamedBuffer::NAME_COUNT];
+
+    friend class TextureBundle;
 };
 
 }

@@ -16,7 +16,7 @@
 
 namespace ark {
 
-class ARK_API Texture : public Resource {
+class ARK_API Texture final : public Resource {
 public:
     enum Format {
         FORMAT_AUTO = 0x8000,
@@ -40,30 +40,34 @@ public:
         TYPE_COUNT
     };
 
-    enum Parameter {
-        PARAMETER_NEAREST,
-        PARAMETER_LINEAR,
-        PARAMETER_LINEAR_MIPMAP,
-        PARAMETER_CLAMP_TO_EDGE,
-        PARAMETER_CLAMP_TO_BORDER,
-        PARAMETER_MIRRORED_REPEAT,
-        PARAMETER_REPEAT,
-        PARAMETER_MIRROR_CLAMP_TO_EDGE,
-        PARAMETER_COUNT
+    enum CONSTANT {
+        CONSTANT_NEAREST,
+        CONSTANT_LINEAR,
+        CONSTANT_LINEAR_MIPMAP,
+        CONSTANT_CLAMP_TO_EDGE,
+        CONSTANT_CLAMP_TO_BORDER,
+        CONSTANT_MIRRORED_REPEAT,
+        CONSTANT_REPEAT,
+        CONSTANT_MIRROR_CLAMP_TO_EDGE,
+        CONSTANT_COUNT
     };
 
     struct ARK_API Parameters {
-        Parameters(const document& parameters = nullptr, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
+        Parameters(Type type, const document& parameters = nullptr, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
 
+        Type _type;
         Format _format;
         Feature _features;
 
-        Parameter _min_filter;
-        Parameter _mag_filter;
+        CONSTANT _min_filter;
+        CONSTANT _mag_filter;
 
-        Parameter _wrap_s;
-        Parameter _wrap_t;
-        Parameter _wrap_r;
+        CONSTANT _wrap_s;
+        CONSTANT _wrap_t;
+        CONSTANT _wrap_r;
+
+    private:
+        CONSTANT getEnumValue(Dictionary<document>& dict, const String& name, Texture::CONSTANT defValue);
     };
 
     class ARK_API Delegate : public Resource {
@@ -98,7 +102,7 @@ public:
         bitmap _bitmap;
     };
 
-    Texture(const sp<Size>& size, const sp<Variable<sp<Delegate>>>& delegate, Type type);
+    Texture(const sp<Size>& size, const sp<Variable<sp<Delegate>>>& delegate, const sp<Parameters>& parameters);
     virtual ~Texture() override;
 
     virtual uint64_t id() override;
@@ -154,7 +158,7 @@ public:
 private:
     sp<Size> _size;
     sp<Variable<sp<Delegate>>> _delegate;
-    Type _type;
+    sp<Parameters> _parameters;
 
     Notifier _notifier;
 

@@ -1,5 +1,6 @@
 #include "renderer/impl/importer/atlas_importer_generic_xml.h"
 
+#include "core/ark.h"
 #include "core/util/documents.h"
 
 #include "renderer/base/atlas.h"
@@ -7,10 +8,10 @@
 
 namespace ark {
 
-void AtlasImporterTexturePacker::import(Atlas& atlas, const ResourceLoaderContext& resourceLoaderContext, const document& manifest)
+void AtlasImporterTexturePacker::import(Atlas& atlas, const document& manifest)
 {
     const String& path = Documents::ensureAttribute(manifest, Constants::Attributes::SRC);
-    const document src = resourceLoaderContext.documents()->get(path);
+    const document src = Documents::loadFromReadable(Ark::instance().openAsset(path));
     DCHECK(src, "Cannot load %s", path.c_str());
     for(const document& i : src->children())
     {
@@ -23,13 +24,13 @@ void AtlasImporterTexturePacker::import(Atlas& atlas, const ResourceLoaderContex
         uint32_t oy = Documents::getAttribute<uint32_t>(i, "oY", 0);
         uint32_t ow = Documents::getAttribute<uint32_t>(i, "oW", w);
         uint32_t oh = Documents::getAttribute<uint32_t>(i, "oH", h);
-        float px = Documents::getAttribute<float>(i, "pX", 0);
-        float py = Documents::getAttribute<float>(i, "pY", 0);
+        float px = Documents::getAttribute<float>(i, "pX", 0.5f);
+        float py = Documents::getAttribute<float>(i, "pY", 0.5f);
         atlas.add(n, x, y, x + w, y + h, (ow * px - ox) / w, (h - oh * py + oy) / h);
     }
 }
 
-sp<Atlas::Importer> AtlasImporterTexturePacker::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<Atlas::Importer> AtlasImporterTexturePacker::BUILDER::build(const sp<Scope>& /*args*/)
 {
     return sp<AtlasImporterTexturePacker>::make();
 }

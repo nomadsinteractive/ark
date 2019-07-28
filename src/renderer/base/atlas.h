@@ -26,7 +26,7 @@ public:
     public:
         virtual ~Importer() = default;
 
-        virtual void import(Atlas& atlas, const ResourceLoaderContext& resourceLoaderContext, const document& manifest) = 0;
+        virtual void import(Atlas& atlas, const document& manifest) = 0;
     };
 
     class ARK_API Item {

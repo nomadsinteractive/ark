@@ -38,8 +38,8 @@ private:
 
 }
 
-Texture::Texture(const sp<Size>& size, const sp<Variable<sp<Delegate>>>& delegate, Type type)
-    : _size(size), _delegate(delegate), _type(type)
+Texture::Texture(const sp<Size>& size, const sp<Variable<sp<Delegate>>>& delegate, const sp<Parameters>& parameters)
+    : _size(size), _delegate(delegate), _parameters(parameters)
 {
 }
 
@@ -60,7 +60,7 @@ Resource::RecycleFunc Texture::recycle()
 
 Texture::Type Texture::type() const
 {
-    return _type;
+    return _parameters->_type;
 }
 
 uint64_t Texture::id()
@@ -148,49 +148,52 @@ template<> ARK_API Texture::Feature Conversions::to<String, Texture::Feature>(co
     return Texture::FEATURE_DEFAULT;
 }
 
-template<> ARK_API Texture::Parameter Conversions::to<String, Texture::Parameter>(const String& str)
+template<> ARK_API Texture::CONSTANT Conversions::to<String, Texture::CONSTANT>(const String& str)
 {
     if(str)
     {
         if(str == "nearest")
-            return Texture::PARAMETER_NEAREST;
+            return Texture::CONSTANT_NEAREST;
         if(str == "linear")
-            return Texture::PARAMETER_LINEAR;
+            return Texture::CONSTANT_LINEAR;
         if(str == "linear_mipmap")
-            return Texture::PARAMETER_LINEAR_MIPMAP;
+            return Texture::CONSTANT_LINEAR_MIPMAP;
         if(str == "clamp_to_edge")
-            return Texture::PARAMETER_CLAMP_TO_EDGE;
+            return Texture::CONSTANT_CLAMP_TO_EDGE;
         if(str == "clamp_to_border")
-            return Texture::PARAMETER_CLAMP_TO_BORDER;
+            return Texture::CONSTANT_CLAMP_TO_BORDER;
         if(str == "mirrored_repeat")
-            return Texture::PARAMETER_MIRRORED_REPEAT;
+            return Texture::CONSTANT_MIRRORED_REPEAT;
         if(str == "repeat")
-            return Texture::PARAMETER_REPEAT;
+            return Texture::CONSTANT_REPEAT;
         if(str == "mirror_clamp_to_edge")
-            return Texture::PARAMETER_MIRROR_CLAMP_TO_EDGE;
+            return Texture::CONSTANT_MIRROR_CLAMP_TO_EDGE;
     }
     DFATAL("Unknow TextureParameter: %s", str.c_str());
-    return Texture::PARAMETER_NEAREST;
+    return Texture::CONSTANT_NEAREST;
 }
 
-Texture::Parameters::Parameters(const document& parameters, Format format, Texture::Feature features)
-    : _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
+Texture::Parameters::Parameters(Type type, const document& parameters, Format format, Texture::Feature features)
+    : _type(type), _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
       _features(parameters ? Documents::getAttribute<Texture::Feature>(parameters, "feature", features) : features),
-      _min_filter((features & Texture::FEATURE_MIPMAPS) ? PARAMETER_LINEAR_MIPMAP : PARAMETER_LINEAR), _mag_filter(PARAMETER_LINEAR),
-      _wrap_s(PARAMETER_CLAMP_TO_EDGE), _wrap_t(PARAMETER_CLAMP_TO_EDGE), _wrap_r(PARAMETER_CLAMP_TO_EDGE)
+      _min_filter((features & Texture::FEATURE_MIPMAPS) ? CONSTANT_LINEAR_MIPMAP : CONSTANT_LINEAR), _mag_filter(CONSTANT_LINEAR),
+      _wrap_s(CONSTANT_CLAMP_TO_EDGE), _wrap_t(CONSTANT_CLAMP_TO_EDGE), _wrap_r(CONSTANT_CLAMP_TO_EDGE)
 {
     if(parameters)
     {
-        _format = Documents::getAttribute<Texture::Format>(parameters, "format", Texture::FORMAT_AUTO);
-        _features = Documents::getAttribute<Texture::Feature>(parameters, "feature", Texture::FEATURE_DEFAULT);
-
         DictionaryByAttributeName byName(parameters, Constants::Attributes::NAME);
-        _min_filter = Documents::getAttribute(parameters, "min_filter", _min_filter);
-        _mag_filter = Documents::getAttribute(parameters, "mag_filter", _mag_filter);
-        _wrap_s = Documents::getAttribute(parameters, "wrap_s", _wrap_s);
-        _wrap_t = Documents::getAttribute(parameters, "wrap_t", _wrap_t);
-        _wrap_r = Documents::getAttribute(parameters, "wrap_r", _wrap_r);
+        _min_filter = getEnumValue(byName, "min_filter", _min_filter);
+        _mag_filter = getEnumValue(byName, "mag_filter", _mag_filter);
+        _wrap_s = getEnumValue(byName, "wrap_s", _wrap_s);
+        _wrap_t = getEnumValue(byName, "wrap_t", _wrap_t);
+        _wrap_r = getEnumValue(byName, "wrap_r", _wrap_r);
     }
+}
+
+Texture::CONSTANT Texture::Parameters::getEnumValue(Dictionary<document>& dict, const String& name, Texture::CONSTANT defValue)
+{
+    const document doc = dict.get(name);
+    return doc ? Documents::getAttribute<Texture::CONSTANT>(doc, Constants::Attributes::VALUE, defValue) : defValue;
 }
 
 Texture::Delegate::Delegate(Texture::Type type)
@@ -210,7 +213,7 @@ Texture::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& value, c
 
 sp<Texture> Texture::DICTIONARY::build(const sp<Scope>& /*args*/)
 {
-    return _resource_loader_context->textureBundle()->get(_src);
+    return _resource_loader_context->textureBundle()->getTexture(_src);
 }
 
 
@@ -222,13 +225,15 @@ Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const 
 
 sp<Texture> Texture::BUILDER::build(const sp<Scope>& args)
 {
+    Type type = Documents::getAttribute<Type>(_manifest, Constants::Attributes::TYPE, TYPE_2D);
+    const sp<Texture::Parameters> parameters = sp<Texture::Parameters>::make(type, _manifest);
+
     const sp<String> src = _src->build(args);
     if(src)
-       return _resource_loader_context->textureBundle()->get(*src);
+       return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
 
-    Type type = Documents::getAttribute<Type>(_manifest, Constants::Attributes::TYPE, TYPE_2D);
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
-    return _resource_loader_context->renderController()->createTexture(size, type, _uploader->build(args));
+    return _resource_loader_context->renderController()->createTexture(size, parameters, _uploader->build(args));
 }
 
 Texture::UploaderBitmap::UploaderBitmap(const bitmap& bitmap)

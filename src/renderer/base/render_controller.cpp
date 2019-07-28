@@ -16,48 +16,6 @@
 
 namespace ark {
 
-namespace {
-
-class UploaderBitmapBundle : public Texture::Uploader {
-public:
-    UploaderBitmapBundle(const sp<Dictionary<bitmap>>& bitmapLoader, const String& name)
-        : _bitmap_loader(bitmapLoader), _name(name) {
-    }
-
-    virtual void upload(GraphicsContext& graphicContext, Texture::Delegate& delegate) override {
-        const bitmap bitmap = _bitmap_loader->get(_name);
-        DCHECK(bitmap, "Texture resource \"%s\" not found", _name.c_str());
-        delegate.uploadBitmap(graphicContext, 0, bitmap);
-    }
-
-private:
-    sp<Dictionary<bitmap>> _bitmap_loader;
-    String _name;
-};
-
-
-class GLTextureBundle : public Dictionary<sp<Texture>> {
-public:
-    GLTextureBundle(const sp<RendererFactory>& rendererFactory, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
-        : _renderer_factory(rendererFactory), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader)
-    {
-    }
-
-    virtual sp<Texture> get(const String& name) override {
-        const bitmap bitmapBounds = _bitmap_bounds_loader->get(name);
-        DCHECK(bitmapBounds, "Texture resource \"%s\" not found", name.c_str());
-        return _renderer_factory->createTexture(sp<Size>::make(bitmapBounds->width(), bitmapBounds->height()), Texture::TYPE_2D, sp<UploaderBitmapBundle>::make(_bitmap_loader, name));
-    }
-
-private:
-    sp<RendererFactory> _renderer_factory;
-
-    sp<Dictionary<bitmap>> _bitmap_loader;
-    sp<Dictionary<bitmap>> _bitmap_bounds_loader;
-};
-
-}
-
 RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
     : _render_engine(renderEngine), _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader)
 {
@@ -170,21 +128,16 @@ sp<PipelineFactory> RenderController::createPipelineFactory() const
     return _render_engine->rendererFactory()->createPipelineFactory();
 }
 
-sp<Dictionary<sp<Texture>>> RenderController::createTextureBundle() const
+sp<Texture> RenderController::createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader, RenderController::UploadStrategy us)
 {
-    return sp<GLTextureBundle>::make(_render_engine->rendererFactory(), _bitmap_loader, _bitmap_bounds_loader);
-}
-
-sp<Texture> RenderController::createTexture(const sp<Size>& size, Texture::Type type, const sp<Texture::Uploader>& uploader, RenderController::UploadStrategy us)
-{
-    const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(size, type, uploader);
+    const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(size, parameters, uploader);
     upload(texture, nullptr, us);
     return texture;
 }
 
 sp<Texture> RenderController::createTexture2D(const sp<Size>& size, const sp<Texture::Uploader>& uploader, RenderController::UploadStrategy us)
 {
-    return createTexture(size, Texture::TYPE_2D, uploader, us);
+    return createTexture(size, sp<Texture::Parameters>::make(Texture::TYPE_2D), uploader, us);
 }
 
 Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader)

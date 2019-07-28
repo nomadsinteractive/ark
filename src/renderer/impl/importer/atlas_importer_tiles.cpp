@@ -8,7 +8,7 @@
 
 namespace ark {
 
-void AtlasImporterTiles::import(Atlas& atlas, const ResourceLoaderContext& /*resourceLoaderContext*/, const document& manifest)
+void AtlasImporterTiles::import(Atlas& atlas, const document& manifest)
 {
     int32_t type = Documents::getAttribute<int32_t>(manifest, Constants::Attributes::TYPE, -1);
     const uint32_t tileWidth = Documents::ensureAttribute<uint32_t>(manifest, "tile-width");
@@ -39,7 +39,7 @@ void AtlasImporterTiles::import(Atlas& atlas, const ResourceLoaderContext& /*res
         }
 }
 
-sp<Atlas::Importer> AtlasImporterTiles::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<Atlas::Importer> AtlasImporterTiles::BUILDER::build(const sp<Scope>& /*args*/)
 {
     return sp<AtlasImporterTiles>::make();
 }

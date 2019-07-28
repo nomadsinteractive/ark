@@ -7,13 +7,13 @@
 
 namespace ark {
 
-void AtlasImporterCharacters::import(Atlas& atlas, const ResourceLoaderContext& /*resourceLoaderContext*/, const document& manifest)
+void AtlasImporterCharacters::import(Atlas& atlas, const document& manifest)
 {
     uint32_t flowx = 0;
     uint32_t flowy = 0;
     uint32_t fontWidth = Documents::ensureAttribute<uint32_t>(manifest, "font-width");
     uint32_t fontHeight = Documents::ensureAttribute<uint32_t>(manifest, "font-height");
-    uint32_t textureWidth = atlas.texture()->width();
+    uint32_t textureWidth = static_cast<uint32_t>(atlas.texture()->width());
     const String& characters = Documents::ensureAttribute(manifest, "characters");
     for(const char* iter = characters.c_str(); *iter; iter++)
     {
@@ -27,7 +27,7 @@ void AtlasImporterCharacters::import(Atlas& atlas, const ResourceLoaderContext& 
     }
 }
 
-sp<Atlas::Importer> AtlasImporterCharacters::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<Atlas::Importer> AtlasImporterCharacters::BUILDER::build(const sp<Scope>& /*args*/)
 {
     return sp<AtlasImporterCharacters>::make();
 }

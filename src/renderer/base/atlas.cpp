@@ -96,7 +96,7 @@ Atlas::Item Atlas::makeItem(uint32_t left, uint32_t top, uint32_t right, uint32_
 
 Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(factory), _manifest(manifest), _atlas(factory.getBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)),
-      _texture(factory.getBuilder<Texture>(manifest, Constants::Attributes::SRC)),
+      _texture(factory.ensureConcreteClassBuilder<Texture>(manifest, Constants::Attributes::TEXTURE)),
       _resource_loader_context(resourceLoaderContext)
 {
 }
@@ -108,22 +108,23 @@ sp<Atlas> Atlas::BUILDER::build(const sp<Scope>& args)
 
     const sp<Texture> texture = _texture->build(args);
     DCHECK(texture, "Build atlas or texture from \"%s\" failed", Documents::toString(_manifest).c_str());
-    const sp<Atlas> atlas = sp<Atlas>::make(_texture->build(args));
+    const sp<Atlas> atlas = sp<Atlas>::make(texture);
     for(const document& i : _manifest->children())
     {
         if(i->name() == "import")
         {
-            const sp<Atlas::Importer> importer = _factory.ensure<Atlas::Importer>(i, Constants::Attributes::CLASS, args);
-            importer->import(atlas, _resource_loader_context, i);
+            const sp<Atlas::Importer> importer = _factory.ensure<Atlas::Importer>(i, args);
+            importer->import(atlas, i);
         }
-        else
+        else if(i->name() != Constants::Attributes::TEXTURE)
         {
+            DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
             uint32_t type = Documents::getAttribute<uint32_t>(i, Constants::Attributes::TYPE, 0);
             if(type == 0)
             {
                 const String character = Documents::getAttribute(i, "character");
                 if(character)
-                    type = character.at(0);
+                    type = static_cast<uint32_t>(character.at(0));
             }
             const Rect r = Rect::parse(i);
             atlas->add(type, static_cast<uint32_t>(r.left()), static_cast<uint32_t>(r.top()), static_cast<uint32_t>(r.right()), static_cast<uint32_t>(r.bottom()),
