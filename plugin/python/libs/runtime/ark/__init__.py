@@ -1104,5 +1104,29 @@ class Collider:
         return RigidBody()
 
 
+class Command:
+
+    @property
+    def state(self) -> int:
+        return 0
+
+    def activate(self):
+        pass
+
+    def deactivate(self):
+        pass
+
+
+class CommandDispatcher:
+    DISPATCHER_FLAG_DEFAULT = 0
+    DISPATCHER_FLAG_EXCLUSIVE = 1
+
+    def __init__(self, flag: int = DISPATCHER_FLAG_DEFAULT):
+        pass
+
+    def make_command(self, on_active, on_deactive) -> Command:
+        return Command()
+
+
 def __trace__():
     pass

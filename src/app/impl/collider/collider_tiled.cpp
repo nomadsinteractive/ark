@@ -30,13 +30,16 @@ public:
 
     virtual V2 val() override {
         const V2 position = _delegate->val();
-        _bounds.setCenter(position.x(), position.y());
-        _rigid_body->collision(_bounds);
+        const sp<TiledCollider::RigidBodyImpl> rigidBody = _rigid_body.lock();
+        if(rigidBody) {
+            _bounds.setCenter(position.x(), position.y());
+            rigidBody->collision(_bounds);
+        }
         return position;
     }
 
 private:
-    sp<TiledCollider::RigidBodyImpl> _rigid_body;
+    WeakPtr<TiledCollider::RigidBodyImpl> _rigid_body;
     sp<Vec> _delegate;
     Rect _bounds;
 };

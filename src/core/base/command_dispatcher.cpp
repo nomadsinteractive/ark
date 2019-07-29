@@ -4,8 +4,8 @@
 
 namespace ark {
 
-CommandDispatcher::CommandDispatcher(CommandDispatcher::GroupFlag groupFlag)
-    : _current(sp<CommandSet>::make(groupFlag == GROUP_FLAG_EXCLUSIVE))
+CommandDispatcher::CommandDispatcher(CommandDispatcher::DispatcherFlag flag)
+    : _current(sp<CommandSet>::make(flag == DISPATCHER_FLAG_EXCLUSIVE))
 {
 }
 

@@ -7,7 +7,9 @@
 #include "core/base/api.h"
 #include "core/collection/list.h"
 #include "core/concurrent/lf_queue.h"
+#include "core/inf/runnable.h"
 #include "core/inf/variable.h"
+#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -21,6 +23,30 @@
 namespace ark {
 
 class ARK_API RenderController {
+private:
+    template<typename T> class Synchronized : public Runnable {
+    public:
+        Synchronized(const sp<Variable<T>>& delegate, const sp<Boolean>& flag)
+            : _delegate(delegate), _flag(flag), _value(sp<typename Variable<T>::Impl>::make(_delegate->val())) {
+        }
+
+        virtual void run() override {
+            if(_flag->val())
+                _value->set(_delegate->val());
+        }
+
+        const sp<typename Variable<T>::Impl>& value() const {
+            return _value;
+        }
+
+    private:
+        sp<Variable<T>> _delegate;
+        sp<Boolean> _flag;
+
+        sp<typename Variable<T>::Impl> _value;
+
+    };
+
 public:
     enum UploadStrategy {
         US_ONCE = 0,
@@ -68,7 +94,10 @@ public:
     sp<Boolean> makeSynchronizeFlag();
 
     template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate) {
-        return sp<typename Variable<T>::Synchronized>::make(delegate, makeSynchronizeFlag());
+        const sp<Synchronized<T>> s = sp<Synchronized<T>>::make(delegate, makeSynchronizeFlag());
+        const sp<Variable<T>> var = s->value();
+        addPreUpdateRequest(s, sp<BooleanByWeakRef<Variable<T>>>::make(var, 1));
+        return var;
     }
 
     sp<Variable<uint64_t>> ticker() const;

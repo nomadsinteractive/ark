@@ -13,14 +13,14 @@ namespace ark {
 class ARK_API CommandDispatcher {
 public:
 //  [[script::bindings::enumeration]]
-    enum GroupFlag {
-        GROUP_FLAG_DEFAULT,
-        GROUP_FLAG_EXCLUSIVE
+    enum DispatcherFlag {
+        DISPATCHER_FLAG_DEFAULT,
+        DISPATCHER_FLAG_EXCLUSIVE
     };
 
 public:
 //  [[script::bindings::auto]]
-    CommandDispatcher(CommandDispatcher::GroupFlag groupFlag = CommandDispatcher::GROUP_FLAG_DEFAULT);
+    CommandDispatcher(CommandDispatcher::DispatcherFlag flag = CommandDispatcher::DISPATCHER_FLAG_DEFAULT);
 
 //  [[script::bindings::auto]]
     sp<Command> makeCommand(const sp<Runnable>& onActive, const sp<Runnable>& onDeactive);
