@@ -313,10 +313,6 @@ class Boolean(_Var):
         return None
 
 
-class Integer(_Var):
-    pass
-
-
 class Numeric(_Var):
     def __init__(self, val):
         _Var.__init__(self, val)
@@ -367,6 +363,14 @@ class Numeric(_Var):
     @staticmethod
     def vibrate(s0: float, v0: float, s1: float, v1: float, duration: float, t=None):
         return None
+
+
+class Integer(_Var):
+    def __init__(self, value: Union[int, 'Integer', list, tuple]):
+        super().__init__(value)
+
+    def animate(self, interval: Numeric, duration: Numeric) -> 'Integer':
+        return Integer(0)
 
 
 class Disposed:
@@ -1107,8 +1111,8 @@ class Collider:
 class Command:
 
     @property
-    def state(self) -> int:
-        return 0
+    def active(self) -> bool:
+        return False
 
     def activate(self):
         pass
@@ -1117,11 +1121,11 @@ class Command:
         pass
 
 
-class CommandDispatcher:
-    DISPATCHER_FLAG_DEFAULT = 0
-    DISPATCHER_FLAG_EXCLUSIVE = 1
+class State:
+    STATE_FLAG_DEFAULT = 0
+    STATE_FLAG_EXCLUSIVE = 1
 
-    def __init__(self, flag: int = DISPATCHER_FLAG_DEFAULT):
+    def __init__(self, flag: int = STATE_FLAG_DEFAULT):
         pass
 
     def make_command(self, on_active, on_deactive) -> Command:
