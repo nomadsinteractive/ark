@@ -1,5 +1,7 @@
 #include "renderer/base/pipeline_bindings.h"
 
+#include "core/util/conversions.h"
+
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/pipeline_layout.h"
@@ -10,8 +12,8 @@
 
 namespace ark {
 
-PipelineBindings::PipelineBindings(RenderModel::Mode mode, const sp<PipelineLayout>& pipelineLayout)
-    : _stub(sp<Stub>::make(mode, pipelineLayout))
+PipelineBindings::PipelineBindings(RenderModel::Mode mode, const sp<PipelineLayout>& pipelineLayout, Flag flag)
+    : _stub(sp<Stub>::make(mode, pipelineLayout, flag))
 {
 }
 
@@ -96,8 +98,8 @@ PipelineBindings::Attributes::Attributes(const PipelineInput& input)
     _offsets[ATTRIBUTE_NAME_MODEL_ID] = input.getAttributeOffset("ModelId");
 }
 
-PipelineBindings::Stub::Stub(RenderModel::Mode mode, const sp<PipelineLayout>& pipelineLayout)
-    : _mode(mode), _layout(pipelineLayout), _input(_layout->input()), _attributes(_input), _flags(FLAG_DEFAULT_VALUE)
+PipelineBindings::Stub::Stub(RenderModel::Mode mode, const sp<PipelineLayout>& pipelineLayout, Flag flag)
+    : _mode(mode), _layout(pipelineLayout), _input(_layout->input()), _attributes(_input), _flags(flag)
 {
     _samplers.resize(_input->samplerCount());
 
@@ -108,5 +110,30 @@ PipelineBindings::Stub::Stub(RenderModel::Mode mode, const sp<PipelineLayout>& p
         if(i < _samplers.size())
             _samplers[i] = samplers.values().at(i);
 }
+
+template<> ARK_API PipelineBindings::Flag Conversions::to<String, PipelineBindings::Flag>(const String& str)
+{
+    int32_t flag = 0;
+    for(const String& i : str.split('|'))
+        if(i == "cull_mode_none")
+        {
+            DCHECK((flag & PipelineBindings::FLAG_CULL_MODE_BITMASK) == 0, "Exclusive flag found in \"%s\"", str.c_str());
+            flag |= static_cast<int32_t>(PipelineBindings::FLAG_CULL_MODE_NONE);
+        }
+        else if(i == "cull_mode_cw")
+        {
+            DCHECK((flag & PipelineBindings::FLAG_CULL_MODE_BITMASK) == 0, "Exclusive flag found in \"%s\"", str.c_str());
+            flag |= static_cast<int32_t>(PipelineBindings::FLAG_CULL_MODE_CW);
+        }
+        else if(i == "cull_mode_ccw")
+        {
+            DCHECK((flag & PipelineBindings::FLAG_CULL_MODE_BITMASK) == 0, "Exclusive flag found in \"%s\"", str.c_str());
+            flag |= static_cast<int32_t>(PipelineBindings::FLAG_CULL_MODE_CCW);
+        }
+        else if(i == "dynamic_scissor")
+            flag |= static_cast<int32_t>(PipelineBindings::FLAG_DYNAMIC_SCISSOR);
+    return static_cast<PipelineBindings::Flag>(flag);
+}
+
 
 }

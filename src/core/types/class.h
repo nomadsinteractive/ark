@@ -10,30 +10,6 @@
 
 namespace ark {
 
-template<typename... Args> class Implementation {
-public:
-    template<typename T> static _CONSTEXPR bool is() {
-        return check<T, Args...>();
-    }
-
-private:
-    template<typename T> static _CONSTEXPR bool check() {
-        return false;
-    }
-
-    template<typename T, typename U, typename... Types> static _CONSTEXPR bool check() {
-        return std::is_same<T, U>::value ? true : (sizeof...(Types) == 0 ? sfinae_check<T, U>(true) : check<T, Types...>());
-    }
-
-    template<typename T, typename U> static _CONSTEXPR bool sfinae_check(const decltype(U::template is<T>())) {
-        return U::template is<T>();
-    }
-
-    template<typename T, typename U> static _CONSTEXPR bool sfinae_check(...) {
-        return std::is_same<T, U>::value;
-    }
-};
-
 class ARK_API IClass {
 public:
     virtual ~IClass() = default;

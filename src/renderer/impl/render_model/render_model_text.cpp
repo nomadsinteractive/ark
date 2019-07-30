@@ -27,8 +27,8 @@ GLModelText::Stub::Stub(const sp<RenderController>& renderController, const sp<A
 
 void GLModelText::Stub::reset(uint32_t textureWidth, uint32_t textureHeight)
 {
-    _size->setWidth(textureWidth);
-    _size->setHeight(textureHeight);
+    _size->setWidth(static_cast<float>(textureWidth));
+    _size->setHeight(static_cast<float>(textureHeight));
     _font_glyph = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1), true);
     _texture = _render_controller->createTexture2D(_size, sp<Texture::UploaderBitmap>::make(_font_glyph), RenderController::US_ON_SURFACE_READY);
     _atlas = sp<Atlas>::make(_texture, true);

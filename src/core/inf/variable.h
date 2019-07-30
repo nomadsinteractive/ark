@@ -58,21 +58,6 @@ private:
 };
 
 
-template<typename T> class Variable<T>::Get : public Variable<T> {
-public:
-    Get(const sp<Dictionary<T>>& dictionary, const String& name)
-        : _dictionary(dictionary), _name(name) {
-    }
-
-    virtual T val() override {
-        return _dictionary->get(_name);
-    }
-
-private:
-    sp<Dictionary<T>> _dictionary;
-    String _name;
-};
-
 }
 
 #endif

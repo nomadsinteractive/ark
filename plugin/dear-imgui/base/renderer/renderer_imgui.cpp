@@ -256,13 +256,11 @@ sp<Renderer> RendererImgui::BUILDER::build(const sp<Scope>& args)
 
 RendererImgui::DrawCommand::DrawCommand(const Shader& shader, const sp<PipelineFactory>& pipelineFactory, RenderController& renderController, const sp<Texture>& texture, const sp<LFStack<sp<DrawCommand>>>& recycler)
     : _vertex_buffer(renderController.makeVertexBuffer()), _index_buffer(renderController.makeIndexBuffer()),
-      _shader_bindings(sp<ShaderBindings>::make(pipelineFactory, sp<PipelineBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, shader.layout()), renderController, _vertex_buffer, _index_buffer)),
+      _shader_bindings(sp<ShaderBindings>::make(pipelineFactory, sp<PipelineBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, shader.layout(), static_cast<PipelineBindings::Flag>(PipelineBindings::FLAG_CULL_MODE_NONE | PipelineBindings::FLAG_DYNAMIC_SCISSOR)), renderController, _vertex_buffer, _index_buffer)),
       _recycler(recycler)
 {
     PipelineBindings& pipelineBindings = _shader_bindings->pipelineBindings();
     pipelineBindings.bindSampler(texture);
-    pipelineBindings.setFlag(PipelineBindings::FLAG_CULL_MODE_NONE, PipelineBindings::FLAG_CULL_MODE_BITMASK);
-    pipelineBindings.setFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK);
 }
 
 void RendererImgui::DrawCommand::recycle(const sp<RendererImgui::DrawCommand>& self)

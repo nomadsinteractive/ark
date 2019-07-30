@@ -15,11 +15,19 @@ namespace ark {
 //[[script::bindings::class("Integer")]]
 class ARK_API IntegerUtil final {
 public:
+//  [[script::bindings::enumeration]]
+    enum Repeat {
+        REPEAT_NONE,
+        REPEAT_RESTART,
+        REPEAT_REVERSE
+    };
 
+//[[script::bindings::constructor]]
+    static sp<Integer> create(int32_t value);
 //[[script::bindings::constructor]]
     static sp<Integer> create(const sp<Integer>& value);
 //[[script::bindings::constructor]]
-    static sp<Integer> create(int32_t value);
+    static sp<Integer> create(std::vector<int32_t> values);
 
 //[[script::bindings::operator(+)]]
     static sp<Integer> add(const sp<Integer>& self, const sp<Integer>& rvalue);
@@ -80,6 +88,10 @@ public:
 //[[script::bindings::classmethod]]
     static void fix(const sp<Integer>& self);
 
+//[[script::bindings::classmethod]]
+    static sp<Integer> repeat(const sp<Integer>& self, IntegerUtil::Repeat repeat = IntegerUtil::REPEAT_NONE);
+//[[script::bindings::classmethod]]
+    static sp<Integer> animate(const sp<Integer>& self, const sp<Numeric>& interval = nullptr, const sp<Numeric>& duration = nullptr);
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Integer> {
@@ -92,16 +104,6 @@ public:
         sp<Builder<Integer>> _value;
     };
 
-//  [[plugin::builder::by-value]]
-    class ARRAY_DICTIONARY : public Builder<IntArray> {
-    public:
-        ARRAY_DICTIONARY(BeanFactory& factory, const String& value);
-
-        virtual sp<IntArray> build(const sp<Scope>& args) override;
-
-    private:
-        std::vector<sp<Builder<Integer>>> _array_builders;
-    };
 };
 
 }

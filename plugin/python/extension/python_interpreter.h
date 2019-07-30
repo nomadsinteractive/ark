@@ -35,7 +35,7 @@ public:
 
     PythonInterpreter();
 
-    sp<Numeric> toNumeric(PyObject* object);
+    sp<Numeric> toNumeric(PyObject* object, bool alert = true);
     String toString(PyObject* object, const char* encoding = nullptr, const char* error = nullptr);
     sp<Scope> toScope(PyObject* kws);
 
@@ -212,7 +212,7 @@ private:
 
     sp<Vec2> toVec2(PyObject* object, bool alert);
     sp<Vec3> toVec3(PyObject* object, bool alert);
-    sp<Integer> toInteger(PyObject* object);
+    sp<Integer> toInteger(PyObject* object, bool alert);
     sp<Runnable> toRunnable(PyObject* object);
     sp<CollisionCallback> toCollisionCallback(PyObject* object);
     sp<EventListener> toEventListener(PyObject* object);
@@ -231,12 +231,12 @@ private:
 
 template<> inline sp<Numeric> PythonInterpreter::toSharedPtr<Numeric>(PyObject* object, bool alert)
 {
-    return toNumeric(object);
+    return toNumeric(object, alert);
 }
 
 template<> inline sp<Integer> PythonInterpreter::toSharedPtr<Integer>(PyObject* object, bool alert)
 {
-    return toInteger(object);
+    return toInteger(object, alert);
 }
 
 template<> inline sp<Runnable> PythonInterpreter::toSharedPtr<Runnable>(PyObject* object, bool alert)

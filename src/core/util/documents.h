@@ -12,9 +12,7 @@ namespace ark {
 class ARK_API Documents {
 public:
     static document parse(const String& xml);
-//  [[script::bindings::auto]]
     static document loadFromFile(const String& file_path);
-//  [[script::bindings::auto]]
     static void saveToFile(const document& doc, const String& file_path);
     static document loadFromReadable(const sp<Readable>& readable);
 

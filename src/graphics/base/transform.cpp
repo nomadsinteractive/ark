@@ -9,11 +9,12 @@
 
 #include "graphics/base/matrix.h"
 #include "graphics/base/rotate.h"
+#include "graphics/impl/vec/vec3_impl.h"
 
 namespace ark {
 
 Transform::Transform(const sp<Rotate>& rotate, const sp<Vec3>& scale, const sp<Vec>& translate)
-    : _rotate(rotate), _scale(scale), _translate(translate)
+    : _rotate(rotate), _scale(scale ? scale : Ark::instance().obtain<Vec3Impl>(1.0f, 1.0f, 1.0f).cast<Vec3>()), _translate(translate)
 {
 }
 
@@ -22,7 +23,7 @@ Transform::Snapshot Transform::snapshot() const
     Snapshot ss;
     ss.rotate_value = _rotate->radians();
     ss.rotate_direction = _rotate->direction()->val();
-    ss.scale = _scale ? _scale->val() : V3(1.0f, 1.0f, 1.0f);
+    ss.scale = _scale->val();
     ss.translate = _translate->val();
     return ss;
 }

@@ -1,17 +1,34 @@
 #include "core/util/integer_util.h"
 
 #include "core/base/bean_factory.h"
+#include "core/base/clock.h"
 #include "core/base/expression.h"
+#include "core/impl/integer/integer_by_array.h"
+#include "core/impl/integer/integer_by_interval.h"
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/impl/integer/integer_add.h"
-#include "core/impl/integer/integer_floor_div.h"
-#include "core/impl/integer/integer_multiply.h"
-#include "core/impl/integer/integer_subtract.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
 #include "core/util/strings.h"
 
 namespace ark {
+
+namespace {
+
+class IntegerArray : public Integer, public Implements<IntegerArray, Integer> {
+public:
+    IntegerArray(std::vector<int32_t> values)
+        : _values(std::move(values)) {
+
+    }
+
+    virtual int32_t val() override {
+        return _values.size() > 0 ? _values.at(0) : 0;
+    }
+
+    std::vector<int32_t> _values;
+};
+
+}
 
 sp<Integer> IntegerUtil::create(const sp<Integer>& value)
 {
@@ -23,9 +40,14 @@ sp<Integer> IntegerUtil::create(int32_t value)
     return sp<IntegerWrapper>::make(value);
 }
 
+sp<Integer> IntegerUtil::create(std::vector<int32_t> values)
+{
+    return sp<IntegerArray>::make(std::move(values));
+}
+
 sp<Integer> IntegerUtil::add(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
-    return sp<IntegerAdd>::make(self, rvalue);
+    return sp<VariableOP2<int32_t, int32_t, Operators::Add<int32_t>, sp<Integer>, sp<Integer>>>::make(self, rvalue);
 }
 
 void IntegerUtil::iadd(const sp<Integer>& self, const sp<Integer>& rvalue)
@@ -35,7 +57,7 @@ void IntegerUtil::iadd(const sp<Integer>& self, const sp<Integer>& rvalue)
 
 sp<Integer> IntegerUtil::sub(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
-    return sp<IntegerSubtract>::make(self, rvalue);
+    return sp<VariableOP2<int32_t, int32_t, Operators::Sub<int32_t>, sp<Integer>, sp<Integer>>>::make(self, rvalue);
 }
 
 void IntegerUtil::isub(const sp<Integer>& self, const sp<Integer>& rvalue)
@@ -45,7 +67,7 @@ void IntegerUtil::isub(const sp<Integer>& self, const sp<Integer>& rvalue)
 
 sp<Integer> IntegerUtil::mul(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
-    return sp<IntegerMultiply>::make(self, rvalue);
+    return sp<VariableOP2<int32_t, int32_t, Operators::Mul<int32_t>, sp<Integer>, sp<Integer>>>::make(self, rvalue);
 }
 
 sp<Integer> IntegerUtil::mod(const sp<Integer>& self, const sp<Integer>& rvalue)
@@ -67,7 +89,7 @@ sp<Numeric> IntegerUtil::truediv(const sp<Integer>& self, const sp<Integer>& rva
 
 sp<Integer> IntegerUtil::floordiv(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
-    return sp<IntegerFloorDiv>::make(self, rvalue);
+    return sp<VariableOP2<int32_t, int32_t, Operators::Div<int32_t>, sp<Integer>, sp<Integer>>>::make(self, rvalue);
 }
 
 sp<Integer> IntegerUtil::negative(const sp<Integer>& self)
@@ -168,6 +190,18 @@ void IntegerUtil::fix(const sp<Integer>& self)
         iw->fix();
 }
 
+sp<Integer> IntegerUtil::repeat(const sp<Integer>& self, IntegerUtil::Repeat repeat)
+{
+    const sp<IntegerArray> ia = self.as<IntegerArray>();
+    DCHECK(ia, "Animation needs an IntegerArray instance, others have not been implemented yet");
+    return sp<IntegerByArray>::make(sp<IntArray::Vector>::make(ia->_values), repeat);
+}
+
+sp<Integer> IntegerUtil::animate(const sp<Integer>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)
+{
+    return sp<IntegerByInterval>::make(self, duration ? duration : Ark::instance().clock()->duration(), interval ? interval : sp<Numeric>::adopt(new Numeric::Const(1.0f / 24)));
+}
+
 IntegerUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
     : _value(Expression::Compiler<int32_t, NumericOperation<int32_t>>().compile(factory, expr.strip()))
 {
@@ -176,21 +210,6 @@ IntegerUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
 sp<Integer> IntegerUtil::DICTIONARY::build(const sp<Scope>& args)
 {
     return _value->build(args);
-}
-
-IntegerUtil::ARRAY_DICTIONARY::ARRAY_DICTIONARY(BeanFactory& factory, const String& value)
-{
-    for(const String& i : Strings::unwrap(value,'[', ']').split(','))
-        _array_builders.push_back(factory.ensureBuilder<Integer>(i));
-}
-
-sp<IntArray> IntegerUtil::ARRAY_DICTIONARY::build(const sp<Scope>& args)
-{
-    const sp<IntArray> s = sp<IntArray::Allocated>::make(_array_builders.size());
-    int32_t* buf = s->buf();
-    for(size_t i = 0; i < _array_builders.size(); i++)
-        buf[i] = _array_builders[i]->build(args)->val();
-    return s;
 }
 
 }

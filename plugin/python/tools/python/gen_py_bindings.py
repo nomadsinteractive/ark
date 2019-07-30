@@ -446,9 +446,9 @@ class GenArgument:
     def _gen_var_declare(self, typename, varname, funcname, functype, argname, extract_cast=False):
         argappendix = ', false' if extract_cast else ''
         if self._default_value and (self._accept_type.startswith('sp<') or self._meta.parse_signature == 'O'):
-            return 'const %s %s = %s ? PythonInterpreter::instance()->%s<%s>(%s%s) : %s;' % (
+            return '%s %s = %s ? PythonInterpreter::instance()->%s<%s>(%s%s) : %s;' % (
                 typename, varname, argname, funcname, functype, argname, argappendix, self._default_value)
-        return 'const %s %s = PythonInterpreter::instance()->%s<%s>(%s%s);' % (typename, varname, funcname, functype, argname, argappendix)
+        return '%s %s = PythonInterpreter::instance()->%s<%s>(%s%s);' % (typename, varname, funcname, functype, argname, argappendix)
 
     def str(self):
         return self._str
@@ -476,13 +476,14 @@ ARK_PY_ARGUMENTS = (
 )
 
 ARK_PY_ARGUMENT_CHECKERS = {
-    'bool': GenConverter('(PyLong_CheckExact({0}) || PyBool_Check({0}))', 'PyLong_AsLong({0}) != 0'),
-    'int32_t': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', 'PyLong_AsLong({0})'),
-    'uint32_t': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', 'PyLong_AsLong({0})'),
-    'float': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', 'PyFloat_AsDouble({0})'),
+    'bool': GenConverter('(PyLong_CheckExact({0}) || PyBool_Check({0}))', '{0}'),
+    'int32_t': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', '{0}'),
+    'uint32_t': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', '{0}'),
+    'float': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', '{0}'),
+    'std::vector<int32_t>': GenConverter('(PyList_CheckExact({0}) || PyTuple_CheckExact({0}))', 'std::move({0})'),
     'V2': GenConverter('(PyTuple_CheckExact({0}) && PyObject_Length({0}) == 2)', '{0}'),
     'V3': GenConverter('(PyTuple_CheckExact({0}) && PyObject_Length({0}) == 3)', '{0}'),
-    'std::wstring': GenConverter('PyUnicode_CheckExact({0})', 'PyUnicode_DATA({0})')
+    'std::wstring': GenConverter('PyUnicode_CheckExact({0})', '{0}')
 }
 
 
@@ -514,8 +515,12 @@ def parse_method_arguments(arguments):
 
 
 def gen_method_call_arg(i, targettype, argtype):
-    equals = acg.typeCompare(targettype, remove_crv(argtype))
-    return 'obj%d' % i if equals or '<' in argtype else gen_cast_call(targettype, 'obj%d' % i)
+    ctype = remove_crv(argtype)
+    equals = acg.typeCompare(targettype, ctype)
+    argname = 'obj%d' % i if equals or '<' in argtype else gen_cast_call(targettype, 'obj%d' % i)
+    if ctype in ARK_PY_ARGUMENT_CHECKERS:
+        return ARK_PY_ARGUMENT_CHECKERS[ctype].cast(argname)
+    return argname
 
 
 def gen_cast_call(targettype, name):
@@ -1023,12 +1028,10 @@ def create_overloaded_method_type(base_type, **kwargs):
                         not_overloaded_args[j] = None
 
             m0 = self._overloaded_methods[0]
-            # not_overloaded_names = ['obj%d' % i for i, j in enumerate(not_overloaded_args) if j and j.default_value is None]
             not_overloaded_declar = [j.gen_declare('obj%d' % i, 'arg%d' % i, not m0.check_argument_type) for i, j in enumerate(not_overloaded_args) if j]
             self._gen_convert_args_code(lines, not_overloaded_declar)
             for i in self._overloaded_methods:
                 type_checks = [k.gen_type_check('arg%d' % j) for j, k, l in zip(range(len(i.arguments)), i.arguments, not_overloaded_args) if not l]
-                # lines.extend(['if(%s)' % ' && '.join(([j for j in type_checks if j] + not_overloaded_names) or ['true']), '{'])
                 lines.extend(['if(%s)' % ' && '.join(([j for j in type_checks if j]) or ['true']), '{'])
                 body_lines = []
                 overloaded_args = [None if j else k for j, k in zip(not_overloaded_args, i.arguments)]
@@ -1047,7 +1050,6 @@ def create_overloaded_method_type(base_type, **kwargs):
                     print('Overloaded methods(%s, %s) should have equal number of arguments' % (m1, method))
                     sys.exit(-1)
             method._arguments = self._replace_arguments(method.arguments)
-            # method.calling_type_check = True
             self._overloaded_methods.append(method)
 
         @staticmethod

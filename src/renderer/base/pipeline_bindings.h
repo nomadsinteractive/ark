@@ -19,9 +19,9 @@ public:
     };
 
     enum Flag {
-        FLAG_CULL_MODE_NONE = 0,
         FLAG_CULL_MODE_CW = 1,
         FLAG_CULL_MODE_CCW = 2,
+        FLAG_CULL_MODE_NONE = 3,
         FLAG_CULL_MODE_BITMASK = 3,
         FLAG_DYNAMIC_SCISSOR = 4,
         FLAG_DYNAMIC_SCISSOR_BITMASK = 4,
@@ -35,7 +35,7 @@ public:
     };
 
 public:
-    PipelineBindings(RenderModel::Mode mode, const sp<PipelineLayout>& pipelineLayout);
+    PipelineBindings(RenderModel::Mode mode, const sp<PipelineLayout>& pipelineLayout, Flag flag);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineBindings);
 
     RenderModel::Mode mode() const;
@@ -59,7 +59,7 @@ public:
 
 private:
     struct Stub {
-        Stub(RenderModel::Mode mode, const sp<PipelineLayout>& pipelineLayout);
+        Stub(RenderModel::Mode mode, const sp<PipelineLayout>& pipelineLayout, Flag flag);
 
         RenderModel::Mode _mode;
         sp<PipelineLayout> _layout;

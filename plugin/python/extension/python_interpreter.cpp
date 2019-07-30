@@ -133,7 +133,7 @@ PyObject* PythonInterpreter::fromByteArray(const bytearray& bytes) const
     return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(bytes->buf()), bytes->length());
 }
 
-sp<Numeric> PythonInterpreter::toNumeric(PyObject* object)
+sp<Numeric> PythonInterpreter::toNumeric(PyObject* object, bool alert)
 {
     if(isNoneOrNull(object))
         return nullptr;
@@ -143,10 +143,10 @@ sp<Numeric> PythonInterpreter::toNumeric(PyObject* object)
     if(PyFloat_Check(object))
         return sp<Numeric::Const>::make(static_cast<float>(PyFloat_AsDouble(object)));
 
-    return asInterface<Numeric>(object, false);
+    return asInterface<Numeric>(object, alert);
 }
 
-sp<Integer> PythonInterpreter::toInteger(PyObject* object)
+sp<Integer> PythonInterpreter::toInteger(PyObject* object, bool alert)
 {
     if(PyLong_Check(object))
         return sp<Integer::Const>::make(PyLong_AsLong(object));
@@ -156,7 +156,7 @@ sp<Integer> PythonInterpreter::toInteger(PyObject* object)
         return sp<Integer::Const>::make(static_cast<int32_t>(PyFloat_AsDouble(object)));
     }
 
-    return asInterface<Integer>(object);
+    return asInterface<Integer>(object, alert);
 }
 
 sp<Scope> PythonInterpreter::toScope(PyObject* kws)
