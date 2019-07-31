@@ -10,9 +10,9 @@ StateMachine::StateMachine()
 {
 }
 
-sp<Command> StateMachine::addCommand(const sp<Runnable>& onActive, const sp<Runnable>& onDeactive)
+sp<Command> StateMachine::addCommand(const sp<Runnable>& onActive, const sp<Runnable>& onDeactive, uint32_t category)
 {
-    return sp<Command>::make(++_stub->_new_command_id, _stub, onActive, onDeactive);
+    return sp<Command>::make(++_stub->_new_command_id, _stub, onActive, onDeactive, category);
 }
 
 sp<State> StateMachine::addState(const sp<Runnable>& onActive, const sp<Runnable>& onDeactive, int32_t flag)
@@ -41,9 +41,12 @@ void StateMachine::Stub::activate(const State& state)
 
 void StateMachine::Stub::deactivate(const State& state)
 {
-    state.deactivate();
-    if(_states.size() > 0 && _states.front() == state)
-        pop();
+    if(state.active())
+    {
+        state.deactivate();
+        if(_states.size() > 0 && _states.front() == state)
+            pop();
+    }
 }
 
 State StateMachine::Stub::front() const
@@ -59,6 +62,9 @@ void StateMachine::Stub::pop()
     do {
         _states.pop_front();
     } while(!_states.empty() && !_states.front().active());
+
+    if(_states.size() > 0)
+        _states.front().refreshState();
 
     if(_states.size() > 0)
         _states.front().activate();

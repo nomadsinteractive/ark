@@ -15,7 +15,7 @@ public:
     StateMachine();
 
 //  [[script::bindings::auto]]
-    sp<Command> addCommand(const sp<Runnable>& onActive = nullptr, const sp<Runnable>& onDeactive = nullptr);
+    sp<Command> addCommand(const sp<Runnable>& onActive = nullptr, const sp<Runnable>& onDeactive = nullptr, uint32_t category = 0);
 
 //  [[script::bindings::auto]]
     sp<State> addState(const sp<Runnable>& onActive = nullptr, const sp<Runnable>& onDeactive = nullptr, int32_t flag = 0);

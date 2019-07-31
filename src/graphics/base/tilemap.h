@@ -20,7 +20,6 @@ class ARK_API Tilemap : public Renderer, Block {
 public:
 // [[script::bindings::auto]]
     Tilemap(const sp<LayerContext>& layerContext, uint32_t width, uint32_t height, const sp<Tileset>& tileset, const sp<TilemapImporter>& importer = nullptr);
-    ~Tilemap() override;
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 // [[script::bindings::property]]
@@ -79,6 +78,15 @@ public:
     };
 
 private:
+    struct Layer {
+        Layer(uint32_t row, uint32_t col);
+        ~Layer();
+        DISALLOW_COPY_AND_ASSIGN(Layer);
+
+        sp<RenderObject>* _tiles;
+    };
+
+private:
     sp<LayerContext> _layer_context;
     SafePtr<Size> _size;
     sp<Tileset> _tileset;
@@ -90,7 +98,9 @@ private:
     uint32_t _col_count;
     uint32_t _row_count;
 
-    sp<RenderObject>* _tiles;
+    std::vector<sp<Layer>> _layers;
+
+    sp<Layer> _current_layer;
 
 };
 

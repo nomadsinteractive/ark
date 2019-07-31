@@ -4,8 +4,8 @@
 
 namespace ark {
 
-Command::Command(uint32_t id, const WeakPtr<StateMachine::Stub>& stateMachine, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive)
-    : _id(id), _state_machine(stateMachine), _on_active(onActive), _on_deactive(onDeactive), _state(STATE_DEACTIVATED)
+Command::Command(uint32_t id, const WeakPtr<StateMachine::Stub>& stateMachine, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive, uint32_t category)
+    : _id(id), _state_machine(stateMachine), _on_active(onActive), _on_deactive(onDeactive), _category(category), _state(STATE_DEACTIVATED)
 {
 }
 
@@ -32,6 +32,16 @@ const sp<Runnable>& Command::onActive() const
 const sp<Runnable>& Command::onDeactive() const
 {
     return _on_deactive;
+}
+
+uint32_t Command::category() const
+{
+    return _category;
+}
+
+bool Command::conflicts(const Command& other) const
+{
+    return static_cast<bool>(_category & other._category);
 }
 
 Command::State Command::state() const

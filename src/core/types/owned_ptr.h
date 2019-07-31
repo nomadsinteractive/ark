@@ -11,6 +11,10 @@ public:
     OwnedPtr(T* instance = nullptr, bool autoRelease = true) noexcept
         : _inst(instance), _auto_release(autoRelease) {
     }
+    OwnedPtr(OwnedPtr&& other)
+        : _inst(other._inst), _auto_release(other._auto_release) {
+        other._inst = nullptr;
+    }
 
     T* operator ->() const {
         return _inst;

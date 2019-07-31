@@ -21,7 +21,7 @@ public:
     };
 
 public:
-    Command(uint32_t id, const WeakPtr<StateMachine::Stub>& stateMachine, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive);
+    Command(uint32_t id, const WeakPtr<StateMachine::Stub>& stateMachine, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive, uint32_t category);
 
     uint32_t id() const;
 
@@ -33,6 +33,9 @@ public:
     const sp<Runnable>& onActive() const;
     const sp<Runnable>& onDeactive() const;
 
+    uint32_t category() const;
+    bool conflicts(const Command& other) const;
+
     State state() const;
     void setState(State state);
 
@@ -41,6 +44,7 @@ private:
     WeakPtr<StateMachine::Stub> _state_machine;
     sp<Runnable> _on_active;
     sp<Runnable> _on_deactive;
+    uint32_t _category;
 
     State _state;
 };

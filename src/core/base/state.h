@@ -14,8 +14,7 @@ class ARK_API State {
 public:
 //  [[script::bindings::enumeration]]
     enum StateFlag {
-        STATE_FLAG_EXCLUSIVE = 1,
-        STATE_FLAG_AUTO_DEACTIVATE = 2,
+        STATE_FLAG_AUTO_DEACTIVATE = 1,
         STATE_FLAG_DEFAULT = 0
     };
 
@@ -36,11 +35,13 @@ public:
 //  [[script::bindings::auto]]
     void deactivate() const;
 
-    bool execute(const Command& command) const;
-    bool terminate(const Command& command) const;
+    void execute(const Command& command) const;
+    void terminate(const Command& command) const;
 
 //  [[script::bindings::auto]]
     void linkCommand(const sp<Command>& command, const sp<Runnable>& onActive = nullptr, const sp<Runnable>& onDeactive = nullptr) const;
+
+    void refreshState() const;
 
 private:
     struct CommandWithHandlers {
@@ -65,7 +66,7 @@ private:
         std::unordered_map<uint32_t, sp<CommandWithHandlers>> _commands;
 
         const sp<CommandWithHandlers>& getCommandWithHandlers(uint32_t commandId) const;
-        int32_t transfer(uint32_t commandId, Command::State state, Command::State toState) const;
+        int32_t resolveConflicts(const Command& command, Command::State state, Command::State toState) const;
     };
 
 private:

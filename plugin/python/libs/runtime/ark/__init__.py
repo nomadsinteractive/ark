@@ -366,8 +366,15 @@ class Numeric(_Var):
 
 
 class Integer(_Var):
+    REPEAT_NONE = 0
+    REPEAT_RESTART = 1
+    REPEAT_REVERSE = 2
+
     def __init__(self, value: Union[int, 'Integer', list, tuple]):
         super().__init__(value)
+
+    def repeat(self, repeat: int) -> 'Integer':
+        return Integer(0)
 
     def animate(self, interval: Numeric, duration: Numeric) -> 'Integer':
         return Integer(0)
@@ -1119,9 +1126,8 @@ class Command:
 
 
 class State:
+    STATE_FLAG_AUTO_DEACTIVATE = 1
     STATE_FLAG_DEFAULT = 0
-    STATE_FLAG_EXCLUSIVE = 1
-    STATE_FLAG_AUTO_DEACTIVATE = 2
 
     def __init__(self, on_active: Union[Callable, None] = None, on_deactive: Union[Callable, None] = None, flag: int = STATE_FLAG_DEFAULT):
         pass
@@ -1144,7 +1150,7 @@ class StateMachine:
     def __init__(self):
         pass
 
-    def add_command(self, on_active: Union[Callable, None] = None, on_deactive: Union[Callable, None] = None) -> Command:
+    def add_command(self, on_active: Union[Callable, None] = None, on_deactive: Union[Callable, None] = None, category: int = 0) -> Command:
         return Command()
 
     def add_state(self, on_active: Union[Callable, None] = None, on_deactive: Union[Callable, None] = None, flag: int = 0) -> State:
@@ -1155,6 +1161,13 @@ class StateMachine:
 
     def deactivate(self, state: State):
         pass
+
+
+class CollisionManifold:
+
+    @property
+    def normal(self) -> tuple:
+        return tuple(0, 0)
 
 
 def __trace__():
