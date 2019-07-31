@@ -5,82 +5,137 @@
 
 namespace ark {
 
-State::State(State::StateFlag flag)
-    : _exclusive(flag == STATE_FLAG_EXCLUSIVE)
+State::State(const WeakPtr<StateMachine::Stub>& stateMachine, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive, State::StateFlag flag)
+    : _stub(sp<Stub>::make(stateMachine, onActive, onDeactive, flag))
 {
 }
 
-void State::linkCommand(const Command& command, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive)
+bool State::operator ==(const State& other) const
 {
-    DCHECK(_commands.find(command._id) == _commands.end(), "Command has been linked to this state already");
-    _commands[command._id] = sp<CommandWithState>::make(onActive, onDeactive);
+    return _stub == other._stub;
 }
 
-void State::execute(const Command& command, State::CommandState commandState)
+bool State::operator !=(const State& other) const
 {
-    const auto iter = _commands.find(command._id);
-    DCHECK(iter != _commands.end(), "Command does not belong to this State");
-    iter->second->execute(commandState);
+    return _stub != other._stub;
 }
 
-State::CommandWithState::CommandWithState(const sp<Runnable>& onActive, const sp<Runnable>& onDeactive)
-    : _state(COMMAND_STATE_DEACTIVATED), _handlers{onActive, onDeactive, onDeactive}
+ark::State::operator bool() const
+{
+    return static_cast<bool>(_stub);
+}
+
+bool State::active() const
+{
+    return _stub->_state == Command::STATE_ACTIVATED;
+}
+
+void State::activate() const
+{
+    _stub->_state = Command::STATE_ACTIVATED;
+    if(_stub->_on_active)
+        _stub->_on_active->run();
+}
+
+void State::deactivate() const
+{
+    _stub->_state = Command::STATE_DEACTIVATED;
+    if(_stub->_on_deactive)
+        _stub->_on_deactive->run();
+}
+
+void State::linkCommand(const sp<Command>& command, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive) const
+{
+    DCHECK(_stub->_commands.find(command->id()) == _stub->_commands.end(), "Command has been linked to this state already");
+    _stub->_commands[command->id()] = sp<CommandWithHandlers>::make(command, onActive ? onActive : command->onActive(), onDeactive ? onDeactive : command->onDeactive());
+}
+
+State::CommandWithHandlers::CommandWithHandlers(const sp<Command>& command, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive)
+    : _command(command), _handlers{onActive, onDeactive, onDeactive}
 {
 }
 
-void State::CommandWithState::execute(CommandState state)
+Command::State State::CommandWithHandlers::state() const
 {
-    DCHECK(state >= 0 && state < COMMAND_STATE_COUNT, "Illegal state, stateId: %d", state);
-    _state = state;
-    if(_handlers[_state])
-        _handlers[_state]->run();
+    return _command->state();
 }
 
-void State::activate(const Command& command)
+void State::CommandWithHandlers::setState(Command::State state)
 {
-    const sp<CommandWithState>& cws = ensureCommandWithState(command._id);
-    DCHECK(cws->_state != State::COMMAND_STATE_ACTIVATED, "Illegal state, Command has been already activated");
-    if(_exclusive)
-        transfer(command._id, State::COMMAND_STATE_ACTIVATED, State::COMMAND_STATE_PAUSED);
-    cws->execute(State::COMMAND_STATE_ACTIVATED);
+    DCHECK(state >= 0 && state < Command::STATE_COUNT, "Illegal state, stateId: %d", state);
+    _command->setState(state);
+    if(_handlers[state])
+        _handlers[state]->run();
 }
 
-void State::deactivate(const Command& command)
+bool State::execute(const Command& command) const
 {
-    const sp<CommandWithState>& cws = ensureCommandWithState(command._id);
-    DCHECK(cws->_state != State::COMMAND_STATE_DEACTIVATED, "Illegal state, Command has been already deactivated");
-    if(_exclusive)
+    const sp<CommandWithHandlers>& cws = _stub->getCommandWithHandlers(command.id());
+    if(!cws)
+        return false;
+
+    DCHECK(cws->state() != Command::STATE_ACTIVATED, "Illegal state, Command has been executed already");
+    if(_stub->_flag & STATE_FLAG_EXCLUSIVE)
+        _stub->transfer(command.id(), Command::STATE_ACTIVATED, Command::STATE_SUPPRESSED);
+    cws->setState(Command::STATE_ACTIVATED);
+    return true;
+}
+
+bool State::terminate(const Command& command) const
+{
+    const sp<CommandWithHandlers>& cws = _stub->getCommandWithHandlers(command.id());
+    if(!cws)
+        return false;
+
+    DCHECK(cws->state() != Command::STATE_DEACTIVATED, "Illegal state, Command has been terminated already");
+    if(_stub->_flag & STATE_FLAG_EXCLUSIVE)
     {
-        cws->_state = State::COMMAND_STATE_DEACTIVATED;
-        if(transfer(command._id, State::COMMAND_STATE_PAUSED, State::COMMAND_STATE_ACTIVATED) == 0)
-           cws->execute(State::COMMAND_STATE_DEACTIVATED);
+        cws->_command->setState(Command::STATE_DEACTIVATED);
+        if(_stub->transfer(command.id(), Command::STATE_SUPPRESSED, Command::STATE_ACTIVATED) == 0)
+           cws->setState(Command::STATE_DEACTIVATED);
     }
     else
-        cws->execute(State::COMMAND_STATE_DEACTIVATED);
+        cws->setState(Command::STATE_DEACTIVATED);
+
+    if(_stub->_flag & STATE_FLAG_AUTO_DEACTIVATE)
+    {
+        for(const auto& i : _stub->_commands)
+        {
+            if(i.second->state() == Command::STATE_ACTIVATED)
+                return true;
+        }
+        _stub->_state_machine.ensure()->deactivate(*this);
+    }
+
+    return true;
 }
 
-int32_t State::transfer(uint32_t commandId, State::CommandState state, State::CommandState toState)
+const sp<State::CommandWithHandlers>& State::Stub::getCommandWithHandlers(uint32_t commandId) const
+{
+    const auto iter = _commands.find(commandId);
+    return iter != _commands.end() ? iter->second : sp<State::CommandWithHandlers>::null();
+}
+
+int32_t State::Stub::transfer(uint32_t commandId, Command::State state, Command::State toState) const
 {
     int32_t count = 0;
     for(auto iter = _commands.begin(); iter != _commands.end(); ++iter)
     {
-        const sp<State::CommandWithState>& i = iter->second;
+        const sp<State::CommandWithHandlers>& i = iter->second;
         if(iter->first != commandId)
         {
-            if(i->_state == state)
-                i->execute(toState);
-            if(i->_state == toState)
+            if(i->state() == state)
+                i->setState(toState);
+            if(i->state() == toState)
                 ++count;
         }
     }
     return count;
 }
 
-const sp<State::CommandWithState>& State::ensureCommandWithState(uint32_t commandId) const
+State::Stub::Stub(const WeakPtr<StateMachine::Stub>& stateMachine, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive, State::StateFlag flag)
+    : _state_machine(stateMachine), _on_active(onActive), _on_deactive(onDeactive), _flag(flag), _state(Command::STATE_DEACTIVATED)
 {
-    const auto iter = _commands.find(commandId);
-    DCHECK(iter != _commands.end(), "Command does not belong to this State");
-    return iter->second;
 }
 
 }

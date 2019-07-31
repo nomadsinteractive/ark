@@ -1,11 +1,10 @@
 #ifndef ARK_CORE_BASE_STATE_MACHINE_H_
 #define ARK_CORE_BASE_STATE_MACHINE_H_
 
-#include <stack>
+#include <list>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/base/state.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -16,28 +15,37 @@ public:
     StateMachine();
 
 //  [[script::bindings::auto]]
-    sp<Command> addCommand();
+    sp<Command> addCommand(const sp<Runnable>& onActive = nullptr, const sp<Runnable>& onDeactive = nullptr);
+
 //  [[script::bindings::auto]]
-    void push(const sp<State>& state);
+    sp<State> addState(const sp<Runnable>& onActive = nullptr, const sp<Runnable>& onDeactive = nullptr, int32_t flag = 0);
+
 //  [[script::bindings::auto]]
-    void pop();
+    void activate(const State& state);
+//  [[script::bindings::auto]]
+    void deactivate(const State& state);
 
 private:
     struct Stub {
 
-        const sp<State>& top() const;
+        void activate(const State& state);
+        void deactivate(const State& state);
 
-        void activate(const Command& command);
-        void deactivate(const Command& command);
+        State front() const;
+        void pop();
+
+        void execute(const Command& command);
+        void terminate(const Command& command);
 
         uint32_t _new_command_id;
-        std::stack<sp<State>> _states;
+        std::list<State> _states;
     };
 
 private:
     sp<Stub> _stub;
 
     friend class Command;
+    friend class State;
 };
 
 };

@@ -517,6 +517,7 @@ class Mat3:
 
 class RenderObject:
     def __init__(self, t, pos=None, size=None, transform=None, varyings=None):
+        self._position = pos
         self._transform = transform
         self._disposed = Boolean(False)
 
@@ -529,8 +530,8 @@ class RenderObject:
         pass
 
     @property
-    def position(self):
-        return None
+    def position(self) -> Vec3:
+        return self._position
 
     @position.setter
     def position(self, v):
@@ -1110,6 +1111,21 @@ class Collider:
 
 class Command:
 
+    def execute(self):
+        pass
+
+    def terminate(self):
+        pass
+
+
+class State:
+    STATE_FLAG_DEFAULT = 0
+    STATE_FLAG_EXCLUSIVE = 1
+    STATE_FLAG_AUTO_DEACTIVATE = 2
+
+    def __init__(self, on_active: Union[Callable, None] = None, on_deactive: Union[Callable, None] = None, flag: int = STATE_FLAG_DEFAULT):
+        pass
+
     @property
     def active(self) -> bool:
         return False
@@ -1120,16 +1136,25 @@ class Command:
     def deactivate(self):
         pass
 
-
-class State:
-    STATE_FLAG_DEFAULT = 0
-    STATE_FLAG_EXCLUSIVE = 1
-
-    def __init__(self, flag: int = STATE_FLAG_DEFAULT):
+    def link_command(self, command: Command, on_active: Union[Callable, None] = None, on_deactive: Union[Callable, None] = None):
         pass
 
-    def make_command(self, on_active, on_deactive) -> Command:
+
+class StateMachine:
+    def __init__(self):
+        pass
+
+    def add_command(self, on_active: Union[Callable, None] = None, on_deactive: Union[Callable, None] = None) -> Command:
         return Command()
+
+    def add_state(self, on_active: Union[Callable, None] = None, on_deactive: Union[Callable, None] = None, flag: int = 0) -> State:
+        return State()
+
+    def activate(self, state: State):
+        pass
+
+    def deactivate(self, state: State):
+        pass
 
 
 def __trace__():

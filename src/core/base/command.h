@@ -6,27 +6,43 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/state_machine.h"
+#include "core/types/weak_ptr.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
 class ARK_API Command {
 public:
-    Command(uint32_t id, const sp<StateMachine::Stub>& stateMachine);
+    enum State {
+        STATE_ACTIVATED,
+        STATE_DEACTIVATED,
+        STATE_SUPPRESSED,
+        STATE_COUNT
+    };
 
-//  [[script::bindings::property]]
+public:
+    Command(uint32_t id, const WeakPtr<StateMachine::Stub>& stateMachine, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive);
+
     uint32_t id() const;
 
 //  [[script::bindings::auto]]
-    void activate() const;
+    void execute() const;
 //  [[script::bindings::auto]]
-    void deactivate() const;
+    void terminate() const;
+
+    const sp<Runnable>& onActive() const;
+    const sp<Runnable>& onDeactive() const;
+
+    State state() const;
+    void setState(State state);
 
 private:
     uint32_t _id;
-    sp<StateMachine::Stub> _state_machine;
+    WeakPtr<StateMachine::Stub> _state_machine;
+    sp<Runnable> _on_active;
+    sp<Runnable> _on_deactive;
 
-    friend class State;
+    State _state;
 };
 
 }

@@ -64,11 +64,6 @@ private:
             return _shared_ptr ? *reinterpret_cast<sp<T>*>(_shared_ptr) : sp<T>::null();
         }
 
-        template<typename T> sp<T>& unpack() {
-            DCHECK(_type_id == Type<T>::id(), "Wrong type being unpacked");
-            return _shared_ptr ? *reinterpret_cast<sp<T>*>(_shared_ptr) : sp<T>::null();
-        }
-
     private:
         void* _shared_ptr;
         void* _ptr;

@@ -43,7 +43,7 @@ public:
         return SharedPtr<T>(new T(std::forward<Args>(args)...));
     }
 
-    static SharedPtr<T>& null() {
+    static const SharedPtr<T>& null() {
         static SharedPtr<T> inst = nullptr;
         return inst;
     }

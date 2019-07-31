@@ -5,6 +5,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/command.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -13,49 +14,62 @@ class ARK_API State {
 public:
 //  [[script::bindings::enumeration]]
     enum StateFlag {
-        STATE_FLAG_DEFAULT,
-        STATE_FLAG_EXCLUSIVE
-    };
-
-    enum CommandState {
-        COMMAND_STATE_ACTIVATED,
-        COMMAND_STATE_DEACTIVATED,
-        COMMAND_STATE_PAUSED,
-        COMMAND_STATE_COUNT
+        STATE_FLAG_EXCLUSIVE = 1,
+        STATE_FLAG_AUTO_DEACTIVATE = 2,
+        STATE_FLAG_DEFAULT = 0
     };
 
 public:
+    State() = default;
+    State(const WeakPtr<StateMachine::Stub>& stateMachine, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive, State::StateFlag flag = State::STATE_FLAG_DEFAULT);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(State);
+
+    bool operator ==(const State& other) const;
+    bool operator !=(const State& other) const;
+    operator bool() const;
+
+//  [[script::bindings::property]]
+    bool active() const;
+
 //  [[script::bindings::auto]]
-    State(State::StateFlag flag = State::STATE_FLAG_DEFAULT);
+    void activate() const;
+//  [[script::bindings::auto]]
+    void deactivate() const;
 
-    void activate(const Command& command);
-    void deactivate(const Command& command);
-
-    void execute(const Command& command, CommandState commandState);
+    bool execute(const Command& command) const;
+    bool terminate(const Command& command) const;
 
 //  [[script::bindings::auto]]
-    void linkCommand(const Command& command, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive);
+    void linkCommand(const sp<Command>& command, const sp<Runnable>& onActive = nullptr, const sp<Runnable>& onDeactive = nullptr) const;
 
 private:
-    struct CommandWithState {
-        CommandWithState(const sp<Runnable>& onActive, const sp<Runnable>& onDeactive);
+    struct CommandWithHandlers {
+        CommandWithHandlers(const sp<Command>& command, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive);
 
-        void execute(CommandState state);
+        Command::State state() const;
+        void setState(Command::State state);
 
-        CommandState _state;
-        sp<Runnable> _handlers[COMMAND_STATE_COUNT];
+        sp<Command> _command;
+        sp<Runnable> _handlers[Command::STATE_COUNT];
+    };
+
+    struct Stub {
+        Stub(const WeakPtr<StateMachine::Stub>& stateMachine, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive, State::StateFlag flag = State::STATE_FLAG_DEFAULT);
+
+        WeakPtr<StateMachine::Stub> _state_machine;
+        sp<Runnable> _on_active;
+        sp<Runnable> _on_deactive;
+        StateFlag _flag;
+
+        Command::State _state;
+        std::unordered_map<uint32_t, sp<CommandWithHandlers>> _commands;
+
+        const sp<CommandWithHandlers>& getCommandWithHandlers(uint32_t commandId) const;
+        int32_t transfer(uint32_t commandId, Command::State state, Command::State toState) const;
     };
 
 private:
-    int32_t transfer(uint32_t commandId, State::CommandState state, State::CommandState toState);
-    const sp<CommandWithState>& ensureCommandWithState(uint32_t commandId) const;
-
-private:
-    bool _exclusive;
-
-    std::unordered_map<uint32_t, sp<CommandWithState>> _commands;
-
-    friend class Command;
+    sp<Stub> _stub;
 };
 
 }

@@ -1,6 +1,7 @@
 #include "core/base/state_machine.h"
 
 #include "core/base/command.h"
+#include "core/base/state.h"
 
 namespace ark {
 
@@ -9,41 +10,74 @@ StateMachine::StateMachine()
 {
 }
 
-sp<Command> StateMachine::addCommand()
+sp<Command> StateMachine::addCommand(const sp<Runnable>& onActive, const sp<Runnable>& onDeactive)
 {
-    return sp<Command>::make(++_stub->_new_command_id, _stub);
+    return sp<Command>::make(++_stub->_new_command_id, _stub, onActive, onDeactive);
 }
 
-void StateMachine::push(const sp<State>& state)
+sp<State> StateMachine::addState(const sp<Runnable>& onActive, const sp<Runnable>& onDeactive, int32_t flag)
 {
-    _stub->_states.push(state);
+    return sp<State>::make(_stub, onActive, onDeactive, static_cast<State::StateFlag>(flag));
 }
 
-void StateMachine::pop()
+void StateMachine::activate(const State& state)
 {
-    _stub->_states.pop();
+    _stub->activate(state);
 }
 
-const sp<State>& StateMachine::Stub::top() const
+void StateMachine::deactivate(const State& state)
+{
+    _stub->deactivate(state);
+}
+
+void StateMachine::Stub::activate(const State& state)
+{
+    if(!state.active())
+    {
+        state.activate();
+        _states.push_front(state);
+    }
+}
+
+void StateMachine::Stub::deactivate(const State& state)
+{
+    state.deactivate();
+    if(_states.size() > 0 && _states.front() == state)
+        pop();
+}
+
+State StateMachine::Stub::front() const
 {
     if(_states.size() == 0)
-        return sp<State>::null();
+        return State();
 
-    return _states.top();
+    return _states.front();
 }
 
-void StateMachine::Stub::activate(const Command& command)
+void StateMachine::Stub::pop()
 {
-    const sp<State>& current = top();
-    DWARN(current, "Cannot activate Command(%d), StateMachine is empty", command.id());
-    current->activate(command);
+    do {
+        _states.pop_front();
+    } while(!_states.empty() && !_states.front().active());
+
+    if(_states.size() > 0)
+        _states.front().activate();
 }
 
-void StateMachine::Stub::deactivate(const Command& command)
+void StateMachine::Stub::execute(const Command& command)
 {
-    const sp<State>& current = top();
-    DWARN(current, "Cannot deactivate Command(%d), StateMachine is empty", command.id());
-    current->deactivate(command);
+    const State top = front();
+    DWARN(top, "Cannot execute Command(%d), StateMachine is empty", command.id());
+    if(top)
+        top.execute(command);
+}
+
+void StateMachine::Stub::terminate(const Command& command)
+{
+    const State top = front();
+    DWARN(top, "Cannot terminate Command(%d), StateMachine is empty", command.id());
+    if(top)
+        top.terminate(command);
 }
 
 }
