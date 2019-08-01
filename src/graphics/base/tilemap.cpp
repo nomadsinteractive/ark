@@ -10,6 +10,7 @@
 
 #include "graphics/base/layer_context.h"
 #include "graphics/base/size.h"
+#include "graphics/base/tilemap_layer.h"
 #include "graphics/base/tileset.h"
 #include "graphics/base/v2.h"
 
@@ -20,40 +21,16 @@ Tilemap::Tilemap(const sp<LayerContext>& layerContext, uint32_t width, uint32_t 
       _col_count(width / _tileset->tileWidth()), _row_count(height / _tileset->tileHeight())
 {
     DASSERT(_layer_context);
-    clear();
+    makeLayer();
 }
 
 void Tilemap::render(RenderRequest& /*renderRequest*/, float x, float y)
 {
-    const V position = _position->val();
-    const V scroll = _scroller->val();
-    float sx = scroll.x() - position.x(), sy = scroll.y() - position.y();
-    float fx, cx, fy, cy, tileWidth = static_cast<float>(_tileset->tileWidth()), tileHeight = static_cast<float>(_tileset->tileHeight());
-    Math::modBetween(sx, sx + _size->width(), tileWidth, fx, cx);
-    Math::modBetween(sy, sy + _size->height(), tileHeight, fy, cy);
-    int32_t rowIdStart = static_cast<int32_t>(fy / tileHeight);
-    int32_t colIdStart = static_cast<int32_t>(fx / tileWidth);
-    int32_t rowIdEnd = std::min<int32_t>(static_cast<int32_t>(_row_count), static_cast<int32_t>(cy / tileHeight));
-    int32_t colIdEnd = std::min<int32_t>(static_cast<int32_t>(_col_count), static_cast<int32_t>(cx / tileWidth));
-
     _layer_context->renderRequest(V2(x, y));
 
-    sp<RenderObject>* tiles = _current_layer->_tiles;
-    float ox = sx - fx - tileWidth / 2.0f, oy = sy - fy - tileHeight / 2.0f;
-    for(int32_t i = rowIdStart; i < rowIdEnd; i++)
-    {
-        if(i >= 0)
-        {
-            float dy = (i - rowIdStart) * tileHeight - oy;
-            for(int32_t j = colIdStart; j < colIdEnd; j++)
-                if(j >= 0)
-                {
-                    const sp<RenderObject>& renderObject = tiles[i * _col_count + j];
-                    if(renderObject)
-                        _layer_context->draw((j - colIdStart) * tileWidth - ox, dy, renderObject);
-                }
-        }
-    }
+    const V scroll = _scroller->val();
+    for(const sp<TilemapLayer>& i : _layers)
+        i->render(_layer_context, scroll, _size->width(), _size->height());
 }
 
 const SafePtr<Size>& Tilemap::size()
@@ -64,7 +41,7 @@ const SafePtr<Size>& Tilemap::size()
 const sp<RenderObject>& Tilemap::getTile(uint32_t rowId, uint32_t colId) const
 {
     DCHECK(rowId < _row_count && colId < _col_count, "Invaild tile id:(%d, %d), tile map size(%d, %d)", rowId, colId, _row_count, _col_count);
-    return _current_layer->_tiles[rowId * _col_count + colId];
+    return _layers.back()->_tiles[rowId * _col_count + colId];
 }
 
 int32_t Tilemap::getTileType(uint32_t rowId, uint32_t colId) const
@@ -80,8 +57,7 @@ const sp<RenderObject>& Tilemap::getTileByPosition(float x, float y) const
 
 void Tilemap::setTile(uint32_t rowId, uint32_t colId, const sp<RenderObject>& renderObject)
 {
-    DCHECK(rowId < _row_count && colId < _col_count, "Invaild tile id:(%d, %d), tile map size(%d, %d)", rowId, colId, _row_count, _col_count);
-    _current_layer->_tiles[rowId * _col_count + colId] = renderObject;
+    _layers.back()->setTile(rowId, colId, renderObject);
 }
 
 void Tilemap::setTile(uint32_t rowId, uint32_t colId, int32_t tileId)
@@ -94,9 +70,6 @@ void Tilemap::setTile(uint32_t rowId, uint32_t colId, int32_t tileId)
 void Tilemap::clear()
 {
     _layers.clear();
-
-    _current_layer = sp<Layer>::make(_row_count, _col_count);
-    _layers.push_back(_current_layer);
 }
 
 const sp<Tileset>& Tilemap::tileset() const
@@ -145,6 +118,30 @@ void Tilemap::load(const String& src)
     load(Ark::instance().openAsset(src));
 }
 
+sp<TilemapLayer> Tilemap::makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Tileset>& tileset, const sp<Vec>& position, Tilemap::LayerFlag layerFlag)
+{
+    sp<TilemapLayer> layer = sp<TilemapLayer>::make(rowCount ? rowCount : _row_count, colCount ? colCount : _col_count, tileset ? tileset : _tileset, position ? position : static_cast<const sp<Vec>&>(_position), layerFlag);
+    _layers.push_back(layer);
+    return layer;
+}
+
+void Tilemap::addLayer(const sp<TilemapLayer>& layer)
+{
+    _layers.push_back(layer);
+}
+
+void Tilemap::removeLayer(const sp<TilemapLayer>& layer)
+{
+    const auto iter = std::find(_layers.begin(), _layers.end(), layer);
+    DCHECK(iter != _layers.end(), "Layer does not belong to this Tilemap");
+    _layers.erase(iter);
+}
+
+const std::list<sp<TilemapLayer>>& Tilemap::layers() const
+{
+    return _layers;
+}
+
 Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, true)), _width(factory.ensureBuilder<Integer>(manifest, Constants::Attributes::WIDTH)),
       _height(factory.ensureBuilder<Integer>(manifest, Constants::Attributes::HEIGHT)), _tileset(factory.ensureBuilder<Tileset>(manifest, "tileset")),
@@ -155,16 +152,6 @@ Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<Tilemap> Tilemap::BUILDER::build(const sp<Scope>& args)
 {
     return sp<Tilemap>::make(_layer_context->build(args), _width->build(args)->val(), _height->build(args)->val(), _tileset->build(args), _importer->build(args));
-}
-
-Tilemap::Layer::Layer(uint32_t row, uint32_t col)
-{
-    _tiles = new sp<RenderObject>[row * col];
-}
-
-Tilemap::Layer::~Layer()
-{
-    delete[] _tiles;
 }
 
 }

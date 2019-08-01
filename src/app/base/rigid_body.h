@@ -4,6 +4,7 @@
 #include "core/base/api.h"
 #include "core/inf/builder.h"
 #include "core/types/box.h"
+#include "core/types/weak_ptr.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
@@ -47,7 +48,7 @@ public:
         SafePtr<Disposed> _disposed;
 
         sp<Callback> _callback;
-        sp<RenderObject> _render_object;
+        WeakPtr<RenderObject> _render_object;
 
         sp<Box> _tag;
     };
@@ -91,7 +92,7 @@ public:
     void setTag(const Box& box) const;
 
 //  [[script::bindings::property]]
-    const sp<RenderObject>& renderObject() const;
+    sp<RenderObject> renderObject() const;
 
 //  [[script::bindings::property]]
     const sp<Disposed>& disposed() const;

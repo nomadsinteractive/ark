@@ -20,11 +20,11 @@ namespace ark {
 
 class TiledCollider : public Collider {
 public:
-    TiledCollider(const sp<Tilemap>& tileMap, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    TiledCollider(const sp<Tilemap>& tilemap, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
 
-//  [[plugin::resource-loader("tiled")]]
+//  [[plugin::resource-loader("tilemap")]]
     class BUILDER : public Builder<Collider> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
@@ -64,14 +64,14 @@ public:
         void updateRigidBodyShadow(uint32_t id, float tileWidth, float tileHeight, uint32_t colCount, const sp<RenderObject>& renderObject);
 
     private:
-        sp<Tilemap> _tile_map;
+        sp<Tilemap> _tilemap;
         sp<RigidBodyShadow> _rigid_body_shadow;
 
         std::set<uint32_t> _contacts;
     };
 
 private:
-    sp<Tilemap> _tile_map;
+    sp<Tilemap> _tilemap;
     sp<ResourceLoaderContext> _resource_loader_context;
 
     uint32_t _rigid_body_base;

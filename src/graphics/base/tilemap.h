@@ -1,9 +1,10 @@
-#ifndef ARK_APP_BASE_TILEMAP_H_
-#define ARK_APP_BASE_TILEMAP_H_
+#ifndef ARK_GRAPHICS_BASE_TILEMAP_H_
+#define ARK_GRAPHICS_BASE_TILEMAP_H_
+
+#include <list>
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
-#include "core/inf/variable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
@@ -17,6 +18,13 @@ namespace ark {
 
 //[[script::bindings::extends(Renderer)]]
 class ARK_API Tilemap : public Renderer, Block {
+public:
+//  [[script::bindings::enumeration]]
+    enum LayerFlag {
+        LAYER_FLAG_COLLIDABLE = 1,
+        LAYER_FLAG_DEFAULT = 0
+    };
+
 public:
 // [[script::bindings::auto]]
     Tilemap(const sp<LayerContext>& layerContext, uint32_t width, uint32_t height, const sp<Tileset>& tileset, const sp<TilemapImporter>& importer = nullptr);
@@ -62,6 +70,15 @@ public:
 //  [[script::bindings::auto]]
     void load(const String& src);
 
+//  [[script::bindings::auto]]
+    sp<TilemapLayer> makeLayer(uint32_t rowCount = 0, uint32_t colCount = 0, const sp<Tileset>& tileset = nullptr, const sp<Vec>& position = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
+//  [[script::bindings::auto]]
+    void addLayer(const sp<TilemapLayer>& layer);
+//  [[script::bindings::auto]]
+    void removeLayer(const sp<TilemapLayer>& layer);
+
+    const std::list<sp<TilemapLayer>>& layers() const;
+
 //  [[plugin::builder]]
     class BUILDER : public Builder<Tilemap> {
     public:
@@ -78,15 +95,6 @@ public:
     };
 
 private:
-    struct Layer {
-        Layer(uint32_t row, uint32_t col);
-        ~Layer();
-        DISALLOW_COPY_AND_ASSIGN(Layer);
-
-        sp<RenderObject>* _tiles;
-    };
-
-private:
     sp<LayerContext> _layer_context;
     SafePtr<Size> _size;
     sp<Tileset> _tileset;
@@ -98,10 +106,9 @@ private:
     uint32_t _col_count;
     uint32_t _row_count;
 
-    std::vector<sp<Layer>> _layers;
+    std::list<sp<TilemapLayer>> _layers;
 
-    sp<Layer> _current_layer;
-
+    friend class TilemapLayer;
 };
 
 }

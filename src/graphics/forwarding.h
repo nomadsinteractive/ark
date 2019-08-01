@@ -40,6 +40,7 @@ class Rotate;
 class Size;
 class SurfaceController;
 class Tilemap;
+class TilemapLayer;
 class Tileset;
 class Vec2Impl;
 class Vec3Impl;

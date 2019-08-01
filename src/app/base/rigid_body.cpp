@@ -93,9 +93,9 @@ void RigidBody::setTag(const Box& box) const
     *(_stub->_tag) = box;
 }
 
-const sp<RenderObject>& RigidBody::renderObject() const
+sp<RenderObject> RigidBody::renderObject() const
 {
-    return _stub->_render_object;
+    return _stub->_render_object.lock();
 }
 
 const sp<Disposed>& RigidBody::disposed() const
