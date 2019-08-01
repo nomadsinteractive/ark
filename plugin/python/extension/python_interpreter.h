@@ -148,10 +148,11 @@ public:
     bool exceptErr(PyObject* type) const;
 
 private:
-    template<typename T> PyObject* fromIterable_sfinae(const T& list, decltype(list.at(0))*) {
+    template<typename T> PyObject* fromIterable_sfinae(const T& list, decltype(list.front())*) {
         PyObject* pyList = PyList_New(list.size());
-        for(size_t i = 0; i < list.size(); ++i)
-            PyList_SetItem(pyList, i, toPyObject(list.at(i)));
+        Py_ssize_t index = 0;
+        for(const auto& i : list)
+            PyList_SetItem(pyList, index++, toPyObject(i));
         return pyList;
     }
 

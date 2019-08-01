@@ -87,16 +87,6 @@ uint32_t Tilemap::rowCount() const
     return _row_count;
 }
 
-const sp<Vec>& Tilemap::position() const
-{
-    return _position;
-}
-
-void Tilemap::setPosition(const sp<Vec>& position)
-{
-    _position = position;
-}
-
 const sp<Vec>& Tilemap::scroller() const
 {
     return _scroller;
@@ -120,7 +110,7 @@ void Tilemap::load(const String& src)
 
 sp<TilemapLayer> Tilemap::makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Tileset>& tileset, const sp<Vec>& position, Tilemap::LayerFlag layerFlag)
 {
-    sp<TilemapLayer> layer = sp<TilemapLayer>::make(rowCount ? rowCount : _row_count, colCount ? colCount : _col_count, tileset ? tileset : _tileset, position ? position : static_cast<const sp<Vec>&>(_position), layerFlag);
+    sp<TilemapLayer> layer = sp<TilemapLayer>::make(rowCount ? rowCount : _row_count, colCount ? colCount : _col_count, tileset ? tileset : _tileset, position, layerFlag);
     _layers.push_back(layer);
     return layer;
 }

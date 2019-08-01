@@ -895,7 +895,21 @@ class Tileset:
         pass
 
 
+class TilemapLayer:
+
+    @property
+    def flag(self) -> int:
+        return 0
+
+    @flag.setter
+    def flag(self, flag):
+        pass
+
+
 class Tilemap(Renderer):
+    LAYER_FLAG_COLLIDABLE = 1
+    LAYER_FLAG_DEFAULT = 0
+
     def __init__(self, layer, w, h, tileset: Tileset):
         self._tileset = tileset
 
@@ -938,6 +952,10 @@ class Tilemap(Renderer):
     @scroller.setter
     def scroller(self, val):
         pass
+
+    @property
+    def layers(self) -> List[TilemapLayer]:
+        return []
 
     def load(self, src: Union[Readable, str]):
         pass

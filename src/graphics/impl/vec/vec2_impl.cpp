@@ -64,24 +64,24 @@ void Vec2Impl::fix()
     _y->fix();
 }
 
-Vec2Impl::VV2_DICTIONARY::VV2_DICTIONARY(BeanFactory& factory, const String& str)
+Vec2Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
 {
     BeanUtils::split<Numeric, Numeric>(factory, str, _x, _y);
 }
 
-sp<Vec2> Vec2Impl::VV2_DICTIONARY::build(const sp<Scope>& args)
+sp<Vec2> Vec2Impl::DICTIONARY::build(const sp<Scope>& args)
 {
     const sp<Numeric> x = _x->build(args);
     const sp<Numeric> y = _y->build(args);
     return sp<Vec2Impl>::make(x, y ? y : x);
 }
 
-Vec2Impl::VV2_BUILDER::VV2_BUILDER(BeanFactory& factory, const document& doc)
+Vec2Impl::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
     : _x(factory.getBuilder<Numeric>(doc, "x")), _y(factory.getBuilder<Numeric>(doc, "y"))
 {
 }
 
-sp<Vec2> Vec2Impl::VV2_BUILDER::build(const sp<Scope>& args)
+sp<Vec2> Vec2Impl::BUILDER::build(const sp<Scope>& args)
 {
     return sp<Vec2Impl>::make(_x->build(args), _y->build(args));
 }

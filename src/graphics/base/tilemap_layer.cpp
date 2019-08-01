@@ -55,6 +55,11 @@ const sp<Vec>& TilemapLayer::position() const
     return _position;
 }
 
+void TilemapLayer::setPosition(const sp<Vec>& position)
+{
+    _position = position;
+}
+
 const sp<Tileset>& TilemapLayer::tileset() const
 {
     return _tileset;
@@ -103,6 +108,11 @@ void TilemapLayer::setTile(uint32_t row, uint32_t col, int32_t tileId)
 Tilemap::LayerFlag TilemapLayer::flag() const
 {
     return _flag;
+}
+
+void TilemapLayer::setFlag(Tilemap::LayerFlag flag)
+{
+    _flag = flag;
 }
 
 void TilemapLayer::clear()

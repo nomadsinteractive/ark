@@ -20,9 +20,16 @@ public:
 
 // [[script::bindings::property]]
     const sp<Vec>& position() const;
+// [[script::bindings::property]]
+    void setPosition(const sp<Vec>& position);
 
 // [[script::bindings::property]]
     const sp<Tileset>& tileset() const;
+
+// [[script::bindings::property]]
+    Tilemap::LayerFlag flag() const;
+// [[script::bindings::property]]
+    void setFlag(Tilemap::LayerFlag flag);
 
     uint32_t colCount() const;
     uint32_t rowCount() const;
@@ -38,8 +45,6 @@ public:
 // [[script::bindings::auto]]
     void setTile(uint32_t row, uint32_t col, int32_t tileId);
 
-    Tilemap::LayerFlag flag() const;
-
 // [[script::bindings::auto]]
     void clear();
 
@@ -48,7 +53,7 @@ private:
     uint32_t _row_count;
     sp<Tileset> _tileset;
 
-    sp<Vec> _position;
+    SafePtr<Vec> _position;
 
     Tilemap::LayerFlag _flag;
 

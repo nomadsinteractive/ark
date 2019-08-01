@@ -56,14 +56,12 @@ public:
     uint32_t rowCount() const;
 
 // [[script::bindings::property]]
-    const sp<Vec>& position() const;
-// [[script::bindings::property]]
-    void setPosition(const sp<Vec>& position);
-
-// [[script::bindings::property]]
     const sp<Vec>& scroller() const;
 // [[script::bindings::property]]
     void setScroller(const sp<Vec>& scroller);
+
+//  [[script::bindings::property]]
+    const std::list<sp<TilemapLayer>>& layers() const;
 
 //  [[script::bindings::auto]]
     void load(const sp<Readable>& readable);
@@ -76,8 +74,6 @@ public:
     void addLayer(const sp<TilemapLayer>& layer);
 //  [[script::bindings::auto]]
     void removeLayer(const sp<TilemapLayer>& layer);
-
-    const std::list<sp<TilemapLayer>>& layers() const;
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Tilemap> {
@@ -100,7 +96,6 @@ private:
     sp<Tileset> _tileset;
     sp<TilemapImporter> _importer;
 
-    SafePtr<Vec> _position;
     SafePtr<Vec> _scroller;
 
     uint32_t _col_count;

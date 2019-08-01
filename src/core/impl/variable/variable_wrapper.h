@@ -18,8 +18,7 @@ public:
     VariableWrapper(T value) noexcept
         : _variable_impl(new typename Variable<T>::Impl(value)), _delegate(sp<Variable<T>>::adopt(_variable_impl)) {
     }
-    VariableWrapper(const VariableWrapper& other) = default;
-    VariableWrapper(VariableWrapper&& other) = default;
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(VariableWrapper);
 
     virtual T val() override {
         return _delegate->val();

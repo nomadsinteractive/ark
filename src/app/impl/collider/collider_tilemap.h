@@ -43,15 +43,25 @@ private:
         RigidBodyShadow(uint32_t width, uint32_t height);
 
         void setId(uint32_t id);
-        void setPosition(float x, float y);
 
         virtual void dispose() override;
 
-    private:
         sp<Vec2::Impl> _position;
     };
 
 public:
+
+    struct Contact {
+        Contact(uint32_t layerId, uint32_t row, uint32_t col, uint32_t colCount, const V2& position, const sp<RenderObject>& renderObject);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Contact);
+
+        uint32_t _id;
+        V2 _position;
+        sp<RenderObject> _render_object;
+
+        bool operator <(const Contact& other) const;
+    };
+
     class RigidBodyImpl : public RigidBody {
     public:
         RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Tilemap>& tileMap);
@@ -61,13 +71,13 @@ public:
         void collision(const Rect& rect);
 
     private:
-        void updateRigidBodyShadow(uint32_t id, float tileWidth, float tileHeight, uint32_t colCount, const sp<RenderObject>& renderObject);
+        void updateRigidBodyShadow(const Contact& contact);
 
     private:
         sp<Tilemap> _tilemap;
         sp<RigidBodyShadow> _rigid_body_shadow;
 
-        std::set<uint32_t> _contacts;
+        std::set<Contact> _contacts;
     };
 
 private:

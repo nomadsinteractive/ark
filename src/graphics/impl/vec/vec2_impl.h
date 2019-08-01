@@ -30,9 +30,9 @@ public:
     void fix();
 
 //  [[plugin::builder("vec2")]]
-    class VV2_BUILDER : public Builder<Vec2> {
+    class BUILDER : public Builder<Vec2> {
     public:
-        VV2_BUILDER(BeanFactory& factory, const document& doc);
+        BUILDER(BeanFactory& factory, const document& doc);
 
         virtual sp<Vec2> build(const sp<Scope>& args) override;
 
@@ -42,9 +42,9 @@ public:
     };
 
 //  [[plugin::builder::by-value]]
-    class VV2_DICTIONARY : public Builder<Vec2> {
+    class DICTIONARY : public Builder<Vec2> {
     public:
-        VV2_DICTIONARY(BeanFactory& factory, const String& str);
+        DICTIONARY(BeanFactory& factory, const String& str);
 
         virtual sp<Vec2> build(const sp<Scope>& args) override;
 

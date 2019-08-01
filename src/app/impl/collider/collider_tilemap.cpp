@@ -77,13 +77,11 @@ TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type
 {
 }
 
-void TiledCollider::RigidBodyImpl::updateRigidBodyShadow(uint32_t id, float tileWidth, float tileHeight, uint32_t colCount, const sp<RenderObject>& renderObject)
+void TiledCollider::RigidBodyImpl::updateRigidBodyShadow(const Contact& contact)
 {
-    uint32_t row = id / colCount;
-    uint32_t col = id % colCount;
-    _rigid_body_shadow->setId(id);
-    _rigid_body_shadow->setPosition(col * tileWidth + tileWidth / 2.0f, row * tileHeight + tileHeight / 2.0f);
-    _rigid_body_shadow->stub()->_render_object = renderObject;
+    _rigid_body_shadow->setId(contact._id);
+    _rigid_body_shadow->_position->set(contact._position);
+    _rigid_body_shadow->stub()->_render_object = contact._render_object;
 }
 
 void TiledCollider::RigidBodyImpl::dispose()
@@ -95,60 +93,62 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
     if(!callback()->hasCallback())
         return;
 
-    std::set<uint32_t> candidates = _contacts;
-    std::set<uint32_t> contacts;
+    std::set<Contact> candidates = _contacts;
+    std::set<Contact> contacts;
 
+    uint32_t layerId = 0;
     for(const sp<TilemapLayer>& i : _tilemap->layers())
     {
-        const V position = i->position()->val();
-        float left = rect.left() - position.x();
-        float right = rect.right() - position.x();
-        float top = rect.top() - position.y();
-        float bottom = rect.bottom() - position.y();
-        float tileWidth = static_cast<float>(i->tileset()->tileWidth());
-        float tileHeight = static_cast<float>(i->tileset()->tileHeight());
+        if(i->flag() & Tilemap::LAYER_FLAG_COLLIDABLE)
+        {
+            const V position = i->position()->val();
+            float left = rect.left() - position.x();
+            float right = rect.right() - position.x();
+            float top = rect.top() - position.y();
+            float bottom = rect.bottom() - position.y();
+            float tileWidth = static_cast<float>(i->tileset()->tileWidth());
+            float tileHeight = static_cast<float>(i->tileset()->tileHeight());
 
-        int32_t bColId = static_cast<int32_t>(left / tileWidth) - (left < 0 ? 1 : 0);
-        int32_t eColId = static_cast<int32_t>(right / tileWidth) - (right < 0 ? 1 : 0);
-        int32_t bRowId = static_cast<int32_t>(top / tileHeight) - (top < 0 ? 1 : 0);
-        int32_t eRowId = static_cast<int32_t>(bottom / tileHeight) - (bottom < 0 ? 1 : 0);
+            int32_t bColId = static_cast<int32_t>(left / tileWidth) - (left < 0 ? 1 : 0);
+            int32_t eColId = static_cast<int32_t>(right / tileWidth) - (right < 0 ? 1 : 0);
+            int32_t bRowId = static_cast<int32_t>(top / tileHeight) - (top < 0 ? 1 : 0);
+            int32_t eRowId = static_cast<int32_t>(bottom / tileHeight) - (bottom < 0 ? 1 : 0);
 
-        uint32_t colCount = i->colCount();
-        uint32_t rowCount = i->rowCount();
+            uint32_t colCount = i->colCount();
+            uint32_t rowCount = i->rowCount();
 
-        for(int32_t col = bColId; col <= eColId; col ++)
-            for(int32_t row = bRowId; row <= eRowId; row ++)
-                if(col >= 0 && row >= 0 && col < colCount && row < rowCount)
-                {
-                    const sp<RenderObject>& tile = i->getTile(row, col);
-                    if(tile)
+            for(int32_t col = bColId; col <= eColId; col ++)
+                for(int32_t row = bRowId; row <= eRowId; row ++)
+                    if(col >= 0 && row >= 0 && col < colCount && row < rowCount)
                     {
-                        uint32_t rigidBodyId = row * colCount + col;
-                        candidates.insert(rigidBodyId);
-                        contacts.insert(rigidBodyId);
-
-                        bool notInContacts = _contacts.find(rigidBodyId) == _contacts.end();
-                        if(notInContacts)
+                        const sp<RenderObject>& tile = i->getTile(row, col);
+                        if(tile)
                         {
-                            updateRigidBodyShadow(rigidBodyId, tileWidth, tileHeight, colCount, tile);
-                            const V normal(col == bColId ? 1.0f : (col == eColId ? -1.0f : 0.0f),
-                                           row == bRowId ? 1.0f : (row == eRowId ? -1.0f : 0.0f));
-                            if(callback()->hasCallback())
-                                callback()->onBeginContact(_rigid_body_shadow, CollisionManifold(normal));
+                            const Contact contact(layerId, row, col, colCount, position + V2((col + 0.5f) * tileWidth, (row + 0.5f) * tileHeight), tile);
+                            candidates.insert(contact);
+                            contacts.insert(contact);
+
+                            bool notInContacts = _contacts.find(contact) == _contacts.end();
+                            if(notInContacts)
+                            {
+                                updateRigidBodyShadow(contact);
+                                const V normal(col == bColId ? 1.0f : (col == eColId ? -1.0f : 0.0f),
+                                               row == bRowId ? 1.0f : (row == eRowId ? -1.0f : 0.0f));
+                                if(callback()->hasCallback())
+                                    callback()->onBeginContact(_rigid_body_shadow, CollisionManifold(normal));
+                            }
                         }
                     }
-                }
-
-        for(uint32_t id : candidates)
-            if(contacts.find(id) == contacts.end())
-            {
-                uint32_t row = id / colCount;
-                uint32_t col = id % colCount;
-                updateRigidBodyShadow(id, tileWidth, tileHeight, colCount, i->getTile(row, col));
-                _rigid_body_shadow->setId(id);
-                callback()->onEndContact(_rigid_body_shadow);
-            }
+        }
+        ++layerId;
     }
+
+    for(const Contact& contact : candidates)
+        if(contacts.find(contact) == contacts.end())
+        {
+            updateRigidBodyShadow(contact);
+            callback()->onEndContact(_rigid_body_shadow);
+        }
     _contacts = contacts;
 }
 
@@ -163,13 +163,18 @@ void TiledCollider::RigidBodyShadow::setId(uint32_t id)
     stub()->_id = id;
 }
 
-void TiledCollider::RigidBodyShadow::setPosition(float x, float y)
-{
-    _position->set(V2(x, y));
-}
-
 void TiledCollider::RigidBodyShadow::dispose()
 {
+}
+
+TiledCollider::Contact::Contact(uint32_t layerId, uint32_t row, uint32_t col, uint32_t colCount, const V2& position, const sp<RenderObject>& renderObject)
+    : _id((layerId << 24) + (row * colCount + col)), _position(position), _render_object(renderObject)
+{
+}
+
+bool TiledCollider::Contact::operator <(const TiledCollider::Contact& other) const
+{
+    return _id < other._id;
 }
 
 }
