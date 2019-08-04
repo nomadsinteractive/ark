@@ -14,8 +14,9 @@
 
 namespace ark {
 
-TilemapLayer::TilemapLayer(uint32_t rowCount, uint32_t colCount, const sp<Tileset>& tileset, const sp<Vec>& position, Tilemap::LayerFlag flag)
-    : _col_count(colCount), _row_count(rowCount), _tileset(tileset), _position(position), _flag(flag)
+TilemapLayer::TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, const sp<Vec>& position, Tilemap::LayerFlag flag)
+    : _col_count(colCount), _row_count(rowCount), _layer_context(tilemap._layer_context), _size(tilemap._size), _tileset(tilemap._tileset), _position(position),
+      _scroller(tilemap._scroller), _flag(flag)
 {
     _tiles = new sp<RenderObject>[_col_count * _row_count];
 }
@@ -25,27 +26,46 @@ TilemapLayer::~TilemapLayer()
     delete[] _tiles;
 }
 
-void TilemapLayer::render(LayerContext& layerContext, const V& scroll, float width, float height)
+void TilemapLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
 {
-    const V position = _position->val();
-    float sx = scroll.x() - position.x(), sy = scroll.y() - position.y();
-    float fx, cx, fy, cy, tileWidth = static_cast<float>(_tileset->tileWidth()), tileHeight = static_cast<float>(_tileset->tileHeight());
-    Math::modBetween(sx, sx + width, tileWidth, fx, cx);
-    Math::modBetween(sy, sy + height, tileHeight, fy, cy);
-    int32_t rowStart = static_cast<int32_t>(fy / tileHeight);
-    int32_t colStart = static_cast<int32_t>(fx / tileWidth);
-    int32_t rowEnd = std::min<int32_t>(static_cast<int32_t>(_row_count), static_cast<int32_t>(cy / tileHeight));
-    int32_t colEnd = std::min<int32_t>(static_cast<int32_t>(_col_count), static_cast<int32_t>(cx / tileWidth));
-    float ox = sx - fx - tileWidth / 2.0f, oy = sy - fy - tileHeight / 2.0f;
+    float width = _size->width();
+    float height = _size->height();
+    float tileWidth = static_cast<float>(_tileset->tileWidth()), tileHeight = static_cast<float>(_tileset->tileHeight());
 
-    for(int32_t i = std::max(rowStart, 0); i < rowEnd; ++i)
+    const V position = _position->val();
+    const V scroll = _scroller->val();
+    float vsx = scroll.x() - position.x(), vsy = scroll.y() - position.y();
+    float sx, ex, sy, ey, ox, oy;
+
+    if(_flag & Tilemap::LAYER_FLAG_SCROLLABLE)
+    {
+        viewportIntersect(vsx, vsx + width, _col_count * tileWidth, sx, ex);
+        viewportIntersect(vsy, vsy + height, _row_count * tileHeight, sy, ey);
+        ox = sx - Math::modFloor(sx, tileWidth) - tileWidth / 2.0f;
+        oy = sy - Math::modFloor(sy, tileWidth) - tileHeight / 2.0f;
+    }
+    else
+    {
+        sx = sy = 0;
+        ex = width;
+        ey = height;
+        ox = -position.x() - tileWidth / 2.0f;
+        oy = -position.y() - tileHeight / 2.0f;
+    }
+
+    int32_t rowStart = std::max(static_cast<int32_t>(sy / tileHeight) - 1, 0);
+    int32_t colStart = std::max(static_cast<int32_t>(sx / tileWidth) - 1, 0);
+    int32_t rowEnd = std::min<int32_t>(static_cast<int32_t>(_row_count), static_cast<int32_t>(ey / tileHeight) + 1);
+    int32_t colEnd = std::min<int32_t>(static_cast<int32_t>(_col_count), static_cast<int32_t>(ex / tileWidth) + 1);
+
+    for(int32_t i = rowStart; i < rowEnd; ++i)
     {
         float dy = (i - rowStart) * tileHeight - oy;
-        for(int32_t j = std::max(colStart, 0); j < colEnd; ++j)
+        for(int32_t j = colStart; j < colEnd; ++j)
         {
             const sp<RenderObject>& renderObject = _tiles[i * _col_count + j];
             if(renderObject)
-                layerContext.draw((j - colStart) * tileWidth - ox, dy, renderObject);
+                _layer_context->draw((j - colStart) * tileWidth - ox + x, dy + y, renderObject);
         }
     }
 }
@@ -119,6 +139,12 @@ void TilemapLayer::clear()
 {
     delete[] _tiles;
     _tiles = new sp<RenderObject>[_col_count * _row_count];
+}
+
+void TilemapLayer::viewportIntersect(float vs, float ve, float width, float& start, float& end)
+{
+    start = std::max(0.0f, vs);
+    end = std::min(ve, width);
 }
 
 }

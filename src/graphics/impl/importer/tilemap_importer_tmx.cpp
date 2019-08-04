@@ -12,14 +12,15 @@ namespace ark {
 void TilemapImporterTmx::import(Tilemap& tilemap, const sp<Readable>& src)
 {
     const document manifest = Documents::loadFromReadable(src);
-    uint32_t rowCount = tilemap.rowCount();
-    uint32_t colCount = tilemap.colCount();
 
     tilemap.clear();
 
     for(const document& i : manifest->children("layer"))
     {
-        const sp<TilemapLayer> layer = tilemap.makeLayer();
+        uint32_t rowCount = Documents::ensureAttribute<uint32_t>(i, "height");
+        uint32_t colCount = Documents::ensureAttribute<uint32_t>(i, "width");
+
+        const sp<TilemapLayer> layer = tilemap.makeLayer(rowCount, colCount);
         const document data = i->getChild("data");
         DASSERT(data);
         uint32_t row = 1;

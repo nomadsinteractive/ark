@@ -14,8 +14,8 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-class PyCallableDuckType : public Duck<Runnable>, public Duck<EventListener>, public Duck<CharacterMaker>, public Duck<CharacterMapper>, public Duck<TileMaker>,
-        public Implements<PyCallableDuckType, Duck<Runnable>, Duck<EventListener>, Duck<CharacterMaker>, Duck<CharacterMapper>, Duck<TileMaker>> {
+class PyCallableDuckType : public Duck<Runnable>, public Duck<EventListener>, public Duck<CharacterMaker>, public Duck<CharacterMapper>, public Duck<RendererMaker>,
+        public Implements<PyCallableDuckType, Duck<Runnable>, Duck<EventListener>, Duck<CharacterMaker>, Duck<CharacterMapper>, Duck<RendererMaker>> {
 public:
     PyCallableDuckType(const sp<PyInstance>& inst);
 
@@ -23,7 +23,7 @@ public:
     virtual void to(sp<EventListener>& inst) override;
     virtual void to(sp<CharacterMaker>& inst) override;
     virtual void to(sp<CharacterMapper>& inst) override;
-    virtual void to(sp<TileMaker>& inst) override;
+    virtual void to(sp<RendererMaker>& inst) override;
 
 private:
     sp<PyInstance> _instance;

@@ -10,13 +10,13 @@
 
 namespace ark {
 
-class ARK_API TilemapLayer {
+class ARK_API TilemapLayer : public Renderer {
 public:
 // [[script::bindings::auto]]
-    TilemapLayer(uint32_t rowCount, uint32_t colCount, const sp<Tileset>& tileset, const sp<Vec>& position, Tilemap::LayerFlag flag);
+    TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, const sp<Vec>& position = nullptr, Tilemap::LayerFlag flag = Tilemap::LAYER_FLAG_DEFAULT);
     ~TilemapLayer();
 
-    void render(LayerContext& layerContext, const V& scroll, float width, float height);
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
 // [[script::bindings::property]]
     const sp<Vec>& position() const;
@@ -31,7 +31,9 @@ public:
 // [[script::bindings::property]]
     void setFlag(Tilemap::LayerFlag flag);
 
+// [[script::bindings::property]]
     uint32_t colCount() const;
+// [[script::bindings::property]]
     uint32_t rowCount() const;
 
 // [[script::bindings::auto]]
@@ -49,11 +51,17 @@ public:
     void clear();
 
 private:
+    void viewportIntersect(float vs, float ve, float width, float& start, float& end);
+
+private:
     uint32_t _col_count;
     uint32_t _row_count;
+    sp<LayerContext> _layer_context;
+    sp<Size> _size;
     sp<Tileset> _tileset;
 
     SafePtr<Vec> _position;
+    SafePtr<Vec> _scroller;
 
     Tilemap::LayerFlag _flag;
 

@@ -5,7 +5,7 @@
 
 namespace ark {
 
-VerticalScrollable::VerticalScrollable(const sp<TileMaker>& tileMaker, const sp<Numeric>& scroller, int32_t height, int32_t tileHeight, uint32_t itemCount)
+VerticalScrollable::VerticalScrollable(const sp<RendererMaker>& tileMaker, const sp<Numeric>& scroller, int32_t height, int32_t tileHeight, uint32_t itemCount)
     : _tile_maker(tileMaker),  _tiles(itemCount), _scroller(scroller),
       _height(height), _tile_height(tileHeight),
       _scroll_position(static_cast<int32_t>(scroller->val())), _grid_position(lower(_scroll_position)) {
@@ -63,12 +63,12 @@ void VerticalScrollable::ensureTile(Tile<sp<Renderer>>& tile, int32_t position)
     if(tile.position() != position)
     {
         tile.setPosition(position);
-        tile.renderer() = _tile_maker->makeTile(0, position);
+        tile.renderer() = _tile_maker->make(0, position);
     }
 }
 
 VerticalScrollable::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
-    : _tile_maker(factory.ensureBuilder<TileMaker>(doc, "tile-maker")), _scroller(factory.ensureBuilder<Numeric>(doc, "scroller")),
+    : _tile_maker(factory.ensureBuilder<RendererMaker>(doc, "renderer-maker")), _scroller(factory.ensureBuilder<Numeric>(doc, "scroller")),
       _height(Documents::ensureAttribute<int32_t>(doc, "height")),
       _tile_height(Documents::ensureAttribute<int32_t>(doc, "tile-height")),
       _rows(Documents::getAttribute<uint32_t>(doc, "rows", 0))

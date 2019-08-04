@@ -13,7 +13,7 @@ namespace ark {
 
 class HorizontalScrollable : public Renderer {
 public:
-    HorizontalScrollable(const sp<TileMaker>& tileMaker, const sp<Numeric>& scroller, int32_t width, int32_t tileWidth, uint32_t itemCount);
+    HorizontalScrollable(const sp<RendererMaker>& tileMaker, const sp<Numeric>& scroller, int32_t width, int32_t tileWidth, uint32_t itemCount);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
@@ -25,7 +25,7 @@ public:
         virtual sp<Renderer> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<TileMaker>> _tile_maker;
+        sp<Builder<RendererMaker>> _tile_maker;
         sp<Builder<Numeric>> _scroller;
 
         sp<Builder<Numeric>> _width;
@@ -42,7 +42,7 @@ private:
     void ensureTile(Tile<sp<Renderer>>& tile, int32_t position);
 
 private:
-    sp<TileMaker> _tile_maker;
+    sp<RendererMaker> _tile_maker;
     RollingList<Tile<sp<Renderer>>> _tiles;
     sp<Numeric> _scroller;
 

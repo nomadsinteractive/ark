@@ -13,7 +13,7 @@ PythonCallableTileMaker::PythonCallableTileMaker(const sp<PyInstance>& callable)
 {
 }
 
-sp<Renderer> PythonCallableTileMaker::makeTile(int32_t x, int32_t y)
+sp<Renderer> PythonCallableTileMaker::make(int32_t x, int32_t y)
 {
     DCHECK_THREAD_FLAG();
 

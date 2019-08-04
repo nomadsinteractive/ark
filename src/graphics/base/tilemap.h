@@ -22,23 +22,26 @@ public:
 //  [[script::bindings::enumeration]]
     enum LayerFlag {
         LAYER_FLAG_COLLIDABLE = 1,
+        LAYER_FLAG_SCROLLABLE = 2,
         LAYER_FLAG_DEFAULT = 0
     };
 
 public:
 // [[script::bindings::auto]]
-    Tilemap(const sp<LayerContext>& layerContext, uint32_t width, uint32_t height, const sp<Tileset>& tileset, const sp<TilemapImporter>& importer = nullptr);
+    Tilemap(const sp<LayerContext>& layerContext, const sp<Size>& size, const sp<Tileset>& tileset, const sp<TilemapImporter>& importer = nullptr);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 // [[script::bindings::property]]
     virtual const SafePtr<Size>& size() override;
 
+
+// [[script::bindings::auto]]
+    sp<TilemapLayer> makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Vec>& position = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
+
 // [[script::bindings::auto]]
     const sp<RenderObject>& getTile(uint32_t rowId, uint32_t colId) const;
 // [[script::bindings::auto]]
     int32_t getTileType(uint32_t rowId, uint32_t colId) const;
-// [[script::bindings::auto]]
-    const sp<RenderObject>& getTileByPosition(float x, float y) const;
 // [[script::bindings::auto]]
     void setTile(uint32_t rowId, uint32_t colId, const sp<RenderObject>& renderObject);
 // [[script::bindings::auto]]
@@ -49,11 +52,6 @@ public:
 
 // [[script::bindings::property]]
     const sp<Tileset>& tileset() const;
-
-// [[script::bindings::property]]
-    uint32_t colCount() const;
-// [[script::bindings::property]]
-    uint32_t rowCount() const;
 
 // [[script::bindings::property]]
     const sp<Vec>& scroller() const;
@@ -69,8 +67,6 @@ public:
     void load(const String& src);
 
 //  [[script::bindings::auto]]
-    sp<TilemapLayer> makeLayer(uint32_t rowCount = 0, uint32_t colCount = 0, const sp<Tileset>& tileset = nullptr, const sp<Vec>& position = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
-//  [[script::bindings::auto]]
     void addLayer(const sp<TilemapLayer>& layer);
 //  [[script::bindings::auto]]
     void removeLayer(const sp<TilemapLayer>& layer);
@@ -84,10 +80,12 @@ public:
 
     private:
         sp<Builder<LayerContext>> _layer_context;
-        sp<Builder<Integer>> _width;
-        sp<Builder<Integer>> _height;
+        sp<Builder<Size>> _size;
         sp<Builder<Tileset>> _tileset;
         sp<Builder<TilemapImporter>> _importer;
+
+        document _scrollable;
+        sp<Builder<RendererMaker>> _renderer_maker;
     };
 
 private:
@@ -95,15 +93,13 @@ private:
     SafePtr<Size> _size;
     sp<Tileset> _tileset;
     sp<TilemapImporter> _importer;
-
     SafePtr<Vec> _scroller;
 
-    uint32_t _col_count;
-    uint32_t _row_count;
-
     std::list<sp<TilemapLayer>> _layers;
+    sp<Scrollable> _scrollable;
 
     friend class TilemapLayer;
+    friend class BUILDER;
 };
 
 }

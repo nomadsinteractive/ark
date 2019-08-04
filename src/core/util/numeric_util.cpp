@@ -6,6 +6,7 @@
 #include "core/base/expression.h"
 #include "core/impl/builder/builder_by_instance.h"
 #include "core/impl/numeric/approach.h"
+#include "core/impl/numeric/clamp.h"
 #include "core/impl/numeric/fence.h"
 #include "core/impl/numeric/integral.h"
 #include "core/impl/numeric/max.h"
@@ -266,22 +267,21 @@ float NumericUtil::fix(const sp<Numeric>& self)
 sp<Expectation> NumericUtil::approach(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
     Notifier notifier;
-    const sp<Numeric> approach = sp<Approach>::make(self, a1, notifier);
-    return sp<Expectation>::make(approach, a1, std::move(notifier));
+    return sp<Expectation>::make(sp<Approach>::make(self, a1, notifier), std::move(notifier));
 }
 
 sp<Expectation> NumericUtil::atLeast(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
     DASSERT(self && a1);
     Notifier notifier;
-    return sp<Expectation>::make(sp<AtLeast>::make(self, a1, notifier), a1, std::move(notifier));
+    return sp<Expectation>::make(sp<AtLeast>::make(self, a1, notifier), std::move(notifier));
 }
 
 sp<Expectation> NumericUtil::atMost(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
     DASSERT(self && a1);
     Notifier notifier;
-    return sp<Expectation>::make(sp<AtMost>::make(self, a1, notifier), a1, std::move(notifier));
+    return sp<Expectation>::make(sp<AtMost>::make(self, a1, notifier), std::move(notifier));
 }
 
 sp<Expectation> NumericUtil::boundary(const sp<Numeric>& self, const sp<Numeric>& a1)
@@ -290,11 +290,18 @@ sp<Expectation> NumericUtil::boundary(const sp<Numeric>& self, const sp<Numeric>
     return self->val() < a1->val() ? atMost(self, a1) : atLeast(self, a1);
 }
 
+sp<Expectation> NumericUtil::clamp(const sp<Numeric>& self, const sp<Numeric>& min, const sp<Numeric>& max)
+{
+    DASSERT(self && min && max);
+    Notifier notifier;
+    return sp<Expectation>::make(sp<Clamp>::make(self, min, max, notifier), std::move(notifier));
+}
+
 sp<Expectation> NumericUtil::fence(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
     DASSERT(self && a1);
     Notifier notifier;
-    return sp<Expectation>::make(sp<Fence>::make(self, a1, notifier), a1, std::move(notifier));
+    return sp<Expectation>::make(sp<Fence>::make(self, a1, notifier), std::move(notifier));
 }
 
 sp<Numeric> NumericUtil::pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t)

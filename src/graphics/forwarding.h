@@ -24,7 +24,7 @@ class Model;
 class RenderLayer;
 class LayerContext;
 class Varyings;
-class TileMaker;
+class RendererMaker;
 class Transform;
 class Transformable;
 class Rect;

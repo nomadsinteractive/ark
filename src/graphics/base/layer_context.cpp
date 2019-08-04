@@ -35,7 +35,7 @@ void LayerContext::renderRequest(const V2& position)
 
 void LayerContext::draw(float x, float y, const sp<RenderObject>& renderObject)
 {
-    _transient_items.emplace_back(x, y, renderObject);
+    _transient_items.emplace_back(x + _position.x(), y + _position.y(), renderObject);
 }
 
 void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed)
@@ -60,7 +60,7 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memor
             if(!i._render_object->isDisposed())
             {
                 RenderObject::Snapshot snapshot = i._render_object->snapshot(memoryPool);
-                snapshot._position = snapshot._position + V3(i._x, i._y, 0) + _position;
+                snapshot._position = snapshot._position + V3(i._x, i._y, 0);
                 output._items.push_back(std::move(snapshot));
                 notify = true;
             }

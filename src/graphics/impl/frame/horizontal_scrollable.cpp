@@ -6,7 +6,7 @@
 
 namespace ark {
 
-HorizontalScrollable::HorizontalScrollable(const sp<TileMaker>& tileMaker, const sp<Numeric>& scroller, int32_t width, int32_t tileWidth, uint32_t itemCount)
+HorizontalScrollable::HorizontalScrollable(const sp<RendererMaker>& tileMaker, const sp<Numeric>& scroller, int32_t width, int32_t tileWidth, uint32_t itemCount)
     : _tile_maker(tileMaker),  _tiles(itemCount), _scroller(scroller), _width(width), _tile_width(tileWidth),
       _scroll_position(std::numeric_limits<int32_t>::min()), _grid_position(0) {
 }
@@ -53,7 +53,7 @@ void HorizontalScrollable::ensureTile(Tile<sp<Renderer>>& tile, int32_t position
     tile.setOffset(position - _grid_position);
     if(tile.position() != position)
     {
-        const sp<Renderer> renderer = _tile_maker->makeTile(position, 0);
+        const sp<Renderer> renderer = _tile_maker->make(position, 0);
         DASSERT(renderer);
         tile.setPosition(position);
         tile.renderer() = renderer;
@@ -61,7 +61,7 @@ void HorizontalScrollable::ensureTile(Tile<sp<Renderer>>& tile, int32_t position
 }
 
 HorizontalScrollable::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _tile_maker(factory.ensureBuilder<TileMaker>(manifest, "tile-maker")), _scroller(factory.ensureBuilder<Numeric>(manifest, "scroller")),
+    : _tile_maker(factory.ensureBuilder<RendererMaker>(manifest, "renderer-maker")), _scroller(factory.ensureBuilder<Numeric>(manifest, "scroller")),
       _width(factory.ensureBuilder<Numeric>(manifest, "width")),
       _tile_width(factory.ensureBuilder<Numeric>(manifest, "tile-width")),
       _cols(Documents::getAttribute<uint32_t>(manifest, "cols", 0))

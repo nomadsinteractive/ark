@@ -376,7 +376,7 @@ class Integer(_Var):
     def repeat(self, repeat: int) -> 'Integer':
         return Integer(0)
 
-    def animate(self, interval: Numeric, duration: Numeric) -> 'Integer':
+    def animate(self, interval: Union[Numeric, float] = None, duration: Union[Numeric, float] = None) -> 'Integer':
         return Integer(0)
 
 
@@ -910,7 +910,7 @@ class Tilemap(Renderer):
     LAYER_FLAG_COLLIDABLE = 1
     LAYER_FLAG_DEFAULT = 0
 
-    def __init__(self, layer, w, h, tileset: Tileset):
+    def __init__(self, layer: LayerContext, w: int, h: int, tileset: Tileset):
         self._tileset = tileset
 
     def clear(self):
@@ -956,6 +956,9 @@ class Tilemap(Renderer):
     @property
     def layers(self) -> List[TilemapLayer]:
         return []
+
+    def add_layer(self, layer: TilemapLayer):
+        pass
 
     def load(self, src: Union[Readable, str]):
         pass
@@ -1135,6 +1138,10 @@ class Collider:
 
 
 class Command:
+
+    @property
+    def active(self) -> bool:
+        return False
 
     def execute(self):
         pass

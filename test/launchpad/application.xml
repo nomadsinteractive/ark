@@ -51,7 +51,7 @@
     <layout id="layout-008" class="vertical" gravity="left|bottom"/>
     <layout id="layout-009" class="vertical" gravity="right|top"/>
     <layout id="layout-010" class="grid" gravity="center" cols="2" rows="2"/>
-    <vertical-scrollable id="scrollable-001" tile-height="50" height="100" rows="3" tile-maker="$tile_maker" scroller="$scroller"/>
+    <vertical-scrollable id="scrollable-001" tile-height="50" height="100" rows="3" renderer-maker="$tile_maker" scroller="$scroller"/>
     <string-bundle id="string-bundle-001" class="yaml" src="i18n/${locale}"/>
     <render-object id="c001" type="0" position="100, @c001-fall" size="20, 20"/>
     <render-object id="c002" type="0" position="200, 0" size="400, 40"/>

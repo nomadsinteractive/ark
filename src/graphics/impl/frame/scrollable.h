@@ -2,7 +2,6 @@
 #define ARK_GRAPHICS_IMPL_FRAME_SCORLLABLE_H_
 
 #include "core/base/api.h"
-#include "core/concurrent/dual.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -19,6 +18,7 @@ class ARK_API Scrollable : public Renderer, public Block {
 public:
     struct ARK_API Params {
         Params(int32_t rowCount, int32_t colCount, int32_t rowIndex, int32_t colIndex, int32_t tileWidth, int32_t tileHeight);
+        Params(const document& manifest);
 
         int32_t _row_count;
         int32_t _col_count;
@@ -38,9 +38,9 @@ private:
         int32_t scrollX() const;
         int32_t scrollY() const;
 
-        void roll(const RollingAdapter& rollingView, TileMaker& tileMaker, int32_t tileWidth, int32_t tileHeight);
+        void roll(const RollingAdapter& rollingView, RendererMaker& tileMaker, int32_t tileWidth, int32_t tileHeight);
 
-        const sp<Renderer>& getTile(int32_t rowIndex, int32_t colIndex) const;
+        const sp<Renderer>& getTile(RendererMaker& tileMaker, int32_t rowIndex, int32_t colIndex) const;
         void putTile(int32_t rowIndex, int32_t colIndex, const sp<Renderer>& tile);
 
     private:
@@ -51,32 +51,29 @@ private:
     };
 
 public:
-    Scrollable(const sp<Vec>& scroller, const sp<TileMaker>& tileMaker, const sp<Size>& size, const Params& params);
+    Scrollable(const sp<Vec>& scroller, const sp<RendererMaker>& tileMaker, const sp<Size>& size, const Params& params);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
     virtual const SafePtr<Size>& size() override;
 
-    void initialize();
-
 //  [[plugin::builder("scrollable")]]
     class BUILDER : public Builder<Renderer> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Renderer> build(const sp<Scope>& args) override;
 
     private:
         sp<Builder<Vec>> _scroller;
-        sp<Builder<TileMaker>> _tile_maker;
+        sp<Builder<RendererMaker>> _tile_maker;
         sp<Builder<Size>> _size;
-
-        int32_t _rows, _cols;
-        int32_t _row_index, _col_index;
-        int32_t _tile_width, _tile_height;
+        Params _params;
     };
 
 private:
+    void initialize();
+
     int32_t width() const;
     int32_t height() const;
 
@@ -85,9 +82,9 @@ private:
 
 private:
     Params _params;
-    Dual<RollingAdapter> _rolling_view;
+    RollingAdapter _rolling_view;
     sp<Vec> _scroller;
-    sp<TileMaker> _tile_maker;
+    sp<RendererMaker> _renderer_maker;
     SafePtr<Size> _size;
     int32_t _scroll_x;
     int32_t _scroll_y;

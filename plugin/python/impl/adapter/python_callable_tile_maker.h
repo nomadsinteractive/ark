@@ -12,11 +12,11 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-class PythonCallableTileMaker : public TileMaker {
+class PythonCallableTileMaker : public RendererMaker {
 public:
     PythonCallableTileMaker(const sp<PyInstance>& callable);
 
-    virtual sp<Renderer> makeTile(int32_t x, int32_t y) override;
+    virtual sp<Renderer> make(int32_t x, int32_t y) override;
 
 private:
     sp<PyInstance> _callable;

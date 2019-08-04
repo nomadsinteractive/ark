@@ -25,6 +25,9 @@ public:
 
     uint32_t id() const;
 
+//  [[script::bindings::property]]
+    bool active() const;
+
 //  [[script::bindings::auto]]
     void execute() const;
 //  [[script::bindings::auto]]

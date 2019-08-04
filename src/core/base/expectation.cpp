@@ -2,8 +2,8 @@
 
 namespace ark {
 
-Expectation::Expectation(const sp<Numeric>& delegate, const sp<Numeric>& expectation, Notifier notifier)
-    : _delegate(delegate), _expectation(expectation), _notifier(std::move(notifier))
+Expectation::Expectation(const sp<Numeric>& delegate, Notifier notifier)
+    : _delegate(delegate), _notifier(std::move(notifier))
 {
 }
 
@@ -15,16 +15,6 @@ float Expectation::val()
 const sp<Numeric>& Expectation::delegate() const
 {
     return _delegate;
-}
-
-const sp<Numeric>& Expectation::expectation() const
-{
-    return _expectation;
-}
-
-const Notifier& Expectation::notifier() const
-{
-    return _notifier;
 }
 
 void Expectation::update()

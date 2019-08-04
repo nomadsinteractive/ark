@@ -30,10 +30,10 @@ void TilemapImporterCsv::import(Tilemap& tilemap, const sp<Readable>& src)
             tilemap.setTile(rowCount, colCount++, ro);
             return true;
         });
-        DCHECK(colCount == tilemap.colCount(), "Insufficient columns, got %d, should be %d", colCount, tilemap.colCount());
+//        DCHECK(colCount == tilemap.colCount(), "Insufficient columns, got %d, should be %d", colCount, tilemap.colCount());
         ++rowCount;
     }
-    DCHECK(rowCount == tilemap.rowCount(), "Insufficient rows, got %d, should be %d", rowCount, tilemap.rowCount());
+//    DCHECK(rowCount == tilemap.rowCount(), "Insufficient rows, got %d, should be %d", rowCount, tilemap.rowCount());
 }
 
 sp<TilemapImporter> TilemapImporterCsv::DICTIONARY::build(const sp<Scope>& /*args*/)

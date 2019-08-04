@@ -38,27 +38,45 @@ int32_t Scrollable::RollingAdapter::scrollY() const
     return _scroll_y;
 }
 
-void Scrollable::RollingAdapter::roll(const Scrollable::RollingAdapter& rollingView, TileMaker& tileMaker, int32_t tileWidth, int32_t tileHeight)
+void Scrollable::RollingAdapter::roll(const Scrollable::RollingAdapter& rollingView, RendererMaker& tileMaker, int32_t tileWidth, int32_t tileHeight)
 {
     int32_t viewRight = rollingView.scrollX() + _params._col_count * tileWidth;
     int32_t viewBottom = rollingView.scrollY() + _params._row_count * tileHeight;
     sp<Renderer>* tiles = _tiles->buf();
+
+    std::set<sp<Renderer>> overrided;
+    std::set<sp<Renderer>> maked;
+
     for(int32_t i = 0; i < _params._row_count; i++)
         for(int32_t j = 0; j < _params._col_count; j++)
         {
+            sp<Renderer>& renderer = tiles[i * _params._col_count + j];
             int32_t x = _scroll_x + j * tileWidth;
             int32_t y = _scroll_y + i * tileHeight;
+            overrided.insert(renderer);
             if(x >= rollingView.scrollX() && x < viewRight && y >= rollingView.scrollY() && y < viewBottom)
-                tiles[i * _params._col_count + j] = rollingView.getTile((y - rollingView.scrollY()) / tileHeight, (x - rollingView.scrollX()) / tileWidth);
+                renderer = rollingView.getTile(tileMaker, (y - rollingView.scrollY()) / tileHeight, (x - rollingView.scrollX()) / tileWidth);
             else
-                tiles[i * _params._col_count + j] = tileMaker.makeTile(x, y);
+                renderer = tileMaker.make(x, y);
+            maked.insert(renderer);
         }
+
+    for(const sp<Renderer>& i : overrided)
+        if(i && maked.find(i) != maked.end())
+            tileMaker.recycle(i);
 }
 
-const sp<Renderer>& Scrollable::RollingAdapter::getTile(int32_t rowIndex, int32_t colIndex) const
+const sp<Renderer>& Scrollable::RollingAdapter::getTile(RendererMaker& tileMaker, int32_t rowIndex, int32_t colIndex) const
 {
     DCHECK(rowIndex >= 0 && colIndex >= 0 && rowIndex < _params._row_count && colIndex < _params._row_count, "Grid(row:%d, col: %d) out of bounds", rowIndex, colIndex);
-    return _tiles->buf()[rowIndex * _params._col_count + colIndex];
+    sp<Renderer>& renderer = _tiles->buf()[rowIndex * _params._col_count + colIndex];
+    if(!renderer)
+    {
+        int32_t x = _scroll_x + colIndex * _params._tile_width;
+        int32_t y = _scroll_y + rowIndex * _params._tile_height;
+        renderer = tileMaker.make(x, y);
+    }
+    return renderer;
 }
 
 void Scrollable::RollingAdapter::putTile(int32_t rowIndex, int32_t colIndex, const sp<Renderer>& tile)
@@ -67,27 +85,27 @@ void Scrollable::RollingAdapter::putTile(int32_t rowIndex, int32_t colIndex, con
     _tiles->buf()[rowIndex * _params._col_count + colIndex] = tile;
 }
 
-Scrollable::Scrollable(const sp<Vec>& scroller, const sp<TileMaker>& tileMaker, const sp<Size>& size, const Scrollable::Params& params)
-    : _params(params), _rolling_view(RollingAdapter(_params), RollingAdapter(_params)), _scroller(scroller), _tile_maker(tileMaker), _size(size),
+Scrollable::Scrollable(const sp<Vec>& scroller, const sp<RendererMaker>& tileMaker, const sp<Size>& size, const Scrollable::Params& params)
+    : _params(params), _rolling_view(_params), _scroller(scroller), _renderer_maker(tileMaker), _size(size),
       _scroll_x(0), _scroll_y(0)
 {
+    initialize();
 }
 
 void Scrollable::render(RenderRequest& renderRequest, float x, float y)
 {
     update();
 
-    const RollingAdapter& rollingView = _rolling_view.front();
-    const int32_t cx = _scroll_x - rollingView.scrollX();
-    const int32_t cy = _scroll_y - rollingView.scrollY();
+    const int32_t cx = _scroll_x - _rolling_view.scrollX();
+    const int32_t cy = _scroll_y - _rolling_view.scrollY();
     int32_t sx, ex;
     int32_t sy, ey;
     Math::modBetween<int32_t>(cx, cx + width(), _params._tile_width, sx, ex);
     Math::modBetween<int32_t>(cy, cy + height(), _params._tile_height, sy, ey);
-    for(int32_t i = sy / _params._tile_height; i < ey / _params._tile_height && i < _params._row_count; i++)
-        for(int32_t j = sx / _params._tile_width; j < ex / _params._tile_width && j < _params._col_count; j++)
+    for(int32_t i = sy / _params._tile_height; i <= ey / _params._tile_height && i < _params._row_count; i++)
+        for(int32_t j = sx / _params._tile_width; j <= ex / _params._tile_width && j < _params._col_count; j++)
         {
-            const sp<Renderer>& tile = rollingView.getTile(i, j);
+            const sp<Renderer>& tile = _rolling_view.getTile(_renderer_maker, i, j);
             DCHECK(tile, "Grid(row:%d, col: %d) is null", i, j);
             tile->render(renderRequest, x + j * _params._tile_width - cx, y + i * _params._tile_height - cy);
         }
@@ -100,29 +118,23 @@ const SafePtr<Size>& Scrollable::size()
 
 void Scrollable::initialize()
 {
-    RollingAdapter& rollingView = _rolling_view.back();
+//    _rolling_view.setScrollXY(_scroll_x - _params._col_index * _params._tile_width, _scroll_y - _params._row_index * _params._tile_height);
 
-    rollingView.setScrollXY(_scroll_x - _params._col_index * _params._tile_width, _scroll_y - _params._row_index * _params._tile_height);
-
-    for(int32_t i = 0; i < _params._row_count; i++)
-        for(int32_t j = 0; j < _params._col_count; j++)
-            rollingView.putTile(i, j, _tile_maker->makeTile((j - _params._col_index) * _params._tile_width, (i - _params._row_index) * _params._tile_height));
-
-    _rolling_view.swap();
+//    for(int32_t i = 0; i < _params._row_count; i++)
+//        for(int32_t j = 0; j < _params._col_count; j++)
+//            _rolling_view.putTile(i, j, _tile_maker->makeTile((j - _params._col_index) * _params._tile_width, (i - _params._row_index) * _params._tile_height));
 }
 
 void Scrollable::updateTask()
 {
-    const RollingAdapter& front = _rolling_view.front();
-    const int32_t colIndex = (_scroll_x - front.scrollX()) / _params._tile_width;
-    const int32_t rowIndex = (_scroll_y - front.scrollY()) / _params._tile_height;
+    const int32_t colIndex = (_scroll_x - _rolling_view.scrollX()) / _params._tile_width;
+    const int32_t rowIndex = (_scroll_y - _rolling_view.scrollY()) / _params._tile_height;
     if(colIndex != _params._col_index || rowIndex != _params._row_index)
     {
+        const RollingAdapter front = _rolling_view;
         LOGD("col = %d row = %d", colIndex, rowIndex);
-        RollingAdapter& back = _rolling_view.back();
-        back.setScrollXY(Math::modFloor<int32_t>(_scroll_x - _params._col_index * _params._tile_width, _params._tile_width), Math::modFloor(_scroll_y - _params._row_index * _params._tile_height, _params._tile_height));
-        back.roll(front, _tile_maker, _params._tile_width, _params._tile_height);
-        _rolling_view.swap();
+        _rolling_view.setScrollXY(Math::modFloor<int32_t>(_scroll_x - _params._col_index * _params._tile_width, _params._tile_width), Math::modFloor(_scroll_y - _params._row_index * _params._tile_height, _params._tile_height));
+        _rolling_view.roll(front, _renderer_maker, _params._tile_width, _params._tile_height);
     }
 }
 
@@ -154,20 +166,22 @@ Scrollable::Params::Params(int32_t rowCount, int32_t colCount, int32_t rowIndex,
 {
 }
 
-Scrollable::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _scroller(parent.ensureBuilder<Vec>(doc, "scroller")), _tile_maker(parent.ensureBuilder<TileMaker>(doc, "tile-maker")), _size(parent.ensureBuilder<Size>(doc, Constants::Attributes::SIZE)),
-      _rows(Documents::ensureAttribute<int32_t>(doc, "rows")), _cols(Documents::ensureAttribute<int32_t>(doc, "cols")),
-      _row_index(_rows / 2), _col_index(_cols / 2),
-      _tile_width(Documents::ensureAttribute<int32_t>(doc, "tile-width")), _tile_height(Documents::ensureAttribute<int32_t>(doc, "tile-height"))
+Scrollable::Params::Params(const document& manifest)
+    : _row_count(Documents::ensureAttribute<int32_t>(manifest, "rows")), _col_count(Documents::ensureAttribute<int32_t>(manifest, "cols")),
+      _row_index(_row_count / 2), _col_index(_col_count / 2), _tile_width(Documents::ensureAttribute<int32_t>(manifest, "renderer-width")),
+      _tile_height(Documents::ensureAttribute<int32_t>(manifest, "renderer-height"))
+{
+}
+
+Scrollable::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _scroller(factory.ensureBuilder<Vec>(manifest, "scroller")), _tile_maker(factory.ensureBuilder<RendererMaker>(manifest, "renderer-maker")),
+      _size(factory.ensureBuilder<Size>(manifest, Constants::Attributes::SIZE)), _params(manifest)
 {
 }
 
 sp<Renderer> Scrollable::BUILDER::build(const sp<Scope>& args)
 {
-    const Scrollable::Params params(_rows, _cols, _row_index, _col_index, _tile_width, _tile_height);
-    const sp<Scrollable> scrollable = sp<Scrollable>::make(_scroller->build(args), _tile_maker->build(args), _size->build(args), params);
-    scrollable->initialize();
-    return scrollable;
+    return sp<Scrollable>::make(_scroller->build(args), _tile_maker->build(args), _size->build(args), _params);
 }
 
 }

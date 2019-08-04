@@ -11,14 +11,11 @@ namespace ark {
 //[[script::bindings::extends(Numeric)]]
 class ARK_API Expectation : public Numeric {
 public:
-    Expectation(const sp<Numeric>& delegate, const sp<Numeric>& expectation, Notifier notifier);
+    Expectation(const sp<Numeric>& delegate, Notifier notifier);
 
     virtual float val() override;
 
     const sp<Numeric>& delegate() const;
-    const sp<Numeric>& expectation() const;
-
-    const Notifier& notifier() const;
 
 //[[script::bindings::auto]]
     void update();

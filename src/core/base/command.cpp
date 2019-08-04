@@ -14,6 +14,11 @@ uint32_t Command::id() const
     return _id;
 }
 
+bool Command::active() const
+{
+    return _state != STATE_DEACTIVATED;
+}
+
 void Command::execute() const
 {
     _state_machine.ensure()->execute(*this);

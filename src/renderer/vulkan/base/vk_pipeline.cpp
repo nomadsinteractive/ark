@@ -232,7 +232,7 @@ void VKPipeline::setupPipeline(GraphicsContext& graphicsContext, const VertexLay
                 0,
                 VK_FALSE);
 
-    const VkCullModeFlags cullModeFlags[3] = {VK_CULL_MODE_NONE, VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_BACK_BIT};
+    const VkCullModeFlags cullModeFlags[] = {VK_CULL_MODE_NONE, VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_BACK_BIT, VK_CULL_MODE_NONE};
     VkPipelineRasterizationStateCreateInfo rasterizationState =
             vks::initializers::pipelineRasterizationStateCreateInfo(
                 VK_POLYGON_MODE_FILL,

@@ -104,7 +104,7 @@ void PyCallableDuckType::to(sp<CharacterMapper>& inst)
     inst = sp<PythonCallableCharacterMapper>::make(_instance);
 }
 
-void PyCallableDuckType::to(sp<TileMaker>& inst)
+void PyCallableDuckType::to(sp<RendererMaker>& inst)
 {
     inst = sp<PythonCallableTileMaker>::make(_instance);
 }

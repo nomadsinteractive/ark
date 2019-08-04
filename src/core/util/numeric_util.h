@@ -98,6 +98,8 @@ public:
 //[[script::bindings::classmethod]]
     static sp<Expectation> boundary(const sp<Numeric>& self, const sp<Numeric>& a1);
 //[[script::bindings::classmethod]]
+    static sp<Expectation> clamp(const sp<Numeric>& self, const sp<Numeric>& min, const sp<Numeric>& max);
+//[[script::bindings::classmethod]]
     static sp<Expectation> fence(const sp<Numeric>& self, const sp<Numeric>& a1);
 //[[script::bindings::classmethod]]
     static sp<Numeric> integral(const sp<Numeric>& self, const sp<Numeric>& t = nullptr);
