@@ -109,12 +109,12 @@ bool PyInstance::isCallable()
 
 void PyInstance::clear()
 {
-    if(_object)
+    if(_object && !_is_borrowed_reference)
     {
         DASSERT(_object->ob_refcnt > 0);
         Py_DECREF(_object);
-        _object = nullptr;
     }
+    _object = nullptr;
 }
 
 }

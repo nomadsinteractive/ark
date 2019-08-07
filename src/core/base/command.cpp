@@ -46,7 +46,7 @@ uint32_t Command::category() const
 
 bool Command::conflicts(const Command& other) const
 {
-    return static_cast<bool>(_category & other._category);
+    return (_category & other._category) != 0;
 }
 
 Command::State Command::state() const

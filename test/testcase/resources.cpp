@@ -1,7 +1,8 @@
 #include "test/base/test_case.h"
 
 #include "core/ark.h"
-#include "core/impl/asset/zip_asset.h"
+#include "core/impl/asset_bundle/asset_bundle_zip_file.h"
+#include "core/inf/asset.h"
 #include "core/inf/readable.h"
 
 #include "platform/platform.h"
@@ -12,11 +13,11 @@ namespace unittest {
 class ResourcesTestCase : public TestCase {
 public:
     virtual int launch() {
-        const sp<Readable> readable = Ark::instance().getAsset(".")->get("testcase.zip");
+        const sp<Readable> readable = Ark::instance().openAsset("testcase.zip");
         if(!readable)
             return -1;
-        const sp<Asset> zip = sp<ZipAsset>::make(readable);
-        const sp<Readable> fp1 = zip->get("boxes.cpp");
+        const sp<AssetBundle> zip = sp<AssetBundleZipFile>::make(readable, "/");
+        const sp<Readable> fp1 = zip->get("boxes.cpp")->open();
         if(!fp1)
             return 1;
         String content = Strings::loadFromReadable(fp1);

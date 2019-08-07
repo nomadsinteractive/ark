@@ -1,9 +1,11 @@
 #include "core/base/expectation.h"
 
+#include "core/base/observer.h"
+
 namespace ark {
 
 Expectation::Expectation(const sp<Numeric>& delegate, Notifier notifier)
-    : _delegate(delegate), _notifier(std::move(notifier))
+    : Delegate<Numeric>(delegate), _notifier(std::move(notifier))
 {
 }
 
@@ -12,14 +14,22 @@ float Expectation::val()
     return _delegate->val();
 }
 
-const sp<Numeric>& Expectation::delegate() const
+int32_t Expectation::traverse(const Holder::Visitor& visitor)
 {
-    return _delegate;
+    for(const sp<Observer>& i : _observers)
+    {
+        int32_t r = i->traverse(visitor);
+        if(r)
+            return r;
+    }
+    return 0;
 }
 
-void Expectation::update()
+int32_t Expectation::clear()
 {
-    _notifier.notify();
+    for(const sp<Observer>& i : _observers)
+        i->clear();
+    return 0;
 }
 
 sp<Observer> Expectation::createObserver(const sp<Runnable>& callback, bool oneshot)

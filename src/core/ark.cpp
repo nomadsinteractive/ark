@@ -312,6 +312,7 @@ sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, const sp<Appli
 #ifdef ARK_USE_VULKAN
         return sp<RenderEngine>::make(version, sp<vulkan::RendererFactoryVulkan>::make(appResource->recycler()));
 #endif
+        break;
     }
     DFATAL("Unknown engine type: %d", version);
     return nullptr;

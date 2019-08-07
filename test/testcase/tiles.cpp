@@ -38,9 +38,9 @@ private:
 };
 
 
-class TileMakerImpl : public TileMaker {
+class RendererMakerImpl : public RendererMaker {
 public:
-    virtual sp<Renderer> makeTile(int32_t x, int32_t y) override {
+    virtual sp<Renderer> make(int32_t x, int32_t y) override {
         printf("makeTile(%d, %d)\n", x, y);
         return sp<TileRendererImpl>::make(x, y);
     }
@@ -52,11 +52,11 @@ class TilesTestCase : public TestCase {
 public:
     virtual int launch() {
         const sp<BeanFactory> beanFactory = this->getBeanFactory();
-        const sp<TileMaker> tileMaker = sp<TileMakerImpl>::make();
+        const sp<RendererMaker> rendererMaker = sp<RendererMakerImpl>::make();
         const sp<Scope> args = sp<Scope>::make();
         const sp<Numeric::Impl> scroller = sp<Numeric::Impl>::make(0.0f);
         args->put<Numeric>("scroller", scroller);
-        args->put<TileMaker>("tile_maker", tileMaker);
+        args->put<RendererMaker>("tile_maker", rendererMaker);
         const sp<Renderer> scrollable = beanFactory->build<Renderer>("@scrollable-001", args);
         int32_t errorCode, errorBase = 1;
         errorCode = checkScrollable(scrollable, NAN, 0.0f, 50.0f, NAN, errorBase);

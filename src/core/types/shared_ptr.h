@@ -21,22 +21,36 @@ public:
     _CONSTEXPR SharedPtr(std::nullptr_t null) noexcept
         : _ptr(null), _interfaces(null) {
     }
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SharedPtr);
+    SharedPtr(const SharedPtr& other) noexcept
+        : _ptr(other._ptr), _interfaces(other._interfaces) {
+        if(_interfaces)
+            _interfaces->ref();
+    }
+    SharedPtr(SharedPtr&&) noexcept = default;
     SharedPtr(std::shared_ptr<T> ptr, std::shared_ptr<Interfaces> interfaces) noexcept
         : _ptr(std::move(ptr)), _interfaces(std::move(interfaces)) {
     }
     template<typename U> SharedPtr(const SharedPtr<U>& ptr) noexcept
         : _ptr(std::static_pointer_cast<T>(ptr._ptr)), _interfaces(ptr.ensureInterfaces()) {
+        if(_interfaces)
+            _interfaces->ref();
     }
+    ~SharedPtr() {
+        if(_interfaces)
+            _interfaces->deref();
+    }
+
+    SharedPtr& operator=(const SharedPtr& other) noexcept {
+        _ptr = other._ptr;
+        _interfaces = other._interfaces;
+        return *this;
+    }
+    SharedPtr& operator=(SharedPtr&&) noexcept = default;
 
     typedef T _PtrType;
 
     static SharedPtr<T> adopt(T* instance) {
         return SharedPtr<T>(instance);
-    }
-
-    static SharedPtr<T> borrow(T* instance, std::function<void(T*)> deleter = [](T*) {}) {
-        return SharedPtr<T>(instance, nullptr, std::move(deleter));
     }
 
     template<typename... Args> static SharedPtr<T> make(Args&&... args) {
@@ -132,6 +146,12 @@ public:
 
     bool unique() const {
         return _ptr.unique();
+    }
+
+    void setRefCounter(Interfaces::RefCounter* refCounter) const {
+        const std::shared_ptr<Interfaces>& interfaces = ensureInterfaces();
+        DCHECK(!interfaces->_ref_counter, "RefCounter has been set");
+        interfaces->_ref_counter = refCounter;
     }
 
 private:

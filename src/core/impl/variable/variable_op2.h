@@ -3,6 +3,9 @@
 
 #include <type_traits>
 
+#include "core/inf/variable.h"
+#include "core/types/class.h"
+
 namespace ark {
 
 template<typename T, typename P, typename OP2, typename LVType, typename RVType, typename OPType = typename std::result_of<OP2(T, P)>::type> class VariableOP2 : public Variable<OPType> {

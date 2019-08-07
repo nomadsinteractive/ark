@@ -8,7 +8,7 @@
 #include "core/base/clock.h"
 #include "core/base/scope.h"
 #include "core/base/thread.h"
-#include "core/epi/lifecycle.h"
+#include "core/epi/disposed.h"
 #include "core/inf/dictionary.h"
 #include "core/inf/variable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
@@ -16,7 +16,7 @@
 #include "core/util/math.h"
 
 #include "graphics/base/transform.h"
-#include "graphics/base/rotation.h"
+#include "graphics/base/rotate.h"
 
 #include "app/base/application_context.h"
 #include "app/base/resource_loader.h"
@@ -31,15 +31,15 @@ class FactoriesCase : public TestCase {
 public:
     virtual int launch() {
         Ark& ark = Ark::instance();
-        WeakPtr<Lifecycle> we1;
+        WeakPtr<Disposed> we1;
         {
         const sp<ResourceLoader> resourceLoader = ark.applicationContext()->createResourceLoader("application.xml", nullptr);
         BeanFactory& beanFactory = resourceLoader->beanFactory();
         ark.applicationContext()->clock()->setTicker(Platform::getSteadyClock());
 
-        const sp<Lifecycle> e1 = beanFactory.build<Lifecycle>("@e1");
+        const sp<Disposed> e1 = beanFactory.build<Disposed>("@e1");
 
-        TESTCASE_VALIDATE(e1 && !e1->isDisposed());
+        TESTCASE_VALIDATE(e1 && !e1->val());
 
         we1 = e1;
 
@@ -47,7 +47,7 @@ public:
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
 
-        TESTCASE_VALIDATE(e1->isDisposed());
+        TESTCASE_VALIDATE(e1->val());
 
         sp<Numeric> g1 = beanFactory.build<Numeric>("25.0");
         TESTCASE_VALIDATE(g1 && g1->val() == 25.0f);
@@ -91,16 +91,16 @@ public:
 //            return 17;
 
         sp<Transform> t2 = beanFactory.build<Transform>("@t2");
-        TESTCASE_VALIDATE(t2 && t2->translation()->val().x() == 20.0f && t2->translation()->val().y() == 30.0f);
+        TESTCASE_VALIDATE(t2 && t2->translate()->val().x() == 20.0f && t2->translate()->val().y() == 30.0f);
 
         sp<Transform> t3 = beanFactory.build<Transform>("@t3");
         TESTCASE_VALIDATE(t3 && t3->scale()->val().x() == 2.0f && t3->scale()->val().y() == 2.0f);
 
         sp<Transform> t4 = beanFactory.build<Transform>("@t4");
-        TESTCASE_VALIDATE(t4 && t4->rotation()->radians() == 1.0f);
+        TESTCASE_VALIDATE(t4 && t4->rotate()->radians() == 1.0f);
 
-        const sp<Lifecycle> e004 = beanFactory.build<Lifecycle>("@e004");
-        const sp<Lifecycle> e004Copy = beanFactory.build<Lifecycle>("@e004");
+        const sp<Disposed> e004 = beanFactory.build<Disposed>("@e004");
+        const sp<Disposed> e004Copy = beanFactory.build<Disposed>("@e004");
         TESTCASE_VALIDATE(e004 == e004Copy);
 
         const sp<Numeric> g8 = beanFactory.build<Numeric>("@g8");
@@ -143,8 +143,8 @@ public:
 
         }
 
-        const sp<Lifecycle> lifecycle = we1.lock();
-        TESTCASE_VALIDATE(!lifecycle);
+        const sp<Disposed> Disposed = we1.lock();
+        TESTCASE_VALIDATE(!Disposed);
 
         return 0;
     }

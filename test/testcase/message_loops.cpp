@@ -9,7 +9,7 @@
 #include "core/inf/runnable.h"
 #include "core/concurrent/lf_stack.h"
 #include "core/concurrent/one_consumer_synchronized.h"
-#include "core/epi/lifecycle.h"
+#include "core/epi/disposed.h"
 #include "core/impl/message_loop/message_loop_default.h"
 #include "core/types/shared_ptr.h"
 
@@ -48,18 +48,17 @@ class MessageLoopTestCase : public TestCase {
 public:
     virtual int launch() override {
         const sp<MessageLoopThread> messageLoopThread = sp<MessageLoopThread>::make(Platform::getSteadyClock());
-        messageLoopThread->start();
         sp<RunnableImpl> task = sp<RunnableImpl>::make("a");
         sp<RunnableImpl> task1 = sp<RunnableImpl>::make("b");
         sp<RunnableImpl> task2 = sp<RunnableImpl>::make("c");
-        sp<Lifecycle> expirable = sp<Lifecycle>::make();
+        sp<Disposed> expirable = sp<Disposed>::make();
 
         messageLoopThread->post(task, 0.2f);
         messageLoopThread->schedule(task1, 0.3f);
         messageLoopThread->schedule(task2.absorb(expirable), 0.3f);
         expirable->dispose();
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        messageLoopThread->terminate();
+        messageLoopThread->thread().terminate();
         messageLoopThread->thread().join();
 
         return task->tick() == 1 && task1->tick() == 4 && task2->tick() == 1 ? 0 : -1;

@@ -24,13 +24,13 @@ public:
     virtual void preInitialize(PipelineBuildingContext& context) override {
         context.addAttribute("Alpha01", "float");
         context.addAttribute("PointSize", "float");
-        context.addUniform("u_Color01", Uniform::TYPE_F4, nullptr, nullptr, 0);
+        context.addUniform("u_Color01", Uniform::TYPE_F4, 1, nullptr, nullptr, 0);
     }
 
-    virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const sp<ShaderBindings>& /*shaderBindings*/) override {
+    virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {
         context._fragment.addModifier("vec4(1.0, 1.0, 1.0, v_Alpha01)");
         context._fragment.addModifier("u_Color01");
-        context._vertex.addSource("gl_PointSize = a_PointSize;");
+        context._vertex.addPostMainSource("gl_PointSize = a_PointSize;");
     }
 };
 
@@ -50,12 +50,9 @@ public:
         const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(pipelineFactory, vert, frag);
         buildingContext->addSnippet(snippet);
 
-        const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(Ark::instance().applicationContext()->renderController(), buildingContext);
-        const sp<Shader> shader = sp<Shader>::make(buildingContext->_shader, pipelineLayout, nullptr);
-        const sp<PipelineInput>& pipelineInput = shader->pipelineLayout()->input();
-//        puts(source->vertex()._source.c_str());
+        const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);
+        const sp<PipelineInput>& pipelineInput = pipelineLayout->input();
         puts("---------------------------------------------------------------------");
-//        puts(source->fragment()._source.c_str());
         if(pipelineInput->streams()[0].stride() == 0)
             return 1;
         if(!pipelineInput->getAttribute("Position").length())

@@ -11,13 +11,13 @@ if(ARK_FORCE_STATIC_VCRT)
 endif()
 
 if(ARK_USE_OPEN_GL)
-    ark_add_denpendency(3rdparty/glbinding glbinding 3rdparty/glbinding/source/glbinding/include)
+    ark_add_denpendency(3rdparty/glbinding glbinding 3rdparty/glbinding/source/glbinding/include ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/glbinding/source/glbinding/include)
 
-    list(APPEND ARK_OPENGL_INCLUDE_DIRS
-        ${ARK_SRC_DIR}/3rdparty/glbinding/source/glbinding/include
-        ${PROJECT_BINARY_DIR}/3rdparty/glbinding/source/glbinding/include
-        )
-    set(ARK_OPENGL_LIBRARIES glbinding)
+#    list(APPEND ARK_OPENGL_INCLUDE_DIRS
+#        ${ARK_SRC_DIR}/3rdparty/glbinding/source/glbinding/include
+#        ${PROJECT_BINARY_DIR}/3rdparty/glbinding/source/glbinding/include
+#        )
+#    set(ARK_OPENGL_LIBRARIES glbinding)
 endif()
 
 if(ARK_USE_VULKAN)

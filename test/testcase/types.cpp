@@ -121,12 +121,6 @@ public:
         const sp<D> castedD = nodeClass->cast(n1.pack(), Type<D>::id()).unpack<D>();
         TESTCASE_VALIDATE(castedD && castedD->h == 8);
 
-        typedef Implementation<uint8_t, uint16_t, uint32_t, uint64_t, Implementation<A, B, D>> implements;
-        TESTCASE_VALIDATE(implements::is<uint8_t>());
-        TESTCASE_VALIDATE(implements::is<uint16_t>() && implements::is<uint32_t>() && implements::is<uint64_t>());
-        TESTCASE_VALIDATE(!implements::is<void>());
-        TESTCASE_VALIDATE(implements::is<A>() && implements::is<B>() && implements::is<D>());
-
         sp<B> nodeB = node;
         Box nb = nodeB.pack();
 

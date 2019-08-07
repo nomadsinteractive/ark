@@ -109,6 +109,11 @@ void Vec4Util::setX(const sp<Vec4>& self, float x)
     ensureImpl(self)->x()->set(x);
 }
 
+void Vec4Util::setX(const sp<Vec4>& self, const sp<Numeric>& x)
+{
+    ensureImpl(self)->x()->set(x);
+}
+
 float Vec4Util::y(const sp<Vec4>& self)
 {
     const sp<Vec4Impl> impl = self.as<Vec4Impl>();
@@ -120,15 +125,46 @@ void Vec4Util::setY(const sp<Vec4>& self, float y)
     ensureImpl(self)->y()->set(y);
 }
 
+void Vec4Util::setY(const sp<Vec4>& self, const sp<Numeric>& y)
+{
+    ensureImpl(self)->y()->set(y);
+}
+
+float Vec4Util::z(const sp<Vec4>& self)
+{
+    return self->val().z();
+}
+
+void Vec4Util::setZ(const sp<Vec4>& self, float z)
+{
+    ensureImpl(self)->z()->set(z);
+}
+
+void Vec4Util::setZ(const sp<Vec4>& self, const sp<Numeric>& z)
+{
+    ensureImpl(self)->z()->set(z);
+}
+
+float Vec4Util::w(const sp<Vec4>& self)
+{
+    const sp<Vec4Impl> impl = self.as<Vec4Impl>();
+    return impl ? impl->w()->val() : self->val().w();
+}
+
+void Vec4Util::setW(const sp<Vec4>& self, float w)
+{
+    ensureImpl(self)->w()->set(w);
+}
+
+void Vec4Util::setW(const sp<Vec4>& self, const sp<Numeric>& w)
+{
+    ensureImpl(self)->w()->set(w);
+}
+
 sp<Numeric> Vec4Util::vx(const sp<Vec4>& self)
 {
     const sp<Vec4Impl> impl = self.as<Vec4Impl>();
     return impl ? static_cast<sp<Numeric>>(impl->x()) : static_cast<sp<Numeric>>(sp<_Vec4Numeric>::make(self, 0));
-}
-
-void Vec4Util::setVx(const sp<Vec4>& self, const sp<Numeric>& x)
-{
-    ensureImpl(self)->x()->set(x);
 }
 
 sp<Numeric> Vec4Util::vy(const sp<Vec4>& self)
@@ -137,9 +173,16 @@ sp<Numeric> Vec4Util::vy(const sp<Vec4>& self)
     return impl ? static_cast<sp<Numeric>>(impl->y()) : static_cast<sp<Numeric>>(sp<_Vec4Numeric>::make(self, 1));
 }
 
-void Vec4Util::setVy(const sp<Vec4>& self, const sp<Numeric>& y)
+sp<Numeric> Vec4Util::vz(const sp<Vec4>& self)
 {
-    ensureImpl(self)->y()->set(y);
+    const sp<Vec4Impl> impl = self.as<Vec4Impl>();
+    return impl ? static_cast<sp<Numeric>>(impl->z()) : static_cast<sp<Numeric>>(sp<_Vec4Numeric>::make(self, 2));
+}
+
+sp<Numeric> Vec4Util::vw(const sp<Vec4>& self)
+{
+    const sp<Vec4Impl> impl = self.as<Vec4Impl>();
+    return impl ? static_cast<sp<Numeric>>(impl->w()) : static_cast<sp<Numeric>>(sp<_Vec4Numeric>::make(self, 3));
 }
 
 void Vec4Util::fix(const sp<Vec4>& self)

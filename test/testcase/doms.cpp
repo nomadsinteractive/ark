@@ -5,7 +5,6 @@
 #include "core/ark.h"
 #include "core/base/string_buffer.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
-#include "core/impl/asset/directory_asset.h"
 #include "core/impl/dictionary/xml_directory.h"
 #include "core/util/documents.h"
 #include "core/util/strings.h"

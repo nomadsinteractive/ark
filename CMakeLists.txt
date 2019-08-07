@@ -14,13 +14,13 @@ set(ARK_PLUGIN_DIR ${ARK_SRC_DIR}/plugin)
 set(ARK_RUNTIME_SHARED_LIBRARY ${PROJECT_NAME})
 set(ARK_RUNTIME_STATIC_LIBRARY ${PROJECT_NAME}_static)
 set(TESTCASES_EXECUTABLE ${PROJECT_NAME}-testcases)
-set(GENERATED_TESTCASE_LAUNCHPAD ${ARK_GENERATED_FILE_DIRECTORY}/testcase_launchpad.cpp)
 
 set(ARK_INCLUDE_DIRS ${ARK_SRC_DIR} ${ARK_SRC_DIR}/src ${ARK_SRC_DIR}/platform/${SYSTEM} ${ARK_SRC_DIR}/platform/any)
 set(ARK_LIBRARIES ${ARK_RUNTIME_SHARED_LIBRARY})
 set(ARK_STATIC_LIBRARIES ${ARK_RUNTIME_STATIC_LIBRARY})
 
 include(${ARK_TOOLS_DIR}/core.cmake)
+
 set(ARK_SYSTEM_NAME ${SYSTEM} CACHE STRING "Target system name of ARK was built for")
 
 option(ARK_BUILD_STATIC_LIBRARY "Build static library" OFF)
@@ -240,6 +240,7 @@ if(ARK_BUILD_STATIC_LIBRARY)
     target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK)
     target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PUBLIC -DARK_BUILD_STATIC)
     if(ARK_TEST_ENABLE)
+        set(GENERATED_TESTCASE_LAUNCHPAD ${ARK_GENERATED_FILE_DIRECTORY}/testcase_launchpad.cpp)
         aux_source_directory(test/base TEST_SRC_LIST)
         aux_source_directory(test/testcase TEST_SRC_LIST)
         add_custom_command(OUTPUT ${GENERATED_TESTCASE_LAUNCHPAD}

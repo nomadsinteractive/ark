@@ -2,6 +2,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
+#include "core/base/delegate.h"
 #include "core/base/expectation.h"
 #include "core/base/expression.h"
 #include "core/impl/builder/builder_by_instance.h"
@@ -22,10 +23,10 @@ namespace ark {
 
 namespace {
 
-class AtLeast : public Numeric {
+class AtLeast : public Numeric, public Delegate<Numeric>, Implements<AtLeast, Numeric, Delegate<Numeric>> {
 public:
     AtLeast(const sp<Numeric>& delegate, const sp<Numeric>& boundary, Notifier notifier)
-         : _delegate(delegate), _boundary(boundary), _notifer(std::move(notifier)) {
+         : Delegate<Numeric>(delegate), _boundary(boundary), _notifer(std::move(notifier)) {
     }
 
     virtual float val() override {
@@ -39,17 +40,16 @@ public:
     }
 
 private:
-    sp<Numeric> _delegate;
     sp<Numeric> _boundary;
 
     Notifier _notifer;
 };
 
 
-class AtMost : public Numeric {
+class AtMost : public Numeric, public Delegate<Numeric>, Implements<AtMost, Numeric, Delegate<Numeric>> {
 public:
     AtMost(const sp<Numeric>& delegate, const sp<Numeric>& boundary, Notifier notifier)
-         : _delegate(delegate), _boundary(boundary), _notifer(std::move(notifier)) {
+         : Delegate<Numeric>(delegate), _boundary(boundary), _notifer(std::move(notifier)) {
     }
 
     virtual float val() override {
@@ -63,7 +63,6 @@ public:
     }
 
 private:
-    sp<Numeric> _delegate;
     sp<Numeric> _boundary;
 
     Notifier _notifer;

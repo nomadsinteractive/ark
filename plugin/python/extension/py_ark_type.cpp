@@ -1,6 +1,7 @@
 #include "python/extension/py_ark_type.h"
 
 #include "core/base/scope.h"
+#include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/util/log.h"
 
@@ -32,12 +33,29 @@ static Py_hash_t __hash__(PyArkType::Instance* self)
 
 static int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args)
 {
-    return self->container ? self->container->traverse(visitor, args) : 0;
+    if(self->container)
+        return self->container->traverse(visitor, args);
+
+    const sp<Holder> holder = self->box->as<Holder>();
+    if(holder)
+        holder->traverse([&visitor, args](const Box& packed) {
+            const sp<PyInstance> pi = packed.as<PyInstance>();
+            if(pi)
+                visitor(pi->object(), args);
+            return 0;
+        });
+    return 0;
 }
 
 static int __clear__(PyArkType::Instance* self)
 {
-    return self->container ? self->container->clear() : 0;
+    if(self->container)
+        return self->container->clear();
+
+    const sp<Holder> holder = self->box->as<Holder>();
+    if(holder)
+        holder->clear();
+    return 0;
 }
 
 PyArkType::PyArkType(const String& name, const String& doc, PyTypeObject* base, unsigned long flags)

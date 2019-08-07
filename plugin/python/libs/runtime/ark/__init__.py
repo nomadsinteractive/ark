@@ -240,10 +240,10 @@ class Expectation:
     def update(self):
         pass
 
-    def create_observer(self, callback, oneshot=False) -> Observer:
+    def create_observer(self, callback: Callable, oneshot=False) -> Observer:
         pass
 
-    def add_observer(self, callback, oneshot=False) -> Observer:
+    def add_observer(self, callback: Callable, oneshot=False) -> Observer:
         pass
 
 

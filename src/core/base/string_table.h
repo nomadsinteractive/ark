@@ -14,7 +14,7 @@ public:
     const sp<StringBundle>& getStringBundle(const String& name);
 
     sp<String> getString(const String& stringTableName, const String& stringName, bool alert = true);
-    sp<String> getString(const String& name, bool alert = true);
+    sp<String> getString(const String& name, bool alert);
 
 private:
     std::map<String, sp<StringBundle>> _string_bundle_by_name;

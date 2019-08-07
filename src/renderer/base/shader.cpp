@@ -68,13 +68,13 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& d
 {
     const Global<StringTable> stringTable;
     const sp<Builder<Shader>> shader = factory.getBuilder<Shader>(doc, Constants::Attributes::SHADER);
-    return shader ? shader : sp<Builder<Shader>>::adopt(new ShaderBuilderImpl(factory, doc, resourceLoaderContext, stringTable->getString(defVertex), stringTable->getString(defFragment), defaultCamera));
+    return shader ? shader : sp<Builder<Shader>>::adopt(new ShaderBuilderImpl(factory, doc, resourceLoaderContext, stringTable->getString(defVertex, true), stringTable->getString(defFragment, true), defaultCamera));
 }
 
 sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment, const sp<Snippet>& snippet, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
     const Global<StringTable> stringTable;
-    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(resourceLoaderContext->renderController()->createPipelineFactory(), stringTable->getString(vertex), stringTable->getString(fragment));
+    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(resourceLoaderContext->renderController()->createPipelineFactory(), stringTable->getString(vertex, true), stringTable->getString(fragment, true));
     if(snippet)
         buildingContext->addSnippet(snippet);
 
