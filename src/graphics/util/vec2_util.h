@@ -28,6 +28,8 @@ public:
     static sp<Vec2> mul(const sp<Vec2>& lvalue, float rvalue);
 //[[script::bindings::operator(*)]]
     static sp<Vec2> mul(float lvalue, const sp<Vec2>& rvalue);
+//[[script::bindings::operator(*)]]
+    static sp<Vec2> mul(const sp<Vec2>& lvalue, sp<Numeric>& rvalue);
 //[[script::bindings::operator(/)]]
     static sp<Vec2> truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
 //[[script::bindings::operator(//)]]

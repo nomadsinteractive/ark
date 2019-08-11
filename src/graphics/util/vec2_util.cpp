@@ -83,6 +83,11 @@ sp<Vec2> Vec2Util::mul(float lvalue, const sp<Vec2>& rvalue)
     return sp<VariableOP2<float, V2, Operators::Mul<float, V2>, float, sp<Vec2>>>::make(lvalue, rvalue);
 }
 
+sp<Vec2> Vec2Util::mul(const sp<Vec2>& lvalue, sp<Numeric>& rvalue)
+{
+    return sp<VariableOP2<V2, float, Operators::Mul<V2, float>, sp<Vec2>, sp<Numeric>>>::make(lvalue, rvalue);
+}
+
 sp<Vec2> Vec2Util::truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
     return sp<VariableOP2<V2, V2, Operators::Div<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
