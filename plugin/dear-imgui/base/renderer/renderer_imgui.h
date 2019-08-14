@@ -5,7 +5,7 @@
 #include "core/base/memory_pool.h"
 #include "core/base/object_pool.h"
 #include "core/concurrent/lf_stack.h"
-#include "core/types/class.h"
+#include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/inf/renderer.h"
