@@ -105,7 +105,7 @@ public:
     void addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired);
 
     void preUpdate();
-    void deferUnref(const Box& box);
+    void deferUnref(Box box);
 
     const sp<NamedBuffer>& getNamedBuffer(NamedBuffer::Name name) const;
 

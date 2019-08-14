@@ -4,6 +4,7 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/types/null.h"
+#include "core/util/holder_util.h"
 
 #include "graphics/base/v3.h"
 
@@ -16,17 +17,23 @@ Rotate::Rotate(const sp<Numeric>& value, const sp<Vec3>& direction)
 {
 }
 
-float Rotate::radians() const
+void Rotate::traverse(const Holder::Visitor& visitor)
+{
+    HolderUtil::visit(_value->delegate(), visitor);
+    HolderUtil::visit(_direction, visitor);
+}
+
+float Rotate::rotation() const
 {
     return _value->val();
 }
 
-void Rotate::setRadians(float rotation)
+void Rotate::setRotation(float rotation)
 {
     _value->set(rotation);
 }
 
-void Rotate::setRadians(const sp<Numeric>& rotation)
+void Rotate::setRotation(const sp<Numeric>& rotation)
 {
     _value->set(rotation);
 }
@@ -48,7 +55,7 @@ const sp<NumericWrapper>& Rotate::value() const
 
 template<> ARK_API sp<Rotate> Null::ptr()
 {
-    return Ark::instance().obtain<Rotate>(Null::ptr<Numeric>(), Ark::instance().obtain<Vec3::Const>(Rotate::Z_AXIS));
+    return Ark::instance().obtain<Rotate>(nullptr, Ark::instance().obtain<Vec3::Const>(Rotate::Z_AXIS));
 }
 
 Rotate::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

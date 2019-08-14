@@ -3,6 +3,7 @@
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
+#include "core/inf/holder.h"
 #include "core/types/box.h"
 #include "core/types/weak_ptr.h"
 #include "core/types/safe_ptr.h"
@@ -16,8 +17,8 @@
 
 namespace ark {
 
-//[[script::bindings::container]]
-class ARK_API RigidBody {
+//[[script::bindings::holder]]
+class ARK_API RigidBody : public Holder {
 public:
     class ARK_API Callback {
     public:
@@ -54,7 +55,7 @@ public:
     };
 
 public:
-    virtual ~RigidBody() = default;
+    virtual ~RigidBody() override = default;
 
     RigidBody(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed = nullptr);
     RigidBody(const sp<Stub>& stub);
@@ -63,6 +64,8 @@ public:
     virtual void dispose() = 0;
 //  [[script::bindings::auto]]
     virtual void bind(const sp<RenderObject>& renderObject);
+
+    virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::property]]
     int32_t id() const;
@@ -120,6 +123,7 @@ public:
 
 private:
     sp<Stub> _stub;
+
 };
 
 }

@@ -40,6 +40,11 @@ void Visibility::set(const sp<Boolean>& visible)
     _visible->set(visible);
 }
 
+const sp<Boolean>& Visibility::delegate() const
+{
+    return _visible->delegate();
+}
+
 Visibility::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
     : _visible(factory.ensureBuilder<Boolean>(value))
 {

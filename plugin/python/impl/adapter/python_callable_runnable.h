@@ -4,9 +4,10 @@
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/epi/disposed.h"
-#include "core/types/class.h"
+#include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 
+#include "python/forwarding.h"
 #include "python/extension/py_instance.h"
 
 namespace ark {
@@ -15,7 +16,7 @@ namespace python {
 
 class PythonCallableRunnable : public Runnable, public Disposed, Implements<PythonCallableRunnable, Runnable, Disposed> {
 public:
-    PythonCallableRunnable(const sp<PyInstance>& callable);
+    PythonCallableRunnable(PyInstance callable);
 
     virtual void run() override;
 
@@ -40,8 +41,7 @@ private:
     };
 
 private:
-    PyInstance _args;
-    sp<PyInstance> _callable;
+    PyInstance _callable;
     sp<Result> _result;
 
 };

@@ -6,6 +6,7 @@
 #include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
 #include "core/inf/flatable.h"
+#include "core/inf/holder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -14,7 +15,7 @@
 
 namespace ark {
 
-class ARK_API Varyings : public Flatable {
+class ARK_API Varyings : public Flatable, public Holder {
 private:
     class Varying {
     public:
@@ -27,6 +28,8 @@ private:
     private:
         int32_t _offset;
         sp<Flatable> _flatable;
+
+        friend class Varyings;
     };
 
 public:
@@ -46,6 +49,8 @@ public:
 
     virtual void flat(void* buf) override;
     virtual uint32_t size() override;
+
+    virtual void traverse(const Visitor& visitor) override;
 
     void addVarying(const String& name, const sp<Flatable>& flatable);
 
@@ -81,6 +86,7 @@ private:
     sp<PipelineInput> _pipeline_input;
     std::unordered_map<String, Varying> _varyings;
     uint32_t _size;
+
 };
 
 }

@@ -4,6 +4,7 @@
 #include "core/base/api.h"
 #include "core/collection/list.h"
 #include "core/inf/builder.h"
+#include "core/inf/holder.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v2.h"
@@ -12,8 +13,8 @@
 
 namespace ark {
 
-//[[script::bindings::auto]]
-class LayerContext {
+//[[script::bindings::holder]]
+class ARK_API LayerContext : public Holder{
 private:
     struct Item {
         Item(float x, float y, const sp<RenderObject>& renderObject);
@@ -26,6 +27,8 @@ private:
 public:
     LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier>& notifier, Layer::Type type);
 
+    virtual void traverse(const Visitor& visitor) override;
+
     const sp<RenderModel>& renderModel() const;
 
     Layer::Type layerType() const;
@@ -34,7 +37,9 @@ public:
 
     void draw(float x, float y, const sp<RenderObject>& renderObject);
 
+//  [[script::bindings::auto]]
     void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = sp<Boolean>::null());
+//  [[script::bindings::auto]]
     void clear();
 
     void takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memoryPool);
@@ -72,6 +77,7 @@ private:
     V3 _position;
     std::vector<Item> _transient_items;
     List<RenderObject, RenderObjectFilter> _items;
+
 };
 
 }

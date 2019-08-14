@@ -8,16 +8,23 @@
 #include "core/inf/duck.h"
 #include "core/forwarding.h"
 #include "core/types/interfaces.h"
-#include "core/types/null.h"
 #include "core/types/type.h"
 
 namespace ark {
 
 class ARK_API Box {
 public:
-    typedef void(*Destructor)(void*);
+    typedef void(*Destructor)(const void*);
 
     Box() noexcept = default;
+    Box(const sp<void>&) noexcept;
+    template<typename T> Box(const sp<T>& sharedPtr) noexcept
+        : Box(sharedPtr ? new SharedPtr<T>(sharedPtr) : nullptr) {
+    }
+    template<typename T> Box(sp<T>&& sharedPtr) noexcept
+        : Box(sharedPtr ? new SharedPtr<T>(std::move(sharedPtr)) : nullptr) {
+    }
+
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Box);
 
     explicit operator bool() const;
@@ -44,29 +51,32 @@ public:
 
     Box toConcrete() const;
 
-    void* ptr() const;
+    const void* ptr() const;
     const std::shared_ptr<Interfaces>& interfaces() const;
 
 private:
-    Box(void* instance, void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor);
+    template<typename T> Box(const sp<T>* sharedPtr)
+        : _stub(sharedPtr ? std::make_shared<Stub>(sharedPtr, sharedPtr->get(), Type<T>::id(), sharedPtr->ensureInterfaces(), _shared_ptr_destructor<T>) : nullptr) {
+    }
+    Box(const void* sharedPtr, const void* instancePtr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor) noexcept;
 
     class ARK_API Stub {
     public:
-        Stub(void* instance, void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor);
+        Stub(const void* instance, const void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor);
         ~Stub();
 
-        void* ptr() const;
+        const void* ptr() const;
         TypeId typeId() const;
         const std::shared_ptr<Interfaces>& interfaces() const;
 
         template<typename T> const sp<T>& unpack() const {
             DCHECK(_type_id == Type<T>::id(), "Wrong type being unpacked");
-            return _shared_ptr ? *reinterpret_cast<sp<T>*>(_shared_ptr) : sp<T>::null();
+            return _shared_ptr ? *reinterpret_cast<const sp<T>*>(_shared_ptr) : sp<T>::null();
         }
 
     private:
-        void* _shared_ptr;
-        void* _ptr;
+        const void* _shared_ptr;
+        const void* _instance_ptr;
         TypeId _type_id;
         std::shared_ptr<Interfaces> _interfaces;
 
@@ -74,6 +84,10 @@ private:
 
         friend class Box;
     };
+
+    template<typename T> static void _shared_ptr_destructor(const void* inst) {
+        delete reinterpret_cast<const SharedPtr<T>*>(inst);
+    }
 
 private:
     std::shared_ptr<Stub> _stub;

@@ -6,7 +6,7 @@
 #include "core/util/log.h"
 
 #include "python/extension/python_interpreter.h"
-#include "python/extension/py_garbage_collector.h"
+#include "python/extension/py_instance_ref.h"
 
 namespace ark {
 namespace plugin {
@@ -31,30 +31,47 @@ static Py_hash_t __hash__(PyArkType::Instance* self)
     return reinterpret_cast<Py_hash_t>(self->box->ptr());
 }
 
+struct BreakException {
+    BreakException(int32_t retcode)
+        : _retcode(retcode) {
+    }
+
+    int32_t _retcode;
+};
+
 static int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args)
 {
-    if(self->container)
-        return self->container->traverse(visitor, args);
-
     const sp<Holder> holder = self->box->as<Holder>();
     if(holder)
-        holder->traverse([&visitor, args](const Box& packed) {
-            const sp<PyInstance> pi = packed.as<PyInstance>();
-            if(pi)
-                visitor(pi->object(), args);
-            return 0;
-        });
+        try {
+            holder->traverse([&visitor, args](Box& packed) {
+                const sp<PyInstanceRef> pi = packed.as<PyInstanceRef>();
+                if(pi) {
+                    int32_t vret = visitor(pi->instance(), args);
+                    if(vret)
+                        throw BreakException(vret);
+                    return true;
+                }
+                return false;
+            });
+        } catch(const BreakException& e) {
+            return e._retcode;
+        }
     return 0;
 }
 
 static int __clear__(PyArkType::Instance* self)
 {
-    if(self->container)
-        return self->container->clear();
-
     const sp<Holder> holder = self->box->as<Holder>();
     if(holder)
-        holder->clear();
+        holder->traverse([](Box& packed) {
+                const sp<PyInstanceRef> pi = packed.as<PyInstanceRef>();
+                if(pi) {
+                    pi->clear();
+                    return true;
+                }
+                return false;
+            });
     return 0;
 }
 
@@ -122,7 +139,7 @@ PyObject* PyArkType::load(Instance& inst, const String& loader, TypeId typeId, c
     const std::map<TypeId, LoaderFunction>& functions = getLoader(loader);
     const auto iter = functions.find(typeId);
     DCHECK(iter != functions.end(), "Loader \"%s\" has no LoaderFunction for %d", loader.c_str(), typeId);
-    return wrap(inst, iter->second(inst, id, args), args);
+    return PythonInterpreter::instance()->toPyObject(iter->second(inst, id, args));
 }
 
 void PyArkType::doInitConstants()
@@ -133,25 +150,6 @@ void PyArkType::doInitConstants()
         int32_t value = iter->second;
         PyDict_SetItemString(_py_type_object.tp_dict, name.c_str(), PyLong_FromLong(value));
     }
-}
-
-PyObject* PyArkType::wrap(Instance& inst, const Box& box, const sp<Scope>& args) const
-{
-    PyObject* bean = PythonInterpreter::instance()->toPyObject(box);
-    if(args)
-    {
-        Instance* beanInst = reinterpret_cast<Instance*>(bean);
-        PyContainer* beanWrapper = beanInst->getContainer();
-        PyContainer* wrapper = beanWrapper ? beanWrapper : inst.getContainer();
-        DASSERT(wrapper);
-        for(auto iter = args->variables().begin(); iter != args->variables().end(); ++iter)
-        {
-            const sp<PyGarbageCollector> collector = iter->second.as<PyGarbageCollector>();
-            if(collector)
-                wrapper->addCollector(collector);
-        }
-    }
-    return bean;
 }
 
 PyTypeObject* PyArkType::basetype()
@@ -210,7 +208,6 @@ PyObject* PyArkType::__new__(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
     PyObject* obj = PyType_GenericNew(type, args, kwds);
     Instance* self = reinterpret_cast<Instance*>(obj);
-    self->container = nullptr;
     self->weakreflist = nullptr;
     return obj;
 }
@@ -218,7 +215,6 @@ PyObject* PyArkType::__new__(PyTypeObject* type, PyObject* args, PyObject* kwds)
 void PyArkType::__dealloc__(Instance* self)
 {
     delete self->box;
-    delete self->container;
 
     if (self->weakreflist)
         PyObject_ClearWeakRefs(reinterpret_cast<PyObject*>(self));

@@ -9,7 +9,7 @@
 
 #include "graphics/impl/vec/vec2_impl.h"
 #include "graphics/impl/vec/vec_neg.h"
-#include "graphics/impl/vec/vv2_with_transform.h"
+#include "graphics/impl/vec/vec2_with_transform.h"
 
 namespace ark {
 
@@ -104,9 +104,9 @@ sp<Vec2> Vec2Util::negative(const sp<Vec2>& self)
     return sp<VecNeg<V2>>::make(self);
 }
 
-sp<Vec2> Vec2Util::transform(const sp<Vec2>& self, const sp<Transform>& transform, const sp<Vec2>& org)
+sp<Vec2> Vec2Util::transform(const sp<Vec2>& self, const sp<Transform>& transform)
 {
-    return sp<Vec2WithTransform>::make(self, org, transform);
+    return sp<Vec2WithTransform>::make(self, transform);
 }
 
 sp<Vec2> Vec2Util::normalize(const sp<Vec2>& self)

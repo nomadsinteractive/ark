@@ -5,10 +5,9 @@
 #include "core/base/object_pool.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
+#include "core/util/holder_util.h"
 #include "core/util/numeric_util.h"
 #include "core/util/strings.h"
-
-#include "graphics/impl/vec/vv2_with_transform.h"
 
 namespace ark {
 
@@ -40,6 +39,12 @@ Vec2Impl::Vec2Impl(Vec2& other) noexcept
 V2 Vec2Impl::val()
 {
     return V2(_x->val(), _y->val());
+}
+
+void Vec2Impl::traverse(const Holder::Visitor& visitor)
+{
+    HolderUtil::visit(_x, visitor);
+    HolderUtil::visit(_y, visitor);
 }
 
 const sp<NumericWrapper>& Vec2Impl::x() const

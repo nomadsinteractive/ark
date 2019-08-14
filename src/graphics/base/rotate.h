@@ -3,6 +3,7 @@
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
+#include "core/inf/holder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
@@ -10,18 +11,21 @@
 
 namespace ark {
 
-class ARK_API Rotate {
+//[[script::bindings::holder]]
+class ARK_API Rotate : public Holder {
 public:
 //  [[script::bindings::auto]]
     Rotate(const sp<Numeric>& value, const sp<Vec3>& direction = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotate);
 
+    virtual void traverse(const Visitor& visitor) override;
+
 //  [[script::bindings::property]]
-    float radians() const;
+    float rotation() const;
 //  [[script::bindings::property]]
-    void setRadians(float radians);
+    void setRotation(float rotation);
 //  [[script::bindings::property]]
-    void setRadians(const sp<Numeric>& radians);
+    void setRotation(const sp<Numeric>& rotation);
 
 //  [[script::bindings::property]]
     const sp<Vec3>& direction() const;

@@ -4,7 +4,7 @@
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
-#include "core/types/class.h"
+#include "core/types/implements.h"
 #include "core/types/safe_ptr.h"
 
 #include "graphics/inf/renderer.h"

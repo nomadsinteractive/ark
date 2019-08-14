@@ -1,6 +1,7 @@
 #include "graphics/base/layer.h"
 
 #include "core/base/bean_factory.h"
+#include "core/util/holder_util.h"
 
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_command_pipeline.h"
@@ -17,6 +18,11 @@ Layer::Layer(const sp<RenderLayer>& renderLayer, Layer::Type type)
 void Layer::render(RenderRequest& /*renderRequest*/, float x, float y)
 {
     _layer_context->renderRequest(V2(x, y));
+}
+
+void Layer::traverse(const Holder::Visitor& visitor)
+{
+    HolderUtil::visit(_layer_context, visitor);
 }
 
 void Layer::draw(float x, float y, const sp<RenderObject>& renderObject)

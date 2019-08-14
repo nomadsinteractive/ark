@@ -27,6 +27,8 @@ public:
 //  [[script::bindings::auto]]
     void set(const sp<Boolean>& disposed);
 
+    const sp<Boolean>& delegate() const;
+
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Disposed> {
     public:

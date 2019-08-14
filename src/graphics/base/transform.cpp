@@ -5,7 +5,7 @@
 #include "core/inf/variable.h"
 #include "core/types/null.h"
 #include "core/util/documents.h"
-#include "core/util/math.h"
+#include "core/util/holder_util.h"
 
 #include "graphics/base/matrix.h"
 #include "graphics/base/rotate.h"
@@ -13,18 +13,25 @@
 
 namespace ark {
 
-Transform::Transform(const sp<Rotate>& rotate, const sp<Vec3>& scale, const sp<Vec>& translate)
-    : _rotate(rotate), _scale(scale ? scale : Ark::instance().obtain<Vec3Impl>(1.0f, 1.0f, 1.0f).cast<Vec3>()), _translate(translate)
+Transform::Transform(const sp<Rotate>& rotate, const sp<Vec3>& scale, const sp<Vec3>& translate)
+    : _rotate(rotate), _scale(scale ? scale : Ark::instance().obtain<Vec3Impl>(1.0f, 1.0f, 1.0f).cast<Vec3>()), _pivot(translate)
 {
+}
+
+void Transform::traverse(const Holder::Visitor& visitor)
+{
+    HolderUtil::visit(_rotate, visitor);
+    HolderUtil::visit(_scale, visitor);
+    HolderUtil::visit(_pivot, visitor);
 }
 
 Transform::Snapshot Transform::snapshot() const
 {
     Snapshot ss;
-    ss.rotate_value = _rotate->radians();
+    ss.rotate_value = _rotate->rotation();
     ss.rotate_direction = _rotate->direction()->val();
     ss.scale = _scale->val();
-    ss.translate = _translate->val();
+    ss.pivot = _pivot->val();
     return ss;
 }
 
@@ -48,14 +55,14 @@ void Transform::setScale(const sp<Vec3>& scale)
     _scale = scale;
 }
 
-const sp<Vec>& Transform::translate() const
+const sp<Vec3>& Transform::pivot() const
 {
-    return _translate;
+    return _pivot;
 }
 
-void Transform::setTranslate(const sp<Vec>& translation)
+void Transform::setPivot(const sp<Vec3>& pivot)
 {
-    _translate = translation;
+    _pivot = pivot;
 }
 
 Transform::Snapshot::Snapshot()
@@ -66,15 +73,15 @@ Transform::Snapshot::Snapshot()
 Matrix Transform::Snapshot::toMatrix() const
 {
     Matrix matrix;
-    matrix.translate(translate.x(), translate.y(), translate.z());
-    matrix.scale(scale.x(), scale.y(), scale.z());
     matrix.rotate(rotate_value, rotate_direction.x(), rotate_direction.y(), rotate_direction.z());
+    matrix.scale(scale.x(), scale.y(), scale.z());
+    matrix.translate(pivot.x(), pivot.y(), pivot.z());
     return matrix;
 }
 
 bool Transform::Snapshot::operator ==(const Transform::Snapshot& other) const
 {
-    return translate == other.translate && scale == other.scale && rotate_value == other.rotate_value && rotate_direction == other.rotate_direction;
+    return pivot == other.pivot && scale == other.scale && rotate_value == other.rotate_value && rotate_direction == other.rotate_direction;
 }
 
 bool Transform::Snapshot::operator !=(const Transform::Snapshot& other) const
@@ -86,8 +93,8 @@ void Transform::Snapshot::map(float x, float y, float tx, float ty, float& mx, f
 {
     if(rotate_value == 0.0f)
     {
-        mx = x * scale.x() + translate.x();
-        my = y * scale.y() + translate.y();
+        mx = (x + pivot.x()) * scale.x();
+        my = (y + pivot.y()) * scale.y();
     }
     else
     {
@@ -104,9 +111,9 @@ V3 Transform::Snapshot::mapXYZ(const V3& p) const
     float x, y, z;
     if(rotate_value == 0.0f)
     {
-        x = p.x() * scale.x() + translate.x();
-        y = p.y() * scale.y() + translate.y();
-        z = p.z() * scale.z() + translate.z();
+        x = (p.x() + pivot.x()) * scale.x();
+        y = (p.y() + pivot.y()) * scale.y();
+        z = (p.z() + pivot.z()) * scale.z();
     }
     else
     {
@@ -118,17 +125,17 @@ V3 Transform::Snapshot::mapXYZ(const V3& p) const
 
 Transform::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _rotate(factory.getBuilder<Rotate>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec3>(manifest, "scale")),
-      _translation(factory.getBuilder<Vec>(manifest, Constants::Attributes::TRANSLATION))
+      _pivot(factory.getBuilder<Vec3>(manifest, "pivot"))
 {
 }
 
 sp<Transform> Transform::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<Transform>::make(_rotate->build(args), _scale->build(args), _translation->build(args));
+    return sp<Transform>::make(_rotate->build(args), _scale->build(args), _pivot->build(args));
 }
 
-Transform::DICTIONARY::DICTIONARY(BeanFactory& parent, const String& value)
-    : _impl(parent, Documents::fromProperties(Strings::parseProperties(value)))
+Transform::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
+    : _impl(factory, Documents::fromProperties(Strings::parseProperties(value)))
 {
 }
 

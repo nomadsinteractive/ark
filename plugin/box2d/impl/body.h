@@ -3,8 +3,6 @@
 
 #include <Box2D/Box2D.h>
 
-#include "core/base/object.h"
-#include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/weak_ptr.h"
 
@@ -24,7 +22,7 @@ namespace box2d {
 
 //[[script::bindings::container]]
 //[[script::bindings::extends(RigidBody)]]
-class ARK_PLUGIN_BOX2D_API Body : public Object, public RigidBody, Implements<Body, Object, RigidBody> {
+class ARK_PLUGIN_BOX2D_API Body : public RigidBody, Implements<Body, RigidBody> {
 public:
     struct Stub {
         Stub(const World& world, b2Body* body);
@@ -119,34 +117,6 @@ public:
     sp<Future> applyLinearVelocity(const sp<Vec2>& velocity);
 //  [[script::bindings::auto]]
     sp<Future> applyRotate(const sp<Numeric>& rotate);
-
-//  [[plugin::builder]]
-    class BUILDER_IMPL1 : public Builder<Body> {
-    public:
-        BUILDER_IMPL1(BeanFactory& factory, const document& manifest);
-
-        virtual sp<Body> build(const sp<Scope>& args) override;
-
-    private:
-        sp<Builder<Collider>> _world;
-        sp<Builder<Shape>> _shape;
-        sp<Builder<Vec>> _position;
-        sp<Builder<Size>> _size;
-        float _density;
-        float _friction;
-
-    };
-
-//  [[plugin::builder("b2Body")]]
-    class BUILDER_IMPL2 : public Builder<Object> {
-    public:
-        BUILDER_IMPL2(BeanFactory& factory, const document& manifest);
-
-        virtual sp<Object> build(const sp<Scope>& args) override;
-
-    private:
-        BUILDER_IMPL1 _delegate;
-    };
 
 private:
     sp<Stub> _stub;

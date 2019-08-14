@@ -202,9 +202,9 @@ void RenderController::preUpdate()
         runnable->run();
 }
 
-void RenderController::deferUnref(const Box& box)
+void RenderController::deferUnref(Box box)
 {
-    _defered_instances.push_back(box);
+    _defered_instances.push_back(std::move(box));
 }
 
 const sp<NamedBuffer>& RenderController::getNamedBuffer(NamedBuffer::Name name) const

@@ -12,10 +12,9 @@ class ARK_API Holder {
 public:
     virtual ~Holder() = default;
 
-    typedef std::function<bool(const Box&)> Visitor;
+    typedef std::function<bool(Box&)> Visitor;
 
-    virtual int32_t traverse(const Visitor& visitor) = 0;
-    virtual int32_t clear() = 0;
+    virtual void traverse(const Visitor& visitor) = 0;
 };
 
 }

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "core/inf/builder.h"
+#include "core/inf/holder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/inf/renderer.h"
@@ -11,7 +12,8 @@
 
 namespace ark {
 
-class ARK_API Layer : public Renderer {
+//[[script::bindings::holder]]
+class ARK_API Layer : public Renderer, public Holder {
 public:
 //  [[script::bindings::enumeration]]
     enum Type {
@@ -24,10 +26,8 @@ public:
 // [[script::bindings::auto]]
     Layer(const sp<RenderLayer>& renderLayer = nullptr, Layer::Type type = Layer::TYPE_DYNAMIC);
 
-//  [[script::bindings::meta(expire())]]
-//  [[script::bindings::meta(isExpired())]]
-
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void traverse(const Visitor& visitor) override;
 
     void draw(float x, float y, const sp<RenderObject>& renderObject);
 
@@ -75,6 +75,7 @@ private:
     sp<LayerContext> _layer_context;
 
     friend class RenderLayer;
+
 };
 
 }

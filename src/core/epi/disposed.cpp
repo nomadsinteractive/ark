@@ -39,6 +39,11 @@ void Disposed::set(const sp<Boolean>& disposed)
     _disposed->set(disposed);
 }
 
+const sp<Boolean>& Disposed::delegate() const
+{
+    return _disposed->delegate();
+}
+
 Disposed::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
     : _disposed(value == "true")
 {

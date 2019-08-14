@@ -63,7 +63,7 @@ void RenderModelAssimp::postSnapshot(RenderController& /*renderController*/, Ren
     {
         const RenderObject::Snapshot& ro = snapshot._items.at(i);
         Transform::Snapshot transform = ro._transform;
-        transform.translate += ro._position;
+        transform.pivot += ro._position;
         _model_matrics->buf()[i] = transform.toMatrix();
     }
 }

@@ -332,29 +332,29 @@ class Numeric(_Var):
     def fence(self, fence) -> Expectation:
         return Expectation()
 
-    def integral(self, t=None):
-        return None
+    def integral(self, t=None)-> 'Numeric':
+        return Numeric(0)
 
-    def __add__(self, other):
-        return None
+    def __add__(self, other) -> 'Numeric':
+        return Numeric(0)
 
-    def __mul__(self, other):
-        return None
+    def __mul__(self, other) -> 'Numeric':
+        return Numeric(0)
 
-    def __sub__(self, other):
-        return None
+    def __sub__(self, other) -> 'Numeric':
+        return Numeric(0)
 
-    def __truediv__(self, other):
-        return None
+    def __truediv__(self, other) -> 'Numeric':
+        return Numeric(0)
 
-    def __gt__(self, other):
-        return False
+    def __gt__(self, other) -> 'Boolean':
+        return Boolean(False)
 
-    def __lt__(self, other):
-        return False
+    def __lt__(self, other) -> 'Boolean':
+        return Boolean(False)
 
-    def __eq__(self, other):
-        return False
+    def __eq__(self, other) -> 'Boolean':
+        return Boolean(False)
 
     @staticmethod
     def pursue(from_value: float, to_value, duration: float, t=None):
@@ -616,7 +616,7 @@ class Layer:
     TYPE_DYNAMIC = 1
     TYPE_STATIC = 2
 
-    def __init__(self, render_layer: RenderLayer):
+    def __init__(self, render_layer: Union[RenderLayer, None]):
         self._render_layer = render_layer
 
     @property
@@ -749,26 +749,26 @@ class Rotate:
         self._direction = direction
 
     @property
-    def radians(self):
+    def rotation(self) -> float:
         return self._value
 
-    @radians.setter
-    def radians(self, v):
+    @rotation.setter
+    def rotation(self, v: Union[float, Numeric]):
         self._value = v
 
     @property
-    def direction(self):
+    def direction(self) -> Vec3:
         return self._direction
 
 
 class Transform:
-    def __init__(self, rotate=None, scale=None, translate=None):
+    def __init__(self, rotate: Union[Rotate, None], scale: Union[Vec3, None] = None, translate: Union[Vec3, None] = None):
         self._rotate = rotate
         self._scale = scale
         self._translate = translate
 
     @property
-    def rotate(self):
+    def rotate(self) -> Rotate:
         return self._rotate
 
     @rotate.setter
@@ -776,7 +776,7 @@ class Transform:
         self._rotate = v
 
     @property
-    def scale(self):
+    def scale(self) -> Vec3:
         return self._scale
 
     @scale.setter
@@ -784,7 +784,7 @@ class Transform:
         self._scale = v
 
     @property
-    def translate(self):
+    def translate(self) -> Vec3:
         return self._translate
 
     @translate.setter

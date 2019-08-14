@@ -17,19 +17,6 @@ namespace python {
 
 template<typename T> class PyArkMetaType {
 public:
-    static PyObject* absorb(typename PyArkType::Instance* self, PyObject* args) {
-        PyObject* arg1;
-        if(PyArg_ParseTuple(args, "O", &arg1)) {
-            sp<T>& ptr = self->unpack<T>();
-            if(PythonInterpreter::instance()->isInstance<Disposed>(arg1)) {
-                typename PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(arg1);
-                ptr.absorb(instance->unpack<Disposed>());
-            }
-        }
-        Py_INCREF(self);
-        return reinterpret_cast<PyObject*>(self);
-    }
-
     static PyObject* expire(typename PyArkType::Instance* self, PyObject* /*args*/) {
         const sp<T>& ptr = self->unpack<T>();
         if(ptr.template is<Disposed>()) {
@@ -57,18 +44,6 @@ public:
             const SafePtr<Size>& size = block->size();
             if(size)
                 return PythonInterpreter::instance()->pyNewObject<Size>(size);
-        }
-        Py_RETURN_NONE;
-    }
-
-    static PyObject* addRenderer(typename PyArkType::Instance* self, PyObject* args) {
-        PyObject* arg1;
-        if(PyArg_ParseTuple(args, "O", &arg1)) {
-            const sp<T>& ptr = self->unpack<T>();
-            if(ptr.template is<Renderer::Group>()) {
-                const sp<Renderer::Group> rendererGroup = ptr.template as<Renderer::Group>();
-                rendererGroup->addRenderer(PythonInterpreter::instance()->asInterface<Renderer>(arg1));
-            }
         }
         Py_RETURN_NONE;
     }

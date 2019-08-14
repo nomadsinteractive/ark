@@ -20,7 +20,7 @@
 
 #include "python/api.h"
 #include "python/extension/py_ark_type.h"
-#include "python/extension/py_instance.h"
+#include "python/extension/py_instance_ref.h"
 
 namespace ark {
 namespace plugin {
@@ -64,8 +64,8 @@ public:
             PyList_SetItem(pyList, i, toPyObject<T>(ptr[i]));
         return pyList;
     }
-    PyObject* fromSharedPtr(const sp<PyInstance>& inst) {
-        PyObject* obj = inst->object();
+    PyObject* fromSharedPtr(const sp<PyInstanceRef>& inst) {
+        PyObject* obj = inst->instance();
         Py_XINCREF(obj);
         return obj;
     }
@@ -121,9 +121,7 @@ public:
 
     template<typename T> PyObject* pyNewObject(const sp<T>& object) {
         TypeId typeId = object.ensureInterfaces()->typeId();
-        if(_type_by_id.find(typeId) != _type_by_id.end())
-            return toPyObject(object.ensureInterfaces()->as(object.pack(), typeId));
-        return getPyArkType<T>()->create(object.pack());
+        return _type_by_id.find(typeId) != _type_by_id.end() ? toPyObject(object.ensureInterfaces()->as(object, typeId)) : getPyArkType<T>()->create(object);
     }
 
     template<typename T, typename P> void pyModuleAddType(PyObject* module, const char* moduleName, const char* typeName, PyTypeObject* base, long flags) {
@@ -209,7 +207,6 @@ private:
         }
         return col;
     }
-
 
     sp<Vec2> toVec2(PyObject* object, bool alert);
     sp<Vec3> toVec3(PyObject* object, bool alert);

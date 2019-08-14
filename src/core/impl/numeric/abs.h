@@ -16,18 +16,6 @@ public:
 //  [[plugin::function("abs")]]
     static sp<Numeric> call(const sp<Numeric>& x);
 
-//  [[plugin::builder("abs")]]
-    class BUILDER : public Builder<Numeric> {
-    public:
-        BUILDER(BeanFactory& parent, const document& doc);
-
-        virtual sp<Numeric> build(const sp<Scope>& args) override;
-
-    private:
-        sp<Builder<Numeric>> _x;
-
-    };
-
 private:
     sp<Numeric> _x;
 

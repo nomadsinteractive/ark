@@ -21,33 +21,16 @@ public:
     _CONSTEXPR SharedPtr(std::nullptr_t null) noexcept
         : _ptr(null), _interfaces(null) {
     }
-    SharedPtr(const SharedPtr& other) noexcept
-        : _ptr(other._ptr), _interfaces(other._interfaces) {
-        if(_interfaces)
-            _interfaces->ref();
-    }
-    SharedPtr(SharedPtr&&) noexcept = default;
     SharedPtr(std::shared_ptr<T> ptr, std::shared_ptr<Interfaces> interfaces) noexcept
         : _ptr(std::move(ptr)), _interfaces(std::move(interfaces)) {
     }
     template<typename U> SharedPtr(const SharedPtr<U>& ptr) noexcept
-        : _ptr(std::static_pointer_cast<T>(ptr._ptr)), _interfaces(ptr.ensureInterfaces()) {
-        if(_interfaces)
-            _interfaces->ref();
+        : SharedPtr(std::static_pointer_cast<T>(ptr._ptr), ptr.ensureInterfaces()) {
     }
-    ~SharedPtr() {
-        if(_interfaces)
-            _interfaces->deref();
-    }
-
-    SharedPtr& operator=(const SharedPtr& other) noexcept {
-        _ptr = other._ptr;
-        _interfaces = other._interfaces;
-        return *this;
-    }
-    SharedPtr& operator=(SharedPtr&&) noexcept = default;
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SharedPtr);
 
     typedef T _PtrType;
+    typedef typename std::remove_extent<T>::type element_type;
 
     static SharedPtr<T> adopt(T* instance) {
         return SharedPtr<T>(instance);
@@ -97,14 +80,6 @@ public:
         return _ptr.get();
     }
 
-    Box pack() const {
-        if(!_ptr)
-            return Box();
-        SharedPtr<T>* instance = new SharedPtr<T>(*this);
-        Box box(instance, instance->get(), Type<T>::id(), ensureInterfaces(), packedBoxDestructor);
-        return box;
-    }
-
     const std::shared_ptr<T>& ptr() const {
         return _ptr;
     }
@@ -119,10 +94,10 @@ public:
         return SharedPtr<U>(std::static_pointer_cast<U>(_ptr), ensureInterfaces());
     }
 
-    template<typename U> SharedPtr<T>& absorb(const SharedPtr<U>& beingAbsorbed) {
+    template<typename U> const SharedPtr<T>& absorb(const SharedPtr<U>& beingAbsorbed) const {
         ensureInterfaces();
         if(beingAbsorbed._interfaces != _interfaces)
-            _interfaces->absorb(beingAbsorbed.pack());
+            _interfaces->absorb(beingAbsorbed);
         return *this;
     }
 
@@ -132,14 +107,8 @@ public:
 
     template<typename U> SharedPtr<U> as() const {
         if(_ptr) {
-            const Box self = pack();
-            sp<U> ptr = _interfaces->as<U>(self);
-            if(!ptr) {
-                const sp<Duck<U>> duckType = _interfaces->as<Duck<U>>(self);
-                if(duckType)
-                    duckType->to(ptr);
-            }
-            return ptr;
+            Box self(this, get(), Type<T>::id(), ensureInterfaces(), [](const void*) {});
+            return self.as<U>();
         }
         return nullptr;
     }
@@ -148,23 +117,12 @@ public:
         return _ptr.unique();
     }
 
-    void setRefCounter(Interfaces::RefCounter* refCounter) const {
-        const std::shared_ptr<Interfaces>& interfaces = ensureInterfaces();
-        DCHECK(!interfaces->_ref_counter, "RefCounter has been set");
-        interfaces->_ref_counter = refCounter;
-    }
-
 private:
     SharedPtr(T* instance) noexcept
         : _ptr(instance) {
     }
     SharedPtr(T* ptr, std::shared_ptr<Interfaces> interfaces, std::function<void(T*)> deleter) noexcept
         : _ptr(ptr, std::move(deleter)), _interfaces(std::move(interfaces)) {
-    }
-
-    static void packedBoxDestructor(void* inst) {
-        SharedPtr<T>* b = reinterpret_cast<SharedPtr<T>*>(inst);
-        delete b;
     }
 
     template<typename U> friend class SharedPtr;
@@ -192,8 +150,8 @@ public:
         DFATAL("Illegal SharedPtr<void> class instance creation");
     }
 
-    Box pack() const {
-        return Box();
+    void* get() const {
+        return nullptr;
     }
 
     operator bool() const {
@@ -205,6 +163,10 @@ public:
     }
 
     const std::shared_ptr<Interfaces>& interfaces() const {
+        return _interfaces;
+    }
+
+    const std::shared_ptr<Interfaces>& ensureInterfaces() const {
         return _interfaces;
     }
 

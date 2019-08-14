@@ -5,7 +5,7 @@
 #include "core/ark.h"
 #include "core/base/delegate.h"
 #include "core/inf/variable.h"
-#include "core/types/class.h"
+#include "core/types/implements.h"
 #include "core/types/null.h"
 
 #include "app/base/application_context.h"

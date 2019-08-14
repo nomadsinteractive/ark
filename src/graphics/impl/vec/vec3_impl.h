@@ -3,6 +3,7 @@
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
+#include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -12,7 +13,7 @@
 
 namespace ark {
 
-class ARK_API Vec3Impl final : public Vec3 {
+class ARK_API Vec3Impl final : public Vec3, public Holder {
 public:
     Vec3Impl() noexcept;
     Vec3Impl(float x, float y, float z) noexcept;
@@ -20,6 +21,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Vec3Impl);
 
     virtual V3 val() override;
+    virtual void traverse(const Visitor& visitor) override;
 
     const sp<NumericWrapper>& x() const;
     const sp<NumericWrapper>& y() const;

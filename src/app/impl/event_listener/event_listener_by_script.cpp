@@ -15,7 +15,7 @@ bool EventListenerByScript::onEvent(const Event& event)
 {
     const sp<Event> copy = sp<Event>::make(event);
     Script::Arguments args;
-    args.push_back(copy.pack());
+    args.emplace_back(copy);
     return static_cast<bool>(_script->call(_event_name, args));
 }
 

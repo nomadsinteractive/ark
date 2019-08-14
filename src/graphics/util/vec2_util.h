@@ -38,7 +38,7 @@ public:
     static sp<Vec2> negative(const sp<Vec2>& self);
 
 //[[script::bindings::classmethod]]
-    static sp<Vec2> transform(const sp<Vec2>& self, const sp<Transform>& transform, const sp<Vec2>& org);
+    static sp<Vec2> transform(const sp<Vec2>& self, const sp<Transform>& transform);
 //[[script::bindings::classmethod]]
     static sp<Vec2> normalize(const sp<Vec2>& self);
 

@@ -4,6 +4,7 @@
 #include <Box2D/Box2D.h>
 
 #include "core/base/object.h"
+#include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"

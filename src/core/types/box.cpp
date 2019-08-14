@@ -5,8 +5,12 @@
 
 namespace ark {
 
-Box::Box(void* instance, void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor)
-    : _stub(std::make_shared<Stub>(instance, ptr, typeId, interfaces, destructor))
+Box::Box(const void* sharedPtr, const void* instancePtr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor) noexcept
+    : _stub(std::make_shared<Stub>(sharedPtr, instancePtr, typeId, interfaces, destructor))
+{
+}
+
+Box::Box(const sp<void>&) noexcept
 {
 }
 
@@ -21,7 +25,7 @@ Box Box::toConcrete() const
     return _stub->_interfaces->as(*this, _stub->_interfaces->typeId());
 }
 
-void* Box::ptr() const
+const void* Box::ptr() const
 {
     return _stub ? _stub->ptr() : nullptr;
 }
@@ -37,8 +41,8 @@ Box::operator bool() const
     return _stub && _stub->ptr() != nullptr;
 }
 
-Box::Stub::Stub(void* instance, void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor)
-    : _shared_ptr(instance), _ptr(ptr), _type_id(typeId), _interfaces(interfaces), _destructor(destructor)
+Box::Stub::Stub(const void* instance, const void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor)
+    : _shared_ptr(instance), _instance_ptr(ptr), _type_id(typeId), _interfaces(interfaces), _destructor(destructor)
 {
 }
 
@@ -48,9 +52,9 @@ Box::Stub::~Stub()
         _destructor(_shared_ptr);
 }
 
-void* Box::Stub::ptr() const
+const void* Box::Stub::ptr() const
 {
-    return _ptr;
+    return _instance_ptr;
 }
 
 TypeId Box::Stub::typeId() const

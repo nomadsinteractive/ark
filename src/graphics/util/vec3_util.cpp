@@ -44,10 +44,10 @@ private:
     sp<Vec3> _b;
 };
 
-class Vec3Normalize : public Vec3 {
+class Vec3Normalize : public Delegate<Vec3>, public Vec3 {
 public:
     Vec3Normalize(const sp<Vec3>& delegate)
-        : _delegate(delegate) {
+        : Delegate(delegate) {
     }
 
     virtual V3 val() override {
@@ -56,11 +56,9 @@ public:
         return V3(normalized.x, normalized.y, normalized.z);
     }
 
-private:
-    sp<Vec3> _delegate;
 };
 
-class Vec2ToVec3 : public Vec3 {
+class Vec2ToVec3 : public Vec3, public Holder, Implements<Vec2ToVec3, Vec3, Holder> {
 public:
     Vec2ToVec3(const sp<Vec2>& vec2)
         : _vec2(vec2) {
@@ -70,8 +68,13 @@ public:
         return _vec2->val();
     }
 
+    virtual void traverse(const Visitor& visitor) override {
+        HolderUtil::visit(_vec2, visitor);
+    }
+
 private:
     sp<Vec2> _vec2;
+
 };
 
 }

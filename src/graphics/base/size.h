@@ -3,6 +3,7 @@
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
+#include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -11,8 +12,9 @@
 
 namespace ark {
 
+//[[script::bindings::holder]]
 //[[core::class]]
-class ARK_API Size : public Vec3 {
+class ARK_API Size : public Vec3, public Holder {
 public:
     Size();
     Size(float width, float height, float depth = 0);
@@ -20,6 +22,7 @@ public:
     Size(const sp<Numeric>& width, const sp<Numeric>& height, const sp<Numeric>& depth = nullptr);
 
     virtual V3 val() override;
+    virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::property]]
     float width() const;
@@ -77,6 +80,7 @@ private:
     sp<NumericWrapper> _width;
     sp<NumericWrapper> _height;
     sp<NumericWrapper> _depth;
+
 };
 
 }

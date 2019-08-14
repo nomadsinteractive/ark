@@ -7,6 +7,7 @@
 #include "core/base/api.h"
 #include "core/inf/builder.h"
 #include "core/inf/script.h"
+#include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 
 #include "python/api.h"

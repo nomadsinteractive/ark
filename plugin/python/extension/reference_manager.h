@@ -6,21 +6,21 @@
 #include "core/forwarding.h"
 #include "core/types/weak_ptr.h"
 
+#include "python/forwarding.h"
+
 namespace ark {
 namespace plugin {
 namespace python {
 
-class PyInstance;
-
 class ReferenceManager {
 public:
 //  [[script::bindings::property]]
-    std::vector<sp<PyInstance>> refs();
+    std::vector<sp<PyInstanceRef>> refs();
 
-    void track(const WeakPtr<PyInstance>& ref);
+    void track(const WeakPtr<PyInstanceRef>& ref);
 
 private:
-    std::vector<WeakPtr<PyInstance>> _refs;
+    std::vector<WeakPtr<PyInstanceRef>> _refs;
 };
 
 }

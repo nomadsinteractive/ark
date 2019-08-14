@@ -22,7 +22,7 @@ public:
         if(!inst) {
             inst = _delegate->build(args);
             DASSERT(inst);
-            reference->put<T>(_name, inst);
+            reference->put(_name, inst);
             _delegate = nullptr;
         }
         return inst;

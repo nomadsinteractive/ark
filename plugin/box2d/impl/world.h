@@ -11,6 +11,7 @@
 #include "core/base/object_pool.h"
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
+#include "core/types/implements.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 

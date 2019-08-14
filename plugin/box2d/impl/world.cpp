@@ -47,7 +47,7 @@ sp<RigidBody> World::createBody(Collider::BodyType type, int32_t shape, const sp
     const BodyCreateInfo& manifest = iter->second;
     const sp<Body> body = sp<Body>::make(*this, type, position, size, rotate ? rotate->value().cast<Numeric>() : sp<Numeric>::null(), manifest);
     if(rotate)
-        body->setAngle(rotate->radians());
+        body->setAngle(rotate->rotation());
 
     if(manifest.category || manifest.mask || manifest.group)
     {

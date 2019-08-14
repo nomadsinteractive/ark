@@ -9,24 +9,24 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-PyObjectDuckType::PyObjectDuckType(const sp<PyInstance>& inst)
-    : _instance(inst)
+PyObjectDuckType::PyObjectDuckType(PyInstance inst)
+    : _instance(std::move(inst))
 {
 }
 
 void PyObjectDuckType::to(sp<CollisionCallback>& inst)
 {
-    inst = sp<CollisionCallbackPythonAdapter>::make(_instance);
+    inst = PythonInterpreter::instance()->toCppObject<sp<CollisionCallback>>(_instance.instance());
 }
 
 void PyObjectDuckType::to(sp<Array<Color>>& inst)
 {
-    inst = PythonInterpreter::instance()->toArray<Color>(_instance->object());
+    inst = PythonInterpreter::instance()->toArray<Color>(_instance.instance());
 }
 
 void PyObjectDuckType::to(sp<Array<int32_t>>& inst)
 {
-    inst = PythonInterpreter::instance()->toArray<int32_t>(_instance->object());
+    inst = PythonInterpreter::instance()->toArray<int32_t>(_instance.instance());
 }
 
 }

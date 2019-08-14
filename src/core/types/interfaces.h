@@ -14,16 +14,7 @@ namespace ark {
 
 class ARK_API Interfaces {
 public:
-    class ARK_API RefCounter {
-    public:
-        virtual ~RefCounter() = default;
-
-        virtual void ref() = 0;
-        virtual void deref() = 0;
-    };
-
-public:
-    Interfaces(Class* clazz, RefCounter* refCounter = nullptr);
+    Interfaces(Class* clazz);
     DISALLOW_COPY_AND_ASSIGN(Interfaces);
 
     template<typename T> bool is() const {
@@ -47,12 +38,7 @@ public:
     void reset();
 
 private:
-    void ref();
-    void deref();
-
-private:
     Class* _class;
-    RefCounter* _ref_counter;
 
     std::map<TypeId, Box> _attachments;
 

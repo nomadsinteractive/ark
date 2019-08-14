@@ -3,6 +3,7 @@
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
+#include "core/inf/holder.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_ptr.h"
@@ -15,8 +16,8 @@
 
 namespace ark {
 
-//[[script::bindings::container]]
-class ARK_API RenderObject : public Block {
+//[[script::bindings::holder]]
+class ARK_API RenderObject : public Block, public Holder {
 public:
     struct Snapshot {
         Snapshot(int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
@@ -39,10 +40,11 @@ public:
 //  [[script::bindings::meta(isExpired())]]
 
 //  [[script::bindings::property]]
-    const sp<Integer> type() const;
+    virtual const SafePtr<Size>& size() override;
+    virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::property]]
-    virtual const SafePtr<Size>& size() override;
+    const sp<Integer> type() const;
 
 //  [[script::bindings::property]]
     const SafePtr<Transform>& transform() const;
@@ -147,6 +149,7 @@ private:
     SafePtr<Visibility> _visible;
 
     Box _tag;
+
 };
 
 }

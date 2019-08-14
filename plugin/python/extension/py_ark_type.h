@@ -15,7 +15,6 @@
 
 #include "python/api.h"
 #include "python/forwarding.h"
-#include "python/extension/py_container.h"
 
 namespace ark {
 namespace plugin {
@@ -28,7 +27,6 @@ public:
     typedef struct {
         PyObject_HEAD
         Box* box;
-        PyContainer* container;
         PyObject* weakreflist;
 
         template<typename T> const sp<T>& unpack() const {
@@ -40,39 +38,6 @@ public:
             const sp<T> inst = box->as<T>();
             DCHECK(inst, "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::getClass<T>()->name());
             return inst;
-        }
-
-        PyContainer* getContainer() {
-            if(container)
-                return container;
-            if(PyObject_IS_GC(reinterpret_cast<PyObject*>(this)))
-                container = new PyContainer();
-            return container;
-        }
-
-        template<typename T> void addObjectToContainer(const sp<T>& object) {
-            const sp<PyGarbageCollector> gc = object.template as<PyGarbageCollector>();
-            if(gc) {
-                PyContainer* gcContainer = getContainer();
-                DCHECK(gcContainer, "Object doesnot support GC");
-                gcContainer->addCollector(gc);
-            }
-        }
-
-        void addObjectToContainer(float /*object*/) {
-        }
-
-        void addObjectToContainer(const V2& /*object*/) {
-        }
-
-        void addObjectToContainer(const Box& object) {
-            if(!object)
-                return;
-
-            DCHECK(object.typeId() == Type<PyInstance>::id(), "Object is not a PyInstance");
-            PyContainer* gcContainer = getContainer();
-            DCHECK(gcContainer, "Object doesnot support GC");
-            gcContainer->setTag(object.as<PyInstance>());
         }
 
     private:
@@ -114,7 +79,7 @@ private:
 
     const std::map<TypeId, LoaderFunction>& getLoader(const String& name) const;
 
-    PyObject* wrap(Instance& inst, const Box& box, const sp<Scope>& args) const;
+//    PyObject* wrap(Instance& inst, const Box& box, const sp<Scope>& args) const;
 
     static PyTypeObject* basetype();
 

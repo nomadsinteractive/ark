@@ -4,6 +4,7 @@
 
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
+#include "core/util/holder_util.h"
 
 #include "graphics/base/v2.h"
 
@@ -27,6 +28,13 @@ Size::Size(const sp<Numeric>& width, const sp<Numeric>& height, const sp<Numeric
 V3 Size::val()
 {
     return V3(_width->val(), _height->val(), _depth->val());
+}
+
+void Size::traverse(const Holder::Visitor& visitor)
+{
+    HolderUtil::visit(_width, visitor);
+    HolderUtil::visit(_height, visitor);
+    HolderUtil::visit(_depth, visitor);
 }
 
 float Size::width() const

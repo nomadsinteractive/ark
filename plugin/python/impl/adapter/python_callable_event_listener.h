@@ -13,12 +13,12 @@ namespace python {
 
 class PythonCallableEventListener : public EventListener, Implements<PythonCallableEventListener, EventListener> {
 public:
-    PythonCallableEventListener(const sp<PyInstance>& callable);
+    PythonCallableEventListener(PyInstance callable);
 
     virtual bool onEvent(const Event& event) override;
 
 private:
-    sp<PyInstance> _callable;
+    PyInstance _callable;
     PyInstance _args;
 
 };

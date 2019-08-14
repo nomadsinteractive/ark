@@ -14,22 +14,10 @@ float Expectation::val()
     return _delegate->val();
 }
 
-int32_t Expectation::traverse(const Holder::Visitor& visitor)
+void Expectation::traverse(const Holder::Visitor& visitor)
 {
     for(const sp<Observer>& i : _observers)
-    {
-        int32_t r = i->traverse(visitor);
-        if(r)
-            return r;
-    }
-    return 0;
-}
-
-int32_t Expectation::clear()
-{
-    for(const sp<Observer>& i : _observers)
-        i->clear();
-    return 0;
+        i->traverse(visitor);
 }
 
 sp<Observer> Expectation::createObserver(const sp<Runnable>& callback, bool oneshot)

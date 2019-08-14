@@ -22,7 +22,7 @@ public:
 
     template<typename T> const Box& put(const sp<T>& item) {
         Box& slot = _items[Type<T>::id()];
-        slot = item.pack();
+        slot = item;
         return slot;
     }
 

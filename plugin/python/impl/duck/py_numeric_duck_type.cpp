@@ -11,19 +11,19 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-PyNumericDuckType::PyNumericDuckType(const sp<PyInstance>& inst)
-    : _instance(inst)
+PyNumericDuckType::PyNumericDuckType(PyInstance inst)
+    : _instance(std::move(inst))
 {
 }
 
 void PyNumericDuckType::to(sp<Integer>& inst)
 {
-    inst = sp<Integer::Impl>::make(PyLong_AsLong(_instance->object()));
+    inst = PythonInterpreter::instance()->toCppObject<sp<Integer>>(_instance.instance());
 }
 
 void PyNumericDuckType::to(sp<Numeric>& inst)
 {
-    inst = PythonInterpreter::instance()->toNumeric(_instance->object());
+    inst = PythonInterpreter::instance()->toCppObject<sp<Numeric>>(_instance.instance());
 }
 
 }

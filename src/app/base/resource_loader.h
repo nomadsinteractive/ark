@@ -29,7 +29,7 @@ private:
             const SafePtr<Builder<T>>& builder = getBuilder(Identifier::parseRef(refid));
             const sp<T> ptr = builder->build(nullptr);
             DCHECK(ptr, "ResourceLoader has no object referred as \"%s\"", refid.c_str());
-            return ptr.pack();
+            return ptr;
         }
 
         const SafePtr<Builder<T>>& getBuilder(const Identifier& id) {

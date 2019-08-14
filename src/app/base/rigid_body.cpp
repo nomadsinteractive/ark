@@ -9,6 +9,7 @@
 #include "core/base/string.h"
 #include "core/inf/variable.h"
 #include "core/util/conversions.h"
+#include "core/util/holder_util.h"
 
 #include "graphics/base/size.h"
 #include "graphics/base/v3.h"
@@ -36,6 +37,12 @@ void RigidBody::bind(const sp<RenderObject>& renderObject)
     renderObject->setPosition(Vec3Util::create(position()));
     renderObject->setTransform(_stub->_transform);
     _stub->_render_object = renderObject;
+}
+
+void RigidBody::traverse(const Holder::Visitor& visitor)
+{
+    visitor(_stub->_tag);
+    HolderUtil::visit(_stub->_callback->_collision_callback, visitor);
 }
 
 int32_t RigidBody::id() const

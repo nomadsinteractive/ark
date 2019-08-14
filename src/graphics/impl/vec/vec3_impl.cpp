@@ -4,6 +4,7 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
+#include "core/util/holder_util.h"
 
 #include "graphics/base/v3.h"
 
@@ -27,6 +28,13 @@ Vec3Impl::Vec3Impl(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>
 V3 Vec3Impl::val()
 {
     return V3(_x->val(), _y->val(), _z->val());
+}
+
+void Vec3Impl::traverse(const Holder::Visitor& visitor)
+{
+    HolderUtil::visit(_x, visitor);
+    HolderUtil::visit(_y, visitor);
+    HolderUtil::visit(_z, visitor);
 }
 
 const sp<NumericWrapper>& Vec3Impl::x() const

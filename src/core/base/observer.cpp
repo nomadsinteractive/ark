@@ -10,15 +10,9 @@ Observer::Observer(const sp<Runnable>& callback, bool oneshot)
 {
 }
 
-int32_t Observer::traverse(const Holder::Visitor& visitor)
+void Observer::traverse(const Holder::Visitor& visitor)
 {
-    return HolderUtil::visit(_callback, visitor);
-}
-
-int32_t Observer::clear()
-{
-    _callback = nullptr;
-    return 0;
+    HolderUtil::visit(_callback, visitor);
 }
 
 void Observer::update()

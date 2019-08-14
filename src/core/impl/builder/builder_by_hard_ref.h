@@ -18,7 +18,7 @@ public:
         const sp<Scope> reference = _references.lock();
         DCHECK(reference, "BeanFactory has been disposed");
         const sp<T> bean = _delegate->build(args);
-        reference->put<T>(_name, bean);
+        reference->put(_name, bean);
         return bean;
     }
 

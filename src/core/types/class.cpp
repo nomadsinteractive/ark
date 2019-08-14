@@ -1,6 +1,7 @@
 #include "core/types/class.h"
 
 #include "core/base/class_manager.h"
+#include "core/types/box.h"
 
 namespace ark {
 

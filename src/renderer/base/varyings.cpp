@@ -7,7 +7,7 @@
 #include "core/inf/flatable.h"
 #include "core/inf/variable.h"
 #include "core/impl/flatable/flatable_by_variable.h"
-#include "core/util/bean_utils.h"
+#include "core/util/holder_util.h"
 
 #include "graphics/base/rect.h"
 
@@ -37,6 +37,12 @@ void Varyings::flat(void* buf)
 uint32_t Varyings::size()
 {
     return _size;
+}
+
+void Varyings::traverse(const Holder::Visitor& visitor)
+{
+    for(const auto& iter : _varyings)
+        HolderUtil::visit(iter.second._flatable, visitor);
 }
 
 void Varyings::addVarying(const String& name, const sp<Flatable>& flatable)

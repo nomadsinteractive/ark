@@ -3,29 +3,51 @@
 
 #include "core/base/delegate.h"
 #include "core/inf/holder.h"
+#include "core/inf/flatable.h"
+#include "core/inf/runnable.h"
+#include "core/inf/variable.h"
+#include "core/types/box.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
 class HolderUtil {
 public:
-
-    template<typename T> static int32_t visit(const sp<T>& inst, const Holder::Visitor& visitor) {
-        int32_t r = HolderUtil::traverse(inst, visitor);
-        if(r)
-            return r;
-        return visitor(inst.pack());
+    template<typename T> static void visit(const SafePtr<T>& inst, const Holder::Visitor& visitor) {
+        visit<T>(static_cast<sp<T>>(inst), visitor);
     }
 
-    template<typename T> static int32_t traverse(const sp<T>& inst, const Holder::Visitor& visitor) {
-        const sp<Holder> holder = inst.template as<Holder>();
-        int32_t traversed = holder ? holder->traverse(visitor) : 0;
-        if(!traversed) {
+    template<typename T> static void visit(const sp<T>& inst, const Holder::Visitor& visitor) {
+        if(inst) {
+            Box packed = inst;
+            if(visitor(packed))
+                return;
+            traverse(inst, visitor);
+        }
+    }
+
+private:
+    template<typename T> static void traverse(const sp<T>& inst, const Holder::Visitor& visitor) {
+        if(inst) {
+            const sp<Holder> holder = inst.template as<Holder>();
+            if(holder) {
+                holder->traverse(visitor);
+                return;
+            }
+            traverse_delegate_sfinae(inst, visitor, nullptr);
+        }
+    }
+
+    template<typename T> static void traverse_delegate_sfinae(const sp<T>& inst, const Holder::Visitor& visitor, typename std::remove_reference<typename std::remove_cv<decltype(inst->delegate())>::type>::type::_PtrType*) {
+        return visit(inst->delegate(), visitor);
+    }
+
+    template<typename T> static void traverse_delegate_sfinae(const sp<T>& inst, const Holder::Visitor& visitor, ...) {
+        if(std::is_abstract<T>::value) {
             const sp<Delegate<T>> delegate = inst.template as<Delegate<T>>();
             if(delegate)
-                return traverse(delegate->delegate(), visitor);
+                return visit(delegate->delegate(), visitor);
         }
-        return traversed;
     }
 
 };

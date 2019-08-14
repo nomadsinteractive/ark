@@ -17,8 +17,7 @@ public:
     Expectation(const sp<Numeric>& delegate, Notifier notifier);
 
     virtual float val() override;
-    virtual int32_t traverse(const Visitor& visitor) override;
-    virtual int32_t clear() override;
+    virtual void traverse(const Visitor& visitor) override;
 
 //[[script::bindings::auto]]
     sp<Observer> createObserver(const sp<Runnable>& callback, bool oneshot = false);

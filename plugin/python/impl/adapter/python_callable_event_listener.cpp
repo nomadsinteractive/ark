@@ -10,8 +10,8 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-PythonCallableEventListener::PythonCallableEventListener(const sp<PyInstance>& callable)
-    : _callable(callable), _args(PyInstance::steal(PyTuple_New(1)))
+PythonCallableEventListener::PythonCallableEventListener(PyInstance callable)
+    : _callable(std::move(callable)), _args(PyInstance::steal(PyTuple_New(1)))
 {
 }
 
@@ -21,7 +21,7 @@ bool PythonCallableEventListener::onEvent(const Event& event)
 
     PyObject* pyEvent = PythonInterpreter::instance()->fromSharedPtr<Event>(sp<Event>::make(event));
     PyTuple_SetItem(_args, 0, pyEvent);
-    PyObject* ret = _callable->call(_args);
+    PyObject* ret = _callable.call(_args);
     bool consumed = false;
     if(ret)
     {

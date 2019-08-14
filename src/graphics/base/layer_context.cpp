@@ -2,6 +2,7 @@
 
 #include "core/epi/disposed.h"
 #include "core/epi/notifier.h"
+#include "core/util/holder_util.h"
 
 #include "graphics/base/layer.h"
 
@@ -15,6 +16,12 @@ LayerContext::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
 LayerContext::LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier>& notifier, Layer::Type type)
     : _render_model(renderModel), _notifier(notifier), _layer_type(type), _render_requested(false)
 {
+}
+
+void LayerContext::traverse(const Holder::Visitor& visitor)
+{
+    for(const sp<RenderObject>& i : _items)
+        HolderUtil::visit(i, visitor);
 }
 
 const sp<RenderModel>& LayerContext::renderModel() const

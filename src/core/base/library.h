@@ -43,7 +43,7 @@ public:
 
     template<typename T> void addCallable(const String& name, const sp<Callable<T>>& callable) {
         Function<T> func;
-        _callables.insert(std::make_pair(func.name(name), callable.pack()));
+        _callables.insert(std::make_pair(func.name(name), callable));
     }
 
 private:

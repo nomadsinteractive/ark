@@ -4,6 +4,11 @@
 #include <Python.h>
 
 #include "core/forwarding.h"
+#include "core/types/implements.h"
+#include "core/types/shared_ptr.h"
+
+#include "python/forwarding.h"
+#include "python/extension/py_instance_ref.h"
 
 namespace ark {
 namespace plugin {
@@ -11,25 +16,27 @@ namespace python {
 
 class PyInstance {
 public:
-    PyInstance(const PyInstance& other) = delete;
-    PyInstance(PyInstance&& other);
-    ~PyInstance();
+    PyInstance();
+    PyInstance(const sp<PyInstanceRef>& ref);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PyInstance);
 
     static PyInstance borrow(PyObject* object);
     static PyInstance steal(PyObject* object);
     static PyInstance own(PyObject* object);
 
-    static sp<PyInstance> track(PyObject* object);
+    static PyInstance track(PyObject* object);
 
+    const sp<PyInstanceRef>& ref() const;
+
+    PyObject* instance() const;
     operator PyObject*();
     explicit operator bool();
 
-    PyObject* object();
     PyObject* type();
     const char* name();
 
     bool hasAttr(const char* name) const;
-    sp<PyInstance> getAttr(const char* name) const;
+    PyInstance getAttr(const char* name) const;
 
     PyObject* call(PyObject* args);
 
@@ -38,11 +45,30 @@ public:
     void clear();
 
 private:
-    PyInstance(PyObject* object, bool isBorrowedReference);
+    class Borrowed : public PyInstanceRef, Implements<Borrowed, PyInstanceRef> {
+    public:
+        Borrowed(PyObject* object);
+
+        virtual void clear();
+
+    };
+
+    class Owned : public PyInstanceRef, Implements<Owned, PyInstanceRef> {
+    public:
+        Owned(PyObject* object);
+        ~Owned() override;
+
+    };
+
+    class Stolen : public PyInstanceRef, Implements<Stolen, PyInstanceRef> {
+    public:
+        Stolen(PyObject* object);
+        ~Stolen() override;
+
+    };
 
 private:
-    PyObject* _object;
-    bool _is_borrowed_reference;
+    sp<PyInstanceRef> _ref;
 };
 
 }

@@ -8,8 +8,8 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-PythonCallableTileMaker::PythonCallableTileMaker(const sp<PyInstance>& callable)
-    : _callable(callable), _args(PyInstance::steal(PyTuple_New(2)))
+PythonCallableTileMaker::PythonCallableTileMaker(PyInstance callable)
+    : _callable(std::move(callable)), _args(PyInstance::steal(PyTuple_New(2)))
 {
 }
 
@@ -21,7 +21,7 @@ sp<Renderer> PythonCallableTileMaker::make(int32_t x, int32_t y)
     PyObject* pyY = PythonInterpreter::instance()->fromType<int32_t>(y);
     PyTuple_SetItem(_args, 0, pyX);
     PyTuple_SetItem(_args, 1, pyY);
-    PyObject* ret = _callable->call(_args);
+    PyObject* ret = _callable.call(_args);
     if(ret)
     {
         const sp<Renderer> renderer = PythonInterpreter::instance()->toSharedPtr<Renderer>(ret);

@@ -6,6 +6,7 @@
 #include "core/epi/disposed.h"
 #include "core/epi/visibility.h"
 #include "core/util/bean_utils.h"
+#include "core/util/holder_util.h"
 #include "core/util/numeric_util.h"
 
 #include "graphics/base/size.h"
@@ -43,6 +44,18 @@ float RenderObject::height() const
 const SafePtr<Size>& RenderObject::size()
 {
     return _size;
+}
+
+void RenderObject::traverse(const Holder::Visitor& visitor)
+{
+    visitor(_tag);
+    HolderUtil::visit(_type->delegate(), visitor);
+    HolderUtil::visit(_position, visitor);
+    HolderUtil::visit(_size, visitor);
+    HolderUtil::visit(_transform, visitor);
+    HolderUtil::visit(_varyings, visitor);
+    HolderUtil::visit(_disposed->delegate(), visitor);
+    HolderUtil::visit(_visible->delegate(), visitor);
 }
 
 const SafePtr<Transform>& RenderObject::transform() const
@@ -174,12 +187,6 @@ void RenderObject::setVisible(const sp<Boolean>& visible)
 
 void RenderObject::dispose()
 {
-    _type->set(0);
-    _position = nullptr;
-    _size = nullptr;
-    _transform = nullptr;
-    _varyings = nullptr;
-    _tag = Box();
     _disposed->dispose();
 }
 

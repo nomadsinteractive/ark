@@ -5,6 +5,7 @@
 #include "core/forwarding.h"
 #include "core/inf/dictionary.h"
 #include "core/inf/builder.h"
+#include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_ptr.h"
@@ -14,11 +15,14 @@
 
 namespace ark {
 
-class ARK_API Transform {
+//[[script::bindings::holder]]
+class ARK_API Transform : public Holder {
 public:
 //  [[script::bindings::auto]]
-    Transform(const sp<Rotate>& rotate = nullptr, const sp<Vec3>& scale = nullptr, const sp<Vec>& translate = nullptr);
+    Transform(const sp<Rotate>& rotate = nullptr, const sp<Vec3>& scale = nullptr, const sp<Vec3>& pivot = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Transform);
+
+    virtual void traverse(const Visitor& visitor) override;
 
     class ARK_API Snapshot {
     public:
@@ -36,7 +40,7 @@ public:
         float rotate_value;
         V3 rotate_direction;
         V3 scale;
-        V3 translate;
+        V3 pivot;
     };
 
     Snapshot snapshot() const;
@@ -52,9 +56,9 @@ public:
     void setScale(const sp<Vec3>& scale);
 
 //  [[script::bindings::property]]
-    const sp<Vec>& translate() const;
+    const sp<Vec3>& pivot() const;
 //  [[script::bindings::property]]
-    void setTranslate(const sp<Vec>& translate);
+    void setPivot(const sp<Vec3>& pivot);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Transform> {
@@ -66,14 +70,14 @@ public:
     private:
         SafePtr<Builder<Rotate>> _rotate;
         SafePtr<Builder<Vec3>> _scale;
-        SafePtr<Builder<Vec>> _translation;
+        SafePtr<Builder<Vec3>> _pivot;
 
     };
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Transform> {
     public:
-        DICTIONARY(BeanFactory& parent, const String& value);
+        DICTIONARY(BeanFactory& factory, const String& value);
 
         virtual sp<Transform> build(const sp<Scope>& args) override;
 
@@ -85,7 +89,7 @@ public:
 private:
     SafePtr<Rotate> _rotate;
     sp<Vec3> _scale;
-    SafePtr<Vec> _translate;
+    SafePtr<Vec3> _pivot;
 
 };
 

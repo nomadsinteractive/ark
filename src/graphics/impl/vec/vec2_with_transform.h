@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_IMPL_VV2_VV2_WITH_TRANSFORM_H_
-#define ARK_GRAPHICS_IMPL_VV2_VV2_WITH_TRANSFORM_H_
+#ifndef ARK_GRAPHICS_IMPL_VEC_VEC2_WITH_TRANSFORM_H_
+#define ARK_GRAPHICS_IMPL_VEC_VEC2_WITH_TRANSFORM_H_
 
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
@@ -10,13 +10,12 @@ namespace ark {
 
 class Vec2WithTransform : public Vec2 {
 public:
-    Vec2WithTransform(const sp<Vec2>& delegate, const sp<Vec2>& org, const sp<Transform>& transform);
+    Vec2WithTransform(const sp<Vec2>& delegate, const sp<Transform>& transform);
 
     virtual V2 val() override;
 
 private:
     sp<Vec2> _delegate;
-    sp<Vec2> _org;
     sp<Transform> _transform;
 };
 

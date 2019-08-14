@@ -8,7 +8,7 @@ import re
 import acg
 from acg import HeaderPattern
 
-CLASS_PATTERN = re.compile(r'(\[\[core::class\]\])?([\w<>\s]+)class\s+(ARK_API\s+)?([\w\d_]+)(?:\s+final)?\s+(:[^{;]+)?[{;]')
+CLASS_PATTERN = re.compile(r'(\[\[core::class\]\])?([\w<():=,>\s]+)class\s+(ARK_API\s+)?([\w\d_]+)(?:\s+final)?\s+(:[^{;]+)?[{;]')
 
 INDENT = '\n    '
 

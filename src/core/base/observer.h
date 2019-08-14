@@ -14,8 +14,7 @@ public:
     Observer(const sp<Runnable>& callback, bool oneshot = true);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Observer);
 
-    virtual int32_t traverse(const Visitor& visitor) override;
-    virtual int32_t clear() override;
+    virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::auto]]
     void update();

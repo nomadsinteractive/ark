@@ -14,12 +14,12 @@ namespace python {
 
 class PythonCallableTileMaker : public RendererMaker {
 public:
-    PythonCallableTileMaker(const sp<PyInstance>& callable);
+    PythonCallableTileMaker(PyInstance callable);
 
     virtual sp<Renderer> make(int32_t x, int32_t y) override;
 
 private:
-    sp<PyInstance> _callable;
+    PyInstance _callable;
     PyInstance _args;
 
 };

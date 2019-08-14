@@ -9,7 +9,7 @@ from os import path
 
 LOADER_TEMPLATE = '''template<typename T> static Box PyArk${classname}_${methodname}Function(PyArkType::Instance& inst, const String& id, const sp<Scope>& args) {
     const sp<T> bean = inst.unpack<${classname}>()->${methodname}<T>(id, args);
-    return bean.pack();
+    return Box(bean);
 }'''
 
 
@@ -341,7 +341,6 @@ def gen_py_binding_cpp(name, namespaces, includes, lines):
 #include "python/extension/arkmodule.h"
 #include "python/extension/python_interpreter.h"
 #include "python/extension/py_ark_meta_type.h"
-#include "python/extension/py_container.h"
 
 %s
 
@@ -710,8 +709,8 @@ class GenConstructorMethod(GenMethod):
 
     def _gen_call_statement(self, genclass, argnames):
         if self._is_static:
-            return 'self->box = new Box(%s::%s(%s).pack());' % (genclass.classname, self._funcname, argnames)
-        return 'self->box = new Box(sp<%s>::make(%s).pack());' % (self._funcname, argnames)
+            return 'self->box = new Box(%s::%s(%s));' % (genclass.classname, self._funcname, argnames)
+        return 'self->box = new Box(sp<%s>::make(%s));' % (self._funcname, argnames)
 
     def gen_py_return(self):
         return 'int'
@@ -797,8 +796,6 @@ class GenPropertyMethod(GenMethod):
             lines = ['%s::%s(%s%s);' % (genclass.classname, self._name, self_statement, argnames and ', ' + argnames)]
         else:
             lines = ['%s->%s(%s);' % (self_statement, self._name, argnames)]
-        if self._is_setter and genclass.is_container:
-            lines.append('self->addObjectToContainer(obj0);')
         return '\n    '.join(lines)
 
     def _ensure_property_def(self, properties):

@@ -4,6 +4,7 @@
 #include "core/base/api.h"
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
+#include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -13,7 +14,7 @@
 
 namespace ark {
 
-class Vec2Impl : public Vec2 {
+class Vec2Impl : public Vec2, public Holder {
 public:
     Vec2Impl() noexcept;
     Vec2Impl(float x, float y) noexcept;
@@ -22,6 +23,7 @@ public:
     Vec2Impl(Vec2& other) noexcept;
 
     virtual V2 val() override;
+    virtual void traverse(const Visitor& visitor) override;
 
     const sp<NumericWrapper>& x() const;
     const sp<NumericWrapper>& y() const;

@@ -29,10 +29,6 @@ public:
         return get(name).template as<T>();
     }
 
-    template<typename T> void put(const String& name, const sp<T>& object) {
-        put(name, object.pack());
-    }
-
     virtual Box get(const String& name) override;
 
     void put(const String& name, const Box& value);

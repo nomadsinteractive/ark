@@ -185,7 +185,7 @@ void Body::bind(const sp<RenderObject>& renderObject)
     if(type() & Collider::BODY_FLAG_MANUAL_ROTATION)
     {
         const sp<Numeric> r = transform()->rotate() ? transform()->rotate()->value()->delegate().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>::null();
-        transform()->rotate()->setRadians(sp<ManualRotation>::make(_stub, r));
+        transform()->rotate()->setRotation(sp<ManualRotation>::make(_stub, r));
     }
 }
 
@@ -340,35 +340,6 @@ sp<Future> Body::applyRotate(const sp<Numeric>& rotate)
     const sp<Runnable> task = sp<ManualApplyRotate>::make(_stub, rotate, future);
     Ark::instance().applicationContext()->addPreRenderTask(task, future->cancelled());
     return future;
-}
-
-Body::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest)
-    : _world(factory.ensureBuilder<Collider>(manifest, "world")),
-      _shape(factory.ensureBuilder<Shape>(manifest, "shape")),
-      _position(factory.ensureBuilder<Vec>(manifest, Constants::Attributes::POSITION)),
-      _size(factory.ensureBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _density(Documents::getAttribute<float>(manifest, "density", 1.0f)),
-      _friction(Documents::getAttribute<float>(manifest, "friction", 0.2f))
-{
-    DCHECK(_world, "Illegal world object");
-}
-
-sp<Body> Body::BUILDER_IMPL1::build(const sp<Scope>& args)
-{
-    const sp<World> world = BeanUtils::as<World>(_world, args);
-    const sp<Shape> shape = _shape->build(args);
-    const sp<Vec> position = _position->build(args);
-    return sp<Body>::make(world, Collider::BODY_TYPE_DYNAMIC, position, _size->build(args), nullptr, shape, _density, _friction);
-}
-
-Body::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& factory, const document& manifest)
-    : _delegate(factory, manifest)
-{
-}
-
-sp<Object> Body::BUILDER_IMPL2::build(const sp<Scope>& args)
-{
-    return _delegate.build(args);
 }
 
 Body::Stub::Stub(const World& world, b2Body* body)

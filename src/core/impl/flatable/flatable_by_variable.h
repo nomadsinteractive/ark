@@ -2,13 +2,15 @@
 #define ARK_CORE_IMPL_FLATABLE_FLATABLE_BY_VARIABLE_H_
 
 #include "core/inf/flatable.h"
+#include "core/inf/holder.h"
 #include "core/inf/variable.h"
-
+#include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
+#include "core/util/holder_util.h"
 
 namespace ark {
 
-template<typename T, typename S = T> class FlatableByVariable : public Flatable {
+template<typename T, typename S = T> class FlatableByVariable : public Flatable, public Holder, Implements<FlatableByVariable<T, S>, Flatable, Holder> {
 public:
     typedef Variable<S> VarType;
 
@@ -22,6 +24,10 @@ public:
 
     virtual uint32_t size() override {
         return static_cast<uint32_t>(sizeof(T));
+    }
+
+    virtual void traverse(const Visitor& visitor) override {
+        HolderUtil::visit(_var, visitor);
     }
 
     const sp<VarType>& var() const {

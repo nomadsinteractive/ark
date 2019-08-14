@@ -18,6 +18,4 @@ sp<Flatable> FlatableV2f::BUILDER::build(const sp<Scope>& args)
     return sp<FlatableByVariable<V2>>::make(_vec2->build(args));
 }
 
-
-
 }

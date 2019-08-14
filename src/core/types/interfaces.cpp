@@ -5,8 +5,8 @@
 
 namespace ark {
 
-Interfaces::Interfaces(Class* clazz, RefCounter* refCounter)
-    : _class(clazz), _ref_counter(refCounter)
+Interfaces::Interfaces(Class* clazz)
+    : _class(clazz)
 {
     DASSERT(_class);
 }
@@ -49,20 +49,7 @@ bool Interfaces::isInstance(TypeId id) const
 
 void Interfaces::reset()
 {
-    _ref_counter = nullptr;
     _attachments.clear();
-}
-
-void Interfaces::ref()
-{
-    if(_ref_counter)
-        _ref_counter->ref();
-}
-
-void Interfaces::deref()
-{
-    if(_ref_counter)
-        _ref_counter->deref();
 }
 
 }

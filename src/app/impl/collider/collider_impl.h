@@ -7,6 +7,7 @@
 #include "core/base/object_pool.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
+#include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -94,7 +95,7 @@ public:
         friend class RigidBodyImpl;
     };
 
-    class RigidBodyImpl : public RigidBody {
+    class RigidBodyImpl : public RigidBody, Implements<RigidBodyImpl, RigidBody, Holder> {
     public:
         RigidBodyImpl(const sp<ColliderImpl::Stub>& collider, const sp<RigidBodyShadow>& shadow);
         ~RigidBodyImpl();

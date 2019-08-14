@@ -17,8 +17,8 @@ namespace {
 
 class PythonCallableCharacterMaker : public CharacterMaker {
 public:
-    PythonCallableCharacterMaker(const sp<PyInstance>& callable)
-        : _callable(callable), _args(PyInstance::steal(PyTuple_New(3))) {
+    PythonCallableCharacterMaker(PyInstance callable)
+        : _callable(std::move(callable)), _args(PyInstance::steal(PyTuple_New(3))) {
     }
 
     virtual sp<RenderObject> makeCharacter(int32_t type, const sp<Vec>& position, const sp<Size>& size) override {
@@ -31,7 +31,7 @@ public:
         PyTuple_SetItem(_args, 0, pyType);
         PyTuple_SetItem(_args, 1, pyPosition);
         PyTuple_SetItem(_args, 2, pySize);
-        PyObject* ret = _callable->call(_args);
+        PyObject* ret = _callable.call(_args);
         if(ret)
         {
             const sp<RenderObject> renderObject = ret == Py_None ? nullptr : PythonInterpreter::instance()->toCppObject<sp<RenderObject>>(ret);
@@ -45,15 +45,15 @@ public:
     }
 
 private:
-    sp<PyInstance> _callable;
+    PyInstance _callable;
     PyInstance _args;
 
 };
 
 class PythonCallableCharacterMapper : public CharacterMapper {
 public:
-    PythonCallableCharacterMapper(const sp<PyInstance>& callable)
-        : _callable(callable), _args(PyInstance::steal(PyTuple_New(1))) {
+    PythonCallableCharacterMapper(PyInstance callable)
+        : _callable(std::move(callable)), _args(PyInstance::steal(PyTuple_New(1))) {
     }
 
     virtual int32_t mapCharacter(int32_t c) override {
@@ -62,7 +62,7 @@ public:
         const sp<PythonInterpreter>& interpreter = PythonInterpreter::instance();
         PyObject* pyType = interpreter->toPyObject<int32_t>(c);
         PyTuple_SetItem(_args, 0, pyType);
-        PyInstance ret = PyInstance::steal(_callable->call(_args));
+        PyInstance ret = PyInstance::steal(_callable.call(_args));
         if(ret)
             return PythonInterpreter::instance()->toCppObject<int32_t>(ret);
 
@@ -71,7 +71,7 @@ public:
     }
 
 private:
-    sp<PyInstance> _callable;
+    PyInstance _callable;
     PyInstance _args;
 
 };
@@ -79,14 +79,14 @@ private:
 }
 
 
-PyCallableDuckType::PyCallableDuckType(const sp<PyInstance>& inst)
-    : _instance(inst)
+PyCallableDuckType::PyCallableDuckType(PyInstance inst)
+    : _instance(std::move(inst))
 {
 }
 
 void PyCallableDuckType::to(sp<Runnable>& inst)
 {
-    inst = sp<PythonCallableRunnable>::make(PyInstance::track(_instance->object()));
+    inst = PythonInterpreter::instance()->toCppObject<sp<Runnable>>(_instance.instance());
 }
 
 void PyCallableDuckType::to(sp<EventListener>& inst)

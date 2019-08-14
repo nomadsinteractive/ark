@@ -10,81 +10,70 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-
-PyInstance::PyInstance(PyObject* object, bool isBorrowedReference)
-    : _object(object), _is_borrowed_reference(isBorrowedReference)
+PyInstance::PyInstance()
 {
 }
 
-PyInstance::PyInstance(PyInstance&& other)
-    : _object(other._object), _is_borrowed_reference(other._is_borrowed_reference)
+PyInstance::PyInstance(const sp<PyInstanceRef>& ref)
+    : _ref(ref)
 {
-    other._object = nullptr;
-}
-
-PyInstance::~PyInstance()
-{
-    if(!_is_borrowed_reference)
-        Py_XDECREF(_object);
 }
 
 PyInstance PyInstance::borrow(PyObject* object)
 {
-    return PyInstance(object, true);
+    return PyInstance(sp<Borrowed>::make(object));
 }
 
 PyInstance PyInstance::steal(PyObject* object)
 {
-    return PyInstance(object, false);
+    return PyInstance(sp<Stolen>::make(object));
 }
 
 PyInstance PyInstance::own(PyObject* object)
 {
-    Py_XINCREF(object);
-    return PyInstance(object, false);
+    return PyInstance(sp<Owned>::make(object));
 }
 
-sp<PyInstance> PyInstance::track(PyObject* object)
+PyInstance PyInstance::track(PyObject* object)
 {
-    Py_XINCREF(object);
-    const sp<PyInstance> ref = sp<PyInstance>::adopt(new PyInstance(object, false));
+    const sp<PyInstanceRef> ref = sp<Owned>::make(object);
     PythonInterpreter::instance()->referenceManager()->track(ref);
     return ref;
 }
 
-PyObject* PyInstance::object()
+const sp<PyInstanceRef>& PyInstance::ref() const
 {
-    return _object ? _object : Py_None;
+    return _ref;
 }
 
 PyInstance::operator bool()
 {
-    return _object && Py_None != _object;
+    return _ref && Py_None != _ref->instance();
 }
 
 PyObject* PyInstance::type()
 {
-    return reinterpret_cast<PyObject*>(_object->ob_type);
+    return reinterpret_cast<PyObject*>(_ref->instance()->ob_type);
 }
 
 const char* PyInstance::name()
 {
-    return Py_TYPE(_object)->tp_name;
+    return Py_TYPE(_ref->instance())->tp_name;
 }
 
 PyInstance::operator PyObject* ()
 {
-    return _object;
+    return _ref->instance();
 }
 
 bool PyInstance::hasAttr(const char* name) const
 {
-    return PyObject_HasAttrString(_object, name) != 0;
+    return PyObject_HasAttrString(_ref->instance(), name) != 0;
 }
 
-sp<PyInstance> PyInstance::getAttr(const char* name) const
+PyInstance PyInstance::getAttr(const char* name) const
 {
-    const sp<PyInstance> attr = sp<PyInstance>::make(PyInstance::steal(PyObject_GetAttrString(_object, name)));
+    const sp<PyInstanceRef> attr = sp<Stolen>::make(PyObject_GetAttrString(_ref->instance(), name));
     PythonInterpreter::instance()->referenceManager()->track(attr);
     return attr;
 }
@@ -92,10 +81,10 @@ sp<PyInstance> PyInstance::getAttr(const char* name) const
 PyObject* PyInstance::call(PyObject* args)
 {
     try {
-        return PyObject_Call(_object, args, nullptr);
+        return PyObject_Call(_ref->instance(), args, nullptr);
     }
     catch(const std::exception& e) {
-        PyObject* repr = PyObject_Repr(_object);
+        PyObject* repr = PyObject_Repr(_ref->instance());
         LOGE("Exception occured while calling method \"%s\"", PythonInterpreter::instance()->toString(repr).c_str());
         Py_XDECREF(repr);
         throw e;
@@ -104,17 +93,48 @@ PyObject* PyInstance::call(PyObject* args)
 
 bool PyInstance::isCallable()
 {
-    return PyCallable_Check(_object) != 0;
+    return PyCallable_Check(_ref->instance()) != 0;
+}
+
+PyObject* PyInstance::instance() const
+{
+    return _ref->instance();
 }
 
 void PyInstance::clear()
 {
-    if(_object && !_is_borrowed_reference)
-    {
-        DASSERT(_object->ob_refcnt > 0);
-        Py_DECREF(_object);
-    }
-    _object = nullptr;
+    _ref = nullptr;
+}
+
+PyInstance::Borrowed::Borrowed(PyObject* object)
+    : PyInstanceRef(object)
+{
+}
+
+void PyInstance::Borrowed::clear()
+{
+    DFATAL("You cannot clear a borrowed instance");
+}
+
+PyInstance::Owned::Owned(PyObject* object)
+    : PyInstanceRef(object)
+{
+    Py_XINCREF(_instance);
+}
+
+PyInstance::Owned::~Owned()
+{
+    Py_XDECREF(_instance);
+}
+
+PyInstance::Stolen::Stolen(PyObject* object)
+    : PyInstanceRef(object)
+{
+}
+
+PyInstance::Stolen::~Stolen()
+{
+    Py_XDECREF(_instance);
 }
 
 }

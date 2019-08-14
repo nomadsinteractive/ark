@@ -28,6 +28,8 @@ public:
 //  [[script::bindings::auto]]
     void set(const sp<Boolean>& visible);
 
+    const sp<Boolean>& delegate() const;
+
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Visibility> {
     public:

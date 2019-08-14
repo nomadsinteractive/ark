@@ -4,6 +4,7 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
+#include "core/util/holder_util.h"
 
 #include "graphics/base/color.h"
 
@@ -27,6 +28,14 @@ Vec4Impl::Vec4Impl(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>
 V4 Vec4Impl::val()
 {
     return V4(_x->val(), _y->val(), _z->val(), _w->val());
+}
+
+void Vec4Impl::traverse(const Holder::Visitor& visitor)
+{
+    HolderUtil::visit(_x, visitor);
+    HolderUtil::visit(_y, visitor);
+    HolderUtil::visit(_z, visitor);
+    HolderUtil::visit(_w, visitor);
 }
 
 const sp<NumericWrapper>& Vec4Impl::x() const

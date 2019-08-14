@@ -154,7 +154,7 @@ Emitter::Iteration::Iteration(BeanFactory& factory, const document& manifest)
 void Emitter::Iteration::doIteration(const sp<Scope>& scope, const sp<ObjectPool>& objectPool, const sp<Numeric>& duration, uint64_t baseline)
 {
     float translate = baseline / 1000000.0f;
-    scope->put<Numeric>(_name, objectPool->obtain<VariableOP2<float, float, Operators::Add<float>, sp<Numeric>, float>>(duration, translate));
+    scope->put(_name, objectPool->obtain<VariableOP2<float, float, Operators::Add<float>, sp<Numeric>, float>>(duration, translate));
     for(const auto& i : _numerics)
         scope->put(i.first, i.second->build(scope));
 }

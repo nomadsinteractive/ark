@@ -1,5 +1,7 @@
 #include "python/impl/adapter/collision_callback_python_adapter.h"
 
+#include "core/util/holder_util.h"
+
 #include "app/base/collision_manifold.h"
 
 #include "python/api.h"
@@ -11,9 +13,9 @@ namespace python {
 
 CollisionCallbackPythonAdapter::CollisionCallbackPythonAdapter(const PyInstance& callback)
     : _on_begin_contact(callback.hasAttr("on_begin_contact") ? callback.getAttr("on_begin_contact")
-                                                             : sp<PyInstance>::null()),
+                                                             : PyInstance()),
       _on_end_contact(callback.hasAttr("on_end_contact") ? callback.getAttr("on_end_contact")
-                                                           : sp<PyInstance>::null()),
+                                                           : PyInstance()),
       _collision_manifold(sp<CollisionManifold>::make(V()))
 {
 }
@@ -33,7 +35,7 @@ void CollisionCallbackPythonAdapter::onBeginContact(const sp<RigidBody>& rigidBo
 /* Check again, in case of GC */
         if(_on_begin_contact)
         {
-            PyObject* ret = _on_begin_contact->call(args);
+            PyObject* ret = _on_begin_contact.call(args);
             if(ret)
                 Py_DECREF(ret);
             else
@@ -55,7 +57,7 @@ void CollisionCallbackPythonAdapter::onEndContact(const sp<RigidBody>& rigidBody
 /* Check again, in case of GC */
         if(_on_end_contact)
         {
-            PyObject* ret = _on_end_contact->call(args);
+            PyObject* ret = _on_end_contact.call(args);
             if(ret)
                 Py_DECREF(ret);
             else
@@ -66,35 +68,17 @@ void CollisionCallbackPythonAdapter::onEndContact(const sp<RigidBody>& rigidBody
     }
 }
 
-int CollisionCallbackPythonAdapter::traverse(visitproc visit, void* arg)
+void CollisionCallbackPythonAdapter::traverse(const Holder::Visitor& visitor)
 {
-    if(_on_begin_contact)
-        Py_VISIT(_on_begin_contact->object());
-    if(_on_end_contact)
-        Py_VISIT(_on_end_contact->object());
-    return 0;
-}
-
-int CollisionCallbackPythonAdapter::clear()
-{
-    if(_on_begin_contact)
-    {
-        sp<PyInstance> inst = std::move(_on_begin_contact);
-        inst->clear();
-    }
-    if(_on_end_contact)
-    {
-        sp<PyInstance> inst = std::move(_on_end_contact);
-        inst->clear();
-    }
-    return 0;
+    HolderUtil::visit(_on_begin_contact.ref(), visitor);
+    HolderUtil::visit(_on_end_contact.ref(), visitor);
 }
 
 PyObject* CollisionCallbackPythonAdapter::toPyObject(const sp<RigidBody>& rigidBody) const
 {
     TypeId concreteTypeId = rigidBody.ensureInterfaces()->typeId();
     if(PythonInterpreter::instance()->isPyObject(concreteTypeId))
-        return PythonInterpreter::instance()->toPyObject(rigidBody.pack().toConcrete());
+        return PythonInterpreter::instance()->toPyObject(Box(rigidBody).toConcrete());
     return PythonInterpreter::instance()->fromSharedPtr<RigidBody>(rigidBody);
 }
 

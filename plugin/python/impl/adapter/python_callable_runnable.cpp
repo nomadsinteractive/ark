@@ -1,16 +1,18 @@
 #include "python/impl/adapter/python_callable_runnable.h"
 
 #include "core/impl/variable/variable_wrapper.h"
+#include "core/util/log.h"
 
 #include "python/api.h"
 #include "python/extension/python_interpreter.h"
+#include "python/extension/py_instance_ref.h"
 
 namespace ark {
 namespace plugin {
 namespace python {
 
-PythonCallableRunnable::PythonCallableRunnable(const sp<PyInstance>& callable)
-    : Disposed(sp<Result>::make()), _args(PyInstance::steal(PyTuple_New(0))), _callable(callable), _result(_disposed->delegate())
+PythonCallableRunnable::PythonCallableRunnable(PyInstance callable)
+    : Disposed(sp<Result>::make()), _callable(std::move(callable)), _result(_disposed->delegate())
 {
 }
 
@@ -18,17 +20,22 @@ void PythonCallableRunnable::run()
 {
     DCHECK_THREAD_FLAG();
 
-    PyObject* ret = _callable->call(_args);
-    if(ret)
+    DWARN(_callable, "This PyObject has been recycled by Python garbage collector");
+    if(_callable.instance())
     {
-        if(ret == Py_None)
-            _result->setFunctionResult(FUNCTION_RESULT_NONE);
+        PyInstance args(PyInstance::steal(PyTuple_New(0)));
+        PyObject* ret = _callable.call(args);
+        if(ret)
+        {
+            if(ret == Py_None)
+                _result->setFunctionResult(FUNCTION_RESULT_NONE);
+            else
+                _result->setFunctionResult(PyObject_IsTrue(ret) ? FUNCTION_RESULT_TRUE : FUNCTION_RESULT_FALSE);
+            Py_DECREF(ret);
+        }
         else
-            _result->setFunctionResult(PyObject_IsTrue(ret) ? FUNCTION_RESULT_TRUE : FUNCTION_RESULT_FALSE);
-        Py_DECREF(ret);
+            PythonInterpreter::instance()->logErr();
     }
-    else
-        PythonInterpreter::instance()->logErr();
 }
 
 PythonCallableRunnable::Result::Result()

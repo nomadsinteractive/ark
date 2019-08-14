@@ -18,7 +18,7 @@
 
 #include "python/api.h"
 #include "python/extension/python_interpreter.h"
-#include "python/extension/py_garbage_collector.h"
+#include "python/extension/py_instance_ref.h"
 #include "python/extension/reference_manager.h"
 
 #include "python/impl/adapter/collision_callback_python_adapter.h"
@@ -36,7 +36,12 @@ namespace python {
 sp<Runnable> PythonInterpreter::toRunnable(PyObject* object)
 {
     if(PyCallable_Check(object))
-        return sp<PythonCallableRunnable>::make(PyInstance::track(object));
+    {
+        PyInstance inst = PyInstance::own(object);
+        sp<PythonCallableRunnable> runnable = sp<PythonCallableRunnable>::make(inst);
+        runnable.absorb(inst.ref());
+        return runnable;
+    }
 
     return asInterface<Runnable>(object);
 }
@@ -174,27 +179,15 @@ sp<Scope> PythonInterpreter::toScope(PyObject* kws)
             if(isPyArkTypeObject(Py_TYPE(item)))
                 scope->put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
             else if(PyBool_Check(item))
-                scope->put<Boolean>(sKey, sp<Boolean::Const>::make(PyObject_IsTrue(item) != 0));
-            else if(PyFloat_Check(item) || PyLong_Check(item) || PyObject_HasAttrString(item, "val"))
-            {
-                const sp<PyInstance> owned = PyInstance::track(item);
-                sp<PyNumericDuckType> pyDuck = sp<PyNumericDuckType>::make(owned);
-                scope->put<PyNumericDuckType>(sKey, pyDuck);
-            }
+                scope->put(sKey, sp<Boolean::Const>::make(PyObject_IsTrue(item) != 0));
+            else if(PyFloat_Check(item) || PyLong_Check(item) || isInstance<Numeric>(item) || isInstance<Integer>(item))
+                scope->put(sKey, sp<PyNumericDuckType>::make(PyInstance::track(item)));
             else if(PyBytes_Check(item) || PyUnicode_Check(item))
-                scope->put<String>(sKey, sp<String>::make(toString(item)));
+                scope->put(sKey, sp<String>::make(toString(item)));
             else if(PyCallable_Check(item))
-            {
-                const sp<PyInstance> owned = PyInstance::track(item);
-                sp<PyCallableDuckType> pyDuck = sp<PyCallableDuckType>::make(owned);
-                pyDuck.absorb<PyGarbageCollector>(sp<PyGarbageCollectorImpl>::make(owned));
-                scope->put<PyCallableDuckType>(sKey, pyDuck);
-            }
+                scope->put(sKey, sp<PyCallableDuckType>::make(PyInstance::track(item)));
             else
-            {
-                const sp<PyInstance> owned = PyInstance::track(item);
-                scope->put<PyObjectDuckType>(sKey, sp<PyObjectDuckType>::make(owned));
-            }
+                scope->put(sKey, sp<PyObjectDuckType>::make(PyInstance::track(item)));
         }
         Py_DECREF(keys);
         return scope;
@@ -269,10 +262,10 @@ PyObject* PythonInterpreter::toPyObject(const Box& box)
     if(!box)
         Py_RETURN_NONE;
 
-    if(box.typeId() == Type<PyInstance>::id())
+    if(box.typeId() == Type<PyInstanceRef>::id())
     {
-        PyObject* object = box.as<PyInstance>()->object();
-        Py_INCREF(object);
+        PyObject* object = box.as<PyInstanceRef>()->instance();
+        Py_XINCREF(object);
         return object;
     }
 
@@ -335,7 +328,7 @@ template<> ARK_PLUGIN_PYTHON_API std::wstring PythonInterpreter::toType<std::wst
 
 template<> ARK_PLUGIN_PYTHON_API Box PythonInterpreter::toType<Box>(PyObject* object)
 {
-    return object != Py_None ? PyInstance::track(object).pack() : Box();
+    return object != Py_None ? Box(PyInstance::track(object).ref()) : Box();
 }
 
 template<> ARK_PLUGIN_PYTHON_API bool PythonInterpreter::toType<bool>(PyObject* object)
