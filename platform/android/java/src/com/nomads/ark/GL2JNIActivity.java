@@ -18,6 +18,7 @@ package com.nomads.ark;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,14 +44,14 @@ public class GL2JNIActivity extends Activity {
         
         String screenOrientation = infos.get("screen_orientation");
         if(screenOrientation != null) {
-            if(screenOrientation.equals("sensor_landscape"))
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-            else if(screenOrientation.equals("sensor_portrait"))
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-            else if(screenOrientation.equals("landscape"))
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            else if(screenOrientation.equals("portrait"))
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            try {
+                Field field = ActivityInfo.class.getDeclaredField("SCREEN_ORIENTATION_" + screenOrientation.toUpperCase());
+                setRequestedOrientation(field.getInt(null));
+            } catch(NoSuchFieldException e) {
+                Log.e(TAG, String.format("Invalid screen_orientation: %s", screenOrientation));
+            } catch(IllegalAccessException e) {
+                Log.e(TAG, e.getMessage());
+            }
         }
 
         super.onCreate(icicle);
