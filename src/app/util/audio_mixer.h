@@ -47,8 +47,6 @@ private:
     array<int16_t> _buffer;
     array<int32_t> _buffer_hdr;
 
-    uint32_t _total_weight;
-
     static const uint32_t TONE_MAP_WEIGHT_ONE = 32768;
     std::vector<int16_t> _tone_map;
 };

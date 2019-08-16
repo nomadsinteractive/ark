@@ -44,7 +44,7 @@ static int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args
     const sp<Holder> holder = self->box->as<Holder>();
     if(holder)
         try {
-            holder->traverse([&visitor, args](Box& packed) {
+            holder->traverse([&visitor, args](const Box& packed) {
                 const sp<PyInstanceRef> pi = packed.as<PyInstanceRef>();
                 if(pi) {
                     int32_t vret = visitor(pi->instance(), args);
@@ -64,7 +64,7 @@ static int __clear__(PyArkType::Instance* self)
 {
     const sp<Holder> holder = self->box->as<Holder>();
     if(holder)
-        holder->traverse([](Box& packed) {
+        holder->traverse([](const Box& packed) {
                 const sp<PyInstanceRef> pi = packed.as<PyInstanceRef>();
                 if(pi) {
                     pi->clear();

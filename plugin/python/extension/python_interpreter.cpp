@@ -1,16 +1,13 @@
 #include "python/extension/python_interpreter.h"
 
-#include "core/base/expectation.h"
 #include "core/base/scope.h"
 #include "core/inf/variable.h"
-#include "core/inf/message_loop.h"
 #include "core/types/box.h"
 #include "core/types/global.h"
 #include "core/types/null.h"
 #include "core/util/log.h"
 
 #include "graphics/base/color.h"
-#include "graphics/impl/vec/vec3_impl.h"
 #include "graphics/util/vec2_util.h"
 #include "graphics/util/vec3_util.h"
 
@@ -36,12 +33,7 @@ namespace python {
 sp<Runnable> PythonInterpreter::toRunnable(PyObject* object)
 {
     if(PyCallable_Check(object))
-    {
-        PyInstance inst = PyInstance::own(object);
-        sp<PythonCallableRunnable> runnable = sp<PythonCallableRunnable>::make(inst);
-        runnable.absorb(inst.ref());
-        return runnable;
-    }
+        return sp<PythonCallableRunnable>::make(PyInstance::own(object));
 
     return asInterface<Runnable>(object);
 }

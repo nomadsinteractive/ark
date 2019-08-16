@@ -4,10 +4,12 @@
 #include "core/inf/runnable.h"
 #include "core/util/conversions.h"
 #include "core/util/dictionaries.h"
+#include "core/util/holder_util.h"
 #include "core/util/log.h"
 
 #include "graphics/base/bounds.h"
 #include "graphics/base/render_object.h"
+#include "graphics/base/size.h"
 #include "graphics/impl/renderer/renderer_by_render_object.h"
 
 #include "app/base/event.h"
@@ -69,6 +71,17 @@ View::View(const sp<Size>& size)
 const SafePtr<Size>& View::size()
 {
     return _layout_param->size();
+}
+
+void View::traverse(const Holder::Visitor& visitor)
+{
+    HolderUtil::visit(_layout_param->size(), visitor);
+    HolderUtil::visit(_on_enter, visitor);
+    HolderUtil::visit(_on_leave, visitor);
+    HolderUtil::visit(_on_push, visitor);
+    HolderUtil::visit(_on_click, visitor);
+    HolderUtil::visit(_on_release, visitor);
+    HolderUtil::visit(_on_move, visitor);
 }
 
 const SafePtr<LayoutParam>& View::layoutParam() const

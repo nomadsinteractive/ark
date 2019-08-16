@@ -19,8 +19,7 @@ public:
 
     template<typename T> static void visit(const sp<T>& inst, const Holder::Visitor& visitor) {
         if(inst) {
-            Box packed = inst;
-            if(visitor(packed))
+            if(visitor(inst))
                 return;
             traverse(inst, visitor);
         }

@@ -2,6 +2,7 @@
 
 #include "core/epi/disposed.h"
 #include "core/epi/visibility.h"
+#include "core/util/holder_util.h"
 
 #include "graphics/base/size.h"
 #include "graphics/inf/renderer.h"
@@ -18,7 +19,15 @@ LayoutHierarchy::Slot::Slot(const sp<Renderer>& renderer, bool layoutRequested)
     : _x(0), _y(0), _layout_width(0), _layout_height(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _view_group(renderer.as<ViewGroup>()),
       _disposed(renderer.as<Disposed>()), _visibility(renderer.as<Visibility>())
 {
-    DASSERT(renderer);
+    DASSERT(_renderer);
+}
+
+void LayoutHierarchy::Slot::traverse(const Holder::Visitor& visitor)
+{
+    if(_view)
+        HolderUtil::visit(_view, visitor);
+    else
+        HolderUtil::visit(_renderer, visitor);
 }
 
 bool LayoutHierarchy::Slot::isDisposed() const
@@ -111,6 +120,14 @@ bool LayoutHierarchy::Slot::onEventDispatch(const Event& event, float x, float y
 LayoutHierarchy::LayoutHierarchy(const sp<Layout>& layout)
     : _layout(layout)
 {
+}
+
+void LayoutHierarchy::traverse(const Holder::Visitor& visitor)
+{
+    for(const sp<Slot>& i : _slots)
+        i->traverse(visitor);
+    for(const sp<Slot>& i : _incremental)
+        i->traverse(visitor);
 }
 
 void LayoutHierarchy::render(RenderRequest& renderRequest, float x, float y) const

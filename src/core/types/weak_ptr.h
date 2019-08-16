@@ -11,7 +11,7 @@ public:
     _CONSTEXPR WeakPtr() noexcept {
     }
     WeakPtr(const SharedPtr<T>& sharedPtr) noexcept
-        : _weak_ptr(sharedPtr.ptr()), _weak_interfaces(sharedPtr.ensureInterfaces()) {
+        : _weak_ptr(sharedPtr._ptr), _weak_interfaces(sharedPtr.ensureInterfaces()) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(WeakPtr);
 

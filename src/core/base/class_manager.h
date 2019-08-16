@@ -6,6 +6,7 @@
 
 #include "core/base/api.h"
 #include "core/types/class.h"
+#include "core/types/implements.h"
 
 namespace ark {
 

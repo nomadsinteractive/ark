@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "core/forwarding.h"
+#include "core/inf/holder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -13,11 +14,13 @@
 
 namespace ark {
 
-class LayoutHierarchy {
+class LayoutHierarchy : public Holder {
 private:
-    class Slot {
+    class Slot : public Holder {
     public:
         Slot(const sp<Renderer>& renderer, bool layoutRequested);
+
+        virtual void traverse(const Visitor& visitor) override;
 
         bool isDisposed() const;
         bool layoutRequested() const;
@@ -43,10 +46,15 @@ private:
         sp<ViewGroup> _view_group;
         sp<Disposed> _disposed;
         sp<Visibility> _visibility;
+
+        friend class LayoutHierarchy;
+
     };
 
 public:
     LayoutHierarchy(const sp<Layout>& layout);
+
+    virtual void traverse(const Visitor& visitor) override;
 
     void render(RenderRequest& renderRequest, float x, float y) const;
     bool onEvent(const Event& event, float x, float y) const;
@@ -66,6 +74,7 @@ private:
 
     std::vector<sp<Slot>> _slots;
     std::vector<sp<Slot>> _incremental;
+
 };
 
 }

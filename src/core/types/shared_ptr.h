@@ -80,10 +80,6 @@ public:
         return _ptr.get();
     }
 
-    const std::shared_ptr<T>& ptr() const {
-        return _ptr;
-    }
-
     const std::shared_ptr<Interfaces>& ensureInterfaces() const {
         if(!_interfaces)
             _interfaces.reset(new Interfaces(Class::getClass<T>()));
@@ -126,6 +122,7 @@ private:
     }
 
     template<typename U> friend class SharedPtr;
+    template<typename U> friend class WeakPtr;
 
     friend class MemoryPool;
     friend class ObjectPool;
@@ -134,7 +131,6 @@ private:
     std::shared_ptr<T> _ptr;
     mutable std::shared_ptr<Interfaces> _interfaces;
 };
-
 
 template<> class SharedPtr<void> {
 public:

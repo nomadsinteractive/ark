@@ -6,7 +6,10 @@
 #include "renderer/base/texture_bundle.h"
 #include "renderer/base/resource_loader_context.h"
 
+#include "graphics/inf/renderer.h"
+
 #include "app/base/application_context.h"
+#include "app/view/arena.h"
 
 namespace ark {
 
@@ -18,6 +21,11 @@ ResourceLoader::ResourceLoader(const BeanFactory& beanFactory)
 ResourceLoader::~ResourceLoader()
 {
     LOGD("");
+}
+
+void ResourceLoader::traverse(const Holder::Visitor& visitor)
+{
+    doTraverse(_bean_factory.references(), visitor);
 }
 
 sp<BoxBundle> ResourceLoader::refs() const
@@ -66,6 +74,12 @@ const BeanFactory& ResourceLoader::beanFactory() const
 BeanFactory& ResourceLoader::beanFactory()
 {
     return _bean_factory;
+}
+
+void ResourceLoader::doTraverse(const Scope& scope, const Holder::Visitor& visitor)
+{
+    for(const auto& iter : scope.variables())
+        visit<Boolean, Integer, Numeric, Renderer, Arena>(iter.second, visitor);
 }
 
 ResourceLoader::BUILDER::BUILDER(BeanFactory& factory, const document& doc, const sp<ApplicationContext>& applicationContext)

@@ -3,6 +3,7 @@
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
+#include "core/inf/holder.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/inf/block.h"
@@ -13,7 +14,7 @@
 
 namespace ark {
 
-class ARK_API View : public Block {
+class ARK_API View : public Block, public Holder {
 public:
     enum State {
         STATE_DEFAULT = 0,
@@ -37,9 +38,10 @@ public:
 public:
     View(const sp<LayoutParam>& layoutParam);
     View(const sp<Size>& size);
-    virtual ~View() = default;
 
     virtual const SafePtr<Size>& size() override;
+
+    virtual void traverse(const Visitor& visitor) override;
 
     const SafePtr<LayoutParam>& layoutParam() const;
     void setLayoutParam(const sp<LayoutParam>& layoutParam);
@@ -260,6 +262,7 @@ protected:
     sp<Runnable> _on_release;
 
     sp<EventListener> _on_move;
+
 };
 
 }

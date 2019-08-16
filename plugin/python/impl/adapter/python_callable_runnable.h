@@ -1,6 +1,7 @@
 #ifndef ARK_PLUGIN_PYTHON_IMPL_RUNNABLE_PYTHON_CALLABLE_RUNNABLE_H_
 #define ARK_PLUGIN_PYTHON_IMPL_RUNNABLE_PYTHON_CALLABLE_RUNNABLE_H_
 
+#include "core/inf/holder.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/epi/disposed.h"
@@ -14,11 +15,13 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-class PythonCallableRunnable : public Runnable, public Disposed, Implements<PythonCallableRunnable, Runnable, Disposed> {
+class PythonCallableRunnable : public Runnable, public Disposed, public Holder, Implements<PythonCallableRunnable, Runnable, Disposed, Holder> {
 public:
     PythonCallableRunnable(PyInstance callable);
 
     virtual void run() override;
+
+    virtual void traverse(const Visitor& visitor) override;
 
 private:
 

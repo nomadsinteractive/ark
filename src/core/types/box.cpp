@@ -10,10 +10,6 @@ Box::Box(const void* sharedPtr, const void* instancePtr, TypeId typeId, const st
 {
 }
 
-Box::Box(const sp<void>&) noexcept
-{
-}
-
 TypeId Box::typeId() const
 {
     return _stub ? _stub->typeId() : 0;

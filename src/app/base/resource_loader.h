@@ -3,12 +3,14 @@
 
 #include <unordered_map>
 
+#include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/collection/by_type.h"
+#include "core/inf/holder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
-#include "core/forwarding.h"
+#include "core/util/holder_util.h"
 
 #include "renderer/forwarding.h"
 
@@ -16,8 +18,8 @@
 
 namespace ark {
 
-//[[script::bindings::container]]
-class ARK_API ResourceLoader {
+//[[script::bindings::holder]]
+class ARK_API ResourceLoader : public Holder {
 private:
     template<typename T> class BuilderRefs : public BoxBundle {
     public:
@@ -62,7 +64,7 @@ private:
 
 public:
     ResourceLoader(const BeanFactory& beanFactory);
-    ~ResourceLoader();
+    ~ResourceLoader() override;
 
 //  [[script::bindings::loader]]
     template<typename T> sp<T> load(const String& name, const sp<Scope>& args = nullptr) {
@@ -72,6 +74,8 @@ public:
         const Identifier id = name.at(0) == Identifier::ID_TYPE_REFERENCE ? Identifier::parse(name) : Identifier::parseRef(name);
         return _builder_refs.ensure<BuilderRefs<T>>(_bean_factory)->getBuilder(id)->build(args);
     }
+
+    virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::property]]
     sp<BoxBundle> refs() const;
@@ -114,10 +118,29 @@ public:
     };
 
 private:
+    void doTraverse(const Scope& scope, const Visitor& visitor);
+
+    template<typename T = void, typename... Args> void visit(const Box& packed, const Visitor& visitor) {
+        if(!std::is_same<T, void>::value) {
+            if(Type<T>::id() == packed.typeId())
+                doVisit(packed.unpack<T>(), visitor);
+            visit<Args...>(packed, visitor);
+        }
+    }
+
+    template<typename T> void doVisit(const sp<T>& obj, const Visitor& visitor) {
+        HolderUtil::visit<T>(obj, visitor);
+    }
+
+    void doVisit(const sp<void>& /*obj*/, const Visitor& /*visitor*/) {
+    }
+
+private:
     BeanFactory _bean_factory;
     ByType _builder_refs;
 
     sp<PackageRefs> _packages;
+
 };
 
 }

@@ -34,6 +34,11 @@ sp<Renderer> PythonCallableTileMaker::make(int32_t x, int32_t y)
     return nullptr;
 }
 
+void PythonCallableTileMaker::traverse(const Holder::Visitor& visitor)
+{
+    visitor(_callable.ref());
+}
+
 }
 }
 }

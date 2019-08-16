@@ -31,11 +31,10 @@ public:
 
     virtual Box get(const String& name) override;
 
-    void put(const String& name, const Box& value);
+    void put(const String& name, Box value);
     void remove(const String& name);
 
     const std::map<String, Box>& variables() const;
-    std::map<String, Box>& variables();
 
 private:
     std::map<String, Box> _variables;

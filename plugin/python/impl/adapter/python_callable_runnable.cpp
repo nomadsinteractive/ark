@@ -38,6 +38,11 @@ void PythonCallableRunnable::run()
     }
 }
 
+void PythonCallableRunnable::traverse(const Holder::Visitor& visitor)
+{
+    visitor(_callable.ref());
+}
+
 PythonCallableRunnable::Result::Result()
     : _function_result(FUNCTION_RESULT_NONE)
 {

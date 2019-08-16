@@ -20,9 +20,9 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-//[[script::bindings::container]]
+//[[script::bindings::holder]]
 //[[script::bindings::extends(RigidBody)]]
-class ARK_PLUGIN_BOX2D_API Body : public RigidBody, Implements<Body, RigidBody> {
+class ARK_PLUGIN_BOX2D_API Body : public RigidBody, Implements<Body, RigidBody, Holder> {
 public:
     struct Stub {
         Stub(const World& world, b2Body* body);

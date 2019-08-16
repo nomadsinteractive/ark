@@ -15,17 +15,12 @@ Box Scope::get(const String& name)
     return iter != _variables.end() ? iter->second : Box();
 }
 
-void Scope::put(const String& name, const Box& value)
+void Scope::put(const String& name, Box value)
 {
-    _variables[name] = value;
+    _variables[name] = std::move(value);
 }
 
 const std::map<String, Box>& Scope::variables() const
-{
-    return _variables;
-}
-
-std::map<String, Box>& Scope::variables()
 {
     return _variables;
 }

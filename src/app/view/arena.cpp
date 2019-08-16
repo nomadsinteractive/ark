@@ -2,6 +2,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/util/bean_utils.h"
+#include "core/util/holder_util.h"
 #include "core/util/log.h"
 
 #include "graphics/base/layer.h"
@@ -13,8 +14,8 @@
 
 namespace ark {
 
-Arena::Arena(const sp<Renderer>& rootView, const sp<ResourceLoader>& resourceLoader)
-    : _event_listeners(new EventListenerList()), _view_group(rootView), _renderer(rootView), _resource_loader(resourceLoader)
+Arena::Arena(const sp<ViewGroup>& view, const sp<ResourceLoader>& resourceLoader)
+    : _event_listeners(new EventListenerList()), _view_group(view), _resource_loader(resourceLoader)
 {
     DCHECK(_view_group, "Arena's renderer delegate must be ViewGroup");
 }
@@ -32,8 +33,8 @@ void Arena::addRenderer(const sp<Renderer>& renderer)
 
 void Arena::render(RenderRequest& renderRequest, float x, float y)
 {
-    DASSERT(_renderer);
-    _renderer->render(renderRequest, x, y);
+    DASSERT(_view_group);
+    _view_group->render(renderRequest, x, y);
     for(const sp<Renderer>& i : _layers)
         i->render(renderRequest, x, y);
 }
@@ -42,6 +43,13 @@ bool Arena::onEvent(const Event& event)
 {
     DASSERT(_view_group);
     return _view_group->onEvent(event, 0.0f, 0.0f) || _event_listeners->onEvent(event);
+}
+
+void Arena::traverse(const Holder::Visitor& visitor)
+{
+    HolderUtil::visit(_view_group, visitor);
+    for(const sp<Renderer>& i : _layers)
+        HolderUtil::visit(i, visitor);
 }
 
 sp<Renderer> Arena::loadRenderer(const String& name, const sp<Scope>& args)
@@ -94,7 +102,6 @@ void Arena::addLayer(const sp<Renderer>& layer)
 void Arena::setView(const sp<Renderer>& view)
 {
     DCHECK(view.is<ViewGroup>(), "Arena's renderer delegate must be ViewGroup");
-    _renderer = view;
     _view_group = view.as<ViewGroup>();
 }
 
@@ -149,17 +156,6 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
         }
     }
     return arena;
-}
-
-Arena::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Arena>>& delegate, const String& value)
-    : _delegate(delegate), _expired(factory.ensureBuilder<Disposed>(value))
-{
-}
-
-sp<Arena> Arena::STYLE::build(const sp<Scope>& args)
-{
-    sp<Arena> bean = _delegate->build(args);
-    return bean.absorb<Disposed>(_expired->build(args));
 }
 
 }

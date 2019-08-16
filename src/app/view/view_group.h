@@ -16,13 +16,15 @@
 
 namespace ark {
 
-class ARK_API ViewGroup final : public View, public Renderer, public Renderer::Group, Implements<ViewGroup, View, Block, Renderer, Renderer::Group> {
+class ARK_API ViewGroup final : public View, public Renderer, public Renderer::Group, Implements<ViewGroup, View, Block, Renderer, Renderer::Group, Holder> {
 public:
     ViewGroup(const Frame& background, const sp<Layout>& layout, const sp<LayoutParam>& layoutParam);
     ~ViewGroup() override;
 
     virtual void addRenderer(const sp<Renderer>& renderer) override;
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
+
+    virtual void traverse(const Visitor& visitor) override;
 
     bool onEvent(const Event& event, float x, float y);
 
@@ -46,6 +48,7 @@ private:
     sp<Renderer> _background;
 
     sp<LayoutHierarchy> _layout_hierarchy;
+
 };
 
 }

@@ -34,6 +34,11 @@ bool PythonCallableEventListener::onEvent(const Event& event)
     return consumed;
 }
 
+void PythonCallableEventListener::traverse(const Holder::Visitor& visitor)
+{
+    visitor(_callable.ref());
+}
+
 }
 }
 }

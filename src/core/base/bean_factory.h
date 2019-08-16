@@ -11,7 +11,6 @@
 #include "core/inf/builder.h"
 #include "core/inf/dictionary.h"
 #include "core/impl/builder/builder_by_argument.h"
-#include "core/impl/builder/builder_by_hard_ref.h"
 #include "core/impl/builder/builder_by_instance.h"
 #include "core/impl/builder/builder_by_soft_ref.h"
 #include "core/base/scope.h"
@@ -121,8 +120,6 @@ private:
                 return builder;
             if(id.at(0) == '@')
                 return sp<Builder<T>>::adopt(new BuilderBySoftRef<T>(id.substr(1), _references, std::move(builder)));
-            if(id.at(0) == '#')
-                return sp<Builder<T>>::adopt(new BuilderByHardRef<T>(id.substr(1), _references, std::move(builder)));
             return builder;
         }
 

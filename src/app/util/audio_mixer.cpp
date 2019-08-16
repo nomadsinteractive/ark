@@ -51,7 +51,7 @@ private:
 
 
 AudioMixer::AudioMixer(uint32_t bufferLength)
-    : _buffer(sp<Array<int16_t>::Allocated>::make(bufferLength)), _buffer_hdr(sp<Array<int32_t>::Allocated>::make(bufferLength)), _total_weight(0)
+    : _buffer(sp<Array<int16_t>::Allocated>::make(bufferLength)), _buffer_hdr(sp<Array<int32_t>::Allocated>::make(bufferLength))
 {
     ensureToneMapRange(TONE_MAP_WEIGHT_ONE);
 }

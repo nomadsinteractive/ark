@@ -2,6 +2,7 @@
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
+#include "core/util/holder_util.h"
 #include "core/util/log.h"
 
 #include "graphics/base/frame.h"
@@ -40,6 +41,13 @@ void ViewGroup::render(RenderRequest& renderRequest, float x, float y)
 
     _layout_hierarchy->updateLayout(_layout_param);
     _layout_hierarchy->render(renderRequest, x, y);
+}
+
+void ViewGroup::traverse(const Holder::Visitor& visitor)
+{
+    View::traverse(visitor);
+    HolderUtil::visit(_background, visitor);
+    _layout_hierarchy->traverse(visitor);
 }
 
 bool ViewGroup::onEvent(const Event& event, float x, float y)

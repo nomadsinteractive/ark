@@ -4,6 +4,7 @@
 #include "core/base/api.h"
 #include "core/collection/list.h"
 #include "core/inf/builder.h"
+#include "core/inf/holder.h"
 #include "core/types/owned_ptr.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -17,10 +18,10 @@
 
 namespace ark {
 
-//[[script::bindings::container]]
-class ARK_API Arena final : public EventListener, public Renderer, public Renderer::Group {
+//[[script::bindings::holder]]
+class ARK_API Arena final : public EventListener, public Renderer, public Renderer::Group, public Holder {
 public:
-    Arena(const sp<Renderer>& rootView, const sp<ResourceLoader>& resourceLoader);
+    Arena(const sp<ViewGroup>& view, const sp<ResourceLoader>& resourceLoader);
     ~Arena() override;
 
 //  [[script::bindings::meta(expire())]]
@@ -31,6 +32,8 @@ public:
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
     virtual bool onEvent(const Event& event) override;
+
+    virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::loader]]
     template<typename T> const sp<T> load(const String& name, const sp<Scope>& args = nullptr) {
@@ -85,22 +88,9 @@ public:
         String _view;
     };
 
-//  [[plugin::style("expired")]]
-    class STYLE : public Builder<Arena> {
-    public:
-        STYLE(BeanFactory& factory, const sp<Builder<Arena>>& delegate, const String& value);
-
-        virtual sp<Arena> build(const sp<Scope>& args) override;
-
-    private:
-        sp<Builder<Arena>> _delegate;
-        sp<Builder<Disposed>> _expired;
-    };
-
 private:
     op<EventListenerList> _event_listeners;
     sp<ViewGroup> _view_group;
-    sp<Renderer> _renderer;
     sp<ResourceLoader> _resource_loader;
     DisposableItemList<Renderer> _layers;
 
