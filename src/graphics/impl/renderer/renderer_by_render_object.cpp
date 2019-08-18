@@ -20,6 +20,8 @@ RendererByRenderObject::RendererByRenderObject(const sp<RenderObject>& renderObj
 {
     DASSERT(_render_object);
     DASSERT(_layer_context);
+    if(!_render_object->size())
+        measure(_render_object->size());
 }
 
 void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, float x, float y)
@@ -30,6 +32,13 @@ void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, float x, f
 const SafePtr<Size>& RendererByRenderObject::size()
 {
     return _render_object->size();
+}
+
+void RendererByRenderObject::measure(Size& size)
+{
+    const Metrics metrics = _layer_context->renderModel()->measure(_render_object->type()->val());
+    size.setWidth(metrics.size.x());
+    size.setHeight(metrics.size.y());
 }
 
 RendererByRenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

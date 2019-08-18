@@ -11,7 +11,7 @@ Scope::Scope(std::map<String, Box> variables)
 
 Box Scope::get(const String& name)
 {
-    auto iter = _variables.find(name);
+    const auto iter = _variables.find(name);
     return iter != _variables.end() ? iter->second : Box();
 }
 

@@ -10,8 +10,7 @@ Use it for:
 
 """
 
-from typing import Callable, List, Type, TypeVar, Union
-
+from typing import Callable, List, Type, TypeVar, Union, Optional
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'Numeric', 'Layer', 'Vec2', 'Vec3',
                            'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotate', 'Size', 'StringBundle', 'Tilemap', 'TilemapImporter', 'Tileset',
@@ -719,27 +718,27 @@ class Event:
     CODE_KEYBOARD_SPACE = 48
 
     @property
-    def action(self):
+    def action(self) -> int:
         return self.ACTION_KEY_DOWN
 
     @property
-    def code(self):
+    def code(self) -> int:
         return self.CODE_NONE
 
     @property
-    def x(self):
+    def x(self) -> int:
         return 0
 
     @property
-    def y(self):
+    def y(self) -> int:
         return 0
 
     @property
-    def xy(self):
-        return (0, 0)
+    def xy(self) -> tuple:
+        return 0, 0
 
     @property
-    def timestamp(self):
+    def timestamp(self) -> int:
         return 0
 
 
@@ -762,7 +761,7 @@ class Rotate:
 
 
 class Transform:
-    def __init__(self, rotate: Union[Rotate, None], scale: Union[Vec3, None] = None, translate: Union[Vec3, None] = None):
+    def __init__(self, rotate: Optional[Rotate], scale: Optional[Vec3, Vec2] = None, translate: Optional[Vec3, Vec2] = None):
         self._rotate = rotate
         self._scale = scale
         self._translate = translate

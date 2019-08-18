@@ -33,6 +33,9 @@ public:
     };
 
 private:
+    void measure(Size& size);
+
+private:
     sp<RenderObject> _render_object;
     sp<LayerContext> _layer_context;
 

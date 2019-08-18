@@ -167,6 +167,16 @@ sp<Numeric> NumericUtil::negative(const sp<Numeric>& self)
     return sp<NumericNegative>::make(self);
 }
 
+sp<Numeric> NumericUtil::pow(const sp<Numeric>& x, const sp<Integer>& y, const sp<Integer>& /*z*/)
+{
+    return sp<VariableOP2<float, int32_t, Operators::Pow<float, int32_t>, sp<Numeric>, sp<Integer>>>::make(x, y);
+}
+
+sp<Numeric> NumericUtil::pow(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Integer>& /*z*/)
+{
+    return sp<VariableOP2<float, float, Operators::Pow<float>, sp<Numeric>, sp<Numeric>>>::make(x, y);
+}
+
 int32_t NumericUtil::toInt32(const sp<Numeric>& self)
 {
     return static_cast<int32_t>(self->val());

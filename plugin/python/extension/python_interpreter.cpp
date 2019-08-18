@@ -145,13 +145,8 @@ sp<Numeric> PythonInterpreter::toNumeric(PyObject* object, bool alert)
 
 sp<Integer> PythonInterpreter::toInteger(PyObject* object, bool alert)
 {
-    if(PyLong_Check(object))
+    if(PyLong_CheckExact(object))
         return sp<Integer::Const>::make(PyLong_AsLong(object));
-    if(PyFloat_Check(object))
-    {
-        DWARN(false, "Casting from float to integer loses precision.");
-        return sp<Integer::Const>::make(static_cast<int32_t>(PyFloat_AsDouble(object)));
-    }
 
     return asInterface<Integer>(object, alert);
 }

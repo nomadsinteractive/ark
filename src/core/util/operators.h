@@ -86,6 +86,13 @@ public:
         }
     };
 
+    template<typename T, typename P = T> class Pow {
+    public:
+        auto operator()(T v1, P v2)->decltype(std::pow(v1, v2)) {
+            return std::pow(v1, v2);
+        }
+    };
+
     template<typename T> class And {
     public:
         auto operator()(T v1, T v2)->decltype(v1 && v2) {
