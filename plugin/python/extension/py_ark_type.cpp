@@ -12,16 +12,17 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-static PyObject* __richcmp__(PyArkType::Instance* obj1, PyArkType::Instance* obj2, int op)
+static PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, int op)
 {
-    if(!PythonInterpreter::instance()->isPyArkTypeObject(Py_TYPE(obj2)))
+    bool obj2IsNone = obj2 == Py_None;
+    if(!(obj2IsNone || PythonInterpreter::instance()->isPyArkTypeObject(Py_TYPE(obj2))))
     {
         LOGW("Comparing \"%s\" with \"%s\" is not supported", Py_TYPE(obj1)->tp_name, Py_TYPE(obj2)->tp_name);
         Py_RETURN_NOTIMPLEMENTED;
     }
 
     Py_hash_t hash1 = reinterpret_cast<Py_hash_t>(obj1->box->ptr());
-    Py_hash_t hash2 = reinterpret_cast<Py_hash_t>(obj2->box->ptr());
+    Py_hash_t hash2 = obj2IsNone ? PyObject_Hash(obj2) : reinterpret_cast<Py_hash_t>(reinterpret_cast<PyArkType::Instance*>(obj2)->box->ptr());
 
     Py_RETURN_RICHCOMPARE(hash1, hash2, op);
 }

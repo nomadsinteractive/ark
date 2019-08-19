@@ -19,6 +19,8 @@ public:
     static String getUserStoragePath(const String& path);
 //  [[script::bindings::auto]]
     static String getExternalStoragePath(const String& path);
+//  [[script::bindings::auto]]
+    static void sysCall(int32_t id, const String& value);
 
     static sp<AssetBundle> getAssetBundle(const String& path, const String& appPath);
     static sp<Alphabet> getSystemAlphabet(const Font& font, const String& lang);

@@ -184,6 +184,12 @@ private:
     template<typename T> PyObject* toPyObject_sfinae(const T& iterable, decltype(iterable.begin())*) {
         return fromIterable_sfinae<T>(iterable, nullptr);
     }
+    template<typename T> PyObject* toPyObject_sfinae(const T& value, decltype(value.second)*) {
+        PyObject* pyTuple = PyTuple_New(2);
+        PyList_SetItem(pyTuple, 0, toPyObject(value.first));
+        PyList_SetItem(pyTuple, 1, toPyObject(value.second));
+        return pyTuple;
+    }
     template<typename T> PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_enum<T>::value>::type*) {
         return fromType<int32_t>(static_cast<int32_t>(value));
     }

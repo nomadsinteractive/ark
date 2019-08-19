@@ -88,8 +88,8 @@ public:
 
     template<typename T, typename P = T> class Pow {
     public:
-        auto operator()(T v1, P v2)->decltype(std::pow(v1, v2)) {
-            return std::pow(v1, v2);
+        float operator()(T v1, P v2) {
+            return static_cast<float>(std::pow(v1, v2));
         }
     };
 

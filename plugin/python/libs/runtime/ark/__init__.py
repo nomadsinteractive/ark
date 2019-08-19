@@ -1035,8 +1035,16 @@ class Visibility:
 
 class Platform:
     @staticmethod
-    def get_user_storage_path(p):
-        return None
+    def get_user_storage_path(p: str) -> str:
+        return ''
+
+    @staticmethod
+    def get_external_storage_path(p: str) -> str:
+        return ''
+
+    @staticmethod
+    def sys_call(cmd_id: int, cmd_value: str):
+        pass
 
 
 class RigidBody:

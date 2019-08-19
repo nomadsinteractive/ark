@@ -85,7 +85,7 @@ class GL2JNIView extends GLSurfaceView {
     }
 
     private void init(boolean translucent, int depth, int stencil) {
-        JNILib.onCreate(getContext(), getContext().getAssets());
+        JNILib.onCreate(new ApplicationContextAdapter(getContext()), getContext().getAssets());
         
         /* By default, GLSurfaceView() creates a RGB_565 opaque surface.
          * If we want a translucent one, we should change the surface's

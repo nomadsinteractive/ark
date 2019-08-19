@@ -16,13 +16,12 @@
 
 package com.nomads.ark;
 
-import android.content.Context;
 import android.content.res.AssetManager;
 import android.view.Surface;
 
 public class JNILib {
 
-    public static native void onCreate(Context applicationContext, AssetManager assetManager);
+    public static native void onCreate(Object applicationContext, AssetManager assetManager);
 
     public static native void onSurfaceCreated(Surface surface);
     /**

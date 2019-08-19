@@ -54,9 +54,7 @@ V3 Bezier2::val()
 
 V2 Bezier2::interpolate(const V2& p1, const V2& p2, float t)
 {
-    float p1x = p1.x(), p1y = p1.y();
-    float p2x = p2.x(), p2y = p2.y();
-    return V2((p2x - p1x) * t + p1x, (p2y - p1y) * t + p1y);
+    return (p2 - p1) * t + p1;
 }
 
 Bezier2::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

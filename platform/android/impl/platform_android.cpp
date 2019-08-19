@@ -74,6 +74,20 @@ String PlatformAndroid::getUserStoragePath(const String& filename)
 
 namespace ark {
 
+static String java_File_getAbsolutePath(JNIEnv* env, jobject jFile)
+{
+    jclass jFileClass = env->GetObjectClass(jFile);
+    jmethodID getAbsoluteMethodID = env->GetMethodID(jFileClass, "getAbsolutePath", "()Ljava/lang/String;");
+    jstring jAbsolutePath = (jstring) env->CallObjectMethod(jFile, getAbsoluteMethodID);
+    jboolean isCopy = false;
+    const char* buf = env->GetStringUTFChars(jAbsolutePath, &isCopy);
+    const String path = buf;
+    env->ReleaseStringUTFChars(jAbsolutePath, buf);
+    env->DeleteLocalRef(jFileClass);
+    env->DeleteLocalRef(jAbsolutePath);
+    return path;
+}
+
 void Platform::log(Log::LogLevel logLevel, const char* tag, const char* content)
 {
 	const String message = Strings::sprintf("%s: %s", tag, content);
@@ -118,19 +132,11 @@ String Platform::getUserStoragePath(const String& filename)
 		jstring jPath = JNIUtil::newStringUTF(env, path.c_str());
 		jobject jFile = env->CallObjectMethod(gApplicationContext, methodID, jPath, 0);
 		if(jFile)
-		{
-			jclass jFileClass = env->GetObjectClass(jFile);
-			jmethodID getAbsoluteMethodID = env->GetMethodID(jFileClass, "getAbsolutePath", "()Ljava/lang/String;");
-			jstring jAbsolutePath = (jstring) env->CallObjectMethod(jFile, getAbsoluteMethodID);
-			jboolean isCopy = false;
-			const char* buf = env->GetStringUTFChars(jAbsolutePath, &isCopy);
-			ret = Strings::sprintf("%s/%s", buf, name.c_str());
-			env->ReleaseStringUTFChars(jAbsolutePath, buf);
-			env->DeleteLocalRef(jFileClass);
-			env->DeleteLocalRef(jFile);
-			env->DeleteLocalRef(jAbsolutePath);
-		}
-		env->DeleteLocalRef(jPath);
+        {
+            ret = pathJoin(java_File_getAbsolutePath(env, jFile), path);
+            env->DeleteLocalRef(jFile);
+        }
+        env->DeleteLocalRef(jPath);
 		env->DeleteLocalRef(applicationContextClass);
 		return ret;
 	}
@@ -149,20 +155,24 @@ String Platform::getExternalStoragePath(const String& path)
         jobject jFile = env->CallObjectMethod(gApplicationContext, methodID, nullptr);
         if(jFile)
         {
-            jclass jFileClass = env->GetObjectClass(jFile);
-            jmethodID getAbsoluteMethodID = env->GetMethodID(jFileClass, "getAbsolutePath", "()Ljava/lang/String;");
-            jstring jAbsolutePath = (jstring) env->CallObjectMethod(jFile, getAbsoluteMethodID);
-            jboolean isCopy = false;
-            const char* buf = env->GetStringUTFChars(jAbsolutePath, &isCopy);
-            ret = pathJoin(buf, path);
-            env->ReleaseStringUTFChars(jAbsolutePath, buf);
-            env->DeleteLocalRef(jFileClass);
+            ret = pathJoin(java_File_getAbsolutePath(env, jFile), path);
             env->DeleteLocalRef(jFile);
-            env->DeleteLocalRef(jAbsolutePath);
         }
         env->DeleteLocalRef(applicationContextClass);
     }
     return ret;
+}
+
+void Platform::sysCall(int32_t id, const String& value)
+{
+    DASSERT(gApplicationContext);
+    JNIEnv* env = JNIUtil::attachCurrentThread();
+    jclass applicationContextClass = env->GetObjectClass(gApplicationContext);
+    jmethodID methodID = env->GetMethodID(applicationContextClass, "sysCall", "(ILjava/lang/String;)V");
+    jstring jValue = JNIUtil::newStringUTF(env, value.c_str());
+    env->CallVoidMethod(gApplicationContext, methodID, id, jValue);
+    env->DeleteLocalRef(jValue);
+    env->DeleteLocalRef(applicationContextClass);
 }
 
 String Platform::getRealPath(const String& path)

@@ -50,6 +50,10 @@ String Platform::getExternalStoragePath(const String& path)
     return s.empty() ? "." : s;
 }
 
+void Platform::sysCall(int32_t id, const String& value)
+{
+}
+
 String Platform::getDefaultFontDirectory()
 {
     TCHAR nWindowsDirectory[MAX_PATH];

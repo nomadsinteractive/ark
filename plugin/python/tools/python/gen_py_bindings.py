@@ -19,34 +19,34 @@ TP_AS_NUMBER_TEMPLATE = [
     '    (binaryfunc) ${nb_subtract}, /* binaryfunc nb_subtract; */ /* __sub__ */',
     '    (binaryfunc) ${nb_multiply}, /* binaryfunc nb_multiply; */ /* __mul__ */',
     '    (binaryfunc) ${nb_remainder}, /* binaryfunc nb_remainder; */ /* __mod__ */',
-    '    0,               /* binaryfunc nb_divmod; */ /* __divmod__ */',
+    '    nullptr,               /* binaryfunc nb_divmod; */ /* __divmod__ */',
     '    (ternaryfunc) ${nb_power},   /* ternaryfunc nb_power; */ /* __pow__ */',
     '    (unaryfunc) ${nb_negative},        /* unaryfunc nb_negative; */ /* __neg__ */',
-    '    0,               /* unaryfunc nb_positive; */ /* __pos__ */',
-    '    0,               /* unaryfunc nb_absolute; */ /* __abs__ */',
+    '    nullptr,               /* unaryfunc nb_positive; */ /* __pos__ */',
+    '    nullptr,               /* unaryfunc nb_absolute; */ /* __abs__ */',
     '    (inquiry) ${nb_bool}, /* inquiry nb_bool; */ /* __bool__ */',
-    '    0,               /* unaryfunc nb_invert; */ /* __invert__ */',
-    '    0,               /* binaryfunc nb_lshift; */ /* __lshift__ */',
-    '    0,               /* binaryfunc nb_rshift; */ /* __rshift__ */',
+    '    nullptr,               /* unaryfunc nb_invert; */ /* __invert__ */',
+    '    nullptr,               /* binaryfunc nb_lshift; */ /* __lshift__ */',
+    '    nullptr,               /* binaryfunc nb_rshift; */ /* __rshift__ */',
     '    (binaryfunc) ${nb_and}, /* binaryfunc nb_and; */ /* __and__ */',
-    '    0,               /* binaryfunc nb_xor; */ /* __xor__ */',
+    '    nullptr,               /* binaryfunc nb_xor; */ /* __xor__ */',
     '    (binaryfunc) ${nb_or}, /* binaryfunc nb_or; */ /* __or__ */',
     '    (unaryfunc) ${nb_int}, /* unaryfunc nb_int; */ /* __int__ */',
-    '    0,               /* void *nb_reserved; */',
+    '    nullptr,               /* void *nb_reserved; */',
     '    (unaryfunc) ${nb_float},       /* unaryfunc nb_float; */ /* __float__ */',
     '    (binaryfunc) ${nb_inplace_add},       /* binaryfunc nb_inplace_add */',
     '    (binaryfunc) ${nb_inplace_subtract},       /* binaryfunc nb_inplace_subtract */',
     '    (binaryfunc) ${nb_inplace_multiply},       /* binaryfunc nb_inplace_multiply */',
-    '    0, /* binaryfunc nb_inplace_remainder;  */',
-    '    0, /* ternaryfunc nb_inplace_power;     */',
-    '    0, /* binaryfunc nb_inplace_lshift;     */',
-    '    0, /* binaryfunc nb_inplace_rshift;     */',
-    '    0, /* binaryfunc nb_inplace_and;        */',
-    '    0, /* binaryfunc nb_inplace_xor;        */',
-    '    0, /* binaryfunc nb_inplace_or;         */',
+    '    nullptr, /* binaryfunc nb_inplace_remainder;  */',
+    '    nullptr, /* ternaryfunc nb_inplace_power;     */',
+    '    nullptr, /* binaryfunc nb_inplace_lshift;     */',
+    '    nullptr, /* binaryfunc nb_inplace_rshift;     */',
+    '    nullptr, /* binaryfunc nb_inplace_and;        */',
+    '    nullptr, /* binaryfunc nb_inplace_xor;        */',
+    '    nullptr, /* binaryfunc nb_inplace_or;         */',
     '    (binaryfunc) ${nb_floor_divide}, /* binaryfunc nb_floor_divide;       */',
     '    (binaryfunc) ${nb_true_divide}, /* binaryfunc nb_true_divide;         */ /* __div__ */',
-    '    0, /* binaryfunc nb_inplace_floor_divide;*/',
+    '    nullptr, /* binaryfunc nb_inplace_floor_divide;*/',
     '    (binaryfunc) ${nb_inplace_true_divide}, /* binaryfunc nb_inplace_true_divide  */ /* __idiv__ */',
     '};'
 ]
@@ -1163,7 +1163,7 @@ class GenClass(object):
         if operator_methods:
             args = {'py_class_name': self._py_class_name}
             methods_dict = dict((i.operator, '%s::%s' % (self._py_class_name, i.name)) for i in operator_methods)
-            args.update((j, methods_dict[i] if i in methods_dict else '0') for i, j in TP_AS_NUMBER_TEMPLATE_OPERATOR.items())
+            args.update((j, methods_dict[i] if i in methods_dict else 'nullptr') for i, j in TP_AS_NUMBER_TEMPLATE_OPERATOR.items())
             operator_defs.extend(acg.format(i, **args) for i in TP_AS_NUMBER_TEMPLATE)
         return operator_defs
 

@@ -21,7 +21,8 @@ public:
         ACTION_MOVE,
         ACTION_WHEEL,
         ACTION_BACK_PRESSED,
-        ACTION_CANCEL
+        ACTION_CANCEL,
+        ACTION_USER_DEFINED = 10000
     };
 //  [[script::bindings::enumeration]]
     enum Code {
@@ -90,6 +91,7 @@ public:
         CODE_MOUSE_BUTTON_LEFT,
         CODE_MOUSE_BUTTON_MIDDLE,
         CODE_MOUSE_BUTTON_RIGHT,
+        CODE_USER_DEFINED = 10000
     };
 
     Event(Action action, float x, float y, uint32_t timestamp, Code code = CODE_NONE);
