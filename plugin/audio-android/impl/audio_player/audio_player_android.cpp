@@ -159,8 +159,6 @@ private:
     int16_t _sample_channels = 2;
     oboe::AudioFormat _sample_format = oboe::AudioFormat::I16;
 
-    int32_t _play_stream_underrun_count;
-    int32_t _buf_size_in_frames;
     int32_t _frames_per_burst;
     int32_t _buffer_size_selection = kBufferSizeAutomatic;
 

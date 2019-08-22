@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.nomads.ark;
+package com.nomadsinteractive.ark;
 /*
  * Copyright (C) 2008 The Android Open Source Project
  *
@@ -32,11 +32,6 @@ package com.nomads.ark;
  */
 
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
@@ -69,7 +64,7 @@ import android.view.View;
  *   that matches it exactly (with regards to red/green/blue/alpha channels
  *   bit depths). Failure to do so would result in an EGL_BAD_MATCH error.
  */
-class GL2JNIView extends GLSurfaceView {
+public class GL2JNIView extends GLSurfaceView {
     private static String TAG = "GL2JNIView";
     private static final boolean DEBUG = false;
     private static final int EGL_CONTEXT_VERSION = 2;
@@ -201,7 +196,7 @@ class GL2JNIView extends GLSurfaceView {
         }
 
         public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display,
-                EGLConfig[] configs) {
+                                      EGLConfig[] configs) {
             for(EGLConfig config : configs) {
                 int d = findConfigAttrib(egl, display, config,
                         EGL10.EGL_DEPTH_SIZE, 0);
@@ -229,7 +224,7 @@ class GL2JNIView extends GLSurfaceView {
         }
 
         private int findConfigAttrib(EGL10 egl, EGLDisplay display,
-                EGLConfig config, int attribute, int defaultValue) {
+                                     EGLConfig config, int attribute, int defaultValue) {
 
             if (egl.eglGetConfigAttrib(display, config, attribute, mValue)) {
                 return mValue[0];
@@ -238,7 +233,7 @@ class GL2JNIView extends GLSurfaceView {
         }
 
         private void printConfigs(EGL10 egl, EGLDisplay display,
-            EGLConfig[] configs) {
+                                  EGLConfig[] configs) {
             int numConfigs = configs.length;
             Log.w(TAG, String.format("%d configurations", numConfigs));
             for (int i = 0; i < numConfigs; i++) {
@@ -248,7 +243,7 @@ class GL2JNIView extends GLSurfaceView {
         }
 
         private void printConfig(EGL10 egl, EGLDisplay display,
-                EGLConfig config) {
+                                 EGLConfig config) {
             int[] attributes = {
                     EGL10.EGL_BUFFER_SIZE,
                     EGL10.EGL_ALPHA_SIZE,

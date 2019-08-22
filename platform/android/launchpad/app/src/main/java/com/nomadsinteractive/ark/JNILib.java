@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.nomads.ark;
+package com.nomadsinteractive.ark;
 
 import android.content.res.AssetManager;
 import android.view.Surface;
@@ -22,12 +22,7 @@ import android.view.Surface;
 public class JNILib {
 
     public static native void onCreate(Object applicationContext, AssetManager assetManager);
-
     public static native void onSurfaceCreated(Surface surface);
-    /**
-     * @param width  the current view width
-     * @param height the current view height
-     */
     public static native void onSurfaceChanged(int width, int height);
 
     public static native void onDraw();

@@ -403,6 +403,11 @@ ShaderPreprocessor::Preprocessor::Preprocessor(ShaderPreprocessor::ShaderType ty
 {
 }
 
+ShaderPreprocessor::ShaderType ShaderPreprocessor::Preprocessor::type() const
+{
+    return _type;
+}
+
 String ShaderPreprocessor::Preprocessor::process(const RenderContext& glContext) const
 {
     DCHECK(glContext.version() > 0, "Unintialized GLContext");

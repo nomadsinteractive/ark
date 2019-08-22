@@ -22,14 +22,14 @@
 #include "util/jni_util.h"
 
 extern "C" {
-    JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onCreate(JNIEnv* env, jobject obj, jobject applicationContext, jobject assetManager);
-    JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onSurfaceCreated(JNIEnv* env, jobject obj, jobject surface);
-    JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onSurfaceChanged(JNIEnv* env, jobject obj, jint width, jint height);
-    JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onDraw(JNIEnv* env, jobject obj);
-    JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onPause(JNIEnv* env, jobject obj);
-    JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onResume(JNIEnv* env, jobject obj);
-    JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onDestroy(JNIEnv* env, jobject obj);
-    JNIEXPORT jboolean JNICALL Java_com_nomads_ark_JNILib_onEvent(JNIEnv* env, jobject obj, jint action, jfloat x, jfloat y, jlong timestamp);
+    JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onCreate(JNIEnv* env, jobject obj, jobject applicationContext, jobject assetManager);
+    JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onSurfaceCreated(JNIEnv* env, jobject obj, jobject surface);
+    JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onSurfaceChanged(JNIEnv* env, jobject obj, jint width, jint height);
+    JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onDraw(JNIEnv* env, jobject obj);
+    JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onPause(JNIEnv* env, jobject obj);
+    JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onResume(JNIEnv* env, jobject obj);
+    JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onDestroy(JNIEnv* env, jobject obj);
+    JNIEXPORT jboolean JNICALL Java_com_nomadsinteractive_ark_JNILib_onEvent(JNIEnv* env, jobject obj, jint action, jfloat x, jfloat y, jlong timestamp);
 };
 
 namespace ark {
@@ -52,7 +52,7 @@ static sp<Application> _application;
 static ANativeWindow* _window;
 
 
-JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onCreate(JNIEnv* env, jobject obj, jobject applicationContext, jobject assetManager)
+JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onCreate(JNIEnv* env, jobject obj, jobject applicationContext, jobject assetManager)
 {
     JNIUtil::init(env);
     if(gApplicationContext)
@@ -70,7 +70,7 @@ JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onCreate(JNIEnv* env, jobject 
     _application->onCreate();
 }
 
-JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onSurfaceCreated(JNIEnv* env, jobject obj, jobject surface)
+JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onSurfaceCreated(JNIEnv* env, jobject obj, jobject surface)
 {
 	RenderContext::Info& info = _application->context()->renderEngine()->renderContext()->info();
 	_window = ANativeWindow_fromSurface(env, surface);
@@ -79,27 +79,27 @@ JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onSurfaceCreated(JNIEnv* env, 
 	_ark->applicationContext()->updateRenderState();
 }
 
-JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onSurfaceChanged(JNIEnv* env, jobject obj, jint width, jint height)
+JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onSurfaceChanged(JNIEnv* env, jobject obj, jint width, jint height)
 {
-    _application->onSurfaceChanged(width, height);
+    _application->onSurfaceChanged(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
 }
 
-JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onDraw(JNIEnv* env, jobject obj)
+JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onDraw(JNIEnv* env, jobject obj)
 {
     _application->onSurfaceUpdate();
 }
 
-JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onPause(JNIEnv* env, jobject obj)
+JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onPause(JNIEnv* env, jobject obj)
 {
     _application->onPause();
 }
 
-JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onResume(JNIEnv* env, jobject obj)
+JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onResume(JNIEnv* env, jobject obj)
 {
     _application->onResume();
 }
 
-JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onDestroy(JNIEnv* env, jobject obj)
+JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onDestroy(JNIEnv* env, jobject obj)
 {
     _application->onDestroy();
 	ANativeWindow_release(_window);
@@ -108,7 +108,7 @@ JNIEXPORT void JNICALL Java_com_nomads_ark_JNILib_onDestroy(JNIEnv* env, jobject
 	_window = nullptr;
 }
 
-JNIEXPORT jboolean JNICALL Java_com_nomads_ark_JNILib_onEvent(JNIEnv* env, jobject obj, jint action, jfloat x, jfloat y, jlong timestamp)
+JNIEXPORT jboolean JNICALL Java_com_nomadsinteractive_ark_JNILib_onEvent(JNIEnv* env, jobject obj, jint action, jfloat x, jfloat y, jlong timestamp)
 {
     Event::Action s = Event::ACTION_KEY_NONE;
     switch(action)
@@ -132,5 +132,5 @@ JNIEXPORT jboolean JNICALL Java_com_nomads_ark_JNILib_onEvent(JNIEnv* env, jobje
             DFATAL("Unrecognized action code: %d", action);
             break;
     }
-    return _application->onEvent(Event(s, x, y, timestamp), true);
+    return static_cast<jboolean>(_application->onEvent(Event(s, x, y, static_cast<uint32_t>(timestamp)), true));
 }

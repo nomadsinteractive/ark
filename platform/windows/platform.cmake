@@ -4,20 +4,14 @@ if(ARK_FORCE_STATIC_VCRT)
   foreach(flag_var
       CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
       CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO)
-    if(${flag_var} MATCHES "/MD")
-      string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+    if(${${flag_var}} MATCHES "/MD")
+      string(REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
     endif()
   endforeach()
 endif()
 
 if(ARK_USE_OPEN_GL)
     ark_add_denpendency(3rdparty/glbinding glbinding 3rdparty/glbinding/source/glbinding/include ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/glbinding/source/glbinding/include)
-
-#    list(APPEND ARK_OPENGL_INCLUDE_DIRS
-#        ${ARK_SRC_DIR}/3rdparty/glbinding/source/glbinding/include
-#        ${PROJECT_BINARY_DIR}/3rdparty/glbinding/source/glbinding/include
-#        )
-#    set(ARK_OPENGL_LIBRARIES glbinding)
 endif()
 
 if(ARK_USE_VULKAN)

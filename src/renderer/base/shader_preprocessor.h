@@ -39,6 +39,8 @@ public:
         Preprocessor(ShaderType type, String source);
         DEFAULT_COPY_AND_ASSIGN(Preprocessor);
 
+        ShaderType type() const;
+
         String process(const RenderContext& glContext) const;
 
     private:
