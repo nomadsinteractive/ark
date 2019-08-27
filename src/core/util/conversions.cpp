@@ -39,9 +39,9 @@ template<> ARK_API int16_t Conversions::to<String, int16_t>(const String& str)
 template<> ARK_API float Conversions::to<String, float>(const String& str)
 {
     if(str == "match_parent")
-        return LayoutParam::MATCH_PARENT;
+        return static_cast<float>(LayoutParam::MATCH_PARENT);
     if(str == "wrap_content")
-        return LayoutParam::WRAP_CONTENT;
+        return static_cast<float>(LayoutParam::WRAP_CONTENT);
     if(str.endsWith("s"))
         return Conversions::to<String, Clock::Interval>(str).sec();
     return static_cast<float>(atof(str.c_str()));

@@ -35,6 +35,7 @@ public:
     RenderObject(int32_t type, const sp<Vec3>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
 //  [[script::bindings::auto]]
     RenderObject(const sp<Integer>& type, const sp<Vec3>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
+    RenderObject(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings, const sp<Disposed>& disposed);
 
 //  [[script::bindings::meta(expire())]]
 //  [[script::bindings::meta(isExpired())]]
@@ -135,6 +136,7 @@ public:
         SafePtr<Builder<Size>> _size;
         SafePtr<Builder<Transform>> _transform;
         SafePtr<Builder<Varyings>> _varyings;
+        SafePtr<Builder<Disposed>> _disposed;
     };
 
 private:

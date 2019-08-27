@@ -126,9 +126,8 @@ aux_source_directory(src/app/view LOCAL_SRC_LIST)
 aux_source_directory(platform/any LOCAL_SRC_LIST)
 ark_include_directories(platform/any)
 
-list(APPEND LOCAL_INCLUDE_DIRS 3rdparty/glm)
+ark_include_directories(3rdparty/glm)
 
-ark_add_denpendency(3rdparty/math-neon math-neon 3rdparty/math-neon)
 ark_add_denpendency(3rdparty/tinyxml2 tinyxml2 3rdparty/tinyxml2)
 ark_add_denpendency(3rdparty/libyaml yaml 3rdparty/libyaml/include)
 ark_compile_definitions(-DYAML_DECLARE_STATIC)
@@ -183,11 +182,6 @@ ark_add_plugin_directory(python plugin/python)
 ark_add_plugin_directory(box2d plugin/box2d)
 ark_add_plugin_directory(vorbis plugin/vorbis)
 ark_add_plugin_directory(miniaudio plugin/miniaudio)
-
-if(NOT IOS)
-    ark_add_plugin_directory(portaudio plugin/portaudio)
-endif()
-
 ark_add_plugin_directory(noise plugin/noise)
 ark_add_plugin_directory(fmod plugin/fmod)
 ark_add_plugin_directory(assimp plugin/assimp)

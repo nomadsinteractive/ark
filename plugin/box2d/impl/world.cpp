@@ -139,7 +139,7 @@ void World::setBodyManifest(int32_t id, const BodyCreateInfo& bodyManifest)
 }
 
 World::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _expired(factory.getBuilder<Boolean>(manifest, Constants::Attributes::EXPIRED))
+    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _disposed(factory.getBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED))
 {
     BeanUtils::split<Numeric, Numeric>(factory, manifest, "pixel-per-meter", _ppmx, _ppmy);
     BeanUtils::split<Numeric, Numeric>(factory, manifest, "gravity", _gravity_x, _gravity_y);
@@ -170,7 +170,7 @@ sp<World> World::BUILDER_IMPL1::build(const sp<Scope>& args)
         importer->import(world);
     }
 
-    const sp<Boolean> expired = _expired->build(args);
+    const sp<Boolean> expired = _disposed->build(args);
     _resource_loader_context->renderController()->addPreUpdateRequest(world->_stub, expired ? expired : BooleanUtil::__or__(_resource_loader_context->disposed(), sp<Boolean>::adopt(new BooleanByWeakRef<World::Stub>(world->_stub, 1))));
     return world;
 }

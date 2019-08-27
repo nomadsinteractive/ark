@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <math.h>
 #include <stdlib.h>
-#include <math_neon.h>
 
 #include "core/inf/variable.h"
 #include "core/impl/numeric/abs.h"
@@ -36,10 +35,10 @@ private:
 
 }
 
-const float Math::PI = static_cast<float>(M_PI);
-const float Math::PIx2 = static_cast<float>(M_PI * 2.0f);
-const float Math::PI_2 = static_cast<float>(M_PI_2);
-const float Math::PI_4 = static_cast<float>(M_PI_4);
+const float Math::PI = 3.14159265358979323846f;
+const float Math::PIx2 = Math::PI * 2.0f;
+const float Math::PI_2 = Math::PI / 2.0f;
+const float Math::PI_4 = Math::PI / 4.0f;
 
 uint32_t Math::log2(uint32_t value)
 {
@@ -58,7 +57,7 @@ uint32_t Math::log2(uint32_t value)
 
 float Math::abs(float x)
 {
-    return fabsf_c(x);
+    return std::abs(x);
 }
 
 sp<Numeric> Math::abs(const sp<Numeric>& x)
@@ -68,7 +67,7 @@ sp<Numeric> Math::abs(const sp<Numeric>& x)
 
 float Math::sin(float x)
 {
-    return sinf_c(x);
+    return std::sin(x);
 }
 
 sp<Numeric> Math::sin(const sp<Numeric>& x)
@@ -78,7 +77,7 @@ sp<Numeric> Math::sin(const sp<Numeric>& x)
 
 float Math::cos(float x)
 {
-    return cosf_c(x);
+    return std::cos(x);
 }
 
 sp<Numeric> Math::cos(const sp<Numeric>& x)
@@ -103,12 +102,12 @@ sp<Numeric> Math::max(const sp<Numeric>& a1, const sp<Numeric>& a2)
 
 float Math::acos(float x)
 {
-    return acosf_c(x);
+    return std::acos(x);
 }
 
 float Math::atan2(float y, float x)
 {
-    return atan2f_c(y, x);
+    return std::atan2(y, x);
 }
 
 float Math::radians(float degree)
@@ -118,17 +117,17 @@ float Math::radians(float degree)
 
 float Math::tanh(float x)
 {
-    return tanhf_c(x);
+    return std::tanh(x);
 }
 
 int32_t Math::floor(float x)
 {
-    return (int32_t) x;
+    return static_cast<int32_t>(x);
 }
 
 int32_t Math::round(float x)
 {
-    return (int32_t) (x + .5f);
+    return static_cast<int32_t>(x + 0.5f);
 }
 
 float Math::randf()
@@ -169,7 +168,7 @@ float Math::hypot(float dx, float dy)
 float Math::sqrt(float x)
 {
     DCHECK(x >= 0, "Illegal argument, negative value(%.2f)", x);
-    return sqrtf_c(x);
+    return std::sqrt(x);
 }
 
 V3 Math::quadratic(float a, float b, float c)
@@ -177,7 +176,7 @@ V3 Math::quadratic(float a, float b, float c)
 	float d = b * b - 4.0f * a * c;
 	if(d < 0)
 		return V3(d, 0, 0);
-	float sqrtd = ::sqrt(d);
+    float sqrtd = std::sqrt(d);
 	return V3(d, (-b + sqrtd) / 2.0f / a, (-b - sqrtd) / 2.0f / a);
 }
 
@@ -191,8 +190,8 @@ V2 Math::projectile(float dx, float dy, float v, float g, uint32_t sid)
     float vx2 = sid == 0 ? solutions.y() : solutions.z();
     if(solutions.x() < 0 || vx2 < 0)
 		return V2(0, 0);
-	float vx = ::sqrt(vx2);
-	float vy = ::sqrt(v * v - vx2);
+    float vx = std::sqrt(vx2);
+    float vy = std::sqrt(v * v - vx2);
     return V2(dx > 0 ? vx : -vx, g < 0 ? vy : -vy);
 }
 

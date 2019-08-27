@@ -81,8 +81,7 @@ class ArkModuleFinder:
     def _create_module_spec(self, fullname, source, path, package, filepath):
         loader = self._ark_asset_loader_type(self._bootstrap, source, path, package, fullname, filepath, self._ark.is_debug_build())
         spec = self._bootstrap.ModuleSpec(fullname, loader, origin=filepath, is_package=bool(path))
-        if filepath:
-            spec.has_location = True
+        spec.has_location = bool(filepath)
         return spec
 
     def _path_join(self, *paths):

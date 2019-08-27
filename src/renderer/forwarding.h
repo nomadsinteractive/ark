@@ -8,6 +8,7 @@ class Atlas;
 class Attribute;
 class Buffer;
 class Characters;
+class Emitter;
 class Framebuffer;
 class Pipeline;
 class PipelineFactory;

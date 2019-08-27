@@ -3,46 +3,48 @@
 
 #include <vector>
 
+#include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/base/clock.h"
 #include "core/inf/builder.h"
-#include "core/types/class.h"
+#include "core/inf/runnable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
+#include "graphics/base/v3.h"
 
 #include "renderer/forwarding.h"
 
 namespace ark {
 
-//[[core::class]]
-class Emitter : public Renderer {
+class ARK_API Emitter {
 private:
-    struct Stub {
-        Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Integer>& type, const sp<Vec>& position, const sp<Size>& size, const sp<Scope>& arguments);
+    struct Source {
+        Source(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Scope>& arguments);
 
         sp<Scope> _arguments;
 
         SafePtr<Integer> _type;
-        SafePtr<Vec> _position;
+        SafePtr<Vec3> _position;
         sp<Size> _size;
 
         sp<ObjectPool> _object_pool;
     };
 
 public:
-    Emitter(const sp<Stub>& stub, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory);
+    Emitter(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Source>& source, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+//  [[script::bindings::property]]
+    bool active();
+//  [[script::bindings::property]]
+    void setActive(bool active);
 
-//  [[plugin::resource-loader("emitter")]]
-    class BUILDER : public Builder<Renderer> {
+//  [[plugin::resource-loader]]
+    class BUILDER : public Builder<Emitter> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Emitter> build(const sp<Scope>& args) override;
 
     private:
         BeanFactory _factory;
@@ -50,71 +52,63 @@ public:
 
         sp<ResourceLoaderContext> _resource_loader_context;
 
-        sp<Clock> _clock;
         sp<Builder<Integer>> _type;
-        SafePtr<Builder<Vec>> _position;
+        SafePtr<Builder<Vec3>> _position;
         SafePtr<Builder<Size>> _size;
         sp<Builder<LayerContext>> _layer_context;
 
     };
 
 private:
-    class Iteration {
-    public:
-        Iteration(BeanFactory& factory, const document& manifest);
-
-        void doIteration(const sp<Scope>& scope, const sp<ObjectPool>& objectPool, const sp<Numeric>& duration, uint64_t baseline);
-
-        uint32_t count() const;
-
-    private:
-        String _name;
-        uint32_t _count;
-
-        std::vector<std::pair<String, sp<Builder<Numeric>>>> _numerics;
-    };
-
     class Particale {
     public:
-        Particale(const sp<Stub>& stub, const document& doc, BeanFactory& args);
+        Particale(const sp<Source>& stub, const document& doc, BeanFactory& factory);
         Particale(const Particale& other) = default;
 
-        uint64_t show(float x, float y, const sp<Clock>& clock, uint64_t tick, const sp<LayerContext>& layerContext);
+        uint64_t show(const V3& position, uint64_t tick, const sp<LayerContext>& layerContext);
 
     private:
-        sp<Vec> makePosition(ObjectPool& objectPool, float x, float y) const;
+        sp<Vec3> makePosition(ObjectPool& objectPool, const V3& position) const;
 
     private:
-        sp<Stub> _stub;
+        sp<Source> _stub;
 
         sp<Builder<Integer>> _type;
-        sp<Builder<Vec>> _position;
+        sp<Builder<Vec3>> _position;
         sp<Builder<Size>> _size;
         SafePtr<Builder<Transform>> _transform;
         SafePtr<Builder<Varyings>> _varyings;
         sp<Builder<Boolean>> _disposed;
 
-        sp<Iteration> _iteration;
-
         uint64_t _interval;
-
-        float _x, _y;
-        uint64_t last_emit_tick;
+        uint64_t _last_emit_tick;
+        V3 _source_position;
     };
 
-    uint64_t emitParticles(uint64_t tick);
+    class Stub : public Runnable {
+    public:
+        Stub(const sp<Clock>& clock, const sp<LayerContext>& layerContext, const sp<Source>& source, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory);
+
+        virtual void run() override;
+
+    private:
+        uint64_t emit(uint64_t tick);
+
+    private:
+        sp<Clock> _clock;
+        sp<LayerContext> _layer_context;
+
+        sp<Source> _source;
+
+        std::vector<Particale> _particles;
+        uint64_t _next_tick;
+
+    };
 
 private:
     sp<Stub> _stub;
-    sp<LayerContext> _layer_context;
-    std::vector<Particale> _particles;
-    sp<Clock> _clock;
-
-    uint64_t _next_tick;
-
-    friend class BUILDER;
-    friend class Particale;
-
+    sp<RenderController> _render_controller;
+    sp<BooleanWrapper> _disposed;
 };
 
 }

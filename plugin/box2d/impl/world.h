@@ -90,7 +90,7 @@ public:
 
         sp<Builder<Numeric>> _ppmx, _ppmy;
         sp<Builder<Numeric>> _gravity_x, _gravity_y;
-        SafePtr<Builder<Boolean>> _expired;
+        SafePtr<Builder<Boolean>> _disposed;
     };
 
 //  [[plugin::resource-loader("b2World")]]

@@ -35,6 +35,7 @@ FUNC_BUILDER_TEMPLATE = '''Library ${plugin_name}::createLibrary()
 
 _class_members = {}
 
+
 def declare_namespaces(namespaces, source):
     return '\n'.join(['namespace %s {' % i for i in namespaces]) + '\n\n' + source + '\n' +'\n'.join(['}'] * len(namespaces))
 
@@ -237,11 +238,10 @@ def search_for_plugins(paths):
         result.append(Decorator(filename, interface_class, implement_class, main_class, style_name, arguments))
 
     acg.match_header_patterns(paths, True,
-            HeaderPattern(BUILDER_PATTERN, match_builder),
-            HeaderPattern(DICTIONARY_PATTERN, match_dictionary),
-            HeaderPattern(FUNCTION_PATTERN, match_function),
-            HeaderPattern(STYLE_PATTERN, match_style)
-        )
+                              HeaderPattern(BUILDER_PATTERN, match_builder),
+                              HeaderPattern(DICTIONARY_PATTERN, match_dictionary),
+                              HeaderPattern(FUNCTION_PATTERN, match_function),
+                              HeaderPattern(STYLE_PATTERN, match_style))
     return result
 
 

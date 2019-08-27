@@ -173,7 +173,7 @@ void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineInpu
         if(!i.second.id())
             i.second.upload(graphicsContext);
 
-        glBindBuffer(GL_ARRAY_BUFFER, i.second.id());
+        glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(i.second.id()));
         bindBuffer(graphicsContext, input, i.first);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
@@ -239,12 +239,12 @@ void GLPipeline::activeTexture(const Texture& texture, uint32_t name)
 {
     static GLenum glTargets[Texture::TYPE_COUNT] = {GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP};
     glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + name));
-    glBindTexture(glTargets[texture.type()], texture.delegate()->id());
+    glBindTexture(glTargets[texture.type()], static_cast<GLuint>(texture.delegate()->id()));
 
-    char uniformName[16] = "u_Texture0";
-    uniformName[9] = static_cast<char>('0' + name);
+    char uniformName[16] = {'u', '_', 'T', 'e', 'x', 't', 'u', 'r', 'e', static_cast<char>('0' + name)};
+//    uniformName[9] = static_cast<char>('0' + name);
     const GLPipeline::GLUniform& uTexture = getUniform(uniformName);
-    uTexture.setUniform1i(name);
+    uTexture.setUniform1i(static_cast<GLint>(name));
 }
 
 void GLPipeline::glUpdateMatrix(GraphicsContext& /*graphicsContext*/, const String& name, const Matrix& matrix)

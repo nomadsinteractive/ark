@@ -4,7 +4,6 @@
 #include "core/forwarding.h"
 #include "core/inf/duck.h"
 #include "core/types/implements.h"
-#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 

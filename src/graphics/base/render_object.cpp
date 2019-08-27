@@ -26,6 +26,11 @@ RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec3>& position, co
 {
 }
 
+RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings, const sp<Disposed>& disposed)
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _disposed(disposed)
+{
+}
+
 const sp<Integer> RenderObject::type() const
 {
     return _type;
@@ -220,13 +225,14 @@ RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
       _position(factory.getBuilder<Vec3>(manifest, Constants::Attributes::POSITION)),
       _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _transform(factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM)),
-      _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS))
+      _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS)),
+      _disposed(factory.getBuilder<Disposed>(manifest, Constants::Attributes::DISPOSED))
 {
 }
 
 sp<RenderObject> RenderObject::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<RenderObject>::make(_type->build(args), _position->build(args), _size->build(args), _transform->build(args), _varyings->build(args));
+    return sp<RenderObject>::make(_type->build(args), _position->build(args), _size->build(args), _transform->build(args), _varyings->build(args), _disposed->build(args));
 }
 
 RenderObject::Snapshot::Snapshot(int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings)

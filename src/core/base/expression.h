@@ -17,6 +17,20 @@ namespace ark {
 
 class Expression {
 private:
+    template<typename T> class CallerBuilderV0 : public Builder<T> {
+    public:
+        CallerBuilderV0(const sp<Callable<sp<T>()>>& callable)
+            : _callable(callable) {
+        }
+
+        virtual sp<T> build(const sp<Scope>& /*args*/) override {
+            return _callable->call();
+        }
+
+    private:
+        sp<Callable<sp<T>()>> _callable;
+    };
+
     template<typename T> class CallerBuilderV1 : public Builder<T> {
     public:
         CallerBuilderV1(const sp<Callable<sp<T>(const sp<T>&)>>& callable, const sp<Builder<T>>& a1)
@@ -119,7 +133,12 @@ public:
                 const Global<PluginManager> pluginManager;
                 const std::vector<String> paramList = params.split(',');
                 typedef sp<N> ParamType;
-                if(paramList.size() == 1) {
+                if(paramList.size() == 0) {
+                    const sp<Callable<ParamType()>> callable = pluginManager->getCallable<ParamType()>(func);
+                    DCHECK(callable, "Undefined function \"%s\"", func.c_str());
+                    return sp<CallerBuilderV0<N>>::make(callable);
+                }
+                else if(paramList.size() == 1) {
                     const sp<Callable<ParamType(const ParamType&)>> callable = pluginManager->getCallable<ParamType(const ParamType&)>(func);
                     DCHECK(callable, "Undefined function \"%s\"", func.c_str());
                     return sp<CallerBuilderV1<N>>::make(callable, compile(factory, params));

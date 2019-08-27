@@ -5,16 +5,16 @@
 #include "core/base/object_pool.h"
 #include "core/dom/dom_document.h"
 #include "core/impl/boolean/boolean_by_timeout.h"
+#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/impl/variable/variable_op2.h"
-#include "core/util/bean_utils.h"
+#include "core/impl/variable/variable_wrapper.h"
+#include "core/util/boolean_util.h"
 #include "core/util/operators.h"
 
 #include "graphics/base/layer.h"
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
-#include "graphics/base/v2.h"
-#include "graphics/impl/vec/vec_with_translation.h"
-#include "graphics/impl/vec/vec2_impl.h"
+#include "graphics/impl/vec/vec3_impl.h"
 #include "graphics/util/vec3_util.h"
 
 #include "renderer/base/resource_loader_context.h"
@@ -22,146 +22,126 @@
 
 namespace ark {
 
-Emitter::Emitter(const sp<Stub>& stub, const sp<Clock>& clock,
-                                 const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory)
-    : _stub(stub), _layer_context(layerContext), _clock(clock), _next_tick(0)
+Emitter::Emitter(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Source>& source, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory)
+    : _stub(sp<Stub>::make(clock, layerContext, source, particleDescriptor, beanFactory)), _render_controller(resourceLoaderContext->renderController()), _disposed(sp<BooleanWrapper>::make(true))
 {
-    for(const document& doc : particleDescriptor)
-        _particles.push_back(Particale(_stub, doc, beanFactory));
 }
 
-void Emitter::render(RenderRequest& /*renderRequest*/, float /*x*/, float /*y*/)
+bool Emitter::active()
 {
-    uint64_t tick = _clock->tick();
-    if(tick > _next_tick)
-        _next_tick = emitParticles(tick);
+    return !_disposed->val();
 }
 
-uint64_t Emitter::emitParticles(uint64_t tick)
+void Emitter::setActive(bool active)
 {
-    uint64_t nextTick = std::numeric_limits<std::uint64_t>::max();
-    const V position = _stub->_position->val();
-    for(Particale& i : _particles)
-        nextTick = std::min(i.show(position.x(), position.y(), _clock, tick, _layer_context), nextTick);
-    return nextTick;
+    if(_disposed->val() == active)
+    {
+        _disposed->set(!active);
+        if(active)
+            _render_controller->addPreUpdateRequest(_stub, BooleanUtil::__or__(_disposed, sp<BooleanByWeakRef<Boolean>>::make(_disposed, 1)));
+    }
 }
 
 Emitter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext),
-      _clock(Ark::instance().clock()),
       _type(factory.getBuilder<Integer>(manifest, Constants::Attributes::TYPE)),
-      _position(factory.getBuilder<Vec>(manifest, Constants::Attributes::POSITION)),
+      _position(factory.getBuilder<Vec3>(manifest, Constants::Attributes::POSITION)),
       _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, false))
 {
 }
 
-sp<Renderer> Emitter::BUILDER::build(const sp<Scope>& args)
+sp<Emitter> Emitter::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<Stub> stub = sp<Stub>::make(_resource_loader_context, _type->build(args), _position->build(args), _size->build(args), args);
-    return sp<Renderer>::adopt(new Emitter(stub, _clock, _layer_context->build(args), _manifest->children(), _factory));
+    const sp<Source> stub = sp<Source>::make(_resource_loader_context, _type->build(args), _position->build(args), _size->build(args), args);
+    return sp<Emitter>::make(_resource_loader_context, stub, Ark::instance().clock(), _layer_context->build(args), _manifest->children(), _factory);
 }
 
-Emitter::Particale::Particale(const sp<Stub>& stub, const document& manifest, BeanFactory& factory)
-    : _stub(stub), last_emit_tick(0)
+Emitter::Particale::Particale(const sp<Source>& stub, const document& manifest, BeanFactory& factory)
+    : _stub(stub), _last_emit_tick(0)
 {
-    const document im = manifest->getChild("iteration");
-    if(im)
-        _iteration = sp<Iteration>::make(factory, im);
     _interval = Documents::ensureAttribute<Clock::Interval>(manifest, Constants::Attributes::INTERVAL).usec();
     DCHECK(_interval, "Interval must be greater than 0");
 
     _type = factory.getBuilder<Integer>(manifest, Constants::Attributes::TYPE);
-    _position = factory.getBuilder<Vec>(manifest, Constants::Attributes::POSITION);
+    _position = factory.getBuilder<Vec3>(manifest, Constants::Attributes::POSITION);
     _size = factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE);
     _transform = factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM);
     _varyings = factory.getBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS);
-    _disposed = factory.ensureBuilder<Boolean>(manifest, Constants::Attributes::EXPIRED);
+    _disposed = factory.ensureBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED);
 }
 
-uint64_t Emitter::Particale::show(float x, float y, const sp<Clock>& clock, uint64_t tick, const sp<LayerContext>& layerContext)
+uint64_t Emitter::Particale::show(const V3& position, uint64_t tick, const sp<LayerContext>& layerContext)
 {
-    uint32_t count;
-    uint64_t elpased = tick - last_emit_tick;
-    uint64_t dt, let = 0;
-    float dx, dy;
-    if(last_emit_tick)
+    uint32_t iteration = 1;
+    uint64_t elpased = tick - _last_emit_tick;
+    uint64_t dt;
+    V3 delta;
+    if(_last_emit_tick)
     {
         uint32_t ic = static_cast<uint32_t>(elpased / _interval);
-        count = ic * (_iteration ? _iteration->count() : 1);
-        dx = (x - _x) / count;
-        dy = (y - _y) / count;
-        dt = elpased / count;
-        last_emit_tick += (_interval * ic);
+        delta = (position - _source_position) / static_cast<float>(iteration);
+        dt = elpased / iteration;
+        _last_emit_tick += (_interval * ic);
     }
     else
     {
-        _x = x;
-        _y = y;
-        last_emit_tick = tick;
-        return last_emit_tick + _interval;
+        _source_position = position;
+        _last_emit_tick = tick;
+        return _last_emit_tick + _interval;
     }
 
     const sp<Integer> type = _type ? _type->build(_stub->_arguments) : static_cast<sp<Integer>>(_stub->_type);
     const sp<Size> size = _size ? _size->build(_stub->_arguments) : _stub->_size;
     const sp<Transform> transform = _transform->build(_stub->_arguments);
-    const sp<Varyings> filter = _varyings->build(_stub->_arguments);
-    const sp<Numeric> duration = clock->duration();
+    const sp<Varyings> varyings = _varyings->build(_stub->_arguments);
 
-    for(uint32_t i = 0; i < count; i++)
+    for(uint32_t i = 0; i < iteration; i++)
     {
-        if(_iteration)
-        {
-            _iteration->doIteration(_stub->_arguments, _stub->_object_pool, duration, let);
-            let += dt;
-        }
-
-        _x += dx;
-        _y += dy;
-        const sp<Vec> position = makePosition(_stub->_object_pool, _x , _y);
+        _source_position += delta;
+        const sp<Vec3> position = makePosition(_stub->_object_pool, _source_position);
         const sp<Boolean> disposed = _disposed->build(_stub->_arguments);
-        const sp<RenderObject> renderObject = _stub->_object_pool->obtain<RenderObject>(type, Vec3Util::create(position), size, transform, filter);
+        const sp<RenderObject> renderObject = _stub->_object_pool->obtain<RenderObject>(type, position, size, transform, varyings);
         DWARN(disposed, "You're creating particles that will NEVER die, is that what you really want?");
         layerContext->addRenderObject(renderObject, disposed);
     }
-    return last_emit_tick + _interval;
+    return _last_emit_tick + _interval;
 }
 
-sp<Vec> Emitter::Particale::makePosition(ObjectPool& objectPool, float x, float y) const
+sp<Vec3> Emitter::Particale::makePosition(ObjectPool& objectPool, const V3& position) const
 {
     if(_position)
-        return objectPool.obtain<VecWithTranslation<V>>(_position->build(_stub->_arguments), V(x, y));
-    return objectPool.obtain<Vec2Impl>(x, y);
+        return objectPool.obtain<VariableOP2<V3, V3, Operators::Add<V3>, sp<Vec3>, V3>>(_position->build(_stub->_arguments), position);
+    return objectPool.obtain<Vec3Impl>(position.x(), position.y(), position.z());
 }
 
-Emitter::Stub::Stub(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Integer>& type, const sp<Vec>& position, const sp<Size>& size, const sp<Scope>& arguments)
+Emitter::Source::Source(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Scope>& arguments)
     : _arguments(sp<Scope>::make(arguments)), _type(type), _position(position), _size(size),
       _object_pool(resourceLoaderContext->objectPool())
 {
 }
 
-Emitter::Iteration::Iteration(BeanFactory& factory, const document& manifest)
-    : _name(Documents::ensureAttribute(manifest, Constants::Attributes::NAME)), _count(Documents::ensureAttribute<uint32_t>(manifest, "count"))
+Emitter::Stub::Stub(const sp<Clock>& clock, const sp<LayerContext>& layerContext, const sp<Emitter::Source>& source, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory)
+    : _clock(clock), _layer_context(layerContext), _source(source), _next_tick(0)
 {
-    for(const document& i : manifest->children("numeric"))
-    {
-        const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
-        const sp<Builder<Numeric>> builder = factory.ensureBuilder<Numeric>(Documents::ensureAttribute(i, Constants::Attributes::VALUE));
-        _numerics.push_back(std::pair<String, sp<Builder<Numeric>>>(name, builder));
-    }
+    for(const document& i : particleDescriptor)
+        _particles.push_back(Particale(_source, i, beanFactory));
 }
 
-void Emitter::Iteration::doIteration(const sp<Scope>& scope, const sp<ObjectPool>& objectPool, const sp<Numeric>& duration, uint64_t baseline)
+void Emitter::Stub::run()
 {
-    float translate = baseline / 1000000.0f;
-    scope->put(_name, objectPool->obtain<VariableOP2<float, float, Operators::Add<float>, sp<Numeric>, float>>(duration, translate));
-    for(const auto& i : _numerics)
-        scope->put(i.first, i.second->build(scope));
+    uint64_t tick = _clock->tick();
+    if(tick > _next_tick)
+        _next_tick = emit(tick);
 }
 
-uint32_t Emitter::Iteration::count() const
+uint64_t Emitter::Stub::emit(uint64_t tick)
 {
-    return _count;
+    uint64_t nextTick = std::numeric_limits<std::uint64_t>::max();
+    const V3 position = _source->_position->val();
+    for(Particale& i : _particles)
+        nextTick = std::min(i.show(position, tick, _layer_context), nextTick);
+    return nextTick;
 }
 
 }

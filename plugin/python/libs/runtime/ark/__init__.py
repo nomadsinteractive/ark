@@ -1202,5 +1202,16 @@ class CollisionManifold:
         return tuple(0, 0)
 
 
+class Emitter:
+
+    @property
+    def active(self):
+        return False
+
+    @active.setter
+    def active(self, active):
+        pass
+
+
 def __trace__():
     pass

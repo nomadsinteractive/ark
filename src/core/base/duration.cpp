@@ -18,6 +18,11 @@ float Duration::val()
     return _delegate->val();
 }
 
+sp<Numeric> Duration::duration()
+{
+    return Ark::instance().clock()->duration();
+}
+
 Duration::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _clock(factory.getBuilder<Clock>(manifest, Constants::Attributes::CLOCK)),
       _delegate(factory.getBuilder<Numeric>(manifest, "t")),

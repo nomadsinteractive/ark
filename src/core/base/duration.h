@@ -14,6 +14,9 @@ public:
 
     virtual float val() override;
 
+//  [[plugin::function("duration")]]
+    static sp<Numeric> duration();
+
 //  [[plugin::builder]]
     class BUILDER : public Builder<Duration> {
     public:
