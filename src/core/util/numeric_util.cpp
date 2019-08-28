@@ -9,12 +9,12 @@
 #include "core/impl/numeric/approach.h"
 #include "core/impl/numeric/clamp.h"
 #include "core/impl/numeric/fence.h"
-#include "core/impl/numeric/integral.h"
 #include "core/impl/numeric/max.h"
 #include "core/impl/numeric/min.h"
 #include "core/impl/numeric/numeric_negative.h"
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/numeric/vibrate.h"
+#include "core/impl/variable/integral.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/util/operators.h"
@@ -331,7 +331,7 @@ sp<Numeric> NumericUtil::vibrate(float s0, float v0, float s1, float v1, float d
 
 sp<Numeric> NumericUtil::integral(const sp<Numeric>& self, const sp<Numeric>& t)
 {
-    return sp<Integral>::make(self, t ? t : Ark::instance().clock()->duration());
+    return sp<Integral<float>>::make(self, t ? t : Ark::instance().clock()->duration());
 }
 
 NumericUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)

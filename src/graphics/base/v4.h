@@ -26,6 +26,7 @@ public:
     friend V4 operator -(const V4& lvalue, const V4& rvalue);
     friend V4 operator *(const V4& lvalue, const V4& rvalue);
     friend V4 operator *(const V4& lvalue, float rvalue);
+    friend V4 operator *(float lvalue, const V4& rvalue);
     friend V4 operator /(const V4& lvalue, const V4& rvalue);
     friend V4 operator /(const V4& lvalue, float rvalue);
 

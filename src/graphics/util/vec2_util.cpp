@@ -3,6 +3,8 @@
 #include <algorithm>
 
 #include "core/ark.h"
+#include "core/base/clock.h"
+#include "core/impl/variable/integral.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
@@ -93,10 +95,14 @@ sp<Vec2> Vec2Util::truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
     return sp<VariableOP2<V2, V2, Operators::Div<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
 }
 
-sp<Vec2> Vec2Util::floordiv(const sp<Vec2>& self, const sp<Vec2>& rvalue)
+sp<Vec2> Vec2Util::truediv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue)
 {
-    FATAL("Unimplemented");
-    return nullptr;
+    return sp<VariableOP2<V2, float, Operators::Div<V2, float>, sp<Vec2>, sp<Numeric>>>::make(lvalue, rvalue);
+}
+
+sp<Vec2> Vec2Util::truediv(const sp<Vec2>& lvalue, float rvalue)
+{
+    return sp<VariableOP2<V2, float, Operators::Div<V2, float>, sp<Vec2>, float>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::negative(const sp<Vec2>& self)
@@ -112,6 +118,12 @@ sp<Vec2> Vec2Util::transform(const sp<Vec2>& self, const sp<Transform>& transfor
 sp<Vec2> Vec2Util::normalize(const sp<Vec2>& self)
 {
     return sp<Vec2Normalize>::make(self);
+}
+
+sp<Vec2> Vec2Util::integral(const sp<Vec2>& self, const sp<Numeric>& t)
+{
+    sp<Numeric> duration = t ? t : Ark::instance().clock()->duration();
+    return sp<Integral<V2>>::make(self, std::move(duration));
 }
 
 void Vec2Util::set(const sp<Vec2>& self, const V2 val)
@@ -191,6 +203,25 @@ void Vec2Util::setVy(const sp<Vec2>& self, const sp<Numeric>& y)
 void Vec2Util::fix(const sp<Vec2>& self)
 {
     ensureImpl(self)->fix();
+}
+
+sp<Vec2> Vec2Util::wrap(const sp<Vec2>& self)
+{
+    return sp<VariableWrapper<V2>>::make(self);
+}
+
+sp<Vec2> Vec2Util::delegate(const sp<Vec2>& self)
+{
+    sp<VariableWrapper<V2>> wrapper = self.as<VariableWrapper<V2>>();
+    DWARN(wrapper, "Non-Vec2Wrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
+    return wrapper ? wrapper->delegate() : nullptr;
+}
+
+void Vec2Util::setDelegate(const sp<Vec2>& self, const sp<Vec2>& delegate)
+{
+    sp<VariableWrapper<V2>> wrapper = self.as<VariableWrapper<V2>>();
+    DCHECK(wrapper, "Must be an Vec2Wrapper instance to set its delegate attribute");
+    wrapper->set(delegate);
 }
 
 sp<Vec2Impl> Vec2Util::ensureImpl(const sp<Vec2>& self)

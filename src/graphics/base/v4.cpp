@@ -91,6 +91,11 @@ V4 operator *(const V4& lvalue, float rvalue)
     return V4(lvalue._x * rvalue, lvalue._y * rvalue, lvalue._z * rvalue, lvalue._w * rvalue);
 }
 
+V4 operator *(float a1, const V4& a2)
+{
+    return V4(a2._x * a1, a2._y * a1, a2._z * a1, a2._w * a1);
+}
+
 V4 operator /(const V4& lvalue, const V4& rvalue)
 {
     return V4(lvalue._x / rvalue._x, lvalue._y / rvalue._y, lvalue._z / rvalue._z, lvalue._w / rvalue._w);

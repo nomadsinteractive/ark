@@ -164,10 +164,10 @@ sp<Scope> PythonInterpreter::toScope(PyObject* kws)
             PyObject* key = PyList_GetItem(keys, i);
             PyObject* item = PyDict_GetItem(kws, key);
             const String sKey = toString(key);
-            if(isPyArkTypeObject(Py_TYPE(item)))
-                scope->put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
-            else if(PyTuple_CheckExact(item))
+            if(PyTuple_CheckExact(item) || isInstance<Vec2>(item) || isInstance<Vec3>(item) || isInstance<Vec4>(item))
                 scope->put(sKey, sp<PyVecDuckType>::make(PyInstance::track(item)));
+            else if(isPyArkTypeObject(Py_TYPE(item)))
+                scope->put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
             else if(PyBool_Check(item))
                 scope->put(sKey, sp<Boolean::Const>::make(PyObject_IsTrue(item) != 0));
             else if(isInstance<Numeric>(item) || isInstance<Integer>(item) || PyFloat_Check(item) || PyLong_Check(item))

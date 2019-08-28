@@ -26,9 +26,9 @@ public:
 //[[script::bindings::operator(*)]]
     static sp<Vec3> mul(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //[[script::bindings::operator(*)]]
-    static sp<Vec3> mul(const sp<Vec3>& lvalue, const V3& rvalue);
-//[[script::bindings::operator(*)]]
     static sp<Vec3> mul(const sp<Vec3>& lvalue, float rvalue);
+//[[script::bindings::operator(*)]]
+    static sp<Vec3> mul(const sp<Vec3>& lvalue, sp<Numeric>& rvalue);
 //[[script::bindings::operator(/)]]
     static sp<Vec3> truediv(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //[[script::bindings::operator(//)]]
@@ -81,6 +81,8 @@ public:
     static sp<Vec3> cross(const sp<Vec3>& self, const V3& other);
 //[[script::bindings::classmethod]]
     static sp<Vec3> normalize(const sp<Vec3>& self);
+//[[script::bindings::classmethod]]
+    static sp<Vec3> integral(const sp<Vec3>& self, const sp<Numeric>& t = nullptr);
 
 
 private:

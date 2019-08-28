@@ -32,8 +32,10 @@ public:
     static sp<Vec2> mul(const sp<Vec2>& lvalue, sp<Numeric>& rvalue);
 //[[script::bindings::operator(/)]]
     static sp<Vec2> truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
-//[[script::bindings::operator(//)]]
-    static sp<Vec2> floordiv(const sp<Vec2>& self, const sp<Vec2>& rvalue);
+//[[script::bindings::operator(/)]]
+    static sp<Vec2> truediv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue);
+//[[script::bindings::operator(/)]]
+    static sp<Vec2> truediv(const sp<Vec2>& lvalue, float rvalue);
 //[[script::bindings::operator(neg)]]
     static sp<Vec2> negative(const sp<Vec2>& self);
 
@@ -41,6 +43,8 @@ public:
     static sp<Vec2> transform(const sp<Vec2>& self, const sp<Transform>& transform);
 //[[script::bindings::classmethod]]
     static sp<Vec2> normalize(const sp<Vec2>& self);
+//[[script::bindings::classmethod]]
+    static sp<Vec2> integral(const sp<Vec2>& self, const sp<Numeric>& t = nullptr);
 
 //[[script::bindings::classmethod]]
     static void set(const sp<Vec2>& self, const V2 val);
@@ -75,6 +79,13 @@ public:
 
 //[[script::bindings::classmethod]]
     static void fix(const sp<Vec2>& self);
+
+//[[script::bindings::classmethod]]
+    static sp<Vec2> wrap(const sp<Vec2>& self);
+//[[script::bindings::property]]
+    static sp<Vec2> delegate(const sp<Vec2>& self);
+//[[script::bindings::property]]
+    static void setDelegate(const sp<Vec2>& self, const sp<Vec2>& delegate);
 
 private:
     static sp<Vec2Impl> ensureImpl(const sp<Vec2>& self);

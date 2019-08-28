@@ -10,7 +10,7 @@ Use it for:
 
 """
 
-from typing import Callable, List, Type, TypeVar, Union, Optional
+from typing import Callable, List, Type, TypeVar, Union, Optional, Tuple
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'Numeric', 'Layer', 'Vec2', 'Vec3',
                            'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotate', 'Size', 'StringBundle', 'Tilemap', 'TilemapImporter', 'Tileset',
@@ -402,7 +402,7 @@ class Vec2:
         self._y = y
 
     @property
-    def x(self):
+    def x(self) -> float:
         return self._x
 
     @x.setter
@@ -410,7 +410,7 @@ class Vec2:
         pass
 
     @property
-    def y(self):
+    def y(self) -> float:
         return self._y
 
     @property
@@ -426,7 +426,7 @@ class Vec2:
         pass
 
     @property
-    def vx(self):
+    def vx(self) -> Numeric:
         return self._x
 
     @vx.setter
@@ -434,15 +434,29 @@ class Vec2:
         pass
 
     @property
-    def vy(self):
+    def vy(self) -> Numeric:
         return self._y
 
     @vy.setter
     def vy(self, vy):
         pass
 
+    @property
+    def delegate(self) -> 'Vec2':
+        return self
+
+    @delegate.setter
+    def delegate(self, delegate: 'Vec2')
+        pass
+
     def transform(self, transform, org):
         return self._x, self._y
+
+    def integral(self, t: Optional[Numeric] = None):
+        return None
+
+    def wrap(self) -> 'Vec2':
+        return Vec2(self._x, self._y)
 
     def fix(self):
         pass

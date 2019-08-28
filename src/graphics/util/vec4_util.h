@@ -33,6 +33,8 @@ public:
 
 //[[script::bindings::classmethod]]
     static sp<Vec4> transform(const sp<Vec4>& self, const sp<Transform>& transform, const sp<Vec4>& org);
+//[[script::bindings::classmethod]]
+    static sp<Vec4> integral(const sp<Vec4>& self, const sp<Numeric>& t = nullptr);
 
 //[[script::bindings::classmethod]]
     static void set(const sp<Vec4>& self, const V4& val);

@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 
 #include "core/ark.h"
+#include "core/base/clock.h"
+#include "core/impl/variable/integral.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
@@ -109,14 +111,14 @@ sp<Vec3> Vec3Util::mul(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
     return sp<VariableOP2<V3, V3, Operators::Mul<V3>, sp<Vec3>, sp<Vec3>>>::make(lvalue, rvalue);
 }
 
-sp<Vec3> Vec3Util::mul(const sp<Vec3>& lvalue, const V3& rvalue)
-{
-    return sp<VariableOP2<V3, V3, Operators::Mul<V3>, sp<Vec3>, V3>>::make(lvalue, rvalue);
-}
-
 sp<Vec3> Vec3Util::mul(const sp<Vec3>& lvalue, float rvalue)
 {
     return sp<VariableOP2<V3, float, Operators::Mul<V3, float>, sp<Vec3>, float>>::make(lvalue, rvalue);
+}
+
+sp<Vec3> Vec3Util::mul(const sp<Vec3>& lvalue, sp<Numeric>& rvalue)
+{
+    return sp<VariableOP2<V3, float, Operators::Mul<V3, float>, sp<Vec3>, sp<Numeric>>>::make(lvalue, rvalue);
 }
 
 sp<Vec3> Vec3Util::truediv(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
@@ -244,6 +246,12 @@ sp<Vec3> Vec3Util::cross(const sp<Vec3>& self, const V3& other)
 sp<Vec3> Vec3Util::normalize(const sp<Vec3>& self)
 {
     return sp<Vec3Normalize>::make(self);
+}
+
+sp<Vec3> Vec3Util::integral(const sp<Vec3>& self, const sp<Numeric>& t)
+{
+    sp<Numeric> duration = t ? t : Ark::instance().clock()->duration();
+    return sp<Integral<V3>>::make(self, std::move(duration));
 }
 
 sp<Vec3Impl> Vec3Util::ensureImpl(const sp<Vec3>& self)

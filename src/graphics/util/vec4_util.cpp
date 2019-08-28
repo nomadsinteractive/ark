@@ -1,6 +1,8 @@
 #include "graphics/util/vec4_util.h"
 
 #include "core/ark.h"
+#include "core/base/clock.h"
+#include "core/impl/variable/integral.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
@@ -74,6 +76,12 @@ sp<Vec4> Vec4Util::transform(const sp<Vec4>& self, const sp<Transform>& transfor
 {
     FATAL("Unimplemented");
     return nullptr;
+}
+
+sp<Vec4> Vec4Util::integral(const sp<Vec4>& self, const sp<Numeric>& t)
+{
+    sp<Numeric> duration = t ? t : Ark::instance().clock()->duration();
+    return sp<Integral<V4>>::make(self, std::move(duration));
 }
 
 void Vec4Util::set(const sp<Vec4>& self, const V4& val)
