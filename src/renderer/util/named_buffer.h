@@ -25,7 +25,7 @@ public:
 
     void reset();
 
-    Buffer::Snapshot snapshot(RenderController& renderController, size_t objectCount);
+    Buffer::Snapshot snapshot(RenderController& renderController, size_t objectCount, size_t reservedIfInsufficient = 0);
 
 public:
     class NinePatch : public Uploader {

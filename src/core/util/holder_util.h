@@ -2,12 +2,16 @@
 #define ARK_CORE_UTIL_HOLDER_UTIL_H_
 
 #include "core/base/delegate.h"
+#include "core/base/scope.h"
+#include "core/base/string.h"
 #include "core/inf/holder.h"
-#include "core/inf/flatable.h"
-#include "core/inf/runnable.h"
-#include "core/inf/variable.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
+
+#include "graphics/forwarding.h"
+
+#include "renderer/forwarding.h"
+#include "app/forwarding.h"
 
 namespace ark {
 
@@ -23,6 +27,11 @@ public:
                 return;
             traverse(inst, visitor);
         }
+    }
+
+    static void visit(const sp<Scope>& scope, const Holder::Visitor& visitor) {
+        for(const auto& iter : scope->variables())
+            visit_box<Boolean, Integer, Numeric, Renderer, Arena, Vec2, Vec3, Vec4>(iter.second, visitor);
     }
 
 private:
@@ -42,11 +51,24 @@ private:
     }
 
     template<typename T> static void traverse_delegate_sfinae(const sp<T>& inst, const Holder::Visitor& visitor, ...) {
-        if(std::is_abstract<T>::value) {
-            const sp<Delegate<T>> delegate = inst.template as<Delegate<T>>();
-            if(delegate)
-                return visit(delegate->delegate(), visitor);
+        const sp<Delegate<T>> delegate = inst.template as<Delegate<T>>();
+        if(delegate)
+            return visit(delegate->delegate(), visitor);
+    }
+
+    template<typename T = void, typename... Args> static void visit_box(const Box& packed, const Holder::Visitor& visitor) {
+        if(!std::is_same<T, void>::value) {
+            if(Type<T>::id() == packed.typeId())
+                doVisit(packed.unpack<T>(), visitor);
+            visit_box<Args...>(packed, visitor);
         }
+    }
+
+    template<typename T> static void doVisit(const sp<T>& obj, const Holder::Visitor& visitor) {
+        HolderUtil::visit<T>(obj, visitor);
+    }
+
+    static void doVisit(const sp<void>& /*obj*/, const Holder::Visitor& /*visitor*/) {
     }
 
 };

@@ -47,6 +47,11 @@ void Size::setWidth(float width)
     _width->set(width);
 }
 
+void Size::setWidth(const sp<Numeric>& width)
+{
+    _width->set(width);
+}
+
 float Size::height() const
 {
     return _height->val();
@@ -57,12 +62,22 @@ void Size::setHeight(float height)
     _height->set(height);
 }
 
+void Size::setHeight(const sp<Numeric>& height)
+{
+    _height->set(height);
+}
+
 float Size::depth() const
 {
     return _depth->val();
 }
 
 void Size::setDepth(float depth)
+{
+    _depth->set(depth);
+}
+
+void Size::setDepth(const sp<Numeric>& depth)
 {
     _depth->set(depth);
 }

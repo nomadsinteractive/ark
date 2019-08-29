@@ -29,13 +29,19 @@ public:
 //  [[script::bindings::property]]
     void setWidth(float width);
 //  [[script::bindings::property]]
+    void setWidth(const sp<Numeric>& width);
+//  [[script::bindings::property]]
     float height() const;
 //  [[script::bindings::property]]
     void setHeight(float height);
 //  [[script::bindings::property]]
+    void setHeight(const sp<Numeric>& height);
+//  [[script::bindings::property]]
     float depth() const;
 //  [[script::bindings::property]]
     void setDepth(float depth);
+//  [[script::bindings::property]]
+    void setDepth(const sp<Numeric>& depth);
 
 //  [[script::bindings::property]]
     const sp<Numeric> vwidth() const;

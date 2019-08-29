@@ -20,10 +20,11 @@ public:
     virtual void traverse(const Visitor& visitor) override;
 
 //[[script::bindings::auto]]
-    sp<Observer> createObserver(const sp<Runnable>& callback, bool oneshot = false);
-
+    sp<Observer> createObserver(const sp<Runnable>& callback, bool oneshot = true);
 //[[script::bindings::auto]]
-    const sp<Observer>& addObserver(const sp<Runnable>& callback, bool oneshot = false);
+    const sp<Observer>& addObserver(const sp<Runnable>& callback, bool oneshot = true);
+//[[script::bindings::auto]]
+    void clear();
 
 private:
     Notifier _notifier;

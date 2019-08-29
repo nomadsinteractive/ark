@@ -20,17 +20,16 @@ void NamedBuffer::reset()
     _object_count = 0;
 }
 
-Buffer::Snapshot NamedBuffer::NamedBuffer::snapshot(RenderController& renderController, size_t objectCount)
+Buffer::Snapshot NamedBuffer::NamedBuffer::snapshot(RenderController& renderController, size_t objectCount, size_t reservedIfInsufficient)
 {
     const size_t warningLimit = 10000;
     DWARN(objectCount < warningLimit, "Object count(%d) exceeding warning limit(%d). You can make the limit larger if you're sure what you're doing", objectCount, warningLimit);
     size_t size = _size_calculator(objectCount);
     if(_object_count < objectCount)
     {
-        _object_count = objectCount;
-        const sp<Uploader> uploader = _maker(objectCount);
-        DCHECK(uploader && uploader->size() >= size, "Making Uploader failed, object-count: %d, uploader-size: %d, required-size: %d", objectCount, uploader ? uploader->size() : 0, size);
-
+        _object_count = objectCount + reservedIfInsufficient;
+        const sp<Uploader> uploader = _maker(_object_count);
+        DCHECK(uploader && uploader->size() >= size, "Making Uploader failed, object-count: %d, uploader-size: %d, required-size: %d", _object_count, uploader ? uploader->size() : 0, size);
         renderController.upload(_buffer.delegate(), uploader, RenderController::US_RELOAD);
     }
     return _buffer.snapshot(size);

@@ -55,7 +55,7 @@ void GLModelQuad::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapsho
 
 void GLModelQuad::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
 {
-    snapshot._index_buffer = _index_buffer->snapshot(renderController, snapshot._items.size());
+    snapshot._index_buffer = _index_buffer->snapshot(renderController, snapshot._items.size(), snapshot._items.size());
 }
 
 Metrics GLModelQuad::measure(int32_t type)

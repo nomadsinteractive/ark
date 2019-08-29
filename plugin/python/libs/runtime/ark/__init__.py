@@ -1226,6 +1226,12 @@ class Emitter:
     def active(self, active):
         pass
 
+    def activate(self):
+        pass
+
+    def deactivate(self):
+        pass
+
 
 def __trace__():
     pass

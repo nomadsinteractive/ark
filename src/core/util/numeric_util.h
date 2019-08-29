@@ -92,6 +92,8 @@ public:
 
 //[[script::bindings::classmethod]]
     static float fix(const sp<Numeric>& self);
+//[[script::bindings::classmethod]]
+    static sp<Numeric> wrap(const sp<Numeric>& self);
 
 //[[script::bindings::classmethod]]
     static sp<Expectation> approach(const sp<Numeric>& self, const sp<Numeric>& a1);

@@ -118,24 +118,6 @@ public:
     };
 
 private:
-    void doTraverse(const Scope& scope, const Visitor& visitor);
-
-    template<typename T = void, typename... Args> void visit(const Box& packed, const Visitor& visitor) {
-        if(!std::is_same<T, void>::value) {
-            if(Type<T>::id() == packed.typeId())
-                doVisit(packed.unpack<T>(), visitor);
-            visit<Args...>(packed, visitor);
-        }
-    }
-
-    template<typename T> void doVisit(const sp<T>& obj, const Visitor& visitor) {
-        HolderUtil::visit<T>(obj, visitor);
-    }
-
-    void doVisit(const sp<void>& /*obj*/, const Visitor& /*visitor*/) {
-    }
-
-private:
     BeanFactory _bean_factory;
     ByType _builder_refs;
 

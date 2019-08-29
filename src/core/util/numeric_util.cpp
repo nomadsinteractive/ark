@@ -274,6 +274,11 @@ float NumericUtil::fix(const sp<Numeric>& self)
     return 0;
 }
 
+sp<Numeric> NumericUtil::wrap(const sp<Numeric>& self)
+{
+    return sp<NumericWrapper>::make(self);
+}
+
 sp<Expectation> NumericUtil::approach(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
     Notifier notifier;

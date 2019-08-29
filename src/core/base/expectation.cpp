@@ -31,4 +31,9 @@ const sp<Observer>& Expectation::addObserver(const sp<Runnable>& callback, bool 
     return _observers.back();
 }
 
+void Expectation::clear()
+{
+    _observers.clear();
+}
+
 }

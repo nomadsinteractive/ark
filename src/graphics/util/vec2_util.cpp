@@ -4,9 +4,11 @@
 
 #include "core/ark.h"
 #include "core/base/clock.h"
+#include "core/inf/holder.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
+#include "core/util/holder_util.h"
 #include "core/util/operators.h"
 
 #include "graphics/impl/vec/vec2_impl.h"
@@ -17,9 +19,9 @@ namespace ark {
 
 namespace {
 
-class _Vec2Numeric : public Numeric {
+class Vec2Numeric : public Numeric, public Holder, Implements<Vec2Numeric, Numeric, Holder> {
 public:
-    _Vec2Numeric(const sp<Vec2>& delegate, int32_t dim)
+    Vec2Numeric(const sp<Vec2>& delegate, int32_t dim)
         : _delegate(delegate), _dim(dim) {
     }
 
@@ -27,25 +29,34 @@ public:
         return _delegate->val()[_dim];
     }
 
+    virtual void traverse(const Visitor& visitor) override {
+        HolderUtil::visit(_delegate, visitor);
+    }
+
 private:
     sp<Vec2> _delegate;
     int32_t _dim;
+
 };
 
-class Vec2Normalize : public Vec2 {
+class Vec2Normalize : public Vec2, public Holder, Implements<Vec2Normalize, Vec2, Holder> {
 public:
     Vec2Normalize(const sp<Vec2>& value)
-        : _value(value) {
+        : _delegate(value) {
     }
 
     virtual V2 val() override {
-        V2 val = _value->val();
+        V2 val = _delegate->val();
         float hypot = std::max(Math::hypot(val.x(), val.y()), 0.000001f);
         return val / hypot;
     }
 
+    virtual void traverse(const Visitor& visitor) override {
+        HolderUtil::visit(_delegate, visitor);
+    }
+
 private:
-    sp<Vec2> _value;
+    sp<Vec2> _delegate;
 };
 
 }
@@ -181,7 +192,7 @@ void Vec2Util::setY(const sp<Vec2>& self, const sp<Numeric>& y)
 sp<Numeric> Vec2Util::vx(const sp<Vec2>& self)
 {
     const sp<Vec2Impl> impl = self.as<Vec2Impl>();
-    return impl ? static_cast<sp<Numeric>>(impl->x()) : static_cast<sp<Numeric>>(sp<_Vec2Numeric>::make(self, 0));
+    return impl ? static_cast<sp<Numeric>>(impl->x()) : static_cast<sp<Numeric>>(sp<Vec2Numeric>::make(self, 0));
 }
 
 void Vec2Util::setVx(const sp<Vec2>& self, const sp<Numeric>& x)
@@ -192,7 +203,7 @@ void Vec2Util::setVx(const sp<Vec2>& self, const sp<Numeric>& x)
 sp<Numeric> Vec2Util::vy(const sp<Vec2>& self)
 {
     const sp<Vec2Impl> impl = self.as<Vec2Impl>();
-    return impl ? static_cast<sp<Numeric>>(impl->y()) : static_cast<sp<Numeric>>(sp<_Vec2Numeric>::make(self, 1));
+    return impl ? static_cast<sp<Numeric>>(impl->y()) : static_cast<sp<Numeric>>(sp<Vec2Numeric>::make(self, 1));
 }
 
 void Vec2Util::setVy(const sp<Vec2>& self, const sp<Numeric>& y)

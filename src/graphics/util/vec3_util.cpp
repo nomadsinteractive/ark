@@ -46,7 +46,7 @@ private:
     sp<Vec3> _b;
 };
 
-class Vec3Normalize : public Delegate<Vec3>, public Vec3 {
+class Vec3Normalize : public Delegate<Vec3>, public Vec3, Implements<Vec3Normalize, Vec3, Delegate<Vec3>> {
 public:
     Vec3Normalize(const sp<Vec3>& delegate)
         : Delegate(delegate) {

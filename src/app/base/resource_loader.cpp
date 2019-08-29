@@ -2,6 +2,7 @@
 
 #include "core/util/documents.h"
 #include "core/util/log.h"
+#include "core/util/holder_util.h"
 
 #include "renderer/base/texture_bundle.h"
 #include "renderer/base/resource_loader_context.h"
@@ -25,7 +26,7 @@ ResourceLoader::~ResourceLoader()
 
 void ResourceLoader::traverse(const Holder::Visitor& visitor)
 {
-    doTraverse(_bean_factory.references(), visitor);
+    HolderUtil::visit(_bean_factory.references(), visitor);
 }
 
 sp<BoxBundle> ResourceLoader::refs() const
@@ -74,12 +75,6 @@ const BeanFactory& ResourceLoader::beanFactory() const
 BeanFactory& ResourceLoader::beanFactory()
 {
     return _bean_factory;
-}
-
-void ResourceLoader::doTraverse(const Scope& scope, const Holder::Visitor& visitor)
-{
-    for(const auto& iter : scope.variables())
-        visit<Boolean, Integer, Numeric, Renderer, Arena>(iter.second, visitor);
 }
 
 ResourceLoader::BUILDER::BUILDER(BeanFactory& factory, const document& doc, const sp<ApplicationContext>& applicationContext)

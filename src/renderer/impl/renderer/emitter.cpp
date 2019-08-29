@@ -9,11 +9,13 @@
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/boolean_util.h"
+#include "core/util/holder_util.h"
 #include "core/util/operators.h"
 
 #include "graphics/base/layer.h"
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
+#include "graphics/base/size.h"
 #include "graphics/impl/vec/vec3_impl.h"
 #include "graphics/util/vec3_util.h"
 
@@ -27,6 +29,14 @@ Emitter::Emitter(const sp<ResourceLoaderContext>& resourceLoaderContext, const s
 {
 }
 
+void Emitter::traverse(const Holder::Visitor& visitor)
+{
+    HolderUtil::visit(_stub->_source->_position, visitor);
+    HolderUtil::visit(_stub->_source->_size, visitor);
+    HolderUtil::visit(_stub->_source->_type, visitor);
+    HolderUtil::visit(_stub->_source->_arguments, visitor);
+}
+
 bool Emitter::active()
 {
     return !_disposed->val();
@@ -38,8 +48,29 @@ void Emitter::setActive(bool active)
     {
         _disposed->set(!active);
         if(active)
-            _render_controller->addPreUpdateRequest(_stub, BooleanUtil::__or__(_disposed, sp<BooleanByWeakRef<Boolean>>::make(_disposed, 1)));
+            doActivate();
     }
+}
+
+void Emitter::activate()
+{
+    DWARN(_disposed->val(), "Emitter activated already");
+    if(_disposed->val())
+    {
+        doActivate();
+        _disposed->set(false);
+    }
+}
+
+void Emitter::deactivate()
+{
+    DWARN(!_disposed->val(), "Emitter has not been activated");
+    _disposed->set(true);
+}
+
+void Emitter::doActivate()
+{
+    _render_controller->addPreUpdateRequest(_stub, BooleanUtil::__or__(_disposed, sp<BooleanByWeakRef<Boolean>>::make(_disposed, 1)));
 }
 
 Emitter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

@@ -6,6 +6,7 @@
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
+#include "core/inf/holder.h"
 #include "core/inf/runnable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -17,7 +18,8 @@
 
 namespace ark {
 
-class ARK_API Emitter {
+//[[script::bindings::holder]]
+class ARK_API Emitter : public Holder {
 private:
     struct Source {
         Source(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Scope>& arguments);
@@ -34,10 +36,17 @@ private:
 public:
     Emitter(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Source>& source, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory);
 
+    virtual void traverse(const Visitor& visitor) override;
+
 //  [[script::bindings::property]]
     bool active();
 //  [[script::bindings::property]]
     void setActive(bool active);
+
+//  [[script::bindings::auto]]
+    void activate();
+//  [[script::bindings::auto]]
+    void deactivate();
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Emitter> {
@@ -103,7 +112,11 @@ private:
         std::vector<Particale> _particles;
         uint64_t _next_tick;
 
+        friend class Emitter;
     };
+
+private:
+    void doActivate();
 
 private:
     sp<Stub> _stub;
