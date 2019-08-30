@@ -929,7 +929,7 @@ class Tilemap(Renderer):
     def clear(self):
         pass
 
-    def set_tile(self, row_id: int, col_id: int, obj: Union[int, RenderObject]):
+    def set_tile(self, row_id: int, col_id: int, obj: Optional[int, RenderObject]):
         pass
 
     def get_tile(self, row: int, col: int) -> RenderObject:

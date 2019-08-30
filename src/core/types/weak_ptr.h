@@ -20,8 +20,7 @@ public:
         if(!ptr)
             return nullptr;
 
-        std::shared_ptr<Interfaces> interfaces = _weak_interfaces.lock();
-        return SharedPtr<T>(std::move(ptr), std::move(interfaces ? interfaces : std::make_shared<Interfaces>(nullptr)));
+        return SharedPtr<T>(std::move(ptr), _weak_interfaces.lock());
     }
 
     SharedPtr<T> ensure() const {
