@@ -8,11 +8,11 @@
 
 namespace ark {
 
-static void _thread_main_entry(const sp<Thread::Stub> stub)
+static void _thread_main_entry(const Thread thread)
 {
-    const sp<Runnable> entry = stub->entry();
-    stub->resume();
-    stub->setEntry(nullptr);
+    const sp<Runnable> entry = thread.entry();
+    thread.resume();
+    thread.setEntry(nullptr);
     entry->run();
     Platform::detachCurrentThread();
 }
@@ -22,14 +22,20 @@ Thread::Thread(const sp<Runnable>& entry)
 {
 }
 
-Thread::Thread(const Thread& other)
-    : _stub(other._stub)
+Thread::Thread(const sp<Thread::Stub>& stub)
+    : _stub(stub)
 {
 }
 
-void Thread::setEntry(const sp<Runnable>& entry)
+const sp<Runnable>& Thread::entry() const
 {
-    _stub->setEntry(entry);
+    return _stub->_entry;
+}
+
+void Thread::setEntry(const sp<Runnable>& entry) const
+{
+    DCHECK(!entry || _stub->_state == THREAD_STATE_NONE, "Cannot set entry after thread being started");
+    _stub->_entry = entry;
 }
 
 void Thread::start()
@@ -37,9 +43,14 @@ void Thread::start()
     _stub->start(_stub);
 }
 
-void Thread::signal() const
+Thread::State Thread::status() const
 {
-    _stub->notify();
+    return _stub->_state;
+}
+
+void Thread::notify() const
+{
+    _stub->_mutex.notify();
 }
 
 void Thread::resume() const
@@ -69,27 +80,22 @@ void Thread::detach() const
 
 bool Thread::isRunning() const
 {
-    return _stub->status() == THREAD_STATE_RUNNING;
+    return _stub->_state == THREAD_STATE_RUNNING;
 }
 
 bool Thread::isPaused() const
 {
-    return _stub->status() == THREAD_STATE_PAUSED;
+    return _stub->_state == THREAD_STATE_PAUSED;
 }
 
 bool Thread::isTerminated() const
 {
-    return _stub->status() == THREAD_STATE_TERMINATED;
+    return _stub->_state == THREAD_STATE_TERMINATED;
 }
 
 Thread::Id Thread::currentThreadId()
 {
     return std::this_thread::get_id();
-}
-
-const sp<Thread::Stub>& Thread::stub() const
-{
-    return _stub;
 }
 
 Thread::Stub::Stub(const sp<Runnable>& entry)
@@ -106,7 +112,7 @@ void Thread::Stub::start(const sp<Stub>& self)
 {
     DCHECK(_state == THREAD_STATE_NONE && _entry, "Illegal state(%d). Could not start thread", _state);
     LOGD("");
-    _thread = std::thread(_thread_main_entry, self);
+    _thread = std::thread(_thread_main_entry, Thread(self));
 }
 
 void Thread::Stub::resume()
@@ -141,29 +147,6 @@ void Thread::Stub::detach()
     LOGD("");
     if(_thread.joinable())
         _thread.detach();
-}
-
-Thread::State Thread::Stub::status() const
-{
-    return _state;
-}
-
-const sp<Runnable>& Thread::Stub::entry() const
-{
-    return _entry;
-}
-
-void Thread::Stub::setEntry(const sp<Runnable>& entry)
-{
-    if(!entry || _state == THREAD_STATE_NONE)
-        _entry = entry;
-    else
-        FATAL("Cannot set entry after thread being started");
-}
-
-void Thread::Stub::notify()
-{
-    _condition_variable.notify_one();
 }
 
 }

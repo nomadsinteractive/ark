@@ -30,7 +30,7 @@ const char* ShaderPreprocessor::ANNOTATION_FRAG_OUT = "${frag.out}";
 const char* ShaderPreprocessor::ANNOTATION_FRAG_COLOR = "${frag.color}";
 
 static std::regex _INCLUDE_PATTERN("#include\\s*[<\"]([^>\"]+)[>\"]");
-static std::regex _STRUCT_PATTERN("struct\\s+(\\w+)\\s*\\{[^}]+\\}\\s*;");
+static std::regex _STRUCT_PATTERN("struct\\s+(\\w+)\\s*\\{([^}]+)\\}\\s*;");
 static std::regex _IN_PATTERN("(?:attribute|in)" ATTRIBUTE_PATTERN);
 static std::regex _OUT_PATTERN("(?:varying|out)" ATTRIBUTE_PATTERN);
 static std::regex _IN_OUT_PATTERN("(?:varying|in)" ATTRIBUTE_PATTERN);
@@ -108,6 +108,7 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
     _main.replace(_STRUCT_PATTERN, [this](const std::smatch& m) {
         const sp<String> declaration = sp<String>::make(m.str());
         this->_struct_declarations.push_back(declaration);
+        this->_struct_definitions.push_back(m[1].str(), m[2].str());
         return nullptr;
     });
 
@@ -182,7 +183,9 @@ void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int
         if(!uniforms.has(name))
         {
             const Declaration& declare = iter.second;
-            uniforms.push_back(name, sp<Uniform>::make(name, Uniform::toType(declare.type()), declare.length(), nullptr, nullptr));
+            Uniform::Type type = Uniform::toType(declare.type());
+            uniforms.push_back(name, sp<Uniform>::make(name, declare.type(), type, type == Uniform::TYPE_STRUCT ? getUniformSize(type, declare.type())
+                                                                                                                : Uniform::getTypeSize(type), declare.length(), nullptr, nullptr));
         }
     }
 
@@ -201,7 +204,7 @@ void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int
 
             if(!_uniforms.has(i->name()))
             {
-                const String type = i->getDeclaredType();
+                const String type = i->declaredType();
                 sp<String> declaration = sp<String>::make(i->declaration("uniform "));
                 _uniforms.vars().push_back(i->name(), Declaration(i->name(), type, i->length(), declaration));
                 if(pos == String::npos)
@@ -244,6 +247,23 @@ void ShaderPreprocessor::addUniform(const String& type, const String& name, uint
     else
         _uniforms.vars().push_back(name, std::move(uniform));
     _uniform_declarations.push_back(declaration);
+}
+
+uint32_t ShaderPreprocessor::getUniformSize(Uniform::Type type, const String& declaredType) const
+{
+    if(type != Uniform::TYPE_STRUCT)
+        return Uniform::getTypeSize(type);
+
+    const String source = _struct_definitions.at(declaredType);
+    size_t size = 0;
+    for(const String& i : source.split(';'))
+    {
+        String vtype, vname;
+        Strings::cut(i.strip(), vtype, vname, ' ');
+        Uniform::Type t = Uniform::toType(vtype);
+        size += getUniformSize(t, vtype.strip());
+    }
+    return size;
 }
 
 String ShaderPreprocessor::genDeclarations() const

@@ -32,7 +32,7 @@ private:
 
     class Worker : public Runnable {
     public:
-        Worker(const sp<Stub>& stub, const sp<Thread::Stub>& threadStub);
+        Worker(const sp<Stub>& stub, const Thread& thread);
         ~Worker() override;
 
         bool idle() const;
@@ -45,7 +45,7 @@ private:
 
     private:
         sp<Stub> _stub;
-        sp<Thread::Stub> _thread_stub;
+        Thread _thread;
 
         OCSQueue<sp<Runnable>> _pendings;
         bool _idle;

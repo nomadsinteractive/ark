@@ -775,7 +775,7 @@ class Rotate:
 
 
 class Transform:
-    def __init__(self, rotate: Optional[Rotate], scale: Optional[Vec3, Vec2] = None, translate: Optional[Vec3, Vec2] = None):
+    def __init__(self, rotate: Optional[Rotate] = None, scale: Optional[Vec3, Vec2] = None, translate: Optional[Vec3, Vec2] = None):
         self._rotate = rotate
         self._scale = scale
         self._translate = translate

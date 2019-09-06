@@ -54,6 +54,7 @@ static ANativeWindow* _window;
 
 JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onCreate(JNIEnv* env, jobject obj, jobject applicationContext, jobject assetManager)
 {
+    LOGD("onCreate");
     JNIUtil::init(env);
     if(gApplicationContext)
         env->DeleteGlobalRef(gApplicationContext);
@@ -62,7 +63,7 @@ JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onCreate(JNIEnv* en
         env->DeleteGlobalRef(gAssetManager);
     gAssetManager = env->NewGlobalRef(assetManager);
     
-	const sp<Manifest> manifest = sp<Manifest>::make("manifest.xml");
+    const sp<Manifest> manifest = sp<Manifest>::make("manifest.xml");
     _ark = sp<Ark>::make(0, nullptr, manifest);
     const sp<Size>& renderResolution = manifest->rendererResolution();
     Viewport viewport(0.0f, 0.0f, renderResolution->width(), renderResolution->height(), 0.0f, renderResolution->width());
@@ -72,15 +73,17 @@ JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onCreate(JNIEnv* en
 
 JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onSurfaceCreated(JNIEnv* env, jobject obj, jobject surface)
 {
-	RenderContext::Info& info = _application->context()->renderEngine()->renderContext()->info();
-	_window = ANativeWindow_fromSurface(env, surface);
-	info.android.window = _window;
+    LOGD("onSurfaceCreated");
+    RenderContext::Info& info = _application->context()->renderEngine()->renderContext()->info();
+    _window = ANativeWindow_fromSurface(env, surface);
+    info.android.window = _window;
     _application->onSurfaceCreated();
-	_ark->applicationContext()->updateRenderState();
+    _ark->applicationContext()->updateRenderState();
 }
 
 JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onSurfaceChanged(JNIEnv* env, jobject obj, jint width, jint height)
 {
+    LOGD("onSurfaceChanged");
     _application->onSurfaceChanged(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
 }
 
@@ -91,21 +94,25 @@ JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onDraw(JNIEnv* env,
 
 JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onPause(JNIEnv* env, jobject obj)
 {
+    LOGD("onPause");
     _application->onPause();
 }
 
 JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onResume(JNIEnv* env, jobject obj)
 {
+    LOGD("onResume");
     _application->onResume();
 }
 
 JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onDestroy(JNIEnv* env, jobject obj)
 {
+    LOGD("onDestroy");
     _application->onDestroy();
-	ANativeWindow_release(_window);
+    if(_window)
+        ANativeWindow_release(_window);
+    _window = nullptr;
     _application = nullptr;
     _ark = nullptr;
-	_window = nullptr;
 }
 
 JNIEXPORT jboolean JNICALL Java_com_nomadsinteractive_ark_JNILib_onEvent(JNIEnv* env, jobject obj, jint action, jfloat x, jfloat y, jlong timestamp)

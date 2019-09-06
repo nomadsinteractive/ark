@@ -183,7 +183,8 @@ Ark::~Ark()
             if(iter == _instance_stack.end())
                 break;
         }
-    _instance = _instance_stack.size() > 0 ? _instance_stack.front() : nullptr;
+    if(_instance == this)
+        _instance = _instance_stack.size() > 0 ? _instance_stack.front() : nullptr;
 }
 
 Ark& Ark::instance()

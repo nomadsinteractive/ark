@@ -36,15 +36,14 @@ import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
 import android.view.View;
+import com.nomadsinteractive.launchpad.MainActivity;
 
 /**
  * A simple GLSurfaceView sub-class that demonstrate how to perform
@@ -80,18 +79,13 @@ public class GL2JNIView extends GLSurfaceView {
     }
 
     private void init(boolean translucent, int depth, int stencil) {
-        JNILib.onCreate(new ApplicationContextAdapter(getContext()), getContext().getAssets());
-        
         /* By default, GLSurfaceView() creates a RGB_565 opaque surface.
          * If we want a translucent one, we should change the surface's
          * format here, using PixelFormat.TRANSLUCENT for GL Surfaces
          * is interpreted as any 32-bit surface with alpha by SurfaceFlinger.
          */
-        
-        SurfaceHolder surfaceHolder = getHolder();
-        
         if (translucent) {
-            surfaceHolder.setFormat(PixelFormat.TRANSLUCENT);
+            getHolder().setFormat(PixelFormat.TRANSLUCENT);
         }
 
         setEGLContextClientVersion(EGL_CONTEXT_VERSION);
@@ -109,15 +103,6 @@ public class GL2JNIView extends GLSurfaceView {
                              new ConfigChooser(8, 8, 8, 8, depth, stencil) :
                              new ConfigChooser(5, 6, 5, 0, depth, stencil) );
 
-        /* Set the renderer responsible for frame rendering */
-        setRenderer(new Renderer(surfaceHolder));
-        
-        setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return JNILib.onEvent(event.getAction(), event.getX(), event.getY(), event.getEventTime());
-            }
-        });
     }
 
     
@@ -336,24 +321,5 @@ public class GL2JNIView extends GLSurfaceView {
         protected int mStencilSize;
         private int[] mValue = new int[1];
     }
-    
-    private static class Renderer implements GLSurfaceView.Renderer {
-        private SurfaceHolder mSurfaceHoder;
-        
-        public Renderer(SurfaceHolder surfaceHolder) {
-            mSurfaceHoder = surfaceHolder;
-        }
-        
-        public void onDrawFrame(GL10 gl) {
-            JNILib.onDraw();
-        }
 
-        public void onSurfaceChanged(GL10 gl, int width, int height) {
-            JNILib.onSurfaceChanged(width, height);
-        }
-
-        public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-            JNILib.onSurfaceCreated(mSurfaceHoder.getSurface());
-        }
-    }
 }

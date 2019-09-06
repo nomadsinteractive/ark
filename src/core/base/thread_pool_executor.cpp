@@ -42,7 +42,7 @@ void ThreadPoolExecutor::execute(const sp<Runnable>& task)
 sp<ThreadPoolExecutor::Worker> ThreadPoolExecutor::createWorker()
 {
     Thread thread;
-    const sp<Worker> worker = sp<Worker>::make(_stub, thread.stub());
+    const sp<Worker> worker = sp<Worker>::make(_stub, thread);
     _stub->_workers.push(worker);
     _stub->_worker_count ++;
     thread.setEntry(worker);
@@ -50,15 +50,15 @@ sp<ThreadPoolExecutor::Worker> ThreadPoolExecutor::createWorker()
     return worker;
 }
 
-ThreadPoolExecutor::Worker::Worker(const sp<Stub>& stub, const sp<Thread::Stub>& threadStub)
-    : _stub(stub), _thread_stub(threadStub), _idle(false), _idled_cycle(0)
+ThreadPoolExecutor::Worker::Worker(const sp<Stub>& stub, const Thread& thread)
+    : _stub(stub), _thread(thread), _idle(false), _idled_cycle(0)
 {
 }
 
 ThreadPoolExecutor::Worker::~Worker()
 {
-    _thread_stub->detach();
-    _thread_stub->terminate();
+    _thread.detach();
+    _thread.terminate();
 }
 
 bool ThreadPoolExecutor::Worker::idle() const
@@ -69,9 +69,9 @@ bool ThreadPoolExecutor::Worker::idle() const
 void ThreadPoolExecutor::Worker::run()
 {
     const auto duration = std::chrono::milliseconds(1);
-    while(_thread_stub->status() != Thread::THREAD_STATE_TERMINATED)
+    while(_thread.status() != Thread::THREAD_STATE_TERMINATED)
     {
-        _thread_stub->wait(duration);
+        _thread.wait(duration);
         sp<Runnable> front;
         if(_pendings.pop(front))
         {
@@ -114,7 +114,7 @@ void ThreadPoolExecutor::Worker::post(const sp<Runnable>& task)
 {
     _idle = false;
     _pendings.add(task);
-    _thread_stub->notify();
+    _thread.notify();
 }
 
 ThreadPoolExecutor::Stub::Stub(const sp<MessageLoop>& messageLoop, uint32_t capacity)

@@ -6,12 +6,16 @@
 #include <thread>
 
 #include "core/base/api.h"
+#include "core/base/mutex.h"
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
 class ARK_API Thread {
+private:
+    class Stub;
+
 public:
     enum State {
         THREAD_STATE_NONE,
@@ -23,7 +27,8 @@ public:
     typedef std::thread::id Id;
 
     Thread(const sp<Runnable>& entry = nullptr);
-    Thread(const Thread& other);
+    Thread(const sp<Stub>& stub);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Thread);
 
     void resume() const;
     void pause() const;
@@ -36,17 +41,20 @@ public:
     bool isPaused() const;
     bool isTerminated() const;
 
-    void setEntry(const sp<Runnable>& entry);
+    const sp<Runnable>& entry() const;
+    void setEntry(const sp<Runnable>& entry) const;
+
     void start();
 
     template<typename T> bool wait(const T& duration) const {
-        return _stub->wait<T>(duration);
+        return _stub->_mutex.wait<T>(duration);
     }
     template<typename T, typename U> bool wait(const T& duration, U pred) const {
-        return _stub->wait<T, U>(duration, std::move(pred));
+        return _stub->_mutex.wait<T, U>(duration, std::move(pred));
     }
 
-    void signal() const;
+    State status() const;
+    void notify() const;
 
     template<typename T> static T& local() {
         thread_local T THREAD_LOCAL;
@@ -55,7 +63,7 @@ public:
 
     static Id currentThreadId();
 
-public:
+private:
     class Stub {
     public:
         Stub(const sp<Runnable>& entry);
@@ -68,35 +76,15 @@ public:
         void join();
         void detach();
 
-        State status() const;
-
-        const sp<Runnable>& entry() const;
-        void setEntry(const sp<Runnable>& entry);
-
-        template<typename T> bool wait(const T& duration) {
-            std::unique_lock<std::mutex> lk(_mutex);
-            return _condition_variable.wait_for(lk, duration) == std::cv_status::timeout;
-        }
-        template<typename T, typename U> bool wait(const T& duration, U pred) {
-            std::unique_lock<std::mutex> lk(_mutex);
-            return _condition_variable.wait_for(lk, duration, std::move(pred));
-        }
-
-        void notify();
-
     private:
         State _state;
 
         sp<Runnable> _entry;
-
-        std::mutex _mutex;
-        std::condition_variable _condition_variable;
-
+        Mutex _mutex;
         std::thread _thread;
 
+        friend class Thread;
     };
-
-    const sp<Stub>& stub() const;
 
 private:
     sp<Stub> _stub;

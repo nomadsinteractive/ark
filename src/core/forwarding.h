@@ -57,6 +57,7 @@ class Manifest;
 class MemoryPool;
 class MessageLoop;
 class MessageLoopDefault;
+class Mutex;
 class Object;
 class ObjectPool;
 class Observer;

@@ -160,6 +160,7 @@ private:
 
     void addInclude(const String& source, const String& filepath);
     void addUniform(const String& type, const String& name, uint32_t length, const sp<String>& declaration);
+    uint32_t getUniformSize(Uniform::Type type, const String& declaredType) const;
 
 private:
     sp<CodeBlock> _main_block;
@@ -174,6 +175,7 @@ public:
 
     Source _includes;
     Source _struct_declarations;
+    Table<String, String> _struct_definitions;
     Source _uniform_declarations;
     Source _attribute_declarations;
 

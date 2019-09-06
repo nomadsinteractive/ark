@@ -55,6 +55,12 @@ public:
         US_ONCE_AND_ON_SURFACE_READY = 3
     };
 
+    enum UploadPriority {
+        UP_DEFAULT,
+        UP_LEVEL_1,
+        UP_LEVEL_2
+    };
+
 public:
     RenderController(const sp<RenderEngine>& renderEngine, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader);
 
@@ -67,9 +73,8 @@ public:
 
     void onDrawFrame(GraphicsContext& graphicsContext);
 
-    void upload(const sp<Resource>& resource, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy);
-
-    void uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy);
+    void upload(const sp<Resource>& resource, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, UploadPriority priority = UP_DEFAULT);
+    void uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, UploadPriority priority = UP_DEFAULT);
 
     template<typename T, typename... Args> sp<T> createResource(Args&&... args) {
         const sp<T> res = sp<T>::make(std::forward<Args>(args)...);
@@ -110,11 +115,11 @@ public:
     const sp<NamedBuffer>& getNamedBuffer(NamedBuffer::Name name) const;
 
 private:
-    class ExpirableResource {
+    class RenderResource {
     public:
-        ExpirableResource() = default;
-        ExpirableResource(const sp<Resource>& resource, const sp<Uploader>& uploader);
-        ExpirableResource(const ExpirableResource& other) = default;
+        RenderResource() = default;
+        RenderResource(const sp<Resource>& resource, const sp<Uploader>& uploader, UploadPriority uploadPriority);
+        RenderResource(const RenderResource& other) = default;
 
         const sp<Resource>& resource() const;
 
@@ -123,11 +128,14 @@ private:
         void upload(GraphicsContext& graphicsContext) const;
         void recycle(GraphicsContext& graphicsContext) const;
 
-        bool operator < (const ExpirableResource& other) const;
+        UploadPriority uploadPriority() const;
+
+        bool operator < (const RenderResource& other) const;
 
     private:
         sp<Resource> _resource;
         sp<Uploader> _uploader;
+        UploadPriority _upload_priority;
     };
 
     class SynchronizeFlag : public Boolean {
@@ -144,10 +152,10 @@ private:
 
     struct PreparingResource {
         PreparingResource() = default;
-        PreparingResource(const ExpirableResource& resource, RenderController::UploadStrategy strategy);
+        PreparingResource(const RenderResource& resource, RenderController::UploadStrategy strategy);
         PreparingResource(const PreparingResource& other) = default;
 
-        ExpirableResource _resource;
+        RenderResource _resource;
         RenderController::UploadStrategy _strategy;
 
         bool operator < (const PreparingResource& other) const;
@@ -165,7 +173,7 @@ private:
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
 
     LFQueue<PreparingResource> _preparing_items;
-    std::set<ExpirableResource> _on_surface_ready_items;
+    std::set<RenderResource> _on_surface_ready_items;
 
     DisposableItemList<Runnable> _on_pre_update_request;
     std::vector<Box> _defered_instances;

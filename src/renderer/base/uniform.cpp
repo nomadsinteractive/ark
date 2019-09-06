@@ -10,8 +10,18 @@
 
 namespace ark {
 
+Uniform::Uniform(const String& name, const String& declaredType, Uniform::Type type, size_t size, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
+    : _name(name), _declared_type(declaredType), _type(type), _size(size), _length(length), _flatable(flatable), _notifier(notifier), _dirty_flag(_notifier ? _notifier->createDirtyFlag() : sp<Boolean>::null()), _binding(binding)
+{
+}
+
+Uniform::Uniform(const String& name, const String& type, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
+    : Uniform(name, type, toType(type), getTypeSize(toType(type)), length, flatable, notifier, binding)
+{
+}
+
 Uniform::Uniform(const String& name, Uniform::Type type, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
-    : _name(name), _type(type), _length(length), _flatable(flatable), _notifier(notifier), _dirty_flag(_notifier ? _notifier->createDirtyFlag() : sp<Boolean>::null()), _binding(binding)
+    : Uniform(name, toDeclaredType(type), type, getTypeSize(type), length, flatable, notifier, binding)
 {
 }
 
@@ -32,8 +42,7 @@ uint32_t Uniform::length() const
 
 size_t Uniform::size() const
 {
-    const size_t typeSizes[TYPE_COUNT] = {0, 4, 4, 8, 16, 16, 4, 4, 8, 16, 16, 36, 36, 64, 64, 4};
-    size_t s = typeSizes[_type] * _length;
+    size_t s = _size * _length;
     DCHECK(!_flatable || _flatable->size() <= s, "Uniform buffer overflow, name: \"%s\", size: %d, flatable size: %d", _name.c_str(), s, _flatable->size());
     DWARN(!_flatable || _flatable->size() == s, "Uniform buffer size mismatch, name: \"%s\", size: %d, flatable size: %d", _name.c_str(), s, _flatable->size());
     return s;
@@ -67,13 +76,12 @@ Uniform::Type Uniform::toType(const String& declaredType)
         return TYPE_MAT4;
     if(declaredType == "sampler2D")
         return TYPE_SAMPLER2D;
-    DFATAL("Unknow uniform type: %s", declaredType.c_str());
-    return TYPE_F1;
+    return TYPE_STRUCT;
 }
 
-String Uniform::getDeclaredType() const
+String Uniform::toDeclaredType(Type type)
 {
-    switch(_type) {
+    switch(type) {
     case TYPE_I1V:
     case TYPE_I1:
         return "int";
@@ -100,8 +108,19 @@ String Uniform::getDeclaredType() const
     default:
         break;
     }
-    DFATAL("Unsupported type: %d", _type);
+    DFATAL("Unsupported type: %d", type);
     return "";
+}
+
+uint32_t Uniform::getTypeSize(Uniform::Type type)
+{
+    const size_t typeSizes[TYPE_COUNT] = {0, 4, 4, 8, 16, 16, 4, 4, 8, 16, 16, 36, 36, 64, 64, 4, 0};
+    return typeSizes[type];
+}
+
+const String& Uniform::declaredType() const
+{
+    return _declared_type;
 }
 
 const sp<Flatable>& Uniform::flatable() const
@@ -128,7 +147,7 @@ bool Uniform::dirty() const
 
 String Uniform::declaration(const String& descriptor) const
 {
-    const String t = getDeclaredType();
+    const String t = declaredType();
     if(_length == 1)
         return Strings::sprintf("%s%s %s;", descriptor.c_str(), t.c_str(), _name.c_str());
     return Strings::sprintf("%s%s %s[%d];", descriptor.c_str(), t.c_str(), _name.c_str(), _length);

@@ -10,6 +10,5 @@ extern "C" ARK_API Plugin* __ark_vorbis_initialize__(Ark&);
 
 Plugin* __ark_vorbis_initialize__(Ark& ark)
 {
-    ark.push();
     return new VorbisPlugin();
 }

@@ -31,9 +31,12 @@ public:
         TYPE_MAT4,
         TYPE_MAT4V,
         TYPE_SAMPLER2D,
+        TYPE_STRUCT,
         TYPE_COUNT
     };
 
+    Uniform(const String& name, const String& declaredType, Type type, size_t size, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding = -1);
+    Uniform(const String& name, const String& type, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding = -1);
     Uniform(const String& name, Type type, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding = -1);
     DEFAULT_COPY_AND_ASSIGN(Uniform);
 
@@ -44,8 +47,10 @@ public:
     size_t size() const;
 
     static Type toType(const String& declaredType);
+    static String toDeclaredType(Type type);
+    static uint32_t getTypeSize(Type type);
 
-    String getDeclaredType() const;
+    const String& declaredType() const;
 
     const sp<Flatable>& flatable() const;
     void setFlatable(const sp<Flatable>& flatable);
@@ -61,7 +66,9 @@ public:
 
 private:
     String _name;
+    String _declared_type;
     Type _type;
+    size_t _size;
     uint32_t _length;
     sp<Flatable> _flatable;
     sp<Notifier> _notifier;

@@ -64,24 +64,24 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
         _recycler->doRecycling(graphicsContext);
 }
 
-void RenderController::upload(const sp<Resource>& resource, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy)
+void RenderController::upload(const sp<Resource>& resource, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, RenderController::UploadPriority priority)
 {
     switch(strategy & 3)
     {
     case RenderController::US_ONCE_AND_ON_SURFACE_READY:
     case RenderController::US_ONCE:
     case RenderController::US_RELOAD:
-        _preparing_items.push(PreparingResource(ExpirableResource(resource, uploader), strategy));
+        _preparing_items.push(PreparingResource(RenderResource(resource, uploader, priority), strategy));
         break;
     case RenderController::US_ON_SURFACE_READY:
-        _on_surface_ready_items.insert(ExpirableResource(resource, uploader));
+        _on_surface_ready_items.insert(RenderResource(resource, uploader, priority));
         break;
     }
 }
 
-void RenderController::uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy)
+void RenderController::uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, RenderController::UploadPriority priority)
 {
-    upload(buffer._delegate, uploader, strategy);
+    upload(buffer._delegate, uploader, strategy, priority);
 }
 
 const sp<Recycler>& RenderController::recycler() const
@@ -93,7 +93,7 @@ void RenderController::doRecycling(GraphicsContext& graphicsContext)
 {
     for(auto iter = _on_surface_ready_items.begin(); iter != _on_surface_ready_items.end();)
     {
-        const ExpirableResource& resource = *iter;
+        const RenderResource& resource = *iter;
         if(resource.isExpired())
         {
             resource.recycle(graphicsContext);
@@ -106,11 +106,16 @@ void RenderController::doRecycling(GraphicsContext& graphicsContext)
 
 void RenderController::doSurfaceReady(GraphicsContext& graphicsContext)
 {
-    for(const ExpirableResource& resource : _on_surface_ready_items)
+    for(const RenderResource& resource : _on_surface_ready_items)
         resource.recycle(graphicsContext);
 
-    for(const ExpirableResource& resource : _on_surface_ready_items)
-        resource.upload(graphicsContext);
+    for(const RenderResource& resource : _on_surface_ready_items)
+        if(resource.uploadPriority() == UP_LEVEL_2)
+            resource.upload(graphicsContext);
+
+    for(const RenderResource& resource : _on_surface_ready_items)
+        if(resource.uploadPriority() != UP_LEVEL_2)
+            resource.upload(graphicsContext);
 }
 
 const sp<RenderEngine>& RenderController::renderEngine() const
@@ -213,37 +218,42 @@ const sp<NamedBuffer>& RenderController::getNamedBuffer(NamedBuffer::Name name) 
     return _named_buffers[name];
 }
 
-RenderController::ExpirableResource::ExpirableResource(const sp<Resource>& resource, const sp<Uploader>& uploader)
-    : _resource(resource), _uploader(uploader)
+RenderController::RenderResource::RenderResource(const sp<Resource>& resource, const sp<Uploader>& uploader, UploadPriority uploadPriority)
+    : _resource(resource), _uploader(uploader), _upload_priority(uploadPriority)
 {
 }
 
-const sp<Resource>& RenderController::ExpirableResource::resource() const
+const sp<Resource>& RenderController::RenderResource::resource() const
 {
     return _resource;
 }
 
-bool RenderController::ExpirableResource::isExpired() const
+bool RenderController::RenderResource::isExpired() const
 {
     return _resource.unique();
 }
 
-void RenderController::ExpirableResource::upload(GraphicsContext& graphicsContext) const
+void RenderController::RenderResource::upload(GraphicsContext& graphicsContext) const
 {
     _resource->upload(graphicsContext, _uploader);
 }
 
-void RenderController::ExpirableResource::recycle(GraphicsContext& graphicsContext) const
+void RenderController::RenderResource::recycle(GraphicsContext& graphicsContext) const
 {
     _resource->recycle()(graphicsContext);
 }
 
-bool RenderController::ExpirableResource::operator <(const RenderController::ExpirableResource& other) const
+RenderController::UploadPriority RenderController::RenderResource::uploadPriority() const
+{
+    return _upload_priority;
+}
+
+bool RenderController::RenderResource::operator <(const RenderController::RenderResource& other) const
 {
     return _resource < other._resource;
 }
 
-RenderController::PreparingResource::PreparingResource(const RenderController::ExpirableResource& resource, RenderController::UploadStrategy strategy)
+RenderController::PreparingResource::PreparingResource(const RenderController::RenderResource& resource, RenderController::UploadStrategy strategy)
     : _resource(resource), _strategy(strategy)
 {
 }

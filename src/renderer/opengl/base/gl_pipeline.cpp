@@ -242,7 +242,6 @@ void GLPipeline::activeTexture(const Texture& texture, uint32_t name)
     glBindTexture(glTargets[texture.type()], static_cast<GLuint>(texture.delegate()->id()));
 
     char uniformName[16] = {'u', '_', 'T', 'e', 'x', 't', 'u', 'r', 'e', static_cast<char>('0' + name)};
-//    uniformName[9] = static_cast<char>('0' + name);
     const GLPipeline::GLUniform& uTexture = getUniform(uniformName);
     uTexture.setUniform1i(static_cast<GLint>(name));
 }

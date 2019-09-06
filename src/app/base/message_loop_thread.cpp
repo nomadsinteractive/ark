@@ -22,13 +22,13 @@ MessageLoopThread::~MessageLoopThread()
 void MessageLoopThread::post(const sp<Runnable>& task, float delay)
 {
     _message_loop->post(task, delay);
-    _thread.signal();
+    _thread.notify();
 }
 
 void MessageLoopThread::schedule(const sp<Runnable>& task, float interval)
 {
     _message_loop->schedule(task, interval);
-    _thread.signal();
+    _thread.notify();
 }
 
 void MessageLoopThread::pause()

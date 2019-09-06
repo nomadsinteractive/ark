@@ -32,26 +32,38 @@ namespace python {
 
 static struct _frozen _injected_frozen[10];
 
+static bool hasInjected()
+{
+    for(const struct _frozen* pt = PyImport_FrozenModules, *i = _injected_frozen; pt->name; pt ++, i ++)
+        if(strcmp(pt->name, "_frozen_importlib_org") == 0)
+            return true;
+    return false;
+}
+
 PythonScript::PythonScript(const String& name, const document& libraries)
     : _name(Strings::fromUTF8(name))
 {
     DSET_THREAD_FLAG();
     PyImport_AppendInittab("ark", PyInit_ark);
-    memset(_injected_frozen, 0, sizeof(_injected_frozen));
-    for(struct _frozen* pt = (struct _frozen *) PyImport_FrozenModules, *i = _injected_frozen; pt->name; pt ++, i ++)
+    if(!hasInjected())
     {
-        i->code = pt->code;
-        i->size = pt->size;
-        i->name = pt->name;
-        if(strcmp(pt->name, "_frozen_importlib") == 0)
+        memset(_injected_frozen, 0, sizeof(_injected_frozen));
+        for(struct _frozen* pt = (struct _frozen *) PyImport_FrozenModules, *i = _injected_frozen; pt->name; pt ++, i ++)
         {
-            i->code = _Py_M__importlib;
-            i->size = sizeof(_Py_M__importlib);
-            i++;
             i->code = pt->code;
             i->size = pt->size;
-            i->name = "_frozen_importlib_org";
+            i->name = pt->name;
+            if(strcmp(pt->name, "_frozen_importlib") == 0)
+            {
+                i->code = _Py_M__importlib;
+                i->size = sizeof(_Py_M__importlib);
+                i++;
+                i->code = pt->code;
+                i->size = pt->size;
+                i->name = "_frozen_importlib_org";
+            }
         }
+        PyImport_FrozenModules = _injected_frozen;
     }
     std::vector<String> paths;
     for(const document& i : libraries->children("library"))
@@ -60,7 +72,6 @@ PythonScript::PythonScript(const String& name, const document& libraries)
         paths.push_back(v);
     }
     setPythonPath(paths);
-    PyImport_FrozenModules = _injected_frozen;
     if(!Py_HasFileSystemDefaultEncoding)
     {
         char* encodings = reinterpret_cast<char*>(PyMem_RawMalloc(8));

@@ -15,7 +15,6 @@ extern void __ark_bootstrap_shaders_string_table__();
 
 Plugin* __ark_dear_imgui_initialize__(Ark& ark)
 {
-    ark.push();
     __ark_bootstrap_shaders_string_table__();
     return new DearImguiPlugin();
 }
