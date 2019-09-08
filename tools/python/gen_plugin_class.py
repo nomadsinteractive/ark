@@ -200,7 +200,7 @@ def search_for_plugins(paths):
         name = x[1]
         builder_name = x[2]
         interface_class = x[3]
-        arguments = parse_function_arguments(builder_name, content)
+        arguments = [(i, j) for i, j in parse_function_arguments(builder_name, content) if not i.startswith('=')]
         if builder_type != 'resource-loader':
             result.append(Builder(filename, name, interface_class, main_class, builder_name, arguments))
         else:

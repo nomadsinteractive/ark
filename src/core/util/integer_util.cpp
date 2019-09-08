@@ -14,15 +14,22 @@ namespace ark {
 
 namespace {
 
-class IntegerArray : public Integer, public Implements<IntegerArray, Integer> {
+class IntegerArray : public Integer, public IntArray, public Implements<IntegerArray, Integer, IntArray> {
 public:
     IntegerArray(std::vector<int32_t> values)
         : _values(std::move(values)) {
-
     }
 
     virtual int32_t val() override {
         return _values.size() > 0 ? _values.at(0) : 0;
+    }
+
+    virtual size_t length() override {
+        return _values.size();
+    }
+
+    virtual int32_t* buf() override {
+        return &_values[0];
     }
 
     std::vector<int32_t> _values;
@@ -192,9 +199,9 @@ void IntegerUtil::fix(const sp<Integer>& self)
 
 sp<Integer> IntegerUtil::repeat(const sp<Integer>& self, IntegerUtil::Repeat repeat)
 {
-    const sp<IntegerArray> ia = self.as<IntegerArray>();
-    DCHECK(ia, "Animation needs an IntegerArray instance, others have not been implemented yet");
-    return sp<IntegerByArray>::make(sp<IntArray::Vector>::make(ia->_values), repeat);
+    const sp<IntArray> ia = self.as<IntArray>();
+    DCHECK(ia, "Animation needs an IntArray instance, others have not been implemented yet");
+    return sp<IntegerByArray>::make(ia, repeat);
 }
 
 sp<Integer> IntegerUtil::animate(const sp<Integer>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)
@@ -203,13 +210,37 @@ sp<Integer> IntegerUtil::animate(const sp<Integer>& self, const sp<Numeric>& int
 }
 
 IntegerUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
-    : _value(Expression::Compiler<int32_t, NumericOperation<int32_t>>().compile(factory, expr.strip()))
+    : _value(makeIntegerBuilder(factory, expr.strip()))
 {
 }
 
 sp<Integer> IntegerUtil::DICTIONARY::build(const sp<Scope>& args)
 {
     return _value->build(args);
+}
+
+sp<Builder<Integer>> IntegerUtil::DICTIONARY::makeIntegerBuilder(BeanFactory& factory, const String& expr) const
+{
+    DCHECK(expr, "Empty Integer expression");
+    if(expr.at(0) == '[')
+    {
+        DCHECK(expr.at(expr.length() - 1) == ']', "Illegal IntArray expression");
+        std::vector<int32_t> values;
+        for(const String& i : expr.substr(1, expr.length() - 1).split(','))
+            values.push_back(Strings::parse<int32_t>(i.strip()));
+        return sp<BuilderByInstance<Integer>>::make(sp<IntegerArray>::make(std::move(values)));
+    }
+    return Expression::Compiler<int32_t, NumericOperation<int32_t>>().compile(factory, expr);
+}
+
+IntegerUtil::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _delegate(factory, Documents::ensureAttribute(manifest, Constants::Attributes::VALUE))
+{
+}
+
+sp<Integer> IntegerUtil::BUILDER::build(const sp<Scope>& args)
+{
+    return _delegate.build(args);
 }
 
 }

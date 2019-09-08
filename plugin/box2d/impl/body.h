@@ -30,6 +30,8 @@ public:
 
         void dispose();
 
+        b2Body* body();
+
         int32_t _id;
         World _world;
         b2Body* _body;

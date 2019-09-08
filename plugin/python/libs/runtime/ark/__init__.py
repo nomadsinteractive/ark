@@ -446,10 +446,10 @@ class Vec2:
         return self
 
     @delegate.setter
-    def delegate(self, delegate: 'Vec2')
+    def delegate(self, delegate: 'Vec2'):
         pass
 
-    def transform(self, transform, org):
+    def transform(self, transform):
         return self._x, self._y
 
     def integral(self, t: Optional[Numeric] = None):

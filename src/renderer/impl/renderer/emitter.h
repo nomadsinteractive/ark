@@ -8,18 +8,20 @@
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
 #include "core/inf/runnable.h"
+#include "core/epi/disposed.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v3.h"
+#include "graphics/inf/renderer.h"
 
 #include "renderer/forwarding.h"
 
 namespace ark {
 
 //[[script::bindings::holder]]
-class ARK_API Emitter : public Holder {
+class ARK_API Emitter : public Holder, public Renderer, public Disposed {
 private:
     struct Source {
         Source(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Scope>& arguments);
@@ -34,9 +36,10 @@ private:
     };
 
 public:
-    Emitter(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Source>& source, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory);
+    Emitter(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Source>& source, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory, bool disposed);
 
     virtual void traverse(const Visitor& visitor) override;
+    virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
 //  [[script::bindings::property]]
     bool active();
@@ -51,7 +54,7 @@ public:
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Emitter> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, bool disposed = true);
 
         virtual sp<Emitter> build(const sp<Scope>& args) override;
 
@@ -65,7 +68,18 @@ public:
         SafePtr<Builder<Vec3>> _position;
         SafePtr<Builder<Size>> _size;
         sp<Builder<LayerContext>> _layer_context;
+        bool _disposed;
+    };
 
+//  [[plugin::resource-loader("emitter")]]
+    class RENDERER_BUILDER : public Builder<Renderer> {
+    public:
+        RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+        virtual sp<Renderer> build(const sp<Scope>& args) override;
+
+    private:
+        BUILDER _delegate;
     };
 
 private:
@@ -121,7 +135,7 @@ private:
 private:
     sp<Stub> _stub;
     sp<RenderController> _render_controller;
-    sp<BooleanWrapper> _disposed;
+
 };
 
 }

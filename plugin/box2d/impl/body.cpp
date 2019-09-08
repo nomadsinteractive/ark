@@ -215,115 +215,116 @@ sp<Body> Body::obtain(const Shadow* shadow, ObjectPool& objectPool)
 
 b2Body* Body::body() const
 {
-    return _stub->_body;
+
+    return _stub->body();
 }
 
 float Body::angle()
 {
-    return _stub->_body->GetAngle();
+    return _stub->body()->GetAngle();
 }
 
 void Body::setAngle(float rad)
 {
-    _stub->_body->SetTransform(_stub->_body->GetWorldCenter(), rad);
+    _stub->body()->SetTransform(_stub->_body->GetWorldCenter(), rad);
 }
 
 float Body::angularVelocity()
 {
-    return _stub->_body->GetAngularVelocity();
+    return _stub->body()->GetAngularVelocity();
 }
 
 void Body::setAngularVelocity(float omega)
 {
-    _stub->_body->SetAngularVelocity(omega);
+    _stub->body()->SetAngularVelocity(omega);
 }
 
 V2 Body::linearVelocity() const
 {
-    const b2Vec2 velocity = _stub->_body->GetLinearVelocity();
+    const b2Vec2 velocity = _stub->body()->GetLinearVelocity();
     return V2(velocity.x, velocity.y);
 }
 
 void Body::setLinearVelocity(const V2& velocity)
 {
-    _stub->_body->SetLinearVelocity(b2Vec2(velocity.x(), velocity.y()));
+    _stub->body()->SetLinearVelocity(b2Vec2(velocity.x(), velocity.y()));
 }
 
 float Body::gravityScale() const
 {
-    return _stub->_body->GetGravityScale();
+    return _stub->body()->GetGravityScale();
 }
 
 void Body::setGravityScale(float scale)
 {
-    _stub->_body->SetGravityScale(scale);
+    _stub->body()->SetGravityScale(scale);
 }
 
 bool Body::active()
 {
-    return _stub->_body->IsActive();
+    return _stub->body()->IsActive();
 }
 
 void Body::setActive(bool active)
 {
     DCHECK(!_stub->_world.world().IsLocked(), "Cannot set active in the middle of a time step");
-    _stub->_body->SetActive(active);
+    _stub->body()->SetActive(active);
 }
 
 bool Body::awake()
 {
-    return _stub->_body->IsAwake();
+    return _stub->body()->IsAwake();
 }
 
 void Body::setAwake(bool awake)
 {
-    _stub->_body->SetAwake(awake);
+    _stub->body()->SetAwake(awake);
 }
 
 float Body::x() const
 {
-    return _stub->_body->GetPosition().x;
+    return _stub->body()->GetPosition().x;
 }
 
 float Body::y() const
 {
-    return _stub->_body->GetPosition().y;
+    return _stub->body()->GetPosition().y;
 }
 
 float Body::mass() const
 {
-    return _stub->_body->GetMass();
+    return _stub->body()->GetMass();
 }
 
 void Body::applyTorque(float torque, bool wake)
 {
-    _stub->_body->ApplyTorque(torque, wake);
+    _stub->body()->ApplyTorque(torque, wake);
 }
 
 void Body::applyForce(const V2& force, const V2& point, bool wake)
 {
-    _stub->_body->ApplyForce(b2Vec2(force.x(), force.y()), b2Vec2(point.x(), point.y()), wake);
+    _stub->body()->ApplyForce(b2Vec2(force.x(), force.y()), b2Vec2(point.x(), point.y()), wake);
 }
 
 void Body::applyForceToCenter(const V2& force, bool wake)
 {
-    _stub->_body->ApplyForceToCenter(b2Vec2(force.x(), force.y()), wake);
+    _stub->body()->ApplyForceToCenter(b2Vec2(force.x(), force.y()), wake);
 }
 
 void Body::applyLinearImpulse(const V2& impulse, const V2& point, bool wake)
 {
-    _stub->_body->ApplyLinearImpulse(b2Vec2(impulse.x(), impulse.y()), b2Vec2(point.x(), point.y()), wake);
+    _stub->body()->ApplyLinearImpulse(b2Vec2(impulse.x(), impulse.y()), b2Vec2(point.x(), point.y()), wake);
 }
 
 void Body::applyAngularImpulse(float impulse, bool wake)
 {
-    _stub->_body->ApplyAngularImpulse(impulse, wake);
+    _stub->body()->ApplyAngularImpulse(impulse, wake);
 }
 
 void Body::setTransform(const V2& position, float angle)
 {
     DCHECK(!_stub->_world.world().IsLocked(), "Cannot set transform in the middle of a time step");
-    _stub->_body->SetTransform(b2Vec2(position.x(), position.y()), angle);
+    _stub->body()->SetTransform(b2Vec2(position.x(), position.y()), angle);
 }
 
 sp<Future> Body::applyLinearVelocity(const sp<Vec2>& velocity)
@@ -369,6 +370,12 @@ void Body::Stub::dispose()
 
     _body = nullptr;
     _callback = nullptr;
+}
+
+b2Body* Body::Stub::body()
+{
+    DCHECK(_body, "Body has been disposed");
+    return _body;
 }
 
 Body::Shadow::Shadow(const sp<Body::Stub>& body, const sp<RigidBody::Stub>& rigidBody)

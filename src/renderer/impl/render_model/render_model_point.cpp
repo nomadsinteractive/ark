@@ -23,7 +23,7 @@ sp<ShaderBindings> GLModelPoint::makeShaderBindings(const Shader& shader)
 
 void GLModelPoint::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
 {
-    snapshot._index_buffer = _index_buffer->snapshot(renderController, snapshot._items.size());
+    snapshot._index_buffer = _index_buffer->snapshot(renderController, snapshot._items.size(), snapshot._items.size());
 }
 
 void GLModelPoint::start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot)

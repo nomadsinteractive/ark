@@ -101,7 +101,21 @@ public:
         virtual sp<Integer> build(const sp<Scope>& args) override;
 
     private:
+        sp<Builder<Integer>> makeIntegerBuilder(BeanFactory& factory, const String& expr) const;
+
+    private:
         sp<Builder<Integer>> _value;
+    };
+
+//  [[plugin::builder]]
+    class BUILDER : public Builder<Integer> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest);
+
+        virtual sp<Integer> build(const sp<Scope>& args) override;
+
+    private:
+        DICTIONARY _delegate;
     };
 
 };

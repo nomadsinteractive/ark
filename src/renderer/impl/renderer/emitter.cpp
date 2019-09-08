@@ -24,8 +24,8 @@
 
 namespace ark {
 
-Emitter::Emitter(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Source>& source, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory)
-    : _stub(sp<Stub>::make(clock, layerContext, source, particleDescriptor, beanFactory)), _render_controller(resourceLoaderContext->renderController()), _disposed(sp<BooleanWrapper>::make(true))
+Emitter::Emitter(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Source>& source, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory, bool disposed)
+    : Disposed(disposed), _stub(sp<Stub>::make(clock, layerContext, source, particleDescriptor, beanFactory)), _render_controller(resourceLoaderContext->renderController())
 {
 }
 
@@ -35,6 +35,11 @@ void Emitter::traverse(const Holder::Visitor& visitor)
     HolderUtil::visit(_stub->_source->_size, visitor);
     HolderUtil::visit(_stub->_source->_type, visitor);
     HolderUtil::visit(_stub->_source->_arguments, visitor);
+}
+
+void Emitter::render(RenderRequest& /*renderRequest*/, float /*x*/, float /*y*/)
+{
+    _stub->run();
 }
 
 bool Emitter::active()
@@ -73,19 +78,20 @@ void Emitter::doActivate()
     _render_controller->addPreUpdateRequest(_stub, BooleanUtil::__or__(_disposed, sp<BooleanByWeakRef<Boolean>>::make(_disposed, 1)));
 }
 
-Emitter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+Emitter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, bool disposed)
     : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext),
       _type(factory.getBuilder<Integer>(manifest, Constants::Attributes::TYPE)),
       _position(factory.getBuilder<Vec3>(manifest, Constants::Attributes::POSITION)),
       _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, false))
+      _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, false)),
+      _disposed(disposed)
 {
 }
 
 sp<Emitter> Emitter::BUILDER::build(const sp<Scope>& args)
 {
     const sp<Source> stub = sp<Source>::make(_resource_loader_context, _type->build(args), _position->build(args), _size->build(args), args);
-    return sp<Emitter>::make(_resource_loader_context, stub, Ark::instance().clock(), _layer_context->build(args), _manifest->children(), _factory);
+    return sp<Emitter>::make(_resource_loader_context, stub, Ark::instance().clock(), _layer_context->build(args), _manifest->children(), _factory, _disposed);
 }
 
 Emitter::Particale::Particale(const sp<Source>& stub, const document& manifest, BeanFactory& factory)
@@ -173,6 +179,16 @@ uint64_t Emitter::Stub::emit(uint64_t tick)
     for(Particale& i : _particles)
         nextTick = std::min(i.show(position, tick, _layer_context), nextTick);
     return nextTick;
+}
+
+Emitter::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _delegate(factory, manifest, resourceLoaderContext, false)
+{
+}
+
+sp<Renderer> Emitter::RENDERER_BUILDER::build(const sp<Scope>& args)
+{
+    return _delegate.build(args);
 }
 
 }
