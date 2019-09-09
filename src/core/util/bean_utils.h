@@ -49,7 +49,7 @@ private:
         if(elems.empty())
             builder = beanFactory.getNullBuilder<T>();
         else {
-            const String str = elems.front();
+            const String str = elems.front().strip();
             elems.pop_front();
             builder = beanFactory.getBuilder<T>(str);
         }
