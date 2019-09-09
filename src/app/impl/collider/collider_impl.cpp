@@ -25,7 +25,7 @@ namespace {
 
 class DynamicPosition : public Vec2 {
 public:
-    DynamicPosition(const sp<ColliderImpl::Stub>& collider, const sp<Vec>& position)
+    DynamicPosition(const sp<ColliderImpl::Stub>& collider, const sp<Vec2>& position)
         : _collider(collider), _position(position) {
     }
 
@@ -35,16 +35,17 @@ public:
     }
 
     virtual V2 val() override {
-        const V position = _position->val();
-        if(_rigid_body_shadow && !_rigid_body_shadow->disposed()) {
+        const V2 position = _position->val();
+        if(_rigid_body_shadow && _rigid_body_shadow->isDisposed())
+            _rigid_body_shadow = nullptr;
+        if(_rigid_body_shadow)
             _rigid_body_shadow->collision(_rigid_body_shadow, _collider, position, _aabb);
-        }
         return position;
     }
 
 private:
     sp<ColliderImpl::Stub> _collider;
-    sp<Vec> _position;
+    sp<Vec2> _position;
     sp<ColliderImpl::RigidBodyShadow> _rigid_body_shadow;
     Rect _aabb;
 };
@@ -70,16 +71,17 @@ sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, c
 {
     DASSERT(position);
     DASSERT(size);
+    const sp<Disposed> disposed = sp<Disposed>::make();
     if(type == Collider::BODY_TYPE_DYNAMIC)
     {
         const sp<DynamicPosition> dpos = sp<DynamicPosition>::make(_stub, position);
-        const sp<Vec> pos = _resource_loader_context->synchronize<V>(dpos);
-        const sp<RigidBodyImpl> rigidBody = _stub->createRigidBody(type, shape, pos, size, rotate, _stub);
+        const sp<Vec2> pos = _resource_loader_context->synchronize<V2>(dpos, disposed);
+        const sp<RigidBodyImpl> rigidBody = _stub->createRigidBody(type, shape, pos, size, rotate, disposed, _stub);
         dpos->setRigidBody(rigidBody->shadow());
         return rigidBody;
     }
     DCHECK(type == Collider::BODY_TYPE_KINEMATIC || type == Collider::BODY_TYPE_STATIC, "Unknown BodyType: %d", type);
-    return _stub->createRigidBody(type, shape, position, size, rotate, _stub);
+    return _stub->createRigidBody(type, shape, position, size, rotate, disposed, _stub);
 }
 
 ColliderImpl::Stub::Stub(const sp<Tracker>& tracker, const document& manifest)
@@ -97,12 +99,12 @@ void ColliderImpl::Stub::remove(const RigidBody& rigidBody)
     _rigid_bodies.erase(iter);
 }
 
-sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<ColliderImpl::Stub>& self)
+sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed, const sp<ColliderImpl::Stub>& self)
 {
     uint32_t rigidBodyId = ++_rigid_body_base_id;
     float s = std::max(size->width(), size->height());
     const sp<Vec> dp = _tracker->create(rigidBodyId, position, sp<Vec::Const>::make(V(s, s)));
-    const sp<RigidBodyShadow> rigidBodyShadow = _object_pool.obtain<RigidBodyShadow>(rigidBodyId, type, dp, size, rotate);
+    const sp<RigidBodyShadow> rigidBodyShadow = _object_pool.obtain<RigidBodyShadow>(rigidBodyId, type, dp, size, rotate, disposed);
     const sp<RigidBodyImpl> rigidBody = _object_pool.obtain<RigidBodyImpl>(self, rigidBodyShadow);
 
     DWARN(_c2_shapes.find(BODY_SHAPE_AABB) == _c2_shapes.end()
@@ -199,8 +201,8 @@ void ColliderImpl::RigidBodyImpl::dispose()
     _shadow->dispose(_collider);
 }
 
-ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate)
-    : RigidBody(id, type, position, size, rotate), _c2_rigid_body(position, rotate, type == Collider::BODY_TYPE_STATIC), _disposed(false), _dispose_requested(false)
+ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed)
+    : RigidBody(id, type, position, size, rotate, disposed), _c2_rigid_body(position, rotate, type == Collider::BODY_TYPE_STATIC), _dispose_requested(false)
 {
 }
 
@@ -280,7 +282,7 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
             if(candidates.find(i) == candidates.end())
             {
                 const sp<RigidBodyShadow> s = collider.findRigidBody(i);
-                shadowStub._callback->onEndContact(self, s ? s : collider._object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, nullptr, nullptr, nullptr));
+                shadowStub._callback->onEndContact(self, s ? s : collider._object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, nullptr, nullptr, nullptr, nullptr));
             }
         }
         _contacts = candidates;
@@ -289,16 +291,16 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
 
 void ColliderImpl::RigidBodyShadow::dispose(ColliderImpl::Stub& stub)
 {
-    if(!_disposed)
+    if(!isDisposed())
     {
         stub.remove(*this);
-        _disposed = true;
+        disposed()->dispose();
     }
 }
 
-bool ColliderImpl::RigidBodyShadow::disposed() const
+bool ColliderImpl::RigidBodyShadow::isDisposed() const
 {
-    return _disposed;
+    return disposed()->val();
 }
 
 Rect ColliderImpl::RigidBodyShadow::makeRigidBodyAABB() const

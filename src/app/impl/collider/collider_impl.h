@@ -49,7 +49,7 @@ public:
 
         void remove(const RigidBody& rigidBody);
 
-        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Stub>& self);
+        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed, const sp<Stub>& self);
         const sp<RigidBodyShadow>& ensureRigidBody(int32_t id) const;
         const sp<RigidBodyShadow> findRigidBody(int32_t id) const;
 
@@ -67,7 +67,7 @@ public:
 
     class RigidBodyShadow : public RigidBody {
     public:
-        RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate);
+        RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed);
 
         virtual void dispose() override;
 
@@ -76,7 +76,7 @@ public:
         void makeBox();
         void makeShape(C2_TYPE type, const C2Shape& shape);
 
-        bool disposed() const;
+        bool isDisposed() const;
 
         void collision(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const V& position, const Rect& aabb);
 
@@ -89,7 +89,6 @@ public:
         C2RigidBody _c2_rigid_body;
 
         std::unordered_set<int32_t> _contacts;
-        bool _disposed;
         bool _dispose_requested;
 
         friend class RigidBodyImpl;
@@ -98,7 +97,7 @@ public:
     class RigidBodyImpl : public RigidBody, Implements<RigidBodyImpl, RigidBody, Holder> {
     public:
         RigidBodyImpl(const sp<ColliderImpl::Stub>& collider, const sp<RigidBodyShadow>& shadow);
-        ~RigidBodyImpl();
+        ~RigidBodyImpl() override;
 
         virtual void dispose() override;
 

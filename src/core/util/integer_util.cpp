@@ -17,11 +17,11 @@ namespace {
 class IntegerArray : public Integer, public IntArray, public Implements<IntegerArray, Integer, IntArray> {
 public:
     IntegerArray(std::vector<int32_t> values)
-        : _values(std::move(values)) {
+        : _values(std::move(values)), _iter(0) {
     }
 
     virtual int32_t val() override {
-        return _values.size() > 0 ? _values.at(0) : 0;
+        return _iter < _values.size() ? _values.at(_iter++) : -1;
     }
 
     virtual size_t length() override {
@@ -32,7 +32,23 @@ public:
         return &_values[0];
     }
 
+    class BUILDER : public Builder<Integer> {
+    public:
+        BUILDER(std::vector<int32_t> values)
+            : _values(std::move(values)) {
+        }
+
+        virtual sp<Integer> build(const sp<Scope>& /*args*/) override {
+            return sp<IntegerArray>::make(_values);
+        }
+
+    private:
+        std::vector<int32_t> _values;
+    };
+
+private:
     std::vector<int32_t> _values;
+    size_t _iter;
 };
 
 }
@@ -57,19 +73,9 @@ sp<Integer> IntegerUtil::add(const sp<Integer>& self, const sp<Integer>& rvalue)
     return sp<VariableOP2<int32_t, int32_t, Operators::Add<int32_t>, sp<Integer>, sp<Integer>>>::make(self, rvalue);
 }
 
-void IntegerUtil::iadd(const sp<Integer>& self, const sp<Integer>& rvalue)
-{
-    FATAL("Unimplemented");
-}
-
 sp<Integer> IntegerUtil::sub(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
     return sp<VariableOP2<int32_t, int32_t, Operators::Sub<int32_t>, sp<Integer>, sp<Integer>>>::make(self, rvalue);
-}
-
-void IntegerUtil::isub(const sp<Integer>& self, const sp<Integer>& rvalue)
-{
-    FATAL("Unimplemented");
 }
 
 sp<Integer> IntegerUtil::mul(const sp<Integer>& self, const sp<Integer>& rvalue)
@@ -81,11 +87,6 @@ sp<Integer> IntegerUtil::mod(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
     FATAL("Unimplemented");
     return nullptr;
-}
-
-void IntegerUtil::imul(const sp<Integer>& self, const sp<Integer>& rvalue)
-{
-    FATAL("Unimplemented");
 }
 
 sp<Numeric> IntegerUtil::truediv(const sp<Integer>& self, const sp<Integer>& rvalue)
@@ -197,6 +198,11 @@ void IntegerUtil::fix(const sp<Integer>& self)
         iw->fix();
 }
 
+sp<Integer> IntegerUtil::wrap(const sp<Integer>& self)
+{
+    return sp<IntegerWrapper>::make(self);
+}
+
 sp<Integer> IntegerUtil::repeat(const sp<Integer>& self, IntegerUtil::Repeat repeat)
 {
     const sp<IntArray> ia = self.as<IntArray>();
@@ -228,7 +234,7 @@ sp<Builder<Integer>> IntegerUtil::DICTIONARY::makeIntegerBuilder(BeanFactory& fa
         std::vector<int32_t> values;
         for(const String& i : expr.substr(1, expr.length() - 1).split(','))
             values.push_back(Strings::parse<int32_t>(i.strip()));
-        return sp<BuilderByInstance<Integer>>::make(sp<IntegerArray>::make(std::move(values)));
+        return sp<IntegerArray::BUILDER>::make(std::move(values));
     }
     return Expression::Compiler<int32_t, NumericOperation<int32_t>>().compile(factory, expr);
 }

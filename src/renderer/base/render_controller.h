@@ -98,10 +98,10 @@ public:
 
     sp<Boolean> makeSynchronizeFlag();
 
-    template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate) {
+    template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& disposed) {
         const sp<Synchronized<T>> s = sp<Synchronized<T>>::make(delegate, makeSynchronizeFlag());
         const sp<Variable<T>> var = s->value();
-        addPreUpdateRequest(s, sp<BooleanByWeakRef<Variable<T>>>::make(var, 1));
+        addPreUpdateRequest(s, disposed ? disposed : sp<Boolean>::adopt(new BooleanByWeakRef<Variable<T>>(var, 1)));
         return var;
     }
 

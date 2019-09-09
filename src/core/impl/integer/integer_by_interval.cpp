@@ -10,7 +10,7 @@
 namespace ark {
 
 IntegerByInterval::IntegerByInterval(const sp<Integer>& delegate, const sp<Numeric>& duration, const sp<Numeric>& interval)
-    : _delegate(delegate), _duration(duration), _interval(interval), _value(delegate->val()), _next_update_time(duration->val() + interval->val())
+    : Delegate(delegate), _duration(duration), _interval(interval), _value(delegate->val()), _next_update_time(duration->val() + interval->val())
 {
 }
 

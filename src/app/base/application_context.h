@@ -72,8 +72,8 @@ public:
         _render_controller->deferUnref(inst);
     }
 
-    template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate) const {
-        return _render_controller->synchronize<T>(delegate);
+    template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& disposed = nullptr) const {
+        return _render_controller->synchronize<T>(delegate, disposed);
     }
 
 private:

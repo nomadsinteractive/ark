@@ -34,8 +34,8 @@ public:
     const sp<ObjectPool>& objectPool() const;
     sp<Boolean> disposed() const;
 
-    template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate) {
-        return _render_controller->synchronize<T>(delegate);
+    template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& disposed = nullptr) {
+        return _render_controller->synchronize<T>(delegate, disposed);
     }
 
 private:

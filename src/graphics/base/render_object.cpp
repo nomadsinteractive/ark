@@ -207,7 +207,7 @@ void RenderObject::hide()
 
 bool RenderObject::isDisposed() const
 {
-    return _disposed->val();
+    return _type->val() < 0 || _disposed->val();
 }
 
 bool RenderObject::isVisible() const

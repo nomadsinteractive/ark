@@ -36,8 +36,8 @@ int32_t IntegerByArray::Stub::val()
         {
             if(_repeat == IntegerUtil::REPEAT_NONE)
             {
-                _position = length - 1;
                 _step = 0;
+                return -1;
             }
             else if(_repeat == IntegerUtil::REPEAT_RESTART)
                 _position = 0;

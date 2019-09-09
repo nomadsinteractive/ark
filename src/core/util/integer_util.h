@@ -31,18 +31,12 @@ public:
 
 //[[script::bindings::operator(+)]]
     static sp<Integer> add(const sp<Integer>& self, const sp<Integer>& rvalue);
-//[[script::bindings::operator(+=)]]
-    static void iadd(const sp<Integer>& self, const sp<Integer>& rvalue);
 //[[script::bindings::operator(-)]]
     static sp<Integer> sub(const sp<Integer>& self, const sp<Integer>& rvalue);
-//[[script::bindings::operator(-=)]]
-    static void isub(const sp<Integer>& self, const sp<Integer>& rvalue);
 //[[script::bindings::operator(*)]]
     static sp<Integer> mul(const sp<Integer>& self, const sp<Integer>& rvalue);
 //[[script::bindings::operator(%)]]
     static sp<Integer> mod(const sp<Integer>& self, const sp<Integer>& rvalue);
-//[[script::bindings::operator(*=)]]
-    static void imul(const sp<Integer>& self, const sp<Integer>& rvalue);
 //[[script::bindings::operator(/)]]
     static sp<Numeric> truediv(const sp<Integer>& self, const sp<Integer>& rvalue);
 //[[script::bindings::operator(//)]]
@@ -87,6 +81,8 @@ public:
 
 //[[script::bindings::classmethod]]
     static void fix(const sp<Integer>& self);
+//[[script::bindings::classmethod]]
+    static sp<Integer> wrap(const sp<Integer>& self);
 
 //[[script::bindings::classmethod]]
     static sp<Integer> repeat(const sp<Integer>& self, IntegerUtil::Repeat repeat = IntegerUtil::REPEAT_NONE);

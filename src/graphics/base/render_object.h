@@ -37,9 +37,6 @@ public:
     RenderObject(const sp<Integer>& type, const sp<Vec3>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
     RenderObject(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings, const sp<Disposed>& disposed);
 
-//  [[script::bindings::meta(expire())]]
-//  [[script::bindings::meta(isExpired())]]
-
 //  [[script::bindings::property]]
     virtual const SafePtr<Size>& size() override;
     virtual void traverse(const Visitor& visitor) override;

@@ -2,13 +2,14 @@
 #define ARK_CORE_IMPL_INTEGER_INTEGER_BY_INTERVAL_H_
 
 #include "core/forwarding.h"
+#include "core/base/delegate.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-class IntegerByInterval : public Integer {
+class IntegerByInterval : public Integer, public Delegate<Integer> {
 public:
     IntegerByInterval(const sp<Integer>& delegate, const sp<Numeric>& duration, const sp<Numeric>& interval);
 
@@ -41,7 +42,6 @@ public:
     };
 
 private:
-    sp<Integer> _delegate;
     sp<Numeric> _duration;
     sp<Numeric> _interval;
 
