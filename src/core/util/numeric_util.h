@@ -114,6 +114,8 @@ public:
     static sp<Numeric> pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t = nullptr);
 //[[script::bindings::auto]]
     static sp<Numeric> vibrate(float s0, float v0, float s1, float v1, float duration, const sp<Numeric>& t = nullptr);
+//[[script::bindings::auto]]
+    static sp<Numeric> boost(float v0, const sp<Numeric>& a, const sp<Numeric>& cd, const sp<Numeric>& t = nullptr);
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Numeric> {

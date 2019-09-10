@@ -363,6 +363,10 @@ class Numeric(_Var):
     def vibrate(s0: float, v0: float, s1: float, v1: float, duration: float, t=None):
         return None
 
+    @staticmethod
+    def boost(v0: float, a: Union[float, 'Numeric'], cd: Union[float, 'Numeric'], t: Optional['Numeric'] = None):
+        return None
+
 
 class Integer(_Var):
     REPEAT_NONE = 0
@@ -493,6 +497,10 @@ class Vec3(Vec2):
     @property
     def vz(self):
         return self._z
+
+    @vz.setter
+    def vz(self, vz):
+        pass
 
     @property
     def xyz(self):

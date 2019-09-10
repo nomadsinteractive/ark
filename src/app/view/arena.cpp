@@ -59,6 +59,11 @@ sp<Renderer> Arena::loadRenderer(const String& name, const sp<Scope>& args)
     return renderer;
 }
 
+Box Arena::getReference(const String& id) const
+{
+    return _resource_loader->refs()->get(id);
+}
+
 const sp<ResourceLoader>& Arena::resourceLoader() const
 {
     DCHECK(_resource_loader, "Trying to get ResourceLoader on a disposed Arena");
