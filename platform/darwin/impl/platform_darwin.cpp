@@ -97,6 +97,10 @@ String Platform::getExternalStoragePath(const String& path)
     return path;
 }
 
+void Platform::sysCall(int32_t /*id*/, const String& /*value*/)
+{
+}
+
 void Platform::glInitialize()
 {
 #ifdef ARK_USE_OPEN_GL
