@@ -4,13 +4,16 @@
 #include "core/inf/variable.h"
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
+#include "core/util/math.h"
 
 #include "graphics/base/v3.h"
 
 namespace ark {
 
-V2::V2()
-    : _x(0), _y(0)
+const float V2::MIN_NORMALIZE_LENGTH = 0.000000001f;
+
+V2::V2(float v)
+    : _x(v), _y(v)
 {
 }
 
@@ -130,6 +133,17 @@ float V2::z() const
 float V2::dot(const V2& other) const
 {
     return _x * other._x + _y * other._y;
+}
+
+float V2::length() const
+{
+    return Math::sqrt(_x * _x + _y * _y);
+}
+
+V2 V2::normalize() const
+{
+    float hypot = std::max(length(), MIN_NORMALIZE_LENGTH);
+    return V2(_x / hypot, _y / hypot);
 }
 
 const float& V2::operator[](int32_t p) const

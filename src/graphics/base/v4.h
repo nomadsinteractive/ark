@@ -9,7 +9,7 @@ namespace ark {
 
 class ARK_API V4 : public V3 {
 public:
-    V4();
+    V4(float v = 0);
     V4(float x, float y, float z, float w);
     V4(const std::initializer_list<float>& values);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(V4);
@@ -34,6 +34,8 @@ public:
     V4 operator -() const;
 
     float dot(const V4& other) const;
+    float length() const;
+    V4 normalize() const;
 
 private:
     float _w;

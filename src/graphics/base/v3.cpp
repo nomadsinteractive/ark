@@ -4,11 +4,12 @@
 #include "core/inf/variable.h"
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
+#include "core/util/math.h"
 
 namespace ark {
 
-V3::V3()
-    : V2(), _z(0)
+V3::V3(float v)
+    : V2(v), _z(v)
 {
 }
 
@@ -117,6 +118,17 @@ V3 V3::operator -() const
 float V3::dot(const V3& other) const
 {
     return _x * other._x + _y * other._y + _z * other._z;
+}
+
+float V3::length() const
+{
+    return Math::sqrt(_x * _x + _y * _y + _z * _z);
+}
+
+V3 V3::normalize() const
+{
+    float hypot = std::max(length(), MIN_NORMALIZE_LENGTH);
+    return V3(_x / hypot, _y / hypot, _z / hypot);
 }
 
 V3 V3::cross(const V3& other) const

@@ -11,7 +11,7 @@ namespace ark {
 
 class ARK_API V2 {
 public:
-    V2();
+    V2(float v = 0);
     V2(float x, float y);
     V2(float x, float y, float z);
     V2(const V3& other);
@@ -41,12 +41,16 @@ public:
     float z() const;
 
     float dot(const V2& other) const;
+    float length() const;
+    V2 normalize() const;
 
     const float& operator[](int32_t p) const;
     float& operator[](int32_t p);
 
 protected:
     void initialize(const std::initializer_list<float>& values, size_t len);
+
+    static const float MIN_NORMALIZE_LENGTH;
 
 protected:
     float _x;

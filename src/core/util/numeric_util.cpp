@@ -14,6 +14,7 @@
 #include "core/impl/numeric/numeric_negative.h"
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/numeric/vibrate.h"
+#include "core/impl/variable/boost.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
@@ -67,33 +68,6 @@ private:
     sp<Numeric> _boundary;
 
     Notifier _notifer;
-};
-
-class Boost : public Numeric {
-public:
-    Boost(float v0, const sp<Numeric>& a, const sp<Numeric>& cd, const sp<Numeric>& t)
-        : _v(v0), _a(a), _cd(cd), _t(t), _last_t(_t->val()) {
-        DWARN(_cd->val() >= 0, "The drag coefficient factor should be greater than 0, got %.2f", _cd->val());
-    }
-
-    virtual float val() override {
-        float t = _t->val();
-        float dt = (t - _last_t);
-        float v = _v;
-        float r = v * v * _cd->val();
-        float a = _a->val() - (v > 0 ? r : -r);
-        _v = v + a * dt;
-        _last_t = t;
-        return _v;
-    }
-
-private:
-    float _v;
-    sp<Numeric> _a;
-    sp<Numeric> _cd;
-
-    sp<Numeric> _t;
-    float _last_t;
 };
 
 }
@@ -306,6 +280,11 @@ sp<Numeric> NumericUtil::wrap(const sp<Numeric>& self)
     return sp<NumericWrapper>::make(self);
 }
 
+sp<Numeric> NumericUtil::synchronize(const sp<Numeric>& self, const sp<Boolean>& disposed)
+{
+    return Ark::instance().applicationContext()->synchronize(self, disposed);
+}
+
 sp<Expectation> NumericUtil::approach(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
     Notifier notifier;
@@ -361,9 +340,9 @@ sp<Numeric> NumericUtil::vibrate(float s0, float v0, float s1, float v1, float d
     return sp<Vibrate>::make(boundary(mul(t ? t : Ark::instance().clock()->duration(), multiplier), b)->delegate(), a, t0, o);
 }
 
-sp<Numeric> NumericUtil::boost(float v0, const sp<Numeric>& a, const sp<Numeric>& cd, const sp<Numeric>& t)
+sp<Numeric> NumericUtil::boost(const sp<Numeric>& self, float v0, const sp<Numeric>& cd, const sp<Numeric>& t)
 {
-    return sp<Boost>::make(v0, a, cd, t ? t : Ark::instance().clock()->duration());
+    return sp<Boost<float>>::make(self, v0, cd, t ? t : Ark::instance().clock()->duration());
 }
 
 sp<Numeric> NumericUtil::integral(const sp<Numeric>& self, const sp<Numeric>& t)

@@ -94,6 +94,8 @@ public:
     static float fix(const sp<Numeric>& self);
 //[[script::bindings::classmethod]]
     static sp<Numeric> wrap(const sp<Numeric>& self);
+//[[script::bindings::classmethod]]
+    static sp<Numeric> synchronize(const sp<Numeric>& self, const sp<Boolean>& disposed = nullptr);
 
 //[[script::bindings::classmethod]]
     static sp<Expectation> approach(const sp<Numeric>& self, const sp<Numeric>& a1);
@@ -109,13 +111,13 @@ public:
     static sp<Expectation> fence(const sp<Numeric>& self, const sp<Numeric>& a1);
 //[[script::bindings::classmethod]]
     static sp<Numeric> integral(const sp<Numeric>& self, const sp<Numeric>& t = nullptr);
+//[[script::bindings::classmethod]]
+    static sp<Numeric> boost(const sp<Numeric>& self, float v0, const sp<Numeric>& cd, const sp<Numeric>& t = nullptr);
 
 //[[script::bindings::auto]]
     static sp<Numeric> pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t = nullptr);
 //[[script::bindings::auto]]
     static sp<Numeric> vibrate(float s0, float v0, float s1, float v1, float duration, const sp<Numeric>& t = nullptr);
-//[[script::bindings::auto]]
-    static sp<Numeric> boost(float v0, const sp<Numeric>& a, const sp<Numeric>& cd, const sp<Numeric>& t = nullptr);
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Numeric> {

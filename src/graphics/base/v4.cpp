@@ -2,16 +2,17 @@
 
 #include "core/ark.h"
 #include "core/inf/array.h"
+#include "core/types/null.h"
 #include "core/util/conversions.h"
 #include "core/util/strings.h"
-#include "core/types/null.h"
+#include "core/util/math.h"
 
 #include "graphics/base/color.h"
 
 namespace ark {
 
-V4::V4()
-    : V3(), _w(0)
+V4::V4(float v)
+    : V3(v), _w(v)
 {
 }
 
@@ -119,6 +120,17 @@ V4 V4::operator -() const
 float V4::dot(const V4& other) const
 {
     return _x * other._x + _y * other._y + _z * other._z + _w * other._w;
+}
+
+float V4::length() const
+{
+    return Math::sqrt(_x * _x + _y * _y + _z * _z + _w * _w);
+}
+
+V4 V4::normalize() const
+{
+    float hypot = std::max(length(), MIN_NORMALIZE_LENGTH);
+    return V4(_x / hypot, _y / hypot, _z / hypot, _w / hypot);
 }
 
 template<> ARK_API V4 Conversions::to<String, V4>(const String& s)

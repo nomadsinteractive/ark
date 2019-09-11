@@ -5,6 +5,7 @@
 #include "core/ark.h"
 #include "core/base/clock.h"
 #include "core/inf/holder.h"
+#include "core/impl/variable/boost.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
@@ -137,6 +138,11 @@ sp<Vec2> Vec2Util::integral(const sp<Vec2>& self, const sp<Numeric>& t)
     return sp<Integral<V2>>::make(self, std::move(duration));
 }
 
+sp<Vec2> Vec2Util::boost(const sp<Vec2>& self, const V2& v0, const sp<Numeric>& cd, const sp<Numeric>& t)
+{
+    return sp<Boost<V2>>::make(self, v0, cd, t ? t : Ark::instance().clock()->duration());
+}
+
 void Vec2Util::set(const sp<Vec2>& self, const V2 val)
 {
     ensureImpl(self)->set(val);
@@ -219,6 +225,11 @@ void Vec2Util::fix(const sp<Vec2>& self)
 sp<Vec2> Vec2Util::wrap(const sp<Vec2>& self)
 {
     return sp<VariableWrapper<V2>>::make(self);
+}
+
+sp<Vec2> Vec2Util::synchronize(const sp<Vec2>& self, const sp<Boolean>& disposed)
+{
+    return Ark::instance().applicationContext()->synchronize(self, disposed);
 }
 
 sp<Vec2> Vec2Util::delegate(const sp<Vec2>& self)

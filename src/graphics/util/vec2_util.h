@@ -45,6 +45,8 @@ public:
     static sp<Vec2> normalize(const sp<Vec2>& self);
 //[[script::bindings::classmethod]]
     static sp<Vec2> integral(const sp<Vec2>& self, const sp<Numeric>& t = nullptr);
+//[[script::bindings::classmethod]]
+    static sp<Vec2> boost(const sp<Vec2>& self, const V2& v0, const sp<Numeric>& cd, const sp<Numeric>& t = nullptr);
 
 //[[script::bindings::classmethod]]
     static void set(const sp<Vec2>& self, const V2 val);
@@ -82,6 +84,9 @@ public:
 
 //[[script::bindings::classmethod]]
     static sp<Vec2> wrap(const sp<Vec2>& self);
+//[[script::bindings::classmethod]]
+    static sp<Vec2> synchronize(const sp<Vec2>& self, const sp<Boolean>& disposed = nullptr);
+
 //[[script::bindings::property]]
     static sp<Vec2> delegate(const sp<Vec2>& self);
 //[[script::bindings::property]]

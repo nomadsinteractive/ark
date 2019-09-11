@@ -462,6 +462,9 @@ class Vec2:
     def wrap(self) -> 'Vec2':
         return Vec2(self._x, self._y)
 
+    def synchronize(self, disposed: Optional[Boolean] = None) -> 'Vec2':
+        return Vec2(self._x, self._y)
+
     def fix(self):
         pass
 
