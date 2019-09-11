@@ -676,6 +676,9 @@ class Clock:
     def duration(self) -> 'Numeric':
         return Numeric(0)
 
+    def timeout(self, seconds: float) -> 'Boolean':
+        return Boolean(False)
+
 
 class Event:
     ACTION_KEY_NONE = 0

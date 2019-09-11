@@ -214,7 +214,7 @@ void ColliderImpl::RigidBodyShadow::makeAABB()
 void ColliderImpl::RigidBodyShadow::makeBall()
 {
     const Rect aabb = makeRigidBodyAABB();
-    float radius = std::min(aabb.width(), aabb.height());
+    float radius = std::min(aabb.width(), aabb.height()) / 2.0f;
     DCHECK(radius >= 0, "Radius must greater than 0");
     _c2_rigid_body.makeCircle(V2((aabb.left() + aabb.right()) / 2.0f, (aabb.top() + aabb.bottom()) / 2.0f), radius);
 }

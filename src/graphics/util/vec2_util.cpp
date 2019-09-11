@@ -219,6 +219,14 @@ void Vec2Util::setVy(const sp<Vec2>& self, const sp<Numeric>& y)
 
 void Vec2Util::fix(const sp<Vec2>& self)
 {
+    sp<VariableWrapper<V2>> wrapper = self.as<VariableWrapper<V2>>();
+    if(wrapper)
+    {
+        wrapper->fix();
+        return;
+    }
+    sp<Vec2Impl> impl = self.as<Vec2Impl>();
+    DCHECK(impl, "Object is not an instance of neither VariableWrapper<V2> or Vec2Impl");
     ensureImpl(self)->fix();
 }
 

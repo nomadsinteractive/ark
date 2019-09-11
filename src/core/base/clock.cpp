@@ -4,6 +4,7 @@
 
 #include "core/ark.h"
 #include "core/inf/variable.h"
+#include "core/impl/boolean/boolean_by_timeout.h"
 #include "core/impl/numeric/min.h"
 #include "core/util/strings.h"
 #include "core/util/conversions.h"
@@ -141,6 +142,11 @@ sp<Numeric> Clock::duration() const
 sp<Numeric> Clock::durationUntil(const sp<Numeric>& until) const
 {
     return sp<Min>::make(duration(), until);
+}
+
+sp<Boolean> Clock::timeout(float seconds) const
+{
+    return sp<BooleanByTimeout>::make(duration(), seconds);
 }
 
 void Clock::pause() const
