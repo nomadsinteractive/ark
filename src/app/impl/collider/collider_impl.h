@@ -1,6 +1,7 @@
 #ifndef ARK_APP_IMPL_COLLIDER_COLLIDER_IMPL_H_
 #define ARK_APP_IMPL_COLLIDER_COLLIDER_IMPL_H_
 
+#include <vector>
 #include <unordered_set>
 #include <unordered_map>
 
@@ -45,7 +46,7 @@ public:
 
 public:
     struct Stub {
-        Stub(const sp<Tracker>& tracker, const document& manifest);
+        Stub(const sp<Tracker>& tracker, const document& manifest, ResourceLoaderContext& resourceLoaderContext);
 
         void remove(const RigidBody& rigidBody);
 
@@ -56,7 +57,7 @@ public:
         sp<Tracker> _tracker;
 
         std::unordered_map<int32_t, sp<RigidBodyShadow>> _rigid_bodies;
-        std::unordered_map<int32_t, std::pair<C2_TYPE, C2Shape>> _c2_shapes;
+        std::unordered_map<int32_t, std::vector<C2Shape>> _c2_shapes;
         int32_t _rigid_body_base_id;
         ObjectPool _object_pool;
 
@@ -74,7 +75,7 @@ public:
         void makeAABB();
         void makeBall();
         void makeBox();
-        void makeShape(C2_TYPE type, const C2Shape& shape);
+        void setShapes(const std::vector<C2Shape>& shape, const Size& size);
 
         bool isDisposed() const;
 

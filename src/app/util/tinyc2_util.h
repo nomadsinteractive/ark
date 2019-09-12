@@ -1,6 +1,8 @@
 #ifndef ARK_APP_UTIL_TINYC2_UTIL_H_
 #define ARK_APP_UTIL_TINYC2_UTIL_H_
 
+#include <vector>
+
 #include <tinyc2.h>
 
 #include "core/types/shared_ptr.h"
@@ -9,11 +11,15 @@
 
 namespace ark {
 
-union C2Shape {
-    c2AABB aabb;
-    c2Capsule capsule;
-    c2Circle circle;
-    c2Poly poly;
+struct C2Shape {
+    C2_TYPE t;
+
+    union {
+        c2AABB aabb;
+        c2Capsule capsule;
+        c2Circle circle;
+        c2Poly poly;
+    } s;
 };
 
 class C2RigidBody {
@@ -25,24 +31,16 @@ public:
     void makeCircle(const V2& p, float radius);
     void makeCapsule(const V2& p1, const V2& p2, float radius);
     void makePoly(const c2Poly& poly);
-    void makeShape(C2_TYPE type, const C2Shape& shape);
+    void setShapes(const std::vector<C2Shape>& shapes, const Size& size);
 
-    int collide(const C2RigidBody& other) const;
     void collideManifold(const C2RigidBody& other, c2Manifold* m) const;
-
-    const C2Shape& shape() const;
-    C2Shape& shape();
-
-    const sp<Rotate>& rotate() const;
-
     bool isStaticBody() const;
 
 private:
-    const C2Shape& updateShape(C2Shape& shape, c2x& x) const;
+    std::vector<C2Shape> transform(c2x& x) const;
 
 private:
-    C2_TYPE _type;
-    C2Shape _shape;
+    std::vector<C2Shape> _shapes;
     sp<Vec2> _position;
     sp<Rotate> _rotate;
     bool _is_static_body;

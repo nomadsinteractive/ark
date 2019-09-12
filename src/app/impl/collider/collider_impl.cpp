@@ -53,7 +53,7 @@ private:
 }
 
 ColliderImpl::ColliderImpl(const sp<Tracker>& tracker, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _stub(sp<Stub>::make(tracker, manifest)), _resource_loader_context(resourceLoaderContext)
+    : _stub(sp<Stub>::make(tracker, manifest, resourceLoaderContext)), _resource_loader_context(resourceLoaderContext)
 {
 }
 
@@ -84,10 +84,16 @@ sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, c
     return _stub->createRigidBody(type, shape, position, size, rotate, disposed, _stub);
 }
 
-ColliderImpl::Stub::Stub(const sp<Tracker>& tracker, const document& manifest)
+ColliderImpl::Stub::Stub(const sp<Tracker>& tracker, const document& manifest, ResourceLoaderContext& resourceLoaderContext)
     : _tracker(tracker), _rigid_body_base_id(0)/*, _axises(sp<Axises>::make())*/
 {
     loadShapes(manifest);
+    for(const document& i : manifest->children("import"))
+    {
+        const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
+        document content = resourceLoaderContext.documents()->get(src);
+        loadShapes(content->ensureChild("bodies"));
+    }
 }
 
 void ColliderImpl::Stub::remove(const RigidBody& rigidBody)
@@ -124,7 +130,7 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
     default:
         const auto iter = _c2_shapes.find(shape);
         DCHECK(iter != _c2_shapes.end(), "Unknow shape: %d", shape);
-        rigidBodyShadow->makeShape(iter->second.first, iter->second.second);
+        rigidBodyShadow->setShapes(iter->second, size);
     }
 
     _rigid_bodies[rigidBodyShadow->id()] = rigidBodyShadow;
@@ -146,38 +152,63 @@ const sp<ColliderImpl::RigidBodyShadow> ColliderImpl::Stub::findRigidBody(int32_
 
 void ColliderImpl::Stub::loadShapes(const document& manifest)
 {
-    for(const document& i : manifest->children("shape"))
+    for(const document& i : manifest->children("body"))
     {
-        int32_t shapeId = Documents::ensureAttribute<int32_t>(i, "shape-id");
-        const String& shapeType = Documents::ensureAttribute(i, "shape-type");
-        C2_TYPE type;
+        int32_t shapeId = Documents::ensureAttribute<int32_t>(i, "name");
+        String shapeType = Documents::getAttribute(i, "shape-type");
         C2Shape shape;
+        std::vector<C2Shape> shapes;
         if(shapeType == "capsule")
         {
-            type = C2_CAPSULE;
-            shape.capsule.a.x = Documents::ensureAttribute<float>(i, "ax");
-            shape.capsule.a.y = Documents::ensureAttribute<float>(i, "ay");
-            shape.capsule.b.x = Documents::ensureAttribute<float>(i, "bx");
-            shape.capsule.b.y = Documents::ensureAttribute<float>(i, "by");
-            shape.capsule.r = Documents::ensureAttribute<float>(i, "r");
+            shape.t = C2_CAPSULE;
+            shape.s.capsule.a.x = Documents::ensureAttribute<float>(i, "ax");
+            shape.s.capsule.a.y = Documents::ensureAttribute<float>(i, "ay");
+            shape.s.capsule.b.x = Documents::ensureAttribute<float>(i, "bx");
+            shape.s.capsule.b.y = Documents::ensureAttribute<float>(i, "by");
+            shape.s.capsule.r = Documents::ensureAttribute<float>(i, "r");
+            shapes.push_back(shape);
         }
-        else if(shapeType == "poly")
+        else if(shapeType == "polygon")
         {
             int32_t c = 0;
-            type = C2_POLY;
             for(const document& j : i->children())
             {
                 DCHECK(c < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
-                shape.poly.verts[c].x = Documents::ensureAttribute<float>(j, "x");
-                shape.poly.verts[c].y = Documents::ensureAttribute<float>(j, "y");
+                shape.s.poly.verts[c].x = Documents::ensureAttribute<float>(j, "x");
+                shape.s.poly.verts[c].y = Documents::ensureAttribute<float>(j, "y");
                 c++;
             }
-            shape.poly.count = c;
-            c2MakePoly(&shape.poly);
+            shape.t = C2_POLY;
+            shape.s.poly.count = c;
+            c2MakePoly(&shape.s.poly);
+            shapes.push_back(shape);
         }
         else
-            DFATAL("Unknow shape type: %s", shapeType.c_str());
-        _c2_shapes[shapeId] = std::make_pair(type, shape);
+        {
+            const document& fixtures = i->ensureChild("fixtures");
+            const document& fixture = fixtures->ensureChild("fixture");
+            const document& fixture_type = fixture->ensureChild("fixture_type");
+            DCHECK(fixture_type->value() == "POLYGON", "Unsupported fixture_type: %s", fixture_type->value().c_str());
+
+            const document& polygons = fixture->ensureChild("polygons");
+            for(const document& j : polygons->children("polygon"))
+            {
+                const std::vector<String> values = j->value().split(',');
+                DCHECK(values.size() % 2 == 0, "Illegal vertex points: %s", j->value().c_str());
+
+                for(size_t k = 0; k < values.size(); k += 2)
+                {
+                    DCHECK(k / 2 < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
+                    shape.s.poly.verts[k / 2].x = Strings::parse<float>(values.at(k));
+                    shape.s.poly.verts[k / 2].y = Strings::parse<float>(values.at(k + 1));
+                }
+                shape.t = C2_POLY;
+                shape.s.poly.count = values.size() / 2;
+                c2MakePoly(&shape.s.poly);
+                shapes.push_back(shape);
+            }
+        }
+        _c2_shapes[shapeId] = std::move(shapes);
     }
 }
 
@@ -231,9 +262,9 @@ void ColliderImpl::RigidBodyShadow::makeBox()
     _c2_rigid_body.makePoly(box);
 }
 
-void ColliderImpl::RigidBodyShadow::makeShape(C2_TYPE type, const C2Shape& shape)
+void ColliderImpl::RigidBodyShadow::setShapes(const std::vector<C2Shape>& shapes, const Size& size)
 {
-    _c2_rigid_body.makeShape(type, shape);
+    _c2_rigid_body.setShapes(shapes, size);
 }
 
 void ColliderImpl::RigidBodyShadow::dispose()
