@@ -41,10 +41,15 @@ public:
 
     };
 
+public:
     class RigidBodyImpl;
     class RigidBodyShadow;
 
-public:
+    struct ShapeManifest {
+        V2 unit;
+        std::vector<C2Shape> shapes;
+    };
+
     struct Stub {
         Stub(const sp<Tracker>& tracker, const document& manifest, ResourceLoaderContext& resourceLoaderContext);
 
@@ -57,7 +62,7 @@ public:
         sp<Tracker> _tracker;
 
         std::unordered_map<int32_t, sp<RigidBodyShadow>> _rigid_bodies;
-        std::unordered_map<int32_t, std::vector<C2Shape>> _c2_shapes;
+        std::unordered_map<int32_t, ShapeManifest> _c2_shapes;
         int32_t _rigid_body_base_id;
         ObjectPool _object_pool;
 
@@ -75,7 +80,7 @@ public:
         void makeAABB();
         void makeBall();
         void makeBox();
-        void setShapes(const std::vector<C2Shape>& shape, const Size& size);
+        void setShapes(const std::vector<C2Shape>& shape, const V2& scale);
 
         bool isDisposed() const;
 

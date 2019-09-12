@@ -61,9 +61,15 @@ void C2RigidBody::makePoly(const c2Poly& poly)
     _shapes.push_back(shape);
 }
 
-void C2RigidBody::setShapes(const std::vector<C2Shape>& shapes, const Size& size)
+void C2RigidBody::setShapes(const std::vector<C2Shape>& shapes, const V2& scale)
 {
     _shapes = shapes;
+    for(C2Shape& i: _shapes)
+        for(int32_t j = 0; j < i.s.poly.count; ++j)
+        {
+            i.s.poly.verts[j].x *= scale.x();
+            i.s.poly.verts[j].y *= scale.y();
+        }
 }
 
 void C2RigidBody::collideManifold(const C2RigidBody& other, c2Manifold* m) const

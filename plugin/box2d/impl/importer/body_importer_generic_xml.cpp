@@ -76,11 +76,7 @@ void ImporterGenericXML::import(World& world)
         int32_t id = Strings::parse<int32_t>(name);
         DCHECK(id >= 0, "Illegal body id: %d, \"%s\" must be a postive integer", id, name.c_str());
 
-        const String& ss = i->ensureChild("size")->value();
-        const std::vector<String> sst = ss.split(',');
-        DCHECK(sst.size() == 2, "Illegal size: %s", ss.c_str());
-        const V2 size(Strings::parse<float>(sst.at(0)), Strings::parse<float>(sst.at(1)));
-
+        const V2 size = Strings::parse<V2>(i->ensureChild("size")->value());
         const document& fixtures = i->ensureChild("fixtures");
         const document& fixture = fixtures->ensureChild("fixture");
         const document& fixture_type = fixture->ensureChild("fixture_type");

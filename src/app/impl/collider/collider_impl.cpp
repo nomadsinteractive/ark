@@ -130,7 +130,8 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
     default:
         const auto iter = _c2_shapes.find(shape);
         DCHECK(iter != _c2_shapes.end(), "Unknow shape: %d", shape);
-        rigidBodyShadow->setShapes(iter->second, size);
+        const V2& unit = iter->second.unit;
+        rigidBodyShadow->setShapes(iter->second.shapes, V2(size->width() * unit.x(), size->height() * unit.y()));
     }
 
     _rigid_bodies[rigidBodyShadow->id()] = rigidBodyShadow;
@@ -157,7 +158,8 @@ void ColliderImpl::Stub::loadShapes(const document& manifest)
         int32_t shapeId = Documents::ensureAttribute<int32_t>(i, "name");
         String shapeType = Documents::getAttribute(i, "shape-type");
         C2Shape shape;
-        std::vector<C2Shape> shapes;
+        V2 unit(1.0f);
+        ShapeManifest shapes;
         if(shapeType == "capsule")
         {
             shape.t = C2_CAPSULE;
@@ -166,7 +168,7 @@ void ColliderImpl::Stub::loadShapes(const document& manifest)
             shape.s.capsule.b.x = Documents::ensureAttribute<float>(i, "bx");
             shape.s.capsule.b.y = Documents::ensureAttribute<float>(i, "by");
             shape.s.capsule.r = Documents::ensureAttribute<float>(i, "r");
-            shapes.push_back(shape);
+            shapes.shapes.push_back(shape);
         }
         else if(shapeType == "polygon")
         {
@@ -181,7 +183,7 @@ void ColliderImpl::Stub::loadShapes(const document& manifest)
             shape.t = C2_POLY;
             shape.s.poly.count = c;
             c2MakePoly(&shape.s.poly);
-            shapes.push_back(shape);
+            shapes.shapes.push_back(shape);
         }
         else
         {
@@ -203,11 +205,13 @@ void ColliderImpl::Stub::loadShapes(const document& manifest)
                     shape.s.poly.verts[k / 2].y = Strings::parse<float>(values.at(k + 1));
                 }
                 shape.t = C2_POLY;
-                shape.s.poly.count = values.size() / 2;
+                shape.s.poly.count = static_cast<int32_t>(values.size() / 2);
                 c2MakePoly(&shape.s.poly);
-                shapes.push_back(shape);
+                unit = V2(1.0f) / Strings::parse<V2>(i->ensureChild("size")->value());
+                shapes.shapes.push_back(shape);
             }
         }
+        shapes.unit = unit;
         _c2_shapes[shapeId] = std::move(shapes);
     }
 }
@@ -262,9 +266,9 @@ void ColliderImpl::RigidBodyShadow::makeBox()
     _c2_rigid_body.makePoly(box);
 }
 
-void ColliderImpl::RigidBodyShadow::setShapes(const std::vector<C2Shape>& shapes, const Size& size)
+void ColliderImpl::RigidBodyShadow::setShapes(const std::vector<C2Shape>& shapes, const V2& scale)
 {
-    _c2_rigid_body.setShapes(shapes, size);
+    _c2_rigid_body.setShapes(shapes, scale);
 }
 
 void ColliderImpl::RigidBodyShadow::dispose()

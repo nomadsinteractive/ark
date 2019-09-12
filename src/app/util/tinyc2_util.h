@@ -31,7 +31,7 @@ public:
     void makeCircle(const V2& p, float radius);
     void makeCapsule(const V2& p1, const V2& p2, float radius);
     void makePoly(const c2Poly& poly);
-    void setShapes(const std::vector<C2Shape>& shapes, const Size& size);
+    void setShapes(const std::vector<C2Shape>& shapes, const V2& scale);
 
     void collideManifold(const C2RigidBody& other, c2Manifold* m) const;
     bool isStaticBody() const;
