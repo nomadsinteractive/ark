@@ -1,10 +1,9 @@
 #include "graphics/impl/alphabet/alphabet_true_type.h"
 
 #include "core/ark.h"
-#include "core/inf/dictionary.h"
+#include "core/base/bean_factory.h"
 #include "core/impl/readable/file_readable.h"
 #include "core/util/documents.h"
-#include "core/types/global.h"
 
 #include "graphics/base/bitmap.h"
 
@@ -66,15 +65,15 @@ sp<Readable> AlphabetTrueType::getFontResource(const String& name) const
     return Ark::instance().tryOpenAsset(name);
 }
 
-AlphabetTrueType::BUILDER::BUILDER(BeanFactory& /*factory*/, const document manifest)
-    : _src(Documents::getAttribute(manifest, Constants::Attributes::SRC)),
+AlphabetTrueType::BUILDER::BUILDER(BeanFactory& factory, const document manifest)
+    : _src(factory.ensureBuilder<String>(manifest, Constants::Attributes::SRC)),
       _text_size(Documents::getAttribute<uint32_t>(manifest, Constants::Attributes::TEXT_SIZE, 24))
 {
 }
 
-sp<Alphabet> AlphabetTrueType::BUILDER::build(const sp<Scope>& /*args*/)
+sp<Alphabet> AlphabetTrueType::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<AlphabetTrueType>::make(_src, _text_size);
+    return sp<AlphabetTrueType>::make(_src->build(args), _text_size);
 }
 
 }

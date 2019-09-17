@@ -6,6 +6,8 @@
 #include "core/util/dictionaries.h"
 #include "core/util/documents.h"
 
+#include "graphics/base/v2.h"
+
 namespace ark {
 
 Rect::Rect(const Rect& other) noexcept
@@ -74,6 +76,11 @@ void Rect::scale(float xScale, float yScale)
     _right = _right * xScale;
     _top = _top * yScale;
     _bottom = _bottom * yScale;
+}
+
+void Rect::scale(const V2& s)
+{
+    scale(s.x(), s.y());
 }
 
 void Rect::translate(float x, float y)

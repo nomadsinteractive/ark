@@ -30,6 +30,16 @@ Characters::Characters(const sp<LayerContext>& layer, float textScale, float let
 {
 }
 
+Characters::Characters(const sp<Layer>& layer, float textScale, float letterSpacing, float lineHeight, float lineIndent)
+    : Characters(layer->context(), textScale, letterSpacing, lineHeight, lineIndent)
+{
+}
+
+Characters::Characters(const sp<RenderLayer>& layer, float textScale, float letterSpacing, float lineHeight, float lineIndent)
+    : Characters(layer->makeContext(Layer::TYPE_DYNAMIC), textScale, letterSpacing, lineHeight, lineIndent)
+{
+}
+
 Characters::Characters(const sp<LayerContext>& layerContext, const sp<ObjectPool>& objectPool, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
     : _layer_context(layerContext), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()), _character_mapper(characterMapper), _character_maker(characterMaker),
       _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(-g_upDirection * lineHeight),

@@ -5,6 +5,8 @@
 
 #include "core/base/api.h"
 
+#include "graphics/forwarding.h"
+
 namespace ark {
 
 class ARK_API Rect {
@@ -31,6 +33,7 @@ public:
     float height() const;
 
     void scale(float xScale, float yScale);
+    void scale(const V2& scale);
     void translate(float x, float y);
     void vflip(float height);
 

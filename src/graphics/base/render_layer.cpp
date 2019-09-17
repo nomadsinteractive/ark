@@ -13,6 +13,8 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_input.h"
+#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
@@ -95,7 +97,13 @@ sp<RenderCommand> RenderLayer::Snapshot::render(float x, float y)
                                       buf.vertices().toSnapshot(_stub->_shader_bindings->vertexBuffer()),
                                       buf.indices(),
                                       static_cast<int32_t>(_items.size()));
-        drawingContext._parameters._scissor = _scissor;
+
+        if(_stub->_scissor)
+        {
+            drawingContext._parameters._scissor = _scissor;
+            drawingContext._parameters._scissor.scale(_stub->_render_controller->renderEngine()->renderContext()->displayUnit());
+        }
+
         if(buf.isInstanced())
             drawingContext._instanced_array_snapshots = buf.makeDividedBufferSnapshots();
 

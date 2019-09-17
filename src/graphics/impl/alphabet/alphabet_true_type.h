@@ -28,7 +28,7 @@ public:
         virtual sp<Alphabet> build(const sp<Scope>& args) override;
 
     private:
-        String _src;
+        sp<Builder<String>> _src;
         uint32_t _text_size;
     };
 private:

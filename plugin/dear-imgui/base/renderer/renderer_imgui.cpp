@@ -196,7 +196,7 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
                 const RenderContext& renderContext = _render_engine->renderContext();
                 DrawingContext drawingContext(_shader, drawCommand->_shader_bindings, ubos, vertexBuffer, indexBuffer, static_cast<int32_t>(pcmd->ElemCount / 3), offset, pcmd->ElemCount);
                 drawingContext._parameters._scissor = Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y);
-                drawingContext._parameters._scissor.scale(renderContext.displayScale().x(), renderContext.displayScale().y());
+                drawingContext._parameters._scissor.scale(renderContext.displayUnit());
                 if(_vflip)
                     drawingContext._parameters._scissor.vflip(static_cast<float>(renderContext.displayResolution().height));
                 renderCommand = sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(_object_pool), drawCommand);

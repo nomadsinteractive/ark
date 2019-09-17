@@ -301,10 +301,10 @@ def gen_class_body_source(genclass, includes, lines, buildables):
 
         property_defs = genclass.gen_property_defs()
         if property_defs:
-            propertydeclare = '{"%s", %s, %s, "%s"}'
+            propertydeclare = '{"%s", %s, %s, "%s", nullptr}'
             methoddeclare = ',\n    '.join(propertydeclare % tuple(i) for i in property_defs)
-            lines.append('\nstatic PyGetSetDef %s_getseters[] = {\n    %s,\n    {nullptr}\n};' % (
-            genclass.py_class_name, methoddeclare))
+            lines.append('\nstatic PyGetSetDef %s_getseters[] = {\n    %s,\n    {%s}\n};'
+                         % (genclass.py_class_name, methoddeclare, ', '.join(['nullptr'] * 5)))
             tp_method_lines.append('pyTypeObject->tp_getset = %s_getseters;' % genclass.py_class_name)
 
         for i in genclass.loader_methods():

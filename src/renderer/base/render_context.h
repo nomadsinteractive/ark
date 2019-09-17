@@ -83,7 +83,7 @@ public:
     const Resolution& displayResolution() const;
     void setDisplayResolution(const Resolution& displayResolution);
 
-    const V2& displayScale() const;
+    const V2& displayUnit() const;
 
     void setSnippetFactory(sp<SnippetFactory> snippetfactory);
     const sp<SnippetFactory>& snippetFactory() const;
@@ -105,7 +105,7 @@ private:
     std::map<String, String> _annotations;
     sp<SnippetFactory> _snippet_factory;
     Resolution _display_resolution;
-    V2 _display_scale;
+    V2 _display_unit;
 };
 
 }

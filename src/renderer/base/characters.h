@@ -11,7 +11,6 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/metrics.h"
-#include "graphics/inf/alphabet.h"
 
 #include "renderer/forwarding.h"
 
@@ -21,6 +20,10 @@ namespace ark {
 
 class ARK_API Characters {
 public:
+//  [[script::bindings::auto]]
+    Characters(const sp<Layer>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+//  [[script::bindings::auto]]
+    Characters(const sp<RenderLayer>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
 //  [[script::bindings::auto]]
     Characters(const sp<LayerContext>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
     Characters(const sp<LayerContext>& layerContext, const sp<ObjectPool>& objectPool, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
