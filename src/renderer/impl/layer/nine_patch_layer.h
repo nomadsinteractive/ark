@@ -5,6 +5,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
 
@@ -16,16 +17,12 @@ public:
 //  [[plugin::resource-loader("nine-patch-layer")]]
     class BUILDER : public Builder<RenderLayer> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<RenderLayer> build(const sp<Scope>& args) override;
 
     private:
-        document _manifest;
-        sp<ResourceLoaderContext> _resource_loader_context;
-
-        sp<Builder<Atlas>> _atlas;
-        sp<Builder<Shader>> _shader;
+        RenderLayer::BUILDER _impl;
     };
 
 };

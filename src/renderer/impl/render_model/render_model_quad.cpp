@@ -11,25 +11,25 @@
 
 namespace ark {
 
-GLModelQuad::GLModelQuad(const RenderController& renderController, const sp<Atlas>& atlas)
+RenderModelQuad::RenderModelQuad(const RenderController& renderController, const sp<Atlas>& atlas)
     : _atlas(atlas), _index_buffer(renderController.getNamedBuffer(NamedBuffer::NAME_QUADS))
 {
 }
 
-sp<ShaderBindings> GLModelQuad::makeShaderBindings(const Shader& shader)
+sp<ShaderBindings> RenderModelQuad::makeShaderBindings(const Shader& shader)
 {
     const sp<ShaderBindings> bindings = shader.makeBindings(RENDER_MODE_TRIANGLES, shader.renderController()->makeVertexBuffer(), _index_buffer->buffer());
     bindings->pipelineBindings()->bindSampler(_atlas->texture());
     return bindings;
 }
 
-void GLModelQuad::start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot)
+void RenderModelQuad::start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     buf.vertices().setGrowCapacity(4 * snapshot._items.size());
     buf.setIndices(snapshot._index_buffer);
 }
 
-void GLModelQuad::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
+void RenderModelQuad::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
     const Atlas::Item& texCoord = _atlas->at(snapshot._type);
     const V2& pivot = texCoord.pivot();
@@ -53,25 +53,25 @@ void GLModelQuad::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapsho
     buf.writeTexCoordinate(texCoord.right(), texCoord.bottom());
 }
 
-void GLModelQuad::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
+void RenderModelQuad::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
 {
     snapshot._index_buffer = _index_buffer->snapshot(renderController, snapshot._items.size(), snapshot._items.size());
 }
 
-Metrics GLModelQuad::measure(int32_t type)
+Metrics RenderModelQuad::measure(int32_t type)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
     return {texCoord.size(), texCoord.size(), {0, 0}};
 }
 
-GLModelQuad::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _atlas(factory.ensureBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)), _resource_loader_context(resourceLoaderContext)
+RenderModelQuad::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _atlas(factory.ensureConcreteClassBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)), _resource_loader_context(resourceLoaderContext)
 {
 }
 
-sp<RenderModel> GLModelQuad::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> RenderModelQuad::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<GLModelQuad>::make(_resource_loader_context->renderController(), _atlas->build(args));
+    return sp<RenderModelQuad>::make(_resource_loader_context->renderController(), _atlas->build(args));
 }
 
 }

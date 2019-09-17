@@ -5,6 +5,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
 
@@ -21,10 +22,7 @@ public:
         virtual sp<RenderLayer> build(const sp<Scope>& args) override;
 
     private:
-        document _manifest;
-        sp<ResourceLoaderContext> _resource_loader_context;
-        sp<Builder<Atlas>> _atlas;
-        sp<Builder<Shader>> _shader;
+        RenderLayer::BUILDER _impl;
     };
 
 };

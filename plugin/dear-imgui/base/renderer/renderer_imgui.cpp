@@ -14,7 +14,7 @@
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
 #include "graphics/inf/render_command.h"
-#include "graphics/impl/renderer/renderer_group.h"
+#include "graphics/impl/renderer/render_group.h"
 
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_bindings.h"
@@ -198,7 +198,7 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
                 drawingContext._parameters._scissor = Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y);
                 drawingContext._parameters._scissor.scale(renderContext.displayScale().x(), renderContext.displayScale().y());
                 if(_vflip)
-                    drawingContext._parameters._scissor.vflip(renderContext.displayResolution().height);
+                    drawingContext._parameters._scissor.vflip(static_cast<float>(renderContext.displayResolution().height));
                 renderCommand = sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(_object_pool), drawCommand);
                 renderRequest.addRequest(renderCommand);
             }

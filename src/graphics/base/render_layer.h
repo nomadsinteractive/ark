@@ -8,6 +8,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/layer.h"
+#include "graphics/base/rect.h"
 #include "graphics/base/render_object.h"
 #include "graphics/inf/renderer.h"
 
@@ -21,12 +22,13 @@ public:
 
 private:
     struct Stub {
-        Stub(const sp<RenderModel>& renderModel, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        Stub(const sp<RenderModel>& renderModel, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         sp<RenderCommand> render(const Snapshot& snapshot, float x, float y);
 
         sp<RenderModel> _render_model;
         sp<Shader> _shader;
+        sp<Vec4> _scissor;
         sp<ResourceLoaderContext> _resource_loader_context;
 
         sp<MemoryPool> _memory_pool;
@@ -66,6 +68,8 @@ public:
 
         Buffer::Snapshot _index_buffer;
 
+        Rect _scissor;
+
         SnapshotFlag _flag;
 
         DISALLOW_COPY_AND_ASSIGN(Snapshot);
@@ -77,7 +81,7 @@ public:
     };
 
 public:
-    RenderLayer(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    RenderLayer(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
@@ -95,6 +99,7 @@ public:
     class BUILDER : public Builder<RenderLayer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<RenderModel>> renderModel, sp<Builder<Shader>> shader = nullptr);
 
         virtual sp<RenderLayer> build(const sp<Scope>& args) override;
 
@@ -102,6 +107,7 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
         sp<Builder<RenderModel>> _model;
         sp<Builder<Shader>> _shader;
+        SafePtr<Builder<Vec4>> _scissor;
     };
 
 //  [[plugin::resource-loader("render-layer")]]

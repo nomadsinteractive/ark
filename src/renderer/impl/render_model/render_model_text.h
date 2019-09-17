@@ -10,7 +10,7 @@
 
 namespace ark {
 
-class GLModelText : public RenderModel {
+class RenderModelText : public RenderModel {
 private:
     class Stub : public Variable<sp<Texture::Delegate>> {
     public:
@@ -39,11 +39,11 @@ private:
         uint32_t _flowx, _flowy;
         int32_t _max_glyph_height;
 
-        friend class GLModelText;
+        friend class RenderModelText;
     };
 
 public:
-    GLModelText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
+    RenderModelText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
 
     virtual sp<ShaderBindings> makeShaderBindings(const Shader& shader) override;
 

@@ -19,7 +19,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/render_model.h"
-#include "renderer/impl/layer/alphabet_layer.h"
+#include "renderer/impl/layer/text_layer.h"
 
 #include "app/view/layout_param.h"
 

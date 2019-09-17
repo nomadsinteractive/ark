@@ -32,12 +32,12 @@ const op<ByIndex<Atlas::Item>>& Atlas::items() const
 
 uint32_t Atlas::width() const
 {
-    return _texture->width();
+    return static_cast<uint32_t>(_texture->width());
 }
 
 uint32_t Atlas::height() const
 {
-    return _texture->height();
+    return static_cast<uint32_t>(_texture->height());
 }
 
 uint16_t Atlas::halfPixelX() const
@@ -53,6 +53,11 @@ uint16_t Atlas::halfPixelY() const
 bool Atlas::has(int32_t c) const
 {
     return _items->has(c);
+}
+
+const V2& Atlas::getOriginalSize(int32_t c) const
+{
+    return at(c).size();
 }
 
 void Atlas::add(int32_t id, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX, float pivotY)

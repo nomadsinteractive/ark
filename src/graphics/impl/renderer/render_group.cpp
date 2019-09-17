@@ -1,4 +1,4 @@
-#include "graphics/impl/renderer/renderer_group.h"
+#include "graphics/impl/renderer/render_group.h"
 
 #include "core/dom/dom_document.h"
 #include "core/util/log.h"

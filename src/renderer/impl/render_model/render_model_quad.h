@@ -10,9 +10,9 @@
 
 namespace ark {
 
-class GLModelQuad : public RenderModel {
+class RenderModelQuad : public RenderModel {
 public:
-    GLModelQuad(const RenderController& renderController, const sp<Atlas>& atlas);
+    RenderModelQuad(const RenderController& renderController, const sp<Atlas>& atlas);
 
     virtual sp<ShaderBindings> makeShaderBindings(const Shader& shader) override;
 

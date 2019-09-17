@@ -9,9 +9,9 @@
 
 namespace ark {
 
-class GLModelPoint : public RenderModel {
+class RenderModelPoint : public RenderModel {
 public:
-    GLModelPoint(const RenderController& renderController, const sp<Atlas>& atlas);
+    RenderModelPoint(const RenderController& renderController, const sp<Atlas>& atlas);
 
     virtual sp<ShaderBindings> makeShaderBindings(const Shader& shader) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;

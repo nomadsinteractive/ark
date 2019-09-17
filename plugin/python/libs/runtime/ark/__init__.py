@@ -184,6 +184,19 @@ class ApplicationController:
         pass
 
 
+class Atlas:
+
+    def has(self, c: int) -> bool:
+        return False
+
+    def get_original_size(self, c:  int) -> tuple:
+        return 0, 0
+
+
+class Tracker:
+    pass
+
+
 class AudioPlayer:
     PLAY_OPTION_DEFAULT = -1
     PLAY_OPTION_LOOP_OFF = 0

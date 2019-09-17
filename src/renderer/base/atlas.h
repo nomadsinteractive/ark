@@ -62,7 +62,11 @@ public:
     uint16_t halfPixelX() const;
     uint16_t halfPixelY() const;
 
+//  [[script::bindings::auto]]
     bool has(int32_t c) const;
+//  [[script::bindings::auto]]
+    const V2& getOriginalSize(int32_t c) const;
+
     void add(int32_t id, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX = 0, float pivotY = 0);
 
     const Item& at(int32_t id) const;

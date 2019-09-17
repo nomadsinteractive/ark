@@ -3,7 +3,7 @@
 
 namespace ark {
 
-class AlphabetLayer;
+class TextLayer;
 class Atlas;
 class Attribute;
 class Buffer;

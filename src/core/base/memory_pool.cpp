@@ -27,8 +27,8 @@ bytearray MemoryPool::allocate(size_t size) const
     DCHECK(blockId < MAX_BLOCK_COUNT * SUB_BLOCK_COUNT, "Cannot allocate memory, size too big %d", size);
     const std::shared_ptr<Block> block = _blocks[blockId];
     const sp<Slot> slot = block->obtain(size);
-    const bytearray allocated(slot.get(), slot.ensureInterfaces(), [block, slot](ByteArray*) {
-            block->recycle(slot);
+    const bytearray allocated(slot.get(), nullptr, [block, slot](ByteArray*) {
+            block->recycle(std::move(slot));
         });
     return allocated;
 }
@@ -126,7 +126,7 @@ void MemoryPool::Block::recycle(sp<MemoryPool::Slot> slot)
         _pages.push(page);
     else
     {
-        _page_ttl -= 1;
+        --_page_ttl;
         LOGD("Dropping page, page-size: %d page-ttl: %d", _page_size, _page_ttl.load(std::memory_order_relaxed));
     }
 }
@@ -138,8 +138,8 @@ sp<MemoryPool::Page> MemoryPool::Block::lockPage()
     {
         _page_ttl += PAGE_TTL_INCREMENT;
         int32_t pageTTL = _page_ttl.load(std::memory_order_relaxed) / PAGE_TTL_INCREMENT;
-        page = sp<Page>::make(_page_size, pageTTL);
         LOGD("Creating page, page-size: %d page-ttl: %d", _page_size, pageTTL);
+        return sp<Page>::make(_page_size, pageTTL);
     }
     return page;
 }

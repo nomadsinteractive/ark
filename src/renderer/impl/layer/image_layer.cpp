@@ -2,8 +2,6 @@
 
 #include "core/base/bean_factory.h"
 
-#include "graphics/base/render_layer.h"
-
 #include "renderer/base/shader.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/render_model/render_model_quad.h"
@@ -11,14 +9,12 @@
 namespace ark {
 
 ImageLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _atlas(factory.ensureBuilder<Atlas>(manifest)),
-      _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext)) {
+    : _impl(factory, manifest, resourceLoaderContext, sp<RenderModelQuad::BUILDER>::make(factory, manifest, resourceLoaderContext)) {
 }
 
 sp<RenderLayer> ImageLayer::BUILDER::build(const sp<Scope>& args)
 {
-    const sp<Atlas> atlas = _atlas->build(args);
-    return sp<RenderLayer>::make(sp<GLModelQuad>::make(_resource_loader_context->renderController(), atlas), _shader->build(args), _resource_loader_context);
+    return _impl.build(args);
 }
 
 }

@@ -4,7 +4,7 @@
 #include "core/impl/runnable/runnable_by_function.h"
 
 #include "graphics/base/render_command_pipeline.h"
-#include "graphics/impl/renderer/renderer_group.h"
+#include "graphics/impl/renderer/render_group.h"
 #include "graphics/inf/render_view.h"
 #include "graphics/base/render_layer.h"
 

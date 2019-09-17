@@ -19,24 +19,24 @@
 
 namespace ark {
 
-GLModelText::Stub::Stub(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
+RenderModelText::Stub::Stub(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
     : _render_controller(renderController), _alphabet(alphabet), _size(sp<Size>::make())
 {
     reset(textureWidth, textureHeight);
 }
 
-void GLModelText::Stub::reset(uint32_t textureWidth, uint32_t textureHeight)
+void RenderModelText::Stub::reset(uint32_t textureWidth, uint32_t textureHeight)
 {
     _size->setWidth(static_cast<float>(textureWidth));
     _size->setHeight(static_cast<float>(textureHeight));
     _font_glyph = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1), true);
     _texture = _render_controller->createTexture2D(_size, sp<Texture::UploaderBitmap>::make(_font_glyph), RenderController::US_ON_SURFACE_READY);
     _atlas = sp<Atlas>::make(_texture, true);
-    _delegate = sp<GLModelQuad>::make(_render_controller, _atlas);
+    _delegate = sp<RenderModelQuad>::make(_render_controller, _atlas);
     clear();
 }
 
-bool GLModelText::Stub::prepareOne(int32_t c)
+bool RenderModelText::Stub::prepareOne(int32_t c)
 {
     Alphabet::Metrics metrics;
     if(_alphabet->measure(c, metrics, false))
@@ -63,7 +63,7 @@ bool GLModelText::Stub::prepareOne(int32_t c)
     return true;
 }
 
-bool GLModelText::Stub::checkUnpreparedCharacter(const RenderLayer::Snapshot& renderContext)
+bool RenderModelText::Stub::checkUnpreparedCharacter(const RenderLayer::Snapshot& renderContext)
 {
     for(const RenderObject::Snapshot& i : renderContext._items)
     {
@@ -73,7 +73,7 @@ bool GLModelText::Stub::checkUnpreparedCharacter(const RenderLayer::Snapshot& re
     return false;
 }
 
-void GLModelText::Stub::clear()
+void RenderModelText::Stub::clear()
 {
     _flowx = _flowy = 0;
     _max_glyph_height = 0;
@@ -81,7 +81,7 @@ void GLModelText::Stub::clear()
     memset(_font_glyph->at(0, 0), 0, _font_glyph->width() * _font_glyph->height());
 }
 
-bool GLModelText::Stub::prepare(const RenderLayer::Snapshot& snapshot, bool allowReset)
+bool RenderModelText::Stub::prepare(const RenderLayer::Snapshot& snapshot, bool allowReset)
 {
     for(const RenderObject::Snapshot& i : snapshot._items)
     {
@@ -98,17 +98,17 @@ bool GLModelText::Stub::prepare(const RenderLayer::Snapshot& snapshot, bool allo
     return true;
 }
 
-sp<Texture::Delegate> GLModelText::Stub::val()
+sp<Texture::Delegate> RenderModelText::Stub::val()
 {
     return _texture->delegate();
 }
 
-GLModelText::GLModelText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
+RenderModelText::RenderModelText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
     : _stub(sp<Stub>::make(renderController, alphabet, textureWidth, textureHeight))
 {
 }
 
-sp<ShaderBindings> GLModelText::makeShaderBindings(const Shader& shader)
+sp<ShaderBindings> RenderModelText::makeShaderBindings(const Shader& shader)
 {
     const sp<ShaderBindings> bindings = shader.makeBindings(RENDER_MODE_TRIANGLES);
     _shader_texture = sp<Texture>::make(_stub->_size, _stub, sp<Texture::Parameters>::make(Texture::TYPE_2D));
@@ -116,7 +116,7 @@ sp<ShaderBindings> GLModelText::makeShaderBindings(const Shader& shader)
     return bindings;
 }
 
-void GLModelText::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
+void RenderModelText::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
 {
     if(_stub->checkUnpreparedCharacter(snapshot))
     {
@@ -132,17 +132,17 @@ void GLModelText::postSnapshot(RenderController& renderController, RenderLayer::
     _stub->_delegate->postSnapshot(renderController, snapshot);
 }
 
-void GLModelText::start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot)
+void RenderModelText::start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     _stub->_delegate->start(buf, snapshot);
 }
 
-void GLModelText::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
+void RenderModelText::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
     _stub->_delegate->load(buf, snapshot);
 }
 
-Metrics GLModelText::measure(int32_t type)
+Metrics RenderModelText::measure(int32_t type)
 {
     Alphabet::Metrics metrics;
     bool r = _stub->_alphabet->measure(type, metrics, false);
@@ -154,15 +154,15 @@ Metrics GLModelText::measure(int32_t type)
     };
 }
 
-GLModelText::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+RenderModelText::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _alphabet(factory.ensureBuilder<Alphabet>(manifest, Constants::Attributes::ALPHABET)),
       _texture_width(Documents::getAttribute<uint32_t>(manifest, "texture-width", 256)), _texture_height(Documents::getAttribute<uint32_t>(manifest, "texture-height", 256))
 {
 }
 
-sp<RenderModel> GLModelText::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> RenderModelText::BUILDER::build(const sp<Scope>& args)
 {
-    return sp<GLModelText>::make(_resource_loader_context->renderController(), _alphabet->build(args), _texture_width, _texture_height);
+    return sp<RenderModelText>::make(_resource_loader_context->renderController(), _alphabet->build(args), _texture_width, _texture_height);
 }
 
 }

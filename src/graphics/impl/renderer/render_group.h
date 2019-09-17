@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_IMPL_RENDERER_RENDERER_GROUP_H_
-#define ARK_GRAPHICS_IMPL_RENDERER_RENDERER_GROUP_H_
+#ifndef ARK_GRAPHICS_IMPL_RENDERER_RENDER_GROUP_H_
+#define ARK_GRAPHICS_IMPL_RENDERER_RENDER_GROUP_H_
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
@@ -12,12 +12,12 @@ namespace ark {
 
 class ARK_API RendererGroup : public Renderer, public Renderer::Group {
 public:
-    ~RendererGroup();
+    ~RendererGroup() override;
 
     virtual void addRenderer(const sp<Renderer>& renderer) override;
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
-//  [[plugin::builder("renderer-group")]]
+//  [[plugin::builder("render-group")]]
     class BUILDER : public Builder<Renderer> {
     public:
         BUILDER(BeanFactory& beanFactory, const document& manifest);

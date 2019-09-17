@@ -8,8 +8,8 @@ namespace ark {
 
 template<typename T> class BuilderByInstance : public Builder<T> {
 public:
-    BuilderByInstance(const sp<T>& instance)
-        : _instance(instance) {
+    BuilderByInstance(sp<T> instance)
+        : _instance(std::move(instance)) {
     }
 
     virtual sp<T> build(const sp<Scope>& /*args*/) override {
