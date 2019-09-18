@@ -15,8 +15,6 @@ namespace ark {
 class ARK_API Strings {
 public:
     static sp<Builder<String>> load(const String& resid);
-    static sp<Builder<String>> load(const document& manifest, const String& attr);
-    static sp<Builder<String>> load(const document& manifest, const String& attr, const String& defvalue);
 
     static String loadFromReadable(const sp<Readable>& readable);
 

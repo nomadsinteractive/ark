@@ -315,8 +315,8 @@ public:
         return findBuilderByValue<T>(id);
     }
 
-    template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr) {
-        const String attrValue = Documents::getAttribute(doc, attr);
+    template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr, const String& defValue = String()) {
+        const String attrValue = Documents::getAttribute(doc, attr, defValue);
         if(attrValue.empty()) {
             const document& child = doc->getChild(attr);
             return child ? findBuilderByDocument<T>(child) : nullptr;

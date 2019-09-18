@@ -12,7 +12,9 @@
 #include "core/inf/array.h"
 #include "core/inf/builder.h"
 #include "core/inf/readable.h"
+#include "core/inf/variable.h"
 #include "core/impl/builder/builder_by_argument.h"
+#include "core/impl/builder/builder_by_instance.h"
 #include "core/types/global.h"
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
@@ -20,6 +22,25 @@
 #include "core/base/identifier.h"
 
 namespace ark {
+
+static std::vector<sp<Builder<String>>> regexp_split(const std::string& s, const std::regex& pattern, const std::function<sp<Builder<String>>(const std::smatch&)>& replacer)
+{
+    std::smatch match;
+    std::string str = s;
+    std::vector<sp<Builder<String>>> items;
+
+    while(std::regex_search(str, match, pattern))
+    {
+        if(!match.prefix().str().empty())
+            items.push_back(sp<BuilderByInstance<String>>::make(sp<String>::make(match.prefix().str())));
+        items.push_back(replacer(match));
+        str = match.suffix().str();
+    }
+    if(!str.empty())
+        items.push_back(sp<BuilderByInstance<String>>::make(sp<String>::make(std::move(str))));
+    return items;
+}
+
 
 namespace {
 
@@ -42,32 +63,7 @@ private:
 
 class StringBuilderImpl2 : public Builder<String> {
 public:
-    StringBuilderImpl2(const String& value)
-        : _value(sp<String>::make(value)) {
-    }
-
-    virtual sp<String> build(const sp<Scope>& args) override {
-        if(args) {
-            static const std::regex VAR_PATTERN("\\$\\{?([\\w\\d_]+)\\}?");
-            const String replaced = _value->replace(VAR_PATTERN, [&args](Array<String>& groups)->String {
-                const String& a = groups.buf()[1];
-                const sp<String> replacement = args->get<String>(a);
-                DCHECK(replacement, "Cannot get value by key \"%s\"", a.c_str());
-                return replacement;
-            });
-            return sp<String>::make(replaced);
-        }
-        return _value;
-    }
-
-private:
-    sp<String> _value;
-
-};
-
-class StringBuilderImpl3 : public Builder<String> {
-public:
-    StringBuilderImpl3(const String& name)
+    StringBuilderImpl2(const String& name)
         : _name(name) {
     }
 
@@ -81,29 +77,52 @@ private:
     String _name;
 };
 
+class StringBuilderImpl3 : public Builder<String> {
+public:
+    StringBuilderImpl3(const String& value)
+        : _value(sp<String>::make(value)) {
+        static const std::regex VAR_PATTERN("([$@])\\{?([\\w:/]+)\\}?");
+        _builders = regexp_split(_value->c_str(), VAR_PATTERN, [](const std::smatch& match) -> sp<Builder<String>> {
+            const String& p = match[1].str();
+            const String& s = match[2].str();
+            if(p == "$")
+                return sp<StringBuilderImpl2>::make(s);
+            Identifier id = Identifier::parseRef(s);
+            return sp<StringBuilderImpl1>::make(id.package(), id.ref());
+        });
+    }
+
+    virtual sp<String> build(const sp<Scope>& args) override {
+        if(args) {
+            StringBuffer sb;
+            for(const sp<Builder<String>>& i : _builders) {
+                sp<String> v = i->build(args);
+                sb << v->c_str();
+            }
+            return sp<String>::make(sb.str());
+        }
+        return _value;
+    }
+
+private:
+    sp<String> _value;
+
+    std::vector<sp<Builder<String>>> _builders;
+};
+
 }
 
 sp<Builder<String>> Strings::load(const String& resid)
 {
     if(!resid)
-        return sp<StringBuilderImpl2>::make(resid);
+        return sp<StringBuilderImpl3>::make(resid);
 
     const Identifier id = Identifier::parse(resid, Identifier::FORMAT_NAMESPACE);
-    if(id.isArg())
-        return sp<StringBuilderImpl3>::make(id.arg());
     if(id.isRef())
         return sp<StringBuilderImpl1>::make(id.package(), id.ref());
-    return sp<StringBuilderImpl2>::make(resid);
-}
-
-sp<Builder<String>> Strings::load(const document& manifest, const String& attr)
-{
-    return load(Documents::ensureAttribute(manifest, attr));
-}
-
-sp<Builder<String>> Strings::load(const document& manifest, const String& attr, const String& defvalue)
-{
-    return load(Documents::getAttribute(manifest, attr, defvalue));
+    if(id.isArg())
+        return sp<StringBuilderImpl2>::make(id.arg());
+    return sp<StringBuilderImpl3>::make(resid);
 }
 
 String Strings::loadFromReadable(const sp<Readable>& readable)

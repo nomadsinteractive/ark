@@ -126,8 +126,8 @@ sp<ShaderBindings> Shader::makeBindings(RenderModel::Mode mode, const Buffer& ve
 }
 
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _vertex(Strings::load(manifest, "vertex", "@shaders:default.vert")),
-      _fragment(Strings::load(manifest, "fragment", "@shaders:texture.frag")), _snippet(factory.getBuilder<Snippet>(manifest, Constants::Attributes::SNIPPET)),
+    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _vertex(factory.getBuilder<String>(manifest, "vertex", "@shaders:default.vert")),
+      _fragment(factory.getBuilder<String>(manifest, "fragment", "@shaders:texture.frag")), _snippet(factory.getBuilder<Snippet>(manifest, Constants::Attributes::SNIPPET)),
       _camera(factory.getBuilder<Camera>(manifest, Constants::Attributes::CAMERA)),
       _pipeline_bindings_flag(Documents::getAttribute<PipelineBindings::Flag>(_manifest, "flags", PipelineBindings::FLAG_DEFAULT_VALUE))
 {

@@ -6,6 +6,7 @@
 
 #include "core/base/string_buffer.h"
 #include "core/inf/array.h"
+#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -142,7 +143,7 @@ String String::replace(const String& text, const String& replacement) const
         s.erase(pos, text.length());
         s.insert(pos, replacement._str);
     }
-    return s;
+    return std::move(s);
 }
 
 String String::replace(const std::regex& pattern, const std::function<String(Array<String>&)>& replacer) const
@@ -172,7 +173,7 @@ String String::toLower() const
 {
     std::string s = _str;
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-    return s;
+    return std::move(s);
 }
 
 void String::insert(size_type pos, const String& str)

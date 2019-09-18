@@ -143,6 +143,9 @@ class ApplicationFacade:
     def set_default_event_listener(self, event_listener: Callable[['Event'], bool]):
         pass
 
+    def get_string(self, resid: str) -> str:
+        return ''
+
     def exit(self):
         pass
 
@@ -294,6 +297,9 @@ class ResourceLoader:
 
     @property
     def packages(self):
+        return None
+
+    def get_reference(self, name: str):
         return None
 
 
@@ -677,10 +683,32 @@ class Arena:
         return clz()
 
     @property
+    def layers(self):
+        return None
+
+    @property
+    def render_layers(self):
+        return None
+
+    @property
+    def packages(self):
+        return None
+
+    @property
+    def refs(self):
+        return None
+
+    def get_reference(self, name: str):
+        return None
+
+    @property
     def resource_loader(self):
         return None
 
     def add_renderer(self, renderer):
+        pass
+
+    def load_renderer(self, name: str, **kwargs):
         pass
 
 
