@@ -28,7 +28,7 @@ namespace ark {
 RenderLayer::Stub::Stub(const sp<RenderModel>& renderModel, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_model(renderModel), _shader(shader), _scissor(scissor), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
       _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_render_model->makeShaderBindings(_shader)), _notifier(sp<Notifier>::make()),
-      _dirty(_notifier->createDirtyFlag()), _layer_context(sp<LayerContext>::make(renderModel, _notifier, Layer::TYPE_DYNAMIC)), _stride(shader->input()->getStream(0).stride())
+      _dirty(_notifier->createDirtyFlag()), _layer_context(sp<LayerContext>::make(renderModel, _notifier, Layer::TYPE_TRANSIENT)), _stride(shader->input()->getStream(0).stride())
 {
 }
 

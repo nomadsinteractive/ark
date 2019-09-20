@@ -41,8 +41,8 @@ Characters::Characters(const sp<RenderLayer>& layer, float textScale, float lett
 }
 
 Characters::Characters(const sp<LayerContext>& layerContext, const sp<ObjectPool>& objectPool, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : _layer_context(layerContext), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()), _character_mapper(characterMapper), _character_maker(characterMaker),
-      _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(-g_upDirection * lineHeight),
+    : _layer_context(layerContext), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()), _character_mapper(characterMapper),
+      _character_maker(characterMaker), _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(-g_upDirection * lineHeight),
       _line_indent(lineIndent), _model(layerContext->renderModel()), _size(_object_pool->obtain<Size>(0.0f, 0.0f))
 {
 }
@@ -57,9 +57,9 @@ void Characters::setLayoutParam(const sp<LayoutParam>& layoutParam)
     _layout_param = layoutParam;
 }
 
-const std::vector<sp<RenderObject>>& Characters::characters() const
+const std::vector<sp<RenderObject>>& Characters::contents() const
 {
-    return _characters;
+    return _contents;
 }
 
 const SafePtr<Size>& Characters::size() const
@@ -75,7 +75,9 @@ const std::wstring& Characters::text() const
 void Characters::setText(const std::wstring& text)
 {
     _text = text;
-    _characters.clear();
+    for(const sp<RenderObject>& i : _contents)
+        i->dispose();
+    _contents.clear();
 
     float boundary = _layout_param ? _layout_param->contentWidth() : 0;
     if(boundary > 0)
@@ -122,8 +124,7 @@ void Characters::createContentWithBoundary(float boundary)
     _size->setWidth(flowx);
     _size->setHeight(std::abs(flowy) + fontHeight);
 
-    _layer_context->clear();
-    for(const sp<RenderObject>& i : _characters)
+    for(const sp<RenderObject>& i : _contents)
         _layer_context->addRenderObject(i);
 }
 
@@ -136,8 +137,7 @@ void Characters::createContentNoBoundary()
     _size->setWidth(flowx);
     _size->setHeight(std::abs(flowy) + fontHeight);
 
-    _layer_context->clear();
-    for(const sp<RenderObject>& i : _characters)
+    for(const sp<RenderObject>& i : _contents)
         _layer_context->addRenderObject(i);
 }
 
@@ -156,7 +156,7 @@ void Characters::placeNoBoundary(wchar_t c, float& flowx, float& flowy, float& f
         fontHeight = height;
     else
         flowx += _letter_spacing;
-    _characters.push_back(makeCharacter(type, _object_pool->obtain<Vec::Const>(V(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight)), itemSize));
+    _contents.push_back(makeCharacter(type, V2(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight), itemSize));
     flowx += width;
 }
 
@@ -182,7 +182,7 @@ void Characters::placeOne(const Characters::LayoutChar& layoutChar, float& flowx
     float bitmapX = _text_scale * metrics.xyz.x();
     float bitmapY = _text_scale * metrics.xyz.y();
     const sp<Size> itemSize = _object_pool->obtain<Size>(bitmapWidth, bitmapHeight);
-    _characters.push_back(makeCharacter(layoutChar._type, _object_pool->obtain<Vec::Const>(V(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight)), itemSize));
+    _contents.push_back(makeCharacter(layoutChar._type, V2(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight), itemSize));
     flowx += width;
 }
 
@@ -239,13 +239,14 @@ int32_t Characters::toType(wchar_t c) const
     return _character_mapper ? _character_mapper->mapCharacter(static_cast<int32_t>(c)) : static_cast<int32_t>(c);
 }
 
-sp<RenderObject> Characters::makeCharacter(int32_t type, const sp<Vec2>& position, const sp<Size>& size) const
+sp<RenderObject> Characters::makeCharacter(int32_t type, const V2& position, const sp<Size>& size) const
 {
-    return _character_maker ? _character_maker->makeCharacter(type, position, size) : _object_pool->obtain<RenderObject>(type, Vec3Util::create(position), size);
+    return _character_maker ? _character_maker->makeCharacter(type, position, size) :
+                              _object_pool->obtain<RenderObject>(type, _object_pool->obtain<Vec3::Const>(position), size);
 }
 
 Characters::BUILDER::BUILDER(BeanFactory& factory, const document manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, true)), _character_mapper(factory.getBuilder<CharacterMapper>(manifest, "character-mapper")),
+    : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_DYNAMIC)), _character_mapper(factory.getBuilder<CharacterMapper>(manifest, "character-mapper")),
       _character_maker(factory.getBuilder<CharacterMaker>(manifest, "character-maker")), _object_pool(resourceLoaderContext->objectPool()),
       _text_scale(Documents::getAttribute<float>(manifest, "text-scale", 1.0f)), _letter_spacing(Documents::getAttribute<float>(manifest, "letter-spacing", 0.0f)),
       _line_height(Documents::getAttribute<float>(manifest, "line-height", 0.0f)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))

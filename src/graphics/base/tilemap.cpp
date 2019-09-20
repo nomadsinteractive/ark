@@ -154,7 +154,7 @@ const std::list<sp<TilemapLayer>>& Tilemap::layers() const
 }
 
 Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, true)), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+    : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_TRANSIENT)), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _tileset(factory.ensureBuilder<Tileset>(manifest, "tileset")), _importer(factory.getBuilder<TilemapImporter>(manifest, "importer")), _scrollable(manifest->getChild("scrollable")),
       _renderer_maker(_scrollable ? factory.ensureBuilder<RendererMaker>(_scrollable, "renderer-maker") : nullptr)
 {

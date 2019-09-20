@@ -65,7 +65,7 @@ void TilemapLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
         {
             const sp<RenderObject>& renderObject = _tiles[i * _col_count + j];
             if(renderObject)
-                _layer_context->draw((j - colStart) * tileWidth - ox + x, dy + y, renderObject);
+                _layer_context->drawRenderObject((j - colStart) * tileWidth - ox + x, dy + y, renderObject);
         }
     }
 }

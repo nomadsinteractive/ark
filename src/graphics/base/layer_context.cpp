@@ -40,7 +40,7 @@ void LayerContext::renderRequest(const V2& position)
     _position = position;
 }
 
-void LayerContext::draw(float x, float y, const sp<RenderObject>& renderObject)
+void LayerContext::drawRenderObject(float x, float y, const sp<RenderObject>& renderObject)
 {
     _transient_items.emplace_back(x + _position.x(), y + _position.y(), renderObject);
 }
@@ -82,7 +82,7 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memor
             }
         }
 
-        if(notify || _layer_type == Layer::TYPE_DYNAMIC)
+        if(notify || _layer_type == Layer::TYPE_DYNAMIC || _layer_type == Layer::TYPE_TRANSIENT)
             _notifier->notify();
     }
     _transient_items.clear();
@@ -105,9 +105,9 @@ FilterAction LayerContext::RenderObjectFilter::operator()(const sp<RenderObject>
     return FILTER_ACTION_NONE;
 }
 
-LayerContext::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, bool makeContext)
+LayerContext::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, Layer::Type layerType)
     : _layer(factory.getBuilder<Layer>(manifest, Constants::Attributes::LAYER)),
-      _render_layer(_layer ? nullptr : factory.getBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER)), _make_context(makeContext)
+      _render_layer(_layer ? nullptr : factory.getBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER)), _layer_type(layerType)
 {
     DCHECK(_layer || _render_layer, "LayerContext must be associated with one Layer or RenderLayer");
 }
@@ -117,8 +117,8 @@ sp<LayerContext> LayerContext::BUILDER::build(const sp<Scope>& args)
     if(_layer)
         return _layer->build(args)->context();
     const sp<RenderLayer> renderLayer = _render_layer->build(args);
-    if(_make_context)
-        return renderLayer->makeContext(Layer::TYPE_DYNAMIC);
+    if(_layer_type != Layer::TYPE_UNSPECIFIED)
+        return renderLayer->makeContext(_layer_type);
     return renderLayer->context();
 }
 

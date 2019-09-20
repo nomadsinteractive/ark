@@ -28,6 +28,11 @@ void RendererUtil::dispose(const sp<Renderer>& self)
     }
 }
 
+sp<Renderer> RendererUtil::makeDisposable(const sp<Renderer>& self, const sp<Boolean>& disposed)
+{
+    return self.absorb(disposed ? sp<Disposed>::make(disposed) : sp<Disposed>::make());
+}
+
 SafePtr<Size> RendererUtil::size(const sp<Renderer>& self)
 {
     if(self.template is<Block>())

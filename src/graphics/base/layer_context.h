@@ -35,7 +35,7 @@ public:
 
     void renderRequest(const V2& position);
 
-    void draw(float x, float y, const sp<RenderObject>& renderObject);
+    void drawRenderObject(float x, float y, const sp<RenderObject>& renderObject);
 
 //  [[script::bindings::auto]]
     void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = sp<Boolean>::null());
@@ -46,14 +46,14 @@ public:
 
     class BUILDER : public Builder<LayerContext> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, bool makeContext);
+        BUILDER(BeanFactory& factory, const document& manifest, Layer::Type layerType);
 
         virtual sp<LayerContext> build(const sp<Scope>& args) override;
 
     private:
         sp<Builder<Layer>> _layer;
         sp<Builder<RenderLayer>> _render_layer;
-        bool _make_context;
+        Layer::Type _layer_type;
     };
 
 private:

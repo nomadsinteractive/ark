@@ -251,17 +251,6 @@ class Observer:
         pass
 
 
-class Expectation:
-    def update(self):
-        pass
-
-    def create_observer(self, callback: Callable, oneshot=False) -> Observer:
-        pass
-
-    def add_observer(self, callback: Callable, oneshot=False) -> Observer:
-        pass
-
-
 class Renderer:
 
     def add_renderer(self, renderer: 'Renderer'):
@@ -275,6 +264,9 @@ class Renderer:
         return Size(0, 0)
 
     def translate(self, position: Union[tuple, 'Vec2']) -> 'Renderer':
+        return self
+
+    def make_disposable(self, disposed: Optional[bool, 'Disposed'] = None):
         return self
 
 
@@ -335,22 +327,22 @@ class Numeric(_Var):
     def __init__(self, val):
         _Var.__init__(self, val)
 
-    def approach(self, expectation) -> Expectation:
+    def approach(self, expectation) -> 'Expectation':
         return Expectation()
 
-    def at_least(self, least) -> Expectation:
+    def at_least(self, least) -> 'Expectation':
         return Expectation()
 
-    def at_most(self, most) -> Expectation:
+    def at_most(self, most) -> 'Expectation':
         return Expectation()
 
-    def boundary(self, boundary) -> Expectation:
+    def boundary(self, boundary) -> 'Expectation':
         return Expectation()
 
-    def fence(self, fence) -> Expectation:
+    def fence(self, fence) -> 'Expectation':
         return Expectation()
 
-    def integral(self, t=None)-> 'Numeric':
+    def integral(self, t=None) -> 'Numeric':
         return Numeric(0)
 
     def __add__(self, other) -> 'Numeric':
@@ -644,6 +636,20 @@ class RenderObject:
         pass
 
 
+class Expectation(Numeric):
+    def __init__(self, val):
+        super().__init__(val)
+
+    def update(self):
+        pass
+
+    def create_observer(self, callback: Callable, oneshot=False) -> Observer:
+        pass
+
+    def add_observer(self, callback: Callable, oneshot=False) -> Observer:
+        pass
+
+
 class LayerContext:
     pass
 
@@ -651,6 +657,9 @@ class LayerContext:
 class RenderLayer:
     @property
     def context(self) -> LayerContext:
+        return LayerContext()
+
+    def make_context(self, layer_type) -> LayerContext:
         return LayerContext()
 
 
@@ -891,8 +900,12 @@ class Math:
         return 0
 
     @staticmethod
-    def randf():
+    def randf() -> float:
         return 0
+
+    @staticmethod
+    def randv() -> Numeric:
+        return Numeric(0)
 
     @staticmethod
     def atan(x):
@@ -1052,16 +1065,24 @@ class EventDispatcher:
 
 
 class Characters:
-    def __init__(self, layer_context, text_scale=1.0, letter_spacing=0, line_height=0, line_indent=0):
+    def __init__(self, layer: Union[Layer, RenderLayer, LayerContext], text_scale=1.0, letter_spacing=0, line_height=0, line_indent=0):
+        self._size = Size(0, 0)
+
+    @property
+    def text(self) -> str:
+        return ''
+
+    @text.setter
+    def text(self, text: str):
         pass
 
     @property
-    def text(self):
-        return None
+    def contents(self) -> List[RenderObject]:
+        return []
 
-    @text.setter
-    def text(self, text):
-        pass
+    @property
+    def size(self) -> Size:
+        return self._size
 
 
 class StringBundle:

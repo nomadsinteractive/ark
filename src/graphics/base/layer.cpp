@@ -10,8 +10,8 @@
 
 namespace ark {
 
-Layer::Layer(const sp<RenderLayer>& renderLayer, Layer::Type type)
-    : _render_layer(renderLayer), _layer_context(renderLayer ? renderLayer->makeContext(type) : sp<LayerContext>::null())
+Layer::Layer(const sp<LayerContext>& layerContext)
+    : _layer_context(layerContext)
 {
 }
 
@@ -25,26 +25,9 @@ void Layer::traverse(const Holder::Visitor& visitor)
     HolderUtil::visit(_layer_context, visitor);
 }
 
-void Layer::draw(float x, float y, const sp<RenderObject>& renderObject)
+void Layer::dispose()
 {
-    _layer_context->draw(x, y, renderObject);
-}
-
-void Layer::attach(const sp<RenderLayer>& renderLayer)
-{
-    _render_layer = renderLayer;
-    _layer_context = _render_layer->makeContext(_layer_context->layerType());
-}
-
-void Layer::detach()
-{
-    _render_layer = nullptr;
     _layer_context = nullptr;
-}
-
-const sp<RenderLayer>& Layer::renderer() const
-{
-    return _render_layer;
 }
 
 const sp<LayerContext>& Layer::context() const
@@ -71,7 +54,8 @@ Layer::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manife
 
 sp<Layer> Layer::BUILDER_IMPL1::build(const sp<Scope>& args)
 {
-    const sp<Layer> layer = sp<Layer>::make(_render_layer->build(args), _type);
+    const sp<RenderLayer> renderLayer = _render_layer->build(args);
+    const sp<Layer> layer = sp<Layer>::make(renderLayer->makeContext(_type));
     const sp<LayerContext>& layerContext = layer->context();
     for(const sp<Builder<RenderObject>>& i : _render_objects)
         layerContext->addRenderObject(i->build(args));
@@ -92,8 +76,10 @@ template<> ARK_API Layer::Type Conversions::to<String, Layer::Type>(const String
 {
     if(str == "dynamic")
         return Layer::TYPE_DYNAMIC;
-    DCHECK(str == "static", "Unkown layer type: %s, known types are ['static', 'dynamic']", str.c_str());
-    return Layer::TYPE_STATIC;
+    if(str == "static")
+        return Layer::TYPE_STATIC;
+    DCHECK(str == "transient", "Unkown layer type: %s, known types are ['static', 'dynamic', 'transient']", str.c_str());
+    return Layer::TYPE_TRANSIENT;
 }
 
 }

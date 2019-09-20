@@ -9,7 +9,7 @@ class CharacterMaker {
 public:
     virtual ~CharacterMaker() = default;
 
-    virtual sp<RenderObject> makeCharacter(int32_t type, const sp<Vec>& position, const sp<Size>& size) = 0;
+    virtual sp<RenderObject> makeCharacter(int32_t type, const V2& position, const sp<Size>& size) = 0;
 };
 
 }

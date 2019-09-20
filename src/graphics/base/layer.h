@@ -19,25 +19,19 @@ public:
     enum Type {
         TYPE_UNSPECIFIED,
         TYPE_DYNAMIC,
-        TYPE_STATIC
+        TYPE_STATIC,
+        TYPE_TRANSIENT
     };
 
 public:
-// [[script::bindings::auto]]
-    Layer(const sp<RenderLayer>& renderLayer = nullptr, Layer::Type type = Layer::TYPE_DYNAMIC);
+    Layer(const sp<LayerContext>& layerContext);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
     virtual void traverse(const Visitor& visitor) override;
 
-    void draw(float x, float y, const sp<RenderObject>& renderObject);
-
 // [[script::bindings::auto]]
-    void attach(const sp<RenderLayer>& renderLayer);
-// [[script::bindings::auto]]
-    void detach();
+    void dispose();
 
-// [[script::bindings::property]]
-    const sp<RenderLayer>& renderer() const;
 // [[script::bindings::property]]
     const sp<LayerContext>& context() const;
 
@@ -71,7 +65,6 @@ public:
     };
 
 private:
-    sp<RenderLayer> _render_layer;
     sp<LayerContext> _layer_context;
 
     friend class RenderLayer;

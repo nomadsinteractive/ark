@@ -203,10 +203,9 @@ std::map<String, String> Strings::parseProperties(const String& str, char delim,
     std::vector<String> elems = str.split(delim);
     for(const String& i : elems)
     {
-        String key;
-        String value;
-        if(parseNameValuePair(i, equal, key, value))
-            properties[key] = value;
+        String key, value;
+        parseNameValuePair(i, equal, key, value);
+        properties[key] = value;
     }
     return properties;
 }

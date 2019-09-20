@@ -3,6 +3,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 
@@ -17,6 +18,8 @@ public:
 
 //[[script::bindings::classmethod]]
     static void dispose(const sp<Renderer>& self);
+//[[script::bindings::classmethod]]
+    static sp<Renderer> makeDisposable(const sp<Renderer>& self, const sp<Boolean>& disposed = nullptr);
 
 //[[script::bindings::property]]
     static SafePtr<Size> size(const sp<Renderer>& self);

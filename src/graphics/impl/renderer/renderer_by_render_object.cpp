@@ -26,7 +26,7 @@ RendererByRenderObject::RendererByRenderObject(const sp<RenderObject>& renderObj
 
 void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, float x, float y)
 {
-    _layer_context->draw(x, y, _render_object);
+    _layer_context->drawRenderObject(x, y, _render_object);
 }
 
 const SafePtr<Size>& RendererByRenderObject::size()
@@ -42,7 +42,7 @@ void RendererByRenderObject::measure(Size& size)
 }
 
 RendererByRenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _render_object(factory.ensureBuilder<RenderObject>(manifest)), _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, false))
+    : _render_object(factory.ensureBuilder<RenderObject>(manifest)), _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_UNSPECIFIED))
 {
 }
 

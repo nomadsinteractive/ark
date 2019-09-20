@@ -83,7 +83,7 @@ Emitter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const 
       _type(factory.getBuilder<Integer>(manifest, Constants::Attributes::TYPE)),
       _position(factory.getBuilder<Vec3>(manifest, Constants::Attributes::POSITION)),
       _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, false)),
+      _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_DYNAMIC)),
       _disposed(disposed)
 {
 }

@@ -32,7 +32,7 @@ public:
     void setLayoutParam(const sp<LayoutParam>& layoutParam);
 
 //  [[script::bindings::property]]
-    const std::vector<sp<RenderObject>>& characters() const;
+    const std::vector<sp<RenderObject>>& contents() const;
 
 //  [[script::bindings::property]]
     const SafePtr<Size>& size() const;
@@ -89,7 +89,7 @@ private:
     bool isWordBreaker(wchar_t c) const;
 
     int32_t toType(wchar_t c) const;
-    sp<RenderObject> makeCharacter(int32_t type, const sp<Vec2>& position, const sp<Size>& size) const;
+    sp<RenderObject> makeCharacter(int32_t type, const V2& position, const sp<Size>& size) const;
 
 private:
     sp<LayerContext> _layer_context;
@@ -98,7 +98,7 @@ private:
     sp<CharacterMapper> _character_mapper;
     sp<CharacterMaker> _character_maker;
 
-    std::vector<sp<RenderObject>> _characters;
+    std::vector<sp<RenderObject>> _contents;
     std::wstring _text;
 
     float _text_scale;

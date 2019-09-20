@@ -136,6 +136,8 @@ public:
 
 //  [[script::bindings::auto]]
     static ARK_API float randf();
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> randv();
 
     static ARK_API uint32_t hypot(int32_t dx, int32_t dy);
 //  [[script::bindings::auto]]

@@ -33,6 +33,15 @@ private:
     sp<Vec2> _value;
 };
 
+class RandNumeric : public Numeric {
+public:
+
+    virtual float val() override {
+        return Math::randf();
+    }
+};
+
+
 }
 
 const float Math::PI = 3.14159265358979323846f;
@@ -133,6 +142,11 @@ int32_t Math::round(float x)
 float Math::randf()
 {
     return rand() / static_cast<float>(RAND_MAX);
+}
+
+sp<Numeric> Math::randv()
+{
+    return sp<RandNumeric>::make();
 }
 
 uint32_t Math::hypot(int32_t dx, int32_t dy)

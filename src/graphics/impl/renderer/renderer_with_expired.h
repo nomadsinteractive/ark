@@ -13,15 +13,26 @@ class RendererWithExpired {
 public:
 
 //  [[plugin::style("expired")]]
-    class DECORATOR : public Builder<Renderer> {
+    class STYLE : public Builder<Renderer> {
     public:
-        DECORATOR(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& value);
+        STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& value);
 
         virtual sp<Renderer> build(const sp<Scope>& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;
-        sp<Builder<Disposed>> _expired;
+        sp<Builder<Disposed>> _disposed;
+    };
+
+//  [[plugin::style("disposable")]]
+    class STYLE_DISPOSABLE : public Builder<Renderer> {
+    public:
+        STYLE_DISPOSABLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& value);
+
+        virtual sp<Renderer> build(const sp<Scope>& args) override;
+
+    private:
+        sp<Builder<Renderer>> _delegate;
     };
 
 };

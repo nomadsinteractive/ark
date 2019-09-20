@@ -133,8 +133,8 @@ private:
                         f = factory.decorate<T>(f, node);
                     } else {
                         String key, value;
-                        if(Strings::parseNameValuePair(style, ':', key, value))
-                            f = factory.decorate<T>(f, key, value);
+                        Strings::parseNameValuePair(style, ':', key, value);
+                        f = factory.decorate<T>(f, key, value);
                     }
                 }
                 return f;
