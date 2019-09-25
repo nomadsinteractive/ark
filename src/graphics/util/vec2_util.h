@@ -87,6 +87,9 @@ public:
 //[[script::bindings::classmethod]]
     static sp<Vec2> synchronize(const sp<Vec2>& self, const sp<Boolean>& disposed = nullptr);
 
+//[[script::bindings::classmethod]]
+    static sp<Vec2> fence(const sp<Vec2>& self, const sp<Vec3>& plane, const sp<Observer>& observer);
+
 //[[script::bindings::property]]
     static sp<Vec2> delegate(const sp<Vec2>& self);
 //[[script::bindings::property]]

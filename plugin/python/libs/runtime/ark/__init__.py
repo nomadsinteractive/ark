@@ -328,22 +328,25 @@ class Numeric(_Var):
         _Var.__init__(self, val)
 
     def approach(self, expectation) -> 'Expectation':
-        return Expectation()
+        return Expectation(self)
 
     def at_least(self, least) -> 'Expectation':
-        return Expectation()
+        return Expectation(self)
 
     def at_most(self, most) -> 'Expectation':
-        return Expectation()
+        return Expectation(self)
 
     def boundary(self, boundary) -> 'Expectation':
-        return Expectation()
+        return Expectation(self)
 
     def fence(self, fence) -> 'Expectation':
-        return Expectation()
+        return Expectation(self)
 
-    def integral(self, t=None) -> 'Numeric':
+    def integral(self, t: Optional['Numeric'] = None) -> 'Numeric':
         return Numeric(0)
+
+    def boost(self, v0: float, cd: Union[float, 'Numeric'], t: Optional['Numeric'] = None):
+        return None
 
     def __add__(self, other) -> 'Numeric':
         return Numeric(0)
@@ -372,10 +375,6 @@ class Numeric(_Var):
 
     @staticmethod
     def vibrate(s0: float, v0: float, s1: float, v1: float, duration: float, t=None):
-        return None
-
-    @staticmethod
-    def boost(v0: float, a: Union[float, 'Numeric'], cd: Union[float, 'Numeric'], t: Optional['Numeric'] = None):
         return None
 
 
@@ -474,6 +473,9 @@ class Vec2:
         return Vec2(self._x, self._y)
 
     def synchronize(self, disposed: Optional[Boolean] = None) -> 'Vec2':
+        return Vec2(self._x, self._y)
+
+    def fence(self, plane: Union['Vec3', tuple], observer: Union[Observer, Callable[[], None]]) -> 'Vec2':
         return Vec2(self._x, self._y)
 
     def fix(self):
@@ -867,6 +869,31 @@ class Transform:
     @translate.setter
     def translate(self, v):
         self._translate = v
+
+
+class Random:
+    def __init__(self, seed: Optional[int] = None):
+        self._seed = seed
+
+    @property
+    def seed(self):
+        return self._seed
+
+    @seed.setter
+    def seed(self, seed):
+        self._seed = seed
+
+    def randf(self) -> float:
+        return 0
+
+    def randv(self) -> Numeric:
+        return 0
+
+    def uniform(self, a: Union[float, Numeric], b: Union[float, Numeric]) -> Numeric:
+        return Numeric(0)
+
+    def normal(self, a: Union[float, Numeric], b: Union[float, Numeric]) -> Numeric:
+        return Numeric(0)
 
 
 class Math:

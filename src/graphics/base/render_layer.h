@@ -38,7 +38,7 @@ private:
         sp<Notifier> _notifier;
         sp<Boolean> _dirty;
         WeakRefList<LayerContext> _layer_contexts;
-        sp<LayerContext> _layer_context;
+        sp<Layer> _layer;
 
         uint32_t _stride;
 
@@ -89,6 +89,8 @@ public:
 
     Snapshot snapshot() const;
 
+//  [[script::bindings::property]]
+    const sp<Layer>& layer() const;
 //  [[script::bindings::property]]
     const sp<LayerContext>& context() const;
 

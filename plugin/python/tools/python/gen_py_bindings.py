@@ -87,8 +87,8 @@ AUTOBIND_CONSTANT_PATTERN = re.compile(r'\[\[script::bindings::constant\(([\w_]+
 AUTOBIND_ENUMERATION_PATTERN = re.compile(r'\[\[script::bindings::enumeration\]\]\s*enum\s+(\w+)\s*\{([^}]+)};')
 AUTOBIND_PROPERTY_PATTERN = re.compile(r'\[\[script::bindings::property\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
 AUTOBIND_GETPROP_PATTERN = re.compile(r'\[\[script::bindings::getprop\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
-AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader\]\]\s+template<typename T>\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;{]*\{')
-AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor)\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
+AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader\]\]\s+template<typename T>\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;{]*{')
+AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor)\]\]\s+([^(\r\n]+)\(([^\r\n]*)\)[^;\r\n]*;')
 AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
 AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::class\(([^)]+)\)\]\]')
 AUTOBIND_EXTENDS_PATTERN = re.compile(r'\[\[script::bindings::extends\((\w+)\)\]\]')
@@ -96,7 +96,7 @@ AUTOBIND_TYPEDEF_PATTERN = re.compile(r'\[\[script::bindings::auto\]\]\s+typedef
 AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container|holder)\]\]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
 AUTOBIND_META_PATTERN = re.compile(r'\[\[script::bindings::meta\(([^)]+)\([^)]*\)\)\]\]')
 
-BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^\]]*\]\]\s+class\s+[\w\d_]+\s*:\s*public\s+Builder<([^{]+)>\s*\{')
+BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^\]]*\]\]\s+class\s+[\w\d_]+\s*:\s*public\s+Builder<([^{]+)>\s*{')
 
 CLASS_DELIMITER = '\n//%s\n' % ('-' * 120)
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')

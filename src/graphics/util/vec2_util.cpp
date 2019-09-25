@@ -4,6 +4,7 @@
 
 #include "core/ark.h"
 #include "core/base/clock.h"
+#include "core/base/observer.h"
 #include "core/inf/holder.h"
 #include "core/impl/variable/boost.h"
 #include "core/impl/variable/integral.h"
@@ -58,6 +59,41 @@ public:
 
 private:
     sp<Vec2> _delegate;
+};
+
+class Vec2Fence : public Vec2, public Holder, Implements<Vec2Fence, Vec2, Holder> {
+public:
+    Vec2Fence(sp<Vec2> delegate, sp<Vec3> plane, sp<Observer> observer)
+        : _delegate(std::move(delegate)), _plane(std::move(plane)), _observer(std::move(observer)), _distance(getPlaneDistance(_delegate->val())) {
+    }
+
+    virtual V2 val() override {
+        V2 v = _delegate->val();
+        float distance = getPlaneDistance(v);
+        if(!Math::signEquals(_distance, distance)) {
+            _observer->update();
+            _distance = distance;
+        }
+        return v;
+    }
+
+    virtual void traverse(const Visitor& visitor) override {
+        HolderUtil::visit(_delegate, visitor);
+        HolderUtil::visit(_plane, visitor);
+        _observer->traverse(visitor);
+    }
+
+private:
+    float getPlaneDistance(const V2& pos) const {
+        return V3(pos.x(), pos.y(), 1.0f).dot(_plane->val());
+    }
+
+private:
+    sp<Vec2> _delegate;
+    sp<Vec3> _plane;
+    sp<Observer> _observer;
+
+    float _distance;
 };
 
 }
@@ -238,6 +274,11 @@ sp<Vec2> Vec2Util::wrap(const sp<Vec2>& self)
 sp<Vec2> Vec2Util::synchronize(const sp<Vec2>& self, const sp<Boolean>& disposed)
 {
     return Ark::instance().applicationContext()->synchronize(self, disposed);
+}
+
+sp<Vec2> Vec2Util::fence(const sp<Vec2>& self, const sp<Vec3>& plane, const sp<Observer>& observer)
+{
+    return sp<Vec2Fence>::make(self, plane, observer);
 }
 
 sp<Vec2> Vec2Util::delegate(const sp<Vec2>& self)

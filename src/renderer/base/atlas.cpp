@@ -90,10 +90,10 @@ uint16_t Atlas::unnormalize(uint32_t x, uint32_t s)
 
 Atlas::Item Atlas::makeItem(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX, float pivotY) const
 {
-    uint16_t l = unnormalize(left, _texture->width());
-    uint16_t t = unnormalize(top, _texture->height());
-    uint16_t r = unnormalize(right, _texture->width());
-    uint16_t b = unnormalize(bottom, _texture->height());
+    uint16_t l = unnormalize(left, static_cast<uint32_t>(_texture->width()));
+    uint16_t t = unnormalize(top, static_cast<uint32_t>(_texture->height()));
+    uint16_t r = unnormalize(right, static_cast<uint32_t>(_texture->width()));
+    uint16_t b = unnormalize(bottom, static_cast<uint32_t>(_texture->height()));
     float width = static_cast<float>(right - left);
     float height = static_cast<float>(bottom - top);
     return Item(l + _half_pixel_x, b - _half_pixel_y, r - _half_pixel_x, t + _half_pixel_y, width, height, pivotX, pivotY);
