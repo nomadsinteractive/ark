@@ -217,7 +217,8 @@ private:
     sp<Vec2> toVec2(PyObject* object, bool alert);
     sp<Vec3> toVec3(PyObject* object, bool alert);
     sp<Integer> toInteger(PyObject* object, bool alert);
-    sp<Runnable> toRunnable(PyObject* object);
+    sp<Runnable> toRunnable(PyObject* object, bool alert);
+    sp<Observer> toObserver(PyObject* object, bool alert);
     sp<CollisionCallback> toCollisionCallback(PyObject* object);
     sp<EventListener> toEventListener(PyObject* object);
 
@@ -245,7 +246,12 @@ template<> inline sp<Integer> PythonInterpreter::toSharedPtr<Integer>(PyObject* 
 
 template<> inline sp<Runnable> PythonInterpreter::toSharedPtr<Runnable>(PyObject* object, bool alert)
 {
-    return toRunnable(object);
+    return toRunnable(object, alert);
+}
+
+template<> inline sp<Observer> PythonInterpreter::toSharedPtr<Observer>(PyObject* object, bool alert)
+{
+    return toObserver(object, alert);
 }
 
 template<> inline sp<CollisionCallback> PythonInterpreter::toSharedPtr<CollisionCallback>(PyObject* object, bool alert)

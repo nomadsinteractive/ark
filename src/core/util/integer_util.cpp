@@ -7,6 +7,7 @@
 #include "core/impl/integer/integer_by_interval.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
+#include "core/util/conversions.h"
 #include "core/util/operators.h"
 #include "core/util/strings.h"
 
@@ -14,41 +15,23 @@ namespace ark {
 
 namespace {
 
-class IntegerArray : public Integer, public IntArray, public Implements<IntegerArray, Integer, IntArray> {
+class IntegerArray {
 public:
-    IntegerArray(std::vector<int32_t> values)
-        : _values(std::move(values)), _iter(0) {
-    }
-
-    virtual int32_t val() override {
-        return _iter < _values.size() ? _values.at(_iter++) : -1;
-    }
-
-    virtual size_t length() override {
-        return _values.size();
-    }
-
-    virtual int32_t* buf() override {
-        return &_values[0];
-    }
-
     class BUILDER : public Builder<Integer> {
     public:
-        BUILDER(std::vector<int32_t> values)
-            : _values(std::move(values)) {
+        BUILDER(std::vector<int32_t> values, IntegerUtil::Repeat repeat)
+            : _values(std::move(values)), _repeat(repeat) {
         }
 
         virtual sp<Integer> build(const sp<Scope>& /*args*/) override {
-            return sp<IntegerArray>::make(_values);
+            return sp<IntegerByArray>::make(sp<IntArray::Vector>::make(_values), _repeat);
         }
 
     private:
         std::vector<int32_t> _values;
+        IntegerUtil::Repeat _repeat;
     };
 
-private:
-    std::vector<int32_t> _values;
-    size_t _iter;
 };
 
 }
@@ -65,7 +48,7 @@ sp<Integer> IntegerUtil::create(int32_t value)
 
 sp<Integer> IntegerUtil::create(std::vector<int32_t> values)
 {
-    return sp<IntegerArray>::make(std::move(values));
+    return sp<IntegerByArray>::make(sp<IntArray::Vector>::make(std::move(values)), REPEAT_NONE);
 }
 
 sp<Integer> IntegerUtil::add(const sp<Integer>& self, const sp<Integer>& rvalue)
@@ -215,8 +198,13 @@ sp<Integer> IntegerUtil::animate(const sp<Integer>& self, const sp<Numeric>& int
     return sp<IntegerByInterval>::make(self, duration ? duration : Ark::instance().clock()->duration(), interval ? interval : sp<Numeric>::adopt(new Numeric::Const(1.0f / 24)));
 }
 
-IntegerUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
-    : _value(makeIntegerBuilder(factory, expr.strip()))
+IntegerUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
+    : DICTIONARY(factory, value, REPEAT_NONE)
+{
+}
+
+IntegerUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr, Repeat repeat)
+    : _value(makeIntegerBuilder(factory, expr.strip(), repeat))
 {
 }
 
@@ -225,7 +213,7 @@ sp<Integer> IntegerUtil::DICTIONARY::build(const sp<Scope>& args)
     return _value->build(args);
 }
 
-sp<Builder<Integer>> IntegerUtil::DICTIONARY::makeIntegerBuilder(BeanFactory& factory, const String& expr) const
+sp<Builder<Integer>> IntegerUtil::DICTIONARY::makeIntegerBuilder(BeanFactory& factory, const String& expr, Repeat repeat) const
 {
     DCHECK(expr, "Empty Integer expression");
     if(expr.at(0) == '[')
@@ -234,19 +222,32 @@ sp<Builder<Integer>> IntegerUtil::DICTIONARY::makeIntegerBuilder(BeanFactory& fa
         std::vector<int32_t> values;
         for(const String& i : expr.substr(1, expr.length() - 1).split(','))
             values.push_back(Strings::parse<int32_t>(i.strip()));
-        return sp<IntegerArray::BUILDER>::make(std::move(values));
+        return sp<IntegerArray::BUILDER>::make(std::move(values), repeat);
     }
     return Expression::Compiler<int32_t, NumericOperation<int32_t>>().compile(factory, expr);
 }
 
 IntegerUtil::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _delegate(factory, Documents::ensureAttribute(manifest, Constants::Attributes::VALUE))
+    : _delegate(factory, Documents::ensureAttribute(manifest, Constants::Attributes::VALUE), Documents::getAttribute<Repeat>(manifest, "repeat", REPEAT_NONE))
 {
 }
 
 sp<Integer> IntegerUtil::BUILDER::build(const sp<Scope>& args)
 {
     return _delegate.build(args);
+}
+
+template<> ARK_API IntegerUtil::Repeat Conversions::to<String, IntegerUtil::Repeat>(const String& str)
+{
+    const String repeat = str.toLower();
+    if(repeat == "restart")
+        return IntegerUtil::REPEAT_RESTART;
+    if(repeat == "reverse")
+        return IntegerUtil::REPEAT_REVERSE;
+    if(repeat == "reverse_restart")
+        return IntegerUtil::REPEAT_REVERSE_RESTART;
+    WARN(str == "none", "Unknow Repeat: \"%s, supported enums are [\"none\", \"restart\", \"reverse\", \"reverse_restart\", ...]", str.c_str());
+    return IntegerUtil::REPEAT_NONE;
 }
 
 }

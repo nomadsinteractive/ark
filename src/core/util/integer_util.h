@@ -19,7 +19,8 @@ public:
     enum Repeat {
         REPEAT_NONE,
         REPEAT_RESTART,
-        REPEAT_REVERSE
+        REPEAT_REVERSE,
+        REPEAT_REVERSE_RESTART
     };
 
 //[[script::bindings::constructor]]
@@ -92,12 +93,13 @@ public:
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Integer> {
     public:
-        DICTIONARY(BeanFactory& beanFactory, const String& value);
+        DICTIONARY(BeanFactory& factory, const String& value);
+        DICTIONARY(BeanFactory& factory, const String& value, Repeat repeat);
 
         virtual sp<Integer> build(const sp<Scope>& args) override;
 
     private:
-        sp<Builder<Integer>> makeIntegerBuilder(BeanFactory& factory, const String& expr) const;
+        sp<Builder<Integer>> makeIntegerBuilder(BeanFactory& factory, const String& expr, Repeat repeat) const;
 
     private:
         sp<Builder<Integer>> _value;

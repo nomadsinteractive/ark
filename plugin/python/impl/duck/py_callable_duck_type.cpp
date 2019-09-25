@@ -1,5 +1,7 @@
 #include "python/impl/duck/py_callable_duck_type.h"
 
+#include "core/base/observer.h"
+
 #include "graphics/inf/character_maker.h"
 #include "graphics/inf/character_mapper.h"
 
@@ -87,6 +89,11 @@ PyCallableDuckType::PyCallableDuckType(PyInstance inst)
 void PyCallableDuckType::to(sp<Runnable>& inst)
 {
     inst = sp<PythonCallableRunnable>::make(_instance);
+}
+
+void PyCallableDuckType::to(sp<Observer>& inst)
+{
+    inst = sp<Observer>::make(sp<PythonCallableRunnable>::make(_instance));
 }
 
 void PyCallableDuckType::to(sp<EventListener>& inst)

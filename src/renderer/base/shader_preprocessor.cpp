@@ -95,7 +95,7 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
         return false;
     });
 
-    DCHECK(_main_block, "Undefined ark_main in shader");
+    DCHECK(_main_block, "Parsing source error: \n%s\n Undefined ark_main in shader", source.c_str());
 
     _main_block->parse(buildingContext);
 }

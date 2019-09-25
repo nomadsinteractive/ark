@@ -1,15 +1,12 @@
 #include "core/impl/integer/integer_by_array.h"
 
-#include "core/base/bean_factory.h"
-#include "core/epi/disposed.h"
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
-#include "core/util/documents.h"
 
 namespace ark {
 
 IntegerByArray::IntegerByArray(const sp<IntArray>& array, IntegerUtil::Repeat repeat)
-    : _stub(sp<Stub>::make(array, repeat))
+    : Delegate(array), _repeat(repeat), _position(0), _step(1)
 {
     DCHECK(array && array->length() > 0, "Empty array");
     DCHECK(repeat != IntegerUtil::REPEAT_REVERSE || array->length() > 1, "A reversable array must have at least 2 elements");
@@ -17,20 +14,10 @@ IntegerByArray::IntegerByArray(const sp<IntArray>& array, IntegerUtil::Repeat re
 
 int32_t IntegerByArray::val()
 {
-    return _stub->val();
-}
-
-IntegerByArray::Stub::Stub(const sp<IntArray>& array, IntegerUtil::Repeat repeat)
-    : _array(array), _position(0), _repeat(repeat), _step(1)
-{
-}
-
-int32_t IntegerByArray::Stub::val()
-{
-    int32_t v = _array->buf()[_position];
+    int32_t v = _delegate->buf()[_position];
     if(_step)
     {
-        int32_t length = static_cast<int32_t>(_array->length());
+        int32_t length = static_cast<int32_t>(_delegate->length());
         _position += _step;
         if(_position == length)
         {

@@ -1,5 +1,6 @@
 #include "python/extension/python_interpreter.h"
 
+#include "core/base/observer.h"
 #include "core/base/scope.h"
 #include "core/inf/variable.h"
 #include "core/types/box.h"
@@ -31,12 +32,21 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-sp<Runnable> PythonInterpreter::toRunnable(PyObject* object)
+sp<Runnable> PythonInterpreter::toRunnable(PyObject* object, bool alert)
 {
     if(PyCallable_Check(object))
         return sp<PythonCallableRunnable>::make(PyInstance::own(object));
 
-    return asInterface<Runnable>(object);
+    return asInterface<Runnable>(object, alert);
+}
+
+sp<Observer> PythonInterpreter::toObserver(PyObject* object, bool alert)
+{
+    sp<Runnable> runnable = toRunnable(object, false);
+    if(runnable)
+        return sp<Observer>::make(runnable);
+
+    return asInterface<Observer>(object, alert);
 }
 
 sp<CollisionCallback> PythonInterpreter::toCollisionCallback(PyObject* object)
