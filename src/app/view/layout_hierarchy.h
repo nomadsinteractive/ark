@@ -11,6 +11,7 @@
 #include "graphics/base/v3.h"
 
 #include "app/forwarding.h"
+#include "app/inf/layout.h"
 
 namespace ark {
 
@@ -27,13 +28,15 @@ private:
 
         void updateLayout();
 
-        void doPlace(float clientHeight, const sp<Layout>& layout);
-        void doWrapContentPlace(const sp<Layout>& layout, Rect& contentRect) const;
+        void doPlace(Layout::Context& ctx, float clientHeight, const sp<Layout>& layout);
+        void doWrapContentPlace(Layout::Context& ctx, const sp<Layout>& layout, Rect& contentRect) const;
         void doLayoutEnd(const Rect& p);
 
         void render(RenderRequest& renderRequest, float x, float y);
 
         bool onEventDispatch(const Event& event, float x, float y);
+
+        sp<LayoutParam> getLayoutParam() const;
 
     private:
         float _x, _y;
@@ -61,12 +64,13 @@ public:
 
     void updateLayout(LayoutParam& layoutParam);
 
-    void doWrapContentLayout(LayoutParam& layoutParam);
+    void doWrapContentLayout(Layout::Context& ctx, LayoutParam& layoutParam);
 
     void addRenderer(const sp<Renderer>& renderer);
 
 private:
     bool isLayoutNeeded(const LayoutParam& layoutParam);
+    std::vector<sp<LayoutParam>> getLayoutParams() const;
 
 private:
     sp<Layout> _layout;

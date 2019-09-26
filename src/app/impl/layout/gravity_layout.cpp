@@ -44,20 +44,18 @@ Rect GravityLayout::place(View::Gravity gravity, float clientWidth, float client
     return Rect(x, y, x + width, y + height);
 }
 
-void GravityLayout::begin(LayoutParam& layoutParam)
+void GravityLayout::begin(Context& /*ctx*/, LayoutParam& /*layoutParam*/)
 {
-    _content_width = layoutParam.contentWidth();
-    _content_height = layoutParam.contentHeight();
 }
 
-Rect GravityLayout::place(LayoutParam& layoutParam)
+Rect GravityLayout::place(Context& ctx, LayoutParam& layoutParam)
 {
-    return GravityLayout::place(_gravity, _content_width, _content_height, layoutParam.calcLayoutWidth(_content_width), layoutParam.calcLayoutHeight(_content_height));
+    return GravityLayout::place(_gravity, ctx._client_width, ctx._client_height, layoutParam.calcLayoutWidth(ctx._client_width), layoutParam.calcLayoutHeight(ctx._client_height));
 }
 
-Rect GravityLayout::end()
+Rect GravityLayout::end(Context& ctx)
 {
-    return Rect(0.0f, 0.0f, _content_width, _content_height);
+    return Rect(0.0f, 0.0f, ctx._client_width, ctx._client_height);
 }
 
 GravityLayout::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& doc)

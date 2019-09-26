@@ -13,9 +13,9 @@ class VerticalLayout : public Layout {
 public:
     VerticalLayout(const View::Gravity gravity);
 
-    virtual void begin(LayoutParam& layoutParam) override;
-    virtual Rect place(LayoutParam& layoutParam) override;
-    virtual Rect end() override;
+    virtual void begin(Context& ctx, LayoutParam& layoutParam) override;
+    virtual Rect place(Context& ctx, LayoutParam& layoutParam) override;
+    virtual Rect end(Context& ctx) override;
 
 //  [[plugin::builder("vertical")]]
     class BUILDER : public Builder<Layout> {
@@ -30,8 +30,8 @@ public:
     };
 
 private:
-    float _content_width, _content_height;
     View::Gravity _place_gravity, _end_gravity;
+    float _content_available;
     float _flowy;
     float _max_width;
 };

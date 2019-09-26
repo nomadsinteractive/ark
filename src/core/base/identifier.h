@@ -4,6 +4,8 @@
 #include "core/base/api.h"
 #include "core/base/string.h"
 
+#include "core/collection/table.h"
+
 namespace ark {
 
 class ARK_API Identifier {
@@ -27,6 +29,8 @@ public:
     const String& ref() const;
     const String& val() const;
 
+    const Table<String, String>& queries() const;
+
     String toString() const;
 
     bool isRef() const;
@@ -36,19 +40,24 @@ public:
     enum IdType {
         ID_TYPE_VALUE = 0,
         ID_TYPE_REFERENCE = '@',
-        ID_TYPE_ARGUMENT = '$'
+        ID_TYPE_ARGUMENT = '$',
+        ID_TYPE_QUERY = '?'
     };
 
 private:
-    Identifier(IdType type, const String& package, const String& val);
+    Identifier(IdType type, const String& package, const String& val, const String& queries);
 
-    static bool parseAndVaildate(const String& s, String& package, String& val, Format format);
+    static bool parseAndVaildate(const String& s, String& package, String& val, String& queries, Format format);
+
+    void parseQueries(const String& queries);
 
 private:
     IdType _type;
 
     String _package;
     String _value;
+
+    Table<String, String> _queries;
 
 };
 

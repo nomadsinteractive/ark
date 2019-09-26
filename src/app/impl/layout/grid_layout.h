@@ -13,9 +13,9 @@ class GridLayout : public Layout {
 public:
     GridLayout(uint32_t rows, uint32_t cols, const View::Gravity gravity);
 
-    virtual void begin(LayoutParam& layoutParam) override;
-    virtual Rect place(LayoutParam& layoutParam) override;
-    virtual Rect end() override;
+    virtual void begin(Context& ctx, LayoutParam& layoutParam) override;
+    virtual Rect place(Context& ctx, LayoutParam& layoutParam) override;
+    virtual Rect end(Context& ctx) override;
 
 //  [[plugin::builder("grid")]]
     class BUILDER : public Builder<Layout> {

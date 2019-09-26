@@ -50,7 +50,7 @@ void LayoutHierarchy::Slot::updateLayout()
     _layout_requested = false;
 }
 
-void LayoutHierarchy::Slot::doPlace(float clientHeight, const sp<Layout>& layout)
+void LayoutHierarchy::Slot::doPlace(Layout::Context& ctx, float clientHeight, const sp<Layout>& layout)
 {
     if(_view)
     {
@@ -59,14 +59,14 @@ void LayoutHierarchy::Slot::doPlace(float clientHeight, const sp<Layout>& layout
         if(layoutParam->display() == LayoutParam::DISPLAY_BLOCK)
         {
             const Rect& margins = layoutParam->margins();
-            const Rect target = layout->place(layoutParam);
+            const Rect target = layout->place(ctx, layoutParam);
             _y = clientHeight - target.top() - margins.top() - layoutParam->contentHeight();
             _x = target.left() + margins.left();
         }
     }
 }
 
-void LayoutHierarchy::Slot::doWrapContentPlace(const sp<Layout>& layout, Rect& contentRect) const
+void LayoutHierarchy::Slot::doWrapContentPlace(Layout::Context& ctx, const sp<Layout>& layout, Rect& contentRect) const
 {
     if(_view)
     {
@@ -74,7 +74,7 @@ void LayoutHierarchy::Slot::doWrapContentPlace(const sp<Layout>& layout, Rect& c
         DASSERT(layoutParam);
         if(layoutParam->display() == LayoutParam::DISPLAY_BLOCK)
         {
-            const Rect rect = layout->place(layoutParam);
+            const Rect rect = layout->place(ctx, layoutParam);
             contentRect.setLeft(std::min(contentRect.left(), rect.left()));
             contentRect.setTop(std::min(contentRect.top(), rect.top()));
             contentRect.setRight(std::max(contentRect.right(), rect.right()));
@@ -115,6 +115,11 @@ bool LayoutHierarchy::Slot::onEventDispatch(const Event& event, float x, float y
         return _view->dispatchEvent(viewEvent, event.ptin(target));
     }
     return false;
+}
+
+sp<LayoutParam> LayoutHierarchy::Slot::getLayoutParam() const
+{
+    return _view ? static_cast<sp<LayoutParam>>(_view->layoutParam()) : nullptr;
 }
 
 LayoutHierarchy::LayoutHierarchy(const sp<Layout>& layout)
@@ -173,6 +178,20 @@ bool LayoutHierarchy::isLayoutNeeded(const LayoutParam& layoutParam)
     return layoutNeeded;
 }
 
+std::vector<sp<LayoutParam>> LayoutHierarchy::getLayoutParams() const
+{
+    std::vector<sp<LayoutParam>> layoutParams;
+
+    for(const sp<Slot>& i : _slots)
+    {
+        sp<LayoutParam> lp = i->getLayoutParam();
+        if(lp && lp->display() == LayoutParam::DISPLAY_BLOCK)
+            layoutParams.push_back(std::move(lp));
+    }
+
+    return layoutParams;
+}
+
 void LayoutHierarchy::updateLayout(LayoutParam& layoutParam)
 {
     if(_incremental.size())
@@ -185,15 +204,19 @@ void LayoutHierarchy::updateLayout(LayoutParam& layoutParam)
     {
         if(_layout)
         {
-            if(layoutParam.isWrapContent())
-                doWrapContentLayout(layoutParam);
+            Layout::Context ctx(layoutParam, [this]() {
+                return this->getLayoutParams();
+            });
 
-            _layout->begin(layoutParam);
+            if(layoutParam.isWrapContent())
+                doWrapContentLayout(ctx, layoutParam);
+
+            _layout->begin(ctx, layoutParam);
 
             for(const sp<Slot>& i: _slots)
-                i->doPlace(layoutParam.contentHeight(), _layout);
+                i->doPlace(ctx, layoutParam.contentHeight(), _layout);
 
-            const Rect p = _layout->end();
+            const Rect p = _layout->end(ctx);
             for(const sp<Slot>& i : _slots)
                 i->doLayoutEnd(p);
         }
@@ -203,15 +226,15 @@ void LayoutHierarchy::updateLayout(LayoutParam& layoutParam)
     }
 }
 
-void LayoutHierarchy::doWrapContentLayout(LayoutParam& layoutParam)
+void LayoutHierarchy::doWrapContentLayout(Layout::Context& ctx, LayoutParam& layoutParam)
 {
     LayoutParam lp(layoutParam);
     Rect clientRect;
-    _layout->begin(lp);
+    _layout->begin(ctx, lp);
     for(const sp<Slot>& i: _slots)
-        i->doWrapContentPlace(_layout, clientRect);
+        i->doWrapContentPlace(ctx, _layout, clientRect);
 
-    _layout->end();
+    _layout->end(ctx);
     layoutParam.setContentWidth(clientRect.width());
     layoutParam.setContentHeight(clientRect.height());
 }

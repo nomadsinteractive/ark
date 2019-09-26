@@ -15,14 +15,14 @@ GridLayout::GridLayout(uint32_t rows, uint32_t cols, const View::Gravity gravity
 {
 }
 
-void GridLayout::begin(LayoutParam& layoutParam)
+void GridLayout::begin(Context& ctx, LayoutParam& layoutParam)
 {
     _grid_width = layoutParam.contentWidth() / _cols;
     _grid_height = layoutParam.contentHeight() / _rows;
     _flow_index = 0;
 }
 
-Rect GridLayout::place(LayoutParam& layoutParam)
+Rect GridLayout::place(Context& ctx, LayoutParam& layoutParam)
 {
     DCHECK(_flow_index < _cols * _rows, "Flow index out of bounds");
     Rect rect = GravityLayout::place(_gravity, _grid_width, _grid_height, layoutParam.calcLayoutWidth(_grid_width), layoutParam.calcLayoutHeight(_grid_height));
@@ -31,7 +31,7 @@ Rect GridLayout::place(LayoutParam& layoutParam)
     return rect;
 }
 
-Rect GridLayout::end()
+Rect GridLayout::end(Context& /*ctx*/)
 {
     return Rect();
 }

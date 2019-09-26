@@ -49,7 +49,9 @@ public:
     };
 
 private:
-    Rect getPatches(const document& doc, const Rect& bounds) const;
+    void importAtlasItem(int32_t type, const Rect& paddings, uint32_t textureWidth, uint32_t textureHeight);
+
+    Rect getPatches(const Rect& paddings, const Rect& bounds) const;
 
 private:
     sp<Atlas> _atlas;

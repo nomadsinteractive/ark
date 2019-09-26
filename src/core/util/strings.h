@@ -21,7 +21,7 @@ public:
     static uint32_t hash(const String& text);
 
     static String unwrap(const String& str, char open, char close);
-    static void cut(const String& str, String& left, String& right, char sep);
+    static void cut(const String& str, String& left, String& right, char sep, bool clearValues = true);
     static void rcut(const String& str, String& left, String& right, char sep);
 
     static void parentheses(const String& expr, String& lvalue, String& remaining);

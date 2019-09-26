@@ -17,17 +17,18 @@ HorizontalLayout::HorizontalLayout(const View::Gravity& gravity)
 {
 }
 
-void HorizontalLayout::begin(LayoutParam& layoutParam)
+void HorizontalLayout::begin(Context& ctx, LayoutParam& /*layoutParam*/)
 {
-    _content_width = layoutParam.contentWidth();
-    _content_height = layoutParam.contentHeight();
+    for(const sp<LayoutParam>& i : ctx._layout_param_descriptor())
+        ctx._content_width += i->offsetWidth();
+    _content_available = ctx._client_width - ctx._content_width;
     _flowx = 0.0f;
     _max_height = 0.0f;
 }
 
-Rect HorizontalLayout::place(LayoutParam& layoutParam)
+Rect HorizontalLayout::place(Context& ctx, LayoutParam& layoutParam)
 {
-    Rect rect = GravityLayout::place(_place_gravity, _content_width, _content_height, layoutParam.calcLayoutWidth(_content_width - _flowx), layoutParam.calcLayoutHeight(_content_height));
+    Rect rect = GravityLayout::place(_place_gravity, ctx._client_width, ctx._client_height, layoutParam.calcLayoutWidth(_content_available), layoutParam.calcLayoutHeight(ctx._client_width));
     rect.translate(_flowx, 0);
     _flowx += rect.width();
     if(_max_height < rect.height())
@@ -35,9 +36,9 @@ Rect HorizontalLayout::place(LayoutParam& layoutParam)
     return rect;
 }
 
-Rect HorizontalLayout::end()
+Rect HorizontalLayout::end(Context& ctx)
 {
-    return GravityLayout::place(_end_gravity, _content_width, _content_height, _flowx, _max_height);
+    return GravityLayout::place(_end_gravity, ctx._client_width, ctx._client_height, _flowx, _max_height);
 }
 
 HorizontalLayout::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& doc)

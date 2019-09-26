@@ -18,9 +18,9 @@ public:
 
     static Rect place(View::Gravity gravity, float clientWidth, float clientHeight, float width, float height);
 
-    virtual void begin(LayoutParam& layoutParam) override;
-    virtual Rect place(LayoutParam& layoutParam) override;
-    virtual Rect end() override;
+    virtual void begin(Context& ctx, LayoutParam& layoutParam) override;
+    virtual Rect place(Context& ctx, LayoutParam& layoutParam) override;
+    virtual Rect end(Context& ctx) override;
 
 //  [[plugin::builder("gravity")]]
     class BUILDER : public Builder<Layout> {
@@ -35,7 +35,6 @@ public:
     };
 
 private:
-    float _content_width, _content_height;
     View::Gravity _gravity;
 
 };

@@ -13,9 +13,9 @@ namespace ark {
 class FrameLayout : public Layout {
 public:
 
-    virtual void begin(LayoutParam& layoutParam) override;
-    virtual Rect place(LayoutParam& layoutParam) override;
-    virtual Rect end() override;
+    virtual void begin(Context& ctx, LayoutParam& layoutParam) override;
+    virtual Rect place(Context& ctx, LayoutParam& layoutParam) override;
+    virtual Rect end(Context& ctx) override;
 
 //  [[plugin::builder("frame")]]
     class BUILDER : public Builder<Layout> {

@@ -30,9 +30,11 @@ public:
 
     float contentWidth() const;
     void setContentWidth(float contentWidth);
+    float offsetWidth() const;
 
     float contentHeight() const;
     void setContentHeight(float contentHeight);
+    float offsetHeight() const;
 
     const SafePtr<Size>& size() const;
     void setSize(const sp<Size>& size);

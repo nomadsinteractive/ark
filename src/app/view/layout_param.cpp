@@ -49,7 +49,12 @@ float LayoutParam::calcLayoutHeight(float available)
 
 float LayoutParam::contentWidth() const
 {
-    return _size->width();
+    return std::max(_size->width(), 0.0f);
+}
+
+float LayoutParam::offsetWidth() const
+{
+    return contentWidth() + _margins.left() + _margins.right();
 }
 
 void LayoutParam::setContentWidth(float contentWidth)
@@ -59,7 +64,12 @@ void LayoutParam::setContentWidth(float contentWidth)
 
 float LayoutParam::contentHeight() const
 {
-    return _size->height();
+    return std::max(_size->height(), 0.0f);
+}
+
+float LayoutParam::offsetHeight() const
+{
+    return contentHeight() + _margins.top() + _margins.bottom();
 }
 
 void LayoutParam::setContentHeight(float contentHeight)

@@ -15,17 +15,19 @@ VerticalLayout::VerticalLayout(const View::Gravity gravity)
 {
 }
 
-void VerticalLayout::begin(LayoutParam& layoutParam)
+void VerticalLayout::begin(Context& ctx, LayoutParam& layoutParam)
 {
-    _content_width = layoutParam.contentWidth();
-    _content_height = layoutParam.contentHeight();
+    for(const sp<LayoutParam>& i : ctx._layout_param_descriptor())
+        ctx._content_height += i->offsetHeight();
+
+    _content_available = ctx._client_height - ctx._content_height;
     _flowy = 0.0f;
     _max_width = 0.0f;
 }
 
-Rect VerticalLayout::place(LayoutParam& layoutParam)
+Rect VerticalLayout::place(Context& ctx, LayoutParam& layoutParam)
 {
-    Rect rect = GravityLayout::place(_place_gravity, _content_width, _content_height, layoutParam.calcLayoutWidth(_content_width), layoutParam.calcLayoutHeight(_content_height - _flowy));
+    Rect rect = GravityLayout::place(_place_gravity, ctx._client_width, ctx._client_height, layoutParam.calcLayoutWidth(ctx._client_width), layoutParam.calcLayoutHeight(_content_available));
     rect.translate(0, _flowy);
     _flowy += rect.height();
     if(_max_width < rect.height())
@@ -33,9 +35,9 @@ Rect VerticalLayout::place(LayoutParam& layoutParam)
     return rect;
 }
 
-Rect VerticalLayout::end()
+Rect VerticalLayout::end(Context& ctx)
 {
-    return GravityLayout::place(_end_gravity, _content_width, _content_height, _max_width, _flowy);
+    return GravityLayout::place(_end_gravity, ctx._client_width, ctx._client_height, _max_width, _flowy);
 }
 
 VerticalLayout::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& doc)

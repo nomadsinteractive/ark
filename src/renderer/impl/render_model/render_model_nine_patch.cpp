@@ -3,9 +3,9 @@
 #include "core/dom/dom_document.h"
 #include "core/util/documents.h"
 
+#include "renderer/base/atlas.h"
 #include "graphics/base/layer_context.h"
 
-#include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_bindings.h"
@@ -39,21 +39,26 @@ RenderModelNinePatch::RenderModelNinePatch(const RenderController& renderControl
 {
     uint32_t textureWidth = static_cast<uint32_t>(_atlas->texture()->width());
     uint32_t textureHeight = static_cast<uint32_t>(_atlas->texture()->height());
-    for(const document& node : manifest->children("render-object"))
+    for(const document& node : manifest->children())
     {
-        int32_t type = Documents::getAttribute<int32_t>(node, Constants::Attributes::TYPE, 0);
-        bool hasBounds = atlas->has(type);
-        if(hasBounds)
+        String name = node->name();
+        const Rect paddings = Documents::ensureAttribute<Rect>(node, Constants::Attributes::NINE_PATCH_PADDINGS);
+        if(name == "import")
         {
-            const Atlas::Item& item = atlas->at(type);
-            const Rect bounds(item.left() * textureWidth / 65536.0f - 0.5f, item.bottom() * textureHeight / 65536.0f - 0.5f,
-                              item.right() * textureWidth / 65536.0f + 0.5f, item.top() * textureHeight / 65536.0f + 0.5f);
-            _nine_patch_items.emplace(type, bounds, getPatches(node, bounds), textureWidth, textureHeight);
+            for(const auto& i : _atlas->items()->indices())
+                importAtlasItem(i.first, paddings, textureWidth, textureHeight);
         }
         else
         {
-            const Rect bounds = Rect::parse(node);
-            _nine_patch_items.emplace(type, bounds, getPatches(node, bounds), textureWidth, textureHeight);
+            int32_t type = Documents::getAttribute<int32_t>(node, Constants::Attributes::TYPE, 0);
+            bool hasBounds = atlas->has(type);
+            if(hasBounds)
+                importAtlasItem(type, paddings, textureWidth, textureHeight);
+            else
+            {
+                const Rect bounds = Rect::parse(node);
+                _nine_patch_items.emplace(type, bounds, getPatches(paddings, bounds), textureWidth, textureHeight);
+            }
         }
     }
 }
@@ -94,10 +99,17 @@ void RenderModelNinePatch::load(DrawingBuffer& buf, const RenderObject::Snapshot
     }
 }
 
-Rect RenderModelNinePatch::getPatches(const document& doc, const Rect& bounds) const
+Rect RenderModelNinePatch::getPatches(const Rect& paddings, const Rect& bounds) const
 {
-    const Rect pad = Documents::ensureAttribute<Rect>(doc, Constants::Attributes::NINE_PATCH_PADDINGS);
-    return Rect(pad.left(), pad.top(), bounds.width() - pad.right(), bounds.height() - pad.bottom());
+    return Rect(paddings.left(), paddings.top(), bounds.width() - paddings.right(), bounds.height() - paddings.bottom());
+}
+
+void RenderModelNinePatch::importAtlasItem(int32_t type, const Rect& paddings, uint32_t textureWidth, uint32_t textureHeight)
+{
+    const Atlas::Item& item = _atlas->at(type);
+    const Rect bounds(item.left() * textureWidth / 65536.0f - 0.5f, item.bottom() * textureHeight / 65536.0f - 0.5f,
+                      item.right() * textureWidth / 65536.0f + 0.5f, item.top() * textureHeight / 65536.0f + 0.5f);
+    _nine_patch_items.emplace(type, bounds, getPatches(paddings, bounds), textureWidth, textureHeight);
 }
 
 RenderModelNinePatch::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

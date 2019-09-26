@@ -5,32 +5,35 @@
 
 namespace ark {
 
-Identifier::Identifier(IdType type, const String& package, const String& value)
+Identifier::Identifier(IdType type, const String& package, const String& value, const String& queries)
     : _type(type), _package(package), _value(value)
 {
+    if(queries)
+        parseQueries(queries);
 }
 
 Identifier Identifier::parse(const String& s, Format format)
 {
     DCHECK(s, "Illegal identifier: empty string");
-    String package, value;
+    String package, value, queries;
     IdType idType = static_cast<IdType>(s.at(0));
 
-    if(idType == ID_TYPE_REFERENCE && parseAndVaildate(s.substr(1), package, value, format))
-        return Identifier(ID_TYPE_REFERENCE, package, value);
+    if(idType == ID_TYPE_REFERENCE && parseAndVaildate(s.substr(1), package, value, queries, format))
+        return Identifier(ID_TYPE_REFERENCE, package, value, queries);
 
-    if(idType == ID_TYPE_ARGUMENT && parseAndVaildate(s.substr(1), package, value, format))
-        return Identifier(ID_TYPE_ARGUMENT, package, value);
+    if(idType == ID_TYPE_ARGUMENT && parseAndVaildate(s.substr(1), package, value, queries, format))
+        return Identifier(ID_TYPE_ARGUMENT, package, value, queries);
 
-    return Identifier(ID_TYPE_VALUE, package, s);
+    return Identifier(ID_TYPE_VALUE, package, s, queries);
 }
 
 Identifier Identifier::parseRef(const String& s)
 {
     DCHECK(s, "Illegal identifier: empty string");
-    String package, ref;
-    Strings::cut(s, package, ref, ':');
-    return Identifier(ID_TYPE_REFERENCE, package, ref);
+    String package, ref, queries;
+    parseAndVaildate(s, package, ref, queries, FORMAT_NAMESPACE_STRICT);
+//    Strings::cut(s, package, ref, ':');
+    return Identifier(ID_TYPE_REFERENCE, package, ref, queries);
 }
 
 const String& Identifier::package() const
@@ -51,6 +54,11 @@ const String& Identifier::ref() const
 const String& Identifier::val() const
 {
     return _type == ID_TYPE_VALUE ? _value : String::null();
+}
+
+const Table<String, String>& Identifier::queries() const
+{
+    return _queries;
 }
 
 String Identifier::toString() const
@@ -81,12 +89,26 @@ bool Identifier::isVal() const
     return _type == ID_TYPE_VALUE;
 }
 
-bool Identifier::parseAndVaildate(const String& s, String& package, String& value, Format format)
+bool Identifier::parseAndVaildate(const String& s, String& package, String& value, String& queries, Format format)
 {
-    Strings::cut(s, package, value, ':');
+    String valAndQueries;
+    Strings::cut(s, package, valAndQueries, ':');
+
+    value = valAndQueries;
+    Strings::cut(valAndQueries, value, queries, '?', false);
     if(FORMAT_NAMESPACE_STRICT == format)
         return Strings::isVariableName(package) && Strings::isVariableName(value);
     return true;
+}
+
+void Identifier::parseQueries(const String& queries)
+{
+    for(const String& i : queries.split('&'))
+    {
+        String name, value;
+        Strings::cut(i, name, value, '=');
+        _queries.push_back(name.strip(), value.strip());
+    }
 }
 
 }
