@@ -104,7 +104,7 @@ public:
 private:
     sp<AssetBundle> createAsset(BeanFactory& factory, const Manifest::Asset& manifest) {
         sp<AssetBundle> asset = manifest._protocol.empty() ? _builtin_asset_bundle->getBundle(manifest._src) :
-                                                             factory.build<AssetBundle>(manifest._protocol, manifest._src);
+                                                             factory.build<AssetBundle>(manifest._protocol, manifest._src, {});
         DWARN(asset, "Unable to load AssetBundle, protocol: %s, src: %s", manifest._protocol.c_str(), manifest._src.c_str());
         return asset;
     }

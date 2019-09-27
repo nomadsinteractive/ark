@@ -113,7 +113,7 @@ public:
     public:
         RIGID_BODY_STYLE(BeanFactory& factory, const sp<Builder<RenderObject>>& delegate, const String& value);
 
-        virtual sp<RenderObject> build(const sp<Scope>& args) override;
+        virtual sp<RenderObject> build(const Scope& args) override;
 
     private:
         sp<Builder<RenderObject>> _delegate;

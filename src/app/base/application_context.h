@@ -26,7 +26,7 @@ public:
     ApplicationContext(const sp<ApplicationResource>& applicationResource, const sp<RenderEngine>& renderEngine);
     ~ApplicationContext();
 
-    sp<ResourceLoader> createResourceLoader(const String& name, const sp<Scope>& args);
+    sp<ResourceLoader> createResourceLoader(const String& name, const Scope& args);
     sp<ResourceLoader> createResourceLoader(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     const sp<ApplicationResource>& applicationResource() const;

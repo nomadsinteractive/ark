@@ -22,7 +22,7 @@ FrameLayout::BUILDER::BUILDER()
 {
 }
 
-sp<Layout> FrameLayout::BUILDER::build(const sp<Scope>& /*args*/)
+sp<Layout> FrameLayout::BUILDER::build(const Scope& /*args*/)
 {
     return sp<Layout>::adopt(new FrameLayout());
 }

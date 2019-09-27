@@ -36,7 +36,7 @@ public:
     virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::loader]]
-    template<typename T> const sp<T> load(const String& name, const sp<Scope>& args = nullptr) {
+    template<typename T> const sp<T> load(const String& name, const Scope& args) {
         DCHECK(_resource_loader, "Trying to load objects on a disposed Arena");
         const sp<T> bean = _resource_loader->load<T>(name, args);
         DCHECK(bean, "Cannot build object \"%s\"", name.c_str());
@@ -44,7 +44,7 @@ public:
     }
 
 //  [[script::bindings::auto]]
-    sp<Renderer> loadRenderer(const String& name, const sp<Scope>& args = nullptr);
+    sp<Renderer> loadRenderer(const String& name, const Scope& args);
 //  [[script::bindings::auto]]
     Box getReference(const String& id) const;
 
@@ -78,7 +78,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Arena> build(const sp<Scope>& args) override;
+        virtual sp<Arena> build(const Scope& args) override;
 
     private:
         BeanFactory _factory;

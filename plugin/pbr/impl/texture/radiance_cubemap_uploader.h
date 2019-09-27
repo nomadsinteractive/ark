@@ -22,7 +22,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Texture::Uploader> build(const sp<Scope>& args) override;
+        virtual sp<Texture::Uploader> build(const Scope& args) override;
 
     private:
         sp<Builder<Size>> _size;

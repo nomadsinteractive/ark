@@ -62,7 +62,7 @@ ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, c
 {
 }
 
-sp<Collider> ColliderImpl::BUILDER::build(const sp<Scope>& args)
+sp<Collider> ColliderImpl::BUILDER::build(const Scope& args)
 {
     return sp<ColliderImpl>::make(_tracker->build(args), _manifest, _resource_loader_context);
 }

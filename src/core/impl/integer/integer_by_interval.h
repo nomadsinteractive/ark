@@ -20,7 +20,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Integer> build(const sp<Scope>& args) override;
+        virtual sp<Integer> build(const Scope& args) override;
 
     private:
         sp<Builder<Integer>> _delegate;
@@ -33,7 +33,7 @@ public:
     public:
         STYLE(BeanFactory& factory, const sp<Builder<Integer>>& delegate, const String& value);
 
-        virtual sp<Integer> build(const sp<Scope>& args) override;
+        virtual sp<Integer> build(const Scope& args) override;
 
     private:
         sp<Builder<Integer>> _delegate;

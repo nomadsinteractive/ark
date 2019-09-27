@@ -160,7 +160,7 @@ Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Tilemap> Tilemap::BUILDER::build(const sp<Scope>& args)
+sp<Tilemap> Tilemap::BUILDER::build(const Scope& args)
 {
     sp<Tilemap> tilemap = sp<Tilemap>::make(_layer_context->build(args), _size->build(args), _tileset->build(args), _importer->build(args));
     if(_scrollable)

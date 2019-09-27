@@ -20,7 +20,7 @@ public:
     public:
         STYLE(BeanFactory& factory, const sp<Builder<Alphabet>>& delegate, const String& value);
 
-        virtual sp<Alphabet> build(const sp<Scope>& args) override;
+        virtual sp<Alphabet> build(const Scope& args) override;
 
     private:
         sp<Builder<Alphabet>> _delegate;

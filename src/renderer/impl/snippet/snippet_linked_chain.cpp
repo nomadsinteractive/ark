@@ -48,7 +48,7 @@ SnippetLinkedChain::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& v
 {
 }
 
-sp<Snippet> SnippetLinkedChain::DICTIONARY::build(const sp<Scope>& args)
+sp<Snippet> SnippetLinkedChain::DICTIONARY::build(const Scope& args)
 {
     const std::vector<String> l = Strings::unwrap(_value, '[', ']').split(',');
     DCHECK(l.size() > 0, "Empty list");
@@ -71,7 +71,7 @@ SnippetLinkedChain::BUILDER::BUILDER(BeanFactory& factory, const document& manif
 {
 }
 
-sp<Snippet> SnippetLinkedChain::BUILDER::build(const sp<Scope>& args)
+sp<Snippet> SnippetLinkedChain::BUILDER::build(const Scope& args)
 {
     sp<Snippet> snippet;
     sp<SnippetLinkedChain> chain;
@@ -90,7 +90,7 @@ sp<Snippet> SnippetLinkedChain::BUILDER::build(const sp<Scope>& args)
     return chain ? chain.cast<Snippet>() : snippet;
 }
 
-sp<Snippet> SnippetLinkedChain::BUILDER::_build(const document& manifest, const sp<Scope>& args)
+sp<Snippet> SnippetLinkedChain::BUILDER::_build(const document& manifest, const Scope& args)
 {
     const String type = Documents::getAttribute(manifest, Constants::Attributes::TYPE);
     const String value = Documents::getAttribute(manifest, Constants::Attributes::VALUE);

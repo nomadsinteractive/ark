@@ -167,7 +167,7 @@ RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, co
 {
 }
 
-sp<RenderLayer> RenderLayer::BUILDER::build(const sp<Scope>& args)
+sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
 {
     return sp<RenderLayer>::make(_model->build(args), _shader->build(args), _scissor->build(args), _resource_loader_context);
 }
@@ -177,7 +177,7 @@ RenderLayer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const docu
 {
 }
 
-sp<Renderer> RenderLayer::RENDERER_BUILDER::build(const sp<Scope>& args)
+sp<Renderer> RenderLayer::RENDERER_BUILDER::build(const Scope& args)
 {
     return _impl.build(args);
 }

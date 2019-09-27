@@ -24,7 +24,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& value);
 
-        virtual sp<Snippet> build(const sp<Scope>& args) override;
+        virtual sp<Snippet> build(const Scope& args) override;
 
     private:
         BeanFactory _factory;
@@ -37,10 +37,10 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Snippet> build(const sp<Scope>& args) override;
+        virtual sp<Snippet> build(const Scope& args) override;
 
     private:
-        sp<Snippet> _build(const document& manifest, const sp<Scope>& args);
+        sp<Snippet> _build(const document& manifest, const Scope& args);
 
     private:
         BeanFactory _factory;

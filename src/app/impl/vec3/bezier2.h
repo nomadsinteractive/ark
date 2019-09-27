@@ -25,7 +25,7 @@ public:
     public:
         BUILDER(BeanFactory& parent, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Vec3> build(const sp<Scope>& args) override;
+        virtual sp<Vec3> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _t;

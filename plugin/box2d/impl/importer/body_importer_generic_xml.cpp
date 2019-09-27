@@ -100,7 +100,7 @@ ImporterGenericXML::BUILDER::BUILDER(BeanFactory& factory, const document& manif
 {
 }
 
-sp<World::Importer> ImporterGenericXML::BUILDER::build(const sp<Scope>& args)
+sp<World::Importer> ImporterGenericXML::BUILDER::build(const Scope& args)
 {
     const sp<String> src = _src->build(args);
     const document manifest = _resource_loader_context->documents()->get(src);

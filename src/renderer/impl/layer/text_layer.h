@@ -19,7 +19,7 @@ public:
     public:
         BUILDER(BeanFactory& parent, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        sp<RenderLayer> build(const sp<Scope>& args);
+        sp<RenderLayer> build(const Scope& args);
 
     private:
         RenderLayer::BUILDER _impl;

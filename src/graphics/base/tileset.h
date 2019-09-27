@@ -36,7 +36,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Tileset> build(const sp<Scope>& args) override;
+        virtual sp<Tileset> build(const Scope& args) override;
 
     private:
         uint32_t _tile_width;

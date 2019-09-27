@@ -76,7 +76,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Tilemap> build(const sp<Scope>& args) override;
+        virtual sp<Tilemap> build(const Scope& args) override;
 
     private:
         sp<Builder<LayerContext>> _layer_context;

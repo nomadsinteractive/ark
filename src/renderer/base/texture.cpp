@@ -211,7 +211,7 @@ Texture::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& value, c
 {
 }
 
-sp<Texture> Texture::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<Texture> Texture::DICTIONARY::build(const Scope& /*args*/)
 {
     return _resource_loader_context->textureBundle()->getTexture(_src);
 }
@@ -223,7 +223,7 @@ Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const 
 {
 }
 
-sp<Texture> Texture::BUILDER::build(const sp<Scope>& args)
+sp<Texture> Texture::BUILDER::build(const Scope& args)
 {
     Type type = Documents::getAttribute<Type>(_manifest, Constants::Attributes::TYPE, TYPE_2D);
     const sp<Texture::Parameters> parameters = sp<Texture::Parameters>::make(type, _manifest);

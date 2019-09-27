@@ -23,7 +23,7 @@ Pythagorean::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest
 {
 }
 
-sp<Numeric> Pythagorean::BUILDER::build(const sp<Scope>& args)
+sp<Numeric> Pythagorean::BUILDER::build(const Scope& args)
 {
     return sp<Pythagorean>::make(_a1->build(args), _a2->build(args));
 }

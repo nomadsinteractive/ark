@@ -40,7 +40,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<RenderModel> build(const sp<Scope>& args) override;
+        virtual sp<RenderModel> build(const Scope& args) override;
 
     private:
         document _manifest;

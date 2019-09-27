@@ -23,7 +23,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Shape> build(const sp<Scope>& args) override;
+        virtual sp<Shape> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _sample_count;

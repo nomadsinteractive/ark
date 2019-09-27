@@ -80,7 +80,7 @@ public:
         : _a1(a1), _a2(a2) {
     }
 
-    virtual sp<Boolean> build(const sp<Scope>& args) override {
+    virtual sp<Boolean> build(const Scope& args) override {
         return sp<OP>::make(_a1->build(args), _a2->build(args));
     }
 
@@ -95,7 +95,7 @@ public:
         : _a1(a1) {
     }
 
-    virtual sp<Boolean> build(const sp<Scope>& args) override {
+    virtual sp<Boolean> build(const Scope& args) override {
         return BooleanUtil::negative(_a1->build(args));
     }
 
@@ -127,7 +127,7 @@ public:
 
             const Identifier id = Identifier::parse(expr);
             if(id.isRef())
-                return factory.getBuilderByRef<Boolean>(id.ref());
+                return factory.getBuilderByRef<Boolean>(id);
             if(id.isArg())
                 return factory.getBuilderByArg<Boolean>(id.arg());
         }
@@ -269,7 +269,7 @@ BooleanUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
     DCHECK(_value, "Boolean expression compile failed: %s", expr.c_str());
 }
 
-sp<Boolean> BooleanUtil::DICTIONARY::build(const sp<Scope>& args)
+sp<Boolean> BooleanUtil::DICTIONARY::build(const Scope& args)
 {
     return _value->build(args);
 }
@@ -278,7 +278,7 @@ BooleanUtil::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, getValue(manifest))) {
 }
 
-sp<Boolean> BooleanUtil::BUILDER::build(const sp<Scope>& args)
+sp<Boolean> BooleanUtil::BUILDER::build(const Scope& args)
 {
     return _value->build(args);
 }

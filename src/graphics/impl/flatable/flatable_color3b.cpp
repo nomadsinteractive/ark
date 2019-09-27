@@ -33,7 +33,7 @@ FlatableColor3b::BUILDER::BUILDER(BeanFactory& parent, const String& value)
 {
 }
 
-sp<Flatable> FlatableColor3b::BUILDER::build(const sp<Scope>& args)
+sp<Flatable> FlatableColor3b::BUILDER::build(const Scope& args)
 {
     return sp<FlatableColor3b>::make(_color->build(args));
 }

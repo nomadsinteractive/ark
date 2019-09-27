@@ -52,7 +52,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Shader> build(const sp<Scope>& args) override;
+        virtual sp<Shader> build(const Scope& args) override;
 
     private:
         BeanFactory _factory;

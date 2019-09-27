@@ -22,7 +22,7 @@ SnippetAlphaTest::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& man
 {
 }
 
-sp<Snippet> SnippetAlphaTest::BUILDER::build(const sp<Scope>& /*args*/)
+sp<Snippet> SnippetAlphaTest::BUILDER::build(const Scope& /*args*/)
 {
     return sp<SnippetAlphaTest>::make(_threshold);
 }

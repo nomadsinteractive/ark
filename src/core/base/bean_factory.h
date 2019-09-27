@@ -6,14 +6,13 @@
 #include <unordered_map>
 
 #include "core/base/api.h"
+#include "core/base/identifier.h"
 #include "core/collection/by_type.h"
 #include "core/dom/dom_document.h"
 #include "core/inf/builder.h"
 #include "core/inf/dictionary.h"
-#include "core/impl/builder/builder_by_instance.h"
-#include "core/impl/builder/builder_by_soft_ref.h"
-#include "core/base/identifier.h"
 #include "core/util/documents.h"
+#include "core/types/weak_ptr.h"
 
 namespace ark {
 
@@ -80,7 +79,6 @@ private:
         sp<Builder<T>> createBuilder(BeanFactory& factory, const String& className, const document& doc) const {
             const String id = Documents::getAttribute(doc, Constants::Attributes::ID);
             const String ref = Documents::getAttribute(doc, Constants::Attributes::REF);
-            DCHECK(ref.empty() || ref.at(0) != '#', "Reference \"%s\" may not be hard reference", ref.c_str());
             const String style = Documents::getAttribute(doc, Constants::Attributes::STYLE);
             if(className.empty()) {
                 do {
@@ -112,13 +110,7 @@ private:
             return wrapBuilder(decorateBuilder(factory, builder, style), id);
         }
 
-        sp<Builder<T>> wrapBuilder(sp<Builder<T>> builder, const String& id) const {
-            if(id.empty())
-                return builder;
-            if(id.at(0) == '@')
-                return sp<Builder<T>>::adopt(new BuilderBySoftRef<T>(id.substr(1), _references, std::move(builder)));
-            return builder;
-        }
+        sp<Builder<T>> wrapBuilder(sp<Builder<T>> builder, const String& id) const;
 
         sp<Builder<T>> decorateBuilder(BeanFactory& factory, const sp<Builder<T>>& builder, const String& styles) const {
             if(styles && builder) {
@@ -238,52 +230,52 @@ public:
         if(id.package()) {
             const sp<BeanFactory>& factory = getPackage(id.package());
             DCHECK(factory, "Id: \"%s\"'s package \"%s\" not found", id.toString().c_str(), id.package().c_str());
-            builder = factory ? factory->getBuilderByRef<T>(id.ref()) : nullptr;
+            builder = factory ? factory->getBuilderByRef<T>(id) : nullptr;
         }
         else
-            builder = getBuilderByRef<T>(id.ref());
+            builder = getBuilderByRef<T>(id);
         return builder ? builder : findBuilderByValue<T>(id.toString());
     }
 
-    template<typename T> sp<T> build(const String& value, const sp<Scope>& args = nullptr) {
+    template<typename T> sp<T> build(const String& value, const Scope& args) {
         return buildSafe<T>(getBuilder<T>(value), args);
     }
 
-    template<typename T> sp<T> build(const String& type, const String& value, const sp<Scope>& args = nullptr) {
+    template<typename T> sp<T> build(const String& type, const String& value, const Scope& args) {
         return buildSafe<T>(findBuilderByTypeValue<T>(type, value), args);
     }
 
-    template<typename T> sp<T> build(const document& doc, const sp<Scope>& args = nullptr) {
+    template<typename T> sp<T> build(const document& doc, const Scope& args) {
         return buildSafe<T>(findBuilderByDocument<T>(doc), args);
     }
 
-    template<typename T> sp<T> build(const document& doc, const String& attr, const sp<Scope>& args = nullptr) {
+    template<typename T> sp<T> build(const document& doc, const String& attr, const Scope& args) {
         return buildSafe<T>(getBuilder<T>(doc, attr), args);
     }
 
-    template<typename T> sp<T> ensure(const String& value, const sp<Scope>& args = nullptr) {
+    template<typename T> sp<T> ensure(const String& value, const Scope& args) {
         const sp<T> obj = build<T>(value, args);
         DCHECK(obj, "Counld not build \"%s\"", value.c_str());
         return obj;
     }
 
-    template<typename T> sp<T> ensure(const String& type, const String& value, const sp<Scope>& args = nullptr) {
+    template<typename T> sp<T> ensure(const String& type, const String& value, const Scope& args) {
         return ensureBuilderByTypeValue<T>(type, value)->build(args);
     }
 
-    template<typename T> sp<T> ensure(const document& doc, const sp<Scope>& args = nullptr) {
+    template<typename T> sp<T> ensure(const document& doc, const Scope& args) {
         const sp<T> obj = build<T>(doc, args);
         DCHECK(obj, "Counld not build \"%s\"", Documents::toString(doc).c_str());
         return obj;
     }
 
-    template<typename T> sp<T> ensure(const document& doc, const String& attr, const sp<Scope>& args = nullptr) {
+    template<typename T> sp<T> ensure(const document& doc, const String& attr, const Scope& args) {
         const sp<T> obj = build<T>(doc, attr, args);
         DCHECK(obj, "Counld not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
         return obj;
     }
 
-    template<typename T, typename U> sp<T> buildDecorated(const document& doc, const sp<Scope>& args = nullptr) {
+    template<typename T, typename U> sp<T> buildDecorated(const document& doc, const Scope& args) {
         const sp<Builder<U>> builder = findBuilderByDocument<U>(doc);
         if(!builder)
             return nullptr;
@@ -294,7 +286,7 @@ public:
         return builder->build(args);
     }
 
-    template<typename T, typename U> sp<T> ensureDecorated(const document& doc, const sp<Scope>& args = nullptr) {
+    template<typename T, typename U> sp<T> ensureDecorated(const document& doc, const Scope& args) {
         const sp<T> obj = buildDecorated<T, U>(doc, args);
         DCHECK(obj, "Counld not build \"%s\"", Documents::toString(doc).c_str());
         return obj;
@@ -332,21 +324,8 @@ public:
     }
 
     template<typename T> sp<Builder<T>> getBuilderByArg(const String& argname);
-
     template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id);
-
-    template<typename T> sp<Builder<T>> getBuilderByRef(const String& refid) {
-        const sp<T> inst = _stub->_references->get<T>(refid);
-        if(inst)
-            return sp<BuilderByInstance<T>>::make(inst);
-
-        for(const Factory& i : _stub->_factories) {
-            const sp<Builder<T>> builder = i.findBuilder<T>(refid, *this);
-            if(builder)
-                return builder;
-        }
-        return nullptr;
-    }
+    template<typename T> sp<Builder<T>> getBuilderByRef(const Identifier& id);
 
     template<typename T> sp<Builder<T>> ensureBuilder(const String& id) {
         DCHECK(id, "Empty value being built");
@@ -446,7 +425,7 @@ private:
         return builder;
     }
 
-    template<typename T> sp<T> buildSafe(const sp<Builder<T>>& builder, const sp<Scope>& args) {
+    template<typename T> sp<T> buildSafe(const sp<Builder<T>>& builder, const Scope& args) {
         return builder ? builder->build(args) : nullptr;
     }
 
@@ -456,9 +435,90 @@ private:
 
 }
 
-#include "core/impl/builder/builder_by_argument.h"
+#endif
+
+#ifndef ARK_CORE_BEAN_FACTORY_H_APPENDIX_
+#define ARK_CORE_BEAN_FACTORY_H_APPENDIX_
+
+#include "core/base/scope.h"
 
 namespace ark {
+
+namespace  {
+
+template<typename T> class BuilderBySoftRef : public Builder<T> {
+public:
+    BuilderBySoftRef(String name, const WeakPtr<Scope>& references, sp<Builder<T>> delegate)
+        : _name(std::move(name)), _references(references), _delegate(std::move(delegate)) {
+    }
+
+    virtual sp<T> build(const Scope& args) override {
+        const sp<Scope> reference = _references.lock();
+        DCHECK(reference, "BeanFactory has been disposed");
+        sp<T> inst = reference->get<T>(_name);
+        if(!inst) {
+            inst = _delegate->build(args);
+            DCHECK(inst, "Cannot build \"%s\"", _name.c_str());
+            reference->put(_name, inst);
+            _delegate = nullptr;
+        }
+        return inst;
+    }
+
+private:
+    String _name;
+    WeakPtr<Scope> _references;
+    sp<Builder<T>> _delegate;
+};
+
+template<typename T> class BuilderByArgument : public Builder<T> {
+public:
+    BuilderByArgument(const WeakPtr<Scope>& references, const String& name, const sp<Builder<T>> fallback = nullptr)
+        : _references(references), _name(name), _fallback(std::move(fallback)) {
+    }
+
+    virtual sp<T> build(const Scope& args) override {
+        sp<T> value = args.build<T>(_name, args);
+        if(!value) {
+            const sp<Scope> references = _references.lock();
+            DCHECK(references, "BeanFactory has been disposed");
+            value = references->get<T>(_name);
+        }
+        DCHECK(value || _fallback, "Cannot get argument \"%s\"", _name.c_str());
+        return value ? value : _fallback->build(args);
+    }
+
+private:
+    WeakPtr<Scope> _references;
+    String _name;
+    sp<Builder<T>> _fallback;
+};
+
+template<typename T> class BuilderWithQueries : public Builder<T> {
+public:
+    BuilderWithQueries(sp<Builder<T>> delegate, BeanFactory factory, const Identifier& id)
+        : _delegate(std::move(delegate)), _queries(sp<Scope::Queries>::make(std::move(factory), id.queries())) {
+    }
+
+    virtual sp<T> build(const Scope& args) override {
+        Scope argsAndQueries(args.variables(), _queries);
+        return _delegate->build(argsAndQueries);
+    }
+
+private:
+    sp<Builder<T>> _delegate;
+    sp<Scope::Queries> _queries;
+};
+
+}
+
+template<typename T> sp<Builder<T>> BeanFactory::Worker<T>::wrapBuilder(sp<Builder<T>> builder, const String& id) const {
+    if(id.empty())
+        return builder;
+    if(id.at(0) == '@')
+        return sp<Builder<T>>::adopt(new BuilderBySoftRef<T>(id.substr(1), _references, std::move(builder)));
+    return builder;
+}
 
 template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const String& argname) {
     return sp<BuilderByArgument<T>>::make(_stub->_references, argname);
@@ -467,6 +527,23 @@ template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const String& a
 template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const Identifier& id) {
     DCHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
     return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), findBuilderByValue<T>(id.toString()));
+}
+
+template<typename T> sp<Builder<T>> BeanFactory::getBuilderByRef(const Identifier& id) {
+    String refid = id.ref();
+    const sp<T> inst = _stub->_references->get<T>(refid);
+    if(inst)
+       return sp<typename Builder<T>::Prebuilt>::make(inst);
+
+    for(const Factory& i : _stub->_factories) {
+       const sp<Builder<T>> builder = i.findBuilder<T>(refid, *this);
+       if(builder) {
+           if(id.queries().size())
+               return sp<BuilderWithQueries<T>>::make(builder, *this, id);
+           return builder;
+       }
+    }
+    return nullptr;
 }
 
 }

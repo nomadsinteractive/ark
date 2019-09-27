@@ -23,7 +23,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& value);
 
-        virtual sp<Snippet> build(const sp<Scope>&) override;
+        virtual sp<Snippet> build(const Scope&) override;
 
     private:
         sp<Builder<Vec4>> _color;

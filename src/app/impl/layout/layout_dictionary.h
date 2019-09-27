@@ -16,7 +16,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& value);
 
-        virtual sp<Layout> build(const sp<Scope>&) override;
+        virtual sp<Layout> build(const Scope&) override;
 
     private:
         String _layout;

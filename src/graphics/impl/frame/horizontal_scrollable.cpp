@@ -68,7 +68,7 @@ HorizontalScrollable::BUILDER::BUILDER(BeanFactory& factory, const document& man
 {
 }
 
-sp<Renderer> HorizontalScrollable::BUILDER::build(const sp<Scope>& args)
+sp<Renderer> HorizontalScrollable::BUILDER::build(const Scope& args)
 {
     int32_t width = static_cast<int32_t>(BeanUtils::toFloat(_width, args));
     int32_t tileWidth = static_cast<int32_t>(BeanUtils::toFloat(_tile_width, args));

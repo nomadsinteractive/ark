@@ -45,7 +45,7 @@ PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipe
     _fragment.initialize(fragment, *this);
 }
 
-PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment, BeanFactory& factory, const sp<Scope>& args, const document& manifest)
+PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment, BeanFactory& factory, const Scope& args, const document& manifest)
     : _pipeline_factory(pipelineFactory), _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT)
 {
     loadPredefinedParam(factory, args, manifest);
@@ -54,7 +54,7 @@ PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipe
     _fragment.initialize(fragment, *this);
 }
 
-void PipelineBuildingContext::loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
+void PipelineBuildingContext::loadPredefinedParam(BeanFactory& factory, const Scope& args, const document& manifest)
 {
     loadPredefinedUniform(factory, args, manifest);
     loadPredefinedSampler(factory, args, manifest);
@@ -184,7 +184,7 @@ void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
     }
 }
 
-void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
+void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const Scope& args, const document& manifest)
 {
     for(const document& i : manifest->children("uniform"))
     {
@@ -223,7 +223,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
     }
 }
 
-void PipelineBuildingContext::loadPredefinedSampler(BeanFactory& factory, const sp<Scope>& args, const document& manifest)
+void PipelineBuildingContext::loadPredefinedSampler(BeanFactory& factory, const Scope& args, const document& manifest)
 {
     uint32_t binding = 0;
 

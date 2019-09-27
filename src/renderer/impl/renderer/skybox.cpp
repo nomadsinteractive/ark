@@ -46,7 +46,7 @@ Skybox::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const s
 {
 }
 
-sp<Renderer> Skybox::BUILDER::build(const sp<Scope>& args)
+sp<Renderer> Skybox::BUILDER::build(const Scope& args)
 {
     const sp<Size> size = _size->build(args);
     return sp<Skybox>::make(size, _shader->build(args), _texture->build(args), _resource_loader_context);

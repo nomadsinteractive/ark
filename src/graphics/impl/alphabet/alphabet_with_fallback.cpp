@@ -28,7 +28,7 @@ AlphabetWithFallback::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Alphab
 {
 }
 
-sp<Alphabet> AlphabetWithFallback::STYLE::build(const sp<Scope>& args)
+sp<Alphabet> AlphabetWithFallback::STYLE::build(const Scope& args)
 {
     return sp<AlphabetWithFallback>::make(_delegate->build(args), _fallback->build(args));
 }

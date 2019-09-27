@@ -55,7 +55,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<LayoutParam> build(const sp<Scope>& args) override;
+        virtual sp<LayoutParam> build(const Scope& args) override;
 
     private:
         sp<Builder<Size>> _size;

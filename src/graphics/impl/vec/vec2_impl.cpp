@@ -74,7 +74,7 @@ Vec2Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
     BeanUtils::split<Numeric, Numeric>(factory, str, _x, _y);
 }
 
-sp<Vec2> Vec2Impl::DICTIONARY::build(const sp<Scope>& args)
+sp<Vec2> Vec2Impl::DICTIONARY::build(const Scope& args)
 {
     const sp<Numeric> x = _x->build(args);
     const sp<Numeric> y = _y->build(args);
@@ -86,7 +86,7 @@ Vec2Impl::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
 {
 }
 
-sp<Vec2> Vec2Impl::BUILDER::build(const sp<Scope>& args)
+sp<Vec2> Vec2Impl::BUILDER::build(const Scope& args)
 {
     return sp<Vec2Impl>::make(_x->build(args), _y->build(args));
 }

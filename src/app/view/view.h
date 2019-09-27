@@ -68,7 +68,7 @@ public:
     public:
         DISPLAY_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope> &args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;
@@ -81,7 +81,7 @@ public:
     public:
         SIZE_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope> &args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;
@@ -93,7 +93,7 @@ public:
     public:
         MARGINS_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         BeanFactory _bean_factory;
@@ -107,7 +107,7 @@ public:
     public:
         MARGIN_LEFT_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         BeanFactory _bean_factory;
@@ -121,7 +121,7 @@ public:
     public:
         MARGIN_RIGHT_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         BeanFactory _bean_factory;
@@ -134,7 +134,7 @@ public:
     public:
         MARGIN_TOP_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         BeanFactory _bean_factory;
@@ -147,7 +147,7 @@ public:
     public:
         MARGIN_BOTTOM_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         BeanFactory _bean_factory;
@@ -160,7 +160,7 @@ public:
     public:
         LAYOUT_PARAM_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;
@@ -172,7 +172,7 @@ public:
     public:
         ON_ENTER_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;
@@ -184,7 +184,7 @@ public:
     public:
         ON_LEAVE_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;
@@ -196,7 +196,7 @@ public:
     public:
         ON_PUSH_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;
@@ -208,7 +208,7 @@ public:
     public:
         ON_CLICK_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;
@@ -221,7 +221,7 @@ public:
     public:
         ON_RELEASE_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;
@@ -234,7 +234,7 @@ public:
     public:
         ON_MOVE_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;

@@ -46,7 +46,7 @@ RendererByRenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& m
 {
 }
 
-sp<Renderer> RendererByRenderObject::BUILDER::build(const sp<Scope>& args)
+sp<Renderer> RendererByRenderObject::BUILDER::build(const Scope& args)
 {
     return sp<RendererByRenderObject>::make(_render_object->build(args), _layer_context->build(args));
 }

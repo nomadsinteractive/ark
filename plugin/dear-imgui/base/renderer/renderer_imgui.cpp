@@ -214,7 +214,7 @@ RendererImgui::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, 
 {
 }
 
-sp<Renderer> RendererImgui::BUILDER::build(const sp<Scope>& args)
+sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
 {
     const Viewport& viewport = _resource_loader_context->renderController()->renderEngine()->viewport();
 

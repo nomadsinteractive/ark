@@ -253,7 +253,7 @@ Characters::BUILDER::BUILDER(BeanFactory& factory, const document manifest, cons
 {
 }
 
-sp<Characters> Characters::BUILDER::build(const sp<Scope>& args)
+sp<Characters> Characters::BUILDER::build(const Scope& args)
 {
     return sp<Characters>::make(_layer_context->build(args), _object_pool, _character_mapper->build(args), _character_maker->build(args), _text_scale, _letter_spacing,
                                 _line_height, _line_indent);

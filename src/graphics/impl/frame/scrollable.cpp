@@ -179,7 +179,7 @@ Scrollable::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Renderer> Scrollable::BUILDER::build(const sp<Scope>& args)
+sp<Renderer> Scrollable::BUILDER::build(const Scope& args)
 {
     return sp<Scrollable>::make(_scroller->build(args), _tile_maker->build(args), _size->build(args), _params);
 }

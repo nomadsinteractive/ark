@@ -40,7 +40,7 @@ Polygon::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& manifest)
     }
 }
 
-sp<Shape> Polygon::BUILDER::build(const sp<Scope>& /*args*/)
+sp<Shape> Polygon::BUILDER::build(const Scope& /*args*/)
 {
     return sp<Polygon>::make(_vertices);
 }

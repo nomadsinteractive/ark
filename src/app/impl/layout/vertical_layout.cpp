@@ -45,7 +45,7 @@ VerticalLayout::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& doc)
 {
 }
 
-sp<Layout> VerticalLayout::BUILDER::build(const sp<Scope>& /*args*/)
+sp<Layout> VerticalLayout::BUILDER::build(const Scope& /*args*/)
 {
     return sp<VerticalLayout>::make(_gravity);
 }

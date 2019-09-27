@@ -17,7 +17,7 @@ public:
     public:
         BUILDER() = default;
 
-        virtual sp<Atlas::Importer> build(const sp<Scope>& args) override;
+        virtual sp<Atlas::Importer> build(const Scope& args) override;
     };
 
 };

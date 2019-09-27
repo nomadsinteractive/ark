@@ -31,7 +31,7 @@ IntegerByInterval::BUILDER::BUILDER(BeanFactory& factory, const document& manife
 {
 }
 
-sp<Integer> IntegerByInterval::BUILDER::build(const sp<Scope>& args)
+sp<Integer> IntegerByInterval::BUILDER::build(const Scope& args)
 {
     return sp<IntegerByInterval>::make(_delegate->build(args), _duration->build(args), _interval->build(args));
 }
@@ -41,7 +41,7 @@ IntegerByInterval::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Integer>>
 {
 }
 
-sp<Integer> IntegerByInterval::STYLE::build(const sp<Scope>& args)
+sp<Integer> IntegerByInterval::STYLE::build(const Scope& args)
 {
     const sp<Integer> delegate = _delegate->build(args);
     return sp<IntegerByInterval>::make(delegate, _duration->build(args), _interval->build(args)).absorb(delegate);

@@ -21,7 +21,7 @@ public:
     public:
         STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& value);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;

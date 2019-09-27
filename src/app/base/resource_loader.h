@@ -29,7 +29,7 @@ private:
 
         virtual Box get(const String& refid) override {
             const SafePtr<Builder<T>>& builder = getBuilder(Identifier::parseRef(refid));
-            const sp<T> ptr = builder->build(nullptr);
+            const sp<T> ptr = builder->build({});
             DCHECK(ptr, "ResourceLoader has no object referred as \"%s\"", refid.c_str());
             return ptr;
         }
@@ -67,7 +67,7 @@ public:
     ~ResourceLoader() override;
 
 //  [[script::bindings::loader]]
-    template<typename T> sp<T> load(const String& name, const sp<Scope>& args = nullptr) {
+    template<typename T> sp<T> load(const String& name, const Scope& args) {
         DCHECK(name, "Empty name");
         if(name.at(0) == '#')
             return _bean_factory.getBuilder<T>(name.substr(1))->build(args);
@@ -96,7 +96,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& doc, const sp<ApplicationContext>& applicationContext);
 
-        virtual sp<ResourceLoader> build(const sp<Scope>& args) override;
+        virtual sp<ResourceLoader> build(const Scope& args) override;
 
     private:
         BeanFactory _factory;
@@ -110,7 +110,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& value, const sp<ApplicationContext>& applicationContext);
 
-        virtual sp<ResourceLoader> build(const sp<Scope>& args) override;
+        virtual sp<ResourceLoader> build(const Scope& args) override;
 
     private:
         String _src;

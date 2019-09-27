@@ -106,7 +106,7 @@ Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp
 {
 }
 
-sp<Atlas> Atlas::BUILDER::build(const sp<Scope>& args)
+sp<Atlas> Atlas::BUILDER::build(const Scope& args)
 {
     if(_atlas)
         return _atlas->build(args);

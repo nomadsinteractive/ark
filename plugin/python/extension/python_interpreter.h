@@ -36,8 +36,8 @@ public:
     PythonInterpreter();
 
     sp<Numeric> toNumeric(PyObject* object, bool alert = true);
-    String toString(PyObject* object, const char* encoding = nullptr, const char* error = nullptr);
-    sp<Scope> toScope(PyObject* kws);
+    String toString(PyObject* object, const char* encoding = nullptr, const char* error = nullptr) const;
+    Scope toScope(PyObject* kws) const;
 
     template<typename T> PyObject* toPyObject(const T& obj) {
         return toPyObject_sfinae<T>(obj, nullptr);
@@ -94,13 +94,13 @@ public:
         return pyArkType->ready<T>();
     }
 
-    template<typename T> PyArkType* getPyArkType() {
+    template<typename T> PyArkType* getPyArkType() const {
         auto iter = _type_by_id.find(Type<T>::id());
         DCHECK(iter != _type_by_id.end(), "PyTypeObject not found");
         return reinterpret_cast<PyArkType*>(iter->second);
     }
 
-    template<typename T> bool isInstance(PyObject* object) {
+    template<typename T> bool isInstance(PyObject* object) const {
         return PyObject_IsInstance(object, getPyArkType<T>()->getPyObject()) != 0;
     }
 
@@ -132,7 +132,7 @@ public:
             PyModule_AddObject(module, typeName, pyType.getPyObject());
     }
 
-    bool isPyArkTypeObject(void* pyTypeObject);
+    bool isPyArkTypeObject(void* pyTypeObject) const;
     PyArkType* getPyArkType(PyObject* pyObject);
     PyArkType* ensurePyArkType(PyObject* pyObject);
 
@@ -222,10 +222,10 @@ private:
     sp<CollisionCallback> toCollisionCallback(PyObject* object);
     sp<EventListener> toEventListener(PyObject* object);
 
-    String unicodeToUTF8String(PyObject* object, const char* encoding, const char* error);
+    String unicodeToUTF8String(PyObject* object, const char* encoding, const char* error) const;
 
-    std::wstring pyUnicodeToWString(PyObject* unicode);
-    std::wstring toWString(PyObject* object);
+    std::wstring pyUnicodeToWString(PyObject* unicode) const;
+    std::wstring toWString(PyObject* object) const;
 
 private:
     std::map<TypeId, PyArkType*> _type_by_id;

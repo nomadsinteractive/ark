@@ -6,7 +6,7 @@
 
 namespace ark {
 
-template<> ARK_API float Dictionaries::get<float>(BeanFactory& beanFactory, const String& value, const sp<Scope>& args)
+template<> ARK_API float Dictionaries::get<float>(BeanFactory& beanFactory, const String& value, const Scope& args)
 {
     if(Strings::isNumeric(value))
         return Strings::parse<float>(value);
@@ -15,7 +15,7 @@ template<> ARK_API float Dictionaries::get<float>(BeanFactory& beanFactory, cons
     return var ? var->val() : 0.0f;
 }
 
-template<> ARK_API String Dictionaries::get<String>(BeanFactory& /*beanFactory*/, const String& value, const sp<Scope>& /*args*/)
+template<> ARK_API String Dictionaries::get<String>(BeanFactory& /*beanFactory*/, const String& value, const Scope& /*args*/)
 {
     return value;
 }

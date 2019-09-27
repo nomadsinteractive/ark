@@ -26,7 +26,7 @@ Sine::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
 {
 }
 
-sp<Numeric> Sine::BUILDER::build(const sp<Scope>& args)
+sp<Numeric> Sine::BUILDER::build(const Scope& args)
 {
     return Sine::call(_x->build(args));
 }

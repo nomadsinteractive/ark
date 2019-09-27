@@ -35,7 +35,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& value);
 
-        virtual sp<Visibility> build(const sp<Scope>& args);
+        virtual sp<Visibility> build(const Scope& args);
 
     private:
         sp<Builder<Boolean>> _visible;

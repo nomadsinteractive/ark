@@ -19,7 +19,7 @@ namespace ark {
 class PipelineBuildingContext {
 public:
     PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment);
-    PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment, BeanFactory& factory, const sp<Scope>& args, const document& manifest);
+    PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment, BeanFactory& factory, const Scope& args, const document& manifest);
 
     void initialize();
 
@@ -53,11 +53,11 @@ public:
 private:
     Attribute makePredefinedAttribute(const String& name, const String& type);
 
-    void loadPredefinedParam(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
+    void loadPredefinedParam(BeanFactory& factory, const Scope& args, const document& manifest);
 
     void loadPredefinedAttribute(const document& manifest);
-    void loadPredefinedUniform(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
-    void loadPredefinedSampler(BeanFactory& factory, const sp<Scope>& args, const document& manifest);
+    void loadPredefinedUniform(BeanFactory& factory, const Scope& args, const document& manifest);
+    void loadPredefinedSampler(BeanFactory& factory, const Scope& args, const document& manifest);
 };
 
 }

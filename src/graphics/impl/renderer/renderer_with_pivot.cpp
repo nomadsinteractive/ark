@@ -41,7 +41,7 @@ RendererWithPivot::STYLE::STYLE(BeanFactory& /*factory*/, const sp<Builder<Rende
 {
 }
 
-sp<Renderer> RendererWithPivot::STYLE::build(const sp<Scope>& args)
+sp<Renderer> RendererWithPivot::STYLE::build(const Scope& args)
 {
     const sp<Renderer> bean = _delegate->build(args);
     return sp<Renderer>::adopt(new RendererWithPivot(bean, _pivot)).absorb(bean);

@@ -25,7 +25,7 @@ Acos::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
 {
 }
 
-sp<Numeric> Acos::BUILDER::build(const sp<Scope>& args)
+sp<Numeric> Acos::BUILDER::build(const Scope& args)
 {
     return sp<Acos>::make(_x->build(args));
 }

@@ -18,7 +18,7 @@ public:
     public:
         DICTIONARY() = default;
 
-        virtual sp<TilesetImporter> build(const sp<Scope>& args) override;
+        virtual sp<TilesetImporter> build(const Scope& args) override;
     };
 
 };

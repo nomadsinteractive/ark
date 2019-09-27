@@ -10,7 +10,7 @@ void SnippetAcolor::preInitialize(PipelineBuildingContext& context)
     context._fragment.addModifier("v_Color");
 }
 
-sp<Snippet> SnippetAcolor::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<Snippet> SnippetAcolor::DICTIONARY::build(const Scope& /*args*/)
 {
     return sp<SnippetAcolor>::make();
 }

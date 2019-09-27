@@ -31,10 +31,10 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Button> build(const sp<Scope>& args) override;
+        virtual sp<Button> build(const Scope& args) override;
 
     private:
-        void loadStatus(const sp<Button>& button, const document& doc, BeanFactory& args, const sp<Scope>&);
+        void loadStatus(const sp<Button>& button, const document& doc, BeanFactory& args, const Scope&);
 
     private:
         BeanFactory _factory;
@@ -49,7 +49,7 @@ public:
     public:
         BUILDER_IMPL2(BeanFactory& parent, const document& doc);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         BUILDER _delegate;

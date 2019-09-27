@@ -60,14 +60,14 @@ public:
 
     TypeId typeId() const;
 
-    PyObject* load(Instance& inst, const String& loader, TypeId typeId, const String& id, const sp<Scope>& args) const;
+    PyObject* load(Instance& inst, const String& loader, TypeId typeId, const String& id, const Scope& args) const;
 
     PyObject* getPyObject();
     PyTypeObject* getPyTypeObject();
 
     PyObject* create(const Box& box);
 
-    typedef Box (*LoaderFunction)(Instance&, const String&, const sp<Scope>&);
+    typedef Box (*LoaderFunction)(Instance&, const String&, const Scope&);
     std::map<TypeId, LoaderFunction>& ensureLoader(const String& name);
 
 protected:
@@ -79,7 +79,7 @@ private:
 
     const std::map<TypeId, LoaderFunction>& getLoader(const String& name) const;
 
-//    PyObject* wrap(Instance& inst, const Box& box, const sp<Scope>& args) const;
+//    PyObject* wrap(Instance& inst, const Box& box, const Scope& args) const;
 
     static PyTypeObject* basetype();
 

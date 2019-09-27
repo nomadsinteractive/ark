@@ -85,7 +85,7 @@ Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
         _shader = factory.ensureBuilder<Shader>(manifest, Constants::Attributes::SHADER);
 }
 
-sp<Varyings> Varyings::BUILDER::build(const sp<Scope>& args)
+sp<Varyings> Varyings::BUILDER::build(const Scope& args)
 {
     if(!_shader)
         return nullptr;

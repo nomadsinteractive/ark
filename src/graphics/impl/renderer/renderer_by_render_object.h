@@ -25,7 +25,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<RenderObject>> _render_object;

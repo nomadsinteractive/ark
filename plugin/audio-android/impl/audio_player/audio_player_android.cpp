@@ -191,7 +191,7 @@ AudioPlayerAndroid::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& /
 {
 }
 
-sp<AudioPlayer> AudioPlayerAndroid::BUILDER::build(const sp<Scope>& /*args*/)
+sp<AudioPlayer> AudioPlayerAndroid::BUILDER::build(const Scope& /*args*/)
 {
     return sp<AudioPlayerAndroid>::make(_resource_loader_context);
 }
@@ -201,7 +201,7 @@ AudioPlayerAndroid::BUILDER_DEFAULT::BUILDER_DEFAULT(BeanFactory& factory, const
 {
 }
 
-sp<AudioPlayer> AudioPlayerAndroid::BUILDER_DEFAULT::build(const sp<Scope>& args)
+sp<AudioPlayer> AudioPlayerAndroid::BUILDER_DEFAULT::build(const Scope& args)
 {
     return _delegate.build(args);
 }

@@ -148,7 +148,7 @@ World::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manife
         _importers.push_back(_factory.ensureBuilder<Importer>(i));
 }
 
-sp<World> World::BUILDER_IMPL1::build(const sp<Scope>& args)
+sp<World> World::BUILDER_IMPL1::build(const Scope& args)
 {
     b2Vec2 gravity(BeanUtils::toFloat(_gravity_x, args), BeanUtils::toFloat(_gravity_y, args));
     const sp<World> world = sp<World>::make(gravity, BeanUtils::toFloat(_ppmx, args), BeanUtils::toFloat(_ppmy, args));
@@ -180,7 +180,7 @@ World::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& factory, const document& manife
 {
 }
 
-sp<Collider> World::BUILDER_IMPL2::build(const sp<Scope>& args)
+sp<Collider> World::BUILDER_IMPL2::build(const Scope& args)
 {
     return _delegate.build(args);
 }

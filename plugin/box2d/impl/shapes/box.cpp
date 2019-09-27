@@ -23,7 +23,7 @@ Box::BUILDER::BUILDER()
 {
 }
 
-sp<Shape> Box::BUILDER::build(const sp<Scope>& /*args*/)
+sp<Shape> Box::BUILDER::build(const Scope& /*args*/)
 {
     return sp<Box>::make();
 }

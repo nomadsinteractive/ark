@@ -63,7 +63,7 @@ Rotate::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Rotate> Rotate::BUILDER::build(const sp<Scope>& args)
+sp<Rotate> Rotate::BUILDER::build(const Scope& args)
 {
     return sp<Rotate>::make(_rotation->build(args));
 }
@@ -73,7 +73,7 @@ Rotate::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
 {
 }
 
-sp<Rotate> Rotate::DICTIONARY::build(const sp<Scope>& args)
+sp<Rotate> Rotate::DICTIONARY::build(const Scope& args)
 {
     return sp<Rotate>::make(_rotation->build(args));
 }

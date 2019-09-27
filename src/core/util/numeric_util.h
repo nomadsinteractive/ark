@@ -124,7 +124,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& expr);
 
-        virtual sp<Numeric> build(const sp<Scope>& args) override;
+        virtual sp<Numeric> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _value;
@@ -135,7 +135,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Numeric> build(const sp<Scope>& args) override;
+        virtual sp<Numeric> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _value;

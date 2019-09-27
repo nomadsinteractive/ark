@@ -22,7 +22,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& doc);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<RendererMaker>> _tile_maker;

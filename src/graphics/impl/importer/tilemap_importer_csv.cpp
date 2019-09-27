@@ -36,7 +36,7 @@ void TilemapImporterCsv::import(Tilemap& tilemap, const sp<Readable>& src)
 //    DCHECK(rowCount == tilemap.rowCount(), "Insufficient rows, got %d, should be %d", rowCount, tilemap.rowCount());
 }
 
-sp<TilemapImporter> TilemapImporterCsv::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<TilemapImporter> TilemapImporterCsv::DICTIONARY::build(const Scope& /*args*/)
 {
     return sp<TilemapImporterCsv>::make();
 }

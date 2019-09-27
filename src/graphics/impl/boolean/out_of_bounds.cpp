@@ -25,7 +25,7 @@ OutOfBounds::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
 {
 }
 
-sp<Boolean> OutOfBounds::BUILDER::build(const sp<Scope>& args)
+sp<Boolean> OutOfBounds::BUILDER::build(const Scope& args)
 {
     return sp<OutOfBounds>::make(_bounds->build(args), _position->build(args));
 }

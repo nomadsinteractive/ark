@@ -22,10 +22,10 @@ public:
     public:
         BUILDER(BeanFactory& beanFactory, const document& manifest);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        void loadGroup(RendererGroup& rendererGroup, const sp<Scope>& args);
+        void loadGroup(RendererGroup& rendererGroup, const Scope& args);
 
     private:
         BeanFactory _factory;

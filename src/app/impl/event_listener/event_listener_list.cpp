@@ -22,7 +22,7 @@ EventListenerList::BUILDER::BUILDER(BeanFactory& factory, const document& manife
 {
 }
 
-sp<EventListener> EventListenerList::BUILDER::build(const sp<Scope>& /*args*/)
+sp<EventListener> EventListenerList::BUILDER::build(const Scope& /*args*/)
 {
     return sp<EventListenerList>::make();
 }

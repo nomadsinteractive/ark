@@ -27,7 +27,7 @@ Cosine::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
 {
 }
 
-sp<Numeric> Cosine::BUILDER::build(const sp<Scope>& args)
+sp<Numeric> Cosine::BUILDER::build(const Scope& args)
 {
     return Cosine::call(_x->build(args));
 }

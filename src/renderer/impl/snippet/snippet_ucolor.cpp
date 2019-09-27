@@ -24,7 +24,7 @@ SnippetUColor::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
 {
 }
 
-sp<Snippet> SnippetUColor::DICTIONARY::build(const sp<Scope>& args)
+sp<Snippet> SnippetUColor::DICTIONARY::build(const Scope& args)
 {
     return sp<SnippetUColor>::make(_color->build(args));
 }

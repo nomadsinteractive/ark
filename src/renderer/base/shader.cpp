@@ -36,7 +36,7 @@ public:
           _camera(factory.getBuilder<Camera>(doc, Constants::Attributes::CAMERA)), _pipeline_bindings_flag(Documents::getAttribute<PipelineBindings::Flag>(_manifest, "flags", PipelineBindings::FLAG_DEFAULT_VALUE)) {
     }
 
-    virtual sp<Shader> build(const sp<Scope>& args) override {
+    virtual sp<Shader> build(const Scope& args) override {
         sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller->createPipelineFactory(), _vertex, _fragment, _factory, args, _manifest);
         sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);
         sp<Camera> camera = _camera->build(args);
@@ -133,7 +133,7 @@ Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const s
 {
 }
 
-sp<Shader> Shader::BUILDER::build(const sp<Scope>& args)
+sp<Shader> Shader::BUILDER::build(const Scope& args)
 {
     const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_resource_loader_context->renderController()->createPipelineFactory(), _vertex->build(args), _fragment->build(args), _factory, args, _manifest);
     if(_snippet)

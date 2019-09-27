@@ -23,7 +23,7 @@ RendererWithVisibility::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Rend
 {
 }
 
-sp<Renderer> RendererWithVisibility::STYLE::build(const sp<Scope>& args)
+sp<Renderer> RendererWithVisibility::STYLE::build(const Scope& args)
 {
     const sp<Renderer> delegate = _delegate->build(args);
     const sp<Visibility> visibility =  _visibility->build(args);

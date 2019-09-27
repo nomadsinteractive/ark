@@ -9,7 +9,7 @@ namespace ark {
 
 class Dictionaries {
 public:
-    template<typename T> static T get(BeanFactory& beanFactory, const String& value, const sp<Scope>& args);
+    template<typename T> static T get(BeanFactory& beanFactory, const String& value, const Scope& args);
 
 };
 

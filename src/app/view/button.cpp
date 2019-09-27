@@ -1,7 +1,6 @@
 #include "app/view/button.h"
 
 #include "core/inf/runnable.h"
-#include "core/impl/builder/builder_by_instance.h"
 #include "core/types/null.h"
 #include "core/util/documents.h"
 #include "core/util/log.h"
@@ -82,7 +81,7 @@ Button::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Button> Button::BUILDER::build(const sp<Scope>& args)
+sp<Button> Button::BUILDER::build(const Scope& args)
 {
     const sp<Renderer> foreground = _foreground->build(args);
     const Frame background = _background->build(args);
@@ -92,11 +91,11 @@ sp<Button> Button::BUILDER::build(const sp<Scope>& args)
     const sp<Button> button = sp<Button>::make(foreground, background.renderer(), size, _gravity ? Strings::parse<Gravity>(_gravity) : CENTER);
     loadStatus(button, _manifest, _factory, args);
     if(style)
-        _factory.decorate<Renderer>(sp<BuilderByInstance<Renderer>>::make(button), style)->build(args);
+        _factory.decorate<Renderer>(sp<Builder<Renderer>::Prebuilt>::make(button), style)->build(args);
     return button;
 }
 
-void Button::BUILDER::loadStatus(const sp<Button>& button, const document& doc, BeanFactory& factory, const sp<Scope>& args)
+void Button::BUILDER::loadStatus(const sp<Button>& button, const document& doc, BeanFactory& factory, const Scope& args)
 {
     for(const document& node : doc->children("state"))
     {
@@ -115,7 +114,7 @@ Button::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& parent, const document& doc)
 {
 }
 
-sp<Renderer> Button::BUILDER_IMPL2::build(const sp<Scope>& args)
+sp<Renderer> Button::BUILDER_IMPL2::build(const Scope& args)
 {
     return _delegate.build(args);
 }

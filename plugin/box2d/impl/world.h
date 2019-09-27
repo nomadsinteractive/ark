@@ -76,10 +76,10 @@ public:
     public:
         BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<World> build(const sp<Scope>& args) override;
+        virtual sp<World> build(const Scope& args) override;
 
     private:
-        void createBody(Collider::BodyType type, const sp<World>& world, const document& manifest, const sp<Scope>& args);
+        void createBody(Collider::BodyType type, const sp<World>& world, const document& manifest, const Scope& args);
 
     private:
         BeanFactory _factory;
@@ -98,7 +98,7 @@ public:
     public:
         BUILDER_IMPL2(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Collider> build(const sp<Scope>& args) override;
+        virtual sp<Collider> build(const Scope& args) override;
 
     private:
         BUILDER_IMPL1 _delegate;

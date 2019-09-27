@@ -33,7 +33,7 @@ Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     _characters = cid ? factory.ensureBuilder<Characters>(cid) : factory.ensureBuilder<Characters>(manifest);
 }
 
-sp<Renderer> Text::BUILDER::build(const sp<Scope>& args)
+sp<Renderer> Text::BUILDER::build(const Scope& args)
 {
     const sp<Characters> chars = _characters->build(args);
     const sp<LayoutParam> layoutParam = _layout_param->build(args);

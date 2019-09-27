@@ -195,7 +195,7 @@ RenderModelAssimp::BUILDER::BUILDER(const document& manifest, const sp<ResourceL
     : _resource_loader_context(resourceLoaderContext), _manifest(manifest) {
 }
 
-sp<RenderModel> RenderModelAssimp::BUILDER::build(const sp<Scope>& /*args*/)
+sp<RenderModel> RenderModelAssimp::BUILDER::build(const Scope& /*args*/)
 {
     return sp<RenderModelAssimp>::make(_resource_loader_context, _manifest);
 }

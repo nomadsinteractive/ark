@@ -61,7 +61,7 @@ ShaderFrame::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, co
 {
 }
 
-sp<Renderer> ShaderFrame::BUILDER::build(const sp<Scope>& args)
+sp<Renderer> ShaderFrame::BUILDER::build(const Scope& args)
 {
     const sp<Size> size = _size->build(args);
     const sp<Shader> shader = _shader->build(args);

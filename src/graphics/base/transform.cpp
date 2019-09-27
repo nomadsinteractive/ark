@@ -129,7 +129,7 @@ Transform::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Transform> Transform::BUILDER::build(const sp<Scope>& args)
+sp<Transform> Transform::BUILDER::build(const Scope& args)
 {
     return sp<Transform>::make(_rotate->build(args), _scale->build(args), _pivot->build(args));
 }
@@ -139,7 +139,7 @@ Transform::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
 {
 }
 
-sp<Transform> Transform::DICTIONARY::build(const sp<Scope>& args)
+sp<Transform> Transform::DICTIONARY::build(const Scope& args)
 {
     return _impl.build(args);
 }

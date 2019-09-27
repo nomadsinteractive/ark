@@ -230,7 +230,7 @@ RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<RenderObject> RenderObject::BUILDER::build(const sp<Scope>& args)
+sp<RenderObject> RenderObject::BUILDER::build(const Scope& args)
 {
     return sp<RenderObject>::make(_type->build(args), _position->build(args), _size->build(args), _transform->build(args), _varyings->build(args), _disposed->build(args));
 }

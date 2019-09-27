@@ -22,7 +22,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Duration> build(const sp<Scope>& args) override;
+        virtual sp<Duration> build(const Scope& args) override;
 
     private:
         sp<Builder<Clock>> _clock;
@@ -35,7 +35,7 @@ public:
     public:
         NUMERIC_BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Numeric> build(const sp<Scope>& args) override;
+        virtual sp<Numeric> build(const Scope& args) override;
 
     private:
         BUILDER _builder;
@@ -46,7 +46,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory);
 
-        virtual sp<Duration> build(const sp<Scope>& args) override;
+        virtual sp<Duration> build(const Scope& args) override;
     };
 
 

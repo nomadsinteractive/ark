@@ -39,7 +39,7 @@ Damper::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
  *      o = (s1 ^ 2 - s2 ^ 2 + v ^ 2) / (s1 - s2) / 2
  */
 
-sp<Numeric> Damper::BUILDER::build(const sp<Scope>& args)
+sp<Numeric> Damper::BUILDER::build(const Scope& args)
 {
     const sp<Numeric> t = _duration->build(args);
     float v = BeanUtils::toFloat(_v, args);

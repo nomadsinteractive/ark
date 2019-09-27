@@ -96,7 +96,7 @@ public:
         DICTIONARY(BeanFactory& factory, const String& value);
         DICTIONARY(BeanFactory& factory, const String& value, Repeat repeat);
 
-        virtual sp<Integer> build(const sp<Scope>& args) override;
+        virtual sp<Integer> build(const Scope& args) override;
 
     private:
         sp<Builder<Integer>> makeIntegerBuilder(BeanFactory& factory, const String& expr, Repeat repeat) const;
@@ -110,7 +110,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Integer> build(const sp<Scope>& args) override;
+        virtual sp<Integer> build(const Scope& args) override;
 
     private:
         DICTIONARY _delegate;

@@ -71,7 +71,7 @@ AlphabetTrueType::BUILDER::BUILDER(BeanFactory& factory, const document manifest
 {
 }
 
-sp<Alphabet> AlphabetTrueType::BUILDER::build(const sp<Scope>& args)
+sp<Alphabet> AlphabetTrueType::BUILDER::build(const Scope& args)
 {
     return sp<AlphabetTrueType>::make(_src->build(args), _text_size);
 }

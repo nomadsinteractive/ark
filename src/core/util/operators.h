@@ -115,7 +115,7 @@ public:
             : _a1(a1), _a2(a2) {
         }
 
-        virtual sp<Variable<T>> build(const sp<Scope>& args) override {
+        virtual sp<Variable<T>> build(const Scope& args) override {
             return sp<VariableOP2<T, T, OP, sp<Variable<T>>, sp<Variable<T>>>>::make(_a1->build(args), _a2->build(args));
         }
 

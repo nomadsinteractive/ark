@@ -22,7 +22,7 @@ public:
     public:
         BUILDER(BeanFactory& parent, const document& doc);
 
-        virtual sp<Numeric> build(const sp<Scope>& args) override;
+        virtual sp<Numeric> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _y;

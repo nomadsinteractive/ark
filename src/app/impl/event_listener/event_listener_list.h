@@ -18,7 +18,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<EventListener> build(const sp<Scope>& args) override;
+        virtual sp<EventListener> build(const Scope& args) override;
 
     };
 

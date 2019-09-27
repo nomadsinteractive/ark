@@ -65,7 +65,7 @@ GLSnippetClipPlane::BUILDER::BUILDER(BeanFactory& factory, const document& manif
     }
 }
 
-sp<Snippet> GLSnippetClipPlane::BUILDER::build(const sp<Scope>& args)
+sp<Snippet> GLSnippetClipPlane::BUILDER::build(const Scope& args)
 {
     const sp<GLSnippetClipPlane> snippet = sp<GLSnippetClipPlane>::make();
     for(const auto& i : _planes)

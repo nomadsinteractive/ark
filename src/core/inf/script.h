@@ -14,7 +14,7 @@ public:
 
     typedef std::vector<Box> Arguments;
 
-    virtual void run(const sp<Asset>& script, const sp<Scope>& vars) = 0;
+    virtual void run(const sp<Asset>& script, const Scope& vars) = 0;
     virtual Box call(const String& function, const Arguments& args) = 0;
 
 };

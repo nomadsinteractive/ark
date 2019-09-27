@@ -10,7 +10,7 @@ RendererWithExpired::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Rendere
 {
 }
 
-sp<Renderer> RendererWithExpired::STYLE::build(const sp<Scope>& args)
+sp<Renderer> RendererWithExpired::STYLE::build(const Scope& args)
 {
     sp<Renderer> bean = _delegate->build(args);
     return bean.absorb<Disposed>(_disposed->build(args));
@@ -22,7 +22,7 @@ RendererWithExpired::STYLE_DISPOSABLE::STYLE_DISPOSABLE(BeanFactory& /*factory*/
     DWARN(value.empty(), "Style \"disposable\" has unnecessary value: \"%s\"", value.c_str());
 }
 
-sp<Renderer> RendererWithExpired::STYLE_DISPOSABLE::build(const sp<Scope>& args)
+sp<Renderer> RendererWithExpired::STYLE_DISPOSABLE::build(const Scope& args)
 {
     sp<Renderer> bean = _delegate->build(args);
     return bean.absorb<Disposed>(sp<Disposed>::make());

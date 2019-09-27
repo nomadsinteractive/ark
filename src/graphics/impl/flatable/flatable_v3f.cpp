@@ -13,7 +13,7 @@ FlatableV3f::BUILDER::BUILDER(BeanFactory& factory, const String& value)
 {
 }
 
-sp<Flatable> FlatableV3f::BUILDER::build(const sp<Scope>& args)
+sp<Flatable> FlatableV3f::BUILDER::build(const Scope& args)
 {
     return sp<FlatableByVariable<V3>>::make(_vec3->build(args));
 }

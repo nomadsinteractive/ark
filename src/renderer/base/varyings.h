@@ -74,7 +74,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Varyings> build(const sp<Scope>& args) override;
+        virtual sp<Varyings> build(const Scope& args) override;
 
     private:
         BeanFactory _factory;

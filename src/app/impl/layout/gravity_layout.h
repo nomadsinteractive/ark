@@ -27,7 +27,7 @@ public:
     public:
         BUILDER(BeanFactory& parent, const document& doc);
 
-        virtual sp<Layout> build(const sp<Scope>& args) override;
+        virtual sp<Layout> build(const Scope& args) override;
 
     private:
         View::Gravity _gravity;

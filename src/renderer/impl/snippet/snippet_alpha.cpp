@@ -10,7 +10,7 @@ void SnippetAlpha::preInitialize(PipelineBuildingContext& context)
     context._fragment.addModifier("vec4(1.0, 1.0, 1.0, v_Alpha)");
 }
 
-sp<Snippet> SnippetAlpha::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<Snippet> SnippetAlpha::DICTIONARY::build(const Scope& /*args*/)
 {
     return sp<SnippetAlpha>::make();
 }

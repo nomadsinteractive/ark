@@ -27,7 +27,7 @@ Focus::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Numeric> Focus::BUILDER::build(const sp<Scope>& args)
+sp<Numeric> Focus::BUILDER::build(const Scope& args)
 {
     return sp<Numeric>::adopt(new Focus(_target->build(args), _nearest->build(args)->val(), _farest->build(args)->val(), _value->build(args)->val()));
 }

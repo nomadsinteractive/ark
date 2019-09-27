@@ -52,7 +52,7 @@ Layer::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manife
         _render_objects.push_back(factory.ensureBuilder<RenderObject>(i));
 }
 
-sp<Layer> Layer::BUILDER_IMPL1::build(const sp<Scope>& args)
+sp<Layer> Layer::BUILDER_IMPL1::build(const Scope& args)
 {
     const sp<RenderLayer> renderLayer = _render_layer->build(args);
     const sp<Layer> layer = sp<Layer>::make(renderLayer->makeContext(_type));
@@ -67,7 +67,7 @@ Layer::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& factory, const document& manife
 {
 }
 
-sp<Renderer> Layer::BUILDER_IMPL2::build(const sp<Scope>& args)
+sp<Renderer> Layer::BUILDER_IMPL2::build(const Scope& args)
 {
     return _builder_impl.build(args);
 }

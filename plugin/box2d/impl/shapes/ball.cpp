@@ -26,7 +26,7 @@ Ball::BUILDER::BUILDER()
 {
 }
 
-sp<Shape> Ball::BUILDER::build(const sp<Scope>& args)
+sp<Shape> Ball::BUILDER::build(const Scope& args)
 {
     return sp<Ball>::make();
 }

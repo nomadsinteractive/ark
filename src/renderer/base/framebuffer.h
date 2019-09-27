@@ -24,7 +24,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Framebuffer> build(const sp<Scope>& args) override;
+        virtual sp<Framebuffer> build(const Scope& args) override;
 
     private:
         sp<RenderController> _render_controller;
@@ -37,7 +37,7 @@ public:
     public:
         RENDERER_BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<Framebuffer>> _framebuffer;

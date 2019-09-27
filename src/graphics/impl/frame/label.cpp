@@ -26,7 +26,7 @@ Label::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Renderer> Label::BUILDER::build(const sp<Scope>& args)
+sp<Renderer> Label::BUILDER::build(const Scope& args)
 {
     const sp<Characters> chars = _characters->build(args);
     const sp<String> text = _text->build(args);

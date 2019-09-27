@@ -22,7 +22,7 @@ LayoutDictionary::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String&
     DCHECK(_gravity != View::NONE, "Invaild gravity value: \"%s\"", value.c_str());
 }
 
-sp<Layout> LayoutDictionary::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<Layout> LayoutDictionary::DICTIONARY::build(const Scope& /*args*/)
 {
     if(_layout == "vertical")
         return sp<VerticalLayout>::make(_gravity);

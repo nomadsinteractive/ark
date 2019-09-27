@@ -120,7 +120,7 @@ AudioPlayerFMOD::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& /*ma
 {
 }
 
-sp<AudioPlayer> AudioPlayerFMOD::BUILDER::build(const sp<Scope>& /*args*/)
+sp<AudioPlayer> AudioPlayerFMOD::BUILDER::build(const Scope& /*args*/)
 {
     return sp<AudioPlayerFMOD>::make(_resource_loader_context);
 }
@@ -162,7 +162,7 @@ AudioPlayerFMOD::BUILDER_DEFAULT::BUILDER_DEFAULT(BeanFactory& factory, const do
 {
 }
 
-sp<AudioPlayer> AudioPlayerFMOD::BUILDER_DEFAULT::build(const sp<Scope>& args)
+sp<AudioPlayer> AudioPlayerFMOD::BUILDER_DEFAULT::build(const Scope& args)
 {
     return _delegate.build(args);
 }

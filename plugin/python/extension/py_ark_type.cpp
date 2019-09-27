@@ -135,7 +135,7 @@ const std::map<TypeId, PyArkType::LoaderFunction>& PyArkType::getLoader(const St
     return iter->second;
 }
 
-PyObject* PyArkType::load(Instance& inst, const String& loader, TypeId typeId, const String& id, const sp<Scope>& args) const
+PyObject* PyArkType::load(Instance& inst, const String& loader, TypeId typeId, const String& id, const Scope& args) const
 {
     const std::map<TypeId, LoaderFunction>& functions = getLoader(loader);
     const auto iter = functions.find(typeId);

@@ -24,7 +24,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Snippet> build(const sp<Scope>& args) override;
+        virtual sp<Snippet> build(const Scope& args) override;
 
     private:
         std::vector<std::pair<uint32_t, sp<Builder<Vec4>>>> _planes;

@@ -52,7 +52,7 @@ FileReadable::BUILDER::BUILDER(BeanFactory& factory, const String& src)
 {
 }
 
-sp<Readable> FileReadable::BUILDER::build(const sp<Scope>& args)
+sp<Readable> FileReadable::BUILDER::build(const Scope& args)
 {
     return Ark::instance().openAsset(_src->build(args));
 }

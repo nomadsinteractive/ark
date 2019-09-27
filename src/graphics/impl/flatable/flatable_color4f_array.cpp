@@ -30,7 +30,7 @@ FlatableColor4fArray::BUILDER::BUILDER(BeanFactory& parent, const String& value)
 {
 }
 
-sp<Flatable> FlatableColor4fArray::BUILDER::build(const sp<Scope>& args)
+sp<Flatable> FlatableColor4fArray::BUILDER::build(const Scope& args)
 {
     return sp<FlatableColor4fArray>::make(_color_array->build(args));
 }

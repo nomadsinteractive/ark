@@ -160,7 +160,7 @@ RenderModelText::BUILDER::BUILDER(BeanFactory& factory, const document& manifest
 {
 }
 
-sp<RenderModel> RenderModelText::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> RenderModelText::BUILDER::build(const Scope& args)
 {
     return sp<RenderModelText>::make(_resource_loader_context->renderController(), _alphabet->build(args), _texture_width, _texture_height);
 }

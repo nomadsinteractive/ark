@@ -103,7 +103,7 @@ public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<RenderModel>> renderModel, sp<Builder<Shader>> shader = nullptr);
 
-        virtual sp<RenderLayer> build(const sp<Scope>& args) override;
+        virtual sp<RenderLayer> build(const Scope& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
@@ -117,7 +117,7 @@ public:
     public:
         RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         BUILDER _impl;

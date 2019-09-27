@@ -105,7 +105,7 @@ AssetBundleUtil::FILE_DICTIONARY::FILE_DICTIONARY(BeanFactory& /*factory*/, cons
 {
 }
 
-sp<AssetBundle> AssetBundleUtil::FILE_DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<AssetBundle> AssetBundleUtil::FILE_DICTIONARY::build(const Scope& /*args*/)
 {
     return AssetBundleUtil::createFileAssetBundle(_src);
 }
@@ -115,7 +115,7 @@ AssetBundleUtil::EXTERNAL_DICTIONARY::EXTERNAL_DICTIONARY(BeanFactory& /*factory
 {
 }
 
-sp<AssetBundle> AssetBundleUtil::EXTERNAL_DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<AssetBundle> AssetBundleUtil::EXTERNAL_DICTIONARY::build(const Scope& /*args*/)
 {
     return AssetBundleUtil::createFileAssetBundle(_src);
 }

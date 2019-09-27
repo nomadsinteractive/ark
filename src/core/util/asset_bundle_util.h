@@ -30,7 +30,7 @@ public:
     public:
         FILE_DICTIONARY(BeanFactory& factory, const String& src);
 
-        virtual sp<AssetBundle> build(const sp<Scope>& args) override;
+        virtual sp<AssetBundle> build(const Scope& args) override;
 
     private:
         String _src;
@@ -41,7 +41,7 @@ public:
     public:
         EXTERNAL_DICTIONARY(BeanFactory& factory, const String& src);
 
-        virtual sp<AssetBundle> build(const sp<Scope>& args) override;
+        virtual sp<AssetBundle> build(const Scope& args) override;
 
     private:
         String _src;

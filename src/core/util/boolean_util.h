@@ -63,7 +63,7 @@ public:
     public:
         DICTIONARY(BeanFactory&, const String& expr);
 
-        virtual sp<Boolean> build(const sp<Scope>& args) override;
+        virtual sp<Boolean> build(const Scope& args) override;
 
     private:
         sp<Builder<Boolean>> _value;
@@ -74,7 +74,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Boolean> build(const sp<Scope>& args) override;
+        virtual sp<Boolean> build(const Scope& args) override;
 
     private:
         String getValue(const document& manifest) const;

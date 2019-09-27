@@ -24,7 +24,7 @@ RendererWithPosition::DECORATOR::DECORATOR(BeanFactory& parent, const sp<Builder
 {
 }
 
-sp<Renderer> RendererWithPosition::DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> RendererWithPosition::DECORATOR::build(const Scope& args)
 {
     const sp<Renderer> bean = _delegate->build(args);
     return sp<Renderer>::adopt(new RendererWithPosition(bean, _position->build(args))).absorb(bean);

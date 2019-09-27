@@ -32,7 +32,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Collider> build(const sp<Scope>& args) override;
+        virtual sp<Collider> build(const Scope& args) override;
 
     private:
         document _manifest;

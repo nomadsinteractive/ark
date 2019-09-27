@@ -22,7 +22,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& doc);
 
-        virtual sp<StringBundle> build(const sp<Scope>& args);
+        virtual sp<StringBundle> build(const Scope& args);
 
     private:
         sp<Builder<String>> _src;

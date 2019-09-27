@@ -62,7 +62,7 @@ sp<EventListener> PythonInterpreter::toEventListener(PyObject* object)
     return asInterface<EventListener>(object);
 }
 
-String PythonInterpreter::toString(PyObject* object, const char* encoding, const char* error)
+String PythonInterpreter::toString(PyObject* object, const char* encoding, const char* error) const
 {
     if(object)
     {
@@ -81,7 +81,7 @@ String PythonInterpreter::toString(PyObject* object, const char* encoding, const
     return "";
 }
 
-std::wstring PythonInterpreter::toWString(PyObject* object)
+std::wstring PythonInterpreter::toWString(PyObject* object) const
 {
     if(PyUnicode_Check(object))
         return pyUnicodeToWString(object);
@@ -162,46 +162,45 @@ sp<Integer> PythonInterpreter::toInteger(PyObject* object, bool alert)
     return asInterface<Integer>(object, alert);
 }
 
-sp<Scope> PythonInterpreter::toScope(PyObject* kws)
+Scope PythonInterpreter::toScope(PyObject* kws) const
 {
+    Scope scope;
     if(kws)
     {
         PyObject* keys = PyDict_Keys(kws);
         const Py_ssize_t size = PyList_Size(keys);
-        const sp<Scope> scope = sp<Scope>::make();
         for(Py_ssize_t i = 0; i < size; i ++)
         {
             PyObject* key = PyList_GetItem(keys, i);
             PyObject* item = PyDict_GetItem(kws, key);
             const String sKey = toString(key);
             if(PyTuple_CheckExact(item) || isInstance<Vec2>(item) || isInstance<Vec3>(item) || isInstance<Vec4>(item))
-                scope->put(sKey, sp<PyVecDuckType>::make(PyInstance::track(item)));
+                scope.put(sKey, sp<PyVecDuckType>::make(PyInstance::track(item)));
             else if(isPyArkTypeObject(Py_TYPE(item)))
-                scope->put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
+                scope.put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
             else if(PyBool_Check(item))
-                scope->put(sKey, sp<Boolean::Const>::make(PyObject_IsTrue(item) != 0));
+                scope.put(sKey, sp<Boolean::Const>::make(PyObject_IsTrue(item) != 0));
             else if(isInstance<Numeric>(item) || isInstance<Integer>(item) || PyFloat_Check(item) || PyLong_Check(item))
-                scope->put(sKey, sp<PyNumericDuckType>::make(PyInstance::track(item)));
+                scope.put(sKey, sp<PyNumericDuckType>::make(PyInstance::track(item)));
             else if(PyBytes_Check(item) || PyUnicode_Check(item))
-                scope->put(sKey, sp<String>::make(toString(item)));
+                scope.put(sKey, sp<String>::make(toString(item)));
             else if(PyCallable_Check(item))
-                scope->put(sKey, sp<PyCallableDuckType>::make(PyInstance::track(item)));
+                scope.put(sKey, sp<PyCallableDuckType>::make(PyInstance::track(item)));
             else
-                scope->put(sKey, sp<PyObjectDuckType>::make(PyInstance::track(item)));
+                scope.put(sKey, sp<PyObjectDuckType>::make(PyInstance::track(item)));
         }
         Py_DECREF(keys);
-        return scope;
     }
-    return nullptr;
+    return scope;
 }
 
-String PythonInterpreter::unicodeToUTF8String(PyObject* object, const char* encoding, const char* error)
+String PythonInterpreter::unicodeToUTF8String(PyObject* object, const char* encoding, const char* error) const
 {
     DCHECK(PyUnicode_Check(object), "Expecting an unicode object");
     return PyUnicode_AsUTF8(object);
 }
 
-std::wstring PythonInterpreter::pyUnicodeToWString(PyObject* unicode)
+std::wstring PythonInterpreter::pyUnicodeToWString(PyObject* unicode) const
 {
     PyUnicode_READY(unicode);
     uint32_t k = PyUnicode_KIND(unicode);
@@ -237,7 +236,7 @@ PythonInterpreter::PythonInterpreter()
 {
 }
 
-bool PythonInterpreter::isPyArkTypeObject(void* pyTypeObject)
+bool PythonInterpreter::isPyArkTypeObject(void* pyTypeObject) const
 {
     return _type_by_py_object.find(pyTypeObject) != _type_by_py_object.end();
 }

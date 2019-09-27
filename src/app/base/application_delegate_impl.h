@@ -4,6 +4,7 @@
 #include <list>
 
 #include "core/base/api.h"
+#include "core/base/scope.h"
 #include "core/base/string.h"
 #include "core/forwarding.h"
 
@@ -33,7 +34,7 @@ public:
 
 private:
     struct ScriptTag {
-        ScriptTag(ResourceLoader& resourceLoader, const document& manifest, const sp<Scope>& vars);
+        ScriptTag(ResourceLoader& resourceLoader, const document& manifest, const Scope& vars);
 
         void run() const;
 
@@ -44,7 +45,7 @@ private:
         sp<Asset> _source;
 
         sp<Script> _script;
-        sp<Scope> _vars;
+        Scope _vars;
     };
 
 private:

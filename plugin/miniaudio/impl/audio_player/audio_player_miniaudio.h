@@ -27,7 +27,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<AudioPlayer> build(const sp<Scope>& args) override;
+        virtual sp<AudioPlayer> build(const Scope& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
@@ -39,7 +39,7 @@ public:
     public:
         BUILDER_DEFAULT(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<AudioPlayer> build(const sp<Scope>& args) override;
+        virtual sp<AudioPlayer> build(const Scope& args) override;
 
     private:
         BUILDER _delegate;

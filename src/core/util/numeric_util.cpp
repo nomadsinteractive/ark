@@ -5,7 +5,6 @@
 #include "core/base/delegate.h"
 #include "core/base/expectation.h"
 #include "core/base/expression.h"
-#include "core/impl/builder/builder_by_instance.h"
 #include "core/impl/numeric/approach.h"
 #include "core/impl/numeric/clamp.h"
 #include "core/impl/numeric/fence.h"
@@ -356,7 +355,7 @@ NumericUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
     DCHECK(_value, "Numeric expression compile failed: %s", expr.c_str());
 }
 
-sp<Numeric> NumericUtil::DICTIONARY::build(const sp<Scope>& args)
+sp<Numeric> NumericUtil::DICTIONARY::build(const Scope& args)
 {
     return _value->build(args);
 }
@@ -366,7 +365,7 @@ NumericUtil::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Numeric> NumericUtil::BUILDER::build(const sp<Scope>& args)
+sp<Numeric> NumericUtil::BUILDER::build(const Scope& args)
 {
     return _value->build(args);
 }

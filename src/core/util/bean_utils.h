@@ -15,7 +15,7 @@ namespace ark {
 class ARK_API BeanUtils {
 public:
     static float toFloat(BeanFactory& args, const String& value, float defValue = 0);
-    static float toFloat(const sp<Builder<Numeric>>& t, const sp<Scope>& args, float defValue = 0);
+    static float toFloat(const sp<Builder<Numeric>>& t, const Scope& args, float defValue = 0);
 
     template<typename... Args> static void split(BeanFactory& beanFactory, const document& manifest, const String& attr, sp<Builder<Args>>&... args) {
         split<Args...>(beanFactory, Documents::ensureAttribute(manifest, attr), args...);
@@ -28,14 +28,14 @@ public:
         doSplit<Args...>(beanFactory, elems, args...);
     }
 
-    template<typename T, typename U> static sp<T> as(const sp<Builder<U>>& builder, const sp<Scope>& args) {
+    template<typename T, typename U> static sp<T> as(const sp<Builder<U>>& builder, const Scope& args) {
         const sp<U> object = builder->build(args);
         DCHECK(object && object.template is<T>(), "Illegal object");
         return object.template as<T>();
     }
 
     template<typename T> static sp<T> as(BeanFactory& args, const String& str) {
-        const sp<Object> object = args.ensure<Object>(str);
+        const sp<Object> object = args.ensure<Object>(str, {});
         DCHECK(object && object.is<T>(), "Illegal object");
         return object.as<T>();
     }

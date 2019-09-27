@@ -6,8 +6,6 @@
 #include "core/base/callable.h"
 #include "core/base/plugin_manager.h"
 #include "core/inf/variable.h"
-#include "core/impl/builder/builder_by_instance.h"
-#include "core/impl/builder/builder_by_argument.h"
 #include "core/types/global.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/operators.h"
@@ -23,7 +21,7 @@ private:
             : _callable(callable) {
         }
 
-        virtual sp<T> build(const sp<Scope>& /*args*/) override {
+        virtual sp<T> build(const Scope& /*args*/) override {
             return _callable->call();
         }
 
@@ -37,7 +35,7 @@ private:
             : _callable(callable), _a1(a1) {
         }
 
-        virtual sp<T> build(const sp<Scope>& args) override {
+        virtual sp<T> build(const Scope& args) override {
             return _callable->call(_a1->build(args));
         }
 
@@ -52,7 +50,7 @@ private:
             : _callable(callable), _a1(a1), _a2(a2) {
         }
 
-        virtual sp<T> build(const sp<Scope>& args) override {
+        virtual sp<T> build(const Scope& args) override {
             return _callable->call(_a1->build(args), _a2->build(args));
         }
 
@@ -113,7 +111,7 @@ public:
         V getVariableBuilder(BeanFactory& factory, const String& expr) const {
             const char* str = expr.c_str();
             if(expr.length() > 1 && (*str == '@' || *str == '$') && Strings::isVariableName(str + 1)) {
-                const sp<Builder<N>> builder = *str == '@' ? factory.getBuilderByRef<N>(str + 1) : factory.getBuilderByArg<N>(str + 1);
+                const sp<Builder<N>> builder = *str == '@' ? factory.getBuilderByRef<N>(Identifier::parseRef(str + 1)) : factory.getBuilderByArg<N>(str + 1);
                 DCHECK(builder, "Cannot build \"%s\"", expr.c_str());
                 return builder;
             }
@@ -122,7 +120,7 @@ public:
 
         V toPhrase(const String& expr, BeanFactory& factory, bool compilePhrase = false) const {
             if(OP::isConstant(expr))
-                return sp<BuilderByInstance<N>>::make(sp<typename N::Impl>::make(Strings::parse<T>(expr)));
+                return sp<typename Builder<N>::Prebuilt>::make(sp<typename N::Impl>::make(Strings::parse<T>(expr)));
 
             const V vBuilder = getVariableBuilder(factory, expr);
             if(vBuilder)
@@ -252,7 +250,7 @@ public:
     }
 
     static BuilderType eval(BeanFactory& /*factory*/, const String& expr) {
-        return sp<BuilderByInstance<Variable<T>>>::make(sp<typename Variable<T>::Const>::make(Strings::parse<T>(expr)));
+        return sp<typename Builder<Variable<T>>::Prebuilt>::make(sp<typename Variable<T>::Const>::make(Strings::parse<T>(expr)));
     }
 
     static Expression::Operator<T> OPS[4];

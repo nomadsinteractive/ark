@@ -10,7 +10,7 @@ FlatableUint8::BUILDER::BUILDER(BeanFactory& factory, const String& value)
 {
 }
 
-sp<Flatable> FlatableUint8::BUILDER::build(const sp<Scope>& args)
+sp<Flatable> FlatableUint8::BUILDER::build(const Scope& args)
 {
     return sp<FlatableByVariable<uint8_t, int32_t>>::make(_var->build(args));
 }

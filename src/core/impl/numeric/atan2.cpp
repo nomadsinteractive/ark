@@ -26,7 +26,7 @@ Atan2::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
 {
 }
 
-sp<Numeric> Atan2::BUILDER::build(const sp<Scope>& args)
+sp<Numeric> Atan2::BUILDER::build(const Scope& args)
 {
     return sp<Atan2>::make(_y->build(args), _x->build(args));
 }

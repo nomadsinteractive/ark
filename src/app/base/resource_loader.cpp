@@ -63,7 +63,7 @@ void ResourceLoader::import(const document& manifest, BeanFactory& parent)
             _bean_factory.addPackage(name, package);
         }
         else
-            _bean_factory.addPackage(name, parent.ensure<ResourceLoader>(src)->beanFactory());
+            _bean_factory.addPackage(name, parent.ensure<ResourceLoader>(src, {})->beanFactory());
     }
 }
 
@@ -83,7 +83,7 @@ ResourceLoader::BUILDER::BUILDER(BeanFactory& factory, const document& doc, cons
 {
 }
 
-sp<ResourceLoader> ResourceLoader::BUILDER::build(const sp<Scope>& /*args*/)
+sp<ResourceLoader> ResourceLoader::BUILDER::build(const Scope& /*args*/)
 {
     return _application_context->createResourceLoader(_manifest, nullptr);
 }
@@ -93,9 +93,9 @@ ResourceLoader::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& v
 {
 }
 
-sp<ResourceLoader> ResourceLoader::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<ResourceLoader> ResourceLoader::DICTIONARY::build(const Scope& args)
 {
-    return _application_context->createResourceLoader(_src, nullptr);
+    return _application_context->createResourceLoader(_src, args);
 }
 
 ResourceLoader::PackageRefs::PackageRefs(const BeanFactory& beanFactory)

@@ -81,7 +81,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Atlas> build(const sp<Scope>& args) override;
+        virtual sp<Atlas> build(const Scope& args) override;
 
     private:
         BeanFactory _factory;

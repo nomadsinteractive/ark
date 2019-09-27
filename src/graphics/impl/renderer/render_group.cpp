@@ -30,21 +30,21 @@ RendererGroup::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manife
 {
 }
 
-sp<Renderer> RendererGroup::BUILDER::build(const sp<Scope>& args)
+sp<Renderer> RendererGroup::BUILDER::build(const Scope& args)
 {
     const sp<RendererGroup> rendererGroup = sp<RendererGroup>::make();
     loadGroup(rendererGroup, args);
     return rendererGroup;
 }
 
-void RendererGroup::BUILDER::loadGroup(RendererGroup& rendererGroup, const sp<Scope>& args)
+void RendererGroup::BUILDER::loadGroup(RendererGroup& rendererGroup, const Scope& args)
 {
     for(const document& i : _manifest->children())
     {
         if(i->name() == Constants::Attributes::RENDER_LAYER)
-            rendererGroup.addRenderer(_factory.ensureDecorated<Renderer, RenderLayer>(i));
+            rendererGroup.addRenderer(_factory.ensureDecorated<Renderer, RenderLayer>(i, args));
         else if(i->name() == Constants::Attributes::LAYER)
-            rendererGroup.addRenderer(_factory.ensureDecorated<Renderer, Layer>(i));
+            rendererGroup.addRenderer(_factory.ensureDecorated<Renderer, Layer>(i, args));
         else
             rendererGroup.addRenderer(_factory.ensure<Renderer>(i, args));
     }

@@ -14,7 +14,7 @@ PointLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, con
 {
 }
 
-sp<RenderLayer> PointLayer::BUILDER::build(const sp<Scope>& args)
+sp<RenderLayer> PointLayer::BUILDER::build(const Scope& args)
 {
     return _impl.build(args);
 }

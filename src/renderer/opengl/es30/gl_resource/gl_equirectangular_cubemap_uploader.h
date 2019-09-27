@@ -22,7 +22,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Texture::Uploader> build(const sp<Scope>& args) override;
+        virtual sp<Texture::Uploader> build(const Scope& args) override;
 
     private:
         sp<RenderController> _render_controller;

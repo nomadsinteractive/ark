@@ -41,7 +41,7 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
 
     applicationFacade->setBackgroundColor(Documents::getAttribute<Color>(appManifest, "background-color", Color::BLACK));
 
-    const sp<Arena> arena = appResourceLoader->beanFactory().build<Arena>(appManifest, "arena");
+    const sp<Arena> arena = appResourceLoader->beanFactory().build<Arena>(appManifest, "arena", {});
     if(arena)
         applicationFacade->setArena(arena);
 
@@ -78,11 +78,10 @@ void ApplicationDelegateImpl::onResume()
             i.run();
 }
 
-ApplicationDelegateImpl::ScriptTag::ScriptTag(ResourceLoader& resourceLoader, const document& manifest, const sp<Scope>& vars)
+ApplicationDelegateImpl::ScriptTag::ScriptTag(ResourceLoader& resourceLoader, const document& manifest, const Scope& vars)
     : _on(Documents::getAttribute(manifest, "on", SCRIPT_RUN_ON_CREATE)),
       _function_name(Documents::getAttribute(manifest, "function")),
-      _script(resourceLoader.beanFactory().ensure<Script>(manifest)),
-      _vars(vars)
+      _script(resourceLoader.beanFactory().ensure<Script>(manifest, vars)), _vars(vars)
 {
     const String src = Documents::getAttribute(manifest, Constants::Attributes::SRC);
     if(src)

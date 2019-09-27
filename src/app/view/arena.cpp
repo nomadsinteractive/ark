@@ -52,7 +52,7 @@ void Arena::traverse(const Holder::Visitor& visitor)
         HolderUtil::visit(i, visitor);
 }
 
-sp<Renderer> Arena::loadRenderer(const String& name, const sp<Scope>& args)
+sp<Renderer> Arena::loadRenderer(const String& name, const Scope& args)
 {
     const sp<Renderer> renderer = load<Renderer>(name, args);
     addRenderer(renderer);
@@ -130,7 +130,7 @@ Arena::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
+sp<Arena> Arena::BUILDER::build(const Scope& args)
 {
     const sp<ResourceLoader> r1 = _resource_loader->build(args);
     const sp<ResourceLoader> resourceLoader = r1 ? r1 : sp<ResourceLoader>::make(_factory);
@@ -150,10 +150,10 @@ sp<Arena> Arena::BUILDER::build(const sp<Scope>& args)
             if(layer)
                 arena->addLayer(layer);
             else
-                arena->addLayer(factory.ensureDecorated<Renderer, RenderLayer>(i));
+                arena->addLayer(factory.ensureDecorated<Renderer, RenderLayer>(i, args));
         }
         else if(name == Constants::Attributes::LAYER)
-            arena->addLayer(factory.ensureDecorated<Renderer, Layer>(i));
+            arena->addLayer(factory.ensureDecorated<Renderer, Layer>(i, args));
         else
         {
             DWARN(name == Constants::Attributes::RENDERER || name == Constants::Attributes::RENDER_LAYER || name == Constants::Attributes::LAYER || name == Constants::Attributes::VIEW, "[Renderer, RenderLayer, Layer, View] expected, \"%s\" found", name.c_str());

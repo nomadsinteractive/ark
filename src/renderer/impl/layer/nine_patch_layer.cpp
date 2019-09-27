@@ -13,7 +13,7 @@ NinePatchLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest,
 {
 }
 
-sp<RenderLayer> NinePatchLayer::BUILDER::build(const sp<Scope>& args)
+sp<RenderLayer> NinePatchLayer::BUILDER::build(const Scope& args)
 {
     return _impl.build(args);
 }

@@ -21,7 +21,7 @@ BooleanAnd::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
 {
 }
 
-sp<Boolean> BooleanAnd::BUILDER::build(const sp<Scope>& args)
+sp<Boolean> BooleanAnd::BUILDER::build(const Scope& args)
 {
     return sp<BooleanAnd>::make(_a1->build(args), _a2->build(args));
 }

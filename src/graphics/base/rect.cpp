@@ -167,7 +167,7 @@ template<> ARK_API String Conversions::to<Rect, String>(const Rect& rect)
     return Strings::sprintf("(%.2f, %.2f, %.2f, %.2f)", rect.left(), rect.top(), rect.right(), rect.bottom());
 }
 
-template<> ARK_API Rect Dictionaries::get<Rect>(BeanFactory& beanFactory, const String& value, const sp<Scope>& args)
+template<> ARK_API Rect Dictionaries::get<Rect>(BeanFactory& beanFactory, const String& value, const Scope& args)
 {
     const String unwrapped = Strings::unwrap(value.strip(), '(', ')');
     DCHECK(unwrapped, "Empty RectF value");

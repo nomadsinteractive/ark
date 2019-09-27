@@ -44,7 +44,7 @@ Between::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Numeric> Between::BUILDER::build(const sp<Scope>& args)
+sp<Numeric> Between::BUILDER::build(const Scope& args)
 {
     return sp<Numeric>::adopt(new Between(_delegate->build(args), _min->build(args), _max->build(args), _oncross->build(args)));
 }

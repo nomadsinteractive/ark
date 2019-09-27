@@ -57,7 +57,7 @@ TiledCollider::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, 
 {
 }
 
-sp<Collider> TiledCollider::BUILDER::build(const sp<Scope>& args)
+sp<Collider> TiledCollider::BUILDER::build(const Scope& args)
 {
     return sp<TiledCollider>::make(_tilemap->build(args), _resource_loader_context);
 }

@@ -79,7 +79,7 @@ GLModelLineStrip::BUILDER::BUILDER(BeanFactory& factory, const document& manifes
 {
 }
 
-sp<RenderModel> GLModelLineStrip::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> GLModelLineStrip::BUILDER::build(const Scope& args)
 {
     return sp<GLModelLineStrip>::make(_resource_loader_context, _atlas->build(args));
 }

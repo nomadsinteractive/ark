@@ -15,7 +15,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const String& value);
 
-        virtual sp<Flatable> build(const sp<Scope>& args) override;
+        virtual sp<Flatable> build(const Scope& args) override;
 
     private:
         sp<Builder<Vec3>> _vec3;

@@ -41,7 +41,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Rotate> build(const sp<Scope>& args) override;
+        virtual sp<Rotate> build(const Scope& args) override;
 
     private:
         SafePtr<Builder<Numeric>> _rotation;
@@ -52,7 +52,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& str);
 
-        virtual sp<Rotate> build(const sp<Scope>& args) override;
+        virtual sp<Rotate> build(const Scope& args) override;
 
     private:
         SafePtr<Builder<Numeric>> _rotation;

@@ -49,7 +49,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Characters> build(const sp<Scope>& args) override;
+        virtual sp<Characters> build(const Scope& args) override;
 
     private:
         sp<Builder<LayerContext>> _layer_context;

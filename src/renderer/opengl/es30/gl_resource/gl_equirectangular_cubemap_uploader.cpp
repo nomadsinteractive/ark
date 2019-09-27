@@ -29,7 +29,7 @@ GLEquirectangularCubemapUploader::BUILDER::BUILDER(BeanFactory& factory, const d
 {
 }
 
-sp<Texture::Uploader> GLEquirectangularCubemapUploader::BUILDER::build(const sp<Scope>& args)
+sp<Texture::Uploader> GLEquirectangularCubemapUploader::BUILDER::build(const Scope& args)
 {
     return sp<GLEquirectangularCubemapUploader>::make(_render_controller, _shader->build(args), _texture->build(args), _size->build(args));
 }

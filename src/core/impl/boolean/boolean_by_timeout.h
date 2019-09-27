@@ -19,7 +19,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Boolean> build(const sp<Scope>& args) override;
+        virtual sp<Boolean> build(const Scope& args) override;
 
     private:
         sp<Builder<Duration>> _duration;

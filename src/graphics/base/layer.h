@@ -45,7 +45,7 @@ public:
     public:
         BUILDER_IMPL1(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Layer> build(const sp<Scope>& args) override;
+        virtual sp<Layer> build(const Scope& args) override;
 
     private:
         Layer::Type _type;
@@ -58,7 +58,7 @@ public:
     public:
         BUILDER_IMPL2(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         BUILDER_IMPL1 _builder_impl;

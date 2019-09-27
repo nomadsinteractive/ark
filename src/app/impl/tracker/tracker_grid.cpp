@@ -191,7 +191,7 @@ TrackerGrid::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Tracker> TrackerGrid::BUILDER::build(const sp<Scope>& args)
+sp<Tracker> TrackerGrid::BUILDER::build(const Scope& args)
 {
     return sp<TrackerGrid>::make(_cell->build(args)->val());
 }

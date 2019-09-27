@@ -31,7 +31,7 @@ Duration::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     DWARN(!(_clock && _delegate), "Clock will be ommited since \"t\" is specified");
 }
 
-sp<Duration> Duration::BUILDER::build(const sp<Scope>& args)
+sp<Duration> Duration::BUILDER::build(const Scope& args)
 {
     const sp<Numeric> util = _until ? _until->build(args) : sp<Numeric>::null();
     if(_delegate)
@@ -48,7 +48,7 @@ Duration::NUMERIC_BUILDER::NUMERIC_BUILDER(BeanFactory& factory, const document&
 {
 }
 
-sp<Numeric> Duration::NUMERIC_BUILDER::build(const sp<Scope>& args)
+sp<Numeric> Duration::NUMERIC_BUILDER::build(const Scope& args)
 {
     return _builder.build(args);
 }
@@ -57,7 +57,7 @@ Duration::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/)
 {
 }
 
-sp<Duration> Duration::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<Duration> Duration::DICTIONARY::build(const Scope& /*args*/)
 {
     return sp<Duration>::make(Ark::instance().clock()->duration());
 }

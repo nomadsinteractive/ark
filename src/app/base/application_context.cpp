@@ -72,7 +72,7 @@ void ApplicationContext::initResourceLoader(const document& manifest)
     _resource_loader->import(doc, _resource_loader->beanFactory());
 }
 
-sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const sp<Scope>& args)
+sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const Scope& args)
 {
     Identifier id(Identifier::parse(name));
     if(id.isVal())

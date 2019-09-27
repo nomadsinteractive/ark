@@ -107,7 +107,7 @@ YAMLStringBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifes
 {
 }
 
-sp<StringBundle> YAMLStringBundle::BUILDER::build(const sp<Scope>& args)
+sp<StringBundle> YAMLStringBundle::BUILDER::build(const Scope& args)
 {
     return sp<YAMLStringBundle>::make(Ark::instance().getAssetBundle(_src->build(args)));
 }

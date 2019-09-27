@@ -257,7 +257,7 @@ View::DISPLAY_DECORATOR::DISPLAY_DECORATOR(BeanFactory& /*beanFactory*/, const s
     : _delegate(delegate), _display(Strings::parse<LayoutParam::Display>(style)) {
 }
 
-sp<Renderer> View::DISPLAY_DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> View::DISPLAY_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->setDisplay(_display);
@@ -269,7 +269,7 @@ View::MARGINS_DECORATOR::MARGINS_DECORATOR(BeanFactory& beanFactory, const sp<Bu
 {
 }
 
-sp<Renderer> View::MARGINS_DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> View::MARGINS_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     const sp<View> view = bindView(renderer);
@@ -286,7 +286,7 @@ View::MARGIN_TOP_DECORATOR::MARGIN_TOP_DECORATOR(BeanFactory& beanFactory, const
 {
 }
 
-sp<Renderer> View::MARGIN_TOP_DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> View::MARGIN_TOP_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->margins().setTop(Dictionaries::get<float>(_bean_factory, _margin_top, args));
@@ -298,7 +298,7 @@ View::MARGIN_LEFT_DECORATOR::MARGIN_LEFT_DECORATOR(BeanFactory& beanFactory, con
 {
 }
 
-sp<Renderer> View::MARGIN_LEFT_DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> View::MARGIN_LEFT_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->margins().setLeft(Dictionaries::get<float>(_bean_factory, _margin_left, args));
@@ -310,7 +310,7 @@ View::MARGIN_RIGHT_DECORATOR::MARGIN_RIGHT_DECORATOR(BeanFactory& beanFactory, c
 {
 }
 
-sp<Renderer> View::MARGIN_RIGHT_DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> View::MARGIN_RIGHT_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->margins().setRight(Dictionaries::get<float>(_bean_factory, _margin_right, args));
@@ -322,7 +322,7 @@ View::MARGIN_BOTTOM_DECORATOR::MARGIN_BOTTOM_DECORATOR(BeanFactory& beanFactory,
 {
 }
 
-sp<Renderer> View::MARGIN_BOTTOM_DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> View::MARGIN_BOTTOM_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->margins().setBottom(Dictionaries::get<float>(_bean_factory, _margin_bottom, args));
@@ -334,7 +334,7 @@ View::SIZE_DECORATOR::SIZE_DECORATOR(BeanFactory& beanFactory, const sp<Builder<
 {
 }
 
-sp<Renderer> View::SIZE_DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> View::SIZE_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->setSize(_size->build(args));
@@ -346,7 +346,7 @@ View::ON_ENTER_DECORATOR::ON_ENTER_DECORATOR(BeanFactory& beanFactory, const sp<
 {
 }
 
-sp<Renderer> View::ON_ENTER_DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> View::ON_ENTER_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setOnEnter(_on_enter->build(args));
@@ -358,7 +358,7 @@ View::ON_LEAVE_DECORATOR::ON_LEAVE_DECORATOR(BeanFactory& beanFactory, const sp<
 {
 }
 
-sp<Renderer> View::ON_LEAVE_DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> View::ON_LEAVE_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setOnLeave(_on_leave->build(args));
@@ -370,7 +370,7 @@ View::ON_PUSH_DECORATOR::ON_PUSH_DECORATOR(BeanFactory& beanFactory, const sp<Bu
 {
 }
 
-sp<Renderer> View::ON_PUSH_DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> View::ON_PUSH_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setOnPush(_on_push->build(args));
@@ -382,7 +382,7 @@ View::ON_CLICK_DECORATOR::ON_CLICK_DECORATOR(BeanFactory& beanFactory, const sp<
 {
 }
 
-sp<Renderer> View::ON_CLICK_DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> View::ON_CLICK_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setOnClick(_on_click->build(args));
@@ -394,7 +394,7 @@ View::ON_RELEASE_DECORATOR::ON_RELEASE_DECORATOR(BeanFactory& beanFactory, const
 {
 }
 
-sp<Renderer> View::ON_RELEASE_DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> View::ON_RELEASE_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setOnRelease(_on_release->build(args));
@@ -406,7 +406,7 @@ View::ON_MOVE_DECORATOR::ON_MOVE_DECORATOR(BeanFactory &beanFactory, const sp<Bu
 {
 }
 
-sp<Renderer> View::ON_MOVE_DECORATOR::build(const sp<Scope> &args)
+sp<Renderer> View::ON_MOVE_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setOnMove(_on_move->build(args));
@@ -418,7 +418,7 @@ View::LAYOUT_PARAM_DECORATOR::LAYOUT_PARAM_DECORATOR(BeanFactory& beanFactory, c
 {
 }
 
-sp<Renderer> View::LAYOUT_PARAM_DECORATOR::build(const sp<Scope>& args)
+sp<Renderer> View::LAYOUT_PARAM_DECORATOR::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setLayoutParam(_layout_param->build(args));

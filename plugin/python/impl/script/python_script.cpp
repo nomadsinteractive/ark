@@ -91,9 +91,9 @@ PythonScript::~PythonScript()
     Py_Finalize();
 }
 
-void PythonScript::addScopeToDict(PyObject* dict, const sp<Scope>& scope)
+void PythonScript::addScopeToDict(PyObject* dict, const Scope& scope)
 {
-    for(const auto& iter : scope->variables())
+    for(const auto& iter : scope.variables())
     {
         const String& name = iter.first;
         const Box& box = iter.second;
@@ -111,7 +111,7 @@ PyObject* PythonScript::argumentsToTuple(const Script::Arguments& args)
     return tuple;
 }
 
-void PythonScript::run(const sp<Asset>& script, const sp<Scope>& vars)
+void PythonScript::run(const sp<Asset>& script, const Scope& vars)
 {
     DCHECK_THREAD_FLAG();
     PyObject* m = PyImport_AddModule("__main__");
@@ -170,7 +170,7 @@ PythonScript::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& doc)
 {
 }
 
-sp<Script> PythonScript::BUILDER::build(const sp<Scope>& args)
+sp<Script> PythonScript::BUILDER::build(const Scope& args)
 {
     const sp<Script> script = sp<PythonScript>::make("ark-python", _manifest);
     const Global<PluginManager> pluginManager;

@@ -35,7 +35,7 @@ public:
     public:
         BUILDER(BeanFactory& parent, const document& doc);
 
-        virtual sp<Vec3> build(const sp<Scope>& args) override;
+        virtual sp<Vec3> build(const Scope& args) override;
 
     private:
         SafePtr<Builder<Numeric>> _x, _y, _z;
@@ -46,7 +46,7 @@ public:
     public:
         DICTIONARY(BeanFactory& parent, const String& str);
 
-        virtual sp<Vec3> build(const sp<Scope>& args) override;
+        virtual sp<Vec3> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _x, _y, _z;

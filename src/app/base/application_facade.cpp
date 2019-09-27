@@ -67,7 +67,7 @@ void ApplicationFacade::setArena(const sp<Arena>& arena)
     _context->addEventListener(_arena);
 }
 
-sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name, const sp<Scope>& args)
+sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name, const Scope& args)
 {
     return _context->createResourceLoader(name, args);
 }

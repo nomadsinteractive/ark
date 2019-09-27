@@ -42,7 +42,7 @@ GridLayout::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
 {
 }
 
-sp<Layout> GridLayout::BUILDER::build(const sp<Scope>& args)
+sp<Layout> GridLayout::BUILDER::build(const Scope& args)
 {
     return sp<GridLayout>::make(static_cast<uint32_t>(BeanUtils::toFloat(_rows, args)), static_cast<uint32_t>(BeanUtils::toFloat(_cols, args)), _gravity);
 }

@@ -19,7 +19,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<RenderLayer> build(const sp<Scope>& args) override;
+        virtual sp<RenderLayer> build(const Scope& args) override;
 
     private:
         RenderLayer::BUILDER _impl;

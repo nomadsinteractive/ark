@@ -23,7 +23,7 @@ public:
     PythonScript(const String& name, const document& libraries);
     ~PythonScript();
 
-    virtual void run(const sp<Asset>& script, const sp<Scope>& vars) override;
+    virtual void run(const sp<Asset>& script, const Scope& vars) override;
     virtual Box call(const String& function, const Arguments& args) override;
 
     PyObject* arkModule();
@@ -33,14 +33,14 @@ public:
     public:
         BUILDER(BeanFactory& parent, const document& doc);
 
-        virtual sp<Script> build(const sp<Scope>& args) override;
+        virtual sp<Script> build(const Scope& args) override;
 
     private:
         document _manifest;
     };
 
 private:
-    void addScopeToDict(PyObject* dict, const sp<Scope>& scope);
+    void addScopeToDict(PyObject* dict, const Scope& scope);
     PyObject* argumentsToTuple(const Arguments& args);
 
 private:

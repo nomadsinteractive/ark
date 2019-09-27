@@ -25,7 +25,7 @@ void TilesetImporterTsx::import(Tileset& tileset, const sp<Readable>& src)
     }
 }
 
-sp<TilesetImporter> TilesetImporterTsx::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<TilesetImporter> TilesetImporterTsx::DICTIONARY::build(const Scope& /*args*/)
 {
     return sp<TilesetImporterTsx>::make();
 }

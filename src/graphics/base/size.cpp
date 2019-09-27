@@ -121,7 +121,7 @@ Size::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
     BeanUtils::split(factory, value, _width, _height, _depth);
 }
 
-sp<Size> Size::DICTIONARY::build(const sp<Scope>& args)
+sp<Size> Size::DICTIONARY::build(const Scope& args)
 {
     return sp<Size>::make(_width->build(args), _height->build(args), _depth->build(args));
 }
@@ -134,7 +134,7 @@ Size::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Size> Size::BUILDER::build(const sp<Scope>& args)
+sp<Size> Size::BUILDER::build(const Scope& args)
 {
     if(_size)
         return _size->build(args);

@@ -112,7 +112,7 @@ LayerContext::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, L
     DCHECK(_layer || _render_layer, "LayerContext must be associated with one Layer or RenderLayer");
 }
 
-sp<LayerContext> LayerContext::BUILDER::build(const sp<Scope>& args)
+sp<LayerContext> LayerContext::BUILDER::build(const Scope& args)
 {
     if(_layer)
         return _layer->build(args)->context();

@@ -63,7 +63,7 @@ ViewGroup::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Renderer> ViewGroup::BUILDER::build(const sp<Scope>& args)
+sp<Renderer> ViewGroup::BUILDER::build(const Scope& args)
 {
     const sp<ViewGroup> viewGroup = sp<ViewGroup>::make(_background->build(args), _layout->build(args), _layout_param->build(args));
     for(const document& i : _manifest->children())

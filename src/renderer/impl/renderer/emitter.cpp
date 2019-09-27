@@ -88,7 +88,7 @@ Emitter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const 
 {
 }
 
-sp<Emitter> Emitter::BUILDER::build(const sp<Scope>& args)
+sp<Emitter> Emitter::BUILDER::build(const Scope& args)
 {
     const sp<Source> stub = sp<Source>::make(_resource_loader_context, _type->build(args), _position->build(args), _size->build(args), args);
     return sp<Emitter>::make(_resource_loader_context, stub, Ark::instance().clock(), _layer_context->build(args), _manifest->children(), _factory, _disposed);
@@ -152,8 +152,8 @@ sp<Vec3> Emitter::Particale::makePosition(ObjectPool& objectPool, const V3& posi
     return objectPool.obtain<Vec3Impl>(position.x(), position.y(), position.z());
 }
 
-Emitter::Source::Source(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Scope>& arguments)
-    : _arguments(sp<Scope>::make(arguments)), _type(type), _position(position), _size(size),
+Emitter::Source::Source(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const Scope& arguments)
+    : _arguments(arguments), _type(type), _position(position), _size(size),
       _object_pool(resourceLoaderContext->objectPool())
 {
 }
@@ -186,7 +186,7 @@ Emitter::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document
 {
 }
 
-sp<Renderer> Emitter::RENDERER_BUILDER::build(const sp<Scope>& args)
+sp<Renderer> Emitter::RENDERER_BUILDER::build(const Scope& args)
 {
     return _delegate.build(args);
 }

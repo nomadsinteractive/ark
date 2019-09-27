@@ -79,7 +79,7 @@ Vec4Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Vec4> Vec4Impl::BUILDER::build(const sp<Scope>& args)
+sp<Vec4> Vec4Impl::BUILDER::build(const Scope& args)
 {
     return sp<Vec4Impl>::make(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
 }
@@ -93,7 +93,7 @@ Vec4Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
         BeanUtils::split(factory, str, _x, _y, _z, _w);
 }
 
-sp<Vec4> Vec4Impl::DICTIONARY::build(const sp<Scope>& args)
+sp<Vec4> Vec4Impl::DICTIONARY::build(const Scope& args)
 {
     if(_is_color)
         return sp<Color>::make(_color);

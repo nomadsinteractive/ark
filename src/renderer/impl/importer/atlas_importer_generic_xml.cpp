@@ -30,7 +30,7 @@ void AtlasImporterTexturePacker::import(Atlas& atlas, const document& manifest)
     }
 }
 
-sp<Atlas::Importer> AtlasImporterTexturePacker::BUILDER::build(const sp<Scope>& /*args*/)
+sp<Atlas::Importer> AtlasImporterTexturePacker::BUILDER::build(const Scope& /*args*/)
 {
     return sp<AtlasImporterTexturePacker>::make();
 }

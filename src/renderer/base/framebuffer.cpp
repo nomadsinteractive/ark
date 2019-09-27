@@ -29,7 +29,7 @@ Framebuffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, co
 {
 }
 
-sp<Framebuffer> Framebuffer::BUILDER::build(const sp<Scope>& args)
+sp<Framebuffer> Framebuffer::BUILDER::build(const Scope& args)
 {
     return _render_controller->makeFramebuffer(_renderer->build(args), _texture->build(args));
 }
@@ -39,7 +39,7 @@ Framebuffer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const docu
 {
 }
 
-sp<Renderer> Framebuffer::RENDERER_BUILDER::build(const sp<Scope>& args)
+sp<Renderer> Framebuffer::RENDERER_BUILDER::build(const Scope& args)
 {
     return _framebuffer->build(args);
 }

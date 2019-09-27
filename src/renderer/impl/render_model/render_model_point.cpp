@@ -45,7 +45,7 @@ RenderModelPoint::BUILDER::BUILDER(BeanFactory& factory, const document& manifes
 {
 }
 
-sp<RenderModel> RenderModelPoint::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> RenderModelPoint::BUILDER::build(const Scope& args)
 {
     return sp<RenderModelPoint>::make(_resource_loader_context->renderController(), _atlas->build(args));
 }

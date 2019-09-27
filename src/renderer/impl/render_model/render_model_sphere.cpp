@@ -114,7 +114,7 @@ GLModelSphere::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, 
 {
 }
 
-sp<RenderModel> GLModelSphere::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> GLModelSphere::BUILDER::build(const Scope& args)
 {
     return sp<GLModelSphere>::make(_resource_loader_context, _atlas->build(args), _sample_count);
 }

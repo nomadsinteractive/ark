@@ -12,7 +12,7 @@ ImageLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, con
     : _impl(factory, manifest, resourceLoaderContext, sp<RenderModelQuad::BUILDER>::make(factory, manifest, resourceLoaderContext)) {
 }
 
-sp<RenderLayer> ImageLayer::BUILDER::build(const sp<Scope>& args)
+sp<RenderLayer> ImageLayer::BUILDER::build(const Scope& args)
 {
     return _impl.build(args);
 }

@@ -46,7 +46,7 @@ HorizontalLayout::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& doc)
 {
 }
 
-sp<Layout> HorizontalLayout::BUILDER::build(const sp<Scope>& /*args*/)
+sp<Layout> HorizontalLayout::BUILDER::build(const Scope& /*args*/)
 {
     return sp<Layout>::adopt(new HorizontalLayout(_gravity));
 }

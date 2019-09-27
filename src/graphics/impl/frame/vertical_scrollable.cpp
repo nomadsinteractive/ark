@@ -77,7 +77,7 @@ VerticalScrollable::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
     DCHECK(_tile_height > 0, "Illegal tile-height: %d", _tile_height);
 }
 
-sp<Renderer> VerticalScrollable::BUILDER::build(const sp<Scope>& args)
+sp<Renderer> VerticalScrollable::BUILDER::build(const Scope& args)
 {
     return sp<VerticalScrollable>::make(_tile_maker->build(args), _scroller->build(args), _height, _tile_height, _rows ? _rows : (_height - 1) / _tile_height  + 2);
 }

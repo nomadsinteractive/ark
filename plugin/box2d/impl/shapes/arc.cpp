@@ -50,7 +50,7 @@ Arc::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Shape> Arc::BUILDER::build(const sp<Scope>& args)
+sp<Shape> Arc::BUILDER::build(const Scope& args)
 {
     uint32_t sampleCount = static_cast<uint32_t>(_sample_count->build(args)->val());
     float a = _a->build(args)->val();

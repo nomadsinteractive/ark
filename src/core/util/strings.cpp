@@ -9,12 +9,11 @@
 #include <regex>
 
 #include "core/base/string_table.h"
+#include "core/base/scope.h"
 #include "core/inf/array.h"
 #include "core/inf/builder.h"
 #include "core/inf/readable.h"
 #include "core/inf/variable.h"
-#include "core/impl/builder/builder_by_argument.h"
-#include "core/impl/builder/builder_by_instance.h"
 #include "core/types/global.h"
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
@@ -32,12 +31,12 @@ static std::vector<sp<Builder<String>>> regexp_split(const std::string& s, const
     while(std::regex_search(str, match, pattern))
     {
         if(!match.prefix().str().empty())
-            items.push_back(sp<BuilderByInstance<String>>::make(sp<String>::make(match.prefix().str())));
+            items.push_back(sp<Builder<String>::Prebuilt>::make(sp<String>::make(match.prefix().str())));
         items.push_back(replacer(match));
         str = match.suffix().str();
     }
     if(!str.empty())
-        items.push_back(sp<BuilderByInstance<String>>::make(sp<String>::make(std::move(str))));
+        items.push_back(sp<Builder<String>::Prebuilt>::make(sp<String>::make(std::move(str))));
     return items;
 }
 
@@ -50,7 +49,7 @@ public:
         : _package(package), _resid(resid) {
     }
 
-    virtual sp<String> build(const sp<Scope>& /*args*/) override {
+    virtual sp<String> build(const Scope& /*args*/) override {
         const Global<StringTable> stringTable;
         return stringTable->getString(_package, _resid);
     }
@@ -67,8 +66,8 @@ public:
         : _name(name) {
     }
 
-    virtual sp<String> build(const sp<Scope>& args) override {
-        const sp<String> value = args ? args->get<String>(_name) : nullptr;
+    virtual sp<String> build(const Scope& args) override {
+        const sp<String> value = args.get<String>(_name);
         DCHECK(value, "Cannot get argument \"%s\"", _name.c_str());
         return value;
     }
@@ -92,16 +91,13 @@ public:
         });
     }
 
-    virtual sp<String> build(const sp<Scope>& args) override {
-        if(args) {
-            StringBuffer sb;
-            for(const sp<Builder<String>>& i : _builders) {
-                sp<String> v = i->build(args);
-                sb << v->c_str();
-            }
-            return sp<String>::make(sb.str());
+    virtual sp<String> build(const Scope& args) override {
+        StringBuffer sb;
+        for(const sp<Builder<String>>& i : _builders) {
+            sp<String> v = i->build(args);
+            sb << v->c_str();
         }
-        return _value;
+        return sp<String>::make(sb.str());
     }
 
 private:
@@ -540,7 +536,7 @@ Strings::BUILDER::BUILDER(BeanFactory& /*factory*/, const String& value)
 {
 }
 
-sp<String> Strings::BUILDER::build(const sp<Scope>& args)
+sp<String> Strings::BUILDER::build(const Scope& args)
 {
     return _delegate->build(args);
 }

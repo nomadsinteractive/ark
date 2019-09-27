@@ -10,7 +10,7 @@ void SnippetPointSize::preInitialize(PipelineBuildingContext& context)
     context._vertex.addPreMainSource("gl_PointSize = a_PointSize;");
 }
 
-sp<Snippet> SnippetPointSize::DICTIONARY::build(const sp<Scope>& /*args*/)
+sp<Snippet> SnippetPointSize::DICTIONARY::build(const Scope& /*args*/)
 {
     return sp<SnippetPointSize>::make();
 }

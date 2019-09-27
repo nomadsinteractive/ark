@@ -95,7 +95,7 @@ OggDecoderReadable::BUILDER::BUILDER(BeanFactory& factory, const String& src)
 {
 }
 
-sp<Readable> OggDecoderReadable::BUILDER::build(const sp<Scope>& args)
+sp<Readable> OggDecoderReadable::BUILDER::build(const Scope& args)
 {
     const String src = _src->build(args);
     return sp<OggDecoderReadable>::make(Ark::instance().openAsset(src));

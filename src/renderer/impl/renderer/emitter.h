@@ -24,9 +24,9 @@ namespace ark {
 class ARK_API Emitter : public Holder, public Renderer, public Disposed {
 private:
     struct Source {
-        Source(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Scope>& arguments);
+        Source(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const Scope& arguments);
 
-        sp<Scope> _arguments;
+        Scope _arguments;
 
         SafePtr<Integer> _type;
         SafePtr<Vec3> _position;
@@ -56,7 +56,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, bool disposed = true);
 
-        virtual sp<Emitter> build(const sp<Scope>& args) override;
+        virtual sp<Emitter> build(const Scope& args) override;
 
     private:
         BeanFactory _factory;
@@ -76,7 +76,7 @@ public:
     public:
         RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Renderer> build(const sp<Scope>& args) override;
+        virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         BUILDER _delegate;

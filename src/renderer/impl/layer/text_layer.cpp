@@ -16,7 +16,7 @@ public:
           _color(factory.getBuilder<Vec4>(manifest, Constants::Attributes::TEXT_COLOR)) {
     }
 
-    virtual sp<Shader> build(const sp<Scope>& args) override {
+    virtual sp<Shader> build(const Scope& args) override {
         const sp<Vec4> color = _color ? _color->build(args) : sp<Color>::make(Color::WHITE).cast<Vec4>();
         return _shader ? _shader->build(args) : Shader::fromStringTable("shaders/default.vert", "shaders/alpha.frag", sp<SnippetUColor>::make(color), _resource_loader_context);
     }
@@ -34,7 +34,7 @@ TextLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, cons
 {
 }
 
-sp<RenderLayer> TextLayer::BUILDER::build(const sp<Scope>& args)
+sp<RenderLayer> TextLayer::BUILDER::build(const Scope& args)
 {
     return _impl.build(args);
 }

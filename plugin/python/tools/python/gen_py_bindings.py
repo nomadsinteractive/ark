@@ -7,7 +7,7 @@ import re
 import sys
 from os import path
 
-LOADER_TEMPLATE = '''template<typename T> static Box PyArk${classname}_${methodname}Function(PyArkType::Instance& inst, const String& id, const sp<Scope>& args) {
+LOADER_TEMPLATE = '''template<typename T> static Box PyArk${classname}_${methodname}Function(PyArkType::Instance& inst, const String& id, const Scope& args) {
     const sp<T> bean = inst.unpack<${classname}>()->${methodname}<T>(id, args);
     return Box(bean);
 }'''
@@ -430,7 +430,7 @@ class GenArgument:
             return '%s %s = %s;' % (typename, objname, argname)
         m = acg.getSharedPtrType(self._accept_type)
         if m == 'Scope':
-            return acg.format('const sp<Scope> ${objname} = PythonInterpreter::instance()->toScope(kws);',
+            return acg.format('const Scope ${objname} = PythonInterpreter::instance()->toScope(kws);',
                               objname=objname, argname=argname)
         if m == 'char*':
             return self._gen_var_declare('String', objname, 'toType', 'String', argname)
@@ -459,7 +459,7 @@ class GenArgument:
 
 ARK_PY_ARGUMENTS = (
     (r'String\s*&?', GenArgumentMeta('const char*', 'const char*', 's')),
-    (r'sp<Scope>\s*&', GenArgumentMeta('PyObject*', 'sp<Scope>', '')),
+    (r'Scope\s*&', GenArgumentMeta('PyObject*', 'Scope', '')),
     (r'std::wstring\s*&', GenArgumentMeta('PyObject*', 'std::wstring', 'O')),
     (r'Box\s*&', GenArgumentMeta('PyObject*', 'Box', 'O')),
     (r'sp<([^>]+|[\w\d_]+<[\w\d_]+>)>\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
@@ -495,7 +495,7 @@ def parse_method_arguments(arguments):
         default_value = None
         pos = argstr.find('=')
         if pos != -1:
-            if not argstr.startswith('sp<Scope>'):
+            if not argstr.startswith('Scope'):
                 default_value = argstr[pos + 1:].strip()
                 if default_value.endswith('('):
                     default_value += ')'
@@ -534,7 +534,7 @@ class GenMethod(object):
         self._name = name
         self._return_type = return_type
         self._arguments = parse_method_arguments(args)
-        self._has_keyvalue_arguments = args and self._arguments[-1].type_compare('sp<Scope>')
+        self._has_keyvalue_arguments = args and self._arguments[-1].type_compare('Scope')
         self._flags = ('METH_VARARGS|METH_KEYWORDS' if self._has_keyvalue_arguments else 'METH_VARARGS')
         self._self_argument = None
 

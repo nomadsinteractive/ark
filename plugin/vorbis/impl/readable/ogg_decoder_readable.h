@@ -28,7 +28,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const String& src);
 
-        virtual sp<Readable> build(const sp<Scope>& args) override;
+        virtual sp<Readable> build(const Scope& args) override;
 
     private:
         sp<Builder<String>> _src;

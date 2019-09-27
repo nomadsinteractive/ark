@@ -34,7 +34,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& value);
 
-        virtual sp<Disposed> build(const sp<Scope>& args);
+        virtual sp<Disposed> build(const Scope& args);
 
     private:
         bool _disposed;

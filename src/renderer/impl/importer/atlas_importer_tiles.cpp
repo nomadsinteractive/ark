@@ -39,7 +39,7 @@ void AtlasImporterTiles::import(Atlas& atlas, const document& manifest)
         }
 }
 
-sp<Atlas::Importer> AtlasImporterTiles::BUILDER::build(const sp<Scope>& /*args*/)
+sp<Atlas::Importer> AtlasImporterTiles::BUILDER::build(const Scope& /*args*/)
 {
     return sp<AtlasImporterTiles>::make();
 }

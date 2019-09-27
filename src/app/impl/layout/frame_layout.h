@@ -22,7 +22,7 @@ public:
     public:
         BUILDER();
 
-        virtual sp<Layout> build(const sp<Scope>& args) override;
+        virtual sp<Layout> build(const Scope& args) override;
 
     };
 

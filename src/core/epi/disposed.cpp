@@ -51,7 +51,7 @@ Disposed::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
         _delegate = factory.ensureBuilder<Boolean>(value);
 }
 
-sp<Disposed> Disposed::DICTIONARY::build(const sp<Scope>& args)
+sp<Disposed> Disposed::DICTIONARY::build(const Scope& args)
 {
     return _delegate ? sp<Disposed>::make(_delegate->build(args)) : sp<Disposed>::make(_disposed);
 }

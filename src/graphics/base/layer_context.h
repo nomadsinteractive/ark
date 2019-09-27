@@ -48,7 +48,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest, Layer::Type layerType);
 
-        virtual sp<LayerContext> build(const sp<Scope>& args) override;
+        virtual sp<LayerContext> build(const Scope& args) override;
 
     private:
         sp<Builder<Layer>> _layer;

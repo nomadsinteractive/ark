@@ -50,7 +50,7 @@ Visibility::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
 {
 }
 
-sp<Visibility> Visibility::DICTIONARY::build(const sp<Scope>& args)
+sp<Visibility> Visibility::DICTIONARY::build(const Scope& args)
 {
     return sp<Visibility>::make(_visible->build(args));
 }

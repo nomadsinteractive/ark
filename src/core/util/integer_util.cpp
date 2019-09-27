@@ -23,7 +23,7 @@ public:
             : _values(std::move(values)), _repeat(repeat) {
         }
 
-        virtual sp<Integer> build(const sp<Scope>& /*args*/) override {
+        virtual sp<Integer> build(const Scope& /*args*/) override {
             return sp<IntegerByArray>::make(sp<IntArray::Vector>::make(_values), _repeat);
         }
 
@@ -208,7 +208,7 @@ IntegerUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr, Re
 {
 }
 
-sp<Integer> IntegerUtil::DICTIONARY::build(const sp<Scope>& args)
+sp<Integer> IntegerUtil::DICTIONARY::build(const Scope& args)
 {
     return _value->build(args);
 }
@@ -232,7 +232,7 @@ IntegerUtil::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Integer> IntegerUtil::BUILDER::build(const sp<Scope>& args)
+sp<Integer> IntegerUtil::BUILDER::build(const Scope& args)
 {
     return _delegate.build(args);
 }

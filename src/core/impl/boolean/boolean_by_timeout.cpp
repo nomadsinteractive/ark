@@ -32,7 +32,7 @@ BooleanByTimeout::BUILDER::BUILDER(BeanFactory& factory, const document& manifes
     }
 }
 
-sp<Boolean> BooleanByTimeout::BUILDER::build(const sp<Scope>& args)
+sp<Boolean> BooleanByTimeout::BUILDER::build(const Scope& args)
 {
     if(_sec == 0)
     {

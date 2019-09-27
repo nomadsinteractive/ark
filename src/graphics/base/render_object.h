@@ -125,7 +125,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<RenderObject> build(const sp<Scope>& args) override;
+        virtual sp<RenderObject> build(const Scope& args) override;
 
     private:
         sp<Builder<Integer>> _type;

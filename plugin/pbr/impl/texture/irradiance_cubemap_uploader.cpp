@@ -61,7 +61,7 @@ IrradianceCubemapUploader::BUILDER::BUILDER(BeanFactory& factory, const document
 {
 }
 
-sp<Texture::Uploader> IrradianceCubemapUploader::BUILDER::build(const sp<Scope>& args)
+sp<Texture::Uploader> IrradianceCubemapUploader::BUILDER::build(const Scope& args)
 {
     return sp<IrradianceCubemapUploader>::make(_texture->build(args), _size->build(args));
 }

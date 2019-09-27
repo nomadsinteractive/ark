@@ -132,7 +132,7 @@ AudioPlayerMiniAudio::BUILDER::BUILDER(BeanFactory& /*factory*/, const document&
 {
 }
 
-sp<AudioPlayer> AudioPlayerMiniAudio::BUILDER::build(const sp<Scope>& /*args*/)
+sp<AudioPlayer> AudioPlayerMiniAudio::BUILDER::build(const Scope& /*args*/)
 {
     return sp<AudioPlayerMiniAudio>::make(_resource_loader_context);
 }
@@ -142,7 +142,7 @@ AudioPlayerMiniAudio::BUILDER_DEFAULT::BUILDER_DEFAULT(BeanFactory& factory, con
 {
 }
 
-sp<AudioPlayer> AudioPlayerMiniAudio::BUILDER_DEFAULT::build(const sp<Scope>& args)
+sp<AudioPlayer> AudioPlayerMiniAudio::BUILDER_DEFAULT::build(const Scope& args)
 {
     return _delegate.build(args);
 }

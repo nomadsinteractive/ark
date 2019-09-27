@@ -32,7 +32,6 @@ Identifier Identifier::parseRef(const String& s)
     DCHECK(s, "Illegal identifier: empty string");
     String package, ref, queries;
     parseAndVaildate(s, package, ref, queries, FORMAT_NAMESPACE_STRICT);
-//    Strings::cut(s, package, ref, ':');
     return Identifier(ID_TYPE_REFERENCE, package, ref, queries);
 }
 

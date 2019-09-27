@@ -29,8 +29,8 @@ public:
         }
     }
 
-    static void visit(const sp<Scope>& scope, const Holder::Visitor& visitor) {
-        for(const auto& iter : scope->variables())
+    static void visit(const Scope& scope, const Holder::Visitor& visitor) {
+        for(const auto& iter : scope.variables())
             visit_box<Boolean, Integer, Numeric, Renderer, Arena, Vec2, Vec3, Vec4>(iter.second, visitor);
     }
 

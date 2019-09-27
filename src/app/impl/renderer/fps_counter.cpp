@@ -56,7 +56,7 @@ FPSCounter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Renderer> FPSCounter::BUILDER::build(const sp<Scope>& args)
+sp<Renderer> FPSCounter::BUILDER::build(const Scope& args)
 {
     return sp<FPSCounter>::make(Ark::instance().clock(), _interval, _characters->build(args), _message);
 }

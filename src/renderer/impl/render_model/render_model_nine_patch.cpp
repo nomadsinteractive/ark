@@ -117,7 +117,7 @@ RenderModelNinePatch::BUILDER::BUILDER(BeanFactory& factory, const document& man
 {
 }
 
-sp<RenderModel> RenderModelNinePatch::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> RenderModelNinePatch::BUILDER::build(const Scope& args)
 {
     return sp<RenderModelNinePatch>::make(_resource_loader_context->renderController(), _manifest, _atlas->build(args));
 }

@@ -21,7 +21,7 @@ public:
     public:
         BUILDER(BeanFactory& parent, const String& value);
 
-        virtual sp<Flatable> build(const sp<Scope>& args) override;
+        virtual sp<Flatable> build(const Scope& args) override;
 
     private:
         sp<Builder<ark::Array<Color>>> _color_array;

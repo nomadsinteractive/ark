@@ -127,7 +127,7 @@ LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<LayoutParam> LayoutParam::BUILDER::build(const sp<Scope>& args)
+sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
 {
     return _size ? sp<LayoutParam>::make(_size->build(args), _display) : nullptr;
 }

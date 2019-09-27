@@ -16,7 +16,7 @@ public:
     public:
         DICTIONARY() = default;
 
-        virtual sp<Snippet> build(const sp<Scope>& args) override;
+        virtual sp<Snippet> build(const Scope& args) override;
 
     };
 

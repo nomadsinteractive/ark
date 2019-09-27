@@ -54,7 +54,7 @@ Tileset::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
 }
 
-sp<Tileset> Tileset::BUILDER::build(const sp<Scope>& args)
+sp<Tileset> Tileset::BUILDER::build(const Scope& args)
 {
     return sp<Tileset>::make(_tile_width, _tile_height, _importer->build(args));
 }

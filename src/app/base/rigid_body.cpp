@@ -186,7 +186,7 @@ RigidBody::RIGID_BODY_STYLE::RIGID_BODY_STYLE(BeanFactory& factory, const sp<Bui
 {
 }
 
-sp<RenderObject> RigidBody::RIGID_BODY_STYLE::build(const sp<Scope>& args)
+sp<RenderObject> RigidBody::RIGID_BODY_STYLE::build(const Scope& args)
 {
     const sp<RenderObject> renderObject = _delegate->build(args);
     const sp<RigidBody> rigidBody = _rigid_body->build(args);

@@ -63,7 +63,7 @@ GravityLayout::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& doc)
 {
 }
 
-sp<Layout> GravityLayout::BUILDER::build(const sp<Scope>& /*args*/)
+sp<Layout> GravityLayout::BUILDER::build(const Scope& /*args*/)
 {
     return sp<Layout>::adopt(new GravityLayout(_gravity));
 }

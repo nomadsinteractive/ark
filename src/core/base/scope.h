@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_BASE_SCOPE_IMPL_H_
-#define ARK_CORE_BASE_SCOPE_IMPL_H_
+#ifndef ARK_CORE_BASE_SCOPE_H_
+#define ARK_CORE_BASE_SCOPE_H_
 
 #include <map>
 
@@ -21,24 +21,65 @@ class BoxBundle {
 
 class ARK_API Scope : public BoxBundle {
 public:
+    struct ARK_API Queries;
+
+public:
     Scope() = default;
-    Scope(std::map<String, Box> variables);
+    Scope(std::map<String, Box> variables, sp<Queries> queries = nullptr);
     DEFAULT_COPY_AND_ASSIGN(Scope);
 
-    template<typename T> sp<T> get(const String& name) {
-        return get(name).template as<T>();
+    template<typename T> sp<T> get(const String& name) const {
+        return getObject(name).template as<T>();
     }
+
+    template<typename T> sp<T> build(const String& name, const Scope& args) const;
 
     virtual Box get(const String& name) override;
 
     void put(const String& name, Box value);
-    void remove(const String& name);
 
     const std::map<String, Box>& variables() const;
 
 private:
+    Box getObject(const String& name) const;
+
+private:
     std::map<String, Box> _variables;
+    sp<Queries> _queries;
 };
+
+}
+
+#endif
+
+#ifndef ARK_CORE_BASE_SCOPE_H_APPENDIX_
+#define ARK_CORE_BASE_SCOPE_H_APPENDIX_
+
+#include "core/base/bean_factory.h"
+#include "core/collection/table.h"
+
+namespace ark {
+
+struct Scope::Queries {
+    BeanFactory _bean_factory;
+    Table<String, String> _queries;
+
+    Queries(BeanFactory factory, Table<String, String> queries);
+
+    template<typename T> sp<T> build(const String& name, const Scope& args) {
+        const auto iter = _queries.find(name);
+        if(iter != _queries.end())
+            return _bean_factory.build<T>(iter->second, args);
+        return nullptr;
+    }
+};
+
+template<typename T> sp<T> Scope::build(const String& name, const Scope& args) const {
+    sp<T> obj = getObject(name).template as<T>();
+    if(!obj && _queries)
+        obj = _queries->build<T>(name, args);
+    return obj;
+}
 
 }
 

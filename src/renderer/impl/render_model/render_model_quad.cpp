@@ -69,7 +69,7 @@ RenderModelQuad::BUILDER::BUILDER(BeanFactory& factory, const document& manifest
 {
 }
 
-sp<RenderModel> RenderModelQuad::BUILDER::build(const sp<Scope>& args)
+sp<RenderModel> RenderModelQuad::BUILDER::build(const Scope& args)
 {
     return sp<RenderModelQuad>::make(_resource_loader_context->renderController(), _atlas->build(args));
 }

@@ -60,7 +60,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Size> build(const sp<Scope>& args) override;
+        virtual sp<Size> build(const Scope& args) override;
 
     private:
         sp<Builder<Size>> _size;
@@ -74,7 +74,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& value);
 
-        virtual sp<Size> build(const sp<Scope>& args) override;
+        virtual sp<Size> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _width;

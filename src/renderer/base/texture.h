@@ -132,7 +132,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Texture> build(const sp<Scope>& args) override;
+        virtual sp<Texture> build(const Scope& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
@@ -144,7 +144,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Texture> build(const sp<Scope>& args) override;
+        virtual sp<Texture> build(const Scope& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;

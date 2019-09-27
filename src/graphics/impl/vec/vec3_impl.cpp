@@ -71,7 +71,7 @@ Vec3Impl::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
 {
 }
 
-sp<Vec3> Vec3Impl::BUILDER::build(const sp<Scope>& args)
+sp<Vec3> Vec3Impl::BUILDER::build(const Scope& args)
 {
     return sp<Vec3Impl>::make(_x->build(args), _y->build(args), _z->build(args));
 }
@@ -82,7 +82,7 @@ Vec3Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
     BeanUtils::split(factory, str, _x, _y, _z);
 }
 
-sp<Vec3> Vec3Impl::DICTIONARY::build(const sp<Scope>& args)
+sp<Vec3> Vec3Impl::DICTIONARY::build(const Scope& args)
 {
     const sp<Numeric> x = _x->build(args);
     const sp<Numeric> y = _y->build(args);
