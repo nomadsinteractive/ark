@@ -10,11 +10,8 @@
 #include "core/dom/dom_document.h"
 #include "core/inf/builder.h"
 #include "core/inf/dictionary.h"
-#include "core/impl/builder/builder_by_argument.h"
 #include "core/impl/builder/builder_by_instance.h"
 #include "core/impl/builder/builder_by_soft_ref.h"
-#include "core/base/scope.h"
-#include "core/types/box.h"
 #include "core/base/identifier.h"
 #include "core/util/documents.h"
 
@@ -334,14 +331,9 @@ public:
         return ensureBuilder<T>(attrValue);
     }
 
-    template<typename T> sp<Builder<T>> getBuilderByArg(const String& argname) {
-        return sp<BuilderByArgument<T>>::make(_stub->_references, argname);
-    }
+    template<typename T> sp<Builder<T>> getBuilderByArg(const String& argname);
 
-    template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id) {
-        DCHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
-        return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), findBuilderByValue<T>(id.toString()));
-    }
+    template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id);
 
     template<typename T> sp<Builder<T>> getBuilderByRef(const String& refid) {
         const sp<T> inst = _stub->_references->get<T>(refid);
@@ -461,6 +453,21 @@ private:
 private:
     sp<Stub> _stub;
 };
+
+}
+
+#include "core/impl/builder/builder_by_argument.h"
+
+namespace ark {
+
+template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const String& argname) {
+    return sp<BuilderByArgument<T>>::make(_stub->_references, argname);
+}
+
+template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const Identifier& id) {
+    DCHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
+    return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), findBuilderByValue<T>(id.toString()));
+}
 
 }
 
