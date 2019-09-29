@@ -150,6 +150,11 @@ sp<LayerContext> RenderLayer::makeContext(Layer::Type layerType) const
     return layerContext;
 }
 
+sp<Layer> RenderLayer::makeLayer(Layer::Type layerType) const
+{
+    return sp<Layer>::make(makeContext(layerType));
+}
+
 void RenderLayer::render(RenderRequest& renderRequest, float x, float y)
 {
     _stub->_layer->render(renderRequest, x, y);

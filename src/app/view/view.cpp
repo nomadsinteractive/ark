@@ -26,6 +26,8 @@ template<> ARK_API View::State Conversions::to<String, View::State>(const String
         return View::STATE_MOVING;
     if(str == "pushing")
         return View::STATE_PUSHING;
+    if(str == "actived")
+        return View::STATE_ACTIVED;
     return View::STATE_DEFAULT;
 }
 
@@ -59,7 +61,7 @@ template<> ARK_API View::Gravity Conversions::to<String, View::Gravity>(const St
 }
 
 View::View(const sp<LayoutParam>& layoutParam)
-    : _layout_param(layoutParam), _state(STATE_DEFAULT)
+    : _layout_param(layoutParam), _state(sp<State>::make(STATE_DEFAULT))
 {
 }
 
@@ -99,6 +101,16 @@ View::State View::state() const
     return _state;
 }
 
+void View::addState(View::State state)
+{
+    *_state = static_cast<State>(*_state | state);
+}
+
+void View::removeState(View::State state)
+{
+    *_state = static_cast<State>(*_state & ~(state));
+}
+
 const sp<Runnable>& View::onEnter() const
 {
     return _on_enter;
@@ -108,7 +120,7 @@ bool View::fireOnEnter()
 {
     if(_on_enter)
         _on_enter->run();
-    _state = static_cast<State>(_state | STATE_MOVING);
+    addState(STATE_MOVING);
     return static_cast<bool>(_on_enter);
 }
 
@@ -126,7 +138,7 @@ bool View::fireOnLeave()
 {
     if(_on_leave)
         _on_leave->run();
-    _state = static_cast<State>(_state & ~(STATE_MOVING));
+    removeState(STATE_MOVING);
     return static_cast<bool>(_on_leave);
 }
 
@@ -144,7 +156,7 @@ bool View::fireOnPush()
 {
     if(_on_push)
         _on_push->run();
-    _state = static_cast<State>(_state | STATE_PUSHING);
+    addState(STATE_PUSHING);
     return _on_push || _on_click;
 }
 
@@ -152,7 +164,7 @@ bool View::fireOnRelease()
 {
     if(_on_release)
         _on_release->run();
-    _state = static_cast<State>(_state & ~(STATE_PUSHING));
+    removeState(STATE_PUSHING);
     return false;
 }
 
@@ -170,7 +182,6 @@ bool View::fireOnClick()
 {
     if(_on_click)
         _on_click->run();
-    _state = STATE_MOVING;
     return static_cast<bool>(_on_click);
 }
 
@@ -206,33 +217,22 @@ void View::setOnMove(const sp<EventListener>& onMove)
 
 bool View::dispatchEvent(const Event& event, bool ptin)
 {
-    switch(_state)
+    if(ptin && !(*_state & View::STATE_MOVING) && event.action() == Event::ACTION_MOVE)
+        fireOnEnter();
+
+    if(!ptin)
     {
-    case View::STATE_DEFAULT:
-        if(ptin)
-        {
-            if(event.action() == Event::ACTION_MOVE)
-                fireOnEnter();
-        }
-        else
-            break;
-    case View::STATE_PUSHING:
-    case View::STATE_MOVING:
-    case View::STATE_MOVING_PUSHING:
-        if(!ptin)
-        {
-            if(event.action() == Event::ACTION_MOVE)
-                fireOnLeave();
-        }
-        else if(event.action() == Event::ACTION_UP && !fireOnRelease() && fireOnClick())
-            return true;
-        else if(event.action() == Event::ACTION_DOWN && fireOnPush())
-            return true;
-        break;
+        if(event.action() == Event::ACTION_MOVE)
+            fireOnLeave();
     }
+    else if(event.action() == Event::ACTION_UP && !fireOnRelease() && fireOnClick())
+        return true;
+    else if(event.action() == Event::ACTION_DOWN && fireOnPush())
+        return true;
+
     if(event.action() == Event::ACTION_MOVE && ptin)
         return fireOnMove(event);
-    if(event.action() == Event::ACTION_UP && (_state & View::STATE_PUSHING))
+    if(event.action() == Event::ACTION_UP && (*_state & View::STATE_PUSHING))
         fireOnRelease();
     return false;
 }

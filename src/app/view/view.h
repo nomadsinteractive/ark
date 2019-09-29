@@ -20,7 +20,8 @@ public:
         STATE_DEFAULT = 0,
         STATE_PUSHING = 1,
         STATE_MOVING = 2,
-        STATE_MOVING_PUSHING = STATE_PUSHING | STATE_MOVING,
+        STATE_ACTIVED = 4,
+        STATE_COUNT = 4
     };
 
     enum Gravity {
@@ -47,6 +48,8 @@ public:
     void setLayoutParam(const sp<LayoutParam>& layoutParam);
 
     State state() const;
+    void addState(State state);
+    void removeState(State state);
 
     const sp<Runnable>& onEnter() const;
     void setOnEnter(const sp<Runnable>& fireOnEnter);
@@ -254,7 +257,7 @@ protected:
 protected:
     SafePtr<LayoutParam> _layout_param;
 
-    State _state;
+    sp<State> _state;
     sp<Runnable> _on_enter;
     sp<Runnable> _on_leave;
     sp<Runnable> _on_push;

@@ -23,8 +23,8 @@ public:
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
-    void setForeground(View::State status, const sp<Renderer>& foreground);
-    void setBackground(View::State status, const sp<Renderer>& background);
+    void setForeground(View::State status, sp<Renderer> foreground, const sp<Boolean>& enabled);
+    void setBackground(View::State status, sp<Renderer> background, const sp<Boolean>& enabled);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Button> {
@@ -54,10 +54,6 @@ public:
     private:
         BUILDER _delegate;
     };
-
-private:
-    virtual bool fireOnPush() override;
-    virtual bool fireOnRelease() override;
 
 private:
     op<RendererWithState> _foreground;

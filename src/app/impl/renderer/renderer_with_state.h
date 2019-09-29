@@ -13,22 +13,28 @@ namespace ark {
 
 class RendererWithState : public Renderer {
 public:
-    RendererWithState(const sp<Renderer>& def);
+    RendererWithState(const sp<Renderer>& def, const sp<View::State>& state);
 
     virtual void render(RenderRequest& renderRequest, float x, float y) override;
 
-    View::State status() const;
-    void setStatus(View::State status);
-
-    void setStateRenderer(View::State status, const sp<Renderer>& drawable);
+    void setStateRenderer(View::State status, sp<Renderer> renderer, sp<Boolean> enabled);
 
     const sp<Renderer>& getRendererByCurrentStatus();
 
 private:
-    View::State _state;
-    sp<Renderer> _default;
-    std::map<View::State, sp<Renderer>> _selector;
+    struct StateRenderer {
+        StateRenderer() = default;
+        StateRenderer(sp<Renderer> renderer, sp<Boolean> boolean);
 
+        sp<Renderer> _renderer;
+        sp<Boolean> _enabled;
+    };
+
+private:
+    sp<Renderer> _default;
+    sp<View::State> _state;
+
+    StateRenderer _selectors[View::STATE_COUNT - 1];
 };
 
 }

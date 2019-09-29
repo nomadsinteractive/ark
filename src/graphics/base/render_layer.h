@@ -96,6 +96,8 @@ public:
 
 //[[script::bindings::auto]]
     sp<LayerContext> makeContext(Layer::Type layerType) const;
+//[[script::bindings::auto]]
+    sp<Layer> makeLayer(Layer::Type layerType) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<RenderLayer> {

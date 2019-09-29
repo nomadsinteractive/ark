@@ -17,7 +17,7 @@
 namespace ark {
 
 Button::Button(const sp<Renderer>& foreground, const sp<Renderer>& background, const sp<Size>& block, Gravity gravity)
-    : View(block), _foreground(new RendererWithState(foreground)), _background(new RendererWithState(background)), _gravity(gravity)
+    : View(block), _foreground(new RendererWithState(foreground, _state)), _background(new RendererWithState(background, _state)), _gravity(gravity)
 {
 }
 
@@ -48,28 +48,14 @@ void Button::render(RenderRequest& renderRequest, float x, float y)
         _foreground->render(renderRequest, x, y);
 }
 
-void Button::setForeground(View::State status, const sp<Renderer>& foreground)
+void Button::setForeground(View::State status, sp<Renderer> foreground, const sp<Boolean>& enabled)
 {
-    _foreground->setStateRenderer(status, foreground);
+    _foreground->setStateRenderer(status, std::move(foreground), enabled);
 }
 
-void Button::setBackground(View::State status, const sp<Renderer>& background)
+void Button::setBackground(View::State status, sp<Renderer> background, const sp<Boolean>& enabled)
 {
-    _background->setStateRenderer(status, background);
-}
-
-bool Button::fireOnPush()
-{
-    _foreground->setStatus(View::STATE_PUSHING);
-    _background->setStatus(View::STATE_PUSHING);
-    return View::fireOnPush();
-}
-
-bool Button::fireOnRelease()
-{
-    _foreground->setStatus(View::STATE_DEFAULT);
-    _background->setStatus(View::STATE_DEFAULT);
-    return View::fireOnRelease();
+    _background->setStateRenderer(status, std::move(background), enabled);
 }
 
 Button::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -100,12 +86,16 @@ void Button::BUILDER::loadStatus(const sp<Button>& button, const document& doc, 
     for(const document& node : doc->children("state"))
     {
         View::State status = Documents::ensureAttribute<View::State>(node, Constants::Attributes::NAME);
-        const sp<Renderer> foreground = factory.build<Renderer>(node, Constants::Attributes::FOREGROUND, args);
-        const sp<Renderer> background = factory.build<Renderer>(node, Constants::Attributes::BACKGROUND, args);
+        sp<Renderer> foreground = factory.build<Renderer>(node, Constants::Attributes::FOREGROUND, args);
+        sp<Renderer> background = factory.build<Renderer>(node, Constants::Attributes::BACKGROUND, args);
+        const sp<Boolean> enabled = factory.build<Boolean>(node, "enabled", args);
+        if(enabled)
+            button->addState(status);
+
         if(foreground)
-            button->setForeground(status, foreground);
+            button->setForeground(status, std::move(foreground), enabled);
         if(background)
-            button->setBackground(status, background);
+            button->setBackground(status, std::move(background), enabled);
     }
 }
 
