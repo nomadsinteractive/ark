@@ -8,9 +8,9 @@ void FrameLayout::begin(Context& /*ctx*/, LayoutParam& /*layoutParam*/)
 {
 }
 
-Rect FrameLayout::place(Context& /*ctx*/, LayoutParam& layoutParam)
+Rect FrameLayout::place(Context& ctx, LayoutParam& layoutParam)
 {
-    return Rect(0, 0, layoutParam.contentWidth(), layoutParam.contentHeight());
+    return Rect(0, 0, layoutParam.calcLayoutWidth(ctx._client_width), layoutParam.calcLayoutHeight(ctx._client_height));
 }
 
 Rect FrameLayout::end(Context& /*ctx*/)

@@ -28,7 +28,7 @@ void HorizontalLayout::begin(Context& ctx, LayoutParam& /*layoutParam*/)
 
 Rect HorizontalLayout::place(Context& ctx, LayoutParam& layoutParam)
 {
-    Rect rect = GravityLayout::place(_place_gravity, ctx._client_width, ctx._client_height, layoutParam.calcLayoutWidth(_content_available), layoutParam.calcLayoutHeight(ctx._client_width));
+    Rect rect = GravityLayout::place(_place_gravity, ctx._client_width, ctx._client_height, layoutParam.calcLayoutWidth(_content_available), layoutParam.calcLayoutHeight(ctx._client_height));
     rect.translate(_flowx, 0);
     _flowx += rect.width();
     if(_max_height < rect.height())
