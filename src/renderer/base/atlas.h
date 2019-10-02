@@ -59,9 +59,6 @@ public:
     uint32_t width() const;
     uint32_t height() const;
 
-    uint16_t halfPixelX() const;
-    uint16_t halfPixelY() const;
-
 //  [[script::bindings::auto]]
     bool has(int32_t c) const;
 //  [[script::bindings::auto]]
@@ -95,7 +92,6 @@ private:
 
 private:
     sp<Texture> _texture;
-    uint16_t _half_pixel_x, _half_pixel_y;
 
     op<ByIndex<Item>> _items;
     bool _allow_default_item;

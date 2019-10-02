@@ -54,9 +54,9 @@ bool RenderModelText::Stub::prepareOne(int32_t c)
 
         if(_max_glyph_height < metrics.bitmap_height)
             _max_glyph_height = metrics.bitmap_height;
-        _atlas->add(c, _flowx, _flowy, _flowx + metrics.bitmap_width, _flowy + metrics.bitmap_height + 1);
+        _atlas->add(c, _flowx, _flowy, _flowx + metrics.bitmap_width, _flowy + metrics.bitmap_height);
         _alphabet->draw(c, _font_glyph, _flowx, _flowy);
-        _flowx += metrics.bitmap_width;
+        _flowx += (metrics.bitmap_width + 1);
     }
     else
         DWARN(false, "Error loading character %d", c);

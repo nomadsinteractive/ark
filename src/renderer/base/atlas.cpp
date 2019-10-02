@@ -15,8 +15,7 @@
 namespace ark {
 
 Atlas::Atlas(const sp<Texture>& texture, bool allowDefaultItem)
-    : _texture(texture), _half_pixel_x(static_cast<uint16_t>(32768 / texture->width())), _half_pixel_y(static_cast<uint16_t>(32768 / texture->height())),
-      _items(new ByIndex<Item>()), _allow_default_item(allowDefaultItem)
+    : _texture(texture), _items(new ByIndex<Item>()), _allow_default_item(allowDefaultItem)
 {
 }
 
@@ -38,16 +37,6 @@ uint32_t Atlas::width() const
 uint32_t Atlas::height() const
 {
     return static_cast<uint32_t>(_texture->height());
-}
-
-uint16_t Atlas::halfPixelX() const
-{
-    return _half_pixel_x;
-}
-
-uint16_t Atlas::halfPixelY() const
-{
-    return _half_pixel_y;
 }
 
 bool Atlas::has(int32_t c) const
@@ -75,7 +64,7 @@ void Atlas::getOriginalPosition(int32_t id, Rect& position) const
     const Atlas::Item& item = at(id);
     float nw = _texture->width() / 65536.0f;
     float nh = _texture->height() / 65536.0f;
-    position = Rect((item.left() - _half_pixel_x) * nw, (item.bottom() - _half_pixel_y) * nh, (item.right() + _half_pixel_x) * nw, (item.top() + _half_pixel_y) * nh);
+    position = Rect(item.left() * nw, item.bottom() * nh, item.right() * nw, item.top() * nh);
 }
 
 void Atlas::clear()
@@ -85,7 +74,7 @@ void Atlas::clear()
 
 uint16_t Atlas::unnormalize(uint32_t x, uint32_t s)
 {
-    return static_cast<uint16_t>(x * 65536 / s);
+    return static_cast<uint16_t>(std::min<uint32_t>(x * 65536 / s, std::numeric_limits<uint16_t>::max()));
 }
 
 Atlas::Item Atlas::makeItem(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX, float pivotY) const
@@ -96,7 +85,7 @@ Atlas::Item Atlas::makeItem(uint32_t left, uint32_t top, uint32_t right, uint32_
     uint16_t b = unnormalize(bottom, static_cast<uint32_t>(_texture->height()));
     float width = static_cast<float>(right - left);
     float height = static_cast<float>(bottom - top);
-    return Item(l + _half_pixel_x, b - _half_pixel_y, r - _half_pixel_x, t + _half_pixel_y, width, height, pivotX, pivotY);
+    return Item(l, b, r, t, width, height, pivotX, pivotY);
 }
 
 Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -124,12 +113,12 @@ sp<Atlas> Atlas::BUILDER::build(const Scope& args)
         else if(i->name() != Constants::Attributes::TEXTURE)
         {
             DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
-            uint32_t type = Documents::getAttribute<uint32_t>(i, Constants::Attributes::TYPE, 0);
+            int32_t type = Documents::getAttribute<int32_t>(i, Constants::Attributes::TYPE, 0);
             if(type == 0)
             {
                 const String character = Documents::getAttribute(i, "character");
                 if(character)
-                    type = static_cast<uint32_t>(character.at(0));
+                    type = static_cast<int32_t>(character.at(0));
             }
             const Rect r = Rect::parse(i);
             atlas->add(type, static_cast<uint32_t>(r.left()), static_cast<uint32_t>(r.top()), static_cast<uint32_t>(r.right()), static_cast<uint32_t>(r.bottom()),

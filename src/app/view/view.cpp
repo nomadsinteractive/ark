@@ -222,7 +222,7 @@ bool View::dispatchEvent(const Event& event, bool ptin)
 
     if(!ptin)
     {
-        if(event.action() == Event::ACTION_MOVE)
+        if(event.action() == Event::ACTION_MOVE && (*_state & View::STATE_MOVING))
             fireOnLeave();
     }
     else if(event.action() == Event::ACTION_UP && !fireOnRelease() && fireOnClick())
