@@ -90,11 +90,9 @@ bool Identifier::isVal() const
 
 bool Identifier::parseAndVaildate(const String& s, String& package, String& value, String& queries, Format format)
 {
-    String valAndQueries;
-    Strings::cut(s, package, valAndQueries, ':');
-
-    value = valAndQueries;
-    Strings::cut(valAndQueries, value, queries, '?', false);
+    String packageAndName = s;
+    Strings::cut(s, packageAndName, queries, '?', false);
+    Strings::cut(packageAndName, package, value, ':');
     if(FORMAT_NAMESPACE_STRICT == format)
         return Strings::isVariableName(package) && Strings::isVariableName(value);
     return true;

@@ -41,10 +41,11 @@ void SurfaceController::update(RenderRequest& renderRequest)
     if(size < 3)
     {
         const sp<RenderCommandPipeline> renderCommand = _object_pool.obtain<RenderCommandPipeline>();
+        const V3 position(0);
         renderRequest.start(renderCommand);
-        _renderers->render(renderRequest, 0, 0);
-        _controls->render(renderRequest, 0, 0);
-        _layers->render(renderRequest, 0, 0);
+        _renderers->render(renderRequest, position);
+        _controls->render(renderRequest, position);
+        _layers->render(renderRequest, position);
         renderRequest.finish();
     }
     else

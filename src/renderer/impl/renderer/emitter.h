@@ -39,7 +39,7 @@ public:
     Emitter(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Source>& source, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory, bool disposed);
 
     virtual void traverse(const Visitor& visitor) override;
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
 //  [[script::bindings::property]]
     bool active();

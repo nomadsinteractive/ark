@@ -22,7 +22,7 @@ public:
 
     const sp<Renderer>& renderer() const;
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     virtual const SafePtr<Size>& size() override;
     const sp<Size>& size() const;

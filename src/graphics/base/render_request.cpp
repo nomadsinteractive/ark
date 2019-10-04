@@ -14,8 +14,8 @@ namespace {
 
 class BackgroundRenderCommand : public RenderCommand, public Runnable {
 public:
-    BackgroundRenderCommand(const RenderLayer& layer, float x, float y)
-        : _layer_snapshot(layer.snapshot()), _x(x), _y(y) {
+    BackgroundRenderCommand(const RenderLayer& layer, const V3& position)
+        : _layer_snapshot(layer.snapshot()), _position(position) {
     }
 
     virtual void draw(GraphicsContext& graphicsContext) override {
@@ -23,14 +23,13 @@ public:
     }
 
     virtual void run() override {
-        _delegate = _layer_snapshot.render(_x, _y);
+        _delegate = _layer_snapshot.render(_position);
         DASSERT(_delegate);
     }
 
 private:
     RenderLayer::Snapshot _layer_snapshot;
-    float _x;
-    float _y;
+    V3 _position;
 
     sp<RenderCommand> _delegate;
 };
@@ -81,9 +80,9 @@ void RenderRequest::addRequest(const sp<RenderCommand>& renderCommand)
     _stub->_render_command_pipe_line->add(renderCommand);
 }
 
-void RenderRequest::addBackgroundRequest(const RenderLayer& layer, float x, float y)
+void RenderRequest::addBackgroundRequest(const RenderLayer& layer, const V3& position)
 {
-    const sp<BackgroundRenderCommand> renderCommand = _stub->_object_pool.obtain<BackgroundRenderCommand>(layer, x, y);
+    const sp<BackgroundRenderCommand> renderCommand = _stub->_object_pool.obtain<BackgroundRenderCommand>(layer, position);
     ++(_stub->_background_renderer_count);
     _stub->_render_command_pipe_line->add(renderCommand);
 

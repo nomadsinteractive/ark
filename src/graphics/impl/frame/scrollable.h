@@ -53,7 +53,7 @@ private:
 public:
     Scrollable(const sp<Vec>& scroller, const sp<RendererMaker>& tileMaker, const sp<Size>& size, const Params& params);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     virtual const SafePtr<Size>& size() override;
 

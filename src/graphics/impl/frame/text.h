@@ -20,7 +20,7 @@ class Text : public Renderer, public Block {
 public:
     Text(const sp<Characters>& characters);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     virtual const SafePtr<Size>& size() override;
 

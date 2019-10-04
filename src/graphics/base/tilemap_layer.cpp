@@ -26,15 +26,15 @@ TilemapLayer::~TilemapLayer()
     delete[] _tiles;
 }
 
-void TilemapLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
+void TilemapLayer::render(RenderRequest& /*renderRequest*/, const V3& position)
 {
     float width = _size->width();
     float height = _size->height();
     float tileWidth = static_cast<float>(_tileset->tileWidth()), tileHeight = static_cast<float>(_tileset->tileHeight());
 
-    const V position = _position->val();
+    const V pos = _position->val();
     const V scroll = _scroller->val();
-    float vsx = scroll.x() - position.x(), vsy = scroll.y() - position.y();
+    float vsx = scroll.x() - pos.x(), vsy = scroll.y() - pos.y();
     float sx, ex, sy, ey, ox, oy;
 
     if(_flag & Tilemap::LAYER_FLAG_SCROLLABLE)
@@ -49,8 +49,8 @@ void TilemapLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
         sx = sy = 0;
         ex = width;
         ey = height;
-        ox = -position.x() - tileWidth / 2.0f;
-        oy = -position.y() - tileHeight / 2.0f;
+        ox = -pos.x() - tileWidth / 2.0f;
+        oy = -pos.y() - tileHeight / 2.0f;
     }
 
     int32_t rowStart = std::max(static_cast<int32_t>(sy / tileHeight) - 1, 0);
@@ -65,7 +65,7 @@ void TilemapLayer::render(RenderRequest& /*renderRequest*/, float x, float y)
         {
             const sp<RenderObject>& renderObject = _tiles[i * _col_count + j];
             if(renderObject)
-                _layer_context->drawRenderObject((j - colStart) * tileWidth - ox + x, dy + y, renderObject);
+                _layer_context->drawRenderObject(V3((j - colStart) * tileWidth - ox, dy, 0) + position, renderObject);
         }
     }
 }

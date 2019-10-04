@@ -22,7 +22,7 @@ public:
     ~ViewGroup() override;
 
     virtual void addRenderer(const sp<Renderer>& renderer) override;
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     virtual void traverse(const Visitor& visitor) override;
 

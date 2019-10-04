@@ -25,7 +25,7 @@ public:
 
     RendererWithPivot(const sp<Renderer>& renderer, Pivot pivot);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
 //  [[plugin::style("pivot")]]
     class STYLE : public Builder<Renderer> {

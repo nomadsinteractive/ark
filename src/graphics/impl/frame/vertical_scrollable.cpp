@@ -3,6 +3,8 @@
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
 
+#include "graphics/base/v3.h"
+
 namespace ark {
 
 VerticalScrollable::VerticalScrollable(const sp<RendererMaker>& tileMaker, const sp<Numeric>& scroller, int32_t height, int32_t tileHeight, uint32_t itemCount)
@@ -12,7 +14,7 @@ VerticalScrollable::VerticalScrollable(const sp<RendererMaker>& tileMaker, const
     update();
 }
 
-void VerticalScrollable::render(RenderRequest& renderRequest, float x, float y)
+void VerticalScrollable::render(RenderRequest& renderRequest, const V3& position)
 {
     int32_t scrollPosition = static_cast<int32_t>(_scroller->val());
     if(scrollPosition != _scroll_position)
@@ -24,7 +26,7 @@ void VerticalScrollable::render(RenderRequest& renderRequest, float x, float y)
     {
         Tile<sp<Renderer>>& tile = _tiles[(i - _grid_position) / _tile_height];
         ensureTile(tile, i);
-        tile.renderer()->render(renderRequest, x, y + tile.offset() - gs);
+        tile.renderer()->render(renderRequest, position + V3(0, tile.offset() - gs, 0));
     }
 }
 

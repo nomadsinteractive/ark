@@ -92,7 +92,7 @@ Scrollable::Scrollable(const sp<Vec>& scroller, const sp<RendererMaker>& tileMak
     initialize();
 }
 
-void Scrollable::render(RenderRequest& renderRequest, float x, float y)
+void Scrollable::render(RenderRequest& renderRequest, const V3& position)
 {
     update();
 
@@ -107,7 +107,7 @@ void Scrollable::render(RenderRequest& renderRequest, float x, float y)
         {
             const sp<Renderer>& tile = _rolling_view.getTile(_renderer_maker, i, j);
             DCHECK(tile, "Grid(row:%d, col: %d) is null", i, j);
-            tile->render(renderRequest, x + j * _params._tile_width - cx, y + i * _params._tile_height - cy);
+            tile->render(renderRequest, V3(j * _params._tile_width - cx, i * _params._tile_height - cy, 0) + position);
         }
 }
 

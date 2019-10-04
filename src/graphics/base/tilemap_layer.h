@@ -16,7 +16,7 @@ public:
     TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, const sp<Vec>& position = nullptr, Tilemap::LayerFlag flag = Tilemap::LAYER_FLAG_DEFAULT);
     ~TilemapLayer();
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
 // [[script::bindings::property]]
     const sp<Vec>& position() const;

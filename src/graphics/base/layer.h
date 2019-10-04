@@ -26,7 +26,7 @@ public:
 public:
     Layer(const sp<LayerContext>& layerContext);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
     virtual void traverse(const Visitor& visitor) override;
 
 // [[script::bindings::auto]]

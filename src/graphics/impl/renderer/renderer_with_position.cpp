@@ -3,28 +3,27 @@
 #include "core/inf/variable.h"
 #include "core/base/bean_factory.h"
 
-#include "graphics/base/v2.h"
+#include "graphics/base/v3.h"
 
 namespace ark {
 
-RendererWithPosition::RendererWithPosition(const sp<Renderer>& renderer, const sp<Vec>& position)
+RendererWithPosition::RendererWithPosition(const sp<Renderer>& renderer, const sp<Vec3>& position)
     : _renderer(renderer), _position(position)
 {
     DCHECK(renderer && position, "Arguments must not be null");
 }
 
-void RendererWithPosition::render(RenderRequest& renderRequest, float x, float y)
+void RendererWithPosition::render(RenderRequest& renderRequest, const V3& position)
 {
-    const V position = _position->val();
-    _renderer->render(renderRequest, x + position.x(), y + position.y());
+    _renderer->render(renderRequest, position + _position->val());
 }
 
-RendererWithPosition::DECORATOR::DECORATOR(BeanFactory& parent, const sp<Builder<Renderer>>& delegate, const String& value)
-    : _delegate(delegate), _position(parent.ensureBuilder<Vec>(value))
+RendererWithPosition::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& value)
+    : _delegate(delegate), _position(factory.ensureBuilder<Vec3>(value))
 {
 }
 
-sp<Renderer> RendererWithPosition::DECORATOR::build(const Scope& args)
+sp<Renderer> RendererWithPosition::STYLE::build(const Scope& args)
 {
     const sp<Renderer> bean = _delegate->build(args);
     return sp<Renderer>::adopt(new RendererWithPosition(bean, _position->build(args))).absorb(bean);

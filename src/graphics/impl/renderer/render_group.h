@@ -15,7 +15,7 @@ public:
     ~RendererGroup() override;
 
     virtual void addRenderer(const sp<Renderer>& renderer) override;
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
 //  [[plugin::builder("render-group")]]
     class BUILDER : public Builder<Renderer> {

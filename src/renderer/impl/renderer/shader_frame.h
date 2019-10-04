@@ -20,7 +20,7 @@ class ShaderFrame : public Renderer, public Block {
 public:
     ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     virtual const SafePtr<Size>& size() override;
 
@@ -41,7 +41,7 @@ public:
     };
 
 private:
-    bytearray getVertexBuffer(float x, float y) const;
+    bytearray getVertexBuffer(const V3& position) const;
 
 private:
     SafePtr<Size> _size;

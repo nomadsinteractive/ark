@@ -27,7 +27,7 @@ const SafePtr<Size>& FPSCounter::size()
     return _characters->size();
 }
 
-void FPSCounter::render(RenderRequest& /*renderRequest*/, float x, float y)
+void FPSCounter::render(RenderRequest& /*renderRequest*/, const V3& position)
 {
     ++ _frame_rendered;
     float duration = _duration->val();
@@ -39,7 +39,7 @@ void FPSCounter::render(RenderRequest& /*renderRequest*/, float x, float y)
         _last_refresh = duration;
         _frame_rendered = 0;
     }
-    _characters->renderRequest(V2(x, y));
+    _characters->renderRequest(position);
 }
 
 void FPSCounter::updateFPS(float fps)

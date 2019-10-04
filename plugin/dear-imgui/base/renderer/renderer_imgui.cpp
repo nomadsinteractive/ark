@@ -80,7 +80,7 @@ RendererImgui::RendererImgui(const sp<ResourceLoaderContext>& resourceLoaderCont
 {
 }
 
-void RendererImgui::render(RenderRequest& renderRequest, float x, float y)
+void RendererImgui::render(RenderRequest& renderRequest, const V3& position)
 {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -88,7 +88,7 @@ void RendererImgui::render(RenderRequest& renderRequest, float x, float y)
     io.DisplaySize.y = _render_engine->viewport().height();
 
     ImGui::NewFrame();
-    _renderer_group->render(renderRequest, x, y);
+    _renderer_group->render(renderRequest, position);
     ImGui::EndFrame();
     ImGui::Render();
     MyImGuiRenderFunction(renderRequest, ImGui::GetDrawData());

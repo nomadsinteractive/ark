@@ -19,7 +19,7 @@ public:
 
     virtual const SafePtr<Size>& size() override;
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     void updateFPS(float fps);
 

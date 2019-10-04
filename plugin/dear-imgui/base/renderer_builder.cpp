@@ -142,7 +142,7 @@ public:
         : _widget(widget) {
     }
 
-    virtual void render(RenderRequest& /*renderRequest*/, float /*x*/, float /*y*/) override {
+    virtual void render(RenderRequest& /*renderRequest*/, const V3& /*position*/) override {
         _widget->render();
     }
 

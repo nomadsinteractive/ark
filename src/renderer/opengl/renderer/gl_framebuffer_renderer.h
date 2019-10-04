@@ -18,7 +18,7 @@ class GLFramebufferRenderer : public Renderer {
 public:
     GLFramebufferRenderer(const sp<Renderer>& delegate, const sp<GLFramebuffer>& framebuffer);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
 private:
     sp<Renderer> _delegate;

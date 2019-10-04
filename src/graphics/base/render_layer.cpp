@@ -70,7 +70,7 @@ RenderLayer::Snapshot::Snapshot(const sp<Stub>& stub)
     }
 }
 
-sp<RenderCommand> RenderLayer::Snapshot::render(float x, float y)
+sp<RenderCommand> RenderLayer::Snapshot::render(const V3& position)
 {
     if(_items.size() > 0)
     {
@@ -80,7 +80,7 @@ sp<RenderCommand> RenderLayer::Snapshot::render(float x, float y)
         for(const RenderObject::Snapshot& i : _items)
         {
             buf.setRenderObject(i);
-            buf.setTranslate(V3(x + i._position.x(), y + i._position.y(), i._position.z()));
+            buf.setTranslate(position + i._position);
             _stub->_render_model->load(buf, i);
             if(buf.isInstanced())
             {
@@ -155,10 +155,10 @@ sp<Layer> RenderLayer::makeLayer(Layer::Type layerType) const
     return sp<Layer>::make(makeContext(layerType));
 }
 
-void RenderLayer::render(RenderRequest& renderRequest, float x, float y)
+void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
 {
-    _stub->_layer->render(renderRequest, x, y);
-    renderRequest.addBackgroundRequest(*this, x, y);
+    _stub->_layer->render(renderRequest, position);
+    renderRequest.addBackgroundRequest(*this, position);
 }
 
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

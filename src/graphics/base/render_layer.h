@@ -60,7 +60,7 @@ public:
     struct Snapshot {
         Snapshot(Snapshot&& other) = default;
 
-        sp<RenderCommand> render(float x, float y);
+        sp<RenderCommand> render(const V3& position);
 
         sp<Stub> _stub;
         std::vector<UBOSnapshot> _ubos;
@@ -83,7 +83,7 @@ public:
 public:
     RenderLayer(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     const sp<RenderModel>& model() const;
 

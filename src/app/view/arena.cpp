@@ -31,12 +31,12 @@ void Arena::addRenderer(const sp<Renderer>& renderer)
     _view_group->addRenderer(renderer);
 }
 
-void Arena::render(RenderRequest& renderRequest, float x, float y)
+void Arena::render(RenderRequest& renderRequest, const V3& position)
 {
     DASSERT(_view_group);
-    _view_group->render(renderRequest, x, y);
+    _view_group->render(renderRequest, position);
     for(const sp<Renderer>& i : _layers)
-        i->render(renderRequest, x, y);
+        i->render(renderRequest, position);
 }
 
 bool Arena::onEvent(const Event& event)

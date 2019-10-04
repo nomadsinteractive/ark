@@ -4,7 +4,7 @@
 #include "core/base/bean_factory.h"
 #include "core/types/safe_ptr.h"
 
-#include "graphics/base/v2.h"
+#include "graphics/base/v3.h"
 #include "graphics/base/size.h"
 #include "graphics/inf/block.h"
 
@@ -16,7 +16,7 @@ RendererWithPivot::RendererWithPivot(const sp<Renderer>& renderer, Pivot pivot)
     DCHECK(_block, "Only block renderer may have pivot");
 }
 
-void RendererWithPivot::render(RenderRequest& renderRequest, float x, float y)
+void RendererWithPivot::render(RenderRequest& renderRequest, const V3& position)
 {
     float ox = 0, oy = 0;
     const sp<Size>& size = _block->size();
@@ -33,7 +33,7 @@ void RendererWithPivot::render(RenderRequest& renderRequest, float x, float y)
     else if((_pivot & BOTTOM) == BOTTOM)
         oy = (-1.0f + g_upDirection) * size->height() / 2.0f;
 
-    _renderer->render(renderRequest, x + ox, y + oy);
+    _renderer->render(renderRequest, position + V3(ox, oy, 0));
 }
 
 RendererWithPivot::STYLE::STYLE(BeanFactory& /*factory*/, const sp<Builder<Renderer>>& delegate, const String& value)

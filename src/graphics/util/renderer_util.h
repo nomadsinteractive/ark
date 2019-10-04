@@ -25,7 +25,7 @@ public:
     static SafePtr<Size> size(const sp<Renderer>& self);
 
 //[[script::bindings::classmethod]]
-    static sp<Renderer> translate(const sp<Renderer>& self, const sp<Vec2>& position);
+    static sp<Renderer> translate(const sp<Renderer>& self, const sp<Vec3>& position);
 
 };
 

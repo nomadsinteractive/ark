@@ -130,8 +130,9 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
     default:
         const auto iter = _c2_shapes.find(shape);
         DCHECK(iter != _c2_shapes.end(), "Unknow shape: %d", shape);
-        const V2& unit = iter->second.unit;
-        rigidBodyShadow->setShapes(iter->second.shapes, V2(size->width() * unit.x(), size->height() * unit.y()));
+//        const V2& unit = iter->second.unit;
+//        rigidBodyShadow->setShapes(iter->second.shapes, V2(size->width() * unit.x(), size->height() * unit.y()));
+        rigidBodyShadow->setShapes(iter->second.shapes, V2(1.0f));
     }
 
     _rigid_bodies[rigidBodyShadow->id()] = rigidBodyShadow;
@@ -207,7 +208,7 @@ void ColliderImpl::Stub::loadShapes(const document& manifest)
                 shape.t = C2_POLY;
                 shape.s.poly.count = static_cast<int32_t>(values.size() / 2);
                 c2MakePoly(&shape.s.poly);
-                unit = V2(1.0f) / Strings::parse<V2>(i->ensureChild("size")->value());
+//                unit = V2(1.0f) / Strings::parse<V2>(i->ensureChild("size")->value());
                 shapes.shapes.push_back(shape);
             }
         }

@@ -32,7 +32,7 @@ private:
         void doWrapContentPlace(Layout::Context& ctx, const sp<Layout>& layout, Rect& contentRect) const;
         void doLayoutEnd(const Rect& p);
 
-        void render(RenderRequest& renderRequest, float x, float y);
+        void render(RenderRequest& renderRequest, const V3& position);
 
         bool onEventDispatch(const Event& event, float x, float y);
 
@@ -59,7 +59,7 @@ public:
 
     virtual void traverse(const Visitor& visitor) override;
 
-    void render(RenderRequest& renderRequest, float x, float y) const;
+    void render(RenderRequest& renderRequest, const V3& position) const;
     bool onEvent(const Event& event, float x, float y) const;
 
     void updateLayout(LayoutParam& layoutParam);

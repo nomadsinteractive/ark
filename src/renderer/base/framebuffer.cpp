@@ -18,9 +18,9 @@ const sp<Resource>& Framebuffer::resource() const
     return _resource;
 }
 
-void Framebuffer::render(RenderRequest& renderRequest, float x, float y)
+void Framebuffer::render(RenderRequest& renderRequest, const V3& position)
 {
-    _delegate->render(renderRequest, x, y);
+    _delegate->render(renderRequest, position);
 }
 
 Framebuffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

@@ -30,10 +30,10 @@ const sp<Renderer>& Frame::renderer() const
     return _renderer;
 }
 
-void Frame::render(RenderRequest& renderRequest, float x, float y)
+void Frame::render(RenderRequest& renderRequest, const V3& position)
 {
     DASSERT(_block);
-    _renderer->render(renderRequest, x, y);
+    _renderer->render(renderRequest, position);
 }
 
 const SafePtr<Size>& Frame::size()

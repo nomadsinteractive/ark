@@ -28,7 +28,7 @@ Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>
     _shader_bindings->pipelineBindings()->bindSampler(texture);
 }
 
-void Skybox::render(RenderRequest& renderRequest, float x, float y)
+void Skybox::render(RenderRequest& renderRequest, const V3& /*position*/)
 {
     DrawingContext drawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _shader_bindings->vertexBuffer().snapshot(), _index_buffer, 1);
     renderRequest.addRequest(drawingContext.toRenderCommand(_object_pool));

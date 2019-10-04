@@ -30,7 +30,7 @@ public:
 // [[script::bindings::auto]]
     Tilemap(const sp<LayerContext>& layerContext, const sp<Size>& size, const sp<Tileset>& tileset, const sp<TilemapImporter>& importer = nullptr);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 // [[script::bindings::property]]
     virtual const SafePtr<Size>& size() override;
 

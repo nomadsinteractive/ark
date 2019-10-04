@@ -19,10 +19,10 @@ void RendererGroup::addRenderer(const sp<Renderer>& renderer)
     _items.push_back(renderer);
 }
 
-void RendererGroup::render(RenderRequest& renderRequest, float x, float y)
+void RendererGroup::render(RenderRequest& renderRequest, const V3& position)
 {
     for(const sp<Renderer>& i : _items)
-        i->render(renderRequest, x, y);
+        i->render(renderRequest, position);
 }
 
 RendererGroup::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)

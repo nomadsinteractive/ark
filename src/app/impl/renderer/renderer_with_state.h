@@ -15,7 +15,7 @@ class RendererWithState : public Renderer {
 public:
     RendererWithState(const sp<Renderer>& def, const sp<View::State>& state);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     void setStateRenderer(View::State status, sp<Renderer> renderer, sp<Boolean> enabled);
 

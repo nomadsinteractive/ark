@@ -8,8 +8,8 @@
 
 namespace ark {
 
-LayerContext::Item::Item(float x, float y, const sp<RenderObject>& renderObject)
-    : _x(x), _y(y), _render_object(renderObject)
+LayerContext::Item::Item(const V3& position, const sp<RenderObject>& renderObject)
+    : _position(position), _render_object(renderObject)
 {
 }
 
@@ -34,15 +34,15 @@ Layer::Type LayerContext::layerType() const
     return _layer_type;
 }
 
-void LayerContext::renderRequest(const V2& position)
+void LayerContext::renderRequest(const V3& position)
 {
     _render_requested = true;
     _position = position;
 }
 
-void LayerContext::drawRenderObject(float x, float y, const sp<RenderObject>& renderObject)
+void LayerContext::drawRenderObject(const V3& position, const sp<RenderObject>& renderObject)
 {
-    _transient_items.emplace_back(x + _position.x(), y + _position.y(), renderObject);
+    _transient_items.emplace_back(position + _position, renderObject);
 }
 
 void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed)
@@ -67,7 +67,7 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memor
             if(!i._render_object->isDisposed())
             {
                 RenderObject::Snapshot snapshot = i._render_object->snapshot(memoryPool);
-                snapshot._position = snapshot._position + V3(i._x, i._y, 0);
+                snapshot._position = snapshot._position + i._position;
                 output._items.push_back(std::move(snapshot));
                 notify = true;
             }

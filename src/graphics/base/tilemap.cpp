@@ -58,15 +58,15 @@ Tilemap::Tilemap(const sp<LayerContext>& layerContext, const sp<Size>& size, con
     DASSERT(_layer_context);
 }
 
-void Tilemap::render(RenderRequest& renderRequest, float x, float y)
+void Tilemap::render(RenderRequest& renderRequest, const V3& position)
 {
-    _layer_context->renderRequest(V2(x, y));
+    _layer_context->renderRequest(position);
 
     if(_scrollable)
-        _scrollable->render(renderRequest, 0, 0);
+        _scrollable->render(renderRequest, V3(0));
 
     for(const sp<TilemapLayer>& i : _layers)
-        i->render(renderRequest, 0, 0);
+        i->render(renderRequest, V3(0));
 }
 
 const SafePtr<Size>& Tilemap::size()

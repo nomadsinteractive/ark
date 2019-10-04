@@ -10,11 +10,11 @@ RendererWithState::RendererWithState(const sp<Renderer>& def, const sp<View::Sta
 {
 }
 
-void RendererWithState::render(RenderRequest& renderRequest, float x, float y)
+void RendererWithState::render(RenderRequest& renderRequest, const V3& position)
 {
     const sp<Renderer>& current = getRendererByCurrentStatus();
     if(current)
-        current->render(renderRequest, x, y);
+        current->render(renderRequest, position);
 }
 
 void RendererWithState::setStateRenderer(View::State status, sp<Renderer> renderer, sp<Boolean> enabled)

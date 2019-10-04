@@ -12,25 +12,25 @@ namespace ark {
 
 class RendererWithPosition : public Renderer {
 public:
-    RendererWithPosition(const sp<Renderer>& renderer, const sp<Vec>& position);
+    RendererWithPosition(const sp<Renderer>& renderer, const sp<Vec3>& position);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
 //  [[plugin::style("position")]]
-    class DECORATOR : public Builder<Renderer> {
+    class STYLE : public Builder<Renderer> {
     public:
-        DECORATOR(BeanFactory& parent, const sp<Builder<Renderer>>& delegate, const String& value);
+        STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& value);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;
-        sp<Builder<Vec>> _position;
+        sp<Builder<Vec3>> _position;
     };
 
 private:
     sp<Renderer> _renderer;
-    sp<Vec> _position;
+    sp<Vec3> _position;
 
 };
 

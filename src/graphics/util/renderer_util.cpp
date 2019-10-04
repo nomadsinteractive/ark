@@ -44,7 +44,7 @@ SafePtr<Size> RendererUtil::size(const sp<Renderer>& self)
     return SafePtr<Size>();
 }
 
-sp<Renderer> ark::RendererUtil::translate(const sp<Renderer>& self, const sp<Vec2>& position)
+sp<Renderer> ark::RendererUtil::translate(const sp<Renderer>& self, const sp<Vec3>& position)
 {
     return sp<RendererWithPosition>::make(self, position);
 }

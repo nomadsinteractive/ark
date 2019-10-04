@@ -37,7 +37,7 @@ void Emitter::traverse(const Holder::Visitor& visitor)
     HolderUtil::visit(_stub->_source->_arguments, visitor);
 }
 
-void Emitter::render(RenderRequest& /*renderRequest*/, float /*x*/, float /*y*/)
+void Emitter::render(RenderRequest& /*renderRequest*/, const V3& /*x*/)
 {
     _stub->run();
 }

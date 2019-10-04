@@ -24,9 +24,9 @@ ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const s
 {
 }
 
-void ShaderFrame::render(RenderRequest& renderRequest, float x, float y)
+void ShaderFrame::render(RenderRequest& renderRequest, const V3& position)
 {
-    const sp<Uploader> uploader = _object_pool->obtain<ByteArrayUploader>(getVertexBuffer(x, y));
+    const sp<Uploader> uploader = _object_pool->obtain<ByteArrayUploader>(getVertexBuffer(position));
     DrawingContext drawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _vertex_buffer.snapshot(uploader), _index_buffer, 1);
     renderRequest.addRequest(drawingContext.toRenderCommand(_object_pool));
 }
@@ -36,8 +36,9 @@ const SafePtr<Size>& ShaderFrame::size()
     return _size;
 }
 
-bytearray ShaderFrame::getVertexBuffer(float x, float y) const
+bytearray ShaderFrame::getVertexBuffer(const V3& position) const
 {
+    float x = position.x(), y = position.y();
     float top = y + _size->height(), bottom = y;
     uint16_t uvtop = 0xffff, uvbottom = 0;
     Array<float>::Fixed<16> buffer({x, bottom, 0, 0, x, top, 0, 0, x + _size->width(), bottom, 0, 0, x + _size->width(), top, 0, 0});

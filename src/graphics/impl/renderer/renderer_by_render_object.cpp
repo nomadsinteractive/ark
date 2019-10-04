@@ -24,9 +24,9 @@ RendererByRenderObject::RendererByRenderObject(const sp<RenderObject>& renderObj
         measure(_render_object->size());
 }
 
-void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, float x, float y)
+void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, const V3& position)
 {
-    _layer_context->drawRenderObject(x, y, _render_object);
+    _layer_context->drawRenderObject(position, _render_object);
 }
 
 const SafePtr<Size>& RendererByRenderObject::size()

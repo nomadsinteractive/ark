@@ -27,7 +27,7 @@ class RendererImgui : public Renderer, public Renderer::Group, public EventListe
 public:
     RendererImgui(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Shader>& shader, const sp<Texture>& texture);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
     virtual void addRenderer(const sp<Renderer>& renderer) override;
     virtual bool onEvent(const Event& event) override;
 

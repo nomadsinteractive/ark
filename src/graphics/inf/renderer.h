@@ -11,7 +11,7 @@ class ARK_API Renderer {
 public:
     virtual ~Renderer() = default;
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) = 0;
+    virtual void render(RenderRequest& renderRequest, const V3& position) = 0;
 
     class ARK_API Group {
     public:

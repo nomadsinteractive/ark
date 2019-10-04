@@ -21,7 +21,7 @@ public:
     Button(const sp<Renderer>& foreground, const sp<Renderer>& background, const sp<Size>& block, Gravity gravity);
     ~Button() override;
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     void setForeground(View::State status, sp<Renderer> foreground, const sp<Boolean>& enabled);
     void setBackground(View::State status, sp<Renderer> background, const sp<Boolean>& enabled);

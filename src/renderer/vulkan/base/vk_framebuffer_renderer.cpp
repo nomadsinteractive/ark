@@ -48,10 +48,10 @@ VKFramebufferRenderer::VKFramebufferRenderer(const sp<Renderer>& delegate, const
 {
 }
 
-void VKFramebufferRenderer::render(RenderRequest& renderRequest, float x, float y)
+void VKFramebufferRenderer::render(RenderRequest& renderRequest, const V3& position)
 {
     renderRequest.addRequest(_pre_draw);
-    _delegate->render(renderRequest, x, y);
+    _delegate->render(renderRequest, position);
     renderRequest.addRequest(_post_draw);
 }
 

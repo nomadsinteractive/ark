@@ -8,6 +8,7 @@
 #include "graphics/base/frame.h"
 #include "graphics/base/size.h"
 #include "graphics/base/rect.h"
+#include "graphics/base/v3.h"
 
 #include "app/base/event.h"
 #include "app/impl/renderer/renderer_with_state.h"
@@ -25,9 +26,9 @@ Button::~Button()
 {
 }
 
-void Button::render(RenderRequest& renderRequest, float x, float y)
+void Button::render(RenderRequest& renderRequest, const V3& position)
 {
-    _background->render(renderRequest, x, y);
+    _background->render(renderRequest, position);
     if(_gravity != NONE)
     {
         const sp<Renderer>& fg = _foreground->getRendererByCurrentStatus();
@@ -38,14 +39,14 @@ void Button::render(RenderRequest& renderRequest, float x, float y)
             if(size)
             {
                 Rect target = GravityLayout::place(_gravity, _layout_param->size()->width(), _layout_param->size()->height(), size->width(), size->height());
-                fg->render(renderRequest, x + target.left(), y + target.top());
+                fg->render(renderRequest, position + V3(target.left(), target.top(), 0));
             }
             else
-                fg->render(renderRequest, x, y);
+                fg->render(renderRequest, position);
         }
     }
     else
-        _foreground->render(renderRequest, x, y);
+        _foreground->render(renderRequest, position);
 }
 
 void Button::setForeground(View::State status, sp<Renderer> foreground, const sp<Boolean>& enabled)

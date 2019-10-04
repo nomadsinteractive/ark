@@ -34,13 +34,13 @@ void ViewGroup::addRenderer(const sp<Renderer>& renderer)
     _layout_hierarchy->addRenderer(renderer);
 }
 
-void ViewGroup::render(RenderRequest& renderRequest, float x, float y)
+void ViewGroup::render(RenderRequest& renderRequest, const V3& position)
 {
     if(_background)
-        _background->render(renderRequest, x, y);
+        _background->render(renderRequest, position);
 
     _layout_hierarchy->updateLayout(_layout_param);
-    _layout_hierarchy->render(renderRequest, x, y);
+    _layout_hierarchy->render(renderRequest, position);
 }
 
 void ViewGroup::traverse(const Holder::Visitor& visitor)

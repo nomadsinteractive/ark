@@ -17,10 +17,10 @@ namespace ark {
 class ARK_API LayerContext : public Holder{
 private:
     struct Item {
-        Item(float x, float y, const sp<RenderObject>& renderObject);
+        Item(const V3& position, const sp<RenderObject>& renderObject);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
 
-        float _x, _y;
+        V3 _position;
         sp<RenderObject> _render_object;
     };
 
@@ -33,9 +33,9 @@ public:
 
     Layer::Type layerType() const;
 
-    void renderRequest(const V2& position);
+    void renderRequest(const V3& position);
 
-    void drawRenderObject(float x, float y, const sp<RenderObject>& renderObject);
+    void drawRenderObject(const V3& position, const sp<RenderObject>& renderObject);
 
 //  [[script::bindings::auto]]
     void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = sp<Boolean>::null());

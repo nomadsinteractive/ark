@@ -93,11 +93,11 @@ void LayoutHierarchy::Slot::doLayoutEnd(const Rect& p)
     updateLayout();
 }
 
-void LayoutHierarchy::Slot::render(RenderRequest& renderRequest, float x, float y)
+void LayoutHierarchy::Slot::render(RenderRequest& renderRequest, const V3& position)
 {
     if(!_layout_requested)
     {
-        _renderer->render(renderRequest, x + _x, y + _y);
+        _renderer->render(renderRequest, V3(_x, _y, 0) + position);
         if(_view)
             _layout_requested = _layout_width != _view->size()->width() || _layout_height != _view->size()->height();
     }
@@ -135,10 +135,10 @@ void LayoutHierarchy::traverse(const Holder::Visitor& visitor)
         i->traverse(visitor);
 }
 
-void LayoutHierarchy::render(RenderRequest& renderRequest, float x, float y) const
+void LayoutHierarchy::render(RenderRequest& renderRequest, const V3& position) const
 {
     for(const sp<Slot>& i: _slots)
-        i->render(renderRequest, x, y);
+        i->render(renderRequest, position);
 }
 
 bool LayoutHierarchy::onEvent(const Event& event, float x, float y) const

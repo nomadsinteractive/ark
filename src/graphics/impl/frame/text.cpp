@@ -16,9 +16,9 @@ Text::Text(const sp<Characters>& characters)
 {
 }
 
-void Text::render(RenderRequest& /*pipeline*/, float x, float y)
+void Text::render(RenderRequest& /*pipeline*/, const V3& position)
 {
-    _characters->renderRequest(V2(x, y));
+    _characters->renderRequest(position);
 }
 
 const SafePtr<Size>& Text::size()

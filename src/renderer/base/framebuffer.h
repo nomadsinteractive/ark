@@ -17,7 +17,7 @@ public:
 
     const sp<Resource>& resource() const;
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Framebuffer> {

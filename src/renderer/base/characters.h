@@ -42,7 +42,7 @@ public:
 //  [[script::bindings::property]]
     void setText(const std::wstring& text);
 
-    void renderRequest(const V2& position);
+    void renderRequest(const V3& position);
 
 //[[plugin::resource-loader]]
     class BUILDER : public Builder<Characters> {

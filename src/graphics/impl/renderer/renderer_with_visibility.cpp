@@ -12,10 +12,10 @@ RendererWithVisibility::RendererWithVisibility(const sp<Renderer>& renderer, con
     DASSERT(_visibility);
 }
 
-void RendererWithVisibility::render(RenderRequest& renderRequest, float x, float y)
+void RendererWithVisibility::render(RenderRequest& renderRequest, const V3& position)
 {
     if(_visibility->val())
-        _renderer->render(renderRequest, x, y);
+        _renderer->render(renderRequest, position);
 }
 
 RendererWithVisibility::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& value)

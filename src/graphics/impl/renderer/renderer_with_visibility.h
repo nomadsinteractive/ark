@@ -14,7 +14,7 @@ class RendererWithVisibility : public Renderer {
 public:
     RendererWithVisibility(const sp<Renderer>& renderer, const sp<Visibility>& visibility);
 
-    virtual void render(RenderRequest& renderRequest, float x, float y) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
 //  [[plugin::style("visibility")]]
     class STYLE : public Builder<Renderer> {

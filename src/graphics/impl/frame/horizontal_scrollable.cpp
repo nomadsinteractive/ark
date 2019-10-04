@@ -4,6 +4,8 @@
 #include "core/inf/variable.h"
 #include "core/util/bean_utils.h"
 
+#include "graphics/base/v3.h"
+
 namespace ark {
 
 HorizontalScrollable::HorizontalScrollable(const sp<RendererMaker>& tileMaker, const sp<Numeric>& scroller, int32_t width, int32_t tileWidth, uint32_t itemCount)
@@ -11,7 +13,7 @@ HorizontalScrollable::HorizontalScrollable(const sp<RendererMaker>& tileMaker, c
       _scroll_position(std::numeric_limits<int32_t>::min()), _grid_position(0) {
 }
 
-void HorizontalScrollable::render(RenderRequest& renderRequest, float x, float y)
+void HorizontalScrollable::render(RenderRequest& renderRequest, const V3& position)
 {
     int32_t scrollPosition = static_cast<int32_t>(_scroller->val());
     if(scrollPosition != _scroll_position)
@@ -22,7 +24,7 @@ void HorizontalScrollable::render(RenderRequest& renderRequest, float x, float y
     {
         Tile<sp<Renderer>>& tile = _tiles[(i - _grid_position) / _tile_width];
         ensureTile(tile, i);
-        tile.renderer()->render(renderRequest, x + tile.offset() - gs, y);
+        tile.renderer()->render(renderRequest, position + V3(tile.offset() - gs, 0, 0));
     }
 }
 

@@ -86,7 +86,7 @@ void Characters::setText(const std::wstring& text)
         createContentNoBoundary();
 }
 
-void Characters::renderRequest(const V2& position)
+void Characters::renderRequest(const V3& position)
 {
     _layer_context->renderRequest(position);
 }
