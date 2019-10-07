@@ -201,6 +201,20 @@ bool Strings::parseNameValuePair(const String& expr, char equal, String& name, S
     return pos != String::npos;
 }
 
+bool Strings::parseArrayAndIndex(const String& expr, String& name, int32_t& index)
+{
+    const auto s1 = expr.find('[');
+    if(s1 == String::npos)
+        return false;
+    const auto s2 = expr.find(']');
+    if(s2 == String::npos)
+        return false;
+
+    name = expr.substr(0, s1 - 1);
+    index = parse<int32_t>(expr.substr(s1 + 1, s2));
+    return true;
+}
+
 std::map<String, String> Strings::parseProperties(const String& str, char delim, char equal)
 {
     std::map<String, String> properties;

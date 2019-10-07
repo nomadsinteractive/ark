@@ -1,7 +1,6 @@
 #include "graphics/impl/frame/text.h"
 
 #include "core/base/bean_factory.h"
-#include "core/types/safe_ptr.h"
 #include "core/util/documents.h"
 
 #include "graphics/base/layer_context.h"
@@ -23,7 +22,7 @@ void Text::render(RenderRequest& /*pipeline*/, const V3& position)
 
 const SafePtr<Size>& Text::size()
 {
-    return _size;
+    return _characters->layoutParam()->size();
 }
 
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

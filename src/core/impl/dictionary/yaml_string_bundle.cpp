@@ -36,10 +36,40 @@ sp<String> YAMLStringBundle::get(const String& name)
     if(iter == _bundle.end())
         loadBundle(package);
 
-    std::map<String, sp<String>>& bundle = _bundle[package];
-    const auto iter1 = bundle.find(nodename);
-    DWARN(iter1 != bundle.end(), "YAML node \"%s\" not found", nodename.c_str());
-    return iter1 != bundle.end() ? iter1->second : sp<String>::make("[" + name + "]");
+    std::map<String, sp<Item>>& bundle = _bundle[package];
+    String arrayname;
+    int32_t arrayindex;
+    do {
+        if(Strings::parseArrayAndIndex(nodename, arrayname, arrayindex))
+        {
+            const auto iter1 = bundle.find(arrayname);
+
+            if(iter1 == bundle.end())
+            {
+                DWARN(false, "YAML node \"%s\" not found", arrayname.c_str());
+                break;
+            }
+            if(!iter1->second->isSequence())
+            {
+                DWARN(false, "YAML node \"%s\" found, but it's not an array", arrayname.c_str());
+                break;
+            }
+            if(arrayindex < 0 || static_cast<size_t>(arrayindex) >= iter1->second->sequence()->size())
+            {
+                DWARN(false , "YAML node \"%s\" found, but index out of range", arrayname.c_str());
+                break;
+            }
+            return iter1->second->sequence()->at(static_cast<size_t>(arrayindex));
+        }
+        const auto iter1 = bundle.find(nodename);
+        if(iter1 == bundle.end())
+        {
+            DWARN(false, "YAML node \"%s\" not found", nodename.c_str());
+            break;
+        }
+        return iter1->second->value();
+    } while(false);
+    return sp<String>::make("[" + name + "]");
 }
 
 void YAMLStringBundle::loadBundle(const String& name)
@@ -57,10 +87,9 @@ void YAMLStringBundle::loadBundle(const String& name)
     yaml_event_t event;
     yaml_event_type_t eventType;
 
-    std::map<String, sp<String>>& bundle = _bundle[name];
-    String key, value;
-    String* scalar = nullptr;
-    int32_t seqIndex = -1;
+    std::map<String, sp<Item>>& bundle = _bundle[name];
+    std::vector<String> keys;
+    sp<Item> value;
     do {
         if (!yaml_parser_parse(&parser, &event))
             FATAL("YAML parser error %d\n", parser.error);
@@ -69,30 +98,38 @@ void YAMLStringBundle::loadBundle(const String& name)
         switch(eventType)
         {
         case YAML_MAPPING_START_EVENT:
-            scalar = &key;
+            keys.push_back("");
+            value = nullptr;
             break;
         case YAML_MAPPING_END_EVENT:
-            scalar = nullptr;
+            keys.pop_back();
             break;
         case YAML_SEQUENCE_START_EVENT:
-            seqIndex = 0;
+            DCHECK(value, "Unable to start YAML sequence");
+            value->makeSequence();
             break;
         case YAML_SEQUENCE_END_EVENT:
-            seqIndex = -1;
-            scalar = &key;
+            makeKey(bundle, keys) = std::move(value);
             break;
-        case YAML_SCALAR_EVENT:
-            DCHECK(scalar, "Illegal state: mapping event not start.");
-            *scalar = reinterpret_cast<const char*>(event.data.scalar.value);
-            if(seqIndex != -1)
-                bundle[Strings::sprintf("%s[%d]", key.c_str(), seqIndex++)] = sp<String>::make(value);
-            else if(scalar == &key)
-                scalar = &value;
+        case YAML_SCALAR_EVENT: {
+            DCHECK(keys.size() > 0, "Illegal state: mapping event not start.");
+            String scalar = reinterpret_cast<const char*>(event.data.scalar.value);
+            if(value == nullptr)
+            {
+                keys.back() = std::move(scalar);
+                value = sp<Item>::make();
+            }
             else
             {
-                bundle[key] = sp<String>::make(value);
-                scalar = &key;
+                if(value->isSequence())
+                    value->addSequenceValue(std::move(scalar));
+                else
+                {
+                    value->setValue(std::move(scalar));
+                    makeKey(bundle, keys) = std::move(value);
+                }
             }
+        }
             break;
         default:
             break;
@@ -100,6 +137,22 @@ void YAMLStringBundle::loadBundle(const String& name)
         yaml_event_delete(&event);
     } while(eventType != YAML_STREAM_END_EVENT);
     yaml_parser_delete(&parser);
+}
+
+sp<YAMLStringBundle::Item>& YAMLStringBundle::makeKey(std::map<String, sp<Item>>& bundle, const std::vector<String>& keys) const
+{
+    StringBuffer sb;
+    bool dirty = false;
+    for(const String& i : keys)
+    {
+        if(dirty)
+            sb << '/';
+        else
+            dirty = true;
+        sb << i;
+
+    }
+    return bundle[sb.str()];
 }
 
 YAMLStringBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -110,6 +163,37 @@ YAMLStringBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifes
 sp<StringBundle> YAMLStringBundle::BUILDER::build(const Scope& args)
 {
     return sp<YAMLStringBundle>::make(Ark::instance().getAssetBundle(_src->build(args)));
+}
+
+void YAMLStringBundle::Item::setValue(String value)
+{
+    _value = sp<String>::make(std::move(value));
+}
+
+void YAMLStringBundle::Item::addSequenceValue(String value)
+{
+    DASSERT(_sequence);
+    _sequence->push_back(sp<String>::make(std::move(value)));
+}
+
+void YAMLStringBundle::Item::makeSequence()
+{
+    _sequence = sp<std::vector<sp<String>>>::make();
+}
+
+bool YAMLStringBundle::Item::isSequence() const
+{
+    return static_cast<bool>(_sequence);
+}
+
+const sp<String>& YAMLStringBundle::Item::value() const
+{
+    return _value;
+}
+
+const sp<std::vector<sp<String>>>& YAMLStringBundle::Item::sequence() const
+{
+    return _sequence;
 }
 
 }

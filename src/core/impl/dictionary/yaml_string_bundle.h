@@ -29,11 +29,33 @@ public:
     };
 
 private:
+
+    class Item {
+    public:
+        Item() = default;
+        DEFAULT_COPY_AND_ASSIGN(Item);
+
+        void setValue(String value);
+        void addSequenceValue(String value);
+
+        void makeSequence();
+        bool isSequence() const;
+
+        const sp<String>& value() const;
+        const sp<std::vector<sp<String>>>& sequence() const;
+
+    private:
+        sp<String> _value;
+        sp<std::vector<sp<String>>> _sequence;
+    };
+
     void loadBundle(const String& name);
+
+    sp<Item>& makeKey(std::map<String, sp<Item>>& bundle, const std::vector<String>& keys) const;
 
 private:
     sp<AssetBundle> _resource;
-    std::map<String, std::map<String, sp<String>>> _bundle;
+    std::map<String, std::map<String, sp<Item>>> _bundle;
 };
 
 }

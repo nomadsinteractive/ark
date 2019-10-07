@@ -40,7 +40,6 @@ public:
 private:
     sp<RenderLayer> _render_layer;
     sp<Characters> _characters;
-    SafePtr<Size> _size;
 };
 
 }

@@ -28,6 +28,7 @@ public:
     static size_t parentheses(const String& expr, size_t start, char open = '(', char close = ')');
 
     static bool parseNameValuePair(const String& expr, char equal, String& name, String& value);
+    static bool parseArrayAndIndex(const String& expr, String& name, int32_t& index);
 
     static std::map<String, String> parseProperties(const String& str, char delim = ';', char equal = ':');
     static const String& getProperty(const std::map<String, String>& properties, const String& key, const String& defValue = String::null());
