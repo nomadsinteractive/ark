@@ -117,6 +117,11 @@ sp<String> ApplicationFacade::getString(const String& resid)
     return _context->getString(resid);
 }
 
+std::vector<String> ApplicationFacade::getStringArray(const String& resid)
+{
+    return _context->getStringArray(resid);
+}
+
 sp<Runnable> ApplicationFacade::defer(const sp<Runnable>& task) const
 {
     return _context->defer(task);

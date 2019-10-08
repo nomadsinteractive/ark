@@ -70,14 +70,13 @@ class Script;
 class State;
 class StateMachine;
 class String;
+class StringBundle;
 class StringBuffer;
 class StringTable;
 class Thread;
 class ThreadPoolExecutor;
 class Visibility;
 
-//[[script::bindings::auto]]
-typedef Dictionary<sp<String>> StringBundle;
 typedef Dictionary<Box> BoxBundle;
 
 typedef Variable<bool> Boolean;

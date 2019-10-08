@@ -220,6 +220,13 @@ sp<String> ApplicationContext::getString(const String& resid)
     return _string_table->getString(id.package(), id.ref());
 }
 
+std::vector<String> ApplicationContext::getStringArray(const String& resid)
+{
+    DASSERT(resid);
+    const Identifier id = resid.at(0) == '@' ? Identifier::parse(resid, Identifier::FORMAT_URL) : Identifier::parseRef(resid);
+    return _string_table->getStringArray(id.package(), id.ref(), true);
+}
+
 sp<Runnable> ApplicationContext::defer(const sp<Runnable>& task) const
 {
     return sp<DeferedRunnable>::make(_message_loop, task);

@@ -59,6 +59,8 @@ public:
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
 //  [[script::bindings::auto]]
     sp<String> getString(const String& resid);
+//  [[script::bindings::auto]]
+    std::vector<String> getStringArray(const String& resid);
 
 //  [[script::bindings::auto]]
     sp<Runnable> defer(const sp<Runnable>& task) const;

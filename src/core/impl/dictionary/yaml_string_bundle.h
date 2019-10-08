@@ -6,7 +6,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "core/inf/builder.h"
-#include "core/inf/dictionary.h"
+#include "core/inf/string_bundle.h"
 #include "core/forwarding.h"
 
 namespace ark {
@@ -15,7 +15,8 @@ class YAMLStringBundle : public StringBundle {
 public:
     YAMLStringBundle(const sp<AssetBundle>& resource);
 
-    virtual sp<String> get(const String& name);
+    virtual sp<String> getString(const String& resid) override;
+    virtual std::vector<String> getStringArray(const String& resid) override;
 
 //  [[plugin::builder("yaml")]]
     class BUILDER : public Builder<StringBundle> {
@@ -42,20 +43,22 @@ private:
         bool isSequence() const;
 
         const sp<String>& value() const;
-        const sp<std::vector<sp<String>>>& sequence() const;
+        const sp<std::vector<String>>& sequence() const;
 
     private:
         sp<String> _value;
-        sp<std::vector<sp<String>>> _sequence;
+        sp<std::vector<String>> _sequence;
     };
 
     void loadBundle(const String& name);
 
+    const std::map<String, sp<Item>>& getPackageBundle(const String& resid, String& nodename);
     sp<Item>& makeKey(std::map<String, sp<Item>>& bundle, const std::vector<String>& keys) const;
 
 private:
     sp<AssetBundle> _resource;
     std::map<String, std::map<String, sp<Item>>> _bundle;
+
 };
 
 }

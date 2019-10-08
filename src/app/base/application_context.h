@@ -55,6 +55,7 @@ public:
 
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
     sp<String> getString(const String& resid);
+    std::vector<String> getStringArray(const String& resid);
 
     sp<Runnable> defer(const sp<Runnable>& task) const;
 

@@ -42,7 +42,7 @@ Characters::Characters(const sp<RenderLayer>& layer, float textScale, float lett
 
 Characters::Characters(const sp<LayerContext>& layerContext, const sp<ObjectPool>& objectPool, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
     : _layer_context(layerContext), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()), _character_mapper(characterMapper),
-      _character_maker(characterMaker), _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(-g_upDirection * lineHeight),
+      _character_maker(characterMaker), _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(g_upDirection * lineHeight),
       _line_indent(lineIndent), _model(layerContext->renderModel()), _size(_object_pool->obtain<Size>(0.0f, 0.0f))
 {
 }
@@ -55,6 +55,8 @@ const sp<LayoutParam>& Characters::layoutParam() const
 void Characters::setLayoutParam(const sp<LayoutParam>& layoutParam)
 {
     _layout_param = layoutParam;
+    if(_layout_param)
+        _layout_size = _layout_param->size()->val();
 }
 
 const std::vector<sp<RenderObject>>& Characters::contents() const
@@ -75,6 +77,21 @@ const std::wstring& Characters::text() const
 void Characters::setText(const std::wstring& text)
 {
     _text = text;
+    createContent();
+}
+
+void Characters::renderRequest(const V3& position)
+{
+    if(_layout_param && _layout_size != _layout_param->size()->val())
+    {
+        _layout_size = _layout_param->size()->val();
+        createContent();
+    }
+    _layer_context->renderRequest(position);
+}
+
+void Characters::createContent()
+{
     for(const sp<RenderObject>& i : _contents)
         i->dispose();
     _contents.clear();
@@ -86,14 +103,9 @@ void Characters::setText(const std::wstring& text)
         createContentNoBoundary();
 }
 
-void Characters::renderRequest(const V3& position)
-{
-    _layer_context->renderRequest(position);
-}
-
 void Characters::createContentWithBoundary(float boundary)
 {
-    float flowx = 0, flowy = 0;
+    float flowx = 0, flowy = getFlowY();
     const std::vector<LayoutChar> layoutChars = Characters::getCharacterMetrics(_text);
     float fontHeight = layoutChars.size() > 0 ? layoutChars.at(0)._metrics.bounds.y() * _text_scale : 0;
     size_t begin = 0;
@@ -130,7 +142,7 @@ void Characters::createContentWithBoundary(float boundary)
 
 void Characters::createContentNoBoundary()
 {
-    float flowx = 0, flowy = 0;
+    float flowx = 0, flowy = getFlowY();
     float fontHeight = 0;
     for(wchar_t c : _text)
         placeNoBoundary(c, flowx, flowy, fontHeight);
@@ -188,8 +200,15 @@ void Characters::placeOne(const Characters::LayoutChar& layoutChar, float& flowx
 
 void Characters::nextLine(float fontHeight, float& flowx, float& flowy) const
 {
-    flowy += (_line_height != 0 ? _line_height : (-fontHeight * g_upDirection));
+    flowy += (_line_height != 0 ? -_line_height : (-fontHeight * g_upDirection));
     flowx = _line_indent;
+}
+
+float Characters::getFlowY() const
+{
+    if(!_layout_param || g_upDirection < 0)
+        return 0;
+    return _layout_param->size()->height() - _line_height;
 }
 
 std::vector<Characters::LayoutChar> Characters::getCharacterMetrics(const std::wstring& text) const

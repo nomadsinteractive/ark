@@ -2,6 +2,7 @@
 
 #include "core/base/string_table.h"
 #include "core/inf/dictionary.h"
+#include "core/inf/string_bundle.h"
 #include "core/inf/runnable.h"
 #include "core/impl/runnable/runnable_by_function.h"
 #include "core/types/global.h"
@@ -29,9 +30,13 @@ namespace {
 
 class AssetStringBundle : public StringBundle {
 public:
-    virtual sp<String> get(const String& name) override {
+    virtual sp<String> getString(const String& name) override {
         const sp<Readable> readable = Ark::instance().openAsset(name);
         return sp<String>::make(Strings::loadFromReadable(readable));
+    }
+
+    virtual std::vector<String> getStringArray(const String& /*resid*/) override {
+        return {};
     }
 };
 

@@ -70,11 +70,12 @@ if __name__ == '__main__':
 
     macro = '_'.join([i.upper() for i in namespaces] + ([i.upper() for i in stringtablenames]) + ['H_'])
     classdeclare = acg.format('''
-class ${classname} : public ark::Dictionary<sp<String>> {
+class ${classname} : public ark::StringBundle {
 public:
     ${classname}();
 
-    virtual sp<String> get(const String& name) override;
+    virtual sp<String> getString(const String& name) override;
+    virtual std::vector<String> getStringArray(const String& name) override;
 
 private:
     std::unordered_map<String, sp<String>> _items;
@@ -87,7 +88,7 @@ private:
 
 #include <unordered_map>
 
-#include "core/inf/dictionary.h"
+#include "core/inf/string_bundle.h"
 
 ${classdeclare}
 
@@ -99,10 +100,15 @@ ${classname}::${classname}()
     ${0};
 }
 
-sp<String> ${classname}::get(const String& name)
+sp<String> ${classname}::getString(const String& name)
 {
     auto iter = _items.find(name);
     return iter != _items.end() ? iter->second : nullptr;
+}
+
+std::vector<String> ${classname}::getStringArray(const String&)
+{
+    return {};
 }
 
 ''', ';\n    '.join(['_items["%s"] = sp<String>::make(%s::%s)' % (i[2], i[0], i[1]) for i in stringitems]), classname=classname)

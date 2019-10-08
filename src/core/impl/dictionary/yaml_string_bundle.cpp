@@ -27,49 +27,58 @@ YAMLStringBundle::YAMLStringBundle(const sp<AssetBundle>& resource)
     DASSERT(_resource);
 }
 
-sp<String> YAMLStringBundle::get(const String& name)
+sp<String> YAMLStringBundle::getString(const String& resid)
 {
-    String package, nodename;
-    Strings::cut(name, package, nodename, '/');
-    DCHECK(package && nodename, "Illegal string bundle \"%s\"", name.c_str());
-    const auto iter = _bundle.find(package);
-    if(iter == _bundle.end())
-        loadBundle(package);
-
-    std::map<String, sp<Item>>& bundle = _bundle[package];
-    String arrayname;
+    String nodename, arrayname;
     int32_t arrayindex;
+    const std::map<String, sp<Item>>& bundle = getPackageBundle(resid, nodename);
     do {
         if(Strings::parseArrayAndIndex(nodename, arrayname, arrayindex))
         {
-            const auto iter1 = bundle.find(arrayname);
+            const auto iter = bundle.find(arrayname);
 
-            if(iter1 == bundle.end())
+            if(iter == bundle.end())
             {
                 DWARN(false, "YAML node \"%s\" not found", arrayname.c_str());
                 break;
             }
-            if(!iter1->second->isSequence())
+            if(!iter->second->isSequence())
             {
                 DWARN(false, "YAML node \"%s\" found, but it's not an array", arrayname.c_str());
                 break;
             }
-            if(arrayindex < 0 || static_cast<size_t>(arrayindex) >= iter1->second->sequence()->size())
+            if(arrayindex < 0 || static_cast<size_t>(arrayindex) >= iter->second->sequence()->size())
             {
                 DWARN(false , "YAML node \"%s\" found, but index out of range", arrayname.c_str());
                 break;
             }
-            return iter1->second->sequence()->at(static_cast<size_t>(arrayindex));
+            return sp<String>::make(iter->second->sequence()->at(static_cast<size_t>(arrayindex)));
         }
-        const auto iter1 = bundle.find(nodename);
-        if(iter1 == bundle.end())
+        const auto iter = bundle.find(nodename);
+        if(iter == bundle.end())
         {
             DWARN(false, "YAML node \"%s\" not found", nodename.c_str());
             break;
         }
-        return iter1->second->value();
+        return iter->second->value();
     } while(false);
-    return sp<String>::make("[" + name + "]");
+    return sp<String>::make("[" + resid + "]");
+}
+
+std::vector<String> YAMLStringBundle::getStringArray(const String& resid)
+{
+    String nodename, arrayname;
+    const std::map<String, sp<Item>>& bundle = getPackageBundle(resid, nodename);
+    do {
+        const auto iter = bundle.find(nodename);
+        if(iter == bundle.end())
+        {
+            DWARN(false, "YAML node \"%s\" not found", nodename.c_str());
+            break;
+        }
+        return iter->second->isSequence() ? iter->second->sequence() : std::vector<String>({*iter->second->value()});
+    } while(false);
+    return {};
 }
 
 void YAMLStringBundle::loadBundle(const String& name)
@@ -139,6 +148,18 @@ void YAMLStringBundle::loadBundle(const String& name)
     yaml_parser_delete(&parser);
 }
 
+const std::map<String, sp<YAMLStringBundle::Item>>& YAMLStringBundle::getPackageBundle(const String& resid, String& nodename)
+{
+    String package;
+    Strings::cut(resid, package, nodename, '/');
+    DCHECK(package && nodename, "Illegal string bundle \"%s\"", resid.c_str());
+    const auto iter = _bundle.find(package);
+    if(iter == _bundle.end())
+        loadBundle(package);
+
+    return _bundle[package];
+}
+
 sp<YAMLStringBundle::Item>& YAMLStringBundle::makeKey(std::map<String, sp<Item>>& bundle, const std::vector<String>& keys) const
 {
     StringBuffer sb;
@@ -173,12 +194,12 @@ void YAMLStringBundle::Item::setValue(String value)
 void YAMLStringBundle::Item::addSequenceValue(String value)
 {
     DASSERT(_sequence);
-    _sequence->push_back(sp<String>::make(std::move(value)));
+    _sequence->push_back(std::move(value));
 }
 
 void YAMLStringBundle::Item::makeSequence()
 {
-    _sequence = sp<std::vector<sp<String>>>::make();
+    _sequence = sp<std::vector<String>>::make();
 }
 
 bool YAMLStringBundle::Item::isSequence() const
@@ -191,7 +212,7 @@ const sp<String>& YAMLStringBundle::Item::value() const
     return _value;
 }
 
-const sp<std::vector<sp<String>>>& YAMLStringBundle::Item::sequence() const
+const sp<std::vector<String> >& YAMLStringBundle::Item::sequence() const
 {
     return _sequence;
 }

@@ -64,6 +64,7 @@ public:
     };
 
 private:
+    void createContent();
     void createContentWithBoundary(float boundary);
     void createContentNoBoundary();
 
@@ -83,6 +84,7 @@ private:
     void placeOne(const LayoutChar& layoutChar, float& flowx, float flowy);
 
     void nextLine(float fontHeight, float& flowx, float& flowy) const;
+    float getFlowY() const;
 
     std::vector<LayoutChar> getCharacterMetrics(const std::wstring& text) const;
     bool isCJK(int32_t c) const;
@@ -109,6 +111,7 @@ private:
     sp<RenderModel> _model;
 
     SafePtr<Size> _size;
+    V3 _layout_size;
 };
 
 }

@@ -16,6 +16,9 @@ public:
     sp<String> getString(const String& stringTableName, const String& stringName, bool alert = true);
     sp<String> getString(const String& name, bool alert);
 
+    std::vector<String> getStringArray(const String& stringTableName, const String& name, bool alert);
+    std::vector<String> getStringArray(const String& name, bool alert);
+
 private:
     std::map<String, sp<StringBundle>> _string_bundle_by_name;
 

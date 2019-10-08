@@ -146,6 +146,9 @@ class ApplicationFacade:
     def get_string(self, resid: str) -> str:
         return ''
 
+    def get_string_array(self, resid: str) -> List[str]:
+        return []
+
     def exit(self):
         pass
 
@@ -1113,8 +1116,12 @@ class Characters:
 
 
 class StringBundle:
-    def __init__(self):
-        pass
+
+    def get_string(self, resid: str) -> str:
+        return ''
+
+    def get_string_array(self, resid: str) -> List[str]:
+        return []
 
 
 class Varyings:
