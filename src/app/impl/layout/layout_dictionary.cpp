@@ -13,13 +13,13 @@ LayoutDictionary::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String&
 {
     String gravity;
     if(Strings::splitFunction(value, _layout, gravity))
-        _gravity = Strings::parse<View::Gravity>(gravity);
+        _gravity = Strings::parse<LayoutParam::Gravity>(gravity);
     else
     {
         _layout = value;
-        _gravity = View::GRAVITY_DEFAULT;
+        _gravity = LayoutParam::GRAVITY_DEFAULT;
     }
-    DCHECK(_gravity != View::NONE, "Invaild gravity value: \"%s\"", value.c_str());
+    DCHECK(_gravity != LayoutParam::NONE, "Invaild gravity value: \"%s\"", value.c_str());
 }
 
 sp<Layout> LayoutDictionary::DICTIONARY::build(const Scope& /*args*/)

@@ -11,9 +11,9 @@
 
 namespace ark {
 
-HorizontalLayout::HorizontalLayout(const View::Gravity& gravity)
-    : _place_gravity(static_cast<View::Gravity>(gravity & View::CENTER_VERTICAL)),
-      _end_gravity(static_cast<View::Gravity>(gravity & View::CENTER_HORIZONTAL))
+HorizontalLayout::HorizontalLayout(const LayoutParam::Gravity& gravity)
+    : _place_gravity(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::CENTER_VERTICAL)),
+      _end_gravity(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::CENTER_HORIZONTAL))
 {
 }
 
@@ -42,7 +42,7 @@ Rect HorizontalLayout::end(Context& ctx)
 }
 
 HorizontalLayout::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& doc)
-    : _gravity(Documents::getAttribute<View::Gravity>(doc, Constants::Attributes::GRAVITY, View::Gravity::TOP))
+    : _gravity(Documents::getAttribute<LayoutParam::Gravity>(doc, Constants::Attributes::GRAVITY, LayoutParam::Gravity::TOP))
 {
 }
 

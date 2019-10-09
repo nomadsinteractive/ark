@@ -63,7 +63,7 @@ void HorizontalScrollable::ensureTile(Tile<sp<Renderer>>& tile, int32_t position
 }
 
 HorizontalScrollable::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _tile_maker(factory.ensureBuilder<RendererMaker>(manifest, "renderer-maker")), _scroller(factory.ensureBuilder<Numeric>(manifest, "scroller")),
+    : _renderer_maker(factory.ensureBuilder<RendererMaker>(manifest, "renderer-maker")), _scroller(factory.ensureBuilder<Numeric>(manifest, "scroller")),
       _width(factory.ensureBuilder<Numeric>(manifest, "width")),
       _tile_width(factory.ensureBuilder<Numeric>(manifest, "tile-width")),
       _cols(Documents::getAttribute<uint32_t>(manifest, "cols", 0))
@@ -76,7 +76,7 @@ sp<Renderer> HorizontalScrollable::BUILDER::build(const Scope& args)
     int32_t tileWidth = static_cast<int32_t>(BeanUtils::toFloat(_tile_width, args));
     DCHECK(width > 0, "Illegal width: %d", width);
     DCHECK(tileWidth > 0, "Illegal tile-width: %d", tileWidth);
-    return sp<HorizontalScrollable>::make(_tile_maker->build(args), _scroller->build(args), width, tileWidth, _cols ? _cols : (width - 1) / tileWidth  + 2);
+    return sp<HorizontalScrollable>::make(_renderer_maker->build(args), _scroller->build(args), width, tileWidth, _cols ? _cols : (width - 1) / tileWidth + 2);
 }
 
 }

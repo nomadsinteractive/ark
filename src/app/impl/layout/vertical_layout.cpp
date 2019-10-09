@@ -9,9 +9,9 @@
 
 namespace ark {
 
-VerticalLayout::VerticalLayout(const View::Gravity gravity)
-    : _place_gravity(static_cast<View::Gravity>(gravity & View::CENTER_HORIZONTAL)),
-      _end_gravity(static_cast<View::Gravity>(gravity & View::CENTER_VERTICAL))
+VerticalLayout::VerticalLayout(const LayoutParam::Gravity gravity)
+    : _place_gravity(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::CENTER_HORIZONTAL)),
+      _end_gravity(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::CENTER_VERTICAL))
 {
 }
 
@@ -41,7 +41,7 @@ Rect VerticalLayout::end(Context& ctx)
 }
 
 VerticalLayout::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& doc)
-    : _gravity(Documents::ensureAttribute<View::Gravity>(doc, Constants::Attributes::GRAVITY))
+    : _gravity(Documents::ensureAttribute<LayoutParam::Gravity>(doc, Constants::Attributes::GRAVITY))
 {
 }
 

@@ -14,9 +14,9 @@ namespace ark {
 
 class GravityLayout : public Layout {
 public:
-    GravityLayout(const View::Gravity& gravity);
+    GravityLayout(const LayoutParam::Gravity& gravity);
 
-    static Rect place(View::Gravity gravity, float clientWidth, float clientHeight, float width, float height);
+    static Rect place(LayoutParam::Gravity gravity, float clientWidth, float clientHeight, float width, float height);
 
     virtual void begin(Context& ctx, LayoutParam& layoutParam) override;
     virtual Rect place(Context& ctx, LayoutParam& layoutParam) override;
@@ -25,17 +25,17 @@ public:
 //  [[plugin::builder("gravity")]]
     class BUILDER : public Builder<Layout> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Layout> build(const Scope& args) override;
 
     private:
-        View::Gravity _gravity;
+        LayoutParam::Gravity _gravity;
 
     };
 
 private:
-    View::Gravity _gravity;
+    LayoutParam::Gravity _gravity;
 
 };
 

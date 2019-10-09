@@ -14,17 +14,17 @@ PyVecDuckType::PyVecDuckType(PyInstance inst)
 
 void PyVecDuckType::to(sp<Vec2>& inst)
 {
-    inst = PythonInterpreter::instance()->toCppObject<sp<Vec2>>(_instance.instance());
+    inst = PythonInterpreter::instance()->toCppObject<sp<Vec2>>(_instance.pyObject());
 }
 
 void PyVecDuckType::to(sp<Vec3>& inst)
 {
-    inst = PythonInterpreter::instance()->toCppObject<sp<Vec3>>(_instance.instance());
+    inst = PythonInterpreter::instance()->toCppObject<sp<Vec3>>(_instance.pyObject());
 }
 
 void PyVecDuckType::to(sp<Vec4>& inst)
 {
-    inst = PythonInterpreter::instance()->toCppObject<sp<Vec4>>(_instance.instance());
+    inst = PythonInterpreter::instance()->toCppObject<sp<Vec4>>(_instance.pyObject());
 }
 
 }

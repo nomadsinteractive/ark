@@ -61,10 +61,10 @@ const char* PyInstance::name()
     return Py_TYPE(_ref->instance())->tp_name;
 }
 
-PyInstance::operator PyObject* ()
-{
-    return _ref->instance();
-}
+//PyInstance::operator PyObject* ()
+//{
+//    return _ref->instance();
+//}
 
 bool PyInstance::hasAttr(const char* name) const
 {
@@ -96,7 +96,7 @@ bool PyInstance::isCallable()
     return PyCallable_Check(_ref->instance()) != 0;
 }
 
-PyObject* PyInstance::instance() const
+PyObject* PyInstance::pyObject() const
 {
     return _ref->instance();
 }

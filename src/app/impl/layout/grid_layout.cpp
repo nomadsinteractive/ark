@@ -10,7 +10,7 @@
 
 namespace ark {
 
-GridLayout::GridLayout(uint32_t rows, uint32_t cols, const View::Gravity gravity)
+GridLayout::GridLayout(uint32_t rows, uint32_t cols, const LayoutParam::Gravity gravity)
     : _rows(rows), _cols(cols), _gravity(gravity)
 {
 }
@@ -38,7 +38,7 @@ Rect GridLayout::end(Context& /*ctx*/)
 
 GridLayout::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
     : _rows(parent.ensureBuilder<Numeric>(doc, "rows")), _cols(parent.ensureBuilder<Numeric>(doc, "cols")),
-      _gravity(Documents::ensureAttribute<View::Gravity>(doc, Constants::Attributes::GRAVITY))
+      _gravity(Documents::ensureAttribute<LayoutParam::Gravity>(doc, Constants::Attributes::GRAVITY))
 {
 }
 

@@ -4,6 +4,7 @@
 
 #include "core/inf/variable.h"
 #include "core/util/bean_utils.h"
+#include "core/util/conversions.h"
 #include "core/util/strings.h"
 
 #include "graphics/base/size.h"
@@ -22,8 +23,8 @@ template<> ARK_API LayoutParam::Display Conversions::to<String, LayoutParam::Dis
     return LayoutParam::DISPLAY_BLOCK;
 }
 
-LayoutParam::LayoutParam(const sp<Size>& size, LayoutParam::Display display)
-    : _size(Null::toSafe(size)), _display(display)
+LayoutParam::LayoutParam(const sp<Size>& size, LayoutParam::Display display, Gravity gravity)
+    : _size(Null::toSafe(size)), _display(display), _gravity(gravity)
 {
 }
 
@@ -97,6 +98,16 @@ void LayoutParam::setDisplay(Display display)
     _display = display;
 }
 
+LayoutParam::Gravity LayoutParam::gravity() const
+{
+    return _gravity;
+}
+
+void LayoutParam::setGravity(LayoutParam::Gravity gravity)
+{
+    _gravity = gravity;
+}
+
 const Rect& LayoutParam::margins() const
 {
     return _margins;
@@ -135,6 +146,35 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
 template<> ARK_API sp<LayoutParam> Null::ptr()
 {
     return Ark::instance().obtain<LayoutParam>(Ark::instance().obtain<Size>(static_cast<float>(LayoutParam::MATCH_PARENT), static_cast<float>(LayoutParam::MATCH_PARENT)));
+}
+
+template<> ARK_API LayoutParam::Gravity Conversions::to<String, LayoutParam::Gravity>(const String& s)
+{
+    if(s == "none")
+        return LayoutParam::NONE;
+
+    uint32_t gravity = LayoutParam::NONE;
+    for(const String& i : s.split('|'))
+    {
+        const String str = i.strip();
+        if(str == "left")
+            gravity |= LayoutParam::LEFT;
+        else if(str == "right")
+            gravity |= LayoutParam::RIGHT;
+        else if(str == "top")
+            gravity |= LayoutParam::TOP;
+        else if(str == "bottom")
+            gravity |= LayoutParam::BOTTOM;
+        else if(str == "center")
+            gravity |= LayoutParam::CENTER;
+        else if(str == "center_horizontal")
+            gravity |= LayoutParam::CENTER_HORIZONTAL;
+        else if(str == "center_vertical")
+            gravity |= LayoutParam::CENTER_VERTICAL;
+        else
+            DFATAL("Unknown gravity value: \"%s\"", i.c_str());
+    }
+    return static_cast<LayoutParam::Gravity>(gravity);
 }
 
 }

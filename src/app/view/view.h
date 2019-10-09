@@ -24,18 +24,6 @@ public:
         STATE_COUNT = 4
     };
 
-    enum Gravity {
-        NONE = 0,
-        LEFT = 1,
-        RIGHT = 2,
-        CENTER_HORIZONTAL = 3,
-        TOP = 4,
-        BOTTOM = 8,
-        CENTER_VERTICAL = 12,
-        CENTER = CENTER_VERTICAL | CENTER_HORIZONTAL,
-        GRAVITY_DEFAULT = CENTER
-    };
-
 public:
     View(const sp<LayoutParam>& layoutParam);
     View(const sp<Size>& size);
@@ -67,9 +55,9 @@ public:
     bool dispatchEvent(const Event& event, bool ptin);
 
 //  [[plugin::style("display")]]
-    class DISPLAY_DECORATOR : public Builder<Renderer> {
+    class STYLE_DISPLAY : public Builder<Renderer> {
     public:
-        DISPLAY_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_DISPLAY(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
@@ -79,10 +67,23 @@ public:
         LayoutParam::Display _display;
     };
 
-//  [[plugin::style("size")]]
-    class SIZE_DECORATOR : public Builder<Renderer> {
+//  [[plugin::style("gravity")]]
+    class STYLE_GRAVITY : public Builder<Renderer> {
     public:
-        SIZE_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_GRAVITY(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style);
+
+        virtual sp<Renderer> build(const Scope& args) override;
+
+    private:
+        sp<Builder<Renderer>> _delegate;
+
+        LayoutParam::Gravity _gravity;
+    };
+
+//  [[plugin::style("size")]]
+    class STYLE_SIZE : public Builder<Renderer> {
+    public:
+        STYLE_SIZE(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
@@ -92,9 +93,9 @@ public:
     };
 
 //  [[plugin::style("margins")]]
-    class MARGINS_DECORATOR : public Builder<Renderer> {
+    class STYLE_MARGINS : public Builder<Renderer> {
     public:
-        MARGINS_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_MARGINS(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
@@ -106,9 +107,9 @@ public:
     };
 
 //  [[plugin::style("margin-left")]]
-    class MARGIN_LEFT_DECORATOR : public Builder<Renderer> {
+    class STYLE_MARGIN_LEFT : public Builder<Renderer> {
     public:
-        MARGIN_LEFT_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_MARGIN_LEFT(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
@@ -120,9 +121,9 @@ public:
     };
 
 //  [[plugin::style("margin-right")]]
-    class MARGIN_RIGHT_DECORATOR : public Builder<Renderer> {
+    class STYLE_MARGIN_RIGHT : public Builder<Renderer> {
     public:
-        MARGIN_RIGHT_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_MARGIN_RIGHT(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
@@ -133,9 +134,9 @@ public:
     };
 
 //  [[plugin::style("margin-top")]]
-    class MARGIN_TOP_DECORATOR : public Builder<Renderer> {
+    class STYLE_MARGIN_TOP : public Builder<Renderer> {
     public:
-        MARGIN_TOP_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_MARGIN_TOP(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
@@ -146,9 +147,9 @@ public:
     };
 
 //  [[plugin::style("margin-bottom")]]
-    class MARGIN_BOTTOM_DECORATOR : public Builder<Renderer> {
+    class STYLE_MARGIN_BOTTOM : public Builder<Renderer> {
     public:
-        MARGIN_BOTTOM_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_MARGIN_BOTTOM(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
@@ -159,9 +160,9 @@ public:
     };
 
 //  [[plugin::style("layout-param")]]
-    class LAYOUT_PARAM_DECORATOR : public Builder<Renderer> {
+    class STYLE_LAYOUT_PARAM : public Builder<Renderer> {
     public:
-        LAYOUT_PARAM_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_LAYOUT_PARAM(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
@@ -171,9 +172,9 @@ public:
     };
 
 //  [[plugin::style("onenter")]]
-    class ON_ENTER_DECORATOR : public Builder<Renderer> {
+    class STYLE_ON_ENTER : public Builder<Renderer> {
     public:
-        ON_ENTER_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_ON_ENTER(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
@@ -183,9 +184,9 @@ public:
     };
 
 //  [[plugin::style("onleave")]]
-    class ON_LEAVE_DECORATOR : public Builder<Renderer> {
+    class STYLE_ON_LEAVE : public Builder<Renderer> {
     public:
-        ON_LEAVE_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_ON_LEAVE(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
@@ -195,9 +196,9 @@ public:
     };
 
 //  [[plugin::style("onpush")]]
-    class ON_PUSH_DECORATOR : public Builder<Renderer> {
+    class STYLE_ON_PUSH : public Builder<Renderer> {
     public:
-        ON_PUSH_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_ON_PUSH(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
@@ -207,9 +208,9 @@ public:
     };
 
 //  [[plugin::style("onclick")]]
-    class ON_CLICK_DECORATOR : public Builder<Renderer> {
+    class STYLE_ON_CLICK : public Builder<Renderer> {
     public:
-        ON_CLICK_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_ON_CLICK(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
@@ -220,9 +221,9 @@ public:
     };
 
 //  [[plugin::style("onrelease")]]
-    class ON_RELEASE_DECORATOR : public Builder<Renderer> {
+    class STYLE_ON_RELEASE : public Builder<Renderer> {
     public:
-        ON_RELEASE_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_ON_RELEASE(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
@@ -233,9 +234,9 @@ public:
     };
 
 //  [[plugin::style("onmove")]]
-    class ON_MOVE_DECORATOR : public Builder<Renderer> {
+    class STYLE_ON_MOVE : public Builder<Renderer> {
     public:
-        ON_MOVE_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_ON_MOVE(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 

@@ -121,8 +121,8 @@ void PythonScript::run(const sp<Asset>& script, const Scope& vars)
     LOGD("run script, location: %s", script->location().c_str());
     addScopeToDict(globals, vars);
     PyInstance co = PyInstance::steal(Py_CompileStringExFlags(Strings::loadFromReadable(script->open()).c_str(), script->location().c_str(), Py_file_input, nullptr, -1));
-    PyInstance v = PyInstance::steal(PyEval_EvalCode(co, globals, globals));
-    if (v.instance() == nullptr)
+    PyInstance v = PyInstance::steal(PyEval_EvalCode(co.pyObject(), globals, globals));
+    if (v.pyObject() == nullptr)
     {
         PythonInterpreter::instance()->logErr();
         return;
@@ -141,7 +141,7 @@ Box PythonScript::call(const String& function, const Script::Arguments& args)
     Box r;
     if(func && func.isCallable())
     {
-        PyObject* ret = func.call(tuple);
+        PyObject* ret = func.call(tuple.pyObject());
         if(ret)
         {
             PyObject* type = reinterpret_cast<PyObject*>(ret->ob_type);

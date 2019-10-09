@@ -74,9 +74,9 @@ PyObject* ark_log(Log::LogLevel level, PyObject* args)
         PyInstance pyContent = PyInstance::borrow(PyTuple_GetItem(args, 0));
         DASSERT(pyContent);
         PyInstance varargs = PyInstance::steal(PyTuple_GetSlice(args, 1, size));
-        PyInstance formatted = PyInstance::steal(size > 1 ? PyUnicode_Format(pyContent, varargs) : PyObject_Str(pyContent));
-        DCHECK(formatted, "Unsatisfied format: %s", PythonInterpreter::instance()->toString(pyContent).c_str());
-        const String content = PythonInterpreter::instance()->toString(formatted);
+        PyInstance formatted = PyInstance::steal(size > 1 ? PyUnicode_Format(pyContent.pyObject(), varargs.pyObject()) : PyObject_Str(pyContent.pyObject()));
+        DCHECK(formatted, "Unsatisfied format: %s", PythonInterpreter::instance()->toString(pyContent.pyObject()).c_str());
+        const String content = PythonInterpreter::instance()->toString(formatted.pyObject());
         Log::log(level, "Python", content.c_str());
     }
     Py_RETURN_NONE;

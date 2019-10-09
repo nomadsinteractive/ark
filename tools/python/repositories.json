@@ -61,7 +61,7 @@
     {
         "url": "https://github.com/nih-at/libzip.git",
         "name": "libzip",
-        "tag": "rel-1-5-1"
+        "tag": "rel-1-5-2"
     },
     {
         "url": "https://github.com/xiph/ogg.git",

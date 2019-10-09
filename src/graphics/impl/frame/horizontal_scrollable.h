@@ -25,7 +25,7 @@ public:
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        sp<Builder<RendererMaker>> _tile_maker;
+        sp<Builder<RendererMaker>> _renderer_maker;
         sp<Builder<Numeric>> _scroller;
 
         sp<Builder<Numeric>> _width;

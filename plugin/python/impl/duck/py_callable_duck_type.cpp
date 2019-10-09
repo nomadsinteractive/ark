@@ -7,7 +7,7 @@
 
 #include "python/impl/adapter/python_callable_runnable.h"
 #include "python/impl/adapter/python_callable_event_listener.h"
-#include "python/impl/adapter/python_callable_tile_maker.h"
+#include "python/impl/adapter/renderer_maker_python.h"
 
 #include "python/extension/python_interpreter.h"
 
@@ -30,10 +30,10 @@ public:
         PyObject* pyType = interpreter->toPyObject<int32_t>(type);
         PyObject* pyPosition = interpreter->toPyObject<V2>(position);
         PyObject* pySize = interpreter->toPyObject<sp<Size>>(size);
-        PyTuple_SetItem(_args, 0, pyType);
-        PyTuple_SetItem(_args, 1, pyPosition);
-        PyTuple_SetItem(_args, 2, pySize);
-        PyObject* ret = _callable.call(_args);
+        PyTuple_SetItem(_args.pyObject(), 0, pyType);
+        PyTuple_SetItem(_args.pyObject(), 1, pyPosition);
+        PyTuple_SetItem(_args.pyObject(), 2, pySize);
+        PyObject* ret = _callable.call(_args.pyObject());
         if(ret)
         {
             const sp<RenderObject> renderObject = ret == Py_None ? nullptr : PythonInterpreter::instance()->toCppObject<sp<RenderObject>>(ret);
@@ -63,10 +63,10 @@ public:
 
         const sp<PythonInterpreter>& interpreter = PythonInterpreter::instance();
         PyObject* pyType = interpreter->toPyObject<int32_t>(c);
-        PyTuple_SetItem(_args, 0, pyType);
-        PyInstance ret = PyInstance::steal(_callable.call(_args));
+        PyTuple_SetItem(_args.pyObject(), 0, pyType);
+        PyInstance ret = PyInstance::steal(_callable.call(_args.pyObject()));
         if(ret)
-            return PythonInterpreter::instance()->toCppObject<int32_t>(ret);
+            return PythonInterpreter::instance()->toCppObject<int32_t>(ret.pyObject());
 
         PythonInterpreter::instance()->logErr();
         return 0;
@@ -113,7 +113,7 @@ void PyCallableDuckType::to(sp<CharacterMapper>& inst)
 
 void PyCallableDuckType::to(sp<RendererMaker>& inst)
 {
-    inst = sp<PythonCallableTileMaker>::make(_instance);
+    inst = sp<RendererMakerPython>::make(_instance);
 }
 
 }

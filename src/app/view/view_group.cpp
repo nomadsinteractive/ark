@@ -70,7 +70,7 @@ sp<Renderer> ViewGroup::BUILDER::build(const Scope& args)
     {
         const String& name = i->name();
         if(name == Constants::Attributes::LAYER)
-            viewGroup->addRenderer(_factory.ensure<Layer>(i, args));
+            viewGroup->addRenderer(_factory.ensureDecorated<Renderer, Layer>(i, args));
         else if(name != Constants::Attributes::BACKGROUND)
             viewGroup->addRenderer(_factory.ensure<Renderer>(i, args));
     }

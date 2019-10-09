@@ -20,7 +20,7 @@ public:
 
     private:
         String _layout;
-        View::Gravity _gravity;
+        LayoutParam::Gravity _gravity;
     };
 };
 

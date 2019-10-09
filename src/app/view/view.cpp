@@ -31,35 +31,6 @@ template<> ARK_API View::State Conversions::to<String, View::State>(const String
     return View::STATE_DEFAULT;
 }
 
-template<> ARK_API View::Gravity Conversions::to<String, View::Gravity>(const String& s)
-{
-    if(s == "none")
-        return View::NONE;
-
-    uint32_t gravity = View::NONE;
-    for(const String& i : s.split('|'))
-    {
-        const String str = i.strip();
-        if(str == "left")
-            gravity |= View::LEFT;
-        else if(str == "right")
-            gravity |= View::RIGHT;
-        else if(str == "top")
-            gravity |= View::TOP;
-        else if(str == "bottom")
-            gravity |= View::BOTTOM;
-        else if(str == "center")
-            gravity |= View::CENTER;
-        else if(str == "center_horizontal")
-            gravity |= View::CENTER_HORIZONTAL;
-        else if(str == "center_vertical")
-            gravity |= View::CENTER_VERTICAL;
-        else
-            DFATAL("Unknown gravity value: \"%s\"", i.c_str());
-    }
-    return static_cast<View::Gravity>(gravity);
-}
-
 View::View(const sp<LayoutParam>& layoutParam)
     : _layout_param(layoutParam), _state(sp<State>::make(STATE_DEFAULT))
 {
@@ -253,23 +224,34 @@ sp<View> bindView(sp<Renderer>& decorated)
 
 }
 
-View::DISPLAY_DECORATOR::DISPLAY_DECORATOR(BeanFactory& /*beanFactory*/, const sp<Builder<Renderer>>& delegate, const String& style)
+View::STYLE_DISPLAY::STYLE_DISPLAY(BeanFactory& /*beanFactory*/, const sp<Builder<Renderer>>& delegate, const String& style)
     : _delegate(delegate), _display(Strings::parse<LayoutParam::Display>(style)) {
 }
 
-sp<Renderer> View::DISPLAY_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_DISPLAY::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->setDisplay(_display);
     return renderer;
 }
 
-View::MARGINS_DECORATOR::MARGINS_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
+View::STYLE_GRAVITY::STYLE_GRAVITY(BeanFactory& /*factory*/, const sp<Builder<Renderer>>& delegate, const String& style)
+    : _delegate(delegate), _gravity(Strings::parse<LayoutParam::Gravity>(style)) {
+}
+
+sp<Renderer> View::STYLE_GRAVITY::build(const Scope& args)
+{
+    sp<Renderer> renderer = _delegate->build(args);
+    bindView(renderer)->layoutParam()->setGravity(_gravity);
+    return renderer;
+}
+
+View::STYLE_MARGINS::STYLE_MARGINS(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
     : _bean_factory(beanFactory), _delegate(delegate), _margins(style)
 {
 }
 
-sp<Renderer> View::MARGINS_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_MARGINS::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     const sp<View> view = bindView(renderer);
@@ -281,144 +263,144 @@ sp<Renderer> View::MARGINS_DECORATOR::build(const Scope& args)
     return renderer;
 }
 
-View::MARGIN_TOP_DECORATOR::MARGIN_TOP_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
+View::STYLE_MARGIN_TOP::STYLE_MARGIN_TOP(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
     : _bean_factory(beanFactory), _delegate(delegate), _margin_top(style)
 {
 }
 
-sp<Renderer> View::MARGIN_TOP_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_MARGIN_TOP::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->margins().setTop(Dictionaries::get<float>(_bean_factory, _margin_top, args));
     return renderer;
 }
 
-View::MARGIN_LEFT_DECORATOR::MARGIN_LEFT_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
+View::STYLE_MARGIN_LEFT::STYLE_MARGIN_LEFT(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
     : _bean_factory(beanFactory), _delegate(delegate), _margin_left(style)
 {
 }
 
-sp<Renderer> View::MARGIN_LEFT_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_MARGIN_LEFT::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->margins().setLeft(Dictionaries::get<float>(_bean_factory, _margin_left, args));
     return renderer;
 }
 
-View::MARGIN_RIGHT_DECORATOR::MARGIN_RIGHT_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
+View::STYLE_MARGIN_RIGHT::STYLE_MARGIN_RIGHT(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
     : _bean_factory(beanFactory), _delegate(delegate), _margin_right(style)
 {
 }
 
-sp<Renderer> View::MARGIN_RIGHT_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_MARGIN_RIGHT::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->margins().setRight(Dictionaries::get<float>(_bean_factory, _margin_right, args));
     return renderer;
 }
 
-View::MARGIN_BOTTOM_DECORATOR::MARGIN_BOTTOM_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
+View::STYLE_MARGIN_BOTTOM::STYLE_MARGIN_BOTTOM(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
     : _bean_factory(beanFactory), _delegate(delegate), _margin_bottom(style)
 {
 }
 
-sp<Renderer> View::MARGIN_BOTTOM_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_MARGIN_BOTTOM::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->margins().setBottom(Dictionaries::get<float>(_bean_factory, _margin_bottom, args));
     return renderer;
 }
 
-View::SIZE_DECORATOR::SIZE_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
+View::STYLE_SIZE::STYLE_SIZE(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
     : _delegate(delegate), _size(beanFactory.ensureBuilder<Size>(style))
 {
 }
 
-sp<Renderer> View::SIZE_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_SIZE::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->setSize(_size->build(args));
     return renderer;
 }
 
-View::ON_ENTER_DECORATOR::ON_ENTER_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer> >& delegate, const String& style)
+View::STYLE_ON_ENTER::STYLE_ON_ENTER(BeanFactory& beanFactory, const sp<Builder<Renderer> >& delegate, const String& style)
     : _delegate(delegate), _on_enter(beanFactory.ensureBuilder<Runnable>(style))
 {
 }
 
-sp<Renderer> View::ON_ENTER_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_ON_ENTER::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setOnEnter(_on_enter->build(args));
     return renderer;
 }
 
-View::ON_LEAVE_DECORATOR::ON_LEAVE_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
+View::STYLE_ON_LEAVE::STYLE_ON_LEAVE(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
     : _delegate(delegate), _on_leave(beanFactory.ensureBuilder<Runnable>(style))
 {
 }
 
-sp<Renderer> View::ON_LEAVE_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_ON_LEAVE::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setOnLeave(_on_leave->build(args));
     return renderer;
 }
 
-View::ON_PUSH_DECORATOR::ON_PUSH_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer> >& delegate, const String& style)
+View::STYLE_ON_PUSH::STYLE_ON_PUSH(BeanFactory& beanFactory, const sp<Builder<Renderer> >& delegate, const String& style)
     : _delegate(delegate), _on_push(beanFactory.ensureBuilder<Runnable>(style))
 {
 }
 
-sp<Renderer> View::ON_PUSH_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_ON_PUSH::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setOnPush(_on_push->build(args));
     return renderer;
 }
 
-View::ON_CLICK_DECORATOR::ON_CLICK_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer> >& delegate, const String& style)
+View::STYLE_ON_CLICK::STYLE_ON_CLICK(BeanFactory& beanFactory, const sp<Builder<Renderer> >& delegate, const String& style)
     : _delegate(delegate), _on_click(beanFactory.ensureBuilder<Runnable>(style))
 {
 }
 
-sp<Renderer> View::ON_CLICK_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_ON_CLICK::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setOnClick(_on_click->build(args));
     return renderer;
 }
 
-View::ON_RELEASE_DECORATOR::ON_RELEASE_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer> >& delegate, const String& style)
+View::STYLE_ON_RELEASE::STYLE_ON_RELEASE(BeanFactory& beanFactory, const sp<Builder<Renderer> >& delegate, const String& style)
     : _delegate(delegate), _on_release(beanFactory.ensureBuilder<Runnable>(style))
 {
 }
 
-sp<Renderer> View::ON_RELEASE_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_ON_RELEASE::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setOnRelease(_on_release->build(args));
     return renderer;
 }
 
-View::ON_MOVE_DECORATOR::ON_MOVE_DECORATOR(BeanFactory &beanFactory, const sp<Builder<Renderer> > &delegate, const String &style)
+View::STYLE_ON_MOVE::STYLE_ON_MOVE(BeanFactory &beanFactory, const sp<Builder<Renderer> > &delegate, const String &style)
     : _delegate(delegate), _on_move(beanFactory.ensureBuilder<EventListener>(style))
 {
 }
 
-sp<Renderer> View::ON_MOVE_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_ON_MOVE::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setOnMove(_on_move->build(args));
     return renderer;
 }
 
-View::LAYOUT_PARAM_DECORATOR::LAYOUT_PARAM_DECORATOR(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
+View::STYLE_LAYOUT_PARAM::STYLE_LAYOUT_PARAM(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
     : _delegate(delegate), _layout_param(beanFactory.ensureBuilder<LayoutParam>(style))
 {
 }
 
-sp<Renderer> View::LAYOUT_PARAM_DECORATOR::build(const Scope& args)
+sp<Renderer> View::STYLE_LAYOUT_PARAM::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setLayoutParam(_layout_param->build(args));

@@ -7,7 +7,6 @@ namespace python {
 
 class PyInstance;
 class PyInstanceRef;
-class PyContainer;
 
 }
 }

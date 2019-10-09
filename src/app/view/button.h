@@ -18,7 +18,7 @@ namespace ark {
 
 class Button final : public View, public Renderer {
 public:
-    Button(const sp<Renderer>& foreground, const sp<Renderer>& background, const sp<Size>& block, Gravity gravity);
+    Button(const sp<Renderer>& foreground, const sp<Renderer>& background, const sp<Size>& block, LayoutParam::Gravity gravity);
     ~Button() override;
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
@@ -58,7 +58,7 @@ public:
 private:
     op<RendererWithState> _foreground;
     op<RendererWithState> _background;
-    Gravity _gravity;
+    LayoutParam::Gravity _gravity;
 
 
 };

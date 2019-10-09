@@ -28,8 +28,7 @@ public:
 
     const sp<PyInstanceRef>& ref() const;
 
-    PyObject* instance() const;
-    operator PyObject*();
+    PyObject* pyObject() const;
     explicit operator bool();
 
     PyObject* type();

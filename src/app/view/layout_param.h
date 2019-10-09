@@ -18,11 +18,23 @@ public:
         DISPLAY_ABSOLUTE
     };
 
+    enum Gravity {
+        NONE = 0,
+        LEFT = 1,
+        RIGHT = 2,
+        CENTER_HORIZONTAL = 3,
+        TOP = 4,
+        BOTTOM = 8,
+        CENTER_VERTICAL = 12,
+        CENTER = CENTER_VERTICAL | CENTER_HORIZONTAL,
+        GRAVITY_DEFAULT = CENTER
+    };
+
     static const int32_t MATCH_PARENT;
     static const int32_t WRAP_CONTENT;
 
 public:
-    LayoutParam(const sp<Size>& size, Display display = DISPLAY_BLOCK);
+    LayoutParam(const sp<Size>& size, Display display = DISPLAY_BLOCK, Gravity gravity = NONE);
     LayoutParam(const LayoutParam& other) = default;
 
     float calcLayoutWidth(float available);
@@ -41,6 +53,9 @@ public:
 
     Display display() const;
     void setDisplay(Display display);
+
+    Gravity gravity() const;
+    void setGravity(Gravity gravity);
 
     const Rect& margins() const;
     Rect& margins();
@@ -66,6 +81,7 @@ private:
     SafePtr<Size> _size;
 
     Display _display;
+    Gravity _gravity;
     Rect _margins;
 };
 

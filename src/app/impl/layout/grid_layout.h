@@ -11,7 +11,7 @@ namespace ark {
 
 class GridLayout : public Layout {
 public:
-    GridLayout(uint32_t rows, uint32_t cols, const View::Gravity gravity);
+    GridLayout(uint32_t rows, uint32_t cols, const LayoutParam::Gravity gravity);
 
     virtual void begin(Context& ctx, LayoutParam& layoutParam) override;
     virtual Rect place(Context& ctx, LayoutParam& layoutParam) override;
@@ -26,13 +26,13 @@ public:
 
     private:
         sp<Builder<Numeric>> _rows, _cols;
-        View::Gravity _gravity;
+        LayoutParam::Gravity _gravity;
 
     };
 
 private:
     uint32_t _rows, _cols;
-    View::Gravity _gravity;
+    LayoutParam::Gravity _gravity;
 
     float _grid_width, _grid_height;
     uint32_t _flow_index;

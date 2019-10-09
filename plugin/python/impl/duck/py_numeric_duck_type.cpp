@@ -18,12 +18,12 @@ PyNumericDuckType::PyNumericDuckType(PyInstance inst)
 
 void PyNumericDuckType::to(sp<Integer>& inst)
 {
-    inst = PythonInterpreter::instance()->toCppObject<sp<Integer>>(_instance.instance());
+    inst = PythonInterpreter::instance()->toCppObject<sp<Integer>>(_instance.pyObject());
 }
 
 void PyNumericDuckType::to(sp<Numeric>& inst)
 {
-    inst = PythonInterpreter::instance()->toCppObject<sp<Numeric>>(_instance.instance());
+    inst = PythonInterpreter::instance()->toCppObject<sp<Numeric>>(_instance.pyObject());
 }
 
 }

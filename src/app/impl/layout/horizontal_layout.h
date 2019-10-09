@@ -14,7 +14,7 @@ namespace ark {
 
 class HorizontalLayout : public Layout {
 public:
-    HorizontalLayout(const View::Gravity& gravity);
+    HorizontalLayout(const LayoutParam::Gravity& gravity);
 
     virtual void begin(Context& ctx, LayoutParam& layoutParam) override;
     virtual Rect place(Context& ctx, LayoutParam& layoutParam) override;
@@ -28,11 +28,11 @@ public:
         virtual sp<Layout> build(const Scope& args) override;
 
     private:
-        View::Gravity _gravity;
+        LayoutParam::Gravity _gravity;
     };
 
 private:
-    View::Gravity _place_gravity, _end_gravity;
+    LayoutParam::Gravity _place_gravity, _end_gravity;
     float _content_available;
     float _flowx;
     float _max_height;
