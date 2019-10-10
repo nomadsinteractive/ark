@@ -13,8 +13,8 @@
 namespace ark {
 
 DrawingBuffer::DrawingBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
-    : _shader_bindings(shaderBindings), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), stride, instanceCount),
-      _divided_buffer_builders(shaderBindings->makeDividedBufferBuilders(resourceLoaderContext->memoryPool(), resourceLoaderContext->objectPool(), instanceCount)),
+    : _shader_bindings(shaderBindings), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(resourceLoaderContext->objectPool(), stride, instanceCount),
+      _divided_buffer_builders(shaderBindings->makeDividedBufferBuilders(resourceLoaderContext->objectPool(), instanceCount)),
       _indice_base(0), _is_instanced(_pipeline_bindings->hasDivisors())
 {
 }

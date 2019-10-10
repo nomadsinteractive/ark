@@ -83,14 +83,14 @@ sp<Pipeline> ShaderBindings::getPipeline(GraphicsContext& graphicsContext)
     return _pipeline;
 }
 
-std::map<uint32_t, Buffer::Builder> ShaderBindings::makeDividedBufferBuilders(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t instanceCount) const
+std::map<uint32_t, Buffer::Builder> ShaderBindings::makeDividedBufferBuilders(const sp<ObjectPool>& objectPool, size_t instanceCount) const
 {
     std::map<uint32_t, Buffer::Builder> builders;
     const sp<PipelineInput>& pipelineInput = _pipeline_bindings->input();
-    for(const std::pair<uint32_t, Buffer>& i : *_divisors)
+    for(const auto& i : *_divisors)
     {
         const PipelineInput::Stream& stream = pipelineInput->getStream(i.first);
-        builders.insert(std::make_pair(i.first, Buffer::Builder(memoryPool, objectPool, stream.stride(), instanceCount / i.first)));
+        builders.insert(std::make_pair(i.first, Buffer::Builder(objectPool, stream.stride(), instanceCount / i.first)));
     }
     return builders;
 }
@@ -98,9 +98,9 @@ std::map<uint32_t, Buffer::Builder> ShaderBindings::makeDividedBufferBuilders(co
 sp<std::map<uint32_t, Buffer>> ShaderBindings::makeDivisors(RenderController& renderController) const
 {
     sp<std::map<uint32_t, Buffer>> divisors = sp<std::map<uint32_t, Buffer>>::make();
-    for(auto iter : pipelineInput()->streams())
+    for(const auto& i : pipelineInput()->streams())
     {
-        uint32_t divisor = iter.first;
+        uint32_t divisor = i.first;
         if(divisor != 0)
         {
             DCHECK(divisors->find(divisor) == divisors->end(), "Duplicated stream divisor: %d", divisor);

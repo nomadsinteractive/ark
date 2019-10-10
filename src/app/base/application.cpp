@@ -93,8 +93,7 @@ void Application::onCreate()
     const Global<StringTable> stringTable;
     stringTable->addStringBundle("asset", sp<AssetStringBundle>::make());
     const sp<RenderView> renderView = _application_context->renderEngine()->createRenderView(_application_context->renderController(), _viewport);
-    _surface = sp<Surface>::make(renderView, _application_context->renderController());
-    _surface_updater = _surface->makeUpdater(_application_context);
+    _surface = sp<Surface>::make(renderView, _application_context);
     _application_context->post([this] () {
         onCreateTask();
     });
@@ -162,7 +161,7 @@ void Application::onSurfaceUpdate()
 {
     if(_alive)
     {
-        _application_context->post(_surface_updater);
+        _application_context->post(_surface->updater());
         _application_context->updateRenderState();
         _application_delegate->onSurfaceDraw();
     }

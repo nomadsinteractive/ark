@@ -19,21 +19,6 @@ Ark::RendererVersion RenderEngine::version() const
     return _render_context->version();
 }
 
-const Viewport& RenderEngine::viewport() const
-{
-    return _render_context->viewport();
-}
-
-//const V2& RenderEngine::displayResolution() const
-//{
-//    return _render_context->displayResolution();
-//}
-
-//void RenderEngine::setDisplayResolution(const V2& resolution)
-//{
-//    _render_context->setDisplayResolution(resolution);
-//}
-
 const sp<RendererFactory>& RenderEngine::rendererFactory() const
 {
     return _renderer_factory;
@@ -42,6 +27,11 @@ const sp<RendererFactory>& RenderEngine::rendererFactory() const
 const sp<RenderContext>& RenderEngine::renderContext() const
 {
     return _render_context;
+}
+
+const Viewport& RenderEngine::viewport() const
+{
+    return _render_context->viewport();
 }
 
 void RenderEngine::onSurfaceCreated()

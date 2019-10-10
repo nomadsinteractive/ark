@@ -6,6 +6,8 @@
 
 #include "graphics/base/layer.h"
 
+#include "renderer/base/shader.h"
+
 namespace ark {
 
 LayerContext::Item::Item(const V3& position, const sp<RenderObject>& renderObject)
@@ -62,11 +64,12 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memor
 {
     if(_render_requested)
     {
+        const sp<PipelineInput> pipelineInput = output._stub->_shader->input();
         bool notify = false;
         for(const Item& i : _transient_items)
             if(!i._render_object->isDisposed())
             {
-                RenderObject::Snapshot snapshot = i._render_object->snapshot(memoryPool);
+                RenderObject::Snapshot snapshot = i._render_object->snapshot(pipelineInput, memoryPool);
                 snapshot._position = snapshot._position + i._position;
                 output._items.push_back(std::move(snapshot));
                 notify = true;
@@ -76,7 +79,7 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memor
         {
             if(i->isVisible())
             {
-                RenderObject::Snapshot snapshot = i->snapshot(memoryPool);
+                RenderObject::Snapshot snapshot = i->snapshot(pipelineInput, memoryPool);
                 snapshot._position = snapshot._position + _position;
                 output._items.push_back(std::move(snapshot));
             }

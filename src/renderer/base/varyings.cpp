@@ -17,26 +17,9 @@
 
 namespace ark {
 
-Varyings::Varyings(const Shader& shader)
-    : _pipeline_input(shader.input()), _size(0)
-{
-}
-
 Varyings::Varyings()
     : _size(0)
 {
-}
-
-void Varyings::flat(void* buf)
-{
-    uint8_t* ptr = reinterpret_cast<uint8_t*>(buf);
-    for(const auto& i : _varyings)
-        i.second.apply(ptr);
-}
-
-uint32_t Varyings::size()
-{
-    return _size;
 }
 
 void Varyings::traverse(const Holder::Visitor& visitor)
@@ -48,10 +31,8 @@ void Varyings::traverse(const Holder::Visitor& visitor)
 void Varyings::addVarying(const String& name, const sp<Flatable>& flatable)
 {
     DCHECK(_varyings.find(name) == _varyings.end(), "Varying \"%s\" already exists", name.c_str());
-    int32_t offset = _pipeline_input->getAttributeOffset(name);
-    DCHECK(offset >= 0, "Illegal Varying, name: \"%s\", offset: %d", name.c_str(), offset);
-    _varyings[name] = Varying(offset, flatable);
-    _size = std::max<uint32_t>(offset + flatable->size(), _size);
+    _varyings.emplace(name, flatable);
+    _size = 0;
 }
 
 void Varyings::add(const String& name, const sp<Numeric>& var)
@@ -59,10 +40,18 @@ void Varyings::add(const String& name, const sp<Numeric>& var)
     addVarying(name, sp<FlatableByVariable<float>>::make(var));
 }
 
-Varyings::Snapshot Varyings::snapshot(MemoryPool& memoryPool) const
+Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, MemoryPool& memoryPool)
 {
-    if(!_size)
+    if(!_varyings.size())
         return Snapshot();
+
+    if(!_size)
+        for(auto& i : _varyings)
+        {
+            i.second._offset = pipelineInput.getAttributeOffset(i.first);
+            DCHECK(i.second._offset >= 0, "Illegal Varying, name: \"%s\", offset: %d", i.first.c_str(), i.second._offset);
+            _size = std::max<uint32_t>(static_cast<uint32_t>(i.second._offset) + i.second._flatable->size(), _size);
+        }
 
     const bytearray bytes = memoryPool.allocate(_size);
     uint8_t* ptr = reinterpret_cast<uint8_t*>(bytes->buf());
@@ -80,19 +69,14 @@ Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         _varying_builders.emplace_back(name, factory.ensureBuilderByTypeValue<Flatable>(type, value));
     }
-
-    if(_varying_builders.size() > 0)
-        _shader = factory.ensureBuilder<Shader>(manifest, Constants::Attributes::SHADER);
 }
 
 sp<Varyings> Varyings::BUILDER::build(const Scope& args)
 {
-    if(!_shader)
-        return nullptr;
+    if(_varying_builders.size() == 0)
+        return Ark::instance().obtain<Varyings>();
 
-    const sp<Shader> shader = _shader->build(args);
-    const sp<Varyings> varyings = sp<Varyings>::make(shader);
-
+    const sp<Varyings> varyings = sp<Varyings>::make();
     for(const VaryingBuilder& i : _varying_builders)
         varyings->addVarying(i._name,  i._flatable->build(args));
     return varyings;
@@ -103,19 +87,19 @@ template<> ARK_API sp<Varyings> Null::ptr()
     return Ark::instance().obtain<Varyings>();
 }
 
-Varyings::Varying::Varying(int32_t offset, const sp<Flatable>& flatable)
-    : _offset(offset), _flatable(flatable)
+Varyings::Varying::Varying(const sp<Flatable>& flatable, int32_t offset)
+    : _flatable(flatable), _offset(offset)
 {
-    DCHECK(offset >= 0, "Invail varying offset: %d", offset);
 }
 
 Varyings::Varying::Varying()
-    : _offset(0)
+    : _offset(-1)
 {
 }
 
 void Varyings::Varying::apply(uint8_t* ptr) const
 {
+    DASSERT(_offset >= 0);
     _flatable->flat(ptr + _offset);
 }
 

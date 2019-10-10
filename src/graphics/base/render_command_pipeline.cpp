@@ -4,11 +4,6 @@
 
 namespace ark {
 
-void RenderCommandPipeline::reset()
-{
-    _commands.clear();
-}
-
 void RenderCommandPipeline::add(const sp<RenderCommand>& renderCommand)
 {
     if(renderCommand)

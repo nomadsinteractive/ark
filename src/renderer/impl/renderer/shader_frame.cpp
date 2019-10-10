@@ -51,7 +51,7 @@ bytearray ShaderFrame::getVertexBuffer(const V3& position) const
     ip[23] = uvbottom;
     ip[30] = 0xffff;
     ip[31] = uvtop;
-    const bytearray preallocated = _memory_pool->allocate(buffer.size());
+    const bytearray preallocated = sp<ByteArray::Allocated>::make(buffer.size());
     memcpy(preallocated->buf(), buffer.buf(), buffer.size());
     return preallocated;
 }

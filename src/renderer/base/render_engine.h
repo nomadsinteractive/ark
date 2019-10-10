@@ -17,12 +17,9 @@ public:
 
     Ark::RendererVersion version() const;
 
-    const Viewport& viewport() const;
-//    const V2& displayResolution() const;
-//    void setDisplayResolution(const V2& displayResolution);
-
     const sp<RendererFactory>& rendererFactory() const;
     const sp<RenderContext>& renderContext() const;
+    const Viewport& viewport() const;
 
     void onSurfaceCreated();
 

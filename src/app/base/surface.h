@@ -14,22 +14,21 @@ namespace ark {
 
 class ARK_API Surface {
 public:
-    Surface(const sp<RenderView>& renderView, const sp<RenderController>& renderController);
+    Surface(const sp<RenderView>& renderView, const sp<ApplicationContext>& applicationContext);
 
     const sp<RenderView>& renderView() const;
     const sp<SurfaceController>& controller() const;
+    const sp<SurfaceUpdater>& updater() const;
 
     void onSurfaceCreated();
     void onSurfaceChanged(uint32_t width, uint32_t height);
     void onRenderFrame(const Color& backgroundColor);
 
-    sp<SurfaceUpdater> makeUpdater(const sp<ApplicationContext>& applicationContext) const;
-
 private:
     sp<RenderView> _render_view;
-    sp<RenderController> _render_controller;
 
     sp<SurfaceController> _surface_controller;
+    sp<SurfaceUpdater> _updater;
 
 };
 

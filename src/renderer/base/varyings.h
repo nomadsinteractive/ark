@@ -15,19 +15,19 @@
 
 namespace ark {
 
-class ARK_API Varyings : public Flatable, public Holder {
+class ARK_API Varyings : public Holder {
 private:
     class Varying {
     public:
-        Varying(int32_t offset, const sp<Flatable>& flatable);
+        Varying(const sp<Flatable>& flatable, int32_t offset = -1);
         Varying();
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Varying);
 
         void apply(uint8_t* ptr) const;
 
     private:
-        int32_t _offset;
         sp<Flatable> _flatable;
+        int32_t _offset;
 
         friend class Varyings;
     };
@@ -44,20 +44,14 @@ public:
 
 public:
 //[[script::bindings::auto]]
-    Varyings(const Shader& shader);
     Varyings();
 
-    virtual void flat(void* buf) override;
-    virtual uint32_t size() override;
-
     virtual void traverse(const Visitor& visitor) override;
-
-    void addVarying(const String& name, const sp<Flatable>& flatable);
 
 //[[script::bindings::auto]]
     void add(const String& name, const sp<Numeric>& var);
 
-    Snapshot snapshot(MemoryPool& memoryPool) const;
+    Snapshot snapshot(const PipelineInput& pipelineInput, MemoryPool& memoryPool);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Varyings> {
@@ -78,15 +72,18 @@ public:
 
     private:
         BeanFactory _factory;
-        sp<Builder<Shader>> _shader;
         std::vector<VaryingBuilder> _varying_builders;
     };
+
+private:
+    void addVarying(const String& name, const sp<Flatable>& flatable);
 
 private:
     sp<PipelineInput> _pipeline_input;
     std::unordered_map<String, Varying> _varyings;
     uint32_t _size;
 
+    friend class BUILDER;
 };
 
 }

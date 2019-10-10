@@ -4,23 +4,19 @@
 #include <atomic>
 
 #include "core/base/api.h"
+#include "core/concurrent/one_consumer_synchronized.h"
 #include "core/types/shared_ptr.h"
-#include "core/base/object_pool.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/render_command_pipeline.h"
-#include "graphics/inf/render_command.h"
-#include "graphics/inf/renderer.h"
 
 namespace ark {
 
 class ARK_API RenderRequest {
 public:
     RenderRequest() = default;
-    RenderRequest(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, LFStack<RenderRequest>& renderRequestRecycler);
+    RenderRequest(const sp<Executor>& executor, const sp<OCSQueue<sp<RenderCommand>>>& renderCommands);
     DEFAULT_COPY_AND_ASSIGN(RenderRequest);
 
-    void start(const sp<RenderCommandPipeline>& renderCommandPipeline);
     void finish();
 
     void addRequest(const sp<RenderCommand>& renderCommand);
@@ -28,20 +24,14 @@ public:
 
 public:
     struct Stub {
-        Stub(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, LFStack<RenderRequest>& renderRequestRecycler);
+        Stub(const sp<Executor>& executor, const sp<OCSQueue<sp<RenderCommand>>>& renderCommands);
 
-        void start(const sp<RenderCommandPipeline>& renderCommandPipeline);
-        void onJobDone(const sp<Stub>& self);
-
-        void sendRequest();
+        void onJobDone();
 
         sp<Executor> _executor;
+        sp<OCSQueue<sp<RenderCommand>>> _render_commands;
+
         sp<RenderCommandPipeline> _render_command_pipe_line;
-        sp<SurfaceController> _surface_controller;
-
-        LFStack<RenderRequest>& _render_request_recycler;
-
-        ObjectPool _object_pool;
         std::atomic<int32_t> _background_renderer_count;
     };
 
@@ -50,7 +40,6 @@ private:
 
 private:
     sp<Stub> _stub;
-    sp<Runnable> _callback;
 
     friend struct Stub;
 };

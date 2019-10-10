@@ -94,8 +94,8 @@ const sp<Buffer::Delegate>& Buffer::delegate() const
     return _delegate;
 }
 
-Buffer::Builder::Builder(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t stride, size_t growCapacity)
-    : _memory_pool(memoryPool), _object_pool(objectPool), _stride(stride), _grow_capacity(growCapacity), _ptr(nullptr), _boundary(nullptr), _size(0)
+Buffer::Builder::Builder(const sp<ObjectPool>& objectPool, size_t stride, size_t growCapacity)
+    : _object_pool(objectPool), _stride(stride), _grow_capacity(growCapacity), _ptr(nullptr), _boundary(nullptr), _size(0)
 {
 }
 
@@ -159,7 +159,7 @@ void Buffer::Builder::grow()
     if(_buffers.size() % 4 == 3)
         _grow_capacity *= 2;
 
-    const bytearray bytes = _memory_pool->allocate(_grow_capacity * _stride);
+    const bytearray bytes = sp<ByteArray::Allocated>::make(_grow_capacity * _stride);
     _buffers.push_back(bytes);
     _ptr = bytes->buf();
     _boundary = _ptr + bytes->length();

@@ -39,7 +39,6 @@ protected:
     sp<ApplicationDelegate> _application_delegate;
     sp<ApplicationContext> _application_context;
     sp<Surface> _surface;
-    sp<SurfaceUpdater> _surface_updater;
     Viewport _viewport;
     uint32_t _width, _height;
 

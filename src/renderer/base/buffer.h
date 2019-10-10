@@ -68,7 +68,7 @@ public:
 
     class ARK_API Builder {
     public:
-        Builder(const sp<MemoryPool>& memoryPool, const sp<ObjectPool>& objectPool, size_t stride, size_t growCapacity);
+        Builder(const sp<ObjectPool>& objectPool, size_t stride, size_t growCapacity);
         DEFAULT_COPY_AND_ASSIGN(Builder);
 
         template<typename T> void write(const T& value, size_t offset = 0) {
@@ -99,7 +99,6 @@ public:
         sp<Uploader> makeUploader() const;
 
     private:
-        sp<MemoryPool> _memory_pool;
         sp<ObjectPool> _object_pool;
 
         size_t _stride;

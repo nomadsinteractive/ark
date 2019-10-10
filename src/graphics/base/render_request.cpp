@@ -14,8 +14,8 @@ namespace {
 
 class BackgroundRenderCommand : public RenderCommand, public Runnable {
 public:
-    BackgroundRenderCommand(const RenderLayer& layer, const V3& position)
-        : _layer_snapshot(layer.snapshot()), _position(position) {
+    BackgroundRenderCommand(const RenderRequest& renderRequest, const RenderLayer& layer, const V3& position)
+        : _render_request(renderRequest), _layer_snapshot(layer.snapshot()), _position(position) {
     }
 
     virtual void draw(GraphicsContext& graphicsContext) override {
@@ -25,54 +25,33 @@ public:
     virtual void run() override {
         _delegate = _layer_snapshot.render(_position);
         DASSERT(_delegate);
+        _render_request.finish();
     }
 
 private:
+    RenderRequest _render_request;
     RenderLayer::Snapshot _layer_snapshot;
     V3 _position;
 
     sp<RenderCommand> _delegate;
 };
 
-
-class RenderCommandCallback : public Runnable {
-public:
-    RenderCommandCallback(const sp<RenderRequest::Stub>& stub)
-        : _stub(stub) {
-    }
-
-    virtual void run() override {
-        _stub->onJobDone(_stub);
-    }
-
-private:
-    sp<RenderRequest::Stub> _stub;
-
-};
-
-
 }
 
-RenderRequest::RenderRequest(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, LFStack<RenderRequest>& renderRequestRecycler)
-    : RenderRequest(sp<Stub>::make(executor, surfaceController, renderRequestRecycler))
+RenderRequest::RenderRequest(const sp<Executor>& executor, const sp<OCSQueue<sp<RenderCommand>>>& renderCommands)
+    : _stub(sp<Stub>::make(executor, renderCommands))
 {
 }
 
 RenderRequest::RenderRequest(const sp<RenderRequest::Stub>& stub)
-    : _stub(stub), _callback(_stub->_object_pool.obtain<RenderCommandCallback>(_stub))
+    : _stub(stub)
 {
-}
-
-void RenderRequest::start(const sp<RenderCommandPipeline>& renderCommandPipeline)
-{
-    DCHECK(!_stub->_render_command_pipe_line, "Illegal state, starting request on an unfinished RenderRequest");
-    _stub->_render_command_pipe_line = renderCommandPipeline;
-    _stub->_background_renderer_count.store(1);
 }
 
 void RenderRequest::finish()
 {
-    _stub->onJobDone(_stub);
+    _stub->onJobDone();
+    _stub = nullptr;
 }
 
 void RenderRequest::addRequest(const sp<RenderCommand>& renderCommand)
@@ -82,28 +61,26 @@ void RenderRequest::addRequest(const sp<RenderCommand>& renderCommand)
 
 void RenderRequest::addBackgroundRequest(const RenderLayer& layer, const V3& position)
 {
-    const sp<BackgroundRenderCommand> renderCommand = _stub->_object_pool.obtain<BackgroundRenderCommand>(layer, position);
+    const sp<BackgroundRenderCommand> renderCommand = sp<BackgroundRenderCommand>::make(*this, layer, position);
     ++(_stub->_background_renderer_count);
     _stub->_render_command_pipe_line->add(renderCommand);
-
-    _stub->_executor->execute(_stub->_object_pool.obtain<RunnableWithCallback>(renderCommand, Observer(_callback, true)));
+    _stub->_executor->execute(renderCommand);
 }
 
-RenderRequest::Stub::Stub(const sp<Executor>& executor, const sp<SurfaceController>& surfaceController, LFStack<RenderRequest>& renderRequestRecycler)
-    : _executor(executor), _surface_controller(surfaceController), _render_request_recycler(renderRequestRecycler)
+RenderRequest::Stub::Stub(const sp<Executor>& executor, const sp<OCSQueue<sp<RenderCommand>>>& renderCommands)
+    : _executor(executor), _render_commands(renderCommands), _render_command_pipe_line(sp<RenderCommandPipeline>::make()), _background_renderer_count(1)
 {
 }
 
-void RenderRequest::Stub::onJobDone(const sp<Stub>& self)
+void RenderRequest::Stub::onJobDone()
 {
     int32_t count = --_background_renderer_count;
     DCHECK(count >= 0, "Bad count: %d", count);
     if(count == 0)
     {
         DASSERT(_render_command_pipe_line);
-        _surface_controller->postRenderCommand(_render_command_pipe_line);
+        _render_commands->add(static_cast<sp<RenderCommand>>(_render_command_pipe_line));
         _render_command_pipe_line = nullptr;
-        _render_request_recycler.push(self);
     }
 }
 

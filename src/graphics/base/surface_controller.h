@@ -15,28 +15,24 @@ namespace ark {
 
 class ARK_API SurfaceController {
 public:
-    SurfaceController();
+    SurfaceController(const sp<Executor>& executor);
 
 // [[script::bindings::auto]]
     void addRenderer(const sp<Renderer>& renderer);
 // [[script::bindings::auto]]
-    void addControl(const sp<Renderer>& control);
-// [[script::bindings::auto]]
-    void addLayer(const sp<RenderLayer>& layer);
+    void addLayer(const sp<Renderer>& layer);
 
-    void postRenderCommand(const sp<RenderCommandPipeline>& renderCommand);
-
-    void update(RenderRequest& renderRequest);
+    void requestUpdate();
 
     void onRenderFrame(const Color& backgroundColor, RenderView& renderView);
 
 private:
+    sp<Executor> _executor;
+
     sp<RendererGroup> _renderers;
-    sp<RendererGroup> _controls;
     sp<RendererGroup> _layers;
 
-    ObjectPool _object_pool;
-    OCSQueue<sp<RenderCommandPipeline>> _render_commands;
+    sp<OCSQueue<sp<RenderCommand>>> _render_commands;
 };
 
 }

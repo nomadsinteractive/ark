@@ -17,8 +17,8 @@ private:
     typedef _Node<T> Node;
 
 public:
-    void add(const T& data) {
-        _pending.push(obtain(data));
+    void add(T data) {
+        _pending.push(obtain(std::move(data)));
     }
 
     size_t size() const {
@@ -39,11 +39,11 @@ public:
     }
 
 private:
-    Node* obtain(const T& data) {
+    Node* obtain(T data) {
         Node* pooled = _recycler.obtain();
         if(pooled)
-            return new(pooled) Node(data, nullptr);
-        return Node::alloc(data);
+            return new(pooled) Node(std::move(data), nullptr);
+        return Node::alloc(std::move(data));
     }
 
 private:

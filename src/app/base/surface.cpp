@@ -15,12 +15,11 @@
 
 #include "app/base/surface_updater.h"
 
-#include "platform/platform.h"
-
 namespace ark {
 
-Surface::Surface(const sp<RenderView>& renderView, const sp<RenderController>& renderController)
-    : _render_view(renderView), _render_controller(renderController), _surface_controller(sp<SurfaceController>::make())
+Surface::Surface(const sp<RenderView>& renderView, const sp<ApplicationContext>& applicationContext)
+    : _render_view(renderView), _surface_controller(sp<SurfaceController>::make(applicationContext->executor())),
+      _updater(sp<SurfaceUpdater>::make(_surface_controller, applicationContext->renderController()))
 {
 }
 
@@ -32,6 +31,11 @@ const sp<RenderView>& Surface::renderView() const
 const sp<SurfaceController>& Surface::controller() const
 {
     return _surface_controller;
+}
+
+const sp<SurfaceUpdater>& Surface::updater() const
+{
+    return _updater;
 }
 
 void Surface::onSurfaceCreated()
@@ -47,11 +51,6 @@ void Surface::onSurfaceChanged(uint32_t width, uint32_t height)
 void Surface::onRenderFrame(const Color& backgroundColor)
 {
     _surface_controller->onRenderFrame(backgroundColor, _render_view);
-}
-
-sp<SurfaceUpdater> Surface::makeUpdater(const sp<ApplicationContext>& applicationContext) const
-{
-    return sp<SurfaceUpdater>::make(applicationContext, _surface_controller, _render_controller);
 }
 
 }
