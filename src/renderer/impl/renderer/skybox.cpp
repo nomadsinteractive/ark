@@ -15,14 +15,13 @@
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/base/resource_loader_context.h"
 
-#include "renderer/opengl/util/gl_util.h"
+#include "renderer/util/vertex_util.h"
 
 namespace ark {
 
 Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _size(size), _shader(shader),
-      _shader_bindings(shader->makeBindings(RenderModel::RENDER_MODE_TRIANGLES, resourceLoaderContext->renderController()->makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(GLUtil::makeUnitCubeVertices())), resourceLoaderContext->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC))),
-      _memory_pool(resourceLoaderContext->memoryPool()), _object_pool(resourceLoaderContext->objectPool()),
+      _shader_bindings(shader->makeBindings(RenderModel::RENDER_MODE_TRIANGLES, resourceLoaderContext->renderController()->makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(VertexUtil::makeUnitCubeVertices())), resourceLoaderContext->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC))),
       _index_buffer(resourceLoaderContext->renderController()->getNamedBuffer(NamedBuffer::NAME_QUADS)->snapshot(resourceLoaderContext->renderController(), 6))
 {
     _shader_bindings->pipelineBindings()->bindSampler(texture);
@@ -30,8 +29,8 @@ Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>
 
 void Skybox::render(RenderRequest& renderRequest, const V3& /*position*/)
 {
-    DrawingContext drawingContext(_shader, _shader_bindings, _shader->snapshot(_memory_pool), _shader_bindings->vertexBuffer().snapshot(), _index_buffer, 1);
-    renderRequest.addRequest(drawingContext.toRenderCommand(_object_pool));
+    DrawingContext drawingContext(_shader, _shader_bindings, _shader->snapshot(renderRequest.allocator()), _shader_bindings->vertexBuffer().snapshot(), _index_buffer, 1);
+    renderRequest.addRequest(drawingContext.toRenderCommand());
 }
 
 const SafePtr<Size>& Skybox::size()

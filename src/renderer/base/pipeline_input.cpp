@@ -1,5 +1,6 @@
 #include "renderer/base/pipeline_input.h"
 
+#include "core/base/allocator.h"
 #include "core/base/memory_pool.h"
 #include "core/base/string.h"
 
@@ -149,14 +150,15 @@ void PipelineInput::UBO::doSnapshot(bool force) const
     }
 }
 
-RenderLayer::UBOSnapshot PipelineInput::UBO::snapshot(MemoryPool& memoryPool) const
+RenderLayer::UBOSnapshot PipelineInput::UBO::snapshot(Allocator& allocator) const
 {
-    RenderLayer::UBOSnapshot ubo;
     doSnapshot(false);
-    ubo._dirty_flags = memoryPool.allocate(_dirty_flags->size());
-    memcpy(ubo._dirty_flags->buf(), _dirty_flags->buf(), _dirty_flags->size());
-    ubo._buffer = memoryPool.allocate(_buffer->size());
-    memcpy(ubo._buffer->buf(), _buffer->buf(), _buffer->size());
+    RenderLayer::UBOSnapshot ubo {
+        allocator.sbrk(_dirty_flags->size()),
+        allocator.sbrk(_buffer->size())
+    };
+    memcpy(ubo._dirty_flags.buf(), _dirty_flags->buf(), _dirty_flags->size());
+    memcpy(ubo._buffer.buf(), _buffer->buf(), _buffer->size());
     return ubo;
 }
 

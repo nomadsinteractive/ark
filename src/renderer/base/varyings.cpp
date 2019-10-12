@@ -1,6 +1,7 @@
 #include "renderer/base/varyings.h"
 
 #include "core/ark.h"
+#include "core/base/allocator.h"
 #include "core/base/bean_factory.h"
 #include "core/base/memory_pool.h"
 #include "core/inf/array.h"
@@ -40,7 +41,7 @@ void Varyings::add(const String& name, const sp<Numeric>& var)
     addVarying(name, sp<FlatableByVariable<float>>::make(var));
 }
 
-Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, MemoryPool& memoryPool)
+Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Allocator& allocator)
 {
     if(!_varyings.size())
         return Snapshot();
@@ -53,11 +54,10 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Memory
             _size = std::max<uint32_t>(static_cast<uint32_t>(i.second._offset) + i.second._flatable->size(), _size);
         }
 
-    const bytearray bytes = memoryPool.allocate(_size);
-    uint8_t* ptr = reinterpret_cast<uint8_t*>(bytes->buf());
+    ByteArray::Borrowed memory = allocator.sbrk(_size);
     for(const auto& i : _varyings)
-        i.second.apply(ptr);
-    return bytes;
+        i.second.apply(memory.buf());
+    return Snapshot(memory);
 }
 
 Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -108,8 +108,13 @@ Varyings::BUILDER::VaryingBuilder::VaryingBuilder(const String& name, const sp<B
 {
 }
 
-Varyings::Snapshot::Snapshot(const bytearray& bytes)
-    : _bytes(bytes)
+Varyings::Snapshot::Snapshot()
+    : _memory(nullptr, 0)
+{
+}
+
+Varyings::Snapshot::Snapshot(ByteArray::Borrowed memory)
+    : _memory(memory)
 {
 }
 

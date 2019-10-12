@@ -51,6 +51,9 @@ public:
     const SafePtr<Size>& size() const;
     void setSize(const sp<Size>& size);
 
+    const sp<Boolean>& stopPropagation() const;
+    void setStopPropagation(sp<Boolean> stopPropagation);
+
     Display display() const;
     void setDisplay(Display display);
 
@@ -79,6 +82,7 @@ public:
 
 private:
     SafePtr<Size> _size;
+    sp<Boolean> _stop_propagation;
 
     Display _display;
     Gravity _gravity;

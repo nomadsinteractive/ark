@@ -26,22 +26,22 @@
 namespace ark {
 
 RenderLayer::Stub::Stub(const sp<RenderModel>& renderModel, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _render_model(renderModel), _shader(shader), _scissor(scissor), _resource_loader_context(resourceLoaderContext), _memory_pool(resourceLoaderContext->memoryPool()),
+    : _render_model(renderModel), _shader(shader), _scissor(scissor), _resource_loader_context(resourceLoaderContext),
       _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_render_model->makeShaderBindings(_shader)), _notifier(sp<Notifier>::make()),
       _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(renderModel, _notifier, Layer::TYPE_TRANSIENT))), _stride(shader->input()->getStream(0).stride())
 {
 }
 
-RenderLayer::Snapshot::Snapshot(const sp<Stub>& stub)
+RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& stub)
     : _stub(stub)
 {
-    _stub->_layer->context()->takeSnapshot(*this, stub->_memory_pool);
+    _stub->_layer->context()->takeSnapshot(*this, renderRequest.allocator());
 
     Layer::Type combined = Layer::TYPE_UNSPECIFIED;
 
     for(const sp<LayerContext>& i : stub->_layer_contexts)
     {
-        i->takeSnapshot(*this, stub->_memory_pool);
+        i->takeSnapshot(*this, renderRequest.allocator());
         DWARN(combined != Layer::TYPE_STATIC || i->layerType() != Layer::TYPE_DYNAMIC, "Combining static and dynamic layers together leads to low efficiency");
         if(combined != Layer::TYPE_DYNAMIC)
             combined = i->layerType();
@@ -49,7 +49,7 @@ RenderLayer::Snapshot::Snapshot(const sp<Stub>& stub)
 
     _stub->_render_model->postSnapshot(_stub->_render_controller, *this);
 
-    _ubos = _stub->_shader->snapshot(_stub->_memory_pool);
+    _ubos = _stub->_shader->snapshot(renderRequest.allocator());
     if(_stub->_scissor)
     {
         V4 s = _stub->_scissor->val();
@@ -74,7 +74,7 @@ sp<RenderCommand> RenderLayer::Snapshot::render(const V3& position)
 {
     if(_items.size() > 0)
     {
-        DrawingBuffer buf(_stub->_resource_loader_context, _stub->_shader_bindings, _items.size(), _stub->_stride);
+        DrawingBuffer buf(_stub->_shader_bindings, _items.size(), _stub->_stride);
         _stub->_render_model->start(buf, *this);
 
         for(const RenderObject::Snapshot& i : _items)
@@ -107,10 +107,10 @@ sp<RenderCommand> RenderLayer::Snapshot::render(const V3& position)
         if(buf.isInstanced())
             drawingContext._instanced_array_snapshots = buf.makeDividedBufferSnapshots();
 
-        return drawingContext.toRenderCommand(_stub->_resource_loader_context->objectPool());
+        return drawingContext.toRenderCommand();
     }
     DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos));
-    return drawingContext.toRenderCommand(_stub->_resource_loader_context->objectPool());
+    return drawingContext.toRenderCommand();
 }
 
 RenderLayer::RenderLayer(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -133,9 +133,9 @@ const sp<LayerContext>& RenderLayer::context() const
     return _stub->_layer->context();
 }
 
-RenderLayer::Snapshot RenderLayer::snapshot() const
+RenderLayer::Snapshot RenderLayer::snapshot(RenderRequest& renderRequest) const
 {
-    return Snapshot(_stub);
+    return Snapshot(renderRequest, _stub);
 }
 
 const sp<Layer>& RenderLayer::layer() const

@@ -36,8 +36,8 @@ public:
         return SharedPtr<T>(instance);
     }
 
-    template<typename... Args> static SharedPtr<T> make(Args&&... args) {
-        return SharedPtr<T>(new T(std::forward<Args>(args)...));
+    template<typename U = T, typename... Args> static SharedPtr<T> make(Args&&... args) {
+        return SharedPtr<T>(new U(std::forward<Args>(args)...));
     }
 
     static const SharedPtr<T>& null() {

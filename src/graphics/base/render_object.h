@@ -118,7 +118,7 @@ public:
     bool isDisposed() const;
     bool isVisible() const;
 
-    Snapshot snapshot(const PipelineInput& pipelineInput, MemoryPool& memoryPool) const;
+    Snapshot snapshot(const PipelineInput& pipelineInput, Allocator& allocator) const;
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<RenderObject> {

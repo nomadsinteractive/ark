@@ -60,7 +60,7 @@ void LayerContext::clear()
     _notifier->notify();
 }
 
-void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memoryPool)
+void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, Allocator& allocator)
 {
     if(_render_requested)
     {
@@ -69,7 +69,7 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memor
         for(const Item& i : _transient_items)
             if(!i._render_object->isDisposed())
             {
-                RenderObject::Snapshot snapshot = i._render_object->snapshot(pipelineInput, memoryPool);
+                RenderObject::Snapshot snapshot = i._render_object->snapshot(pipelineInput, allocator);
                 snapshot._position = snapshot._position + i._position;
                 output._items.push_back(std::move(snapshot));
                 notify = true;
@@ -79,7 +79,7 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memor
         {
             if(i->isVisible())
             {
-                RenderObject::Snapshot snapshot = i->snapshot(pipelineInput, memoryPool);
+                RenderObject::Snapshot snapshot = i->snapshot(pipelineInput, allocator);
                 snapshot._position = snapshot._position + _position;
                 output._items.push_back(std::move(snapshot));
             }

@@ -33,13 +33,12 @@ private:
     };
 
 public:
-    class Snapshot {
-    public:
-        Snapshot() = default;
-        Snapshot(const bytearray& bytes);
+    struct Snapshot {
+        Snapshot();
+        Snapshot(ByteArray::Borrowed memory);
         DEFAULT_COPY_AND_ASSIGN(Snapshot);
 
-        bytearray _bytes;
+        ByteArray::Borrowed _memory;
     };
 
 public:
@@ -51,7 +50,7 @@ public:
 //[[script::bindings::auto]]
     void add(const String& name, const sp<Numeric>& var);
 
-    Snapshot snapshot(const PipelineInput& pipelineInput, MemoryPool& memoryPool);
+    Snapshot snapshot(const PipelineInput& pipelineInput, Allocator& allocator);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Varyings> {

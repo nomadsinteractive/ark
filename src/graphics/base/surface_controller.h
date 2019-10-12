@@ -2,7 +2,6 @@
 #define ARK_GRAPHICS_BASE_SURFACE_CONTROLLER_H_
 
 #include "core/base/api.h"
-#include "core/base/object_pool.h"
 #include "core/concurrent/one_consumer_synchronized.h"
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
@@ -20,6 +19,8 @@ public:
 // [[script::bindings::auto]]
     void addRenderer(const sp<Renderer>& renderer);
 // [[script::bindings::auto]]
+    void addController(const sp<Renderer>& controller);
+// [[script::bindings::auto]]
     void addLayer(const sp<Renderer>& layer);
 
     void requestUpdate();
@@ -28,11 +29,13 @@ public:
 
 private:
     sp<Executor> _executor;
+    sp<MemoryPool> _memory_pool;
 
     sp<RendererGroup> _renderers;
+    sp<RendererGroup> _controllers;
     sp<RendererGroup> _layers;
 
-    sp<OCSQueue<sp<RenderCommand>>> _render_commands;
+    sp<OCSQueue<RenderRequest>> _render_requests;
 };
 
 }

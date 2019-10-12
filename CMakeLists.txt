@@ -138,7 +138,7 @@ if(NOT ARK_USE_SYSTEM_ZLIB)
     ark_add_denpendency(3rdparty/zlib zlibstatic ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/zlib 3rdparty/zlib)
     set(ZLIB_ROOT ${ARK_3RDPARTY_DIR}/zlib)
     set(ZLIB_INCLUDE_DIR ${ARK_3RDPARTY_DIR}/zlib ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/zlib)
-    set(ZLIB_VERSION_STRING "1.2.8")
+    set(ZLIB_VERSION_STRING "1.2.11")
     set(ZLIB_LIBRARY zlibstatic)
 endif()
 

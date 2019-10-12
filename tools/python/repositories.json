@@ -17,7 +17,7 @@
     {
         "url": "https://github.com/madler/zlib.git",
         "name": "zlib",
-        "tag": "v1.2.8"
+        "tag": "v1.2.11"
     },
     {
         "url": "https://github.com/leethomason/tinyxml2.git",
@@ -27,17 +27,12 @@
     {
         "url": "git://git.savannah.gnu.org/freetype/freetype2.git",
         "name": "freetype",
-        "tag": "VER-2-7-1"
+        "tag": "VER-2-10-1"
     },
     {
         "url": "https://github.com/g-truc/glm.git",
         "name": "glm",
         "tag": "0.9.9.5"
-    },
-    {
-        "url": "https://github.com/anholt/libepoxy.git",
-        "name": "libepoxy",
-        "tag": "v1.3.1"
     },
     {
         "url": "https://git.assembla.com/portaudio.git",
@@ -109,11 +104,6 @@
     {
         "url": "https://github.com/jlblancoc/nanoflann.git",
         "name": "nanoflann",
-        "tag": "master"
-    },
-    {
-        "url": "https://github.com/RandyGaul/tinyheaders.git",
-        "name": "tinyheaders",
         "tag": "master"
     },
     {

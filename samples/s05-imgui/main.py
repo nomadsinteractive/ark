@@ -3,7 +3,7 @@ import ark
 from ark import dear_imgui
 
 
-def show_my_windwow(builder):
+def show_my_window(builder):
 
     def onclick():
         ark.logd('abc')
@@ -60,7 +60,7 @@ def main():
 
     builder = dear_imgui.RendererBuilder()
     # builder.show_about_window()
-    show_my_windwow(builder)
+    show_my_window(builder)
     builder.show_demo_window()
 
     imgui.add_renderer(builder.build())

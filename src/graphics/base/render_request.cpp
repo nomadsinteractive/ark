@@ -7,6 +7,7 @@
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/base/surface_controller.h"
 #include "graphics/base/render_layer.h"
+#include "graphics/inf/render_view.h"
 
 namespace ark {
 
@@ -15,7 +16,7 @@ namespace {
 class BackgroundRenderCommand : public RenderCommand, public Runnable {
 public:
     BackgroundRenderCommand(const RenderRequest& renderRequest, const RenderLayer& layer, const V3& position)
-        : _render_request(renderRequest), _layer_snapshot(layer.snapshot()), _position(position) {
+        : _render_request(renderRequest), _layer_snapshot(layer.snapshot(_render_request)), _position(position) {
     }
 
     virtual void draw(GraphicsContext& graphicsContext) override {
@@ -25,7 +26,7 @@ public:
     virtual void run() override {
         _delegate = _layer_snapshot.render(_position);
         DASSERT(_delegate);
-        _render_request.finish();
+        _render_request.jobDone();
     }
 
 private:
@@ -38,9 +39,19 @@ private:
 
 }
 
-RenderRequest::RenderRequest(const sp<Executor>& executor, const sp<OCSQueue<sp<RenderCommand>>>& renderCommands)
-    : _stub(sp<Stub>::make(executor, renderCommands))
+RenderRequest::RenderRequest(const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests)
+    : _stub(sp<Stub>::make(executor, memoryPool, renderRequests))
 {
+}
+
+Allocator& RenderRequest::allocator() const
+{
+    return _stub->_allocator;
+}
+
+void RenderRequest::onRenderFrame(const Color& backgroundColor, RenderView& renderView) const
+{
+    renderView.onRenderFrame(backgroundColor, _stub->_render_command_pipe_line);
 }
 
 RenderRequest::RenderRequest(const sp<RenderRequest::Stub>& stub)
@@ -48,9 +59,9 @@ RenderRequest::RenderRequest(const sp<RenderRequest::Stub>& stub)
 {
 }
 
-void RenderRequest::finish()
+void RenderRequest::jobDone()
 {
-    _stub->onJobDone();
+    _stub->onJobDone(_stub);
     _stub = nullptr;
 }
 
@@ -67,21 +78,17 @@ void RenderRequest::addBackgroundRequest(const RenderLayer& layer, const V3& pos
     _stub->_executor->execute(renderCommand);
 }
 
-RenderRequest::Stub::Stub(const sp<Executor>& executor, const sp<OCSQueue<sp<RenderCommand>>>& renderCommands)
-    : _executor(executor), _render_commands(renderCommands), _render_command_pipe_line(sp<RenderCommandPipeline>::make()), _background_renderer_count(1)
+RenderRequest::Stub::Stub(const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests)
+    : _allocator(memoryPool), _executor(executor), _render_requests(renderRequests), _render_command_pipe_line(sp<RenderCommandPipeline>::make()), _background_renderer_count(1)
 {
 }
 
-void RenderRequest::Stub::onJobDone()
+void RenderRequest::Stub::onJobDone(const sp<Stub>& self)
 {
     int32_t count = --_background_renderer_count;
     DCHECK(count >= 0, "Bad count: %d", count);
     if(count == 0)
-    {
-        DASSERT(_render_command_pipe_line);
-        _render_commands->add(static_cast<sp<RenderCommand>>(_render_command_pipe_line));
-        _render_command_pipe_line = nullptr;
-    }
+        _render_requests->add(RenderRequest(self));
 }
 
 }

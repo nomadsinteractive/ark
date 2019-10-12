@@ -31,7 +31,6 @@ private:
         sp<Vec4> _scissor;
         sp<ResourceLoaderContext> _resource_loader_context;
 
-        sp<MemoryPool> _memory_pool;
         sp<RenderController> _render_controller;
         sp<ShaderBindings> _shader_bindings;
 
@@ -46,8 +45,8 @@ private:
 
 public:
     struct UBOSnapshot {
-        bytearray _dirty_flags;
-        bytearray _buffer;
+        ByteArray::Borrowed _dirty_flags;
+        ByteArray::Borrowed _buffer;
     };
 
     enum SnapshotFlag {
@@ -75,7 +74,7 @@ public:
         DISALLOW_COPY_AND_ASSIGN(Snapshot);
 
     private:
-        Snapshot(const sp<Stub>& stub);
+        Snapshot(RenderRequest& renderRequest, const sp<Stub>& stub);
 
         friend class RenderLayer;
     };
@@ -87,7 +86,7 @@ public:
 
     const sp<RenderModel>& model() const;
 
-    Snapshot snapshot() const;
+    Snapshot snapshot(RenderRequest& renderRequest) const;
 
 //  [[script::bindings::property]]
     const sp<Layer>& layer() const;

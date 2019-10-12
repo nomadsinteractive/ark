@@ -68,7 +68,7 @@ public:
 
     class ARK_API Builder {
     public:
-        Builder(const sp<ObjectPool>& objectPool, size_t stride, size_t growCapacity);
+        Builder(size_t stride, size_t growCapacity);
         DEFAULT_COPY_AND_ASSIGN(Builder);
 
         template<typename T> void write(const T& value, size_t offset = 0) {
@@ -81,9 +81,7 @@ public:
                 write<T>(value, offsets[name]);
         }
 
-        void writeArray(const bytearray& buf);
-
-        void append(bytearray buffer);
+        void writeArray(ByteArray& array);
 
         void setGrowCapacity(size_t growCapacity);
         void next();
@@ -99,8 +97,6 @@ public:
         sp<Uploader> makeUploader() const;
 
     private:
-        sp<ObjectPool> _object_pool;
-
         size_t _stride;
         size_t _grow_capacity;
 

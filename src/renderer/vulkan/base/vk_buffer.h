@@ -23,7 +23,7 @@ public:
     virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
 
-    void reload(GraphicsContext& graphicsContext, const bytearray& buf);
+    void reload(GraphicsContext& graphicsContext, const ByteArray::Borrowed& buf);
 
     const VkBuffer& vkBuffer() const;
 

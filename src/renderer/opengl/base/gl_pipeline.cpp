@@ -122,10 +122,10 @@ void GLPipeline::bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<P
     const std::vector<sp<Uniform>>& uniforms = ubo->uniforms().values();
     for(size_t i = 0; i < uniforms.size(); ++i)
     {
-        if(uboSnapshot._dirty_flags->buf()[i] || _rebind_needed)
+        if(uboSnapshot._dirty_flags.buf()[i] || _rebind_needed)
         {
             const sp<Uniform>& uniform = uniforms.at(i);
-            uint8_t* buf = uboSnapshot._buffer->buf();
+            uint8_t* buf = uboSnapshot._buffer.buf();
             const auto pair = ubo->slots().at(i);
             bindUniform(reinterpret_cast<float*>(buf + pair.first), pair.second, uniform);
         }

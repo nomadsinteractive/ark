@@ -42,7 +42,7 @@ public:
 //  [[script::bindings::auto]]
     void clear();
 
-    void takeSnapshot(RenderLayer::Snapshot& output, MemoryPool& memoryPool);
+    void takeSnapshot(RenderLayer::Snapshot& output, Allocator& allocator);
 
     class BUILDER : public Builder<LayerContext> {
     public:

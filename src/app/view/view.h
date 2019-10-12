@@ -159,6 +159,18 @@ public:
         String _margin_bottom;
     };
 
+//  [[plugin::style("stop-propagation")]]
+    class STOP_PROPAGATION_PARAM : public Builder<Renderer> {
+    public:
+        STOP_PROPAGATION_PARAM(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style);
+
+        virtual sp<Renderer> build(const Scope& args) override;
+
+    private:
+        sp<Builder<Renderer>> _delegate;
+        sp<Builder<Boolean>> _stop_propagation;
+    };
+
 //  [[plugin::style("layout-param")]]
     class STYLE_LAYOUT_PARAM : public Builder<Renderer> {
     public:

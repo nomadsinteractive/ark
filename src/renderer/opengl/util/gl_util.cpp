@@ -15,6 +15,7 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
+#include "renderer/util/vertex_util.h"
 
 #include "renderer/opengl/base/gl_buffer.h"
 #include "renderer/opengl/base/gl_pipeline.h"
@@ -104,42 +105,6 @@ GLenum GLUtil::getPixelFormat(int32_t format, const Bitmap& bitmap)
     return flagSigned ? GL_INT : GL_FLOAT;
 }
 
-bytearray GLUtil::makeUnitCubeVertices()
-{
-    static float vertices[] = {
-        -1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-
-         1.0f, -1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f, -1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f,  1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f, -1.0f
-    };
-    return sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
-}
-
 void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, RenderController& renderController, const sp<Pipeline>& pipeline, Texture& texture, int32_t width, int32_t height)
 {
     uint32_t captureFBO, captureRBO;
@@ -178,15 +143,15 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     Buffer vertexBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC);
     Buffer indexBuffer = renderController.makeIndexBuffer(Buffer::USAGE_STATIC);
 
-    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(sp<Uploader::Array<uint8_t>>::make(GLUtil::makeUnitCubeVertices()));
+    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(sp<Uploader::Array<uint8_t>>::make(VertexUtil::makeUnitCubeVertices()));
     vertexBufferSnapshot.upload(graphicsContext);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.id());
+    glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(vertexBuffer.id()));
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, nullptr);
 
     const Buffer::Snapshot indexBufferSnapshot = indexBuffer.snapshot(NamedBuffer::Quads::maker()(6));
     indexBufferSnapshot.upload(graphicsContext);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferSnapshot.id());
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(indexBufferSnapshot.id()));
 
     glViewport(0, 0, width, height);
     glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);

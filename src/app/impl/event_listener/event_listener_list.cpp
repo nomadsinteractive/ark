@@ -1,7 +1,5 @@
 #include "app/impl/event_listener/event_listener_list.h"
 
-#include "app/base/event.h"
-
 namespace ark {
 
 void EventListenerList::addEventListener(const sp<EventListener>& eventListener)
@@ -18,7 +16,7 @@ bool EventListenerList::onEvent(const Event& event)
     return false;
 }
 
-EventListenerList::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+EventListenerList::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& /*manifest*/)
 {
 }
 

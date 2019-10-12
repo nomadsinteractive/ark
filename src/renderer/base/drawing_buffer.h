@@ -21,7 +21,7 @@ namespace ark {
 
 class ARK_API DrawingBuffer {
 public:
-    DrawingBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t renderObjectCount, uint32_t stride);
+    DrawingBuffer(const sp<ShaderBindings>& shaderBindings, size_t renderObjectCount, uint32_t stride);
     DEFAULT_COPY_AND_ASSIGN(DrawingBuffer);
 
     void writePosition(const V3& position);

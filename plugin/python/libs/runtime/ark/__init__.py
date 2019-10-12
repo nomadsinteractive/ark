@@ -1244,10 +1244,10 @@ class SurfaceController:
     def add_renderer(self, renderer: Renderer):
         pass
 
-    def add_control(self, renderer: Renderer):
+    def add_controller(self, renderer: Renderer):
         pass
 
-    def add_layer(self, render_layer: RenderLayer):
+    def add_layer(self, renderer: Renderer):
         pass
 
 

@@ -215,9 +215,9 @@ bool RenderObject::isVisible() const
     return _visible->val();
 }
 
-RenderObject::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, MemoryPool& memoryPool) const
+RenderObject::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, Allocator& allocator) const
 {
-    return Snapshot(_type->val(), _position->val(), _size->val(), _transform->snapshot(), _varyings->snapshot(pipelineInput, memoryPool));
+    return Snapshot(_type->val(), _position->val(), _size->val(), _transform->snapshot(), _varyings->snapshot(pipelineInput, allocator));
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

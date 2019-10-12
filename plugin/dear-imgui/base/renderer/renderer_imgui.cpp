@@ -168,7 +168,7 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
         Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(_object_pool.obtain<Uploader::Array<uint8_t>>(ib));
 
         uint32_t offset = 0;
-        const std::vector<RenderLayer::UBOSnapshot> ubos = _shader->snapshot(_memory_pool);
+        const std::vector<RenderLayer::UBOSnapshot> ubos = _shader->snapshot(renderRequest.allocator());
         sp<ImguiRenderCommand> renderCommand = nullptr;
         for (int j = 0; j < cmd_list->CmdBuffer.Size; j++)
         {
@@ -199,7 +199,7 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
                 drawingContext._parameters._scissor.scale(renderContext.displayUnit());
                 if(_vflip)
                     drawingContext._parameters._scissor.vflip(static_cast<float>(renderContext.displayResolution().height));
-                renderCommand = sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(_object_pool), drawCommand);
+                renderCommand = sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(), drawCommand);
                 renderRequest.addRequest(renderCommand);
             }
             offset += pcmd->ElemCount;

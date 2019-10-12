@@ -88,6 +88,16 @@ void LayoutParam::setSize(const sp<Size>& size)
     _size = size;
 }
 
+const sp<Boolean>& LayoutParam::stopPropagation() const
+{
+    return _stop_propagation;
+}
+
+void LayoutParam::setStopPropagation(sp<Boolean> stopPropagation)
+{
+    _stop_propagation = std::move(stopPropagation);
+}
+
 LayoutParam::Display LayoutParam::display() const
 {
     return _display;

@@ -337,10 +337,10 @@ void VKPipeline::buildCommandBuffer(GraphicsContext& graphicsContext, const Draw
     vkCmdDrawIndexed(commandBuffer, drawingContext._parameters._count, 1, drawingContext._parameters._start, 0, 0);
 }
 
-bool VKPipeline::isDirty(const bytearray& dirtyFlags) const
+bool VKPipeline::isDirty(const ByteArray::Borrowed& dirtyFlags) const
 {
-    size_t size = dirtyFlags->length();
-    uint8_t* buf = dirtyFlags->buf();
+    size_t size = dirtyFlags.length();
+    uint8_t* buf = dirtyFlags.buf();
     for(size_t i = 0; i < size; ++i)
         if(buf[i])
             return true;

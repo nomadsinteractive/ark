@@ -41,8 +41,6 @@ private:
     SafePtr<Size> _size;
     sp<Shader> _shader;
     sp<ShaderBindings> _shader_bindings;
-    sp<MemoryPool> _memory_pool;
-    sp<ObjectPool> _object_pool;
 
     Buffer::Snapshot _index_buffer;
 };

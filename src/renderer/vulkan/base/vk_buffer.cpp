@@ -61,11 +61,11 @@ Resource::RecycleFunc VKBuffer::recycle()
     };
 }
 
-void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const bytearray& buf)
+void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const ByteArray::Borrowed& buf)
 {
-    DCHECK(buf->size() <= size(), "Buffer memory overflow, buffer size: %d, source size: %d", size(), buf->size());
+    DCHECK(buf.length() <= size(), "Buffer memory overflow, buffer size: %d, source size: %d", size(), buf.length());
     void* mapped = _memory->map();
-    memcpy(mapped, buf->buf(), buf->size());
+    memcpy(mapped, buf.buf(), buf.length());
     if((_memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
         VKUtil::checkResult(flush());
     _memory->unmap();

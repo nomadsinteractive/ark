@@ -111,7 +111,7 @@ bool LayoutHierarchy::Slot::onEventDispatch(const Event& event, float x, float y
         const Rect target(x + _x, y + _y, x + _x + layoutParam->contentWidth(), y + _y + layoutParam->contentHeight());
         const Event viewEvent(event.action(), event.x() - _x - x, event.y() - _y - y, event.timestamp(), event.code());
         if(_view_group)
-            return _view_group->dispatchEvent(viewEvent, event.ptin(target)) || _view_group->onEvent(event, target.left(), target.top());
+            return _view_group->onEvent(event, target.left(), target.top()) || _view_group->dispatchEvent(viewEvent, event.ptin(target));
         return _view->dispatchEvent(viewEvent, event.ptin(target));
     }
     return false;

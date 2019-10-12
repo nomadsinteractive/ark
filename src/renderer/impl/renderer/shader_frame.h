@@ -48,7 +48,6 @@ private:
     sp<Shader> _shader;
 
     sp<ObjectPool> _object_pool;
-    sp<MemoryPool> _memory_pool;
     sp<ShaderBindings> _shader_bindings;
     Buffer _vertex_buffer;
     Buffer::Snapshot _index_buffer;

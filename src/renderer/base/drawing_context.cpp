@@ -65,12 +65,12 @@ DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings
     DWARN(_shader_bindings->vertexBuffer().id() == vertexBuffer.id(), "ShaderBinding's VertexBuffer: %lld, which is not the same as DrawingContext's VertexBuffer snapshot: %lld", _shader_bindings->vertexBuffer().id(), vertexBuffer.id());
 }
 
-sp<RenderCommand> DrawingContext::toRenderCommand(ObjectPool& objectPool)
+sp<RenderCommand> DrawingContext::toRenderCommand()
 {
     DCHECK(_shader && _shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
     if(_parameters._count)
-        return objectPool.obtain<RenderCommandDraw>(std::move(*this));
-    return objectPool.obtain<RenderCommandBind>(std::move(*this));
+        return sp<RenderCommandDraw>::make(std::move(*this));
+    return sp<RenderCommandBind>::make(std::move(*this));
 }
 
 void DrawingContext::upload(GraphicsContext& graphicsContext)

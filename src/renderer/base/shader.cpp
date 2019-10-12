@@ -82,11 +82,11 @@ sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment,
     return sp<Shader>::make(buildingContext->_pipeline_factory, resourceLoaderContext->renderController(), pipelineLayout, nullptr, PipelineBindings::FLAG_DEFAULT_VALUE);
 }
 
-std::vector<RenderLayer::UBOSnapshot> Shader::snapshot(MemoryPool& memoryPool) const
+std::vector<RenderLayer::UBOSnapshot> Shader::snapshot(Allocator& allocator) const
 {
     std::vector<RenderLayer::UBOSnapshot> uboSnapshot;
     for(const sp<PipelineInput::UBO>& i : _input->ubos())
-        uboSnapshot.push_back(i->snapshot(memoryPool));
+        uboSnapshot.push_back(i->snapshot(allocator));
     return uboSnapshot;
 }
 

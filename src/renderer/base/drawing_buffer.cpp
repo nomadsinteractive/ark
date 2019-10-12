@@ -12,9 +12,9 @@
 
 namespace ark {
 
-DrawingBuffer::DrawingBuffer(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<ShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
-    : _shader_bindings(shaderBindings), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(resourceLoaderContext->objectPool(), stride, instanceCount),
-      _divided_buffer_builders(shaderBindings->makeDividedBufferBuilders(resourceLoaderContext->objectPool(), instanceCount)),
+DrawingBuffer::DrawingBuffer(const sp<ShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
+    : _shader_bindings(shaderBindings), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(stride, instanceCount),
+      _divided_buffer_builders(shaderBindings->makeDividedBufferBuilders(instanceCount)),
       _indice_base(0), _is_instanced(_pipeline_bindings->hasDivisors())
 {
 }
@@ -73,8 +73,8 @@ void DrawingBuffer::writeBitangent(const V3& bitangent)
 
 void DrawingBuffer::applyVaryings()
 {
-    if(_varyings._bytes)
-        _vertices.writeArray(_varyings._bytes);
+    if(_varyings._memory.length())
+        _vertices.writeArray(_varyings._memory);
 }
 
 void DrawingBuffer::nextVertex()

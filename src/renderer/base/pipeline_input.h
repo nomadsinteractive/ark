@@ -43,7 +43,7 @@ public:
     public:
         UBO(uint32_t binding);
 
-        RenderLayer::UBOSnapshot snapshot(MemoryPool& memoryPool) const;
+        RenderLayer::UBOSnapshot snapshot(Allocator& allocator) const;
 
         void notify() const;
 

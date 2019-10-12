@@ -94,27 +94,21 @@ const sp<Buffer::Delegate>& Buffer::delegate() const
     return _delegate;
 }
 
-Buffer::Builder::Builder(const sp<ObjectPool>& objectPool, size_t stride, size_t growCapacity)
-    : _object_pool(objectPool), _stride(stride), _grow_capacity(growCapacity), _ptr(nullptr), _boundary(nullptr), _size(0)
+Buffer::Builder::Builder(size_t stride, size_t growCapacity)
+    : _stride(stride), _grow_capacity(growCapacity), _ptr(nullptr), _boundary(nullptr), _size(0)
 {
+}
+
+void Buffer::Builder::writeArray(ByteArray& array)
+{
+    DCHECK(array.length() <= _stride, "Varyings buffer overflow: stride: %d, varyings size: %d", _stride, array.length());
+    DCHECK(_ptr + _stride <= _boundary, "Varyings buffer out of bounds");
+    memcpy(_ptr, array.buf(), array.length());
 }
 
 void Buffer::Builder::setGrowCapacity(size_t growCapacity)
 {
     _grow_capacity = growCapacity;
-}
-
-void Buffer::Builder::writeArray(const bytearray& buf)
-{
-    DCHECK(buf->length() <= _stride, "Varyings buffer overflow: stride: %d, varyings size: %d", _stride, buf->length());
-    DCHECK(_ptr + _stride <= _boundary, "Varyings buffer out of bounds");
-    memcpy(_ptr, buf->buf(), buf->length());
-}
-
-void Buffer::Builder::append(bytearray buffer)
-{
-    _size += buffer->size();
-    _buffers.push_back(std::move(buffer));
 }
 
 void Buffer::Builder::next()
@@ -139,9 +133,9 @@ sp<Uploader> Buffer::Builder::makeUploader() const
         return nullptr;
 
     if(_buffers.size() == 1)
-        return _object_pool->obtain<ByteArrayUploader>(_buffers[0]);
+        return sp<Uploader>::adopt(new ByteArrayUploader(_buffers[0]));
 
-    return _object_pool->obtain<ByteArrayListUploader>(_buffers);
+    return sp<Uploader>::adopt(new ByteArrayListUploader(_buffers));
 }
 
 size_t Buffer::Builder::stride() const

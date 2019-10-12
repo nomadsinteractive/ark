@@ -188,24 +188,26 @@ void View::setOnMove(const sp<EventListener>& onMove)
 
 bool View::dispatchEvent(const Event& event, bool ptin)
 {
-    if(ptin && !(*_state & View::STATE_MOVING) && event.action() == Event::ACTION_MOVE)
+    Event::Action action = event.action();
+    if(ptin && !(*_state & View::STATE_MOVING) && (action == Event::ACTION_MOVE || action == Event::ACTION_DOWN))
         fireOnEnter();
 
     if(!ptin)
     {
-        if(event.action() == Event::ACTION_MOVE && (*_state & View::STATE_MOVING))
+        if(action == Event::ACTION_MOVE && (*_state & View::STATE_MOVING))
             fireOnLeave();
     }
-    else if(event.action() == Event::ACTION_UP && !fireOnRelease() && fireOnClick())
+    else if(action == Event::ACTION_UP && !fireOnRelease() && fireOnClick())
         return true;
-    else if(event.action() == Event::ACTION_DOWN && fireOnPush())
+    else if(action == Event::ACTION_DOWN && fireOnPush())
         return true;
 
-    if(event.action() == Event::ACTION_MOVE && ptin)
+    if(action == Event::ACTION_MOVE && ptin)
         return fireOnMove(event);
-    if(event.action() == Event::ACTION_UP && (*_state & View::STATE_PUSHING))
+    if(action == Event::ACTION_UP && (*_state & View::STATE_PUSHING))
         fireOnRelease();
-    return false;
+
+    return _layout_param->stopPropagation() && _layout_param->stopPropagation()->val();
 }
 
 namespace {
@@ -392,6 +394,18 @@ sp<Renderer> View::STYLE_ON_MOVE::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->setOnMove(_on_move->build(args));
+    return renderer;
+}
+
+View::STOP_PROPAGATION_PARAM::STOP_PROPAGATION_PARAM(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style)
+    : _delegate(delegate), _stop_propagation(style ? factory.ensureBuilder<Boolean>(style) : nullptr)
+{
+}
+
+sp<Renderer> View::STOP_PROPAGATION_PARAM::build(const Scope& args)
+{
+    sp<Renderer> renderer = _delegate->build(args);
+    bindView(renderer)->layoutParam()->setStopPropagation(_stop_propagation ? _stop_propagation->build(args) : sp<Boolean>::make<Boolean::Const>(true));
     return renderer;
 }
 

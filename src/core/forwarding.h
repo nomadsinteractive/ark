@@ -31,6 +31,7 @@ template <typename T> using op = OwnedPtr<T>;
 template <typename T> using array = sp<Array<T>>;
 
 class Ark;
+class Allocator;
 class Asset;
 class AssetBundle;
 class BeanFactory;

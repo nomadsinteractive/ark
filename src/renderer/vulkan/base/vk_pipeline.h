@@ -49,7 +49,7 @@ private:
 
     void buildCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
 
-    bool isDirty(const bytearray& dirtyFlags) const;
+    bool isDirty(const ByteArray::Borrowed& dirtyFlags) const;
 
 private:
     PipelineBindings _bindings;

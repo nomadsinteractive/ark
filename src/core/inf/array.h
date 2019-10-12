@@ -72,6 +72,14 @@ public:
         return _data;
     }
 
+    size_t length() const {
+        return _length;
+    }
+
+    T* buf() const {
+        return _data;
+    }
+
 private:
     T* _data;
     size_t _length;
