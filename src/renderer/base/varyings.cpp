@@ -74,7 +74,7 @@ Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<Varyings> Varyings::BUILDER::build(const Scope& args)
 {
     if(_varying_builders.size() == 0)
-        return Ark::instance().obtain<Varyings>();
+        return sp<Varyings>::make();
 
     const sp<Varyings> varyings = sp<Varyings>::make();
     for(const VaryingBuilder& i : _varying_builders)
@@ -84,7 +84,7 @@ sp<Varyings> Varyings::BUILDER::build(const Scope& args)
 
 template<> ARK_API sp<Varyings> Null::ptr()
 {
-    return Ark::instance().obtain<Varyings>();
+    return sp<Varyings>::make();
 }
 
 Varyings::Varying::Varying(const sp<Flatable>& flatable, int32_t offset)

@@ -67,7 +67,7 @@ void Vec3Impl::fix()
 }
 
 Vec3Impl::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
-    : _x(factory.getBuilder<Numeric>(doc, "x")), _y(factory.getBuilder<Numeric>(doc, "y")), _z(factory.getBuilder<Numeric>(doc, "z"))
+    : _x(factory.ensureBuilder<Numeric>(doc, "x")), _y(factory.getBuilder<Numeric>(doc, "y")), _z(factory.getBuilder<Numeric>(doc, "z"))
 {
 }
 

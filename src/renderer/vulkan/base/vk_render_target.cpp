@@ -318,8 +318,7 @@ void VKRenderTarget::setupFrameBuffer()
     // Depth/Stencil attachment is the same for all frame buffers
     attachments[1] = _depth_stencil.view;
 
-    VkFramebufferCreateInfo frameBufferCreateInfo = {};
-    frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    VkFramebufferCreateInfo frameBufferCreateInfo = vks::initializers::framebufferCreateInfo();
     frameBufferCreateInfo.pNext = nullptr;
     frameBufferCreateInfo.renderPass = _render_pass_begin_info.renderPass;
     frameBufferCreateInfo.attachmentCount = 2;

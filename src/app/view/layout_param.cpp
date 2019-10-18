@@ -155,7 +155,7 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
 
 template<> ARK_API sp<LayoutParam> Null::ptr()
 {
-    return Ark::instance().obtain<LayoutParam>(Ark::instance().obtain<Size>(static_cast<float>(LayoutParam::MATCH_PARENT), static_cast<float>(LayoutParam::MATCH_PARENT)));
+    return sp<LayoutParam>::make(sp<Size>::make(static_cast<float>(LayoutParam::MATCH_PARENT), static_cast<float>(LayoutParam::MATCH_PARENT)));
 }
 
 template<> ARK_API LayoutParam::Gravity Conversions::to<String, LayoutParam::Gravity>(const String& s)

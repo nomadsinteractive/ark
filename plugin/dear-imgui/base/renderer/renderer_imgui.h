@@ -76,9 +76,6 @@ private:
 
     sp<LFStack<sp<DrawCommand>>> _draw_commands;
     sp<PipelineFactory> _bindings;
-
-    bool _vflip;
-    V2 _viewport_scale;
 };
 
 

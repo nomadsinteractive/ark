@@ -58,7 +58,7 @@ sp<Disposed> Disposed::DICTIONARY::build(const Scope& args)
 
 template<> ARK_API sp<Disposed> Null::ptr()
 {
-    return Ark::instance().obtain<Disposed>(false);
+    return sp<Disposed>::make(false);
 }
 
 }

@@ -54,8 +54,17 @@ template<> ARK_API Ark::RendererVersion Conversions::to<String, Ark::RendererVer
         return static_cast<Ark::RendererVersion>(atoi(glversion.c_str() + 7));
     if(glversion.startsWith("vulkan_"))
         return static_cast<Ark::RendererVersion>(atoi(glversion.c_str() + 7) + 100);
-    WARN(str == "auto", "Unknow GLVersion: \"%s, supported GLVersions are [\"opengl_21\", \"opengl_46\", \"vulkan_11\", ...]", str.c_str());
+    WARN(str == "auto", "Unknow RendererVersion: \"%s, supported values are [\"opengl_21\", \"opengl_46\", \"vulkan_11\", ...]", str.c_str());
     return Ark::AUTO;
+}
+
+template<> ARK_API Ark::RendererCoordinateSystem Conversions::to<String, Ark::RendererCoordinateSystem>(const String& str)
+{
+    const String cs = str.toLower();
+    if(cs == "lhs")
+        return Ark::COORDINATE_SYSTEM_LHS;
+    DCHECK(str == "rhs", "Unknow RendererCoordinateSystem: \"%s, supported values are [\"lhs\", \"rhs\"]", str.c_str());
+    return Ark::COORDINATE_SYSTEM_RHS;
 }
 
 template<> ARK_API String Conversions::to<uint32_t, String>(const uint32_t& val)

@@ -69,10 +69,12 @@ public:
     };
 
 public:
-    RenderContext(Ark::RendererVersion version, const Viewport& viewport, float upDirection);
+    RenderContext(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const Viewport& viewport);
 
     Ark::RendererVersion version() const;
     void setVersion(Ark::RendererVersion version);
+
+    Ark::RendererCoordinateSystem coordinateSystem() const;
 
     const std::map<String, String>& annotations() const;
     std::map<String, String>& annotations();
@@ -93,12 +95,10 @@ public:
     const Info& info() const;
     Info& info();
 
-    float upDirection() const;
-
 private:
     Ark::RendererVersion _version;
+    Ark::RendererCoordinateSystem _coordinate_system;
     Viewport _viewport;
-    float _up_direction;
 
     Info _info;
 

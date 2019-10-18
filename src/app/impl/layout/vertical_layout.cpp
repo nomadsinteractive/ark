@@ -15,7 +15,7 @@ VerticalLayout::VerticalLayout(const LayoutParam::Gravity gravity)
 {
 }
 
-void VerticalLayout::begin(Context& ctx, LayoutParam& layoutParam)
+void VerticalLayout::begin(Context& ctx, LayoutParam& /*layoutParam*/)
 {
     for(const sp<LayoutParam>& i : ctx._layout_param_descriptor())
         ctx._content_height += i->offsetHeight();

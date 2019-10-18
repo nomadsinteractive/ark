@@ -57,6 +57,8 @@ public:
         Renderer();
 
         Ark::RendererVersion _version;
+        Ark::RendererCoordinateSystem _coordinate_system;
+
         sp<Size> _resolution;
 
         Viewport toViewport() const;

@@ -16,6 +16,7 @@
 #include "renderer/base/texture.h"
 #include "renderer/base/uniform.h"
 #include "renderer/inf/resource.h"
+#include "renderer/util/vertex_util.h"
 
 #include "renderer/opengl/util/gl_util.h"
 
@@ -28,8 +29,8 @@ namespace {
 
 class GLScissor {
 public:
-    GLScissor(const Rect& rect)
-        : _enabled(rect.right() > rect.left() && rect.bottom() >= rect.top()) {
+    GLScissor(const Rect& rect, bool enabled)
+        : _enabled(enabled) {
         if(_enabled) {
             glEnable(GL_SCISSOR_TEST);
             glScissor(static_cast<GLint>(rect.left()), static_cast<GLint>(rect.top()), static_cast<GLsizei>(rect.width()), static_cast<GLsizei>(rect.height()));
@@ -65,7 +66,7 @@ private:
 
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const PipelineBindings& bindings)
     : _recycler(recycler), _pipeline_input(bindings.input()), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _cull_face(bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK) != PipelineBindings::FLAG_CULL_MODE_NONE),
-      _id(0), _render_command(createRenderCommand(bindings)), _rebind_needed(true)
+      _scissor(bindings.scissor()), _scissor_enabled(VertexUtil::isScissorEnabled(_scissor)), _id(0), _render_command(createRenderCommand(bindings)), _rebind_needed(true)
 {
 }
 
@@ -160,6 +161,10 @@ void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext
 
 void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
+    const GLCullFace cullFace(_cull_face);
+    bool contextScissorEnabled = VertexUtil::isScissorEnabled(drawingContext._parameters._scissor);
+    const GLScissor scissor(contextScissorEnabled ? drawingContext._parameters._scissor : _scissor, contextScissorEnabled || _scissor_enabled);
+
     _render_command->_parameters = drawingContext._parameters;
     _render_command->draw(graphicsContext);
 }
@@ -221,8 +226,8 @@ sp<GLPipeline::GLRenderCommand> GLPipeline::createRenderCommand(const PipelineBi
 {
     GLenum mode = GLUtil::toEnum(bindings.mode());
     if(bindings.hasDivisors())
-        return sp<GLDrawElementsInstanced>::make(mode, _cull_face);
-    return sp<GLDrawElements>::make(mode, _cull_face);
+        return sp<GLDrawElementsInstanced>::make(mode);
+    return sp<GLDrawElements>::make(mode);
 }
 
 void GLPipeline::bindUniform(GraphicsContext& /*graphicsContext*/, const Uniform& uniform)
@@ -458,34 +463,30 @@ GLuint GLPipeline::Shader::compile(uint32_t version, GLenum type, const String& 
     return id;
 }
 
-GLPipeline::GLRenderCommand::GLRenderCommand(GLenum mode, bool cullFace)
-    : _mode(mode), _cull_face(cullFace)
+GLPipeline::GLRenderCommand::GLRenderCommand(GLenum mode)
+    : _mode(mode)
 {
 }
 
-GLPipeline::GLDrawElements::GLDrawElements(GLenum mode, bool cullFace)
-    : GLRenderCommand(mode, cullFace)
+GLPipeline::GLDrawElements::GLDrawElements(GLenum mode)
+    : GLRenderCommand(mode)
 {
 }
 
 void GLPipeline::GLDrawElements::draw(GraphicsContext& /*graphicsContext*/)
 {
     DASSERT(_parameters._count);
-    const GLCullFace cullFace(_cull_face);
-    const GLScissor scissor(_parameters._scissor);
     glDrawElements(_mode, static_cast<GLsizei>(_parameters._count), GLIndexType, reinterpret_cast<GLvoid*>(_parameters._start * sizeof(element_index_t)));
 }
 
-GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode, bool cullFace)
-    : GLRenderCommand(mode, cullFace)
+GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode)
+    : GLRenderCommand(mode)
 {
 }
 
 void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& /*graphicsContext*/)
 {
     DASSERT(_parameters._count);
-    const GLCullFace cullFace(_cull_face);
-    const GLScissor scissor(_parameters._scissor);
     glDrawElementsInstanced(_mode, static_cast<GLsizei>(_parameters._count), GLIndexType, nullptr, _parameters._instance_count);
 }
 

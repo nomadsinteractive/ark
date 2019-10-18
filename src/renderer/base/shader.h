@@ -11,7 +11,6 @@
 #include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/pipeline_bindings.h"
 #include "renderer/inf/render_model.h"
 #include "renderer/inf/resource.h"
 #include "renderer/inf/pipeline_factory.h"
@@ -29,7 +28,7 @@ public:
     };
 
 public:
-    Shader(const sp<PipelineFactory> pipelineFactory, const sp<RenderController>& renderController, const sp<PipelineLayout>& layout, const sp<Camera>& camera, PipelineBindings::Flag pipelineBindingsFlag);
+    Shader(const sp<PipelineFactory>& pipelineFactory, const sp<RenderController>& renderController, const sp<PipelineLayout>& layout, const sp<Camera>& camera, const Rect& pipelineBindingsScissors, uint32_t pipelineBindingsFlag);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Shader);
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
@@ -63,7 +62,8 @@ public:
         sp<Builder<String>> _fragment;
         sp<Builder<Snippet>> _snippet;
         SafePtr<Builder<Camera>> _camera;
-        PipelineBindings::Flag _pipeline_bindings_flag;
+        SafePtr<Builder<Vec4>> _pipeline_bindings_scissor;
+        uint32_t _pipeline_bindings_flags;
     };
 
 private:
@@ -72,7 +72,8 @@ private:
     sp<PipelineLayout> _pipeline_layout;
     sp<PipelineInput> _input;
     sp<Camera> _camera;
-    PipelineBindings::Flag _pipeline_bindings_flag;
+    Rect _pipeline_bindings_scissor;
+    uint32_t _pipeline_bindings_flag;
 };
 
 }

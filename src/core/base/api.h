@@ -176,8 +176,6 @@ template<THREAD_ID ID> void __thread_check__(const char* func) {
 
 void ARK_API __trace__();
 
-extern float g_upDirection;
-
 }
 
 #endif

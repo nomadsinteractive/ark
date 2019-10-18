@@ -57,7 +57,7 @@ sp<Visibility> Visibility::DICTIONARY::build(const Scope& args)
 
 template<> ARK_API sp<Visibility> Null::ptr()
 {
-    return Ark::instance().obtain<Visibility>(true);
+    return sp<Visibility>::make(true);
 }
 
 }

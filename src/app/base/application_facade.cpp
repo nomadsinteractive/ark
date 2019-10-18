@@ -55,6 +55,12 @@ const sp<Arena>& ApplicationFacade::arena() const
 
 void ApplicationFacade::setArena(const sp<Arena>& arena)
 {
+    if(_arena == arena)
+    {
+        DWARN(false, "Replacing current Arena with the same one");
+        return;
+    }
+
     if(_arena)
         _arena.as<Disposed>()->dispose();
 

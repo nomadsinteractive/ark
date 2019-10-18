@@ -4,8 +4,8 @@
 
 namespace ark {
 
-RenderContext::RenderContext(Ark::RendererVersion version, const Viewport& viewport, float upDirection)
-    : _version(version), _viewport(viewport), _up_direction(upDirection)
+RenderContext::RenderContext(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const Viewport& viewport)
+    : _version(version), _coordinate_system(coordinateSystem), _viewport(viewport)
 {
 }
 
@@ -17,6 +17,11 @@ Ark::RendererVersion RenderContext::version() const
 void RenderContext::setVersion(Ark::RendererVersion version)
 {
     _version = version;
+}
+
+Ark::RendererCoordinateSystem RenderContext::coordinateSystem() const
+{
+    return _coordinate_system;
 }
 
 const std::map<String, String>& RenderContext::annotations() const
@@ -93,11 +98,6 @@ const RenderContext::Info& RenderContext::info() const
 RenderContext::Info& RenderContext::info()
 {
     return _info;
-}
-
-float RenderContext::upDirection() const
-{
-    return _up_direction;
 }
 
 void RenderContext::setSnippetFactory(sp<SnippetFactory> snippetfactory)

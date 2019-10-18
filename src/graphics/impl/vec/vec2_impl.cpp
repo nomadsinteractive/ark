@@ -81,8 +81,8 @@ sp<Vec2> Vec2Impl::DICTIONARY::build(const Scope& args)
     return sp<Vec2Impl>::make(x, y ? y : x);
 }
 
-Vec2Impl::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
-    : _x(factory.getBuilder<Numeric>(doc, "x")), _y(factory.getBuilder<Numeric>(doc, "y"))
+Vec2Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _x(factory.ensureBuilder<Numeric>(manifest, "x")), _y(factory.getBuilder<Numeric>(manifest, "y"))
 {
 }
 

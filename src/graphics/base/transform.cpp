@@ -14,7 +14,7 @@
 namespace ark {
 
 Transform::Transform(const sp<Rotate>& rotate, const sp<Vec3>& scale, const sp<Vec3>& translate)
-    : _rotate(rotate), _scale(scale ? scale : Ark::instance().obtain<Vec3Impl>(1.0f, 1.0f, 1.0f).cast<Vec3>()), _pivot(translate)
+    : _rotate(rotate), _scale(scale ? scale : sp<Vec3Impl>::make(1.0f, 1.0f, 1.0f).cast<Vec3>()), _pivot(translate)
 {
 }
 
@@ -146,7 +146,7 @@ sp<Transform> Transform::DICTIONARY::build(const Scope& args)
 
 template<> ARK_API sp<Transform> Null::ptr()
 {
-    return Ark::instance().obtain<Transform>();
+    return sp<Transform>::make();
 }
 
 }

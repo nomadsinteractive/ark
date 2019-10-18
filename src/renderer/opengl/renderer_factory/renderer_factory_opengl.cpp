@@ -42,7 +42,7 @@ RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<Recycler>& recycler)
 
 sp<RenderContext> RendererFactoryOpenGL::initialize(Ark::RendererVersion version)
 {
-    const sp<RenderContext> renderContext = sp<RenderContext>::make(version, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f), 1.0f);
+    const sp<RenderContext> renderContext = sp<RenderContext>::make(version, Ark::COORDINATE_SYSTEM_RHS, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
     if(version != Ark::AUTO)
         setVersion(version, renderContext);
     return renderContext;
@@ -101,9 +101,9 @@ sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buff
     return sp<GLBuffer>::make(type, usage, _recycler);
 }
 
-sp<Camera::Delegate> RendererFactoryOpenGL::createCamera()
+sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(Ark::RendererCoordinateSystem cs)
 {
-    return sp<Camera::DelegateRH_NO>::make();
+    return cs == Ark::COORDINATE_SYSTEM_RHS ? sp<Camera::Delegate>::make<Camera::DelegateRH_NO>() : sp<Camera::Delegate>::make<Camera::DelegateLH_NO>();
 }
 
 sp<Framebuffer> RendererFactoryOpenGL::createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture)

@@ -1,5 +1,6 @@
 #include "renderer/base/render_controller.h"
 
+#include "core/base/manifest.h"
 #include "core/inf/runnable.h"
 #include "core/util/log.h"
 
@@ -125,7 +126,7 @@ const sp<RenderEngine>& RenderController::renderEngine() const
 
 sp<Camera::Delegate> RenderController::createCamera() const
 {
-    return _render_engine->rendererFactory()->createCamera();
+    return _render_engine->rendererFactory()->createCamera(Ark::instance().manifest()->renderer()._coordinate_system);
 }
 
 sp<PipelineFactory> RenderController::createPipelineFactory() const

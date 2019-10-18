@@ -76,7 +76,7 @@ private:
 
 RendererImgui::RendererImgui(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Shader>& shader, const sp<Texture>& texture)
     : _shader(shader), _render_controller(resourceLoaderContext->renderController()), _render_engine(_render_controller->renderEngine()), _renderer_group(sp<RendererGroup>::make()), _texture(texture),
-      _draw_commands(sp<LFStack<sp<DrawCommand>>>::make()), _bindings(shader->pipelineFactory()), _vflip(_render_engine->renderContext()->upDirection() > 0)
+      _draw_commands(sp<LFStack<sp<DrawCommand>>>::make()), _bindings(shader->pipelineFactory())
 {
 }
 
@@ -193,12 +193,8 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
                 // Render 'pcmd->ElemCount/3' indexed triangles.
                 // By default the indices ImDrawIdx are 16-bits, you can change them to 32-bits in imconfig.h if your engine doesn't support 16-bits indices.
                 const ImVec2& pos = draw_data->DisplayPos;
-                const RenderContext& renderContext = _render_engine->renderContext();
                 DrawingContext drawingContext(_shader, drawCommand->_shader_bindings, ubos, vertexBuffer, indexBuffer, static_cast<int32_t>(pcmd->ElemCount / 3), offset, pcmd->ElemCount);
-                drawingContext._parameters._scissor = Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y);
-                drawingContext._parameters._scissor.scale(renderContext.displayUnit());
-                if(_vflip)
-                    drawingContext._parameters._scissor.vflip(static_cast<float>(renderContext.displayResolution().height));
+                drawingContext._parameters._scissor = _render_engine->toRendererScissor(Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y), Ark::COORDINATE_SYSTEM_LHS);
                 renderCommand = sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(), drawCommand);
                 renderRequest.addRequest(renderCommand);
             }
@@ -218,8 +214,8 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
 {
     const Viewport& viewport = _resource_loader_context->renderController()->renderEngine()->viewport();
 
-    float upDirection = _resource_loader_context->renderController()->renderEngine()->renderContext()->upDirection();
-    _camera->ortho(0, viewport.width(), 0, viewport.height(), viewport.near(), viewport.far(), -upDirection);
+    Ark::RendererCoordinateSystem coordinateSystem = _resource_loader_context->renderController()->renderEngine()->renderContext()->coordinateSystem();
+    _camera->ortho(0, viewport.width(), 0, viewport.height(), viewport.near(), viewport.far(), static_cast<Ark::RendererCoordinateSystem>(-coordinateSystem));
 
     const Global<ImguiContext> context;
     ImGuiIO& io = ImGui::GetIO();
@@ -256,7 +252,7 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
 
 RendererImgui::DrawCommand::DrawCommand(const Shader& shader, const sp<PipelineFactory>& pipelineFactory, RenderController& renderController, const sp<Texture>& texture, const sp<LFStack<sp<DrawCommand>>>& recycler)
     : _vertex_buffer(renderController.makeVertexBuffer()), _index_buffer(renderController.makeIndexBuffer()),
-      _shader_bindings(sp<ShaderBindings>::make(pipelineFactory, sp<PipelineBindings>::make(RenderModel::RENDER_MODE_TRIANGLES, shader.layout(), static_cast<PipelineBindings::Flag>(PipelineBindings::FLAG_CULL_MODE_NONE | PipelineBindings::FLAG_DYNAMIC_SCISSOR)), renderController, _vertex_buffer, _index_buffer)),
+      _shader_bindings(sp<ShaderBindings>::make(pipelineFactory, sp<PipelineBindings>::make(PipelineBindings::Parameters(RenderModel::RENDER_MODE_TRIANGLES, Rect(), PipelineBindings::FLAG_CULL_MODE_NONE | PipelineBindings::FLAG_DYNAMIC_SCISSOR), shader.layout()), renderController, _vertex_buffer, _index_buffer)),
       _recycler(recycler)
 {
     PipelineBindings& pipelineBindings = _shader_bindings->pipelineBindings();

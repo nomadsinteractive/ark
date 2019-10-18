@@ -263,7 +263,7 @@ sp<Vec3Impl> Vec3Util::ensureImpl(const sp<Vec3>& self)
 
 template<> ARK_API sp<Vec3> Null::ptr()
 {
-    return Ark::instance().obtain<Vec3Impl>();
+    return sp<Vec3Impl>::make();
 }
 
 }

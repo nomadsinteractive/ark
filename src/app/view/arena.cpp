@@ -115,12 +115,6 @@ const sp<ViewGroup>& Arena::view() const
     return _view_group;
 }
 
-void Arena::dispose()
-{
-    _layers.clear();
-    _resource_loader = nullptr;
-}
-
 Arena::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _factory(factory), _manifest(manifest), _resource_loader(factory.getBuilder<ResourceLoader>(manifest, "resource-loader")),
       _layout(factory.getBuilder<Layout>(manifest, Constants::Attributes::LAYOUT)),

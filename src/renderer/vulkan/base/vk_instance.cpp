@@ -1,5 +1,8 @@
 #include "renderer/vulkan/base/vk_instance.h"
 
+#include "core/ark.h"
+#include "core/base/manifest.h"
+
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vulkan_debug.h"
 
@@ -25,7 +28,7 @@ void VKInstance::initialize()
 {
     VkApplicationInfo appInfo = {};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "ark";
+    appInfo.pApplicationName = Ark::instance().manifest()->name().c_str();
     appInfo.pEngineName = "ark";
     appInfo.apiVersion = VK_API_VERSION_1_0;
 

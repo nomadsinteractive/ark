@@ -304,7 +304,7 @@ sp<Vec2Impl> Vec2Util::ensureImpl(const sp<Vec2>& self)
 
 template<> ARK_API sp<Vec2> Null::ptr()
 {
-    return Ark::instance().obtain<Vec2Impl>();
+    return sp<Vec2Impl>::make();
 }
 
 }

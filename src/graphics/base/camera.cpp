@@ -88,9 +88,9 @@ Camera::Camera()
 {
 }
 
-void Camera::ortho(float left, float right, float bottom, float top, float near, float far, float upDirection)
+void Camera::ortho(float left, float right, float bottom, float top, float near, float far, Ark::RendererCoordinateSystem coordinateSystem)
 {
-    if(upDirection  < 0)
+    if(coordinateSystem  < 0)
         std::swap(top, bottom);
 
     _vp->_value = sp<Variable<Matrix>::Const>::make(_delegate->ortho(left, right, bottom, top, near * 2 - far, far));
@@ -188,6 +188,46 @@ Matrix Camera::DelegateLH_ZO::ortho(float left, float right, float bottom, float
 Matrix Camera::DelegateLH_ZO::perspective(float fov, float aspect, float near, float far)
 {
     return Matrix(glm::perspectiveLH_ZO(fov, aspect, near, far));
+}
+
+Matrix Camera::DelegateRH_ZO::frustum(float left, float right, float bottom, float top, float near, float far)
+{
+    return Matrix(glm::frustumRH_ZO(left, right, bottom, top, near, far));
+}
+
+Matrix Camera::DelegateRH_ZO::lookAt(const V3& position, const V3& target, const V3& up)
+{
+    return Matrix(glm::lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), -up.y(), up.z())));
+}
+
+Matrix Camera::DelegateRH_ZO::ortho(float left, float right, float bottom, float top, float near, float far)
+{
+    return Matrix(glm::orthoRH_ZO(left, right, bottom, top, near, far));
+}
+
+Matrix Camera::DelegateRH_ZO::perspective(float fov, float aspect, float near, float far)
+{
+    return Matrix(glm::perspectiveRH_ZO(fov, aspect, near, far));
+}
+
+Matrix Camera::DelegateLH_NO::frustum(float left, float right, float bottom, float top, float near, float far)
+{
+    return Matrix(glm::frustumLH_NO(left, right, bottom, top, near, far));
+}
+
+Matrix Camera::DelegateLH_NO::lookAt(const V3& position, const V3& target, const V3& up)
+{
+    return Matrix(glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z())));
+}
+
+Matrix Camera::DelegateLH_NO::ortho(float left, float right, float bottom, float top, float near, float far)
+{
+    return Matrix(glm::orthoLH_NO(left, right, bottom, top, near, far));
+}
+
+Matrix Camera::DelegateLH_NO::perspective(float fov, float aspect, float near, float far)
+{
+    return Matrix(glm::perspectiveLH_NO(fov, aspect, near, far));
 }
 
 Matrix Camera::DelegateRH_NO::frustum(float left, float right, float bottom, float top, float near, float far)

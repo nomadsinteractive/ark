@@ -55,7 +55,7 @@ const sp<NumericWrapper>& Rotate::value() const
 
 template<> ARK_API sp<Rotate> Null::ptr()
 {
-    return Ark::instance().obtain<Rotate>(nullptr, Ark::instance().obtain<Vec3::Const>(Rotate::Z_AXIS));
+    return sp<Rotate>::make(nullptr, sp<Vec3>::make<Vec3::Const>(Rotate::Z_AXIS));
 }
 
 Rotate::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

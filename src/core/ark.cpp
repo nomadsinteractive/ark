@@ -162,7 +162,7 @@ private:
 };
 
 Ark::Ark(int32_t argc, const char** argv)
-    : _argc(argc), _argv(argv), _object_pool(sp<ObjectPool>::make())
+    : _argc(argc), _argv(argv)
 {
     push();
     __ark_bootstrap__();
@@ -209,7 +209,7 @@ void Ark::initialize(const sp<Manifest>& manifest)
     _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleUtil::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->appDir()), factory, _manifest->assets());
     const sp<AssetBundle> asset = _asset_bundle->getAssetBundle("/");
     const sp<ApplicationResource> appResource = sp<ApplicationResource>::make(sp<XMLDirectory>::make(asset), asset);
-    const sp<RenderEngine> renderEngine = createRenderEngine(_manifest->renderer()._version, appResource);
+    const sp<RenderEngine> renderEngine = createRenderEngine(_manifest->renderer()._version, _manifest->renderer()._coordinate_system, appResource);
     _application_context = createApplicationContext(_manifest, appResource, renderEngine);
 }
 
@@ -275,11 +275,6 @@ const sp<ApplicationContext>& Ark::applicationContext() const
     return _application_context;
 }
 
-const sp<ObjectPool>& Ark::objectPool() const
-{
-    return _object_pool;
-}
-
 sp<ApplicationContext> Ark::createApplicationContext(const Manifest& manifest, const sp<ApplicationResource>& appResource, const sp<RenderEngine>& renderEngine)
 {
     const Global<PluginManager> pluginManager;
@@ -289,7 +284,7 @@ sp<ApplicationContext> Ark::createApplicationContext(const Manifest& manifest, c
     return applicationContext;
 }
 
-sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, const sp<ApplicationResource>& appResource)
+sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationResource>& appResource)
 {
     switch(version) {
     case AUTO:
@@ -307,11 +302,11 @@ sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, const sp<Appli
     case OPENGL_45:
     case OPENGL_46:
 #ifdef ARK_USE_OPEN_GL
-        return sp<RenderEngine>::make(version, sp<opengl::RendererFactoryOpenGL>::make(appResource->recycler()));
+        return sp<RenderEngine>::make(version, coordinateSystem, sp<opengl::RendererFactoryOpenGL>::make(appResource->recycler()));
 #endif
     case VULKAN_11:
 #ifdef ARK_USE_VULKAN
-        return sp<RenderEngine>::make(version, sp<vulkan::RendererFactoryVulkan>::make(appResource->recycler()));
+        return sp<RenderEngine>::make(version, coordinateSystem, sp<vulkan::RendererFactoryVulkan>::make(appResource->recycler()));
 #endif
         break;
     }

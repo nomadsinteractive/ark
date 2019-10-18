@@ -17,16 +17,18 @@
 #include "graphics/util/vec3_util.h"
 
 #include "renderer/base/atlas.h"
+#include "renderer/base/render_engine.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/render_model.h"
 #include "renderer/impl/layer/text_layer.h"
 
+#include "app/base/application_context.h"
 #include "app/view/layout_param.h"
 
 namespace ark {
 
 Characters::Characters(const sp<LayerContext>& layer, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : Characters(layer, nullptr, nullptr, nullptr, textScale, letterSpacing, lineHeight, lineIndent)
+    : Characters(layer, nullptr, nullptr, textScale, letterSpacing, lineHeight, lineIndent)
 {
 }
 
@@ -40,10 +42,10 @@ Characters::Characters(const sp<RenderLayer>& layer, float textScale, float lett
 {
 }
 
-Characters::Characters(const sp<LayerContext>& layerContext, const sp<ObjectPool>& objectPool, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : _layer_context(layerContext), _object_pool(objectPool ? objectPool : Ark::instance().objectPool()), _character_mapper(characterMapper),
-      _character_maker(characterMaker), _text_scale(textScale), _letter_spacing(letterSpacing), _line_height(g_upDirection * lineHeight),
-      _line_indent(lineIndent), _model(layerContext->renderModel()), _size(_object_pool->obtain<Size>(0.0f, 0.0f))
+Characters::Characters(const sp<LayerContext>& layerContext, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
+    : _layer_context(layerContext), _character_mapper(characterMapper), _character_maker(characterMaker), _text_scale(textScale), _letter_spacing(letterSpacing),
+      _layout_direction(Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(1.0f)), _line_height(_layout_direction * lineHeight), _line_indent(lineIndent),
+      _model(layerContext->renderModel()), _size(sp<Size>::make(0.0f, 0.0f))
 {
 }
 
@@ -163,7 +165,7 @@ void Characters::placeNoBoundary(wchar_t c, float& flowx, float& flowy, float& f
     float height = _text_scale * metrics.bounds.y();
     float bitmapX = _text_scale * metrics.xyz.x();
     float bitmapY = _text_scale * metrics.xyz.y();
-    const sp<Size> itemSize = _object_pool->obtain<Size>(bitmapWidth, bitmapHeight);
+    const sp<Size> itemSize = sp<Size>::make(bitmapWidth, bitmapHeight);
     if(fontHeight == 0)
         fontHeight = height;
     else
@@ -193,22 +195,22 @@ void Characters::placeOne(const Characters::LayoutChar& layoutChar, float& flowx
     float height = _text_scale * metrics.bounds.y();
     float bitmapX = _text_scale * metrics.xyz.x();
     float bitmapY = _text_scale * metrics.xyz.y();
-    const sp<Size> itemSize = _object_pool->obtain<Size>(bitmapWidth, bitmapHeight);
+    const sp<Size> itemSize = sp<Size>::make(bitmapWidth, bitmapHeight);
     _contents.push_back(makeCharacter(layoutChar._type, V2(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight), itemSize));
     flowx += width;
 }
 
 void Characters::nextLine(float fontHeight, float& flowx, float& flowy) const
 {
-    flowy += (_line_height != 0 ? -_line_height : (-fontHeight * g_upDirection));
+    flowy += (_line_height != 0 ? _line_height : (fontHeight * _layout_direction));
     flowx = _line_indent;
 }
 
 float Characters::getFlowY() const
 {
-    if(!_layout_param || g_upDirection < 0)
+    if(!_layout_param || _layout_direction > 0)
         return 0;
-    return _layout_param->size()->height() - _line_height;
+    return _layout_param->size()->height() + _line_height;
 }
 
 std::vector<Characters::LayoutChar> Characters::getCharacterMetrics(const std::wstring& text) const
@@ -261,12 +263,12 @@ int32_t Characters::toType(wchar_t c) const
 sp<RenderObject> Characters::makeCharacter(int32_t type, const V2& position, const sp<Size>& size) const
 {
     return _character_maker ? _character_maker->makeCharacter(type, position, size) :
-                              _object_pool->obtain<RenderObject>(type, _object_pool->obtain<Vec3::Const>(position), size);
+                              sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(position), size);
 }
 
-Characters::BUILDER::BUILDER(BeanFactory& factory, const document manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+Characters::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_DYNAMIC)), _character_mapper(factory.getBuilder<CharacterMapper>(manifest, "character-mapper")),
-      _character_maker(factory.getBuilder<CharacterMaker>(manifest, "character-maker")), _object_pool(resourceLoaderContext->objectPool()),
+      _character_maker(factory.getBuilder<CharacterMaker>(manifest, "character-maker")),
       _text_scale(Documents::getAttribute<float>(manifest, "text-scale", 1.0f)), _letter_spacing(Documents::getAttribute<float>(manifest, "letter-spacing", 0.0f)),
       _line_height(Documents::getAttribute<float>(manifest, "line-height", 0.0f)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))
 {
@@ -274,8 +276,7 @@ Characters::BUILDER::BUILDER(BeanFactory& factory, const document manifest, cons
 
 sp<Characters> Characters::BUILDER::build(const Scope& args)
 {
-    return sp<Characters>::make(_layer_context->build(args), _object_pool, _character_mapper->build(args), _character_maker->build(args), _text_scale, _letter_spacing,
-                                _line_height, _line_indent);
+    return sp<Characters>::make(_layer_context->build(args), _character_mapper->build(args), _character_maker->build(args), _text_scale, _letter_spacing, _line_height, _line_indent);
 }
 
 Characters::LayoutChar::LayoutChar(int32_t type, const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak)

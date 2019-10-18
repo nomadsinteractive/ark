@@ -16,6 +16,7 @@ public:
     }
     Rect(const Rect& other) noexcept;
     Rect(float left, float top, float right, float bottom) noexcept;
+    Rect(const V4& vec4) noexcept;
 
     float left() const;
     void setLeft(float left);

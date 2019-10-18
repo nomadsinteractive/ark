@@ -1,6 +1,7 @@
 #ifndef ARK_GRAPHICS_BASE_CAMERA_H_
 #define ARK_GRAPHICS_BASE_CAMERA_H_
 
+#include "core/ark.h"
 #include "core/forwarding.h"
 #include "core/inf/flatable.h"
 #include "core/inf/variable.h"
@@ -45,6 +46,22 @@ public:
         virtual Matrix perspective(float fov, float aspect, float near, float far) override;
     };
 
+    class DelegateRH_ZO : public Delegate {
+    public:
+        virtual Matrix frustum(float left, float right, float bottom, float top, float near, float far) override;
+        virtual Matrix lookAt(const V3& position, const V3& target, const V3& up) override;
+        virtual Matrix ortho(float left, float right, float bottom, float top, float near, float far) override;
+        virtual Matrix perspective(float fov, float aspect, float near, float far) override;
+    };
+
+    class DelegateLH_NO : public Delegate {
+    public:
+        virtual Matrix frustum(float left, float right, float bottom, float top, float near, float far) override;
+        virtual Matrix lookAt(const V3& position, const V3& target, const V3& up) override;
+        virtual Matrix ortho(float left, float right, float bottom, float top, float near, float far) override;
+        virtual Matrix perspective(float fov, float aspect, float near, float far) override;
+    };
+
     class DelegateRH_NO : public Delegate {
     public:
         virtual Matrix frustum(float left, float right, float bottom, float top, float near, float far) override;
@@ -58,7 +75,7 @@ public:
     Camera();
 
 //  [[script::bindings::auto]]
-    void ortho(float left, float right, float bottom, float top, float near, float far, float upDirection = 1.0f);
+    void ortho(float left, float right, float bottom, float top, float near, float far, Ark::RendererCoordinateSystem coordinateSystem = Ark::COORDINATE_SYSTEM_RHS);
 //  [[script::bindings::auto]]
     void frustum(float left, float right, float bottom, float top, float near, float far);
 //  [[script::bindings::auto]]

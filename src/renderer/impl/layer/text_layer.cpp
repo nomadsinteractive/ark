@@ -17,8 +17,11 @@ public:
     }
 
     virtual sp<Shader> build(const Scope& args) override {
+        if(_shader)
+            return _shader->build(args);
+
         const sp<Vec4> color = _color ? _color->build(args) : sp<Color>::make(Color::WHITE).cast<Vec4>();
-        return _shader ? _shader->build(args) : Shader::fromStringTable("shaders/default.vert", "shaders/alpha.frag", sp<SnippetUColor>::make(color), _resource_loader_context);
+        return Shader::fromStringTable("shaders/default.vert", "shaders/alpha.frag", sp<SnippetUColor>::make(color), _resource_loader_context);
     }
 
 private:

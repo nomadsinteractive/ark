@@ -70,9 +70,6 @@ public:
 //  [[script::bindings::property]]
     const sp<ViewGroup>& view() const;
 
-//  [[script::bindings::auto]]
-    void dispose();
-
 //  [[plugin::builder]]
     class BUILDER : public Builder<Arena> {
     public:

@@ -5,7 +5,6 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/base/object_pool.h"
 #include "core/base/string.h"
 #include "core/collection/by_type.h"
 #include "core/types/shared_ptr.h"
@@ -36,6 +35,12 @@ public:
         VULKAN_11 = 111
     };
 
+    enum RendererCoordinateSystem {
+        COORDINATE_SYSTEM_DEFAULT = 0,
+        COORDINATE_SYSTEM_LHS = -1,
+        COORDINATE_SYSTEM_RHS = 1
+    };
+
     Ark(int32_t argc, const char** argv);
     Ark(int32_t argc, const char** argv, const sp<Manifest>& manifest);
     ~Ark();
@@ -57,10 +62,6 @@ public:
         _interfaces.put<T>(item);
     }
 
-    template<typename U, typename... Args> sp<U> obtain(Args&&... args) {
-        return _object_pool->obtain<U, Args...>(std::forward<Args>(args)...);
-    }
-
     sp<BeanFactory> createBeanFactory(const String& src) const;
     sp<BeanFactory> createBeanFactory(const sp<Dictionary<document>>& dictionary) const;
 
@@ -78,13 +79,11 @@ public:
     const sp<Clock>& clock() const;
     const sp<ApplicationContext>& applicationContext() const;
 
-    const sp<ObjectPool>& objectPool() const;
-
 private:
     class ArkAssetBundle;
 
     sp<ApplicationContext> createApplicationContext(const Manifest& manifest, const sp<ApplicationResource>& resource, const sp<RenderEngine>& renderEngine);
-    sp<RenderEngine> createRenderEngine(RendererVersion version, const sp<ApplicationResource>& appResource);
+    sp<RenderEngine> createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationResource>& appResource);
 
     void loadPlugins(const Manifest& manifest) const;
 
@@ -99,7 +98,6 @@ private:
     ByType _interfaces;
 
     sp<ArkAssetBundle> _asset_bundle;
-    sp<ObjectPool> _object_pool;
 
     sp<Manifest> _manifest;
 };

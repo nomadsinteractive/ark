@@ -37,6 +37,18 @@ void VKTexture2D::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /
 {
     if(_uploader)
         _uploader->upload(graphicsContext, *this);
+    else
+    {
+        Texture::Format format = _parameters->_format;
+        if(format == Texture::FORMAT_AUTO)
+            uploadBitmap(graphicsContext, 0, Bitmap(_width, _height, _width * 4, 4, false));
+        else
+        {
+            uint8_t channels = format & Texture::FORMAT_RGBA;
+            uint32_t pixelbytes = format == Texture::FORMAT_F16 ? 2 : (format == Texture::FORMAT_F32 ? 4 : 1);
+            uploadBitmap(graphicsContext, 0, Bitmap(_width, _height, _width * channels * pixelbytes, channels, false));
+        }
+    }
 }
 
 Resource::RecycleFunc VKTexture2D::recycle()

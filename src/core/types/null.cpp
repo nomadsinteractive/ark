@@ -8,17 +8,17 @@ namespace ark {
 
 template<> ARK_API sp<Numeric> Null::ptr()
 {
-    return Ark::instance().obtain<Numeric::Const>(0.0f);
+    return sp<Numeric>::make<Numeric::Const>(0.0f);
 }
 
 template<> ARK_API sp<Integer> Null::ptr()
 {
-    return Ark::instance().obtain<Integer::Const>(0);
+    return sp<Integer>::make<Integer::Const>(0);
 }
 
 template<> ARK_API sp<Boolean> Null::ptr()
 {
-    return Ark::instance().obtain<Boolean::Const>(false);
+    return sp<Boolean>::make<Boolean::Const>(false);
 }
 
 }

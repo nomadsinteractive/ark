@@ -12,14 +12,19 @@
 
 namespace ark {
 
-PipelineBindings::PipelineBindings(RenderModel::Mode mode, const sp<PipelineLayout>& pipelineLayout, Flag flag)
-    : _stub(sp<Stub>::make(mode, pipelineLayout, flag))
+PipelineBindings::PipelineBindings(const Parameters& parameters, const sp<PipelineLayout>& pipelineLayout)
+    : _stub(sp<Stub>::make(parameters, pipelineLayout))
 {
 }
 
 RenderModel::Mode PipelineBindings::mode() const
 {
-    return _stub->_mode;
+    return _stub->_parameters._mode;
+}
+
+const Rect& PipelineBindings::scissor() const
+{
+    return _stub->_parameters._scissor;
 }
 
 const sp<PipelineLayout>& PipelineBindings::layout() const
@@ -60,7 +65,7 @@ bool PipelineBindings::hasDivisors() const
 
 PipelineBindings::Flag PipelineBindings::getFlag(PipelineBindings::Flag bitmask) const
 {
-    return static_cast<Flag>(_stub->_flags & static_cast<uint32_t>(bitmask));
+    return static_cast<Flag>(_stub->_parameters._flags & static_cast<uint32_t>(bitmask));
 }
 
 bool PipelineBindings::hasFlag(PipelineBindings::Flag flag, PipelineBindings::Flag bitmask) const
@@ -70,7 +75,7 @@ bool PipelineBindings::hasFlag(PipelineBindings::Flag flag, PipelineBindings::Fl
 
 void PipelineBindings::setFlag(PipelineBindings::Flag flag, PipelineBindings::Flag bitmask) const
 {
-    _stub->_flags = static_cast<uint32_t>(_stub->_flags & ~static_cast<uint32_t>(bitmask)) | static_cast<uint32_t>(flag);
+    _stub->_parameters._flags = static_cast<uint32_t>(_stub->_parameters._flags & ~static_cast<uint32_t>(bitmask)) | static_cast<uint32_t>(flag);
 }
 
 sp<Pipeline> PipelineBindings::getPipeline(GraphicsContext& graphicsContext, const sp<PipelineFactory>& pipelineFactory)
@@ -98,8 +103,8 @@ PipelineBindings::Attributes::Attributes(const PipelineInput& input)
     _offsets[ATTRIBUTE_NAME_MODEL_ID] = input.getAttributeOffset("ModelId");
 }
 
-PipelineBindings::Stub::Stub(RenderModel::Mode mode, const sp<PipelineLayout>& pipelineLayout, Flag flag)
-    : _mode(mode), _layout(pipelineLayout), _input(_layout->input()), _attributes(_input), _flags(flag)
+PipelineBindings::Stub::Stub(const Parameters& parameters, const sp<PipelineLayout>& pipelineLayout)
+    : _parameters(parameters), _layout(pipelineLayout), _input(_layout->input()), _attributes(_input)
 {
     _samplers.resize(_input->samplerCount());
 
@@ -130,9 +135,17 @@ template<> ARK_API PipelineBindings::Flag Conversions::to<String, PipelineBindin
             DCHECK((flag & PipelineBindings::FLAG_CULL_MODE_BITMASK) == 0, "Exclusive flag found in \"%s\"", str.c_str());
             flag |= static_cast<int32_t>(PipelineBindings::FLAG_CULL_MODE_CCW);
         }
-        else if(i == "dynamic_scissor")
+        else
+        {
+            DCHECK(i == "dynamic_scissor", "Unknow PipelineBindings flag: %s, available values are [\"cull_mode_none\", \"cull_mode_cw\", \"cull_mode_ccw\", \"dynamic_scissor\"]", i.c_str());
             flag |= static_cast<int32_t>(PipelineBindings::FLAG_DYNAMIC_SCISSOR);
+        }
     return static_cast<PipelineBindings::Flag>(flag);
+}
+
+PipelineBindings::Parameters::Parameters(RenderModel::Mode mode, const Rect& scissor, uint32_t flags)
+    : _mode(mode), _scissor(scissor), _flags(flags)
+{
 }
 
 

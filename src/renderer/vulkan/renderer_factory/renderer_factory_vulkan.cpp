@@ -48,7 +48,7 @@ RendererFactoryVulkan::~RendererFactoryVulkan()
 
 sp<RenderContext> RendererFactoryVulkan::initialize(Ark::RendererVersion version)
 {
-    const sp<RenderContext> vkContext = sp<RenderContext>::make(version, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f), -1.0f);
+    const sp<RenderContext> vkContext = sp<RenderContext>::make(version, Ark::COORDINATE_SYSTEM_LHS, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f));
     if(version != Ark::AUTO)
         setVersion(version, vkContext);
     return vkContext;
@@ -91,9 +91,9 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buff
     return sp<VKBuffer>::make(_renderer, _recycler, usagesFlags[type], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
-sp<Camera::Delegate> RendererFactoryVulkan::createCamera()
+sp<Camera::Delegate> RendererFactoryVulkan::createCamera(Ark::RendererCoordinateSystem cs)
 {
-    return sp<Camera::DelegateLH_ZO>::make();
+    return cs == Ark::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>();
 }
 
 sp<Framebuffer> RendererFactoryVulkan::createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture)

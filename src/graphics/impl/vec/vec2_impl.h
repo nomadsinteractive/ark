@@ -39,7 +39,7 @@ public:
         virtual sp<Vec2> build(const Scope& args) override;
 
     private:
-        SafePtr<Builder<Numeric>> _x;
+        sp<Builder<Numeric>> _x;
         SafePtr<Builder<Numeric>> _y;
     };
 

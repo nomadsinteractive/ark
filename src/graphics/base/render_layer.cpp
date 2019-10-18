@@ -12,6 +12,7 @@
 
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/drawing_buffer.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_context.h"
 #include "renderer/base/render_engine.h"
@@ -30,6 +31,7 @@ RenderLayer::Stub::Stub(const sp<RenderModel>& renderModel, const sp<Shader>& sh
       _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_render_model->makeShaderBindings(_shader)), _notifier(sp<Notifier>::make()),
       _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(renderModel, _notifier, Layer::TYPE_TRANSIENT))), _stride(shader->input()->getStream(0).stride())
 {
+    DCHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
 }
 
 RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& stub)
@@ -99,10 +101,7 @@ sp<RenderCommand> RenderLayer::Snapshot::render(const V3& position)
                                       static_cast<int32_t>(_items.size()));
 
         if(_stub->_scissor)
-        {
-            drawingContext._parameters._scissor = _scissor;
-            drawingContext._parameters._scissor.scale(_stub->_render_controller->renderEngine()->renderContext()->displayUnit());
-        }
+            drawingContext._parameters._scissor = _stub->_render_controller->renderEngine()->toRendererScissor(_scissor);
 
         if(buf.isInstanced())
             drawingContext._instanced_array_snapshots = buf.makeDividedBufferSnapshots();

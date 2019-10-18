@@ -26,7 +26,7 @@ public:
     Characters(const sp<RenderLayer>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
 //  [[script::bindings::auto]]
     Characters(const sp<LayerContext>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
-    Characters(const sp<LayerContext>& layerContext, const sp<ObjectPool>& objectPool, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
+    Characters(const sp<LayerContext>& layerContext, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
     const sp<LayoutParam>& layoutParam() const;
     void setLayoutParam(const sp<LayoutParam>& layoutParam);
@@ -44,10 +44,10 @@ public:
 
     void renderRequest(const V3& position);
 
-//[[plugin::resource-loader]]
+//[[plugin::builder]]
     class BUILDER : public Builder<Characters> {
     public:
-        BUILDER(BeanFactory& factory, const document manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Characters> build(const Scope& args) override;
 
@@ -55,7 +55,6 @@ public:
         sp<Builder<LayerContext>> _layer_context;
         SafePtr<Builder<CharacterMapper>> _character_mapper;
         SafePtr<Builder<CharacterMaker>> _character_maker;
-        sp<ObjectPool> _object_pool;
 
         float _text_scale;
         float _letter_spacing;
@@ -96,7 +95,6 @@ private:
 private:
     sp<LayerContext> _layer_context;
     sp<LayoutParam> _layout_param;
-    sp<ObjectPool> _object_pool;
     sp<CharacterMapper> _character_mapper;
     sp<CharacterMaker> _character_maker;
 
@@ -105,6 +103,7 @@ private:
 
     float _text_scale;
     float _letter_spacing;
+    float _layout_direction;
     float _line_height;
     float _line_indent;
 

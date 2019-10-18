@@ -6,7 +6,7 @@
 #include "core/util/dictionaries.h"
 #include "core/util/documents.h"
 
-#include "graphics/base/v2.h"
+#include "graphics/base/v4.h"
 
 namespace ark {
 
@@ -17,6 +17,11 @@ Rect::Rect(const Rect& other) noexcept
 
 Rect::Rect(float left, float top, float right, float bottom) noexcept
     : _left(left), _top(top), _right(right), _bottom(bottom)
+{
+}
+
+Rect::Rect(const V4& vec4) noexcept
+    : _left(vec4.x()), _top(vec4.y()), _right(vec4.z()), _bottom(vec4.w())
 {
 }
 

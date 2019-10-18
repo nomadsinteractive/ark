@@ -34,11 +34,20 @@ public:
         int32_t _offsets[ATTRIBUTE_NAME_COUNT];
     };
 
+    struct ARK_API Parameters {
+        Parameters(RenderModel::Mode mode, const Rect& scissor, uint32_t flags);
+
+        RenderModel::Mode _mode;
+        Rect _scissor;
+        uint32_t _flags;
+    };
+
 public:
-    PipelineBindings(RenderModel::Mode mode, const sp<PipelineLayout>& pipelineLayout, Flag flag);
+    PipelineBindings(const Parameters& parameters, const sp<PipelineLayout>& pipelineLayout);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineBindings);
 
     RenderModel::Mode mode() const;
+    const Rect& scissor() const;
 
     const sp<PipelineLayout>& layout() const;
     const sp<PipelineInput>& input() const;
@@ -59,17 +68,15 @@ public:
 
 private:
     struct Stub {
-        Stub(RenderModel::Mode mode, const sp<PipelineLayout>& pipelineLayout, Flag flag);
+        Stub(const Parameters& parameters, const sp<PipelineLayout>& pipelineLayout);
 
-        RenderModel::Mode _mode;
+        Parameters _parameters;
         sp<PipelineLayout> _layout;
         sp<PipelineInput> _input;
 
         Attributes _attributes;
 
         std::vector<sp<Texture>> _samplers;
-
-        uint32_t _flags;
     };
 
 private:

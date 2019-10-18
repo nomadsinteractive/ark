@@ -19,7 +19,7 @@ public:
     virtual void onSurfaceCreated(RenderContext& glContext) override;
 
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
-    virtual sp<Camera::Delegate> createCamera() override;
+    virtual sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem cs) override;
     virtual sp<Framebuffer> createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture) override;
     virtual sp<RenderView> createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController) override;
     virtual sp<PipelineFactory> createPipelineFactory() override;

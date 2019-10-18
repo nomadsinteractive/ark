@@ -207,7 +207,7 @@ sp<Vec4Impl> Vec4Util::ensureImpl(const sp<Vec4>& self)
 
 template<> ARK_API sp<Vec4> Null::ptr()
 {
-    return Ark::instance().obtain<Vec4Impl>();
+    return sp<Vec4Impl>::make();
 }
 
 }

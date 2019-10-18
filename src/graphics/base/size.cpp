@@ -113,7 +113,7 @@ void Size::adopt(const Size& other)
 
 template<> ARK_API sp<Size> Null::ptr()
 {
-    return Ark::instance().obtain<Size>();
+    return sp<Size>::make();
 }
 
 Size::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)

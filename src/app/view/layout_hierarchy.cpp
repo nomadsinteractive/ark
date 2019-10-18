@@ -12,7 +12,6 @@
 #include "app/view/view.h"
 #include "app/view/view_group.h"
 
-
 namespace ark {
 
 LayoutHierarchy::Slot::Slot(const sp<Renderer>& renderer, bool layoutRequested)
@@ -60,7 +59,7 @@ void LayoutHierarchy::Slot::doPlace(Layout::Context& ctx, float clientHeight, co
         {
             const Rect& margins = layoutParam->margins();
             const Rect target = layout->place(ctx, layoutParam);
-            _y = clientHeight - target.top() - margins.top() - layoutParam->contentHeight();
+            _y = clientHeight - layoutParam->contentHeight() - target.top() - margins.top();
             _x = target.left() + margins.left();
         }
     }
@@ -88,7 +87,7 @@ void LayoutHierarchy::Slot::doLayoutEnd(const Rect& p)
     if(_view)
     {
         _x += p.left();
-        _y -= (g_upDirection * p.top());
+        _y -= p.top();
     }
     updateLayout();
 }
@@ -97,7 +96,7 @@ void LayoutHierarchy::Slot::render(RenderRequest& renderRequest, const V3& posit
 {
     if(!_layout_requested)
     {
-        _renderer->render(renderRequest, V3(_x, _y, 0) + position);
+        _renderer->render(renderRequest, position + V3(_x, _y, 0));
         if(_view)
             _layout_requested = _layout_width != _view->size()->width() || _layout_height != _view->size()->height();
     }

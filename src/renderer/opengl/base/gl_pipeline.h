@@ -107,26 +107,25 @@ private:
 
     class GLRenderCommand : public RenderCommand {
     public:
-        GLRenderCommand(GLenum mode, bool cullFace);
+        GLRenderCommand(GLenum mode);
         virtual ~GLRenderCommand() = default;
 
         DrawingContext::Parameters _parameters;
 
     protected:
         GLenum _mode;
-        bool _cull_face;
     };
 
     class GLDrawElements : public GLRenderCommand {
     public:
-        GLDrawElements(GLenum mode, bool cullFace);
+        GLDrawElements(GLenum mode);
 
         virtual void draw(GraphicsContext& graphicsContext) override;
     };
 
     class GLDrawElementsInstanced : public GLRenderCommand {
     public:
-        GLDrawElementsInstanced(GLenum mode, bool cullFace);
+        GLDrawElementsInstanced(GLenum mode);
 
         virtual void draw(GraphicsContext& graphicsContext) override;
     };
@@ -143,6 +142,8 @@ private:
     String _fragment_source;
 
     bool _cull_face;
+    Rect _scissor;
+    bool _scissor_enabled;
 
     GLuint _id;
 

@@ -46,7 +46,7 @@ uint64_t VKFramebuffer::id()
     return 0;
 }
 
-void VKFramebuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& /*uploader*/)
+void VKFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
     VkDevice device = _renderer->vkLogicalDevice();
     uint32_t width = static_cast<uint32_t>(_texture->width());
@@ -141,6 +141,8 @@ void VKFramebuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Upload
     VKUtil::checkResult(vkCreateRenderPass(device, &renderPassInfo, nullptr, &_render_pass_begin_info.renderPass));
 
     const sp<VKTexture2D> vkTexture = _texture->delegate();
+    if(!vkTexture->id())
+        vkTexture->upload(graphicsContext, nullptr);
 
     VkImageView attachments[2];
     attachments[0] = vkTexture->vkDescriptor().imageView;
