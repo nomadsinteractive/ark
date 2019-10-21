@@ -23,7 +23,7 @@ TP_AS_NUMBER_TEMPLATE = [
     '    (ternaryfunc) ${nb_power},   /* ternaryfunc nb_power; */ /* __pow__ */',
     '    (unaryfunc) ${nb_negative},        /* unaryfunc nb_negative; */ /* __neg__ */',
     '    nullptr,               /* unaryfunc nb_positive; */ /* __pos__ */',
-    '    nullptr,               /* unaryfunc nb_absolute; */ /* __abs__ */',
+    '    (unaryfunc) ${nb_absolute},               /* unaryfunc nb_absolute; */ /* __abs__ */',
     '    (inquiry) ${nb_bool}, /* inquiry nb_bool; */ /* __bool__ */',
     '    nullptr,               /* unaryfunc nb_invert; */ /* __invert__ */',
     '    nullptr,               /* binaryfunc nb_lshift; */ /* __lshift__ */',
@@ -58,6 +58,7 @@ TP_AS_NUMBER_TEMPLATE_OPERATOR = {
     '%': 'nb_remainder',
     'bool': 'nb_bool',
     'neg': 'nb_negative',
+    'abs': 'nb_absolute',
     'pow': 'nb_power',
     '&&': 'nb_and',
     '||': 'nb_or',
@@ -71,7 +72,7 @@ TP_AS_NUMBER_TEMPLATE_OPERATOR = {
     '/=': 'nb_inplace_true_divide'
 }
 
-NO_STATIC_OPS = {'neg', 'int', 'float', '+=', '-=', '*=', '/='}
+NO_STATIC_OPS = {'neg', 'abs', 'int', 'float', '+=', '-=', '*=', '/='}
 
 RICH_COMPARE_OPS = {
     '<': 'Py_LT',

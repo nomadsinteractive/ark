@@ -10,7 +10,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class Frame final : public Renderer, public Block {
 public:
     Frame() = default;

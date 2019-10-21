@@ -29,16 +29,24 @@ void Varyings::traverse(const Holder::Visitor& visitor)
         HolderUtil::visit(iter.second._flatable, visitor);
 }
 
-void Varyings::addVarying(const String& name, const sp<Flatable>& flatable)
+void Varyings::setVarying(const String& name, sp<Flatable> flatable)
 {
-    DCHECK(_varyings.find(name) == _varyings.end(), "Varying \"%s\" already exists", name.c_str());
-    _varyings.emplace(name, flatable);
-    _size = 0;
+    auto iter = _varyings.find(name);
+    if(iter == _varyings.end())
+    {
+        _varyings.emplace(name, std::move(flatable));
+        _size = 0;
+    }
+    else
+    {
+        DCHECK(iter->second._flatable->size() == flatable->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), iter->second._flatable->size(), flatable->size());
+        iter->second = Varying(std::move(flatable), iter->second._offset);
+    }
 }
 
-void Varyings::add(const String& name, const sp<Numeric>& var)
+void Varyings::set(const String& name, const sp<Numeric>& var)
 {
-    addVarying(name, sp<FlatableByVariable<float>>::make(var));
+    setVarying(name, sp<Flatable>::make<FlatableByVariable<float>>(var));
 }
 
 Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Allocator& allocator)
@@ -78,7 +86,7 @@ sp<Varyings> Varyings::BUILDER::build(const Scope& args)
 
     const sp<Varyings> varyings = sp<Varyings>::make();
     for(const VaryingBuilder& i : _varying_builders)
-        varyings->addVarying(i._name,  i._flatable->build(args));
+        varyings->setVarying(i._name,  i._flatable->build(args));
     return varyings;
 }
 

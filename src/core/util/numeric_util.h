@@ -52,6 +52,8 @@ public:
     static sp<Numeric> mod(float lvalue, const sp<Numeric>& rvalue);
 //[[script::bindings::operator(neg)]]
     static sp<Numeric> negative(const sp<Numeric>& self);
+//[[script::bindings::operator(abs)]]
+    static sp<Numeric> absolute(const sp<Numeric>& self);
 //[[script::bindings::operator(pow)]]
     static sp<Numeric> pow(const sp<Numeric>& x, const sp<Integer>& y, const sp<Integer>& z = nullptr);
 //[[script::bindings::operator(pow)]]

@@ -617,8 +617,8 @@ class RenderObject:
         self._transform = transform
 
     @property
-    def varyings(self):
-        return None
+    def varyings(self) -> 'Varyings':
+        return Varyings()
 
     @varyings.setter
     def varyings(self, v):
@@ -1125,10 +1125,8 @@ class StringBundle:
 
 
 class Varyings:
-    def __init__(self, shader):
-        pass
 
-    def add(self, name, obj):
+    def set(self, name: str, obj: Union[Numeric, Vec2, Vec3, Vec4]):
         pass
 
 

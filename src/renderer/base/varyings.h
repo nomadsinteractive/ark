@@ -1,6 +1,8 @@
 #ifndef ARK_RENDERER_BASE_VARYINGS_H_
 #define ARK_RENDERER_BASE_VARYINGS_H_
 
+#include <map>
+
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
@@ -48,7 +50,7 @@ public:
     virtual void traverse(const Visitor& visitor) override;
 
 //[[script::bindings::auto]]
-    void add(const String& name, const sp<Numeric>& var);
+    void set(const String& name, const sp<Numeric>& var);
 
     Snapshot snapshot(const PipelineInput& pipelineInput, Allocator& allocator);
 
@@ -75,11 +77,11 @@ public:
     };
 
 private:
-    void addVarying(const String& name, const sp<Flatable>& flatable);
+    void setVarying(const String& name, sp<Flatable> flatable);
 
 private:
     sp<PipelineInput> _pipeline_input;
-    std::unordered_map<String, Varying> _varyings;
+    std::map<String, Varying> _varyings;
     uint32_t _size;
 
     friend class BUILDER;

@@ -101,11 +101,6 @@ public:
 
 
 //  [[script::bindings::auto]]
-    static ARK_API float abs(float x);
-//  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> abs(const sp<Numeric>& x);
-
-//  [[script::bindings::auto]]
     static ARK_API float sin(float x);
 //  [[script::bindings::auto]]
     static ARK_API sp<Numeric> sin(const sp<Numeric>& x);

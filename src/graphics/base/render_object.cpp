@@ -68,6 +68,11 @@ const SafePtr<Transform>& RenderObject::transform() const
     return _transform;
 }
 
+const SafePtr<Varyings>& RenderObject::varyings() const
+{
+    return _varyings;
+}
+
 void RenderObject::setType(int32_t type)
 {
     _type->set(type);

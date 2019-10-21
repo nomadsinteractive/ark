@@ -10,7 +10,6 @@
 #include "core/impl/numeric/fence.h"
 #include "core/impl/numeric/max.h"
 #include "core/impl/numeric/min.h"
-#include "core/impl/numeric/numeric_negative.h"
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/numeric/vibrate.h"
 #include "core/impl/variable/boost.h"
@@ -67,6 +66,36 @@ private:
     sp<Numeric> _boundary;
 
     Notifier _notifer;
+};
+
+class Absolute : public Numeric {
+public:
+    Absolute(const sp<Numeric>& a1)
+        : _a1(a1) {
+    }
+
+    virtual float val() override {
+        return std::abs(_a1->val());
+    }
+
+private:
+    sp<Numeric> _a1;
+
+};
+
+class Negative : public Numeric {
+public:
+    Negative(const sp<Numeric>& a1)
+        : _a1(a1) {
+    }
+
+    virtual float val() override {
+        return -_a1->val();
+    }
+
+private:
+    sp<Numeric> _a1;
+
 };
 
 }
@@ -165,7 +194,12 @@ sp<Numeric> NumericUtil::mod(float lvalue, const sp<Numeric>& rvalue)
 
 sp<Numeric> NumericUtil::negative(const sp<Numeric>& self)
 {
-    return sp<NumericNegative>::make(self);
+    return sp<Negative>::make(self);
+}
+
+sp<Numeric> NumericUtil::absolute(const sp<Numeric>& self)
+{
+    return sp<Absolute>::make(self);
 }
 
 sp<Numeric> NumericUtil::pow(const sp<Numeric>& x, const sp<Integer>& y, const sp<Integer>& /*z*/)
