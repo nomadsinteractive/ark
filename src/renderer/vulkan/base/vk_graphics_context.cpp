@@ -49,7 +49,7 @@ void VKGraphicsContext::initialize(GraphicsContext& graphicsContext)
 void VKGraphicsContext::begin(uint32_t imageId, const Color& backgroundColor)
 {
     VkClearValue vkClearValues[2];
-    vkClearValues[0].color = {{backgroundColor.red(), backgroundColor.green(), backgroundColor.blue(), backgroundColor.alpha()}};
+    vkClearValues[0].color = {{backgroundColor.r(), backgroundColor.g(), backgroundColor.b(), backgroundColor.a()}};
     vkClearValues[1].depthStencil = {1.0f, 0};
 
     const VKRenderTarget& renderTarget = _renderer->renderTarget();

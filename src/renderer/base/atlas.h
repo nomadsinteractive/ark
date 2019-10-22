@@ -32,25 +32,22 @@ public:
     class ARK_API Item {
     public:
         Item();
-        Item(uint16_t left, uint16_t top, uint16_t right, uint16_t bottom, float width, float height, float pivotX = 0, float pivotY = 0);
+        Item(uint16_t ux, uint16_t uy, uint16_t vx, uint16_t vy, const Rect& bounds, const V2& size);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
 
+        const Rect& bounds() const;
         const V2& size() const;
-        const V2& pivot() const;
 
-        uint16_t left() const;
-        uint16_t top() const;
-        uint16_t right() const;
-        uint16_t bottom() const;
-
-        float width() const;
-        float height() const;
+        uint16_t ux() const;
+        uint16_t uy() const;
+        uint16_t vx() const;
+        uint16_t vy() const;
 
     private:
-        uint16_t _left, _top;
-        uint16_t _right, _bottom;
+        uint16_t _ux, _uy;
+        uint16_t _vx, _vy;
+        Rect _bounds;
         V2 _size;
-        V2 _pivot;
     };
 
     const sp<Texture>& texture() const;
@@ -64,7 +61,7 @@ public:
 //  [[script::bindings::auto]]
     const V2& getOriginalSize(int32_t c) const;
 
-    void add(int32_t id, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX = 0, float pivotY = 0);
+    void add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot);
 
     const Item& at(int32_t id) const;
     void getOriginalPosition(int32_t id, Rect& position) const;
@@ -87,8 +84,9 @@ public:
         SafePtr<Builder<Texture>> _texture;
         sp<ResourceLoaderContext> _resource_loader_context;
     };
+
 private:
-    Item makeItem(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, float pivotX, float pivotY) const;
+    Item makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const;
 
 private:
     sp<Texture> _texture;

@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "core/ark.h"
-
+#include "core/base/bean_factory.h"
 #include "core/inf/importer.h"
 #include "core/inf/variable.h"
 #include "core/util/math.h"

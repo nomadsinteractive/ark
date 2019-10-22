@@ -3,17 +3,16 @@
 #include "core/ark.h"
 #include "core/base/allocator.h"
 #include "core/base/bean_factory.h"
-#include "core/base/memory_pool.h"
-#include "core/inf/array.h"
 #include "core/inf/flatable.h"
 #include "core/inf/variable.h"
 #include "core/impl/flatable/flatable_by_variable.h"
 #include "core/util/holder_util.h"
 
 #include "graphics/base/rect.h"
+#include "graphics/base/v4.h"
 
 #include "renderer/base/shader.h"
-#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/pipeline_input.h"
 #include "renderer/base/varyings.h"
 
 namespace ark {
@@ -47,6 +46,21 @@ void Varyings::setVarying(const String& name, sp<Flatable> flatable)
 void Varyings::set(const String& name, const sp<Numeric>& var)
 {
     setVarying(name, sp<Flatable>::make<FlatableByVariable<float>>(var));
+}
+
+void Varyings::set(const String& name, const sp<Vec2>& var)
+{
+    setVarying(name, sp<Flatable>::make<FlatableByVariable<V2>>(var));
+}
+
+void Varyings::set(const String& name, const sp<Vec3>& var)
+{
+    setVarying(name, sp<Flatable>::make<FlatableByVariable<V3>>(var));
+}
+
+void Varyings::set(const String& name, const sp<Vec4>& var)
+{
+    setVarying(name, sp<Flatable>::make<FlatableByVariable<V4>>(var));
 }
 
 Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Allocator& allocator)

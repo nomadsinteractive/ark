@@ -79,8 +79,6 @@ private:
 
     const std::map<TypeId, LoaderFunction>& getLoader(const String& name) const;
 
-//    PyObject* wrap(Instance& inst, const Box& box, const Scope& args) const;
-
     static PyTypeObject* basetype();
 
     static PyObject* __new__(PyTypeObject *type, PyObject *args, PyObject *kwds);

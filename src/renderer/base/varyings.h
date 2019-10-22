@@ -5,7 +5,8 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/base/bean_factory.h"
+#include "core/base/string.h"
+#include "core/inf/array.h"
 #include "core/inf/builder.h"
 #include "core/inf/flatable.h"
 #include "core/inf/holder.h"
@@ -51,6 +52,12 @@ public:
 
 //[[script::bindings::auto]]
     void set(const String& name, const sp<Numeric>& var);
+//[[script::bindings::auto]]
+    void set(const String& name, const sp<Vec2>& var);
+//[[script::bindings::auto]]
+    void set(const String& name, const sp<Vec3>& var);
+//[[script::bindings::auto]]
+    void set(const String& name, const sp<Vec4>& var);
 
     Snapshot snapshot(const PipelineInput& pipelineInput, Allocator& allocator);
 
@@ -72,7 +79,6 @@ public:
         virtual sp<Varyings> build(const Scope& args) override;
 
     private:
-        BeanFactory _factory;
         std::vector<VaryingBuilder> _varying_builders;
     };
 

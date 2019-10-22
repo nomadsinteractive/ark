@@ -3,9 +3,6 @@
 #include "core/ark.h"
 #include "core/util/documents.h"
 
-#include "renderer/base/atlas.h"
-#include "renderer/base/resource_loader_context.h"
-
 namespace ark {
 
 void AtlasImporterTexturePacker::import(Atlas& atlas, const document& manifest)
@@ -22,11 +19,11 @@ void AtlasImporterTexturePacker::import(Atlas& atlas, const document& manifest)
         uint32_t h = Documents::getAttribute<uint32_t>(i, "h", 0);
         uint32_t ox = Documents::getAttribute<uint32_t>(i, "oX", 0);
         uint32_t oy = Documents::getAttribute<uint32_t>(i, "oY", 0);
-        uint32_t ow = Documents::getAttribute<uint32_t>(i, "oW", w);
-        uint32_t oh = Documents::getAttribute<uint32_t>(i, "oH", h);
+        float ow = static_cast<float>(Documents::getAttribute<uint32_t>(i, "oW", w));
+        float oh = static_cast<float>(Documents::getAttribute<uint32_t>(i, "oH", h));
         float px = Documents::getAttribute<float>(i, "pX", 0.5f);
         float py = Documents::getAttribute<float>(i, "pY", 0.5f);
-        atlas.add(n, x, y, x + w, y + h, (ow * px - ox) / w, (h - oh * py + oy) / h);
+        atlas.add(n, x, y, x + w, y + h, Rect(ox / ow, oy / oh, (ox + w) / ow, (oy + h) / oh), V2(ow, oh), V2(px, 1.0f - py));
     }
 }
 

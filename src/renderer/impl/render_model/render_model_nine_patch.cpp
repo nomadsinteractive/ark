@@ -107,8 +107,8 @@ Rect RenderModelNinePatch::getPatches(const Rect& paddings, const Rect& bounds) 
 void RenderModelNinePatch::importAtlasItem(int32_t type, const Rect& paddings, uint32_t textureWidth, uint32_t textureHeight)
 {
     const Atlas::Item& item = _atlas->at(type);
-    const Rect bounds(item.left() * textureWidth / 65536.0f, item.bottom() * textureHeight / 65536.0f,
-                      item.right() * textureWidth / 65536.0f, item.top() * textureHeight / 65536.0f);
+    const Rect bounds(item.ux() * textureWidth / 65536.0f, item.vy() * textureHeight / 65536.0f,
+                      item.vx() * textureWidth / 65536.0f, item.uy() * textureHeight / 65536.0f);
     _nine_patch_items.emplace(type, bounds, getPatches(paddings, bounds), textureWidth, textureHeight);
 }
 

@@ -1124,22 +1124,22 @@ class StringBundle:
         return []
 
 
-class Varyings:
-
-    def set(self, name: str, obj: Union[Numeric, Vec2, Vec3, Vec4]):
-        pass
-
-
-class Color:
+class Color(Vec4):
     def __init__(self, v):
-        pass
+        super().__init__(0, 0, 0, 0)
 
-    def assign(self, other):
+    def assign(self, other: 'Color'):
         pass
 
     @propertry
-    def value(self):
-        return None
+    def value(self) -> int:
+        return 0
+
+
+class Varyings:
+
+    def set(self, name: str, obj: Union[Numeric, Vec2, Vec3, Vec4, Color]):
+        pass
 
 
 class Visibility:

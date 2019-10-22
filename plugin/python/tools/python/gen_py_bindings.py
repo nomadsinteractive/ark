@@ -199,7 +199,7 @@ def gen_class_header_source(genclass, declares):
     s = '\n    '.join(i for i in method_declarations if i)
     declares.append(acg.format('''class ${py_class_name} : public ark::plugin::python::PyArkType {
 public:
-    ${py_class_name}(const String& name, const String& doc, PyTypeObject* base, long flags);
+    ${py_class_name}(const String& name, const String& doc, PyTypeObject* base, unsigned long flags);
 
     ${method_declares}
 };''', method_declares=s, py_class_name=genclass.py_class_name))
@@ -320,7 +320,7 @@ def gen_class_body_source(genclass, includes, lines, buildables):
     genclass.gen_py_type_constructor_codes(tp_method_lines)
     if genclass.constants:
         tp_method_lines.extend('_constants["%s"] = %s;' % (i, j) for i, j in genclass.constants.items())
-    constructor = acg.format('''${py_class_name}::${py_class_name}(const String& name, const String& doc, PyTypeObject* base, long flags)
+    constructor = acg.format('''${py_class_name}::${py_class_name}(const String& name, const String& doc, PyTypeObject* base, unsigned long flags)
     : PyArkType(name, doc, base, flags)
 {${tp_methods}
 }''', py_class_name=genclass.py_class_name, tp_methods='\n    ' + '\n    '.join(tp_method_lines) if tp_method_lines else '')

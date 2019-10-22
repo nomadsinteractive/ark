@@ -13,31 +13,32 @@
 namespace ark {
 
 //[[core::class]]
+//[[script::bindings::extends(Vec4)]]
 class ARK_API Color : public Vec4, public Notifier {
 public:
     Color();
 //  [[script::bindings::auto]]
     Color(uint32_t value);
-    Color(float red, float green, float blue, float alpha);
-    Color(float red, float green, float blue);
+    Color(float r, float g, float b, float a);
+    Color(float r, float g, float b);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Color);
 
 //  [[script::bindings::property]]
-    float red() const;
+    float r() const;
 //  [[script::bindings::property]]
-    void setRed(float red);
+    void setR(float r);
 //  [[script::bindings::property]]
-    float green() const;
+    float g() const;
 //  [[script::bindings::property]]
-    void setGreen(float green);
+    void setG(float g);
 //  [[script::bindings::property]]
-    float blue() const;
+    float b() const;
 //  [[script::bindings::property]]
-    void setBlue(float blue);
+    void setB(float b);
 //  [[script::bindings::property]]
-    float alpha() const;
+    float a() const;
 //  [[script::bindings::property]]
-    void setAlpha(float alpha);
+    void setA(float a);
 
 //  [[script::bindings::property]]
     uint32_t value() const;

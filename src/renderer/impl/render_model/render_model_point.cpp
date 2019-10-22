@@ -37,7 +37,7 @@ void RenderModelPoint::load(DrawingBuffer& buf, const RenderObject::Snapshot& sn
     const Atlas::Item& texCoord = _atlas->at(snapshot._type);
     buf.nextVertex();
     buf.writePosition(0, 0, 0);
-    buf.writeTexCoordinate(static_cast<uint16_t>((texCoord.left() + texCoord.right()) / 2), static_cast<uint16_t>((texCoord.top() + texCoord.bottom()) / 2));
+    buf.writeTexCoordinate(static_cast<uint16_t>((texCoord.ux() + texCoord.vx()) / 2), static_cast<uint16_t>((texCoord.uy() + texCoord.vy()) / 2));
 }
 
 RenderModelPoint::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

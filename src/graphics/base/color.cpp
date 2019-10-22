@@ -30,45 +30,45 @@ Color::Color(float red, float green, float blue)
 {
 }
 
-float Color::red() const
+float Color::r() const
 {
     return _color._x;
 }
 
-void Color::setRed(float red)
+void Color::setR(float red)
 {
     _color._x = red;
     notify();
 }
 
-float Color::green() const
+float Color::g() const
 {
     return _color._y;
 }
 
-void Color::setGreen(float green)
+void Color::setG(float green)
 {
     _color._y = green;
     notify();
 }
 
-float Color::blue() const
+float Color::b() const
 {
     return _color._z;
 }
 
-void Color::setBlue(float blue)
+void Color::setB(float blue)
 {
     _color._z = blue;
     notify();
 }
 
-float Color::alpha() const
+float Color::a() const
 {
     return _color.w();
 }
 
-void Color::setAlpha(float alpha)
+void Color::setA(float alpha)
 {
     _color._w = alpha;
     notify();

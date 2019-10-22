@@ -69,8 +69,8 @@ void GLModelSphere::load(DrawingBuffer& buf, const RenderObject::Snapshot& snaps
     {
         buf.nextVertex();
         buf.writePosition(elements[0], elements[1], elements[2]);
-        uint16_t u = item.left() + static_cast<uint16_t>((item.right() - item.left()) * elements[3]);
-        uint16_t v = item.top() + static_cast<uint16_t>((item.bottom() - item.top()) * elements[4]);
+        uint16_t u = item.ux() + static_cast<uint16_t>((item.vx() - item.ux()) * elements[3]);
+        uint16_t v = item.uy() + static_cast<uint16_t>((item.vy() - item.uy()) * elements[4]);
         buf.writeTexCoordinate(u, v);
 
         const V3 normal(elements[0], elements[1], elements[2]);

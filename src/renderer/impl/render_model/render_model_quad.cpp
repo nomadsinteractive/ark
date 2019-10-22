@@ -32,25 +32,26 @@ void RenderModelQuad::start(DrawingBuffer& buf, const RenderLayer::Snapshot& sna
 void RenderModelQuad::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
 {
     const Atlas::Item& texCoord = _atlas->at(snapshot._type);
-    const V2& pivot = texCoord.pivot();
-    float width = static_cast<int32_t>(snapshot._size.x()) == 0 ? texCoord.width() : snapshot._size.x();
-    float height = static_cast<int32_t>(snapshot._size.y()) == 0 ? texCoord.height() : snapshot._size.y();
+    const Rect& bounds = texCoord.bounds();
+    const V2& size = texCoord.size();
+    float width = static_cast<int32_t>(snapshot._size.x()) == 0 ? size.x() : snapshot._size.x();
+    float height = static_cast<int32_t>(snapshot._size.y()) == 0 ? size.y() : snapshot._size.y();
 
     buf.nextVertex();
-    buf.writePosition(0 - pivot.x() * width, 0 - pivot.y() * height, 0);
-    buf.writeTexCoordinate(texCoord.left(), texCoord.top());
+    buf.writePosition(bounds.left() * width, bounds.top() * height, 0);
+    buf.writeTexCoordinate(texCoord.ux(), texCoord.uy());
 
     buf.nextVertex();
-    buf.writePosition(0 - pivot.x() * width, height - pivot.y() * height, 0);
-    buf.writeTexCoordinate(texCoord.left(), texCoord.bottom());
+    buf.writePosition(bounds.left() * width, bounds.bottom() * height, 0);
+    buf.writeTexCoordinate(texCoord.ux(), texCoord.vy());
 
     buf.nextVertex();
-    buf.writePosition(width - pivot.x() * width, 0 - pivot.y() * height, 0);
-    buf.writeTexCoordinate(texCoord.right(), texCoord.top());
+    buf.writePosition(bounds.right() * width, bounds.top() * height, 0);
+    buf.writeTexCoordinate(texCoord.vx(), texCoord.uy());
 
     buf.nextVertex();
-    buf.writePosition(width - pivot.x() * width, height - pivot.y() * height, 0);
-    buf.writeTexCoordinate(texCoord.right(), texCoord.bottom());
+    buf.writePosition(bounds.right() * width, bounds.bottom() * height, 0);
+    buf.writeTexCoordinate(texCoord.vx(), texCoord.vy());
 }
 
 void RenderModelQuad::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)

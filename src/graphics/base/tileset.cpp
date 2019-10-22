@@ -1,6 +1,7 @@
 #include "graphics/base/tileset.h"
 
 #include "core/ark.h"
+#include "core/base/bean_factory.h"
 #include "core/inf/asset.h"
 #include "core/inf/importer.h"
 #include "core/util/documents.h"
