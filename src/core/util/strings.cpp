@@ -80,7 +80,7 @@ class StringBuilderImpl3 : public Builder<String> {
 public:
     StringBuilderImpl3(const String& value)
         : _value(sp<String>::make(value)) {
-        static const std::regex VAR_PATTERN("([$@])\\{?([\\w:/]+)\\}?");
+        static const std::regex VAR_PATTERN("([$@])\\{?([\\w.:\\-?&/]+)\\}?");
         _builders = regexp_split(_value->c_str(), VAR_PATTERN, [](const std::smatch& match) -> sp<Builder<String>> {
             const String& p = match[1].str();
             const String& s = match[2].str();
@@ -110,7 +110,7 @@ private:
 
 sp<Builder<String>> Strings::load(const String& resid)
 {
-    if(!resid)
+    if(!resid || resid.find('{') != String::npos)
         return sp<StringBuilderImpl3>::make(resid);
 
     const Identifier id = Identifier::parse(resid, Identifier::FORMAT_NAMESPACE);
@@ -529,7 +529,7 @@ bool Strings::isArgument(const String& value)
 
 bool Strings::isVariableCharacter(char c, bool allowDash)
 {
-    if(!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || (allowDash && c == '-')))
+    if(!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '.' || (allowDash && c == '-')))
         return false;
     return true;
 }

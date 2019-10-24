@@ -23,7 +23,9 @@ void AtlasImporterTexturePacker::import(Atlas& atlas, const document& manifest)
         float oh = static_cast<float>(Documents::getAttribute<uint32_t>(i, "oH", h));
         float px = Documents::getAttribute<float>(i, "pX", 0.5f);
         float py = Documents::getAttribute<float>(i, "pY", 0.5f);
-        atlas.add(n, x, y, x + w, y + h, Rect(ox / ow, oy / oh, (ox + w) / ow, (oy + h) / oh), V2(ow, oh), V2(px, 1.0f - py));
+        Rect bounds(ox / ow, oy / oh, (ox + w) / ow, (oy + h) / oh);
+        bounds.vflip(1.0f);
+        atlas.add(n, x, y, x + w, y + h, bounds, V2(ow, oh), V2(px, 1.0f - py));
     }
 }
 

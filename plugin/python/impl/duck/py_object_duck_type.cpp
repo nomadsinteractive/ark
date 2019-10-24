@@ -15,6 +15,11 @@ PyObjectDuckType::PyObjectDuckType(PyInstance inst)
 {
 }
 
+void PyObjectDuckType::to(sp<String>& inst)
+{
+    inst = sp<String>::make(PythonInterpreter::instance()->toString(_instance.pyObject()));
+}
+
 void PyObjectDuckType::to(sp<CollisionCallback>& inst)
 {
     inst = PythonInterpreter::instance()->toCppObject<sp<CollisionCallback>>(_instance.pyObject());
@@ -26,14 +31,14 @@ void PyObjectDuckType::to(sp<RendererMaker>& inst)
     inst = sp<RendererMakerPython>::make(_instance.getAttr("make"), std::move(recycler));
 }
 
-void PyObjectDuckType::to(sp<Array<Color>>& inst)
+void PyObjectDuckType::to(sp<Integer>& inst)
 {
-    inst = PythonInterpreter::instance()->toArray<Color>(_instance.pyObject());
+    inst = PythonInterpreter::instance()->toCppObject<sp<Integer>>(_instance.pyObject());
 }
 
-void PyObjectDuckType::to(sp<Array<int32_t>>& inst)
+void PyObjectDuckType::to(sp<Numeric>& inst)
 {
-    inst = PythonInterpreter::instance()->toArray<int32_t>(_instance.pyObject());
+    inst = PythonInterpreter::instance()->toCppObject<sp<Numeric>>(_instance.pyObject());
 }
 
 }

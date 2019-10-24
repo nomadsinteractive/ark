@@ -180,10 +180,6 @@ Scope PythonInterpreter::toScope(PyObject* kws) const
                 scope.put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
             else if(PyBool_Check(item))
                 scope.put(sKey, sp<Boolean::Const>::make(PyObject_IsTrue(item) != 0));
-            else if(isInstance<Numeric>(item) || isInstance<Integer>(item) || PyFloat_Check(item) || PyLong_Check(item))
-                scope.put(sKey, sp<PyNumericDuckType>::make(PyInstance::track(item)));
-            else if(PyBytes_Check(item) || PyUnicode_Check(item))
-                scope.put(sKey, sp<String>::make(toString(item)));
             else if(PyCallable_Check(item))
                 scope.put(sKey, sp<PyCallableDuckType>::make(PyInstance::track(item)));
             else

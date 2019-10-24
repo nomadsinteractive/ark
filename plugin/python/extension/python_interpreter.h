@@ -146,7 +146,7 @@ public:
     bool exceptErr(PyObject* type) const;
 
 private:
-    template<typename T> PyObject* fromIterable_sfinae(const T& list, decltype(list.front())*) {
+    template<typename T> PyObject* fromIterable_sfinae(const T& list, typename std::remove_reference<decltype(list.front())>::type*) {
         PyObject* pyList = PyList_New(list.size());
         Py_ssize_t index = 0;
         for(const auto& i : list)

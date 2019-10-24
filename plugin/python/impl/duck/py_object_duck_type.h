@@ -16,15 +16,16 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-class PyObjectDuckType : public Duck<CollisionCallback>, public Duck<RendererMaker>, public Duck<Array<Color>>, public Duck<Array<int32_t>>,
-        public Implements<PyObjectDuckType, Duck<CollisionCallback>, Duck<RendererMaker>, Duck<Array<Color>>, Duck<Array<int32_t>>> {
+class PyObjectDuckType : public Duck<String>, public Duck<CollisionCallback>, public Duck<RendererMaker>, public Duck<Integer>, public Duck<Numeric>,
+        public Implements<PyObjectDuckType, Duck<String>, Duck<CollisionCallback>, Duck<RendererMaker>, Duck<Integer>, Duck<Numeric>> {
 public:
     PyObjectDuckType(PyInstance inst);
 
+    virtual void to(sp<String>& inst) override;
     virtual void to(sp<CollisionCallback>& inst) override;
     virtual void to(sp<RendererMaker>& inst) override;
-    virtual void to(sp<Array<Color>>& inst) override;
-    virtual void to(sp<Array<int32_t>>& inst) override;
+    virtual void to(sp<Integer>& inst) override;
+    virtual void to(sp<Numeric>& inst) override;
 
 private:
     PyInstance _instance;
