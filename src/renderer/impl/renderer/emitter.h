@@ -24,15 +24,13 @@ namespace ark {
 class ARK_API Emitter : public Holder, public Renderer, public Disposed {
 private:
     struct Source {
-        Source(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const Scope& arguments);
+        Source(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const Scope& arguments);
 
         Scope _arguments;
 
         SafePtr<Integer> _type;
         SafePtr<Vec3> _position;
         sp<Size> _size;
-
-        sp<ObjectPool> _object_pool;
     };
 
 public:
@@ -91,7 +89,7 @@ private:
         uint64_t show(const V3& position, uint64_t tick, const sp<LayerContext>& layerContext);
 
     private:
-        sp<Vec3> makePosition(ObjectPool& objectPool, const V3& position) const;
+        sp<Vec3> makePosition(const V3& position) const;
 
     private:
         sp<Source> _stub;

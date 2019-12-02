@@ -27,11 +27,6 @@ public:
     const float* value() const;
     void map(const float x, const float y, const float z, float& transformedX, float& transformedY, float& transformedZ) const;
 
-    static Matrix ortho(float left, float right, float bottom, float top, float near, float far);
-    static Matrix lookAt(const V3& position, const V3& target, const V3& up);
-    static Matrix frustum(float left, float right, float bottom, float top, float near, float far);
-    static Matrix perspective(float fov, float aspect, float near, float far);
-
 private:
     template<typename T> const T& matrix() const {
         return *reinterpret_cast<const T*>(_value);

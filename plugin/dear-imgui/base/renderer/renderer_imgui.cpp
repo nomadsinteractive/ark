@@ -164,8 +164,8 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
         memcpy(ib->buf(), cmd_list->IdxBuffer.Data, static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes()));
 
         sp<DrawCommand> drawCommand = obtainDrawCommand();
-        Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(_object_pool.obtain<Uploader::Array<uint8_t>>(vb));
-        Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(_object_pool.obtain<Uploader::Array<uint8_t>>(ib));
+        Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(sp<Uploader::Array<uint8_t>>::make(vb));
+        Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(sp<Uploader::Array<uint8_t>>::make(ib));
 
         uint32_t offset = 0;
         const std::vector<RenderLayer::UBOSnapshot> ubos = _shader->snapshot(renderRequest.allocator());

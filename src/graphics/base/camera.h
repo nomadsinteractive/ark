@@ -7,6 +7,7 @@
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/forwarding.h"
 #include "graphics/base/matrix.h"
 #include "graphics/base/viewport.h"
 #include "graphics/base/v3.h"
@@ -17,13 +18,13 @@ class ARK_API Camera {
 public:
     class Holder : public Flatable {
     public:
-        Holder(const sp<Variable<Matrix>>& value);
+        Holder(sp<Mat4> value);
 
         virtual void flat(void* buf) override;
         virtual uint32_t size() override;
 
     private:
-        sp<Variable<Matrix>> _value;
+        sp<Mat4> _value;
 
         friend class Camera;
     };
@@ -32,42 +33,42 @@ public:
     public:
         virtual ~Delegate() = default;
 
-        virtual Matrix frustum(float left, float right, float bottom, float top, float near, float far) = 0;
-        virtual Matrix lookAt(const V3& position, const V3& target, const V3& up) = 0;
-        virtual Matrix ortho(float left, float right, float bottom, float top, float near, float far) = 0;
-        virtual Matrix perspective(float fov, float aspect, float near, float far) = 0;
+        virtual M4 frustum(float left, float right, float bottom, float top, float near, float far) = 0;
+        virtual M4 lookAt(const V3& position, const V3& target, const V3& up) = 0;
+        virtual M4 ortho(float left, float right, float bottom, float top, float near, float far) = 0;
+        virtual M4 perspective(float fov, float aspect, float near, float far) = 0;
     };
 
     class DelegateLH_ZO : public Delegate {
     public:
-        virtual Matrix frustum(float left, float right, float bottom, float top, float near, float far) override;
-        virtual Matrix lookAt(const V3& position, const V3& target, const V3& up) override;
-        virtual Matrix ortho(float left, float right, float bottom, float top, float near, float far) override;
-        virtual Matrix perspective(float fov, float aspect, float near, float far) override;
+        virtual M4 frustum(float left, float right, float bottom, float top, float near, float far) override;
+        virtual M4 lookAt(const V3& position, const V3& target, const V3& up) override;
+        virtual M4 ortho(float left, float right, float bottom, float top, float near, float far) override;
+        virtual M4 perspective(float fov, float aspect, float near, float far) override;
     };
 
     class DelegateRH_ZO : public Delegate {
     public:
-        virtual Matrix frustum(float left, float right, float bottom, float top, float near, float far) override;
-        virtual Matrix lookAt(const V3& position, const V3& target, const V3& up) override;
-        virtual Matrix ortho(float left, float right, float bottom, float top, float near, float far) override;
-        virtual Matrix perspective(float fov, float aspect, float near, float far) override;
+        virtual M4 frustum(float left, float right, float bottom, float top, float near, float far) override;
+        virtual M4 lookAt(const V3& position, const V3& target, const V3& up) override;
+        virtual M4 ortho(float left, float right, float bottom, float top, float near, float far) override;
+        virtual M4 perspective(float fov, float aspect, float near, float far) override;
     };
 
     class DelegateLH_NO : public Delegate {
     public:
-        virtual Matrix frustum(float left, float right, float bottom, float top, float near, float far) override;
-        virtual Matrix lookAt(const V3& position, const V3& target, const V3& up) override;
-        virtual Matrix ortho(float left, float right, float bottom, float top, float near, float far) override;
-        virtual Matrix perspective(float fov, float aspect, float near, float far) override;
+        virtual M4 frustum(float left, float right, float bottom, float top, float near, float far) override;
+        virtual M4 lookAt(const V3& position, const V3& target, const V3& up) override;
+        virtual M4 ortho(float left, float right, float bottom, float top, float near, float far) override;
+        virtual M4 perspective(float fov, float aspect, float near, float far) override;
     };
 
     class DelegateRH_NO : public Delegate {
     public:
-        virtual Matrix frustum(float left, float right, float bottom, float top, float near, float far) override;
-        virtual Matrix lookAt(const V3& position, const V3& target, const V3& up) override;
-        virtual Matrix ortho(float left, float right, float bottom, float top, float near, float far) override;
-        virtual Matrix perspective(float fov, float aspect, float near, float far) override;
+        virtual M4 frustum(float left, float right, float bottom, float top, float near, float far) override;
+        virtual M4 lookAt(const V3& position, const V3& target, const V3& up) override;
+        virtual M4 ortho(float left, float right, float bottom, float top, float near, float far) override;
+        virtual M4 perspective(float fov, float aspect, float near, float far) override;
     };
 
 public:

@@ -33,10 +33,6 @@ public:
         return *this;
     }
 
-    bool operator != (const sp<T>& other) const {
-        return _inst != other._inst;
-    }
-
     T* operator ->() const {
         return _inst.get();
     }
@@ -47,10 +43,6 @@ public:
 
     operator T&() const {
         return *_inst;
-    }
-
-    T* get() const {
-        return _inst.get();
     }
 
 private:

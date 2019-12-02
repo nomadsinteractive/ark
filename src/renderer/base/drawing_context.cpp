@@ -1,7 +1,5 @@
 #include "renderer/base/drawing_context.h"
 
-#include "core/base/object_pool.h"
-
 #include "graphics/base/camera.h"
 #include "graphics/inf/render_command.h"
 

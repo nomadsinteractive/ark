@@ -37,8 +37,6 @@ public:
 
     void activeTexture(const Texture& texture, uint32_t name);
 
-    void glUpdateMatrix(GraphicsContext& graphicsContext, const String& name, const Matrix& matrix);
-
     class GLUniform {
     public:
         GLUniform(GLint location = -1);

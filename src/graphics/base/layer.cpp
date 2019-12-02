@@ -22,7 +22,8 @@ void Layer::render(RenderRequest& /*renderRequest*/, const V3& position)
 
 void Layer::traverse(const Holder::Visitor& visitor)
 {
-    HolderUtil::visit(_layer_context, visitor);
+    if(_layer_context)
+        _layer_context->traverse(visitor);
 }
 
 void Layer::dispose()

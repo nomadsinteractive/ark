@@ -6,7 +6,9 @@
 #include "core/util/math.h"
 
 #include "graphics/base/bitmap.h"
+#include "graphics/base/mat.h"
 #include "graphics/base/matrix.h"
+#include "graphics/util/matrix_util.h"
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/graphics_context.h"
@@ -119,14 +121,14 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     for (uint32_t i = 0; i < 6; ++i)
         ::glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA8, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
 
-    const Matrix captureProjection = Matrix::perspective(Math::radians(90.0f), 1.0f, 0.1f, 10.0f);
-    const Matrix captureViews[] = {
-        Matrix::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 1.0f,  0.0f,  0.0f), V3(0.0f, -1.0f,  0.0f)),
-        Matrix::lookAt(V3(0.0f, 0.0f, 0.0f), V3(-1.0f,  0.0f,  0.0f), V3(0.0f, -1.0f,  0.0f)),
-        Matrix::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 0.0f,  1.0f,  0.0f), V3(0.0f,  0.0f,  1.0f)),
-        Matrix::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 0.0f, -1.0f,  0.0f), V3(0.0f,  0.0f, -1.0f)),
-        Matrix::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 0.0f,  0.0f,  1.0f), V3(0.0f, -1.0f,  0.0f)),
-        Matrix::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 0.0f,  0.0f, -1.0f), V3(0.0f, -1.0f,  0.0f))
+    const M4 captureProjection = MatrixUtil::perspective(Math::radians(90.0f), 1.0f, 0.1f, 10.0f);
+    const M4 captureViews[] = {
+        MatrixUtil::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 1.0f,  0.0f,  0.0f), V3(0.0f, -1.0f,  0.0f)),
+        MatrixUtil::lookAt(V3(0.0f, 0.0f, 0.0f), V3(-1.0f,  0.0f,  0.0f), V3(0.0f, -1.0f,  0.0f)),
+        MatrixUtil::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 0.0f,  1.0f,  0.0f), V3(0.0f,  0.0f,  1.0f)),
+        MatrixUtil::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 0.0f, -1.0f,  0.0f), V3(0.0f,  0.0f, -1.0f)),
+        MatrixUtil::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 0.0f,  0.0f,  1.0f), V3(0.0f, -1.0f,  0.0f)),
+        MatrixUtil::lookAt(V3(0.0f, 0.0f, 0.0f), V3( 0.0f,  0.0f, -1.0f), V3(0.0f, -1.0f,  0.0f))
     };
 
     const sp<opengl::GLPipeline> glPipeline = pipeline;
@@ -157,7 +159,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
     for (uint32_t i = 0; i < 6; ++i)
     {
-        glPipeline->getUniform("u_View").setUniformMatrix4fv(1, GL_FALSE, captureViews[i].value());
+        glPipeline->getUniform("u_View").setUniformMatrix4fv(1, GL_FALSE, reinterpret_cast<const GLfloat*>(&captureViews[i]));
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, id, 0);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -251,13 +251,6 @@ void GLPipeline::activeTexture(const Texture& texture, uint32_t name)
     uTexture.setUniform1i(static_cast<GLint>(name));
 }
 
-void GLPipeline::glUpdateMatrix(GraphicsContext& /*graphicsContext*/, const String& name, const Matrix& matrix)
-{
-    const GLPipeline::GLUniform& uniform = getUniform(name);
-    DCHECK(uniform, "Uniform %s not found", name.c_str());
-    uniform.setUniformMatrix4fv(1, GL_FALSE, matrix.value());
-}
-
 void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const PipelineInput& input, uint32_t divisor)
 {
     const PipelineInput::Stream& stream = input.getStream(divisor);

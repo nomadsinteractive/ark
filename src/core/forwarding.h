@@ -60,7 +60,6 @@ class MessageLoop;
 class MessageLoopDefault;
 class Mutex;
 class Object;
-class ObjectPool;
 class Observer;
 class Plugin;
 class PluginManager;

@@ -22,8 +22,9 @@ LayerContext::LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier
 
 void LayerContext::traverse(const Holder::Visitor& visitor)
 {
-    for(const sp<RenderObject>& i : _items)
-        HolderUtil::visit(i, visitor);
+    if(_layer_type != Layer::TYPE_TRANSIENT)
+        for(const sp<RenderObject>& i : _items)
+            HolderUtil::visit(i, visitor);
 }
 
 const sp<RenderModel>& LayerContext::renderModel() const

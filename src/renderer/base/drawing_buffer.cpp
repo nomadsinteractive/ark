@@ -2,7 +2,6 @@
 
 #include "core/inf/array.h"
 #include "core/base/memory_pool.h"
-#include "core/base/object_pool.h"
 
 #include "graphics/base/v3.h"
 

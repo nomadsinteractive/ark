@@ -125,7 +125,6 @@ private:
     template<typename U> friend class WeakPtr;
 
     friend class MemoryPool;
-    friend class ObjectPool;
 
 private:
     std::shared_ptr<T> _ptr;

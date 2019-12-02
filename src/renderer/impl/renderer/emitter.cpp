@@ -2,7 +2,6 @@
 
 #include "core/ark.h"
 #include "core/base/clock.h"
-#include "core/base/object_pool.h"
 #include "core/dom/dom_document.h"
 #include "core/impl/boolean/boolean_by_timeout.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
@@ -90,7 +89,7 @@ Emitter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const 
 
 sp<Emitter> Emitter::BUILDER::build(const Scope& args)
 {
-    const sp<Source> stub = sp<Source>::make(_resource_loader_context, _type->build(args), _position->build(args), _size->build(args), args);
+    const sp<Source> stub = sp<Source>::make(_type->build(args), _position->build(args), _size->build(args), args);
     return sp<Emitter>::make(_resource_loader_context, stub, Ark::instance().clock(), _layer_context->build(args), _manifest->children(), _factory, _disposed);
 }
 
@@ -136,31 +135,31 @@ uint64_t Emitter::Particale::show(const V3& position, uint64_t tick, const sp<La
     for(uint32_t i = 0; i < iteration; i++)
     {
         _source_position += delta;
-        const sp<Vec3> position = makePosition(_stub->_object_pool, _source_position);
+        const sp<Vec3> position = makePosition(_source_position);
         const sp<Boolean> disposed = _disposed->build(_stub->_arguments);
-        const sp<RenderObject> renderObject = _stub->_object_pool->obtain<RenderObject>(type, position, size, transform, varyings);
+        const sp<RenderObject> renderObject = sp<RenderObject>::make(type, position, size, transform, varyings);
         DWARN(disposed, "You're creating particles that will NEVER die, is that what you really want?");
         layerContext->addRenderObject(renderObject, disposed);
     }
     return _last_emit_tick + _interval;
 }
 
-sp<Vec3> Emitter::Particale::makePosition(ObjectPool& objectPool, const V3& position) const
+sp<Vec3> Emitter::Particale::makePosition(const V3& position) const
 {
     if(_position)
-        return objectPool.obtain<VariableOP2<V3, V3, Operators::Add<V3>, sp<Vec3>, V3>>(_position->build(_stub->_arguments), position);
-    return objectPool.obtain<Vec3Impl>(position.x(), position.y(), position.z());
+        return sp<VariableOP2<V3, V3, Operators::Add<V3>, sp<Vec3>, V3>>::make(_position->build(_stub->_arguments), position);
+    return Vec3Util::create(position.x(), position.y(), position.z());
 }
 
-Emitter::Source::Source(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const Scope& arguments)
-    : _arguments(arguments), _type(type), _position(position), _size(size),
-      _object_pool(resourceLoaderContext->objectPool())
+Emitter::Source::Source(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const Scope& arguments)
+    : _arguments(arguments), _type(type), _position(position), _size(size)
 {
 }
 
 Emitter::Stub::Stub(const sp<Clock>& clock, const sp<LayerContext>& layerContext, const sp<Emitter::Source>& source, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory)
     : _clock(clock), _layer_context(layerContext), _source(source), _next_tick(0)
 {
+    DWARN(_layer_context->layerType() == Layer::TYPE_TRANSIENT, "You're creating emitter on a non-transient Layer, which may cause efficiency problems");
     for(const document& i : particleDescriptor)
         _particles.push_back(Particale(_source, i, beanFactory));
 }

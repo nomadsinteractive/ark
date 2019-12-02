@@ -3,7 +3,6 @@
 
 #include "core/inf/builder.h"
 #include "core/base/memory_pool.h"
-#include "core/base/object_pool.h"
 #include "core/concurrent/lf_stack.h"
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
@@ -72,7 +71,6 @@ private:
     sp<Texture> _texture;
 
     MemoryPool _memory_pool;
-    ObjectPool _object_pool;
 
     sp<LFStack<sp<DrawCommand>>> _draw_commands;
     sp<PipelineFactory> _bindings;

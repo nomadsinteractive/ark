@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "core/base/memory_pool.h"
-#include "core/base/object_pool.h"
 
 #include "renderer/inf/uploader.h"
 

@@ -70,26 +70,6 @@ void Matrix::map(const float x, const float y, const float z, float& transformed
     transformedZ = transformed.z;
 }
 
-Matrix Matrix::ortho(float left, float right, float bottom, float top, float near, float far)
-{
-    return Matrix(glm::ortho(left, right, bottom, top, near, far));
-}
-
-Matrix Matrix::lookAt(const V3& position, const V3& target, const V3& up)
-{
-    return Matrix(glm::lookAt(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z())));
-}
-
-Matrix Matrix::frustum(float left, float right, float bottom, float top, float near, float far)
-{
-    return Matrix(glm::frustum(left, right, bottom, top, near, far));
-}
-
-Matrix Matrix::perspective(float fov, float aspect, float near, float far)
-{
-    return Matrix(glm::perspective(fov, aspect, near, far));
-}
-
 template<> ARK_API String Strings::toString<Matrix>(const Matrix& value)
 {
     return Strings::join<float>(value.value(), 0, 16);

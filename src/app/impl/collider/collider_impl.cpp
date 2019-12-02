@@ -107,11 +107,11 @@ void ColliderImpl::Stub::remove(const RigidBody& rigidBody)
 
 sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed, const sp<ColliderImpl::Stub>& self)
 {
-    uint32_t rigidBodyId = ++_rigid_body_base_id;
+    int32_t rigidBodyId = ++_rigid_body_base_id;
     float s = std::max(size->width(), size->height());
     const sp<Vec> dp = _tracker->create(rigidBodyId, position, sp<Vec::Const>::make(V(s, s)));
-    const sp<RigidBodyShadow> rigidBodyShadow = _object_pool.obtain<RigidBodyShadow>(rigidBodyId, type, dp, size, rotate, disposed);
-    const sp<RigidBodyImpl> rigidBody = _object_pool.obtain<RigidBodyImpl>(self, rigidBodyShadow);
+    const sp<RigidBodyShadow> rigidBodyShadow = sp<RigidBodyShadow>::make(rigidBodyId, type, dp, size, rotate, disposed);
+    const sp<RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(self, rigidBodyShadow);
 
     DWARN(_c2_shapes.find(BODY_SHAPE_AABB) == _c2_shapes.end()
           && _c2_shapes.find(BODY_SHAPE_BALL) == _c2_shapes.end()
@@ -318,7 +318,7 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
             if(candidates.find(i) == candidates.end())
             {
                 const sp<RigidBodyShadow> s = collider.findRigidBody(i);
-                shadowStub._callback->onEndContact(self, s ? s : collider._object_pool.obtain<RigidBodyShadow>(i, Collider::BODY_TYPE_DYNAMIC, nullptr, nullptr, nullptr, nullptr));
+                shadowStub._callback->onEndContact(self, s ? s : sp<RigidBodyShadow>::make(i, Collider::BODY_TYPE_DYNAMIC, nullptr, nullptr, nullptr, nullptr));
             }
         }
         _contacts = candidates;

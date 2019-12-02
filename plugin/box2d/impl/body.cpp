@@ -194,7 +194,7 @@ void Body::dispose()
     _stub->dispose();
 }
 
-sp<Body> Body::obtain(const Shadow* shadow, ObjectPool& objectPool)
+sp<Body> Body::obtain(const Shadow* shadow)
 {
     const sp<Stub> bodyStub = shadow->_body.ensure();
     sp<RigidBody::Stub> rigidBodyStub = shadow->_rigid_body.lock();
@@ -206,11 +206,11 @@ sp<Body> Body::obtain(const Shadow* shadow, ObjectPool& objectPool)
                     (s._body->GetType() == b2_kinematicBody ? Collider::BODY_TYPE_KINEMATIC : Collider::BODY_TYPE_DYNAMIC);
         const b2Vec2& position = s._body->GetPosition();
         float rotation = s._body->GetTransform().q.GetAngle();
-        const sp<Vec> p = objectPool.obtain<Vec::Const>(V(position.x, position.y));
-        const sp<Rotate> rotate = objectPool.obtain<Rotate>(objectPool.obtain<Numeric::Const>(rotation));
-        rigidBodyStub = objectPool.obtain<RigidBody::Stub>(s._id, bodyType, p, nullptr, rotate, s._disposed, nullptr, shadow->_tag);
+        const sp<Vec2> p = sp<Vec2::Const>::make(V(position.x, position.y));
+        const sp<Rotate> rotate = sp<Rotate>::make(sp<Numeric::Const>::make(rotation));
+        rigidBodyStub = sp<RigidBody::Stub>::make(s._id, bodyType, p, nullptr, rotate, s._disposed, nullptr, shadow->_tag);
     }
-    return objectPool.obtain<Body>(shadow->_body.ensure(), rigidBodyStub);
+    return sp<Body>::make(shadow->_body.ensure(), rigidBodyStub);
 }
 
 b2Body* Body::body() const

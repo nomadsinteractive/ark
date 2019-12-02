@@ -208,13 +208,13 @@ void World::ContactListenerImpl::BeginContact(b2Contact* contact)
         {
             body1->_contacts.insert(body2->_id);
             if(body1->_callback->hasCallback())
-                body1->_callback->onBeginContact(Body::obtain(s2, _object_pool), CollisionManifold(normal));
+                body1->_callback->onBeginContact(Body::obtain(s2), CollisionManifold(normal));
         }
         if(body2->_contacts.find(body1->_id) == body2->_contacts.end())
         {
             body2->_contacts.insert(body1->_id);
             if(body2->_callback->hasCallback())
-                body2->_callback->onBeginContact(Body::obtain(s1, _object_pool), CollisionManifold(-normal));
+                body2->_callback->onBeginContact(Body::obtain(s1), CollisionManifold(-normal));
         }
     }
 }
@@ -232,14 +232,14 @@ void World::ContactListenerImpl::EndContact(b2Contact* contact)
         {
             body1->_contacts.erase(it1);
             if(body1->_callback->hasCallback())
-                body1->_callback->onEndContact(Body::obtain(s2, _object_pool));
+                body1->_callback->onEndContact(Body::obtain(s2));
         }
         const auto it2 = body2->_contacts.find(body1->_id);
         if(it2 != body2->_contacts.end())
         {
             body2->_contacts.erase(it2);
             if(body2->_callback->hasCallback())
-                body2->_callback->onEndContact(Body::obtain(s1, _object_pool));
+                body2->_callback->onEndContact(Body::obtain(s1));
         }
     }
 }

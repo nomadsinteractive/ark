@@ -60,7 +60,7 @@ public:
     virtual void bind(const sp<RenderObject>& renderObject) override;
     virtual void dispose() override;
 
-    static sp<Body> obtain(const Shadow* shadow, ObjectPool& objectPool);
+    static sp<Body> obtain(const Shadow* shadow);
 
     b2Body* body() const;
 

@@ -13,13 +13,16 @@
 #include "core/types/global.h"
 #include "core/util/operators.h"
 
+#include "graphics/base/mat.h"
+#include "graphics/util/matrix_util.h"
+
 #include "app/base/application_context.h"
 
 namespace ark {
 
 namespace {
 
-class FrustumMatrixVariable : public Variable<Matrix>, public Runnable {
+class FrustumMatrixVariable : public Mat4, public Runnable {
 public:
     FrustumMatrixVariable(const sp<Camera::Delegate>& delegate, const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up, const sp<Notifier>& notifier)
         : _delegate(delegate), _position(position), _target(target), _up(up), _notifier(notifier) {
@@ -29,7 +32,7 @@ public:
         update();
     }
 
-    virtual Matrix val() override {
+    virtual M4 val() override {
         return _matrix;
     }
 
@@ -60,31 +63,31 @@ private:
     V3 _t;
     V3 _u;
 
-    Matrix _matrix;
+    M4 _matrix;
 };
 
-class MulMatrixVariable : public Variable<Matrix> {
+class MulMatrixVariable : public Mat4 {
 public:
-    MulMatrixVariable(const sp<Variable<Matrix>>& lvalue, const sp<Variable<Matrix>>& rvalue)
-        : _lvalue(lvalue), _rvalue(rvalue) {
+    MulMatrixVariable(sp<Mat4> lvalue, sp<Mat4> rvalue)
+        : _lvalue(std::move(lvalue)), _rvalue(std::move(rvalue)) {
     }
 
-    virtual Matrix val() override {
-        const Matrix lvalue = _lvalue->val();
-        const Matrix rvalue = _rvalue->val();
-        return lvalue * rvalue;
+    virtual M4 val() override {
+        const M4 lvalue = _lvalue->val();
+        const M4 rvalue = _rvalue->val();
+        return MatrixUtil::mul(lvalue, rvalue);
     }
 
 private:
-    sp<Variable<Matrix>> _lvalue;
-    sp<Variable<Matrix>> _rvalue;
+    sp<Mat4> _lvalue;
+    sp<Mat4> _rvalue;
 };
 
 }
 
 Camera::Camera()
-    : _delegate(Ark::instance().applicationContext()->renderController()->createCamera()), _view(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))),
-      _projection(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))), _vp(sp<Holder>::make(sp<Variable<Matrix>::Const>::make(Matrix()))), _notifier(sp<Notifier>::make())
+    : _delegate(Ark::instance().applicationContext()->renderController()->createCamera()), _view(sp<Holder>::make(sp<Mat4::Const>::make(M4()))),
+      _projection(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _vp(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _notifier(sp<Notifier>::make())
 {
 }
 
@@ -93,25 +96,25 @@ void Camera::ortho(float left, float right, float bottom, float top, float near,
     if(coordinateSystem  < 0)
         std::swap(top, bottom);
 
-    _vp->_value = sp<Variable<Matrix>::Const>::make(_delegate->ortho(left, right, bottom, top, near * 2 - far, far));
+    _vp->_value = sp<Mat4::Const>::make(_delegate->ortho(left, right, bottom, top, near * 2 - far, far));
     _notifier->notify();
 }
 
 void Camera::frustum(float left, float right, float bottom, float top, float near, float far)
 {
-    _projection->_value = sp<Variable<Matrix>::Const>::make(_delegate->frustum(left, right, bottom, top, near, far));
+    _projection->_value = sp<Mat4::Const>::make(_delegate->frustum(left, right, bottom, top, near, far));
     updateViewProjection();
 }
 
 void Camera::perspective(float fov, float aspect, float near, float far)
 {
-    _projection->_value = sp<Variable<Matrix>::Const>::make(_delegate->perspective(fov, aspect, near, far));
+    _projection->_value = sp<Mat4::Const>::make(_delegate->perspective(fov, aspect, near, far));
     updateViewProjection();
 }
 
 void Camera::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    _view->_value = sp<Variable<Matrix>::Const>::make(_delegate->lookAt(position, target, up));
+    _view->_value = sp<Mat4::Const>::make(_delegate->lookAt(position, target, up));
     updateViewProjection();
 }
 
@@ -156,98 +159,98 @@ void Camera::updateViewProjection()
     _notifier->notify();
 }
 
-Camera::Holder::Holder(const sp<Variable<Matrix>>& value)
-    : _value(value) {
+Camera::Holder::Holder(sp<Mat4> value)
+    : _value(std::move(value)) {
 }
 
 void Camera::Holder::flat(void* buf)
 {
-    *reinterpret_cast<Matrix*>(buf) = _value->val();
+    *reinterpret_cast<M4*>(buf) = _value->val();
 }
 
 uint32_t Camera::Holder::size()
 {
-    return sizeof(Matrix);
+    return sizeof(M4);
 }
 
-Matrix Camera::DelegateLH_ZO::frustum(float left, float right, float bottom, float top, float near, float far)
+M4 Camera::DelegateLH_ZO::frustum(float left, float right, float bottom, float top, float near, float far)
 {
-    return Matrix(glm::frustumLH_ZO(left, right, bottom, top, near, far));
+    return M4(glm::frustumLH_ZO(left, right, bottom, top, near, far));
 }
 
-Matrix Camera::DelegateLH_ZO::lookAt(const V3& position, const V3& target, const V3& up)
+M4 Camera::DelegateLH_ZO::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    return Matrix(glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), -up.y(), up.z())));
+    return M4(glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), -up.y(), up.z())));
 }
 
-Matrix Camera::DelegateLH_ZO::ortho(float left, float right, float bottom, float top, float near, float far)
+M4 Camera::DelegateLH_ZO::ortho(float left, float right, float bottom, float top, float near, float far)
 {
-    return Matrix(glm::orthoLH_ZO(left, right, bottom, top, near, far));
+    return M4(glm::orthoLH_ZO(left, right, bottom, top, near, far));
 }
 
-Matrix Camera::DelegateLH_ZO::perspective(float fov, float aspect, float near, float far)
+M4 Camera::DelegateLH_ZO::perspective(float fov, float aspect, float near, float far)
 {
-    return Matrix(glm::perspectiveLH_ZO(fov, aspect, near, far));
+    return M4(glm::perspectiveLH_ZO(fov, aspect, near, far));
 }
 
-Matrix Camera::DelegateRH_ZO::frustum(float left, float right, float bottom, float top, float near, float far)
+M4 Camera::DelegateRH_ZO::frustum(float left, float right, float bottom, float top, float near, float far)
 {
-    return Matrix(glm::frustumRH_ZO(left, right, bottom, top, near, far));
+    return M4(glm::frustumRH_ZO(left, right, bottom, top, near, far));
 }
 
-Matrix Camera::DelegateRH_ZO::lookAt(const V3& position, const V3& target, const V3& up)
+M4 Camera::DelegateRH_ZO::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    return Matrix(glm::lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), -up.y(), up.z())));
+    return M4(glm::lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), -up.y(), up.z())));
 }
 
-Matrix Camera::DelegateRH_ZO::ortho(float left, float right, float bottom, float top, float near, float far)
+M4 Camera::DelegateRH_ZO::ortho(float left, float right, float bottom, float top, float near, float far)
 {
-    return Matrix(glm::orthoRH_ZO(left, right, bottom, top, near, far));
+    return M4(glm::orthoRH_ZO(left, right, bottom, top, near, far));
 }
 
-Matrix Camera::DelegateRH_ZO::perspective(float fov, float aspect, float near, float far)
+M4 Camera::DelegateRH_ZO::perspective(float fov, float aspect, float near, float far)
 {
-    return Matrix(glm::perspectiveRH_ZO(fov, aspect, near, far));
+    return M4(glm::perspectiveRH_ZO(fov, aspect, near, far));
 }
 
-Matrix Camera::DelegateLH_NO::frustum(float left, float right, float bottom, float top, float near, float far)
+M4 Camera::DelegateLH_NO::frustum(float left, float right, float bottom, float top, float near, float far)
 {
-    return Matrix(glm::frustumLH_NO(left, right, bottom, top, near, far));
+    return M4(glm::frustumLH_NO(left, right, bottom, top, near, far));
 }
 
-Matrix Camera::DelegateLH_NO::lookAt(const V3& position, const V3& target, const V3& up)
+M4 Camera::DelegateLH_NO::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    return Matrix(glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z())));
+    return M4(glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z())));
 }
 
-Matrix Camera::DelegateLH_NO::ortho(float left, float right, float bottom, float top, float near, float far)
+M4 Camera::DelegateLH_NO::ortho(float left, float right, float bottom, float top, float near, float far)
 {
-    return Matrix(glm::orthoLH_NO(left, right, bottom, top, near, far));
+    return M4(glm::orthoLH_NO(left, right, bottom, top, near, far));
 }
 
-Matrix Camera::DelegateLH_NO::perspective(float fov, float aspect, float near, float far)
+M4 Camera::DelegateLH_NO::perspective(float fov, float aspect, float near, float far)
 {
-    return Matrix(glm::perspectiveLH_NO(fov, aspect, near, far));
+    return M4(glm::perspectiveLH_NO(fov, aspect, near, far));
 }
 
-Matrix Camera::DelegateRH_NO::frustum(float left, float right, float bottom, float top, float near, float far)
+M4 Camera::DelegateRH_NO::frustum(float left, float right, float bottom, float top, float near, float far)
 {
-    return Matrix(glm::frustumRH_NO(left, right, bottom, top, near, far));
+    return M4(glm::frustumRH_NO(left, right, bottom, top, near, far));
 }
 
-Matrix Camera::DelegateRH_NO::lookAt(const V3& position, const V3& target, const V3& up)
+M4 Camera::DelegateRH_NO::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    return Matrix(glm::lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z())));
+    return M4(glm::lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z())));
 }
 
-Matrix Camera::DelegateRH_NO::ortho(float left, float right, float bottom, float top, float near, float far)
+M4 Camera::DelegateRH_NO::ortho(float left, float right, float bottom, float top, float near, float far)
 {
-    return Matrix(glm::orthoRH_NO(left, right, bottom, top, near, far));
+    return M4(glm::orthoRH_NO(left, right, bottom, top, near, far));
 }
 
-Matrix Camera::DelegateRH_NO::perspective(float fov, float aspect, float near, float far)
+M4 Camera::DelegateRH_NO::perspective(float fov, float aspect, float near, float far)
 {
-    return Matrix(glm::perspectiveRH_NO(fov, aspect, near, far));
+    return M4(glm::perspectiveRH_NO(fov, aspect, near, far));
 }
 
 }

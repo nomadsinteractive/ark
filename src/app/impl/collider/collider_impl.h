@@ -5,7 +5,6 @@
 #include <unordered_set>
 #include <unordered_map>
 
-#include "core/base/object_pool.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
@@ -64,7 +63,6 @@ public:
         std::unordered_map<int32_t, sp<RigidBodyShadow>> _rigid_bodies;
         std::unordered_map<int32_t, ShapeManifest> _c2_shapes;
         int32_t _rigid_body_base_id;
-        ObjectPool _object_pool;
 
     private:
         void loadShapes(const document& manifest);

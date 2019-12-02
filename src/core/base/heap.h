@@ -5,7 +5,6 @@
 #include <map>
 #include <queue>
 
-#include "core/base/object_pool.h"
 #include "core/collection/bitwise_trie.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/weak_ptr.h"
@@ -13,7 +12,7 @@
 
 namespace ark {
 
-template<typename MemoryType, typename SizeType, size_t kAlignment = sizeof(size_t)> class Heap {
+template<typename MemoryType, typename SizeType, size_t kAlignment = sizeof(void*)> class Heap {
 public:
     typedef decltype(std::declval<MemoryType>().begin()) PtrType;
 
@@ -309,7 +308,7 @@ public:
         }
 
         sp<Fragment> addFragment(FragmentState state, SizeType offset, SizeType size) {
-            sp<Fragment> fragment = _object_pool.obtain<Fragment>(state, offset, size);
+            sp<Fragment> fragment = sp<Fragment>::make(state, offset, size);
             if(state == FRAGMENT_STATE_UNUSED)
                 ensureAllocator(size).push(fragment);
             _fragments[offset] = fragment;
@@ -324,8 +323,6 @@ public:
         }
 
     private:
-        ObjectPool _object_pool;
-
         FragmentTrie _fragment_trie;
         std::map<SizeType, sp<Fragment>> _fragments;
     };

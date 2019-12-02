@@ -8,7 +8,6 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/object.h"
-#include "core/base/object_pool.h"
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
 #include "core/types/implements.h"
@@ -111,9 +110,6 @@ private:
     public:
         virtual void BeginContact(b2Contact* contact);
         virtual void EndContact(b2Contact* contact);
-
-    private:
-        ObjectPool _object_pool;
     };
 
     class DestructionListenerImpl : public b2DestructionListener {
