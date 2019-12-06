@@ -4,40 +4,41 @@
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
 #include "core/types/null.h"
+#include "core/util/conversions.h"
 #include "core/util/documents.h"
 #include "core/util/holder_util.h"
 
-#include "graphics/base/matrix.h"
-#include "graphics/base/rotate.h"
-#include "graphics/impl/vec/vec3_impl.h"
+#include "graphics/base/v3.h"
+#include "graphics/impl/transform/transform_none.h"
+#include "graphics/impl/transform/transform_linear_2d.h"
+#include "graphics/impl/transform/transform_simple_2d.h"
+#include "graphics/impl/transform/transform_linear_3d.h"
+#include "graphics/impl/transform/transform_simple_3d.h"
+#include "graphics/util/matrix_util.h"
 
 namespace ark {
 
-Transform::Transform(const sp<Rotate>& rotate, const sp<Vec3>& scale, const sp<Vec3>& translate)
-    : _rotate(rotate), _scale(scale ? scale : sp<Vec3Impl>::make(1.0f, 1.0f, 1.0f).cast<Vec3>()), _pivot(translate)
+Transform::Transform(Type type, const sp<Rotate>& rotate, const sp<Vec3>& scale, const sp<Vec3>& translate)
+    : _type(type), _rotate(rotate, DelegateUpdater(*this)), _scale(scale, V3(1.0f), DelegateUpdater(*this)), _pivot(translate, DelegateUpdater(*this)),
+      _delegate(makeDelegate())
 {
 }
 
 void Transform::traverse(const Holder::Visitor& visitor)
 {
-    HolderUtil::visit(_rotate, visitor);
-    HolderUtil::visit(_scale, visitor);
-    HolderUtil::visit(_pivot, visitor);
+    HolderUtil::visit(_rotate.delegate(), visitor);
+    HolderUtil::visit(_scale.delegate(), visitor);
+    HolderUtil::visit(_pivot.delegate(), visitor);
 }
 
 Transform::Snapshot Transform::snapshot() const
 {
-    Snapshot ss;
-    ss.rotate_value = _rotate->rotation();
-    ss.rotate_direction = _rotate->direction()->val();
-    ss.scale = _scale->val();
-    ss.pivot = _pivot->val();
-    return ss;
+    return Snapshot(*this);
 }
 
 const sp<Rotate>& Transform::rotate()
 {
-    return _rotate;
+    return _rotate.ensure();
 }
 
 void Transform::setRotate(const sp<Rotate>& rotate)
@@ -45,9 +46,9 @@ void Transform::setRotate(const sp<Rotate>& rotate)
     _rotate = rotate;
 }
 
-const sp<Vec3>& Transform::scale() const
+const sp<Vec3>& Transform::scale()
 {
-    return _scale;
+    return _scale.ensure();
 }
 
 void Transform::setScale(const sp<Vec3>& scale)
@@ -55,9 +56,9 @@ void Transform::setScale(const sp<Vec3>& scale)
     _scale = scale;
 }
 
-const sp<Vec3>& Transform::pivot() const
+const sp<Vec3>& Transform::pivot()
 {
-    return _pivot;
+    return _pivot.ensure();
 }
 
 void Transform::setPivot(const sp<Vec3>& pivot)
@@ -65,73 +66,50 @@ void Transform::setPivot(const sp<Vec3>& pivot)
     _pivot = pivot;
 }
 
-Transform::Snapshot::Snapshot()
-    : rotate_value(0), rotate_direction(Rotate::Z_AXIS), scale(V3(1.0f, 1.0f, 1.0f))
+sp<Transform::Delegate> Transform::makeDelegate() const
 {
+    if(!_rotate && !_scale && !_pivot)
+        return Null::toSafe<Transform::Delegate>(nullptr);
+
+    return _rotate ? makeTransformLinear() : makeTransformSimple();
 }
 
-Matrix Transform::Snapshot::toMatrix() const
+sp<Transform::Delegate> Transform::makeTransformLinear() const
 {
-    Matrix matrix;
-    matrix.rotate(rotate_value, rotate_direction.x(), rotate_direction.y(), rotate_direction.z());
-    matrix.scale(scale.x(), scale.y(), scale.z());
-    matrix.translate(pivot.x(), pivot.y(), pivot.z());
-    return matrix;
+    return _type == TYPE_LINEAR_2D ? sp<Transform::Delegate>::make<TransformLinear2D>() : sp<Transform::Delegate>::make<TransformLinear3D>();
 }
 
-bool Transform::Snapshot::operator ==(const Transform::Snapshot& other) const
+sp<Transform::Delegate> Transform::makeTransformSimple() const
 {
-    return pivot == other.pivot && scale == other.scale && rotate_value == other.rotate_value && rotate_direction == other.rotate_direction;
+    return _type == TYPE_LINEAR_2D ? sp<Transform::Delegate>::make<TransformSimple2D>() : sp<Transform::Delegate>::make<TransformSimple2D>();
 }
 
-bool Transform::Snapshot::operator !=(const Transform::Snapshot& other) const
+Transform::Snapshot::Snapshot(const Transform& transform)
+    : _delegate(transform._delegate)
 {
-    return !(*this == other);
+    _delegate->snapshot(transform, *this);
 }
 
-void Transform::Snapshot::map(float x, float y, float tx, float ty, float& mx, float& my) const
+M4 Transform::Snapshot::toMatrix() const
 {
-    if(rotate_value == 0.0f)
-    {
-        mx = (x + pivot.x()) * scale.x();
-        my = (y + pivot.y()) * scale.y();
-    }
-    else
-    {
-        Matrix matrix = toMatrix();
-        float mz;
-        matrix.map(x, y, 0.0f, mx, my, mz);
-    }
-    mx += tx;
-    my += ty;
+    return _delegate->toMatrix(*this);
 }
 
-V3 Transform::Snapshot::mapXYZ(const V3& p) const
+V3 Transform::Snapshot::transform(const V3& p) const
 {
-    float x, y, z;
-    if(rotate_value == 0.0f)
-    {
-        x = (p.x() + pivot.x()) * scale.x();
-        y = (p.y() + pivot.y()) * scale.y();
-        z = (p.z() + pivot.z()) * scale.z();
-    }
-    else
-    {
-        const Matrix matrix = toMatrix();
-        matrix.map(p.x(), p.y(), p.z(), x, y, z);
-    }
-    return V3(x, y, z);
+    return _delegate->transform(*this, p);
 }
 
 Transform::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _rotate(factory.getBuilder<Rotate>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec3>(manifest, "scale")),
+    : _type(Documents::getAttribute(manifest, Constants::Attributes::TYPE, Transform::TYPE_LINEAR_3D)),
+      _rotate(factory.getBuilder<Rotate>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec3>(manifest, "scale")),
       _pivot(factory.getBuilder<Vec3>(manifest, "pivot"))
 {
 }
 
 sp<Transform> Transform::BUILDER::build(const Scope& args)
 {
-    return sp<Transform>::make(_rotate->build(args), _scale->build(args), _pivot->build(args));
+    return sp<Transform>::make(_type, _rotate->build(args), _scale->build(args), _pivot->build(args));
 }
 
 Transform::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
@@ -147,6 +125,14 @@ sp<Transform> Transform::DICTIONARY::build(const Scope& args)
 template<> ARK_API sp<Transform> Null::ptr()
 {
     return sp<Transform>::make();
+}
+
+template<> ARK_API Transform::Type Conversions::to<String, Transform::Type>(const String& str)
+{
+    if(str == "2d")
+        return Transform::TYPE_LINEAR_2D;
+    DCHECK(str == "3d", "Unknow transform type: %s", str.c_str());
+    return Transform::TYPE_LINEAR_3D;
 }
 
 }

@@ -18,7 +18,6 @@ class Frame;
 class BitmapBundle;
 class Scrollable;
 class RenderLayer;
-class Matrix;
 class Mat3Impl;
 class Model;
 class RenderLayer;

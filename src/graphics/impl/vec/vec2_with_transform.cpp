@@ -12,10 +12,8 @@ Vec2WithTransform::Vec2WithTransform(const sp<Vec2>& delegate, const sp<Transfor
 
 V2 Vec2WithTransform::val()
 {
-    const V2 p = _delegate->val();
-    float x, y;
-    _transform->snapshot().map(p.x(), p.y(), 0, 0, x, y);
-    return V2(x, y);
+    const V3 p = _transform->snapshot().transform(V3(_delegate->val(), 0));
+    return V2(p.x(), p.y());
 }
 
 }

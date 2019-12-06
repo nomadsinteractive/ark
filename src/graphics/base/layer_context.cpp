@@ -102,7 +102,6 @@ FilterAction LayerContext::RenderObjectFilter::operator()(const sp<RenderObject>
 {
     if(renderObject->isDisposed() || (_disposed && _disposed->val()))
     {
-        renderObject->dispose();
         _notifier->notify();
         return FILTER_ACTION_REMOVE;
     }

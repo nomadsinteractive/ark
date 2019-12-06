@@ -21,7 +21,7 @@ void Text::render(RenderRequest& /*pipeline*/, const V3& position)
     _characters->renderRequest(position);
 }
 
-const SafePtr<Size>& Text::size()
+const sp<Size>& Text::size()
 {
     return _characters->layoutParam()->size();
 }

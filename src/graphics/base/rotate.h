@@ -4,19 +4,32 @@
 #include "core/base/api.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
+#include "core/inf/variable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/v3.h"
 
 namespace ark {
 
+struct Rotation {
+    Rotation();
+    Rotation(float angle, const V3& direction);
+
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotation);
+    float angle;
+    V3 direction;
+};
+
 //[[script::bindings::holder]]
-class ARK_API Rotate : public Holder {
+class ARK_API Rotate : public Holder, public Variable<Rotation> {
 public:
 //  [[script::bindings::auto]]
     Rotate(const sp<Numeric>& value, const sp<Vec3>& direction = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotate);
+
+    virtual Rotation val() override;
 
     virtual void traverse(const Visitor& visitor) override;
 

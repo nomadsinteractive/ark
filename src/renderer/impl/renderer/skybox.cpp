@@ -33,7 +33,7 @@ void Skybox::render(RenderRequest& renderRequest, const V3& /*position*/)
     renderRequest.addRequest(drawingContext.toRenderCommand());
 }
 
-const SafePtr<Size>& Skybox::size()
+const sp<Size>& Skybox::size()
 {
     return _size;
 }

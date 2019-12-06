@@ -8,7 +8,6 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/matrix.h"
 #include "graphics/base/viewport.h"
 #include "graphics/base/v3.h"
 

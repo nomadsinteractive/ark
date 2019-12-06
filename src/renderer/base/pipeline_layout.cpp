@@ -70,7 +70,7 @@ const Table<String, sp<Texture>>& PipelineLayout::samplers() const
 
 void PipelineLayout::initialize(const Camera& camera)
 {
-    DCHECK(_building_context, "ShaderSource should not be initialized more than once");
+    DCHECK(_building_context, "PipelineLayout should not be initialized more than once");
 
     if(_snippet)
         _snippet->preInitialize(_building_context);

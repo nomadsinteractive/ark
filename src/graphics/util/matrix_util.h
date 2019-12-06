@@ -14,12 +14,19 @@ public:
     static M3 mul(const M3& lvalue, const M3& rvalue);
     static V3 mul(const M3& lvalue, const V3& rvalue);
 
+    static M3 rotate(const M3& lvalue, float radian);
+    static M3 scale(const M3& lvalue, const V2& rvalue);
+    static M3 translate(const M3& lvalue, const V2& rvalue);
+
     static M4 mul(const M4& lvalue, const M4& rvalue);
     static V4 mul(const M4& lvalue, const V4& rvalue);
 
     static M4 rotate(const M4& lvalue, const V3& direction, float radian);
     static M4 scale(const M4& lvalue, const V3& rvalue);
     static M4 translate(const M4& lvalue, const V3& rvalue);
+
+    static V2 transform(const M3& matrix, const V2& pos);
+    static V3 transform(const M4& matrix, const V3& pos);
 
     static M4 ortho(float left, float right, float bottom, float top, float near, float far);
     static M4 lookAt(const V3& position, const V3& target, const V3& up);

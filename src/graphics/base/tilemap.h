@@ -32,7 +32,7 @@ public:
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 // [[script::bindings::property]]
-    virtual const SafePtr<Size>& size() override;
+    virtual const sp<Size>& size() override;
 
 
 // [[script::bindings::auto]]

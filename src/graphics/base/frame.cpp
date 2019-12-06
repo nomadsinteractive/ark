@@ -36,7 +36,7 @@ void Frame::render(RenderRequest& renderRequest, const V3& position)
     _renderer->render(renderRequest, position);
 }
 
-const SafePtr<Size>& Frame::size()
+const sp<Size>& Frame::size()
 {
     DASSERT(_block);
     return _block->size();

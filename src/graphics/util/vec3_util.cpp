@@ -67,7 +67,7 @@ public:
     }
 
     virtual V3 val() override {
-        return _vec2->val();
+        return V3(_vec2->val(), 0);
     }
 
     virtual void traverse(const Visitor& visitor) override {
@@ -159,7 +159,7 @@ V2 Vec3Util::xy(const sp<Vec3>& self)
 
 void Vec3Util::setXy(const sp<Vec3>& self, const V2& xy)
 {
-    ensureImpl(self)->set(xy);
+    ensureImpl(self)->set(V3(xy, 0));
 }
 
 float Vec3Util::x(const sp<Vec3>& self)

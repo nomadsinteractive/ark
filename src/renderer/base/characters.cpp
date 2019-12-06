@@ -263,7 +263,7 @@ int32_t Characters::toType(wchar_t c) const
 sp<RenderObject> Characters::makeCharacter(int32_t type, const V2& position, const sp<Size>& size) const
 {
     return _character_maker ? _character_maker->makeCharacter(type, position, size) :
-                              sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(position), size);
+                              sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(V3(position, 0)), size);
 }
 
 Characters::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

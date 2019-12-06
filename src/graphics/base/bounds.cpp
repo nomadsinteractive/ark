@@ -26,7 +26,7 @@ const sp<Vec3>& Bounds::center() const
     return _center;
 }
 
-const SafePtr<Size>& Bounds::size()
+const sp<Size>& Bounds::size()
 {
     return _size;
 }

@@ -9,6 +9,7 @@
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
 #include "graphics/base/v4.h"
+#include "graphics/util/matrix_util.h"
 
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/drawing_buffer.h"
@@ -88,9 +89,7 @@ sp<RenderCommand> RenderLayer::Snapshot::render(const V3& position)
             {
                 Buffer::Builder& sBuilder = buf.getInstancedArrayBuilder(1);
                 sBuilder.next();
-                Matrix matrix = i._transform.toMatrix();
-                matrix.translate(i._position.x(), i._position.y(), i._position.z());
-                matrix.scale(i._size.x(), i._size.y(), i._size.z());
+                M4 matrix = MatrixUtil::scale(MatrixUtil::translate(i._transform.toMatrix(), i._position), i._size) ;
                 sBuilder.write(matrix);
             }
         }

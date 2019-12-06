@@ -17,6 +17,11 @@ Rotate::Rotate(const sp<Numeric>& value, const sp<Vec3>& direction)
 {
 }
 
+Rotation Rotate::val()
+{
+    return Rotation(_value->val(), _direction->val());
+}
+
 void Rotate::traverse(const Holder::Visitor& visitor)
 {
     HolderUtil::visit(_value->delegate(), visitor);
@@ -76,6 +81,16 @@ Rotate::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
 sp<Rotate> Rotate::DICTIONARY::build(const Scope& args)
 {
     return sp<Rotate>::make(_rotation->build(args));
+}
+
+Rotation::Rotation()
+    : angle(0), direction(Rotate::Z_AXIS)
+{
+}
+
+Rotation::Rotation(float angle, const V3& direction)
+    : angle(angle), direction(direction)
+{
 }
 
 }

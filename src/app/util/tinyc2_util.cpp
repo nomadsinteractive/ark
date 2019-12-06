@@ -93,15 +93,13 @@ bool C2RigidBody::isStaticBody() const
 
 std::vector<C2Shape> C2RigidBody::transform(c2x& x) const
 {
-    Transform::Snapshot ts;
-    ts.rotate_value = _rotate ? _rotate->rotation() : 0;
-    ts.rotate_direction = _rotate ? _rotate->direction()->val() : Rotate::Z_AXIS;
+    float rotation = _rotate ? _rotate->rotation() : 0;
 
     const V2 pos = _position->val();
     x.p.x = pos.x();
     x.p.y = pos.y();
-    x.r.c = Math::cos(ts.rotate_value);
-    x.r.s = Math::sin(ts.rotate_value);
+    x.r.c = Math::cos(rotation);
+    x.r.s = Math::sin(rotation);
 
     if(_is_static_body)
         return _shapes;
@@ -114,17 +112,17 @@ std::vector<C2Shape> C2RigidBody::transform(c2x& x) const
         {
         case C2_CIRCLE:
             shape.s.circle.r = i.s.circle.r;
-            ts.map(i.s.circle.p.x, i.s.circle.p.y, pos.x(), pos.y(), shape.s.circle.p.x, shape.s.circle.p.y);
+            translate(i.s.circle.p.x, i.s.circle.p.y, pos, shape.s.circle.p.x, shape.s.circle.p.y);
             break;
         case C2_AABB:
-            DCHECK(ts.rotate_value == 0, "Rotation: %.2f, which is not supported on AABBs", ts.rotate_value);
-            ts.map(i.s.aabb.min.x, i.s.aabb.min.y, pos.x(), pos.y(), shape.s.aabb.min.x, shape.s.aabb.min.y);
-            ts.map(i.s.aabb.max.x, i.s.aabb.max.y, pos.x(), pos.y(), shape.s.aabb.max.x, shape.s.aabb.max.y);
+            DCHECK(rotation == 0, "Rotation: %.2f, which is not supported on AABBs", rotation);
+            translate(i.s.aabb.min.x, i.s.aabb.min.y, pos, shape.s.aabb.min.x, shape.s.aabb.min.y);
+            translate(i.s.aabb.max.x, i.s.aabb.max.y, pos, shape.s.aabb.max.x, shape.s.aabb.max.y);
             break;
         case C2_CAPSULE:
             shape.s.capsule.r = i.s.capsule.r;
-            ts.map(i.s.capsule.a.x, i.s.capsule.a.y, pos.x(), pos.y(), shape.s.capsule.a.x, shape.s.capsule.a.y);
-            ts.map(i.s.capsule.b.x, i.s.capsule.b.y, pos.x(), pos.y(), shape.s.capsule.b.x, shape.s.capsule.b.y);
+            translate(i.s.capsule.a.x, i.s.capsule.a.y, pos, shape.s.capsule.a.x, shape.s.capsule.a.y);
+            translate(i.s.capsule.b.x, i.s.capsule.b.y, pos, shape.s.capsule.b.x, shape.s.capsule.b.y);
             break;
         case C2_POLY:
             shape.s.poly = i.s.poly;
@@ -133,6 +131,12 @@ std::vector<C2Shape> C2RigidBody::transform(c2x& x) const
         shapes.push_back(shape);
     }
     return shapes;
+}
+
+void C2RigidBody::translate(float x, float y, const V2& translate, float& ox, float oy) const
+{
+    ox = x + translate.x();
+    oy = y + translate.y();
 }
 
 }

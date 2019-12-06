@@ -4,6 +4,7 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/inf/variable.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v3.h"
@@ -83,7 +84,6 @@ public:
     static sp<Vec3> normalize(const sp<Vec3>& self);
 //[[script::bindings::classmethod]]
     static sp<Vec3> integral(const sp<Vec3>& self, const sp<Numeric>& t = nullptr);
-
 
 private:
     static sp<Vec3Impl> ensureImpl(const sp<Vec3>& self);

@@ -16,7 +16,7 @@ void Label::render(RenderRequest& /*pipeline*/, const V3& position)
     _characters->renderRequest(position);
 }
 
-const SafePtr<Size>& Label::size()
+const sp<Size>& Label::size()
 {
     return _characters->size();
 }

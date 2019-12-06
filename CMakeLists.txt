@@ -82,6 +82,7 @@ aux_source_directory(src/graphics/impl/flatable LOCAL_SRC_LIST)
 aux_source_directory(src/graphics/impl/importer LOCAL_SRC_LIST)
 aux_source_directory(src/graphics/impl/mat LOCAL_SRC_LIST)
 aux_source_directory(src/graphics/impl/renderer LOCAL_SRC_LIST)
+aux_source_directory(src/graphics/impl/transform LOCAL_SRC_LIST)
 aux_source_directory(src/graphics/impl/vec LOCAL_SRC_LIST)
 aux_source_directory(src/graphics/util LOCAL_SRC_LIST)
 

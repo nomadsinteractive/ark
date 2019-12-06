@@ -21,7 +21,7 @@ public:
     const sp<Vec3>& center() const;
 
 //  [[script::bindings::property]]
-    virtual const SafePtr<Size>& size() override;
+    virtual const sp<Size>& size() override;
 
 private:
     sp<Vec3> _center;

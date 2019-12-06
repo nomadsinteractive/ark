@@ -62,7 +62,7 @@ V2 RigidBody::xy() const
 
 V3 RigidBody::xyz() const
 {
-    return _stub->_position->val();
+    return V3(_stub->_position->val(), 0);
 }
 
 float RigidBody::width() const
@@ -143,7 +143,7 @@ template<> ARK_API Collider::BodyType Conversions::to<String, Collider::BodyType
 }
 
 RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed, const sp<Callback>& callback, const sp<Box>& tag)
-    : _id(id), _type(type), _position(position), _size(size), _transform(sp<Transform>::make(rotate)), _disposed(disposed), _callback(callback ? callback : sp<Callback>::make()), _tag(tag ? tag : sp<Box>::make())
+    : _id(id), _type(type), _position(position), _size(size), _transform(sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate)), _disposed(disposed), _callback(callback ? callback : sp<Callback>::make()), _tag(tag ? tag : sp<Box>::make())
 {
 }
 

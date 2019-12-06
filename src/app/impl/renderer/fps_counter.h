@@ -17,7 +17,7 @@ class FPSCounter : public Renderer, public Block {
 public:
     FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<Characters>& characters, const String& message);
 
-    virtual const SafePtr<Size>& size() override;
+    virtual const sp<Size>& size() override;
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 

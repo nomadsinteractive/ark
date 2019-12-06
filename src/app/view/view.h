@@ -28,7 +28,7 @@ public:
     View(const sp<LayoutParam>& layoutParam);
     View(const sp<Size>& size);
 
-    virtual const SafePtr<Size>& size() override;
+    virtual const sp<Size>& size() override;
 
     virtual void traverse(const Visitor& visitor) override;
 

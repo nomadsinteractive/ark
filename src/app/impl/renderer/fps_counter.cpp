@@ -22,7 +22,7 @@ FPSCounter::FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<C
 {
 }
 
-const SafePtr<Size>& FPSCounter::size()
+const sp<Size>& FPSCounter::size()
 {
     return _characters->size();
 }

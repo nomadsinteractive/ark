@@ -6,7 +6,6 @@
 #include <stdint.h>
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/matrix.h"
 #include "renderer/opengl/base/gl_pipeline.h"
 #include "renderer/base/graphics_context.h"
 

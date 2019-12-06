@@ -6,7 +6,6 @@
 #include "core/util/strings.h"
 
 #include "graphics/base/color.h"
-#include "graphics/base/matrix.h"
 
 #include "renderer/base/recycler.h"
 #include "renderer/base/pipeline_bindings.h"

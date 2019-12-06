@@ -4,6 +4,7 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/inf/variable.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v4.h"

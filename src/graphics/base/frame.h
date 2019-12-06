@@ -23,7 +23,7 @@ public:
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
-    virtual const SafePtr<Size>& size() override;
+    virtual const sp<Size>& size() override;
     const sp<Size>& size() const;
 
 private:

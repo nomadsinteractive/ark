@@ -21,6 +21,11 @@ V4::V4(float x, float y, float z, float w)
 {
 }
 
+V4::V4(const V3& xyz, float w)
+    : V3(xyz), _w(w)
+{
+}
+
 V4::V4(const std::initializer_list<float>& values)
 {
     initialize(values, 4);

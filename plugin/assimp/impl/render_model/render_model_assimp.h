@@ -58,7 +58,7 @@ private:
     sp<Assimp::Importer> _importer;
     std::unordered_map<int32_t, sp<Model>> _models;
     std::vector<sp<Texture>> _textures;
-    array<Matrix> _model_matrics;
+    array<M4> _model_matrics;
 
 };
 

@@ -89,7 +89,6 @@ Scrollable::Scrollable(const sp<Vec>& scroller, const sp<RendererMaker>& tileMak
     : _params(params), _rolling_view(_params), _scroller(scroller), _renderer_maker(tileMaker), _size(size),
       _scroll_x(0), _scroll_y(0)
 {
-    initialize();
 }
 
 void Scrollable::render(RenderRequest& renderRequest, const V3& position)
@@ -111,18 +110,9 @@ void Scrollable::render(RenderRequest& renderRequest, const V3& position)
         }
 }
 
-const SafePtr<Size>& Scrollable::size()
+const sp<Size>& Scrollable::size()
 {
     return _size;
-}
-
-void Scrollable::initialize()
-{
-//    _rolling_view.setScrollXY(_scroll_x - _params._col_index * _params._tile_width, _scroll_y - _params._row_index * _params._tile_height);
-
-//    for(int32_t i = 0; i < _params._row_count; i++)
-//        for(int32_t j = 0; j < _params._col_count; j++)
-//            _rolling_view.putTile(i, j, _tile_maker->makeTile((j - _params._col_index) * _params._tile_width, (i - _params._row_index) * _params._tile_height));
 }
 
 void Scrollable::updateTask()

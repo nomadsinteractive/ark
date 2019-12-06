@@ -8,8 +8,6 @@
 #include "core/util/math.h"
 #include "core/util/strings.h"
 
-#include "graphics/base/v3.h"
-
 namespace ark {
 
 const float V2::MIN_NORMALIZE_LENGTH = 0.000000001f;
@@ -21,16 +19,6 @@ V2::V2(float v)
 
 V2::V2(float x, float y)
     : _x(x), _y(y)
-{
-}
-
-V2::V2(float x, float y, float /*z*/)
-    : _x(x), _y(y)
-{
-}
-
-V2::V2(const V3& other)
-    : _x(other.x()), _y(other.y())
 {
 }
 

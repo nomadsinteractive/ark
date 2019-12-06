@@ -14,7 +14,7 @@ namespace ark {
 DrawingBuffer::DrawingBuffer(const sp<ShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
     : _shader_bindings(shaderBindings), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(stride, instanceCount),
       _divided_buffer_builders(shaderBindings->makeDividedBufferBuilders(instanceCount)),
-      _indice_base(0), _is_instanced(_pipeline_bindings->hasDivisors())
+      _indice_base(0), _is_instanced(_pipeline_bindings->hasDivisors()), _transform(nullptr)
 {
 }
 
@@ -26,7 +26,7 @@ void DrawingBuffer::writePosition(const V3& position)
 void DrawingBuffer::writePosition(float x, float y, float z)
 {
     const V3 position(x, y, z);
-    _vertices.write<V3>(_is_instanced ? position : (_transform.mapXYZ(position) + _translate), 0);
+    _vertices.write<V3>(_is_instanced ? position : (_transform->transform(position) + _translate), 0);
 }
 
 void DrawingBuffer::writeTexCoordinate(uint16_t u, uint16_t v)
@@ -94,7 +94,7 @@ void DrawingBuffer::setTranslate(const V3& translate)
 
 void DrawingBuffer::setRenderObject(const RenderObject::Snapshot& renderObject)
 {
-    _transform = renderObject._transform;
+    _transform = &renderObject._transform;
     _varyings = renderObject._varyings;
 }
 

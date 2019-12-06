@@ -7,8 +7,8 @@
 
 #include "graphics/base/bitmap.h"
 #include "graphics/base/bitmap_bundle.h"
-#include "graphics/base/matrix.h"
 #include "graphics/base/size.h"
+#include "graphics/util/matrix_util.h"
 
 #include "renderer/base/model.h"
 #include "renderer/base/drawing_buffer.h"
@@ -27,7 +27,7 @@ namespace plugin {
 namespace assimp {
 
 RenderModelAssimp::RenderModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest)
-    : _importer(sp<Assimp::Importer>::make()), _model_matrics(sp<Array<Matrix>::Allocated>::make(32))
+    : _importer(sp<Assimp::Importer>::make()), _model_matrics(sp<Array<M4>::Allocated>::make(32))
 {
     _importer->SetIOHandler(new ArkIOSystem());
 
@@ -50,7 +50,7 @@ sp<ShaderBindings> RenderModelAssimp::makeShaderBindings(const Shader& shader)
     const sp<ShaderBindings> bindings = shader.makeBindings(RENDER_MODE_TRIANGLES, shader.renderController()->makeVertexBuffer(), shader.renderController()->makeIndexBuffer());
 
     const sp<Uniform> uniform = bindings->pipelineInput()->getUniform("u_ModelMatrix");
-    uniform->setFlatable(sp<Flatable::Array<Matrix>>::make(_model_matrics));
+    uniform->setFlatable(sp<Flatable::Array<M4>>::make(_model_matrics));
     for(const sp<Texture>& i : _textures)
         bindings->pipelineBindings()->bindSampler(i);
     return bindings;
@@ -62,9 +62,8 @@ void RenderModelAssimp::postSnapshot(RenderController& /*renderController*/, Ren
     for(size_t i = 0; i < snapshot._items.size(); ++i)
     {
         const RenderObject::Snapshot& ro = snapshot._items.at(i);
-        Transform::Snapshot transform = ro._transform;
-        transform.pivot += ro._position;
-        _model_matrics->buf()[i] = transform.toMatrix();
+        const Transform::Snapshot& transform = ro._transform;
+        _model_matrics->buf()[i] = MatrixUtil::mul(MatrixUtil::translate(M4::identity(), ro._position), transform.toMatrix());
     }
 }
 

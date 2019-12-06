@@ -844,7 +844,11 @@ class Rotate:
 
 
 class Transform:
-    def __init__(self, rotate: Optional[Rotate] = None, scale: Optional[Vec3, Vec2] = None, translate: Optional[Vec3, Vec2] = None):
+    TYPE_LINEAR_2D = 0
+    TYPE_LINEAR_3D = 1
+
+    def __init__(self, t: int = TYPE_LINEAR_3D, rotate: Optional[Rotate] = None, scale: Optional[Vec3, Vec2] = None, translate: Optional[Vec3, Vec2] = None):
+        self._type = t
         self._rotate = rotate
         self._scale = scale
         self._translate = translate

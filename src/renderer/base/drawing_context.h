@@ -7,7 +7,6 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/render_layer.h"
-#include "graphics/base/matrix.h"
 #include "graphics/base/rect.h"
 
 #include "renderer/forwarding.h"

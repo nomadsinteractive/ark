@@ -38,6 +38,7 @@ public:
 
 private:
     std::vector<C2Shape> transform(c2x& x) const;
+    void translate(float x, float y, const V2& translate, float& ox, float oy) const;
 
 private:
     std::vector<C2Shape> _shapes;

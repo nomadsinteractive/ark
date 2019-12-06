@@ -71,12 +71,12 @@ private:
 
     element_index_t _indice_base;
 
-    Transform::Snapshot _transform;
     V3 _translate;
 
     Varyings::Snapshot _varyings;
 
     bool _is_instanced;
+    const Transform::Snapshot* _transform;
 };
 
 }

@@ -69,7 +69,7 @@ void Tilemap::render(RenderRequest& renderRequest, const V3& position)
         i->render(renderRequest, V3(0));
 }
 
-const SafePtr<Size>& Tilemap::size()
+const sp<Size>& Tilemap::size()
 {
     return _size;
 }

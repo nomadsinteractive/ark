@@ -20,8 +20,8 @@ RendererByRenderObject::RendererByRenderObject(const sp<RenderObject>& renderObj
 {
     DASSERT(_render_object);
     DASSERT(_layer_context);
-    if(!_render_object->size())
-        measure(_render_object->size());
+    if(!_render_object->_size)
+        measure(_render_object->_size.ensure());
 }
 
 void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, const V3& position)
@@ -29,9 +29,9 @@ void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, const V3& 
     _layer_context->drawRenderObject(position, _render_object);
 }
 
-const SafePtr<Size>& RendererByRenderObject::size()
+const sp<Size>& RendererByRenderObject::size()
 {
-    return _render_object->size();
+    return _render_object->_size.ensure();
 }
 
 void RendererByRenderObject::measure(Size& size)

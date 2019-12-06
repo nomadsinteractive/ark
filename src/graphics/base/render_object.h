@@ -4,12 +4,15 @@
 #include "core/base/api.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
+#include "core/epi/disposed.h"
+#include "core/epi/visibility.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_ptr.h"
+#include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/inf/block.h"
+#include "graphics/base/size.h"
 #include "graphics/base/transform.h"
 
 #include "renderer/base/varyings.h"
@@ -17,7 +20,7 @@
 namespace ark {
 
 //[[script::bindings::holder]]
-class ARK_API RenderObject : public Block, public Holder {
+class ARK_API RenderObject : public Holder {
 public:
     struct Snapshot {
         Snapshot(int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
@@ -37,21 +40,15 @@ public:
     RenderObject(const sp<Integer>& type, const sp<Vec3>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
     RenderObject(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings, const sp<Disposed>& disposed);
 
-//  [[script::bindings::property]]
-    virtual const SafePtr<Size>& size() override;
     virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::property]]
     const sp<Integer> type() const;
-//  [[script::bindings::property]]
-    const SafePtr<Transform>& transform() const;
-//  [[script::bindings::property]]
-    const SafePtr<Varyings>& varyings() const;
 
 //  [[script::bindings::property]]
-    float width() const;
+    float width();
 //  [[script::bindings::property]]
-    float height() const;
+    float height();
 
 //  [[script::bindings::property]]
     void setType(int32_t type);
@@ -83,13 +80,19 @@ public:
     V3 xyz() const;
 
 //  [[script::bindings::property]]
-    const SafePtr<Vec3>& position() const;
+    const sp<Vec3>& position();
 //  [[script::bindings::property]]
     void setPosition(const sp<Vec3>& position);
 //  [[script::bindings::property]]
+    const sp<Size>& size();
+//  [[script::bindings::property]]
     void setSize(const sp<Size>& size);
 //  [[script::bindings::property]]
+    const SafePtr<Transform>& transform() const;
+//  [[script::bindings::property]]
     void setTransform(const sp<Transform>& transform);
+//  [[script::bindings::property]]
+    const SafePtr<Varyings>& varyings() const;
 //  [[script::bindings::property]]
     void setVaryings(const sp<Varyings>& varyings);
 
@@ -99,12 +102,12 @@ public:
     void setTag(const Box& tag);
 
 //  [[script::bindings::property]]
-    const sp<Disposed>& disposed() const;
+    const sp<Disposed>& disposed();
 //  [[script::bindings::property]]
     void setDisposed(const sp<Boolean>& disposed);
 
 //  [[script::bindings::property]]
-    const sp<Visibility>& visible() const;
+    const sp<Visibility>& visible();
 //  [[script::bindings::property]]
     void setVisible(const sp<Boolean>& visible);
 
@@ -140,15 +143,17 @@ public:
 private:
     sp<IntegerWrapper> _type;
 
-    SafePtr<Vec3> _position;
-    SafePtr<Size> _size;
+    SafeVar<Vec3> _position;
+    SafeVar<Size> _size;
     SafePtr<Transform> _transform;
     SafePtr<Varyings> _varyings;
 
-    SafePtr<Disposed> _disposed;
-    SafePtr<Visibility> _visible;
+    SafeVar<Disposed> _disposed;
+    SafeVar<Visibility> _visible;
 
     Box _tag;
+
+    friend class RendererByRenderObject;
 
 };
 

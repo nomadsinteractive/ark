@@ -31,7 +31,7 @@ void ShaderFrame::render(RenderRequest& renderRequest, const V3& position)
     renderRequest.addRequest(drawingContext.toRenderCommand());
 }
 
-const SafePtr<Size>& ShaderFrame::size()
+const sp<Size>& ShaderFrame::size()
 {
     return _size;
 }

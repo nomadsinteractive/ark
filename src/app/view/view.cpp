@@ -41,14 +41,13 @@ View::View(const sp<Size>& size)
 {
 }
 
-const SafePtr<Size>& View::size()
+const sp<Size>& View::size()
 {
     return _layout_param->size();
 }
 
 void View::traverse(const Holder::Visitor& visitor)
 {
-    HolderUtil::visit(_layout_param->size(), visitor);
     HolderUtil::visit(_on_enter, visitor);
     HolderUtil::visit(_on_leave, visitor);
     HolderUtil::visit(_on_push, visitor);

@@ -62,7 +62,7 @@ void RenderModelQuad::postSnapshot(RenderController& renderController, RenderLay
 Metrics RenderModelQuad::measure(int32_t type)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
-    return {texCoord.size(), texCoord.size(), {0, 0}};
+    return {V3(texCoord.size(), 0), V3(texCoord.size(), 0), {0, 0, 0}};
 }
 
 RenderModelQuad::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

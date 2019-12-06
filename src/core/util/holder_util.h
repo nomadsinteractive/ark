@@ -6,6 +6,7 @@
 #include "core/base/string.h"
 #include "core/inf/holder.h"
 #include "core/types/box.h"
+#include "core/types/safe_var.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"

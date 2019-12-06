@@ -12,7 +12,7 @@ class ARK_API Block {
 public:
     virtual ~Block() = default;
 
-    virtual const SafePtr<Size>& size() = 0;
+    virtual const sp<Size>& size() = 0;
 };
 
 }

@@ -2,6 +2,7 @@
 #define ARK_GRAPHICS_IMPL_VEC_VEC3_H_
 
 #include "core/base/api.h"
+#include "core/base/string.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
 #include "core/inf/variable.h"

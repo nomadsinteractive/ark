@@ -13,8 +13,6 @@ class ARK_API V2 {
 public:
     V2(float v = 0);
     V2(float x, float y);
-    V2(float x, float y, float z);
-    V2(const V3& other);
     V2(const std::initializer_list<float>& values);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(V2);
 

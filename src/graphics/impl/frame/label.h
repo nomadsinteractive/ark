@@ -19,7 +19,7 @@ public:
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
-    virtual const SafePtr<Size>& size() override;
+    virtual const sp<Size>& size() override;
 
 //  [[plugin::builder("label")]]
     class BUILDER : public Builder<Renderer> {

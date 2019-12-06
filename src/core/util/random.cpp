@@ -3,6 +3,7 @@
 #include <utility>
 
 #include "core/inf/variable.h"
+#include "core/types/shared_ptr.h"
 
 namespace ark {
 

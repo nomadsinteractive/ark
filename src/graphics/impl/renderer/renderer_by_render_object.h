@@ -4,6 +4,7 @@
 #include "core/inf/builder.h"
 #include "core/types/class.h"
 #include "core/types/shared_ptr.h"
+#include "core/types/safe_ptr.h"
 
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
@@ -18,7 +19,7 @@ public:
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
-    virtual const SafePtr<Size>& size() override;
+    virtual const sp<Size>& size() override;
 
 //  [[plugin::builder("render-object")]]
     class BUILDER : public Builder<Renderer> {
