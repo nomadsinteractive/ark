@@ -4,6 +4,7 @@
 
 #include "core/ark.h"
 #include "core/impl/variable/variable_wrapper.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/base/mat.h"
 #include "graphics/impl/mat/mat3_impl.h"
@@ -20,6 +21,10 @@ public:
 
     virtual M3 val() override {
         return _lvalue->val().mat<glm::mat3>() * _rvalue->val().mat<glm::mat3>();
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        return VariableUtil::update(timestamp, _lvalue, _rvalue);
     }
 
 private:
@@ -40,6 +45,10 @@ public:
         return V3(result.x, result.y, result.z);
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return VariableUtil::update(timestamp, _lvalue, _rvalue);
+    }
+
 private:
     sp<Mat3> _lvalue;
     sp<Vec3> _rvalue;
@@ -55,6 +64,10 @@ public:
         const glm::mat3 lvalue = _lvalue->val().mat<glm::mat3>();
         const glm::vec3 result = lvalue * _rvalue;
         return V3(result.x, result.y, result.z);
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        return _lvalue->update(timestamp);
     }
 
 private:
@@ -76,6 +89,10 @@ public:
         return V2(result.x / result.z, result.y / result.z);
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return VariableUtil::update(timestamp, _lvalue, _rvalue);
+    }
+
 private:
     sp<Mat3> _lvalue;
     sp<Vec2> _rvalue;
@@ -92,6 +109,10 @@ public:
         const glm::vec3 result = lvalue * _rvalue;
         DCHECK(result.z != 0, "Division by zero");
         return V2(result.x / result.z, result.y / result.z);
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        return _lvalue->update(timestamp);
     }
 
 private:

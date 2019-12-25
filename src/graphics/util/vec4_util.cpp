@@ -24,9 +24,14 @@ public:
         return _delegate->val()[_dim];
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return _delegate->update(timestamp);
+    }
+
 private:
     sp<Vec4> _delegate;
     int32_t _dim;
+
 };
 
 }

@@ -24,7 +24,7 @@ public:
     }
 
     virtual void run() override {
-        _delegate = _layer_snapshot.render(_position);
+        _delegate = _layer_snapshot.render(_render_request, _position);
         DASSERT(_delegate);
         _render_request.jobDone();
     }
@@ -39,9 +39,14 @@ private:
 
 }
 
-RenderRequest::RenderRequest(const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests)
-    : _stub(sp<Stub>::make(executor, memoryPool, renderRequests))
+RenderRequest::RenderRequest(uint64_t timestamp, const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests)
+    : _stub(sp<Stub>::make(timestamp, executor, memoryPool, renderRequests))
 {
+}
+
+uint64_t RenderRequest::timestamp() const
+{
+    return _stub->_timestamp;
 }
 
 Allocator& RenderRequest::allocator() const
@@ -78,8 +83,8 @@ void RenderRequest::addBackgroundRequest(const RenderLayer& layer, const V3& pos
     _stub->_executor->execute(renderCommand);
 }
 
-RenderRequest::Stub::Stub(const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests)
-    : _allocator(memoryPool), _executor(executor), _render_requests(renderRequests), _render_command_pipe_line(sp<RenderCommandPipeline>::make()), _background_renderer_count(1)
+RenderRequest::Stub::Stub(uint64_t timestamp, const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests)
+    : _timestamp(timestamp), _allocator(memoryPool), _executor(executor), _render_requests(renderRequests), _render_command_pipe_line(sp<RenderCommandPipeline>::make()), _background_renderer_count(1)
 {
 }
 

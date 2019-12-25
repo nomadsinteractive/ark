@@ -13,10 +13,12 @@ public:
     Vec2WithTransform(const sp<Vec2>& delegate, const sp<Transform>& transform);
 
     virtual V2 val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 private:
     sp<Vec2> _delegate;
     sp<Transform> _transform;
+
 };
 
 }

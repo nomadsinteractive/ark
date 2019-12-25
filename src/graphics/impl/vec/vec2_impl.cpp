@@ -7,6 +7,7 @@
 #include "core/util/holder_util.h"
 #include "core/util/numeric_util.h"
 #include "core/util/strings.h"
+#include "core/util/variable_util.h"
 
 namespace ark {
 
@@ -38,6 +39,11 @@ Vec2Impl::Vec2Impl(Vec2& other) noexcept
 V2 Vec2Impl::val()
 {
     return V2(_x->val(), _y->val());
+}
+
+bool Vec2Impl::update(uint64_t timestamp)
+{
+    return VariableUtil::update(timestamp, _x, _y);
 }
 
 void Vec2Impl::traverse(const Holder::Visitor& visitor)

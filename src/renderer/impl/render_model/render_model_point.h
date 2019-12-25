@@ -17,7 +17,7 @@ public:
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
     virtual void start(DrawingBuffer& buf, const RenderLayer::Snapshot& layerContext) override;
-    virtual void load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot) override;
+    virtual void load(VertexStream& buf, const Renderable::Snapshot& snapshot) override;
 
 //  [[plugin::resource-loader("point")]]
     class BUILDER : public Builder<RenderModel> {

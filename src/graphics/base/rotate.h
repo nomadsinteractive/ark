@@ -30,6 +30,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotate);
 
     virtual Rotation val() override;
+    virtual bool update(uint64_t timestamp) override;
 
     virtual void traverse(const Visitor& visitor) override;
 
@@ -75,7 +76,6 @@ public:
 private:
     sp<NumericWrapper> _value;
     sp<Vec3> _direction;
-
 };
 
 }

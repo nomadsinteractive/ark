@@ -24,6 +24,10 @@ public:
         return _v;
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return _t->update(timestamp);
+    }
+
 private:
 
     template<typename U> U getRC_sfinae(const U& v, float cd, decltype(v.length())*) const {

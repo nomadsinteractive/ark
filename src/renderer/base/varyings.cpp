@@ -28,6 +28,15 @@ void Varyings::traverse(const Holder::Visitor& visitor)
         HolderUtil::visit(iter.second._flatable, visitor);
 }
 
+bool Varyings::update(uint64_t timestamp) const
+{
+    bool dirty = false;
+    for(const auto& i : _varyings)
+        if(i.second._flatable->update(timestamp))
+            dirty = true;
+    return dirty;
+}
+
 void Varyings::setVarying(const String& name, sp<Flatable> flatable)
 {
     auto iter = _varyings.find(name);

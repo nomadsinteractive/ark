@@ -4,10 +4,11 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/inf/array.h"
+#include "core/inf/updatable.h"
 
 namespace ark {
 
-class ARK_API Flatable {
+class ARK_API Flatable : public Updatable {
 public:
     virtual ~Flatable() = default;
 
@@ -31,8 +32,13 @@ public:
         return _values->size();
     }
 
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return true;
+    }
+
 private:
     array<T> _values;
+
 };
 
 }

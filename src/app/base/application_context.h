@@ -89,7 +89,7 @@ private:
     public:
         Ticker();
 
-        void update();
+        virtual bool update(uint64_t timestamp) override;
         virtual uint64_t val() override;
 
     private:

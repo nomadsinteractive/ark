@@ -1,6 +1,7 @@
 #include "renderer/impl/render_model/render_model_point.h"
 
 #include "renderer/base/atlas.h"
+#include "renderer/base/vertex_stream.h"
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/resource_loader_context.h"
@@ -32,10 +33,10 @@ void RenderModelPoint::start(DrawingBuffer& buf, const RenderLayer::Snapshot& sn
     buf.setIndices(snapshot._index_buffer);
 }
 
-void RenderModelPoint::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
+void RenderModelPoint::load(VertexStream& buf, const Renderable::Snapshot& snapshot)
 {
     const Atlas::Item& texCoord = _atlas->at(snapshot._type);
-    buf.nextVertex();
+    buf.next();
     buf.writePosition(0, 0, 0);
     buf.writeTexCoordinate(static_cast<uint16_t>((texCoord.ux() + texCoord.vx()) / 2), static_cast<uint16_t>((texCoord.uy() + texCoord.vy()) / 2));
 }

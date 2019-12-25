@@ -6,6 +6,7 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/base/mat.h"
 
@@ -25,6 +26,10 @@ public:
         const V3 n = _n->val();
         float values[9] = {t.x(), b.x(), n.x(), t.y(), b.y(), n.y(), t.z(), b.z(), n.z()};
         return M3(values);
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        return VariableUtil::update(timestamp, _t, _b, _n);
     }
 
 private:
@@ -57,6 +62,11 @@ Mat3Impl::Mat3Impl(const sp<Vec3>& t, const sp<Vec3>& b, const sp<Vec3>& n) noex
 M3 Mat3Impl::val()
 {
     return _impl->val();
+}
+
+bool Mat3Impl::update(uint64_t timestamp)
+{
+    return _impl->update(timestamp);
 }
 
 void Mat3Impl::fix()

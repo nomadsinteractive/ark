@@ -56,9 +56,14 @@ public:
     static const Color BLACK;
 
     virtual V4 val() override;
+    virtual bool update(uint64_t timestamp) override;
+
+private:
+    void doNotify();
 
 private:
     V4 _color;
+    Timestamp _timestamp;
 
 };
 

@@ -6,6 +6,7 @@
 #include "renderer/base/atlas.h"
 #include "graphics/base/layer_context.h"
 
+#include "renderer/base/vertex_stream.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_bindings.h"
@@ -83,7 +84,7 @@ void RenderModelNinePatch::start(DrawingBuffer& buf, const RenderLayer::Snapshot
     buf.setIndices(snapshot._index_buffer);
 }
 
-void RenderModelNinePatch::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
+void RenderModelNinePatch::load(VertexStream& buf, const Renderable::Snapshot& snapshot)
 {
     const Item& item = _nine_patch_items.at(snapshot._type);
     const Rect& paddings = item._paddings;
@@ -92,7 +93,7 @@ void RenderModelNinePatch::load(DrawingBuffer& buf, const RenderObject::Snapshot
     float yData[4] = {paintRect.bottom(), paintRect.bottom() - paddings.top(), paintRect.top() + paddings.bottom(), paintRect.top()};
     for(uint32_t i = 0; i < 4; i++) {
         for(uint32_t j = 0; j < 4; j++) {
-            buf.nextVertex();
+            buf.next();
             buf.writePosition(xData[j], yData[i], 0);
             buf.writeTexCoordinate(item._x[j], item._y[i]);
         }

@@ -20,6 +20,11 @@ bool Visibility::val()
     return _visible->val();
 }
 
+bool Visibility::update(uint64_t timestamp)
+{
+    return _visible->update(timestamp);
+}
+
 void Visibility::show()
 {
     _visible->set(true);

@@ -6,6 +6,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/tilemap.h"
+#include "graphics/impl/renderable/renderable_passive.h"
 
 
 namespace ark {
@@ -14,7 +15,6 @@ class ARK_API TilemapLayer : public Renderer {
 public:
 // [[script::bindings::auto]]
     TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, const sp<Vec>& position = nullptr, Tilemap::LayerFlag flag = Tilemap::LAYER_FLAG_DEFAULT);
-    ~TilemapLayer();
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -48,7 +48,7 @@ public:
     void setTile(uint32_t row, uint32_t col, int32_t tileId);
 
 // [[script::bindings::auto]]
-    void clear();
+    void reset();
 
 private:
     void viewportIntersect(float vs, float ve, float width, float& start, float& end);
@@ -65,7 +65,7 @@ private:
 
     Tilemap::LayerFlag _flag;
 
-    sp<RenderObject>* _tiles;
+    std::vector<sp<RenderablePassive>> _tiles;
 
     friend class Tilemap;
 };

@@ -5,6 +5,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
 #include "core/util/holder_util.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/base/color.h"
 
@@ -28,6 +29,11 @@ Vec4Impl::Vec4Impl(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>
 V4 Vec4Impl::val()
 {
     return V4(_x->val(), _y->val(), _z->val(), _w->val());
+}
+
+bool Vec4Impl::update(uint64_t timestamp)
+{
+    return VariableUtil::update(timestamp, _x, _y, _z, _w);
 }
 
 void Vec4Impl::traverse(const Holder::Visitor& visitor)

@@ -5,6 +5,7 @@
 #include "core/util/holder_util.h"
 
 #include "graphics/base/layer.h"
+#include "graphics/base/render_object.h"
 
 #include "renderer/base/shader.h"
 
@@ -23,7 +24,7 @@ LayerContext::LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier
 void LayerContext::traverse(const Holder::Visitor& visitor)
 {
     if(_layer_type != Layer::TYPE_TRANSIENT)
-        for(const sp<RenderObject>& i : _items)
+        for(const sp<Renderable>& i : _renderables)
             HolderUtil::visit(i, visitor);
 }
 
@@ -43,69 +44,57 @@ void LayerContext::renderRequest(const V3& position)
     _position = position;
 }
 
-void LayerContext::drawRenderObject(const V3& position, const sp<RenderObject>& renderObject)
+void LayerContext::add(const sp<Renderable>& renderable, const sp<Boolean>& disposed)
 {
-    _transient_items.emplace_back(position + _position, renderObject);
+    DASSERT(renderable);
+    _renderables.push_back(renderable, disposed);
+    _notifier->notify();
 }
 
 void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed)
 {
-    DASSERT(renderObject);
-    _items.push_back(renderObject, disposed, _notifier);
-    _notifier->notify();
+    add(renderObject, disposed ? disposed : renderObject->disposed().as<Boolean>());
 }
 
 void LayerContext::clear()
 {
-    _items.clear();
+    _renderables.clear();
     _notifier->notify();
 }
 
-void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, Allocator& allocator)
+void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderRequest& renderRequest)
 {
     if(_render_requested)
     {
         const sp<PipelineInput> pipelineInput = output._stub->_shader->input();
         bool notify = false;
-        for(const Item& i : _transient_items)
-            if(!i._render_object->isDisposed())
-            {
-                RenderObject::Snapshot snapshot = i._render_object->snapshot(pipelineInput, allocator);
-                snapshot._position = snapshot._position + i._position;
-                output._items.push_back(std::move(snapshot));
-                notify = true;
-            }
 
-        for(const sp<RenderObject>& i : _items)
+        for(const sp<Renderable>& i : _renderables)
         {
-            if(i->isVisible())
+            Renderable::Snapshot snapshot = i->snapshot(pipelineInput, renderRequest);
+            if(snapshot._disposed)
+                notify = true;
+            else
             {
-                RenderObject::Snapshot snapshot = i->snapshot(pipelineInput, allocator);
                 snapshot._position = snapshot._position + _position;
-                output._items.push_back(std::move(snapshot));
+                output._items.emplace_back(std::move(snapshot));
             }
         }
 
-        if(notify || _layer_type == Layer::TYPE_DYNAMIC || _layer_type == Layer::TYPE_TRANSIENT)
+        if(notify || _layer_type == Layer::TYPE_TRANSIENT)
             _notifier->notify();
     }
-    _transient_items.clear();
     _render_requested = false;
 }
 
-LayerContext::RenderObjectFilter::RenderObjectFilter(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed, const sp<Notifier>& notifier)
-    : _disposed(disposed ? disposed : renderObject.as<Disposed>().cast<Boolean>()), _notifier(notifier)
+LayerContext::RenderableFilter::RenderableFilter(const sp<Renderable>& /*renderable*/, const sp<Boolean>& disposed)
+    : _disposed(disposed)
 {
 }
 
-FilterAction LayerContext::RenderObjectFilter::operator()(const sp<RenderObject>& renderObject) const
+FilterAction LayerContext::RenderableFilter::operator()(const sp<Renderable>& /*renderable*/) const
 {
-    if(renderObject->isDisposed() || (_disposed && _disposed->val()))
-    {
-        _notifier->notify();
-        return FILTER_ACTION_REMOVE;
-    }
-    return FILTER_ACTION_NONE;
+    return (_disposed && _disposed->val()) ? FILTER_ACTION_REMOVE_AFTER : FILTER_ACTION_NONE;
 }
 
 LayerContext::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, Layer::Type layerType)

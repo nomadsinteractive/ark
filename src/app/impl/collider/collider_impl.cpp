@@ -43,6 +43,10 @@ public:
         return position;
     }
 
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return true;
+    }
+
 private:
     sp<ColliderImpl::Stub> _collider;
     sp<Vec2> _position;

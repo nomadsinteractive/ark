@@ -42,7 +42,7 @@ const sp<Snippet>& PipelineBindings::snippet() const
     return _stub->_layout->snippet();
 }
 
-const PipelineBindings::Attributes& PipelineBindings::attributes() const
+const Buffer::Attributes& PipelineBindings::attributes() const
 {
     return _stub->_attributes;
 }
@@ -92,15 +92,6 @@ sp<Pipeline> PipelineBindings::getPipeline(GraphicsContext& graphicsContext, con
     graphicsContext.renderController()->upload(_pipeline, nullptr, RenderController::US_ON_SURFACE_READY, RenderController::UP_LEVEL_2);
     _pipeline->upload(graphicsContext, nullptr);
     return _pipeline;
-}
-
-PipelineBindings::Attributes::Attributes(const PipelineInput& input)
-{
-    _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = input.getAttributeOffset("TexCoordinate");
-    _offsets[ATTRIBUTE_NAME_NORMAL] = input.getAttributeOffset("Normal");
-    _offsets[ATTRIBUTE_NAME_TANGENT] = input.getAttributeOffset("Tangent");
-    _offsets[ATTRIBUTE_NAME_BITANGENT] = input.getAttributeOffset("Bitangent");
-    _offsets[ATTRIBUTE_NAME_MODEL_ID] = input.getAttributeOffset("ModelId");
 }
 
 PipelineBindings::Stub::Stub(const Parameters& parameters, const sp<PipelineLayout>& pipelineLayout)

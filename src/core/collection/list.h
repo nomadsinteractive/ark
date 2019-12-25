@@ -14,7 +14,8 @@ namespace ark {
 enum FilterAction {
     FILTER_ACTION_NONE,
     FILTER_ACTION_SKIP,
-    FILTER_ACTION_REMOVE
+    FILTER_ACTION_REMOVE,
+    FILTER_ACTION_REMOVE_AFTER
 };
 
 class ListFilters {
@@ -90,25 +91,33 @@ public:
         }
 
         sp<T>& operator *() {
-            return (*this->_iterator)._item;
+            return _filter_action == FILTER_ACTION_REMOVE_AFTER ? _removed_after : (*this->_iterator)._item;
         }
 
     private:
         void forward() {
             do {
+                if(_filter_action == FILTER_ACTION_REMOVE_AFTER)
+                    _removed_after = nullptr;
+
                 if(this->_iterator == _list.end())
                     break;
                 const auto& i = *(this->_iterator);
-                FilterAction fa = i._filter(i._item);
-                if(fa == FILTER_ACTION_NONE)
+                _filter_action = i._filter(i._item);
+                if(_filter_action == FILTER_ACTION_NONE)
                     break;
-                if(fa == FILTER_ACTION_REMOVE)
+                if(_filter_action == FILTER_ACTION_REMOVE || _filter_action == FILTER_ACTION_REMOVE_AFTER) {
+                    if(_filter_action == FILTER_ACTION_REMOVE_AFTER)
+                        _removed_after = (*this->_iterator)._item;
                     this->_iterator = _list.erase(this->_iterator);
+                }
             } while(true);
         }
 
     private:
         _List& _list;
+        FilterAction _filter_action;
+        sp<T> _removed_after;
     };
 
 public:

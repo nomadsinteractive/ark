@@ -8,11 +8,11 @@
 
 namespace ark {
 
-class Fence : public Numeric {
+class Fence : public Numeric::Updatable {
 public:
     Fence(const sp<Numeric>& delegate, const sp<Numeric>& expectation, Notifier notifier);
 
-    virtual float val() override;
+    virtual bool doUpdate(uint64_t timestamp, float& value) override;
 
 private:
     sp<Numeric> _delegate;
@@ -21,6 +21,7 @@ private:
     Notifier _notifer;
 
     bool _is_greater;
+
 };
 
 }

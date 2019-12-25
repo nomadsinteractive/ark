@@ -26,6 +26,10 @@ public:
         return this->_delegate->val();
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return this->_delegate->update(timestamp);
+    }
+
     void set(T value) {
         if(_variable_impl)
             _variable_impl->set(value);

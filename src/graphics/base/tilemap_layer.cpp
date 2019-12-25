@@ -5,9 +5,11 @@
 #include "core/ark.h"
 
 #include "core/inf/variable.h"
+#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/util/math.h"
 
 #include "graphics/base/layer_context.h"
+#include "graphics/base/render_object.h"
 #include "graphics/base/size.h"
 #include "graphics/base/tilemap.h"
 #include "graphics/base/tileset.h"
@@ -16,14 +18,9 @@ namespace ark {
 
 TilemapLayer::TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, const sp<Vec>& position, Tilemap::LayerFlag flag)
     : _col_count(colCount), _row_count(rowCount), _layer_context(tilemap._layer_context), _size(tilemap._size), _tileset(tilemap._tileset), _position(position),
-      _scroller(tilemap._scroller), _flag(flag)
+      _scroller(tilemap._scroller), _flag(flag), _tiles(_col_count * _row_count)
 {
-    _tiles = new sp<RenderObject>[_col_count * _row_count];
-}
-
-TilemapLayer::~TilemapLayer()
-{
-    delete[] _tiles;
+    reset();
 }
 
 void TilemapLayer::render(RenderRequest& /*renderRequest*/, const V3& position)
@@ -62,11 +59,7 @@ void TilemapLayer::render(RenderRequest& /*renderRequest*/, const V3& position)
     {
         float dy = (i - rowStart) * tileHeight - oy;
         for(int32_t j = colStart; j < colEnd; ++j)
-        {
-            const sp<RenderObject>& renderObject = _tiles[i * _col_count + j];
-            if(renderObject)
-                _layer_context->drawRenderObject(V3((j - colStart) * tileWidth - ox, dy, 0) + position, renderObject);
-        }
+            _tiles.at(i * _col_count + j)->requestUpdate(V3((j - colStart) * tileWidth - ox, dy, 0) + position);
     }
 }
 
@@ -98,7 +91,8 @@ uint32_t TilemapLayer::rowCount() const
 const sp<RenderObject>& TilemapLayer::getTile(uint32_t rowId, uint32_t colId) const
 {
     DCHECK(rowId < _row_count && colId < _col_count, "Invaild tile id:(%d, %d), tile map size(%d, %d)", rowId, colId, _row_count, _col_count);
-    return _tiles[rowId * _col_count + colId];
+    const sp<RenderablePassive>& renderable = _tiles[rowId * _col_count + colId];
+    return renderable ? renderable->renderObject() : sp<RenderObject>::null();
 }
 
 int32_t TilemapLayer::getTileType(uint32_t rowId, uint32_t colId) const
@@ -115,7 +109,8 @@ const sp<RenderObject>& TilemapLayer::getTileByPosition(float x, float y) const
 void TilemapLayer::setTile(uint32_t row, uint32_t col, const sp<RenderObject>& renderObject)
 {
     DCHECK(row < _row_count && col < _col_count, "Invaild tile position:(%d, %d), tilemap size(%d, %d)", row, col, _row_count, _col_count);
-    _tiles[row * _col_count + col] = renderObject;
+    sp<RenderablePassive> renderable = sp<RenderablePassive>::make(renderObject);
+    _tiles[row * _col_count + col] = std::move(renderable);
 }
 
 void TilemapLayer::setTile(uint32_t row, uint32_t col, int32_t tileId)
@@ -135,10 +130,14 @@ void TilemapLayer::setFlag(Tilemap::LayerFlag flag)
     _flag = flag;
 }
 
-void TilemapLayer::clear()
+void TilemapLayer::reset()
 {
-    delete[] _tiles;
-    _tiles = new sp<RenderObject>[_col_count * _row_count];
+    for(size_t i = 0; i < _tiles.size(); ++i)
+    {
+        sp<RenderablePassive> renderable = sp<RenderablePassive>::make();
+        _layer_context->add(renderable, sp<BooleanByWeakRef<Renderable>>::make(renderable, 0));
+        _tiles[i] = std::move(renderable);
+    }
 }
 
 void TilemapLayer::viewportIntersect(float vs, float ve, float width, float& start, float& end)

@@ -63,6 +63,7 @@ public:
     Borrowed(T* data, size_t length)
         : _data(data), _length(length) {
     }
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Borrowed);
 
     virtual size_t length() override {
         return _length;
@@ -111,6 +112,7 @@ public:
     Fixed(const std::initializer_list<T>& list) {
         std::copy(list.begin(), list.begin() + std::min(LEN, list.size()), _data.begin());
     }
+    DISALLOW_COPY_AND_ASSIGN(Fixed);
 
     virtual size_t length() override {
         return _data.size();

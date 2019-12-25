@@ -143,11 +143,13 @@ private:
         SynchronizeFlag();
 
         virtual bool val() override;
+        virtual bool update(uint64_t timestamp) override;
 
         void reset();
 
     private:
         bool _value;
+
     };
 
     struct PreparingResource {

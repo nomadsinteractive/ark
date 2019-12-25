@@ -36,6 +36,8 @@ private:
         Result();
 
         virtual bool val() override;
+        virtual bool update(uint64_t /*timestamp*/) override;
+
 
         void setFunctionResult(FunctionResult functionResult);
 

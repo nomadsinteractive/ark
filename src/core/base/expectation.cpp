@@ -14,6 +14,11 @@ float Expectation::val()
     return _delegate->val();
 }
 
+bool Expectation::update(uint64_t timestamp)
+{
+    return _delegate->update(timestamp);
+}
+
 void Expectation::traverse(const Holder::Visitor& visitor)
 {
     for(const sp<Observer>& i : _observers)

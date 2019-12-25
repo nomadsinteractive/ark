@@ -14,11 +14,12 @@ public:
     OutOfBounds(const sp<Bounds>& bounds, const sp<Vec>& position);
 
     virtual bool val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 //  [[plugin::builder("out_of_bounds")]]
     class BUILDER : public Builder<Boolean> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Boolean> build(const Scope& args) override;
 

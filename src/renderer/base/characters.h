@@ -11,6 +11,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/metrics.h"
+#include "graphics/impl/renderable/renderable_passive.h"
 
 #include "renderer/forwarding.h"
 
@@ -67,6 +68,8 @@ private:
     void createContentWithBoundary(float boundary);
     void createContentNoBoundary();
 
+    void createLayerContent(float width, float height);
+
     struct LayoutChar {
         LayoutChar(int32_t type, const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak);
 
@@ -99,6 +102,7 @@ private:
     sp<CharacterMaker> _character_maker;
 
     std::vector<sp<RenderObject>> _contents;
+    std::vector<sp<RenderablePassive>> _renderables;
     std::wstring _text;
 
     float _text_scale;

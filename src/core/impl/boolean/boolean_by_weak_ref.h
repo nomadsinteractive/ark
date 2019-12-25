@@ -17,9 +17,14 @@ public:
         return _weak_ref.useCount() <= _use_count;
     }
 
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return true;
+    }
+
 private:
     WeakPtr<T> _weak_ref;
     long _use_count;
+
 };
 
 }

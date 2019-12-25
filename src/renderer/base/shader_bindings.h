@@ -43,7 +43,7 @@ public:
 
     sp<Pipeline> getPipeline(GraphicsContext& graphicsContext);
 
-    std::map<uint32_t, Buffer::Builder> makeDividedBufferBuilders(size_t instanceCount) const;
+    std::map<uint32_t, Buffer::Builder> makeDividedBufferBuilders(const RenderRequest& renderRequest, const Buffer::Attributes& attributes) const;
 
 private:
     sp<std::map<uint32_t, Buffer>> makeDivisors(RenderController& renderController) const;

@@ -30,7 +30,7 @@ public:
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
     virtual void start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot) override;
-    virtual void load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot) override;
+    virtual void load(VertexStream& buf, const Renderable::Snapshot& snapshot) override;
 
 //  [[plugin::resource-loader("assimp")]]
     class BUILDER : public Builder<RenderModel> {

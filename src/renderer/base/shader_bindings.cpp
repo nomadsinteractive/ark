@@ -83,14 +83,14 @@ sp<Pipeline> ShaderBindings::getPipeline(GraphicsContext& graphicsContext)
     return _pipeline;
 }
 
-std::map<uint32_t, Buffer::Builder> ShaderBindings::makeDividedBufferBuilders(size_t instanceCount) const
+std::map<uint32_t, Buffer::Builder> ShaderBindings::makeDividedBufferBuilders(const RenderRequest& renderRequest, const Buffer::Attributes& attributes) const
 {
     std::map<uint32_t, Buffer::Builder> builders;
     const sp<PipelineInput>& pipelineInput = _pipeline_bindings->input();
     for(const auto& i : *_divisors)
     {
         const PipelineInput::Stream& stream = pipelineInput->getStream(i.first);
-        builders.insert(std::make_pair(i.first, Buffer::Builder(stream.stride(), instanceCount / i.first)));
+        builders.insert(std::make_pair(i.first, Buffer::Builder(renderRequest, attributes, stream.stride())));
     }
     return builders;
 }

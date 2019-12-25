@@ -1,6 +1,7 @@
 #include "renderer/impl/render_model/render_model_quad.h"
 
 #include "renderer/base/atlas.h"
+#include "renderer/base/vertex_stream.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_bindings.h"
@@ -29,7 +30,7 @@ void RenderModelQuad::start(DrawingBuffer& buf, const RenderLayer::Snapshot& sna
     buf.setIndices(snapshot._index_buffer);
 }
 
-void RenderModelQuad::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
+void RenderModelQuad::load(VertexStream& buf, const Renderable::Snapshot& snapshot)
 {
     const Atlas::Item& texCoord = _atlas->at(snapshot._type);
     const Rect& bounds = texCoord.bounds();
@@ -37,19 +38,19 @@ void RenderModelQuad::load(DrawingBuffer& buf, const RenderObject::Snapshot& sna
     float width = static_cast<int32_t>(snapshot._size.x()) == 0 ? size.x() : snapshot._size.x();
     float height = static_cast<int32_t>(snapshot._size.y()) == 0 ? size.y() : snapshot._size.y();
 
-    buf.nextVertex();
+    buf.next();
     buf.writePosition(bounds.left() * width, bounds.top() * height, 0);
     buf.writeTexCoordinate(texCoord.ux(), texCoord.uy());
 
-    buf.nextVertex();
+    buf.next();
     buf.writePosition(bounds.left() * width, bounds.bottom() * height, 0);
     buf.writeTexCoordinate(texCoord.ux(), texCoord.vy());
 
-    buf.nextVertex();
+    buf.next();
     buf.writePosition(bounds.right() * width, bounds.top() * height, 0);
     buf.writeTexCoordinate(texCoord.vx(), texCoord.uy());
 
-    buf.nextVertex();
+    buf.next();
     buf.writePosition(bounds.right() * width, bounds.bottom() * height, 0);
     buf.writeTexCoordinate(texCoord.vx(), texCoord.vy());
 }

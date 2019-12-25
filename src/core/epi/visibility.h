@@ -18,6 +18,7 @@ public:
     Visibility(const sp<Boolean>& visible);
 
     virtual bool val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 //  [[script::bindings::auto]]
     void show();

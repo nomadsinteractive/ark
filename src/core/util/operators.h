@@ -107,6 +107,27 @@ public:
         }
     };
 
+    template<typename T> class Not {
+    public:
+        T operator()(T val) {
+            return !val;
+        }
+    };
+
+    template<typename T> class Min {
+    public:
+        T operator()(T v1, T v2) {
+            return v1 < v2 ? v1 : v2;
+        }
+    };
+
+    template<typename T> class Max {
+    public:
+        T operator()(T v1, T v2) {
+            return v1 > v2 ? v1 : v2;
+        }
+    };
+
     template<typename T, typename OP> class Builder : public ark::Builder<Variable<T>> {
     public:
         typedef sp<ark::Builder<Variable<T>>> BuilderType;

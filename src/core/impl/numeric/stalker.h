@@ -12,6 +12,7 @@ public:
     Stalker(const sp<Numeric>& t, const sp<Numeric>& target, float s0, float eta);
 
     virtual float val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 private:
     void doChase(float s0, float v0, float target, float dt);

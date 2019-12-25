@@ -101,9 +101,8 @@ void VKMemoryPtr::Stub::upload(Uploader& uploader)
     DCHECK(uploader.size() <= _size, "Uploader size: %d, memory size: %d", uploader.size(), _size);
 
     uint8_t* buf = reinterpret_cast<uint8_t*>(map());
-    uploader.upload([&buf](void* data, size_t size) {
-        memcpy(buf, data, size);
-        buf += size;
+    uploader.upload([&buf](void* data, size_t size, size_t offset) {
+        memcpy(buf + offset, data, size);
     });
 
     unmap();

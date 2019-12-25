@@ -3,7 +3,7 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
-#include "core/impl/numeric/min.h"
+#include "core/util/math.h"
 
 namespace ark {
 
@@ -16,6 +16,11 @@ Duration::Duration(const sp<Numeric>& delegate)
 float Duration::val()
 {
     return _delegate->val();
+}
+
+bool Duration::update(uint64_t timestamp)
+{
+    return _delegate->update(timestamp);
 }
 
 sp<Numeric> Duration::duration()
@@ -37,7 +42,7 @@ sp<Duration> Duration::BUILDER::build(const Scope& args)
     if(_delegate)
     {
         const sp<Numeric> delegate = _delegate->build(args);
-        return sp<Duration>::make(util ? sp<Numeric>::adopt(new Min(delegate, util)) : delegate);
+        return sp<Duration>::make(util ? Math::min(delegate, util) : delegate);
     }
     const sp<Clock> clock = _clock ? _clock->build(args) : Ark::instance().clock();
     return sp<Duration>::make(util ? clock->durationUntil(util) : clock->duration());

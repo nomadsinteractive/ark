@@ -18,6 +18,11 @@ public:
         return _condition->val() ? _a->val() : _b->val();
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        _condition->update(timestamp);
+        return _condition->val() ? _a->update(timestamp) : _b->update(timestamp);
+    }
+
 private:
     sp<Boolean> _condition;
     sp<Variable<T>> _a;

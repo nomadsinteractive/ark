@@ -1,6 +1,7 @@
 #include "graphics/impl/boolean/out_of_bounds.h"
 
 #include "core/base/bean_factory.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/base/bounds.h"
 #include "graphics/base/v2.h"
@@ -20,8 +21,13 @@ bool OutOfBounds::val()
     return !_bounds->ptin(pt);
 }
 
-OutOfBounds::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
-    : _bounds(parent.ensureBuilder<Bounds>(doc, Constants::Attributes::BOUNDS)), _position(parent.ensureBuilder<Vec>(doc, Constants::Attributes::POSITION))
+bool OutOfBounds::update(uint64_t timestamp)
+{
+    return VariableUtil::update(timestamp, _position, _bounds);
+}
+
+OutOfBounds::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _bounds(factory.ensureBuilder<Bounds>(manifest, Constants::Attributes::BOUNDS)), _position(factory.ensureBuilder<Vec>(manifest, Constants::Attributes::POSITION))
 {
 }
 

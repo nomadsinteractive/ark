@@ -222,6 +222,7 @@ void LayoutHierarchy::updateLayout(LayoutParam& layoutParam)
         else
             for(const sp<Slot>& i : _slots)
                 i->updateLayout();
+        puts("updated");
     }
 }
 

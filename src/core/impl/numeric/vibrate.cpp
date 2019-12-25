@@ -14,4 +14,9 @@ float Vibrate::val()
     return _a * Math::sin(_t->val() + _c) + _o;
 }
 
+bool Vibrate::update(uint64_t timestamp)
+{
+    return _t->update(timestamp);
+}
+
 }

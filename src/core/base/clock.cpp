@@ -5,9 +5,9 @@
 #include "core/ark.h"
 #include "core/inf/variable.h"
 #include "core/impl/boolean/boolean_by_timeout.h"
-#include "core/impl/numeric/min.h"
-#include "core/util/strings.h"
 #include "core/util/conversions.h"
+#include "core/util/math.h"
+#include "core/util/strings.h"
 
 #include "platform/platform.h"
 
@@ -29,9 +29,14 @@ public:
         return (_ticker->val() - _initial_ticket) / 1000000.0f;
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return _timestamp.update(timestamp);
+    }
+
 private:
     sp<Variable<uint64_t>> _ticker;
     uint64_t _initial_ticket;
+    Timestamp _timestamp;
 };
 
 }
@@ -44,6 +49,10 @@ public:
 
     virtual uint64_t val() override {
         return _paused ? _paused : _delegate->val() - _bypass;
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        return !_paused && _timestamp.update(timestamp);
     }
 
     void setDelegate(const sp<Variable<uint64_t>>& delegate) {
@@ -64,6 +73,7 @@ private:
     sp<Variable<uint64_t>> _delegate;
     uint64_t _bypass;
     uint64_t _paused;
+    Timestamp _timestamp;
 };
 
 Clock::Interval::Interval(uint64_t usec)
@@ -119,6 +129,11 @@ uint64_t Clock::val()
     return _ticker->val();
 }
 
+bool Clock::update(uint64_t timestamp)
+{
+    return _ticker->update(timestamp);
+}
+
 uint64_t Clock::tick() const
 {
     return _ticker->val();
@@ -141,7 +156,7 @@ sp<Numeric> Clock::duration() const
 
 sp<Numeric> Clock::durationUntil(const sp<Numeric>& until) const
 {
-    return sp<Min>::make(duration(), until);
+    return Math::min(duration(), until);
 }
 
 sp<Boolean> Clock::timeout(float seconds) const

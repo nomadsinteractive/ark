@@ -12,6 +12,7 @@
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/holder_util.h"
 #include "core/util/operators.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/impl/vec/vec2_impl.h"
 #include "graphics/impl/vec/vec_neg.h"
@@ -29,6 +30,10 @@ public:
 
     virtual float val() override {
         return _delegate->val()[_dim];
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        return _delegate->update(timestamp);
     }
 
     virtual void traverse(const Visitor& visitor) override {
@@ -53,12 +58,17 @@ public:
         return val / hypot;
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return _delegate->update(timestamp);
+    }
+
     virtual void traverse(const Visitor& visitor) override {
         HolderUtil::visit(_delegate, visitor);
     }
 
 private:
     sp<Vec2> _delegate;
+
 };
 
 class Vec2Fence : public Vec2, public Holder, Implements<Vec2Fence, Vec2, Holder> {
@@ -75,6 +85,10 @@ public:
             _distance = distance;
         }
         return v;
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        return VariableUtil::update(timestamp, _delegate, _plane);
     }
 
     virtual void traverse(const Visitor& visitor) override {

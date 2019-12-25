@@ -18,6 +18,7 @@ public:
     Disposed(const sp<Boolean>& disposed);
 
     virtual bool val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 //  [[script::bindings::auto]]
     void dispose();

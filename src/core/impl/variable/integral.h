@@ -25,6 +25,10 @@ public:
         return _s;
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return _t->update(timestamp);
+    }
+
     virtual void traverse(const Visitor& visitor) override {
         HolderUtil::visit(_v, visitor);
         HolderUtil::visit(_t, visitor);

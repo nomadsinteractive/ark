@@ -1,27 +1,34 @@
 #include "core/impl/numeric/clamp.h"
 
+#include "core/util/variable_util.h"
+
+
 namespace ark {
 
 Clamp::Clamp(const sp<Numeric>& delegate, const sp<Numeric>& min, const sp<Numeric>& max, Notifier notifier)
-    : _delegate(delegate), _min(min), _max(max), _notifier(std::move(notifier))
+    : Updatable(delegate->val()), _delegate(delegate), _min(min), _max(max), _notifier(std::move(notifier))
 {
 }
 
-float Clamp::val()
+bool Clamp::doUpdate(uint64_t timestamp, float& value)
 {
-    float v = _delegate->val();
+    if(!VariableUtil::update(timestamp, _delegate, _min, _max))
+        return false;
+
+    value = _delegate->val();
     float t;
-    if((t = _min->val()) > v)
+    if((t = _min->val()) > value)
     {
         _notifier.notify();
-        return t;
+        value = t;
     }
-    if((t = _max->val()) < v)
+    else if((t = _max->val()) < value)
     {
         _notifier.notify();
-        return t;
+        value = t;
     }
-    return v;
+
+    return true;
 }
 
 }

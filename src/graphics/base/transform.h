@@ -46,7 +46,8 @@ public:
     class ARK_API Snapshot {
     public:
         Snapshot(const Transform& transform);
-        Snapshot(const Snapshot& other) = default;
+        Snapshot() = default;
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
         M4 toMatrix() const;
 
@@ -70,6 +71,8 @@ public:
     };
 
     Snapshot snapshot() const;
+
+    bool update(uint64_t timestamp) const;
 
 //  [[script::bindings::property]]
     const sp<Rotate>& rotate();

@@ -22,6 +22,8 @@ public:
     Size(const sp<Numeric>& width, const sp<Numeric>& height, const sp<Numeric>& depth = nullptr);
 
     virtual V3 val() override;
+    virtual bool update(uint64_t timestamp) override;
+
     virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::property]]
@@ -86,7 +88,6 @@ private:
     sp<NumericWrapper> _width;
     sp<NumericWrapper> _height;
     sp<NumericWrapper> _depth;
-
 };
 
 }

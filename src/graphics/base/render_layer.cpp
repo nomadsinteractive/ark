@@ -13,6 +13,7 @@
 
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/drawing_buffer.h"
+#include "renderer/base/model.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_context.h"
@@ -20,6 +21,8 @@
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
+#include "renderer/base/vertex_stream.h"
+#include "renderer/inf/model_loader.h"
 
 #include "renderer/inf/pipeline.h"
 #include "renderer/inf/pipeline_factory.h"
@@ -30,7 +33,7 @@ namespace ark {
 RenderLayer::Stub::Stub(const sp<RenderModel>& renderModel, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_model(renderModel), _shader(shader), _scissor(scissor), _resource_loader_context(resourceLoaderContext),
       _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_render_model->makeShaderBindings(_shader)), _notifier(sp<Notifier>::make()),
-      _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(renderModel, _notifier, Layer::TYPE_TRANSIENT))), _stride(shader->input()->getStream(0).stride())
+      _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(renderModel, _notifier, Layer::TYPE_DYNAMIC))), _stride(shader->input()->getStream(0).stride())
 {
     DCHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
 }
@@ -38,13 +41,13 @@ RenderLayer::Stub::Stub(const sp<RenderModel>& renderModel, const sp<Shader>& sh
 RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& stub)
     : _stub(stub)
 {
-    _stub->_layer->context()->takeSnapshot(*this, renderRequest.allocator());
+    _stub->_layer->context()->takeSnapshot(*this, renderRequest);
 
     Layer::Type combined = Layer::TYPE_UNSPECIFIED;
 
     for(const sp<LayerContext>& i : stub->_layer_contexts)
     {
-        i->takeSnapshot(*this, renderRequest.allocator());
+        i->takeSnapshot(*this, renderRequest);
         DWARN(combined != Layer::TYPE_STATIC || i->layerType() != Layer::TYPE_DYNAMIC, "Combining static and dynamic layers together leads to low efficiency");
         if(combined != Layer::TYPE_DYNAMIC)
             combined = i->layerType();
@@ -53,46 +56,78 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
     _stub->_render_model->postSnapshot(_stub->_render_controller, *this);
 
     _ubos = _stub->_shader->snapshot(renderRequest.allocator());
-    if(_stub->_scissor)
+
+    if(_stub->_scissor && _stub->_scissor->update(renderRequest.timestamp()))
     {
         V4 s = _stub->_scissor->val();
         _scissor = Rect(s.x(), s.y(), s.z(), s.w());
     }
 
-    if(combined == Layer::TYPE_DYNAMIC)
-        _flag = SNAPSHOT_FLAG_DYNAMIC;
+    const Buffer& vbo = _stub->_shader_bindings->vertexBuffer();
+
+    bool dirty = _stub->_dirty->val();
+    if(vbo.size() == 0)
+        _flag = SNAPSHOT_FLAG_RELOAD;
+    else if(combined != Layer::TYPE_STATIC)
+        _flag = dirty ? SNAPSHOT_FLAG_RELOAD : SNAPSHOT_FLAG_DYNAMIC_UPDATE;
     else
-    {
-        bool dirty = _stub->_dirty->val();
-        const Buffer& vbo = _stub->_shader_bindings->vertexBuffer();
-        const Buffer& ibo = _stub->_shader_bindings->indexBuffer();
-        if(vbo.size() == 0 || ibo.size() == 0)
-            _flag = SNAPSHOT_FLAG_STATIC_INITIALIZE;
-        else
-            _flag = dirty ? SNAPSHOT_FLAG_STATIC_MODIFIED : SNAPSHOT_FLAG_STATIC_REUSE;
-    }
+        _flag = dirty ? SNAPSHOT_FLAG_STATIC_MODIFIED : SNAPSHOT_FLAG_STATIC_REUSE;
 }
 
-sp<RenderCommand> RenderLayer::Snapshot::render(const V3& position)
+void RenderLayer::Snapshot::doRenderModelSnapshot(const RenderRequest& renderRequest, DrawingBuffer& buf) const
 {
-    if(_items.size() > 0)
+    _stub->_render_model->start(buf, *this);
+    if(_flag == SNAPSHOT_FLAG_RELOAD)
     {
-        DrawingBuffer buf(_stub->_shader_bindings, _items.size(), _stub->_stride);
-        _stub->_render_model->start(buf, *this);
-
-        for(const RenderObject::Snapshot& i : _items)
+        VertexStream writer = buf.makeVertexStream(renderRequest, buf.vertices()._grow_capacity, 0);
+        for(const Renderable::Snapshot& i : _items)
         {
-            buf.setRenderObject(i);
-            buf.setTranslate(position + i._position);
-            _stub->_render_model->load(buf, i);
+            writer.setRenderObject(i);
+            writer.setTranslate(i._position);
+            _stub->_render_model->load(writer, i);
             if(buf.isInstanced())
             {
                 Buffer::Builder& sBuilder = buf.getInstancedArrayBuilder(1);
                 sBuilder.next();
-                M4 matrix = MatrixUtil::scale(MatrixUtil::translate(i._transform.toMatrix(), i._position), i._size) ;
+                M4 matrix = MatrixUtil::scale(MatrixUtil::translate(i._transform.toMatrix(), i._position), i._size);
                 sBuilder.write(matrix);
             }
         }
+    }
+    else
+    {
+        size_t step = buf.vertices()._grow_capacity / _items.size();
+        size_t offset = 0;
+        for(const Renderable::Snapshot& i : _items)
+        {
+            if(i._dirty)
+            {
+                VertexStream writer = buf.makeVertexStream(renderRequest, step, offset);
+                writer.setRenderObject(i);
+                writer.setTranslate(i._position);
+                _stub->_render_model->load(writer, i);
+            }
+            offset += step;
+        }
+    }
+}
+
+void RenderLayer::Snapshot::doModelLoaderSnapshot(const RenderRequest& renderRequest, DrawingBuffer& buf) const
+{
+    const sp<Model>& unitModel = _stub->_model_loader->unitModel();
+    if(unitModel)
+    {
+        size_t bufferSize = unitModel->vertices()->size() * _items.size();
+    }
+}
+
+sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderRequest, const V3& /*position*/)
+{
+    if(_items.size() > 0)
+    {
+        DrawingBuffer buf(renderRequest, _stub->_shader_bindings, _stub->_stride);
+
+        doRenderModelSnapshot(renderRequest, buf);
 
         DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos),
                                       buf.vertices().toSnapshot(_stub->_shader_bindings->vertexBuffer()),

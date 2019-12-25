@@ -13,26 +13,12 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/size.h"
-#include "graphics/base/transform.h"
-
-#include "renderer/base/varyings.h"
+#include "graphics/inf/renderable.h"
 
 namespace ark {
 
 //[[script::bindings::holder]]
-class ARK_API RenderObject : public Holder {
-public:
-    struct Snapshot {
-        Snapshot(int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
-        Snapshot(const Snapshot& other) = default;
-
-        int32_t _type;
-        V3 _position;
-        V3 _size;
-        Transform::Snapshot _transform;
-        Varyings::Snapshot _varyings;
-    };
-
+class ARK_API RenderObject : public Holder, public Renderable {
 public:
 //  [[script::bindings::auto]]
     RenderObject(int32_t type, const sp<Vec3>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
@@ -122,7 +108,7 @@ public:
     bool isDisposed() const;
     bool isVisible() const;
 
-    Snapshot snapshot(const PipelineInput& pipelineInput, Allocator& allocator) const;
+    virtual Renderable::Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest) override;
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<RenderObject> {

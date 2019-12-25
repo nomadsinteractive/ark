@@ -2,8 +2,8 @@
 
 namespace ark {
 
-Model::Model(array<element_index_t> indices, array<V3> vertices, array<Model::UV> uvs, array<V3> normals, array<Model::Tangents> tangents)
-    : _indices(std::move(indices)), _vertices(std::move(vertices)), _uvs(std::move(uvs)), _normals(std::move(normals)), _tangents(std::move(tangents))
+Model::Model(const array<element_index_t>& indices, const array<V3>& vertices, const array<UV>& uvs, const array<V3>& normals, const array<Tangents>& tangents, const V3& size)
+    : _indices(indices), _vertices(vertices), _uvs(uvs), _normals(normals), _tangents(tangents), _size(size)
 {
 }
 
@@ -30,6 +30,11 @@ const array<V3>& Model::normals() const
 const array<Model::Tangents>& Model::tangents() const
 {
     return _tangents;
+}
+
+const V3& Model::size() const
+{
+    return _size;
 }
 
 Model::UV::UV(uint16_t u, uint16_t v)

@@ -17,7 +17,7 @@ public:
     virtual sp<ShaderBindings> makeShaderBindings(const Shader& shader) override;
 
     virtual void start(DrawingBuffer& buf, const RenderLayer::Snapshot& layerContext) override;
-    virtual void load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot) override;
+    virtual void load(VertexStream& buf, const Renderable::Snapshot& snapshot) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
     virtual Metrics measure(int32_t type) override;

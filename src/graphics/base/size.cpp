@@ -5,6 +5,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
 #include "core/util/holder_util.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/base/v2.h"
 
@@ -28,6 +29,11 @@ Size::Size(const sp<Numeric>& width, const sp<Numeric>& height, const sp<Numeric
 V3 Size::val()
 {
     return V3(_width->val(), _height->val(), _depth->val());
+}
+
+bool Size::update(uint64_t timestamp)
+{
+    return VariableUtil::update(timestamp, _width, _height, _depth);
 }
 
 void Size::traverse(const Holder::Visitor& visitor)

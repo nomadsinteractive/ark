@@ -35,6 +35,10 @@ public:
         return _stub->_body->GetAngle();
     }
 
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return true;
+    }
+
     sp<Body::Stub> _stub;
     sp<Numeric> _delegate;
 };
@@ -50,8 +54,13 @@ public:
         return V(_stub->_body->GetPosition().x, _stub->_body->GetPosition().y);
     }
 
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return true;
+    }
+
     sp<Body::Stub> _stub;
     sp<Vec> _delegate;
+
 };
 
 class RenderObjectPosition : public Vec3 {
@@ -65,6 +74,10 @@ public:
         float x = _stub->_world.toPixelX(_stub->_body->GetPosition().x);
         float y = _stub->_world.toPixelY(_stub->_body->GetPosition().y);
         return V3(x, y, 0);
+    }
+
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return true;
     }
 
 private:
@@ -82,6 +95,10 @@ public:
         float rotation = _delegate->val();
         _stub->_body->SetTransform(_stub->_body->GetWorldCenter(), rotation);
         return rotation;
+    }
+
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return true;
     }
 
 private:

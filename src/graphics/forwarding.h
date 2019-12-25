@@ -27,6 +27,7 @@ class RendererMaker;
 class Transform;
 class Transformable;
 class Rect;
+class Renderable;
 class RenderCommand;
 class RenderCommandPipeline;
 class RenderObject;

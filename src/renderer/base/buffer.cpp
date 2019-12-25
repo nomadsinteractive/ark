@@ -4,9 +4,48 @@
 
 #include "core/base/memory_pool.h"
 
+#include "renderer/base/pipeline_input.h"
+#include "renderer/base/vertex_stream.h"
 #include "renderer/inf/uploader.h"
 
 namespace ark {
+
+namespace {
+
+class UploaderImpl : public Uploader {
+public:
+    UploaderImpl(const std::vector<Buffer::Block>& blocks)
+        : Uploader(getUploaderSize(blocks)), _blocks(blocks) {
+
+    }
+
+    virtual void upload(const UploadFunc& uploader) override {
+        for(const Buffer::Block& i : _blocks)
+            uploader(i.content.buf(), i.content.length(), i.offset);
+    }
+
+private:
+    static size_t getUploaderSize(const std::vector<Buffer::Block>& blocks) {
+        size_t size = 0;
+        for(const Buffer::Block& i : blocks)
+            size = std::max(size, i.offset + i.content.length());
+        return size;
+    }
+
+private:
+    std::vector<Buffer::Block> _blocks;
+};
+
+}
+
+Buffer::Attributes::Attributes(const PipelineInput& input)
+{
+    _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = input.getAttributeOffset("TexCoordinate");
+    _offsets[ATTRIBUTE_NAME_NORMAL] = input.getAttributeOffset("Normal");
+    _offsets[ATTRIBUTE_NAME_TANGENT] = input.getAttributeOffset("Tangent");
+    _offsets[ATTRIBUTE_NAME_BITANGENT] = input.getAttributeOffset("Bitangent");
+    _offsets[ATTRIBUTE_NAME_MODEL_ID] = input.getAttributeOffset("ModelId");
+}
 
 Buffer::Snapshot::Snapshot(const sp<Delegate>& stub)
     : _delegate(stub), _size(stub->size())
@@ -93,8 +132,8 @@ const sp<Buffer::Delegate>& Buffer::delegate() const
     return _delegate;
 }
 
-Buffer::Builder::Builder(size_t stride, size_t growCapacity)
-    : _stride(stride), _grow_capacity(growCapacity), _ptr(nullptr), _boundary(nullptr), _size(0)
+Buffer::Builder::Builder(const RenderRequest& renderRequest, const Attributes& attributes, size_t stride)
+    : _render_request(renderRequest), _attributes(attributes), _stride(stride), _grow_capacity(0), _ptr(nullptr), _boundary(nullptr), _size(0)
 {
 }
 
@@ -126,20 +165,24 @@ Buffer::Snapshot Buffer::Builder::toSnapshot(const Buffer& buffer) const
     return buffer.snapshot(makeUploader());
 }
 
+void Buffer::Builder::addBlock(size_t offset, ByteArray::Borrowed& content)
+{
+    _blocks.emplace_back(offset, content);
+    _size = std::max(_size, content.length() + offset);
+}
+
 sp<Uploader> Buffer::Builder::makeUploader() const
 {
+    if(_blocks.size() > 0)
+        return sp<UploaderImpl>::make(_blocks);
+
     if(_buffers.size() == 0)
         return nullptr;
 
     if(_buffers.size() == 1)
-        return sp<Uploader>::adopt(new ByteArrayUploader(_buffers[0]));
+        return sp<Uploader>::make<ByteArrayUploader>(_buffers.at(0));
 
-    return sp<Uploader>::adopt(new ByteArrayListUploader(_buffers));
-}
-
-size_t Buffer::Builder::stride() const
-{
-    return _stride;
+    return sp<Uploader>::make<ByteArrayListUploader>(_buffers);
 }
 
 size_t Buffer::Builder::length() const
@@ -147,12 +190,21 @@ size_t Buffer::Builder::length() const
     return _size / _stride;
 }
 
+//BufferWriter Buffer::Builder::makeWriter(size_t size, size_t offset)
+//{
+//    Block block(offset, _render_request.allocator().sbrk(size));
+//    BufferWriter writer(_attributes, block.content.buf(), block.content.length(), _stride);
+//    _blocks.push_back(block);
+//    _size = std::max(_size, size + offset);
+//    return writer;
+//}
+
 void Buffer::Builder::grow()
 {
     if(_buffers.size() % 4 == 3)
         _grow_capacity *= 2;
 
-    const bytearray bytes = sp<ByteArray::Allocated>::make(_grow_capacity * _stride);
+    const bytearray bytes = sp<ByteArray::Borrowed>::make(_render_request.allocator().sbrk(_grow_capacity * _stride));
     _buffers.push_back(bytes);
     _ptr = bytes->buf();
     _boundary = _ptr + bytes->length();
@@ -176,6 +228,11 @@ Buffer::Delegate::Delegate()
 size_t Buffer::Delegate::size() const
 {
     return _size;
+}
+
+Buffer::Block::Block(size_t offset, const ByteArray::Borrowed& content)
+    : offset(offset), content(content)
+{
 }
 
 }

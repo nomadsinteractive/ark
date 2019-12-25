@@ -5,10 +5,9 @@
 #include <stdlib.h>
 
 #include "core/inf/variable.h"
-#include "core/impl/numeric/max.h"
-#include "core/impl/numeric/min.h"
-#include "core/impl/numeric/cosine.h"
-#include "core/impl/numeric/sine.h"
+#include "core/impl/variable/variable_op1.h"
+#include "core/impl/variable/variable_op2.h"
+#include "core/util/operators.h"
 
 #include "core/util/log.h"
 
@@ -16,30 +15,16 @@ namespace ark {
 
 namespace {
 
-class AtanVec2 : public Numeric {
-public:
-    AtanVec2(const sp<Vec2>& value)
-        : _value(value) {
-    }
-
-public:
-    virtual float val() override {
-        const V2 val = _value->val();
-        return Math::atan2(val.y(), val.x());
-    }
-
-private:
-    sp<Vec2> _value;
-};
-
 class RandNumeric : public Numeric {
 public:
-
     virtual float val() override {
         return Math::randf();
     }
-};
 
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return true;
+    }
+};
 
 }
 
@@ -48,9 +33,14 @@ const float Math::PIx2 = Math::PI * 2.0f;
 const float Math::PI_2 = Math::PI / 2.0f;
 const float Math::PI_4 = Math::PI / 4.0f;
 
+static float _atan2(const V2& val)
+{
+    return Math::atan2(val.y(), val.x());
+}
+
 uint32_t Math::log2(uint32_t value)
 {
-    static const int tab32[32] = {
+    static const uint32_t tab32[32] = {
         0,  9,  1, 10, 13, 21,  2, 29,
        11, 14, 16, 18, 22, 25,  3, 30,
         8, 12, 20, 28, 15, 17, 24,  7,
@@ -60,7 +50,7 @@ uint32_t Math::log2(uint32_t value)
     value |= value >> 4;
     value |= value >> 8;
     value |= value >> 16;
-    return tab32[(uint32_t) (value * 0x07C4ACDD) >> 27];
+    return tab32[static_cast<uint32_t>((value * 0x07C4ACDD) >> 27)];
 }
 
 float Math::sin(float x)
@@ -70,7 +60,7 @@ float Math::sin(float x)
 
 sp<Numeric> Math::sin(const sp<Numeric>& x)
 {
-    return sp<Sine>::make(x);
+    return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::sin), x);
 }
 
 float Math::cos(float x)
@@ -80,27 +70,32 @@ float Math::cos(float x)
 
 sp<Numeric> Math::cos(const sp<Numeric>& x)
 {
-    return sp<Cosine>::make(x);
+    return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::cos), x);
 }
 
-sp<Numeric> Math::atan(const sp<Vec2>& vec)
+sp<Numeric> Math::atan(const sp<Vec2>& val)
 {
-    return sp<AtanVec2>::make(vec);
+    return sp<VariableOP1<float, V2>>::make(_atan2, val);
 }
 
 sp<Numeric> Math::min(const sp<Numeric>& a1, const sp<Numeric>& a2)
 {
-    return sp<Min>::make(a1, a2);
+    return sp<VariableOP2<float, float, Operators::Min<float>, sp<Numeric>, sp<Numeric>>>::make(a1, a2);
 }
 
 sp<Numeric> Math::max(const sp<Numeric>& a1, const sp<Numeric>& a2)
 {
-    return sp<Max>::make(a1, a2);
+    return sp<VariableOP2<float, float, Operators::Max<float>, sp<Numeric>, sp<Numeric>>>::make(a1, a2);
 }
 
 float Math::acos(float x)
 {
     return std::acos(x);
+}
+
+sp<Numeric> Math::acos(const sp<Numeric>& x)
+{
+    return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::acos), x);
 }
 
 float Math::atan2(float y, float x)
@@ -172,6 +167,11 @@ float Math::sqrt(float x)
 {
     DCHECK(x >= 0, "Illegal argument, negative value(%.2f)", x);
     return std::sqrt(x);
+}
+
+sp<Numeric> Math::sqrt(const sp<Numeric>& x)
+{
+    return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::sqrt), x);
 }
 
 V3 Math::quadratic(float a, float b, float c)

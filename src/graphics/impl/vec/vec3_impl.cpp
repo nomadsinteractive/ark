@@ -5,6 +5,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
 #include "core/util/holder_util.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/base/v3.h"
 
@@ -28,6 +29,11 @@ Vec3Impl::Vec3Impl(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>
 V3 Vec3Impl::val()
 {
     return V3(_x->val(), _y->val(), _z->val());
+}
+
+bool Vec3Impl::update(uint64_t timestamp)
+{
+    return VariableUtil::update(timestamp, _x, _y, _z);
 }
 
 void Vec3Impl::traverse(const Holder::Visitor& visitor)

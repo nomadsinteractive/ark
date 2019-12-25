@@ -6,9 +6,11 @@
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_ptr.h"
 
-#include "graphics/inf/block.h"
-#include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
+#include "graphics/inf/block.h"
+#include "graphics/inf/renderable.h"
+#include "graphics/inf/renderer.h"
+#include "graphics/impl/renderable/renderable_passive.h"
 
 namespace ark {
 
@@ -37,8 +39,8 @@ private:
     void measure(Size& size);
 
 private:
-    sp<RenderObject> _render_object;
     sp<LayerContext> _layer_context;
+    sp<RenderablePassive> _renderable;
 
 };
 

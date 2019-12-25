@@ -13,6 +13,7 @@ public:
     Approach(const sp<Numeric>& delegate, const sp<Numeric>& expectation, Notifier notifier);
 
     virtual float val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 private:
     sp<Numeric> _delegate;

@@ -34,7 +34,6 @@ public:
 // [[script::bindings::property]]
     virtual const sp<Size>& size() override;
 
-
 // [[script::bindings::auto]]
     sp<TilemapLayer> makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Vec>& position = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
 

@@ -28,6 +28,12 @@ public:
 
 };
 
+class FrameLayoutNew : public LayoutNew {
+public:
+    virtual std::vector<sp<Numeric>> place(const std::vector<sp<Slot>>& children, const sp<Slot>& parent) override;
+
+};
+
 }
 
 #endif

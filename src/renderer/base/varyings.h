@@ -39,7 +39,7 @@ public:
     struct Snapshot {
         Snapshot();
         Snapshot(ByteArray::Borrowed memory);
-        DEFAULT_COPY_AND_ASSIGN(Snapshot);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
         ByteArray::Borrowed _memory;
     };
@@ -49,6 +49,8 @@ public:
     Varyings();
 
     virtual void traverse(const Visitor& visitor) override;
+
+    bool update(uint64_t timestamp) const;
 
 //[[script::bindings::auto]]
     void set(const String& name, const sp<Numeric>& var);

@@ -51,4 +51,9 @@ sp<Layout> HorizontalLayout::BUILDER::build(const Scope& /*args*/)
     return sp<Layout>::adopt(new HorizontalLayout(_gravity));
 }
 
+std::vector<sp<Numeric>> HorizontalLayoutNew::place(const std::vector<sp<LayoutNew::Slot> >& children, const sp<Slot>& parent)
+{
+    return std::vector<sp<Numeric>>();
+}
+
 }

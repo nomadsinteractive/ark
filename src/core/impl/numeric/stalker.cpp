@@ -34,6 +34,11 @@ float Stalker::val()
     return s;
 }
 
+bool Stalker::update(uint64_t timestamp)
+{
+    return _t->update(timestamp);
+}
+
 void Stalker::doChase(float s0, float v0, float target, float dt)
 {
     float t1;

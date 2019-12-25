@@ -4,75 +4,74 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/expression.h"
-#include "core/impl/boolean/boolean_and.h"
-#include "core/impl/boolean/boolean_not.h"
-#include "core/impl/boolean/boolean_or.h"
 #include "core/impl/variable/variable_observer.h"
+#include "core/impl/variable/variable_op1.h"
+#include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 
 namespace ark {
 
 namespace {
 
-class GT : public Boolean {
-public:
-    GT(const sp<Numeric>& a1, const sp<Numeric>& a2)
-        : _a1(a1), _a2(a2) {
-    }
+//class GT : public Boolean {
+//public:
+//    GT(const sp<Numeric>& a1, const sp<Numeric>& a2)
+//        : _a1(a1), _a2(a2) {
+//    }
 
-    virtual bool val() override {
-        return _a1->val() > _a2->val();
-    }
+//    virtual bool val() override {
+//        return _a1->val() > _a2->val();
+//    }
 
-private:
-    sp<Numeric> _a1;
-    sp<Numeric> _a2;
-};
+//private:
+//    sp<Numeric> _a1;
+//    sp<Numeric> _a2;
+//};
 
-class LT : public Boolean {
-public:
-    LT(const sp<Numeric>& a1, const sp<Numeric>& a2)
-        : _a1(a1), _a2(a2) {
-    }
+//class LT : public Boolean {
+//public:
+//    LT(const sp<Numeric>& a1, const sp<Numeric>& a2)
+//        : _a1(a1), _a2(a2) {
+//    }
 
-    virtual bool val() override {
-        return _a1->val() < _a2->val();
-    }
+//    virtual bool val() override {
+//        return _a1->val() < _a2->val();
+//    }
 
-private:
-    sp<Numeric> _a1;
-    sp<Numeric> _a2;
-};
+//private:
+//    sp<Numeric> _a1;
+//    sp<Numeric> _a2;
+//};
 
-class GET : public Boolean {
-public:
-    GET(const sp<Numeric>& a1, const sp<Numeric>& a2)
-        : _a1(a1), _a2(a2) {
-    }
+//class GET : public Boolean {
+//public:
+//    GET(const sp<Numeric>& a1, const sp<Numeric>& a2)
+//        : _a1(a1), _a2(a2) {
+//    }
 
-    virtual bool val() override {
-        return _a1->val() >= _a2->val();
-    }
+//    virtual bool val() override {
+//        return _a1->val() >= _a2->val();
+//    }
 
-private:
-    sp<Numeric> _a1;
-    sp<Numeric> _a2;
-};
+//private:
+//    sp<Numeric> _a1;
+//    sp<Numeric> _a2;
+//};
 
-class LET : public Boolean {
-public:
-    LET(const sp<Numeric>& a1, const sp<Numeric>& a2)
-        : _a1(a1), _a2(a2) {
-    }
+//class LET : public Boolean {
+//public:
+//    LET(const sp<Numeric>& a1, const sp<Numeric>& a2)
+//        : _a1(a1), _a2(a2) {
+//    }
 
-    virtual bool val() override {
-        return _a1->val() <= _a2->val();
-    }
+//    virtual bool val() override {
+//        return _a1->val() <= _a2->val();
+//    }
 
-private:
-    sp<Numeric> _a1;
-    sp<Numeric> _a2;
-};
+//private:
+//    sp<Numeric> _a1;
+//    sp<Numeric> _a2;
+//};
 
 template<typename OP, typename T = Boolean> class OperationBuilder : public Builder<Boolean> {
 public:
@@ -105,16 +104,18 @@ private:
 
 class BooleanOperation {
 public:
+    template <typename T> using OP2 = VariableOP2<float, float, T, sp<Numeric>, sp<Numeric>>;
+
     static bool isConstant(const String& expr) {
         return expr == "true" || expr == "false";
     }
 
     static sp<Builder<Boolean>> booleanAnd(const sp<Builder<Boolean>>& a1, const sp<Builder<Boolean>>& a2) {
-        return sp<OperationBuilder<BooleanAnd>>::make(a1, a2);
+        return sp<OperationBuilder<VariableOP2<bool, bool, Operators::And<bool>, sp<Boolean>, sp<Boolean>>>>::make(a1, a2);
     }
 
     static sp<Builder<Boolean>> booleanOr(const sp<Builder<Boolean>>& a1, const sp<Builder<Boolean>>& a2) {
-        return sp<OperationBuilder<BooleanOr>>::make(a1, a2);
+        return sp<OperationBuilder<VariableOP2<bool, bool, Operators::Or<bool>, sp<Boolean>, sp<Boolean>>>>::make(a1, a2);
     }
 
     static sp<Builder<Boolean>> eval(BeanFactory& factory, const String& expr) {
@@ -137,13 +138,13 @@ public:
         const String& op = ptr[2];
         const sp<Builder<Numeric>> rvalue = factory.ensureBuilder<Numeric>(ptr[3]);
         if(op == ">")
-            return sp<OperationBuilder<GT, Numeric>>::make(lvalue, rvalue);
+            return sp<OperationBuilder<OP2<Operators::GT<float>>, Numeric>>::make(lvalue, rvalue);
         if(op == "<")
-            return sp<OperationBuilder<LT, Numeric>>::make(lvalue, rvalue);
+            return sp<OperationBuilder<OP2<Operators::GT<float>>, Numeric>>::make(lvalue, rvalue);
         if(op == ">=")
-            return sp<OperationBuilder<GET, Numeric>>::make(lvalue, rvalue);
+            return sp<OperationBuilder<OP2<Operators::GE<float>>, Numeric>>::make(lvalue, rvalue);
         if(op == "<=")
-            return sp<OperationBuilder<LET, Numeric>>::make(lvalue, rvalue);
+            return sp<OperationBuilder<OP2<Operators::LE<float>>, Numeric>>::make(lvalue, rvalue);
         return nullptr;
     }
 
@@ -159,6 +160,12 @@ Expression::Operator<bool> BooleanOperation::OPS[2] = {
 
 String BooleanOperation::NEGATIVE_OPS[2] = {"!", "not "};
 
+
+static bool _operator_not(bool val)
+{
+    return !val;
+}
+
 }
 
 sp<Boolean> BooleanUtil::create(const sp<Boolean>& value)
@@ -173,17 +180,17 @@ sp<Boolean> BooleanUtil::create(bool value)
 
 sp<Boolean> BooleanUtil::__and__(const sp<Boolean>& self, const sp<Boolean>& rvalue)
 {
-    return sp<BooleanAnd>::make(self, rvalue);
+    return sp<VariableOP2<bool, bool, Operators::And<bool>, sp<Boolean>, sp<Boolean>>>::make(self, rvalue);
 }
 
 sp<Boolean> BooleanUtil::__or__(const sp<Boolean>& self, const sp<Boolean>& rvalue)
 {
-    return sp<BooleanOr>::make(self, rvalue);
+    return sp<VariableOP2<bool, bool, Operators::Or<bool>, sp<Boolean>, sp<Boolean>>>::make(self, rvalue);
 }
 
 sp<Boolean> BooleanUtil::negative(const sp<Boolean>& self)
 {
-    return sp<BooleanNot>::make(self);
+    return sp<VariableOP1<bool>>::make(_operator_not, self);
 }
 
 bool BooleanUtil::toBool(const sp<Boolean>& self)

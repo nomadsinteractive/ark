@@ -12,6 +12,7 @@ namespace ark {
 class NamedBuffer {
 public:
     enum Name {
+        NAME_NONE,
         NAME_QUADS,
         NAME_NINE_PATCH,
         NAME_POINTS,
@@ -64,6 +65,18 @@ public:
 
     private:
         size_t _object_count;
+    };
+
+    class Concat : public Uploader {
+    public:
+        Concat(size_t objectCount, size_t vertexCount, const array<element_index_t>& indices);
+
+        virtual void upload(const Uploader::UploadFunc& uploader) override;
+
+    private:
+        size_t _object_count;
+        size_t _vertex_count;
+        array<element_index_t> _indices;
     };
 
 private:

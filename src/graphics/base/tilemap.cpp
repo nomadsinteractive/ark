@@ -9,6 +9,7 @@
 #include "core/util/math.h"
 
 #include "graphics/base/layer_context.h"
+#include "graphics/base/render_object.h"
 #include "graphics/base/size.h"
 #include "graphics/base/tilemap_layer.h"
 #include "graphics/base/tileset.h"

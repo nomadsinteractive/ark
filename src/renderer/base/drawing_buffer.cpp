@@ -8,94 +8,23 @@
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader_bindings.h"
+#include "renderer/base/vertex_stream.h"
 
 namespace ark {
 
-DrawingBuffer::DrawingBuffer(const sp<ShaderBindings>& shaderBindings, size_t instanceCount, uint32_t stride)
-    : _shader_bindings(shaderBindings), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(stride, instanceCount),
-      _divided_buffer_builders(shaderBindings->makeDividedBufferBuilders(instanceCount)),
-      _indice_base(0), _is_instanced(_pipeline_bindings->hasDivisors()), _transform(nullptr)
+DrawingBuffer::DrawingBuffer(const RenderRequest& renderRequest, const sp<ShaderBindings>& shaderBindings, uint32_t stride)
+    : _shader_bindings(shaderBindings), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(renderRequest, _pipeline_bindings->attributes(), stride),
+      _divided_buffer_builders(shaderBindings->makeDividedBufferBuilders(renderRequest, _pipeline_bindings->attributes())),
+      _is_instanced(_pipeline_bindings->hasDivisors())
 {
 }
 
-void DrawingBuffer::writePosition(const V3& position)
+VertexStream DrawingBuffer::makeVertexStream(const RenderRequest& renderRequest, size_t length, size_t offset)
 {
-    _vertices.write<V3>(position, 0);
-}
-
-void DrawingBuffer::writePosition(float x, float y, float z)
-{
-    const V3 position(x, y, z);
-    _vertices.write<V3>(_is_instanced ? position : (_transform->transform(position) + _translate), 0);
-}
-
-void DrawingBuffer::writeTexCoordinate(uint16_t u, uint16_t v)
-{
-    const uint16_t uv[2] = {u, v};
-    _vertices.write(uv, _pipeline_bindings->attributes()._offsets, PipelineBindings::ATTRIBUTE_NAME_TEX_COORDINATE);
-}
-
-void DrawingBuffer::writeModelId(int32_t modelId)
-{
-    _vertices.write(modelId, _pipeline_bindings->attributes()._offsets, PipelineBindings::ATTRIBUTE_NAME_MODEL_ID);
-}
-
-void DrawingBuffer::writeNormal(float x, float y, float z)
-{
-    writeNormal(V3(x, y, z));
-}
-
-void DrawingBuffer::writeNormal(const V3& normal)
-{
-    _vertices.write(normal, _pipeline_bindings->attributes()._offsets, PipelineBindings::ATTRIBUTE_NAME_NORMAL);
-}
-
-void DrawingBuffer::writeTangent(float x, float y, float z)
-{
-    writeTangent(V3(x, y, z));
-}
-
-void DrawingBuffer::writeTangent(const V3& tangent)
-{
-    _vertices.write(tangent, _pipeline_bindings->attributes()._offsets, PipelineBindings::ATTRIBUTE_NAME_TANGENT);
-}
-
-void DrawingBuffer::writeBitangent(float x, float y, float z)
-{
-    writeBitangent(V3(x, y, z));
-}
-
-void DrawingBuffer::writeBitangent(const V3& bitangent)
-{
-    _vertices.write(bitangent, _pipeline_bindings->attributes()._offsets, PipelineBindings::ATTRIBUTE_NAME_BITANGENT);
-}
-
-void DrawingBuffer::applyVaryings()
-{
-    if(_varyings._memory.length())
-        _vertices.writeArray(_varyings._memory);
-}
-
-void DrawingBuffer::nextVertex()
-{
-    _vertices.next();
-    applyVaryings();
-}
-
-void DrawingBuffer::nextModel()
-{
-    _indice_base = static_cast<element_index_t>(_vertices.length());
-}
-
-void DrawingBuffer::setTranslate(const V3& translate)
-{
-    _translate = translate;
-}
-
-void DrawingBuffer::setRenderObject(const RenderObject::Snapshot& renderObject)
-{
-    _transform = &renderObject._transform;
-    _varyings = renderObject._varyings;
+    size_t size = length * _vertices._stride;
+    ByteArray::Borrowed content = renderRequest.allocator().sbrk(size);
+    _vertices.addBlock(offset * _vertices._stride, content);
+    return VertexStream(_pipeline_bindings->attributes(), content.buf(), size, _vertices._stride, !_is_instanced);
 }
 
 const sp<ShaderBindings>& DrawingBuffer::shaderBindings() const

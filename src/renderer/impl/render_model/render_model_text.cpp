@@ -7,6 +7,7 @@
 #include "graphics/inf/alphabet.h"
 
 #include "renderer/base/atlas.h"
+#include "renderer/base/vertex_stream.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_bindings.h"
@@ -65,7 +66,7 @@ bool RenderModelText::Stub::prepareOne(int32_t c)
 
 bool RenderModelText::Stub::checkUnpreparedCharacter(const RenderLayer::Snapshot& renderContext)
 {
-    for(const RenderObject::Snapshot& i : renderContext._items)
+    for(const Renderable::Snapshot& i : renderContext._items)
     {
         if(!_atlas->has(i._type))
             return true;
@@ -83,7 +84,7 @@ void RenderModelText::Stub::clear()
 
 bool RenderModelText::Stub::prepare(const RenderLayer::Snapshot& snapshot, bool allowReset)
 {
-    for(const RenderObject::Snapshot& i : snapshot._items)
+    for(const Renderable::Snapshot& i : snapshot._items)
     {
         if(!_atlas->has(i._type) && !prepareOne(i._type))
         {
@@ -101,6 +102,11 @@ bool RenderModelText::Stub::prepare(const RenderLayer::Snapshot& snapshot, bool 
 sp<Texture::Delegate> RenderModelText::Stub::val()
 {
     return _texture->delegate();
+}
+
+bool RenderModelText::Stub::update(uint64_t /*timestamp*/)
+{
+    return true;
 }
 
 RenderModelText::RenderModelText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
@@ -137,7 +143,7 @@ void RenderModelText::start(DrawingBuffer& buf, const RenderLayer::Snapshot& sna
     _stub->_delegate->start(buf, snapshot);
 }
 
-void RenderModelText::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
+void RenderModelText::load(VertexStream& buf, const Renderable::Snapshot& snapshot)
 {
     _stub->_delegate->load(buf, snapshot);
 }

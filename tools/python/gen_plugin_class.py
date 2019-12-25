@@ -8,9 +8,10 @@ import re
 import acg
 from acg import HeaderPattern
 
+ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+\]\])*'
 BUILDER_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)(?:\("([\w\d\-_]+)"\))?\]\]\s+class\s+([\w\d_]+)\s+:\s+public\s+Builder<([^{]+)>\s+\{')
 DICTIONARY_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)::by-value(?:\("([\w\d\-_]+)"\))?\]\]\s+class\s+([\w\d_]+)\s+:\s+public\s+Builder<([^{]+)>\s+\{')
-FUNCTION_PATTERN = re.compile(r'\[\[plugin::function\("([\w\d\-_]+)"\)\]\]\s+static\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
+FUNCTION_PATTERN = re.compile(r'\[\[plugin::function\("([\w\d\-_]+)"\)\]\]\s*%s\s*static\s+(?:ARK_API\s+)?([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;' % ANNOTATION_PATTERN)
 STYLE_PATTERN = re.compile(r'\[\[plugin::style\("([\w\d\-_]+)"\)\]\]\s+class\s+([\w\d_]+)\s+:\s+public\s+Builder<([^{]+)>\s+\{')
 
 INDENT = '\n    '

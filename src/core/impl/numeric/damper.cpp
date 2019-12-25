@@ -17,6 +17,10 @@ float Damper::val()
     return _o + _a * Math::sin(_t->val() + _c);
 }
 
+bool Damper::update(uint64_t timestamp)
+{
+    return _t->update(timestamp);
+}
 
 Damper::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _duration(factory.ensureBuilder<Duration>(manifest)), _v(factory.getBuilder<Numeric>(manifest, "v")),
@@ -48,7 +52,7 @@ sp<Numeric> Damper::BUILDER::build(const Scope& args)
     float o = (s1 * s1 - s2 * s2 + v * v) / (s1 - s2) / 2.0f;
     float a = std::abs(s2 - o);
     float c = v2c(v, a);
-    return std::abs(o + a * Math::sin(c)) < std::abs(o - a * Math::sin(c)) ? sp<Numeric>::adopt(new Damper(t, a, c, o)) : sp<Numeric>::adopt(new Damper(t, a, -c, o));
+    return std::abs(o + a * Math::sin(c)) < std::abs(o - a * Math::sin(c)) ? sp<Numeric>::make<Damper>(t, a, c, o) : sp<Numeric>::make<Damper>(t, a, -c, o);
 }
 
 float Damper::BUILDER::v2c(float v, float a) const

@@ -3,8 +3,6 @@
 #ifdef ARK_MINIAUDIO_UNIMPLEMENTED
 #define MINIAUDIO_IMPLEMENTATION
 #endif
-#include <miniaudio.h>
-
 #include <thread>
 
 #include "core/base/future.h"
@@ -16,6 +14,9 @@
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/util/audio_mixer.h"
+
+#include <miniaudio.h>
+
 
 namespace ark {
 namespace plugin {

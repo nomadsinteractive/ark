@@ -25,6 +25,16 @@ uint32_t FlatableColor4fArray::size()
     return _color_array->length() * sizeof(V4);
 }
 
+bool FlatableColor4fArray::update(uint64_t timestamp)
+{
+    bool dirty = false;
+    size_t len = _color_array->length();
+    Color* color = _color_array->buf();
+    for(size_t i = 0; i < len; ++i)
+        dirty = color[i].update(timestamp) || dirty;
+    return dirty;
+}
+
 FlatableColor4fArray::BUILDER::BUILDER(BeanFactory& parent, const String& value)
     : _color_array(parent.ensureBuilder<ark::Array<Color>>(value))
 {

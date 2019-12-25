@@ -2,10 +2,10 @@
 
 #include "core/ark.h"
 #include "core/base/clock.h"
-
 #include "core/base/bean_factory.h"
 #include "core/base/duration.h"
 #include "core/inf/array.h"
+#include "core/util/variable_util.h"
 
 namespace ark {
 
@@ -23,6 +23,11 @@ int32_t IntegerByInterval::val()
         _value = _delegate->val();
     }
     return _value;
+}
+
+bool IntegerByInterval::update(uint64_t timestamp)
+{
+    return VariableUtil::update(timestamp, _duration, _interval);
 }
 
 IntegerByInterval::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

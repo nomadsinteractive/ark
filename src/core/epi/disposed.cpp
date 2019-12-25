@@ -1,9 +1,6 @@
 #include "core/epi/disposed.h"
 
 #include "core/base/bean_factory.h"
-#include "core/impl/boolean/boolean_and.h"
-#include "core/impl/boolean/boolean_not.h"
-#include "core/impl/boolean/boolean_or.h"
 #include "core/impl/variable/variable_observer.h"
 #include "core/impl/variable/variable_wrapper.h"
 
@@ -22,6 +19,11 @@ Disposed::Disposed(const sp<Boolean>& disposed)
 bool Disposed::val()
 {
     return _disposed->val();
+}
+
+bool Disposed::update(uint64_t timestamp)
+{
+    return _disposed->update(timestamp);
 }
 
 void Disposed::dispose()

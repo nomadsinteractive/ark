@@ -8,11 +8,11 @@
 
 namespace ark {
 
-class Clamp : public Numeric {
+class Clamp : public Numeric::Updatable {
 public:
     Clamp(const sp<Numeric>& delegate, const sp<Numeric>& min, const sp<Numeric>& max, Notifier notifier);
 
-    virtual float val() override;
+    virtual bool doUpdate(uint64_t timestamp, float& value) override;
 
 private:
     sp<Numeric> _delegate;

@@ -13,6 +13,7 @@ public:
     Duration(const sp<Numeric>& delegate);
 
     virtual float val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 //  [[plugin::function("duration")]]
     static sp<Numeric> duration();
@@ -52,6 +53,7 @@ public:
 
 private:
     sp<Numeric> _delegate;
+
 };
 
 }

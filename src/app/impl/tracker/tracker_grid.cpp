@@ -4,6 +4,7 @@
 #include "core/inf/variable.h"
 #include "core/util/math.h"
 #include "core/util/log.h"
+#include "core/util/variable_util.h"
 
 namespace ark {
 
@@ -26,6 +27,10 @@ public:
         const V s = _size->val();
         _stub->update(_id, p, s);
         return p;
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        return VariableUtil::update(timestamp, _position, _size);
     }
 
 private:

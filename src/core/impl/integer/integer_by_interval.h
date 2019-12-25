@@ -14,6 +14,7 @@ public:
     IntegerByInterval(const sp<Integer>& delegate, const sp<Numeric>& duration, const sp<Numeric>& interval);
 
     virtual int32_t val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 //  [[plugin::builder("by-interval")]]
     class BUILDER : public Builder<Integer> {
@@ -47,6 +48,7 @@ private:
 
     int32_t _value;
     float _next_update_time;
+
 };
 
 }

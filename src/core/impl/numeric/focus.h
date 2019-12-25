@@ -8,11 +8,11 @@
 
 namespace ark {
 
-class Focus : public Numeric {
+class Focus : public Numeric::Updatable {
 public:
     Focus(const sp<Numeric>& focus, float nearest, float farest, float value);
 
-    virtual float val() override;
+    virtual bool doUpdate(uint64_t timestamp, float& value) override;
 
 //  [[plugin::builder("focus")]]
     class BUILDER : public Builder<Numeric> {
@@ -35,6 +35,7 @@ private:
     float _farest;
 
     float _value;
+
 };
 
 }

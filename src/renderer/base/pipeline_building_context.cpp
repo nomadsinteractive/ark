@@ -30,6 +30,10 @@ public:
         return _aligned_size;
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return _delegate->update(timestamp);
+    }
+
 private:
     sp<Flatable> _delegate;
 

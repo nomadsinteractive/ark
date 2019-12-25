@@ -52,6 +52,11 @@ V3 Bezier2::val()
     return V3(_last.x(), _last.y(), Math::atan2(q2.y() - q1.y(), q2.x() - q1.x()));
 }
 
+bool Bezier2::update(uint64_t timestamp)
+{
+    return _t->update(timestamp);
+}
+
 V2 Bezier2::interpolate(const V2& p1, const V2& p2, float t)
 {
     return (p2 - p1) * t + p1;

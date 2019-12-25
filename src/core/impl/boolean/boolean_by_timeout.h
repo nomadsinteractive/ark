@@ -13,6 +13,7 @@ public:
     BooleanByTimeout(const sp<Numeric>& ticker, float timeout);
 
     virtual bool val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 //  [[plugin::builder("by-timeout")]]
     class BUILDER : public Builder<Boolean> {
@@ -30,6 +31,7 @@ public:
 private:
     sp<Numeric> _duration;
     float _timeout;
+
 };
 
 }

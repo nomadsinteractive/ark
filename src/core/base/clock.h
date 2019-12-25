@@ -41,6 +41,7 @@ public:
     Clock(const Clock& other) = default;
 
     virtual uint64_t val() override;
+    virtual bool update(uint64_t timestamp) override;
 
     uint64_t tick() const;
 
@@ -65,6 +66,7 @@ private:
 
 private:
     sp<Ticker> _ticker;
+
 };
 
 }

@@ -1,6 +1,7 @@
 #include "renderer/impl/render_model/render_model_line_strip.h"
 
 #include "renderer/base/atlas.h"
+#include "renderer/base/vertex_stream.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/drawing_buffer.h"
@@ -36,7 +37,7 @@ std::vector<element_index_t> GLModelLineStrip::makeIndices(const RenderLayer::Sn
     std::vector<element_index_t> indices;
     element_index_t index = 0;
     bool degenerate = false;
-    for(const RenderObject::Snapshot& i : layerContext._items)
+    for(const Renderable::Snapshot& i : layerContext._items)
     {
         if(i._type == 0)
         {
@@ -62,16 +63,15 @@ void GLModelLineStrip::start(DrawingBuffer& buf, const RenderLayer::Snapshot& sn
     buf.setIndices(_indices);
 }
 
-void GLModelLineStrip::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
+void GLModelLineStrip::load(VertexStream& buf, const Renderable::Snapshot& snapshot)
 {
     if(snapshot._type)
     {
         const Atlas::Item& texCoord = _atlas->at(snapshot._type);
-        buf.nextVertex();
+        buf.next();
         buf.writePosition(0, 0, 0);
         buf.writeTexCoordinate(static_cast<uint16_t>((texCoord.ux() + texCoord.vx()) / 2), static_cast<uint16_t>((texCoord.uy() + texCoord.vy()) / 2));
     }
-    buf.nextModel();
 }
 
 GLModelLineStrip::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

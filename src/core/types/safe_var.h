@@ -57,6 +57,10 @@ public:
         return this->_delegate ? this->_delegate->val() : _default_val;
     }
 
+    bool update(uint64_t timestamp) const {
+        return this->_delegate ? this->_delegate->update(timestamp) : false;
+    }
+
     const sp<T>& ensure() {
         if(!this->_delegate) {
             this->_delegate = Null::toSafe<T>(nullptr);

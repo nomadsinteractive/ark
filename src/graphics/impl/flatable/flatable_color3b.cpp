@@ -28,6 +28,11 @@ uint32_t FlatableColor3b::size()
     return 3;
 }
 
+bool FlatableColor3b::update(uint64_t timestamp)
+{
+    return _color->update(timestamp);
+}
+
 FlatableColor3b::BUILDER::BUILDER(BeanFactory& parent, const String& value)
     : _color(parent.ensureBuilder<Vec4>(value))
 {

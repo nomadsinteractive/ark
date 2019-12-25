@@ -34,6 +34,10 @@ public:
         return _var;
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return _var->update(timestamp);
+    }
+
 private:
     sp<VarType> _var;
 

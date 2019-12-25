@@ -22,6 +22,11 @@ float Randf::val()
     return Math::randf() * (b - a) + a;
 }
 
+bool Randf::update(uint64_t /*timestamp*/)
+{
+    return true;
+}
+
 sp<Numeric> Randf::randf(const sp<Numeric>& b)
 {
     Randf rand(b);

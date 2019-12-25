@@ -23,6 +23,8 @@ public:
     Vec2Impl(Vec2& other) noexcept;
 
     virtual V2 val() override;
+    virtual bool update(uint64_t timestamp) override;
+
     virtual void traverse(const Visitor& visitor) override;
 
     const sp<NumericWrapper>& x() const;

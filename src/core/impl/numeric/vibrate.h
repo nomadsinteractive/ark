@@ -12,6 +12,7 @@ public:
     Vibrate(const sp<Numeric>& t, float a, float c, float o);
 
     virtual float val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 private:
     sp<Numeric> _t;

@@ -7,6 +7,7 @@
 #include "core/util/conversions.h"
 #include "core/util/documents.h"
 #include "core/util/holder_util.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/base/v3.h"
 #include "graphics/impl/transform/transform_none.h"
@@ -34,6 +35,11 @@ void Transform::traverse(const Holder::Visitor& visitor)
 Transform::Snapshot Transform::snapshot() const
 {
     return Snapshot(*this);
+}
+
+bool Transform::update(uint64_t timestamp) const
+{
+    return VariableUtil::update(timestamp, _rotate, _scale, _pivot);
 }
 
 const sp<Rotate>& Transform::rotate()

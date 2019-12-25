@@ -1,6 +1,7 @@
 #include "graphics/base/bounds.h"
 
 #include "core/util/math.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/base/size.h"
 
@@ -29,6 +30,11 @@ const sp<Vec3>& Bounds::center() const
 const sp<Size>& Bounds::size()
 {
     return _size;
+}
+
+bool Bounds::update(uint64_t timestamp)
+{
+    return VariableUtil::update(timestamp, _center, _size);
 }
 
 }

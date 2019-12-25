@@ -29,7 +29,8 @@ void RenderController::reset()
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
     for(const sp<NamedBuffer>& i : _named_buffers)
-        i->reset();
+        if(i)
+            i->reset();
 }
 
 void RenderController::onSurfaceReady(GraphicsContext& graphicsContext)
@@ -277,6 +278,11 @@ bool RenderController::SynchronizeFlag::val()
         return true;
     }
     return false;
+}
+
+bool RenderController::SynchronizeFlag::update(uint64_t /*timestamp*/)
+{
+    return true;
 }
 
 void RenderController::SynchronizeFlag::reset()

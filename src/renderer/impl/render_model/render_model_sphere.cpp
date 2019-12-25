@@ -4,6 +4,7 @@
 #include "core/util/log.h"
 
 #include "renderer/base/atlas.h"
+#include "renderer/base/vertex_stream.h"
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader.h"
@@ -61,13 +62,13 @@ void GLModelSphere::start(DrawingBuffer& buf, const RenderLayer::Snapshot& layer
     buf.setIndices(_instance_index.snapshot());
 }
 
-void GLModelSphere::load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot)
+void GLModelSphere::load(VertexStream& buf, const Renderable::Snapshot& snapshot)
 {
     float* elements = _vertices_boiler_plate->buf();
     const Atlas::Item& item = _atlas->at(snapshot._type);
     for(uint32_t i = 0; i < _vertex_count; i++)
     {
-        buf.nextVertex();
+        buf.next();
         buf.writePosition(elements[0], elements[1], elements[2]);
         uint16_t u = item.ux() + static_cast<uint16_t>((item.vx() - item.ux()) * elements[3]);
         uint16_t v = item.uy() + static_cast<uint16_t>((item.vy() - item.uy()) * elements[4]);
@@ -79,7 +80,6 @@ void GLModelSphere::load(DrawingBuffer& buf, const RenderObject::Snapshot& snaps
         buf.writeTangent(tangent);
         elements += 5;
     }
-    buf.nextModel();
 }
 
 void GLModelSphere::buildVertex(float*& buffer, float lng, float lat) const
@@ -95,10 +95,8 @@ void GLModelSphere::buildVertex(float*& buffer, float lng, float lat) const
 
 void GLModelSphere::buildTexture(float*& buffer, float lng, float lat) const
 {
-    float x = (float) (lng / Math::PI / 2);
-    float y = (float) (lat / Math::PI);
-    (*buffer++) = x;
-    (*buffer++) = y;
+    (*buffer++) = static_cast<float>(lng / Math::PI / 2);
+    (*buffer++) = static_cast<float>(lat / Math::PI);
 }
 
 void GLModelSphere::degenerate(element_index_t*& buffer, element_index_t index) const

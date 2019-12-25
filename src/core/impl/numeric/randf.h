@@ -14,6 +14,7 @@ public:
     Randf(const sp<Numeric>& a, const sp<Numeric>& b);
 
     virtual float val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 //  [[plugin::function("randf")]]
     static sp<Numeric> randf(const sp<Numeric>& b);

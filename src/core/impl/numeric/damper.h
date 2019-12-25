@@ -13,6 +13,7 @@ public:
     Damper(const sp<Numeric>& t, float a, float c, float o);
 
     virtual float val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 //  [[plugin::builder("damper")]]
     class BUILDER : public Builder<Numeric> {
@@ -33,6 +34,7 @@ public:
 private:
     sp<Numeric> _t;
     float _a, _c, _o;
+
 };
 
 }

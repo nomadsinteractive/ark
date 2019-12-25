@@ -19,6 +19,7 @@ public:
     Bezier2(const sp<Numeric>& t, const sp<Numeric>& v, const sp<Vec2>& p1, const sp<Vec2>& p2, const sp<Vec2>& p3, const sp<Runnable>& onarrival);
 
     virtual V3 val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 //  [[plugin::resource-loader("bezier2")]]
     class BUILDER : public Builder<Vec3> {
@@ -48,6 +49,7 @@ private:
     V2 _last;
     float _last_t;
     float _p;
+
 };
 
 }

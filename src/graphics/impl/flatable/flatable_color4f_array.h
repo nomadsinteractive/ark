@@ -15,6 +15,7 @@ public:
 
     virtual void flat(void* buf) override;
     virtual uint32_t size() override;
+    virtual bool update(uint64_t timestamp) override;
 
 //  [[plugin::builder::by-value("color4fv")]]
     class BUILDER : public Builder<Flatable> {

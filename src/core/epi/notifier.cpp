@@ -24,8 +24,13 @@ public:
         return d;
     }
 
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return true;
+    }
+
 private:
     bool _dirty;
+
 };
 
 }

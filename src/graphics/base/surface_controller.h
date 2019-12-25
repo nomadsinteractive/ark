@@ -36,6 +36,8 @@ private:
     sp<RendererGroup> _layers;
 
     sp<OCSQueue<RenderRequest>> _render_requests;
+
+    sp<Variable<uint64_t>> _clock;
 };
 
 }

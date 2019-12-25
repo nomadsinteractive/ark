@@ -18,6 +18,10 @@ public:
         return -(_delegate->val());
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return _delegate->update(timestamp);
+    }
+
 private:
     sp<Variable<T>> _delegate;
 };

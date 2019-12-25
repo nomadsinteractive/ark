@@ -8,6 +8,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/impl/vec/vec3_impl.h"
 #include "graphics/impl/vec/vec_neg.h"
@@ -26,6 +27,10 @@ public:
         return _delegate->val()[_dim];
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return _delegate->update(timestamp);
+    }
+
 private:
     sp<Vec3> _delegate;
     int32_t _dim;
@@ -41,9 +46,14 @@ public:
         return _a->val().cross(_b->val());
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return VariableUtil::update(timestamp, _a, _b);
+    }
+
 private:
     sp<Vec3> _a;
     sp<Vec3> _b;
+
 };
 
 class Vec3Normalize : public Delegate<Vec3>, public Vec3, Implements<Vec3Normalize, Vec3, Delegate<Vec3>> {
@@ -58,6 +68,10 @@ public:
         return V3(normalized.x, normalized.y, normalized.z);
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return _delegate->update(timestamp);
+    }
+
 };
 
 class Vec2ToVec3 : public Vec3, public Holder, Implements<Vec2ToVec3, Vec3, Holder> {
@@ -68,6 +82,10 @@ public:
 
     virtual V3 val() override {
         return V3(_vec2->val(), 0);
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        return _vec2->update(timestamp);
     }
 
     virtual void traverse(const Visitor& visitor) override {

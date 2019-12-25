@@ -9,7 +9,7 @@
 #include "graphics/forwarding.h"
 #include "graphics/base/layer.h"
 #include "graphics/base/rect.h"
-#include "graphics/base/render_object.h"
+#include "graphics/inf/renderable.h"
 #include "graphics/inf/renderer.h"
 
 #include "renderer/base/buffer.h"
@@ -27,6 +27,7 @@ private:
         sp<RenderCommand> render(const Snapshot& snapshot, float x, float y);
 
         sp<RenderModel> _render_model;
+        sp<ModelLoader> _model_loader;
         sp<Shader> _shader;
         sp<Vec4> _scissor;
         sp<ResourceLoaderContext> _resource_loader_context;
@@ -50,8 +51,8 @@ public:
     };
 
     enum SnapshotFlag {
-        SNAPSHOT_FLAG_DYNAMIC,
-        SNAPSHOT_FLAG_STATIC_INITIALIZE,
+        SNAPSHOT_FLAG_RELOAD,
+        SNAPSHOT_FLAG_DYNAMIC_UPDATE,
         SNAPSHOT_FLAG_STATIC_MODIFIED,
         SNAPSHOT_FLAG_STATIC_REUSE
     };
@@ -59,11 +60,11 @@ public:
     struct Snapshot {
         Snapshot(Snapshot&& other) = default;
 
-        sp<RenderCommand> render(const V3& position);
+        sp<RenderCommand> render(const RenderRequest& renderRequest, const V3& position);
 
         sp<Stub> _stub;
         std::vector<UBOSnapshot> _ubos;
-        std::vector<RenderObject::Snapshot> _items;
+        std::vector<Renderable::Snapshot> _items;
 
         Buffer::Snapshot _index_buffer;
 
@@ -75,6 +76,9 @@ public:
 
     private:
         Snapshot(RenderRequest& renderRequest, const sp<Stub>& stub);
+
+        void doRenderModelSnapshot(const RenderRequest& renderRequest, DrawingBuffer& buf) const;
+        void doModelLoaderSnapshot(const RenderRequest& renderRequest, DrawingBuffer& buf) const;
 
         friend class RenderLayer;
     };

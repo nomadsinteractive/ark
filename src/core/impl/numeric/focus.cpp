@@ -6,19 +6,23 @@
 namespace ark {
 
 Focus::Focus(const sp<Numeric>& target, float nearest, float farest, float value)
-    : _target(target), _nearest(nearest), _farest(farest), _value(value)
+    : Updatable(value), _target(target), _nearest(nearest), _farest(farest)
 {
 }
 
-float Focus::val()
+bool Focus::doUpdate(uint64_t timestamp, float& value)
 {
+    if(!_target->update(timestamp))
+        return false;
+
     float fv = _target->val();
-    float d = fv - _value;
+    float d = fv - value;
     if(d < _nearest)
-        _value = fv - _nearest;
+        value = fv - _nearest;
     else if(d > _farest)
-        _value = fv - _farest;
-    return _value;
+        value = fv - _farest;
+
+    return true;
 }
 
 Focus::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

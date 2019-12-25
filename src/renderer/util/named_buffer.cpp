@@ -3,6 +3,8 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/render_controller.h"
 
+#include "renderer/base/model.h"
+
 namespace ark {
 
 NamedBuffer::NamedBuffer::NamedBuffer(const Buffer& buffer, Uploader::MakerFunc maker, std::function<size_t(size_t)> sizeCalculator)
@@ -57,7 +59,7 @@ void NamedBuffer::NinePatch::upload(const Uploader::UploadFunc& uploader)
         buf += ((bolierPlateLength + 2));
     }
 
-    uploader(array->buf(), array->length());
+    uploader(array->buf(), array->length(), 0);
 }
 
 sp<NamedBuffer> NamedBuffer::NinePatch::make(RenderController& renderController)
@@ -88,18 +90,18 @@ void NamedBuffer::Quads::upload(const Uploader::UploadFunc& uploader)
         buf[idx++] = offset + 3;
         buf[idx++] = offset + 1;
     }
-    uploader(result->buf(), result->length());
+    uploader(result->buf(), result->length(), 0);
 }
 
 Uploader::MakerFunc NamedBuffer::Quads::maker()
 {
-    return [](size_t objectCount)->sp<Uploader> { return sp<Quads>::make(objectCount); };
+    return [](size_t objectCount)->sp<Uploader> { return sp<Concat>::make(objectCount, 4, sp<IndexArray::Vector>::make(std::vector<element_index_t>({0, 2, 1, 2, 3, 1}))); };
 }
 
 sp<NamedBuffer> NamedBuffer::Quads::make(RenderController& renderController)
 {
     return sp<NamedBuffer>::make(renderController.makeIndexBuffer(Buffer::USAGE_STATIC),
-                                                   [](size_t objectCount)->sp<Uploader> { return sp<Quads>::make(objectCount); },
+                                                   maker(),
                                                    [](size_t objectCount)->size_t { return objectCount * 6 * sizeof(element_index_t); });
 }
 
@@ -118,14 +120,35 @@ void NamedBuffer::Points::upload(const Uploader::UploadFunc& uploader)
         element_index_t offset = static_cast<element_index_t>(i);
         buf[idx++] = offset;
     }
-    uploader(result->buf(), result->size());
+    uploader(result->buf(), result->size(), 0);
 }
 
 sp<NamedBuffer> NamedBuffer::Points::make(RenderController& renderController)
 {
     return sp<NamedBuffer>::make(renderController.makeIndexBuffer(Buffer::USAGE_STATIC),
                                                    [](size_t objectCount)->sp<Uploader> { return sp<Points>::make(objectCount); },
-                                                   [](size_t objectCount)->size_t { return objectCount * sizeof(element_index_t); });
+    [](size_t objectCount)->size_t { return objectCount * sizeof(element_index_t); });
+}
+
+NamedBuffer::Concat::Concat(size_t objectCount, size_t vertexCount, const array<element_index_t>& indices)
+    : Uploader(objectCount * indices->size()), _object_count(objectCount), _vertex_count(vertexCount), _indices(indices)
+{
+}
+
+void NamedBuffer::Concat::upload(const Uploader::UploadFunc& uploader)
+{
+    size_t length = _indices->length();
+    size_t size = _indices->size();
+    size_t offset = 0;
+    std::vector<element_index_t> indices(length);
+    element_index_t* buf = &indices.front();
+    memcpy(buf, _indices->buf(), _indices->size());
+    for(size_t i = 0; i < _object_count; ++i, offset += size)
+    {
+        uploader(buf, size, offset);
+        for(size_t j = 0; j < length; ++j)
+            buf[j] = static_cast<element_index_t>(buf[j] + _vertex_count);
+    }
 }
 
 }

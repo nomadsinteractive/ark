@@ -55,6 +55,11 @@ bool PythonCallableRunnable::Result::val()
 
 }
 
+bool PythonCallableRunnable::Result::update(uint64_t)
+{
+    return true;
+}
+
 void PythonCallableRunnable::Result::setFunctionResult(PythonCallableRunnable::FunctionResult functionResult)
 {
     _function_result = functionResult;

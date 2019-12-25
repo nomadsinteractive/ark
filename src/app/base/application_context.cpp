@@ -256,7 +256,7 @@ void ApplicationContext::resume()
 
 void ApplicationContext::updateRenderState()
 {
-    _ticker->update();
+    _ticker->update(0);
     _render_message_loop->pollOnce();
 }
 
@@ -270,9 +270,10 @@ ApplicationContext::Ticker::Ticker()
 {
 }
 
-void ApplicationContext::Ticker::update()
+bool ApplicationContext::Ticker::update(uint64_t /*timestamp*/)
 {
     _val = _steady_clock->val();
+    return true;
 }
 
 uint64_t ApplicationContext::Ticker::val()

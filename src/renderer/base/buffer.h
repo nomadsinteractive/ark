@@ -8,6 +8,8 @@
 #include "core/inf/array.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/base/render_request.h"
+
 #include "renderer/forwarding.h"
 #include "renderer/inf/resource.h"
 
@@ -25,6 +27,21 @@ public:
         USAGE_DYNAMIC,
         USAGE_STATIC,
         USAGE_COUNT
+    };
+
+    enum AttributeName {
+        ATTRIBUTE_NAME_TEX_COORDINATE,
+        ATTRIBUTE_NAME_NORMAL,
+        ATTRIBUTE_NAME_TANGENT,
+        ATTRIBUTE_NAME_BITANGENT,
+        ATTRIBUTE_NAME_MODEL_ID,
+        ATTRIBUTE_NAME_COUNT
+    };
+
+    struct Attributes {
+        Attributes(const PipelineInput& input);
+
+        int32_t _offsets[ATTRIBUTE_NAME_COUNT];
     };
 
     class ARK_API Delegate : public Resource {
@@ -66,9 +83,16 @@ public:
         size_t _size;
     };
 
+    struct Block {
+        Block(size_t offset, const ByteArray::Borrowed& content);
+
+        size_t offset;
+        ByteArray::Borrowed content;
+    };
+
     class ARK_API Builder {
     public:
-        Builder(size_t stride, size_t growCapacity);
+        Builder(const RenderRequest& renderRequest, const Attributes& attributes, size_t stride);
         DEFAULT_COPY_AND_ASSIGN(Builder);
 
         template<typename T> void write(const T& value, size_t offset = 0) {
@@ -88,21 +112,26 @@ public:
 
         Snapshot toSnapshot(const Buffer& buffer) const;
 
-        size_t stride() const;
+        void addBlock(size_t offset, ByteArray::Borrowed& content);
+
         size_t length() const;
 
-    private:
         void grow();
 
         sp<Uploader> makeUploader() const;
 
-    private:
+//    private:
+        RenderRequest _render_request;
+        Attributes _attributes;
+
         size_t _stride;
         size_t _grow_capacity;
 
         uint8_t* _ptr;
         uint8_t* _boundary;
         std::vector<bytearray> _buffers;
+
+        std::vector<Block> _blocks;
 
         size_t _size;
     };

@@ -5,6 +5,7 @@
 #include "core/ark.h"
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
+#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/util/math.h"
 
 #include "graphics/base/layer.h"
@@ -89,7 +90,10 @@ void Characters::renderRequest(const V3& position)
         _layout_size = _layout_param->size()->val();
         createContent();
     }
-    _layer_context->renderRequest(position);
+
+    _layer_context->renderRequest(V3());
+    for(const sp<RenderablePassive>& i : _renderables)
+        i->requestUpdate(position);
 }
 
 void Characters::createContent()
@@ -103,6 +107,19 @@ void Characters::createContent()
         createContentWithBoundary(boundary);
     else
         createContentNoBoundary();
+}
+
+void Characters::createLayerContent(float width, float height)
+{
+    _size->setWidth(width);
+    _size->setHeight(height);
+
+    for(const sp<RenderObject>& i : _contents)
+    {
+        sp<RenderablePassive> renderable = sp<RenderablePassive>::make(i);
+        _layer_context->add(renderable, sp<BooleanByWeakRef<RenderablePassive>>::make(renderable, 1));
+        _renderables.push_back(std::move(renderable));
+    }
 }
 
 void Characters::createContentWithBoundary(float boundary)
@@ -135,11 +152,7 @@ void Characters::createContentWithBoundary(float boundary)
         }
     }
 
-    _size->setWidth(flowx);
-    _size->setHeight(std::abs(flowy) + fontHeight);
-
-    for(const sp<RenderObject>& i : _contents)
-        _layer_context->addRenderObject(i);
+    createLayerContent(flowx, std::abs(flowy) + fontHeight);
 }
 
 void Characters::createContentNoBoundary()
@@ -148,11 +161,8 @@ void Characters::createContentNoBoundary()
     float fontHeight = 0;
     for(wchar_t c : _text)
         placeNoBoundary(c, flowx, flowy, fontHeight);
-    _size->setWidth(flowx);
-    _size->setHeight(std::abs(flowy) + fontHeight);
 
-    for(const sp<RenderObject>& i : _contents)
-        _layer_context->addRenderObject(i);
+    createLayerContent(flowx, std::abs(flowy) + fontHeight);
 }
 
 void Characters::placeNoBoundary(wchar_t c, float& flowx, float& flowy, float& fontHeight)

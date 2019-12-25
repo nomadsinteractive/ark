@@ -1,6 +1,8 @@
 #ifndef ARK_CORE_BASE_EXPECTATION_H_
 #define ARK_CORE_BASE_EXPECTATION_H_
 
+#include <vector>
+
 #include "core/base/api.h"
 #include "core/base/delegate.h"
 #include "core/epi/notifier.h"
@@ -17,6 +19,8 @@ public:
     Expectation(const sp<Numeric>& delegate, Notifier notifier);
 
     virtual float val() override;
+    virtual bool update(uint64_t timestamp) override;
+
     virtual void traverse(const Visitor& visitor) override;
 
 //[[script::bindings::auto]]
@@ -29,7 +33,6 @@ public:
 private:
     Notifier _notifier;
     std::vector<sp<Observer>> _observers;
-
 };
 
 }

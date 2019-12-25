@@ -22,6 +22,7 @@ private:
         bool prepare(const RenderLayer::Snapshot& snapshot, bool allowReset);
 
         virtual sp<Texture::Delegate> val() override;
+        virtual bool update(uint64_t timestamp) override;
 
     private:
         bool prepareOne(int32_t c);
@@ -50,7 +51,7 @@ public:
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
     virtual void start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot) override;
-    virtual void load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot) override;
+    virtual void load(VertexStream& buf, const Renderable::Snapshot& snapshot) override;
     virtual Metrics measure(int32_t type) override;
 
 //  [[plugin::resource-loader("text")]]

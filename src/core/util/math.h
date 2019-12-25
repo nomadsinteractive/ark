@@ -99,25 +99,31 @@ public:
 
     static ARK_API uint32_t log2(uint32_t x);
 
-
 //  [[script::bindings::auto]]
     static ARK_API float sin(float x);
+//  [[plugin::function("sin")]]
 //  [[script::bindings::auto]]
     static ARK_API sp<Numeric> sin(const sp<Numeric>& x);
 //  [[script::bindings::auto]]
     static ARK_API float cos(float x);
+//  [[plugin::function("cos")]]
 //  [[script::bindings::auto]]
     static ARK_API sp<Numeric> cos(const sp<Numeric>& x);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> atan(const sp<Vec2>& vec);
+    static ARK_API sp<Numeric> atan(const sp<Vec2>& val);
 
+//  [[plugin::function("min")]]
 //  [[script::bindings::auto]]
     static ARK_API sp<Numeric> min(const sp<Numeric>& a1, const sp<Numeric>& a2);
+//  [[plugin::function("max")]]
 //  [[script::bindings::auto]]
     static ARK_API sp<Numeric> max(const sp<Numeric>& a1, const sp<Numeric>& a2);
 
 //  [[script::bindings::auto]]
     static ARK_API float acos(float x);
+//  [[plugin::function("acos")]]
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> acos(const sp<Numeric>& x);
 //  [[script::bindings::auto]]
     static ARK_API float atan2(float y, float x);
 //  [[script::bindings::auto]]
@@ -139,6 +145,9 @@ public:
     static ARK_API float hypot(float dx, float dy);
 //  [[script::bindings::auto]]
     static ARK_API float sqrt(float number);
+//  [[plugin::function("sqrt")]]
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> sqrt(const sp<Numeric>& number);
 
 //  [[script::bindings::auto]]
     static ARK_API V3 quadratic(float a, float b, float c);

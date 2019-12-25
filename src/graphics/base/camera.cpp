@@ -12,6 +12,7 @@
 #include "core/impl/variable/variable_op2.h"
 #include "core/types/global.h"
 #include "core/util/operators.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/base/mat.h"
 #include "graphics/util/matrix_util.h"
@@ -29,15 +30,19 @@ public:
     }
 
     virtual void run() override {
-        update();
+        doUpdate();
     }
 
     virtual M4 val() override {
         return _matrix;
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return VariableUtil::update(timestamp, _position, _target, _up);
+    }
+
 private:
-    void update() {
+    void doUpdate() {
         const V3 position = _position->val();
         const V3 target = _target->val();
         const V3 up = _up->val();
@@ -78,9 +83,14 @@ public:
         return MatrixUtil::mul(lvalue, rvalue);
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return VariableUtil::update(timestamp, _lvalue, _rvalue);
+    }
+
 private:
     sp<Mat4> _lvalue;
     sp<Mat4> _rvalue;
+
 };
 
 }
@@ -171,6 +181,11 @@ void Camera::Holder::flat(void* buf)
 uint32_t Camera::Holder::size()
 {
     return sizeof(M4);
+}
+
+bool Camera::Holder::update(uint64_t timestamp)
+{
+    return _value->update(timestamp);
 }
 
 M4 Camera::DelegateLH_ZO::frustum(float left, float right, float bottom, float top, float near, float far)

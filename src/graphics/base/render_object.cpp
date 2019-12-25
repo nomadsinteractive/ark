@@ -6,6 +6,7 @@
 #include "core/util/bean_utils.h"
 #include "core/util/holder_util.h"
 #include "core/util/numeric_util.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/util/vec3_util.h"
 
@@ -218,9 +219,13 @@ bool RenderObject::isVisible() const
     return _visible.val();
 }
 
-RenderObject::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, Allocator& allocator) const
+Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest)
 {
-    return Snapshot(_type->val(), _position.val(), _size.val(), _transform->snapshot(), _varyings->snapshot(pipelineInput, allocator));
+    if(_disposed.update(renderRequest.timestamp()) && _disposed.val())
+        return Renderable::Snapshot();
+
+    bool dirty = VariableUtil::update(renderRequest.timestamp(), _visible, _type, _position, _size, _transform, _varyings, _visible);
+    return Renderable::Snapshot(false, dirty, _visible.val(), _type->val(), _position.val(), _size.val(), _transform->snapshot(), _varyings->snapshot(pipelineInput, renderRequest.allocator()));
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -236,11 +241,6 @@ RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<RenderObject> RenderObject::BUILDER::build(const Scope& args)
 {
     return sp<RenderObject>::make(_type->build(args), _position->build(args), _size->build(args), _transform->build(args), _varyings->build(args), _disposed->build(args));
-}
-
-RenderObject::Snapshot::Snapshot(int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings)
-    : _type(type), _position(position), _size(size), _transform(transform), _varyings(varyings)
-{
 }
 
 }

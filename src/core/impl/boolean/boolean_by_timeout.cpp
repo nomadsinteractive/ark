@@ -19,6 +19,11 @@ bool BooleanByTimeout::val()
     return _duration->val() > _timeout;
 }
 
+bool BooleanByTimeout::update(uint64_t timestamp)
+{
+    return _duration->update(timestamp);
+}
+
 BooleanByTimeout::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _duration(factory.ensureBuilder<Duration>(manifest)), _sec(0)
 {
@@ -40,7 +45,7 @@ sp<Boolean> BooleanByTimeout::BUILDER::build(const Scope& args)
         DCHECK(_sec > 0, "Timeout value must not be zero");
         _timeout = nullptr;
     }
-    return sp<Boolean>::adopt(new BooleanByTimeout(_duration->build(args), _sec));
+    return sp<Boolean>::make<BooleanByTimeout>(_duration->build(args), _sec);
 }
 
 }

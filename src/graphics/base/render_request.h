@@ -15,9 +15,10 @@ namespace ark {
 class ARK_API RenderRequest {
 public:
     RenderRequest() = default;
-    RenderRequest(const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests);
+    RenderRequest(uint64_t timestamp, const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests);
     DEFAULT_COPY_AND_ASSIGN(RenderRequest);
 
+    uint64_t timestamp() const;
     Allocator& allocator() const;
 
     void onRenderFrame(const Color& backgroundColor, RenderView& renderView) const;
@@ -29,10 +30,11 @@ public:
 
 public:
     struct Stub {
-        Stub(const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests);
+        Stub(uint64_t timestamp, const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests);
 
         void onJobDone(const sp<Stub>& self);
 
+        uint64_t _timestamp;
         Allocator _allocator;
         sp<Executor> _executor;
         sp<OCSQueue<RenderRequest>> _render_requests;

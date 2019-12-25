@@ -43,4 +43,9 @@ int32_t IntegerByArray::val()
     return v;
 }
 
+bool IntegerByArray::update(uint64_t /*timestamp*/)
+{
+    return true;
+}
+
 }

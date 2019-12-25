@@ -10,22 +10,24 @@ namespace ark {
 template<typename T> class VariableObserver : public Variable<T> {
 public:
     VariableObserver(const sp<Variable<T>>& delegate, const sp<Observer>& observer)
-        : _delegate(delegate), _observer(observer), _value(delegate->val()) {
+        : _delegate(delegate), _observer(observer) {
     }
 
     virtual T val() override {
-        T v = _delegate->val();
-        if(v != _value) {
-            _value = v;
+        return _delegate->val();
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        if(_delegate->update(timestamp)) {
             _observer->update();
+            return true;
         }
-        return v;
+        return false;
     }
 
 private:
     sp<Variable<T>> _delegate;
     sp<Observer> _observer;
-    T _value;
 };
 
 }

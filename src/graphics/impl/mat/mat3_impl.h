@@ -18,12 +18,12 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mat3Impl);
 
     virtual M3 val() override;
+    virtual bool update(uint64_t timestamp) override;
 
     void fix();
 
 private:
     sp<VariableWrapper<M3>> _impl;
-
 };
 
 }

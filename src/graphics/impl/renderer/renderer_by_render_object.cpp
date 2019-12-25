@@ -12,31 +12,30 @@
 
 #include "renderer/inf/render_model.h"
 
-
 namespace ark {
 
 RendererByRenderObject::RendererByRenderObject(const sp<RenderObject>& renderObject, const sp<LayerContext>& layerContext)
-    : _render_object(renderObject), _layer_context(layerContext)
+    : _layer_context(layerContext), _renderable(sp<RenderablePassive>::make(renderObject))
 {
-    DASSERT(_render_object);
     DASSERT(_layer_context);
-    if(!_render_object->_size)
-        measure(_render_object->_size.ensure());
+    if(!_renderable->renderObject()->_size)
+        measure(_renderable->renderObject()->_size.ensure());
+    _layer_context->add(_renderable, renderObject->disposed());
 }
 
 void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, const V3& position)
 {
-    _layer_context->drawRenderObject(position, _render_object);
+    _renderable->requestUpdate(position);
 }
 
 const sp<Size>& RendererByRenderObject::size()
 {
-    return _render_object->_size.ensure();
+    return _renderable->renderObject()->_size.ensure();
 }
 
 void RendererByRenderObject::measure(Size& size)
 {
-    const Metrics metrics = _layer_context->renderModel()->measure(_render_object->type()->val());
+    const Metrics metrics = _layer_context->renderModel()->measure(_renderable->renderObject()->type()->val());
     size.setWidth(metrics.size.x());
     size.setHeight(metrics.size.y());
 }

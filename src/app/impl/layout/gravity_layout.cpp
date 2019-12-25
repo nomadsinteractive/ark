@@ -44,6 +44,25 @@ Rect GravityLayout::place(LayoutParam::Gravity gravity, float clientWidth, float
     return Rect(x, y, x + width, y + height);
 }
 
+float GravityLayout::place(LayoutParam::Gravity gravity, float size, float available)
+{
+    switch(gravity)
+    {
+        case LayoutParam::LEFT:
+        case LayoutParam::TOP:
+            return 0;
+        case LayoutParam::RIGHT:
+        case LayoutParam::BOTTOM:
+            return available - size;
+        case LayoutParam::CENTER_HORIZONTAL:
+        case LayoutParam::CENTER_VERTICAL:
+            return (available - size) / 2;
+        default:
+        break;
+    }
+    return 0;
+}
+
 void GravityLayout::begin(Context& /*ctx*/, LayoutParam& /*layoutParam*/)
 {
 }

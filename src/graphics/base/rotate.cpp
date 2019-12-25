@@ -5,6 +5,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/types/null.h"
 #include "core/util/holder_util.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/base/v3.h"
 
@@ -20,6 +21,11 @@ Rotate::Rotate(const sp<Numeric>& value, const sp<Vec3>& direction)
 Rotation Rotate::val()
 {
     return Rotation(_value->val(), _direction->val());
+}
+
+bool Rotate::update(uint64_t timestamp)
+{
+    return VariableUtil::update(timestamp, _value, _direction);
 }
 
 void Rotate::traverse(const Holder::Visitor& visitor)

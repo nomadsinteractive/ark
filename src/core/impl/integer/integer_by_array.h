@@ -13,11 +13,13 @@ public:
     IntegerByArray(const sp<IntArray>& array, IntegerUtil::Repeat repeat);
 
     virtual int32_t val() override;
+    virtual bool update(uint64_t timestamp) override;
 
 private:
     IntegerUtil::Repeat _repeat;
     int32_t _position;
     int32_t _step;
+
 };
 
 }

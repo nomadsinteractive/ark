@@ -38,7 +38,7 @@ float Color::r() const
 void Color::setR(float red)
 {
     _color._x = red;
-    notify();
+    doNotify();
 }
 
 float Color::g() const
@@ -49,7 +49,7 @@ float Color::g() const
 void Color::setG(float green)
 {
     _color._y = green;
-    notify();
+    doNotify();
 }
 
 float Color::b() const
@@ -60,7 +60,7 @@ float Color::b() const
 void Color::setB(float blue)
 {
     _color._z = blue;
-    notify();
+    doNotify();
 }
 
 float Color::a() const
@@ -71,7 +71,7 @@ float Color::a() const
 void Color::setA(float alpha)
 {
     _color._w = alpha;
-    notify();
+    doNotify();
 }
 
 uint32_t Color::value() const
@@ -87,13 +87,13 @@ uint32_t Color::value() const
 void Color::setValue(uint32_t value)
 {
     _color = V4((value >> 24) / 255.0f, ((value >> 16) & 0xff) / 255.0f, ((value >> 8) & 0xff) / 255.0f, (value & 0xff) / 255.0f);
-    notify();
+    doNotify();
 }
 
 void Color::assign(const Color& other)
 {
     _color = other._color;
-    notify();
+    doNotify();
 }
 
 bool Color::operator ==(const Color& other) const
@@ -109,6 +109,17 @@ bool Color::operator !=(const Color& other) const
 V4 Color::val()
 {
     return _color;
+}
+
+bool Color::update(uint64_t timestamp)
+{
+    return _timestamp.update(timestamp);
+}
+
+void Color::doNotify()
+{
+    _timestamp.setDirty();
+    notify();
 }
 
 template<> ARK_API Color Conversions::to<String, Color>(const String& s)

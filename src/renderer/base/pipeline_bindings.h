@@ -3,21 +3,13 @@
 
 #include "core/base/api.h"
 
+#include "renderer/base/buffer.h"
 #include "renderer/inf/render_model.h"
 
 namespace ark {
 
 class ARK_API PipelineBindings {
 public:
-    enum AttributeName {
-        ATTRIBUTE_NAME_TEX_COORDINATE,
-        ATTRIBUTE_NAME_NORMAL,
-        ATTRIBUTE_NAME_TANGENT,
-        ATTRIBUTE_NAME_BITANGENT,
-        ATTRIBUTE_NAME_MODEL_ID,
-        ATTRIBUTE_NAME_COUNT
-    };
-
     enum Flag {
         FLAG_CULL_MODE_CW = 1,
         FLAG_CULL_MODE_CCW = 2,
@@ -26,12 +18,6 @@ public:
         FLAG_DYNAMIC_SCISSOR = 4,
         FLAG_DYNAMIC_SCISSOR_BITMASK = 4,
         FLAG_DEFAULT_VALUE = FLAG_CULL_MODE_CCW
-    };
-
-    struct Attributes {
-        Attributes(const PipelineInput& input);
-
-        int32_t _offsets[ATTRIBUTE_NAME_COUNT];
     };
 
     struct ARK_API Parameters {
@@ -53,7 +39,7 @@ public:
     const sp<PipelineInput>& input() const;
     const sp<Snippet>& snippet() const;
 
-    const Attributes& attributes() const;
+    const Buffer::Attributes& attributes() const;
     const std::vector<sp<Texture>>& samplers() const;
 
     void bindSampler(const sp<Texture>& texture, uint32_t name = 0);
@@ -74,7 +60,7 @@ private:
         sp<PipelineLayout> _layout;
         sp<PipelineInput> _input;
 
-        Attributes _attributes;
+        Buffer::Attributes _attributes;
 
         std::vector<sp<Texture>> _samplers;
     };

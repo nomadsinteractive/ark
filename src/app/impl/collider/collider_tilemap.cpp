@@ -39,10 +39,15 @@ public:
         return position;
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return _delegate->update(timestamp);
+    }
+
 private:
     WeakPtr<TiledCollider::RigidBodyImpl> _rigid_body;
     sp<Vec> _delegate;
     Rect _bounds;
+
 };
 
 }

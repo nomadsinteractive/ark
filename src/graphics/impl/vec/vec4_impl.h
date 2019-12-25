@@ -22,6 +22,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Vec4Impl);
 
     virtual V4 val() override;
+    virtual bool update(uint64_t timestamp) override;
     virtual void traverse(const Visitor& visitor) override;
 
     const sp<NumericWrapper>& x() const;

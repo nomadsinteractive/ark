@@ -15,7 +15,7 @@ namespace ark {
 
 class ARK_API Uploader {
 public:
-    typedef std::function<void(void*, size_t)>  UploadFunc;
+    typedef std::function<void(void*, size_t, size_t)>  UploadFunc;
     typedef std::function<sp<Uploader>(size_t)> MakerFunc;
 
     Uploader(size_t size);
@@ -42,7 +42,7 @@ public:
     }
 
     virtual void upload(const UploadFunc& uploader) override {
-        uploader(_array->buf(), _array->size());
+        uploader(_array->buf(), _array->size(), 0);
     }
 
 private:
@@ -58,8 +58,12 @@ public:
     }
 
     virtual void upload(const UploadFunc& uploader) override {
-        for(const auto& i : _array_list)
-            uploader(i->buf(), i->size());
+        size_t offset = 0;
+        for(const auto& i : _array_list) {
+            size_t size = i->size();
+            uploader(i->buf(), size, offset);
+            offset += size;
+        }
     }
 
 private:
@@ -73,7 +77,7 @@ public:
     }
 
     virtual void upload(const UploadFunc& uploader) override {
-        uploader(&_vector[0], _vector.size() * sizeof(T));
+        uploader(&_vector[0], _vector.size() * sizeof(T), 0);
     }
 
 private:
@@ -88,7 +92,7 @@ public:
     }
 
     virtual void upload(const UploadFunc& uploader) override {
-        uploader(_object.get(), _size);
+        uploader(_object.get(), _size, 0);
     }
 
 private:
@@ -106,7 +110,7 @@ public:
     }
 
     virtual void upload(const UploadFunc& uploader) override {
-        uploader(_memory, _size);
+        uploader(_memory, _size, 0);
     }
 
 private:

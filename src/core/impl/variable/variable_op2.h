@@ -20,12 +20,26 @@ public:
         return _op2(_val_sfinae<LVType, T>(_p1, nullptr), _val_sfinae<RVType, P>(_p2, nullptr));
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        bool d1 = _update_sfinae(_p1, timestamp, nullptr);
+        bool d2 = _update_sfinae(_p2, timestamp, nullptr);
+        return d1 || d2;
+    }
+
     virtual void traverse(const Visitor& visitor) override {
         _visit_sfinae(_p1, visitor, nullptr);
         _visit_sfinae(_p2, visitor, nullptr);
     }
 
 private:
+    template<typename U> static bool _update_sfinae(const U& p, uint64_t timestamp, decltype(p->update(0))* /*args*/) {
+        return p->update(timestamp);
+    }
+
+    template<typename U> static bool _update_sfinae(const U& /*p*/, uint64_t /*timestamp*/, ...) {
+        return false;
+    }
+
     template<typename U, typename V> static V _val_sfinae(const U& p, decltype(p->val())* /*args*/) {
         return static_cast<V>(p->val());
     }

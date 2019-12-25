@@ -27,17 +27,8 @@ public:
         V3 _bitangent;
     };
 
-    struct Vertex {
-        Vertex(V3* position, UV* uv, V3* normal, Tangents* tangent);
-
-        V3* _position;
-        UV* _uv;
-        V3* _normal;
-        Tangents* _tangent;
-    };
-
 public:
-    Model(array<element_index_t> indices, array<V3> vertices, array<UV> uvs, array<V3> normals, array<Tangents> tangents);
+    Model(const array<element_index_t>& indices, const array<V3>& vertices, const array<UV>& uvs, const array<V3>& normals, const array<Tangents>& tangents, const V3& size = V3(1.0f));
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Model);
 
     const array<element_index_t>& indices() const;
@@ -47,6 +38,8 @@ public:
     const array<V3>& normals() const;
     const array<Tangents>& tangents() const;
 
+    const V3& size() const;
+
 private:
     array<element_index_t> _indices;
 
@@ -54,6 +47,8 @@ private:
     array<UV> _uvs;
     array<V3> _normals;
     array<Tangents> _tangents;
+
+    V3 _size;
 };
 
 }

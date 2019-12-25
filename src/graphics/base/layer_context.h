@@ -35,14 +35,13 @@ public:
 
     void renderRequest(const V3& position);
 
-    void drawRenderObject(const V3& position, const sp<RenderObject>& renderObject);
-
+    void add(const sp<Renderable>& renderable, const sp<Boolean>& disposed = nullptr);
 //  [[script::bindings::auto]]
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = sp<Boolean>::null());
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = nullptr);
 //  [[script::bindings::auto]]
     void clear();
 
-    void takeSnapshot(RenderLayer::Snapshot& output, Allocator& allocator);
+    void takeSnapshot(RenderLayer::Snapshot& output, const RenderRequest& renderRequest);
 
     class BUILDER : public Builder<LayerContext> {
     public:
@@ -57,15 +56,14 @@ public:
     };
 
 private:
-    class RenderObjectFilter {
+    class RenderableFilter {
     public:
-        RenderObjectFilter(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed, const sp<Notifier>& notifier);
+        RenderableFilter(const sp<Renderable>& renderObject, const sp<Boolean>& disposed);
 
-        FilterAction operator()(const sp<RenderObject>& renderObject) const;
+        FilterAction operator()(const sp<Renderable>& renderObject) const;
 
     private:
         sp<Boolean> _disposed;
-        sp<Notifier> _notifier;
     };
 
 private:
@@ -75,8 +73,7 @@ private:
 
     bool _render_requested;
     V3 _position;
-    std::vector<Item> _transient_items;
-    List<RenderObject, RenderObjectFilter> _items;
+    List<Renderable, RenderableFilter> _renderables;
 
 };
 

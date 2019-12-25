@@ -8,8 +8,6 @@
 #include "core/impl/numeric/approach.h"
 #include "core/impl/numeric/clamp.h"
 #include "core/impl/numeric/fence.h"
-#include "core/impl/numeric/max.h"
-#include "core/impl/numeric/min.h"
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/numeric/vibrate.h"
 #include "core/impl/variable/boost.h"
@@ -18,6 +16,7 @@
 #include "core/impl/variable/variable_ternary.h"
 #include "core/util/operators.h"
 #include "core/util/strings.h"
+#include "core/util/variable_util.h"
 
 namespace ark {
 
@@ -37,6 +36,10 @@ public:
             return boundary;
         }
         return value;
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        return VariableUtil::update(timestamp, _delegate, _boundary);
     }
 
 private:
@@ -62,6 +65,10 @@ public:
         return value;
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return VariableUtil::update(timestamp, _delegate, _boundary);
+    }
+
 private:
     sp<Numeric> _boundary;
 
@@ -76,6 +83,10 @@ public:
 
     virtual float val() override {
         return std::abs(_a1->val());
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        return _a1->update(timestamp);
     }
 
 private:
@@ -93,13 +104,15 @@ public:
         return -_a1->val();
     }
 
+    virtual bool update(uint64_t timestamp) override {
+        return _a1->update(timestamp);
+    }
+
 private:
     sp<Numeric> _a1;
-
 };
 
 }
-
 
 sp<Numeric> NumericUtil::create(const sp<Numeric>& value)
 {

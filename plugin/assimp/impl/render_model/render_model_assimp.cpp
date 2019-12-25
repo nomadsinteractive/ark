@@ -61,7 +61,7 @@ void RenderModelAssimp::postSnapshot(RenderController& /*renderController*/, Ren
     DCHECK(snapshot._items.size() <= _model_matrics->length(), "Cannot support more than %d renderobjects", _model_matrics->length());
     for(size_t i = 0; i < snapshot._items.size(); ++i)
     {
-        const RenderObject::Snapshot& ro = snapshot._items.at(i);
+        const Renderable::Snapshot& ro = snapshot._items.at(i);
         const Transform::Snapshot& transform = ro._transform;
         _model_matrics->buf()[i] = MatrixUtil::mul(MatrixUtil::translate(M4::identity(), ro._position), transform.toMatrix());
     }
@@ -73,12 +73,12 @@ void RenderModelAssimp::start(DrawingBuffer& buf, const RenderLayer::Snapshot& s
 
     if(snapshot._flag != RenderLayer::SNAPSHOT_FLAG_STATIC_REUSE)
     {
-        DWARN(snapshot._flag != RenderLayer::SNAPSHOT_FLAG_DYNAMIC, "Dynamic layer for 3D models is inefficiency");
+        DWARN(snapshot._flag != RenderLayer::SNAPSHOT_FLAG_DYNAMIC_UPDATE, "Dynamic layer for 3D models is inefficiency");
         std::vector<sp<Array<element_index_t>>> indices;
         buf.vertices().setGrowCapacity(100000);
         for(size_t i = 0; i < snapshot._items.size(); ++i)
         {
-            const RenderObject::Snapshot& ro = snapshot._items.at(i);
+            const Renderable::Snapshot& ro = snapshot._items.at(i);
             const auto iter = _models.find(ro._type);
             DCHECK(iter != _models.end(), "Model %d does not exist", ro._type);
             const sp<Model>& model = iter->second;
@@ -105,7 +105,7 @@ void RenderModelAssimp::start(DrawingBuffer& buf, const RenderLayer::Snapshot& s
         buf.setIndices(ibo.snapshot());
 }
 
-void RenderModelAssimp::load(DrawingBuffer& /*buf*/, const RenderObject::Snapshot& /*snapshot*/)
+void RenderModelAssimp::load(VertexStream& /*buf*/, const Renderable::Snapshot& /*snapshot*/)
 {
 }
 
@@ -148,7 +148,7 @@ sp<Model> RenderModelAssimp::loadModel(const aiMesh* mesh)
         *(++u) = Model::UV(static_cast<uint16_t>(mesh->mTextureCoords[0][i].x * 0xffff), static_cast<uint16_t>(mesh->mTextureCoords[0][i].y * 0xffff));
     }
 
-    return sp<Model>::make(std::move(indices), std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents));
+    return sp<Model>::make(indices, vertices, uvs, normals, tangents);
 }
 
 array<element_index_t> RenderModelAssimp::loadIndices(const aiMesh* mesh) const
@@ -167,27 +167,28 @@ array<element_index_t> RenderModelAssimp::loadIndices(const aiMesh* mesh) const
 
 void RenderModelAssimp::compose(const Model& model, int32_t modelId, DrawingBuffer& buf) const
 {
-    V3* vertices = model.vertices()->buf();
-    V3* normals = model.normals() ? model.normals()->buf() : nullptr;
-    Model::Tangents* tangents = model.tangents() ? model.tangents()->buf() : nullptr;
-    Model::UV* uvs = model.uvs()->buf();
+    DFATAL("Unimplemented");
+//    V3* vertices = model.vertices()->buf();
+//    V3* normals = model.normals() ? model.normals()->buf() : nullptr;
+//    Model::Tangents* tangents = model.tangents() ? model.tangents()->buf() : nullptr;
+//    Model::UV* uvs = model.uvs()->buf();
 
-    size_t length = model.vertices()->length();
-    for(size_t i = 0; i < length; ++i)
-    {
-        buf.nextVertex();
-        buf.writePosition(*(vertices++));
-        if(normals)
-            buf.writeNormal(*(normals++));
-        if(tangents)
-        {
-            buf.writeTangent(tangents->_tangent);
-            ++tangents;
-        }
-        buf.writeModelId(modelId);
-        buf.writeTexCoordinate(uvs->_u, uvs->_v);
-        ++uvs;
-    }
+//    size_t length = model.vertices()->length();
+//    for(size_t i = 0; i < length; ++i)
+//    {
+//        buf.nextVertex();
+//        buf.writePosition(*(vertices++));
+//        if(normals)
+//            buf.writeNormal(*(normals++));
+//        if(tangents)
+//        {
+//            buf.writeTangent(tangents->_tangent);
+//            ++tangents;
+//        }
+//        buf.writeModelId(modelId);
+//        buf.writeTexCoordinate(uvs->_u, uvs->_v);
+//        ++uvs;
+//    }
 }
 
 RenderModelAssimp::BUILDER::BUILDER(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

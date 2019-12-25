@@ -19,9 +19,14 @@ public:
         return _distribution(_generator);
     }
 
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return true;
+    }
+
 private:
     T _distribution;
     std::mt19937 _generator;
+
 };
 
 template<typename T, typename U = typename T::result_type> class DynamicDistribution : public Variable<U> {
@@ -33,6 +38,10 @@ public:
     virtual U val() override {
         T dis(_a->val(), _b->val());
         return dis(_generator);
+    }
+
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return true;
     }
 
 private:

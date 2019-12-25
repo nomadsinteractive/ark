@@ -5,11 +5,13 @@
 #include <vector>
 
 #include "core/base/api.h"
+#include "core/types/safe_var.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/forwarding.h"
 
 #include "app/forwarding.h"
+#include "app/view/view.h"
 #include "app/view/layout_param.h"
 
 namespace ark {
@@ -37,6 +39,22 @@ public:
     virtual void begin(Context& ctx, LayoutParam& layoutParam) = 0;
     virtual Rect place(Context& ctx, LayoutParam& layoutParam) = 0;
     virtual Rect end(Context& ctx) = 0;
+};
+
+class ARK_API LayoutNew {
+public:
+    virtual ~LayoutNew() = default;
+
+    struct Slot {
+        SafeVar<Numeric> _margin_before;
+        SafeVar<Numeric> _margin_after;
+        sp<NumericWrapper> _size;
+        float _weight;
+        LayoutParam::Gravity _gravity;
+    };
+
+    virtual std::vector<sp<Numeric>> place(const std::vector<sp<Slot>>& children, const sp<Slot>& parent) = 0;
+
 };
 
 }

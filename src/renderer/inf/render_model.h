@@ -7,7 +7,7 @@
 #include "graphics/forwarding.h"
 #include "graphics/base/render_layer.h"
 #include "graphics/base/metrics.h"
-#include "graphics/base/render_object.h"
+#include "graphics/inf/renderable.h"
 
 #include "renderer/forwarding.h"
 
@@ -23,6 +23,9 @@ public:
         RENDER_MODE_TRIANGLE_STRIP,
         RENDER_MODE_COUNT,
     };
+    RenderModel(const sp<ModelLoader>& modelLoader = nullptr)
+        : _model_loader(modelLoader) {
+    }
 
     virtual ~RenderModel() = default;
 
@@ -30,9 +33,16 @@ public:
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) = 0;
 
     virtual void start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot) = 0;
-    virtual void load(DrawingBuffer& buf, const RenderObject::Snapshot& snapshot) = 0;
+    virtual void load(VertexStream& buf, const Renderable::Snapshot& snapshot) = 0;
 
     virtual Metrics measure(int32_t type) { return Metrics(); }
+
+    const sp<ModelLoader>& modelLoader() const {
+        return _model_loader;
+    }
+
+private:
+    sp<ModelLoader> _model_loader;
 
 };
 
