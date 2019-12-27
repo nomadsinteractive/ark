@@ -22,7 +22,7 @@ public:
 
 private:
     struct Stub {
-        Stub(const sp<RenderModel>& renderModel, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        Stub(const sp<RenderModel>& renderModel, const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         sp<RenderCommand> render(const Snapshot& snapshot, float x, float y);
 
@@ -84,7 +84,7 @@ public:
     };
 
 public:
-    RenderLayer(const sp<RenderModel>& model, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    RenderLayer(const sp<RenderModel>& model, const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -106,13 +106,14 @@ public:
     class BUILDER : public Builder<RenderLayer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<RenderModel>> renderModel, sp<Builder<Shader>> shader = nullptr);
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<RenderModel>> renderModel, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader = nullptr);
 
         virtual sp<RenderLayer> build(const Scope& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
         sp<Builder<RenderModel>> _model;
+        sp<Builder<ModelLoader>> _model_loader;
         sp<Builder<Shader>> _shader;
         SafePtr<Builder<Vec4>> _scissor;
     };

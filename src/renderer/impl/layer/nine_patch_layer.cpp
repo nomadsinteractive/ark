@@ -9,7 +9,7 @@
 namespace ark {
 
 NinePatchLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _impl(factory, manifest, resourceLoaderContext, sp<RenderModelNinePatch::BUILDER>::make(factory, manifest, resourceLoaderContext))
+    : _impl(factory, manifest, resourceLoaderContext, sp<RenderModelNinePatch::BUILDER>::make(factory, manifest, resourceLoaderContext), nullptr)
 {
 }
 

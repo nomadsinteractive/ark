@@ -33,7 +33,7 @@ private:
 }
 
 TextLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _impl(factory, manifest, resourceLoaderContext, sp<RenderModelText::BUILDER>::make(factory, manifest, resourceLoaderContext), sp<ShaderBuilder>::make(factory, manifest, resourceLoaderContext))
+    : _impl(factory, manifest, resourceLoaderContext, sp<RenderModelText::BUILDER>::make(factory, manifest, resourceLoaderContext), nullptr, sp<ShaderBuilder>::make(factory, manifest, resourceLoaderContext))
 {
 }
 

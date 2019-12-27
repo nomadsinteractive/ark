@@ -9,7 +9,7 @@
 namespace ark {
 
 PointLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _impl(factory, manifest, resourceLoaderContext, sp<RenderModelPoint::BUILDER>::make(factory, manifest, resourceLoaderContext),
+    : _impl(factory, manifest, resourceLoaderContext, sp<RenderModelPoint::BUILDER>::make(factory, manifest, resourceLoaderContext), nullptr,
             Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/point.vert", "shaders/point.frag"))
 {
 }

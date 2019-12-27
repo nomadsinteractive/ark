@@ -25,7 +25,7 @@ public:
         return _unit_model;
     }
 
-    virtual sp<Model> load(int32_t type) = 0;
+    virtual Model load(int32_t type) = 0;
 
 private:
     RenderModel::Mode _render_mode;

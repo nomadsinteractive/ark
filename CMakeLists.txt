@@ -89,6 +89,7 @@ aux_source_directory(src/graphics/util LOCAL_SRC_LIST)
 
 aux_source_directory(src/renderer/base LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/importer LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/impl/model_loader LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/renderer LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/render_model LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/layer LOCAL_SRC_LIST)

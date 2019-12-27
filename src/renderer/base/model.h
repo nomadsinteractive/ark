@@ -28,6 +28,7 @@ public:
     };
 
 public:
+    Model() = default;
     Model(const array<element_index_t>& indices, const array<V3>& vertices, const array<UV>& uvs, const array<V3>& normals, const array<Tangents>& tangents, const V3& size = V3(1.0f));
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Model);
 
@@ -39,6 +40,8 @@ public:
     const array<Tangents>& tangents() const;
 
     const V3& size() const;
+
+    V3 toScale(const V3& renderObjectSize) const;
 
 private:
     array<element_index_t> _indices;
