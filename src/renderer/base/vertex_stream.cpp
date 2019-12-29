@@ -43,11 +43,11 @@ void VertexStream::writeModelId(int32_t modelId)
 
 void VertexStream::writeModel(const Model& model, const V3& scale)
 {
-    DCHECK(model.vertices() && model.uvs() && model.vertices()->length() == model.uvs()->length(), "Invaild model: Vertex UVs mismatch");
-    size_t len = model.vertices()->length();
+    DCHECK(model.vert() && model.uvs() && model.vert()->length() == model.uvs()->length(), "Invaild model: Vertex UVs mismatch");
+    size_t len = model.vert()->length();
     DCHECK(!model.normals() || model.normals()->length() == len, "Invaild model: Vertex Normals mismatch");
     DCHECK(!model.tangents() || model.tangents()->length() == len, "Invaild model: Vertex Tangents mismatch");
-    V3* vertex = model.vertices()->buf();
+    V3* vertex = model.vert()->buf();
     Model::UV* uv = model.uvs()->buf();
     V3* normal = model.normals() ? model.normals()->buf() : nullptr;
     Model::Tangents * tangent = model.tangents() ? model.tangents()->buf() : nullptr;

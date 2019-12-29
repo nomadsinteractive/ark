@@ -2,6 +2,7 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
+#include "renderer/impl/vertices/vertices_quad.h"
 
 namespace ark {
 
@@ -18,22 +19,14 @@ Model ModelLoaderQuad::load(int32_t type)
 
     const Atlas::Item& texCoord = _atlas->at(type);
     const V2& size = texCoord.size();
-    sp<Array<Model::UV>> uvs = sp<Array<Model::UV>::Fixed<4>>::make(std::initializer_list<Model::UV>({{texCoord.ux(), texCoord.uy()}, {texCoord.ux(), texCoord.vy()},
-                                                                                                      {texCoord.vx(), texCoord.uy()}, {texCoord.vx(), texCoord.vy()}}));
-    Model model(nullptr, makeVertices(texCoord.bounds()), uvs, nullptr, nullptr, V3(size, 0));
+    Model model(nullptr, sp<VerticesQuad>::make(texCoord), V3(size, 0));
     _models.insert(std::make_pair(type, model));
     return model;
 }
 
 sp<Model> ModelLoaderQuad::makeUnitModel()
 {
-    return sp<Model>::make(nullptr, makeVertices(Rect(0, 0, 1.0f, 1.0f)), nullptr, nullptr, nullptr, V3(1.0f));
-}
-
-sp<Array<V3>> ModelLoaderQuad::makeVertices(const Rect& bounds)
-{
-    return sp<Array<V3>::Fixed<4>>::make(std::initializer_list<V3>({{bounds.left(), bounds.top(), 0}, {bounds.left(), bounds.bottom(), 0},
-                                                                    {bounds.right(), bounds.top(), 0}, {bounds.right(), bounds.bottom(), 0}}));
+    return sp<Model>::make(nullptr, sp<VerticesQuad>::make(), V3(1.0f));
 }
 
 ModelLoaderQuad::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

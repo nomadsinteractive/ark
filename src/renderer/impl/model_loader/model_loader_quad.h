@@ -27,7 +27,6 @@ public:
 
 private:
     static sp<Model> makeUnitModel();
-    static sp<Array<V3>> makeVertices(const Rect& bounds);
 
 private:
     sp<Atlas> _atlas;

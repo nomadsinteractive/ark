@@ -23,6 +23,7 @@
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/vertex_stream.h"
 #include "renderer/inf/model_loader.h"
+#include "renderer/inf/vertices.h"
 
 #include "renderer/inf/pipeline.h"
 #include "renderer/inf/pipeline_factory.h"
@@ -125,23 +126,22 @@ void RenderLayer::Snapshot::doModelLoaderSnapshot(const RenderRequest& renderReq
             {
                 const Model model = _stub->_model_loader->load(i._type);
                 writer.setRenderObject(i);
-                writer.writeModel(model, model.toScale(i._size));
+                model.writeToStream(writer, i._size);
             }
         }
         else
         {
-            size_t step = verticesLength;
             size_t offset = 0;
             for(const Renderable::Snapshot& i : _items)
             {
                 if(i._dirty)
                 {
-                    VertexStream writer = buf.makeVertexStream(renderRequest, step, offset);
+                    VertexStream writer = buf.makeVertexStream(renderRequest, verticesLength, offset);
                     const Model model = _stub->_model_loader->load(i._type);
                     writer.setRenderObject(i);
-                    writer.writeModel(model, model.toScale(i._size));
+                    model.writeToStream(writer, i._size);
                 }
-                offset += step;
+                offset += verticesLength;
             }
         }
     }

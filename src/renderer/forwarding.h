@@ -7,7 +7,6 @@ class TextLayer;
 class Atlas;
 class Attribute;
 class Buffer;
-class VertexStream;
 class Characters;
 class Emitter;
 class Framebuffer;
@@ -42,6 +41,8 @@ class Layer;
 class RenderModel;
 class RendererFactory;
 class ResourceLoaderContext;
+class VertexStream;
+class Vertices;
 class Uploader;
 
 }
