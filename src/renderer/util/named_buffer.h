@@ -29,30 +29,16 @@ public:
     Buffer::Snapshot snapshot(RenderController& renderController, size_t objectCount, size_t reservedIfInsufficient = 0);
 
 public:
-    class NinePatch : public Uploader {
+    class NinePatch {
     public:
-        NinePatch(size_t objectCount);
-
-        virtual void upload(const Uploader::UploadFunc& uploader) override;
-
-        static sp<NamedBuffer> make(RenderController& renderController);
-
-    private:
-        size_t _object_count;
-        ark::Array<element_index_t>::Fixed<28> _boiler_plate;
-    };
-
-    class Quads : public Uploader {
-    public:
-        Quads(size_t objectCount);
-
-        virtual void upload(const Uploader::UploadFunc& uploader) override;
-
         static Uploader::MakerFunc maker();
         static sp<NamedBuffer> make(RenderController& renderController);
+    };
 
-    private:
-        size_t _object_count;
+    class Quads {
+    public:
+        static Uploader::MakerFunc maker();
+        static sp<NamedBuffer> make(RenderController& renderController);
     };
 
     class Points : public Uploader {
@@ -70,6 +56,18 @@ public:
     class Concat : public Uploader {
     public:
         Concat(size_t objectCount, size_t vertexCount, const array<element_index_t>& indices);
+
+        virtual void upload(const Uploader::UploadFunc& uploader) override;
+
+    private:
+        size_t _object_count;
+        size_t _vertex_count;
+        array<element_index_t> _indices;
+    };
+
+    class Degenerate : public Uploader {
+    public:
+        Degenerate(size_t objectCount, size_t vertexCount, const array<element_index_t>& indices);
 
         virtual void upload(const Uploader::UploadFunc& uploader) override;
 

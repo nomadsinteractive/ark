@@ -37,8 +37,6 @@ public:
     void writeTexCoordinate(uint16_t u, uint16_t v);
     void writeModelId(int32_t modelId);
 
-    void writeModel(const Model& model, const V3& scale);
-
     void setRenderObject(const Renderable::Snapshot& renderObject);
 
     void next();

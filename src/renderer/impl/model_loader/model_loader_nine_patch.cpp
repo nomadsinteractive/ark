@@ -3,25 +3,9 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
 #include "renderer/base/texture.h"
+#include "renderer/impl/vertices/vertices_nine_patch.h"
 
 namespace ark {
-
-ModelLoaderNinePatch::Item::Item(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
-    : _paddings(patches)
-{
-    _x[0] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left()), textureWidth);
-    _x[1] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left() + patches.left()), textureWidth);
-    _x[2] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left() + patches.right()), textureWidth);
-    _x[3] = Atlas::unnormalize(static_cast<uint32_t>(bounds.right()), textureWidth);
-
-    _y[0] = Atlas::unnormalize(static_cast<uint32_t>(bounds.top()), textureHeight);
-    _y[1] = Atlas::unnormalize(static_cast<uint32_t>(bounds.top() + patches.top()), textureHeight);
-    _y[2] = Atlas::unnormalize(static_cast<uint32_t>(bounds.top() + patches.bottom()), textureHeight);
-    _y[3] = Atlas::unnormalize(static_cast<uint32_t>(bounds.bottom()), textureHeight);
-
-    _paddings.setRight(bounds.width() - patches.right());
-    _paddings.setBottom(bounds.height() - patches.bottom());
-}
 
 ModelLoaderNinePatch::ModelLoaderNinePatch(const document& manifest, const sp<Atlas>& atlas)
     : ModelLoader(RenderModel::RENDER_MODE_TRIANGLE_STRIP, makeUnitModel()), _atlas(atlas)
@@ -46,7 +30,7 @@ ModelLoaderNinePatch::ModelLoaderNinePatch(const document& manifest, const sp<At
             else
             {
                 const Rect bounds = Rect::parse(node);
-                _nine_patch_items.emplace(type, bounds, getPatches(paddings, bounds), textureWidth, textureHeight);
+                _vertices.insert({type, sp<VerticesNinePatch>::make(bounds, getPatches(paddings, bounds), textureWidth, textureHeight)});
             }
         }
     }
@@ -54,18 +38,14 @@ ModelLoaderNinePatch::ModelLoaderNinePatch(const document& manifest, const sp<At
 
 Model ModelLoaderNinePatch::load(int32_t type)
 {
-    return Model();
+    const auto iter = _vertices.find(type);
+    DCHECK(iter != _vertices.end(), "");
+    return Model(nullptr, _vertices.at(type));
 }
 
 sp<Model> ModelLoaderNinePatch::makeUnitModel()
 {
-    return sp<Model>::make(nullptr, makeVertices(Rect(0, 0, 1.0f, 1.0f)), nullptr, nullptr, nullptr, V3(1.0f));
-}
-
-sp<Array<V3>> ModelLoaderNinePatch::makeVertices(const Rect& bounds)
-{
-    return sp<Array<V3>::Fixed<4>>::make(std::initializer_list<V3>({{bounds.left(), bounds.top(), 0}, {bounds.left(), bounds.bottom(), 0},
-                                                                    {bounds.right(), bounds.top(), 0}, {bounds.right(), bounds.bottom(), 0}}));
+    return sp<Model>::make(nullptr, sp<VerticesNinePatch>::make());
 }
 
 void ModelLoaderNinePatch::importAtlasItem(int32_t type, const Rect& paddings, uint32_t textureWidth, uint32_t textureHeight)
@@ -73,7 +53,7 @@ void ModelLoaderNinePatch::importAtlasItem(int32_t type, const Rect& paddings, u
     const Atlas::Item& item = _atlas->at(type);
     const Rect bounds(item.ux() * textureWidth / 65536.0f, item.vy() * textureHeight / 65536.0f,
                       item.vx() * textureWidth / 65536.0f, item.uy() * textureHeight / 65536.0f);
-    _nine_patch_items.emplace(type, bounds, getPatches(paddings, bounds), textureWidth, textureHeight);
+    _vertices.insert({type, sp<VerticesNinePatch>::make(bounds, getPatches(paddings, bounds), textureWidth, textureHeight)});
 }
 
 Rect ModelLoaderNinePatch::getPatches(const Rect& paddings, const Rect& bounds) const

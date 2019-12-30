@@ -37,60 +37,16 @@ Buffer::Snapshot NamedBuffer::NamedBuffer::snapshot(RenderController& renderCont
     return _buffer.snapshot(size);
 }
 
-NamedBuffer::NinePatch::NinePatch(size_t objectCount)
-    : Uploader(((28 + 2) * objectCount - 2) * sizeof(element_index_t)), _object_count(objectCount),
-      _boiler_plate({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15}) {
-    DASSERT(_object_count);
-}
-
-void NamedBuffer::NinePatch::upload(const Uploader::UploadFunc& uploader)
+Uploader::MakerFunc NamedBuffer::NinePatch::maker()
 {
-    const size_t bolierPlateLength = _boiler_plate.length();
-    bytearray array = sp<ByteArray::Allocated>::make(size());
-    element_index_t* buf = reinterpret_cast<element_index_t*>(array->buf());
-    element_index_t* src = _boiler_plate.buf();
-    for(size_t i = 0; i < _object_count; i ++) {
-        for(size_t j = 0; j < bolierPlateLength; j ++)
-            buf[j] = static_cast<element_index_t>(src[j] + i * 16);
-        if(i + 1 != _object_count) {
-            buf[bolierPlateLength] = static_cast<element_index_t>(15 + i * 16);
-            buf[bolierPlateLength + 1] = static_cast<element_index_t>((i + 1) * 16);
-        }
-        buf += ((bolierPlateLength + 2));
-    }
-
-    uploader(array->buf(), array->length(), 0);
+    return [](size_t objectCount)->sp<Uploader> { return sp<Degenerate>::make(objectCount, 16, sp<IndexArray::Fixed<28>>::make(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15}))); };
 }
 
 sp<NamedBuffer> NamedBuffer::NinePatch::make(RenderController& renderController)
 {
     return sp<NamedBuffer>::make(renderController.makeIndexBuffer(Buffer::USAGE_STATIC),
-                                                   [](size_t objectCount)->sp<Uploader> { return sp<NinePatch>::make(objectCount); },
+                                                   maker(),
                                                    [](size_t objectCount)->size_t { return ((28 + 2) * objectCount - 2) * sizeof(element_index_t); });
-}
-
-NamedBuffer::Quads::Quads(size_t objectCount)
-    : Uploader(objectCount * 6 * sizeof(element_index_t)), _object_count(objectCount)
-{
-}
-
-void NamedBuffer::Quads::upload(const Uploader::UploadFunc& uploader)
-{
-    bytearray result = sp<ByteArray::Allocated>::make(size());
-
-    element_index_t* buf = reinterpret_cast<element_index_t*>(result->buf());
-    size_t idx = 0;
-    for(size_t i = 0; i < _object_count; i ++) {
-        element_index_t offset = static_cast<element_index_t>(i * 4);
-
-        buf[idx++] = offset;
-        buf[idx++] = offset + 2;
-        buf[idx++] = offset + 1;
-        buf[idx++] = offset + 2;
-        buf[idx++] = offset + 3;
-        buf[idx++] = offset + 1;
-    }
-    uploader(result->buf(), result->length(), 0);
 }
 
 Uploader::MakerFunc NamedBuffer::Quads::maker()
@@ -142,12 +98,41 @@ void NamedBuffer::Concat::upload(const Uploader::UploadFunc& uploader)
     size_t offset = 0;
     std::vector<element_index_t> indices(length);
     element_index_t* buf = &indices.front();
-    memcpy(buf, _indices->buf(), _indices->size());
+    memcpy(buf, _indices->buf(), size);
     for(size_t i = 0; i < _object_count; ++i, offset += size)
     {
+        if(i != 0)
+            for(size_t j = 0; j < length; ++j)
+                buf[j] += static_cast<element_index_t>(_vertex_count);
         uploader(buf, size, offset);
-        for(size_t j = 0; j < length; ++j)
-            buf[j] = static_cast<element_index_t>(buf[j] + _vertex_count);
+    }
+}
+
+NamedBuffer::Degenerate::Degenerate(size_t objectCount, size_t vertexCount, const array<element_index_t>& indices)
+    : Uploader(objectCount * indices->size() + 2 *  sizeof(element_index_t) * (objectCount - 1)), _object_count(objectCount), _vertex_count(vertexCount), _indices(indices)
+{
+}
+
+void NamedBuffer::Degenerate::upload(const Uploader::UploadFunc& uploader)
+{
+    size_t length = _indices->length();
+    size_t size = _indices->size();
+    size_t offset = 0;
+    std::vector<element_index_t> indices(length + 2);
+    element_index_t* buf = &indices.front();
+    memcpy(buf, _indices->buf(), size);
+    for(size_t i = 0; i < _object_count; ++i, offset += (size + 2 * sizeof(element_index_t)))
+    {
+        if(i == _object_count - 1)
+            uploader(buf, size, offset);
+        else
+        {
+            buf[length] = buf[length - 1];
+            buf[length + 1] = static_cast<element_index_t>(buf[0] + _vertex_count);
+            uploader(buf, size + 2 * sizeof(element_index_t), offset);
+            for(size_t j = 0; j < length; ++j)
+                buf[j] += static_cast<element_index_t>(_vertex_count);
+        }
     }
 }
 

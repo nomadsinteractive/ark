@@ -17,7 +17,7 @@ private:
 
 public:
     VariableOP1(OPFunc func, const sp<Variable<U>>& arg)
-        : _func(std::move(func)), _arg(arg), _val(0) {
+        : _func(std::move(func)), _arg(arg), _val(_func(_arg->val())) {
     }
 
     virtual T val() override {

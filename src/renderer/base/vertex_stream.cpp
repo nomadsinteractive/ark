@@ -41,31 +41,6 @@ void VertexStream::writeModelId(int32_t modelId)
     write(modelId, _attributes._offsets, Buffer::ATTRIBUTE_NAME_MODEL_ID);
 }
 
-void VertexStream::writeModel(const Model& model, const V3& scale)
-{
-    DCHECK(model.vert() && model.uvs() && model.vert()->length() == model.uvs()->length(), "Invaild model: Vertex UVs mismatch");
-    size_t len = model.vert()->length();
-    DCHECK(!model.normals() || model.normals()->length() == len, "Invaild model: Vertex Normals mismatch");
-    DCHECK(!model.tangents() || model.tangents()->length() == len, "Invaild model: Vertex Tangents mismatch");
-    V3* vertex = model.vert()->buf();
-    Model::UV* uv = model.uvs()->buf();
-    V3* normal = model.normals() ? model.normals()->buf() : nullptr;
-    Model::Tangents * tangent = model.tangents() ? model.tangents()->buf() : nullptr;
-    for(size_t i = 0; i < len; ++i)
-    {
-        next();
-        writePosition(vertex[i] * scale);
-        writeTexCoordinate(uv[i]._u, uv[i]._v);
-        if(normal)
-            writeNormal(normal[i]);
-        if(tangent)
-        {
-            writeTangent(tangent[i]._tangent);
-            writeBitangent(tangent[i]._bitangent);
-        }
-    }
-}
-
 void VertexStream::setRenderObject(const Renderable::Snapshot& renderObject)
 {
     _transform = &renderObject._transform;

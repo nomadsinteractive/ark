@@ -9,26 +9,17 @@
 namespace ark {
 
 class VerticesNinePatch : public Vertices {
-private:
-    struct Item {
-        Item(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight);
-        Item(const Item& other) = default;
-        Item() = default;
-
-        uint16_t _x[4];
-        uint16_t _y[4];
-
-        Rect _paddings;
-    };
-
 public:
+    VerticesNinePatch();
     VerticesNinePatch(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight);
 
     virtual void write(VertexStream& buf, const V3& size) override;
 
 private:
-    Item _item;
+    uint16_t _x[4];
+    uint16_t _y[4];
 
+    Rect _paddings;
 };
 
 }

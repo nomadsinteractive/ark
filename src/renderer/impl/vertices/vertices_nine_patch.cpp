@@ -4,8 +4,13 @@
 
 namespace ark {
 
-VerticesNinePatch::Item::Item(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
-    : _paddings(patches)
+VerticesNinePatch::VerticesNinePatch()
+    : Vertices(16)
+{
+}
+
+VerticesNinePatch::VerticesNinePatch(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
+    : Vertices(16)
 {
     _x[0] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left()), textureWidth);
     _x[1] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left() + patches.left()), textureWidth);
@@ -21,22 +26,16 @@ VerticesNinePatch::Item::Item(const Rect& bounds, const Rect& patches, uint32_t 
     _paddings.setBottom(bounds.height() - patches.bottom());
 }
 
-VerticesNinePatch::VerticesNinePatch(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
-    : Vertices(16), _item(bounds, patches, textureWidth, textureHeight)
-{
-}
-
 void VerticesNinePatch::write(VertexStream& buf, const V3& size)
 {
-    const Rect& paddings = _item._paddings;
-    const Rect paintRect(0, 0, std::max(paddings.left() + paddings.right(), size.x()), std::max(paddings.top() + paddings.bottom(), size.y()));
-    float xData[4] = {paintRect.left(), paintRect.left() + paddings.left(), paintRect.right() - paddings.right(), paintRect.right()};
-    float yData[4] = {paintRect.bottom(), paintRect.bottom() - paddings.top(), paintRect.top() + paddings.bottom(), paintRect.top()};
+    const Rect paintRect(0, 0, std::max(_paddings.left() + _paddings.right(), size.x()), std::max(_paddings.top() + _paddings.bottom(), size.y()));
+    float xData[4] = {paintRect.left(), paintRect.left() + _paddings.left(), paintRect.right() - _paddings.right(), paintRect.right()};
+    float yData[4] = {paintRect.bottom(), paintRect.bottom() - _paddings.top(), paintRect.top() + _paddings.bottom(), paintRect.top()};
     for(uint32_t i = 0; i < 4; i++) {
         for(uint32_t j = 0; j < 4; j++) {
             buf.next();
             buf.writePosition(xData[j], yData[i], 0);
-            buf.writeTexCoordinate(_item._x[j], _item._y[i]);
+            buf.writeTexCoordinate(_x[j], _y[i]);
         }
     }
 }
