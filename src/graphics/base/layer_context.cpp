@@ -11,8 +11,8 @@
 
 namespace ark {
 
-LayerContext::Item::Item(const V3& position, const sp<RenderObject>& renderObject)
-    : _position(position), _render_object(renderObject)
+LayerContext::Item::Item(const sp<Renderable>& renderable, const sp<Boolean>& disposed)
+    : _renderable(renderable), _disposed(disposed)
 {
 }
 
@@ -24,8 +24,8 @@ LayerContext::LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier
 void LayerContext::traverse(const Holder::Visitor& visitor)
 {
     if(_layer_type != Layer::TYPE_TRANSIENT)
-        for(const sp<Renderable>& i : _renderables)
-            HolderUtil::visit(i, visitor);
+        for(const Item& i : _renderables)
+            HolderUtil::visit(i._renderable, visitor);
 }
 
 const sp<RenderModel>& LayerContext::renderModel() const
@@ -38,16 +38,15 @@ Layer::Type LayerContext::layerType() const
     return _layer_type;
 }
 
-void LayerContext::renderRequest(const V3& position)
+void LayerContext::renderRequest(const V3& /*position*/)
 {
     _render_requested = true;
-    _position = position;
 }
 
 void LayerContext::add(const sp<Renderable>& renderable, const sp<Boolean>& disposed)
 {
     DASSERT(renderable);
-    _renderables.push_back(renderable, disposed);
+    _renderables.emplace_back(renderable, disposed);
     _notifier->notify();
 }
 
@@ -69,16 +68,19 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
         const sp<PipelineInput> pipelineInput = output._stub->_shader->input();
         bool notify = false;
 
-        for(const sp<Renderable>& i : _renderables)
+        for(auto iter = _renderables.begin(); iter != _renderables.end(); ++iter)
         {
-            Renderable::Snapshot snapshot = i->snapshot(pipelineInput, renderRequest);
-            if(snapshot._disposed)
-                notify = true;
-            else
+            const Item& i = *iter;
+            Renderable::Snapshot snapshot = i._disposed->val() ? Renderable::Snapshot() : i._renderable->snapshot(pipelineInput, renderRequest);
+            if(snapshot._disposed || snapshot._type == -1)
             {
-                snapshot._position = snapshot._position + _position;
-                output._items.emplace_back(std::move(snapshot));
+                notify = true;
+                iter = _renderables.erase(iter);
+                if(iter == _renderables.end())
+                    break;
             }
+            else
+                output._items.emplace_back(std::move(snapshot));
         }
 
         if(notify || _layer_type == Layer::TYPE_TRANSIENT)

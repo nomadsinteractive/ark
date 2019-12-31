@@ -27,7 +27,7 @@ int32_t IntegerByInterval::val()
 
 bool IntegerByInterval::update(uint64_t timestamp)
 {
-    return VariableUtil::update(timestamp, _duration, _interval);
+    return VariableUtil::update(timestamp, _delegate, _duration, _interval);
 }
 
 IntegerByInterval::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

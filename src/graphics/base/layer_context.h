@@ -2,7 +2,6 @@
 #define ARK_GRAPHICS_BASE_LAYER_CONTEXT_H_
 
 #include "core/base/api.h"
-#include "core/collection/list.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
 
@@ -17,11 +16,11 @@ namespace ark {
 class ARK_API LayerContext : public Holder{
 private:
     struct Item {
-        Item(const V3& position, const sp<RenderObject>& renderObject);
+        Item(const sp<Renderable>& renderable, const sp<Boolean>& disposed);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
 
-        V3 _position;
-        sp<RenderObject> _render_object;
+        sp<RenderObject> _renderable;
+        sp<Boolean> _disposed;
     };
 
 public:
@@ -72,8 +71,7 @@ private:
     Layer::Type _layer_type;
 
     bool _render_requested;
-    V3 _position;
-    List<Renderable, RenderableFilter> _renderables;
+    std::vector<Item> _renderables;
 
 };
 
