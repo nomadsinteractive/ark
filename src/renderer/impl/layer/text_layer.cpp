@@ -20,7 +20,7 @@ public:
         if(_shader)
             return _shader->build(args);
 
-        const sp<Vec4> color = _color ? _color->build(args) : sp<Color>::make(Color::WHITE).cast<Vec4>();
+        const sp<Vec4> color = _color ? _color->build(args) : sp<Vec4>::make<Color>(Color::WHITE);
         return Shader::fromStringTable("shaders/default.vert", "shaders/alpha.frag", sp<SnippetUColor>::make(color), _resource_loader_context);
     }
 

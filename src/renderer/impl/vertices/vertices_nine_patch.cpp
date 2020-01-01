@@ -10,7 +10,7 @@ VerticesNinePatch::VerticesNinePatch()
 }
 
 VerticesNinePatch::VerticesNinePatch(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
-    : Vertices(16)
+    : Vertices(16), _paddings(patches)
 {
     _x[0] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left()), textureWidth);
     _x[1] = Atlas::unnormalize(static_cast<uint32_t>(bounds.left() + patches.left()), textureWidth);
