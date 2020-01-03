@@ -19,7 +19,7 @@ private:
         Item(const sp<Renderable>& renderable, const sp<Boolean>& disposed);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
 
-        sp<RenderObject> _renderable;
+        sp<Renderable> _renderable;
         sp<Boolean> _disposed;
     };
 
@@ -55,22 +55,13 @@ public:
     };
 
 private:
-    class RenderableFilter {
-    public:
-        RenderableFilter(const sp<Renderable>& renderObject, const sp<Boolean>& disposed);
-
-        FilterAction operator()(const sp<Renderable>& renderObject) const;
-
-    private:
-        sp<Boolean> _disposed;
-    };
-
-private:
     sp<RenderModel> _render_model;
     sp<Notifier> _notifier;
     Layer::Type _layer_type;
 
     bool _render_requested;
+    bool _render_done;
+
     std::vector<Item> _renderables;
 
 };

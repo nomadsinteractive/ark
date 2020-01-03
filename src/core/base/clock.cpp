@@ -30,13 +30,12 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return _timestamp.update(timestamp);
+        return _ticker->update(timestamp);
     }
 
 private:
     sp<Variable<uint64_t>> _ticker;
     uint64_t _initial_ticket;
-    Timestamp _timestamp;
 };
 
 }
@@ -51,8 +50,8 @@ public:
         return _paused ? _paused : _delegate->val() - _bypass;
     }
 
-    virtual bool update(uint64_t timestamp) override {
-        return !_paused && _timestamp.update(timestamp);
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return !_paused;
     }
 
     void setDelegate(const sp<Variable<uint64_t>>& delegate) {
@@ -73,7 +72,6 @@ private:
     sp<Variable<uint64_t>> _delegate;
     uint64_t _bypass;
     uint64_t _paused;
-    Timestamp _timestamp;
 };
 
 Clock::Interval::Interval(uint64_t usec)

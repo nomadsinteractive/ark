@@ -120,7 +120,6 @@ public:
 
         sp<Uploader> makeUploader() const;
 
-//    private:
         RenderRequest _render_request;
         Attributes _attributes;
 

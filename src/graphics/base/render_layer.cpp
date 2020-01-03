@@ -42,10 +42,9 @@ RenderLayer::Stub::Stub(const sp<RenderModel>& renderModel, const sp<ModelLoader
 RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& stub)
     : _stub(stub)
 {
-    _stub->_layer->context()->takeSnapshot(*this, renderRequest);
-
     Layer::Type combined = Layer::TYPE_UNSPECIFIED;
 
+    _stub->_layer->context()->takeSnapshot(*this, renderRequest);
     for(const sp<LayerContext>& i : stub->_layer_contexts)
     {
         i->takeSnapshot(*this, renderRequest);

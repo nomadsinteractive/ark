@@ -21,7 +21,6 @@
 #include "renderer/base/render_engine.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/render_model.h"
-#include "renderer/impl/layer/text_layer.h"
 
 #include "app/base/application_context.h"
 #include "app/view/layout_param.h"

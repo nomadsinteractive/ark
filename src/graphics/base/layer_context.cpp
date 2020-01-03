@@ -9,15 +9,20 @@
 
 #include "renderer/base/shader.h"
 
+#include "core/util/log.h"
+#include "renderer/base/pipeline_input.h"
+
 namespace ark {
 
 LayerContext::Item::Item(const sp<Renderable>& renderable, const sp<Boolean>& disposed)
     : _renderable(renderable), _disposed(disposed)
 {
+    DASSERT(_renderable);
+    DASSERT(_disposed);
 }
 
 LayerContext::LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier>& notifier, Layer::Type type)
-    : _render_model(renderModel), _notifier(notifier), _layer_type(type), _render_requested(false)
+    : _render_model(renderModel), _notifier(notifier), _layer_type(type), _render_requested(false), _render_done(false)
 {
 }
 
@@ -63,40 +68,33 @@ void LayerContext::clear()
 
 void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderRequest& renderRequest)
 {
-    if(_render_requested)
+    bool notify = false;
+    const sp<PipelineInput>& pipelineInput = output._stub->_shader->input();
+
+    for(auto iter = _renderables.begin(); iter != _renderables.end(); ++iter)
     {
-        const sp<PipelineInput> pipelineInput = output._stub->_shader->input();
-        bool notify = false;
-
-        for(auto iter = _renderables.begin(); iter != _renderables.end(); ++iter)
+        const Item& i = *iter;
+        Renderable::Snapshot snapshot = i._disposed->val() ? Renderable::Snapshot() : i._renderable->snapshot(pipelineInput, renderRequest);
+        if(snapshot._disposed || snapshot._type == -1)
         {
-            const Item& i = *iter;
-            Renderable::Snapshot snapshot = i._disposed->val() ? Renderable::Snapshot() : i._renderable->snapshot(pipelineInput, renderRequest);
-            if(snapshot._disposed || snapshot._type == -1)
-            {
-                notify = true;
-                iter = _renderables.erase(iter);
-                if(iter == _renderables.end())
-                    break;
-            }
-            else
-                output._items.emplace_back(std::move(snapshot));
+            notify = true;
+            iter = _renderables.erase(iter);
+            if(iter == _renderables.end())
+                break;
         }
-
-        if(notify || _layer_type == Layer::TYPE_TRANSIENT)
-            _notifier->notify();
+        else
+        {
+            snapshot._dirty = snapshot._dirty || _render_done != _render_requested;
+            snapshot._visible = _render_requested && snapshot._visible;
+            output._items.emplace_back(std::move(snapshot));
+        }
     }
+
+    if(notify || _layer_type == Layer::TYPE_TRANSIENT)
+        _notifier->notify();
+
+    _render_done = _render_requested;
     _render_requested = false;
-}
-
-LayerContext::RenderableFilter::RenderableFilter(const sp<Renderable>& /*renderable*/, const sp<Boolean>& disposed)
-    : _disposed(disposed)
-{
-}
-
-FilterAction LayerContext::RenderableFilter::operator()(const sp<Renderable>& /*renderable*/) const
-{
-    return (_disposed && _disposed->val()) ? FILTER_ACTION_REMOVE_AFTER : FILTER_ACTION_NONE;
 }
 
 LayerContext::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, Layer::Type layerType)

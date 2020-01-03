@@ -4,13 +4,14 @@
 #include "core/base/bean_factory.h"
 
 #include "graphics/base/v3.h"
+#include "graphics/base/render_request.h"
 
 namespace ark {
 
 RendererWithPosition::RendererWithPosition(const sp<Renderer>& renderer, const sp<Vec3>& position)
     : _renderer(renderer), _position(position)
 {
-    DCHECK(renderer && position, "Arguments must not be null");
+    DCHECK(_renderer && _position, "Arguments must not be null");
 }
 
 void RendererWithPosition::render(RenderRequest& renderRequest, const V3& position)
