@@ -95,28 +95,13 @@ public:
         Builder(const RenderRequest& renderRequest, const Attributes& attributes, size_t stride);
         DEFAULT_COPY_AND_ASSIGN(Builder);
 
-        template<typename T> void write(const T& value, size_t offset = 0) {
-            DCHECK(sizeof(T) + offset <= _stride, "Stride overflow: sizeof(value) = %d, offset = %d", sizeof(value), offset);
-            memcpy(_ptr + offset, &value, sizeof(T));
-        }
-
-        template<typename T> void write(const T& value, const int32_t* offsets, int32_t name) {
-            if(offsets[name] >= 0)
-                write<T>(value, offsets[name]);
-        }
-
-        void writeArray(ByteArray& array);
-
         void setGrowCapacity(size_t growCapacity);
-        void next();
 
         Snapshot toSnapshot(const Buffer& buffer) const;
 
         void addBlock(size_t offset, ByteArray::Borrowed& content);
 
         size_t length() const;
-
-        void grow();
 
         sp<Uploader> makeUploader() const;
 
@@ -125,10 +110,6 @@ public:
 
         size_t _stride;
         size_t _grow_capacity;
-
-        uint8_t* _ptr;
-        uint8_t* _boundary;
-        std::vector<bytearray> _buffers;
 
         std::vector<Block> _blocks;
 

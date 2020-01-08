@@ -133,31 +133,13 @@ const sp<Buffer::Delegate>& Buffer::delegate() const
 }
 
 Buffer::Builder::Builder(const RenderRequest& renderRequest, const Attributes& attributes, size_t stride)
-    : _render_request(renderRequest), _attributes(attributes), _stride(stride), _grow_capacity(0), _ptr(nullptr), _boundary(nullptr), _size(0)
+    : _render_request(renderRequest), _attributes(attributes), _stride(stride), _grow_capacity(0), _size(0)
 {
-}
-
-void Buffer::Builder::writeArray(ByteArray& array)
-{
-    DCHECK(array.length() <= _stride, "Varyings buffer overflow: stride: %d, varyings size: %d", _stride, array.length());
-    DCHECK(_ptr + _stride <= _boundary, "Varyings buffer out of bounds");
-    memcpy(_ptr, array.buf(), array.length());
 }
 
 void Buffer::Builder::setGrowCapacity(size_t growCapacity)
 {
     _grow_capacity = growCapacity;
-}
-
-void Buffer::Builder::next()
-{
-    if(_ptr == _boundary)
-        grow();
-    else
-        _ptr += _stride;
-
-    _size += _stride;
-    DCHECK(_ptr <= _boundary, "Array buffer out of bounds");
 }
 
 Buffer::Snapshot Buffer::Builder::toSnapshot(const Buffer& buffer) const
@@ -173,41 +155,15 @@ void Buffer::Builder::addBlock(size_t offset, ByteArray::Borrowed& content)
 
 sp<Uploader> Buffer::Builder::makeUploader() const
 {
-    if(_blocks.size() > 0)
-        return sp<UploaderImpl>::make(_blocks);
-
-    if(_buffers.size() == 0)
+    if(_blocks.size() == 0)
         return nullptr;
 
-    if(_buffers.size() == 1)
-        return sp<Uploader>::make<ByteArrayUploader>(_buffers.at(0));
-
-    return sp<Uploader>::make<ByteArrayListUploader>(_buffers);
+    return sp<UploaderImpl>::make(_blocks);
 }
 
 size_t Buffer::Builder::length() const
 {
     return _size / _stride;
-}
-
-//BufferWriter Buffer::Builder::makeWriter(size_t size, size_t offset)
-//{
-//    Block block(offset, _render_request.allocator().sbrk(size));
-//    BufferWriter writer(_attributes, block.content.buf(), block.content.length(), _stride);
-//    _blocks.push_back(block);
-//    _size = std::max(_size, size + offset);
-//    return writer;
-//}
-
-void Buffer::Builder::grow()
-{
-    if(_buffers.size() % 4 == 3)
-        _grow_capacity *= 2;
-
-    const bytearray bytes = sp<ByteArray::Borrowed>::make(_render_request.allocator().sbrk(_grow_capacity * _stride));
-    _buffers.push_back(bytes);
-    _ptr = bytes->buf();
-    _boundary = _ptr + bytes->length();
 }
 
 Uploader::Uploader(size_t size)

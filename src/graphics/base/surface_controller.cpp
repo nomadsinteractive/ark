@@ -52,10 +52,9 @@ void SurfaceController::requestUpdate()
 
 void SurfaceController::onRenderFrame(const Color& backgroundColor, RenderView& renderView)
 {
-    const static auto duration = std::chrono::milliseconds(1);
     RenderRequest renderRequest;
     while(!_render_requests->pop(renderRequest))
-        std::this_thread::sleep_for(duration);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     renderRequest.onRenderFrame(backgroundColor, renderView);
 }
 

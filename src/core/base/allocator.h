@@ -1,6 +1,7 @@
 #ifndef ARK_CORE_BASE_ALLOCATOR_H_
 #define ARK_CORE_BASE_ALLOCATOR_H_
 
+#include <mutex>
 #include <vector>
 
 #include "core/base/api.h"
@@ -26,6 +27,8 @@ private:
     std::vector<bytearray> _blocks;
     uint8_t* _ptr;
     size_t _available;
+
+    std::mutex _mutex;
 };
 
 }
