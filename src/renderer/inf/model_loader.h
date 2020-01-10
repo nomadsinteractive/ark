@@ -25,6 +25,9 @@ public:
         return _unit_model;
     }
 
+    virtual void initialize(ShaderBindings& shaderBindings) = 0;
+    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) = 0;
+
     virtual Model load(int32_t type) = 0;
 
 private:

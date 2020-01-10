@@ -37,6 +37,15 @@ RenderLayer::Stub::Stub(const sp<RenderModel>& renderModel, const sp<ModelLoader
       _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(renderModel, _notifier, Layer::TYPE_DYNAMIC))), _stride(shader->input()->getStream(0).stride())
 {
     DCHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
+    if(_model_loader)
+        _model_loader->initialize(_shader_bindings);
+}
+
+sp<LayerContext> RenderLayer::Stub::makeLayerContext(Layer::Type layerType)
+{
+    const sp<LayerContext> layerContext = sp<LayerContext>::make(_render_model, _notifier, layerType);
+    _layer_contexts.push_back(layerContext, _notifier);
+    return layerContext;
 }
 
 RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& stub)
@@ -54,6 +63,8 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
     }
 
     _stub->_render_model->postSnapshot(_stub->_render_controller, *this);
+    if(_stub->_model_loader)
+        _stub->_model_loader->postSnapshot(_stub->_render_controller, *this);
 
     _ubos = _stub->_shader->snapshot(renderRequest.allocator());
 
@@ -87,9 +98,7 @@ void RenderLayer::Snapshot::doRenderModelSnapshot(const RenderRequest& renderReq
             if(buf.isInstanced())
             {
                 Buffer::Builder& sBuilder = buf.getInstancedArrayBuilder(1);
-                sBuilder.next();
                 M4 matrix = MatrixUtil::scale(MatrixUtil::translate(i._transform.toMatrix(), i._position), i._size);
-                sBuilder.write(matrix);
             }
         }
     }
@@ -206,9 +215,7 @@ const sp<Layer>& RenderLayer::layer() const
 
 sp<LayerContext> RenderLayer::makeContext(Layer::Type layerType) const
 {
-    const sp<LayerContext> layerContext = sp<LayerContext>::make(_stub->_render_model, _stub->_notifier, layerType);
-    _stub->_layer_contexts.push_back(layerContext);
-    return layerContext;
+    return _stub->makeLayerContext(layerType);
 }
 
 sp<Layer> RenderLayer::makeLayer(Layer::Type layerType) const
@@ -246,6 +253,21 @@ RenderLayer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const docu
 sp<Renderer> RenderLayer::RENDERER_BUILDER::build(const Scope& args)
 {
     return _impl.build(args);
+}
+
+RenderLayer::LayerContextFilter::LayerContextFilter(const sp<LayerContext>& /*item*/, const sp<Notifier>& notifier)
+    : _notifier(notifier)
+{
+}
+
+FilterAction RenderLayer::LayerContextFilter::operator()(const sp<LayerContext>& item) const
+{
+    if(item.unique())
+    {
+        _notifier->notify();
+        return FILTER_ACTION_REMOVE;
+    }
+    return FILTER_ACTION_NONE;
 }
 
 }

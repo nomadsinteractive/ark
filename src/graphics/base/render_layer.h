@@ -21,10 +21,22 @@ public:
     struct Snapshot;
 
 private:
+    class LayerContextFilter {
+    public:
+        LayerContextFilter(const sp<LayerContext>& item, const sp<Notifier>& notifier);
+
+        FilterAction operator()(const sp<LayerContext>& item) const;
+
+    private:
+        sp<Notifier> _notifier;
+
+    };
+
     struct Stub {
         Stub(const sp<RenderModel>& renderModel, const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         sp<RenderCommand> render(const Snapshot& snapshot, float x, float y);
+        sp<LayerContext> makeLayerContext(Layer::Type layerType);
 
         sp<RenderModel> _render_model;
         sp<ModelLoader> _model_loader;
@@ -37,7 +49,7 @@ private:
 
         sp<Notifier> _notifier;
         sp<Boolean> _dirty;
-        WeakRefList<LayerContext> _layer_contexts;
+        List<LayerContext, LayerContextFilter> _layer_contexts;
         sp<Layer> _layer;
 
         uint32_t _stride;

@@ -1,0 +1,24 @@
+#include "renderer/impl/vertices/vertices_point.h"
+
+#include "renderer/base/vertex_stream.h"
+
+namespace ark {
+
+VerticesPoint::VerticesPoint()
+    : Vertices(1)
+{
+}
+
+VerticesPoint::VerticesPoint(const Atlas::Item& atlasItem)
+    : Vertices(1), _atlas_item(atlasItem)
+{
+}
+
+void VerticesPoint::write(VertexStream& buf, const V3& /*size*/)
+{
+    buf.next();
+    buf.writePosition(0, 0, 0);
+    buf.writeTexCoordinate(static_cast<uint16_t>((_atlas_item.ux() + _atlas_item.vx()) / 2), static_cast<uint16_t>((_atlas_item.uy() + _atlas_item.vy()) / 2));
+}
+
+}

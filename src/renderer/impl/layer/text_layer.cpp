@@ -2,6 +2,7 @@
 
 #include "renderer/base/shader.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/impl/model_loader/model_loader_text.h"
 #include "renderer/impl/render_model/render_model_text.h"
 #include "renderer/impl/snippet/snippet_ucolor.h"
 
@@ -33,7 +34,8 @@ private:
 }
 
 TextLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _impl(factory, manifest, resourceLoaderContext, sp<RenderModelText::BUILDER>::make(factory, manifest, resourceLoaderContext), nullptr, sp<ShaderBuilder>::make(factory, manifest, resourceLoaderContext))
+    : _impl(factory, manifest, resourceLoaderContext, sp<RenderModelText::BUILDER>::make(factory, manifest, resourceLoaderContext),
+            sp<ModelLoaderText::BUILDER>::make(factory, manifest, resourceLoaderContext), sp<ShaderBuilder>::make(factory, manifest, resourceLoaderContext))
 {
 }
 

@@ -12,6 +12,9 @@ class ModelLoaderQuad : public ModelLoader {
 public:
     ModelLoaderQuad(const sp<Atlas>& atlas);
 
+    virtual void initialize(ShaderBindings& shaderBindings) override;
+    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
+
     virtual Model load(int32_t type) override;
 
     class BUILDER : public Builder<ModelLoader> {

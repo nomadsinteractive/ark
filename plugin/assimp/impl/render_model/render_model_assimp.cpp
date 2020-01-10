@@ -147,8 +147,8 @@ sp<Model> RenderModelAssimp::loadModel(const aiMesh* mesh)
             *(++t) = Model::Tangents(V3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z), V3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z));
         *(++u) = Model::UV(static_cast<uint16_t>(mesh->mTextureCoords[0][i].x * 0xffff), static_cast<uint16_t>(mesh->mTextureCoords[0][i].y * 0xffff));
     }
-
-    return sp<Model>::make(indices, vertices, uvs, normals, tangents);
+    DFATAL("Unimplemented");
+//    return sp<Model>::make(indices, vertices, uvs, normals, tangents);
 }
 
 array<element_index_t> RenderModelAssimp::loadIndices(const aiMesh* mesh) const

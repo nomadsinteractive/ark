@@ -11,6 +11,14 @@ ModelLoaderQuad::ModelLoaderQuad(const sp<Atlas>& atlas)
 {
 }
 
+void ModelLoaderQuad::initialize(ShaderBindings& shaderBindings)
+{
+}
+
+void ModelLoaderQuad::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& /*snapshot*/)
+{
+}
+
 Model ModelLoaderQuad::load(int32_t type)
 {
     const auto iter = _models.find(type);

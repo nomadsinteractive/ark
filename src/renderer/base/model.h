@@ -31,17 +31,11 @@ public:
 
 public:
     Model() = default;
-    Model(const array<element_index_t>& indices, const array<V3>& vert, const array<UV>& uvs, const array<V3>& normals, const array<Tangents>& tangents, const V3& size = V3(1.0f));
     Model(const array<element_index_t>& indices, const sp<Vertices>& vertices, const V3& size = V3(1.0f));
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Model);
 
     const array<element_index_t>& indices() const;
     const sp<Vertices>& vertices() const;
-
-    const array<V3>& vert() const;
-    const array<UV>& uvs() const;
-    const array<V3>& normals() const;
-    const array<Tangents>& tangents() const;
 
     const V3& size() const;
 

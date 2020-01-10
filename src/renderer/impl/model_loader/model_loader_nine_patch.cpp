@@ -36,6 +36,14 @@ ModelLoaderNinePatch::ModelLoaderNinePatch(const document& manifest, const sp<At
     }
 }
 
+void ModelLoaderNinePatch::initialize(ShaderBindings& shaderBindings)
+{
+}
+
+void ModelLoaderNinePatch::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& /*snapshot*/)
+{
+}
+
 Model ModelLoaderNinePatch::load(int32_t type)
 {
     const auto iter = _vertices.find(type);

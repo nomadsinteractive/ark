@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_UTIL_VERTEX_UTIL_H_
-#define ARK_RENDERER_UTIL_VERTEX_UTIL_H_
+#ifndef ARK_RENDERER_UTIL_ELEMENT_UTIL_H_
+#define ARK_RENDERER_UTIL_ELEMENT_UTIL_H_
 
 #include "core/forwarding.h"
 #include "core/inf/array.h"
@@ -8,7 +8,7 @@
 
 namespace ark {
 
-class VertexUtil {
+class ElementUtil {
 public:
     static bytearray makeUnitCubeVertices();
 
