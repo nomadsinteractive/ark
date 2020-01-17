@@ -23,13 +23,13 @@ public:
     V3& operator *=(const V3& other);
     V3& operator /=(const V3& other);
 
-    friend V3 operator +(const V3& lvalue, const V3& rvalue);
-    friend V3 operator -(const V3& lvalue, const V3& rvalue);
-    friend V3 operator *(const V3& lvalue, const V3& rvalue);
-    friend V3 operator *(const V3& lvalue, float rvalue);
-    friend V3 operator *(float lvalue, const V3& rvalue);
-    friend V3 operator /(const V3& lvalue, const V3& rvalue);
-    friend V3 operator /(const V3& lvalue, float rvalue);
+    friend ARK_API V3 operator +(const V3& lvalue, const V3& rvalue);
+    friend ARK_API V3 operator -(const V3& lvalue, const V3& rvalue);
+    friend ARK_API V3 operator *(const V3& lvalue, const V3& rvalue);
+    friend ARK_API V3 operator *(const V3& lvalue, float rvalue);
+    friend ARK_API V3 operator *(float lvalue, const V3& rvalue);
+    friend ARK_API V3 operator /(const V3& lvalue, const V3& rvalue);
+    friend ARK_API V3 operator /(const V3& lvalue, float rvalue);
 
     float z() const;
 

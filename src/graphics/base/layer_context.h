@@ -24,11 +24,12 @@ private:
     };
 
 public:
-    LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier>& notifier, Layer::Type type);
+    LayerContext(const sp<ModelLoader>& modelLoader, const sp<Notifier>& notifier, Layer::Type type);
 
     virtual void traverse(const Visitor& visitor) override;
 
     const sp<RenderModel>& renderModel() const;
+    const sp<ModelLoader>& modelLoader() const;
 
     Layer::Type layerType() const;
 
@@ -55,7 +56,7 @@ public:
     };
 
 private:
-    sp<RenderModel> _render_model;
+    sp<ModelLoader> _model_loader;
     sp<Notifier> _notifier;
     Layer::Type _layer_type;
 

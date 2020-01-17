@@ -1,6 +1,7 @@
 #include "renderer/impl/model_loader/model_loader_text.h"
 
 #include "core/util/log.h"
+#include "core/impl/boolean/boolean_by_weak_ref.h"
 
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
@@ -19,6 +20,7 @@
 #include "renderer/base/texture.h"
 #include "renderer/impl/model_loader/model_loader_quad.h"
 #include "renderer/impl/vertices/vertices_quad.h"
+#include "renderer/util/element_util.h"
 
 
 namespace ark {
@@ -113,7 +115,7 @@ bool ModelLoaderText::Stub::update(uint64_t /*timestamp*/)
 }
 
 ModelLoaderText::ModelLoaderText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
-    : ModelLoader(RenderModel::RENDER_MODE_TRIANGLES, sp<Model>::make(nullptr, sp<VerticesQuad>::make(), V3(1.0f))), _stub(sp<Stub>::make(renderController, alphabet, textureWidth, textureHeight))
+    : ModelLoader(RenderModel::RENDER_MODE_TRIANGLES, ElementUtil::makeUnitQuadModel()), _stub(sp<Stub>::make(renderController, alphabet, textureWidth, textureHeight))
 {
 }
 
@@ -141,20 +143,15 @@ void ModelLoaderText::postSnapshot(RenderController& renderController, RenderLay
 
 Model ModelLoaderText::load(int32_t type)
 {
-    return _stub->_delegate->load(type);
+    Alphabet::Metrics metrics;
+    bool r = _stub->_alphabet->measure(type, metrics, false);
+    DCHECK(r, "Measuring failed, type: %d", type);
+    V3 bounds(static_cast<float>(metrics.width), static_cast<float>(metrics.height), 0);
+    V3 size(static_cast<float>(metrics.bitmap_width), static_cast<float>(metrics.bitmap_height), 0);
+    V3 xyz = V3(static_cast<float>(metrics.bitmap_x), static_cast<float>(metrics.bitmap_y), 0);
+    Model model = _stub->_delegate->load(type);
+    return Model(model.indices(), model.vertices(), {bounds, size, xyz});
 }
-
-//Metrics ModelLoaderText::measure(int32_t type)
-//{
-//    Alphabet::Metrics metrics;
-//    bool r = _stub->_alphabet->measure(type, metrics, false);
-//    DCHECK(r, "Measuring failed, type: %d", type);
-//    return {
-//        {static_cast<float>(metrics.width), static_cast<float>(metrics.height)},
-//        {static_cast<float>(metrics.bitmap_width), static_cast<float>(metrics.bitmap_height)},
-//        {static_cast<float>(metrics.bitmap_x), static_cast<float>(metrics.bitmap_y)}
-//    };
-//}
 
 ModelLoaderText::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _alphabet(factory.ensureBuilder<Alphabet>(manifest, Constants::Attributes::ALPHABET)),

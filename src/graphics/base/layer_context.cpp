@@ -21,8 +21,8 @@ LayerContext::Item::Item(const sp<Renderable>& renderable, const sp<Boolean>& di
     DASSERT(_disposed);
 }
 
-LayerContext::LayerContext(const sp<RenderModel>& renderModel, const sp<Notifier>& notifier, Layer::Type type)
-    : _render_model(renderModel), _notifier(notifier), _layer_type(type), _render_requested(false), _render_done(false)
+LayerContext::LayerContext(const sp<ModelLoader>& models, const sp<Notifier>& notifier, Layer::Type type)
+    : _model_loader(models), _notifier(notifier), _layer_type(type), _render_requested(false), _render_done(false)
 {
 }
 
@@ -33,9 +33,9 @@ void LayerContext::traverse(const Holder::Visitor& visitor)
             HolderUtil::visit(i._renderable, visitor);
 }
 
-const sp<RenderModel>& LayerContext::renderModel() const
+const sp<ModelLoader>& LayerContext::modelLoader() const
 {
-    return _render_model;
+    return _model_loader;
 }
 
 Layer::Type LayerContext::layerType() const

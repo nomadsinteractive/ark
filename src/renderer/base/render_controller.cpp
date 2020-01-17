@@ -9,9 +9,13 @@
 
 #include "renderer/base/framebuffer.h"
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/model.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/inf/renderer_factory.h"
+#include "renderer/inf/vertices.h"
+#include "renderer/util/element_util.h"
+#include "renderer/util/named_buffer.h"
 
 #include "platform/platform.h"
 
@@ -218,6 +222,31 @@ const sp<NamedBuffer>& RenderController::getNamedBuffer(NamedBuffer::Name name) 
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
     return _named_buffers[name];
+}
+
+sp<NamedBuffer> RenderController::getSharedBuffer(RenderModel::Mode renderMode, const Model& model)
+{
+    const array<element_index_t>& indices = model.indices();
+    element_index_t hash = ElementUtil::hash(indices);
+    const auto iter = _shared_buffers.find(hash);
+    if(iter != _shared_buffers.end())
+        return iter->second;
+
+    bool degenerate = renderMode == RenderModel::RENDER_MODE_TRIANGLE_STRIP;
+    size_t indexCount = indices->length();
+    size_t vertexCount = model.vertices()->length();
+
+    sp<NamedBuffer> sharedBuffer;
+    if(degenerate)
+        sharedBuffer = sp<NamedBuffer>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
+                                             [indices, vertexCount](size_t objectCount)->sp<Uploader> { return sp<NamedBuffer::Degenerate>::make(objectCount, vertexCount, indices); },
+                                             [indexCount](size_t objectCount)->size_t { return ((indexCount + 2) * objectCount - 2) * sizeof(element_index_t); });
+    else
+        sharedBuffer = sp<NamedBuffer>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
+                                             [indices, vertexCount](size_t objectCount)->sp<Uploader> { return sp<NamedBuffer::Concat>::make(objectCount, vertexCount, indices); },
+                                             [indexCount](size_t objectCount)->size_t { return indexCount * objectCount * sizeof(element_index_t); });
+    _shared_buffers.insert(std::make_pair(hash, sharedBuffer));
+    return sharedBuffer;
 }
 
 RenderController::RenderResource::RenderResource(const sp<Resource>& resource, const sp<Uploader>& uploader, UploadPriority uploadPriority)

@@ -2,6 +2,7 @@
 #define ARK_RENDERER_BASE_RENDER_CONTROLLER_H_
 
 #include <vector>
+#include <unordered_map>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -17,6 +18,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
+#include "renderer/inf/render_model.h"
 #include "renderer/inf/uploader.h"
 #include "renderer/util/named_buffer.h"
 
@@ -114,6 +116,8 @@ public:
 
     const sp<NamedBuffer>& getNamedBuffer(NamedBuffer::Name name) const;
 
+    sp<NamedBuffer> getSharedBuffer(RenderModel::Mode renderMode, const Model& model);
+
 private:
     class RenderResource {
     public:
@@ -182,6 +186,7 @@ private:
     WeakRefList<SynchronizeFlag> _synchronize_flags;
 
     sp<NamedBuffer> _named_buffers[NamedBuffer::NAME_COUNT];
+    std::unordered_map<element_index_t, sp<NamedBuffer>> _shared_buffers;
 
     friend class TextureBundle;
 };

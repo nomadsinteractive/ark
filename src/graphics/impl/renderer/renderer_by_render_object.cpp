@@ -10,7 +10,9 @@
 #include "graphics/base/render_layer.h"
 #include "graphics/base/size.h"
 
+#include "renderer/base/model.h"
 #include "renderer/inf/render_model.h"
+#include "renderer/inf/model_loader.h"
 
 namespace ark {
 
@@ -35,7 +37,7 @@ const sp<Size>& RendererByRenderObject::size()
 
 void RendererByRenderObject::measure(Size& size)
 {
-    const Metrics metrics = _layer_context->renderModel()->measure(_renderable->renderObject()->type()->val());
+    const Metrics& metrics = _layer_context->modelLoader()->load(_renderable->renderObject()->type()->val()).metrics();
     size.setWidth(metrics.size.x());
     size.setHeight(metrics.size.y());
 }

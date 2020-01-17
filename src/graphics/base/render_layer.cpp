@@ -31,19 +31,23 @@
 
 namespace ark {
 
-RenderLayer::Stub::Stub(const sp<RenderModel>& renderModel, const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _render_model(renderModel), _model_loader(modelLoader), _shader(shader), _scissor(scissor), _resource_loader_context(resourceLoaderContext),
-      _render_controller(resourceLoaderContext->renderController()), _shader_bindings(_render_model->makeShaderBindings(_shader)), _notifier(sp<Notifier>::make()),
-      _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(renderModel, _notifier, Layer::TYPE_DYNAMIC))), _stride(shader->input()->getStream(0).stride())
+RenderLayer::Stub::Stub(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _model_loader(modelLoader), _shader(shader), _scissor(scissor), _resource_loader_context(resourceLoaderContext),
+      _render_controller(resourceLoaderContext->renderController()), _notifier(sp<Notifier>::make()), _dirty(_notifier->createDirtyFlag()),
+      _layer(sp<Layer>::make(sp<LayerContext>::make(_model_loader, _notifier, Layer::TYPE_DYNAMIC))), _stride(shader->input()->getStream(0).stride())
 {
+    if(_model_loader->unitModel())
+    {
+        _shared_buffer = _render_controller->getSharedBuffer(_model_loader->renderMode(), _model_loader->unitModel());
+        _shader_bindings = _shader->makeBindings(_model_loader->renderMode(), _render_controller->makeVertexBuffer(), _shared_buffer->buffer());
+    }
+    _model_loader->initialize(_shader_bindings);
     DCHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
-    if(_model_loader)
-        _model_loader->initialize(_shader_bindings);
 }
 
 sp<LayerContext> RenderLayer::Stub::makeLayerContext(Layer::Type layerType)
 {
-    const sp<LayerContext> layerContext = sp<LayerContext>::make(_render_model, _notifier, layerType);
+    const sp<LayerContext> layerContext = sp<LayerContext>::make(_model_loader, _notifier, layerType);
     _layer_contexts.push_back(layerContext, _notifier);
     return layerContext;
 }
@@ -62,9 +66,10 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
             combined = i->layerType();
     }
 
-    _stub->_render_model->postSnapshot(_stub->_render_controller, *this);
-    if(_stub->_model_loader)
-        _stub->_model_loader->postSnapshot(_stub->_render_controller, *this);
+    _stub->_model_loader->postSnapshot(_stub->_render_controller, *this);
+
+    if(stub->_shared_buffer)
+        _index_buffer = stub->_shared_buffer->snapshot(_stub->_render_controller, _items.size(), _items.size());
 
     _ubos = _stub->_shader->snapshot(renderRequest.allocator());
 
@@ -85,44 +90,43 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
         _flag = dirty ? SNAPSHOT_FLAG_STATIC_MODIFIED : SNAPSHOT_FLAG_STATIC_REUSE;
 }
 
-void RenderLayer::Snapshot::doRenderModelSnapshot(const RenderRequest& renderRequest, DrawingBuffer& buf) const
-{
-    _stub->_render_model->start(buf, *this);
-    if(_flag == SNAPSHOT_FLAG_RELOAD)
-    {
-        VertexStream writer = buf.makeVertexStream(renderRequest, buf.vertices()._grow_capacity, 0);
-        for(const Renderable::Snapshot& i : _items)
-        {
-            writer.setRenderObject(i);
-            _stub->_render_model->load(writer, i);
-            if(buf.isInstanced())
-            {
-                Buffer::Builder& sBuilder = buf.getInstancedArrayBuilder(1);
-                M4 matrix = MatrixUtil::scale(MatrixUtil::translate(i._transform.toMatrix(), i._position), i._size);
-            }
-        }
-    }
-    else
-    {
-        size_t step = buf.vertices()._grow_capacity / _items.size();
-        size_t offset = 0;
-        for(const Renderable::Snapshot& i : _items)
-        {
-            if(i._dirty)
-            {
-                VertexStream writer = buf.makeVertexStream(renderRequest, step, offset);
-                writer.setRenderObject(i);
-                _stub->_render_model->load(writer, i);
-            }
-            offset += step;
-        }
-    }
-}
+//void RenderLayer::Snapshot::doRenderModelSnapshot(const RenderRequest& renderRequest, DrawingBuffer& buf) const
+//{
+//    _stub->_render_model->start(buf, *this);
+//    if(_flag == SNAPSHOT_FLAG_RELOAD)
+//    {
+//        VertexStream writer = buf.makeVertexStream(renderRequest, buf.vertices()._grow_capacity, 0);
+//        for(const Renderable::Snapshot& i : _items)
+//        {
+//            writer.setRenderObject(i);
+//            _stub->_render_model->load(writer, i);
+//            if(buf.isInstanced())
+//            {
+//                Buffer::Builder& sBuilder = buf.getInstancedArrayBuilder(1);
+//                M4 matrix = MatrixUtil::scale(MatrixUtil::translate(i._transform.toMatrix(), i._position), i._size);
+//            }
+//        }
+//    }
+//    else
+//    {
+//        size_t step = buf.vertices()._grow_capacity / _items.size();
+//        size_t offset = 0;
+//        for(const Renderable::Snapshot& i : _items)
+//        {
+//            if(i._dirty)
+//            {
+//                VertexStream writer = buf.makeVertexStream(renderRequest, step, offset);
+//                writer.setRenderObject(i);
+//                _stub->_render_model->load(writer, i);
+//            }
+//            offset += step;
+//        }
+//    }
+//}
 
 void RenderLayer::Snapshot::doModelLoaderSnapshot(const RenderRequest& renderRequest, DrawingBuffer& buf) const
 {
-    _stub->_render_model->start(buf, *this);
-
+    buf.setIndices(_index_buffer);
     const sp<Model>& unitModel = _stub->_model_loader->unitModel();
     if(unitModel)
     {
@@ -160,11 +164,7 @@ sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderReque
     if(_items.size() > 0)
     {
         DrawingBuffer buf(renderRequest, _stub->_shader_bindings, _stub->_stride);
-
-        if(_stub->_model_loader)
-            doModelLoaderSnapshot(renderRequest, buf);
-        else
-            doRenderModelSnapshot(renderRequest, buf);
+        doModelLoaderSnapshot(renderRequest, buf);
 
         DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos),
                                       buf.vertices().toSnapshot(_stub->_shader_bindings->vertexBuffer()),
@@ -183,19 +183,14 @@ sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderReque
     return drawingContext.toRenderCommand();
 }
 
-RenderLayer::RenderLayer(const sp<RenderModel>& model, const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : RenderLayer(sp<Stub>::make(model, modelLoader, shader, scissor, resourceLoaderContext))
+RenderLayer::RenderLayer(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : RenderLayer(sp<Stub>::make(modelLoader, shader, scissor, resourceLoaderContext))
 {
 }
 
 RenderLayer::RenderLayer(const sp<RenderLayer::Stub>& stub)
     : _stub(stub)
 {
-}
-
-const sp<RenderModel>& RenderLayer::model() const
-{
-    return _stub->_render_model;
 }
 
 const sp<LayerContext>& RenderLayer::context() const
@@ -230,19 +225,19 @@ void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
 }
 
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : BUILDER(factory, manifest, resourceLoaderContext, factory.ensureBuilder<RenderModel>(manifest, Constants::Attributes::MODEL), nullptr)
+    : BUILDER(factory, manifest, resourceLoaderContext, factory.ensureBuilder<ModelLoader>(manifest, Constants::Attributes::MODEL))
 {
 }
 
-RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<RenderModel>> renderModel, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader)
-    : _resource_loader_context(resourceLoaderContext), _model(std::move(renderModel)), _model_loader(std::move(modelLoader)),
+RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader)
+    : _resource_loader_context(resourceLoaderContext), _model_loader(std::move(modelLoader)),
       _shader(shader ? std::move(shader) : Shader::fromDocument(factory, manifest, resourceLoaderContext)), _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
 {
 }
 
 sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
 {
-    return sp<RenderLayer>::make(_model->build(args), _model_loader ? _model_loader->build(args) : nullptr, _shader->build(args), _scissor->build(args), _resource_loader_context);
+    return sp<RenderLayer>::make(_model_loader->build(args), _shader->build(args), _scissor->build(args), _resource_loader_context);
 }
 
 RenderLayer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

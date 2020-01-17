@@ -37,7 +37,8 @@ ark_link_libraries(assimp)
 
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(impl/io LOCAL_SRC_LIST)
-aux_source_directory(impl/render_model LOCAL_SRC_LIST)
+aux_source_directory(impl/model_loader LOCAL_SRC_LIST)
+aux_source_directory(impl/vertices LOCAL_SRC_LIST)
 
 ark_setup_tools(ark_gen_plugin_class)
 ark_gen_plugin_class(assimp core ark::plugin::assimp assimp_plugin impl)

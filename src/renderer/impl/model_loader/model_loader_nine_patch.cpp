@@ -2,13 +2,16 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
+#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
 #include "renderer/impl/vertices/vertices_nine_patch.h"
+#include "renderer/util/element_util.h"
 
 namespace ark {
 
 ModelLoaderNinePatch::ModelLoaderNinePatch(const document& manifest, const sp<Atlas>& atlas)
-    : ModelLoader(RenderModel::RENDER_MODE_TRIANGLE_STRIP, makeUnitModel()), _atlas(atlas)
+    : ModelLoader(RenderModel::RENDER_MODE_TRIANGLE_STRIP, ElementUtil::makeUnitNinePatchModel()), _atlas(atlas)
 {
     uint32_t textureWidth = static_cast<uint32_t>(_atlas->texture()->width());
     uint32_t textureHeight = static_cast<uint32_t>(_atlas->texture()->height());
@@ -38,6 +41,7 @@ ModelLoaderNinePatch::ModelLoaderNinePatch(const document& manifest, const sp<At
 
 void ModelLoaderNinePatch::initialize(ShaderBindings& shaderBindings)
 {
+    shaderBindings.pipelineBindings()->bindSampler(_atlas->texture());
 }
 
 void ModelLoaderNinePatch::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& /*snapshot*/)
@@ -49,11 +53,6 @@ Model ModelLoaderNinePatch::load(int32_t type)
     const auto iter = _vertices.find(type);
     DCHECK(iter != _vertices.end(), "");
     return Model(nullptr, _vertices.at(type));
-}
-
-sp<Model> ModelLoaderNinePatch::makeUnitModel()
-{
-    return sp<Model>::make(nullptr, sp<VerticesNinePatch>::make());
 }
 
 void ModelLoaderNinePatch::importAtlasItem(int32_t type, const Rect& paddings, uint32_t textureWidth, uint32_t textureHeight)

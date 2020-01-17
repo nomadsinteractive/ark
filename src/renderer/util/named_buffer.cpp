@@ -1,7 +1,6 @@
 #include "renderer/util/named_buffer.h"
 
 #include "renderer/base/render_controller.h"
-#include "renderer/base/render_controller.h"
 
 #include "renderer/base/model.h"
 

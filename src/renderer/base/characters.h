@@ -11,6 +11,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/metrics.h"
+#include "graphics/base/render_layer.h"
 #include "graphics/impl/renderable/renderable_passive.h"
 
 #include "renderer/forwarding.h"
@@ -111,7 +112,7 @@ private:
     float _line_height;
     float _line_indent;
 
-    sp<RenderModel> _model;
+    sp<ModelLoader> _model_loader;
 
     SafePtr<Size> _size;
     V3 _layout_size;

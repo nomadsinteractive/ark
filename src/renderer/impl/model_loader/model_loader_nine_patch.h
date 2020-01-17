@@ -30,8 +30,6 @@ public:
     };
 
 private:
-    static sp<Model> makeUnitModel();
-
     void importAtlasItem(int32_t type, const Rect& paddings, uint32_t textureWidth, uint32_t textureHeight);
 
     Rect getPatches(const Rect& paddings, const Rect& bounds) const;

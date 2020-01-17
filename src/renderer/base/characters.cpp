@@ -18,9 +18,11 @@
 #include "graphics/util/vec3_util.h"
 
 #include "renderer/base/atlas.h"
+#include "renderer/base/model.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/render_model.h"
+#include "renderer/inf/model_loader.h"
 
 #include "app/base/application_context.h"
 #include "app/view/layout_param.h"
@@ -45,7 +47,7 @@ Characters::Characters(const sp<RenderLayer>& layer, float textScale, float lett
 Characters::Characters(const sp<LayerContext>& layerContext, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
     : _layer_context(layerContext), _character_mapper(characterMapper), _character_maker(characterMaker), _text_scale(textScale), _letter_spacing(letterSpacing),
       _layout_direction(Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(1.0f)), _line_height(_layout_direction * lineHeight), _line_indent(lineIndent),
-      _model(layerContext->renderModel()), _size(sp<Size>::make(0.0f, 0.0f))
+      _model_loader(layerContext->modelLoader()), _size(sp<Size>::make(0.0f, 0.0f))
 {
 }
 
@@ -167,7 +169,7 @@ void Characters::createContentNoBoundary()
 void Characters::placeNoBoundary(wchar_t c, float& flowx, float& flowy, float& fontHeight)
 {
     int32_t type = toType(c);
-    const Metrics metrics = _model->measure(type);
+    const Metrics& metrics = _model_loader->load(type).metrics();
     float bitmapWidth = _text_scale * metrics.size.x();
     float bitmapHeight = _text_scale * metrics.size.y();
     float width = _text_scale * metrics.bounds.x();
@@ -241,7 +243,7 @@ std::vector<Characters::LayoutChar> Characters::getCharacterMetrics(const std::w
         }
         else
         {
-            const Metrics m = _model->measure(type);
+            const Metrics& m = _model_loader->load(type).metrics();
             bool iscjk = isCJK(c);
             bool iswordbreak = isWordBreaker(c);
             integral += _text_scale * m.bounds.x();

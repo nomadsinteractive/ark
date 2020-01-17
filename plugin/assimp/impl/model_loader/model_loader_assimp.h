@@ -1,5 +1,5 @@
-#ifndef ARK_PLUGIN_ASSIMP_IMPL_RENDER_MODEL_RENDER_MODEL_ASSIMP_H_
-#define ARK_PLUGIN_ASSIMP_IMPL_RENDER_MODEL_RENDER_MODEL_ASSIMP_H_
+#ifndef ARK_PLUGIN_ASSIMP_IMPL_MODEL_LOADER_MODEL_LOADER_ASSIMP_H_
+#define ARK_PLUGIN_ASSIMP_IMPL_MODEL_LOADER_MODEL_LOADER_ASSIMP_H_
 
 #include <unordered_map>
 
@@ -16,28 +16,27 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
-#include "renderer/inf/render_model.h"
+#include "renderer/inf/model_loader.h"
 
 namespace ark {
 namespace plugin {
 namespace assimp {
 
-class RenderModelAssimp : public RenderModel {
+class ModelLoaderAssimp : public ModelLoader {
 public:
-    RenderModelAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest);
+    ModelLoaderAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest);
 
-    virtual sp<ShaderBindings> makeShaderBindings(const Shader& shader) override;
+    virtual void initialize(ShaderBindings& shaderBindings) override;
+
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
-
-    virtual void start(DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot) override;
-    virtual void load(VertexStream& buf, const Renderable::Snapshot& snapshot) override;
+    virtual Model load(int32_t type) override;
 
 //  [[plugin::resource-loader("assimp")]]
-    class BUILDER : public Builder<RenderModel> {
+    class BUILDER : public Builder<ModelLoader> {
     public:
         BUILDER(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<RenderModel> build(const Scope& args) override;
+        virtual sp<ModelLoader> build(const Scope& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
@@ -49,14 +48,14 @@ private:
 
     bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
 
-    sp<Model> loadModel(const aiMesh* mesh);
+    Model loadModel(const aiMesh* mesh) const;
     array<element_index_t> loadIndices(const aiMesh* mesh) const;
 
     void compose(const Model& model, int32_t modelId, DrawingBuffer& buf) const;
 
 private:
     sp<Assimp::Importer> _importer;
-    std::unordered_map<int32_t, sp<Model>> _models;
+    std::unordered_map<int32_t, Model> _models;
     std::vector<sp<Texture>> _textures;
     array<M4> _model_matrics;
 

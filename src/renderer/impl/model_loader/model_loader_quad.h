@@ -29,12 +29,7 @@ public:
     };
 
 private:
-    static sp<Model> makeUnitModel();
-
-private:
     sp<Atlas> _atlas;
-
-    std::unordered_map<int32_t, Model> _models;
 };
 
 }
