@@ -10,7 +10,7 @@
 namespace ark {
 
 ModelLoaderQuad::ModelLoaderQuad(const sp<Atlas>& atlas)
-    : ModelLoader(RenderModel::RENDER_MODE_TRIANGLES, ElementUtil::makeUnitQuadModel()), _atlas(atlas)
+    : ModelLoader(RenderModel::RENDER_MODE_TRIANGLES), _atlas(atlas)
 {
 }
 

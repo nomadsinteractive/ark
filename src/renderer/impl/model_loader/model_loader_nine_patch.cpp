@@ -11,7 +11,7 @@
 namespace ark {
 
 ModelLoaderNinePatch::ModelLoaderNinePatch(const document& manifest, const sp<Atlas>& atlas)
-    : ModelLoader(RenderModel::RENDER_MODE_TRIANGLE_STRIP, ElementUtil::makeUnitNinePatchModel()), _atlas(atlas)
+    : ModelLoader(RenderModel::RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas)
 {
     uint32_t textureWidth = static_cast<uint32_t>(_atlas->texture()->width());
     uint32_t textureHeight = static_cast<uint32_t>(_atlas->texture()->height());

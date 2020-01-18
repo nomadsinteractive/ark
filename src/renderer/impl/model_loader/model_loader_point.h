@@ -29,9 +29,6 @@ public:
     };
 
 private:
-    static sp<Model> makeUnitModel();
-
-private:
     sp<Atlas> _atlas;
 };
 

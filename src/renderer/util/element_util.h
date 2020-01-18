@@ -12,8 +12,9 @@ class ElementUtil {
 public:
     static bytearray makeUnitCubeVertices();
 
-    static sp<Model> makeUnitQuadModel();
-    static sp<Model> makeUnitNinePatchModel();
+    static Model makeUnitNinePatchModel();
+    static Model makeUnitPointModel();
+    static Model makeUnitQuadModel();
 
     static element_index_t hash(const sp<IndexArray>& indices);
 

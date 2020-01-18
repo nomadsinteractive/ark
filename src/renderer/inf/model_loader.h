@@ -12,17 +12,13 @@ namespace ark {
 
 class ARK_API ModelLoader {
 public:
-    ModelLoader(RenderModel::Mode renderMode, const sp<Model>& unitModel)
-        : _render_mode(renderMode), _unit_model(unitModel) {
+    ModelLoader(RenderModel::Mode renderMode)
+        : _render_mode(renderMode) {
     }
     virtual ~ModelLoader() = default;
 
     RenderModel::Mode renderMode() const {
         return _render_mode;
-    }
-
-    const sp<Model>& unitModel() const {
-        return _unit_model;
     }
 
     virtual void initialize(ShaderBindings& shaderBindings) = 0;
@@ -32,7 +28,6 @@ public:
 
 private:
     RenderModel::Mode _render_mode;
-    sp<Model> _unit_model;
 };
 
 }

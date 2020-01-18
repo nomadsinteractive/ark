@@ -4,6 +4,8 @@
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/model_loader/model_loader_text.h"
 #include "renderer/impl/snippet/snippet_ucolor.h"
+#include "renderer/impl/render_command_composer/rcc_uniform_models.h"
+#include "renderer/util/element_util.h"
 
 namespace ark {
 
@@ -33,7 +35,8 @@ private:
 }
 
 TextLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _impl(factory, manifest, resourceLoaderContext, sp<ModelLoaderText::BUILDER>::make(factory, manifest, resourceLoaderContext), sp<ShaderBuilder>::make(factory, manifest, resourceLoaderContext))
+    : _impl(factory, manifest, resourceLoaderContext, sp<ModelLoaderText::BUILDER>::make(factory, manifest, resourceLoaderContext), sp<Builder<RenderCommandComposer>::Prebuilt>::make(sp<RCCUniformModels>::make(ElementUtil::makeUnitQuadModel())),
+            sp<ShaderBuilder>::make(factory, manifest, resourceLoaderContext))
 {
 }
 

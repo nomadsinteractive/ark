@@ -3,20 +3,19 @@
 
 namespace ark {
 
-class TextLayer;
 class Atlas;
 class Attribute;
 class Buffer;
 class Characters;
+class DrawingBuffer;
 class Emitter;
 class Framebuffer;
-class Pipeline;
-class PipelineFactory;
+class Layer;
 class Model;
 class ModelLoader;
-class DrawingBuffer;
+class Pipeline;
+class PipelineFactory;
 class NamedBuffer;
-class RenderModel;
 class SnippetFactory;
 class Recycler;
 class Resource;
@@ -36,8 +35,8 @@ class Uniform;
 class GraphicsContext;
 class RenderContext;
 class RenderController;
+class RenderCommandComposer;
 class RenderEngine;
-class Layer;
 class RenderModel;
 class RendererFactory;
 class ResourceLoaderContext;
