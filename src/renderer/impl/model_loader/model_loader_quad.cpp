@@ -4,6 +4,7 @@
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader_bindings.h"
+#include "renderer/impl/render_command_composer/rcc_uniform_models.h"
 #include "renderer/impl/vertices/vertices_quad.h"
 #include "renderer/util/element_util.h"
 
@@ -12,6 +13,11 @@ namespace ark {
 ModelLoaderQuad::ModelLoaderQuad(const sp<Atlas>& atlas)
     : ModelLoader(RenderModel::RENDER_MODE_TRIANGLES), _atlas(atlas)
 {
+}
+
+sp<RenderCommandComposer> ModelLoaderQuad::makeRenderCommandComposer()
+{
+    return sp<RCCUniformModels>::make(ElementUtil::makeUnitQuadModel());
 }
 
 void ModelLoaderQuad::initialize(ShaderBindings& shaderBindings)

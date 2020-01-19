@@ -47,6 +47,12 @@ ModelLoaderAssimp::ModelLoaderAssimp(const sp<ResourceLoaderContext>& resourceLo
     _importer->FreeScene();
 }
 
+sp<RenderCommandComposer> ModelLoaderAssimp::makeRenderCommandComposer()
+{
+    DFATAL("Unimplemented");
+    return nullptr;
+}
+
 void ModelLoaderAssimp::initialize(ShaderBindings& shaderBindings)
 {
     const sp<Uniform> uniform = shaderBindings.pipelineInput()->getUniform("u_ModelMatrix");

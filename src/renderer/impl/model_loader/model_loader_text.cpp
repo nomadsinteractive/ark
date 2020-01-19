@@ -119,6 +119,11 @@ ModelLoaderText::ModelLoaderText(const sp<RenderController>& renderController, c
 {
 }
 
+sp<RenderCommandComposer> ModelLoaderText::makeRenderCommandComposer()
+{
+    return _stub->_delegate->makeRenderCommandComposer();
+}
+
 void ModelLoaderText::initialize(ShaderBindings& shaderBindings)
 {
     _shader_texture = sp<Texture>::make(_stub->_size, _stub, sp<Texture::Parameters>::make(Texture::TYPE_2D));

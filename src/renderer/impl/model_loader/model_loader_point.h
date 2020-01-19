@@ -12,6 +12,8 @@ class ModelLoaderPoint : public ModelLoader {
 public:
     ModelLoaderPoint(const sp<Atlas>& atlas);
 
+    virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
+
     virtual void initialize(ShaderBindings& shaderBindings) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
@@ -30,6 +32,7 @@ public:
 
 private:
     sp<Atlas> _atlas;
+
 };
 
 }

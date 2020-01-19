@@ -4,13 +4,21 @@
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader_bindings.h"
+#include "renderer/impl/render_command_composer/rcc_uniform_models.h"
 #include "renderer/impl/vertices/vertices_point.h"
+#include "renderer/util/element_util.h"
+
 
 namespace ark {
 
 ModelLoaderPoint::ModelLoaderPoint(const sp<Atlas>& atlas)
     : ModelLoader(RenderModel::RENDER_MODE_POINTS), _atlas(atlas)
 {
+}
+
+sp<RenderCommandComposer> ModelLoaderPoint::makeRenderCommandComposer()
+{
+    return sp<RCCUniformModels>::make(ElementUtil::makeUnitPointModel());
 }
 
 void ModelLoaderPoint::initialize(ShaderBindings& shaderBindings)

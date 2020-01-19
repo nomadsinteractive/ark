@@ -23,9 +23,9 @@
 
 namespace ark {
 
-RenderLayer::Stub::Stub(const sp<ModelLoader>& modelLoader, const sp<RenderCommandComposer>& renderCommandComposer, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _model_loader(modelLoader), _render_command_composer(renderCommandComposer), _shader(shader), _scissor(scissor), _render_controller(resourceLoaderContext->renderController()),
-      _shader_bindings(renderCommandComposer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _notifier(sp<Notifier>::make()),
+RenderLayer::Stub::Stub(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _model_loader(modelLoader), _render_command_composer(_model_loader->makeRenderCommandComposer()), _shader(shader), _scissor(scissor), _render_controller(resourceLoaderContext->renderController()),
+      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _notifier(sp<Notifier>::make()),
       _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(_model_loader, _notifier, Layer::TYPE_DYNAMIC))), _stride(shader->input()->getStream(0).stride())
 {
     _model_loader->initialize(_shader_bindings);
@@ -81,8 +81,8 @@ sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderReque
     return drawingContext.toRenderCommand();
 }
 
-RenderLayer::RenderLayer(const sp<ModelLoader>& modelLoader, const sp<RenderCommandComposer>& renderCommandComposer, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : RenderLayer(sp<Stub>::make(modelLoader, renderCommandComposer, shader, scissor, resourceLoaderContext))
+RenderLayer::RenderLayer(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : RenderLayer(sp<Stub>::make(modelLoader, shader, scissor, resourceLoaderContext))
 {
 }
 
@@ -123,19 +123,19 @@ void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
 }
 
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : BUILDER(factory, manifest, resourceLoaderContext, factory.ensureBuilder<ModelLoader>(manifest, Constants::Attributes::MODEL), factory.ensureBuilder<RenderCommandComposer>(manifest, "composer"))
+    : BUILDER(factory, manifest, resourceLoaderContext, factory.ensureBuilder<ModelLoader>(manifest, Constants::Attributes::MODEL))
 {
 }
 
-RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<ModelLoader>> modelLoader, sp<Builder<RenderCommandComposer>> renderCommandComposer, sp<Builder<Shader>> shader)
-    : _resource_loader_context(resourceLoaderContext), _model_loader(std::move(modelLoader)), _render_command_composer(std::move(renderCommandComposer)),
-      _shader(shader ? std::move(shader) : Shader::fromDocument(factory, manifest, resourceLoaderContext)), _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
+RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader)
+    : _resource_loader_context(resourceLoaderContext), _model_loader(std::move(modelLoader)), _shader(shader ? std::move(shader) : Shader::fromDocument(factory, manifest, resourceLoaderContext)),
+      _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
 {
 }
 
 sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
 {
-    return sp<RenderLayer>::make(_model_loader->build(args), _render_command_composer->build(args), _shader->build(args), _scissor->build(args), _resource_loader_context);
+    return sp<RenderLayer>::make(_model_loader->build(args), _shader->build(args), _scissor->build(args), _resource_loader_context);
 }
 
 RenderLayer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

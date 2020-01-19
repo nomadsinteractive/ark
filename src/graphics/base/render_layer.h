@@ -34,7 +34,7 @@ private:
     };
 
     struct Stub {
-        Stub(const sp<ModelLoader>& modelLoader, const sp<RenderCommandComposer>& renderCommandComposer, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        Stub(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         sp<RenderCommand> render(const Snapshot& snapshot, float x, float y);
         sp<LayerContext> makeLayerContext(Layer::Type layerType);
@@ -96,7 +96,7 @@ public:
     };
 
 public:
-    RenderLayer(const sp<ModelLoader>& modelLoader, const sp<RenderCommandComposer>& renderCommandComposer, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    RenderLayer(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -116,14 +116,13 @@ public:
     class BUILDER : public Builder<RenderLayer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<ModelLoader>> modelLoader, sp<Builder<RenderCommandComposer>> renderCommandComposer, sp<Builder<Shader>> shader = nullptr);
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader = nullptr);
 
         virtual sp<RenderLayer> build(const Scope& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
         sp<Builder<ModelLoader>> _model_loader;
-        sp<Builder<RenderCommandComposer>> _render_command_composer;
         sp<Builder<Shader>> _shader;
         SafePtr<Builder<Vec4>> _scissor;
     };

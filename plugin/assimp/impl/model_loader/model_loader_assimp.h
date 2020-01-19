@@ -26,8 +26,9 @@ class ModelLoaderAssimp : public ModelLoader {
 public:
     ModelLoaderAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest);
 
-    virtual void initialize(ShaderBindings& shaderBindings) override;
+    virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
 
+    virtual void initialize(ShaderBindings& shaderBindings) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
     virtual Model load(int32_t type) override;
 

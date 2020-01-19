@@ -46,6 +46,8 @@ private:
 public:
     ModelLoaderText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
 
+    virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
+
     virtual void initialize(ShaderBindings& shaderBindings) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
@@ -66,6 +68,7 @@ public:
 private:
     sp<Stub> _stub;
     sp<Texture> _shader_texture;
+
 };
 
 }

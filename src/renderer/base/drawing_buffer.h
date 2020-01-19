@@ -25,6 +25,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN(DrawingBuffer);
 
     VertexStream makeVertexStream(const RenderRequest& renderRequest, size_t length, size_t offset);
+    VertexStream makeDividedVertexStream(const RenderRequest& renderRequest, size_t length, size_t offset, uint32_t divisor);
 
     const sp<ShaderBindings>& shaderBindings() const;
 
