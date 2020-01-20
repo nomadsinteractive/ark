@@ -28,7 +28,6 @@ public:
 
     virtual void traverse(const Visitor& visitor) override;
 
-    const sp<RenderModel>& renderModel() const;
     const sp<ModelLoader>& modelLoader() const;
 
     Layer::Type layerType() const;

@@ -12,29 +12,22 @@
 #include "renderer/base/model.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_engine.h"
+#include "renderer/base/shared_buffer.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/vertices.h"
 #include "renderer/util/element_util.h"
-#include "renderer/util/named_buffer.h"
-
-#include "platform/platform.h"
 
 namespace ark {
 
 RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
     : _render_engine(renderEngine), _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader)
 {
-    _named_buffers[NamedBuffer::NAME_QUADS] = NamedBuffer::Quads::make(*this);
-    _named_buffers[NamedBuffer::NAME_NINE_PATCH] = NamedBuffer::NinePatch::make(*this);
-    _named_buffers[NamedBuffer::NAME_POINTS] = NamedBuffer::Points::make(*this);
 }
 
 void RenderController::reset()
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
-    for(const sp<NamedBuffer>& i : _named_buffers)
-        if(i)
-            i->reset();
+    _shared_buffers.clear();
 }
 
 void RenderController::onSurfaceReady(GraphicsContext& graphicsContext)
@@ -218,13 +211,24 @@ void RenderController::deferUnref(Box box)
     _defered_instances.push_back(std::move(box));
 }
 
-const sp<NamedBuffer>& RenderController::getNamedBuffer(NamedBuffer::Name name) const
+sp<SharedBuffer> RenderController::getNamedBuffer(SharedBuffer::Name name)
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
-    return _named_buffers[name];
+    switch(name) {
+    case SharedBuffer::NAME_QUADS:
+        return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLES, ElementUtil::makeUnitQuadModel());
+    case SharedBuffer::NAME_NINE_PATCH:
+        return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLE_STRIP, ElementUtil::makeUnitNinePatchModel());
+    case SharedBuffer::NAME_POINTS:
+        return getSharedBuffer(ModelLoader::RENDER_MODE_POINTS, ElementUtil::makeUnitPointModel());
+    default:
+        break;
+    }
+    DFATAL("Unsupported SharedBuffer: %d", name);
+    return nullptr;
 }
 
-sp<NamedBuffer> RenderController::getSharedBuffer(RenderModel::Mode renderMode, const Model& model)
+sp<SharedBuffer> RenderController::getSharedBuffer(ModelLoader::RenderMode renderMode, const Model& model)
 {
     const array<element_index_t>& indices = model.indices();
     element_index_t hash = ElementUtil::hash(indices);
@@ -232,18 +236,18 @@ sp<NamedBuffer> RenderController::getSharedBuffer(RenderModel::Mode renderMode, 
     if(iter != _shared_buffers.end())
         return iter->second;
 
-    bool degenerate = renderMode == RenderModel::RENDER_MODE_TRIANGLE_STRIP;
+    bool degenerate = renderMode == ModelLoader::RENDER_MODE_TRIANGLE_STRIP;
     size_t indexCount = indices->length();
     size_t vertexCount = model.vertices()->length();
 
-    sp<NamedBuffer> sharedBuffer;
+    sp<SharedBuffer> sharedBuffer;
     if(degenerate)
-        sharedBuffer = sp<NamedBuffer>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
-                                             [indices, vertexCount](size_t objectCount)->sp<Uploader> { return sp<NamedBuffer::Degenerate>::make(objectCount, vertexCount, indices); },
+        sharedBuffer = sp<SharedBuffer>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
+                                             [indices, vertexCount](size_t objectCount)->sp<Uploader> { return sp<SharedBuffer::Degenerate>::make(objectCount, vertexCount, indices); },
                                              [indexCount](size_t objectCount)->size_t { return ((indexCount + 2) * objectCount - 2) * sizeof(element_index_t); });
     else
-        sharedBuffer = sp<NamedBuffer>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
-                                             [indices, vertexCount](size_t objectCount)->sp<Uploader> { return sp<NamedBuffer::Concat>::make(objectCount, vertexCount, indices); },
+        sharedBuffer = sp<SharedBuffer>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
+                                             [indices, vertexCount](size_t objectCount)->sp<Uploader> { return sp<SharedBuffer::Concat>::make(objectCount, vertexCount, indices); },
                                              [indexCount](size_t objectCount)->size_t { return indexCount * objectCount * sizeof(element_index_t); });
     _shared_buffers.insert(std::make_pair(hash, sharedBuffer));
     return sharedBuffer;

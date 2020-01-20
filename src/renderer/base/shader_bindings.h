@@ -14,7 +14,6 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
-#include "renderer/inf/render_model.h"
 #include "renderer/inf/pipeline_factory.h"
 
 namespace ark {
@@ -43,7 +42,7 @@ public:
 
     sp<Pipeline> getPipeline(GraphicsContext& graphicsContext);
 
-    std::map<uint32_t, Buffer::Builder> makeDividedBufferBuilders(const RenderRequest& renderRequest, const Buffer::Attributes& attributes) const;
+    std::map<uint32_t, Buffer::Builder> makeDividedBufferBuilders() const;
 
 private:
     sp<std::map<uint32_t, Buffer>> makeDivisors(RenderController& renderController) const;

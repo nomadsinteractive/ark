@@ -11,7 +11,7 @@
 #include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/render_model.h"
+#include "renderer/inf/model_loader.h"
 #include "renderer/inf/resource.h"
 #include "renderer/inf/pipeline_factory.h"
 
@@ -34,7 +34,7 @@ public:
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
     static sp<Shader> fromStringTable(const String& vertex = "shaders/default.vert", const String& fragment = "shaders/texture.frag", const sp<Snippet>& snippet = nullptr, const sp<ResourceLoaderContext>& resourceLoaderContext = nullptr);
 
-    std::vector<RenderLayer::UBOSnapshot> snapshot(Allocator& allocator) const;
+    std::vector<RenderLayer::UBOSnapshot> snapshot(const RenderRequest& renderRequest) const;
 
     const sp<PipelineFactory>& pipelineFactory() const;
     const sp<RenderController>& renderController() const;
@@ -43,8 +43,8 @@ public:
     const sp<PipelineLayout>& layout() const;
     const sp<Camera>& camera() const;
 
-    sp<ShaderBindings> makeBindings(RenderModel::Mode mode) const;
-    sp<ShaderBindings> makeBindings(RenderModel::Mode mode, const Buffer& vertex, const Buffer& index) const;
+    sp<ShaderBindings> makeBindings(ModelLoader::RenderMode mode) const;
+    sp<ShaderBindings> makeBindings(ModelLoader::RenderMode mode, const Buffer& vertex, const Buffer& index) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Shader> {

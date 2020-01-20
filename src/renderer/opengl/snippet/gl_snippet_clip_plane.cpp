@@ -22,7 +22,7 @@ void GLSnippetClipPlane::preInitialize(PipelineBuildingContext& context)
     for(const auto& i : _planes)
     {
         const String uName = Strings::sprintf("u_Plane%d", i.first);
-        context.addUniform(uName, Uniform::TYPE_F4, 1, sp<FlatableByVariable<V4>>::make(i.second), i.second.as<Notifier>(), -1);
+        context.addUniform(uName, Uniform::TYPE_F4, 1, sp<FlatableByVariable<V4>>::make(i.second), -1);
     }
 }
 

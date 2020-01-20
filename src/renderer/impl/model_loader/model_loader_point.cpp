@@ -12,7 +12,7 @@
 namespace ark {
 
 ModelLoaderPoint::ModelLoaderPoint(const sp<Atlas>& atlas)
-    : ModelLoader(RenderModel::RENDER_MODE_POINTS), _atlas(atlas)
+    : ModelLoader(ModelLoader::RENDER_MODE_POINTS), _atlas(atlas)
 {
 }
 

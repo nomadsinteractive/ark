@@ -29,7 +29,7 @@ namespace plugin {
 namespace assimp {
 
 ModelLoaderAssimp::ModelLoaderAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest)
-    : ModelLoader(RenderModel::RENDER_MODE_TRIANGLES), _importer(sp<Assimp::Importer>::make()), _model_matrics(sp<Array<M4>::Allocated>::make(32))
+    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _importer(sp<Assimp::Importer>::make()), _model_matrics(sp<Array<M4>::Allocated>::make(32))
 {
     _importer->SetIOHandler(new ArkIOSystem());
 

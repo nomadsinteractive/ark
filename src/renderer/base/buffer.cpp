@@ -132,14 +132,9 @@ const sp<Buffer::Delegate>& Buffer::delegate() const
     return _delegate;
 }
 
-Buffer::Builder::Builder(const RenderRequest& renderRequest, const Attributes& attributes, size_t stride)
-    : _render_request(renderRequest), _attributes(attributes), _stride(stride), _grow_capacity(0), _size(0)
+Buffer::Builder::Builder(size_t stride)
+    : _stride(stride), _size(0)
 {
-}
-
-void Buffer::Builder::setGrowCapacity(size_t growCapacity)
-{
-    _grow_capacity = growCapacity;
 }
 
 Buffer::Snapshot Buffer::Builder::toSnapshot(const Buffer& buffer) const
@@ -159,11 +154,6 @@ sp<Uploader> Buffer::Builder::makeUploader() const
         return nullptr;
 
     return sp<UploaderImpl>::make(_blocks);
-}
-
-size_t Buffer::Builder::length() const
-{
-    return _size / _stride;
 }
 
 Uploader::Uploader(size_t size)

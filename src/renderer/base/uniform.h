@@ -35,9 +35,9 @@ public:
         TYPE_COUNT
     };
 
-    Uniform(const String& name, const String& declaredType, Type type, size_t size, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding = -1);
-    Uniform(const String& name, const String& type, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding = -1);
-    Uniform(const String& name, Type type, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding = -1);
+    Uniform(const String& name, const String& declaredType, Type type, size_t size, uint32_t length, const sp<Flatable>& flatable, int32_t binding = -1);
+    Uniform(const String& name, const String& type, uint32_t length, const sp<Flatable>& flatable, int32_t binding = -1);
+    Uniform(const String& name, Type type, uint32_t length, const sp<Flatable>& flatable, int32_t binding = -1);
     DEFAULT_COPY_AND_ASSIGN(Uniform);
 
     const String& name() const;
@@ -55,9 +55,6 @@ public:
     const sp<Flatable>& flatable() const;
     void setFlatable(const sp<Flatable>& flatable);
 
-    void setNotifier(const sp<Notifier>& notifier);
-    bool dirty() const;
-
     int32_t binding() const;
     void setBinding(int32_t binding);
 
@@ -71,8 +68,6 @@ private:
     size_t _size;
     uint32_t _length;
     sp<Flatable> _flatable;
-    sp<Notifier> _notifier;
-    sp<Boolean> _dirty_flag;
     int32_t _binding;
 };
 

@@ -56,7 +56,7 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
     _stub->_model_loader->postSnapshot(_stub->_render_controller, *this);
     _stub->_render_command_composer->postSnapshot(_stub->_render_controller, *this);
 
-    _ubos = _stub->_shader->snapshot(renderRequest.allocator());
+    _ubos = _stub->_shader->snapshot(renderRequest);
 
     if(_stub->_scissor && _stub->_scissor->update(renderRequest.timestamp()))
         _scissor = Rect(_stub->_scissor->val());

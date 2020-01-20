@@ -19,15 +19,15 @@ namespace ark {
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _size(size), _shader(shader),
-      _shader_bindings(shader->makeBindings(RenderModel::RENDER_MODE_TRIANGLES, resourceLoaderContext->renderController()->makeVertexBuffer(), resourceLoaderContext->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC))),
-      _vertex_buffer(_shader_bindings->vertexBuffer()), _index_buffer(resourceLoaderContext->renderController()->getNamedBuffer(NamedBuffer::NAME_QUADS)->snapshot(resourceLoaderContext->renderController(), 1))
+      _shader_bindings(shader->makeBindings(ModelLoader::RENDER_MODE_TRIANGLES, resourceLoaderContext->renderController()->makeVertexBuffer(), resourceLoaderContext->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC))),
+      _vertex_buffer(_shader_bindings->vertexBuffer()), _index_buffer(resourceLoaderContext->renderController()->getNamedBuffer(SharedBuffer::NAME_QUADS)->snapshot(resourceLoaderContext->renderController(), 1))
 {
 }
 
 void ShaderFrame::render(RenderRequest& renderRequest, const V3& position)
 {
     const sp<Uploader> uploader = sp<ByteArrayUploader>::make(getVertexBuffer(position));
-    DrawingContext drawingContext(_shader, _shader_bindings, _shader->snapshot(renderRequest.allocator()), _vertex_buffer.snapshot(uploader), _index_buffer, 1);
+    DrawingContext drawingContext(_shader, _shader_bindings, _shader->snapshot(renderRequest), _vertex_buffer.snapshot(uploader), _index_buffer, 1);
     renderRequest.addRequest(drawingContext.toRenderCommand());
 }
 

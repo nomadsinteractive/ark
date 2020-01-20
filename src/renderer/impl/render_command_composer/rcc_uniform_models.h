@@ -12,14 +12,14 @@ class RCCUniformModels : public RenderCommandComposer {
 public:
     RCCUniformModels(Model model);
 
-    virtual sp<ShaderBindings> makeShaderBindings(Shader& shader, RenderController& renderController, RenderModel::Mode renderMode) override;
+    virtual sp<ShaderBindings> makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode) override;
 
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
     virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot) override;
 
 private:
     Model _model;
-    sp<NamedBuffer> _shared_buffer;
+    sp<SharedBuffer> _shared_buffer;
 };
 
 }

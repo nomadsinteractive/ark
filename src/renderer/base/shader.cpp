@@ -87,11 +87,11 @@ sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment,
     return sp<Shader>::make(buildingContext->_pipeline_factory, resourceLoaderContext->renderController(), pipelineLayout, nullptr, Rect(), PipelineBindings::FLAG_DEFAULT_VALUE);
 }
 
-std::vector<RenderLayer::UBOSnapshot> Shader::snapshot(Allocator& allocator) const
+std::vector<RenderLayer::UBOSnapshot> Shader::snapshot(const RenderRequest& renderRequest) const
 {
     std::vector<RenderLayer::UBOSnapshot> uboSnapshot;
     for(const sp<PipelineInput::UBO>& i : _input->ubos())
-        uboSnapshot.push_back(i->snapshot(allocator));
+        uboSnapshot.push_back(i->snapshot(renderRequest));
     return uboSnapshot;
 }
 
@@ -120,12 +120,12 @@ const sp<PipelineLayout>& Shader::layout() const
     return _pipeline_layout;
 }
 
-sp<ShaderBindings> Shader::makeBindings(RenderModel::Mode mode) const
+sp<ShaderBindings> Shader::makeBindings(ModelLoader::RenderMode mode) const
 {
     return sp<ShaderBindings>::make(_pipeline_factory, sp<PipelineBindings>::make(PipelineBindings::Parameters(mode, _pipeline_bindings_scissor, _pipeline_bindings_flag), _pipeline_layout), _render_controller);
 }
 
-sp<ShaderBindings> Shader::makeBindings(RenderModel::Mode mode, const Buffer& vertex, const Buffer& index) const
+sp<ShaderBindings> Shader::makeBindings(ModelLoader::RenderMode mode, const Buffer& vertex, const Buffer& index) const
 {
     return sp<ShaderBindings>::make(_pipeline_factory, sp<PipelineBindings>::make(PipelineBindings::Parameters(mode, _pipeline_bindings_scissor, _pipeline_bindings_flag), _pipeline_layout), _render_controller, vertex, index);
 }

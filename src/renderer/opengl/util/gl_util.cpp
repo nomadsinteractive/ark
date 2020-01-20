@@ -53,10 +53,10 @@ struct GLConstants {
 
 }
 
-GLenum GLUtil::toEnum(RenderModel::Mode renderMode)
+GLenum GLUtil::toEnum(ModelLoader::RenderMode renderMode)
 {
-    static const GLenum models[RenderModel::RENDER_MODE_COUNT] = {GL_LINES, GL_POINTS, GL_TRIANGLES, GL_TRIANGLE_STRIP};
-    DCHECK(renderMode >= 0 && renderMode < RenderModel::RENDER_MODE_COUNT, "Unknown Mode: %d", renderMode);
+    static const GLenum models[ModelLoader::RENDER_MODE_COUNT] = {GL_LINES, GL_POINTS, GL_TRIANGLES, GL_TRIANGLE_STRIP};
+    DCHECK(renderMode >= 0 && renderMode < ModelLoader::RENDER_MODE_COUNT, "Unknown Mode: %d", renderMode);
     return models[renderMode];
 }
 
@@ -150,7 +150,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, nullptr);
 
-    const Buffer::Snapshot indexBufferSnapshot = indexBuffer.snapshot(NamedBuffer::Quads::maker()(6));
+    const Buffer::Snapshot indexBufferSnapshot = indexBuffer.snapshot(SharedBuffer::Quads::maker()(6));
     indexBufferSnapshot.upload(graphicsContext);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(indexBufferSnapshot.id()));
 

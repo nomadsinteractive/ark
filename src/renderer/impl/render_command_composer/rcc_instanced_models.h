@@ -11,7 +11,7 @@ class RCCInstancedModels : public RenderCommandComposer {
 public:
     RCCInstancedModels(Model model);
 
-    virtual sp<ShaderBindings> makeShaderBindings(Shader& shader, RenderController& renderController, RenderModel::Mode renderMode) override;
+    virtual sp<ShaderBindings> makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode) override;
 
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
     virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot) override;

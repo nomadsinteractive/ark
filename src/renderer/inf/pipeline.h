@@ -9,7 +9,6 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/texture.h"
 #include "renderer/inf/resource.h"
-#include "renderer/inf/render_model.h"
 
 namespace ark {
 

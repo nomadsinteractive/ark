@@ -23,7 +23,6 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/render_engine.h"
-#include "renderer/inf/render_model.h"
 #include "renderer/inf/uploader.h"
 
 #include "app/base/application_context.h"
@@ -168,7 +167,7 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
         Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(sp<Uploader::Array<uint8_t>>::make(ib));
 
         uint32_t offset = 0;
-        const std::vector<RenderLayer::UBOSnapshot> ubos = _shader->snapshot(renderRequest.allocator());
+        const std::vector<RenderLayer::UBOSnapshot> ubos = _shader->snapshot(renderRequest);
         sp<ImguiRenderCommand> renderCommand = nullptr;
         for (int j = 0; j < cmd_list->CmdBuffer.Size; j++)
         {
@@ -252,7 +251,7 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
 
 RendererImgui::DrawCommand::DrawCommand(const Shader& shader, const sp<PipelineFactory>& pipelineFactory, RenderController& renderController, const sp<Texture>& texture, const sp<LFStack<sp<DrawCommand>>>& recycler)
     : _vertex_buffer(renderController.makeVertexBuffer()), _index_buffer(renderController.makeIndexBuffer()),
-      _shader_bindings(sp<ShaderBindings>::make(pipelineFactory, sp<PipelineBindings>::make(PipelineBindings::Parameters(RenderModel::RENDER_MODE_TRIANGLES, Rect(), PipelineBindings::FLAG_CULL_MODE_NONE | PipelineBindings::FLAG_DYNAMIC_SCISSOR), shader.layout()), renderController, _vertex_buffer, _index_buffer)),
+      _shader_bindings(sp<ShaderBindings>::make(pipelineFactory, sp<PipelineBindings>::make(PipelineBindings::Parameters(ModelLoader::RENDER_MODE_TRIANGLES, Rect(), PipelineBindings::FLAG_CULL_MODE_NONE | PipelineBindings::FLAG_DYNAMIC_SCISSOR), shader.layout()), renderController, _vertex_buffer, _index_buffer)),
       _recycler(recycler)
 {
     PipelineBindings& pipelineBindings = _shader_bindings->pipelineBindings();

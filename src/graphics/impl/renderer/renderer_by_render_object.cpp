@@ -11,7 +11,6 @@
 #include "graphics/base/size.h"
 
 #include "renderer/base/model.h"
-#include "renderer/inf/render_model.h"
 #include "renderer/inf/model_loader.h"
 
 namespace ark {

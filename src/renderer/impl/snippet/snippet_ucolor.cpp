@@ -15,7 +15,7 @@ SnippetUColor::SnippetUColor(const sp<Vec4>& color)
 
 void SnippetUColor::preInitialize(PipelineBuildingContext& context)
 {
-    context.addUniform("u_Color", Uniform::TYPE_F4, 1, sp<FlatableByVariable<V4>>::make(_color), _color.as<Notifier>(), -1);
+    context.addUniform("u_Color", Uniform::TYPE_F4, 1, sp<FlatableByVariable<V4>>::make(_color), -1);
     context._fragment.addModifier("u_Color");
 }
 

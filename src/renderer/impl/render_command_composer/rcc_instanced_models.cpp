@@ -21,7 +21,7 @@ RCCInstancedModels::RCCInstancedModels(Model model)
 {
 }
 
-sp<ShaderBindings> RCCInstancedModels::makeShaderBindings(Shader& shader, RenderController& renderController, RenderModel::Mode renderMode)
+sp<ShaderBindings> RCCInstancedModels::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
 {
     _indices = renderController.makeIndexBuffer(Buffer::USAGE_STATIC, sp<Uploader::Array<element_index_t>>::make(_model.indices()));
     return shader.makeBindings(renderMode, renderController.makeVertexBuffer(), _indices);
@@ -38,7 +38,7 @@ sp<RenderCommand> RCCInstancedModels::compose(const RenderRequest& renderRequest
     const std::vector<Renderable::Snapshot>& items = snapshot._items;
     const sp<ModelLoader>& modelLoader = snapshot._stub->_model_loader;
 
-    DrawingBuffer buf(renderRequest, snapshot._stub->_shader_bindings, snapshot._stub->_stride);
+    DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
     buf.setIndices(snapshot._index_buffer);
 
     if(snapshot._flag == RenderLayer::SNAPSHOT_FLAG_RELOAD)
@@ -47,27 +47,12 @@ sp<RenderCommand> RCCInstancedModels::compose(const RenderRequest& renderRequest
         const Model model = modelLoader->load(0);
         model.writeToStream(writer, V3(1.0f));
     }
-//    else
-//    {
-//        size_t offset = 0;
-//        for(const Renderable::Snapshot& i : items)
-//        {
-//            if(i._dirty)
-//            {
-//                VertexStream writer = buf.makeVertexStream(renderRequest, verticesLength, offset);
-//                const Model model = modelLoader->load(i._type);
-//                writer.setRenderObject(i);
-//                model.writeToStream(writer, i._size);
-//            }
-//            offset += verticesLength;
-//        }
-//    }
 
     VertexStream writer = buf.makeDividedVertexStream(renderRequest, items.size(), 0, 1);
     for(const Renderable::Snapshot& i : items)
     {
         writer.next();
-        writer.write(MatrixUtil::scale(i._transform.toMatrix(), i._size));
+        writer.write(MatrixUtil::scale(MatrixUtil::translate(i._transform.toMatrix(), i._position), i._size));
     }
 
     DrawingContext drawingContext(snapshot._stub->_shader, snapshot._stub->_shader_bindings, std::move(snapshot._ubos),

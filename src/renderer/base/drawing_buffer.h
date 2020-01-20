@@ -21,7 +21,7 @@ namespace ark {
 
 class ARK_API DrawingBuffer {
 public:
-    DrawingBuffer(const RenderRequest& renderRequest, const sp<ShaderBindings>& shaderBindings, uint32_t stride);
+    DrawingBuffer(const sp<ShaderBindings>& shaderBindings, uint32_t stride);
     DEFAULT_COPY_AND_ASSIGN(DrawingBuffer);
 
     VertexStream makeVertexStream(const RenderRequest& renderRequest, size_t length, size_t offset);

@@ -134,7 +134,7 @@ PipelineInput::UBO::UBO(uint32_t binding)
 {
 }
 
-void PipelineInput::UBO::doSnapshot(bool force) const
+void PipelineInput::UBO::doSnapshot(uint64_t timestamp, bool force) const
 {
     uint8_t* buf = _buffer->buf();
     uint8_t* dirtyFlags = _dirty_flags->buf();
@@ -143,19 +143,20 @@ void PipelineInput::UBO::doSnapshot(bool force) const
     {
         const Uniform& uniform = uniforms.at(i);
         const sp<Flatable>& flatable = uniform.flatable();
-        dirtyFlags[i] = static_cast<uint8_t>(force || uniform.dirty());
+        bool dirty = flatable && flatable->update(timestamp);
+        dirtyFlags[i] = static_cast<uint8_t>(force || dirty);
         if(dirtyFlags[i] && flatable)
             flatable->flat(buf);
         buf += uniform.size();
     }
 }
 
-RenderLayer::UBOSnapshot PipelineInput::UBO::snapshot(Allocator& allocator) const
+RenderLayer::UBOSnapshot PipelineInput::UBO::snapshot(const RenderRequest& renderRequest) const
 {
-    doSnapshot(false);
+    doSnapshot(renderRequest.timestamp(), false);
     RenderLayer::UBOSnapshot ubo {
-        allocator.sbrk(_dirty_flags->size()),
-        allocator.sbrk(_buffer->size())
+        renderRequest.allocator().sbrk(_dirty_flags->size()),
+        renderRequest.allocator().sbrk(_buffer->size())
     };
     memcpy(ubo._dirty_flags.buf(), _dirty_flags->buf(), _dirty_flags->size());
     memcpy(ubo._buffer.buf(), _buffer->buf(), _buffer->size());
@@ -170,12 +171,6 @@ uint32_t PipelineInput::UBO::binding() const
 size_t PipelineInput::UBO::size() const
 {
     return _buffer->length();
-}
-
-void PipelineInput::UBO::notify() const
-{
-    for(const sp<Uniform>& i : _uniforms.values())
-        i->notify();
 }
 
 const Table<String, sp<Uniform> >& PipelineInput::UBO::uniforms() const
@@ -213,7 +208,7 @@ void PipelineInput::UBO::initialize()
 
     _dirty_flags = (sp<ByteArray::Allocated>::make(_uniforms.size()));
 
-    doSnapshot(true);
+    doSnapshot(0, true);
 }
 
 void PipelineInput::UBO::addUniform(const sp<Uniform>& uniform)

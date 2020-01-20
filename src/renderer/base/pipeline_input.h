@@ -43,9 +43,7 @@ public:
     public:
         UBO(uint32_t binding);
 
-        RenderLayer::UBOSnapshot snapshot(Allocator& allocator) const;
-
-        void notify() const;
+        RenderLayer::UBOSnapshot snapshot(const RenderRequest& renderRequest) const;
 
         uint32_t binding() const;
         size_t size() const;
@@ -59,7 +57,7 @@ public:
     private:
         void initialize();
         void addUniform(const sp<Uniform>& uniform);
-        void doSnapshot(bool force) const;
+        void doSnapshot(uint64_t timestamp, bool force) const;
 
     private:
         Table<String, sp<Uniform>> _uniforms;

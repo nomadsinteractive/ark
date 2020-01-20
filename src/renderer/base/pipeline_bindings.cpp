@@ -17,7 +17,7 @@ PipelineBindings::PipelineBindings(const Parameters& parameters, const sp<Pipeli
 {
 }
 
-RenderModel::Mode PipelineBindings::mode() const
+ModelLoader::RenderMode PipelineBindings::mode() const
 {
     return _stub->_parameters._mode;
 }
@@ -134,7 +134,7 @@ template<> ARK_API PipelineBindings::Flag Conversions::to<String, PipelineBindin
     return static_cast<PipelineBindings::Flag>(flag);
 }
 
-PipelineBindings::Parameters::Parameters(RenderModel::Mode mode, const Rect& scissor, uint32_t flags)
+PipelineBindings::Parameters::Parameters(ModelLoader::RenderMode mode, const Rect& scissor, uint32_t flags)
     : _mode(mode), _scissor(scissor), _flags(flags)
 {
 }

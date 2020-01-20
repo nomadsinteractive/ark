@@ -4,7 +4,7 @@
 #include "core/base/api.h"
 
 #include "renderer/base/buffer.h"
-#include "renderer/inf/render_model.h"
+#include "renderer/inf/model_loader.h"
 
 namespace ark {
 
@@ -21,9 +21,9 @@ public:
     };
 
     struct ARK_API Parameters {
-        Parameters(RenderModel::Mode mode, const Rect& scissor, uint32_t flags);
+        Parameters(ModelLoader::RenderMode mode, const Rect& scissor, uint32_t flags);
 
-        RenderModel::Mode _mode;
+        ModelLoader::RenderMode _mode;
         Rect _scissor;
         uint32_t _flags;
     };
@@ -32,7 +32,7 @@ public:
     PipelineBindings(const Parameters& parameters, const sp<PipelineLayout>& pipelineLayout);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineBindings);
 
-    RenderModel::Mode mode() const;
+    ModelLoader::RenderMode mode() const;
     const Rect& scissor() const;
 
     const sp<PipelineLayout>& layout() const;

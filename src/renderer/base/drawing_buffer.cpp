@@ -12,9 +12,9 @@
 
 namespace ark {
 
-DrawingBuffer::DrawingBuffer(const RenderRequest& renderRequest, const sp<ShaderBindings>& shaderBindings, uint32_t stride)
-    : _shader_bindings(shaderBindings), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(renderRequest, _pipeline_bindings->attributes(), stride),
-      _divided_buffer_builders(shaderBindings->makeDividedBufferBuilders(renderRequest, _pipeline_bindings->attributes())),
+DrawingBuffer::DrawingBuffer(const sp<ShaderBindings>& shaderBindings, uint32_t stride)
+    : _shader_bindings(shaderBindings), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(stride),
+      _divided_buffer_builders(shaderBindings->makeDividedBufferBuilders()),
       _is_instanced(_pipeline_bindings->hasDivisors())
 {
 }

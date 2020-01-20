@@ -3,21 +3,30 @@
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
-#include "core/types/shared_ptr.h"
+
+#include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/render_model.h"
 
 namespace ark {
 
 class ARK_API ModelLoader {
 public:
-    ModelLoader(RenderModel::Mode renderMode)
+    enum RenderMode {
+        RENDER_MODE_NONE = -1,
+        RENDER_MODE_LINES,
+        RENDER_MODE_POINTS,
+        RENDER_MODE_TRIANGLES,
+        RENDER_MODE_TRIANGLE_STRIP,
+        RENDER_MODE_COUNT,
+    };
+
+    ModelLoader(RenderMode renderMode)
         : _render_mode(renderMode) {
     }
     virtual ~ModelLoader() = default;
 
-    RenderModel::Mode renderMode() const {
+    RenderMode renderMode() const {
         return _render_mode;
     }
 
@@ -29,7 +38,7 @@ public:
     virtual Model load(int32_t type) = 0;
 
 private:
-    RenderModel::Mode _render_mode;
+    RenderMode _render_mode;
 };
 
 }

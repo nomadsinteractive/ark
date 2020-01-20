@@ -36,7 +36,7 @@ public:
 private:
     void initialize(const Camera& camera);
 
-    void addUniform(const String& name, const sp<Flatable>& flatable, const sp<Notifier>& notifier);
+    void addUniform(const String& name, const sp<Flatable>& flatable);
 
 private:
     sp<PipelineBuildingContext> _building_context;

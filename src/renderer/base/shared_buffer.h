@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_UTIL_NAMED_BUFFER_H_
-#define ARK_RENDERER_UTIL_NAMED_BUFFER_H_
+#ifndef ARK_RENDERER_BASE_SHARED_BUFFER_H_
+#define ARK_RENDERER_BASE_SHARED_BUFFER_H_
 
 #include <functional>
 
@@ -9,7 +9,7 @@
 
 namespace ark {
 
-class NamedBuffer {
+class SharedBuffer {
 public:
     enum Name {
         NAME_NONE,
@@ -20,37 +20,17 @@ public:
     };
 
 public:
-    NamedBuffer(const Buffer& buffer, Uploader::MakerFunc maker, std::function<size_t(size_t)> sizeCalculator);
+    SharedBuffer(const Buffer& buffer, Uploader::MakerFunc maker, std::function<size_t(size_t)> sizeCalculator);
 
     const Buffer& buffer() const;
-
-    void reset();
 
     Buffer::Snapshot snapshot(RenderController& renderController, size_t objectCount, size_t reservedIfInsufficient = 0);
 
 public:
-    class NinePatch {
-    public:
-        static Uploader::MakerFunc maker();
-        static sp<NamedBuffer> make(RenderController& renderController);
-    };
 
     class Quads {
     public:
         static Uploader::MakerFunc maker();
-        static sp<NamedBuffer> make(RenderController& renderController);
-    };
-
-    class Points : public Uploader {
-    public:
-        Points(size_t objectCount);
-
-        virtual void upload(const Uploader::UploadFunc& uploader) override;
-
-        static sp<NamedBuffer> make(RenderController& renderController);
-
-    private:
-        size_t _object_count;
     };
 
     class Concat : public Uploader {

@@ -15,7 +15,7 @@
 namespace ark {
 
 ModelLoaderSphere::ModelLoaderSphere(const sp<Atlas>& atlas, uint32_t sampleCount)
-    : ModelLoader(RenderModel::RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas), _sample_count(sampleCount), _indices(sp<IndexArray::Allocated>::make(4 * sampleCount * sampleCount + 2 * (sampleCount * 2 - 1)))
+    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas), _sample_count(sampleCount), _indices(sp<IndexArray::Allocated>::make(4 * sampleCount * sampleCount + 2 * (sampleCount * 2 - 1)))
 {
     element_index_t* indices = _indices->buf();
     for(uint32_t i = 0; i < sampleCount * 2; i++)

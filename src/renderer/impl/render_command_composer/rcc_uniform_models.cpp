@@ -20,7 +20,7 @@ RCCUniformModels::RCCUniformModels(Model model)
 {
 }
 
-sp<ShaderBindings> RCCUniformModels::makeShaderBindings(Shader& shader, RenderController& renderController, RenderModel::Mode renderMode)
+sp<ShaderBindings> RCCUniformModels::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
 {
     _shared_buffer = renderController.getSharedBuffer(renderMode, _model);
     return shader.makeBindings(renderMode, renderController.makeVertexBuffer(), _shared_buffer->buffer());
@@ -37,7 +37,7 @@ sp<RenderCommand> RCCUniformModels::compose(const RenderRequest& renderRequest, 
     const std::vector<Renderable::Snapshot>& items = snapshot._items;
     const sp<ModelLoader>& modelLoader = snapshot._stub->_model_loader;
 
-    DrawingBuffer buf(renderRequest, snapshot._stub->_shader_bindings, snapshot._stub->_stride);
+    DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
     buf.setIndices(snapshot._index_buffer);
 
     if(snapshot._flag == RenderLayer::SNAPSHOT_FLAG_RELOAD)

@@ -23,14 +23,11 @@ namespace ark {
 
 namespace {
 
-class FrustumMatrixVariable : public Mat4, public Runnable {
+class FrustumMatrixVariable : public Mat4 {
 public:
-    FrustumMatrixVariable(const sp<Camera::Delegate>& delegate, const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up, const sp<Notifier>& notifier)
-        : _delegate(delegate), _position(position), _target(target), _up(up), _notifier(notifier) {
-    }
-
-    virtual void run() override {
-        doUpdate();
+    FrustumMatrixVariable(sp<Camera::Delegate> delegate, sp<Vec3> position, sp<Vec3> target, const sp<Vec3> up)
+        : _delegate(std::move(delegate)), _position(std::move(position)), _target(std::move(target)), _up(std::move(up)),
+          _matrix(_delegate->lookAt(_position->val(), _target->val(), _up->val())) {
     }
 
     virtual M4 val() override {
@@ -38,21 +35,11 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return VariableUtil::update(timestamp, _position, _target, _up);
-    }
-
-private:
-    void doUpdate() {
-        const V3 position = _position->val();
-        const V3 target = _target->val();
-        const V3 up = _up->val();
-        if(_p != position || _t != target || _u != up) {
-            _matrix = _delegate->lookAt(position, target, up);
-            _notifier->notify();
-            _p = position;
-            _t = target;
-            _u = up;
+        if(VariableUtil::update(timestamp, _position, _target, _up)) {
+            _matrix = _delegate->lookAt(_position->val(), _target->val(), _up->val());
+            return true;
         }
+        return false;
     }
 
 private:
@@ -62,35 +49,32 @@ private:
     sp<Vec3> _target;
     sp<Vec3> _up;
 
-    sp<Notifier> _notifier;
-
-    V3 _p;
-    V3 _t;
-    V3 _u;
-
     M4 _matrix;
 };
 
 class MulMatrixVariable : public Mat4 {
 public:
     MulMatrixVariable(sp<Mat4> lvalue, sp<Mat4> rvalue)
-        : _lvalue(std::move(lvalue)), _rvalue(std::move(rvalue)) {
+        : _lvalue(std::move(lvalue)), _rvalue(std::move(rvalue)), _matrix(MatrixUtil::mul(_lvalue->val(), _rvalue->val())) {
     }
 
     virtual M4 val() override {
-        const M4 lvalue = _lvalue->val();
-        const M4 rvalue = _rvalue->val();
-        return MatrixUtil::mul(lvalue, rvalue);
+        return _matrix;
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return VariableUtil::update(timestamp, _lvalue, _rvalue);
+        if(VariableUtil::update(timestamp, _lvalue, _rvalue)) {
+            _matrix = MatrixUtil::mul(_lvalue->val(), _rvalue->val());
+            return true;
+        }
+        return false;
     }
 
 private:
     sp<Mat4> _lvalue;
     sp<Mat4> _rvalue;
 
+    M4 _matrix;
 };
 
 }
@@ -130,9 +114,7 @@ void Camera::lookAt(const V3& position, const V3& target, const V3& up)
 
 void Camera::lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up)
 {
-    const sp<FrustumMatrixVariable> var = sp<FrustumMatrixVariable>::make(_delegate, position, target, up, _notifier);
-    _view->_value = var;
-    Ark::instance().applicationContext()->addPreRenderTask(var, sp<BooleanByWeakRef<Runnable>>::make(var, 1));
+    _view->_value = sp<FrustumMatrixVariable>::make(_delegate, position, target, up);
     updateViewProjection();
 }
 

@@ -82,8 +82,7 @@ uint64_t GLPipeline::id()
 
 void GLPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
-    for(const sp<PipelineInput::UBO>& i : _pipeline_input->ubos())
-        i->notify();
+    _rebind_needed = true;
 
     _vertex_shader = makeShader(graphicsContext, _version, GL_VERTEX_SHADER, _vertex_source);
     _fragment_shader = makeShader(graphicsContext, _version, GL_FRAGMENT_SHADER, _fragment_source);
@@ -130,7 +129,6 @@ void GLPipeline::bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<P
             bindUniform(reinterpret_cast<float*>(buf + pair.first), pair.second, uniform);
         }
     }
-    _rebind_needed = false;
 }
 
 void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
@@ -147,6 +145,7 @@ void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext
         const sp<PipelineInput::UBO>& ubo = pipelineInput->ubos().at(i);
         bindUBO(uboSnapshot, ubo);
     }
+    _rebind_needed = false;
 
     const std::vector<sp<Texture>>& samplers = drawingContext._shader_bindings->samplers();
     for(size_t i = 0; i < samplers.size(); ++i)

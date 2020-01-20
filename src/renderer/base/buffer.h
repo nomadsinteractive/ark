@@ -92,28 +92,19 @@ public:
 
     class ARK_API Builder {
     public:
-        Builder(const RenderRequest& renderRequest, const Attributes& attributes, size_t stride);
+        Builder(size_t stride);
         DEFAULT_COPY_AND_ASSIGN(Builder);
-
-        void setGrowCapacity(size_t growCapacity);
 
         Snapshot toSnapshot(const Buffer& buffer) const;
 
         void addBlock(size_t offset, ByteArray::Borrowed& content);
 
-        size_t length() const;
-
         sp<Uploader> makeUploader() const;
 
-        RenderRequest _render_request;
-        Attributes _attributes;
-
         size_t _stride;
-        size_t _grow_capacity;
+        size_t _size;
 
         std::vector<Block> _blocks;
-
-        size_t _size;
     };
 
 public:

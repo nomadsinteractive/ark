@@ -8,7 +8,6 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
-#include "renderer/inf/render_model.h"
 
 #include "renderer/vulkan/forward.h"
 
@@ -31,7 +30,7 @@ public:
     static VkFormat toTextureFormat(uint32_t rowBytes, uint32_t width, uint8_t channels, Texture::Format format);
     static VkFormat toTextureFormat(const Bitmap& bitmap, Texture::Format format);
     static VkShaderStageFlagBits toStage(Shader::Stage stage);
-    static VkPrimitiveTopology toPrimitiveTopology(RenderModel::Mode mode);
+    static VkPrimitiveTopology toPrimitiveTopology(ModelLoader::RenderMode mode);
 
     static std::vector<uint32_t> compileSPIR(const String& source, Shader::Stage stage);
 

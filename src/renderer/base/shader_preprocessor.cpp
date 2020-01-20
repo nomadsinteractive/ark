@@ -185,7 +185,7 @@ void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int
             const Declaration& declare = iter.second;
             Uniform::Type type = Uniform::toType(declare.type());
             uniforms.push_back(name, sp<Uniform>::make(name, declare.type(), type, type == Uniform::TYPE_STRUCT ? getUniformSize(type, declare.type())
-                                                                                                                : Uniform::getTypeSize(type), declare.length(), nullptr, nullptr));
+                                                                                                                : Uniform::getTypeSize(type), declare.length(), nullptr));
         }
     }
 
@@ -222,7 +222,7 @@ sp<Uniform> ShaderPreprocessor::getUniformInput(const String& name, Uniform::Typ
 
     const Declaration& declaration = _uniforms.vars().at(name);
     DCHECK(Uniform::toType(declaration.type()) == type, "Uniform \"%s\" declared type: %s, but it should be %d", name.c_str(), declaration.type().c_str(), type);
-    return sp<Uniform>::make(name, type, 1, nullptr, nullptr);
+    return sp<Uniform>::make(name, type, 1, nullptr);
 }
 
 String ShaderPreprocessor::outputName() const

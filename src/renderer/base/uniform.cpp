@@ -10,18 +10,18 @@
 
 namespace ark {
 
-Uniform::Uniform(const String& name, const String& declaredType, Uniform::Type type, size_t size, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
-    : _name(name), _declared_type(declaredType), _type(type), _size(size), _length(length), _flatable(flatable), _notifier(notifier), _dirty_flag(_notifier ? _notifier->createDirtyFlag() : sp<Boolean>::null()), _binding(binding)
+Uniform::Uniform(const String& name, const String& declaredType, Uniform::Type type, size_t size, uint32_t length, const sp<Flatable>& flatable, int32_t binding)
+    : _name(name), _declared_type(declaredType), _type(type), _size(size), _length(length), _flatable(flatable), _binding(binding)
 {
 }
 
-Uniform::Uniform(const String& name, const String& type, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
-    : Uniform(name, type, toType(type), getTypeSize(toType(type)), length, flatable, notifier, binding)
+Uniform::Uniform(const String& name, const String& type, uint32_t length, const sp<Flatable>& flatable, int32_t binding)
+    : Uniform(name, type, toType(type), getTypeSize(toType(type)), length, flatable, binding)
 {
 }
 
-Uniform::Uniform(const String& name, Uniform::Type type, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
-    : Uniform(name, toDeclaredType(type), type, getTypeSize(type), length, flatable, notifier, binding)
+Uniform::Uniform(const String& name, Uniform::Type type, uint32_t length, const sp<Flatable>& flatable, int32_t binding)
+    : Uniform(name, toDeclaredType(type), type, getTypeSize(type), length, flatable, binding)
 {
 }
 
@@ -133,30 +133,12 @@ void Uniform::setFlatable(const sp<Flatable>& flatable)
     _flatable = flatable;
 }
 
-void Uniform::setNotifier(const sp<Notifier>& notifier)
-{
-    DASSERT(notifier);
-    _notifier = notifier;
-    _dirty_flag = _notifier->createDirtyFlag();
-}
-
-bool Uniform::dirty() const
-{
-    return _dirty_flag ? _dirty_flag->val() : true;
-}
-
 String Uniform::declaration(const String& descriptor) const
 {
     const String t = declaredType();
     if(_length == 1)
         return Strings::sprintf("%s%s %s;", descriptor.c_str(), t.c_str(), _name.c_str());
     return Strings::sprintf("%s%s %s[%d];", descriptor.c_str(), t.c_str(), _name.c_str(), _length);
-}
-
-void Uniform::notify() const
-{
-    if(_notifier)
-        _notifier->notify();
 }
 
 }

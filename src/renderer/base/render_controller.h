@@ -18,9 +18,9 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
-#include "renderer/inf/render_model.h"
+#include "renderer/inf/model_loader.h"
 #include "renderer/inf/uploader.h"
-#include "renderer/util/named_buffer.h"
+#include "renderer/base/shared_buffer.h"
 
 namespace ark {
 
@@ -114,9 +114,9 @@ public:
     void preUpdate();
     void deferUnref(Box box);
 
-    const sp<NamedBuffer>& getNamedBuffer(NamedBuffer::Name name) const;
+    sp<SharedBuffer> getNamedBuffer(SharedBuffer::Name name);
 
-    sp<NamedBuffer> getSharedBuffer(RenderModel::Mode renderMode, const Model& model);
+    sp<SharedBuffer> getSharedBuffer(ModelLoader::RenderMode renderMode, const Model& model);
 
 private:
     class RenderResource {
@@ -185,8 +185,7 @@ private:
     std::vector<Box> _defered_instances;
     WeakRefList<SynchronizeFlag> _synchronize_flags;
 
-    sp<NamedBuffer> _named_buffers[NamedBuffer::NAME_COUNT];
-    std::unordered_map<element_index_t, sp<NamedBuffer>> _shared_buffers;
+    std::unordered_map<element_index_t, sp<SharedBuffer>> _shared_buffers;
 
     friend class TextureBundle;
 };

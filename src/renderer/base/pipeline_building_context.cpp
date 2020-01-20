@@ -153,9 +153,9 @@ void PipelineBuildingContext::addSnippet(const sp<Snippet>& snippet)
     _snippet = _snippet ? sp<Snippet>::adopt(new SnippetLinkedChain(_snippet, snippet)) : snippet;
 }
 
-void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type, uint32_t length, const sp<Flatable>& flatable, const sp<Notifier>& notifier, int32_t binding)
+void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type, uint32_t length, const sp<Flatable>& flatable, int32_t binding)
 {
-    _uniforms.push_back(name, sp<Uniform>::make(name, type, length, flatable, notifier, binding));
+    _uniforms.push_back(name, sp<Uniform>::make(name, type, length, flatable, binding));
 }
 
 void PipelineBuildingContext::addUniform(const sp<Uniform>& uniform)
@@ -223,7 +223,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         default:
             FATAL("Unknow type \"%s\"", type.c_str());
         }
-        addUniform(name, uType, 1, uType == Uniform::TYPE_F3 ? sp<Flatable>::adopt(new AlignedFlatable(flatable, 16)) : flatable, flatable.as<Notifier>(), binding);
+        addUniform(name, uType, 1, uType == Uniform::TYPE_F3 ? sp<Flatable>::make<AlignedFlatable>(flatable, 16) : flatable, binding);
     }
 }
 
