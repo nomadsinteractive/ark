@@ -20,7 +20,6 @@ TilemapLayer::TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t c
     : _col_count(colCount), _row_count(rowCount), _layer_context(tilemap._layer_context), _size(tilemap._size), _tileset(tilemap._tileset), _position(position),
       _scroller(tilemap._scroller), _flag(flag), _tiles(_col_count * _row_count)
 {
-    reset();
 }
 
 void TilemapLayer::render(RenderRequest& /*renderRequest*/, const V3& position)
@@ -59,7 +58,11 @@ void TilemapLayer::render(RenderRequest& /*renderRequest*/, const V3& position)
     {
         float dy = (i - rowStart) * tileHeight - oy;
         for(int32_t j = colStart; j < colEnd; ++j)
-            _tiles.at(i * _col_count + j)->requestUpdate(V3((j - colStart) * tileWidth - ox, dy, 0) + position);
+        {
+            const sp<RenderablePassive>& tile = _tiles.at(i * _col_count + j);
+            if(tile)
+                tile->requestUpdate(V3((j - colStart) * tileWidth - ox, dy, 0) + position);
+        }
     }
 }
 
@@ -109,7 +112,9 @@ const sp<RenderObject>& TilemapLayer::getTileByPosition(float x, float y) const
 void TilemapLayer::setTile(uint32_t row, uint32_t col, const sp<RenderObject>& renderObject)
 {
     DCHECK(row < _row_count && col < _col_count, "Invaild tile position:(%d, %d), tilemap size(%d, %d)", row, col, _row_count, _col_count);
-    sp<RenderablePassive> renderable = sp<RenderablePassive>::make(renderObject);
+    sp<RenderablePassive> renderable = renderObject ? sp<RenderablePassive>::make(renderObject) : nullptr;
+    if(renderObject)
+        _layer_context->add(renderable, sp<BooleanByWeakRef<Renderable>>::make(renderable, 1));
     _tiles[row * _col_count + col] = std::move(renderable);
 }
 
@@ -120,6 +125,11 @@ void TilemapLayer::setTile(uint32_t row, uint32_t col, int32_t tileId)
     setTile(row, col, tile);
 }
 
+void TilemapLayer::reset()
+{
+    std::fill(_tiles.begin(), _tiles.end(), nullptr);
+}
+
 Tilemap::LayerFlag TilemapLayer::flag() const
 {
     return _flag;
@@ -128,16 +138,6 @@ Tilemap::LayerFlag TilemapLayer::flag() const
 void TilemapLayer::setFlag(Tilemap::LayerFlag flag)
 {
     _flag = flag;
-}
-
-void TilemapLayer::reset()
-{
-    for(size_t i = 0; i < _tiles.size(); ++i)
-    {
-        sp<RenderablePassive> renderable = sp<RenderablePassive>::make();
-        _layer_context->add(renderable, sp<BooleanByWeakRef<Renderable>>::make(renderable, 0));
-        _tiles[i] = std::move(renderable);
-    }
 }
 
 void TilemapLayer::viewportIntersect(float vs, float ve, float width, float& start, float& end)

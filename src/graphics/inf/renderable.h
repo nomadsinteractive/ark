@@ -15,8 +15,8 @@ public:
     virtual ~Renderable() = default;
 
     struct Snapshot {
-        Snapshot()
-            : _disposed(true) {
+        Snapshot(bool disposed = true)
+            : _disposed(disposed) {
         }
         Snapshot(bool disposed, bool dirty, bool visible, int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings)
             : _disposed(disposed), _dirty(dirty), _visible(visible), _type(type), _position(position), _size(size), _transform(transform), _varyings(varyings) {

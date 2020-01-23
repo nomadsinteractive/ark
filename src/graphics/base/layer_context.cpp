@@ -15,10 +15,9 @@
 namespace ark {
 
 LayerContext::Item::Item(const sp<Renderable>& renderable, const sp<Boolean>& disposed)
-    : _renderable(renderable), _disposed(disposed)
+    : _renderable(renderable), _disposed(disposed, false)
 {
     DASSERT(_renderable);
-    DASSERT(_disposed);
 }
 
 LayerContext::LayerContext(const sp<ModelLoader>& models, const sp<Notifier>& notifier, Layer::Type type)
@@ -71,10 +70,10 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
     bool notify = false;
     const sp<PipelineInput>& pipelineInput = output._stub->_shader->input();
 
-    for(auto iter = _renderables.begin(); iter != _renderables.end(); ++iter)
+    for(auto iter = _renderables.begin(); iter != _renderables.end(); )
     {
         const Item& i = *iter;
-        Renderable::Snapshot snapshot = i._disposed->val() ? Renderable::Snapshot() : i._renderable->snapshot(pipelineInput, renderRequest);
+        Renderable::Snapshot snapshot = i._disposed.val() ? Renderable::Snapshot() : i._renderable->snapshot(pipelineInput, renderRequest);
         if(snapshot._disposed || snapshot._type == -1)
         {
             notify = true;
@@ -87,6 +86,7 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
             snapshot._dirty = snapshot._dirty || _render_done != _render_requested;
             snapshot._visible = _render_requested && snapshot._visible;
             output._items.emplace_back(std::move(snapshot));
+            ++iter;
         }
     }
 

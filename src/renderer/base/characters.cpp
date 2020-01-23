@@ -10,12 +10,13 @@
 
 #include "graphics/base/layer.h"
 #include "graphics/base/layer_context.h"
+#include "graphics/base/render_layer.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/size.h"
 #include "graphics/base/v2.h"
+#include "graphics/impl/renderable/renderable_passive.h"
 #include "graphics/inf/character_mapper.h"
 #include "graphics/inf/character_maker.h"
-#include "graphics/util/vec3_util.h"
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
@@ -98,8 +99,6 @@ void Characters::renderRequest(const V3& position)
 
 void Characters::createContent()
 {
-    for(const sp<RenderObject>& i : _contents)
-        i->dispose();
     _contents.clear();
 
     float boundary = _layout_param ? _layout_param->contentWidth() : 0;
@@ -114,6 +113,7 @@ void Characters::createLayerContent(float width, float height)
     _size->setWidth(width);
     _size->setHeight(height);
 
+    _renderables.clear();
     for(const sp<RenderObject>& i : _contents)
     {
         sp<RenderablePassive> renderable = sp<RenderablePassive>::make(i);

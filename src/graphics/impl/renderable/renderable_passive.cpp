@@ -11,7 +11,7 @@ RenderablePassive::RenderablePassive(const sp<RenderObject>& renderObject)
 
 Renderable::Snapshot RenderablePassive::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest)
 {
-    Renderable::Snapshot snapshot = _render_object->snapshot(pipelineInput, renderRequest);
+    Renderable::Snapshot snapshot = _render_object ? _render_object->snapshot(pipelineInput, renderRequest) : Renderable::Snapshot(false);
     snapshot._dirty = snapshot._dirty || _position_changed || (_visible != _render_requested);
     snapshot._visible = _visible = _render_requested;
     snapshot._position += _position;
@@ -27,7 +27,6 @@ const sp<RenderObject>& RenderablePassive::renderObject() const
 
 void RenderablePassive::requestUpdate(const V3& position)
 {
-    DASSERT(_render_object);
     _position_changed = _position != position;
     if(_position_changed)
         _position = position;

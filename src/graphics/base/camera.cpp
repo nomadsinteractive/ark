@@ -25,7 +25,7 @@ namespace {
 
 class FrustumMatrixVariable : public Mat4 {
 public:
-    FrustumMatrixVariable(sp<Camera::Delegate> delegate, sp<Vec3> position, sp<Vec3> target, const sp<Vec3> up)
+    FrustumMatrixVariable(sp<Camera::Delegate> delegate, sp<Vec3> position, sp<Vec3> target, sp<Vec3> up)
         : _delegate(std::move(delegate)), _position(std::move(position)), _target(std::move(target)), _up(std::move(up)),
           _matrix(_delegate->lookAt(_position->val(), _target->val(), _up->val())) {
     }
@@ -79,9 +79,11 @@ private:
 
 }
 
+static const char sNearFarPlaneWarning[] = "Near: %.2f, Far: %.2f. Far plane should be further than near plane, and the distance of near plane should be greater than zero.";
+
 Camera::Camera()
     : _delegate(Ark::instance().applicationContext()->renderController()->createCamera()), _view(sp<Holder>::make(sp<Mat4::Const>::make(M4()))),
-      _projection(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _vp(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _notifier(sp<Notifier>::make())
+      _projection(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _vp(sp<Holder>::make(sp<Mat4::Const>::make(M4())))
 {
 }
 
@@ -91,17 +93,18 @@ void Camera::ortho(float left, float right, float bottom, float top, float near,
         std::swap(top, bottom);
 
     _vp->_value = sp<Mat4::Const>::make(_delegate->ortho(left, right, bottom, top, near * 2 - far, far));
-    _notifier->notify();
 }
 
 void Camera::frustum(float left, float right, float bottom, float top, float near, float far)
 {
+    DWARN(far > near && near > 0, sNearFarPlaneWarning, near, far);
     _projection->_value = sp<Mat4::Const>::make(_delegate->frustum(left, right, bottom, top, near, far));
     updateViewProjection();
 }
 
 void Camera::perspective(float fov, float aspect, float near, float far)
 {
+    DWARN(far > near && near > 0, sNearFarPlaneWarning, near, far);
     _projection->_value = sp<Mat4::Const>::make(_delegate->perspective(fov, aspect, near, far));
     updateViewProjection();
 }
@@ -133,11 +136,6 @@ const sp<Camera::Holder>& Camera::vp() const
     return _vp;
 }
 
-const sp<Notifier>& Camera::notifier() const
-{
-    return _notifier;
-}
-
 const sp<Camera>& Camera::getDefaultCamera()
 {
     const Global<Camera> camera;
@@ -148,7 +146,6 @@ const sp<Camera>& Camera::getDefaultCamera()
 void Camera::updateViewProjection()
 {
     _vp->_value = sp<MulMatrixVariable>::make(_projection->_value, _view->_value);
-    _notifier->notify();
 }
 
 Camera::Holder::Holder(sp<Mat4> value)

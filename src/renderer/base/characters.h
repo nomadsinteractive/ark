@@ -11,8 +11,6 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/metrics.h"
-#include "graphics/base/render_layer.h"
-#include "graphics/impl/renderable/renderable_passive.h"
 
 #include "renderer/forwarding.h"
 

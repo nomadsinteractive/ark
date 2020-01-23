@@ -20,7 +20,7 @@ private:
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
 
         sp<Renderable> _renderable;
-        sp<Boolean> _disposed;
+        SafeVar<Boolean> _disposed;
     };
 
 public:

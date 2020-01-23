@@ -91,10 +91,6 @@ public:
     const sp<Holder>& projection() const;
     const sp<Holder>& vp() const;
 
-    const sp<Notifier>& notifier() const;
-
-//    Snapshot snapshot() const;
-
     static const sp<Camera>& getDefaultCamera();
 
 private:
@@ -107,8 +103,6 @@ private:
     sp<Holder> _projection;
 
     sp<Holder> _vp;
-
-    sp<Notifier> _notifier;
 };
 
 }
