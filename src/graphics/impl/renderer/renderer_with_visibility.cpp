@@ -3,6 +3,9 @@
 #include "core/base/bean_factory.h"
 #include "core/epi/visibility.h"
 
+#include "graphics/base/render_request.h"
+
+
 namespace ark {
 
 RendererWithVisibility::RendererWithVisibility(const sp<Renderer>& renderer, const sp<Visibility>& visibility)
@@ -14,6 +17,8 @@ RendererWithVisibility::RendererWithVisibility(const sp<Renderer>& renderer, con
 
 void RendererWithVisibility::render(RenderRequest& renderRequest, const V3& position)
 {
+    _visibility->update(renderRequest.timestamp());
+
     if(_visibility->val())
         _renderer->render(renderRequest, position);
 }

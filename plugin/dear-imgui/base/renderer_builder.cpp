@@ -55,7 +55,7 @@ private:
 class Text : public Widget {
 public:
     Text(std::function<void(const char*)> func, const String& content)
-        : _func(func), _content(content) {
+        : _func(std::move(func)), _content(content) {
     }
 
     virtual void render() override {

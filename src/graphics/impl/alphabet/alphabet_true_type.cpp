@@ -29,11 +29,15 @@ AlphabetTrueType::~AlphabetTrueType()
 
 bool AlphabetTrueType::measure(int32_t c, Metrics& metrics, bool hasFallback)
 {
+    const std::lock_guard<std::mutex> lock(_mutex);
+
     FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
     if(hasFallback && !glyphIndex)
         return false;
-    if(FT_Load_Glyph(_ft_font_face, glyphIndex, FT_LOAD_NO_BITMAP) != 0)
-        DFATAL("Error loading metrics, character: %d", c);
+
+    FT_Error err;
+    if((err = FT_Load_Glyph(_ft_font_face, glyphIndex, FT_LOAD_NO_BITMAP)) != 0)
+        DFATAL("Error loading metrics, character: %d. Error code: %d", c, err);
     FT_GlyphSlot slot = _ft_font_face->glyph;
     metrics.width = slot->advance.x >> 6;
     metrics.height = _line_height_in_pixel;
@@ -46,6 +50,8 @@ bool AlphabetTrueType::measure(int32_t c, Metrics& metrics, bool hasFallback)
 
 bool AlphabetTrueType::draw(uint32_t c, const bitmap& image, int32_t x, int32_t y)
 {
+    const std::lock_guard<std::mutex> lock(_mutex);
+
     FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
     if(!glyphIndex)
         return false;

@@ -33,9 +33,6 @@ private:
     sp<Numeric> _target;
     float _nearest;
     float _farest;
-
-    float _value;
-
 };
 
 }

@@ -21,7 +21,7 @@ LayerContext::Item::Item(const sp<Renderable>& renderable, const sp<Boolean>& di
 }
 
 LayerContext::LayerContext(const sp<ModelLoader>& models, const sp<Notifier>& notifier, Layer::Type type)
-    : _model_loader(models), _notifier(notifier), _layer_type(type), _render_requested(false), _render_done(false)
+    : _model_loader(models), _notifier(notifier), _layer_type(type), _render_requested(false), _render_done(false), _position_changed(false)
 {
 }
 
@@ -42,9 +42,12 @@ Layer::Type LayerContext::layerType() const
     return _layer_type;
 }
 
-void LayerContext::renderRequest(const V3& /*position*/)
+void LayerContext::renderRequest(const V3& position)
 {
     _render_requested = true;
+    _position_changed = _position != position;
+    if(_position_changed)
+        _position = position;
 }
 
 void LayerContext::add(const sp<Renderable>& renderable, const sp<Boolean>& disposed)
@@ -74,6 +77,7 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
     {
         const Item& i = *iter;
         Renderable::Snapshot snapshot = i._disposed.val() ? Renderable::Snapshot() : i._renderable->snapshot(pipelineInput, renderRequest);
+        snapshot._position += _position;
         if(snapshot._disposed || snapshot._type == -1)
         {
             notify = true;
@@ -83,7 +87,7 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
         }
         else
         {
-            snapshot._dirty = snapshot._dirty || _render_done != _render_requested;
+            snapshot._dirty = snapshot._dirty || _position_changed || _render_done != _render_requested;
             snapshot._visible = _render_requested && snapshot._visible;
             output._items.emplace_back(std::move(snapshot));
             ++iter;

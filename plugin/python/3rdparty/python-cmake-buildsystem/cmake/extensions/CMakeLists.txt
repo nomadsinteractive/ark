@@ -253,7 +253,7 @@ if(WIN32)
                 _ctypes/callbacks.c
                 _ctypes/callproc.c
                 _ctypes/cfield.c
-                _ctypes/libffi_mingw/closures.c
+#                _ctypes/libffi_mingw/closures.c
                 _ctypes/libffi_mingw/debug.c
                 _ctypes/libffi_mingw/prep_cif.c
                 _ctypes/libffi_mingw/raw_api.c
@@ -316,7 +316,7 @@ else(WIN32)
                     _ctypes/callbacks.c
                     _ctypes/callproc.c
                     _ctypes/cfield.c
-                    _ctypes/libffi/src/closures.c
+#                    _ctypes/libffi/src/closures.c
                     _ctypes/libffi/src/prep_cif.c
                     _ctypes/stgdict.c
                     _ctypes/libffi/src/${_libffi_system_dir}/ffi.c

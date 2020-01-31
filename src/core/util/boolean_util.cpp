@@ -13,66 +13,6 @@ namespace ark {
 
 namespace {
 
-//class GT : public Boolean {
-//public:
-//    GT(const sp<Numeric>& a1, const sp<Numeric>& a2)
-//        : _a1(a1), _a2(a2) {
-//    }
-
-//    virtual bool val() override {
-//        return _a1->val() > _a2->val();
-//    }
-
-//private:
-//    sp<Numeric> _a1;
-//    sp<Numeric> _a2;
-//};
-
-//class LT : public Boolean {
-//public:
-//    LT(const sp<Numeric>& a1, const sp<Numeric>& a2)
-//        : _a1(a1), _a2(a2) {
-//    }
-
-//    virtual bool val() override {
-//        return _a1->val() < _a2->val();
-//    }
-
-//private:
-//    sp<Numeric> _a1;
-//    sp<Numeric> _a2;
-//};
-
-//class GET : public Boolean {
-//public:
-//    GET(const sp<Numeric>& a1, const sp<Numeric>& a2)
-//        : _a1(a1), _a2(a2) {
-//    }
-
-//    virtual bool val() override {
-//        return _a1->val() >= _a2->val();
-//    }
-
-//private:
-//    sp<Numeric> _a1;
-//    sp<Numeric> _a2;
-//};
-
-//class LET : public Boolean {
-//public:
-//    LET(const sp<Numeric>& a1, const sp<Numeric>& a2)
-//        : _a1(a1), _a2(a2) {
-//    }
-
-//    virtual bool val() override {
-//        return _a1->val() <= _a2->val();
-//    }
-
-//private:
-//    sp<Numeric> _a1;
-//    sp<Numeric> _a2;
-//};
-
 template<typename OP, typename T = Boolean> class OperationBuilder : public Builder<Boolean> {
 public:
     OperationBuilder(const sp<Builder<T>>& a1, const sp<Builder<T>>& a2)

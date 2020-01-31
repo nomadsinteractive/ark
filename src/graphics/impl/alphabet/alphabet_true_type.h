@@ -1,6 +1,8 @@
 #ifndef ARK_GRAPHICS_IMPL_ALPHABET_TRUE_TYPE_ALPHABET_H_
 #define ARK_GRAPHICS_IMPL_ALPHABET_TRUE_TYPE_ALPHABET_H_
 
+#include <mutex>
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -40,6 +42,8 @@ private:
     FT_Face _ft_font_face;
     int32_t _base_line_position;
     uint32_t _line_height_in_pixel;
+
+    std::mutex _mutex;
 
 };
 

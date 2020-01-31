@@ -65,9 +65,9 @@ public:
 
     static size_type npos;
 
-    friend String operator +(const String& lvalue, const String& rvalue);
-    friend String operator +(const String& lvalue, const char* rvalue);
-    friend String operator +(const char* lvalue, const String& rvalue);
+    friend ARK_API String operator +(const String& lvalue, const String& rvalue);
+    friend ARK_API String operator +(const String& lvalue, const char* rvalue);
+    friend ARK_API String operator +(const char* lvalue, const String& rvalue);
 
     static const String& null();
 

@@ -61,6 +61,9 @@ private:
 
     bool _render_requested;
     bool _render_done;
+    bool _position_changed;
+
+    V3 _position;
 
     std::vector<Item> _renderables;
 
