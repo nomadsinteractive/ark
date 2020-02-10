@@ -15,6 +15,8 @@ public:
     Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t channels, const bytearray& bytes);
     ~Bitmap();
 
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Bitmap);
+
 //  [[script::bindings::property]]
     uint32_t width() const;
 //  [[script::bindings::property]]
