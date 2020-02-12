@@ -42,7 +42,7 @@ public:
     bool onEvent(const Event& event);
 
     void addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& disposed = nullptr);
-    void addEventListener(const sp<EventListener>& eventListener);
+    void addEventListener(const sp<EventListener>& eventListener, int32_t priority);
     void setDefaultEventListener(const sp<EventListener>& eventListener);
 
     void post(const sp<Runnable>& task, float delay = 0);

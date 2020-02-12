@@ -103,7 +103,7 @@ public:
     };
 
     Texture(const sp<Size>& size, const sp<Variable<sp<Delegate>>>& delegate, const sp<Parameters>& parameters);
-    virtual ~Texture() override;
+    ~Texture() override;
 
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext, const sp<ark::Uploader>& uploader) override;

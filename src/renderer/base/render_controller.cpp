@@ -90,7 +90,7 @@ const sp<Recycler>& RenderController::recycler() const
 
 void RenderController::doRecycling(GraphicsContext& graphicsContext)
 {
-    for(auto iter = _on_surface_ready_items.begin(); iter != _on_surface_ready_items.end();)
+    for(auto iter = _on_surface_ready_items.begin(); iter != _on_surface_ready_items.end(); )
     {
         const RenderResource& resource = *iter;
         if(resource.isExpired())

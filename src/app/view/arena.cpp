@@ -94,9 +94,9 @@ sp<BoxBundle> Arena::packages() const
     return _resource_loader->packages();
 }
 
-void Arena::addEventListener(const sp<EventListener>& eventListener)
+void Arena::addEventListener(const sp<EventListener>& eventListener, int32_t priority)
 {
-    _event_listeners->addEventListener(eventListener);
+    _event_listeners->addEventListener(eventListener, priority);
 }
 
 void Arena::addLayer(const sp<Renderer>& layer)

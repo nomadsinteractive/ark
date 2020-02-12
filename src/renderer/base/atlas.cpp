@@ -49,6 +49,12 @@ const V2& Atlas::getOriginalSize(int32_t c) const
     return at(c).size();
 }
 
+Rect Atlas::getItemUV(int32_t c) const
+{
+    const Item& item = at(c);
+    return Rect(item.ux() / 65536.0f, item.uy() / 65536.0f, item.vx() / 65536.0f, item.vy() / 65536.0f);
+}
+
 void Atlas::add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot)
 {
     _items->add(id, makeItem(ux, uy, vx, vy, bounds, size, pivot));

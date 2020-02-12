@@ -182,6 +182,16 @@ void BooleanUtil::set(const sp<BooleanWrapper>& self, const sp<Boolean>& delegat
     self->set(delegate);
 }
 
+void BooleanUtil::toggle(const sp<Boolean::Impl>& self)
+{
+    self->set(!self->val());
+}
+
+void BooleanUtil::toggle(const sp<BooleanWrapper>& self)
+{
+    self->set(!self->val());
+}
+
 sp<Boolean> BooleanUtil::observe(const sp<Boolean>& self, const sp<Observer>& observer)
 {
     return sp<VariableObserver<bool>>::make(self, observer);

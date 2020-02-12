@@ -21,8 +21,8 @@ public:
 
 class Updatable::Timestamp : public Updatable {
 public:
-    Timestamp()
-        : _timestamp(0) {
+    Timestamp(bool dirty = false)
+        : _timestamp(dirty ? std::numeric_limits<uint64_t>::max() : 0) {
     }
 
     virtual bool update(uint64_t timestamp) override {

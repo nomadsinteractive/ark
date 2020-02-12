@@ -35,7 +35,7 @@ public:
             _variable_impl->set(value);
         else {
             deferedUnref();
-            _variable_impl = new typename Variable<T>::Impl(value);
+            _variable_impl = new typename Variable<T>::Impl(value, true);
             this->_delegate = sp<Variable<T>>::adopt(_variable_impl);
         }
     }

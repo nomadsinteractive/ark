@@ -173,9 +173,9 @@ void ApplicationContext::addPreRenderTask(const sp<Runnable>& task, const sp<Boo
     _render_controller->addPreUpdateRequest(task, disposed);
 }
 
-void ApplicationContext::addEventListener(const sp<EventListener>& eventListener)
+void ApplicationContext::addEventListener(const sp<EventListener>& eventListener, int32_t priority)
 {
-    _event_listeners->addEventListener(eventListener);
+    _event_listeners->addEventListener(eventListener, priority);
 }
 
 void ApplicationContext::setDefaultEventListener(const sp<EventListener>& eventListener)

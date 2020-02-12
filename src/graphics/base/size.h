@@ -56,6 +56,8 @@ public:
     void assign(const Size& other);
 //  [[script::bindings::auto]]
     void adopt(const Size& other);
+//  [[script::bindings::auto]]
+    void fix();
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Size> {

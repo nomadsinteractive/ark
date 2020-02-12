@@ -137,7 +137,7 @@ class ApplicationFacade:
     def add_pre_render_task(self, task: Callable, expired: 'Boolean' = None):
         pass
 
-    def add_event_listener(self, event_listener: Callable[['Event'], bool]):
+    def add_event_listener(self, event_listener: Callable[['Event'], bool], priority: int = 0):
         pass
 
     def set_default_event_listener(self, event_listener: Callable[['Event'], bool]):
@@ -319,6 +319,9 @@ class Boolean(_Var):
     def ternary(self, positive, negative):
         return None
 
+    def toggle(self):
+        return None
+
     def __or__(self, other):
         return None
 
@@ -388,6 +391,9 @@ class Integer(_Var):
 
     def __init__(self, value: Union[int, 'Integer', list, tuple]):
         super().__init__(value)
+
+    def __int__(self) -> int:
+        return 0
 
     def repeat(self, repeat: int) -> 'Integer':
         return Integer(0)
@@ -565,6 +571,7 @@ class Mat3:
 class RenderObject:
     def __init__(self, t, pos=None, size=None, transform=None, varyings=None):
         self._position = pos
+        self._size = size
         self._transform = transform
         self._disposed = Boolean(False)
 
@@ -607,6 +614,10 @@ class RenderObject:
     @property
     def y(self):
         return 0
+
+    @property
+    def size(self):
+        return self._size
 
     @property
     def transform(self) -> 'Transform':
@@ -663,6 +674,10 @@ class RenderLayer:
     @property
     def context(self) -> LayerContext:
         return LayerContext()
+
+    @property
+    def layer(self) -> 'Layer':
+        return Layer(self)
 
     def make_context(self, layer_type) -> LayerContext:
         return LayerContext()
@@ -963,7 +978,7 @@ class Readable:
 
 
 class Size:
-    def __init__(self, w, h):
+    def __init__(self, w, h, d = None):
         pass
 
     @property
@@ -1319,6 +1334,25 @@ class StateMachine:
 
     def deactivate(self, state: State):
         pass
+
+
+class Texture:
+
+    @property
+    def width(self) -> int:
+        return 0
+
+    @property
+    def height(self) -> int:
+        return 0
+
+    @property
+    def depth(self) -> int:
+        return 0
+
+    @property
+    def size(self) -> Size:
+        return Size(0, 0)
 
 
 class CollisionManifold:

@@ -15,10 +15,11 @@ aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(3rdparty/imgui LOCAL_SRC_LIST)
 
 aux_source_directory(base LOCAL_SRC_LIST)
-aux_source_directory(base/renderer LOCAL_SRC_LIST)
+aux_source_directory(renderer LOCAL_SRC_LIST)
+aux_source_directory(widget LOCAL_SRC_LIST)
 
 ark_setup_tools(ark_gen_plugin_class)
-ark_gen_plugin_class(dear_imgui core ark::plugin::dear_imgui dear_imgui_plugin base)
+ark_gen_plugin_class(dear_imgui core ark::plugin::dear_imgui dear_imgui_plugin base renderer)
 
 ark_setup_tools(ark_gen_string_table)
 ark_gen_string_table(shaders ark::plugin::imgui shaders)

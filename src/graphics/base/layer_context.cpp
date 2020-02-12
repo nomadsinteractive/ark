@@ -82,8 +82,6 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
         {
             notify = true;
             iter = _renderables.erase(iter);
-            if(iter == _renderables.end())
-                break;
         }
         else
         {

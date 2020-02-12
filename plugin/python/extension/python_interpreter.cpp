@@ -486,6 +486,26 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<V3>(const
     return v3;
 }
 
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<V4>(const V4& value)
+{
+    PyObject* v4 = PyTuple_New(4);
+    PyTuple_SetItem(v4, 0, PyFloat_FromDouble(value.x()));
+    PyTuple_SetItem(v4, 1, PyFloat_FromDouble(value.y()));
+    PyTuple_SetItem(v4, 2, PyFloat_FromDouble(value.z()));
+    PyTuple_SetItem(v4, 3, PyFloat_FromDouble(value.w()));
+    return v4;
+}
+
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Rect>(const Rect& value)
+{
+    PyObject* v4 = PyTuple_New(4);
+    PyTuple_SetItem(v4, 0, PyFloat_FromDouble(value.left()));
+    PyTuple_SetItem(v4, 1, PyFloat_FromDouble(value.top()));
+    PyTuple_SetItem(v4, 2, PyFloat_FromDouble(value.right()));
+    PyTuple_SetItem(v4, 3, PyFloat_FromDouble(value.bottom()));
+    return v4;
+}
+
 template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Color>(const Color& color)
 {
     return PythonInterpreter::instance()->fromSharedPtr<Color>(sp<Color>::make(color));

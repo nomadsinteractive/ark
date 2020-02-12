@@ -1,5 +1,5 @@
-#ifndef ARK_PLUGIN_DEAR_IMGUI_BASE_RENDERER_RENDERER_IMGUI_H_
-#define ARK_PLUGIN_DEAR_IMGUI_BASE_RENDERER_RENDERER_IMGUI_H_
+#ifndef ARK_PLUGIN_DEAR_IMGUI_RENDERER_RENDERER_IMGUI_H_
+#define ARK_PLUGIN_DEAR_IMGUI_RENDERER_RENDERER_IMGUI_H_
 
 #include "core/inf/builder.h"
 #include "core/base/memory_pool.h"
@@ -14,6 +14,8 @@
 #include "renderer/base/shader_bindings.h"
 
 #include "app/inf/event_listener.h"
+
+#include "dear-imgui/forwarding.h"
 
 struct ImDrawData;
 struct ImGuiIO;
@@ -46,21 +48,29 @@ public:
     };
 
     struct DrawCommand {
-        DrawCommand(const Shader& shader, const sp<PipelineFactory>& pipelineFactory, RenderController& renderController, const sp<Texture>& texture, const sp<LFStack<sp<DrawCommand>>>& recycler);
+        DrawCommand(const Shader& shader, const sp<PipelineFactory>& pipelineFactory, RenderController& renderController, const sp<Texture>& texture);
 
         Buffer _vertex_buffer;
         Buffer _index_buffer;
         sp<ShaderBindings> _shader_bindings;
-
-        void recycle(const sp<DrawCommand>& self);
-
-        sp<LFStack<sp<DrawCommand>>> _recycler;
     };
 
-    sp<DrawCommand> obtainDrawCommand();
+    class DrawCommandRecycler {
+    public:
+        DrawCommandRecycler(const sp<LFStack<sp<DrawCommand>>>& recycler, const sp<DrawCommand>& drawCommand);
+        ~DrawCommandRecycler();
+
+        const sp<DrawCommand>& drawCommand() const;
+
+    private:
+        sp<LFStack<sp<RendererImgui::DrawCommand>>> _recycler;
+        sp<DrawCommand> _draw_command;
+    };
 
 private:
     void MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawData* draw_data);
+
+    sp<DrawCommandRecycler> obtainDrawCommandRecycler(const ImguiContext& imguiContext, Texture* texture, std::map<void*, sp<DrawCommandRecycler>>& cache);
 
 private:
     sp<Shader> _shader;
@@ -72,8 +82,7 @@ private:
 
     MemoryPool _memory_pool;
 
-    sp<LFStack<sp<DrawCommand>>> _draw_commands;
-    sp<PipelineFactory> _bindings;
+    sp<PipelineFactory> _pipeline_factory;
 };
 
 

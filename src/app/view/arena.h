@@ -61,7 +61,7 @@ public:
     sp<BoxBundle> packages() const;
 
 //  [[script::bindings::auto]]
-    void addEventListener(const sp<EventListener>& eventListener);
+    void addEventListener(const sp<EventListener>& eventListener, int32_t priority = 0);
 //  [[script::bindings::auto]]
     void addLayer(const sp<Renderer>& layer);
 

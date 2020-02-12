@@ -13,6 +13,9 @@
 #include "graphics/forwarding.h"
 #include "graphics/base/v2.h"
 
+#include "renderer/forwarding.h"
+
+#include "dear-imgui/forwarding.h"
 #include "dear-imgui/api.h"
 #include "dear-imgui/inf/widget.h"
 
@@ -46,6 +49,8 @@ public:
 
 // [[script::bindings::auto]]
     void combo(const String& label, const sp<Integer>& option, const std::vector<String>& items);
+// [[script::bindings::auto]]
+    void listBox(const String& label, const sp<Integer>& option, const std::vector<String>& items);
 
 // [[script::bindings::auto]]
     void indent(float w = 0);
@@ -62,7 +67,16 @@ public:
     void text(const String& name);
 
 // [[script::bindings::auto]]
+    void inputInt(const String& label, const sp<Integer>& value, int32_t step = 1, int32_t step_fast = 100, int32_t flags = 0);
+
+// [[script::bindings::auto]]
     void inputFloat(const String& label, const sp<Numeric>& value, float step = 0.0f, float step_fast = 0.0f, const String& format = "%.3f");
+// [[script::bindings::auto]]
+    void inputFloat2(const String& label, const sp<Vec2>& value, const String& format = "%.3f", int32_t flags = 0);
+// [[script::bindings::auto]]
+    void inputFloat3(const String& label, const sp<Vec3>& value, const String& format = "%.3f", int32_t flags = 0);
+// [[script::bindings::auto]]
+    void inputFloat4(const String& label, const sp<Vec4>& value, const String& format = "%.3f", int32_t flags = 0);
 
 // [[script::bindings::auto]]
     void sliderFloat(const String& label, const sp<Numeric>& value, float v_min, float v_max, const String& format = "%.3f", float power = 1.0f);
@@ -83,9 +97,12 @@ public:
     void colorPicker4(const String& label, const sp<Vec4>& value);
 
 // [[script::bindings::auto]]
-    void showAboutWindow();
+    void image(const sp<Texture>& texture, const sp<Vec2>& size, const V2& uv0 = V2(0), const V2& uv1 = V2(1.0f), const sp<Vec4>& color = nullptr, const sp<Vec4>& borderColor = nullptr);
+
 // [[script::bindings::auto]]
-    void showDemoWindow();
+    sp<Controller> showAboutWindow();
+// [[script::bindings::auto]]
+    sp<Controller> showDemoWindow();
 
 // [[script::bindings::auto]]
     sp<Renderer> build() const;

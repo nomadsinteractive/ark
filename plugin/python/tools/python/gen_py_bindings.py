@@ -1045,7 +1045,7 @@ def create_overloaded_method_type(base_type, **kwargs):
         def add_overloaded_method(self, method):
             if self._overloaded_methods:
                 m1 = self._overloaded_methods[-1]
-                if len(m1.arguments) != len(method.arguments) or len(method.arguments) == 0:
+                if len(m1.arguments) != len(method.arguments):
                     print('Overloaded methods(%s, %s) should have equal number of arguments' % (m1, method))
                     sys.exit(-1)
             method._arguments = self._replace_arguments(method.arguments)

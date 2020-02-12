@@ -14,9 +14,9 @@ namespace ark {
 class ARK_API NumericUtil final {
 public:
 //[[script::bindings::constructor]]
-    static sp<Numeric> create(const sp<Numeric>& value);
-//[[script::bindings::constructor]]
     static sp<Numeric> create(float value);
+//[[script::bindings::constructor]]
+    static sp<Numeric> create(const sp<Numeric>& value);
 
 //[[script::bindings::operator(+)]]
     static sp<Numeric> add(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);

@@ -9,7 +9,7 @@ void TransformLinear2D::snapshot(const Transform& transform, Transform::Snapshot
 {
     Snapshot* data = snapshot.makeData<Snapshot>();
     const Rotation rot = transform._rotate.val();
-    data->matrix = MatrixUtil::rotate(MatrixUtil::scale(MatrixUtil::translate(M3::identity(), V2(transform._pivot.val())), V2(transform._scale.val())), rot.angle);
+    data->matrix = MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(M3::identity(), V2(transform._scale.val())), rot.angle), V2(transform._pivot.val()));
 }
 
 V3 TransformLinear2D::transform(const Transform::Snapshot& snapshot, const V3& position) const
@@ -26,7 +26,7 @@ M4 TransformLinear2D::toMatrix(const Transform::Snapshot& snapshot) const
     memcpy(matrix.value(), data->matrix.value(), sizeof(float) * 3);
     memcpy(matrix.value() + 4, data->matrix.value() + 3, sizeof(float) * 3);
     memcpy(matrix.value() + 8, data->matrix.value() + 6, sizeof(float) * 3);
-    return M4::identity();
+    return matrix;
 }
 
 }

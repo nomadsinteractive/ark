@@ -1,4 +1,4 @@
-#include "dear-imgui/base/renderer/renderer_imgui.h"
+#include "dear-imgui/renderer/renderer_imgui.h"
 
 #include <cctype>
 
@@ -28,54 +28,39 @@
 #include "app/base/application_context.h"
 #include "app/base/event.h"
 
+#include "dear-imgui/base/imgui_context.h"
+
 namespace ark {
 namespace plugin {
 namespace dear_imgui {
 
 namespace {
 
-class ImguiContext {
-public:
-    ImguiContext()
-        : _context(ImGui::CreateContext()) {
-    }
-    ~ImguiContext() {
-        ImGui::DestroyContext(_context);
-    }
-
-private:
-    ImGuiContext* _context;
-};
-
-
 class ImguiRenderCommand : public RenderCommand {
 public:
-    ImguiRenderCommand(sp<RenderCommand> delegate, sp<RendererImgui::DrawCommand> drawCommand)
-        : _delegate(std::move(delegate)), _draw_command(std::move(drawCommand)), _recycle(false) {
+    ImguiRenderCommand(sp<RenderCommand> delegate, sp<RendererImgui::DrawCommandRecycler> recycler)
+        : _delegate(std::move(delegate)), _recycler(std::move(recycler)) {
     }
 
     virtual void draw(GraphicsContext& graphicsContext) override {
         _delegate->draw(graphicsContext);
-        DASSERT(_draw_command);
-        if(_recycle)
-            _draw_command->recycle(_draw_command);
-    }
-
-    void recycleWhenDone() {
-        _recycle = true;
     }
 
 private:
     sp<RenderCommand> _delegate;
-    sp<RendererImgui::DrawCommand> _draw_command;
-    bool _recycle;
+    sp<RendererImgui::DrawCommandRecycler> _recycler;
 };
 
 }
 
+static void updateKeyStatus(ImGuiIO& io, ImGuiKey_ keycode, bool isKeyDown) {
+    io.KeyMap[keycode] = isKeyDown ? keycode : -1;
+    io.KeysDown[keycode] = isKeyDown;
+}
+
 RendererImgui::RendererImgui(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Shader>& shader, const sp<Texture>& texture)
     : _shader(shader), _render_controller(resourceLoaderContext->renderController()), _render_engine(_render_controller->renderEngine()), _renderer_group(sp<RendererGroup>::make()), _texture(texture),
-      _draw_commands(sp<LFStack<sp<DrawCommand>>>::make()), _bindings(shader->pipelineFactory())
+      _pipeline_factory(shader->pipelineFactory())
 {
 }
 
@@ -118,17 +103,38 @@ bool RendererImgui::onEvent(const Event& event)
         return true;
     case Event::ACTION_KEY_DOWN:
     case Event::ACTION_KEY_UP:
-        switch(event.code())
         {
-            case Event::CODE_KEYBOARD_LSHIFT:
-            case Event::CODE_KEYBOARD_RSHIFT:
-                io.KeyShift = event.action() == Event::ACTION_KEY_DOWN;
-                return true;
-            default:
+            const bool isKeyDown = event.action() == Event::ACTION_KEY_DOWN;
+            switch(event.code())
+            {
+                case Event::CODE_KEYBOARD_LSHIFT:
+                case Event::CODE_KEYBOARD_RSHIFT:
+                    io.KeyShift = event.action() == Event::ACTION_KEY_DOWN;
+                    return true;
+                case Event::CODE_KEYBOARD_LEFT:
+                    updateKeyStatus(io, ImGuiKey_LeftArrow, isKeyDown);
+                    return true;
+                case Event::CODE_KEYBOARD_RIGHT:
+                    updateKeyStatus(io, ImGuiKey_RightArrow, isKeyDown);
+                    return true;
+                case Event::CODE_KEYBOARD_UP:
+                    updateKeyStatus(io, ImGuiKey_UpArrow, isKeyDown);
+                    return true;
+                case Event::CODE_KEYBOARD_DOWN:
+                    updateKeyStatus(io, ImGuiKey_DownArrow, isKeyDown);
+                    return true;
+                case Event::CODE_KEYBOARD_DELETE:
+                    updateKeyStatus(io, ImGuiKey_Delete, isKeyDown);
+                    return true;
+                case Event::CODE_KEYBOARD_BACKSPACE:
+                    updateKeyStatus(io, ImGuiKey_Backspace, isKeyDown);
+                    return true;
+                default:
+                    break;
+            }
+            if(!isKeyDown)
                 break;
         }
-        if(event.action() == Event::ACTION_KEY_DOWN)
-            break;
     case Event::ACTION_KEY_REPEAT:
         if(event.code() < Event::CODE_NO_ASCII) {
             wchar_t c = Event::toCharacter(event.code());
@@ -141,17 +147,11 @@ bool RendererImgui::onEvent(const Event& event)
     return false;
 }
 
-sp<RendererImgui::DrawCommand> RendererImgui::obtainDrawCommand()
-{
-    sp<DrawCommand> cmd;
-    if(_draw_commands->pop(cmd))
-        return cmd;
-
-    return sp<DrawCommand>::make(_shader, _bindings, _render_controller, _texture, _draw_commands);
-}
-
 void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawData* draw_data)
 {
+    const Global<ImguiContext> context;
+    std::map<void*, sp<DrawCommandRecycler>> recyclers;
+
     for (int i = 0; i < draw_data->CmdListsCount; i++)
     {
         const ImDrawList* cmd_list = draw_data->CmdLists[i];
@@ -162,13 +162,11 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
         memcpy(vb->buf(), cmd_list->VtxBuffer.Data, static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes()));
         memcpy(ib->buf(), cmd_list->IdxBuffer.Data, static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes()));
 
-        sp<DrawCommand> drawCommand = obtainDrawCommand();
-        Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(sp<Uploader::Array<uint8_t>>::make(vb));
-        Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(sp<Uploader::Array<uint8_t>>::make(ib));
+        const sp<Uploader::Array<uint8_t>> verticsUploader = sp<Uploader::Array<uint8_t>>::make(vb);
+        const sp<Uploader::Array<uint8_t>> indicesUploader = sp<Uploader::Array<uint8_t>>::make(ib);
 
         uint32_t offset = 0;
         const std::vector<RenderLayer::UBOSnapshot> ubos = _shader->snapshot(renderRequest);
-        sp<ImguiRenderCommand> renderCommand = nullptr;
         for (int j = 0; j < cmd_list->CmdBuffer.Size; j++)
         {
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[j];
@@ -192,16 +190,35 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
                 // Render 'pcmd->ElemCount/3' indexed triangles.
                 // By default the indices ImDrawIdx are 16-bits, you can change them to 32-bits in imconfig.h if your engine doesn't support 16-bits indices.
                 const ImVec2& pos = draw_data->DisplayPos;
-                DrawingContext drawingContext(_shader, drawCommand->_shader_bindings, ubos, vertexBuffer, indexBuffer, static_cast<int32_t>(pcmd->ElemCount / 3), offset, pcmd->ElemCount);
+
+                sp<DrawCommandRecycler> recycler = obtainDrawCommandRecycler(context, reinterpret_cast<Texture*>(pcmd->TextureId), recyclers);
+                const sp<DrawCommand>& drawCommand = recycler->drawCommand();
+                Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(verticsUploader);
+                Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(indicesUploader);
+                DrawingContext drawingContext(_shader, drawCommand->_shader_bindings, ubos, std::move(vertexBuffer), std::move(indexBuffer), static_cast<int32_t>(pcmd->ElemCount / 3), offset, pcmd->ElemCount);
                 drawingContext._parameters._scissor = _render_engine->toRendererScissor(Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y), Ark::COORDINATE_SYSTEM_LHS);
-                renderCommand = sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(), drawCommand);
-                renderRequest.addRequest(renderCommand);
+                renderRequest.addRequest(sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(), std::move(recycler)));
             }
             offset += pcmd->ElemCount;
         }
-        if(renderCommand)
-            renderCommand->recycleWhenDone();
     }
+}
+
+sp<RendererImgui::DrawCommandRecycler> RendererImgui::obtainDrawCommandRecycler(const ImguiContext& imguiContext, Texture* texture, std::map<void*, sp<RendererImgui::DrawCommandRecycler>>& cache)
+{
+    const auto iter = cache.find(texture);
+    if(iter != cache.end())
+        return iter->second;
+
+    const sp<LFStack<sp<RendererImgui::DrawCommand>>>& drawCommandPool = imguiContext.obtainDrawCommandPool(texture);
+
+    sp<DrawCommand> drawCommand;
+    if(!drawCommandPool->pop(drawCommand))
+        drawCommand = sp<DrawCommand>::make(_shader, _pipeline_factory, _render_controller, texture ? sp<Texture>::make(*texture) : _texture);
+
+    sp<DrawCommandRecycler> recycler = sp<DrawCommandRecycler>::make(drawCommandPool, drawCommand);
+    cache.insert(std::make_pair(texture, recycler));
+    return recycler;
 }
 
 RendererImgui::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -249,18 +266,27 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
     return sp<RendererImgui>::make(_resource_loader_context, _shader->build(args), texture);
 }
 
-RendererImgui::DrawCommand::DrawCommand(const Shader& shader, const sp<PipelineFactory>& pipelineFactory, RenderController& renderController, const sp<Texture>& texture, const sp<LFStack<sp<DrawCommand>>>& recycler)
+RendererImgui::DrawCommand::DrawCommand(const Shader& shader, const sp<PipelineFactory>& pipelineFactory, RenderController& renderController, const sp<Texture>& texture)
     : _vertex_buffer(renderController.makeVertexBuffer()), _index_buffer(renderController.makeIndexBuffer()),
-      _shader_bindings(sp<ShaderBindings>::make(pipelineFactory, sp<PipelineBindings>::make(PipelineBindings::Parameters(ModelLoader::RENDER_MODE_TRIANGLES, Rect(), PipelineBindings::FLAG_CULL_MODE_NONE | PipelineBindings::FLAG_DYNAMIC_SCISSOR), shader.layout()), renderController, _vertex_buffer, _index_buffer)),
-      _recycler(recycler)
+      _shader_bindings(sp<ShaderBindings>::make(pipelineFactory, sp<PipelineBindings>::make(PipelineBindings::Parameters(ModelLoader::RENDER_MODE_TRIANGLES, Rect(), PipelineBindings::FLAG_CULL_MODE_NONE | PipelineBindings::FLAG_DYNAMIC_SCISSOR), shader.layout()), renderController, _vertex_buffer, _index_buffer))
 {
     PipelineBindings& pipelineBindings = _shader_bindings->pipelineBindings();
     pipelineBindings.bindSampler(texture);
 }
 
-void RendererImgui::DrawCommand::recycle(const sp<RendererImgui::DrawCommand>& self)
+RendererImgui::DrawCommandRecycler::DrawCommandRecycler(const sp<LFStack<sp<RendererImgui::DrawCommand>>>& recycler, const sp<RendererImgui::DrawCommand>& drawCommand)
+    : _recycler(recycler), _draw_command(drawCommand)
 {
-    _recycler->push(self);
+}
+
+RendererImgui::DrawCommandRecycler::~DrawCommandRecycler()
+{
+    _recycler->push(_draw_command);
+}
+
+const sp<RendererImgui::DrawCommand>& RendererImgui::DrawCommandRecycler::drawCommand() const
+{
+    return _draw_command;
 }
 
 }

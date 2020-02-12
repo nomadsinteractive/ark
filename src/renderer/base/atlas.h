@@ -50,16 +50,22 @@ public:
         V2 _size;
     };
 
+//  [[script::bindings::property]]
     const sp<Texture>& texture() const;
-    const op<ByIndex<Item>>& items() const;
 
+//  [[script::bindings::property]]
     uint32_t width() const;
+//  [[script::bindings::property]]
     uint32_t height() const;
 
 //  [[script::bindings::auto]]
     bool has(int32_t c) const;
 //  [[script::bindings::auto]]
     const V2& getOriginalSize(int32_t c) const;
+//  [[script::bindings::auto]]
+    Rect getItemUV(int32_t c) const;
+
+    const op<ByIndex<Item>>& items() const;
 
     void add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot);
 

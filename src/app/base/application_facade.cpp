@@ -70,7 +70,7 @@ void ApplicationFacade::setArena(const sp<Arena>& arena)
     _arena.absorb<Disposed>(sp<Disposed>::make());
 
     _surface_controller->addRenderer(_arena);
-    _context->addEventListener(_arena);
+    _context->addEventListener(_arena, 0);
 }
 
 sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name, const Scope& args)
@@ -88,9 +88,9 @@ void ApplicationFacade::addPreRenderTask(const sp<Runnable>& task, const sp<Bool
     _context->addPreRenderTask(task, expired);
 }
 
-void ApplicationFacade::addEventListener(const sp<EventListener>& eventListener)
+void ApplicationFacade::addEventListener(const sp<EventListener>& eventListener, int32_t priority)
 {
-    _context->addEventListener(eventListener);
+    _context->addEventListener(eventListener, priority);
 }
 
 void ApplicationFacade::setDefaultEventListener(const sp<EventListener>& eventListener)

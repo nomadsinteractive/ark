@@ -220,6 +220,8 @@ public:
             return Event::CODE_KEYBOARD_ESCAPE;
         case SDL_SCANCODE_BACKSPACE:
             return Event::CODE_KEYBOARD_BACKSPACE;
+        case SDL_SCANCODE_DELETE:
+            return Event::CODE_KEYBOARD_DELETE;
         case SDL_SCANCODE_TAB:
             return Event::CODE_KEYBOARD_TAB;
         case SDL_SCANCODE_SPACE:

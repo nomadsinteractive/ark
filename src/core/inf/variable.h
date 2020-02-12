@@ -21,8 +21,8 @@ public:
 
 template<typename T> class Variable<T>::Impl : public Variable<T>, Implements<typename Variable<T>::Impl, Variable<T>> {
 public:
-    Impl(const T& value)
-        : _value(value) {
+    Impl(const T& value, bool dirty = false)
+        : _value(value), _timestamp(dirty) {
     }
 
     virtual T val() override {

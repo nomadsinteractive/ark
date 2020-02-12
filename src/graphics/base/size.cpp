@@ -117,6 +117,13 @@ void Size::adopt(const Size& other)
     _depth->set(other._depth);
 }
 
+void Size::fix()
+{
+    _width->fix();
+    _height->fix();
+    _depth->fix();
+}
+
 template<> ARK_API sp<Size> Null::ptr()
 {
     return sp<Size>::make();

@@ -44,6 +44,11 @@ public:
 //[[script::bindings::classmethod]]
     static void set(const sp<BooleanWrapper>& self, const sp<Boolean>& delegate);
 
+//[[script::bindings::classmethod]]
+    static void toggle(const sp<Boolean::Impl>& self);
+//[[script::bindings::classmethod]]
+    static void toggle(const sp<BooleanWrapper>& self);
+
 //  [[script::bindings::classmethod]]
     static sp<Boolean> observe(const sp<Boolean>& self, const sp<Observer>& observer);
 
@@ -53,7 +58,6 @@ public:
     static sp<Vec2> ternary(const sp<Boolean>& self, const sp<Vec2>& postive, const sp<Vec2>& negative);
 //[[script::bindings::classmethod]]
     static sp<Vec3> ternary(const sp<Boolean>& self, const sp<Vec3>& postive, const sp<Vec3>& negative);
-
 
 //[[script::bindings::classmethod]]
     static void fix(const sp<Boolean>& self);

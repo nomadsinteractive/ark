@@ -2,27 +2,28 @@
 
 namespace ark {
 
-void EventListenerList::addEventListener(const sp<EventListener>& eventListener)
+void EventListenerList::addEventListener(const sp<EventListener>& eventListener, int32_t priority)
 {
     DASSERT(eventListener);
-    _event_listeners.push_back(eventListener);
+    _event_listeners[-priority].push_back(eventListener);
 }
 
 bool EventListenerList::onEvent(const Event& event)
 {
-    for(const sp<EventListener>& i : _event_listeners)
-        if(i->onEvent(event))
-            return true;
+    for(auto iter = _event_listeners.begin(); iter != _event_listeners.end(); )
+    {
+        DisposableItemList<EventListener>& eventListener = iter->second;
+        if(eventListener.items().size() == 0)
+            iter = _event_listeners.erase(iter);
+        else
+        {
+            for(const sp<EventListener>& i : eventListener)
+                if(i->onEvent(event))
+                    return true;
+            ++iter;
+        }
+    }
     return false;
-}
-
-EventListenerList::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& /*manifest*/)
-{
-}
-
-sp<EventListener> EventListenerList::BUILDER::build(const Scope& /*args*/)
-{
-    return sp<EventListenerList>::make();
 }
 
 }

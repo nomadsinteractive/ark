@@ -4,11 +4,11 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-std::vector<sp<PyInstanceRef> > ReferenceManager::refs()
+std::vector<sp<PyInstanceRef>> ReferenceManager::refs()
 {
     std::vector<sp<PyInstanceRef>> r;
 
-    for(auto iter = _refs.begin(); iter != _refs.end();)
+    for(auto iter = _refs.begin(); iter != _refs.end(); )
     {
         const sp<PyInstanceRef> ref = iter->lock();
         if(ref)
@@ -17,11 +17,7 @@ std::vector<sp<PyInstanceRef> > ReferenceManager::refs()
             ++iter;
         }
         else
-        {
             iter = _refs.erase(iter);
-            if(iter == _refs.end())
-                break;
-        }
     }
 
     return r;

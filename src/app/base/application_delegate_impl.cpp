@@ -52,7 +52,7 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
         if(script._on == SCRIPT_RUN_ON_CREATE)
             script.run();
         else if(script._on == SCRIPT_RUN_ON_EVENT)
-            applicationContext->addEventListener(script.makeEventListener());
+            applicationContext->addEventListener(script.makeEventListener(), 0);
         else if(script._on == SCRIPT_RUN_ON_UNHANDLED_EVENT)
         {
             DWARN(!defaultEventListenerSet, "Default EventListener has been set already");

@@ -52,15 +52,15 @@ DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings
 {
 }
 
-DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& vertexBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount)
-    : DrawingContext(shader, shaderBindings, std::move(ubo), vertexBuffer, indexBuffer, instanceCount, 0, indexBuffer.length<element_index_t>())
+DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, int32_t instanceCount)
+    : DrawingContext(shader, shaderBindings, std::move(ubo), std::move(vertexBuffer), std::move(indexBuffer), instanceCount, 0, indexBuffer.length<element_index_t>())
 {
 }
 
-DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, const Buffer::Snapshot& vertexBuffer, const Buffer::Snapshot& indexBuffer, int32_t instanceCount, uint32_t start, uint32_t count)
-    : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _vertex_buffer(vertexBuffer), _index_buffer(indexBuffer), _parameters(instanceCount, start, count)
+DrawingContext::DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, int32_t instanceCount, uint32_t start, uint32_t count)
+    : _shader(shader), _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _vertex_buffer(std::move(vertexBuffer)), _index_buffer(std::move(indexBuffer)), _parameters(instanceCount, start, count)
 {
-    DWARN(_shader_bindings->vertexBuffer().id() == vertexBuffer.id(), "ShaderBinding's VertexBuffer: %lld, which is not the same as DrawingContext's VertexBuffer snapshot: %lld", _shader_bindings->vertexBuffer().id(), vertexBuffer.id());
+    DWARN(_shader_bindings->vertexBuffer().id() == _vertex_buffer.id(), "ShaderBinding's VertexBuffer: %lld, which is not the same as DrawingContext's VertexBuffer snapshot: %lld", _shader_bindings->vertexBuffer().id(), vertexBuffer.id());
 }
 
 sp<RenderCommand> DrawingContext::toRenderCommand()
