@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_IMPL_FRAME_HORIZONTAL_SCROLLABLE_H_
-#define ARK_GRAPHICS_IMPL_FRAME_HORIZONTAL_SCROLLABLE_H_
+#ifndef ARK_GRAPHICS_IMPL_RENDERER_HORIZONTAL_SCROLLABLE_H_
+#define ARK_GRAPHICS_IMPL_RENDERER_HORIZONTAL_SCROLLABLE_H_
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
@@ -9,13 +9,17 @@
 #include "graphics/inf/renderer.h"
 #include "graphics/util/tiles.h"
 
+#include "app/view/layout_hierarchy.h"
+
 namespace ark {
 
-class HorizontalScrollable : public Renderer {
+class HorizontalScrollable : public Renderer, public LayoutEventListener {
 public:
     HorizontalScrollable(const sp<RendererMaker>& tileMaker, const sp<Numeric>& scroller, int32_t width, int32_t tileWidth, uint32_t itemCount);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
+
+    virtual bool onEvent(const Event& event, float x, float y, bool ptin) override;
 
 //  [[plugin::builder("horizontal-scrollable")]]
     class BUILDER : public Builder<Renderer> {
@@ -39,11 +43,11 @@ private:
 
     int32_t lower(int32_t pos) const;
     int32_t upper(int32_t pos) const;
-    void ensureTile(Tile<sp<Renderer>>& tile, int32_t position);
+    void ensureTile(RendererTile& tile, int32_t position);
 
 private:
     sp<RendererMaker> _tile_maker;
-    RollingList<Tile<sp<Renderer>>> _tiles;
+    RollingList _tiles;
     sp<Numeric> _scroller;
 
     const int32_t _width;

@@ -15,6 +15,13 @@
 
 namespace ark {
 
+class ARK_API LayoutEventListener {
+public:
+    virtual ~LayoutEventListener() = default;
+
+    virtual bool onEvent(const Event& event, float x, float y, bool ptin) = 0;
+};
+
 class LayoutHierarchy : public Holder {
 private:
     class Slot : public Holder {
@@ -46,7 +53,7 @@ private:
         bool _layout_requested;
         sp<Renderer> _renderer;
         sp<View> _view;
-        sp<ViewGroup> _view_group;
+        sp<LayoutEventListener> _layout_event_listener;
         sp<Disposed> _disposed;
         sp<Visibility> _visibility;
 

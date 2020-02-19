@@ -14,7 +14,7 @@ INDENT = '\n    '
 
 
 CORE_INTERFACES = ('Numeric', 'Integer', 'Resource', 'EventListener', 'Renderer', 'Notifier', 'Block',
-                   'Boolean', 'Runnable', 'Vec2', 'Vec3', 'Vec4', 'Mat3', 'Holder')
+                   'Boolean', 'Runnable', 'Vec2', 'Vec3', 'Vec4', 'Mat3', 'Holder', 'LayoutEventListener')
 
 
 class GenClass:

@@ -1,6 +1,7 @@
 #ifndef ARK_GRAPHICS_UTIL_TILES_H_
 #define ARK_GRAPHICS_UTIL_TILES_H_
 
+#include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -8,87 +9,54 @@
 
 namespace ark {
 
-template<typename T> class Tile {
+class LayoutEventListener;
+
+class RendererTile {
 public:
-    Tile()
-        : _offset(0), _position(-1) {
-    }
-    Tile(const T& renderer, int32_t offset)
-        : _renderer(renderer), _offset(offset), _position(-1) {
-    }
-    Tile(const Tile& other)
-        : _renderer(other._renderer), _offset(other._offset), _position(other._position) {
-    }
+    RendererTile();
+    RendererTile(const sp<Renderer>& renderer, int32_t offset);
 
-    explicit operator bool() const {
-        return static_cast<bool>(_renderer);
-    }
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RendererTile);
 
-    void render(RenderCommandPipeline& pipeline, int32_t scroll, float x, float y) {
-        _renderer.render(pipeline, scroll, x, y);
-    }
+    explicit operator bool() const;
 
-    int32_t offset() const {
-        return _offset;
-    }
+    int32_t offset() const;
 
-    void setOffset(int32_t offset) {
-        _offset = offset;
-    }
+    void setOffset(int32_t offset);
 
-    void roll(int32_t offset) {
-        _offset += offset;
-    }
+    void roll(int32_t offset);
 
-    int32_t position() const {
-        return _position;
-    }
+    int32_t position() const;
 
-    void setPosition(int32_t position) {
-        _position = position;
-    }
+    void setPosition(int32_t position);
 
-    const T& renderer() const {
-        return _renderer;
-    }
+    void setRenderer(sp<Renderer> renderer);
 
-    T& renderer() {
-        return _renderer;
-    }
+    const sp<Renderer>& renderer() const;
+
+    const sp<LayoutEventListener>& layoutEventListener() const;
 
 private:
-    T _renderer;
+    sp<Renderer> _renderer;
+    sp<LayoutEventListener> _layout_event_listener;
 
     int32_t _offset;
     int32_t _position;
 
 };
 
-template<typename T> class RollingList {
+class RollingList {
 public:
-    RollingList(uint32_t itemCount)
-        : _items(new T[itemCount]), _item_count(itemCount), _head(0) {
-    }
-    ~RollingList() {
-        delete[] _items;
-    }
+    RollingList(uint32_t itemCount);
+    ~RollingList();
 
-    void roll(int32_t offset) {
-        _head = (_head + (offset >= 0 ? offset : offset + _item_count)) % _item_count;
-    }
+    void roll(int32_t offset);
 
-    const T& operator[](uint32_t index) const {
-        DCHECK(index < _item_count, "Index out of bounds");
-        return _items[(_head + index) % _item_count];
-    }
-
-    T& operator[](uint32_t index) {
-        DCHECK(index < _item_count, "Index out of bounds");
-        return _items[(_head + index) % _item_count];
-    }
+    const RendererTile& operator[](uint32_t index) const;
+    RendererTile& operator[](uint32_t index);
 
 private:
-    T* _items;
+    RendererTile* _items;
     uint32_t _item_count;
     uint32_t _head;
 };

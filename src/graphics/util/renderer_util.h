@@ -20,6 +20,8 @@ public:
     static void dispose(const sp<Renderer>& self);
 //[[script::bindings::classmethod]]
     static sp<Renderer> makeDisposable(const sp<Renderer>& self, const sp<Boolean>& disposed = nullptr);
+//[[script::bindings::classmethod]]
+    static sp<Renderer> makeAutoRelease(const sp<Renderer>& self, int32_t refCount = 1);
 
 //[[script::bindings::property]]
     static SafePtr<Size> size(const sp<Renderer>& self);

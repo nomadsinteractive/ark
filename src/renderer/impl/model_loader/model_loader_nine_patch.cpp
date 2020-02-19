@@ -57,7 +57,7 @@ void ModelLoaderNinePatch::postSnapshot(RenderController& /*renderController*/, 
 Model ModelLoaderNinePatch::load(int32_t type)
 {
     const auto iter = _vertices.find(type);
-    DCHECK(iter != _vertices.end(), "");
+    DCHECK(iter != _vertices.end(), "Cannot find type: %d", type);
     return Model(nullptr, _vertices.at(type));
 }
 

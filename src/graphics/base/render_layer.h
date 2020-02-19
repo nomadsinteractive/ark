@@ -17,6 +17,7 @@
 
 namespace ark {
 
+//[[script::bindings::extends(Renderer)]]
 class ARK_API RenderLayer : public Renderer {
 public:
     struct Snapshot;

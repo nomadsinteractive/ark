@@ -42,7 +42,7 @@ void Arena::render(RenderRequest& renderRequest, const V3& position)
 bool Arena::onEvent(const Event& event)
 {
     DASSERT(_view_group);
-    return _view_group->onEvent(event, 0.0f, 0.0f) || _event_listeners->onEvent(event);
+    return _view_group->onEvent(event, 0.0f, 0.0f, true) || _event_listeners->onEvent(event);
 }
 
 void Arena::traverse(const Holder::Visitor& visitor)

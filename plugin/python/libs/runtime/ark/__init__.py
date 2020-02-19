@@ -272,6 +272,9 @@ class Renderer:
     def make_disposable(self, disposed: Optional[bool, 'Disposed'] = None):
         return self
 
+    def make_auto_release(self, ref_count: int = 1):
+        return self
+
 
 class ResourceLoader:
 
@@ -670,7 +673,7 @@ class LayerContext:
     pass
 
 
-class RenderLayer:
+class RenderLayer(Renderer):
     @property
     def context(self) -> LayerContext:
         return LayerContext()

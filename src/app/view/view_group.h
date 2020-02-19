@@ -12,11 +12,13 @@
 
 #include "app/forwarding.h"
 #include "app/inf/event_listener.h"
+#include "app/view/layout_hierarchy.h"
 #include "app/view/view.h"
 
 namespace ark {
 
-class ARK_API ViewGroup final : public View, public Renderer, public Renderer::Group, Implements<ViewGroup, View, Block, Renderer, Renderer::Group, Holder> {
+class ARK_API ViewGroup final : public View, public Renderer, public Renderer::Group, public LayoutEventListener,
+                                Implements<ViewGroup, View, Block, Renderer, Renderer::Group, LayoutEventListener, Holder> {
 public:
     ViewGroup(const Frame& background, const sp<Layout>& layout, const sp<LayoutParam>& layoutParam);
     ~ViewGroup() override;
@@ -26,7 +28,7 @@ public:
 
     virtual void traverse(const Visitor& visitor) override;
 
-    bool onEvent(const Event& event, float x, float y);
+    virtual bool onEvent(const Event& event, float x, float y, bool ptin) override;
 
 //  [[plugin::builder("view-group")]]
     class BUILDER : public Builder<Renderer> {

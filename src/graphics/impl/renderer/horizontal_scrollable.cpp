@@ -1,4 +1,4 @@
-#include "graphics/impl/frame/horizontal_scrollable.h"
+#include "graphics/impl/renderer/horizontal_scrollable.h"
 
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
@@ -10,7 +10,8 @@ namespace ark {
 
 HorizontalScrollable::HorizontalScrollable(const sp<RendererMaker>& tileMaker, const sp<Numeric>& scroller, int32_t width, int32_t tileWidth, uint32_t itemCount)
     : _tile_maker(tileMaker),  _tiles(itemCount), _scroller(scroller), _width(width), _tile_width(tileWidth),
-      _scroll_position(std::numeric_limits<int32_t>::min()), _grid_position(0) {
+      _scroll_position(std::numeric_limits<int32_t>::min()), _grid_position(0)
+{
 }
 
 void HorizontalScrollable::render(RenderRequest& renderRequest, const V3& position)
@@ -22,13 +23,31 @@ void HorizontalScrollable::render(RenderRequest& renderRequest, const V3& positi
     const int32_t end = upper(_scroll_position + _width);
     for(int32_t i = _grid_position; i < end; i += _tile_width)
     {
-        Tile<sp<Renderer>>& tile = _tiles[(i - _grid_position) / _tile_width];
+        RendererTile& tile = _tiles[(i - _grid_position) / _tile_width];
         ensureTile(tile, i);
         tile.renderer()->render(renderRequest, position + V3(tile.offset() - gs, 0, 0));
     }
 }
 
-void HorizontalScrollable::scrollTo(int32_t scrollPosition) {
+bool HorizontalScrollable::onEvent(const Event& event, float x, float y, bool ptin)
+{
+    int32_t scrollPosition = static_cast<int32_t>(_scroller->val());
+    if(scrollPosition != _scroll_position)
+        scrollTo(scrollPosition);
+    const int32_t gs = _scroll_position - _grid_position;
+    const int32_t end = upper(_scroll_position + _width);
+    for(int32_t i = _grid_position; i < end; i += _tile_width)
+    {
+        RendererTile& tile = _tiles[(i - _grid_position) / _tile_width];
+        ensureTile(tile, i);
+        if(tile.layoutEventListener() && tile.layoutEventListener()->onEvent(event, x + tile.offset() - gs, y, ptin))
+            return true;
+    }
+    return false;
+}
+
+void HorizontalScrollable::scrollTo(int32_t scrollPosition)
+{
     int32_t gridPosition = lower(scrollPosition);
     _scroll_position = scrollPosition;
     if(gridPosition != _grid_position)
@@ -50,15 +69,13 @@ int32_t HorizontalScrollable::upper(int32_t pos) const
     return mod == 0 ? pos : pos - (mod >= 0 ? mod : _tile_width + mod) + _tile_width;
 }
 
-void HorizontalScrollable::ensureTile(Tile<sp<Renderer>>& tile, int32_t position)
+void HorizontalScrollable::ensureTile(RendererTile& tile, int32_t position)
 {
     tile.setOffset(position - _grid_position);
     if(tile.position() != position)
     {
-        const sp<Renderer> renderer = _tile_maker->make(position, 0);
-        DASSERT(renderer);
         tile.setPosition(position);
-        tile.renderer() = renderer;
+        tile.setRenderer(_tile_maker->make(position, 0));
     }
 }
 

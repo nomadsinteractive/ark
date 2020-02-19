@@ -2,6 +2,7 @@
 
 #include "core/epi/disposed.h"
 #include "core/types/safe_ptr.h"
+#include "core/impl/boolean/boolean_by_weak_ref.h"
 
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
@@ -31,6 +32,11 @@ void RendererUtil::dispose(const sp<Renderer>& self)
 sp<Renderer> RendererUtil::makeDisposable(const sp<Renderer>& self, const sp<Boolean>& disposed)
 {
     return self.absorb(disposed ? sp<Disposed>::make(disposed) : sp<Disposed>::make());
+}
+
+sp<Renderer> RendererUtil::makeAutoRelease(const sp<Renderer>& self, int32_t refCount)
+{
+    return makeDisposable(self, sp<BooleanByWeakRef<Renderer>>::make(self, refCount));
 }
 
 SafePtr<Size> RendererUtil::size(const sp<Renderer>& self)

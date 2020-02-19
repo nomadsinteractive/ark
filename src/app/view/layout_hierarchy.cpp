@@ -10,12 +10,11 @@
 #include "app/base/event.h"
 #include "app/inf/layout.h"
 #include "app/view/view.h"
-#include "app/view/view_group.h"
 
 namespace ark {
 
 LayoutHierarchy::Slot::Slot(const sp<Renderer>& renderer, bool layoutRequested)
-    : _x(0), _y(0), _layout_width(0), _layout_height(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _view_group(renderer.as<ViewGroup>()),
+    : _x(0), _y(0), _layout_width(0), _layout_height(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _layout_event_listener(renderer.as<LayoutEventListener>()),
       _disposed(renderer.as<Disposed>()), _visibility(renderer.as<Visibility>())
 {
     DASSERT(_renderer);
@@ -109,9 +108,10 @@ bool LayoutHierarchy::Slot::onEventDispatch(const Event& event, float x, float y
         const sp<LayoutParam>& layoutParam = _view->layoutParam();
         const Rect target(x + _x, y + _y, x + _x + layoutParam->contentWidth(), y + _y + layoutParam->contentHeight());
         const Event viewEvent(event.action(), event.x() - _x - x, event.y() - _y - y, event.timestamp(), event.code());
-        if(_view_group)
-            return _view_group->onEvent(event, target.left(), target.top()) || _view_group->dispatchEvent(viewEvent, event.ptin(target));
-        return _view->dispatchEvent(viewEvent, event.ptin(target));
+        const bool ptin = event.ptin(target);
+        if(_layout_event_listener)
+            return _layout_event_listener->onEvent(event, target.left(), target.top(), ptin);
+        return _view->dispatchEvent(viewEvent, ptin);
     }
     return false;
 }

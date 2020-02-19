@@ -11,7 +11,6 @@
 
 #include "app/base/event.h"
 #include "app/inf/layout.h"
-#include "app/view/layout_hierarchy.h"
 
 namespace ark {
 
@@ -50,9 +49,9 @@ void ViewGroup::traverse(const Holder::Visitor& visitor)
     _layout_hierarchy->traverse(visitor);
 }
 
-bool ViewGroup::onEvent(const Event& event, float x, float y)
+bool ViewGroup::onEvent(const Event& event, float x, float y, bool ptin)
 {
-    return _layout_hierarchy->onEvent(event, x, y);
+    return _layout_hierarchy->onEvent(event, x, y) || dispatchEvent(event, ptin);
 }
 
 ViewGroup::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
