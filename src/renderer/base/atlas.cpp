@@ -55,6 +55,11 @@ Rect Atlas::getItemUV(int32_t c) const
     return Rect(item.ux() / 65536.0f, item.uy() / 65536.0f, item.vx() / 65536.0f, item.vy() / 65536.0f);
 }
 
+ByType& Atlas::attachments()
+{
+    return _attachments;
+}
+
 void Atlas::add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot)
 {
     _items->add(id, makeItem(ux, uy, vx, vy, bounds, size, pivot));

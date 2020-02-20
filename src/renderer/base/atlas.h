@@ -5,6 +5,7 @@
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/collection/by_index.h"
+#include "core/collection/by_type.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -65,6 +66,8 @@ public:
 //  [[script::bindings::auto]]
     Rect getItemUV(int32_t c) const;
 
+    ByType& attachments();
+
     const op<ByIndex<Item>>& items() const;
 
     void add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot);
@@ -100,6 +103,8 @@ private:
     op<ByIndex<Item>> _items;
     bool _allow_default_item;
     Item _default_item;
+
+    ByType _attachments;
 
     friend class BUILDER;
 
