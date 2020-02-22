@@ -27,12 +27,10 @@ public:
     void roll(int32_t offset);
 
     int32_t position() const;
-
     void setPosition(int32_t position);
 
     void setRenderer(sp<Renderer> renderer);
-
-    const sp<Renderer>& renderer() const;
+    void render(RenderRequest& renderRequest, const V3& position);
 
     const sp<LayoutEventListener>& layoutEventListener() const;
 

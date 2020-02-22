@@ -1,5 +1,7 @@
 #include "graphics/util/tiles.h"
 
+#include "graphics/inf/renderer.h"
+
 namespace ark {
 
 RendererTile::RendererTile()
@@ -39,14 +41,14 @@ void RendererTile::setPosition(int32_t position)
 
 void RendererTile::setRenderer(sp<Renderer> renderer)
 {
-    DASSERT(renderer);
     _layout_event_listener = renderer.as<LayoutEventListener>();
     _renderer = std::move(renderer);
 }
 
-const sp<Renderer>& RendererTile::renderer() const
+void RendererTile::render(RenderRequest& renderRequest, const V3& position)
 {
-    return _renderer;
+    if(_renderer)
+        _renderer->render(renderRequest, position);
 }
 
 const sp<LayoutEventListener>& RendererTile::layoutEventListener() const

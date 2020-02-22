@@ -15,6 +15,8 @@
 
 #include "dear-imgui/base/controller.h"
 #include "dear-imgui/base/imgui_context.h"
+#include "dear-imgui/base/renderer_context.h"
+#include "dear-imgui/renderer/renderer_imgui.h"
 
 namespace ark {
 namespace plugin {
@@ -74,19 +76,15 @@ private:
 
 class Image : public Widget {
 public:
-    Image(sp<Texture> texture, sp<Vec2> size, const V2& uv0, const V2& uv1, sp<Vec4> color, sp<Vec4> borderColor)
+    Image(sp<Texture> texture, sp<Vec2> size, const V2& uv0, const V2& uv1, sp<Vec4> color, sp<Vec4> borderColor, sp<RendererContext> rendererContext)
         : _texture(std::move(texture)), _size(std::move(size)), _uv0(*reinterpret_cast<const ImVec2*>(&uv0)), _uv1(*reinterpret_cast<const ImVec2*>(&uv1)),
-          _color(std::move(color)), _border_color(std::move(borderColor)) {
-        if(_texture) {
-            Global<ImguiContext> context;
-            context->addTextureRefCount(_texture.get());
-        }
+          _color(std::move(color)), _border_color(std::move(borderColor)), _renderer_context(std::move(rendererContext)) {
+        if(_texture)
+            _renderer_context->addTextureRefCount(_texture.get());
     }
     ~Image() override {
-        if(_texture) {
-            Global<ImguiContext> context;
-            context->relTextureRefCount(_texture.get());
-        }
+        if(_texture)
+            _renderer_context->relTextureRefCount(_texture.get());
     }
 
     virtual void render() override {
@@ -102,6 +100,8 @@ private:
     ImVec2 _uv0, _uv1;
     sp<Vec4> _color;
     sp<Vec4> _border_color;
+
+    sp<RendererContext> _renderer_context;
 };
 
 
@@ -198,8 +198,8 @@ static bool Items_VectorGetter(void* data, int idx, const char** out_text)
     return true;
 }
 
-RendererBuilder::RendererBuilder()
-    : _stub(sp<Stub>::make())
+RendererBuilder::RendererBuilder(const sp<Renderer>& imguiRenderer)
+    : _renderer_context(imguiRenderer.as<RendererImgui>()->rendererContext()), _stub(sp<Stub>::make())
 {
     push(sp<WidgetGroup>::make());
 }
@@ -347,7 +347,7 @@ void RendererBuilder::colorPicker4(const String& label, const sp<Vec4>& value)
 
 void RendererBuilder::image(const sp<Texture>& texture, const sp<Vec2>& size, const V2& uv0, const V2& uv1, const sp<Vec4>& color, const sp<Vec4>& borderColor)
 {
-    addWidget(sp<Image>::make(texture, size, uv0, uv1, color ? color : sp<Vec4>::make<Vec4::Const>(V4(1.0f)), borderColor ? borderColor : sp<Vec4>::make<Vec4::Const>(V4(0))));
+    addWidget(sp<Image>::make(texture, size, uv0, uv1, color ? color : sp<Vec4>::make<Vec4::Const>(V4(1.0f)), borderColor ? borderColor : sp<Vec4>::make<Vec4::Const>(V4(0)), _renderer_context));
 }
 
 sp<Controller> RendererBuilder::showAboutWindow()

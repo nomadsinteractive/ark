@@ -17,6 +17,7 @@ void AtlasImporterTiles::import(Atlas& atlas, const document& manifest)
     const uint32_t marginY = Documents::getAttribute<uint32_t>(manifest, "margin-y", 0);
     const float pivotX = Documents::getAttribute<float>(manifest, "pivot-x", 0);
     const float pivotY = Documents::getAttribute<float>(manifest, "pivot-y", 0);
+    const bool override = Documents::getAttribute<bool>(manifest, "override", false);
     const uint32_t flowx = marginX + tileWidth;
     const uint32_t flowy = marginY + tileHeight;
 
@@ -30,12 +31,18 @@ void AtlasImporterTiles::import(Atlas& atlas, const document& manifest)
     const uint32_t yCount = static_cast<uint32_t>(Math::round(bounds.height() / flowy));
     const uint32_t bl = static_cast<uint32_t>(bounds.left());
     const uint32_t bt = static_cast<uint32_t>(bounds.top());
+
+    type = Documents::getAttribute<int32_t>(manifest, "begin", type + 1) - 1;
     for(uint32_t i = 0; i < yCount; i++)
         for(uint32_t j = 0; j < xCount; j++)
         {
-            uint32_t left = bl + j * flowx;
-            uint32_t top = bt + i * flowy;
-            atlas.add(++type, left, top, left + tileWidth, top + tileHeight, Rect(0, 0, 1.0f, 1.0f), V2(tileWidth, tileHeight), V2(pivotX, pivotY));
+            ++type;
+            if(!atlas.has(type) || override)
+            {
+                uint32_t left = bl + j * flowx;
+                uint32_t top = bt + i * flowy;
+                atlas.add(type, left, top, left + tileWidth, top + tileHeight, Rect(0, 0, 1.0f, 1.0f), V2(tileWidth, tileHeight), V2(pivotX, pivotY));
+            }
         }
 }
 

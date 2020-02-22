@@ -32,6 +32,8 @@ public:
     virtual void addRenderer(const sp<Renderer>& renderer) override;
     virtual bool onEvent(const Event& event) override;
 
+    const sp<RendererContext>& rendererContext() const;
+
 public:
 //  [[plugin::resource-loader("imgui")]]
     class BUILDER : public Builder<Renderer> {
@@ -70,7 +72,7 @@ public:
 private:
     void MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawData* draw_data);
 
-    sp<DrawCommandRecycler> obtainDrawCommandRecycler(const ImguiContext& imguiContext, Texture* texture, std::map<void*, sp<DrawCommandRecycler>>& cache);
+    sp<DrawCommandRecycler> obtainDrawCommandRecycler(Texture* texture, std::map<void*, sp<DrawCommandRecycler>>& cache);
 
 private:
     sp<Shader> _shader;
@@ -83,6 +85,7 @@ private:
     MemoryPool _memory_pool;
 
     sp<PipelineFactory> _pipeline_factory;
+    sp<RendererContext> _renderer_context;
 };
 
 

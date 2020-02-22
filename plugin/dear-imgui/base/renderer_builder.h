@@ -28,7 +28,7 @@ class WidgetGroup;
 class ARK_PLUGIN_DEAR_IMGUI_API RendererBuilder {
 public:
 // [[script::bindings::auto]]
-    RendererBuilder();
+    RendererBuilder(const sp<Renderer>& imguiRenderer);
 
 // [[script::bindings::auto]]
     bool begin(const String& name);
@@ -197,6 +197,8 @@ private:
     };
 
 private:
+    sp<RendererContext> _renderer_context;
+
     sp<Stub> _stub;
 };
 

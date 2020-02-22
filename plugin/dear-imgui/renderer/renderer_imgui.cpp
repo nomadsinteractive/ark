@@ -29,6 +29,7 @@
 #include "app/base/event.h"
 
 #include "dear-imgui/base/imgui_context.h"
+#include "dear-imgui/base/renderer_context.h"
 
 namespace ark {
 namespace plugin {
@@ -60,7 +61,7 @@ static void updateKeyStatus(ImGuiIO& io, ImGuiKey_ keycode, bool isKeyDown) {
 
 RendererImgui::RendererImgui(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Shader>& shader, const sp<Texture>& texture)
     : _shader(shader), _render_controller(resourceLoaderContext->renderController()), _render_engine(_render_controller->renderEngine()), _renderer_group(sp<RendererGroup>::make()), _texture(texture),
-      _pipeline_factory(shader->pipelineFactory())
+      _pipeline_factory(shader->pipelineFactory()), _renderer_context(sp<RendererContext>::make())
 {
 }
 
@@ -147,9 +148,13 @@ bool RendererImgui::onEvent(const Event& event)
     return false;
 }
 
+const sp<RendererContext>& RendererImgui::rendererContext() const
+{
+    return _renderer_context;
+}
+
 void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawData* draw_data)
 {
-    const Global<ImguiContext> context;
     std::map<void*, sp<DrawCommandRecycler>> recyclers;
 
     for (int i = 0; i < draw_data->CmdListsCount; i++)
@@ -191,7 +196,7 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
                 // By default the indices ImDrawIdx are 16-bits, you can change them to 32-bits in imconfig.h if your engine doesn't support 16-bits indices.
                 const ImVec2& pos = draw_data->DisplayPos;
 
-                sp<DrawCommandRecycler> recycler = obtainDrawCommandRecycler(context, reinterpret_cast<Texture*>(pcmd->TextureId), recyclers);
+                sp<DrawCommandRecycler> recycler = obtainDrawCommandRecycler(reinterpret_cast<Texture*>(pcmd->TextureId), recyclers);
                 const sp<DrawCommand>& drawCommand = recycler->drawCommand();
                 Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(verticsUploader);
                 Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(indicesUploader);
@@ -204,13 +209,13 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
     }
 }
 
-sp<RendererImgui::DrawCommandRecycler> RendererImgui::obtainDrawCommandRecycler(const ImguiContext& imguiContext, Texture* texture, std::map<void*, sp<RendererImgui::DrawCommandRecycler>>& cache)
+sp<RendererImgui::DrawCommandRecycler> RendererImgui::obtainDrawCommandRecycler(Texture* texture, std::map<void*, sp<RendererImgui::DrawCommandRecycler>>& cache)
 {
     const auto iter = cache.find(texture);
     if(iter != cache.end())
         return iter->second;
 
-    const sp<LFStack<sp<RendererImgui::DrawCommand>>>& drawCommandPool = imguiContext.obtainDrawCommandPool(texture);
+    const sp<LFStack<sp<RendererImgui::DrawCommand>>>& drawCommandPool = _renderer_context->obtainDrawCommandPool(texture);
 
     sp<DrawCommand> drawCommand;
     if(!drawCommandPool->pop(drawCommand))

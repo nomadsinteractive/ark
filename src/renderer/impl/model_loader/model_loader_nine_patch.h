@@ -41,10 +41,6 @@ public:
     };
 
 private:
-//    void importAtlasItem(int32_t type, const Rect& paddings, uint32_t textureWidth, uint32_t textureHeight);
-
-//    Rect getPatches(const Rect& paddings, const Rect& bounds) const;
-
     struct NinePatchVertices {
 
         void import(Atlas& atlas, const document& manifest);
@@ -52,7 +48,7 @@ private:
         void add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Atlas& atlas);
         void add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Rect& bounds);
 
-        Rect getPatches(const Rect& paddings, const Rect& bounds) const;
+        sp<Vertices> makeNinePatchVertices(uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Rect& bounds) const;
 
         std::unordered_map<int32_t, sp<Vertices>> _vertices;
     };

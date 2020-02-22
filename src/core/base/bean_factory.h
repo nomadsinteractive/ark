@@ -308,7 +308,12 @@ public:
         const String attrValue = Documents::getAttribute(doc, attr, defValue);
         if(attrValue.empty()) {
             const document& child = doc->getChild(attr);
-            return child ? findBuilderByDocument<T>(child) : nullptr;
+            if(child) {
+                const sp<Builder<T>> builder = findBuilderByDocument<T>(child);
+                DCHECK(builder, "Cannot build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
+                return builder;
+            }
+            return nullptr;
         }
         return ensureBuilder<T>(attrValue);
     }

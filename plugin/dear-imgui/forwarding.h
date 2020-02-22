@@ -7,6 +7,7 @@ namespace dear_imgui {
 
 class Controller;
 class ImguiContext;
+class RendererContext;
 class Widget;
 
 }

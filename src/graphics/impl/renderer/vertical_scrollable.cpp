@@ -32,7 +32,7 @@ void VerticalScrollable::render(RenderRequest& renderRequest, const V3& position
     {
         RendererTile& tile = _tiles[(i - _grid_position) / _tile_height];
         ensureTile(tile, i);
-        tile.renderer()->render(renderRequest, position + V3(0, tile.offset() - gs, 0));
+        tile.render(renderRequest, position + V3(0, tile.offset() - gs, 0));
     }
     if(_scissor)
     {
