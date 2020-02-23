@@ -7,8 +7,14 @@
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/impl/renderer/renderer_with_position.h"
+#include "graphics/impl/renderer/renderer_wrapper.h"
 
 namespace ark {
+
+sp<Renderer> RendererUtil::create(const sp<Renderer>& delegate)
+{
+    return wrap(delegate);
+}
 
 void RendererUtil::addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer)
 {
@@ -17,6 +23,11 @@ void RendererUtil::addRenderer(const sp<Renderer>& self, const sp<Renderer>& ren
         const sp<Renderer::Group> rendererGroup = self.template as<Renderer::Group>();
         rendererGroup->addRenderer(renderer);
     }
+}
+
+sp<Renderer> RendererUtil::wrap(const sp<Renderer>& self)
+{
+    return sp<RendererWrapper>::make(self);
 }
 
 void RendererUtil::dispose(const sp<Renderer>& self)
@@ -48,6 +59,20 @@ SafePtr<Size> RendererUtil::size(const sp<Renderer>& self)
             return block->size();
     }
     return SafePtr<Size>();
+}
+
+const sp<Renderer>& RendererUtil::delegate(const sp<Renderer>& self)
+{
+    const sp<Delegate<Renderer>> rd = self.as<Delegate<Renderer>>();
+    DWARN(rd, "Renderer is not an instance of Delegate<Renderer>");
+    return rd ? rd->delegate() : sp<Renderer>::null();
+}
+
+void RendererUtil::setDelegate(const sp<Renderer>& self, const sp<Renderer>& delegate)
+{
+    const sp<Delegate<Renderer>> rd = self.as<Delegate<Renderer>>();
+    DCHECK(rd, "Renderer is not an instance of Delegate<Renderer>");
+    rd->setDelegate(delegate);
 }
 
 sp<Renderer> ark::RendererUtil::translate(const sp<Renderer>& self, const sp<Vec3>& position)

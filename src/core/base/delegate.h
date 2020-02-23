@@ -14,6 +14,10 @@ public:
         return _delegate;
     }
 
+    void setDelegate(const sp<T>& delegate) {
+        _delegate = delegate;
+    }
+
 protected:
     Delegate(const sp<T>& delegate)
         : _delegate(delegate) {

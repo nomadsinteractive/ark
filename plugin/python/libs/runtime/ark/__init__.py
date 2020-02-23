@@ -255,6 +255,8 @@ class Observer:
 
 
 class Renderer:
+    def __init__(self, delegate: Optional['Renderer'] = None):
+        self._delegate = delegate
 
     def add_renderer(self, renderer: 'Renderer'):
         pass
@@ -265,6 +267,14 @@ class Renderer:
     @property
     def size(self) -> 'Size':
         return Size(0, 0)
+
+    @property
+    def delegate(self) -> 'Renderer':
+        return self
+
+    @delegate.setter
+    def delegate(self, v: 'Renderer'):
+        pass
 
     def translate(self, position: Union[tuple, 'Vec2']) -> 'Renderer':
         return self

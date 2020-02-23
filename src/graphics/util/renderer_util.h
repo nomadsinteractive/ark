@@ -12,9 +12,13 @@ namespace ark {
 //[[script::bindings::class("Renderer")]]
 class ARK_API RendererUtil final {
 public:
+//[[script::bindings::constructor]]
+    static sp<Renderer> create(const sp<Renderer>& delegate = nullptr);
 
 //[[script::bindings::classmethod]]
     static void addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer);
+//[[script::bindings::classmethod]]
+    static sp<Renderer> wrap(const sp<Renderer>& self);
 
 //[[script::bindings::classmethod]]
     static void dispose(const sp<Renderer>& self);
@@ -25,6 +29,10 @@ public:
 
 //[[script::bindings::property]]
     static SafePtr<Size> size(const sp<Renderer>& self);
+//[[script::bindings::property]]
+    static const sp<Renderer>& delegate(const sp<Renderer>& self);
+//[[script::bindings::property]]
+    static void setDelegate(const sp<Renderer>& self, const sp<Renderer>& delegate);
 
 //[[script::bindings::classmethod]]
     static sp<Renderer> translate(const sp<Renderer>& self, const sp<Vec3>& position);
