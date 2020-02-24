@@ -155,16 +155,16 @@ bool LayoutHierarchy::onEvent(const Event& event, float x, float y) const
 bool LayoutHierarchy::isLayoutNeeded(const LayoutParam& layoutParam)
 {
     bool layoutNeeded = false;
-    for(auto iter = _slots.begin(); iter != _slots.end(); ++iter)
+    for(auto iter = _slots.begin(); iter != _slots.end(); )
     {
         const sp<Slot>& i = *iter;
         if(i->isDisposed())
         {
             iter = _slots.erase(iter);
-            if(iter == _slots.end())
-                return true;
-            continue;
+            layoutNeeded = true;
         }
+        else
+            ++iter;
         layoutNeeded = layoutNeeded || i->layoutRequested();
     }
 
