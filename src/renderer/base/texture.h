@@ -120,6 +120,7 @@ public:
 
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
+    const sp<Parameters>& parameters() const;
 
     sp<Delegate> delegate() const;
 

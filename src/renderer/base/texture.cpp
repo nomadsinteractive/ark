@@ -88,6 +88,11 @@ const sp<Size>& Texture::size() const
     return _size;
 }
 
+const sp<Texture::Parameters>& Texture::parameters() const
+{
+    return _parameters;
+}
+
 sp<Texture::Delegate> Texture::delegate() const
 {
     return _delegate->val();

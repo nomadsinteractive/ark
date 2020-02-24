@@ -15,6 +15,7 @@ private:
     class Stub : public Variable<sp<Texture::Delegate>> {
     public:
         Stub(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
+        Stub(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, sp<Texture> texture);
 
         void reset(uint32_t textureWidth, uint32_t textureHeight);
 
@@ -32,10 +33,10 @@ private:
         sp<RenderController> _render_controller;
         sp<Alphabet> _alphabet;
         bitmap _font_glyph;
-        sp<Texture> _texture;
         sp<Atlas> _atlas;
         sp<ModelLoader> _delegate;
         sp<Size> _size;
+        sp<Texture> _texture;
 
         uint32_t _flowx, _flowy;
         int32_t _max_glyph_height;
@@ -45,6 +46,7 @@ private:
 
 public:
     ModelLoaderText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight);
+    ModelLoaderText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, sp<Texture> texture);
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
 
@@ -62,6 +64,7 @@ public:
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
         sp<Builder<Alphabet>> _alphabet;
+        SafePtr<Builder<Texture>> _texture;
         uint32_t _texture_width, _texture_height;
     };
 

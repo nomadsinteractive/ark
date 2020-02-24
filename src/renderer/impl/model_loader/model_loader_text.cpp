@@ -27,12 +27,20 @@ ModelLoaderText::Stub::Stub(const sp<RenderController>& renderController, const 
     reset(textureWidth, textureHeight);
 }
 
+ModelLoaderText::Stub::Stub(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, sp<Texture> texture)
+    : _render_controller(renderController), _alphabet(alphabet), _size(sp<Size>::make()), _texture(std::move(texture))
+{
+    reset(_texture->width(), _texture->height());
+}
+
 void ModelLoaderText::Stub::reset(uint32_t textureWidth, uint32_t textureHeight)
 {
     _size->setWidth(static_cast<float>(textureWidth));
     _size->setHeight(static_cast<float>(textureHeight));
     _font_glyph = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1), true);
-    _texture = _render_controller->createTexture2D(_size, sp<Texture::UploaderBitmap>::make(_font_glyph), RenderController::US_ONCE_AND_ON_SURFACE_READY);
+    sp<Texture::Uploader> uploader = sp<Texture::UploaderBitmap>::make(_font_glyph);
+    _texture = _texture ? _render_controller->createTexture(_size, _texture->parameters(), uploader, RenderController::US_ONCE_AND_ON_SURFACE_READY)
+                        : _render_controller->createTexture2D(_size, uploader, RenderController::US_ONCE_AND_ON_SURFACE_READY);
     _atlas = sp<Atlas>::make(_texture, true);
     _delegate = sp<ModelLoaderQuad>::make(_atlas);
     clear();
@@ -115,6 +123,11 @@ ModelLoaderText::ModelLoaderText(const sp<RenderController>& renderController, c
 {
 }
 
+ModelLoaderText::ModelLoaderText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, sp<Texture> texture)
+    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(renderController, alphabet, std::move(texture)))
+{
+}
+
 sp<RenderCommandComposer> ModelLoaderText::makeRenderCommandComposer()
 {
     return _stub->_delegate->makeRenderCommandComposer();
@@ -156,12 +169,15 @@ Model ModelLoaderText::load(int32_t type)
 
 ModelLoaderText::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _alphabet(factory.ensureBuilder<Alphabet>(manifest, Constants::Attributes::ALPHABET)),
+      _texture(factory.getBuilder<Texture>(manifest, Constants::Attributes::TEXTURE)),
       _texture_width(Documents::getAttribute<uint32_t>(manifest, "texture-width", 256)), _texture_height(Documents::getAttribute<uint32_t>(manifest, "texture-height", 256))
 {
 }
 
 sp<ModelLoader> ModelLoaderText::BUILDER::build(const Scope& args)
 {
+    if(_texture)
+        return sp<ModelLoaderText>::make(_resource_loader_context->renderController(), _alphabet->build(args), _texture->build(args));
     return sp<ModelLoaderText>::make(_resource_loader_context->renderController(), _alphabet->build(args), _texture_width, _texture_height);
 }
 
