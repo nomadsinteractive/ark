@@ -5,7 +5,7 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
 
 #include "renderer/opengl/base/gl_pipeline.h"
@@ -17,7 +17,7 @@ sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsConte
 {
     DCHECK(bindings.mode() != ModelLoader::RENDER_MODE_NONE, "Pipeline has no RenderMode initialized");
     const sp<PipelineLayout>& pipelineLayout = bindings.layout();
-    const sp<RenderContext>& renderContext = graphicsContext.renderContext();
+    const sp<RenderEngineContext>& renderContext = graphicsContext.renderContext();
     return sp<GLPipeline>::make(graphicsContext.recycler(), renderContext->getGLSLVersion(),
                                 pipelineLayout->vertex().process(renderContext), pipelineLayout->fragment().process(renderContext), bindings);
 }

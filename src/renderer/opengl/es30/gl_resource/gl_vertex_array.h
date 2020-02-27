@@ -12,7 +12,7 @@ namespace gles30 {
 
 class GLVertexArray : public Resource {
 public:
-    GLVertexArray(const sp<opengl::GLPipeline>& pipeline, const ShaderBindings& shaderBindings);
+    GLVertexArray(sp<opengl::GLPipeline> pipeline, Buffer vertices, const ShaderBindings& shaderBindings);
 
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;

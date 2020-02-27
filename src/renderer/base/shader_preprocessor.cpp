@@ -11,7 +11,7 @@
 
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 
 #define ARRAY_PATTERN       "(?:\\[\\s*(\\d+)\\s*\\])?"
 #define VAR_TYPE_PATTERN    "\\s+(int|uint8|float|vec2|vec3|vec4|mat3|mat4|sampler2D|samplerCube)\\s+"
@@ -428,7 +428,7 @@ ShaderPreprocessor::ShaderType ShaderPreprocessor::Preprocessor::type() const
     return _type;
 }
 
-String ShaderPreprocessor::Preprocessor::process(const RenderContext& glContext) const
+String ShaderPreprocessor::Preprocessor::process(const RenderEngineContext& glContext) const
 {
     DCHECK(glContext.version() > 0, "Unintialized GLContext");
 

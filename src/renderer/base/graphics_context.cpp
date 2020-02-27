@@ -11,7 +11,7 @@
 
 namespace ark {
 
-GraphicsContext::GraphicsContext(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController)
+GraphicsContext::GraphicsContext(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
     : _render_context(renderContext), _render_controller(renderController), _tick(0)
 {
 }
@@ -41,7 +41,7 @@ const sp<Recycler>& GraphicsContext::recycler() const
     return _render_controller->recycler();
 }
 
-const sp<RenderContext>& GraphicsContext::renderContext() const
+const sp<RenderEngineContext>& GraphicsContext::renderContext() const
 {
     return _render_context;
 }

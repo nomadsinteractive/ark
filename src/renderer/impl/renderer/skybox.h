@@ -16,7 +16,7 @@ namespace ark {
 
 class Skybox : public Renderer, public Block {
 public:
-    Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, RenderController& renderController);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -40,7 +40,10 @@ public:
 private:
     SafePtr<Size> _size;
     sp<Shader> _shader;
+    sp<ByType> _attachments;
     sp<ShaderBindings> _shader_bindings;
+
+    Buffer _vertices;
 
     Buffer::Snapshot _index_buffer;
 };

@@ -19,6 +19,7 @@ public:
 
 private:
     Model _model;
+    sp<ByType> _attachments;
     sp<SharedBuffer> _shared_buffer;
 };
 

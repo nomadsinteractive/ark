@@ -5,7 +5,7 @@
 #include "renderer/base/buffer.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_input.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/shader_bindings.h"
@@ -263,7 +263,7 @@ void VKPipeline::setupPipeline(GraphicsContext& graphicsContext, const VertexLay
                 VK_TRUE,
                 VK_COMPARE_OP_LESS_OR_EQUAL);
 
-    const RenderContext::Resolution& displayResolution = graphicsContext.renderContext()->displayResolution();
+    const RenderEngineContext::Resolution& displayResolution = graphicsContext.renderContext()->displayResolution();
     const Rect& scissor = _bindings.scissor();
     const VkRect2D vkScissors = ElementUtil::isScissorEnabled(scissor) ? VkRect2D({{static_cast<int32_t>(scissor.left()), static_cast<int32_t>(scissor.top())}, {static_cast<uint32_t>(scissor.width()), static_cast<uint32_t>(scissor.height())}})
                                                                       : VkRect2D({{0, 0}, {displayResolution.width, displayResolution.height}});

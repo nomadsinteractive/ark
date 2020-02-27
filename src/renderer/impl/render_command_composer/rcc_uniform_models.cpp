@@ -16,14 +16,14 @@
 namespace ark {
 
 RCCUniformModels::RCCUniformModels(Model model)
-    : _model(std::move(model))
+    : _model(std::move(model)), _attachments(sp<ByType>::make())
 {
 }
 
 sp<ShaderBindings> RCCUniformModels::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
 {
     _shared_buffer = renderController.getSharedBuffer(renderMode, _model);
-    return shader.makeBindings(renderMode, renderController.makeVertexBuffer(), _shared_buffer->buffer());
+    return shader.makeBindings(renderMode);
 }
 
 void RCCUniformModels::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
@@ -66,10 +66,8 @@ sp<RenderCommand> RCCUniformModels::compose(const RenderRequest& renderRequest, 
         }
     }
 
-    DrawingContext drawingContext(snapshot._stub->_shader, snapshot._stub->_shader_bindings, std::move(snapshot._ubos),
-                                  buf.vertices().toSnapshot(snapshot._stub->_shader_bindings->vertexBuffer()),
-                                  buf.indices(),
-                                  static_cast<int32_t>(items.size()));
+    DrawingContext drawingContext(snapshot._stub->_shader_bindings, _attachments, std::move(snapshot._ubos),
+                                  buf.vertices().toSnapshot(snapshot._stub->_vertices), buf.indices(), static_cast<int32_t>(items.size()));
 
     if(snapshot._stub->_scissor)
         drawingContext._parameters._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);

@@ -4,7 +4,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_building_context.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
 #include "renderer/inf/snippet_factory.h"

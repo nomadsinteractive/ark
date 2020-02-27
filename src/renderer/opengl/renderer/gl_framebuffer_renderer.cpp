@@ -10,7 +10,7 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/resource.h"
@@ -45,7 +45,7 @@ public:
     virtual void draw(GraphicsContext& graphicsContext) override {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        const RenderContext::Resolution& resolution = graphicsContext.renderContext()->displayResolution();
+        const RenderEngineContext::Resolution& resolution = graphicsContext.renderContext()->displayResolution();
         glViewport(0, 0, static_cast<GLsizei>(resolution.width), static_cast<GLsizei>(resolution.height));
     }
 

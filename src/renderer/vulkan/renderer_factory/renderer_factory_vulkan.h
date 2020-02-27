@@ -17,18 +17,18 @@ public:
     RendererFactoryVulkan(const sp<Recycler>& recycler);
     ~RendererFactoryVulkan() override;
 
-    virtual sp<RenderContext> initialize(Ark::RendererVersion version) override;
-    virtual void onSurfaceCreated(RenderContext& glContext) override;
+    virtual sp<RenderEngineContext> initialize(Ark::RendererVersion version) override;
+    virtual void onSurfaceCreated(RenderEngineContext& glContext) override;
 
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
     virtual sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem cs) override;
     virtual sp<Framebuffer> createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture) override;
-    virtual sp<RenderView> createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController) override;
+    virtual sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
     virtual sp<PipelineFactory> createPipelineFactory() override;
     virtual sp<Texture> createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader) override;
 
 private:
-    void setVersion(Ark::RendererVersion version, RenderContext& vkContext);
+    void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext);
 
 private:
     sp<Recycler> _recycler;

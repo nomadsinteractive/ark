@@ -29,7 +29,7 @@ class SnippetDelegate;
 class Texture;
 class TextureBundle;
 class GraphicsContext;
-class RenderContext;
+class RenderEngineContext;
 class RenderController;
 class RenderCommandComposer;
 class RenderEngine;

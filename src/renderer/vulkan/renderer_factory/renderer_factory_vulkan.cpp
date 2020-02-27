@@ -9,7 +9,7 @@
 #include "graphics/base/viewport.h"
 
 #include "renderer/base/framebuffer.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
 
 #include "renderer/vulkan/base/vk_instance.h"
@@ -46,15 +46,15 @@ RendererFactoryVulkan::~RendererFactoryVulkan()
 {
 }
 
-sp<RenderContext> RendererFactoryVulkan::initialize(Ark::RendererVersion version)
+sp<RenderEngineContext> RendererFactoryVulkan::initialize(Ark::RendererVersion version)
 {
-    const sp<RenderContext> vkContext = sp<RenderContext>::make(version, Ark::COORDINATE_SYSTEM_LHS, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f));
+    const sp<RenderEngineContext> vkContext = sp<RenderEngineContext>::make(version, Ark::COORDINATE_SYSTEM_LHS, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f));
     if(version != Ark::AUTO)
         setVersion(version, vkContext);
     return vkContext;
 }
 
-void RendererFactoryVulkan::onSurfaceCreated(RenderContext& vkContext)
+void RendererFactoryVulkan::onSurfaceCreated(RenderEngineContext& vkContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
@@ -70,7 +70,7 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderContext& vkContext)
     _renderer->_render_target = sp<VKRenderTarget>::make(vkContext, _renderer->_device);
 }
 
-void RendererFactoryVulkan::setVersion(Ark::RendererVersion version, RenderContext& vkContext)
+void RendererFactoryVulkan::setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
 {
     LOGD("Choose Vulkan Version = %d", version);
     std::map<String, String>& annotations = vkContext.annotations();
@@ -102,7 +102,7 @@ sp<Framebuffer> RendererFactoryVulkan::createFramebuffer(const sp<Renderer>& ren
     return sp<Framebuffer>::make(fbo, sp<VKFramebufferRenderer>::make(renderer, fbo));
 }
 
-sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController)
+sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
 {
     return sp<RenderViewVulkan>::make(_renderer, renderContext, renderController);
 }

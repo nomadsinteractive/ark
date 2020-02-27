@@ -17,14 +17,14 @@
 namespace ark {
 
 RCCInstancedModels::RCCInstancedModels(Model model)
-    : _model(std::move(model))
+    : _model(std::move(model)), _attachments(sp<ByType>::make())
 {
 }
 
 sp<ShaderBindings> RCCInstancedModels::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
 {
     _indices = renderController.makeIndexBuffer(Buffer::USAGE_STATIC, sp<Uploader::Array<element_index_t>>::make(_model.indices()));
-    return shader.makeBindings(renderMode, renderController.makeVertexBuffer(), _indices);
+    return shader.makeBindings(renderMode);
 }
 
 void RCCInstancedModels::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& snapshot)
@@ -55,10 +55,8 @@ sp<RenderCommand> RCCInstancedModels::compose(const RenderRequest& renderRequest
         writer.write(MatrixUtil::scale(MatrixUtil::translate(i._transform.toMatrix(), i._position), i._size));
     }
 
-    DrawingContext drawingContext(snapshot._stub->_shader, snapshot._stub->_shader_bindings, std::move(snapshot._ubos),
-                                  buf.vertices().toSnapshot(snapshot._stub->_shader_bindings->vertexBuffer()),
-                                  buf.indices(),
-                                  static_cast<int32_t>(items.size()));
+    DrawingContext drawingContext(snapshot._stub->_shader_bindings, _attachments, std::move(snapshot._ubos),
+                                  buf.vertices().toSnapshot(snapshot._stub->_vertices), buf.indices(), static_cast<int32_t>(items.size()));
 
     if(snapshot._stub->_scissor)
         drawingContext._parameters._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);

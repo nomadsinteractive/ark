@@ -19,7 +19,7 @@ namespace vulkan {
 
 class VKRenderTarget {
 public:
-    VKRenderTarget(const RenderContext& renderContext, sp<VKDevice>& device);
+    VKRenderTarget(const RenderEngineContext& renderContext, sp<VKDevice>& device);
     ~VKRenderTarget();
 
     uint32_t width() const;
@@ -48,7 +48,7 @@ public:
     void onSurfaceChanged(uint32_t width, uint32_t height);
 
 private:
-    void initSwapchain(const RenderContext& renderContext);
+    void initSwapchain(const RenderEngineContext& renderContext);
     void createCommandPool();
     void setupDepthStencil();
     void setupRenderPass();

@@ -4,7 +4,7 @@
 
 #include "graphics/base/camera.h"
 
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 #include "renderer/inf/renderer_factory.h"
 
 namespace ark {
@@ -24,7 +24,7 @@ const sp<RendererFactory>& RenderEngine::rendererFactory() const
     return _renderer_factory;
 }
 
-const sp<RenderContext>& RenderEngine::renderContext() const
+const sp<RenderEngineContext>& RenderEngine::renderContext() const
 {
     return _render_context;
 }

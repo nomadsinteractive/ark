@@ -25,7 +25,7 @@ namespace ark {
 
 RenderLayer::Stub::Stub(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _model_loader(modelLoader), _render_command_composer(_model_loader->makeRenderCommandComposer()), _shader(shader), _scissor(scissor), _render_controller(resourceLoaderContext->renderController()),
-      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _notifier(sp<Notifier>::make()),
+      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _vertices(_render_controller->makeVertexBuffer()), _notifier(sp<Notifier>::make()),
       _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(_model_loader, _notifier, Layer::TYPE_DYNAMIC))), _stride(shader->input()->getStream(0).stride())
 {
     _model_loader->initialize(_shader_bindings);
@@ -61,10 +61,8 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
     if(_stub->_scissor && _stub->_scissor->update(renderRequest.timestamp()))
         _scissor = Rect(_stub->_scissor->val());
 
-    const Buffer& vbo = _stub->_shader_bindings->vertexBuffer();
-
     bool dirty = _stub->_dirty->val();
-    if(vbo.size() == 0)
+    if(_stub->_vertices.size() == 0)
         _flag = SNAPSHOT_FLAG_RELOAD;
     else if(combined != Layer::TYPE_STATIC)
         _flag = dirty ? SNAPSHOT_FLAG_RELOAD : SNAPSHOT_FLAG_DYNAMIC_UPDATE;
@@ -77,7 +75,7 @@ sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderReque
     if(_items.size() > 0)
         return _stub->_render_command_composer->compose(renderRequest, *this);
 
-    DrawingContext drawingContext(_stub->_shader, _stub->_shader_bindings, std::move(_ubos));
+    DrawingContext drawingContext(_stub->_shader_bindings, nullptr, std::move(_ubos));
     return drawingContext.toRenderCommand();
 }
 

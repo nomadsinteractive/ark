@@ -41,7 +41,7 @@ public:
 
         ShaderType type() const;
 
-        String process(const RenderContext& glContext) const;
+        String process(const RenderEngineContext& glContext) const;
 
     private:
         ShaderType _type;

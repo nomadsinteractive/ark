@@ -12,7 +12,7 @@
 #include "renderer/base/buffer.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
@@ -172,7 +172,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glDeleteFramebuffers(1, &captureFBO);
     glDeleteRenderbuffers(1, &captureRBO);
 
-    const RenderContext::Resolution& resolution = graphicsContext.renderContext()->displayResolution();
+    const RenderEngineContext::Resolution& resolution = graphicsContext.renderContext()->displayResolution();
     glViewport(0, 0, static_cast<GLsizei>(resolution.width), static_cast<GLsizei>(resolution.height));
 }
 

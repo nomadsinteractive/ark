@@ -48,6 +48,8 @@ private:
         sp<RenderController> _render_controller;
         sp<ShaderBindings> _shader_bindings;
 
+        Buffer _vertices;
+
         sp<Notifier> _notifier;
         sp<Boolean> _dirty;
         List<LayerContext, LayerContextFilter> _layer_contexts;

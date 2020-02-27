@@ -20,9 +20,9 @@ public:
         return _items.find(Type<T>::id()) != _items.end();
     }
 
-    template<typename T> const Box& put(const sp<T>& item) {
+    template<typename T> const Box& put(sp<T> item) {
         Box& slot = _items[Type<T>::id()];
-        slot = item;
+        slot = std::move(item);
         return slot;
     }
 

@@ -1,67 +1,67 @@
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 
 #include "renderer/inf/snippet_factory.h"
 
 namespace ark {
 
-RenderContext::RenderContext(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const Viewport& viewport)
+RenderEngineContext::RenderEngineContext(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const Viewport& viewport)
     : _version(version), _coordinate_system(coordinateSystem), _viewport(viewport)
 {
 }
 
-Ark::RendererVersion RenderContext::version() const
+Ark::RendererVersion RenderEngineContext::version() const
 {
     return _version;
 }
 
-void RenderContext::setVersion(Ark::RendererVersion version)
+void RenderEngineContext::setVersion(Ark::RendererVersion version)
 {
     _version = version;
 }
 
-Ark::RendererCoordinateSystem RenderContext::coordinateSystem() const
+Ark::RendererCoordinateSystem RenderEngineContext::coordinateSystem() const
 {
     return _coordinate_system;
 }
 
-const std::map<String, String>& RenderContext::annotations() const
+const std::map<String, String>& RenderEngineContext::annotations() const
 {
     return _annotations;
 }
 
-std::map<String, String>& RenderContext::annotations()
+std::map<String, String>& RenderEngineContext::annotations()
 {
     return _annotations;
 }
 
-const Viewport& RenderContext::viewport() const
+const Viewport& RenderEngineContext::viewport() const
 {
     return _viewport;
 }
 
-void RenderContext::setViewport(const Viewport& viewport)
+void RenderEngineContext::setViewport(const Viewport& viewport)
 {
     _viewport = viewport;
     _display_unit = V2(_display_resolution.width / _viewport.width(), _display_resolution.height / _viewport.height());
 }
 
-const RenderContext::Resolution& RenderContext::displayResolution() const
+const RenderEngineContext::Resolution& RenderEngineContext::displayResolution() const
 {
     return _display_resolution;
 }
 
-void RenderContext::setDisplayResolution(const Resolution& resolution)
+void RenderEngineContext::setDisplayResolution(const Resolution& resolution)
 {
     _display_resolution = resolution;
     _display_unit = V2(_display_resolution.width / _viewport.width(), _display_resolution.height / _viewport.height());
 }
 
-const V2& RenderContext::displayUnit() const
+const V2& RenderEngineContext::displayUnit() const
 {
     return _display_unit;
 }
 
-uint32_t RenderContext::getGLSLVersion() const
+uint32_t RenderEngineContext::getGLSLVersion() const
 {
     switch(_version) {
     case Ark::OPENGL_20:
@@ -90,22 +90,22 @@ uint32_t RenderContext::getGLSLVersion() const
     return 110;
 }
 
-const RenderContext::Info& RenderContext::info() const
+const RenderEngineContext::Info& RenderEngineContext::info() const
 {
     return _info;
 }
 
-RenderContext::Info& RenderContext::info()
+RenderEngineContext::Info& RenderEngineContext::info()
 {
     return _info;
 }
 
-void RenderContext::setSnippetFactory(sp<SnippetFactory> snippetfactory)
+void RenderEngineContext::setSnippetFactory(sp<SnippetFactory> snippetfactory)
 {
     _snippet_factory = std::move(snippetfactory);
 }
 
-const sp<SnippetFactory>& RenderContext::snippetFactory() const
+const sp<SnippetFactory>& RenderEngineContext::snippetFactory() const
 {
     DCHECK(_snippet_factory, "Uninitialized GLContext");
     return _snippet_factory;

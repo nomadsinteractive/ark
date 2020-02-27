@@ -27,16 +27,17 @@ public:
         context._fragment._macro_defines.push_back("#define textureCube texture");
     }
 
-    virtual void preBind(GraphicsContext& graphicsContext, const sp<Pipeline>& pipeline, ShaderBindings& bindings) override {
-        const sp<GLVertexArray> vertexArray = sp<GLVertexArray>::make(pipeline, bindings);
-        vertexArray->upload(graphicsContext, nullptr);
-        bindings.attachments().put(vertexArray);
-        graphicsContext.renderController()->upload(vertexArray, nullptr, RenderController::US_ON_SURFACE_READY);
-    }
-
-    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& context) override {
-        const sp<GLVertexArray>& vertexArray = context._shader_bindings->attachments().ensure<GLVertexArray>();
-        glBindVertexArray(static_cast<GLuint>(vertexArray->id()));
+    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
+        const sp<GLVertexArray>& vertexArray = context._attachments->get<GLVertexArray>();
+        uint64_t vertexArrayId = vertexArray ? vertexArray->id() : 0;
+        if(!vertexArrayId) {
+            sp<GLVertexArray> va = sp<GLVertexArray>::make(context._shader_bindings->getPipeline(graphicsContext), context._vertex_buffer.delegate(), context._shader_bindings);
+            va->upload(graphicsContext, nullptr);
+            graphicsContext.renderController()->upload(va, nullptr, RenderController::US_ON_SURFACE_READY);
+            vertexArrayId = va->id();
+            context._attachments->put(std::move(va));
+        }
+        glBindVertexArray(static_cast<GLuint>(vertexArrayId));
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(context._index_buffer.id()));
     }
 

@@ -6,6 +6,7 @@ namespace plugin {
 namespace dear_imgui {
 
 class Controller;
+class DrawCommandPool;
 class ImguiContext;
 class RendererContext;
 class Widget;

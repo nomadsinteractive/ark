@@ -14,18 +14,18 @@ namespace ark {
 
 class ARK_API GraphicsContext {
 public:
-    GraphicsContext(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController);
+    GraphicsContext(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController);
     ~GraphicsContext();
 
     void onSurfaceReady();
     void onDrawFrame();
 
-    const sp<RenderContext>& renderContext() const;
+    const sp<RenderEngineContext>& renderContext() const;
     const sp<RenderController>& renderController() const;
     const sp<Recycler>& recycler() const;
 
-    template<typename T> void attach(const sp<T>& attachment) {
-        _attachments.put<T>(attachment);
+    template<typename T> void attach(sp<T> attachment) {
+        _attachments.put<T>(std::move(attachment));
     }
     template<typename T> const sp<T>& attachment() {
         return _attachments.ensure<T>();
@@ -34,7 +34,7 @@ public:
     uint32_t tick() const;
 
 private:
-    sp<RenderContext> _render_context;
+    sp<RenderEngineContext> _render_context;
     sp<RenderController> _render_controller;
     uint32_t _tick;
 

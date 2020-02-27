@@ -18,7 +18,7 @@ namespace ark {
 //[[core::class]]
 class ShaderFrame : public Renderer, public Block {
 public:
-    ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderController& renderController);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -46,6 +46,7 @@ private:
 private:
     SafePtr<Size> _size;
     sp<Shader> _shader;
+    sp<ByType> _attachments;
 
     sp<ShaderBindings> _shader_bindings;
     Buffer _vertex_buffer;

@@ -4,7 +4,7 @@
 
 #include "graphics/base/color.h"
 
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
@@ -20,7 +20,7 @@ namespace ark {
 
 namespace vulkan {
 
-VKRenderTarget::VKRenderTarget(const RenderContext& renderContext, sp<VKDevice>& device)
+VKRenderTarget::VKRenderTarget(const RenderEngineContext& renderContext, sp<VKDevice>& device)
     : _device(device), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0)
 {
     _queue = _device->vkQueue();
@@ -174,9 +174,9 @@ void VKRenderTarget::onSurfaceChanged(uint32_t width, uint32_t height)
     _render_pass_begin_info.renderArea.extent.height = _height;
 }
 
-void VKRenderTarget::initSwapchain(const RenderContext& renderContext)
+void VKRenderTarget::initSwapchain(const RenderEngineContext& renderContext)
 {
-    const RenderContext::Info& info = renderContext.info();
+    const RenderEngineContext::Info& info = renderContext.info();
 #if defined(_WIN32)
     _swap_chain.initSurface(info.windows.hinstance, info.windows.window);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)

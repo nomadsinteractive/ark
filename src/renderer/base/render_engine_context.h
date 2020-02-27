@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_RENDER_CONTEXT_H_
-#define ARK_RENDERER_BASE_RENDER_CONTEXT_H_
+#ifndef ARK_RENDERER_BASE_RENDER_ENGINE_CONTEXT_H_
+#define ARK_RENDERER_BASE_RENDER_ENGINE_CONTEXT_H_
 
 #include <map>
 
@@ -32,7 +32,7 @@ typedef struct _NSWindow NSWindow;
 
 namespace ark {
 
-class ARK_API RenderContext {
+class ARK_API RenderEngineContext {
 public:
     union Info {
 #ifdef ARK_PLATFORM_WINDOWS
@@ -69,7 +69,7 @@ public:
     };
 
 public:
-    RenderContext(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const Viewport& viewport);
+    RenderEngineContext(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const Viewport& viewport);
 
     Ark::RendererVersion version() const;
     void setVersion(Ark::RendererVersion version);

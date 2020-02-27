@@ -18,7 +18,7 @@
 #include "graphics/base/bitmap.h"
 
 #include "renderer/base/attribute.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/inf/uploader.h"
 

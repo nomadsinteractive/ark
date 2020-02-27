@@ -15,7 +15,7 @@
 
 namespace ark {
 
-RenderViewOpenGL::RenderViewOpenGL(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController)
+RenderViewOpenGL::RenderViewOpenGL(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
     : _graphics_context(new GraphicsContext(renderContext, renderController))
 {
 }

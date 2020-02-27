@@ -16,7 +16,7 @@
 namespace ark {
 namespace vulkan {
 
-RenderViewVulkan::RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderContext>& renderContext, const sp<RenderController>& renderController)
+RenderViewVulkan::RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
     : _renderer(renderer), _graphics_context(new GraphicsContext(renderContext, renderController))
 {
 }

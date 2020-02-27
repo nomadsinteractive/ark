@@ -29,21 +29,21 @@ public:
     };
 
 public:
-    DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo);
-    DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, int32_t instanceCount);
-    DrawingContext(const sp<Shader>& shader, const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, int32_t instanceCount, uint32_t start, uint32_t count);
+    DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo);
+    DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, int32_t instanceCount);
+    DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, int32_t instanceCount, uint32_t start, uint32_t count);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
     sp<RenderCommand> toRenderCommand();
 
-    sp<Shader> _shader;
     sp<ShaderBindings> _shader_bindings;
+    sp<ByType> _attachments;
 
     std::vector<RenderLayer::UBOSnapshot> _ubos;
     Buffer::Snapshot _vertex_buffer;
-    std::vector<std::pair<uint32_t, Buffer::Snapshot>> _instanced_array_snapshots;
-
     Buffer::Snapshot _index_buffer;
+
+    std::vector<std::pair<uint32_t, Buffer::Snapshot>> _instanced_array_snapshots;
 
     Parameters _parameters;
 

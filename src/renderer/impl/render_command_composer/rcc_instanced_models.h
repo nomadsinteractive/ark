@@ -18,6 +18,7 @@ public:
 
 private:
     Model _model;
+    sp<ByType> _attachments;
     Buffer _indices;
 };
 

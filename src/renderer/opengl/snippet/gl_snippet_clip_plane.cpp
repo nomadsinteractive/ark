@@ -11,7 +11,7 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 
 #include "platform/gl/gl.h"
 

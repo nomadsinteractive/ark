@@ -50,11 +50,11 @@ public:
     };
 
     struct DrawCommand {
-        DrawCommand(const Shader& shader, const sp<PipelineFactory>& pipelineFactory, RenderController& renderController, const sp<Texture>& texture);
+        DrawCommand(RenderController& renderController);
 
         Buffer _vertex_buffer;
         Buffer _index_buffer;
-        sp<ShaderBindings> _shader_bindings;
+        sp<ByType> _attachments;
     };
 
     class DrawCommandRecycler {
@@ -72,7 +72,7 @@ public:
 private:
     void MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawData* draw_data);
 
-    sp<DrawCommandRecycler> obtainDrawCommandRecycler(Texture* texture, std::map<void*, sp<DrawCommandRecycler>>& cache);
+    sp<DrawCommandRecycler> obtainDrawCommandRecycler(Texture* texture);
 
 private:
     sp<Shader> _shader;

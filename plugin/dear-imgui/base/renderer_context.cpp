@@ -1,38 +1,50 @@
 #include "dear-imgui/base/renderer_context.h"
 
+#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/shader.h"
+#include "renderer/base/texture.h"
+
+#include "dear-imgui/base/draw_command_pool.h"
+
 
 namespace ark {
 namespace plugin {
 namespace dear_imgui {
 
-const sp<LFStack<sp<RendererImgui::DrawCommand>>>& RendererContext::obtainDrawCommandPool(void* texture) const
+RendererContext::RendererContext(const sp<Shader>& shader, const sp<RenderController>& renderController)
+    : _shader(shader), _render_controller(renderController)
 {
-    if(texture == nullptr)
-        return _default_pool._draw_commands;
+}
 
+void RendererContext::addDefaultTexture(const sp<Texture>& texture)
+{
+    _draw_commands[nullptr] = sp<DrawCommandPool>::make(_shader, _render_controller, texture);
+}
+
+const sp<DrawCommandPool>& RendererContext::obtainDrawCommandPool(void* texture) const
+{
     const auto iter = _draw_commands.find(texture);
-    DCHECK(iter != _draw_commands.end(), "No Texture(%p) drawing requested");
-    return iter->second._draw_commands;
+    DCHECK(iter != _draw_commands.end(), "No Texture(%p) drawing requested", texture);
+    return iter->second;
 }
 
 void RendererContext::addTextureRefCount(Texture* texture)
 {
-    DrawCommandPool& pool = _draw_commands[texture];
-    ++ pool._refcount;
+    DCHECK(!texture, "May not add default texture refcount");
+    sp<DrawCommandPool>& pool = _draw_commands[texture];
+    if(!pool)
+        pool = sp<DrawCommandPool>::make(_shader, _render_controller, sp<Texture>::make(*texture));
+    ++ pool->_refcount;
 }
 
 void RendererContext::relTextureRefCount(Texture* texture)
 {
+    DCHECK(!texture, "May not release default texture refcount");
     const auto iter = _draw_commands.find(texture);
     DASSERT(iter != _draw_commands.end());
-    DrawCommandPool& pool = iter->second;
-    if(-- pool._refcount <= 0)
+    sp<DrawCommandPool>& pool = iter->second;
+    if(-- pool->_refcount <= 0)
         _draw_commands.erase(iter);
-}
-
-RendererContext::DrawCommandPool::DrawCommandPool()
-    : _refcount(0), _draw_commands(sp<LFStack<sp<RendererImgui::DrawCommand>>>::make())
-{
 }
 
 }

@@ -44,7 +44,6 @@ public:
     const sp<Camera>& camera() const;
 
     sp<ShaderBindings> makeBindings(ModelLoader::RenderMode mode) const;
-    sp<ShaderBindings> makeBindings(ModelLoader::RenderMode mode, const Buffer& vertex, const Buffer& index) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Shader> {

@@ -125,11 +125,6 @@ sp<ShaderBindings> Shader::makeBindings(ModelLoader::RenderMode mode) const
     return sp<ShaderBindings>::make(_pipeline_factory, sp<PipelineBindings>::make(PipelineBindings::Parameters(mode, _pipeline_bindings_scissor, _pipeline_bindings_flag), _pipeline_layout), _render_controller);
 }
 
-sp<ShaderBindings> Shader::makeBindings(ModelLoader::RenderMode mode, const Buffer& vertex, const Buffer& index) const
-{
-    return sp<ShaderBindings>::make(_pipeline_factory, sp<PipelineBindings>::make(PipelineBindings::Parameters(mode, _pipeline_bindings_scissor, _pipeline_bindings_flag), _pipeline_layout), _render_controller, vertex, index);
-}
-
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _vertex(factory.getBuilder<String>(manifest, "vertex", "@shaders:default.vert")),
       _fragment(factory.getBuilder<String>(manifest, "fragment", "@shaders:texture.frag")), _snippet(factory.getBuilder<Snippet>(manifest, Constants::Attributes::SNIPPET)),

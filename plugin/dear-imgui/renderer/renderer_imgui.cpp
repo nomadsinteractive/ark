@@ -19,7 +19,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/render_engine.h"
@@ -28,6 +28,7 @@
 #include "app/base/application_context.h"
 #include "app/base/event.h"
 
+#include "dear-imgui/base/draw_command_pool.h"
 #include "dear-imgui/base/imgui_context.h"
 #include "dear-imgui/base/renderer_context.h"
 
@@ -61,8 +62,9 @@ static void updateKeyStatus(ImGuiIO& io, ImGuiKey_ keycode, bool isKeyDown) {
 
 RendererImgui::RendererImgui(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Shader>& shader, const sp<Texture>& texture)
     : _shader(shader), _render_controller(resourceLoaderContext->renderController()), _render_engine(_render_controller->renderEngine()), _renderer_group(sp<RendererGroup>::make()), _texture(texture),
-      _pipeline_factory(shader->pipelineFactory()), _renderer_context(sp<RendererContext>::make())
+      _pipeline_factory(shader->pipelineFactory()), _renderer_context(sp<RendererContext>::make(shader, resourceLoaderContext->renderController()))
 {
+    _renderer_context->addDefaultTexture(texture);
 }
 
 void RendererImgui::render(RenderRequest& renderRequest, const V3& position)
@@ -155,8 +157,6 @@ const sp<RendererContext>& RendererImgui::rendererContext() const
 
 void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawData* draw_data)
 {
-    std::map<void*, sp<DrawCommandRecycler>> recyclers;
-
     for (int i = 0; i < draw_data->CmdListsCount; i++)
     {
         const ImDrawList* cmd_list = draw_data->CmdLists[i];
@@ -196,11 +196,12 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
                 // By default the indices ImDrawIdx are 16-bits, you can change them to 32-bits in imconfig.h if your engine doesn't support 16-bits indices.
                 const ImVec2& pos = draw_data->DisplayPos;
 
-                sp<DrawCommandRecycler> recycler = obtainDrawCommandRecycler(reinterpret_cast<Texture*>(pcmd->TextureId), recyclers);
+                const sp<DrawCommandPool>& drawCommandPool = _renderer_context->obtainDrawCommandPool(reinterpret_cast<Texture*>(pcmd->TextureId));
+                sp<DrawCommandRecycler> recycler = drawCommandPool->obtainDrawCommandRecycler();
                 const sp<DrawCommand>& drawCommand = recycler->drawCommand();
                 Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(verticsUploader);
                 Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(indicesUploader);
-                DrawingContext drawingContext(_shader, drawCommand->_shader_bindings, ubos, std::move(vertexBuffer), std::move(indexBuffer), static_cast<int32_t>(pcmd->ElemCount / 3), offset, pcmd->ElemCount);
+                DrawingContext drawingContext(drawCommandPool->_shader_bindings, drawCommand->_attachments, ubos, std::move(vertexBuffer), std::move(indexBuffer), static_cast<int32_t>(pcmd->ElemCount / 3), offset, pcmd->ElemCount);
                 drawingContext._parameters._scissor = _render_engine->toRendererScissor(Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y), Ark::COORDINATE_SYSTEM_LHS);
                 renderRequest.addRequest(sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(), std::move(recycler)));
             }
@@ -209,20 +210,15 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
     }
 }
 
-sp<RendererImgui::DrawCommandRecycler> RendererImgui::obtainDrawCommandRecycler(Texture* texture, std::map<void*, sp<RendererImgui::DrawCommandRecycler>>& cache)
+sp<RendererImgui::DrawCommandRecycler> RendererImgui::obtainDrawCommandRecycler(Texture* texture)
 {
-    const auto iter = cache.find(texture);
-    if(iter != cache.end())
-        return iter->second;
-
-    const sp<LFStack<sp<RendererImgui::DrawCommand>>>& drawCommandPool = _renderer_context->obtainDrawCommandPool(texture);
+    const sp<DrawCommandPool>& drawCommandPool = _renderer_context->obtainDrawCommandPool(texture);
 
     sp<DrawCommand> drawCommand;
-    if(!drawCommandPool->pop(drawCommand))
-        drawCommand = sp<DrawCommand>::make(_shader, _pipeline_factory, _render_controller, texture ? sp<Texture>::make(*texture) : _texture);
+    if(!drawCommandPool->_draw_commands->pop(drawCommand))
+        drawCommand = sp<DrawCommand>::make(_render_controller);
 
-    sp<DrawCommandRecycler> recycler = sp<DrawCommandRecycler>::make(drawCommandPool, drawCommand);
-    cache.insert(std::make_pair(texture, recycler));
+    sp<DrawCommandRecycler> recycler = sp<DrawCommandRecycler>::make(drawCommandPool->_draw_commands, drawCommand);
     return recycler;
 }
 
@@ -271,12 +267,9 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
     return sp<RendererImgui>::make(_resource_loader_context, _shader->build(args), texture);
 }
 
-RendererImgui::DrawCommand::DrawCommand(const Shader& shader, const sp<PipelineFactory>& pipelineFactory, RenderController& renderController, const sp<Texture>& texture)
-    : _vertex_buffer(renderController.makeVertexBuffer()), _index_buffer(renderController.makeIndexBuffer()),
-      _shader_bindings(sp<ShaderBindings>::make(pipelineFactory, sp<PipelineBindings>::make(PipelineBindings::Parameters(ModelLoader::RENDER_MODE_TRIANGLES, Rect(), PipelineBindings::FLAG_CULL_MODE_NONE | PipelineBindings::FLAG_DYNAMIC_SCISSOR), shader.layout()), renderController, _vertex_buffer, _index_buffer))
+RendererImgui::DrawCommand::DrawCommand(RenderController& renderController)
+    : _vertex_buffer(renderController.makeVertexBuffer()), _index_buffer(renderController.makeIndexBuffer()), _attachments(sp<ByType>::make())
 {
-    PipelineBindings& pipelineBindings = _shader_bindings->pipelineBindings();
-    pipelineBindings.bindSampler(texture);
 }
 
 RendererImgui::DrawCommandRecycler::DrawCommandRecycler(const sp<LFStack<sp<RendererImgui::DrawCommand>>>& recycler, const sp<RendererImgui::DrawCommand>& drawCommand)

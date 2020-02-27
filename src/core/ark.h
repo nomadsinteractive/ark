@@ -58,10 +58,6 @@ public:
         return _interfaces.ensure<T>(std::forward<Args>(args)...);
     }
 
-    template<typename T> void put(const sp<T>& item) {
-        _interfaces.put<T>(item);
-    }
-
     sp<BeanFactory> createBeanFactory(const String& src) const;
     sp<BeanFactory> createBeanFactory(const sp<Dictionary<document>>& dictionary) const;
 

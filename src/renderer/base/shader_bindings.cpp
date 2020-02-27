@@ -9,12 +9,7 @@
 namespace ark {
 
 ShaderBindings::ShaderBindings(const sp<PipelineFactory>& pipelineFactory, const sp<PipelineBindings>& pipelineBindings, RenderController& renderController)
-    : ShaderBindings(pipelineFactory, pipelineBindings, renderController, renderController.makeVertexBuffer(), renderController.makeIndexBuffer(Buffer::USAGE_STATIC))
-{
-}
-
-ShaderBindings::ShaderBindings(const sp<PipelineFactory>& pipelineFactory, const sp<PipelineBindings>& pipelineBindings, RenderController& renderController, const Buffer& vertexBuffer, const Buffer& indexBuffer)
-    : _pipeline_factory(pipelineFactory), _pipeline_bindings(pipelineBindings), _vertex_buffer(vertexBuffer), _index_buffer(indexBuffer), _divisors(makeDivisors(renderController))
+    : _pipeline_factory(pipelineFactory), _pipeline_bindings(pipelineBindings), _divisors(makeDivisors(renderController))
 {
 }
 
@@ -48,29 +43,9 @@ const std::vector<sp<Texture>>& ShaderBindings::samplers() const
     return _pipeline_bindings->samplers();
 }
 
-const Buffer& ShaderBindings::vertexBuffer() const
-{
-    return _vertex_buffer;
-}
-
-const Buffer& ShaderBindings::indexBuffer() const
-{
-    return _index_buffer;
-}
-
 const sp<std::map<uint32_t, Buffer>>& ShaderBindings::divisors() const
 {
     return _divisors;
-}
-
-const ByType& ShaderBindings::attachments() const
-{
-    return _attachments;
-}
-
-ByType& ShaderBindings::attachments()
-{
-    return _attachments;
 }
 
 sp<Pipeline> ShaderBindings::getPipeline(GraphicsContext& graphicsContext)

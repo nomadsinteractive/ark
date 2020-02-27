@@ -8,8 +8,6 @@
 #include "renderer/forwarding.h"
 
 #include "dear-imgui/forwarding.h"
-#include "dear-imgui/api.h"
-
 #include "dear-imgui/renderer/renderer_imgui.h"
 
 namespace ark {
@@ -18,25 +16,19 @@ namespace dear_imgui {
 
 class RendererContext {
 public:
-    const sp<LFStack<sp<RendererImgui::DrawCommand>>>& obtainDrawCommandPool(void* texture) const;
+    RendererContext(const sp<Shader>& shader, const sp<RenderController>& renderController);
+
+    void addDefaultTexture(const sp<Texture>& texture);
+    const sp<DrawCommandPool>& obtainDrawCommandPool(void* texture) const;
 
     void addTextureRefCount(Texture* texture);
     void relTextureRefCount(Texture* texture);
 
-    void clear();
-
 private:
-    struct DrawCommandPool {
-        DrawCommandPool();
+    sp<Shader> _shader;
+    sp<RenderController> _render_controller;
 
-        int32_t _refcount;
-        sp<LFStack<sp<RendererImgui::DrawCommand>>> _draw_commands;
-    };
-
-private:
-    std::map<void*, DrawCommandPool> _draw_commands;
-    DrawCommandPool _default_pool;
-
+    std::map<void*, sp<DrawCommandPool>> _draw_commands;
 };
 
 }

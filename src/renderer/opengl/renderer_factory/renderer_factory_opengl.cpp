@@ -10,7 +10,7 @@
 #include "graphics/base/viewport.h"
 
 #include "renderer/base/framebuffer.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/texture.h"
 
@@ -40,15 +40,15 @@ RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<Recycler>& recycler)
     pluginManager->addPlugin(sp<opengl::OpenglPlugin>::make());
 }
 
-sp<RenderContext> RendererFactoryOpenGL::initialize(Ark::RendererVersion version)
+sp<RenderEngineContext> RendererFactoryOpenGL::initialize(Ark::RendererVersion version)
 {
-    const sp<RenderContext> renderContext = sp<RenderContext>::make(version, Ark::COORDINATE_SYSTEM_RHS, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
+    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(version, Ark::COORDINATE_SYSTEM_RHS, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
     if(version != Ark::AUTO)
         setVersion(version, renderContext);
     return renderContext;
 }
 
-void RendererFactoryOpenGL::onSurfaceCreated(RenderContext& glContext)
+void RendererFactoryOpenGL::onSurfaceCreated(RenderEngineContext& glContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
@@ -66,7 +66,7 @@ void RendererFactoryOpenGL::onSurfaceCreated(RenderContext& glContext)
     }
 }
 
-void RendererFactoryOpenGL::setVersion(Ark::RendererVersion version, RenderContext& glContext)
+void RendererFactoryOpenGL::setVersion(Ark::RendererVersion version, RenderEngineContext& glContext)
 {
     LOGD("Choose GLVersion = %d", version);
     std::map<String, String>& annotations = glContext.annotations();
@@ -91,7 +91,7 @@ void RendererFactoryOpenGL::setVersion(Ark::RendererVersion version, RenderConte
     glContext.setVersion(version);
 }
 
-sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderContext>& renderContext, const sp<RenderController>& renderController)
+sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
 {
     return sp<RenderView>::adopt(new RenderViewOpenGL(renderContext, renderController));
 }

@@ -6,22 +6,18 @@
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
-#include "core/collection/by_type.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
-#include "renderer/inf/pipeline_factory.h"
 
 namespace ark {
 
 class ARK_API ShaderBindings {
 public:
     ShaderBindings(const sp<PipelineFactory>& pipelineFactory, const sp<PipelineBindings>& pipelineBindings, RenderController& renderController);
-    ShaderBindings(const sp<PipelineFactory>& pipelineFactory, const sp<PipelineBindings>& pipelineBindings, RenderController& renderController, const Buffer& arrayBuffer, const Buffer& indexBuffer);
 
     const sp<PipelineFactory>& pipelineFactory() const;
     const sp<PipelineBindings>& pipelineBindings() const;
@@ -29,16 +25,8 @@ public:
     const sp<Snippet>& snippet() const;
     const sp<PipelineLayout>& pipelineLayout() const;
     const sp<PipelineInput>& pipelineInput() const;
-
     const std::vector<sp<Texture>>& samplers() const;
-
-    const Buffer& vertexBuffer() const;
-    const Buffer& indexBuffer() const;
-
     const sp<std::map<uint32_t, Buffer>>& divisors() const;
-
-    const ByType& attachments() const;
-    ByType& attachments();
 
     sp<Pipeline> getPipeline(GraphicsContext& graphicsContext);
 
@@ -51,12 +39,7 @@ private:
     sp<PipelineFactory> _pipeline_factory;
     sp<PipelineBindings> _pipeline_bindings;
 
-    Buffer _vertex_buffer;
-    Buffer _index_buffer;
-
     sp<std::map<uint32_t, Buffer>> _divisors;
-
-    ByType _attachments;
 
     sp<Pipeline> _pipeline;
 };

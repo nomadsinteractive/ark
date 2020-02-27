@@ -18,7 +18,7 @@ public:
     Ark::RendererVersion version() const;
 
     const sp<RendererFactory>& rendererFactory() const;
-    const sp<RenderContext>& renderContext() const;
+    const sp<RenderEngineContext>& renderContext() const;
     const Viewport& viewport() const;
 
     float toLayoutDirection(float direction) const;
@@ -32,7 +32,7 @@ private:
     Ark::RendererCoordinateSystem _coordinate_system;
 
     sp<RendererFactory> _renderer_factory;
-    sp<RenderContext> _render_context;
+    sp<RenderEngineContext> _render_context;
 
 };
 

@@ -25,7 +25,7 @@
 #include "graphics/inf/render_view.h"
 
 #include "renderer/base/render_engine.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_controller.h"
@@ -284,7 +284,7 @@ int SDLApplication::run()
     auto result = SDL_GetWindowWMInfo(_main_window, &wmInfo);
     DASSERT(result);
 
-    RenderContext::Info& info = _application_context->renderEngine()->renderContext()->info();
+    RenderEngineContext::Info& info = _application_context->renderEngine()->renderContext()->info();
 
 #if defined(ARK_PLATFORM_WINDOWS)
     info.windows.hinstance = wmInfo.info.win.hinstance;
