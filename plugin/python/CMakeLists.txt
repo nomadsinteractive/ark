@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 
 set(SRC_DIR ${ARK_SRC_DIR}/plugin/python/3rdparty/Python)
 
-list(APPEND DISABLED_MODULES "ARRAY" "AUDIOOP" "TESTCAPI" "CTYPES_TEST" "PWD" "MULTIPROCESSING" "OSSAUDIODEV" "SCPROXY" "SQLITE3" "GRP" "TERMIOS" "MMAP" "OSSAUDIODEV")
+list(APPEND DISABLED_MODULES "ARRAY" "AUDIOOP" "DECIMAL" "TESTCAPI" "CTYPES" "CTYPES_TEST" "PWD" "MULTIPROCESSING" "OSSAUDIODEV" "SCPROXY" "SQLITE3" "GRP" "TERMIOS" "MMAP" "OSSAUDIODEV")
 if(IOS OR ANDROID)
     list(APPEND DISABLED_MODULES CTYPES CURSES DECIMAL)
 endif()
@@ -31,7 +31,7 @@ else()
 endif()
 
 ark_ensure_dependency(3rdparty/Python)
-add_subdirectory(3rdparty/python-cmake-buildsystem)
+add_subdirectory(python-cmake-buildsystem)
 
 ark_link_libraries(${ARK_PYTHON_LIBRARIES})
 

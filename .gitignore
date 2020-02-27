@@ -3,6 +3,7 @@
 bin
 gen
 out
+3rdparty
 
 # Prerequisites
 *.d
