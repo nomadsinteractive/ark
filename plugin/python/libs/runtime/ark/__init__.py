@@ -1146,6 +1146,9 @@ class Characters:
     def size(self) -> Size:
         return self._size
 
+    def set_rich_text(self, text: str, **kwargs):
+        pass
+
 
 class StringBundle:
 
@@ -1390,6 +1393,23 @@ class Emitter:
 
     def deactivate(self):
         pass
+
+
+class LayoutParam:
+
+    DISPLAY_BLOCK = 0
+    DISPLAY_FLOAT = 1
+    DISPLAY_ABSOLUTE = 2
+
+    GRAVITY_NONE = 0
+    GRAVITY_LEFT = 1
+    GRAVITY_RIGHT = 2
+    GRAVITY_CENTER_HORIZONTAL = 3
+    GRAVITY_TOP = 4
+    GRAVITY_BOTTOM = 8
+    GRAVITY_CENTER_VERTICAL = 12
+    GRAVITY_CENTER = GRAVITY_CENTER_VERTICAL | GRAVITY_CENTER_HORIZONTAL
+    GRAVITY_DEFAULT = GRAVITY_CENTER
 
 
 def __trace__():

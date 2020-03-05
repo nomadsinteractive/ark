@@ -23,7 +23,7 @@ public:
     int ftNewFaceFromReadable(const sp<Readable>& readable, FT_Long face_index, FT_Face* aface);
 
     static FT_F26Dot6 ftF26Dot6(uint32_t integer, uint32_t fractional);
-    static uint32_t ftCalculateLineHeight(FT_Face face);
+    static int32_t ftCalculateLineHeight(FT_Face face);
     static int32_t ftCalculateBaseLinePosition(FT_Face face);
 
 private:

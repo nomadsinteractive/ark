@@ -115,7 +115,7 @@ std::vector<sp<Numeric>> FrameLayoutNew::place(const std::vector<sp<LayoutNew::S
     {
         if(i->_weight > 0)
             i->_size->set(sp<FrameSize>::make(parent->_size, i));
-        slots.push_back(parent->_gravity != LayoutParam::NONE ? sp<Numeric>::make<FramePositionWithGravity>(parent, i) : sp<Numeric>::make<FramePosition>(i));
+        slots.push_back(parent->_gravity != LayoutParam::GRAVITY_NONE ? sp<Numeric>::make<FramePositionWithGravity>(parent, i) : sp<Numeric>::make<FramePosition>(i));
     }
     return slots;
 }

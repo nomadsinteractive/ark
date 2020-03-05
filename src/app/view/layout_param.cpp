@@ -130,7 +130,17 @@ Rect& LayoutParam::margins()
 
 bool LayoutParam::isWrapContent() const
 {
-    return isWrapContent(_size->width()) || isWrapContent(_size->height());
+    return isWidthWrapContent() || isHeightWrapContent();
+}
+
+bool LayoutParam::isWidthWrapContent() const
+{
+    return isWrapContent(_size->width());
+}
+
+bool LayoutParam::isHeightWrapContent() const
+{
+    return isWrapContent(_size->height());
 }
 
 bool LayoutParam::isMatchParent(float unit)
@@ -161,26 +171,26 @@ template<> ARK_API sp<LayoutParam> Null::ptr()
 template<> ARK_API LayoutParam::Gravity Conversions::to<String, LayoutParam::Gravity>(const String& s)
 {
     if(s == "none")
-        return LayoutParam::NONE;
+        return LayoutParam::GRAVITY_NONE;
 
-    uint32_t gravity = LayoutParam::NONE;
+    uint32_t gravity = LayoutParam::GRAVITY_NONE;
     for(const String& i : s.split('|'))
     {
         const String str = i.strip();
         if(str == "left")
-            gravity |= LayoutParam::LEFT;
+            gravity |= LayoutParam::GRAVITY_LEFT;
         else if(str == "right")
-            gravity |= LayoutParam::RIGHT;
+            gravity |= LayoutParam::GRAVITY_RIGHT;
         else if(str == "top")
-            gravity |= LayoutParam::TOP;
+            gravity |= LayoutParam::GRAVITY_TOP;
         else if(str == "bottom")
-            gravity |= LayoutParam::BOTTOM;
+            gravity |= LayoutParam::GRAVITY_BOTTOM;
         else if(str == "center")
-            gravity |= LayoutParam::CENTER;
+            gravity |= LayoutParam::GRAVITY_CENTER;
         else if(str == "center_horizontal")
-            gravity |= LayoutParam::CENTER_HORIZONTAL;
+            gravity |= LayoutParam::GRAVITY_CENTER_HORIZONTAL;
         else if(str == "center_vertical")
-            gravity |= LayoutParam::CENTER_VERTICAL;
+            gravity |= LayoutParam::GRAVITY_CENTER_VERTICAL;
         else
             DFATAL("Unknown gravity value: \"%s\"", i.c_str());
     }

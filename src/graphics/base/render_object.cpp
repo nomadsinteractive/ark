@@ -229,7 +229,7 @@ Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, 
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _type(factory.ensureBuilder<Integer>(manifest, Constants::Attributes::TYPE)),
+    : _type(factory.getBuilder<Integer>(manifest, Constants::Attributes::TYPE)),
       _position(factory.getBuilder<Vec3>(manifest, Constants::Attributes::POSITION)),
       _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _transform(factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM)),

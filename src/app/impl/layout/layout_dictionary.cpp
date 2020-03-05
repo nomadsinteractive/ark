@@ -19,7 +19,7 @@ LayoutDictionary::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String&
         _layout = value;
         _gravity = LayoutParam::GRAVITY_DEFAULT;
     }
-    DCHECK(_gravity != LayoutParam::NONE, "Invaild gravity value: \"%s\"", value.c_str());
+    DCHECK(_gravity != LayoutParam::GRAVITY_NONE, "Invaild gravity value: \"%s\"", value.c_str());
 }
 
 sp<Layout> LayoutDictionary::DICTIONARY::build(const Scope& /*args*/)

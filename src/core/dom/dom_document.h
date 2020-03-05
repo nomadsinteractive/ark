@@ -8,27 +8,11 @@
 
 namespace ark {
 
+//[[script::bindings::extends(DOMElement)]]
 class ARK_API DOMDocument : public DOMElement {
 public:
 //  [[script::bindings::auto]]
-    DOMDocument(const String& name);
-/*
-//  [[script::bindings::property]]
-    const String& name() const;
-//  [[script::bindings::property]]
-    const String& value() const;
-//  [[script::bindings::property]]
-    void setValue(const String& value);
-
-//  [[script::bindings::property]]
-    const std::vector<attribute>& attributes() const;
-//  [[script::bindings::auto]]
-    const sp<DOMAttribute>& getAttribute(const String& name) const;
-//  [[script::bindings::auto]]
-    void setAttribute(const String& name, const String& value);
-//  [[script::bindings::auto]]
-    void addAttribute(const sp<DOMAttribute>& attr);
-*/
+    DOMDocument(const String& name, const String& value = "", DOMElement::ElementType type = DOMElement::ELEMENT_TYPE_ELEMENT);
 
 //  [[script::bindings::auto]]
     const document& getChild(const String& name) const;

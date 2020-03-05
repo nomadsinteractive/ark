@@ -18,26 +18,26 @@ GravityLayout::GravityLayout(const LayoutParam::Gravity& gravity)
 Rect GravityLayout::place(LayoutParam::Gravity gravity, float clientWidth, float clientHeight, float width, float height)
 {
     float x = 0, y = 0;
-    switch(gravity & LayoutParam::CENTER_HORIZONTAL)
+    switch(gravity & LayoutParam::GRAVITY_CENTER_HORIZONTAL)
     {
-        case LayoutParam::LEFT:
+        case LayoutParam::GRAVITY_LEFT:
         break;
-        case LayoutParam::RIGHT:
+        case LayoutParam::GRAVITY_RIGHT:
             x = clientWidth - width;
         break;
-        case LayoutParam::CENTER_HORIZONTAL:
+        case LayoutParam::GRAVITY_CENTER_HORIZONTAL:
             x = (clientWidth - width) / 2;
         break;
     }
-    switch(gravity & LayoutParam::CENTER_VERTICAL)
+    switch(gravity & LayoutParam::GRAVITY_CENTER_VERTICAL)
     {
-        case LayoutParam::TOP:
+        case LayoutParam::GRAVITY_TOP:
             y = 0;
         break;
-        case LayoutParam::BOTTOM:
+        case LayoutParam::GRAVITY_BOTTOM:
             y = clientHeight - height;
         break;
-        case LayoutParam::CENTER_VERTICAL:
+        case LayoutParam::GRAVITY_CENTER_VERTICAL:
             y = (clientHeight - height) / 2;
         break;
     }
@@ -48,14 +48,14 @@ float GravityLayout::place(LayoutParam::Gravity gravity, float size, float avail
 {
     switch(gravity)
     {
-        case LayoutParam::LEFT:
-        case LayoutParam::TOP:
+        case LayoutParam::GRAVITY_LEFT:
+        case LayoutParam::GRAVITY_TOP:
             return 0;
-        case LayoutParam::RIGHT:
-        case LayoutParam::BOTTOM:
+        case LayoutParam::GRAVITY_RIGHT:
+        case LayoutParam::GRAVITY_BOTTOM:
             return available - size;
-        case LayoutParam::CENTER_HORIZONTAL:
-        case LayoutParam::CENTER_VERTICAL:
+        case LayoutParam::GRAVITY_CENTER_HORIZONTAL:
+        case LayoutParam::GRAVITY_CENTER_VERTICAL:
             return (available - size) / 2;
         default:
         break;
@@ -69,7 +69,7 @@ void GravityLayout::begin(Context& /*ctx*/, LayoutParam& /*layoutParam*/)
 
 Rect GravityLayout::place(Context& ctx, LayoutParam& layoutParam)
 {
-    LayoutParam::Gravity gravity = layoutParam.gravity() == LayoutParam::NONE ? _gravity : layoutParam.gravity();
+    LayoutParam::Gravity gravity = layoutParam.gravity() == LayoutParam::GRAVITY_NONE ? _gravity : layoutParam.gravity();
     return GravityLayout::place(gravity, ctx._client_width, ctx._client_height, layoutParam.calcLayoutWidth(ctx._client_width), layoutParam.calcLayoutHeight(ctx._client_height));
 }
 
@@ -79,7 +79,7 @@ Rect GravityLayout::end(Context& ctx)
 }
 
 GravityLayout::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& manifest)
-    : _gravity(Documents::getAttribute<LayoutParam::Gravity>(manifest, Constants::Attributes::GRAVITY, LayoutParam::Gravity::LEFT))
+    : _gravity(Documents::getAttribute<LayoutParam::Gravity>(manifest, Constants::Attributes::GRAVITY, LayoutParam::Gravity::GRAVITY_LEFT))
 {
 }
 

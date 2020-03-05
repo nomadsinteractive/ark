@@ -28,14 +28,18 @@ private:
         }
 
         virtual Box get(const String& refid) override {
-            const SafePtr<Builder<T>>& builder = getBuilder(Identifier::parseRef(refid));
+            SafePtr<Builder<T>> builder = getBuilder(Identifier::parseRef(refid));
             const sp<T> ptr = builder->build({});
             DCHECK(ptr, "ResourceLoader has no object referred as \"%s\"", refid.c_str());
             return ptr;
         }
 
-        const SafePtr<Builder<T>>& getBuilder(const Identifier& id) {
+        SafePtr<Builder<T>> getBuilder(const Identifier& id) {
             DCHECK(id.isRef(), "Id \"%s\" must be a reference", (id.isArg() ? id.arg().c_str() : id.val().c_str()));
+
+            if(id.package())
+                return _bean_factory.createBuilderByRef<T>(id);
+
             const auto iter = _builders.find(id.ref());
             if(iter != _builders.end())
                 return iter->second;

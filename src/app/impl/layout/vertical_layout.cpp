@@ -10,8 +10,8 @@
 namespace ark {
 
 VerticalLayout::VerticalLayout(const LayoutParam::Gravity gravity)
-    : _place_gravity(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::CENTER_HORIZONTAL)),
-      _end_gravity(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::CENTER_VERTICAL))
+    : _place_gravity(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::GRAVITY_CENTER_HORIZONTAL)),
+      _end_gravity(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::GRAVITY_CENTER_VERTICAL))
 {
 }
 

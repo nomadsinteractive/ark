@@ -118,7 +118,7 @@ public:
         virtual sp<RenderObject> build(const Scope& args) override;
 
     private:
-        sp<Builder<Integer>> _type;
+        SafePtr<Builder<Integer>> _type;
         SafePtr<Builder<Vec3>> _position;
         SafePtr<Builder<Size>> _size;
         SafePtr<Builder<Transform>> _transform;

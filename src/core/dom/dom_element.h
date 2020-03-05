@@ -10,22 +10,25 @@
 
 namespace ark {
 
+//[[script::bindings::extends(DOMAttribute)]]
 class ARK_API DOMElement : public DOMAttribute {
+public:
+    enum ElementType {
+        ELEMENT_TYPE_ELEMENT,
+        ELEMENT_TYPE_TEXT,
+        ELEMENT_TYPE_COMMENT,
+        ELEMENT_TYPE_UNKNOWN
+    };
 public:
     typedef std::map<String, attribute>::iterator Iterator;
 
     DOMElement();
-    DOMElement(const String& name);
+    DOMElement(const String& name, DOMElement::ElementType type = DOMElement::ELEMENT_TYPE_ELEMENT);
 //  [[script::bindings::auto]]
-    DOMElement(const String& name, const String& value);
-/*
+    DOMElement(const String& name, const String& value, DOMElement::ElementType type = DOMElement::ELEMENT_TYPE_ELEMENT);
+
 //  [[script::bindings::property]]
-    const String& name() const;
-//  [[script::bindings::property]]
-    const String& value() const;
-//  [[script::bindings::property]]
-    void setValue(const String& value);
-*/
+    DOMElement::ElementType type() const;
 //  [[script::bindings::property]]
     const std::vector<attribute>& attributes() const;
 
@@ -37,6 +40,8 @@ public:
     void addAttribute(const sp<DOMAttribute>& attr);
 
 private:
+    DOMElement::ElementType _type;
+
     Table<String, attribute> _attributes;
 };
 

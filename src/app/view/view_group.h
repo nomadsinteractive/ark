@@ -30,6 +30,8 @@ public:
 
     virtual bool onEvent(const Event& event, float x, float y, bool ptin) override;
 
+    void updateLayout() const;
+
 //  [[plugin::builder("view-group")]]
     class BUILDER : public Builder<Renderer> {
     public:

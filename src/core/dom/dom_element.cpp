@@ -7,18 +7,23 @@
 namespace ark {
 
 DOMElement::DOMElement()
-    : DOMAttribute()
+    : DOMAttribute(), _type(ELEMENT_TYPE_ELEMENT)
 {
 }
 
-DOMElement::DOMElement(const String& name)
-    : DOMAttribute(name)
+DOMElement::DOMElement(const String& name, DOMElement::ElementType type)
+    : DOMAttribute(name), _type(type)
 {
 }
 
-DOMElement::DOMElement(const String& name, const String& value)
-    : DOMAttribute(name, value)
+DOMElement::DOMElement(const String& name, const String& value, DOMElement::ElementType type)
+    : DOMAttribute(name, value), _type(type)
 {
+}
+
+DOMElement::ElementType DOMElement::type() const
+{
+    return _type;
 }
 
 const std::vector<attribute>& DOMElement::attributes() const

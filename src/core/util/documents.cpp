@@ -13,31 +13,65 @@ namespace ark {
 
 namespace {
 
-attribute _tinyattribute2attribute(const XMLAttribute* tinyattr)
+void _tinyattribute2attribute(DOMDocument& element, const XMLElement* tinyelement)
 {
-    return attribute::make(tinyattr->Name(), tinyattr->Value());
-}
-
-document _tinyelement2document(const XMLElement* tinyelement)
-{
-    const document element = document::make(tinyelement->Name());
     const char* text = tinyelement->GetText();
     if(text)
-        element->setValue(text);
+        element.setValue(text);
 
     for(const XMLAttribute* tinyattr = tinyelement->FirstAttribute();
              tinyattr;
              tinyattr = tinyattr->Next())
     {
-        attribute attr = _tinyattribute2attribute(tinyattr);
-        element->addAttribute(attr);
+        attribute attr = attribute::make(tinyattr->Name(), tinyattr->Value());
+        element.addAttribute(attr);
     }
+}
+
+document _tinyelement2document(const XMLElement* tinyelement)
+{
+    const document element = document::make(tinyelement->Name());
+
+    _tinyattribute2attribute(element, tinyelement);
+
     for(const XMLElement* tinynode = tinyelement->FirstChildElement();
              tinynode;
              tinynode = tinynode->NextSiblingElement())
     {
         document node = _tinyelement2document(tinynode);
         element->addChild(node);
+    }
+    return element;
+}
+
+document _tinyelement2documentfull(const XMLElement* tinyelement)
+{
+    const document element = document::make(tinyelement->Name());
+
+    _tinyattribute2attribute(element, tinyelement);
+
+    for(const XMLNode* tinynode = tinyelement->FirstChild();
+             tinynode;
+             tinynode = tinynode->NextSibling())
+    {
+        const XMLElement* tinyelement = tinynode->ToElement();
+        if(tinyelement)
+        {
+            element->addChild(_tinyelement2documentfull(tinyelement));
+            continue;
+        }
+        const XMLText* tinytext = tinynode->ToText();
+        if(tinytext)
+        {
+            element->addChild(sp<DOMDocument>::make("#text", tinytext->Value(), DOMDocument::ELEMENT_TYPE_TEXT));
+            continue;
+        }
+        const XMLComment* tinycomment = tinynode->ToComment();
+        if(tinycomment)
+        {
+            element->addChild(sp<DOMDocument>::make("#comment", tinycomment->Value(), DOMDocument::ELEMENT_TYPE_COMMENT));
+            continue;
+        }
     }
     return element;
 }
@@ -50,6 +84,14 @@ document Documents::parse(const String& xml)
     tinydoc.Parse(xml.c_str());
     DCHECK(tinydoc.RootElement(), "XML document parse failed.");
     return _tinyelement2document(tinydoc.RootElement());
+}
+
+document Documents::parseFull(const String& xml)
+{
+    XMLDocument tinydoc;
+    tinydoc.Parse(xml.c_str());
+    DCHECK(tinydoc.RootElement(), "XML document parse failed.");
+    return _tinyelement2documentfull(tinydoc.RootElement());
 }
 
 document Documents::loadFromFile(const String& file_path)

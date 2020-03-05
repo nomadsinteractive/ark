@@ -7,6 +7,7 @@
 
 #include "graphics/base/frame.h"
 #include "graphics/base/layer.h"
+#include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
 
 #include "app/base/event.h"
@@ -52,6 +53,11 @@ void ViewGroup::traverse(const Holder::Visitor& visitor)
 bool ViewGroup::onEvent(const Event& event, float x, float y, bool ptin)
 {
     return _layout_hierarchy->onEvent(event, x, y) || dispatchEvent(event, ptin);
+}
+
+void ViewGroup::updateLayout() const
+{
+    _layout_hierarchy->updateLayout(_layout_param);
 }
 
 ViewGroup::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

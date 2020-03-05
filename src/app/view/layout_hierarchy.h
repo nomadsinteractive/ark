@@ -34,6 +34,7 @@ private:
         bool layoutRequested() const;
 
         void updateLayout();
+        void wrapContentLayout() const;
 
         void doPlace(Layout::Context& ctx, float clientHeight, const sp<Layout>& layout);
         void doWrapContentPlace(Layout::Context& ctx, const sp<Layout>& layout, Rect& contentRect) const;
@@ -53,6 +54,7 @@ private:
         bool _layout_requested;
         sp<Renderer> _renderer;
         sp<View> _view;
+        sp<ViewGroup> _view_group;
         sp<LayoutEventListener> _layout_event_listener;
         sp<Disposed> _disposed;
         sp<Visibility> _visibility;
@@ -71,12 +73,12 @@ public:
 
     void updateLayout(LayoutParam& layoutParam);
 
-    void doWrapContentLayout(Layout::Context& ctx, LayoutParam& layoutParam);
-
     void addRenderer(const sp<Renderer>& renderer);
 
 private:
+    void doWrapContentLayout(Layout::Context& ctx, LayoutParam& layoutParam);
     bool isLayoutNeeded(const LayoutParam& layoutParam);
+
     std::vector<sp<LayoutParam>> getLayoutParams() const;
 
 private:
@@ -85,7 +87,6 @@ private:
 
     std::vector<sp<Slot>> _slots;
     std::vector<sp<Slot>> _incremental;
-
 };
 
 }

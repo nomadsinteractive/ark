@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "core/base/api.h"
+#include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -26,7 +27,8 @@ public:
     Characters(const sp<RenderLayer>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
 //  [[script::bindings::auto]]
     Characters(const sp<LayerContext>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
-    Characters(const sp<LayerContext>& layerContext, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
+
+    Characters(const BeanFactory& factory, const sp<LayerContext>& layerContext, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
     const sp<LayoutParam>& layoutParam() const;
     void setLayoutParam(const sp<LayoutParam>& layoutParam);
@@ -42,6 +44,9 @@ public:
 //  [[script::bindings::property]]
     void setText(const std::wstring& text);
 
+//  [[script::bindings::auto]]
+    void setRichText(const std::wstring& richText, const Scope& args);
+
     void renderRequest(const V3& position);
 
 //[[plugin::builder]]
@@ -52,6 +57,7 @@ public:
         virtual sp<Characters> build(const Scope& args) override;
 
     private:
+        BeanFactory _bean_factory;
         sp<Builder<LayerContext>> _layer_context;
         SafePtr<Builder<CharacterMapper>> _character_mapper;
         SafePtr<Builder<CharacterMaker>> _character_maker;
@@ -64,8 +70,12 @@ public:
 
 private:
     void createContent();
-    void createContentWithBoundary(float boundary);
-    void createContentNoBoundary();
+    void createRichContent(const Scope& args);
+    float createContentWithBoundary(CharacterMaker& cm, float& flowx, float& flowy, const std::wstring& text, float boundary);
+    float createContentNoBoundary(CharacterMaker& cm, float& flowx, float flowy, const std::wstring& text);
+
+    float doCreateContent(CharacterMaker& cm, float& flowx, float& flowy, const std::wstring& text, float boundary);
+    float doCreateRichContent(CharacterMaker& cm, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary);
 
     void createLayerContent(float width, float height);
 
@@ -80,22 +90,23 @@ private:
         bool _is_line_break;
     };
 
-    void placeNoBoundary(wchar_t c, float& flowx, float& flowy, float& fontHeight);
-    void place(const std::vector<LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
-    void placeOne(const LayoutChar& layoutChar, float& flowx, float flowy);
+    void place(CharacterMaker& cm, const std::vector<LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
+    void placeOne(CharacterMaker& cm, const Metrics& metrics, int32_t type, float& flowx, float flowy, float* fontHeight = nullptr);
 
     void nextLine(float fontHeight, float& flowx, float& flowy) const;
     float getFlowY() const;
 
-    std::vector<LayoutChar> getCharacterMetrics(const std::wstring& text) const;
+    std::vector<LayoutChar> getCharacterMetrics(CharacterMaker& cm, const std::wstring& text) const;
     bool isCJK(int32_t c) const;
     bool isWordBreaker(wchar_t c) const;
 
     int32_t toType(wchar_t c) const;
-    sp<RenderObject> makeCharacter(int32_t type, const V2& position, const sp<Size>& size) const;
+    sp<RenderObject> makeCharacter(int32_t type, const V3& position, const sp<Size>& size) const;
 
 private:
+    BeanFactory::WeakRef _bean_factory;
     sp<LayerContext> _layer_context;
+    float _text_scale;
     sp<LayoutParam> _layout_param;
     sp<CharacterMapper> _character_mapper;
     sp<CharacterMaker> _character_maker;
@@ -104,7 +115,6 @@ private:
     std::vector<sp<RenderablePassive>> _renderables;
     std::wstring _text;
 
-    float _text_scale;
     float _letter_spacing;
     float _layout_direction;
     float _line_height;

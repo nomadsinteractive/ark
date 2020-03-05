@@ -24,6 +24,24 @@ public:
         STATE_COUNT = 4
     };
 
+private:
+    template<typename T> class LayoutValueBuilder {
+    public:
+        LayoutValueBuilder(BeanFactory& factory, const String& style)
+            : _factory(factory), _value(style) {
+        }
+
+        T build(const Scope& args) {
+            if(_value.startsWith("$"))
+                return static_cast<T>(_factory.ensure<Integer>(_value, args)->val());
+            return Strings::parse<T>(_value);
+        }
+
+    private:
+        BeanFactory _factory;
+        String _value;
+    };
+
 public:
     View(const sp<LayoutParam>& layoutParam);
     View(const sp<Size>& size);
@@ -57,14 +75,13 @@ public:
 //  [[plugin::style("display")]]
     class STYLE_DISPLAY : public Builder<Renderer> {
     public:
-        STYLE_DISPLAY(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STYLE_DISPLAY(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<Renderer>> _delegate;
-
-        LayoutParam::Display _display;
+        LayoutValueBuilder<LayoutParam::Display> _display;
     };
 
 //  [[plugin::style("gravity")]]
@@ -76,8 +93,7 @@ public:
 
     private:
         sp<Builder<Renderer>> _delegate;
-
-        LayoutParam::Gravity _gravity;
+        LayoutValueBuilder<LayoutParam::Gravity> _gravity;
     };
 
 //  [[plugin::style("size")]]

@@ -27,10 +27,9 @@ const sp<Size>& Text::size()
 }
 
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _layout_param(factory.ensureBuilder<LayoutParam>(manifest)), _text(factory.getBuilder<String>(manifest, Constants::Attributes::TEXT))
+    : _characters(factory.ensureConcreteClassBuilder<Characters>(manifest, "characters")), _layout_param(factory.ensureBuilder<LayoutParam>(manifest)),
+      _text(factory.getBuilder<String>(manifest, Constants::Attributes::TEXT))
 {
-    const String cid = Documents::getAttribute(manifest, "characters");
-    _characters = cid ? factory.ensureBuilder<Characters>(cid) : factory.ensureBuilder<Characters>(manifest);
 }
 
 sp<Renderer> Text::BUILDER::build(const Scope& args)

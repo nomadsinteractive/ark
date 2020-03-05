@@ -41,7 +41,7 @@ FT_F26Dot6 FreeTypes::ftF26Dot6(uint32_t integer, uint32_t fractional)
     return integer << 6 | (077 & fractional);
 }
 
-uint32_t FreeTypes::ftCalculateLineHeight(FT_Face face)
+int32_t FreeTypes::ftCalculateLineHeight(FT_Face face)
 {
     return face->size->metrics.height >> 6;
 }

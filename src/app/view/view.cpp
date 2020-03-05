@@ -225,25 +225,25 @@ sp<View> bindView(sp<Renderer>& decorated)
 
 }
 
-View::STYLE_DISPLAY::STYLE_DISPLAY(BeanFactory& /*beanFactory*/, const sp<Builder<Renderer>>& delegate, const String& style)
-    : _delegate(delegate), _display(Strings::parse<LayoutParam::Display>(style)) {
+View::STYLE_DISPLAY::STYLE_DISPLAY(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style)
+    : _delegate(delegate), _display(factory, style) {
 }
 
 sp<Renderer> View::STYLE_DISPLAY::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->layoutParam()->setDisplay(_display);
+    bindView(renderer)->layoutParam()->setDisplay(_display.build(args));
     return renderer;
 }
 
-View::STYLE_GRAVITY::STYLE_GRAVITY(BeanFactory& /*factory*/, const sp<Builder<Renderer>>& delegate, const String& style)
-    : _delegate(delegate), _gravity(Strings::parse<LayoutParam::Gravity>(style)) {
+View::STYLE_GRAVITY::STYLE_GRAVITY(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style)
+    : _delegate(delegate), _gravity(factory, style) {
 }
 
 sp<Renderer> View::STYLE_GRAVITY::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->layoutParam()->setGravity(_gravity);
+    bindView(renderer)->layoutParam()->setGravity(_gravity.build(args));
     return renderer;
 }
 

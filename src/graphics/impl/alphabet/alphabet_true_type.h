@@ -41,7 +41,7 @@ private:
 
     FT_Face _ft_font_face;
     int32_t _base_line_position;
-    uint32_t _line_height_in_pixel;
+    int32_t _line_height_in_pixel;
 
     std::mutex _mutex;
 

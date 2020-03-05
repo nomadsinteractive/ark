@@ -10,45 +10,53 @@
 
 namespace ark {
 
-class LayoutParam {
+class ARK_API LayoutParam {
 public:
+//  [[script::bindings::enumeration]]
     enum Display {
         DISPLAY_BLOCK,
         DISPLAY_FLOAT,
         DISPLAY_ABSOLUTE
     };
-
+//  [[script::bindings::enumeration]]
     enum Gravity {
-        NONE = 0,
-        LEFT = 1,
-        RIGHT = 2,
-        CENTER_HORIZONTAL = 3,
-        TOP = 4,
-        BOTTOM = 8,
-        CENTER_VERTICAL = 12,
-        CENTER = CENTER_VERTICAL | CENTER_HORIZONTAL,
-        GRAVITY_DEFAULT = CENTER
+        GRAVITY_NONE = 0,
+        GRAVITY_LEFT = 1,
+        GRAVITY_RIGHT = 2,
+        GRAVITY_CENTER_HORIZONTAL = 3,
+        GRAVITY_TOP = 4,
+        GRAVITY_BOTTOM = 8,
+        GRAVITY_CENTER_VERTICAL = 12,
+        GRAVITY_CENTER = GRAVITY_CENTER_VERTICAL | GRAVITY_CENTER_HORIZONTAL,
+        GRAVITY_DEFAULT = GRAVITY_CENTER
     };
 
     static const int32_t MATCH_PARENT;
     static const int32_t WRAP_CONTENT;
 
 public:
-    LayoutParam(const sp<Size>& size, Display display = DISPLAY_BLOCK, Gravity gravity = NONE);
+    LayoutParam(const sp<Size>& size, Display display = DISPLAY_BLOCK, Gravity gravity = GRAVITY_NONE);
     LayoutParam(const LayoutParam& other) = default;
 
     float calcLayoutWidth(float available);
     float calcLayoutHeight(float available);
 
+//  [[script::bindings::property]]
     float contentWidth() const;
+//  [[script::bindings::property]]
     void setContentWidth(float contentWidth);
+
     float offsetWidth() const;
 
+//  [[script::bindings::property]]
     float contentHeight() const;
+//  [[script::bindings::property]]
     void setContentHeight(float contentHeight);
     float offsetHeight() const;
 
+//  [[script::bindings::property]]
     const SafePtr<Size>& size() const;
+//  [[script::bindings::property]]
     void setSize(const sp<Size>& size);
 
     const sp<Boolean>& stopPropagation() const;
@@ -64,6 +72,8 @@ public:
     Rect& margins();
 
     bool isWrapContent() const;
+    bool isWidthWrapContent() const;
+    bool isHeightWrapContent() const;
 
     static bool isMatchParent(float unit);
     static bool isWrapContent(float unit);

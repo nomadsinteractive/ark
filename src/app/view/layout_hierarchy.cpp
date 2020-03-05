@@ -10,12 +10,13 @@
 #include "app/base/event.h"
 #include "app/inf/layout.h"
 #include "app/view/view.h"
+#include "app/view/view_group.h"
 
 namespace ark {
 
 LayoutHierarchy::Slot::Slot(const sp<Renderer>& renderer, bool layoutRequested)
-    : _x(0), _y(0), _layout_width(0), _layout_height(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _layout_event_listener(renderer.as<LayoutEventListener>()),
-      _disposed(renderer.as<Disposed>()), _visibility(renderer.as<Visibility>())
+    : _x(0), _y(0), _layout_width(0), _layout_height(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _view_group(renderer.as<ViewGroup>()),
+      _layout_event_listener(renderer.as<LayoutEventListener>()), _disposed(renderer.as<Disposed>()), _visibility(renderer.as<Visibility>())
 {
     DASSERT(_renderer);
 }
@@ -46,6 +47,12 @@ void LayoutHierarchy::Slot::updateLayout()
         _layout_height = _view->size()->height();
     }
     _layout_requested = false;
+}
+
+void LayoutHierarchy::Slot::wrapContentLayout() const
+{
+    if(_view_group && _view_group->layoutParam()->isWrapContent())
+        _view_group->updateLayout();
 }
 
 void LayoutHierarchy::Slot::doPlace(Layout::Context& ctx, float clientHeight, const sp<Layout>& layout)
@@ -88,7 +95,6 @@ void LayoutHierarchy::Slot::doLayoutEnd(const Rect& p)
         _x += p.left();
         _y -= p.top();
     }
-    updateLayout();
 }
 
 void LayoutHierarchy::Slot::render(RenderRequest& renderRequest, const V3& position)
@@ -201,6 +207,9 @@ void LayoutHierarchy::updateLayout(LayoutParam& layoutParam)
     }
     if(isLayoutNeeded(layoutParam))
     {
+        for(const sp<Slot>& i : _slots)
+            i->wrapContentLayout();
+
         if(_layout)
         {
             Layout::Context ctx(layoutParam, [this]() {
@@ -219,9 +228,8 @@ void LayoutHierarchy::updateLayout(LayoutParam& layoutParam)
             for(const sp<Slot>& i : _slots)
                 i->doLayoutEnd(p);
         }
-        else
-            for(const sp<Slot>& i : _slots)
-                i->updateLayout();
+        for(const sp<Slot>& i : _slots)
+            i->updateLayout();
     }
 }
 
@@ -234,8 +242,10 @@ void LayoutHierarchy::doWrapContentLayout(Layout::Context& ctx, LayoutParam& lay
         i->doWrapContentPlace(ctx, _layout, clientRect);
 
     _layout->end(ctx);
-    layoutParam.setContentWidth(clientRect.width());
-    layoutParam.setContentHeight(clientRect.height());
+    if(layoutParam.isWidthWrapContent())
+        layoutParam.setContentWidth(clientRect.width());
+    if(layoutParam.isHeightWrapContent())
+        layoutParam.setContentHeight(clientRect.height());
 }
 
 void LayoutHierarchy::addRenderer(const sp<Renderer>& renderer)

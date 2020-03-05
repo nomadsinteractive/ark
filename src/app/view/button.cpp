@@ -29,7 +29,7 @@ Button::~Button()
 void Button::render(RenderRequest& renderRequest, const V3& position)
 {
     _background->render(renderRequest, position);
-    if(_gravity != LayoutParam::NONE)
+    if(_gravity != LayoutParam::GRAVITY_NONE)
     {
         const sp<Renderer>& fg = _foreground->getRendererByCurrentStatus();
         if(fg)
@@ -75,7 +75,7 @@ sp<Button> Button::BUILDER::build(const Scope& args)
     const sp<Size> builtSize = _size->build(args);
     const String style = Documents::getAttribute(_manifest, Constants::Attributes::STYLE);
     const sp<Size> size = builtSize ? builtSize : background.size();
-    const sp<Button> button = sp<Button>::make(foreground, background.renderer(), size, _gravity ? Strings::parse<LayoutParam::Gravity>(_gravity) : LayoutParam::CENTER);
+    const sp<Button> button = sp<Button>::make(foreground, background.renderer(), size, _gravity ? Strings::parse<LayoutParam::Gravity>(_gravity) : LayoutParam::GRAVITY_CENTER);
     loadStatus(button, _manifest, _factory, args);
     if(style)
         _factory.decorate<Renderer>(sp<Builder<Renderer>::Prebuilt>::make(button), style)->build(args);

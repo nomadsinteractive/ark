@@ -23,12 +23,12 @@ public:
         : _callable(std::move(callable)), _args(PyInstance::steal(PyTuple_New(3))) {
     }
 
-    virtual sp<RenderObject> makeCharacter(int32_t type, const V2& position, const sp<Size>& size) override {
+    virtual sp<RenderObject> makeCharacter(int32_t type, const V3& position, const sp<Size>& size) override {
         DCHECK_THREAD_FLAG();
 
         const sp<PythonInterpreter>& interpreter = PythonInterpreter::instance();
         PyObject* pyType = interpreter->toPyObject<int32_t>(type);
-        PyObject* pyPosition = interpreter->toPyObject<V2>(position);
+        PyObject* pyPosition = interpreter->toPyObject<V3>(position);
         PyObject* pySize = interpreter->toPyObject<sp<Size>>(size);
         PyTuple_SetItem(_args.pyObject(), 0, pyType);
         PyTuple_SetItem(_args.pyObject(), 1, pyPosition);
@@ -44,6 +44,10 @@ public:
             PythonInterpreter::instance()->logErr();
 
         return nullptr;
+    }
+
+    virtual V2 scale() override {
+        return V2(1.0f);
     }
 
 private:

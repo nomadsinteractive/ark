@@ -7,8 +7,8 @@
 
 namespace ark {
 
-DOMDocument::DOMDocument(const String& name)
-    : DOMElement(name)
+DOMDocument::DOMDocument(const String& name, const String& value, ElementType type)
+    : DOMElement(name, value, type)
 {
 }
 
