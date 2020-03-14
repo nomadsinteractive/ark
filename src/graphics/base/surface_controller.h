@@ -23,7 +23,7 @@ public:
 // [[script::bindings::auto]]
     void addLayer(const sp<Renderer>& layer);
 
-    void requestUpdate();
+    void requestUpdate(uint64_t timestamp);
 
     void onRenderFrame(const Color& backgroundColor, RenderView& renderView);
 
@@ -36,8 +36,6 @@ private:
     sp<RendererGroup> _layers;
 
     sp<OCSQueue<RenderRequest>> _render_requests;
-
-    sp<Variable<uint64_t>> _clock;
 };
 
 }

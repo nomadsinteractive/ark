@@ -176,9 +176,9 @@ public:
     };
 
 //  [[plugin::style("stop-propagation")]]
-    class STOP_PROPAGATION_PARAM : public Builder<Renderer> {
+    class STOP_PROPAGATION_STYLE : public Builder<Renderer> {
     public:
-        STOP_PROPAGATION_PARAM(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style);
+        STOP_PROPAGATION_STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style);
 
         virtual sp<Renderer> build(const Scope& args) override;
 

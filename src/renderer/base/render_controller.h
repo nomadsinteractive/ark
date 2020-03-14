@@ -18,35 +18,36 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
-#include "renderer/inf/model_loader.h"
-#include "renderer/inf/uploader.h"
 #include "renderer/base/shared_buffer.h"
+#include "renderer/inf/model_loader.h"
+
+#include "platform/platform.h"
 
 namespace ark {
 
 class ARK_API RenderController {
 private:
-    template<typename T> class Synchronized : public Runnable {
+    template<typename T> class SynchronizedVar : public Updatable {
     public:
-        Synchronized(const sp<Variable<T>>& delegate, const sp<Boolean>& flag)
-            : _delegate(delegate), _flag(flag), _value(sp<typename Variable<T>::Impl>::make(_delegate->val())) {
+        SynchronizedVar(const sp<Variable<T>>& delegate)
+            : _delegate(delegate), _var(sp<typename Variable<T>::Impl>::make(_delegate->val())) {
         }
 
-        virtual void run() override {
-            if(_flag->val())
-                _value->set(_delegate->val());
+        const sp<typename Variable<T>::Impl>& var() const {
+            return _var;
         }
 
-        const sp<typename Variable<T>::Impl>& value() const {
-            return _value;
+        virtual bool update(uint64_t timestamp) override {
+            if(_delegate->update(timestamp)) {
+                _var->set(_delegate->val());
+                return true;
+            }
+            return false;
         }
 
     private:
         sp<Variable<T>> _delegate;
-        sp<Boolean> _flag;
-
-        sp<typename Variable<T>::Impl> _value;
-
+        sp<typename Variable<T>::Impl> _var;
     };
 
 public:
@@ -98,20 +99,16 @@ public:
 
     sp<Framebuffer> makeFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture);
 
-    sp<Boolean> makeSynchronizeFlag();
-
     template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& disposed) {
-        const sp<Synchronized<T>> s = sp<Synchronized<T>>::make(delegate, makeSynchronizeFlag());
-        const sp<Variable<T>> var = s->value();
-        addPreUpdateRequest(s, disposed ? disposed : sp<Boolean>::adopt(new BooleanByWeakRef<Variable<T>>(var, 1)));
+        const sp<SynchronizedVar<T>> s = sp<SynchronizedVar<T>>::make(delegate);
+        const sp<Variable<T>>& var = s->var();
+        _on_pre_updatable.push_back(s, disposed ? disposed : sp<Boolean>::make<BooleanByWeakRef<Variable<T>>>(var, 1));
         return var;
     }
 
-    sp<Variable<uint64_t>> ticker() const;
-
     void addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired);
 
-    void preUpdate();
+    void preUpdate(uint64_t timestamp);
     void deferUnref(Box box);
 
     sp<SharedBuffer> getNamedBuffer(SharedBuffer::Name name);
@@ -142,20 +139,6 @@ private:
         UploadPriority _upload_priority;
     };
 
-    class SynchronizeFlag : public Boolean {
-    public:
-        SynchronizeFlag();
-
-        virtual bool val() override;
-        virtual bool update(uint64_t timestamp) override;
-
-        void reset();
-
-    private:
-        bool _value;
-
-    };
-
     struct PreparingResource {
         PreparingResource() = default;
         PreparingResource(const RenderResource& resource, RenderController::UploadStrategy strategy);
@@ -181,10 +164,10 @@ private:
     LFQueue<PreparingResource> _preparing_items;
     std::set<RenderResource> _on_surface_ready_items;
 
+    DisposableItemList<Updatable> _on_pre_updatable;
     DisposableItemList<Runnable> _on_pre_update_request;
-    std::vector<Box> _defered_instances;
-    WeakRefList<SynchronizeFlag> _synchronize_flags;
 
+    std::vector<Box> _defered_instances;
     std::unordered_map<element_index_t, sp<SharedBuffer>> _shared_buffers;
 
     friend class TextureBundle;

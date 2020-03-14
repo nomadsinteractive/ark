@@ -2,6 +2,7 @@
 #define ARK_CORE_INF_VARIABLE_H_
 
 #include "core/forwarding.h"
+#include "core/base/timestamp.h"
 #include "core/inf/updatable.h"
 #include "core/types/implements.h"
 
@@ -21,8 +22,8 @@ public:
 
 template<typename T> class Variable<T>::Impl : public Variable<T>, Implements<typename Variable<T>::Impl, Variable<T>> {
 public:
-    Impl(const T& value, bool dirty = false)
-        : _value(value), _timestamp(dirty) {
+    Impl(const T& value)
+        : _value(value) {
     }
 
     virtual T val() override {

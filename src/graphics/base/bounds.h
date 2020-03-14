@@ -17,7 +17,7 @@ public:
     Bounds(const sp<Vec3>& center, const sp<Size>& size);
 
 //  [[script::bindings::auto]]
-    bool ptin(const V& pt) const;
+    bool ptin(const V3& pt) const;
 //  [[script::bindings::property]]
     const sp<Vec3>& center() const;
 

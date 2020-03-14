@@ -43,8 +43,8 @@ public:
         return position;
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
-        return true;
+    virtual bool update(uint64_t timestamp) override {
+        return _position->update(timestamp);
     }
 
 private:

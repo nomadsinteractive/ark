@@ -75,6 +75,7 @@ class StringBuffer;
 class StringTable;
 class Thread;
 class ThreadPoolExecutor;
+class Updatable;
 class Visibility;
 
 typedef Dictionary<Box> BoxBundle;

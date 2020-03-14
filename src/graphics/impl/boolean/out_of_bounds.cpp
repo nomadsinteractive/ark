@@ -4,11 +4,11 @@
 #include "core/util/variable_util.h"
 
 #include "graphics/base/bounds.h"
-#include "graphics/base/v2.h"
+#include "graphics/base/v3.h"
 
 namespace ark {
 
-OutOfBounds::OutOfBounds(const sp<Bounds>& bounds, const sp<Vec>& position)
+OutOfBounds::OutOfBounds(const sp<Bounds>& bounds, const sp<Vec3>& position)
     : _bounds(bounds), _position(position)
 {
     DASSERT(bounds);
@@ -17,7 +17,7 @@ OutOfBounds::OutOfBounds(const sp<Bounds>& bounds, const sp<Vec>& position)
 
 bool OutOfBounds::val()
 {
-    const V pt = _position->val();
+    const V3 pt = _position->val();
     return !_bounds->ptin(pt);
 }
 
@@ -27,7 +27,7 @@ bool OutOfBounds::update(uint64_t timestamp)
 }
 
 OutOfBounds::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _bounds(factory.ensureBuilder<Bounds>(manifest, Constants::Attributes::BOUNDS)), _position(factory.ensureBuilder<Vec>(manifest, Constants::Attributes::POSITION))
+    : _bounds(factory.ensureBuilder<Bounds>(manifest, Constants::Attributes::BOUNDS)), _position(factory.ensureBuilder<Vec3>(manifest, Constants::Attributes::POSITION))
 {
 }
 

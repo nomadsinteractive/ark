@@ -161,13 +161,6 @@ sp<Framebuffer> RenderController::makeFramebuffer(const sp<Renderer>& renderer, 
     return framebuffer;
 }
 
-sp<Boolean> RenderController::makeSynchronizeFlag()
-{
-    const sp<SynchronizeFlag> flag = sp<SynchronizeFlag>::make();
-    _synchronize_flags.push_back(flag);
-    return flag;
-}
-
 Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader)
 {
     Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage));
@@ -187,7 +180,7 @@ void RenderController::addPreUpdateRequest(const sp<Runnable>& task, const sp<Bo
     }
 }
 
-void RenderController::preUpdate()
+void RenderController::preUpdate(uint64_t timestamp)
 {
 #ifdef ARK_FLAG_DEBUG
     static int i = 0;
@@ -199,8 +192,8 @@ void RenderController::preUpdate()
 #endif
     _defered_instances.clear();
 
-    for(const sp<SynchronizeFlag>& i : _synchronize_flags)
-        i->reset();
+    for(const sp<Updatable>& i : _on_pre_updatable)
+        i->update(timestamp);
 
     for(const sp<Runnable>& runnable : _on_pre_update_request)
         runnable->run();
@@ -296,31 +289,6 @@ RenderController::PreparingResource::PreparingResource(const RenderController::R
 bool RenderController::PreparingResource::operator <(const RenderController::PreparingResource& other) const
 {
     return _resource < other._resource;
-}
-
-RenderController::SynchronizeFlag::SynchronizeFlag()
-    : _value(false)
-{
-}
-
-bool RenderController::SynchronizeFlag::val()
-{
-    if(_value)
-    {
-        _value = false;
-        return true;
-    }
-    return false;
-}
-
-bool RenderController::SynchronizeFlag::update(uint64_t /*timestamp*/)
-{
-    return true;
-}
-
-void RenderController::SynchronizeFlag::reset()
-{
-    _value = true;
 }
 
 }

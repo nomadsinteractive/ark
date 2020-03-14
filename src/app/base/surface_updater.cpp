@@ -1,24 +1,25 @@
 #include "app/base/surface_updater.h"
 
-#include "graphics/base/render_request.h"
 #include "graphics/base/surface_controller.h"
 
 #include "renderer/base/render_controller.h"
 
-#include "app/base/application_context.h"
+#include "platform/platform.h"
+
 
 namespace ark {
 
 SurfaceUpdater::SurfaceUpdater(const sp<SurfaceController>& surfaceController, const sp<RenderController>& renderController)
-    : _surface_controller(surfaceController), _render_controller(renderController)
+    : _surface_controller(surfaceController), _render_controller(renderController), _clock(Platform::getSteadyClock())
 {
 }
 
 void SurfaceUpdater::run()
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
-    _render_controller->preUpdate();
-    _surface_controller->requestUpdate();
+    uint64_t timestamp = _clock->val();
+    _render_controller->preUpdate(timestamp);
+    _surface_controller->requestUpdate(timestamp);
 }
 
 }

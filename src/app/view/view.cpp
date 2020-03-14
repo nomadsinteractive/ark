@@ -187,7 +187,7 @@ void View::setOnMove(const sp<EventListener>& onMove)
 
 bool View::dispatchEvent(const Event& event, bool ptin)
 {
-    Event::Action action = event.action();
+    const Event::Action action = event.action();
     if(ptin && !(*_state & View::STATE_MOVING) && (action == Event::ACTION_MOVE || action == Event::ACTION_DOWN))
         fireOnEnter();
 
@@ -195,16 +195,21 @@ bool View::dispatchEvent(const Event& event, bool ptin)
     {
         if(action == Event::ACTION_MOVE && (*_state & View::STATE_MOVING))
             fireOnLeave();
+        if(action == Event::ACTION_UP && (*_state & View::STATE_PUSHING))
+            fireOnRelease();
     }
-    else if(action == Event::ACTION_UP && !fireOnRelease() && fireOnClick())
+    else if(action == Event::ACTION_UP)
+    {
+        if((*_state & View::STATE_PUSHING) && !fireOnRelease() && fireOnClick())
+            return true;
+    }
+    else if(action == Event::ACTION_DOWN)
+    {
+        if(ptin && fireOnPush())
+            return true;
+    }
+    else if(action == Event::ACTION_MOVE && fireOnMove(event))
         return true;
-    else if(action == Event::ACTION_DOWN && fireOnPush())
-        return true;
-
-    if(action == Event::ACTION_MOVE && ptin)
-        return fireOnMove(event);
-    if(action == Event::ACTION_UP && (*_state & View::STATE_PUSHING))
-        fireOnRelease();
 
     return _layout_param->stopPropagation() && _layout_param->stopPropagation()->val();
 }
@@ -396,12 +401,12 @@ sp<Renderer> View::STYLE_ON_MOVE::build(const Scope& args)
     return renderer;
 }
 
-View::STOP_PROPAGATION_PARAM::STOP_PROPAGATION_PARAM(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style)
+View::STOP_PROPAGATION_STYLE::STOP_PROPAGATION_STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style)
     : _delegate(delegate), _stop_propagation(style ? factory.ensureBuilder<Boolean>(style) : nullptr)
 {
 }
 
-sp<Renderer> View::STOP_PROPAGATION_PARAM::build(const Scope& args)
+sp<Renderer> View::STOP_PROPAGATION_STYLE::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->setStopPropagation(_stop_propagation ? _stop_propagation->build(args) : sp<Boolean>::make<Boolean::Const>(true));

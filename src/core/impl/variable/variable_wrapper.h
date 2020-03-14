@@ -4,6 +4,7 @@
 #include "core/forwarding.h"
 #include "core/ark.h"
 #include "core/base/delegate.h"
+#include "core/base/timestamp.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
 #include "core/types/null.h"
@@ -27,7 +28,7 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return this->_delegate->update(timestamp);
+        return this->_delegate->update(timestamp) || _timestamp.update(timestamp);
     }
 
     void set(T value) {
@@ -35,8 +36,9 @@ public:
             _variable_impl->set(value);
         else {
             deferedUnref();
-            _variable_impl = new typename Variable<T>::Impl(value, true);
+            _variable_impl = new typename Variable<T>::Impl(value);
             this->_delegate = sp<Variable<T>>::adopt(_variable_impl);
+            _timestamp.setDirty();
         }
     }
 
@@ -44,6 +46,7 @@ public:
         deferedUnref();
         DCHECK(delegate.get() != this, "Recursive delegate being set");
         this->_delegate = Null::toSafe(delegate);
+        _timestamp.setDirty();
     }
 
     T fix() {
@@ -61,6 +64,7 @@ private:
 
 private:
     typename Variable<T>::Impl* _variable_impl;
+    Timestamp _timestamp;
 };
 
 }

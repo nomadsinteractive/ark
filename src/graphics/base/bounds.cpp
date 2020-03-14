@@ -12,7 +12,7 @@ Bounds::Bounds(const sp<Vec3>& position, const sp<Size>& size)
 {
 }
 
-bool Bounds::ptin(const V& pt) const
+bool Bounds::ptin(const V3& pt) const
 {
     const V c = _center->val();
     const V s = _size->val();

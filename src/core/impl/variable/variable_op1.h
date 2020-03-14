@@ -3,6 +3,7 @@
 
 #include <functional>
 
+#include "core/base/timestamp.h"
 #include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
@@ -41,7 +42,7 @@ private:
     sp<Variable<U>> _arg;
 
     T _val;
-    typename Variable<T>::Timestamp _timestamp;
+    Timestamp _timestamp;
 };
 
 }
