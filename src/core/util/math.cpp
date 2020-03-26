@@ -8,8 +8,10 @@
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
-
 #include "core/util/log.h"
+
+#include "graphics/base/v4.h"
+
 
 namespace ark {
 
@@ -32,11 +34,6 @@ const float Math::PI = 3.14159265358979323846f;
 const float Math::PIx2 = Math::PI * 2.0f;
 const float Math::PI_2 = Math::PI / 2.0f;
 const float Math::PI_4 = Math::PI / 4.0f;
-
-static float _atan2(const V2& val)
-{
-    return Math::atan2(val.y(), val.x());
-}
 
 uint32_t Math::log2(uint32_t value)
 {
@@ -73,19 +70,14 @@ sp<Numeric> Math::cos(const sp<Numeric>& x)
     return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::cos), x);
 }
 
-sp<Numeric> Math::atan(const sp<Vec2>& val)
-{
-    return sp<VariableOP1<float, V2>>::make(_atan2, val);
-}
-
 sp<Numeric> Math::min(const sp<Numeric>& a1, const sp<Numeric>& a2)
 {
-    return sp<VariableOP2<float, float, Operators::Min<float>, sp<Numeric>, sp<Numeric>>>::make(a1, a2);
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Min<float>>>::make(a1, a2);
 }
 
 sp<Numeric> Math::max(const sp<Numeric>& a1, const sp<Numeric>& a2)
 {
-    return sp<VariableOP2<float, float, Operators::Max<float>, sp<Numeric>, sp<Numeric>>>::make(a1, a2);
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Max<float>>>::make(a1, a2);
 }
 
 float Math::acos(float x)
@@ -174,13 +166,28 @@ sp<Numeric> Math::sqrt(const sp<Numeric>& x)
     return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::sqrt), x);
 }
 
+sp<Numeric> Math::dot(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
+{
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Dot<V2>>>::make(lvalue, rvalue);
+}
+
+sp<Numeric> Math::dot(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
+{
+    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Dot<V3>>>::make(lvalue, rvalue);
+}
+
+sp<Numeric> Math::dot(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
+{
+    return sp<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Dot<V4>>>::make(lvalue, rvalue);
+}
+
 V3 Math::quadratic(float a, float b, float c)
 {
-	float d = b * b - 4.0f * a * c;
-	if(d < 0)
-		return V3(d, 0, 0);
+    float d = b * b - 4.0f * a * c;
+    if(d < 0)
+        return V3(d, 0, 0);
     float sqrtd = std::sqrt(d);
-	return V3(d, (-b + sqrtd) / 2.0f / a, (-b - sqrtd) / 2.0f / a);
+    return V3(d, (-b + sqrtd) / 2.0f / a, (-b - sqrtd) / 2.0f / a);
 }
 
 V2 Math::projectile(float dx, float dy, float v, float g, uint32_t sid)

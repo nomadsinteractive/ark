@@ -18,6 +18,7 @@ class Frame;
 class BitmapBundle;
 class Scrollable;
 class RenderLayer;
+class Mat2Impl;
 class Mat3Impl;
 class Model;
 class RenderLayer;
@@ -56,9 +57,11 @@ template<uint32_t S> class Mat;
 
 typedef sp<Bitmap> bitmap;
 
+typedef Mat<2> M2;
 typedef Mat<3> M3;
 typedef Mat<4> M4;
 
+typedef Variable<M2> Mat2;
 typedef Variable<M3> Mat3;
 typedef Variable<M4> Mat4;
 
@@ -75,7 +78,7 @@ typedef Importer<Tileset> TilesetImporter;
 
 typedef Vec2 Vec;
 typedef V2 V;
-typedef Vec2Util VecUtil;
+//typedef Vec2Util VecUtil;
 
 const int32_t DIMENSIONS = 2;
 

@@ -108,6 +108,23 @@ private:
         std::list<sp<String>> _fragments;
     };
 
+    struct Parameter {
+        enum Modifier {
+            PARAMETER_MODIFIER_DEFAULT = 0,
+            PARAMETER_MODIFIER_IN = 1,
+            PARAMETER_MODIFIER_OUT = 2,
+            PARAMETER_MODIFIER_IN_OUT = 3
+        };
+        Parameter();
+        Parameter(String type, String name, Modifier modifier);
+
+        DEFAULT_COPY_AND_ASSIGN(Parameter);
+
+        String _type;
+        String _name;
+        Modifier _modifier;
+    };
+
     struct Function {
         Function(const String& name, const String& params, const String& body);
         DEFAULT_COPY_AND_ASSIGN(Function);
@@ -115,8 +132,10 @@ private:
         String _name;
         String _params;
         String _body;
-        std::vector<std::pair<String, String>> _ins;
-        std::vector<std::pair<String, String>> _outs;
+//        std::vector<std::pair<String, String>> _ins;
+//        std::vector<std::pair<String, String>> _outs;
+        std::vector<Parameter> _ins;
+        std::vector<Parameter> _outs;
     };
 
     struct CodeBlock {
@@ -124,6 +143,7 @@ private:
         DEFAULT_COPY_AND_ASSIGN(CodeBlock);
 
         void parse(PipelineBuildingContext& buildingContext);
+        Parameter parseParameter(const String& param);
 
         void genDefinition();
         String genOutCall(ShaderType type);

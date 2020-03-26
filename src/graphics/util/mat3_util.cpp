@@ -1,9 +1,9 @@
 #include "graphics/util/mat3_util.h"
 
-#include <glm/glm.hpp>
-
 #include "core/ark.h"
 #include "core/impl/variable/variable_wrapper.h"
+#include "core/impl/variable/variable_op2.h"
+#include "core/util/operators.h"
 #include "core/util/variable_util.h"
 
 #include "graphics/base/mat.h"
@@ -11,120 +11,10 @@
 
 namespace ark {
 
-namespace {
-
-class Mat3MulMat3 : public Mat3 {
-public:
-    Mat3MulMat3(const sp<Mat3>& lvalue, const sp<Mat3>& rvalue)
-        : _lvalue(lvalue), _rvalue(rvalue) {
-    }
-
-    virtual M3 val() override {
-        return _lvalue->val().mat<glm::mat3>() * _rvalue->val().mat<glm::mat3>();
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return VariableUtil::update(timestamp, _lvalue, _rvalue);
-    }
-
-private:
-    sp<Mat3> _lvalue;
-    sp<Mat3> _rvalue;
-};
-
-class Mat3MulVec3 : public Vec3 {
-public:
-    Mat3MulVec3(const sp<Mat3>& lvalue, const sp<Vec3>& rvalue)
-        : _lvalue(lvalue), _rvalue(rvalue) {
-    }
-
-    virtual V3 val() override {
-        const glm::mat3 lvalue = _lvalue->val().mat<glm::mat3>();
-        const V3 rvalue = _rvalue->val();
-        const glm::vec3 result = lvalue * glm::vec3(rvalue.x(), rvalue.y(), rvalue.z());
-        return V3(result.x, result.y, result.z);
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return VariableUtil::update(timestamp, _lvalue, _rvalue);
-    }
-
-private:
-    sp<Mat3> _lvalue;
-    sp<Vec3> _rvalue;
-};
-
-class Mat3MulV3 : public Vec3 {
-public:
-    Mat3MulV3(const sp<Mat3>& lvalue, const V3& rvalue)
-        : _lvalue(lvalue), _rvalue(rvalue.x(), rvalue.y(), rvalue.z()) {
-    }
-
-    virtual V3 val() override {
-        const glm::mat3 lvalue = _lvalue->val().mat<glm::mat3>();
-        const glm::vec3 result = lvalue * _rvalue;
-        return V3(result.x, result.y, result.z);
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return _lvalue->update(timestamp);
-    }
-
-private:
-    sp<Mat3> _lvalue;
-    glm::vec3 _rvalue;
-};
-
-class Mat3MulVec2 : public Vec2 {
-public:
-    Mat3MulVec2(const sp<Mat3>& lvalue, const sp<Vec2>& rvalue)
-        : _lvalue(lvalue), _rvalue(rvalue) {
-    }
-
-    virtual V2 val() override {
-        const glm::mat3 lvalue = _lvalue->val().mat<glm::mat3>();
-        const V2 rvalue = _rvalue->val();
-        const glm::vec3 result = lvalue * glm::vec3(rvalue.x(), rvalue.y(), 1.0f);
-        DCHECK(result.z != 0, "Division by zero");
-        return V2(result.x / result.z, result.y / result.z);
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return VariableUtil::update(timestamp, _lvalue, _rvalue);
-    }
-
-private:
-    sp<Mat3> _lvalue;
-    sp<Vec2> _rvalue;
-};
-
-class Mat3MulV2 : public Vec2 {
-public:
-    Mat3MulV2(const sp<Mat3>& lvalue, const V2& rvalue)
-        : _lvalue(lvalue), _rvalue(rvalue.x(), rvalue.y(), 1.0f) {
-    }
-
-    virtual V2 val() override {
-        const glm::mat3 lvalue = _lvalue->val().mat<glm::mat3>();
-        const glm::vec3 result = lvalue * _rvalue;
-        DCHECK(result.z != 0, "Division by zero");
-        return V2(result.x / result.z, result.y / result.z);
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return _lvalue->update(timestamp);
-    }
-
-private:
-    sp<Mat3> _lvalue;
-    glm::vec3 _rvalue;
-};
-
-}
-
 sp<Mat3> Mat3Util::create(const sp<Vec3>& t, const sp<Vec3>& b, const sp<Vec3>& n)
 {
-    return sp<Mat3Impl>::make(t, b, n);
+    DASSERT((t && b && n) || (!t && !b && !n));
+    return t ? sp<Mat3>::make<Mat3Impl>(t, b, n) : sp<Mat3>::make<Mat3::Const>(M3::identity());
 }
 
 sp<Mat3> Mat3Util::create(const V3& t, const V3& b, const V3& n)
@@ -134,27 +24,32 @@ sp<Mat3> Mat3Util::create(const V3& t, const V3& b, const V3& n)
 
 sp<Mat3> Mat3Util::mul(const sp<Mat3>& lvalue, const sp<Mat3>& rvalue)
 {
-    return sp<Mat3MulMat3>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Mat3>, sp<Mat3>, Operators::Mul<M3, M3>>>::make(lvalue, rvalue);
 }
 
 sp<Vec3> Mat3Util::mul(const sp<Mat3>& lvalue, const sp<Vec3>& rvalue)
 {
-    return sp<Mat3MulVec3>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Mat3>, sp<Vec3>, Operators::Mul<M3, V3>>>::make(lvalue, rvalue);
 }
 
 sp<Vec3> Mat3Util::mul(const sp<Mat3>& lvalue, const V3& rvalue)
 {
-    return sp<Mat3MulV3>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Mat3>, V3, Operators::Mul<M3, V3>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Mat3Util::mul(const sp<Mat3>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<Mat3MulVec2>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Mat3>, sp<Vec2>, Operators::Mul<M3, V2>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Mat3Util::mul(const sp<Mat3>& lvalue, const V2& rvalue)
 {
-    return sp<Mat3MulV2>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Mat3>, V2, Operators::Mul<M3, V2>>>::make(lvalue, rvalue);
+}
+
+sp<Mat3> Mat3Util::identity()
+{
+    return sp<Mat3Impl>::make();
 }
 
 void Mat3Util::fix(const sp<Mat3>& self)

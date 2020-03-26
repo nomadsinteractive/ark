@@ -82,12 +82,12 @@ void PipelineBuildingContext::initialize()
     });
 
     for(const auto& i : _vertex_in)
-        _vertex._ins.declare(i.first, "a_", Strings::capitalFirst(i.second));
+        _vertex._ins.declare(i._type, "a_", Strings::capitalFirst(i._name));
     for(const auto& i : _fragment_in)
     {
-        const String n = Strings::capitalFirst(i.second);
+        const String n = Strings::capitalFirst(i._name);
         fragmentUsedVars.insert(n);
-        _fragment._ins.declare(i.first, "v_", n);
+        _fragment._ins.declare(i._type, "v_", n);
     }
 
     Table<String, String> attributes;
@@ -131,7 +131,7 @@ void PipelineBuildingContext::initialize()
     }
 
     for(const auto& i : _vertex_out)
-        _vertex._outs.declare(i.first, "", i.second);
+        _vertex._outs.declare(i._type, "", i._name);
 }
 
 void PipelineBuildingContext::setupUniforms()
@@ -169,7 +169,7 @@ Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, c
         _attributes[name] = makePredefinedAttribute(name, type);
 
     if(scopes == ShaderPreprocessor::SHADER_TYPE_FRAGMENT)
-        _fragment_in.push_back(std::pair<String, String>(type, name));
+        _fragment_in.push_back(ShaderPreprocessor::Parameter(type, name, ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN));
 
     return _attributes[name];
 }

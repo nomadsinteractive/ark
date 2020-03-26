@@ -9,7 +9,9 @@
 #include "core/impl/variable/boost.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/variable_wrapper.h"
+#include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
+#include "core/impl/variable/variable_ternary.h"
 #include "core/util/holder_util.h"
 #include "core/util/operators.h"
 #include "core/util/variable_util.h"
@@ -112,6 +114,11 @@ private:
 
 }
 
+static float _atan2(const V2& val)
+{
+    return Math::atan2(val.y(), val.x());
+}
+
 sp<Vec2> Vec2Util::create(const sp<Numeric>& x, const sp<Numeric>& y)
 {
     return sp<Vec2Impl>::make(x, y);
@@ -124,47 +131,47 @@ sp<Vec2> Vec2Util::create(float x, float y)
 
 sp<Vec2> Vec2Util::add(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VariableOP2<V2, V2, Operators::Add<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Add<V2>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::sub(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VariableOP2<V2, V2, Operators::Sub<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Sub<V2>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::mul(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VariableOP2<V2, V2, Operators::Mul<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Mul<V2>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::mul(const sp<Vec2>& lvalue, float rvalue)
 {
-    return sp<VariableOP2<V2, float, Operators::Mul<V2, float>, sp<Vec2>, float>>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Vec2>, float, Operators::Mul<V2, float>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::mul(float lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VariableOP2<float, V2, Operators::Mul<float, V2>, float, sp<Vec2>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, sp<Vec2>, Operators::Mul<float, V2>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::mul(const sp<Vec2>& lvalue, sp<Numeric>& rvalue)
 {
-    return sp<VariableOP2<V2, float, Operators::Mul<V2, float>, sp<Vec2>, sp<Numeric>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Mul<V2, float>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VariableOP2<V2, V2, Operators::Div<V2>, sp<Vec2>, sp<Vec2>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Div<V2>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::truediv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue)
 {
-    return sp<VariableOP2<V2, float, Operators::Div<V2, float>, sp<Vec2>, sp<Numeric>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Div<V2, float>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::truediv(const sp<Vec2>& lvalue, float rvalue)
 {
-    return sp<VariableOP2<V2, float, Operators::Div<V2, float>, sp<Vec2>, float>>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Vec2>, float, Operators::Div<V2, float>>>::make(lvalue, rvalue);
 }
 
 sp<Vec2> Vec2Util::negative(const sp<Vec2>& self)
@@ -293,6 +300,16 @@ sp<Vec2> Vec2Util::synchronize(const sp<Vec2>& self, const sp<Boolean>& disposed
 sp<Vec2> Vec2Util::fence(const sp<Vec2>& self, const sp<Vec3>& plane, const sp<Observer>& observer)
 {
     return sp<Vec2Fence>::make(self, plane, observer);
+}
+
+sp<Vec2> Vec2Util::ifElse(const sp<Vec2>& self, const sp<Boolean>& condition, const sp<Vec2>& negative)
+{
+    return sp<VariableTernary<V2>>::make(condition, self, negative);
+}
+
+sp<Numeric> Vec2Util::atan2(const sp<Vec2>& self)
+{
+    return sp<VariableOP1<float, V2>>::make(_atan2, self);
 }
 
 sp<Vec2> Vec2Util::delegate(const sp<Vec2>& self)

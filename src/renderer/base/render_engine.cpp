@@ -24,7 +24,7 @@ const sp<RendererFactory>& RenderEngine::rendererFactory() const
     return _renderer_factory;
 }
 
-const sp<RenderEngineContext>& RenderEngine::renderContext() const
+const sp<RenderEngineContext>& RenderEngine::context() const
 {
     return _render_context;
 }

@@ -352,11 +352,12 @@ using namespace ark::plugin::python;
 
 
 class GenArgumentMeta:
-    def __init__(self, typename, castsig, parsetuplesig, is_base_type=False):
+    def __init__(self, typename, castsig, parsetuplesig, is_base_type=False, has_defvalue=False):
         self._typename = typename
         self._cast_signature = castsig
         self._parse_signature = parsetuplesig
         self._is_base_type = is_base_type
+        self._has_defvalue = has_defvalue
 
     @property
     def typename(self):
@@ -373,6 +374,10 @@ class GenArgumentMeta:
     @property
     def is_base_type(self):
         return self._is_base_type
+
+    @property
+    def has_defvalue(self):
+        return self._has_defvalue
 
 
 class GenConverter:
@@ -413,7 +418,11 @@ class GenArgument:
     @property
     def parse_signature(self):
         s = self._meta.parse_signature
-        return s if self._default_value is None else '|' + s
+        return s if not self.has_defvalue else '|' + s
+
+    @property
+    def has_defvalue(self):
+        return self._default_value is not None or self._meta.has_defvalue
 
     def type_compare(self, typename):
         return acg.typeCompare(typename, self._str)
@@ -548,6 +557,9 @@ class GenMethod(object):
     def gen_py_arguments(self):
         return 'Instance* self, PyObject* args' + (', PyObject* kws' if self._has_keyvalue_arguments else '')
 
+    def gen_py_argc(self):
+        return 'PyObject_Length(args)'
+
     def gen_local_var_declarations(self):
         declares = {}
         for i, j in enumerate(self._arguments):
@@ -557,21 +569,27 @@ class GenMethod(object):
                 declares[typename] = '%s, %sarg%d' % (declares[typename], '*' if typename.endswith('*') else '', i)
             else:
                 declares[typename] = '%s arg%d' % (typename, i)
-            if j.default_value is not None:
-                dmap = {'true': '1', 'false': '0'}
-                if j.typename in ('uint32_t', 'int32_t', 'float'):
-                    dvalue = j.default_value if j.default_value not in dmap else dmap[j.default_value]
-                elif realtypename == 'PyObject*' and j.accept_type == 'bool':
-                    dvalue = 'Py_True' if j.default_value == 'true' else 'Py_False'
-                elif realtypename == 'bool' and j.accept_type == 'bool':
-                    dvalue = 'true' if j.default_value == 'true' else 'false'
-                elif realtypename == 'char*' and j.default_value:
-                    dvalue = j.default_value
-                else:
-                    dvalue = 'nullptr'
-                declares[typename] += ' = %s' % dvalue
-            elif not j.meta._parse_signature:
+            if not j.meta.parse_signature:
                 declares[typename] += ' = kws'
+            else:
+                dvalue = None
+                if realtypename == 'PyObject*':
+                    if j.accept_type == 'bool':
+                        dvalue = 'Py_True' if j.default_value == 'true' else 'Py_False'
+                    else:
+                        dvalue = 'nullptr'
+                elif j.default_value is not None:
+                    dmap = {'true': '1', 'false': '0'}
+                    if j.typename in ('uint32_t', 'int32_t', 'float'):
+                        dvalue = j.default_value if j.default_value not in dmap else dmap[j.default_value]
+                    elif realtypename == 'bool' and j.accept_type == 'bool':
+                        dvalue = 'true' if j.default_value == 'true' else 'false'
+                    elif realtypename == 'char*' and j.default_value:
+                        dvalue = j.default_value
+                    else:
+                        dvalue = 'nullptr'
+                if dvalue:
+                    declares[typename] += ' = %s' % dvalue
         return [i + ';' for i in declares.values()]
 
     @property
@@ -628,7 +646,7 @@ class GenMethod(object):
         parsestatement = '''%s
     if(!PyArg_ParseTuple(args, "%s", %s))
         %s;
-''' % ('\n    '.join(declares), parse_format, ', '.join('&arg%d' % i for i, j in enumerate(args) if j.meta._parse_signature), self.err_return_value)
+''' % ('\n    '.join(declares), parse_format, ', '.join('&arg%d' % i for i, j in enumerate(args) if j.meta.parse_signature), self.err_return_value)
         lines.append(parsestatement)
 
     def need_unpack_statement(self):
@@ -688,8 +706,9 @@ class GenMethod(object):
             callstatement = '%s ret = %s' % (acg.strip_key_words(self._return_type, ['virtual']), callstatement)
         calling_lines = [callstatement] + pyret
         type_checks = [(i, j.gen_type_check('t')) for i, j in enumerate(gen_type_check_args) if j]
-        nullptr_check = ['(obj%d || arg%d == Py_None)' % (i, i) for i, j in type_checks if not j]
+        nullptr_check = ['(obj%d || %d >= argc)' % (i, i) for i, j in type_checks if not j]
         if self_type_checks or nullptr_check:
+            lines.insert(0, 'Py_ssize_t argc = %s;' % self.gen_py_argc())
             nullptr_check = self_type_checks + nullptr_check
             calling_lines = ['if(%s)' % ' && '.join(nullptr_check), '{'] + [INDENT + i for i in calling_lines] + ['}']
         lines.extend(bodylines + calling_lines)
@@ -785,6 +804,11 @@ class GenPropertyMethod(GenMethod):
             return 'Instance* self, PyObject* arg0, void* /*closure*/'
         return 'Instance* self, PyObject* /*args*/'
 
+    def gen_py_argc(self):
+        if self._is_setter:
+            return 1
+        return 0
+
     def gen_py_getset_def(self, properties, genclass):
         property_def = self._ensure_property_def(properties)
         if self._is_setter:
@@ -838,6 +862,9 @@ class GenGetPropMethod(GenMethod):
 
     def gen_py_arguments(self):
         return 'Instance* self, PyObject* arg0'
+
+    def gen_py_argc(self):
+        return 1
 
     def _gen_body_lines(self, genclass):
         return ['PyObject* attr = PyObject_GenericGetAttr(reinterpret_cast<PyObject*>(self), arg0);',
@@ -950,6 +977,9 @@ class GenOperatorMethod(GenMethod):
             return ', '.join(args)
         return ', '.join(['Instance* self'] + args)
 
+    def gen_py_argc(self):
+        return len(self._arguments)
+
     def _gen_call_statement(self, genclass, argnames):
         if self._is_static:
             return '%s::%s(%s);' % (genclass.classname, self._name, argnames)
@@ -1013,7 +1043,7 @@ def create_overloaded_method_type(base_type, **kwargs):
     class GenOverloadedMethod(base_type):
         def __init__(self, m1, m2):
             base_type.__init__(self, m1.name, [], m1.return_type, **kwargs)
-            self._arguments = self._replace_arguments(m1.arguments)
+            self._arguments = self._replace_arguments(m1.arguments, m2.arguments)
             self._overloaded_methods = []
             self.add_overloaded_method(m1)
             self.add_overloaded_method(m2)
@@ -1048,12 +1078,13 @@ def create_overloaded_method_type(base_type, **kwargs):
                 if len(m1.arguments) != len(method.arguments):
                     print('Overloaded methods(%s, %s) should have equal number of arguments' % (m1, method))
                     sys.exit(-1)
-            method._arguments = self._replace_arguments(method.arguments)
+            method._arguments = self._replace_arguments(method.arguments, self._arguments)
             self._overloaded_methods.append(method)
 
         @staticmethod
-        def _replace_arguments(arguments):
-            return [GenArgument(i.accept_type, i.default_value, GenArgumentMeta('PyObject*', i.meta.cast_signature, 'O'), i.str()) for i in arguments]
+        def _replace_arguments(args1, args2):
+            assert len(args1) == len(args2)
+            return [GenArgument(i.accept_type, i.default_value, GenArgumentMeta('PyObject*', i.meta.cast_signature, 'O', False, i.has_defvalue or j.has_defvalue), i.str()) for i, j in zip(args1, args2)]
 
     return GenOverloadedMethod
 

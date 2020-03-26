@@ -4,10 +4,37 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
 
+#include "core/util/math.h"
+
 #include "graphics/base/mat.h"
 #include "graphics/base/v4.h"
 
 namespace ark {
+
+M2 MatrixUtil::mul(const M2& lvalue, const M2& rvalue)
+{
+    return M2(lvalue.mat<glm::mat2>() * rvalue.mat<glm::mat2>());
+}
+
+V2 MatrixUtil::mul(const M2& lvalue, const V2& rvalue)
+{
+    const glm::vec2 r = lvalue.mat<glm::mat2>() * glm::vec2(rvalue.x(), rvalue.y());
+    return V2(r.x, r.y);
+}
+
+M2 MatrixUtil::rotate(const M2& lvalue, float radian)
+{
+    float cos = Math::cos(radian);
+    float sin = Math::sin(radian);
+    float rot[4] = {cos, sin, -sin, cos};
+    return lvalue * M2(rot);
+}
+
+M2 MatrixUtil::scale(const M2& lvalue, const V2& rvalue)
+{
+    float scale[4] = {rvalue.x(), 0, 0, rvalue.y()};
+    return lvalue * M2(scale);
+}
 
 M3 MatrixUtil::mul(const M3& lvalue, const M3& rvalue)
 {
@@ -18,6 +45,13 @@ V3 MatrixUtil::mul(const M3& lvalue, const V3& rvalue)
 {
     const glm::vec3 r = lvalue.mat<glm::mat3>() * glm::vec3(rvalue.x(), rvalue.y(), rvalue.z());
     return V3(r.x, r.y, r.z);
+}
+
+V2 MatrixUtil::mul(const M3& lvalue, const V2& rvalue)
+{
+    const V3 r = mul(lvalue, V3(rvalue, 1.0f));
+    DCHECK(r.z() != 0, "Division by zero");
+    return V2(r.x() / r.z(), r.y() / r.z());
 }
 
 M3 MatrixUtil::rotate(const M3& lvalue, float radian)

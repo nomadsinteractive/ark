@@ -6,6 +6,8 @@
 #include "core/base/api.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/v4.h"
+#include "graphics/util/matrix_util.h"
 
 namespace ark {
 
@@ -43,6 +45,23 @@ public:
         DCHECK(sizeof(_value) == sizeof(T), "Matrix size unmatch: %d != %d", sizeof(_value), sizeof(T));
         return *reinterpret_cast<T*>(_value);
     }
+
+    friend ARK_API Mat<S> operator *(const Mat<S>& lvalue, const Mat<S>& rvalue) {
+        return MatrixUtil::mul(lvalue, rvalue);
+    }
+
+    friend ARK_API V2 operator *(const Mat<S>& lvalue, const V2& rvalue) {
+        return MatrixUtil::mul(lvalue, rvalue);
+    }
+
+    friend ARK_API V3 operator *(const Mat<S>& lvalue, const V3& rvalue) {
+        return MatrixUtil::mul(lvalue, rvalue);
+    }
+
+    friend ARK_API V4 operator *(const Mat<S>& lvalue, const V4& rvalue) {
+        return MatrixUtil::mul(lvalue, rvalue);
+    }
+
 
 private:
     float _value[S * S];

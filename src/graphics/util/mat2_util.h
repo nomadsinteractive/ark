@@ -1,0 +1,43 @@
+#ifndef ARK_GRAPHICS_UTIL_MAT2_UTIL_H_
+#define ARK_GRAPHICS_UTIL_MAT2_UTIL_H_
+
+#include "core/forwarding.h"
+#include "core/base/api.h"
+#include "core/types/shared_ptr.h"
+
+#include "graphics/forwarding.h"
+#include "graphics/base/v2.h"
+
+namespace ark {
+
+//[[script::bindings::class("Mat2")]]
+class ARK_API Mat2Util final {
+public:
+//[[script::bindings::constructor]]
+    static sp<Mat2> create(const V2& t, const V2& b);
+//[[script::bindings::constructor]]
+    static sp<Mat2> create(const sp<Vec2>& t = nullptr, const sp<Vec2>& b = nullptr);
+
+//[[script::bindings::operator(*)]]
+    static sp<Mat2> mul(const sp<Mat2>& lvalue, const sp<Mat2>& rvalue);
+//[[script::bindings::operator(*)]]
+    static sp<Vec2> mul(const sp<Mat2>& lvalue, const sp<Vec2>& rvalue);
+//[[script::bindings::operator(*)]]
+    static sp<Vec2> mul(const sp<Mat2>& lvalue, const V2& rvalue);
+
+//[[script::bindings::classmethod]]
+    static sp<Mat2> rotate(const sp<Mat2>& self, const sp<Numeric>& radians);
+//[[script::bindings::classmethod]]
+    static sp<Mat2> rotate(const sp<Mat2>& self, const sp<Rotate>& rotate);
+
+//[[script::bindings::classmethod]]
+    static sp<Mat2> ifElse(const sp<Mat2>& self, const sp<Boolean>& condition, const sp<Mat2>& negative);
+
+//[[script::bindings::classmethod]]
+    static sp<Mat2> freeze(const sp<Mat2>& self);
+
+};
+
+}
+
+#endif

@@ -279,12 +279,12 @@ int SDLApplication::run()
     }
 
     SDL_SysWMinfo wmInfo;
-    SDL_VERSION(&wmInfo.version);
+    SDL_VERSION(&wmInfo.version)
 
     auto result = SDL_GetWindowWMInfo(_main_window, &wmInfo);
     DASSERT(result);
 
-    RenderEngineContext::Info& info = _application_context->renderEngine()->renderContext()->info();
+    RenderEngineContext::Info& info = _application_context->renderEngine()->context()->info();
 
 #if defined(ARK_PLATFORM_WINDOWS)
     info.windows.hinstance = wmInfo.info.win.hinstance;

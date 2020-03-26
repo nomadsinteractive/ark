@@ -8,8 +8,11 @@
 #include <type_traits>
 #include <vector>
 
+#include "core/forwarding.h"
 #include "core/base/api.h"
-#include "graphics/base/v3.h"
+
+#include "graphics/forwarding.h"
+#include "graphics/base/v4.h"
 
 namespace ark {
 
@@ -109,8 +112,6 @@ public:
 //  [[plugin::function("cos")]]
 //  [[script::bindings::auto]]
     static ARK_API sp<Numeric> cos(const sp<Numeric>& x);
-//  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> atan(const sp<Vec2>& val);
 
 //  [[plugin::function("min")]]
 //  [[script::bindings::auto]]
@@ -148,6 +149,13 @@ public:
 //  [[plugin::function("sqrt")]]
 //  [[script::bindings::auto]]
     static ARK_API sp<Numeric> sqrt(const sp<Numeric>& number);
+
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> dot(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> dot(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> dot(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
 
 //  [[script::bindings::auto]]
     static ARK_API V3 quadratic(float a, float b, float c);

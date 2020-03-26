@@ -36,10 +36,10 @@ public:
     Table<String, sp<Uniform>> _uniforms;
     Table<String, sp<Texture>> _samplers;
 
-    std::vector<std::pair<String, String>> _vertex_in;
-    std::vector<std::pair<String, String>> _vertex_out;
+    std::vector<ShaderPreprocessor::Parameter> _vertex_in;
+    std::vector<ShaderPreprocessor::Parameter> _vertex_out;
 
-    std::vector<std::pair<String, String>> _fragment_in;
+    std::vector<ShaderPreprocessor::Parameter> _fragment_in;
 
     std::map<String, String> _vert_in_declared;
 

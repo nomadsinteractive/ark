@@ -12,7 +12,7 @@
 #include "graphics/base/size.h"
 
 #include "renderer/base/render_engine.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_delegate_impl.h"
@@ -74,7 +74,7 @@ JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onCreate(JNIEnv* en
 JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onSurfaceCreated(JNIEnv* env, jobject obj, jobject surface)
 {
     LOGD("onSurfaceCreated");
-    RenderContext::Info& info = _application->context()->renderEngine()->renderContext()->info();
+    RenderEngineContext::Info& info = _application->context()->renderEngine()->context()->info();
     _window = ANativeWindow_fromSurface(env, surface);
     info.android.window = _window;
     _application->onSurfaceCreated();

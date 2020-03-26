@@ -11,8 +11,15 @@ namespace ark {
 class ARK_API MatrixUtil final {
 public:
 
+    static M2 mul(const M2& lvalue, const M2& rvalue);
+    static V2 mul(const M2& lvalue, const V2& rvalue);
+
+    static M2 rotate(const M2& lvalue, float radian);
+    static M2 scale(const M2& lvalue, const V2& rvalue);
+
     static M3 mul(const M3& lvalue, const M3& rvalue);
     static V3 mul(const M3& lvalue, const V3& rvalue);
+    static V2 mul(const M3& lvalue, const V2& rvalue);
 
     static M3 rotate(const M3& lvalue, float radian);
     static M3 scale(const M3& lvalue, const V2& rvalue);

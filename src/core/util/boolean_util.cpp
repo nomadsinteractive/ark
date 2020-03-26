@@ -44,18 +44,18 @@ private:
 
 class BooleanOperation {
 public:
-    template <typename T> using OP2 = VariableOP2<float, float, T, sp<Numeric>, sp<Numeric>>;
+    template <typename T> using OP2 = VariableOP2<sp<Numeric>, sp<Numeric>, T>;
 
     static bool isConstant(const String& expr) {
         return expr == "true" || expr == "false";
     }
 
     static sp<Builder<Boolean>> booleanAnd(const sp<Builder<Boolean>>& a1, const sp<Builder<Boolean>>& a2) {
-        return sp<OperationBuilder<VariableOP2<bool, bool, Operators::And<bool>, sp<Boolean>, sp<Boolean>>>>::make(a1, a2);
+        return sp<OperationBuilder<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::And<bool>>>>::make(a1, a2);
     }
 
     static sp<Builder<Boolean>> booleanOr(const sp<Builder<Boolean>>& a1, const sp<Builder<Boolean>>& a2) {
-        return sp<OperationBuilder<VariableOP2<bool, bool, Operators::Or<bool>, sp<Boolean>, sp<Boolean>>>>::make(a1, a2);
+        return sp<OperationBuilder<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::Or<bool>>>>::make(a1, a2);
     }
 
     static sp<Builder<Boolean>> eval(BeanFactory& factory, const String& expr) {
@@ -120,12 +120,12 @@ sp<Boolean> BooleanUtil::create(bool value)
 
 sp<Boolean> BooleanUtil::__and__(const sp<Boolean>& self, const sp<Boolean>& rvalue)
 {
-    return sp<VariableOP2<bool, bool, Operators::And<bool>, sp<Boolean>, sp<Boolean>>>::make(self, rvalue);
+    return sp<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::And<bool>>>::make(self, rvalue);
 }
 
 sp<Boolean> BooleanUtil::__or__(const sp<Boolean>& self, const sp<Boolean>& rvalue)
 {
-    return sp<VariableOP2<bool, bool, Operators::Or<bool>, sp<Boolean>, sp<Boolean>>>::make(self, rvalue);
+    return sp<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::Or<bool>>>::make(self, rvalue);
 }
 
 sp<Boolean> BooleanUtil::negative(const sp<Boolean>& self)

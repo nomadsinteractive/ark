@@ -15,9 +15,9 @@ namespace ark {
 class ARK_API Vec4Util final {
 public:
 //[[script::bindings::constructor]]
-    static sp<Vec4> create(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z, const sp<Numeric>& w);
-//[[script::bindings::constructor]]
     static sp<Vec4> create(float x, float y, float z, float w);
+//[[script::bindings::constructor]]
+    static sp<Vec4> create(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z, const sp<Numeric>& w);
 
 //[[script::bindings::operator(+)]]
     static sp<Vec4> add(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);

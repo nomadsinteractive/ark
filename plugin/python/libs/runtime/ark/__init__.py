@@ -489,7 +489,7 @@ class Vec2:
         return self._x, self._y
 
     def integral(self, t: Optional[Numeric] = None):
-        return None
+        pass
 
     def wrap(self) -> 'Vec2':
         return Vec2(self._x, self._y)
@@ -501,6 +501,12 @@ class Vec2:
         return Vec2(self._x, self._y)
 
     def fix(self):
+        pass
+
+    def atan2(self) -> Numeric:
+        pass
+
+    def normalize(self):
         pass
 
     def __add__(self, other):
@@ -547,9 +553,6 @@ class Vec3(Vec2):
     def cross(self, other):
         return None
 
-    def normalize(self):
-        return None
-
 
 class Vec4(Vec3):
     def __init__(self, x, y, z, w):
@@ -570,6 +573,23 @@ class Vec4(Vec3):
 
     @vw.setter
     def vw(self, v):
+        pass
+
+
+class Mat2:
+    def __init__(self, t=None, b=None):
+        pass
+
+    def __mul__(self, other):
+        pass
+
+    def rotate(self, rot: Union[float, Numeric, 'Rotate']) -> 'Mat2':
+        pass
+
+    def freeze(self) -> 'Mat2':
+        pass
+
+    def if_else(self, condition: Boolean, other: 'Mat2') -> 'Mat2':
         pass
 
 
@@ -962,6 +982,10 @@ class Math:
         return 0
 
     @staticmethod
+    def dot(x, y) -> Numeric:
+        pass
+
+    @staticmethod
     def randf() -> float:
         return 0
 
@@ -1298,7 +1322,7 @@ class Collider:
     BODY_FLAG_MANUAL_ROTATION = 16
 
     def create_body(self, type, shape, position, size=None, rotate=None, is_sensor=False) -> RigidBody:
-        return RigidBody()
+        pass
 
 
 class Command:

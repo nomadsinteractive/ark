@@ -53,17 +53,17 @@ sp<Integer> IntegerUtil::create(std::vector<int32_t> values)
 
 sp<Integer> IntegerUtil::add(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
-    return sp<VariableOP2<int32_t, int32_t, Operators::Add<int32_t>, sp<Integer>, sp<Integer>>>::make(self, rvalue);
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Add<int32_t>>>::make(self, rvalue);
 }
 
 sp<Integer> IntegerUtil::sub(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
-    return sp<VariableOP2<int32_t, int32_t, Operators::Sub<int32_t>, sp<Integer>, sp<Integer>>>::make(self, rvalue);
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Sub<int32_t>>>::make(self, rvalue);
 }
 
 sp<Integer> IntegerUtil::mul(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
-    return sp<VariableOP2<int32_t, int32_t, Operators::Mul<int32_t>, sp<Integer>, sp<Integer>>>::make(self, rvalue);
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Mul<int32_t>>>::make(self, rvalue);
 }
 
 sp<Integer> IntegerUtil::mod(const sp<Integer>& self, const sp<Integer>& rvalue)
@@ -80,7 +80,7 @@ sp<Numeric> IntegerUtil::truediv(const sp<Integer>& self, const sp<Integer>& rva
 
 sp<Integer> IntegerUtil::floordiv(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
-    return sp<VariableOP2<int32_t, int32_t, Operators::Div<int32_t>, sp<Integer>, sp<Integer>>>::make(self, rvalue);
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Div<int32_t>>>::make(self, rvalue);
 }
 
 sp<Integer> IntegerUtil::negative(const sp<Integer>& self)
@@ -101,32 +101,32 @@ float IntegerUtil::toFloat(const sp<Integer>& self)
 
 sp<Boolean> IntegerUtil::gt(const sp<Integer>& self, const sp<Integer>& other)
 {
-    return sp<VariableOP2<int32_t, int32_t, Operators::GT<int32_t>, sp<Integer>, sp<Integer>>>::make(self, other);
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::GT<int32_t>>>::make(self, other);
 }
 
 sp<Boolean> IntegerUtil::ge(const sp<Integer>& self, const sp<Integer>& other)
 {
-    return sp<VariableOP2<int32_t, int32_t, Operators::GE<int32_t>, sp<Integer>, sp<Integer>>>::make(self, other);
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::GE<int32_t>>>::make(self, other);
 }
 
 sp<Boolean> IntegerUtil::lt(const sp<Integer>& self, const sp<Integer>& other)
 {
-    return sp<VariableOP2<int32_t, int32_t, Operators::LT<int32_t>, sp<Integer>, sp<Integer>>>::make(self, other);
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::LT<int32_t>>>::make(self, other);
 }
 
 sp<Boolean> IntegerUtil::le(const sp<Integer>& self, const sp<Integer>& other)
 {
-    return sp<VariableOP2<int32_t, int32_t, Operators::LE<int32_t>, sp<Integer>, sp<Integer>>>::make(self, other);
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::LE<int32_t>>>::make(self, other);
 }
 
 sp<Boolean> IntegerUtil::eq(const sp<Integer>& self, const sp<Integer>& other)
 {
-    return sp<VariableOP2<int32_t, int32_t, Operators::EQ<int32_t>, sp<Integer>, sp<Integer>>>::make(self, other);
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::EQ<int32_t>>>::make(self, other);
 }
 
 sp<Boolean> IntegerUtil::ne(const sp<Integer>& self, const sp<Integer>& other)
 {
-    return sp<VariableOP2<int32_t, int32_t, Operators::NE<int32_t>, sp<Integer>, sp<Integer>>>::make(self, other);
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::NE<int32_t>>>::make(self, other);
 }
 
 int32_t IntegerUtil::val(const sp<Integer>& self)

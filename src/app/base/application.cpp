@@ -151,7 +151,7 @@ void Application::onSurfaceChanged(uint32_t width, uint32_t height)
 
     _surface->onSurfaceChanged(width, height);
     _application_delegate->onSurfaceChanged(width, height);
-    _application_context->renderEngine()->renderContext()->setDisplayResolution({width, height});
+    _application_context->renderEngine()->context()->setDisplayResolution({width, height});
     _width = width;
     _height = height;
 }

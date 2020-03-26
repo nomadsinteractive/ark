@@ -14,9 +14,9 @@ namespace ark {
 class ARK_API Mat3Util final {
 public:
 //[[script::bindings::constructor]]
-    static sp<Mat3> create(const sp<Vec3>& t = nullptr, const sp<Vec3>& b = nullptr, const sp<Vec3>& n = nullptr);
-//[[script::bindings::constructor]]
     static sp<Mat3> create(const V3& t, const V3& b, const V3& n);
+//[[script::bindings::constructor]]
+    static sp<Mat3> create(const sp<Vec3>& t = nullptr, const sp<Vec3>& b = nullptr, const sp<Vec3>& n = nullptr);
 
 //[[script::bindings::operator(*)]]
     static sp<Mat3> mul(const sp<Mat3>& lvalue, const sp<Mat3>& rvalue);
@@ -28,6 +28,9 @@ public:
     static sp<Vec2> mul(const sp<Mat3>& lvalue, const sp<Vec2>& rvalue);
 //[[script::bindings::operator(*)]]
     static sp<Vec2> mul(const sp<Mat3>& lvalue, const V2& rvalue);
+
+//[[script::bindings::auto]]
+    static sp<Mat3> identity();
 
 //[[script::bindings::classmethod]]
     static void fix(const sp<Mat3>& self);

@@ -10,7 +10,7 @@
 #include "graphics/base/surface_controller.h"
 
 #include "renderer/base/render_engine.h"
-#include "renderer/base/render_context.h"
+#include "renderer/base/render_engine_context.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_controller.h"
@@ -107,7 +107,7 @@ static void engineHandleCmd(android_app* state, int32_t cmd)
     case APP_CMD_INIT_WINDOW:
         if (state->window != nullptr)
         {
-            RenderContext::Info& info = app->context()->renderEngine()->renderContext()->info();
+            RenderEngineContext::Info& info = app->context()->renderEngine()->context()->info();
             info.android.window = state->window;
             app->context()->postToRenderer([app]() {
                 app->onSurfaceCreated();

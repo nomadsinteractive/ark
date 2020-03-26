@@ -15,9 +15,9 @@ namespace ark {
 class ARK_API Vec2Util final {
 public:
 //[[script::bindings::constructor]]
-    static sp<Vec2> create(const sp<Numeric>& x, const sp<Numeric>& y);
-//[[script::bindings::constructor]]
     static sp<Vec2> create(float x, float y);
+//[[script::bindings::constructor]]
+    static sp<Vec2> create(const sp<Numeric>& x, const sp<Numeric>& y);
 
 //[[script::bindings::operator(+)]]
     static sp<Vec2> add(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
@@ -32,11 +32,11 @@ public:
 //[[script::bindings::operator(*)]]
     static sp<Vec2> mul(const sp<Vec2>& lvalue, sp<Numeric>& rvalue);
 //[[script::bindings::operator(/)]]
+    static sp<Vec2> truediv(const sp<Vec2>& lvalue, float rvalue);
+//[[script::bindings::operator(/)]]
     static sp<Vec2> truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
 //[[script::bindings::operator(/)]]
     static sp<Vec2> truediv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue);
-//[[script::bindings::operator(/)]]
-    static sp<Vec2> truediv(const sp<Vec2>& lvalue, float rvalue);
 //[[script::bindings::operator(neg)]]
     static sp<Vec2> negative(const sp<Vec2>& self);
 
@@ -90,6 +90,11 @@ public:
 
 //[[script::bindings::classmethod]]
     static sp<Vec2> fence(const sp<Vec2>& self, const sp<Vec3>& plane, const sp<Observer>& observer);
+//[[script::bindings::classmethod]]
+    static sp<Vec2> ifElse(const sp<Vec2>& self, const sp<Boolean>& condition, const sp<Vec2>& negative);
+
+//[[script::bindings::classmethod]]
+    static sp<Numeric> atan2(const sp<Vec2>& self);
 
 //[[script::bindings::property]]
     static sp<Vec2> delegate(const sp<Vec2>& self);

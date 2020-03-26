@@ -1,11 +1,7 @@
 #include "graphics/impl/mat/mat3_impl.h"
 
-#include <glm/glm.hpp>
-
 #include "core/ark.h"
-#include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/util/bean_utils.h"
 #include "core/util/variable_util.h"
 
 #include "graphics/base/mat.h"

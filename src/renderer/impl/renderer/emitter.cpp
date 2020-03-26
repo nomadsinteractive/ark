@@ -147,7 +147,7 @@ uint64_t Emitter::Particale::show(const V3& position, uint64_t tick, const sp<La
 sp<Vec3> Emitter::Particale::makePosition(const V3& position) const
 {
     if(_position)
-        return sp<VariableOP2<V3, V3, Operators::Add<V3>, sp<Vec3>, V3>>::make(_position->build(_stub->_arguments), position);
+        return sp<VariableOP2<sp<Vec3>, V3, Operators::Add<V3>>>::make(_position->build(_stub->_arguments), position);
     return Vec3Util::create(position.x(), position.y(), position.z());
 }
 

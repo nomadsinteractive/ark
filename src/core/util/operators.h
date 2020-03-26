@@ -79,6 +79,13 @@ public:
         }
     };
 
+    template<typename T, typename P = T> class Dot {
+    public:
+        auto operator()(const T& v1, const P& v2)->decltype(v1.dot(v2)) {
+            return v1.dot(v2);
+        }
+    };
+
     template<typename T, typename P = T> class Mod {
     public:
         auto operator()(T v1, P v2)->decltype(v1 / v2) {
@@ -137,7 +144,7 @@ public:
         }
 
         virtual sp<Variable<T>> build(const Scope& args) override {
-            return sp<VariableOP2<T, T, OP, sp<Variable<T>>, sp<Variable<T>>>>::make(_a1->build(args), _a2->build(args));
+            return sp<VariableOP2<sp<Variable<T>>, sp<Variable<T>>, OP>>::make(_a1->build(args), _a2->build(args));
         }
 
     private:

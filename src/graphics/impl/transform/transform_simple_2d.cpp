@@ -24,7 +24,7 @@ M4 TransformSimple2D::toMatrix(const Transform::Snapshot& snapshot) const
 {
     const M4 m = M4::identity();
     const Snapshot* data = snapshot.getData<Snapshot>();
-    return MatrixUtil::translate(MatrixUtil::scale(m, V3(data->scale.x(), data->scale.y(), 1.0f)), data->pivot);
+    return MatrixUtil::translate(MatrixUtil::scale(m, V3(data->scale.x(), data->scale.y(), 1.0f)), V3(data->pivot, 0));
 }
 
 }

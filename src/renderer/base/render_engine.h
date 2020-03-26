@@ -18,7 +18,8 @@ public:
     Ark::RendererVersion version() const;
 
     const sp<RendererFactory>& rendererFactory() const;
-    const sp<RenderEngineContext>& renderContext() const;
+    const sp<RenderEngineContext>& context() const;
+
     const Viewport& viewport() const;
 
     float toLayoutDirection(float direction) const;
