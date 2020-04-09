@@ -14,7 +14,7 @@ public:
 
 };
 
-template<typename T, typename UPDATER = _SafeVarDefaultUpdater> class SafeVar : public Delegate<T> {
+template<typename T> class SafeVar : public Delegate<T> {
 public:
     typedef decltype(std::declval<T>().val()) ValType;
 
@@ -23,12 +23,6 @@ public:
     }
     SafeVar(const sp<T>& delegate, const ValType& defaultVal) noexcept
         : Delegate<T>(delegate), _default_val(defaultVal) {
-    }
-    SafeVar(const sp<T>& delegate, UPDATER updater) noexcept
-        : Delegate<T>(delegate), _updater(std::move(updater)) {
-    }
-    SafeVar(const sp<T>& delegate, const ValType& defaultVal, UPDATER updater) noexcept
-        : Delegate<T>(delegate), _default_val(defaultVal), _updater(std::move(updater)) {
     }
 
     explicit operator bool() const {
@@ -44,12 +38,10 @@ public:
 
     SafeVar& operator =(const sp<T>& other) noexcept {
         this->_delegate = other;
-        this->_updater();
         return *this;
     }
     SafeVar& operator =(sp<T>&& other) noexcept {
         this->_delegate = std::move(other);
-        this->_updater();
         return *this;
     }
 
@@ -61,17 +53,16 @@ public:
         return this->_delegate ? this->_delegate->update(timestamp) : false;
     }
 
-    const sp<T>& ensure() {
+    template<typename UPDATER = _SafeVarDefaultUpdater> const sp<T>& ensure(UPDATER& updater = UPDATER()) {
         if(!this->_delegate) {
             this->_delegate = Null::toSafe<T>(nullptr);
-            this->_updater();
+            updater();
         }
         return this->_delegate;
     }
 
 private:
     ValType _default_val;
-    UPDATER _updater;
 };
 
 }

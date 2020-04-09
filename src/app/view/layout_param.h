@@ -4,9 +4,10 @@
 #include "core/base/api.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_ptr.h"
+#include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/rect.h"
+#include "graphics/base/v4.h"
 
 namespace ark {
 
@@ -68,8 +69,8 @@ public:
     Gravity gravity() const;
     void setGravity(Gravity gravity);
 
-    const Rect& margins() const;
-    Rect& margins();
+    const SafeVar<Vec4>& margins() const;
+    void setMargins(sp<Vec4> margins);
 
     bool isWrapContent() const;
     bool isWidthWrapContent() const;
@@ -92,11 +93,11 @@ public:
 
 private:
     SafePtr<Size> _size;
+    SafeVar<Vec4> _margins;
     sp<Boolean> _stop_propagation;
 
     Display _display;
     Gravity _gravity;
-    Rect _margins;
 };
 
 }

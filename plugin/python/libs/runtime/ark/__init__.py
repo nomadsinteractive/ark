@@ -10,7 +10,7 @@ Use it for:
 
 """
 
-from typing import Callable, List, Type, TypeVar, Union, Optional, Tuple
+from typing import Callable, List, Type, TypeVar, Union, Optional
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'Numeric', 'Layer', 'Vec2', 'Vec3',
                            'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotate', 'Size', 'StringBundle', 'Tilemap', 'TilemapImporter', 'Tileset',
@@ -362,10 +362,16 @@ class Numeric(_Var):
         return Expectation(self)
 
     def integral(self, t: Optional['Numeric'] = None) -> 'Numeric':
-        return Numeric(0)
+        pass
 
-    def boost(self, v0: float, cd: Union[float, 'Numeric'], t: Optional['Numeric'] = None):
-        return None
+    def boost(self, v0: float, cd: Union[float, 'Numeric'], t: Optional['Numeric'] = None) -> 'Numeric':
+        pass
+
+    def if_else(self, condition: Boolean, negative: 'Numeric') -> 'Numeric':
+        pass
+
+    def synchronize(self, disposed: Boolean) -> 'Numeric':
+        pass
 
     def __add__(self, other) -> 'Numeric':
         return Numeric(0)
@@ -501,6 +507,9 @@ class Vec2:
         return Vec2(self._x, self._y)
 
     def fix(self):
+        pass
+
+    def freeze(self):
         pass
 
     def atan2(self) -> Numeric:

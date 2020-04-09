@@ -82,6 +82,8 @@ public:
 
 //[[script::bindings::classmethod]]
     static void fix(const sp<Vec2>& self);
+//[[script::bindings::classmethod]]
+    static sp<Vec2> freeze(const sp<Vec2>& self);
 
 //[[script::bindings::classmethod]]
     static sp<Vec2> wrap(const sp<Vec2>& self);

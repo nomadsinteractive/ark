@@ -112,6 +112,9 @@ public:
 //[[script::bindings::classmethod]]
     static sp<Expectation> fence(const sp<Numeric>& self, const sp<Numeric>& a1);
 //[[script::bindings::classmethod]]
+    static sp<Numeric> ifElse(const sp<Numeric>& self, const sp<Boolean>& condition, const sp<Numeric>& negative);
+
+//[[script::bindings::classmethod]]
     static sp<Numeric> integral(const sp<Numeric>& self, const sp<Numeric>& t = nullptr);
 //[[script::bindings::classmethod]]
     static sp<Numeric> boost(const sp<Numeric>& self, float v0, const sp<Numeric>& cd, const sp<Numeric>& t = nullptr);

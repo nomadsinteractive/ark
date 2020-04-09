@@ -8,7 +8,7 @@ namespace ark {
 
 class RenderablePassive : public Renderable {
 public:
-    RenderablePassive(const sp<RenderObject>& renderObject = nullptr);
+    RenderablePassive(sp<RenderObject> renderObject);
 
     virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest) override;
 

@@ -77,6 +77,9 @@ public:
 //[[script::bindings::classmethod]]
     static void fix(const sp<Vec3>& self);
 //[[script::bindings::classmethod]]
+    static sp<Vec3> freeze(const sp<Vec3>& self);
+
+//[[script::bindings::classmethod]]
     static sp<Vec3> cross(const sp<Vec3>& self, const sp<Vec3>& other);
 //[[script::bindings::classmethod]]
     static sp<Vec3> cross(const sp<Vec3>& self, const V3& other);

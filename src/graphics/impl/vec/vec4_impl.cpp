@@ -81,7 +81,7 @@ void Vec4Impl::fix()
 }
 
 Vec4Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _x(factory.ensureBuilder<Numeric>(manifest, "x")), _y(factory.getBuilder<Numeric>(manifest, "y")), _z(factory.getBuilder<Numeric>(manifest, "z")), _w(factory.getBuilder<Numeric>(manifest, "w"))
+    : _x(factory.getBuilder<Numeric>(manifest, "x")), _y(factory.getBuilder<Numeric>(manifest, "y")), _z(factory.getBuilder<Numeric>(manifest, "z")), _w(factory.getBuilder<Numeric>(manifest, "w"))
 {
 }
 

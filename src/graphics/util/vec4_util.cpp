@@ -203,6 +203,11 @@ void Vec4Util::fix(const sp<Vec4>& self)
     ensureImpl(self)->fix();
 }
 
+sp<Vec4> Vec4Util::freeze(const sp<Vec4>& self)
+{
+    return sp<Vec4::Const>::make(self->val());
+}
+
 sp<Vec4Impl> Vec4Util::ensureImpl(const sp<Vec4>& self)
 {
     const sp<Vec4Impl> impl = self.as<Vec4Impl>();

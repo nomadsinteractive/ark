@@ -4,8 +4,8 @@
 
 namespace ark {
 
-RenderablePassive::RenderablePassive(const sp<RenderObject>& renderObject)
-    : _render_object(renderObject), _position_changed(true), _render_requested(false), _visible(true)
+RenderablePassive::RenderablePassive(sp<RenderObject> renderObject)
+    : _render_object(std::move(renderObject)), _position_changed(true), _render_requested(false), _visible(true)
 {
 }
 

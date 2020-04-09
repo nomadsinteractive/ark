@@ -24,28 +24,30 @@ template<> ARK_API LayoutParam::Display Conversions::to<String, LayoutParam::Dis
 }
 
 LayoutParam::LayoutParam(const sp<Size>& size, LayoutParam::Display display, Gravity gravity)
-    : _size(Null::toSafe(size)), _display(display), _gravity(gravity)
+    : _size(Null::toSafe(size)), _margins(nullptr), _display(display), _gravity(gravity)
 {
 }
 
 float LayoutParam::calcLayoutWidth(float available)
 {
+    const V4 margins = _margins.val();
     if(isMatchParent(_size->width()))
     {
-        _size->setWidth(available - _margins.left() - _margins.right());
+        _size->setWidth(available - margins.w() - margins.y());
         return available;
     }
-    return _size->width() + _margins.left() + _margins.right();
+    return _size->width() + margins.w() + margins.y();
 }
 
 float LayoutParam::calcLayoutHeight(float available)
 {
+    const V4 margins = _margins.val();
     if(isMatchParent(_size->height()))
     {
-        _size->setHeight(available - _margins.top() - _margins.bottom());
+        _size->setHeight(available - margins.x() - margins.z());
         return available;
     }
-    return _size->height() + _margins.top() + _margins.bottom();
+    return _size->height() + margins.x() + margins.z();
 }
 
 float LayoutParam::contentWidth() const
@@ -55,7 +57,8 @@ float LayoutParam::contentWidth() const
 
 float LayoutParam::offsetWidth() const
 {
-    return contentWidth() + _margins.left() + _margins.right();
+    const V4 margins = _margins.val();
+    return contentWidth() + margins.w() + margins.y();
 }
 
 void LayoutParam::setContentWidth(float contentWidth)
@@ -70,7 +73,8 @@ float LayoutParam::contentHeight() const
 
 float LayoutParam::offsetHeight() const
 {
-    return contentHeight() + _margins.top() + _margins.bottom();
+    const V4 margins = _margins.val();
+    return contentHeight() + margins.x() + margins.z();
 }
 
 void LayoutParam::setContentHeight(float contentHeight)
@@ -118,14 +122,14 @@ void LayoutParam::setGravity(LayoutParam::Gravity gravity)
     _gravity = gravity;
 }
 
-const Rect& LayoutParam::margins() const
+const SafeVar<Vec4>& LayoutParam::margins() const
 {
     return _margins;
 }
 
-Rect& LayoutParam::margins()
+void LayoutParam::setMargins(sp<Vec4> margins)
 {
-    return _margins;
+    _margins = std::move(margins);
 }
 
 bool LayoutParam::isWrapContent() const

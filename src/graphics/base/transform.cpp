@@ -20,8 +20,7 @@
 namespace ark {
 
 Transform::Transform(Type type, const sp<Rotate>& rotate, const sp<Vec3>& scale, const sp<Vec3>& translate)
-    : _type(type), _rotate(rotate, DelegateUpdater(*this)), _scale(scale, V3(1.0f), DelegateUpdater(*this)), _pivot(translate, DelegateUpdater(*this)),
-      _delegate(makeDelegate())
+    : _type(type), _rotate(rotate), _scale(scale, V3(1.0f)), _pivot(translate), _delegate(makeDelegate())
 {
 }
 
@@ -44,7 +43,7 @@ bool Transform::update(uint64_t timestamp) const
 
 const sp<Rotate>& Transform::rotate()
 {
-    return _rotate.ensure();
+    return _rotate.ensure<DelegateUpdater>(DelegateUpdater(*this));
 }
 
 void Transform::setRotate(const sp<Rotate>& rotate)
@@ -54,7 +53,7 @@ void Transform::setRotate(const sp<Rotate>& rotate)
 
 const sp<Vec3>& Transform::scale()
 {
-    return _scale.ensure();
+    return _scale.ensure<DelegateUpdater>(DelegateUpdater(*this));
 }
 
 void Transform::setScale(const sp<Vec3>& scale)
@@ -64,7 +63,7 @@ void Transform::setScale(const sp<Vec3>& scale)
 
 const sp<Vec3>& Transform::pivot()
 {
-    return _pivot.ensure();
+    return _pivot.ensure<DelegateUpdater>(DelegateUpdater(*this));
 }
 
 void Transform::setPivot(const sp<Vec3>& pivot)

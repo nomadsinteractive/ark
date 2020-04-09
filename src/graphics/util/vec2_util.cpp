@@ -287,6 +287,11 @@ void Vec2Util::fix(const sp<Vec2>& self)
     ensureImpl(self)->fix();
 }
 
+sp<Vec2> Vec2Util::freeze(const sp<Vec2>& self)
+{
+    return sp<Vec2::Const>::make(self->val());
+}
+
 sp<Vec2> Vec2Util::wrap(const sp<Vec2>& self)
 {
     return sp<VariableWrapper<V2>>::make(self);

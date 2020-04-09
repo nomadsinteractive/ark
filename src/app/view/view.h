@@ -116,10 +116,8 @@ public:
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        BeanFactory _bean_factory;
         sp<Builder<Renderer>> _delegate;
-        String _margins;
-
+        sp<Builder<Vec4>> _margins;
     };
 
 //  [[plugin::style("margin-left")]]
@@ -130,9 +128,8 @@ public:
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        BeanFactory _bean_factory;
         sp<Builder<Renderer>> _delegate;
-        String _margin_left;
+        sp<Builder<Numeric>> _margin_left;
 
     };
 
@@ -144,9 +141,8 @@ public:
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        BeanFactory _bean_factory;
         sp<Builder<Renderer>> _delegate;
-        String _margin_right;
+        sp<Builder<Numeric>> _margin_right;
     };
 
 //  [[plugin::style("margin-top")]]
@@ -157,9 +153,8 @@ public:
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        BeanFactory _bean_factory;
         sp<Builder<Renderer>> _delegate;
-        String _margin_top;
+        sp<Builder<Numeric>> _margin_top;
     };
 
 //  [[plugin::style("margin-bottom")]]
@@ -170,9 +165,8 @@ public:
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        BeanFactory _bean_factory;
         sp<Builder<Renderer>> _delegate;
-        String _margin_bottom;
+        sp<Builder<Numeric>> _margin_bottom;
     };
 
 //  [[plugin::style("stop-propagation")]]

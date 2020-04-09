@@ -15,28 +15,32 @@
 
 namespace ark {
 
-RendererByRenderObject::RendererByRenderObject(const sp<RenderObject>& renderObject, const sp<LayerContext>& layerContext)
-    : _layer_context(layerContext), _renderable(sp<RenderablePassive>::make(renderObject))
+RendererByRenderObject::RendererByRenderObject(sp<LayerContext> layerContext, sp<RenderObject> renderObject)
+    : _layer_context(std::move(layerContext)), _render_object(std::move(renderObject))
 {
     DASSERT(_layer_context);
-    if(!_renderable->renderObject()->_size)
-        measure(_renderable->renderObject()->_size.ensure());
-    _layer_context->add(_renderable, renderObject->disposed());
+    if(!_render_object->_size)
+        measure(_render_object->_size.ensure());
 }
 
 void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, const V3& position)
 {
+    if(!_renderable)
+    {
+         _renderable = sp<RenderablePassive>::make(_render_object);
+         _layer_context->add(_renderable, _renderable->renderObject()->disposed());
+    }
     _renderable->requestUpdate(position);
 }
 
 const sp<Size>& RendererByRenderObject::size()
 {
-    return _renderable->renderObject()->_size.ensure();
+    return _render_object->_size.ensure();
 }
 
 void RendererByRenderObject::measure(Size& size)
 {
-    const Metrics& metrics = _layer_context->modelLoader()->load(_renderable->renderObject()->type()->val()).metrics();
+    const Metrics& metrics = _layer_context->modelLoader()->load(_render_object->type()->val()).metrics();
     size.setWidth(metrics.size.x());
     size.setHeight(metrics.size.y());
 }
@@ -48,7 +52,7 @@ RendererByRenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& m
 
 sp<Renderer> RendererByRenderObject::BUILDER::build(const Scope& args)
 {
-    return sp<RendererByRenderObject>::make(_render_object->build(args), _layer_context->build(args));
+    return sp<RendererByRenderObject>::make(_layer_context->build(args), _render_object->build(args));
 }
 
 }

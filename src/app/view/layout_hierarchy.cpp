@@ -3,8 +3,11 @@
 #include "core/epi/disposed.h"
 #include "core/epi/visibility.h"
 #include "core/util/holder_util.h"
+#include "core/util/variable_util.h"
 
+#include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
+#include "graphics/base/v4.h"
 #include "graphics/inf/renderer.h"
 
 #include "app/base/event.h"
@@ -63,10 +66,10 @@ void LayoutHierarchy::Slot::doPlace(Layout::Context& ctx, float clientHeight, co
         DASSERT(layoutParam);
         if(layoutParam->display() == LayoutParam::DISPLAY_BLOCK)
         {
-            const Rect& margins = layoutParam->margins();
+            const V4 margins = layoutParam->margins().val();
             const Rect target = layout->place(ctx, layoutParam);
-            _y = clientHeight - layoutParam->contentHeight() - target.top() - margins.top();
-            _x = target.left() + margins.left();
+            _y = clientHeight - layoutParam->contentHeight() - target.top() - margins.x();
+            _x = target.left() + margins.w();
         }
     }
 }
@@ -103,7 +106,7 @@ void LayoutHierarchy::Slot::render(RenderRequest& renderRequest, const V3& posit
     {
         _renderer->render(renderRequest, position + V3(_x, _y, 0));
         if(_view)
-            _layout_requested = _layout_width != _view->size()->width() || _layout_height != _view->size()->height();
+            _layout_requested = VariableUtil::update(renderRequest.timestamp(), _view->layoutParam()->margins(), _view->size());
     }
 }
 

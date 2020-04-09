@@ -139,9 +139,9 @@ private:
 private:
     Type _type;
 
-    SafeVar<Rotate, DelegateUpdater> _rotate;
-    SafeVar<Vec3, DelegateUpdater> _scale;
-    SafeVar<Vec3, DelegateUpdater> _pivot;
+    SafeVar<Rotate> _rotate;
+    SafeVar<Vec3> _scale;
+    SafeVar<Vec3> _pivot;
 
     sp<Delegate> _delegate;
 

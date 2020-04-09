@@ -82,6 +82,8 @@ public:
 
 //[[script::bindings::classmethod]]
     static void fix(const sp<Vec4>& self);
+//[[script::bindings::classmethod]]
+    static sp<Vec4> freeze(const sp<Vec4>& self);
 
 private:
     static sp<Vec4Impl> ensureImpl(const sp<Vec4>& self);

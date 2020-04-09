@@ -12,7 +12,7 @@ namespace ark {
 class RendererWithExpired {
 public:
 
-//  [[plugin::style("expired")]]
+//  [[plugin::style("disposed")]]
     class STYLE : public Builder<Renderer> {
     public:
         STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& value);

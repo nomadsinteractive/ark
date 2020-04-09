@@ -371,6 +371,11 @@ sp<Expectation> NumericUtil::fence(const sp<Numeric>& self, const sp<Numeric>& a
     return sp<Expectation>::make(sp<Fence>::make(self, a1, notifier), std::move(notifier));
 }
 
+sp<Numeric> NumericUtil::ifElse(const sp<Numeric>& self, const sp<Boolean>& condition, const sp<Numeric>& negative)
+{
+    return sp<VariableTernary<float>>::make(condition, self, negative);
+}
+
 sp<Numeric> NumericUtil::pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t)
 {
     return sp<Stalker>::make(t ? t : Ark::instance().clock()->duration(), target, s0, duration);

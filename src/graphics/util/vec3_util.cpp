@@ -251,6 +251,11 @@ void Vec3Util::fix(const sp<Vec3>& self)
     ensureImpl(self)->fix();
 }
 
+sp<Vec3> Vec3Util::freeze(const sp<Vec3>& self)
+{
+    return sp<Vec3::Const>::make(self->val());
+}
+
 sp<Vec3> Vec3Util::cross(const sp<Vec3>& self, const sp<Vec3>& other)
 {
     return sp<Vec3Cross>::make(self, other);

@@ -5,20 +5,22 @@
 #include "core/util/bean_utils.h"
 
 #include "graphics/base/v3.h"
+#include "graphics/base/render_request.h"
+#include "graphics/base/size.h"
 
 namespace ark {
 
-HorizontalScrollable::HorizontalScrollable(const sp<RendererMaker>& tileMaker, const sp<Numeric>& scroller, int32_t width, int32_t tileWidth, uint32_t itemCount)
-    : _tile_maker(tileMaker),  _tiles(itemCount), _scroller(scroller), _width(width), _tile_width(tileWidth),
+HorizontalScrollable::HorizontalScrollable(const sp<RendererMaker>& tileMaker, const sp<Numeric>& scroller, const sp<Size>& size, int32_t tileWidth, uint32_t itemCount)
+    : _tile_maker(tileMaker), _tiles(itemCount), _scroller(scroller), _size(size), _width(static_cast<int32_t >(_size->width())), _tile_width(tileWidth),
       _scroll_position(std::numeric_limits<int32_t>::min()), _grid_position(0)
 {
+    scrollTo(static_cast<int32_t>(_scroller->val()));
 }
 
 void HorizontalScrollable::render(RenderRequest& renderRequest, const V3& position)
 {
-    int32_t scrollPosition = static_cast<int32_t>(_scroller->val());
-    if(scrollPosition != _scroll_position)
-        scrollTo(scrollPosition);
+    if(_scroller->update(renderRequest.timestamp()))
+        scrollTo(static_cast<int32_t>(_scroller->val()));
     const int32_t gs = _scroll_position - _grid_position;
     const int32_t end = upper(_scroll_position + _width);
     for(int32_t i = _grid_position; i < end; i += _tile_width)
@@ -27,6 +29,11 @@ void HorizontalScrollable::render(RenderRequest& renderRequest, const V3& positi
         ensureTile(tile, i);
         tile.render(renderRequest, position + V3(tile.offset() - gs, 0, 0));
     }
+}
+
+const sp<Size>& HorizontalScrollable::size()
+{
+    return _size;
 }
 
 bool HorizontalScrollable::onEvent(const Event& event, float x, float y, bool ptin)
@@ -81,7 +88,7 @@ void HorizontalScrollable::ensureTile(RendererTile& tile, int32_t position)
 
 HorizontalScrollable::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _renderer_maker(factory.ensureBuilder<RendererMaker>(manifest, "renderer-maker")), _scroller(factory.ensureBuilder<Numeric>(manifest, "scroller")),
-      _width(factory.ensureBuilder<Numeric>(manifest, "width")),
+      _size(factory.getConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _tile_width(factory.ensureBuilder<Numeric>(manifest, "tile-width")),
       _cols(Documents::getAttribute<uint32_t>(manifest, "cols", 0))
 {
@@ -89,11 +96,10 @@ HorizontalScrollable::BUILDER::BUILDER(BeanFactory& factory, const document& man
 
 sp<Renderer> HorizontalScrollable::BUILDER::build(const Scope& args)
 {
-    int32_t width = static_cast<int32_t>(BeanUtils::toFloat(_width, args));
+    const sp<Size> size = _size->build(args);
     int32_t tileWidth = static_cast<int32_t>(BeanUtils::toFloat(_tile_width, args));
-    DCHECK(width > 0, "Illegal width: %d", width);
     DCHECK(tileWidth > 0, "Illegal tile-width: %d", tileWidth);
-    return sp<HorizontalScrollable>::make(_renderer_maker->build(args), _scroller->build(args), width, tileWidth, _cols ? _cols : (width - 1) / tileWidth + 2);
+    return sp<HorizontalScrollable>::make(_renderer_maker->build(args), _scroller->build(args), size, tileWidth, _cols ? _cols : (static_cast<int32_t >(size->width()) - 1) / tileWidth + 2);
 }
 
 }

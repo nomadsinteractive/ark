@@ -6,6 +6,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/util/tiles.h"
 
@@ -13,26 +14,27 @@
 
 namespace ark {
 
-class HorizontalScrollable : public Renderer, public LayoutEventListener {
+class HorizontalScrollable : public Renderer, public Block, public LayoutEventListener {
 public:
-    HorizontalScrollable(const sp<RendererMaker>& tileMaker, const sp<Numeric>& scroller, int32_t width, int32_t tileWidth, uint32_t itemCount);
+    HorizontalScrollable(const sp<RendererMaker>& tileMaker, const sp<Numeric>& scroller, const sp<Size>& size, int32_t tileWidth, uint32_t itemCount);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
+
+    virtual const sp<Size>& size() override;
 
     virtual bool onEvent(const Event& event, float x, float y, bool ptin) override;
 
 //  [[plugin::builder("horizontal-scrollable")]]
     class BUILDER : public Builder<Renderer> {
     public:
-        BUILDER(BeanFactory& parent, const document& manifest);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<Builder<RendererMaker>> _renderer_maker;
         sp<Builder<Numeric>> _scroller;
-
-        sp<Builder<Numeric>> _width;
+        sp<Builder<Size>> _size;
         sp<Builder<Numeric>> _tile_width;
 
         uint32_t _cols;
@@ -49,6 +51,7 @@ private:
     sp<RendererMaker> _tile_maker;
     RollingList _tiles;
     sp<Numeric> _scroller;
+    sp<Size> _size;
 
     const int32_t _width;
     const int32_t _tile_width;
