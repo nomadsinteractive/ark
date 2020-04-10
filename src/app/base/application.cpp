@@ -170,8 +170,7 @@ void Application::onSurfaceUpdate()
 
 bool Application::onEvent(const Event& event, bool mapViewport)
 {
-    const Event mapped(event.action(), mapViewport ? _viewport.toViewportX(event.x(), _width) : event.x(),
-                       mapViewport ? _viewport.toViewportY(event.y(), _height) : event.y(), event.timestamp(), event.code());
+    const Event mapped(event, mapViewport ? _viewport.toViewportX(event.x(), _width) : event.x(), mapViewport ? _viewport.toViewportY(event.y(), _height) : event.y());
     _application_context->post([this, mapped] () {
         onEventTask(mapped);
     });

@@ -89,16 +89,43 @@ public:
         CODE_NO_ASCII = 1000,
         CODE_KEYBOARD_LSHIFT,
         CODE_KEYBOARD_RSHIFT,
-        CODE_MOUSE_BUTTON_LEFT,
-        CODE_MOUSE_BUTTON_MIDDLE,
-        CODE_MOUSE_BUTTON_RIGHT,
         CODE_USER_DEFINED = 10000
     };
 
-    Event(Action action, float x, float y, uint32_t timestamp, Code code = CODE_NONE);
-    Event(Action action, int32_t x, int32_t y, uint32_t timestamp, Code code = CODE_NONE);
-    Event(Action action, uint32_t timestamp, Code code);
-    Event(const Event& other);
+    enum Button {
+        BUTTON_MOUSE_LEFT,
+        BUTTON_MOUSE_MIDDLE,
+        BUTTON_MOUSE_RIGHT
+    };
+
+    struct ButtonInfo {
+        ButtonInfo(float x, float y, Button which);
+
+        float _x, _y;
+        Button _which;
+    };
+
+    struct MotionInfo {
+        MotionInfo(float x, float y, Button which, uint32_t states);
+
+        float _x, _y;
+        Button _which;
+        uint32_t _states;
+    };
+
+    union EventInfo {
+        EventInfo(Code code);
+        EventInfo(const ButtonInfo& button);
+        EventInfo(const MotionInfo& motion);
+
+        Code _code;
+        ButtonInfo _button;
+        MotionInfo _motion;
+    };
+
+    Event(Action action, uint32_t timestamp, const EventInfo& info);
+    Event(const Event& other, float x, float y);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Event);
 
     bool ptin(const Rect& rectf) const;
 
@@ -116,15 +143,15 @@ public:
 
 //  [[script::bindings::property]]
     Event::Code code() const;
+//  [[script::bindings::property]]
+    Event::Button button() const;
 
-    static wchar_t toCharacter(Event::Code code);
+    wchar_t toCharacter() const;
 
 private:
     Action _action;
-    float _x;
-    float _y;
     uint32_t _timestamp;
-    Code _code;
+    EventInfo _info;
 };
 
 }

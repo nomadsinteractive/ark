@@ -1428,6 +1428,17 @@ class Emitter:
         pass
 
 
+class EventListener:
+    def __init__(self, listener):
+        pass
+
+    def make_disposable(self, disposed: Optional[Boolean] = None) -> 'EventListener':
+        pass
+
+    def make_auto_release(self, ref_count: int = 1) -> 'EventListener':
+        pass
+
+
 class LayoutParam:
 
     DISPLAY_BLOCK = 0

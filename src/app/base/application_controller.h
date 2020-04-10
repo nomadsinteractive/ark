@@ -31,7 +31,7 @@ public:
     virtual ~ApplicationController() = default;
 
 //  [[script::bindings::auto]]
-    virtual sp<Object> createCursor(const sp<Bitmap>& bitmap, uint32_t hotX, uint32_t hotY) = 0;
+    virtual sp<Object> createCursor(const sp<Bitmap>& bitmap, int32_t hotX, int32_t hotY) = 0;
 //  [[script::bindings::auto]]
     virtual sp<Object> createSystemCursor(ApplicationController::SystemCursorName name) = 0;
 

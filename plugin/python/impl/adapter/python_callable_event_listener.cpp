@@ -25,7 +25,7 @@ bool PythonCallableEventListener::onEvent(const Event& event)
     bool consumed = false;
     if(ret)
     {
-        consumed = ret == Py_None ? false : PyObject_IsTrue(ret) == 0;
+        consumed = PyObject_IsTrue(ret) == 1;
         Py_DECREF(ret);
     }
     else

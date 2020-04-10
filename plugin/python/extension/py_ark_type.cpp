@@ -1,6 +1,7 @@
 #include "python/extension/py_ark_type.h"
 
 #include "core/base/scope.h"
+#include "core/epi/disposed.h"
 #include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/util/log.h"
@@ -241,8 +242,10 @@ PyObject* PyArkType::__absorb__(PyArkType::Instance* self, PyObject* args, PyObj
     return reinterpret_cast<PyObject*>(self);
 }
 
-PyObject* PyArkType::__dispose__(PyArkType::Instance* self, PyObject* args, PyObject* kwargs)
+PyObject* PyArkType::__dispose__(PyArkType::Instance* self, PyObject* /*args*/, PyObject* /*kwargs*/)
 {
+    const sp<Disposed> disposed = PythonInterpreter::instance()->asInterface<Disposed>(reinterpret_cast<PyObject*>(self));
+    disposed->dispose();
     Py_RETURN_NONE;
 }
 

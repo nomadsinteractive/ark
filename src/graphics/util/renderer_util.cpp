@@ -30,16 +30,6 @@ sp<Renderer> RendererUtil::wrap(const sp<Renderer>& self)
     return sp<RendererWrapper>::make(self);
 }
 
-void RendererUtil::dispose(const sp<Renderer>& self)
-{
-    if(self.template is<Disposed>())
-    {
-        const sp<Disposed> m = self.template as<Disposed>();
-        if(m)
-            m->dispose();
-    }
-}
-
 sp<Renderer> RendererUtil::makeDisposable(const sp<Renderer>& self, const sp<Boolean>& disposed)
 {
     return self.absorb(disposed ? sp<Disposed>::make(disposed) : sp<Disposed>::make());

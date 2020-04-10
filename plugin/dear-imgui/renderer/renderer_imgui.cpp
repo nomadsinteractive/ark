@@ -96,10 +96,10 @@ bool RendererImgui::onEvent(const Event& event)
         io.MousePos = ImVec2(event.x(), io.DisplaySize.y - event.y());
         return true;
     case Event::ACTION_DOWN:
-        io.MouseDown[MouseIndex[event.code() - Event::CODE_MOUSE_BUTTON_LEFT]] = true;
+        io.MouseDown[MouseIndex[event.button() - Event::BUTTON_MOUSE_LEFT]] = true;
         return true;
     case Event::ACTION_UP:
-        io.MouseDown[MouseIndex[event.code() - Event::CODE_MOUSE_BUTTON_LEFT]] = false;
+        io.MouseDown[MouseIndex[event.button() - Event::BUTTON_MOUSE_LEFT]] = false;
         return true;
     case Event::ACTION_WHEEL:
         io.MouseWheel = event.y();
@@ -140,7 +140,7 @@ bool RendererImgui::onEvent(const Event& event)
         }
     case Event::ACTION_KEY_REPEAT:
         if(event.code() < Event::CODE_NO_ASCII) {
-            wchar_t c = Event::toCharacter(event.code());
+            wchar_t c = event.toCharacter();
             io.AddInputCharacter(static_cast<ImWchar>(io.KeyShift ? std::toupper(c) : c));
         }
         return true;

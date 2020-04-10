@@ -2,29 +2,21 @@
 
 namespace ark {
 
-Event::Event(Event::Action action, float x, float y, uint32_t timestamp, Code code)
-    : _action(action), _x(x), _y(y), _timestamp(timestamp), _code(code)
+Event::Event(Event::Action action, uint32_t timestamp, const EventInfo& info)
+    : _action(action), _timestamp(timestamp), _info(info)
 {
 }
 
-Event::Event(Event::Action action, int32_t x, int32_t y, uint32_t timestamp, Code code)
-    : _action(action), _x(static_cast<float>(x)), _y(static_cast<float>(y)), _timestamp(timestamp), _code(code)
+Event::Event(const Event& other, float x, float y)
+    : _action(other._action), _timestamp(other._timestamp), _info(other._info)
 {
-}
-
-Event::Event(Event::Action action, uint32_t timestamp, Event::Code code)
-    : _action(action), _x(0.0f), _y(0.0f), _timestamp(timestamp), _code(code)
-{
-}
-
-Event::Event(const Event& other)
-    : _action(other._action), _x(other._x), _y(other._y), _timestamp(other._timestamp), _code(other._code)
-{
+    _info._button._x = x;
+    _info._button._y = y;
 }
 
 bool Event::ptin(const Rect& rectf) const
 {
-    return rectf.ptin(_x, _y);
+    return rectf.ptin(x(), y());
 }
 
 Event::Action Event::action() const
@@ -34,17 +26,17 @@ Event::Action Event::action() const
 
 float Event::x() const
 {
-    return _x;
+    return _info._button._x;
 }
 
 float Event::y() const
 {
-    return _y;
+    return _info._button._y;
 }
 
 V2 Event::xy() const
 {
-    return V2(_x, _y);
+    return V2(_info._button._x, _info._button._y);
 }
 
 uint32_t Event::timestamp() const
@@ -54,12 +46,42 @@ uint32_t Event::timestamp() const
 
 Event::Code Event::code() const
 {
-    return _code;
+    return _info._code;
 }
 
-wchar_t Event::toCharacter(Event::Code code)
+Event::Button Event::button() const
 {
-    return static_cast<wchar_t>(code);
+    return _info._button._which;
+}
+
+wchar_t Event::toCharacter() const
+{
+    return static_cast<wchar_t>(_info._code);
+}
+
+Event::EventInfo::EventInfo(Event::Code code)
+    : _code(code)
+{
+}
+
+Event::EventInfo::EventInfo(const Event::ButtonInfo& button)
+    : _button(button)
+{
+}
+
+Event::EventInfo::EventInfo(const Event::MotionInfo& motion)
+    : _motion(motion)
+{
+}
+
+Event::ButtonInfo::ButtonInfo(float x, float y, Event::Button which)
+    : _x(x), _y(y), _which(which)
+{
+}
+
+Event::MotionInfo::MotionInfo(float x, float y, Event::Button which, uint32_t states)
+    : _x(x), _y(y), _which(which), _states(states)
+{
 }
 
 }

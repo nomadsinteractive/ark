@@ -18,8 +18,8 @@
 namespace ark {
 
 LayoutHierarchy::Slot::Slot(const sp<Renderer>& renderer, bool layoutRequested)
-    : _x(0), _y(0), _layout_width(0), _layout_height(0), _layout_requested(layoutRequested), _renderer(renderer), _view(renderer.as<View>()), _view_group(renderer.as<ViewGroup>()),
-      _layout_event_listener(renderer.as<LayoutEventListener>()), _disposed(renderer.as<Disposed>()), _visibility(renderer.as<Visibility>())
+    : _layout_requested(layoutRequested), _renderer(renderer), _view(_renderer.as<View>()), _view_group(_renderer.as<ViewGroup>()),
+      _layout_event_listener(renderer.as<LayoutEventListener>()), _disposed(renderer.as<Disposed>()), _visibility(_renderer.as<Visibility>())
 {
     DASSERT(_renderer);
 }
@@ -44,11 +44,6 @@ bool LayoutHierarchy::Slot::layoutRequested() const
 
 void LayoutHierarchy::Slot::updateLayout()
 {
-    if(_view)
-    {
-        _layout_width = _view->size()->width();
-        _layout_height = _view->size()->height();
-    }
     _layout_requested = false;
 }
 
@@ -68,8 +63,7 @@ void LayoutHierarchy::Slot::doPlace(Layout::Context& ctx, float clientHeight, co
         {
             const V4 margins = layoutParam->margins().val();
             const Rect target = layout->place(ctx, layoutParam);
-            _y = clientHeight - layoutParam->contentHeight() - target.top() - margins.x();
-            _x = target.left() + margins.w();
+            _position = V2(target.left() + margins.w(), clientHeight - layoutParam->contentHeight() - target.top() - margins.x());
         }
     }
 }
@@ -83,10 +77,8 @@ void LayoutHierarchy::Slot::doWrapContentPlace(Layout::Context& ctx, const sp<La
         if(layoutParam->display() == LayoutParam::DISPLAY_BLOCK)
         {
             const Rect rect = layout->place(ctx, layoutParam);
-            contentRect.setLeft(std::min(contentRect.left(), rect.left()));
-            contentRect.setTop(std::min(contentRect.top(), rect.top()));
-            contentRect.setRight(std::max(contentRect.right(), rect.right()));
-            contentRect.setBottom(std::max(contentRect.bottom(), rect.bottom()));
+            contentRect = Rect(std::min(contentRect.left(), rect.left()), std::min(contentRect.top(), rect.top()),
+                               std::max(contentRect.right(), rect.right()), std::max(contentRect.bottom(), rect.bottom()));
         }
     }
 }
@@ -94,17 +86,14 @@ void LayoutHierarchy::Slot::doWrapContentPlace(Layout::Context& ctx, const sp<La
 void LayoutHierarchy::Slot::doLayoutEnd(const Rect& p)
 {
     if(_view)
-    {
-        _x += p.left();
-        _y -= p.top();
-    }
+        _position += V2(p.left(), -p.top());
 }
 
 void LayoutHierarchy::Slot::render(RenderRequest& renderRequest, const V3& position)
 {
     if(!_layout_requested)
     {
-        _renderer->render(renderRequest, position + V3(_x, _y, 0));
+        _renderer->render(renderRequest, position + V3(_position, 0));
         if(_view)
             _layout_requested = VariableUtil::update(renderRequest.timestamp(), _view->layoutParam()->margins(), _view->size());
     }
@@ -115,8 +104,9 @@ bool LayoutHierarchy::Slot::onEventDispatch(const Event& event, float x, float y
     if(_view && (!_visibility || _visibility->val()))
     {
         const sp<LayoutParam>& layoutParam = _view->layoutParam();
-        const Rect target(x + _x, y + _y, x + _x + layoutParam->contentWidth(), y + _y + layoutParam->contentHeight());
-        const Event viewEvent(event.action(), event.x() - _x - x, event.y() - _y - y, event.timestamp(), event.code());
+        const V2 pos = _position;
+        const Rect target(x + pos.x(), y + pos.y(), x + pos.x() + layoutParam->contentWidth(), y + pos.y() + layoutParam->contentHeight());
+        const Event viewEvent(event, event.x() - x - pos.x(), event.y() - y - pos.y());
         const bool ptin = event.ptin(target);
         if(_layout_event_listener)
             return _layout_event_listener->onEvent(event, target.left(), target.top(), ptin);

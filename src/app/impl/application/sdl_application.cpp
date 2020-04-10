@@ -65,9 +65,9 @@ private:
 
 class SDLApplicationController : public ApplicationController {
 public:
-    virtual sp<Object> createCursor(const sp<Bitmap>& bitmap, uint32_t hotX, uint32_t hotY) override {
-        SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(bitmap->at(0, 0), bitmap->width(), bitmap->height(),
-                                                        32, bitmap->rowBytes(), 0x00FF0000, 0x0000FF00,
+    virtual sp<Object> createCursor(const sp<Bitmap>& bitmap, int32_t hotX, int32_t hotY) override {
+        SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(bitmap->at(0, 0), static_cast<int32_t>(bitmap->width()), static_cast<int32_t>(bitmap->height()),
+                                                        32, static_cast<int32_t>(bitmap->rowBytes()), 0x00FF0000, 0x0000FF00,
                                                         0x000000FF, 0xFF000000);
         SDL_Cursor* cursor = SDL_CreateColorCursor(surface, hotX, hotY);
         SDL_FreeSurface(surface);
@@ -154,20 +154,22 @@ public:
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
                 {
-                    Event::Code code = static_cast<Event::Code>(Event::CODE_MOUSE_BUTTON_LEFT + event.button.button - SDL_BUTTON_LEFT);
-                    Event e(event.type == SDL_MOUSEBUTTONDOWN ? Event::ACTION_DOWN : Event::ACTION_UP, event.button.x, event.button.y, event.button.timestamp, code);
+                    Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
+                    Event e(event.type == SDL_MOUSEBUTTONDOWN ? Event::ACTION_DOWN : Event::ACTION_UP, event.button.timestamp, Event::ButtonInfo(static_cast<float>(event.button.x), static_cast<float>(event.button.y), which));
                     _application.onEvent(e, true);
                     break;
                 }
             case SDL_MOUSEMOTION:
                 {
-                    Event e(Event::ACTION_MOVE, event.motion.x, event.motion.y, event.motion.timestamp);
+                    Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
+                    Event e(Event::ACTION_MOVE, event.motion.timestamp, Event::MotionInfo(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y), which, event.motion.state));
                     _application.onEvent(e, true);
                     break;
                 }
             case SDL_MOUSEWHEEL:
                 {
-                    Event e(Event::ACTION_WHEEL, event.wheel.x, event.wheel.y, event.wheel.timestamp);
+                    Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
+                    Event e(Event::ACTION_WHEEL, event.motion.timestamp, Event::MotionInfo(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y), which, 0));
                     _application.onEvent(e, false);
                     break;
                 }

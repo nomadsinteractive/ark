@@ -47,10 +47,7 @@ private:
         sp<LayoutParam> getLayoutParam() const;
 
     private:
-        float _x, _y;
-        float _layout_width;
-        float _layout_height;
-
+        V2 _position;
         bool _layout_requested;
         sp<Renderer> _renderer;
         sp<View> _view;
