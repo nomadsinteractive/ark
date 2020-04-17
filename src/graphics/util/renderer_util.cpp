@@ -1,12 +1,14 @@
 #include "graphics/util/renderer_util.h"
 
 #include "core/epi/disposed.h"
+#include "core/epi/visibility.h"
 #include "core/types/safe_ptr.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
 
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/impl/renderer/renderer_with_position.h"
+#include "graphics/impl/renderer/renderer_with_visibility.h"
 #include "graphics/impl/renderer/renderer_wrapper.h"
 
 namespace ark {
@@ -18,11 +20,9 @@ sp<Renderer> RendererUtil::create(const sp<Renderer>& delegate)
 
 void RendererUtil::addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer)
 {
-    if(self.template is<Renderer::Group>())
-    {
-        const sp<Renderer::Group> rendererGroup = self.template as<Renderer::Group>();
-        rendererGroup->addRenderer(renderer);
-    }
+    DCHECK(self.template is<Renderer::Group>(), "Cannot call addRenderer on a none-group renderer");
+    const sp<Renderer::Group> rendererGroup = self.template as<Renderer::Group>();
+    rendererGroup->addRenderer(renderer);
 }
 
 sp<Renderer> RendererUtil::wrap(const sp<Renderer>& self)
@@ -33,6 +33,11 @@ sp<Renderer> RendererUtil::wrap(const sp<Renderer>& self)
 sp<Renderer> RendererUtil::makeDisposable(const sp<Renderer>& self, const sp<Boolean>& disposed)
 {
     return self.absorb(disposed ? sp<Disposed>::make(disposed) : sp<Disposed>::make());
+}
+
+sp<Renderer> RendererUtil::makeVisible(const sp<Renderer>& self, const sp<Boolean>& visibility)
+{
+    return self.absorb(sp<Visibility>::make(visibility));
 }
 
 sp<Renderer> RendererUtil::makeAutoRelease(const sp<Renderer>& self, int32_t refCount)

@@ -23,6 +23,8 @@ public:
 //[[script::bindings::classmethod]]
     static sp<Renderer> makeDisposable(const sp<Renderer>& self, const sp<Boolean>& disposed = nullptr);
 //[[script::bindings::classmethod]]
+    static sp<Renderer> makeVisible(const sp<Renderer>& self, const sp<Boolean>& visibility);
+//[[script::bindings::classmethod]]
     static sp<Renderer> makeAutoRelease(const sp<Renderer>& self, int32_t refCount = 1);
 
 //[[script::bindings::property]]

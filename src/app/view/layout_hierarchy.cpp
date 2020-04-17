@@ -91,7 +91,7 @@ void LayoutHierarchy::Slot::doLayoutEnd(const Rect& p)
 
 void LayoutHierarchy::Slot::render(RenderRequest& renderRequest, const V3& position)
 {
-    if(!_layout_requested)
+    if(!_layout_requested && (!_visibility || _visibility->val()))
     {
         _renderer->render(renderRequest, position + V3(_position, 0));
         if(_view)

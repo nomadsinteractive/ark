@@ -279,11 +279,14 @@ class Renderer:
     def translate(self, position: Union[tuple, 'Vec2']) -> 'Renderer':
         return self
 
-    def make_disposable(self, disposed: Optional[bool, 'Disposed'] = None):
-        return self
+    def make_disposable(self, disposed: Optional[bool, 'Disposed'] = None) -> 'Renderer':
+        pass
 
-    def make_auto_release(self, ref_count: int = 1):
-        return self
+    def make_visible(self, visibility: Union[bool, 'Boolean', 'Visibility']) -> 'Renderer':
+        pass
+
+    def make_auto_release(self, ref_count: int = 1) -> 'Renderer':
+        pass
 
 
 class ResourceLoader:

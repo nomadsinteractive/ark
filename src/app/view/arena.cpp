@@ -115,6 +115,15 @@ const sp<ViewGroup>& Arena::view() const
     return _view_group;
 }
 
+template<typename T> void addDecoratedLayer(Arena& arena, BeanFactory& factory, const document& manifest, const Scope& args)
+{
+    const sp<Renderer> layer = factory.build<Renderer>(manifest, args);
+    if(layer)
+        arena.addLayer(layer);
+    else
+        arena.addLayer(factory.ensureDecorated<Renderer, T>(manifest, args));
+}
+
 Arena::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _factory(factory), _manifest(manifest), _resource_loader(factory.getBuilder<ResourceLoader>(manifest, "resource-loader")),
       _layout(factory.getBuilder<Layout>(manifest, Constants::Attributes::LAYOUT)),
@@ -139,18 +148,12 @@ sp<Arena> Arena::BUILDER::build(const Scope& args)
         if(name == Constants::Attributes::EVENT_LISTENER)
             arena->addEventListener(factory.ensure<EventListener>(i, args));
         else if(name == Constants::Attributes::RENDER_LAYER)
-        {
-            const sp<Renderer> layer = factory.build<Renderer>(i, args);
-            if(layer)
-                arena->addLayer(layer);
-            else
-                arena->addLayer(factory.ensureDecorated<Renderer, RenderLayer>(i, args));
-        }
+            addDecoratedLayer<RenderLayer>(arena, factory, i, args);
         else if(name == Constants::Attributes::LAYER)
-            arena->addLayer(factory.ensureDecorated<Renderer, Layer>(i, args));
+            addDecoratedLayer<Layer>(arena, factory, i, args);
         else
         {
-            DWARN(name == Constants::Attributes::RENDERER || name == Constants::Attributes::RENDER_LAYER || name == Constants::Attributes::LAYER || name == Constants::Attributes::VIEW, "[Renderer, RenderLayer, Layer, View] expected, \"%s\" found", name.c_str());
+            DWARN(name == Constants::Attributes::RENDERER || name == Constants::Attributes::VIEW, "[Renderer, RenderLayer, Layer, View] expected, \"%s\" found", name.c_str());
             arena->addRenderer(factory.ensure<Renderer>(i, args));
         }
     }

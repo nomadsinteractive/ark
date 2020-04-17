@@ -5,10 +5,12 @@
 
 namespace ark {
 
-void AtlasImporterTexturePacker::import(Atlas& atlas, const document& manifest)
+void AtlasImporterGenericXML::import(Atlas& atlas, const document& manifest)
 {
     const String& path = Documents::ensureAttribute(manifest, Constants::Attributes::SRC);
     const document src = Documents::loadFromReadable(Ark::instance().openAsset(path));
+    float defPx = Documents::getAttribute<float>(manifest, "px", 0.5f);
+    float defPy = Documents::getAttribute<float>(manifest, "py", 0.5f);
     DCHECK(src, "Cannot load %s", path.c_str());
     for(const document& i : src->children())
     {
@@ -21,17 +23,17 @@ void AtlasImporterTexturePacker::import(Atlas& atlas, const document& manifest)
         uint32_t oy = Documents::getAttribute<uint32_t>(i, "oY", 0);
         float ow = static_cast<float>(Documents::getAttribute<uint32_t>(i, "oW", w));
         float oh = static_cast<float>(Documents::getAttribute<uint32_t>(i, "oH", h));
-        float px = Documents::getAttribute<float>(i, "pX", 0.5f);
-        float py = Documents::getAttribute<float>(i, "pY", 0.5f);
+        float px = Documents::getAttribute<float>(i, "pX", defPx);
+        float py = Documents::getAttribute<float>(i, "pY", defPy);
         Rect bounds(ox / ow, oy / oh, (ox + w) / ow, (oy + h) / oh);
         bounds.vflip(1.0f);
         atlas.add(n, x, y, x + w, y + h, bounds, V2(ow, oh), V2(px, 1.0f - py));
     }
 }
 
-sp<Atlas::Importer> AtlasImporterTexturePacker::BUILDER::build(const Scope& /*args*/)
+sp<Atlas::Importer> AtlasImporterGenericXML::BUILDER::build(const Scope& /*args*/)
 {
-    return sp<AtlasImporterTexturePacker>::make();
+    return sp<AtlasImporterGenericXML>::make();
 }
 
 }

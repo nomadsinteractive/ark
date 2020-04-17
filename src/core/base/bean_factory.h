@@ -25,11 +25,10 @@ private:
         }
 
         sp<Builder<T>> findBuilder(const String& id, BeanFactory& factory) {
-            const document doc = _document_by_id->get(id);
-            if(!doc)
+            const document manifest = _document_by_id->get(id);
+            if(!manifest)
                 return nullptr;
-            const sp<Builder<T>> builder = createBuilder(factory, doc);
-            return builder;
+            return createBuilder(factory, manifest);
         }
 
         sp<Builder<T>> createValueBuilder(BeanFactory& factory, const String& value) const {
@@ -230,7 +229,7 @@ public:
         if(id.package()) {
             const sp<BeanFactory>& factory = getPackage(id.package());
             DCHECK(factory, "Id: \"%s\"'s package \"%s\" not found", id.toString().c_str(), id.package().c_str());
-            builder = factory ? factory->getBuilderByRef<T>(id) : nullptr;
+            builder = factory ? factory->getBuilderByRef<T>(id, *this) : nullptr;
         }
         else
             builder = getBuilderByRef<T>(id);
@@ -328,9 +327,13 @@ public:
         return ensureBuilder<T>(attrValue);
     }
 
+    template<typename T> sp<Builder<T>> getBuilderByRef(const Identifier& id) {
+        return getBuilderByRef<T>(id, *this);
+    }
+
     template<typename T> sp<Builder<T>> getBuilderByArg(const String& argname);
     template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id);
-    template<typename T> sp<Builder<T>> getBuilderByRef(const Identifier& id);
+    template<typename T> sp<Builder<T>> getBuilderByRef(const Identifier& id, BeanFactory& factory);
 
     template<typename T> sp<Builder<T>> ensureBuilder(const String& id) {
         DCHECK(id, "Empty value being built");
@@ -561,7 +564,7 @@ template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const Identifie
     return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), findBuilderByValue<T>(id.toString()));
 }
 
-template<typename T> sp<Builder<T>> BeanFactory::getBuilderByRef(const Identifier& id) {
+template<typename T> sp<Builder<T>> BeanFactory::getBuilderByRef(const Identifier& id, BeanFactory& factory) {
     String refid = id.ref();
     const sp<T> inst = _stub->_references->get<T>(refid);
     if(inst)
@@ -571,7 +574,7 @@ template<typename T> sp<Builder<T>> BeanFactory::getBuilderByRef(const Identifie
        const sp<Builder<T>> builder = i.findBuilder<T>(refid, *this);
        if(builder) {
            if(id.queries().size())
-               return sp<BuilderWithQueries<T>>::make(builder, *this, id);
+               return sp<BuilderWithQueries<T>>::make(builder, factory, id);
            return builder;
        }
     }

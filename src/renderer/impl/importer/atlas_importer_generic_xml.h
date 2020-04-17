@@ -7,7 +7,7 @@
 
 namespace ark {
 
-class AtlasImporterTexturePacker : public Atlas::Importer {
+class AtlasImporterGenericXML : public Atlas::Importer {
 public:
 
     virtual void import(Atlas& atlas, const document& manifest) override;
