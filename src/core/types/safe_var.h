@@ -10,7 +10,7 @@ namespace ark {
 
 class _SafeVarDefaultUpdater {
 public:
-    void operator() () {}
+    void operator() () const {}
 
 };
 
@@ -53,7 +53,7 @@ public:
         return this->_delegate ? this->_delegate->update(timestamp) : false;
     }
 
-    template<typename UPDATER = _SafeVarDefaultUpdater> const sp<T>& ensure(UPDATER& updater = UPDATER()) {
+    template<typename UPDATER = _SafeVarDefaultUpdater> const sp<T>& ensure(const UPDATER& updater = UPDATER()) {
         if(!this->_delegate) {
             this->_delegate = Null::toSafe<T>(nullptr);
             updater();

@@ -30,7 +30,7 @@ public:
     AndroidApplicationController() {
     }
 
-    virtual sp<Object> createCursor(const sp<Bitmap>& bitmap, uint32_t hotX, uint32_t hotY) override {
+    virtual sp<Object> createCursor(const sp<Bitmap>& bitmap, int32_t hotX, int32_t hotY) override {
         return nullptr;
     }
 
@@ -79,14 +79,14 @@ static int32_t engineHandleInput(android_app* state, AInputEvent* inputEvent)
             default:
                 break;
         }
-        app->onEvent(Event(s, x, y, timestamp), true);
+        app->onEvent(Event(s, timestamp, Event::MotionInfo(x, y, Event::BUTTON_MOTION_POINTER1, 0)), true);
     }
     else if(type == AINPUT_EVENT_TYPE_KEY)
     {
         int32_t keycode = AKeyEvent_getKeyCode(inputEvent);
         uint32_t timestamp = static_cast<uint32_t>(AKeyEvent_getEventTime(inputEvent) >> 10);
         if(keycode == AKEYCODE_BACK)
-            app->onEvent(Event(Event::ACTION_BACK_PRESSED, 0, 0, timestamp), false);
+            app->onEvent(Event(Event::ACTION_BACK_PRESSED, timestamp, Event::EventInfo(Event::CODE_NONE)), false);
     }
     return 0;
 }

@@ -139,5 +139,5 @@ JNIEXPORT jboolean JNICALL Java_com_nomadsinteractive_ark_JNILib_onEvent(JNIEnv*
             DFATAL("Unrecognized action code: %d", action);
             break;
     }
-    return static_cast<jboolean>(_application->onEvent(Event(s, x, y, static_cast<uint32_t>(timestamp)), true));
+    return static_cast<jboolean>(_application->onEvent(Event(s, static_cast<uint32_t>(timestamp), Event::MotionInfo(x, y, Event::BUTTON_MOTION_POINTER1, 0)), true));
 }

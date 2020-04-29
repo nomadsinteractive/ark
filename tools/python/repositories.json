@@ -42,7 +42,7 @@
     {
         "url": "https://github.com/spurious/SDL-mirror.git",
         "name": "SDL2",
-        "branch": "remotes/origin/release-2.0.8"
+        "branch": "remotes/origin/release-2.0.12"
     },
     {
         "url": "https://github.com/python/cpython.git",

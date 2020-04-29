@@ -95,7 +95,11 @@ public:
     enum Button {
         BUTTON_MOUSE_LEFT,
         BUTTON_MOUSE_MIDDLE,
-        BUTTON_MOUSE_RIGHT
+        BUTTON_MOUSE_RIGHT,
+        BUTTON_MOTION_POINTER1,
+        BUTTON_MOTION_POINTER2,
+        BUTTON_MOTION_POINTER3,
+        BUTTON_MOTION_POINTER4
     };
 
     struct ButtonInfo {

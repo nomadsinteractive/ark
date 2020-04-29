@@ -42,6 +42,7 @@ list(APPEND LOCAL_INCLUDE_DIRS ${PLUGIN_ROOT_DIR})
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_SRC_DIR})
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_SRC_DIR}/src)
 list(APPEND ARK_PYTHON_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR})
+list(APPEND ARK_PYTHON_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/python-cmake-buildsystem/bin)
 list(APPEND ARK_PYTHON_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Python/Include)
 
 aux_source_directory(. LOCAL_SRC_LIST)
@@ -73,7 +74,9 @@ ark_unset_local_variables()
 list(APPEND LOCAL_LIBS libpython-static)
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_PYTHON_INCLUDE_DIR})
 
-ark_add_executable(_freeze_importlib ${SRC_DIR}/Programs/_freeze_importlib.c)
+if(NOT (ANDROID OR IOS))
+    ark_add_executable(_freeze_importlib ${SRC_DIR}/Programs/_freeze_importlib.c)
+endif()
 
 set(ARK_PYTHON_INCLUDE_DIR ${ARK_PYTHON_INCLUDE_DIR} PARENT_SCOPE)
 set(ARK_PYTHON_LIBRARIES ${ARK_PYTHON_LIBRARIES} PARENT_SCOPE)
