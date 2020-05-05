@@ -48,7 +48,7 @@ private:
 };
 
 DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo)
-    : _shader_bindings(shaderBindings), _attachments(attachments), _ubos(std::move(ubo))
+    : _shader_bindings(shaderBindings), _attachments(attachments), _ubos(std::move(ubo)), _scissor(0, 0, -1.0f, -1.0f)
 {
 }
 
@@ -58,7 +58,7 @@ DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const s
 }
 
 DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, int32_t instanceCount, uint32_t start, uint32_t count)
-    : _shader_bindings(shaderBindings), _attachments(attachments), _ubos(std::move(ubo)), _vertex_buffer(std::move(vertexBuffer)), _index_buffer(std::move(indexBuffer)), _parameters(instanceCount, start, count)
+    : _shader_bindings(shaderBindings), _attachments(attachments), _ubos(std::move(ubo)), _vertex_buffer(std::move(vertexBuffer)), _index_buffer(std::move(indexBuffer)), _scissor(0, 0, -1.0f, -1.0f), _parameters(instanceCount, start, count)
 {
 }
 
@@ -100,7 +100,7 @@ DrawingContext::Parameters::Parameters()
 }
 
 DrawingContext::Parameters::Parameters(int32_t instanceCount, uint32_t start, uint32_t count)
-    : _instance_count(instanceCount), _start(start), _count(count), _scissor(0, 0, -1.0f, -1.0f)
+    : _instance_count(instanceCount), _start(start), _count(count)
 {
 }
 

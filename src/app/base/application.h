@@ -28,7 +28,9 @@ public:
     void onSurfaceCreated();
     void onSurfaceChanged(uint32_t width, uint32_t height);
     void onSurfaceUpdate();
-    bool onEvent(const Event& event, bool mapViewport);
+    bool onEvent(const Event& event);
+
+    V2 toViewportPosition(const V2& xy) const;
 
     const char* name() const;
     const sp<ApplicationContext>& context() const;

@@ -97,6 +97,10 @@ class ApplicationFacade:
         return Clock()
 
     @property
+    def cursor_position(self) -> 'Vec2':
+        return Vec2(0, 0)
+
+    @property
     def application_controller(self) -> 'ApplicationController':
         return ApplicationController()
 

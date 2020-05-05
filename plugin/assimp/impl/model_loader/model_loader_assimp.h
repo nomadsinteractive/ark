@@ -17,6 +17,7 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
 #include "renderer/inf/model_loader.h"
+#include "renderer/inf/uploader.h"
 
 namespace ark {
 namespace plugin {
@@ -47,18 +48,40 @@ public:
 private:
     void loadSceneTexture(const ResourceLoaderContext& renderController, const aiTexture* tex);
 
-    bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
-
-    Model loadModel(const aiMesh* mesh) const;
     array<element_index_t> loadIndices(const aiMesh* mesh) const;
 
     void compose(const Model& model, int32_t modelId, DrawingBuffer& buf) const;
 
 private:
-    sp<Assimp::Importer> _importer;
-    std::unordered_map<int32_t, Model> _models;
-    std::vector<sp<Texture>> _textures;
+    struct Stub {
+        Stub();
+
+        void initialize(const document& manifest, const ResourceLoaderContext& resourceLoaderContext);
+
+        Assimp::Importer _importer;
+        std::unordered_map<int32_t, Model> _models;
+        std::vector<sp<Texture>> _textures;
+
+    private:
+        Model loadModel(const aiMesh* mesh) const;
+
+        bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
+        array<element_index_t> loadIndices(const aiMesh* mesh) const;
+
+        void loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex);
+
+    };
+
+    class VerticesUploader : public Uploader {
+    public:
+        virtual void upload(const UploadFunc& uploader) override;
+
+    };
+
+private:
+    sp<Stub> _stub;
     array<M4> _model_matrics;
+    Buffer _vertices;
 
 };
 

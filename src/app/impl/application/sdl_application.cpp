@@ -155,29 +155,32 @@ public:
             case SDL_MOUSEBUTTONUP:
                 {
                     Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
-                    Event e(event.type == SDL_MOUSEBUTTONDOWN ? Event::ACTION_DOWN : Event::ACTION_UP, event.button.timestamp, Event::ButtonInfo(static_cast<float>(event.button.x), static_cast<float>(event.button.y), which));
-                    _application.onEvent(e, true);
+                    Event::ButtonInfo bi(_application.toViewportPosition(V2(static_cast<float>(event.button.x), static_cast<float>(event.button.y))), which);
+                    Event e(event.type == SDL_MOUSEBUTTONDOWN ? Event::ACTION_DOWN : Event::ACTION_UP, event.button.timestamp, bi);
+                    _application.onEvent(e);
                     break;
                 }
             case SDL_MOUSEMOTION:
                 {
                     Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
-                    Event e(Event::ACTION_MOVE, event.motion.timestamp, Event::MotionInfo(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y), which, event.motion.state));
-                    _application.onEvent(e, true);
+                    Event::MotionInfo mi(_application.toViewportPosition(V2(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y))), which, event.motion.state);
+                    Event e(Event::ACTION_MOVE, event.motion.timestamp, mi);
+                    _application.onEvent(e);
                     break;
                 }
             case SDL_MOUSEWHEEL:
                 {
                     Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
-                    Event e(Event::ACTION_WHEEL, event.motion.timestamp, Event::MotionInfo(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y), which, 0));
-                    _application.onEvent(e, false);
+                    Event::MotionInfo mi(V2(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y)), which, event.motion.state);
+                    Event e(Event::ACTION_WHEEL, event.motion.timestamp, mi);
+                    _application.onEvent(e);
                     break;
                 }
             case SDL_KEYDOWN:
             case SDL_KEYUP:
                 {
                     Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_KEYDOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), event.key.timestamp, sdlScanCodeToEventCode(event.key.keysym.scancode));
-                    _application.onEvent(e, false);
+                    _application.onEvent(e);
                     break;
                 }
             case SDL_WINDOWEVENT:

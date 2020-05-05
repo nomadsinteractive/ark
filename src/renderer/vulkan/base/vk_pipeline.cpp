@@ -329,7 +329,7 @@ void VKPipeline::buildCommandBuffer(GraphicsContext& graphicsContext, const Draw
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkVertexBuffer, &offsets);
     vkCmdBindIndexBuffer(commandBuffer, vkIndexBuffer, 0, kVKIndexType);
 
-    const Rect& scissor = drawingContext._parameters._scissor;
+    const Rect& scissor = drawingContext._scissor;
     if(scissor.right() > scissor.left() && scissor.bottom() >= scissor.top())
     {
         DCHECK(drawingContext._shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "Pipeline has no DYNAMIC_SCISSOR flag set");

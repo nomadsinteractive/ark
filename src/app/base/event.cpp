@@ -7,11 +7,10 @@ Event::Event(Event::Action action, uint32_t timestamp, const EventInfo& info)
 {
 }
 
-Event::Event(const Event& other, float x, float y)
+Event::Event(const Event& other, const V2& xy)
     : _action(other._action), _timestamp(other._timestamp), _info(other._info)
 {
-    _info._button._x = x;
-    _info._button._y = y;
+    _info._button._xy = xy;
 }
 
 bool Event::ptin(const Rect& rectf) const
@@ -26,17 +25,17 @@ Event::Action Event::action() const
 
 float Event::x() const
 {
-    return _info._button._x;
+    return _info._button._xy.x();
 }
 
 float Event::y() const
 {
-    return _info._button._y;
+    return _info._button._xy.y();
 }
 
 V2 Event::xy() const
 {
-    return V2(_info._button._x, _info._button._y);
+    return _info._button._xy;
 }
 
 uint32_t Event::timestamp() const
@@ -74,13 +73,13 @@ Event::EventInfo::EventInfo(const Event::MotionInfo& motion)
 {
 }
 
-Event::ButtonInfo::ButtonInfo(float x, float y, Event::Button which)
-    : _x(x), _y(y), _which(which)
+Event::ButtonInfo::ButtonInfo(const V2& xy, Event::Button which)
+    : _xy(xy), _which(which)
 {
 }
 
-Event::MotionInfo::MotionInfo(float x, float y, Event::Button which, uint32_t states)
-    : _x(x), _y(y), _which(which), _states(states)
+Event::MotionInfo::MotionInfo(const V2& xy, Event::Button which, uint32_t states)
+    : _xy(xy), _which(which), _states(states)
 {
 }
 

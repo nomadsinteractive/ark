@@ -99,16 +99,16 @@ public:
     };
 
     struct ButtonInfo {
-        ButtonInfo(float x, float y, Button which);
+        ButtonInfo(const V2& xy, Button which);
 
-        float _x, _y;
+        V2 _xy;
         Button _which;
     };
 
     struct MotionInfo {
-        MotionInfo(float x, float y, Button which, uint32_t states);
+        MotionInfo(const V2& xy, Button which, uint32_t states);
 
-        float _x, _y;
+        V2 _xy;
         Button _which;
         uint32_t _states;
     };
@@ -124,7 +124,7 @@ public:
     };
 
     Event(Action action, uint32_t timestamp, const EventInfo& info);
-    Event(const Event& other, float x, float y);
+    Event(const Event& other, const V2& xy);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Event);
 
     bool ptin(const Rect& rectf) const;

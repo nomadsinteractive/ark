@@ -22,8 +22,8 @@ public:
     float near() const;
     float far() const;
 
-    float toViewportX(float screenX, uint32_t screenWidth);
-    float toViewportY(float screenY, uint32_t screenHeight);
+    float toViewportX(float screenX, uint32_t screenWidth) const;
+    float toViewportY(float screenY, uint32_t screenHeight) const;
 
 private:
     float _near;

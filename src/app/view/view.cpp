@@ -212,7 +212,7 @@ bool View::dispatchEvent(const Event& event, bool ptin)
     else if(action == Event::ACTION_MOVE && fireOnMove(event))
         return true;
 
-    return _layout_param->stopPropagation() && _layout_param->stopPropagation()->val();
+    return ptin && _layout_param->stopPropagation() && _layout_param->stopPropagation()->val();
 }
 
 namespace {
