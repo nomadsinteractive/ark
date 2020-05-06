@@ -160,8 +160,8 @@ void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext
 void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     const GLCullFace cullFace(_cull_face);
-    bool contextScissorEnabled = ElementUtil::isScissorEnabled(drawingContext._parameters._scissor);
-    const GLScissor scissor(contextScissorEnabled ? drawingContext._parameters._scissor : _scissor, contextScissorEnabled || _scissor_enabled);
+    bool contextScissorEnabled = ElementUtil::isScissorEnabled(drawingContext._scissor);
+    const GLScissor scissor(contextScissorEnabled ? drawingContext._scissor : _scissor, contextScissorEnabled || _scissor_enabled);
 
     _render_command->_parameters = drawingContext._parameters;
     _render_command->draw(graphicsContext);

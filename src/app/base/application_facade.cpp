@@ -4,6 +4,7 @@
 
 #include "graphics/base/camera.h"
 #include "graphics/base/surface_controller.h"
+#include "graphics/impl/vec/vec2_impl.h"
 
 #include "app/base/application.h"
 #include "app/base/application_controller.h"
@@ -21,6 +22,11 @@ ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface, c
 const sp<Clock>& ApplicationFacade::clock() const
 {
     return _context->clock();
+}
+
+sp<Vec2> ApplicationFacade::cursorPosition() const
+{
+    return _context->cursorPosition();
 }
 
 const sp<ApplicationController>& ApplicationFacade::applicationController() const

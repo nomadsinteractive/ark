@@ -22,12 +22,12 @@ float Viewport::far() const
     return _far;
 }
 
-float Viewport::toViewportX(float screenX, uint32_t screenWidth)
+float Viewport::toViewportX(float screenX, uint32_t screenWidth) const
 {
     return left() + (right() - left()) * screenX / screenWidth;
 }
 
-float Viewport::toViewportY(float screenY, uint32_t screenHeight)
+float Viewport::toViewportY(float screenY, uint32_t screenHeight) const
 {
     const float bt = bottom() - top();
     return bt > 0.0f ? bt - bt * screenY / screenHeight : - bt * screenY / screenHeight;

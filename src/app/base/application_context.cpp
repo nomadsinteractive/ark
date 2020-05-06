@@ -16,12 +16,14 @@
 #include "core/types/global.h"
 
 #include "graphics/base/bitmap_bundle.h"
+#include "graphics/impl/vec/vec2_impl.h"
 
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/renderer_factory.h"
 
 #include "app/base/application_resource.h"
+#include "app/base/event.h"
 #include "app/base/message_loop_thread.h"
 #include "app/base/resource_loader.h"
 #include "app/impl/event_listener/event_listener_list.h"
@@ -51,7 +53,7 @@ private:
 }
 
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources, const sp<RenderEngine>& renderEngine)
-    : _ticker(sp<Ticker>::make()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->recycler(), applicationResources->bitmapBundle(), applicationResources->bitmapBoundsLoader())),
+    : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->recycler(), applicationResources->bitmapBundle(), applicationResources->bitmapBoundsLoader())),
       _clock(sp<Clock>::make(_ticker)), _message_loop(makeMessageLoop()), _executor(sp<ThreadPoolExecutor>::make(_message_loop)), _event_listeners(new EventListenerList()),
       _string_table(Global<StringTable>()), _background_color(Color::BLACK), _paused(false)
 {
@@ -163,8 +165,15 @@ const sp<Clock>& ApplicationContext::clock() const
     return _clock;
 }
 
+const sp<Vec2Impl>& ApplicationContext::cursorPosition() const
+{
+    return _cursor_position;
+}
+
 bool ApplicationContext::onEvent(const Event& event)
 {
+    if(event.action() == Event::ACTION_UP || event.action() == Event::ACTION_DOWN || event.action() == Event::ACTION_MOVE)
+        _cursor_position->set(event.xy());
     return _event_listeners->onEvent(event) || (_default_event_listener && _default_event_listener->onEvent(event));
 }
 

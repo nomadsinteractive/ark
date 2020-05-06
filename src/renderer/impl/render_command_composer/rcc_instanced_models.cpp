@@ -59,7 +59,7 @@ sp<RenderCommand> RCCInstancedModels::compose(const RenderRequest& renderRequest
                                   buf.vertices().toSnapshot(snapshot._stub->_vertices), buf.indices(), static_cast<int32_t>(items.size()));
 
     if(snapshot._stub->_scissor)
-        drawingContext._parameters._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);
+        drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);
 
     drawingContext._instanced_array_snapshots = buf.makeDividedBufferSnapshots();
 

@@ -168,13 +168,17 @@ void Application::onSurfaceUpdate()
         _application_context->updateRenderState();
 }
 
-bool Application::onEvent(const Event& event, bool mapViewport)
+bool Application::onEvent(const Event& event)
 {
-    const Event mapped(event, mapViewport ? _viewport.toViewportX(event.x(), _width) : event.x(), mapViewport ? _viewport.toViewportY(event.y(), _height) : event.y());
-    _application_context->post([this, mapped] () {
-        onEventTask(mapped);
+    _application_context->post([this, event] () {
+        onEventTask(event);
     });
     return true;
+}
+
+V2 Application::toViewportPosition(const V2& xy) const
+{
+    return V2(_viewport.toViewportX(xy.x(), _width), _viewport.toViewportY(xy.y(), _height));
 }
 
 }

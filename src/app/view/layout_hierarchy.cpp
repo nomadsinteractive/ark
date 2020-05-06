@@ -76,6 +76,8 @@ void LayoutHierarchy::Slot::doWrapContentPlace(Layout::Context& ctx, const sp<La
         DASSERT(layoutParam);
         if(layoutParam->display() == LayoutParam::DISPLAY_BLOCK)
         {
+            ctx._client_width = std::max(ctx._client_width, layoutParam->offsetWidth());
+            ctx._client_height = std::max(ctx._client_height, layoutParam->offsetHeight());
             const Rect rect = layout->place(ctx, layoutParam);
             contentRect = Rect(std::min(contentRect.left(), rect.left()), std::min(contentRect.top(), rect.top()),
                                std::max(contentRect.right(), rect.right()), std::max(contentRect.bottom(), rect.bottom()));
@@ -106,7 +108,7 @@ bool LayoutHierarchy::Slot::onEventDispatch(const Event& event, float x, float y
         const sp<LayoutParam>& layoutParam = _view->layoutParam();
         const V2 pos = _position;
         const Rect target(x + pos.x(), y + pos.y(), x + pos.x() + layoutParam->contentWidth(), y + pos.y() + layoutParam->contentHeight());
-        const Event viewEvent(event, event.x() - x - pos.x(), event.y() - y - pos.y());
+        const Event viewEvent(event, V2(event.x() - x - pos.x(), event.y() - y - pos.y()));
         const bool ptin = event.ptin(target);
         if(_layout_event_listener)
             return _layout_event_listener->onEvent(event, target.left(), target.top(), ptin);

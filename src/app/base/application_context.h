@@ -38,6 +38,7 @@ public:
     const std::vector<String>& argv() const;
 
     const sp<Clock>& clock() const;
+    const sp<Vec2Impl>& cursorPosition() const;
 
     bool onEvent(const Event& event);
 
@@ -100,6 +101,7 @@ private:
 private:
     std::vector<String> _argv;
     sp<Ticker> _ticker;
+    sp<Vec2Impl> _cursor_position;
 
     sp<ApplicationResource> _application_resource;
     sp<RenderEngine> _render_engine;

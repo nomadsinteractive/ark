@@ -25,7 +25,7 @@ public:
         uint32_t _start;
         uint32_t _count;
 
-        Rect _scissor;
+//        Rect _scissor;
     };
 
 public:
@@ -45,6 +45,7 @@ public:
 
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> _instanced_array_snapshots;
 
+    Rect _scissor;
     Parameters _parameters;
 
 private:
