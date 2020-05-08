@@ -665,8 +665,12 @@ class RenderObject:
         return 0
 
     @property
-    def size(self):
+    def size(self) -> 'Size':
         return self._size
+
+    @size.setter
+    def size(self, v: 'Size'):
+        self._size = v
 
     @property
     def transform(self) -> 'Transform':

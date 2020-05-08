@@ -117,6 +117,7 @@ public:
     };
 
 private:
+    void updateDelegate();
     sp<Delegate> makeDelegate() const;
     sp<Delegate> makeTransformLinear() const;
     sp<Delegate> makeTransformSimple() const;
@@ -128,12 +129,11 @@ private:
         }
 
         void operator() () const {
-            _transform._delegate = _transform.makeDelegate();
+            _transform.updateDelegate();
         }
 
     private:
         Transform& _transform;
-
     };
 
 private:

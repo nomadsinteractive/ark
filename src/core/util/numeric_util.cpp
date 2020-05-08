@@ -321,6 +321,11 @@ float NumericUtil::fix(const sp<Numeric>& self)
     return 0;
 }
 
+sp<Numeric> NumericUtil::freeze(const sp<Numeric>& self)
+{
+    return sp<NumericWrapper>::make(self->val());
+}
+
 sp<Numeric> NumericUtil::wrap(const sp<Numeric>& self)
 {
     return sp<NumericWrapper>::make(self);

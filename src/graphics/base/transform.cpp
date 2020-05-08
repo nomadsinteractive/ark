@@ -49,6 +49,7 @@ const sp<Rotate>& Transform::rotate()
 void Transform::setRotate(const sp<Rotate>& rotate)
 {
     _rotate = rotate;
+    updateDelegate();
 }
 
 const sp<Vec3>& Transform::scale()
@@ -59,6 +60,7 @@ const sp<Vec3>& Transform::scale()
 void Transform::setScale(const sp<Vec3>& scale)
 {
     _scale = scale;
+    updateDelegate();
 }
 
 const sp<Vec3>& Transform::pivot()
@@ -69,6 +71,12 @@ const sp<Vec3>& Transform::pivot()
 void Transform::setPivot(const sp<Vec3>& pivot)
 {
     _pivot = pivot;
+    updateDelegate();
+}
+
+void Transform::updateDelegate()
+{
+    _delegate = makeDelegate();
 }
 
 sp<Transform::Delegate> Transform::makeDelegate() const

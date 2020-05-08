@@ -51,7 +51,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
     }
 
     const Model model = _multi_models->load(1);
-    indirectCmds.push_back({model.indices()->length(), items.size(), 0, 0, 0});
+    indirectCmds.push_back({static_cast<uint32_t>(model.indices()->length()), static_cast<uint32_t>(items.size()), 0, 0, 0});
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), _vertices.snapshot(), _indices.snapshot(),
                                   DrawingContext::ParamDrawMultiElementsIndirect(buf.makeDividedBufferSnapshots(), _draw_indirect.snapshot(sp<Uploader::Vector<DrawingContext::DrawElementsIndirectCommand>>::make(std::move(indirectCmds)))));
