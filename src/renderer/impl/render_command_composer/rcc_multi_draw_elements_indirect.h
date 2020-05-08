@@ -1,0 +1,55 @@
+#ifndef ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_MULTI_DRAW_ELEMENTS_INDIRECT_H_
+#define ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_MULTI_DRAW_ELEMENTS_INDIRECT_H_
+
+#include <unordered_map>
+
+#include "renderer/forwarding.h"
+#include "renderer/base/model.h"
+#include "renderer/inf/render_command_composer.h"
+#include "renderer/inf/uploader.h"
+
+namespace ark {
+
+class ARK_API RCCMultiDrawElementsIndirect : public RenderCommandComposer {
+public:
+    RCCMultiDrawElementsIndirect(const sp<MultiModels>& multiModels);
+
+    virtual sp<ShaderBindings> makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode) override;
+
+    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
+    virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot) override;
+
+private:
+
+    class VerticesUploader : public Uploader {
+    public:
+        VerticesUploader(const sp<MultiModels>& multiModels, const sp<PipelineInput>& pipelineInput);
+
+        void upload(const UploadFunc& uploader);
+
+    private:
+        sp<MultiModels> _multi_models;
+        sp<PipelineInput> _pipeline_input;
+    };
+
+    class IndicesUploader : public Uploader {
+    public:
+        IndicesUploader(const sp<MultiModels>& multiModels);
+
+        void upload(const UploadFunc& uploader);
+
+    private:
+        sp<MultiModels> _multi_models;
+    };
+
+private:
+    sp<MultiModels> _multi_models;
+
+    Buffer _vertices;
+    Buffer _indices;
+    Buffer _draw_indirect;
+};
+
+}
+
+#endif

@@ -223,9 +223,18 @@ void GLPipeline::bindUniform(float* buf, uint32_t size, const Uniform& uniform)
 sp<GLPipeline::GLRenderCommand> GLPipeline::createRenderCommand(const PipelineBindings& bindings) const
 {
     GLenum mode = GLUtil::toEnum(bindings.mode());
-    if(bindings.hasDivisors())
-        return sp<GLDrawElementsInstanced>::make(mode);
-    return sp<GLDrawElements>::make(mode);
+    switch(bindings.renderProcedure())
+    {
+        case PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS:
+            return sp<GLDrawElements>::make(mode);
+        case PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED:
+            DASSERT(bindings.hasDivisors());
+            return sp<GLDrawElementsInstanced>::make(mode);
+        case PipelineBindings::RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT:
+            return sp<GLMultiDrawElementsIndirect>::make(mode);;
+    }
+    DFATAL("Not render procedure creator for %d", bindings.renderProcedure());
+    return nullptr;
 }
 
 void GLPipeline::bindUniform(GraphicsContext& /*graphicsContext*/, const Uniform& uniform)
@@ -466,8 +475,8 @@ GLPipeline::GLDrawElements::GLDrawElements(GLenum mode)
 
 void GLPipeline::GLDrawElements::draw(GraphicsContext& /*graphicsContext*/)
 {
-    DASSERT(_parameters._count);
-    glDrawElements(_mode, static_cast<GLsizei>(_parameters._count), GLIndexType, reinterpret_cast<GLvoid*>(_parameters._start * sizeof(element_index_t)));
+    DASSERT(_parameters._draw_elements._count);
+    glDrawElements(_mode, static_cast<GLsizei>(_parameters._draw_elements._count), GLIndexType, reinterpret_cast<GLvoid*>(_parameters._draw_elements._start * sizeof(element_index_t)));
 }
 
 GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode)
@@ -475,10 +484,35 @@ GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode)
 {
 }
 
-void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& /*graphicsContext*/)
+void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& graphicsContext)
 {
-    DASSERT(_parameters._count);
-    glDrawElementsInstanced(_mode, static_cast<GLsizei>(_parameters._count), GLIndexType, nullptr, _parameters._instance_count);
+    DASSERT(_parameters._draw_elements_instanced._count);
+    for(const auto& i : _parameters._draw_elements_instanced._instanced_array_snapshots)
+    {
+        i.second.upload(graphicsContext);
+        DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
+    }
+    glDrawElementsInstanced(_mode, static_cast<GLsizei>(_parameters._draw_elements_instanced._count), GLIndexType, nullptr, _parameters._draw_elements_instanced._instance_count);
+}
+
+GLPipeline::GLMultiDrawElementsIndirect::GLMultiDrawElementsIndirect(GLenum mode)
+    : GLRenderCommand(mode)
+{
+}
+
+void GLPipeline::GLMultiDrawElementsIndirect::draw(GraphicsContext& graphicsContext)
+{
+    auto& drawMultiElementsIndirect = _parameters._draw_multi_elements_indirect;
+    DASSERT(drawMultiElementsIndirect.isActive());
+    for(const auto& i : drawMultiElementsIndirect._instanced_array_snapshots)
+    {
+        i.second.upload(graphicsContext);
+        DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
+    }
+    drawMultiElementsIndirect._indirect_cmds.upload(graphicsContext);
+    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, static_cast<GLuint>(drawMultiElementsIndirect._indirect_cmds.id()));
+    glMultiDrawElementsIndirect(_mode, GLIndexType, 0, _parameters._draw_multi_elements_indirect._indirect_cmds.size() / sizeof(DrawingContext::DrawElementsIndirectCommand), sizeof(DrawingContext::DrawElementsIndirectCommand));
+    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 }
 
 }

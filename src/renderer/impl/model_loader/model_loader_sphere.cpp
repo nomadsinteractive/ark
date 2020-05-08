@@ -9,7 +9,7 @@
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
 #include "renderer/impl/vertices/vertices_sphere.h"
-#include "renderer/impl/render_command_composer/rcc_instanced_models.h"
+#include "renderer/impl/render_command_composer/rcc_draw_elements_instanced.h"
 #include "renderer/util/element_util.h"
 
 namespace ark {
@@ -34,7 +34,7 @@ ModelLoaderSphere::ModelLoaderSphere(const sp<Atlas>& atlas, uint32_t sampleCoun
 
 sp<RenderCommandComposer> ModelLoaderSphere::makeRenderCommandComposer()
 {
-    return sp<RCCInstancedModels>::make(Model(_indices, sp<VerticesSphere>::make(_sample_count)));
+    return sp<RCCDrawElementsInstanced>::make(Model(_indices, sp<VerticesSphere>::make(_sample_count)));
 }
 
 void ModelLoaderSphere::initialize(ShaderBindings& shaderBindings)

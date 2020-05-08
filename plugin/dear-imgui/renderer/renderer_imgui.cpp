@@ -92,17 +92,16 @@ bool RendererImgui::onEvent(const Event& event)
     const size_t MouseIndex[5] = {0, 2, 1, 0, 0};
     switch(event.action())
     {
-    case Event::ACTION_MOVE:
-        io.MousePos = ImVec2(event.x(), io.DisplaySize.y - event.y());
-        return true;
     case Event::ACTION_DOWN:
         io.MouseDown[MouseIndex[event.button() - Event::BUTTON_MOUSE_LEFT]] = true;
+    case Event::ACTION_MOVE:
+        io.MousePos = ImVec2(event.x(), io.DisplaySize.y - event.y());
         return true;
     case Event::ACTION_UP:
         io.MouseDown[MouseIndex[event.button() - Event::BUTTON_MOUSE_LEFT]] = false;
         return true;
     case Event::ACTION_WHEEL:
-        io.MouseWheel = event.y();
+        io.MouseWheel = event.x();
         return true;
     case Event::ACTION_KEY_DOWN:
     case Event::ACTION_KEY_UP:
@@ -201,7 +200,7 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
                 const sp<DrawCommand>& drawCommand = recycler->drawCommand();
                 Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(verticsUploader);
                 Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(indicesUploader);
-                DrawingContext drawingContext(drawCommandPool->_shader_bindings, drawCommand->_attachments, ubos, std::move(vertexBuffer), std::move(indexBuffer), static_cast<int32_t>(pcmd->ElemCount / 3), offset, pcmd->ElemCount);
+                DrawingContext drawingContext(drawCommandPool->_shader_bindings, drawCommand->_attachments, ubos, std::move(vertexBuffer), std::move(indexBuffer), DrawingContext::ParamDrawElements(offset, pcmd->ElemCount));
                 drawingContext._scissor = _render_engine->toRendererScissor(Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y), Ark::COORDINATE_SYSTEM_LHS);
                 renderRequest.addRequest(sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(), std::move(recycler)));
             }

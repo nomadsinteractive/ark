@@ -13,6 +13,7 @@ import android.content.pm.ActivityInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
@@ -63,6 +64,12 @@ public class MainActivity extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return JNILib.onEvent(event.getAction(), event.getX(), event.getY(), event.getEventTime());
+            }
+        });
+        mView.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                return JNILib.onKeyEvent(keyEvent.getAction(), keyEvent.getKeyCode(), keyEvent.getEventTime());
             }
         });
         setContentView(mView);

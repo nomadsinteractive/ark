@@ -337,7 +337,7 @@ void VKPipeline::buildCommandBuffer(GraphicsContext& graphicsContext, const Draw
         vkCmdSetScissor(commandBuffer, 0, 1, &vkScissor);
     }
 
-    vkCmdDrawIndexed(commandBuffer, drawingContext._parameters._count, 1, drawingContext._parameters._start, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, drawingContext._parameters._draw_elements._count, 1, drawingContext._parameters._draw_elements._start, 0, 0);
 }
 
 bool VKPipeline::isDirty(const ByteArray::Borrowed& dirtyFlags) const

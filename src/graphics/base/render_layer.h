@@ -41,14 +41,12 @@ private:
         sp<LayerContext> makeLayerContext(Layer::Type layerType);
 
         sp<ModelLoader> _model_loader;
-        sp<RenderCommandComposer> _render_command_composer;
         sp<Shader> _shader;
         sp<Vec4> _scissor;
 
         sp<RenderController> _render_controller;
+        sp<RenderCommandComposer> _render_command_composer;
         sp<ShaderBindings> _shader_bindings;
-
-        Buffer _vertices;
 
         sp<Notifier> _notifier;
         sp<Boolean> _dirty;

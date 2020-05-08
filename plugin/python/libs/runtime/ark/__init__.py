@@ -864,6 +864,9 @@ class Event:
     CODE_KEYBOARD_TAB = 47
     CODE_KEYBOARD_SPACE = 48
 
+    CODE_KEYBOARD_BACK = 49
+    CODE_KEYBOARD_MENU = 50
+
     @property
     def action(self) -> int:
         return self.ACTION_KEY_DOWN

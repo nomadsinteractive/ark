@@ -31,4 +31,5 @@ public class JNILib {
     public static native void onDestroy();
 
     public static native boolean onEvent(int action, float x, float y, long timestamp);
+    public static native boolean onKeyEvent(int action, int keycode, long timestamp);
 }

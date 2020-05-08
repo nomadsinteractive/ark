@@ -52,21 +52,20 @@ DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const s
 {
 }
 
-DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, int32_t instanceCount)
-    : DrawingContext(shaderBindings, attachments, std::move(ubo), std::move(vertexBuffer), std::move(indexBuffer), instanceCount, 0, indexBuffer.length<element_index_t>())
-{
-}
-
-DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, int32_t instanceCount, uint32_t start, uint32_t count)
-    : _shader_bindings(shaderBindings), _attachments(attachments), _ubos(std::move(ubo)), _vertex_buffer(std::move(vertexBuffer)), _index_buffer(std::move(indexBuffer)), _scissor(0, 0, -1.0f, -1.0f), _parameters(instanceCount, start, count)
+DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, const Parameters& parameters)
+    : _shader_bindings(shaderBindings), _attachments(attachments), _ubos(std::move(ubo)), _vertex_buffer(std::move(vertexBuffer)), _index_buffer(std::move(indexBuffer)), _scissor(0, 0, -1.0f, -1.0f), _parameters(parameters)
 {
 }
 
 sp<RenderCommand> DrawingContext::toRenderCommand()
 {
     DCHECK(_shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
-    if(_parameters._count)
-        return sp<RenderCommandDraw>::make(std::move(*this));
+    return sp<RenderCommandDraw>::make(std::move(*this));
+}
+
+sp<RenderCommand> DrawingContext::toBindCommand()
+{
+    DCHECK(_shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
     return sp<RenderCommandBind>::make(std::move(*this));
 }
 
@@ -76,12 +75,6 @@ void DrawingContext::upload(GraphicsContext& graphicsContext)
     _index_buffer.upload(graphicsContext);
     DCHECK(_vertex_buffer.id(), "Invaild VertexBuffer");
     DCHECK(_index_buffer.id(), "Invaild IndexBuffer");
-
-    for(const auto& i : _instanced_array_snapshots)
-    {
-        i.second.upload(graphicsContext);
-        DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
-    }
 }
 
 void DrawingContext::preDraw(GraphicsContext& graphicsContext)
@@ -94,13 +87,93 @@ void DrawingContext::postDraw(GraphicsContext& graphicsContext)
     _shader_bindings->snippet()->postDraw(graphicsContext);
 }
 
-DrawingContext::Parameters::Parameters()
-    : _instance_count(0), _start(0), _count(0)
+DrawingContext::ParamDrawElements::ParamDrawElements()
+    : _count(0), _start(0)
 {
 }
 
-DrawingContext::Parameters::Parameters(int32_t instanceCount, uint32_t start, uint32_t count)
-    : _instance_count(instanceCount), _start(start), _count(count)
+DrawingContext::ParamDrawElements::ParamDrawElements(uint32_t start, uint32_t count)
+    : _count(count), _start(start)
+{
+}
+
+DrawingContext::Parameters::Parameters()
+    : _draw_elements(0, 0)
+{
+}
+
+DrawingContext::Parameters::Parameters(DrawingContext::Parameters&& other)
+{
+    if(other._draw_elements.isActive())
+        _draw_elements = std::move(other._draw_elements);
+    else if(other._draw_elements_instanced.isActive())
+        _draw_elements_instanced.assign(std::move(other._draw_elements_instanced));
+    else if(other._draw_multi_elements_indirect.isActive())
+        _draw_multi_elements_indirect.assign(std::move(other._draw_multi_elements_indirect));
+}
+
+DrawingContext::Parameters::Parameters(const DrawingContext::Parameters& other)
+{
+    if(other._draw_elements.isActive())
+        _draw_elements = other._draw_elements;
+    else if(other._draw_elements_instanced.isActive())
+        _draw_elements_instanced.assign(other._draw_elements_instanced);
+    else if(other._draw_multi_elements_indirect.isActive())
+        _draw_multi_elements_indirect.assign(other._draw_multi_elements_indirect);
+}
+
+DrawingContext::Parameters::Parameters(const DrawingContext::ParamDrawElements& drawElements)
+    : _draw_elements(drawElements)
+{
+}
+
+DrawingContext::Parameters::Parameters(const DrawingContext::ParamDrawElementsInstanced& drawElementsInstanced)
+    : _draw_elements_instanced(drawElementsInstanced)
+{
+}
+
+DrawingContext::Parameters::Parameters(const DrawingContext::ParamDrawMultiElementsIndirect& drawMultiElementsIndirect)
+    : _draw_multi_elements_indirect(drawMultiElementsIndirect)
+{
+}
+
+DrawingContext::Parameters::~Parameters()
+{
+    if(_draw_elements.isActive())
+        _draw_elements.~ParamDrawElements();
+    else if(_draw_elements_instanced.isActive())
+        _draw_elements_instanced.~ParamDrawElementsInstanced();
+    else if(_draw_multi_elements_indirect.isActive())
+        _draw_multi_elements_indirect.~ParamDrawMultiElementsIndirect();
+}
+
+DrawingContext::Parameters& DrawingContext::Parameters::operator =(const DrawingContext::Parameters& other)
+{
+    if(other._draw_elements.isActive())
+        _draw_elements = other._draw_elements;
+    else if(other._draw_elements_instanced.isActive())
+        _draw_elements_instanced.assign(other._draw_elements_instanced);
+    else if(other._draw_multi_elements_indirect.isActive())
+        _draw_multi_elements_indirect.assign(other._draw_multi_elements_indirect);
+    return *this;
+}
+
+DrawingContext::ParamDrawElementsInstanced::ParamDrawElementsInstanced()
+    : _count(0), _start(0)
+{
+}
+
+DrawingContext::ParamDrawElementsInstanced::ParamDrawElementsInstanced(uint32_t start, uint32_t count, int32_t instanceCount, std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots)
+    : _count(count), _start(start), _instance_count(instanceCount), _instanced_array_snapshots(std::move(snapshots))
+{
+}
+
+DrawingContext::ParamDrawMultiElementsIndirect::ParamDrawMultiElementsIndirect()
+{
+}
+
+DrawingContext::ParamDrawMultiElementsIndirect::ParamDrawMultiElementsIndirect(std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots, Buffer::Snapshot indirectCmds)
+    : _instanced_array_snapshots(std::move(snapshots)), _indirect_cmds(std::move(indirectCmds))
 {
 }
 

@@ -9,7 +9,7 @@
 namespace ark {
 
 ShaderBindings::ShaderBindings(const sp<PipelineFactory>& pipelineFactory, const sp<PipelineBindings>& pipelineBindings, RenderController& renderController)
-    : _pipeline_factory(pipelineFactory), _pipeline_bindings(pipelineBindings), _divisors(makeDivisors(renderController))
+    : _pipeline_factory(pipelineFactory), _pipeline_bindings(pipelineBindings), _divisors(makeDivisors(renderController)), _attachments(sp<ByType>::make())
 {
 }
 
@@ -46,6 +46,11 @@ const std::vector<sp<Texture>>& ShaderBindings::samplers() const
 const sp<std::map<uint32_t, Buffer>>& ShaderBindings::divisors() const
 {
     return _divisors;
+}
+
+const sp<ByType>& ShaderBindings::attachments() const
+{
+    return _attachments;
 }
 
 sp<Pipeline> ShaderBindings::getPipeline(GraphicsContext& graphicsContext)

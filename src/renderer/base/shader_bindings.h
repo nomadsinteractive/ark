@@ -27,6 +27,7 @@ public:
     const sp<PipelineInput>& pipelineInput() const;
     const std::vector<sp<Texture>>& samplers() const;
     const sp<std::map<uint32_t, Buffer>>& divisors() const;
+    const sp<ByType>& attachments() const;
 
     sp<Pipeline> getPipeline(GraphicsContext& graphicsContext);
 
@@ -42,6 +43,9 @@ private:
     sp<std::map<uint32_t, Buffer>> _divisors;
 
     sp<Pipeline> _pipeline;
+
+    sp<ByType> _attachments;
+
 };
 
 }

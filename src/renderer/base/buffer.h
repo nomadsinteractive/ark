@@ -20,6 +20,7 @@ public:
     enum Type {
         TYPE_VERTEX,
         TYPE_INDEX,
+        TYPE_DRAW_INDIRECT,
         TYPE_COUNT
     };
 

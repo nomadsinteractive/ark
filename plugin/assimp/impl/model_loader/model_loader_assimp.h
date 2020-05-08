@@ -17,7 +17,6 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
 #include "renderer/inf/model_loader.h"
-#include "renderer/inf/uploader.h"
 
 namespace ark {
 namespace plugin {
@@ -50,8 +49,6 @@ private:
 
     array<element_index_t> loadIndices(const aiMesh* mesh) const;
 
-    void compose(const Model& model, int32_t modelId, DrawingBuffer& buf) const;
-
 private:
     struct Stub {
         Stub();
@@ -59,7 +56,7 @@ private:
         void initialize(const document& manifest, const ResourceLoaderContext& resourceLoaderContext);
 
         Assimp::Importer _importer;
-        std::unordered_map<int32_t, Model> _models;
+        sp<MultiModels> _models;
         std::vector<sp<Texture>> _textures;
 
     private:
@@ -72,17 +69,8 @@ private:
 
     };
 
-    class VerticesUploader : public Uploader {
-    public:
-        virtual void upload(const UploadFunc& uploader) override;
-
-    };
-
 private:
     sp<Stub> _stub;
-    array<M4> _model_matrics;
-    Buffer _vertices;
-
 };
 
 }

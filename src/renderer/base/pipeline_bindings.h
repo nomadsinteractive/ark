@@ -20,10 +20,17 @@ public:
         FLAG_DEFAULT_VALUE = FLAG_CULL_MODE_CCW
     };
 
+    enum RenderProcedure {
+        RENDER_PROCEDURE_DRAW_ELEMENTS,
+        RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED,
+        RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT
+    };
+
     struct ARK_API Parameters {
-        Parameters(ModelLoader::RenderMode mode, const Rect& scissor, uint32_t flags);
+        Parameters(ModelLoader::RenderMode mode, RenderProcedure renderProcedure, const Rect& scissor, uint32_t flags);
 
         ModelLoader::RenderMode _mode;
+        RenderProcedure _render_procedure;
         Rect _scissor;
         uint32_t _flags;
     };
@@ -33,6 +40,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineBindings);
 
     ModelLoader::RenderMode mode() const;
+    RenderProcedure renderProcedure() const;
     const Rect& scissor() const;
 
     const sp<PipelineLayout>& layout() const;

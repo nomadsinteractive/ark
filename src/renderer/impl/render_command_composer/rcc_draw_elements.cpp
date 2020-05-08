@@ -1,4 +1,4 @@
-#include "renderer/impl/render_command_composer/rcc_uniform_models.h"
+#include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 
 #include "graphics/base/render_layer.h"
 #include "graphics/base/render_request.h"
@@ -15,23 +15,24 @@
 
 namespace ark {
 
-RCCUniformModels::RCCUniformModels(Model model)
-    : _model(std::move(model)), _attachments(sp<ByType>::make())
+RCCDrawElements::RCCDrawElements(Model model)
+    : _model(std::move(model))
 {
 }
 
-sp<ShaderBindings> RCCUniformModels::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
+sp<ShaderBindings> RCCDrawElements::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
 {
+    _vertices = renderController.makeVertexBuffer();
     _shared_buffer = renderController.getSharedBuffer(renderMode, _model);
-    return shader.makeBindings(renderMode);
+    return shader.makeBindings(renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS);
 }
 
-void RCCUniformModels::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
+void RCCDrawElements::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
 {
     snapshot._index_buffer = _shared_buffer->snapshot(renderController, snapshot._items.size(), snapshot._items.size());
 }
 
-sp<RenderCommand> RCCUniformModels::compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot)
+sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot)
 {
     size_t verticesLength = _model.vertices()->length();
     const std::vector<Renderable::Snapshot>& items = snapshot._items;
@@ -40,7 +41,7 @@ sp<RenderCommand> RCCUniformModels::compose(const RenderRequest& renderRequest, 
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
     buf.setIndices(snapshot._index_buffer);
 
-    if(snapshot._flag == RenderLayer::SNAPSHOT_FLAG_RELOAD)
+    if(snapshot._flag == RenderLayer::SNAPSHOT_FLAG_RELOAD || _vertices.size() == 0)
     {
         VertexStream writer = buf.makeVertexStream(renderRequest, verticesLength * items.size(), 0);
         for(const Renderable::Snapshot& i : items)
@@ -66,8 +67,8 @@ sp<RenderCommand> RCCUniformModels::compose(const RenderRequest& renderRequest, 
         }
     }
 
-    DrawingContext drawingContext(snapshot._stub->_shader_bindings, _attachments, std::move(snapshot._ubos),
-                                  buf.vertices().toSnapshot(snapshot._stub->_vertices), buf.indices(), static_cast<int32_t>(items.size()));
+    DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos),
+                                  buf.vertices().toSnapshot(_vertices), buf.indices(), DrawingContext::ParamDrawElements(0, buf.indices().length<element_index_t>()));
 
     if(snapshot._stub->_scissor)
         drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);

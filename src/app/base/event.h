@@ -12,7 +12,7 @@ class ARK_API Event {
 public:
 //  [[script::bindings::enumeration]]
     enum Action {
-        ACTION_KEY_NONE,
+        ACTION_NONE,
         ACTION_KEY_DOWN,
         ACTION_KEY_UP,
         ACTION_KEY_REPEAT,
@@ -89,6 +89,10 @@ public:
         CODE_NO_ASCII = 1000,
         CODE_KEYBOARD_LSHIFT,
         CODE_KEYBOARD_RSHIFT,
+
+        CODE_KEYBOARD_BACK,
+        CODE_KEYBOARD_MENU,
+
         CODE_USER_DEFINED = 10000
     };
 

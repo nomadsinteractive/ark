@@ -61,7 +61,7 @@ static int32_t engineHandleInput(android_app* state, AInputEvent* inputEvent)
         action = action & AMOTION_EVENT_ACTION_MASK;
         float x = AMotionEvent_getX(inputEvent, pointerIndex), y = AMotionEvent_getY(inputEvent, pointerIndex);
         uint32_t timestamp = static_cast<uint32_t>(AMotionEvent_getEventTime(inputEvent) >> 10);
-        Event::Action s = Event::ACTION_KEY_NONE;
+        Event::Action s = Event::ACTION_NONE;
         switch(action)
         {
             case AMOTION_EVENT_ACTION_DOWN:
@@ -79,14 +79,14 @@ static int32_t engineHandleInput(android_app* state, AInputEvent* inputEvent)
             default:
                 break;
         }
-        app->onEvent(Event(s, timestamp, Event::MotionInfo(x, y, Event::BUTTON_MOTION_POINTER1, 0)), true);
+        app->onEvent(Event(s, timestamp, Event::MotionInfo(app->toViewportPosition(V2(x, y)), Event::BUTTON_MOTION_POINTER1, 0)));
     }
     else if(type == AINPUT_EVENT_TYPE_KEY)
     {
         int32_t keycode = AKeyEvent_getKeyCode(inputEvent);
         uint32_t timestamp = static_cast<uint32_t>(AKeyEvent_getEventTime(inputEvent) >> 10);
         if(keycode == AKEYCODE_BACK)
-            app->onEvent(Event(Event::ACTION_BACK_PRESSED, timestamp, Event::EventInfo(Event::CODE_NONE)), false);
+            app->onEvent(Event(Event::ACTION_BACK_PRESSED, timestamp, Event::EventInfo(Event::CODE_NONE)));
     }
     return 0;
 }
@@ -135,7 +135,7 @@ AndroidApplication::AndroidApplication(const sp<ApplicationDelegate>& applicatio
 {
 }
 
-static void onContentRectChanged(ANativeActivity* activity, const ARect* rect)
+static void onContentRectChanged(ANativeActivity* /*activity*/, const ARect* rect)
 {
     const Global<PlatformAndroid> platform;
     android_app* state = platform->state();

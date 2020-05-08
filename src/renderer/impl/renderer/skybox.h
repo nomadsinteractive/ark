@@ -40,7 +40,6 @@ public:
 private:
     SafePtr<Size> _size;
     sp<Shader> _shader;
-    sp<ByType> _attachments;
     sp<ShaderBindings> _shader_bindings;
 
     Buffer _vertices;

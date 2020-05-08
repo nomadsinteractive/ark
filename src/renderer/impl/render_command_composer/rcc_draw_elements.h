@@ -1,5 +1,6 @@
-#ifndef ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_INSTANCED_MODELS_H_
-#define ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_INSTANCED_MODELS_H_
+#ifndef ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_DRAW_ELEMENTS_H_
+#define ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_DRAW_ELEMENTS_H_
+
 
 #include "renderer/forwarding.h"
 #include "renderer/base/model.h"
@@ -7,9 +8,9 @@
 
 namespace ark {
 
-class RCCInstancedModels : public RenderCommandComposer {
+class RCCDrawElements : public RenderCommandComposer {
 public:
-    RCCInstancedModels(Model model);
+    RCCDrawElements(Model model);
 
     virtual sp<ShaderBindings> makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode) override;
 
@@ -18,8 +19,8 @@ public:
 
 private:
     Model _model;
-    sp<ByType> _attachments;
-    Buffer _indices;
+    Buffer _vertices;
+    sp<SharedBuffer> _shared_buffer;
 };
 
 }

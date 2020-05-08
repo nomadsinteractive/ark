@@ -4,7 +4,7 @@
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader_bindings.h"
-#include "renderer/impl/render_command_composer/rcc_uniform_models.h"
+#include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 #include "renderer/impl/vertices/vertices_point.h"
 #include "renderer/util/element_util.h"
 
@@ -18,7 +18,7 @@ ModelLoaderPoint::ModelLoaderPoint(const sp<Atlas>& atlas)
 
 sp<RenderCommandComposer> ModelLoaderPoint::makeRenderCommandComposer()
 {
-    return sp<RCCUniformModels>::make(ElementUtil::makeUnitPointModel());
+    return sp<RCCDrawElements>::make(ElementUtil::makeUnitPointModel());
 }
 
 void ModelLoaderPoint::initialize(ShaderBindings& shaderBindings)

@@ -24,8 +24,8 @@
 namespace ark {
 
 RenderLayer::Stub::Stub(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _model_loader(modelLoader), _render_command_composer(_model_loader->makeRenderCommandComposer()), _shader(shader), _scissor(scissor), _render_controller(resourceLoaderContext->renderController()),
-      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _vertices(_render_controller->makeVertexBuffer()), _notifier(sp<Notifier>::make()),
+    : _model_loader(modelLoader), _shader(shader), _scissor(scissor), _render_controller(resourceLoaderContext->renderController()), _render_command_composer(_model_loader->makeRenderCommandComposer()),
+      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _notifier(sp<Notifier>::make()),
       _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(_model_loader, _notifier, Layer::TYPE_DYNAMIC))), _stride(shader->input()->getStream(0).stride())
 {
     _model_loader->initialize(_shader_bindings);
@@ -62,9 +62,7 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
         _scissor = Rect(_stub->_scissor->val());
 
     bool dirty = _stub->_dirty->val();
-    if(_stub->_vertices.size() == 0)
-        _flag = SNAPSHOT_FLAG_RELOAD;
-    else if(combined != Layer::TYPE_STATIC)
+    if(combined != Layer::TYPE_STATIC)
         _flag = dirty ? SNAPSHOT_FLAG_RELOAD : SNAPSHOT_FLAG_DYNAMIC_UPDATE;
     else
         _flag = dirty ? SNAPSHOT_FLAG_STATIC_MODIFIED : SNAPSHOT_FLAG_STATIC_REUSE;
@@ -76,7 +74,7 @@ sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderReque
         return _stub->_render_command_composer->compose(renderRequest, *this);
 
     DrawingContext drawingContext(_stub->_shader_bindings, nullptr, std::move(_ubos));
-    return drawingContext.toRenderCommand();
+    return drawingContext.toBindCommand();
 }
 
 RenderLayer::RenderLayer(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)

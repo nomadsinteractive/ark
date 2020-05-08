@@ -60,6 +60,23 @@ GLenum GLUtil::toEnum(ModelLoader::RenderMode renderMode)
     return models[renderMode];
 }
 
+GLenum GLUtil::toBufferType(Buffer::Type type)
+{
+    switch(type)
+    {
+    case Buffer::TYPE_VERTEX:
+        return GL_ARRAY_BUFFER;
+    case Buffer::TYPE_INDEX:
+        return GL_ELEMENT_ARRAY_BUFFER;
+    case Buffer::TYPE_DRAW_INDIRECT:
+        return GL_DRAW_INDIRECT_BUFFER;
+    default:
+        break;
+    }
+    DFATAL("Unknow buffer type: %d", type);
+    return GL_ARRAY_BUFFER;
+}
+
 GLenum GLUtil::getEnum(const String& name)
 {
     const Global<GLConstants> constants;

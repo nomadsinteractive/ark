@@ -11,6 +11,7 @@
 #include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/resource.h"
 #include "renderer/inf/pipeline_factory.h"
@@ -43,7 +44,7 @@ public:
     const sp<PipelineLayout>& layout() const;
     const sp<Camera>& camera() const;
 
-    sp<ShaderBindings> makeBindings(ModelLoader::RenderMode mode) const;
+    sp<ShaderBindings> makeBindings(ModelLoader::RenderMode mode, PipelineBindings::RenderProcedure renderProcedure) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Shader> {

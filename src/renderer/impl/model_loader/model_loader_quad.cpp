@@ -4,7 +4,7 @@
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader_bindings.h"
-#include "renderer/impl/render_command_composer/rcc_uniform_models.h"
+#include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 #include "renderer/impl/vertices/vertices_quad.h"
 #include "renderer/util/element_util.h"
 
@@ -17,7 +17,7 @@ ModelLoaderQuad::ModelLoaderQuad(const sp<Atlas>& atlas)
 
 sp<RenderCommandComposer> ModelLoaderQuad::makeRenderCommandComposer()
 {
-    return sp<RCCUniformModels>::make(ElementUtil::makeUnitQuadModel());
+    return sp<RCCDrawElements>::make(ElementUtil::makeUnitQuadModel());
 }
 
 void ModelLoaderQuad::initialize(ShaderBindings& shaderBindings)

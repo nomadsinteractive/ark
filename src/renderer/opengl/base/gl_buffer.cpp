@@ -5,12 +5,13 @@
 #include "renderer/base/recycler.h"
 #include "renderer/inf/uploader.h"
 
+#include "renderer/opengl/util/gl_util.h"
+
 namespace ark {
 namespace opengl {
 
 GLBuffer::GLBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Recycler>& recycler)
-    : _type(type == Buffer::TYPE_VERTEX ? GL_ARRAY_BUFFER : GL_ELEMENT_ARRAY_BUFFER),
-      _usage(usage == Buffer::USAGE_DYNAMIC ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW), _recycler(recycler), _id(0)
+    : _type(GLUtil::toBufferType(type)), _usage(usage == Buffer::USAGE_DYNAMIC ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW), _recycler(recycler), _id(0)
 {
 }
 

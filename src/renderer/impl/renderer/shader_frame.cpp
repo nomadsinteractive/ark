@@ -18,7 +18,7 @@
 namespace ark {
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderController& renderController)
-    : _size(size), _shader(shader), _attachments(sp<ByType>::make()), _shader_bindings(shader->makeBindings(ModelLoader::RENDER_MODE_TRIANGLES)),
+    : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS)),
       _vertex_buffer(renderController.makeVertexBuffer()), _index_buffer(renderController.getNamedBuffer(SharedBuffer::NAME_QUADS)->snapshot(renderController, 1))
 {
 }
@@ -26,7 +26,7 @@ ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderC
 void ShaderFrame::render(RenderRequest& renderRequest, const V3& position)
 {
     const sp<Uploader> uploader = sp<ByteArrayUploader>::make(getVertexBuffer(position));
-    DrawingContext drawingContext(_shader_bindings, _attachments, _shader->snapshot(renderRequest), _vertex_buffer.snapshot(uploader), _index_buffer, 1);
+    DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->snapshot(renderRequest), _vertex_buffer.snapshot(uploader), _index_buffer, DrawingContext::ParamDrawElements(0, _index_buffer.length<element_index_t>()));
     renderRequest.addRequest(drawingContext.toRenderCommand());
 }
 

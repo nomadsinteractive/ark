@@ -30,6 +30,7 @@ extern "C" {
     JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onResume(JNIEnv* env, jobject obj);
     JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onDestroy(JNIEnv* env, jobject obj);
     JNIEXPORT jboolean JNICALL Java_com_nomadsinteractive_ark_JNILib_onEvent(JNIEnv* env, jobject obj, jint action, jfloat x, jfloat y, jlong timestamp);
+    JNIEXPORT jboolean JNICALL Java_com_nomadsinteractive_ark_JNILib_onKeyEvent(JNIEnv* env, jobject obj, jint action, jint keycode, jlong timestamp);
 };
 
 namespace ark {
@@ -117,7 +118,7 @@ JNIEXPORT void JNICALL Java_com_nomadsinteractive_ark_JNILib_onDestroy(JNIEnv* e
 
 JNIEXPORT jboolean JNICALL Java_com_nomadsinteractive_ark_JNILib_onEvent(JNIEnv* env, jobject obj, jint action, jfloat x, jfloat y, jlong timestamp)
 {
-    Event::Action s = Event::ACTION_KEY_NONE;
+    Event::Action s = Event::ACTION_NONE;
     switch(action)
     {
         case 0:
@@ -139,5 +140,25 @@ JNIEXPORT jboolean JNICALL Java_com_nomadsinteractive_ark_JNILib_onEvent(JNIEnv*
             DFATAL("Unrecognized action code: %d", action);
             break;
     }
-    return static_cast<jboolean>(_application->onEvent(Event(s, static_cast<uint32_t>(timestamp), Event::MotionInfo(x, y, Event::BUTTON_MOTION_POINTER1, 0)), true));
+    return static_cast<jboolean>(_application->onEvent(Event(s, static_cast<uint32_t>(timestamp), Event::MotionInfo(_application->toViewportPosition(V2(x, y)), Event::BUTTON_MOTION_POINTER1, 0))));
+}
+
+static Event::Code toEventCode(int32_t keycode)
+{
+    switch(keycode)
+    {
+        case 4:
+            return Event::CODE_KEYBOARD_BACK;
+        case 82:
+            return Event::CODE_KEYBOARD_MENU;
+        default:
+            break;
+    }
+    return static_cast<Event::Code>(keycode);
+}
+
+JNIEXPORT jboolean JNICALL Java_com_nomadsinteractive_ark_JNILib_onKeyEvent(JNIEnv* /*env*/, jobject /*obj*/, jint action, jint keycode, jlong timestamp)
+{
+    Event::Action s = (action & 1) ? Event::ACTION_KEY_UP : Event::ACTION_KEY_DOWN;
+    return static_cast<jboolean>(_application->onEvent(Event(s, static_cast<uint32_t>(timestamp), Event::EventInfo(toEventCode(keycode)))));
 }

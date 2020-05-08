@@ -128,6 +128,13 @@ private:
         virtual void draw(GraphicsContext& graphicsContext) override;
     };
 
+    class GLMultiDrawElementsIndirect : public GLRenderCommand {
+    public:
+        GLMultiDrawElementsIndirect(GLenum mode);
+
+        virtual void draw(GraphicsContext& graphicsContext) override;
+    };
+
     sp<GLRenderCommand> createRenderCommand(const PipelineBindings& bindings) const;
 
 private:
