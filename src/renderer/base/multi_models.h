@@ -20,6 +20,7 @@ public:
 
     void addModel(int32_t type, const Model& model);
 
+    const ModelInfo& ensure(int32_t type) const;
     Model load(int32_t type) const;
 
     const std::unordered_map<int32_t, ModelInfo>& models() const;

@@ -3,10 +3,14 @@
 
 #include <unordered_map>
 
+#include "core/collection/table.h"
+
 #include "renderer/forwarding.h"
+#include "renderer/base/drawing_context.h"
 #include "renderer/base/model.h"
 #include "renderer/inf/render_command_composer.h"
 #include "renderer/inf/uploader.h"
+
 
 namespace ark {
 
@@ -41,6 +45,14 @@ private:
     private:
         sp<MultiModels> _multi_models;
     };
+
+    struct IndirectCmd {
+        DrawingContext::DrawElementsIndirectCommand _command;
+        std::vector<const Renderable::Snapshot*> _snapshots;
+    };
+
+private:
+    sp<Uploader> makeIndirectBufferUploader(const Table<int32_t, IndirectCmd>& indirectCmds);
 
 private:
     sp<MultiModels> _multi_models;

@@ -11,11 +11,16 @@ void MultiModels::addModel(int32_t type, const Model& model)
     _index_length += model.indices()->length();
 }
 
-Model MultiModels::load(int32_t type) const
+const MultiModels::ModelInfo& MultiModels::ensure(int32_t type) const
 {
     const auto iter = _models.find(type);
     DCHECK(iter != _models.end(), "Model not found, type: %d", type);
-    return iter->second._model;
+    return iter->second;
+}
+
+Model MultiModels::load(int32_t type) const
+{
+    return ensure(type)._model;
 }
 
 const std::unordered_map<int32_t, MultiModels::ModelInfo>& MultiModels::models() const

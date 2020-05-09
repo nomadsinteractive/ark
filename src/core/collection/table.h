@@ -1,6 +1,7 @@
 #ifndef ARK_CORE_COLLECTION_TABLE_H_
 #define ARK_CORE_COLLECTION_TABLE_H_
 
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -10,21 +11,21 @@ namespace ark {
 
 template<typename T, typename U> class Table {
 public:
-    struct Iterator {
-        typedef std::pair<std::reference_wrapper<const T>, std::reference_wrapper<const U>> PairType;
+    template<bool IS_CONSTANT> struct Iterator {
 
-        Iterator(const std::vector<T>& keys, const std::vector<U>& values, size_t iterator)
-            : _keys(keys), _values(values), _iterator(iterator), _value(iterator != Constants::npos ? new PairType(_keys.at(_iterator), _values.at(_iterator)) : nullptr) {
+        template <typename V> using PType = typename std::conditional<IS_CONSTANT, const V&, V&>::type;
+        template <typename V> using VType = typename std::conditional<IS_CONSTANT, const std::vector<V>&, std::vector<V>&>::type;
+
+        typedef std::pair<PType<T>, PType<U>> PairType;
+
+        Iterator(VType<T> keys, VType<U> values, size_t iterator)
+            : _keys(keys), _values(values), _iterator(iterator), _data(iterator != Constants::npos ? new PairType(_keys.at(_iterator), _values.at(_iterator)) : nullptr) {
             DCHECK(keys.size() == values.size(), "Zipped iterator must be equal length");
         }
         Iterator(Iterator&& other)
-            : _keys(other._keys), _values(other._values), _iterator(other._iterator), _value(other._value) {
-            other._value = nullptr;
+            : _keys(other._keys), _values(other._values), _iterator(other._iterator), _data(std::move(other._data)) {
         }
         DISALLOW_COPY_AND_ASSIGN(Iterator);
-        ~Iterator() {
-            delete _value;
-        }
 
         Iterator& operator ++() {
             next();
@@ -45,36 +46,37 @@ public:
         }
 
         const PairType& operator *() const {
-            DASSERT(_value);
-            return *_value;
+            DASSERT(_data);
+            return *_data;
         }
 
         const PairType* operator ->() const {
-            DASSERT(_value);
-            return _value;
+            DASSERT(_data);
+            return _data.get();
         }
 
     private:
         void next() {
-            DASSERT(_value);
+            DASSERT(_data);
             DASSERT(_iterator != Constants::npos);
             DASSERT(_iterator < _keys.size());
             ++_iterator;
             if(_iterator == _keys.size())
                 _iterator = Constants::npos;
             else
-                *_value = PairType(_keys.at(_iterator), _values.at(_iterator));
+                _data.reset(new PairType(_keys.at(_iterator), _values.at(_iterator)));
         }
 
     private:
-        const std::vector<T>& _keys;
-        const std::vector<U>& _values;
+        VType<T> _keys;
+        VType<U> _values;
 
         size_t _iterator;
-        PairType* _value;
+        std::unique_ptr<PairType> _data;
     };
 
-    typedef Iterator const_iterator;
+    typedef Iterator<false> iterator;
+    typedef Iterator<true>  const_iterator;
 
 public:
     Table() = default;
@@ -117,6 +119,19 @@ public:
         _keys.push_back(key);
         _values.push_back(U());
         return _values.back();
+    }
+
+    iterator begin() {
+        return iterator(_keys, _values, _keys.empty() ? Constants::npos : 0);
+    }
+
+    iterator end() {
+        return iterator(_keys, _values, Constants::npos);
+    }
+
+    iterator find(const T& key) {
+        const auto iter = _indices.find(key);
+        return iter != _indices.end() ? iterator(_keys, _values, iter->second) : end();
     }
 
     const_iterator begin() const {

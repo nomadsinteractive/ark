@@ -5,7 +5,6 @@
 #include "graphics/util/matrix_util.h"
 
 #include "renderer/base/drawing_buffer.h"
-#include "renderer/base/drawing_context.h"
 #include "renderer/base/multi_models.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_controller.h"
@@ -42,24 +41,50 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
 
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
     VertexStream writer = buf.makeDividedVertexStream(renderRequest, items.size(), 0, 1);
+    sp<Uploader> indirectUploader = nullptr;
 
-    std::vector<DrawingContext::DrawElementsIndirectCommand> indirectCmds;
+    Table<int32_t, IndirectCmd> indirectCmds;
+
     for(const Renderable::Snapshot& i : items)
     {
-        writer.next();
-        writer.write(MatrixUtil::scale(MatrixUtil::translate(i._transform.toMatrix(), i._position), i._size));
+        IndirectCmd& modelIndirect = indirectCmds[i._type];
+        if(modelIndirect._snapshots.empty())
+        {
+            const MultiModels::ModelInfo& modelInfo = _multi_models->ensure(i._type);
+            modelIndirect._command = {static_cast<uint32_t>(modelInfo._model.indices()->length()), 0, modelInfo._index_offset, modelInfo._vertex_offset, 0};
+        }
+
+        ++ (modelIndirect._command._instance_count);
+        modelIndirect._snapshots.push_back(&i);
     }
 
-    const Model model = _multi_models->load(1);
-    indirectCmds.push_back({static_cast<uint32_t>(model.indices()->length()), static_cast<uint32_t>(items.size()), 0, 0, 0});
+    uint32_t baseInstance = 0;
+    for(auto& i : indirectCmds)
+    {
+        i.second._command._base_instance = baseInstance;
+        baseInstance += i.second._snapshots.size();
+        for(const Renderable::Snapshot* i : i.second._snapshots)
+        {
+            writer.next();
+            writer.write(MatrixUtil::scale(MatrixUtil::translate(i->_transform.toMatrix(), i->_position), i->_size));
+        }
+    }
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), _vertices.snapshot(), _indices.snapshot(),
-                                  DrawingContext::ParamDrawMultiElementsIndirect(buf.makeDividedBufferSnapshots(), _draw_indirect.snapshot(sp<Uploader::Vector<DrawingContext::DrawElementsIndirectCommand>>::make(std::move(indirectCmds)))));
+                                  DrawingContext::ParamDrawMultiElementsIndirect(buf.makeDividedBufferSnapshots(), _draw_indirect.snapshot(makeIndirectBufferUploader(indirectCmds))));
 
     if(snapshot._stub->_scissor)
         drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);
 
     return drawingContext.toRenderCommand();
+}
+
+sp<Uploader> RCCMultiDrawElementsIndirect::makeIndirectBufferUploader(const Table<int32_t, RCCMultiDrawElementsIndirect::IndirectCmd>& indirectCmds)
+{
+    std::vector<DrawingContext::DrawElementsIndirectCommand> cmds;
+    for(const auto& i : indirectCmds)
+        cmds.push_back(i.second._command);
+    return sp<Uploader::Vector<DrawingContext::DrawElementsIndirectCommand>>::make(std::move(cmds));
 }
 
 RCCMultiDrawElementsIndirect::VerticesUploader::VerticesUploader(const sp<MultiModels>& multiModels, const sp<PipelineInput>& pipelineInput)
