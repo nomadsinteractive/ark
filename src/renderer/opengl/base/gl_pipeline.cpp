@@ -511,7 +511,7 @@ void GLPipeline::GLMultiDrawElementsIndirect::draw(GraphicsContext& graphicsCont
     }
     drawMultiElementsIndirect._indirect_cmds.upload(graphicsContext);
     glBindBuffer(GL_DRAW_INDIRECT_BUFFER, static_cast<GLuint>(drawMultiElementsIndirect._indirect_cmds.id()));
-    glMultiDrawElementsIndirect(_mode, GLIndexType, 0, _parameters._draw_multi_elements_indirect._indirect_cmds.size() / sizeof(DrawingContext::DrawElementsIndirectCommand), sizeof(DrawingContext::DrawElementsIndirectCommand));
+    glMultiDrawElementsIndirect(_mode, GLIndexType, 0, drawMultiElementsIndirect._draw_count, sizeof(DrawingContext::DrawElementsIndirectCommand));
     glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 }
 

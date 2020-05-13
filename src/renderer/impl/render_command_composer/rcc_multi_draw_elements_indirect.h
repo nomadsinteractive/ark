@@ -48,11 +48,12 @@ private:
 
     struct IndirectCmd {
         DrawingContext::DrawElementsIndirectCommand _command;
-        std::vector<const Renderable::Snapshot*> _snapshots;
+        std::vector<size_t> _snapshot_offsets;
     };
 
 private:
-    sp<Uploader> makeIndirectBufferUploader(const Table<int32_t, IndirectCmd>& indirectCmds);
+    sp<Uploader> makeIndirectBufferUploader();
+    void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot);
 
 private:
     sp<MultiModels> _multi_models;
@@ -60,6 +61,8 @@ private:
     Buffer _vertices;
     Buffer _indices;
     Buffer _draw_indirect;
+
+    Table<int32_t, IndirectCmd> _indirect_cmds;
 };
 
 }

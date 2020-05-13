@@ -27,7 +27,6 @@ class Varyings;
 class RendererMaker;
 class Transform;
 class Transformable;
-class Rect;
 class Renderable;
 class RenderCommand;
 class RenderCommandPipeline;
@@ -53,7 +52,12 @@ class V4;
 class Vec2Util;
 class Viewport;
 
+template<typename T> class RectT;
 template<uint32_t S> class Mat;
+
+typedef RectT<float> RectF;
+typedef RectT<int32_t> RectI;
+typedef RectF Rect;
 
 typedef sp<Bitmap> bitmap;
 

@@ -172,8 +172,8 @@ DrawingContext::ParamDrawMultiElementsIndirect::ParamDrawMultiElementsIndirect()
 {
 }
 
-DrawingContext::ParamDrawMultiElementsIndirect::ParamDrawMultiElementsIndirect(std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots, Buffer::Snapshot indirectCmds)
-    : _instanced_array_snapshots(std::move(snapshots)), _indirect_cmds(std::move(indirectCmds))
+DrawingContext::ParamDrawMultiElementsIndirect::ParamDrawMultiElementsIndirect(std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots, Buffer::Snapshot indirectCmds, uint32_t drawCount)
+    : _instanced_array_snapshots(std::move(snapshots)), _indirect_cmds(std::move(indirectCmds)), _draw_count(drawCount)
 {
 }
 

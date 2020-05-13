@@ -147,11 +147,10 @@ public:
         return iter != _indices.end() ? const_iterator(_keys, _values, iter->second) : end();
     }
 
-    template<typename V> V toMap() const {
-        V map;
-        for(const auto& i : _indices)
-            map[i.first] = _values[i.second];
-        return map;
+    void clear() {
+        _indices.clear();
+        _keys.clear();
+        _values.clear();
     }
 
 private:

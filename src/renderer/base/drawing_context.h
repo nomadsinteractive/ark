@@ -65,10 +65,11 @@ public:
 
     struct ARK_API ParamDrawMultiElementsIndirect : public Param<ParamDrawMultiElementsIndirect> {
         ParamDrawMultiElementsIndirect();
-        ParamDrawMultiElementsIndirect(std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots, Buffer::Snapshot indirectCmds);
+        ParamDrawMultiElementsIndirect(std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots, Buffer::Snapshot indirectCmds, uint32_t drawCount);
 
         std::vector<std::pair<uint32_t, Buffer::Snapshot>> _instanced_array_snapshots;
         Buffer::Snapshot _indirect_cmds;
+        uint32_t _draw_count;
     };
 
     union ARK_API Parameters {
