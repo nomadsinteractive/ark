@@ -19,7 +19,7 @@ public:
 
     const sp<Dictionary<document>>& documents() const;
     const sp<BitmapBundle>& bitmapBundle() const;
-    const sp<Dictionary<bitmap>>& bitmapBoundsLoader() const;
+    const sp<BitmapBundle>& bitmapBoundsBundle() const;
 
     document loadDocument(const String& name) const;
 
@@ -32,7 +32,7 @@ private:
     sp<Dictionary<document>> _documents;
 
     sp<BitmapBundle> _bitmap_bundle;
-    sp<Dictionary<bitmap>> _bitmap_bounds_loader;
+    sp<BitmapBundle> _bitmap_bounds_loader;
 
     sp<Recycler> _recycler;
 };

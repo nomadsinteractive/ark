@@ -231,37 +231,43 @@ void VKUtil::createImage(const VKDevice& device, const VkImageCreateInfo& imageC
     checkResult(vkBindImageMemory(logicalDevice, *image, *memory, 0));
 }
 
-VkFormat VKUtil::getAttributeFormat(const Attribute& attribute)
+VkFormat VKUtil::toAttributeFormat(Attribute::Type type, uint32_t length)
 {
-    if(attribute.length() > 0 && attribute.length() < 5)
+    if(length > 0 && length < 5)
     {
-        if(attribute.type() == Attribute::TYPE_FLOAT)
+        switch(type)
         {
-            const VkFormat formats[4] = {VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT};
-            return formats[attribute.length() - 1];
-        }
-        if(attribute.type() == Attribute::TYPE_UBYTE)
-        {
-            const VkFormat formats[4] = {VK_FORMAT_R8_UNORM, VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8A8_UNORM};
-            return formats[attribute.length() - 1];
-        }
-        else if(attribute.type() == Attribute::TYPE_INTEGER)
-        {
-            const VkFormat formats[4] = {VK_FORMAT_R32_SINT, VK_FORMAT_R32G32_SINT, VK_FORMAT_R32G32B32_SINT, VK_FORMAT_R32G32B32A32_SINT};
-            return formats[attribute.length() - 1];
-        }
-        else if(attribute.type() == Attribute::TYPE_SHORT)
-        {
-            const VkFormat formats[4] = {VK_FORMAT_R16_SNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R16G16B16A16_SNORM};
-            return formats[attribute.length() - 1];
-        }
-        else if(attribute.type() == Attribute::TYPE_USHORT)
-        {
-            const VkFormat formats[4] = {VK_FORMAT_R16_UNORM, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16A16_UNORM};
-            return formats[attribute.length() - 1];
+            case Attribute::TYPE_FLOAT:
+            {
+                const VkFormat formats[4] = {VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT};
+                return formats[length - 1];
+            }
+            case Attribute::TYPE_BYTE:
+            case Attribute::TYPE_UBYTE:
+            {
+                const VkFormat formats[4] = {VK_FORMAT_R8_UNORM, VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8A8_UNORM};
+                return formats[length - 1];
+            }
+            case Attribute::TYPE_INTEGER:
+            {
+                const VkFormat formats[4] = {VK_FORMAT_R32_SINT, VK_FORMAT_R32G32_SINT, VK_FORMAT_R32G32B32_SINT, VK_FORMAT_R32G32B32A32_SINT};
+                return formats[length - 1];
+            }
+            case Attribute::TYPE_SHORT:
+            {
+                const VkFormat formats[4] = {VK_FORMAT_R16_SNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R16G16B16A16_SNORM};
+                return formats[length - 1];
+            }
+            case Attribute::TYPE_USHORT:
+            {
+                const VkFormat formats[4] = {VK_FORMAT_R16_UNORM, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16A16_UNORM};
+                return formats[length - 1];
+            }
+            default:
+                break;
         }
     }
-    DFATAL("Unsupport type %s, length %d", attribute.declareType().c_str(), attribute.length());
+    DFATAL("Unsupport type %d, length %d", type, length);
     return VK_FORMAT_R32G32B32A32_SFLOAT;
 }
 

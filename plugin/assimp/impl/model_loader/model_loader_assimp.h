@@ -24,7 +24,7 @@ namespace assimp {
 
 class ModelLoaderAssimp : public ModelLoader {
 public:
-    ModelLoaderAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest);
+    ModelLoaderAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas, const document& manifest);
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
 
@@ -35,12 +35,13 @@ public:
 //  [[plugin::resource-loader("assimp")]]
     class BUILDER : public Builder<ModelLoader> {
     public:
-        BUILDER(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<ModelLoader> build(const Scope& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
+        SafePtr<Builder<Atlas>> _atlas;
         document _manifest;
     };
 
@@ -51,16 +52,15 @@ private:
 
 private:
     struct Stub {
-        Stub();
+        Stub(const ResourceLoaderContext& resourceLoaderContext, const Atlas& atlas, const document& manifest);
 
-        void initialize(const document& manifest, const ResourceLoaderContext& resourceLoaderContext);
-
-        Assimp::Importer _importer;
         sp<MultiModels> _models;
         std::vector<sp<Texture>> _textures;
 
     private:
-        Model loadModel(const aiMesh* mesh) const;
+        void initialize(const ResourceLoaderContext& resourceLoaderContext, const Atlas& atlas, const document& manifest);
+
+        Model loadModel(const aiMesh* mesh, int32_t type, const Atlas& atlas) const;
 
         bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
         array<element_index_t> loadIndices(const aiMesh* mesh) const;

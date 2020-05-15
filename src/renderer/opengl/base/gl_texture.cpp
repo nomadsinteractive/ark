@@ -25,8 +25,7 @@ GLTexture::GLTexture(const sp<Recycler>& recycler, const sp<Size>& size, uint32_
 
 GLTexture::~GLTexture()
 {
-    if(_id > 0)
-        _recycler->recycle(*this);
+    _recycler->recycle(*this);
 }
 
 void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)

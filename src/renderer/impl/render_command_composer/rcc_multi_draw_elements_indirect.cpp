@@ -51,7 +51,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
             if(modelIndirect._snapshot_offsets.empty())
             {
                 const MultiModels::ModelInfo& modelInfo = _multi_models->ensure(i._type);
-                modelIndirect._command = {static_cast<uint32_t>(modelInfo._model.indices()->length()), 0, modelInfo._index_offset, modelInfo._vertex_offset, 0};
+                modelIndirect._command = {static_cast<uint32_t>(modelInfo._model.indices()->length()), 0, static_cast<uint32_t>(modelInfo._index_offset), static_cast<uint32_t>(modelInfo._vertex_offset), 0};
             }
 
             ++ (modelIndirect._command._instance_count);

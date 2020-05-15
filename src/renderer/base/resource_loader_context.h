@@ -20,15 +20,19 @@ namespace ark {
 
 class ARK_API ResourceLoaderContext {
 public:
-    ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<BitmapBundle>& images, const sp<Executor>& executor, const sp<RenderController>& renderController);
+    ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<BitmapBundle>& bitmapBundle, const sp<BitmapBundle>& bitmapBoundsBundle,
+                          const sp<Executor>& executor, const sp<RenderController>& renderController);
     ~ResourceLoaderContext();
 
     const sp<Dictionary<document>>& documents() const;
-    const sp<BitmapBundle>& images() const;
 
     const sp<RenderController>& renderController() const;
     const sp<Executor>& executor() const;
+
+    const sp<BitmapBundle>& bitmapBundle() const;
+    const sp<BitmapBundle>& bitmapBoundsBundle() const;
     const sp<TextureBundle>& textureBundle() const;
+
     sp<Boolean> disposed() const;
 
     template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& disposed = nullptr) {
@@ -37,7 +41,8 @@ public:
 
 private:
     sp<Dictionary<document>> _documents;
-    sp<BitmapBundle> _images;
+    sp<BitmapBundle> _bitmap_bundle;
+    sp<BitmapBundle> _bitmap_bounds_bundle;
     sp<Executor> _executor;
     sp<RenderController> _render_controller;
     sp<TextureBundle> _texture_bundle;

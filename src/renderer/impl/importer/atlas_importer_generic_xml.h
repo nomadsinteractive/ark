@@ -10,7 +10,7 @@ namespace ark {
 class AtlasImporterGenericXML : public Atlas::Importer {
 public:
 
-    virtual void import(Atlas& atlas, const document& manifest) override;
+    virtual void import(Atlas& atlas, BeanFactory& factory, const document& manifest) override;
 
 //  [[plugin::builder("generic-xml")]]
     class BUILDER : public Builder<Atlas::Importer> {

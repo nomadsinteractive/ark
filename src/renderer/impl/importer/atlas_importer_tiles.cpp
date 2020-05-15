@@ -8,7 +8,7 @@
 
 namespace ark {
 
-void AtlasImporterTiles::import(Atlas& atlas, const document& manifest)
+void AtlasImporterTiles::import(Atlas& atlas, BeanFactory& /*factory*/, const document& manifest)
 {
     int32_t type = Documents::getAttribute<int32_t>(manifest, Constants::Attributes::TYPE, -1);
     const uint32_t tileWidth = Documents::ensureAttribute<uint32_t>(manifest, "tile-width");
@@ -20,13 +20,7 @@ void AtlasImporterTiles::import(Atlas& atlas, const document& manifest)
     const bool override = Documents::getAttribute<bool>(manifest, "override", false);
     const uint32_t flowx = marginX + tileWidth;
     const uint32_t flowy = marginY + tileHeight;
-
-    Rect bounds;
-    if(type != -1)
-        atlas.getOriginalPosition(type, bounds);
-    else
-        bounds = Rect::parse(manifest);
-
+    const Rect bounds = type != -1 ? atlas.getOriginalPosition(type) : Rect::parse(manifest);
     const uint32_t xCount = static_cast<uint32_t>(Math::round(bounds.width() / flowx));
     const uint32_t yCount = static_cast<uint32_t>(Math::round(bounds.height() / flowy));
     const uint32_t bl = static_cast<uint32_t>(bounds.left());

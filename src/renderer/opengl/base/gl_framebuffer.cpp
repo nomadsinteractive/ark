@@ -16,8 +16,7 @@ GLFramebuffer::GLFramebuffer(const sp<Recycler>& recycler, const sp<Texture>& te
 
 GLFramebuffer::~GLFramebuffer()
 {
-    if(_id)
-        _recycler->recycle(*this);
+    _recycler->recycle(*this);
 }
 
 uint64_t GLFramebuffer::id()

@@ -33,7 +33,7 @@ const sp<BitmapBundle>& ApplicationResource::bitmapBundle() const
     return _bitmap_bundle;
 }
 
-const sp<Dictionary<bitmap>>& ApplicationResource::bitmapBoundsLoader() const
+const sp<BitmapBundle>& ApplicationResource::bitmapBoundsBundle() const
 {
     return _bitmap_bounds_loader;
 }

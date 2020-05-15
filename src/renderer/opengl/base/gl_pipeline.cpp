@@ -71,8 +71,7 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const Str
 
 GLPipeline::~GLPipeline()
 {
-    if(_id)
-        _recycler->recycle(*this);
+    _recycler->recycle(*this);
 }
 
 uint64_t GLPipeline::id()

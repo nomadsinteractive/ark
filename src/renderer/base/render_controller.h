@@ -90,8 +90,8 @@ public:
     sp<Camera::Delegate> createCamera() const;
     sp<PipelineFactory> createPipelineFactory() const;
 
-    sp<Texture> createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader, RenderController::UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
-    sp<Texture> createTexture2D(const sp<Size>& size, const sp<Texture::Uploader>& uploader, UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
+    sp<Texture> createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
+    sp<Texture> createTexture2D(sp<Size> size, sp<Texture::Uploader> uploader, UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
 
     Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader);
     Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr);

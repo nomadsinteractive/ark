@@ -35,6 +35,7 @@ void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
     _vk_context = sp<VKGraphicsContext>::make(_renderer);
     _vk_context->initialize(_graphics_context);
     _graphics_context->attach<VKGraphicsContext>(_vk_context);
+    _graphics_context->onSurfaceReady();
 }
 
 void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, const sp<RenderCommand>& renderCommand)

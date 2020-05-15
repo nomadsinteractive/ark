@@ -58,10 +58,8 @@ sp<Texture> TextureBundle::doCreateTexture(const String& src, const sp<Texture::
 {
     const bitmap bitmapBounds = _bitmap_bounds_loader->get(src);
     DCHECK(bitmapBounds, "Texture resource \"%s\" not found", src.c_str());
-    sp<Texture> texture = _renderer_factory->createTexture(sp<Size>::make(static_cast<float>(bitmapBounds->width()), static_cast<float>(bitmapBounds->height())), parameters, sp<UploaderBitmapBundle>::make(_bitmap_loader, src));
-    DCHECK(texture, "Texture \"%s\" not loaded", src.c_str());
-    _render_controller->upload(texture, nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY);
-    return texture;
+    const sp<Size> size = sp<Size>::make(static_cast<float>(bitmapBounds->width()), static_cast<float>(bitmapBounds->height()));
+    return _render_controller->createTexture(size, parameters, sp<UploaderBitmapBundle>::make(_bitmap_loader, src));
 }
 
 }

@@ -7,7 +7,7 @@
 
 namespace ark {
 
-void AtlasImporterCharacters::import(Atlas& atlas, const document& manifest)
+void AtlasImporterCharacters::import(Atlas& atlas, BeanFactory& factory, const document& manifest)
 {
     uint32_t flowx = 0;
     uint32_t flowy = 0;

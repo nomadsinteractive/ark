@@ -6,7 +6,8 @@ namespace ark {
 
 void Recycler::recycle(Resource& resource)
 {
-    _recyclers.push(resource.recycle());
+    if(resource.id())
+        _recyclers.push(resource.recycle());
 }
 
 void Recycler::recycle(Resource::RecycleFunc recycler)

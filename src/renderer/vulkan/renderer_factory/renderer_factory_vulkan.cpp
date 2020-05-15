@@ -87,7 +87,7 @@ void RendererFactoryVulkan::setVersion(Ark::RendererVersion version, RenderEngin
 
 sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buffer::Usage /*usage*/)
 {
-    static const VkBufferUsageFlags usagesFlags[Buffer::TYPE_COUNT] = {VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_INDEX_BUFFER_BIT};
+    static const VkBufferUsageFlags usagesFlags[Buffer::TYPE_COUNT] = {VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT};
     return sp<VKBuffer>::make(_renderer, _recycler, usagesFlags[type], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
@@ -112,13 +112,11 @@ sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
     return sp<PipelineFactoryVulkan>::make(_recycler, _renderer);
 }
 
-sp<Texture> RendererFactoryVulkan::createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
+sp<Texture::Delegate> RendererFactoryVulkan::createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
 {
-    sp<Texture::Delegate> delegate;
     if(parameters->_type == Texture::TYPE_2D)
-        delegate = sp<VKTexture2D>::make(_recycler, _renderer, static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), parameters, uploader);
-    DCHECK(delegate, "Unsupported TextureType: %d", parameters->_type);
-    return sp<Texture>::make(size, sp<Variable<sp<Texture::Delegate>>::Const>::make(delegate), parameters);
+        return sp<VKTexture2D>::make(_recycler, _renderer, static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), parameters, uploader);
+    return nullptr;
 }
 
 }

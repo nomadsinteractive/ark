@@ -102,7 +102,7 @@ public:
         bitmap _bitmap;
     };
 
-    Texture(const sp<Size>& size, const sp<Variable<sp<Delegate>>>& delegate, const sp<Parameters>& parameters);
+    Texture(sp<Delegate> delegate, sp<Size> size, sp<Parameters> parameters);
     ~Texture() override;
 
     virtual uint64_t id() override;
@@ -122,7 +122,9 @@ public:
     const sp<Size>& size() const;
     const sp<Parameters>& parameters() const;
 
-    sp<Delegate> delegate() const;
+    const sp<Delegate>& delegate() const;
+    void setDelegate(sp<Delegate> delegate);
+    void setDelegate(sp<Delegate> delegate, sp<Size> size);
 
     const Notifier& notifier() const;
 
@@ -157,8 +159,8 @@ public:
     };
 
 private:
+    sp<Delegate> _delegate;
     sp<Size> _size;
-    sp<Variable<sp<Delegate>>> _delegate;
     sp<Parameters> _parameters;
 
     Notifier _notifier;

@@ -89,6 +89,9 @@ Bitmap Bitmap::crop(uint32_t x, uint32_t y, uint32_t w, uint32_t h) const
 
 void Bitmap::draw(void* buf, uint32_t width, uint32_t height, int32_t x, int32_t y, int32_t stride)
 {
+    if(buf == nullptr || width == 0 || height == 0)
+        return;
+
     uint8_t* ptr = reinterpret_cast<uint8_t*>(buf);
     uint32_t x_offset = x < 0 ? 0 - x : 0;
     uint32_t y_offset = y < 0 ? 0 - y : 0;
@@ -96,10 +99,23 @@ void Bitmap::draw(void* buf, uint32_t width, uint32_t height, int32_t x, int32_t
     uint32_t y_max = std::min(y + height, _height);
     uint8_t* row = at(0, y);
     uint32_t i = y + y_offset;
-    uint32_t copylen = x_max - x - x_offset;
+    uint32_t srcComponentSize = stride / width;
+    uint32_t dstComponentSize = _row_bytes / _width;
+
+    DCHECK(dstComponentSize >= srcComponentSize, "Src component size cannot be greater than dest component size");
 
     for (i = y; i < y_max; i++, row += _row_bytes)
-        memcpy(row + x + x_offset, reinterpret_cast<const void*>(ptr + (i - y - y_offset) * stride), copylen);
+        if(srcComponentSize == dstComponentSize)
+        {
+            uint32_t copylen = (x_max - x - x_offset) * srcComponentSize;
+            memcpy(row + (x + x_offset) * dstComponentSize, reinterpret_cast<const void*>(ptr + (i - y - y_offset) * stride), copylen);
+        }
+        else
+            for(uint32_t j = x + x_offset; j < x_max; ++j)
+            {
+                memcpy(row + j * dstComponentSize, reinterpret_cast<const void*>((ptr + j * srcComponentSize) + (i - y - y_offset) * stride), srcComponentSize);
+                memset(row + j * dstComponentSize + srcComponentSize, 0xff, dstComponentSize - srcComponentSize);
+            }
 }
 
 void Bitmap::dump(const String& filename) const

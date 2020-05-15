@@ -128,13 +128,15 @@ void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline:
                                                    divsor == 0 ? VK_VERTEX_INPUT_RATE_VERTEX : VK_VERTEX_INPUT_RATE_INSTANCE));
 
         uint32_t location = 0;
-        for(const auto& j : stream.attributes().values())
+        for(const Attribute& j : stream.attributes().values())
         {
-            vertexLayout.attributeDescriptions.push_back(vks::initializers::vertexInputAttributeDescription(
-                                                         divsor,
-                                                         location++,
-                                                         VKUtil::getAttributeFormat(j),
-                                                         j.offset()));
+            uint32_t slen = std::min<uint32_t>(4, j.length());
+            for(uint32_t offset = 0; offset < j.length(); offset += slen)
+                vertexLayout.attributeDescriptions.push_back(vks::initializers::vertexInputAttributeDescription(
+                                                             divsor,
+                                                             location++,
+                                                             VKUtil::toAttributeFormat(j.type(), std::min<uint32_t>(4, j.length() - offset)),
+                                                             j.offset() + offset * j.componentSize()));
         }
     }
     vertexLayout.inputState = vks::initializers::pipelineVertexInputStateCreateInfo();
@@ -337,7 +339,21 @@ void VKPipeline::buildCommandBuffer(GraphicsContext& graphicsContext, const Draw
         vkCmdSetScissor(commandBuffer, 0, 1, &vkScissor);
     }
 
-    vkCmdDrawIndexed(commandBuffer, drawingContext._parameters._draw_elements._count, 1, drawingContext._parameters._draw_elements._start, 0, 0);
+    if(drawingContext._shader_bindings->pipelineBindings()->renderProcedure() == PipelineBindings::RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT)
+    {
+        const DrawingContext::ParamDrawMultiElementsIndirect& param = drawingContext._parameters._draw_multi_elements_indirect;
+        DASSERT(param.isActive());
+        for(const auto& i : param._instanced_array_snapshots)
+        {
+            i.second.upload(graphicsContext);
+            DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
+        }
+
+        param._indirect_cmds.upload(graphicsContext);
+        vkCmdDrawIndexedIndirect(commandBuffer, (VkBuffer) (param._indirect_cmds.id()), 0, param._draw_count, sizeof(DrawingContext::DrawElementsIndirectCommand));
+    }
+    else
+        vkCmdDrawIndexed(commandBuffer, drawingContext._parameters._draw_elements._count, 1, drawingContext._parameters._draw_elements._start, 0, 0);
 }
 
 bool VKPipeline::isDirty(const ByteArray::Borrowed& dirtyFlags) const

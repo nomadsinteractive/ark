@@ -25,7 +25,7 @@ public:
     virtual sp<Framebuffer> createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture) override;
     virtual sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
     virtual sp<PipelineFactory> createPipelineFactory() override;
-    virtual sp<Texture> createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader) override;
+    virtual sp<Texture::Delegate> createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader) override;
 
 private:
     void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext);

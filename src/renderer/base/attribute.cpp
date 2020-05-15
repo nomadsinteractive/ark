@@ -52,16 +52,20 @@ uint32_t Attribute::length() const
     return _length;
 }
 
-uint32_t Attribute::size() const
+uint32_t Attribute::componentSize() const
 {
     if(_type == TYPE_FLOAT || _type == TYPE_INTEGER)
-        return _length * sizeof(float);
+        return sizeof(float);
     if(_type == TYPE_BYTE || _type == TYPE_UBYTE)
-        return _length;
+        return 1;
     if(_type == TYPE_SHORT || _type == TYPE_USHORT)
-        return _length * sizeof(int16_t);
-    DFATAL("Unimplemented");
+        return sizeof(int16_t);
     return 0;
+}
+
+uint32_t Attribute::size() const
+{
+    return componentSize() * _length;
 }
 
 bool Attribute::normalized() const

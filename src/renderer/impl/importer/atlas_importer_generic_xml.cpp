@@ -5,7 +5,7 @@
 
 namespace ark {
 
-void AtlasImporterGenericXML::import(Atlas& atlas, const document& manifest)
+void AtlasImporterGenericXML::import(Atlas& atlas, BeanFactory& factory, const document& manifest)
 {
     const String& path = Documents::ensureAttribute(manifest, Constants::Attributes::SRC);
     const document src = Documents::loadFromReadable(Ark::instance().openAsset(path));

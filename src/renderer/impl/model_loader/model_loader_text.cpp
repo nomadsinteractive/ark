@@ -39,8 +39,10 @@ void ModelLoaderText::Stub::reset(uint32_t textureWidth, uint32_t textureHeight)
     _size->setHeight(static_cast<float>(textureHeight));
     _font_glyph = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1), true);
     sp<Texture::Uploader> uploader = sp<Texture::UploaderBitmap>::make(_font_glyph);
-    _texture = _texture ? _render_controller->createTexture(_size, _texture->parameters(), uploader, RenderController::US_ONCE_AND_ON_SURFACE_READY)
-                        : _render_controller->createTexture2D(_size, uploader, RenderController::US_ONCE_AND_ON_SURFACE_READY);
+    if(_texture)
+        _texture->setDelegate(_render_controller->createTexture(_size, _texture->parameters(), std::move(uploader), RenderController::US_ONCE_AND_ON_SURFACE_READY)->delegate(), _size);
+    else
+        _texture = _render_controller->createTexture2D(_size, std::move(uploader), RenderController::US_ONCE_AND_ON_SURFACE_READY);
     _atlas = sp<Atlas>::make(_texture, true);
     _delegate = sp<ModelLoaderQuad>::make(_atlas);
     clear();
@@ -108,16 +110,6 @@ bool ModelLoaderText::Stub::prepare(const RenderLayer::Snapshot& snapshot, bool 
     return true;
 }
 
-sp<Texture::Delegate> ModelLoaderText::Stub::val()
-{
-    return _texture->delegate();
-}
-
-bool ModelLoaderText::Stub::update(uint64_t /*timestamp*/)
-{
-    return true;
-}
-
 ModelLoaderText::ModelLoaderText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
     : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(renderController, alphabet, textureWidth, textureHeight))
 {
@@ -135,8 +127,7 @@ sp<RenderCommandComposer> ModelLoaderText::makeRenderCommandComposer()
 
 void ModelLoaderText::initialize(ShaderBindings& shaderBindings)
 {
-    _shader_texture = sp<Texture>::make(_stub->_size, _stub, sp<Texture::Parameters>::make(Texture::TYPE_2D));
-    shaderBindings.pipelineBindings()->bindSampler(_shader_texture);
+    shaderBindings.pipelineBindings()->bindSampler(_stub->_texture);
 }
 
 void ModelLoaderText::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
@@ -150,7 +141,7 @@ void ModelLoaderText::postSnapshot(RenderController& renderController, RenderLay
             LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _stub->_atlas->items()->indices().size());
             _stub->reset(width, height);
         }
-        _stub->_render_controller->upload(_shader_texture, nullptr, RenderController::US_RELOAD);
+        _stub->_render_controller->upload(_stub->_texture, nullptr, RenderController::US_RELOAD);
     }
     _stub->_delegate->postSnapshot(renderController, snapshot);
 }

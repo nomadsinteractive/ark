@@ -53,7 +53,7 @@ private:
 }
 
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources, const sp<RenderEngine>& renderEngine)
-    : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->recycler(), applicationResources->bitmapBundle(), applicationResources->bitmapBoundsLoader())),
+    : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->recycler(), applicationResources->bitmapBundle(), applicationResources->bitmapBoundsBundle())),
       _clock(sp<Clock>::make(_ticker)), _message_loop(makeMessageLoop()), _executor(sp<ThreadPoolExecutor>::make(_message_loop)), _event_listeners(new EventListenerList()),
       _string_table(Global<StringTable>()), _background_color(Color::BLACK), _paused(false)
 {
@@ -100,7 +100,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoaderImpl(const document& 
     const document doc = createResourceLoaderManifest(manifest);
     const sp<DictionaryByAttributeName> documentDictionary = sp<DictionaryByAttributeName>::make(doc, Constants::Attributes::ID);
     const sp<BeanFactory> beanFactory = Ark::instance().createBeanFactory(documentDictionary);
-    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), _application_resource->bitmapBundle(), _executor, _render_controller);
+    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), _application_resource->bitmapBundle(), _application_resource->bitmapBoundsBundle(), _executor, _render_controller);
 
     const Global<PluginManager> pluginManager;
     pluginManager->each([&] (const sp<Plugin>& plugin)->bool {

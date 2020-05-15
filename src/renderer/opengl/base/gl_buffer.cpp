@@ -17,8 +17,7 @@ GLBuffer::GLBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Recycler>& r
 
 GLBuffer::~GLBuffer()
 {
-    if(_id > 0)
-        _recycler->recycle(*this);
+    _recycler->recycle(*this);
 }
 
 void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& uploader)

@@ -19,6 +19,34 @@ Atlas::Atlas(const sp<Texture>& texture, bool allowDefaultItem)
 {
 }
 
+void Atlas::load(BeanFactory& factory, const document& manifest, const Scope& args)
+{
+    for(const document& i : manifest->children())
+    {
+        if(i->name() == "import")
+        {
+            const sp<Atlas::Importer> importer = factory.ensure<Atlas::Importer>(i, args);
+            importer->import(*this, factory, i);
+        }
+        else if(i->name() != Constants::Attributes::TEXTURE)
+        {
+            DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
+            int32_t type = Documents::getAttribute<int32_t>(i, Constants::Attributes::TYPE, 0);
+            if(type == 0)
+            {
+                const String character = Documents::getAttribute(i, "character");
+                if(character)
+                    type = static_cast<int32_t>(character.at(0));
+            }
+            const Rect r = Rect::parse(i);
+            float px = Documents::getAttribute<float>(i, "pivot-x", 0);
+            float py = Documents::getAttribute<float>(i, "pivot-x", 0);
+            add(type, static_cast<uint32_t>(r.left()), static_cast<uint32_t>(r.top()), static_cast<uint32_t>(r.right()), static_cast<uint32_t>(r.bottom()),
+                Rect(0, 0, 1.0f, 1.0f), V2(r.width(), r.height()), V2(px, py));
+        }
+    }
+}
+
 const sp<Texture>& Atlas::texture() const
 {
     return _texture;
@@ -70,12 +98,12 @@ const Atlas::Item& Atlas::at(int32_t id) const
     return _allow_default_item ? (has(id) ? _items->at(id) : _default_item) : _items->at(id);
 }
 
-void Atlas::getOriginalPosition(int32_t id, Rect& position) const
+Rect Atlas::getOriginalPosition(int32_t id) const
 {
     const Atlas::Item& item = at(id);
     float nw = _texture->width() / 65536.0f;
     float nh = _texture->height() / 65536.0f;
-    position = Rect(item.ux() * nw, item.vy() * nh, item.vx() * nw, item.uy() * nh);
+    return Rect(item.ux() * nw, item.vy() * nh, item.vx() * nw, item.uy() * nh);
 }
 
 void Atlas::clear()
@@ -97,45 +125,17 @@ Atlas::Item Atlas::makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, 
     return Item(l, b, r, t, Rect(bounds.left() - pivot.x(), bounds.top() - pivot.y(), bounds.right() - pivot.x(), bounds.bottom() - pivot.y()), size);
 }
 
-Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _factory(factory), _manifest(manifest), _atlas(factory.getBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)),
-      _texture(factory.ensureConcreteClassBuilder<Texture>(manifest, Constants::Attributes::TEXTURE)),
-      _resource_loader_context(resourceLoaderContext)
+Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _factory(factory), _manifest(manifest), _texture(factory.ensureConcreteClassBuilder<Texture>(manifest, Constants::Attributes::TEXTURE))
 {
 }
 
 sp<Atlas> Atlas::BUILDER::build(const Scope& args)
 {
-    if(_atlas)
-        return _atlas->build(args);
-
     const sp<Texture> texture = _texture->build(args);
-    DCHECK(texture, "Build atlas or texture from \"%s\" failed", Documents::toString(_manifest).c_str());
+    DCHECK(texture, "Build texture from \"%s\" failed", Documents::toString(_manifest).c_str());
     const sp<Atlas> atlas = sp<Atlas>::make(texture);
-    for(const document& i : _manifest->children())
-    {
-        if(i->name() == "import")
-        {
-            const sp<Atlas::Importer> importer = _factory.ensure<Atlas::Importer>(i, args);
-            importer->import(atlas, i);
-        }
-        else if(i->name() != Constants::Attributes::TEXTURE)
-        {
-            DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
-            int32_t type = Documents::getAttribute<int32_t>(i, Constants::Attributes::TYPE, 0);
-            if(type == 0)
-            {
-                const String character = Documents::getAttribute(i, "character");
-                if(character)
-                    type = static_cast<int32_t>(character.at(0));
-            }
-            const Rect r = Rect::parse(i);
-            float px = Documents::getAttribute<float>(i, "pivot-x", 0);
-            float py = Documents::getAttribute<float>(i, "pivot-x", 0);
-            atlas->add(type, static_cast<uint32_t>(r.left()), static_cast<uint32_t>(r.top()), static_cast<uint32_t>(r.right()), static_cast<uint32_t>(r.bottom()),
-                       Rect(0, 0, 1.0f, 1.0f), V2(r.width(), r.height()), V2(px, py));
-        }
-    }
+    atlas->load(_factory, _manifest, args);
     return atlas;
 }
 

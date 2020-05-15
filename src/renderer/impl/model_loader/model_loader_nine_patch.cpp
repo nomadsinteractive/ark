@@ -53,7 +53,7 @@ sp<Atlas::Importer> ModelLoaderNinePatch::ATLAS_IMPORTER_BUILDER::build(const Sc
     return sp<NinePatchAtlasImporter>::make();
 }
 
-void ModelLoaderNinePatch::NinePatchAtlasImporter::import(Atlas& atlas, const document& manifest)
+void ModelLoaderNinePatch::NinePatchAtlasImporter::import(Atlas& atlas, BeanFactory& /*factory*/, const document& manifest)
 {
     const sp<NinePatchVertices>& vertices = atlas.attachments().ensure<NinePatchVertices>();
     vertices->import(atlas, manifest);

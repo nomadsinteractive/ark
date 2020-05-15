@@ -38,8 +38,8 @@ private:
 
 }
 
-Texture::Texture(const sp<Size>& size, const sp<Variable<sp<Delegate>>>& delegate, const sp<Parameters>& parameters)
-    : _size(size), _delegate(delegate), _parameters(parameters)
+Texture::Texture(sp<Delegate> delegate, sp<Size> size, sp<Parameters> parameters)
+    : _delegate(std::move(delegate)), _size(std::move(size)), _parameters(std::move(parameters))
 {
 }
 
@@ -49,13 +49,13 @@ Texture::~Texture()
 
 void Texture::upload(GraphicsContext& graphicsContext, const sp<ark::Uploader>& uploader)
 {
-    _delegate->val()->upload(graphicsContext, uploader);
+    _delegate->upload(graphicsContext, uploader);
     _notifier.notify();
 }
 
 Resource::RecycleFunc Texture::recycle()
 {
-    return _delegate->val()->recycle();
+    return _delegate->recycle();
 }
 
 Texture::Type Texture::type() const
@@ -65,7 +65,7 @@ Texture::Type Texture::type() const
 
 uint64_t Texture::id()
 {
-    return _delegate->val()->id();
+    return _delegate->id();
 }
 
 int32_t Texture::width() const
@@ -93,9 +93,20 @@ const sp<Texture::Parameters>& Texture::parameters() const
     return _parameters;
 }
 
-sp<Texture::Delegate> Texture::delegate() const
+const sp<Texture::Delegate>& Texture::delegate() const
 {
-    return _delegate->val();
+    return _delegate;
+}
+
+void Texture::setDelegate(sp<Texture::Delegate> delegate)
+{
+    _delegate = std::move(delegate);
+}
+
+void Texture::setDelegate(sp<Delegate> delegate, sp<Size> size)
+{
+    _delegate = std::move(delegate);
+    _size = std::move(size);
 }
 
 const Notifier& Texture::notifier() const

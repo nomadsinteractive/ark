@@ -55,7 +55,7 @@ private:
 
     class NinePatchAtlasImporter : public Atlas::Importer {
     public:
-        virtual void import(Atlas& atlas, const document& manifest) override;
+        virtual void import(Atlas& atlas, BeanFactory& factory, const document& manifest) override;
     };
 
 private:

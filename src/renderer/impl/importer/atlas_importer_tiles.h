@@ -10,7 +10,7 @@ namespace ark {
 class AtlasImporterTiles : public Atlas::Importer {
 public:
 
-    virtual void import(Atlas& atlas, const document& manifest) override;
+    virtual void import(Atlas& atlas, BeanFactory& factory, const document& manifest) override;
 
 //  [[plugin::builder("tiles")]]
     class BUILDER : public Builder<Atlas::Importer> {

@@ -4,7 +4,6 @@
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/pipeline_input.h"
-//#include "renderer/base/shader_bindings.h"
 
 #include "renderer/inf/snippet.h"
 
@@ -46,11 +45,30 @@ public:
     }
 
 private:
+    uint32_t getNextLayoutLocation(const ShaderPreprocessor::Declaration& declar, uint32_t& counter) const {
+        uint32_t location = counter;
+        Uniform::Type type = Uniform::toType(declar.type());
+        switch(type)
+        {
+            case Uniform::TYPE_MAT3:
+            case Uniform::TYPE_MAT3V:
+                counter += 3 * declar.length();
+            break;
+            case Uniform::TYPE_MAT4:
+            case Uniform::TYPE_MAT4V:
+                counter += 4 * declar.length();
+            break;
+            default:
+                counter ++;
+        }
+        return location;
+    }
+
     uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& declarations, const String& descriptor, uint32_t start) {
         uint32_t counter = start;
         for(const ShaderPreprocessor::Declaration& i : declarations.vars().values()) {
             StringBuffer sb;
-            sb << "layout (" << descriptor << " = " << (counter++) << ") " << *i.source();
+            sb << "layout (" << descriptor << " = " << getNextLayoutLocation(i, counter) << ") " << *i.source();
             *i.source() = sb.str();
         }
         return counter;
@@ -60,7 +78,7 @@ private:
         uint32_t counter = start;
         DCHECK(ins.vars().size() == outs.vars().size(), "Output/Input mismatch, output and input have different numbers of items: %d vs %s", ins.vars().size(), outs.vars().size());
         for(const ShaderPreprocessor::Declaration& i : ins.vars().values()) {
-            const String prefix = Strings::sprintf("layout (%s = %d) ", descriptor.c_str(), counter++);
+            const String prefix = Strings::sprintf("layout (%s = %d) ", descriptor.c_str(), getNextLayoutLocation(i, counter));
             *i.source() = prefix + *i.source();
 
             DCHECK(outs.vars().has(i.name()), "Output/Input mismatch, \"%s\" exists in input but not found in next stage of shader", i.name().c_str());

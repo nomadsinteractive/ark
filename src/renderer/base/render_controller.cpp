@@ -132,16 +132,18 @@ sp<PipelineFactory> RenderController::createPipelineFactory() const
     return _render_engine->rendererFactory()->createPipelineFactory();
 }
 
-sp<Texture> RenderController::createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader, RenderController::UploadStrategy us)
+sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us)
 {
-    const sp<Texture> texture = _render_engine->rendererFactory()->createTexture(size, parameters, uploader);
+    const sp<Texture::Delegate> delegate = _render_engine->rendererFactory()->createTexture(size, parameters, uploader);
+    DCHECK(delegate, "Unsupported TextureType: %d", parameters->_type);
+    const sp<Texture> texture = sp<Texture>::make(std::move(delegate), std::move(size), std::move(parameters));
     upload(texture, nullptr, us);
     return texture;
 }
 
-sp<Texture> RenderController::createTexture2D(const sp<Size>& size, const sp<Texture::Uploader>& uploader, RenderController::UploadStrategy us)
+sp<Texture> RenderController::createTexture2D(sp<Size> size, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us)
 {
-    return createTexture(size, sp<Texture::Parameters>::make(Texture::TYPE_2D), uploader, us);
+    return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D), std::move(uploader), us);
 }
 
 Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader)

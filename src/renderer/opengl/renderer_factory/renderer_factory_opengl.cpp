@@ -117,15 +117,14 @@ sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()
     return sp<PipelineFactoryOpenGL>::make();
 }
 
-sp<Texture> RendererFactoryOpenGL::createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
+sp<Texture::Delegate> RendererFactoryOpenGL::createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
 {
-    sp<Texture::Delegate> delegate;
+//    sp<Texture::Delegate> delegate;
     if(parameters->_type == Texture::TYPE_2D)
-        delegate = sp<GLTexture2D>::make(_recycler, size, sp<Texture::Parameters>::make(parameters), uploader);
+        return sp<GLTexture2D>::make(_recycler, size, sp<Texture::Parameters>::make(parameters), uploader);
     else if(parameters->_type == Texture::TYPE_CUBEMAP)
-        delegate = sp<GLCubemap>::make(_recycler, size, sp<Texture::Parameters>::make(parameters), uploader);
-    DCHECK(delegate, "Unsupported TextureType: %d", parameters->_type);
-    return sp<Texture>::make(size, sp<Variable<sp<Texture::Delegate>>::Const>::make(delegate), parameters);
+        return sp<GLCubemap>::make(_recycler, size, sp<Texture::Parameters>::make(parameters), uploader);
+//    return sp<Texture>::make(size, sp<Variable<sp<Texture::Delegate>>::Const>::make(delegate), parameters);
 }
 
 }

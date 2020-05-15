@@ -10,7 +10,8 @@
 #include "graphics/base/size.h"
 #include "graphics/util/matrix_util.h"
 
-#include "renderer/inf/render_command_composer.h"
+
+#include "renderer/base/atlas.h"
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/model.h"
 #include "renderer/base/multi_models.h"
@@ -22,6 +23,7 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/uniform.h"
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"
+#include "renderer/inf/render_command_composer.h"
 
 #include "assimp/impl/io/ark_io_system.h"
 #include "assimp/impl/vertices/vertices_assimp.h"
@@ -31,10 +33,9 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-ModelLoaderAssimp::ModelLoaderAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make())
+ModelLoaderAssimp::ModelLoaderAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas, const document& manifest)
+    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(resourceLoaderContext, atlas, manifest))
 {
-    _stub->initialize(manifest, resourceLoaderContext);
 }
 
 sp<RenderCommandComposer> ModelLoaderAssimp::makeRenderCommandComposer()
@@ -57,42 +58,43 @@ Model ModelLoaderAssimp::load(int32_t type)
     return _stub->_models->load(type);
 }
 
-ModelLoaderAssimp::BUILDER::BUILDER(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _manifest(manifest) {
+ModelLoaderAssimp::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _resource_loader_context(resourceLoaderContext), _atlas(factory.getBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)), _manifest(manifest) {
 }
 
-sp<ModelLoader> ModelLoaderAssimp::BUILDER::build(const Scope& /*args*/)
+sp<ModelLoader> ModelLoaderAssimp::BUILDER::build(const Scope& args)
 {
-    return sp<ModelLoaderAssimp>::make(_resource_loader_context, _manifest);
+    return sp<ModelLoaderAssimp>::make(_resource_loader_context, _atlas->build(args), _manifest);
 }
 
-ModelLoaderAssimp::Stub::Stub()
+ModelLoaderAssimp::Stub::Stub(const ResourceLoaderContext& resourceLoaderContext, const Atlas& atlas, const document& manifest)
     : _models(sp<MultiModels>::make())
 {
+    initialize(resourceLoaderContext, atlas, manifest);
 }
 
-void ModelLoaderAssimp::Stub::initialize(const document& manifest, const ResourceLoaderContext& resourceLoaderContext)
+void ModelLoaderAssimp::Stub::initialize(const ResourceLoaderContext& resourceLoaderContext, const Atlas& atlas, const document& manifest)
 {
-    _importer.SetIOHandler(new ArkIOSystem());
+    Assimp::Importer importer;
+    importer.SetIOHandler(new ArkIOSystem());
 
     for(const document& i : manifest->children())
     {
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
         const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
-        const aiScene* scene = _importer.ReadFile(src.c_str(), aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_FlipWindingOrder);
-        _models->addModel(type, loadModel(scene->mMeshes[0]));
+        const aiScene* scene = importer.ReadFile(src.c_str(), aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_FlipWindingOrder);
+        _models->addModel(type, loadModel(scene->mMeshes[0], type, atlas));
 
         for(uint32_t i = 0; i < scene->mNumTextures; ++i)
             loadSceneTexture(resourceLoaderContext, scene->mTextures[i]);
     }
 
-    _importer.FreeScene();
+    importer.FreeScene();
 }
 
-Model ModelLoaderAssimp::Stub::loadModel(const aiMesh* mesh) const
+Model ModelLoaderAssimp::Stub::loadModel(const aiMesh* mesh, int32_t type, const Atlas& atlas) const
 {
     sp<Array<element_index_t>> indices = loadIndices(mesh);
-
     sp<Array<V3>> vertices = sp<Array<V3>::Allocated>::make(mesh->mNumVertices);
     sp<Array<VerticesAssimp::UV>> uvs = sp<Array<VerticesAssimp::UV>::Allocated>::make(mesh->mNumVertices);
     sp<Array<V3>> normals = mesh->HasNormals() ? sp<Array<V3>::Allocated>::make(mesh->mNumVertices) : sp<Array<V3>::Allocated>::null();
@@ -102,6 +104,9 @@ Model ModelLoaderAssimp::Stub::loadModel(const aiMesh* mesh) const
     V3* norm = normals ? normals->buf() - 1 : nullptr;
     VerticesAssimp::Tangent* t = tangents ? tangents->buf() - 1 : nullptr;
     VerticesAssimp::UV* u = uvs->buf() - 1;
+
+    const Rect bounds = atlas.has(type) ? atlas.getItemUV(type) : Rect(0, 1.0f, 1.0f, 0);
+
     for(uint32_t i = 0; i < mesh->mNumVertices; i ++)
     {
         *(++vert) = V3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
@@ -109,7 +114,8 @@ Model ModelLoaderAssimp::Stub::loadModel(const aiMesh* mesh) const
             *(++norm) = V3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
         if(tangents)
             *(++t) = VerticesAssimp::Tangent(V3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z), V3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z));
-        *(++u) = VerticesAssimp::UV(static_cast<uint16_t>(mesh->mTextureCoords[0][i].x * 0xffff), static_cast<uint16_t>(mesh->mTextureCoords[0][i].y * 0xffff));
+        *(++u) = VerticesAssimp::UV(static_cast<uint16_t>((mesh->mTextureCoords[0][i].x * bounds.width() + bounds.left()) * 0xffff),
+                                    static_cast<uint16_t>((mesh->mTextureCoords[0][i].y * bounds.height() + bounds.bottom()) * 0xffff));
     }
 
     return Model(indices, sp<VerticesAssimp>::make(std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents)));
@@ -127,7 +133,7 @@ bitmap ModelLoaderAssimp::Stub::loadBitmap(const sp<BitmapBundle>& imageResource
 
 void ModelLoaderAssimp::Stub::loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex)
 {
-    const bitmap bitmap = loadBitmap(resourceLoaderContext.images(), tex);
+    const bitmap bitmap = loadBitmap(resourceLoaderContext.bitmapBundle(), tex);
     _textures.push_back(resourceLoaderContext.renderController()->createTexture2D(sp<Size>::make(static_cast<float>(bitmap->width()), static_cast<float>(bitmap->height())), sp<Texture::UploaderBitmap>::make(bitmap)));
 }
 

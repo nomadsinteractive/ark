@@ -27,7 +27,7 @@ public:
     public:
         virtual ~Importer() = default;
 
-        virtual void import(Atlas& atlas, const document& manifest) = 0;
+        virtual void import(Atlas& atlas, BeanFactory& factory, const document& manifest) = 0;
     };
 
     class ARK_API Item {
@@ -51,6 +51,8 @@ public:
         V2 _size;
     };
 
+    void load(BeanFactory& factory, const document& manifest, const Scope& args);
+
 //  [[script::bindings::property]]
     const sp<Texture>& texture() const;
 
@@ -73,25 +75,23 @@ public:
     void add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot);
 
     const Item& at(int32_t id) const;
-    void getOriginalPosition(int32_t id, Rect& position) const;
+    Rect getOriginalPosition(int32_t id) const;
 
     void clear();
 
     static uint16_t unnormalize(uint32_t x, uint32_t s);
 
-//  [[plugin::resource-loader]]
+//  [[plugin::builder]]
     class BUILDER : public Builder<Atlas> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Atlas> build(const Scope& args) override;
 
     private:
         BeanFactory _factory;
         document _manifest;
-        sp<Builder<Atlas>> _atlas;
         SafePtr<Builder<Texture>> _texture;
-        sp<ResourceLoaderContext> _resource_loader_context;
     };
 
 private:

@@ -34,6 +34,8 @@ public:
     void setDivisor(uint32_t divisor);
 
     uint32_t length() const;
+
+    uint32_t componentSize() const;
     uint32_t size() const;
 
     bool normalized() const;
