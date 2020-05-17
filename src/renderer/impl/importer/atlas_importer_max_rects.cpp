@@ -40,6 +40,7 @@ void AtlasImporterMaxRects::import(Atlas& atlas, BeanFactory& factory, const doc
             DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
             int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
             MaxRectsBinPack::Rect rect = binPack.Insert(bitmap->width(), bitmap->height(), MaxRectsBinPack::RectBestShortSideFit);
+            DCHECK(rect.width != 0 && rect.height != 0, "Cannot insert more bitmap into the atlas(%d, %d), more space required", texture->width(), texture->height());
             Rect bounds(0, 0, 1.0f, 1.0f);
             atlas.add(type, rect.x, rect.y, rect.x + rect.width, rect.y + rect.height, bounds, V2(rect.width, rect.height), V2(0.5f, 0.5f));
             bitmaps.emplace_back<PackedBitmap>({src, rect.x, rect.y});

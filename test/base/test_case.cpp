@@ -23,7 +23,7 @@ sp<BeanFactory> TestCase::getBeanFactory() const
 
 sp<ResourceLoader> TestCase::getResourceLoader() const
 {
-    return Ark::instance().applicationContext()->createResourceLoader("application.xml", nullptr);
+    return Ark::instance().applicationContext()->createResourceLoader("application.xml", Scope());
 }
 
 }

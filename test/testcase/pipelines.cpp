@@ -24,7 +24,7 @@ public:
     virtual void preInitialize(PipelineBuildingContext& context) override {
         context.addAttribute("Alpha01", "float");
         context.addAttribute("PointSize", "float");
-        context.addUniform("u_Color01", Uniform::TYPE_F4, 1, nullptr, nullptr, 0);
+        context.addUniform("u_Color01", Uniform::TYPE_F4, 1, nullptr, 0);
     }
 
     virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {

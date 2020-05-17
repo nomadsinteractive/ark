@@ -2,7 +2,6 @@
 #include <vector>
 
 #include "core/base/string.h"
-#include "core/base/object_pool.h"
 #include "core/base/memory_pool.h"
 #include "core/inf/array.h"
 #include "core/inf/duck.h"
@@ -115,28 +114,16 @@ public:
         TESTCASE_VALIDATE(locked && locked->a == 1);
 
         const sp<Node> n1 = sp<Node>::adopt(new Node());
-        const sp<B> castedB = nodeClass->cast(n1.pack(), Type<B>::id()).unpack<B>();
+        const sp<B> castedB = nodeClass->cast(n1, Type<B>::id()).unpack<B>();
         TESTCASE_VALIDATE(castedB && castedB->d == 4);
 
-        const sp<D> castedD = nodeClass->cast(n1.pack(), Type<D>::id()).unpack<D>();
+        const sp<D> castedD = nodeClass->cast(n1, Type<D>::id()).unpack<D>();
         TESTCASE_VALIDATE(castedD && castedD->h == 8);
 
         sp<B> nodeB = node;
-        Box nb = nodeB.pack();
+        Box nb = nodeB;
 
         sp<D> b = nb.as<D>();
-
-        ObjectPool pool;
-        {
-            sp<B> p1 = pool.obtain<B>();
-            sp<B> p2 = pool.obtain<B>();
-            sp<B> p3 = pool.obtain<B>();
-            sp<A> p4 = p3;
-            sp<A> p5 = p3.cast<A>();
-            sp<A> p6 = p5;
-        }
-        sp<B> p4 = pool.obtain<B>();
-        sp<B> p5 = pool.obtain<B>();
 
         MemoryPool memoryPool;
         void* ap1;

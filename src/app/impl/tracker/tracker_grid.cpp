@@ -1,49 +1,11 @@
 #include "app/impl/tracker/tracker_grid.h"
 
 #include "core/base/bean_factory.h"
-#include "core/inf/variable.h"
 #include "core/util/math.h"
-#include "core/util/log.h"
-#include "core/util/variable_util.h"
 
 namespace ark {
 
-namespace {
-
-class TrackedPosition : public Vec {
-public:
-    TrackedPosition(int32_t id, const sp<TrackerGrid::Stub>& stub, const sp<Vec>& position, const sp<Vec>& size)
-        : _id(id), _stub(stub), _position(position), _size(size) {
-        const V p = _position->val();
-        const V s = _size->val();
-        _stub->create(_id, p, s);
-    }
-    ~TrackedPosition() {
-        _stub->remove(_id);
-    }
-
-    virtual V val() override {
-        const V p = _position->val();
-        const V s = _size->val();
-        _stub->update(_id, p, s);
-        return p;
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return VariableUtil::update(timestamp, _position, _size);
-    }
-
-private:
-    int32_t _id;
-    sp<TrackerGrid::Stub> _stub;
-    sp<Vec> _position;
-    sp<Vec> _size;
-
-};
-
-}
-
-TrackerGrid::TrackerGrid(const V& cell)
+TrackerGrid::TrackerGrid(const VType& cell)
     : _stub(sp<Stub>::make(cell))
 {
 }
@@ -63,7 +25,7 @@ std::unordered_set<int32_t> TrackerGrid::search(const V& position, const V& size
     return _stub->search(position, size);
 }
 
-TrackerGrid::Stub::Stub(const V& cell)
+TrackerGrid::Stub::Stub(const VType& cell)
 {
     for(int32_t i = 0; i < DIMENSIONS; i++)
     {
@@ -78,7 +40,7 @@ void TrackerGrid::Stub::remove(int32_t id)
         _axes[i].remove(id);
 }
 
-void TrackerGrid::Stub::create(int32_t id, const V& position, const V& size)
+void TrackerGrid::Stub::create(int32_t id, const VType& position, const VType& size)
 {
     for(int32_t i = 0; i < DIMENSIONS; i++)
     {
@@ -88,7 +50,7 @@ void TrackerGrid::Stub::create(int32_t id, const V& position, const V& size)
     }
 }
 
-void TrackerGrid::Stub::update(int32_t id, const V& position, const V& size)
+void TrackerGrid::Stub::update(int32_t id, const VType& position, const VType& size)
 {
     for(int32_t i = 0; i < DIMENSIONS; i++)
     {
@@ -98,7 +60,7 @@ void TrackerGrid::Stub::update(int32_t id, const V& position, const V& size)
     }
 }
 
-std::unordered_set<int32_t> TrackerGrid::Stub::search(const V& position, const V& size) const
+std::unordered_set<int32_t> TrackerGrid::Stub::search(const VType& position, const VType& size) const
 {
     std::unordered_set<int32_t> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
     for(int32_t i = 1; i < DIMENSIONS && !candidates.empty(); i++)

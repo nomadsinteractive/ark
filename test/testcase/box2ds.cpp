@@ -25,14 +25,15 @@ public:
         pluginManager->load("ark-box2d");
         const sp<ResourceLoader> resourceLoader = getResourceLoader();
 
-        const sp<Object> world = resourceLoader->load<Object>("world");
+        const Scope args;
+        const sp<Object> world = resourceLoader->load<Object>("world", args);
         if(!world.is<Runnable>())
             return 1;
 
         const sp<Runnable> worldRunnable = world.as<Runnable>();
-        const sp<Object> body = resourceLoader->load<Object>("body");
-        const sp<Vec2> position = resourceLoader->load<Vec2>("position");
-        const sp<Numeric> rotation = resourceLoader->load<Numeric>("rotation");
+        const sp<Object> body = resourceLoader->load<Object>("body", args);
+        const sp<Vec2> position = resourceLoader->load<Vec2>("position", args);
+        const sp<Numeric> rotation = resourceLoader->load<Numeric>("rotation", args);
         for(uint32_t i = 0; i < 100; ++i)
         {
             Trace<0, 100> _trace;

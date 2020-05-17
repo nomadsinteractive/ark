@@ -65,7 +65,7 @@ private:
 
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const PipelineBindings& bindings)
     : _recycler(recycler), _pipeline_input(bindings.input()), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _cull_face(bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK) != PipelineBindings::FLAG_CULL_MODE_NONE),
-      _scissor(bindings.scissor()), _scissor_enabled(ElementUtil::isScissorEnabled(_scissor)), _id(0), _render_command(createRenderCommand(bindings)), _rebind_needed(true)
+      _scissor(bindings.scissor()), _scissor_enabled(ElementUtil::isScissorEnabled(_scissor)), _id(0), _renderer(makeBakedRenderer(bindings)), _rebind_needed(true)
 {
 }
 
@@ -130,7 +130,7 @@ void GLPipeline::bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<P
     }
 }
 
-void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
+void GLPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
 
@@ -152,18 +152,18 @@ void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext
         const sp<Texture>& sampler = samplers.at(i);
         DWARN(sampler, "Pipeline has unbound sampler at: %d", i);
         if(sampler)
-            activeTexture(sampler, i);
+            activeTexture(sampler, static_cast<uint32_t>(i));
     }
 }
 
 void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    const GLCullFace cullFace(_cull_face);
     bool contextScissorEnabled = ElementUtil::isScissorEnabled(drawingContext._scissor);
+
+    const GLCullFace cullFace(_cull_face);
     const GLScissor scissor(contextScissorEnabled ? drawingContext._scissor : _scissor, contextScissorEnabled || _scissor_enabled);
 
-    _render_command->_parameters = drawingContext._parameters;
-    _render_command->draw(graphicsContext);
+    _renderer->draw(graphicsContext, drawingContext);
 }
 
 void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineInput& input, const std::map<uint32_t, Buffer>& divisors)
@@ -219,7 +219,7 @@ void GLPipeline::bindUniform(float* buf, uint32_t size, const Uniform& uniform)
     }
 }
 
-sp<GLPipeline::GLRenderCommand> GLPipeline::createRenderCommand(const PipelineBindings& bindings) const
+sp<GLPipeline::BakedRenderer> GLPipeline::makeBakedRenderer(const PipelineBindings& bindings) const
 {
     GLenum mode = GLUtil::toEnum(bindings.mode());
     switch(bindings.renderProcedure())
@@ -230,7 +230,7 @@ sp<GLPipeline::GLRenderCommand> GLPipeline::createRenderCommand(const PipelineBi
             DASSERT(bindings.hasDivisors());
             return sp<GLDrawElementsInstanced>::make(mode);
         case PipelineBindings::RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT:
-            return sp<GLMultiDrawElementsIndirect>::make(mode);;
+            return sp<GLMultiDrawElementsIndirect>::make(mode);
     }
     DFATAL("Not render procedure creator for %d", bindings.renderProcedure());
     return nullptr;
@@ -462,55 +462,54 @@ GLuint GLPipeline::Shader::compile(uint32_t version, GLenum type, const String& 
     return id;
 }
 
-GLPipeline::GLRenderCommand::GLRenderCommand(GLenum mode)
+GLPipeline::GLDrawElements::GLDrawElements(GLenum mode)
     : _mode(mode)
 {
 }
 
-GLPipeline::GLDrawElements::GLDrawElements(GLenum mode)
-    : GLRenderCommand(mode)
+void GLPipeline::GLDrawElements::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
 {
-}
-
-void GLPipeline::GLDrawElements::draw(GraphicsContext& /*graphicsContext*/)
-{
-    DASSERT(_parameters._draw_elements._count);
-    glDrawElements(_mode, static_cast<GLsizei>(_parameters._draw_elements._count), GLIndexType, reinterpret_cast<GLvoid*>(_parameters._draw_elements._start * sizeof(element_index_t)));
+    const DrawingContext::ParamDrawElements& param = drawingContext._parameters._draw_elements;
+    DASSERT(param._count);
+    glDrawElements(_mode, static_cast<GLsizei>(param._count), GLIndexType, reinterpret_cast<GLvoid*>(param._start * sizeof(element_index_t)));
 }
 
 GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode)
-    : GLRenderCommand(mode)
+    : _mode(mode)
 {
 }
 
-void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& graphicsContext)
+void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    DASSERT(_parameters._draw_elements_instanced._count);
-    for(const auto& i : _parameters._draw_elements_instanced._instanced_array_snapshots)
+    const DrawingContext::ParamDrawElementsInstanced& param = drawingContext._parameters._draw_elements_instanced;
+    DASSERT(param.isActive());
+    DASSERT(param._count);
+    for(const auto& i : param._instanced_array_snapshots)
     {
         i.second.upload(graphicsContext);
         DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
     }
-    glDrawElementsInstanced(_mode, static_cast<GLsizei>(_parameters._draw_elements_instanced._count), GLIndexType, nullptr, _parameters._draw_elements_instanced._instance_count);
+    glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, param._instance_count);
 }
 
 GLPipeline::GLMultiDrawElementsIndirect::GLMultiDrawElementsIndirect(GLenum mode)
-    : GLRenderCommand(mode)
+    : _mode(mode)
 {
 }
 
-void GLPipeline::GLMultiDrawElementsIndirect::draw(GraphicsContext& graphicsContext)
+void GLPipeline::GLMultiDrawElementsIndirect::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    auto& drawMultiElementsIndirect = _parameters._draw_multi_elements_indirect;
-    DASSERT(drawMultiElementsIndirect.isActive());
-    for(const auto& i : drawMultiElementsIndirect._instanced_array_snapshots)
+    const DrawingContext::ParamDrawMultiElementsIndirect& param = drawingContext._parameters._draw_multi_elements_indirect;
+    DASSERT(param.isActive());
+
+    for(const auto& i : param._instanced_array_snapshots)
     {
         i.second.upload(graphicsContext);
         DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
     }
-    drawMultiElementsIndirect._indirect_cmds.upload(graphicsContext);
-    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, static_cast<GLuint>(drawMultiElementsIndirect._indirect_cmds.id()));
-    glMultiDrawElementsIndirect(_mode, GLIndexType, 0, drawMultiElementsIndirect._draw_count, sizeof(DrawingContext::DrawElementsIndirectCommand));
+    param._indirect_cmds.upload(graphicsContext);
+    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, static_cast<GLuint>(param._indirect_cmds.id()));
+    glMultiDrawElementsIndirect(_mode, GLIndexType, nullptr, static_cast<GLsizei>(param._draw_count), sizeof(DrawingContext::DrawElementsIndirectCommand));
     glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 }
 

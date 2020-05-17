@@ -67,13 +67,13 @@ sp<ModelLoader> ModelLoaderAssimp::BUILDER::build(const Scope& args)
     return sp<ModelLoaderAssimp>::make(_resource_loader_context, _atlas->build(args), _manifest);
 }
 
-ModelLoaderAssimp::Stub::Stub(const ResourceLoaderContext& resourceLoaderContext, const Atlas& atlas, const document& manifest)
+ModelLoaderAssimp::Stub::Stub(const ResourceLoaderContext& resourceLoaderContext, const sp<Atlas>& atlas, const document& manifest)
     : _models(sp<MultiModels>::make())
 {
     initialize(resourceLoaderContext, atlas, manifest);
 }
 
-void ModelLoaderAssimp::Stub::initialize(const ResourceLoaderContext& resourceLoaderContext, const Atlas& atlas, const document& manifest)
+void ModelLoaderAssimp::Stub::initialize(const ResourceLoaderContext& resourceLoaderContext, const sp<Atlas>& atlas, const document& manifest)
 {
     Assimp::Importer importer;
     importer.SetIOHandler(new ArkIOSystem());
@@ -92,7 +92,7 @@ void ModelLoaderAssimp::Stub::initialize(const ResourceLoaderContext& resourceLo
     importer.FreeScene();
 }
 
-Model ModelLoaderAssimp::Stub::loadModel(const aiMesh* mesh, int32_t type, const Atlas& atlas) const
+Model ModelLoaderAssimp::Stub::loadModel(const aiMesh* mesh, int32_t type, const sp<Atlas>& atlas) const
 {
     sp<Array<element_index_t>> indices = loadIndices(mesh);
     sp<Array<V3>> vertices = sp<Array<V3>::Allocated>::make(mesh->mNumVertices);
@@ -105,7 +105,7 @@ Model ModelLoaderAssimp::Stub::loadModel(const aiMesh* mesh, int32_t type, const
     VerticesAssimp::Tangent* t = tangents ? tangents->buf() - 1 : nullptr;
     VerticesAssimp::UV* u = uvs->buf() - 1;
 
-    const Rect bounds = atlas.has(type) ? atlas.getItemUV(type) : Rect(0, 1.0f, 1.0f, 0);
+    const Rect bounds = atlas && atlas->has(type) ? atlas->getItemUV(type) : Rect(0, 1.0f, 1.0f, 0);
 
     for(uint32_t i = 0; i < mesh->mNumVertices; i ++)
     {

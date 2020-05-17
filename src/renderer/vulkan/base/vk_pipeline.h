@@ -51,12 +51,41 @@ private:
 
     bool isDirty(const ByteArray::Borrowed& dirtyFlags) const;
 
+    class BakedRenderer {
+    public:
+        virtual ~BakedRenderer() = default;
+
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) = 0;
+    };
+
+    class VKDrawElements : public BakedRenderer {
+    public:
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override;
+
+    };
+
+    class VKDrawElementsInstanced : public BakedRenderer {
+    public:
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override;
+
+    };
+
+    class VKMultiDrawElementsIndirect : public BakedRenderer {
+    public:
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override;
+
+    };
+
+    sp<BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings) const;
+
+
 private:
     PipelineBindings _bindings;
 
     sp<Recycler> _recycler;
     sp<VKRenderer> _renderer;
     sp<VKDescriptorPool> _descriptor_pool;
+    sp<BakedRenderer> _backed_renderer;
 
     VkPipelineLayout _layout;
     VkDescriptorSetLayout _descriptor_set_layout;

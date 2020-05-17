@@ -87,7 +87,7 @@ Bitmap Bitmap::crop(uint32_t x, uint32_t y, uint32_t w, uint32_t h) const
     return s;
 }
 
-void Bitmap::draw(void* buf, uint32_t width, uint32_t height, int32_t x, int32_t y, int32_t stride)
+void Bitmap::draw(void* buf, uint32_t width, uint32_t height, int32_t x, int32_t y, uint32_t stride)
 {
     if(buf == nullptr || width == 0 || height == 0)
         return;

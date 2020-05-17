@@ -103,39 +103,44 @@ private:
     void bindUniform(GraphicsContext& graphicsContext, const Uniform& uniform);
     void bindUniform(float* buf, uint32_t size, const Uniform& uniform);
 
-    class GLRenderCommand : public RenderCommand {
+    class BakedRenderer {
     public:
-        GLRenderCommand(GLenum mode);
-        virtual ~GLRenderCommand() = default;
+        virtual ~BakedRenderer() = default;
 
-        DrawingContext::Parameters _parameters;
-
-    protected:
-        GLenum _mode;
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
     };
 
-    class GLDrawElements : public GLRenderCommand {
+    class GLDrawElements : public BakedRenderer {
     public:
         GLDrawElements(GLenum mode);
 
-        virtual void draw(GraphicsContext& graphicsContext) override;
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+
+    private:
+        GLenum _mode;
     };
 
-    class GLDrawElementsInstanced : public GLRenderCommand {
+    class GLDrawElementsInstanced : public BakedRenderer {
     public:
         GLDrawElementsInstanced(GLenum mode);
 
-        virtual void draw(GraphicsContext& graphicsContext) override;
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+
+    private:
+        GLenum _mode;
     };
 
-    class GLMultiDrawElementsIndirect : public GLRenderCommand {
+    class GLMultiDrawElementsIndirect : public BakedRenderer {
     public:
         GLMultiDrawElementsIndirect(GLenum mode);
 
-        virtual void draw(GraphicsContext& graphicsContext) override;
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+
+    private:
+        GLenum _mode;
     };
 
-    sp<GLRenderCommand> createRenderCommand(const PipelineBindings& bindings) const;
+    sp<BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings) const;
 
 private:
     sp<Recycler> _recycler;
@@ -158,7 +163,7 @@ private:
     std::map<String, GLAttribute> _attributes;
     std::map<String, GLUniform> _uniforms;
 
-    sp<GLRenderCommand> _render_command;
+    sp<BakedRenderer> _renderer;
     bool _rebind_needed;
 };
 

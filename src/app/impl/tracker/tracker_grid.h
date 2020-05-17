@@ -4,7 +4,9 @@
 #include <unordered_map>
 
 #include "core/inf/builder.h"
+#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v3.h"
@@ -15,7 +17,11 @@ namespace ark {
 
 class TrackerGrid : public Tracker {
 public:
-    TrackerGrid(const V& cell);
+    static_assert (DIMENSIONS == 2 || DIMENSIONS == 3, "Dimension should be either 2(V2) or 3(V3)");
+    typedef std::conditional<DIMENSIONS == 2, V2, V3>::type VType;
+    typedef Variable<VType> VecType;
+
+    TrackerGrid(const VType& cell);
 
     virtual sp<Vec> create(int32_t id, const sp<Vec>& position, const sp<Vec>& size) override;
     virtual void remove(int32_t id) override;
@@ -59,13 +65,13 @@ public:
 
     class Stub {
     public:
-        Stub(const V& cell);
+        Stub(const VType& cell);
 
         void remove(int32_t id);
-        void create(int32_t id, const V& position, const V& size);
-        void update(int32_t id, const V& position, const V& size);
+        void create(int32_t id, const VType& position, const VType& size);
+        void update(int32_t id, const VType& position, const VType& size);
 
-        std::unordered_set<int32_t> search(const V& position, const V& size) const;
+        std::unordered_set<int32_t> search(const VType& position, const VType& size) const;
 
     private:
         Axis _axes[DIMENSIONS];
@@ -81,6 +87,37 @@ public:
     private:
         sp<Builder<Vec>> _cell;
 
+    };
+
+private:
+    class TrackedPosition : public VecType {
+    public:
+        TrackedPosition(int32_t id, const sp<TrackerGrid::Stub>& stub, const sp<VecType>& position, const sp<VecType>& size)
+            : _id(id), _stub(stub), _position(position), _size(size) {
+            const VType p = _position->val();
+            const VType s = _size->val();
+            _stub->create(_id, p, s);
+        }
+        ~TrackedPosition() override {
+            _stub->remove(_id);
+        }
+
+        virtual VType val() override {
+            const VType p = _position->val();
+            const VType s = _size->val();
+            _stub->update(_id, p, s);
+            return p;
+        }
+
+        virtual bool update(uint64_t timestamp) override {
+            return VariableUtil::update(timestamp, _position, _size);
+        }
+
+    private:
+        int32_t _id;
+        sp<TrackerGrid::Stub> _stub;
+        sp<VecType> _position;
+        sp<VecType> _size;
     };
 
 private:

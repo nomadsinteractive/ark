@@ -24,8 +24,8 @@ include(${ARK_TOOLS_DIR}/core.cmake)
 set(ARK_SYSTEM_NAME ${SYSTEM} CACHE STRING "Target system name of ARK was built for")
 
 option(ARK_BUILD_STATIC_LIBRARY "Build static library" OFF)
-CMAKE_DEPENDENT_OPTION(ARK_TEST_ENABLE "Build testcases" ON "ARK_BUILD_STATIC_LIBRARY" OFF)
 option(ARK_BUILD_SAMPLES "Build samples" ON)
+ark_compile_definition_option(ARK_BUILD_TESTS "Build testcases" ON)
 
 option(ARK_BUILD_PLUGIN_FMOD "Build fmod plugin" OFF)
 
@@ -235,24 +235,31 @@ if(ARK_BUILD_STATIC_PLUGINS)
 endif()
 list(APPEND LOCAL_SHARED_LIBRARY_DEPENDENCIES ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST} ${LOCAL_RUNTIME_LIBRARY_SRC_LIST} ${LOCAL_RES_LIST})
 
-ark_add_shared_library(${ARK_RUNTIME_SHARED_LIBRARY} ${LOCAL_SHARED_LIBRARY_DEPENDENCIES})
+if(ARK_BUILD_TESTS)
+    set(GENERATED_RUN_TESTS ${ARK_GENERATED_FILE_DIRECTORY}/testcase_launchpad.cpp)
+    aux_source_directory(test/base TEST_SRC_LIST)
+    aux_source_directory(test/testcase TEST_SRC_LIST)
+    add_custom_command(OUTPUT ${GENERATED_RUN_TESTS}
+        COMMAND python ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py ${ARK_SRC_DIR}/test/testcase ${GENERATED_RUN_TESTS}
+        DEPENDS ${TEST_SRC_LIST} ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    list(APPEND TEST_SRC_LIST ${GENERATED_RUN_TESTS})
+endif()
+
+ark_add_shared_library(${ARK_RUNTIME_SHARED_LIBRARY} ${LOCAL_SHARED_LIBRARY_DEPENDENCIES} ${TEST_SRC_LIST})
 target_compile_definitions(${ARK_RUNTIME_SHARED_LIBRARY} PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK)
 target_link_libraries(${ARK_RUNTIME_SHARED_LIBRARY} PRIVATE ${ARK_DEPENDENCY_3RDPARTY_LIBRARIES})
 
+if(ARK_BUILD_TESTS AND NOT ARK_BUILD_STATIC_LIBRARY)
+    ark_add_executable(${TESTCASES_EXECUTABLE} test/main.cpp ${ARK_RUNTIME_SHARED_LIBRARY})
+endif()
+
 if(ARK_BUILD_STATIC_LIBRARY)
-    ark_add_static_library(${ARK_RUNTIME_STATIC_LIBRARY} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
+    ark_add_static_library(${ARK_RUNTIME_STATIC_LIBRARY} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST} ${TEST_SRC_LIST})
     target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PRIVATE -DARK_FLAG_BUILDING_FRAMEWORK)
     target_compile_definitions(${ARK_RUNTIME_STATIC_LIBRARY} PUBLIC -DARK_BUILD_STATIC)
-    if(ARK_TEST_ENABLE)
-        set(GENERATED_TESTCASE_LAUNCHPAD ${ARK_GENERATED_FILE_DIRECTORY}/testcase_launchpad.cpp)
-        aux_source_directory(test/base TEST_SRC_LIST)
-        aux_source_directory(test/testcase TEST_SRC_LIST)
-        add_custom_command(OUTPUT ${GENERATED_TESTCASE_LAUNCHPAD}
-            COMMAND python ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py ${ARK_SRC_DIR}/test/testcase ${GENERATED_TESTCASE_LAUNCHPAD}
-            DEPENDS ${TEST_SRC_LIST} ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-        ark_add_executable(${TESTCASES_EXECUTABLE} ${TEST_SRC_LIST} ${GENERATED_TESTCASE_LAUNCHPAD} ${ARK_RUNTIME_STATIC_LIBRARY} ${ARK_DEPENDENCY_LIBRARIES})
-        target_compile_definitions(${TESTCASES_EXECUTABLE} PRIVATE -DARK_BUILD_STATIC)
+    if(ARK_BUILD_TESTS)
+        ark_add_executable(${TESTCASES_EXECUTABLE} test/main.cpp ${ARK_RUNTIME_STATIC_LIBRARY} ${ARK_DEPENDENCY_LIBRARIES})
     endif()
 endif()
 

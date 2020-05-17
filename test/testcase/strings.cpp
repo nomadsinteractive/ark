@@ -49,7 +49,7 @@ public:
 //        if(Strings::parse<View::Gravity>("?") != View::Gravity::NONE)
 //            return 7;
 
-        if(Strings::parse<View::Gravity>("right") != View::Gravity::RIGHT)
+        if(Strings::parse<LayoutParam::Gravity>("right") != LayoutParam::GRAVITY_RIGHT)
             return 8;
 
         const String formatted = Strings::sprintf("hello %s %d", "world", 123);

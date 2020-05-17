@@ -88,6 +88,10 @@ public:
         }
         return (_ticker->val() - _initial_ticket) / 1000000.0f;
     }
+    
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return true;
+    }
 
 private:
     ark::sp<ark::Variable<uint64_t>> _ticker;
@@ -101,7 +105,7 @@ public:
 
     }
 
-    virtual ark::sp<ark::Numeric> build(const ark::sp<ark::Scope>& /*args*/) override {
+    virtual ark::sp<ark::Numeric> build(const ark::Scope& /*args*/) override {
         const ark::sp<Duration> t = ark::sp<Duration>::make(ark::Platform::getSteadyClock());
         return ark::NumericUtil::add(ark::NumericUtil::mul(_v, t), _s);
     }
@@ -118,7 +122,7 @@ public:
 
     }
 
-    virtual ark::sp<ark::Numeric> build(const ark::sp<ark::Scope>& /*args*/) override {
+    virtual ark::sp<ark::Numeric> build(const ark::Scope& /*args*/) override {
         const ark::sp<Duration> t = ark::sp<Duration>::make(ark::Platform::getSteadyClock());
         const ark::sp<ark::Numeric> tsquare = ark::NumericUtil::mul(t, t);
         return ark::NumericUtil::add(_s, ark::NumericUtil::mul(0.5f, ark::NumericUtil::mul(_v, tsquare)));
@@ -146,13 +150,17 @@ public:
 
 }
 
-int main(int argc, const char* argv[])
-{
-    ark::Ark ark(argc, argv, ark::sp<ark::Manifest>::make("manifest.xml"));
-    const ark::Global<ark::PluginManager> pluginManager;
-    pluginManager->addPlugin(ark::sp<TestcasePlugin>::make());
+namespace ark {
+
+int32_t Ark::runTests(int argc, const char* argv[]) const {
+    const Global<PluginManager> pluginManager;
+    pluginManager->addPlugin(sp<TestcasePlugin>::make());
     %s
+    return 0;
 }
+
+}
+
 ''' % (sys.argv[0], '\n'.join(externals), content)
     if len(sys.argv) > 2:
         writetofile(sys.argv[2], src)

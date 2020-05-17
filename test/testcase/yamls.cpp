@@ -3,6 +3,7 @@
 #include "core/forwarding.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/dictionary.h"
+#include "core/inf/string_bundle.h"
 
 #include "graphics/base/font.h"
 
@@ -20,11 +21,11 @@ public:
         const sp<Scope> scope = sp<Scope>::make();
         scope->put("locale", sp<String>::make("zh"));
         const sp<StringBundle> zhStringBundle = beanFactory->build<StringBundle>("@string-bundle-001", scope);
-        if(*zhStringBundle->get("l001/_locale") != "ZH")
+        if(*zhStringBundle->getString("l001/_locale") != "ZH")
             return 1;
         scope->put("locale", sp<String>::make("en"));
         const sp<StringBundle> enStringBundle = beanFactory->build<StringBundle>("@string-bundle-001", scope);
-        if(*enStringBundle->get("l001/_locale") != "EN")
+        if(*enStringBundle->getString("l001/_locale") != "EN")
             return 2;
         return 0;
     }

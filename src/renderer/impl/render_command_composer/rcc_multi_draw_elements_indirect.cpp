@@ -63,7 +63,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
     writeModelMatices(renderRequest, buf, snapshot);
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), _vertices.snapshot(), _indices.snapshot(),
-                                  DrawingContext::ParamDrawMultiElementsIndirect(buf.makeDividedBufferSnapshots(), _draw_indirect.snapshot(indirectUploader), _indirect_cmds.size()));
+                                  DrawingContext::ParamDrawMultiElementsIndirect(buf.makeDividedBufferSnapshots(), _draw_indirect.snapshot(indirectUploader), static_cast<uint32_t>(_indirect_cmds.size())));
 
     if(snapshot._stub->_scissor)
         drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);
@@ -74,8 +74,14 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
 sp<Uploader> RCCMultiDrawElementsIndirect::makeIndirectBufferUploader()
 {
     std::vector<DrawingContext::DrawElementsIndirectCommand> cmds;
+    uint32_t baseInstance = 0;
     for(const auto& i : _indirect_cmds)
+    {
+        const DrawingContext::DrawElementsIndirectCommand& cmd = i.second._command;
         cmds.push_back(i.second._command);
+        cmds.back()._base_instance = baseInstance;
+        baseInstance += cmd._instance_count;
+    }
     return sp<Uploader::Vector<DrawingContext::DrawElementsIndirectCommand>>::make(std::move(cmds));
 }
 

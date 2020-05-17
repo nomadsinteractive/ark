@@ -36,14 +36,14 @@ public:
     virtual void onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold) override {
         const V p1 = _render_object->position()->val();
         const V p2 = rigidBody->position()->val();
-        printf("onBeginContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotate()->radians());
+        printf("onBeginContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotate()->val().angle);
         _contact_began = true;
     }
 
     virtual void onEndContact(const sp<RigidBody>& rigidBody) override {
         const V p1 = _render_object->xy();
         const V p2 = rigidBody->position()->val();
-        printf("onEndContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotate()->radians());
+        printf("onEndContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotate()->val().angle);
         if(_contact_began)
             _contact_ended = true;
     }

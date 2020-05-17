@@ -180,7 +180,7 @@ void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
     {
         const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
         DCHECK(!name.empty(), "Empty name");
-        DWARN(isupper(name[0]) || name.startsWith("a_"), "GLAttribute name \"%s\" should be capital first or started with a_", name.c_str());
+        DWARN(isupper(name[0]) || name.startsWith("a_"), "Attribute name \"%s\" should be capital first or started with a_", name.c_str());
         const String attrName = name.startsWith("a_") ? name.substr(2) : name;
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         uint32_t divisor = Documents::getAttribute<uint32_t>(i, "divisor", 0);

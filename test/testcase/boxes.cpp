@@ -18,7 +18,7 @@ public:
     virtual int launch() override {
         {
             sp<TestA> i32 = sp<TestA>::make();
-            Box box(i32.pack());
+            Box box(i32);
             box.unpack<TestA>();
         }
         return TestA::refCount() == 0 ? 0 : 1;

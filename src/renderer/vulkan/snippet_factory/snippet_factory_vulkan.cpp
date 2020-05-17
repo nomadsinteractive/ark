@@ -21,7 +21,7 @@ public:
         const String sLocation = "location";
         const String sBinding = "binding";
 
-        setLayoutDescriptor(context._vertex._ins, sLocation, 0);
+        setLayoutDescriptor(setupLayoutLocation(context, context._vertex._ins), sLocation, 0);
 
         const sp<PipelineInput>& pipelineInput = pipelineLayout.input();
         declareUBOStruct(context._vertex, pipelineInput);
@@ -29,7 +29,7 @@ public:
 
         context._fragment._outs.declare("vec4", "v_", "FragColor");
 
-        setLayoutDescriptor(context._fragment._samplers, sBinding, pipelineInput->ubos().size());
+        setLayoutDescriptor(context._fragment._samplers, sBinding, static_cast<uint32_t>(pipelineInput->ubos().size()));
 
         setLayoutDescriptor(context._vertex._outs, context._fragment._ins, sLocation, 0);
         setLayoutDescriptor(context._fragment._outs, sLocation, 0);
@@ -64,9 +64,33 @@ private:
         return location;
     }
 
-    uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& declarations, const String& descriptor, uint32_t start) {
-        uint32_t counter = start;
+    std::vector<ShaderPreprocessor::Declaration> setupLayoutLocation(const PipelineBuildingContext& context, const ShaderPreprocessor::DeclarationList& declarations) {
+        std::vector<ShaderPreprocessor::Declaration> locations;
+        std::map<uint32_t, std::vector<const ShaderPreprocessor::Declaration*>> divisors;
+
         for(const ShaderPreprocessor::Declaration& i : declarations.vars().values()) {
+            const auto iter = context._attributes.find(i.name());
+            DCHECK(iter != context._attributes.end(), "Cannot find attribute %s", i.name().c_str());
+            const Attribute& attribute = iter->second;
+            divisors[attribute.divisor()].push_back(&i);
+        }
+
+        for(const auto& i : divisors)
+        {
+            for(const ShaderPreprocessor::Declaration* j : i.second)
+                locations.push_back(*j);
+        }
+
+        return locations;
+    }
+
+    uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& declarations, const String& descriptor, uint32_t start) {
+        return setLayoutDescriptor(declarations.vars().values(), descriptor, start);
+    }
+
+    uint32_t setLayoutDescriptor(const std::vector<ShaderPreprocessor::Declaration>& declarations, const String& descriptor, uint32_t start) {
+        uint32_t counter = start;
+        for(const ShaderPreprocessor::Declaration& i : declarations) {
             StringBuffer sb;
             sb << "layout (" << descriptor << " = " << getNextLayoutLocation(i, counter) << ") " << *i.source();
             *i.source() = sb.str();

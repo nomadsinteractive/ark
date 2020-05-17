@@ -25,7 +25,8 @@ class VorbisTestCase : public TestCase {
 public:
     virtual int launch() {
         const sp<ResourceLoader> resourceLoader = getResourceLoader();
-        const sp<AudioPlayer> portaudioPlayer = resourceLoader->load<AudioPlayer>("audio_player");
+        const Scope args;
+        const sp<AudioPlayer> portaudioPlayer = resourceLoader->load<AudioPlayer>("audio_player", args);
         const sp<Future> f1 = AudioPlayer::play(portaudioPlayer, "test.ogg", AudioPlayer::PLAY_OPTION_DEFAULT);
         std::this_thread::sleep_for(std::chrono::milliseconds(800));
         const sp<Future> f2 = AudioPlayer::play(portaudioPlayer, "test.ogg", AudioPlayer::PLAY_OPTION_DEFAULT);
@@ -33,7 +34,7 @@ public:
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 
-        const sp<AudioPlayer> fmodPlayer = resourceLoader->load<AudioPlayer>("fmod_player");
+        const sp<AudioPlayer> fmodPlayer = resourceLoader->load<AudioPlayer>("fmod_player", args);
         const sp<Future> f3 = AudioPlayer::play(fmodPlayer, "test.ogg", AudioPlayer::PLAY_OPTION_DEFAULT);
         std::this_thread::sleep_for(std::chrono::milliseconds(800));
         const sp<Future> f4 = AudioPlayer::play(fmodPlayer, "test.ogg", AudioPlayer::PLAY_OPTION_DEFAULT);

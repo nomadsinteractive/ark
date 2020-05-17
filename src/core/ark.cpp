@@ -305,6 +305,7 @@ sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordi
         return sp<RenderEngine>::make(version, coordinateSystem, sp<opengl::RendererFactoryOpenGL>::make(appResource->recycler()));
 #endif
     case VULKAN_11:
+    case VULKAN_12:
 #ifdef ARK_USE_VULKAN
         return sp<RenderEngine>::make(version, coordinateSystem, sp<vulkan::RendererFactoryVulkan>::make(appResource->recycler()));
 #endif

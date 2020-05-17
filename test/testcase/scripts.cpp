@@ -27,11 +27,12 @@ public:
         Global<PluginManager> pluginManager;
         pluginManager->load("ark-python");
 
-        const sp<ResourceLoader> resourceLoader = Ark::instance().applicationContext()->createResourceLoader("application.xml", nullptr);
+        const sp<ResourceLoader> resourceLoader = getResourceLoader();
         if(!resourceLoader)
             return -1;
 
-        const sp<Script> script = resourceLoader->load<Script>("script");
+        const Scope args;
+        const sp<Script> script = resourceLoader->load<Script>("script", args);
         if(!script) {
             puts("No script interpreter installed");
             return -1;
@@ -42,7 +43,7 @@ public:
             return -1;
         }
         const sp<Scope> vars = sp<Scope>::make();
-        vars->put<ResourceLoader>("_resource_loader", resourceLoader);
+        vars->put("_resource_loader", resourceLoader);
         script->run(Ark::instance().getAsset("hello.py"), vars);
         return 0;
     }

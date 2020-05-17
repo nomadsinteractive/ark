@@ -119,7 +119,6 @@ public:
     DEFAULT_COPY_AND_ASSIGN(BitwiseTrie);
 
     U* put(T key, U value) {
-        const Path* s2 = findLeafPath(2);
         Path* path = makeLeafPath(&_root, Key(static_cast<KeyType>(key), 0), 0);
         U& leaf = _leaves[key];
         leaf = std::move(value);

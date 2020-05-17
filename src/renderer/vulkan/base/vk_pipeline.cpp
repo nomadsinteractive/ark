@@ -27,8 +27,8 @@ namespace ark {
 namespace vulkan {
 
 VKPipeline::VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Shader::Stage, String> shaders)
-    : _bindings(bindings), _recycler(recycler), _renderer(renderer), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE), _descriptor_set(VK_NULL_HANDLE),
-      _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _rebind_needed(true)
+    : _bindings(bindings), _recycler(recycler), _renderer(renderer), _backed_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
+      _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _rebind_needed(true)
 {
 }
 
@@ -118,6 +118,7 @@ void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& dr
 
 void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)
 {
+    uint32_t location = 0;
     for(const auto& i : input.streams())
     {
         uint32_t divsor = i.first;
@@ -127,7 +128,6 @@ void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline:
                                                    stream.stride(),
                                                    divsor == 0 ? VK_VERTEX_INPUT_RATE_VERTEX : VK_VERTEX_INPUT_RATE_INSTANCE));
 
-        uint32_t location = 0;
         for(const Attribute& j : stream.attributes().values())
         {
             uint32_t slen = std::min<uint32_t>(4, j.length());
@@ -339,21 +339,7 @@ void VKPipeline::buildCommandBuffer(GraphicsContext& graphicsContext, const Draw
         vkCmdSetScissor(commandBuffer, 0, 1, &vkScissor);
     }
 
-    if(drawingContext._shader_bindings->pipelineBindings()->renderProcedure() == PipelineBindings::RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT)
-    {
-        const DrawingContext::ParamDrawMultiElementsIndirect& param = drawingContext._parameters._draw_multi_elements_indirect;
-        DASSERT(param.isActive());
-        for(const auto& i : param._instanced_array_snapshots)
-        {
-            i.second.upload(graphicsContext);
-            DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
-        }
-
-        param._indirect_cmds.upload(graphicsContext);
-        vkCmdDrawIndexedIndirect(commandBuffer, (VkBuffer) (param._indirect_cmds.id()), 0, param._draw_count, sizeof(DrawingContext::DrawElementsIndirectCommand));
-    }
-    else
-        vkCmdDrawIndexed(commandBuffer, drawingContext._parameters._draw_elements._count, 1, drawingContext._parameters._draw_elements._start, 0, 0);
+    _backed_renderer->draw(graphicsContext, drawingContext, commandBuffer);
 }
 
 bool VKPipeline::isDirty(const ByteArray::Borrowed& dirtyFlags) const
@@ -364,6 +350,63 @@ bool VKPipeline::isDirty(const ByteArray::Borrowed& dirtyFlags) const
         if(buf[i])
             return true;
     return false;
+}
+
+sp<VKPipeline::BakedRenderer> VKPipeline::makeBakedRenderer(const PipelineBindings& bindings) const
+{
+    switch(bindings.renderProcedure())
+    {
+        case PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS:
+            return sp<VKDrawElements>::make();
+        case PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED:
+            DASSERT(bindings.hasDivisors());
+            return sp<VKDrawElementsInstanced>::make();
+        case PipelineBindings::RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT:
+            return sp<VKMultiDrawElementsIndirect>::make();
+        }
+    DFATAL("Not render procedure creator for %d", bindings.renderProcedure());
+    return nullptr;
+}
+
+void VKPipeline::VKDrawElements::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
+{
+    const DrawingContext::ParamDrawElements& param = drawingContext._parameters._draw_elements;
+    DASSERT(param.isActive());
+    vkCmdDrawIndexed(commandBuffer, param._count, 1, param._start, 0, 0);
+}
+
+void VKPipeline::VKDrawElementsInstanced::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
+{
+    const DrawingContext::ParamDrawElementsInstanced& param = drawingContext._parameters._draw_elements_instanced;
+    DASSERT(param.isActive());
+
+    VkDeviceSize offsets = 0;
+    for(const auto& i : param._instanced_array_snapshots)
+    {
+        i.second.upload(graphicsContext);
+        DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
+        VkBuffer vkInstanceVertexBuffer = (VkBuffer) (i.second.id());
+        vkCmdBindVertexBuffers(commandBuffer, i.first, 1, &vkInstanceVertexBuffer, &offsets);
+    }
+    vkCmdDrawIndexed(commandBuffer, param._count, static_cast<uint32_t>(param._instance_count), param._start, 0, 0);
+}
+
+void VKPipeline::VKMultiDrawElementsIndirect::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
+{
+    const DrawingContext::ParamDrawMultiElementsIndirect& param = drawingContext._parameters._draw_multi_elements_indirect;
+    DASSERT(param.isActive());
+
+    VkDeviceSize offsets = 0;
+    for(const auto& i : param._instanced_array_snapshots)
+    {
+        i.second.upload(graphicsContext);
+        DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
+        VkBuffer vkInstanceVertexBuffer = (VkBuffer) (i.second.id());
+        vkCmdBindVertexBuffers(commandBuffer, i.first, 1, &vkInstanceVertexBuffer, &offsets);
+    }
+
+    param._indirect_cmds.upload(graphicsContext);
+    vkCmdDrawIndexedIndirect(commandBuffer, (VkBuffer) (param._indirect_cmds.id()), 0, param._draw_count, sizeof(DrawingContext::DrawElementsIndirectCommand));
 }
 
 }

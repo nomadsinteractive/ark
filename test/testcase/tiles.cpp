@@ -9,7 +9,7 @@
 #include "graphics/base/render_request.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/inf/tile_maker.h"
-#include "graphics/impl/frame/vertical_scrollable.h"
+#include "graphics/impl/renderer/vertical_scrollable.h"
 
 namespace ark {
 namespace unittest {
@@ -27,9 +27,9 @@ public:
         : _tile_x(tileX), _tile_y(tileY) {
     }
 
-    virtual void render(RenderRequest& /*pipeline*/, float /*x*/, float y) override {
+    virtual void render(RenderRequest& /*pipeline*/, const V3& position) override {
         const int32_t idx = (_tile_y + _tile_height) / _tile_height;
-        if(_render_position[idx] != y)
+        if(_render_position[idx] != position.y())
             _error_code = _error_base + idx;
     }
 
@@ -55,8 +55,8 @@ public:
         const sp<RendererMaker> rendererMaker = sp<RendererMakerImpl>::make();
         const sp<Scope> args = sp<Scope>::make();
         const sp<Numeric::Impl> scroller = sp<Numeric::Impl>::make(0.0f);
-        args->put<Numeric>("scroller", scroller);
-        args->put<RendererMaker>("tile_maker", rendererMaker);
+        args->put("scroller", scroller);
+        args->put("tile_maker", rendererMaker);
         const sp<Renderer> scrollable = beanFactory->build<Renderer>("@scrollable-001", args);
         int32_t errorCode, errorBase = 1;
         errorCode = checkScrollable(scrollable, NAN, 0.0f, 50.0f, NAN, errorBase);
@@ -93,9 +93,8 @@ private:
         _render_position[1] = p2;
         _render_position[2] = p3;
         _render_position[3] = p4;
-        LFStack<RenderRequest> recycler;
-        RenderRequest pipeline(nullptr, nullptr, recycler);
-        scrollable->render(pipeline, 0.0f, 0.0f);
+        RenderRequest renderRequest;
+        scrollable->render(renderRequest, V3(0));
         return _error_code;
     }
 };

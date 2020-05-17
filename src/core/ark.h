@@ -32,7 +32,8 @@ public:
         OPENGL_44 = 44,
         OPENGL_45 = 45,
         OPENGL_46 = 46,
-        VULKAN_11 = 111
+        VULKAN_11 = 111,
+        VULKAN_12 = 112
     };
 
     enum RendererCoordinateSystem {
@@ -74,6 +75,8 @@ public:
 
     const sp<Clock>& clock() const;
     const sp<ApplicationContext>& applicationContext() const;
+
+    int32_t runTests(int argc, const char* argv[]) const;
 
 private:
     class ArkAssetBundle;
