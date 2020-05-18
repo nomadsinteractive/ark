@@ -51,7 +51,7 @@ public:
 
     virtual sp<String> build(const Scope& /*args*/) override {
         const Global<StringTable> stringTable;
-        return stringTable->getString(_package, _resid);
+        return stringTable->getString(_package, _resid, true);
     }
 
 private:

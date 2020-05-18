@@ -6,10 +6,13 @@ import ark
 print('Hello world, today is ', ctime(time()))
 print(dir(ark))
 
-from _frozen_importlib import ModuleSpec
 from _frozen_importlib import ArkModuleFinder
 from _frozen_importlib import ArkModuleLoader
-sys.meta_path.append(ArkModuleFinder(ark, ModuleSpec, ArkModuleLoader, ['asset:///test.egg', os.path.join(os.getcwd(), 'libs')]))
+
+import _frozen_importlib_org
+import _frozen_importlib_external
+
+sys.meta_path.append(ArkModuleFinder(ark, _frozen_importlib_org, _frozen_importlib_external, ArkModuleLoader, ['asset:///test.egg', os.path.join(os.getcwd(), 'libs')]))
 
 import test_module
 print(test_module)

@@ -40,8 +40,8 @@ class PipelinesTestCase : public TestCase {
 public:
     virtual int launch() {
         Global<StringTable> stringTable;
-        const sp<String> vert = stringTable->getString("shaders", "default.vert");
-        const sp<String> frag = stringTable->getString("shaders", "texture.frag");
+        const sp<String> vert = stringTable->getString("shaders", "default.vert", true);
+        const sp<String> frag = stringTable->getString("shaders", "texture.frag", true);
         if(!vert || !frag)
             return -1;
 
@@ -52,15 +52,12 @@ public:
 
         const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);
         const sp<PipelineInput>& pipelineInput = pipelineLayout->input();
-        puts("---------------------------------------------------------------------");
-        if(pipelineInput->streams()[0].stride() == 0)
-            return 1;
-        if(!pipelineInput->getAttribute("Position").length())
-            return 2;
-        if(!pipelineInput->getAttribute("TexCoordinate").offset())
-            return 3;
-        if(!pipelineInput->getAttribute("Alpha01").offset())
-            return 4;
+
+        buildingContext->initialize();
+        TESTCASE_VALIDATE(pipelineInput->streams()[0].stride() != 0);
+        TESTCASE_VALIDATE(pipelineInput->getAttribute("Position").length());
+        TESTCASE_VALIDATE(pipelineInput->getAttributeOffset("TexCoordinate") != -1);
+        TESTCASE_VALIDATE(pipelineInput->getAttributeOffset("Alpha01") == -1);
 
         return 0;
     }

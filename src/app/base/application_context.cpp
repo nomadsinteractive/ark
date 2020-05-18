@@ -226,7 +226,7 @@ sp<String> ApplicationContext::getString(const String& resid)
 {
     DASSERT(resid);
     const Identifier id = resid.at(0) == '@' ? Identifier::parse(resid, Identifier::FORMAT_URL) : Identifier::parseRef(resid);
-    return _string_table->getString(id.package(), id.ref());
+    return _string_table->getString(id.package(), id.ref(), true);
 }
 
 std::vector<String> ApplicationContext::getStringArray(const String& resid)

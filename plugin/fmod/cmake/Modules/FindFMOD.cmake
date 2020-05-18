@@ -30,6 +30,8 @@ FIND_PATH(FMOD_LL_INCLUDE_DIR "fmod.h"
   $ENV{FMOD_HOME}/inc
   $ENV{FMOD_HOME}/api/lowlevel/inc
   $ENV{EXTERNLIBS}/fmod/lowlevel/inc
+  $ENV{FMOD_HOME}/api/core/inc
+  $ENV{EXTERNLIBS}/fmod/core/inc
   ~/Library/Frameworks
   /Library/Frameworks
   /usr/local
@@ -41,6 +43,7 @@ FIND_PATH(FMOD_LL_INCLUDE_DIR "fmod.h"
   DOC "fmod - Headers"
   CMAKE_FIND_ROOT_PATH_BOTH
 )
+
 
 IF(MSVC)
     IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -75,6 +78,8 @@ IF(ANDROID)
       PATHS
       $ENV{FMOD_HOME}/api/lowlevel/lib/armeabi-v7a
       $ENV{EXTERNLIBS}/fmod/lowlevel/lib
+      $ENV{FMOD_HOME}/api/core/lib/armeabi-v7a
+      $ENV{EXTERNLIBS}/fmod/core/lib
       DOC "fmod_event - Library"
       CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -92,7 +97,7 @@ ELSE()
       /opt/local
       /opt/csw
       /opt
-      PATH_SUFFIXES lib lib64
+      PATH_SUFFIXES lib x86 lib64 x64
       DOC "fmod - Library"
       CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -101,6 +106,8 @@ ELSE()
       $ENV{FMOD_HOME}
       $ENV{FMOD_HOME}/api/lowlevel/lib
       $ENV{EXTERNLIBS}/fmod/lowlevel/lib
+      $ENV{FMOD_HOME}/api/core/lib
+      $ENV{EXTERNLIBS}/fmod/core/lib
       ~/Library/Frameworks
       /Library/Frameworks
       /usr/local
@@ -109,11 +116,12 @@ ELSE()
       /opt/local
       /opt/csw
       /opt
-      PATH_SUFFIXES lib lib64
+      PATH_SUFFIXES lib x86 lib64 x64
       DOC "fmod_event - Library"
       CMAKE_FIND_ROOT_PATH_BOTH
     )
 ENDIF()
+
 
 INCLUDE(FindPackageHandleStandardArgs)
 
@@ -124,7 +132,7 @@ IF(MSVC)
     $ENV{FMOD_HOME}
     $ENV{FMOD_HOME}/api/studio/lib
     $ENV{EXTERNLIBS}/fmod/studio/lib
-    PATH_SUFFIXES lib lib64
+    PATH_SUFFIXES lib x86 lib64 x64
     DOC "fmod - Library (Debug)"
   )
   FIND_LIBRARY(FMOD_EVENT_LIBRARY_DEBUG NAMES ${FMOD_EVENT_DBG_NAMES}
@@ -132,7 +140,9 @@ IF(MSVC)
     $ENV{FMOD_HOME}
     $ENV{FMOD_HOME}/api/lowlevel/lib
     $ENV{EXTERNLIBS}/fmod/lowlevel/lib
-    PATH_SUFFIXES lib lib64
+    $ENV{FMOD_HOME}/api/core/lib
+    $ENV{EXTERNLIBS}/fmod/core/lib
+    PATH_SUFFIXES lib x86 lib64 x64
     DOC "fmod_event - Library (Debug)"
   )
 

@@ -23,60 +23,36 @@ public:
         const std::map<String, String> properties = Strings::parseProperties(str);
         const String& s = Strings::getProperty(properties, "abc");
         const String& left = Strings::getProperty(properties, "left");
-        if(!s.empty() || left.empty())
-            return 1;
 
-        Rect rect = Strings::parse<Rect>(str);
-        if(rect.left() != 0 || rect.top() != 0 || rect.width() != 20 || rect.height() != 20)
-            return 2;
+        TESTCASE_VALIDATE(s.empty() && !left.empty());
 
-        Rect rectf = Strings::parse<Rect>(str);
-        if(rectf.left() != 0 || rectf.top() != 0 || rectf.width() != 20 || rectf.height() != 20)
-            return 3;
+        Rect rect = Strings::parse<Rect>("(0, 0, 20, 30)");
+        TESTCASE_VALIDATE(rect.left() == 0 && rect.top() == 0 && rect.width() == 20 && rect.height() == 30);
 
-        rect = Strings::parse<Rect>("(0, 0, 20, 30)");
-        if(rect.left() != 0 || rect.top() != 0 || rect.width() != 20 || rect.height() != 30)
-            return 4;
-
-        rectf = Strings::parse<Rect>("0, 0, 20.0, 30.0");
-        if(rectf.left() != 0 || rectf.top() != 0 || rectf.width() != 20.0f || rectf.height() != 30.0f)
-            return 5;
+        Rect rectf = Strings::parse<Rect>("0, 0, 20.0, 30.0");
+        TESTCASE_VALIDATE(rectf.left() == 0 && rectf.top() == 0 && rectf.width() == 20.0f && rectf.height() == 30.0f);
 
         Color white = Strings::parse<Color>("#ffffff");
-        if(white != Color::WHITE)
-            return 6;
+        TESTCASE_VALIDATE(white == Color::WHITE);
 
-//        if(Strings::parse<View::Gravity>("?") != View::Gravity::NONE)
-//            return 7;
+        TESTCASE_VALIDATE(Strings::parse<LayoutParam::Gravity>("right") == LayoutParam::GRAVITY_RIGHT);
 
-        if(Strings::parse<LayoutParam::Gravity>("right") != LayoutParam::GRAVITY_RIGHT)
-            return 8;
 
         const String formatted = Strings::sprintf("hello %s %d", "world", 123);
-        if(formatted != "hello world 123")
-            return 9;
+        TESTCASE_VALIDATE(formatted == "hello world 123");
 
         const String s001 = "0123456789";
-        if(s001.substr(5) != "56789")
-            return 10;
-        if(s001.substr(5, 7) != "56")
-            return 11;
-
-        if(String("").strip() != String(""))
-            return 12;
-        if(String(" \t").strip() != String(""))
-            return 13;
-        if(String("a b \t").strip() != String("a b"))
-            return 14;
-        if(String(" \ra b \t").strip() != String("a b"))
-            return 15;
-        if(String(" \ra b").strip() != String("a b"))
-            return 16;
+        TESTCASE_VALIDATE(s001.substr(5) == "56789");
+        TESTCASE_VALIDATE(s001.substr(5, 7) == "56");
+        TESTCASE_VALIDATE(String("").strip() == String(""));
+        TESTCASE_VALIDATE(String(" \t").strip() == String(""));
+        TESTCASE_VALIDATE(String("a b \t").strip() == String("a b"));
+        TESTCASE_VALIDATE(String(" \ra b \t").strip() == String("a b"));
+        TESTCASE_VALIDATE(String(" \ra b").strip() == String("a b"));
         const std::regex VAR_PATTERN("\\$\\{?([\\w\\d_]+)\\}?");
-        if(String("${a}a = $bb.").replace(VAR_PATTERN, [] (Array<String>& groups) {
-            return groups.buf()[1];
-        }) != String("aa = bb."))
-            return 17;
+        TESTCASE_VALIDATE(String("${a}a = $bb.").replace(VAR_PATTERN,[] (Array<String>& groups) {
+                return groups.buf()[1];
+            }) == String("aa = bb."));
         return 0;
     }
 };

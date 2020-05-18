@@ -11,6 +11,8 @@
 #include "graphics/inf/tile_maker.h"
 #include "graphics/impl/renderer/vertical_scrollable.h"
 
+#include "platform/platform.h"
+
 namespace ark {
 namespace unittest {
 
@@ -93,7 +95,7 @@ private:
         _render_position[1] = p2;
         _render_position[2] = p3;
         _render_position[3] = p4;
-        RenderRequest renderRequest;
+        RenderRequest renderRequest(Platform::getSteadyClock()->val(), nullptr, nullptr, nullptr);
         scrollable->render(renderRequest, V3(0));
         return _error_code;
     }

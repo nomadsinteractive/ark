@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest>
     <plugin name="ark-fmod"/>
-    <plugin name="ark-portaudio"/>
+    <plugin name="ark-miniaudio"/>
     <plugin name="ark-vorbis"/>
 </manifest>
