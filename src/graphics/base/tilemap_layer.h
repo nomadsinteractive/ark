@@ -14,14 +14,14 @@ namespace ark {
 class ARK_API TilemapLayer : public Renderer {
 public:
 // [[script::bindings::auto]]
-    TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, const sp<Vec>& position = nullptr, Tilemap::LayerFlag flag = Tilemap::LAYER_FLAG_DEFAULT);
+    TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position = nullptr, Tilemap::LayerFlag flag = Tilemap::LAYER_FLAG_DEFAULT);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
 // [[script::bindings::property]]
-    const sp<Vec>& position() const;
+    const sp<Vec3>& position() const;
 // [[script::bindings::property]]
-    void setPosition(const sp<Vec>& position);
+    void setPosition(const sp<Vec3>& position);
 
 // [[script::bindings::property]]
     const sp<Tileset>& tileset() const;
@@ -60,8 +60,8 @@ private:
     sp<Size> _size;
     sp<Tileset> _tileset;
 
-    SafePtr<Vec> _position;
-    SafePtr<Vec> _scroller;
+    SafePtr<Vec3> _position;
+    SafePtr<Vec3> _scroller;
 
     Tilemap::LayerFlag _flag;
 

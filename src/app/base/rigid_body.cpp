@@ -22,7 +22,7 @@
 
 namespace ark {
 
-RigidBody::RigidBody(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed)
+RigidBody::RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed)
     : _stub(sp<Stub>::make(id, type, position, size, rotate, disposed))
 {
 }
@@ -34,7 +34,7 @@ RigidBody::RigidBody(const sp<RigidBody::Stub>& stub)
 
 void RigidBody::bind(const sp<RenderObject>& renderObject)
 {
-    renderObject->setPosition(Vec3Util::create(position()));
+    renderObject->setPosition(position());
     renderObject->setTransform(_stub->_transform);
     _stub->_render_object = renderObject;
 }
@@ -62,7 +62,7 @@ V2 RigidBody::xy() const
 
 V3 RigidBody::xyz() const
 {
-    return V3(_stub->_position->val(), 0);
+    return _stub->_position->val();
 }
 
 float RigidBody::width() const
@@ -75,7 +75,7 @@ float RigidBody::height() const
     return _stub->_size->height();
 }
 
-const sp<Vec>& RigidBody::position() const
+const sp<Vec3>& RigidBody::position() const
 {
     return _stub->_position;
 }
@@ -142,7 +142,7 @@ template<> ARK_API Collider::BodyType Conversions::to<String, Collider::BodyType
     return Collider::BODY_TYPE_STATIC;
 }
 
-RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed, const sp<Callback>& callback, const sp<Box>& tag)
+RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed, const sp<Callback>& callback, const sp<Box>& tag)
     : _id(id), _type(type), _position(position), _size(size), _transform(sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate)), _disposed(disposed), _callback(callback ? callback : sp<Callback>::make()), _tag(tag ? tag : sp<Box>::make())
 {
 }

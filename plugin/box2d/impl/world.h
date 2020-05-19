@@ -39,18 +39,18 @@ public:
     };
 
 public:
-    World(const b2Vec2& gravity, float ppmX, float ppmY);
+    World(const b2Vec2& gravity, const V2& pixelPerMeter);
     DEFAULT_COPY_AND_ASSIGN(World);
 
     virtual void run() override;
 
 //  [[script::bindings::auto]]
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size = nullptr, const sp<Rotate>& rotate = nullptr) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size = nullptr, const sp<Rotate>& rotate = nullptr) override;
 
     b2World& world() const;
 
     b2Body* createBody(const b2BodyDef& bodyDef) const;
-    b2Body* createBody(Collider::BodyType type, const V& position, const sp<Size>& size, const BodyCreateInfo& createInfo) const;
+    b2Body* createBody(Collider::BodyType type, const V3& position, const sp<Size>& size, const BodyCreateInfo& createInfo) const;
 
 //  [[script::bindings::meta(expire())]]
 //  [[script::bindings::meta(isExpired())]]
@@ -87,8 +87,8 @@ public:
 
         std::vector<sp<Builder<Importer>>> _importers;
 
-        sp<Builder<Numeric>> _ppmx, _ppmy;
-        sp<Builder<Numeric>> _gravity_x, _gravity_y;
+        sp<Builder<Vec2>> _ppm;
+        sp<Builder<Vec2>> _gravity;
         SafePtr<Builder<Boolean>> _disposed;
     };
 
@@ -124,7 +124,7 @@ private:
     };
 
     struct Stub : public Runnable {
-        Stub(const b2Vec2& gravity, float ppmX, float ppmY);
+        Stub(const b2Vec2& gravity, const V2& pixelPerMeter);
 
         virtual void run() override;
 

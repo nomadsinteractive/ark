@@ -82,8 +82,6 @@ private:
 
     sp<Texture> _texture;
 
-    MemoryPool _memory_pool;
-
     sp<PipelineFactory> _pipeline_factory;
     sp<RendererContext> _renderer_context;
 };

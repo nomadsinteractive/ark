@@ -23,9 +23,9 @@ namespace ark {
 
 namespace {
 
-class DynamicPosition : public Vec2 {
+class DynamicPosition : public Vec3 {
 public:
-    DynamicPosition(const sp<ColliderImpl::Stub>& collider, const sp<Vec2>& position)
+    DynamicPosition(const sp<ColliderImpl::Stub>& collider, const sp<Vec3>& position)
         : _collider(collider), _position(position) {
     }
 
@@ -34,8 +34,8 @@ public:
         _aabb = Rect(0, 0, _rigid_body_shadow->size()->width(), _rigid_body_shadow->size()->height());
     }
 
-    virtual V2 val() override {
-        const V2 position = _position->val();
+    virtual V3 val() override {
+        const V3 position = _position->val();
         if(_rigid_body_shadow && _rigid_body_shadow->isDisposed())
             _rigid_body_shadow = nullptr;
         if(_rigid_body_shadow)
@@ -49,7 +49,7 @@ public:
 
 private:
     sp<ColliderImpl::Stub> _collider;
-    sp<Vec2> _position;
+    sp<Vec3> _position;
     sp<ColliderImpl::RigidBodyShadow> _rigid_body_shadow;
     Rect _aabb;
 };
@@ -71,7 +71,7 @@ sp<Collider> ColliderImpl::BUILDER::build(const Scope& args)
     return sp<ColliderImpl>::make(_tracker->build(args), _manifest, _resource_loader_context);
 }
 
-sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate)
+sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate)
 {
     DASSERT(position);
     DASSERT(size);
@@ -79,7 +79,7 @@ sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, c
     if(type == Collider::BODY_TYPE_DYNAMIC)
     {
         const sp<DynamicPosition> dpos = sp<DynamicPosition>::make(_stub, position);
-        const sp<Vec2> pos = _resource_loader_context->synchronize<V2>(dpos, disposed);
+        const sp<Vec3> pos = _resource_loader_context->synchronize<V3>(dpos, disposed);
         const sp<RigidBodyImpl> rigidBody = _stub->createRigidBody(type, shape, pos, size, rotate, disposed, _stub);
         dpos->setRigidBody(rigidBody->shadow());
         return rigidBody;
@@ -109,11 +109,11 @@ void ColliderImpl::Stub::remove(const RigidBody& rigidBody)
     _rigid_bodies.erase(iter);
 }
 
-sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed, const sp<ColliderImpl::Stub>& self)
+sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed, const sp<ColliderImpl::Stub>& self)
 {
     int32_t rigidBodyId = ++_rigid_body_base_id;
     float s = std::max(size->width(), size->height());
-    const sp<Vec> dp = _tracker->create(rigidBodyId, position, sp<Vec::Const>::make(V(s, s)));
+    const sp<Vec3> dp = _tracker->create(rigidBodyId, position, sp<Vec3::Const>::make(V3(s)));
     const sp<RigidBodyShadow> rigidBodyShadow = sp<RigidBodyShadow>::make(rigidBodyId, type, dp, size, rotate, disposed);
     const sp<RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(self, rigidBodyShadow);
 
@@ -134,8 +134,6 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
     default:
         const auto iter = _c2_shapes.find(shape);
         DCHECK(iter != _c2_shapes.end(), "Unknow shape: %d", shape);
-//        const V2& unit = iter->second.unit;
-//        rigidBodyShadow->setShapes(iter->second.shapes, V2(size->width() * unit.x(), size->height() * unit.y()));
         rigidBodyShadow->setShapes(iter->second.shapes, V2(1.0f));
     }
 
@@ -212,7 +210,6 @@ void ColliderImpl::Stub::loadShapes(const document& manifest)
                 shape.t = C2_POLY;
                 shape.s.poly.count = static_cast<int32_t>(values.size() / 2);
                 c2MakePoly(&shape.s.poly);
-//                unit = V2(1.0f) / Strings::parse<V2>(i->ensureChild("size")->value());
                 shapes.shapes.push_back(shape);
             }
         }
@@ -241,7 +238,7 @@ void ColliderImpl::RigidBodyImpl::dispose()
     _shadow->dispose(_collider);
 }
 
-ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed)
+ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed)
     : RigidBody(id, type, position, size, rotate, disposed), _c2_rigid_body(position, rotate, type == Collider::BODY_TYPE_STATIC), _dispose_requested(false)
 {
 }
@@ -281,7 +278,7 @@ void ColliderImpl::RigidBodyShadow::dispose()
     _dispose_requested = true;
 }
 
-void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const V& position, const Rect& aabb)
+void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const V3& position, const Rect& aabb)
 {
     if(_dispose_requested)
     {
@@ -289,7 +286,7 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
         return;
     }
 
-    std::unordered_set<int32_t> candidates = collider._tracker->search(position, V(aabb.width(), aabb.height()));
+    std::unordered_set<int32_t> candidates = collider._tracker->search(V3(position, 0), V3(aabb.width(), aabb.height(), 0));
     if(candidates.size())
     {
         std::unordered_set<int32_t> contacts = _contacts;
@@ -309,7 +306,7 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
             {
                 auto iter2 = contacts.find(id);
                 if(iter2 == contacts.end())
-                    shadowStub._callback->onBeginContact(self, rigidBody, CollisionManifold(V(manifold.normal.x, manifold.normal.y)));
+                    shadowStub._callback->onBeginContact(self, rigidBody, CollisionManifold(V3(manifold.normal.x, manifold.normal.y, 0)));
                 else
                     contacts.erase(iter2);
                 ++iter;

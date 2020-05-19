@@ -5,12 +5,12 @@
 
 namespace ark {
 
-TrackerGrid::TrackerGrid(const VType& cell)
-    : _stub(sp<Stub>::make(cell))
+TrackerGrid::TrackerGrid(uint32_t dimension, const V3& cell)
+    : _stub(sp<Stub>::make(dimension, cell))
 {
 }
 
-sp<Vec> TrackerGrid::create(int32_t id, const sp<Vec>& position, const sp<Vec>& size)
+sp<Vec3> TrackerGrid::create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& size)
 {
     return sp<TrackedPosition>::make(id, _stub, position, size);
 }
@@ -20,29 +20,37 @@ void TrackerGrid::remove(int32_t id)
     _stub->remove(id);
 }
 
-std::unordered_set<int32_t> TrackerGrid::search(const V& position, const V& size)
+std::unordered_set<int32_t> TrackerGrid::search(const V3& position, const V3& size)
 {
     return _stub->search(position, size);
 }
 
-TrackerGrid::Stub::Stub(const VType& cell)
+TrackerGrid::Stub::Stub(uint32_t dimension, const V3& cell)
+    : _dimension(dimension), _axes(new Axis[dimension])
 {
-    for(int32_t i = 0; i < DIMENSIONS; i++)
+    DCHECK(_dimension < 4, "Dimension should be either 2(V2) or 3(V3)");
+
+    for(uint32_t i = 0; i < _dimension; i++)
     {
         _axes[i]._stride = static_cast<int32_t>(cell[i]);
         DASSERT(_axes[i]._stride > 0);
     }
 }
 
+TrackerGrid::Stub::~Stub()
+{
+    delete[] _axes;
+}
+
 void TrackerGrid::Stub::remove(int32_t id)
 {
-    for(int32_t i = 0; i < DIMENSIONS; i++)
+    for(uint32_t i = 0; i < _dimension; i++)
         _axes[i].remove(id);
 }
 
-void TrackerGrid::Stub::create(int32_t id, const VType& position, const VType& size)
+void TrackerGrid::Stub::create(int32_t id, const V3& position, const V3& size)
 {
-    for(int32_t i = 0; i < DIMENSIONS; i++)
+    for(uint32_t i = 0; i < _dimension; i++)
     {
         float p = position[i];
         float s = size[i];
@@ -50,9 +58,9 @@ void TrackerGrid::Stub::create(int32_t id, const VType& position, const VType& s
     }
 }
 
-void TrackerGrid::Stub::update(int32_t id, const VType& position, const VType& size)
+void TrackerGrid::Stub::update(int32_t id, const V3& position, const V3& size)
 {
-    for(int32_t i = 0; i < DIMENSIONS; i++)
+    for(uint32_t i = 0; i < _dimension; i++)
     {
         float p = position[i];
         float s = size[i];
@@ -60,10 +68,10 @@ void TrackerGrid::Stub::update(int32_t id, const VType& position, const VType& s
     }
 }
 
-std::unordered_set<int32_t> TrackerGrid::Stub::search(const VType& position, const VType& size) const
+std::unordered_set<int32_t> TrackerGrid::Stub::search(const V3& position, const V3& size) const
 {
     std::unordered_set<int32_t> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
-    for(int32_t i = 1; i < DIMENSIONS && !candidates.empty(); i++)
+    for(uint32_t i = 1; i < _dimension && !candidates.empty(); i++)
     {
         const std::unordered_set<int32_t> s1 = std::move(candidates);
         const std::unordered_set<int32_t> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
@@ -154,13 +162,13 @@ void TrackerGrid::Axis::remove(int32_t id, int32_t rangeId)
 }
 
 TrackerGrid::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _cell(factory.ensureBuilder<Vec>(manifest, "cell"))
+    : _dimension(Documents::getAttribute(manifest, "dimension", 2)), _cell(factory.ensureBuilder<Vec3>(manifest, "cell"))
 {
 }
 
 sp<Tracker> TrackerGrid::BUILDER::build(const Scope& args)
 {
-    return sp<TrackerGrid>::make(_cell->build(args)->val());
+    return sp<TrackerGrid>::make(_dimension, _cell->build(args)->val());
 }
 
 TrackerGrid::Axis::Range::Range()

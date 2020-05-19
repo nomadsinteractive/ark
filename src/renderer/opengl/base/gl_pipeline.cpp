@@ -509,7 +509,12 @@ void GLPipeline::GLMultiDrawElementsIndirect::draw(GraphicsContext& graphicsCont
     }
     param._indirect_cmds.upload(graphicsContext);
     glBindBuffer(GL_DRAW_INDIRECT_BUFFER, static_cast<GLuint>(param._indirect_cmds.id()));
+#ifndef ANDROID
     glMultiDrawElementsIndirect(_mode, GLIndexType, nullptr, static_cast<GLsizei>(param._draw_count), sizeof(DrawingContext::DrawElementsIndirectCommand));
+#else
+    for(uint32_t i = 0; i < param._draw_count; ++i)
+        glDrawElementsIndirect(_mode, GLIndexType, reinterpret_cast<const void *>(i * sizeof(DrawingContext::DrawElementsIndirectCommand)));
+#endif
     glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 }
 

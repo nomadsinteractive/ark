@@ -35,7 +35,7 @@ public:
     virtual const sp<Size>& size() override;
 
 // [[script::bindings::auto]]
-    sp<TilemapLayer> makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Vec>& position = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
+    sp<TilemapLayer> makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
 
 // [[script::bindings::auto]]
     const sp<RenderObject>& getTile(uint32_t rowId, uint32_t colId) const;
@@ -53,9 +53,9 @@ public:
     const sp<Tileset>& tileset() const;
 
 // [[script::bindings::property]]
-    const sp<Vec>& scroller() const;
+    const sp<Vec3>& scroller() const;
 // [[script::bindings::property]]
-    void setScroller(const sp<Vec>& scroller);
+    void setScroller(const sp<Vec3>& scroller);
 
 //  [[script::bindings::property]]
     const std::list<sp<TilemapLayer>>& layers() const;
@@ -92,7 +92,7 @@ private:
     SafePtr<Size> _size;
     sp<Tileset> _tileset;
     sp<TilemapImporter> _importer;
-    SafePtr<Vec> _scroller;
+    SafePtr<Vec3> _scroller;
 
     std::list<sp<TilemapLayer>> _layers;
     sp<Scrollable> _scrollable;

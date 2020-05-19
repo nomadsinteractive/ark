@@ -96,13 +96,13 @@ bool RendererImgui::onEvent(const Event& event)
         io.MouseDown[MouseIndex[event.button() - Event::BUTTON_MOUSE_LEFT]] = true;
     case Event::ACTION_MOVE:
         io.MousePos = ImVec2(event.x(), io.DisplaySize.y - event.y());
-        return true;
+        break;
     case Event::ACTION_UP:
         io.MouseDown[MouseIndex[event.button() - Event::BUTTON_MOUSE_LEFT]] = false;
-        return true;
+        break;
     case Event::ACTION_WHEEL:
         io.MouseWheel = event.x();
-        return true;
+        break;
     case Event::ACTION_KEY_DOWN:
     case Event::ACTION_KEY_UP:
         {
@@ -112,25 +112,25 @@ bool RendererImgui::onEvent(const Event& event)
                 case Event::CODE_KEYBOARD_LSHIFT:
                 case Event::CODE_KEYBOARD_RSHIFT:
                     io.KeyShift = event.action() == Event::ACTION_KEY_DOWN;
-                    return true;
+                    break;
                 case Event::CODE_KEYBOARD_LEFT:
                     updateKeyStatus(io, ImGuiKey_LeftArrow, isKeyDown);
-                    return true;
+                    break;
                 case Event::CODE_KEYBOARD_RIGHT:
                     updateKeyStatus(io, ImGuiKey_RightArrow, isKeyDown);
-                    return true;
+                    break;
                 case Event::CODE_KEYBOARD_UP:
                     updateKeyStatus(io, ImGuiKey_UpArrow, isKeyDown);
-                    return true;
+                    break;
                 case Event::CODE_KEYBOARD_DOWN:
                     updateKeyStatus(io, ImGuiKey_DownArrow, isKeyDown);
-                    return true;
+                    break;
                 case Event::CODE_KEYBOARD_DELETE:
                     updateKeyStatus(io, ImGuiKey_Delete, isKeyDown);
-                    return true;
+                    break;
                 case Event::CODE_KEYBOARD_BACKSPACE:
                     updateKeyStatus(io, ImGuiKey_Backspace, isKeyDown);
-                    return true;
+                    break;
                 default:
                     break;
             }
@@ -142,11 +142,11 @@ bool RendererImgui::onEvent(const Event& event)
             wchar_t c = event.toCharacter();
             io.AddInputCharacter(static_cast<ImWchar>(io.KeyShift ? std::toupper(c) : c));
         }
-        return true;
+        break;
     default:
         break;
     }
-    return false;
+    return io.WantCaptureMouse || io.WantCaptureKeyboard || io.WantTextInput;
 }
 
 const sp<RendererContext>& RendererImgui::rendererContext() const
@@ -160,8 +160,8 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
     {
         const ImDrawList* cmd_list = draw_data->CmdLists[i];
 
-        bytearray vb = _memory_pool.allocate(static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes()));
-        bytearray ib = _memory_pool.allocate(static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes()));
+        bytearray vb = sp<ByteArray::Borrowed>::make(renderRequest.allocator().sbrk(cmd_list->VtxBuffer.size_in_bytes()));
+        bytearray ib = sp<ByteArray::Borrowed>::make(renderRequest.allocator().sbrk(cmd_list->IdxBuffer.size_in_bytes()));
 
         memcpy(vb->buf(), cmd_list->VtxBuffer.Data, static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes()));
         memcpy(ib->buf(), cmd_list->IdxBuffer.Data, static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes()));

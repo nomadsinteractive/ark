@@ -17,7 +17,7 @@ void AtlasImporterCharacters::import(Atlas& atlas, BeanFactory& factory, const d
     const String& characters = Documents::ensureAttribute(manifest, "characters");
     for(const char* iter = characters.c_str(); *iter; iter++)
     {
-        atlas.add(*iter, flowx, flowy, flowx + fontWidth, flowy + fontHeight, Rect(0, 0, 1, 1), V2(fontWidth, fontHeight), V(0));
+        atlas.add(*iter, flowx, flowy, flowx + fontWidth, flowy + fontHeight, Rect(0, 0, 1, 1), V2(fontWidth, fontHeight), V3(0));
         flowx += fontWidth;
         if(flowx >= textureWidth)
         {

@@ -793,6 +793,10 @@ class Arena:
     def load_renderer(self, name: str, **kwargs):
         pass
 
+    def add_event_listener(self, event_listener: Callable[['Event'], bool], priority: int = 0):
+        pass
+
+
 
 class Clock:
 
@@ -1285,6 +1289,10 @@ class RigidBody:
     @property
     def size(self) -> Size:
         return Size(0, 0)
+
+    @property
+    def transform(self) -> Transform:
+        pass
 
     @property
     def width(self) -> float:

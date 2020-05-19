@@ -37,13 +37,13 @@ public:
     };
 
     struct ARK_API Stub {
-        Stub(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed = nullptr,
+        Stub(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed = nullptr,
              const sp<Callback>& callback = nullptr, const sp<Box>& tag = nullptr);
         ~Stub();
 
         int32_t _id;
         Collider::BodyType _type;
-        SafePtr<Vec> _position;
+        SafePtr<Vec3> _position;
         SafePtr<Size> _size;
         sp<Transform> _transform;
         SafePtr<Disposed> _disposed;
@@ -57,7 +57,7 @@ public:
 public:
     virtual ~RigidBody() override = default;
 
-    RigidBody(int32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed = nullptr);
+    RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed = nullptr);
     RigidBody(const sp<Stub>& stub);
 
 //  [[script::bindings::auto]]
@@ -83,7 +83,7 @@ public:
     float height() const;
 
 //  [[script::bindings::property]]
-    const sp<Vec>& position() const;
+    const sp<Vec3>& position() const;
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 //  [[script::bindings::property]]

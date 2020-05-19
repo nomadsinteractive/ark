@@ -18,12 +18,12 @@ public:
     virtual ~Tracker() = default;
 
 //  [[script::bindings::auto]]
-    virtual sp<Vec> create(int32_t id, const sp<Vec>& position, const sp<Vec>& aabb) = 0;
+    virtual sp<Vec3> create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& aabb) = 0;
 //  [[script::bindings::auto]]
     virtual void remove(int32_t id) = 0;
 
 //  [[script::bindings::auto]]
-    virtual std::unordered_set<int32_t> search(const V& position, const V& aabb) = 0;
+    virtual std::unordered_set<int32_t> search(const V3& position, const V3& aabb) = 0;
 };
 
 }

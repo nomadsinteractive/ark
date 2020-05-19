@@ -23,14 +23,14 @@ namespace ark {
 
 namespace {
 
-class DynamicPosition : public Vec2 {
+class DynamicPosition : public Vec3 {
 public:
-    DynamicPosition(const sp<TiledCollider::RigidBodyImpl>& rigidBody, const sp<Vec>& delegate)
+    DynamicPosition(const sp<TiledCollider::RigidBodyImpl>& rigidBody, const sp<Vec3>& delegate)
         : _rigid_body(rigidBody), _delegate(delegate), _bounds(0, 0, rigidBody->size()->width(), rigidBody->size()->height()) {
     }
 
-    virtual V2 val() override {
-        const V2 position = _delegate->val();
+    virtual V3 val() override {
+        const V3 position = _delegate->val();
         const sp<TiledCollider::RigidBodyImpl> rigidBody = _rigid_body.lock();
         if(rigidBody) {
             _bounds.setCenter(position.x(), position.y());
@@ -45,7 +45,7 @@ public:
 
 private:
     WeakPtr<TiledCollider::RigidBodyImpl> _rigid_body;
-    sp<Vec> _delegate;
+    sp<Vec3> _delegate;
     Rect _bounds;
 
 };
@@ -67,17 +67,17 @@ sp<Collider> TiledCollider::BUILDER::build(const Scope& args)
     return sp<TiledCollider>::make(_tilemap->build(args), _resource_loader_context);
 }
 
-sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& /*rotate*/)
+sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& /*rotate*/)
 {
     DCHECK(type != Collider::BODY_TYPE_STATIC, "Cannot create static body in TiledCollider");
     DASSERT(position && size);
 
     const sp<RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(++_rigid_body_base, type, position, size, _tilemap);
-    rigidBody->stub()->_position = _resource_loader_context->synchronize<V>(sp<DynamicPosition>::make(rigidBody, position));
+    rigidBody->stub()->_position = _resource_loader_context->synchronize<V3>(sp<DynamicPosition>::make(rigidBody, position));
     return rigidBody;
 }
 
-TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Tilemap>& tileMap)
+TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Tilemap>& tileMap)
     : RigidBody(id, type, position, size, Null::toSafe<Rotate>(nullptr)), _tilemap(tileMap), _rigid_body_shadow(sp<RigidBodyShadow>::make(tileMap->tileset()->tileWidth(), tileMap->tileset()->tileHeight()))
 {
 }
@@ -85,7 +85,7 @@ TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type
 void TiledCollider::RigidBodyImpl::updateRigidBodyShadow(const Contact& contact)
 {
     _rigid_body_shadow->setId(contact._id);
-    _rigid_body_shadow->_position->set(contact._position);
+    _rigid_body_shadow->_position->set(V3(contact._position, 0));
     _rigid_body_shadow->stub()->_render_object = contact._render_object;
 }
 
@@ -106,7 +106,7 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
     {
         if(i->flag() & Tilemap::LAYER_FLAG_COLLIDABLE)
         {
-            const V position = i->position()->val();
+            const V3 position = i->position()->val();
             float left = rect.left() - position.x();
             float right = rect.right() - position.x();
             float top = rect.top() - position.y();
@@ -137,8 +137,8 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
                             if(notInContacts)
                             {
                                 updateRigidBodyShadow(contact);
-                                const V normal(col == bColId ? 1.0f : (col == eColId ? -1.0f : 0.0f),
-                                               row == bRowId ? 1.0f : (row == eRowId ? -1.0f : 0.0f));
+                                const V3 normal(col == bColId ? 1.0f : (col == eColId ? -1.0f : 0.0f),
+                                               row == bRowId ? 1.0f : (row == eRowId ? -1.0f : 0.0f), 0);
                                 if(callback()->hasCallback())
                                     callback()->onBeginContact(_rigid_body_shadow, CollisionManifold(normal));
                             }
@@ -158,7 +158,7 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
 }
 
 TiledCollider::RigidBodyShadow::RigidBodyShadow(uint32_t width, uint32_t height)
-    : RigidBody(0, Collider::BODY_TYPE_STATIC, sp<Vec2::Impl>::make(V2()), sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), nullptr)
+    : RigidBody(0, Collider::BODY_TYPE_STATIC, sp<Vec3::Impl>::make(V3()), sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), nullptr)
 {
     _position = position();
 }

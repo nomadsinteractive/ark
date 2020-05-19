@@ -16,7 +16,7 @@
 
 namespace ark {
 
-TilemapLayer::TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, const sp<Vec>& position, Tilemap::LayerFlag flag)
+TilemapLayer::TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position, Tilemap::LayerFlag flag)
     : _col_count(colCount), _row_count(rowCount), _layer_context(tilemap._layer_context), _size(tilemap._size), _tileset(tilemap._tileset), _position(position),
       _scroller(tilemap._scroller), _flag(flag), _tiles(_col_count * _row_count)
 {
@@ -28,8 +28,8 @@ void TilemapLayer::render(RenderRequest& /*renderRequest*/, const V3& position)
     float height = _size->height();
     float tileWidth = static_cast<float>(_tileset->tileWidth()), tileHeight = static_cast<float>(_tileset->tileHeight());
 
-    const V pos = _position->val();
-    const V scroll = _scroller->val();
+    const V3 pos = _position->val();
+    const V3 scroll = _scroller->val();
     float vsx = scroll.x() - pos.x(), vsy = scroll.y() - pos.y();
     float sx, ex, sy, ey, ox, oy;
 
@@ -66,12 +66,12 @@ void TilemapLayer::render(RenderRequest& /*renderRequest*/, const V3& position)
     }
 }
 
-const sp<Vec>& TilemapLayer::position() const
+const sp<Vec3>& TilemapLayer::position() const
 {
     return _position;
 }
 
-void TilemapLayer::setPosition(const sp<Vec>& position)
+void TilemapLayer::setPosition(const sp<Vec3>& position)
 {
     _position = position;
 }

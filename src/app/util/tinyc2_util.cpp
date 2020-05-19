@@ -14,7 +14,12 @@
 
 namespace ark {
 
-C2RigidBody::C2RigidBody(const sp<Vec2>& position, const sp<Rotate>& rotate, bool isStaticBody)
+C2Shape::C2Shape()
+{
+    memset(this, 0, sizeof(*this));
+}
+
+C2RigidBody::C2RigidBody(const sp<Vec3>& position, const sp<Rotate>& rotate, bool isStaticBody)
     : _position(position), _rotate(rotate), _is_static_body(isStaticBody)
 {
 }

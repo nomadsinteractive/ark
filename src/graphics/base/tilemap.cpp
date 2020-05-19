@@ -108,12 +108,12 @@ const sp<Tileset>& Tilemap::tileset() const
     return _tileset;
 }
 
-const sp<Vec>& Tilemap::scroller() const
+const sp<Vec3>& Tilemap::scroller() const
 {
     return _scroller;
 }
 
-void Tilemap::setScroller(const sp<Vec>& scroller)
+void Tilemap::setScroller(const sp<Vec3>& scroller)
 {
     _scroller = scroller;
 }
@@ -129,7 +129,7 @@ void Tilemap::load(const String& src)
     load(Ark::instance().openAsset(src));
 }
 
-sp<TilemapLayer> Tilemap::makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Vec>& position, Tilemap::LayerFlag layerFlag)
+sp<TilemapLayer> Tilemap::makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position, Tilemap::LayerFlag layerFlag)
 {
     sp<TilemapLayer> layer = sp<TilemapLayer>::make(*this, rowCount, colCount, position, layerFlag);
     _layers.push_back(layer);

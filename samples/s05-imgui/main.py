@@ -58,7 +58,7 @@ def main():
     _application.arena = arena
     imgui = arena.resource_loader.refs.imgui
 
-    builder = dear_imgui.RendererBuilder()
+    builder = dear_imgui.RendererBuilder(imgui)
     # builder.show_about_window()
     show_my_window(builder)
     builder.show_demo_window()

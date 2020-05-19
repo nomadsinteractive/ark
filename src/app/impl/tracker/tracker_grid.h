@@ -17,16 +17,12 @@ namespace ark {
 
 class TrackerGrid : public Tracker {
 public:
-    static_assert (DIMENSIONS == 2 || DIMENSIONS == 3, "Dimension should be either 2(V2) or 3(V3)");
-    typedef std::conditional<DIMENSIONS == 2, V2, V3>::type VType;
-    typedef Variable<VType> VecType;
+    TrackerGrid(uint32_t dimension, const V3& cell);
 
-    TrackerGrid(const VType& cell);
-
-    virtual sp<Vec> create(int32_t id, const sp<Vec>& position, const sp<Vec>& size) override;
+    virtual sp<Vec3> create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& size) override;
     virtual void remove(int32_t id) override;
 
-    virtual std::unordered_set<int32_t> search(const V& position, const V& size) override;
+    virtual std::unordered_set<int32_t> search(const V3& position, const V3& size) override;
 
 public:
     class Stub;
@@ -65,16 +61,18 @@ public:
 
     class Stub {
     public:
-        Stub(const VType& cell);
+        Stub(uint32_t dimension, const V3& cell);
+        ~Stub();
 
         void remove(int32_t id);
-        void create(int32_t id, const VType& position, const VType& size);
-        void update(int32_t id, const VType& position, const VType& size);
+        void create(int32_t id, const V3& position, const V3& size);
+        void update(int32_t id, const V3& position, const V3& size);
 
-        std::unordered_set<int32_t> search(const VType& position, const VType& size) const;
+        std::unordered_set<int32_t> search(const V3& position, const V3& size) const;
 
     private:
-        Axis _axes[DIMENSIONS];
+        uint32_t _dimension;
+        Axis* _axes;
     };
 
 //  [[plugin::builder("grid")]]
@@ -85,26 +83,27 @@ public:
         virtual sp<Tracker> build(const Scope& args) override;
 
     private:
-        sp<Builder<Vec>> _cell;
+        uint32_t _dimension;
+        sp<Builder<Vec3>> _cell;
 
     };
 
 private:
-    class TrackedPosition : public VecType {
+    class TrackedPosition : public Vec3 {
     public:
-        TrackedPosition(int32_t id, const sp<TrackerGrid::Stub>& stub, const sp<VecType>& position, const sp<VecType>& size)
+        TrackedPosition(int32_t id, const sp<TrackerGrid::Stub>& stub, const sp<Vec3>& position, const sp<Vec3>& size)
             : _id(id), _stub(stub), _position(position), _size(size) {
-            const VType p = _position->val();
-            const VType s = _size->val();
+            const V3 p = _position->val();
+            const V3 s = _size->val();
             _stub->create(_id, p, s);
         }
         ~TrackedPosition() override {
             _stub->remove(_id);
         }
 
-        virtual VType val() override {
-            const VType p = _position->val();
-            const VType s = _size->val();
+        virtual V3 val() override {
+            const V3 p = _position->val();
+            const V3 s = _size->val();
             _stub->update(_id, p, s);
             return p;
         }
@@ -116,8 +115,8 @@ private:
     private:
         int32_t _id;
         sp<TrackerGrid::Stub> _stub;
-        sp<VecType> _position;
-        sp<VecType> _size;
+        sp<Vec3> _position;
+        sp<Vec3> _size;
     };
 
 private:

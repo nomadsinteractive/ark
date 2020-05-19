@@ -11,7 +11,7 @@ namespace ark {
 
 class ARK_API V2 {
 public:
-    V2(float v = 0);
+    explicit V2(float v = 0);
     V2(float x, float y);
     V2(const std::initializer_list<float>& values);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(V2);

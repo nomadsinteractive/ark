@@ -43,15 +43,15 @@ public:
     sp<Numeric> _delegate;
 };
 
-class _RigidBodyPosition : public Vec {
+class _RigidBodyPosition : public Vec3 {
 public:
-    _RigidBodyPosition(const sp<Body::Stub>& stub, const sp<Vec>& delegate)
+    _RigidBodyPosition(const sp<Body::Stub>& stub, const sp<Vec3>& delegate)
         : _stub(stub)/*, _delegate(delegate)*/ {
     }
 
-    virtual V val() override {
+    virtual V3 val() override {
         DCHECK(_stub->_body, "Body has been disposed");
-        return V(_stub->_body->GetPosition().x, _stub->_body->GetPosition().y);
+        return V3(_stub->_body->GetPosition().x, _stub->_body->GetPosition().y, 0);
     }
 
     virtual bool update(uint64_t /*timestamp*/) override {
@@ -59,7 +59,7 @@ public:
     }
 
     sp<Body::Stub> _stub;
-    sp<Vec> _delegate;
+    sp<Vec3> _delegate;
 
 };
 
@@ -170,17 +170,17 @@ private:
 
 }
 
-Body::Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction, bool isSensor)
+Body::Body(const World& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction, bool isSensor)
     : Body(world, type, position, size, rotate, BodyCreateInfo(shape, density, friction, isSensor))
 {
 }
 
-Body::Body(const World& world, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo)
+Body::Body(const World& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo)
     : Body(sp<Stub>::make(world, world.createBody(type, position->val(), size, createInfo)), type, position, size, rotate)
 {
 }
 
-Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec>& position, const sp<Size>& size, const sp<Numeric>& rotation)
+Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotation)
     : RigidBody(stub->_id, type,
                 sp<_RigidBodyPosition>::make(stub, position),
                 size,
@@ -223,7 +223,7 @@ sp<Body> Body::obtain(const Shadow* shadow)
                     (s._body->GetType() == b2_kinematicBody ? Collider::BODY_TYPE_KINEMATIC : Collider::BODY_TYPE_DYNAMIC);
         const b2Vec2& position = s._body->GetPosition();
         float rotation = s._body->GetTransform().q.GetAngle();
-        const sp<Vec2> p = sp<Vec2::Const>::make(V(position.x, position.y));
+        const sp<Vec3> p = sp<Vec3::Const>::make(V3(position.x, position.y, 0));
         const sp<Rotate> rotate = sp<Rotate>::make(sp<Numeric::Const>::make(rotation));
         rigidBodyStub = sp<RigidBody::Stub>::make(s._id, bodyType, p, nullptr, rotate, s._disposed, nullptr, shadow->_tag);
     }

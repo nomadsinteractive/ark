@@ -80,10 +80,6 @@ typedef Importer<Tilemap> TilemapImporter;
 //[[script::bindings::auto]]
 typedef Importer<Tileset> TilesetImporter;
 
-typedef Vec2 Vec;
-typedef V2 V;
-//typedef Vec2Util VecUtil;
-
 const int32_t DIMENSIONS = 2;
 
 }

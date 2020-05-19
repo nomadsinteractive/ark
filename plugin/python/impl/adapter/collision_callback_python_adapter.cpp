@@ -16,7 +16,7 @@ CollisionCallbackPythonAdapter::CollisionCallbackPythonAdapter(const PyInstance&
                                                              : PyInstance()),
       _on_end_contact(callback.hasAttr("on_end_contact") ? callback.getAttr("on_end_contact")
                                                            : PyInstance()),
-      _collision_manifold(sp<CollisionManifold>::make(V()))
+      _collision_manifold(sp<CollisionManifold>::make(V3()))
 {
 }
 

@@ -12,6 +12,8 @@
 namespace ark {
 
 struct C2Shape {
+    C2Shape();
+
     C2_TYPE t;
 
     union {
@@ -24,7 +26,7 @@ struct C2Shape {
 
 class C2RigidBody {
 public:
-    C2RigidBody(const sp<Vec2>& position, const sp<Rotate>& rotate, bool isStaticBody);
+    C2RigidBody(const sp<Vec3>& position, const sp<Rotate>& rotate, bool isStaticBody);
     C2RigidBody(const C2RigidBody& other) = default;
 
     void makeAABB(const Rect& aabb);
@@ -42,7 +44,7 @@ private:
 
 private:
     std::vector<C2Shape> _shapes;
-    sp<Vec2> _position;
+    sp<Vec3> _position;
     sp<Rotate> _rotate;
     bool _is_static_body;
 };

@@ -3,7 +3,7 @@
 	<alphabet id="@a001" class="true-type" src="fonts/PassionOne-Regular.ttf" text-size="96" style="fallback: @a002"/>
 	<alphabet id="@a002" class="system" text-size="96"/>
 	<atlas id="@blocks" src="blocks.png">
-		<import class="tiles" tile-width="32" tile-height="32" rect="0, 0, 512, 512"/>
+		<import class="tiles" tile-width="32" tile-height="32" rect="0, 0, 512, 512" pivot-x="0.5" pivot-y="0.5"/>
 	</atlas>
 	<atlas id="@alphabets" src="alphabet.png">
 		<import class="characters" characters="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890/.(),- "

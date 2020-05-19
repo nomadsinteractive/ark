@@ -10,14 +10,14 @@ namespace ark {
 
 class ARK_API CollisionManifold {
 public:
-    CollisionManifold(const V& normal);
+    CollisionManifold(const V3& normal);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(CollisionManifold);
 
 //  [[script::bindings::property]]
-    const V& normal() const;
+    const V3& normal() const;
 
 private:
-    V _normal;
+    V3 _normal;
 };
 
 }

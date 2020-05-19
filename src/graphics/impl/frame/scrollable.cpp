@@ -85,7 +85,7 @@ void Scrollable::RollingAdapter::putTile(int32_t rowIndex, int32_t colIndex, con
     _tiles->buf()[rowIndex * _params._col_count + colIndex] = tile;
 }
 
-Scrollable::Scrollable(const sp<Vec>& scroller, const sp<RendererMaker>& tileMaker, const sp<Size>& size, const Scrollable::Params& params)
+Scrollable::Scrollable(const sp<Vec3>& scroller, const sp<RendererMaker>& tileMaker, const sp<Size>& size, const Scrollable::Params& params)
     : _params(params), _rolling_view(_params), _scroller(scroller), _renderer_maker(tileMaker), _size(size),
       _scroll_x(0), _scroll_y(0)
 {
@@ -130,7 +130,7 @@ void Scrollable::updateTask()
 
 void Scrollable::update()
 {
-    const V scroll = _scroller->val();
+    const V3 scroll = _scroller->val();
     int32_t scrollX = static_cast<int32_t>(scroll.x());
     int32_t scrollY = static_cast<int32_t>(scroll.y());
     if(scrollX != _scroll_x || scrollY != _scroll_y)
@@ -164,7 +164,7 @@ Scrollable::Params::Params(const document& manifest)
 }
 
 Scrollable::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _scroller(factory.ensureBuilder<Vec>(manifest, "scroller")), _tile_maker(factory.ensureBuilder<RendererMaker>(manifest, "renderer-maker")),
+    : _scroller(factory.ensureBuilder<Vec3>(manifest, "scroller")), _tile_maker(factory.ensureBuilder<RendererMaker>(manifest, "renderer-maker")),
       _size(factory.ensureBuilder<Size>(manifest, Constants::Attributes::SIZE)), _params(manifest)
 {
 }

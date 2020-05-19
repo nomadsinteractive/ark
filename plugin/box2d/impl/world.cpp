@@ -24,8 +24,8 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-World::World(const b2Vec2& gravity, float ppmX, float ppmY)
-    : _stub(sp<Stub>::make(gravity, ppmX, ppmY))
+World::World(const b2Vec2& gravity, const V2& pixelPerMeter)
+    : _stub(sp<Stub>::make(gravity, pixelPerMeter))
 {
     const BodyCreateInfo box(sp<Box>::make(), 1.0f, 0.2f);
     _stub->_body_manifests[Collider::BODY_SHAPE_AABB] = box;
@@ -40,7 +40,7 @@ void World::run()
     _stub->run();
 }
 
-sp<RigidBody> World::createBody(Collider::BodyType type, int32_t shape, const sp<Vec>& position, const sp<Size>& size, const sp<Rotate>& rotate)
+sp<RigidBody> World::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate)
 {
     const auto iter = _stub->_body_manifests.find(shape);
     DCHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-id: %d not found", shape);
@@ -72,7 +72,7 @@ b2Body* World::createBody(const b2BodyDef& bodyDef) const
     return _stub->_world.CreateBody(&bodyDef);
 }
 
-b2Body* World::createBody(Collider::BodyType type, const V& position, const sp<Size>& size, const BodyCreateInfo& createInfo) const
+b2Body* World::createBody(Collider::BodyType type, const V3& position, const sp<Size>& size, const BodyCreateInfo& createInfo) const
 {
     b2BodyDef bodyDef;
     switch(type & Collider::BODY_TYPE_MASK)
@@ -139,19 +139,18 @@ void World::setBodyManifest(int32_t id, const BodyCreateInfo& bodyManifest)
 }
 
 World::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _disposed(factory.getBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED))
+    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _ppm(factory.ensureBuilder<Vec2>(manifest, "pixel-per-meter")),
+      _gravity(factory.ensureBuilder<Vec2>(manifest, "gravity")), _disposed(factory.getBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED))
 {
-    BeanUtils::split<Numeric, Numeric>(factory, manifest, "pixel-per-meter", _ppmx, _ppmy);
-    BeanUtils::split<Numeric, Numeric>(factory, manifest, "gravity", _gravity_x, _gravity_y);
-
     for(const document& i : _manifest->children("import"))
         _importers.push_back(_factory.ensureBuilder<Importer>(i));
 }
 
 sp<World> World::BUILDER_IMPL1::build(const Scope& args)
 {
-    b2Vec2 gravity(BeanUtils::toFloat(_gravity_x, args), BeanUtils::toFloat(_gravity_y, args));
-    const sp<World> world = sp<World>::make(gravity, BeanUtils::toFloat(_ppmx, args), BeanUtils::toFloat(_ppmy, args));
+    const V2 g = _gravity->build(args)->val();
+    b2Vec2 gravity(g.x(), g.y());
+    const sp<World> world = sp<World>::make(gravity, _ppm->build(args)->val());
     for(const document& i : _manifest->children("rigid-body"))
     {
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
@@ -185,8 +184,8 @@ sp<Collider> World::BUILDER_IMPL2::build(const Scope& args)
     return _delegate.build(args);
 }
 
-World::Stub::Stub(const b2Vec2& gravity, float ppmX, float ppmY)
-    : _ppm_x(ppmX), _ppm_y(ppmY), _time_step(1.0f / 60.0f), _velocity_iterations(6), _position_iterations(2), _rigid_body_id_base(0), _world(gravity)
+World::Stub::Stub(const b2Vec2& gravity, const V2& pixelPerMeter)
+    : _ppm_x(pixelPerMeter.x()), _ppm_y(pixelPerMeter.y()), _time_step(1.0f / 60.0f), _velocity_iterations(6), _position_iterations(2), _rigid_body_id_base(0), _world(gravity)
 {
 }
 
@@ -199,7 +198,7 @@ void World::ContactListenerImpl::BeginContact(b2Contact* contact)
 {
     Body::Shadow* s1 = reinterpret_cast<Body::Shadow*>(contact->GetFixtureA()->GetBody()->GetUserData());
     Body::Shadow* s2 = reinterpret_cast<Body::Shadow*>(contact->GetFixtureB()->GetBody()->GetUserData());
-    const V normal = V(contact->GetManifold()->localNormal.x, contact->GetManifold()->localNormal.y);
+    const V3 normal = V3(contact->GetManifold()->localNormal.x, contact->GetManifold()->localNormal.y, 0);
     if(s1 && s2)
     {
         const sp<Body::Stub> body1 = s1->_body.ensure();
