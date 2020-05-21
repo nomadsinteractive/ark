@@ -17,7 +17,7 @@ android {
     }
     sourceSets {
         main {
-            assets.srcDirs = project.hasProperty('asset_dir') ? [asset_dir] : ['assets']
+            assets.srcDirs = project.hasProperty('asset_dir') ? [asset_dir.split(';')] : ['assets']
             jniLibs.srcDirs = ['libs']
         }
     }

@@ -52,8 +52,8 @@ DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const s
 {
 }
 
-DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, const Parameters& parameters)
-    : _shader_bindings(shaderBindings), _attachments(attachments), _ubos(std::move(ubo)), _vertex_buffer(std::move(vertexBuffer)), _index_buffer(std::move(indexBuffer)), _scissor(0, 0, -1.0f, -1.0f), _parameters(parameters)
+DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, Parameters parameters)
+    : _shader_bindings(shaderBindings), _attachments(attachments), _ubos(std::move(ubo)), _vertex_buffer(std::move(vertexBuffer)), _index_buffer(std::move(indexBuffer)), _scissor(0, 0, -1.0f, -1.0f), _parameters(std::move(parameters))
 {
 }
 
@@ -87,11 +87,6 @@ void DrawingContext::postDraw(GraphicsContext& graphicsContext)
     _shader_bindings->snippet()->postDraw(graphicsContext);
 }
 
-DrawingContext::ParamDrawElements::ParamDrawElements()
-    : _count(0), _start(0)
-{
-}
-
 DrawingContext::ParamDrawElements::ParamDrawElements(uint32_t start, uint32_t count)
     : _count(count), _start(start)
 {
@@ -107,9 +102,11 @@ DrawingContext::Parameters::Parameters(DrawingContext::Parameters&& other)
     if(other._draw_elements.isActive())
         _draw_elements = std::move(other._draw_elements);
     else if(other._draw_elements_instanced.isActive())
-        _draw_elements_instanced.assign(std::move(other._draw_elements_instanced));
+        new(&_draw_elements_instanced) auto(std::move(other._draw_elements_instanced));
     else if(other._draw_multi_elements_indirect.isActive())
-        _draw_multi_elements_indirect.assign(std::move(other._draw_multi_elements_indirect));
+        new(&_draw_multi_elements_indirect) auto(std::move(other._draw_multi_elements_indirect));
+    else
+        DFATAL("Shouldn't be here");
 }
 
 DrawingContext::Parameters::Parameters(const DrawingContext::Parameters& other)
@@ -117,9 +114,11 @@ DrawingContext::Parameters::Parameters(const DrawingContext::Parameters& other)
     if(other._draw_elements.isActive())
         _draw_elements = other._draw_elements;
     else if(other._draw_elements_instanced.isActive())
-        _draw_elements_instanced.assign(other._draw_elements_instanced);
+        new(&_draw_elements_instanced) auto(other._draw_elements_instanced);
     else if(other._draw_multi_elements_indirect.isActive())
-        _draw_multi_elements_indirect.assign(other._draw_multi_elements_indirect);
+        new(&_draw_multi_elements_indirect) auto(other._draw_multi_elements_indirect);
+    else
+        DFATAL("Shouldn't be here");
 }
 
 DrawingContext::Parameters::Parameters(const DrawingContext::ParamDrawElements& drawElements)
@@ -127,13 +126,13 @@ DrawingContext::Parameters::Parameters(const DrawingContext::ParamDrawElements& 
 {
 }
 
-DrawingContext::Parameters::Parameters(const DrawingContext::ParamDrawElementsInstanced& drawElementsInstanced)
-    : _draw_elements_instanced(drawElementsInstanced)
+DrawingContext::Parameters::Parameters(DrawingContext::ParamDrawElementsInstanced drawElementsInstanced)
+    : _draw_elements_instanced(std::move(drawElementsInstanced))
 {
 }
 
-DrawingContext::Parameters::Parameters(const DrawingContext::ParamDrawMultiElementsIndirect& drawMultiElementsIndirect)
-    : _draw_multi_elements_indirect(drawMultiElementsIndirect)
+DrawingContext::Parameters::Parameters(ParamDrawMultiElementsIndirect drawMultiElementsIndirect)
+    : _draw_multi_elements_indirect(std::move(drawMultiElementsIndirect))
 {
 }
 
@@ -145,6 +144,8 @@ DrawingContext::Parameters::~Parameters()
         _draw_elements_instanced.~ParamDrawElementsInstanced();
     else if(_draw_multi_elements_indirect.isActive())
         _draw_multi_elements_indirect.~ParamDrawMultiElementsIndirect();
+    else
+        DFATAL("Shouldn't be here");
 }
 
 DrawingContext::Parameters& DrawingContext::Parameters::operator =(const DrawingContext::Parameters& other)
@@ -152,23 +153,29 @@ DrawingContext::Parameters& DrawingContext::Parameters::operator =(const Drawing
     if(other._draw_elements.isActive())
         _draw_elements = other._draw_elements;
     else if(other._draw_elements_instanced.isActive())
-        _draw_elements_instanced.assign(other._draw_elements_instanced);
+        assign(_draw_elements_instanced, other._draw_elements_instanced);
     else if(other._draw_multi_elements_indirect.isActive())
-        _draw_multi_elements_indirect.assign(other._draw_multi_elements_indirect);
+        assign(_draw_multi_elements_indirect, other._draw_multi_elements_indirect);
+    else
+        DFATAL("Shouldn't be here");
     return *this;
 }
 
-DrawingContext::ParamDrawElementsInstanced::ParamDrawElementsInstanced()
-    : _count(0), _start(0)
+DrawingContext::Parameters& DrawingContext::Parameters::operator =(DrawingContext::Parameters&& other)
 {
+    if(other._draw_elements.isActive())
+        _draw_elements = other._draw_elements;
+    else if(other._draw_elements_instanced.isActive())
+        assign(_draw_elements_instanced, std::move(other._draw_elements_instanced));
+    else if(other._draw_multi_elements_indirect.isActive())
+        assign(_draw_multi_elements_indirect, std::move(other._draw_multi_elements_indirect));
+    else
+        DFATAL("Shouldn't be here");
+    return *this;
 }
 
 DrawingContext::ParamDrawElementsInstanced::ParamDrawElementsInstanced(uint32_t start, uint32_t count, int32_t instanceCount, std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots)
     : _count(count), _start(start), _instance_count(instanceCount), _instanced_array_snapshots(std::move(snapshots))
-{
-}
-
-DrawingContext::ParamDrawMultiElementsIndirect::ParamDrawMultiElementsIndirect()
 {
 }
 

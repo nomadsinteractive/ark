@@ -36,8 +36,11 @@ public:
             return assetBundle;
 
         const sp<Asset> asset = get(path);
-        if(asset)
-            return sp<AssetBundleZipFile>::make(asset->open(), path);
+        if(asset) {
+            const sp<Readable> readable = asset->open();
+            if(readable)
+                return sp<AssetBundleZipFile>::make(asset->open(), path);
+        }
 
         String dirname;
         String filename;
@@ -47,8 +50,9 @@ public:
             Strings::rcut(s, dirname, name, '/');
             filename = filename.empty() ? name : name + "/" + filename;
             const sp<Asset> asset = dirname.empty() ? nullptr : get(dirname);
-            if(asset) {
-                const sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(asset->open(), dirname);
+            const sp<Readable> readable = asset ? asset->open() : nullptr;
+            if(readable) {
+                const sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(readable, dirname);
                 const String entryName = filename + "/";
                 return zip->hasEntry(entryName) ? sp<AssetBundleWithPrefix>::make(zip, entryName) : nullptr;
             }

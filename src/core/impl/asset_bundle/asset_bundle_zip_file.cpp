@@ -124,8 +124,9 @@ bool AssetBundleZipFile::hasEntry(const String& name) const
 }
 
 AssetBundleZipFile::Stub::Stub(const sp<Readable>& zipReadable, const String& zipLocation)
-    : _zip_readable(zipReadable), _zip_location(Platform::getRealPath(zipLocation)), _size(zipReadable->remaining())
+    : _zip_readable(zipReadable), _zip_location(Platform::getRealPath(zipLocation)), _size(_zip_readable ? _zip_readable->remaining() : 0)
 {
+    DCHECK(_zip_readable, "Cannot open file %s", _zip_location.c_str());
     zip_error_t error;
     _zip_source = zip_source_function_create(_local_zip_source_callback, this, &error);
     DCHECK(_zip_source, "Zip function create error: %s", zip_error_strerror(&error));
