@@ -19,9 +19,9 @@ public:
 
     }
 
-    virtual void upload(const UploadFunc& uploader) override {
+    virtual void upload(Writable& uploader) override {
         for(const Buffer::Block& i : _blocks)
-            uploader(i.content.buf(), i.content.length(), i.offset);
+            uploader.write(i.content.buf(), static_cast<uint32_t>(i.content.length()), static_cast<uint32_t>(i.offset));
     }
 
 private:

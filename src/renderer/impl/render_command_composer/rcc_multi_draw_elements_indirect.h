@@ -29,7 +29,7 @@ private:
     public:
         VerticesUploader(const sp<MultiModels>& multiModels, const sp<PipelineInput>& pipelineInput);
 
-        void upload(const UploadFunc& uploader);
+        void upload(Writable& uploader);
 
     private:
         sp<MultiModels> _multi_models;
@@ -40,7 +40,7 @@ private:
     public:
         IndicesUploader(const sp<MultiModels>& multiModels);
 
-        void upload(const UploadFunc& uploader);
+        void upload(Writable& uploader);
 
     private:
         sp<MultiModels> _multi_models;

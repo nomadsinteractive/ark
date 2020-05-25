@@ -15,10 +15,10 @@ namespace box2d {
 class ARK_PLUGIN_BOX2D_API Joint {
 public:
     struct Stub {
-        sp<World> _world;
+        sp<ColliderBox2D> _world;
         b2Joint* _joint;
 
-        Stub(const sp<World>& world, b2Joint* joint);
+        Stub(const sp<ColliderBox2D>& world, b2Joint* joint);
         ~Stub();
 
         void dispose();
@@ -26,7 +26,7 @@ public:
     };
 
 public:
-    Joint(const sp<World>& world, b2Joint* joint);
+    Joint(const sp<ColliderBox2D>& world, b2Joint* joint);
     ~Joint();
 
     void dispose();

@@ -15,13 +15,16 @@ namespace ark {
 class ARK_API Model {
 public:
     Model() = default;
-    Model(const array<element_index_t>& indices, const sp<Vertices>& vertices, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
+    Model(sp<Uploader> indices, sp<Vertices> vertices, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Model);
 
-    const array<element_index_t>& indices() const;
+    const sp<Uploader>& indices() const;
     const sp<Vertices>& vertices() const;
 
     const Metrics& metrics() const;
+
+    size_t indexLength() const;
+    size_t vertexLength() const;
 
     void writeToStream(VertexStream& buf, const V3& size) const;
 
@@ -29,7 +32,7 @@ private:
     V3 toScale(const V3& renderObjectSize) const;
 
 private:
-    array<element_index_t> _indices;
+    sp<Uploader> _indices;
     sp<Vertices> _vertices;
     Metrics _metrics;
 };

@@ -7,6 +7,7 @@
 
 #include "core/base/api.h"
 #include "core/inf/array.h"
+#include "core/inf/writable.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -15,14 +16,13 @@ namespace ark {
 
 class ARK_API Uploader {
 public:
-    typedef std::function<void(void*, size_t, size_t)>  UploadFunc;
     typedef std::function<sp<Uploader>(size_t)> MakerFunc;
 
     Uploader(size_t size);
     virtual ~Uploader() = default;
 
     size_t size() const;
-    virtual void upload(const UploadFunc& uploader) = 0;
+    virtual void upload(Writable& uploader) = 0;
 
     template<typename T> class Array;
     template<typename T> class ArrayList;
@@ -41,8 +41,8 @@ public:
         : Uploader(array->size()), _array(array) {
     }
 
-    virtual void upload(const UploadFunc& uploader) override {
-        uploader(_array->buf(), _array->size(), 0);
+    virtual void upload(Writable& uploader) override {
+        uploader.write(_array->buf(), _array->size(), 0);
     }
 
 private:
@@ -57,11 +57,11 @@ public:
             _size += i->size();
     }
 
-    virtual void upload(const UploadFunc& uploader) override {
+    virtual void upload(Writable& uploader) override {
         size_t offset = 0;
         for(const auto& i : _array_list) {
             size_t size = i->size();
-            uploader(i->buf(), size, offset);
+            uploader.write(i->buf(), size, offset);
             offset += size;
         }
     }
@@ -76,8 +76,8 @@ public:
         : Uploader(vector.size() * sizeof(T)), _vector(std::move(vector)) {
     }
 
-    virtual void upload(const UploadFunc& uploader) override {
-        uploader(&_vector[0], _vector.size() * sizeof(T), 0);
+    virtual void upload(Writable& uploader) override {
+        uploader.write(&_vector[0], _vector.size() * sizeof(T), 0);
     }
 
 private:
@@ -91,8 +91,8 @@ public:
         DWARN(std::is_standard_layout<T>::value, "T is not a StandardLayoutType");
     }
 
-    virtual void upload(const UploadFunc& uploader) override {
-        uploader(_object.get(), _size, 0);
+    virtual void upload(Writable& uploader) override {
+        uploader.write(_object.get(), _size, 0);
     }
 
 private:
@@ -109,8 +109,8 @@ public:
         delete[] _memory;
     }
 
-    virtual void upload(const UploadFunc& uploader) override {
-        uploader(_memory, _size, 0);
+    virtual void upload(Writable& uploader) override {
+        uploader.write(_memory, static_cast<uint32_t>(_size), 0);
     }
 
 private:

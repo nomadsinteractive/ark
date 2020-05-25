@@ -10,6 +10,28 @@
 namespace ark {
 namespace opengl {
 
+namespace {
+
+class WritableGLBuffer : public Writable {
+public:
+    WritableGLBuffer(GLenum type, size_t size)
+        : _type(type), _size(size) {
+    }
+
+    virtual uint32_t write(void* buffer, uint32_t size, uint32_t offset) override {
+        DASSERT(buffer);
+        DCHECK(offset + size <= _size, "GLBuffer data overflow");
+        glBufferSubData(_type, static_cast<GLsizeiptr>(offset), static_cast<GLsizeiptr>(size), buffer);
+        return size;
+    }
+
+private:
+    GLenum _type;
+    size_t _size;
+};
+
+}
+
 GLBuffer::GLBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Recycler>& recycler)
     : _type(GLUtil::toBufferType(type)), _usage(usage == Buffer::USAGE_DYNAMIC ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW), _recycler(recycler), _id(0)
 {
@@ -29,12 +51,8 @@ void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& uploader
     _size = uploader.size();
     if(static_cast<size_t>(bufsize) < _size)
         glBufferData(_type, static_cast<GLsizeiptr>(_size), nullptr, _usage);
-    Uploader::UploadFunc func = [this](void* data, size_t size, size_t offset) {
-        DASSERT(data);
-        DCHECK(offset + size <= _size, "GLBuffer data overflow");
-        glBufferSubData(_type, static_cast<GLsizeiptr>(offset), static_cast<GLsizeiptr>(size), data);
-    };
-    uploader.upload(func);
+    WritableGLBuffer writer(_type, _size);
+    uploader.upload(writer);
     glBindBuffer(_type, 0);
 }
 

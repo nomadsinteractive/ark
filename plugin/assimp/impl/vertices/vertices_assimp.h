@@ -8,37 +8,23 @@
 
 #include "renderer/inf/vertices.h"
 
+#include "assimp/base/mesh.h"
+
 namespace ark {
 namespace plugin {
 namespace assimp {
 
 class VerticesAssimp : public Vertices {
 public:
-    struct UV {
-        UV() = default;
-        UV(uint16_t u, uint16_t v);
-
-        uint16_t _u;
-        uint16_t _v;
-    };
-
-    struct Tangent {
-        Tangent() = default;
-        Tangent(const V3& tangent, const V3& bitangent);
-
-        V3 _tangent;
-        V3 _bitangent;
-    };
-
-    VerticesAssimp(sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents);
+    VerticesAssimp(sp<Array<Mesh>> meshes);
 
     virtual void write(VertexStream& buf, const V3& size) override;
 
 private:
-    sp<Array<V3>> _vertices;
-    sp<Array<UV>> _uvs;
-    sp<Array<V3>> _normals;
-    sp<Array<Tangent>> _tangents;
+    size_t calcVertexLength(Array<Mesh>& meshes) const;
+
+private:
+    sp<Array<Mesh>> _meshes;
 };
 
 }

@@ -16,7 +16,7 @@ public:
     static Model makeUnitPointModel();
     static Model makeUnitQuadModel();
 
-    static element_index_t hash(const sp<IndexArray>& indices);
+    static element_index_t hash(element_index_t* buf, size_t len);
 
     static bool isScissorEnabled(const Rect& scissor);
 };

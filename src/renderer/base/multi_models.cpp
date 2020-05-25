@@ -7,8 +7,8 @@ namespace ark {
 void MultiModels::addModel(int32_t type, const Model& model)
 {
     _models[type] = ModelInfo(model, _vertex_length, _index_length);
-    _vertex_length += model.vertices()->length();
-    _index_length += model.indices()->length();
+    _vertex_length += model.vertexLength();
+    _index_length += model.indexLength();
 }
 
 const MultiModels::ModelInfo& MultiModels::ensure(int32_t type) const
@@ -23,7 +23,7 @@ Model MultiModels::load(int32_t type) const
     return ensure(type)._model;
 }
 
-const std::unordered_map<int32_t, MultiModels::ModelInfo>& MultiModels::models() const
+const Table<int32_t, MultiModels::ModelInfo>& MultiModels::models() const
 {
     return _models;
 }

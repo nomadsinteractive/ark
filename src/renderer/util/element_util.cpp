@@ -9,6 +9,7 @@
 #include "renderer/impl/vertices/vertices_nine_patch.h"
 #include "renderer/impl/vertices/vertices_point.h"
 #include "renderer/impl/vertices/vertices_quad.h"
+#include "renderer/inf/uploader.h"
 
 
 namespace ark {
@@ -51,23 +52,21 @@ bytearray ElementUtil::makeUnitCubeVertices()
 
 Model ElementUtil::makeUnitQuadModel()
 {
-    return Model(sp<IndexArray::Fixed<6>>::make(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), sp<VerticesQuad>::make(), Metrics{V3(1.0f), V3(1.0f), V3(0)});
+    return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<6>>::make(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1}))), sp<VerticesQuad>::make(), Metrics{V3(1.0f), V3(1.0f), V3(0)});
 }
 
 Model ElementUtil::makeUnitNinePatchModel()
 {
-    return Model(sp<IndexArray::Fixed<28>>::make(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15})), sp<VerticesNinePatch>::make());
+    return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<28>>::make(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15}))), sp<VerticesNinePatch>::make());
 }
 
 Model ElementUtil::makeUnitPointModel()
 {
-    return Model(sp<IndexArray::Fixed<1>>::make(std::initializer_list<element_index_t>({0})), sp<VerticesPoint>::make(), Metrics{V3(1.0f), V3(1.0f), V3()});
+    return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<1>>::make(std::initializer_list<element_index_t>({0}))), sp<VerticesPoint>::make(), Metrics{V3(1.0f), V3(1.0f), V3()});
 }
 
-element_index_t ElementUtil::hash(const sp<IndexArray>& indices)
+element_index_t ElementUtil::hash(element_index_t* buf, size_t len)
 {
-    element_index_t* buf = indices->buf();
-    size_t len = indices->length();
     element_index_t h = 0;
     for(size_t i = 0; i < len; ++i)
         h = h * 101 + buf[i];

@@ -19,6 +19,24 @@
 
 namespace ark {
 
+namespace {
+
+class WritableIndiceHash : public Writable {
+public:
+    WritableIndiceHash()
+        : _hash(0) {
+    }
+
+    virtual uint32_t write(void* buffer, uint32_t size, uint32_t offset) override {
+        _hash += ElementUtil::hash(reinterpret_cast<element_index_t*>(buffer), size / sizeof(element_index_t));
+        return size;
+    }
+
+    element_index_t _hash;
+};
+
+}
+
 RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
     : _render_engine(renderEngine), _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader)
 {
@@ -115,6 +133,13 @@ void RenderController::doSurfaceReady(GraphicsContext& graphicsContext)
     for(const RenderResource& resource : _on_surface_ready_items)
         if(resource.uploadPriority() != UP_LEVEL_2)
             resource.upload(graphicsContext);
+}
+
+element_index_t RenderController::getIndicesHash(Uploader& indices) const
+{
+    WritableIndiceHash writer;
+    indices.upload(writer);
+    return writer._hash;
 }
 
 const sp<RenderEngine>& RenderController::renderEngine() const
@@ -225,15 +250,15 @@ sp<SharedBuffer> RenderController::getNamedBuffer(SharedBuffer::Name name)
 
 sp<SharedBuffer> RenderController::getSharedBuffer(ModelLoader::RenderMode renderMode, const Model& model)
 {
-    const array<element_index_t>& indices = model.indices();
-    element_index_t hash = ElementUtil::hash(indices);
+    const sp<Uploader>& indices = model.indices();
+    element_index_t hash = getIndicesHash(indices);
     const auto iter = _shared_buffers.find(hash);
     if(iter != _shared_buffers.end())
         return iter->second;
 
     bool degenerate = renderMode == ModelLoader::RENDER_MODE_TRIANGLE_STRIP;
-    size_t indexCount = indices->length();
-    size_t vertexCount = model.vertices()->length();
+    size_t indexCount = model.indexLength();
+    size_t vertexCount = model.vertexLength();
 
     sp<SharedBuffer> sharedBuffer;
     if(degenerate)

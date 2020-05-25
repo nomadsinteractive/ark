@@ -3,15 +3,16 @@
 #include "core/inf/variable.h"
 
 #include "renderer/inf/vertices.h"
+#include "renderer/inf/uploader.h"
 
 namespace ark {
 
-Model::Model(const array<element_index_t>& indices, const sp<Vertices>& vertices, const Metrics& metrics)
-    : _indices(indices), _vertices(vertices), _metrics(metrics)
+Model::Model(sp<Uploader> indices, sp<Vertices> vertices, const Metrics& metrics)
+    : _indices(std::move(indices)), _vertices(std::move(vertices)), _metrics(metrics)
 {
 }
 
-const array<element_index_t>& Model::indices() const
+const sp<Uploader>& Model::indices() const
 {
     return _indices;
 }
@@ -24,6 +25,16 @@ const sp<Vertices>& Model::vertices() const
 const Metrics& Model::metrics() const
 {
     return _metrics;
+}
+
+size_t Model::indexLength() const
+{
+    return _indices->size() / sizeof(element_index_t);
+}
+
+size_t Model::vertexLength() const
+{
+    return _vertices->length();
 }
 
 V3 Model::toScale(const V3& renderObjectSize) const

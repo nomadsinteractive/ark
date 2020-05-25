@@ -35,26 +35,26 @@ public:
 
     class Concat : public Uploader {
     public:
-        Concat(size_t objectCount, size_t vertexCount, const array<element_index_t>& indices);
+        Concat(size_t objectCount, size_t vertexCount, const sp<Uploader>& indices);
 
-        virtual void upload(const Uploader::UploadFunc& uploader) override;
+        virtual void upload(Writable& uploader) override;
 
     private:
         size_t _object_count;
         size_t _vertex_count;
-        array<element_index_t> _indices;
+        sp<Uploader> _indices;
     };
 
     class Degenerate : public Uploader {
     public:
-        Degenerate(size_t objectCount, size_t vertexCount, const array<element_index_t>& indices);
+        Degenerate(size_t objectCount, size_t vertexCount, const sp<Uploader>& indices);
 
-        virtual void upload(const Uploader::UploadFunc& uploader) override;
+        virtual void upload(Writable& uploader) override;
 
     private:
         size_t _object_count;
         size_t _vertex_count;
-        array<element_index_t> _indices;
+        sp<Uploader> _indices;
     };
 
 private:

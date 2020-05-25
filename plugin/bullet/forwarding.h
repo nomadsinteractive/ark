@@ -3,13 +3,12 @@
 
 namespace ark {
 namespace plugin {
-namespace box2d {
+namespace bullet {
 
-class RigidBodyBox2D;
+class Body;
 class BodyCreateInfo;
-class Joint;
-class Shape;
-class ColliderBox2D;
+class CollisionShape;
+class World;
 
 }
 }

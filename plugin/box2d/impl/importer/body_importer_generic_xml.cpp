@@ -65,7 +65,7 @@ ImporterGenericXML::ImporterGenericXML(const document& manifest)
 {
 }
 
-void ImporterGenericXML::import(World& world)
+void ImporterGenericXML::import(ColliderBox2D& world)
 {
     const document bodies = _manifest->getChild("bodies");
     DASSERT(bodies);
@@ -100,7 +100,7 @@ ImporterGenericXML::BUILDER::BUILDER(BeanFactory& factory, const document& manif
 {
 }
 
-sp<World::Importer> ImporterGenericXML::BUILDER::build(const Scope& args)
+sp<ColliderBox2D::Importer> ImporterGenericXML::BUILDER::build(const Scope& args)
 {
     const sp<String> src = _src->build(args);
     const document manifest = _resource_loader_context->documents()->get(src);

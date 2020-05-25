@@ -1,5 +1,5 @@
-#ifndef ARK_PLUGIN_BOX2D_IMPL_BODY_H_
-#define ARK_PLUGIN_BOX2D_IMPL_BODY_H_
+#ifndef ARK_PLUGIN_BOX2D_IMPL_RIGID_BODY_BOX2D_H_
+#define ARK_PLUGIN_BOX2D_IMPL_RIGID_BODY_BOX2D_H_
 
 #include <Box2D/Box2D.h>
 
@@ -13,7 +13,7 @@
 
 #include "box2d/api.h"
 #include "box2d/forwarding.h"
-#include "box2d/impl/world.h"
+#include "box2d/impl/collider_box2d.h"
 #include "box2d/inf/shape.h"
 
 namespace ark {
@@ -22,10 +22,11 @@ namespace box2d {
 
 //[[script::bindings::holder]]
 //[[script::bindings::extends(RigidBody)]]
-class ARK_PLUGIN_BOX2D_API Body : public RigidBody, Implements<Body, RigidBody, Holder> {
+//[[script::bindings::name("RigidBody")]]
+class ARK_PLUGIN_BOX2D_API RigidBodyBox2D : public RigidBody, Implements<RigidBodyBox2D, RigidBody, Holder> {
 public:
     struct Stub {
-        Stub(const World& world, b2Body* body);
+        Stub(const ColliderBox2D& world, b2Body* body);
         ~Stub();
 
         void dispose();
@@ -33,7 +34,7 @@ public:
         b2Body* body();
 
         int32_t _id;
-        World _world;
+        ColliderBox2D _world;
         b2Body* _body;
 
         SafePtr<Disposed> _disposed;
@@ -52,15 +53,15 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Body(const World& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction, bool isSensor = false);
-    Body(const World& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo);
-    Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate);
-    Body(const sp<Stub>& stub, const sp<RigidBody::Stub>& rigidbody);
+    RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction, bool isSensor = false);
+    RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo);
+    RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate);
+    RigidBodyBox2D(const sp<Stub>& stub, const sp<RigidBody::Stub>& rigidbody);
 
     virtual void bind(const sp<RenderObject>& renderObject) override;
     virtual void dispose() override;
 
-    static sp<Body> obtain(const Shadow* shadow);
+    static sp<RigidBodyBox2D> obtain(const Shadow* shadow);
 
     b2Body* body() const;
 
@@ -123,7 +124,7 @@ public:
 private:
     sp<Stub> _stub;
 
-    friend class World;
+    friend class ColliderBox2D;
 };
 
 }

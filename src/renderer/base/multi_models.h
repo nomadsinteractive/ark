@@ -1,7 +1,7 @@
 #ifndef ARK_RENDERER_BASE_MULTI_MODELS_H_
 #define ARK_RENDERER_BASE_MULTI_MODELS_H_
 
-#include <unordered_map>
+#include "core/collection/table.h"
 
 #include "renderer/base/model.h"
 
@@ -23,13 +23,13 @@ public:
     const ModelInfo& ensure(int32_t type) const;
     Model load(int32_t type) const;
 
-    const std::unordered_map<int32_t, ModelInfo>& models() const;
+    const Table<int32_t, ModelInfo>& models() const;
 
     size_t vertexLength() const;
     size_t indexLength() const;
 
 private:
-    std::unordered_map<int32_t, ModelInfo> _models;
+    Table<int32_t, ModelInfo> _models;
 
     size_t _vertex_length;
     size_t _index_length;

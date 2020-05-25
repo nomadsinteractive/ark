@@ -1,4 +1,4 @@
-#include "box2d/impl/body.h"
+#include "box2d/impl/rigid_body_box2d.h"
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
@@ -16,7 +16,7 @@
 #include "graphics/base/transform.h"
 #include "graphics/base/v3.h"
 
-#include "impl/world.h"
+#include "box2d/impl/collider_box2d.h"
 
 namespace ark {
 namespace plugin {
@@ -26,7 +26,7 @@ namespace {
 
 class _RigidBodyRotation : public Numeric {
 public:
-    _RigidBodyRotation(const sp<Body::Stub>& stub, const sp<Numeric>& delegate)
+    _RigidBodyRotation(const sp<RigidBodyBox2D::Stub>& stub, const sp<Numeric>& delegate)
         : _stub(stub), _delegate(delegate) {
     }
 
@@ -39,13 +39,13 @@ public:
         return true;
     }
 
-    sp<Body::Stub> _stub;
+    sp<RigidBodyBox2D::Stub> _stub;
     sp<Numeric> _delegate;
 };
 
 class _RigidBodyPosition : public Vec3 {
 public:
-    _RigidBodyPosition(const sp<Body::Stub>& stub, const sp<Vec3>& delegate)
+    _RigidBodyPosition(const sp<RigidBodyBox2D::Stub>& stub, const sp<Vec3>& delegate)
         : _stub(stub)/*, _delegate(delegate)*/ {
     }
 
@@ -58,14 +58,14 @@ public:
         return true;
     }
 
-    sp<Body::Stub> _stub;
+    sp<RigidBodyBox2D::Stub> _stub;
     sp<Vec3> _delegate;
 
 };
 
 class RenderObjectPosition : public Vec3 {
 public:
-    RenderObjectPosition(const sp<Body::Stub>& stub)
+    RenderObjectPosition(const sp<RigidBodyBox2D::Stub>& stub)
         : _stub(stub) {
     }
 
@@ -81,12 +81,12 @@ public:
     }
 
 private:
-    sp<Body::Stub> _stub;
+    sp<RigidBodyBox2D::Stub> _stub;
 };
 
 class ManualRotation : public Numeric {
 public:
-    ManualRotation(const sp<Body::Stub>& stub, const sp<Numeric>& delegate)
+    ManualRotation(const sp<RigidBodyBox2D::Stub>& stub, const sp<Numeric>& delegate)
         : _stub(stub), _delegate(delegate) {
     }
 
@@ -102,13 +102,13 @@ public:
     }
 
 private:
-    sp<Body::Stub> _stub;
+    sp<RigidBodyBox2D::Stub> _stub;
     sp<Numeric> _delegate;
 };
 
 class ManualLinearVelocity : public Runnable {
 public:
-    ManualLinearVelocity(const sp<Body::Stub>& body, const sp<Vec2>& velocity, const sp<Future>& future)
+    ManualLinearVelocity(const sp<RigidBodyBox2D::Stub>& body, const sp<Vec2>& velocity, const sp<Future>& future)
         : _body(body), _velocity(velocity), _future(future) {
     }
 
@@ -124,14 +124,14 @@ public:
     }
 
 private:
-    sp<Body::Stub> _body;
+    sp<RigidBodyBox2D::Stub> _body;
     sp<Vec2> _velocity;
     sp<Future> _future;
 };
 
 class ManualApplyRotate : public Runnable {
 public:
-    ManualApplyRotate(const sp<Body::Stub>& body, const sp<Numeric>& rotate, const sp<Future>& future)
+    ManualApplyRotate(const sp<RigidBodyBox2D::Stub>& body, const sp<Numeric>& rotate, const sp<Future>& future)
         : _body(body), _rotate(rotate), _future(future) {
     }
 
@@ -147,14 +147,14 @@ public:
     }
 
 private:
-    sp<Body::Stub> _body;
+    sp<RigidBodyBox2D::Stub> _body;
     sp<Numeric> _rotate;
     sp<Future> _future;
 };
 
 class BodyDisposer {
 public:
-    BodyDisposer(const World& world, b2Body* body)
+    BodyDisposer(const ColliderBox2D& world, b2Body* body)
         : _world(world), _body(body) {
     }
     ~BodyDisposer() {
@@ -164,23 +164,23 @@ public:
     }
 
 private:
-    World _world;
+    ColliderBox2D _world;
     b2Body* _body;
 };
 
 }
 
-Body::Body(const World& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction, bool isSensor)
-    : Body(world, type, position, size, rotate, BodyCreateInfo(shape, density, friction, isSensor))
+RigidBodyBox2D::RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction, bool isSensor)
+    : RigidBodyBox2D(world, type, position, size, rotate, BodyCreateInfo(shape, density, friction, isSensor))
 {
 }
 
-Body::Body(const World& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo)
-    : Body(sp<Stub>::make(world, world.createBody(type, position->val(), size, createInfo)), type, position, size, rotate)
+RigidBodyBox2D::RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo)
+    : RigidBodyBox2D(sp<Stub>::make(world, world.createBody(type, position->val(), size, createInfo)), type, position, size, rotate)
 {
 }
 
-Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotation)
+RigidBodyBox2D::RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotation)
     : RigidBody(stub->_id, type,
                 sp<_RigidBodyPosition>::make(stub, position),
                 size,
@@ -190,12 +190,12 @@ Body::Body(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& positi
     _stub->_body->SetUserData(new Shadow(stub, RigidBody::stub()));
 }
 
-Body::Body(const sp<Body::Stub>& stub, const sp<RigidBody::Stub>& rigidbody)
+RigidBodyBox2D::RigidBodyBox2D(const sp<RigidBodyBox2D::Stub>& stub, const sp<RigidBody::Stub>& rigidbody)
     : RigidBody(rigidbody), _stub(stub)
 {
 }
 
-void Body::bind(const sp<RenderObject>& renderObject)
+void RigidBodyBox2D::bind(const sp<RenderObject>& renderObject)
 {
     renderObject->setPosition(sp<RenderObjectPosition>::make(_stub));
     renderObject->setTransform(transform());
@@ -206,12 +206,12 @@ void Body::bind(const sp<RenderObject>& renderObject)
     }
 }
 
-void Body::dispose()
+void RigidBodyBox2D::dispose()
 {
     _stub->dispose();
 }
 
-sp<Body> Body::obtain(const Shadow* shadow)
+sp<RigidBodyBox2D> RigidBodyBox2D::obtain(const Shadow* shadow)
 {
     const sp<Stub> bodyStub = shadow->_body.ensure();
     sp<RigidBody::Stub> rigidBodyStub = shadow->_rigid_body.lock();
@@ -227,124 +227,124 @@ sp<Body> Body::obtain(const Shadow* shadow)
         const sp<Rotate> rotate = sp<Rotate>::make(sp<Numeric::Const>::make(rotation));
         rigidBodyStub = sp<RigidBody::Stub>::make(s._id, bodyType, p, nullptr, rotate, s._disposed, nullptr, shadow->_tag);
     }
-    return sp<Body>::make(shadow->_body.ensure(), rigidBodyStub);
+    return sp<RigidBodyBox2D>::make(shadow->_body.ensure(), rigidBodyStub);
 }
 
-b2Body* Body::body() const
+b2Body* RigidBodyBox2D::body() const
 {
 
     return _stub->body();
 }
 
-float Body::angle()
+float RigidBodyBox2D::angle()
 {
     return _stub->body()->GetAngle();
 }
 
-void Body::setAngle(float rad)
+void RigidBodyBox2D::setAngle(float rad)
 {
     _stub->body()->SetTransform(_stub->_body->GetWorldCenter(), rad);
 }
 
-float Body::angularVelocity()
+float RigidBodyBox2D::angularVelocity()
 {
     return _stub->body()->GetAngularVelocity();
 }
 
-void Body::setAngularVelocity(float omega)
+void RigidBodyBox2D::setAngularVelocity(float omega)
 {
     _stub->body()->SetAngularVelocity(omega);
 }
 
-V2 Body::linearVelocity() const
+V2 RigidBodyBox2D::linearVelocity() const
 {
     const b2Vec2 velocity = _stub->body()->GetLinearVelocity();
     return V2(velocity.x, velocity.y);
 }
 
-void Body::setLinearVelocity(const V2& velocity)
+void RigidBodyBox2D::setLinearVelocity(const V2& velocity)
 {
     _stub->body()->SetLinearVelocity(b2Vec2(velocity.x(), velocity.y()));
 }
 
-float Body::gravityScale() const
+float RigidBodyBox2D::gravityScale() const
 {
     return _stub->body()->GetGravityScale();
 }
 
-void Body::setGravityScale(float scale)
+void RigidBodyBox2D::setGravityScale(float scale)
 {
     _stub->body()->SetGravityScale(scale);
 }
 
-bool Body::active()
+bool RigidBodyBox2D::active()
 {
     return _stub->body()->IsActive();
 }
 
-void Body::setActive(bool active)
+void RigidBodyBox2D::setActive(bool active)
 {
     DCHECK(!_stub->_world.world().IsLocked(), "Cannot set active in the middle of a time step");
     _stub->body()->SetActive(active);
 }
 
-bool Body::awake()
+bool RigidBodyBox2D::awake()
 {
     return _stub->body()->IsAwake();
 }
 
-void Body::setAwake(bool awake)
+void RigidBodyBox2D::setAwake(bool awake)
 {
     _stub->body()->SetAwake(awake);
 }
 
-float Body::x() const
+float RigidBodyBox2D::x() const
 {
     return _stub->body()->GetPosition().x;
 }
 
-float Body::y() const
+float RigidBodyBox2D::y() const
 {
     return _stub->body()->GetPosition().y;
 }
 
-float Body::mass() const
+float RigidBodyBox2D::mass() const
 {
     return _stub->body()->GetMass();
 }
 
-void Body::applyTorque(float torque, bool wake)
+void RigidBodyBox2D::applyTorque(float torque, bool wake)
 {
     _stub->body()->ApplyTorque(torque, wake);
 }
 
-void Body::applyForce(const V2& force, const V2& point, bool wake)
+void RigidBodyBox2D::applyForce(const V2& force, const V2& point, bool wake)
 {
     _stub->body()->ApplyForce(b2Vec2(force.x(), force.y()), b2Vec2(point.x(), point.y()), wake);
 }
 
-void Body::applyForceToCenter(const V2& force, bool wake)
+void RigidBodyBox2D::applyForceToCenter(const V2& force, bool wake)
 {
     _stub->body()->ApplyForceToCenter(b2Vec2(force.x(), force.y()), wake);
 }
 
-void Body::applyLinearImpulse(const V2& impulse, const V2& point, bool wake)
+void RigidBodyBox2D::applyLinearImpulse(const V2& impulse, const V2& point, bool wake)
 {
     _stub->body()->ApplyLinearImpulse(b2Vec2(impulse.x(), impulse.y()), b2Vec2(point.x(), point.y()), wake);
 }
 
-void Body::applyAngularImpulse(float impulse, bool wake)
+void RigidBodyBox2D::applyAngularImpulse(float impulse, bool wake)
 {
     _stub->body()->ApplyAngularImpulse(impulse, wake);
 }
 
-void Body::setTransform(const V2& position, float angle)
+void RigidBodyBox2D::setTransform(const V2& position, float angle)
 {
     DCHECK(!_stub->_world.world().IsLocked(), "Cannot set transform in the middle of a time step");
     _stub->body()->SetTransform(b2Vec2(position.x(), position.y()), angle);
 }
 
-sp<Future> Body::applyLinearVelocity(const sp<Vec2>& velocity)
+sp<Future> RigidBodyBox2D::applyLinearVelocity(const sp<Vec2>& velocity)
 {
     const sp<Future> future = sp<Future>::make();
     const sp<ManualLinearVelocity> task = sp<ManualLinearVelocity>::make(_stub, velocity, future);
@@ -352,7 +352,7 @@ sp<Future> Body::applyLinearVelocity(const sp<Vec2>& velocity)
     return future;
 }
 
-sp<Future> Body::applyRotate(const sp<Numeric>& rotate)
+sp<Future> RigidBodyBox2D::applyRotate(const sp<Numeric>& rotate)
 {
     const sp<Future> future = sp<Future>::make();
     const sp<Runnable> task = sp<ManualApplyRotate>::make(_stub, rotate, future);
@@ -360,23 +360,23 @@ sp<Future> Body::applyRotate(const sp<Numeric>& rotate)
     return future;
 }
 
-Body::Stub::Stub(const World& world, b2Body* body)
+RigidBodyBox2D::Stub::Stub(const ColliderBox2D& world, b2Body* body)
     : _id(world.genRigidBodyId()), _world(world), _body(body)
 {
 }
 
-Body::Stub::~Stub()
+RigidBodyBox2D::Stub::~Stub()
 {
     if(_body)
         dispose();
 }
 
-void Body::Stub::dispose()
+void RigidBodyBox2D::Stub::dispose()
 {
     DCHECK(_body, "Body has been disposed already");
     LOGD("id = %d", _id);
 
-    delete reinterpret_cast<Body::Shadow*>(_body->GetUserData());
+    delete reinterpret_cast<RigidBodyBox2D::Shadow*>(_body->GetUserData());
     _body->SetUserData(nullptr);
     _disposed->dispose();
 
@@ -389,13 +389,13 @@ void Body::Stub::dispose()
     _callback = nullptr;
 }
 
-b2Body* Body::Stub::body()
+b2Body* RigidBodyBox2D::Stub::body()
 {
     DCHECK(_body, "Body has been disposed");
     return _body;
 }
 
-Body::Shadow::Shadow(const sp<Body::Stub>& body, const sp<RigidBody::Stub>& rigidBody)
+RigidBodyBox2D::Shadow::Shadow(const sp<RigidBodyBox2D::Stub>& body, const sp<RigidBody::Stub>& rigidBody)
     : _body(body), _rigid_body(rigidBody), _tag(rigidBody->_tag)
 {
 }

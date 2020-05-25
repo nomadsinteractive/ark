@@ -4,14 +4,14 @@
 
 #include "app/base/application_context.h"
 
-#include "plugin/box2d/impl/body.h"
-#include "plugin/box2d/impl/world.h"
+#include "box2d/impl/rigid_body_box2d.h"
+#include "box2d/impl/collider_box2d.h"
 
 namespace ark {
 namespace plugin {
 namespace box2d {
 
-Joint::Joint(const sp<World>& world, b2Joint* joint)
+Joint::Joint(const sp<ColliderBox2D>& world, b2Joint* joint)
     : _stub(sp<Stub>::make(world, joint))
 {
     world->track(_stub);
@@ -33,7 +33,7 @@ void Joint::release()
     _stub->release();
 }
 
-Joint::Stub::Stub(const sp<World>& world, b2Joint* joint)
+Joint::Stub::Stub(const sp<ColliderBox2D>& world, b2Joint* joint)
     : _world(world), _joint(joint)
 {
 }

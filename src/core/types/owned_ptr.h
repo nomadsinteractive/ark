@@ -28,7 +28,7 @@ public:
         return static_cast<U*>(_inst);
     }
 
-    operator bool () const {
+    explicit operator bool () const {
         return _inst != nullptr;
     }
 
@@ -38,6 +38,14 @@ public:
 
     operator T& () const {
         return *_inst;
+    }
+
+    operator const T* () const {
+        return _inst;
+    }
+
+    operator T* () {
+        return _inst;
     }
 
     void reset(T* instance = nullptr, bool autoRelease = true) {

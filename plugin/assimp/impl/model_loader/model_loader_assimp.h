@@ -17,6 +17,9 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
 #include "renderer/inf/model_loader.h"
+#include "renderer/inf/uploader.h"
+
+#include "assimp/impl/vertices/vertices_assimp.h"
 
 namespace ark {
 namespace plugin {
@@ -50,6 +53,19 @@ private:
 
     array<element_index_t> loadIndices(const aiMesh* mesh) const;
 
+    class IndicesUploader : public Uploader {
+    public:
+        IndicesUploader(sp<ark::Array<Mesh>> meshes);
+
+        virtual void upload(Writable& uploader) override;
+
+    private:
+        size_t calcIndicesSize(ark::Array<Mesh>& meshes) const;
+
+    private:
+        sp<ark::Array<Mesh>> _meshes;
+    };
+
 private:
     struct Stub {
         Stub(const ResourceLoaderContext& resourceLoaderContext, const sp<Atlas>& atlas, const document& manifest);
@@ -60,13 +76,13 @@ private:
     private:
         void initialize(const ResourceLoaderContext& resourceLoaderContext, const sp<Atlas>& atlas, const document& manifest);
 
-        Model loadModel(const aiMesh* mesh, int32_t type, const sp<Atlas>& atlas) const;
+        Mesh loadMesh(const aiMesh* mesh, const Rect& bounds, element_index_t indexOffset) const;
+        Model loadModel(const aiScene* scene, const Rect& bounds) const;
 
         bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
-        array<element_index_t> loadIndices(const aiMesh* mesh) const;
+        array<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;
 
         void loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex);
-
     };
 
 private:

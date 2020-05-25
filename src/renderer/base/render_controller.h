@@ -155,6 +155,8 @@ private:
     void doRecycling(GraphicsContext& graphicsContext);
     void doSurfaceReady(GraphicsContext& graphicsContext);
 
+    element_index_t getIndicesHash(Uploader& indices) const;
+
 private:
     sp<RenderEngine> _render_engine;
     sp<Recycler> _recycler;

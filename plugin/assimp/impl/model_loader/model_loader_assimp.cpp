@@ -26,7 +26,6 @@
 #include "renderer/inf/render_command_composer.h"
 
 #include "assimp/impl/io/ark_io_system.h"
-#include "assimp/impl/vertices/vertices_assimp.h"
 
 
 namespace ark {
@@ -83,7 +82,8 @@ void ModelLoaderAssimp::Stub::initialize(const ResourceLoaderContext& resourceLo
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
         const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
         const aiScene* scene = importer.ReadFile(src.c_str(), aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_FlipWindingOrder);
-        _models->addModel(type, loadModel(scene->mMeshes[0], type, atlas));
+        const Rect bounds = atlas && atlas->has(type) ? atlas->getItemUV(type) : Rect(0, 1.0f, 1.0f, 0);
+        _models->addModel(type, loadModel(scene, bounds));
 
         for(uint32_t i = 0; i < scene->mNumTextures; ++i)
             loadSceneTexture(resourceLoaderContext, scene->mTextures[i]);
@@ -92,20 +92,18 @@ void ModelLoaderAssimp::Stub::initialize(const ResourceLoaderContext& resourceLo
     importer.FreeScene();
 }
 
-Model ModelLoaderAssimp::Stub::loadModel(const aiMesh* mesh, int32_t type, const sp<Atlas>& atlas) const
+Mesh ModelLoaderAssimp::Stub::loadMesh(const aiMesh* mesh, const Rect& bounds, element_index_t indexOffset) const
 {
-    sp<Array<element_index_t>> indices = loadIndices(mesh);
+    sp<Array<element_index_t>> indices = loadIndices(mesh, indexOffset);
     sp<Array<V3>> vertices = sp<Array<V3>::Allocated>::make(mesh->mNumVertices);
-    sp<Array<VerticesAssimp::UV>> uvs = sp<Array<VerticesAssimp::UV>::Allocated>::make(mesh->mNumVertices);
+    sp<Array<Mesh::UV>> uvs = sp<Array<Mesh::UV>::Allocated>::make(mesh->mNumVertices);
     sp<Array<V3>> normals = mesh->HasNormals() ? sp<Array<V3>::Allocated>::make(mesh->mNumVertices) : sp<Array<V3>::Allocated>::null();
-    sp<Array<VerticesAssimp::Tangent>> tangents = mesh->HasTangentsAndBitangents() ? sp<Array<VerticesAssimp::Tangent>::Allocated>::make(mesh->mNumVertices) : sp<Array<VerticesAssimp::Tangent>::Allocated>::null();
+    sp<Array<Mesh::Tangent>> tangents = mesh->HasTangentsAndBitangents() ? sp<Array<Mesh::Tangent>::Allocated>::make(mesh->mNumVertices) : sp<Array<Mesh::Tangent>::Allocated>::null();
 
     V3* vert = vertices->buf() - 1;
     V3* norm = normals ? normals->buf() - 1 : nullptr;
-    VerticesAssimp::Tangent* t = tangents ? tangents->buf() - 1 : nullptr;
-    VerticesAssimp::UV* u = uvs->buf() - 1;
-
-    const Rect bounds = atlas && atlas->has(type) ? atlas->getItemUV(type) : Rect(0, 1.0f, 1.0f, 0);
+    Mesh::Tangent* t = tangents ? tangents->buf() - 1 : nullptr;
+    Mesh::UV* u = uvs->buf() - 1;
 
     for(uint32_t i = 0; i < mesh->mNumVertices; i ++)
     {
@@ -113,12 +111,27 @@ Model ModelLoaderAssimp::Stub::loadModel(const aiMesh* mesh, int32_t type, const
         if(norm)
             *(++norm) = V3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
         if(tangents)
-            *(++t) = VerticesAssimp::Tangent(V3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z), V3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z));
-        *(++u) = VerticesAssimp::UV(static_cast<uint16_t>((mesh->mTextureCoords[0][i].x * bounds.width() + bounds.left()) * 0xffff),
-                                    static_cast<uint16_t>((mesh->mTextureCoords[0][i].y * bounds.height() + bounds.bottom()) * 0xffff));
+            *(++t) = Mesh::Tangent(V3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z), V3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z));
+        *(++u) = mesh->mTextureCoords[0] ? Mesh::UV(static_cast<uint16_t>((mesh->mTextureCoords[0][i].x * bounds.width() + bounds.left()) * 0xffff),
+                                                    static_cast<uint16_t>((mesh->mTextureCoords[0][i].y * bounds.height() + bounds.bottom()) * 0xffff)) : Mesh::UV(0, 0);
     }
 
-    return Model(indices, sp<VerticesAssimp>::make(std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents)));
+    return Mesh(indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents));
+}
+
+Model ModelLoaderAssimp::Stub::loadModel(const aiScene* scene, const Rect& bounds) const
+{
+    std::vector<Mesh> meshes;
+    element_index_t indexOffset = 0;
+    for(uint32_t i = 0; i < scene->mNumMeshes; ++i)
+    {
+        meshes.push_back(loadMesh(scene->mMeshes[i], bounds, indexOffset));
+        indexOffset += meshes.back().vertexLength();
+    }
+
+    sp<Array<Mesh>> m = sp<Array<Mesh>::Vector>::make(std::move(meshes));
+    sp<Uploader> uploader = sp<IndicesUploader>::make(m);
+    return Model(std::move(uploader), sp<VerticesAssimp>::make(std::move(m)));
 }
 
 bitmap ModelLoaderAssimp::Stub::loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const
@@ -137,18 +150,47 @@ void ModelLoaderAssimp::Stub::loadSceneTexture(const ResourceLoaderContext& reso
     _textures.push_back(resourceLoaderContext.renderController()->createTexture2D(sp<Size>::make(static_cast<float>(bitmap->width()), static_cast<float>(bitmap->height())), sp<Texture::UploaderBitmap>::make(bitmap)));
 }
 
-array<element_index_t> ModelLoaderAssimp::Stub::loadIndices(const aiMesh* mesh) const
+array<element_index_t> ModelLoaderAssimp::Stub::loadIndices(const aiMesh* mesh, element_index_t indexOffset) const
 {
     const array<element_index_t> s = sp<Array<element_index_t>::Allocated>::make(mesh->mNumFaces * 3);
     element_index_t* buf = s->buf();
     for(uint32_t i = 0; i < mesh->mNumFaces; i ++)
     {
-        buf[2] = static_cast<element_index_t>(mesh->mFaces[i].mIndices[0]);
-        buf[1] = static_cast<element_index_t>(mesh->mFaces[i].mIndices[1]);
-        buf[0] = static_cast<element_index_t>(mesh->mFaces[i].mIndices[2]);
+        buf[2] = static_cast<element_index_t>(mesh->mFaces[i].mIndices[0]) + indexOffset;
+        buf[1] = static_cast<element_index_t>(mesh->mFaces[i].mIndices[1]) + indexOffset;
+        buf[0] = static_cast<element_index_t>(mesh->mFaces[i].mIndices[2]) + indexOffset;
         buf += 3;
     }
     return s;
+}
+
+ModelLoaderAssimp::IndicesUploader::IndicesUploader(sp<ark::Array<Mesh>> meshes)
+    : Uploader(calcIndicesSize(meshes)), _meshes(std::move(meshes))
+{
+}
+
+void ModelLoaderAssimp::IndicesUploader::upload(Writable& uploader)
+{
+    uint32_t offset = 0;
+    size_t length = _meshes->length();
+    Mesh* buf = _meshes->buf();
+    for(size_t i = 0; i < length; ++i)
+    {
+        const array<element_index_t>& indices = buf[i].indices();
+        uint32_t size = static_cast<uint32_t>(indices->size());
+        uploader.write(indices->buf(), size, offset);
+        offset += size;
+    }
+}
+
+size_t ModelLoaderAssimp::IndicesUploader::calcIndicesSize(ark::Array<Mesh>& meshes) const
+{
+    size_t size = 0;
+    size_t length = meshes.length();
+    Mesh* buf = meshes.buf();
+    for(size_t i = 0; i < length; ++i)
+        size += buf[i].indices()->length() * sizeof(element_index_t);
+    return size;
 }
 
 }

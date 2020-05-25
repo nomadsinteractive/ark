@@ -1,5 +1,5 @@
-#ifndef ARK_PLUGIN_BOX2D_IMPL_WORLD_H_
-#define ARK_PLUGIN_BOX2D_IMPL_WORLD_H_
+#ifndef ARK_PLUGIN_BOX2D_IMPL_COLLIDER_BOX2D_H_
+#define ARK_PLUGIN_BOX2D_IMPL_COLLIDER_BOX2D_H_
 
 #include <unordered_map>
 #include <vector>
@@ -27,20 +27,21 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-class ARK_PLUGIN_BOX2D_API World : public Runnable, public Collider, Implements<World, Runnable, Collider> {
+//[[script::bindings::name("World")]]
+class ARK_PLUGIN_BOX2D_API ColliderBox2D : public Runnable, public Collider, Implements<ColliderBox2D, Runnable, Collider> {
 public:
 
     class Importer {
     public:
         virtual ~Importer() = default;
 
-        virtual void import(World& world) = 0;
+        virtual void import(ColliderBox2D& world) = 0;
 
     };
 
 public:
-    World(const b2Vec2& gravity, const V2& pixelPerMeter);
-    DEFAULT_COPY_AND_ASSIGN(World);
+    ColliderBox2D(const b2Vec2& gravity, const V2& pixelPerMeter);
+    DEFAULT_COPY_AND_ASSIGN(ColliderBox2D);
 
     virtual void run() override;
 
@@ -71,14 +72,14 @@ public:
     void track(const sp<Joint::Stub>& joint) const;
 
 //  [[plugin::resource-loader]]
-    class BUILDER_IMPL1 : public Builder<World> {
+    class BUILDER_IMPL1 : public Builder<ColliderBox2D> {
     public:
         BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<World> build(const Scope& args) override;
+        virtual sp<ColliderBox2D> build(const Scope& args) override;
 
     private:
-        void createBody(Collider::BodyType type, const sp<World>& world, const document& manifest, const Scope& args);
+        void createBody(Collider::BodyType type, const sp<ColliderBox2D>& world, const document& manifest, const Scope& args);
 
     private:
         BeanFactory _factory;
@@ -149,7 +150,7 @@ private:
     sp<Stub> _stub;
 
     friend class BUILDER_IMPL1;
-    friend class Body;
+    friend class RigidBodyBox2D;
     friend class Importer;
 };
 

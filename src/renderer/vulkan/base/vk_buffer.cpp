@@ -1,5 +1,7 @@
 #include "renderer/vulkan/base/vk_buffer.h"
 
+#include "core/impl/writable/writable_memory.h"
+
 #include "renderer/base/recycler.h"
 #include "renderer/inf/uploader.h"
 
@@ -31,10 +33,8 @@ void VKBuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uplo
     {
         ensureSize(graphicsContext, uploader);
 
-        uint8_t* mapped = reinterpret_cast<uint8_t*>(_memory->map());
-        uploader->upload([mapped](void* buf, size_t size, size_t offset) {
-            memcpy(mapped + offset, buf, size);
-        });
+        WritableMemory writable(_memory->map());
+        uploader->upload(writable);
         if((_memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
             flush();
         _memory->unmap();

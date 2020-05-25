@@ -51,7 +51,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
             if(modelIndirect._snapshot_offsets.empty())
             {
                 const MultiModels::ModelInfo& modelInfo = _multi_models->ensure(i._type);
-                modelIndirect._command = {static_cast<uint32_t>(modelInfo._model.indices()->length()), 0, static_cast<uint32_t>(modelInfo._index_offset), static_cast<uint32_t>(modelInfo._vertex_offset), 0};
+                modelIndirect._command = {static_cast<uint32_t>(modelInfo._model.indexLength()), 0, static_cast<uint32_t>(modelInfo._index_offset), static_cast<uint32_t>(modelInfo._vertex_offset), 0};
             }
 
             ++ (modelIndirect._command._instance_count);
@@ -106,19 +106,19 @@ RCCMultiDrawElementsIndirect::VerticesUploader::VerticesUploader(const sp<MultiM
 {
 }
 
-void RCCMultiDrawElementsIndirect::VerticesUploader::upload(const Uploader::UploadFunc& uploader)
+void RCCMultiDrawElementsIndirect::VerticesUploader::upload(Writable& uploader)
 {
-    size_t offset = 0;
+    uint32_t offset = 0;
     size_t stride = _pipeline_input->getStream(0).stride();
     Buffer::Attributes attributes(_pipeline_input);
     for(const auto& i : _multi_models->models())
     {
         const Model& model = i.second._model;
-        size_t size = model.vertices()->length() * stride;
+        uint32_t size = static_cast<uint32_t>(model.vertices()->length() * stride);
         uint8_t* buf = new uint8_t[size];
         VertexStream stream(attributes, buf, size, stride, false);
         i.second._model.writeToStream(stream, V3(1.0f));
-        uploader(buf, size, offset);
+        uploader.write(buf, size, offset);
         offset += size;
         delete[] buf;
     }
@@ -129,14 +129,35 @@ RCCMultiDrawElementsIndirect::IndicesUploader::IndicesUploader(const sp<MultiMod
 {
 }
 
-void RCCMultiDrawElementsIndirect::IndicesUploader::upload(const Uploader::UploadFunc& uploader)
+namespace {
+
+class WritableWithOffset : public Writable {
+public:
+    WritableWithOffset(Writable& delegate, uint32_t offset)
+        : _delegate(delegate), _offset(offset) {
+    }
+
+    virtual uint32_t write(void* buffer, uint32_t size, uint32_t offset) override {
+        _delegate.write(buffer, size, _offset + offset);
+        return size;
+    }
+
+private:
+    Writable& _delegate;
+    uint32_t _offset;
+};
+
+}
+
+void RCCMultiDrawElementsIndirect::IndicesUploader::upload(Writable& uploader)
 {
-    size_t offset = 0;
+    uint32_t offset = 0;
     for(const auto& i: _multi_models->models())
     {
-        const array<element_index_t>& indices = i.second._model.indices();
-        size_t size = indices->size();
-        uploader(indices->buf(), size, offset);
+        const sp<Uploader>& indices = i.second._model.indices();
+        uint32_t size = static_cast<uint32_t>(indices->size());
+        WritableWithOffset writable(uploader, offset);
+        indices->upload(writable);
         offset += size;
     }
 }

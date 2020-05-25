@@ -91,7 +91,7 @@ AUTOBIND_GETPROP_PATTERN = re.compile(r'\[\[script::bindings::getprop\]\]\s+([^(
 AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader\]\]\s+template<typename T>\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;{]*{')
 AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor)\]\]\s+([^(\r\n]+)\(([^\r\n]*)\)[^;\r\n]*;')
 AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
-AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::class\(([^)]+)\)\]\]')
+AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::(class|name)\(([^)]+)\)\]\]')
 AUTOBIND_EXTENDS_PATTERN = re.compile(r'\[\[script::bindings::extends\((\w+)\)\]\]')
 AUTOBIND_TYPEDEF_PATTERN = re.compile(r'\[\[script::bindings::auto\]\]\s+typedef\s+\w[\w<>\s]+\s+(\w+);')
 AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container|holder)\]\]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
@@ -232,10 +232,11 @@ def gen_module_type_declarations(modulename, results):
         genclasses = genclasses[1:]
         if not i.base_classname or i.base_classname in class_declared or i.base_classname not in class_names:
             base_type = 'pi->getPyArkType<%s>()->getPyTypeObject()' % i.base_classname if i.base_classname else 'nullptr'
-            declarations.append(line_pattern % (i.py_class_name, i.binding_classname, modulename, i.binding_classname, base_type,
+            declarations.append(line_pattern % (i.py_class_name, i.binding_classname, modulename, i.name, base_type,
                                                 '|Py_TPFLAGS_HAVE_GC' if i.is_container else ''))
             class_declared.add(i.binding_classname)
         else:
+            assert len(genclasses) != 0
             genclasses.append(i)
 
     return declarations
@@ -1094,6 +1095,7 @@ class GenClass(object):
         self._py_src_name = 'py_ark_' + acg.camel_case_to_snake_case(class_name) + '_type'
         self._py_class_name = 'PyArk%sType' % class_name
         self._filename = filename
+        self._name = class_name
         self._classname = class_name
         self._binding_classname = class_name
         self._base_classname = None
@@ -1106,6 +1108,14 @@ class GenClass(object):
         return self._classname
 
     @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, v: str):
+        self._name = v
+
+    @property
     def binding_classname(self):
         return self._binding_classname
 
@@ -1114,6 +1124,7 @@ class GenClass(object):
         self._py_src_name = 'py_ark_' + acg.camel_case_to_snake_case(v) + '_type'
         self._py_class_name = 'PyArk%sType' % v
         self._binding_classname = v
+        self._name = v
 
     @property
     def base_classname(self):
@@ -1269,7 +1280,11 @@ def main(params, paths):
 
     def autoclass(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
-        genclass.binding_classname = x.strip('"')
+        name = x[1].strip('"')
+        if x[0] == 'class':
+            genclass.binding_classname = name
+        else:
+            genclass.name = name
 
     def autoextends(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)

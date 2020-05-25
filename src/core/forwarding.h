@@ -77,6 +77,7 @@ class Thread;
 class ThreadPoolExecutor;
 class Updatable;
 class Visibility;
+class Writable;
 
 typedef Dictionary<Box> BoxBundle;
 

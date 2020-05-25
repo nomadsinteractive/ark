@@ -37,6 +37,7 @@ list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/assimp/inclu
 ark_link_libraries(assimp)
 
 aux_source_directory(. LOCAL_SRC_LIST)
+aux_source_directory(base LOCAL_SRC_LIST)
 aux_source_directory(impl/io LOCAL_SRC_LIST)
 aux_source_directory(impl/model_loader LOCAL_SRC_LIST)
 aux_source_directory(impl/vertices LOCAL_SRC_LIST)

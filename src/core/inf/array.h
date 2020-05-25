@@ -19,6 +19,16 @@ public:
         return sizeof(T) * this->length();
     }
 
+    T& at(size_t i) {
+        DASSERT(i < length());
+        return buf()[i];
+    }
+
+    const T& at(size_t i) const {
+        DASSERT(i < length());
+        return buf()[i];
+    }
+
     class Allocated;
     class Borrowed;
     class Vector;
