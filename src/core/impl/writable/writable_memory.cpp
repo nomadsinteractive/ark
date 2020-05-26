@@ -1,5 +1,7 @@
 #include "core/impl/writable/writable_memory.h"
 
+#include <string.h>
+
 namespace ark {
 
 WritableMemory::WritableMemory(void* ptr)

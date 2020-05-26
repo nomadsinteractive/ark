@@ -1,5 +1,5 @@
-#ifndef ARK_PLUGIN_BULLET_BASE_WORLD_H_
-#define ARK_PLUGIN_BULLET_BASE_WORLD_H_
+#ifndef ARK_PLUGIN_BULLET_BASE_COLLIDER_BULLET_H_
+#define ARK_PLUGIN_BULLET_BASE_COLLIDER_BULLET_H_
 
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
@@ -17,9 +17,9 @@ namespace ark {
 namespace plugin {
 namespace bullet {
 
-class World : public Runnable, public Collider, Implements<World, Runnable, Collider> {
+class ColliderBullet : public Runnable, public Collider, Implements<ColliderBullet, Runnable, Collider> {
 public:
-    World(const V3& gravity);
+    ColliderBullet(const V3& gravity);
 
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
 
@@ -27,21 +27,22 @@ public:
 
     btDiscreteDynamicsWorld* btDynamicWorld() const;
 
-//  [[plugin::builder]]
-    class BUILDER_IMPL1 : public Builder<World> {
+//  [[plugin::resource-loader]]
+    class BUILDER_IMPL1 : public Builder<ColliderBullet> {
     public:
-        BUILDER_IMPL1(BeanFactory& factory, const document& manifest);
+        BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<World> build(const Scope& args) override;
+        virtual sp<ColliderBullet> build(const Scope& args) override;
 
     private:
         sp<Builder<Vec3>> _gravity;
+        sp<ResourceLoaderContext> _resource_loader_context;
     };
 
-//  [[plugin::builder("bullet")]]
+//  [[plugin::resource-loader("btWorld")]]
     class BUILDER_IMPL2 : public Builder<Collider> {
     public:
-        BUILDER_IMPL2(BeanFactory& factory, const document& manifest);
+        BUILDER_IMPL2(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<Collider> build(const Scope& args) override;
 

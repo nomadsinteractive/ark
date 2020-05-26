@@ -4,7 +4,7 @@ namespace ark {
 namespace plugin {
 namespace bullet {
 
-CollisionShape::CollisionShape(World world, btCollisionShape* shape)
+CollisionShape::CollisionShape(ColliderBullet world, btCollisionShape* shape)
     : _world(std::move(world)), _shape(shape)
 {
 }

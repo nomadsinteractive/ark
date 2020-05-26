@@ -53,7 +53,7 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
     for(const Renderable::Snapshot& i : items)
     {
         writer.next();
-        writer.write(MatrixUtil::scale(MatrixUtil::translate(i._transform.toMatrix(), i._position), i._size));
+        writer.write(MatrixUtil::translate(M4::identity(), i._position) * MatrixUtil::scale(i._transform.toMatrix(), i._size));
     }
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos),

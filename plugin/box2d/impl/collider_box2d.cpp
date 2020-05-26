@@ -170,7 +170,7 @@ sp<ColliderBox2D> ColliderBox2D::BUILDER_IMPL1::build(const Scope& args)
     }
 
     const sp<Boolean> expired = _disposed->build(args);
-    _resource_loader_context->renderController()->addPreUpdateRequest(world->_stub, expired ? expired : BooleanUtil::__or__(_resource_loader_context->disposed(), sp<Boolean>::adopt(new BooleanByWeakRef<ColliderBox2D::Stub>(world->_stub, 1))));
+    _resource_loader_context->renderController()->addPreUpdateRequest(world->_stub, expired ? expired : BooleanUtil::__or__(_resource_loader_context->disposed(), sp<Boolean>::make<BooleanByWeakRef<ColliderBox2D::Stub>>(world->_stub, 1)));
     return world;
 }
 

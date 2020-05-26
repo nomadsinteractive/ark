@@ -88,16 +88,17 @@ sp<Uploader> RCCMultiDrawElementsIndirect::makeIndirectBufferUploader()
 void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot)
 {
     size_t offset = 0;
-    for(auto& i : _indirect_cmds)
-        for(size_t i : i.second._snapshot_offsets)
+    for(const auto& i : _indirect_cmds)
+        for(size_t j : i.second._snapshot_offsets)
         {
-            const Renderable::Snapshot& s = snapshot._items.at(i);
+            const Renderable::Snapshot& s = snapshot._items.at(j);
             if(s._dirty)
             {
-                VertexStream writer = buf.makeDividedVertexStream(renderRequest, 1, offset++, 1);
+                VertexStream writer = buf.makeDividedVertexStream(renderRequest, 1, offset, 1);
                 writer.next();
-                writer.write(MatrixUtil::scale(MatrixUtil::translate(s._transform.toMatrix(), s._position), s._size));
+                writer.write(MatrixUtil::translate(M4::identity(), s._position) * MatrixUtil::scale(s._transform.toMatrix(), s._size));
             }
+            ++ offset;
         }
 }
 

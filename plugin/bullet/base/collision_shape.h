@@ -4,7 +4,7 @@
 #include "core/types/owned_ptr.h"
 #include "core/types/shared_ptr.h"
 
-#include "bullet/base/world.h"
+#include "bullet/base/collider_bullet.h"
 
 namespace ark {
 namespace plugin {
@@ -12,12 +12,12 @@ namespace bullet {
 
 class CollisionShape {
 public:
-    CollisionShape(World world, btCollisionShape* shape);
+    CollisionShape(ColliderBullet world, btCollisionShape* shape);
 
     btCollisionShape* btShape() const;
 
 private:
-    World _world;
+    ColliderBullet _world;
     op<btCollisionShape> _shape;
 };
 

@@ -6,7 +6,7 @@ namespace ark {
 namespace plugin {
 namespace bullet {
 
-RigidBodyBullet::Stub::Stub(World world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass)
+RigidBodyBullet::Stub::Stub(ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass)
     : _world(std::move(world)), _shape(std::move(shape)), _motion_state(makeMotionState(transform)), _rigid_body(makeRigidBody(_shape->btShape(), _motion_state.get(), mass))
 {
 }
@@ -34,7 +34,7 @@ btRigidBody* RigidBodyBullet::Stub::makeRigidBody(btCollisionShape* shape, btMot
     return new btRigidBody(cInfo);
 }
 
-RigidBodyBullet::RigidBodyBullet(int32_t id, Collider::BodyType type, World world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass)
+RigidBodyBullet::RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass)
     : RigidBody(id, type, nullptr, nullptr, nullptr),  _stub(sp<Stub>::make(std::move(world), std::move(shape), transform, mass))
 {
 }

@@ -6,7 +6,7 @@
 
 #include "app/base/rigid_body.h"
 
-#include "bullet/base/world.h"
+#include "bullet/base/collider_bullet.h"
 #include "bullet/forwarding.h"
 
 namespace ark {
@@ -15,14 +15,14 @@ namespace bullet {
 
 class RigidBodyBullet : public RigidBody {
 public:
-    RigidBodyBullet(int32_t id, Collider::BodyType type, World world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass);
+    RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass);
 
     virtual void dispose() override;
 
 private:
     class Stub {
     public:
-        Stub(World world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass);
+        Stub(ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass);
         ~Stub();
 
     private:
@@ -30,7 +30,7 @@ private:
         btRigidBody* makeRigidBody(btCollisionShape* shape, btMotionState* motionState, btScalar mass) const;
 
     private:
-        World _world;
+        ColliderBullet _world;
         sp<CollisionShape> _shape;
 
         op<btMotionState> _motion_state;

@@ -13,7 +13,7 @@
 
 namespace ark {
 
-struct Rotation {
+struct ARK_API Rotation {
     Rotation();
     Rotation(float angle, const V3& direction);
 
