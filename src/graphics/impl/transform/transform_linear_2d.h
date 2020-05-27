@@ -16,7 +16,6 @@ public:
 
 private:
     struct Snapshot {
-        uint32_t magic;
         M3 matrix;
     };
 };

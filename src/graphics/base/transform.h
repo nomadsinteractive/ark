@@ -20,17 +20,6 @@ namespace ark {
 //[[script::bindings::holder]]
 class ARK_API Transform : public Holder {
 public:
-//  [[script::bindings::enumeration]]
-    enum Type {
-        TYPE_LINEAR_2D,
-        TYPE_LINEAR_3D
-    };
-
-//  [[script::bindings::auto]]
-    Transform(Transform::Type type = Transform::TYPE_LINEAR_3D, const sp<Rotate>& rotate = nullptr, const sp<Vec3>& scale = nullptr, const sp<Vec3>& pivot = nullptr);
-
-    virtual void traverse(const Visitor& visitor) override;
-
     class Snapshot;
 
     class Delegate {
@@ -42,6 +31,20 @@ public:
         virtual V3 transform(const Snapshot& snapshot, const V3& position) const = 0;
         virtual M4 toMatrix(const Snapshot& snapshot) const = 0;
     };
+
+public:
+//  [[script::bindings::enumeration]]
+    enum Type {
+        TYPE_LINEAR_2D,
+        TYPE_LINEAR_3D,
+        TYPE_DELEGATED
+    };
+
+//  [[script::bindings::auto]]
+    Transform(Transform::Type type = Transform::TYPE_LINEAR_3D, const sp<Rotate>& rotate = nullptr, const sp<Vec3>& scale = nullptr, const sp<Vec3>& pivot = nullptr);
+    Transform(sp<Delegate> delegate);
+
+    virtual void traverse(const Visitor& visitor) override;
 
     class ARK_API Snapshot {
     public:
@@ -55,18 +58,19 @@ public:
 
         template<typename T> T* makeData() {
             T* data = reinterpret_cast<T*>(_data);
-            data->magic = ark::Type<T>::id();
+            _magic = ark::Type<T>::id();
             return data;
         }
 
         template<typename T> const T* getData() const {
+            DCHECK(_magic == ark::Type<T>::id(), "Transform magic mismatch, this Snapshot was taken by a different transform delegate");
             const T* data = reinterpret_cast<const T*>(_data);
-            DCHECK(data->magic == ark::Type<T>::id(), "Transform magic mismatch, this Snapshot was taken by a different transform delegate");
             return data;
         }
 
     private:
         sp<Delegate> _delegate;
+        TypeId _magic;
         uint8_t _data[72];
     };
 
@@ -129,7 +133,8 @@ private:
         }
 
         void operator() () const {
-            _transform.updateDelegate();
+            if(_transform._type != TYPE_DELEGATED)
+                _transform.updateDelegate();
         }
 
     private:

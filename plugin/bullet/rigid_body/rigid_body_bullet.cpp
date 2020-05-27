@@ -31,16 +31,68 @@ btRigidBody* RigidBodyBullet::Stub::makeRigidBody(btCollisionShape* shape, btMot
 
     btRigidBody::btRigidBodyConstructionInfo cInfo(mass, motionState, shape, localInertia);
 
-    return new btRigidBody(cInfo);
+    btRigidBody* rigidBody = new btRigidBody(cInfo);
+    _world.btDynamicWorld()->addRigidBody(rigidBody);
+    rigidBody->setUserIndex(-1);
+    return rigidBody;
 }
 
 RigidBodyBullet::RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass)
     : RigidBody(id, type, nullptr, nullptr, nullptr),  _stub(sp<Stub>::make(std::move(world), std::move(shape), transform, mass))
 {
+    stub()->_position = sp<Position>::make(_stub);
+    stub()->_transform = sp<Transform>::make(sp<TransformDelegate>::make(_stub));
 }
 
 void RigidBodyBullet::dispose()
 {
+}
+
+RigidBodyBullet::Position::Position(const sp<RigidBodyBullet::Stub>& stub)
+    : _stub(stub)
+{
+}
+
+bool RigidBodyBullet::Position::update(uint64_t /*timestamp*/)
+{
+    return true;
+}
+
+V3 RigidBodyBullet::Position::val()
+{
+    return getWorldPosition();
+}
+
+V3 RigidBodyBullet::Position::getWorldPosition() const
+{
+    btTransform transform;
+    _stub->_motion_state->getWorldTransform(transform);
+    const btVector3& pos = transform.getOrigin();
+    return V3(pos.x(), pos.y(), pos.z());
+}
+
+RigidBodyBullet::TransformDelegate::TransformDelegate(const sp<RigidBodyBullet::Stub>& stub)
+    : _stub(stub)
+{
+}
+
+void RigidBodyBullet::TransformDelegate::snapshot(const Transform& /*transform*/, Transform::Snapshot& snapshot) const
+{
+    btTransform* transform = snapshot.makeData<btTransform>();
+    _stub->_motion_state->getWorldTransform(*transform);
+    transform->setOrigin(btVector3(0, 0, 0));
+}
+
+V3 RigidBodyBullet::TransformDelegate::transform(const Transform::Snapshot& /*snapshot*/, const V3& position) const
+{
+    return position;
+}
+
+M4 RigidBodyBullet::TransformDelegate::toMatrix(const Transform::Snapshot& snapshot) const
+{
+    M4 matrix;
+    snapshot.getData<btTransform>()->getOpenGLMatrix(reinterpret_cast<btScalar*>(&matrix));
+    return matrix;
 }
 
 }

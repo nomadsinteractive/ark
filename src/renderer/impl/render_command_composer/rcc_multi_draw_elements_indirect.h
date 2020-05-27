@@ -53,7 +53,7 @@ private:
 
 private:
     sp<Uploader> makeIndirectBufferUploader();
-    void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot);
+    void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot, bool reload);
 
 private:
     sp<MultiModels> _multi_models;

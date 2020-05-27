@@ -62,6 +62,13 @@ public:
         return MatrixUtil::mul(lvalue, rvalue);
     }
 
+    const float& operator[] (size_t i) const {
+        return _value[i];
+    }
+
+    float& operator[] (size_t i) {
+        return _value[i];
+    }
 
 private:
     float _value[S * S];

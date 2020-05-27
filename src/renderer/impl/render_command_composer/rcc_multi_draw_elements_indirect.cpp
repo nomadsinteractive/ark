@@ -40,8 +40,9 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
 
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
     sp<Uploader> indirectUploader = nullptr;
+    bool reload = snapshot._flag == RenderLayer::SNAPSHOT_FLAG_RELOAD || _vertices.size() == 0;
 
-    if(snapshot._flag == RenderLayer::SNAPSHOT_FLAG_RELOAD || _vertices.size() == 0)
+    if(reload)
     {
         _indirect_cmds.clear();
         size_t offset = 0;
@@ -60,7 +61,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
         indirectUploader = makeIndirectBufferUploader();
     }
 
-    writeModelMatices(renderRequest, buf, snapshot);
+    writeModelMatices(renderRequest, buf, snapshot, reload);
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), _vertices.snapshot(), _indices.snapshot(),
                                   DrawingContext::ParamDrawMultiElementsIndirect(buf.makeDividedBufferSnapshots(), _draw_indirect.snapshot(indirectUploader), static_cast<uint32_t>(_indirect_cmds.size())));
@@ -85,14 +86,14 @@ sp<Uploader> RCCMultiDrawElementsIndirect::makeIndirectBufferUploader()
     return sp<Uploader::Vector<DrawingContext::DrawElementsIndirectCommand>>::make(std::move(cmds));
 }
 
-void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot)
+void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot, bool reload)
 {
     size_t offset = 0;
     for(const auto& i : _indirect_cmds)
         for(size_t j : i.second._snapshot_offsets)
         {
             const Renderable::Snapshot& s = snapshot._items.at(j);
-            if(s._dirty)
+            if(reload || s._dirty)
             {
                 VertexStream writer = buf.makeDividedVertexStream(renderRequest, 1, offset, 1);
                 writer.next();

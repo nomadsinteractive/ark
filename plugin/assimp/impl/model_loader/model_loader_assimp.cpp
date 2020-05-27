@@ -92,7 +92,7 @@ void ModelLoaderAssimp::Stub::initialize(const ResourceLoaderContext& resourceLo
     importer.FreeScene();
 }
 
-Mesh ModelLoaderAssimp::Stub::loadMesh(const aiMesh* mesh, const Rect& bounds, element_index_t indexOffset) const
+Mesh ModelLoaderAssimp::Stub::loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t indexOffset) const
 {
     sp<Array<element_index_t>> indices = loadIndices(mesh, indexOffset);
     sp<Array<V3>> vertices = sp<Array<V3>::Allocated>::make(mesh->mNumVertices);
@@ -112,20 +112,20 @@ Mesh ModelLoaderAssimp::Stub::loadMesh(const aiMesh* mesh, const Rect& bounds, e
             *(++norm) = V3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
         if(tangents)
             *(++t) = Mesh::Tangent(V3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z), V3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z));
-        *(++u) = mesh->mTextureCoords[0] ? Mesh::UV(static_cast<uint16_t>((mesh->mTextureCoords[0][i].x * bounds.width() + bounds.left()) * 0xffff),
-                                                    static_cast<uint16_t>((mesh->mTextureCoords[0][i].y * bounds.height() + bounds.bottom()) * 0xffff)) : Mesh::UV(0, 0);
+        *(++u) = mesh->mTextureCoords[0] ? Mesh::UV(static_cast<uint16_t>((mesh->mTextureCoords[0][i].x * uvBounds.width() + uvBounds.left()) * 0xffff),
+                                                    static_cast<uint16_t>((mesh->mTextureCoords[0][i].y * uvBounds.height() + uvBounds.bottom()) * 0xffff)) : Mesh::UV(0, 0);
     }
 
     return Mesh(indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents));
 }
 
-Model ModelLoaderAssimp::Stub::loadModel(const aiScene* scene, const Rect& bounds) const
+Model ModelLoaderAssimp::Stub::loadModel(const aiScene* scene, const Rect& uvBounds) const
 {
     std::vector<Mesh> meshes;
     element_index_t indexOffset = 0;
     for(uint32_t i = 0; i < scene->mNumMeshes; ++i)
     {
-        meshes.push_back(loadMesh(scene->mMeshes[i], bounds, indexOffset));
+        meshes.push_back(loadMesh(scene->mMeshes[i], uvBounds, indexOffset));
         indexOffset += meshes.back().vertexLength();
     }
 

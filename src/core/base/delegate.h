@@ -14,13 +14,13 @@ public:
         return _delegate;
     }
 
-    void setDelegate(const sp<T>& delegate) {
-        _delegate = delegate;
+    void setDelegate(sp<T> delegate) {
+        _delegate = std::move(delegate);
     }
 
 protected:
-    Delegate(const sp<T>& delegate)
-        : _delegate(delegate) {
+    Delegate(sp<T> delegate)
+        : _delegate(std::move(delegate)) {
     }
 
 protected:

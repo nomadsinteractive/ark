@@ -24,6 +24,11 @@ Transform::Transform(Type type, const sp<Rotate>& rotate, const sp<Vec3>& scale,
 {
 }
 
+Transform::Transform(sp<Transform::Delegate> delegate)
+    : _type(TYPE_DELEGATED), _delegate(std::move(delegate))
+{
+}
+
 void Transform::traverse(const Holder::Visitor& visitor)
 {
     HolderUtil::visit(_rotate.delegate(), visitor);
@@ -81,6 +86,8 @@ void Transform::updateDelegate()
 
 sp<Transform::Delegate> Transform::makeDelegate() const
 {
+    DCHECK(_type != TYPE_DELEGATED, "Delegated Transform may not be updated");
+
     if(!_rotate && !_scale && !_pivot)
         return Null::toSafe<Transform::Delegate>(nullptr);
 

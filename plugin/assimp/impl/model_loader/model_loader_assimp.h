@@ -76,8 +76,8 @@ private:
     private:
         void initialize(const ResourceLoaderContext& resourceLoaderContext, const sp<Atlas>& atlas, const document& manifest);
 
-        Mesh loadMesh(const aiMesh* mesh, const Rect& bounds, element_index_t indexOffset) const;
-        Model loadModel(const aiScene* scene, const Rect& bounds) const;
+        Mesh loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t indexOffset) const;
+        Model loadModel(const aiScene* scene, const Rect& uvBounds) const;
 
         bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
         array<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;

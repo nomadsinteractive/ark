@@ -18,11 +18,14 @@ template<typename T> class SafeVar : public Delegate<T> {
 public:
     typedef decltype(std::declval<T>().val()) ValType;
 
-    SafeVar(const sp<T>& delegate) noexcept
-        : Delegate<T>(delegate) {
+    SafeVar() noexcept
+        : Delegate<T>(nullptr) {
     }
-    SafeVar(const sp<T>& delegate, const ValType& defaultVal) noexcept
-        : Delegate<T>(delegate), _default_val(defaultVal) {
+    SafeVar(sp<T> delegate) noexcept
+        : Delegate<T>(std::move(delegate)) {
+    }
+    SafeVar(sp<T> delegate, const ValType& defaultVal) noexcept
+        : Delegate<T>(std::move(delegate)), _default_val(defaultVal) {
     }
 
     explicit operator bool() const {
