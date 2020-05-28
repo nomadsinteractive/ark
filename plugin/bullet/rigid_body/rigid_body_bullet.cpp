@@ -78,9 +78,10 @@ RigidBodyBullet::TransformDelegate::TransformDelegate(const sp<RigidBodyBullet::
 
 void RigidBodyBullet::TransformDelegate::snapshot(const Transform& /*transform*/, Transform::Snapshot& snapshot) const
 {
-    btTransform* transform = snapshot.makeData<btTransform>();
-    _stub->_motion_state->getWorldTransform(*transform);
-    transform->setOrigin(btVector3(0, 0, 0));
+    btTransform transform;
+    _stub->_motion_state->getWorldTransform(transform);
+    transform.setOrigin(btVector3(0, 0, 0));
+    transform.getOpenGLMatrix(reinterpret_cast<btScalar*>(snapshot.makeData<M4>()));
 }
 
 V3 RigidBodyBullet::TransformDelegate::transform(const Transform::Snapshot& /*snapshot*/, const V3& position) const
@@ -90,9 +91,7 @@ V3 RigidBodyBullet::TransformDelegate::transform(const Transform::Snapshot& /*sn
 
 M4 RigidBodyBullet::TransformDelegate::toMatrix(const Transform::Snapshot& snapshot) const
 {
-    M4 matrix;
-    snapshot.getData<btTransform>()->getOpenGLMatrix(reinterpret_cast<btScalar*>(&matrix));
-    return matrix;
+    return *snapshot.getData<M4>();
 }
 
 }

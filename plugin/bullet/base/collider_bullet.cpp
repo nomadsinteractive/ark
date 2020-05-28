@@ -30,7 +30,10 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape,
     transform.setIdentity();
     transform.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
     transform.setRotation(btQuaternion(btVector3(rot.direction.x(), rot.direction.y(), rot.direction.z()), rot.angle));
-    sp<CollisionShape> cs = sp<CollisionShape>::make(*this, new btBoxShape(btVector3(size->width() / 2, size->height() / 2, size->depth() / 2)));
+    btCollisionShape* btShape = shape == Collider::BODY_SHAPE_BOX ?
+                static_cast<btCollisionShape*>(new btBoxShape(btVector3(size->width() / 2, size->height() / 2, size->depth() / 2)))
+              : static_cast<btCollisionShape*>(new btSphereShape(size->width() / 2));
+    sp<CollisionShape> cs = sp<CollisionShape>::make(*this, btShape);
     return sp<RigidBodyBullet>::make(type, static_cast<Collider::BodyType>(shape), *this, std::move(cs), transform, type == Collider::BODY_TYPE_STATIC ? 0 : 1.0f);
 }
 
