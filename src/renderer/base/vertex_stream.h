@@ -13,12 +13,21 @@ namespace ark {
 
 class ARK_API VertexStream {
 public:
-    VertexStream(const Buffer::Attributes& attributes, uint8_t* ptr, size_t size, size_t stride, bool doTransform);
+    class Writer {
+    public:
+        virtual ~Writer() = default;
+
+        virtual void next() = 0;
+        virtual void writePosition(const V3& position) = 0;
+        virtual void write(const void* ptr, uint32_t size, uint32_t offset) = 0;
+    };
+
+public:
+    VertexStream(const Buffer::Attributes& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
+    VertexStream(const Buffer::Attributes& attributes, bool doTransform, sp<Writer> writer);
 
     template<typename T> void write(const T& value, size_t offset = 0) {
-        DCHECK(_ptr, "BufferWriter is uninitialized, call next() first");
-        DCHECK(sizeof(T) + offset <= _stride, "Stride overflow: sizeof(value) = %d, offset = %d", sizeof(value), offset);
-        memcpy(_ptr + offset, &value, sizeof(T));
+        _writer->write(&value, sizeof(T), offset);
     }
 
     template<typename T> void write(const T& value, const int32_t* offsets, int32_t name) {
@@ -27,19 +36,31 @@ public:
     }
 
     void writePosition(const V3& position);
-    void writePosition(float x, float y, float z);
-    void writeNormal(float x, float y, float z);
     void writeNormal(const V3& normal);
-    void writeTangent(float x, float y, float z);
     void writeTangent(const V3& tangent);
-    void writeBitangent(float x, float y, float z);
     void writeBitangent(const V3& bitangent);
     void writeTexCoordinate(uint16_t u, uint16_t v);
-    void writeModelId(int32_t modelId);
 
     void setRenderObject(const Renderable::Snapshot& renderObject);
 
     void next();
+
+private:
+    class WriterMemory : public Writer {
+    public:
+        WriterMemory(uint8_t* ptr, uint32_t size, uint32_t stride);
+
+        virtual void next() override;
+        virtual void writePosition(const V3& position) override;
+        virtual void write(const void* ptr, uint32_t size, uint32_t offset) override;
+
+    private:
+        uint8_t* _ptr;
+        uint8_t* _begin;
+        uint8_t* _end;
+
+        uint32_t _stride;
+    };
 
 private:
     void applyVaryings();
@@ -48,12 +69,7 @@ private:
 
 private:
     Buffer::Attributes _attributes;
-
-    uint8_t* _ptr;
-    uint8_t* _begin;
-    uint8_t* _end;
-
-    size_t _stride;
+    sp<Writer> _writer;
 
     bool _do_transform;
     bool _visible;

@@ -24,7 +24,7 @@ VertexStream DrawingBuffer::makeVertexStream(const RenderRequest& renderRequest,
     size_t size = length * _vertices._stride;
     ByteArray::Borrowed content = renderRequest.allocator().sbrk(size);
     _vertices.addBlock(offset * _vertices._stride, content);
-    return VertexStream(_pipeline_bindings->attributes(), content.buf(), size, _vertices._stride, !_is_instanced);
+    return VertexStream(_pipeline_bindings->attributes(), !_is_instanced, content.buf(), size, _vertices._stride);
 }
 
 VertexStream DrawingBuffer::makeDividedVertexStream(const RenderRequest& renderRequest, size_t length, size_t offset, uint32_t divisor)
@@ -34,7 +34,7 @@ VertexStream DrawingBuffer::makeDividedVertexStream(const RenderRequest& renderR
     size_t size = length * builder._stride;
     ByteArray::Borrowed content = renderRequest.allocator().sbrk(size);
     builder.addBlock(offset * builder._stride, content);
-    return VertexStream(_pipeline_bindings->attributes(), content.buf(), size, builder._stride, !_is_instanced);
+    return VertexStream(_pipeline_bindings->attributes(), !_is_instanced, content.buf(), size, builder._stride);
 }
 
 const sp<ShaderBindings>& DrawingBuffer::shaderBindings() const

@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_MULTI_MODELS_H_
-#define ARK_RENDERER_BASE_MULTI_MODELS_H_
+#ifndef ARK_RENDERER_BASE_MODEL_BUNDLE_H_
+#define ARK_RENDERER_BASE_MODEL_BUNDLE_H_
 
 #include "core/collection/table.h"
 
@@ -7,7 +7,7 @@
 
 namespace ark {
 
-class ARK_API MultiModels {
+class ARK_API ModelBundle {
 public:
     struct ModelInfo {
         ModelInfo() = default;

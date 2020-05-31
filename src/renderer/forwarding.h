@@ -14,7 +14,7 @@ class Framebuffer;
 class Layer;
 class Model;
 class ModelLoader;
-class MultiModels;
+class ModelBundle;
 class Pipeline;
 class PipelineFactory;
 class Recycler;

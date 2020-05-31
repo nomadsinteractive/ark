@@ -67,7 +67,7 @@ sp<ModelLoader> ModelLoaderAssimp::BUILDER::build(const Scope& args)
 }
 
 ModelLoaderAssimp::Stub::Stub(const ResourceLoaderContext& resourceLoaderContext, const sp<Atlas>& atlas, const document& manifest)
-    : _models(sp<MultiModels>::make())
+    : _models(sp<ModelBundle>::make())
 {
     initialize(resourceLoaderContext, atlas, manifest);
 }

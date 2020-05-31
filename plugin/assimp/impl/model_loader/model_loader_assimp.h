@@ -70,7 +70,7 @@ private:
     struct Stub {
         Stub(const ResourceLoaderContext& resourceLoaderContext, const sp<Atlas>& atlas, const document& manifest);
 
-        sp<MultiModels> _models;
+        sp<ModelBundle> _models;
         std::vector<sp<Texture>> _textures;
 
     private:

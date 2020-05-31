@@ -44,7 +44,6 @@ Buffer::Attributes::Attributes(const PipelineInput& input)
     _offsets[ATTRIBUTE_NAME_NORMAL] = input.getAttributeOffset("Normal");
     _offsets[ATTRIBUTE_NAME_TANGENT] = input.getAttributeOffset("Tangent");
     _offsets[ATTRIBUTE_NAME_BITANGENT] = input.getAttributeOffset("Bitangent");
-    _offsets[ATTRIBUTE_NAME_MODEL_ID] = input.getAttributeOffset("ModelId");
 }
 
 Buffer::Snapshot::Snapshot(const sp<Delegate>& stub)
