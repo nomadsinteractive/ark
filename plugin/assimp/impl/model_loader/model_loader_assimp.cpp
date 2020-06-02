@@ -14,7 +14,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/model.h"
-#include "renderer/base/multi_models.h"
+#include "renderer/base/model_bundle.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_input.h"

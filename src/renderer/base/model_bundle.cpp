@@ -1,4 +1,4 @@
-#include "renderer/base/multi_models.h"
+#include "renderer/base/model_bundle.h"
 
 #include "renderer/inf/vertices.h"
 

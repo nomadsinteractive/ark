@@ -5,7 +5,7 @@
 #include "graphics/util/matrix_util.h"
 
 #include "renderer/base/drawing_buffer.h"
-#include "renderer/base/multi_models.h"
+#include "renderer/base/model_bundle.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/render_engine.h"
