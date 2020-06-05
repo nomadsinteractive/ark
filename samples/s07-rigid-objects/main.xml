@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<import name="pre" src="prefab.xml"/>
+	<view id="@root_view" class="view-group" size="960, 540" layout="frame"/>
+	<texture id="@t01" width="1024" height="1024"/>
+	<shader id="@s001" vertex="@asset:light.vert" fragment="@asset:light.frag" camera="$c">
+		<sampler ref="@t01"/>
+		<attribute name="Model" type="mat4" divisor="1"/>
+		<uniform name="u_LightPos" type="v3f" value="$lp"/>
+		<uniform name="u_LightColor" type="v3f" value="1, 1, 1"/>
+		<uniform name="u_LightAttenuation" type="v3f" value="1, 0.0014, 0.000007"/>
+		<uniform name="u_AmbientLightColor" type="v3f" value="0.3, 0.3, 0.3"/>
+	</shader>
+	<atlas id="@atlas_01" texture="@t01"/>
+	<model-loader id="@assimp" class="assimp" atlas="@atlas_01">
+		<model type="1" src="sphere.dae">
+			<map type="albedo" src="duckCM.tga"/>
+		</model>
+		<model type="2" src="cube_emptyTags.dae">
+			<map type="albedo" src="blocks.png"/>
+		</model>
+	</model-loader>
+	<renderer id="@imgui" class="imgui">
+		<font src="fonts/Cousine-Regular.ttf" size="14"/>
+		<font src="fonts/DroidSans.ttf" size="14"/>
+	</renderer>
+	<arena id="main" view="@root_view">
+		<render-layer ref="@pre:rl001"/>
+		<render-layer ref="@pre:rl003"/>
+
+		<render-layer id="@rl001" model="@assimp" shader="@s001"/>
+
+		<layer render-layer="@rl001" id="@l001"/>
+		<layer render-layer="@pre:rl003" id="@l003"/>
+
+		<renderer ref="@imgui"/>
+		<renderer ref="@pre:fps-counter"/>
+
+		<event-listener ref="@imgui"/>
+	</arena>
+	<collider id="b2World" class="b2World" pixel-per-meter="(100, 100)" gravity="(0, -9.8)"/>
+	<collider id="btWorld" class="btWorld" gravity="(0, -980, 0)"/>
+</resources>

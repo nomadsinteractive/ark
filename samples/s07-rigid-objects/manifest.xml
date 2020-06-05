@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest>
+	<asset prefix="/" src="../assets"/>
+	<asset protocol="external" src="/ark-launchpad"/>
+    <heap>
+        <device unit-size="4M"/>
+        <host unit-size="4M"/>
+    </heap>
+    <renderer version="auto">
+        <resolution width="960" height="540"/>
+    </renderer>
+	<resource-loader src="app.xml"/>
+	<application title="RigidBodies" window-flag="show_cursor">
+        <script ref="@main" src="main.py"/>
+	</application>
+
+    <plugin name="ark-python"/>
+	<plugin name="ark-assimp"/>
+	<plugin name="ark-box2d"/>
+	<plugin name="ark-box2d-pybindings"/>
+	<plugin name="ark-bullet"/>
+	<plugin name="ark-dear-imgui"/>
+	<plugin name="ark-dear-imgui-pybindings"/>
+</manifest>
