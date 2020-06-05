@@ -32,7 +32,7 @@ private:
         void upload(Writable& uploader);
 
     private:
-        sp<ModelBundle> _multi_models;
+        sp<ModelBundle> _model_bundle;
         sp<PipelineInput> _pipeline_input;
     };
 
@@ -43,7 +43,7 @@ private:
         void upload(Writable& uploader);
 
     private:
-        sp<ModelBundle> _multi_models;
+        sp<ModelBundle> _model_bundle;
     };
 
     struct IndirectCmd {
@@ -56,7 +56,7 @@ private:
     void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot, bool reload);
 
 private:
-    sp<ModelBundle> _multi_models;
+    sp<ModelBundle> _model_bundle;
 
     Buffer _vertices;
     Buffer _indices;

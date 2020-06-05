@@ -32,21 +32,6 @@ private:
         int32_t _y;
     };
 
-    class MaxRectsTextureUploader : public Texture::Uploader {
-    public:
-        MaxRectsTextureUploader(uint32_t width, uint32_t height, uint8_t channels, const sp<BitmapBundle>& bitmapBundle, std::vector<PackedBitmap> bitmaps);
-
-        void upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate);
-
-    private:
-        uint32_t _width;
-        uint32_t _height;
-        uint8_t _channels;
-        sp<BitmapBundle> _bitmap_bundle;
-        std::vector<PackedBitmap> _bitmaps;
-
-    };
-
 private:
     sp<ResourceLoaderContext> _resource_loader_context;
 

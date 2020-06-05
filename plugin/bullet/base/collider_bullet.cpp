@@ -17,8 +17,8 @@ namespace ark {
 namespace plugin {
 namespace bullet {
 
-ColliderBullet::ColliderBullet(const V3& gravity)
-    : _stub(sp<Stub>::make(gravity))
+ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
+    : _stub(sp<Stub>::make(gravity, std::move(modelLoader)))
 {
 }
 
@@ -47,9 +47,9 @@ btDiscreteDynamicsWorld* ColliderBullet::btDynamicWorld() const
     return _stub->_dynamics_world.get();
 }
 
-ColliderBullet::Stub::Stub(const V3& gravity)
-    : _collision_configuration(new btDefaultCollisionConfiguration()), _collision_dispatcher(new btCollisionDispatcher(_collision_configuration)), _broadphase(new btDbvtBroadphase()),
-      _solver(new btSequentialImpulseConstraintSolver()), _dynamics_world(new btDiscreteDynamicsWorld(_collision_dispatcher, _broadphase, _solver, _collision_configuration)),
+ColliderBullet::Stub::Stub(const V3& gravity, sp<ModelLoader> modelLoader)
+    : _model_loader(std::move(modelLoader)), _collision_configuration(new btDefaultCollisionConfiguration()), _collision_dispatcher(new btCollisionDispatcher(_collision_configuration)),
+      _broadphase(new btDbvtBroadphase()), _solver(new btSequentialImpulseConstraintSolver()), _dynamics_world(new btDiscreteDynamicsWorld(_collision_dispatcher, _broadphase, _solver, _collision_configuration)),
       _time_step(1 / 60.0f)
 {
     _dynamics_world->setGravity(btVector3(gravity.x(), gravity.y(), gravity.z()));
@@ -82,13 +82,13 @@ void ColliderBullet::Stub::dispose()
 }
 
 ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _gravity(factory.ensureBuilder<Vec3>(manifest, "gravity")), _resource_loader_context(resourceLoaderContext)
+    : _gravity(factory.ensureBuilder<Vec3>(manifest, "gravity")), _model_loader(factory.getBuilder<ModelLoader>(manifest, "model-loader")), _resource_loader_context(resourceLoaderContext)
 {
 }
 
 sp<ColliderBullet> ColliderBullet::BUILDER_IMPL1::build(const Scope& args)
 {
-    const sp<ColliderBullet> collider = sp<ColliderBullet>::make(_gravity->build(args)->val());
+    const sp<ColliderBullet> collider = sp<ColliderBullet>::make(_gravity->build(args)->val(), _model_loader->build(args));
     _resource_loader_context->renderController()->addPreUpdateRequest(collider, BooleanUtil::__or__(_resource_loader_context->disposed(), sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 1)));
     return collider;
 }

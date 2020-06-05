@@ -16,6 +16,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
+#include "renderer/base/model_bundle.h"
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/uploader.h"
 
@@ -27,7 +28,7 @@ namespace assimp {
 
 class ModelLoaderAssimp : public ModelLoader {
 public:
-    ModelLoaderAssimp(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Atlas>& atlas, const document& manifest);
+    ModelLoaderAssimp(sp<Atlas> atlas, const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest);
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
 
@@ -43,16 +44,12 @@ public:
         virtual sp<ModelLoader> build(const Scope& args) override;
 
     private:
-        sp<ResourceLoaderContext> _resource_loader_context;
         SafePtr<Builder<Atlas>> _atlas;
         document _manifest;
+        sp<ResourceLoaderContext> _resource_loader_context;
     };
 
 private:
-    void loadSceneTexture(const ResourceLoaderContext& renderController, const aiTexture* tex);
-
-    array<element_index_t> loadIndices(const aiMesh* mesh) const;
-
     class IndicesUploader : public Uploader {
     public:
         IndicesUploader(sp<ark::Array<Mesh>> meshes);
@@ -67,26 +64,31 @@ private:
     };
 
 private:
-    struct Stub {
-        Stub(const ResourceLoaderContext& resourceLoaderContext, const sp<Atlas>& atlas, const document& manifest);
+    bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
+    void loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex);
 
-        sp<ModelBundle> _models;
-        std::vector<sp<Texture>> _textures;
+    class Importer : public ModelBundle::Importer {
+    public:
+        Importer();
+
+        virtual Model import(const String& src, const Rect& bounds) override;
 
     private:
-        void initialize(const ResourceLoaderContext& resourceLoaderContext, const sp<Atlas>& atlas, const document& manifest);
-
         Mesh loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t indexOffset) const;
         Model loadModel(const aiScene* scene, const Rect& uvBounds) const;
 
         bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
         array<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;
 
-        void loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex);
+    private:
+        Assimp::Importer _importer;
+
     };
 
 private:
-    sp<Stub> _stub;
+    sp<ModelBundle> _models;
+    std::vector<sp<Texture>> _textures;
+
 };
 
 }

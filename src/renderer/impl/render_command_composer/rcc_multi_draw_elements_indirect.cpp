@@ -18,14 +18,14 @@
 namespace ark {
 
 RCCMultiDrawElementsIndirect::RCCMultiDrawElementsIndirect(const sp<ModelBundle>& multiModels)
-    : _multi_models(multiModels)
+    : _model_bundle(multiModels)
 {
 }
 
 sp<ShaderBindings> RCCMultiDrawElementsIndirect::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
 {
-    _vertices = renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<VerticesUploader>::make(_multi_models, shader.input()));
-    _indices = renderController.makeIndexBuffer(Buffer::USAGE_STATIC, sp<IndicesUploader>::make(_multi_models));
+    _vertices = renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<VerticesUploader>::make(_model_bundle, shader.input()));
+    _indices = renderController.makeIndexBuffer(Buffer::USAGE_STATIC, sp<IndicesUploader>::make(_model_bundle));
     _draw_indirect = renderController.makeBuffer(Buffer::TYPE_DRAW_INDIRECT, Buffer::USAGE_DYNAMIC, nullptr);
     return shader.makeBindings(renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT);
 }
@@ -51,7 +51,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
             IndirectCmd& modelIndirect = _indirect_cmds[i._type];
             if(modelIndirect._snapshot_offsets.empty())
             {
-                const ModelBundle::ModelInfo& modelInfo = _multi_models->ensure(i._type);
+                const ModelBundle::ModelInfo& modelInfo = _model_bundle->ensure(i._type);
                 modelIndirect._command = {static_cast<uint32_t>(modelInfo._model.indexLength()), 0, static_cast<uint32_t>(modelInfo._index_offset), static_cast<uint32_t>(modelInfo._vertex_offset), 0};
             }
 
@@ -104,7 +104,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
 }
 
 RCCMultiDrawElementsIndirect::VerticesUploader::VerticesUploader(const sp<ModelBundle>& multiModels, const sp<PipelineInput>& pipelineInput)
-    : Uploader(multiModels->vertexLength() * pipelineInput->getStream(0).stride()), _multi_models(multiModels), _pipeline_input(pipelineInput)
+    : Uploader(multiModels->vertexLength() * pipelineInput->getStream(0).stride()), _model_bundle(multiModels), _pipeline_input(pipelineInput)
 {
 }
 
@@ -113,7 +113,7 @@ void RCCMultiDrawElementsIndirect::VerticesUploader::upload(Writable& uploader)
     uint32_t offset = 0;
     size_t stride = _pipeline_input->getStream(0).stride();
     Buffer::Attributes attributes(_pipeline_input);
-    for(const auto& i : _multi_models->models())
+    for(const auto& i : _model_bundle->models())
     {
         const Model& model = i.second._model;
         uint32_t size = static_cast<uint32_t>(model.vertices()->length() * stride);
@@ -127,7 +127,7 @@ void RCCMultiDrawElementsIndirect::VerticesUploader::upload(Writable& uploader)
 }
 
 RCCMultiDrawElementsIndirect::IndicesUploader::IndicesUploader(const sp<ModelBundle>& multiModels)
-    : Uploader(multiModels->indexLength() * sizeof(element_index_t)), _multi_models(multiModels)
+    : Uploader(multiModels->indexLength() * sizeof(element_index_t)), _model_bundle(multiModels)
 {
 }
 
@@ -154,7 +154,7 @@ private:
 void RCCMultiDrawElementsIndirect::IndicesUploader::upload(Writable& uploader)
 {
     uint32_t offset = 0;
-    for(const auto& i: _multi_models->models())
+    for(const auto& i: _model_bundle->models())
     {
         const sp<Uploader>& indices = i.second._model.indices();
         uint32_t size = static_cast<uint32_t>(indices->size());

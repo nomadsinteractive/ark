@@ -9,6 +9,7 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/base/texture_packer.h"
 #include "renderer/base/texture.h"
 
 namespace ark {
@@ -21,14 +22,9 @@ AtlasImporterMaxRects::AtlasImporterMaxRects(const sp<ResourceLoaderContext>& re
 void AtlasImporterMaxRects::import(Atlas& atlas, BeanFactory& factory, const document& manifest)
 {
     const sp<Texture>& texture = atlas.texture();
-    MaxRectsBinPack binPack(texture->width(), texture->height(), false);
-    std::vector<PackedBitmap> bitmaps;
-    uint8_t channels = 0;
+    TexturePacker texturePacker(_resource_loader_context, texture->width(), texture->height(), false);
     for(const document& i : manifest->children())
     {
-        const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
-        const bitmap bitmap = _resource_loader_context->bitmapBoundsBundle()->get(src);
-        channels = std::max(bitmap->channels(), channels);
         if(i->name() == Constants::Attributes::ATLAS)
         {
             Atlas imported(nullptr);
@@ -38,17 +34,14 @@ void AtlasImporterMaxRects::import(Atlas& atlas, BeanFactory& factory, const doc
         else
         {
             DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
+
+            const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
             int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
-            MaxRectsBinPack::Rect rect = binPack.Insert(bitmap->width(), bitmap->height(), MaxRectsBinPack::RectBestShortSideFit);
-            DCHECK(rect.width != 0 && rect.height != 0, "Cannot insert more bitmap into the atlas(%d, %d), more space required", texture->width(), texture->height());
-            Rect bounds(0, 0, 1.0f, 1.0f);
-            atlas.add(type, rect.x, rect.y, rect.x + rect.width, rect.y + rect.height, bounds, V2(rect.width, rect.height), V2(0.5f, 0.5f));
-            bitmaps.emplace_back<PackedBitmap>({src, rect.x, rect.y});
+            const RectI rect = texturePacker.addBitmap(src);
+            atlas.add(type, rect.left(), rect.top(), rect.right(), rect.bottom(), Rect(0, 0, 1.0f, 1.0f), V2(rect.width(), rect.height()), V2(0.5f, 0.5f));
         }
     }
-    const sp<Texture::Uploader> uploader = sp<MaxRectsTextureUploader>::make(texture->width(),texture->height(), channels, _resource_loader_context->bitmapBundle(), std::move(bitmaps));
-    const sp<Texture> tex = _resource_loader_context->renderController()->createTexture(texture->size(), texture->parameters(), uploader);
-    texture->setDelegate(tex->delegate());
+    texturePacker.updateTexture(texture);
 }
 
 AtlasImporterMaxRects::BUILDER::BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -59,22 +52,6 @@ AtlasImporterMaxRects::BUILDER::BUILDER(const sp<ResourceLoaderContext>& resourc
 sp<Atlas::Importer> AtlasImporterMaxRects::BUILDER::build(const Scope& /*args*/)
 {
     return sp<AtlasImporterMaxRects>::make(_resource_loader_context);
-}
-
-AtlasImporterMaxRects::MaxRectsTextureUploader::MaxRectsTextureUploader(uint32_t width, uint32_t height, uint8_t channels, const sp<BitmapBundle>& bitmapBundle, std::vector<PackedBitmap> bitmaps)
-    : _width(width), _height(height), _channels(channels), _bitmap_bundle(bitmapBundle), _bitmaps(std::move(bitmaps))
-{
-}
-
-void AtlasImporterMaxRects::MaxRectsTextureUploader::upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
-{
-    const bitmap content = sp<Bitmap>::make(_width, _height, _width * _channels, _channels, true);
-    for(const PackedBitmap& i : _bitmaps)
-    {
-        const bitmap s = _bitmap_bundle->get(i._src);
-        content->draw(s->bytes()->buf(), s->width(), s->height(), i._x, i._y, s->rowBytes());
-    }
-    delegate.uploadBitmap(graphicsContext, 0, content);
 }
 
 }
