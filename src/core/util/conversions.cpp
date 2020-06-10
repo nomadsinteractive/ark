@@ -16,6 +16,11 @@
 
 namespace ark {
 
+template<> ARK_API String Conversions::to<String, String>(const String& str)
+{
+    return str;
+}
+
 template<> ARK_API uint32_t Conversions::to<String, uint32_t>(const String& str)
 {
     return atoi(str.c_str());

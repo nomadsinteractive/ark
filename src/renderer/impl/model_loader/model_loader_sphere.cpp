@@ -11,7 +11,7 @@
 #include "renderer/impl/vertices/vertices_sphere.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements_instanced.h"
 #include "renderer/inf/uploader.h"
-#include "renderer/util/element_util.h"
+#include "renderer/util/render_util.h"
 
 namespace ark {
 

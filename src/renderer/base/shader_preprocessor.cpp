@@ -36,9 +36,9 @@ static std::regex _OUT_PATTERN("(?:varying|out)" ATTRIBUTE_PATTERN);
 static std::regex _IN_OUT_PATTERN("(?:varying|in)" ATTRIBUTE_PATTERN);
 static std::regex _UNIFORM_PATTERN("uniform" UNIFORM_PATTERN);
 
-ShaderPreprocessor::ShaderPreprocessor(ShaderType type)
-    : _type(type), _version(0), _ins(_attribute_declarations, type == SHADER_TYPE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
-      _outs(_attribute_declarations, type == SHADER_TYPE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
+ShaderPreprocessor::ShaderPreprocessor(Shader::Stage stage)
+    : _stage(stage), _version(0), _ins(_attribute_declarations, stage == Shader::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
+      _outs(_attribute_declarations, stage == Shader::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
       _uniforms(_uniform_declarations, "uniform"), _samplers(_uniform_declarations, "uniform"), _pre_main(sp<String>::make()),
       _output_var(sp<String>::make()), _post_main(sp<String>::make())
 {
@@ -102,7 +102,7 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
 
 void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
 {
-    _ins.parse(_type == SHADER_TYPE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
+    _ins.parse(_stage == Shader::SHADER_STAGE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
     _outs.parse(_OUT_PATTERN);
 
     _main.replace(_STRUCT_PATTERN, [this](const std::smatch& m) {
@@ -136,7 +136,7 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
         _main.push_back(sp<String>::make("\n\nvoid main() {\n"));
         _main.push_back(_pre_main);
         _main.push_back(sp<String>::make(Strings::sprintf(INDENT_STR "%s = ", outVar.c_str())));
-        *_output_var = _main_block->genOutCall(_type);
+        *_output_var = _main_block->genOutCall(_stage);
         _main.push_back(_output_var);
         _main.push_back(sp<String>::make(";"));
         _main.push_back(_post_main);
@@ -144,7 +144,7 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
         _main.push_back(sp<String>::make("\n}\n\n"));
     }
 
-    if(_type == SHADER_TYPE_VERTEX)
+    if(_stage == Shader::SHADER_STAGE_VERTEX)
     {
         for(const auto& i : _main_block->_function._ins)
             context._vertex_in.push_back(i);
@@ -162,7 +162,7 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
             }
         }
     }
-    else if(_type == SHADER_TYPE_FRAGMENT)
+    else if(_stage == Shader::SHADER_STAGE_FRAGMENT)
     {
         for(const auto& i : _main_block->_function._ins)
             context._fragment_in.push_back(i);
@@ -171,7 +171,7 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
 
 ShaderPreprocessor::Preprocessor ShaderPreprocessor::preprocess()
 {
-    return Preprocessor(_type, genDeclarations() + _main.str());
+    return Preprocessor(_stage, genDeclarations() + _main.str());
 }
 
 void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int32_t& binding)
@@ -226,7 +226,7 @@ sp<Uniform> ShaderPreprocessor::getUniformInput(const String& name, Uniform::Typ
 
 String ShaderPreprocessor::outputName() const
 {
-    return _type == SHADER_TYPE_VERTEX ? "gl_Position" : ANNOTATION_FRAG_COLOR;
+    return _stage == Shader::SHADER_STAGE_VERTEX ? "gl_Position" : ANNOTATION_FRAG_COLOR;
 }
 
 size_t ShaderPreprocessor::parseFunctionBody(const String& s, String& body) const
@@ -362,7 +362,7 @@ void ShaderPreprocessor::CodeBlock::genDefinition()
     *_place_hoder = sb.str();
 }
 
-String ShaderPreprocessor::CodeBlock::genOutCall(ShaderPreprocessor::ShaderType type)
+String ShaderPreprocessor::CodeBlock::genOutCall(Shader::Stage stage)
 {
     StringBuffer sb;
     sb << "ark_main(";
@@ -371,14 +371,14 @@ String ShaderPreprocessor::CodeBlock::genOutCall(ShaderPreprocessor::ShaderType 
     {
         if(iter != begin)
             sb << ", ";
-        sb << (type == SHADER_TYPE_VERTEX ? "a_" : "v_");
+        sb << (stage == Shader::SHADER_STAGE_VERTEX ? "a_" : "v_");
         sb << Strings::capitalFirst(iter->_name);
     }
     sb << ')';
     return sb.str();
 }
 
-bool ShaderPreprocessor::CodeBlock::hasOutParam(const String& name) const
+bool ShaderPreprocessor::CodeBlock::hasOutAttribute(const String& name) const
 {
     const String oName = name.startsWith("v_") ? name : String("v_") + name;
     for(const auto& i : _function._outs)
@@ -431,16 +431,16 @@ Table<String, ShaderPreprocessor::Declaration>& ShaderPreprocessor::DeclarationL
 }
 
 ShaderPreprocessor::Preprocessor::Preprocessor()
-    : _type(SHADER_TYPE_NONE)
+    : _type(Shader::SHADER_STAGE_NONE)
 {
 }
 
-ShaderPreprocessor::Preprocessor::Preprocessor(ShaderPreprocessor::ShaderType type, String source)
-    : _type(type), _source(std::move(source))
+ShaderPreprocessor::Preprocessor::Preprocessor(Shader::Stage stage, String source)
+    : _type(stage), _source(std::move(source))
 {
 }
 
-ShaderPreprocessor::ShaderType ShaderPreprocessor::Preprocessor::type() const
+Shader::Stage ShaderPreprocessor::Preprocessor::stage() const
 {
     return _type;
 }

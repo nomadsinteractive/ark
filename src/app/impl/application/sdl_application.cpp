@@ -35,7 +35,9 @@
 #include "platform/platform.h"
 
 #ifdef ARK_PLATFORM_DARWIN
-extern "C" void* Cocoa_Mtl_AddMetalView(SDL_Window* window);
+struct SDL_VideoDevice;
+
+extern "C" void* Cocoa_Metal_CreateView(SDL_VideoDevice* _this, SDL_Window* window);
 #endif
 
 namespace ark {
@@ -297,7 +299,7 @@ int SDLApplication::run()
     info.windows.window = wmInfo.info.win.window;
 #elif defined (ARK_PLATFORM_DARWIN)
     info.darwin.window = wmInfo.info.cocoa.window;
-    info.darwin.view = Cocoa_Mtl_AddMetalView(_main_window);
+    info.darwin.view = Cocoa_Metal_CreateView(nullptr, _main_window);
 #endif
 
     /* Create our opengl context and attach it to our window */

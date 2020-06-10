@@ -14,14 +14,13 @@
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/base/resource_loader_context.h"
-
-#include "renderer/util/element_util.h"
+#include "renderer/util/render_util.h"
 
 namespace ark {
 
 Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, RenderController& renderController)
     : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS)),
-      _vertices(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(ElementUtil::makeUnitCubeVertices()))),
+      _vertices(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(RenderUtil::makeUnitCubeVertices()))),
       _index_buffer(renderController.getNamedBuffer(SharedBuffer::NAME_QUADS)->snapshot(renderController, 6))
 {
     _shader_bindings->pipelineBindings()->bindSampler(texture);

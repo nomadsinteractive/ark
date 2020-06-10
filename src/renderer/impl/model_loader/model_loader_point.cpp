@@ -6,7 +6,7 @@
 #include "renderer/base/shader_bindings.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 #include "renderer/impl/vertices/vertices_point.h"
-#include "renderer/util/element_util.h"
+#include "renderer/util/render_util.h"
 
 
 namespace ark {
@@ -18,7 +18,7 @@ ModelLoaderPoint::ModelLoaderPoint(const sp<Atlas>& atlas)
 
 sp<RenderCommandComposer> ModelLoaderPoint::makeRenderCommandComposer()
 {
-    return sp<RCCDrawElements>::make(ElementUtil::makeUnitPointModel());
+    return sp<RCCDrawElements>::make(RenderUtil::makeUnitPointModel());
 }
 
 void ModelLoaderPoint::initialize(ShaderBindings& shaderBindings)

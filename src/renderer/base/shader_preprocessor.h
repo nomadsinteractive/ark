@@ -12,6 +12,7 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/attribute.h"
 #include "renderer/base/render_engine.h"
+#include "renderer/base/shader.h"
 #include "renderer/base/uniform.h"
 
 namespace ark {
@@ -21,12 +22,6 @@ private:
     class Source;
 
 public:
-    enum ShaderType {
-        SHADER_TYPE_NONE,
-        SHADER_TYPE_VERTEX,
-        SHADER_TYPE_FRAGMENT
-    };
-
     static const char* ANNOTATION_VERT_IN;
     static const char* ANNOTATION_VERT_OUT;
     static const char* ANNOTATION_FRAG_IN;
@@ -36,15 +31,15 @@ public:
     class Preprocessor {
     public:
         Preprocessor();
-        Preprocessor(ShaderType type, String source);
+        Preprocessor(Shader::Stage stage, String source);
         DEFAULT_COPY_AND_ASSIGN(Preprocessor);
 
-        ShaderType type() const;
+        Shader::Stage stage() const;
 
         String process(const RenderEngineContext& glContext) const;
 
     private:
-        ShaderType _type;
+        Shader::Stage _type;
         String _source;
     };
 
@@ -132,8 +127,6 @@ private:
         String _name;
         String _params;
         String _body;
-//        std::vector<std::pair<String, String>> _ins;
-//        std::vector<std::pair<String, String>> _outs;
         std::vector<Parameter> _ins;
         std::vector<Parameter> _outs;
     };
@@ -146,16 +139,16 @@ private:
         Parameter parseParameter(const String& param);
 
         void genDefinition();
-        String genOutCall(ShaderType type);
+        String genOutCall(Shader::Stage stage);
 
-        bool hasOutParam(const String& name) const;
+        bool hasOutAttribute(const String& name) const;
 
         Function _function;
         sp<String> _place_hoder;
     };
 
 public:
-    ShaderPreprocessor(ShaderType type);
+    ShaderPreprocessor(Shader::Stage stage);
 
     void addPreMainSource(const String& source);
     void addPostMainSource(const String& source);
@@ -189,7 +182,7 @@ private:
     friend class PipelineLayout;
 
 public:
-    ShaderType _type;
+    Shader::Stage _stage;
 
     Source _main;
 

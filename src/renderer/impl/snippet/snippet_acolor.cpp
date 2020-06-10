@@ -6,7 +6,7 @@ namespace ark {
 
 void SnippetAcolor::preInitialize(PipelineBuildingContext& context)
 {
-    context.addPredefinedAttribute("Color", "vec4", ShaderPreprocessor::SHADER_TYPE_FRAGMENT);
+    context.addPredefinedAttribute("Color", "vec4", Shader::SHADER_STAGE_FRAGMENT);
     context._fragment.addModifier("v_Color");
 }
 

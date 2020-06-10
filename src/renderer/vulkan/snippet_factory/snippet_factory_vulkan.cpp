@@ -1,5 +1,7 @@
 #include "renderer/vulkan/snippet_factory/snippet_factory_vulkan.h"
 
+#include "core/util/strings.h"
+
 #include "renderer/base/render_controller.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
@@ -100,7 +102,7 @@ private:
 
     uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& ins, const ShaderPreprocessor::DeclarationList& outs, const String& descriptor, uint32_t start) {
         uint32_t counter = start;
-        DCHECK(ins.vars().size() == outs.vars().size(), "Output/Input mismatch, output and input have different numbers of items: %d vs %s", ins.vars().size(), outs.vars().size());
+        DCHECK(ins.vars().size() == outs.vars().size(), "Output/Input mismatch, output and input have different numbers of items: [%s] vs [%s]", Strings::join(&ins.vars().keys().at(0), 0, ins.vars().keys().size()).c_str(), Strings::join(&outs.vars().keys().at(0), 0, outs.vars().keys().size()).c_str());
         for(const ShaderPreprocessor::Declaration& i : ins.vars().values()) {
             const String prefix = Strings::sprintf("layout (%s = %d) ", descriptor.c_str(), getNextLayoutLocation(i, counter));
             *i.source() = prefix + *i.source();

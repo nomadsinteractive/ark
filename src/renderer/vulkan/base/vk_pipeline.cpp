@@ -10,7 +10,7 @@
 #include "renderer/base/recycler.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/inf/uploader.h"
-#include "renderer/util/element_util.h"
+#include "renderer/util/render_util.h"
 
 #include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/vk_command_buffers.h"
@@ -267,7 +267,7 @@ void VKPipeline::setupPipeline(GraphicsContext& graphicsContext, const VertexLay
 
     const RenderEngineContext::Resolution& displayResolution = graphicsContext.renderContext()->displayResolution();
     const Rect& scissor = _bindings.scissor();
-    const VkRect2D vkScissors = ElementUtil::isScissorEnabled(scissor) ? VkRect2D({{static_cast<int32_t>(scissor.left()), static_cast<int32_t>(scissor.top())}, {static_cast<uint32_t>(scissor.width()), static_cast<uint32_t>(scissor.height())}})
+    const VkRect2D vkScissors = RenderUtil::isScissorEnabled(scissor) ? VkRect2D({{static_cast<int32_t>(scissor.left()), static_cast<int32_t>(scissor.top())}, {static_cast<uint32_t>(scissor.width()), static_cast<uint32_t>(scissor.height())}})
                                                                       : VkRect2D({{0, 0}, {displayResolution.width, displayResolution.height}});
     VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
     viewportState.pScissors = &vkScissors;

@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_UTIL_RENDERER_UTIL_H_
-#define ARK_GRAPHICS_UTIL_RENDERER_UTIL_H_
+#ifndef ARK_GRAPHICS_UTIL_RENDERER_TYPE_H_
+#define ARK_GRAPHICS_UTIL_RENDERER_TYPE_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -10,7 +10,7 @@
 namespace ark {
 
 //[[script::bindings::class("Renderer")]]
-class ARK_API RendererUtil final {
+class ARK_API RendererType final {
 public:
 //[[script::bindings::constructor]]
     static sp<Renderer> create(const sp<Renderer>& delegate = nullptr);

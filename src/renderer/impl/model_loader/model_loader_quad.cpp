@@ -6,7 +6,7 @@
 #include "renderer/base/shader_bindings.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 #include "renderer/impl/vertices/vertices_quad.h"
-#include "renderer/util/element_util.h"
+#include "renderer/util/render_util.h"
 
 namespace ark {
 
@@ -17,7 +17,7 @@ ModelLoaderQuad::ModelLoaderQuad(const sp<Atlas>& atlas)
 
 sp<RenderCommandComposer> ModelLoaderQuad::makeRenderCommandComposer()
 {
-    return sp<RCCDrawElements>::make(ElementUtil::makeUnitQuadModel());
+    return sp<RCCDrawElements>::make(RenderUtil::makeUnitQuadModel());
 }
 
 void ModelLoaderQuad::initialize(ShaderBindings& shaderBindings)

@@ -67,6 +67,8 @@ private:
     bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
     void loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex);
 
+    sp<ModelBundle> makeModelBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest, sp<Atlas> atlas);
+
     class Importer : public ModelBundle::Importer {
     public:
         Importer();

@@ -22,10 +22,11 @@ namespace ark {
 class ARK_API Shader {
 public:
     enum Stage {
-        STAGE_NONE = -1,
-        STAGE_VERTEX,
-        STAGE_FRAGMENT,
-        STAGE_COUNT
+        SHADER_STAGE_NONE = -1,
+        SHADER_STAGE_VERTEX,
+        SHADER_STAGE_FRAGMENT,
+        SHADER_STAGE_COMPUTE,
+        SHADER_STAGE_COUNT
     };
 
 public:

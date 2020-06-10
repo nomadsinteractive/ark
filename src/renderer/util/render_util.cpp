@@ -1,4 +1,4 @@
-#include "renderer/util/element_util.h"
+#include "renderer/util/render_util.h"
 
 #include "core/types/shared_ptr.h"
 
@@ -14,7 +14,7 @@
 
 namespace ark {
 
-bytearray ElementUtil::makeUnitCubeVertices()
+bytearray RenderUtil::makeUnitCubeVertices()
 {
     static float vertices[] = {
         -1.0f,  1.0f, -1.0f,
@@ -50,22 +50,22 @@ bytearray ElementUtil::makeUnitCubeVertices()
     return sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
 }
 
-Model ElementUtil::makeUnitQuadModel()
+Model RenderUtil::makeUnitQuadModel()
 {
     return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<6>>::make(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1}))), sp<VerticesQuad>::make(), Metrics{V3(1.0f), V3(1.0f), V3(0)});
 }
 
-Model ElementUtil::makeUnitNinePatchModel()
+Model RenderUtil::makeUnitNinePatchModel()
 {
     return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<28>>::make(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15}))), sp<VerticesNinePatch>::make());
 }
 
-Model ElementUtil::makeUnitPointModel()
+Model RenderUtil::makeUnitPointModel()
 {
     return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<1>>::make(std::initializer_list<element_index_t>({0}))), sp<VerticesPoint>::make(), Metrics{V3(1.0f), V3(1.0f), V3()});
 }
 
-element_index_t ElementUtil::hash(element_index_t* buf, size_t len)
+element_index_t RenderUtil::hash(element_index_t* buf, size_t len)
 {
     element_index_t h = 0;
     for(size_t i = 0; i < len; ++i)
@@ -73,7 +73,7 @@ element_index_t ElementUtil::hash(element_index_t* buf, size_t len)
     return h;
 }
 
-bool ElementUtil::isScissorEnabled(const Rect& scissor)
+bool RenderUtil::isScissorEnabled(const Rect& scissor)
 {
     return scissor.right() > scissor.left() && scissor.bottom() > scissor.top();
 }

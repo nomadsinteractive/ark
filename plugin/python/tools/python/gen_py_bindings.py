@@ -1112,7 +1112,7 @@ class GenClass(object):
         return self._name
 
     @name.setter
-    def name(self, v: str):
+    def name(self, v):
         self._name = v
 
     @property

@@ -43,14 +43,14 @@ private:
 }
 
 PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment)
-    : _pipeline_factory(pipelineFactory), _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT)
+    : _pipeline_factory(pipelineFactory), _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX), _fragment(Shader::SHADER_STAGE_FRAGMENT)
 {
     _vertex.initialize(vertex, *this);
     _fragment.initialize(fragment, *this);
 }
 
 PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment, BeanFactory& factory, const Scope& args, const document& manifest)
-    : _pipeline_factory(pipelineFactory), _input(sp<PipelineInput>::make()), _vertex(ShaderPreprocessor::SHADER_TYPE_VERTEX), _fragment(ShaderPreprocessor::SHADER_TYPE_FRAGMENT)
+    : _pipeline_factory(pipelineFactory), _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX), _fragment(Shader::SHADER_STAGE_FRAGMENT)
 {
     loadPredefinedParam(factory, args, manifest);
 
@@ -104,7 +104,7 @@ void PipelineBuildingContext::initialize()
     {
         if(!_vertex._ins.has(i.first)
                 && !_vertex._outs.has(i.first)
-                && !_vertex._main_block->hasOutParam(i.first))
+                && !_vertex._main_block->hasOutAttribute(i.first))
         {
             generated.push_back(i.first);
             addAttribute(i.first, i.second);
@@ -163,12 +163,12 @@ void PipelineBuildingContext::addUniform(const sp<Uniform>& uniform)
     _uniforms.push_back(uniform->name(), uniform);
 }
 
-Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t scopes)
+Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t stage)
 {
     if(_attributes.find(name) == _attributes.end())
         _attributes[name] = makePredefinedAttribute(name, type);
 
-    if(scopes == ShaderPreprocessor::SHADER_TYPE_FRAGMENT)
+    if(stage == Shader::SHADER_STAGE_FRAGMENT)
         _fragment_in.push_back(ShaderPreprocessor::Parameter(type, name, ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN));
 
     return _attributes[name];

@@ -6,7 +6,7 @@ namespace ark {
 
 void SnippetAlpha::preInitialize(PipelineBuildingContext& context)
 {
-    context.addPredefinedAttribute("Alpha", "float", ShaderPreprocessor::SHADER_TYPE_FRAGMENT);
+    context.addPredefinedAttribute("Alpha", "float", Shader::SHADER_STAGE_FRAGMENT);
     context._fragment.addModifier("vec4(1.0, 1.0, 1.0, v_Alpha)");
 }
 

@@ -7,7 +7,7 @@
 #include "renderer/base/texture.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 #include "renderer/impl/vertices/vertices_nine_patch.h"
-#include "renderer/util/element_util.h"
+#include "renderer/util/render_util.h"
 
 namespace ark {
 
@@ -19,7 +19,7 @@ ModelLoaderNinePatch::ModelLoaderNinePatch(const document& manifest, const sp<At
 
 sp<RenderCommandComposer> ModelLoaderNinePatch::makeRenderCommandComposer()
 {
-    return sp<RCCDrawElements>::make(ElementUtil::makeUnitNinePatchModel());
+    return sp<RCCDrawElements>::make(RenderUtil::makeUnitNinePatchModel());
 }
 
 void ModelLoaderNinePatch::initialize(ShaderBindings& shaderBindings)

@@ -33,8 +33,9 @@ namespace plugin {
 namespace assimp {
 
 ModelLoaderAssimp::ModelLoaderAssimp(sp<Atlas> atlas, const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _models(sp<ModelBundle>::make(resourceLoaderContext, manifest, std::move(atlas), Importer()))
+    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _models(makeModelBundle(resourceLoaderContext, manifest, std::move(atlas)))
 {
+
 }
 
 sp<RenderCommandComposer> ModelLoaderAssimp::makeRenderCommandComposer()
@@ -78,6 +79,12 @@ void ModelLoaderAssimp::loadSceneTexture(const ResourceLoaderContext& resourceLo
 {
     const bitmap bitmap = loadBitmap(resourceLoaderContext.bitmapBundle(), tex);
     _textures.push_back(resourceLoaderContext.renderController()->createTexture2D(sp<Size>::make(static_cast<float>(bitmap->width()), static_cast<float>(bitmap->height())), sp<Texture::UploaderBitmap>::make(bitmap)));
+}
+
+sp<ModelBundle> ModelLoaderAssimp::makeModelBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest, sp<Atlas> atlas)
+{
+    Importer importer;
+    return sp<ModelBundle>::make(resourceLoaderContext, manifest, std::move(atlas), importer);
 }
 
 array<element_index_t> ModelLoaderAssimp::Importer::loadIndices(const aiMesh* mesh, element_index_t indexOffset) const

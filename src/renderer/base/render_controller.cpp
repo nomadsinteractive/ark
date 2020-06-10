@@ -15,7 +15,7 @@
 #include "renderer/base/shared_buffer.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/vertices.h"
-#include "renderer/util/element_util.h"
+#include "renderer/util/render_util.h"
 
 namespace ark {
 
@@ -28,7 +28,7 @@ public:
     }
 
     virtual uint32_t write(void* buffer, uint32_t size, uint32_t offset) override {
-        _hash += ElementUtil::hash(reinterpret_cast<element_index_t*>(buffer), size / sizeof(element_index_t));
+        _hash += RenderUtil::hash(reinterpret_cast<element_index_t*>(buffer), size / sizeof(element_index_t));
         return size;
     }
 
@@ -236,11 +236,11 @@ sp<SharedBuffer> RenderController::getNamedBuffer(SharedBuffer::Name name)
     DTHREAD_CHECK(THREAD_ID_CORE);
     switch(name) {
     case SharedBuffer::NAME_QUADS:
-        return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLES, ElementUtil::makeUnitQuadModel());
+        return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLES, RenderUtil::makeUnitQuadModel());
     case SharedBuffer::NAME_NINE_PATCH:
-        return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLE_STRIP, ElementUtil::makeUnitNinePatchModel());
+        return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLE_STRIP, RenderUtil::makeUnitNinePatchModel());
     case SharedBuffer::NAME_POINTS:
-        return getSharedBuffer(ModelLoader::RENDER_MODE_POINTS, ElementUtil::makeUnitPointModel());
+        return getSharedBuffer(ModelLoader::RENDER_MODE_POINTS, RenderUtil::makeUnitPointModel());
     default:
         break;
     }

@@ -1,4 +1,4 @@
-#include "graphics/util/renderer_util.h"
+#include "graphics/util/renderer_type.h"
 
 #include "core/epi/disposed.h"
 #include "core/epi/visibility.h"
@@ -13,39 +13,39 @@
 
 namespace ark {
 
-sp<Renderer> RendererUtil::create(const sp<Renderer>& delegate)
+sp<Renderer> RendererType::create(const sp<Renderer>& delegate)
 {
     return wrap(delegate);
 }
 
-void RendererUtil::addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer)
+void RendererType::addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer)
 {
     DCHECK(self.template is<Renderer::Group>(), "Cannot call addRenderer on a none-group renderer");
     const sp<Renderer::Group> rendererGroup = self.template as<Renderer::Group>();
     rendererGroup->addRenderer(renderer);
 }
 
-sp<Renderer> RendererUtil::wrap(const sp<Renderer>& self)
+sp<Renderer> RendererType::wrap(const sp<Renderer>& self)
 {
     return sp<RendererWrapper>::make(self);
 }
 
-sp<Renderer> RendererUtil::makeDisposable(const sp<Renderer>& self, const sp<Boolean>& disposed)
+sp<Renderer> RendererType::makeDisposable(const sp<Renderer>& self, const sp<Boolean>& disposed)
 {
     return self.absorb(disposed ? sp<Disposed>::make(disposed) : sp<Disposed>::make());
 }
 
-sp<Renderer> RendererUtil::makeVisible(const sp<Renderer>& self, const sp<Boolean>& visibility)
+sp<Renderer> RendererType::makeVisible(const sp<Renderer>& self, const sp<Boolean>& visibility)
 {
     return self.absorb(sp<Visibility>::make(visibility));
 }
 
-sp<Renderer> RendererUtil::makeAutoRelease(const sp<Renderer>& self, int32_t refCount)
+sp<Renderer> RendererType::makeAutoRelease(const sp<Renderer>& self, int32_t refCount)
 {
     return makeDisposable(self, sp<BooleanByWeakRef<Renderer>>::make(self, refCount));
 }
 
-SafePtr<Size> RendererUtil::size(const sp<Renderer>& self)
+SafePtr<Size> RendererType::size(const sp<Renderer>& self)
 {
     if(self.template is<Block>())
     {
@@ -56,21 +56,21 @@ SafePtr<Size> RendererUtil::size(const sp<Renderer>& self)
     return SafePtr<Size>();
 }
 
-const sp<Renderer>& RendererUtil::delegate(const sp<Renderer>& self)
+const sp<Renderer>& RendererType::delegate(const sp<Renderer>& self)
 {
     const sp<Delegate<Renderer>> rd = self.as<Delegate<Renderer>>();
     DWARN(rd, "Renderer is not an instance of Delegate<Renderer>");
     return rd ? rd->delegate() : sp<Renderer>::null();
 }
 
-void RendererUtil::setDelegate(const sp<Renderer>& self, const sp<Renderer>& delegate)
+void RendererType::setDelegate(const sp<Renderer>& self, const sp<Renderer>& delegate)
 {
     const sp<Delegate<Renderer>> rd = self.as<Delegate<Renderer>>();
     DCHECK(rd, "Renderer is not an instance of Delegate<Renderer>");
     rd->setDelegate(delegate);
 }
 
-sp<Renderer> ark::RendererUtil::translate(const sp<Renderer>& self, const sp<Vec3>& position)
+sp<Renderer> ark::RendererType::translate(const sp<Renderer>& self, const sp<Vec3>& position)
 {
     return sp<RendererWithPosition>::make(self, position);
 }
