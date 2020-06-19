@@ -8,7 +8,7 @@ namespace bullet {
 class Body;
 class BodyCreateInfo;
 class CollisionShape;
-class  ColliderBullet;
+class ColliderBullet;
 
 }
 }

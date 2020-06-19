@@ -29,6 +29,46 @@ public:
         return buf()[i];
     }
 
+    class iterator {
+    public:
+        iterator(T* buf, size_t iter)
+            : _buf(buf), _iter(iter) {
+        }
+
+        bool operator == (const iterator& other) const {
+            return _buf == other._buf && _iter == other._iter;
+        }
+
+        bool operator != (const iterator& other) const {
+            return _buf != other._buf || _iter != other._iter;
+        }
+
+        const iterator& operator ++() {
+            ++(this->_iter);
+            return *this;
+        }
+
+        iterator operator ++(int) {
+            return iterator(_buf, _iter++);
+        }
+
+        T& operator *() {
+            return _buf[_iter];
+        }
+
+    private:
+        T* _buf;
+        size_t _iter;
+    };
+
+    iterator begin() {
+        return iterator(buf(), 0);
+    }
+
+    iterator end() {
+        return iterator(buf(), length());
+    }
+
     class Allocated;
     class Borrowed;
     class Vector;

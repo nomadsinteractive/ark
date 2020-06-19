@@ -10,7 +10,6 @@ namespace ark {
 class ARK_API StringBuffer {
 public:
     StringBuffer();
-    StringBuffer(const String& str);
 
     String str() const;
     void clear();

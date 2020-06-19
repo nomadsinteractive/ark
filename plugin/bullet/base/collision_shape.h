@@ -12,13 +12,17 @@ namespace bullet {
 
 class CollisionShape {
 public:
-    CollisionShape(ColliderBullet world, btCollisionShape* shape);
+    CollisionShape(btCollisionShape* shape, btScalar mass);
+    virtual ~CollisionShape() = default;
 
     btCollisionShape* btShape() const;
 
+    btScalar mass() const;
+    void setMass(btScalar mass);
+
 private:
-    ColliderBullet _world;
     op<btCollisionShape> _shape;
+    btScalar _mass;
 };
 
 }

@@ -12,6 +12,7 @@ class DrawingContext;
 class Emitter;
 class Framebuffer;
 class Layer;
+class Mesh;
 class Model;
 class ModelLoader;
 class ModelBundle;

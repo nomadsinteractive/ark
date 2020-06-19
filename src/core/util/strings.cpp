@@ -464,10 +464,10 @@ bool Strings::splitFunction(const String& expr, String& func, String& args)
     return false;
 }
 
-String Strings::capitalFirst(const String& name)
+String Strings::capitalizeFirst(const String& name)
 {
     String s = name;
-    s[0] = toupper(s[0]);
+    s[0] = static_cast<char>(toupper(s[0]));
     return s;
 }
 

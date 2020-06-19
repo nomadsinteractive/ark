@@ -70,7 +70,7 @@ public:
         const Table<String, Declaration>& vars() const;
         Table<String, Declaration>& vars();
 
-        void declare(const String& type, const String& prefix, const String& name);
+        void declare(const String& type, const char* prefix, const String& name);
         void parse(const std::regex& pattern);
 
     private:
@@ -121,30 +121,27 @@ private:
     };
 
     struct Function {
-        Function(const String& name, const String& params, const String& body);
+        Function(const String& name, const String& params, const String& body, const sp<String>& placeHolder);
         DEFAULT_COPY_AND_ASSIGN(Function);
+
+        void parse(PipelineBuildingContext& buildingContext);
+
+        void genDefinition();
+        String genOutCall(Shader::Stage pre, Shader::Stage stage) const;
+
+        bool hasOutAttribute(const String& name) const;
 
         String _name;
         String _params;
         String _body;
         std::vector<Parameter> _ins;
         std::vector<Parameter> _outs;
-    };
 
-    struct CodeBlock {
-        CodeBlock(const Function& procedure, const sp<String>& placeHolder);
-        DEFAULT_COPY_AND_ASSIGN(CodeBlock);
+        sp<String> _place_hoder;
 
-        void parse(PipelineBuildingContext& buildingContext);
+    private:
         Parameter parseParameter(const String& param);
 
-        void genDefinition();
-        String genOutCall(Shader::Stage stage);
-
-        bool hasOutAttribute(const String& name) const;
-
-        Function _function;
-        sp<String> _place_hoder;
     };
 
 public:
@@ -154,7 +151,7 @@ public:
     void addPostMainSource(const String& source);
     void addModifier(const String& modifier);
 
-    void initialize(const String& source, PipelineBuildingContext& context);
+    void initialize(const String& source, PipelineBuildingContext& context, Shader::Stage pre);
 
     void setupUniforms(Table<String, sp<Uniform>>& uniforms, int32_t& counter);
 
@@ -166,7 +163,7 @@ public:
 
 private:
     void parseMainBlock(const String& source, PipelineBuildingContext& buildingContext);
-    void parseDeclarations(PipelineBuildingContext& context);
+    void parseDeclarations(PipelineBuildingContext& context, Shader::Stage pre);
     size_t parseFunctionBody(const String& s, String& body) const;
 
     String genDeclarations() const;
@@ -175,8 +172,10 @@ private:
     void addUniform(const String& type, const String& name, uint32_t length, const sp<String>& declaration);
     uint32_t getUniformSize(Uniform::Type type, const String& declaredType) const;
 
+    static const char* getOutAttributePrefix(Shader::Stage preStage);
+
 private:
-    sp<CodeBlock> _main_block;
+    sp<Function> _main_block;
 
     friend class PipelineBuildingContext;
     friend class PipelineLayout;

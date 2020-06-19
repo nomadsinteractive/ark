@@ -1,5 +1,6 @@
 #include "box2d/impl/collider_box2d.h"
 
+#include "core/ark.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
 #include "core/util/boolean_util.h"
@@ -143,7 +144,7 @@ ColliderBox2D::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document
       _gravity(factory.ensureBuilder<Vec2>(manifest, "gravity")), _disposed(factory.getBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED))
 {
     for(const document& i : _manifest->children("import"))
-        _importers.push_back(_factory.ensureBuilder<Importer>(i));
+        _importers.push_back({_factory.ensureBuilder<RigidBodyImporter>(i), Documents::ensureAttribute(i, Constants::Attributes::SRC)});
 }
 
 sp<ColliderBox2D> ColliderBox2D::BUILDER_IMPL1::build(const Scope& args)
@@ -163,10 +164,11 @@ sp<ColliderBox2D> ColliderBox2D::BUILDER_IMPL1::build(const Scope& args)
         world->_stub->_body_manifests[type] = bodyCreateInfo;
     }
 
-    for(const sp<Builder<Importer>>& i : _importers)
+    Ark& ark = Ark::instance();
+    for(const auto& i : _importers)
     {
-        const sp<Importer> importer = i->build(args);
-        importer->import(world);
+        const sp<RigidBodyImporter> importer = i.first->build(args);
+        importer->import(world, ark.openAsset(i.second));
     }
 
     const sp<Boolean> expired = _disposed->build(args);

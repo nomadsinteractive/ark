@@ -20,8 +20,6 @@
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/uploader.h"
 
-#include "assimp/impl/vertices/vertices_assimp.h"
-
 namespace ark {
 namespace plugin {
 namespace assimp {
@@ -50,20 +48,6 @@ public:
     };
 
 private:
-    class IndicesUploader : public Uploader {
-    public:
-        IndicesUploader(sp<ark::Array<Mesh>> meshes);
-
-        virtual void upload(Writable& uploader) override;
-
-    private:
-        size_t calcIndicesSize(ark::Array<Mesh>& meshes) const;
-
-    private:
-        sp<ark::Array<Mesh>> _meshes;
-    };
-
-private:
     bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
     void loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex);
 
@@ -88,7 +72,7 @@ private:
     };
 
 private:
-    sp<ModelBundle> _models;
+    sp<ModelBundle> _model_bundle;
     std::vector<sp<Texture>> _textures;
 
 };

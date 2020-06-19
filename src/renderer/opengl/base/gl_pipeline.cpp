@@ -15,7 +15,7 @@
 #include "renderer/base/texture.h"
 #include "renderer/base/uniform.h"
 #include "renderer/inf/resource.h"
-#include "renderer/util/element_util.h"
+#include "renderer/util/render_util.h"
 
 #include "renderer/opengl/util/gl_util.h"
 
@@ -65,7 +65,7 @@ private:
 
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const PipelineBindings& bindings)
     : _recycler(recycler), _pipeline_input(bindings.input()), _version(version), _vertex_source(vertexShader), _fragment_source(fragmentShader), _cull_face(bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK) != PipelineBindings::FLAG_CULL_MODE_NONE),
-      _scissor(bindings.scissor()), _scissor_enabled(ElementUtil::isScissorEnabled(_scissor)), _id(0), _renderer(makeBakedRenderer(bindings)), _rebind_needed(true)
+      _scissor(bindings.scissor()), _scissor_enabled(RenderUtil::isScissorEnabled(_scissor)), _id(0), _renderer(makeBakedRenderer(bindings)), _rebind_needed(true)
 {
 }
 
@@ -158,7 +158,7 @@ void GLPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
 
 void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    bool contextScissorEnabled = ElementUtil::isScissorEnabled(drawingContext._scissor);
+    bool contextScissorEnabled = RenderUtil::isScissorEnabled(drawingContext._scissor);
 
     const GLCullFace cullFace(_cull_face);
     const GLScissor scissor(contextScissorEnabled ? drawingContext._scissor : _scissor, contextScissorEnabled || _scissor_enabled);

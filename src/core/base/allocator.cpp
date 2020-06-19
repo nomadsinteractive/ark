@@ -4,16 +4,16 @@
 
 namespace ark {
 
-Allocator::Allocator(const sp<MemoryPool>& memoryPool, size_t blockSize, size_t alignment)
-    : _memory_pool(memoryPool), _block_size(blockSize), _alignment(alignment), _ptr(nullptr), _available(0)
+Allocator::Allocator(const sp<MemoryPool>& memoryPool, size_t blockSize)
+    : _memory_pool(memoryPool), _block_size(blockSize), _ptr(nullptr), _available(0)
 {
 }
 
-ByteArray::Borrowed Allocator::sbrk(size_t size)
+ByteArray::Borrowed Allocator::sbrk(size_t size, size_t alignment)
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    size_t m = size % _alignment;
-    size_t sizeNeeded = size + (m ? _alignment - m : 0);
+    size_t m = size % alignment;
+    size_t sizeNeeded = size + (m ? alignment - m : 0);
 
     if(_available < sizeNeeded)
         newBlock(std::max(sizeNeeded, _block_size));

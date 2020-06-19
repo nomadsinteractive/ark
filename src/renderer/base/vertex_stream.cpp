@@ -18,7 +18,7 @@ VertexStream::VertexStream(const Buffer::Attributes& attributes, bool doTransfor
 
 void VertexStream::writePosition(const V3& position)
 {
-    write<V3>(_visible ? (_do_transform ? (_transform->transform(position) + _translate) : position) : V3());
+    _writer->writePosition(_visible ? (_do_transform ? (_transform->transform(position) + _translate) : position) : V3());
 }
 
 void VertexStream::writeTexCoordinate(uint16_t u, uint16_t v)

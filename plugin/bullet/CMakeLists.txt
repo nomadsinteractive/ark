@@ -16,14 +16,15 @@ ark_include_directories(3rdparty/bullet3/src)
 
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(base LOCAL_SRC_LIST)
+aux_source_directory(importer LOCAL_SRC_LIST)
 aux_source_directory(rigid_body LOCAL_SRC_LIST)
 
 ark_setup_tools(ark_gen_plugin_class)
-ark_gen_plugin_class(bullet core ark::plugin::bullet bullet_plugin base rigid_body)
+ark_gen_plugin_class(bullet core ark::plugin::bullet bullet_plugin base rigid_body importer)
 
 ark_link_libraries(BulletDynamics BulletCollision Bullet3Common LinearMath)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DARK_FLAG_BUILDING_PLUGIN_BULLET)
 
-#ark_export_dependency_libraries(${PROJECT_NAME} Box2D)
+#ark_export_dependency_libraries(${PROJECT_NAME} BulletDynamics BulletCollision Bullet3Common LinearMath)

@@ -42,20 +42,20 @@ private:
 
 }
 
-PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment)
-    : _pipeline_factory(pipelineFactory), _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX), _fragment(Shader::SHADER_STAGE_FRAGMENT)
+PipelineBuildingContext::PipelineBuildingContext(const String& vertex, const String& fragment)
+    : _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX), _fragment(Shader::SHADER_STAGE_FRAGMENT)
 {
-    _vertex.initialize(vertex, *this);
-    _fragment.initialize(fragment, *this);
+    _vertex.initialize(vertex, *this, Shader::SHADER_STAGE_NONE);
+    _fragment.initialize(fragment, *this, Shader::SHADER_STAGE_VERTEX);
 }
 
-PipelineBuildingContext::PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment, BeanFactory& factory, const Scope& args, const document& manifest)
-    : _pipeline_factory(pipelineFactory), _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX), _fragment(Shader::SHADER_STAGE_FRAGMENT)
+PipelineBuildingContext::PipelineBuildingContext(const String& vertex, const String& fragment, BeanFactory& factory, const Scope& args, const document& manifest)
+    : _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX), _fragment(Shader::SHADER_STAGE_FRAGMENT)
 {
     loadPredefinedParam(factory, args, manifest);
 
-    _vertex.initialize(vertex, *this);
-    _fragment.initialize(fragment, *this);
+    _vertex.initialize(vertex, *this, Shader::SHADER_STAGE_NONE);
+    _fragment.initialize(fragment, *this, Shader::SHADER_STAGE_VERTEX);
 }
 
 void PipelineBuildingContext::loadPredefinedParam(BeanFactory& factory, const Scope& args, const document& manifest)
@@ -70,24 +70,20 @@ void PipelineBuildingContext::initialize()
     for(const auto& i : _vertex._ins.vars().values())
         if(_vert_in_declared.find(i.name()) == _vert_in_declared.end())
         {
-            _vert_in_declared[i.name()] = i.type();
+            _vert_in_declared.insert(i.name());
             addAttribute(i.name(), i.type());
         }
 
-    std::set<String> fragmentUsedVars;
-    static const std::regex varPattern("\\bv_([\\w\\d_]+)\\b");
-    _fragment._main.search(varPattern, [&fragmentUsedVars](const std::smatch& m)->bool {
-        fragmentUsedVars.insert(m[1].str());
-        return true;
-    });
+    for(const auto& i : _vertex._main_block->_ins)
+        _vertex._ins.declare(i._type, "a_", Strings::capitalizeFirst(i._name));
 
-    for(const auto& i : _vertex_in)
-        _vertex._ins.declare(i._type, "a_", Strings::capitalFirst(i._name));
+    std::set<String> passThroughVars;
     for(const auto& i : _fragment_in)
     {
-        const String n = Strings::capitalFirst(i._name);
-        fragmentUsedVars.insert(n);
+        const String n = Strings::capitalizeFirst(i._name);
         _fragment._ins.declare(i._type, "v_", n);
+        if(!_vertex._main_block->hasOutAttribute(n))
+            passThroughVars.insert(n);
     }
 
     Table<String, String> attributes;
@@ -116,22 +112,22 @@ void PipelineBuildingContext::initialize()
 
     for(const auto& i : attributes)
     {
-        if(fragmentUsedVars.find(i.first) != fragmentUsedVars.end())
+        if(passThroughVars.find(i.first) != passThroughVars.end())
             _fragment._ins.declare(i.second, "v_", i.first);
     }
 
     for(const String& i : generated)
     {
         _vertex._ins.declare(attributes.at(i), "a_", i);
-        if(fragmentUsedVars.find(i) != fragmentUsedVars.end())
+        if(passThroughVars.find(i) != passThroughVars.end())
         {
             _vertex._outs.declare(attributes.at(i), "v_", i);
             _vertex.addPreMainSource(Strings::sprintf("v_%s = a_%s;", i.c_str(), i.c_str()));
         }
     }
 
-    for(const auto& i : _vertex_out)
-        _vertex._outs.declare(i._type, "", i._name);
+    for(const auto& i : _vertex._main_block->_outs)
+        _vertex._outs.declare(i._type, "v_", Strings::capitalizeFirst(i._name));
 }
 
 void PipelineBuildingContext::setupUniforms()

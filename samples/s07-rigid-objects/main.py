@@ -1,6 +1,7 @@
 import math
 import random
 
+import ark
 from ark import dear_imgui, ApplicationFacade, Arena, Event, Integer, Collider, RenderObject, Size, Camera, Vec3, Numeric
 
 
@@ -25,7 +26,7 @@ class Application:
         self._body_ttl = Numeric(5)
         self._rigid_body_ground_b2 = self._world_box2d.create_body(Collider.BODY_TYPE_STATIC, Collider.BODY_SHAPE_BOX, (4.8, 0), Size(6.0, 1.0))
         self._rigid_body_ground_bt = self._world_bullet.create_body(Collider.BODY_TYPE_STATIC, Collider.BODY_SHAPE_BOX, (480, 0, 0), Size(600, 100, 600))
-        self._shapes = [Collider.BODY_SHAPE_BALL, Collider.BODY_SHAPE_BOX]
+        self._shapes = [Collider.BODY_SHAPE_BALL, Collider.BODY_SHAPE_BOX, 3]
 
     @property
     def imgui(self):
@@ -62,7 +63,7 @@ class Application:
         xy = event.xy
         shape = self._shapes[shape_id]
         s = self._body_size.val
-        s1 = s / [2, 100][shape_id]
+        s1 = s / [2, 100, 50][shape_id]
         rigid_body = self._world_bullet.create_body(Collider.BODY_TYPE_DYNAMIC, shape, xy, Size(s, s, s))
         render_object = RenderObject(self._shape_id.val + 1, None, Size(s1, s1, s1))
         rigid_body.bind(render_object)
@@ -81,6 +82,8 @@ class Application:
         builder.radio_button('Ball', self._shape_id, 0)
         builder.same_line()
         builder.radio_button('Box', self._shape_id, 1)
+        builder.same_line()
+        builder.radio_button('Duck', self._shape_id, 2)
         builder.slider_float('RigidBody size', self._body_size, 10, 100, '%.1f')
         builder.slider_float('RigidBody TTL', self._body_ttl, 5, 50, '%.1f')
         builder.slider_float3('Light Position', self._light_position, 0, 1000, '%.1f')

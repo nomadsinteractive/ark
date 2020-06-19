@@ -38,7 +38,7 @@ public:
 
     static bool splitFunction(const String& expr, String& func, String& args);
 
-    static String capitalFirst(const String& name);
+    static String capitalizeFirst(const String& name);
 
     template<typename T> static array<T> toArray(const String& str, char open = '(', char close = ')') {
         const String value = Strings::unwrap(str.strip(), open, close);

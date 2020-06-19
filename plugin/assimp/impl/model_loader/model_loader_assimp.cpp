@@ -13,6 +13,7 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_buffer.h"
+#include "renderer/base/mesh.h"
 #include "renderer/base/model.h"
 #include "renderer/base/model_bundle.h"
 #include "renderer/base/pipeline_bindings.h"
@@ -33,14 +34,14 @@ namespace plugin {
 namespace assimp {
 
 ModelLoaderAssimp::ModelLoaderAssimp(sp<Atlas> atlas, const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _models(makeModelBundle(resourceLoaderContext, manifest, std::move(atlas)))
+    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _model_bundle(makeModelBundle(resourceLoaderContext, manifest, std::move(atlas)))
 {
 
 }
 
 sp<RenderCommandComposer> ModelLoaderAssimp::makeRenderCommandComposer()
 {
-    return sp<RCCMultiDrawElementsIndirect>::make(_models);
+    return sp<RCCMultiDrawElementsIndirect>::make(_model_bundle);
 }
 
 void ModelLoaderAssimp::initialize(ShaderBindings& /*shaderBindings*/)
@@ -53,7 +54,7 @@ void ModelLoaderAssimp::postSnapshot(RenderController& /*renderController*/, Ren
 
 Model ModelLoaderAssimp::load(int32_t type)
 {
-    return _models->load(type);
+    return _model_bundle->load(type);
 }
 
 ModelLoaderAssimp::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -84,7 +85,9 @@ void ModelLoaderAssimp::loadSceneTexture(const ResourceLoaderContext& resourceLo
 sp<ModelBundle> ModelLoaderAssimp::makeModelBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest, sp<Atlas> atlas)
 {
     Importer importer;
-    return sp<ModelBundle>::make(resourceLoaderContext, manifest, std::move(atlas), importer);
+    sp<ModelBundle> modelBundle = sp<ModelBundle>::make(std::move(atlas));
+    modelBundle->import(resourceLoaderContext, manifest, importer);
+    return modelBundle;
 }
 
 array<element_index_t> ModelLoaderAssimp::Importer::loadIndices(const aiMesh* mesh, element_index_t indexOffset) const
@@ -99,35 +102,6 @@ array<element_index_t> ModelLoaderAssimp::Importer::loadIndices(const aiMesh* me
         buf += 3;
     }
     return s;
-}
-
-ModelLoaderAssimp::IndicesUploader::IndicesUploader(sp<ark::Array<Mesh>> meshes)
-    : Uploader(calcIndicesSize(meshes)), _meshes(std::move(meshes))
-{
-}
-
-void ModelLoaderAssimp::IndicesUploader::upload(Writable& uploader)
-{
-    uint32_t offset = 0;
-    size_t length = _meshes->length();
-    Mesh* buf = _meshes->buf();
-    for(size_t i = 0; i < length; ++i)
-    {
-        const array<element_index_t>& indices = buf[i].indices();
-        uint32_t size = static_cast<uint32_t>(indices->size());
-        uploader.write(indices->buf(), size, offset);
-        offset += size;
-    }
-}
-
-size_t ModelLoaderAssimp::IndicesUploader::calcIndicesSize(ark::Array<Mesh>& meshes) const
-{
-    size_t size = 0;
-    size_t length = meshes.length();
-    Mesh* buf = meshes.buf();
-    for(size_t i = 0; i < length; ++i)
-        size += buf[i].indices()->length() * sizeof(element_index_t);
-    return size;
 }
 
 ModelLoaderAssimp::Importer::Importer()
@@ -178,9 +152,7 @@ Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& u
         indexOffset += meshes.back().vertexLength();
     }
 
-    sp<Array<Mesh>> m = sp<Array<Mesh>::Vector>::make(std::move(meshes));
-    sp<Uploader> uploader = sp<IndicesUploader>::make(m);
-    return Model(std::move(uploader), sp<VerticesAssimp>::make(std::move(m)));
+    return Model(sp<Array<Mesh>::Vector>::make(std::move(meshes)));
 }
 
 }

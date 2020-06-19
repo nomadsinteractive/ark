@@ -38,6 +38,12 @@ private:
 
 }
 
+Buffer::Attributes::Attributes()
+{
+    for(uint32_t i = 0; i < ATTRIBUTE_NAME_COUNT; ++i)
+        _offsets[i] = -1;
+}
+
 Buffer::Attributes::Attributes(const PipelineInput& input)
 {
     _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = input.getAttributeOffset("TexCoordinate");

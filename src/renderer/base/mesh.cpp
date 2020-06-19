@@ -1,4 +1,4 @@
-#include "assimp/base/mesh.h"
+#include "renderer/base/mesh.h"
 
 #include "core/inf/array.h"
 
@@ -30,6 +30,11 @@ size_t Mesh::vertexLength() const
 const array<element_index_t>& Mesh::indices() const
 {
     return _indices;
+}
+
+const array<V3>& Mesh::vertices() const
+{
+    return _vertices;
 }
 
 void Mesh::write(VertexStream& buf, const V3& size) const

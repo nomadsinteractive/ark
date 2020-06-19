@@ -9,8 +9,12 @@
 
 namespace ark {
 
-ModelBundle::ModelBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest, sp<Atlas> atlas, Importer& importer)
+ModelBundle::ModelBundle(sp<Atlas> atlas)
     : _atlas(std::move(atlas)), _vertex_length(0), _index_length(0)
+{
+}
+
+void ModelBundle::import(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest, ModelBundle::Importer& importer)
 {
     TexturePacker texturePacker(resourceLoaderContext, _atlas->width(), _atlas->height(), false);
     for(const document& i : manifest->children())

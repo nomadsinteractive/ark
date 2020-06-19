@@ -39,6 +39,7 @@ public:
     };
 
     struct Attributes {
+        Attributes();
         Attributes(const PipelineInput& input);
 
         int32_t _offsets[ATTRIBUTE_NAME_COUNT];

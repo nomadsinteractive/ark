@@ -6,6 +6,8 @@
 
 #include "graphics/forwarding.h"
 
+#include "renderer/base/shader.h"
+
 namespace ark {
 
 class RenderUtil {
@@ -17,6 +19,8 @@ public:
     static Model makeUnitQuadModel();
 
     static element_index_t hash(element_index_t* buf, size_t len);
+
+    static String outAttributeName(const String& name, Shader::Stage preStage);
 
     static bool isScissorEnabled(const Rect& scissor);
 };

@@ -16,7 +16,7 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
-#include "renderer/util/element_util.h"
+#include "renderer/util/render_util.h"
 
 #include "renderer/opengl/base/gl_buffer.h"
 #include "renderer/opengl/base/gl_pipeline.h"
@@ -161,7 +161,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     Buffer vertexBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC);
     Buffer indexBuffer = renderController.makeIndexBuffer(Buffer::USAGE_STATIC);
 
-    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(sp<Uploader::Array<uint8_t>>::make(ElementUtil::makeUnitCubeVertices()));
+    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(sp<Uploader::Array<uint8_t>>::make(RenderUtil::makeUnitCubeVertices()));
     vertexBufferSnapshot.upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(vertexBuffer.id()));
     glEnableVertexAttribArray(0);

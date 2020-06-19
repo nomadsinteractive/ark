@@ -73,6 +73,14 @@ element_index_t RenderUtil::hash(element_index_t* buf, size_t len)
     return h;
 }
 
+String RenderUtil::outAttributeName(const String& name, Shader::Stage preStage)
+{
+    DCHECK(preStage == Shader::SHADER_STAGE_NONE || preStage == Shader::SHADER_STAGE_VERTEX, "Only none and vertex stage's out attribute name supported");
+    const char sPrefix[][8] = {"a_", "v_"};
+    const String prefix = sPrefix[preStage + 1];
+    return name.startsWith(prefix) ? name : prefix + Strings::capitalizeFirst(name);
+}
+
 bool RenderUtil::isScissorEnabled(const Rect& scissor)
 {
     return scissor.right() > scissor.left() && scissor.bottom() > scissor.top();

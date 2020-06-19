@@ -81,7 +81,9 @@ void RigidBodyBullet::TransformDelegate::snapshot(const Transform& /*transform*/
     btTransform transform;
     _stub->_motion_state->getWorldTransform(transform);
     transform.setOrigin(btVector3(0, 0, 0));
-    transform.getOpenGLMatrix(reinterpret_cast<btScalar*>(snapshot.makeData<M4>()));
+    M4 matrix;
+    transform.getOpenGLMatrix(reinterpret_cast<btScalar*>(&matrix));
+    *snapshot.makeData<M4>() = matrix;
 }
 
 V3 RigidBodyBullet::TransformDelegate::transform(const Transform::Snapshot& /*snapshot*/, const V3& position) const

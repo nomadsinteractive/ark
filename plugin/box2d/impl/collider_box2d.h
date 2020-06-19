@@ -17,6 +17,7 @@
 #include "renderer/forwarding.h"
 
 #include "app/inf/collider.h"
+#include "core/inf/importer.h"
 
 #include "box2d/api.h"
 #include "box2d/forwarding.h"
@@ -30,14 +31,7 @@ namespace box2d {
 //[[script::bindings::name("World")]]
 class ARK_PLUGIN_BOX2D_API ColliderBox2D : public Runnable, public Collider, Implements<ColliderBox2D, Runnable, Collider> {
 public:
-
-    class Importer {
-    public:
-        virtual ~Importer() = default;
-
-        virtual void import(ColliderBox2D& world) = 0;
-
-    };
+    typedef Importer<ColliderBox2D> RigidBodyImporter;
 
 public:
     ColliderBox2D(const b2Vec2& gravity, const V2& pixelPerMeter);
@@ -86,7 +80,7 @@ public:
         document _manifest;
         sp<ResourceLoaderContext> _resource_loader_context;
 
-        std::vector<sp<Builder<Importer>>> _importers;
+        std::vector<std::pair<sp<Builder<RigidBodyImporter>>, String>> _importers;
 
         sp<Builder<Vec2>> _ppm;
         sp<Builder<Vec2>> _gravity;
@@ -151,7 +145,6 @@ private:
 
     friend class BUILDER_IMPL1;
     friend class RigidBodyBox2D;
-    friend class Importer;
 };
 
 }

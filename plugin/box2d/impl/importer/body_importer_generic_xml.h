@@ -1,5 +1,5 @@
-#ifndef ARK_PLUGIN_BOX2D_IMPL_IMPORTER_BODY_IMPORTER_GENERIC_XML_H_
-#define ARK_PLUGIN_BOX2D_IMPL_IMPORTER_BODY_IMPORTER_GENERIC_XML_H_
+#ifndef ARK_PLUGIN_BOX2D_IMPL_IMPORTER_RIGID_BODY_IMPORTER_GENERIC_XML_H_
+#define ARK_PLUGIN_BOX2D_IMPL_IMPORTER_RIGID_BODY_IMPORTER_GENERIC_XML_H_
 
 #include "box2d/impl/collider_box2d.h"
 
@@ -7,26 +7,20 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-class ImporterGenericXML : public ColliderBox2D::Importer {
+class RigidBodyImporterGenericXML : public ColliderBox2D::RigidBodyImporter {
 public:
-    ImporterGenericXML(const document& manifest);
 
-    virtual void import(ColliderBox2D& world) override;
+    virtual void import(ColliderBox2D& world, const sp<Readable>& readable) override;
 
 //  [[plugin::resource-loader("generic-xml")]]
-    class BUILDER : public Builder<ColliderBox2D::Importer> {
+    class BUILDER : public Builder<ColliderBox2D::RigidBodyImporter> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER() = default;
 
-        virtual sp<ColliderBox2D::Importer> build(const Scope& args) override;
+        virtual sp<ColliderBox2D::RigidBodyImporter> build(const Scope& args) override;
 
-    private:
-        sp<ResourceLoaderContext> _resource_loader_context;
-        sp<Builder<String>> _src;
     };
 
-private:
-    document _manifest;
 };
 
 }

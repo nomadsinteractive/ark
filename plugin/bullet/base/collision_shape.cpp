@@ -4,14 +4,24 @@ namespace ark {
 namespace plugin {
 namespace bullet {
 
-CollisionShape::CollisionShape(ColliderBullet world, btCollisionShape* shape)
-    : _world(std::move(world)), _shape(shape)
+CollisionShape::CollisionShape(btCollisionShape* shape, btScalar mass)
+    : _shape(shape), _mass(mass)
 {
 }
 
 btCollisionShape* CollisionShape::btShape() const
 {
     return _shape.get();
+}
+
+btScalar CollisionShape::mass() const
+{
+    return _mass;
+}
+
+void CollisionShape::setMass(btScalar mass)
+{
+    _mass = mass;
 }
 
 }

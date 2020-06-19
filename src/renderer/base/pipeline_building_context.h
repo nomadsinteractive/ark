@@ -2,6 +2,7 @@
 #define ARK_RENDERER_BASE_PIPELINE_BUILDING_CONTEXT_H_
 
 #include <map>
+#include <set>
 #include <vector>
 
 #include "core/base/string.h"
@@ -18,14 +19,13 @@ namespace ark {
 
 class PipelineBuildingContext {
 public:
-    PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment);
-    PipelineBuildingContext(const sp<PipelineFactory>& pipelineFactory, const String& vertex, const String& fragment, BeanFactory& factory, const Scope& args, const document& manifest);
+    PipelineBuildingContext(const String& vertex, const String& fragment);
+    PipelineBuildingContext(const String& vertex, const String& fragment, BeanFactory& factory, const Scope& args, const document& manifest);
 
     void initialize();
 
     void setupUniforms();
 
-    sp<PipelineFactory> _pipeline_factory;
     sp<PipelineInput> _input;
     sp<Snippet> _snippet;
 
@@ -36,12 +36,9 @@ public:
     Table<String, sp<Uniform>> _uniforms;
     Table<String, sp<Texture>> _samplers;
 
-    std::vector<ShaderPreprocessor::Parameter> _vertex_in;
-    std::vector<ShaderPreprocessor::Parameter> _vertex_out;
-
     std::vector<ShaderPreprocessor::Parameter> _fragment_in;
 
-    std::map<String, String> _vert_in_declared;
+    std::set<String> _vert_in_declared;
 
     void addAttribute(const String& name, const String& type);
     void addSnippet(const sp<Snippet>& snippet);

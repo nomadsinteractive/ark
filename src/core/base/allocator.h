@@ -12,9 +12,9 @@ namespace ark {
 
 class ARK_API Allocator {
 public:
-    Allocator(const sp<MemoryPool>& memoryPool, size_t blockSize = 1024 * 1024, size_t alignment = sizeof(void*));
+    Allocator(const sp<MemoryPool>& memoryPool, size_t blockSize = 1024 * 1024);
 
-    ByteArray::Borrowed sbrk(size_t size);
+    ByteArray::Borrowed sbrk(size_t size, size_t alignment = sizeof(void*));
 
 private:
     void newBlock(size_t size);
@@ -22,7 +22,6 @@ private:
 private:
     sp<MemoryPool> _memory_pool;
     size_t _block_size;
-    size_t _alignment;
 
     std::vector<bytearray> _blocks;
     uint8_t* _ptr;

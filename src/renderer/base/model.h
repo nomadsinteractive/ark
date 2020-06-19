@@ -9,6 +9,8 @@
 #include "graphics/base/v3.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/inf/vertices.h"
+#include "renderer/inf/uploader.h"
 
 namespace ark {
 
@@ -16,10 +18,12 @@ class ARK_API Model {
 public:
     Model() = default;
     Model(sp<Uploader> indices, sp<Vertices> vertices, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
+    Model(sp<Array<Mesh>> meshes, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Model);
 
     const sp<Uploader>& indices() const;
     const sp<Vertices>& vertices() const;
+    const sp<Array<Mesh>>& meshes() const;
 
     const Metrics& metrics() const;
 
@@ -32,8 +36,37 @@ private:
     V3 toScale(const V3& renderObjectSize) const;
 
 private:
+    class MeshIndicesUploader : public Uploader {
+    public:
+        MeshIndicesUploader(sp<ark::Array<Mesh>> meshes);
+
+        virtual void upload(Writable& uploader) override;
+
+    private:
+        size_t calcIndicesSize(ark::Array<Mesh>& meshes) const;
+
+    private:
+        sp<ark::Array<Mesh>> _meshes;
+    };
+
+    class MeshVertices : public Vertices {
+    public:
+        MeshVertices(sp<Array<Mesh>> meshes);
+
+        virtual void write(VertexStream& buf, const V3& size) override;
+
+    private:
+        size_t calcVertexLength(Array<Mesh>& meshes) const;
+
+    private:
+        sp<Array<Mesh>> _meshes;
+    };
+
+private:
     sp<Uploader> _indices;
     sp<Vertices> _vertices;
+    sp<Array<Mesh>> _meshes;
+
     Metrics _metrics;
 };
 

@@ -1,5 +1,5 @@
-#ifndef ARK_PLUGIN_ASSIMP_BASE_MESH_H_
-#define ARK_PLUGIN_ASSIMP_BASE_MESH_H_
+#ifndef ARK_RENDERER_BASE_MESH_H_
+#define ARK_RENDERER_BASE_MESH_H_
 
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
@@ -34,6 +34,7 @@ public:
     size_t vertexLength() const;
 
     const array<element_index_t>& indices() const;
+    const array<V3>& vertices() const;
 
     void write(VertexStream& buf, const V3& size) const;
 

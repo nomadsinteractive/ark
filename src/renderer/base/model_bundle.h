@@ -31,7 +31,9 @@ public:
     };
 
 public:
-    ModelBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest, sp<Atlas> atlas, Importer& importer);
+    ModelBundle(sp<Atlas> atlas);
+
+    void import(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest, Importer& importer);
 
     const ModelInfo& ensure(int32_t type) const;
     Model load(int32_t type) const;

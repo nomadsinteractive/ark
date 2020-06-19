@@ -8,11 +8,6 @@ StringBuffer::StringBuffer()
 {
 }
 
-StringBuffer::StringBuffer(const String& str)
-    : _ss(str._str)
-{
-}
-
 String StringBuffer::str() const
 {
     return _ss.str();
@@ -20,8 +15,7 @@ String StringBuffer::str() const
 
 void StringBuffer::clear()
 {
-    _ss.str("");
-    _ss.clear();
+    _ss = std::ostringstream();
 }
 
 StringBuffer& StringBuffer::operator <<(const String& str)

@@ -60,14 +60,10 @@ private:
 
 }
 
-ImporterGenericXML::ImporterGenericXML(const document& manifest)
-    : _manifest(manifest)
+void RigidBodyImporterGenericXML::import(ColliderBox2D& world, const sp<Readable>& readable)
 {
-}
-
-void ImporterGenericXML::import(ColliderBox2D& world)
-{
-    const document bodies = _manifest->getChild("bodies");
+    const document manifest = Documents::loadFromReadable(readable);
+    const document bodies = manifest->getChild("bodies");
     DASSERT(bodies);
 
     for(const document& i : bodies->children("body"))
@@ -95,16 +91,9 @@ void ImporterGenericXML::import(ColliderBox2D& world)
     }
 }
 
-ImporterGenericXML::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _src(factory.ensureBuilder<String>(manifest, Constants::Attributes::SRC))
+sp<ColliderBox2D::RigidBodyImporter> RigidBodyImporterGenericXML::BUILDER::build(const Scope& /*args*/)
 {
-}
-
-sp<ColliderBox2D::Importer> ImporterGenericXML::BUILDER::build(const Scope& args)
-{
-    const sp<String> src = _src->build(args);
-    const document manifest = _resource_loader_context->documents()->get(src);
-    return sp<ImporterGenericXML>::make(manifest);
+    return sp<RigidBodyImporterGenericXML>::make();
 }
 
 }

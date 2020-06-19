@@ -19,6 +19,9 @@
 		<model type="2" src="cube_emptyTags.dae">
 			<map type="albedo" src="blocks.png"/>
 		</model>
+		<model type="3" src="duck.dae">
+			<map type="albedo" src="duckCM.tga"/>
+		</model>
 	</model-loader>
 	<renderer id="@imgui" class="imgui">
 		<font src="fonts/Cousine-Regular.ttf" size="14"/>
@@ -39,5 +42,9 @@
 		<event-listener ref="@imgui"/>
 	</arena>
 	<collider id="b2World" class="b2World" pixel-per-meter="(100, 100)" gravity="(0, -9.8)"/>
-	<collider id="btWorld" class="btWorld" gravity="(0, -980, 0)"/>
+	<collider id="btWorld" class="btWorld" gravity="(0, -980, 0)">
+		<import class="ConvexHull" model-loader="@assimp">
+			<model type="3"/>
+		</import>
+	</collider>
 </resources>

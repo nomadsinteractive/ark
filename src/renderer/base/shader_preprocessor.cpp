@@ -36,6 +36,8 @@ static std::regex _OUT_PATTERN("(?:varying|out)" ATTRIBUTE_PATTERN);
 static std::regex _IN_OUT_PATTERN("(?:varying|in)" ATTRIBUTE_PATTERN);
 static std::regex _UNIFORM_PATTERN("uniform" UNIFORM_PATTERN);
 
+static char _STAGE_ATTR_PREFIX[4][Shader::SHADER_STAGE_COUNT] = {"a_", "v_", "f_", "c_"};
+
 ShaderPreprocessor::ShaderPreprocessor(Shader::Stage stage)
     : _stage(stage), _version(0), _ins(_attribute_declarations, stage == Shader::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
       _outs(_attribute_declarations, stage == Shader::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
@@ -59,10 +61,10 @@ void ShaderPreprocessor::addModifier(const String& modifier)
     *_output_var = Strings::sprintf("%s * %s", _output_var->c_str(), modifier.c_str());
 }
 
-void ShaderPreprocessor::initialize(const String& source, PipelineBuildingContext& context)
+void ShaderPreprocessor::initialize(const String& source, PipelineBuildingContext& context, Shader::Stage pre)
 {
     parseMainBlock(source, context);
-    parseDeclarations(context);
+    parseDeclarations(context, pre);
 }
 
 static bool sanitizer(const std::smatch& match) {
@@ -91,7 +93,7 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
         _main.push_back(sp<String>::make(prefix));
         _main.push_back(fragment);
         _main.push_back(sp<String>::make(remaining.substr(prefixStart)));
-        _main_block = sp<CodeBlock>::make(Function("main", m[1].str(), body.strip()), fragment);
+        _main_block = sp<Function>::make("main", m[1].str(), body.strip(), fragment);
         return false;
     });
 
@@ -100,7 +102,7 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
     _main_block->parse(buildingContext);
 }
 
-void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
+void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context, Shader::Stage pre)
 {
     _ins.parse(_stage == Shader::SHADER_STAGE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
     _outs.parse(_OUT_PATTERN);
@@ -136,7 +138,7 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
         _main.push_back(sp<String>::make("\n\nvoid main() {\n"));
         _main.push_back(_pre_main);
         _main.push_back(sp<String>::make(Strings::sprintf(INDENT_STR "%s = ", outVar.c_str())));
-        *_output_var = _main_block->genOutCall(_stage);
+        *_output_var = _main_block->genOutCall(pre, _stage);
         _main.push_back(_output_var);
         _main.push_back(sp<String>::make(";"));
         _main.push_back(_post_main);
@@ -146,25 +148,19 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
 
     if(_stage == Shader::SHADER_STAGE_VERTEX)
     {
-        for(const auto& i : _main_block->_function._ins)
-            context._vertex_in.push_back(i);
-
-        for(const auto& i : _main_block->_function._outs)
-            context._vertex_out.push_back(i);
-
-        for(const auto& i : context._vertex_in)
+        for(const auto& i : _main_block->_ins)
         {
-            const String name = Strings::capitalFirst(i._name);
+            const String name = Strings::capitalizeFirst(i._name);
             if(context._vert_in_declared.find(name) == context._vert_in_declared.end())
             {
-                context._vert_in_declared[name] = i._type;
+                context._vert_in_declared.insert(name);
                 context.addAttribute(name, i._type);
             }
         }
     }
     else if(_stage == Shader::SHADER_STAGE_FRAGMENT)
     {
-        for(const auto& i : _main_block->_function._ins)
+        for(const auto& i : _main_block->_ins)
             context._fragment_in.push_back(i);
     }
 }
@@ -265,6 +261,11 @@ uint32_t ShaderPreprocessor::getUniformSize(Uniform::Type type, const String& de
     return size;
 }
 
+const char* ShaderPreprocessor::getOutAttributePrefix(Shader::Stage preStage)
+{
+    return _STAGE_ATTR_PREFIX[preStage + 1];
+}
+
 String ShaderPreprocessor::genDeclarations() const
 {
     StringBuffer sb;
@@ -293,33 +294,28 @@ void ShaderPreprocessor::addInclude(const String& source, const String& filepath
     _includes.push_back(content ? content : sp<String>::make(source));
 }
 
-ShaderPreprocessor::Function::Function(const String& name, const String& params, const String& body)
-    : _name(name), _params(params), _body(body)
+ShaderPreprocessor::Function::Function(const String& name, const String& params, const String& body, const sp<String>& placeHolder)
+    : _name(name), _params(params), _body(body), _place_hoder(placeHolder)
 {
 }
 
-ShaderPreprocessor::CodeBlock::CodeBlock(const Function& procedure, const sp<String>& placeHolder)
-    : _function(procedure), _place_hoder(placeHolder)
+void ShaderPreprocessor::Function::parse(PipelineBuildingContext& buildingContext)
 {
-}
-
-void ShaderPreprocessor::CodeBlock::parse(PipelineBuildingContext& buildingContext)
-{
-    for(const String& i : _function._params.split(','))
+    for(const String& i : _params.split(','))
     {
         String s = i.strip();
         Parameter param = parseParameter(s);
         if(param._modifier & Parameter::PARAMETER_MODIFIER_OUT)
-            _function._outs.push_back(std::move(param));
+            _outs.push_back(std::move(param));
         else
         {
-            buildingContext.addPredefinedAttribute(Strings::capitalFirst(param._name), param._type, 0);
-            _function._ins.push_back(std::move(param));
+            buildingContext.addPredefinedAttribute(Strings::capitalizeFirst(param._name), param._type, 0);
+            _ins.push_back(std::move(param));
         }
     }
 }
 
-ShaderPreprocessor::Parameter ShaderPreprocessor::CodeBlock::parseParameter(const String& param)
+ShaderPreprocessor::Parameter ShaderPreprocessor::Function::parseParameter(const String& param)
 {
     int32_t modifier = Parameter::PARAMETER_MODIFIER_DEFAULT;
     String type, name;
@@ -347,42 +343,52 @@ ShaderPreprocessor::Parameter ShaderPreprocessor::CodeBlock::parseParameter(cons
     return Parameter(std::move(type), std::move(name), static_cast<Parameter::Modifier>(modifier));
 }
 
-void ShaderPreprocessor::CodeBlock::genDefinition()
+void ShaderPreprocessor::Function::genDefinition()
 {
     StringBuffer sb;
-    sb << "vec4 ark_" << _function._name << "(";
-    const auto begin = _function._ins.begin();
-    for(auto iter = begin; iter != _function._ins.end(); ++iter)
+    sb << "vec4 ark_" << _name << "(";
+
+    const auto begin = _ins.begin();
+    for(auto iter = begin; iter != _ins.end(); ++iter)
     {
         if(iter != begin)
             sb << ", ";
-        sb << iter->_type << " " << iter->_name;
+        sb << "in " << iter->_type << " " << iter->_name;
     }
-    sb << ") {\n    " << _function._body << "\n}";
+
+    for(const auto& i : _outs)
+        sb << ", out " << i._type << " " << i._name;
+
+
+    sb << ") {\n    " << _body << "\n}";
     *_place_hoder = sb.str();
 }
 
-String ShaderPreprocessor::CodeBlock::genOutCall(Shader::Stage stage)
+String ShaderPreprocessor::Function::genOutCall(Shader::Stage pre, Shader::Stage stage) const
 {
     StringBuffer sb;
     sb << "ark_main(";
-    const auto begin = _function._ins.begin();
-    for(auto iter = begin; iter != _function._ins.end(); ++iter)
+    const auto begin = _ins.begin();
+    for(auto iter = begin; iter != _ins.end(); ++iter)
     {
         if(iter != begin)
             sb << ", ";
-        sb << (stage == Shader::SHADER_STAGE_VERTEX ? "a_" : "v_");
-        sb << Strings::capitalFirst(iter->_name);
+//        sb << (stage == Shader::SHADER_STAGE_VERTEX ? "a_" : "v_");
+        sb << getOutAttributePrefix(pre);
+        sb << Strings::capitalizeFirst(iter->_name);
     }
+
+    for(const auto& i : _outs)
+        sb << ", " << "v_" << Strings::capitalizeFirst(i._name);
+
     sb << ')';
     return sb.str();
 }
 
-bool ShaderPreprocessor::CodeBlock::hasOutAttribute(const String& name) const
+bool ShaderPreprocessor::Function::hasOutAttribute(const String& name) const
 {
-    const String oName = name.startsWith("v_") ? name : String("v_") + name;
-    for(const auto& i : _function._outs)
-        if(i._name == oName)
+    for(const auto& i : _outs)
+        if(Strings::capitalizeFirst(i._name) == name)
             return true;
     return false;
 }
@@ -392,11 +398,11 @@ ShaderPreprocessor::DeclarationList::DeclarationList(Source& source, const Strin
 {
 }
 
-void ShaderPreprocessor::DeclarationList::declare(const String& type, const String& prefix, const String& name)
+void ShaderPreprocessor::DeclarationList::declare(const String& type, const char* prefix, const String& name)
 {
     if(!_vars.has(name))
     {
-        const sp<String> declared = sp<String>::make(Strings::sprintf("%s %s %s%s;\n", _descriptor.c_str(), type.c_str(), prefix.c_str(), name.c_str()));
+        const sp<String> declared = sp<String>::make(Strings::sprintf("%s %s %s%s;\n", _descriptor.c_str(), type.c_str(), prefix, name.c_str()));
         _source.push_back(declared);
 
         _vars.push_back(name, Declaration(name, type, 1, declared));

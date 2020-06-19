@@ -1,6 +1,8 @@
 #ifndef ARK_PLUGIN_BULLET_BASE_COLLIDER_BULLET_H_
 #define ARK_PLUGIN_BULLET_BASE_COLLIDER_BULLET_H_
 
+#include <vector>
+
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
@@ -12,6 +14,8 @@
 
 #include "app/inf/collider.h"
 
+#include "plugin/bullet/forwarding.h"
+
 #include "btBulletDynamicsCommon.h"
 
 namespace ark {
@@ -20,6 +24,14 @@ namespace bullet {
 
 class ColliderBullet : public Runnable, public Collider, Implements<ColliderBullet, Runnable, Collider> {
 public:
+    class RigidBodyImporter {
+    public:
+        virtual ~RigidBodyImporter() = default;
+
+        virtual void import(ColliderBullet& collider, const document& manifest) = 0;
+    };
+
+public:
     ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader);
 
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate) override;
@@ -27,6 +39,9 @@ public:
     virtual void run() override;
 
     btDiscreteDynamicsWorld* btDynamicWorld() const;
+
+    const std::unordered_map<int32_t, sp<CollisionShape>>& collisionShapes() const;
+    std::unordered_map<int32_t, sp<CollisionShape>>& collisionShapes();
 
 //  [[plugin::resource-loader]]
     class BUILDER_IMPL1 : public Builder<ColliderBullet> {
@@ -38,6 +53,8 @@ public:
     private:
         sp<Builder<Vec3>> _gravity;
         SafePtr<Builder<ModelLoader>> _model_loader;
+        std::vector<std::pair<sp<Builder<RigidBodyImporter>>, document>> _importers;
+
         sp<ResourceLoaderContext> _resource_loader_context;
     };
 
@@ -61,6 +78,7 @@ private:
         void dispose();
 
         sp<ModelLoader> _model_loader;
+        std::unordered_map<int32_t, sp<CollisionShape>> _collision_shapes;
 
         op<btDefaultCollisionConfiguration> _collision_configuration;
         op<btCollisionDispatcher> _collision_dispatcher;
