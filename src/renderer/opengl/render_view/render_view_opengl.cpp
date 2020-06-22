@@ -29,6 +29,18 @@ void RenderViewOpenGL::onSurfaceCreated()
     GLDebug::glPrintString("GL Version:", GL_VERSION);
     GLDebug::glPrintInteger("Max Uniform Components", GL_MAX_VERTEX_UNIFORM_COMPONENTS);
     GLDebug::glPrintInteger("Max Uniform Vectors", GL_MAX_VERTEX_UNIFORM_VECTORS);
+
+    int32_t work_grp_cnt[3];
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &work_grp_cnt[0]);
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &work_grp_cnt[1]);
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &work_grp_cnt[2]);
+    LOGD("Max Compute Work Group Count: (%d, %d, %d)", work_grp_cnt[0], work_grp_cnt[1], work_grp_cnt[2]);
+
+    int32_t work_grp_size[3];
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &work_grp_size[0]);
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &work_grp_size[1]);
+    glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &work_grp_size[2]);
+    LOGD("Max Compute Work Group Size: (%d, %d, %d)", work_grp_size[0], work_grp_size[1], work_grp_size[2]);
 }
 
 void RenderViewOpenGL::onSurfaceChanged(uint32_t width, uint32_t height)

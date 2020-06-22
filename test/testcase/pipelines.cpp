@@ -47,7 +47,7 @@ public:
 
         const sp<PipelineFactory> pipelineFactory = Ark::instance().applicationContext()->renderEngine()->rendererFactory()->createPipelineFactory();
         const sp<Snippet> snippet = sp<SnippetTest>::make();
-        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(pipelineFactory, vert, frag);
+        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(vert, frag);
         buildingContext->addSnippet(snippet);
 
         const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);

@@ -1,6 +1,7 @@
 #ifndef ARK_RENDERER_BASE_MESH_H_
 #define ARK_RENDERER_BASE_MESH_H_
 
+#include "core/base/api.h"
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
@@ -10,9 +11,9 @@
 
 namespace ark {
 
-class Mesh {
+class ARK_API Mesh {
 public:
-    struct UV {
+    struct ARK_API UV {
         UV() = default;
         UV(uint16_t u, uint16_t v);
 
@@ -20,7 +21,7 @@ public:
         uint16_t _v;
     };
 
-    struct Tangent {
+    struct ARK_API Tangent {
         Tangent() = default;
         Tangent(const V3& tangent, const V3& bitangent);
 

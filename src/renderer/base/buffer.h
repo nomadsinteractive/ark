@@ -38,7 +38,7 @@ public:
         ATTRIBUTE_NAME_COUNT
     };
 
-    struct Attributes {
+    struct ARK_API Attributes {
         Attributes();
         Attributes(const PipelineInput& input);
 
