@@ -43,6 +43,9 @@ private:
     void bind();
     VkResult flush();
 
+    bool isDeviceLocal() const;
+    bool isHostCoherent() const;
+
 private:
     sp<VKRenderer> _renderer;
     sp<Recycler> _recycler;

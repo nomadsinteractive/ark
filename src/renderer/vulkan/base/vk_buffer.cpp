@@ -5,8 +5,9 @@
 #include "renderer/base/recycler.h"
 #include "renderer/inf/uploader.h"
 
-#include "renderer/vulkan/base/vk_renderer.h"
+#include "renderer/vulkan/base/vk_command_pool.h"
 #include "renderer/vulkan/base/vk_heap.h"
+#include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/util/vk_util.h"
 
 namespace ark {
@@ -33,11 +34,26 @@ void VKBuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uplo
     {
         ensureSize(graphicsContext, uploader);
 
-        WritableMemory writable(_memory->map());
-        uploader->upload(writable);
-        if((_memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
-            flush();
-        _memory->unmap();
+        if(isDeviceLocal())
+        {
+            VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+            stagingBuffer.upload(graphicsContext, uploader);
+
+            VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+            VkBufferCopy copyRegion = {0, 0, _size};
+            vkCmdCopyBuffer(copyCmd, stagingBuffer.vkBuffer(), _descriptor.buffer, 1, &copyRegion);
+            _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
+
+            stagingBuffer.recycle()(graphicsContext);
+        }
+        else
+        {
+            WritableMemory writable(_memory->map());
+            uploader->upload(writable);
+            if(!isHostCoherent())
+                VKUtil::checkResult(flush());
+            _memory->unmap();
+        }
     }
 }
 
@@ -63,9 +79,10 @@ Resource::RecycleFunc VKBuffer::recycle()
 void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const ByteArray::Borrowed& buf)
 {
     DCHECK(buf.length() <= size(), "Buffer memory overflow, buffer size: %d, source size: %d", size(), buf.length());
+    DCHECK(!isDeviceLocal(), "Can't reload a Vulkan Buffer with VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT set");
     void* mapped = _memory->map();
     memcpy(mapped, buf.buf(), buf.length());
-    if((_memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
+    if(!isHostCoherent())
         VKUtil::checkResult(flush());
     _memory->unmap();
 }
@@ -90,7 +107,7 @@ void VKBuffer::ensureSize(GraphicsContext& graphicsContext, const Uploader& uplo
         if (_descriptor.buffer)
             vkDestroyBuffer(_renderer->vkLogicalDevice(), _descriptor.buffer, nullptr);
 
-        const VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo(_usage_flags, _size);
+        const VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo(isDeviceLocal() ? _usage_flags | VK_BUFFER_USAGE_TRANSFER_DST_BIT : _usage_flags, _size);
         VKUtil::checkResult(vkCreateBuffer(_renderer->vkLogicalDevice(), &bufferCreateInfo, nullptr, &_descriptor.buffer));
 
         _notifier.notify();
@@ -121,6 +138,16 @@ VkResult VKBuffer::flush()
     mappedRange.offset = 0;
     mappedRange.size = _size;
     return vkFlushMappedMemoryRanges(_renderer->vkLogicalDevice(), 1, &mappedRange);
+}
+
+bool VKBuffer::isDeviceLocal() const
+{
+    return _memory_property_flags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+}
+
+bool VKBuffer::isHostCoherent() const
+{
+    return _memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 }
 
 VkResult VKBuffer::invalidate()

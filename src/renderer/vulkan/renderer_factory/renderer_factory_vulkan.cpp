@@ -85,10 +85,11 @@ void RendererFactoryVulkan::setVersion(Ark::RendererVersion version, RenderEngin
     vkContext.setVersion(version);
 }
 
-sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buffer::Usage /*usage*/)
+sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buffer::Usage usage)
 {
     static const VkBufferUsageFlags usagesFlags[Buffer::TYPE_COUNT] = {VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT};
-    return sp<VKBuffer>::make(_renderer, _recycler, usagesFlags[type], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    return sp<VKBuffer>::make(_renderer, _recycler, usagesFlags[type], usage == Buffer::USAGE_STATIC ? VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+                                                                                                     : VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
 sp<Camera::Delegate> RendererFactoryVulkan::createCamera(Ark::RendererCoordinateSystem cs)
