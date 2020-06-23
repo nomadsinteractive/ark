@@ -89,7 +89,7 @@ sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, c
 }
 
 ColliderImpl::Stub::Stub(const sp<Tracker>& tracker, const document& manifest, ResourceLoaderContext& resourceLoaderContext)
-    : _tracker(tracker), _rigid_body_base_id(0)/*, _axises(sp<Axises>::make())*/
+    : _tracker(tracker), _rigid_body_base_id(0)
 {
     loadShapes(manifest);
     for(const document& i : manifest->children("import"))
@@ -165,7 +165,7 @@ void ColliderImpl::Stub::loadShapes(const document& manifest)
         ShapeManifest shapes;
         if(shapeType == "capsule")
         {
-            shape.t = C2_CAPSULE;
+            shape.t = C2_TYPE_CAPSULE;
             shape.s.capsule.a.x = Documents::ensureAttribute<float>(i, "ax");
             shape.s.capsule.a.y = Documents::ensureAttribute<float>(i, "ay");
             shape.s.capsule.b.x = Documents::ensureAttribute<float>(i, "bx");
@@ -183,7 +183,7 @@ void ColliderImpl::Stub::loadShapes(const document& manifest)
                 shape.s.poly.verts[c].y = Documents::ensureAttribute<float>(j, "y");
                 c++;
             }
-            shape.t = C2_POLY;
+            shape.t = C2_TYPE_POLY;
             shape.s.poly.count = c;
             c2MakePoly(&shape.s.poly);
             shapes.shapes.push_back(shape);
@@ -207,7 +207,7 @@ void ColliderImpl::Stub::loadShapes(const document& manifest)
                     shape.s.poly.verts[k / 2].x = Strings::parse<float>(values.at(k));
                     shape.s.poly.verts[k / 2].y = Strings::parse<float>(values.at(k + 1));
                 }
-                shape.t = C2_POLY;
+                shape.t = C2_TYPE_POLY;
                 shape.s.poly.count = static_cast<int32_t>(values.size() / 2);
                 c2MakePoly(&shape.s.poly);
                 shapes.shapes.push_back(shape);
@@ -306,7 +306,7 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
             {
                 auto iter2 = contacts.find(id);
                 if(iter2 == contacts.end())
-                    shadowStub._callback->onBeginContact(self, rigidBody, CollisionManifold(V3(manifold.normal.x, manifold.normal.y, 0)));
+                    shadowStub._callback->onBeginContact(self, rigidBody, CollisionManifold(V3(manifold.n.x, manifold.n.y, 0)));
                 else
                     contacts.erase(iter2);
                 ++iter;

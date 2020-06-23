@@ -1,7 +1,7 @@
-#include "app/util/tinyc2_util.h"
+#include "app/util/cute_c2_impl.h"
 
-#define TINYC2_IMPLEMENTATION
-#include <tinyc2.h>
+#define CUTE_C2_IMPLEMENTATION
+#include <cute_c2.h>
 
 #include "core/inf/variable.h"
 #include "core/util/math.h"
@@ -27,7 +27,7 @@ C2RigidBody::C2RigidBody(const sp<Vec3>& position, const sp<Rotate>& rotate, boo
 void C2RigidBody::makeAABB(const Rect& aabb)
 {
     C2Shape shape;
-    shape.t = C2_AABB;
+    shape.t = C2_TYPE_AABB;
     shape.s.aabb.min.x = aabb.left();
     shape.s.aabb.min.y = aabb.top();
     shape.s.aabb.max.x = aabb.right();
@@ -38,7 +38,7 @@ void C2RigidBody::makeAABB(const Rect& aabb)
 void C2RigidBody::makeCircle(const V2& p, float radius)
 {
     C2Shape shape;
-    shape.t = C2_CIRCLE;
+    shape.t = C2_TYPE_CIRCLE;
     shape.s.circle.p.x = p.x();
     shape.s.circle.p.y = p.y();
     shape.s.circle.r = radius;
@@ -48,7 +48,7 @@ void C2RigidBody::makeCircle(const V2& p, float radius)
 void C2RigidBody::makeCapsule(const V2& p1, const V2& p2, float radius)
 {
     C2Shape shape;
-    shape.t = C2_CAPSULE;
+    shape.t = C2_TYPE_CAPSULE;
     shape.s.capsule.a.x = p1.x();
     shape.s.capsule.a.y = p1.y();
     shape.s.capsule.b.x = p2.x();
@@ -60,7 +60,7 @@ void C2RigidBody::makeCapsule(const V2& p1, const V2& p2, float radius)
 void C2RigidBody::makePoly(const c2Poly& poly)
 {
     C2Shape shape;
-    shape.t = C2_POLY;
+    shape.t = C2_TYPE_POLY;
     shape.s.poly = poly;
     c2MakePoly(&shape.s.poly);
     _shapes.push_back(shape);
@@ -115,21 +115,21 @@ std::vector<C2Shape> C2RigidBody::transform(c2x& x) const
         shape.t = i.t;
         switch(i.t)
         {
-        case C2_CIRCLE:
+        case C2_TYPE_CIRCLE:
             shape.s.circle.r = i.s.circle.r;
             translate(i.s.circle.p.x, i.s.circle.p.y, pos, shape.s.circle.p.x, shape.s.circle.p.y);
             break;
-        case C2_AABB:
+        case C2_TYPE_AABB:
             DCHECK(rotation == 0, "Rotation: %.2f, which is not supported on AABBs", rotation);
             translate(i.s.aabb.min.x, i.s.aabb.min.y, pos, shape.s.aabb.min.x, shape.s.aabb.min.y);
             translate(i.s.aabb.max.x, i.s.aabb.max.y, pos, shape.s.aabb.max.x, shape.s.aabb.max.y);
             break;
-        case C2_CAPSULE:
+        case C2_TYPE_CAPSULE:
             shape.s.capsule.r = i.s.capsule.r;
             translate(i.s.capsule.a.x, i.s.capsule.a.y, pos, shape.s.capsule.a.x, shape.s.capsule.a.y);
             translate(i.s.capsule.b.x, i.s.capsule.b.y, pos, shape.s.capsule.b.x, shape.s.capsule.b.y);
             break;
-        case C2_POLY:
+        case C2_TYPE_POLY:
             shape.s.poly = i.s.poly;
             break;
         }

@@ -1,9 +1,9 @@
-#ifndef ARK_APP_UTIL_TINYC2_UTIL_H_
-#define ARK_APP_UTIL_TINYC2_UTIL_H_
+#ifndef ARK_APP_UTIL_CUTE_C2_IMPL_H_
+#define ARK_APP_UTIL_CUTE_C2_IMPL_H_
 
 #include <vector>
 
-#include <tinyc2.h>
+#include <cute_c2.h>
 
 #include "core/types/shared_ptr.h"
 

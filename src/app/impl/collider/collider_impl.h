@@ -16,7 +16,7 @@
 #include "app/base/rigid_body.h"
 #include "app/impl/collider/axis_segments.h"
 #include "app/inf/collider.h"
-#include "app/util/tinyc2_util.h"
+#include "app/util/cute_c2_impl.h"
 
 namespace ark {
 

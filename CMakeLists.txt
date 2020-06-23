@@ -156,8 +156,8 @@ ark_ensure_dependency(3rdparty/glm)
 add_subdirectory(3rdparty/glm)
 list(APPEND LOCAL_INCLUDE_DIRS 3rdparty/glm)
 
-ark_ensure_dependency(3rdparty/tinyheaders)
-ark_include_directories(3rdparty/tinyheaders)
+ark_ensure_dependency(3rdparty/cute_headers)
+ark_include_directories(3rdparty/cute_headers)
 
 if(ARK_USE_LIBPNG)
     set(SKIP_INSTALL_ALL ON)
