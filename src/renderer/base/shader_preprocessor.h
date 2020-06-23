@@ -36,7 +36,7 @@ public:
 
         Shader::Stage stage() const;
 
-        String process(const RenderEngineContext& glContext) const;
+        String process(const RenderEngineContext& renderEngineContext) const;
 
     private:
         Shader::Stage _type;
@@ -127,7 +127,7 @@ private:
         void parse(PipelineBuildingContext& buildingContext);
 
         void genDefinition();
-        String genOutCall(Shader::Stage pre, Shader::Stage stage) const;
+        String genOutCall(Shader::Stage preShaderStage) const;
 
         bool hasOutAttribute(const String& name) const;
 
@@ -145,15 +145,21 @@ private:
     };
 
 public:
-    ShaderPreprocessor(Shader::Stage stage);
+    ShaderPreprocessor(Shader::Stage shaderStage, Shader::Stage preShaderStage);
 
     void addPreMainSource(const String& source);
     void addPostMainSource(const String& source);
     void addModifier(const String& modifier);
 
-    void initialize(const String& source, PipelineBuildingContext& context, Shader::Stage pre);
+    void initialize(const String& source, PipelineBuildingContext& context);
 
     void setupUniforms(Table<String, sp<Uniform>>& uniforms, int32_t& counter);
+
+    const char* inVarPrefix() const;
+    const char* outVarPrefix() const;
+
+    void inDeclare(const String& type, const String& name);
+    void outDeclare(const String& type, const String& name);
 
     Preprocessor preprocess();
 
@@ -163,7 +169,7 @@ public:
 
 private:
     void parseMainBlock(const String& source, PipelineBuildingContext& buildingContext);
-    void parseDeclarations(PipelineBuildingContext& context, Shader::Stage pre);
+    void parseDeclarations(PipelineBuildingContext& context);
     size_t parseFunctionBody(const String& s, String& body) const;
 
     String genDeclarations() const;
@@ -181,7 +187,8 @@ private:
     friend class PipelineLayout;
 
 public:
-    Shader::Stage _stage;
+    Shader::Stage _shader_stage;
+    Shader::Stage _pre_shader_stage;
 
     Source _main;
 

@@ -48,6 +48,11 @@ void RigidBodyBullet::dispose()
 {
 }
 
+void RigidBodyBullet::applyCentralForce(const V3& force)
+{
+    _stub->_rigid_body->applyCentralForce(btVector3(force.x(), force.y(), force.z()));
+}
+
 RigidBodyBullet::Position::Position(const sp<RigidBodyBullet::Stub>& stub)
     : _stub(stub)
 {

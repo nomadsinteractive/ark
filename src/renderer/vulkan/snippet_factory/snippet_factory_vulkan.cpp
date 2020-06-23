@@ -29,7 +29,7 @@ public:
         declareUBOStruct(context._vertex, pipelineInput);
         declareUBOStruct(context._fragment, pipelineInput);
 
-        context._fragment._outs.declare("vec4", "v_", "FragColor");
+        context._fragment.outDeclare("vec4", "FragColor");
 
         setLayoutDescriptor(context._fragment._samplers, sBinding, static_cast<uint32_t>(pipelineInput->ubos().size()));
 

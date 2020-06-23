@@ -1,5 +1,5 @@
-#ifndef ARK_PLUGIN_BOX2D_FORWARDING_H_
-#define ARK_PLUGIN_BOX2D_FORWARDING_H_
+#ifndef ARK_PLUGIN_BULLET_FORWARDING_H_
+#define ARK_PLUGIN_BULLET_FORWARDING_H_
 
 namespace ark {
 namespace plugin {
@@ -9,6 +9,7 @@ class Body;
 class BodyCreateInfo;
 class CollisionShape;
 class ColliderBullet;
+class RigidBodyBullet;
 
 }
 }

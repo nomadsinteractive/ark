@@ -85,7 +85,7 @@ void RendererFactoryOpenGL::setVersion(Ark::RendererVersion version, RenderEngin
         annotations["vert.out"] = "out";
         annotations["frag.in"] = "in";
         annotations["frag.out"] = "out";
-        annotations["frag.color"] = "v_FragColor";
+        annotations["frag.color"] = "f_FragColor";
         glContext.setSnippetFactory(sp<gles30::SnippetFactoryGLES30>::make());
     }
     glContext.setVersion(version);

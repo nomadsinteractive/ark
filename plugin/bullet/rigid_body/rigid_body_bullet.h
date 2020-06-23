@@ -18,11 +18,16 @@ namespace ark {
 namespace plugin {
 namespace bullet {
 
+//[[script::bindings::extends(RigidBody)]]
+//[[script::bindings::name("RigidBody")]]
 class RigidBodyBullet : public RigidBody {
 public:
     RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass);
 
     virtual void dispose() override;
+
+//  [[script::bindings::auto]]
+    void applyCentralForce(const V3& force);
 
 private:
     class Stub;
@@ -72,6 +77,7 @@ private:
 
         btVector3 _local_inertia;
 
+        friend class RigidBodyBullet;
         friend class Position;
         friend class TransformDelegate;
     };

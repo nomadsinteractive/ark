@@ -43,19 +43,19 @@ private:
 }
 
 PipelineBuildingContext::PipelineBuildingContext(const String& vertex, const String& fragment)
-    : _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX), _fragment(Shader::SHADER_STAGE_FRAGMENT)
+    : _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX, Shader::SHADER_STAGE_NONE), _fragment(Shader::SHADER_STAGE_FRAGMENT, Shader::SHADER_STAGE_VERTEX)
 {
-    _vertex.initialize(vertex, *this, Shader::SHADER_STAGE_NONE);
-    _fragment.initialize(fragment, *this, Shader::SHADER_STAGE_VERTEX);
+    _vertex.initialize(vertex, *this);
+    _fragment.initialize(fragment, *this);
 }
 
 PipelineBuildingContext::PipelineBuildingContext(const String& vertex, const String& fragment, BeanFactory& factory, const Scope& args, const document& manifest)
-    : _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX), _fragment(Shader::SHADER_STAGE_FRAGMENT)
+    : _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX, Shader::SHADER_STAGE_NONE), _fragment(Shader::SHADER_STAGE_FRAGMENT, Shader::SHADER_STAGE_VERTEX)
 {
     loadPredefinedParam(factory, args, manifest);
 
-    _vertex.initialize(vertex, *this, Shader::SHADER_STAGE_NONE);
-    _fragment.initialize(fragment, *this, Shader::SHADER_STAGE_VERTEX);
+    _vertex.initialize(vertex, *this);
+    _fragment.initialize(fragment, *this);
 }
 
 void PipelineBuildingContext::loadPredefinedParam(BeanFactory& factory, const Scope& args, const document& manifest)
@@ -75,13 +75,13 @@ void PipelineBuildingContext::initialize()
         }
 
     for(const auto& i : _vertex._main_block->_ins)
-        _vertex._ins.declare(i._type, "a_", Strings::capitalizeFirst(i._name));
+        _vertex.inDeclare(i._type, Strings::capitalizeFirst(i._name));
 
     std::set<String> passThroughVars;
     for(const auto& i : _fragment_in)
     {
         const String n = Strings::capitalizeFirst(i._name);
-        _fragment._ins.declare(i._type, "v_", n);
+        _fragment.inDeclare(i._type, n);
         if(!_vertex._main_block->hasOutAttribute(n))
             passThroughVars.insert(n);
     }
@@ -113,21 +113,21 @@ void PipelineBuildingContext::initialize()
     for(const auto& i : attributes)
     {
         if(passThroughVars.find(i.first) != passThroughVars.end())
-            _fragment._ins.declare(i.second, "v_", i.first);
+            _fragment.inDeclare(i.second, i.first);
     }
 
     for(const String& i : generated)
     {
-        _vertex._ins.declare(attributes.at(i), "a_", i);
+        _vertex.inDeclare(attributes.at(i), i);
         if(passThroughVars.find(i) != passThroughVars.end())
         {
-            _vertex._outs.declare(attributes.at(i), "v_", i);
-            _vertex.addPreMainSource(Strings::sprintf("v_%s = a_%s;", i.c_str(), i.c_str()));
+            _vertex.outDeclare(attributes.at(i), i);
+            _vertex.addPreMainSource(Strings::sprintf("%s%s = %s%s;", _vertex.outVarPrefix(), i.c_str(), _vertex.inVarPrefix(), i.c_str()));
         }
     }
 
     for(const auto& i : _vertex._main_block->_outs)
-        _vertex._outs.declare(i._type, "v_", Strings::capitalizeFirst(i._name));
+        _vertex.outDeclare(i._type, Strings::capitalizeFirst(i._name));
 }
 
 void PipelineBuildingContext::setupUniforms()
@@ -146,7 +146,7 @@ void PipelineBuildingContext::addAttribute(const String& name, const String& typ
 void PipelineBuildingContext::addSnippet(const sp<Snippet>& snippet)
 {
     DASSERT(snippet);
-    _snippet = _snippet ? sp<Snippet>::adopt(new SnippetLinkedChain(_snippet, snippet)) : snippet;
+    _snippet = _snippet ? sp<Snippet>::make<SnippetLinkedChain>(_snippet, snippet) : snippet;
 }
 
 void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type, uint32_t length, const sp<Flatable>& flatable, int32_t binding)

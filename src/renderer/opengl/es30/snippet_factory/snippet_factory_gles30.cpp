@@ -22,7 +22,7 @@ namespace {
 class SnippetGLES30 : public Snippet {
 public:
     virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {
-        context._fragment._outs.declare("vec4", "v_", "FragColor");
+        context._fragment.outDeclare("vec4", "FragColor");
         context._fragment._macro_defines.push_back("#define texture2D texture");
         context._fragment._macro_defines.push_back("#define textureCube texture");
     }

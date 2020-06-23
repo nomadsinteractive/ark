@@ -31,16 +31,16 @@ const char* ShaderPreprocessor::ANNOTATION_FRAG_COLOR = "${frag.color}";
 
 static std::regex _INCLUDE_PATTERN("#include\\s*[<\"]([^>\"]+)[>\"]");
 static std::regex _STRUCT_PATTERN("struct\\s+(\\w+)\\s*\\{([^}]+)\\}\\s*;");
-static std::regex _IN_PATTERN("(?:attribute|in)" ATTRIBUTE_PATTERN);
+static std::regex _IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
 static std::regex _OUT_PATTERN("(?:varying|out)" ATTRIBUTE_PATTERN);
-static std::regex _IN_OUT_PATTERN("(?:varying|in)" ATTRIBUTE_PATTERN);
+//static std::regex _IN_OUT_PATTERN("(?:varying|in)" ATTRIBUTE_PATTERN);
 static std::regex _UNIFORM_PATTERN("uniform" UNIFORM_PATTERN);
 
 static char _STAGE_ATTR_PREFIX[4][Shader::SHADER_STAGE_COUNT] = {"a_", "v_", "f_", "c_"};
 
-ShaderPreprocessor::ShaderPreprocessor(Shader::Stage stage)
-    : _stage(stage), _version(0), _ins(_attribute_declarations, stage == Shader::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
-      _outs(_attribute_declarations, stage == Shader::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
+ShaderPreprocessor::ShaderPreprocessor(Shader::Stage shaderStage, Shader::Stage preShaderStage)
+    : _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _ins(_attribute_declarations, shaderStage == Shader::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
+      _outs(_attribute_declarations, shaderStage == Shader::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
       _uniforms(_uniform_declarations, "uniform"), _samplers(_uniform_declarations, "uniform"), _pre_main(sp<String>::make()),
       _output_var(sp<String>::make()), _post_main(sp<String>::make())
 {
@@ -61,10 +61,10 @@ void ShaderPreprocessor::addModifier(const String& modifier)
     *_output_var = Strings::sprintf("%s * %s", _output_var->c_str(), modifier.c_str());
 }
 
-void ShaderPreprocessor::initialize(const String& source, PipelineBuildingContext& context, Shader::Stage pre)
+void ShaderPreprocessor::initialize(const String& source, PipelineBuildingContext& context)
 {
     parseMainBlock(source, context);
-    parseDeclarations(context, pre);
+    parseDeclarations(context);
 }
 
 static bool sanitizer(const std::smatch& match) {
@@ -102,9 +102,9 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
     _main_block->parse(buildingContext);
 }
 
-void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context, Shader::Stage pre)
+void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
 {
-    _ins.parse(_stage == Shader::SHADER_STAGE_FRAGMENT ? _IN_OUT_PATTERN : _IN_PATTERN);
+    _ins.parse(_IN_PATTERN);
     _outs.parse(_OUT_PATTERN);
 
     _main.replace(_STRUCT_PATTERN, [this](const std::smatch& m) {
@@ -138,7 +138,7 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context, Sha
         _main.push_back(sp<String>::make("\n\nvoid main() {\n"));
         _main.push_back(_pre_main);
         _main.push_back(sp<String>::make(Strings::sprintf(INDENT_STR "%s = ", outVar.c_str())));
-        *_output_var = _main_block->genOutCall(pre, _stage);
+        *_output_var = _main_block->genOutCall(_pre_shader_stage);
         _main.push_back(_output_var);
         _main.push_back(sp<String>::make(";"));
         _main.push_back(_post_main);
@@ -146,7 +146,7 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context, Sha
         _main.push_back(sp<String>::make("\n}\n\n"));
     }
 
-    if(_stage == Shader::SHADER_STAGE_VERTEX)
+    if(_shader_stage == Shader::SHADER_STAGE_VERTEX)
     {
         for(const auto& i : _main_block->_ins)
         {
@@ -158,7 +158,7 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context, Sha
             }
         }
     }
-    else if(_stage == Shader::SHADER_STAGE_FRAGMENT)
+    else if(_shader_stage == Shader::SHADER_STAGE_FRAGMENT)
     {
         for(const auto& i : _main_block->_ins)
             context._fragment_in.push_back(i);
@@ -167,7 +167,7 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context, Sha
 
 ShaderPreprocessor::Preprocessor ShaderPreprocessor::preprocess()
 {
-    return Preprocessor(_stage, genDeclarations() + _main.str());
+    return Preprocessor(_shader_stage, genDeclarations() + _main.str());
 }
 
 void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int32_t& binding)
@@ -210,6 +210,26 @@ void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int
     binding = next;
 }
 
+const char* ShaderPreprocessor::inVarPrefix() const
+{
+    return _STAGE_ATTR_PREFIX[_pre_shader_stage + 1];
+}
+
+const char* ShaderPreprocessor::outVarPrefix() const
+{
+    return _STAGE_ATTR_PREFIX[_shader_stage + 1];
+}
+
+void ShaderPreprocessor::inDeclare(const String& type, const String& name)
+{
+    _ins.declare(type, inVarPrefix(), name);
+}
+
+void ShaderPreprocessor::outDeclare(const String& type, const String& name)
+{
+    _outs.declare(type, outVarPrefix(), name);
+}
+
 sp<Uniform> ShaderPreprocessor::getUniformInput(const String& name, Uniform::Type type) const
 {
     if(!_uniforms.has(name))
@@ -222,7 +242,7 @@ sp<Uniform> ShaderPreprocessor::getUniformInput(const String& name, Uniform::Typ
 
 String ShaderPreprocessor::outputName() const
 {
-    return _stage == Shader::SHADER_STAGE_VERTEX ? "gl_Position" : ANNOTATION_FRAG_COLOR;
+    return _shader_stage == Shader::SHADER_STAGE_VERTEX ? "gl_Position" : ANNOTATION_FRAG_COLOR;
 }
 
 size_t ShaderPreprocessor::parseFunctionBody(const String& s, String& body) const
@@ -364,7 +384,7 @@ void ShaderPreprocessor::Function::genDefinition()
     *_place_hoder = sb.str();
 }
 
-String ShaderPreprocessor::Function::genOutCall(Shader::Stage pre, Shader::Stage stage) const
+String ShaderPreprocessor::Function::genOutCall(Shader::Stage preShaderStage) const
 {
     StringBuffer sb;
     sb << "ark_main(";
@@ -373,8 +393,7 @@ String ShaderPreprocessor::Function::genOutCall(Shader::Stage pre, Shader::Stage
     {
         if(iter != begin)
             sb << ", ";
-//        sb << (stage == Shader::SHADER_STAGE_VERTEX ? "a_" : "v_");
-        sb << getOutAttributePrefix(pre);
+        sb << getOutAttributePrefix(preShaderStage);
         sb << Strings::capitalizeFirst(iter->_name);
     }
 
@@ -451,17 +470,17 @@ Shader::Stage ShaderPreprocessor::Preprocessor::stage() const
     return _type;
 }
 
-String ShaderPreprocessor::Preprocessor::process(const RenderEngineContext& glContext) const
+String ShaderPreprocessor::Preprocessor::process(const RenderEngineContext& renderEngineContext) const
 {
-    DCHECK(glContext.version() > 0, "Unintialized GLContext");
+    DCHECK(renderEngineContext.version() > 0, "Unintialized RenderEngineContext");
 
     static std::regex var_pattern("\\$\\{([\\w.]+)\\}");
-    const std::map<String, String>& annotations = glContext.annotations();
+    const std::map<String, String>& annotations = renderEngineContext.annotations();
 
     return _source.replace(var_pattern, [&annotations] (Array<String>& matches)->String {
         const String& varName = matches.buf()[1];
         const auto iter = annotations.find(varName);
-        DCHECK(iter != annotations.end(), "Cannot find constant \"%s\" in RenderEngine", varName.c_str());
+        DCHECK(iter != annotations.end(), "Cannot find constant \"%s\" in RenderEngineContext", varName.c_str());
         return iter->second;
     });
 }
