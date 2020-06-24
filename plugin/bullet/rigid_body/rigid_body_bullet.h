@@ -11,6 +11,7 @@
 
 #include "app/base/rigid_body.h"
 
+#include "bullet/api.h"
 #include "bullet/base/collider_bullet.h"
 #include "bullet/forwarding.h"
 
@@ -20,7 +21,7 @@ namespace bullet {
 
 //[[script::bindings::extends(RigidBody)]]
 //[[script::bindings::name("RigidBody")]]
-class RigidBodyBullet : public RigidBody {
+class ARK_PLUGIN_BULLET_API RigidBodyBullet : public RigidBody {
 public:
     RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass);
 
