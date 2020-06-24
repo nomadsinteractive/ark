@@ -67,27 +67,17 @@ void PipelineBuildingContext::loadPredefinedParam(BeanFactory& factory, const Sc
 
 void PipelineBuildingContext::initialize()
 {
-    for(const auto& i : _vertex._ins.vars().values())
-        if(_vert_in_declared.find(i.name()) == _vert_in_declared.end())
-        {
-            _vert_in_declared.insert(i.name());
-            addAttribute(i.name(), i.type());
-        }
+    for(const auto& i : _vertex._declaration_ins.vars().values())
+        addInputAttribute(i.name(), i.type());
 
     for(const auto& i : _vertex._main_block->_ins)
         _vertex.inDeclare(i._type, Strings::capitalizeFirst(i._name));
 
     std::set<String> passThroughVars;
-    for(const auto& i : _fragment_in)
-    {
-        const String n = Strings::capitalizeFirst(i._name);
-        _fragment.inDeclare(i._type, n);
-        if(!_vertex._main_block->hasOutAttribute(n))
-            passThroughVars.insert(n);
-    }
+    _fragment.linkPreStage(_vertex, passThroughVars);
 
     Table<String, String> attributes;
-    for(const auto& i : _fragment._ins.vars().values())
+    for(const auto& i : _fragment._declaration_ins.vars().values())
         if(!attributes.has(i.name()))
             attributes.push_back(i.name(), i.type());
 
@@ -98,8 +88,8 @@ void PipelineBuildingContext::initialize()
     std::vector<String> generated;
     for(const auto& i : attributes)
     {
-        if(!_vertex._ins.has(i.first)
-                && !_vertex._outs.has(i.first)
+        if(!_vertex._declaration_ins.has(i.first)
+                && !_vertex._declaration_outs.has(i.first)
                 && !_vertex._main_block->hasOutAttribute(i.first))
         {
             generated.push_back(i.first);
@@ -159,13 +149,22 @@ void PipelineBuildingContext::addUniform(const sp<Uniform>& uniform)
     _uniforms.push_back(uniform->name(), uniform);
 }
 
+void PipelineBuildingContext::addInputAttribute(const String& name, const String& type)
+{
+    if(_vert_in_declared.find(name) == _vert_in_declared.end())
+    {
+        _vert_in_declared.insert(name);
+        addAttribute(name, type);
+    }
+}
+
 Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t stage)
 {
     if(_attributes.find(name) == _attributes.end())
         _attributes[name] = makePredefinedAttribute(name, type);
 
     if(stage == Shader::SHADER_STAGE_FRAGMENT)
-        _fragment_in.push_back(ShaderPreprocessor::Parameter(type, name, ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN));
+        _fragment._predefined_parameters.push_back(ShaderPreprocessor::Parameter(type, name, ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN));
 
     return _attributes[name];
 }

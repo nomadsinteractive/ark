@@ -36,8 +36,6 @@ public:
     Table<String, sp<Uniform>> _uniforms;
     Table<String, sp<Texture>> _samplers;
 
-    std::vector<ShaderPreprocessor::Parameter> _fragment_in;
-
     std::set<String> _vert_in_declared;
 
     void addAttribute(const String& name, const String& type);
@@ -45,6 +43,7 @@ public:
     void addUniform(const String& name, Uniform::Type type, uint32_t length, const sp<Flatable>& flatable, int32_t binding);
     void addUniform(const sp<Uniform>& uniform);
 
+    void addInputAttribute(const String& name, const String& type);
     Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t scopes);
 
 private:

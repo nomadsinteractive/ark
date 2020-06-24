@@ -23,7 +23,7 @@ public:
         const String sLocation = "location";
         const String sBinding = "binding";
 
-        setLayoutDescriptor(setupLayoutLocation(context, context._vertex._ins), sLocation, 0);
+        setLayoutDescriptor(setupLayoutLocation(context, context._vertex._declaration_ins), sLocation, 0);
 
         const sp<PipelineInput>& pipelineInput = pipelineLayout.input();
         declareUBOStruct(context._vertex, pipelineInput);
@@ -31,19 +31,19 @@ public:
 
         context._fragment.outDeclare("vec4", "FragColor");
 
-        setLayoutDescriptor(context._fragment._samplers, sBinding, static_cast<uint32_t>(pipelineInput->ubos().size()));
+        setLayoutDescriptor(context._fragment._declaration_samplers, sBinding, static_cast<uint32_t>(pipelineInput->ubos().size()));
 
-        setLayoutDescriptor(context._vertex._outs, context._fragment._ins, sLocation, 0);
-        setLayoutDescriptor(context._fragment._outs, sLocation, 0);
+        setLayoutDescriptor(context._vertex._declaration_outs, context._fragment._declaration_ins, sLocation, 0);
+        setLayoutDescriptor(context._fragment._declaration_outs, sLocation, 0);
 
-        context._vertex._macro_defines.push_back("#extension GL_ARB_separate_shader_objects : enable");
-        context._vertex._macro_defines.push_back("#extension GL_ARB_shading_language_420pack : enable");
+        context._vertex._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
+        context._vertex._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
 
-        context._fragment._macro_defines.push_back("#extension GL_ARB_separate_shader_objects : enable");
-        context._fragment._macro_defines.push_back("#extension GL_ARB_shading_language_420pack : enable");
+        context._fragment._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
+        context._fragment._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
 
-        context._fragment._macro_defines.push_back("#define texture2D texture");
-        context._fragment._macro_defines.push_back("#define textureCube texture");
+        context._fragment._predefined_macros.push_back("#define texture2D texture");
+        context._fragment._predefined_macros.push_back("#define textureCube texture");
     }
 
 private:
@@ -117,7 +117,7 @@ private:
     }
 
     void declareUBOStruct(ShaderPreprocessor& shader, const PipelineInput& piplineInput) {
-        for(const ShaderPreprocessor::Declaration& i : shader._uniforms.vars().values())
+        for(const ShaderPreprocessor::Declaration& i : shader._declaration_uniforms.vars().values())
             *i.source() = "";
 
         for(const sp<PipelineInput::UBO>& i : piplineInput.ubos())

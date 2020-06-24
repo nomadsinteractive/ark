@@ -71,7 +71,6 @@ public:
         Table<String, Declaration>& vars();
 
         void declare(const String& type, const char* prefix, const String& name);
-        void parse(const std::regex& pattern);
 
     private:
         Source& _source;
@@ -161,6 +160,8 @@ public:
     void inDeclare(const String& type, const String& name);
     void outDeclare(const String& type, const String& name);
 
+    void linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
+
     Preprocessor preprocess();
 
     sp<Uniform> getUniformInput(const String& name, Uniform::Type type) const;
@@ -172,11 +173,13 @@ private:
     void parseDeclarations(PipelineBuildingContext& context);
     size_t parseFunctionBody(const String& s, String& body) const;
 
-    String genDeclarations() const;
+    String genDeclarations(const String& mainFunc) const;
 
     void addInclude(const String& source, const String& filepath);
     void addUniform(const String& type, const String& name, uint32_t length, const sp<String>& declaration);
     uint32_t getUniformSize(Uniform::Type type, const String& declaredType) const;
+
+    void linkParameters(const std::vector<Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
 
     static const char* getOutAttributePrefix(Shader::Stage preStage);
 
@@ -200,13 +203,13 @@ public:
 
     int32_t _version;
 
-    std::vector<String> _macro_defines;
+    std::vector<String> _predefined_macros;
+    std::vector<Parameter> _predefined_parameters;
 
-    DeclarationList _ins;
-    DeclarationList _outs;
-
-    DeclarationList _uniforms;
-    DeclarationList _samplers;
+    DeclarationList _declaration_ins;
+    DeclarationList _declaration_outs;
+    DeclarationList _declaration_uniforms;
+    DeclarationList _declaration_samplers;
 
     sp<String> _pre_main;
     sp<String> _output_var;
