@@ -32,11 +32,13 @@ public:
     ShaderPreprocessor _vertex;
     ShaderPreprocessor _fragment;
 
+    std::map<Shader::Stage, ShaderPreprocessor> _stages;
+
     std::map<String, Attribute> _attributes;
     Table<String, sp<Uniform>> _uniforms;
     Table<String, sp<Texture>> _samplers;
 
-    std::set<String> _vert_in_declared;
+    std::set<String> _input_vars;
 
     void addAttribute(const String& name, const String& type);
     void addSnippet(const sp<Snippet>& snippet);
@@ -49,6 +51,7 @@ public:
 private:
     Attribute makePredefinedAttribute(const String& name, const String& type);
 
+    void loadClassicalPipeline(const String& vertex, const String& fragment);
     void loadPredefinedParam(BeanFactory& factory, const Scope& args, const document& manifest);
 
     void loadPredefinedAttribute(const document& manifest);

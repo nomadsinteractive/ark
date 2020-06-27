@@ -34,7 +34,7 @@ static std::regex _STRUCT_PATTERN("struct\\s+(\\w+)\\s*\\{([^}]+)\\}\\s*;");
 static std::regex _IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
 static std::regex _UNIFORM_PATTERN("uniform" UNIFORM_PATTERN);
 
-static char _STAGE_ATTR_PREFIX[4][Shader::SHADER_STAGE_COUNT] = {"a_", "v_", "f_", "c_"};
+static char _STAGE_ATTR_PREFIX[Shader::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_",/* "t_", "g_", */"f_", "c_"};
 
 ShaderPreprocessor::ShaderPreprocessor(Shader::Stage shaderStage, Shader::Stage preShaderStage)
     : _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declarations, shaderStage == Shader::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
@@ -62,7 +62,14 @@ void ShaderPreprocessor::addModifier(const String& modifier)
 void ShaderPreprocessor::initialize(const String& source, PipelineBuildingContext& context)
 {
     parseMainBlock(source, context);
-    parseDeclarations(context);
+    parseDeclarations();
+}
+
+void ShaderPreprocessor::initializeAsFirst(const String& source, PipelineBuildingContext& context)
+{
+    initialize(source, context);
+    for(const auto& i : _main_block->_ins)
+        context.addInputAttribute(Strings::capitalizeFirst(i._name), i._type);
 }
 
 static bool sanitizer(const std::smatch& match) {
@@ -100,7 +107,7 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
     _main_block->parse(buildingContext);
 }
 
-void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
+void ShaderPreprocessor::parseDeclarations()
 {
     _main.replace(_STRUCT_PATTERN, [this](const std::smatch& m) {
         const sp<String> declaration = sp<String>::make(m.str());
@@ -141,11 +148,6 @@ void ShaderPreprocessor::parseDeclarations(PipelineBuildingContext& context)
         _main.push_back(sp<String>::make("\n}\n\n"));
     }
 
-    if(_shader_stage == Shader::SHADER_STAGE_VERTEX)
-    {
-        for(const auto& i : _main_block->_ins)
-            context.addInputAttribute(Strings::capitalizeFirst(i._name), i._type);
-    }
 }
 
 ShaderPreprocessor::Preprocessor ShaderPreprocessor::preprocess()

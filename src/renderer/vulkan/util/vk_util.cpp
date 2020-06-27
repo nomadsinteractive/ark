@@ -154,7 +154,7 @@ static const TBuiltInResource DefaultTBuiltInResource = {
 class GLSLLangInitializer {
 public:
     GLSLLangInitializer()
-        : _languages{EShLangVertex, EShLangFragment, EShLangCompute}, _built_in_resource(DefaultTBuiltInResource) {
+        : _languages{EShLangVertex, /*EShLangTessControl, EShLangGeometry, */EShLangFragment, EShLangCompute}, _built_in_resource(DefaultTBuiltInResource) {
         glslang::InitializeProcess();
     }
     ~GLSLLangInitializer() {

@@ -45,17 +45,14 @@ private:
 PipelineBuildingContext::PipelineBuildingContext(const String& vertex, const String& fragment)
     : _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX, Shader::SHADER_STAGE_NONE), _fragment(Shader::SHADER_STAGE_FRAGMENT, Shader::SHADER_STAGE_VERTEX)
 {
-    _vertex.initialize(vertex, *this);
-    _fragment.initialize(fragment, *this);
+    loadClassicalPipeline(vertex, fragment);
 }
 
 PipelineBuildingContext::PipelineBuildingContext(const String& vertex, const String& fragment, BeanFactory& factory, const Scope& args, const document& manifest)
     : _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX, Shader::SHADER_STAGE_NONE), _fragment(Shader::SHADER_STAGE_FRAGMENT, Shader::SHADER_STAGE_VERTEX)
 {
     loadPredefinedParam(factory, args, manifest);
-
-    _vertex.initialize(vertex, *this);
-    _fragment.initialize(fragment, *this);
+    loadClassicalPipeline(vertex, fragment);
 }
 
 void PipelineBuildingContext::loadPredefinedParam(BeanFactory& factory, const Scope& args, const document& manifest)
@@ -151,9 +148,9 @@ void PipelineBuildingContext::addUniform(const sp<Uniform>& uniform)
 
 void PipelineBuildingContext::addInputAttribute(const String& name, const String& type)
 {
-    if(_vert_in_declared.find(name) == _vert_in_declared.end())
+    if(_input_vars.find(name) == _input_vars.end())
     {
-        _vert_in_declared.insert(name);
+        _input_vars.insert(name);
         addAttribute(name, type);
     }
 }
@@ -264,6 +261,12 @@ Attribute PipelineBuildingContext::makePredefinedAttribute(const String& name, c
         return Attribute("a_" + name, Attribute::TYPE_FLOAT, type, 16, false);
     DFATAL("Unknown attribute type \"%s\"", type.c_str());
     return Attribute();
+}
+
+void PipelineBuildingContext::loadClassicalPipeline(const String& vertex, const String& fragment)
+{
+    _vertex.initializeAsFirst(vertex, *this);
+    _fragment.initialize(fragment, *this);
 }
 
 }

@@ -151,6 +151,7 @@ public:
     void addModifier(const String& modifier);
 
     void initialize(const String& source, PipelineBuildingContext& context);
+    void initializeAsFirst(const String& source, PipelineBuildingContext& context);
 
     void setupUniforms(Table<String, sp<Uniform>>& uniforms, int32_t& counter);
 
@@ -170,7 +171,7 @@ public:
 
 private:
     void parseMainBlock(const String& source, PipelineBuildingContext& buildingContext);
-    void parseDeclarations(PipelineBuildingContext& context);
+    void parseDeclarations();
     size_t parseFunctionBody(const String& s, String& body) const;
 
     String genDeclarations(const String& mainFunc) const;
