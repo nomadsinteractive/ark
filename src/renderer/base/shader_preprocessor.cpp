@@ -34,10 +34,10 @@ static std::regex _STRUCT_PATTERN("struct\\s+(\\w+)\\s*\\{([^}]+)\\}\\s*;");
 static std::regex _IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
 static std::regex _UNIFORM_PATTERN("uniform" UNIFORM_PATTERN);
 
-static char _STAGE_ATTR_PREFIX[Shader::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_",/* "t_", "g_", */"f_", "c_"};
+static char _STAGE_ATTR_PREFIX[Shader::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
 
-ShaderPreprocessor::ShaderPreprocessor(Shader::Stage shaderStage, Shader::Stage preShaderStage)
-    : _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declarations, shaderStage == Shader::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
+ShaderPreprocessor::ShaderPreprocessor(sp<String> source, Shader::Stage shaderStage, Shader::Stage preShaderStage)
+    : _source(std::move(source)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declarations, shaderStage == Shader::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
       _declaration_outs(_attribute_declarations, shaderStage == Shader::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
       _declaration_uniforms(_uniform_declarations, "uniform"), _declaration_samplers(_uniform_declarations, "uniform"), _pre_main(sp<String>::make()),
       _output_var(sp<String>::make()), _post_main(sp<String>::make())
@@ -59,15 +59,15 @@ void ShaderPreprocessor::addModifier(const String& modifier)
     *_output_var = Strings::sprintf("%s * %s", _output_var->c_str(), modifier.c_str());
 }
 
-void ShaderPreprocessor::initialize(const String& source, PipelineBuildingContext& context)
+void ShaderPreprocessor::initialize(PipelineBuildingContext& context)
 {
-    parseMainBlock(source, context);
+    parseMainBlock(_source, context);
     parseDeclarations();
 }
 
-void ShaderPreprocessor::initializeAsFirst(const String& source, PipelineBuildingContext& context)
+void ShaderPreprocessor::initializeAsFirst(PipelineBuildingContext& context)
 {
-    initialize(source, context);
+    initialize(context);
     for(const auto& i : _main_block->_ins)
         context.addInputAttribute(Strings::capitalizeFirst(i._name), i._type);
 }
@@ -87,7 +87,7 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
 
     DWARN(source.search(_IN_PATTERN, sanitizer), "Non-standard attribute declared above, move it into ark_main function's parameters will disable this warning.");
 
-    static const std::regex FUNC_PATTERN("vec4\\s+ark_main\\(([^)]*)\\)");
+    static const std::regex FUNC_PATTERN("(vec4|void)\\s+ark_main\\(([^)]*)\\)");
 
     source.search(FUNC_PATTERN, [this] (const std::smatch& m)->bool {
         const String prefix = m.prefix().str();
@@ -98,7 +98,7 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
         _main.push_back(sp<String>::make(prefix));
         _main.push_back(fragment);
         _main.push_back(sp<String>::make(remaining.substr(prefixStart)));
-        _main_block = sp<Function>::make("main", m[1].str(), body.strip(), fragment);
+        _main_block = sp<Function>::make("main", m[2].str(), body.strip(), fragment);
         return false;
     });
 
@@ -333,7 +333,7 @@ void ShaderPreprocessor::Function::parse(PipelineBuildingContext& buildingContex
             _outs.push_back(std::move(param));
         else
         {
-            buildingContext.addPredefinedAttribute(Strings::capitalizeFirst(param._name), param._type, 0);
+            buildingContext.addPredefinedAttribute(Strings::capitalizeFirst(param._name), param._type, Shader::SHADER_STAGE_VERTEX);
             _ins.push_back(std::move(param));
         }
     }

@@ -42,20 +42,19 @@ private:
 
 }
 
-PipelineBuildingContext::PipelineBuildingContext(const String& vertex, const String& fragment)
-    : _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX, Shader::SHADER_STAGE_NONE), _fragment(Shader::SHADER_STAGE_FRAGMENT, Shader::SHADER_STAGE_VERTEX)
+PipelineBuildingContext::PipelineBuildingContext()
+    : _input(sp<PipelineInput>::make())
 {
-    loadClassicalPipeline(vertex, fragment);
 }
 
-PipelineBuildingContext::PipelineBuildingContext(const String& vertex, const String& fragment, BeanFactory& factory, const Scope& args, const document& manifest)
-    : _input(sp<PipelineInput>::make()), _vertex(Shader::SHADER_STAGE_VERTEX, Shader::SHADER_STAGE_NONE), _fragment(Shader::SHADER_STAGE_FRAGMENT, Shader::SHADER_STAGE_VERTEX)
+PipelineBuildingContext::PipelineBuildingContext(sp<String> vertex, sp<String> fragment)
+    : PipelineBuildingContext()
 {
-    loadPredefinedParam(factory, args, manifest);
-    loadClassicalPipeline(vertex, fragment);
+    addStage(std::move(vertex), Shader::SHADER_STAGE_VERTEX, Shader::SHADER_STAGE_NONE);
+    addStage(std::move(fragment), Shader::SHADER_STAGE_FRAGMENT, Shader::SHADER_STAGE_VERTEX);
 }
 
-void PipelineBuildingContext::loadPredefinedParam(BeanFactory& factory, const Scope& args, const document& manifest)
+void PipelineBuildingContext::loadManifest(const document& manifest, BeanFactory& factory, const Scope& args)
 {
     loadPredefinedUniform(factory, args, manifest);
     loadPredefinedSampler(factory, args, manifest);
@@ -64,19 +63,32 @@ void PipelineBuildingContext::loadPredefinedParam(BeanFactory& factory, const Sc
 
 void PipelineBuildingContext::initialize()
 {
-    for(const auto& i : _vertex._declaration_ins.vars().values())
+    initializePipelines();
+
+    ShaderPreprocessor& firstStage = _stages.begin()->second;
+
+    for(const auto& i : firstStage._declaration_ins.vars().values())
         addInputAttribute(i.name(), i.type());
 
-    for(const auto& i : _vertex._main_block->_ins)
-        _vertex.inDeclare(i._type, Strings::capitalizeFirst(i._name));
+    for(const auto& i : firstStage._main_block->_ins)
+        firstStage.inDeclare(i._type, Strings::capitalizeFirst(i._name));
 
     std::set<String> passThroughVars;
-    _fragment.linkPreStage(_vertex, passThroughVars);
+    const ShaderPreprocessor* prestage = nullptr;;
+    for(auto iter = _stages.begin(); iter != _stages.end(); ++iter)
+    {
+        if(iter != _stages.begin())
+            iter->second->linkPreStage(*prestage, passThroughVars);
+        prestage = iter->second.get();
+    }
 
     Table<String, String> attributes;
-    for(const auto& i : _fragment._declaration_ins.vars().values())
-        if(!attributes.has(i.name()))
-            attributes.push_back(i.name(), i.type());
+
+    for(auto iter = _stages.begin(); iter != _stages.end(); ++iter)
+        if(iter != _stages.begin())
+            for(const auto& i : iter->second->_declaration_ins.vars().values())
+                if(!attributes.has(i.name()))
+                    attributes.push_back(i.name(), i.type());
 
     for(const auto& i : _attributes)
         if(!attributes.has(i.first))
@@ -85,9 +97,9 @@ void PipelineBuildingContext::initialize()
     std::vector<String> generated;
     for(const auto& i : attributes)
     {
-        if(!_vertex._declaration_ins.has(i.first)
-                && !_vertex._declaration_outs.has(i.first)
-                && !_vertex._main_block->hasOutAttribute(i.first))
+        if(!firstStage._declaration_ins.has(i.first)
+                && !firstStage._declaration_outs.has(i.first)
+                && !firstStage._main_block->hasOutAttribute(i.first))
         {
             generated.push_back(i.first);
             addAttribute(i.first, i.second);
@@ -97,6 +109,8 @@ void PipelineBuildingContext::initialize()
     for(auto iter : _input->streams())
         iter.second.align();
 
+    //TODO: link all outputs to next stage's inputs
+    ShaderPreprocessor& _fragment = getStage(Shader::SHADER_STAGE_FRAGMENT);
     for(const auto& i : attributes)
     {
         if(passThroughVars.find(i.first) != passThroughVars.end())
@@ -105,28 +119,34 @@ void PipelineBuildingContext::initialize()
 
     for(const String& i : generated)
     {
-        _vertex.inDeclare(attributes.at(i), i);
+        firstStage.inDeclare(attributes.at(i), i);
         if(passThroughVars.find(i) != passThroughVars.end())
         {
-            _vertex.outDeclare(attributes.at(i), i);
-            _vertex.addPreMainSource(Strings::sprintf("%s%s = %s%s;", _vertex.outVarPrefix(), i.c_str(), _vertex.inVarPrefix(), i.c_str()));
+            firstStage.outDeclare(attributes.at(i), i);
+            firstStage.addPreMainSource(Strings::sprintf("%s%s = %s%s;", firstStage.outVarPrefix(), i.c_str(), firstStage.inVarPrefix(), i.c_str()));
         }
     }
 
-    for(const auto& i : _vertex._main_block->_outs)
-        _vertex.outDeclare(i._type, Strings::capitalizeFirst(i._name));
+    for(const auto& i : firstStage._main_block->_outs)
+        firstStage.outDeclare(i._type, Strings::capitalizeFirst(i._name));
 }
 
 void PipelineBuildingContext::setupUniforms()
 {
     int32_t binding = 0;
-    _vertex.setupUniforms(_uniforms, binding);
-    _fragment.setupUniforms(_uniforms, binding);
+    for(auto& i : _stages)
+        i.second->setupUniforms(_uniforms, binding);
+}
+
+const std::map<Shader::Stage, op<ShaderPreprocessor> >& PipelineBuildingContext::stages() const
+{
+    return _stages;
 }
 
 void PipelineBuildingContext::addAttribute(const String& name, const String& type)
 {
-    Attribute& attr = addPredefinedAttribute(name, type, 0);
+    //TODO: add attribute to specified stage
+    Attribute& attr = addPredefinedAttribute(name, type, Shader::SHADER_STAGE_VERTEX);
     _input->addAttribute(name, attr);
 }
 
@@ -155,15 +175,28 @@ void PipelineBuildingContext::addInputAttribute(const String& name, const String
     }
 }
 
-Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t stage)
+Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, Shader::Stage stage)
 {
     if(_attributes.find(name) == _attributes.end())
         _attributes[name] = makePredefinedAttribute(name, type);
 
-    if(stage == Shader::SHADER_STAGE_FRAGMENT)
-        _fragment._predefined_parameters.push_back(ShaderPreprocessor::Parameter(type, name, ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN));
-
+    getStage(stage)->_predefined_parameters.push_back(ShaderPreprocessor::Parameter(type, name, ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN));
     return _attributes[name];
+}
+
+const op<ShaderPreprocessor>& PipelineBuildingContext::getStage(Shader::Stage shaderStage) const
+{
+    auto iter = _stages.find(shaderStage);
+    DCHECK(iter != _stages.end(), "Stage '%d' not found", shaderStage);
+    return iter->second;
+}
+
+const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> source, Shader::Stage shaderStage, Shader::Stage preShaderStage)
+{
+    op<ShaderPreprocessor>& stage = _stages[shaderStage];
+    DCHECK(!stage, "Stage '%d' has been initialized already", shaderStage);
+    stage.reset(new ShaderPreprocessor(std::move(source), shaderStage, preShaderStage));
+    return stage;
 }
 
 void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
@@ -176,7 +209,7 @@ void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
         const String attrName = name.startsWith("a_") ? name.substr(2) : name;
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         uint32_t divisor = Documents::getAttribute<uint32_t>(i, "divisor", 0);
-        addPredefinedAttribute(attrName, type, 0).setDivisor(divisor);
+        addPredefinedAttribute(attrName, type, Shader::SHADER_STAGE_VERTEX).setDivisor(divisor);
     }
 }
 
@@ -263,10 +296,13 @@ Attribute PipelineBuildingContext::makePredefinedAttribute(const String& name, c
     return Attribute();
 }
 
-void PipelineBuildingContext::loadClassicalPipeline(const String& vertex, const String& fragment)
+void PipelineBuildingContext::initializePipelines()
 {
-    _vertex.initializeAsFirst(vertex, *this);
-    _fragment.initialize(fragment, *this);
+    for(auto iter = _stages.begin(); iter != _stages.end(); ++iter)
+        if(iter == _stages.begin())
+            iter->second->initializeAsFirst(*this);
+        else
+            iter->second->initialize(*this);
 }
 
 }

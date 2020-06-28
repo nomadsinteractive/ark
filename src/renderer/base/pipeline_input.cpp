@@ -33,7 +33,7 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
         _ubos.push_back(std::move(i.second));
     }
 
-    _sampler_count = buildingContext._fragment._declaration_samplers.vars().size();
+    _sampler_count = buildingContext.getStage(Shader::SHADER_STAGE_FRAGMENT)->_declaration_samplers.vars().size();
 }
 
 const std::vector<sp<PipelineInput::UBO>>& PipelineInput::ubos() const

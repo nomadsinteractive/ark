@@ -144,14 +144,14 @@ private:
     };
 
 public:
-    ShaderPreprocessor(Shader::Stage shaderStage, Shader::Stage preShaderStage);
+    ShaderPreprocessor(sp<String> source, Shader::Stage shaderStage, Shader::Stage preShaderStage);
 
     void addPreMainSource(const String& source);
     void addPostMainSource(const String& source);
     void addModifier(const String& modifier);
 
-    void initialize(const String& source, PipelineBuildingContext& context);
-    void initializeAsFirst(const String& source, PipelineBuildingContext& context);
+    void initialize(PipelineBuildingContext& context);
+    void initializeAsFirst(PipelineBuildingContext& context);
 
     void setupUniforms(Table<String, sp<Uniform>>& uniforms, int32_t& counter);
 
@@ -185,6 +185,7 @@ private:
     static const char* getOutAttributePrefix(Shader::Stage preStage);
 
 private:
+    sp<String> _source;
     sp<Function> _main_block;
 
     friend class PipelineBuildingContext;

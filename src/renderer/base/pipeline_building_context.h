@@ -8,6 +8,7 @@
 #include "core/base/string.h"
 #include "core/base/string_buffer.h"
 #include "core/collection/table.h"
+#include "core/types/owned_ptr.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/shader_preprocessor.h"
@@ -19,8 +20,10 @@ namespace ark {
 
 class PipelineBuildingContext {
 public:
-    PipelineBuildingContext(const String& vertex, const String& fragment);
-    PipelineBuildingContext(const String& vertex, const String& fragment, BeanFactory& factory, const Scope& args, const document& manifest);
+    PipelineBuildingContext();
+    PipelineBuildingContext(sp<String> vertex, sp<String> fragment);
+
+    void loadManifest(const document& manifest, BeanFactory& factory, const Scope& args);
 
     void initialize();
 
@@ -29,16 +32,13 @@ public:
     sp<PipelineInput> _input;
     sp<Snippet> _snippet;
 
-    ShaderPreprocessor _vertex;
-    ShaderPreprocessor _fragment;
-
-    std::map<Shader::Stage, ShaderPreprocessor> _stages;
-
     std::map<String, Attribute> _attributes;
     Table<String, sp<Uniform>> _uniforms;
     Table<String, sp<Texture>> _samplers;
 
     std::set<String> _input_vars;
+
+    const std::map<Shader::Stage, op<ShaderPreprocessor>>& stages() const;
 
     void addAttribute(const String& name, const String& type);
     void addSnippet(const sp<Snippet>& snippet);
@@ -46,17 +46,21 @@ public:
     void addUniform(const sp<Uniform>& uniform);
 
     void addInputAttribute(const String& name, const String& type);
-    Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t scopes);
+    Attribute& addPredefinedAttribute(const String& name, const String& type, Shader::Stage stage);
+
+    const op<ShaderPreprocessor>& getStage(Shader::Stage shaderStage) const;
+    const op<ShaderPreprocessor>& addStage(sp<String> source, Shader::Stage shaderStage, Shader::Stage preShaderStage);
 
 private:
     Attribute makePredefinedAttribute(const String& name, const String& type);
 
-    void loadClassicalPipeline(const String& vertex, const String& fragment);
-    void loadPredefinedParam(BeanFactory& factory, const Scope& args, const document& manifest);
+    void initializePipelines();
 
     void loadPredefinedAttribute(const document& manifest);
     void loadPredefinedUniform(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadPredefinedSampler(BeanFactory& factory, const Scope& args, const document& manifest);
+
+    std::map<Shader::Stage, op<ShaderPreprocessor>> _stages;
 };
 
 }

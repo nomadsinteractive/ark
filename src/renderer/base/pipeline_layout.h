@@ -26,7 +26,7 @@ public:
 
     const sp<PipelineInput>& input() const;
 
-    std::map<Shader::Stage, String> getPreprocessedShaders(const RenderEngineContext& glContext) const;
+    std::map<Shader::Stage, String> getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const;
 
     const ShaderPreprocessor::Preprocessor& vertex() const;
     const ShaderPreprocessor::Preprocessor& fragment() const;

@@ -6,8 +6,9 @@ namespace ark {
 
 void SnippetPointSize::preInitialize(PipelineBuildingContext& context)
 {
-    context.addPredefinedAttribute("PointSize", "float", 0);
-    context._vertex.addPreMainSource("gl_PointSize = a_PointSize;");
+    ShaderPreprocessor& vertex = context.getStage(Shader::SHADER_STAGE_VERTEX);
+    context.addPredefinedAttribute("PointSize", "float", Shader::SHADER_STAGE_VERTEX);
+    vertex.addPreMainSource("gl_PointSize = a_PointSize;");
 }
 
 sp<Snippet> SnippetPointSize::DICTIONARY::build(const Scope& /*args*/)

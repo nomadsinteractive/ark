@@ -24,8 +24,9 @@ public:
     enum Stage {
         SHADER_STAGE_NONE = -1,
         SHADER_STAGE_VERTEX,
-//        SHADER_STAGE_TESSELLATION,
-//        SHADER_STAGE_GEOMETRY,
+        SHADER_STAGE_TESSELLATION_CTRL,
+        SHADER_STAGE_TESSELLATION_EVAL,
+        SHADER_STAGE_GEOMETRY,
         SHADER_STAGE_FRAGMENT,
         SHADER_STAGE_COMPUTE,
         SHADER_STAGE_COUNT
@@ -45,7 +46,6 @@ public:
 
     const sp<PipelineInput>& input() const;
     const sp<PipelineLayout>& layout() const;
-    const sp<Camera>& camera() const;
 
     sp<ShaderBindings> makeBindings(ModelLoader::RenderMode mode, PipelineBindings::RenderProcedure renderProcedure) const;
 
@@ -57,12 +57,16 @@ public:
         virtual sp<Shader> build(const Scope& args) override;
 
     private:
+        std::map<Shader::Stage, sp<Builder<String>>> loadStages(BeanFactory& factory, const document& manifest) const;
+
+        sp<PipelineBuildingContext> makePipelineBuildingContext(const Scope& args) const;
+
+    private:
         BeanFactory _factory;
         document _manifest;
         sp<ResourceLoaderContext> _resource_loader_context;
 
-        sp<Builder<String>> _vertex;
-        sp<Builder<String>> _fragment;
+        std::map<Shader::Stage, sp<Builder<String>>> _stages;
         sp<Builder<Snippet>> _snippet;
         SafePtr<Builder<Camera>> _camera;
         SafePtr<Builder<Vec4>> _pipeline_bindings_scissor;

@@ -130,7 +130,7 @@ void GLPipeline::bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<P
     }
 }
 
-void GLPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+void GLPipeline::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
 {
     const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
 
@@ -275,7 +275,7 @@ GLint GLPipeline::getAttribLocation(const String& name)
 GLint GLPipeline::getUniformLocation(const String& name)
 {
     GLint location = glGetUniformLocation(_id, name.c_str());
-    DWARN(location != -1, "Undefine uniform \"%s\". It might be optimized out, or something goes wrong.", name.c_str());
+    DWARN(location != -1, "Undefined uniform \"%s\". It might be optimized out, or something goes wrong.", name.c_str());
     return location;
 }
 

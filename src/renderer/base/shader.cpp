@@ -6,6 +6,7 @@
 #include "core/inf/array.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/global.h"
+#include "core/util/conversions.h"
 #include "core/util/documents.h"
 #include "core/util/strings.h"
 
@@ -32,18 +33,18 @@ namespace {
 
 class ShaderBuilderImpl : public Builder<Shader> {
 public:
-    ShaderBuilderImpl(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& vertex, const String& fragment, const sp<Camera>& defaultCamera)
-        : _factory(factory), _manifest(doc), _render_controller(resourceLoaderContext->renderController()), _vertex(vertex), _fragment(fragment), _default_camera(defaultCamera),
+    ShaderBuilderImpl(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<String> vertex, sp<String> fragment, const sp<Camera>& defaultCamera)
+        : _factory(factory), _manifest(doc), _render_controller(resourceLoaderContext->renderController()), _vertex(std::move(vertex)), _fragment(std::move(fragment)), _default_camera(defaultCamera),
           _camera(factory.getBuilder<Camera>(doc, Constants::Attributes::CAMERA)), _pipeline_bindings_scissor(factory.getBuilder<Vec4>(_manifest, "scissor")),
           _pipeline_bindings_flags(Documents::getAttribute<PipelineBindings::Flag>(_manifest, "flags", PipelineBindings::FLAG_DEFAULT_VALUE)) {
     }
 
     virtual sp<Shader> build(const Scope& args) override {
-        sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_vertex, _fragment, _factory, args, _manifest);
-        sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);
+        sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_vertex, _fragment);
+        buildingContext->loadManifest(_manifest, _factory, args);
         sp<Camera> camera = _camera->build(args);
         const sp<Vec4> scissor = _pipeline_bindings_scissor->build(args);
-        return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, pipelineLayout, camera ? camera : _default_camera, scissor ? Rect(scissor->val()) : Rect(), _pipeline_bindings_flags);
+        return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext), camera ? camera : _default_camera, scissor ? Rect(scissor->val()) : Rect(), _pipeline_bindings_flags);
     }
 
 private:
@@ -51,7 +52,7 @@ private:
     document _manifest;
     sp<RenderController> _render_controller;
 
-    String _vertex, _fragment;
+    sp<String> _vertex, _fragment;
     sp<Camera> _default_camera;
 
     SafePtr<Builder<Camera>> _camera;
@@ -105,11 +106,6 @@ const sp<PipelineInput>& Shader::input() const
     return _input;
 }
 
-const sp<Camera>& Shader::camera() const
-{
-    return _camera;
-}
-
 const sp<RenderController>& Shader::renderController() const
 {
     return _render_controller;
@@ -126,8 +122,7 @@ sp<ShaderBindings> Shader::makeBindings(ModelLoader::RenderMode mode, PipelineBi
 }
 
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _vertex(factory.getBuilder<String>(manifest, "vertex", "@shaders:default.vert")),
-      _fragment(factory.getBuilder<String>(manifest, "fragment", "@shaders:texture.frag")), _snippet(factory.getBuilder<Snippet>(manifest, Constants::Attributes::SNIPPET)),
+    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _stages(loadStages(factory, manifest)), _snippet(factory.getBuilder<Snippet>(manifest, Constants::Attributes::SNIPPET)),
       _camera(factory.getBuilder<Camera>(manifest, Constants::Attributes::CAMERA)), _pipeline_bindings_scissor(factory.getBuilder<Vec4>(_manifest, "scissor")),
       _pipeline_bindings_flags(Documents::getAttribute<PipelineBindings::Flag>(_manifest, "flags", PipelineBindings::FLAG_DEFAULT_VALUE))
 {
@@ -135,7 +130,8 @@ Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const s
 
 sp<Shader> Shader::BUILDER::build(const Scope& args)
 {
-    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_vertex->build(args), _fragment->build(args), _factory, args, _manifest);
+    const sp<PipelineBuildingContext> buildingContext = makePipelineBuildingContext(args);
+    buildingContext->loadManifest(_manifest, _factory, args);
     if(_snippet)
         buildingContext->addSnippet(_snippet->build(args));
 
@@ -143,5 +139,50 @@ sp<Shader> Shader::BUILDER::build(const Scope& args)
     const sp<RenderController>& renderController = _resource_loader_context->renderController();
     return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext), _camera->build(args), scissor ? Rect(scissor->val()) : Rect(), _pipeline_bindings_flags);
 }
+
+std::map<Shader::Stage, sp<Builder<String>>> Shader::BUILDER::loadStages(BeanFactory& factory, const document& manifest) const
+{
+    std::map<Shader::Stage, sp<Builder<String>>> stages;
+
+    for(const document& i : manifest->children("stage"))
+    {
+        Shader::Stage type = Documents::ensureAttribute<Shader::Stage>(i, Constants::Attributes::TYPE);
+        DCHECK(stages.find(type) == stages.end(), "Stage duplicated: %s", Documents::getAttribute(i, Constants::Attributes::TYPE).c_str());
+        stages[type] = factory.ensureBuilder<String>(i, Constants::Attributes::SRC);
+    }
+
+    if(stages.empty())
+    {
+        stages[Shader::SHADER_STAGE_VERTEX] = factory.getBuilder<String>(manifest, "vertex", "@shaders:default.vert");
+        stages[Shader::SHADER_STAGE_FRAGMENT] = factory.getBuilder<String>(manifest, "fragment", "@shaders:texture.frag");
+    }
+
+    return stages;
+}
+
+sp<PipelineBuildingContext> Shader::BUILDER::makePipelineBuildingContext(const Scope& args) const
+{
+    sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make();
+    Shader::Stage prestage = Shader::SHADER_STAGE_NONE;
+    for(const auto& i : _stages)
+    {
+        context->addStage(i.second->build(args), i.first, prestage);
+        prestage = i.first;
+    }
+    return context;
+}
+
+template<> ARK_API Shader::Stage Conversions::to<String, Shader::Stage>(const String& val)
+{
+    if(val == "vertex")
+        return Shader::SHADER_STAGE_VERTEX;
+    if(val == "fragment")
+        return Shader::SHADER_STAGE_FRAGMENT;
+    if(val == "compute")
+        return Shader::SHADER_STAGE_COMPUTE;
+    DCHECK(val.empty(), "Unknown stage: '%s'", val.c_str());
+    return Shader::SHADER_STAGE_NONE;
+}
+
 
 }

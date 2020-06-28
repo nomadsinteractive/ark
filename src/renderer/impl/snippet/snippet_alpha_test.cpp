@@ -13,7 +13,7 @@ SnippetAlphaTest::SnippetAlphaTest(float threshold)
 
 void SnippetAlphaTest::preInitialize(PipelineBuildingContext& context)
 {
-    ShaderPreprocessor& preprocessor = context._fragment;
+    ShaderPreprocessor& preprocessor = context.getStage(Shader::SHADER_STAGE_FRAGMENT);
     preprocessor.addPostMainSource(Strings::sprintf("if(%s.a < %.2f)\n        discard;", preprocessor.outputName().c_str(), _threshold));
 }
 

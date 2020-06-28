@@ -28,9 +28,12 @@ public:
     }
 
     virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {
-        context._fragment.addModifier("vec4(1.0, 1.0, 1.0, v_Alpha01)");
-        context._fragment.addModifier("u_Color01");
-        context._vertex.addPostMainSource("gl_PointSize = a_PointSize;");
+        ShaderPreprocessor& vertex = context.getStage(Shader::SHADER_STAGE_VERTEX);
+        ShaderPreprocessor& fragment = context.getStage(Shader::SHADER_STAGE_FRAGMENT);
+
+        fragment.addModifier("vec4(1.0, 1.0, 1.0, v_Alpha01)");
+        fragment.addModifier("u_Color01");
+        vertex.addPostMainSource("gl_PointSize = a_PointSize;");
     }
 };
 
@@ -47,7 +50,7 @@ public:
 
         const sp<PipelineFactory> pipelineFactory = Ark::instance().applicationContext()->renderEngine()->rendererFactory()->createPipelineFactory();
         const sp<Snippet> snippet = sp<SnippetTest>::make();
-        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(vert, frag);
+        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(std::move(vert), std::move(frag));
         buildingContext->addSnippet(snippet);
 
         const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);

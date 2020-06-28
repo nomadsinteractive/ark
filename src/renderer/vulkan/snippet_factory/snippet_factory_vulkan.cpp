@@ -17,33 +17,36 @@ namespace {
 class CoreSnippetVulkan : public Snippet {
 public:
     virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override {
-        context._vertex._version = 450;
-        context._fragment._version = 450;
+        ShaderPreprocessor& vertex = context.getStage(Shader::SHADER_STAGE_VERTEX);
+        ShaderPreprocessor& fragment = context.getStage(Shader::SHADER_STAGE_FRAGMENT);
+
+        vertex._version = 450;
+        fragment._version = 450;
 
         const String sLocation = "location";
         const String sBinding = "binding";
 
-        setLayoutDescriptor(setupLayoutLocation(context, context._vertex._declaration_ins), sLocation, 0);
+        setLayoutDescriptor(setupLayoutLocation(context, vertex._declaration_ins), sLocation, 0);
 
         const sp<PipelineInput>& pipelineInput = pipelineLayout.input();
-        declareUBOStruct(context._vertex, pipelineInput);
-        declareUBOStruct(context._fragment, pipelineInput);
+        declareUBOStruct(vertex, pipelineInput);
+        declareUBOStruct(fragment, pipelineInput);
 
-        context._fragment.outDeclare("vec4", "FragColor");
+        fragment.outDeclare("vec4", "FragColor");
 
-        setLayoutDescriptor(context._fragment._declaration_samplers, sBinding, static_cast<uint32_t>(pipelineInput->ubos().size()));
+        setLayoutDescriptor(fragment._declaration_samplers, sBinding, static_cast<uint32_t>(pipelineInput->ubos().size()));
 
-        setLayoutDescriptor(context._vertex._declaration_outs, context._fragment._declaration_ins, sLocation, 0);
-        setLayoutDescriptor(context._fragment._declaration_outs, sLocation, 0);
+        setLayoutDescriptor(vertex._declaration_outs, fragment._declaration_ins, sLocation, 0);
+        setLayoutDescriptor(fragment._declaration_outs, sLocation, 0);
 
-        context._vertex._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
-        context._vertex._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
+        vertex._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
+        vertex._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
 
-        context._fragment._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
-        context._fragment._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
+        fragment._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
+        fragment._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
 
-        context._fragment._predefined_macros.push_back("#define texture2D texture");
-        context._fragment._predefined_macros.push_back("#define textureCube texture");
+        fragment._predefined_macros.push_back("#define texture2D texture");
+        fragment._predefined_macros.push_back("#define textureCube texture");
     }
 
 private:

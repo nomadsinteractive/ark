@@ -33,8 +33,8 @@ void PipelineLayout::preCompile(GraphicsContext& graphicsContext)
     {
         _snippet->preCompile(graphicsContext, _building_context, *this);
 
-        _vertex = _building_context->_vertex.preprocess();
-        _fragment = _building_context->_fragment.preprocess();
+        _vertex = _building_context->getStage(Shader::SHADER_STAGE_VERTEX)->preprocess();
+        _fragment = _building_context->getStage(Shader::SHADER_STAGE_FRAGMENT)->preprocess();
 
         _building_context = nullptr;
     }
@@ -45,11 +45,11 @@ const sp<PipelineInput>& PipelineLayout::input() const
     return _input;
 }
 
-std::map<Shader::Stage, String> PipelineLayout::getPreprocessedShaders(const RenderEngineContext& glContext) const
+std::map<Shader::Stage, String> PipelineLayout::getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const
 {
     std::map<Shader::Stage, String> shaders;
-    shaders[Shader::SHADER_STAGE_VERTEX] = _vertex.process(glContext);
-    shaders[Shader::SHADER_STAGE_FRAGMENT] = _fragment.process(glContext);
+    shaders[Shader::SHADER_STAGE_VERTEX] = _vertex.process(renderEngineContext);
+    shaders[Shader::SHADER_STAGE_FRAGMENT] = _fragment.process(renderEngineContext);
     return shaders;
 }
 
@@ -89,7 +89,7 @@ void PipelineLayout::initialize(const Camera& camera)
 
 void PipelineLayout::addUniform(const String& name, const sp<Flatable>& flatable)
 {
-    sp<Uniform> uniform = _building_context->_vertex.getUniformInput(name, Uniform::TYPE_MAT4);
+    sp<Uniform> uniform = _building_context->getStage(Shader::SHADER_STAGE_VERTEX)->getUniformInput(name, Uniform::TYPE_MAT4);
     if(uniform)
     {
         uniform->setFlatable(flatable);

@@ -154,7 +154,7 @@ static const TBuiltInResource DefaultTBuiltInResource = {
 class GLSLLangInitializer {
 public:
     GLSLLangInitializer()
-        : _languages{EShLangVertex, /*EShLangTessControl, EShLangGeometry, */EShLangFragment, EShLangCompute}, _built_in_resource(DefaultTBuiltInResource) {
+        : _languages{EShLangVertex, EShLangTessControl, EShLangTessEvaluation, EShLangGeometry, EShLangFragment, EShLangCompute}, _built_in_resource(DefaultTBuiltInResource) {
         glslang::InitializeProcess();
     }
     ~GLSLLangInitializer() {
@@ -291,7 +291,8 @@ VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, Texture::Format format)
 
 VkShaderStageFlagBits VKUtil::toStage(Shader::Stage stage)
 {
-    static const VkShaderStageFlagBits vkStages[] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT, VK_SHADER_STAGE_COMPUTE_BIT};
+    static const VkShaderStageFlagBits vkStages[Shader::SHADER_STAGE_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+                                                                               VK_SHADER_STAGE_GEOMETRY_BIT, VK_SHADER_STAGE_FRAGMENT_BIT, VK_SHADER_STAGE_COMPUTE_BIT};
     DCHECK(stage > Shader::SHADER_STAGE_NONE && stage < Shader::SHADER_STAGE_COUNT, "Illegal Shader::Stage: %d", stage);
     return vkStages[stage];
 }
