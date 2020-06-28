@@ -17,36 +17,42 @@ namespace {
 class CoreSnippetVulkan : public Snippet {
 public:
     virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override {
-        ShaderPreprocessor& vertex = context.getStage(Shader::SHADER_STAGE_VERTEX);
-        ShaderPreprocessor& fragment = context.getStage(Shader::SHADER_STAGE_FRAGMENT);
-
-        vertex._version = 450;
-        fragment._version = 450;
+        ShaderPreprocessor& firstStage = context.stages().begin()->second;
 
         const String sLocation = "location";
-        const String sBinding = "binding";
 
-        setLayoutDescriptor(setupLayoutLocation(context, vertex._declaration_ins), sLocation, 0);
+        setLayoutDescriptor(setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
 
         const sp<PipelineInput>& pipelineInput = pipelineLayout.input();
-        declareUBOStruct(vertex, pipelineInput);
-        declareUBOStruct(fragment, pipelineInput);
 
-        fragment.outDeclare("vec4", "FragColor");
+        if(context.hasStage(Shader::SHADER_STAGE_FRAGMENT))
+        {
+            ShaderPreprocessor& fragment = context.getStage(Shader::SHADER_STAGE_FRAGMENT);
+            fragment.outDeclare("vec4", "FragColor");
+            setLayoutDescriptor(fragment._declaration_samplers, "binding", static_cast<uint32_t>(pipelineInput->ubos().size()));
+            fragment._predefined_macros.push_back("#define texture2D texture");
+            fragment._predefined_macros.push_back("#define textureCube texture");
+        }
 
-        setLayoutDescriptor(fragment._declaration_samplers, sBinding, static_cast<uint32_t>(pipelineInput->ubos().size()));
+        ShaderPreprocessor* prestage = nullptr;
+        for(auto iter = context.stages().begin(); iter != context.stages().end(); ++iter)
+        {
+            if(iter != context.stages().begin())
+            {
+                setLayoutDescriptor(prestage->_declaration_outs, iter->second->_declaration_ins, sLocation, 0);
+                setLayoutDescriptor(iter->second->_declaration_outs, sLocation, 0);
+            }
+            prestage = iter->second.get();
+        }
 
-        setLayoutDescriptor(vertex._declaration_outs, fragment._declaration_ins, sLocation, 0);
-        setLayoutDescriptor(fragment._declaration_outs, sLocation, 0);
-
-        vertex._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
-        vertex._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
-
-        fragment._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
-        fragment._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
-
-        fragment._predefined_macros.push_back("#define texture2D texture");
-        fragment._predefined_macros.push_back("#define textureCube texture");
+        for(const auto& i : context.stages())
+        {
+            ShaderPreprocessor& preprocessor = i.second;
+            preprocessor._version = 450;
+            declareUBOStruct(preprocessor, pipelineInput);
+            preprocessor._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
+            preprocessor._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
+        }
     }
 
 private:

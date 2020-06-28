@@ -12,6 +12,7 @@ namespace ark {
 PipelineInput::PipelineInput()
     : _sampler_count(0)
 {
+    _streams.insert(std::make_pair(0, Stream()));
 }
 
 void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
@@ -33,7 +34,8 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
         _ubos.push_back(std::move(i.second));
     }
 
-    _sampler_count = buildingContext.getStage(Shader::SHADER_STAGE_FRAGMENT)->_declaration_samplers.vars().size();
+    _sampler_count = buildingContext.hasStage(Shader::SHADER_STAGE_FRAGMENT) ?
+                     buildingContext.getStage(Shader::SHADER_STAGE_FRAGMENT)->_declaration_samplers.vars().size() : 0;
 }
 
 const std::vector<sp<PipelineInput::UBO>>& PipelineInput::ubos() const

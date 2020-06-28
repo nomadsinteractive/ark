@@ -77,19 +77,23 @@ void PipelineLayout::initialize(const Camera& camera)
 
     _building_context->initialize();
 
-    addUniform("u_MVP", camera.vp());
-    addUniform("u_VP", camera.vp());
-    addUniform("u_View", camera.view());
-    addUniform("u_Projection", camera.projection());
+    if(_building_context->hasStage(Shader::SHADER_STAGE_VERTEX))
+    {
+        ShaderPreprocessor& vertex = _building_context->getStage(Shader::SHADER_STAGE_VERTEX);
+        tryBindUniform(vertex, "u_MVP", camera.vp());
+        tryBindUniform(vertex, "u_VP", camera.vp());
+        tryBindUniform(vertex, "u_View", camera.view());
+        tryBindUniform(vertex, "u_Projection", camera.projection());
+    }
 
     _building_context->setupUniforms();
 
     _input->initialize(_building_context);
 }
 
-void PipelineLayout::addUniform(const String& name, const sp<Flatable>& flatable)
+void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Flatable>& flatable)
 {
-    sp<Uniform> uniform = _building_context->getStage(Shader::SHADER_STAGE_VERTEX)->getUniformInput(name, Uniform::TYPE_MAT4);
+    sp<Uniform> uniform = shaderPreprocessor.getUniformInput(name, Uniform::TYPE_MAT4);
     if(uniform)
     {
         uniform->setFlatable(flatable);

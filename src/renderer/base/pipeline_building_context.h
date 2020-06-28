@@ -48,6 +48,7 @@ public:
     void addInputAttribute(const String& name, const String& type);
     Attribute& addPredefinedAttribute(const String& name, const String& type, Shader::Stage stage);
 
+    bool hasStage(Shader::Stage shaderStage) const;
     const op<ShaderPreprocessor>& getStage(Shader::Stage shaderStage) const;
     const op<ShaderPreprocessor>& addStage(sp<String> source, Shader::Stage shaderStage, Shader::Stage preShaderStage);
 

@@ -110,12 +110,13 @@ void PipelineBuildingContext::initialize()
         iter.second.align();
 
     //TODO: link all outputs to next stage's inputs
-    ShaderPreprocessor& _fragment = getStage(Shader::SHADER_STAGE_FRAGMENT);
-    for(const auto& i : attributes)
-    {
-        if(passThroughVars.find(i.first) != passThroughVars.end())
-            _fragment.inDeclare(i.second, i.first);
-    }
+    for(auto iter = _stages.begin(); iter != _stages.end(); ++iter)
+        if(iter != _stages.begin())
+            for(const auto& i : attributes)
+            {
+                if(passThroughVars.find(i.first) != passThroughVars.end())
+                    iter->second->inDeclare(i.second, i.first);
+            }
 
     for(const String& i : generated)
     {
@@ -182,6 +183,11 @@ Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, c
 
     getStage(stage)->_predefined_parameters.push_back(ShaderPreprocessor::Parameter(type, name, ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN));
     return _attributes[name];
+}
+
+bool PipelineBuildingContext::hasStage(Shader::Stage shaderStage) const
+{
+    return _stages.find(shaderStage) != _stages.end();
 }
 
 const op<ShaderPreprocessor>& PipelineBuildingContext::getStage(Shader::Stage shaderStage) const
