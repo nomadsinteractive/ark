@@ -33,8 +33,8 @@ void PipelineLayout::preCompile(GraphicsContext& graphicsContext)
     {
         _snippet->preCompile(graphicsContext, _building_context, *this);
 
-        _vertex = _building_context->getStage(Shader::SHADER_STAGE_VERTEX)->preprocess();
-        _fragment = _building_context->getStage(Shader::SHADER_STAGE_FRAGMENT)->preprocess();
+        for(const auto& i : _building_context->stages())
+            _preprocessed_stages[i.first] = i.second->preprocess();
 
         _building_context = nullptr;
     }
@@ -48,19 +48,11 @@ const sp<PipelineInput>& PipelineLayout::input() const
 std::map<Shader::Stage, String> PipelineLayout::getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const
 {
     std::map<Shader::Stage, String> shaders;
-    shaders[Shader::SHADER_STAGE_VERTEX] = _vertex.process(renderEngineContext);
-    shaders[Shader::SHADER_STAGE_FRAGMENT] = _fragment.process(renderEngineContext);
+
+    for(const auto& i : _preprocessed_stages)
+        shaders[i.first] = i.second.toSourceCode(renderEngineContext);
+
     return shaders;
-}
-
-const ShaderPreprocessor::Preprocessor& PipelineLayout::vertex() const
-{
-    return _vertex;
-}
-
-const ShaderPreprocessor::Preprocessor& PipelineLayout::fragment() const
-{
-    return _fragment;
 }
 
 const Table<String, sp<Texture>>& PipelineLayout::samplers() const

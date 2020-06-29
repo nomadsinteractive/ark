@@ -28,15 +28,15 @@ public:
     static const char* ANNOTATION_FRAG_OUT;
     static const char* ANNOTATION_FRAG_COLOR;
 
-    class Preprocessor {
+    class Preprocessed {
     public:
-        Preprocessor();
-        Preprocessor(Shader::Stage stage, String source);
-        DEFAULT_COPY_AND_ASSIGN(Preprocessor);
+        Preprocessed();
+        Preprocessed(Shader::Stage stage, String source);
+        DEFAULT_COPY_AND_ASSIGN(Preprocessed);
 
         Shader::Stage stage() const;
 
-        String process(const RenderEngineContext& renderEngineContext) const;
+        String toSourceCode(const RenderEngineContext& renderEngineContext) const;
 
     private:
         Shader::Stage _type;
@@ -120,7 +120,7 @@ private:
     };
 
     struct Function {
-        Function(const String& name, const String& params, const String& body, const sp<String>& placeHolder);
+        Function(String name, String params, String returnType, String body, sp<String> placeHolder);
         DEFAULT_COPY_AND_ASSIGN(Function);
 
         void parse(PipelineBuildingContext& buildingContext);
@@ -132,6 +132,7 @@ private:
 
         String _name;
         String _params;
+        String _return_type;
         String _body;
         std::vector<Parameter> _ins;
         std::vector<Parameter> _outs;
@@ -163,7 +164,7 @@ public:
 
     void linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
 
-    Preprocessor preprocess();
+    Preprocessed preprocess();
 
     sp<Uniform> getUniformInput(const String& name, Uniform::Type type) const;
 

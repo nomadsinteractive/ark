@@ -13,6 +13,7 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_input.h"
+#include "renderer/base/shader.h"
 #include "renderer/inf/resource.h"
 #include "renderer/inf/pipeline.h"
 
@@ -23,7 +24,7 @@ namespace opengl {
 
 class GLPipeline : public Pipeline {
 public:
-    GLPipeline(const sp<Recycler>& recycler, uint32_t version, const String& vertexShader, const String& fragmentShader, const PipelineBindings& bindings);
+    GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<Shader::Stage, String> shaders, const PipelineBindings& bindings);
     virtual ~GLPipeline() override;
 
     virtual uint64_t id() override;
@@ -74,10 +75,10 @@ private:
         GLint _location;
     };
 
-    class Shader {
+    class Stage {
     public:
-        Shader(const sp<Recycler>& recycler, uint32_t version, GLenum type, const String& source);
-        ~Shader();
+        Stage(const sp<Recycler>& recycler, uint32_t version, GLenum type, const String& source);
+        ~Stage();
 
         uint32_t id();
 
@@ -90,18 +91,18 @@ private:
     };
 
 private:
-    String getInformationLog() const;
-    sp<Shader> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum type, const String& source) const;
+    String getInformationLog(GLuint id) const;
+    sp<Stage> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum type, const String& source) const;
 
-    GLint getAttribLocation(const String& name);
-    const GLAttribute& getAttribute(const String& name);
-
-    GLint getUniformLocation(const String& name);
-
-    void bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo);
     void bindBuffer(GraphicsContext&, const PipelineInput& input, uint32_t divisor);
-    void bindUniform(GraphicsContext& graphicsContext, const Uniform& uniform);
-    void bindUniform(float* buf, uint32_t size, const Uniform& uniform);
+
+    class PipelineOperation {
+    public:
+        virtual ~PipelineOperation() = default;
+
+        virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
+    };
 
     class BakedRenderer {
     public:
@@ -140,31 +141,71 @@ private:
         GLenum _mode;
     };
 
-    sp<BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings) const;
+    struct Stub {
+        Stub();
+
+        void bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo);
+        void bindUniform(float* buf, uint32_t size, const Uniform& uniform);
+        void activeTexture(const Texture& texture, uint32_t name);
+
+        const GLPipeline::GLUniform& getUniform(const String& name);
+        GLint getUniformLocation(const String& name);
+
+        const GLPipeline::GLAttribute& getAttribute(const String& name);
+        GLint getAttribLocation(const String& name);
+
+        GLuint _id;
+
+        std::map<String, GLAttribute> _attributes;
+        std::map<String, GLUniform> _uniforms;
+
+        bool _rebind_needed;
+    };
+
+    class PipelineOperationDraw : public PipelineOperation {
+    public:
+        PipelineOperationDraw(const sp<Stub>& stub, const PipelineBindings& bindings);
+
+        virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+
+    private:
+        sp<GLPipeline::BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings) const;
+
+    private:
+        sp<Stub> _stub;
+
+        bool _cull_face;
+
+        Rect _scissor;
+        bool _scissor_enabled;
+
+        sp<BakedRenderer> _renderer;
+    };
+
+    class PipelineOperationCompute : public PipelineOperation {
+    public:
+        PipelineOperationCompute(const sp<Stub>& stub);
+
+        virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+
+    private:
+        sp<Stub> _stub;
+    };
+
+    sp<PipelineOperation> makePipelineOperation(const PipelineBindings& bindings) const;
 
 private:
+    sp<Stub> _stub;
     sp<Recycler> _recycler;
-    sp<PipelineInput> _pipeline_input;
 
     uint32_t _version;
 
-    String _vertex_source;
-    String _fragment_source;
+    std::map<Shader::Stage, String> _shaders;
 
-    bool _cull_face;
-    Rect _scissor;
-    bool _scissor_enabled;
+    sp<PipelineOperation> _pipeline_operation;
 
-    GLuint _id;
-
-    sp<GLPipeline::Shader> _vertex_shader;
-    sp<GLPipeline::Shader> _fragment_shader;
-
-    std::map<String, GLAttribute> _attributes;
-    std::map<String, GLUniform> _uniforms;
-
-    sp<BakedRenderer> _renderer;
-    bool _rebind_needed;
 };
 
 }

@@ -21,6 +21,7 @@ public:
         TYPE_VERTEX,
         TYPE_INDEX,
         TYPE_DRAW_INDIRECT,
+        TYPE_STORAGE,
         TYPE_COUNT
     };
 

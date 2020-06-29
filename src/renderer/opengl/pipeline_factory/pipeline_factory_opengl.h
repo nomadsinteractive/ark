@@ -3,6 +3,7 @@
 
 #include "core/forwarding.h"
 
+#include "renderer/base/shader.h"
 #include "renderer/inf/pipeline_factory.h"
 
 namespace ark {

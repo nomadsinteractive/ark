@@ -28,9 +28,6 @@ public:
 
     std::map<Shader::Stage, String> getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const;
 
-    const ShaderPreprocessor::Preprocessor& vertex() const;
-    const ShaderPreprocessor::Preprocessor& fragment() const;
-
     const Table<String, sp<Texture>>& samplers() const;
 
 private:
@@ -43,9 +40,7 @@ private:
     sp<PipelineInput> _input;
     sp<Snippet> _snippet;
 
-    ShaderPreprocessor::Preprocessor _vertex;
-    ShaderPreprocessor::Preprocessor _fragment;
-
+    std::map<Shader::Stage, ShaderPreprocessor::Preprocessed> _preprocessed_stages;
     Table<String, sp<Texture>> _samplers;
 
     friend class Shader;

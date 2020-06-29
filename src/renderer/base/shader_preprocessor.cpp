@@ -94,11 +94,11 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
         const String remaining = m.suffix().str();
         String body;
         size_t prefixStart = parseFunctionBody(remaining, body);
-        const sp<String> fragment = sp<String>::make();
+        sp<String> fragment = sp<String>::make();
         _main.push_back(sp<String>::make(prefix));
         _main.push_back(fragment);
         _main.push_back(sp<String>::make(remaining.substr(prefixStart)));
-        _main_block = sp<Function>::make("main", m[2].str(), body.strip(), fragment);
+        _main_block = sp<Function>::make("main", m[2].str(), m[1].str(), body.strip(), std::move(fragment));
         return false;
     });
 
@@ -139,7 +139,8 @@ void ShaderPreprocessor::parseDeclarations()
 
         _main.push_back(sp<String>::make("\n\nvoid main() {\n"));
         _main.push_back(_pre_main);
-        _main.push_back(sp<String>::make(Strings::sprintf(INDENT_STR "%s = ", outVar.c_str())));
+        if(outVar)
+            _main.push_back(sp<String>::make(Strings::sprintf(INDENT_STR "%s = ", outVar.c_str())));
         *_output_var = _main_block->genOutCall(_pre_shader_stage);
         _main.push_back(_output_var);
         _main.push_back(sp<String>::make(";"));
@@ -150,9 +151,9 @@ void ShaderPreprocessor::parseDeclarations()
 
 }
 
-ShaderPreprocessor::Preprocessor ShaderPreprocessor::preprocess()
+ShaderPreprocessor::Preprocessed ShaderPreprocessor::preprocess()
 {
-    return Preprocessor(_shader_stage, genDeclarations(_main.str()));
+    return Preprocessed(_shader_stage, genDeclarations(_main.str()));
 }
 
 void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int32_t& binding)
@@ -233,7 +234,8 @@ sp<Uniform> ShaderPreprocessor::getUniformInput(const String& name, Uniform::Typ
 
 String ShaderPreprocessor::outputName() const
 {
-    return _shader_stage == Shader::SHADER_STAGE_VERTEX ? "gl_Position" : ANNOTATION_FRAG_COLOR;
+    static const char* sOutputNames[Shader::SHADER_STAGE_COUNT] = {"gl_Position", "", "", "", ANNOTATION_FRAG_COLOR, ""};
+    return sOutputNames[_shader_stage];
 }
 
 size_t ShaderPreprocessor::parseFunctionBody(const String& s, String& body) const
@@ -318,8 +320,8 @@ void ShaderPreprocessor::addInclude(const String& source, const String& filepath
     _includes.push_back(content ? content : sp<String>::make(source));
 }
 
-ShaderPreprocessor::Function::Function(const String& name, const String& params, const String& body, const sp<String>& placeHolder)
-    : _name(name), _params(params), _body(body), _place_hoder(placeHolder)
+ShaderPreprocessor::Function::Function(String name, String params, String returnType, String body, sp<String> placeHolder)
+    : _name(std::move(name)), _params(std::move(params)), _return_type(std::move(returnType)), _body(std::move(body)), _place_hoder(std::move(placeHolder))
 {
 }
 
@@ -370,7 +372,7 @@ ShaderPreprocessor::Parameter ShaderPreprocessor::Function::parseParameter(const
 void ShaderPreprocessor::Function::genDefinition()
 {
     StringBuffer sb;
-    sb << "vec4 ark_" << _name << "(";
+    sb << _return_type << " ark_" << _name << "(";
 
     const auto begin = _ins.begin();
     for(auto iter = begin; iter != _ins.end(); ++iter)
@@ -449,22 +451,22 @@ Table<String, ShaderPreprocessor::Declaration>& ShaderPreprocessor::DeclarationL
     return _vars;
 }
 
-ShaderPreprocessor::Preprocessor::Preprocessor()
+ShaderPreprocessor::Preprocessed::Preprocessed()
     : _type(Shader::SHADER_STAGE_NONE)
 {
 }
 
-ShaderPreprocessor::Preprocessor::Preprocessor(Shader::Stage stage, String source)
+ShaderPreprocessor::Preprocessed::Preprocessed(Shader::Stage stage, String source)
     : _type(stage), _source(std::move(source))
 {
 }
 
-Shader::Stage ShaderPreprocessor::Preprocessor::stage() const
+Shader::Stage ShaderPreprocessor::Preprocessed::stage() const
 {
     return _type;
 }
 
-String ShaderPreprocessor::Preprocessor::process(const RenderEngineContext& renderEngineContext) const
+String ShaderPreprocessor::Preprocessed::toSourceCode(const RenderEngineContext& renderEngineContext) const
 {
     DCHECK(renderEngineContext.version() > 0, "Unintialized RenderEngineContext");
 

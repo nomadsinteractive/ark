@@ -62,19 +62,16 @@ GLenum GLUtil::toEnum(ModelLoader::RenderMode renderMode)
 
 GLenum GLUtil::toBufferType(Buffer::Type type)
 {
-    switch(type)
-    {
-    case Buffer::TYPE_VERTEX:
-        return GL_ARRAY_BUFFER;
-    case Buffer::TYPE_INDEX:
-        return GL_ELEMENT_ARRAY_BUFFER;
-    case Buffer::TYPE_DRAW_INDIRECT:
-        return GL_DRAW_INDIRECT_BUFFER;
-    default:
-        break;
-    }
-    DFATAL("Unknow buffer type: %d", type);
-    return GL_ARRAY_BUFFER;
+    static const GLenum types[Buffer::TYPE_COUNT] = {GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER, GL_DRAW_INDIRECT_BUFFER, GL_SHADER_STORAGE_BUFFER};
+    DCHECK(type >= 0 && type < Buffer::TYPE_COUNT, "Unknown buffer type: %d", type);
+    return types[type];
+}
+
+GLenum GLUtil::toShaderType(Shader::Stage stage)
+{
+    static const GLenum types[Shader::SHADER_STAGE_COUNT] = {GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
+    DASSERT(stage >= 0 && stage < Shader::SHADER_STAGE_COUNT);
+    return types[stage];
 }
 
 GLenum GLUtil::getEnum(const String& name)
