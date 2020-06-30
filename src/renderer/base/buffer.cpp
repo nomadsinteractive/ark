@@ -5,6 +5,8 @@
 #include "core/base/memory_pool.h"
 
 #include "renderer/base/pipeline_input.h"
+#include "renderer/base/render_controller.h"
+#include "renderer/base/resource_loader_context.h"
 #include "renderer/base/vertex_stream.h"
 #include "renderer/inf/uploader.h"
 
@@ -34,6 +36,39 @@ private:
 
 private:
     std::vector<Buffer::Block> _blocks;
+};
+
+class BufferObjectUploader : public Uploader {
+public:
+    BufferObjectUploader(std::vector<sp<Flatable>> vars, size_t stride, size_t length)
+        : Uploader(stride * length), _stride(stride), _length(length), _vars(std::move(vars)) {
+
+    }
+
+    virtual void upload(Writable& writable) override {
+        std::vector<int8_t> buf(_stride);
+        for(size_t i = 0; i < _length; ++i) {
+            size_t offset = 0;
+            for(const sp<Flatable>& j : _vars) {
+                j->flat(&buf[offset]);
+                offset += j->size();
+            }
+            writable.write(&buf[0], _stride, _stride * i);
+        }
+    }
+
+private:
+    size_t calcUploaderSize(const std::vector<sp<Flatable>>& vars) const {
+        size_t size = 0;
+        for(const sp<Flatable>& i : vars)
+            size += i->size();
+        return size;
+    }
+
+private:
+    size_t _stride;
+    size_t _length;
+    std::vector<sp<Flatable>> _vars;
 };
 
 }
@@ -137,23 +172,23 @@ const sp<Buffer::Delegate>& Buffer::delegate() const
     return _delegate;
 }
 
-Buffer::Builder::Builder(size_t stride)
+Buffer::Factory::Factory(size_t stride)
     : _stride(stride), _size(0)
 {
 }
 
-Buffer::Snapshot Buffer::Builder::toSnapshot(const Buffer& buffer) const
+Buffer::Snapshot Buffer::Factory::toSnapshot(const Buffer& buffer) const
 {
     return buffer.snapshot(makeUploader());
 }
 
-void Buffer::Builder::addBlock(size_t offset, ByteArray::Borrowed& content)
+void Buffer::Factory::addBlock(size_t offset, ByteArray::Borrowed& content)
 {
     _blocks.emplace_back(offset, content);
     _size = std::max(_size, content.length() + offset);
 }
 
-sp<Uploader> Buffer::Builder::makeUploader() const
+sp<Uploader> Buffer::Factory::makeUploader() const
 {
     if(_blocks.size() == 0)
         return nullptr;
@@ -184,6 +219,31 @@ size_t Buffer::Delegate::size() const
 Buffer::Block::Block(size_t offset, const ByteArray::Borrowed& content)
     : offset(offset), content(content)
 {
+}
+
+Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _resource_loader_context(resourceLoaderContext), _length(factory.ensureBuilder<Integer>(manifest, "length")), _stride(factory.getBuilder<Integer>(manifest, "stride"))
+{
+    for(const document& i : manifest->children())
+    {
+        const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
+        const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
+        _vars.push_back(factory.ensureBuilderByTypeValue<Flatable>(type, value));
+    }
+}
+
+sp<Buffer> Buffer::BUILDER::build(const Scope& args)
+{
+    size_t stride = 0;
+    std::vector<sp<Flatable>> vars;
+    for(const sp<Builder<Flatable>>& i : _vars)
+    {
+        sp<Flatable> var = i->build(args);
+        stride += var->size();
+        vars.push_back(std::move(var));
+    }
+    sp<Uploader> uploader = sp<BufferObjectUploader>::make(std::move(vars), _stride ? _stride->build(args)->val() : stride, _length->build(args)->val());
+    return sp<Buffer>::make(_resource_loader_context->renderController()->makeBuffer(Buffer::TYPE_STORAGE, Buffer::USAGE_STATIC, uploader));
 }
 
 }

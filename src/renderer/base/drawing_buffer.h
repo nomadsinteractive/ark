@@ -29,15 +29,15 @@ public:
 
     const sp<ShaderBindings>& shaderBindings() const;
 
-    const Buffer::Builder& vertices() const;
-    Buffer::Builder& vertices();
+    const Buffer::Factory& vertices() const;
+    Buffer::Factory& vertices();
 
     const Buffer::Snapshot& indices() const;
     void setIndices(Buffer::Snapshot indices);
 
     bool isInstanced() const;
 
-    Buffer::Builder& getInstancedArrayBuilder(uint32_t divisor);
+    Buffer::Factory& getInstancedArrayBuilder(uint32_t divisor);
 
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> makeDividedBufferSnapshots() const;
 
@@ -45,8 +45,8 @@ private:
     sp<ShaderBindings> _shader_bindings;
     sp<PipelineBindings> _pipeline_bindings;
 
-    Buffer::Builder _vertices;
-    std::map<uint32_t, Buffer::Builder> _divided_buffer_builders;
+    Buffer::Factory _vertices;
+    std::map<uint32_t, Buffer::Factory> _divided_buffer_builders;
 
     Buffer::Snapshot _indices;
     bool _is_instanced;

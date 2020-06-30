@@ -33,6 +33,7 @@ static std::regex _INCLUDE_PATTERN("#include\\s*[<\"]([^>\"]+)[>\"]");
 static std::regex _STRUCT_PATTERN("struct\\s+(\\w+)\\s*\\{([^}]+)\\}\\s*;");
 static std::regex _IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
 static std::regex _UNIFORM_PATTERN("uniform" UNIFORM_PATTERN);
+static std::regex _SSBO_PATTERN("layout\\(std140, binding\\s*=\\s*(\\d+)\\)\\s+buffer\\s+(\\w+)");
 
 static char _STAGE_ATTR_PREFIX[Shader::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
 
@@ -127,6 +128,11 @@ void ShaderPreprocessor::parseDeclarations()
         uint32_t length = m[3].str().empty() ? 1 : Strings::parse<uint32_t>(m[3].str());
         this->addUniform(m[1].str(), m[2].str(), length, declaration);
         return nullptr;
+    });
+
+    _main.search(_SSBO_PATTERN, [this](const std::smatch& m) {
+        _ssbos[m[2].str()] = Strings::parse<int32_t>(m[0].str());
+        return true;
     });
 
     if(!_main_block)

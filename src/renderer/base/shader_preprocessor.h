@@ -200,14 +200,17 @@ public:
 
     Source _includes;
     Source _struct_declarations;
-    Table<String, String> _struct_definitions;
     Source _uniform_declarations;
     Source _attribute_declarations;
+
+    Table<String, String> _struct_definitions;
 
     int32_t _version;
 
     std::vector<String> _predefined_macros;
     std::vector<Parameter> _predefined_parameters;
+
+    std::map<std::string, int32_t> _ssbos;
 
     DeclarationList _declaration_ins;
     DeclarationList _declaration_outs;

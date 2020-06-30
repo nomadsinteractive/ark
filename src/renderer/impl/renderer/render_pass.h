@@ -1,12 +1,9 @@
-#ifndef ARK_RENDERER_IMPL_RENDERER_SHADER_FRAME_H_
-#define ARK_RENDERER_IMPL_RENDERER_SHADER_FRAME_H_
+#ifndef ARK_RENDERER_IMPL_RENDERER_RENDER_PASS_H_
+#define ARK_RENDERER_IMPL_RENDERER_RENDER_PASS_H_
 
 #include "core/inf/builder.h"
-#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/base/layer_context.h"
-#include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
 
@@ -15,16 +12,13 @@
 
 namespace ark {
 
-//[[core::class]]
-class ShaderFrame : public Renderer, public Block {
+class RenderPass : public Renderer {
 public:
-    ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderController& renderController);
+    RenderPass(sp<Shader> shader);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
-    virtual const sp<Size>& size() override;
-
-//  [[plugin::resource-loader("shader-frame")]]
+//  [[plugin::resource-loader("render-pass")]]
     class BUILDER : public Builder<Renderer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
@@ -32,19 +26,15 @@ public:
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        document _manifest;
-
         sp<ResourceLoaderContext> _resource_loader_context;
 
-        sp<Builder<Size>> _size;
         sp<Builder<Shader>> _shader;
+        sp<Builder<Buffer>> _vertex;
+
+        sp<Builder<Integer>> _count;
     };
 
 private:
-    bytearray getVertexBuffer(const V3& position) const;
-
-private:
-    SafePtr<Size> _size;
     sp<Shader> _shader;
 
     sp<ShaderBindings> _shader_bindings;

@@ -6,6 +6,8 @@
 #include "core/base/api.h"
 #include "core/forwarding.h"
 #include "core/inf/array.h"
+#include "core/inf/builder.h"
+#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/render_request.h"
@@ -92,10 +94,10 @@ public:
         ByteArray::Borrowed content;
     };
 
-    class ARK_API Builder {
+    class ARK_API Factory {
     public:
-        Builder(size_t stride);
-        DEFAULT_COPY_AND_ASSIGN(Builder);
+        Factory(size_t stride);
+        DEFAULT_COPY_AND_ASSIGN(Factory);
 
         Snapshot toSnapshot(const Buffer& buffer) const;
 
@@ -126,6 +128,22 @@ public:
     void upload(GraphicsContext&) const;
 
     const sp<Delegate>& delegate() const;
+
+//  [[plugin::resource-loader]]
+    class BUILDER : public Builder<Buffer> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+        virtual sp<Buffer> build(const Scope& args) override;
+
+    private:
+        sp<ResourceLoaderContext> _resource_loader_context;
+
+        sp<Builder<Integer>> _length;
+        SafePtr<Builder<Integer>> _stride;
+
+        std::vector<sp<Builder<Flatable>>> _vars;
+    };
 
 private:
     sp<Delegate> _delegate;

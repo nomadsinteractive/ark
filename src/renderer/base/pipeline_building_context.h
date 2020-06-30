@@ -11,10 +11,11 @@
 #include "core/types/owned_ptr.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/buffer.h"
+#include "renderer/base/shader.h"
 #include "renderer/base/shader_preprocessor.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/uniform.h"
-#include "renderer/base/shader.h"
 
 namespace ark {
 
@@ -35,6 +36,7 @@ public:
     std::map<String, Attribute> _attributes;
     Table<String, sp<Uniform>> _uniforms;
     Table<String, sp<Texture>> _samplers;
+    Table<String, Buffer> _ssbos;
 
     std::set<String> _input_vars;
 
@@ -60,6 +62,7 @@ private:
     void loadPredefinedAttribute(const document& manifest);
     void loadPredefinedUniform(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadPredefinedSampler(BeanFactory& factory, const Scope& args, const document& manifest);
+    void loadPredefinedBuffer(BeanFactory& factory, const Scope& args, const document& manifest);
 
     std::map<Shader::Stage, op<ShaderPreprocessor>> _stages;
 };

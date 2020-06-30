@@ -58,6 +58,7 @@ void PipelineBuildingContext::loadManifest(const document& manifest, BeanFactory
 {
     loadPredefinedUniform(factory, args, manifest);
     loadPredefinedSampler(factory, args, manifest);
+    loadPredefinedBuffer(factory, args, manifest);
     loadPredefinedAttribute(manifest);
 }
 
@@ -271,6 +272,16 @@ void PipelineBuildingContext::loadPredefinedSampler(BeanFactory& factory, const 
         DCHECK(!_samplers.has(name), "Sampler \"%s\" redefined", name.c_str());
         _samplers.push_back(name, texture);
         binding++;
+    }
+}
+
+void PipelineBuildingContext::loadPredefinedBuffer(BeanFactory& factory, const Scope& args, const document& manifest)
+{
+    for(const document& i : manifest->children("buffer"))
+    {
+        String name = Documents::getAttribute(i, Constants::Attributes::NAME);
+        DCHECK(!_ssbos.has(name), "Buffer object \"%s\" redefined", name.c_str());
+        _ssbos.push_back(name, factory.ensure<Buffer>(i, args));
     }
 }
 
