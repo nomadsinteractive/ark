@@ -14,7 +14,7 @@ namespace ark {
 
 class RenderPass : public Renderer {
 public:
-    RenderPass(sp<Shader> shader);
+    RenderPass(sp<Shader> shader, sp<Buffer> vertexBuffer, sp<Integer> drawCount);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -29,16 +29,17 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
 
         sp<Builder<Shader>> _shader;
-        sp<Builder<Buffer>> _vertex;
+        sp<Builder<Buffer>> _vertex_buffer;
 
-        sp<Builder<Integer>> _count;
+        sp<Builder<Integer>> _draw_count;
     };
 
 private:
     sp<Shader> _shader;
+    sp<Buffer> _vertex_buffer;
+    sp<Integer> _draw_count;
 
     sp<ShaderBindings> _shader_bindings;
-    Buffer _vertex_buffer;
     Buffer::Snapshot _index_buffer;
 };
 

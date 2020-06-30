@@ -28,8 +28,16 @@ namespace vulkan {
 
 VKPipeline::VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Shader::Stage, String> shaders)
     : _bindings(bindings), _recycler(recycler), _renderer(renderer), _backed_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
-      _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _rebind_needed(true)
+      _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _rebind_needed(true), _is_compute_pipeline(false)
 {
+    for(const auto& i : _shaders)
+    {
+        if(i.first == Shader::SHADER_STAGE_COMPUTE)
+        {
+            _is_compute_pipeline = true;
+            DCHECK(_shaders.size() == 1, "Compute stage is exclusive");
+        }
+    }
 }
 
 VKPipeline::~VKPipeline()
@@ -59,13 +67,19 @@ uint64_t VKPipeline::id()
 
 void VKPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
-    VertexLayout vertexLayout;
-    setupVertexDescriptions(_bindings.input(), vertexLayout);
     setupDescriptorSetLayout(_bindings.input());
 
     _descriptor_pool = _renderer->renderTarget()->makeDescriptorPool(graphicsContext.recycler());
     setupDescriptorSet(graphicsContext, _bindings);
-    setupPipeline(graphicsContext, vertexLayout);
+
+    if(_is_compute_pipeline)
+        setupComputePipeline(graphicsContext);
+    else
+    {
+        VertexLayout vertexLayout;
+        setupVertexDescriptions(_bindings.input(), vertexLayout);
+        setupGraphicsPipeline(graphicsContext, vertexLayout);
+    }
 }
 
 Resource::RecycleFunc VKPipeline::recycle()
@@ -113,7 +127,10 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
 
 void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    buildCommandBuffer(graphicsContext, drawingContext);
+    if(_is_compute_pipeline)
+        buildComputeCommandBuffer(graphicsContext, drawingContext);
+    else
+        buildDrawCommandBuffer(graphicsContext, drawingContext);
 }
 
 void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)
@@ -225,7 +242,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     vkUpdateDescriptorSets(device->vkLogicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 }
 
-void VKPipeline::setupPipeline(GraphicsContext& graphicsContext, const VertexLayout& vertexLayout)
+void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const VertexLayout& vertexLayout)
 {
     const sp<VKDevice>& device = _renderer->device();
 
@@ -293,11 +310,7 @@ void VKPipeline::setupPipeline(GraphicsContext& graphicsContext, const VertexLay
     for(const auto& i : _shaders)
         shaderStages.push_back(VKUtil::createShader(device->vkLogicalDevice(), i.second, i.first));
 
-    VkGraphicsPipelineCreateInfo pipelineCreateInfo =
-            vks::initializers::pipelineCreateInfo(
-                _layout,
-                _renderer->vkRenderPass(),
-                0);
+    VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, _renderer->vkRenderPass(), 0);
 
     pipelineCreateInfo.pVertexInputState = &vertexLayout.inputState;
     pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
@@ -316,7 +329,17 @@ void VKPipeline::setupPipeline(GraphicsContext& graphicsContext, const VertexLay
         vkDestroyShaderModule(device->vkLogicalDevice(), i.module, nullptr);
 }
 
-void VKPipeline::buildCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+void VKPipeline::setupComputePipeline(GraphicsContext& /*graphicsContext*/)
+{
+    const sp<VKDevice>& device = _renderer->device();
+    VkPipelineShaderStageCreateInfo stage = VKUtil::createShader(device->vkLogicalDevice(), _shaders.begin()->second, _shaders.begin()->first);
+    VkComputePipelineCreateInfo computePipelineCreateInfo = vks::initializers::computePipelineCreateInfo(_layout, 0);
+    computePipelineCreateInfo.stage = stage;
+    vkCreateComputePipelines(device->vkLogicalDevice(), device->vkPipelineCache(), 1, &computePipelineCreateInfo, nullptr, &_pipeline);
+    vkDestroyShaderModule(device->vkLogicalDevice(), stage.module, nullptr);
+}
+
+void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     const sp<VKGraphicsContext>& vkContext = graphicsContext.attachment<VKGraphicsContext>();
 
@@ -324,12 +347,11 @@ void VKPipeline::buildCommandBuffer(GraphicsContext& graphicsContext, const Draw
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _layout, 0, 1, &_descriptor_set, 0, nullptr);
 
-    VkBuffer vkVertexBuffer = (VkBuffer)(drawingContext._vertex_buffer.id());
-    VkBuffer vkIndexBuffer = (VkBuffer)(drawingContext._index_buffer.id());
-
     VkDeviceSize offsets = 0;
+    VkBuffer vkVertexBuffer = (VkBuffer)(drawingContext._vertex_buffer.id());
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkVertexBuffer, &offsets);
-    vkCmdBindIndexBuffer(commandBuffer, vkIndexBuffer, 0, kVKIndexType);
+    if(drawingContext._index_buffer)
+        vkCmdBindIndexBuffer(commandBuffer, (VkBuffer)(drawingContext._index_buffer.id()), 0, kVKIndexType);
 
     const Rect& scissor = drawingContext._scissor;
     if(scissor.right() > scissor.left() && scissor.bottom() >= scissor.top())
@@ -340,6 +362,17 @@ void VKPipeline::buildCommandBuffer(GraphicsContext& graphicsContext, const Draw
     }
 
     _backed_renderer->draw(graphicsContext, drawingContext, commandBuffer);
+}
+
+void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+{
+    const sp<VKGraphicsContext>& vkContext = graphicsContext.attachment<VKGraphicsContext>();
+
+    VkCommandBuffer commandBuffer = vkContext->vkCommandBuffer();
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipeline);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _layout, 0, 1, &_descriptor_set, 0, nullptr);
+    vkCmdDispatch(commandBuffer, 10, 1, 1);
+
 }
 
 bool VKPipeline::isDirty(const ByteArray::Borrowed& dirtyFlags) const
@@ -356,6 +389,8 @@ sp<VKPipeline::BakedRenderer> VKPipeline::makeBakedRenderer(const PipelineBindin
 {
     switch(bindings.renderProcedure())
     {
+        case PipelineBindings::RENDER_PROCEDURE_DRAW_ARRAYS:
+            return sp<VKDrawArrays>::make();
         case PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS:
             return sp<VKDrawElements>::make();
         case PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED:
@@ -366,6 +401,13 @@ sp<VKPipeline::BakedRenderer> VKPipeline::makeBakedRenderer(const PipelineBindin
         }
     DFATAL("Not render procedure creator for %d", bindings.renderProcedure());
     return nullptr;
+}
+
+void VKPipeline::VKDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
+{
+    const DrawingContext::ParamDrawElements& param = drawingContext._parameters._draw_elements;
+    DASSERT(param.isActive());
+    vkCmdDraw(commandBuffer, param._count, 1, param._start, 0);
 }
 
 void VKPipeline::VKDrawElements::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)

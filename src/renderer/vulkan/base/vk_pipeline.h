@@ -45,9 +45,12 @@ private:
     void setupVertexDescriptions(const PipelineInput& input, VertexLayout& vertexLayout);
     void setupDescriptorSetLayout(const PipelineInput& pipelineInput);
     void setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineBindings& bindings);
-    void setupPipeline(GraphicsContext& graphicsContext, const VertexLayout& vertexLayout);
 
-    void buildCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
+    void setupGraphicsPipeline(GraphicsContext& graphicsContext, const VertexLayout& vertexLayout);
+    void setupComputePipeline(GraphicsContext& graphicsContext);
+
+    void buildDrawCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
+    void buildComputeCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
 
     bool isDirty(const ByteArray::Borrowed& dirtyFlags) const;
 
@@ -56,6 +59,12 @@ private:
         virtual ~BakedRenderer() = default;
 
         virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) = 0;
+    };
+
+    class VKDrawArrays : public BakedRenderer {
+    public:
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override;
+
     };
 
     class VKDrawElements : public BakedRenderer {
@@ -99,6 +108,7 @@ private:
     std::vector<sp<Boolean>> _texture_observers;
 
     bool _rebind_needed;
+    bool _is_compute_pipeline;
 };
 
 }

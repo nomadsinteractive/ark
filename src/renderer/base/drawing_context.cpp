@@ -72,9 +72,12 @@ sp<RenderCommand> DrawingContext::toBindCommand()
 void DrawingContext::upload(GraphicsContext& graphicsContext)
 {
     _vertex_buffer.upload(graphicsContext);
-    _index_buffer.upload(graphicsContext);
     DCHECK(_vertex_buffer.id(), "Invaild VertexBuffer");
-    DCHECK(_index_buffer.id(), "Invaild IndexBuffer");
+    if(_index_buffer)
+    {
+        _index_buffer.upload(graphicsContext);
+        DCHECK(_index_buffer.id(), "Invaild IndexBuffer");
+    }
 }
 
 void DrawingContext::preDraw(GraphicsContext& graphicsContext)
