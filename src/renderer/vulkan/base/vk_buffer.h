@@ -29,7 +29,7 @@ public:
 
     VkResult invalidate();
 
-    const VkDescriptorBufferInfo& descriptor() const;
+    const VkDescriptorBufferInfo& vkDescriptor() const;
 
     Notifier& notifier();
 

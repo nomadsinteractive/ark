@@ -3,6 +3,7 @@
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vulkan_debug.h"
 
+#include "renderer/vulkan/base/vk_command_pool.h"
 #include "renderer/vulkan/base/vk_instance.h"
 #include "renderer/vulkan/util/vk_util.h"
 
@@ -19,8 +20,8 @@ VKDevice::VKDevice(const sp<VKInstance>& instance, VkPhysicalDevice physicalDevi
 
     VKUtil::checkResult(_vulkan_device->createLogicalDevice(_vulkan_device->enabledFeatures, _enabled_extensions));
 
-    // Get a graphics queue from the device
-    vkGetDeviceQueue(_vulkan_device->logicalDevice, _vulkan_device->queueFamilyIndices.graphics, 0, &_queue);
+    initDeviceQueue(_vulkan_device->queueFamilyIndices.graphics);
+    initDeviceQueue(_vulkan_device->queueFamilyIndices.compute);
 
     VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(_vulkan_device->physicalDevice, &_depth_format);
     DASSERT(validDepthFormat);
@@ -46,11 +47,6 @@ VkPhysicalDevice VKDevice::vkPhysicalDevice() const
 VkDevice VKDevice::vkLogicalDevice() const
 {
     return _vulkan_device->logicalDevice;
-}
-
-VkQueue VKDevice::vkQueue() const
-{
-    return _queue;
 }
 
 void VKDevice::waitIdle() const
@@ -93,11 +89,27 @@ uint32_t VKDevice::getMemoryType(uint32_t typeBits, VkMemoryPropertyFlags proper
     return _vulkan_device->getMemoryType(typeBits, properties, memTypeFound);
 }
 
+VkQueue VKDevice::getQueueByFamilyIndex(uint32_t familyIndex) const
+{
+    return _queue_families.at(familyIndex);
+}
+
+sp<VKCommandPool> VKDevice::makeComputeCommandPool() const
+{
+    return sp<VKCommandPool>::make(*this, _vulkan_device->queueFamilyIndices.compute);
+}
+
 void VKDevice::createPipelineCache()
 {
     VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
     pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
     VKUtil::checkResult(vkCreatePipelineCache(_vulkan_device->logicalDevice, &pipelineCacheCreateInfo, nullptr, &_pipeline_cache));
+}
+
+void VKDevice::initDeviceQueue(uint32_t familyIndex)
+{
+    if(_queue_families.find(familyIndex) == _queue_families.end())
+        vkGetDeviceQueue(_vulkan_device->logicalDevice, familyIndex, 0, &_queue_families[familyIndex]);
 }
 
 }

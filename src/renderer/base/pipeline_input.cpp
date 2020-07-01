@@ -43,6 +43,16 @@ const std::vector<sp<PipelineInput::UBO>>& PipelineInput::ubos() const
     return _ubos;
 }
 
+std::vector<PipelineInput::SSBO>& PipelineInput::ssbos()
+{
+    return _ssbos;
+}
+
+const std::vector<PipelineInput::SSBO>& PipelineInput::ssbos() const
+{
+    return _ssbos;
+}
+
 const std::map<uint32_t, PipelineInput::Stream>& PipelineInput::streams() const
 {
     return _streams;
@@ -216,6 +226,11 @@ void PipelineInput::UBO::initialize()
 void PipelineInput::UBO::addUniform(const sp<Uniform>& uniform)
 {
     _uniforms.push_back(uniform->name(), uniform);
+}
+
+PipelineInput::SSBO::SSBO(Buffer buffer, uint32_t binding)
+    : _buffer(std::move(buffer)), _binding(binding)
+{
 }
 
 }

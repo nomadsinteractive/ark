@@ -14,6 +14,7 @@
 
 #include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/vk_command_buffers.h"
+#include "renderer/vulkan/base/vk_command_pool.h"
 #include "renderer/vulkan/base/vk_descriptor_pool.h"
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_graphics_context.h"
@@ -25,6 +26,22 @@
 
 namespace ark {
 namespace vulkan {
+
+namespace {
+
+class VKComputeContext {
+public:
+    VKComputeContext(const sp<VKRenderer>& renderer)
+        : _command_pool(renderer->device()->makeComputeCommandPool()) {
+    }
+
+private:
+    sp<VKCommandPool> _command_pool;
+    VkCommandBuffer _command_buffer;
+    VkSemaphore _semaphore;
+};
+
+}
 
 VKPipeline::VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Shader::Stage, String> shaders)
     : _bindings(bindings), _recycler(recycler), _renderer(renderer), _backed_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
@@ -134,7 +151,7 @@ void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& dr
 void VKPipeline::compute(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     DCHECK(_is_compute_pipeline, "Not a compute pipeline");
-    buildComputeCommandBuffer(graphicsContext);
+    buildComputeCommandBuffer(graphicsContext, drawingContext);
 }
 
 void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)
@@ -182,6 +199,15 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
         binding = std::max(binding, i->binding());
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
     }
+    for(const PipelineInput::SSBO& i : pipelineInput.ssbos())
+    {
+        VkShaderStageFlags stages = i._stages.empty() ? VK_SHADER_STAGE_ALL : static_cast<VkShaderStageFlags>(0);
+        for(Shader::Stage j : i._stages)
+            stages = static_cast<VkShaderStageFlags>(stages | VKUtil::toStage(j));
+
+        binding = std::max(binding, i._binding);
+        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding));
+    }
 
     for(size_t i = 0; i < pipelineInput.samplerCount(); ++i)
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, ++binding));
@@ -228,7 +254,17 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
                                           _descriptor_set,
                                           VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                           i->binding(),
-                                          &ubo->descriptor()));
+                                          &ubo->vkDescriptor()));
+    }
+    for(const PipelineInput::SSBO& i : bindings.input()->ssbos())
+    {
+        binding = std::max(binding, i._binding);
+        const sp<VKBuffer> sbo = i._buffer.delegate();
+        writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
+                                          _descriptor_set,
+                                          VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                          i._binding,
+                                          &sbo->vkDescriptor()));
     }
 
     _texture_observers.clear();
@@ -368,14 +404,14 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
     _backed_renderer->draw(graphicsContext, drawingContext, commandBuffer);
 }
 
-void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext)
+void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     const sp<VKGraphicsContext>& vkContext = graphicsContext.attachment<VKGraphicsContext>();
 
     VkCommandBuffer commandBuffer = vkContext->vkCommandBuffer();
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _layout, 0, 1, &_descriptor_set, 0, nullptr);
-    vkCmdDispatch(commandBuffer, 10, 1, 1);
+    vkCmdDispatch(commandBuffer, 100, 1, 1);
 
 }
 

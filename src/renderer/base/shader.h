@@ -34,7 +34,7 @@ public:
 
 public:
     Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> layout, std::vector<sp<SnippetDraw>> drawSnippets, const sp<Camera>& camera, const Rect& pipelineBindingsScissor, uint32_t pipelineBindingsFlag);
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Shader);
+    DEFAULT_COPY_AND_ASSIGN(Shader);
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
     static sp<Shader> fromStringTable(const String& vertex = "shaders/default.vert", const String& fragment = "shaders/texture.frag", const sp<Snippet>& snippet = nullptr, const sp<ResourceLoaderContext>& resourceLoaderContext = nullptr);

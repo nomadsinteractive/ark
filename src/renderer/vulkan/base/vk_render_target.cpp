@@ -23,7 +23,6 @@ namespace vulkan {
 VKRenderTarget::VKRenderTarget(const RenderEngineContext& renderContext, sp<VKDevice>& device)
     : _device(device), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0)
 {
-    _queue = _device->vkQueue();
     _swap_chain.connect(_device->vkInstance(), _device->vkPhysicalDevice(), _device->vkLogicalDevice());
 
     _clear_values[0].color = {{0, 0, 0, 0}};
@@ -35,6 +34,8 @@ VKRenderTarget::VKRenderTarget(const RenderEngineContext& renderContext, sp<VKDe
     _render_pass_begin_info.pClearValues = _clear_values;
 
     initSwapchain(renderContext);
+
+    _queue = _device->getQueueByFamilyIndex(_swap_chain.queueNodeIndex);
     _command_pool = sp<VKCommandPool>::make(_device, _swap_chain.queueNodeIndex);
 }
 

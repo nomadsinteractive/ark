@@ -14,10 +14,8 @@ namespace vulkan {
 
 class VKCommandPool {
 public:
-    VKCommandPool(const sp<VKDevice>& device, uint32_t queueNodeIndex);
+    VKCommandPool(const VKDevice& device, uint32_t queueNodeIndex);
     ~VKCommandPool();
-
-    const sp<VKDevice>& device() const;
 
     VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, bool begin) const;
     std::vector<VkCommandBuffer> makeCommandBuffers(uint32_t count) const;
@@ -27,8 +25,10 @@ public:
     void destroyCommandBuffers(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers) const;
 
 private:
-    sp<VKDevice> _device;
+    VkDevice _logical_device;
+    uint32_t _queue_family_index;
 
+    VkQueue _queue;
     VkCommandPool _command_pool;
 
 };

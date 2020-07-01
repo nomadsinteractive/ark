@@ -160,7 +160,7 @@ VkResult VKBuffer::invalidate()
     return vkInvalidateMappedMemoryRanges(_renderer->vkLogicalDevice(), 1, &mappedRange);
 }
 
-const VkDescriptorBufferInfo& VKBuffer::descriptor() const
+const VkDescriptorBufferInfo& VKBuffer::vkDescriptor() const
 {
     return _descriptor;
 }

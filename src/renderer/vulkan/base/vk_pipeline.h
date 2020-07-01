@@ -51,7 +51,7 @@ private:
     void setupComputePipeline(GraphicsContext& graphicsContext);
 
     void buildDrawCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
-    void buildComputeCommandBuffer(GraphicsContext& graphicsContext);
+    void buildComputeCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
 
     bool isDirty(const ByteArray::Borrowed& dirtyFlags) const;
 

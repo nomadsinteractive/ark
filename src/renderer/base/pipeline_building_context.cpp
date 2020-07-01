@@ -131,6 +131,21 @@ void PipelineBuildingContext::initialize()
 
     for(const auto& i : firstStage._main_block->_outs)
         firstStage.outDeclare(i._type, Strings::capitalizeFirst(i._name));
+
+    Table<String, PipelineInput::SSBO> sobs;
+    for(const auto& i : _stages)
+    {
+        for(const auto& j : i.second->_ssbos)
+        {
+            const String& name = j.first;
+            if(!sobs.has(name))
+                sobs[name] = PipelineInput::SSBO(_ssbos.at(name), static_cast<uint32_t>(j.second));
+            sobs[name]._stages.insert(i.first);
+        }
+    }
+
+    for(const auto& i : sobs)
+        _input->ssbos().push_back(i.second);
 }
 
 void PipelineBuildingContext::setupUniforms()

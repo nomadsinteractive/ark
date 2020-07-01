@@ -10,7 +10,7 @@ namespace ark {
 
 class SnippetDrawCompute : public SnippetDraw {
 public:
-    SnippetDrawCompute(sp<Shader> shader);
+    SnippetDrawCompute(sp<Shader> shader, sp<Buffer> buffer);
 
     virtual void postDraw(GraphicsContext& graphicsContext) override;
 
@@ -23,11 +23,14 @@ public:
 
     private:
         sp<Builder<Shader>> _shader;
+        sp<Builder<Buffer>> _buffer;
 
     };
 
 private:
     sp<Shader> _shader;
+    sp<Buffer> _buffer;
+
     sp<ShaderBindings> _shader_bindings;
 
 };

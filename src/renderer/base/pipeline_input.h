@@ -72,12 +72,27 @@ public:
         friend class PipelineInput;
     };
 
+    struct SSBO {
+        SSBO() = default;
+        SSBO(Buffer buffer, uint32_t binding);
+        DEFAULT_COPY_AND_ASSIGN(SSBO);
+
+        Buffer _buffer;
+        uint32_t _binding;
+
+        std::set<Shader::Stage> _stages;
+
+    };
+
 public:
     PipelineInput();
 
     void initialize(const PipelineBuildingContext& buildingContext);
 
     const std::vector<sp<UBO>>& ubos() const;
+
+    std::vector<SSBO>& ssbos();
+    const std::vector<SSBO>& ssbos() const;
 
     const std::map<uint32_t, Stream>& streams() const;
     std::map<uint32_t, Stream>& streams();
@@ -95,6 +110,8 @@ public:
 
 private:
     std::vector<sp<UBO>> _ubos;
+    std::vector<SSBO> _ssbos;
+
     std::map<uint32_t, Stream> _streams;
     size_t _sampler_count;
 
