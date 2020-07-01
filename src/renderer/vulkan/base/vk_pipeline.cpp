@@ -127,10 +127,14 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
 
 void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    if(_is_compute_pipeline)
-        buildComputeCommandBuffer(graphicsContext, drawingContext);
-    else
-        buildDrawCommandBuffer(graphicsContext, drawingContext);
+    DCHECK(!_is_compute_pipeline, "Not a drawing pipeline");
+    buildDrawCommandBuffer(graphicsContext, drawingContext);
+}
+
+void VKPipeline::compute(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+{
+    DCHECK(_is_compute_pipeline, "Not a compute pipeline");
+    buildComputeCommandBuffer(graphicsContext);
 }
 
 void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)
@@ -364,7 +368,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
     _backed_renderer->draw(graphicsContext, drawingContext, commandBuffer);
 }
 
-void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext)
 {
     const sp<VKGraphicsContext>& vkContext = graphicsContext.attachment<VKGraphicsContext>();
 

@@ -4,6 +4,7 @@
 #include <list>
 #include <type_traits>
 #include <unordered_map>
+#include <vector>
 
 #include "core/base/api.h"
 #include "core/base/identifier.h"
@@ -315,6 +316,20 @@ public:
             return nullptr;
         }
         return ensureBuilder<T>(attrValue);
+    }
+
+    template<typename T> std::vector<sp<Builder<T>>> getBuilderList(const document& doc, const String& nodeName, const String& defValue = "") {
+        std::vector<sp<Builder<T>>> list;
+        const String attrValue = Documents::getAttribute(doc, nodeName, defValue);
+        if(attrValue)
+            list.push_back(ensureBuilder<T>(attrValue));
+
+        for(const document& i : doc->children(nodeName)) {
+            sp<Builder<T>> builder = findBuilderByDocument<T>(i);
+            DCHECK(builder, "Cannot build \"%s\" from \"%s\"", nodeName.c_str(), Documents::toString(i).c_str());
+            list.push_back(std::move(builder));
+        }
+        return list;
     }
 
     template<typename T> sp<Builder<T>> getConcreteClassBuilder(const document& doc, const String& attr) {

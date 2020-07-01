@@ -3,6 +3,7 @@
 
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
+#include "core/types/safe_ptr.h"
 
 #include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
@@ -29,8 +30,8 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
 
         sp<Builder<Shader>> _shader;
-        sp<Builder<Buffer>> _vertex_buffer;
 
+        sp<Builder<Buffer>> _vertex_buffer;
         sp<Builder<Integer>> _draw_count;
     };
 

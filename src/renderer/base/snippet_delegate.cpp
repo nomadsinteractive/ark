@@ -66,7 +66,7 @@ sp<Snippet> CoreGLSnippet::createCoreSnippet(GraphicsContext& graphicsContext) c
 {
     const sp<Snippet> coreSnippet = graphicsContext.renderContext()->snippetFactory()->createCoreSnippet(graphicsContext.renderController());
     DASSERT(coreSnippet);
-    return _snippet ? sp<Snippet>::adopt(new SnippetLinkedChain(coreSnippet, _snippet)) : coreSnippet;
+    return _snippet ? sp<Snippet>::make<SnippetLinkedChain>(coreSnippet, _snippet) : coreSnippet;
 }
 
 SnippetDelegate::SnippetDelegate(const sp<Snippet>& snippet)

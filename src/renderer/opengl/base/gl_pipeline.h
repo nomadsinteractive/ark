@@ -33,6 +33,7 @@ public:
 
     virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
     virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+    virtual void compute(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
 
     void bindBuffer(GraphicsContext& graphicsContext, const PipelineInput& input, const std::map<uint32_t, Buffer>& divisors);
 
@@ -96,19 +97,21 @@ private:
 
     void bindBuffer(GraphicsContext&, const PipelineInput& input, uint32_t divisor);
 
-    class PipelineOperation {
-    public:
-        virtual ~PipelineOperation() = default;
-
-        virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
-    };
-
     class BakedRenderer {
     public:
         virtual ~BakedRenderer() = default;
 
         virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
+    };
+
+    class GLDrawArrays : public BakedRenderer {
+    public:
+        GLDrawArrays(GLenum mode);
+
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+
+    private:
+        GLenum _mode;
     };
 
     class GLDrawElements : public BakedRenderer {
@@ -168,6 +171,7 @@ private:
 
         virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
         virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+        virtual void compute(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
 
     private:
         sp<GLPipeline::BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings) const;
@@ -189,9 +193,11 @@ private:
 
         virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
         virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+        virtual void compute(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
 
     private:
         sp<Stub> _stub;
+
     };
 
     sp<PipelineOperation> makePipelineOperation(const PipelineBindings& bindings) const;
@@ -205,7 +211,6 @@ private:
     std::map<Shader::Stage, String> _shaders;
 
     sp<PipelineOperation> _pipeline_operation;
-
 };
 
 }

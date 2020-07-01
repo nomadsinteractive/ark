@@ -129,6 +129,11 @@ void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& dr
     _pipeline_operation->draw(graphicsContext, drawingContext);
 }
 
+void GLPipeline::compute(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+{
+    _pipeline_operation->compute(graphicsContext, drawingContext);
+}
+
 void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineInput& input, const std::map<uint32_t, Buffer>& divisors)
 {
     DCHECK(id(), "GLProgram unprepared");
@@ -341,6 +346,18 @@ GLuint GLPipeline::Stage::compile(uint32_t version, GLenum type, const String& s
     return id;
 }
 
+GLPipeline::GLDrawArrays::GLDrawArrays(GLenum mode)
+    : _mode(mode)
+{
+}
+
+void GLPipeline::GLDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
+{
+    const DrawingContext::ParamDrawElements& param = drawingContext._parameters._draw_elements;
+    DASSERT(param._count);
+    glDrawArrays(_mode, param._start * sizeof(element_index_t), static_cast<GLsizei>(param._count));
+}
+
 GLPipeline::GLDrawElements::GLDrawElements(GLenum mode)
     : _mode(mode)
 {
@@ -439,11 +456,18 @@ void GLPipeline::PipelineOperationDraw::draw(GraphicsContext& graphicsContext, c
     _renderer->draw(graphicsContext, drawingContext);
 }
 
+void GLPipeline::PipelineOperationDraw::compute(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*drawingContext*/)
+{
+    DFATAL("This is a drawing pipeline, not compute");
+}
+
 sp<GLPipeline::BakedRenderer> GLPipeline::PipelineOperationDraw::makeBakedRenderer(const PipelineBindings& bindings) const
 {
     GLenum mode = GLUtil::toEnum(bindings.mode());
     switch(bindings.renderProcedure())
     {
+    case PipelineBindings::RENDER_PROCEDURE_DRAW_ARRAYS:
+        return sp<GLDrawArrays>::make(mode);
     case PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS:
         return sp<GLDrawElements>::make(mode);
     case PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED:
@@ -560,13 +584,17 @@ GLPipeline::PipelineOperationCompute::PipelineOperationCompute(const sp<GLPipeli
 {
 }
 
-void GLPipeline::PipelineOperationCompute::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+void GLPipeline::PipelineOperationCompute::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*drawingContext*/)
 {
-    glDispatchCompute(10, 1, 1);
 }
 
 void GLPipeline::PipelineOperationCompute::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*drawingContext*/)
 {
+}
+
+void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
+{
+    glDispatchCompute(100, 1, 1);
 }
 
 }

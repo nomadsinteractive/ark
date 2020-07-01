@@ -44,7 +44,7 @@ public:
         buildingContext->loadManifest(_manifest, _factory, args);
         sp<Camera> camera = _camera->build(args);
         const sp<Vec4> scissor = _pipeline_bindings_scissor->build(args);
-        return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext), camera ? camera : _default_camera, scissor ? Rect(scissor->val()) : Rect(), _pipeline_bindings_flags);
+        return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext), std::vector<sp<SnippetDraw>>(), camera ? camera : _default_camera, scissor ? Rect(scissor->val()) : Rect(), _pipeline_bindings_flags);
     }
 
 private:
@@ -63,9 +63,10 @@ private:
 
 }
 
-Shader::Shader(const sp<PipelineFactory>& pipelineFactory, const sp<RenderController>& renderController, const sp<PipelineLayout>& pipelineLayout, const sp<Camera>& camera, const Rect& pipelineBindingsScissor, uint32_t pipelineBindingsFlag)
-    : _pipeline_factory(pipelineFactory), _render_controller(renderController), _pipeline_layout(pipelineLayout), _input(_pipeline_layout->input()), _camera(camera ? camera : Camera::getDefaultCamera()),
-      _pipeline_bindings_scissor(_render_controller->renderEngine()->toRendererScissor(pipelineBindingsScissor)), _pipeline_bindings_flag(pipelineBindingsFlag)
+Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, std::vector<sp<SnippetDraw>> drawSnippets,
+               const sp<Camera>& camera, const Rect& pipelineBindingsScissor, uint32_t pipelineBindingsFlag)
+    : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _input(_pipeline_layout->input()), _camera(camera ? camera : Camera::getDefaultCamera()),
+      _draw_snippets(std::move(drawSnippets)), _pipeline_bindings_scissor(_render_controller->renderEngine()->toRendererScissor(pipelineBindingsScissor)), _pipeline_bindings_flag(pipelineBindingsFlag)
 {
     _pipeline_layout->initialize(_camera);
 }
@@ -85,7 +86,7 @@ sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment,
         buildingContext->addSnippet(snippet);
 
     const sp<RenderController>& renderController = resourceLoaderContext->renderController();
-    return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext), nullptr, Rect(), PipelineBindings::FLAG_DEFAULT_VALUE);
+    return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext), std::vector<sp<SnippetDraw>>(), nullptr, Rect(), PipelineBindings::FLAG_DEFAULT_VALUE);
 }
 
 std::vector<RenderLayer::UBOSnapshot> Shader::snapshot(const RenderRequest& renderRequest) const
@@ -118,11 +119,15 @@ const sp<PipelineLayout>& Shader::layout() const
 
 sp<ShaderBindings> Shader::makeBindings(ModelLoader::RenderMode mode, PipelineBindings::RenderProcedure renderProcedure) const
 {
-    return sp<ShaderBindings>::make(_pipeline_factory, sp<PipelineBindings>::make(PipelineBindings::Parameters(mode, renderProcedure, _pipeline_bindings_scissor, _pipeline_bindings_flag), _pipeline_layout), _render_controller);
+    const sp<ShaderBindings> shaderBindings = sp<ShaderBindings>::make(_pipeline_factory, sp<PipelineBindings>::make(PipelineBindings::Parameters(mode, renderProcedure, _pipeline_bindings_scissor, _pipeline_bindings_flag), _pipeline_layout), _render_controller);
+    for(const sp<SnippetDraw>& i : _draw_snippets)
+        shaderBindings->addSnippetDraw(i);
+    return shaderBindings;
 }
 
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _stages(loadStages(factory, manifest)), _snippet(factory.getBuilder<Snippet>(manifest, Constants::Attributes::SNIPPET)),
+    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _stages(loadStages(factory, manifest)),
+      _draw_snippets(factory.getBuilderList<SnippetDraw>(manifest, "snippet-draw")), _snippet(factory.getBuilder<Snippet>(manifest, Constants::Attributes::SNIPPET)),
       _camera(factory.getBuilder<Camera>(manifest, Constants::Attributes::CAMERA)), _pipeline_bindings_scissor(factory.getBuilder<Vec4>(_manifest, "scissor")),
       _pipeline_bindings_flags(Documents::getAttribute<PipelineBindings::Flag>(_manifest, "flags", PipelineBindings::FLAG_DEFAULT_VALUE))
 {
@@ -135,9 +140,13 @@ sp<Shader> Shader::BUILDER::build(const Scope& args)
     if(_snippet)
         buildingContext->addSnippet(_snippet->build(args));
 
+    std::vector<sp<SnippetDraw>> drawSnippets;
+    for(const sp<Builder<SnippetDraw>>& i : _draw_snippets)
+        drawSnippets.push_back(i->build(args));
+
     const sp<Vec4> scissor = _pipeline_bindings_scissor->build(args);
     const sp<RenderController>& renderController = _resource_loader_context->renderController();
-    return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext), _camera->build(args), scissor ? Rect(scissor->val()) : Rect(), _pipeline_bindings_flags);
+    return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext), std::move(drawSnippets), _camera->build(args), scissor ? Rect(scissor->val()) : Rect(), _pipeline_bindings_flags);
 }
 
 std::map<Shader::Stage, sp<Builder<String>>> Shader::BUILDER::loadStages(BeanFactory& factory, const document& manifest) const

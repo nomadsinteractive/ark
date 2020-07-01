@@ -15,7 +15,6 @@ namespace opengl {
 
 sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
 {
-    DCHECK(bindings.mode() != ModelLoader::RENDER_MODE_NONE, "Pipeline has no RenderMode initialized");
     const sp<PipelineLayout>& pipelineLayout = bindings.layout();
     const sp<RenderEngineContext>& renderContext = graphicsContext.renderContext();
     return sp<GLPipeline>::make(graphicsContext.recycler(), renderContext->getGLSLVersion(), pipelineLayout->getPreprocessedShaders(graphicsContext.renderContext()), bindings);

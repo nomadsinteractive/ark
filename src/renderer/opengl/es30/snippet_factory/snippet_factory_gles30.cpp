@@ -41,7 +41,8 @@ public:
             context._attachments->put(std::move(va));
         }
         glBindVertexArray(static_cast<GLuint>(vertexArrayId));
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(context._index_buffer.id()));
+        if(context._index_buffer)
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(context._index_buffer.id()));
     }
 
     virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {

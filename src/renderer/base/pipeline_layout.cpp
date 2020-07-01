@@ -64,9 +64,7 @@ void PipelineLayout::initialize(const Camera& camera)
 {
     DCHECK(_building_context, "PipelineLayout should not be initialized more than once");
 
-    if(_snippet)
-        _snippet->preInitialize(_building_context);
-
+    _snippet->preInitialize(_building_context);
     _building_context->initialize();
 
     if(_building_context->hasStage(Shader::SHADER_STAGE_VERTEX))

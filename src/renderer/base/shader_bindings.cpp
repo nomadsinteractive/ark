@@ -4,12 +4,12 @@
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/inf/snippet.h"
 
 namespace ark {
 
 ShaderBindings::ShaderBindings(const sp<PipelineFactory>& pipelineFactory, const sp<PipelineBindings>& pipelineBindings, RenderController& renderController)
-    : _pipeline_factory(pipelineFactory), _pipeline_bindings(pipelineBindings), _divisors(makeDivisors(renderController)), _attachments(sp<ByType>::make())
+    : _pipeline_factory(pipelineFactory), _pipeline_bindings(pipelineBindings), _snippet_draw(_pipeline_bindings->layout()->snippet()), _divisors(makeDivisors(renderController)),
+      _attachments(sp<ByType>::make())
 {
 }
 
@@ -23,9 +23,15 @@ const sp<PipelineBindings>& ShaderBindings::pipelineBindings() const
     return _pipeline_bindings;
 }
 
-const sp<Snippet>& ShaderBindings::snippet() const
+const sp<SnippetDraw>& ShaderBindings::snippet() const
 {
-    return _pipeline_bindings->layout()->snippet();
+    return _snippet_draw;
+}
+
+void ShaderBindings::addSnippetDraw(sp<SnippetDraw> snippet)
+{
+    DCHECK(!_pipeline, "Draw snippet can only be added before pipeline creation");
+    _snippet_draw = sp<SnippetDrawLinkedChain>::make(std::move(_snippet_draw), std::move(snippet));
 }
 
 const sp<PipelineLayout>& ShaderBindings::pipelineLayout() const
@@ -58,7 +64,7 @@ sp<Pipeline> ShaderBindings::getPipeline(GraphicsContext& graphicsContext)
     if(!_pipeline)
     {
         _pipeline = _pipeline_bindings->getPipeline(graphicsContext, _pipeline_factory);
-        snippet()->preBind(graphicsContext, _pipeline, *this);
+        _snippet_draw->preBind(graphicsContext, _pipeline, *this);
     }
     return _pipeline;
 }
@@ -88,6 +94,30 @@ sp<std::map<uint32_t, Buffer>> ShaderBindings::makeDivisors(RenderController& re
         }
     }
     return divisors;
+}
+
+ShaderBindings::SnippetDrawLinkedChain::SnippetDrawLinkedChain(sp<SnippetDraw> delegate, sp<SnippetDraw> next)
+    : _delegate(std::move(delegate)), _next(std::move(next))
+{
+    DASSERT(_delegate && _next);
+}
+
+void ShaderBindings::SnippetDrawLinkedChain::preBind(GraphicsContext& graphicsContext, const sp<Pipeline>& pipeline, ShaderBindings& bindings)
+{
+    _delegate->preBind(graphicsContext, pipeline, bindings);
+    _next->preBind(graphicsContext, pipeline, bindings);
+}
+
+void ShaderBindings::SnippetDrawLinkedChain::preDraw(GraphicsContext& graphicsContext, const DrawingContext& context)
+{
+    _delegate->preDraw(graphicsContext, context);
+    _next->preDraw(graphicsContext, context);
+}
+
+void ShaderBindings::SnippetDrawLinkedChain::postDraw(GraphicsContext& graphicsContext)
+{
+    _delegate->postDraw(graphicsContext);
+    _next->postDraw(graphicsContext);
 }
 
 }

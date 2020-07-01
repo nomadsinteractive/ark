@@ -12,12 +12,19 @@
 
 namespace ark {
 
-class ARK_API Pipeline : public Resource {
+class ARK_API PipelineOperation {
 public:
-    virtual ~Pipeline() = default;
+    virtual ~PipelineOperation() = default;
 
     virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
     virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
+
+    virtual void compute(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
+};
+
+class ARK_API Pipeline : public Resource, public PipelineOperation {
+public:
+    virtual ~Pipeline() = default;
 };
 
 }
