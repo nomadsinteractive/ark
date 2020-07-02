@@ -62,10 +62,7 @@ const sp<ByType>& ShaderBindings::attachments() const
 sp<Pipeline> ShaderBindings::getPipeline(GraphicsContext& graphicsContext)
 {
     if(!_pipeline)
-    {
         _pipeline = _pipeline_bindings->getPipeline(graphicsContext, _pipeline_factory);
-        _snippet_draw->preBind(graphicsContext, _pipeline, *this);
-    }
     return _pipeline;
 }
 
@@ -100,12 +97,6 @@ ShaderBindings::SnippetDrawLinkedChain::SnippetDrawLinkedChain(sp<SnippetDraw> d
     : _delegate(std::move(delegate)), _next(std::move(next))
 {
     DASSERT(_delegate && _next);
-}
-
-void ShaderBindings::SnippetDrawLinkedChain::preBind(GraphicsContext& graphicsContext, const sp<Pipeline>& pipeline, ShaderBindings& bindings)
-{
-    _delegate->preBind(graphicsContext, pipeline, bindings);
-    _next->preBind(graphicsContext, pipeline, bindings);
 }
 
 void ShaderBindings::SnippetDrawLinkedChain::preDraw(GraphicsContext& graphicsContext, const DrawingContext& context)

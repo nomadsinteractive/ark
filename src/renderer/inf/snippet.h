@@ -11,7 +11,6 @@ class ARK_API SnippetDraw {
 public:
     virtual ~SnippetDraw() = default;
 
-    virtual void preBind(GraphicsContext& graphicsContext, const sp<Pipeline>& pipeline, ShaderBindings& bindings) {}
     virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) {}
     virtual void postDraw(GraphicsContext& graphicsContext) {}
 };

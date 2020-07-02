@@ -25,12 +25,6 @@ void SnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, PipelineBu
     _next->preCompile(graphicsContext, context, pipelineLayout);
 }
 
-void SnippetLinkedChain::preBind(GraphicsContext& graphicsContext, const sp<Pipeline>& pipeline, ShaderBindings& bindings)
-{
-    _delegate->preBind(graphicsContext, pipeline, bindings);
-    _next->preBind(graphicsContext, pipeline, bindings);
-}
-
 void SnippetLinkedChain::preDraw(GraphicsContext& graphicsContext, const DrawingContext& context)
 {
     _delegate->preDraw(graphicsContext, context);

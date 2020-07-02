@@ -44,7 +44,6 @@ private:
     public:
         SnippetDrawLinkedChain(sp<SnippetDraw> delegate, sp<SnippetDraw> next);
 
-        virtual void preBind(GraphicsContext& graphicsContext, const sp<Pipeline>& pipeline, ShaderBindings& bindings) override;
         virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override;
         virtual void postDraw(GraphicsContext& graphicsContext) override;
 
