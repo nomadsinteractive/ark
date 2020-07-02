@@ -34,7 +34,7 @@ public:
 
     virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
     virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-    virtual void compute(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+    virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 
 private:
     struct VertexLayout {
@@ -51,7 +51,7 @@ private:
     void setupComputePipeline(GraphicsContext& graphicsContext);
 
     void buildDrawCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
-    void buildComputeCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
+    void buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& drawingContext);
 
     bool isDirty(const ByteArray::Borrowed& dirtyFlags) const;
 

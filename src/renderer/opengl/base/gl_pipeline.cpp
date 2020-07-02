@@ -7,6 +7,7 @@
 
 #include "graphics/base/color.h"
 
+#include "renderer/base/compute_context.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/graphics_context.h"
@@ -129,9 +130,9 @@ void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& dr
     _pipeline_operation->draw(graphicsContext, drawingContext);
 }
 
-void GLPipeline::compute(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+void GLPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
 {
-    _pipeline_operation->compute(graphicsContext, drawingContext);
+    _pipeline_operation->compute(graphicsContext, computeContext);
 }
 
 void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineInput& input, const std::map<uint32_t, Buffer>& divisors)
@@ -456,7 +457,7 @@ void GLPipeline::PipelineOperationDraw::draw(GraphicsContext& graphicsContext, c
     _renderer->draw(graphicsContext, drawingContext);
 }
 
-void GLPipeline::PipelineOperationDraw::compute(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*drawingContext*/)
+void GLPipeline::PipelineOperationDraw::compute(GraphicsContext& /*graphicsContext*/, const ComputeContext& /*computeContext*/)
 {
     DFATAL("This is a drawing pipeline, not compute");
 }
@@ -592,9 +593,12 @@ void GLPipeline::PipelineOperationCompute::draw(GraphicsContext& /*graphicsConte
 {
 }
 
-void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
+void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& /*graphicsContext*/, const ComputeContext& computeContext)
 {
+    glUseProgram(_stub->_id);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, computeContext._vertex_buffer.id());
     glDispatchCompute(100, 1, 1);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
 }
 
 }

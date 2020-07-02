@@ -19,7 +19,7 @@ public:
     virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
     virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
 
-    virtual void compute(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
+    virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) = 0;
 };
 
 class ARK_API Pipeline : public Resource, public PipelineOperation {

@@ -33,7 +33,7 @@ public:
 
     virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
     virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-    virtual void compute(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+    virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 
     void bindBuffer(GraphicsContext& graphicsContext, const PipelineInput& input, const std::map<uint32_t, Buffer>& divisors);
 
@@ -171,7 +171,7 @@ private:
 
         virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
         virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-        virtual void compute(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+        virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 
     private:
         sp<GLPipeline::BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings) const;
@@ -193,7 +193,7 @@ private:
 
         virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
         virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-        virtual void compute(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+        virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 
     private:
         sp<Stub> _stub;

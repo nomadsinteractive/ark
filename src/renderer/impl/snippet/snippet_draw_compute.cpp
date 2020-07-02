@@ -1,5 +1,6 @@
 #include "renderer/impl/snippet/snippet_draw_compute.h"
 
+#include "renderer/base/compute_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/inf/pipeline.h"
@@ -12,8 +13,8 @@ SnippetDrawCompute::SnippetDrawCompute(sp<Shader> shader, sp<Buffer> buffer)
 
 void SnippetDrawCompute::postDraw(GraphicsContext& graphicsContext)
 {
-    DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), {}, _buffer->snapshot(), Buffer::Snapshot(), DrawingContext::ParamDrawElements(0, 0));
-    _shader_bindings->getPipeline(graphicsContext)->compute(graphicsContext, drawingContext);
+    ComputeContext computeContext(_shader_bindings, {}, _buffer->snapshot());
+    _shader_bindings->getPipeline(graphicsContext)->compute(graphicsContext, computeContext);
 }
 
 SnippetDrawCompute::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

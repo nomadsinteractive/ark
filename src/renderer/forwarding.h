@@ -7,6 +7,7 @@ class Atlas;
 class Attribute;
 class Buffer;
 class Characters;
+class ComputeContext;
 class DrawingBuffer;
 class DrawingContext;
 class Emitter;
