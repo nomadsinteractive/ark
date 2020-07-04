@@ -12,9 +12,6 @@ class SnippetDrawCompute : public Snippet {
 public:
     SnippetDrawCompute(sp<Shader> shader, sp<Buffer> buffer);
 
-    virtual void preInitialize(PipelineBuildingContext& context) override;
-    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
-
     virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
 
 //  [[plugin::builder("compute")]]
