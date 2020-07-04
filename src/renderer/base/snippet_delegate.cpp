@@ -11,14 +11,13 @@
 
 namespace ark {
 
-class CoreGLSnippet : public Snippet {
+class CoreSnippet : public Snippet {
 public:
-    CoreGLSnippet(SnippetDelegate& wrapper, const sp<Snippet>& snippet);
+    CoreSnippet(SnippetDelegate& wrapper, const sp<Snippet>& snippet);
 
     virtual void preInitialize(PipelineBuildingContext& context) override;
     virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
-    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override;
-    virtual void postDraw(GraphicsContext& graphicsContext) override;
+    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
 
 private:
     sp<Snippet> createCoreSnippet(GraphicsContext& graphicsContext) const;
@@ -26,37 +25,33 @@ private:
 private:
     SnippetDelegate& _wrapper;
     sp<Snippet> _snippet;
+
 };
 
-CoreGLSnippet::CoreGLSnippet(SnippetDelegate& wrapper, const sp<Snippet>& snippet)
+CoreSnippet::CoreSnippet(SnippetDelegate& wrapper, const sp<Snippet>& snippet)
     : _wrapper(wrapper), _snippet(snippet)
 {
 }
 
-void CoreGLSnippet::preInitialize(PipelineBuildingContext& context)
+void CoreSnippet::preInitialize(PipelineBuildingContext& context)
 {
     if(_snippet)
         _snippet->preInitialize(context);
 }
 
-void CoreGLSnippet::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout)
+void CoreSnippet::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout)
 {
     const sp<Snippet> delegate = _wrapper._core;
     _wrapper._core = createCoreSnippet(graphicsContext);
     _wrapper.preCompile(graphicsContext, context, pipelineLayout);
 }
 
-void CoreGLSnippet::preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/)
+sp<Snippet::DrawEvents> CoreSnippet::makeDrawEvents(const RenderRequest& /*renderRequest*/)
 {
-    DFATAL("You're not supposed to be here");
+    return nullptr;
 }
 
-void CoreGLSnippet::postDraw(GraphicsContext& /*graphicsContext*/)
-{
-    DFATAL("You're not supposed to be here");
-}
-
-sp<Snippet> CoreGLSnippet::createCoreSnippet(GraphicsContext& graphicsContext) const
+sp<Snippet> CoreSnippet::createCoreSnippet(GraphicsContext& graphicsContext) const
 {
     const sp<Snippet> coreSnippet = graphicsContext.renderContext()->snippetFactory()->createCoreSnippet(graphicsContext.renderController());
     DASSERT(coreSnippet);
@@ -64,7 +59,7 @@ sp<Snippet> CoreGLSnippet::createCoreSnippet(GraphicsContext& graphicsContext) c
 }
 
 SnippetDelegate::SnippetDelegate(const sp<Snippet>& snippet)
-    : _core(sp<CoreGLSnippet>::make(*this, snippet))
+    : _core(sp<CoreSnippet>::make(*this, snippet))
 {
 }
 
@@ -78,14 +73,9 @@ void SnippetDelegate::preCompile(GraphicsContext& graphicsContext, PipelineBuild
     _core->preCompile(graphicsContext, context, pipelineLayout);
 }
 
-void SnippetDelegate::preDraw(GraphicsContext& graphicsContext, const DrawingContext& context)
+sp<Snippet::DrawEvents> SnippetDelegate::makeDrawEvents(const RenderRequest& renderRequest)
 {
-    _core->preDraw(graphicsContext, context);
-}
-
-void SnippetDelegate::postDraw(GraphicsContext& graphicsContext)
-{
-    _core->postDraw(graphicsContext);
+    return _core->makeDrawEvents(renderRequest);
 }
 
 }

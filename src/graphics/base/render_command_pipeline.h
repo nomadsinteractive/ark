@@ -13,7 +13,7 @@ namespace ark {
 class RenderCommandPipeline : public RenderCommand {
 public:
 
-    void add(const sp<RenderCommand>& renderCommand);
+    void add(sp<RenderCommand> renderCommand);
 
     virtual void draw(GraphicsContext& graphicsContext) override;
 

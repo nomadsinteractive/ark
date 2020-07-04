@@ -25,7 +25,7 @@ public:
 
     void jobDone();
 
-    void addRequest(const sp<RenderCommand>& renderCommand);
+    void addRequest(sp<RenderCommand> renderCommand) const;
     void addBackgroundRequest(const RenderLayer& layer, const V3& position);
 
 public:

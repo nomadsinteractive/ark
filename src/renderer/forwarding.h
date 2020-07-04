@@ -35,7 +35,6 @@ class ResourceLoaderContext;
 class Shader;
 class ShaderBindings;
 class Snippet;
-class SnippetDraw;
 class SnippetDelegate;
 class ShaderPreprocessor;
 class SharedBuffer;

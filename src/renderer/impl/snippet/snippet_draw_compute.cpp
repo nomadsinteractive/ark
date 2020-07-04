@@ -7,14 +7,40 @@
 
 namespace ark {
 
-SnippetDrawCompute::SnippetDrawCompute(sp<Shader> shader, sp<Buffer> buffer)
-    : _shader(std::move(shader)), _buffer(std::move(buffer)), _shader_bindings(_shader->makeBindings(ModelLoader::RENDER_MODE_NONE, PipelineBindings::RENDER_PROCEDURE_DRAW_ARRAYS)) {
+namespace {
+
+class DrawEventsCompute : public Snippet::DrawEvents {
+public:
+    DrawEventsCompute(sp<Shader> shader, sp<Buffer> buffer, const RenderRequest& renderRequest)
+        : _shader(std::move(shader)), _buffer(std::move(buffer)), _shader_bindings(_shader->makeBindings(ModelLoader::RENDER_MODE_NONE, PipelineBindings::RENDER_PROCEDURE_DRAW_ARRAYS)),
+          _compute_context(_shader_bindings, _shader->snapshot(renderRequest), _buffer->snapshot()) {
+    }
+
+    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
+    }
+
+    virtual void postDraw(GraphicsContext& graphicsContext) override {
+        _shader_bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
+    }
+
+private:
+    sp<Shader> _shader;
+    sp<Buffer> _buffer;
+    sp<ShaderBindings> _shader_bindings;
+
+    ComputeContext _compute_context;
+};
+
 }
 
-void SnippetDrawCompute::postDraw(GraphicsContext& graphicsContext)
+SnippetDrawCompute::SnippetDrawCompute(sp<Shader> shader, sp<Buffer> buffer)
+    : _shader(std::move(shader)), _buffer(std::move(buffer))
 {
-    ComputeContext computeContext(_shader_bindings, {}, _buffer->snapshot());
-    _shader_bindings->getPipeline(graphicsContext)->compute(graphicsContext, computeContext);
+}
+
+sp<Snippet::DrawEvents> SnippetDrawCompute::makeDrawEvents(const RenderRequest& renderRequest)
+{
+    return sp<DrawEventsCompute>::make(_shader, _buffer, renderRequest);
 }
 
 SnippetDrawCompute::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -22,7 +48,7 @@ SnippetDrawCompute::BUILDER::BUILDER(BeanFactory& factory, const document& manif
 {
 }
 
-sp<SnippetDraw> SnippetDrawCompute::BUILDER::build(const Scope& args)
+sp<Snippet> SnippetDrawCompute::BUILDER::build(const Scope& args)
 {
     return sp<SnippetDrawCompute>::make(_shader->build(args), _buffer->build(args));
 }

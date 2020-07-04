@@ -9,7 +9,9 @@
 
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_engine_context.h"
+#include "renderer/base/snippet_delegate.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
+
 
 namespace ark {
 
@@ -219,6 +221,11 @@ const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> sourc
     DCHECK(!stage, "Stage '%d' has been initialized already", shaderStage);
     stage.reset(new ShaderPreprocessor(std::move(source), shaderStage, preShaderStage));
     return stage;
+}
+
+sp<Snippet> PipelineBuildingContext::makePipelineSnippet() const
+{
+    return sp<SnippetDelegate>::make(_snippet);
 }
 
 void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)

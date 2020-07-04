@@ -70,17 +70,17 @@ void RenderRequest::jobDone()
     _stub = nullptr;
 }
 
-void RenderRequest::addRequest(const sp<RenderCommand>& renderCommand)
+void RenderRequest::addRequest(sp<RenderCommand> renderCommand) const
 {
-    _stub->_render_command_pipe_line->add(renderCommand);
+    _stub->_render_command_pipe_line->add(std::move(renderCommand));
 }
 
 void RenderRequest::addBackgroundRequest(const RenderLayer& layer, const V3& position)
 {
     const sp<BackgroundRenderCommand> renderCommand = sp<BackgroundRenderCommand>::make(*this, layer, position);
     ++(_stub->_background_renderer_count);
-    _stub->_render_command_pipe_line->add(renderCommand);
     _stub->_executor->execute(renderCommand);
+    _stub->_render_command_pipe_line->add(std::move(renderCommand));
 }
 
 RenderRequest::Stub::Stub(uint64_t timestamp, const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests)

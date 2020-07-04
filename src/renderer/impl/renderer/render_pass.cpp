@@ -15,10 +15,10 @@ RenderPass::RenderPass(sp<Shader> shader, sp<Buffer> vertexBuffer, sp<Integer> d
 {
 }
 
-void RenderPass::render(RenderRequest& renderRequest, const V3& position)
+void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
 {
     DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->snapshot(renderRequest), _vertex_buffer->snapshot(), _index_buffer, DrawingContext::ParamDrawElements(0, static_cast<uint32_t>(_draw_count->val())));
-    renderRequest.addRequest(drawingContext.toRenderCommand());
+    renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
 }
 
 RenderPass::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

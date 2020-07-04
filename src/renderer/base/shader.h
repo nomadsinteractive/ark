@@ -33,7 +33,7 @@ public:
     };
 
 public:
-    Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> layout, std::vector<sp<SnippetDraw>> drawSnippets, const sp<Camera>& camera, const Rect& pipelineBindingsScissor, uint32_t pipelineBindingsFlag);
+    Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> layout, std::vector<sp<Snippet>> snippets, const sp<Camera>& camera, const Rect& pipelineBindingsScissor, uint32_t pipelineBindingsFlag);
     DEFAULT_COPY_AND_ASSIGN(Shader);
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
@@ -67,7 +67,7 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
 
         std::map<Shader::Stage, sp<Builder<String>>> _stages;
-        std::vector<sp<Builder<SnippetDraw>>> _draw_snippets;
+        std::vector<sp<Builder<Snippet>>> _snippets;
         sp<Builder<Snippet>> _snippet;
         SafePtr<Builder<Camera>> _camera;
         SafePtr<Builder<Vec4>> _pipeline_bindings_scissor;
@@ -81,7 +81,7 @@ private:
     sp<PipelineInput> _input;
     sp<Camera> _camera;
 
-    std::vector<sp<SnippetDraw>> _draw_snippets;
+    std::vector<sp<Snippet>> _snippets;
 
     Rect _pipeline_bindings_scissor;
     uint32_t _pipeline_bindings_flag;

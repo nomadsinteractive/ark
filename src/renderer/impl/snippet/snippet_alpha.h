@@ -10,6 +10,8 @@ namespace ark {
 class SnippetAlpha : public Snippet {
 public:
     virtual void preInitialize(PipelineBuildingContext& context) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
+    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
 
 //  [[plugin::builder::by-value("alpha")]]
     class DICTIONARY : public Builder<Snippet> {

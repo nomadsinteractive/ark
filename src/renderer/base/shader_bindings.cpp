@@ -4,11 +4,12 @@
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_controller.h"
+#include "renderer/impl/snippet/snippet_linked_chain.h"
 
 namespace ark {
 
 ShaderBindings::ShaderBindings(const sp<PipelineFactory>& pipelineFactory, const sp<PipelineBindings>& pipelineBindings, RenderController& renderController)
-    : _pipeline_factory(pipelineFactory), _pipeline_bindings(pipelineBindings), _snippet_draw(_pipeline_bindings->layout()->snippet()), _divisors(makeDivisors(renderController)),
+    : _pipeline_factory(pipelineFactory), _pipeline_bindings(pipelineBindings), _snippet(_pipeline_bindings->layout()->snippet()), _divisors(makeDivisors(renderController)),
       _attachments(sp<ByType>::make())
 {
 }
@@ -23,15 +24,15 @@ const sp<PipelineBindings>& ShaderBindings::pipelineBindings() const
     return _pipeline_bindings;
 }
 
-const sp<SnippetDraw>& ShaderBindings::snippet() const
+const sp<Snippet>& ShaderBindings::snippet() const
 {
-    return _snippet_draw;
+    return _snippet;
 }
 
-void ShaderBindings::addSnippetDraw(sp<SnippetDraw> snippet)
+void ShaderBindings::addSnippet(sp<Snippet> snippet)
 {
     DCHECK(!_pipeline, "Draw snippet can only be added before pipeline creation");
-    _snippet_draw = sp<SnippetDrawLinkedChain>::make(std::move(_snippet_draw), std::move(snippet));
+    _snippet = sp<SnippetLinkedChain>::make(std::move(_snippet), std::move(snippet));
 }
 
 const sp<PipelineLayout>& ShaderBindings::pipelineLayout() const
@@ -91,24 +92,6 @@ sp<std::map<uint32_t, Buffer>> ShaderBindings::makeDivisors(RenderController& re
         }
     }
     return divisors;
-}
-
-ShaderBindings::SnippetDrawLinkedChain::SnippetDrawLinkedChain(sp<SnippetDraw> delegate, sp<SnippetDraw> next)
-    : _delegate(std::move(delegate)), _next(std::move(next))
-{
-    DASSERT(_delegate && _next);
-}
-
-void ShaderBindings::SnippetDrawLinkedChain::preDraw(GraphicsContext& graphicsContext, const DrawingContext& context)
-{
-    _delegate->preDraw(graphicsContext, context);
-    _next->preDraw(graphicsContext, context);
-}
-
-void ShaderBindings::SnippetDrawLinkedChain::postDraw(GraphicsContext& graphicsContext)
-{
-    _delegate->postDraw(graphicsContext);
-    _next->postDraw(graphicsContext);
 }
 
 }

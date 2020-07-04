@@ -15,7 +15,6 @@
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/shader_preprocessor.h"
-#include "renderer/base/snippet_delegate.h"
 #include "renderer/inf/pipeline_factory.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/snippet.h"
@@ -23,7 +22,7 @@
 namespace ark {
 
 PipelineLayout::PipelineLayout(const sp<PipelineBuildingContext>& buildingContext)
-    : _building_context(buildingContext), _input(_building_context->_input), _snippet(sp<SnippetDelegate>::make(buildingContext->_snippet)), _samplers(buildingContext->_samplers)
+    : _building_context(buildingContext), _input(_building_context->_input), _snippet(_building_context->makePipelineSnippet()), _samplers(_building_context->_samplers)
 {
 }
 

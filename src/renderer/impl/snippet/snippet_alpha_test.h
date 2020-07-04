@@ -12,6 +12,8 @@ public:
     SnippetAlphaTest(float threadhold);
 
     virtual void preInitialize(PipelineBuildingContext& context) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
+    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
 
 //  [[plugin::builder("alpha-test")]]
     class BUILDER : public Builder<Snippet> {

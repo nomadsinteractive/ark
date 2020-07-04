@@ -10,7 +10,9 @@
 
 namespace ark {
 
-class DrawingContext::RenderCommandBind : public RenderCommand {
+namespace {
+
+class RenderCommandBind : public RenderCommand {
 public:
     RenderCommandBind(DrawingContext context)
         : _context(std::move(context)) {
@@ -23,10 +25,9 @@ public:
 
 private:
     DrawingContext _context;
-
 };
 
-class DrawingContext::RenderCommandDraw : public RenderCommand {
+class RenderCommandDraw : public RenderCommand {
 public:
     RenderCommandDraw(DrawingContext context)
         : _context(std::move(context)) {
@@ -36,16 +37,37 @@ public:
         _context.upload(graphicsContext);
 
         const sp<Pipeline> pipeline = _context._shader_bindings->getPipeline(graphicsContext);
-        _context.preDraw(graphicsContext);
         pipeline->bind(graphicsContext, _context);
         pipeline->draw(graphicsContext, _context);
-        _context.postDraw(graphicsContext);
     }
 
 private:
     DrawingContext _context;
-
 };
+
+class RenderCommandDrawWithEvents : public RenderCommand {
+public:
+    RenderCommandDrawWithEvents(DrawingContext context, sp<Snippet::DrawEvents> snippetDraw)
+        : _context(std::move(context)), _snippet_draw(std::move(snippetDraw)) {
+    }
+
+    virtual void draw(GraphicsContext& graphicsContext) override {
+        _context.upload(graphicsContext);
+
+        const sp<Pipeline> pipeline = _context._shader_bindings->getPipeline(graphicsContext);
+        _snippet_draw->preDraw(graphicsContext, _context);
+        pipeline->bind(graphicsContext, _context);
+        pipeline->draw(graphicsContext, _context);
+        _snippet_draw->postDraw(graphicsContext);
+    }
+
+private:
+    DrawingContext _context;
+    sp<Snippet::DrawEvents> _snippet_draw;
+};
+
+}
+
 
 DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo)
     : _shader_bindings(shaderBindings), _attachments(attachments), _ubos(std::move(ubo)), _scissor(0, 0, -1.0f, -1.0f)
@@ -57,10 +79,12 @@ DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const s
 {
 }
 
-sp<RenderCommand> DrawingContext::toRenderCommand()
+sp<RenderCommand> DrawingContext::toRenderCommand(const RenderRequest& renderRequest)
 {
     DCHECK(_shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
-    return sp<RenderCommandDraw>::make(std::move(*this));
+    sp<Snippet::DrawEvents> drawEvents = _shader_bindings->snippet()->makeDrawEvents(renderRequest);
+    return drawEvents ? sp<RenderCommand>::make<RenderCommandDrawWithEvents>(std::move(*this), std::move(drawEvents))
+                      : sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this));
 }
 
 sp<RenderCommand> DrawingContext::toBindCommand()
@@ -78,16 +102,6 @@ void DrawingContext::upload(GraphicsContext& graphicsContext)
         _index_buffer.upload(graphicsContext);
         DCHECK(_index_buffer.id(), "Invaild IndexBuffer");
     }
-}
-
-void DrawingContext::preDraw(GraphicsContext& graphicsContext)
-{
-    _shader_bindings->snippet()->preDraw(graphicsContext, *this);
-}
-
-void DrawingContext::postDraw(GraphicsContext& graphicsContext)
-{
-    _shader_bindings->snippet()->postDraw(graphicsContext);
 }
 
 DrawingContext::ParamDrawElements::ParamDrawElements(uint32_t start, uint32_t count)

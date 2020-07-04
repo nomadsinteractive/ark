@@ -70,7 +70,7 @@ public:
     };
 
 private:
-    void MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawData* draw_data);
+    void MyImGuiRenderFunction(const RenderRequest& renderRequest, ImDrawData* draw_data);
 
     sp<DrawCommandRecycler> obtainDrawCommandRecycler(Texture* texture);
 

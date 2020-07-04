@@ -54,6 +54,8 @@ public:
     const op<ShaderPreprocessor>& getStage(Shader::Stage shaderStage) const;
     const op<ShaderPreprocessor>& addStage(sp<String> source, Shader::Stage shaderStage, Shader::Stage preShaderStage);
 
+    sp<Snippet> makePipelineSnippet() const;
+
 private:
     Attribute makePredefinedAttribute(const String& name, const String& type);
 

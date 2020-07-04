@@ -19,17 +19,8 @@ namespace gles30 {
 
 namespace {
 
-class SnippetGLES30 : public Snippet {
+class DrawEventsGLES30 : public Snippet::DrawEvents {
 public:
-    virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {
-        if(context.hasStage(Shader::SHADER_STAGE_FRAGMENT)) {
-            ShaderPreprocessor& fragment = context.getStage(Shader::SHADER_STAGE_FRAGMENT);
-            fragment.outDeclare("vec4", "FragColor");
-            fragment._predefined_macros.push_back("#define texture2D texture");
-            fragment._predefined_macros.push_back("#define textureCube texture");
-        }
-    }
-
     virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
         const sp<GLVertexArray>& vertexArray = context._attachments->get<GLVertexArray>();
         uint64_t vertexArrayId = vertexArray ? vertexArray->id() : 0;
@@ -49,6 +40,25 @@ public:
         glBindVertexArray(0);
     }
 
+};
+
+class SnippetGLES30 : public Snippet {
+public:
+    virtual void preInitialize(PipelineBuildingContext& /*context*/) override {
+    }
+
+    virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {
+        if(context.hasStage(Shader::SHADER_STAGE_FRAGMENT)) {
+            ShaderPreprocessor& fragment = context.getStage(Shader::SHADER_STAGE_FRAGMENT);
+            fragment.outDeclare("vec4", "FragColor");
+            fragment._predefined_macros.push_back("#define texture2D texture");
+            fragment._predefined_macros.push_back("#define textureCube texture");
+        }
+    }
+
+    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& /*renderRequest*/) override {
+        return sp<DrawEventsGLES30>::make();
+    }
 };
 
 }

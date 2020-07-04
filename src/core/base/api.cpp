@@ -3,7 +3,6 @@
 #include <cstdarg>
 #include <map>
 #include <system_error>
-#include <unordered_map>
 
 #include "core/util/strings.h"
 #include "core/util/log.h"

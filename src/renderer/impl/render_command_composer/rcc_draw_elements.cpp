@@ -73,7 +73,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
     if(snapshot._stub->_scissor)
         drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);
 
-    return drawingContext.toRenderCommand();
+    return drawingContext.toRenderCommand(renderRequest);
 }
 
 }

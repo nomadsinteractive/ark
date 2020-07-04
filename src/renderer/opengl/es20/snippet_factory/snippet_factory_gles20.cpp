@@ -15,7 +15,7 @@ namespace gles20 {
 
 namespace {
 
-class SnippetGLES20 : public Snippet {
+class DrawEventsGLES20 : public Snippet::DrawEvents {
 public:
     virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
         glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(context._vertex_buffer.id()));
@@ -23,7 +23,17 @@ public:
         const sp<opengl::GLPipeline> pipeline = context._shader_bindings->getPipeline(graphicsContext);
         pipeline->bindBuffer(graphicsContext, context._shader_bindings->pipelineInput(), context._shader_bindings->divisors());
     }
+};
 
+class SnippetGLES20 : public Snippet {
+public:
+    virtual void preInitialize(PipelineBuildingContext& /*context*/) override {
+    }
+    virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& /*context*/, const PipelineLayout& /*pipelineLayout*/) override {
+    }
+    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& /*renderRequest*/) override {
+        return sp<DrawEventsGLES20>::make();
+    }
 };
 
 }

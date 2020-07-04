@@ -8,7 +8,7 @@
 
 namespace ark {
 
-class CoreGLSnippet;
+class CoreSnippet;
 
 class ARK_API SnippetDelegate : public Snippet {
 public:
@@ -16,13 +16,12 @@ public:
 
     virtual void preInitialize(PipelineBuildingContext& context) override;
     virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
-    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override;
-    virtual void postDraw(GraphicsContext& graphicsContext) override;
+    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
 
 private:
     sp<Snippet> _core;
 
-    friend class CoreGLSnippet;
+    friend class CoreSnippet;
 };
 
 }

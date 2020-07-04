@@ -15,8 +15,7 @@ public:
 
     virtual void preInitialize(PipelineBuildingContext& context) override;
     virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
-    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override;
-    virtual void postDraw(GraphicsContext& graphicsContext) override;
+    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Snippet> {

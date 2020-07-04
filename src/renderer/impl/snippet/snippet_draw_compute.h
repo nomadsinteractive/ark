@@ -8,18 +8,21 @@
 
 namespace ark {
 
-class SnippetDrawCompute : public SnippetDraw {
+class SnippetDrawCompute : public Snippet {
 public:
     SnippetDrawCompute(sp<Shader> shader, sp<Buffer> buffer);
 
-    virtual void postDraw(GraphicsContext& graphicsContext) override;
+    virtual void preInitialize(PipelineBuildingContext& context) override;
+    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
+
+    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
 
 //  [[plugin::builder("compute")]]
-    class BUILDER : public Builder<SnippetDraw> {
+    class BUILDER : public Builder<Snippet> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<SnippetDraw> build(const Scope& args) override;
+        virtual sp<Snippet> build(const Scope& args) override;
 
     private:
         sp<Builder<Shader>> _shader;
@@ -30,9 +33,6 @@ public:
 private:
     sp<Shader> _shader;
     sp<Buffer> _buffer;
-
-    sp<ShaderBindings> _shader_bindings;
-
 };
 
 }

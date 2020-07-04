@@ -6,6 +6,32 @@
 
 namespace ark {
 
+namespace {
+
+class DrawEventsLinkedChain : public Snippet::DrawEvents {
+public:
+    DrawEventsLinkedChain(sp<Snippet::DrawEvents> delegate, sp<Snippet::DrawEvents> next)
+        : _delegate(std::move(delegate)), _next(std::move(next)) {
+        DASSERT(_delegate && _next);
+    }
+
+    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
+        _delegate->preDraw(graphicsContext, context);
+        _next->preDraw(graphicsContext, context);
+    }
+
+    virtual void postDraw(GraphicsContext& graphicsContext) override {
+        _delegate->postDraw(graphicsContext);
+        _next->postDraw(graphicsContext);
+    }
+
+private:
+    sp<DrawEvents> _delegate;
+    sp<DrawEvents> _next;
+};
+
+}
+
 SnippetLinkedChain::SnippetLinkedChain(const sp<Snippet>& delegate, const sp<Snippet>& next)
     : _delegate(delegate), _next(next)
 {
@@ -25,16 +51,13 @@ void SnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, PipelineBu
     _next->preCompile(graphicsContext, context, pipelineLayout);
 }
 
-void SnippetLinkedChain::preDraw(GraphicsContext& graphicsContext, const DrawingContext& context)
+sp<Snippet::DrawEvents> SnippetLinkedChain::makeDrawEvents(const RenderRequest& renderRequest)
 {
-    _delegate->preDraw(graphicsContext, context);
-    _next->preDraw(graphicsContext, context);
-}
-
-void SnippetLinkedChain::postDraw(GraphicsContext& graphicsContext)
-{
-    _delegate->postDraw(graphicsContext);
-    _next->postDraw(graphicsContext);
+    sp<Snippet::DrawEvents> de1 = _delegate->makeDrawEvents(renderRequest);
+    sp<Snippet::DrawEvents> de2 = _next->makeDrawEvents(renderRequest);
+    if(de1 && de2)
+        return sp<DrawEventsLinkedChain>::make(de1, de2);
+    return de1 ? de1 : de2;
 }
 
 SnippetLinkedChain::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)

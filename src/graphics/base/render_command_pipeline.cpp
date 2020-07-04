@@ -4,10 +4,10 @@
 
 namespace ark {
 
-void RenderCommandPipeline::add(const sp<RenderCommand>& renderCommand)
+void RenderCommandPipeline::add(sp<RenderCommand> renderCommand)
 {
     if(renderCommand)
-        _commands.push_back(renderCommand);
+        _commands.push_back(std::move(renderCommand));
 }
 
 void RenderCommandPipeline::draw(GraphicsContext& graphicsContext)

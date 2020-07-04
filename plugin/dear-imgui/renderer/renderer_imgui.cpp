@@ -154,7 +154,7 @@ const sp<RendererContext>& RendererImgui::rendererContext() const
     return _renderer_context;
 }
 
-void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawData* draw_data)
+void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, ImDrawData* draw_data)
 {
     for (int i = 0; i < draw_data->CmdListsCount; i++)
     {
@@ -202,7 +202,7 @@ void RendererImgui::MyImGuiRenderFunction(RenderRequest& renderRequest, ImDrawDa
                 Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(indicesUploader);
                 DrawingContext drawingContext(drawCommandPool->_shader_bindings, drawCommand->_attachments, ubos, std::move(vertexBuffer), std::move(indexBuffer), DrawingContext::ParamDrawElements(offset, pcmd->ElemCount));
                 drawingContext._scissor = _render_engine->toRendererScissor(Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y), Ark::COORDINATE_SYSTEM_LHS);
-                renderRequest.addRequest(sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(), std::move(recycler)));
+                renderRequest.addRequest(sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(renderRequest), std::move(recycler)));
             }
             offset += pcmd->ElemCount;
         }

@@ -92,8 +92,10 @@ public:
     DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, Parameters parameters);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
-    sp<RenderCommand> toRenderCommand();
+    sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest);
     sp<RenderCommand> toBindCommand();
+
+    void upload(GraphicsContext& graphicsContext);
 
     sp<ShaderBindings> _shader_bindings;
     sp<ByType> _attachments;
@@ -105,16 +107,6 @@ public:
     Rect _scissor;
     Parameters _parameters;
 
-private:
-    void upload(GraphicsContext& graphicsContext);
-
-    void preDraw(GraphicsContext& graphicsContext);
-    void postDraw(GraphicsContext& graphicsContext);
-
-
-private:
-    class RenderCommandBind;
-    class RenderCommandDraw;
 
 };
 

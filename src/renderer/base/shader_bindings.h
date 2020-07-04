@@ -23,9 +23,8 @@ public:
     const sp<PipelineFactory>& pipelineFactory() const;
     const sp<PipelineBindings>& pipelineBindings() const;
 
-    const sp<SnippetDraw>& snippet() const;
-
-    void addSnippetDraw(sp<SnippetDraw> snippet);
+    const sp<Snippet>& snippet() const;
+    void addSnippet(sp<Snippet> snippet);
 
     const sp<PipelineLayout>& pipelineLayout() const;
     const sp<PipelineInput>& pipelineInput() const;
@@ -40,22 +39,10 @@ public:
 private:
     sp<std::map<uint32_t, Buffer>> makeDivisors(RenderController& renderController) const;
 
-    class SnippetDrawLinkedChain : public SnippetDraw {
-    public:
-        SnippetDrawLinkedChain(sp<SnippetDraw> delegate, sp<SnippetDraw> next);
-
-        virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override;
-        virtual void postDraw(GraphicsContext& graphicsContext) override;
-
-    private:
-        sp<SnippetDraw> _delegate;
-        sp<SnippetDraw> _next;
-    };
-
 private:
     sp<PipelineFactory> _pipeline_factory;
     sp<PipelineBindings> _pipeline_bindings;
-    sp<SnippetDraw> _snippet_draw;
+    sp<Snippet> _snippet;
 
     sp<std::map<uint32_t, Buffer>> _divisors;
 
