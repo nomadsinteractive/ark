@@ -33,7 +33,8 @@ private:
     
 private:
     sp<VKRenderer> _renderer;
-    sp<VKGraphicsContext> _vk_context;
+    sp<VKGraphicsContext> _vk_graphics_context;
+    sp<VKComputeContext> _vk_compute_context;
 
     op<GraphicsContext> _graphics_context;
 };

@@ -16,7 +16,7 @@ public:
           _compute_context(_shader_bindings, _shader->snapshot(renderRequest), _buffer->snapshot()) {
     }
 
-    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
+    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
     }
 
     virtual void postDraw(GraphicsContext& graphicsContext) override {

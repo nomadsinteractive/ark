@@ -208,7 +208,7 @@ void VKFramebuffer::beginCommandBuffer(GraphicsContext& graphicsContext)
     vkCmdSetViewport(_command_buffer, 0, 1, &_viewport);
     vkCmdSetScissor(_command_buffer, 0, 1, &_scissor);
 
-    graphicsContext.attachment<VKGraphicsContext>()->pushCommandBuffer(_command_buffer);
+    graphicsContext.attachments().ensure<VKGraphicsContext>()->pushCommandBuffer(_command_buffer);
 
 }
 
@@ -216,12 +216,12 @@ void VKFramebuffer::endCommandBuffer(GraphicsContext& graphicsContext)
 {
     vkCmdEndRenderPass(_command_buffer);
     VKUtil::checkResult(vkEndCommandBuffer(_command_buffer));
-    graphicsContext.attachment<VKGraphicsContext>()->popCommandBuffer();
+    graphicsContext.attachments().ensure<VKGraphicsContext>()->popCommandBuffer();
 }
 
 void VKFramebuffer::submit(GraphicsContext& graphicsContext)
 {
-    const sp<VKGraphicsContext>& vkContext = graphicsContext.attachment<VKGraphicsContext>();
+    const sp<VKGraphicsContext>& vkContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
     vkContext->addSubmitInfo(1, &_command_buffer, 1, &_semaphore);
 }
 

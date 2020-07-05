@@ -7,6 +7,7 @@ namespace vulkan {
 class VKBuffer;
 class VKCommandBuffers;
 class VKCommandPool;
+class VKComputeContext;
 class VKDescriptorPool;
 class VKDevice;
 class VKFramebuffer;

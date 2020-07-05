@@ -22,8 +22,6 @@ public:
 
     const std::vector<VkCommandBuffer>& vkCommandBuffers() const;
 
-    void submit(GraphicsContext& graphicsContext) const;
-
 private:
     sp<Recycler> _recycler;
     sp<VKRenderTarget> _render_target;

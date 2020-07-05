@@ -30,11 +30,5 @@ const std::vector<VkCommandBuffer>& VKCommandBuffers::vkCommandBuffers() const
     return _command_buffers;
 }
 
-void VKCommandBuffers::submit(GraphicsContext& /*graphicsContext*/) const
-{
-    uint32_t aquiredImageId = _render_target->aquiredImageId();
-    _render_target->submit(_command_buffers.at(aquiredImageId));
-}
-
 }
 }

@@ -1,0 +1,49 @@
+#ifndef ARK_RENDERER_VULKAN_BASE_VK_SUBMIT_QUEUE_H_
+#define ARK_RENDERER_VULKAN_BASE_VK_SUBMIT_QUEUE_H_
+
+#include <vector>
+
+#include "core/types/shared_ptr.h"
+
+#include "graphics/forwarding.h"
+
+#include "renderer/forwarding.h"
+#include "renderer/vulkan/forward.h"
+
+#include "platform/vulkan/vulkan.h"
+
+namespace ark {
+namespace vulkan {
+
+class VKSubmitQueue {
+public:
+    VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlags stageFlags);
+    ~VKSubmitQueue();
+
+    VkSemaphore signalSemaphore() const;
+
+    void begin(VkSemaphore waitSemaphore);
+
+    void submitCommandBuffer(VkCommandBuffer commandBuffer);
+
+    void submit(VkQueue queue);
+
+    void addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers, uint32_t signalSemaphoreCount, const VkSemaphore* pSignalSemaphores);
+    void addWaitSemaphore(VkSemaphore semaphore);
+
+private:
+    sp<VKRenderer> _renderer;
+
+    VkSemaphore _signal_semaphore;
+    VkPipelineStageFlags _stage_flags;
+
+    std::vector<VkCommandBuffer> _submit_queue;
+    std::vector<VkSubmitInfo> _submit_infos;
+    std::vector<VkSemaphore> _wait_semaphores;
+
+};
+
+}
+}
+
+#endif

@@ -8,6 +8,7 @@
 #include "renderer/base/render_controller.h"
 
 #include "renderer/vulkan/base/vk_command_buffers.h"
+#include "renderer/vulkan/base/vk_compute_context.h"
 #include "renderer/vulkan/base/vk_graphics_context.h"
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_render_target.h"
@@ -32,9 +33,12 @@ void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
 
     _renderer->renderTarget()->onSurfaceChanged(width, height);
 
-    _vk_context = sp<VKGraphicsContext>::make(_renderer);
-    _vk_context->initialize(_graphics_context);
-    _graphics_context->attach<VKGraphicsContext>(_vk_context);
+    _vk_graphics_context = sp<VKGraphicsContext>::make(_graphics_context, _renderer);
+    _graphics_context->attachments().put<VKGraphicsContext>(_vk_graphics_context);
+
+    _vk_compute_context = sp<VKComputeContext>::make(_graphics_context, _renderer);
+    _graphics_context->attachments().put<VKComputeContext>(_vk_compute_context);
+
     _graphics_context->onSurfaceReady();
 }
 
@@ -43,14 +47,20 @@ void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, const sp<Rend
     _graphics_context->onDrawFrame();
 
     const sp<VKRenderTarget>& renderTarget = _renderer->renderTarget();
-    uint32_t imageId = renderTarget->acquire(_vk_context);
+    uint32_t imageId = renderTarget->acquire(_vk_graphics_context);
 
-    _vk_context->begin(imageId, backgroundColor);
+    _vk_graphics_context->begin(imageId, backgroundColor);
     renderCommand->draw(_graphics_context);
-    _vk_context->end();
+    _vk_graphics_context->end();
 
-    _vk_context->submit(_graphics_context);
-    renderTarget->swap(_vk_context);
+    _vk_graphics_context->submitCommandBuffer(_vk_graphics_context->vkCommandBuffer());
+    renderTarget->swap(_vk_graphics_context);
+
+    if(_vk_compute_context->vkCommandBuffer() != VK_NULL_HANDLE)
+    {
+        _vk_compute_context->end();
+        _vk_graphics_context->addWaitSemaphore(_vk_compute_context->semaphoreComputeComplete());
+    }
 }
 
 }

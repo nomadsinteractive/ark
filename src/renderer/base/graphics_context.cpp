@@ -41,6 +41,16 @@ const sp<Recycler>& GraphicsContext::recycler() const
     return _render_controller->recycler();
 }
 
+ByType& GraphicsContext::attachments()
+{
+    return _attachments;
+}
+
+const ByType& GraphicsContext::attachments() const
+{
+    return _attachments;
+}
+
 const sp<RenderEngineContext>& GraphicsContext::renderContext() const
 {
     return _render_context;

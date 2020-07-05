@@ -30,6 +30,7 @@ public:
 private:
     sp<Shader> _shader;
     sp<Buffer> _buffer;
+
 };
 
 }

@@ -24,12 +24,8 @@ public:
     const sp<RenderController>& renderController() const;
     const sp<Recycler>& recycler() const;
 
-    template<typename T> void attach(sp<T> attachment) {
-        _attachments.put<T>(std::move(attachment));
-    }
-    template<typename T> const sp<T>& attachment() {
-        return _attachments.ensure<T>();
-    }
+    ByType& attachments();
+    const ByType& attachments() const;
 
     uint32_t tick() const;
 

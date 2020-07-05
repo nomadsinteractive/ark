@@ -87,7 +87,7 @@ private:
     };
 
     sp<BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings) const;
-
+    void bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots);
 
 private:
     PipelineBindings _bindings;

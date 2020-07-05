@@ -14,36 +14,21 @@
 namespace ark {
 namespace vulkan {
 
-VKGraphicsContext::VKGraphicsContext(const sp<VKRenderer>& renderer)
-    : _renderer(renderer), _submit_infos(1)
+VKGraphicsContext::VKGraphicsContext(GraphicsContext& graphicsContext, const sp<VKRenderer>& renderer)
+    : _renderer(renderer), _render_target(_renderer->renderTarget()), _command_buffers(sp<VKCommandBuffers>::make(graphicsContext.recycler(), _render_target)),
+      _submit_queue(_renderer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)
 {
-    VkDevice vkLogicalDevice = renderer->vkLogicalDevice();
+    VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
     // Create synchronization objects
     VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
     // Create a semaphore used to synchronize image presentation
     // Ensures that the image is displayed before we start submitting new commands to the queu
     VKUtil::checkResult(vkCreateSemaphore(vkLogicalDevice, &semaphoreCreateInfo, nullptr, &_semaphore_present_complete));
-    // Create a semaphore used to synchronize command submission
-    // Ensures that the image is not presented until all commands have been sumbitted and executed
-    VKUtil::checkResult(vkCreateSemaphore(vkLogicalDevice, &semaphoreCreateInfo, nullptr, &_semaphore_render_complete));
 }
 
 VKGraphicsContext::~VKGraphicsContext()
 {
-    VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
-    vkDestroySemaphore(vkLogicalDevice, _semaphore_present_complete, nullptr);
-    vkDestroySemaphore(vkLogicalDevice, _semaphore_render_complete, nullptr);
-}
-
-void VKGraphicsContext::initialize(GraphicsContext& graphicsContext)
-{
-    const sp<VKRenderTarget>& renderTarget = _renderer->renderTarget();
-    _command_buffers = sp<VKCommandBuffers>::make(graphicsContext.recycler(), renderTarget);
-    VkSubmitInfo& submitInfo = _submit_infos[0];
-    submitInfo = vks::initializers::submitInfo();
-    submitInfo.pWaitDstStageMask = &_submit_pipeline_stages;
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &_semaphore_render_complete;
+    vkDestroySemaphore(_renderer->vkLogicalDevice(), _semaphore_present_complete, nullptr);
 }
 
 void VKGraphicsContext::begin(uint32_t imageId, const Color& backgroundColor)
@@ -69,21 +54,13 @@ void VKGraphicsContext::begin(uint32_t imageId, const Color& backgroundColor)
     vkCmdSetViewport(_command_buffer, 0, 1, &renderTarget.vkViewport());
     vkCmdSetScissor(_command_buffer, 0, 1, &renderTarget.vkScissor());
 
-    _submit_infos.resize(1);
-    VkSubmitInfo& submitInfo = _submit_infos[0];
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &_semaphore_present_complete;
+    _submit_queue.begin(_semaphore_present_complete);
 }
 
 void VKGraphicsContext::end()
 {
     vkCmdEndRenderPass(_command_buffer);
     VKUtil::checkResult(vkEndCommandBuffer(_command_buffer));
-}
-
-void VKGraphicsContext::submit(GraphicsContext& graphicsContext)
-{
-    _command_buffers->submit(graphicsContext);
 }
 
 VkCommandBuffer VKGraphicsContext::vkCommandBuffer() const
@@ -105,23 +82,34 @@ VkCommandBuffer VKGraphicsContext::popCommandBuffer()
     return _command_buffer;
 }
 
-void VKGraphicsContext::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers, uint32_t signalSemaphoreCount, const VkSemaphore* pSignalSemaphores)
+void VKGraphicsContext::submitCommandBuffer(VkCommandBuffer commandBuffer)
 {
-    VkSubmitInfo& preSubmitInfo = _submit_infos.back();
-    VkSubmitInfo submitInfo = vks::initializers::submitInfo();
-    submitInfo.pWaitDstStageMask = &_submit_pipeline_stages;
-    submitInfo.commandBufferCount = commandBufferCount;
-    submitInfo.pCommandBuffers = pCommandBuffers;
-    submitInfo.signalSemaphoreCount = signalSemaphoreCount;
-    submitInfo.pSignalSemaphores = pSignalSemaphores;
-    submitInfo.pWaitSemaphores = preSubmitInfo.pWaitSemaphores;
-    preSubmitInfo.pWaitSemaphores = pSignalSemaphores;
-    _submit_infos.push_back(submitInfo);
+    _submit_queue.submitCommandBuffer(commandBuffer);
 }
 
-std::vector<VkSubmitInfo>& VKGraphicsContext::submitInfos()
+void VKGraphicsContext::submit(VkQueue queue)
 {
-    return _submit_infos;
+    _submit_queue.submit(queue);
+}
+
+void VKGraphicsContext::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers, uint32_t signalSemaphoreCount, const VkSemaphore* pSignalSemaphores)
+{
+    _submit_queue.addSubmitInfo(commandBufferCount, pCommandBuffers, signalSemaphoreCount, pSignalSemaphores);
+}
+
+void VKGraphicsContext::addWaitSemaphore(VkSemaphore semaphore)
+{
+    _submit_queue.addWaitSemaphore(semaphore);
+}
+
+VkSemaphore VKGraphicsContext::semaphoreRenderComplete() const
+{
+    return _submit_queue.signalSemaphore();
+}
+
+VkSemaphore VKGraphicsContext::semaphorePresentComplete() const
+{
+    return _semaphore_present_complete;
 }
 
 }

@@ -122,12 +122,11 @@ sp<VKDescriptorPool> VKRenderTarget::makeDescriptorPool(const sp<Recycler>& recy
 uint32_t VKRenderTarget::acquire(VKGraphicsContext& vkContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
-    _submit_queue.clear();
-    VkResult result = _swap_chain.acquireNextImage(vkContext._semaphore_present_complete, &_aquired_image_id);
+    VkResult result = _swap_chain.acquireNextImage(vkContext.semaphorePresentComplete(), &_aquired_image_id);
     if(result == VK_ERROR_OUT_OF_DATE_KHR)
     {
         onSurfaceChanged(_width, _height);
-        result = _swap_chain.acquireNextImage(vkContext._semaphore_present_complete, &_aquired_image_id);
+        result = _swap_chain.acquireNextImage(vkContext.semaphorePresentComplete(), &_aquired_image_id);
     }
     VKUtil::checkResult(result);
     return _aquired_image_id;
@@ -138,24 +137,11 @@ uint32_t VKRenderTarget::aquiredImageId() const
     return _aquired_image_id;
 }
 
-void VKRenderTarget::submit(VkCommandBuffer commandBuffer)
+void VKRenderTarget::swap(VKGraphicsContext& vkGraphicsContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
-    _submit_queue.push_back(commandBuffer);
-}
-
-void VKRenderTarget::swap(VKGraphicsContext& vkContext)
-{
-    DTHREAD_CHECK(THREAD_ID_RENDERER);
-
-    std::vector<VkSubmitInfo>& submitInfos = vkContext.submitInfos();
-
-    VkSubmitInfo& submitInfo = submitInfos[0];
-    submitInfo.pCommandBuffers = _submit_queue.data();
-    submitInfo.commandBufferCount = static_cast<uint32_t>(_submit_queue.size());
-    VKUtil::checkResult(vkQueueSubmit(_queue, submitInfos.size(), &submitInfo, VK_NULL_HANDLE));
-
-    VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, vkContext._semaphore_render_complete));
+    vkGraphicsContext.submit(_queue);
+    VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, vkGraphicsContext.semaphoreRenderComplete()));
     vkQueueWaitIdle(_queue);
 }
 

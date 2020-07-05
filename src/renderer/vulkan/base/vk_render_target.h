@@ -42,8 +42,7 @@ public:
     uint32_t acquire(VKGraphicsContext& vkContext);
     uint32_t aquiredImageId() const;
 
-    void submit(VkCommandBuffer commandBuffer);
-    void swap(VKGraphicsContext& vkContext);
+    void swap(VKGraphicsContext& vkGraphicsContext);
 
     void onSurfaceChanged(uint32_t width, uint32_t height);
 
@@ -68,7 +67,6 @@ private:
     VkViewport _viewport;
 
     std::vector<VkFramebuffer> _frame_buffers;
-    std::vector<VkCommandBuffer> _submit_queue;
 
     struct
     {

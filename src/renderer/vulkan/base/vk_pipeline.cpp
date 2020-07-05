@@ -3,6 +3,7 @@
 #include "core/base/observer.h"
 
 #include "renderer/base/buffer.h"
+#include "renderer/base/compute_context.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_engine_context.h"
@@ -15,6 +16,7 @@
 #include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/vk_command_buffers.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
+#include "renderer/vulkan/base/vk_compute_context.h"
 #include "renderer/vulkan/base/vk_descriptor_pool.h"
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_graphics_context.h"
@@ -26,22 +28,6 @@
 
 namespace ark {
 namespace vulkan {
-
-namespace {
-
-class VKComputeContext {
-public:
-    VKComputeContext(const sp<VKRenderer>& renderer)
-        : _command_pool(renderer->device()->makeComputeCommandPool()) {
-    }
-
-private:
-    sp<VKCommandPool> _command_pool;
-    VkCommandBuffer _command_buffer;
-    VkSemaphore _semaphore;
-};
-
-}
 
 VKPipeline::VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Shader::Stage, String> shaders)
     : _bindings(bindings), _recycler(recycler), _renderer(renderer), _backed_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
@@ -127,18 +113,7 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
             break;
         }
 
-    const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
-    DCHECK(uboSnapshots.size() == _ubos.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), _ubos.size());
-
-    for(size_t i = 0; i < uboSnapshots.size(); ++i)
-    {
-        const RenderLayer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
-        if(_rebind_needed || isDirty(uboSnapshot._dirty_flags))
-        {
-            const sp<VKBuffer>& ubo = _ubos.at(i);
-            ubo->reload(graphicsContext, uboSnapshot._buffer);
-        }
-    }
+    bindUBOShapshots(graphicsContext, drawingContext._ubos);
     _rebind_needed = false;
 }
 
@@ -151,6 +126,7 @@ void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& dr
 void VKPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
 {
     DCHECK(_is_compute_pipeline, "Not a compute pipeline");
+    bindUBOShapshots(graphicsContext, computeContext._ubos);
     buildComputeCommandBuffer(graphicsContext, computeContext);
 }
 
@@ -381,9 +357,9 @@ void VKPipeline::setupComputePipeline(GraphicsContext& /*graphicsContext*/)
 
 void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    const sp<VKGraphicsContext>& vkContext = graphicsContext.attachment<VKGraphicsContext>();
+    const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
 
-    VkCommandBuffer commandBuffer = vkContext->vkCommandBuffer();
+    VkCommandBuffer commandBuffer = vkGraphicsContext->vkCommandBuffer();
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _layout, 0, 1, &_descriptor_set, 0, nullptr);
 
@@ -404,11 +380,11 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
     _backed_renderer->draw(graphicsContext, drawingContext, commandBuffer);
 }
 
-void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& drawingContext)
+void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
 {
-    const sp<VKGraphicsContext>& vkContext = graphicsContext.attachment<VKGraphicsContext>();
+    const sp<VKComputeContext>& vkContext = graphicsContext.attachments().ensure<VKComputeContext>();
 
-    VkCommandBuffer commandBuffer = vkContext->vkCommandBuffer();
+    VkCommandBuffer commandBuffer = vkContext->start();
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _layout, 0, 1, &_descriptor_set, 0, nullptr);
     vkCmdDispatch(commandBuffer, 100, 1, 1);
@@ -441,6 +417,21 @@ sp<VKPipeline::BakedRenderer> VKPipeline::makeBakedRenderer(const PipelineBindin
         }
     DFATAL("Not render procedure creator for %d", bindings.renderProcedure());
     return nullptr;
+}
+
+void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots)
+{
+    DCHECK(uboSnapshots.size() == _ubos.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), _ubos.size());
+
+    for(size_t i = 0; i < uboSnapshots.size(); ++i)
+    {
+        const RenderLayer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
+        if(_rebind_needed || isDirty(uboSnapshot._dirty_flags))
+        {
+            const sp<VKBuffer>& ubo = _ubos.at(i);
+            ubo->reload(graphicsContext, uboSnapshot._buffer);
+        }
+    }
 }
 
 void VKPipeline::VKDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
