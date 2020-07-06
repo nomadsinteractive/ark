@@ -9,7 +9,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/vulkan/forward.h"
-
+#include "renderer/vulkan/base/vk_submit_queue.h"
 #include "platform/vulkan/vulkan.h"
 
 namespace ark {
@@ -18,12 +18,12 @@ namespace vulkan {
 class VKComputeContext {
 public:
     VKComputeContext(GraphicsContext& graphicsContext, sp<VKRenderer> renderer);
-    ~VKComputeContext();
 
     void initialize(GraphicsContext& graphicsContext);
 
-    void begin(uint32_t imageId);
+    void begin();
     void end();
+    void submit();
 
     VkCommandBuffer start();
     VkCommandBuffer vkCommandBuffer() const;
@@ -32,16 +32,12 @@ public:
 
 private:
     sp<VKRenderer> _renderer;
-    sp<VKCommandBuffers> _command_buffers;
-
-    std::vector<VkSubmitInfo> _submit_infos;
-
-    VkPipelineStageFlags _submit_pipeline_stages = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+    sp<VKCommandPool> _command_pool;
+    VKSubmitQueue _submit_queue;
 
     VkCommandBuffer _command_buffer;
 
     VkSemaphore _semaphore_render_complete;
-    VkSemaphore _semaphore_compute_complete;
 };
 
 }

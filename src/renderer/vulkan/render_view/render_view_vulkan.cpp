@@ -59,6 +59,7 @@ void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, const sp<Rend
     if(_vk_compute_context->vkCommandBuffer() != VK_NULL_HANDLE)
     {
         _vk_compute_context->end();
+        _vk_compute_context->submit();
         _vk_graphics_context->addWaitSemaphore(_vk_compute_context->semaphoreComputeComplete());
     }
 }

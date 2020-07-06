@@ -55,6 +55,10 @@ public:
         }
     }
 
+    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& /*renderRequest*/) override {
+        return sp<Snippet::DrawEvents>::make();
+    }
+
 private:
     uint32_t getNextLayoutLocation(const ShaderPreprocessor::Declaration& declar, uint32_t& counter) const {
         uint32_t location = counter;

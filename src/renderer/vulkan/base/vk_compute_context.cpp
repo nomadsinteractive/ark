@@ -7,6 +7,8 @@
 #include "renderer/base/render_controller.h"
 
 #include "renderer/vulkan/base/vk_command_buffers.h"
+#include "renderer/vulkan/base/vk_command_pool.h"
+#include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_graphics_context.h"
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_render_target.h"
@@ -16,58 +18,37 @@ namespace ark {
 namespace vulkan {
 
 VKComputeContext::VKComputeContext(GraphicsContext& graphicsContext, sp<VKRenderer> renderer)
-    : _renderer(std::move(renderer)), _submit_infos(1), _command_buffer(VK_NULL_HANDLE)
+    : _renderer(std::move(renderer)), _command_pool(_renderer->device()->makeComputeCommandPool()),
+      _submit_queue(_renderer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT), _command_buffer(VK_NULL_HANDLE),
+      _semaphore_render_complete(graphicsContext.attachments().ensure<VKGraphicsContext>()->semaphoreRenderComplete())
 {
-    VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
-    VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
-    VKUtil::checkResult(vkCreateSemaphore(vkLogicalDevice, &semaphoreCreateInfo, nullptr, &_semaphore_compute_complete));
-
-    const sp<VKRenderTarget>& renderTarget = _renderer->renderTarget();
-    const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
-    _command_buffers = sp<VKCommandBuffers>::make(graphicsContext.recycler(), renderTarget);
-    VkSubmitInfo& submitInfo = _submit_infos[0];
-    submitInfo = vks::initializers::submitInfo();
-    submitInfo.pWaitDstStageMask = &_submit_pipeline_stages;
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &_semaphore_compute_complete;
-
-    _semaphore_render_complete = vkGraphicsContext->semaphoreRenderComplete();
 }
 
-VKComputeContext::~VKComputeContext()
-{
-    VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
-    vkDestroySemaphore(vkLogicalDevice, _semaphore_compute_complete, nullptr);
-}
-
-void VKComputeContext::begin(uint32_t imageId)
+void VKComputeContext::begin()
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
-    VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-
-    const std::vector<VkCommandBuffer>& commandBuffers = _command_buffers->vkCommandBuffers();
-
-    _command_buffer = commandBuffers.at(imageId);
-
-    VKUtil::checkResult(vkBeginCommandBuffer(_command_buffer, &cmdBufInfo));
-
-    _submit_infos.resize(1);
-    VkSubmitInfo& submitInfo = _submit_infos[0];
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &_semaphore_render_complete;
+    _command_buffer = _command_pool->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+    _submit_queue.begin(_semaphore_render_complete);
 }
 
 void VKComputeContext::end()
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     VKUtil::checkResult(vkEndCommandBuffer(_command_buffer));
+    _submit_queue.submitCommandBuffer(_command_buffer);
+}
+
+void VKComputeContext::submit()
+{
+    _submit_queue.submit(_command_pool->vkQueue());
+    _command_pool->destroyCommandBuffers(1, &_command_buffer);
     _command_buffer = VK_NULL_HANDLE;
 }
 
 VkCommandBuffer VKComputeContext::start()
 {
     if(_command_buffer == VK_NULL_HANDLE)
-        begin(0);
+        begin();
     return _command_buffer;
 }
 
@@ -79,7 +60,7 @@ VkCommandBuffer VKComputeContext::vkCommandBuffer() const
 
 VkSemaphore VKComputeContext::semaphoreComputeComplete() const
 {
-    return _semaphore_compute_complete;
+    return _submit_queue.signalSemaphore();
 }
 
 }

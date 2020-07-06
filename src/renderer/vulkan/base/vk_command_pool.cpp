@@ -21,6 +21,11 @@ VKCommandPool::~VKCommandPool()
     vkDestroyCommandPool(_logical_device, _command_pool, nullptr);
 }
 
+VkQueue VKCommandPool::vkQueue() const
+{
+    return _queue;
+}
+
 VkCommandBuffer VKCommandPool::createCommandBuffer(VkCommandBufferLevel level, bool begin) const
 {
     VkCommandBuffer cmdBuffer;
