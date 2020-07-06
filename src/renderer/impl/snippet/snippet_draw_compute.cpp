@@ -11,9 +11,8 @@ namespace {
 
 class DrawEventsCompute : public Snippet::DrawEvents {
 public:
-    DrawEventsCompute(sp<Shader> shader, sp<Buffer> buffer, const RenderRequest& renderRequest)
-        : _shader(std::move(shader)), _buffer(std::move(buffer)), _shader_bindings(_shader->makeBindings(ModelLoader::RENDER_MODE_NONE, PipelineBindings::RENDER_PROCEDURE_DRAW_ARRAYS)),
-          _compute_context(_shader_bindings, _shader->snapshot(renderRequest), _buffer->snapshot()) {
+    DrawEventsCompute(const sp<Shader>& shader, const sp<Buffer>& buffer, const sp<ShaderBindings>& shaderBindings, const RenderRequest& renderRequest)
+        : _shader(shader), _buffer(buffer), _shader_bindings(shaderBindings), _compute_context(_shader_bindings, _shader->snapshot(renderRequest), _buffer->snapshot()) {
     }
 
     virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
@@ -34,13 +33,13 @@ private:
 }
 
 SnippetDrawCompute::SnippetDrawCompute(sp<Shader> shader, sp<Buffer> buffer)
-    : _shader(std::move(shader)), _buffer(std::move(buffer))
+    : _shader(std::move(shader)), _buffer(std::move(buffer)), _shader_bindings(_shader->makeBindings(ModelLoader::RENDER_MODE_NONE, PipelineBindings::RENDER_PROCEDURE_DRAW_ARRAYS))
 {
 }
 
 sp<Snippet::DrawEvents> SnippetDrawCompute::makeDrawEvents(const RenderRequest& renderRequest)
 {
-    return sp<DrawEventsCompute>::make(_shader, _buffer, renderRequest);
+    return sp<DrawEventsCompute>::make(_shader, _buffer, _shader_bindings, renderRequest);
 }
 
 SnippetDrawCompute::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

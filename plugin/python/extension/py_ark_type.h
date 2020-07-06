@@ -24,7 +24,7 @@ class PyGarbageCollector;
 
 class ARK_PLUGIN_PYTHON_API PyArkType {
 public:
-    typedef struct {
+    struct Instance {
         PyObject_HEAD
         Box* box;
         PyObject* weakreflist;
@@ -45,7 +45,7 @@ public:
             return box && box->typeId() == Type<T>::id();
         }
 
-    } Instance;
+    };
 
 public:
     PyArkType(const String& name, const String& doc, PyTypeObject* base, unsigned long flags);

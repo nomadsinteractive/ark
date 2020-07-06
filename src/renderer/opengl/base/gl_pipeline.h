@@ -157,6 +157,8 @@ private:
         const GLPipeline::GLAttribute& getAttribute(const String& name);
         GLint getAttribLocation(const String& name);
 
+        void bindUBOSnapshots(const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots, const PipelineInput& pipelineInput);
+
         GLuint _id;
 
         std::map<String, GLAttribute> _attributes;
@@ -191,8 +193,8 @@ private:
     public:
         PipelineOperationCompute(const sp<Stub>& stub);
 
-        virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+        virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& computeContext) override;
+        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& computeContext) override;
         virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 
     private:

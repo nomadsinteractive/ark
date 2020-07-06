@@ -35,7 +35,12 @@ static std::regex _IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
 static std::regex _UNIFORM_PATTERN("uniform" UNIFORM_PATTERN);
 static std::regex _SSBO_PATTERN("layout\\(std140, binding\\s*=\\s*(\\d+)\\)\\s+buffer\\s+(\\w+)");
 
+#ifndef ANDROID
 static char _STAGE_ATTR_PREFIX[Shader::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
+#else
+static char _STAGE_ATTR_PREFIX[Shader::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "f_", "c_"};
+#endif
+
 
 ShaderPreprocessor::ShaderPreprocessor(sp<String> source, Shader::Stage shaderStage, Shader::Stage preShaderStage)
     : _source(std::move(source)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declarations, shaderStage == Shader::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
@@ -240,7 +245,11 @@ sp<Uniform> ShaderPreprocessor::getUniformInput(const String& name, Uniform::Typ
 
 String ShaderPreprocessor::outputName() const
 {
+#ifndef ANDROID
     static const char* sOutputNames[Shader::SHADER_STAGE_COUNT] = {"gl_Position", "", "", "", ANNOTATION_FRAG_COLOR, ""};
+#else
+    static const char* sOutputNames[Shader::SHADER_STAGE_COUNT] = {"gl_Position", ANNOTATION_FRAG_COLOR, ""};
+#endif
     return sOutputNames[_shader_stage];
 }
 

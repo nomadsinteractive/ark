@@ -69,7 +69,11 @@ GLenum GLUtil::toBufferType(Buffer::Type type)
 
 GLenum GLUtil::toShaderType(Shader::Stage stage)
 {
+#ifndef ANDROID
     static const GLenum types[Shader::SHADER_STAGE_COUNT] = {GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
+#else
+    static const GLenum types[Shader::SHADER_STAGE_COUNT] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
+#endif
     DASSERT(stage >= 0 && stage < Shader::SHADER_STAGE_COUNT);
     return types[stage];
 }

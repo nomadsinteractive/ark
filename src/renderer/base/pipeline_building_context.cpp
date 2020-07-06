@@ -316,7 +316,10 @@ Attribute PipelineBuildingContext::makePredefinedAttribute(const String& name, c
     if(type == "vec2")
         return Attribute("a_" + name, Attribute::TYPE_FLOAT, type, 2, false);
     if(name == "Position")
+    {
+        DCHECK(type == "vec4", "Unacceptable Position type: '%s', must be in [vec2, vec3, vec4]", type.c_str());
         return Attribute("a_Position", Attribute::TYPE_FLOAT, type, 3, false);
+    }
     if(type == "float")
         return Attribute("a_" + name, Attribute::TYPE_FLOAT, type, 1, false);
     if(type == "int")

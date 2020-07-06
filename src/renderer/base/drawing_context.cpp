@@ -29,25 +29,7 @@ private:
 
 class RenderCommandDraw : public RenderCommand {
 public:
-    RenderCommandDraw(DrawingContext context)
-        : _context(std::move(context)) {
-    }
-
-    virtual void draw(GraphicsContext& graphicsContext) override {
-        _context.upload(graphicsContext);
-
-        const sp<Pipeline> pipeline = _context._shader_bindings->getPipeline(graphicsContext);
-        pipeline->bind(graphicsContext, _context);
-        pipeline->draw(graphicsContext, _context);
-    }
-
-private:
-    DrawingContext _context;
-};
-
-class RenderCommandDrawWithEvents : public RenderCommand {
-public:
-    RenderCommandDrawWithEvents(DrawingContext context, sp<Snippet::DrawEvents> snippetDraw)
+    RenderCommandDraw(DrawingContext context, sp<Snippet::DrawEvents> snippetDraw)
         : _context(std::move(context)), _snippet_draw(std::move(snippetDraw)) {
     }
 
@@ -83,8 +65,7 @@ sp<RenderCommand> DrawingContext::toRenderCommand(const RenderRequest& renderReq
 {
     DCHECK(_shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
     sp<Snippet::DrawEvents> drawEvents = _shader_bindings->snippet()->makeDrawEvents(renderRequest);
-    return drawEvents ? sp<RenderCommand>::make<RenderCommandDrawWithEvents>(std::move(*this), std::move(drawEvents))
-                      : sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this));
+    return drawEvents ? sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this), std::move(drawEvents)) : toBindCommand();
 }
 
 sp<RenderCommand> DrawingContext::toBindCommand()

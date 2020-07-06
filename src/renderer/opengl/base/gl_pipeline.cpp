@@ -198,7 +198,7 @@ sp<GLPipeline::Stage> GLPipeline::makeShader(GraphicsContext& graphicsContext, u
 {
     typedef std::unordered_map<GLenum, std::map<String, WeakPtr<Stage>>> ShaderPool;
 
-    ShaderPool& shaders = *graphicsContext.attachment<ShaderPool>();
+    ShaderPool& shaders = *graphicsContext.attachments().ensure<ShaderPool>();
     const auto iter = shaders[type].find(source);
     if(iter != shaders[type].end())
     {
@@ -423,19 +423,8 @@ GLPipeline::PipelineOperationDraw::PipelineOperationDraw(const sp<Stub>& stub, c
 
 void GLPipeline::PipelineOperationDraw::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
 {
-    const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots = drawingContext._ubos;
-
-    const sp<PipelineInput>& pipelineInput = drawingContext._shader_bindings->pipelineInput();
-    DCHECK(uboSnapshots.size() == pipelineInput->ubos().size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), pipelineInput->ubos().size());
-
     glUseProgram(_stub->_id);
-    for(size_t i = 0; i < uboSnapshots.size(); ++i)
-    {
-        const RenderLayer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
-        const sp<PipelineInput::UBO>& ubo = pipelineInput->ubos().at(i);
-        _stub->bindUBO(uboSnapshot, ubo);
-    }
-    _stub->_rebind_needed = false;
+    _stub->bindUBOSnapshots(drawingContext._ubos, drawingContext._shader_bindings->pipelineInput());
 
     const std::vector<sp<Texture>>& samplers = drawingContext._shader_bindings->samplers();
     for(size_t i = 0; i < samplers.size(); ++i)
@@ -580,23 +569,37 @@ GLint GLPipeline::Stub::getAttribLocation(const String& name)
     return glGetAttribLocation(_id, name.c_str());
 }
 
+void GLPipeline::Stub::bindUBOSnapshots(const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots, const PipelineInput& pipelineInput)
+{
+    DCHECK(uboSnapshots.size() == pipelineInput.ubos().size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), pipelineInput.ubos().size());
+
+    for(size_t i = 0; i < uboSnapshots.size(); ++i)
+    {
+        const RenderLayer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
+        const sp<PipelineInput::UBO>& ubo = pipelineInput.ubos().at(i);
+        bindUBO(uboSnapshot, ubo);
+    }
+    _rebind_needed = false;
+}
+
 GLPipeline::PipelineOperationCompute::PipelineOperationCompute(const sp<GLPipeline::Stub>& stub)
     : _stub(stub)
 {
 }
 
-void GLPipeline::PipelineOperationCompute::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*drawingContext*/)
+void GLPipeline::PipelineOperationCompute::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*computeContext*/)
 {
 }
 
-void GLPipeline::PipelineOperationCompute::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*drawingContext*/)
+void GLPipeline::PipelineOperationCompute::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*computeContext*/)
 {
 }
 
 void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& /*graphicsContext*/, const ComputeContext& computeContext)
 {
     glUseProgram(_stub->_id);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, computeContext._vertex_buffer.id());
+    _stub->bindUBOSnapshots(computeContext._ubos, computeContext._shader_bindings->pipelineInput());
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, static_cast<GLuint>(computeContext._vertex_buffer.id()));
     glDispatchCompute(100, 1, 1);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
 }
