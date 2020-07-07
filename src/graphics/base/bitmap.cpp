@@ -24,6 +24,7 @@ Bitmap::Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t chann
 Bitmap::Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t channels, const bytearray& bytes)
     : _width(width), _height(height), _row_bytes(rowBytes), _channels(channels), _bytes(bytes)
 {
+    DASSERT(_channels != 0);
 }
 
 Bitmap::~Bitmap()

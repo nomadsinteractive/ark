@@ -40,7 +40,7 @@ public:
     }
 
     virtual sp<Shader> build(const Scope& args) override {
-        sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_vertex, _fragment);
+        sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller, _vertex, _fragment);
         buildingContext->loadManifest(_manifest, _factory, args);
         sp<Camera> camera = _camera->build(args);
         const sp<Vec4> scissor = _pipeline_bindings_scissor->build(args);
@@ -81,7 +81,7 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& d
 sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment, const sp<Snippet>& snippet, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
     const Global<StringTable> stringTable;
-    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(stringTable->getString(vertex, true), stringTable->getString(fragment, true));
+    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(resourceLoaderContext->renderController(), stringTable->getString(vertex, true), stringTable->getString(fragment, true));
     if(snippet)
         buildingContext->addSnippet(snippet);
 
@@ -164,7 +164,7 @@ std::map<Shader::Stage, sp<Builder<String>>> Shader::BUILDER::loadStages(BeanFac
 
 sp<PipelineBuildingContext> Shader::BUILDER::makePipelineBuildingContext(const Scope& args) const
 {
-    sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make();
+    sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_resource_loader_context->renderController());
     Shader::Stage prestage = Shader::SHADER_STAGE_NONE;
     for(const auto& i : _stages)
     {

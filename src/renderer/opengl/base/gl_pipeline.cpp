@@ -600,7 +600,7 @@ void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& /*graphicsCo
     glUseProgram(_stub->_id);
     _stub->bindUBOSnapshots(computeContext._ubos, computeContext._shader_bindings->pipelineInput());
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, static_cast<GLuint>(computeContext._vertex_buffer.id()));
-    glDispatchCompute(100, 1, 1);
+    glDispatchCompute(computeContext._num_work_groups, 1, 1);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
 }
 

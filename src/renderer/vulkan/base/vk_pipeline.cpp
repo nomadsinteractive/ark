@@ -388,7 +388,6 @@ void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, con
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _layout, 0, 1, &_descriptor_set, 0, nullptr);
     vkCmdDispatch(commandBuffer, 100, 1, 1);
-
 }
 
 bool VKPipeline::isDirty(const ByteArray::Borrowed& dirtyFlags) const

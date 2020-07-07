@@ -21,8 +21,8 @@ namespace ark {
 
 class PipelineBuildingContext {
 public:
-    PipelineBuildingContext();
-    PipelineBuildingContext(sp<String> vertex, sp<String> fragment);
+    PipelineBuildingContext(const sp<RenderController>& renderController);
+    PipelineBuildingContext(const sp<RenderController>& renderController, sp<String> vertex, sp<String> fragment);
 
     void loadManifest(const document& manifest, BeanFactory& factory, const Scope& args);
 
@@ -30,6 +30,7 @@ public:
 
     void setupUniforms();
 
+    sp<RenderController> _render_controller;
     sp<PipelineInput> _input;
     sp<Snippet> _snippet;
 

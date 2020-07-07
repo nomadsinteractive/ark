@@ -112,8 +112,9 @@ public:
     void deferUnref(Box box);
 
     sp<SharedBuffer> getNamedBuffer(SharedBuffer::Name name);
-
     sp<SharedBuffer> getSharedBuffer(ModelLoader::RenderMode renderMode, const Model& model);
+
+    sp<Snippet> createCoreSnippet();
 
 private:
     class RenderResource {

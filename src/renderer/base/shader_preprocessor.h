@@ -154,7 +154,7 @@ public:
     void initialize(PipelineBuildingContext& context);
     void initializeAsFirst(PipelineBuildingContext& context);
 
-    void setupUniforms(Table<String, sp<Uniform>>& uniforms, int32_t& counter);
+    void setupUniforms(Table<String, sp<Uniform>>& uniforms, int32_t& binding);
 
     const char* inVarPrefix() const;
     const char* outVarPrefix() const;

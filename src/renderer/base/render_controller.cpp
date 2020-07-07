@@ -12,8 +12,10 @@
 #include "renderer/base/model.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_engine.h"
+#include "renderer/base/render_engine_context.h"
 #include "renderer/base/shared_buffer.h"
 #include "renderer/inf/renderer_factory.h"
+#include "renderer/inf/snippet_factory.h"
 #include "renderer/inf/vertices.h"
 #include "renderer/util/render_util.h"
 
@@ -271,6 +273,11 @@ sp<SharedBuffer> RenderController::getSharedBuffer(ModelLoader::RenderMode rende
                                              [indexCount](size_t objectCount)->size_t { return indexCount * objectCount * sizeof(element_index_t); });
     _shared_buffers.insert(std::make_pair(hash, sharedBuffer));
     return sharedBuffer;
+}
+
+sp<Snippet> RenderController::createCoreSnippet()
+{
+    return _render_engine->context()->snippetFactory()->createCoreSnippet(*this);
 }
 
 RenderController::RenderResource::RenderResource(const sp<Resource>& resource, const sp<Uploader>& uploader, UploadPriority uploadPriority)

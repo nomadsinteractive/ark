@@ -26,6 +26,7 @@ RectI TexturePacker::addBitmap(const String& src)
 
 void TexturePacker::updateTexture(Texture& texture)
 {
+    DCHECK(_channels, "No bitmap was added");
     const sp<Texture::Uploader> uploader = sp<MaxRectsTextureUploader>::make(texture.width(),texture.height(), _channels, _resource_loader_context->bitmapBundle(), std::move(_packed_bitmaps));
     const sp<Texture> tex = _resource_loader_context->renderController()->createTexture(texture.size(), texture.parameters(), uploader);
     texture.setDelegate(tex->delegate());

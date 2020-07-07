@@ -5,9 +5,9 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
-#include "renderer/inf/snippet_factory.h"
 
 namespace ark {
 
@@ -53,7 +53,7 @@ sp<Snippet::DrawEvents> CoreSnippet::makeDrawEvents(const RenderRequest& /*rende
 
 sp<Snippet> CoreSnippet::createCoreSnippet(GraphicsContext& graphicsContext) const
 {
-    const sp<Snippet> coreSnippet = graphicsContext.renderContext()->snippetFactory()->createCoreSnippet(graphicsContext.renderController());
+    const sp<Snippet> coreSnippet = graphicsContext.renderController()->createCoreSnippet();
     DASSERT(coreSnippet);
     return _snippet ? sp<Snippet>::make<SnippetLinkedChain>(coreSnippet, _snippet) : coreSnippet;
 }

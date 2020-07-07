@@ -16,6 +16,7 @@ ModelBundle::ModelBundle(sp<Atlas> atlas)
 
 void ModelBundle::import(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest, ModelBundle::Importer& importer)
 {
+    bool hasModelMaps = false;
     TexturePacker texturePacker(resourceLoaderContext, _atlas->width(), _atlas->height(), false);
     for(const document& i : manifest->children())
     {
@@ -26,12 +27,14 @@ void ModelBundle::import(const sp<ResourceLoaderContext>& resourceLoaderContext,
             const String& mappingSrc = Documents::ensureAttribute(j, Constants::Attributes::SRC);
             const RectI rect = texturePacker.addBitmap(mappingSrc);
             _atlas->add(type, rect.left(), rect.top(), rect.right(), rect.bottom(), Rect(0, 0, 1.0f, 1.0f), V2(rect.width(), rect.height()), V2(0.5f, 0.5f));
+            hasModelMaps = true;
         }
 
         const Rect bounds = _atlas && _atlas->has(type) ? _atlas->getItemUV(type) : Rect(0, 1.0f, 1.0f, 0);
         addModel(type, importer.import(src, bounds));
     }
-    texturePacker.updateTexture(_atlas->texture());
+    if(hasModelMaps)
+        texturePacker.updateTexture(_atlas->texture());
 }
 
 ModelBundle::ModelInfo& ModelBundle::addModel(int32_t type, const Model& model)

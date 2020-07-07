@@ -10,7 +10,7 @@ namespace ark {
 
 class SnippetDrawCompute : public Snippet {
 public:
-    SnippetDrawCompute(sp<Shader> shader, sp<Buffer> buffer);
+    SnippetDrawCompute(sp<Shader> shader, sp<Buffer> buffer, sp<Integer> numWorkGroups);
 
     virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
 
@@ -24,14 +24,15 @@ public:
     private:
         sp<Builder<Shader>> _shader;
         sp<Builder<Buffer>> _buffer;
-
+        sp<Builder<Integer>> _num_work_groups;
     };
 
 private:
     sp<Shader> _shader;
     sp<Buffer> _buffer;
-    sp<ShaderBindings> _shader_bindings;
+    sp<Integer> _num_work_groups;
 
+    sp<ShaderBindings> _shader_bindings;
 };
 
 }

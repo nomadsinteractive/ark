@@ -44,13 +44,13 @@ private:
 
 }
 
-PipelineBuildingContext::PipelineBuildingContext()
-    : _input(sp<PipelineInput>::make())
+PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController)
+    : _render_controller(renderController), _input(sp<PipelineInput>::make())
 {
 }
 
-PipelineBuildingContext::PipelineBuildingContext(sp<String> vertex, sp<String> fragment)
-    : PipelineBuildingContext()
+PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController, sp<String> vertex, sp<String> fragment)
+    : PipelineBuildingContext(renderController)
 {
     addStage(std::move(vertex), Shader::SHADER_STAGE_VERTEX, Shader::SHADER_STAGE_NONE);
     addStage(std::move(fragment), Shader::SHADER_STAGE_FRAGMENT, Shader::SHADER_STAGE_VERTEX);
@@ -153,6 +153,10 @@ void PipelineBuildingContext::initialize()
 void PipelineBuildingContext::setupUniforms()
 {
     int32_t binding = 0;
+    for(const auto& i : _stages)
+        for(const auto& j : i.second->_ssbos)
+            binding = std::max(binding, j.second + 1);
+
     for(auto& i : _stages)
         i.second->setupUniforms(_uniforms, binding);
 }
