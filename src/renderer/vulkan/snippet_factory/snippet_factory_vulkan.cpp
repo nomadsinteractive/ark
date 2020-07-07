@@ -55,7 +55,7 @@ public:
         }
     }
 
-    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& /*renderRequest*/) override {
+    virtual sp<DrawEvents> makeDrawEvents() override {
         return sp<Snippet::DrawEvents>::make();
     }
 
@@ -160,7 +160,7 @@ private:
 
 }
 
-sp<Snippet> SnippetFactoryVulkan::createCoreSnippet(RenderController& /*resourceManager*/)
+sp<Snippet> SnippetFactoryVulkan::createCoreSnippet()
 {
     return sp<CoreSnippetVulkan>::make();
 }

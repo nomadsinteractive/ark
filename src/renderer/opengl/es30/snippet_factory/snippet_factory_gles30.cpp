@@ -56,14 +56,14 @@ public:
         }
     }
 
-    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& /*renderRequest*/) override {
+    virtual sp<DrawEvents> makeDrawEvents() override {
         return sp<DrawEventsGLES30>::make();
     }
 };
 
 }
 
-sp<Snippet> SnippetFactoryGLES30::createCoreSnippet(RenderController& /*renderController*/)
+sp<Snippet> SnippetFactoryGLES30::createCoreSnippet()
 {
     return sp<SnippetGLES30>::make();
 }

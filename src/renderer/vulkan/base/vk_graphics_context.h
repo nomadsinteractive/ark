@@ -37,7 +37,7 @@ public:
     void addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers, uint32_t signalSemaphoreCount, const VkSemaphore* pSignalSemaphores);
     void addWaitSemaphore(VkSemaphore semaphore);
 
-    VkSemaphore semaphoreRenderComplete() const;
+    VkSemaphore semaphoreRenderComplete(size_t n) const;
     VkSemaphore semaphorePresentComplete() const;
 
 private:

@@ -11,11 +11,12 @@ namespace ark {
 
 class SnippetLinkedChain : public Snippet {
 public:
-    SnippetLinkedChain(const sp<Snippet>& delegate, const sp<Snippet>& next);
+    SnippetLinkedChain(sp<Snippet> delegate, sp<Snippet> next);
 
     virtual void preInitialize(PipelineBuildingContext& context) override;
     virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
     virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
+    virtual sp<DrawEvents> makeDrawEvents() override;
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Snippet> {
@@ -44,6 +45,9 @@ public:
         BeanFactory _factory;
         document _manifest;
     };
+
+private:
+    sp<Snippet::DrawEvents> makeDrawEvents(sp<Snippet::DrawEvents> de1, sp<Snippet::DrawEvents> de2) const;
 
 private:
     sp<Snippet> _delegate;

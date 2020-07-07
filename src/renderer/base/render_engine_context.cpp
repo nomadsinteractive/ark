@@ -107,7 +107,7 @@ void RenderEngineContext::setSnippetFactory(sp<SnippetFactory> snippetfactory)
 
 const sp<SnippetFactory>& RenderEngineContext::snippetFactory() const
 {
-    DCHECK(_snippet_factory, "Uninitialized GLContext");
+    DCHECK(_snippet_factory, "Uninitialized RenderEngineContext");
     return _snippet_factory;
 }
 

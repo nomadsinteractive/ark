@@ -31,14 +31,14 @@ public:
     }
     virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& /*context*/, const PipelineLayout& /*pipelineLayout*/) override {
     }
-    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& /*renderRequest*/) override {
+    virtual sp<DrawEvents> makeDrawEvents() override {
         return sp<DrawEventsGLES20>::make();
     }
 };
 
 }
 
-sp<Snippet> SnippetFactoryGLES20::createCoreSnippet(RenderController& /*renderController*/)
+sp<Snippet> SnippetFactoryGLES20::createCoreSnippet()
 {
     return sp<SnippetGLES20>::make();
 }

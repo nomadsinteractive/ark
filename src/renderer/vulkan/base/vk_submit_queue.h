@@ -17,10 +17,10 @@ namespace vulkan {
 
 class VKSubmitQueue {
 public:
-    VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlags stageFlags);
+    VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlags stageFlags, size_t numOfSignalSemaphores);
     ~VKSubmitQueue();
 
-    VkSemaphore signalSemaphore() const;
+    const std::vector<VkSemaphore>& signalSemaphores() const;
 
     void begin(VkSemaphore waitSemaphore);
 
@@ -33,13 +33,12 @@ public:
 
 private:
     sp<VKRenderer> _renderer;
-
-    VkSemaphore _signal_semaphore;
     VkPipelineStageFlags _stage_flags;
 
     std::vector<VkCommandBuffer> _submit_queue;
     std::vector<VkSubmitInfo> _submit_infos;
     std::vector<VkSemaphore> _wait_semaphores;
+    std::vector<VkSemaphore> _signal_semaphores;
 
 };
 

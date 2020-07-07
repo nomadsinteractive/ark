@@ -19,8 +19,8 @@ namespace vulkan {
 
 VKComputeContext::VKComputeContext(GraphicsContext& graphicsContext, sp<VKRenderer> renderer)
     : _renderer(std::move(renderer)), _command_pool(_renderer->device()->makeComputeCommandPool()),
-      _submit_queue(_renderer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT), _command_buffer(VK_NULL_HANDLE),
-      _semaphore_render_complete(graphicsContext.attachments().ensure<VKGraphicsContext>()->semaphoreRenderComplete())
+      _submit_queue(_renderer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 1), _command_buffer(VK_NULL_HANDLE),
+      _semaphore_render_complete(graphicsContext.attachments().ensure<VKGraphicsContext>()->semaphoreRenderComplete(1))
 {
 }
 
@@ -60,7 +60,7 @@ VkCommandBuffer VKComputeContext::vkCommandBuffer() const
 
 VkSemaphore VKComputeContext::semaphoreComputeComplete() const
 {
-    return _submit_queue.signalSemaphore();
+    return _submit_queue.signalSemaphores().at(0);
 }
 
 }

@@ -141,7 +141,7 @@ void VKRenderTarget::swap(VKGraphicsContext& vkGraphicsContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     vkGraphicsContext.submit(_queue);
-    VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, vkGraphicsContext.semaphoreRenderComplete()));
+    VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, vkGraphicsContext.semaphoreRenderComplete(0)));
     vkQueueWaitIdle(_queue);
 }
 

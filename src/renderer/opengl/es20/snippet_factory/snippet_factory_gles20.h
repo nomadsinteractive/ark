@@ -8,7 +8,7 @@ namespace gles20 {
 
 class SnippetFactoryGLES20 : public SnippetFactory {
 public:
-    virtual sp<Snippet> createCoreSnippet(RenderController& resourceManager) override;
+    virtual sp<Snippet> createCoreSnippet() override;
 };
 
 }

@@ -16,7 +16,7 @@ namespace vulkan {
 
 VKGraphicsContext::VKGraphicsContext(GraphicsContext& graphicsContext, const sp<VKRenderer>& renderer)
     : _renderer(renderer), _render_target(_renderer->renderTarget()), _command_buffers(sp<VKCommandBuffers>::make(graphicsContext.recycler(), _render_target)),
-      _submit_queue(_renderer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)
+      _submit_queue(_renderer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 2)
 {
     VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
     // Create synchronization objects
@@ -102,9 +102,9 @@ void VKGraphicsContext::addWaitSemaphore(VkSemaphore semaphore)
     _submit_queue.addWaitSemaphore(semaphore);
 }
 
-VkSemaphore VKGraphicsContext::semaphoreRenderComplete() const
+VkSemaphore VKGraphicsContext::semaphoreRenderComplete(size_t n) const
 {
-    return _submit_queue.signalSemaphore();
+    return _submit_queue.signalSemaphores().at(n);
 }
 
 VkSemaphore VKGraphicsContext::semaphorePresentComplete() const

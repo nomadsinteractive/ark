@@ -275,11 +275,6 @@ sp<SharedBuffer> RenderController::getSharedBuffer(ModelLoader::RenderMode rende
     return sharedBuffer;
 }
 
-sp<Snippet> RenderController::createCoreSnippet()
-{
-    return _render_engine->context()->snippetFactory()->createCoreSnippet(*this);
-}
-
 RenderController::RenderResource::RenderResource(const sp<Resource>& resource, const sp<Uploader>& uploader, UploadPriority uploadPriority)
     : _resource(resource), _uploader(uploader), _upload_priority(uploadPriority)
 {

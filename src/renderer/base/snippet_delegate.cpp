@@ -8,6 +8,7 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
+#include "renderer/inf/snippet_factory.h"
 
 namespace ark {
 
@@ -17,16 +18,21 @@ public:
 
     virtual void preInitialize(PipelineBuildingContext& context) override;
     virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
-    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
-
-private:
-    sp<Snippet> createCoreSnippet(GraphicsContext& graphicsContext) const;
+    virtual sp<DrawEvents> makeDrawEvents() override;
 
 private:
     SnippetDelegate& _wrapper;
     sp<Snippet> _snippet;
-
 };
+
+static sp<Snippet> createCoreSnippet(GraphicsContext& graphicsContext, sp<Snippet> next)
+{
+    const sp<Snippet> coreSnippet = graphicsContext.renderContext()->snippetFactory()->createCoreSnippet();
+    DASSERT(coreSnippet);
+    return next ? sp<Snippet>::make<SnippetLinkedChain>(std::move(coreSnippet), std::move(next)) : coreSnippet;
+
+}
+
 
 CoreSnippet::CoreSnippet(SnippetDelegate& wrapper, const sp<Snippet>& snippet)
     : _wrapper(wrapper), _snippet(snippet)
@@ -42,20 +48,13 @@ void CoreSnippet::preInitialize(PipelineBuildingContext& context)
 void CoreSnippet::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout)
 {
     const sp<Snippet> delegate = _wrapper._core;
-    _wrapper._core = createCoreSnippet(graphicsContext);
+    _wrapper._core = createCoreSnippet(graphicsContext, _snippet);
     _wrapper.preCompile(graphicsContext, context, pipelineLayout);
 }
 
-sp<Snippet::DrawEvents> CoreSnippet::makeDrawEvents(const RenderRequest& /*renderRequest*/)
+sp<Snippet::DrawEvents> CoreSnippet::makeDrawEvents()
 {
     return nullptr;
-}
-
-sp<Snippet> CoreSnippet::createCoreSnippet(GraphicsContext& graphicsContext) const
-{
-    const sp<Snippet> coreSnippet = graphicsContext.renderController()->createCoreSnippet();
-    DASSERT(coreSnippet);
-    return _snippet ? sp<Snippet>::make<SnippetLinkedChain>(coreSnippet, _snippet) : coreSnippet;
 }
 
 SnippetDelegate::SnippetDelegate(const sp<Snippet>& snippet)
@@ -76,6 +75,11 @@ void SnippetDelegate::preCompile(GraphicsContext& graphicsContext, PipelineBuild
 sp<Snippet::DrawEvents> SnippetDelegate::makeDrawEvents(const RenderRequest& renderRequest)
 {
     return _core->makeDrawEvents(renderRequest);
+}
+
+sp<Snippet::DrawEvents> SnippetDelegate::makeDrawEvents()
+{
+    return _core->makeDrawEvents();
 }
 
 }

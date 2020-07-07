@@ -32,11 +32,11 @@ private:
 
 }
 
-SnippetLinkedChain::SnippetLinkedChain(const sp<Snippet>& delegate, const sp<Snippet>& next)
-    : _delegate(delegate), _next(next)
+SnippetLinkedChain::SnippetLinkedChain(sp<Snippet> delegate, sp<Snippet> next)
+    : _delegate(std::move(delegate)), _next(std::move(next))
 {
-    DASSERT(delegate);
-    DASSERT(next);
+    DASSERT(_delegate);
+    DASSERT(_next);
 }
 
 void SnippetLinkedChain::preInitialize(PipelineBuildingContext& context)
@@ -53,10 +53,18 @@ void SnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, PipelineBu
 
 sp<Snippet::DrawEvents> SnippetLinkedChain::makeDrawEvents(const RenderRequest& renderRequest)
 {
-    sp<Snippet::DrawEvents> de1 = _delegate->makeDrawEvents(renderRequest);
-    sp<Snippet::DrawEvents> de2 = _next->makeDrawEvents(renderRequest);
+    return makeDrawEvents(_delegate->makeDrawEvents(renderRequest), _next->makeDrawEvents(renderRequest));
+}
+
+sp<Snippet::DrawEvents> SnippetLinkedChain::makeDrawEvents()
+{
+    return makeDrawEvents(_delegate->makeDrawEvents(), _next->makeDrawEvents());
+}
+
+sp<Snippet::DrawEvents> SnippetLinkedChain::makeDrawEvents(sp<Snippet::DrawEvents> de1, sp<Snippet::DrawEvents> de2) const
+{
     if(de1 && de2)
-        return sp<DrawEventsLinkedChain>::make(de1, de2);
+        return sp<DrawEventsLinkedChain>::make(std::move(de1), std::move(de2));
     return de1 ? de1 : de2;
 }
 

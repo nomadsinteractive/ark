@@ -8,7 +8,7 @@ namespace vulkan {
 
 class SnippetFactoryVulkan : public SnippetFactory {
 public:
-    virtual sp<Snippet> createCoreSnippet(RenderController& resourceManager) override;
+    virtual sp<Snippet> createCoreSnippet() override;
 };
 
 }
