@@ -65,7 +65,7 @@ sp<RenderCommand> DrawingContext::toRenderCommand(const RenderRequest& renderReq
 {
     DCHECK(_shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
     sp<Snippet::DrawEvents> drawEvents = _shader_bindings->snippet()->makeDrawEvents(renderRequest);
-    return drawEvents ? sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this), std::move(drawEvents)) : toBindCommand();
+    return sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this), std::move(drawEvents));
 }
 
 sp<RenderCommand> DrawingContext::toBindCommand()

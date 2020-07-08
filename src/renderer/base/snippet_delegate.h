@@ -23,6 +23,7 @@ private:
     sp<Snippet> _core;
 
     friend class CoreSnippet;
+    friend class CoreDrawEvents;
 };
 
 }

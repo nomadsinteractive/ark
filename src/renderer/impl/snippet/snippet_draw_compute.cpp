@@ -1,5 +1,7 @@
 #include "renderer/impl/snippet/snippet_draw_compute.h"
 
+#include "core/util/bean_utils.h"
+
 #include "renderer/base/compute_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
@@ -31,25 +33,35 @@ private:
 
 }
 
-SnippetDrawCompute::SnippetDrawCompute(sp<Shader> shader, sp<Buffer> buffer, sp<Integer> numWorkGroups)
+SnippetDrawCompute::SnippetDrawCompute(sp<Shader> shader, sp<Buffer> buffer, std::array<sp<Integer>, 3> numWorkGroups)
     : _shader(std::move(shader)), _buffer(std::move(buffer)), _num_work_groups(std::move(numWorkGroups)), _shader_bindings(_shader->makeBindings(ModelLoader::RENDER_MODE_NONE, PipelineBindings::RENDER_PROCEDURE_DRAW_ARRAYS))
 {
 }
 
 sp<Snippet::DrawEvents> SnippetDrawCompute::makeDrawEvents(const RenderRequest& renderRequest)
 {
-    return sp<DrawEventsCompute>::make(_shader, _buffer, ComputeContext(_shader_bindings, _shader->snapshot(renderRequest), _buffer->snapshot(), _num_work_groups->val()));
+    std::array<int32_t, 3> numWorkGroups = {
+        _num_work_groups.at(0) ? _num_work_groups.at(0)->val() : 1,
+        _num_work_groups.at(1) ? _num_work_groups.at(1)->val() : 1,
+        _num_work_groups.at(2) ? _num_work_groups.at(2)->val() : 1
+    };
+    return sp<DrawEventsCompute>::make(_shader, _buffer, ComputeContext(_shader_bindings, _shader->snapshot(renderRequest), _buffer->snapshot(), std::move(numWorkGroups)));
 }
 
 SnippetDrawCompute::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _shader(factory.ensureBuilder<Shader>(manifest, Constants::Attributes::SHADER)), _buffer(factory.ensureBuilder<Buffer>(manifest, "buffer")),
-      _num_work_groups(factory.ensureBuilder<Integer>(manifest, "num-work-groups"))
+    : _shader(factory.ensureBuilder<Shader>(manifest, Constants::Attributes::SHADER)), _buffer(factory.ensureBuilder<Buffer>(manifest, "buffer"))
 {
+    BeanUtils::split(factory, manifest, "num-work-groups", _num_work_groups[0], _num_work_groups[1], _num_work_groups[2]);
 }
 
 sp<Snippet> SnippetDrawCompute::BUILDER::build(const Scope& args)
 {
-    return sp<SnippetDrawCompute>::make(_shader->build(args), _buffer->build(args), _num_work_groups->build(args));
+    std::array<sp<Integer>, 3> numWorkGroups = {
+        _num_work_groups.at(0) ? _num_work_groups.at(0)->build(args) : nullptr,
+        _num_work_groups.at(1) ? _num_work_groups.at(1)->build(args) : nullptr,
+        _num_work_groups.at(2) ? _num_work_groups.at(2)->build(args) : nullptr,
+    };
+    return sp<SnippetDrawCompute>::make(_shader->build(args), _buffer->build(args), std::move(numWorkGroups));
 }
 
 }

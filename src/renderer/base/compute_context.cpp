@@ -28,7 +28,7 @@ private:
 
 }
 
-ComputeContext::ComputeContext(const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, int32_t numWorkGroups)
+ComputeContext::ComputeContext(const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, Buffer::Snapshot vertexBuffer, std::array<int32_t, 3> numWorkGroups)
     : _shader_bindings(shaderBindings), _ubos(std::move(ubo)), _vertex_buffer(std::move(vertexBuffer)), _num_work_groups(numWorkGroups)
 {
 }
