@@ -70,13 +70,13 @@ template<> ARK_API sp<Rotate> Null::ptr()
 }
 
 Rotate::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _rotation(factory.getBuilder<Numeric>(manifest, Constants::Attributes::ROTATE))
+    : _angle(factory.getBuilder<Numeric>(manifest, Constants::Attributes::ROTATE)), _direction(factory.getBuilder<Vec3>(manifest, "direction"))
 {
 }
 
 sp<Rotate> Rotate::BUILDER::build(const Scope& args)
 {
-    return sp<Rotate>::make(_rotation->build(args));
+    return sp<Rotate>::make(_angle->build(args), _direction->build(args));
 }
 
 Rotate::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)

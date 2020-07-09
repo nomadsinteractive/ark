@@ -58,7 +58,8 @@ public:
         virtual sp<Rotate> build(const Scope& args) override;
 
     private:
-        SafePtr<Builder<Numeric>> _rotation;
+        SafePtr<Builder<Numeric>> _angle;
+        SafePtr<Builder<Vec3>> _direction;
     };
 
 //  [[plugin::builder::by-value]]

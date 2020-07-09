@@ -111,7 +111,7 @@ ModelLoaderAssimp::Importer::Importer()
 
 Model ModelLoaderAssimp::Importer::import(const String& src, const Rect& bounds)
 {
-    const aiScene* scene = _importer.ReadFile(src.c_str(), aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_FlipWindingOrder);
+    const aiScene* scene = _importer.ReadFile(src.c_str(), aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_FlipWindingOrder | aiProcess_GenBoundingBoxes);
     return loadModel(scene, bounds);
 }
 
