@@ -31,7 +31,8 @@ public:
         _convex_hull_shape->addPoint(btVector3(position.x(), position.y(), position.z()));
     }
 
-    virtual void write(const void* ptr, uint32_t size, uint32_t offset) override {
+    virtual uint32_t write(const void* ptr, uint32_t size, uint32_t offset) override {
+        return size;
     }
 
 private:

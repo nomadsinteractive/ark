@@ -77,11 +77,12 @@ void VertexStream::WriterMemory::writePosition(const V3& position)
     write(&position, sizeof(position), 0);
 }
 
-void VertexStream::WriterMemory::write(const void* ptr, uint32_t size, uint32_t offset)
+uint32_t VertexStream::WriterMemory::write(const void* ptr, uint32_t size, uint32_t offset)
 {
     DCHECK(_ptr, "BufferWriter is uninitialized, call nextVertex() first");
     DCHECK(size + offset <= _stride, "Stride overflow: sizeof(value) = %d, offset = %d", size, offset);
     memcpy(_ptr + offset, ptr, size);
+    return size;
 }
 
 }

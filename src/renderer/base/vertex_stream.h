@@ -2,6 +2,7 @@
 #define ARK_RENDERER_BASE_VERTEX_BUFFER_H_
 
 #include "core/base/api.h"
+#include "core/inf/writable.h"
 
 #include "graphics/base/transform.h"
 #include "graphics/inf/renderable.h"
@@ -13,13 +14,12 @@ namespace ark {
 
 class ARK_API VertexStream {
 public:
-    class Writer {
+    class Writer : public Writable {
     public:
         virtual ~Writer() = default;
 
         virtual void next() = 0;
         virtual void writePosition(const V3& position) = 0;
-        virtual void write(const void* ptr, uint32_t size, uint32_t offset) = 0;
     };
 
 public:
@@ -52,7 +52,7 @@ private:
 
         virtual void next() override;
         virtual void writePosition(const V3& position) override;
-        virtual void write(const void* ptr, uint32_t size, uint32_t offset) override;
+        virtual uint32_t write(const void* ptr, uint32_t size, uint32_t offset) override;
 
     private:
         uint8_t* _ptr;

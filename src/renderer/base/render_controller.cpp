@@ -29,8 +29,8 @@ public:
         : _hash(0) {
     }
 
-    virtual uint32_t write(void* buffer, uint32_t size, uint32_t offset) override {
-        _hash += RenderUtil::hash(reinterpret_cast<element_index_t*>(buffer), size / sizeof(element_index_t));
+    virtual uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
+        _hash += RenderUtil::hash(reinterpret_cast<const element_index_t*>(buffer), size / sizeof(element_index_t));
         return size;
     }
 

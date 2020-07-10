@@ -139,7 +139,7 @@ public:
         : _delegate(delegate), _offset(offset) {
     }
 
-    virtual uint32_t write(void* buffer, uint32_t size, uint32_t offset) override {
+    virtual uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
         _delegate.write(buffer, size, _offset + offset);
         return size;
     }

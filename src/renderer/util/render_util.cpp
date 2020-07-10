@@ -65,7 +65,7 @@ Model RenderUtil::makeUnitPointModel()
     return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<1>>::make(std::initializer_list<element_index_t>({0}))), sp<VerticesPoint>::make(), Metrics{V3(1.0f), V3(1.0f), V3()});
 }
 
-element_index_t RenderUtil::hash(element_index_t* buf, size_t len)
+element_index_t RenderUtil::hash(const element_index_t* buf, size_t len)
 {
     element_index_t h = 0;
     for(size_t i = 0; i < len; ++i)
