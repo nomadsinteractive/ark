@@ -25,9 +25,9 @@ public:
 
         const sp<PipelineInput>& pipelineInput = pipelineLayout.input();
 
-        if(context.hasStage(Shader::SHADER_STAGE_FRAGMENT))
+        if(context.hasStage(PipelineInput::SHADER_STAGE_FRAGMENT))
         {
-            ShaderPreprocessor& fragment = context.getStage(Shader::SHADER_STAGE_FRAGMENT);
+            ShaderPreprocessor& fragment = context.getStage(PipelineInput::SHADER_STAGE_FRAGMENT);
             fragment.outDeclare("vec4", "FragColor");
             setLayoutDescriptor(fragment._declaration_samplers, "binding", static_cast<uint32_t>(pipelineInput->ubos().size()));
             fragment._predefined_macros.push_back("#define texture2D texture");

@@ -41,13 +41,14 @@ bool GLTexture2D::download(GraphicsContext& /*graphicsContext*/, Bitmap& bitmap)
     return true;
 }
 
-void GLTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, uint32_t /*index*/, const Bitmap& bitmap)
+void GLTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata)
 {
+    DASSERT(imagedata.size() == 1);
     uint8_t channels = bitmap.channels();
     GLenum format = GLUtil::getTextureFormat(_parameters->_format, channels);
     GLenum pixelFormat = GLUtil::getPixelFormat(_parameters->_format, bitmap);
     GLenum internalFormat = GLUtil::getTextureInternalFormat(_parameters->_format, bitmap);
-    glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(internalFormat), static_cast<int32_t>(bitmap.width()), static_cast<int32_t>(bitmap.height()), 0, format, pixelFormat, bitmap.at(0, 0));
+    glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(internalFormat), static_cast<int32_t>(bitmap.width()), static_cast<int32_t>(bitmap.height()), 0, format, pixelFormat, imagedata.at(0)->buf());
     LOGD("Texture Uploaded, id = %d, width = %d, height = %d", static_cast<uint32_t>(id()), bitmap.width(), bitmap.height());
 }
 

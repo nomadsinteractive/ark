@@ -13,7 +13,6 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_input.h"
-#include "renderer/base/shader.h"
 #include "renderer/inf/resource.h"
 #include "renderer/inf/pipeline.h"
 
@@ -24,7 +23,7 @@ namespace opengl {
 
 class GLPipeline : public Pipeline {
 public:
-    GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<Shader::Stage, String> shaders, const PipelineBindings& bindings);
+    GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<PipelineInput::ShaderStage, String> shaders, const PipelineBindings& bindings);
     virtual ~GLPipeline() override;
 
     virtual uint64_t id() override;
@@ -210,7 +209,7 @@ private:
 
     uint32_t _version;
 
-    std::map<Shader::Stage, String> _shaders;
+    std::map<PipelineInput::ShaderStage, String> _shaders;
 
     sp<PipelineOperation> _pipeline_operation;
 };

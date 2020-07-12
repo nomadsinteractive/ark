@@ -47,7 +47,7 @@ const sp<Snippet>& PipelineBindings::snippet() const
     return _stub->_layout->snippet();
 }
 
-const Buffer::Attributes& PipelineBindings::attributes() const
+const PipelineInput::Attributes& PipelineBindings::attributes() const
 {
     return _stub->_attributes;
 }

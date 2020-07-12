@@ -10,7 +10,6 @@
 #include "renderer/base/attribute.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/shader.h"
 #include "renderer/base/shader_preprocessor.h"
 #include "renderer/base/uniform.h"
 
@@ -26,7 +25,7 @@ public:
 
     const sp<PipelineInput>& input() const;
 
-    std::map<Shader::Stage, String> getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const;
+    std::map<PipelineInput::ShaderStage, String> getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const;
 
     const Table<String, sp<Texture>>& samplers() const;
 
@@ -40,7 +39,7 @@ private:
     sp<PipelineInput> _input;
     sp<Snippet> _snippet;
 
-    std::map<Shader::Stage, ShaderPreprocessor::Preprocessed> _preprocessed_stages;
+    std::map<PipelineInput::ShaderStage, ShaderPreprocessor::Preprocessed> _preprocessed_stages;
     Table<String, sp<Texture>> _samplers;
 
     friend class Shader;

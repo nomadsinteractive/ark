@@ -21,20 +21,6 @@ namespace ark {
 //[[script::bindings::auto]]
 class ARK_API Shader {
 public:
-    enum Stage {
-        SHADER_STAGE_NONE = -1,
-        SHADER_STAGE_VERTEX,
-#ifndef ANDROID
-        SHADER_STAGE_TESSELLATION_CTRL,
-        SHADER_STAGE_TESSELLATION_EVAL,
-        SHADER_STAGE_GEOMETRY,
-#endif
-        SHADER_STAGE_FRAGMENT,
-        SHADER_STAGE_COMPUTE,
-        SHADER_STAGE_COUNT
-    };
-
-public:
     Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> layout, const sp<Camera>& camera, const Rect& pipelineBindingsScissor, uint32_t pipelineBindingsFlag);
     DEFAULT_COPY_AND_ASSIGN(Shader);
 
@@ -59,7 +45,7 @@ public:
         virtual sp<Shader> build(const Scope& args) override;
 
     private:
-        std::map<Shader::Stage, sp<Builder<String>>> loadStages(BeanFactory& factory, const document& manifest) const;
+        std::map<PipelineInput::ShaderStage, sp<Builder<String>>> loadStages(BeanFactory& factory, const document& manifest) const;
 
         sp<PipelineBuildingContext> makePipelineBuildingContext(const Scope& args) const;
 
@@ -68,7 +54,7 @@ public:
         document _manifest;
         sp<ResourceLoaderContext> _resource_loader_context;
 
-        std::map<Shader::Stage, sp<Builder<String>>> _stages;
+        std::map<PipelineInput::ShaderStage, sp<Builder<String>>> _stages;
         std::vector<sp<Builder<Snippet>>> _snippets;
         SafePtr<Builder<Camera>> _camera;
         SafePtr<Builder<Vec4>> _pipeline_bindings_scissor;

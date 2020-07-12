@@ -60,7 +60,7 @@ void ConvexHullRigidBodyImporter::import(ColliderBullet& collider, const documen
 sp<CollisionShape> ConvexHullRigidBodyImporter::makeCollisionShape(const Model& model, btScalar mass)
 {
     btConvexHullShape* convexHullShape = new btConvexHullShape();
-    VertexStream vs(Buffer::Attributes(), false, sp<ConvexHullVertexWriter>::make(convexHullShape));
+    VertexStream vs(PipelineInput::Attributes(), false, sp<ConvexHullVertexWriter>::make(convexHullShape));
     model.writeToStream(vs, V3(1.0f));
     convexHullShape->recalcLocalAabb();
     convexHullShape->optimizeConvexHull();

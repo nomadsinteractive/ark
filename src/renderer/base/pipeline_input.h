@@ -12,12 +12,39 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/attribute.h"
-#include "renderer/base/shader.h"
 
 namespace ark {
 
 class ARK_API PipelineInput {
 public:
+    enum AttributeName {
+        ATTRIBUTE_NAME_TEX_COORDINATE,
+        ATTRIBUTE_NAME_NORMAL,
+        ATTRIBUTE_NAME_TANGENT,
+        ATTRIBUTE_NAME_BITANGENT,
+        ATTRIBUTE_NAME_COUNT
+    };
+
+    enum ShaderStage {
+        SHADER_STAGE_NONE = -1,
+        SHADER_STAGE_VERTEX,
+#ifndef ANDROID
+        SHADER_STAGE_TESSELLATION_CTRL,
+        SHADER_STAGE_TESSELLATION_EVAL,
+        SHADER_STAGE_GEOMETRY,
+#endif
+        SHADER_STAGE_FRAGMENT,
+        SHADER_STAGE_COMPUTE,
+        SHADER_STAGE_COUNT
+    };
+
+    struct ARK_API Attributes {
+        Attributes();
+        Attributes(const PipelineInput& input);
+
+        int32_t _offsets[ATTRIBUTE_NAME_COUNT];
+    };
+
     class Stream {
     public:
         Stream();
@@ -51,8 +78,8 @@ public:
         const Table<String, sp<Uniform>>& uniforms() const;
         const std::vector<std::pair<uintptr_t, size_t>>& slots() const;
 
-        void addStage(Shader::Stage stage);
-        const std::set<Shader::Stage>& stages() const;
+        void addStage(ShaderStage stage);
+        const std::set<ShaderStage>& stages() const;
 
     private:
         void initialize();
@@ -64,7 +91,7 @@ public:
         uint32_t _binding;
 
         std::vector<std::pair<uintptr_t, size_t>> _slots;
-        std::set<Shader::Stage> _stages;
+        std::set<ShaderStage> _stages;
 
         bytearray _dirty_flags;
         bytearray _buffer;
@@ -80,7 +107,7 @@ public:
         Buffer _buffer;
         uint32_t _binding;
 
-        std::set<Shader::Stage> _stages;
+        std::set<ShaderStage> _stages;
 
     };
 

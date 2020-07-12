@@ -6,17 +6,17 @@
 
 namespace ark {
 
-VertexStream::VertexStream(const Buffer::Attributes& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride)
+VertexStream::VertexStream(const PipelineInput::Attributes& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride)
     : _attributes(attributes), _writer(sp<WriterMemory>::make(ptr, size, stride)), _do_transform(doTransform), _visible(true)
 {
 }
 
-VertexStream::VertexStream(const Buffer::Attributes& attributes, bool doTransform, sp<VertexStream::Writer> writer)
+VertexStream::VertexStream(const PipelineInput::Attributes& attributes, bool doTransform, sp<VertexStream::Writer> writer)
     : _attributes(attributes), _writer(std::move(writer)), _do_transform(doTransform), _visible(true)
 {
 }
 
-void VertexStream::writePosition(const V3& position)
+void VertexStream::writePosition(const V3& position, uint32_t vertexId)
 {
     _writer->writePosition(_visible ? (_do_transform ? (_transform->transform(position) + _translate) : position) : V3());
 }
@@ -24,7 +24,7 @@ void VertexStream::writePosition(const V3& position)
 void VertexStream::writeTexCoordinate(uint16_t u, uint16_t v)
 {
     const uint16_t uv[2] = {u, v};
-    write(uv, _attributes._offsets, Buffer::ATTRIBUTE_NAME_TEX_COORDINATE);
+    write(uv, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_TEX_COORDINATE);
 }
 
 void VertexStream::setRenderObject(const Renderable::Snapshot& renderObject)
@@ -37,17 +37,17 @@ void VertexStream::setRenderObject(const Renderable::Snapshot& renderObject)
 
 void VertexStream::writeNormal(const V3& normal)
 {
-    write(normal, _attributes._offsets, Buffer::ATTRIBUTE_NAME_NORMAL);
+    write(normal, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_NORMAL);
 }
 
 void VertexStream::writeTangent(const V3& tangent)
 {
-    write(tangent, _attributes._offsets, Buffer::ATTRIBUTE_NAME_TANGENT);
+    write(tangent, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_TANGENT);
 }
 
 void VertexStream::writeBitangent(const V3& bitangent)
 {
-    write(bitangent, _attributes._offsets, Buffer::ATTRIBUTE_NAME_BITANGENT);
+    write(bitangent, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_BITANGENT);
 }
 
 void VertexStream::next()

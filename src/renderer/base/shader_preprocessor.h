@@ -11,6 +11,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/attribute.h"
+#include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/uniform.h"
@@ -31,15 +32,15 @@ public:
     class Preprocessed {
     public:
         Preprocessed();
-        Preprocessed(Shader::Stage stage, String source);
+        Preprocessed(PipelineInput::ShaderStage stage, String source);
         DEFAULT_COPY_AND_ASSIGN(Preprocessed);
 
-        Shader::Stage stage() const;
+        PipelineInput::ShaderStage stage() const;
 
         String toSourceCode(const RenderEngineContext& renderEngineContext) const;
 
     private:
-        Shader::Stage _type;
+        PipelineInput::ShaderStage _type;
         String _source;
     };
 
@@ -126,7 +127,7 @@ private:
         void parse(PipelineBuildingContext& buildingContext);
 
         void genDefinition();
-        String genOutCall(Shader::Stage preShaderStage) const;
+        String genOutCall(PipelineInput::ShaderStage preShaderStage) const;
 
         bool hasOutAttribute(const String& name) const;
 
@@ -145,7 +146,7 @@ private:
     };
 
 public:
-    ShaderPreprocessor(sp<String> source, Shader::Stage shaderStage, Shader::Stage preShaderStage);
+    ShaderPreprocessor(sp<String> source, PipelineInput::ShaderStage shaderStage, PipelineInput::ShaderStage preShaderStage);
 
     void addPreMainSource(const String& source);
     void addPostMainSource(const String& source);
@@ -183,7 +184,7 @@ private:
 
     void linkParameters(const std::vector<Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
 
-    static const char* getOutAttributePrefix(Shader::Stage preStage);
+    static const char* getOutAttributePrefix(PipelineInput::ShaderStage preStage);
 
 private:
     sp<String> _source;
@@ -193,8 +194,8 @@ private:
     friend class PipelineLayout;
 
 public:
-    Shader::Stage _shader_stage;
-    Shader::Stage _pre_shader_stage;
+    PipelineInput::ShaderStage _shader_stage;
+    PipelineInput::ShaderStage _pre_shader_stage;
 
     Source _main;
 

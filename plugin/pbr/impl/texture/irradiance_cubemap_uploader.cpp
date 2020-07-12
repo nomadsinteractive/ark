@@ -46,11 +46,11 @@ void IrradianceCubemapUploader::upload(GraphicsContext& graphicsContext, Texture
     Bitmap::Util::hvflip<float>(reinterpret_cast<float*>(faceList[3].m_data), n, n, 4);
     Bitmap::Util::hflip<float>(reinterpret_cast<float*>(faceList[3].m_data), n, n, 4);
 
+    const Bitmap uploadingBitmap(n, n, n * 4 * 4, 4, false);
+    std::vector<sp<ByteArray>> imagedata;
     for(uint32_t i = 0; i < 6; ++i)
-    {
-        const Bitmap bitmap(n, n, n * 4 * 4, 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(faceList[imageFaceIndices[i]].m_data), faceList[imageFaceIndices[i]].m_dataSize));
-        delegate.uploadBitmap(graphicsContext, i, bitmap);
-    }
+        imagedata.push_back(sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(faceList[imageFaceIndices[i]].m_data), faceList[imageFaceIndices[i]].m_dataSize));
+    delegate.uploadBitmap(graphicsContext, uploadingBitmap, imagedata);
 
     cmft::imageUnload(input);
     cmft::imageUnload(output);

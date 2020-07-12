@@ -34,7 +34,7 @@ void VerticesNinePatch::write(VertexStream& buf, const V3& size)
     for(uint32_t i = 0; i < 4; i++) {
         for(uint32_t j = 0; j < 4; j++) {
             buf.next();
-            buf.writePosition(V3(xData[j], yData[i], 0));
+            buf.writePosition(V3(xData[j], yData[i], 0), i * 4 + j);
             buf.writeTexCoordinate(_x[j], _y[i]);
         }
     }

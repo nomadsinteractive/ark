@@ -41,12 +41,12 @@ void VKTexture2D::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /
     {
         Texture::Format format = _parameters->_format;
         if(format == Texture::FORMAT_AUTO)
-            uploadBitmap(graphicsContext, 0, Bitmap(_width, _height, _width * 4, 4, false));
+            uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * 4, 4, false), {nullptr});
         else
         {
             uint8_t channels = format & Texture::FORMAT_RGBA;
             uint32_t pixelbytes = format == Texture::FORMAT_F16 ? 2 : (format == Texture::FORMAT_F32 ? 4 : 1);
-            uploadBitmap(graphicsContext, 0, Bitmap(_width, _height, _width * channels * pixelbytes, channels, false));
+            uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * channels * pixelbytes, channels, false), {nullptr});
         }
     }
 }
@@ -74,39 +74,23 @@ bool VKTexture2D::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
     return false;
 }
 
-void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, uint32_t /*index*/, const Bitmap& bitmap)
+void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& images)
 {
-    const bytearray& imagedata = bitmap.bytes();
+    DASSERT(images.size() == 1);
+    const bytearray& imagedata = images.at(0);
     VkFormat format = VKUtil::toTextureFormat(bitmap, _parameters->_format);
 
-    DCHECK(_width == bitmap.width() && _height == bitmap.height(), "Uploading bitmap has different size(%d, %d) compared to Texture's(%d, %d)", bitmap.width(), bitmap.height(), _width, _width);
+    DCHECK(_width == bitmap.width() && _height == bitmap.height(), "Uploading bitmap has different size(%d, %d) compared to Texture's(%d, %d)", bitmap.width(), bitmap.height(), _width, _height);
     _mip_levels = 1;
 
-    // We prefer using staging to copy the texture data to a device local optimal image
-    VkBool32 useStaging = true;
-
-    // Only use linear tiling if forced
-    bool forceLinearTiling = false;
-    if (forceLinearTiling) {
-        // Don't use linear if format is not supported for (linear) shader sampling
-        // Get device properites for the requested texture format
-        VkFormatProperties formatProperties;
-        vkGetPhysicalDeviceFormatProperties(_renderer->vkPhysicalDevice(), format, &formatProperties);
-        useStaging = !(formatProperties.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
-    }
-
-    VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
-    VkMemoryRequirements memReqs = {};
-
     VkDevice logicalDevice = _renderer->vkLogicalDevice();
-    if(useStaging)
     {
         // Create optimal tiled target image on the device
         VkImageCreateInfo imageCreateInfo = vks::initializers::imageCreateInfo();
         imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
         imageCreateInfo.format = format;
         imageCreateInfo.mipLevels = _mip_levels;
-        imageCreateInfo.arrayLayers = 1;
+        imageCreateInfo.arrayLayers = static_cast<uint32_t>(images.size());
         imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -135,221 +119,7 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, uint32_t /*i
         VKUtil::createImage(_renderer->device(), imageCreateInfo, &_image, &_memory);
 
         if(imagedata)
-        {
-            // Copy data to an optimal tiled image
-            // This loads the texture data into a host local buffer that is copied to the optimal tiled image on the device
-
-            // Create a host-visible staging buffer that contains the raw image data
-            // This buffer will be the data source for copying texture data to the optimal tiled image on the device
-            VkBuffer stagingBuffer;
-            VkDeviceMemory stagingMemory;
-
-            VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo();
-            bufferCreateInfo.size = imageDataSize;
-            // This buffer is used as a transfer source for the buffer copy
-            bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-            bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-            VKUtil::checkResult(vkCreateBuffer(logicalDevice, &bufferCreateInfo, nullptr, &stagingBuffer));
-
-            // Get memory requirements for the staging buffer (alignment, memory type bits)
-            vkGetBufferMemoryRequirements(logicalDevice, stagingBuffer, &memReqs);
-            memAllocInfo.allocationSize = memReqs.size;
-            // Get memory type index for a host visible buffer
-            memAllocInfo.memoryTypeIndex = _renderer->device()->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-            VKUtil::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &stagingMemory));
-            VKUtil::checkResult(vkBindBufferMemory(logicalDevice, stagingBuffer, stagingMemory, 0));
-
-            // Copy texture data into host local staging buffer
-            uint8_t* data;
-            VKUtil::checkResult(vkMapMemory(logicalDevice, stagingMemory, 0, memReqs.size, 0, (void **)&data));
-
-            if(imageDataSize == imagedata->size())
-                memcpy(data, imagedata->buf(), imageDataSize);
-            else
-            {
-                uint32_t steps = bitmap.width() * bitmap.height();
-                uint32_t pixelBytes = bitmap.rowBytes() / bitmap.width();
-                uint32_t newPixelBytes = imageDataSize / steps;
-                uint32_t padding = newPixelBytes - pixelBytes;
-                uint8_t* it1 = imagedata->buf();
-                uint8_t* it2 = data;
-                for(uint32_t i = 0; i < steps; ++i)
-                {
-                    memcpy(it2, it1, pixelBytes);
-                    memset(it2 + pixelBytes, 0xff, padding);
-                    it1 += pixelBytes;
-                    it2 += newPixelBytes;
-                }
-            }
-            vkUnmapMemory(logicalDevice, stagingMemory);
-
-            // Setup buffer copy regions for each mip level
-            std::vector<VkBufferImageCopy> bufferCopyRegions;
-            uint32_t offset = 0;
-
-            for (uint32_t i = 0; i < _mip_levels; i++) {
-                VkBufferImageCopy bufferCopyRegion = {};
-                bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                bufferCopyRegion.imageSubresource.mipLevel = i;
-                bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
-                bufferCopyRegion.imageSubresource.layerCount = 1;
-                bufferCopyRegion.imageExtent.width = bitmap.width();
-                bufferCopyRegion.imageExtent.height = bitmap.height();
-                bufferCopyRegion.imageExtent.depth = 1;
-                bufferCopyRegion.bufferOffset = offset;
-
-                bufferCopyRegions.push_back(bufferCopyRegion);
-
-                offset += static_cast<uint32_t>(imageDataSize);
-            }
-
-            VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-
-            // Image memory barriers for the texture image
-
-            // The sub resource range describes the regions of the image that will be transitioned using the memory barriers below
-            VkImageSubresourceRange subresourceRange = {};
-            // Image only contains color data
-            subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            // Start at first mip level
-            subresourceRange.baseMipLevel = 0;
-            // We will transition on all mip levels
-            subresourceRange.levelCount = _mip_levels;
-            // The 2D texture only has one layer
-            subresourceRange.layerCount = 1;
-
-            // Transition the texture image layout to transfer target, so we can safely copy our buffer data to it.
-            VkImageMemoryBarrier imageMemoryBarrier = vks::initializers::imageMemoryBarrier();
-            imageMemoryBarrier.image = _image;
-            imageMemoryBarrier.subresourceRange = subresourceRange;
-            imageMemoryBarrier.srcAccessMask = 0;
-            imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-
-            // Insert a memory dependency at the proper pipeline stages that will execute the image layout transition
-            // Source pipeline stage is host write/read exection (VK_PIPELINE_STAGE_HOST_BIT)
-            // Destination pipeline stage is copy command exection (VK_PIPELINE_STAGE_TRANSFER_BIT)
-            vkCmdPipelineBarrier(
-                        copyCmd,
-                        VK_PIPELINE_STAGE_HOST_BIT,
-                        VK_PIPELINE_STAGE_TRANSFER_BIT,
-                        0,
-                        0, nullptr,
-                        0, nullptr,
-                        1, &imageMemoryBarrier);
-
-            // Copy mip levels from staging buffer
-            vkCmdCopyBufferToImage(
-                        copyCmd,
-                        stagingBuffer,
-                        _image,
-                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                        static_cast<uint32_t>(bufferCopyRegions.size()),
-                        bufferCopyRegions.data());
-
-            // Once the data has been uploaded we transfer to the texture image to the shader read layout, so it can be sampled from
-            imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-            imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-            // Insert a memory dependency at the proper pipeline stages that will execute the image layout transition
-            // Source pipeline stage stage is copy command exection (VK_PIPELINE_STAGE_TRANSFER_BIT)
-            // Destination pipeline stage fragment shader access (VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT)
-            vkCmdPipelineBarrier(
-                        copyCmd,
-                        VK_PIPELINE_STAGE_TRANSFER_BIT,
-                        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-                        0,
-                        0, nullptr,
-                        0, nullptr,
-                        1, &imageMemoryBarrier);
-
-            // Store current layout for later reuse
-            _descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-            _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
-
-            // Clean up staging resources
-            vkFreeMemory(logicalDevice, stagingMemory, nullptr);
-            vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
-        }
-    }
-    else
-    {
-        // Copy data to a linear tiled image
-
-        VkImage mappableImage;
-        VkDeviceMemory mappableMemory;
-
-        // Load mip map level 0 to linear tiling image
-        VkImageCreateInfo imageCreateInfo = vks::initializers::imageCreateInfo();
-        imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageCreateInfo.format = format;
-        imageCreateInfo.mipLevels = 1;
-        imageCreateInfo.arrayLayers = 1;
-        imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-        imageCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
-        imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
-        imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
-        imageCreateInfo.extent = { _width, _height, 1 };
-        VKUtil::checkResult(vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &mappableImage));
-
-        // Get memory requirements for this image like size and alignment
-        vkGetImageMemoryRequirements(logicalDevice, mappableImage, &memReqs);
-        // Set memory allocation size to required memory size
-        memAllocInfo.allocationSize = memReqs.size;
-        // Get memory type that can be mapped to host memory
-        memAllocInfo.memoryTypeIndex = _renderer->device()->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        VKUtil::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &mappableMemory));
-        VKUtil::checkResult(vkBindImageMemory(logicalDevice, mappableImage, mappableMemory, 0));
-
-        // Map image memory
-        void *data;
-        VKUtil::checkResult(vkMapMemory(logicalDevice, mappableMemory, 0, memReqs.size, 0, &data));
-        // Copy image data of the first mip level into memory
-        memcpy(data, imagedata->buf(), imagedata->size());
-        vkUnmapMemory(logicalDevice, mappableMemory);
-
-        // Linear tiled images don't need to be staged and can be directly used as textures
-        _image = mappableImage;
-        _memory = mappableMemory;
-        _descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-        // Setup image memory barrier transfer image to shader read layout
-        VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-
-        // The sub resource range describes the regions of the image we will be transition
-        VkImageSubresourceRange subresourceRange = {};
-        subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        subresourceRange.baseMipLevel = 0;
-        subresourceRange.levelCount = 1;
-        subresourceRange.layerCount = 1;
-
-        // Transition the texture image layout to shader read, so it can be sampled from
-        VkImageMemoryBarrier imageMemoryBarrier = vks::initializers::imageMemoryBarrier();
-        imageMemoryBarrier.image = _image;
-        imageMemoryBarrier.subresourceRange = subresourceRange;
-        imageMemoryBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
-        imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-        imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
-        imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-        // Insert a memory dependency at the proper pipeline stages that will execute the image layout transition
-        // Source pipeline stage is host write/read exection (VK_PIPELINE_STAGE_HOST_BIT)
-        // Destination pipeline stage fragment shader access (VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT)
-        vkCmdPipelineBarrier(
-                    copyCmd,
-                    VK_PIPELINE_STAGE_HOST_BIT,
-                    VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-                    0,
-                    0, nullptr,
-                    0, nullptr,
-                    1, &imageMemoryBarrier);
-
-        _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
+            doUploadBitmap(bitmap, imageDataSize, {imagedata});
     }
 
     // Create a texture sampler
@@ -367,7 +137,7 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, uint32_t /*i
     sampler.compareOp = VK_COMPARE_OP_NEVER;
     sampler.minLod = 0.0f;
     // Set max level-of-detail to mip level count of the texture
-    sampler.maxLod = (useStaging) ? (float)_mip_levels : 0.0f;
+    sampler.maxLod = static_cast<float>(_mip_levels);
     // Enable anisotropic filtering
     // This feature is optional, so we must check if it's supported on the device
     if (_renderer->device()->features().samplerAnisotropy) {
@@ -395,10 +165,10 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, uint32_t /*i
     view.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     view.subresourceRange.baseMipLevel = 0;
     view.subresourceRange.baseArrayLayer = 0;
-    view.subresourceRange.layerCount = 1;
+    view.subresourceRange.layerCount = static_cast<uint32_t>(images.size());
     // Linear tiling usually won't support mip maps
     // Only set mip map count if optimal tiling is used
-    view.subresourceRange.levelCount = (useStaging) ? _mip_levels : 1;
+    view.subresourceRange.levelCount = _mip_levels;
     // The view will be based on the texture's image
     view.image = _image;
     VKUtil::checkResult(vkCreateImageView(logicalDevice, &view, nullptr, &_descriptor.imageView));
@@ -407,6 +177,162 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, uint32_t /*i
 const VkDescriptorImageInfo& VKTexture2D::vkDescriptor() const
 {
     return _descriptor;
+}
+
+void VKTexture2D::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata)
+{
+    VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
+    VkMemoryRequirements memReqs = {};
+
+    VkDevice logicalDevice = _renderer->vkLogicalDevice();
+
+    // Copy data to an optimal tiled image
+    // This loads the texture data into a host local buffer that is copied to the optimal tiled image on the device
+
+    // Create a host-visible staging buffer that contains the raw image data
+    // This buffer will be the data source for copying texture data to the optimal tiled image on the device
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingMemory;
+
+    VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo();
+    bufferCreateInfo.size = imageDataSize * imagedata.size();
+    // This buffer is used as a transfer source for the buffer copy
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    VKUtil::checkResult(vkCreateBuffer(logicalDevice, &bufferCreateInfo, nullptr, &stagingBuffer));
+
+    // Get memory requirements for the staging buffer (alignment, memory type bits)
+    vkGetBufferMemoryRequirements(logicalDevice, stagingBuffer, &memReqs);
+    memAllocInfo.allocationSize = memReqs.size;
+    // Get memory type index for a host visible buffer
+    memAllocInfo.memoryTypeIndex = _renderer->device()->getMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    VKUtil::checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, &stagingMemory));
+    VKUtil::checkResult(vkBindBufferMemory(logicalDevice, stagingBuffer, stagingMemory, 0));
+
+    // Copy texture data into host local staging buffer
+    uint8_t* data;
+    VKUtil::checkResult(vkMapMemory(logicalDevice, stagingMemory, 0, memReqs.size, 0, reinterpret_cast<void**>(&data)));
+    for(size_t i = 0; i < imagedata.size(); ++i)
+    {
+        copyBitmap(data, bitmap, imagedata.at(i), imageDataSize);
+        data += imageDataSize;
+    }
+    vkUnmapMemory(logicalDevice, stagingMemory);
+
+    // Setup buffer copy regions for each mip level
+    uint32_t offset = 0;
+    std::vector<VkBufferImageCopy> bufferCopyRegions;
+    for(size_t i = 0; i < imagedata.size(); ++i)
+    {
+        for(uint32_t j = 0; j < _mip_levels; j++)
+        {
+            VkBufferImageCopy bufferCopyRegion = {};
+            bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            bufferCopyRegion.imageSubresource.mipLevel = j;
+            bufferCopyRegion.imageSubresource.baseArrayLayer = static_cast<uint32_t>(i);
+            bufferCopyRegion.imageSubresource.layerCount = 1;
+            bufferCopyRegion.imageExtent.width = bitmap.width();
+            bufferCopyRegion.imageExtent.height = bitmap.height();
+            bufferCopyRegion.imageExtent.depth = 1;
+            bufferCopyRegion.bufferOffset = offset;
+
+            bufferCopyRegions.push_back(bufferCopyRegion);
+        }
+        offset += static_cast<uint32_t>(imageDataSize);
+    }
+
+    VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+
+    // Image memory barriers for the texture image
+
+    // The sub resource range describes the regions of the image that will be transitioned using the memory barriers below
+    VkImageSubresourceRange subresourceRange = {};
+    // Image only contains color data
+    subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    // Start at first mip level
+    subresourceRange.baseMipLevel = 0;
+    // We will transition on all mip levels
+    subresourceRange.levelCount = _mip_levels;
+    subresourceRange.layerCount = static_cast<uint32_t>(imagedata.size());
+
+    // Transition the texture image layout to transfer target, so we can safely copy our buffer data to it.
+    VkImageMemoryBarrier imageMemoryBarrier = vks::initializers::imageMemoryBarrier();
+    imageMemoryBarrier.image = _image;
+    imageMemoryBarrier.subresourceRange = subresourceRange;
+    imageMemoryBarrier.srcAccessMask = 0;
+    imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+
+    // Insert a memory dependency at the proper pipeline stages that will execute the image layout transition
+    // Source pipeline stage is host write/read exection (VK_PIPELINE_STAGE_HOST_BIT)
+    // Destination pipeline stage is copy command exection (VK_PIPELINE_STAGE_TRANSFER_BIT)
+    vkCmdPipelineBarrier(
+                copyCmd,
+                VK_PIPELINE_STAGE_HOST_BIT,
+                VK_PIPELINE_STAGE_TRANSFER_BIT,
+                0,
+                0, nullptr,
+                0, nullptr,
+                1, &imageMemoryBarrier);
+
+    // Copy mip levels from staging buffer
+    vkCmdCopyBufferToImage(
+                copyCmd,
+                stagingBuffer,
+                _image,
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                static_cast<uint32_t>(bufferCopyRegions.size()),
+                bufferCopyRegions.data());
+
+    // Once the data has been uploaded we transfer to the texture image to the shader read layout, so it can be sampled from
+    imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    // Insert a memory dependency at the proper pipeline stages that will execute the image layout transition
+    // Source pipeline stage stage is copy command exection (VK_PIPELINE_STAGE_TRANSFER_BIT)
+    // Destination pipeline stage fragment shader access (VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT)
+    vkCmdPipelineBarrier(
+                copyCmd,
+                VK_PIPELINE_STAGE_TRANSFER_BIT,
+                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                0,
+                0, nullptr,
+                0, nullptr,
+                1, &imageMemoryBarrier);
+
+    // Store current layout for later reuse
+    _descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
+
+    // Clean up staging resources
+    vkFreeMemory(logicalDevice, stagingMemory, nullptr);
+    vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
+}
+
+void VKTexture2D::copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, size_t imageDataSize)
+{
+    if(imageDataSize == imagedata->size())
+        memcpy(buf, imagedata->buf(), imageDataSize);
+    else
+    {
+        uint32_t steps = bitmap.width() * bitmap.height();
+        uint32_t pixelBytes = bitmap.rowBytes() / bitmap.width();
+        size_t newPixelBytes = imageDataSize / steps;
+        size_t padding = newPixelBytes - pixelBytes;
+        uint8_t* it1 = imagedata->buf();
+        uint8_t* it2 = buf;
+        for(uint32_t i = 0; i < steps; ++i)
+        {
+            memcpy(it2, it1, pixelBytes);
+            memset(it2 + pixelBytes, 0xff, padding);
+            it1 += pixelBytes;
+            it2 += newPixelBytes;
+        }
+    }
 }
 
 }

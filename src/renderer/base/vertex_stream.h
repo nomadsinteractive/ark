@@ -7,7 +7,7 @@
 #include "graphics/base/transform.h"
 #include "graphics/inf/renderable.h"
 
-#include "renderer/base/buffer.h"
+#include "renderer/base/pipeline_input.h"
 #include "renderer/base/varyings.h"
 
 namespace ark {
@@ -23,8 +23,8 @@ public:
     };
 
 public:
-    VertexStream(const Buffer::Attributes& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
-    VertexStream(const Buffer::Attributes& attributes, bool doTransform, sp<Writer> writer);
+    VertexStream(const PipelineInput::Attributes& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
+    VertexStream(const PipelineInput::Attributes& attributes, bool doTransform, sp<Writer> writer);
 
     template<typename T> void write(const T& value, size_t offset = 0) {
         _writer->write(&value, sizeof(T), offset);
@@ -35,7 +35,7 @@ public:
             write<T>(value, offsets[name]);
     }
 
-    void writePosition(const V3& position);
+    void writePosition(const V3& position, uint32_t vertexId);
     void writeNormal(const V3& normal);
     void writeTangent(const V3& tangent);
     void writeBitangent(const V3& bitangent);
@@ -68,7 +68,7 @@ private:
     void writeArray(ByteArray& array);
 
 private:
-    Buffer::Attributes _attributes;
+    PipelineInput::Attributes _attributes;
     sp<Writer> _writer;
 
     bool _do_transform;

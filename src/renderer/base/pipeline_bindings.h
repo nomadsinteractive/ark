@@ -3,7 +3,7 @@
 
 #include "core/base/api.h"
 
-#include "renderer/base/buffer.h"
+#include "renderer/base/pipeline_input.h"
 #include "renderer/inf/model_loader.h"
 
 namespace ark {
@@ -48,7 +48,7 @@ public:
     const sp<PipelineInput>& input() const;
     const sp<Snippet>& snippet() const;
 
-    const Buffer::Attributes& attributes() const;
+    const PipelineInput::Attributes& attributes() const;
     const std::vector<sp<Texture>>& samplers() const;
 
     void bindSampler(const sp<Texture>& texture, uint32_t name = 0);
@@ -69,7 +69,7 @@ private:
         sp<PipelineLayout> _layout;
         sp<PipelineInput> _input;
 
-        Buffer::Attributes _attributes;
+        PipelineInput::Attributes _attributes;
 
         std::vector<sp<Texture>> _samplers;
     };

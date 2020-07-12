@@ -20,7 +20,7 @@ public:
     virtual void upload(GraphicsContext& graphicContext, Texture::Delegate& delegate) override {
         const bitmap bitmap = _bitmap_loader->get(_name);
         DCHECK(bitmap, "Texture resource \"%s\" not found", _name.c_str());
-        delegate.uploadBitmap(graphicContext, 0, bitmap);
+        delegate.uploadBitmap(graphicContext, bitmap, {bitmap->bytes()});
     }
 
 private:

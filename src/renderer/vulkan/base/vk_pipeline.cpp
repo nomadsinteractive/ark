@@ -29,13 +29,13 @@
 namespace ark {
 namespace vulkan {
 
-VKPipeline::VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Shader::Stage, String> shaders)
+VKPipeline::VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<PipelineInput::ShaderStage, String> shaders)
     : _bindings(bindings), _recycler(recycler), _renderer(renderer), _backed_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
       _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _rebind_needed(true), _is_compute_pipeline(false)
 {
     for(const auto& i : _shaders)
     {
-        if(i.first == Shader::SHADER_STAGE_COMPUTE)
+        if(i.first == PipelineInput::SHADER_STAGE_COMPUTE)
         {
             _is_compute_pipeline = true;
             DCHECK(_shaders.size() == 1, "Compute stage is exclusive");
@@ -169,7 +169,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     for(const sp<PipelineInput::UBO>& i : pipelineInput.ubos())
     {
         VkShaderStageFlags stages = i->stages().empty() ? VK_SHADER_STAGE_ALL : static_cast<VkShaderStageFlags>(0);
-        for(Shader::Stage j : i->stages())
+        for(PipelineInput::ShaderStage j : i->stages())
             stages = static_cast<VkShaderStageFlags>(stages | VKUtil::toStage(j));
 
         binding = std::max(binding, i->binding());
@@ -178,7 +178,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     for(const PipelineInput::SSBO& i : pipelineInput.ssbos())
     {
         VkShaderStageFlags stages = i._stages.empty() ? VK_SHADER_STAGE_ALL : static_cast<VkShaderStageFlags>(0);
-        for(Shader::Stage j : i._stages)
+        for(PipelineInput::ShaderStage j : i._stages)
             stages = static_cast<VkShaderStageFlags>(stages | VKUtil::toStage(j));
 
         binding = std::max(binding, i._binding);

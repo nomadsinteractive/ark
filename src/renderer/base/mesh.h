@@ -37,7 +37,7 @@ public:
     const array<element_index_t>& indices() const;
     const array<V3>& vertices() const;
 
-    void write(VertexStream& buf, const V3& size) const;
+    void write(VertexStream& buf, const V3& size, size_t& vertexBase) const;
 
 private:
     array<element_index_t> _indices;

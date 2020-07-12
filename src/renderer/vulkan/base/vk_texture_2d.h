@@ -26,12 +26,15 @@ public:
     virtual RecycleFunc recycle() override;
 
     virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
-    virtual void uploadBitmap(GraphicsContext& graphicContext, uint32_t index, const Bitmap& bitmap) override;
+    virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;
 
     const VkDescriptorImageInfo& vkDescriptor() const;
 
+protected:
+    void doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata);
+
 private:
-    void doUpload();
+    void copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, size_t imageDataSize);
 
 private:
     sp<Recycler> _recycler;

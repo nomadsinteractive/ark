@@ -78,7 +78,7 @@ public:
         Type type() const;
 
         virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) = 0;
-        virtual void uploadBitmap(GraphicsContext& graphicsContext, uint32_t index, const Bitmap& bitmap) = 0;
+        virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) = 0;
 
     private:
         Type _type;

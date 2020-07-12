@@ -44,9 +44,9 @@ const sp<PipelineInput>& PipelineLayout::input() const
     return _input;
 }
 
-std::map<Shader::Stage, String> PipelineLayout::getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const
+std::map<PipelineInput::ShaderStage, String> PipelineLayout::getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const
 {
-    std::map<Shader::Stage, String> shaders;
+    std::map<PipelineInput::ShaderStage, String> shaders;
 
     for(const auto& i : _preprocessed_stages)
         shaders[i.first] = i.second.toSourceCode(renderEngineContext);
@@ -66,9 +66,9 @@ void PipelineLayout::initialize(const Camera& camera)
     _snippet->preInitialize(_building_context);
     _building_context->initialize();
 
-    if(_building_context->hasStage(Shader::SHADER_STAGE_VERTEX))
+    if(_building_context->hasStage(PipelineInput::SHADER_STAGE_VERTEX))
     {
-        ShaderPreprocessor& vertex = _building_context->getStage(Shader::SHADER_STAGE_VERTEX);
+        ShaderPreprocessor& vertex = _building_context->getStage(PipelineInput::SHADER_STAGE_VERTEX);
         tryBindUniform(vertex, "u_MVP", camera.vp());
         tryBindUniform(vertex, "u_VP", camera.vp());
         tryBindUniform(vertex, "u_View", camera.view());

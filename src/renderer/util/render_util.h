@@ -6,7 +6,7 @@
 
 #include "graphics/forwarding.h"
 
-#include "renderer/base/shader.h"
+#include "renderer/base/pipeline_input.h"
 
 namespace ark {
 
@@ -20,7 +20,7 @@ public:
 
     static element_index_t hash(const element_index_t* buf, size_t len);
 
-    static String outAttributeName(const String& name, Shader::Stage preStage);
+    static String outAttributeName(const String& name, PipelineInput::ShaderStage preStage);
 
     static bool isScissorEnabled(const Rect& scissor);
 };

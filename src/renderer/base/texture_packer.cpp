@@ -45,7 +45,7 @@ void TexturePacker::MaxRectsTextureUploader::upload(GraphicsContext& graphicsCon
         const bitmap s = _bitmap_bundle->get(i._src);
         content->draw(s->bytes()->buf(), s->width(), s->height(), i._x, i._y, s->rowBytes());
     }
-    delegate.uploadBitmap(graphicsContext, 0, content);
+    delegate.uploadBitmap(graphicsContext, content, {content->bytes()});
 }
 
 }

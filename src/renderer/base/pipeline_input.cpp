@@ -9,6 +9,20 @@
 
 namespace ark {
 
+PipelineInput::Attributes::Attributes()
+{
+    for(uint32_t i = 0; i < ATTRIBUTE_NAME_COUNT; ++i)
+        _offsets[i] = -1;
+}
+
+PipelineInput::Attributes::Attributes(const PipelineInput& input)
+{
+    _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = input.getAttributeOffset("TexCoordinate");
+    _offsets[ATTRIBUTE_NAME_NORMAL] = input.getAttributeOffset("Normal");
+    _offsets[ATTRIBUTE_NAME_TANGENT] = input.getAttributeOffset("Tangent");
+    _offsets[ATTRIBUTE_NAME_BITANGENT] = input.getAttributeOffset("Bitangent");
+}
+
 PipelineInput::PipelineInput()
     : _sampler_count(0)
 {
@@ -34,8 +48,8 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
         _ubos.push_back(std::move(i.second));
     }
 
-    _sampler_count = buildingContext.hasStage(Shader::SHADER_STAGE_FRAGMENT) ?
-                     buildingContext.getStage(Shader::SHADER_STAGE_FRAGMENT)->_declaration_samplers.vars().size() : 0;
+    _sampler_count = buildingContext.hasStage(SHADER_STAGE_FRAGMENT) ?
+                     buildingContext.getStage(SHADER_STAGE_FRAGMENT)->_declaration_samplers.vars().size() : 0;
 }
 
 const std::vector<sp<PipelineInput::UBO>>& PipelineInput::ubos() const
@@ -195,12 +209,12 @@ const std::vector<std::pair<uintptr_t, size_t>>& PipelineInput::UBO::slots() con
     return _slots;
 }
 
-void PipelineInput::UBO::addStage(Shader::Stage stage)
+void PipelineInput::UBO::addStage(PipelineInput::ShaderStage stage)
 {
     _stages.insert(stage);
 }
 
-const std::set<Shader::Stage>& PipelineInput::UBO::stages() const
+const std::set<PipelineInput::ShaderStage>& PipelineInput::UBO::stages() const
 {
     return _stages;
 }

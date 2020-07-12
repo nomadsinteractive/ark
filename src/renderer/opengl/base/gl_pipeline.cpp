@@ -64,7 +64,7 @@ private:
 
 }
 
-GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<ark::Shader::Stage, String> shaders, const PipelineBindings& bindings)
+GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<PipelineInput::ShaderStage, String> shaders, const PipelineBindings& bindings)
     : _stub(sp<Stub>::make()), _recycler(recycler), _version(version), _shaders(std::move(shaders)), _pipeline_operation(makePipelineOperation(bindings))
 {
 }
@@ -86,7 +86,7 @@ void GLPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*
     _stub->_rebind_needed = true;
     _stub->_id = id;
 
-    std::map<Shader::Stage, sp<GLPipeline::Stage>> compiledShaders;
+    std::map<PipelineInput::ShaderStage, sp<GLPipeline::Stage>> compiledShaders;
 
     for(const auto& i : _shaders)
     {
@@ -173,7 +173,7 @@ void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const Pipeline
 sp<GLPipeline::PipelineOperation> GLPipeline::makePipelineOperation(const PipelineBindings& bindings) const
 {
     for(const auto& i : _shaders)
-        if(i.first == Shader::SHADER_STAGE_COMPUTE)
+        if(i.first == PipelineInput::SHADER_STAGE_COMPUTE)
         {
             DCHECK(_shaders.size() == 1, "Compute shader is an exclusive stage");
             return sp<PipelineOperationCompute>::make(_stub);

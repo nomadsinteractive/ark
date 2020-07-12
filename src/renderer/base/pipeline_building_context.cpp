@@ -52,8 +52,8 @@ PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& ren
 PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController, sp<String> vertex, sp<String> fragment)
     : PipelineBuildingContext(renderController)
 {
-    addStage(std::move(vertex), Shader::SHADER_STAGE_VERTEX, Shader::SHADER_STAGE_NONE);
-    addStage(std::move(fragment), Shader::SHADER_STAGE_FRAGMENT, Shader::SHADER_STAGE_VERTEX);
+    addStage(std::move(vertex), PipelineInput::SHADER_STAGE_VERTEX, PipelineInput::SHADER_STAGE_NONE);
+    addStage(std::move(fragment), PipelineInput::SHADER_STAGE_FRAGMENT, PipelineInput::SHADER_STAGE_VERTEX);
 }
 
 void PipelineBuildingContext::loadManifest(const document& manifest, BeanFactory& factory, const Scope& args)
@@ -161,7 +161,7 @@ void PipelineBuildingContext::setupUniforms()
         i.second->setupUniforms(_uniforms, binding);
 }
 
-const std::map<Shader::Stage, op<ShaderPreprocessor> >& PipelineBuildingContext::stages() const
+const std::map<PipelineInput::ShaderStage, op<ShaderPreprocessor> >& PipelineBuildingContext::stages() const
 {
     return _stages;
 }
@@ -169,7 +169,7 @@ const std::map<Shader::Stage, op<ShaderPreprocessor> >& PipelineBuildingContext:
 void PipelineBuildingContext::addAttribute(const String& name, const String& type)
 {
     //TODO: add attribute to specified stage
-    Attribute& attr = addPredefinedAttribute(name, type, Shader::SHADER_STAGE_VERTEX);
+    Attribute& attr = addPredefinedAttribute(name, type, PipelineInput::SHADER_STAGE_VERTEX);
     _input->addAttribute(name, attr);
 }
 
@@ -198,7 +198,7 @@ void PipelineBuildingContext::addInputAttribute(const String& name, const String
     }
 }
 
-Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, Shader::Stage stage)
+Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, PipelineInput::ShaderStage stage)
 {
     if(_attributes.find(name) == _attributes.end())
         _attributes[name] = makePredefinedAttribute(name, type);
@@ -207,19 +207,19 @@ Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, c
     return _attributes[name];
 }
 
-bool PipelineBuildingContext::hasStage(Shader::Stage shaderStage) const
+bool PipelineBuildingContext::hasStage(PipelineInput::ShaderStage shaderStage) const
 {
     return _stages.find(shaderStage) != _stages.end();
 }
 
-const op<ShaderPreprocessor>& PipelineBuildingContext::getStage(Shader::Stage shaderStage) const
+const op<ShaderPreprocessor>& PipelineBuildingContext::getStage(PipelineInput::ShaderStage shaderStage) const
 {
     auto iter = _stages.find(shaderStage);
     DCHECK(iter != _stages.end(), "Stage '%d' not found", shaderStage);
     return iter->second;
 }
 
-const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> source, Shader::Stage shaderStage, Shader::Stage preShaderStage)
+const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> source, PipelineInput::ShaderStage shaderStage, PipelineInput::ShaderStage preShaderStage)
 {
     op<ShaderPreprocessor>& stage = _stages[shaderStage];
     DCHECK(!stage, "Stage '%d' has been initialized already", shaderStage);
@@ -242,7 +242,7 @@ void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
         const String attrName = name.startsWith("a_") ? name.substr(2) : name;
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         uint32_t divisor = Documents::getAttribute<uint32_t>(i, "divisor", 0);
-        addPredefinedAttribute(attrName, type, Shader::SHADER_STAGE_VERTEX).setDivisor(divisor);
+        addPredefinedAttribute(attrName, type, PipelineInput::SHADER_STAGE_VERTEX).setDivisor(divisor);
     }
 }
 

@@ -33,21 +33,6 @@ public:
         USAGE_COUNT
     };
 
-    enum AttributeName {
-        ATTRIBUTE_NAME_TEX_COORDINATE,
-        ATTRIBUTE_NAME_NORMAL,
-        ATTRIBUTE_NAME_TANGENT,
-        ATTRIBUTE_NAME_BITANGENT,
-        ATTRIBUTE_NAME_COUNT
-    };
-
-    struct ARK_API Attributes {
-        Attributes();
-        Attributes(const PipelineInput& input);
-
-        int32_t _offsets[ATTRIBUTE_NAME_COUNT];
-    };
-
     class ARK_API Delegate : public Resource {
     public:
         Delegate();

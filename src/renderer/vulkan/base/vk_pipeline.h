@@ -21,7 +21,7 @@ namespace vulkan {
 
 class VKPipeline : public Pipeline {
 public:
-    VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Shader::Stage, String> shaders);
+    VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<PipelineInput::ShaderStage, String> shaders);
     ~VKPipeline() override;
 
     VkPipeline vkPipeline() const;
@@ -102,7 +102,7 @@ private:
     VkDescriptorSet _descriptor_set;
     VkPipeline _pipeline;
 
-    std::map<Shader::Stage, String> _shaders;
+    std::map<PipelineInput::ShaderStage, String> _shaders;
 
     std::vector<sp<VKBuffer>> _ubos;
 

@@ -166,8 +166,8 @@ public:
         glslang::FinalizeProcess();
     }
 
-    EShLanguage toShLanguage(Shader::Stage stage) const {
-        DCHECK(stage > Shader::SHADER_STAGE_NONE && stage < Shader::SHADER_STAGE_COUNT, "Illegal Shader::Stage: %d", stage);
+    EShLanguage toShLanguage(PipelineInput::ShaderStage stage) const {
+        DCHECK(stage > PipelineInput::SHADER_STAGE_NONE && stage < PipelineInput::SHADER_STAGE_COUNT, "Illegal PipelineInput::ShaderStage: %d", stage);
         return _languages[stage];
     }
 
@@ -176,7 +176,7 @@ public:
     }
 
 private:
-    EShLanguage _languages[Shader::SHADER_STAGE_COUNT];
+    EShLanguage _languages[PipelineInput::SHADER_STAGE_COUNT];
     TBuiltInResource _built_in_resource;
 
 };
@@ -199,13 +199,13 @@ VkPipelineShaderStageCreateInfo VKUtil::loadShaderSPIR(VkDevice device, std::str
     return shaderStage;
 }
 
-VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String& resid, Shader::Stage stage)
+VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String& resid, PipelineInput::ShaderStage stage)
 {
     const String content = Strings::loadFromReadable(Ark::instance().openAsset(resid));
     return createShader(device, content, stage);
 }
 
-VkPipelineShaderStageCreateInfo VKUtil::createShader(VkDevice device, const String& source, Shader::Stage stage)
+VkPipelineShaderStageCreateInfo VKUtil::createShader(VkDevice device, const String& source, PipelineInput::ShaderStage stage)
 {
     const std::vector<uint32_t> spirv = VKUtil::compileSPIR(source, stage);
     VkShaderModuleCreateInfo moduleCreateInfo{};
@@ -294,15 +294,15 @@ VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, Texture::Format format)
     return toTextureFormat(bitmap.rowBytes(), bitmap.width(), bitmap.channels(), format);
 }
 
-VkShaderStageFlagBits VKUtil::toStage(Shader::Stage stage)
+VkShaderStageFlagBits VKUtil::toStage(PipelineInput::ShaderStage stage)
 {
 #ifndef ANDROID
-    static const VkShaderStageFlagBits vkStages[Shader::SHADER_STAGE_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+    static const VkShaderStageFlagBits vkStages[PipelineInput::SHADER_STAGE_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
                                                                                VK_SHADER_STAGE_GEOMETRY_BIT, VK_SHADER_STAGE_FRAGMENT_BIT, VK_SHADER_STAGE_COMPUTE_BIT};
 #else
     static const VkShaderStageFlagBits vkStages[Shader::SHADER_STAGE_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT, VK_SHADER_STAGE_COMPUTE_BIT};
 #endif
-    DCHECK(stage > Shader::SHADER_STAGE_NONE && stage < Shader::SHADER_STAGE_COUNT, "Illegal Shader::Stage: %d", stage);
+    DCHECK(stage > PipelineInput::SHADER_STAGE_NONE && stage < PipelineInput::SHADER_STAGE_COUNT, "Illegal PipelineInput::ShaderStage: %d", stage);
     return vkStages[stage];
 }
 
@@ -313,7 +313,7 @@ VkPrimitiveTopology VKUtil::toPrimitiveTopology(ModelLoader::RenderMode mode)
     return topologies[mode];
 }
 
-std::vector<uint32_t> VKUtil::compileSPIR(const String& source, Shader::Stage stage)
+std::vector<uint32_t> VKUtil::compileSPIR(const String& source, PipelineInput::ShaderStage stage)
 {
     const Global<GLSLLangInitializer> initializer;
     EShLanguage esStage = initializer->toShLanguage(stage);

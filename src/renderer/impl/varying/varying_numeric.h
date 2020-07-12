@@ -10,7 +10,7 @@ namespace ark {
 
 class VaryingNumeric : public Varying {
 public:
-    VaryingNumeric(sp<Numeric> value);
+    VaryingNumeric(String name, sp<Numeric> value);
 
     virtual void bind(const PipelineInput& pipelineInput) override;
     virtual ByteArray::Borrowed snapshot(const RenderRequest& renderRequest) override;
@@ -24,10 +24,12 @@ public:
         virtual sp<Varying> build(const Scope& args) override;
 
     private:
+        sp<Builder<String>> _name;
         sp<Builder<Numeric>> _value;
     };
 
 private:
+    String _name;
     sp<Numeric> _value;
 
 };

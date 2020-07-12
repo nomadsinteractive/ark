@@ -73,20 +73,6 @@ private:
 
 }
 
-Buffer::Attributes::Attributes()
-{
-    for(uint32_t i = 0; i < ATTRIBUTE_NAME_COUNT; ++i)
-        _offsets[i] = -1;
-}
-
-Buffer::Attributes::Attributes(const PipelineInput& input)
-{
-    _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = input.getAttributeOffset("TexCoordinate");
-    _offsets[ATTRIBUTE_NAME_NORMAL] = input.getAttributeOffset("Normal");
-    _offsets[ATTRIBUTE_NAME_TANGENT] = input.getAttributeOffset("Tangent");
-    _offsets[ATTRIBUTE_NAME_BITANGENT] = input.getAttributeOffset("Bitangent");
-}
-
 Buffer::Snapshot::Snapshot(const sp<Delegate>& stub)
     : _delegate(stub), _size(stub->size())
 {

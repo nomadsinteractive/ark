@@ -103,10 +103,9 @@ size_t Model::MeshVertices::calcVertexLength(Array<Mesh>& meshes) const
 
 void Model::MeshVertices::write(VertexStream& buf, const V3& size)
 {
-    size_t length = _meshes->length();
-    Mesh* m = _meshes->buf();
-    for(size_t i = 0; i < length; ++i)
-        m[i].write(buf, size);
+    size_t vertexBase = 0;
+    for(const Mesh& m : *_meshes)
+        m.write(buf, size, vertexBase);
 }
 
 }

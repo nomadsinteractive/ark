@@ -6,8 +6,8 @@
 
 namespace ark {
 
-VaryingNumeric::VaryingNumeric(sp<Numeric> value)
-    : _value(std::move(value))
+VaryingNumeric::VaryingNumeric(String name, sp<Numeric> value)
+    : _name(std::move(name)), _value(std::move(value))
 {
 }
 
@@ -26,13 +26,13 @@ void VaryingNumeric::apply(Writable& writer, const ByteArray::Borrowed& snapshot
 }
 
 VaryingNumeric::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _value(factory.ensureBuilder<Numeric>(manifest, Constants::Attributes::VALUE))
+    : _name(factory.ensureBuilder<String>(manifest, Constants::Attributes::NAME)), _value(factory.ensureBuilder<Numeric>(manifest, Constants::Attributes::VALUE))
 {
 }
 
 sp<Varying> VaryingNumeric::BUILDER::build(const Scope& args)
 {
-    return sp<VaryingNumeric>::make(_value->build(args));
+    return sp<VaryingNumeric>::make(_name->build(args), _value->build(args));
 }
 
 }
