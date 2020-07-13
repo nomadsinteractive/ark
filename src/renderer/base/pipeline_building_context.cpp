@@ -338,6 +338,8 @@ Attribute PipelineBuildingContext::makePredefinedAttribute(const String& name, c
         return Attribute("a_" + name, Attribute::TYPE_UBYTE, type, 1, false);
     if(type == "mat4")
         return Attribute("a_" + name, Attribute::TYPE_FLOAT, type, 16, false);
+    if(type == "ivec4")
+        return Attribute("a_" + name, Attribute::TYPE_INTEGER, type, 4, false);
     DFATAL("Unknown attribute type \"%s\"", type.c_str());
     return Attribute();
 }

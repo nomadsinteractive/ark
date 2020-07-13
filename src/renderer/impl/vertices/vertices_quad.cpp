@@ -20,19 +20,19 @@ void VerticesQuad::write(VertexStream& buf, const V3& size)
     float height = size.y();
 
     buf.next();
-    buf.writePosition(V3(_bounds.left() * width, _bounds.top() * height, 0), 0);
+    buf.writePosition(V3(_bounds.left() * width, _bounds.top() * height, 0));
     buf.writeTexCoordinate(_ux, _uy);
 
     buf.next();
-    buf.writePosition(V3(_bounds.left() * width, _bounds.bottom() * height, 0), 1);
+    buf.writePosition(V3(_bounds.left() * width, _bounds.bottom() * height, 0));
     buf.writeTexCoordinate(_ux, _vy);
 
     buf.next();
-    buf.writePosition(V3(_bounds.right() * width, _bounds.top() * height, 0), 2);
+    buf.writePosition(V3(_bounds.right() * width, _bounds.top() * height, 0));
     buf.writeTexCoordinate(_vx, _uy);
 
     buf.next();
-    buf.writePosition(V3(_bounds.right() * width, _bounds.bottom() * height, 0), 3);
+    buf.writePosition(V3(_bounds.right() * width, _bounds.bottom() * height, 0));
     buf.writeTexCoordinate(_vx, _vy);
 }
 

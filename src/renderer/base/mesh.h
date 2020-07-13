@@ -1,6 +1,8 @@
 #ifndef ARK_RENDERER_BASE_MESH_H_
 #define ARK_RENDERER_BASE_MESH_H_
 
+#include <array>
+
 #include "core/base/api.h"
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
@@ -29,15 +31,23 @@ public:
         V3 _bitangent;
     };
 
+    struct ARK_API BoneInfo {
+        BoneInfo() = default;
+        BoneInfo(std::array<float, 4> weights, std::array<int32_t, 4> ids);
+
+        std::array<float, 4> _weights;
+        std::array<int32_t, 4> _ids;
+    };
+
 public:
-    Mesh(array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents);
+    Mesh(array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos);
 
     size_t vertexLength() const;
 
     const array<element_index_t>& indices() const;
     const array<V3>& vertices() const;
 
-    void write(VertexStream& buf, const V3& size, size_t& vertexBase) const;
+    void write(VertexStream& buf, const V3& scale) const;
 
 private:
     array<element_index_t> _indices;
@@ -45,6 +55,7 @@ private:
     sp<Array<UV>> _uvs;
     sp<Array<V3>> _normals;
     sp<Array<Tangent>> _tangents;
+    sp<Array<BoneInfo>> _bone_infos;
 
 };
 

@@ -5,8 +5,8 @@
 #include "core/util/documents.h"
 
 #include "renderer/base/buffer.h"
+#include "renderer/base/mesh.h"
 #include "renderer/base/model.h"
-#include "renderer/base/vertex_stream.h"
 #include "renderer/inf/model_loader.h"
 
 #include "plugin/bullet/base/collision_shape.h"
@@ -14,32 +14,6 @@
 namespace ark {
 namespace plugin {
 namespace bullet {
-
-
-namespace {
-
-class ConvexHullVertexWriter : public VertexStream::Writer {
-public:
-    ConvexHullVertexWriter(btConvexHullShape* convexHullShape)
-        : _convex_hull_shape(convexHullShape) {
-    }
-
-    virtual void next() override {
-    }
-
-    virtual void writePosition(const V3& position) override {
-        _convex_hull_shape->addPoint(btVector3(position.x(), position.y(), position.z()));
-    }
-
-    virtual uint32_t write(const void* ptr, uint32_t size, uint32_t offset) override {
-        return size;
-    }
-
-private:
-    btConvexHullShape* _convex_hull_shape;
-};
-
-}
 
 ConvexHullRigidBodyImporter::ConvexHullRigidBodyImporter(sp<ModelLoader> modelLoader)
     : _model_loader(std::move(modelLoader))
@@ -60,8 +34,12 @@ void ConvexHullRigidBodyImporter::import(ColliderBullet& collider, const documen
 sp<CollisionShape> ConvexHullRigidBodyImporter::makeCollisionShape(const Model& model, btScalar mass)
 {
     btConvexHullShape* convexHullShape = new btConvexHullShape();
-    VertexStream vs(PipelineInput::Attributes(), false, sp<ConvexHullVertexWriter>::make(convexHullShape));
-    model.writeToStream(vs, V3(1.0f));
+
+    DCHECK(model.meshes(), "ConvexHullRigidBodyImporter only works with Mesh based models");
+    for(const Mesh& i : *model.meshes())
+        for(const V3& j : *i.vertices())
+            convexHullShape->addPoint(btVector3(j.x(), j.y(), j.z()));
+
     convexHullShape->recalcLocalAabb();
     convexHullShape->optimizeConvexHull();
     return sp<CollisionShape>::make(convexHullShape, mass);

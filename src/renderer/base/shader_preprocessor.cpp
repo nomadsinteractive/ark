@@ -14,7 +14,7 @@
 #include "renderer/base/render_engine_context.h"
 
 #define ARRAY_PATTERN       "(?:\\[\\s*(\\d+)\\s*\\])?"
-#define VAR_TYPE_PATTERN    "\\s+(int|uint8|float|vec2|vec3|vec4|mat3|mat4|sampler2D|samplerCube)\\s+"
+#define VAR_TYPE_PATTERN    "\\s+(int|uint8|float|[bi]?vec[234]|mat3|mat4|sampler2D|samplerCube)\\s+"
 #define ATTRIBUTE_PATTERN   VAR_TYPE_PATTERN "(?:a_|v_)(\\w+)" ARRAY_PATTERN ";"
 #define UNIFORM_PATTERN     "\\s+(\\w+)\\s+" "(u_\\w+)" ARRAY_PATTERN ";"
 

@@ -57,11 +57,12 @@ private:
     public:
         Importer();
 
-        virtual Model import(const String& src, const Rect& bounds) override;
+        virtual Model import(const String& src, const Rect& uvBounds) override;
 
     private:
-        Mesh loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t indexOffset) const;
+        Mesh loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase) const;
         Model loadModel(const aiScene* scene, const Rect& uvBounds) const;
+        void loadBones(const aiMesh* mesh, element_index_t vertexBase);
 
         bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
         array<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;

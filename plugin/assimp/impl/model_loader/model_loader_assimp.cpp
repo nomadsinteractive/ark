@@ -109,19 +109,20 @@ ModelLoaderAssimp::Importer::Importer()
     _importer.SetIOHandler(new ArkIOSystem());
 }
 
-Model ModelLoaderAssimp::Importer::import(const String& src, const Rect& bounds)
+Model ModelLoaderAssimp::Importer::import(const String& src, const Rect& uvBounds)
 {
     const aiScene* scene = _importer.ReadFile(src.c_str(), aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_FlipWindingOrder | aiProcess_GenBoundingBoxes);
-    return loadModel(scene, bounds);
+    return loadModel(scene, uvBounds);
 }
 
-Mesh ModelLoaderAssimp::Importer::loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t indexOffset) const
+Mesh ModelLoaderAssimp::Importer::loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase) const
 {
-    sp<Array<element_index_t>> indices = loadIndices(mesh, indexOffset);
+    sp<Array<element_index_t>> indices = loadIndices(mesh, vertexBase);
     sp<Array<V3>> vertices = sp<Array<V3>::Allocated>::make(mesh->mNumVertices);
     sp<Array<Mesh::UV>> uvs = sp<Array<Mesh::UV>::Allocated>::make(mesh->mNumVertices);
     sp<Array<V3>> normals = mesh->HasNormals() ? sp<Array<V3>::Allocated>::make(mesh->mNumVertices) : sp<Array<V3>::Allocated>::null();
     sp<Array<Mesh::Tangent>> tangents = mesh->HasTangentsAndBitangents() ? sp<Array<Mesh::Tangent>::Allocated>::make(mesh->mNumVertices) : sp<Array<Mesh::Tangent>::Allocated>::null();
+    sp<Array<Mesh::BoneInfo>> bones = mesh->HasBones() ? sp<Array<Mesh::BoneInfo>::Allocated>::make(mesh->mNumVertices) : sp<Array<Mesh::BoneInfo>::Allocated>::null();
 
     V3* vert = vertices->buf() - 1;
     V3* norm = normals ? normals->buf() - 1 : nullptr;
@@ -139,20 +140,55 @@ Mesh ModelLoaderAssimp::Importer::loadMesh(const aiMesh* mesh, const Rect& uvBou
                                                     static_cast<uint16_t>((mesh->mTextureCoords[0][i].y * uvBounds.height() + uvBounds.bottom()) * 0xffff)) : Mesh::UV(0, 0);
     }
 
-    return Mesh(indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents));
+    return Mesh(indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents), std::move(bones));
 }
 
 Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& uvBounds) const
 {
     std::vector<Mesh> meshes;
-    element_index_t indexOffset = 0;
+    element_index_t vertexBase = 0;
+
+    V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
+
     for(uint32_t i = 0; i < scene->mNumMeshes; ++i)
     {
-        meshes.push_back(loadMesh(scene->mMeshes[i], uvBounds, indexOffset));
-        indexOffset += meshes.back().vertexLength();
+        const aiMesh* mesh = scene->mMeshes[i];
+        meshes.push_back(loadMesh(mesh, uvBounds, vertexBase));
+
+        aabbMin = V3(std::min(mesh->mAABB.mMin.x, aabbMin.x()), std::min(mesh->mAABB.mMin.y, aabbMin.y()), std::min(mesh->mAABB.mMin.z, aabbMin.y()));
+        aabbMax = V3(std::max(mesh->mAABB.mMax.x, aabbMax.x()), std::max(mesh->mAABB.mMax.y, aabbMax.y()), std::max(mesh->mAABB.mMax.z, aabbMax.y()));
+
+        vertexBase += meshes.back().vertexLength();
     }
 
-    return Model(sp<Array<Mesh>::Vector>::make(std::move(meshes)));
+    const V3 bounds(aabbMax.x() - aabbMin.x(), aabbMax.y() - aabbMin.y(), aabbMax.z() - aabbMin.z());
+    return Model(sp<Array<Mesh>::Vector>::make(std::move(meshes)), {bounds, bounds, V3(0)});
+}
+
+void ModelLoaderAssimp::Importer::loadBones(const aiMesh* mesh, element_index_t vertexBase)
+{
+    Table<String, size_t> boneMapping;
+    std::unordered_map<uint32_t, uint32_t> bonePerVertex;
+    for(uint32_t i = 0; i < mesh->mNumBones; i++)
+    {
+        uint32_t index = 0;
+        const String name(mesh->mBones[i]->mName.data);
+
+        if (boneMapping.find(name) == boneMapping.end())
+        {
+            index = boneMapping.size();
+            boneMapping.push_back(name, index);
+        }
+        else
+            index = boneMapping.at(name);
+
+        for (uint32_t j = 0; j < mesh->mBones[i]->mNumWeights; j++)
+        {
+            uint32_t vertexID = mesh->mBones[i]->mWeights[j].mVertexId;
+            size_t& perVertexSize = bonePerVertex[vertexID];
+            ++ perVertexSize;
+        }
+    }
 }
 
 }

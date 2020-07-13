@@ -51,7 +51,7 @@ private:
 
     class MeshVertices : public Vertices {
     public:
-        MeshVertices(sp<Array<Mesh>> meshes);
+        MeshVertices(sp<Array<Mesh>> meshes, const V3& metrics);
 
         virtual void write(VertexStream& buf, const V3& size) override;
 
@@ -60,6 +60,7 @@ private:
 
     private:
         sp<Array<Mesh>> _meshes;
+        V3 _size;
     };
 
 private:

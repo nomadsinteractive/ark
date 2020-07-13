@@ -28,8 +28,8 @@ public:
     }
 
     virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {
-        ShaderPreprocessor& vertex = context.getStage(Shader::SHADER_STAGE_VERTEX);
-        ShaderPreprocessor& fragment = context.getStage(Shader::SHADER_STAGE_FRAGMENT);
+        ShaderPreprocessor& vertex = context.getStage(PipelineInput::SHADER_STAGE_VERTEX);
+        ShaderPreprocessor& fragment = context.getStage(PipelineInput::SHADER_STAGE_FRAGMENT);
 
         fragment.addModifier("vec4(1.0, 1.0, 1.0, v_Alpha01)");
         fragment.addModifier("u_Color01");

@@ -35,7 +35,7 @@ public:
             write<T>(value, offsets[name]);
     }
 
-    void writePosition(const V3& position, uint32_t vertexId);
+    void writePosition(const V3& position);
     void writeNormal(const V3& normal);
     void writeTangent(const V3& tangent);
     void writeBitangent(const V3& bitangent);

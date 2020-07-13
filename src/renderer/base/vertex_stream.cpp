@@ -7,7 +7,7 @@
 namespace ark {
 
 VertexStream::VertexStream(const PipelineInput::Attributes& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride)
-    : _attributes(attributes), _writer(sp<WriterMemory>::make(ptr, size, stride)), _do_transform(doTransform), _visible(true)
+    : VertexStream(attributes, doTransform, sp<WriterMemory>::make(ptr, size, stride))
 {
 }
 
@@ -16,7 +16,7 @@ VertexStream::VertexStream(const PipelineInput::Attributes& attributes, bool doT
 {
 }
 
-void VertexStream::writePosition(const V3& position, uint32_t vertexId)
+void VertexStream::writePosition(const V3& position)
 {
     _writer->writePosition(_visible ? (_do_transform ? (_transform->transform(position) + _translate) : position) : V3());
 }

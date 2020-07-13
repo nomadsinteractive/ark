@@ -16,10 +16,11 @@ Mesh::Tangent::Tangent(const V3& tangent, const V3& bitangent)
 {
 }
 
-Mesh::Mesh(array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents)
-    : _indices(std::move(indices)), _vertices(std::move(vertices)), _uvs(std::move(uvs)), _normals(std::move(normals)), _tangents(std::move(tangents))
+Mesh::Mesh(array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos)
+    : _indices(std::move(indices)), _vertices(std::move(vertices)), _uvs(std::move(uvs)), _normals(std::move(normals)), _tangents(std::move(tangents)), _bone_infos(std::move(boneInfos))
 {
-    DASSERT(_vertices->length() == _uvs->length() && (!_normals || _vertices->length() == _normals->length()) && (!_tangents || _vertices->length() == _tangents->length()));
+    DASSERT(_vertices->length() == _uvs->length() && (!_normals || _vertices->length() == _normals->length()) && (!_tangents || _vertices->length() == _tangents->length())
+            && (!_bone_infos || _vertices->length() == _bone_infos->length()));
 }
 
 size_t Mesh::vertexLength() const
@@ -37,7 +38,7 @@ const array<V3>& Mesh::vertices() const
     return _vertices;
 }
 
-void Mesh::write(VertexStream& buf, const V3& size, size_t& vertexBase) const
+void Mesh::write(VertexStream& buf, const V3& scale) const
 {
     V3* vertice = _vertices->buf();
     UV* uv = _uvs->buf();
@@ -48,7 +49,7 @@ void Mesh::write(VertexStream& buf, const V3& size, size_t& vertexBase) const
     for(size_t i = 0; i < len; ++i)
     {
         buf.next();
-        buf.writePosition(*vertice * size, static_cast<uint32_t>(vertexBase + i));
+        buf.writePosition(*vertice * scale);
         ++vertice;
         buf.writeTexCoordinate(uv->_u, uv->_v);
         ++uv;
@@ -64,7 +65,11 @@ void Mesh::write(VertexStream& buf, const V3& size, size_t& vertexBase) const
             ++tangent;
         }
     }
-    vertexBase += len;
+}
+
+Mesh::BoneInfo::BoneInfo(std::array<float, 4> weights, std::array<int32_t, 4> ids)
+    : _weights(std::move(weights)), _ids(std::move(ids))
+{
 }
 
 }

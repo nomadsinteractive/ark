@@ -18,11 +18,10 @@ VerticesSphere::VerticesSphere(sp<std::vector<ModelLoaderSphere::Vertex>> vertic
 
 void VerticesSphere::write(VertexStream& buf, const V3& size)
 {
-    uint32_t vertexId = 0;
     for(const ModelLoaderSphere::Vertex& vertex : *_vertices)
     {
         buf.next();
-        buf.writePosition(vertex._position * size, vertexId ++);
+        buf.writePosition(vertex._position * size);
         buf.writeTexCoordinate(_item.ux() + static_cast<uint16_t>((_item.vx() - _item.ux()) * vertex._u), _item.uy() + static_cast<uint16_t>((_item.vy() - _item.uy()) * vertex._v));
         buf.writeNormal(vertex._position);
         buf.writeTangent(vertex._tangent);
