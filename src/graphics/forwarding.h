@@ -43,6 +43,7 @@ class SurfaceController;
 class Tilemap;
 class TilemapLayer;
 class Tileset;
+class Varying;
 class Vec2Impl;
 class Vec3Impl;
 class Vec4Impl;

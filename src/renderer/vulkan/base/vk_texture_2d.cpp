@@ -119,7 +119,7 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap
         VKUtil::createImage(_renderer->device(), imageCreateInfo, &_image, &_memory);
 
         if(imagedata)
-            doUploadBitmap(bitmap, imageDataSize, {imagedata});
+            doUploadBitmap(bitmap, imageDataSize, images);
     }
 
     // Create a texture sampler

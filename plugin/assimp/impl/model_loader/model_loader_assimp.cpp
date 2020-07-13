@@ -185,7 +185,7 @@ void ModelLoaderAssimp::Importer::loadBones(const aiMesh* mesh, element_index_t 
         for (uint32_t j = 0; j < mesh->mBones[i]->mNumWeights; j++)
         {
             uint32_t vertexID = mesh->mBones[i]->mWeights[j].mVertexId;
-            size_t& perVertexSize = bonePerVertex[vertexID];
+            uint32_t& perVertexSize = bonePerVertex[vertexID];
             ++ perVertexSize;
         }
     }
