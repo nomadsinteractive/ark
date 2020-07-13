@@ -19,7 +19,7 @@ class VKMemoryPtr;
 class VKPipeline;
 class VKRenderer;
 class VKRenderTarget;
-class VKTexture2D;
+class VKTexture;
 class VKUtil;
 
 class PipelineFactoryVulkan;

@@ -10,7 +10,7 @@
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_graphics_context.h"
 #include "renderer/vulkan/base/vk_renderer.h"
-#include "renderer/vulkan/base/vk_texture_2d.h"
+#include "renderer/vulkan/base/vk_texture.h"
 #include "renderer/vulkan/util/vulkan_initializers.hpp"
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vk_util.h"
@@ -140,7 +140,7 @@ void VKFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
 
     VKUtil::checkResult(vkCreateRenderPass(device, &renderPassInfo, nullptr, &_render_pass_begin_info.renderPass));
 
-    const sp<VKTexture2D> vkTexture = _texture->delegate();
+    const sp<VKTexture> vkTexture = _texture->delegate();
     if(!vkTexture->id())
         vkTexture->upload(graphicsContext, nullptr);
 

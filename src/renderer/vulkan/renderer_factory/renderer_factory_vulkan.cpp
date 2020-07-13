@@ -24,7 +24,7 @@
 #include "renderer/vulkan/base/vk_framebuffer_renderer.h"
 #include "renderer/vulkan/base/vk_heap.h"
 #include "renderer/vulkan/base/vk_renderer.h"
-#include "renderer/vulkan/base/vk_texture_2d.h"
+#include "renderer/vulkan/base/vk_texture.h"
 #include "renderer/vulkan/util/vk_util.h"
 
 #include "platform/platform.h"
@@ -115,8 +115,8 @@ sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
 
 sp<Texture::Delegate> RendererFactoryVulkan::createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
 {
-    if(parameters->_type == Texture::TYPE_2D)
-        return sp<VKTexture2D>::make(_recycler, _renderer, static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), parameters, uploader);
+    if(parameters->_type == Texture::TYPE_2D || parameters->_type == Texture::TYPE_CUBEMAP)
+        return sp<VKTexture>::make(_recycler, _renderer, static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), parameters, uploader);
     return nullptr;
 }
 

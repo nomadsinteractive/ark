@@ -30,7 +30,6 @@
 #include "renderer/vulkan/base/vk_pipeline.h"
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_render_target.h"
-#include "renderer/vulkan/base/vk_texture_2d.h"
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vulkan_debug.h"

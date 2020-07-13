@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_2D_H_
-#define ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_2D_H_
+#ifndef ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_H_
+#define ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_H_
 
 #include "core/epi/notifier.h"
 #include "core/types/shared_ptr.h"
@@ -16,10 +16,10 @@
 namespace ark {
 namespace vulkan {
 
-class VKTexture2D : public Texture::Delegate {
+class VKTexture : public Texture::Delegate {
 public:
-    VKTexture2D(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, uint32_t width, uint32_t height, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader);
-    ~VKTexture2D() override;
+    VKTexture(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, uint32_t width, uint32_t height, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader);
+    ~VKTexture() override;
 
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
@@ -42,6 +42,7 @@ private:
     uint32_t _width, _height;
     sp<Texture::Parameters> _parameters;
     sp<Texture::Uploader> _uploader;
+    uint32_t _num_faces;
 
     VkImage _image;
     VkDeviceMemory _memory;

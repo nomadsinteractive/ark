@@ -22,7 +22,7 @@
 #include "renderer/vulkan/base/vk_graphics_context.h"
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/base/vk_render_target.h"
-#include "renderer/vulkan/base/vk_texture_2d.h"
+#include "renderer/vulkan/base/vk_texture.h"
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vk_util.h"
 
@@ -246,7 +246,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     _texture_observers.clear();
     for(const sp<Texture>& i : bindings.samplers())
     {
-        const sp<VKTexture2D> texture = i->delegate();
+        const sp<VKTexture> texture = i->delegate();
         _texture_observers.push_back(i->notifier().createDirtyFlag());
         writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                       _descriptor_set,

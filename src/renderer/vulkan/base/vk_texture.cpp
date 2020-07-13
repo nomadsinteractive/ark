@@ -1,4 +1,4 @@
-#include "renderer/vulkan/base/vk_texture_2d.h"
+#include "renderer/vulkan/base/vk_texture.h"
 
 #include "core/base/string.h"
 #include "core/inf/dictionary.h"
@@ -17,41 +17,42 @@
 namespace ark {
 namespace vulkan {
 
-VKTexture2D::VKTexture2D(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, uint32_t width, uint32_t height, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
-    : Texture::Delegate(Texture::TYPE_2D), _recycler(recycler), _renderer(renderer), _width(width), _height(height), _parameters(parameters), _uploader(uploader),
+VKTexture::VKTexture(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, uint32_t width, uint32_t height, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
+    : Texture::Delegate(parameters->_type), _recycler(recycler), _renderer(renderer), _width(width), _height(height), _parameters(parameters), _uploader(uploader), _num_faces(_parameters->_type == Texture::TYPE_2D ? 1 : 6),
       _image(VK_NULL_HANDLE), _memory(VK_NULL_HANDLE), _descriptor{}
 {
 }
 
-VKTexture2D::~VKTexture2D()
+VKTexture::~VKTexture()
 {
     _recycler->recycle(*this);
 }
 
-uint64_t VKTexture2D::id()
+uint64_t VKTexture::id()
 {
     return (uint64_t)(_image);
 }
 
-void VKTexture2D::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
+void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
     if(_uploader)
         _uploader->upload(graphicsContext, *this);
     else
     {
         Texture::Format format = _parameters->_format;
+        const std::vector<sp<ByteArray>> imagedata(_num_faces);
         if(format == Texture::FORMAT_AUTO)
-            uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * 4, 4, false), {nullptr});
+            uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * 4, 4, false), imagedata);
         else
         {
             uint8_t channels = format & Texture::FORMAT_RGBA;
             uint32_t pixelbytes = format == Texture::FORMAT_F16 ? 2 : (format == Texture::FORMAT_F32 ? 4 : 1);
-            uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * channels * pixelbytes, channels, false), {nullptr});
+            uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * channels * pixelbytes, channels, false), imagedata);
         }
     }
 }
 
-Resource::RecycleFunc VKTexture2D::recycle()
+Resource::RecycleFunc VKTexture::recycle()
 {
     const sp<VKDevice> device = _renderer->device();
     VkDescriptorImageInfo descriptor = _descriptor;
@@ -69,19 +70,21 @@ Resource::RecycleFunc VKTexture2D::recycle()
     };
 }
 
-bool VKTexture2D::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
+bool VKTexture::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
 {
     return false;
 }
 
-void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& images)
+void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& images)
 {
-    DASSERT(images.size() == 1);
+    DASSERT(images.size() == _num_faces);
     const bytearray& imagedata = images.at(0);
     VkFormat format = VKUtil::toTextureFormat(bitmap, _parameters->_format);
 
     DCHECK(_width == bitmap.width() && _height == bitmap.height(), "Uploading bitmap has different size(%d, %d) compared to Texture's(%d, %d)", bitmap.width(), bitmap.height(), _width, _height);
     _mip_levels = 1;
+
+    bool isCubemap = _num_faces == 6;
 
     VkDevice logicalDevice = _renderer->vkLogicalDevice();
     {
@@ -90,7 +93,7 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap
         imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
         imageCreateInfo.format = format;
         imageCreateInfo.mipLevels = _mip_levels;
-        imageCreateInfo.arrayLayers = static_cast<uint32_t>(images.size());
+        imageCreateInfo.arrayLayers = _num_faces;
         imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -98,6 +101,7 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageCreateInfo.extent = { _width, _height, 1 };
         imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        imageCreateInfo.flags = isCubemap ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
         if(!imagedata)
             imageCreateInfo.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
@@ -157,7 +161,7 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap
     // are abstracted by image views containing additional
     // information and sub resource ranges
     VkImageViewCreateInfo view = vks::initializers::imageViewCreateInfo();
-    view.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    view.viewType = isCubemap ? VK_IMAGE_VIEW_TYPE_CUBE : VK_IMAGE_VIEW_TYPE_2D;
     view.format = format;
     view.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
     // The subresource range describes the set of mip levels (and array layers) that can be accessed through this image view
@@ -165,7 +169,7 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap
     view.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     view.subresourceRange.baseMipLevel = 0;
     view.subresourceRange.baseArrayLayer = 0;
-    view.subresourceRange.layerCount = static_cast<uint32_t>(images.size());
+    view.subresourceRange.layerCount = _num_faces;
     // Linear tiling usually won't support mip maps
     // Only set mip map count if optimal tiling is used
     view.subresourceRange.levelCount = _mip_levels;
@@ -174,12 +178,12 @@ void VKTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap
     VKUtil::checkResult(vkCreateImageView(logicalDevice, &view, nullptr, &_descriptor.imageView));
 }
 
-const VkDescriptorImageInfo& VKTexture2D::vkDescriptor() const
+const VkDescriptorImageInfo& VKTexture::vkDescriptor() const
 {
     return _descriptor;
 }
 
-void VKTexture2D::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata)
+void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata)
 {
     VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
     VkMemoryRequirements memReqs = {};
@@ -313,7 +317,7 @@ void VKTexture2D::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, con
     vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
 }
 
-void VKTexture2D::copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, size_t imageDataSize)
+void VKTexture::copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, size_t imageDataSize)
 {
     if(imageDataSize == imagedata->size())
         memcpy(buf, imagedata->buf(), imageDataSize);
