@@ -148,7 +148,7 @@ public:
     }
 
     virtual T* buf() override {
-        return &_data[0];
+        return _data.data();
     }
 
 private:

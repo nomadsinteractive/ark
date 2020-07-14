@@ -2,6 +2,8 @@
 #define ARK_RENDERER_BASE_MODEL_H_
 
 #include "core/forwarding.h"
+#include "core/collection/table.h"
+#include "core/base/string.h"
 #include "core/inf/array.h"
 #include "core/types/shared_ptr.h"
 
@@ -19,7 +21,7 @@ public:
     Model() = default;
     Model(sp<Uploader> indices, sp<Vertices> vertices, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
     Model(sp<Array<Mesh>> meshes, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Model);
+    DEFAULT_COPY_AND_ASSIGN(Model);
 
     const sp<Uploader>& indices() const;
     const sp<Vertices>& vertices() const;
@@ -29,6 +31,9 @@ public:
 
     size_t indexLength() const;
     size_t vertexLength() const;
+
+    const Table<String, sp<AnimateMaker>>& animates() const;
+    Table<String, sp<AnimateMaker>>& animates();
 
     void writeToStream(VertexStream& buf, const V3& size) const;
 
@@ -68,6 +73,7 @@ private:
     sp<Vertices> _vertices;
     sp<Array<Mesh>> _meshes;
 
+    Table<String, sp<AnimateMaker>> _animates;
     Metrics _metrics;
 };
 

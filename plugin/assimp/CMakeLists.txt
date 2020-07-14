@@ -22,7 +22,7 @@ endif()
 
 # Assimp(v4.1.0) tries to include config.h in the source directory prior to the one generated in the binary directory,
 # which might cause compiler errors. So here is a workaround below
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/3rdparty/assimp/include)
+#include_directories(${CMAKE_CURRENT_BINARY_DIR}/3rdparty/assimp/include)
 add_subdirectory(3rdparty/assimp)
 
 get_filename_component(LOCAL_PLUGIN_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
@@ -37,6 +37,7 @@ list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/assimp/inclu
 ark_link_libraries(assimp)
 
 aux_source_directory(. LOCAL_SRC_LIST)
+aux_source_directory(impl/animate_maker LOCAL_SRC_LIST)
 aux_source_directory(impl/io LOCAL_SRC_LIST)
 aux_source_directory(impl/model_loader LOCAL_SRC_LIST)
 

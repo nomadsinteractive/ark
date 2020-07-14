@@ -1,6 +1,7 @@
 #include "renderer/base/mesh.h"
 
 #include "core/inf/array.h"
+#include "core/util/log.h"
 
 #include "renderer/base/vertex_stream.h"
 
@@ -81,7 +82,7 @@ void Mesh::BoneInfo::add(int32_t id, float weight)
             _ids[i] = id;
             return;
         }
-    DFATAL("Unable to add more weight, max array length: %d", _weights.size());
+    LOGW("Unable to add more weight to VertexID(%d), max weightarray length: %d", id, _weights.size());
 }
 
 }

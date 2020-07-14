@@ -1,8 +1,6 @@
 #ifndef ARK_PLUGIN_ASSIMP_IMPL_MODEL_LOADER_MODEL_LOADER_ASSIMP_H_
 #define ARK_PLUGIN_ASSIMP_IMPL_MODEL_LOADER_MODEL_LOADER_ASSIMP_H_
 
-#include <unordered_map>
-
 #include <assimp/postprocess.h>
 #include <assimp/version.h>
 #include <assimp/scene.h>
@@ -62,9 +60,9 @@ private:
         virtual Model import(const String& src, const Rect& uvBounds) override;
 
     private:
-        Mesh loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, Table<String, size_t>& boneMapping) const;
+        Mesh loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, std::unordered_map<String, size_t>& boneMapping) const;
         Model loadModel(const aiScene* scene, const Rect& uvBounds) const;
-        void loadBones(const aiMesh* mesh, Table<String, size_t>& boneMapping, Array<Mesh::BoneInfo>& bones) const;
+        void loadBones(const aiMesh* mesh, std::unordered_map<String, size_t>& boneMapping, Array<Mesh::BoneInfo>& bones) const;
 
         bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
         array<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;

@@ -79,5 +79,4 @@ template<> ARK_API ModelBundle::MappingType Conversions::to<String, ModelBundle:
     return ModelBundle::MAPPING_TYPE_ALBEDO;
 }
 
-
 }

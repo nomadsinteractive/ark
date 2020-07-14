@@ -3,8 +3,9 @@
 #include "core/inf/variable.h"
 
 #include "renderer/base/mesh.h"
-#include "renderer/inf/vertices.h"
+#include "renderer/inf/animate_maker.h"
 #include "renderer/inf/uploader.h"
+#include "renderer/inf/vertices.h"
 
 
 namespace ark {
@@ -47,6 +48,16 @@ size_t Model::indexLength() const
 size_t Model::vertexLength() const
 {
     return _vertices->length();
+}
+
+const Table<String, sp<AnimateMaker>>& Model::animates() const
+{
+    return _animates;
+}
+
+Table<String, sp<AnimateMaker>>& Model::animates()
+{
+    return _animates;
 }
 
 V3 Model::toScale(const V3& renderObjectSize) const

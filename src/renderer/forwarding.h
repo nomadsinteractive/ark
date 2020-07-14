@@ -3,6 +3,7 @@
 
 namespace ark {
 
+class AnimateMaker;
 class Atlas;
 class Attribute;
 class Buffer;
