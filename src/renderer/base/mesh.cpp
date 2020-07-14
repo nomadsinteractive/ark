@@ -72,4 +72,16 @@ Mesh::BoneInfo::BoneInfo(std::array<float, 4> weights, std::array<int32_t, 4> id
 {
 }
 
+void Mesh::BoneInfo::add(int32_t id, float weight)
+{
+    for(size_t i = 0; i < _weights.size(); ++i)
+        if(_weights.at(i) == 0)
+        {
+            _weights[i] = weight;
+            _ids[i] = id;
+            return;
+        }
+    DFATAL("Unable to add more weight, max array length: %d", _weights.size());
+}
+
 }

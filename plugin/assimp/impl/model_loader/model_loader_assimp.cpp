@@ -13,7 +13,6 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_buffer.h"
-#include "renderer/base/mesh.h"
 #include "renderer/base/model.h"
 #include "renderer/base/model_bundle.h"
 #include "renderer/base/pipeline_bindings.h"
@@ -115,7 +114,7 @@ Model ModelLoaderAssimp::Importer::import(const String& src, const Rect& uvBound
     return loadModel(scene, uvBounds);
 }
 
-Mesh ModelLoaderAssimp::Importer::loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase) const
+Mesh ModelLoaderAssimp::Importer::loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, Table<String, size_t>& boneMapping) const
 {
     sp<Array<element_index_t>> indices = loadIndices(mesh, vertexBase);
     sp<Array<V3>> vertices = sp<Array<V3>::Allocated>::make(mesh->mNumVertices);
@@ -139,6 +138,8 @@ Mesh ModelLoaderAssimp::Importer::loadMesh(const aiMesh* mesh, const Rect& uvBou
         *(++u) = mesh->mTextureCoords[0] ? Mesh::UV(static_cast<uint16_t>((mesh->mTextureCoords[0][i].x * uvBounds.width() + uvBounds.left()) * 0xffff),
                                                     static_cast<uint16_t>((mesh->mTextureCoords[0][i].y * uvBounds.height() + uvBounds.bottom()) * 0xffff)) : Mesh::UV(0, 0);
     }
+    if(mesh->HasBones())
+        loadBones(mesh, boneMapping, bones);
 
     return Mesh(indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents), std::move(bones));
 }
@@ -149,11 +150,12 @@ Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& u
     element_index_t vertexBase = 0;
 
     V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
+    Table<String, size_t> boneMapping;
 
     for(uint32_t i = 0; i < scene->mNumMeshes; ++i)
     {
         const aiMesh* mesh = scene->mMeshes[i];
-        meshes.push_back(loadMesh(mesh, uvBounds, vertexBase));
+        meshes.push_back(loadMesh(mesh, uvBounds, vertexBase, boneMapping));
 
         aabbMin = V3(std::min(mesh->mAABB.mMin.x, aabbMin.x()), std::min(mesh->mAABB.mMin.y, aabbMin.y()), std::min(mesh->mAABB.mMin.z, aabbMin.y()));
         aabbMax = V3(std::max(mesh->mAABB.mMax.x, aabbMax.x()), std::max(mesh->mAABB.mMax.y, aabbMax.y()), std::max(mesh->mAABB.mMax.z, aabbMax.y()));
@@ -165,10 +167,9 @@ Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& u
     return Model(sp<Array<Mesh>::Vector>::make(std::move(meshes)), {bounds, bounds, V3(0)});
 }
 
-void ModelLoaderAssimp::Importer::loadBones(const aiMesh* mesh, element_index_t vertexBase)
+void ModelLoaderAssimp::Importer::loadBones(const aiMesh* mesh, Table<String, size_t>& boneMapping, Array<Mesh::BoneInfo>& bones) const
 {
-    Table<String, size_t> boneMapping;
-    std::unordered_map<uint32_t, uint32_t> bonePerVertex;
+    std::unordered_map<uint32_t, Mesh::BoneInfo> bonePerVertex;
     for(uint32_t i = 0; i < mesh->mNumBones; i++)
     {
         uint32_t index = 0;
@@ -185,9 +186,16 @@ void ModelLoaderAssimp::Importer::loadBones(const aiMesh* mesh, element_index_t 
         for (uint32_t j = 0; j < mesh->mBones[i]->mNumWeights; j++)
         {
             uint32_t vertexID = mesh->mBones[i]->mWeights[j].mVertexId;
-            uint32_t& perVertexSize = bonePerVertex[vertexID];
-            ++ perVertexSize;
+            Mesh::BoneInfo& boneInfo = bonePerVertex[vertexID];
+            boneInfo.add(vertexID, mesh->mBones[i]->mWeights[j].mWeight);
         }
+    }
+
+    Mesh::BoneInfo* bonesBuf = bones.buf();
+    for(const auto& i : bonePerVertex)
+    {
+        DASSERT(i.first < bones.length());
+        bonesBuf[i.first] = i.second;
     }
 }
 

@@ -477,6 +477,7 @@ ARK_PY_ARGUMENTS = (
     (r'(document|element|attribute)\s*&', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'V2', GenArgumentMeta('PyObject*', 'V2', 'O')),
     (r'V3', GenArgumentMeta('PyObject*', 'V3', 'O')),
+    (r'V4', GenArgumentMeta('PyObject*', 'V4', 'O')),
     (r'([^>]+|[\w\d_]+<[\w\d_]+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
     (r'(uint32_t|unsigned int|uint8_t)', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
     (r'(int32_t|int|int8_t)', GenArgumentMeta('int32_t', 'int32_t', 'i')),
@@ -494,6 +495,7 @@ ARK_PY_ARGUMENT_CHECKERS = {
     'std::vector<int32_t>': GenConverter('(PyList_CheckExact({0}) || PyTuple_CheckExact({0}))', 'std::move({0})'),
     'V2': GenConverter('(PyTuple_CheckExact({0}) && PyObject_Length({0}) == 2)', '{0}'),
     'V3': GenConverter('(PyTuple_CheckExact({0}) && PyObject_Length({0}) == 3)', '{0}'),
+    'V4': GenConverter('(PyTuple_CheckExact({0}) && PyObject_Length({0}) == 4)', '{0}'),
     'std::wstring': GenConverter('PyUnicode_CheckExact({0})', '{0}')
 }
 

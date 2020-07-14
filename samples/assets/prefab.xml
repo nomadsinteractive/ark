@@ -13,5 +13,9 @@
 	<render-layer id="@rl002" class="text-layer" alphabet="@a001" text-color="#ffffffff"/>
 	<render-layer id="@rl003" class="image-layer" atlas="@blocks"/>
 	<renderer id="fps-counter" class="fps-counter" render-layer="@rl001" message="%.2f / 60"/>
+	<renderer id="imgui" class="imgui">
+		<font src="fonts/Cousine-Regular.ttf" size="14"/>
+		<font src="fonts/DroidSans.ttf" size="14"/>
+	</renderer>
 	<audio-player id="audio_player"/>
 </resources>

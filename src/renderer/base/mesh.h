@@ -35,6 +35,8 @@ public:
         BoneInfo() = default;
         BoneInfo(std::array<float, 4> weights, std::array<int32_t, 4> ids);
 
+        void add(int32_t id, float weight);
+
         std::array<float, 4> _weights;
         std::array<int32_t, 4> _ids;
     };

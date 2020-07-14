@@ -381,13 +381,22 @@ class Numeric(_Var):
         pass
 
     def __add__(self, other) -> 'Numeric':
-        return Numeric(0)
+        pass
+
+    def __radd__(self, other) -> 'Numeric':
+        pass
 
     def __mul__(self, other) -> 'Numeric':
-        return Numeric(0)
+        pass
+
+    def __rmul__(self, other) -> 'Numeric':
+        pass
 
     def __sub__(self, other) -> 'Numeric':
-        return Numeric(0)
+        pass
+
+    def __rsub__(self, other) -> 'Numeric':
+        pass
 
     def __truediv__(self, other) -> 'Numeric':
         return Numeric(0)
@@ -615,6 +624,14 @@ class Mat3:
 
     def __mul__(self, other):
         return None
+
+
+class Mat4:
+    def __init__(self, t=None, b=None, n=None, w=None):
+        pass
+
+    def __mul__(self, other):
+        pass
 
 
 class RenderObject:

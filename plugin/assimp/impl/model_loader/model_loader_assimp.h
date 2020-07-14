@@ -10,12 +10,14 @@
 #include <assimp/DefaultLogger.hpp>
 
 #include "core/forwarding.h"
+#include "core/inf/array.h"
 #include "core/inf/builder.h"
 
 #include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
+#include "renderer/base/mesh.h"
 #include "renderer/base/model_bundle.h"
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/uploader.h"
@@ -60,9 +62,9 @@ private:
         virtual Model import(const String& src, const Rect& uvBounds) override;
 
     private:
-        Mesh loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase) const;
+        Mesh loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, Table<String, size_t>& boneMapping) const;
         Model loadModel(const aiScene* scene, const Rect& uvBounds) const;
-        void loadBones(const aiMesh* mesh, element_index_t vertexBase);
+        void loadBones(const aiMesh* mesh, Table<String, size_t>& boneMapping, Array<Mesh::BoneInfo>& bones) const;
 
         bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
         array<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;

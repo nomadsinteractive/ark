@@ -20,6 +20,7 @@ class Scrollable;
 class RenderLayer;
 class Mat2Impl;
 class Mat3Impl;
+class Mat4Impl;
 class Model;
 class RenderLayer;
 class LayerContext;

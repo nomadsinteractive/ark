@@ -27,6 +27,7 @@ public:
 
     static M4 mul(const M4& lvalue, const M4& rvalue);
     static V4 mul(const M4& lvalue, const V4& rvalue);
+    static V3 mul(const M4& lvalue, const V3& rvalue);
 
     static M4 rotate(const M4& lvalue, const V3& direction, float radian);
     static M4 scale(const M4& lvalue, const V3& rvalue);

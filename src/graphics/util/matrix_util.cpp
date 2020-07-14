@@ -80,6 +80,13 @@ V4 MatrixUtil::mul(const M4& lvalue, const V4& rvalue)
     return V4(r.x, r.y, r.z, r.w);
 }
 
+V3 MatrixUtil::mul(const M4& lvalue, const V3& rvalue)
+{
+    const glm::vec4 r = lvalue.mat<glm::mat4>() * glm::vec4(rvalue.x(), rvalue.y(), rvalue.z(), 1.0f);
+    DCHECK(r.w != 0, "Division by zero");
+    return V3(r.x / r.w, r.y / r.w, r.z / r.w);
+}
+
 M4 MatrixUtil::rotate(const M4& lvalue, const V3& direction, float radian)
 {
     return M4(glm::rotate(lvalue.mat<glm::mat4>(), radian, *reinterpret_cast<const glm::vec3*>(&direction)));
