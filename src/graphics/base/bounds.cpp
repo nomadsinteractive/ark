@@ -16,7 +16,7 @@ bool Bounds::ptin(const V3& pt) const
 {
     const V3 c = _center->val();
     const V3 s = _size->val();
-    for(int32_t i = 0; i < DIMENSIONS; i++)
+    for(int32_t i = 0; i < 3; i++)
         if(!Math::between(c[i] + s[i] / 2.0f, c[i] - s[i] / 2.0f, pt[i]))
             return false;
     return true;

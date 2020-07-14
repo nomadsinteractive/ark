@@ -1,6 +1,6 @@
 #include "assimp/impl/animate_maker/animate_maker_assimp.h"
 
-#include "core/base/string.h"
+#include "graphics/base/mat.h"
 
 namespace ark {
 namespace plugin {
@@ -128,20 +128,19 @@ static const aiNodeAnim* findNodeAnim(const aiAnimation& animation, const String
     return nullptr;
 }
 
-AnimateMakerAssimp::AnimateMakerAssimp(const aiAnimation& animation, const aiNode& rootNode, const std::unordered_map<String, size_t>& boneMapping)
+AnimateMakerAssimp::AnimateMakerAssimp(const aiAnimation& animation, const aiNode& rootNode, const std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping)
     : _animation(&animation), _root_node(&rootNode), _bone_mapping(boneMapping)
 {
 }
 
-array<sp<Mat4>> AnimateMakerAssimp::makeAnimate(const sp<Numeric>& duration)
+sp<Animate> AnimateMakerAssimp::makeAnimate(const sp<Numeric>& duration)
 {
-    return sp<Animate>::make(duration, _animation, _root_node);
+    return sp<AnimateImpl>::make(duration, _animation, _root_node, _bone_mapping);
 }
 
-AnimateMakerAssimp::Animate::Animate(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const std::unordered_map<String, size_t>& boneMapping)
+AnimateMakerAssimp::AnimateImpl::AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping)
     : _ticks_per_sec(static_cast<float>(animation->mTicksPerSecond != 0 ? animation->mTicksPerSecond : 25.0f)), _duration_in_ticks(static_cast<float>(animation->mDuration)),
-      _global_inversed_transform(node->mTransformation), _duration(duration), _animation(animation), _root_node(node), _bone_infos(boneMapping.size()), _matrices(boneMapping.size()),
-      _bone_mapping(std::move(boneMapping)), _last_updated(-1.0f)
+      _global_inversed_transform(node->mTransformation), _duration(duration), _animation(animation), _root_node(node), _bone_infos(boneMapping.size()), _matrices(boneMapping.size())
 {
     _global_inversed_transform.Inverse();
 
@@ -151,26 +150,34 @@ AnimateMakerAssimp::Animate::Animate(const sp<Numeric>& duration, const aiAnimat
         _matrices[i] = boneInfo;
         _bone_infos[i] = std::move(boneInfo);
     }
+
+    for(const auto& i : boneMapping)
+    {
+        size_t index = i.second.first;
+        _bone_mapping.insert(std::make_pair(i.first, index));
+        _bone_infos.at(index)->_offset = i.second.second;
+    }
+
+    update(_duration->val());
 }
 
-size_t AnimateMakerAssimp::Animate::length()
+size_t AnimateMakerAssimp::AnimateImpl::length()
 {
     return _matrices.size();
 }
 
-sp<Mat4>* AnimateMakerAssimp::Animate::buf()
+sp<Mat4>* AnimateMakerAssimp::AnimateImpl::buf()
 {
     float time = _duration->val();
     if(time > _last_updated)
-    {
-        _last_updated = time;
         update(time);
-    }
     return _matrices.data();
 }
 
-void AnimateMakerAssimp::Animate::update(float time)
+void AnimateMakerAssimp::AnimateImpl::update(float time)
 {
+    _last_updated = time;
+
     float animationTime = fmod(time * _ticks_per_sec, _duration_in_ticks);
 
     aiMatrix4x4 identity = aiMatrix4x4();
@@ -180,7 +187,7 @@ void AnimateMakerAssimp::Animate::update(float time)
         i->_final_transform = _global_inversed_transform * i->_intermediate_transform;
 }
 
-void AnimateMakerAssimp::Animate::readNodeHierarchy(float duration, const aiNode* node, const aiMatrix4x4& parentTransform)
+void AnimateMakerAssimp::AnimateImpl::readNodeHierarchy(float duration, const aiNode* node, const aiMatrix4x4& parentTransform)
 {
     const String nodeName(node->mName.data);
     const aiNodeAnim* pNodeAnim = findNodeAnim(*_animation, nodeName);
@@ -207,6 +214,16 @@ void AnimateMakerAssimp::Animate::readNodeHierarchy(float duration, const aiNode
 
     for (uint32_t i = 0; i < node->mNumChildren; i++)
         readNodeHierarchy(duration, node->mChildren[i], globalTransformation);
+}
+
+bool AnimateMakerAssimp::BoneInfo::update(uint64_t /*timestamp*/)
+{
+    return true;
+}
+
+M4 AnimateMakerAssimp::BoneInfo::val()
+{
+    return M4(_final_transform);
 }
 
 }

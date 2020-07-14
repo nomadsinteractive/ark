@@ -1,11 +1,12 @@
 #ifndef ARK_PLUGIN_ASSIMP_IMPL_ANIMATE_MAKER_ANIMATE_MAKER_ASSIMP_H_
 #define ARK_PLUGIN_ASSIMP_IMPL_ANIMATE_MAKER_ANIMATE_MAKER_ASSIMP_H_
 
-#include <vector>
+#include <unordered_map>
 
 #include <assimp/anim.h>
 #include <assimp/scene.h>
 
+#include "core/base/string.h"
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
@@ -18,15 +19,15 @@ namespace assimp {
 
 class AnimateMakerAssimp : public AnimateMaker {
 public:
-    AnimateMakerAssimp(const aiAnimation& animation, const aiNode& rootNode, const std::unordered_map<String, size_t>& boneMapping);
+    AnimateMakerAssimp(const aiAnimation& animation, const aiNode& rootNode, const std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping);
 
-    virtual array<sp<Mat4>> makeAnimate(const sp<Numeric>& duration) override;
+    virtual sp<Animate> makeAnimate(const sp<Numeric>& duration) override;
 
     class BoneInfo;
 
-    class Animate : public Array<sp<Mat4>> {
+    class AnimateImpl : public Animate {
     public:
-        Animate(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const std::unordered_map<String, size_t>& boneMapping);
+        AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping);
 
         virtual size_t length() override;
 
@@ -70,7 +71,7 @@ private:
     const aiAnimation* _animation;
     const aiNode* _root_node;
 
-    std::unordered_map<String, size_t> _bone_mapping;
+    std::unordered_map<String, std::pair<size_t, aiMatrix4x4>> _bone_mapping;
 };
 
 }

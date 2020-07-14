@@ -21,6 +21,8 @@ PipelineInput::Attributes::Attributes(const PipelineInput& input)
     _offsets[ATTRIBUTE_NAME_NORMAL] = input.getAttributeOffset("Normal");
     _offsets[ATTRIBUTE_NAME_TANGENT] = input.getAttributeOffset("Tangent");
     _offsets[ATTRIBUTE_NAME_BITANGENT] = input.getAttributeOffset("Bitangent");
+    _offsets[ATTRIBUTE_NAME_BONE_IDS] = input.getAttributeOffset("BoneIds");
+    _offsets[ATTRIBUTE_NAME_BONE_WEIGHTS] = input.getAttributeOffset("BoneWeights");
 }
 
 PipelineInput::PipelineInput()

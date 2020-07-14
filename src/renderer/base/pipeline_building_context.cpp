@@ -279,7 +279,12 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
             uType = Uniform::TYPE_MAT4;
             break;
         default:
-            FATAL("Unknow type \"%s\"", type.c_str());
+            if(size % 64 == 0) {
+                addUniform(name, Uniform::TYPE_MAT4V, size / 64, flatable, binding);
+                continue;
+            }
+            else
+                FATAL("Unknow type \"%s\"", type.c_str());
         }
         addUniform(name, uType, 1, uType == Uniform::TYPE_F3 ? sp<Flatable>::make<AlignedFlatable>(flatable, 16) : flatable, binding);
     }

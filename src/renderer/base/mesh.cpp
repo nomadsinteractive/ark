@@ -45,6 +45,7 @@ void Mesh::write(VertexStream& buf, const V3& scale) const
     UV* uv = _uvs->buf();
     V3* normal = _normals ? _normals->buf() : nullptr;
     Tangent* tangent = _tangents ? _tangents->buf() : nullptr;
+    BoneInfo* boneInfo = _bone_infos ? _bone_infos->buf() : nullptr;
     size_t len = _vertices->length();
 
     for(size_t i = 0; i < len; ++i)
@@ -55,16 +56,15 @@ void Mesh::write(VertexStream& buf, const V3& scale) const
         buf.writeTexCoordinate(uv->_u, uv->_v);
         ++uv;
         if(normal)
-        {
-            buf.writeNormal(*normal);
-            ++normal;
-        }
+            buf.writeNormal(*(normal++));
         if(tangent)
         {
             buf.writeTangent(tangent->_tangent);
             buf.writeBitangent(tangent->_bitangent);
             ++tangent;
         }
+        if(boneInfo)
+            buf.writeBoneInfo(*(boneInfo++));
     }
 }
 

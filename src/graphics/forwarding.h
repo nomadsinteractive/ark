@@ -77,12 +77,12 @@ typedef Variable<V4> Vec4;
 
 typedef Loader<Bitmap> BitmapLoader;
 
+typedef Array<sp<Mat4>> Animate;
+
 //[[script::bindings::auto]]
 typedef Importer<Tilemap> TilemapImporter;
 //[[script::bindings::auto]]
 typedef Importer<Tileset> TilesetImporter;
-
-const int32_t DIMENSIONS = 2;
 
 }
 

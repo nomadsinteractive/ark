@@ -11,11 +11,13 @@
 #include "graphics/base/v4.h"
 
 #include "renderer/base/drawing_context.h"
+#include "renderer/base/model.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
+#include "renderer/inf/animate_maker.h"
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/pipeline.h"
 #include "renderer/inf/pipeline_factory.h"
@@ -110,6 +112,13 @@ sp<LayerContext> RenderLayer::makeContext(Layer::Type layerType) const
 sp<Layer> RenderLayer::makeLayer(Layer::Type layerType) const
 {
     return sp<Layer>::make(makeContext(layerType));
+}
+
+sp<Animate> RenderLayer::makeAnimate(int32_t modelId, const String& name, const sp<Numeric>& duration) const
+{
+    const Model model = _stub->_model_loader->load(modelId);
+    DCHECK(model.animates().has(name), "Model(%d) has no animate(%s) defined", modelId, name.c_str());
+    return model.animates().at(name)->makeAnimate(duration);
 }
 
 void RenderLayer::render(RenderRequest& renderRequest, const V3& position)

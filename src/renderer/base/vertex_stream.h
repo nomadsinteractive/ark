@@ -7,6 +7,7 @@
 #include "graphics/base/transform.h"
 #include "graphics/inf/renderable.h"
 
+#include "renderer/base/mesh.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/varyings.h"
 
@@ -40,6 +41,7 @@ public:
     void writeTangent(const V3& tangent);
     void writeBitangent(const V3& bitangent);
     void writeTexCoordinate(uint16_t u, uint16_t v);
+    void writeBoneInfo(const Mesh::BoneInfo& boneInfo);
 
     void setRenderObject(const Renderable::Snapshot& renderObject);
 

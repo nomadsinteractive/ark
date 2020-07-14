@@ -14,7 +14,7 @@ class ARK_API AnimateMaker {
 public:
     virtual ~AnimateMaker() = default;
 
-    virtual array<sp<Mat4>> makeAnimate(const sp<Numeric>& duration) = 0;
+    virtual sp<Animate> makeAnimate(const sp<Numeric>& duration) = 0;
 
 };
 

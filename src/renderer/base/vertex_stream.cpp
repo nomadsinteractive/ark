@@ -27,6 +27,12 @@ void VertexStream::writeTexCoordinate(uint16_t u, uint16_t v)
     write(uv, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_TEX_COORDINATE);
 }
 
+void VertexStream::writeBoneInfo(const Mesh::BoneInfo& boneInfo)
+{
+    write(boneInfo._ids, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_BONE_IDS);
+    write(boneInfo._weights, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_BONE_WEIGHTS);
+}
+
 void VertexStream::setRenderObject(const Renderable::Snapshot& renderObject)
 {
     _transform = &renderObject._transform;
