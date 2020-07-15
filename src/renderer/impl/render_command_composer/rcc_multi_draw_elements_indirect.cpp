@@ -95,12 +95,22 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
             const Renderable::Snapshot& s = snapshot._items.at(j);
             if(reload || s._dirty)
             {
+                const ModelBundle::ModelInfo& modelInfo = _model_bundle->ensure(s._type);
+                const Metrics& metrics = modelInfo._model.metrics();
                 VertexStream writer = buf.makeDividedVertexStream(renderRequest, 1, offset, 1);
                 writer.next();
-                writer.write(MatrixUtil::translate(M4::identity(), s._position) * MatrixUtil::scale(s._transform.toMatrix(), s._size));
+                writer.write(MatrixUtil::translate(M4::identity(), s._position) * MatrixUtil::scale(s._transform.toMatrix(), toScale(s._size, metrics)));
             }
             ++ offset;
         }
+}
+
+V3 RCCMultiDrawElementsIndirect::toScale(const V3& displaySize, const Metrics& metrics) const
+{
+    const V3& size = metrics.size;
+    return V3(displaySize.x() != 0 ? displaySize.x() / size.x() : size.x(),
+              displaySize.y() != 0 ? displaySize.y() / size.y() : size.y(),
+              displaySize.z() != 0 ? displaySize.z() /  size.z() : size.z());
 }
 
 RCCMultiDrawElementsIndirect::VerticesUploader::VerticesUploader(const sp<ModelBundle>& multiModels, const sp<PipelineInput>& pipelineInput)

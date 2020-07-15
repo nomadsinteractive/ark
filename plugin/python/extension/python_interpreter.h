@@ -4,6 +4,7 @@
 #include <functional>
 #include <map>
 #include <type_traits>
+#include <vector>
 
 #include <Python.h>
 
@@ -48,27 +49,20 @@ public:
     }
 
     template<typename T> sp<Array<T>> toArray(PyObject* object) {
-        DCHECK(PyList_Check(object), "Object \"\" is not a Python list", Py_TYPE(object)->tp_name);
+        DCHECK(PyList_Check(object), "Object \"%s\" is not a Python list", Py_TYPE(object)->tp_name);
         Py_ssize_t len = PyList_Size(object);
-        const sp<Array<T>> arr = sp<typename Array<T>::Allocated>::make(len);
+        std::vector<T> arr;
         for(Py_ssize_t i = 0; i < len; ++i)
-            arr->buf()[i] = toCppObject<T>(PyList_GetItem(object, i));
-        return arr;
+            arr.push_back(toCppObject<T>(PyList_GetItem(object, i)));
+        return sp<Array<T>::Vector>::make(std::move(arr));
     }
 
-    template<typename T> PyObject* fromSharedPtr(const sp<Array<T>>& array) {
-        T* ptr = array->buf();
-        size_t len = array->length();
-        PyObject* pyList = PyList_New(len);
-        for(size_t i = 0; i < len; i++)
-            PyList_SetItem(pyList, i, toPyObject<T>(ptr[i]));
-        return pyList;
-    }
     PyObject* fromSharedPtr(const sp<PyInstanceRef>& inst) {
         PyObject* obj = inst->instance();
         Py_XINCREF(obj);
         return obj;
     }
+
     PyObject* fromSharedPtr(const sp<String>& inst) {
         if(inst)
             return PyUnicode_FromString(inst->c_str());

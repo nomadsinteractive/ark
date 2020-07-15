@@ -39,7 +39,7 @@ const array<V3>& Mesh::vertices() const
     return _vertices;
 }
 
-void Mesh::write(VertexStream& buf, const V3& scale) const
+void Mesh::write(VertexStream& buf) const
 {
     V3* vertice = _vertices->buf();
     UV* uv = _uvs->buf();
@@ -51,7 +51,7 @@ void Mesh::write(VertexStream& buf, const V3& scale) const
     for(size_t i = 0; i < len; ++i)
     {
         buf.next();
-        buf.writePosition(*vertice * scale);
+        buf.writePosition(*vertice);
         ++vertice;
         buf.writeTexCoordinate(uv->_u, uv->_v);
         ++uv;

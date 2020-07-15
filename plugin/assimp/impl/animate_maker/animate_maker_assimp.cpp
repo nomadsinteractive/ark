@@ -19,7 +19,7 @@ static aiMatrix4x4 interpolateTranslation(float time, const aiNodeAnim* pNodeAni
         uint32_t frameIndex = 0;
         for (uint32_t i = 0; i < pNodeAnim->mNumPositionKeys - 1; i++)
         {
-            if (time < (float)pNodeAnim->mPositionKeys[i + 1].mTime)
+            if (time < static_cast<float>(pNodeAnim->mPositionKeys[i + 1].mTime))
             {
                 frameIndex = i;
                 break;
@@ -29,7 +29,7 @@ static aiMatrix4x4 interpolateTranslation(float time, const aiNodeAnim* pNodeAni
         aiVectorKey currentFrame = pNodeAnim->mPositionKeys[frameIndex];
         aiVectorKey nextFrame = pNodeAnim->mPositionKeys[(frameIndex + 1) % pNodeAnim->mNumPositionKeys];
 
-        float delta = (time - (float)currentFrame.mTime) / (float)(nextFrame.mTime - currentFrame.mTime);
+        float delta = (time - static_cast<float>(currentFrame.mTime)) / static_cast<float>(nextFrame.mTime - currentFrame.mTime);
 
         const aiVector3D& start = currentFrame.mValue;
         const aiVector3D& end = nextFrame.mValue;
@@ -56,7 +56,7 @@ static aiMatrix4x4 interpolateRotation(float time, const aiNodeAnim* pNodeAnim)
         uint32_t frameIndex = 0;
         for (uint32_t i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++)
         {
-            if (time < (float)pNodeAnim->mRotationKeys[i + 1].mTime)
+            if (time < static_cast<float>(pNodeAnim->mRotationKeys[i + 1].mTime))
             {
                 frameIndex = i;
                 break;
@@ -66,7 +66,7 @@ static aiMatrix4x4 interpolateRotation(float time, const aiNodeAnim* pNodeAnim)
         aiQuatKey currentFrame = pNodeAnim->mRotationKeys[frameIndex];
         aiQuatKey nextFrame = pNodeAnim->mRotationKeys[(frameIndex + 1) % pNodeAnim->mNumRotationKeys];
 
-        float delta = (time - (float)currentFrame.mTime) / (float)(nextFrame.mTime - currentFrame.mTime);
+        float delta = (time - static_cast<float>(currentFrame.mTime)) / static_cast<float>(nextFrame.mTime - currentFrame.mTime);
 
         const aiQuaternion& start = currentFrame.mValue;
         const aiQuaternion& end = nextFrame.mValue;
@@ -94,7 +94,7 @@ static aiMatrix4x4 interpolateScale(float time, const aiNodeAnim* pNodeAnim)
         uint32_t frameIndex = 0;
         for (uint32_t i = 0; i < pNodeAnim->mNumScalingKeys - 1; i++)
         {
-            if (time < (float)pNodeAnim->mScalingKeys[i + 1].mTime)
+            if (time < static_cast<float>(pNodeAnim->mScalingKeys[i + 1].mTime))
             {
                 frameIndex = i;
                 break;
@@ -104,7 +104,7 @@ static aiMatrix4x4 interpolateScale(float time, const aiNodeAnim* pNodeAnim)
         aiVectorKey currentFrame = pNodeAnim->mScalingKeys[frameIndex];
         aiVectorKey nextFrame = pNodeAnim->mScalingKeys[(frameIndex + 1) % pNodeAnim->mNumScalingKeys];
 
-        float delta = (time - (float)currentFrame.mTime) / (float)(nextFrame.mTime - currentFrame.mTime);
+        float delta = (time - static_cast<float>(currentFrame.mTime)) / static_cast<float>(nextFrame.mTime - currentFrame.mTime);
 
         const aiVector3D& start = currentFrame.mValue;
         const aiVector3D& end = nextFrame.mValue;

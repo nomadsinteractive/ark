@@ -16,7 +16,7 @@ Model::Model(sp<Uploader> indices, sp<Vertices> vertices, const Metrics& metrics
 }
 
 Model::Model(sp<Array<Mesh>> meshes, const Metrics& metrics)
-    : _indices(sp<MeshIndicesUploader>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes, metrics.size)), _meshes(std::move(meshes)), _metrics(metrics)
+    : _indices(sp<MeshIndicesUploader>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _meshes(std::move(meshes)), _metrics(metrics)
 {
 }
 
@@ -97,8 +97,8 @@ size_t Model::MeshIndicesUploader::calcIndicesSize(ark::Array<Mesh>& meshes) con
     return size;
 }
 
-Model::MeshVertices::MeshVertices(sp<Array<Mesh>> meshes, const V3& size)
-    : Vertices(calcVertexLength(meshes)), _meshes(std::move(meshes)), _size(size)
+Model::MeshVertices::MeshVertices(sp<Array<Mesh>> meshes)
+    : Vertices(calcVertexLength(meshes)), _meshes(std::move(meshes))
 {
 }
 
@@ -112,11 +112,11 @@ size_t Model::MeshVertices::calcVertexLength(Array<Mesh>& meshes) const
     return vertexLength;
 }
 
-void Model::MeshVertices::write(VertexStream& buf, const V3& size)
+void Model::MeshVertices::write(VertexStream& buf, const V3& /*size*/)
 {
-    const V3 scale(size.x() != 0 ? size.x() / _size.x() : _size.x(), size.y() != 0 ? size.y() / _size.y() : _size.y(), size.z() != 0 ? size.z() /  _size.z() : _size.z());
+//    const V3 scale(size.x() != 0 ? size.x() / _size.x() : _size.x(), size.y() != 0 ? size.y() / _size.y() : _size.y(), size.z() != 0 ? size.z() /  _size.z() : _size.z());
     for(const Mesh& m : *_meshes)
-        m.write(buf, scale);
+        m.write(buf);
 }
 
 }

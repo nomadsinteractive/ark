@@ -49,7 +49,7 @@ public:
     const array<element_index_t>& indices() const;
     const array<V3>& vertices() const;
 
-    void write(VertexStream& buf, const V3& scale) const;
+    void write(VertexStream& buf) const;
 
 private:
     array<element_index_t> _indices;

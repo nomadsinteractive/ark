@@ -25,7 +25,18 @@ public:
 
     virtual sp<Animate> makeAnimate(const sp<Numeric>& duration) override;
 
-    class BoneInfo;
+private:
+    class BoneInfo : public Mat4 {
+    public:
+
+        virtual bool update(uint64_t timestamp) override;
+        virtual M4 val() override;
+
+        aiMatrix4x4 _offset;
+        aiMatrix4x4 _intermediate_transform;
+
+        M4 _final_transform;
+    };
 
     class AnimateImpl : public Animate {
     public:
@@ -55,19 +66,6 @@ public:
         std::unordered_map<String, size_t> _bone_mapping;
 
         float _last_updated;
-    };
-
-    class BoneInfo : public Mat4 {
-    public:
-
-        virtual bool update(uint64_t timestamp) override;
-        virtual M4 val() override;
-
-        aiMatrix4x4 _offset;
-        aiMatrix4x4 _intermediate_transform;
-
-        M4 _final_transform;
-
     };
 
 private:

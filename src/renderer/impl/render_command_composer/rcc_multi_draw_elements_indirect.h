@@ -54,6 +54,7 @@ private:
 private:
     sp<Uploader> makeIndirectBufferUploader();
     void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot, bool reload);
+    V3 toScale(const V3& size, const Metrics& metrics) const;
 
 private:
     sp<ModelBundle> _model_bundle;
