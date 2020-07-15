@@ -82,7 +82,7 @@ void Mesh::BoneInfo::add(int32_t id, float weight)
             _ids[i] = id;
             return;
         }
-    LOGW("Unable to add more weight to VertexID(%d), max weightarray length: %d", id, _weights.size());
+    LOGW("Unable to add more weight to BoneId(%d), max weightarray length: %d", id, _weights.size());
 }
 
 }

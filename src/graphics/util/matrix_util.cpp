@@ -114,6 +114,16 @@ V3 MatrixUtil::transform(const M4& matrix, const V3& pos)
     return V3(p.x() / p.w(), p.y() / p.w(), p.z() / p.w());
 }
 
+M3 MatrixUtil::transpose(const M3& matrix)
+{
+    return glm::transpose(glm::make_mat3(reinterpret_cast<const float*>(&matrix)));
+}
+
+M4 MatrixUtil::transpose(const M4& matrix)
+{
+    return glm::transpose(glm::make_mat4(reinterpret_cast<const float*>(&matrix)));
+}
+
 M4 MatrixUtil::ortho(float left, float right, float bottom, float top, float near, float far)
 {
     return M4(glm::ortho(left, right, bottom, top, near, far));

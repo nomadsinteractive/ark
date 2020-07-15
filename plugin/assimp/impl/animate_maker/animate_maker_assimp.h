@@ -11,6 +11,8 @@
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/base/mat.h"
+
 #include "renderer/inf/animate_maker.h"
 
 namespace ark {
@@ -63,7 +65,8 @@ public:
 
         aiMatrix4x4 _offset;
         aiMatrix4x4 _intermediate_transform;
-        aiMatrix4x4 _final_transform;
+
+        M4 _final_transform;
 
     };
 

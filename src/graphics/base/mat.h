@@ -46,6 +46,10 @@ public:
         return *reinterpret_cast<T*>(_value);
     }
 
+    Mat<S> transpose() const {
+        return MatrixUtil::transpose(*this);
+    }
+
     friend ARK_API Mat<S> operator *(const Mat<S>& lvalue, const Mat<S>& rvalue) {
         return MatrixUtil::mul(lvalue, rvalue);
     }

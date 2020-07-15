@@ -177,7 +177,9 @@ Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& u
 
 void ModelLoaderAssimp::Importer::loadBones(const aiMesh* mesh, std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping, Array<Mesh::BoneInfo>& bones) const
 {
-    std::unordered_map<uint32_t, Mesh::BoneInfo> bonePerVertex;
+    Mesh::BoneInfo* bonesBuf = bones.buf();
+    memset(bonesBuf, 0, bones.size());
+
     for(uint32_t i = 0; i < mesh->mNumBones; i++)
     {
         uint32_t index = 0;
@@ -194,16 +196,9 @@ void ModelLoaderAssimp::Importer::loadBones(const aiMesh* mesh, std::unordered_m
         for (uint32_t j = 0; j < mesh->mBones[i]->mNumWeights; j++)
         {
             uint32_t vertexID = mesh->mBones[i]->mWeights[j].mVertexId;
-            Mesh::BoneInfo& boneInfo = bonePerVertex[vertexID];
-            boneInfo.add(vertexID, mesh->mBones[i]->mWeights[j].mWeight);
+            Mesh::BoneInfo& boneInfo = bonesBuf[vertexID];
+            boneInfo.add(index, mesh->mBones[i]->mWeights[j].mWeight);
         }
-    }
-
-    Mesh::BoneInfo* bonesBuf = bones.buf();
-    for(const auto& i : bonePerVertex)
-    {
-        DASSERT(i.first < bones.length());
-        bonesBuf[i.first] = i.second;
     }
 }
 

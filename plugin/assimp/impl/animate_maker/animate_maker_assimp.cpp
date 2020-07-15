@@ -184,7 +184,10 @@ void AnimateMakerAssimp::AnimateImpl::update(float time)
     readNodeHierarchy(animationTime, _root_node, identity);
 
     for(const sp<BoneInfo>& i : _bone_infos)
-        i->_final_transform = _global_inversed_transform * i->_intermediate_transform;
+    {
+        const aiMatrix4x4 finalMatrix = _global_inversed_transform * i->_intermediate_transform;
+        i->_final_transform = M4(finalMatrix).transpose();
+    }
 }
 
 void AnimateMakerAssimp::AnimateImpl::readNodeHierarchy(float duration, const aiNode* node, const aiMatrix4x4& parentTransform)
@@ -223,7 +226,7 @@ bool AnimateMakerAssimp::BoneInfo::update(uint64_t /*timestamp*/)
 
 M4 AnimateMakerAssimp::BoneInfo::val()
 {
-    return M4(_final_transform);
+    return _final_transform;
 }
 
 }
