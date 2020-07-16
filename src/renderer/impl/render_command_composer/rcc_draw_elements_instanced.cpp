@@ -45,7 +45,7 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
     if(snapshot._flag == RenderLayer::SNAPSHOT_FLAG_RELOAD || _vertices.size() == 0)
     {
         VertexStream writer = buf.makeVertexStream(renderRequest, verticesLength, 0);
-        const Model model = modelLoader->load(0);
+        const Model model = modelLoader->loadModel(0);
         model.writeToStream(writer, V3(1.0f));
     }
 

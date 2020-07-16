@@ -113,8 +113,6 @@ public:
     sp<LayerContext> makeContext(Layer::Type layerType) const;
 //[[script::bindings::auto]]
     sp<Layer> makeLayer(Layer::Type layerType) const;
-//[[script::bindings::auto]]
-    sp<Animate> makeAnimate(int32_t modelId, const String& name, const sp<Numeric>& duration) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<RenderLayer> {

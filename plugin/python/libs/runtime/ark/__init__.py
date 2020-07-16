@@ -634,6 +634,26 @@ class Mat4:
         pass
 
 
+class Model:
+
+    @property
+    def index_length(self) -> int:
+        return 0
+
+    @property
+    def vertex_length(self) -> int:
+        return 0
+
+    def make_animate(self, name: str, duration: Numeric):
+        pass
+
+
+class ModelBundle:
+
+    def load(self, t: int) -> Model:
+        pass
+
+
 class RenderObject:
     def __init__(self, t, pos=None, size=None, transform=None, varyings=None):
         self._position = pos

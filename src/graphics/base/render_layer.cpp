@@ -114,13 +114,6 @@ sp<Layer> RenderLayer::makeLayer(Layer::Type layerType) const
     return sp<Layer>::make(makeContext(layerType));
 }
 
-sp<Animate> RenderLayer::makeAnimate(int32_t modelId, const String& name, const sp<Numeric>& duration) const
-{
-    const Model model = _stub->_model_loader->load(modelId);
-    DCHECK(model.animates().has(name), "Model(%d) has no animate(%s) defined", modelId, name.c_str());
-    return model.animates().at(name)->makeAnimate(duration);
-}
-
 void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
 {
     _stub->_layer->render(renderRequest, position);

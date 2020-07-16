@@ -60,6 +60,12 @@ Table<String, sp<AnimateMaker>>& Model::animates()
     return _animates;
 }
 
+sp<Animate> Model::makeAnimate(const String& name, const sp<Numeric>& duration) const
+{
+    DCHECK(_animates.has(name), "Model has no animate(%s) defined", name.c_str());
+    return _animates.at(name)->makeAnimate(duration);
+}
+
 V3 Model::toScale(const V3& renderObjectSize) const
 {
     return V3(renderObjectSize.x() == 0 ? _metrics.size.x() : renderObjectSize.x(), renderObjectSize.y() == 0 ? _metrics.size.y() : renderObjectSize.y(), renderObjectSize.z() == 0 ? _metrics.size.z() : renderObjectSize.z());

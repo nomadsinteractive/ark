@@ -29,8 +29,13 @@ public:
 
     const Metrics& metrics() const;
 
+//[[script::bindings::property]]
     size_t indexLength() const;
+//[[script::bindings::property]]
     size_t vertexLength() const;
+
+//[[script::bindings::auto]]
+    sp<Animate> makeAnimate(const String& name, const sp<Numeric>& duration) const;
 
     const Table<String, sp<AnimateMaker>>& animates() const;
     Table<String, sp<AnimateMaker>>& animates();

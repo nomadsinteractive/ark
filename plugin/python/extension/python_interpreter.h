@@ -54,7 +54,7 @@ public:
         std::vector<T> arr;
         for(Py_ssize_t i = 0; i < len; ++i)
             arr.push_back(toCppObject<T>(PyList_GetItem(object, i)));
-        return sp<Array<T>::Vector>::make(std::move(arr));
+        return sp<typename Array<T>::Vector>::make(std::move(arr));
     }
 
     PyObject* fromSharedPtr(const sp<PyInstanceRef>& inst) {

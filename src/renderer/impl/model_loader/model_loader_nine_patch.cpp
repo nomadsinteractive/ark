@@ -31,7 +31,7 @@ void ModelLoaderNinePatch::postSnapshot(RenderController& /*renderController*/, 
 {
 }
 
-Model ModelLoaderNinePatch::load(int32_t type)
+Model ModelLoaderNinePatch::loadModel(int32_t type)
 {
     const auto iter = _vertices->_vertices.find(type);
     DCHECK(iter != _vertices->_vertices.end(), "Cannot find type: %d", type);

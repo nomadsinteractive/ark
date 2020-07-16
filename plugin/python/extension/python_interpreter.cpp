@@ -422,6 +422,16 @@ template<> ARK_PLUGIN_PYTHON_API Color PythonInterpreter::toType<Color>(PyObject
     return Color();
 }
 
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<int64_t>(const int64_t& value)
+{
+    return PyLong_FromLong(value);
+}
+
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<uint64_t>(const uint64_t& value)
+{
+    return PyLong_FromUnsignedLong(value);
+}
+
 template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<int32_t>(const int32_t& value)
 {
     return PyLong_FromLong(value);

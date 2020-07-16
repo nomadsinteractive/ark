@@ -46,7 +46,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
         VertexStream writer = buf.makeVertexStream(renderRequest, verticesLength * items.size(), 0);
         for(const Renderable::Snapshot& i : items)
         {
-            const Model model = modelLoader->load(i._type);
+            const Model model = modelLoader->loadModel(i._type);
             writer.setRenderObject(i);
             model.writeToStream(writer, i._size);
         }
@@ -59,7 +59,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
             if(i._dirty)
             {
                 VertexStream writer = buf.makeVertexStream(renderRequest, verticesLength, offset);
-                const Model model = modelLoader->load(i._type);
+                const Model model = modelLoader->loadModel(i._type);
                 writer.setRenderObject(i);
                 model.writeToStream(writer, i._size);
             }

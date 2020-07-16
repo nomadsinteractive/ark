@@ -199,7 +199,7 @@ float Characters::createContentNoBoundary(CharacterMaker& cm, float& flowx, floa
     for(wchar_t c : text)
     {
         int32_t type = toType(c);
-        const Metrics& metrics = _model_loader->load(type).metrics();
+        const Metrics& metrics = _model_loader->loadModel(type).metrics();
         flowx += _letter_spacing;
         placeOne(cm, metrics, type, flowx, flowy, &fontHeight);
     }
@@ -267,7 +267,7 @@ std::vector<Characters::LayoutChar> Characters::getCharacterMetrics(CharacterMak
         }
         else
         {
-            const Metrics& m = _model_loader->load(type).metrics();
+            const Metrics& m = _model_loader->loadModel(type).metrics();
             bool iscjk = isCJK(c);
             bool iswordbreak = isWordBreaker(c);
             integral += xScale * m.bounds.x();

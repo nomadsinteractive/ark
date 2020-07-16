@@ -42,7 +42,7 @@ void BvhRigidBodyImporter::import(ColliderBullet& collider, const document& mani
     for(const document& i : manifest->children("model"))
     {
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
-        Model model = _model_loader->load(type);
+        Model model = _model_loader->loadModel(type);
         shapes[type] = makeCollisionShape(model);
     }
 }

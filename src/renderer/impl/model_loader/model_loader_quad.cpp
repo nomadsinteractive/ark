@@ -29,7 +29,7 @@ void ModelLoaderQuad::postSnapshot(RenderController& /*renderController*/, Rende
 {
 }
 
-Model ModelLoaderQuad::load(int32_t type)
+Model ModelLoaderQuad::loadModel(int32_t type)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
     const V2& size = texCoord.size();

@@ -32,8 +32,8 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-ModelLoaderAssimp::ModelLoaderAssimp(sp<Atlas> atlas, const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _model_bundle(makeModelBundle(resourceLoaderContext, manifest, std::move(atlas)))
+ModelLoaderAssimp::ModelLoaderAssimp(sp<ModelBundle> modelBundle)
+    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _model_bundle(std::move(modelBundle))
 {
 }
 
@@ -50,18 +50,18 @@ void ModelLoaderAssimp::postSnapshot(RenderController& /*renderController*/, Ren
 {
 }
 
-Model ModelLoaderAssimp::load(int32_t type)
+Model ModelLoaderAssimp::loadModel(int32_t type)
 {
-    return _model_bundle->load(type);
+    return _model_bundle->loadModel(type);
 }
 
-ModelLoaderAssimp::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _atlas(factory.getBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)), _manifest(manifest), _resource_loader_context(resourceLoaderContext) {
+ModelLoaderAssimp::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _model_bundle(factory.ensureBuilder<ModelBundle>(manifest, "model-bundle")) {
 }
 
 sp<ModelLoader> ModelLoaderAssimp::BUILDER::build(const Scope& args)
 {
-    return sp<ModelLoaderAssimp>::make(_atlas->build(args), _resource_loader_context, _manifest);
+    return sp<ModelLoaderAssimp>::make(_model_bundle->build(args));
 }
 
 bitmap ModelLoaderAssimp::loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const
@@ -78,13 +78,6 @@ void ModelLoaderAssimp::loadSceneTexture(const ResourceLoaderContext& resourceLo
 {
     const bitmap bitmap = loadBitmap(resourceLoaderContext.bitmapBundle(), tex);
     _textures.push_back(resourceLoaderContext.renderController()->createTexture2D(sp<Size>::make(static_cast<float>(bitmap->width()), static_cast<float>(bitmap->height())), sp<Texture::UploaderBitmap>::make(bitmap)));
-}
-
-sp<ModelBundle> ModelLoaderAssimp::makeModelBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest, sp<Atlas> atlas)
-{
-    sp<ModelBundle> modelBundle = sp<ModelBundle>::make(std::move(atlas));
-    modelBundle->import(resourceLoaderContext, manifest, _importer);
-    return modelBundle;
 }
 
 array<element_index_t> ModelLoaderAssimp::Importer::loadIndices(const aiMesh* mesh, element_index_t vertexBase) const
@@ -200,6 +193,11 @@ void ModelLoaderAssimp::Importer::loadBones(const aiMesh* mesh, std::unordered_m
             boneInfo.add(index, mesh->mBones[i]->mWeights[j].mWeight);
         }
     }
+}
+
+sp<ModelBundle::Importer> ModelLoaderAssimp::IMPORTER_BUILDER::build(const Scope& /*args*/)
+{
+    return sp<Importer>::make();
 }
 
 }

@@ -146,7 +146,7 @@ void ModelLoaderText::postSnapshot(RenderController& renderController, RenderLay
     _stub->_delegate->postSnapshot(renderController, snapshot);
 }
 
-Model ModelLoaderText::load(int32_t type)
+Model ModelLoaderText::loadModel(int32_t type)
 {
     Alphabet::Metrics metrics;
     bool r = _stub->_alphabet->measure(type, metrics, false);
@@ -154,7 +154,7 @@ Model ModelLoaderText::load(int32_t type)
     V3 bounds(static_cast<float>(metrics.width), static_cast<float>(metrics.height), 0);
     V3 size(static_cast<float>(metrics.bitmap_width), static_cast<float>(metrics.bitmap_height), 0);
     V3 xyz = V3(static_cast<float>(metrics.bitmap_x), static_cast<float>(metrics.bitmap_y), 0);
-    Model model = _stub->_delegate->load(type);
+    Model model = _stub->_delegate->loadModel(type);
     return Model(model.indices(), model.vertices(), {bounds, size, xyz});
 }
 

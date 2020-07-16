@@ -53,7 +53,7 @@ void ModelLoaderSphere::postSnapshot(RenderController& /*renderController*/, Ren
     }
 }
 
-Model ModelLoaderSphere::load(int32_t type)
+Model ModelLoaderSphere::loadModel(int32_t type)
 {
     return Model(nullptr, sp<VerticesSphere>::make(_vertices.at(type), _atlas->at(type)));
 }

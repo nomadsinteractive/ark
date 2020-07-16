@@ -26,32 +26,37 @@ namespace assimp {
 
 class ModelLoaderAssimp : public ModelLoader {
 public:
-    ModelLoaderAssimp(sp<Atlas> atlas, const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest);
+    ModelLoaderAssimp(sp<ModelBundle> atlas);
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
 
     virtual void initialize(ShaderBindings& shaderBindings) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
-    virtual Model load(int32_t type) override;
+    virtual Model loadModel(int32_t type) override;
 
-//  [[plugin::resource-loader("assimp")]]
+//  [[plugin::builder("assimp")]]
     class BUILDER : public Builder<ModelLoader> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<ModelLoader> build(const Scope& args) override;
 
     private:
-        SafePtr<Builder<Atlas>> _atlas;
-        document _manifest;
-        sp<ResourceLoaderContext> _resource_loader_context;
+        sp<Builder<ModelBundle>> _model_bundle;
+    };
+
+//  [[plugin::builder::by-value("assimp")]]
+    class IMPORTER_BUILDER : public Builder<ModelBundle::Importer> {
+    public:
+        IMPORTER_BUILDER() = default;
+
+        virtual sp<ModelBundle::Importer> build(const Scope& args) override;
+
     };
 
 private:
     bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
     void loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex);
-
-    sp<ModelBundle> makeModelBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest, sp<Atlas> atlas);
 
     class Importer : public ModelBundle::Importer {
     public:

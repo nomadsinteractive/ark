@@ -80,7 +80,7 @@ class Annotation(object):
         func_arguments = parse_arguments(builder_arguments)
         lambda_arguments = parse_function_arguments(tplfunc, tplcontent)
         capture_args, passing_args = self._build_arguments(func_arguments, lambda_arguments)
-        return '%s<%s>(%s[%s](%s)->sp<Builder<%s>> { return sp<Builder<%s>>::adopt(new %s::%s(%s)); });' % (statement, self._interface_class, name, capture_args, builder_arguments, self._interface_class, self._interface_class, self._main_class, self._implement_class, passing_args)
+        return '%s<%s>(%s[%s](%s)->sp<Builder<%s>> { return sp<Builder<%s>>::make<%s::%s>(%s); });' % (statement, self._interface_class, name, capture_args, builder_arguments, self._interface_class, self._interface_class, self._main_class, self._implement_class, passing_args)
 
 
 class ResourceLoader(Annotation):
@@ -126,7 +126,7 @@ class ResourceLoaderDictionary(Annotation):
     def resBuilder(self):
         func_arguments = parse_function_arguments('createResourceLoader', RES_BUILDER_TEMPLATE)
         capture_args, passing_args = self._build_arguments(parse_arguments('BeanFactory& factory, const String& value'), func_arguments)
-        return 'resBeanFactory.addDictionaryFactory<%s>([%s](BeanFactory& factory, const String& value)->sp<Builder<%s>> { return sp<Builder<%s>>::adopt(new %s::%s(%s)); });' % (self._interface_class, capture_args, self._interface_class, self._interface_class, self._main_class, self._implement_class, passing_args)
+        return 'resBeanFactory.addDictionaryFactory<%s>([%s](BeanFactory& factory, const String& value)->sp<Builder<%s>> { return sp<Builder<%s>>::make<%s::%s>(%s); });' % (self._interface_class, capture_args, self._interface_class, self._interface_class, self._main_class, self._implement_class, passing_args)
 
 
 class Decorator(Annotation):
@@ -137,7 +137,7 @@ class Decorator(Annotation):
         func_arguments = 'BeanFactory& factory, const sp<Builder<%s>>& delegate, const String& value' % self._interface_class
         lambda_arguments = parse_function_arguments('createBeanFactory', REF_BUILDER_TEMPLATE)
         capture_args, passing_args = self._build_arguments(parse_arguments(func_arguments), lambda_arguments)
-        return 'refBeanFactory.addBuilderDecorator<%s>("%s", [%s](%s)->sp<Builder<%s>> {return sp<Builder<%s>>::adopt(new %s::%s(%s));});' % (self._interface_class, self._name, capture_args, func_arguments, self._interface_class, self._interface_class, self._main_class, self._implement_class, passing_args)
+        return 'refBeanFactory.addBuilderDecorator<%s>("%s", [%s](%s)->sp<Builder<%s>> { return sp<Builder<%s>>::make<%s::%s>(%s); });' % (self._interface_class, self._name, capture_args, func_arguments, self._interface_class, self._interface_class, self._main_class, self._implement_class, passing_args)
 
 
 def find_main_class(content):

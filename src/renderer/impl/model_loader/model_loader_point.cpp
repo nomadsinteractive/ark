@@ -30,7 +30,7 @@ void ModelLoaderPoint::postSnapshot(RenderController& /*renderController*/, Rend
 {
 }
 
-Model ModelLoaderPoint::load(int32_t type)
+Model ModelLoaderPoint::loadModel(int32_t type)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
     const V2& size = texCoord.size();
