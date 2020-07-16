@@ -432,12 +432,22 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<uint64_t>
     return PyLong_FromUnsignedLong(value);
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<int32_t>(const int32_t& value)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<long>(const long& value)
 {
     return PyLong_FromLong(value);
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<uint32_t>(const uint32_t& value)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<unsigned long>(const unsigned long& value)
+{
+    return PyLong_FromUnsignedLong(value);
+}
+
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<int>(const int& value)
+{
+    return PyLong_FromLong(value);
+}
+
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<unsigned int>(const unsigned int& value)
 {
     return PyLong_FromUnsignedLong(value);
 }
