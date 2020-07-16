@@ -1,4 +1,4 @@
-project(ark-pbr)
+project(ark-cmft)
 cmake_minimum_required(VERSION 3.0)
 
 include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
@@ -21,7 +21,7 @@ ark_include_directories(3rdparty/cmft/include)
 ark_include_directories(3rdparty/cmft/dependency)
 
 aux_source_directory(. LOCAL_SRC_LIST)
-aux_source_directory(impl/texture LOCAL_SRC_LIST)
+aux_source_directory(texture LOCAL_SRC_LIST)
 
 list(APPEND LOCAL_SRC_LIST
     3rdparty/cmft/src/cmft/allocator.cpp
@@ -33,7 +33,7 @@ list(APPEND LOCAL_SRC_LIST
 )
 
 ark_setup_tools(gen_plugin_class)
-ark_gen_plugin_class(pbr builtin ark::plugin::pbr pbr_plugin impl)
+ark_gen_plugin_class(cmft builtin ark::plugin::cmft cmft_plugin impl)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
 ark_export_dependency_libraries(${PROJECT_NAME})

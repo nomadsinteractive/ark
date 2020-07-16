@@ -191,7 +191,7 @@ ark_add_plugin_directory(miniaudio plugin/miniaudio)
 ark_add_plugin_directory(noise plugin/noise)
 ark_add_plugin_directory(fmod plugin/fmod)
 ark_add_plugin_directory(assimp plugin/assimp)
-ark_add_plugin_directory(pbr plugin/pbr)
+ark_add_plugin_directory(cmft plugin/cmft)
 ark_add_plugin_directory(dear_imgui plugin/dear-imgui)
 ark_add_plugin_directory(bullet plugin/bullet)
 
