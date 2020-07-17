@@ -17,6 +17,8 @@
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_input.h"
+#include "renderer/base/render_engine.h"
+#include "renderer/base/render_engine_context.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/shader.h"
@@ -31,38 +33,6 @@
 namespace ark {
 namespace plugin {
 namespace assimp {
-
-ModelLoaderAssimp::ModelLoaderAssimp(sp<ModelBundle> modelBundle)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _model_bundle(std::move(modelBundle))
-{
-}
-
-sp<RenderCommandComposer> ModelLoaderAssimp::makeRenderCommandComposer()
-{
-    return sp<RCCMultiDrawElementsIndirect>::make(_model_bundle);
-}
-
-void ModelLoaderAssimp::initialize(ShaderBindings& /*shaderBindings*/)
-{
-}
-
-void ModelLoaderAssimp::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& /*snapshot*/)
-{
-}
-
-Model ModelLoaderAssimp::loadModel(int32_t type)
-{
-    return _model_bundle->loadModel(type);
-}
-
-ModelLoaderAssimp::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _model_bundle(factory.ensureBuilder<ModelBundle>(manifest, "model-bundle")) {
-}
-
-sp<ModelLoader> ModelLoaderAssimp::BUILDER::build(const Scope& args)
-{
-    return sp<ModelLoaderAssimp>::make(_model_bundle->build(args));
-}
 
 bitmap ModelLoaderAssimp::loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const
 {
@@ -94,14 +64,18 @@ array<element_index_t> ModelLoaderAssimp::Importer::loadIndices(const aiMesh* me
     return s;
 }
 
-ModelLoaderAssimp::Importer::Importer()
+ModelLoaderAssimp::Importer::Importer(Ark::RendererCoordinateSystem coordinateSystem)
+    : _coordinate_system(coordinateSystem)
 {
     _importer.SetIOHandler(new ArkIOSystem());
 }
 
 Model ModelLoaderAssimp::Importer::import(const String& src, const Rect& uvBounds)
 {
-    const aiScene* scene = _importer.ReadFile(src.c_str(), aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes);
+    uint32_t flags = aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes;
+    if(_coordinate_system == Ark::COORDINATE_SYSTEM_LHS)
+        flags |= aiProcess_FlipWindingOrder;
+    const aiScene* scene = _importer.ReadFile(src.c_str(), flags);
     return loadModel(scene, uvBounds);
 }
 
@@ -195,9 +169,14 @@ void ModelLoaderAssimp::Importer::loadBones(const aiMesh* mesh, std::unordered_m
     }
 }
 
+ModelLoaderAssimp::IMPORTER_BUILDER::IMPORTER_BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _coordinate_system(resourceLoaderContext->renderController()->renderEngine()->context()->coordinateSystem())
+{
+}
+
 sp<ModelBundle::Importer> ModelLoaderAssimp::IMPORTER_BUILDER::build(const Scope& /*args*/)
 {
-    return sp<Importer>::make();
+    return sp<Importer>::make(_coordinate_system);
 }
 
 }

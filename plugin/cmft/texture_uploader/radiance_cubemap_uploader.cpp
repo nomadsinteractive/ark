@@ -1,4 +1,4 @@
-#include "cmft/texture/radiance_cubemap_uploader.h"
+#include "cmft/texture_uploader/radiance_cubemap_uploader.h"
 
 #include <cmft/clcontext.h>
 #include <cmft/cubemapfilter.h>

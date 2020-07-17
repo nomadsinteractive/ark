@@ -10,9 +10,13 @@
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include <stb_image_resize.h>
 
+#include "core/base/bean_factory.h"
 #include "core/base/string.h"
-
 #include "core/inf/array.h"
+
+#include "graphics/base/bitmap_bundle.h"
+
+#include "renderer/base/resource_loader_context.h"
 
 namespace ark {
 
@@ -185,6 +189,16 @@ void Bitmap::dump(const String& filename) const
         png_destroy_write_struct(&png_ptr, &info_ptr);
     }
     fclose(fp);
+}
+
+Bitmap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _src(factory.ensureBuilder<String>(manifest, Constants::Attributes::SRC)), _bitmap_bundle(resourceLoaderContext->bitmapBundle())
+{
+}
+
+sp<Bitmap> Bitmap::BUILDER::build(const Scope& args)
+{
+    return _bitmap_bundle->get(_src->build(args));
 }
 
 }

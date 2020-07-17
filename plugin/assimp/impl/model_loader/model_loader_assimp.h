@@ -7,6 +7,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/DefaultLogger.hpp>
 
+#include "core/ark.h"
 #include "core/forwarding.h"
 #include "core/inf/array.h"
 #include "core/inf/builder.h"
@@ -24,34 +25,19 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-class ModelLoaderAssimp : public ModelLoader {
+class ModelLoaderAssimp {
 public:
     ModelLoaderAssimp(sp<ModelBundle> atlas);
 
-    virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
-
-    virtual void initialize(ShaderBindings& shaderBindings) override;
-    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
-    virtual Model loadModel(int32_t type) override;
-
-//  [[plugin::builder("assimp")]]
-    class BUILDER : public Builder<ModelLoader> {
-    public:
-        BUILDER(BeanFactory& factory, const document& manifest);
-
-        virtual sp<ModelLoader> build(const Scope& args) override;
-
-    private:
-        sp<Builder<ModelBundle>> _model_bundle;
-    };
-
-//  [[plugin::builder::by-value("assimp")]]
+//  [[plugin::resource-loader::by-value("assimp")]]
     class IMPORTER_BUILDER : public Builder<ModelBundle::Importer> {
     public:
-        IMPORTER_BUILDER() = default;
+        IMPORTER_BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<ModelBundle::Importer> build(const Scope& args) override;
 
+    private:
+        Ark::RendererCoordinateSystem _coordinate_system;
     };
 
 private:
@@ -60,7 +46,7 @@ private:
 
     class Importer : public ModelBundle::Importer {
     public:
-        Importer();
+        Importer(Ark::RendererCoordinateSystem coordinateSystem);
 
         virtual Model import(const String& src, const Rect& uvBounds) override;
 
@@ -74,13 +60,11 @@ private:
 
     private:
         Assimp::Importer _importer;
+        Ark::RendererCoordinateSystem _coordinate_system;
 
     };
 
 private:
-    Importer _importer;
-
-    sp<ModelBundle> _model_bundle;
     std::vector<sp<Texture>> _textures;
 };
 

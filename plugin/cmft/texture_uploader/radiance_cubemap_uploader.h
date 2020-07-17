@@ -1,5 +1,5 @@
-#ifndef ARK_PLUGIN_CMFT_TEXTURE_IRRADIANCE_CUBEMAP_UPLOADER_H_
-#define ARK_PLUGIN_CMFT_TEXTURE_IRRADIANCE_CUBEMAP_UPLOADER_H_
+#ifndef ARK_PLUGIN_CMFT_TEXTURE_UPLOADER_RADIANCE_CUBEMAP_UPLOADER_H_
+#define ARK_PLUGIN_CMFT_TEXTURE_UPLOADER_RADIANCE_CUBEMAP_UPLOADER_H_
 
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
@@ -13,13 +13,13 @@ namespace ark {
 namespace plugin {
 namespace cmft {
 
-class IrradianceCubemapUploader : public Texture::Uploader {
+class RadianceCubemapUploader : public Texture::Uploader {
 public:
-    IrradianceCubemapUploader(const sp<Texture>& texture, const sp<Size>& size);
+    RadianceCubemapUploader(const sp<Texture>& texture, const sp<Size>& size);
 
     virtual void upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
 
-//  [[plugin::builder("irradiance")]]
+//  [[plugin::builder("radiance")]]
     class BUILDER : public Builder<Texture::Uploader> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);

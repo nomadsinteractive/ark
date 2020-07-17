@@ -2,9 +2,12 @@
 #define ARK_GRAPHICS_BASE_BITMAP_H_
 
 #include "core/base/api.h"
+#include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+
+#include "renderer/forwarding.h"
 
 namespace ark {
 
@@ -95,6 +98,18 @@ public:
             a1 = a2;
             a2 = tmp;
         }
+    };
+
+//  [[plugin::resource-loader]]
+    class BUILDER : public Builder<Bitmap> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+        virtual sp<Bitmap> build(const Scope& args) override;
+
+    private:
+        sp<Builder<String>> _src;
+        sp<BitmapBundle> _bitmap_bundle;
     };
 
 private:
