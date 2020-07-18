@@ -26,7 +26,9 @@ public:
             _initial_ticket = _ticker->val();
             return 0;
         }
-        return (_ticker->val() - _initial_ticket) / 1000000.0f;
+        uint64_t v = _ticker->val();
+        DASSERT(v >= _initial_ticket);
+        return (v - _initial_ticket) / 1000000.0f;
     }
 
     virtual bool update(uint64_t timestamp) override {
@@ -50,8 +52,8 @@ public:
         return _paused ? _paused : _delegate->val() - _bypass;
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
-        return !_paused;
+    virtual bool update(uint64_t timestamp) override {
+        return _paused ? false : _delegate->update(timestamp);
     }
 
     void setDelegate(const sp<Variable<uint64_t>>& delegate) {
@@ -64,8 +66,10 @@ public:
     }
 
     void resume() {
-        _bypass += (_delegate->val() - _bypass - _paused);
-        _paused = 0;
+        if(_paused != 0) {
+            _bypass += (_delegate->val() - _bypass - _paused);
+            _paused = 0;
+        }
     }
 
 private:

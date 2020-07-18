@@ -78,7 +78,7 @@ typedef Variable<V4> Vec4;
 typedef Loader<Bitmap> BitmapLoader;
 
 //[[script::bindings::auto]]
-typedef Array<sp<Mat4>> Animate;
+typedef Flatable Animate;
 
 //[[script::bindings::auto]]
 typedef Importer<Tilemap> TilemapImporter;

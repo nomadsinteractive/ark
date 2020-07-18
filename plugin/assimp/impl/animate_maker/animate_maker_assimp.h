@@ -8,6 +8,7 @@
 
 #include "core/base/string.h"
 #include "core/inf/array.h"
+#include "core/inf/flatable.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
@@ -42,12 +43,13 @@ private:
     public:
         AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping);
 
-        virtual size_t length() override;
+        virtual bool update(uint64_t timestamp) override;
 
-        virtual sp<Mat4>* buf() override;
+        virtual void flat(void* buf) override;
+        virtual uint32_t size() override;
 
     private:
-        void update(float time);
+        void updateHierarchy(float time);
         void readNodeHierarchy(float duration, const aiNode* node, const aiMatrix4x4& parentTransform);
 
     private:
@@ -65,7 +67,6 @@ private:
 
         std::unordered_map<String, size_t> _bone_mapping;
 
-        float _last_updated;
     };
 
 private:

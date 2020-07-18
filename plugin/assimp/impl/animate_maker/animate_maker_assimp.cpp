@@ -158,26 +158,33 @@ AnimateMakerAssimp::AnimateImpl::AnimateImpl(const sp<Numeric>& duration, const 
         _bone_infos.at(index)->_offset = i.second.second;
     }
 
-    update(_duration->val());
+    updateHierarchy(_duration->val());
 }
 
-size_t AnimateMakerAssimp::AnimateImpl::length()
+bool AnimateMakerAssimp::AnimateImpl::update(uint64_t timestamp)
 {
-    return _matrices.size();
+    if(_duration->update(timestamp))
+    {
+        updateHierarchy(_duration->val());
+        return true;
+    }
+    return false;
 }
 
-sp<Mat4>* AnimateMakerAssimp::AnimateImpl::buf()
+void AnimateMakerAssimp::AnimateImpl::flat(void* buf)
 {
-    float time = _duration->val();
-    if(time > _last_updated)
-        update(time);
-    return _matrices.data();
+    M4* mat = reinterpret_cast<M4*>(buf);
+    for(size_t i = 0; i < _matrices.size(); ++i)
+        mat[i] = _matrices.at(i)->val();
 }
 
-void AnimateMakerAssimp::AnimateImpl::update(float time)
+uint32_t AnimateMakerAssimp::AnimateImpl::size()
 {
-    _last_updated = time;
+    return _matrices.size() * sizeof(M4);
+}
 
+void AnimateMakerAssimp::AnimateImpl::updateHierarchy(float time)
+{
     float animationTime = fmod(time * _ticks_per_sec, _duration_in_ticks);
 
     aiMatrix4x4 identity = aiMatrix4x4();

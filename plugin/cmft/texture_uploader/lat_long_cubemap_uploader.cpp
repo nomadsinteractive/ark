@@ -1,6 +1,5 @@
 #include "cmft/texture_uploader/lat_long_cubemap_uploader.h"
 
-#include <cmft/clcontext.h>
 #include <cmft/cubemapfilter.h>
 
 #include "core/inf/array.h"
@@ -42,9 +41,9 @@ void LatLongCubemapUploader::upload(GraphicsContext& graphicsContext, Texture::D
     ::cmft::Image faceList[6];
     ::cmft::imageFaceListFromCubemap(faceList, output);
 
-    Bitmap::Util::rotate<float>(reinterpret_cast<float*>(faceList[2].m_data), faceList[2].m_width, faceList[2].m_height, 3, 270);
-    Bitmap::Util::hvflip<float>(reinterpret_cast<float*>(faceList[3].m_data), faceList[3].m_width, faceList[3].m_height, 3);
-    Bitmap::Util::hflip<float>(reinterpret_cast<float*>(faceList[3].m_data), faceList[3].m_width, faceList[3].m_height, 3);
+    Bitmap::Util<float>::rotate(reinterpret_cast<float*>(faceList[2].m_data), faceList[2].m_width, faceList[2].m_height, 3, 270);
+    Bitmap::Util<float>::hvflip(reinterpret_cast<float*>(faceList[3].m_data), faceList[3].m_width, faceList[3].m_height, 3);
+    Bitmap::Util<float>::hflip(reinterpret_cast<float*>(faceList[3].m_data), faceList[3].m_width, faceList[3].m_height, 3);
 
     const uint32_t imageFaceIndices[6] = {4, 5, 2, 3, 1, 0};
     std::vector<sp<ByteArray>> imagedata;
@@ -62,7 +61,7 @@ void LatLongCubemapUploader::upload(GraphicsContext& graphicsContext, Texture::D
 }
 
 LatLongCubemapUploader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _bitmap(factory.ensureConcreteClassBuilder<Bitmap>(manifest, "bitmap")), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE))
+    : _bitmap(factory.ensureConcreteClassBuilder<Bitmap>(manifest, Constants::Attributes::BITMAP)), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE))
 {
 }
 

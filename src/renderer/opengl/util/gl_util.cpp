@@ -162,7 +162,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     Buffer vertexBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC);
     Buffer indexBuffer = renderController.makeIndexBuffer(Buffer::USAGE_STATIC);
 
-    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(sp<Uploader::Array<uint8_t>>::make(RenderUtil::makeUnitCubeVertices()));
+    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(sp<Uploader::Array<uint8_t>>::make(RenderUtil::makeUnitCubeVertices(false)));
     vertexBufferSnapshot.upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(vertexBuffer.id()));
     glEnableVertexAttribArray(0);

@@ -38,6 +38,9 @@ public:
     };
 
 private:
+    sp<ByteArray> makeUnitCubeVertices(RenderController& renderController) const;
+
+private:
     SafePtr<Size> _size;
     sp<Shader> _shader;
     sp<ShaderBindings> _shader_bindings;

@@ -22,6 +22,7 @@ ark_include_directories(3rdparty/cmft/dependency)
 
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(texture_uploader LOCAL_SRC_LIST)
+aux_source_directory(util LOCAL_SRC_LIST)
 
 list(APPEND LOCAL_SRC_LIST
     3rdparty/cmft/src/cmft/allocator.cpp

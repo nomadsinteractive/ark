@@ -14,7 +14,7 @@
 
 namespace ark {
 
-bytearray RenderUtil::makeUnitCubeVertices()
+bytearray RenderUtil::makeUnitCubeVertices(bool flipWindingOrder)
 {
     static float vertices[] = {
         -1.0f,  1.0f, -1.0f,
@@ -47,6 +47,17 @@ bytearray RenderUtil::makeUnitCubeVertices()
          1.0f, -1.0f,  1.0f,
          1.0f, -1.0f, -1.0f
     };
+
+    if(flipWindingOrder)
+    {
+        sp<ByteArray::Fixed<sizeof(vertices)>> flipped = sp<ByteArray::Fixed<sizeof(vertices)>>::make();
+        memcpy(flipped->buf(), vertices, flipped->size());
+        V3* buf = reinterpret_cast<V3*>(flipped->buf());
+        for(uint32_t i = 0; i < 6; ++i, buf += 4)
+            std::swap(buf[1], buf[2]);
+        return flipped;
+    }
+
     return sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
 }
 

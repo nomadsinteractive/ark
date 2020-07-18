@@ -8,7 +8,7 @@
 
 namespace ark {
 
-FlatableMat4fArray::FlatableMat4fArray(array<sp<Mat4> > array)
+FlatableMat4fArray::FlatableMat4fArray(array<sp<Mat4>> array)
     : _array(std::move(array))
 {
 }

@@ -86,6 +86,7 @@ const char* const ALPHABET = "alphabet";
 const char* const ATLAS = "atlas";
 const char* const BACKGROUND = "background";
 const char* const BINDING = "binding";
+const char* const BITMAP = "bitmap";
 const char* const BOUNDARY = "boundary";
 const char* const BOUNDS = "bounds";
 const char* const CAMERA = "camera";

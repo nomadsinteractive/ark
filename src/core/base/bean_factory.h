@@ -353,31 +353,31 @@ public:
     template<typename T> sp<Builder<T>> ensureBuilder(const String& id) {
         DCHECK(id, "Empty value being built");
         const sp<Builder<T>> builder = getBuilder<T>(id);
-        DCHECK(builder, "Could find builder \"%s\"", id.c_str());
+        DCHECK(builder, "Cannot find builder \"%s\"", id.c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureBuilder(const document& doc) {
         const sp<Builder<T>> builder = findBuilderByDocument<T>(doc);
-        DCHECK(builder, "Counld not build from \"%s\"", Documents::toString(doc).c_str());
+        DCHECK(builder, "Cannot not build from \"%s\"", Documents::toString(doc).c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureBuilder(const document& doc, const String& attr) {
         const sp<Builder<T>> builder = getBuilder<T>(doc, attr);
-        DCHECK(builder, "Counld not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
+        DCHECK(builder, "Cannot not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureConcreteClassBuilder(const document& doc, const String& attr) {
         const sp<Builder<T>> builder = getConcreteClassBuilder<T>(doc, attr);
-        DCHECK(builder, "Counld not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
+        DCHECK(builder, "Cannot not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureBuilderByTypeValue(const String& type, const String& value) {
-        const sp<Builder<T>> builder = findBuilderByTypeValue<T>(type, value);
-        DCHECK(builder, "Counld not build \"%s\" with value \"%s\"", type.c_str(), value.c_str());
+        const sp<Builder<T>> builder = type ? findBuilderByTypeValue<T>(type, value) : getBuilder<T>(value);
+        DCHECK(builder, "Cannot not build Type(%s) with value \"%s\"", type.c_str(), value.c_str());
         return builder;
     }
 

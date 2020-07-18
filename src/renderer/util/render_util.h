@@ -12,7 +12,7 @@ namespace ark {
 
 class RenderUtil {
 public:
-    static bytearray makeUnitCubeVertices();
+    static bytearray makeUnitCubeVertices(bool flipWindingOrder);
 
     static Model makeUnitNinePatchModel();
     static Model makeUnitPointModel();
