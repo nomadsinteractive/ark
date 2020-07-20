@@ -480,6 +480,7 @@ ARK_PY_ARGUMENTS = (
     (r'V4', GenArgumentMeta('PyObject*', 'V4', 'O')),
     (r'([^>]+|[\w\d_]+<[\w\d_]+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
     (r'(uint32_t|unsigned int|uint8_t)', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
+    (r'size_t', GenArgumentMeta('size_t', 'size_t', 'I')),
     (r'(int32_t|int|int8_t)', GenArgumentMeta('int32_t', 'int32_t', 'i')),
     (r'float', GenArgumentMeta('float', 'float', 'f')),
     (r'bool', GenArgumentMeta('int32_t', 'bool', 'p', True)),
@@ -711,7 +712,8 @@ class GenMethod(object):
         type_checks = [(i, j.gen_type_check('t')) for i, j in enumerate(gen_type_check_args) if j]
         nullptr_check = ['(obj%d || %d >= argc)' % (i, i) for i, j in type_checks if not j]
         if self_type_checks or nullptr_check:
-            lines.insert(0, 'Py_ssize_t argc = %s;' % self.gen_py_argc())
+            if nullptr_check:
+                lines.insert(0, 'Py_ssize_t argc = %s;' % self.gen_py_argc())
             nullptr_check = self_type_checks + nullptr_check
             calling_lines = ['if(%s)' % ' && '.join(nullptr_check), '{'] + [INDENT + i for i in calling_lines] + ['}']
         lines.extend(bodylines + calling_lines)

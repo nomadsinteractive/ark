@@ -185,7 +185,16 @@ private:
         return pyTuple;
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_enum<T>::value>::type*) {
-        return fromType<int32_t>(static_cast<int32_t>(value));
+        return PyLong_FromLong(static_cast<int32_t>(value));
+    }
+    template<typename T> PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, bool>::value && std::is_signed<T>::value>::type*) {
+        return PyLong_FromLong(value);
+    }
+    template<typename T> PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, bool>::value && std::is_unsigned<T>::value>::type*) {
+        return PyLong_FromUnsignedLong(value);
+    }
+    template<typename T> PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_floating_point<T>::value>::type*) {
+        return PyFloat_FromDouble(value);
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& value, ...) {
         return fromType<T>(value);

@@ -23,8 +23,8 @@ sp<Renderer> RendererMakerPython::make(int32_t x, int32_t y)
     DCHECK_THREAD_FLAG();
 
     PyInstance args(PyInstance::steal(PyTuple_New(2)));
-    PyObject* pyX = PythonInterpreter::instance()->fromType<int32_t>(x);
-    PyObject* pyY = PythonInterpreter::instance()->fromType<int32_t>(y);
+    PyObject* pyX = PythonInterpreter::instance()->toPyObject<int32_t>(x);
+    PyObject* pyY = PythonInterpreter::instance()->toPyObject<int32_t>(y);
     PyTuple_SetItem(args.pyObject(), 0, pyX);
     PyTuple_SetItem(args.pyObject(), 1, pyY);
     PyObject* ret = _maker.call(args.pyObject());

@@ -422,46 +422,6 @@ template<> ARK_PLUGIN_PYTHON_API Color PythonInterpreter::toType<Color>(PyObject
     return Color();
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<int64_t>(const int64_t& value)
-{
-    return PyLong_FromLong(value);
-}
-
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<uint64_t>(const uint64_t& value)
-{
-    return PyLong_FromUnsignedLong(value);
-}
-
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<int32_t>(const int32_t& value)
-{
-    return PyLong_FromLong(value);
-}
-
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<uint32_t>(const uint32_t& value)
-{
-    return PyLong_FromUnsignedLong(value);
-}
-
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<uint8_t>(const uint8_t& value)
-{
-    return PyLong_FromLong(value);
-}
-
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<float>(const float& value)
-{
-    return PyFloat_FromDouble(value);
-}
-
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Event::Action>(const Event::Action& value)
-{
-    return PyLong_FromLong(static_cast<long>(value));
-}
-
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Event::Code>(const Event::Code& value)
-{
-    return PyLong_FromLong(static_cast<long>(value));
-}
-
 template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Box>(const Box& value)
 {
     return PythonInterpreter::instance()->toPyObject(value);
