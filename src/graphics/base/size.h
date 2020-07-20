@@ -9,6 +9,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/impl/vec/vec3_impl.h"
 
 namespace ark {
 
@@ -53,11 +54,11 @@ public:
     const sp<Numeric> vdepth() const;
 
 //  [[script::bindings::auto]]
-    void assign(const Size& other);
-//  [[script::bindings::auto]]
     void adopt(const Size& other);
 //  [[script::bindings::auto]]
     void fix();
+
+    const sp<Vec3Impl>& impl() const;
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Size> {
@@ -87,9 +88,7 @@ public:
     };
 
 private:
-    sp<NumericWrapper> _width;
-    sp<NumericWrapper> _height;
-    sp<NumericWrapper> _depth;
+    sp<Vec3Impl> _impl;
 };
 
 }

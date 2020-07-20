@@ -74,6 +74,8 @@ public:
 // [[script::bindings::auto]]
     void inputFloat2(const String& label, const sp<Vec2>& value, const String& format = "%.3f", int32_t flags = 0);
 // [[script::bindings::auto]]
+    void inputFloat3(const String& label, const sp<Size>& size, const String& format = "%.3f", int32_t flags = 0);
+// [[script::bindings::auto]]
     void inputFloat3(const String& label, const sp<Vec3>& value, const String& format = "%.3f", int32_t flags = 0);
 // [[script::bindings::auto]]
     void inputFloat4(const String& label, const sp<Vec4>& value, const String& format = "%.3f", int32_t flags = 0);
@@ -82,6 +84,8 @@ public:
     void sliderFloat(const String& label, const sp<Numeric>& value, float v_min, float v_max, const String& format = "%.3f", float power = 1.0f);
 // [[script::bindings::auto]]
     void sliderFloat2(const String& label, const sp<Vec2>& value, float v_min, float v_max, const String& format = "%.3f", float power = 1.0f);
+// [[script::bindings::auto]]
+    void sliderFloat3(const String& label, const sp<Size>& size, float v_min, float v_max, const String& format = "%.3f", float power = 1.0f);
 // [[script::bindings::auto]]
     void sliderFloat3(const String& label, const sp<Vec3>& value, float v_min, float v_max, const String& format = "%.3f", float power = 1.0f);
 // [[script::bindings::auto]]

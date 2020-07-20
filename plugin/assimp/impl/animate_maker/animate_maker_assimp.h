@@ -3,6 +3,8 @@
 
 #include <unordered_map>
 
+#include <assimp/Importer.hpp>
+
 #include <assimp/anim.h>
 #include <assimp/scene.h>
 
@@ -22,7 +24,7 @@ namespace assimp {
 
 class AnimateMakerAssimp : public AnimateMaker {
 public:
-    AnimateMakerAssimp(const aiAnimation& animation, const aiNode& rootNode, const std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping);
+    AnimateMakerAssimp(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, const std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping);
 
     virtual sp<Animate> makeAnimate(const sp<Numeric>& duration) override;
 
@@ -70,6 +72,7 @@ private:
     };
 
 private:
+    sp<Assimp::Importer> _importer;
     const aiAnimation* _animation;
     const aiNode* _root_node;
 

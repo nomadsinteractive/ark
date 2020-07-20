@@ -59,7 +59,6 @@
 #   define DFATAL(...)
 #   define DCHECK(cond, ...) (void (cond))
 #   define DWARN(cond, ...) (void (cond))
-#   define DWARN(cond, ...) (void (cond))
 #   define DTRACE(cond) (void (cond))
 #   define DTHREAD_CHECK(threadId) (void (threadId))
 #endif
@@ -95,7 +94,6 @@ const char* const CLOCK = "clock";
 const char* const COLOR = "color";
 const char* const DELEGATE = "delegate";
 const char* const DISPOSED = "disposed";
-const char* const EXPECTATION = "expectation";
 const char* const EVENT_LISTENER = "event-listener";
 const char* const VARYINGS = "varyings";
 const char* const FOREGROUND = "foreground";
@@ -136,8 +134,6 @@ const char* const RIGHT = "right";
 
 const char* const TEXT_COLOR = "text-color";
 const char* const TEXT_SIZE = "text-size";
-
-const char* const ON_CROSS = "oncross";
 
 const char* const NINE_PATCH_PADDINGS = "paddings";
 

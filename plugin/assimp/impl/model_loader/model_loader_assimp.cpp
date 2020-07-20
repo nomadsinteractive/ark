@@ -67,16 +67,27 @@ array<element_index_t> ModelLoaderAssimp::Importer::loadIndices(const aiMesh* me
 ModelLoaderAssimp::Importer::Importer(Ark::RendererCoordinateSystem coordinateSystem)
     : _coordinate_system(coordinateSystem)
 {
-    _importer.SetIOHandler(new ArkIOSystem());
 }
 
 Model ModelLoaderAssimp::Importer::import(const String& src, const Rect& uvBounds)
 {
+    const sp<Assimp::Importer> importer = sp<Assimp::Importer>::make();
+    importer->SetIOHandler(new ArkIOSystem);
     uint32_t flags = aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes;
     if(_coordinate_system == Ark::COORDINATE_SYSTEM_LHS)
         flags |= aiProcess_FlipWindingOrder;
-    const aiScene* scene = _importer.ReadFile(src.c_str(), flags);
-    return loadModel(scene, uvBounds);
+    const aiScene* scene = importer->ReadFile(src.c_str(), flags);
+
+    std::unordered_map<String, std::pair<size_t, aiMatrix4x4>> boneMapping;
+    Model model = loadModel(scene, uvBounds, boneMapping);
+    if(scene->HasAnimations())
+        for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
+        {
+            const aiAnimation* animation = scene->mAnimations[i];
+            const String name = animation->mName.C_Str();
+            model.animates().push_back(name, sp<AnimateMakerAssimp>::make(importer, animation, scene->mRootNode, boneMapping));
+        }
+    return model;
 }
 
 Mesh ModelLoaderAssimp::Importer::loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping) const
@@ -109,13 +120,12 @@ Mesh ModelLoaderAssimp::Importer::loadMesh(const aiMesh* mesh, const Rect& uvBou
     return Mesh(indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents), std::move(bones));
 }
 
-Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& uvBounds) const
+Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& uvBounds, std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping) const
 {
     std::vector<Mesh> meshes;
     element_index_t vertexBase = 0;
 
     V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
-    std::unordered_map<String, std::pair<size_t, aiMatrix4x4>> boneMapping;
 
     for(uint32_t i = 0; i < scene->mNumMeshes; ++i)
     {
@@ -129,17 +139,7 @@ Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& u
     }
 
     const V3 bounds(aabbMax.x() - aabbMin.x(), aabbMax.y() - aabbMin.y(), aabbMax.z() - aabbMin.z());
-    Model model(sp<Array<Mesh>::Vector>::make(std::move(meshes)), {bounds, bounds, V3(0)});
-
-    if(scene->HasAnimations())
-        for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
-        {
-            const aiAnimation* animation = scene->mAnimations[i];
-            const String name = animation->mName.C_Str();
-            model.animates().push_back(name, sp<AnimateMakerAssimp>::make(*animation, *scene->mRootNode, boneMapping));
-        }
-
-    return model;
+    return Model(sp<Array<Mesh>::Vector>::make(std::move(meshes)), {bounds, bounds, V3(0)});
 }
 
 void ModelLoaderAssimp::Importer::loadBones(const aiMesh* mesh, std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping, Array<Mesh::BoneInfo>& bones) const

@@ -7,6 +7,8 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/types/global.h"
 
+#include "graphics/base/size.h"
+#include "graphics/impl/vec/vec3_impl.h"
 #include "graphics/util/vec2_util.h"
 #include "graphics/util/vec3_util.h"
 #include "graphics/util/vec4_util.h"
@@ -295,6 +297,11 @@ void RendererBuilder::inputFloat2(const String& label, const sp<Vec2>& value, co
     addWidget(sp<InputVec<V2, Vec2Util>>::make([format, flags](const char* l, V2* v) { return ImGui::InputFloat2(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
+void RendererBuilder::inputFloat3(const String& label, const sp<Size>& size, const String& format, int32_t flags)
+{
+    inputFloat3(label, size->impl().cast<Vec3>(), format, flags);
+}
+
 void RendererBuilder::inputFloat3(const String& label, const sp<Vec3>& value, const String& format, int32_t flags)
 {
     addWidget(sp<InputVec<V3, Vec3Util>>::make([format, flags](const char* l, V3* v) { return ImGui::InputFloat3(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
@@ -313,6 +320,11 @@ void RendererBuilder::sliderFloat(const String& label, const sp<Numeric>& value,
 void RendererBuilder::sliderFloat2(const String& label, const sp<Vec2>& value, float v_min, float v_max, const String& format, float power)
 {
     addWidget(sp<InputVec<V2, Vec2Util>>::make([v_min, v_max, format, power](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+}
+
+void RendererBuilder::sliderFloat3(const String& label, const sp<Size>& size, float v_min, float v_max, const String& format, float power)
+{
+    sliderFloat3(label, size->impl().cast<Vec3>(), v_min, v_max, format, power);
 }
 
 void RendererBuilder::sliderFloat3(const String& label, const sp<Vec3>& value, float v_min, float v_max, const String& format, float power)

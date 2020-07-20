@@ -128,8 +128,8 @@ static const aiNodeAnim* findNodeAnim(const aiAnimation& animation, const String
     return nullptr;
 }
 
-AnimateMakerAssimp::AnimateMakerAssimp(const aiAnimation& animation, const aiNode& rootNode, const std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping)
-    : _animation(&animation), _root_node(&rootNode), _bone_mapping(boneMapping)
+AnimateMakerAssimp::AnimateMakerAssimp(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, const std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping)
+    : _importer(std::move(importer)), _animation(animation), _root_node(rootNode), _bone_mapping(boneMapping)
 {
 }
 
