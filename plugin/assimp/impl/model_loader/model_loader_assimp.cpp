@@ -77,7 +77,7 @@ Model ModelLoaderAssimp::Importer::import(const String& src, const Rect& uvBound
     if(_coordinate_system == Ark::COORDINATE_SYSTEM_LHS)
         flags |= aiProcess_FlipWindingOrder;
     const aiScene* scene = importer->ReadFile(src.c_str(), flags);
-
+    DCHECK(scene, "Loading \"%s\" failed", src.c_str());
     std::unordered_map<String, std::pair<size_t, aiMatrix4x4>> boneMapping;
     Model model = loadModel(scene, uvBounds, boneMapping);
     if(scene->HasAnimations())

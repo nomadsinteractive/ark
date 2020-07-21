@@ -214,10 +214,10 @@ void AnimateMakerAssimp::AnimateImpl::readNodeHierarchy(float duration, const ai
     }
 
     const aiMatrix4x4 globalTransformation = parentTransform * nodeTransformation;
-
-    if (_bone_mapping.find(nodeName) != _bone_mapping.end())
+    const auto iter = _bone_mapping.find(nodeName);
+    if (iter != _bone_mapping.end())
     {
-        uint32_t boneIndex = _bone_mapping.at(nodeName);
+        uint32_t boneIndex = iter->second;
         const sp<AnimateMakerAssimp::BoneInfo>& boneInfo = _bone_infos.at(boneIndex);
         boneInfo->_intermediate_transform = globalTransformation * boneInfo->_offset;
     }
