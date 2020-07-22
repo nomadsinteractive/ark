@@ -33,6 +33,11 @@ void VertexStream::writeBoneInfo(const Mesh::BoneInfo& boneInfo)
     write(boneInfo._weights, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_BONE_WEIGHTS);
 }
 
+void VertexStream::writeNodeId(int32_t nodeId)
+{
+    write(nodeId, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_BONE_IDS);
+}
+
 void VertexStream::setRenderObject(const Renderable::Snapshot& renderObject)
 {
     _transform = &renderObject._transform;

@@ -128,8 +128,8 @@ static const aiNodeAnim* findNodeAnim(const aiAnimation& animation, const String
     return nullptr;
 }
 
-AnimateMakerAssimp::AnimateMakerAssimp(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, const std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping)
-    : _importer(std::move(importer)), _animation(animation), _root_node(rootNode), _bone_mapping(boneMapping)
+AnimateMakerAssimp::AnimateMakerAssimp(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, NodeMap boneMapping)
+    : _importer(std::move(importer)), _animation(animation), _root_node(rootNode), _bone_mapping(std::move(boneMapping))
 {
 }
 
@@ -138,24 +138,21 @@ sp<Animate> AnimateMakerAssimp::makeAnimate(const sp<Numeric>& duration)
     return sp<AnimateImpl>::make(duration, _animation, _root_node, _bone_mapping);
 }
 
-AnimateMakerAssimp::AnimateImpl::AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping)
+AnimateMakerAssimp::AnimateImpl::AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const NodeMap& boneMapping)
     : _ticks_per_sec(static_cast<float>(animation->mTicksPerSecond != 0 ? animation->mTicksPerSecond : 25.0f)), _duration_in_ticks(static_cast<float>(animation->mDuration)),
-      _global_inversed_transform(node->mTransformation), _duration(duration), _animation(animation), _root_node(node), _bone_infos(boneMapping.size()), _matrices(boneMapping.size())
+      _global_inversed_transform(node->mTransformation), _duration(duration), _animation(animation), _root_node(node)
 {
     _global_inversed_transform.Inverse();
 
-    for(size_t i = 0; i < _bone_infos.size(); ++i)
-    {
-        sp<BoneInfo> boneInfo = sp<BoneInfo>::make();
-        _matrices[i] = boneInfo;
-        _bone_infos[i] = std::move(boneInfo);
-    }
+    for(size_t i = 0; i < boneMapping.nodes().size(); ++i)
+        _bone_infos.push_back(sp<BoneInfo>::make());
 
-    for(const auto& i : boneMapping)
+    for(const auto& i : boneMapping.nodes())
     {
-        size_t index = i.second.first;
+        const NodeMap::Node& node = i.second;
+        uint32_t index = node._id;
         _bone_mapping.insert(std::make_pair(i.first, index));
-        _bone_infos.at(index)->_offset = i.second.second;
+        _bone_infos.at(index)->_offset = node._transform;
     }
 
     updateHierarchy(_duration->val());
@@ -174,13 +171,13 @@ bool AnimateMakerAssimp::AnimateImpl::update(uint64_t timestamp)
 void AnimateMakerAssimp::AnimateImpl::flat(void* buf)
 {
     M4* mat = reinterpret_cast<M4*>(buf);
-    for(size_t i = 0; i < _matrices.size(); ++i)
-        mat[i] = _matrices.at(i)->val();
+    for(size_t i = 0; i < _bone_infos.size(); ++i)
+        mat[i] = _bone_infos.at(i)->val();
 }
 
 uint32_t AnimateMakerAssimp::AnimateImpl::size()
 {
-    return _matrices.size() * sizeof(M4);
+    return _bone_infos.size() * sizeof(M4);
 }
 
 void AnimateMakerAssimp::AnimateImpl::updateHierarchy(float time)

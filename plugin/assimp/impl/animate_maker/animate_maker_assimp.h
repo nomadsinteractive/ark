@@ -16,6 +16,7 @@
 
 #include "graphics/base/mat.h"
 
+#include "assimp/base/node_map.h"
 #include "renderer/inf/animate_maker.h"
 
 namespace ark {
@@ -24,7 +25,7 @@ namespace assimp {
 
 class AnimateMakerAssimp : public AnimateMaker {
 public:
-    AnimateMakerAssimp(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, const std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping);
+    AnimateMakerAssimp(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, NodeMap boneMapping);
 
     virtual sp<Animate> makeAnimate(const sp<Numeric>& duration) override;
 
@@ -43,7 +44,7 @@ private:
 
     class AnimateImpl : public Animate {
     public:
-        AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const std::unordered_map<String, std::pair<size_t, aiMatrix4x4>>& boneMapping);
+        AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const NodeMap& boneMapping);
 
         virtual bool update(uint64_t timestamp) override;
 
@@ -65,7 +66,6 @@ private:
         const aiNode* _root_node;
 
         std::vector<sp<BoneInfo>> _bone_infos;
-        std::vector<sp<Mat4>> _matrices;
 
         std::unordered_map<String, size_t> _bone_mapping;
 
@@ -76,7 +76,7 @@ private:
     const aiAnimation* _animation;
     const aiNode* _root_node;
 
-    std::unordered_map<String, std::pair<size_t, aiMatrix4x4>> _bone_mapping;
+    NodeMap _bone_mapping;
 };
 
 }

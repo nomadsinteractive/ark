@@ -42,6 +42,7 @@ public:
     void writeBitangent(const V3& bitangent);
     void writeTexCoordinate(uint16_t u, uint16_t v);
     void writeBoneInfo(const Mesh::BoneInfo& boneInfo);
+    void writeNodeId(int32_t nodeId);
 
     void setRenderObject(const Renderable::Snapshot& renderObject);
 

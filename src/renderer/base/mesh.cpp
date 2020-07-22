@@ -39,6 +39,16 @@ const array<V3>& Mesh::vertices() const
     return _vertices;
 }
 
+const sp<Integer>& Mesh::nodeId() const
+{
+    return _node_id;
+}
+
+sp<Integer>& Mesh::nodeId()
+{
+    return _node_id;
+}
+
 void Mesh::write(VertexStream& buf) const
 {
     V3* vertice = _vertices->buf();
@@ -46,6 +56,8 @@ void Mesh::write(VertexStream& buf) const
     V3* normal = _normals ? _normals->buf() : nullptr;
     Tangent* tangent = _tangents ? _tangents->buf() : nullptr;
     BoneInfo* boneInfo = _bone_infos ? _bone_infos->buf() : nullptr;
+    bool hasNodeId = static_cast<bool>(_node_id);
+    int32_t nodeId = hasNodeId ? _node_id->val() : 0;
     size_t len = _vertices->length();
 
     for(size_t i = 0; i < len; ++i)
@@ -65,6 +77,8 @@ void Mesh::write(VertexStream& buf) const
         }
         if(boneInfo)
             buf.writeBoneInfo(*(boneInfo++));
+        if(hasNodeId)
+            buf.writeNodeId(nodeId);
     }
 }
 

@@ -49,6 +49,9 @@ public:
     const array<element_index_t>& indices() const;
     const array<V3>& vertices() const;
 
+    const sp<Integer>& nodeId() const;
+    sp<Integer>& nodeId();
+
     void write(VertexStream& buf) const;
 
 private:
@@ -58,6 +61,7 @@ private:
     sp<Array<V3>> _normals;
     sp<Array<Tangent>> _tangents;
     sp<Array<BoneInfo>> _bone_infos;
+    sp<Integer> _node_id;
 
 };
 
