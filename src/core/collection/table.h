@@ -101,6 +101,10 @@ public:
         return _values;
     }
 
+    std::vector<U>& values() {
+        return _values;
+    }
+
     size_t size() const {
         return _indices.size();
     }

@@ -5,7 +5,7 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-class NodeMap;
+class NodeTable;
 
 }
 }

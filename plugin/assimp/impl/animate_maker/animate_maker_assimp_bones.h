@@ -1,10 +1,9 @@
-#ifndef ARK_PLUGIN_ASSIMP_IMPL_ANIMATE_MAKER_ANIMATE_MAKER_ASSIMP_H_
-#define ARK_PLUGIN_ASSIMP_IMPL_ANIMATE_MAKER_ANIMATE_MAKER_ASSIMP_H_
+#ifndef ARK_PLUGIN_ASSIMP_IMPL_ANIMATE_MAKER_ANIMATE_MAKER_ASSIMP_BONES_H_
+#define ARK_PLUGIN_ASSIMP_IMPL_ANIMATE_MAKER_ANIMATE_MAKER_ASSIMP_BONES_H_
 
 #include <unordered_map>
 
 #include <assimp/Importer.hpp>
-
 #include <assimp/anim.h>
 #include <assimp/scene.h>
 
@@ -16,16 +15,17 @@
 
 #include "graphics/base/mat.h"
 
-#include "assimp/base/node_map.h"
 #include "renderer/inf/animate_maker.h"
+
+#include "assimp/base/node_table.h"
 
 namespace ark {
 namespace plugin {
 namespace assimp {
 
-class AnimateMakerAssimp : public AnimateMaker {
+class AnimateMakerAssimpBones : public AnimateMaker {
 public:
-    AnimateMakerAssimp(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, NodeMap boneMapping);
+    AnimateMakerAssimpBones(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, NodeTable boneMapping);
 
     virtual sp<Animate> makeAnimate(const sp<Numeric>& duration) override;
 
@@ -44,7 +44,7 @@ private:
 
     class AnimateImpl : public Animate {
     public:
-        AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const NodeMap& boneMapping);
+        AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const Table<String, Node>& bones);
 
         virtual bool update(uint64_t timestamp) override;
 
@@ -53,7 +53,6 @@ private:
 
     private:
         void updateHierarchy(float time);
-        void readNodeHierarchy(float duration, const aiNode* node, const aiMatrix4x4& parentTransform);
 
     private:
         float _ticks_per_sec;
@@ -65,9 +64,7 @@ private:
         const aiAnimation* _animation;
         const aiNode* _root_node;
 
-        std::vector<sp<BoneInfo>> _bone_infos;
-
-        std::unordered_map<String, size_t> _bone_mapping;
+        Table<String, Node> _bones;
 
     };
 
@@ -76,7 +73,7 @@ private:
     const aiAnimation* _animation;
     const aiNode* _root_node;
 
-    NodeMap _bone_mapping;
+    NodeTable _bones;
 };
 
 }
