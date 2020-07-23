@@ -6,29 +6,6 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-void AnimateUtil::loadNodeHierarchy(const aiAnimation* animation, float duration, const aiNode* node, const aiMatrix4x4& parentTransform, const NodeLoaderCallback& callback)
-{
-    const String nodeName(node->mName.data);
-    const aiNodeAnim* pNodeAnim = findNodeAnim(animation, nodeName);
-
-    aiMatrix4x4 nodeTransformation(node->mTransformation);
-
-    if(pNodeAnim)
-    {
-        aiMatrix4x4 matScale = AnimateUtil::interpolateScale(duration, pNodeAnim);
-        aiMatrix4x4 matRotation = AnimateUtil::interpolateRotation(duration, pNodeAnim);
-        aiMatrix4x4 matTranslation = AnimateUtil::interpolateTranslation(duration, pNodeAnim);
-
-        nodeTransformation = matTranslation * matRotation * matScale;
-    }
-
-    const aiMatrix4x4 globalTransformation = parentTransform * nodeTransformation;
-    callback(nodeName, globalTransformation);
-
-    for (uint32_t i = 0; i < node->mNumChildren; i++)
-        loadNodeHierarchy(animation, duration, node->mChildren[i], globalTransformation, callback);
-}
-
 aiMatrix4x4 AnimateUtil::interpolateTranslation(float time, const aiNodeAnim* pNodeAnim)
 {
     aiVector3D translation;

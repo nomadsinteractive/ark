@@ -5,6 +5,7 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
+struct Node;
 class NodeTable;
 
 }

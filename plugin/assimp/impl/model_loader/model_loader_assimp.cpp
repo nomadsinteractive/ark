@@ -27,7 +27,7 @@
 #include "renderer/inf/render_command_composer.h"
 
 #include "assimp/base/node_table.h"
-#include "assimp/impl/animate_maker/animate_maker_assimp_bones.h"
+#include "assimp/impl/animate_maker/animate_maker_assimp_nodes.h"
 #include "assimp/impl/io/ark_io_system.h"
 
 
@@ -150,8 +150,9 @@ Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& u
 
     if(scene->HasAnimations())
     {
-        bool boneAnmiation = bones.nodes().size() != 0;
-        if(!boneAnmiation)
+        bool noBones = bones.nodes().size() == 0;
+        AnimateMakerAssimpNodes::NodeLoaderCallback callback;
+        if(noBones)
         {
             NodeTable nodes;
             std::unordered_map<uint32_t, uint32_t> nodeIds;
@@ -159,13 +160,30 @@ Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& u
 
             for(const auto& i : nodeIds)
                 model.meshes()->at(i.first).nodeId() = sp<Integer::Const>::make(i.second);
-        }
 
+            callback = [] (Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform) {
+                const auto iter = nodes.find(nodeName);
+                if (iter != nodes.end()) {
+                    Node& node = iter->second;
+                    node._intermediate = transform;
+                }
+            };
+        }
+        else
+        {
+            callback = [] (Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform) {
+                const auto iter = nodes.find(nodeName);
+                if (iter != nodes.end()) {
+                    Node& node = iter->second;
+                    node._intermediate = transform * node._offset;
+                }
+            };
+        }
         for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
         {
             const aiAnimation* animation = scene->mAnimations[i];
             const String name = animation->mName.C_Str();
-            model.animates().push_back(name, sp<AnimateMakerAssimpBones>::make(importer, animation, scene->mRootNode, bones));
+            model.animates().push_back(name, sp<AnimateMakerAssimpNodes>::make(importer, animation, scene->mRootNode, bones, callback));
         }
     }
 
