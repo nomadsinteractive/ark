@@ -63,7 +63,7 @@ String::size_type String::hash() const
     const char* str = _str.c_str();
     size_type h = 0;
     while(*str)
-        h = h * 101 + *str++;
+        h = h * 101 + static_cast<size_type>(*str++);
     return h;
 }
 
@@ -173,7 +173,7 @@ String String::toLower() const
 {
     std::string s = _str;
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-    return std::move(s);
+    return String(s);
 }
 
 void String::insert(size_type pos, const String& str)
@@ -188,9 +188,9 @@ std::vector<String> String::split(char delim, bool allowEmpty) const
     std::string item;
     while(std::getline(ss, item, delim))
     {
-        const String s = String(item).strip();
+        String s = String(item).strip();
         if(allowEmpty || !s.empty())
-            elems.push_back(s);
+            elems.push_back(std::move(s));
     }
     return elems;
 }

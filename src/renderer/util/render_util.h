@@ -7,6 +7,7 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/base/pipeline_input.h"
+#include "renderer/base/texture.h"
 
 namespace ark {
 
@@ -23,6 +24,8 @@ public:
     static String outAttributeName(const String& name, PipelineInput::ShaderStage preStage);
 
     static bool isScissorEnabled(const Rect& scissor);
+
+    static uint32_t getComponentSize(Texture::Format format);
 };
 
 }

@@ -16,7 +16,7 @@ namespace opengl {
 
 class GLFramebufferRenderer : public Renderer {
 public:
-    GLFramebufferRenderer(const sp<Renderer>& delegate, const sp<GLFramebuffer>& framebuffer);
+    GLFramebufferRenderer(sp<Renderer> delegate, sp<GLFramebuffer> framebuffer);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 

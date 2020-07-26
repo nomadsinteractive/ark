@@ -79,6 +79,18 @@ void ModelLoaderAssimp::Importer::loadNodeHierarchy(const aiNode* node, NodeTabl
         loadNodeHierarchy(node->mChildren[i], nodes, nodeIds);
 }
 
+Table<String, sp<AnimateMaker>> ModelLoaderAssimp::Importer::loadAnimates(const aiScene* scene, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimateMakerAssimpNodes::NodeLoaderCallback& callback) const
+{
+    Table<String, sp<AnimateMaker>> animates;
+    for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
+    {
+        const aiAnimation* animation = scene->mAnimations[i];
+        const String name = animation->mName.C_Str();
+        animates.push_back(name, sp<AnimateMakerAssimpNodes>::make(importer, animation, scene->mRootNode, nodes, callback));
+    }
+    return animates;
+}
+
 ModelLoaderAssimp::Importer::Importer(Ark::RendererCoordinateSystem coordinateSystem)
     : _coordinate_system(coordinateSystem)
 {
@@ -151,7 +163,6 @@ Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& u
     if(scene->HasAnimations())
     {
         bool noBones = bones.nodes().size() == 0;
-        AnimateMakerAssimpNodes::NodeLoaderCallback callback;
         if(noBones)
         {
             NodeTable nodes;
@@ -161,29 +172,25 @@ Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& u
             for(const auto& i : nodeIds)
                 model.meshes()->at(i.first).nodeId() = sp<Integer::Const>::make(i.second);
 
-            callback = [] (Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform) {
+            AnimateMakerAssimpNodes::NodeLoaderCallback callback = [] (Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform) {
                 const auto iter = nodes.find(nodeName);
                 if (iter != nodes.end()) {
                     Node& node = iter->second;
                     node._intermediate = transform;
                 }
             };
+            model.animates() = loadAnimates(scene, importer, nodes, callback);
         }
         else
         {
-            callback = [] (Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform) {
+            AnimateMakerAssimpNodes::NodeLoaderCallback callback = [] (Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform) {
                 const auto iter = nodes.find(nodeName);
                 if (iter != nodes.end()) {
                     Node& node = iter->second;
                     node._intermediate = transform * node._offset;
                 }
             };
-        }
-        for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
-        {
-            const aiAnimation* animation = scene->mAnimations[i];
-            const String name = animation->mName.C_Str();
-            model.animates().push_back(name, sp<AnimateMakerAssimpNodes>::make(importer, animation, scene->mRootNode, bones, callback));
+            model.animates() = loadAnimates(scene, importer, bones, callback);
         }
     }
 

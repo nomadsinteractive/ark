@@ -95,6 +95,12 @@ GLenum GLUtil::getEnum(const String& name, GLenum defValue)
 
 GLenum GLUtil::getTextureInternalFormat(int32_t format, const Bitmap& bitmap)
 {
+    if(format == Texture::FORMAT_DEPTH)
+        return GL_DEPTH_COMPONENT24;
+
+    if(format == Texture::FORMAT_DEPTH_STENCIL)
+        return GL_DEPTH24_STENCIL8;
+
     static const GLenum formats[] = {GL_R8, GL_R8_SNORM, GL_R16, GL_R16_SNORM, GL_R8, GL_R8, GL_R16F, GL_R16F,
                                      GL_RG8, GL_RG8_SNORM, GL_RG16, GL_RG16_SNORM, GL_RG16F, GL_RG16F, GL_RG16F, GL_RG16F,
                                      GL_RGB8, GL_RGB8_SNORM, GL_RGB16, GL_RGB16_SNORM, GL_RGB16F, GL_RGB16F, GL_RGB16F, GL_RGB16F,
@@ -108,6 +114,12 @@ GLenum GLUtil::getTextureInternalFormat(int32_t format, const Bitmap& bitmap)
 
 GLenum GLUtil::getTextureFormat(int32_t format, uint8_t channels)
 {
+    if(format == Texture::FORMAT_DEPTH)
+        return GL_DEPTH_COMPONENT;
+
+    if(format == Texture::FORMAT_DEPTH_STENCIL)
+        return GL_DEPTH_STENCIL;
+
     const GLenum formatByChannels[] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
     DCHECK(channels < 5, "Unknown bitmap format: (channels = %d)", static_cast<uint32_t>(channels));
     return format == Texture::FORMAT_AUTO ? formatByChannels[channels - 1] : formatByChannels[static_cast<uint32_t>(format & Texture::FORMAT_RGBA)];
@@ -115,6 +127,12 @@ GLenum GLUtil::getTextureFormat(int32_t format, uint8_t channels)
 
 GLenum GLUtil::getPixelFormat(int32_t format, const Bitmap& bitmap)
 {
+    if(format == Texture::FORMAT_DEPTH)
+        return GL_FLOAT;
+
+    if(format == Texture::FORMAT_DEPTH_STENCIL)
+        return GL_UNSIGNED_INT_24_8;
+
     bool flagSigned = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED;
     uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
     if(byteCount == 1)

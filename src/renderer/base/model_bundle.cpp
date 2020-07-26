@@ -133,4 +133,14 @@ ModelBundle::Stub::Stub(sp<Atlas> atlas, sp<ModelBundle::Importer> importer)
 {
 }
 
+ModelBundle::MODEL_LOADER_BUILDER::MODEL_LOADER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _impl(factory, manifest, resourceLoaderContext)
+{
+}
+
+sp<ModelLoader> ModelBundle::MODEL_LOADER_BUILDER::build(const Scope& args)
+{
+    return _impl.build(args);
+}
+
 }

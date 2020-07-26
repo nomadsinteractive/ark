@@ -29,6 +29,7 @@ public:
         {
             ShaderPreprocessor& fragment = context.getStage(PipelineInput::SHADER_STAGE_FRAGMENT);
             fragment.outDeclare("vec4", "FragColor");
+            fragment.linkNextStage();
             setLayoutDescriptor(fragment._declaration_samplers, "binding", static_cast<uint32_t>(pipelineInput->ubos().size()));
             fragment._predefined_macros.push_back("#define texture2D texture");
             fragment._predefined_macros.push_back("#define textureCube texture");

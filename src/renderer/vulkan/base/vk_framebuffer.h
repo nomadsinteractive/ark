@@ -17,7 +17,7 @@ namespace vulkan {
 
 class VKFramebuffer : public Resource {
 public:
-    VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, const sp<Texture>& texture);
+    VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> textures);
     ~VKFramebuffer() override;
 
     virtual uint64_t id() override;

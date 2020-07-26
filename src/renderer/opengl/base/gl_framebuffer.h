@@ -11,7 +11,7 @@ namespace opengl {
 
 class GLFramebuffer : public Resource {
 public:
-    GLFramebuffer(const sp<Recycler>& recycler, const sp<Texture>& texture);
+    GLFramebuffer(const sp<Recycler>& recycler, std::vector<sp<Texture>> textures);
     ~GLFramebuffer() override;
 
     virtual uint64_t id() override;
@@ -19,11 +19,11 @@ public:
     virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
 
-    const sp<Texture>& texture() const;
+    const std::vector<sp<Texture>>& textures() const;
 
 private:
     sp<Recycler> _recycler;
-    sp<Texture> _texture;
+    std::vector<sp<Texture>> _textures;
 
     uint32_t _id;
 };

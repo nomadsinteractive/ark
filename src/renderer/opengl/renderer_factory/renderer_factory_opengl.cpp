@@ -106,9 +106,9 @@ sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(Ark::RendererCoordinate
     return cs == Ark::COORDINATE_SYSTEM_RHS ? sp<Camera::Delegate>::make<Camera::DelegateRH_NO>() : sp<Camera::Delegate>::make<Camera::DelegateLH_NO>();
 }
 
-sp<Framebuffer> RendererFactoryOpenGL::createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture)
+sp<Framebuffer> RendererFactoryOpenGL::createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> textures)
 {
-    const sp<GLFramebuffer> fbo = sp<GLFramebuffer>::make(_recycler, texture);
+    const sp<GLFramebuffer> fbo = sp<GLFramebuffer>::make(_recycler, std::move(textures));
     return sp<Framebuffer>::make(fbo, sp<GLFramebufferRenderer>::make(renderer, fbo));
 }
 

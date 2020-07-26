@@ -97,10 +97,10 @@ sp<Camera::Delegate> RendererFactoryVulkan::createCamera(Ark::RendererCoordinate
     return cs == Ark::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>();
 }
 
-sp<Framebuffer> RendererFactoryVulkan::createFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture)
+sp<Framebuffer> RendererFactoryVulkan::createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> textures)
 {
-    const sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, _recycler, texture);
-    return sp<Framebuffer>::make(fbo, sp<VKFramebufferRenderer>::make(renderer, fbo));
+    const sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, _recycler, std::move(textures));
+    return sp<Framebuffer>::make(fbo, sp<VKFramebufferRenderer>::make(std::move(renderer), fbo));
 }
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)

@@ -161,7 +161,7 @@ sp<PipelineFactory> RenderController::createPipelineFactory() const
 
 sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us)
 {
-    const sp<Texture::Delegate> delegate = _render_engine->rendererFactory()->createTexture(size, parameters, uploader);
+    const sp<Texture::Delegate> delegate = _render_engine->rendererFactory()->createTexture(size, parameters, std::move(uploader));
     DCHECK(delegate, "Unsupported TextureType: %d", parameters->_type);
     const sp<Texture> texture = sp<Texture>::make(std::move(delegate), std::move(size), std::move(parameters));
     upload(texture, nullptr, us);
@@ -183,9 +183,9 @@ Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Uploader>
     return makeBuffer(Buffer::TYPE_INDEX, usage, uploader);
 }
 
-sp<Framebuffer> RenderController::makeFramebuffer(const sp<Renderer>& renderer, const sp<Texture>& texture)
+sp<Framebuffer> RenderController::makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> textures)
 {
-    const sp<Framebuffer> framebuffer = renderEngine()->rendererFactory()->createFramebuffer(renderer, texture);
+    const sp<Framebuffer> framebuffer = renderEngine()->rendererFactory()->createFramebuffer(std::move(renderer), std::move(textures));
     upload(framebuffer->resource(), nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY);
     return framebuffer;
 }

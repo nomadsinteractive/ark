@@ -32,7 +32,8 @@ public:
 
     virtual void draw(GraphicsContext& /*graphicsContext*/) override {
         glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_fbo->id()));
-        glViewport(0, 0, static_cast<GLsizei>(_fbo->texture()->width()), static_cast<GLsizei>(_fbo->texture()->height()));
+        const sp<Texture>& texture = _fbo->textures().at(0);
+        glViewport(0, 0, static_cast<GLsizei>(texture->width()), static_cast<GLsizei>(texture->height()));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
@@ -53,8 +54,8 @@ public:
 
 }
 
-GLFramebufferRenderer::GLFramebufferRenderer(const sp<Renderer>& delegate, const sp<GLFramebuffer>& framebuffer)
-    : _delegate(delegate), _fbo(framebuffer), _pre_draw(sp<PreDrawElementsToFBO>::make(_fbo)), _post_draw(sp<PostDrawElementsToFBO>::make())
+GLFramebufferRenderer::GLFramebufferRenderer(sp<Renderer> delegate, sp<GLFramebuffer> framebuffer)
+    : _delegate(std::move(delegate)), _fbo(std::move(framebuffer)), _pre_draw(sp<PreDrawElementsToFBO>::make(_fbo)), _post_draw(sp<PostDrawElementsToFBO>::make())
 {
 }
 

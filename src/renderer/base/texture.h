@@ -24,9 +24,17 @@ public:
         FORMAT_RG = 1,
         FORMAT_RGB = 2,
         FORMAT_RGBA = 3,
-        FORMAT_SIGNED = 4,
-        FORMAT_F16 = 8,
-        FORMAT_F32 = 16
+        FORMAT_DEPTH = 4,
+        FORMAT_DEPTH_STENCIL = 5,
+        FORMAT_SIGNED = 8,
+        FORMAT_F16 = 16,
+        FORMAT_F32 = 32
+    };
+
+    enum Usage {
+        USAGE_COLOR_ATTACHMENT = 0,
+        USAGE_DEPTH_ATTACHMENT = 1,
+        USAGE_STENCIL_ATTACHMENT = 2
     };
 
     enum Feature {
@@ -56,6 +64,7 @@ public:
         Parameters(Type type, const document& parameters = nullptr, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
 
         Type _type;
+        Usage _usage;
         Format _format;
         Feature _features;
 
@@ -148,6 +157,9 @@ public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<Texture> build(const Scope& args) override;
+
+    private:
+        sp<Texture::Uploader> makeBlankUploader(const sp<Size>& size, const Parameters& params);
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;

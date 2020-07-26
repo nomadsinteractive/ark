@@ -22,6 +22,7 @@
 #include "renderer/inf/uploader.h"
 
 #include "assimp/forwarding.h"
+#include "assimp/impl/animate_maker/animate_maker_assimp_nodes.h"
 
 namespace ark {
 namespace plugin {
@@ -56,11 +57,13 @@ private:
         Model loadModel(const aiScene* scene, const Rect& uvBounds, const sp<Assimp::Importer>& importer) const;
         Mesh loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, NodeTable& boneMapping) const;
         void loadBones(const aiMesh* mesh, NodeTable& boneMapping, Array<Mesh::BoneInfo>& bones) const;
+        Table<String, sp<AnimateMaker>> loadAnimates(const aiScene* scene, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimateMakerAssimpNodes::NodeLoaderCallback& callback) const;
 
         bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
         array<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;
 
         void loadNodeHierarchy(const aiNode* node, NodeTable& nodes, std::unordered_map<uint32_t, uint32_t>& nodeIds) const;
+
 
     private:
         Ark::RendererCoordinateSystem _coordinate_system;

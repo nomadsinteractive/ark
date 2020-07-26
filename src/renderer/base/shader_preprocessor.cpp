@@ -152,7 +152,7 @@ void ShaderPreprocessor::parseDeclarations()
         _main.push_back(_pre_main);
         if(outVar)
             _main.push_back(sp<String>::make(Strings::sprintf(INDENT_STR "%s = ", outVar.c_str())));
-        *_output_var = _main_block->genOutCall(_pre_shader_stage);
+        *_output_var = _main_block->genOutCall(_pre_shader_stage, _shader_stage);
         _main.push_back(_output_var);
         _main.push_back(sp<String>::make(";"));
         _main.push_back(_post_main);
@@ -217,14 +217,21 @@ const char* ShaderPreprocessor::outVarPrefix() const
     return _STAGE_ATTR_PREFIX[_shader_stage + 1];
 }
 
-void ShaderPreprocessor::inDeclare(const String& type, const String& name)
+void ShaderPreprocessor::inDeclare(const String& type, const String& name, int32_t location)
 {
-    _declaration_ins.declare(type, inVarPrefix(), name);
+    _declaration_ins.declare(type, inVarPrefix(), name, location);
 }
 
-void ShaderPreprocessor::outDeclare(const String& type, const String& name)
+void ShaderPreprocessor::outDeclare(const String& type, const String& name, int32_t location)
 {
-    _declaration_outs.declare(type, outVarPrefix(), name);
+    _declaration_outs.declare(type, outVarPrefix(), name, location);
+}
+
+void ShaderPreprocessor::linkNextStage()
+{
+    const char* varPrefix = outVarPrefix();
+    for(const Parameter& i : _main_block->_outs)
+        _declaration_outs.declare(i._type, varPrefix, Strings::capitalizeFirst(i._name), -1);
 }
 
 void ShaderPreprocessor::linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars)
@@ -405,7 +412,7 @@ void ShaderPreprocessor::Function::genDefinition()
     *_place_hoder = sb.str();
 }
 
-String ShaderPreprocessor::Function::genOutCall(PipelineInput::ShaderStage preShaderStage) const
+String ShaderPreprocessor::Function::genOutCall(PipelineInput::ShaderStage preShaderStage, PipelineInput::ShaderStage shaderStage) const
 {
     StringBuffer sb;
     sb << "ark_main(";
@@ -419,7 +426,7 @@ String ShaderPreprocessor::Function::genOutCall(PipelineInput::ShaderStage preSh
     }
 
     for(const auto& i : _outs)
-        sb << ", " << "v_" << Strings::capitalizeFirst(i._name);
+        sb << ", " << getOutAttributePrefix(shaderStage) << Strings::capitalizeFirst(i._name);
 
     sb << ')';
     return sb.str();
@@ -438,10 +445,12 @@ ShaderPreprocessor::DeclarationList::DeclarationList(Source& source, const Strin
 {
 }
 
-void ShaderPreprocessor::DeclarationList::declare(const String& type, const char* prefix, const String& name)
+void ShaderPreprocessor::DeclarationList::declare(const String& type, const char* prefix, const String& name, int32_t location)
 {
     if(!_vars.has(name))
     {
+        if(location >= 0)
+            _source.push_back(sp<String>::make(Strings::sprintf("layout (location = %d) ", location)));
         const sp<String> declared = sp<String>::make(Strings::sprintf("%s %s %s%s;\n", _descriptor.c_str(), type.c_str(), prefix, name.c_str()));
         _source.push_back(declared);
 

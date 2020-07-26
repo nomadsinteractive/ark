@@ -15,7 +15,7 @@ namespace vulkan {
 
 class VKFramebufferRenderer : public Renderer {
 public:
-    VKFramebufferRenderer(const sp<Renderer>& delegate, const sp<VKFramebuffer>& framebuffer);
+    VKFramebufferRenderer(sp<Renderer> delegate, sp<VKFramebuffer> framebuffer);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 

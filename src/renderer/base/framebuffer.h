@@ -1,6 +1,8 @@
 #ifndef ARK_RENDERER_BASE_FRAMEBUFFER_H_
 #define ARK_RENDERER_BASE_FRAMEBUFFER_H_
 
+#include <vector>
+
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
@@ -29,7 +31,7 @@ public:
     private:
         sp<RenderController> _render_controller;
         sp<Builder<Renderer>> _renderer;
-        sp<Builder<Texture>> _texture;
+        std::vector<sp<Builder<Texture>>> _textures;
     };
 
 //  [[plugin::builder("framebuffer")]]

@@ -71,7 +71,7 @@ public:
         const Table<String, Declaration>& vars() const;
         Table<String, Declaration>& vars();
 
-        void declare(const String& type, const char* prefix, const String& name);
+        void declare(const String& type, const char* prefix, const String& name, int32_t location);
 
     private:
         Source& _source;
@@ -127,7 +127,7 @@ private:
         void parse(PipelineBuildingContext& buildingContext);
 
         void genDefinition();
-        String genOutCall(PipelineInput::ShaderStage preShaderStage) const;
+        String genOutCall(PipelineInput::ShaderStage preShaderStage, PipelineInput::ShaderStage shaderStage) const;
 
         bool hasOutAttribute(const String& name) const;
 
@@ -160,8 +160,9 @@ public:
     const char* inVarPrefix() const;
     const char* outVarPrefix() const;
 
-    void inDeclare(const String& type, const String& name);
-    void outDeclare(const String& type, const String& name);
+    void inDeclare(const String& type, const String& name, int32_t location = -1);
+    void outDeclare(const String& type, const String& name, int32_t location = -1);
+    void linkNextStage();
 
     void linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
 

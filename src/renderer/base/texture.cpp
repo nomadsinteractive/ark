@@ -15,26 +15,29 @@
 #include "renderer/base/texture_bundle.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
+#include "renderer/util/render_util.h"
 
 namespace ark {
 
 namespace {
 
-class ImageTextureUploader : public Texture::Uploader {
+class BlankUploader : public Texture::Uploader {
 public:
-    ImageTextureUploader(const sp<Variable<bitmap>>& bitmap)
-        : _bitmap(bitmap) {
+    BlankUploader(sp<Size> size, Texture::Format format)
+        : _size(std::move(size)), _component_size(RenderUtil::getComponentSize(format)), _channels((format & Texture::FORMAT_RGBA) + 1) {
     }
 
-    virtual void upload(GraphicsContext& graphicContext, Texture::Delegate& delegate) override {
-        const sp<Bitmap> bitmap = _bitmap->val();
-        delegate.uploadBitmap(graphicContext, bitmap, {bitmap->bytes()});
+    virtual void upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
+        uint32_t width = static_cast<uint32_t>(_size->width());
+        Bitmap bitmap(width, static_cast<uint32_t>(_size->height()), width * _component_size, _channels, false);
+        delegate.uploadBitmap(graphicsContext, bitmap, {sp<ByteArray::Borrowed>::make(nullptr, 0)});
     }
 
 private:
-    sp<Variable<bitmap>> _bitmap;
+    sp<Size> _size;
+    uint32_t _component_size;
+    uint8_t _channels;
 };
-
 
 }
 
@@ -137,14 +140,41 @@ template<> ARK_API Texture::Format Conversions::to<String, Texture::Format>(cons
                 format = static_cast<Texture::Format>(format | Texture::FORMAT_RGB);
             else if(i == "rgba")
                 format = static_cast<Texture::Format>(format | Texture::FORMAT_RGBA);
+            else if(i == "f16")
+                format = static_cast<Texture::Format>(format | Texture::FORMAT_F16);
+            else if(i == "f32")
+                format = static_cast<Texture::Format>(format | Texture::FORMAT_F32);
             else if(i == "signed")
                 format = static_cast<Texture::Format>(format | Texture::FORMAT_SIGNED);
+            else if(i == "depth")
+                format = static_cast<Texture::Format>(format | Texture::FORMAT_DEPTH);
+            else if(i == "depth_stencil")
+                format = static_cast<Texture::Format>(format | Texture::FORMAT_DEPTH_STENCIL);
             else
                 DFATAL("Unknow texture format: %s", i.c_str());
         }
         return format;
     }
     return Texture::FORMAT_AUTO;
+}
+
+template<> ARK_API Texture::Usage Conversions::to<String, Texture::Usage>(const String& str)
+{
+    if(str)
+    {
+        Texture::Usage usage = Texture::USAGE_COLOR_ATTACHMENT;
+        for(const String& i : str.toLower().split('|'))
+        {
+            if(i == "depth")
+                usage = static_cast<Texture::Usage>(usage | Texture::USAGE_DEPTH_ATTACHMENT);
+            else if(i == "stencil")
+                usage = static_cast<Texture::Usage>(usage | Texture::USAGE_STENCIL_ATTACHMENT);
+            else
+                DCHECK(i == "color", "Unknow texture usage: %s", i.c_str());
+        }
+        return usage;
+    }
+    return Texture::USAGE_COLOR_ATTACHMENT;
 }
 
 template<> ARK_API Texture::Feature Conversions::to<String, Texture::Feature>(const String& str)
@@ -190,7 +220,8 @@ template<> ARK_API Texture::CONSTANT Conversions::to<String, Texture::CONSTANT>(
 }
 
 Texture::Parameters::Parameters(Type type, const document& parameters, Format format, Texture::Feature features)
-    : _type(type), _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
+    : _type(type), _usage(parameters ? Documents::getAttribute<Texture::Usage>(parameters, "usage", Texture::USAGE_COLOR_ATTACHMENT) : Texture::USAGE_COLOR_ATTACHMENT),
+      _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
       _features(parameters ? Documents::getAttribute<Texture::Feature>(parameters, "feature", features) : features),
       _min_filter((features & Texture::FEATURE_MIPMAPS) ? CONSTANT_LINEAR_MIPMAP : CONSTANT_LINEAR), _mag_filter(CONSTANT_LINEAR),
       _wrap_s(CONSTANT_CLAMP_TO_EDGE), _wrap_t(CONSTANT_CLAMP_TO_EDGE), _wrap_r(CONSTANT_CLAMP_TO_EDGE)
@@ -249,7 +280,13 @@ sp<Texture> Texture::BUILDER::build(const Scope& args)
        return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
-    return _resource_loader_context->renderController()->createTexture(size, parameters, _uploader->build(args));
+    sp<Texture::Uploader> uploader = _uploader->build(args);
+    return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? uploader : makeBlankUploader(size, parameters));
+}
+
+sp<Texture::Uploader> Texture::BUILDER::makeBlankUploader(const sp<Size>& size, const Texture::Parameters& params)
+{
+    return sp<BlankUploader>::make(size, params._format);
 }
 
 Texture::UploaderBitmap::UploaderBitmap(const bitmap& bitmap)

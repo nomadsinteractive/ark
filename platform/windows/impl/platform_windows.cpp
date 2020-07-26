@@ -105,7 +105,7 @@ sp<Alphabet> Platform::getSystemAlphabet(const Font& font, const String& lang)
 
 void Platform::glInitialize()
 {
-    glbinding::Binding::initialize(false);
+    glbinding::Binding::initialize(nullptr);
 }
 
 void Platform::vkInitialize()

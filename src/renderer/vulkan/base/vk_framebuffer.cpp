@@ -18,11 +18,11 @@
 namespace ark {
 namespace vulkan {
 
-VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, const sp<Texture>& texture)
-    : _renderer(renderer), _recycler(recycler), _texture(texture), _depthstencil_image(VK_NULL_HANDLE), _depthstencil_memory(VK_NULL_HANDLE), _depthstencil_view(VK_NULL_HANDLE),
+VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> textures)
+    : _renderer(renderer), _recycler(recycler), _texture(textures.at(0)), _depthstencil_image(VK_NULL_HANDLE), _depthstencil_memory(VK_NULL_HANDLE), _depthstencil_view(VK_NULL_HANDLE),
       _command_buffer(VK_NULL_HANDLE), _command_buffer_begin_info(vks::initializers::commandBufferBeginInfo()), _render_pass_begin_info(vks::initializers::renderPassBeginInfo()),
-      _viewport(vks::initializers::viewport(static_cast<float>(texture->width()), static_cast<float>(texture->height()), 0, 1.0f)),
-      _scissor(vks::initializers::rect2D(static_cast<int32_t>(texture->width()), static_cast<int32_t>(texture->height()), 0, 0))
+      _viewport(vks::initializers::viewport(static_cast<float>(_texture->width()), static_cast<float>(_texture->height()), 0, 1.0f)),
+      _scissor(vks::initializers::rect2D(_texture->width(), _texture->height(), 0, 0))
 {
     _clear_values[0].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
     _clear_values[1].depthStencil = { 1.0f, 0 };

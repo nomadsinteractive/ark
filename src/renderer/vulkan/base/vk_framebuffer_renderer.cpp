@@ -43,8 +43,8 @@ private:
 
 }
 
-VKFramebufferRenderer::VKFramebufferRenderer(const sp<Renderer>& delegate, const sp<VKFramebuffer>& framebuffer)
-    : _delegate(delegate), _fbo(framebuffer), _pre_draw(sp<PreDrawElementsToFBO>::make(_fbo)), _post_draw(sp<PostDrawElementsToFBO>::make(_fbo))
+VKFramebufferRenderer::VKFramebufferRenderer(sp<Renderer> delegate, sp<VKFramebuffer> framebuffer)
+    : _delegate(std::move(delegate)), _fbo(std::move(framebuffer)), _pre_draw(sp<PreDrawElementsToFBO>::make(_fbo)), _post_draw(sp<PostDrawElementsToFBO>::make(_fbo))
 {
 }
 

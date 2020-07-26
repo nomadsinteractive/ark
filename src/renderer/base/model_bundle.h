@@ -86,6 +86,17 @@ public:
         sp<Builder<Importer>> _importer;
     };
 
+//  [[plugin::resource-loader("model-bundle")]]
+    class MODEL_LOADER_BUILDER : public Builder<ModelLoader> {
+    public:
+        MODEL_LOADER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+        virtual sp<ModelLoader> build(const Scope& args) override;
+
+    private:
+        BUILDER _impl;
+    };
+
 private:
     sp<Stub> _stub;
 

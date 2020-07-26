@@ -97,4 +97,18 @@ bool RenderUtil::isScissorEnabled(const Rect& scissor)
     return scissor.right() > scissor.left() && scissor.bottom() > scissor.top();
 }
 
+uint32_t RenderUtil::getComponentSize(Texture::Format format)
+{
+    if(format == Texture::FORMAT_AUTO)
+        return 4;
+
+    uint32_t unitSize = 1;
+    if(format & Texture::FORMAT_F16)
+        unitSize = 2;
+    else if(format & Texture::FORMAT_F32)
+        unitSize = 4;
+
+    return (static_cast<uint32_t>(format & Texture::FORMAT_RGBA) + 1) * unitSize;
+}
+
 }

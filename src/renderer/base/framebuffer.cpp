@@ -25,13 +25,17 @@ void Framebuffer::render(RenderRequest& renderRequest, const V3& position)
 
 Framebuffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<Renderer>(manifest, Constants::Attributes::DELEGATE)),
-      _texture(factory.ensureBuilder<Texture>(manifest, Constants::Attributes::TEXTURE))
+      _textures(factory.getBuilderList<Texture>(manifest, Constants::Attributes::TEXTURE))
 {
+    DCHECK(_textures.size(), "No texture defined in manifest: \"%s\"", Documents::toString(manifest).c_str());
 }
 
 sp<Framebuffer> Framebuffer::BUILDER::build(const Scope& args)
 {
-    return _render_controller->makeFramebuffer(_renderer->build(args), _texture->build(args));
+    std::vector<sp<Texture>> textures;
+    for(const sp<Builder<Texture>>& i : _textures)
+        textures.push_back(i->build(args));
+    return _render_controller->makeFramebuffer(_renderer->build(args), std::move(textures));
 }
 
 Framebuffer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest)
