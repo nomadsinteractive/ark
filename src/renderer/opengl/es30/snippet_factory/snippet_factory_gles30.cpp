@@ -50,7 +50,7 @@ public:
     virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {
         if(context.hasStage(PipelineInput::SHADER_STAGE_FRAGMENT)) {
             ShaderPreprocessor& fragment = context.getStage(PipelineInput::SHADER_STAGE_FRAGMENT);
-            fragment.outDeclare("vec4", "FragColor");
+            fragment.outDeclare("vec4", "FragColor", 0);
             fragment.linkNextStage();
             fragment._predefined_macros.push_back("#define texture2D texture");
             fragment._predefined_macros.push_back("#define textureCube texture");

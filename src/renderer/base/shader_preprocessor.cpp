@@ -230,8 +230,9 @@ void ShaderPreprocessor::outDeclare(const String& type, const String& name, int3
 void ShaderPreprocessor::linkNextStage()
 {
     const char* varPrefix = outVarPrefix();
+    int32_t location = 0;
     for(const Parameter& i : _main_block->_outs)
-        _declaration_outs.declare(i._type, varPrefix, Strings::capitalizeFirst(i._name), -1);
+        _declaration_outs.declare(i._type, varPrefix, Strings::capitalizeFirst(i._name), ++location);
 }
 
 void ShaderPreprocessor::linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars)

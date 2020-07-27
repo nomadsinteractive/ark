@@ -105,7 +105,7 @@ GLenum GLUtil::getTextureInternalFormat(int32_t format, const Bitmap& bitmap)
                                      GL_RG8, GL_RG8_SNORM, GL_RG16, GL_RG16_SNORM, GL_RG16F, GL_RG16F, GL_RG16F, GL_RG16F,
                                      GL_RGB8, GL_RGB8_SNORM, GL_RGB16, GL_RGB16_SNORM, GL_RGB16F, GL_RGB16F, GL_RGB16F, GL_RGB16F,
                                      GL_RGBA8, GL_RGBA8_SNORM, GL_RGBA16, GL_RGBA16_SNORM, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F};
-    uint32_t signedOffset = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED ? 1 : 0;
+    uint32_t signedOffset = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED ? 1 : ((format & Texture::FORMAT_F16) == Texture::FORMAT_F16 ? 4 : 0);
     uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
     uint32_t channel8 = (bitmap.channels() - 1) * 8;
     DCHECK(byteCount > 0 && byteCount <= 4, "Unsupported color depth: %d", byteCount * 8);

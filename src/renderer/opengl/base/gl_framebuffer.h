@@ -26,6 +26,7 @@ private:
     std::vector<sp<Texture>> _textures;
 
     uint32_t _id;
+    uint32_t _render_buffer_id;
 };
 
 }
