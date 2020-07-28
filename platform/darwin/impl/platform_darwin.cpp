@@ -104,7 +104,7 @@ void Platform::sysCall(int32_t /*id*/, const String& /*value*/)
 void Platform::glInitialize()
 {
 #ifdef ARK_USE_OPEN_GL
-    glbinding::Binding::initialize(false);
+    glbinding::Binding::initialize(nullptr);
 #endif
 }
 

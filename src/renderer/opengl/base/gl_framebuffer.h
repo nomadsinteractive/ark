@@ -1,6 +1,8 @@
 #ifndef ARK_RENDERER_OPENGL_BASE_GL_FRAMEBUFFER_H_
 #define ARK_RENDERER_OPENGL_BASE_GL_FRAMEBUFFER_H_
 
+#include <vector>
+
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
