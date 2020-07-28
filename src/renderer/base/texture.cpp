@@ -146,10 +146,10 @@ template<> ARK_API Texture::Format Conversions::to<String, Texture::Format>(cons
                 format = static_cast<Texture::Format>(format | Texture::FORMAT_F32);
             else if(i == "signed")
                 format = static_cast<Texture::Format>(format | Texture::FORMAT_SIGNED);
-            else if(i == "depth")
-                format = static_cast<Texture::Format>(format | Texture::FORMAT_DEPTH);
-            else if(i == "depth_stencil")
-                format = static_cast<Texture::Format>(format | Texture::FORMAT_DEPTH_STENCIL);
+//            else if(i == "depth")
+//                format = static_cast<Texture::Format>(format | Texture::FORMAT_DEPTH);
+//            else if(i == "depth_stencil")
+//                format = static_cast<Texture::Format>(format | Texture::FORMAT_DEPTH_STENCIL);
             else
                 DFATAL("Unknow texture format: %s", i.c_str());
         }

@@ -137,6 +137,7 @@ void PipelineInput::Stream::addAttribute(String name, Attribute attribute)
 {
     DCHECK(!_attributes.has(name), "Attribute \"%s\" has been added already", name.c_str());
     attribute.setOffset(_stride);
+    DWARN(attribute.length() != 3 || _stride % 16 == 0, "3-component attribute \"%s\" ranged from %d to %d, some GPUs may not like this", name.c_str(), _stride, _stride + attribute.size());
     _stride += attribute.size();
     _attributes.push_back(std::move(name), std::move(attribute));
 }
