@@ -14,6 +14,7 @@ namespace ark {
 class RenderUtil {
 public:
     static bytearray makeUnitCubeVertices(bool flipWindingOrder);
+    static Attribute makePredefinedAttribute(const String& name, const String& type);
 
     static Model makeUnitNinePatchModel();
     static Model makeUnitPointModel();
@@ -26,6 +27,7 @@ public:
     static bool isScissorEnabled(const Rect& scissor);
 
     static uint32_t getComponentSize(Texture::Format format);
+
 };
 
 }

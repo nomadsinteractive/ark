@@ -61,6 +61,32 @@ bytearray RenderUtil::makeUnitCubeVertices(bool flipWindingOrder)
     return sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
 }
 
+Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& type)
+{
+    if(type == "vec3")
+        return Attribute(name, Attribute::TYPE_FLOAT, type, 3, false);
+    if(type == "vec2")
+        return Attribute(name, Attribute::TYPE_FLOAT, type, 2, false);
+    if(type == "float")
+        return Attribute(name, Attribute::TYPE_FLOAT, type, 1, false);
+    if(type == "int")
+        return Attribute(name, Attribute::TYPE_INTEGER, type, 1, false);
+    if(type == "vec4")
+        return Attribute(name, Attribute::TYPE_FLOAT, type, 4, false);
+    if(type == "vec4b")
+        return Attribute(name, Attribute::TYPE_UBYTE, type, 4, true);
+    if(type == "vec3b")
+        return Attribute(name, Attribute::TYPE_UBYTE, type, 3, true);
+    if(type == "uint8")
+        return Attribute(name, Attribute::TYPE_UBYTE, type, 1, false);
+    if(type == "mat4")
+        return Attribute(name, Attribute::TYPE_FLOAT, type, 16, false);
+    if(type == "ivec4")
+        return Attribute(name, Attribute::TYPE_INTEGER, type, 4, false);
+    DFATAL("Unknown attribute type \"%s\"", type.c_str());
+    return Attribute();
+}
+
 Model RenderUtil::makeUnitQuadModel()
 {
     return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<6>>::make(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1}))), sp<VerticesQuad>::make(), Metrics{V3(1.0f), V3(1.0f), V3(0)});

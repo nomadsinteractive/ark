@@ -11,6 +11,7 @@
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
+#include "renderer/util/render_util.h"
 
 
 namespace ark {
@@ -77,7 +78,7 @@ void PipelineBuildingContext::initialize()
         firstStage.inDeclare(i._type, Strings::capitalizeFirst(i._name));
 
     std::set<String> passThroughVars;
-    const ShaderPreprocessor* prestage = nullptr;;
+    const ShaderPreprocessor* prestage = nullptr;
     for(auto iter = _stages.begin(); iter != _stages.end(); ++iter)
     {
         if(iter != _stages.begin())
@@ -318,35 +319,14 @@ void PipelineBuildingContext::loadPredefinedBuffer(BeanFactory& factory, const S
 
 Attribute PipelineBuildingContext::makePredefinedAttribute(const String& name, const String& type)
 {
-    if(type == "vec3")
-        return Attribute("a_" + name, Attribute::TYPE_FLOAT, type, 3, false);
     if(name == "TexCoordinate")
         return Attribute("a_TexCoordinate", Attribute::TYPE_USHORT, type, 2, true);
-    if(type == "vec2")
-        return Attribute("a_" + name, Attribute::TYPE_FLOAT, type, 2, false);
     if(name == "Position")
     {
-        DCHECK(type == "vec4", "Unacceptable Position type: '%s', must be in [vec2, vec3, vec4]", type.c_str());
-        return Attribute("a_Position", Attribute::TYPE_FLOAT, type, 3, false);
+        DCHECK(type == "vec2" || type == "vec3" || type == "vec4", "Unacceptable Position type: '%s', must be in [vec2, vec3, vec4]", type.c_str());
+        return Attribute("a_Position", Attribute::TYPE_FLOAT, type, std::min<uint32_t>(3, static_cast<uint32_t>(type.at(3) - '0')), false);
     }
-    if(type == "float")
-        return Attribute("a_" + name, Attribute::TYPE_FLOAT, type, 1, false);
-    if(type == "int")
-        return Attribute("a_" + name, Attribute::TYPE_INTEGER, type, 1, false);
-    if(type == "vec4")
-        return Attribute("a_" + name, Attribute::TYPE_FLOAT, type, 4, false);
-    if(type == "vec4b")
-        return Attribute("a_" + name, Attribute::TYPE_UBYTE, type, 4, true);
-    if(type == "vec3b")
-        return Attribute("a_" + name, Attribute::TYPE_UBYTE, type, 3, true);
-    if(type == "uint8")
-        return Attribute("a_" + name, Attribute::TYPE_UBYTE, type, 1, false);
-    if(type == "mat4")
-        return Attribute("a_" + name, Attribute::TYPE_FLOAT, type, 16, false);
-    if(type == "ivec4")
-        return Attribute("a_" + name, Attribute::TYPE_INTEGER, type, 4, false);
-    DFATAL("Unknown attribute type \"%s\"", type.c_str());
-    return Attribute();
+    return RenderUtil::makePredefinedAttribute("a_" + name, type);
 }
 
 void PipelineBuildingContext::initializePipelines()

@@ -12,6 +12,7 @@
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_engine_context.h"
+#include "renderer/util/render_util.h"
 
 #define ARRAY_PATTERN       "(?:\\[\\s*(\\d+)\\s*\\])?"
 #define VAR_TYPE_PATTERN    "\\s+(int|uint8|float|[bi]?vec[234]|mat3|mat4|sampler2D|samplerCube)\\s+"
@@ -350,12 +351,18 @@ ShaderPreprocessor::Function::Function(String name, String params, String return
 
 void ShaderPreprocessor::Function::parse(PipelineBuildingContext& buildingContext)
 {
+    uint32_t stride = 0;
     for(const String& i : _params.split(','))
     {
         String s = i.strip();
         Parameter param = parseParameter(s);
         if(param._modifier & Parameter::PARAMETER_MODIFIER_OUT)
+        {
+            const Attribute attr = RenderUtil::makePredefinedAttribute(param._name, param._type);
             _outs.push_back(std::move(param));
+            DWARN(attr.length() != 3 || stride % 16 == 0, "3-component out attribute \"%s\" ranged from %d to %d, some GPUs may not like this", attr.name().c_str(), stride, stride + attr.size());
+            stride += attr.size();
+        }
         else
         {
             buildingContext.addPredefinedAttribute(Strings::capitalizeFirst(param._name), param._type, PipelineInput::SHADER_STAGE_VERTEX);
