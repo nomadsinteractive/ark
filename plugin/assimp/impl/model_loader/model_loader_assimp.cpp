@@ -35,7 +35,12 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-bitmap ModelLoaderAssimp::loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const
+ModelImporterAssimp::ModelImporterAssimp(Ark::RendererCoordinateSystem coordinateSystem)
+    : _coordinate_system(coordinateSystem)
+{
+}
+
+bitmap ModelImporterAssimp::loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const
 {
     if(tex->mHeight == 0)
     {
@@ -45,13 +50,13 @@ bitmap ModelLoaderAssimp::loadBitmap(const sp<BitmapBundle>& imageResource, cons
     return bitmap::make(tex->mWidth, tex->mHeight, tex->mWidth * 4, 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(tex->pcData), tex->mWidth * tex->mHeight * 4));
 }
 
-void ModelLoaderAssimp::loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex)
+void ModelImporterAssimp::loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex)
 {
     const bitmap bitmap = loadBitmap(resourceLoaderContext.bitmapBundle(), tex);
     _textures.push_back(resourceLoaderContext.renderController()->createTexture2D(sp<Size>::make(static_cast<float>(bitmap->width()), static_cast<float>(bitmap->height())), sp<Texture::UploaderBitmap>::make(bitmap)));
 }
 
-array<element_index_t> ModelLoaderAssimp::Importer::loadIndices(const aiMesh* mesh, element_index_t vertexBase) const
+array<element_index_t> ModelImporterAssimp::loadIndices(const aiMesh* mesh, element_index_t vertexBase) const
 {
     const array<element_index_t> s = sp<Array<element_index_t>::Allocated>::make(mesh->mNumFaces * 3);
     element_index_t* buf = s->buf();
@@ -65,7 +70,7 @@ array<element_index_t> ModelLoaderAssimp::Importer::loadIndices(const aiMesh* me
     return s;
 }
 
-void ModelLoaderAssimp::Importer::loadNodeHierarchy(const aiNode* node, NodeTable& nodes, std::unordered_map<uint32_t, uint32_t>& nodeIds) const
+void ModelImporterAssimp::loadNodeHierarchy(const aiNode* node, NodeTable& nodes, std::unordered_map<uint32_t, uint32_t>& nodeIds) const
 {
     if(node->mNumMeshes)
     {
@@ -79,7 +84,7 @@ void ModelLoaderAssimp::Importer::loadNodeHierarchy(const aiNode* node, NodeTabl
         loadNodeHierarchy(node->mChildren[i], nodes, nodeIds);
 }
 
-Table<String, sp<AnimateMaker>> ModelLoaderAssimp::Importer::loadAnimates(const aiScene* scene, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimateMakerAssimpNodes::NodeLoaderCallback& callback) const
+Table<String, sp<AnimateMaker>> ModelImporterAssimp::loadAnimates(const aiScene* scene, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimateMakerAssimpNodes::NodeLoaderCallback& callback) const
 {
     Table<String, sp<AnimateMaker>> animates;
     for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
@@ -91,24 +96,20 @@ Table<String, sp<AnimateMaker>> ModelLoaderAssimp::Importer::loadAnimates(const 
     return animates;
 }
 
-ModelLoaderAssimp::Importer::Importer(Ark::RendererCoordinateSystem coordinateSystem)
-    : _coordinate_system(coordinateSystem)
-{
-}
-
-Model ModelLoaderAssimp::Importer::import(const String& src, const Rect& uvBounds)
+Model ModelImporterAssimp::import(const document& manifest, const Rect& uvBounds)
 {
     const sp<Assimp::Importer> importer = sp<Assimp::Importer>::make();
     importer->SetIOHandler(new ArkIOSystem);
     uint32_t flags = static_cast<uint32_t>(aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes);
     if(_coordinate_system == Ark::COORDINATE_SYSTEM_LHS)
         flags |= aiProcess_FlipWindingOrder;
+    const String& src = Documents::ensureAttribute(manifest, Constants::Attributes::SRC);
     const aiScene* scene = importer->ReadFile(src.c_str(), flags);
     DCHECK(scene, "Loading \"%s\" failed", src.c_str());
     return loadModel(scene, uvBounds, importer);
 }
 
-Mesh ModelLoaderAssimp::Importer::loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, NodeTable& boneMapping) const
+Mesh ModelImporterAssimp::loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, NodeTable& boneMapping) const
 {
     sp<Array<element_index_t>> indices = loadIndices(mesh, vertexBase);
     sp<Array<V3>> vertices = sp<Array<V3>::Allocated>::make(mesh->mNumVertices);
@@ -138,7 +139,7 @@ Mesh ModelLoaderAssimp::Importer::loadMesh(const aiMesh* mesh, const Rect& uvBou
     return Mesh(indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents), std::move(bones));
 }
 
-Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& uvBounds, const sp<Assimp::Importer>& importer) const
+Model ModelImporterAssimp::loadModel(const aiScene* scene, const Rect& uvBounds, const sp<Assimp::Importer>& importer) const
 {
     std::vector<Mesh> meshes;
     element_index_t vertexBase = 0;
@@ -197,7 +198,7 @@ Model ModelLoaderAssimp::Importer::loadModel(const aiScene* scene, const Rect& u
     return model;
 }
 
-void ModelLoaderAssimp::Importer::loadBones(const aiMesh* mesh, NodeTable& boneMapping, Array<Mesh::BoneInfo>& bones) const
+void ModelImporterAssimp::loadBones(const aiMesh* mesh, NodeTable& boneMapping, Array<Mesh::BoneInfo>& bones) const
 {
     Mesh::BoneInfo* bonesBuf = bones.buf();
     memset(bonesBuf, 0, bones.size());
@@ -216,14 +217,14 @@ void ModelLoaderAssimp::Importer::loadBones(const aiMesh* mesh, NodeTable& boneM
     }
 }
 
-ModelLoaderAssimp::IMPORTER_BUILDER::IMPORTER_BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext)
+ModelImporterAssimp::BUILDER::BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _coordinate_system(resourceLoaderContext->renderController()->renderEngine()->context()->coordinateSystem())
 {
 }
 
-sp<ModelBundle::Importer> ModelLoaderAssimp::IMPORTER_BUILDER::build(const Scope& /*args*/)
+sp<ModelBundle::Importer> ModelImporterAssimp::BUILDER::build(const Scope& /*args*/)
 {
-    return sp<Importer>::make(_coordinate_system);
+    return sp<ModelImporterAssimp>::make(_coordinate_system);
 }
 
 }

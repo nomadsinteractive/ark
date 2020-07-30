@@ -16,19 +16,25 @@
 namespace ark {
 
 ModelLoaderSphere::ModelLoaderSphere(const sp<Atlas>& atlas, uint32_t sampleCount)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas), _sample_count(sampleCount), _indices(sp<IndexArray::Allocated>::make(4 * sampleCount * sampleCount + 2 * (sampleCount * 2 - 1)))
+    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _atlas(atlas), _sample_count(sampleCount), _indices(sp<IndexArray::Allocated>::make(2 * 6 * sampleCount * sampleCount))
 {
     element_index_t* indices = _indices->buf();
     for(uint32_t i = 0; i < sampleCount * 2; i++)
     {
         element_index_t offset = static_cast<element_index_t>(i * (sampleCount + 1));
-        if(i != 0)
-            degenerate(indices, offset);
         (*indices++) = offset;
+        (*indices++) = static_cast<element_index_t>(offset + 1 + sampleCount + 1);
+        (*indices++) = static_cast<element_index_t>(offset + 1);
         for(uint32_t j = 1; j < sampleCount; ++j) {
-            (*indices++) = static_cast<element_index_t>(offset + j + sampleCount + 1);
             (*indices++) = static_cast<element_index_t>(offset + j);
+            (*indices++) = static_cast<element_index_t>(offset + j + sampleCount + 1);
+            (*indices++) = static_cast<element_index_t>(offset + j + sampleCount + 2);
+            (*indices++) = static_cast<element_index_t>(offset + j);
+            (*indices++) = static_cast<element_index_t>(offset + j + sampleCount + 2);
+            (*indices++) = static_cast<element_index_t>(offset + j + 1);
         }
+        (*indices++) = static_cast<element_index_t>(offset + sampleCount + sampleCount);
+        (*indices++) = static_cast<element_index_t>(offset + sampleCount - 1);
         (*indices++) = static_cast<element_index_t>(offset + sampleCount);
     }
 }
@@ -62,7 +68,7 @@ sp<std::vector<ModelLoaderSphere::Vertex>> ModelLoaderSphere::makeVertices()
 {
     std::vector<Vertex> vertices((_sample_count * 2 + 1) * (_sample_count + 1));
 
-    Vertex* vertex = &vertices[0];
+    Vertex* vertex = vertices.data();
     float step = Math::PI / _sample_count;
     for(uint32_t i = 0; i <= _sample_count * 2; ++i) {
         float lng = i * step;
@@ -92,13 +98,6 @@ void ModelLoaderSphere::buildTexture(Vertex& vertex, float lng, float lat) const
 {
     vertex._u = static_cast<float>(lng / Math::PI / 2);
     vertex._v = static_cast<float>(lat / Math::PI);
-}
-
-void ModelLoaderSphere::degenerate(element_index_t*& buffer, element_index_t index) const
-{
-    uint16_t d = *(buffer - 1);
-    (*buffer++) = d;
-    (*buffer++) = index;
 }
 
 ModelLoaderSphere::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

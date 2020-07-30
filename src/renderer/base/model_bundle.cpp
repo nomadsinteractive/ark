@@ -76,7 +76,6 @@ void ModelBundle::Stub::import(const sp<ResourceLoaderContext>& resourceLoaderCo
     for(const document& i : manifest->children())
     {
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
-        const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
         for(const document& j : i->children("map"))
         {
             const String& mappingSrc = Documents::ensureAttribute(j, Constants::Attributes::SRC);
@@ -86,7 +85,7 @@ void ModelBundle::Stub::import(const sp<ResourceLoaderContext>& resourceLoaderCo
         }
 
         const Rect bounds = _atlas && _atlas->has(type) ? _atlas->getItemUV(type) : Rect(0, 1.0f, 1.0f, 0);
-        addModel(type, _importer->import(src, bounds));
+        addModel(type, _importer->import(i, bounds));
     }
     if(hasModelMaps)
         texturePacker.updateTexture(_atlas->texture());

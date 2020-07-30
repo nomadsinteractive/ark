@@ -29,7 +29,7 @@ public:
     public:
         virtual ~Importer() = default;
 
-        virtual Model import(const String& src, const Rect& bounds) = 0;
+        virtual Model import(const document& manifest, const Rect& uvBounds) = 0;
     };
 
 

@@ -43,8 +43,6 @@ private:
     void buildVertex(Vertex& vertex, float lng, float lat) const;
     void buildTexture(Vertex& vertex, float lng, float lat) const;
 
-    void degenerate(element_index_t*& buffer, element_index_t index) const;
-
 private:
     sp<Atlas> _atlas;
     uint32_t _sample_count;
