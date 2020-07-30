@@ -21,9 +21,9 @@ ModelBundle::ModelBundle(const sp<ModelBundle::Stub>& stub)
 {
 }
 
-void ModelBundle::import(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest)
+void ModelBundle::import(const sp<ResourceLoaderContext>& resourceLoaderContext, BeanFactory& factory, const document& manifest, const Scope& args)
 {
-    _stub->import(resourceLoaderContext, manifest);
+    _stub->import(resourceLoaderContext, factory, manifest, args);
 }
 
 sp<RenderCommandComposer> ModelBundle::makeRenderCommandComposer()
@@ -69,10 +69,10 @@ size_t ModelBundle::indexLength() const
     return _stub->_index_length;
 }
 
-void ModelBundle::Stub::import(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest)
+void ModelBundle::Stub::import(const sp<ResourceLoaderContext>& resourceLoaderContext, BeanFactory& factory, const document& manifest, const Scope& args)
 {
     bool hasModelMaps = false;
-    TexturePacker texturePacker(resourceLoaderContext, _atlas->width(), _atlas->height(), false);
+    TexturePacker texturePacker(resourceLoaderContext, static_cast<int32_t>(_atlas->width()), static_cast<int32_t>(_atlas->height()), false);
     for(const document& i : manifest->children())
     {
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
@@ -85,7 +85,9 @@ void ModelBundle::Stub::import(const sp<ResourceLoaderContext>& resourceLoaderCo
         }
 
         const Rect bounds = _atlas && _atlas->has(type) ? _atlas->getItemUV(type) : Rect(0, 1.0f, 1.0f, 0);
-        addModel(type, _importer->import(i, bounds));
+
+        const String importer = Documents::getAttribute(i, "importer");
+        addModel(type, importer ? factory.build<Importer>(importer, args)->import(i, bounds) : _importer->import(i, bounds));
     }
     if(hasModelMaps)
         texturePacker.updateTexture(_atlas->texture());
@@ -114,7 +116,7 @@ template<> ARK_API ModelBundle::MappingType Conversions::to<String, ModelBundle:
 }
 
 ModelBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _atlas(factory.ensureBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)),
+    : _bean_factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _atlas(factory.ensureBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)),
       _importer(factory.ensureBuilder<ModelBundle::Importer>(manifest, "importer"))
 {
 }
@@ -123,7 +125,7 @@ sp<ModelBundle> ModelBundle::BUILDER::build(const Scope& args)
 {
     sp<Importer> importer = _importer->build(args);
     sp<ModelBundle> modelBundle = sp<ModelBundle>::make(_atlas->build(args), std::move(importer));
-    modelBundle->import(_resource_loader_context, _manifest);
+    modelBundle->import(_resource_loader_context, _bean_factory, _manifest, args);
     return modelBundle;
 }
 

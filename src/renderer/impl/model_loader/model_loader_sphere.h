@@ -3,7 +3,7 @@
 
 #include "core/types/shared_ptr.h"
 
-#include "renderer/inf/model_loader.h"
+#include "renderer/base/model_bundle.h"
 
 namespace ark {
 
@@ -30,7 +30,15 @@ public:
         uint32_t _sample_count;
     };
 
-private:
+//  [[plugin::builder::by-value("sphere")]]
+    class IMPORTER_BUILDER : public Builder<ModelBundle::Importer> {
+    public:
+        IMPORTER_BUILDER();
+
+        virtual sp<ModelBundle::Importer> build(const Scope& args) override;
+
+    };
+
     struct Vertex {
         V3 _position;
         V3 _tangent;
@@ -38,19 +46,10 @@ private:
     };
 
 private:
-    sp<std::vector<ModelLoaderSphere::Vertex>> makeVertices();
-
-    void buildVertex(Vertex& vertex, float lng, float lat) const;
-    void buildTexture(Vertex& vertex, float lng, float lat) const;
-
-private:
     sp<Atlas> _atlas;
-    uint32_t _sample_count;
 
     indexarray _indices;
-    std::unordered_map<int32_t, sp<std::vector<ModelLoaderSphere::Vertex>>> _vertices;
-
-    friend class VerticesSphere;
+    sp<std::vector<ModelLoaderSphere::Vertex>> _vertices;
 
 };
 

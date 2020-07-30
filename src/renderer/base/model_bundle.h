@@ -1,6 +1,7 @@
 #ifndef ARK_RENDERER_BASE_MODEL_BUNDLE_H_
 #define ARK_RENDERER_BASE_MODEL_BUNDLE_H_
 
+#include "core/base/bean_factory.h"
 #include "core/collection/table.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
@@ -37,7 +38,7 @@ private:
     struct Stub {
         Stub(sp<Atlas> atlas, sp<Importer> importer);
 
-        void import(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest);
+        void import(const sp<ResourceLoaderContext>& resourceLoaderContext, BeanFactory& factory, const document& manifest, const Scope& args);
         ModelInfo& addModel(int32_t type, const Model& model);
         const ModelInfo& ensure(int32_t type) const;
 
@@ -53,7 +54,7 @@ public:
     ModelBundle(sp<Atlas> atlas, sp<Importer> importer);
     ModelBundle(const sp<Stub>& stub);
 
-    void import(const sp<ResourceLoaderContext>& resourceLoaderContext, const document& manifest);
+    void import(const sp<ResourceLoaderContext>& resourceLoaderContext, BeanFactory& factory, const document& manifest, const Scope& args);
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
     virtual void initialize(ShaderBindings& shaderBindings) override;
@@ -79,6 +80,7 @@ public:
         virtual sp<ModelBundle> build(const Scope& args) override;
 
     private:
+        BeanFactory _bean_factory;
         document _manifest;
         sp<ResourceLoaderContext> _resource_loader_context;
 

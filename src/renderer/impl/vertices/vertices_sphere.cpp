@@ -6,13 +6,13 @@
 
 namespace ark {
 
-VerticesSphere::VerticesSphere(uint32_t sampleCount)
-    : Vertices((sampleCount * 2 + 1) * (sampleCount + 1))
+VerticesSphere::VerticesSphere(size_t length)
+    : Vertices(length)
 {
 }
 
-VerticesSphere::VerticesSphere(sp<std::vector<ModelLoaderSphere::Vertex>> vertices, const Atlas::Item& item)
-    : Vertices(vertices->size()), _vertices(std::move(vertices)), _item(item)
+VerticesSphere::VerticesSphere(sp<std::vector<ModelLoaderSphere::Vertex>> vertices, const Rect& uvBounds)
+    : Vertices(vertices->size()), _vertices(std::move(vertices)), _uv_bounds(uvBounds)
 {
 }
 
@@ -22,7 +22,8 @@ void VerticesSphere::write(VertexStream& buf, const V3& size)
     {
         buf.next();
         buf.writePosition(vertex._position * size);
-        buf.writeTexCoordinate(_item.ux() + static_cast<uint16_t>((_item.vx() - _item.ux()) * vertex._u), _item.uy() + static_cast<uint16_t>((_item.vy() - _item.uy()) * vertex._v));
+        buf.writeTexCoordinate(static_cast<uint16_t>((_uv_bounds.left() + _uv_bounds.width() * vertex._u) * 0xffff),
+                               static_cast<uint16_t>((_uv_bounds.top() + _uv_bounds.height() * vertex._v) * 0xffff));
         buf.writeNormal(vertex._position);
         buf.writeTangent(vertex._tangent);
     }

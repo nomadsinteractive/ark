@@ -15,75 +15,7 @@
 
 namespace ark {
 
-ModelLoaderSphere::ModelLoaderSphere(const sp<Atlas>& atlas, uint32_t sampleCount)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _atlas(atlas), _sample_count(sampleCount), _indices(sp<IndexArray::Allocated>::make(2 * 6 * sampleCount * sampleCount))
-{
-    element_index_t* indices = _indices->buf();
-    for(uint32_t i = 0; i < sampleCount * 2; i++)
-    {
-        element_index_t offset = static_cast<element_index_t>(i * (sampleCount + 1));
-        (*indices++) = offset;
-        (*indices++) = static_cast<element_index_t>(offset + 1 + sampleCount + 1);
-        (*indices++) = static_cast<element_index_t>(offset + 1);
-        for(uint32_t j = 1; j < sampleCount; ++j) {
-            (*indices++) = static_cast<element_index_t>(offset + j);
-            (*indices++) = static_cast<element_index_t>(offset + j + sampleCount + 1);
-            (*indices++) = static_cast<element_index_t>(offset + j + sampleCount + 2);
-            (*indices++) = static_cast<element_index_t>(offset + j);
-            (*indices++) = static_cast<element_index_t>(offset + j + sampleCount + 2);
-            (*indices++) = static_cast<element_index_t>(offset + j + 1);
-        }
-        (*indices++) = static_cast<element_index_t>(offset + sampleCount + sampleCount);
-        (*indices++) = static_cast<element_index_t>(offset + sampleCount - 1);
-        (*indices++) = static_cast<element_index_t>(offset + sampleCount);
-    }
-}
-
-sp<RenderCommandComposer> ModelLoaderSphere::makeRenderCommandComposer()
-{
-    return sp<RCCDrawElementsInstanced>::make(Model(sp<Uploader::Array<element_index_t>>::make(_indices), sp<VerticesSphere>::make(_sample_count)));
-}
-
-void ModelLoaderSphere::initialize(ShaderBindings& shaderBindings)
-{
-    shaderBindings.pipelineBindings()->bindSampler(_atlas->texture());
-}
-
-void ModelLoaderSphere::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& snapshot)
-{
-    for(const Renderable::Snapshot& i : snapshot._items)
-    {
-        sp<std::vector<ModelLoaderSphere::Vertex>>& vertices = _vertices[i._type];
-        if(!vertices)
-            vertices = makeVertices();
-    }
-}
-
-Model ModelLoaderSphere::loadModel(int32_t type)
-{
-    return Model(nullptr, sp<VerticesSphere>::make(_vertices.at(type), _atlas->at(type)));
-}
-
-sp<std::vector<ModelLoaderSphere::Vertex>> ModelLoaderSphere::makeVertices()
-{
-    std::vector<Vertex> vertices((_sample_count * 2 + 1) * (_sample_count + 1));
-
-    Vertex* vertex = vertices.data();
-    float step = Math::PI / _sample_count;
-    for(uint32_t i = 0; i <= _sample_count * 2; ++i) {
-        float lng = i * step;
-        for(uint32_t j = 0; j <= _sample_count; ++j) {
-            float lat = j * step;
-            buildVertex(*vertex, lng, lat - Math::PI_2);
-            buildTexture(*vertex, lng, lat);
-            ++vertex;
-        }
-    }
-
-    return sp<std::vector<ModelLoaderSphere::Vertex>>::make(std::move(vertices));
-}
-
-void ModelLoaderSphere::buildVertex(Vertex& vertex, float lng, float lat) const
+static void buildVertex(float lng, float lat, ModelLoaderSphere::Vertex& vertex)
 {
     float r = Math::cos(lat) / 2.0f;
     float px = r * Math::sin(lng);
@@ -94,10 +26,92 @@ void ModelLoaderSphere::buildVertex(Vertex& vertex, float lng, float lat) const
     vertex._tangent = std::abs(normal.x()) < 0.25f ? normal.cross(V3(1.0f, 0.0f, 0.0f)) : normal.cross(V3(0.0f, 1.0f, 0.0f));
 }
 
-void ModelLoaderSphere::buildTexture(Vertex& vertex, float lng, float lat) const
+static void buildTexture(float lng, float lat, ModelLoaderSphere::Vertex& vertex)
 {
     vertex._u = static_cast<float>(lng / Math::PI / 2);
     vertex._v = static_cast<float>(lat / Math::PI);
+}
+
+static sp<std::vector<ModelLoaderSphere::Vertex>> makeVertices(uint32_t sampleCount)
+{
+    std::vector<ModelLoaderSphere::Vertex> vertices((sampleCount * 2 + 1) * (sampleCount + 1));
+
+    ModelLoaderSphere::Vertex* vertex = vertices.data();
+    float step = Math::PI / sampleCount;
+    for(uint32_t i = 0; i <= sampleCount * 2; ++i) {
+        float lng = i * step;
+        for(uint32_t j = 0; j <= sampleCount; ++j) {
+            float lat = j * step;
+            buildVertex(lng, lat - Math::PI_2, *vertex);
+            buildTexture(lng, lat, *vertex);
+            ++vertex;
+        }
+    }
+
+    return sp<std::vector<ModelLoaderSphere::Vertex>>::make(std::move(vertices));
+}
+
+static indexarray makeIndices(uint32_t sampleCount)
+{
+    indexarray indices = sp<IndexArray::Allocated>::make(2 * 6 * sampleCount * sampleCount);
+    element_index_t* buf = indices->buf();
+    for(uint32_t i = 0; i < sampleCount * 2; i++)
+    {
+        element_index_t offset = static_cast<element_index_t>(i * (sampleCount + 1));
+        (*buf++) = offset;
+        (*buf++) = static_cast<element_index_t>(offset + 1 + sampleCount + 1);
+        (*buf++) = static_cast<element_index_t>(offset + 1);
+        for(uint32_t j = 1; j < sampleCount; ++j) {
+            (*buf++) = static_cast<element_index_t>(offset + j);
+            (*buf++) = static_cast<element_index_t>(offset + j + sampleCount + 1);
+            (*buf++) = static_cast<element_index_t>(offset + j + sampleCount + 2);
+            (*buf++) = static_cast<element_index_t>(offset + j);
+            (*buf++) = static_cast<element_index_t>(offset + j + sampleCount + 2);
+            (*buf++) = static_cast<element_index_t>(offset + j + 1);
+        }
+        (*buf++) = static_cast<element_index_t>(offset + sampleCount + sampleCount);
+        (*buf++) = static_cast<element_index_t>(offset + sampleCount - 1);
+        (*buf++) = static_cast<element_index_t>(offset + sampleCount);
+    }
+    return indices;
+}
+
+namespace {
+
+class ModelBundleImporterSphere : public ModelBundle::Importer {
+public:
+    virtual Model import(const document& manifest, const Rect& uvBounds) override {
+        uint32_t sampleCount = Documents::ensureAttribute<uint32_t>(manifest, "sample-count");
+        indexarray indices = makeIndices(sampleCount);
+        sp<std::vector<ModelLoaderSphere::Vertex>> vertices = makeVertices(sampleCount);
+        return Model(sp<Uploader::Array<element_index_t>>::make(std::move(indices)), sp<VerticesSphere>::make(std::move(vertices), uvBounds));
+    }
+};
+
+}
+
+ModelLoaderSphere::ModelLoaderSphere(const sp<Atlas>& atlas, uint32_t sampleCount)
+    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _atlas(atlas), _indices(makeIndices(sampleCount)), _vertices(makeVertices(sampleCount))
+{
+}
+
+sp<RenderCommandComposer> ModelLoaderSphere::makeRenderCommandComposer()
+{
+    return sp<RCCDrawElementsInstanced>::make(Model(sp<Uploader::Array<element_index_t>>::make(_indices), sp<VerticesSphere>::make(_vertices->size())));
+}
+
+void ModelLoaderSphere::initialize(ShaderBindings& shaderBindings)
+{
+    shaderBindings.pipelineBindings()->bindSampler(_atlas->texture());
+}
+
+void ModelLoaderSphere::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& /*snapshot*/)
+{
+}
+
+Model ModelLoaderSphere::loadModel(int32_t type)
+{
+    return Model(nullptr, sp<VerticesSphere>::make(_vertices, _atlas->getItemUV(type)));
 }
 
 ModelLoaderSphere::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -108,6 +122,15 @@ ModelLoaderSphere::BUILDER::BUILDER(BeanFactory& factory, const document& manife
 sp<ModelLoader> ModelLoaderSphere::BUILDER::build(const Scope& args)
 {
     return sp<ModelLoaderSphere>::make(_atlas->build(args), _sample_count);
+}
+
+ModelLoaderSphere::IMPORTER_BUILDER::IMPORTER_BUILDER()
+{
+}
+
+sp<ModelBundle::Importer> ModelLoaderSphere::IMPORTER_BUILDER::build(const Scope& args)
+{
+    return sp<ModelBundleImporterSphere>::make();
 }
 
 }
