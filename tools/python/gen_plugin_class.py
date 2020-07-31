@@ -119,9 +119,17 @@ class Function(Annotation):
         return 'library.addCallable<%s(%s)>("%s", static_cast<%s(*)(%s)>(&%s));' % (self._rettype, self._argtypes, self._funcname, self._rettype, self._argtypes, self._func)
 
 
-class ResourceLoaderDictionary(Annotation):
+class ResourceLoaderDictionaryNamed(Annotation):
+    def __init__(self, filename, name, interface_class, main_class, builder_name, arguments):
+        super(ResourceLoaderDictionaryNamed, self).__init__(filename, name, interface_class, main_class, builder_name, arguments)
+
+    def resBuilder(self):
+        return self._make_call('resBeanFactory.addDictionaryFactory', 'BeanFactory& factory, const String& value', 'createResourceLoader', RES_BUILDER_TEMPLATE)
+
+
+class ResourceLoaderDictionaryNonamed(Annotation):
     def __init__(self, filename, interface_class, implement_class, main_class, arguments):
-        super(ResourceLoaderDictionary, self).__init__(filename, None, interface_class, implement_class, main_class, arguments)
+        super(ResourceLoaderDictionaryNonamed, self).__init__(filename, None, interface_class, implement_class, main_class, arguments)
 
     def resBuilder(self):
         func_arguments = parse_function_arguments('createResourceLoader', RES_BUILDER_TEMPLATE)
@@ -215,8 +223,10 @@ def search_for_plugins(paths):
         arguments = parse_function_arguments(implement_class, content)
         if builder_type != 'resource-loader':
             result.append(Dictionary(filename, name, interface_class, implement_class, main_class, arguments))
+        elif name:
+            result.append(ResourceLoaderDictionaryNamed(filename, name, interface_class, implement_class, main_class, arguments))
         else:
-            result.append(ResourceLoaderDictionary(filename, interface_class, implement_class, main_class, arguments))
+            result.append(ResourceLoaderDictionaryNonamed(filename, interface_class, implement_class, main_class, arguments))
 
     def match_function(filename, content, main_class, x):
         funcname = x[0]

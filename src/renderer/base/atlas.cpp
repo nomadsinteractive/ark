@@ -95,7 +95,7 @@ void Atlas::add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, 
 
 const Atlas::Item& Atlas::at(int32_t id) const
 {
-    return _allow_default_item ? (has(id) ? _items->at(id) : _default_item) : _items->at(id);
+    return _allow_default_item || id == 0 ? (has(id) ? _items->at(id) : _default_item) : _items->at(id);
 }
 
 Rect Atlas::getOriginalPosition(int32_t id) const

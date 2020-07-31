@@ -59,8 +59,9 @@ const std::vector<sp<Texture>>& PipelineBindings::samplers() const
 
 void PipelineBindings::bindSampler(const sp<Texture>& texture, uint32_t name)
 {
-    DCHECK(_stub->_samplers.size() > name, "Illegal sampler binding position: %d, sampler count: %d", name, _stub->_samplers.size());
-    _stub->_samplers[name] = texture;
+    DWARN(_stub->_samplers.size() > name, "Illegal sampler binding position: %d, sampler count: %d", name, _stub->_samplers.size());
+    if(_stub->_samplers.size() > name)
+        _stub->_samplers[name] = texture;
 }
 
 bool PipelineBindings::hasDivisors() const
