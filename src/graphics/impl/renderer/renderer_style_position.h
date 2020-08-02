@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_IMPL_RENDERER_RENDERER_WITH_POSITION_H_
-#define ARK_GRAPHICS_IMPL_RENDERER_RENDERER_WITH_POSITION_H_
+#ifndef ARK_GRAPHICS_IMPL_RENDERER_RENDERER_STYLE_POSITION_H_
+#define ARK_GRAPHICS_IMPL_RENDERER_RENDERER_STYLE_POSITION_H_
 
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
@@ -10,9 +10,9 @@
 
 namespace ark {
 
-class RendererWithPosition : public Renderer {
+class RendererStylePosition : public Renderer {
 public:
-    RendererWithPosition(const sp<Renderer>& renderer, const sp<Vec3>& position);
+    RendererStylePosition(const sp<Renderer>& renderer, const sp<Vec3>& position);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 

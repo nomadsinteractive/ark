@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_IMPL_RENDERER_RENDERER_WITH_VISIBILITY_H_
-#define ARK_GRAPHICS_IMPL_RENDERER_RENDERER_WITH_VISIBILITY_H_
+#ifndef ARK_GRAPHICS_IMPL_RENDERER_RENDERER_STYLE_VISIBILITY_H_
+#define ARK_GRAPHICS_IMPL_RENDERER_RENDERER_STYLE_VISIBILITY_H_
 
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
@@ -10,9 +10,9 @@
 
 namespace ark {
 
-class RendererWithVisibility : public Renderer {
+class RendererStyleVisibility : public Renderer {
 public:
-    RendererWithVisibility(const sp<Renderer>& renderer, const sp<Visibility>& visibility);
+    RendererStyleVisibility(const sp<Renderer>& renderer, const sp<Visibility>& visibility);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 

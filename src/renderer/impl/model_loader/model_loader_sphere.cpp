@@ -61,7 +61,7 @@ static indexarray makeIndices(uint32_t sampleCount)
         (*buf++) = offset;
         (*buf++) = static_cast<element_index_t>(offset + 1 + sampleCount + 1);
         (*buf++) = static_cast<element_index_t>(offset + 1);
-        for(uint32_t j = 1; j < sampleCount; ++j) {
+        for(uint32_t j = 1; j < sampleCount - 1; ++j) {
             (*buf++) = static_cast<element_index_t>(offset + j);
             (*buf++) = static_cast<element_index_t>(offset + j + sampleCount + 1);
             (*buf++) = static_cast<element_index_t>(offset + j + sampleCount + 2);
@@ -70,8 +70,8 @@ static indexarray makeIndices(uint32_t sampleCount)
             (*buf++) = static_cast<element_index_t>(offset + j + 1);
         }
         (*buf++) = static_cast<element_index_t>(offset + sampleCount + sampleCount);
-        (*buf++) = static_cast<element_index_t>(offset + sampleCount - 1);
         (*buf++) = static_cast<element_index_t>(offset + sampleCount);
+        (*buf++) = static_cast<element_index_t>(offset + sampleCount - 1);
     }
     return indices;
 }

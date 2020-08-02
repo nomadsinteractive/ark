@@ -7,8 +7,8 @@
 
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
-#include "graphics/impl/renderer/renderer_with_position.h"
-#include "graphics/impl/renderer/renderer_with_visibility.h"
+#include "graphics/impl/renderer/renderer_style_position.h"
+#include "graphics/impl/renderer/renderer_style_visibility.h"
 #include "graphics/impl/renderer/renderer_wrapper.h"
 
 namespace ark {
@@ -72,7 +72,7 @@ void RendererType::setDelegate(const sp<Renderer>& self, const sp<Renderer>& del
 
 sp<Renderer> ark::RendererType::translate(const sp<Renderer>& self, const sp<Vec3>& position)
 {
-    return sp<RendererWithPosition>::make(self, position);
+    return sp<RendererStylePosition>::make(self, position);
 }
 
 }

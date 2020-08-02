@@ -1,4 +1,4 @@
-#include "graphics/impl/renderer/renderer_with_visibility.h"
+#include "graphics/impl/renderer/renderer_style_visibility.h"
 
 #include "core/base/bean_factory.h"
 #include "core/epi/visibility.h"
@@ -8,14 +8,14 @@
 
 namespace ark {
 
-RendererWithVisibility::RendererWithVisibility(const sp<Renderer>& renderer, const sp<Visibility>& visibility)
+RendererStyleVisibility::RendererStyleVisibility(const sp<Renderer>& renderer, const sp<Visibility>& visibility)
     : _renderer(renderer), _visibility(visibility)
 {
     DASSERT(_renderer);
     DASSERT(_visibility);
 }
 
-void RendererWithVisibility::render(RenderRequest& renderRequest, const V3& position)
+void RendererStyleVisibility::render(RenderRequest& renderRequest, const V3& position)
 {
     _visibility->update(renderRequest.timestamp());
 
@@ -23,16 +23,16 @@ void RendererWithVisibility::render(RenderRequest& renderRequest, const V3& posi
         _renderer->render(renderRequest, position);
 }
 
-RendererWithVisibility::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& value)
+RendererStyleVisibility::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& value)
     : _delegate(delegate), _visibility(factory.ensureBuilder<Visibility>(value))
 {
 }
 
-sp<Renderer> RendererWithVisibility::STYLE::build(const Scope& args)
+sp<Renderer> RendererStyleVisibility::STYLE::build(const Scope& args)
 {
     const sp<Renderer> delegate = _delegate->build(args);
     const sp<Visibility> visibility =  _visibility->build(args);
-    return sp<RendererWithVisibility>::make(delegate, visibility).absorb(visibility).absorb(delegate);
+    return sp<RendererStyleVisibility>::make(delegate, visibility).absorb(visibility).absorb(delegate);
 }
 
 }
