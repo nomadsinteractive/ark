@@ -117,7 +117,7 @@ template<> ARK_API ModelBundle::MappingType Conversions::to<String, ModelBundle:
 
 ModelBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _bean_factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _atlas(factory.ensureBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)),
-      _importer(factory.ensureBuilder<ModelBundle::Importer>(manifest, "importer"))
+      _importer(factory.ensureBuilder<ModelLoader::Importer>(manifest, "importer"))
 {
 }
 
@@ -129,7 +129,7 @@ sp<ModelBundle> ModelBundle::BUILDER::build(const Scope& args)
     return modelBundle;
 }
 
-ModelBundle::Stub::Stub(sp<Atlas> atlas, sp<ModelBundle::Importer> importer)
+ModelBundle::Stub::Stub(sp<Atlas> atlas, sp<ModelLoader::Importer> importer)
     : _atlas(std::move(atlas)), _importer(std::move(importer)), _vertex_length(0), _index_length(0)
 {
 }

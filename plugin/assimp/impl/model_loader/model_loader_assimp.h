@@ -28,18 +28,18 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-class ModelImporterAssimp : public ModelBundle::Importer {
+class ModelImporterAssimp : public ModelLoader::Importer {
 public:
     ModelImporterAssimp(Ark::RendererCoordinateSystem coordinateSystem);
 
     virtual Model import(const document& manifest, const Rect& uvBounds) override;
 
 //  [[plugin::resource-loader::by-value("assimp")]]
-    class BUILDER : public Builder<ModelBundle::Importer> {
+    class BUILDER : public Builder<ModelLoader::Importer> {
     public:
         BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<ModelBundle::Importer> build(const Scope& args) override;
+        virtual sp<ModelLoader::Importer> build(const Scope& args) override;
 
     private:
         Ark::RendererCoordinateSystem _coordinate_system;

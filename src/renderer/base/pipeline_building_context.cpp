@@ -142,7 +142,10 @@ void PipelineBuildingContext::initialize()
         {
             const String& name = j.first;
             if(!sobs.has(name))
+            {
+                DCHECK(_ssbos.has(name), "SSBO \"%s\" does not exist", name.c_str());
                 sobs[name] = PipelineInput::SSBO(_ssbos.at(name), static_cast<uint32_t>(j.second));
+            }
             sobs[name]._stages.insert(i.first);
         }
     }

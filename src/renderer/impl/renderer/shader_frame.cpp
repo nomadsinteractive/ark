@@ -26,7 +26,7 @@ ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderC
 void ShaderFrame::render(RenderRequest& renderRequest, const V3& position)
 {
     const sp<Uploader> uploader = sp<ByteArrayUploader>::make(getVertexBuffer(position));
-    DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->snapshot(renderRequest), _vertex_buffer.snapshot(uploader), _index_buffer, DrawingContext::ParamDrawElements(0, _index_buffer.length<element_index_t>()));
+    DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _vertex_buffer.snapshot(uploader), _index_buffer, DrawingContext::ParamDrawElements(0, _index_buffer.length<element_index_t>()));
     renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
 }
 

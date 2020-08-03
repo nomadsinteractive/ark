@@ -222,7 +222,7 @@ ModelImporterAssimp::BUILDER::BUILDER(const sp<ResourceLoaderContext>& resourceL
 {
 }
 
-sp<ModelBundle::Importer> ModelImporterAssimp::BUILDER::build(const Scope& /*args*/)
+sp<ModelLoader::Importer> ModelImporterAssimp::BUILDER::build(const Scope& /*args*/)
 {
     return sp<ModelImporterAssimp>::make(_coordinate_system);
 }

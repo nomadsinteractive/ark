@@ -127,12 +127,11 @@ void RCCMultiDrawElementsIndirect::VerticesUploader::upload(Writable& uploader)
     {
         const Model& model = i.second._model;
         uint32_t size = static_cast<uint32_t>(model.vertices()->length() * stride);
-        uint8_t* buf = new uint8_t[size];
-        VertexStream stream(attributes, false, buf, size, stride);
+        std::vector<uint8_t> buf(size);
+        VertexStream stream(attributes, false, buf.data(), size, stride);
         i.second._model.writeToStream(stream, V3(1.0f));
-        uploader.write(buf, size, offset);
+        uploader.write(buf.data(), size, offset);
         offset += size;
-        delete[] buf;
     }
 }
 

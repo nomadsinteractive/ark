@@ -78,7 +78,7 @@ static indexarray makeIndices(uint32_t sampleCount)
 
 namespace {
 
-class ModelBundleImporterSphere : public ModelBundle::Importer {
+class ModelBundleImporterSphere : public ModelLoader::Importer {
 public:
     virtual Model import(const document& manifest, const Rect& uvBounds) override {
         uint32_t sampleCount = Documents::ensureAttribute<uint32_t>(manifest, "sample-count");
@@ -128,7 +128,7 @@ ModelLoaderSphere::IMPORTER_BUILDER::IMPORTER_BUILDER()
 {
 }
 
-sp<ModelBundle::Importer> ModelLoaderSphere::IMPORTER_BUILDER::build(const Scope& args)
+sp<ModelLoader::Importer> ModelLoaderSphere::IMPORTER_BUILDER::build(const Scope& args)
 {
     return sp<ModelBundleImporterSphere>::make();
 }

@@ -31,11 +31,11 @@ public:
     };
 
 //  [[plugin::builder::by-value("sphere")]]
-    class IMPORTER_BUILDER : public Builder<ModelBundle::Importer> {
+    class IMPORTER_BUILDER : public Builder<ModelLoader::Importer> {
     public:
         IMPORTER_BUILDER();
 
-        virtual sp<ModelBundle::Importer> build(const Scope& args) override;
+        virtual sp<ModelLoader::Importer> build(const Scope& args) override;
 
     };
 

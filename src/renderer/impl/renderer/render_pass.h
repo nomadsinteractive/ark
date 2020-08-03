@@ -10,12 +10,13 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
+#include "renderer/inf/model_loader.h"
 
 namespace ark {
 
 class RenderPass : public Renderer {
 public:
-    RenderPass(sp<Shader> shader, sp<Buffer> vertexBuffer, sp<Buffer> indexBuffer, sp<Integer> drawCount);
+    RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, ModelLoader::RenderMode mode, sp<Integer> drawCount);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -29,15 +30,18 @@ public:
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
         sp<Builder<Shader>> _shader;
-        sp<Builder<Buffer>> _vertex_buffer;
+        document _model;
+        SafePtr<Builder<ModelLoader::Importer>> _model_importer;
+        SafePtr<Builder<Buffer>> _vertex_buffer;
         SafePtr<Builder<Buffer>> _index_buffer;
+        ModelLoader::RenderMode _mode;
         sp<Builder<Integer>> _draw_count;
     };
 
 private:
     sp<Shader> _shader;
-    sp<Buffer> _vertex_buffer;
-    sp<Buffer> _index_buffer;
+    Buffer _vertex_buffer;
+    Buffer _index_buffer;
     sp<Integer> _draw_count;
     sp<ShaderBindings> _shader_bindings;
 };

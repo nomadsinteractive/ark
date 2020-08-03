@@ -61,6 +61,37 @@ private:
     bool _enabled;
 };
 
+class GLBufferBinder {
+public:
+    GLBufferBinder(GLenum target, GLuint buffer)
+        : _target(target), _buffer(buffer) {
+        glBindBuffer(_target, _buffer);
+    }
+    ~GLBufferBinder() {
+        glBindBuffer(_target, 0);
+    }
+
+private:
+    GLenum _target;
+    GLuint _buffer;
+};
+
+class GLBufferBaseBinder {
+public:
+    GLBufferBaseBinder(GLenum target, GLuint base, GLuint buffer)
+        : _target(target), _base(base), _buffer(buffer) {
+        glBindBufferBase(_target, _base, _buffer);
+    }
+    ~GLBufferBaseBinder() {
+        glBindBufferBase(_target, _base, 0);
+    }
+
+private:
+    GLenum _target;
+    GLuint _base;
+    GLuint _buffer;
+};
+
 
 }
 
@@ -144,9 +175,8 @@ void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineInpu
         if(!i.second.id())
             i.second.upload(graphicsContext);
 
-        glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(i.second.id()));
+        const GLBufferBinder binder(GL_ARRAY_BUFFER, static_cast<GLuint>(i.second.id()));
         bindBuffer(graphicsContext, input, i.first);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 }
 
@@ -405,14 +435,14 @@ void GLPipeline::GLMultiDrawElementsIndirect::draw(GraphicsContext& graphicsCont
         DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
     }
     param._indirect_cmds.upload(graphicsContext);
-    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, static_cast<GLuint>(param._indirect_cmds.id()));
+
+    const GLBufferBinder binder(GL_DRAW_INDIRECT_BUFFER, static_cast<GLuint>(param._indirect_cmds.id()));
 #ifndef ANDROID
     glMultiDrawElementsIndirect(_mode, GLIndexType, nullptr, static_cast<GLsizei>(param._draw_count), sizeof(DrawingContext::DrawElementsIndirectCommand));
 #else
     for(uint32_t i = 0; i < param._draw_count; ++i)
         glDrawElementsIndirect(_mode, GLIndexType, reinterpret_cast<const void *>(i * sizeof(DrawingContext::DrawElementsIndirectCommand)));
 #endif
-    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 }
 
 GLPipeline::PipelineOperationDraw::PipelineOperationDraw(const sp<Stub>& stub, const PipelineBindings& bindings)
@@ -599,9 +629,12 @@ void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& /*graphicsCo
 {
     glUseProgram(_stub->_id);
     _stub->bindUBOSnapshots(computeContext._ubos, computeContext._shader_bindings->pipelineInput());
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, static_cast<GLuint>(computeContext._vertex_buffer.id()));
+
+    std::vector<GLBufferBaseBinder> binders;
+    for(const Buffer::Snapshot& i : computeContext._ssbo)
+        binders.emplace_back(GL_SHADER_STORAGE_BUFFER, 0, i.id());
+
     glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
 }
 
 }

@@ -26,14 +26,6 @@ public:
         size_t _index_offset;
     };
 
-    class ARK_API Importer {
-    public:
-        virtual ~Importer() = default;
-
-        virtual Model import(const document& manifest, const Rect& uvBounds) = 0;
-    };
-
-
 private:
     struct Stub {
         Stub(sp<Atlas> atlas, sp<Importer> importer);

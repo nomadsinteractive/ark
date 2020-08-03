@@ -170,7 +170,7 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
         const sp<Uploader::Array<uint8_t>> indicesUploader = sp<Uploader::Array<uint8_t>>::make(ib);
 
         uint32_t offset = 0;
-        const std::vector<RenderLayer::UBOSnapshot> ubos = _shader->snapshot(renderRequest);
+        const std::vector<RenderLayer::UBOSnapshot> ubos = _shader->takeUBOSnapshot(renderRequest);
         for (int j = 0; j < cmd_list->CmdBuffer.Size; j++)
         {
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[j];

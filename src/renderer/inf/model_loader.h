@@ -21,14 +21,17 @@ public:
         RENDER_MODE_COUNT,
     };
 
-    ModelLoader(RenderMode renderMode)
-        : _render_mode(renderMode) {
-    }
+    ModelLoader(RenderMode renderMode);
     virtual ~ModelLoader() = default;
 
-    RenderMode renderMode() const {
-        return _render_mode;
-    }
+    RenderMode renderMode() const;
+
+    class ARK_API Importer {
+    public:
+        virtual ~Importer() = default;
+
+        virtual Model import(const document& manifest, const Rect& uvBounds) = 0;
+    };
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() = 0;
 

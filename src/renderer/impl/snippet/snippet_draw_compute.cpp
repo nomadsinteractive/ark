@@ -13,8 +13,8 @@ namespace {
 
 class DrawEventsCompute : public Snippet::DrawEvents {
 public:
-    DrawEventsCompute(const sp<Shader>& shader, const sp<Buffer>& buffer, ComputeContext computeContext)
-        : _shader(shader), _buffer(buffer), _compute_context(std::move(computeContext)) {
+    DrawEventsCompute(const sp<Shader>& shader, ComputeContext computeContext)
+        : _shader(shader), _compute_context(std::move(computeContext)) {
     }
 
     virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
@@ -26,15 +26,14 @@ public:
 
 private:
     sp<Shader> _shader;
-    sp<Buffer> _buffer;
 
     ComputeContext _compute_context;
 };
 
 }
 
-SnippetDrawCompute::SnippetDrawCompute(sp<Shader> shader, sp<Buffer> buffer, std::array<sp<Integer>, 3> numWorkGroups)
-    : _shader(std::move(shader)), _buffer(std::move(buffer)), _num_work_groups(std::move(numWorkGroups)), _shader_bindings(_shader->makeBindings(ModelLoader::RENDER_MODE_NONE, PipelineBindings::RENDER_PROCEDURE_DRAW_ARRAYS))
+SnippetDrawCompute::SnippetDrawCompute(sp<Shader> shader, std::array<sp<Integer>, 3> numWorkGroups)
+    : _shader(std::move(shader)), _num_work_groups(std::move(numWorkGroups)), _shader_bindings(_shader->makeBindings(ModelLoader::RENDER_MODE_NONE, PipelineBindings::RENDER_PROCEDURE_DRAW_ARRAYS))
 {
 }
 
@@ -45,11 +44,11 @@ sp<Snippet::DrawEvents> SnippetDrawCompute::makeDrawEvents(const RenderRequest& 
         _num_work_groups.at(1) ? _num_work_groups.at(1)->val() : 1,
         _num_work_groups.at(2) ? _num_work_groups.at(2)->val() : 1
     };
-    return sp<DrawEventsCompute>::make(_shader, _buffer, ComputeContext(_shader_bindings, _shader->snapshot(renderRequest), _buffer->snapshot(), std::move(numWorkGroups)));
+    return sp<DrawEventsCompute>::make(_shader, ComputeContext(_shader_bindings, _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), std::move(numWorkGroups)));
 }
 
 SnippetDrawCompute::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _shader(factory.ensureBuilder<Shader>(manifest, Constants::Attributes::SHADER)), _buffer(factory.ensureBuilder<Buffer>(manifest, "buffer"))
+    : _shader(factory.ensureBuilder<Shader>(manifest, Constants::Attributes::SHADER))
 {
     BeanUtils::split(factory, manifest, "num-work-groups", _num_work_groups[0], _num_work_groups[1], _num_work_groups[2]);
 }
@@ -61,7 +60,7 @@ sp<Snippet> SnippetDrawCompute::BUILDER::build(const Scope& args)
         _num_work_groups.at(1) ? _num_work_groups.at(1)->build(args) : nullptr,
         _num_work_groups.at(2) ? _num_work_groups.at(2)->build(args) : nullptr,
     };
-    return sp<SnippetDrawCompute>::make(_shader->build(args), _buffer->build(args), std::move(numWorkGroups));
+    return sp<SnippetDrawCompute>::make(_shader->build(args), std::move(numWorkGroups));
 }
 
 }
