@@ -59,6 +59,7 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
     _stub->_render_command_composer->postSnapshot(_stub->_render_controller, *this);
 
     _ubos = _stub->_shader->takeUBOSnapshot(renderRequest);
+    _ssbos = _stub->_shader->takeSSBOSnapshot(renderRequest);
 
     if(_stub->_scissor && _stub->_scissor->update(renderRequest.timestamp()))
         _scissor = Rect(_stub->_scissor->val());
@@ -75,7 +76,7 @@ sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderReque
     if(_items.size() > 0)
         return _stub->_render_command_composer->compose(renderRequest, *this);
 
-    DrawingContext drawingContext(_stub->_shader_bindings, nullptr, std::move(_ubos));
+    DrawingContext drawingContext(_stub->_shader_bindings, nullptr, std::move(_ubos), std::move(_ssbos));
     return drawingContext.toBindCommand();
 }
 

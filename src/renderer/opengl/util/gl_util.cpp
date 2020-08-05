@@ -46,6 +46,21 @@ struct GLConstants {
         _enums["rgb"] = GL_RGB;
         _enums["alpha"] = GL_ALPHA;
         _enums["rg"] = GL_RG;
+
+        _enums["always"] = GL_ALWAYS;
+        _enums["never"] = GL_NEVER;
+        _enums["equal"] = GL_EQUAL;
+        _enums["not_equal"] = GL_NOTEQUAL;
+        _enums["less"] = GL_LESS;
+        _enums["greater"] = GL_GREATER;
+        _enums["less_equal"] = GL_LEQUAL;
+        _enums["greater_equal"] = GL_GEQUAL;
+
+        _enums["keep"] = GL_KEEP;
+        _enums["zero"] = GL_ZERO;
+        _enums["replace"] = GL_REPLACE;
+        _enums["incr"] = GL_INCR;
+        _enums["decr"] = GL_DECR;
     }
 
     std::unordered_map<String, GLenum> _enums;
@@ -91,6 +106,16 @@ GLenum GLUtil::getEnum(const String& name, GLenum defValue)
     const Global<GLConstants> constants;
     const auto iter = constants->_enums.find(name);
     return iter != constants->_enums.end() ? iter->second : defValue;
+}
+
+GLenum GLUtil::getEnum(const document& manifest, const String& name)
+{
+    return getEnum(Documents::ensureAttribute(manifest, name));
+}
+
+GLenum GLUtil::getEnum(const document& manifest, const String& name, GLenum defValue)
+{
+    return getEnum(Documents::getAttribute(manifest, name), defValue);
 }
 
 GLenum GLUtil::getTextureInternalFormat(int32_t format, const Bitmap& bitmap)

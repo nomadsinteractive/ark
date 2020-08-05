@@ -12,24 +12,29 @@
 
 namespace ark {
 
-PipelineBindings::PipelineBindings(const Parameters& parameters, const sp<PipelineLayout>& pipelineLayout)
-    : _stub(sp<Stub>::make(parameters, pipelineLayout))
+PipelineBindings::PipelineBindings(ModelLoader::RenderMode mode, RenderProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
+    : _stub(sp<Stub>::make(mode, renderProcedure, std::move(parameters), std::move(pipelineLayout)))
 {
 }
 
 ModelLoader::RenderMode PipelineBindings::mode() const
 {
-    return _stub->_parameters._mode;
+    return _stub->_mode;
 }
 
 PipelineBindings::RenderProcedure PipelineBindings::renderProcedure() const
 {
-    return _stub->_parameters._render_procedure;
+    return _stub->_render_procedure;
 }
 
 const Rect& PipelineBindings::scissor() const
 {
     return _stub->_parameters._scissor;
+}
+
+const PipelineBindings::Parameters& PipelineBindings::parameters() const
+{
+    return _stub->_parameters;
 }
 
 const sp<PipelineLayout>& PipelineBindings::layout() const
@@ -100,8 +105,8 @@ sp<Pipeline> PipelineBindings::getPipeline(GraphicsContext& graphicsContext, con
     return _pipeline;
 }
 
-PipelineBindings::Stub::Stub(const Parameters& parameters, const sp<PipelineLayout>& pipelineLayout)
-    : _parameters(parameters), _layout(pipelineLayout), _input(_layout->input()), _attributes(_input)
+PipelineBindings::Stub::Stub(ModelLoader::RenderMode mode, RenderProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
+    : _mode(mode), _render_procedure(renderProcedure), _parameters(std::move(parameters)), _layout(std::move(pipelineLayout)), _input(_layout->input()), _attributes(_input)
 {
     _samplers.resize(_input->samplerCount());
 
@@ -111,6 +116,24 @@ PipelineBindings::Stub::Stub(const Parameters& parameters, const sp<PipelineLayo
     for(size_t i = 0; i < samplers.values().size(); ++i)
         if(i < _samplers.size())
             _samplers[i] = samplers.values().at(i);
+}
+
+PipelineBindings::Parameters::Parameters(const Rect& scissor, Table<FragmentTest, document> tests, uint32_t flags)
+    : _scissor(scissor), _tests(std::move(tests)), _flags(flags)
+{
+}
+
+PipelineBindings::Parameters::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _render_controller(resourceLoaderContext->renderController()), _pipeline_bindings_scissor(factory.getBuilder<Vec4>(manifest, "scissor")), _pipeline_bindings_flags(Documents::getAttribute<PipelineBindings::Flag>(manifest, "flags", PipelineBindings::FLAG_DEFAULT_VALUE))
+{
+    for(const document& i : manifest->children("test"))
+        _tests.push_back(Documents::ensureAttribute<FragmentTest>(i, Constants::Attributes::TYPE), i);
+}
+
+PipelineBindings::Parameters PipelineBindings::Parameters::BUILDER::build(const Scope& args) const
+{
+    sp<Vec4> scissor = _pipeline_bindings_scissor->build(args);
+    return Parameters(_render_controller->renderEngine()->toRendererScissor(scissor ? Rect(scissor->val()) : Rect()), _tests, _pipeline_bindings_flags);
 }
 
 template<> ARK_API PipelineBindings::Flag Conversions::to<String, PipelineBindings::Flag>(const String& str)
@@ -140,10 +163,14 @@ template<> ARK_API PipelineBindings::Flag Conversions::to<String, PipelineBindin
     return static_cast<PipelineBindings::Flag>(flag);
 }
 
-PipelineBindings::Parameters::Parameters(ModelLoader::RenderMode mode, RenderProcedure renderProcedure, const Rect& scissor, uint32_t flags)
-    : _mode(mode), _render_procedure(renderProcedure), _scissor(scissor), _flags(flags)
+template<> ARK_API PipelineBindings::FragmentTest Conversions::to<String, PipelineBindings::FragmentTest>(const String& str)
 {
+    if(str == "depth")
+        return PipelineBindings::FRAGMENT_TEST_DEPTH;
+    else if(str == "scissor")
+        return PipelineBindings::FRAGMENT_TEST_SCISSOR;
+    DCHECK(str == "stencil", "Unknown FragmentTest: \"%s\", possible values are [depth, scissor, stencil]", str.c_str());
+    return PipelineBindings::FRAGMENT_TEST_STENCIL;
 }
-
 
 }

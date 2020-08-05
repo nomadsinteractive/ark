@@ -30,7 +30,7 @@ Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>
 
 void Skybox::render(RenderRequest& renderRequest, const V3& /*position*/)
 {
-    DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _vertices.snapshot(), _index_buffer, DrawingContext::ParamDrawElements(0, _index_buffer.length<element_index_t>()));
+    DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), _vertices.snapshot(), _index_buffer, DrawingContext::ParamDrawElements(0, _index_buffer.length<element_index_t>()));
     renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
 }
 

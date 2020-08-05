@@ -268,7 +268,7 @@ endif()
 ark_export_libraries(${ARK_LIBRARIES})
 
 if(ARK_BUILD_SAMPLES AND NOT ANDROID AND NOT IOS)
-    ark_add_executable(ark-launcher samples/src/main.cpp)
+    ark_add_executable(ark-launcher src/app/main/main.cpp)
     target_link_libraries(ark-launcher PRIVATE ${ARK_LIBRARIES})
 endif()
 

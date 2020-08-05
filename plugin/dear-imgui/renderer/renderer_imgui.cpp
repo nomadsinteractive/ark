@@ -171,6 +171,7 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
 
         uint32_t offset = 0;
         const std::vector<RenderLayer::UBOSnapshot> ubos = _shader->takeUBOSnapshot(renderRequest);
+        const std::vector<Buffer::Snapshot> ssbos = _shader->takeSSBOSnapshot(renderRequest);
         for (int j = 0; j < cmd_list->CmdBuffer.Size; j++)
         {
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[j];
@@ -200,7 +201,7 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
                 const sp<DrawCommand>& drawCommand = recycler->drawCommand();
                 Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(verticsUploader);
                 Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(indicesUploader);
-                DrawingContext drawingContext(drawCommandPool->_shader_bindings, drawCommand->_attachments, ubos, std::move(vertexBuffer), std::move(indexBuffer), DrawingContext::ParamDrawElements(offset, pcmd->ElemCount));
+                DrawingContext drawingContext(drawCommandPool->_shader_bindings, drawCommand->_attachments, ubos, ssbos, std::move(vertexBuffer), std::move(indexBuffer), DrawingContext::ParamDrawElements(offset, pcmd->ElemCount));
                 drawingContext._scissor = _render_engine->toRendererScissor(Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y), Ark::COORDINATE_SYSTEM_LHS);
                 renderRequest.addRequest(sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(renderRequest), std::move(recycler)));
             }

@@ -13,8 +13,9 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_input.h"
-#include "renderer/inf/resource.h"
 #include "renderer/inf/pipeline.h"
+#include "renderer/inf/resource.h"
+#include "renderer/inf/snippet.h"
 
 #include "platform/gl/gl.h"
 
@@ -212,6 +213,7 @@ private:
     std::map<PipelineInput::ShaderStage, String> _shaders;
 
     sp<PipelineOperation> _pipeline_operation;
+    std::vector<sp<Snippet::DrawEvents>> _draw_tests;
 };
 
 }

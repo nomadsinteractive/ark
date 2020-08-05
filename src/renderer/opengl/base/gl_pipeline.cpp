@@ -92,12 +92,40 @@ private:
     GLuint _buffer;
 };
 
+class GLStencilTest : public Snippet::DrawEvents {
+public:
+    GLStencilTest(const document& manifest)
+        : _func(GLUtil::getEnum(manifest, "func")), _ref(Documents::ensureAttribute<int32_t>(manifest, "ref")), _mask(Documents::getAttribute<uint32_t>(manifest, "mask", 0xff)),
+          _op(GLUtil::getEnum(manifest, "op", GL_KEEP)), _op_dfail(GLUtil::getEnum(manifest, "op-dfail", GL_KEEP)), _op_dpass(GLUtil::getEnum(manifest, "op-dpass", GL_KEEP)) {
+    }
+
+    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+        glEnable(GL_STENCIL_TEST);
+        glStencilFunc(_func, _ref, _mask);
+        glStencilOp(_op, _op_dfail, _op_dpass);
+    }
+
+    virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {
+        glStencilMask(0);
+        glDisable(GL_STENCIL_TEST);
+    }
+
+private:
+    GLenum _func;
+    GLint _ref;
+    GLuint _mask;
+
+    GLenum _op, _op_dfail, _op_dpass;
+};
 
 }
 
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<PipelineInput::ShaderStage, String> shaders, const PipelineBindings& bindings)
     : _stub(sp<Stub>::make()), _recycler(recycler), _version(version), _shaders(std::move(shaders)), _pipeline_operation(makePipelineOperation(bindings))
 {
+    for(const auto& i : bindings.parameters()._tests)
+        if(i.first == PipelineBindings::FRAGMENT_TEST_STENCIL)
+            _draw_tests.push_back(sp<GLStencilTest>::make(i.second));
 }
 
 GLPipeline::~GLPipeline()
@@ -158,7 +186,11 @@ void GLPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
 
 void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
+    for(const sp<Snippet::DrawEvents>& i : _draw_tests)
+        i->preDraw(graphicsContext, drawingContext);
     _pipeline_operation->draw(graphicsContext, drawingContext);
+    for(const sp<Snippet::DrawEvents>& i : _draw_tests)
+        i->postDraw(graphicsContext);
 }
 
 void GLPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
@@ -472,6 +504,10 @@ void GLPipeline::PipelineOperationDraw::draw(GraphicsContext& graphicsContext, c
 
     const GLCullFace cullFace(_cull_face);
     const GLScissor scissor(contextScissorEnabled ? drawingContext._scissor : _scissor, contextScissorEnabled || _scissor_enabled);
+
+    std::vector<GLBufferBaseBinder> binders;
+    for(const Buffer::Snapshot& i : drawingContext._ssbos)
+        binders.emplace_back(GL_SHADER_STORAGE_BUFFER, 0, i.id());
 
     _renderer->draw(graphicsContext, drawingContext);
 }

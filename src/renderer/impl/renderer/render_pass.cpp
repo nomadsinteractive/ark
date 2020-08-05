@@ -48,13 +48,13 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
     uint32_t drawCount = static_cast<uint32_t>(_draw_count->val());
     if(_index_buffer)
     {
-        DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _vertex_buffer.snapshot(),
+        DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), _vertex_buffer.snapshot(),
                                       _index_buffer.snapshot(), DrawingContext::ParamDrawElementsInstanced(0, static_cast<uint32_t>(_index_buffer.size() / sizeof(element_index_t)), drawCount, {}));
         renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
     }
     else
     {
-        DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _vertex_buffer.snapshot(),
+        DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), _vertex_buffer.snapshot(),
                                       Buffer::Snapshot(), DrawingContext::ParamDrawElements(0, drawCount));
         renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
     }

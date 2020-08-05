@@ -78,6 +78,7 @@ public:
 
         sp<Stub> _stub;
         std::vector<UBOSnapshot> _ubos;
+        std::vector<Buffer::Snapshot> _ssbos;
         std::vector<Renderable::Snapshot> _items;
 
         Buffer::Snapshot _index_buffer;

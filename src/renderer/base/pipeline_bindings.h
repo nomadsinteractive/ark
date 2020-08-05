@@ -2,6 +2,11 @@
 #define ARK_RENDERER_BASE_PIPELINE_BINDINGS_H_
 
 #include "core/base/api.h"
+#include "core/forwarding.h"
+#include "core/collection/table.h"
+#include "core/types/shared_ptr.h"
+
+#include "graphics/forwarding.h"
 
 #include "renderer/base/pipeline_input.h"
 #include "renderer/inf/model_loader.h"
@@ -27,22 +32,43 @@ public:
         RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT
     };
 
-    struct ARK_API Parameters {
-        Parameters(ModelLoader::RenderMode mode, RenderProcedure renderProcedure, const Rect& scissor, uint32_t flags);
+    enum FragmentTest {
+        FRAGMENT_TEST_DEPTH,
+        FRAGMENT_TEST_SCISSOR,
+        FRAGMENT_TEST_STENCIL
+    };
 
-        ModelLoader::RenderMode _mode;
-        RenderProcedure _render_procedure;
+    struct ARK_API Parameters {
+        Parameters(const Rect& scissor, Table<FragmentTest, document> tests, uint32_t flags);
+        DEFAULT_COPY_AND_ASSIGN(Parameters);
+
         Rect _scissor;
+        Table<FragmentTest, document> _tests;
         uint32_t _flags;
+
+        class BUILDER {
+        public:
+            BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+            Parameters build(const Scope& args) const;
+
+        private:
+            sp<RenderController> _render_controller;
+
+            SafePtr<Builder<Vec4>> _pipeline_bindings_scissor;
+            Table<FragmentTest, document> _tests;
+            uint32_t _pipeline_bindings_flags;
+        };
     };
 
 public:
-    PipelineBindings(const Parameters& parameters, const sp<PipelineLayout>& pipelineLayout);
+    PipelineBindings(ModelLoader::RenderMode mode, RenderProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineBindings);
 
     ModelLoader::RenderMode mode() const;
     RenderProcedure renderProcedure() const;
     const Rect& scissor() const;
+    const Parameters& parameters() const;
 
     const sp<PipelineLayout>& layout() const;
     const sp<PipelineInput>& input() const;
@@ -63,9 +89,13 @@ public:
 
 private:
     struct Stub {
-        Stub(const Parameters& parameters, const sp<PipelineLayout>& pipelineLayout);
+        Stub(ModelLoader::RenderMode mode, RenderProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
+
+        ModelLoader::RenderMode _mode;
+        RenderProcedure _render_procedure;
 
         Parameters _parameters;
+
         sp<PipelineLayout> _layout;
         sp<PipelineInput> _input;
 

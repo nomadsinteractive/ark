@@ -12,12 +12,13 @@ VertexStream::VertexStream(const PipelineInput::Attributes& attributes, bool doT
 }
 
 VertexStream::VertexStream(const PipelineInput::Attributes& attributes, bool doTransform, sp<VertexStream::Writer> writer)
-    : _attributes(attributes), _writer(std::move(writer)), _do_transform(doTransform), _visible(true)
+    : _attributes(attributes), _writer(std::move(writer)), _do_transform(doTransform), _visible(true), _transform(nullptr)
 {
 }
 
 void VertexStream::writePosition(const V3& position)
 {
+    DASSERT(!_do_transform || _transform);
     _writer->writePosition(_visible ? (_do_transform ? (_transform->transform(position) + _translate) : position) : V3());
 }
 

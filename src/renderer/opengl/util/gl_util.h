@@ -24,6 +24,8 @@ public:
 
     static GLenum getEnum(const String& name);
     static GLenum getEnum(const String& name, GLenum defValue);
+    static GLenum getEnum(const document& manifest, const String& name);
+    static GLenum getEnum(const document& manifest, const String& name, GLenum defValue);
 
     static GLenum getTextureInternalFormat(int32_t format, const Bitmap& bitmap);
     static GLenum getTextureFormat(int32_t format, uint8_t channels);

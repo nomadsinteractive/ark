@@ -116,18 +116,20 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
 
 void ShaderPreprocessor::parseDeclarations()
 {
-    _main.replace(_STRUCT_PATTERN, [this](const std::smatch& m) {
-        const sp<String> declaration = sp<String>::make(m.str());
-        this->_struct_declarations.push_back(declaration);
-        this->_struct_definitions.push_back(m[1].str(), m[2].str());
-        return nullptr;
-    });
-
     _main.replace(_INCLUDE_PATTERN, [this](const std::smatch& m) {
         const String filepath = m.str();
         this->addInclude(m.str(), m[1].str());
         return nullptr;
     });
+
+    auto structPatternReplacer = [this](const std::smatch& m) {
+        const sp<String> declaration = sp<String>::make(m.str());
+        this->_struct_declarations.push_back(declaration);
+        this->_struct_definitions.push_back(m[1].str(), m[2].str());
+        return nullptr;
+    };
+    _includes.replace(_STRUCT_PATTERN, structPatternReplacer);
+    _main.replace(_STRUCT_PATTERN, structPatternReplacer);
 
     _main.replace(_UNIFORM_PATTERN, [this](const std::smatch& m) {
         const sp<String> declaration = sp<String>::make(m.str());
@@ -136,10 +138,12 @@ void ShaderPreprocessor::parseDeclarations()
         return nullptr;
     });
 
-    _main.search(_SSBO_PATTERN, [this](const std::smatch& m) {
+    auto ssboPattern = [this](const std::smatch& m) {
         _ssbos[m[2].str()] = Strings::parse<int32_t>(m[0].str());
         return true;
-    });
+    };
+    _includes.search(_SSBO_PATTERN, ssboPattern);
+    _main.search(_SSBO_PATTERN, ssboPattern);
 
     if(!_main_block)
         return;
@@ -329,8 +333,8 @@ String ShaderPreprocessor::genDeclarations(const String& mainFunc) const
         sb << '\n';
     }
 
-    sb << _includes.str('\n');
     sb << _struct_declarations.str('\n');
+    sb << _includes.str('\n');
     sb << _uniform_declarations.str('\n');
     sb << _attribute_declarations.str('\n');
     sb << mainFunc;
@@ -340,8 +344,13 @@ String ShaderPreprocessor::genDeclarations(const String& mainFunc) const
 void ShaderPreprocessor::addInclude(const String& source, const String& filepath)
 {
     const Global<StringTable> stringtable;
-    const sp<String> content = stringtable->getString(filepath, false);
-    _includes.push_back(content ? content : sp<String>::make(source));
+    sp<String> content;
+    const String::size_type pos = filepath.find(':');
+    if(pos == String::npos)
+        content = stringtable->getString(filepath, false);
+    else
+        content = stringtable->getString(filepath.substr(0, pos), filepath.substr(pos + 1).lstrip('/'), false);
+    _includes.push_back(content ? std::move(content) : sp<String>::make(source));
 }
 
 ShaderPreprocessor::Function::Function(String name, String params, String returnType, String body, sp<String> placeHolder)
