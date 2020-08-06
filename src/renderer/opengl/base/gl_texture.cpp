@@ -17,6 +17,7 @@
 #include "renderer/opengl/util/gl_util.h"
 
 namespace ark {
+namespace opengl {
 
 GLTexture::GLTexture(const sp<Recycler>& recycler, const sp<Size>& size, uint32_t target, Texture::Type type, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
     : Texture::Delegate(type), _recycler(recycler), _size(size), _target(target), _parameters(parameters), _uploader(uploader), _id(0)
@@ -75,9 +76,20 @@ uint32_t GLTexture::target() const
     return _target;
 }
 
+const sp<GLRenderbuffer>& GLTexture::renderbuffer() const
+{
+    return _renderbuffer;
+}
+
+void GLTexture::setRenderbuffer(sp<GLRenderbuffer> renderbuffer)
+{
+    _renderbuffer = std::move(renderbuffer);
+}
+
 uint64_t GLTexture::id()
 {
     return _id;
 }
 
+}
 }

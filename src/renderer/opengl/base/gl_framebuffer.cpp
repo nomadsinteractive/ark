@@ -4,6 +4,9 @@
 
 #include "renderer/base/recycler.h"
 #include "renderer/base/texture.h"
+
+#include "renderer/opengl/base/gl_texture.h"
+#include "renderer/opengl/base/gl_renderbuffer.h"
 #include "renderer/opengl/util/gl_debug.h"
 
 #include "platform/gl/gl.h"
@@ -12,7 +15,7 @@ namespace ark {
 namespace opengl {
 
 GLFramebuffer::GLFramebuffer(const sp<Recycler>& recycler, std::vector<sp<Texture>> textures)
-    : _recycler(recycler), _textures(std::move(textures)), _id(0), _render_buffer_id(0)
+    : _recycler(recycler), _textures(std::move(textures)), _id(0)
 {
 }
 
@@ -49,7 +52,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
             attachment = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + (bindings++));
             drawAttachments.push_back(attachment);
         }
-        else if(usage & Texture::USAGE_DEPTH_ATTACHMENT & Texture::USAGE_STENCIL_ATTACHMENT)
+        else if(usage & (Texture::USAGE_DEPTH_ATTACHMENT | Texture::USAGE_STENCIL_ATTACHMENT))
         {
             attachment = GL_DEPTH_STENCIL_ATTACHMENT;
             depthTexture = i;
@@ -82,12 +85,18 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
 
     if(depthAttachments.size() > 0)
     {
-        if(_render_buffer_id == 0)
-            glGenRenderbuffers(1, &_render_buffer_id);
-        glBindRenderbuffer(GL_RENDERBUFFER, _render_buffer_id);
+        sp<GLTexture> gltex = depthTexture->delegate();
+        sp<GLRenderbuffer> renderbuffer = gltex->renderbuffer();
+        if(!renderbuffer)
+        {
+            renderbuffer = sp<GLRenderbuffer>::make(_recycler);
+            gltex->setRenderbuffer(renderbuffer);
+            renderbuffer->upload(graphicsContext, nullptr);
+        }
+        glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer->id());
         glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, static_cast<GLsizei>(depthTexture->width()), static_cast<GLsizei>(depthTexture->height()));
         for(GLenum i : depthAttachments)
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, i, GL_RENDERBUFFER, _render_buffer_id);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, i, GL_RENDERBUFFER, renderbuffer->id());
     }
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -98,16 +107,10 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
 Resource::RecycleFunc GLFramebuffer::recycle()
 {
     uint32_t id = _id;
-    uint32_t renderBufferId = _render_buffer_id;
     _id = 0;
-    return [id, renderBufferId](GraphicsContext&) {
+    return [id](GraphicsContext&) {
         LOGD("Deleting GLFramebuffer[%d]", id);
         glDeleteFramebuffers(1, &id);
-
-        if(renderBufferId > 0) {
-            LOGD("Deleting GLRenderbuffer[%d]", renderBufferId);
-            glDeleteRenderbuffers(1, &renderBufferId);
-        }
     };
 }
 

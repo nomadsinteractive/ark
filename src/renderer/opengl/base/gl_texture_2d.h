@@ -9,6 +9,7 @@
 #include "renderer/opengl/base/gl_texture.h"
 
 namespace ark {
+namespace opengl {
 
 class GLTexture2D : public GLTexture {
 public:
@@ -19,6 +20,7 @@ public:
 
 };
 
+}
 }
 
 #endif

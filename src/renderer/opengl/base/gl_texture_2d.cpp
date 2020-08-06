@@ -13,6 +13,7 @@
 #include "platform/gl/gl.h"
 
 namespace ark {
+namespace opengl {
 
 GLTexture2D::GLTexture2D(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
     : GLTexture(recycler, size, static_cast<uint32_t>(GL_TEXTURE_2D), Texture::TYPE_2D, parameters, uploader)
@@ -52,4 +53,5 @@ void GLTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap
     LOGD("Texture Uploaded, id = %d, width = %d, height = %d", static_cast<uint32_t>(id()), bitmap.width(), bitmap.height());
 }
 
+}
 }

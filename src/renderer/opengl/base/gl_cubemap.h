@@ -8,6 +8,7 @@
 #include "renderer/opengl/base/gl_texture.h"
 
 namespace ark {
+namespace opengl {
 
 class ARK_API GLCubemap : public GLTexture {
 public:
@@ -19,6 +20,7 @@ public:
 
 };
 
+}
 }
 
 #endif

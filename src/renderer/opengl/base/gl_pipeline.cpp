@@ -92,6 +92,32 @@ private:
     GLuint _buffer;
 };
 
+class GLDepthTest : public Snippet::DrawEvents {
+public:
+    GLDepthTest(const document& manifest)
+        : _func(GLUtil::getEnum(manifest, "func", GL_ZERO)), _enabled(Documents::ensureAttribute<int32_t>(manifest, "enabled")) {
+    }
+
+    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+        if(_enabled) {
+            if(_func != GL_ZERO)
+                glDepthFunc(_func);
+        }
+        else
+            glDisable(GL_DEPTH_TEST);
+    }
+
+    virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {
+        if(!_enabled)
+            glEnable(GL_DEPTH_TEST);
+    }
+
+private:
+    GLenum _func;
+    bool _enabled;
+};
+
+
 class GLStencilTest : public Snippet::DrawEvents {
 public:
     GLStencilTest(const document& manifest)
@@ -101,7 +127,8 @@ public:
 
     virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
         glEnable(GL_STENCIL_TEST);
-        glStencilFunc(_func, _ref, _mask);
+        glStencilMask(_mask);
+        glStencilFunc(_func, _ref, 0xff);
         glStencilOp(_op, _op_dfail, _op_dpass);
     }
 
@@ -124,8 +151,12 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<
     : _stub(sp<Stub>::make()), _recycler(recycler), _version(version), _shaders(std::move(shaders)), _pipeline_operation(makePipelineOperation(bindings))
 {
     for(const auto& i : bindings.parameters()._tests)
-        if(i.first == PipelineBindings::FRAGMENT_TEST_STENCIL)
-            _draw_tests.push_back(sp<GLStencilTest>::make(i.second));
+    {
+        if(i.first == PipelineBindings::FRAGMENT_TEST_DEPTH)
+            _draw_tests.push_back(sp<GLDepthTest>::make(i.second._manifest));
+        else if(i.first == PipelineBindings::FRAGMENT_TEST_STENCIL)
+            _draw_tests.push_back(sp<GLStencilTest>::make(i.second._manifest));
+    }
 }
 
 GLPipeline::~GLPipeline()

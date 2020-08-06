@@ -46,6 +46,7 @@ list(APPEND LOCAL_INCLUDE_DIRS src)
 
 message("Building for ${ARK_SYSTEM_NAME} - ${CMAKE_BUILD_TYPE}; build-share-libs: ${BUILD_SHARED_LIBS}\nCompiler: ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
 ark_compile_definitions(-DARK_SYSTEM_NAME="${ARK_SYSTEM_NAME}")
+ark_compile_features(cxx_std_11)
 
 ark_add_debug_flag()
 

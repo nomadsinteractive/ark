@@ -16,6 +16,7 @@
 #include "renderer/opengl/util/gl_util.h"
 
 namespace ark {
+namespace opengl {
 
 namespace {
 
@@ -72,4 +73,5 @@ void GLCubemap::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
     LOGD("GLCubemap Uploaded, id = %d, width = %d, height = %d", static_cast<uint32_t>(id()), bitmap.width(), bitmap.height());
 }
 
+}
 }

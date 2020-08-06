@@ -15,9 +15,17 @@ namespace ark {
 
 class Framebuffer : public Renderer {
 public:
-    Framebuffer(const sp<Resource>& resource, const sp<Renderer>& delegate);
+    enum ClearMask {
+        CLEAR_MASK_NONE = 0,
+        CLEAR_MASK_COLOR = 1,
+        CLEAR_MASK_DEPTH = 2,
+        CLEAR_MASK_STENCIL = 4,
+        CLEAR_MASK_ALL = 7
+    };
 
-    const sp<Resource>& resource() const;
+    Framebuffer(const sp<Resource>& delegate, const sp<Renderer>& renderer);
+
+    const sp<Resource>& delegate() const;
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -32,6 +40,7 @@ public:
         sp<RenderController> _render_controller;
         sp<Builder<Renderer>> _renderer;
         std::vector<sp<Builder<Texture>>> _textures;
+        ClearMask _clear_mask;
     };
 
 //  [[plugin::builder("framebuffer")]]
@@ -46,8 +55,8 @@ public:
     };
 
 private:
-    sp<Resource> _resource;
-    sp<Renderer> _delegate;
+    sp<Resource> _delegate;
+    sp<Renderer> _renderer;
 
 };
 

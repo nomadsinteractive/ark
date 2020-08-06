@@ -20,7 +20,7 @@ public:
 
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
     virtual sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem cs) override;
-    virtual sp<Framebuffer> createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> textures) override;
+    virtual sp<Framebuffer> createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> textures, int32_t clearMask) override;
     virtual sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
     virtual sp<PipelineFactory> createPipelineFactory() override;
     virtual sp<Texture::Delegate> createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader) override;

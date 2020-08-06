@@ -6,6 +6,7 @@ namespace opengl {
 
 class GLFramebuffer;
 class GLPipeline;
+class GLRenderbuffer;
 
 }
 }

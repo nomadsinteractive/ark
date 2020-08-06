@@ -9,7 +9,10 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
 
+#include "renderer/opengl/forwarding.h"
+
 namespace ark {
+namespace opengl {
 
 class ARK_API GLTexture : public Texture::Delegate {
 public:
@@ -25,6 +28,9 @@ public:
 
     uint32_t target() const;
 
+    const sp<GLRenderbuffer>& renderbuffer() const;
+    void setRenderbuffer(sp<GLRenderbuffer> renderbuffer);
+
 protected:
     sp<Recycler> _recycler;
     sp<Size> _size;
@@ -32,9 +38,12 @@ protected:
     sp<Texture::Parameters> _parameters;
     sp<Texture::Uploader> _uploader;
 
+    sp<GLRenderbuffer> _renderbuffer;
+
     uint32_t _id;
 };
 
+}
 }
 
 #endif

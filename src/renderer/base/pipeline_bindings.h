@@ -38,12 +38,21 @@ public:
         FRAGMENT_TEST_STENCIL
     };
 
+    struct FragmentTestManifest {
+        FragmentTestManifest(document manifest, sp<Vec4> value = nullptr);
+
+        document _manifest;
+        sp<Vec4> _value;
+    };
+
+    typedef Table<FragmentTest, FragmentTestManifest> FragmentTestTable;
+
     struct ARK_API Parameters {
-        Parameters(const Rect& scissor, Table<FragmentTest, document> tests, uint32_t flags);
+        Parameters(const Rect& scissor, FragmentTestTable tests, uint32_t flags);
         DEFAULT_COPY_AND_ASSIGN(Parameters);
 
         Rect _scissor;
-        Table<FragmentTest, document> _tests;
+        FragmentTestTable _tests;
         uint32_t _flags;
 
         class BUILDER {
@@ -56,7 +65,7 @@ public:
             sp<RenderController> _render_controller;
 
             SafePtr<Builder<Vec4>> _pipeline_bindings_scissor;
-            Table<FragmentTest, document> _tests;
+            FragmentTestTable _tests;
             uint32_t _pipeline_bindings_flags;
         };
     };

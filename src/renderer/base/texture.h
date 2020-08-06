@@ -24,8 +24,6 @@ public:
         FORMAT_RG = 1,
         FORMAT_RGB = 2,
         FORMAT_RGBA = 3,
-        FORMAT_DEPTH = 4,
-        FORMAT_DEPTH_STENCIL = 5,
         FORMAT_SIGNED = 8,
         FORMAT_F16 = 16,
         FORMAT_F32 = 32

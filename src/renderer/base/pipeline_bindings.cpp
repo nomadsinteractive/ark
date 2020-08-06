@@ -118,7 +118,7 @@ PipelineBindings::Stub::Stub(ModelLoader::RenderMode mode, RenderProcedure rende
             _samplers[i] = samplers.values().at(i);
 }
 
-PipelineBindings::Parameters::Parameters(const Rect& scissor, Table<FragmentTest, document> tests, uint32_t flags)
+PipelineBindings::Parameters::Parameters(const Rect& scissor, PipelineBindings::FragmentTestTable tests, uint32_t flags)
     : _scissor(scissor), _tests(std::move(tests)), _flags(flags)
 {
 }
@@ -171,6 +171,11 @@ template<> ARK_API PipelineBindings::FragmentTest Conversions::to<String, Pipeli
         return PipelineBindings::FRAGMENT_TEST_SCISSOR;
     DCHECK(str == "stencil", "Unknown FragmentTest: \"%s\", possible values are [depth, scissor, stencil]", str.c_str());
     return PipelineBindings::FRAGMENT_TEST_STENCIL;
+}
+
+PipelineBindings::FragmentTestManifest::FragmentTestManifest(document manifest, sp<Vec4> value)
+    : _manifest(std::move(manifest)), _value(std::move(value))
+{
 }
 
 }
