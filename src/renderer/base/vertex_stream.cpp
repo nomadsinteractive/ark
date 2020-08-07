@@ -39,6 +39,11 @@ void VertexStream::writeNodeId(int32_t nodeId)
     write(nodeId, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_NODE_ID);
 }
 
+void VertexStream::write(const void* buf, uint32_t size, uint32_t offset)
+{
+    _writer->write(buf, size, offset);
+}
+
 void VertexStream::setRenderObject(const Renderable::Snapshot& renderObject)
 {
     _transform = &renderObject._transform;
@@ -65,10 +70,10 @@ void VertexStream::writeBitangent(const V3& bitangent)
 void VertexStream::next()
 {
     _writer->next();
-    applyVaryings();
+    writeVaryings();
 }
 
-void VertexStream::applyVaryings()
+void VertexStream::writeVaryings()
 {
     _writer->write(_varyings._memory.buf(), static_cast<uint32_t>(_varyings._memory.length()), 0);
 }

@@ -78,12 +78,15 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Alloca
         return Snapshot();
 
     if(!_size)
+    {
+        const PipelineInput::Stream& varyingStream = pipelineInput.streams().rbegin()->second;
         for(auto& i : _varyings)
         {
-            i.second._offset = pipelineInput.getAttributeOffset(i.first);
+            i.second._offset = varyingStream.getAttributeOffset(i.first);
             DCHECK(i.second._offset >= 0, "Illegal Varying, name: \"%s\", offset: %d", i.first.c_str(), i.second._offset);
             _size = std::max<uint32_t>(static_cast<uint32_t>(i.second._offset) + i.second._flatable->size(), _size);
         }
+    }
 
     ByteArray::Borrowed memory = allocator.sbrk(_size);
     for(const auto& i : _varyings)

@@ -44,6 +44,8 @@ public:
     void writeBoneInfo(const Mesh::BoneInfo& boneInfo);
     void writeNodeId(int32_t nodeId);
 
+    void write(const void* buf, uint32_t size, uint32_t offset);
+
     void setRenderObject(const Renderable::Snapshot& renderObject);
 
     void next();
@@ -66,8 +68,7 @@ private:
     };
 
 private:
-    void applyVaryings();
-
+    void writeVaryings();
     void writeArray(ByteArray& array);
 
 private:

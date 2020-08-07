@@ -54,6 +54,9 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
     {
         writer.next();
         writer.write(MatrixUtil::translate(M4::identity(), i._position) * MatrixUtil::scale(i._transform.toMatrix(), i._size));
+        const ByteArray::Borrowed& vm = i._varyings._memory;
+        if(vm.length() > 0)
+            writer.write(vm.buf() + sizeof(M4), vm.length() - sizeof(M4), sizeof(M4));
     }
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), std::move(snapshot._ssbos),
