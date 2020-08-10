@@ -92,16 +92,56 @@ private:
     GLuint _buffer;
 };
 
-class GLDepthTest : public Snippet::DrawEvents {
+
+class GLCullFaceTest : public Snippet::DrawEvents {
 public:
-    GLDepthTest(const document& manifest)
-        : _func(GLUtil::getEnum(manifest, "func", GL_ZERO)), _enabled(Documents::ensureAttribute<int32_t>(manifest, "enabled")) {
+    GLCullFaceTest(const document& manifest)
+        : _enabled(Documents::getAttribute<bool>(manifest, "enabled", true)), _front_face(GLUtil::getEnum(manifest, "front-face", GL_ZERO)), _pre_front_face(GL_ZERO) {
     }
 
     virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
         if(_enabled) {
-            if(_func != GL_ZERO)
+            if(_front_face != GL_ZERO) {
+                if(_pre_front_face == GL_ZERO)
+                    glGetIntegerv(GL_FRONT_FACE, &_pre_front_face);
+                glFrontFace(_front_face);
+            }
+        }
+        else
+            glDisable(GL_CULL_FACE);
+
+    }
+
+    virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {
+        if(!_enabled)
+            glEnable(GL_CULL_FACE);
+        if(_front_face != GL_ZERO)
+            glFrontFace(_pre_front_face);
+    }
+
+private:
+    bool _enabled;
+    GLenum _front_face;
+    GLenum _pre_front_face;
+};
+
+
+class GLDepthTest : public Snippet::DrawEvents {
+public:
+    GLDepthTest(const document& manifest)
+        : _func(GLUtil::getEnum(manifest, "func", GL_ZERO)), _pre_func(GL_ZERO), _enabled(Documents::getAttribute<bool>(manifest, "enabled", true)),
+          _read_only(Documents::getAttribute<bool>(manifest, "read-only", false)) {
+    }
+
+    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+        if(_enabled) {
+            if(_func != GL_ZERO) {
+                if(_pre_func == GL_ZERO)
+                    glGetIntegerv(GL_DEPTH_FUNC, &_pre_func);
                 glDepthFunc(_func);
+            }
+            if(_read_only)
+                glDepthMask(GL_FALSE);
         }
         else
             glDisable(GL_DEPTH_TEST);
@@ -110,11 +150,17 @@ public:
     virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {
         if(!_enabled)
             glEnable(GL_DEPTH_TEST);
+        if(_func != GL_ZERO)
+            glDepthFunc(_pre_func);
+        if(_read_only)
+            glDepthMask(GL_TRUE);
     }
 
 private:
     GLenum _func;
+    GLenum _pre_func;
     bool _enabled;
+    bool _read_only;
 };
 
 
@@ -152,7 +198,9 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<
 {
     for(const auto& i : bindings.parameters()._tests)
     {
-        if(i.first == PipelineBindings::FRAGMENT_TEST_DEPTH)
+        if(i.first == PipelineBindings::FRAGMENT_TEST_CULL_FACE)
+            _draw_tests.push_back(sp<GLCullFaceTest>::make(i.second._manifest));
+        else if(i.first == PipelineBindings::FRAGMENT_TEST_DEPTH)
             _draw_tests.push_back(sp<GLDepthTest>::make(i.second._manifest));
         else if(i.first == PipelineBindings::FRAGMENT_TEST_STENCIL)
             _draw_tests.push_back(sp<GLStencilTest>::make(i.second._manifest));

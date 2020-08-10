@@ -61,6 +61,9 @@ struct GLConstants {
         _enums["replace"] = GL_REPLACE;
         _enums["incr"] = GL_INCR;
         _enums["decr"] = GL_DECR;
+
+        _enums["cw"] = GL_CW;
+        _enums["ccw"] = GL_CCW;
     }
 
     std::unordered_map<String, GLenum> _enums;

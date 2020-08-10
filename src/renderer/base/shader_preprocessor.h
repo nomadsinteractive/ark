@@ -71,7 +71,7 @@ public:
         const Table<String, Declaration>& vars() const;
         Table<String, Declaration>& vars();
 
-        void declare(const String& type, const char* prefix, const String& name, int32_t location);
+        void declare(const String& type, const char* prefix, const String& name, int32_t location, const char* qualifier = nullptr);
 
     private:
         Source& _source;
@@ -108,12 +108,14 @@ private:
             PARAMETER_MODIFIER_DEFAULT = 0,
             PARAMETER_MODIFIER_IN = 1,
             PARAMETER_MODIFIER_OUT = 2,
-            PARAMETER_MODIFIER_IN_OUT = 3
+            PARAMETER_MODIFIER_INOUT = 3
         };
         Parameter();
         Parameter(String type, String name, Modifier modifier);
 
         DEFAULT_COPY_AND_ASSIGN(Parameter);
+
+        const char* getQualifierStr() const;
 
         String _type;
         String _name;
@@ -130,6 +132,7 @@ private:
         String genOutCall(PipelineInput::ShaderStage preShaderStage, PipelineInput::ShaderStage shaderStage) const;
 
         bool hasOutAttribute(const String& name) const;
+        bool hasReturnValue() const;
 
         String _name;
         String _params;
@@ -162,7 +165,7 @@ public:
 
     void inDeclare(const String& type, const String& name, int32_t location = -1);
     void outDeclare(const String& type, const String& name, int32_t location = -1);
-    void linkNextStage();
+    void linkNextStage(const String& returnValueName);
 
     void linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
 

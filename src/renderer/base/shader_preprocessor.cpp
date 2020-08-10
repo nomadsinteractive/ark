@@ -152,16 +152,14 @@ void ShaderPreprocessor::parseDeclarations()
 
     {
         const String outVar = outputName();
-
         _main.push_back(sp<String>::make("\n\nvoid main() {\n"));
         _main.push_back(_pre_main);
-        if(outVar)
+        if(outVar && _main_block->hasReturnValue())
             _main.push_back(sp<String>::make(Strings::sprintf(INDENT_STR "%s = ", outVar.c_str())));
         *_output_var = _main_block->genOutCall(_pre_shader_stage, _shader_stage);
         _main.push_back(_output_var);
         _main.push_back(sp<String>::make(";"));
         _main.push_back(_post_main);
-
         _main.push_back(sp<String>::make("\n}\n\n"));
     }
 
@@ -232,12 +230,14 @@ void ShaderPreprocessor::outDeclare(const String& type, const String& name, int3
     _declaration_outs.declare(type, outVarPrefix(), name, location);
 }
 
-void ShaderPreprocessor::linkNextStage()
+void ShaderPreprocessor::linkNextStage(const String& returnValueName)
 {
     const char* varPrefix = outVarPrefix();
-    int32_t location = 0;
+    int32_t location = -1;
+    if(_main_block->hasReturnValue())
+        _declaration_outs.declare(_main_block->_return_type, varPrefix, returnValueName, ++location);
     for(const Parameter& i : _main_block->_outs)
-        _declaration_outs.declare(i._type, varPrefix, Strings::capitalizeFirst(i._name), ++location);
+        _declaration_outs.declare(i._type, varPrefix, Strings::capitalizeFirst(i._name), ++location, i.getQualifierStr());
 }
 
 void ShaderPreprocessor::linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars)
@@ -388,12 +388,20 @@ ShaderPreprocessor::Parameter ShaderPreprocessor::Function::parseParameter(const
     {
         if(i == "in")
         {
-            modifier |= Parameter::PARAMETER_MODIFIER_IN;
+            DCHECK(modifier == Parameter::PARAMETER_MODIFIER_DEFAULT, "Conflicts found in parameter(%s)'s qualifier", param.c_str());
+            modifier = Parameter::PARAMETER_MODIFIER_IN;
             continue;
         }
         if(i == "out")
         {
-            modifier |= Parameter::PARAMETER_MODIFIER_OUT;
+            DCHECK(modifier == Parameter::PARAMETER_MODIFIER_DEFAULT, "Conflicts found in parameter(%s)'s qualifier", param.c_str());
+            modifier = Parameter::PARAMETER_MODIFIER_OUT;
+            continue;
+        }
+        if(i == "inout")
+        {
+            DCHECK(modifier == Parameter::PARAMETER_MODIFIER_DEFAULT, "Conflicts found in parameter(%s)'s qualifier", param.c_str());
+            modifier = Parameter::PARAMETER_MODIFIER_INOUT;
             continue;
         }
         if(!type)
@@ -422,7 +430,7 @@ void ShaderPreprocessor::Function::genDefinition()
     }
 
     for(const auto& i : _outs)
-        sb << ", out " << i._type << " " << i._name;
+        sb << ", " << i.getQualifierStr() << " " << i._type << " " << i._name;
 
 
     sb << ") {\n    " << _body << "\n}";
@@ -457,18 +465,23 @@ bool ShaderPreprocessor::Function::hasOutAttribute(const String& name) const
     return false;
 }
 
+bool ShaderPreprocessor::Function::hasReturnValue() const
+{
+    return _return_type != "void";
+}
+
 ShaderPreprocessor::DeclarationList::DeclarationList(Source& source, const String& descriptor)
     : _source(source), _descriptor(descriptor)
 {
 }
 
-void ShaderPreprocessor::DeclarationList::declare(const String& type, const char* prefix, const String& name, int32_t location)
+void ShaderPreprocessor::DeclarationList::declare(const String& type, const char* prefix, const String& name, int32_t location, const char* qualifier)
 {
     if(!_vars.has(name))
     {
         if(location >= 0)
             _source.push_back(sp<String>::make(Strings::sprintf("layout (location = %d) ", location)));
-        const sp<String> declared = sp<String>::make(Strings::sprintf("%s %s %s%s;\n", _descriptor.c_str(), type.c_str(), prefix, name.c_str()));
+        const sp<String> declared = sp<String>::make(Strings::sprintf("%s %s %s%s;\n", qualifier ? qualifier : _descriptor.c_str(), type.c_str(), prefix, name.c_str()));
         _source.push_back(declared);
 
         _vars.push_back(name, Declaration(name, type, 1, declared));
@@ -646,6 +659,13 @@ ShaderPreprocessor::Parameter::Parameter()
 ShaderPreprocessor::Parameter::Parameter(String type, String name, ShaderPreprocessor::Parameter::Modifier modifier)
     : _type(std::move(type)), _name(std::move(name)), _modifier(modifier)
 {
+}
+
+const char* ShaderPreprocessor::Parameter::getQualifierStr() const
+{
+    const char* qualifiers[] = {"in", "in", "out", "inout"};
+    DASSERT(_modifier >= PARAMETER_MODIFIER_DEFAULT && _modifier <= PARAMETER_MODIFIER_INOUT);
+    return qualifiers[_modifier];
 }
 
 }

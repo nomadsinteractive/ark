@@ -33,6 +33,7 @@ public:
     };
 
     enum FragmentTest {
+        FRAGMENT_TEST_CULL_FACE,
         FRAGMENT_TEST_DEPTH,
         FRAGMENT_TEST_SCISSOR,
         FRAGMENT_TEST_STENCIL

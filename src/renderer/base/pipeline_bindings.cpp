@@ -165,11 +165,13 @@ template<> ARK_API PipelineBindings::Flag Conversions::to<String, PipelineBindin
 
 template<> ARK_API PipelineBindings::FragmentTest Conversions::to<String, PipelineBindings::FragmentTest>(const String& str)
 {
+    if(str == "cull_face")
+        return PipelineBindings::FRAGMENT_TEST_CULL_FACE;
     if(str == "depth")
         return PipelineBindings::FRAGMENT_TEST_DEPTH;
     else if(str == "scissor")
         return PipelineBindings::FRAGMENT_TEST_SCISSOR;
-    DCHECK(str == "stencil", "Unknown FragmentTest: \"%s\", possible values are [depth, scissor, stencil]", str.c_str());
+    DCHECK(str == "stencil", "Unknown FragmentTest: \"%s\", possible values are [cull_face, depth, scissor, stencil]", str.c_str());
     return PipelineBindings::FRAGMENT_TEST_STENCIL;
 }
 
