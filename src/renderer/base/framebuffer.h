@@ -13,7 +13,7 @@
 
 namespace ark {
 
-class Framebuffer : public Renderer {
+class Framebuffer {
 public:
     enum ClearMask {
         CLEAR_MASK_NONE = 0,
@@ -23,11 +23,14 @@ public:
         CLEAR_MASK_ALL = 7
     };
 
-    Framebuffer(const sp<Resource>& delegate, const sp<Renderer>& renderer);
+    Framebuffer(sp<Resource> delegate, std::vector<sp<Texture>> colorAttachments, std::vector<sp<Texture>> renderBufferAttachments);
 
     const sp<Resource>& delegate() const;
+    const std::vector<sp<Texture>>& colorAttachments() const;
+    const std::vector<sp<Texture>>& renderbufferAttachments() const;
 
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
+    int32_t width() const;
+    int32_t height() const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Framebuffer> {
@@ -38,26 +41,31 @@ public:
 
     private:
         sp<RenderController> _render_controller;
-        sp<Builder<Renderer>> _renderer;
         std::vector<sp<Builder<Texture>>> _textures;
-        ClearMask _clear_mask;
     };
 
-//  [[plugin::builder("framebuffer")]]
+//  [[plugin::resource-loader("offscreen")]]
     class RENDERER_BUILDER : public Builder<Renderer> {
     public:
-        RENDERER_BUILDER(BeanFactory& factory, const document& manifest);
+        RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
+        sp<RenderController> _render_controller;
         sp<Builder<Framebuffer>> _framebuffer;
+        sp<Builder<Renderer>> _delegate;
+        std::vector<sp<Builder<Texture>>> _textures;
+        ClearMask _clear_mask;
     };
 
 private:
     sp<Resource> _delegate;
-    sp<Renderer> _renderer;
 
+    std::vector<sp<Texture>> _color_attachments;
+    std::vector<sp<Texture>> _renderbuffer_attachments;
+
+    int32_t _width, _height;
 };
 
 }

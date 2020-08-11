@@ -32,7 +32,8 @@ public:
     enum Usage {
         USAGE_COLOR_ATTACHMENT = 0,
         USAGE_DEPTH_ATTACHMENT = 1,
-        USAGE_STENCIL_ATTACHMENT = 2
+        USAGE_STENCIL_ATTACHMENT = 2,
+        USAGE_DEPTH_STENCIL_ATTACHMENT = 3
     };
 
     enum Feature {
@@ -117,6 +118,7 @@ public:
     virtual RecycleFunc recycle() override;
 
     Type type() const;
+    Usage usage() const;
 
 //  [[script::bindings::property]]
     int32_t width() const;

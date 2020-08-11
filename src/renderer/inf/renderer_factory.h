@@ -23,7 +23,8 @@ public:
 
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) = 0;
     virtual sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem cs) = 0;
-    virtual sp<Framebuffer> createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> texture, int32_t clearMask) = 0;
+    virtual sp<Resource> createFramebuffer(const std::vector<sp<Texture>>& colorAttachments, const std::vector<sp<Texture>>& renderBufferAttachments) = 0;
+    virtual sp<Renderer> createFramebufferRenderer(sp<Framebuffer> framebuffer, sp<Renderer> delegate, std::vector<sp<Texture>> drawBuffers, int32_t clearMask) = 0;
     virtual sp<PipelineFactory> createPipelineFactory() = 0;
     virtual sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) = 0;
     virtual sp<Texture::Delegate> createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader) = 0;

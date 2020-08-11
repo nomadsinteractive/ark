@@ -97,11 +97,14 @@ sp<Camera::Delegate> RendererFactoryVulkan::createCamera(Ark::RendererCoordinate
     return cs == Ark::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>();
 }
 
-sp<Framebuffer> RendererFactoryVulkan::createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> textures, int32_t clearMask)
+sp<Resource> RendererFactoryVulkan::createFramebuffer(const std::vector<sp<Texture>>& colorAttachments, const std::vector<sp<Texture>>& renderBufferAttachments)
 {
-    //TODO: Vulkan framebuffer clearMask
-    const sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, _recycler, std::move(textures));
-    return sp<Framebuffer>::make(fbo, sp<VKFramebufferRenderer>::make(std::move(renderer), fbo));
+    return sp<VKFramebuffer>::make(_renderer, _recycler, colorAttachments);
+}
+
+sp<Renderer> RendererFactoryVulkan::createFramebufferRenderer(sp<Framebuffer> framebuffer, sp<Renderer> delegate, std::vector<sp<Texture>> drawBuffers, int32_t clearMask)
+{
+    return sp<VKFramebufferRenderer>::make(std::move(delegate), framebuffer->delegate());
 }
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)

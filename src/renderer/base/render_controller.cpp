@@ -183,11 +183,11 @@ Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Uploader>
     return makeBuffer(Buffer::TYPE_INDEX, usage, uploader);
 }
 
-sp<Framebuffer> RenderController::makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> textures, int32_t clearMask)
+sp<Framebuffer> RenderController::makeFramebuffer(std::vector<sp<Texture>> colorAttachments, std::vector<sp<Texture>> renderBufferAttachments)
 {
-    const sp<Framebuffer> framebuffer = renderEngine()->rendererFactory()->createFramebuffer(std::move(renderer), std::move(textures), clearMask);
-    upload(framebuffer->delegate(), nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY);
-    return framebuffer;
+    sp<Resource> framebuffer = renderEngine()->rendererFactory()->createFramebuffer(colorAttachments, renderBufferAttachments);
+    upload(framebuffer, nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY);
+    return sp<Framebuffer>::make(std::move(framebuffer), std::move(colorAttachments), std::move(renderBufferAttachments));
 }
 
 Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader)

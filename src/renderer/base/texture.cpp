@@ -66,6 +66,11 @@ Texture::Type Texture::type() const
     return _parameters->_type;
 }
 
+Texture::Usage Texture::usage() const
+{
+    return _parameters->_usage;
+}
+
 uint64_t Texture::id()
 {
     return _delegate->id();
@@ -146,10 +151,6 @@ template<> ARK_API Texture::Format Conversions::to<String, Texture::Format>(cons
                 format = static_cast<Texture::Format>(format | Texture::FORMAT_F32);
             else if(i == "signed")
                 format = static_cast<Texture::Format>(format | Texture::FORMAT_SIGNED);
-//            else if(i == "depth")
-//                format = static_cast<Texture::Format>(format | Texture::FORMAT_DEPTH);
-//            else if(i == "depth_stencil")
-//                format = static_cast<Texture::Format>(format | Texture::FORMAT_DEPTH_STENCIL);
             else
                 DFATAL("Unknow texture format: %s", i.c_str());
         }
@@ -162,17 +163,13 @@ template<> ARK_API Texture::Usage Conversions::to<String, Texture::Usage>(const 
 {
     if(str)
     {
-        Texture::Usage usage = Texture::USAGE_COLOR_ATTACHMENT;
-        for(const String& i : str.toLower().split('|'))
-        {
-            if(i == "depth")
-                usage = static_cast<Texture::Usage>(usage | Texture::USAGE_DEPTH_ATTACHMENT);
-            else if(i == "stencil")
-                usage = static_cast<Texture::Usage>(usage | Texture::USAGE_STENCIL_ATTACHMENT);
-            else
-                DCHECK(i == "color", "Unknow texture usage: %s", i.c_str());
-        }
-        return usage;
+        if(str == "depth")
+            return Texture::USAGE_DEPTH_ATTACHMENT;
+        if(str == "depth_stencil")
+            return Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
+        if(str == "stencil")
+            return Texture::USAGE_STENCIL_ATTACHMENT;
+        DCHECK(str == "color", "Unknow texture usage: %s", str.c_str());
     }
     return Texture::USAGE_COLOR_ATTACHMENT;
 }

@@ -14,8 +14,8 @@
 namespace ark {
 namespace opengl {
 
-GLFramebuffer::GLFramebuffer(const sp<Recycler>& recycler, std::vector<sp<Texture>> textures)
-    : _recycler(recycler), _textures(std::move(textures)), _id(0)
+GLFramebuffer::GLFramebuffer(const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, std::vector<sp<Texture>> renderBufferAttachments)
+    : _recycler(recycler), _color_attachments(std::move(colorAttachments)), _render_buffer_attachments(renderBufferAttachments), _id(0)
 {
 }
 
@@ -38,23 +38,26 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
     Table<uint64_t, GLenum> attachments;
 
     sp<Texture> depthTexture;
-    std::vector<GLenum> drawAttachments;
     std::vector<GLenum> depthAttachments;
     GLenum depthInternalformat;
 
-    for(const sp<Texture>& i : _textures)
+    for(const sp<Texture>& i : _color_attachments)
+    {
+        Texture::Usage usage = i->parameters()->_usage;
+        DASSERT(usage == Texture::USAGE_COLOR_ATTACHMENT);
+
+        i->upload(graphicsContext, nullptr);
+        GLenum attachment = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + (bindings++));
+        attachments.push_back(i->id(), attachment);
+    }
+    for(const sp<Texture>& i : _render_buffer_attachments)
     {
         Texture::Usage usage = i->parameters()->_usage;
         i->upload(graphicsContext, nullptr);
-        GLenum attachment = GL_COLOR_ATTACHMENT0;
-        if(usage == Texture::USAGE_COLOR_ATTACHMENT)
+        const GLenum glAttachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT, GL_DEPTH_STENCIL_ATTACHMENT};
+        DASSERT(usage & (Texture::USAGE_DEPTH_ATTACHMENT | Texture::USAGE_STENCIL_ATTACHMENT));
+        if(usage == Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
         {
-            attachment = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + (bindings++));
-            drawAttachments.push_back(attachment);
-        }
-        else if(usage & (Texture::USAGE_DEPTH_ATTACHMENT | Texture::USAGE_STENCIL_ATTACHMENT))
-        {
-            attachment = GL_DEPTH_STENCIL_ATTACHMENT;
             depthTexture = i;
             depthAttachments.push_back(GL_DEPTH_ATTACHMENT);
             depthAttachments.push_back(GL_STENCIL_ATTACHMENT);
@@ -62,26 +65,26 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
         }
         else if (usage & Texture::USAGE_DEPTH_ATTACHMENT)
         {
-            attachment = GL_DEPTH_ATTACHMENT;
             depthTexture = i;
-            depthAttachments.push_back(attachment);
+            depthAttachments.push_back(glAttachments[usage]);
             depthInternalformat = GL_DEPTH_COMPONENT;
         }
         else if (usage & Texture::USAGE_STENCIL_ATTACHMENT)
         {
-            attachment = GL_STENCIL_ATTACHMENT;
+#ifndef ANDROID
             depthTexture = i;
-            depthAttachments.push_back(attachment);
+            depthAttachments.push_back(glAttachments[usage]);
             depthInternalformat = GL_STENCIL_COMPONENTS;
+#else
+            WARN(false, "GL_STENCIL_COMPONENTS unsupported");
+#endif
         }
-        attachments.push_back(i->id(), attachment);
+        attachments.push_back(i->id(), glAttachments[usage]);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
     for(const auto& i : attachments)
         glFramebufferTexture2D(GL_FRAMEBUFFER, i.second, GL_TEXTURE_2D, static_cast<GLuint>(i.first), 0);
-
-    glDrawBuffers(static_cast<GLsizei>(drawAttachments.size()), drawAttachments.data());
 
     if(depthAttachments.size() > 0)
     {
@@ -112,11 +115,6 @@ Resource::RecycleFunc GLFramebuffer::recycle()
         LOGD("Deleting GLFramebuffer[%d]", id);
         glDeleteFramebuffers(1, &id);
     };
-}
-
-const std::vector<sp<Texture>>& GLFramebuffer::textures() const
-{
-    return _textures;
 }
 
 }

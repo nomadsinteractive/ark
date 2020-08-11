@@ -27,33 +27,42 @@ namespace {
 
 class PreDrawElementsToFBO : public RenderCommand {
 public:
-    PreDrawElementsToFBO(const sp<GLFramebuffer>& fbo, int32_t clearMask)
-        : _fbo(fbo), _clear_mask(toClearBufferMask(clearMask)) {
+    PreDrawElementsToFBO(sp<Framebuffer> fbo, const std::vector<sp<Texture>>& drawBuffers, int32_t clearMask)
+        : _fbo(std::move(fbo)), _width(_fbo->width()), _height(_fbo->height()), _clear_mask(toClearBufferMask(clearMask)) {
+        const std::vector<sp<Texture>>& colorAttachments = _fbo->colorAttachments();
+        for(const sp<Texture>& i : drawBuffers) {
+            const auto iter = std::find(colorAttachments.begin(), colorAttachments.end(), i);
+            DCHECK(iter != colorAttachments.end(), "Texture does not belong to Framebuffer's color attachment");
+            _draw_buffers.push_back(static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + (iter - colorAttachments.begin())));
+        }
     }
 
     virtual void draw(GraphicsContext& /*graphicsContext*/) override {
-        glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_fbo->id()));
-        const sp<Texture>& texture = _fbo->textures().at(0);
-        glViewport(0, 0, static_cast<GLsizei>(texture->width()), static_cast<GLsizei>(texture->height()));
-        if(_clear_mask != GL_NONE_BIT)
-            glClear(_clear_mask);
+        glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_fbo->delegate()->id()));
+        glViewport(0, 0, _width, _height);
+        glDrawBuffers(static_cast<GLsizei>(_draw_buffers.size()), _draw_buffers.data());
+        if(_clear_mask != 0)
+            glClear(static_cast<decltype(GL_COLOR_BUFFER_BIT)>(_clear_mask));
     }
 
 private:
-    ClearBufferMask toClearBufferMask(int32_t clearMask) const {
-        ClearBufferMask cm = GL_NONE_BIT;
+    uint32_t toClearBufferMask(int32_t clearMask) const {
+        uint32_t cm = 0;
         if(clearMask & Framebuffer::CLEAR_MASK_COLOR)
-            cm |= GL_COLOR_BUFFER_BIT;
+            cm |= static_cast<uint32_t>(GL_COLOR_BUFFER_BIT);
         if(clearMask & Framebuffer::CLEAR_MASK_DEPTH)
-            cm |= GL_DEPTH_BUFFER_BIT;
+            cm |= static_cast<uint32_t>(GL_DEPTH_BUFFER_BIT);
         if(clearMask & Framebuffer::CLEAR_MASK_STENCIL)
-            cm |= GL_STENCIL_BUFFER_BIT;
+            cm |= static_cast<uint32_t>(GL_STENCIL_BUFFER_BIT);
         return cm;
     }
 
 private:
-    sp<GLFramebuffer> _fbo;
-    ClearBufferMask _clear_mask;
+    sp<Framebuffer> _fbo;
+    GLsizei _width, _height;
+    uint32_t _clear_mask;
+
+    std::vector<GLenum> _draw_buffers;
 };
 
 class PostDrawElementsToFBO : public RenderCommand {
@@ -69,8 +78,8 @@ public:
 
 }
 
-GLFramebufferRenderer::GLFramebufferRenderer(sp<Renderer> delegate, sp<GLFramebuffer> framebuffer, int32_t clearMask)
-    : _delegate(std::move(delegate)), _fbo(std::move(framebuffer)), _pre_draw(sp<PreDrawElementsToFBO>::make(_fbo, clearMask)), _post_draw(sp<PostDrawElementsToFBO>::make())
+GLFramebufferRenderer::GLFramebufferRenderer(sp<Framebuffer> framebuffer, sp<Renderer> delegate, std::vector<sp<Texture>> drawBuffers, int32_t clearMask)
+    : _delegate(std::move(delegate)), _pre_draw(sp<PreDrawElementsToFBO>::make(std::move(framebuffer), drawBuffers, clearMask)), _post_draw(sp<PostDrawElementsToFBO>::make())
 {
 }
 
