@@ -1,5 +1,7 @@
 #include "assimp/base/node.h"
 
+#include <assimp/matrix4x4.inl>
+
 namespace ark {
 namespace plugin {
 namespace assimp {

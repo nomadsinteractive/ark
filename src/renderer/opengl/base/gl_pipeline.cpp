@@ -103,7 +103,7 @@ public:
         if(_enabled) {
             if(_front_face != GL_ZERO) {
                 if(_pre_front_face == GL_ZERO)
-                    glGetIntegerv(GL_FRONT_FACE, &_pre_front_face);
+                    glGetIntegerv(GL_FRONT_FACE, reinterpret_cast<GLint*>(&_pre_front_face));
                 glFrontFace(_front_face);
             }
         }
@@ -137,7 +137,7 @@ public:
         if(_enabled) {
             if(_func != GL_ZERO) {
                 if(_pre_func == GL_ZERO)
-                    glGetIntegerv(GL_DEPTH_FUNC, &_pre_func);
+                    glGetIntegerv(GL_DEPTH_FUNC, reinterpret_cast<GLint*>(&_pre_func));
                 glDepthFunc(_func);
             }
             if(_read_only)

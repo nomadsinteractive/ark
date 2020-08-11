@@ -46,7 +46,7 @@ public:
         sp<Vec4> _value;
     };
 
-    typedef Table<FragmentTest, FragmentTestManifest> FragmentTestTable;
+    typedef Table<int32_t, FragmentTestManifest> FragmentTestTable;
 
     struct ARK_API Parameters {
         Parameters(const Rect& scissor, FragmentTestTable tests, uint32_t flags);
