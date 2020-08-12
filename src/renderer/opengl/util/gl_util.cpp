@@ -148,8 +148,14 @@ GLenum GLUtil::getPixelFormat(int32_t format, const Bitmap& bitmap)
     if(byteCount == 1)
         return flagSigned ? GL_BYTE : GL_UNSIGNED_BYTE;
     if(byteCount == 2)
+    {
+        if(format & Texture::FORMAT_F16)
+            return GL_HALF_FLOAT;
         return flagSigned ? GL_SHORT: GL_UNSIGNED_SHORT;
-    return flagSigned ? GL_INT : GL_FLOAT;
+    }
+    if(format & Texture::FORMAT_F32)
+        return GL_FLOAT;
+    return flagSigned ? GL_INT : GL_UNSIGNED_INT;
 }
 
 void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, RenderController& renderController, const sp<Pipeline>& pipeline, Texture& texture, int32_t width, int32_t height)

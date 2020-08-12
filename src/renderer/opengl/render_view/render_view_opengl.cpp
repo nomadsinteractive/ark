@@ -29,6 +29,8 @@ void RenderViewOpenGL::onSurfaceCreated()
     GLDebug::glPrintString("GL Version:", GL_VERSION);
     GLDebug::glPrintInteger("Max Uniform Components", GL_MAX_VERTEX_UNIFORM_COMPONENTS);
     GLDebug::glPrintInteger("Max Uniform Vectors", GL_MAX_VERTEX_UNIFORM_VECTORS);
+    GLDebug::glPrintInteger("Max Color Attachments", GL_MAX_COLOR_ATTACHMENTS);
+    GLDebug::glPrintInteger("Max Draw Buffers", GL_MAX_DRAW_BUFFERS);
 
     int32_t work_grp_cnt[3];
     glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &work_grp_cnt[0]);

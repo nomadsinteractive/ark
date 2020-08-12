@@ -32,7 +32,10 @@ GLTexture::~GLTexture()
 void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
     if(_id == 0)
+    {
         glGenTextures(1, &_id);
+        LOGD("Generating GLTexture[%d]", _id);
+    }
 
     glBindTexture(static_cast<GLenum>(_target), _id);
 

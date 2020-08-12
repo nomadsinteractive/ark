@@ -20,6 +20,7 @@ public:
         CLEAR_MASK_COLOR = 1,
         CLEAR_MASK_DEPTH = 2,
         CLEAR_MASK_STENCIL = 4,
+        CLEAR_MASK_DEPTH_STENCIL = 6,
         CLEAR_MASK_ALL = 7
     };
 

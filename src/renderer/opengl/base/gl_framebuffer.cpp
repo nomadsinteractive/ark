@@ -32,7 +32,10 @@ uint64_t GLFramebuffer::id()
 void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
     if(_id == 0)
+    {
         glGenFramebuffers(1, &_id);
+        LOGD("Generating GLFramebuffer[%d]", _id);
+    }
 
     uint32_t bindings = 0;
     Table<uint64_t, GLenum> attachments;
@@ -45,15 +48,16 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
     {
         Texture::Usage usage = i->parameters()->_usage;
         DASSERT(usage == Texture::USAGE_COLOR_ATTACHMENT);
-
-        i->upload(graphicsContext, nullptr);
+        if(i->id() == 0)
+            i->upload(graphicsContext, nullptr);
         GLenum attachment = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + (bindings++));
         attachments.push_back(i->id(), attachment);
     }
     for(const sp<Texture>& i : _render_buffer_attachments)
     {
         Texture::Usage usage = i->parameters()->_usage;
-        i->upload(graphicsContext, nullptr);
+        if(i->id() == 0)
+            i->upload(graphicsContext, nullptr);
         const GLenum glAttachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT, GL_DEPTH_STENCIL_ATTACHMENT};
         DASSERT(usage & (Texture::USAGE_DEPTH_ATTACHMENT | Texture::USAGE_STENCIL_ATTACHMENT));
         if(usage == Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
@@ -84,7 +88,10 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
 
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
     for(const auto& i : attachments)
+    {
         glFramebufferTexture2D(GL_FRAMEBUFFER, i.second, GL_TEXTURE_2D, static_cast<GLuint>(i.first), 0);
+        LOGD("glFramebufferTexture2D, attachment: %d, id: %d", i.second, i.first);
+    }
 
     if(depthAttachments.size() > 0)
     {
