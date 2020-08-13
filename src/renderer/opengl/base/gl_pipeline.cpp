@@ -191,6 +191,31 @@ private:
     GLenum _op, _op_dfail, _op_dpass;
 };
 
+class GLStencilTestSeparate : public Snippet::DrawEvents {
+public:
+    GLStencilTestSeparate(GLenum face, const document& manifest)
+        : _face(face), _mask(Documents::getAttribute<uint32_t>(manifest, "mask", 0xff)),
+          _func(GLUtil::getEnum(manifest, "func")), _func_mask(Documents::getAttribute<uint32_t>(manifest, "func-mask", 0xff)),
+          _ref(Documents::ensureAttribute<int32_t>(manifest, "ref")), _op(GLUtil::getEnum(manifest, "op", GL_KEEP)), _op_dfail(GLUtil::getEnum(manifest, "op-dfail", GL_KEEP)),
+          _op_dpass(GLUtil::getEnum(manifest, "op-dpass", GL_KEEP)) {
+    }
+
+    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+        glStencilMaskSeparate(_face, _mask);
+        glStencilFuncSeparate(_face, _func, _ref, _func_mask);
+        glStencilOpSeparate(_face, _op, _op_dfail, _op_dpass);
+    }
+
+private:
+    GLenum _face;
+    GLuint _mask;
+    GLenum _func;
+    GLuint _func_mask;
+    GLint _ref;
+
+    GLenum _op, _op_dfail, _op_dpass;
+};
+
 }
 
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<PipelineInput::ShaderStage, String> shaders, const PipelineBindings& bindings)

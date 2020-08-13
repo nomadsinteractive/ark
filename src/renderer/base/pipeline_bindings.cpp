@@ -100,7 +100,7 @@ sp<Pipeline> PipelineBindings::getPipeline(GraphicsContext& graphicsContext, con
 
     layout()->preCompile(graphicsContext);
     _pipeline = pipelineFactory->buildPipeline(graphicsContext, *this);
-    graphicsContext.renderController()->upload(_pipeline, nullptr, RenderController::US_ON_SURFACE_READY, RenderController::UP_LEVEL_2);
+    graphicsContext.renderController()->upload(_pipeline, nullptr, RenderController::US_ON_SURFACE_READY, RenderController::UPLOAD_PRIORITY_HIGH);
     _pipeline->upload(graphicsContext, nullptr);
     return _pipeline;
 }

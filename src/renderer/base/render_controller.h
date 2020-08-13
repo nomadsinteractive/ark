@@ -59,9 +59,9 @@ public:
     };
 
     enum UploadPriority {
-        UP_DEFAULT,
-        UP_LEVEL_1,
-        UP_LEVEL_2
+        UPLOAD_PRIORITY_LOW,                /* Framebuffers */
+        UPLOAD_PRIORITY_NORMAL,
+        UPLOAD_PRIORITY_HIGH                /* Pipelines */
     };
 
 public:
@@ -76,8 +76,8 @@ public:
 
     void onDrawFrame(GraphicsContext& graphicsContext);
 
-    void upload(const sp<Resource>& resource, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, UploadPriority priority = UP_DEFAULT);
-    void uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, UploadPriority priority = UP_DEFAULT);
+    void upload(const sp<Resource>& resource, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
+    void uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
 
     template<typename T, typename... Args> sp<T> createResource(Args&&... args) {
         const sp<T> res = sp<T>::make(std::forward<Args>(args)...);
@@ -128,6 +128,7 @@ private:
         void upload(GraphicsContext& graphicsContext) const;
         void recycle(GraphicsContext& graphicsContext) const;
 
+        uint64_t id() const;
         UploadPriority uploadPriority() const;
 
         bool operator < (const RenderResource& other) const;
@@ -152,7 +153,8 @@ private:
 private:
     void prepare(GraphicsContext& graphicsContext, LFQueue<PreparingResource>& items);
     void doRecycling(GraphicsContext& graphicsContext);
-    void doSurfaceReady(GraphicsContext& graphicsContext);
+    void doSurfaceReady(GraphicsContext& graphicsContext) const;
+    void uploadSurfaceReadyItems(GraphicsContext& graphicsContext, UploadPriority up) const;
 
     element_index_t getIndicesHash(Uploader& indices) const;
 

@@ -28,11 +28,12 @@ namespace {
 class PreDrawElementsToFBO : public RenderCommand {
 public:
     PreDrawElementsToFBO(sp<Framebuffer> fbo, const std::vector<sp<Texture>>& drawBuffers, int32_t clearMask)
-        : _fbo(std::move(fbo)), _width(_fbo->width()), _height(_fbo->height()), _clear_mask(toClearBufferMask(clearMask)) {
+        : _fbo(std::move(fbo)), _width(_fbo->width()), _height(_fbo->height()), _clear_mask(clearMask),
+          _clear_color_value{0, 0, 0, 0}, _clear_depth_value(1.0f), _clear_stencil_value(0) {
         const std::vector<sp<Texture>>& colorAttachments = _fbo->colorAttachments();
         for(const sp<Texture>& i : drawBuffers) {
             const auto iter = std::find(colorAttachments.begin(), colorAttachments.end(), i);
-            DCHECK(iter != colorAttachments.end(), "Texture does not belong to Framebuffer's color attachment");
+            DCHECK(iter != colorAttachments.end(), "Texture does not belong to Framebuffer's color attachments");
             _draw_buffers.push_back(static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + (iter - colorAttachments.begin())));
         }
     }
@@ -41,20 +42,21 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_fbo->delegate()->id()));
         glViewport(0, 0, _width, _height);
         glDrawBuffers(static_cast<GLsizei>(_draw_buffers.size()), _draw_buffers.data());
-        if(_clear_mask != 0)
-            glClear(static_cast<decltype(GL_COLOR_BUFFER_BIT)>(_clear_mask));
-    }
+        if(_clear_mask) {
+            uint32_t mds = _clear_mask & Framebuffer::CLEAR_MASK_DEPTH_STENCIL;
+            if(mds) {
+                if(mds == Framebuffer::CLEAR_MASK_DEPTH_STENCIL)
+                    glClearBufferfi(GL_DEPTH_STENCIL, 0, _clear_depth_value, _clear_stencil_value);
+                else if(mds == Framebuffer::CLEAR_MASK_DEPTH)
+                    glClearBufferfv(GL_DEPTH, 0, &_clear_depth_value);
+                else
+                    glClearBufferiv(GL_STENCIL, 0, &_clear_stencil_value);
+            }
 
-private:
-    uint32_t toClearBufferMask(int32_t clearMask) const {
-        uint32_t cm = 0;
-        if(clearMask & Framebuffer::CLEAR_MASK_COLOR)
-            cm |= static_cast<uint32_t>(GL_COLOR_BUFFER_BIT);
-        if(clearMask & Framebuffer::CLEAR_MASK_DEPTH)
-            cm |= static_cast<uint32_t>(GL_DEPTH_BUFFER_BIT);
-        if(clearMask & Framebuffer::CLEAR_MASK_STENCIL)
-            cm |= static_cast<uint32_t>(GL_STENCIL_BUFFER_BIT);
-        return cm;
+            if(_clear_mask & Framebuffer::CLEAR_MASK_COLOR)
+                for(uint32_t i = 0; i < _draw_buffers.size(); ++i)
+                    glClearBufferfv(GL_COLOR, i, _clear_color_value);
+        }
     }
 
 private:
@@ -62,6 +64,9 @@ private:
     GLsizei _width, _height;
     uint32_t _clear_mask;
 
+    float _clear_color_value[4];
+    float _clear_depth_value;
+    int32_t _clear_stencil_value;
     std::vector<GLenum> _draw_buffers;
 };
 

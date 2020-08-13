@@ -64,6 +64,10 @@ struct GLConstants {
 
         _enums["cw"] = GL_CW;
         _enums["ccw"] = GL_CCW;
+
+        _enums["front"] = GL_FRONT;
+        _enums["back"] = GL_BACK;
+        _enums["front_and_back"] = GL_FRONT_AND_BACK;
     }
 
     std::unordered_map<String, GLenum> _enums;

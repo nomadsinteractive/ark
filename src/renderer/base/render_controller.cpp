@@ -123,18 +123,24 @@ void RenderController::doRecycling(GraphicsContext& graphicsContext)
     }
 }
 
-void RenderController::doSurfaceReady(GraphicsContext& graphicsContext)
+void RenderController::doSurfaceReady(GraphicsContext& graphicsContext) const
 {
     for(const RenderResource& resource : _on_surface_ready_items)
         resource.recycle(graphicsContext);
 
-    for(const RenderResource& resource : _on_surface_ready_items)
-        if(resource.uploadPriority() == UP_LEVEL_2)
-            resource.upload(graphicsContext);
+    uploadSurfaceReadyItems(graphicsContext, UPLOAD_PRIORITY_HIGH);
+    uploadSurfaceReadyItems(graphicsContext, UPLOAD_PRIORITY_NORMAL);
+    uploadSurfaceReadyItems(graphicsContext, UPLOAD_PRIORITY_LOW);
+}
 
+void RenderController::uploadSurfaceReadyItems(GraphicsContext& graphicsContext, UploadPriority up) const
+{
     for(const RenderResource& resource : _on_surface_ready_items)
-        if(resource.uploadPriority() != UP_LEVEL_2)
+        if(resource.uploadPriority() == up)
+        {
+            DWARN(resource.id() == 0, "Resource[%d] has been uploaded, please check your UploadPriority", resource.id());
             resource.upload(graphicsContext);
+        }
 }
 
 element_index_t RenderController::getIndicesHash(Uploader& indices) const
@@ -186,7 +192,7 @@ Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Uploader>
 sp<Framebuffer> RenderController::makeFramebuffer(std::vector<sp<Texture>> colorAttachments, std::vector<sp<Texture>> renderBufferAttachments)
 {
     sp<Resource> framebuffer = renderEngine()->rendererFactory()->createFramebuffer(colorAttachments, renderBufferAttachments);
-    upload(framebuffer, nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY);
+    upload(framebuffer, nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY, UPLOAD_PRIORITY_LOW);
     return sp<Framebuffer>::make(std::move(framebuffer), std::move(colorAttachments), std::move(renderBufferAttachments));
 }
 
@@ -298,6 +304,11 @@ void RenderController::RenderResource::upload(GraphicsContext& graphicsContext) 
 void RenderController::RenderResource::recycle(GraphicsContext& graphicsContext) const
 {
     _resource->recycle()(graphicsContext);
+}
+
+uint64_t RenderController::RenderResource::id() const
+{
+    return _resource->id();
 }
 
 RenderController::UploadPriority RenderController::RenderResource::uploadPriority() const
