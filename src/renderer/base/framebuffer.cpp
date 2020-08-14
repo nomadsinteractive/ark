@@ -10,8 +10,8 @@
 
 namespace ark {
 
-Framebuffer::Framebuffer(sp<Resource> delegate, std::vector<sp<Texture>> colorAttachments, std::vector<sp<Texture>> renderBufferAttachments)
-    : _delegate(std::move(delegate)), _color_attachments(std::move(colorAttachments)), _renderbuffer_attachments(std::move(renderBufferAttachments))
+Framebuffer::Framebuffer(sp<Resource> delegate, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachment)
+    : _delegate(std::move(delegate)), _color_attachments(std::move(colorAttachments)), _depth_stencil_attachment(std::move(depthStencilAttachment))
 {
     DCHECK(_color_attachments.size() > 0, "Framebuffer object should have at least one color attachment");
     _width = _color_attachments.at(0)->width();
@@ -28,9 +28,9 @@ const std::vector<sp<Texture>>& Framebuffer::colorAttachments() const
     return _color_attachments;
 }
 
-const std::vector<sp<Texture>>& Framebuffer::renderbufferAttachments() const
+const sp<Texture>& Framebuffer::depthStencilAttachment() const
 {
-    return _renderbuffer_attachments;
+    return _depth_stencil_attachment;
 }
 
 int32_t Framebuffer::width() const
@@ -52,7 +52,7 @@ Framebuffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, co
 sp<Framebuffer> Framebuffer::BUILDER::build(const Scope& args)
 {
     std::vector<sp<Texture>> colorAttachments;
-    std::vector<sp<Texture>> renderBufferAttachments;
+    sp<Texture> depthStencilAttachments;
     for(const sp<Builder<Texture>>& i : _textures)
     {
         sp<Texture> tex = i->build(args);
@@ -60,11 +60,12 @@ sp<Framebuffer> Framebuffer::BUILDER::build(const Scope& args)
             colorAttachments.push_back(std::move(tex));
         else
         {
+            DCHECK(depthStencilAttachments, "Only one depth-stencil attachment is allowed");
             DCHECK(tex->usage() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT, "Unknow Texture usage: %d", tex->usage());
-            renderBufferAttachments.push_back(std::move(tex));
+            depthStencilAttachments = std::move(tex);
         }
     }
-    return _render_controller->makeFramebuffer(std::move(colorAttachments), std::move(renderBufferAttachments));
+    return _render_controller->makeFramebuffer(std::move(colorAttachments), std::move(depthStencilAttachments));
 }
 
 Framebuffer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

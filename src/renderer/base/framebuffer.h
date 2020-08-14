@@ -24,11 +24,11 @@ public:
         CLEAR_MASK_ALL = 7
     };
 
-    Framebuffer(sp<Resource> delegate, std::vector<sp<Texture>> colorAttachments, std::vector<sp<Texture>> renderBufferAttachments);
+    Framebuffer(sp<Resource> delegate, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachment);
 
     const sp<Resource>& delegate() const;
     const std::vector<sp<Texture>>& colorAttachments() const;
-    const std::vector<sp<Texture>>& renderbufferAttachments() const;
+    const sp<Texture>& depthStencilAttachment() const;
 
     int32_t width() const;
     int32_t height() const;
@@ -64,7 +64,7 @@ private:
     sp<Resource> _delegate;
 
     std::vector<sp<Texture>> _color_attachments;
-    std::vector<sp<Texture>> _renderbuffer_attachments;
+    sp<Texture> _depth_stencil_attachment;
 
     int32_t _width, _height;
 };

@@ -13,7 +13,7 @@ namespace opengl {
 
 class GLFramebuffer : public Resource {
 public:
-    GLFramebuffer(const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, std::vector<sp<Texture>> renderBufferAttachments);
+    GLFramebuffer(const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments);
     ~GLFramebuffer() override;
 
     virtual uint64_t id() override;
@@ -24,7 +24,7 @@ public:
 private:
     sp<Recycler> _recycler;
     std::vector<sp<Texture>> _color_attachments;
-    std::vector<sp<Texture>> _render_buffer_attachments;
+    sp<Texture> _depth_stencil_attachment;
 
     uint32_t _id;
 };

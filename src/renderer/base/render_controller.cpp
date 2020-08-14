@@ -189,11 +189,11 @@ Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Uploader>
     return makeBuffer(Buffer::TYPE_INDEX, usage, uploader);
 }
 
-sp<Framebuffer> RenderController::makeFramebuffer(std::vector<sp<Texture>> colorAttachments, std::vector<sp<Texture>> renderBufferAttachments)
+sp<Framebuffer> RenderController::makeFramebuffer(std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments)
 {
-    sp<Resource> framebuffer = renderEngine()->rendererFactory()->createFramebuffer(colorAttachments, renderBufferAttachments);
+    sp<Resource> framebuffer = renderEngine()->rendererFactory()->createFramebuffer(colorAttachments, depthStencilAttachments);
     upload(framebuffer, nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY, UPLOAD_PRIORITY_LOW);
-    return sp<Framebuffer>::make(std::move(framebuffer), std::move(colorAttachments), std::move(renderBufferAttachments));
+    return sp<Framebuffer>::make(std::move(framebuffer), std::move(colorAttachments), std::move(depthStencilAttachments));
 }
 
 Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader)

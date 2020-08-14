@@ -117,7 +117,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
                 DWARN(bitmap.channels() != 4, "Image format is not supported by Vulkan, channesl: %d, converting to RGBA format", bitmap.channels());
                 uint32_t rowBytes = bitmap.rowBytes() / bitmap.channels() * 4;
                 imageDataSize = rowBytes * bitmap.height();
-                format = imageCreateInfo.format = VKUtil::toTextureFormat(rowBytes, bitmap.width(), 4, _parameters->_format);
+                format = imageCreateInfo.format = VKUtil::toTextureFormat(rowBytes / bitmap.width() / 4, 4, _parameters->_format);
             }
         }
         VKUtil::createImage(_renderer->device(), imageCreateInfo, &_image, &_memory);

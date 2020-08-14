@@ -18,12 +18,11 @@
 namespace ark {
 namespace vulkan {
 
-//TODO: MRT
-VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> textures)
-    : _renderer(renderer), _recycler(recycler), _texture(textures.at(0)), _depthstencil_image(VK_NULL_HANDLE), _depthstencil_memory(VK_NULL_HANDLE), _depthstencil_view(VK_NULL_HANDLE),
-      _command_buffer(VK_NULL_HANDLE), _command_buffer_begin_info(vks::initializers::commandBufferBeginInfo()), _render_pass_begin_info(vks::initializers::renderPassBeginInfo()),
-      _viewport(vks::initializers::viewport(static_cast<float>(_texture->width()), static_cast<float>(_texture->height()), 0, 1.0f)),
-      _scissor(vks::initializers::rect2D(_texture->width(), _texture->height(), 0, 0))
+VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments)
+    : _renderer(renderer), _recycler(recycler), _texture(colorAttachments.at(0)), _color_attachments(std::move(colorAttachments)), _depth_stencil_attachment(std::move(depthStencilAttachments)),
+      _depthstencil_image(VK_NULL_HANDLE), _depthstencil_memory(VK_NULL_HANDLE), _depthstencil_view(VK_NULL_HANDLE), _command_buffer(VK_NULL_HANDLE),
+      _command_buffer_begin_info(vks::initializers::commandBufferBeginInfo()), _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(getFramebufferScissor()),
+      _viewport(vks::initializers::viewport(static_cast<float>(_scissor.extent.width), static_cast<float>(_scissor.extent.height), 0, 1.0f))
 {
     _clear_values[0].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
     _clear_values[1].depthStencil = { 1.0f, 0 };
@@ -50,8 +49,8 @@ uint64_t VKFramebuffer::id()
 void VKFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
 {
     VkDevice device = _renderer->vkLogicalDevice();
-    uint32_t width = static_cast<uint32_t>(_texture->width());
-    uint32_t height = static_cast<uint32_t>(_texture->height());
+    uint32_t width = _scissor.extent.width;
+    uint32_t height = _scissor.extent.height;
 
     VkImageCreateInfo image = vks::initializers::imageCreateInfo();
     VkFormat fbDepthFormat;
@@ -224,6 +223,13 @@ void VKFramebuffer::submit(GraphicsContext& graphicsContext)
 {
     const sp<VKGraphicsContext>& vkContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
     vkContext->addSubmitInfo(1, &_command_buffer, 1, &_semaphore);
+}
+
+VkRect2D VKFramebuffer::getFramebufferScissor() const
+{
+    DASSERT(_color_attachments.size() > 0);
+    const sp<Texture>& texture = _color_attachments.at(0);
+    return vks::initializers::rect2D(texture->width(), texture->height(), 0, 0);
 }
 
 }
