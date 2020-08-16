@@ -19,7 +19,7 @@ namespace vulkan {
 
 class VKFramebuffer : public Resource {
 public:
-    VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments);
+    VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
     ~VKFramebuffer() override;
 
     virtual uint64_t id() override;
@@ -50,8 +50,7 @@ private:
     VkCommandBuffer _command_buffer;
     VkSemaphore _semaphore;
 
-    VkDescriptorImageInfo _descriptor;
-    VkClearValue _clear_values[2];
+    std::vector<VkClearValue> _clear_values;
 
     VkCommandBufferBeginInfo _command_buffer_begin_info;
     VkRenderPassBeginInfo _render_pass_begin_info;

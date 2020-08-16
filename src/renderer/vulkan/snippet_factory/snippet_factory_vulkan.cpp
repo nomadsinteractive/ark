@@ -25,6 +25,12 @@ public:
 
         const sp<PipelineInput>& pipelineInput = pipelineLayout.input();
 
+        if(context.hasStage(PipelineInput::SHADER_STAGE_VERTEX))
+        {
+            ShaderPreprocessor& vertex = context.getStage(PipelineInput::SHADER_STAGE_VERTEX);
+            vertex._predefined_macros.push_back("#define gl_InstanceID gl_InstanceIndex");
+        }
+
         if(context.hasStage(PipelineInput::SHADER_STAGE_FRAGMENT))
         {
             ShaderPreprocessor& fragment = context.getStage(PipelineInput::SHADER_STAGE_FRAGMENT);

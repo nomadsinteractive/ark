@@ -34,7 +34,7 @@ public:
         for(const sp<Texture>& i : drawBuffers) {
             const auto iter = std::find(colorAttachments.begin(), colorAttachments.end(), i);
             DCHECK(iter != colorAttachments.end(), "Texture does not belong to Framebuffer's color attachments");
-            _draw_buffers.push_back(static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + (iter - colorAttachments.begin())));
+            _draw_buffers.push_back(static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + static_cast<uint32_t>(iter - colorAttachments.begin())));
         }
     }
 
@@ -54,15 +54,15 @@ public:
             }
 
             if(_clear_mask & Framebuffer::CLEAR_MASK_COLOR)
-                for(uint32_t i = 0; i < _draw_buffers.size(); ++i)
-                    glClearBufferfv(GL_COLOR, i, _clear_color_value);
+                for(size_t i = 0; i < _draw_buffers.size(); ++i)
+                    glClearBufferfv(GL_COLOR, static_cast<GLint>(i), _clear_color_value);
         }
     }
 
 private:
     sp<Framebuffer> _fbo;
     GLsizei _width, _height;
-    uint32_t _clear_mask;
+    int32_t _clear_mask;
 
     float _clear_color_value[4];
     float _clear_depth_value;

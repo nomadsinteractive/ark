@@ -60,7 +60,7 @@ sp<Framebuffer> Framebuffer::BUILDER::build(const Scope& args)
             colorAttachments.push_back(std::move(tex));
         else
         {
-            DCHECK(depthStencilAttachments, "Only one depth-stencil attachment is allowed");
+            DCHECK(depthStencilAttachments == nullptr, "Only one depth-stencil attachment is allowed");
             DCHECK(tex->usage() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT, "Unknow Texture usage: %d", tex->usage());
             depthStencilAttachments = std::move(tex);
         }
@@ -81,7 +81,7 @@ sp<Renderer> Framebuffer::RENDERER_BUILDER::build(const Scope& args)
     sp<Framebuffer> fbo = _framebuffer->build(args);
     for(const sp<Builder<Texture>>& i : _textures)
         drawBuffers.push_back(i->build(args));
-    return _render_controller->renderEngine()->rendererFactory()->createFramebufferRenderer(std::move(fbo), _delegate->build(args), std::move(drawBuffers), _clear_mask);
+    return _render_controller->renderEngine()->rendererFactory()->createFramebufferRenderer(_render_controller, std::move(fbo), _delegate->build(args), std::move(drawBuffers), _clear_mask);
 }
 
 template<> ARK_API Framebuffer::ClearMask Conversions::to<String, Framebuffer::ClearMask>(const String& str)

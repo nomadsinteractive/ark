@@ -106,12 +106,12 @@ sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(Ark::RendererCoordinate
     return cs == Ark::COORDINATE_SYSTEM_RHS ? sp<Camera::Delegate>::make<Camera::DelegateRH_NO>() : sp<Camera::Delegate>::make<Camera::DelegateLH_NO>();
 }
 
-sp<Resource> RendererFactoryOpenGL::createFramebuffer(std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments)
+sp<Resource> RendererFactoryOpenGL::createFramebuffer(const std::vector<sp<Texture>>& colorAttachments, const sp<Texture>& depthStencilAttachments)
 {
-    return sp<GLFramebuffer>::make(_recycler, std::move(colorAttachments), std::move(depthStencilAttachments));
+    return sp<GLFramebuffer>::make(_recycler, colorAttachments, depthStencilAttachments);
 }
 
-sp<Renderer> RendererFactoryOpenGL::createFramebufferRenderer(sp<Framebuffer> framebuffer, sp<Renderer> delegate, std::vector<sp<Texture>> drawBuffers, int32_t clearMask)
+sp<Renderer> RendererFactoryOpenGL::createFramebufferRenderer(RenderController& /*renderController*/, sp<Framebuffer> framebuffer, sp<Renderer> delegate, std::vector<sp<Texture>> drawBuffers, int32_t clearMask)
 {
     return sp<GLFramebufferRenderer>::make(std::move(framebuffer), std::move(delegate), std::move(drawBuffers), clearMask);
 }

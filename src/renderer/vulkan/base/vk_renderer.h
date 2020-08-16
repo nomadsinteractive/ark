@@ -16,8 +16,6 @@ public:
     VKRenderer() = default;
     ~VKRenderer();
 
-    const sp<RenderController>& renderController() const;
-
     const sp<VKCommandPool>& commandPool() const;
     const sp<VKDevice>& device() const;
     const sp<VKHeap>& heap() const;

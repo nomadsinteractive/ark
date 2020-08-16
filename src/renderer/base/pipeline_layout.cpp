@@ -22,7 +22,7 @@
 namespace ark {
 
 PipelineLayout::PipelineLayout(const sp<PipelineBuildingContext>& buildingContext)
-    : _building_context(buildingContext), _input(_building_context->_input), _snippet(_building_context->makePipelineSnippet()), _samplers(_building_context->_samplers)
+    : _building_context(buildingContext), _input(_building_context->_input), _snippet(_building_context->makePipelineSnippet()), _samplers(_building_context->_samplers), _color_attachment_count(0)
 {
 }
 
@@ -59,6 +59,11 @@ const Table<String, sp<Texture>>& PipelineLayout::samplers() const
     return _samplers;
 }
 
+uint32_t PipelineLayout::colorAttachmentCount() const
+{
+    return _color_attachment_count;
+}
+
 void PipelineLayout::initialize(const Camera& camera)
 {
     DCHECK(_building_context, "PipelineLayout should not be initialized more than once");
@@ -66,14 +71,18 @@ void PipelineLayout::initialize(const Camera& camera)
     _snippet->preInitialize(_building_context);
     _building_context->initialize();
 
-    if(_building_context->hasStage(PipelineInput::SHADER_STAGE_VERTEX))
+    ShaderPreprocessor* vertex = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_VERTEX);
+    if(vertex)
     {
-        ShaderPreprocessor& vertex = _building_context->getStage(PipelineInput::SHADER_STAGE_VERTEX);
-        tryBindUniform(vertex, "u_MVP", camera.vp());
-        tryBindUniform(vertex, "u_VP", camera.vp());
-        tryBindUniform(vertex, "u_View", camera.view());
-        tryBindUniform(vertex, "u_Projection", camera.projection());
+        tryBindUniform(*vertex, "u_MVP", camera.vp());
+        tryBindUniform(*vertex, "u_VP", camera.vp());
+        tryBindUniform(*vertex, "u_View", camera.view());
+        tryBindUniform(*vertex, "u_Projection", camera.projection());
     }
+    ShaderPreprocessor* fragment = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT);
+    if(fragment)
+        _color_attachment_count = fragment->_main_block->_outs.size() + (fragment->_main_block->hasReturnValue() ? 1 : 0);
+
 
     _building_context->setupUniforms();
 

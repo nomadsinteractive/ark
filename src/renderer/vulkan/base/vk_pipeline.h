@@ -95,7 +95,7 @@ private:
     sp<Recycler> _recycler;
     sp<VKRenderer> _renderer;
     sp<VKDescriptorPool> _descriptor_pool;
-    sp<BakedRenderer> _backed_renderer;
+    sp<BakedRenderer> _baked_renderer;
 
     VkPipelineLayout _layout;
     VkDescriptorSetLayout _descriptor_set_layout;

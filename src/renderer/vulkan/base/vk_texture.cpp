@@ -87,6 +87,38 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
     bool isCubemap = _num_faces == 6;
 
     VkDevice logicalDevice = _renderer->vkLogicalDevice();
+    if(_parameters->_usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
+    {
+        VkFormat fbDepthFormat;
+        VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(_renderer->vkPhysicalDevice(), &fbDepthFormat);
+        DASSERT(validDepthFormat);
+
+        VkImageCreateInfo image = vks::initializers::imageCreateInfo();
+        image.format = fbDepthFormat;
+        image.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        image.imageType = VK_IMAGE_TYPE_2D;
+        image.extent = {_width, _height , 1};
+        image.mipLevels = 1;
+        image.arrayLayers = _num_faces;
+        image.samples = VK_SAMPLE_COUNT_1_BIT;
+        image.tiling = VK_IMAGE_TILING_OPTIMAL;
+        VKUtil::createImage(_renderer->device(), image, &_image, &_memory);
+
+        VkImageViewCreateInfo depthStencilView = vks::initializers::imageViewCreateInfo();
+        depthStencilView.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        depthStencilView.format = fbDepthFormat;
+        depthStencilView.flags = 0;
+        depthStencilView.subresourceRange = {};
+        depthStencilView.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+        depthStencilView.subresourceRange.baseMipLevel = 0;
+        depthStencilView.subresourceRange.levelCount = 1;
+        depthStencilView.subresourceRange.baseArrayLayer = 0;
+        depthStencilView.subresourceRange.layerCount = _num_faces;
+        depthStencilView.image = _image;
+        VKUtil::checkResult(vkCreateImageView(logicalDevice, &depthStencilView, nullptr, &_descriptor.imageView));
+        return;
+    }
+
     {
         // Create optimal tiled target image on the device
         VkImageCreateInfo imageCreateInfo = vks::initializers::imageCreateInfo();
@@ -103,7 +135,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         imageCreateInfo.flags = isCubemap ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
         if(!imagedata)
-            imageCreateInfo.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+            imageCreateInfo.usage |= VKUtil::toTextureUsage(_parameters->_usage);
 
         size_t imageDataSize = imagedata ? imagedata->size() : 0;
 
@@ -166,7 +198,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
     view.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
     // The subresource range describes the set of mip levels (and array layers) that can be accessed through this image view
     // It's possible to create multiple image views for a single image referring to different (and/or overlapping) ranges of the image
-    view.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    view.subresourceRange.aspectMask = VKUtil::toTextureAspect(_parameters->_usage);
     view.subresourceRange.baseMipLevel = 0;
     view.subresourceRange.baseArrayLayer = 0;
     view.subresourceRange.layerCount = _num_faces;
@@ -197,6 +229,8 @@ void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const
     // This buffer will be the data source for copying texture data to the optimal tiled image on the device
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingMemory;
+
+    DASSERT(imageDataSize > 0);
 
     VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo();
     bufferCreateInfo.size = imageDataSize * imagedata.size();

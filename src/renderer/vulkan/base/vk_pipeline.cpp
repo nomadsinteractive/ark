@@ -5,6 +5,7 @@
 #include "renderer/base/buffer.h"
 #include "renderer/base/compute_context.h"
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
@@ -30,7 +31,7 @@ namespace ark {
 namespace vulkan {
 
 VKPipeline::VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<PipelineInput::ShaderStage, String> shaders)
-    : _bindings(bindings), _recycler(recycler), _renderer(renderer), _backed_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
+    : _bindings(bindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
       _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _rebind_needed(true), _is_compute_pipeline(false)
 {
     for(const auto& i : _shaders)
@@ -276,21 +277,25 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
                 VK_FRONT_FACE_COUNTER_CLOCKWISE,
                 0);
 
-    VkPipelineColorBlendAttachmentState blendAttachmentState =
-            vks::initializers::pipelineColorBlendAttachmentState(
-                0xf,
-                VK_TRUE);
-    blendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-    blendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    blendAttachmentState.alphaBlendOp = VK_BLEND_OP_SUBTRACT;
-    blendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-    blendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    blendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
+    std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
+    for(uint32_t i = 0; i < _bindings.layout()->colorAttachmentCount(); ++i)
+    {
+        VkPipelineColorBlendAttachmentState state = vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_TRUE);
+        state.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        state.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        state.alphaBlendOp = VK_BLEND_OP_SUBTRACT;
+        state.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        state.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        state.colorBlendOp = VK_BLEND_OP_ADD;
+        blendAttachmentStates.push_back(state);
+    }
+
+    DWARN(blendAttachmentStates.size() > 0, "Graphics pipeline has no color attachment");
 
     VkPipelineColorBlendStateCreateInfo colorBlendState =
             vks::initializers::pipelineColorBlendStateCreateInfo(
-                1,
-                &blendAttachmentState);
+                static_cast<uint32_t>(blendAttachmentStates.size()),
+                blendAttachmentStates.data());
 
     VkPipelineDepthStencilStateCreateInfo depthStencilState =
             vks::initializers::pipelineDepthStencilStateCreateInfo(
@@ -377,7 +382,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
         vkCmdSetScissor(commandBuffer, 0, 1, &vkScissor);
     }
 
-    _backed_renderer->draw(graphicsContext, drawingContext, commandBuffer);
+    _baked_renderer->draw(graphicsContext, drawingContext, commandBuffer);
 }
 
 void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& computeContext)

@@ -28,6 +28,7 @@ public:
     std::map<PipelineInput::ShaderStage, String> getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const;
 
     const Table<String, sp<Texture>>& samplers() const;
+    uint32_t colorAttachmentCount() const;
 
 private:
     void initialize(const Camera& camera);
@@ -41,6 +42,8 @@ private:
 
     std::map<PipelineInput::ShaderStage, ShaderPreprocessor::Preprocessed> _preprocessed_stages;
     Table<String, sp<Texture>> _samplers;
+
+    uint32_t _color_attachment_count;
 
     friend class Shader;
     friend class ShaderBindings;

@@ -51,6 +51,7 @@ public:
     Attribute& addPredefinedAttribute(const String& name, const String& type, PipelineInput::ShaderStage stage);
 
     bool hasStage(PipelineInput::ShaderStage shaderStage) const;
+    ShaderPreprocessor* tryGetStage(PipelineInput::ShaderStage shaderStage) const;
     const op<ShaderPreprocessor>& getStage(PipelineInput::ShaderStage shaderStage) const;
     const op<ShaderPreprocessor>& addStage(sp<String> source, PipelineInput::ShaderStage shaderStage, PipelineInput::ShaderStage preShaderStage);
 

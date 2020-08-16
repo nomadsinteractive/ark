@@ -277,14 +277,17 @@ VkFormat VKUtil::toAttributeFormat(Attribute::Type type, uint32_t length)
 
 VkFormat VKUtil::toTextureFormat(uint32_t componentSize, uint8_t channels, Texture::Format format)
 {
-    static const VkFormat vkFormats[] = {VK_FORMAT_R8_UNORM, VK_FORMAT_R8_SNORM, VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R32_UINT, VK_FORMAT_R32_SINT,
-                                         VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8_SNORM, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R32G32_UINT, VK_FORMAT_R32G32_SINT,
-                                         VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8_SNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R32G32B32_UINT, VK_FORMAT_R32G32B32_SINT,
-                                         VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_SNORM, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R32G32B32A32_UINT, VK_FORMAT_R32G32B32A32_SINT};
+    static const VkFormat vkFormats[] = {VK_FORMAT_R8_UNORM, VK_FORMAT_R8_SNORM, VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SFLOAT, VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R32_UINT, VK_FORMAT_R32_SINT,
+                                         VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8_SNORM, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SFLOAT, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R32G32_UINT, VK_FORMAT_R32G32_SINT,
+                                         VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8_SNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SFLOAT, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R32G32B32_UINT, VK_FORMAT_R32G32B32_SINT,
+                                         VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_SNORM, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R32G32B32A32_UINT, VK_FORMAT_R32G32B32A32_SINT};
+    DCHECK(!(format & Texture::FORMAT_SIGNED && format & Texture::FORMAT_F16), "FORMAT_SIGNED format can not combined with FORMAT_F16");
+    DCHECK(!(format & Texture::FORMAT_SIGNED && format & Texture::FORMAT_F32), "FORMAT_SIGNED format can not combined with FORMAT_F32");
     uint32_t signedOffset = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED ? 1 : 0;
+    uint32_t floatPointOffset = (format & Texture::FORMAT_F16) ? 1 : ((format & Texture::FORMAT_F32) ? 1 : 0);
     uint32_t channel8 = (channels - 1) * 8;
     DCHECK(componentSize > 0 && componentSize <= 4 && componentSize != 3, "Unsupported color-depth: %d", componentSize * 8);
-    return vkFormats[channel8 + (componentSize - 1) * 2 + signedOffset];
+    return static_cast<VkFormat>(vkFormats[channel8 + (componentSize - 1) * 2 + floatPointOffset] + signedOffset);
 }
 
 VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, Texture::Format format)
@@ -295,7 +298,29 @@ VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, Texture::Format format)
 VkFormat VKUtil::toTextureFormat(Texture::Format format)
 {
     DCHECK(format != Texture::FORMAT_AUTO, "Cannot determine texture format(auto) without a bitmap");
-    return toTextureFormat((format & Texture::FORMAT_RGBA) + 1, (format & Texture::FORMAT_F16) ? 2 : (format & Texture::FORMAT_F32 ? 4 : 1), format);
+    return toTextureFormat((format & Texture::FORMAT_F16) ? 2 : (format & Texture::FORMAT_F32 ? 4 : 1), (format & Texture::FORMAT_RGBA) + 1, format);
+}
+
+VkImageUsageFlags VKUtil::toTextureUsage(Texture::Usage usage)
+{
+    VkImageUsageFlags vkFlags = 0;
+    if(usage == Texture::USAGE_COLOR_ATTACHMENT)
+        vkFlags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    if(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
+        vkFlags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    return vkFlags;
+}
+
+VkImageAspectFlags VKUtil::toTextureAspect(Texture::Usage usage)
+{
+    VkImageAspectFlags vkFlags = 0;
+    if(usage == Texture::USAGE_COLOR_ATTACHMENT)
+        vkFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+    if(usage & Texture::USAGE_DEPTH_ATTACHMENT)
+        vkFlags |= VK_IMAGE_ASPECT_DEPTH_BIT;
+    if(usage & Texture::USAGE_STENCIL_ATTACHMENT)
+        vkFlags |= VK_IMAGE_ASPECT_STENCIL_BIT;
+    return vkFlags;
 }
 
 VkShaderStageFlagBits VKUtil::toStage(PipelineInput::ShaderStage stage)

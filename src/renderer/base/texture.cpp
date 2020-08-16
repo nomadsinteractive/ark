@@ -30,7 +30,7 @@ public:
     virtual void upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
         uint32_t width = static_cast<uint32_t>(_size->width());
         Bitmap bitmap(width, static_cast<uint32_t>(_size->height()), width * _component_size, _channels, false);
-        delegate.uploadBitmap(graphicsContext, bitmap, {sp<ByteArray::Borrowed>::make(nullptr, 0)});
+        delegate.uploadBitmap(graphicsContext, bitmap, {nullptr});
     }
 
 private:

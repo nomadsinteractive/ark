@@ -31,6 +31,8 @@ public:
     static VkFormat toTextureFormat(uint32_t componentSize, uint8_t channels, Texture::Format format);
     static VkFormat toTextureFormat(const Bitmap& bitmap, Texture::Format format);
     static VkFormat toTextureFormat(Texture::Format format);
+    static VkImageUsageFlags toTextureUsage(Texture::Usage usage);
+    static VkImageAspectFlags toTextureAspect(Texture::Usage usage);
     static VkShaderStageFlagBits toStage(PipelineInput::ShaderStage stage);
     static VkPrimitiveTopology toPrimitiveTopology(ModelLoader::RenderMode mode);
 

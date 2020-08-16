@@ -1,6 +1,6 @@
-project(ark)
-set(ARK_VERSION "0.9.4")
 cmake_minimum_required(VERSION 3.7)
+
+project(ark VERSION 0.9.4)
 
 include(CMakeDependentOption)
 

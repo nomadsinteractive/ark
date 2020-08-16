@@ -216,6 +216,12 @@ bool PipelineBuildingContext::hasStage(PipelineInput::ShaderStage shaderStage) c
     return _stages.find(shaderStage) != _stages.end();
 }
 
+ShaderPreprocessor* PipelineBuildingContext::tryGetStage(PipelineInput::ShaderStage shaderStage) const
+{
+    auto iter = _stages.find(shaderStage);
+    return iter != _stages.end() ? iter->second.get() : nullptr;
+}
+
 const op<ShaderPreprocessor>& PipelineBuildingContext::getStage(PipelineInput::ShaderStage shaderStage) const
 {
     auto iter = _stages.find(shaderStage);
