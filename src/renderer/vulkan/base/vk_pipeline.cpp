@@ -247,13 +247,17 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     _texture_observers.clear();
     for(const sp<Texture>& i : bindings.samplers())
     {
-        const sp<VKTexture> texture = i->delegate();
-        _texture_observers.push_back(i->notifier().createDirtyFlag());
-        writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                      _descriptor_set,
-                                      VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                                      ++binding,
-                                      &texture->vkDescriptor()));
+        DWARN(i, "Pipeline has unbound sampler");
+        if(i)
+        {
+            const sp<VKTexture> texture = i->delegate();
+            _texture_observers.push_back(i->notifier().createDirtyFlag());
+            writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
+                                          _descriptor_set,
+                                          VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                          ++binding,
+                                          &texture->vkDescriptor()));
+        }
     }
 
     vkUpdateDescriptorSets(device->vkLogicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);

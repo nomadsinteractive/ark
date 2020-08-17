@@ -25,18 +25,20 @@ VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>&
       _command_buffer_begin_info(vks::initializers::commandBufferBeginInfo()), _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(getFramebufferScissor()),
       _viewport(vks::initializers::viewport(static_cast<float>(_scissor.extent.width), static_cast<float>(_scissor.extent.height), 0, 1.0f))
 {
+    VkClearValue clearColor;
+    VkClearValue clearDepthStencil;
+    clearColor.color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+    clearDepthStencil.depthStencil = { 1.0f, 0 };
+
     if(clearMask & Framebuffer::CLEAR_MASK_COLOR)
-    {
-        VkClearValue cv = {};
-        cv.color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-        _clear_values.push_back(cv);
-    }
+        _clear_values.push_back(clearColor);
     if(clearMask & Framebuffer::CLEAR_MASK_DEPTH_STENCIL)
-    {
-        VkClearValue cv = {};
-        cv.depthStencil = { 1.0f, 0 };
-        _clear_values.push_back(cv);
-    }
+        _clear_values.push_back(clearDepthStencil);
+
+    for(uint32_t i = 0; i < _color_attachments.size(); ++i)
+        _clear_attachments.push_back({VK_IMAGE_ASPECT_COLOR_BIT, i, clearColor});
+    if(_depth_stencil_attachment)
+        _clear_attachments.push_back({VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, 0, clearDepthStencil});
 
     _render_pass_begin_info.renderArea = _scissor;
     _render_pass_begin_info.clearValueCount = static_cast<uint32_t>(_clear_values.size());
@@ -74,34 +76,6 @@ void VKFramebuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Upload
         const sp<VKTexture> vktex = _depth_stencil_attachment->delegate();
         depthstencilView = vktex->vkDescriptor().imageView;
     }
-//    else
-//    {
-//        VkImageCreateInfo image = vks::initializers::imageCreateInfo();
-//        image.format = fbDepthFormat;
-//        image.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-//        image.imageType = VK_IMAGE_TYPE_2D;
-//        image.extent = {width, height , 1};
-//        image.mipLevels = 1;
-//        image.arrayLayers = 1;
-//        image.samples = VK_SAMPLE_COUNT_1_BIT;
-//        image.tiling = VK_IMAGE_TILING_OPTIMAL;
-//        VKUtil::createImage(_renderer->device(), image, &_depthstencil_image, &_depthstencil_memory);
-
-//        VkImageViewCreateInfo depthStencilView = vks::initializers::imageViewCreateInfo();
-//        depthStencilView.viewType = VK_IMAGE_VIEW_TYPE_2D;
-//        depthStencilView.format = fbDepthFormat;
-//        depthStencilView.flags = 0;
-//        depthStencilView.subresourceRange = {};
-//        depthStencilView.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-//        depthStencilView.subresourceRange.baseMipLevel = 0;
-//        depthStencilView.subresourceRange.levelCount = 1;
-//        depthStencilView.subresourceRange.baseArrayLayer = 0;
-//        depthStencilView.subresourceRange.layerCount = 1;
-//        depthStencilView.image = _depthstencil_image;
-//        VKUtil::checkResult(vkCreateImageView(device, &depthStencilView, nullptr, &_depthstencil_view));
-
-//        depthstencilView = _depthstencil_view;
-//    }
 
     std::vector<VkAttachmentDescription> attachmentDescriptions;
     std::vector<VkAttachmentReference> attachmentReferences;
@@ -239,20 +213,10 @@ void VKFramebuffer::beginCommandBuffer(GraphicsContext& graphicsContext)
     vkCmdSetViewport(_command_buffer, 0, 1, &_viewport);
     vkCmdSetScissor(_command_buffer, 0, 1, &_scissor);
 
-//TODO: clear attachments
-//    VkClearRect clearRect = { {{0, 0}, {540, 960}}, 0, 1 };
-//    VkClearValue clearValue = {};
-//    clearValue.color = {{0, 0, 0, 0}};
-
-//    VkClearValue clearDepthStencil = {};
-//    clearDepthStencil.depthStencil = { 1.0f, 0 };
-
-//    VkClearAttachment clearAttachments[4] = { {VK_IMAGE_ASPECT_COLOR_BIT, 0, clearValue}, {VK_IMAGE_ASPECT_COLOR_BIT, 1, clearValue}, {VK_IMAGE_ASPECT_COLOR_BIT, 2, clearValue},
-//                                              {VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, 0, clearDepthStencil} };
-//    vkCmdClearAttachments(_command_buffer, 4, clearAttachments, 1, &clearRect);
+    const VkClearRect clearRect = { _scissor, 0, 1 };
+    vkCmdClearAttachments(_command_buffer, static_cast<uint32_t>(_clear_attachments.size()), _clear_attachments.data(), 1, &clearRect);
 
     graphicsContext.attachments().ensure<VKGraphicsContext>()->pushCommandBuffer(_command_buffer);
-
 }
 
 void VKFramebuffer::endCommandBuffer(GraphicsContext& graphicsContext)
