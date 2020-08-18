@@ -106,14 +106,14 @@ sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(Ark::RendererCoordinate
     return cs == Ark::COORDINATE_SYSTEM_RHS ? sp<Camera::Delegate>::make<Camera::DelegateRH_NO>() : sp<Camera::Delegate>::make<Camera::DelegateLH_NO>();
 }
 
-sp<Resource> RendererFactoryOpenGL::createFramebuffer(const std::vector<sp<Texture>>& colorAttachments, const sp<Texture>& depthStencilAttachments)
+sp<Framebuffer> RendererFactoryOpenGL::createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
 {
-    return sp<GLFramebuffer>::make(_recycler, colorAttachments, depthStencilAttachments);
-}
-
-sp<Renderer> RendererFactoryOpenGL::createFramebufferRenderer(RenderController& /*renderController*/, sp<Framebuffer> framebuffer, sp<Renderer> delegate, std::vector<sp<Texture>> drawBuffers, int32_t clearMask)
-{
-    return sp<GLFramebufferRenderer>::make(std::move(framebuffer), std::move(delegate), std::move(drawBuffers), clearMask);
+    DCHECK(colorAttachments.size() > 0, "Framebuffer object should have at least one color attachment");
+    int32_t width = colorAttachments.at(0)->width();
+    int32_t height = colorAttachments.at(0)->height();
+    uint32_t drawBufferCount = static_cast<uint32_t>(colorAttachments.size());
+    sp<GLFramebuffer> fbo = sp<GLFramebuffer>::make(_recycler, std::move(colorAttachments), std::move(depthStencilAttachments));
+    return sp<Framebuffer>::make(sp<GLFramebufferRenderer>::make(fbo, width, height, std::move(renderer), drawBufferCount, clearMask), std::move(fbo));
 }
 
 sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()

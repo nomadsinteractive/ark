@@ -44,6 +44,9 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
     std::vector<GLenum> depthAttachments;
     GLenum depthInternalformat;
 
+    uint32_t idx = 0;
+    std::vector<GLenum> drawBuffers;
+
     for(const sp<Texture>& i : _color_attachments)
     {
         Texture::Usage usage = i->parameters()->_usage;
@@ -51,7 +54,9 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
         DASSERT(i->id() != 0);
         GLenum attachment = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + (bindings++));
         attachments.push_back(i->id(), attachment);
+        drawBuffers.push_back(static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + (idx++)));
     }
+
     if(_depth_stencil_attachment)
     {
         Texture::Usage usage = _depth_stencil_attachment->parameters()->_usage;
@@ -85,6 +90,8 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
+    glDrawBuffers(static_cast<uint32_t>(drawBuffers.size()), drawBuffers.data());
+
     for(const auto& i : attachments)
     {
         glFramebufferTexture2D(GL_FRAMEBUFFER, i.second, GL_TEXTURE_2D, static_cast<GLuint>(i.first), 0);

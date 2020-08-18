@@ -13,7 +13,7 @@
 
 namespace ark {
 
-class Framebuffer {
+class Framebuffer : public Renderer {
 public:
     enum ClearMask {
         CLEAR_MASK_NONE = 0,
@@ -24,14 +24,11 @@ public:
         CLEAR_MASK_ALL = 7
     };
 
-    Framebuffer(sp<Resource> delegate, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachment);
+    Framebuffer(sp<Renderer> renderer, sp<Resource> delegate);
+
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     const sp<Resource>& delegate() const;
-    const std::vector<sp<Texture>>& colorAttachments() const;
-    const sp<Texture>& depthStencilAttachment() const;
-
-    int32_t width() const;
-    int32_t height() const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Framebuffer> {
@@ -42,7 +39,9 @@ public:
 
     private:
         sp<RenderController> _render_controller;
+        sp<Builder<Renderer>> _renderer;
         std::vector<sp<Builder<Texture>>> _textures;
+        ClearMask _clear_mask;
     };
 
 //  [[plugin::resource-loader("offscreen")]]
@@ -55,18 +54,11 @@ public:
     private:
         sp<RenderController> _render_controller;
         sp<Builder<Framebuffer>> _framebuffer;
-        sp<Builder<Renderer>> _delegate;
-        std::vector<sp<Builder<Texture>>> _textures;
-        ClearMask _clear_mask;
     };
 
 private:
+    sp<Renderer> _renderer;
     sp<Resource> _delegate;
-
-    std::vector<sp<Texture>> _color_attachments;
-    sp<Texture> _depth_stencil_attachment;
-
-    int32_t _width, _height;
 };
 
 }

@@ -9,12 +9,14 @@
 
 #include "renderer/forwarding.h"
 
+#include "renderer/opengl/forwarding.h"
+
 namespace ark {
 namespace opengl {
 
 class GLFramebufferRenderer : public Renderer {
 public:
-    GLFramebufferRenderer(sp<Framebuffer> framebuffer, sp<Renderer> delegate, std::vector<sp<Texture>> drawBuffers, int32_t clearMask);
+    GLFramebufferRenderer(sp<GLFramebuffer> fbo, int32_t width, int32_t height, sp<Renderer> delegate, uint32_t drawBufferCount, int32_t clearMask);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 

@@ -35,24 +35,6 @@
 namespace ark {
 namespace vulkan {
 
-namespace {
-
-class VKFramebufferResource : public Resource {
-public:
-    virtual uint64_t id() override {
-        return reinterpret_cast<uint64_t>(this);
-    }
-
-    virtual void upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& /*uploader*/) override {
-    }
-
-    virtual RecycleFunc recycle() override {
-        return [](GraphicsContext&) {};
-    }
-};
-
-}
-
 RendererFactoryVulkan::RendererFactoryVulkan(const sp<Recycler>& recycler)
     : _recycler(recycler), _renderer(sp<VKRenderer>::make())
 {
@@ -115,16 +97,10 @@ sp<Camera::Delegate> RendererFactoryVulkan::createCamera(Ark::RendererCoordinate
     return cs == Ark::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>();
 }
 
-sp<Resource> RendererFactoryVulkan::createFramebuffer(const std::vector<sp<Texture>>& /*colorAttachments*/, const sp<Texture>& /*depthStencilAttachments*/)
+sp<Framebuffer> RendererFactoryVulkan::createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
 {
-    return sp<VKFramebufferResource>::make();
-}
-
-sp<Renderer> RendererFactoryVulkan::createFramebufferRenderer(RenderController& renderController, sp<Framebuffer> framebuffer, sp<Renderer> delegate, std::vector<sp<Texture>> drawBuffers, int32_t clearMask)
-{
-    sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, _recycler, std::move(drawBuffers), framebuffer->depthStencilAttachment(), clearMask);
-    renderController.upload(fbo, nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY, RenderController::UPLOAD_PRIORITY_LOW);
-    return sp<VKFramebufferRenderer>::make(std::move(delegate), std::move(fbo));
+    sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, _recycler, std::move(colorAttachments), std::move(depthStencilAttachments), clearMask);
+    return sp<Framebuffer>::make(sp<VKFramebufferRenderer>::make(std::move(renderer), fbo), std::move(fbo));
 }
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)

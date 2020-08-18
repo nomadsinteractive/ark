@@ -81,7 +81,9 @@ void VKSubmitQueue::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBu
 
     VkSubmitInfo& preSubmitInfo = _submit_infos.back();
     submitInfo.pWaitSemaphores = preSubmitInfo.pWaitSemaphores;
+    submitInfo.waitSemaphoreCount = preSubmitInfo.waitSemaphoreCount;
     preSubmitInfo.pWaitSemaphores = pSignalSemaphores;
+    preSubmitInfo.waitSemaphoreCount = 1;
 
     _submit_infos.push_back(submitInfo);
 }

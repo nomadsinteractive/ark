@@ -10,12 +10,14 @@
 
 namespace ark {
 
-Framebuffer::Framebuffer(sp<Resource> delegate, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachment)
-    : _delegate(std::move(delegate)), _color_attachments(std::move(colorAttachments)), _depth_stencil_attachment(std::move(depthStencilAttachment))
+Framebuffer::Framebuffer(sp<Renderer> renderer, sp<Resource> delegate)
+    : _renderer(renderer), _delegate(std::move(delegate))
 {
-    DCHECK(_color_attachments.size() > 0, "Framebuffer object should have at least one color attachment");
-    _width = _color_attachments.at(0)->width();
-    _height = _color_attachments.at(0)->height();
+}
+
+void Framebuffer::render(RenderRequest& renderRequest, const V3& position)
+{
+    _renderer->render(renderRequest, position);
 }
 
 const sp<Resource>& Framebuffer::delegate() const
@@ -23,28 +25,10 @@ const sp<Resource>& Framebuffer::delegate() const
     return _delegate;
 }
 
-const std::vector<sp<Texture>>& Framebuffer::colorAttachments() const
-{
-    return _color_attachments;
-}
-
-const sp<Texture>& Framebuffer::depthStencilAttachment() const
-{
-    return _depth_stencil_attachment;
-}
-
-int32_t Framebuffer::width() const
-{
-    return _width;
-}
-
-int32_t Framebuffer::height() const
-{
-    return _height;
-}
-
 Framebuffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _render_controller(resourceLoaderContext->renderController()), _textures(factory.getBuilderList<Texture>(manifest, Constants::Attributes::TEXTURE))
+    : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<Renderer>(manifest, Constants::Attributes::DELEGATE)),
+      _textures(factory.getBuilderList<Texture>(manifest, Constants::Attributes::TEXTURE)),
+      _clear_mask(Documents::getAttribute<Framebuffer::ClearMask>(manifest, "clear-mask", Framebuffer::CLEAR_MASK_ALL))
 {
     DCHECK(_textures.size(), "No texture attachment defined in manifest: \"%s\"", Documents::toString(manifest).c_str());
 }
@@ -65,23 +49,17 @@ sp<Framebuffer> Framebuffer::BUILDER::build(const Scope& args)
             depthStencilAttachments = std::move(tex);
         }
     }
-    return _render_controller->makeFramebuffer(std::move(colorAttachments), std::move(depthStencilAttachments));
+    return _render_controller->makeFramebuffer(_renderer->build(args), std::move(colorAttachments), std::move(depthStencilAttachments), _clear_mask);
 }
 
 Framebuffer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _render_controller(resourceLoaderContext->renderController()), _framebuffer(factory.ensureConcreteClassBuilder<Framebuffer>(manifest, "framebuffer")),
-      _delegate(factory.ensureBuilder<Renderer>(manifest, Constants::Attributes::DELEGATE)), _textures(factory.getBuilderList<Texture>(manifest, Constants::Attributes::TEXTURE)),
-      _clear_mask(Documents::getAttribute<Framebuffer::ClearMask>(manifest, "clear-mask", Framebuffer::CLEAR_MASK_ALL))
+    : _render_controller(resourceLoaderContext->renderController()), _framebuffer(factory.ensureConcreteClassBuilder<Framebuffer>(manifest, "framebuffer"))
 {
 }
 
 sp<Renderer> Framebuffer::RENDERER_BUILDER::build(const Scope& args)
 {
-    std::vector<sp<Texture>> drawBuffers;
-    sp<Framebuffer> fbo = _framebuffer->build(args);
-    for(const sp<Builder<Texture>>& i : _textures)
-        drawBuffers.push_back(i->build(args));
-    return _render_controller->renderEngine()->rendererFactory()->createFramebufferRenderer(_render_controller, std::move(fbo), _delegate->build(args), std::move(drawBuffers), _clear_mask);
+    return _framebuffer->build(args);
 }
 
 template<> ARK_API Framebuffer::ClearMask Conversions::to<String, Framebuffer::ClearMask>(const String& str)

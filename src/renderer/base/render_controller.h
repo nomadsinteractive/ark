@@ -97,7 +97,7 @@ public:
     Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr);
     Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr);
 
-    sp<Framebuffer> makeFramebuffer(std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments);
+    sp<Framebuffer> makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
 
     template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& disposed) {
         const sp<SynchronizedVar<T>> s = sp<SynchronizedVar<T>>::make(delegate);
