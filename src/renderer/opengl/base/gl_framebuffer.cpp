@@ -48,16 +48,14 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
     {
         Texture::Usage usage = i->parameters()->_usage;
         DASSERT(usage == Texture::USAGE_COLOR_ATTACHMENT);
-        if(i->id() == 0)
-            i->upload(graphicsContext, nullptr);
+        DASSERT(i->id() != 0);
         GLenum attachment = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + (bindings++));
         attachments.push_back(i->id(), attachment);
     }
     if(_depth_stencil_attachment)
     {
         Texture::Usage usage = _depth_stencil_attachment->parameters()->_usage;
-        if(_depth_stencil_attachment->id() == 0)
-            _depth_stencil_attachment->upload(graphicsContext, nullptr);
+        DASSERT(_depth_stencil_attachment->id() != 0);
         const GLenum glAttachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT, GL_DEPTH_STENCIL_ATTACHMENT};
         DASSERT(usage & (Texture::USAGE_DEPTH_ATTACHMENT | Texture::USAGE_STENCIL_ATTACHMENT));
         if(usage == Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)

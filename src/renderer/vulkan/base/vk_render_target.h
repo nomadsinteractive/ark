@@ -37,7 +37,6 @@ public:
     const std::vector<VkFramebuffer>& frameBuffers() const;
 
     std::vector<VkCommandBuffer> makeCommandBuffers() const;
-    sp<VKDescriptorPool> makeDescriptorPool(const sp<Recycler>& recycler) const;
 
     uint32_t acquire(VKGraphicsContext& vkContext);
     uint32_t aquiredImageId() const;

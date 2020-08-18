@@ -104,21 +104,6 @@ std::vector<VkCommandBuffer> VKRenderTarget::makeCommandBuffers() const
     return _command_pool->makeCommandBuffers(_swap_chain.imageCount);
 }
 
-sp<VKDescriptorPool> VKRenderTarget::makeDescriptorPool(const sp<Recycler>& recycler) const
-{
-    VkDescriptorPool descriptorPool;
-
-    std::vector<VkDescriptorPoolSize> poolSizes = {
-        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, _swap_chain.imageCount),
-        vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _swap_chain.imageCount)
-    };
-
-    VkDescriptorPoolCreateInfo descriptorPoolInfo = vks::initializers::descriptorPoolCreateInfo(poolSizes, 1);
-    VKUtil::checkResult(vkCreateDescriptorPool(_device->vkLogicalDevice(), &descriptorPoolInfo, nullptr, &descriptorPool));
-
-    return sp<VKDescriptorPool>::make(recycler, _device, descriptorPool);
-}
-
 uint32_t VKRenderTarget::acquire(VKGraphicsContext& vkContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);

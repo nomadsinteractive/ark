@@ -73,7 +73,9 @@ void VKPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*
 {
     setupDescriptorSetLayout(_bindings.input());
 
-    _descriptor_pool = _renderer->renderTarget()->makeDescriptorPool(graphicsContext.recycler());
+    _descriptor_pool = makeDescriptorPool();
+    _descriptor_pool->upload(graphicsContext);
+
     setupDescriptorSet(graphicsContext, _bindings);
 
     if(_is_compute_pipeline)
@@ -425,6 +427,18 @@ sp<VKPipeline::BakedRenderer> VKPipeline::makeBakedRenderer(const PipelineBindin
         }
     DFATAL("Not render procedure creator for %d", bindings.renderProcedure());
     return nullptr;
+}
+
+sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
+{
+    std::map<VkDescriptorType, uint32_t> poolSizes;
+    if(_bindings.input()->ubos().size())
+        poolSizes[VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER] = static_cast<uint32_t>(_bindings.input()->ubos().size());
+    if(_bindings.input()->ssbos().size())
+        poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_BUFFER] = static_cast<uint32_t>(_bindings.input()->ssbos().size());
+    if(_bindings.samplers().size())
+        poolSizes[VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER] = static_cast<uint32_t>(_bindings.samplers().size());
+    return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes));
 }
 
 void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots)

@@ -87,6 +87,7 @@ private:
     };
 
     sp<BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings) const;
+    sp<VKDescriptorPool> makeDescriptorPool() const;
     void bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots);
 
 private:
