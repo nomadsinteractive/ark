@@ -32,6 +32,9 @@ public:
     void addWaitSemaphore(VkSemaphore semaphore);
 
 private:
+    VkSemaphore* aquireConnectorSemaphore();
+
+private:
     sp<VKRenderer> _renderer;
     VkPipelineStageFlags _stage_flags;
 
