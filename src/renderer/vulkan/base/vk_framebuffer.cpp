@@ -43,10 +43,6 @@ VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>&
     _render_pass_begin_info.renderArea = _scissor;
     _render_pass_begin_info.clearValueCount = static_cast<uint32_t>(_clear_values.size());
     _render_pass_begin_info.pClearValues = _clear_values.data();
-
-    _submit_info.pSignalSemaphores = &_semaphore;
-    _submit_info.commandBufferCount = 1;
-    _submit_info.pCommandBuffers = &_command_buffer;
 }
 
 VKFramebuffer::~VKFramebuffer()

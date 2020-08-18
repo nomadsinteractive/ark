@@ -57,8 +57,6 @@ private:
     VkRenderPassBeginInfo _render_pass_begin_info;
     VkRect2D _scissor;
     VkViewport _viewport;
-
-    VkSubmitInfo _submit_info;
 };
 
 }

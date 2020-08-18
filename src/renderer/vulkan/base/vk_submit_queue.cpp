@@ -14,7 +14,7 @@ namespace ark {
 namespace vulkan {
 
 VKSubmitQueue::VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlags stageFlags, size_t numOfSignalSemaphores)
-    : _renderer(renderer), _stage_flags(stageFlags), _submit_infos(1), _signal_semaphores(numOfSignalSemaphores)
+    : _renderer(renderer), _stage_flags(stageFlags), _submit_infos(1), _signal_semaphores(numOfSignalSemaphores), _aquired_connector_index(0)
 {
     VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
 
@@ -34,6 +34,9 @@ VKSubmitQueue::~VKSubmitQueue()
 
     for(VkSemaphore& i : _signal_semaphores)
         vkDestroySemaphore(vkLogicalDevice, i, nullptr);
+
+    for(VkSemaphore& i : _connector_semaphores)
+        vkDestroySemaphore(vkLogicalDevice, i, nullptr);
 }
 
 const std::vector<VkSemaphore>& VKSubmitQueue::signalSemaphores() const
@@ -47,6 +50,7 @@ void VKSubmitQueue::begin(VkSemaphore waitSemaphore)
     _submit_infos.resize(1);
     _wait_semaphores.push_back(waitSemaphore);
     _submit_queue.clear();
+    _aquired_connector_index = 0;
 }
 
 void VKSubmitQueue::submitCommandBuffer(VkCommandBuffer commandBuffer)
@@ -92,6 +96,19 @@ void VKSubmitQueue::addWaitSemaphore(VkSemaphore semaphore)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     _wait_semaphores.push_back(semaphore);
+}
+
+VkSemaphore* VKSubmitQueue::aquireConnectorSemaphore()
+{
+    DASSERT(_aquired_connector_index <= _connector_semaphores.size());
+    if(_aquired_connector_index == _connector_semaphores.size())
+    {
+        VkSemaphore semaphore;
+        VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
+        VKUtil::checkResult(vkCreateSemaphore(_renderer->vkLogicalDevice(), &semaphoreCreateInfo, nullptr, &semaphore));
+        _connector_semaphores.push_back(semaphore);
+    }
+    return &_connector_semaphores[_aquired_connector_index++];
 }
 
 }
