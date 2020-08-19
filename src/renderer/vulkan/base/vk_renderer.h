@@ -23,7 +23,6 @@ public:
 
     VkDevice vkLogicalDevice() const;
     VkPhysicalDevice vkPhysicalDevice() const;
-    VkRenderPass vkRenderPass() const;
 
 private:
     sp<VKInstance> _instance;

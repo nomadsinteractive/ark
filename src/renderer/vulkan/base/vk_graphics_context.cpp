@@ -44,47 +44,50 @@ void VKGraphicsContext::begin(uint32_t imageId, const Color& backgroundColor)
 
     const std::vector<VkCommandBuffer>& commandBuffers = _command_buffers->vkCommandBuffers();
 
-    _command_buffer = commandBuffers.at(imageId);
-
+    VkCommandBuffer commandBuffer = commandBuffers.at(imageId);
+    pushState({commandBuffer, renderPassBeginInfo.renderPass});
     renderPassBeginInfo.framebuffer = renderTarget.frameBuffers().at(imageId);
     renderPassBeginInfo.clearValueCount = 2;
     renderPassBeginInfo.pClearValues = vkClearValues;
-    VKUtil::checkResult(vkBeginCommandBuffer(_command_buffer, &cmdBufInfo));
-    vkCmdBeginRenderPass(_command_buffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-    vkCmdSetViewport(_command_buffer, 0, 1, &renderTarget.vkViewport());
-    vkCmdSetScissor(_command_buffer, 0, 1, &renderTarget.vkScissor());
+    VKUtil::checkResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
+    vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdSetViewport(commandBuffer, 0, 1, &renderTarget.vkViewport());
+    vkCmdSetScissor(commandBuffer, 0, 1, &renderTarget.vkScissor());
 
     _submit_queue.begin(_semaphore_present_complete);
 }
 
 void VKGraphicsContext::end()
 {
-    vkCmdEndRenderPass(_command_buffer);
-    VKUtil::checkResult(vkEndCommandBuffer(_command_buffer));
+    DASSERT(_state_stack.size() == 1);
+    const State& state = _state_stack.top();
+    vkCmdEndRenderPass(state._command_buffer);
+    VKUtil::checkResult(vkEndCommandBuffer(state._command_buffer));
+    _submit_queue.submitCommandBuffer(state._command_buffer);
+    _state_stack.pop();
 }
 
 VkCommandBuffer VKGraphicsContext::vkCommandBuffer() const
 {
-    return _command_buffer;
+    DASSERT(!_state_stack.empty());
+    return _state_stack.top()._command_buffer;
 }
 
-void VKGraphicsContext::pushCommandBuffer(VkCommandBuffer commandBuffer)
+VkRenderPass VKGraphicsContext::vkRenderPass() const
 {
-    _command_buffer_stack.push(_command_buffer);
-    _command_buffer = commandBuffer;
+    DASSERT(!_state_stack.empty());
+    return _state_stack.top()._render_pass;
 }
 
-VkCommandBuffer VKGraphicsContext::popCommandBuffer()
+void VKGraphicsContext::pushState(const State& state)
 {
-    DASSERT(!_command_buffer_stack.empty());
-    _command_buffer = _command_buffer_stack.top();
-    _command_buffer_stack.pop();
-    return _command_buffer;
+    _state_stack.push(state);
 }
 
-void VKGraphicsContext::submitCommandBuffer(VkCommandBuffer commandBuffer)
+void VKGraphicsContext::popState()
 {
-    _submit_queue.submitCommandBuffer(commandBuffer);
+    DASSERT(!_state_stack.empty());
+    _state_stack.pop();
 }
 
 void VKGraphicsContext::submit(VkQueue queue)

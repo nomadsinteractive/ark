@@ -25,12 +25,16 @@ public:
     void begin(uint32_t imageId, const Color& backgroundColor);
     void end();
 
+    struct State {
+        VkCommandBuffer _command_buffer;
+        VkRenderPass _render_pass;
+    };
+
     VkCommandBuffer vkCommandBuffer() const;
+    VkRenderPass vkRenderPass() const;
 
-    void pushCommandBuffer(VkCommandBuffer commandBuffer);
-    VkCommandBuffer popCommandBuffer();
-
-    void submitCommandBuffer(VkCommandBuffer commandBuffer);
+    void pushState(const State& state);
+    void popState();
 
     void submit(VkQueue queue);
 
@@ -48,8 +52,7 @@ private:
 
     VKSubmitQueue _submit_queue;
 
-    VkCommandBuffer _command_buffer;
-    std::stack<VkCommandBuffer> _command_buffer_stack;
+    std::stack<State> _state_stack;
 
     VkSemaphore _semaphore_present_complete;
 };

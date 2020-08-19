@@ -53,7 +53,6 @@ void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, const sp<Rend
     renderCommand->draw(_graphics_context);
     _vk_graphics_context->end();
 
-    _vk_graphics_context->submitCommandBuffer(_vk_graphics_context->vkCommandBuffer());
     renderTarget->swap(_vk_graphics_context);
 
     if(_vk_compute_context->vkCommandBuffer() != VK_NULL_HANDLE)

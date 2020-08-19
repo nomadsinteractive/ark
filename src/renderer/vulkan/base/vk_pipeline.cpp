@@ -337,7 +337,8 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
     for(const auto& i : _shaders)
         shaderStages.push_back(VKUtil::createShader(device->vkLogicalDevice(), i.second, i.first));
 
-    VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, _renderer->vkRenderPass(), 0);
+    const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
+    VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, vkGraphicsContext->vkRenderPass(), 0);
 
     pipelineCreateInfo.pVertexInputState = &vertexLayout.inputState;
     pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;

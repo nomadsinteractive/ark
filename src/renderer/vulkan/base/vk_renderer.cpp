@@ -68,11 +68,5 @@ VkPhysicalDevice VKRenderer::vkPhysicalDevice() const
     return _device->vkPhysicalDevice();
 }
 
-VkRenderPass VKRenderer::vkRenderPass() const
-{
-    DCHECK(_render_target, "VKRenderer uninitialized");
-    return _render_target->vkRenderPass();
-}
-
 }
 }

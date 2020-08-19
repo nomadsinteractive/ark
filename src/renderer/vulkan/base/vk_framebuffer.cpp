@@ -31,14 +31,10 @@ VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>&
     clearDepthStencil.depthStencil = { 1.0f, 0 };
 
     if(clearMask & Framebuffer::CLEAR_MASK_COLOR)
-        _clear_values.push_back(clearColor);
+        for(uint32_t i = 0; i < _color_attachments.size(); ++i)
+            _clear_values.push_back(clearColor);
     if(clearMask & Framebuffer::CLEAR_MASK_DEPTH_STENCIL)
         _clear_values.push_back(clearDepthStencil);
-
-    for(uint32_t i = 0; i < _color_attachments.size(); ++i)
-        _clear_attachments.push_back({VK_IMAGE_ASPECT_COLOR_BIT, i, clearColor});
-    if(_depth_stencil_attachment)
-        _clear_attachments.push_back({VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT, 0, clearDepthStencil});
 
     _render_pass_begin_info.renderArea = _scissor;
     _render_pass_begin_info.clearValueCount = static_cast<uint32_t>(_clear_values.size());
@@ -206,17 +202,14 @@ void VKFramebuffer::beginCommandBuffer(GraphicsContext& graphicsContext)
     vkCmdSetViewport(_command_buffer, 0, 1, &_viewport);
     vkCmdSetScissor(_command_buffer, 0, 1, &_scissor);
 
-    const VkClearRect clearRect = { _scissor, 0, 1 };
-    vkCmdClearAttachments(_command_buffer, static_cast<uint32_t>(_clear_attachments.size()), _clear_attachments.data(), 1, &clearRect);
-
-    graphicsContext.attachments().ensure<VKGraphicsContext>()->pushCommandBuffer(_command_buffer);
+    graphicsContext.attachments().ensure<VKGraphicsContext>()->pushState({_command_buffer, _render_pass_begin_info.renderPass});
 }
 
 void VKFramebuffer::endCommandBuffer(GraphicsContext& graphicsContext)
 {
     vkCmdEndRenderPass(_command_buffer);
     VKUtil::checkResult(vkEndCommandBuffer(_command_buffer));
-    graphicsContext.attachments().ensure<VKGraphicsContext>()->popCommandBuffer();
+    graphicsContext.attachments().ensure<VKGraphicsContext>()->popState();
 }
 
 void VKFramebuffer::submit(GraphicsContext& graphicsContext)

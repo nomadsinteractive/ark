@@ -50,7 +50,6 @@ private:
     VkCommandBuffer _command_buffer;
 
     std::vector<VkClearValue> _clear_values;
-    std::vector<VkClearAttachment> _clear_attachments;
 
     VkCommandBufferBeginInfo _command_buffer_begin_info;
     VkRenderPassBeginInfo _render_pass_begin_info;
