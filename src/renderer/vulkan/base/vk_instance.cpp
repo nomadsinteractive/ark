@@ -2,11 +2,18 @@
 
 #include "core/ark.h"
 #include "core/base/manifest.h"
+#include "core/util/log.h"
 
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vulkan_debug.h"
 
 #include "renderer/vulkan/util/vk_util.h"
+
+#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN) && !defined(ARK_PLATFORM_ANDROID)
+#define ARK_VK_DEBUG_LAYER_ENABLED  1
+#else
+#define ARK_VK_DEBUG_LAYER_ENABLED  0
+#endif
 
 namespace ark {
 namespace vulkan {
@@ -53,17 +60,14 @@ void VKInstance::initialize()
     instanceCreateInfo.pNext = nullptr;
     instanceCreateInfo.pApplicationInfo = &appInfo;
 
-#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN) && !defined(ARK_PLATFORM_ANDROID)
+#if ARK_VK_DEBUG_LAYER_ENABLED
     _extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+    instanceCreateInfo.enabledLayerCount = vks::debug::validationLayerCount;
+    instanceCreateInfo.ppEnabledLayerNames = vks::debug::validationLayerNames;
 #endif
 
     instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(_extensions.size());
     instanceCreateInfo.ppEnabledExtensionNames = _extensions.data();
-
-#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN) && !defined(ARK_PLATFORM_ANDROID)
-    instanceCreateInfo.enabledLayerCount = vks::debug::validationLayerCount;
-    instanceCreateInfo.ppEnabledLayerNames = vks::debug::validationLayerNames;
-#endif
 
     VKUtil::checkResult(vkCreateInstance(&instanceCreateInfo, nullptr, &_instance));
 
@@ -75,6 +79,11 @@ void VKInstance::initialize()
 
     VKUtil::checkResult(vkEnumeratePhysicalDevices(_instance, &gpuCount, _physical_devices.data()));
 
+#if ARK_VK_DEBUG_LAYER_ENABLED
+    vks::debug::setupDebugging(_instance, VK_DEBUG_REPORT_ERROR_BIT_EXT |
+                               VK_DEBUG_REPORT_WARNING_BIT_EXT |
+                               VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT, VK_NULL_HANDLE);
+#endif
 }
 
 VkInstance VKInstance::vkInstance() const

@@ -479,10 +479,11 @@ void ShaderPreprocessor::DeclarationList::declare(const String& type, const char
 {
     if(!_vars.has(name))
     {
+        sp<String> declared = sp<String>::make(Strings::sprintf("%s %s %s%s;", qualifier ? qualifier : _descriptor.c_str(), type.c_str(), prefix, name.c_str()));
         if(location >= 0)
-            _source.push_back(sp<String>::make(Strings::sprintf("layout (location = %d) ", location)));
-        const sp<String> declared = sp<String>::make(Strings::sprintf("%s %s %s%s;\n", qualifier ? qualifier : _descriptor.c_str(), type.c_str(), prefix, name.c_str()));
-        _source.push_back(declared);
+            _source.push_back(sp<String>::make(Strings::sprintf("layout (location = %d) %s", location, declared->c_str())));
+        else
+            _source.push_back(declared);
 
         _vars.push_back(name, Declaration(name, type, 1, declared));
     }

@@ -92,9 +92,9 @@ void VKGraphicsContext::submit(VkQueue queue)
     _submit_queue.submit(queue);
 }
 
-void VKGraphicsContext::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers, uint32_t signalSemaphoreCount, const VkSemaphore* pSignalSemaphores)
+void VKGraphicsContext::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers)
 {
-    _submit_queue.addSubmitInfo(commandBufferCount, pCommandBuffers, signalSemaphoreCount, pSignalSemaphores);
+    _submit_queue.addSubmitInfo(commandBufferCount, pCommandBuffers);
 }
 
 void VKGraphicsContext::addWaitSemaphore(VkSemaphore semaphore)

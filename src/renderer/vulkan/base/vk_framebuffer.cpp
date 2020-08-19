@@ -162,9 +162,6 @@ void VKFramebuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Upload
     VKUtil::checkResult(vkCreateFramebuffer(device, &fbufCreateInfo, nullptr, &_render_pass_begin_info.framebuffer));
 
     _command_buffer = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
-
-    VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
-    VKUtil::checkResult(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &_semaphore));
 }
 
 Resource::RecycleFunc VKFramebuffer::recycle()
@@ -225,7 +222,7 @@ void VKFramebuffer::endCommandBuffer(GraphicsContext& graphicsContext)
 void VKFramebuffer::submit(GraphicsContext& graphicsContext)
 {
     const sp<VKGraphicsContext>& vkContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
-    vkContext->addSubmitInfo(1, &_command_buffer, 1, &_semaphore);
+    vkContext->addSubmitInfo(1, &_command_buffer);
 }
 
 VkRect2D VKFramebuffer::getFramebufferScissor() const

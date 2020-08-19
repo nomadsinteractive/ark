@@ -48,7 +48,6 @@ private:
     VkImageView _depthstencil_view;
 
     VkCommandBuffer _command_buffer;
-    VkSemaphore _semaphore;
 
     std::vector<VkClearValue> _clear_values;
     std::vector<VkClearAttachment> _clear_attachments;

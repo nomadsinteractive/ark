@@ -14,18 +14,11 @@ namespace ark {
 namespace vulkan {
 
 VKSubmitQueue::VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlags stageFlags, size_t numOfSignalSemaphores)
-    : _renderer(renderer), _stage_flags(stageFlags), _submit_infos(1), _signal_semaphores(numOfSignalSemaphores), _aquired_connector_index(0)
+    : _renderer(renderer), _stage_flags(stageFlags), _signal_semaphores(numOfSignalSemaphores), _aquired_connector_index(0)
 {
     VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
-
     for(VkSemaphore& i : _signal_semaphores)
         VKUtil::checkResult(vkCreateSemaphore(_renderer->vkLogicalDevice(), &semaphoreCreateInfo, nullptr, &i));
-
-    VkSubmitInfo& submitInfo = _submit_infos[0];
-    submitInfo = vks::initializers::submitInfo();
-    submitInfo.pWaitDstStageMask = &_stage_flags;
-    submitInfo.signalSemaphoreCount = _signal_semaphores.size();
-    submitInfo.pSignalSemaphores = _signal_semaphores.data();
 }
 
 VKSubmitQueue::~VKSubmitQueue()
@@ -47,9 +40,9 @@ const std::vector<VkSemaphore>& VKSubmitQueue::signalSemaphores() const
 void VKSubmitQueue::begin(VkSemaphore waitSemaphore)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
-    _submit_infos.resize(1);
-    _wait_semaphores.push_back(waitSemaphore);
+    _submit_infos.clear();
     _submit_queue.clear();
+    _wait_semaphores.push_back(waitSemaphore);
     _aquired_connector_index = 0;
 }
 
@@ -57,38 +50,43 @@ void VKSubmitQueue::submitCommandBuffer(VkCommandBuffer commandBuffer)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     _submit_queue.push_back(commandBuffer);
+    addSubmitInfo(1, &_submit_queue.back());
 }
 
 void VKSubmitQueue::submit(VkQueue queue)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
-    VkSubmitInfo& submitInfo = _submit_infos[0];
-    submitInfo.pCommandBuffers = _submit_queue.data();
-    submitInfo.commandBufferCount = static_cast<uint32_t>(_submit_queue.size());
-    submitInfo.pWaitSemaphores = _wait_semaphores.data();
-    submitInfo.waitSemaphoreCount = static_cast<uint32_t>(_wait_semaphores.size());
-
-    VKUtil::checkResult(vkQueueSubmit(queue, static_cast<uint32_t>(_submit_infos.size()), _submit_infos.data(), VK_NULL_HANDLE));
-
+    if(!_submit_infos.empty())
+    {
+        VkSubmitInfo& firstSubmitInfo = _submit_infos.front();
+        VkSubmitInfo& lastSubmitInfo = _submit_infos.back();
+        firstSubmitInfo.pWaitSemaphores = _wait_semaphores.data();
+        firstSubmitInfo.waitSemaphoreCount = static_cast<uint32_t>(_wait_semaphores.size());
+        lastSubmitInfo.pSignalSemaphores = _signal_semaphores.data();
+        lastSubmitInfo.signalSemaphoreCount = static_cast<uint32_t>(_signal_semaphores.size());
+        VKUtil::checkResult(vkQueueSubmit(queue, static_cast<uint32_t>(_submit_infos.size()), _submit_infos.data(), VK_NULL_HANDLE));
+    }
     _wait_semaphores.clear();
 }
 
-void VKSubmitQueue::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers, uint32_t signalSemaphoreCount, const VkSemaphore* pSignalSemaphores)
+void VKSubmitQueue::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     VkSubmitInfo submitInfo = vks::initializers::submitInfo();
     submitInfo.pWaitDstStageMask = &_stage_flags;
     submitInfo.commandBufferCount = commandBufferCount;
     submitInfo.pCommandBuffers = pCommandBuffers;
-    submitInfo.signalSemaphoreCount = signalSemaphoreCount;
-    submitInfo.pSignalSemaphores = pSignalSemaphores;
+    submitInfo.signalSemaphoreCount = 0;
+    submitInfo.pSignalSemaphores = nullptr;
 
-    VkSubmitInfo& preSubmitInfo = _submit_infos.back();
-    submitInfo.pWaitSemaphores = preSubmitInfo.pWaitSemaphores;
-    submitInfo.waitSemaphoreCount = preSubmitInfo.waitSemaphoreCount;
-    preSubmitInfo.pWaitSemaphores = pSignalSemaphores;
-    preSubmitInfo.waitSemaphoreCount = 1;
-
+    if(!_submit_infos.empty())
+    {
+        VkSubmitInfo& preSubmitInfo = _submit_infos.back();
+//        preSubmitInfo.pSignalSemaphores = aquireConnectorSemaphore();
+//        preSubmitInfo.signalSemaphoreCount = 1;
+//        submitInfo.pWaitSemaphores = preSubmitInfo.pSignalSemaphores;
+//        submitInfo.waitSemaphoreCount = preSubmitInfo.signalSemaphoreCount;
+    }
     _submit_infos.push_back(submitInfo);
 }
 

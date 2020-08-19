@@ -34,7 +34,7 @@ public:
 
     void submit(VkQueue queue);
 
-    void addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers, uint32_t signalSemaphoreCount, const VkSemaphore* pSignalSemaphores);
+    void addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers);
     void addWaitSemaphore(VkSemaphore semaphore);
 
     VkSemaphore semaphoreRenderComplete(size_t n) const;

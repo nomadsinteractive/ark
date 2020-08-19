@@ -25,19 +25,17 @@ public:
 
         const sp<PipelineInput>& pipelineInput = pipelineLayout.input();
 
-        if(context.hasStage(PipelineInput::SHADER_STAGE_VERTEX))
-        {
-            ShaderPreprocessor& vertex = context.getStage(PipelineInput::SHADER_STAGE_VERTEX);
-            vertex._predefined_macros.push_back("#define gl_InstanceID gl_InstanceIndex");
-        }
+        ShaderPreprocessor* vertex = context.tryGetStage(PipelineInput::SHADER_STAGE_VERTEX);
+        if(vertex)
+            vertex->_predefined_macros.push_back("#define gl_InstanceID gl_InstanceIndex");
 
-        if(context.hasStage(PipelineInput::SHADER_STAGE_FRAGMENT))
+        ShaderPreprocessor* fragment = context.tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT);
+        if(fragment)
         {
-            ShaderPreprocessor& fragment = context.getStage(PipelineInput::SHADER_STAGE_FRAGMENT);
-            fragment.linkNextStage("FragColor");
-            setLayoutDescriptor(fragment._declaration_samplers, "binding", static_cast<uint32_t>(pipelineInput->ubos().size()));
-            fragment._predefined_macros.push_back("#define texture2D texture");
-            fragment._predefined_macros.push_back("#define textureCube texture");
+            fragment->linkNextStage("FragColor");
+            setLayoutDescriptor(fragment->_declaration_samplers, "binding", static_cast<uint32_t>(pipelineInput->ubos().size()));
+            fragment->_predefined_macros.push_back("#define texture2D texture");
+            fragment->_predefined_macros.push_back("#define textureCube texture");
         }
 
         ShaderPreprocessor* prestage = nullptr;
