@@ -44,7 +44,6 @@ private:
     std::vector<VkSemaphore> _signal_semaphores;
 
     std::vector<VkSemaphore> _connector_semaphores;
-    uint32_t _aquired_connector_index;
 };
 
 }

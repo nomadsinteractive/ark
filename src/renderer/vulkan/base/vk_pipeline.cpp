@@ -225,15 +225,15 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     for(const sp<PipelineInput::UBO>& i : bindings.input()->ubos())
     {
         const sp<Uploader> uploader = sp<Uploader::Blank>::make(i->size());
-        const sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         ubo->upload(graphicsContext, uploader);
-        _ubos.push_back(ubo);
         binding = std::max(binding, i->binding());
         writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                           _descriptor_set,
                                           VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                           i->binding(),
                                           &ubo->vkDescriptor()));
+        _ubos.push_back(std::move(ubo));
     }
     for(const PipelineInput::SSBO& i : bindings.input()->ssbos())
     {

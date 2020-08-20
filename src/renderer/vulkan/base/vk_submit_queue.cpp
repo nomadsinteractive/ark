@@ -14,7 +14,7 @@ namespace ark {
 namespace vulkan {
 
 VKSubmitQueue::VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlags stageFlags, size_t numOfSignalSemaphores)
-    : _renderer(renderer), _stage_flags(stageFlags), _signal_semaphores(numOfSignalSemaphores), _aquired_connector_index(0)
+    : _renderer(renderer), _stage_flags(stageFlags), _signal_semaphores(numOfSignalSemaphores)
 {
     VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
     for(VkSemaphore& i : _signal_semaphores)
@@ -43,7 +43,6 @@ void VKSubmitQueue::begin(VkSemaphore waitSemaphore)
     _submit_infos.clear();
     _submit_queue.clear();
     _wait_semaphores.push_back(waitSemaphore);
-    _aquired_connector_index = 0;
 }
 
 void VKSubmitQueue::submitCommandBuffer(VkCommandBuffer commandBuffer)

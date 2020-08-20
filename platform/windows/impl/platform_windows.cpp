@@ -10,7 +10,6 @@
 #include "core/inf/variable.h"
 #include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
 #include "core/impl/asset_bundle/asset_bundle_directory.h"
-#include "core/util/strings.h"
 
 #include "graphics/base/font.h"
 #include "graphics/impl/alphabet/alphabet_true_type.h"
