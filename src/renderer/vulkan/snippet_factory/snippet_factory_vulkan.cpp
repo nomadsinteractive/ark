@@ -33,7 +33,7 @@ public:
         if(fragment)
         {
             fragment->linkNextStage("FragColor");
-            setLayoutDescriptor(fragment->_declaration_samplers, "binding", static_cast<uint32_t>(pipelineInput->ubos().size()));
+            setLayoutDescriptor(fragment->_declaration_samplers, "binding", static_cast<uint32_t>(pipelineInput->ubos().size() + pipelineInput->ssbos().size()));
             fragment->_predefined_macros.push_back("#define texture2D texture");
             fragment->_predefined_macros.push_back("#define textureCube texture");
         }
