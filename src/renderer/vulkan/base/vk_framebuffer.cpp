@@ -20,9 +20,75 @@ namespace ark {
 namespace vulkan {
 
 VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
-    : _renderer(renderer), _recycler(recycler), _texture(colorAttachments.at(0)), _color_attachments(std::move(colorAttachments)), _depth_stencil_attachment(std::move(depthStencilAttachments)),
+    : _stub(sp<Stub>::make(renderer, recycler, std::move(colorAttachments), std::move(depthStencilAttachments), clearMask))
+{
+}
+
+VKFramebuffer::~VKFramebuffer()
+{
+    _stub->_recycler->recycle(*this);
+}
+
+uint64_t VKFramebuffer::id()
+{
+    return (uint64_t) _stub->_render_pass_begin_info.framebuffer;
+}
+
+void VKFramebuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& /*uploader*/)
+{
+    _stub->initialize();
+}
+
+Resource::RecycleFunc VKFramebuffer::recycle()
+{
+    const sp<VKDevice> device = _stub->_renderer->device();
+
+    VkImage depthstencilImage = _stub->_depthstencil_image;
+    VkDeviceMemory depthstencilMemory = _stub->_depthstencil_memory;
+    VkImageView depthstencilView = _stub->_depthstencil_view;
+
+    VkFramebuffer framebuffer = _stub->_render_pass_begin_info.framebuffer;
+    VkRenderPass renderPass = _stub->_render_pass_begin_info.renderPass;
+
+    _stub->_depthstencil_image = VK_NULL_HANDLE;
+    _stub->_depthstencil_memory = VK_NULL_HANDLE;
+    _stub->_depthstencil_view = VK_NULL_HANDLE;
+    _stub->_render_pass_begin_info.framebuffer = VK_NULL_HANDLE;
+    _stub->_render_pass_begin_info.renderPass = VK_NULL_HANDLE;
+
+    return [=](GraphicsContext&) {
+        VkDevice logicalDevice = device->vkLogicalDevice();
+        if(depthstencilImage) {
+            vkDestroyImageView(logicalDevice, depthstencilView, nullptr);
+            vkDestroyImage(logicalDevice, depthstencilImage, nullptr);
+            vkFreeMemory(logicalDevice, depthstencilMemory, nullptr);
+        }
+        vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
+        vkDestroyFramebuffer(logicalDevice, framebuffer, nullptr);
+    };
+}
+
+void VKFramebuffer::beginCommandBuffer(GraphicsContext& graphicsContext)
+{
+    graphicsContext.attachments().ensure<VKGraphicsContext>()->pushState(_stub);
+}
+
+void VKFramebuffer::endCommandBuffer(GraphicsContext& graphicsContext)
+{
+    graphicsContext.attachments().ensure<VKGraphicsContext>()->popState();
+}
+
+VkRect2D VKFramebuffer::Stub::getFramebufferScissor() const
+{
+    DASSERT(_color_attachments.size() > 0);
+    const sp<Texture>& texture = _color_attachments.at(0);
+    return vks::initializers::rect2D(texture->width(), texture->height(), 0, 0);
+}
+
+VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture> > colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
+    : _renderer(renderer), _recycler(recycler), _color_attachments(std::move(colorAttachments)), _depth_stencil_attachment(std::move(depthStencilAttachments)),
       _depthstencil_image(VK_NULL_HANDLE), _depthstencil_memory(VK_NULL_HANDLE), _depthstencil_view(VK_NULL_HANDLE), _command_buffer(VK_NULL_HANDLE),
-      _command_buffer_begin_info(vks::initializers::commandBufferBeginInfo()), _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(getFramebufferScissor()),
+      _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(getFramebufferScissor()),
       _viewport(vks::initializers::viewport(static_cast<float>(_scissor.extent.width), static_cast<float>(_scissor.extent.height), 0, 1.0f))
 {
     VkClearValue clearColor;
@@ -41,17 +107,7 @@ VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>&
     _render_pass_begin_info.pClearValues = _clear_values.data();
 }
 
-VKFramebuffer::~VKFramebuffer()
-{
-    _recycler->recycle(*this);
-}
-
-uint64_t VKFramebuffer::id()
-{
-    return (uint64_t) _render_pass_begin_info.framebuffer;
-}
-
-void VKFramebuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& /*uploader*/)
+void VKFramebuffer::Stub::initialize()
 {
     VkDevice device = _renderer->vkLogicalDevice();
     uint32_t width = _scissor.extent.width;
@@ -160,69 +216,22 @@ void VKFramebuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Upload
     _command_buffer = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
 }
 
-Resource::RecycleFunc VKFramebuffer::recycle()
+VkCommandBuffer VKFramebuffer::Stub::vkCommandBuffer()
 {
-    const sp<VKDevice> device = _renderer->device();
-
-    VkImage depthstencilImage = _depthstencil_image;
-    VkDeviceMemory depthstencilMemory = _depthstencil_memory;
-    VkImageView depthstencilView = _depthstencil_view;
-
-    VkFramebuffer framebuffer = _render_pass_begin_info.framebuffer;
-    VkRenderPass renderPass = _render_pass_begin_info.renderPass;
-
-    _depthstencil_image = VK_NULL_HANDLE;
-    _depthstencil_memory = VK_NULL_HANDLE;
-    _depthstencil_view = VK_NULL_HANDLE;
-    _render_pass_begin_info.framebuffer = VK_NULL_HANDLE;
-    _render_pass_begin_info.renderPass = VK_NULL_HANDLE;
-
-    return [=](GraphicsContext&) {
-        VkDevice logicalDevice = device->vkLogicalDevice();
-        if(depthstencilImage) {
-            vkDestroyImageView(logicalDevice, depthstencilView, nullptr);
-            vkDestroyImage(logicalDevice, depthstencilImage, nullptr);
-            vkFreeMemory(logicalDevice, depthstencilMemory, nullptr);
-        }
-        vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
-        vkDestroyFramebuffer(logicalDevice, framebuffer, nullptr);
-    };
+    return _command_buffer;
 }
 
-const sp<Texture>& VKFramebuffer::texture() const
+VkRenderPass VKFramebuffer::Stub::create(const PipelineBindings& bindings)
 {
-    return _texture;
+    return _render_pass_begin_info.renderPass;
 }
 
-void VKFramebuffer::beginCommandBuffer(GraphicsContext& graphicsContext)
+VkRenderPass VKFramebuffer::Stub::begin(VkCommandBuffer commandBuffer)
 {
-    VKUtil::checkResult(vkBeginCommandBuffer(_command_buffer, &_command_buffer_begin_info));
-
-    vkCmdBeginRenderPass(_command_buffer, &_render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
-    vkCmdSetViewport(_command_buffer, 0, 1, &_viewport);
-    vkCmdSetScissor(_command_buffer, 0, 1, &_scissor);
-
-    graphicsContext.attachments().ensure<VKGraphicsContext>()->pushState({_command_buffer, _render_pass_begin_info.renderPass});
-}
-
-void VKFramebuffer::endCommandBuffer(GraphicsContext& graphicsContext)
-{
-    vkCmdEndRenderPass(_command_buffer);
-    VKUtil::checkResult(vkEndCommandBuffer(_command_buffer));
-    graphicsContext.attachments().ensure<VKGraphicsContext>()->popState();
-}
-
-void VKFramebuffer::submit(GraphicsContext& graphicsContext)
-{
-    const sp<VKGraphicsContext>& vkContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
-    vkContext->addSubmitInfo(1, &_command_buffer);
-}
-
-VkRect2D VKFramebuffer::getFramebufferScissor() const
-{
-    DASSERT(_color_attachments.size() > 0);
-    const sp<Texture>& texture = _color_attachments.at(0);
-    return vks::initializers::rect2D(texture->width(), texture->height(), 0, 0);
+    vkCmdBeginRenderPass(commandBuffer, &_render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdSetViewport(commandBuffer, 0, 1, &_viewport);
+    vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
+    return _render_pass_begin_info.renderPass;
 }
 
 }

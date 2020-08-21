@@ -42,8 +42,6 @@ private:
     std::vector<VkSubmitInfo> _submit_infos;
     std::vector<VkSemaphore> _wait_semaphores;
     std::vector<VkSemaphore> _signal_semaphores;
-
-    std::vector<VkSemaphore> _connector_semaphores;
 };
 
 }

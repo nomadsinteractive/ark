@@ -338,7 +338,8 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
         shaderStages.push_back(VKUtil::createShader(device->vkLogicalDevice(), i.second, i.first));
 
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
-    VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, vkGraphicsContext->vkRenderPass(), 0);
+    VKGraphicsContext::State& state = vkGraphicsContext->getCurrentState();
+    VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.createRenderPass(_bindings), 0);
 
     pipelineCreateInfo.pVertexInputState = &vertexLayout.inputState;
     pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
@@ -370,8 +371,8 @@ void VKPipeline::setupComputePipeline(GraphicsContext& /*graphicsContext*/)
 void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
-
-    VkCommandBuffer commandBuffer = vkGraphicsContext->vkCommandBuffer();
+    VKGraphicsContext::State& state = vkGraphicsContext->getCurrentState();
+    VkCommandBuffer commandBuffer = state.startRecording();
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _layout, 0, 1, &_descriptor_set, 0, nullptr);
 

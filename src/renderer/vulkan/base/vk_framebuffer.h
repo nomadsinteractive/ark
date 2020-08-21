@@ -11,6 +11,7 @@
 #include "renderer/inf/resource.h"
 
 #include "renderer/vulkan/forward.h"
+#include "renderer/vulkan/base/vk_graphics_context.h"
 
 #include "platform/vulkan/vulkan.h"
 
@@ -27,34 +28,45 @@ public:
     virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
     virtual RecycleFunc recycle() override;
 
-    const sp<Texture>& texture() const;
-
     void beginCommandBuffer(GraphicsContext& graphicsContext);
     void endCommandBuffer(GraphicsContext& graphicsContext);
-    void submit(GraphicsContext& graphicsContext);
 
 private:
-    VkRect2D getFramebufferScissor() const;
+    class Stub : public VKGraphicsContext::RenderPassPhrase {
+    public:
+        Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
+
+        void initialize();
+
+        virtual VkCommandBuffer vkCommandBuffer() override;
+        virtual VkRenderPass create(const PipelineBindings& bindings) override;
+        virtual VkRenderPass begin(VkCommandBuffer commandBuffer) override;
+
+    private:
+        VkRect2D getFramebufferScissor() const;
+
+    private:
+        sp<VKRenderer> _renderer;
+        sp<Recycler> _recycler;
+        std::vector<sp<Texture>> _color_attachments;
+        sp<Texture> _depth_stencil_attachment;
+
+        VkImage _depthstencil_image;
+        VkDeviceMemory _depthstencil_memory;
+        VkImageView _depthstencil_view;
+
+        VkCommandBuffer _command_buffer;
+        VkRenderPassBeginInfo _render_pass_begin_info;
+        VkRect2D _scissor;
+        VkViewport _viewport;
+
+        std::vector<VkClearValue> _clear_values;
+
+        friend class VKFramebuffer;
+    };
 
 private:
-    sp<VKRenderer> _renderer;
-    sp<Recycler> _recycler;
-    sp<Texture> _texture;
-    std::vector<sp<Texture>> _color_attachments;
-    sp<Texture> _depth_stencil_attachment;
-
-    VkImage _depthstencil_image;
-    VkDeviceMemory _depthstencil_memory;
-    VkImageView _depthstencil_view;
-
-    VkCommandBuffer _command_buffer;
-
-    std::vector<VkClearValue> _clear_values;
-
-    VkCommandBufferBeginInfo _command_buffer_begin_info;
-    VkRenderPassBeginInfo _render_pass_begin_info;
-    VkRect2D _scissor;
-    VkViewport _viewport;
+    sp<Stub> _stub;
 };
 
 }

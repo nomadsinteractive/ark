@@ -34,7 +34,6 @@ public:
 
     virtual void draw(GraphicsContext& graphicsContext) override {
         _fbo->endCommandBuffer(graphicsContext);
-        _fbo->submit(graphicsContext);
     }
 
 private:

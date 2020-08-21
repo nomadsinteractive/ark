@@ -27,9 +27,6 @@ VKSubmitQueue::~VKSubmitQueue()
 
     for(VkSemaphore& i : _signal_semaphores)
         vkDestroySemaphore(vkLogicalDevice, i, nullptr);
-
-    for(VkSemaphore& i : _connector_semaphores)
-        vkDestroySemaphore(vkLogicalDevice, i, nullptr);
 }
 
 const std::vector<VkSemaphore>& VKSubmitQueue::signalSemaphores() const
@@ -63,29 +60,6 @@ void VKSubmitQueue::submit(VkQueue queue)
         firstSubmitInfo.waitSemaphoreCount = static_cast<uint32_t>(_wait_semaphores.size());
         lastSubmitInfo.pSignalSemaphores = _signal_semaphores.data();
         lastSubmitInfo.signalSemaphoreCount = static_cast<uint32_t>(_signal_semaphores.size());
-
-        if(_connector_semaphores.size() < _submit_infos.size() - 1)
-        {
-            size_t count = _submit_infos.size() - _connector_semaphores.size() - 1;
-            for(size_t i = 0; i < count; ++i)
-            {
-                VkSemaphore semaphore;
-                VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
-                VKUtil::checkResult(vkCreateSemaphore(_renderer->vkLogicalDevice(), &semaphoreCreateInfo, nullptr, &semaphore));
-                _connector_semaphores.push_back(semaphore);
-            }
-        }
-
-        for(size_t i = 0; i < _submit_infos.size() - 1; ++i)
-        {
-            VkSubmitInfo& preSubmitInfo = _submit_infos[i];
-            VkSubmitInfo& submitInfo = _submit_infos[i + 1];
-            preSubmitInfo.pSignalSemaphores = &_connector_semaphores[i];
-            preSubmitInfo.signalSemaphoreCount = 1;
-            submitInfo.pWaitSemaphores = preSubmitInfo.pSignalSemaphores;
-            submitInfo.waitSemaphoreCount = preSubmitInfo.signalSemaphoreCount;
-        }
-
         VKUtil::checkResult(vkQueueSubmit(queue, static_cast<uint32_t>(_submit_infos.size()), _submit_infos.data(), VK_NULL_HANDLE));
     }
     _wait_semaphores.clear();
@@ -100,6 +74,8 @@ void VKSubmitQueue::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBu
     submitInfo.pCommandBuffers = pCommandBuffers;
     submitInfo.signalSemaphoreCount = 0;
     submitInfo.pSignalSemaphores = nullptr;
+    submitInfo.waitSemaphoreCount = 0;
+    submitInfo.pWaitSemaphores = nullptr;
     _submit_infos.push_back(submitInfo);
 }
 

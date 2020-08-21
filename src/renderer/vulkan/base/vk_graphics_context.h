@@ -25,15 +25,36 @@ public:
     void begin(uint32_t imageId, const Color& backgroundColor);
     void end();
 
-    struct State {
-        VkCommandBuffer _command_buffer;
-        VkRenderPass _render_pass;
+
+    class RenderPassPhrase {
+    public:
+        virtual ~RenderPassPhrase() = default;
+
+        virtual VkCommandBuffer vkCommandBuffer() = 0;
+        virtual VkRenderPass create(const PipelineBindings& bindings) = 0;
+        virtual VkRenderPass begin(VkCommandBuffer commandBuffer) = 0;
     };
 
-    VkCommandBuffer vkCommandBuffer() const;
-    VkRenderPass vkRenderPass() const;
+    class State {
+    public:
+        State(sp<RenderPassPhrase> renderPassPhrase, VkCommandBuffer commandBuffer, bool beginCommandBuffer);
 
-    void pushState(const State& state);
+        VkRenderPass createRenderPass(const PipelineBindings& bindings);
+        VkCommandBuffer startRecording();
+
+    private:
+        sp<RenderPassPhrase> _render_pass_phrase;
+
+        VkCommandBuffer _command_buffer;
+        bool _begin_command_buffer;
+        VkRenderPass _render_pass;
+
+        friend class VKGraphicsContext;
+    };
+
+    State& getCurrentState();
+
+    void pushState(sp<RenderPassPhrase> starter);
     void popState();
 
     void submit(VkQueue queue);
