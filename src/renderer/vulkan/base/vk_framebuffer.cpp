@@ -109,6 +109,16 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
 
 void VKFramebuffer::Stub::initialize()
 {
+    _command_buffer = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
+}
+
+VkCommandBuffer VKFramebuffer::Stub::vkCommandBuffer()
+{
+    return _command_buffer;
+}
+
+VkRenderPass VKFramebuffer::Stub::create(const PipelineBindings& bindings)
+{
     VkDevice device = _renderer->vkLogicalDevice();
     uint32_t width = _scissor.extent.width;
     uint32_t height = _scissor.extent.height;
@@ -213,16 +223,6 @@ void VKFramebuffer::Stub::initialize()
 
     VKUtil::checkResult(vkCreateFramebuffer(device, &fbufCreateInfo, nullptr, &_render_pass_begin_info.framebuffer));
 
-    _command_buffer = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
-}
-
-VkCommandBuffer VKFramebuffer::Stub::vkCommandBuffer()
-{
-    return _command_buffer;
-}
-
-VkRenderPass VKFramebuffer::Stub::create(const PipelineBindings& bindings)
-{
     return _render_pass_begin_info.renderPass;
 }
 

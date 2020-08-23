@@ -275,13 +275,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
                 0,
                 VK_FALSE);
 
-    const VkCullModeFlags cullModeFlags[] = {VK_CULL_MODE_NONE, VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_BACK_BIT, VK_CULL_MODE_NONE};
-    VkPipelineRasterizationStateCreateInfo rasterizationState =
-            vks::initializers::pipelineRasterizationStateCreateInfo(
-                VK_POLYGON_MODE_FILL,
-                cullModeFlags[_bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK)],
-                VK_FRONT_FACE_COUNTER_CLOCKWISE,
-                0);
+    VkPipelineRasterizationStateCreateInfo rasterizationState = makeRasterizationState();
 
     std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
     for(uint32_t i = 0; i < _bindings.layout()->colorAttachmentCount(); ++i)
@@ -303,11 +297,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
                 static_cast<uint32_t>(blendAttachmentStates.size()),
                 blendAttachmentStates.data());
 
-    VkPipelineDepthStencilStateCreateInfo depthStencilState =
-            vks::initializers::pipelineDepthStencilStateCreateInfo(
-                VK_TRUE,
-                VK_TRUE,
-                VK_COMPARE_OP_LESS_OR_EQUAL);
+    VkPipelineDepthStencilStateCreateInfo depthStencilState = makeDepthStencilState();
 
     const RenderEngineContext::Resolution& displayResolution = graphicsContext.renderContext()->displayResolution();
     const Rect& scissor = _bindings.scissor();
@@ -456,6 +446,36 @@ void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const std::v
             ubo->reload(graphicsContext, uboSnapshot._buffer);
         }
     }
+}
+
+VkPipelineDepthStencilStateCreateInfo VKPipeline::makeDepthStencilState() const
+{
+    if(_bindings.parameters()._tests.has(PipelineBindings::FRAGMENT_TEST_DEPTH))
+    {
+        const PipelineBindings::TraitDepthTest& depthTest = _bindings.parameters()._tests.at(PipelineBindings::FRAGMENT_TEST_DEPTH)._trait._depth_test;
+        const VkCompareOp compareOps[] = {VK_COMPARE_OP_ALWAYS, VK_COMPARE_OP_NEVER, VK_COMPARE_OP_EQUAL, VK_COMPARE_OP_NOT_EQUAL, VK_COMPARE_OP_LESS, VK_COMPARE_OP_GREATER,
+                                          VK_COMPARE_OP_LESS_OR_EQUAL, VK_COMPARE_OP_GREATER_OR_EQUAL};
+        DASSERT(depthTest._func < PipelineBindings::COMPARE_FUNC_LENGTH);
+        return vks::initializers::pipelineDepthStencilStateCreateInfo(depthTest._enabled, depthTest._write_enabled, compareOps[depthTest._func]);
+    }
+    return vks::initializers::pipelineDepthStencilStateCreateInfo(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
+}
+
+VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() const
+{
+    const VkCullModeFlags cullModeFlags[] = {VK_CULL_MODE_NONE, VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_BACK_BIT, VK_CULL_MODE_NONE};
+    VkCullModeFlags flags = cullModeFlags[_bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK)];
+    if(_bindings.parameters()._tests.has(PipelineBindings::FRAGMENT_TEST_CULL_FACE))
+    {
+        const PipelineBindings::TraitCullFaceTest& cullFaceTest = _bindings.parameters()._tests.at(PipelineBindings::FRAGMENT_TEST_CULL_FACE)._trait._cull_face_test;
+        DASSERT(cullFaceTest._front_face < PipelineBindings::FRONT_FACE_LENGTH);
+        return vks::initializers::pipelineRasterizationStateCreateInfo(
+                VK_POLYGON_MODE_FILL,
+                cullFaceTest._enabled ? cullModeFlags[_bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK)] : VK_CULL_MODE_NONE,
+                cullFaceTest._front_face == PipelineBindings::FRONT_FACE_COUTER_CLOCK_WISE ? VK_FRONT_FACE_COUNTER_CLOCKWISE : VK_FRONT_FACE_CLOCKWISE,
+                0);
+    }
+    return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, flags, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
 }
 
 void VKPipeline::VKDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)

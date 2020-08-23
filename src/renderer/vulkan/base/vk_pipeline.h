@@ -90,6 +90,9 @@ private:
     sp<VKDescriptorPool> makeDescriptorPool() const;
     void bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots);
 
+    VkPipelineDepthStencilStateCreateInfo makeDepthStencilState() const;
+    VkPipelineRasterizationStateCreateInfo makeRasterizationState() const;
+
 private:
     PipelineBindings _bindings;
 

@@ -39,11 +39,49 @@ public:
         FRAGMENT_TEST_STENCIL
     };
 
+    enum CompareFunc {
+        COMPARE_FUNC_ALWAYS,
+        COMPARE_FUNC_NEVER,
+        COMPARE_FUNC_EQUAL,
+        COMPARE_FUNC_NOT_EQUAL,
+        COMPARE_FUNC_LESS,
+        COMPARE_FUNC_GREATER,
+        COMPARE_FUNC_LEQUAL,
+        COMPARE_FUNC_GEQUAL,
+        COMPARE_FUNC_LENGTH
+    };
+
+    enum FrontFace {
+        FRONT_FACE_COUTER_CLOCK_WISE,
+        FRONT_FACE_CLOCK_WISE,
+        FRONT_FACE_LENGTH
+    };
+
+    struct TraitDepthTest {
+        bool _enabled;
+        bool _write_enabled;
+        CompareFunc _func;
+    };
+
+    struct TraitCullFaceTest {
+        bool _enabled;
+        FrontFace _front_face;
+    };
+
+    union Trait {
+        TraitDepthTest _depth_test;
+        TraitCullFaceTest _cull_face_test;
+    };
+
     struct FragmentTestManifest {
         FragmentTestManifest(document manifest, sp<Vec4> value = nullptr);
 
         document _manifest;
         sp<Vec4> _value;
+
+        FragmentTest _type;
+        Trait _trait;
+
     };
 
     typedef Table<int32_t, FragmentTestManifest> FragmentTestTable;

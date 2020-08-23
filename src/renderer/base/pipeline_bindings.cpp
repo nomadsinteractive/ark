@@ -163,6 +163,22 @@ template<> ARK_API PipelineBindings::Flag Conversions::to<String, PipelineBindin
     return static_cast<PipelineBindings::Flag>(flag);
 }
 
+PipelineBindings::FragmentTestManifest::FragmentTestManifest(document manifest, sp<Vec4> value)
+    : _manifest(std::move(manifest)), _value(std::move(value)), _type(Documents::ensureAttribute<FragmentTest>(_manifest, Constants::Attributes::TYPE))
+{
+    if(_type == FRAGMENT_TEST_DEPTH)
+    {
+        _trait._depth_test._enabled = Documents::getAttribute<bool>(_manifest, "enabled", true);
+        _trait._depth_test._write_enabled = Documents::getAttribute<bool>(_manifest, "write-enabled", true);
+        _trait._depth_test._func = Documents::getAttribute<CompareFunc>(_manifest, "func", PipelineBindings::COMPARE_FUNC_LEQUAL);
+    }
+    else if(_type == FRAGMENT_TEST_CULL_FACE)
+    {
+        _trait._cull_face_test._enabled = Documents::getAttribute<bool>(_manifest, "enabled", true);
+        _trait._cull_face_test._front_face = Documents::getAttribute<FrontFace>(_manifest, "front-face", PipelineBindings::FRONT_FACE_COUTER_CLOCK_WISE);
+    }
+}
+
 template<> ARK_API PipelineBindings::FragmentTest Conversions::to<String, PipelineBindings::FragmentTest>(const String& str)
 {
     if(str == "cull_face")
@@ -175,9 +191,32 @@ template<> ARK_API PipelineBindings::FragmentTest Conversions::to<String, Pipeli
     return PipelineBindings::FRAGMENT_TEST_STENCIL;
 }
 
-PipelineBindings::FragmentTestManifest::FragmentTestManifest(document manifest, sp<Vec4> value)
-    : _manifest(std::move(manifest)), _value(std::move(value))
+template<> ARK_API PipelineBindings::CompareFunc Conversions::to<String, PipelineBindings::CompareFunc>(const String& str)
 {
+    if(str == "always")
+        return PipelineBindings::COMPARE_FUNC_ALWAYS;
+    if(str == "never")
+        return PipelineBindings::COMPARE_FUNC_NEVER;
+    if(str == "equal")
+        return PipelineBindings::COMPARE_FUNC_EQUAL;
+    if(str == "not_equal")
+        return PipelineBindings::COMPARE_FUNC_NOT_EQUAL;
+    if(str == "less")
+        return PipelineBindings::COMPARE_FUNC_LESS;
+    if(str == "greater")
+        return PipelineBindings::COMPARE_FUNC_GREATER;
+    if(str == "less_equal")
+        return PipelineBindings::COMPARE_FUNC_LEQUAL;
+    DCHECK(str == "greater_equal", "Unknown CompareFunc: \"%s\", possible values are [always, never, equal, not_equal, less, greater, less_equal, greater_equal]", str.c_str());
+    return PipelineBindings::COMPARE_FUNC_GEQUAL;
+}
+
+template<> ARK_API PipelineBindings::FrontFace Conversions::to<String, PipelineBindings::FrontFace>(const String& str)
+{
+    if(str == "ccw")
+        return PipelineBindings::FRONT_FACE_COUTER_CLOCK_WISE;
+    DCHECK(str == "cw", "Unknown FrontFace: \"%s\", possible values are [ccw, cw]", str.c_str());
+    return PipelineBindings::FRONT_FACE_CLOCK_WISE;
 }
 
 }

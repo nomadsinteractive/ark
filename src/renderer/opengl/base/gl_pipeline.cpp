@@ -130,7 +130,7 @@ class GLDepthTest : public Snippet::DrawEvents {
 public:
     GLDepthTest(const document& manifest)
         : _func(GLUtil::getEnum(manifest, "func", GL_ZERO)), _pre_func(GL_ZERO), _enabled(Documents::getAttribute<bool>(manifest, "enabled", true)),
-          _read_only(Documents::getAttribute<bool>(manifest, "read-only", false)) {
+          _read_only(!Documents::getAttribute<bool>(manifest, "write-enabled", true)) {
     }
 
     virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
