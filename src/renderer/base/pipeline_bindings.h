@@ -40,6 +40,7 @@ public:
     };
 
     enum CompareFunc {
+        COMPARE_FUNC_DEFAULT,
         COMPARE_FUNC_ALWAYS,
         COMPARE_FUNC_NEVER,
         COMPARE_FUNC_EQUAL,
@@ -51,16 +52,50 @@ public:
         COMPARE_FUNC_LENGTH
     };
 
+    enum StencilFunc {
+        STENCIL_FUNC_KEEP,
+        STENCIL_FUNC_ZERO,
+        STENCIL_FUNC_REPLACE,
+        STENCIL_FUNC_INCREASE,
+        STENCIL_FUNC_INCREASE_AND_WRAP,
+        STENCIL_FUNC_DECREASE,
+        STENCIL_FUNC_DECREASE_AND_WRAP,
+        STENCIL_FUNC_INVERT,
+        STENCIL_FUNC_LENGTH
+    };
+
     enum FrontFace {
+        FRONT_FACE_DEFAULT,
         FRONT_FACE_COUTER_CLOCK_WISE,
         FRONT_FACE_CLOCK_WISE,
         FRONT_FACE_LENGTH
+    };
+
+    enum FrontFaceType {
+        FRONT_FACE_TYPE_DEFAULT,
+        FRONT_FACE_TYPE_FRONT,
+        FRONT_FACE_TYPE_BACK,
+        FRONT_FACE_TYPE_LENGTH
     };
 
     struct TraitDepthTest {
         bool _enabled;
         bool _write_enabled;
         CompareFunc _func;
+    };
+
+    struct TraitStencilTestSeparate {
+        FrontFaceType _type;
+        CompareFunc _func;
+        uint32_t _mask;
+        uint32_t _compare_mask;
+        uint32_t _ref;
+        StencilFunc _op, _op_dfail, _op_dpass;
+    };
+
+    struct TraitStencilTest {
+        TraitStencilTestSeparate _front;
+        TraitStencilTestSeparate _back;
     };
 
     struct TraitCullFaceTest {
@@ -70,17 +105,18 @@ public:
 
     union Trait {
         TraitDepthTest _depth_test;
+        TraitStencilTest _stencil_test;
         TraitCullFaceTest _cull_face_test;
     };
 
     struct FragmentTestManifest {
-        FragmentTestManifest(document manifest, sp<Vec4> value = nullptr);
-
-        document _manifest;
-        sp<Vec4> _value;
+        FragmentTestManifest(const document& manifest);
 
         FragmentTest _type;
         Trait _trait;
+
+    private:
+        TraitStencilTestSeparate loadStencilTestSeparate(const document& manifest, bool allowDefaultFace) const;
 
     };
 

@@ -163,20 +163,53 @@ template<> ARK_API PipelineBindings::Flag Conversions::to<String, PipelineBindin
     return static_cast<PipelineBindings::Flag>(flag);
 }
 
-PipelineBindings::FragmentTestManifest::FragmentTestManifest(document manifest, sp<Vec4> value)
-    : _manifest(std::move(manifest)), _value(std::move(value)), _type(Documents::ensureAttribute<FragmentTest>(_manifest, Constants::Attributes::TYPE))
+PipelineBindings::FragmentTestManifest::FragmentTestManifest(const document& manifest)
+    : _type(Documents::ensureAttribute<FragmentTest>(manifest, Constants::Attributes::TYPE))
 {
     if(_type == FRAGMENT_TEST_DEPTH)
     {
-        _trait._depth_test._enabled = Documents::getAttribute<bool>(_manifest, "enabled", true);
-        _trait._depth_test._write_enabled = Documents::getAttribute<bool>(_manifest, "write-enabled", true);
-        _trait._depth_test._func = Documents::getAttribute<CompareFunc>(_manifest, "func", PipelineBindings::COMPARE_FUNC_LEQUAL);
+        _trait._depth_test._enabled = Documents::getAttribute<bool>(manifest, "enabled", true);
+        _trait._depth_test._write_enabled = Documents::getAttribute<bool>(manifest, "write-enabled", true);
+        _trait._depth_test._func = Documents::getAttribute<CompareFunc>(manifest, "func", PipelineBindings::COMPARE_FUNC_DEFAULT);
+    }
+    else if(_type == FRAGMENT_TEST_STENCIL)
+    {
+        TraitStencilTest& stencilTest = _trait._stencil_test;
+        const std::vector<document>& faces = manifest->children("face");
+        if(faces.size() == 0)
+            stencilTest._front = stencilTest._back = loadStencilTestSeparate(manifest, true);
+        else
+        {
+            stencilTest._front._type = stencilTest._back._type = FRONT_FACE_TYPE_DEFAULT;
+            for(const auto& i : faces)
+            {
+                PipelineBindings::TraitStencilTestSeparate face = loadStencilTestSeparate(i, false);
+                DCHECK(face._type != FRONT_FACE_TYPE_DEFAULT, "Default face type is not allowed in separated stencil configs");
+                (face._type == FRONT_FACE_TYPE_FRONT ? stencilTest._front : stencilTest._back) = face;
+            }
+        }
     }
     else if(_type == FRAGMENT_TEST_CULL_FACE)
     {
-        _trait._cull_face_test._enabled = Documents::getAttribute<bool>(_manifest, "enabled", true);
-        _trait._cull_face_test._front_face = Documents::getAttribute<FrontFace>(_manifest, "front-face", PipelineBindings::FRONT_FACE_COUTER_CLOCK_WISE);
+        _trait._cull_face_test._enabled = Documents::getAttribute<bool>(manifest, "enabled", true);
+        _trait._cull_face_test._front_face = Documents::getAttribute<FrontFace>(manifest, "front-face", PipelineBindings::FRONT_FACE_DEFAULT);
     }
+}
+
+PipelineBindings::TraitStencilTestSeparate PipelineBindings::FragmentTestManifest::loadStencilTestSeparate(const document& manifest, bool allowDefaultFace) const
+{
+    PipelineBindings::TraitStencilTestSeparate face;
+    face._type = Documents::getAttribute<FrontFaceType>(manifest, "face-type", FRONT_FACE_TYPE_DEFAULT);
+    if(!allowDefaultFace && face._type == FRONT_FACE_TYPE_DEFAULT)
+        return face;
+    face._func = Documents::ensureAttribute<CompareFunc>(manifest, "func");
+    face._mask = Documents::getAttribute<uint32_t>(manifest, "mask", 0xff);
+    face._compare_mask = Documents::getAttribute<uint32_t>(manifest, "compare-mask", 0xff);
+    face._ref = Documents::ensureAttribute<uint32_t>(manifest, "ref");
+    face._op = Documents::getAttribute<StencilFunc>(manifest, "op", STENCIL_FUNC_KEEP);
+    face._op_dfail = Documents::getAttribute<StencilFunc>(manifest, "op-dfail", STENCIL_FUNC_KEEP);
+    face._op_dpass = Documents::getAttribute<StencilFunc>(manifest, "op-dpass", STENCIL_FUNC_KEEP);
+    return face;
 }
 
 template<> ARK_API PipelineBindings::FragmentTest Conversions::to<String, PipelineBindings::FragmentTest>(const String& str)
@@ -211,12 +244,40 @@ template<> ARK_API PipelineBindings::CompareFunc Conversions::to<String, Pipelin
     return PipelineBindings::COMPARE_FUNC_GEQUAL;
 }
 
+template<> ARK_API PipelineBindings::StencilFunc Conversions::to<String, PipelineBindings::StencilFunc>(const String& str)
+{
+    if(str == "keep")
+        return PipelineBindings::STENCIL_FUNC_KEEP;
+    if(str == "zero")
+        return PipelineBindings::STENCIL_FUNC_ZERO;
+    if(str == "replace")
+        return PipelineBindings::STENCIL_FUNC_REPLACE;
+    if(str == "increase")
+        return PipelineBindings::STENCIL_FUNC_INCREASE;
+    if(str == "increase_and_wrap")
+        return PipelineBindings::STENCIL_FUNC_INCREASE_AND_WRAP;
+    if(str == "decrease")
+        return PipelineBindings::STENCIL_FUNC_DECREASE;
+    if(str == "decrease_and_wrap")
+        return PipelineBindings::STENCIL_FUNC_DECREASE_AND_WRAP;
+    DCHECK(str == "invert", "Unknown StencilFunc: \"%s\", possible values are [keep, zero, replace, increase, increase_and_wrap, decrease, decrease_and_wrap, invert]", str.c_str());
+    return PipelineBindings::STENCIL_FUNC_INVERT;
+}
+
 template<> ARK_API PipelineBindings::FrontFace Conversions::to<String, PipelineBindings::FrontFace>(const String& str)
 {
     if(str == "ccw")
         return PipelineBindings::FRONT_FACE_COUTER_CLOCK_WISE;
     DCHECK(str == "cw", "Unknown FrontFace: \"%s\", possible values are [ccw, cw]", str.c_str());
     return PipelineBindings::FRONT_FACE_CLOCK_WISE;
+}
+
+template<> ARK_API PipelineBindings::FrontFaceType Conversions::to<String, PipelineBindings::FrontFaceType>(const String& str)
+{
+    if(str == "front")
+        return PipelineBindings::FRONT_FACE_TYPE_FRONT;
+    DCHECK(str == "back", "Unknown FrontFaceType: \"%s\", possible values are [front, back]", str.c_str());
+    return PipelineBindings::FRONT_FACE_TYPE_BACK;
 }
 
 }

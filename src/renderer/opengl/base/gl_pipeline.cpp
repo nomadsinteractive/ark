@@ -95,8 +95,8 @@ private:
 
 class GLCullFaceTest : public Snippet::DrawEvents {
 public:
-    GLCullFaceTest(const document& manifest)
-        : _enabled(Documents::getAttribute<bool>(manifest, "enabled", true)), _front_face(GLUtil::getEnum(manifest, "front-face", GL_ZERO)), _pre_front_face(GL_ZERO) {
+    GLCullFaceTest(const PipelineBindings::TraitCullFaceTest& trait)
+        : _enabled(trait._enabled), _front_face(trait._front_face == PipelineBindings::FRONT_FACE_DEFAULT ? GL_ZERO : (trait._front_face == PipelineBindings::FRONT_FACE_CLOCK_WISE ? GL_CW : GL_CCW)), _pre_front_face(GL_ZERO) {
     }
 
     virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
@@ -113,10 +113,12 @@ public:
     }
 
     virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {
-        if(!_enabled)
+        if(_enabled) {
+            if(_front_face != GL_ZERO)
+                glFrontFace(_pre_front_face);
+        }
+        else
             glEnable(GL_CULL_FACE);
-        if(_front_face != GL_ZERO)
-            glFrontFace(_pre_front_face);
     }
 
 private:
@@ -128,9 +130,8 @@ private:
 
 class GLDepthTest : public Snippet::DrawEvents {
 public:
-    GLDepthTest(const document& manifest)
-        : _func(GLUtil::getEnum(manifest, "func", GL_ZERO)), _pre_func(GL_ZERO), _enabled(Documents::getAttribute<bool>(manifest, "enabled", true)),
-          _read_only(!Documents::getAttribute<bool>(manifest, "write-enabled", true)) {
+    GLDepthTest(const PipelineBindings::TraitDepthTest& trait)
+        : _func(GLUtil::toCompareFunc(trait._func)), _pre_func(GL_ZERO), _enabled(trait._enabled), _read_only(!trait._write_enabled) {
     }
 
     virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
@@ -166,16 +167,14 @@ private:
 
 class GLStencilTest : public Snippet::DrawEvents {
 public:
-    GLStencilTest(const document& manifest)
-        : _func(GLUtil::getEnum(manifest, "func")), _ref(Documents::ensureAttribute<int32_t>(manifest, "ref")), _mask(Documents::getAttribute<uint32_t>(manifest, "mask", 0xff)),
-          _op(GLUtil::getEnum(manifest, "op", GL_KEEP)), _op_dfail(GLUtil::getEnum(manifest, "op-dfail", GL_KEEP)), _op_dpass(GLUtil::getEnum(manifest, "op-dpass", GL_KEEP)) {
+    GLStencilTest(std::vector<sp<Snippet::DrawEvents>> delegate)
+        : _delegate(std::move(delegate)) {
     }
 
-    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
         glEnable(GL_STENCIL_TEST);
-        glStencilMask(_mask);
-        glStencilFunc(_func, _ref, 0xff);
-        glStencilOp(_op, _op_dfail, _op_dpass);
+        for(const sp<Snippet::DrawEvents>& i : _delegate)
+            i->preDraw(graphicsContext, context);
     }
 
     virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {
@@ -184,25 +183,19 @@ public:
     }
 
 private:
-    GLenum _func;
-    GLint _ref;
-    GLuint _mask;
-
-    GLenum _op, _op_dfail, _op_dpass;
+    std::vector<sp<Snippet::DrawEvents>> _delegate;
 };
 
 class GLStencilTestSeparate : public Snippet::DrawEvents {
 public:
-    GLStencilTestSeparate(GLenum face, const document& manifest)
-        : _face(face), _mask(Documents::getAttribute<uint32_t>(manifest, "mask", 0xff)),
-          _func(GLUtil::getEnum(manifest, "func")), _func_mask(Documents::getAttribute<uint32_t>(manifest, "func-mask", 0xff)),
-          _ref(Documents::ensureAttribute<int32_t>(manifest, "ref")), _op(GLUtil::getEnum(manifest, "op", GL_KEEP)), _op_dfail(GLUtil::getEnum(manifest, "op-dfail", GL_KEEP)),
-          _op_dpass(GLUtil::getEnum(manifest, "op-dpass", GL_KEEP)) {
+    GLStencilTestSeparate(const PipelineBindings::TraitStencilTestSeparate& conf)
+        : _face(GLUtil::toFrontFaceType(conf._type)), _mask(conf._mask), _func(GLUtil::toCompareFunc(conf._func)), _compare_mask(conf._compare_mask),
+          _ref(conf._ref), _op(GLUtil::toStencilFunc(conf._op)), _op_dfail(GLUtil::toStencilFunc(conf._op_dfail)), _op_dpass(GLUtil::toStencilFunc(conf._op_dpass)) {
     }
 
     virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
         glStencilMaskSeparate(_face, _mask);
-        glStencilFuncSeparate(_face, _func, _ref, _func_mask);
+        glStencilFuncSeparate(_face, _func, _ref, _compare_mask);
         glStencilOpSeparate(_face, _op, _op_dfail, _op_dpass);
     }
 
@@ -210,7 +203,7 @@ private:
     GLenum _face;
     GLuint _mask;
     GLenum _func;
-    GLuint _func_mask;
+    GLuint _compare_mask;
     GLint _ref;
 
     GLenum _op, _op_dfail, _op_dpass;
@@ -224,11 +217,25 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<
     for(const auto& i : bindings.parameters()._tests)
     {
         if(i.first == PipelineBindings::FRAGMENT_TEST_CULL_FACE)
-            _draw_tests.push_back(sp<GLCullFaceTest>::make(i.second._manifest));
+            _draw_tests.push_back(sp<GLCullFaceTest>::make(i.second._trait._cull_face_test));
         else if(i.first == PipelineBindings::FRAGMENT_TEST_DEPTH)
-            _draw_tests.push_back(sp<GLDepthTest>::make(i.second._manifest));
+            _draw_tests.push_back(sp<GLDepthTest>::make(i.second._trait._depth_test));
         else if(i.first == PipelineBindings::FRAGMENT_TEST_STENCIL)
-            _draw_tests.push_back(sp<GLStencilTest>::make(i.second._manifest));
+        {
+            std::vector<sp<Snippet::DrawEvents>> delegate;
+            const PipelineBindings::TraitStencilTest& test = i.second._trait._stencil_test;
+            if(test._front._type == PipelineBindings::FRONT_FACE_TYPE_DEFAULT && test._front._type == test._back._type)
+                delegate.push_back(sp<GLStencilTestSeparate>::make(test._front));
+            else
+            {
+                if(test._front._type == PipelineBindings::FRONT_FACE_TYPE_FRONT)
+                    delegate.push_back(sp<GLStencilTestSeparate>::make(test._front));
+                if(test._back._type == PipelineBindings::FRONT_FACE_TYPE_BACK)
+                    delegate.push_back(sp<GLStencilTestSeparate>::make(test._back));
+            }
+            DASSERT(delegate.size() > 0);
+            _draw_tests.push_back(sp<GLStencilTest>::make(std::move(delegate)));
+        }
     }
 }
 

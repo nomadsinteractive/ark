@@ -100,6 +100,27 @@ GLenum GLUtil::toShaderType(PipelineInput::ShaderStage stage)
     return types[stage];
 }
 
+GLenum GLUtil::toCompareFunc(PipelineBindings::CompareFunc func)
+{
+    const GLenum glFuncs[PipelineBindings::COMPARE_FUNC_LENGTH] = {GL_ZERO, GL_ALWAYS, GL_NEVER, GL_EQUAL, GL_NOTEQUAL, GL_LESS, GL_GREATER, GL_LEQUAL, GL_GEQUAL};
+    DCHECK(func < PipelineBindings::COMPARE_FUNC_LENGTH, "Unknow compare func: %d", func);
+    return glFuncs[func];
+}
+
+GLenum GLUtil::toStencilFunc(PipelineBindings::StencilFunc func)
+{
+    const GLenum glFuncs[PipelineBindings::STENCIL_FUNC_LENGTH] = {GL_KEEP, GL_ZERO, GL_REPLACE, GL_INCR, GL_INCR_WRAP, GL_DECR, GL_DECR_WRAP, GL_INVERT};
+    DCHECK(func < PipelineBindings::STENCIL_FUNC_LENGTH, "Unknow stencil func: %d", func);
+    return glFuncs[func];
+}
+
+GLenum GLUtil::toFrontFaceType(PipelineBindings::FrontFaceType face)
+{
+    const GLenum glFaceTypes[PipelineBindings::FRONT_FACE_TYPE_LENGTH] = {GL_FRONT_AND_BACK, GL_FRONT, GL_BACK};
+    DCHECK(face < PipelineBindings::FRONT_FACE_TYPE_LENGTH, "Unknow front face type: %d", face);
+    return glFaceTypes[face];
+}
+
 GLenum GLUtil::getEnum(const String& name)
 {
     const Global<GLConstants> constants;

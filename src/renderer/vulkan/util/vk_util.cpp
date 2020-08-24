@@ -301,6 +301,36 @@ VkFormat VKUtil::toTextureFormat(Texture::Format format)
     return toTextureFormat((format & Texture::FORMAT_F16) ? 2 : (format & Texture::FORMAT_F32 ? 4 : 1), (format & Texture::FORMAT_RGBA) + 1, format);
 }
 
+VkFrontFace VKUtil::toFrontFace(PipelineBindings::FrontFace frontFace)
+{
+    switch(frontFace) {
+        case PipelineBindings::FRONT_FACE_DEFAULT:
+        case PipelineBindings::FRONT_FACE_COUTER_CLOCK_WISE:
+            return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        case PipelineBindings::FRONT_FACE_CLOCK_WISE:
+            return VK_FRONT_FACE_CLOCKWISE;
+        default:
+            DFATAL("Unknow front face: %d", frontFace);
+    }
+    return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+}
+
+VkCompareOp VKUtil::toCompareOp(PipelineBindings::CompareFunc func)
+{
+    const VkCompareOp compareOps[] = {VK_COMPARE_OP_LESS_OR_EQUAL, VK_COMPARE_OP_ALWAYS, VK_COMPARE_OP_NEVER, VK_COMPARE_OP_EQUAL, VK_COMPARE_OP_NOT_EQUAL, VK_COMPARE_OP_LESS,
+                                      VK_COMPARE_OP_GREATER, VK_COMPARE_OP_LESS_OR_EQUAL, VK_COMPARE_OP_GREATER_OR_EQUAL};
+    DASSERT(func < PipelineBindings::COMPARE_FUNC_LENGTH);
+    return compareOps[func];
+}
+
+VkStencilOp VKUtil::toStencilOp(PipelineBindings::StencilFunc func)
+{
+    const VkStencilOp stencilOps[] = {VK_STENCIL_OP_KEEP, VK_STENCIL_OP_ZERO, VK_STENCIL_OP_REPLACE, VK_STENCIL_OP_INCREMENT_AND_CLAMP, VK_STENCIL_OP_INCREMENT_AND_WRAP,
+                                      VK_STENCIL_OP_DECREMENT_AND_CLAMP, VK_STENCIL_OP_DECREMENT_AND_WRAP, VK_STENCIL_OP_INVERT};
+    DASSERT(func < PipelineBindings::STENCIL_FUNC_LENGTH);
+    return stencilOps[func];
+}
+
 VkImageUsageFlags VKUtil::toTextureUsage(Texture::Usage usage)
 {
     VkImageUsageFlags vkFlags = 0;

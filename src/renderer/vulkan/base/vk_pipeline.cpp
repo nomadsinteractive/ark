@@ -450,15 +450,49 @@ void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const std::v
 
 VkPipelineDepthStencilStateCreateInfo VKPipeline::makeDepthStencilState() const
 {
+    VkPipelineDepthStencilStateCreateInfo state{};
+    state.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    state.depthTestEnable = VK_TRUE;
+    state.depthWriteEnable = VK_TRUE;
+    state.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+    state.stencilTestEnable = false;
+
     if(_bindings.parameters()._tests.has(PipelineBindings::FRAGMENT_TEST_DEPTH))
     {
         const PipelineBindings::TraitDepthTest& depthTest = _bindings.parameters()._tests.at(PipelineBindings::FRAGMENT_TEST_DEPTH)._trait._depth_test;
-        const VkCompareOp compareOps[] = {VK_COMPARE_OP_ALWAYS, VK_COMPARE_OP_NEVER, VK_COMPARE_OP_EQUAL, VK_COMPARE_OP_NOT_EQUAL, VK_COMPARE_OP_LESS, VK_COMPARE_OP_GREATER,
-                                          VK_COMPARE_OP_LESS_OR_EQUAL, VK_COMPARE_OP_GREATER_OR_EQUAL};
-        DASSERT(depthTest._func < PipelineBindings::COMPARE_FUNC_LENGTH);
-        return vks::initializers::pipelineDepthStencilStateCreateInfo(depthTest._enabled, depthTest._write_enabled, compareOps[depthTest._func]);
+        state.depthTestEnable = depthTest._enabled;
+        state.depthWriteEnable = depthTest._write_enabled;
+        state.depthCompareOp = VKUtil::toCompareOp(depthTest._func);
     }
-    return vks::initializers::pipelineDepthStencilStateCreateInfo(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
+
+    if(_bindings.parameters()._tests.has(PipelineBindings::FRAGMENT_TEST_STENCIL))
+    {
+        state.stencilTestEnable = true;
+        const PipelineBindings::TraitStencilTest& stencilTest = _bindings.parameters()._tests.at(PipelineBindings::FRAGMENT_TEST_STENCIL)._trait._stencil_test;
+        if(stencilTest._front._type == PipelineBindings::FRONT_FACE_TYPE_DEFAULT && stencilTest._front._type == stencilTest._back._type)
+            state.front = state.back = makeStencilState(stencilTest._front);
+        else
+        {
+            if(stencilTest._front._type == PipelineBindings::FRONT_FACE_TYPE_FRONT)
+                state.front = makeStencilState(stencilTest._front);
+            if(stencilTest._back._type == PipelineBindings::FRONT_FACE_TYPE_BACK)
+                state.back = makeStencilState(stencilTest._back);
+        }
+    }
+    return state;
+}
+
+VkStencilOpState VKPipeline::makeStencilState(const PipelineBindings::TraitStencilTestSeparate& stencil) const
+{
+    VkStencilOpState state{};
+    state.failOp = VKUtil::toStencilOp(stencil._op);
+    state.passOp = VKUtil::toStencilOp(stencil._op_dpass);
+    state.depthFailOp = VKUtil::toStencilOp(stencil._op_dfail);
+    state.compareOp = VKUtil::toCompareOp(stencil._func);
+    state.reference = stencil._ref;
+    state.writeMask = stencil._mask;
+    state.compareMask = stencil._compare_mask;
+    return state;
 }
 
 VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() const
@@ -468,12 +502,10 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
     if(_bindings.parameters()._tests.has(PipelineBindings::FRAGMENT_TEST_CULL_FACE))
     {
         const PipelineBindings::TraitCullFaceTest& cullFaceTest = _bindings.parameters()._tests.at(PipelineBindings::FRAGMENT_TEST_CULL_FACE)._trait._cull_face_test;
-        DASSERT(cullFaceTest._front_face < PipelineBindings::FRONT_FACE_LENGTH);
         return vks::initializers::pipelineRasterizationStateCreateInfo(
                 VK_POLYGON_MODE_FILL,
                 cullFaceTest._enabled ? cullModeFlags[_bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK)] : VK_CULL_MODE_NONE,
-                cullFaceTest._front_face == PipelineBindings::FRONT_FACE_COUTER_CLOCK_WISE ? VK_FRONT_FACE_COUNTER_CLOCKWISE : VK_FRONT_FACE_CLOCKWISE,
-                0);
+                VKUtil::toFrontFace(cullFaceTest._front_face), 0);
     }
     return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, flags, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
 }
