@@ -174,11 +174,12 @@ GLenum GLUtil::getPixelFormat(int32_t format, const Bitmap& bitmap)
         return flagSigned ? GL_BYTE : GL_UNSIGNED_BYTE;
     if(byteCount == 2)
     {
-        if(format & Texture::FORMAT_F16)
+        if(format == Texture::FORMAT_AUTO || format & Texture::FORMAT_F16)
             return GL_HALF_FLOAT;
         return flagSigned ? GL_SHORT: GL_UNSIGNED_SHORT;
     }
-    if(format & Texture::FORMAT_F32)
+    DCHECK(byteCount == 4, "Unsupported component size: %d, only [1, 2, 4] are allowed here", byteCount);
+    if(format == Texture::FORMAT_AUTO || format & Texture::FORMAT_F32)
         return GL_FLOAT;
     return flagSigned ? GL_INT : GL_UNSIGNED_INT;
 }

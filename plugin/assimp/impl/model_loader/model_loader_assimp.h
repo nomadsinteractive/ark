@@ -46,10 +46,13 @@ public:
     };
 
 private:
-    Model loadModel(const aiScene* scene, const Rect& uvBounds, const sp<Assimp::Importer>& importer) const;
+    const aiScene* loadScene(const sp<Assimp::Importer>& importer, const String& src, bool checkMeshes = true) const;
+    Model loadModel(const aiScene* scene, const Rect& uvBounds, const sp<Assimp::Importer>& importer, const document& manifest) const;
     Mesh loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, NodeTable& boneMapping) const;
+    NodeTable loadNodes(const aiNode* node, Model& model) const;
     void loadBones(const aiMesh* mesh, NodeTable& boneMapping, Array<Mesh::BoneInfo>& bones) const;
-    Table<String, sp<AnimateMaker>> loadAnimates(const aiScene* scene, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimateMakerAssimpNodes::NodeLoaderCallback& callback) const;
+    void loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimateMakerAssimpNodes::NodeLoaderCallback& callback) const;
+    void loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, sp<Assimp::Importer> importer, NodeTable nodes, AnimateMakerAssimpNodes::NodeLoaderCallback callback, String name, String alias) const;
 
     bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
     array<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;
@@ -58,7 +61,8 @@ private:
 
     void loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex);
 
-
+    static void callbackNodeAnimation(Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform);
+    static void callbackBoneAnimation(Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform);
 private:
     Ark::RendererCoordinateSystem _coordinate_system;
 

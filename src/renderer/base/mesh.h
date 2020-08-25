@@ -50,7 +50,7 @@ public:
     const array<V3>& vertices() const;
 
     const sp<Integer>& nodeId() const;
-    sp<Integer>& nodeId();
+    void setNodeId(sp<Integer> nodeId);
 
     void write(VertexStream& buf) const;
 

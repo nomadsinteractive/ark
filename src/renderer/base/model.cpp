@@ -55,9 +55,9 @@ const Table<String, sp<AnimateMaker>>& Model::animates() const
     return _animates;
 }
 
-Table<String, sp<AnimateMaker>>& Model::animates()
+void Model::setAnimates(Table<String, sp<AnimateMaker>> animates)
 {
-    return _animates;
+    _animates = std::move(animates);
 }
 
 sp<Animate> Model::makeAnimate(const String& name, const sp<Numeric>& duration) const
@@ -120,7 +120,6 @@ size_t Model::MeshVertices::calcVertexLength(Array<Mesh>& meshes) const
 
 void Model::MeshVertices::write(VertexStream& buf, const V3& /*size*/)
 {
-//    const V3 scale(size.x() != 0 ? size.x() / _size.x() : _size.x(), size.y() != 0 ? size.y() / _size.y() : _size.y(), size.z() != 0 ? size.z() /  _size.z() : _size.z());
     for(const Mesh& m : *_meshes)
         m.write(buf);
 }

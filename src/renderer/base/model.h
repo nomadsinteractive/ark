@@ -38,7 +38,7 @@ public:
     sp<Animate> makeAnimate(const String& name, const sp<Numeric>& duration) const;
 
     const Table<String, sp<AnimateMaker>>& animates() const;
-    Table<String, sp<AnimateMaker>>& animates();
+    void setAnimates(Table<String, sp<AnimateMaker>> animates);
 
     void writeToStream(VertexStream& buf, const V3& size) const;
 

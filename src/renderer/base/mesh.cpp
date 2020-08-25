@@ -44,9 +44,9 @@ const sp<Integer>& Mesh::nodeId() const
     return _node_id;
 }
 
-sp<Integer>& Mesh::nodeId()
+void Mesh::setNodeId(sp<Integer> nodeId)
 {
-    return _node_id;
+    _node_id = std::move(nodeId);
 }
 
 void Mesh::write(VertexStream& buf) const
