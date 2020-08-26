@@ -72,7 +72,7 @@ size_t ModelBundle::indexLength() const
 void ModelBundle::Stub::import(const sp<ResourceLoaderContext>& resourceLoaderContext, BeanFactory& factory, const document& manifest, const Scope& args)
 {
     bool hasModelMaps = false;
-    TexturePacker texturePacker(resourceLoaderContext, static_cast<int32_t>(_atlas->width()), static_cast<int32_t>(_atlas->height()), false);
+    TexturePacker texturePacker(resourceLoaderContext, _atlas->texture(), false);
     for(const document& i : manifest->children())
     {
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
@@ -90,7 +90,7 @@ void ModelBundle::Stub::import(const sp<ResourceLoaderContext>& resourceLoaderCo
         addModel(type, importer ? factory.build<Importer>(importer, args)->import(i, bounds) : _importer->import(i, bounds));
     }
     if(hasModelMaps)
-        texturePacker.updateTexture(_atlas->texture());
+        texturePacker.updateTexture();
 }
 
 ModelBundle::ModelInfo& ModelBundle::Stub::addModel(int32_t type, const Model& model)
@@ -107,12 +107,6 @@ const ModelBundle::ModelInfo& ModelBundle::Stub::ensure(int32_t type) const
     const auto iter = _models.find(type);
     DCHECK(iter != _models.end(), "Model not found, type: %d", type);
     return iter->second;
-}
-
-template<> ARK_API ModelBundle::MappingType Conversions::to<String, ModelBundle::MappingType>(const String& str)
-{
-    DCHECK(str == "albedo", "Only albedo mapping is supported");
-    return ModelBundle::MAPPING_TYPE_ALBEDO;
 }
 
 ModelBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

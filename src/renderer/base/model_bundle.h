@@ -13,13 +13,6 @@ namespace ark {
 
 class ARK_API ModelBundle : public ModelLoader {
 public:
-    enum MappingType {
-        MAPPING_TYPE_ALBEDO,
-        MAPPING_TYPE_NORMAL,
-        MAPPING_TYPE_ROUGHNESS,
-        MAPPING_TYPE_METALIC
-    };
-
     struct ModelInfo {
         Model _model;
         size_t _vertex_offset;

@@ -21,8 +21,7 @@ AtlasImporterMaxRects::AtlasImporterMaxRects(const sp<ResourceLoaderContext>& re
 
 void AtlasImporterMaxRects::import(Atlas& atlas, BeanFactory& factory, const document& manifest)
 {
-    const sp<Texture>& texture = atlas.texture();
-    TexturePacker texturePacker(_resource_loader_context, texture->width(), texture->height(), false);
+    TexturePacker texturePacker(_resource_loader_context, atlas.texture(), false);
     for(const document& i : manifest->children())
     {
         if(i->name() == Constants::Attributes::ATLAS)
@@ -41,7 +40,7 @@ void AtlasImporterMaxRects::import(Atlas& atlas, BeanFactory& factory, const doc
             atlas.add(type, rect.left(), rect.top(), rect.right(), rect.bottom(), Rect(0, 0, 1.0f, 1.0f), V2(rect.width(), rect.height()), V2(0.5f, 0.5f));
         }
     }
-    texturePacker.updateTexture(texture);
+    texturePacker.updateTexture();
 }
 
 AtlasImporterMaxRects::BUILDER::BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext)

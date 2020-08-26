@@ -13,6 +13,15 @@ namespace ark {
 
 class Material {
 public:
+    enum TextureType {
+        TEXTURE_TYPE_BASE_COLOR,
+        TEXTURE_TYPE_NORMAL,
+        TEXTURE_TYPE_ROUGHNESS,
+        TEXTURE_TYPE_METALLIC,
+        TEXTURE_TYPE_SPECULAR,
+        TEXTURE_TYPE_LENGTH
+    };
+
     Material(bitmap baseColor = nullptr, bitmap normal = nullptr, bitmap roughness = nullptr, bitmap metallic = nullptr, bitmap specular = nullptr);
 
     const sp<VariableWrapper<bitmap>>& baseColor() const;
@@ -49,11 +58,7 @@ public:
     };
 
 private:
-    sp<VariableWrapper<bitmap>> _base_color;
-    sp<VariableWrapper<bitmap>> _normal;
-    sp<VariableWrapper<bitmap>> _roughness;
-    sp<VariableWrapper<bitmap>> _metallic;
-    sp<VariableWrapper<bitmap>> _specular;
+    sp<VariableWrapper<bitmap>> _textures[TEXTURE_TYPE_LENGTH];
 };
 
 }
