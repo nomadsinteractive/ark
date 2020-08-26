@@ -21,6 +21,8 @@ class RenderLayer;
 class Mat2Impl;
 class Mat3Impl;
 class Mat4Impl;
+class Material;
+class MaterialBundle;
 class Model;
 class RenderLayer;
 class LayerContext;

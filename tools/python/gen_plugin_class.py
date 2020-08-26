@@ -154,7 +154,7 @@ def find_main_class(content):
 
 
 def parse_function_arguments(funcname, content):
-    m = re.search(r'%s\(((?:[^,]*?,?)*)\)' % funcname, content)
+    m = re.search(r'\b%s\(((?:[^,]*?,?)*)\)' % funcname, content)
     return parse_arguments(m.group(1)) if m else []
 
 

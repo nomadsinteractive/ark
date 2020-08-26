@@ -22,8 +22,8 @@ public:
 
 template<typename T> class Variable<T>::Impl : public Variable<T>, Implements<typename Variable<T>::Impl, Variable<T>> {
 public:
-    Impl(const T& value)
-        : _value(value) {
+    Impl(T value)
+        : _value(std::move(value)) {
     }
 
     virtual T val() override {
@@ -46,8 +46,8 @@ private:
 
 template<typename T> class Variable<T>::Const : public Variable<T>, Implements<typename Variable<T>::Const, Variable<T>> {
 public:
-    Const(const T& value)
-        : _value(value) {
+    Const(T value)
+        : _value(std::move(value)) {
     }
     Const(Variable<T>& other)
         : _value(other.val()) {

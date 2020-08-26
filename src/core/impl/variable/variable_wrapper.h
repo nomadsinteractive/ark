@@ -33,10 +33,10 @@ public:
 
     void set(T value) {
         if(_variable_impl)
-            _variable_impl->set(value);
+            _variable_impl->set(std::move(value));
         else {
             deferedUnref();
-            _variable_impl = new typename Variable<T>::Impl(value);
+            _variable_impl = new typename Variable<T>::Impl(std::move(value));
             this->_delegate = sp<Variable<T>>::adopt(_variable_impl);
             _timestamp.setDirty();
         }

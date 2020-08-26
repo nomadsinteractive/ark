@@ -318,6 +318,17 @@ public:
         return ensureBuilder<T>(attrValue);
     }
 
+    template<typename T> std::vector<sp<Builder<T>>> getBuilderList(const document& doc) {
+        std::vector<sp<Builder<T>>> list;
+
+        for(const document& i : doc->children()) {
+            sp<Builder<T>> builder = findBuilderByDocument<T>(i);
+            DCHECK(builder, "Cannot build \"%s\"", Documents::toString(i).c_str());
+            list.push_back(std::move(builder));
+        }
+        return list;
+    }
+
     template<typename T> std::vector<sp<Builder<T>>> getBuilderList(const document& doc, const String& nodeName, const String& defValue = "") {
         std::vector<sp<Builder<T>>> list;
         const String attrValue = Documents::getAttribute(doc, nodeName, defValue);

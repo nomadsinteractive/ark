@@ -1,6 +1,8 @@
 #ifndef ARK_CORE_UTIL_DOCUMENTS_H_
 #define ARK_CORE_UTIL_DOCUMENTS_H_
 
+#include <vector>
+
 #include "core/base/api.h"
 #include "core/dom/dom_document.h"
 #include "core/types/null.h"
@@ -33,6 +35,13 @@ public:
     }
     template<typename T> static T ensureAttribute(const document& doc, const String& name) {
         return Strings::parse<T>(ensureAttribute(doc, name));
+    }
+
+    template<typename T> static std::vector<T> ensureAttributeList(const document& doc, const String& name, const String& childName = "") {
+        std::vector<T> list;
+        for(const document& i : childName ? doc->children(childName) : doc->children())
+            list.push_back(ensureAttribute<T>(i, name));
+        return list;
     }
 
     template<typename T, typename U> static T getSystemSpecificList(const U& iterable, const String& valuename) {

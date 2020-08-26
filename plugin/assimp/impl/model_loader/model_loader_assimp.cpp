@@ -4,9 +4,11 @@
 #include "core/inf/array.h"
 #include "core/inf/loader.h"
 #include "core/util/documents.h"
+#include "core/util/math.h"
 
 #include "graphics/base/bitmap.h"
 #include "graphics/base/bitmap_bundle.h"
+#include "graphics/base/material_bundle.h"
 #include "graphics/base/size.h"
 #include "graphics/util/matrix_util.h"
 
@@ -35,8 +37,8 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-ModelImporterAssimp::ModelImporterAssimp(Ark::RendererCoordinateSystem coordinateSystem)
-    : _coordinate_system(coordinateSystem)
+ModelImporterAssimp::ModelImporterAssimp(Ark::RendererCoordinateSystem coordinateSystem, sp<MaterialBundle> materialBundle)
+    : _coordinate_system(coordinateSystem), _material_bundle(std::move(materialBundle))
 {
 }
 
@@ -84,17 +86,17 @@ void ModelImporterAssimp::loadNodeHierarchy(const aiNode* node, NodeTable& nodes
         loadNodeHierarchy(node->mChildren[i], nodes, nodeIds);
 }
 
-void ModelImporterAssimp::loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimateMakerAssimpNodes::NodeLoaderCallback& callback) const
+void ModelImporterAssimp::loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimateMakerAssimpNodes::NodeLoaderCallback& callback) const
 {
     for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
     {
         const aiAnimation* animation = scene->mAnimations[i];
         const String name = animation->mName.C_Str();
-        animates.push_back(name, sp<AnimateMakerAssimpNodes>::make(importer, animation, scene->mRootNode, nodes, callback));
+        animates.push_back(name, sp<AnimateMakerAssimpNodes>::make(importer, animation, scene->mRootNode, globalTransformation, nodes, callback));
     }
 }
 
-void ModelImporterAssimp::loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, sp<Assimp::Importer> importer, NodeTable nodes, AnimateMakerAssimpNodes::NodeLoaderCallback callback, String name, String alias) const
+void ModelImporterAssimp::loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, sp<Assimp::Importer> importer, NodeTable nodes, AnimateMakerAssimpNodes::NodeLoaderCallback callback, String name, String alias) const
 {
     for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
     {
@@ -106,9 +108,9 @@ void ModelImporterAssimp::loadAnimates(Table<String, sp<AnimateMaker>>& animates
                 if(animates.has(name))
                     name = std::move(alias);
                 else
-                    animates.push_back(std::move(alias), sp<AnimateMakerAssimpNodes>::make(importer, animation, scene->mRootNode, nodes, callback));
+                    animates.push_back(std::move(alias), sp<AnimateMakerAssimpNodes>::make(importer, animation, scene->mRootNode, globalTransformation, nodes, callback));
             }
-            animates.push_back(std::move(name), sp<AnimateMakerAssimpNodes>::make(std::move(importer), animation, scene->mRootNode, std::move(nodes), std::move(callback)));
+            animates.push_back(std::move(name), sp<AnimateMakerAssimpNodes>::make(std::move(importer), animation, scene->mRootNode, globalTransformation, std::move(nodes), std::move(callback)));
             break;
         }
     }
@@ -133,7 +135,7 @@ const aiScene* ModelImporterAssimp::loadScene(const sp<Assimp::Importer>& import
     return scene;
 }
 
-Mesh ModelImporterAssimp::loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, NodeTable& boneMapping) const
+Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, NodeTable& boneMapping) const
 {
     sp<Array<element_index_t>> indices = loadIndices(mesh, vertexBase);
     sp<Array<V3>> vertices = sp<Array<V3>::Allocated>::make(mesh->mNumVertices);
@@ -160,7 +162,10 @@ Mesh ModelImporterAssimp::loadMesh(const aiMesh* mesh, const Rect& uvBounds, ele
     if(mesh->HasBones())
         loadBones(mesh, boneMapping, bones);
 
-    return Mesh(indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents), std::move(bones));
+    DASSERT(mesh->mMaterialIndex < scene->mNumMaterials);
+    sp<Material> material = _material_bundle ? _material_bundle->getMaterial(scene->mMaterials[mesh->mMaterialIndex]->GetName().C_Str()) : nullptr;
+    DWARN(!_material_bundle || material, "Undefined material(%s) for mesh(%s)",  scene->mMaterials[mesh->mMaterialIndex]->GetName().C_Str(), mesh->mName.C_Str());
+    return Mesh(indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents), std::move(bones), std::move(material));
 }
 
 NodeTable ModelImporterAssimp::loadNodes(const aiNode* node, Model& model) const
@@ -186,7 +191,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, const Rect& uvBounds,
     for(uint32_t i = 0; i < scene->mNumMeshes; ++i)
     {
         const aiMesh* mesh = scene->mMeshes[i];
-        meshes.push_back(loadMesh(mesh, uvBounds, vertexBase, bones));
+        meshes.push_back(loadMesh(scene, mesh, uvBounds, vertexBase, bones));
 
         aabbMin = V3(std::min(mesh->mAABB.mMin.x, aabbMin.x()), std::min(mesh->mAABB.mMin.y, aabbMin.y()), std::min(mesh->mAABB.mMin.z, aabbMin.y()));
         aabbMax = V3(std::max(mesh->mAABB.mMax.x, aabbMax.x()), std::max(mesh->mAABB.mMax.y, aabbMax.y()), std::max(mesh->mAABB.mMax.z, aabbMax.y()));
@@ -204,8 +209,16 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, const Rect& uvBounds,
         Table<String, sp<AnimateMaker>> animates;
         AnimateMakerAssimpNodes::NodeLoaderCallback callback = noBones ? callbackNodeAnimation : callbackBoneAnimation;
         NodeTable nodes = noBones ? loadNodes(scene->mRootNode, model) : std::move(bones);
-
-        loadAnimates(animates, scene, importer, nodes, callbackNodeAnimation);
+        aiMatrix4x4 globalTransformation;
+        int32_t upAxis = -1;
+        if(scene->mMetaData->Get("UpAxis", upAxis))
+        {
+            int32_t upAxisSign = 1;
+            scene->mMetaData->Get("UpAxisSign", upAxisSign);
+            if(upAxis == 1)
+                aiMatrix4x4::RotationX(-upAxisSign * Math::PI_2, globalTransformation);
+        }
+        loadAnimates(animates, scene, globalTransformation, importer, nodes, callbackNodeAnimation);
         for(const auto& i : animateManifests)
         {
             sp<Assimp::Importer> importer = sp<Assimp::Importer>::make();
@@ -214,9 +227,9 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, const Rect& uvBounds,
             String alias = Documents::getAttribute(i, "alias");
             const aiScene* animateScene = loadScene(importer, src, false);
             if(name)
-                loadAnimates(animates, animateScene, std::move(importer), nodes, callback, std::move(name), std::move(alias));
+                loadAnimates(animates, animateScene, globalTransformation, std::move(importer), nodes, callback, std::move(name), std::move(alias));
             else
-                loadAnimates(animates, animateScene, importer, nodes, callback);
+                loadAnimates(animates, animateScene, globalTransformation, importer, nodes, callback);
         }
 
         model.setAnimates(std::move(animates));
@@ -264,14 +277,34 @@ void ModelImporterAssimp::callbackBoneAnimation(Table<String, Node>& nodes, cons
     }
 }
 
-ModelImporterAssimp::BUILDER::BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _coordinate_system(resourceLoaderContext->renderController()->renderEngine()->context()->coordinateSystem())
+ModelImporterAssimp::BUILDER_IMPL::BUILDER_IMPL(const sp<ResourceLoaderContext>& resourceLoaderContext, SafePtr<Builder<MaterialBundle>> materialBundle)
+    : _coordinate_system(resourceLoaderContext->renderController()->renderEngine()->context()->coordinateSystem()), _material_bundle(std::move(materialBundle))
 {
 }
 
-sp<ModelLoader::Importer> ModelImporterAssimp::BUILDER::build(const Scope& /*args*/)
+sp<ModelLoader::Importer> ModelImporterAssimp::BUILDER_IMPL::build(const Scope& args)
 {
-    return sp<ModelImporterAssimp>::make(_coordinate_system);
+    return sp<ModelImporterAssimp>::make(_coordinate_system, _material_bundle->build(args));
+}
+
+ModelImporterAssimp::VALUE_BUILDER::VALUE_BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _impl(resourceLoaderContext, SafePtr<Builder<MaterialBundle>>())
+{
+}
+
+sp<ModelLoader::Importer> ModelImporterAssimp::VALUE_BUILDER::build(const Scope& args)
+{
+    return _impl.build(args);
+}
+
+ModelImporterAssimp::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _impl(resourceLoaderContext, factory.getBuilder<MaterialBundle>(manifest, "material-bundle"))
+{
+}
+
+sp<ModelLoader::Importer> ModelImporterAssimp::BUILDER::build(const Scope& args)
+{
+    return _impl.build(args);
 }
 
 }

@@ -42,12 +42,13 @@ public:
     };
 
 public:
-    Mesh(array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos);
+    Mesh(array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material);
 
     size_t vertexLength() const;
 
     const array<element_index_t>& indices() const;
     const array<V3>& vertices() const;
+    const sp<Material>& material() const;
 
     const sp<Integer>& nodeId() const;
     void setNodeId(sp<Integer> nodeId);
@@ -61,8 +62,9 @@ private:
     sp<Array<V3>> _normals;
     sp<Array<Tangent>> _tangents;
     sp<Array<BoneInfo>> _bone_infos;
-    sp<Integer> _node_id;
+    sp<Material> _material;
 
+    sp<Integer> _node_id;
 };
 
 }

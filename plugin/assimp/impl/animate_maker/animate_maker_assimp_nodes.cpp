@@ -8,19 +8,19 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-AnimateMakerAssimpNodes::AnimateMakerAssimpNodes(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, NodeTable nodes, NodeLoaderCallback callback)
-    : _importer(std::move(importer)), _animation(animation), _root_node(rootNode), _nodes(std::move(nodes)), _callback(std::move(callback))
+AnimateMakerAssimpNodes::AnimateMakerAssimpNodes(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, NodeTable nodes, NodeLoaderCallback callback)
+    : _importer(std::move(importer)), _animation(animation), _root_node(rootNode), _global_transform(globalTransform), _nodes(std::move(nodes)), _callback(std::move(callback))
 {
 }
 
 sp<Animate> AnimateMakerAssimpNodes::makeAnimate(const sp<Numeric>& duration)
 {
-    return sp<AnimateImpl>::make(duration, _animation, _root_node, _nodes.nodes(), _callback);
+    return sp<AnimateImpl>::make(duration, _animation, _root_node, _global_transform, _nodes.nodes(), _callback);
 }
 
-AnimateMakerAssimpNodes::AnimateImpl::AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const Table<String, Node>& nodes, NodeLoaderCallback callback)
+AnimateMakerAssimpNodes::AnimateImpl::AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const aiMatrix4x4& globalTransform, const Table<String, Node>& nodes, NodeLoaderCallback callback)
     : _ticks_per_sec(static_cast<float>(animation->mTicksPerSecond != 0 ? animation->mTicksPerSecond : 25.0f)), _duration_in_ticks(static_cast<float>(animation->mDuration)),
-      _global_inversed_transform(node->mTransformation), _duration(duration), _animation(animation), _root_node(node), _nodes(nodes), _callback(std::move(callback))
+      _global_inversed_transform(node->mTransformation * globalTransform), _duration(duration), _animation(animation), _root_node(node), _nodes(nodes), _callback(std::move(callback))
 {
     _global_inversed_transform.Inverse();
     updateHierarchy(_duration->val());

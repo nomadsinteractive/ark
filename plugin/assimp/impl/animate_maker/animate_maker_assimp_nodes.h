@@ -28,14 +28,14 @@ class AnimateMakerAssimpNodes : public AnimateMaker {
 public:
     typedef std::function<void(Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& globalTransformation)> NodeLoaderCallback;
 
-    AnimateMakerAssimpNodes(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, NodeTable nodes, NodeLoaderCallback callback);
+    AnimateMakerAssimpNodes(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, NodeTable nodes, NodeLoaderCallback callback);
 
     virtual sp<Animate> makeAnimate(const sp<Numeric>& duration) override;
 
 private:
     class AnimateImpl : public Animate {
     public:
-        AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const Table<String, Node>& nodes, NodeLoaderCallback callback);
+        AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const aiMatrix4x4& globalTransform, const Table<String, Node>& nodes, NodeLoaderCallback callback);
 
         virtual bool update(uint64_t timestamp) override;
 
@@ -65,6 +65,7 @@ private:
     sp<Assimp::Importer> _importer;
     const aiAnimation* _animation;
     const aiNode* _root_node;
+    aiMatrix4x4 _global_transform;
 
     NodeTable _nodes;
     NodeLoaderCallback _callback;

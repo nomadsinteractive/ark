@@ -30,29 +30,51 @@ namespace assimp {
 
 class ModelImporterAssimp : public ModelLoader::Importer {
 public:
-    ModelImporterAssimp(Ark::RendererCoordinateSystem coordinateSystem);
+    ModelImporterAssimp(Ark::RendererCoordinateSystem coordinateSystem, sp<MaterialBundle> materialBundle);
 
     virtual Model import(const document& manifest, const Rect& uvBounds) override;
 
-//  [[plugin::resource-loader::by-value("assimp")]]
-    class BUILDER : public Builder<ModelLoader::Importer> {
+    class BUILDER_IMPL : public Builder<ModelLoader::Importer> {
     public:
-        BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER_IMPL(const sp<ResourceLoaderContext>& resourceLoaderContext, SafePtr<Builder<MaterialBundle>> materialBundle);
 
         virtual sp<ModelLoader::Importer> build(const Scope& args) override;
 
     private:
         Ark::RendererCoordinateSystem _coordinate_system;
+        SafePtr<Builder<MaterialBundle>> _material_bundle;
+    };
+
+//  [[plugin::resource-loader::by-value("assimp")]]
+    class VALUE_BUILDER : public Builder<ModelLoader::Importer> {
+    public:
+        VALUE_BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+        virtual sp<ModelLoader::Importer> build(const Scope& args) override;
+
+    private:
+        BUILDER_IMPL _impl;
+    };
+
+//  [[plugin::resource-loader("assimp")]]
+    class BUILDER : public Builder<ModelLoader::Importer> {
+    public:
+        BUILDER(BeanFactory& beanFactory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+        virtual sp<ModelLoader::Importer> build(const Scope& args) override;
+
+    private:
+        BUILDER_IMPL _impl;
     };
 
 private:
     const aiScene* loadScene(const sp<Assimp::Importer>& importer, const String& src, bool checkMeshes = true) const;
     Model loadModel(const aiScene* scene, const Rect& uvBounds, const sp<Assimp::Importer>& importer, const document& manifest) const;
-    Mesh loadMesh(const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, NodeTable& boneMapping) const;
+    Mesh loadMesh(const aiScene* scene, const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, NodeTable& boneMapping) const;
     NodeTable loadNodes(const aiNode* node, Model& model) const;
     void loadBones(const aiMesh* mesh, NodeTable& boneMapping, Array<Mesh::BoneInfo>& bones) const;
-    void loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimateMakerAssimpNodes::NodeLoaderCallback& callback) const;
-    void loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, sp<Assimp::Importer> importer, NodeTable nodes, AnimateMakerAssimpNodes::NodeLoaderCallback callback, String name, String alias) const;
+    void loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimateMakerAssimpNodes::NodeLoaderCallback& callback) const;
+    void loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, sp<Assimp::Importer> importer, NodeTable nodes, AnimateMakerAssimpNodes::NodeLoaderCallback callback, String name, String alias) const;
 
     bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
     array<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;
@@ -65,6 +87,7 @@ private:
     static void callbackBoneAnimation(Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform);
 private:
     Ark::RendererCoordinateSystem _coordinate_system;
+    sp<MaterialBundle> _material_bundle;
 
     std::vector<sp<Texture>> _textures;
 };

@@ -17,8 +17,9 @@ Mesh::Tangent::Tangent(const V3& tangent, const V3& bitangent)
 {
 }
 
-Mesh::Mesh(array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos)
-    : _indices(std::move(indices)), _vertices(std::move(vertices)), _uvs(std::move(uvs)), _normals(std::move(normals)), _tangents(std::move(tangents)), _bone_infos(std::move(boneInfos))
+Mesh::Mesh(array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material)
+    : _indices(std::move(indices)), _vertices(std::move(vertices)), _uvs(std::move(uvs)), _normals(std::move(normals)), _tangents(std::move(tangents)), _bone_infos(std::move(boneInfos)),
+      _material(std::move(material))
 {
     DASSERT(_vertices->length() == _uvs->length() && (!_normals || _vertices->length() == _normals->length()) && (!_tangents || _vertices->length() == _tangents->length())
             && (!_bone_infos || _vertices->length() == _bone_infos->length()));
@@ -37,6 +38,11 @@ const array<element_index_t>& Mesh::indices() const
 const array<V3>& Mesh::vertices() const
 {
     return _vertices;
+}
+
+const sp<Material>& Mesh::material() const
+{
+    return _material;
 }
 
 const sp<Integer>& Mesh::nodeId() const
