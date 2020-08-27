@@ -16,11 +16,13 @@ namespace ark {
 
 class ARK_API TexturePacker {
 public:
-    TexturePacker(const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Texture> texture, bool allowRotate);
+    TexturePacker(const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Texture> texture);
 
-    RectI addBitmap(const String& src);
-    RectI addBitmap(const bitmap& bitmap);
-    RectI addBitmap(sp<Variable<bitmap>> bitmapProvider);
+    RectI addBitmap(MaxRectsBinPack& binPack, const String& src);
+    RectI addBitmap(MaxRectsBinPack& binPack, sp<Variable<bitmap>> bitmapProvider);
+    RectI addBitmap(MaxRectsBinPack& binPack, const bitmap& bounds, sp<Variable<bitmap>> bitmapProvider);
+
+    void addPackedBitmap(int32_t x, int32_t y, const bitmap& bounds, sp<Variable<bitmap>> bitmapProvider);
 
     void updateTexture();
 
@@ -46,13 +48,9 @@ private:
         std::vector<PackedBitmap> _bitmaps;
     };
 
-    RectI doAddBitmap(const bitmap& bounds, sp<Variable<bitmap>> bitmapProvider);
-
 private:
     sp<ResourceLoaderContext> _resource_loader_context;
     sp<Texture> _texture;
-    MaxRectsBinPack _max_rects_bin_pack;
-
     uint8_t _channels;
 
     std::vector<PackedBitmap> _packed_bitmaps;

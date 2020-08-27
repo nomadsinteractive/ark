@@ -64,10 +64,16 @@ void Material::setSpecular(bitmap specular) const
     _textures[TEXTURE_TYPE_SPECULAR]->set(std::move(specular));
 }
 
+const sp<VariableWrapper<bitmap>>& Material::getTexture(Material::TextureType type) const
+{
+    DASSERT(type >= 0 && type < TEXTURE_TYPE_LENGTH);
+    return _textures[type];
+}
+
 Material::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)
 {
     DictionaryByAttributeName types(manifest, Constants::Attributes::TYPE);
-    _base_color = makeBitmapBuilder(beanFactory, types.get("base-color"));
+    _base_color = makeBitmapBuilder(beanFactory, types.get("base_color"));
     _normal = makeBitmapBuilder(beanFactory, types.get("normal"));
     _roughness = makeBitmapBuilder(beanFactory, types.get("roughness"));
     _metallic = makeBitmapBuilder(beanFactory, types.get("metallic"));

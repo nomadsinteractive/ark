@@ -138,7 +138,7 @@ void ModelLoaderText::postSnapshot(RenderController& renderController, RenderLay
         {
             uint32_t width = _stub->_font_glyph->width() * 2;
             uint32_t height = _stub->_font_glyph->height() * 2;
-            LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _stub->_atlas->items()->indices().size());
+            LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _stub->_atlas->items().size());
             _stub->reset(width, height);
         }
         _stub->_render_controller->upload(_stub->_texture, nullptr, RenderController::US_RELOAD);

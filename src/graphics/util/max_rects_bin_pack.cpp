@@ -67,20 +67,7 @@ MaxRectsBinPack::Rect MaxRectsBinPack::Insert(int width, int height, FreeRectCho
     if (newNode.height == 0)
 		return newNode;
 
-	size_t numRectanglesToProcess = freeRectangles.size();
-	for(size_t i = 0; i < numRectanglesToProcess; ++i)
-	{
-		if (SplitFreeNode(freeRectangles[i], newNode))
-		{
-			freeRectangles.erase(freeRectangles.begin() + i);
-			--i;
-			--numRectanglesToProcess;
-		}
-	}
-
-	PruneFreeList();
-
-	usedRectangles.push_back(newNode);
+    PlaceRect(newNode);
 	return newNode;
 }
 
@@ -119,7 +106,7 @@ void MaxRectsBinPack::Insert(std::vector<RectSize>& rects, std::vector<Rect>& ds
 	}
 }
 
-void MaxRectsBinPack::PlaceRect(const Rect &node)
+void MaxRectsBinPack::PlaceRect(const Rect& node)
 {
 	size_t numRectanglesToProcess = freeRectangles.size();
 	for(size_t i = 0; i < numRectanglesToProcess; ++i)

@@ -8,12 +8,12 @@
 
 #include "graphics/base/bitmap.h"
 #include "graphics/base/bitmap_bundle.h"
-#include "graphics/base/material_bundle.h"
 #include "graphics/base/size.h"
 #include "graphics/util/matrix_util.h"
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_buffer.h"
+#include "renderer/base/material_bundle.h"
 #include "renderer/base/model.h"
 #include "renderer/base/model_bundle.h"
 #include "renderer/base/pipeline_bindings.h"
@@ -116,11 +116,11 @@ void ModelImporterAssimp::loadAnimates(Table<String, sp<AnimateMaker>>& animates
     }
 }
 
-Model ModelImporterAssimp::import(const document& manifest, const Rect& uvBounds)
+Model ModelImporterAssimp::import(const document& manifest, Atlas& atlas, int32_t type)
 {
     const sp<Assimp::Importer> importer = sp<Assimp::Importer>::make();
     const String& src = Documents::ensureAttribute(manifest, Constants::Attributes::SRC);
-    return loadModel(loadScene(importer, src), uvBounds, importer, manifest);
+    return loadModel(loadScene(importer, src), atlas, type, importer, manifest);
 }
 
 const aiScene* ModelImporterAssimp::loadScene(const sp<Assimp::Importer>& importer, const String& src, bool checkMeshes) const
@@ -180,13 +180,15 @@ NodeTable ModelImporterAssimp::loadNodes(const aiNode* node, Model& model) const
     return nodes;
 }
 
-Model ModelImporterAssimp::loadModel(const aiScene* scene, const Rect& uvBounds, const sp<Assimp::Importer>& importer, const document& manifest) const
+Model ModelImporterAssimp::loadModel(const aiScene* scene, Atlas& atlas, int32_t type, const sp<Assimp::Importer>& importer, const document& manifest) const
 {
     std::vector<Mesh> meshes;
     element_index_t vertexBase = 0;
 
     NodeTable bones;
     V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
+
+    const Rect uvBounds = atlas.has(type) ? atlas.at(type).uv() : Rect(0, 1.0f, 1.0f, 0);
 
     for(uint32_t i = 0; i < scene->mNumMeshes; ++i)
     {

@@ -15,7 +15,7 @@
 namespace ark {
 
 Atlas::Atlas(const sp<Texture>& texture, bool allowDefaultItem)
-    : _texture(texture), _items(new ByIndex<Item>()), _allow_default_item(allowDefaultItem)
+    : _texture(texture), _width(_texture->width()), _height(_texture->height()), _allow_default_item(allowDefaultItem)
 {
 }
 
@@ -52,24 +52,24 @@ const sp<Texture>& Atlas::texture() const
     return _texture;
 }
 
-const op<ByIndex<Atlas::Item>>& Atlas::items() const
+const std::unordered_map<int32_t, Atlas::Item>& Atlas::items() const
 {
     return _items;
 }
 
 uint32_t Atlas::width() const
 {
-    return static_cast<uint32_t>(_texture->width());
+    return static_cast<uint32_t>(_width);
 }
 
 uint32_t Atlas::height() const
 {
-    return static_cast<uint32_t>(_texture->height());
+    return static_cast<uint32_t>(_height);
 }
 
 bool Atlas::has(int32_t c) const
 {
-    return _items->has(c);
+    return _items.find(c) != _items.end();
 }
 
 const V2& Atlas::getOriginalSize(int32_t c) const
@@ -79,8 +79,7 @@ const V2& Atlas::getOriginalSize(int32_t c) const
 
 Rect Atlas::getItemUV(int32_t c) const
 {
-    const Item& item = at(c);
-    return Rect(item.ux() / 65536.0f, item.uy() / 65536.0f, item.vx() / 65536.0f, item.vy() / 65536.0f);
+    return at(c).uv();
 }
 
 ByType& Atlas::attachments()
@@ -90,25 +89,25 @@ ByType& Atlas::attachments()
 
 void Atlas::add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot)
 {
-    _items->add(id, makeItem(ux, uy, vx, vy, bounds, size, pivot));
+    _items.insert_or_assign(id, makeItem(ux, uy, vx, vy, bounds, size, pivot));
 }
 
 const Atlas::Item& Atlas::at(int32_t id) const
 {
-    return _allow_default_item || id == 0 ? (has(id) ? _items->at(id) : _default_item) : _items->at(id);
+    return _allow_default_item || id == 0 ? (has(id) ? _items.at(id) : _default_item) : _items.at(id);
 }
 
 Rect Atlas::getOriginalPosition(int32_t id) const
 {
     const Atlas::Item& item = at(id);
-    float nw = _texture->width() / 65536.0f;
-    float nh = _texture->height() / 65536.0f;
+    float nw = _width / 65536.0f;
+    float nh = _height / 65536.0f;
     return Rect(item.ux() * nw, item.vy() * nh, item.vx() * nw, item.uy() * nh);
 }
 
 void Atlas::clear()
 {
-    _items.reset(new ByIndex<Item>());
+    _items.clear();
 }
 
 uint16_t Atlas::unnormalize(uint32_t x, uint32_t s)
@@ -118,10 +117,10 @@ uint16_t Atlas::unnormalize(uint32_t x, uint32_t s)
 
 Atlas::Item Atlas::makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const
 {
-    uint16_t l = unnormalize(ux, static_cast<uint32_t>(_texture->width()));
-    uint16_t t = unnormalize(uy, static_cast<uint32_t>(_texture->height()));
-    uint16_t r = unnormalize(vx, static_cast<uint32_t>(_texture->width()));
-    uint16_t b = unnormalize(vy, static_cast<uint32_t>(_texture->height()));
+    uint16_t l = unnormalize(ux, static_cast<uint32_t>(_width));
+    uint16_t t = unnormalize(uy, static_cast<uint32_t>(_height));
+    uint16_t r = unnormalize(vx, static_cast<uint32_t>(_width));
+    uint16_t b = unnormalize(vy, static_cast<uint32_t>(_height));
     return Item(l, b, r, t, Rect(bounds.left() - pivot.x(), bounds.top() - pivot.y(), bounds.right() - pivot.x(), bounds.bottom() - pivot.y()), size);
 }
 
@@ -157,6 +156,11 @@ const Rect& Atlas::Item::bounds() const
 const V2& Atlas::Item::size() const
 {
     return _size;
+}
+
+Rect Atlas::Item::uv() const
+{
+    return Rect(_ux / 65536.0f, _uy / 65536.0f, _vx / 65536.0f, _vy / 65536.0f);
 }
 
 uint16_t Atlas::Item::ux() const

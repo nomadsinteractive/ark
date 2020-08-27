@@ -39,6 +39,8 @@ public:
     const sp<VariableWrapper<bitmap>>& specular() const;
     void setSpecular(bitmap specular) const;
 
+    const sp<VariableWrapper<bitmap>>& getTexture(TextureType type) const;
+
 //  [[plugin::builder]]
     class BUILDER : public Builder<Material> {
     public:

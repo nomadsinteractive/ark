@@ -21,9 +21,9 @@ ModelBundle::ModelBundle(const sp<ModelBundle::Stub>& stub)
 {
 }
 
-void ModelBundle::import(const sp<ResourceLoaderContext>& resourceLoaderContext, BeanFactory& factory, const document& manifest, const Scope& args)
+void ModelBundle::import(BeanFactory& factory, const document& manifest, const Scope& args)
 {
-    _stub->import(resourceLoaderContext, factory, manifest, args);
+    _stub->import(factory, manifest, args);
 }
 
 sp<RenderCommandComposer> ModelBundle::makeRenderCommandComposer()
@@ -69,28 +69,14 @@ size_t ModelBundle::indexLength() const
     return _stub->_index_length;
 }
 
-void ModelBundle::Stub::import(const sp<ResourceLoaderContext>& resourceLoaderContext, BeanFactory& factory, const document& manifest, const Scope& args)
+void ModelBundle::Stub::import(BeanFactory& factory, const document& manifest, const Scope& args)
 {
-    bool hasModelMaps = false;
-    TexturePacker texturePacker(resourceLoaderContext, _atlas->texture(), false);
     for(const document& i : manifest->children())
     {
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
-        for(const document& j : i->children("map"))
-        {
-            const String& mappingSrc = Documents::ensureAttribute(j, Constants::Attributes::SRC);
-            const RectI rect = texturePacker.addBitmap(mappingSrc);
-            _atlas->add(type, rect.left(), rect.top(), rect.right(), rect.bottom(), Rect(0, 0, 1.0f, 1.0f), V2(rect.width(), rect.height()), V2(0.5f, 0.5f));
-            hasModelMaps = true;
-        }
-
-        const Rect bounds = _atlas && _atlas->has(type) ? _atlas->getItemUV(type) : Rect(0, 1.0f, 1.0f, 0);
-
         const String importer = Documents::getAttribute(i, "importer");
-        addModel(type, importer ? factory.build<Importer>(importer, args)->import(i, bounds) : _importer->import(i, bounds));
+        addModel(type, importer ? factory.build<Importer>(importer, args)->import(i, _atlas, type) : _importer->import(i, _atlas, type));
     }
-    if(hasModelMaps)
-        texturePacker.updateTexture();
 }
 
 ModelBundle::ModelInfo& ModelBundle::Stub::addModel(int32_t type, const Model& model)
@@ -109,8 +95,8 @@ const ModelBundle::ModelInfo& ModelBundle::Stub::ensure(int32_t type) const
     return iter->second;
 }
 
-ModelBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _bean_factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _atlas(factory.ensureBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)),
+ModelBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _bean_factory(factory), _manifest(manifest), _atlas(factory.ensureBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)),
       _importer(factory.ensureBuilder<ModelLoader::Importer>(manifest, "importer"))
 {
 }
@@ -119,7 +105,7 @@ sp<ModelBundle> ModelBundle::BUILDER::build(const Scope& args)
 {
     sp<Importer> importer = _importer->build(args);
     sp<ModelBundle> modelBundle = sp<ModelBundle>::make(_atlas->build(args), std::move(importer));
-    modelBundle->import(_resource_loader_context, _bean_factory, _manifest, args);
+    modelBundle->import(_bean_factory, _manifest, args);
     return modelBundle;
 }
 
@@ -128,8 +114,8 @@ ModelBundle::Stub::Stub(sp<Atlas> atlas, sp<ModelLoader::Importer> importer)
 {
 }
 
-ModelBundle::MODEL_LOADER_BUILDER::MODEL_LOADER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _impl(factory, manifest, resourceLoaderContext)
+ModelBundle::MODEL_LOADER_BUILDER::MODEL_LOADER_BUILDER(BeanFactory& factory, const document& manifest)
+    : _impl(factory, manifest)
 {
 }
 

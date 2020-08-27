@@ -7,6 +7,7 @@
 #include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/atlas.h"
 
 namespace ark {
 
@@ -30,7 +31,7 @@ public:
     public:
         virtual ~Importer() = default;
 
-        virtual Model import(const document& manifest, const Rect& uvBounds) = 0;
+        virtual Model import(const document& manifest, Atlas& atlas, int32_t type) = 0;
     };
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() = 0;

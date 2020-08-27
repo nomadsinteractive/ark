@@ -13,7 +13,7 @@ void AtlasImporterCharacters::import(Atlas& atlas, BeanFactory& factory, const d
     uint32_t flowy = 0;
     uint32_t fontWidth = Documents::ensureAttribute<uint32_t>(manifest, "font-width");
     uint32_t fontHeight = Documents::ensureAttribute<uint32_t>(manifest, "font-height");
-    uint32_t textureWidth = static_cast<uint32_t>(atlas.texture()->width());
+    uint32_t textureWidth = atlas.width();
     const String& characters = Documents::ensureAttribute(manifest, "characters");
     for(const char* iter = characters.c_str(); *iter; iter++)
     {

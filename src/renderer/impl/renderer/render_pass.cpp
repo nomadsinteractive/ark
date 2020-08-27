@@ -72,15 +72,15 @@ RenderPass::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, con
 
 sp<Renderer> RenderPass::BUILDER::build(const Scope& args)
 {
-    if(_model_importer)
-    {
-        const sp<ModelLoader::Importer> importer = _model_importer->build(args);
-        Model model = importer->import(_model, Rect(0, 0, 1.0f, 1.0f));
-        sp<Shader> shader = _shader->build(args);
-        Buffer vertices = _resource_loader_context->renderController()->makeVertexBuffer(Buffer::USAGE_STATIC, sp<VerticesBufferUploader>::make(model.vertices(), shader->input()));
-        Buffer indices = _resource_loader_context->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC, model.indices());
-        return sp<RenderPass>::make(std::move(shader), std::move(vertices), std::move(indices), _mode, _draw_count->build(args));
-    }
+//    if(_model_importer)
+//    {
+//        const sp<ModelLoader::Importer> importer = _model_importer->build(args);
+//        Model model = importer->import(_model, Rect(0, 0, 1.0f, 1.0f));
+//        sp<Shader> shader = _shader->build(args);
+//        Buffer vertices = _resource_loader_context->renderController()->makeVertexBuffer(Buffer::USAGE_STATIC, sp<VerticesBufferUploader>::make(model.vertices(), shader->input()));
+//        Buffer indices = _resource_loader_context->renderController()->makeIndexBuffer(Buffer::USAGE_STATIC, model.indices());
+//        return sp<RenderPass>::make(std::move(shader), std::move(vertices), std::move(indices), _mode, _draw_count->build(args));
+//    }
     return sp<RenderPass>::make(_shader->build(args), _vertex_buffer->build(args), _index_buffer ? _index_buffer->build(args) : Buffer(), _mode, _draw_count->build(args));
 }
 

@@ -80,7 +80,7 @@ private:
 	Rect ScoreRect(int width, int height, FreeRectChoiceHeuristic method, int &score1, int &score2) const;
 
 	/// Places the given rectangle into the bin.
-	void PlaceRect(const Rect &node);
+    void PlaceRect(const Rect& node);
 
 	/// Computes the placement score for the -CP variant.
 	int ContactPointScoreNode(int x, int y, int width, int height) const;
@@ -92,13 +92,13 @@ private:
 	Rect FindPositionForNewNodeContactPoint(int width, int height, int &contactScore) const;
 
 	/// @return True if the free node was split.
-	bool SplitFreeNode(Rect freeNode, const Rect &usedNode);
+    bool SplitFreeNode(Rect freeNode, const Rect& usedNode);
 
 	/// Goes through the free rectangle list and removes any redundant entries.
 	void PruneFreeList();
 
     /// Returns true if a is contained in b.
-    static bool IsContainedIn(const Rect &a, const Rect &b);
+    static bool IsContainedIn(const Rect& a, const Rect& b);
 };
 
 }

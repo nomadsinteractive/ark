@@ -39,6 +39,8 @@ public:
         const Rect& bounds() const;
         const V2& size() const;
 
+        Rect uv() const;
+
         uint16_t ux() const;
         uint16_t uy() const;
         uint16_t vx() const;
@@ -70,7 +72,7 @@ public:
 
     ByType& attachments();
 
-    const op<ByIndex<Item>>& items() const;
+    const std::unordered_map<int32_t, Item>& items() const;
 
     void add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot);
 
@@ -100,9 +102,13 @@ private:
 private:
     sp<Texture> _texture;
 
-    op<ByIndex<Item>> _items;
+    float _width;
+    float _height;
+
     bool _allow_default_item;
     Item _default_item;
+
+    std::unordered_map<int32_t, Item> _items;
 
     ByType _attachments;
 

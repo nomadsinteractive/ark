@@ -32,7 +32,7 @@ class ModelImporterAssimp : public ModelLoader::Importer {
 public:
     ModelImporterAssimp(Ark::RendererCoordinateSystem coordinateSystem, sp<MaterialBundle> materialBundle);
 
-    virtual Model import(const document& manifest, const Rect& uvBounds) override;
+    virtual Model import(const document& manifest, Atlas& atlas, int32_t type) override;
 
     class BUILDER_IMPL : public Builder<ModelLoader::Importer> {
     public:
@@ -69,7 +69,7 @@ public:
 
 private:
     const aiScene* loadScene(const sp<Assimp::Importer>& importer, const String& src, bool checkMeshes = true) const;
-    Model loadModel(const aiScene* scene, const Rect& uvBounds, const sp<Assimp::Importer>& importer, const document& manifest) const;
+    Model loadModel(const aiScene* scene, Atlas& atlas, int32_t type, const sp<Assimp::Importer>& importer, const document& manifest) const;
     Mesh loadMesh(const aiScene* scene, const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, NodeTable& boneMapping) const;
     NodeTable loadNodes(const aiNode* node, Model& model) const;
     void loadBones(const aiMesh* mesh, NodeTable& boneMapping, Array<Mesh::BoneInfo>& bones) const;

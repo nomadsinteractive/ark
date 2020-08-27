@@ -21,7 +21,8 @@ AtlasImporterMaxRects::AtlasImporterMaxRects(const sp<ResourceLoaderContext>& re
 
 void AtlasImporterMaxRects::import(Atlas& atlas, BeanFactory& factory, const document& manifest)
 {
-    TexturePacker texturePacker(_resource_loader_context, atlas.texture(), false);
+    TexturePacker texturePacker(_resource_loader_context, atlas.texture());
+    MaxRectsBinPack binPack(atlas.texture()->width(), atlas.texture()->height(), false);
     for(const document& i : manifest->children())
     {
         if(i->name() == Constants::Attributes::ATLAS)
@@ -36,7 +37,7 @@ void AtlasImporterMaxRects::import(Atlas& atlas, BeanFactory& factory, const doc
 
             const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
             int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
-            const RectI rect = texturePacker.addBitmap(src);
+            const RectI rect = texturePacker.addBitmap(binPack, src);
             atlas.add(type, rect.left(), rect.top(), rect.right(), rect.bottom(), Rect(0, 0, 1.0f, 1.0f), V2(rect.width(), rect.height()), V2(0.5f, 0.5f));
         }
     }

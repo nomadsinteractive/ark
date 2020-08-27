@@ -61,15 +61,15 @@ void ModelLoaderNinePatch::NinePatchAtlasImporter::import(Atlas& atlas, BeanFact
 
 void ModelLoaderNinePatch::NinePatchVertices::import(Atlas& atlas, const document& manifest)
 {
-    uint32_t textureWidth = static_cast<uint32_t>(atlas.texture()->width());
-    uint32_t textureHeight = static_cast<uint32_t>(atlas.texture()->height());
+    uint32_t textureWidth = atlas.width();
+    uint32_t textureHeight = atlas.height();
     for(const document& i : manifest->children())
     {
         const String name = i->name();
         const Rect paddings = Documents::ensureAttribute<Rect>(i, Constants::Attributes::NINE_PATCH_PADDINGS);
         if(name == "default")
         {
-            for(const auto& i : atlas.items()->indices())
+            for(const auto& i : atlas.items())
                 add(i.first, textureWidth, textureHeight, paddings, atlas);
         }
         else

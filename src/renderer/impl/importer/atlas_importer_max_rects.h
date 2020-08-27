@@ -26,13 +26,6 @@ public:
     };
 
 private:
-    struct PackedBitmap {
-        String _src;
-        int32_t _x;
-        int32_t _y;
-    };
-
-private:
     sp<ResourceLoaderContext> _resource_loader_context;
 
 };

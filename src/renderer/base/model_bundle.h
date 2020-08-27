@@ -23,7 +23,7 @@ private:
     struct Stub {
         Stub(sp<Atlas> atlas, sp<Importer> importer);
 
-        void import(const sp<ResourceLoaderContext>& resourceLoaderContext, BeanFactory& factory, const document& manifest, const Scope& args);
+        void import(BeanFactory& factory, const document& manifest, const Scope& args);
         ModelInfo& addModel(int32_t type, const Model& model);
         const ModelInfo& ensure(int32_t type) const;
 
@@ -39,7 +39,7 @@ public:
     ModelBundle(sp<Atlas> atlas, sp<Importer> importer);
     ModelBundle(const sp<Stub>& stub);
 
-    void import(const sp<ResourceLoaderContext>& resourceLoaderContext, BeanFactory& factory, const document& manifest, const Scope& args);
+    void import(BeanFactory& factory, const document& manifest, const Scope& args);
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
     virtual void initialize(ShaderBindings& shaderBindings) override;
@@ -57,26 +57,25 @@ public:
 
     const Table<int32_t, ModelInfo>& models() const;
 
-//  [[plugin::resource-loader]]
+//  [[plugin::builder]]
     class BUILDER : public Builder<ModelBundle> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<ModelBundle> build(const Scope& args) override;
 
     private:
         BeanFactory _bean_factory;
         document _manifest;
-        sp<ResourceLoaderContext> _resource_loader_context;
 
         sp<Builder<Atlas>> _atlas;
         sp<Builder<Importer>> _importer;
     };
 
-//  [[plugin::resource-loader("model-bundle")]]
+//  [[plugin::builder("model-bundle")]]
     class MODEL_LOADER_BUILDER : public Builder<ModelLoader> {
     public:
-        MODEL_LOADER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        MODEL_LOADER_BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<ModelLoader> build(const Scope& args) override;
 
