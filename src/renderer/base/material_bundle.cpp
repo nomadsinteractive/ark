@@ -82,7 +82,7 @@ sp<MaterialBundle> MaterialBundle::BUILDER::build(const Scope& args)
     std::map<String, sp<Material>> materials;
     DASSERT(_names.size() == _materials.size());
     for(size_t i = 0; i < _names.size(); ++i)
-        materials.insert_or_assign(_names.at(i), _materials.at(i)->build(args));
+        materials[_names.at(i)] = _materials.at(i)->build(args);
 
     DASSERT(_types.size() == _textures.size());
     std::array<sp<Texture>, Material::TEXTURE_TYPE_LENGTH> textures;

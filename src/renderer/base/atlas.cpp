@@ -89,7 +89,7 @@ ByType& Atlas::attachments()
 
 void Atlas::add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot)
 {
-    _items.insert_or_assign(id, makeItem(ux, uy, vx, vy, bounds, size, pivot));
+    _items[id] = makeItem(ux, uy, vx, vy, bounds, size, pivot);
 }
 
 const Atlas::Item& Atlas::at(int32_t id) const
