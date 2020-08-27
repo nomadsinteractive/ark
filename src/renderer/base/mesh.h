@@ -33,12 +33,12 @@ public:
 
     struct ARK_API BoneInfo {
         BoneInfo() = default;
-        BoneInfo(std::array<float, 4> weights, std::array<int32_t, 4> ids);
+        BoneInfo(std::array<float, 4> weights, std::array<uint32_t, 4> ids);
 
-        void add(int32_t id, float weight);
+        void add(uint32_t id, float weight);
 
         std::array<float, 4> _weights;
-        std::array<int32_t, 4> _ids;
+        std::array<uint32_t, 4> _ids;
     };
 
 public:

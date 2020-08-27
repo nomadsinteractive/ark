@@ -644,6 +644,10 @@ class Model:
     def vertex_length(self) -> int:
         return 0
 
+    @property
+    def animates(self) -> List[str]:
+        return []
+
     def make_animate(self, name: str, duration: Numeric):
         pass
 

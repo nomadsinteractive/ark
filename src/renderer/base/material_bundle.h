@@ -12,6 +12,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/material.h"
+#include "graphics/base/rect.h"
 #include "graphics/util/max_rects_bin_pack.h"
 
 #include "renderer/forwarding.h"
@@ -24,6 +25,7 @@ public:
     MaterialBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, std::map<String, sp<Material>> materials, std::array<sp<Texture>, Material::TEXTURE_TYPE_LENGTH> textures);
 
     sp<Material> getMaterial(const String& name) const;
+    Rect getMaterialUV(const String& name) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<MaterialBundle> {
@@ -44,6 +46,9 @@ public:
 
 private:
     std::map<String, sp<Material>> _materials;
+    std::map<String, RectI> _material_bounds;
+    int32_t _width;
+    int32_t _height;
 
     sp<TexturePacker> _texture_packers[Material::TEXTURE_TYPE_LENGTH];
 

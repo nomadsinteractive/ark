@@ -21,13 +21,13 @@ public:
 
 private:
     struct Stub {
-        Stub(sp<Atlas> atlas, sp<Importer> importer);
+        Stub(sp<MaterialBundle> materialBundle, sp<Importer> importer);
 
         void import(BeanFactory& factory, const document& manifest, const Scope& args);
         ModelInfo& addModel(int32_t type, const Model& model);
         const ModelInfo& ensure(int32_t type) const;
 
-        sp<Atlas> _atlas;
+        sp<MaterialBundle> _material_bundle;
         sp<Importer> _importer;
 
         Table<int32_t, ModelInfo> _models;
@@ -36,7 +36,7 @@ private:
     };
 
 public:
-    ModelBundle(sp<Atlas> atlas, sp<Importer> importer);
+    ModelBundle(sp<MaterialBundle> materialBundle, sp<Importer> importer);
     ModelBundle(const sp<Stub>& stub);
 
     void import(BeanFactory& factory, const document& manifest, const Scope& args);
@@ -68,7 +68,7 @@ public:
         BeanFactory _bean_factory;
         document _manifest;
 
-        sp<Builder<Atlas>> _atlas;
+        sp<Builder<MaterialBundle>> _material_bundle;
         sp<Builder<Importer>> _importer;
     };
 

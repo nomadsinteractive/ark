@@ -88,12 +88,12 @@ void Mesh::write(VertexStream& buf) const
     }
 }
 
-Mesh::BoneInfo::BoneInfo(std::array<float, 4> weights, std::array<int32_t, 4> ids)
+Mesh::BoneInfo::BoneInfo(std::array<float, 4> weights, std::array<uint32_t, 4> ids)
     : _weights(std::move(weights)), _ids(std::move(ids))
 {
 }
 
-void Mesh::BoneInfo::add(int32_t id, float weight)
+void Mesh::BoneInfo::add(uint32_t id, float weight)
 {
     for(size_t i = 0; i < _weights.size(); ++i)
         if(_weights.at(i) == 0)

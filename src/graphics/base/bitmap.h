@@ -4,6 +4,7 @@
 #include <array>
 
 #include "core/base/api.h"
+#include "core/base/string.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
@@ -129,6 +130,18 @@ public:
 
     private:
         sp<Builder<String>> _src;
+        sp<BitmapBundle> _bitmap_bundle;
+    };
+
+//  [[plugin::resource-loader::by-value]]
+    class VALUE_BUILDER : public Builder<Bitmap> {
+    public:
+        VALUE_BUILDER(BeanFactory& factory, const String& src, const sp<ResourceLoaderContext>& resourceLoaderContext);
+
+        virtual sp<Bitmap> build(const Scope& args) override;
+
+    private:
+        String _src;
         sp<BitmapBundle> _bitmap_bundle;
     };
 

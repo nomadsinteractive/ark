@@ -34,11 +34,13 @@ public:
 //[[script::bindings::property]]
     size_t vertexLength() const;
 
+//[[script::bindings::property]]
+    const std::vector<String>& animates() const;
 //[[script::bindings::auto]]
     sp<Animate> makeAnimate(const String& name, const sp<Numeric>& duration) const;
 
-    const Table<String, sp<AnimateMaker>>& animates() const;
-    void setAnimates(Table<String, sp<AnimateMaker>> animates);
+    const Table<String, sp<AnimateMaker>>& animateMakers() const;
+    void setAnimateMakers(Table<String, sp<AnimateMaker>> animateMakers);
 
     void writeToStream(VertexStream& buf, const V3& size) const;
 
@@ -78,7 +80,7 @@ private:
     sp<Vertices> _vertices;
     sp<Array<Mesh>> _meshes;
 
-    Table<String, sp<AnimateMaker>> _animates;
+    Table<String, sp<AnimateMaker>> _animate_makers;
     Metrics _metrics;
 };
 

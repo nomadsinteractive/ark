@@ -31,7 +31,7 @@ public:
     public:
         virtual ~Importer() = default;
 
-        virtual Model import(const document& manifest, Atlas& atlas, int32_t type) = 0;
+        virtual Model import(const document& manifest, MaterialBundle& materialBundle) = 0;
     };
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() = 0;

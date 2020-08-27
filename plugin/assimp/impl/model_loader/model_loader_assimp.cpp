@@ -37,8 +37,8 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-ModelImporterAssimp::ModelImporterAssimp(Ark::RendererCoordinateSystem coordinateSystem, sp<MaterialBundle> materialBundle)
-    : _coordinate_system(coordinateSystem), _material_bundle(std::move(materialBundle))
+ModelImporterAssimp::ModelImporterAssimp(Ark::RendererCoordinateSystem coordinateSystem)
+    : _coordinate_system(coordinateSystem)
 {
 }
 
@@ -116,11 +116,11 @@ void ModelImporterAssimp::loadAnimates(Table<String, sp<AnimateMaker>>& animates
     }
 }
 
-Model ModelImporterAssimp::import(const document& manifest, Atlas& atlas, int32_t type)
+Model ModelImporterAssimp::import(const document& manifest, MaterialBundle& materialBundle)
 {
     const sp<Assimp::Importer> importer = sp<Assimp::Importer>::make();
     const String& src = Documents::ensureAttribute(manifest, Constants::Attributes::SRC);
-    return loadModel(loadScene(importer, src), atlas, type, importer, manifest);
+    return loadModel(loadScene(importer, src), materialBundle, importer, manifest);
 }
 
 const aiScene* ModelImporterAssimp::loadScene(const sp<Assimp::Importer>& importer, const String& src, bool checkMeshes) const
@@ -135,7 +135,7 @@ const aiScene* ModelImporterAssimp::loadScene(const sp<Assimp::Importer>& import
     return scene;
 }
 
-Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, const Rect& uvBounds, element_index_t vertexBase, NodeTable& boneMapping) const
+Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, element_index_t vertexBase, NodeTable& boneMapping) const
 {
     sp<Array<element_index_t>> indices = loadIndices(mesh, vertexBase);
     sp<Array<V3>> vertices = sp<Array<V3>::Allocated>::make(mesh->mNumVertices);
@@ -148,6 +148,12 @@ Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, con
     V3* norm = normals ? normals->buf() - 1 : nullptr;
     Mesh::Tangent* t = tangents ? tangents->buf() - 1 : nullptr;
     Mesh::UV* u = uvs->buf() - 1;
+
+    DASSERT(mesh->mMaterialIndex < scene->mNumMaterials);
+    const String mName = scene->mMaterials[mesh->mMaterialIndex]->GetName().C_Str();
+    sp<Material> material = materialBundle.getMaterial(mName);
+    DWARN(material, "Undefined material(%s) for mesh(%s)", mName.c_str(), mesh->mName.C_Str());
+    const Rect uvBounds = materialBundle.getMaterialUV(mName);
 
     for(uint32_t i = 0; i < mesh->mNumVertices; i ++)
     {
@@ -162,9 +168,6 @@ Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, con
     if(mesh->HasBones())
         loadBones(mesh, boneMapping, bones);
 
-    DASSERT(mesh->mMaterialIndex < scene->mNumMaterials);
-    sp<Material> material = _material_bundle ? _material_bundle->getMaterial(scene->mMaterials[mesh->mMaterialIndex]->GetName().C_Str()) : nullptr;
-    DWARN(!_material_bundle || material, "Undefined material(%s) for mesh(%s)",  scene->mMaterials[mesh->mMaterialIndex]->GetName().C_Str(), mesh->mName.C_Str());
     return Mesh(indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents), std::move(bones), std::move(material));
 }
 
@@ -180,7 +183,7 @@ NodeTable ModelImporterAssimp::loadNodes(const aiNode* node, Model& model) const
     return nodes;
 }
 
-Model ModelImporterAssimp::loadModel(const aiScene* scene, Atlas& atlas, int32_t type, const sp<Assimp::Importer>& importer, const document& manifest) const
+Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& materialBundle, const sp<Assimp::Importer>& importer, const document& manifest) const
 {
     std::vector<Mesh> meshes;
     element_index_t vertexBase = 0;
@@ -188,12 +191,10 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, Atlas& atlas, int32_t
     NodeTable bones;
     V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
 
-    const Rect uvBounds = atlas.has(type) ? atlas.at(type).uv() : Rect(0, 1.0f, 1.0f, 0);
-
     for(uint32_t i = 0; i < scene->mNumMeshes; ++i)
     {
         const aiMesh* mesh = scene->mMeshes[i];
-        meshes.push_back(loadMesh(scene, mesh, uvBounds, vertexBase, bones));
+        meshes.push_back(loadMesh(scene, mesh, materialBundle, vertexBase, bones));
 
         aabbMin = V3(std::min(mesh->mAABB.mMin.x, aabbMin.x()), std::min(mesh->mAABB.mMin.y, aabbMin.y()), std::min(mesh->mAABB.mMin.z, aabbMin.y()));
         aabbMax = V3(std::max(mesh->mAABB.mMax.x, aabbMax.x()), std::max(mesh->mAABB.mMax.y, aabbMax.y()), std::max(mesh->mAABB.mMax.z, aabbMax.y()));
@@ -234,7 +235,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, Atlas& atlas, int32_t
                 loadAnimates(animates, animateScene, globalTransformation, importer, nodes, callback);
         }
 
-        model.setAnimates(std::move(animates));
+        model.setAnimateMakers(std::move(animates));
     }
 
     return model;
@@ -279,34 +280,14 @@ void ModelImporterAssimp::callbackBoneAnimation(Table<String, Node>& nodes, cons
     }
 }
 
-ModelImporterAssimp::BUILDER_IMPL::BUILDER_IMPL(const sp<ResourceLoaderContext>& resourceLoaderContext, SafePtr<Builder<MaterialBundle>> materialBundle)
-    : _coordinate_system(resourceLoaderContext->renderController()->renderEngine()->context()->coordinateSystem()), _material_bundle(std::move(materialBundle))
+ModelImporterAssimp::BUILDER::BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _coordinate_system(resourceLoaderContext->renderController()->renderEngine()->context()->coordinateSystem())
 {
 }
 
-sp<ModelLoader::Importer> ModelImporterAssimp::BUILDER_IMPL::build(const Scope& args)
+sp<ModelLoader::Importer> ModelImporterAssimp::BUILDER::build(const Scope& /*args*/)
 {
-    return sp<ModelImporterAssimp>::make(_coordinate_system, _material_bundle->build(args));
-}
-
-ModelImporterAssimp::VALUE_BUILDER::VALUE_BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _impl(resourceLoaderContext, SafePtr<Builder<MaterialBundle>>())
-{
-}
-
-sp<ModelLoader::Importer> ModelImporterAssimp::VALUE_BUILDER::build(const Scope& args)
-{
-    return _impl.build(args);
-}
-
-ModelImporterAssimp::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _impl(resourceLoaderContext, factory.getBuilder<MaterialBundle>(manifest, "material-bundle"))
-{
-}
-
-sp<ModelLoader::Importer> ModelImporterAssimp::BUILDER::build(const Scope& args)
-{
-    return _impl.build(args);
+    return sp<ModelImporterAssimp>::make(_coordinate_system);
 }
 
 }

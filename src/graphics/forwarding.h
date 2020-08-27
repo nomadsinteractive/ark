@@ -77,7 +77,6 @@ typedef Variable<V4> Vec4;
 
 typedef Loader<Bitmap> BitmapLoader;
 
-//[[script::bindings::auto]]
 typedef Flatable Animate;
 
 //[[script::bindings::auto]]

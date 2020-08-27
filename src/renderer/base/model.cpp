@@ -50,20 +50,25 @@ size_t Model::vertexLength() const
     return _vertices->length();
 }
 
-const Table<String, sp<AnimateMaker>>& Model::animates() const
+const Table<String, sp<AnimateMaker>>& Model::animateMakers() const
 {
-    return _animates;
+    return _animate_makers;
 }
 
-void Model::setAnimates(Table<String, sp<AnimateMaker>> animates)
+void Model::setAnimateMakers(Table<String, sp<AnimateMaker>> animates)
 {
-    _animates = std::move(animates);
+    _animate_makers = std::move(animates);
 }
 
 sp<Animate> Model::makeAnimate(const String& name, const sp<Numeric>& duration) const
 {
-    DCHECK(_animates.has(name), "Model has no animate(%s) defined", name.c_str());
-    return _animates.at(name)->makeAnimate(duration);
+    DCHECK(_animate_makers.has(name), "Model has no animate(%s) defined", name.c_str());
+    return _animate_makers.at(name)->makeAnimate(duration);
+}
+
+const std::vector<String>& Model::animates() const
+{
+    return _animate_makers.keys();
 }
 
 V3 Model::toScale(const V3& renderObjectSize) const

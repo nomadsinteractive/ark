@@ -11,8 +11,8 @@
 
 namespace ark {
 
-ModelBundle::ModelBundle(sp<Atlas> atlas, sp<Importer> importer)
-    : ModelLoader(RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(std::move(atlas), std::move(importer)))
+ModelBundle::ModelBundle(sp<MaterialBundle> materialBundle, sp<Importer> importer)
+    : ModelLoader(RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(std::move(materialBundle), std::move(importer)))
 {
 }
 
@@ -75,7 +75,7 @@ void ModelBundle::Stub::import(BeanFactory& factory, const document& manifest, c
     {
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
         const String importer = Documents::getAttribute(i, "importer");
-        addModel(type, importer ? factory.build<Importer>(importer, args)->import(i, _atlas, type) : _importer->import(i, _atlas, type));
+        addModel(type, importer ? factory.build<Importer>(importer, args)->import(i, _material_bundle) : _importer->import(i, _material_bundle));
     }
 }
 
@@ -96,21 +96,20 @@ const ModelBundle::ModelInfo& ModelBundle::Stub::ensure(int32_t type) const
 }
 
 ModelBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _bean_factory(factory), _manifest(manifest), _atlas(factory.ensureBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)),
+    : _bean_factory(factory), _manifest(manifest), _material_bundle(factory.ensureBuilder<MaterialBundle>(manifest, "material-bundle")),
       _importer(factory.ensureBuilder<ModelLoader::Importer>(manifest, "importer"))
 {
 }
 
 sp<ModelBundle> ModelBundle::BUILDER::build(const Scope& args)
 {
-    sp<Importer> importer = _importer->build(args);
-    sp<ModelBundle> modelBundle = sp<ModelBundle>::make(_atlas->build(args), std::move(importer));
+    sp<ModelBundle> modelBundle = sp<ModelBundle>::make(_material_bundle->build(args), _importer->build(args));
     modelBundle->import(_bean_factory, _manifest, args);
     return modelBundle;
 }
 
-ModelBundle::Stub::Stub(sp<Atlas> atlas, sp<ModelLoader::Importer> importer)
-    : _atlas(std::move(atlas)), _importer(std::move(importer)), _vertex_length(0), _index_length(0)
+ModelBundle::Stub::Stub(sp<MaterialBundle> materialBundle, sp<ModelLoader::Importer> importer)
+    : _material_bundle(std::move(materialBundle)), _importer(std::move(importer)), _vertex_length(0), _index_length(0)
 {
 }
 

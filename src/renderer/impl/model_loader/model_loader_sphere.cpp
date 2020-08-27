@@ -80,9 +80,9 @@ namespace {
 
 class ModelBundleImporterSphere : public ModelLoader::Importer {
 public:
-    virtual Model import(const document& manifest, Atlas& atlas, int32_t type) override {
+    virtual Model import(const document& manifest, MaterialBundle& materialBundle) override {
         uint32_t sampleCount = Documents::ensureAttribute<uint32_t>(manifest, "sample-count");
-        const Rect uvBounds = atlas.has(type) ? atlas.at(type).uv() : Rect(0, 1.0f, 1.0f, 0);
+        const Rect uvBounds = Rect(0, 1.0f, 1.0f, 0);
         indexarray indices = makeIndices(sampleCount);
         sp<std::vector<ModelLoaderSphere::Vertex>> vertices = makeVertices(sampleCount);
         return Model(sp<Uploader::Array<element_index_t>>::make(std::move(indices)), sp<VerticesSphere>::make(std::move(vertices), uvBounds));

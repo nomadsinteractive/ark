@@ -201,6 +201,16 @@ sp<Bitmap> Bitmap::BUILDER::build(const Scope& args)
     return _bitmap_bundle->get(_src->build(args));
 }
 
+Bitmap::VALUE_BUILDER::VALUE_BUILDER(BeanFactory& /*factory*/, const String& src, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _src(src), _bitmap_bundle(resourceLoaderContext->bitmapBundle())
+{
+}
+
+sp<Bitmap> Bitmap::VALUE_BUILDER::build(const Scope& /*args*/)
+{
+    return _bitmap_bundle->get(_src);
+}
+
 }
 
 
