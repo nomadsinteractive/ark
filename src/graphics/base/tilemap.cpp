@@ -15,7 +15,7 @@
 #include "graphics/base/tileset.h"
 #include "graphics/base/v2.h"
 #include "graphics/impl/frame/scrollable.h"
-#include "graphics/util/vec2_util.h"
+#include "graphics/util/vec2_type.h"
 
 namespace ark {
 

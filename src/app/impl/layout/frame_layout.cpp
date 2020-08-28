@@ -1,7 +1,7 @@
 #include "app/impl/layout/frame_layout.h"
 
 #include "core/types/weak_ptr.h"
-#include "core/util/numeric_util.h"
+#include "core/util/numeric_type.h"
 #include "core/util/variable_util.h"
 
 #include "app/view/layout_param.h"

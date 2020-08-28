@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_UTIL_MAT3_UTIL_H_
-#define ARK_GRAPHICS_UTIL_MAT3_UTIL_H_
+#ifndef ARK_GRAPHICS_UTIL_MAT3_TYPE_H_
+#define ARK_GRAPHICS_UTIL_MAT3_TYPE_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -11,7 +11,7 @@
 namespace ark {
 
 //[[script::bindings::class("Mat3")]]
-class ARK_API Mat3Util final {
+class ARK_API Mat3Type final {
 public:
 //[[script::bindings::constructor]]
     static sp<Mat3> create(const V3& t, const V3& b, const V3& n);

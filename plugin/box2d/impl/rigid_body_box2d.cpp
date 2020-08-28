@@ -6,7 +6,7 @@
 #include "core/inf/variable.h"
 #include "core/types/weak_ptr.h"
 #include "core/util/bean_utils.h"
-#include "core/util/numeric_util.h"
+#include "core/util/numeric_type.h"
 #include "core/util/log.h"
 
 #include "graphics/base/bounds.h"

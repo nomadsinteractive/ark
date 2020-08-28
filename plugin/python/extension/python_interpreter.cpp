@@ -9,8 +9,8 @@
 #include "core/util/log.h"
 
 #include "graphics/base/color.h"
-#include "graphics/util/vec2_util.h"
-#include "graphics/util/vec3_util.h"
+#include "graphics/util/vec2_type.h"
+#include "graphics/util/vec3_type.h"
 
 #include "app/base/event.h"
 
@@ -109,7 +109,7 @@ sp<Vec2> PythonInterpreter::toVec2(PyObject* object, bool alert)
     {
         PyObject* x, *y;
         if(PyArg_ParseTuple(object, "OO", &x, &y))
-            return Vec2Util::create(toNumeric(x), toNumeric(y));
+            return Vec2Type::create(toNumeric(x), toNumeric(y));
     }
     return asInterface<Vec2>(object, alert);
 }
@@ -123,7 +123,7 @@ sp<Vec3> PythonInterpreter::toVec3(PyObject* object, bool alert)
     {
         PyObject* x, *y, *z = nullptr;
         if(PyArg_ParseTuple(object, "OO|O", &x, &y, &z))
-            return Vec3Util::create(toNumeric(x), toNumeric(y), toNumeric(z));
+            return Vec3Type::create(toNumeric(x), toNumeric(y), toNumeric(z));
     }
     const sp<Vec3> vec3 = asInterface<Vec3>(object, false);
     if(vec3)
@@ -134,7 +134,7 @@ sp<Vec3> PythonInterpreter::toVec3(PyObject* object, bool alert)
         return nullptr;
 
     DCHECK(vec2, "Cannot cast \"%s\" to Vec3, possible candidates: tuple, Vec3, Vec2", Py_TYPE(object)->tp_name);
-    return Vec3Util::create(vec2);
+    return Vec3Type::create(vec2);
 }
 
 PyObject* PythonInterpreter::fromByteArray(const bytearray& bytes) const

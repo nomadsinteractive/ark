@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_UTIL_VEC4_UTIL_H_
-#define ARK_GRAPHICS_UTIL_VEC4_UTIL_H_
+#ifndef ARK_GRAPHICS_UTIL_VEC4_TYPE_H_
+#define ARK_GRAPHICS_UTIL_VEC4_TYPE_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -12,7 +12,7 @@
 namespace ark {
 
 //[[script::bindings::class("Vec4")]]
-class ARK_API Vec4Util final {
+class ARK_API Vec4Type final {
 public:
 //[[script::bindings::constructor]]
     static sp<Vec4> create(float x, float y, float z, float w);

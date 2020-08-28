@@ -14,7 +14,7 @@
 #include "graphics/base/size.h"
 #include "graphics/base/v3.h"
 #include "graphics/base/render_object.h"
-#include "graphics/util/vec3_util.h"
+#include "graphics/util/vec3_type.h"
 
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"

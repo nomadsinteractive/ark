@@ -16,7 +16,7 @@
 #include "graphics/base/render_object.h"
 #include "graphics/base/size.h"
 #include "graphics/impl/vec/vec3_impl.h"
-#include "graphics/util/vec3_util.h"
+#include "graphics/util/vec3_type.h"
 
 #include "renderer/base/resource_loader_context.h"
 
@@ -148,7 +148,7 @@ sp<Vec3> Emitter::Particale::makePosition(const V3& position) const
 {
     if(_position)
         return sp<VariableOP2<sp<Vec3>, V3, Operators::Add<V3>>>::make(_position->build(_stub->_arguments), position);
-    return Vec3Util::create(position.x(), position.y(), position.z());
+    return Vec3Type::create(position.x(), position.y(), position.z());
 }
 
 Emitter::Source::Source(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const Scope& arguments)

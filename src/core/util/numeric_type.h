@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_UTIL_NUMERIC_UTIL_H_
-#define ARK_CORE_UTIL_NUMERIC_UTIL_H_
+#ifndef ARK_CORE_UTIL_NUMERIC_TYPE_H_
+#define ARK_CORE_UTIL_NUMERIC_TYPE_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -11,7 +11,7 @@
 namespace ark {
 
 //[[script::bindings::class("Numeric")]]
-class ARK_API NumericUtil final {
+class ARK_API NumericType final {
 public:
 //[[script::bindings::constructor]]
     static sp<Numeric> create(float value);

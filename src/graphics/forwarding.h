@@ -51,7 +51,7 @@ class Vec4Impl;
 class V2;
 class V3;
 class V4;
-class Vec2Util;
+class Vec2Type;
 class Viewport;
 
 template<typename T> class RectT;

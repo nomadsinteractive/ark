@@ -1,4 +1,4 @@
-#include "graphics/util/vec3_util.h"
+#include "graphics/util/vec3_type.h"
 
 #include <glm/glm.hpp>
 
@@ -99,185 +99,185 @@ private:
 
 }
 
-sp<Vec3> Vec3Util::create(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z)
+sp<Vec3> Vec3Type::create(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z)
 {
     return sp<Vec3Impl>::make(x, y, z);
 }
 
-sp<Vec3> Vec3Util::create(float x, float y, float z)
+sp<Vec3> Vec3Type::create(float x, float y, float z)
 {
     return sp<Vec3Impl>::make(x, y, z);
 }
 
-sp<Vec3> Vec3Util::create(const sp<Vec2>& vec2)
+sp<Vec3> Vec3Type::create(const sp<Vec2>& vec2)
 {
     return sp<Vec2ToVec3>::make(vec2);
 }
 
-sp<Vec3> Vec3Util::add(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
+sp<Vec3> Vec3Type::add(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
     return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Add<V3>>>::make(lvalue, rvalue);
 }
 
-sp<Vec3> Vec3Util::sub(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
+sp<Vec3> Vec3Type::sub(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
     return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Sub<V3>>>::make(lvalue, rvalue);
 }
 
-sp<Vec3> Vec3Util::mul(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
+sp<Vec3> Vec3Type::mul(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
     return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Mul<V3>>>::make(lvalue, rvalue);
 }
 
-sp<Vec3> Vec3Util::mul(const sp<Vec3>& lvalue, float rvalue)
+sp<Vec3> Vec3Type::mul(const sp<Vec3>& lvalue, float rvalue)
 {
     return sp<VariableOP2<sp<Vec3>, float, Operators::Mul<V3, float>>>::make(lvalue, rvalue);
 }
 
-sp<Vec3> Vec3Util::mul(const sp<Vec3>& lvalue, sp<Numeric>& rvalue)
+sp<Vec3> Vec3Type::mul(const sp<Vec3>& lvalue, sp<Numeric>& rvalue)
 {
     return sp<VariableOP2<sp<Vec3>, sp<Numeric>, Operators::Mul<V3, float>>>::make(lvalue, rvalue);
 }
 
-sp<Vec3> Vec3Util::truediv(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
+sp<Vec3> Vec3Type::truediv(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
     return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Div<V3>>>::make(lvalue, rvalue);
 }
 
-sp<Vec3> Vec3Util::floordiv(const sp<Vec3>& self, const sp<Vec3>& rvalue)
+sp<Vec3> Vec3Type::floordiv(const sp<Vec3>& self, const sp<Vec3>& rvalue)
 {
     FATAL("Unimplemented");
     return nullptr;
 }
 
-sp<Vec3> Vec3Util::negative(const sp<Vec3>& self)
+sp<Vec3> Vec3Type::negative(const sp<Vec3>& self)
 {
     return sp<VecNeg<V3>>::make(self);
 }
 
-void Vec3Util::set(const sp<Vec3>& self, const V3& val)
+void Vec3Type::set(const sp<Vec3>& self, const V3& val)
 {
     ensureImpl(self)->set(val);
 }
 
-V3 Vec3Util::xyz(const sp<Vec3>& self)
+V3 Vec3Type::xyz(const sp<Vec3>& self)
 {
     return self->val();
 }
 
-void Vec3Util::setXyz(const sp<Vec3>& self, const V3& xyz)
+void Vec3Type::setXyz(const sp<Vec3>& self, const V3& xyz)
 {
     ensureImpl(self)->set(xyz);
 }
 
-V2 Vec3Util::xy(const sp<Vec3>& self)
+V2 Vec3Type::xy(const sp<Vec3>& self)
 {
     return self->val();
 }
 
-void Vec3Util::setXy(const sp<Vec3>& self, const V2& xy)
+void Vec3Type::setXy(const sp<Vec3>& self, const V2& xy)
 {
     ensureImpl(self)->set(V3(xy, 0));
 }
 
-float Vec3Util::x(const sp<Vec3>& self)
+float Vec3Type::x(const sp<Vec3>& self)
 {
     const sp<Vec3Impl> impl = self.as<Vec3Impl>();
     return impl ? impl->x()->val() : self->val().x();
 }
 
-void Vec3Util::setX(const sp<Vec3>& self, float x)
+void Vec3Type::setX(const sp<Vec3>& self, float x)
 {
     ensureImpl(self)->x()->set(x);
 }
 
-void Vec3Util::setX(const sp<Vec3>& self, const sp<Numeric>& x)
+void Vec3Type::setX(const sp<Vec3>& self, const sp<Numeric>& x)
 {
     ensureImpl(self)->x()->set(x);
 }
 
-float Vec3Util::y(const sp<Vec3>& self)
+float Vec3Type::y(const sp<Vec3>& self)
 {
     const sp<Vec3Impl> impl = self.as<Vec3Impl>();
     return impl ? impl->y()->val() : self->val().y();
 }
 
-void Vec3Util::setY(const sp<Vec3>& self, float y)
+void Vec3Type::setY(const sp<Vec3>& self, float y)
 {
     ensureImpl(self)->y()->set(y);
 }
 
-void Vec3Util::setY(const sp<Vec3>& self, const sp<Numeric>& y)
+void Vec3Type::setY(const sp<Vec3>& self, const sp<Numeric>& y)
 {
     ensureImpl(self)->y()->set(y);
 }
 
-float Vec3Util::z(const sp<Vec3>& self)
+float Vec3Type::z(const sp<Vec3>& self)
 {
     const sp<Vec3Impl> impl = self.as<Vec3Impl>();
     return impl ? impl->z()->val() : self->val().z();
 }
 
-void Vec3Util::setZ(const sp<Vec3>& self, float z)
+void Vec3Type::setZ(const sp<Vec3>& self, float z)
 {
     ensureImpl(self)->z()->set(z);
 }
 
-void Vec3Util::setZ(const sp<Vec3>& self, const sp<Numeric>& z)
+void Vec3Type::setZ(const sp<Vec3>& self, const sp<Numeric>& z)
 {
     ensureImpl(self)->z()->set(z);
 }
 
-sp<Numeric> Vec3Util::vx(const sp<Vec3>& self)
+sp<Numeric> Vec3Type::vx(const sp<Vec3>& self)
 {
     const sp<Vec3Impl> impl = self.as<Vec3Impl>();
     return impl ? static_cast<sp<Numeric>>(impl->x()) : static_cast<sp<Numeric>>(sp<_Vec3Numeric>::make(self, 0));
 }
 
-sp<Numeric> Vec3Util::vy(const sp<Vec3>& self)
+sp<Numeric> Vec3Type::vy(const sp<Vec3>& self)
 {
     const sp<Vec3Impl> impl = self.as<Vec3Impl>();
     return impl ? static_cast<sp<Numeric>>(impl->y()) : static_cast<sp<Numeric>>(sp<_Vec3Numeric>::make(self, 1));
 }
 
-sp<Numeric> Vec3Util::vz(const sp<Vec3>& self)
+sp<Numeric> Vec3Type::vz(const sp<Vec3>& self)
 {
     const sp<Vec3Impl> impl = self.as<Vec3Impl>();
     return impl ? static_cast<sp<Numeric>>(impl->z()) : static_cast<sp<Numeric>>(sp<_Vec3Numeric>::make(self, 2));
 }
 
-void Vec3Util::fix(const sp<Vec3>& self)
+void Vec3Type::fix(const sp<Vec3>& self)
 {
     ensureImpl(self)->fix();
 }
 
-sp<Vec3> Vec3Util::freeze(const sp<Vec3>& self)
+sp<Vec3> Vec3Type::freeze(const sp<Vec3>& self)
 {
     return sp<Vec3::Const>::make(self->val());
 }
 
-sp<Vec3> Vec3Util::cross(const sp<Vec3>& self, const sp<Vec3>& other)
+sp<Vec3> Vec3Type::cross(const sp<Vec3>& self, const sp<Vec3>& other)
 {
     return sp<Vec3Cross>::make(self, other);
 }
 
-sp<Vec3> Vec3Util::cross(const sp<Vec3>& self, const V3& other)
+sp<Vec3> Vec3Type::cross(const sp<Vec3>& self, const V3& other)
 {
     return sp<Vec3Cross>::make(self, sp<Vec3::Const>::make(other));
 }
 
-sp<Vec3> Vec3Util::normalize(const sp<Vec3>& self)
+sp<Vec3> Vec3Type::normalize(const sp<Vec3>& self)
 {
     return sp<Vec3Normalize>::make(self);
 }
 
-sp<Vec3> Vec3Util::integral(const sp<Vec3>& self, const sp<Numeric>& t)
+sp<Vec3> Vec3Type::integral(const sp<Vec3>& self, const sp<Numeric>& t)
 {
     sp<Numeric> duration = t ? t : Ark::instance().clock()->duration();
     return sp<Integral<V3>>::make(self, std::move(duration));
 }
 
-sp<Vec3Impl> Vec3Util::ensureImpl(const sp<Vec3>& self)
+sp<Vec3Impl> Vec3Type::ensureImpl(const sp<Vec3>& self)
 {
     const sp<Vec3Impl> impl = self.as<Vec3Impl>();
     DCHECK(impl, "This Vec3 object is not a Vec3Impl instance");

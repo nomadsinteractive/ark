@@ -10,6 +10,11 @@ sp<Animate> AnimateType::create(const sp<Animate>& value)
     return sp<AnimateWrapper>::make(value);
 }
 
+void AnimateType::set(const sp<Animate>& self, const sp<Animate>& delegate)
+{
+    ensureImpl(self)->setDelegate(delegate);
+}
+
 sp<AnimateType::AnimateWrapper> AnimateType::ensureImpl(const sp<Animate>& self)
 {
     const sp<AnimateType::AnimateWrapper> impl = self.as<AnimateType::AnimateWrapper>();

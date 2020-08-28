@@ -11,7 +11,7 @@
 #include "graphics/base/render_object.h"
 #include "graphics/base/size.h"
 #include "graphics/impl/renderer/renderer_by_render_object.h"
-#include "graphics/util/vec4_util.h"
+#include "graphics/util/vec4_type.h"
 
 #include "app/base/event.h"
 #include "app/view/layout_param.h"
@@ -275,7 +275,7 @@ View::STYLE_MARGIN_TOP::STYLE_MARGIN_TOP(BeanFactory& beanFactory, const sp<Buil
 sp<Renderer> View::STYLE_MARGIN_TOP::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->layoutParam()->setMargins(Vec4Util::create(_margin_top->build(args), nullptr, nullptr, nullptr));
+    bindView(renderer)->layoutParam()->setMargins(Vec4Type::create(_margin_top->build(args), nullptr, nullptr, nullptr));
     return renderer;
 }
 
@@ -287,7 +287,7 @@ View::STYLE_MARGIN_LEFT::STYLE_MARGIN_LEFT(BeanFactory& beanFactory, const sp<Bu
 sp<Renderer> View::STYLE_MARGIN_LEFT::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->layoutParam()->setMargins(Vec4Util::create(nullptr, nullptr, nullptr, _margin_left->build(args)));
+    bindView(renderer)->layoutParam()->setMargins(Vec4Type::create(nullptr, nullptr, nullptr, _margin_left->build(args)));
     return renderer;
 }
 
@@ -299,7 +299,7 @@ View::STYLE_MARGIN_RIGHT::STYLE_MARGIN_RIGHT(BeanFactory& beanFactory, const sp<
 sp<Renderer> View::STYLE_MARGIN_RIGHT::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->layoutParam()->setMargins(Vec4Util::create(nullptr, _margin_right->build(args), nullptr, nullptr));
+    bindView(renderer)->layoutParam()->setMargins(Vec4Type::create(nullptr, _margin_right->build(args), nullptr, nullptr));
     return renderer;
 }
 
@@ -311,7 +311,7 @@ View::STYLE_MARGIN_BOTTOM::STYLE_MARGIN_BOTTOM(BeanFactory& beanFactory, const s
 sp<Renderer> View::STYLE_MARGIN_BOTTOM::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->layoutParam()->setMargins(Vec4Util::create(nullptr, nullptr, _margin_bottom->build(args), nullptr));
+    bindView(renderer)->layoutParam()->setMargins(Vec4Type::create(nullptr, nullptr, _margin_bottom->build(args), nullptr));
     return renderer;
 }
 

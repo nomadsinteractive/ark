@@ -9,9 +9,9 @@
 
 #include "graphics/base/size.h"
 #include "graphics/impl/vec/vec3_impl.h"
-#include "graphics/util/vec2_util.h"
-#include "graphics/util/vec3_util.h"
-#include "graphics/util/vec4_util.h"
+#include "graphics/util/vec2_type.h"
+#include "graphics/util/vec3_type.h"
+#include "graphics/util/vec4_type.h"
 
 #include "graphics/inf/renderer.h"
 
@@ -294,7 +294,7 @@ void RendererBuilder::inputFloat(const String& label, const sp<Numeric>& value, 
 
 void RendererBuilder::inputFloat2(const String& label, const sp<Vec2>& value, const String& format, int32_t flags)
 {
-    addWidget(sp<InputVec<V2, Vec2Util>>::make([format, flags](const char* l, V2* v) { return ImGui::InputFloat2(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
+    addWidget(sp<InputVec<V2, Vec2Type>>::make([format, flags](const char* l, V2* v) { return ImGui::InputFloat2(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
 void RendererBuilder::inputFloat3(const String& label, const sp<Size>& size, const String& format, int32_t flags)
@@ -304,12 +304,12 @@ void RendererBuilder::inputFloat3(const String& label, const sp<Size>& size, con
 
 void RendererBuilder::inputFloat3(const String& label, const sp<Vec3>& value, const String& format, int32_t flags)
 {
-    addWidget(sp<InputVec<V3, Vec3Util>>::make([format, flags](const char* l, V3* v) { return ImGui::InputFloat3(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
+    addWidget(sp<InputVec<V3, Vec3Type>>::make([format, flags](const char* l, V3* v) { return ImGui::InputFloat3(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
 void RendererBuilder::inputFloat4(const String& label, const sp<Vec4>& value, const String& format, int32_t flags)
 {
-    addWidget(sp<InputVec<V4, Vec4Util>>::make([format, flags](const char* l, V4* v) { return ImGui::InputFloat4(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
+    addWidget(sp<InputVec<V4, Vec4Type>>::make([format, flags](const char* l, V4* v) { return ImGui::InputFloat4(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
 void RendererBuilder::sliderFloat(const String& label, const sp<Numeric>& value, float v_min, float v_max, const String& format, float power)
@@ -319,7 +319,7 @@ void RendererBuilder::sliderFloat(const String& label, const sp<Numeric>& value,
 
 void RendererBuilder::sliderFloat2(const String& label, const sp<Vec2>& value, float v_min, float v_max, const String& format, float power)
 {
-    addWidget(sp<InputVec<V2, Vec2Util>>::make([v_min, v_max, format, power](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<InputVec<V2, Vec2Type>>::make([v_min, v_max, format, power](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
 }
 
 void RendererBuilder::sliderFloat3(const String& label, const sp<Size>& size, float v_min, float v_max, const String& format, float power)
@@ -329,32 +329,32 @@ void RendererBuilder::sliderFloat3(const String& label, const sp<Size>& size, fl
 
 void RendererBuilder::sliderFloat3(const String& label, const sp<Vec3>& value, float v_min, float v_max, const String& format, float power)
 {
-    addWidget(sp<InputVec<V3, Vec3Util>>::make([v_min, v_max, format, power](const char* l, V3* v) { return ImGui::SliderFloat3(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<InputVec<V3, Vec3Type>>::make([v_min, v_max, format, power](const char* l, V3* v) { return ImGui::SliderFloat3(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
 }
 
 void RendererBuilder::sliderFloat4(const String& label, const sp<Vec4>& value, float v_min, float v_max, const String& format, float power)
 {
-    addWidget(sp<InputVec<V4, Vec4Util>>::make([v_min, v_max, format, power](const char* l, V4* v) { return ImGui::SliderFloat4(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<InputVec<V4, Vec4Type>>::make([v_min, v_max, format, power](const char* l, V4* v) { return ImGui::SliderFloat4(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
 }
 
 void RendererBuilder::colorEdit3(const String& label, const sp<Vec3>& value)
 {
-    addWidget(sp<InputVec<V3, Vec3Util>>::make([](const char* l, V3* v) { return ImGui::ColorEdit3(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<InputVec<V3, Vec3Type>>::make([](const char* l, V3* v) { return ImGui::ColorEdit3(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void RendererBuilder::colorEdit4(const String& label, const sp<Vec4>& value)
 {
-    addWidget(sp<InputVec<V4, Vec4Util>>::make([](const char* l, V4* v) { return ImGui::ColorEdit4(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<InputVec<V4, Vec4Type>>::make([](const char* l, V4* v) { return ImGui::ColorEdit4(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void RendererBuilder::colorPicker3(const String& label, const sp<Vec3>& value)
 {
-    addWidget(sp<InputVec<V3, Vec3Util>>::make([](const char* l, V3* v) { return ImGui::ColorPicker3(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<InputVec<V3, Vec3Type>>::make([](const char* l, V3* v) { return ImGui::ColorPicker3(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void RendererBuilder::colorPicker4(const String& label, const sp<Vec4>& value)
 {
-    addWidget(sp<InputVec<V4, Vec4Util>>::make([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<InputVec<V4, Vec4Type>>::make([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void RendererBuilder::image(const sp<Texture>& texture, const sp<Vec2>& size, const V2& uv0, const V2& uv1, const sp<Vec4>& color, const sp<Vec4>& borderColor)

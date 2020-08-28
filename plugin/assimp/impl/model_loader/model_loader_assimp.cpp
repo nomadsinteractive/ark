@@ -91,8 +91,7 @@ void ModelImporterAssimp::loadAnimates(Table<String, sp<AnimateMaker>>& animates
     for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
     {
         const aiAnimation* animation = scene->mAnimations[i];
-        const String name = animation->mName.C_Str();
-        animates.push_back(name, sp<AnimateMakerAssimpNodes>::make(importer, animation, scene->mRootNode, globalTransformation, nodes, callback));
+        animates.push_back(animation->mName.C_Str(), sp<AnimateMakerAssimpNodes>::make(importer, animation, scene->mRootNode, globalTransformation, nodes, callback));
     }
 }
 

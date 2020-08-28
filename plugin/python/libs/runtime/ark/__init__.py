@@ -634,6 +634,13 @@ class Mat4:
         pass
 
 
+class Animate:
+    def __init__(self, delegate: 'Animate'):
+        pass
+
+    def set(self, delegate: 'Animate'):
+        pass
+
 class Model:
 
     @property
@@ -648,7 +655,7 @@ class Model:
     def animates(self) -> List[str]:
         return []
 
-    def make_animate(self, name: str, duration: Numeric):
+    def make_animate(self, name: str, duration: Numeric) -> Animate:
         pass
 
 

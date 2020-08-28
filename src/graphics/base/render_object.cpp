@@ -5,10 +5,10 @@
 #include "core/inf/variable.h"
 #include "core/util/bean_utils.h"
 #include "core/util/holder_util.h"
-#include "core/util/numeric_util.h"
+#include "core/util/numeric_type.h"
 #include "core/util/variable_util.h"
 
-#include "graphics/util/vec3_util.h"
+#include "graphics/util/vec3_type.h"
 
 #include "renderer/base/varyings.h"
 
@@ -90,12 +90,12 @@ float RenderObject::x() const
 
 void RenderObject::setX(float x)
 {
-    Vec3Util::setX(_position.ensure(), x);
+    Vec3Type::setX(_position.ensure(), x);
 }
 
 void RenderObject::setX(const sp<Numeric>& x)
 {
-    Vec3Util::setX(_position.ensure(), x);
+    Vec3Type::setX(_position.ensure(), x);
 }
 
 float RenderObject::y() const
@@ -105,12 +105,12 @@ float RenderObject::y() const
 
 void RenderObject::setY(float y)
 {
-    Vec3Util::setY(_position.ensure(), y);
+    Vec3Type::setY(_position.ensure(), y);
 }
 
 void RenderObject::setY(const sp<Numeric>& y)
 {
-    Vec3Util::setY(_position.ensure(), y);
+    Vec3Type::setY(_position.ensure(), y);
 }
 
 float RenderObject::z() const
@@ -120,12 +120,12 @@ float RenderObject::z() const
 
 void RenderObject::setZ(float z)
 {
-    Vec3Util::setZ(_position.ensure(), z);
+    Vec3Type::setZ(_position.ensure(), z);
 }
 
 void RenderObject::setZ(const sp<Numeric>& z)
 {
-    Vec3Util::setZ(_position.ensure(), z);
+    Vec3Type::setZ(_position.ensure(), z);
 }
 
 V2 RenderObject::xy() const
