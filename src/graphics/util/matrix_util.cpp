@@ -3,6 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include "core/util/math.h"
 
@@ -90,6 +91,11 @@ V3 MatrixUtil::mul(const M4& lvalue, const V3& rvalue)
 M4 MatrixUtil::rotate(const M4& lvalue, const V3& direction, float radian)
 {
     return M4(glm::rotate(lvalue.mat<glm::mat4>(), radian, *reinterpret_cast<const glm::vec3*>(&direction)));
+}
+
+M4 MatrixUtil::rotate(const V4& quaternion)
+{
+    return M4(glm::toMat4(glm::quat(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z())));
 }
 
 M4 MatrixUtil::scale(const M4& lvalue, const V3& rvalue)

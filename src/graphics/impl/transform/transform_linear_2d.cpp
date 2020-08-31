@@ -1,6 +1,6 @@
 #include "graphics/impl/transform/transform_linear_2d.h"
 
-#include "graphics/base/rotate.h"
+#include "graphics/base/quaternion.h"
 #include "graphics/util/matrix_util.h"
 
 namespace ark {

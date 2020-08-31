@@ -39,7 +39,7 @@ class RenderRequest;
 class RenderablePassive;
 class Renderer;
 class RendererGroup;
-class Rotate;
+class Quaternion;
 class Size;
 class SurfaceController;
 class Tilemap;

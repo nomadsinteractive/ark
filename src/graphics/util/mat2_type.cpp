@@ -55,7 +55,7 @@ sp<Mat2> Mat2Type::rotate(const sp<Mat2>& self, const sp<Numeric>& radians)
     return sp<VariableOP2<sp<Mat2>, sp<Numeric>, RotateOP>>::make(self, radians);
 }
 
-sp<Mat2> Mat2Type::rotate(const sp<Mat2>& self, const sp<Rotate>& rot)
+sp<Mat2> Mat2Type::rotate(const sp<Mat2>& self, const sp<Quaternion>& rot)
 {
     return rotate(self, rot->value().as<Numeric>());
 }

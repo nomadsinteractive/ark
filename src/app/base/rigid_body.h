@@ -37,7 +37,7 @@ public:
     };
 
     struct ARK_API Stub {
-        Stub(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed = nullptr,
+        Stub(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Quaternion>& rotate, const sp<Disposed>& disposed = nullptr,
              const sp<Callback>& callback = nullptr, const sp<Box>& tag = nullptr);
         ~Stub();
 
@@ -57,7 +57,7 @@ public:
 public:
     virtual ~RigidBody() override = default;
 
-    RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate, const sp<Disposed>& disposed = nullptr);
+    RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Quaternion>& rotate, const sp<Disposed>& disposed = nullptr);
     RigidBody(const sp<Stub>& stub);
 
 //  [[script::bindings::auto]]

@@ -4,7 +4,7 @@
 #include "core/inf/variable.h"
 #include "core/util/boolean_util.h"
 
-#include "graphics/base/rotate.h"
+#include "graphics/base/quaternion.h"
 #include "graphics/base/size.h"
 #include "graphics/base/v3.h"
 
@@ -22,7 +22,7 @@ ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
 {
 }
 
-sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate)
+sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Quaternion>& rotate)
 {
     btTransform transform;
     const V3 pos = position->val();

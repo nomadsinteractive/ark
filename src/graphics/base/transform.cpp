@@ -19,7 +19,7 @@
 
 namespace ark {
 
-Transform::Transform(Type type, const sp<Rotate>& rotate, const sp<Vec3>& scale, const sp<Vec3>& translate)
+Transform::Transform(Type type, const sp<Quaternion>& rotate, const sp<Vec3>& scale, const sp<Vec3>& translate)
     : _type(type), _rotate(rotate), _scale(scale, V3(1.0f)), _pivot(translate), _delegate(makeDelegate())
 {
 }
@@ -46,12 +46,12 @@ bool Transform::update(uint64_t timestamp) const
     return VariableUtil::update(timestamp, _rotate, _scale, _pivot);
 }
 
-const sp<Rotate>& Transform::rotate()
+const sp<Quaternion>& Transform::rotate()
 {
     return _rotate.ensure<DelegateUpdater>(DelegateUpdater(*this));
 }
 
-void Transform::setRotate(const sp<Rotate>& rotate)
+void Transform::setRotate(const sp<Quaternion>& rotate)
 {
     _rotate = rotate;
     updateDelegate();
@@ -122,7 +122,7 @@ V3 Transform::Snapshot::transform(const V3& p) const
 
 Transform::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _type(Documents::getAttribute(manifest, Constants::Attributes::TYPE, Transform::TYPE_LINEAR_3D)),
-      _rotate(factory.getBuilder<Rotate>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec3>(manifest, "scale")),
+      _rotate(factory.getBuilder<Quaternion>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec3>(manifest, "scale")),
       _pivot(factory.getBuilder<Vec3>(manifest, "pivot"))
 {
 }

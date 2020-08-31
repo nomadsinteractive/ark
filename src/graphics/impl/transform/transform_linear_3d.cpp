@@ -1,7 +1,7 @@
 #include "graphics/impl/transform/transform_linear_3d.h"
 
 #include "graphics/base/mat.h"
-#include "graphics/base/rotate.h"
+#include "graphics/base/quaternion.h"
 #include "graphics/base/v4.h"
 #include "graphics/util/matrix_util.h"
 

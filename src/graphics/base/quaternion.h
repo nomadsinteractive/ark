@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_BASE_ROTATE_H_
-#define ARK_GRAPHICS_BASE_ROTATE_H_
+#ifndef ARK_GRAPHICS_BASE_QUATERNION_H_
+#define ARK_GRAPHICS_BASE_QUATERNION_H_
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
@@ -23,11 +23,11 @@ struct ARK_API Rotation {
 };
 
 //[[script::bindings::holder]]
-class ARK_API Rotate : public Holder, public Variable<Rotation> {
+class ARK_API Quaternion : public Holder, public Variable<Rotation> {
 public:
 //  [[script::bindings::auto]]
-    Rotate(const sp<Numeric>& value, const sp<Vec3>& direction = nullptr);
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotate);
+    Quaternion(const sp<Numeric>& value, const sp<Vec3>& direction = nullptr);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Quaternion);
 
     virtual Rotation val() override;
     virtual bool update(uint64_t timestamp) override;
@@ -51,11 +51,11 @@ public:
     static const V3 Z_AXIS;
 
 //[[plugin::builder]]
-    class BUILDER : public Builder<Rotate> {
+    class BUILDER : public Builder<Quaternion> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Rotate> build(const Scope& args) override;
+        virtual sp<Quaternion> build(const Scope& args) override;
 
     private:
         SafePtr<Builder<Numeric>> _angle;
@@ -63,16 +63,15 @@ public:
     };
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Rotate> {
+    class DICTIONARY : public Builder<Quaternion> {
     public:
         DICTIONARY(BeanFactory& factory, const String& str);
 
-        virtual sp<Rotate> build(const Scope& args) override;
+        virtual sp<Quaternion> build(const Scope& args) override;
 
     private:
         SafePtr<Builder<Numeric>> _rotation;
     };
-
 
 private:
     sp<NumericWrapper> _value;

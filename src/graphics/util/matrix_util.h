@@ -30,6 +30,7 @@ public:
     static V3 mul(const M4& lvalue, const V3& rvalue);
 
     static M4 rotate(const M4& lvalue, const V3& direction, float radian);
+    static M4 rotate(const V4& quaternion);
     static M4 scale(const M4& lvalue, const V3& rvalue);
     static M4 translate(const M4& lvalue, const V3& rvalue);
 

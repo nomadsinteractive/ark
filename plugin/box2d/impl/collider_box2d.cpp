@@ -7,7 +7,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/bounds.h"
-#include "graphics/base/rotate.h"
+#include "graphics/base/quaternion.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/v2.h"
 
@@ -41,7 +41,7 @@ void ColliderBox2D::run()
     _stub->run();
 }
 
-sp<RigidBody> ColliderBox2D::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& rotate)
+sp<RigidBody> ColliderBox2D::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Quaternion>& rotate)
 {
     const auto iter = _stub->_body_manifests.find(shape);
     DCHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-id: %d not found", shape);

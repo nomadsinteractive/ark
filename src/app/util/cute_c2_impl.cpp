@@ -8,7 +8,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/rect.h"
-#include "graphics/base/rotate.h"
+#include "graphics/base/quaternion.h"
 #include "graphics/base/transform.h"
 #include "graphics/base/v2.h"
 
@@ -19,7 +19,7 @@ C2Shape::C2Shape()
     memset(this, 0, sizeof(*this));
 }
 
-C2RigidBody::C2RigidBody(const sp<Vec3>& position, const sp<Rotate>& rotate, bool isStaticBody)
+C2RigidBody::C2RigidBody(const sp<Vec3>& position, const sp<Quaternion>& rotate, bool isStaticBody)
     : _position(position), _rotate(rotate), _is_static_body(isStaticBody)
 {
 }

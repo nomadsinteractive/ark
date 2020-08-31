@@ -26,7 +26,7 @@ struct C2Shape {
 
 class C2RigidBody {
 public:
-    C2RigidBody(const sp<Vec3>& position, const sp<Rotate>& rotate, bool isStaticBody);
+    C2RigidBody(const sp<Vec3>& position, const sp<Quaternion>& rotate, bool isStaticBody);
     C2RigidBody(const C2RigidBody& other) = default;
 
     void makeAABB(const Rect& aabb);
@@ -45,7 +45,7 @@ private:
 private:
     std::vector<C2Shape> _shapes;
     sp<Vec3> _position;
-    sp<Rotate> _rotate;
+    sp<Quaternion> _rotate;
     bool _is_static_body;
 };
 

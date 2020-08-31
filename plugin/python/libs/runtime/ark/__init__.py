@@ -608,7 +608,7 @@ class Mat2:
     def __mul__(self, other):
         pass
 
-    def rotate(self, rot: Union[float, Numeric, 'Rotate']) -> 'Mat2':
+    def rotate(self, rot: Union[float, Numeric, 'Quaternion']) -> 'Mat2':
         pass
 
     def freeze(self) -> 'Mat2':
@@ -948,7 +948,7 @@ class Event:
         return 0
 
 
-class Rotate:
+class Quaternion:
     def __init__(self, value, direction=None):
         self._value = value
         self._direction = direction
@@ -970,14 +970,14 @@ class Transform:
     TYPE_LINEAR_2D = 0
     TYPE_LINEAR_3D = 1
 
-    def __init__(self, t: int = TYPE_LINEAR_3D, rotate: Optional[Rotate] = None, scale: Optional[Vec3, Vec2] = None, translate: Optional[Vec3, Vec2] = None):
+    def __init__(self, t: int = TYPE_LINEAR_3D, rotate: Optional[Quaternion] = None, scale: Optional[Vec3, Vec2] = None, translate: Optional[Vec3, Vec2] = None):
         self._type = t
         self._rotate = rotate
         self._scale = scale
         self._translate = translate
 
     @property
-    def rotate(self) -> Rotate:
+    def rotate(self) -> Quaternion:
         return self._rotate
 
     @rotate.setter

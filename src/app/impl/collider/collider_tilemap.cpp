@@ -67,7 +67,7 @@ sp<Collider> TiledCollider::BUILDER::build(const Scope& args)
     return sp<TiledCollider>::make(_tilemap->build(args), _resource_loader_context);
 }
 
-sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotate>& /*rotate*/)
+sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Quaternion>& /*rotate*/)
 {
     DCHECK(type != Collider::BODY_TYPE_STATIC, "Cannot create static body in TiledCollider");
     DASSERT(position && size);
@@ -78,7 +78,7 @@ sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, 
 }
 
 TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Tilemap>& tileMap)
-    : RigidBody(id, type, position, size, Null::toSafe<Rotate>(nullptr)), _tilemap(tileMap), _rigid_body_shadow(sp<RigidBodyShadow>::make(tileMap->tileset()->tileWidth(), tileMap->tileset()->tileHeight()))
+    : RigidBody(id, type, position, size, Null::toSafe<Quaternion>(nullptr)), _tilemap(tileMap), _rigid_body_shadow(sp<RigidBodyShadow>::make(tileMap->tileset()->tileWidth(), tileMap->tileset()->tileHeight()))
 {
 }
 
