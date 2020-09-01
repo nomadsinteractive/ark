@@ -41,14 +41,14 @@ void ColliderBox2D::run()
     _stub->run();
 }
 
-sp<RigidBody> ColliderBox2D::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Quaternion>& rotate)
+sp<RigidBody> ColliderBox2D::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate)
 {
     const auto iter = _stub->_body_manifests.find(shape);
     DCHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-id: %d not found", shape);
     const BodyCreateInfo& manifest = iter->second;
-    const sp<RigidBodyBox2D> body = sp<RigidBodyBox2D>::make(*this, type, position, size, rotate ? rotate->value().cast<Numeric>() : sp<Numeric>::null(), manifest);
+    const sp<RigidBodyBox2D> body = sp<RigidBodyBox2D>::make(*this, type, position, size, rotate ? rotate->theta() : sp<Numeric>::null(), manifest);
     if(rotate)
-        body->setAngle(rotate->rotation());
+        body->setAngle(rotate->theta()->val());
 
     if(manifest.category || manifest.mask || manifest.group)
     {

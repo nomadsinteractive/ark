@@ -19,7 +19,7 @@ C2Shape::C2Shape()
     memset(this, 0, sizeof(*this));
 }
 
-C2RigidBody::C2RigidBody(const sp<Vec3>& position, const sp<Quaternion>& rotate, bool isStaticBody)
+C2RigidBody::C2RigidBody(const sp<Vec3>& position, const sp<Rotation>& rotate, bool isStaticBody)
     : _position(position), _rotate(rotate), _is_static_body(isStaticBody)
 {
 }
@@ -98,7 +98,7 @@ bool C2RigidBody::isStaticBody() const
 
 std::vector<C2Shape> C2RigidBody::transform(c2x& x) const
 {
-    float rotation = _rotate ? _rotate->rotation() : 0;
+    float rotation = _rotate ? _rotate->theta()->val() : 0;
 
     const V2 pos = _position->val();
     x.p.x = pos.x();

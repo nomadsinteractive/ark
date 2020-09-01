@@ -10,8 +10,8 @@ namespace ark {
 void TransformLinear3D::snapshot(const Transform& transform, Transform::Snapshot& snapshot) const
 {
     Snapshot* data = snapshot.makeData<Snapshot>();
-    const Rotation rot = transform._rotate.val();
-    data->matrix = MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(M4::identity(), transform._scale.val()), rot.direction, rot.angle), transform._pivot.val());
+    const V4 quat = transform._rotation.val();
+    data->matrix = MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(M4::identity(), transform._scale.val()), quat), transform._pivot.val());
 }
 
 V3 TransformLinear3D::transform(const Transform::Snapshot& snapshot, const V3& position) const

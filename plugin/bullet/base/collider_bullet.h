@@ -34,7 +34,7 @@ public:
 public:
     ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader);
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Quaternion>& rotate) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate) override;
 
     virtual void run() override;
 

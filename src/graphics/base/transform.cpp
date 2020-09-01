@@ -19,8 +19,8 @@
 
 namespace ark {
 
-Transform::Transform(Type type, const sp<Quaternion>& rotate, const sp<Vec3>& scale, const sp<Vec3>& translate)
-    : _type(type), _rotate(rotate), _scale(scale, V3(1.0f)), _pivot(translate), _delegate(makeDelegate())
+Transform::Transform(Type type, const sp<Rotation>& rotate, const sp<Vec3>& scale, const sp<Vec3>& translate)
+    : _type(type), _rotation(rotate, V4(0, 0, 0, 1.0f)), _scale(scale, V3(1.0f)), _pivot(translate), _delegate(makeDelegate())
 {
 }
 
@@ -31,7 +31,7 @@ Transform::Transform(sp<Transform::Delegate> delegate)
 
 void Transform::traverse(const Holder::Visitor& visitor)
 {
-    HolderUtil::visit(_rotate.delegate(), visitor);
+    HolderUtil::visit(_rotation.delegate(), visitor);
     HolderUtil::visit(_scale.delegate(), visitor);
     HolderUtil::visit(_pivot.delegate(), visitor);
 }
@@ -43,17 +43,17 @@ Transform::Snapshot Transform::snapshot() const
 
 bool Transform::update(uint64_t timestamp) const
 {
-    return VariableUtil::update(timestamp, _rotate, _scale, _pivot);
+    return VariableUtil::update(timestamp, _rotation, _scale, _pivot);
 }
 
-const sp<Quaternion>& Transform::rotate()
+const sp<Rotation>& Transform::rotation()
 {
-    return _rotate.ensure<DelegateUpdater>(DelegateUpdater(*this));
+    return _rotation.ensure<DelegateUpdater>(DelegateUpdater(*this));
 }
 
-void Transform::setRotate(const sp<Quaternion>& rotate)
+void Transform::setRotation(const sp<Rotation>& rotate)
 {
-    _rotate = rotate;
+    _rotation = rotate;
     updateDelegate();
 }
 
@@ -88,10 +88,10 @@ sp<Transform::Delegate> Transform::makeDelegate() const
 {
     DCHECK(_type != TYPE_DELEGATED, "Delegated Transform may not be updated");
 
-    if(!_rotate && !_scale && !_pivot)
+    if(!_rotation && !_scale && !_pivot)
         return Null::toSafe<Transform::Delegate>(nullptr);
 
-    return _rotate ? makeTransformLinear() : makeTransformSimple();
+    return _rotation ? makeTransformLinear() : makeTransformSimple();
 }
 
 sp<Transform::Delegate> Transform::makeTransformLinear() const
@@ -122,14 +122,14 @@ V3 Transform::Snapshot::transform(const V3& p) const
 
 Transform::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _type(Documents::getAttribute(manifest, Constants::Attributes::TYPE, Transform::TYPE_LINEAR_3D)),
-      _rotate(factory.getBuilder<Quaternion>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec3>(manifest, "scale")),
+      _rotation(factory.getBuilder<Rotation>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec3>(manifest, "scale")),
       _pivot(factory.getBuilder<Vec3>(manifest, "pivot"))
 {
 }
 
 sp<Transform> Transform::BUILDER::build(const Scope& args)
 {
-    return sp<Transform>::make(_type, _rotate->build(args), _scale->build(args), _pivot->build(args));
+    return sp<Transform>::make(_type, _rotation->build(args), _scale->build(args), _pivot->build(args));
 }
 
 Transform::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)

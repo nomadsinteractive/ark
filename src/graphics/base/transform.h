@@ -12,7 +12,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/mat.h"
-#include "graphics/base/quaternion.h"
+#include "graphics/base/rotation.h"
 #include "graphics/base/v3.h"
 
 namespace ark {
@@ -41,7 +41,7 @@ public:
     };
 
 //  [[script::bindings::auto]]
-    Transform(Transform::Type type = Transform::TYPE_LINEAR_3D, const sp<Quaternion>& rotate = nullptr, const sp<Vec3>& scale = nullptr, const sp<Vec3>& pivot = nullptr);
+    Transform(Transform::Type type = Transform::TYPE_LINEAR_3D, const sp<Rotation>& rotation = nullptr, const sp<Vec3>& scale = nullptr, const sp<Vec3>& pivot = nullptr);
     Transform(sp<Delegate> delegate);
 
     virtual void traverse(const Visitor& visitor) override;
@@ -79,9 +79,9 @@ public:
     bool update(uint64_t timestamp) const;
 
 //  [[script::bindings::property]]
-    const sp<Quaternion>& rotate();
+    const sp<Rotation>& rotation();
 //  [[script::bindings::property]]
-    void setRotate(const sp<Quaternion>& rotate);
+    void setRotation(const sp<Rotation>& rotation);
 
 //  [[script::bindings::property]]
     const sp<Vec3>& scale();
@@ -102,7 +102,7 @@ public:
 
     private:
         Type _type;
-        SafePtr<Builder<Quaternion>> _rotate;
+        SafePtr<Builder<Rotation>> _rotation;
         SafePtr<Builder<Vec3>> _scale;
         SafePtr<Builder<Vec3>> _pivot;
 
@@ -144,7 +144,7 @@ private:
 private:
     Type _type;
 
-    SafeVar<Quaternion> _rotate;
+    SafeVar<Rotation> _rotation;
     SafeVar<Vec3> _scale;
     SafeVar<Vec3> _pivot;
 

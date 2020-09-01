@@ -22,14 +22,14 @@ ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
 {
 }
 
-sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Quaternion>& rotate)
+sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate)
 {
     btTransform transform;
     const V3 pos = position->val();
-    const Rotation rot = rotate ? rotate->val() : Rotation();
+    const V4 quat = rotate ? rotate->val() : V4(0, 0, 0, 1.0f);
     transform.setIdentity();
     transform.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
-    transform.setRotation(btQuaternion(btVector3(rot.direction.x(), rot.direction.y(), rot.direction.z()), rot.angle));
+    transform.setRotation(btQuaternion(quat.x(), quat.y(), quat.z(), quat.w()));
 
     sp<CollisionShape> cs;
     const auto iter = _stub->_collision_shapes.find(shape);

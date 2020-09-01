@@ -38,14 +38,14 @@ public:
     virtual void onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold) override {
         const V3 p1 = _render_object->position()->val();
         const V3 p2 = rigidBody->position()->val();
-        printf("onBeginContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotate()->val().angle);
+        printf("onBeginContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotation()->theta()->val());
         _contact_began = true;
     }
 
     virtual void onEndContact(const sp<RigidBody>& rigidBody) override {
         const V3 p1 = _render_object->position()->val();
         const V3 p2 = rigidBody->position()->val();
-        printf("onEndContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotate()->val().angle);
+        printf("onEndContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotation()->theta()->val());
         if(_contact_began)
             _contact_ended = true;
     }
@@ -79,7 +79,7 @@ public:
         const sp<RenderObject> c002 = resourceLoader->load<RenderObject>("c002", args);
         const sp<RigidBody> rigidBody002 = collider->createBody(Collider::BODY_TYPE_STATIC, Collider::BODY_SHAPE_AABB, c002->position(), c002->size());
         const sp<RenderObject> c003 = resourceLoader->load<RenderObject>("c003", args);
-        const sp<RigidBody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, 0, c003->position(), c003->size(), c003->transform()->rotate());
+        const sp<RigidBody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, 0, c003->position(), c003->size(), c003->transform()->rotation());
         const sp<CollisionCallbackImpl> collisionCallbackImpl001 = sp<CollisionCallbackImpl>::make(c001);
         const sp<CollisionCallbackImpl> collisionCallbackImpl003 = sp<CollisionCallbackImpl>::make(c003);
         rigidBody001->setCollisionCallback(collisionCallbackImpl001);

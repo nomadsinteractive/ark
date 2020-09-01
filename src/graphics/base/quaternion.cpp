@@ -1,102 +1,109 @@
 #include "graphics/base/quaternion.h"
 
+#include <glm/gtx/quaternion.hpp>
+
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/types/null.h"
 #include "core/util/holder_util.h"
 #include "core/util/variable_util.h"
+#include "core/util/math.h"
 
 #include "graphics/base/v3.h"
+#include "graphics/util/vec3_type.h"
 
 namespace ark {
 
-const V3 Quaternion::Z_AXIS = V3(0, 0, 1.0f);
+namespace {
 
-Quaternion::Quaternion(const sp<Numeric>& value, const sp<Vec3>& direction)
-    : _value(sp<NumericWrapper>::make(value)), _direction(direction ? direction : static_cast<sp<Vec3>>(sp<Vec3::Const>::make(Z_AXIS)))
+class AxisRotation : public Vec4 {
+public:
+    AxisRotation(const sp<Numeric>& theta, const sp<Vec3>& axis)
+        : _theta(theta), _axis(Vec3Type::normalize(axis)) {
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        if(VariableUtil::update(timestamp, _theta, _axis)) {
+            const V3 axis = _axis->val();
+            const float rad = _theta->val();
+            const float s = Math::sin(rad / 2);
+            const float c = Math::cos(rad / 2);
+            _val = V4(axis.x() * s, axis.y() * s, axis.z() * s, c);
+            return true;
+        }
+        return false;
+    }
+
+    virtual V4 val() override {
+        return _val;
+    }
+
+private:
+    sp<Numeric> _theta;
+    sp<Vec3> _axis;
+
+    V4 _val;
+};
+
+class EulerRotation : public Vec4 {
+public:
+    EulerRotation(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll)
+        : _pitch(pitch), _yaw(yaw), _roll(roll) {
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        if(VariableUtil::update(timestamp, _pitch, _yaw, _roll)) {
+            const glm::quat quat = glm::quat(glm::vec3(_pitch->val(), _yaw->val(), _roll->val()));
+            _val = V4(quat.x, quat.y, quat.z, quat.w);
+            return true;
+        }
+        return false;
+    }
+
+    virtual V4 val() override {
+        return _val;
+    }
+
+private:
+    sp<Numeric> _pitch;
+    sp<Numeric> _yaw;
+    sp<Numeric> _roll;
+
+    V4 _val;
+};
+
+}
+
+
+Quaternion::Quaternion(const sp<Numeric>& rad, const sp<Vec3>& axis)
+    : _delegate(sp<AxisRotation>::make(rad, axis))
 {
 }
 
-Rotation Quaternion::val()
+V4 Quaternion::val()
 {
-    return Rotation(_value->val(), _direction->val());
+    return _delegate->val();
 }
 
 bool Quaternion::update(uint64_t timestamp)
 {
-    return VariableUtil::update(timestamp, _value, _direction);
+    return _delegate->update(timestamp);
 }
 
 void Quaternion::traverse(const Holder::Visitor& visitor)
 {
-    HolderUtil::visit(_value->delegate(), visitor);
-    HolderUtil::visit(_direction, visitor);
+    HolderUtil::visit(_delegate, visitor);
 }
 
-float Quaternion::rotation() const
+void Quaternion::setRotation(const sp<Numeric>& rad, const sp<Vec3>& axis)
 {
-    return _value->val();
+    _delegate = sp<AxisRotation>::make(rad, axis);
 }
 
-void Quaternion::setRotation(float rotation)
+void Quaternion::setEuler(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll)
 {
-    _value->set(rotation);
-}
-
-void Quaternion::setRotation(const sp<Numeric>& rotation)
-{
-    _value->set(rotation);
-}
-
-const sp<Vec3>& Quaternion::direction() const
-{
-    return _direction;
-}
-
-void Quaternion::setDirection(const sp<Vec3>& direction)
-{
-    _direction = direction;
-}
-
-const sp<NumericWrapper>& Quaternion::value() const
-{
-    return _value;
-}
-
-template<> ARK_API sp<Quaternion> Null::ptr()
-{
-    return sp<Quaternion>::make(nullptr, sp<Vec3>::make<Vec3::Const>(Quaternion::Z_AXIS));
-}
-
-Quaternion::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _angle(factory.getBuilder<Numeric>(manifest, Constants::Attributes::ROTATE)), _direction(factory.getBuilder<Vec3>(manifest, "direction"))
-{
-}
-
-sp<Quaternion> Quaternion::BUILDER::build(const Scope& args)
-{
-    return sp<Quaternion>::make(_angle->build(args), _direction->build(args));
-}
-
-Quaternion::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
-    : _rotation(factory.getBuilder<Numeric>(str))
-{
-}
-
-sp<Quaternion> Quaternion::DICTIONARY::build(const Scope& args)
-{
-    return sp<Quaternion>::make(_rotation->build(args));
-}
-
-Rotation::Rotation()
-    : angle(0), direction(Quaternion::Z_AXIS)
-{
-}
-
-Rotation::Rotation(float angle, const V3& direction)
-    : angle(angle), direction(direction)
-{
+    _delegate = sp<EulerRotation>::make(pitch, yaw, roll);
 }
 
 }

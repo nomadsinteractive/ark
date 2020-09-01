@@ -184,7 +184,7 @@ RigidBodyBox2D::RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, co
     : RigidBody(stub->_id, type,
                 sp<_RigidBodyPosition>::make(stub, position),
                 size,
-                sp<Quaternion>::make(sp<_RigidBodyRotation>::make(stub, rotation)), stub->_disposed), _stub(stub)
+                sp<Rotation>::make(sp<_RigidBodyRotation>::make(stub, rotation)), stub->_disposed), _stub(stub)
 {
     _stub->_callback = callback();
     _stub->_body->SetUserData(new Shadow(stub, RigidBody::stub()));
@@ -201,8 +201,8 @@ void RigidBodyBox2D::bind(const sp<RenderObject>& renderObject)
     renderObject->setTransform(transform());
     if(type() & Collider::BODY_FLAG_MANUAL_ROTATION)
     {
-        const sp<Numeric> r = transform()->rotate() ? transform()->rotate()->value()->delegate().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>::null();
-        transform()->rotate()->setRotation(sp<ManualRotation>::make(_stub, r));
+        const sp<Numeric> r = transform()->rotation() ? transform()->rotation()->theta().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>::null();
+        transform()->rotation()->setRotation(sp<ManualRotation>::make(_stub, r), nullptr);
     }
 }
 
@@ -224,7 +224,7 @@ sp<RigidBodyBox2D> RigidBodyBox2D::obtain(const Shadow* shadow)
         const b2Vec2& position = s._body->GetPosition();
         float rotation = s._body->GetTransform().q.GetAngle();
         const sp<Vec3> p = sp<Vec3::Const>::make(V3(position.x, position.y, 0));
-        const sp<Quaternion> rotate = sp<Quaternion>::make(sp<Numeric::Const>::make(rotation));
+        const sp<Rotation> rotate = sp<Rotation>::make(sp<Numeric::Const>::make(rotation));
         rigidBodyStub = sp<RigidBody::Stub>::make(s._id, bodyType, p, nullptr, rotate, s._disposed, nullptr, shadow->_tag);
     }
     return sp<RigidBodyBox2D>::make(shadow->_body.ensure(), rigidBodyStub);

@@ -24,7 +24,7 @@ class ColliderImpl : public Collider {
 public:
     ColliderImpl(const sp<Tracker>& tracker, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Quaternion>& rotate) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate) override;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Collider> {
@@ -54,7 +54,7 @@ public:
 
         void remove(const RigidBody& rigidBody);
 
-        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Quaternion>& rotate, const sp<Disposed>& disposed, const sp<Stub>& self);
+        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, const sp<Disposed>& disposed, const sp<Stub>& self);
         const sp<RigidBodyShadow>& ensureRigidBody(int32_t id) const;
         const sp<RigidBodyShadow> findRigidBody(int32_t id) const;
 
@@ -71,7 +71,7 @@ public:
 
     class RigidBodyShadow : public RigidBody {
     public:
-        RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Quaternion>& rotate, const sp<Disposed>& disposed);
+        RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, const sp<Disposed>& disposed);
 
         virtual void dispose() override;
 

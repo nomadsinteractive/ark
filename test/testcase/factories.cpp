@@ -94,7 +94,7 @@ public:
         TESTCASE_VALIDATE(t3 && t3->scale()->val().x() == 2.0f && t3->scale()->val().y() == 2.0f);
 
         sp<Transform> t4 = beanFactory.build<Transform>("@t4", args);
-        TESTCASE_VALIDATE(t4 && t4->rotate()->val().angle == 1.0f);
+        TESTCASE_VALIDATE(t4 && t4->rotation()->theta()->val() == 1.0f);
 
         const sp<Disposed> e004 = beanFactory.build<Disposed>("@e004", args);
         const sp<Disposed> e004Copy = beanFactory.build<Disposed>("@e004", args);

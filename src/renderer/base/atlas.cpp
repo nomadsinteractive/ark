@@ -15,7 +15,7 @@
 namespace ark {
 
 Atlas::Atlas(const sp<Texture>& texture, bool allowDefaultItem)
-    : _texture(texture), _width(_texture->width()), _height(_texture->height()), _allow_default_item(allowDefaultItem)
+    : _texture(texture), _width(static_cast<float>(_texture->width())), _height(static_cast<float>(_texture->height())), _allow_default_item(allowDefaultItem)
 {
 }
 

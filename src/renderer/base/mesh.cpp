@@ -2,6 +2,7 @@
 
 #include "core/inf/array.h"
 #include "core/util/log.h"
+#include "core/util/math.h"
 
 #include "renderer/base/vertex_stream.h"
 
@@ -102,7 +103,7 @@ void Mesh::BoneInfo::add(uint32_t id, float weight)
             _ids[i] = id;
             return;
         }
-    LOGW("Unable to add more weight to BoneId(%d), max weightarray length: %d", id, _weights.size());
+    DWARN(Math::almostEqual(weight, 0.0f), "Unable to add more weight to BoneId(%d), max weightarray length: %d", id, _weights.size());
 }
 
 }

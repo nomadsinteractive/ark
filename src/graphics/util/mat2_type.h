@@ -27,8 +27,6 @@ public:
 
 //[[script::bindings::classmethod]]
     static sp<Mat2> rotate(const sp<Mat2>& self, const sp<Numeric>& radians);
-//[[script::bindings::classmethod]]
-    static sp<Mat2> rotate(const sp<Mat2>& self, const sp<Quaternion>& rotate);
 
 //[[script::bindings::classmethod]]
     static sp<Mat2> ifElse(const sp<Mat2>& self, const sp<Boolean>& condition, const sp<Mat2>& negative);

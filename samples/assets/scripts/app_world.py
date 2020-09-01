@@ -4,7 +4,7 @@ import ark
 from ark import ApplicationFacade, Vec3, Camera, Math, Numeric, Mat3, Event, Size
 
 
-class AppCamera:
+class AppWorld:
     def __init__(self, application: ApplicationFacade, resolution: Size, target, light_position, radius):
         self._applicaiton = application
         self._resolution = resolution
