@@ -81,6 +81,11 @@ Quaternion::Quaternion(const sp<Numeric>& rad, const sp<Vec3>& axis)
 {
 }
 
+Quaternion::Quaternion(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll)
+    : _delegate(sp<EulerRotation>::make(pitch, yaw, roll))
+{
+}
+
 V4 Quaternion::val()
 {
     return _delegate->val();

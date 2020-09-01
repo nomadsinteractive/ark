@@ -949,40 +949,42 @@ class Event:
 
 
 class Rotation:
-    def __init__(self, value, direction=None):
-        self._value = value
-        self._direction = direction
+    def __init__(self, theta: Union[float, Numeric], axis: Optional[Vec3] = None):
+        self._theta = theta
+        self._axis = axis
 
     @property
-    def rotation(self) -> float:
-        return self._value
-
-    @rotation.setter
-    def rotation(self, v: Union[float, Numeric]):
-        self._value = v
+    def theta(self) -> Numeric:
+        return self._theta
 
     @property
-    def direction(self) -> Vec3:
-        return self._direction
+    def axis(self) -> Vec3:
+        return self._axis
+
+    def set_rotation(self, theta: Union[float, Numeric], axis: Optional[Vec3]):
+        pass
+
+    def set_euler(self, pitch: Union[float, Numeric], yaw: Union[float, Numeric], roll: Union[float, Numeric]):
+        pass
 
 
 class Transform:
     TYPE_LINEAR_2D = 0
     TYPE_LINEAR_3D = 1
 
-    def __init__(self, t: int = TYPE_LINEAR_3D, rotate: Optional[Rotation] = None, scale: Optional[Vec3, Vec2] = None, translate: Optional[Vec3, Vec2] = None):
+    def __init__(self, t: int = TYPE_LINEAR_3D, rotation: Optional[Rotation] = None, scale: Optional[Vec3, Vec2] = None, pivot: Optional[Vec3, Vec2] = None):
         self._type = t
-        self._rotate = rotate
+        self._rotation = rotation
         self._scale = scale
-        self._translate = translate
+        self._pivot = pivot
 
     @property
-    def rotate(self) -> Rotation:
-        return self._rotate
+    def rotation(self) -> Rotation:
+        return self._rotation
 
-    @rotate.setter
-    def rotate(self, v):
-        self._rotate = v
+    @rotation.setter
+    def rotation(self, v: Rotation):
+        self._rotation = v
 
     @property
     def scale(self) -> Vec3:
@@ -993,12 +995,12 @@ class Transform:
         self._scale = v
 
     @property
-    def translate(self) -> Vec3:
-        return self._translate
+    def pivot(self) -> Vec3:
+        return self._pivot
 
-    @translate.setter
-    def translate(self, v):
-        self._translate = v
+    @pivot.setter
+    def pivot(self, v):
+        self._pivot = v
 
 
 class Random:

@@ -14,6 +14,7 @@ namespace ark {
 class ARK_API Quaternion : public Holder, public Vec4 {
 public:
     Quaternion(const sp<Numeric>& rad, const sp<Vec3>& direction);
+    Quaternion(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Quaternion);
 
     virtual V4 val() override;
