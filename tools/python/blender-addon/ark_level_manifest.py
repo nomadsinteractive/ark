@@ -16,51 +16,92 @@ bl_info = {
 }
 
 
+_INDENT_BLOCK = '\t'
+
+
 def to_json_field_value(name, value, indent):
-    return '%s"%s": %s' % ('\t' * indent, name, value)
+    return '%s"%s": %s' % (_INDENT_BLOCK * indent, name, value)
+
+
+def to_xml_attr_value(name, value):
+    return '%s="%s"' % (name, value)
 
 
 class ArkScene:
     def __init__(self, collections):
         self._libraries = list(filter(None, [i.library for i in collections]))
         self._library_collections = [i for i in collections if i.library]
-        self._layers = [ArkLayer(i.objects) for i in collections if not i.library]
+        self._layers = [ArkLayer(i) for i in collections if not i.library]
 
     def to_json(self, indent):
         lines = [i.to_json(indent) for i in self._layers]
         return ',\n'.join(lines)
 
+    def to_xml(self, indent):
+        lines = ['<?xml version="1.0" encoding="utf-8"?>', '%s<scene>' % (_INDENT_BLOCK * indent)]
+        lines.extend(i.to_xml(indent + 1) for i in self._layers)
+        lines.append('%s</scene>' % (_INDENT_BLOCK * indent))
+        return '\n'.join(str(i) for i in lines)
+
 
 class ArkLayer:
-    def __init__(self, objects):
-        self._render_objects = [ArkRenderObject(i) for i in objects]
+    def __init__(self, collection):
+        self._name = collection.name
+        self._render_objects = [ArkRenderObject(i) for i in collection.objects]
 
     def to_json(self, indent):
         lines = [i.to_json(indent) for i in self._render_objects]
         return ',\n'.join(lines)
 
+    def to_xml(self, indent):
+        lines = ['%s<layer name="%s">' % (_INDENT_BLOCK * indent, self._name)]
+        lines.extend(i.to_xml(indent + 1) for i in self._render_objects)
+        lines.append('%s</layer>' % (_INDENT_BLOCK * indent))
+        return '\n'.join(str(i) for i in lines)
+
 
 class ArkRenderObject:
     def __init__(self, obj):
+        self._class = obj.type if obj.type != 'EMPTY' else None
         self._position = obj.location
         self._scale = obj.scale
-        self._rotation = obj.rotation_quaternion
-        self._instance_from = obj.instance_collection
+        if obj.rotation_mode == 'QUATERNION':
+            self._rotation = obj.rotation_quaternion
+        elif obj.rotation_mode == 'AXIS_ANGLE':
+            self._rotation = obj.rotation_euler
+        else:
+            self._rotation = obj.rotation_euler.to_quaternion()
+        self._instance_of = obj.instance_collection and '%s/%s' % (obj.instance_collection.library.name, obj.instance_collection.name)
 
     def to_json(self, indent):
-        lines = [
+        lines = [to_json_field_value('class', '"%s"' % self._class, indent + 1)] if self._class else []
+        lines.extend([
             to_json_field_value('position', list(self._position), indent + 1),
             to_json_field_value('scale', list(self._scale), indent + 1),
             to_json_field_value('rotation', list(self._rotation), indent + 1)
-        ]
+        ])
+        if self._instance_of:
+            lines.append(to_json_field_value('instance-of', '"%s"' % self._instance_of, indent + 1))
         return '{\n%s\n}' % ',\n'.join(lines)
+
+    def to_xml(self, indent):
+        attrs = [to_xml_attr_value('class', self._class)] if self._class else []
+        attrs.extend([
+            to_xml_attr_value('position', tuple(self._position)),
+            to_xml_attr_value('scale', tuple(self._scale)),
+            to_xml_attr_value('rotation', tuple(self._rotation))
+        ])
+        if self._instance_of:
+            attrs.append(to_xml_attr_value('instance-of', self._instance_of))
+        return '%s<render-object %s/>' % (_INDENT_BLOCK * indent, ' '.join(attrs))
 
 
 def generate_level_manifest(context, filepath, opt_name):
     scene = ArkScene(bpy.data.collections)
 
+    content = scene.to_xml(0) if opt_name == 'OPT_XML' else scene.to_json(0)
     with open(filepath, 'wt', encoding='utf-8') as fp:
-        fp.write(scene.to_json(0))
+        fp.write(content)
 
     return {'FINISHED'}
 
@@ -73,7 +114,7 @@ class ArkLevelManifestExporter(Operator, ExportHelper):
     bl_idname = "ark_level_manifest.export"
     bl_label = "Export Ark Level Manifest"
 
-    filename_ext = ".json"
+    filename_ext = ".xml"
 
     filter_glob: StringProperty(default="*.json;*.yaml;*.xml", options={'HIDDEN'}, maxlen=255)
 
@@ -83,7 +124,7 @@ class ArkLevelManifestExporter(Operator, ExportHelper):
         items=(('OPT_JSON', "JSON", "JavaScript Object Notation"),
                ('OPT_YAML', "YAML", "eXtensible Markup Language"),
                ('OPT_XML', "XML", "eXtensible Markup Language")),
-        default='OPT_JSON',
+        default='OPT_XML',
         update=on_file_selector_data_format_update
     )
 
@@ -92,7 +133,7 @@ class ArkLevelManifestExporter(Operator, ExportHelper):
 
 
 def menu_func_export_button(self, context):
-    self.layout.operator(ArkLevelManifestExporter.bl_idname, text="ArkLevelManifest")
+    self.layout.operator(ArkLevelManifestExporter.bl_idname, text="Ark Level Manifest")
 
 
 def register():
