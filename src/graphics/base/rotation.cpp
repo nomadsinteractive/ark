@@ -64,6 +64,16 @@ void Rotation::setRotation(const sp<Numeric>& theta, const sp<Vec3>& axis)
     _delegate = sp<Quaternion>::make(_theta, _axis);
 }
 
+void Rotation::setEuler(float pitch, float yaw, float roll)
+{
+    _delegate = sp<Quaternion>::make(sp<Numeric::Const>::make(pitch), sp<Numeric::Const>::make(yaw), sp<Numeric::Const>::make(roll));
+}
+
+void Rotation::setEuler(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll)
+{
+    _delegate = sp<Quaternion>::make(pitch, yaw, roll);
+}
+
 template<> ARK_API sp<Rotation> Null::ptr()
 {
     return sp<Rotation>::make(sp<Numeric::Const>::make(0));

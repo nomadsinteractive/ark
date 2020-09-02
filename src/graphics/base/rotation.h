@@ -39,6 +39,11 @@ public:
 //  [[script::bindings::auto]]
     void setRotation(const sp<Numeric>& theta, const sp<Vec3>& axis);
 
+//  [[script::bindings::auto]]
+    void setEuler(float pitch, float yaw, float roll);
+//  [[script::bindings::auto]]
+    void setEuler(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll);
+
 //[[plugin::builder]]
     class BUILDER : public Builder<Rotation> {
     public:
