@@ -15,6 +15,7 @@ template<typename T> class Duck;
 template<typename T> class Importer;
 template<typename T> class OwnedPtr;
 template<typename T> class Loader;
+template<typename T> class LoaderBundle;
 template<typename T> class LFStack;
 template<typename T> class LFQueue;
 template<typename T> class SafePtr;

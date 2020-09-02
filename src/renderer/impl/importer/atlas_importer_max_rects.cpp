@@ -4,7 +4,6 @@
 #include "core/util/documents.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/bitmap_bundle.h"
 #include "graphics/util/max_rects_bin_pack.h"
 
 #include "renderer/base/atlas.h"

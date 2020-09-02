@@ -1,7 +1,6 @@
 #include "renderer/base/texture_packer.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/bitmap_bundle.h"
 #include "graphics/base/rect.h"
 
 #include "renderer/base/resource_loader_context.h"

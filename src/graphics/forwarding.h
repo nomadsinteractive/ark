@@ -15,7 +15,6 @@ class CharacterMapper;
 class Color;
 class Font;
 class Frame;
-class BitmapBundle;
 class Scrollable;
 class RenderLayer;
 class Mat2Impl;
@@ -77,6 +76,7 @@ typedef Variable<V3> Vec3;
 typedef Variable<V4> Vec4;
 
 typedef Loader<Bitmap> BitmapLoader;
+typedef LoaderBundle<Bitmap> BitmapBundle;
 
 typedef Flatable Animate;
 

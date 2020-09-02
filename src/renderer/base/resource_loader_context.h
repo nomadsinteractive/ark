@@ -9,6 +9,7 @@
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
+#include "core/impl/dictionary/loader_bundle.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"

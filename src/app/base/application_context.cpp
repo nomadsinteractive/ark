@@ -15,7 +15,6 @@
 #include "core/inf/runnable.h"
 #include "core/types/global.h"
 
-#include "graphics/base/bitmap_bundle.h"
 #include "graphics/impl/vec/vec2_impl.h"
 
 #include "renderer/base/render_controller.h"

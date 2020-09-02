@@ -14,8 +14,6 @@
 #include "core/base/string.h"
 #include "core/inf/array.h"
 
-#include "graphics/base/bitmap_bundle.h"
-
 #include "renderer/base/resource_loader_context.h"
 
 namespace ark {

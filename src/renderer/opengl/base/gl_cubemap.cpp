@@ -6,7 +6,6 @@
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/bitmap_bundle.h"
 #include "graphics/base/size.h"
 
 #include "renderer/base/recycler.h"

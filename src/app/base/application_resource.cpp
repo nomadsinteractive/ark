@@ -2,8 +2,8 @@
 
 #include "core/base/string.h"
 #include "core/inf/dictionary.h"
+#include "core/impl/dictionary/loader_bundle.h"
 
-#include "graphics/base/bitmap_bundle.h"
 #include "graphics/impl/bitmap_loader/jpeg_bitmap_loader.h"
 #include "graphics/impl/bitmap_loader/png_bitmap_loader.h"
 #include "graphics/impl/bitmap_loader/stb_bitmap_loader.h"

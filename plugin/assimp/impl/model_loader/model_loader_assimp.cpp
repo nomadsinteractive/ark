@@ -7,7 +7,6 @@
 #include "core/util/math.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/bitmap_bundle.h"
 #include "graphics/base/size.h"
 #include "graphics/util/matrix_util.h"
 
