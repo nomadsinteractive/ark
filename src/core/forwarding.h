@@ -92,6 +92,9 @@ typedef VariableWrapper<bool> BooleanWrapper;
 typedef VariableWrapper<int32_t> IntegerWrapper;
 typedef VariableWrapper<float> NumericWrapper;
 
+typedef Loader<DOMDocument> DocumentLoader;
+typedef LoaderBundle<DOMDocument> DocumentBundle;
+
 typedef uint16_t element_index_t;
 
 typedef Array<uint8_t>  ByteArray;

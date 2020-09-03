@@ -26,19 +26,24 @@ Rotation::Rotation(const sp<Numeric>& theta, const sp<Vec3>& axis)
     setRotation(theta, axis);
 }
 
+Rotation::Rotation(sp<Numeric> theta, sp<Vec3> axis, sp<Vec4> quaternion)
+    : _theta(std::move(theta)), _axis(std::move(axis)), _quaternion(std::move(quaternion))
+{
+}
+
 V4 Rotation::val()
 {
-    return _delegate->val();
+    return _quaternion->val();
 }
 
 bool Rotation::update(uint64_t timestamp)
 {
-    return _delegate->update(timestamp);
+    return _quaternion->update(timestamp);
 }
 
 void Rotation::traverse(const Holder::Visitor& visitor)
 {
-    HolderUtil::visit(_delegate, visitor);
+    HolderUtil::visit(_quaternion, visitor);
 }
 
 const sp<Numeric>& Rotation::theta() const
@@ -61,22 +66,22 @@ void Rotation::setRotation(const sp<Numeric>& theta, const sp<Vec3>& axis)
     _theta = theta;
     _axis = axis ? axis : sp<Vec3>::make<Vec3::Const>(Rotation::Z_AXIS);
 
-    _delegate = sp<Quaternion>::make(_theta, _axis);
+    _quaternion = sp<Quaternion>::make(_theta, _axis);
 }
 
 void Rotation::setEuler(float pitch, float yaw, float roll)
 {
-    _delegate = sp<Quaternion>::make(sp<Numeric::Const>::make(pitch), sp<Numeric::Const>::make(yaw), sp<Numeric::Const>::make(roll));
+    _quaternion = sp<Quaternion>::make(sp<Numeric::Const>::make(pitch), sp<Numeric::Const>::make(yaw), sp<Numeric::Const>::make(roll));
 }
 
 void Rotation::setEuler(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll)
 {
-    _delegate = sp<Quaternion>::make(pitch, yaw, roll);
+    _quaternion = sp<Quaternion>::make(pitch, yaw, roll);
 }
 
 template<> ARK_API sp<Rotation> Null::ptr()
 {
-    return sp<Rotation>::make(sp<Numeric::Const>::make(0));
+    return sp<Rotation>::make(sp<Numeric>::make<Numeric::Const>(0));
 }
 
 Rotation::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

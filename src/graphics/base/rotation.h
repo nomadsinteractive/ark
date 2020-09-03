@@ -22,6 +22,7 @@ public:
     Rotation(float theta, const V3& axis = Rotation::Z_AXIS);
 //  [[script::bindings::auto]]
     Rotation(const sp<Numeric>& theta, const sp<Vec3>& axis = nullptr);
+    Rotation(sp<Numeric> theta, sp<Vec3> axis, sp<Vec4> quaternion);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotation);
 
     virtual V4 val() override;
@@ -73,7 +74,7 @@ private:
     sp<Numeric> _theta;
     sp<Vec3> _axis;
 
-    sp<Vec4> _delegate;
+    sp<Vec4> _quaternion;
 };
 
 }

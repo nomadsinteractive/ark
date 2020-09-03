@@ -3,6 +3,7 @@
 #include "core/base/string.h"
 #include "core/inf/dictionary.h"
 #include "core/impl/dictionary/loader_bundle.h"
+#include "core/impl/loader/document_loader_xml.h"
 
 #include "graphics/impl/bitmap_loader/jpeg_bitmap_loader.h"
 #include "graphics/impl/bitmap_loader/png_bitmap_loader.h"
@@ -13,8 +14,8 @@
 
 namespace ark {
 
-ApplicationResource::ApplicationResource(const sp<Dictionary<document>>& documents, const sp<AssetBundle>& images)
-    : _images(images), _documents(documents), _bitmap_bundle(createImageLoader(false)), _bitmap_bounds_loader(createImageLoader(true)), _recycler(sp<Recycler>::make())
+ApplicationResource::ApplicationResource(sp<AssetBundle> assetBundle)
+    : _asset_bundle(std::move(assetBundle)), _document_bundle(createDocumentBundle()), _bitmap_bundle(createImageBundle(false)), _bitmap_bounds_loader(createImageBundle(true)), _recycler(sp<Recycler>::make())
 {
 }
 
@@ -23,9 +24,9 @@ const sp<Recycler>& ApplicationResource::recycler() const
     return _recycler;
 }
 
-const sp<Dictionary<document>>& ApplicationResource::documents() const
+const sp<DocumentBundle>& ApplicationResource::documents() const
 {
-    return _documents;
+    return _document_bundle;
 }
 
 const sp<BitmapBundle>& ApplicationResource::bitmapBundle() const
@@ -40,15 +41,22 @@ const sp<BitmapBundle>& ApplicationResource::bitmapBoundsBundle() const
 
 document ApplicationResource::loadDocument(const String& name) const
 {
-    return _documents->get(name);
+    return _document_bundle->get(name);
 }
 
-sp<BitmapBundle> ApplicationResource::createImageLoader(bool justDecodeBounds) const
+sp<DocumentBundle> ApplicationResource::createDocumentBundle() const
+{
+    const sp<DocumentBundle> documentBundle = sp<DocumentBundle>::make(_asset_bundle);
+    documentBundle->addLoader("xml", sp<DocumentLoaderXML>::make());
+    return documentBundle;
+}
+
+sp<BitmapBundle> ApplicationResource::createImageBundle(bool justDecodeBounds) const
 {
 #ifdef ARK_USE_STB_IMAGE
-    const sp<BitmapBundle> imageBundle = sp<BitmapBundle>::make(_images, sp<STBBitmapLoader>::make(justDecodeBounds));
+    const sp<BitmapBundle> imageBundle = sp<BitmapBundle>::make(_asset_bundle, sp<STBBitmapLoader>::make(justDecodeBounds));
 #else
-    const sp<BitmapBundle> imageBundle = sp<BitmapBundle>::make(_images, nullptr);
+    const sp<BitmapBundle> imageBundle = sp<BitmapBundle>::make(_asset_bundle, nullptr);
 #endif
     imageBundle->addLoader("png", sp<PNGBitmapLoader>::make(justDecodeBounds));
 #ifdef ARK_USE_LIBJPEG_TURBO

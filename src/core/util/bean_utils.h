@@ -28,22 +28,6 @@ public:
         doSplit<Args...>(beanFactory, elems, args...);
     }
 
-    template<typename T, typename U> static sp<T> as(const sp<Builder<U>>& builder, const Scope& args) {
-        const sp<U> object = builder->build(args);
-        DCHECK(object && object.template is<T>(), "Illegal object");
-        return object.template as<T>();
-    }
-
-    template<typename T> static sp<T> as(BeanFactory& args, const String& str) {
-        const sp<Object> object = args.ensure<Object>(str, {});
-        DCHECK(object && object.is<T>(), "Illegal object");
-        return object.as<T>();
-    }
-
-    template<typename T> static sp<T> as(BeanFactory& args, const document& doc, const String& attr) {
-        return as<T>(args, Documents::ensureAttribute(doc, attr));
-    }
-
 private:
     template<typename T, typename... Args> static void doSplit(BeanFactory& beanFactory, std::list<String>& elems, sp<Builder<T>>& builder, sp<Builder<Args>>&... args) {
         if(elems.empty())

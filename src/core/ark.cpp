@@ -31,7 +31,6 @@ limitations under the License.
 #include "core/impl/asset_bundle/asset_bundle_zip_file.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/impl/dictionary/dictionary_impl.h"
-#include "core/impl/dictionary/xml_directory.h"
 #include "core/inf/asset.h"
 #include "core/types/global.h"
 #include "core/util/asset_bundle_util.h"
@@ -207,8 +206,7 @@ void Ark::initialize(const sp<Manifest>& manifest)
 
     const sp<BeanFactory> factory = createBeanFactory(sp<DictionaryImpl<document>>::make());
     _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleUtil::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->appDir()), factory, _manifest->assets());
-    const sp<AssetBundle> asset = _asset_bundle->getAssetBundle("/");
-    const sp<ApplicationResource> appResource = sp<ApplicationResource>::make(sp<XMLDirectory>::make(asset), asset);
+    const sp<ApplicationResource> appResource = sp<ApplicationResource>::make(_asset_bundle->getAssetBundle("/"));
     const sp<RenderEngine> renderEngine = createRenderEngine(_manifest->renderer()._version, _manifest->renderer()._coordinate_system, appResource);
     _application_context = createApplicationContext(_manifest, appResource, renderEngine);
 }

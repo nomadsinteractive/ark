@@ -641,6 +641,7 @@ class Animate:
     def set(self, delegate: 'Animate'):
         pass
 
+
 class Model:
 
     @property
@@ -662,6 +663,12 @@ class Model:
 class ModelBundle:
 
     def load(self, t: int) -> Model:
+        pass
+
+
+class LevelLoader:
+
+    def load(self, src: str):
         pass
 
 
