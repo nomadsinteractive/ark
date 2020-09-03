@@ -49,7 +49,7 @@ private:
     template<typename T> sp<Variable<T>> parseVector(const String& value) const {
         T vector(0);
         std::vector<String> splitted = Strings::unwrap(value, '(', ')').split(',');
-        DCHECK(splitted.size() < sizeof(T) / sizeof(float), "Vector \"\" has more components than its target value(Vec%d)", value.c_str(), sizeof(T) / sizeof(float));
+        DCHECK(splitted.size() <= sizeof(T) / sizeof(float), "Vector \"%s\" has more components than its target value(Vec%d)", value.c_str(), sizeof(T) / sizeof(float));
         for(size_t i = 0; i < splitted.size(); ++i)
             vector[i] = Strings::parse<float>(splitted.at(i));
         return sp<typename Variable<T>::Const>::make(vector);

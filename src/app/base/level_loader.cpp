@@ -49,7 +49,7 @@ void LevelLoader::load(const String& src)
                 const sp<Layer>& layer = iter->second._layer;
                 const String& position = Documents::ensureAttribute(j, "position");
                 const String& rotation = Documents::ensureAttribute(j, "rotation");
-                const String& scale = Documents::ensureAttribute(j, "rotation");
+                const String& scale = Documents::ensureAttribute(j, "scale");
                 sp<Transform> transform = sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(nullptr, nullptr, parseVector<V4>(rotation)), parseVector<V3>(scale));
                 sp<RenderObject> renderObject = sp<RenderObject>::make(type, parseVector<V3>(position), nullptr, transform);
                 layer->addRenderObject(renderObject);
