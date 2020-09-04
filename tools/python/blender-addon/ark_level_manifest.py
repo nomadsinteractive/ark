@@ -1,7 +1,10 @@
+from typing import Union
+
 import bpy
 from bpy_extras.io_utils import ExportHelper
 from bpy.props import StringProperty, BoolProperty, EnumProperty
 from bpy.types import Operator
+from mathutils import Quaternion, Vector
 
 
 bl_info = {
@@ -25,6 +28,29 @@ def to_json_field_value(name, value, indent):
 
 def to_xml_attr_value(name, value):
     return '%s="%s"' % (name, value)
+
+
+class XmlWriter:
+    def __init__(self, indent=0):
+        self._body_lines = []
+        self._element_lines = []
+        self._element_name = None
+        self._indent = indent
+
+    def begin_element(self, name):
+        self._element_name = name
+
+    def write_property(self, name: str, value: Union[int, float, tuple, Quaternion, Vector]):
+        if type(value) in (list, Quaternion, Vector):
+            value = tuple(value)
+        self._element_lines.append(to_xml_attr_value(name, value))
+
+    def end_element(self):
+        self._body_lines.append('%s<%s %s/>' % (_INDENT_BLOCK * self._indent, self._element_name, ' '.join(self._element_lines)))
+        self._element_lines.clear()
+
+    def to_str(self) -> str:
+        return '\n'.join(self._body_lines)
 
 
 class ArkScene:
@@ -84,13 +110,17 @@ class ArkLayer:
 
     def to_xml(self, indent):
         lines = ['%s<layer name="%s">' % (_INDENT_BLOCK * indent, self._name)]
-        lines.extend(i.to_xml(indent + 1) for i in self._render_objects)
+        xml_writer = XmlWriter(indent + 1)
+        for i in self._render_objects:
+            i.write(xml_writer)
+        lines.append(xml_writer.to_str())
         lines.append('%s</layer>' % (_INDENT_BLOCK * indent))
         return '\n'.join(str(i) for i in lines)
 
 
 class ArkRenderObject:
     def __init__(self, scene: ArkScene, obj):
+        self._object = obj
         self._class = obj.type if obj.type != 'EMPTY' else None
         self._position = obj.location
         self._scale = obj.scale
@@ -113,16 +143,25 @@ class ArkRenderObject:
             lines.append(to_json_field_value('instance-of', self._instance_of.id, indent + 1))
         return '{\n%s\n}' % ',\n'.join(lines)
 
-    def to_xml(self, indent):
-        attrs = [to_xml_attr_value('class', self._class)] if self._class else []
-        attrs.extend([
-            to_xml_attr_value('position', tuple(self._position)),
-            to_xml_attr_value('scale', tuple(self._scale)),
-            to_xml_attr_value('rotation', tuple(self._rotation))
-        ])
+    def write(self, writer):
+        writer.begin_element('render-object')
+
+        if self._class:
+            writer.write_property('name', self._object.name)
+            writer.write_property('class', self._class)
+            if self._object.type == 'CAMERA':
+                writer.write_property('fov', self._object.data.angle)
+                writer.write_property('clip-near', self._object.data.clip_start)
+                writer.write_property('clip-far', self._object.data.clip_end)
+
+        writer.write_property('position', self._position)
+        writer.write_property('scale', self._scale)
+        writer.write_property('rotation', self._rotation)
         if self._instance_of:
-            attrs.append(to_xml_attr_value('instance-of', self._instance_of.id))
-        return '%s<render-object %s/>' % (_INDENT_BLOCK * indent, ' '.join(attrs))
+            writer.write_property('instance-of', self._instance_of.id)
+
+        writer.end_element()
+        return writer.to_str()
 
 
 def generate_level_manifest(context, filepath, opt_name):

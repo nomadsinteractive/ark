@@ -15,8 +15,8 @@
 
 namespace ark {
 
-LevelLoader::LevelLoader(std::map<String, LevelLoader::InstanceLibrary> instanceLabraries)
-    : _instance_libraries(std::move(instanceLabraries))
+LevelLoader::LevelLoader(std::map<String, sp<Camera>> cameras, std::map<String, LevelLoader::InstanceLibrary> instanceLabraries)
+    : _cameras(std::move(cameras)), _instance_libraries(std::move(instanceLabraries))
 {
 }
 
@@ -41,6 +41,7 @@ void LevelLoader::load(const String& src)
         for(const document& j : i->children("render-object"))
         {
             int32_t instanceOf = Documents::getAttribute<int32_t>(j, "instance-of", -1);
+            const String clazz = Documents::getAttribute(j, "class");
             if(instanceOf != -1)
             {
                 const auto iter = typeMapping.find(instanceOf);
@@ -54,13 +55,37 @@ void LevelLoader::load(const String& src)
                 sp<RenderObject> renderObject = sp<RenderObject>::make(type, parseVector<V3>(position), nullptr, transform);
                 layer->addRenderObject(renderObject);
             }
+            else if(clazz == "CAMERA")
+            {
+                const String& name = Documents::ensureAttribute(j, "name");
+                const String& position = Documents::ensureAttribute(j, "position");
+                const String& rotation = Documents::ensureAttribute(j, "rotation");
+                sp<Transform> transform = sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(nullptr, nullptr, parseVector<V4>(rotation)), nullptr);
+                sp<Camera> camera = getCamera(name);
+                DWARN(camera, "Undefined camera(%s) in \"%s\"", name.c_str(), src.c_str());
+                if(camera)
+                {
+                    const V3 p = parseVector<V3>(position)->val();
+                    const Transform::Snapshot ts = transform->snapshot();
+                    camera->lookAt(p, ts.transform(V3(0, 1, 0)) + p, ts.transform(V3(0, 0, 1)));
+                }
+            }
         }
     }
 
 }
 
+sp<Camera> LevelLoader::getCamera(const String& name) const
+{
+    const auto iter = _cameras.find(name);
+    return iter != _cameras.end() ? iter->second : nullptr;
+}
+
 LevelLoader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
+    for(const document& i : manifest->children("camera"))
+        _cameras.push_back({Documents::ensureAttribute(i, Constants::Attributes::NAME), factory.ensureBuilder<Camera>(i, Constants::Attributes::REF)});
+
     for(const document& i : manifest->children("library"))
         _libraries.push_back({Documents::ensureAttribute(i, Constants::Attributes::NAME), Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE),
                               factory.ensureBuilder<Layer>(i, Constants::Attributes::LAYER)});
@@ -68,11 +93,15 @@ LevelLoader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<LevelLoader> LevelLoader::BUILDER::build(const Scope& args)
 {
+    std::map<String, sp<Camera>> cameras;
+    for(const auto& i : _cameras)
+        cameras[i.first] = i.second->build(args);
+
     std::map<String, InstanceLibrary> instanceLibraries;
     for(const Library& i : _libraries)
         instanceLibraries[i._name] = {i._type, i._layer->build(args)};
 
-    return sp<LevelLoader>::make(std::move(instanceLibraries));
+    return sp<LevelLoader>::make(std::move(cameras), std::move(instanceLibraries));
 }
 
 }

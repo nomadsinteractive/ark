@@ -10,6 +10,8 @@
 #include "core/types/shared_ptr.h"
 #include "core/util/strings.h"
 
+#include "graphics/forwarding.h"
+
 #include "renderer/forwarding.h"
 
 namespace ark {
@@ -22,10 +24,13 @@ public:
     };
 
 public:
-    LevelLoader(std::map<String, InstanceLibrary> instanceLabraries);
+    LevelLoader(std::map<String, sp<Camera>> cameras, std::map<String, InstanceLibrary> instanceLabraries);
 
 //  [[script::bindings::auto]]
     void load(const String& src);
+
+//  [[script::bindings::auto]]
+    sp<Camera> getCamera(const String& name) const;
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<LevelLoader> {
@@ -43,6 +48,7 @@ public:
 
     private:
         std::vector<Library> _libraries;
+        std::vector<std::pair<String, sp<Builder<Camera>>>> _cameras;
     };
 
 private:
@@ -56,6 +62,7 @@ private:
     }
 
 private:
+    std::map<String, sp<Camera>> _cameras;
     std::map<String, InstanceLibrary> _instance_libraries;
 };
 

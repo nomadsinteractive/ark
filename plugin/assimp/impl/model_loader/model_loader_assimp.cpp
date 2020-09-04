@@ -124,7 +124,7 @@ Model ModelImporterAssimp::import(const document& manifest, MaterialBundle& mate
 const aiScene* ModelImporterAssimp::loadScene(const sp<Assimp::Importer>& importer, const String& src, bool checkMeshes) const
 {
     importer->SetIOHandler(new ArkIOSystem);
-    uint32_t flags = static_cast<uint32_t>(aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes);
+    uint32_t flags = static_cast<uint32_t>(aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes | aiProcess_LimitBoneWeights | aiProcess_GlobalScale);
     if(_coordinate_system == Ark::COORDINATE_SYSTEM_LHS)
         flags |= aiProcess_FlipWindingOrder;
     const aiScene* scene = importer->ReadFile(src.c_str(), flags);

@@ -109,9 +109,9 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
 V3 RCCMultiDrawElementsIndirect::toScale(const V3& displaySize, const Metrics& metrics) const
 {
     const V3& size = metrics.size;
-    return V3(displaySize.x() != 0 ? displaySize.x() / size.x() : size.x(),
-              displaySize.y() != 0 ? displaySize.y() / size.y() : size.y(),
-              displaySize.z() != 0 ? displaySize.z() /  size.z() : size.z());
+    return V3(displaySize.x() != 0 ? displaySize.x() / size.x() : 1.0f,
+              displaySize.y() != 0 ? displaySize.y() / size.y() : 1.0f,
+              displaySize.z() != 0 ? displaySize.z() /  size.z() : 1.0f);
 }
 
 RCCMultiDrawElementsIndirect::VerticesUploader::VerticesUploader(const sp<ModelBundle>& multiModels, const sp<PipelineInput>& pipelineInput)
