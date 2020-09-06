@@ -23,10 +23,12 @@ public:
         virtual uint32_t size() override;
         virtual bool update(uint64_t timestamp) override;
 
-    private:
-        sp<Mat4> _value;
+        const sp<Mat4>& matrix() const;
+        void setMatrix(sp<Mat4> matrix);
 
-        friend class Camera;
+    private:
+        sp<Mat4> _matrix;
+        Timestamp _timestamp;
     };
 
     class Delegate {

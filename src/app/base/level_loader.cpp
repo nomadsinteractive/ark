@@ -49,10 +49,10 @@ void LevelLoader::load(const String& src)
                 int32_t type = iter->second._type;
                 const sp<Layer>& layer = iter->second._layer;
                 const String& position = Documents::ensureAttribute(j, "position");
-                const String& rotation = Documents::ensureAttribute(j, "rotation");
                 const String& scale = Documents::ensureAttribute(j, "scale");
-                sp<Transform> transform = sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(nullptr, nullptr, parseVector<V4>(rotation)), parseVector<V3>(scale));
-                sp<RenderObject> renderObject = sp<RenderObject>::make(type, parseVector<V3>(position), nullptr, transform);
+                const String& rotation = Documents::ensureAttribute(j, "rotation");
+                sp<Transform> transform = makeTransform(rotation, scale);
+                sp<RenderObject> renderObject = sp<RenderObject>::make(type, sp<Vec3::Const>::make(parseVector<V3>(position)), nullptr, transform);
                 layer->addRenderObject(renderObject);
             }
             else if(clazz == "CAMERA")
@@ -60,25 +60,31 @@ void LevelLoader::load(const String& src)
                 const String& name = Documents::ensureAttribute(j, "name");
                 const String& position = Documents::ensureAttribute(j, "position");
                 const String& rotation = Documents::ensureAttribute(j, "rotation");
-                sp<Transform> transform = sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(nullptr, nullptr, parseVector<V4>(rotation)), nullptr);
-                sp<Camera> camera = getCamera(name);
+                const sp<Transform> transform = makeTransform(rotation, "");
+                const sp<Camera> camera = getCamera(name);
                 DWARN(camera, "Undefined camera(%s) in \"%s\"", name.c_str(), src.c_str());
                 if(camera)
                 {
-                    const V3 p = parseVector<V3>(position)->val();
+                    const V3 p = parseVector<V3>(position);
                     const Transform::Snapshot ts = transform->snapshot();
-                    camera->lookAt(p, ts.transform(V3(0, 1, 0)) + p, ts.transform(V3(0, 0, 1)));
+                    camera->lookAt(p, ts.transform(V3(0, 0, -1)) + p, ts.transform(V3(0, 1, 0)));
                 }
             }
         }
     }
-
 }
 
 sp<Camera> LevelLoader::getCamera(const String& name) const
 {
     const auto iter = _cameras.find(name);
     return iter != _cameras.end() ? iter->second : nullptr;
+}
+
+sp<Transform> LevelLoader::makeTransform(const String& rotation, const String& scale) const
+{
+    const V3 s = scale ? parseVector<V3>(scale) : V3(1.0f);
+    const V4 rot = parseVector<V4>(rotation);
+    return sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(nullptr, nullptr, sp<Vec4::Const>::make(V4(rot.y(), rot.z(), rot.w(), rot.x()))), sp<Vec3::Const>::make(s));
 }
 
 LevelLoader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

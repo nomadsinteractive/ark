@@ -79,7 +79,7 @@ private:
 
 }
 
-static const char sNearFarPlaneWarning[] = "Near: %.2f, Far: %.2f. Far plane should be further than near plane, and the distance of near plane should be greater than zero.";
+static const char sNearFarPlaneWarning[] = "Near: %.2f, Far: %.2f. Far plane should be further than near plane, and distance to the near plane should be greater than zero.";
 
 Camera::Camera()
     : _delegate(Ark::instance().applicationContext()->renderController()->createCamera()), _view(sp<Holder>::make(sp<Mat4::Const>::make(M4()))),
@@ -92,32 +92,32 @@ void Camera::ortho(float left, float right, float bottom, float top, float near,
     if(coordinateSystem  < 0)
         std::swap(top, bottom);
 
-    _vp->_value = sp<Mat4::Const>::make(_delegate->ortho(left, right, bottom, top, near * 2 - far, far));
+    _vp->setMatrix(sp<Mat4::Const>::make(_delegate->ortho(left, right, bottom, top, near * 2 - far, far)));
 }
 
 void Camera::frustum(float left, float right, float bottom, float top, float near, float far)
 {
     DWARN(far > near && near > 0, sNearFarPlaneWarning, near, far);
-    _projection->_value = sp<Mat4::Const>::make(_delegate->frustum(left, right, bottom, top, near, far));
+    _projection->setMatrix(sp<Mat4::Const>::make(_delegate->frustum(left, right, bottom, top, near, far)));
     updateViewProjection();
 }
 
 void Camera::perspective(float fov, float aspect, float near, float far)
 {
     DWARN(far > near && near > 0, sNearFarPlaneWarning, near, far);
-    _projection->_value = sp<Mat4::Const>::make(_delegate->perspective(fov, aspect, near, far));
+    _projection->setMatrix(sp<Mat4::Const>::make(_delegate->perspective(fov, aspect, near, far)));
     updateViewProjection();
 }
 
 void Camera::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    _view->_value = sp<Mat4::Const>::make(_delegate->lookAt(position, target, up));
+    _view->setMatrix(sp<Mat4::Const>::make(_delegate->lookAt(position, target, up)));
     updateViewProjection();
 }
 
 void Camera::lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up)
 {
-    _view->_value = sp<FrustumMatrixVariable>::make(_delegate, position, target, up);
+    _view->setMatrix(sp<FrustumMatrixVariable>::make(_delegate, position, target, up));
     updateViewProjection();
 }
 
@@ -145,16 +145,16 @@ const sp<Camera>& Camera::getDefaultCamera()
 
 void Camera::updateViewProjection()
 {
-    _vp->_value = sp<MulMatrixVariable>::make(_projection->_value, _view->_value);
+    _vp->setMatrix(sp<MulMatrixVariable>::make(_projection->matrix(), _view->matrix()));
 }
 
 Camera::Holder::Holder(sp<Mat4> value)
-    : _value(std::move(value)) {
+    : _matrix(std::move(value)) {
 }
 
 void Camera::Holder::flat(void* buf)
 {
-    *reinterpret_cast<M4*>(buf) = _value->val();
+    *reinterpret_cast<M4*>(buf) = _matrix->val();
 }
 
 uint32_t Camera::Holder::size()
@@ -164,7 +164,18 @@ uint32_t Camera::Holder::size()
 
 bool Camera::Holder::update(uint64_t timestamp)
 {
-    return _value->update(timestamp);
+    return _matrix->update(timestamp) || _timestamp.update(timestamp);
+}
+
+const sp<Mat4>& Camera::Holder::matrix() const
+{
+    return _matrix;
+}
+
+void Camera::Holder::setMatrix(sp<Mat4> matrix)
+{
+    _matrix = std::move(matrix);
+    _timestamp.setDirty();
 }
 
 M4 Camera::DelegateLH_ZO::frustum(float left, float right, float bottom, float top, float near, float far)
