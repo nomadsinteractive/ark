@@ -54,10 +54,12 @@ class XmlWriter:
 
 
 class ArkScene:
-    def __init__(self, collections):
-        self._libraries = [ArkLibraryCollection(i, j) for i, j in enumerate([i for i in collections if i.library])]
-        self._library_collections = [i for i in collections if i.library]
-        self._layers = [ArkLayer(self, i) for i in collections if not i.library]
+    def __init__(self, layer_collection):
+        self._collections = bpy.data.collections
+        instance_collections = set(filter(None, (i.instance_collection for i in bpy.data.objects)))
+        self._libraries = [ArkInstanceCollection(i, j) for i, j in enumerate(instance_collections)]
+        collections_not_excluded = [i.collection for i in layer_collection.children if not i.exclude]
+        self._layers = [ArkLayer(self, i) for i in collections_not_excluded if not i.library]
 
     def find_library(self, collection):
         for i in self._libraries:
@@ -77,10 +79,10 @@ class ArkScene:
         return '\n'.join(str(i) for i in lines)
 
 
-class ArkLibraryCollection:
+class ArkInstanceCollection:
     def __init__(self, _id, collection):
         self._id = _id
-        self._name = '%s/%s' % (collection.library.name, collection.name)
+        self._name = '%s/%s' % (collection.library.name, collection.name) if collection.library else collection.name
         self._collection = collection
 
     @property
@@ -165,11 +167,14 @@ class ArkRenderObject:
 
 
 def generate_level_manifest(context, filepath, opt_name):
-    scene = ArkScene(bpy.data.collections)
 
-    content = scene.to_xml(0) if opt_name == 'OPT_XML' else scene.to_json(0)
-    with open(filepath, 'wt', encoding='utf-8') as fp:
-        fp.write(content)
+    view_layers = sum([i.view_layers.values() for i in bpy.data.scenes], [])
+    if view_layers:
+        scene = ArkScene(view_layers[0].layer_collection)
+
+        content = scene.to_xml(0) if opt_name == 'OPT_XML' else scene.to_json(0)
+        with open(filepath, 'wt', encoding='utf-8') as fp:
+            fp.write(content)
 
     return {'FINISHED'}
 
