@@ -26,6 +26,7 @@ MaterialBundle::MaterialBundle(const sp<ResourceLoaderContext>& resourceLoaderCo
         }
 
     MaxRectsBinPack binPack(_width, _height, false);
+    std::vector<std::map<bitmap, RectI>> bitmapBounds(Material::TEXTURE_TYPE_LENGTH);
 
     for(const auto& i : _materials)
     {
@@ -37,14 +38,20 @@ MaterialBundle::MaterialBundle(const sp<ResourceLoaderContext>& resourceLoaderCo
                 bitmap bitmap = bitmapProvider->val();
                 if(bitmap)
                 {
-                    const auto iter = _material_bounds.find(i.first);
-                    if(iter == _material_bounds.end())
-                        _material_bounds[i.first] = _texture_packers[j]->addBitmap(binPack, bitmap, bitmapProvider);
-                    else
+                    const auto biter = bitmapBounds[j].find(bitmap);
+                    if(biter == bitmapBounds[j].end())
                     {
-                        const RectI& packedBounds = iter->second;
-                        _texture_packers[j]->addPackedBitmap(packedBounds.left(), packedBounds.top(), bitmap, bitmapProvider);
+                        const auto iter = _material_bounds.find(i.first);
+                        if(iter == _material_bounds.end())
+                            bitmapBounds[j][bitmap] = _material_bounds[i.first] = _texture_packers[j]->addBitmap(binPack, bitmap, bitmapProvider);
+                        else
+                        {
+                            const RectI& packedBounds = iter->second;
+                            _texture_packers[j]->addPackedBitmap(packedBounds.left(), packedBounds.top(), bitmap, bitmapProvider);
+                        }
                     }
+                    else
+                        _material_bounds[i.first] = biter->second;
                 }
             }
     }
