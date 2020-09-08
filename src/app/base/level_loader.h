@@ -24,13 +24,16 @@ public:
     };
 
 public:
-    LevelLoader(std::map<String, sp<Camera>> cameras, std::map<String, InstanceLibrary> instanceLabraries);
+    LevelLoader(std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights, std::map<String, InstanceLibrary> instanceLabraries);
 
 //  [[script::bindings::auto]]
     void load(const String& src);
 
 //  [[script::bindings::auto]]
     sp<Camera> getCamera(const String& name) const;
+
+//  [[script::bindings::auto]]
+    sp<Vec3> getLight(const String& name) const;
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<LevelLoader> {
@@ -49,6 +52,7 @@ public:
     private:
         std::vector<Library> _libraries;
         std::vector<std::pair<String, sp<Builder<Camera>>>> _cameras;
+        std::vector<std::pair<String, sp<Builder<Vec3>>>> _lights;
     };
 
 private:
@@ -65,6 +69,7 @@ private:
 
 private:
     std::map<String, sp<Camera>> _cameras;
+    std::map<String, sp<Vec3>> _lights;
     std::map<String, InstanceLibrary> _instance_libraries;
 };
 

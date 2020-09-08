@@ -88,6 +88,8 @@ public:
     void lookAt(const V3& position, const V3& target, const V3& up);
 //  [[script::bindings::auto]]
     void lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up);
+//  [[script::bindings::property]]
+    sp<Vec3> position() const;
 
     const sp<Holder>& view() const;
     const sp<Holder>& projection() const;
@@ -105,6 +107,8 @@ private:
     sp<Holder> _projection;
 
     sp<Holder> _vp;
+
+    sp<VariableWrapper<V3>> _position;
 };
 
 }

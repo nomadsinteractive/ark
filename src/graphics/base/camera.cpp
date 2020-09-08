@@ -83,7 +83,7 @@ static const char sNearFarPlaneWarning[] = "Near: %.2f, Far: %.2f. Far plane sho
 
 Camera::Camera()
     : _delegate(Ark::instance().applicationContext()->renderController()->createCamera()), _view(sp<Holder>::make(sp<Mat4::Const>::make(M4()))),
-      _projection(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _vp(sp<Holder>::make(sp<Mat4::Const>::make(M4())))
+      _projection(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _vp(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _position(sp<VariableWrapper<V3>>::make(V3(0)))
 {
 }
 
@@ -111,14 +111,21 @@ void Camera::perspective(float fov, float aspect, float near, float far)
 
 void Camera::lookAt(const V3& position, const V3& target, const V3& up)
 {
+    _position->set(position);
     _view->setMatrix(sp<Mat4::Const>::make(_delegate->lookAt(position, target, up)));
     updateViewProjection();
 }
 
 void Camera::lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up)
 {
+    _position->set(position);
     _view->setMatrix(sp<FrustumMatrixVariable>::make(_delegate, position, target, up));
     updateViewProjection();
+}
+
+sp<Vec3> Camera::position() const
+{
+    return _position;
 }
 
 const sp<Camera::Holder>& Camera::view() const

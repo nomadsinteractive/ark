@@ -200,26 +200,37 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         vertexBase += static_cast<element_index_t>(meshes.back().vertexLength());
     }
 
-    const V3 bounds(aabbMax.x() - aabbMin.x(), aabbMax.y() - aabbMin.y(), aabbMax.z() - aabbMin.z());
-    Model model(sp<Array<Mesh>::Vector>::make(std::move(meshes)), {bounds, bounds, V3(0)});
-
     const std::vector<document>& animateManifests = manifest->children("animate");
-    if(scene->HasAnimations() || animateManifests.size() > 0)
+    const bool hasAnimation = scene->HasAnimations() || animateManifests.size() > 0;
+    V3 bounds(aabbMax.x() - aabbMin.x(), aabbMax.y() - aabbMin.y(), aabbMax.z() - aabbMin.z());
+    aiMatrix4x4 globalAnimationTransform;
+    int32_t upAxis = -1;
+    if(scene->mMetaData->Get("UpAxis", upAxis))
+    {
+        int32_t upAxisSign = 1;
+        scene->mMetaData->Get("UpAxisSign", upAxisSign);
+        DWARN(upAxis != 0, "X up axis does not supported");
+        if(upAxis == 1)
+        {
+            if(hasAnimation)
+                aiMatrix4x4::RotationX(-upAxisSign * Math::PI_2, globalAnimationTransform);
+            else
+            {
+                for(Mesh& i : meshes)
+                    yUp2zUp(i, upAxisSign > 0);
+                bounds = yUp2zUp(bounds, upAxisSign > 0);
+            }
+        }
+    }
+
+    Model model(sp<Array<Mesh>::Vector>::make(std::move(meshes)), {bounds, bounds, V3(0)});
+    if(hasAnimation)
     {
         bool noBones = bones.nodes().size() == 0;
         Table<String, sp<AnimateMaker>> animates;
         AnimateMakerAssimpNodes::NodeLoaderCallback callback = noBones ? callbackNodeAnimation : callbackBoneAnimation;
         NodeTable nodes = noBones ? loadNodes(scene->mRootNode, model) : std::move(bones);
-        aiMatrix4x4 globalTransformation;
-        int32_t upAxis = -1;
-        if(scene->mMetaData->Get("UpAxis", upAxis))
-        {
-            int32_t upAxisSign = 1;
-            scene->mMetaData->Get("UpAxisSign", upAxisSign);
-            if(upAxis == 1)
-                aiMatrix4x4::RotationX(-upAxisSign * Math::PI_2, globalTransformation);
-        }
-        loadAnimates(animates, scene, globalTransformation, importer, nodes, callbackNodeAnimation);
+        loadAnimates(animates, scene, globalAnimationTransform, importer, nodes, callbackNodeAnimation);
         for(const auto& i : animateManifests)
         {
             sp<Assimp::Importer> importer = sp<Assimp::Importer>::make();
@@ -228,9 +239,9 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
             String alias = Documents::getAttribute(i, "alias");
             const aiScene* animateScene = loadScene(importer, src, false);
             if(name)
-                loadAnimates(animates, animateScene, globalTransformation, std::move(importer), nodes, callback, std::move(name), std::move(alias));
+                loadAnimates(animates, animateScene, globalAnimationTransform, std::move(importer), nodes, callback, std::move(name), std::move(alias));
             else
-                loadAnimates(animates, animateScene, globalTransformation, importer, nodes, callback);
+                loadAnimates(animates, animateScene, globalAnimationTransform, importer, nodes, callback);
         }
 
         model.setAnimateMakers(std::move(animates));
@@ -256,6 +267,24 @@ void ModelImporterAssimp::loadBones(const aiMesh* mesh, NodeTable& boneMapping, 
             boneInfo.add(index, mesh->mBones[i]->mWeights[j].mWeight);
         }
     }
+}
+
+void ModelImporterAssimp::yUp2zUp(const Mesh& mesh, bool upSign)
+{
+    for(V3& v : *mesh.vertices())
+        v = yUp2zUp(v, upSign);
+    for(V3& n : *mesh.normals())
+        n = yUp2zUp(n, upSign);
+    for(Mesh::Tangent& t : *mesh.tangents())
+    {
+        t._tangent = yUp2zUp(t._tangent, upSign);
+        t._bitangent = yUp2zUp(t._bitangent, upSign);
+    }
+}
+
+V3 ModelImporterAssimp::yUp2zUp(const V3& p, bool upSign)
+{
+    return V3(p.x(), upSign ? -p.z() : p.z(), upSign ? p.y() : -p.y());
 }
 
 void ModelImporterAssimp::callbackNodeAnimation(Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform)

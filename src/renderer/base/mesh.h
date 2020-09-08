@@ -49,6 +49,8 @@ public:
     const array<element_index_t>& indices() const;
     const array<V3>& vertices() const;
     const sp<Material>& material() const;
+    const sp<Array<V3>>& normals() const;
+    const sp<Array<Tangent>>& tangents() const;
 
     const sp<Integer>& nodeId() const;
     void setNodeId(sp<Integer> nodeId);

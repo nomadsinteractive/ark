@@ -46,6 +46,16 @@ const sp<Material>& Mesh::material() const
     return _material;
 }
 
+const sp<Array<V3>>& Mesh::normals() const
+{
+    return _normals;
+}
+
+const sp<Array<Mesh::Tangent>>& Mesh::tangents() const
+{
+    return _tangents;
+}
+
 const sp<Integer>& Mesh::nodeId() const
 {
     return _node_id;

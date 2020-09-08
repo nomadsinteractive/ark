@@ -322,6 +322,10 @@ class Camera:
     def __init__(self):
         pass
 
+    @property
+    def position(self) -> 'Vec3':
+        return None
+
     def ortho(self, left, right, top, bottom, near, far):
         pass
 

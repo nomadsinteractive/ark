@@ -61,6 +61,8 @@ private:
 
     void loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex);
 
+    static void yUp2zUp(const Mesh& mesh, bool upSign);
+    static V3 yUp2zUp(const V3& p, bool upSign);
     static void callbackNodeAnimation(Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform);
     static void callbackBoneAnimation(Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform);
 private:
