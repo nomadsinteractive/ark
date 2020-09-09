@@ -103,12 +103,14 @@ public:
 
     explicit operator bool() const;
 
+//  [[script::bindings::property]]
     size_t size() const;
 
     Snapshot snapshot(const sp<Uploader>& uploader) const;
     Snapshot snapshot(size_t size) const;
     Snapshot snapshot() const;
 
+//  [[script::bindings::property]]
     uint64_t id() const;
     void upload(GraphicsContext&) const;
 
@@ -124,8 +126,10 @@ public:
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
 
+        sp<Builder<Flatable>> _flatable;
         sp<Builder<Integer>> _length;
         SafePtr<Builder<Integer>> _stride;
+        Usage _usage;
 
         std::vector<sp<Builder<Flatable>>> _vars;
     };

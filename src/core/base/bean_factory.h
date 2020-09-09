@@ -387,7 +387,7 @@ public:
     }
 
     template<typename T> sp<Builder<T>> ensureBuilderByTypeValue(const String& type, const String& value) {
-        const sp<Builder<T>> builder = type ? findBuilderByTypeValue<T>(type, value) : getBuilder<T>(value);
+        const sp<Builder<T>> builder = findBuilderByTypeValue<T>(type, value);
         DCHECK(builder, "Cannot not build Type(%s) with value \"%s\"", type.c_str(), value.c_str());
         return builder;
     }

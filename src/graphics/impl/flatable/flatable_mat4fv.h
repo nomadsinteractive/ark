@@ -1,17 +1,18 @@
-#ifndef ARK_GRAPHICS_IMPL_FLATABLE_FLATABLE_MAT4F_ARRAY_H_
-#define ARK_GRAPHICS_IMPL_FLATABLE_FLATABLE_MAT4F_ARRAY_H_
+#ifndef ARK_GRAPHICS_IMPL_FLATABLE_FLATABLE_MAT4FV_H_
+#define ARK_GRAPHICS_IMPL_FLATABLE_FLATABLE_MAT4FV_H_
 
 #include "core/inf/builder.h"
 #include "core/inf/flatable.h"
+#include "core/base/identifier.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 
 namespace ark {
 
-class FlatableMat4fArray : public Flatable {
+class FlatableMat4fv : public Flatable {
 public:
-    FlatableMat4fArray(array<sp<Mat4>> array);
+    FlatableMat4fv(array<sp<Mat4>> array);
 
     virtual void flat(void* buf) override;
     virtual uint32_t size() override;
@@ -25,7 +26,8 @@ public:
         virtual sp<Flatable> build(const Scope& args) override;
 
     private:
-        sp<Builder<ark::Array<sp<Mat4>>>> _array;
+        Identifier _id;
+        sp<Builder<Array<sp<Mat4>>>> _array;
     };
 
 private:

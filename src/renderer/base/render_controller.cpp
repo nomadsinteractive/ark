@@ -203,10 +203,15 @@ Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, cons
     return buffer;
 }
 
-void RenderController::addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired)
+void RenderController::addPreRenderUpdateRequest(const sp<Updatable>& updatable, const sp<Boolean>& disposed)
 {
-    if(expired)
-        _on_pre_update_request.push_back(task, expired);
+    _on_pre_updatable.push_back(updatable, disposed ? disposed : sp<Boolean>::make<BooleanByWeakRef<Updatable>>(updatable, 1));
+}
+
+void RenderController::addPreRenderRunRequest(const sp<Runnable>& task, const sp<Boolean>& disposed)
+{
+    if(disposed)
+        _on_pre_update_request.push_back(task, disposed);
     else
     {
         const sp<Disposed> e = task.as<Disposed>();

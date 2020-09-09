@@ -203,6 +203,17 @@ class Atlas:
         return 0, 0
 
 
+class Buffer:
+
+    @property
+    def size(self) -> int:
+        return 0
+
+    @property
+    def id(self) -> int:
+        return 0
+
+
 class Tracker:
     pass
 

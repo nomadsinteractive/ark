@@ -26,6 +26,20 @@
 namespace ark {
 
 class ARK_API RenderController {
+public:
+    enum UploadStrategy {
+        US_ONCE = 0,
+        US_RELOAD = 1,
+        US_ON_SURFACE_READY = 2,
+        US_ONCE_AND_ON_SURFACE_READY = 3
+    };
+
+    enum UploadPriority {
+        UPLOAD_PRIORITY_LOW,                /* Framebuffers */
+        UPLOAD_PRIORITY_NORMAL,
+        UPLOAD_PRIORITY_HIGH                /* Pipelines */
+    };
+
 private:
     template<typename T> class SynchronizedVar : public Updatable {
     public:
@@ -48,20 +62,6 @@ private:
     private:
         sp<Variable<T>> _delegate;
         sp<typename Variable<T>::Impl> _var;
-    };
-
-public:
-    enum UploadStrategy {
-        US_ONCE = 0,
-        US_RELOAD = 1,
-        US_ON_SURFACE_READY = 2,
-        US_ONCE_AND_ON_SURFACE_READY = 3
-    };
-
-    enum UploadPriority {
-        UPLOAD_PRIORITY_LOW,                /* Framebuffers */
-        UPLOAD_PRIORITY_NORMAL,
-        UPLOAD_PRIORITY_HIGH                /* Pipelines */
     };
 
 public:
@@ -106,7 +106,8 @@ public:
         return var;
     }
 
-    void addPreUpdateRequest(const sp<Runnable>& task, const sp<Boolean>& expired);
+    void addPreRenderUpdateRequest(const sp<Updatable>& updatable, const sp<Boolean>& disposed);
+    void addPreRenderRunRequest(const sp<Runnable>& task, const sp<Boolean>& disposed);
 
     void preUpdate(uint64_t timestamp);
     void deferUnref(Box box);

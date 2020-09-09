@@ -22,7 +22,7 @@ public:
     virtual ~Uploader() = default;
 
     size_t size() const;
-    virtual void upload(Writable& uploader) = 0;
+    virtual void upload(Writable& writable) = 0;
 
     template<typename T> class Array;
     template<typename T> class ArrayList;

@@ -99,7 +99,7 @@ private:
 AudioPlayerFMOD::AudioPlayerFMOD(const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _executor(resourceLoaderContext->executor()), _system(sp<FMODSystem>::make())
 {
-    resourceLoaderContext->renderController()->addPreUpdateRequest(_system, sp<BooleanByWeakRef<FMODSystem>>::make(_system, 1));
+    resourceLoaderContext->renderController()->addPreRenderRunRequest(_system, sp<BooleanByWeakRef<FMODSystem>>::make(_system, 1));
 }
 
 sp<Future> AudioPlayerFMOD::play(const sp<Readable>& source, AudioFormat /*format*/, PlayOption options)

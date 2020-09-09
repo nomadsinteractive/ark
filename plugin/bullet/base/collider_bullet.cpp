@@ -115,7 +115,7 @@ sp<ColliderBullet> ColliderBullet::BUILDER_IMPL1::build(const Scope& args)
 
     for(const auto& i : _importers)
         i.first->build(args)->import(collider, i.second);
-    _resource_loader_context->renderController()->addPreUpdateRequest(collider, BooleanUtil::__or__(_resource_loader_context->disposed(), sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 1)));
+    _resource_loader_context->renderController()->addPreRenderRunRequest(collider, BooleanUtil::__or__(_resource_loader_context->disposed(), sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 1)));
     return collider;
 }
 

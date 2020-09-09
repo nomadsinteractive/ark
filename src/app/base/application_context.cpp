@@ -178,7 +178,7 @@ bool ApplicationContext::onEvent(const Event& event)
 
 void ApplicationContext::addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& disposed)
 {
-    _render_controller->addPreUpdateRequest(task, disposed);
+    _render_controller->addPreRenderRunRequest(task, disposed);
 }
 
 void ApplicationContext::addEventListener(const sp<EventListener>& eventListener, int32_t priority)

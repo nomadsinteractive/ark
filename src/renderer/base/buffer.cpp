@@ -38,11 +38,27 @@ private:
     std::vector<Buffer::Block> _blocks;
 };
 
+class UploaderByFlatable : public Uploader {
+public:
+    UploaderByFlatable(sp<Flatable> flatable)
+        : Uploader(flatable->size()), _flatable(std::move(flatable)) {
+
+    }
+
+    virtual void upload(Writable& writable) override {
+        std::vector<int8_t> buf(_size);
+        _flatable->flat(buf.data());
+        writable.write(buf.data(), _size, 0);
+    }
+
+private:
+    sp<Flatable> _flatable;
+};
+
 class BufferObjectUploader : public Uploader {
 public:
     BufferObjectUploader(std::vector<sp<Flatable>> vars, size_t stride, size_t length)
         : Uploader(stride * length), _stride(stride), _length(length), _vars(std::move(vars)) {
-
     }
 
     virtual void upload(Writable& writable) override {
@@ -69,6 +85,28 @@ private:
     size_t _stride;
     size_t _length;
     std::vector<sp<Flatable>> _vars;
+};
+
+class PreRenderUpdate : public Updatable {
+public:
+    PreRenderUpdate(Buffer buffer, const sp<RenderController>& renderController, sp<Uploader> uploader, sp<Updatable> updatable)
+        : _buffer(std::move(buffer)), _render_controller(renderController), _uploader(std::move(uploader)), _updatable(std::move(updatable)) {
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        if(_updatable->update(timestamp)) {
+            _render_controller->uploadBuffer(_buffer, _uploader, RenderController::US_ONCE);
+            return true;
+        }
+        return false;
+    }
+
+private:
+    Buffer _buffer;
+
+    sp<RenderController> _render_controller;
+    sp<Uploader> _uploader;
+    sp<Updatable> _updatable;
 };
 
 }
@@ -208,8 +246,10 @@ Buffer::Block::Block(size_t offset, const ByteArray::Borrowed& content)
 }
 
 Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _length(factory.ensureBuilder<Integer>(manifest, "length")), _stride(factory.getBuilder<Integer>(manifest, "stride"))
+    : _resource_loader_context(resourceLoaderContext), _flatable(factory.getBuilder<Flatable>(manifest, "data")), _length(factory.getBuilder<Integer>(manifest, "length")),
+      _stride(factory.getBuilder<Integer>(manifest, "stride")), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_DYNAMIC))
 {
+    DCHECK(_flatable || _length, "You must specify either \"data\" or \"length\" to define a buffer");
     for(const document& i : manifest->children())
     {
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
@@ -228,8 +268,22 @@ sp<Buffer> Buffer::BUILDER::build(const Scope& args)
         stride += var->size();
         vars.push_back(std::move(var));
     }
-    sp<Uploader> uploader = sp<BufferObjectUploader>::make(std::move(vars), _stride ? _stride->build(args)->val() : stride, _length->build(args)->val());
-    return sp<Buffer>::make(_resource_loader_context->renderController()->makeBuffer(Buffer::TYPE_STORAGE, Buffer::USAGE_STATIC, uploader));
+    const sp<RenderController>& renderController = _resource_loader_context->renderController();
+    sp<Flatable> flatable = _flatable ? _flatable->build(args) : nullptr;
+    sp<Uploader> uploader = flatable ? sp<Uploader>::make<UploaderByFlatable>(flatable)
+                                     : sp<Uploader>::make<BufferObjectUploader>(std::move(vars), _stride ? _stride->build(args)->val() : stride, _length->build(args)->val());
+    sp<Buffer> buffer = sp<Buffer>::make(renderController->makeBuffer(Buffer::TYPE_STORAGE, _usage, uploader));
+    if(flatable)
+        _resource_loader_context->renderController()->addPreRenderUpdateRequest(sp<PreRenderUpdate>::make(buffer, renderController, uploader, flatable), sp<BooleanByWeakRef<Flatable>>::make(flatable, 2));
+    return buffer;
+}
+
+template<> ARK_API Buffer::Usage Conversions::to<String, Buffer::Usage>(const String& str)
+{
+    if(str == "dynamic")
+        return Buffer::USAGE_DYNAMIC;
+    DCHECK(str == "static", "Unknown BufferUsage: \"%s\", possible values are [dynamic, static]", str.c_str());
+    return Buffer::USAGE_STATIC;
 }
 
 }

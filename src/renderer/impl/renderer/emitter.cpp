@@ -74,7 +74,7 @@ void Emitter::deactivate()
 
 void Emitter::doActivate()
 {
-    _render_controller->addPreUpdateRequest(_stub, BooleanUtil::__or__(_disposed, sp<BooleanByWeakRef<Boolean>>::make(_disposed, 1)));
+    _render_controller->addPreRenderRunRequest(_stub, BooleanUtil::__or__(_disposed, sp<BooleanByWeakRef<Boolean>>::make(_disposed, 1)));
 }
 
 Emitter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, bool disposed)
