@@ -301,7 +301,7 @@ public:
             return createBuilderByRef<T>(f);
         if(f.isArg())
             return getBuilderByArg<T>(f);
-        return findBuilderByValue<T>(id);
+        return f.package() ? findBuilderByTypeValue<T>(f.package(), f.val()) : findBuilderByValue<T>(id);
     }
 
     template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr, const String& defValue = String()) {

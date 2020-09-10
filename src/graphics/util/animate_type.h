@@ -19,6 +19,8 @@ public:
 
 //[[script::bindings::classmethod]]
     static void set(const sp<Animate>& self, const sp<Animate>& delegate);
+//[[script::bindings::property]]
+    static uint32_t size(const sp<Animate>& self);
 
 private:
     class AnimateWrapper : public Animate, Implements<AnimateWrapper, Animate> {

@@ -24,7 +24,8 @@ Identifier Identifier::parse(const String& s, Format format)
     if(idType == ID_TYPE_ARGUMENT && parseAndVaildate(s.substr(1), package, value, queries, format))
         return Identifier(ID_TYPE_ARGUMENT, package, value, queries);
 
-    return Identifier(ID_TYPE_VALUE, package, s, queries);
+    parseAndVaildate(s, package, value, queries, FORMAT_NAMESPACE);
+    return Identifier(ID_TYPE_VALUE, package, value, queries);
 }
 
 Identifier Identifier::parseRef(const String& s)

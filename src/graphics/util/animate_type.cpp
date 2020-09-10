@@ -15,6 +15,11 @@ void AnimateType::set(const sp<Animate>& self, const sp<Animate>& delegate)
     ensureImpl(self)->setDelegate(delegate);
 }
 
+uint32_t AnimateType::size(const sp<Animate>& self)
+{
+    return self->size();
+}
+
 sp<AnimateType::AnimateWrapper> AnimateType::ensureImpl(const sp<Animate>& self)
 {
     const sp<AnimateType::AnimateWrapper> impl = self.as<AnimateType::AnimateWrapper>();

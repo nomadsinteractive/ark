@@ -653,6 +653,10 @@ class Animate:
     def __init__(self, delegate: 'Animate'):
         pass
 
+    @property
+    def size(self):
+        return 0
+
     def set(self, delegate: 'Animate'):
         pass
 

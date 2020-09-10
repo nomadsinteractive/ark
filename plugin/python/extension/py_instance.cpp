@@ -61,11 +61,6 @@ const char* PyInstance::name()
     return Py_TYPE(_ref->instance())->tp_name;
 }
 
-//PyInstance::operator PyObject* ()
-//{
-//    return _ref->instance();
-//}
-
 bool PyInstance::hasAttr(const char* name) const
 {
     return PyObject_HasAttrString(_ref->instance(), name) != 0;
