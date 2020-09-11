@@ -13,7 +13,7 @@ AnimateMakerAssimpNodes::AnimateMakerAssimpNodes(sp<Assimp::Importer> importer, 
 {
 }
 
-sp<Animate> AnimateMakerAssimpNodes::makeAnimate(const sp<Numeric>& duration)
+sp<Flatable> AnimateMakerAssimpNodes::makeAnimate(const sp<Numeric>& duration)
 {
     return sp<AnimateImpl>::make(duration, _animation, _root_node, _global_transform, _nodes.nodes(), _callback);
 }

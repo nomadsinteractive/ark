@@ -16,12 +16,17 @@ PyArrayDuckType::PyArrayDuckType(PyInstance inst)
 
 void PyArrayDuckType::to(sp<Array<sp<Mat3>>>& inst)
 {
-    inst = PythonInterpreter::instance()->toArray<sp<Mat3>>(_instance.pyObject());
+    inst = PythonInterpreter::instance()->toSharedPtrArray<Mat3>(_instance.pyObject(), false);
 }
 
 void PyArrayDuckType::to(sp<Array<sp<Mat4>>>& inst)
 {
-    inst = PythonInterpreter::instance()->toArray<sp<Mat4>>(_instance.pyObject());
+    inst = PythonInterpreter::instance()->toSharedPtrArray<Mat4>(_instance.pyObject(), false);
+}
+
+void PyArrayDuckType::to(sp<Array<sp<Flatable>>>& inst)
+{
+    inst = PythonInterpreter::instance()->toSharedPtrArray<Flatable>(_instance.pyObject(), false);
 }
 
 }

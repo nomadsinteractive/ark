@@ -30,10 +30,10 @@ public:
 
     AnimateMakerAssimpNodes(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, NodeTable nodes, NodeLoaderCallback callback);
 
-    virtual sp<Animate> makeAnimate(const sp<Numeric>& duration) override;
+    virtual sp<Flatable> makeAnimate(const sp<Numeric>& duration) override;
 
 private:
-    class AnimateImpl : public Animate {
+    class AnimateImpl : public Flatable {
     public:
         AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const aiMatrix4x4& globalTransform, const Table<String, Node>& nodes, NodeLoaderCallback callback);
 

@@ -78,8 +78,6 @@ typedef Variable<V4> Vec4;
 typedef Loader<Bitmap> BitmapLoader;
 typedef LoaderBundle<Bitmap> BitmapBundle;
 
-typedef Flatable Animate;
-
 //[[script::bindings::auto]]
 typedef Importer<Tilemap> TilemapImporter;
 //[[script::bindings::auto]]

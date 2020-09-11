@@ -15,17 +15,17 @@ namespace ark {
 class ARK_API AnimateType {
 public:
 //[[script::bindings::constructor]]
-    static sp<Animate> create(const sp<Animate>& value);
+    static sp<Flatable> create(const sp<Flatable>& value);
 
 //[[script::bindings::classmethod]]
-    static void set(const sp<Animate>& self, const sp<Animate>& delegate);
+    static void set(const sp<Flatable>& self, const sp<Flatable>& delegate);
 //[[script::bindings::property]]
-    static uint32_t size(const sp<Animate>& self);
+    static uint32_t size(const sp<Flatable>& self);
 
 private:
-    class AnimateWrapper : public Animate, Implements<AnimateWrapper, Animate> {
+    class AnimateWrapper : public Flatable, Implements<AnimateWrapper, Flatable> {
     public:
-        AnimateWrapper(sp<Animate> delegate);
+        AnimateWrapper(sp<Flatable> delegate);
 
         virtual bool update(uint64_t timestamp) override;
 
@@ -33,16 +33,18 @@ private:
 
         virtual uint32_t size() override;
 
-        void setDelegate(sp<Animate> delegate);
+        void setDelegate(sp<Flatable> delegate);
 
     private:
-        sp<Animate> _delegate;
+        sp<Flatable> _delegate;
     };
 
 private:
-    static sp<AnimateWrapper> ensureImpl(const sp<Animate>& self);
+    static sp<AnimateWrapper> ensureImpl(const sp<Flatable>& self);
 
 };
+
+typedef Flatable Animate;
 
 }
 

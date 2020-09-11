@@ -38,7 +38,7 @@ sp<Runnable> PythonInterpreter::toRunnable(PyObject* object, bool alert)
     if(PyCallable_Check(object))
         return sp<PythonCallableRunnable>::make(PyInstance::own(object));
 
-    return asInterface<Runnable>(object, alert);
+    return toSharedPtrImpl<Runnable>(object, alert);
 }
 
 sp<Observer> PythonInterpreter::toObserver(PyObject* object, bool alert)
@@ -47,7 +47,7 @@ sp<Observer> PythonInterpreter::toObserver(PyObject* object, bool alert)
     if(runnable)
         return sp<Observer>::make(runnable);
 
-    return asInterface<Observer>(object, alert);
+    return toSharedPtrImpl<Observer>(object, alert);
 }
 
 sp<CollisionCallback> PythonInterpreter::toCollisionCallback(PyObject* object)
@@ -60,7 +60,7 @@ sp<EventListener> PythonInterpreter::toEventListener(PyObject* object)
     if(PyCallable_Check(object))
         return sp<PythonCallableEventListener>::make(PyInstance::track(object));
 
-    return asInterface<EventListener>(object);
+    return toSharedPtrImpl<EventListener>(object);
 }
 
 String PythonInterpreter::toString(PyObject* object, const char* encoding, const char* error) const
@@ -111,7 +111,7 @@ sp<Vec2> PythonInterpreter::toVec2(PyObject* object, bool alert)
         if(PyArg_ParseTuple(object, "OO", &x, &y))
             return Vec2Type::create(toNumeric(x), toNumeric(y));
     }
-    return asInterface<Vec2>(object, alert);
+    return toSharedPtrImpl<Vec2>(object, alert);
 }
 
 sp<Vec3> PythonInterpreter::toVec3(PyObject* object, bool alert)
@@ -125,11 +125,11 @@ sp<Vec3> PythonInterpreter::toVec3(PyObject* object, bool alert)
         if(PyArg_ParseTuple(object, "OO|O", &x, &y, &z))
             return Vec3Type::create(toNumeric(x), toNumeric(y), toNumeric(z));
     }
-    const sp<Vec3> vec3 = asInterface<Vec3>(object, false);
+    const sp<Vec3> vec3 = toSharedPtrImpl<Vec3>(object, false);
     if(vec3)
         return vec3;
 
-    const sp<Vec2> vec2 = asInterface<Vec2>(object, false);
+    const sp<Vec2> vec2 = toSharedPtrImpl<Vec2>(object, false);
     if(!vec2 && !alert)
         return nullptr;
 
@@ -152,7 +152,7 @@ sp<Numeric> PythonInterpreter::toNumeric(PyObject* object, bool alert)
     if(PyFloat_Check(object))
         return sp<Numeric::Const>::make(static_cast<float>(PyFloat_AsDouble(object)));
 
-    return asInterface<Numeric>(object, alert);
+    return toSharedPtrImpl<Numeric>(object, alert);
 }
 
 sp<Integer> PythonInterpreter::toInteger(PyObject* object, bool alert)
@@ -160,7 +160,7 @@ sp<Integer> PythonInterpreter::toInteger(PyObject* object, bool alert)
     if(PyLong_CheckExact(object))
         return sp<Integer::Const>::make(PyLong_AsLong(object));
 
-    return asInterface<Integer>(object, alert);
+    return toSharedPtrImpl<Integer>(object, alert);
 }
 
 Scope PythonInterpreter::toScope(PyObject* kws) const
@@ -335,7 +335,7 @@ template<> ARK_PLUGIN_PYTHON_API bool PythonInterpreter::toType<bool>(PyObject* 
         return object == Py_True;
     if(PyLong_Check(object))
         return PyLong_AsLong(object) != 0;
-    const sp<Boolean> b = PythonInterpreter::instance()->asInterface<Boolean>(object);
+    const sp<Boolean> b = PythonInterpreter::instance()->toSharedPtrImpl<Boolean>(object);
     DCHECK(b, "Casting %s to bool failed", Py_TYPE(object)->tp_name);
     return b->val();
 }
@@ -386,7 +386,7 @@ template<> ARK_PLUGIN_PYTHON_API V3 PythonInterpreter::toType<V3>(PyObject* obje
         if(PyArg_ParseTuple(object, "fff", &x, &y, &z))
             return V3(x, y, z);
     }
-    const sp<Vec3> vec3 = asInterface<Vec3>(object);
+    const sp<Vec3> vec3 = toSharedPtrImpl<Vec3>(object);
     if(vec3)
         return vec3->val();
     DFATAL("V3 object should be either Vec3 or length-3 tuple (eg. (1.0, 1.0, 1.0))");
@@ -401,7 +401,7 @@ template<> ARK_PLUGIN_PYTHON_API V4 PythonInterpreter::toType<V4>(PyObject* obje
         if(PyArg_ParseTuple(object, "ffff", &x, &y, &z, &w))
             return V4(x, y, z, w);
     }
-    const sp<Vec4> vec4 = asInterface<Vec4>(object);
+    const sp<Vec4> vec4 = toSharedPtrImpl<Vec4>(object);
     if(vec4)
         return vec4->val();
     DFATAL("V4 object should be either Vec4 or length-4 tuple (eg. (1.0, 1.0, 1.0, 1.0))");

@@ -274,7 +274,7 @@ sp<Buffer> Buffer::BUILDER::build(const Scope& args)
                                      : sp<Uploader>::make<BufferObjectUploader>(std::move(vars), _stride ? static_cast<uint32_t>(_stride->build(args)->val()) : stride, _length->build(args)->val());
     sp<Buffer> buffer = sp<Buffer>::make(renderController->makeBuffer(Buffer::TYPE_STORAGE, _usage, uploader));
     if(flatable)
-        _resource_loader_context->renderController()->addPreRenderUpdateRequest(sp<PreRenderUpdate>::make(buffer, renderController, uploader, flatable), sp<BooleanByWeakRef<Flatable>>::make(flatable, 2));
+        _resource_loader_context->renderController()->addPreRenderUpdateRequest(sp<PreRenderUpdate>::make(buffer, renderController, uploader, flatable), sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer->delegate(), 2));
     return buffer;
 }
 

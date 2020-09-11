@@ -16,7 +16,8 @@ public:
     enum BodyShape {
         BODY_SHAPE_AABB = -1,
         BODY_SHAPE_BALL = -2,
-        BODY_SHAPE_BOX = -3
+        BODY_SHAPE_BOX = -3,
+        BODY_SHAPE_CAPSULE = -4
     };
 
 //  [[script::bindings::enumeration]]

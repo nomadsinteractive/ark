@@ -244,7 +244,7 @@ PyObject* PyArkType::__absorb__(PyArkType::Instance* self, PyObject* args, PyObj
 
 PyObject* PyArkType::__dispose__(PyArkType::Instance* self, PyObject* /*args*/, PyObject* /*kwargs*/)
 {
-    const sp<Disposed> disposed = PythonInterpreter::instance()->asInterface<Disposed>(reinterpret_cast<PyObject*>(self));
+    const sp<Disposed> disposed = PythonInterpreter::instance()->toSharedPtr<Disposed>(reinterpret_cast<PyObject*>(self));
     disposed->dispose();
     Py_RETURN_NONE;
 }

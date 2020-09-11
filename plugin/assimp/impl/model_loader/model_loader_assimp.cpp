@@ -219,6 +219,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
                 for(Mesh& i : meshes)
                     yUp2zUp(i, upAxisSign > 0);
                 bounds = yUp2zUp(bounds, upAxisSign > 0);
+                bounds = V3(std::abs(bounds.x()), std::abs(bounds.y()), std::abs(bounds.z()));
             }
         }
     }

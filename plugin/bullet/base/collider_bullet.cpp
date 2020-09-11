@@ -39,9 +39,24 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape,
     }
     else
     {
-        btCollisionShape* btShape = shape == Collider::BODY_SHAPE_BOX ?
-                    static_cast<btCollisionShape*>(new btBoxShape(btVector3(size->width() / 2, size->height() / 2, size->depth() / 2)))
-                  : static_cast<btCollisionShape*>(new btSphereShape(size->width() / 2));
+        btCollisionShape* btShape;
+        switch(shape)
+        {
+        case Collider::BODY_SHAPE_BOX:
+            btShape = new btBoxShape(btVector3(size->width() / 2, size->height() / 2, size->depth() / 2));
+            break;
+        case Collider::BODY_SHAPE_BALL:
+            btShape = new btSphereShape(size->width() / 2);
+            break;
+        case Collider::BODY_SHAPE_CAPSULE:
+            DWARN(size->height() > size->width(), "When constructing a capsule shape, its height(%.2f) needs be greater than its width(%.2f)", size->height(), size->width());
+            btShape = new btCapsuleShapeZ(size->width() / 2, size->height() - size->width());
+            break;
+        default:
+            DFATAL("Undefined RigidBody(%d) in this world", shape);
+            break;
+        }
+
         cs = sp<CollisionShape>::make(btShape, 1.0f);
     }
     return sp<RigidBodyBullet>::make(type, static_cast<Collider::BodyType>(shape), *this, std::move(cs), transform, type == Collider::BODY_TYPE_STATIC ? 0 : cs->mass());

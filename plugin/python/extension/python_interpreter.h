@@ -48,13 +48,18 @@ public:
         return toCppObject_sfinae<T>(obj, nullptr);
     }
 
-    template<typename T> sp<Array<T>> toArray(PyObject* object) {
+    template<typename T> sp<Array<sp<T>>> toSharedPtrArray(PyObject* object, bool alert) {
         DCHECK(PyList_Check(object), "Object \"%s\" is not a Python list", Py_TYPE(object)->tp_name);
         Py_ssize_t len = PyList_Size(object);
-        std::vector<T> arr;
-        for(Py_ssize_t i = 0; i < len; ++i)
-            arr.push_back(toCppObject<T>(PyList_GetItem(object, i)));
-        return sp<typename Array<T>::Vector>::make(std::move(arr));
+        std::vector<sp<T>> arr;
+        for(Py_ssize_t i = 0; i < len; ++i) {
+            PyObject* pyItem = PyList_GetItem(object, i);
+            sp<T> inst = toSharedPtr<T>(pyItem, alert);
+            if(!(pyItem == Py_None || inst || alert))
+                return nullptr;
+            arr.push_back(std::move(inst));
+        }
+        return sp<typename Array<sp<T>>::Vector>::make(std::move(arr));
     }
 
     PyObject* fromSharedPtr(const sp<PyInstanceRef>& inst) {
@@ -73,9 +78,11 @@ public:
 
     template<typename T> T toType(PyObject* object);
     template<typename T> PyObject* fromType(const T& value);
+
     template<typename T> sp<T> toSharedPtr(PyObject* object, bool alert = true) {
-        return asInterface<T>(object, alert);
+        return toSharedPtrImpl<T>(object, alert);
     }
+
     template<typename T> PyObject* fromSharedPtr(const sp<T>& object) {
         if(!object)
             Py_RETURN_NONE;
@@ -96,21 +103,6 @@ public:
 
     template<typename T> bool isInstance(PyObject* object) const {
         return PyObject_IsInstance(object, getPyArkType<T>()->getPyObject()) != 0;
-    }
-
-    template<typename T> const sp<T> asInterface(PyObject* object, bool alert = true) {
-        if(object == Py_None)
-            return nullptr;
-
-        PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyObject_Type(object));
-        if(isPyArkTypeObject(pyType)) {
-            PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);
-            const sp<T> s = instance->box->as<T>();
-            DCHECK(!alert || s, "Casting \"%s\" to class \"%s\" failed", pyType->tp_name, Class::getClass<T>()->name());
-            return s;
-        }
-        DCHECK(!alert, "Casting \"%s\" to class \"%s\" failed", pyType->tp_name, Class::getClass<T>()->name());
-        return nullptr;
     }
 
     template<typename T> PyObject* pyNewObject(const sp<T>& object) {
@@ -140,6 +132,21 @@ public:
     bool exceptErr(PyObject* type) const;
 
 private:
+    template<typename T> const sp<T> toSharedPtrImpl(PyObject* object, bool alert = true) {
+        if(object == Py_None)
+            return nullptr;
+
+        PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyObject_Type(object));
+        if(isPyArkTypeObject(pyType)) {
+            PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);
+            const sp<T> s = instance->box->as<T>();
+            DCHECK(!alert || s, "Casting \"%s\" to class \"%s\" failed", pyType->tp_name, Class::getClass<T>()->name());
+            return s;
+        }
+        DCHECK(!alert, "Casting \"%s\" to class \"%s\" failed", pyType->tp_name, Class::getClass<T>()->name());
+        return nullptr;
+    }
+
     template<typename T> PyObject* fromIterable_sfinae(const T& list, typename std::remove_reference<decltype(list.front())>::type*) {
         PyObject* pyList = PyList_New(list.size());
         Py_ssize_t index = 0;

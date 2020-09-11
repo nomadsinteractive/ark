@@ -297,7 +297,9 @@ public:
             return nullptr;
 
         const Identifier f = Identifier::parse(id);
-        if(!std::is_same<T, String>::value && f.isRef())
+        if(std::is_same<T, String>::value)
+            return f.isArg() ? getBuilderByArg<T>(f) : findBuilderByValue<T>(id);
+        if(f.isRef())
             return createBuilderByRef<T>(f);
         if(f.isArg())
             return getBuilderByArg<T>(f);

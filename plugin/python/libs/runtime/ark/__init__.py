@@ -867,18 +867,17 @@ class Arena:
     def load_renderer(self, name: str, **kwargs):
         pass
 
-    def add_event_listener(self, event_listener: Callable[['Event'], bool], priority: int = 0):
+    def add_event_listener(self, event_listener: Union[Callable[['Event'], bool], 'EventListener'], priority: int = 0):
         pass
-
 
 
 class Clock:
 
     def duration(self) -> 'Numeric':
-        return Numeric(0)
+        pass
 
     def timeout(self, seconds: float) -> 'Boolean':
-        return Boolean(False)
+        pass
 
 
 class Event:
@@ -1239,9 +1238,20 @@ class Function:
         pass
 
 
-class EventDispatcher:
-    def __init__(self):
+class EventListener:
+    def __init__(self, listener):
         pass
+
+    def make_disposable(self, disposed: Optional[Boolean] = None) -> 'EventListener':
+        pass
+
+    def make_auto_release(self, ref_count: int = 1) -> 'EventListener':
+        pass
+
+
+class EventDispatcher(EventListener):
+    def __init__(self):
+        super().__init__(None)
 
     def on_key_event(self, code, on_press, on_release, on_click, on_repeat):
         pass
@@ -1420,6 +1430,7 @@ class Collider:
     BODY_SHAPE_AABB = -1
     BODY_SHAPE_BALL = -2
     BODY_SHAPE_BOX = -3
+    BODY_SHAPE_CAPSULE = -4
 
     BODY_TYPE_DYNAMIC = 0
     BODY_TYPE_KINEMATIC = 1
@@ -1525,16 +1536,6 @@ class Emitter:
     def deactivate(self):
         pass
 
-
-class EventListener:
-    def __init__(self, listener):
-        pass
-
-    def make_disposable(self, disposed: Optional[Boolean] = None) -> 'EventListener':
-        pass
-
-    def make_auto_release(self, ref_count: int = 1) -> 'EventListener':
-        pass
 
 
 class LayoutParam:
