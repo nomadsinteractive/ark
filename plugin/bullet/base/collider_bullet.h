@@ -22,6 +22,7 @@ namespace ark {
 namespace plugin {
 namespace bullet {
 
+//[[script::bindings::name("World")]]
 class ColliderBullet : public Runnable, public Collider, Implements<ColliderBullet, Runnable, Collider> {
 public:
     class RigidBodyImporter {
@@ -34,7 +35,8 @@ public:
 public:
     ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader);
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate) override;
+//  [[script::bindings::auto]]
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size = nullptr, const sp<Rotation>& rotate = nullptr) override;
 
     virtual void run() override;
 

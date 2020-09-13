@@ -47,7 +47,6 @@ public:
     b2Body* createBody(const b2BodyDef& bodyDef) const;
     b2Body* createBody(Collider::BodyType type, const V3& position, const sp<Size>& size, const BodyCreateInfo& createInfo) const;
 
-//  [[script::bindings::meta(expire())]]
 //  [[script::bindings::meta(isExpired())]]
 
 //  [[script::bindings::auto]]
