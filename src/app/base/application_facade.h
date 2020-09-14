@@ -45,6 +45,8 @@ public:
 //  [[script::bindings::auto]]
     void addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& expired = nullptr);
 //  [[script::bindings::auto]]
+    void addControlLayer(const sp<Renderer>& controlLayer);
+//  [[script::bindings::auto]]
     void addEventListener(const sp<EventListener>& eventListener, int32_t priority = 0);
 //  [[script::bindings::auto]]
     void setDefaultEventListener(const sp<EventListener>& eventListener);

@@ -167,7 +167,7 @@ void RigidBody::Callback::onEndContact(const sp<RigidBody>& rigidBody)
 void RigidBody::Callback::onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
 {
     onBeginContact(rigidBody, manifold);
-    rigidBody->callback()->onBeginContact(self, CollisionManifold(-manifold.normal()));
+    rigidBody->callback()->onBeginContact(self, CollisionManifold(manifold.contactPoint(), -manifold.normal()));
 }
 
 void RigidBody::Callback::onEndContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody)

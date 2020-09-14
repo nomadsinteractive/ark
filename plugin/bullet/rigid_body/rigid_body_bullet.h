@@ -21,7 +21,7 @@ namespace bullet {
 
 //[[script::bindings::extends(RigidBody)]]
 //[[script::bindings::name("RigidBody")]]
-class ARK_PLUGIN_BULLET_API RigidBodyBullet : public RigidBody {
+class ARK_PLUGIN_BULLET_API RigidBodyBullet : public RigidBody, Implements<RigidBodyBullet, RigidBody, Holder>  {
 public:
     RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass);
 
@@ -29,6 +29,11 @@ public:
 
 //  [[script::bindings::auto]]
     void applyCentralForce(const V3& force);
+
+//  [[script::bindings::property]]
+    V3 angularFactor() const;
+//  [[script::bindings::property]]
+    void setAngularFactor(const V3& factor);
 
 private:
     class Stub;
@@ -46,6 +51,7 @@ private:
 
     private:
         sp<Stub> _stub;
+        bool _is_static_body;
     };
 
     class TransformDelegate : public Transform::Delegate {
@@ -62,12 +68,12 @@ private:
 
     class Stub {
     public:
-        Stub(ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass);
+        Stub(ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, Collider::BodyType bodyType, btScalar mass);
         ~Stub();
 
     private:
         btMotionState* makeMotionState(const btTransform& transform) const;
-        btRigidBody* makeRigidBody(btCollisionShape* shape, btMotionState* motionState, btScalar mass) const;
+        btRigidBody* makeRigidBody(btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass) const;
 
     private:
         ColliderBullet _world;
@@ -77,6 +83,7 @@ private:
         op<btRigidBody> _rigid_body;
 
         btVector3 _local_inertia;
+        Collider::BodyType _body_type;
 
         friend class RigidBodyBullet;
         friend class Position;

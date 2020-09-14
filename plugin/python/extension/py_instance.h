@@ -39,7 +39,7 @@ public:
 
     PyObject* call(PyObject* args);
 
-    bool isCallable();
+    bool isCallable() const;
 
     void clear();
 

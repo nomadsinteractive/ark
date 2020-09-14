@@ -21,6 +21,11 @@ V4::V4(float x, float y, float z, float w)
 {
 }
 
+V4::V4(const V2& xy, float z, float w)
+    : V3(xy.x(), xy.y(), z), _w(w)
+{
+}
+
 V4::V4(const V3& xyz, float w)
     : V3(xyz), _w(w)
 {

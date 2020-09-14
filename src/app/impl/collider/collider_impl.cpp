@@ -306,7 +306,10 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
             {
                 auto iter2 = contacts.find(id);
                 if(iter2 == contacts.end())
-                    shadowStub._callback->onBeginContact(self, rigidBody, CollisionManifold(V3(manifold.n.x, manifold.n.y, 0)));
+                {
+                    const c2v& contactPoint = manifold.contact_points[0];
+                    shadowStub._callback->onBeginContact(self, rigidBody, CollisionManifold(V3(contactPoint.x, contactPoint.y, 0), V3(manifold.n.x, manifold.n.y, 0)));
+                }
                 else
                     contacts.erase(iter2);
                 ++iter;

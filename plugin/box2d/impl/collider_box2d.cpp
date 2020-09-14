@@ -200,22 +200,25 @@ void ColliderBox2D::ContactListenerImpl::BeginContact(b2Contact* contact)
 {
     RigidBodyBox2D::Shadow* s1 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureA()->GetBody()->GetUserData());
     RigidBodyBox2D::Shadow* s2 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureB()->GetBody()->GetUserData());
-    const V3 normal = V3(contact->GetManifold()->localNormal.x, contact->GetManifold()->localNormal.y, 0);
     if(s1 && s2)
     {
+        b2WorldManifold worldManifold;
+        contact->GetWorldManifold(&worldManifold);
+        const V3 normal = V3(worldManifold.normal.x, worldManifold.normal.y, 0);
         const sp<RigidBodyBox2D::Stub> body1 = s1->_body.ensure();
         const sp<RigidBodyBox2D::Stub> body2 = s2->_body.ensure();
+        const b2Vec2& contactPoint = worldManifold.points[0];
         if(body1->_contacts.find(body2->_id) == body1->_contacts.end())
         {
             body1->_contacts.insert(body2->_id);
             if(body1->_callback->hasCallback())
-                body1->_callback->onBeginContact(RigidBodyBox2D::obtain(s2), CollisionManifold(normal));
+                body1->_callback->onBeginContact(RigidBodyBox2D::obtain(s2), CollisionManifold(V3(contactPoint.x, contactPoint.y, 0), normal));
         }
         if(body2->_contacts.find(body1->_id) == body2->_contacts.end())
         {
             body2->_contacts.insert(body1->_id);
             if(body2->_callback->hasCallback())
-                body2->_callback->onBeginContact(RigidBodyBox2D::obtain(s1), CollisionManifold(-normal));
+                body2->_callback->onBeginContact(RigidBodyBox2D::obtain(s1), CollisionManifold(V3(contactPoint.x, contactPoint.y, 0), -normal));
         }
     }
 }

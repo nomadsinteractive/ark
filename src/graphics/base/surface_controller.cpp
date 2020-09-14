@@ -13,7 +13,7 @@
 namespace ark {
 
 SurfaceController::SurfaceController(const sp<Executor>& executor)
-    : _executor(executor), _memory_pool(sp<MemoryPool>::make()), _renderers(sp<RendererGroup>::make()), _controllers(sp<RendererGroup>::make()), _layers(sp<RendererGroup>::make()),
+    : _executor(executor), _memory_pool(sp<MemoryPool>::make()), _renderers(sp<RendererGroup>::make()), _controls(sp<RendererGroup>::make()), _layers(sp<RendererGroup>::make()),
       _render_requests(sp<OCSQueue<RenderRequest>>::make())
 {
 }
@@ -23,9 +23,9 @@ void SurfaceController::addRenderer(const sp<Renderer>& renderer)
     _renderers->addRenderer(renderer);
 }
 
-void SurfaceController::addController(const sp<Renderer>& controller)
+void SurfaceController::addControlLayer(const sp<Renderer>& controller)
 {
-    _controllers->addRenderer(controller);
+    _controls->addRenderer(controller);
 }
 
 void SurfaceController::addLayer(const sp<Renderer>& layer)
@@ -41,7 +41,7 @@ void SurfaceController::requestUpdate(uint64_t timestamp)
         const V3 position(0);
         RenderRequest renderRequest(timestamp, _executor, _memory_pool, _render_requests);
         _renderers->render(renderRequest, position);
-        _controllers->render(renderRequest, position);
+        _controls->render(renderRequest, position);
         _layers->render(renderRequest, position);
         renderRequest.jobDone();
     }

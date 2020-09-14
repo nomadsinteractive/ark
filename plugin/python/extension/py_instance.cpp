@@ -86,7 +86,7 @@ PyObject* PyInstance::call(PyObject* args)
     }
 }
 
-bool PyInstance::isCallable()
+bool PyInstance::isCallable() const
 {
     return PyCallable_Check(_ref->instance()) != 0;
 }

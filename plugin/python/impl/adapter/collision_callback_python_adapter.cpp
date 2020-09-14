@@ -13,10 +13,10 @@ namespace python {
 
 CollisionCallbackPythonAdapter::CollisionCallbackPythonAdapter(const PyInstance& callback)
     : _on_begin_contact(callback.hasAttr("on_begin_contact") ? callback.getAttr("on_begin_contact")
-                                                             : PyInstance()),
+                                                             : callback.isCallable() ? PyInstance::own(callback.pyObject()) : PyInstance()),
       _on_end_contact(callback.hasAttr("on_end_contact") ? callback.getAttr("on_end_contact")
                                                            : PyInstance()),
-      _collision_manifold(sp<CollisionManifold>::make(V3()))
+      _collision_manifold(sp<CollisionManifold>::make(V3(), V3()))
 {
 }
 

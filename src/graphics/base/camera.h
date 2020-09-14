@@ -88,6 +88,10 @@ public:
     void lookAt(const V3& position, const V3& target, const V3& up);
 //  [[script::bindings::auto]]
     void lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up);
+
+//  [[script::bindings::auto]]
+    V3 getRayDirection(float screenX, float screenY) const;
+
 //  [[script::bindings::property]]
     sp<Vec3> position() const;
 

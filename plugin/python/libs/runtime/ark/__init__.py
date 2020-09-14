@@ -136,9 +136,12 @@ class ApplicationFacade:
         pass
 
     def create_resource_loader(self, name: str, **kwargs) -> 'ResourceLoader':
-        return ResourceLoader()
+        pass
 
     def add_pre_render_task(self, task: Callable, expired: 'Boolean' = None):
+        pass
+
+    def add_control_layer(self, control: Union['Layer', 'Renderer']):
         pass
 
     def add_event_listener(self, event_listener: Callable[['Event'], bool], priority: int = 0):
@@ -148,10 +151,10 @@ class ApplicationFacade:
         pass
 
     def get_string(self, resid: str) -> str:
-        return ''
+        pass
 
     def get_string_array(self, resid: str) -> List[str]:
-        return []
+        pass
 
     def exit(self):
         pass
@@ -344,6 +347,9 @@ class Camera:
         pass
 
     def look_at(self, position, target, up):
+        pass
+
+    def get_ray_direction(self, screen_x: float, screen_y: float) -> tuple:
         pass
 
 
@@ -1516,8 +1522,12 @@ class Texture:
 class CollisionManifold:
 
     @property
+    def contact_point(self) -> tuple:
+        return 0, 0, 0
+
+    @property
     def normal(self) -> tuple:
-        return tuple(0, 0)
+        return 0, 0, 0
 
 
 class Emitter:

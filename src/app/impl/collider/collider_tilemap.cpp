@@ -129,7 +129,8 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
                         const sp<RenderObject>& tile = i->getTile(row, col);
                         if(tile)
                         {
-                            const Contact contact(layerId, row, col, colCount, position + V2((col + 0.5f) * tileWidth, (row + 0.5f) * tileHeight), tile);
+                            const V3 contactPoint = position + V3((col + 0.5f) * tileWidth, (row + 0.5f) * tileHeight, 0);
+                            const Contact contact(layerId, row, col, colCount, contactPoint, tile);
                             candidates.insert(contact);
                             contacts.insert(contact);
 
@@ -140,7 +141,7 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
                                 const V3 normal(col == bColId ? 1.0f : (col == eColId ? -1.0f : 0.0f),
                                                row == bRowId ? 1.0f : (row == eRowId ? -1.0f : 0.0f), 0);
                                 if(callback()->hasCallback())
-                                    callback()->onBeginContact(_rigid_body_shadow, CollisionManifold(normal));
+                                    callback()->onBeginContact(_rigid_body_shadow, CollisionManifold(contactPoint, normal));
                             }
                         }
                     }

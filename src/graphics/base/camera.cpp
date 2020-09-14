@@ -123,6 +123,15 @@ void Camera::lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<V
     updateViewProjection();
 }
 
+V3 Camera::getRayDirection(float screenX, float screenY) const
+{
+    M4 projection;
+    _projection->flat(&projection);
+
+    const V4 pos = MatrixUtil::mul(MatrixUtil::inverse(projection), V4(screenX, screenY, 1.0f, 1.0f));
+    return V3(pos.x() / pos.w(), pos.y() / pos.w(), pos.z() / pos.w());
+}
+
 sp<Vec3> Camera::position() const
 {
     return _position;

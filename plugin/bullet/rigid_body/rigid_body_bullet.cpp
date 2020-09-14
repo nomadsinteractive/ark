@@ -6,8 +6,8 @@ namespace ark {
 namespace plugin {
 namespace bullet {
 
-RigidBodyBullet::Stub::Stub(ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass)
-    : _world(std::move(world)), _shape(std::move(shape)), _motion_state(makeMotionState(transform)), _rigid_body(makeRigidBody(_shape->btShape(), _motion_state.get(), mass))
+RigidBodyBullet::Stub::Stub(ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, Collider::BodyType bodyType, btScalar mass)
+    : _world(std::move(world)), _shape(std::move(shape)), _motion_state(makeMotionState(transform)), _rigid_body(makeRigidBody(_shape->btShape(), _motion_state.get(), bodyType, mass)), _body_type(bodyType)
 {
 }
 
@@ -21,24 +21,28 @@ btMotionState* RigidBodyBullet::Stub::makeMotionState(const btTransform& transfo
     return new btDefaultMotionState(transform);
 }
 
-btRigidBody* RigidBodyBullet::Stub::makeRigidBody(btCollisionShape* shape, btMotionState* motionState, btScalar mass) const
+btRigidBody* RigidBodyBullet::Stub::makeRigidBody(btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass) const
 {
-    bool isDynamic = (mass != 0.f);
-
+    DASSERT(bodyType == Collider::BODY_TYPE_STATIC || bodyType == Collider::BODY_TYPE_DYNAMIC || bodyType == Collider::BODY_TYPE_KINEMATIC);
     btVector3 localInertia(0, 0, 0);
-    if(isDynamic)
+    if(mass != 0.f)
         _shape->btShape()->calculateLocalInertia(mass, localInertia);
 
     btRigidBody::btRigidBodyConstructionInfo cInfo(mass, motionState, shape, localInertia);
 
     btRigidBody* rigidBody = new btRigidBody(cInfo);
+    if(bodyType == Collider::BODY_TYPE_KINEMATIC)
+    {
+        rigidBody->setCollisionFlags(rigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+        rigidBody->setActivationState(DISABLE_DEACTIVATION);
+    }
     _world.btDynamicWorld()->addRigidBody(rigidBody);
     rigidBody->setUserIndex(-1);
     return rigidBody;
 }
 
 RigidBodyBullet::RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass)
-    : RigidBody(id, type, nullptr, nullptr, nullptr),  _stub(sp<Stub>::make(std::move(world), std::move(shape), transform, mass))
+    : RigidBody(id, type, nullptr, nullptr, nullptr),  _stub(sp<Stub>::make(std::move(world), std::move(shape), transform, type, mass))
 {
     stub()->_position = sp<Position>::make(_stub);
     stub()->_transform = sp<Transform>::make(sp<TransformDelegate>::make(_stub));
@@ -53,14 +57,25 @@ void RigidBodyBullet::applyCentralForce(const V3& force)
     _stub->_rigid_body->applyCentralForce(btVector3(force.x(), force.y(), force.z()));
 }
 
+V3 RigidBodyBullet::angularFactor() const
+{
+    const btVector3& factor = _stub->_rigid_body->getAngularFactor();
+    return V3(factor.x(), factor.y(), factor.z());
+}
+
+void RigidBodyBullet::setAngularFactor(const V3& factor)
+{
+    _stub->_rigid_body->setAngularFactor(btVector3(factor.x(), factor.y(), factor.z()));
+}
+
 RigidBodyBullet::Position::Position(const sp<RigidBodyBullet::Stub>& stub)
-    : _stub(stub)
+    : _stub(stub), _is_static_body(_stub->_body_type == Collider::BODY_TYPE_STATIC)
 {
 }
 
 bool RigidBodyBullet::Position::update(uint64_t /*timestamp*/)
 {
-    return true;
+    return _is_static_body ? false : true;
 }
 
 V3 RigidBodyBullet::Position::val()

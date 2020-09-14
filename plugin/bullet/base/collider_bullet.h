@@ -15,6 +15,7 @@
 #include "app/inf/collider.h"
 
 #include "plugin/bullet/forwarding.h"
+#include "plugin/bullet/api.h"
 
 #include "btBulletDynamicsCommon.h"
 
@@ -23,7 +24,7 @@ namespace plugin {
 namespace bullet {
 
 //[[script::bindings::name("World")]]
-class ColliderBullet : public Runnable, public Collider, Implements<ColliderBullet, Runnable, Collider> {
+class ARK_PLUGIN_BULLET_API ColliderBullet : public Runnable, public Collider, Implements<ColliderBullet, Runnable, Collider> {
 public:
     class RigidBodyImporter {
     public:
@@ -37,6 +38,11 @@ public:
 
 //  [[script::bindings::auto]]
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size = nullptr, const sp<Rotation>& rotate = nullptr) override;
+
+//  [[script::bindings::auto]]
+    void rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback);
+//  [[script::bindings::auto]]
+    void rayCastAllHit(const V3& from, const V3& to, const sp<CollisionCallback>& callback);
 
     virtual void run() override;
 
@@ -88,6 +94,8 @@ private:
         op<btBroadphaseInterface> _broadphase;
         op<btConstraintSolver> _solver;
         op<btDiscreteDynamicsWorld> _dynamics_world;
+
+        uint32_t _body_id_base;
 
         float _time_step;
     };

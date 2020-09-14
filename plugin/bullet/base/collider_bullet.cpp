@@ -1,5 +1,7 @@
 #include "bullet/base/collider_bullet.h"
 
+#include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
+
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
 #include "core/util/boolean_util.h"
@@ -9,6 +11,9 @@
 #include "graphics/base/v3.h"
 
 #include "renderer/base/resource_loader_context.h"
+
+#include "app/base/collision_manifold.h"
+#include "app/inf/collision_callback.h"
 
 #include "bullet/base/collision_shape.h"
 #include "bullet/rigid_body/rigid_body_bullet.h"
@@ -59,7 +64,41 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape,
 
         cs = sp<CollisionShape>::make(btShape, 1.0f);
     }
-    return sp<RigidBodyBullet>::make(type, static_cast<Collider::BodyType>(shape), *this, std::move(cs), transform, type == Collider::BODY_TYPE_STATIC ? 0 : cs->mass());
+    return sp<RigidBodyBullet>::make(++ _stub->_body_id_base, type, *this, std::move(cs), transform, type == Collider::BODY_TYPE_DYNAMIC ? cs->mass() : 0);
+}
+
+void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback)
+{
+    btVector3 btFrom(from.x(), from.y(), from.z());
+    btVector3 btTo(to.x(), to.y(), to.z());
+    btCollisionWorld::ClosestRayResultCallback closestResults(btFrom, btTo);
+    closestResults.m_flags |= btTriangleRaycastCallback::kF_FilterBackfaces;
+
+    _stub->_dynamics_world->rayTest(btVector3(from.x(), from.y(), from.z()), btVector3(to.x(), to.y(), to.z()), closestResults);
+    if (closestResults.hasHit())
+    {
+        btVector3 p = btFrom.lerp(btTo, closestResults.m_closestHitFraction);
+        const btVector3& n = closestResults.m_hitNormalWorld;
+        CollisionManifold manifold(V3(p.x(), p.y(), p.z()), V3(n.x(), n.y(), n.z()));
+        callback->onBeginContact(nullptr, manifold);
+    }
+}
+
+void ColliderBullet::rayCastAllHit(const V3& from, const V3& to, const sp<CollisionCallback>& callback)
+{
+    btVector3 btFrom(from.x(), from.y(), from.z());
+    btVector3 btTo(to.x(), to.y(), to.z());
+    btCollisionWorld::AllHitsRayResultCallback allHitResults(btFrom, btTo);
+    allHitResults.m_flags |= btTriangleRaycastCallback::kF_FilterBackfaces;
+
+    _stub->_dynamics_world->rayTest(btVector3(from.x(), from.y(), from.z()), btVector3(to.x(), to.y(), to.z()), allHitResults);
+    if (allHitResults.hasHit())
+    {
+        btVector3 p = btFrom.lerp(btTo, allHitResults.m_closestHitFraction);
+        const btVector3& n = allHitResults.m_hitNormalWorld[0];
+        CollisionManifold manifold(V3(p.x(), p.y(), p.z()), V3(n.x(), n.y(), n.z()));
+        callback->onBeginContact(nullptr, manifold);
+    }
 }
 
 void ColliderBullet::run()
@@ -85,7 +124,7 @@ std::unordered_map<int32_t, sp<CollisionShape>>& ColliderBullet::collisionShapes
 ColliderBullet::Stub::Stub(const V3& gravity, sp<ModelLoader> modelLoader)
     : _model_loader(std::move(modelLoader)), _collision_configuration(new btDefaultCollisionConfiguration()), _collision_dispatcher(new btCollisionDispatcher(_collision_configuration)),
       _broadphase(new btDbvtBroadphase()), _solver(new btSequentialImpulseConstraintSolver()), _dynamics_world(new btDiscreteDynamicsWorld(_collision_dispatcher, _broadphase, _solver, _collision_configuration)),
-      _time_step(1 / 60.0f)
+      _body_id_base(0), _time_step(1 / 60.0f)
 {
     _dynamics_world->setGravity(btVector3(gravity.x(), gravity.y(), gravity.z()));
 }

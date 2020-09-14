@@ -130,6 +130,11 @@ M4 MatrixUtil::transpose(const M4& matrix)
     return glm::transpose(glm::make_mat4(reinterpret_cast<const float*>(&matrix)));
 }
 
+M4 MatrixUtil::inverse(const M4& matrix)
+{
+    return glm::inverse(glm::make_mat4(reinterpret_cast<const float*>(&matrix)));
+}
+
 M4 MatrixUtil::ortho(float left, float right, float bottom, float top, float near, float far)
 {
     return M4(glm::ortho(left, right, bottom, top, near, far));

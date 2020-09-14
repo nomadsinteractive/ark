@@ -94,6 +94,11 @@ void ApplicationFacade::addPreRenderTask(const sp<Runnable>& task, const sp<Bool
     _context->addPreRenderTask(task, expired);
 }
 
+void ApplicationFacade::addControlLayer(const sp<Renderer>& controlLayer)
+{
+    _surface_controller->addControlLayer(controlLayer);
+}
+
 void ApplicationFacade::addEventListener(const sp<EventListener>& eventListener, int32_t priority)
 {
     _context->addEventListener(eventListener, priority);

@@ -19,7 +19,7 @@ public:
 // [[script::bindings::auto]]
     void addRenderer(const sp<Renderer>& renderer);
 // [[script::bindings::auto]]
-    void addController(const sp<Renderer>& controller);
+    void addControlLayer(const sp<Renderer>& controller);
 // [[script::bindings::auto]]
     void addLayer(const sp<Renderer>& layer);
 
@@ -32,7 +32,7 @@ private:
     sp<MemoryPool> _memory_pool;
 
     sp<RendererGroup> _renderers;
-    sp<RendererGroup> _controllers;
+    sp<RendererGroup> _controls;
     sp<RendererGroup> _layers;
 
     sp<OCSQueue<RenderRequest>> _render_requests;
