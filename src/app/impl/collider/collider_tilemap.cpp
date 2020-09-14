@@ -78,7 +78,7 @@ sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, 
 }
 
 TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Tilemap>& tileMap)
-    : RigidBody(id, type, position, size, Null::toSafe<Rotation>(nullptr)), _tilemap(tileMap), _rigid_body_shadow(sp<RigidBodyShadow>::make(tileMap->tileset()->tileWidth(), tileMap->tileset()->tileHeight()))
+    : RigidBody(id, type, position, size, Null::toSafe<Rotation>(nullptr), Box()), _tilemap(tileMap), _rigid_body_shadow(sp<RigidBodyShadow>::make(tileMap->tileset()->tileWidth(), tileMap->tileset()->tileHeight()))
 {
 }
 
@@ -159,7 +159,7 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
 }
 
 TiledCollider::RigidBodyShadow::RigidBodyShadow(uint32_t width, uint32_t height)
-    : RigidBody(0, Collider::BODY_TYPE_STATIC, sp<Vec3::Impl>::make(V3()), sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), nullptr)
+    : RigidBody(0, Collider::BODY_TYPE_STATIC, sp<Vec3::Impl>::make(V3()), sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), nullptr, Box())
 {
     _position = position();
 }

@@ -48,7 +48,7 @@ public:
 
         WeakPtr<Stub> _body;
         WeakPtr<RigidBody::Stub> _rigid_body;
-        sp<Box> _tag;
+        Box _tag;
     };
 
 public:

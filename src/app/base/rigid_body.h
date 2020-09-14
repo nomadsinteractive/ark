@@ -37,8 +37,7 @@ public:
     };
 
     struct ARK_API Stub {
-        Stub(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, const sp<Disposed>& disposed = nullptr,
-             const sp<Callback>& callback = nullptr, const sp<Box>& tag = nullptr);
+        Stub(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, Box impl, const sp<Disposed>& disposed = nullptr);
         ~Stub();
 
         int32_t _id;
@@ -46,18 +45,20 @@ public:
         SafePtr<Vec3> _position;
         SafePtr<Size> _size;
         sp<Transform> _transform;
+
+        Box _impl;
         SafePtr<Disposed> _disposed;
 
         sp<Callback> _callback;
         WeakPtr<RenderObject> _render_object;
 
-        sp<Box> _tag;
+        Box _tag;
     };
 
 public:
     virtual ~RigidBody() override = default;
 
-    RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, const sp<Disposed>& disposed = nullptr);
+    RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, Box impl, const sp<Disposed>& disposed = nullptr);
     RigidBody(const sp<Stub>& stub);
 
 //  [[script::bindings::auto]]
@@ -106,6 +107,8 @@ public:
     void setCollisionCallback(const sp<CollisionCallback>& collisionCallback);
 
     const sp<Stub>& stub() const;
+    sp<Stub>& stub();
+
     const sp<Callback>& callback() const;
 
 //  [[plugin::style("rigid-body")]]

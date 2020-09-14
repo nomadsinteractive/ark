@@ -24,6 +24,7 @@ namespace bullet {
 class ARK_PLUGIN_BULLET_API RigidBodyBullet : public RigidBody, Implements<RigidBodyBullet, RigidBody, Holder>  {
 public:
     RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass);
+    RigidBodyBullet(const sp<RigidBody::Stub>& other);
 
     virtual void dispose() override;
 

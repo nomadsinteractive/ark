@@ -80,7 +80,8 @@ void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<Colli
         btVector3 p = btFrom.lerp(btTo, closestResults.m_closestHitFraction);
         const btVector3& n = closestResults.m_hitNormalWorld;
         CollisionManifold manifold(V3(p.x(), p.y(), p.z()), V3(n.x(), n.y(), n.z()));
-        callback->onBeginContact(nullptr, manifold);
+        sp<RigidBody::Stub>& stub = *reinterpret_cast<sp<RigidBody::Stub>*>(closestResults.m_collisionObject->getUserPointer());
+        callback->onBeginContact(sp<RigidBodyBullet>::make(stub), manifold);
     }
 }
 

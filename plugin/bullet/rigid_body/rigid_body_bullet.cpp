@@ -42,10 +42,16 @@ btRigidBody* RigidBodyBullet::Stub::makeRigidBody(btCollisionShape* shape, btMot
 }
 
 RigidBodyBullet::RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass)
-    : RigidBody(id, type, nullptr, nullptr, nullptr),  _stub(sp<Stub>::make(std::move(world), std::move(shape), transform, type, mass))
+    : RigidBody(id, type, nullptr, nullptr, nullptr, sp<Stub>::make(std::move(world), std::move(shape), transform, type, mass)), _stub(stub()->_impl.unpack<Stub>())
 {
     stub()->_position = sp<Position>::make(_stub);
     stub()->_transform = sp<Transform>::make(sp<TransformDelegate>::make(_stub));
+    _stub->_rigid_body->setUserPointer(reinterpret_cast<void*>(&stub()));
+}
+
+RigidBodyBullet::RigidBodyBullet(const sp<RigidBody::Stub>& other)
+    : RigidBody(other), _stub(stub()->_impl.unpack<Stub>())
+{
 }
 
 void RigidBodyBullet::dispose()
