@@ -696,6 +696,9 @@ class LevelLoader:
     def load(self, src: str):
         pass
 
+    def get_render_object(self, name: str) -> 'RenderObject':
+        pass
+
 
 class RenderObject:
     def __init__(self, t, pos=None, size=None, transform=None, varyings=None):

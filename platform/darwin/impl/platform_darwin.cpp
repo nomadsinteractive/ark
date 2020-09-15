@@ -17,7 +17,6 @@
 #include "core/inf/variable.h"
 #include "core/impl/asset_bundle/asset_bundle_directory.h"
 #include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
-#include "core/impl/dictionary/xml_directory.h"
 #include "core/util/strings.h"
 
 #include "graphics/base/font.h"

@@ -49,11 +49,14 @@ void LevelLoader::load(const String& src)
                 DASSERT(iter != typeMapping.end());
                 int32_t type = iter->second._type;
                 const sp<Layer>& layer = iter->second._layer;
+                String name = Documents::getAttribute(j, "name");
                 const String& position = Documents::ensureAttribute(j, "position");
                 const String& scale = Documents::ensureAttribute(j, "scale");
                 const String& rotation = Documents::ensureAttribute(j, "rotation");
                 sp<Transform> transform = makeTransform(rotation, scale);
                 sp<RenderObject> renderObject = sp<RenderObject>::make(type, sp<Vec3::Const>::make(parseVector<V3>(position)), nullptr, transform);
+                if(name)
+                    _render_objects[name] = renderObject;
                 layer->addRenderObject(renderObject);
             }
             else if(clazz == "CAMERA")
@@ -96,6 +99,12 @@ sp<Vec3> LevelLoader::getLight(const String& name) const
 {
     const auto iter = _lights.find(name);
     return iter != _lights.end() ? iter->second : nullptr;
+}
+
+sp<RenderObject> LevelLoader::getRenderObject(const String& name) const
+{
+    const auto iter = _render_objects.find(name);
+    return iter != _render_objects.end() ? iter->second : nullptr;
 }
 
 sp<Transform> LevelLoader::makeTransform(const String& rotation, const String& scale) const

@@ -34,7 +34,7 @@ static std::regex _INCLUDE_PATTERN("#include\\s*[<\"]([^>\"]+)[>\"]");
 static std::regex _STRUCT_PATTERN("struct\\s+(\\w+)\\s*\\{([^}]+)\\}\\s*;");
 static std::regex _IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
 static std::regex _UNIFORM_PATTERN("uniform" UNIFORM_PATTERN);
-static std::regex _SSBO_PATTERN("layout\\(std140, binding\\s*=\\s*(\\d+)\\)\\s+buffer\\s+(\\w+)");
+static std::regex _SSBO_PATTERN("layout\\(std140, binding\\s*=\\s*(\\d+)\\)\\s+(?:(?:read|write)only\\s+)?buffer\\s+(\\w+)");
 
 #ifndef ANDROID
 static char _STAGE_ATTR_PREFIX[PipelineInput::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};

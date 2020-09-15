@@ -125,10 +125,9 @@ void Camera::lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<V
 
 V3 Camera::getRayDirection(float screenX, float screenY) const
 {
-    M4 projection;
-    _projection->flat(&projection);
-
-    const V4 pos = MatrixUtil::mul(MatrixUtil::inverse(projection), V4(screenX, screenY, 1.0f, 1.0f));
+    M4 vp;
+    _vp->flat(&vp);
+    const V4 pos = MatrixUtil::mul(MatrixUtil::inverse(vp), V4((screenX - 0.5f) * 2, (screenY - 0.5f) * 2, 1.0f, 1.0f));
     return V3(pos.x() / pos.w(), pos.y() / pos.w(), pos.z() / pos.w());
 }
 
@@ -201,7 +200,7 @@ M4 Camera::DelegateLH_ZO::frustum(float left, float right, float bottom, float t
 
 M4 Camera::DelegateLH_ZO::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    return M4(glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), -up.y(), up.z())));
+    return M4(glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(-up.x(), -up.y(), -up.z())));
 }
 
 M4 Camera::DelegateLH_ZO::ortho(float left, float right, float bottom, float top, float near, float far)
@@ -221,7 +220,7 @@ M4 Camera::DelegateRH_ZO::frustum(float left, float right, float bottom, float t
 
 M4 Camera::DelegateRH_ZO::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    return M4(glm::lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), -up.y(), up.z())));
+    return M4(glm::lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(-up.x(), -up.y(), -up.z())));
 }
 
 M4 Camera::DelegateRH_ZO::ortho(float left, float right, float bottom, float top, float near, float far)
@@ -231,7 +230,7 @@ M4 Camera::DelegateRH_ZO::ortho(float left, float right, float bottom, float top
 
 M4 Camera::DelegateRH_ZO::perspective(float fov, float aspect, float near, float far)
 {
-    return M4(glm::perspectiveRH_ZO(fov, aspect, near, far));
+    return M4(glm::perspectiveRH_ZO(fov, -aspect, near, far));
 }
 
 M4 Camera::DelegateLH_NO::frustum(float left, float right, float bottom, float top, float near, float far)

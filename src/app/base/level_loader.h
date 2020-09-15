@@ -35,6 +35,9 @@ public:
 //  [[script::bindings::auto]]
     sp<Vec3> getLight(const String& name) const;
 
+//  [[script::bindings::auto]]
+    sp<RenderObject> getRenderObject(const String& name) const;
+
 //  [[plugin::builder]]
     class BUILDER : public Builder<LevelLoader> {
     public:
@@ -70,6 +73,7 @@ private:
 private:
     std::map<String, sp<Camera>> _cameras;
     std::map<String, sp<Vec3>> _lights;
+    std::map<String, sp<RenderObject>> _render_objects;
     std::map<String, InstanceLibrary> _instance_libraries;
 };
 

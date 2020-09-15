@@ -125,8 +125,6 @@ const aiScene* ModelImporterAssimp::loadScene(const sp<Assimp::Importer>& import
 {
     importer->SetIOHandler(new ArkIOSystem);
     uint32_t flags = static_cast<uint32_t>(aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes | aiProcess_LimitBoneWeights | aiProcess_GlobalScale);
-    if(_coordinate_system == Ark::COORDINATE_SYSTEM_LHS)
-        flags |= aiProcess_FlipWindingOrder;
     const aiScene* scene = importer->ReadFile(src.c_str(), flags);
     DCHECK(scene, "Loading \"%s\" failed", src.c_str());
     DCHECK(!checkMeshes || scene->mNumMeshes > 0, "This scene(%s) has no meshes, maybe it's a scene contains animation-only informations. You should attach this one to its parent as an animation node.", src.c_str());
