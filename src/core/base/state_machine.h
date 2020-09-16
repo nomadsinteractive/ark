@@ -1,10 +1,11 @@
 #ifndef ARK_CORE_BASE_STATE_MACHINE_H_
 #define ARK_CORE_BASE_STATE_MACHINE_H_
 
-#include <list>
+#include <vector>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/state.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -15,34 +16,17 @@ public:
     StateMachine();
 
 //  [[script::bindings::auto]]
-    sp<Command> addCommand(const sp<Runnable>& onActive = nullptr, const sp<Runnable>& onDeactive = nullptr, uint32_t category = 0);
+    sp<Command> addCommand(const sp<Runnable>& onActive = nullptr, uint32_t category = 0);
 
 //  [[script::bindings::auto]]
-    sp<State> addState(const sp<Runnable>& onActive = nullptr, const sp<Runnable>& onDeactive = nullptr, int32_t flag = 0);
+    sp<State> addState(const sp<Runnable>& onActivate = nullptr, int32_t flag = 0);
 
-//  [[script::bindings::auto]]
-    void activate(const State& state);
-//  [[script::bindings::auto]]
-    void deactivate(const State& state);
+    const std::vector<State>& states() const;
 
 private:
-    struct Stub {
+    uint32_t _command_id_base;
 
-        void activate(const State& state);
-        void deactivate(const State& state);
-
-        State front() const;
-        void pop();
-
-        void execute(const Command& command);
-        void terminate(const Command& command);
-
-        uint32_t _new_command_id;
-        std::list<State> _states;
-    };
-
-private:
-    sp<Stub> _stub;
+    std::vector<State> _states;
 
     friend class Command;
     friend class State;

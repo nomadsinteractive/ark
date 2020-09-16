@@ -1,11 +1,12 @@
 #include "core/base/command.h"
 
+#include "core/base/state_machine.h"
 #include "core/inf/runnable.h"
 
 namespace ark {
 
-Command::Command(uint32_t id, const WeakPtr<StateMachine::Stub>& stateMachine, const sp<Runnable>& onActive, const sp<Runnable>& onDeactive, uint32_t category)
-    : _id(id), _state_machine(stateMachine), _on_active(onActive), _on_deactive(onDeactive), _category(category), _state(STATE_DEACTIVATED)
+Command::Command(StateMachine& stateMachine, uint32_t id, const sp<Runnable>& onActive, uint32_t category)
+    : _state_machine(stateMachine), _id(id), _on_active(onActive), _category(category), _state(STATE_DEACTIVATED)
 {
 }
 
@@ -19,24 +20,14 @@ bool Command::active() const
     return _state != STATE_DEACTIVATED;
 }
 
-void Command::execute() const
+void Command::execute()
 {
-    _state_machine.ensure()->execute(*this);
+    setState(STATE_ACTIVATED);
 }
 
-void Command::terminate() const
+void Command::terminate()
 {
-    _state_machine.ensure()->terminate(*this);
-}
-
-const sp<Runnable>& Command::onActive() const
-{
-    return _on_active;
-}
-
-const sp<Runnable>& Command::onDeactive() const
-{
-    return _on_deactive;
+    _state = STATE_DEACTIVATED;
 }
 
 uint32_t Command::category() const
@@ -57,6 +48,8 @@ Command::State Command::state() const
 void Command::setState(Command::State state)
 {
     _state = state;
+    if(_state == STATE_ACTIVATED && _on_active)
+        _on_active->run();
 }
 
 }
