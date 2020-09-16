@@ -76,9 +76,12 @@ public:
 public:
 //  [[script::bindings::auto]]
     Camera();
+    Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Camera);
 
 //  [[script::bindings::auto]]
-    void ortho(float left, float right, float bottom, float top, float near, float far, Ark::RendererCoordinateSystem coordinateSystem = Ark::COORDINATE_SYSTEM_RHS);
+    void ortho(float left, float right, float bottom, float top, float near, float far);
+    void ortho(float left, float right, float bottom, float top, float near, float far, Ark::RendererCoordinateSystem coordinateSystem);
 //  [[script::bindings::auto]]
     void frustum(float left, float right, float bottom, float top, float near, float far);
 //  [[script::bindings::auto]]
@@ -105,6 +108,7 @@ private:
     void updateViewProjection();
 
 private:
+    Ark::RendererCoordinateSystem _coordinate_system;
     sp<Delegate> _delegate;
 
     sp<Holder> _view;

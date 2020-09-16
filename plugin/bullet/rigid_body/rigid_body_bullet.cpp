@@ -63,6 +63,28 @@ void RigidBodyBullet::applyCentralForce(const V3& force)
     _stub->_rigid_body->applyCentralForce(btVector3(force.x(), force.y(), force.z()));
 }
 
+V3 RigidBodyBullet::linearVelocity() const
+{
+    const btVector3& velocity = _stub->_rigid_body->getLinearVelocity();
+    return V3(velocity.x(), velocity.y(), velocity.z());
+}
+
+void RigidBodyBullet::setLinearVelocity(const V3& velocity)
+{
+    _stub->_rigid_body->setActivationState(DISABLE_DEACTIVATION);
+    _stub->_rigid_body->setLinearVelocity(btVector3(velocity.x(), velocity.y(), velocity.z()));
+}
+
+float RigidBodyBullet::friction() const
+{
+    return _stub->_rigid_body->getFriction();
+}
+
+void RigidBodyBullet::setFriction(float friction)
+{
+    _stub->_rigid_body->setFriction(friction);
+}
+
 V3 RigidBodyBullet::angularFactor() const
 {
     const btVector3& factor = _stub->_rigid_body->getAngularFactor();

@@ -87,7 +87,7 @@ public:
 
     const sp<RenderEngine>& renderEngine() const;
 
-    sp<Camera::Delegate> createCamera() const;
+    sp<Camera> createCamera() const;
     sp<PipelineFactory> createPipelineFactory() const;
 
     sp<Texture> createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);

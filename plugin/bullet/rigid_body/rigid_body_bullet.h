@@ -32,6 +32,16 @@ public:
     void applyCentralForce(const V3& force);
 
 //  [[script::bindings::property]]
+    V3 linearVelocity() const;
+//  [[script::bindings::property]]
+    void setLinearVelocity(const V3& velocity);
+
+//  [[script::bindings::property]]
+    float friction() const;
+//  [[script::bindings::property]]
+    void setFriction(float friction);
+
+//  [[script::bindings::property]]
     V3 angularFactor() const;
 //  [[script::bindings::property]]
     void setAngularFactor(const V3& factor);

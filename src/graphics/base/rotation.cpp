@@ -38,7 +38,7 @@ V4 Rotation::val()
 
 bool Rotation::update(uint64_t timestamp)
 {
-    return _quaternion->update(timestamp);
+    return _quaternion->update(timestamp) || _timestamp.update(timestamp);
 }
 
 void Rotation::traverse(const Holder::Visitor& visitor)
@@ -67,16 +67,19 @@ void Rotation::setRotation(const sp<Numeric>& theta, const sp<Vec3>& axis)
     _axis = axis ? axis : sp<Vec3>::make<Vec3::Const>(Rotation::Z_AXIS);
 
     _quaternion = sp<Quaternion>::make(_theta, _axis);
+    _timestamp.setDirty();
 }
 
 void Rotation::setEuler(float pitch, float yaw, float roll)
 {
     _quaternion = sp<Quaternion>::make(sp<Numeric::Const>::make(pitch), sp<Numeric::Const>::make(yaw), sp<Numeric::Const>::make(roll));
+    _timestamp.setDirty();
 }
 
 void Rotation::setEuler(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll)
 {
     _quaternion = sp<Quaternion>::make(pitch, yaw, roll);
+    _timestamp.setDirty();
 }
 
 template<> ARK_API sp<Rotation> Null::ptr()

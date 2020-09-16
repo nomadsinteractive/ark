@@ -2,6 +2,7 @@
 #define ARK_GRAPHICS_BASE_RENDER_OBJECT_H_
 
 #include "core/base/api.h"
+#include "core/base/timestamp.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
 #include "core/epi/disposed.h"
@@ -138,6 +139,8 @@ private:
     SafeVar<Visibility> _visible;
 
     Box _tag;
+
+    Timestamp _timestamp;
 
     friend class RendererByRenderObject;
 

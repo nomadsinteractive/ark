@@ -20,16 +20,12 @@ namespace {
 class AxisRotation : public Vec4 {
 public:
     AxisRotation(const sp<Numeric>& theta, const sp<Vec3>& axis)
-        : _theta(theta), _axis(Vec3Type::normalize(axis)) {
+        : _theta(theta), _axis(Vec3Type::normalize(axis)), _val(updateQuaternion()) {
     }
 
     virtual bool update(uint64_t timestamp) override {
         if(VariableUtil::update(timestamp, _theta, _axis)) {
-            const V3 axis = _axis->val();
-            const float rad = _theta->val();
-            const float s = Math::sin(rad / 2);
-            const float c = Math::cos(rad / 2);
-            _val = V4(axis.x() * s, axis.y() * s, axis.z() * s, c);
+            _val = updateQuaternion();
             return true;
         }
         return false;
@@ -37,6 +33,15 @@ public:
 
     virtual V4 val() override {
         return _val;
+    }
+
+private:
+    V4 updateQuaternion() const {
+        const V3 axis = _axis->val();
+        const float rad = _theta->val();
+        const float s = Math::sin(rad / 2);
+        const float c = Math::cos(rad / 2);
+        return V4(axis.x() * s, axis.y() * s, axis.z() * s, c);
     }
 
 private:
@@ -49,13 +54,12 @@ private:
 class EulerRotation : public Vec4 {
 public:
     EulerRotation(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll)
-        : _pitch(pitch), _yaw(yaw), _roll(roll) {
+        : _pitch(pitch), _yaw(yaw), _roll(roll), _val(updateQuaternion()) {
     }
 
     virtual bool update(uint64_t timestamp) override {
         if(VariableUtil::update(timestamp, _pitch, _yaw, _roll)) {
-            const glm::quat quat = glm::quat(glm::vec3(_pitch->val(), _yaw->val(), _roll->val()));
-            _val = V4(quat.x, quat.y, quat.z, quat.w);
+            _val = updateQuaternion();
             return true;
         }
         return false;
@@ -63,6 +67,12 @@ public:
 
     virtual V4 val() override {
         return _val;
+    }
+
+private:
+    V4 updateQuaternion() const {
+        const glm::quat quat = glm::quat(glm::vec3(_pitch->val(), _yaw->val(), _roll->val()));
+        return V4(quat.x, quat.y, quat.z, quat.w);
     }
 
 private:

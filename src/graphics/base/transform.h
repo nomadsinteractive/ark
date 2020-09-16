@@ -2,6 +2,7 @@
 #define ARK_GRAPHICS_BASE_TRANSFORM_H_
 
 #include "core/base/api.h"
+#include "core/base/timestamp.h"
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
@@ -76,7 +77,7 @@ public:
 
     Snapshot snapshot() const;
 
-    bool update(uint64_t timestamp) const;
+    bool update(uint64_t timestamp);
 
 //  [[script::bindings::property]]
     const sp<Rotation>& rotation();
@@ -149,6 +150,8 @@ private:
     SafeVar<Vec3> _pivot;
 
     sp<Delegate> _delegate;
+
+    Timestamp _timestamp;
 
     friend class TransformSimple2D;
     friend class TransformSimple3D;

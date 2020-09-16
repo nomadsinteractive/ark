@@ -155,9 +155,10 @@ const sp<RenderEngine>& RenderController::renderEngine() const
     return _render_engine;
 }
 
-sp<Camera::Delegate> RenderController::createCamera() const
+sp<Camera> RenderController::createCamera() const
 {
-    return _render_engine->rendererFactory()->createCamera(Ark::instance().manifest()->renderer()._coordinate_system);
+    Ark::RendererCoordinateSystem cs = Ark::instance().manifest()->renderer()._coordinate_system;
+    return sp<Camera>::make(cs, _render_engine->rendererFactory()->createCamera(cs));
 }
 
 sp<PipelineFactory> RenderController::createPipelineFactory() const

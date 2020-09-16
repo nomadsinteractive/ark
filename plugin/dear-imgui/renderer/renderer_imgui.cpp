@@ -232,7 +232,7 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
     const Viewport& viewport = _resource_loader_context->renderController()->renderEngine()->viewport();
 
     Ark::RendererCoordinateSystem coordinateSystem = _resource_loader_context->renderController()->renderEngine()->context()->coordinateSystem();
-    _camera->ortho(0, viewport.width(), 0, viewport.height(), viewport.near(), viewport.far(), static_cast<Ark::RendererCoordinateSystem>(-coordinateSystem));
+    _camera->ortho(0, viewport.width(), 0, viewport.height(), viewport.clipNear(), viewport.clipFar(), static_cast<Ark::RendererCoordinateSystem>(-coordinateSystem));
 
     const Global<ImguiContext> context;
     ImGuiIO& io = ImGui::GetIO();

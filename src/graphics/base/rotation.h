@@ -2,6 +2,7 @@
 #define ARK_GRAPHICS_BASE_ROTATION_H_
 
 #include "core/base/api.h"
+#include "core/base/timestamp.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
 #include "core/inf/variable.h"
@@ -75,6 +76,8 @@ private:
     sp<Vec3> _axis;
 
     sp<Vec4> _quaternion;
+
+    Timestamp _timestamp;
 };
 
 }

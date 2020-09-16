@@ -2,24 +2,24 @@
 
 namespace ark {
 
-Viewport::Viewport(float left, float top, float right, float bottom, float near, float far)
-    : Rect(left, top, right, bottom), _near(near), _far(far)
+Viewport::Viewport(float left, float top, float right, float bottom, float clipNear, float clipFar)
+    : Rect(left, top, right, bottom), _clip_near(clipNear), _clip_far(clipFar)
 {
 }
 
 Viewport::Viewport(const Viewport& other)
-    : Rect(other), _near(other._near), _far(other._far)
+    : Rect(other), _clip_near(other._clip_near), _clip_far(other._clip_far)
 {
 }
 
-float Viewport::near() const
+float Viewport::clipNear() const
 {
-    return _near;
+    return _clip_near;
 }
 
-float Viewport::far() const
+float Viewport::clipFar() const
 {
-    return _far;
+    return _clip_far;
 }
 
 float Viewport::toViewportX(float screenX, uint32_t screenWidth) const

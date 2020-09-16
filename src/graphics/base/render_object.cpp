@@ -75,12 +75,14 @@ void RenderObject::setType(int32_t type)
 {
     _type->set(type);
     _disposed = nullptr;
+    _timestamp.setDirty();
 }
 
 void RenderObject::setType(const sp<Integer>& type)
 {
     _type->set(type);
     _disposed = type.as<Disposed>();
+    _timestamp.setDirty();
 }
 
 float RenderObject::x() const
@@ -91,11 +93,13 @@ float RenderObject::x() const
 void RenderObject::setX(float x)
 {
     Vec3Type::setX(_position.ensure(), x);
+    _timestamp.setDirty();
 }
 
 void RenderObject::setX(const sp<Numeric>& x)
 {
     Vec3Type::setX(_position.ensure(), x);
+    _timestamp.setDirty();
 }
 
 float RenderObject::y() const
@@ -106,11 +110,13 @@ float RenderObject::y() const
 void RenderObject::setY(float y)
 {
     Vec3Type::setY(_position.ensure(), y);
+    _timestamp.setDirty();
 }
 
 void RenderObject::setY(const sp<Numeric>& y)
 {
     Vec3Type::setY(_position.ensure(), y);
+    _timestamp.setDirty();
 }
 
 float RenderObject::z() const
@@ -121,11 +127,13 @@ float RenderObject::z() const
 void RenderObject::setZ(float z)
 {
     Vec3Type::setZ(_position.ensure(), z);
+    _timestamp.setDirty();
 }
 
 void RenderObject::setZ(const sp<Numeric>& z)
 {
     Vec3Type::setZ(_position.ensure(), z);
+    _timestamp.setDirty();
 }
 
 V2 RenderObject::xy() const
@@ -147,21 +155,25 @@ const sp<Vec3>& RenderObject::position()
 void RenderObject::setPosition(const sp<Vec3>& position)
 {
     _position = position;
+    _timestamp.setDirty();
 }
 
 void RenderObject::setSize(const sp<Size>& size)
 {
     _size = size;
+    _timestamp.setDirty();
 }
 
 void RenderObject::setTransform(const sp<Transform>& transform)
 {
     _transform = transform;
+    _timestamp.setDirty();
 }
 
 void RenderObject::setVaryings(const sp<Varyings>& varyings)
 {
     _varyings = varyings;
+    _timestamp.setDirty();
 }
 
 const Box& RenderObject::tag() const
@@ -192,6 +204,7 @@ const sp<Visibility>& RenderObject::visible()
 void RenderObject::setVisible(const sp<Boolean>& visible)
 {
     _visible.ensure()->set(visible);
+    _timestamp.setDirty();
 }
 
 void RenderObject::dispose()
@@ -224,7 +237,7 @@ Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, 
     if(_disposed.update(renderRequest.timestamp()) && _disposed.val())
         return Renderable::Snapshot();
 
-    bool dirty = VariableUtil::update(renderRequest.timestamp(), _visible, _type, _position, _size, _transform, _varyings, _visible);
+    bool dirty = VariableUtil::update(renderRequest.timestamp(), _visible, _type, _position, _size, _transform, _varyings, _visible) || _timestamp.update(renderRequest.timestamp());
     return Renderable::Snapshot(false, dirty, _visible.val(), _type->val(), _position.val(), _size.val(), _transform->snapshot(), _varyings->snapshot(pipelineInput, renderRequest.allocator()));
 }
 

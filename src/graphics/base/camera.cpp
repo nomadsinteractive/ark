@@ -6,8 +6,8 @@
 #include "core/ark.h"
 
 #include "core/base/observer.h"
-#include "core/impl/variable/variable_wrapper.h"
 #include "core/epi/notifier.h"
+#include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/types/global.h"
@@ -15,7 +15,10 @@
 #include "core/util/variable_util.h"
 
 #include "graphics/base/mat.h"
+#include "graphics/base/viewport.h"
 #include "graphics/util/matrix_util.h"
+
+#include "renderer/base/render_engine.h"
 
 #include "app/base/application_context.h"
 
@@ -82,9 +85,19 @@ private:
 static const char sNearFarPlaneWarning[] = "Near: %.2f, Far: %.2f. Far plane should be further than near plane, and distance to the near plane should be greater than zero.";
 
 Camera::Camera()
-    : _delegate(Ark::instance().applicationContext()->renderController()->createCamera()), _view(sp<Holder>::make(sp<Mat4::Const>::make(M4()))),
+    : Camera(Ark::instance().applicationContext()->renderController()->createCamera())
+{
+}
+
+Camera::Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate)
+    : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Holder>::make(sp<Mat4::Const>::make(M4()))),
       _projection(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _vp(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _position(sp<VariableWrapper<V3>>::make(V3(0)))
 {
+}
+
+void Camera::ortho(float left, float right, float bottom, float top, float near, float far)
+{
+    ortho(left, right, bottom, top, near, far, _coordinate_system);
 }
 
 void Camera::ortho(float left, float right, float bottom, float top, float near, float far, Ark::RendererCoordinateSystem coordinateSystem)
@@ -127,7 +140,12 @@ V3 Camera::getRayDirection(float screenX, float screenY) const
 {
     M4 vp;
     _vp->flat(&vp);
-    const V4 pos = MatrixUtil::mul(MatrixUtil::inverse(vp), V4((screenX - 0.5f) * 2, (screenY - 0.5f) * 2, 1.0f, 1.0f));
+
+    const Viewport& viewport = Ark::instance().applicationContext()->renderEngine()->viewport();
+
+    float ndcx = (screenX * 2 - viewport.width()) / viewport.width();
+    float ndcy = (screenY * 2 - viewport.height()) / viewport.height();
+    const V4 pos = MatrixUtil::mul(MatrixUtil::inverse(vp), V4(ndcx, _coordinate_system == Ark::COORDINATE_SYSTEM_LHS ? -ndcy : ndcy, 1.0f, 1.0f));
     return V3(pos.x() / pos.w(), pos.y() / pos.w(), pos.z() / pos.w());
 }
 

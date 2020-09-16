@@ -41,9 +41,9 @@ Transform::Snapshot Transform::snapshot() const
     return Snapshot(*this);
 }
 
-bool Transform::update(uint64_t timestamp) const
+bool Transform::update(uint64_t timestamp)
 {
-    return VariableUtil::update(timestamp, _rotation, _scale, _pivot);
+    return VariableUtil::update(timestamp, _rotation, _scale, _pivot) || _timestamp.update(timestamp);
 }
 
 const sp<Rotation>& Transform::rotation()
@@ -82,6 +82,7 @@ void Transform::setPivot(const sp<Vec3>& pivot)
 void Transform::updateDelegate()
 {
     _delegate = makeDelegate();
+    _timestamp.setDirty();
 }
 
 sp<Transform::Delegate> Transform::makeDelegate() const
