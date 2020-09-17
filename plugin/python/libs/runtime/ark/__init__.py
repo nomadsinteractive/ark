@@ -596,8 +596,12 @@ class Vec3(Vec2):
     def xyz(self):
         return None
 
-    def cross(self, other):
-        return None
+    @xyz.setter
+    def xyz(self, v):
+        pass
+
+    def cross(self, other) -> 'Vec3':
+        pass
 
 
 class Vec4(Vec3):
@@ -1454,35 +1458,20 @@ class Collider:
 
 class Command:
 
-    @property
-    def active(self) -> bool:
-        return False
-
-    def execute(self):
-        pass
-
-    def terminate(self):
-        pass
-
-
-class State:
-    STATE_FLAG_AUTO_DEACTIVATE = 1
-    STATE_FLAG_DEFAULT = 0
-
-    def __init__(self, on_active: Union[Callable, None] = None, on_deactive: Union[Callable, None] = None, flag: int = STATE_FLAG_DEFAULT):
-        pass
-
-    @property
-    def active(self) -> bool:
-        return False
-
     def activate(self):
         pass
 
     def deactivate(self):
         pass
 
-    def link_command(self, command: Command, on_active: Union[Callable, None] = None, on_deactive: Union[Callable, None] = None):
+
+class State:
+
+    @property
+    def active(self) -> bool:
+        return False
+
+    def link_command(self, command: Command):
         pass
 
 
@@ -1490,16 +1479,16 @@ class StateMachine:
     def __init__(self):
         pass
 
-    def add_command(self, on_active: Union[Callable, None] = None, on_deactive: Union[Callable, None] = None, category: int = 0) -> Command:
-        return Command()
-
-    def add_state(self, on_active: Union[Callable, None] = None, on_deactive: Union[Callable, None] = None, flag: int = 0) -> State:
-        return State()
-
-    def activate(self, state: State):
+    def add_command(self, on_active: Union[Callable, None] = None, category: int = 0) -> Command:
         pass
 
-    def deactivate(self, state: State):
+    def add_state(self, on_active: Union[Callable, None] = None, fallback_state: Union[State, None] = None) -> State:
+        pass
+
+    def start(self, entry: State):
+        pass
+
+    def transit(self, next_state: State):
         pass
 
 

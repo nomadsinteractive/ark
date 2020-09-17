@@ -5,6 +5,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/inf/runnable.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -19,20 +20,15 @@ public:
     };
 
 public:
-    Command(StateMachine& stateMachine, uint32_t id, const sp<Runnable>& onActive, uint32_t category);
-
-    uint32_t id() const;
-
-//  [[script::bindings::property]]
-    bool active() const;
+    Command(StateMachine& stateMachine, const sp<Runnable>& onActive, uint32_t mask);
 
 //  [[script::bindings::auto]]
-    void execute();
+    void activate();
 //  [[script::bindings::auto]]
-    void terminate();
+    void deactivate();
 
 //  [[script::bindings::property]]
-    uint32_t category() const;
+    uint32_t mask() const;
 
     bool conflicts(const Command& other) const;
 
@@ -41,11 +37,11 @@ public:
 
 private:
     StateMachine& _state_machine;
-    uint32_t _id;
     sp<Runnable> _on_active;
-    uint32_t _category;
+    uint32_t _mask;
 
     State _state;
+
 };
 
 }

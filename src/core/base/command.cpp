@@ -5,39 +5,29 @@
 
 namespace ark {
 
-Command::Command(StateMachine& stateMachine, uint32_t id, const sp<Runnable>& onActive, uint32_t category)
-    : _state_machine(stateMachine), _id(id), _on_active(onActive), _category(category), _state(STATE_DEACTIVATED)
+Command::Command(StateMachine& stateMachine, const sp<Runnable>& onActive, uint32_t mask)
+    : _state_machine(stateMachine), _on_active(onActive), _mask(mask), _state(STATE_DEACTIVATED)
 {
 }
 
-uint32_t Command::id() const
+void Command::activate()
 {
-    return _id;
+    _state_machine.activateCommand(*this);
 }
 
-bool Command::active() const
+void Command::deactivate()
 {
-    return _state != STATE_DEACTIVATED;
+    _state_machine.deactivateCommand(*this);
 }
 
-void Command::execute()
+uint32_t Command::mask() const
 {
-    setState(STATE_ACTIVATED);
-}
-
-void Command::terminate()
-{
-    _state = STATE_DEACTIVATED;
-}
-
-uint32_t Command::category() const
-{
-    return _category;
+    return _mask;
 }
 
 bool Command::conflicts(const Command& other) const
 {
-    return (_category & other._category) != 0;
+    return (_mask & other._mask) != 0;
 }
 
 Command::State Command::state() const

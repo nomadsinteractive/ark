@@ -51,8 +51,10 @@ bool EventDispatcher::onEvent(const Event& event)
     {
         const auto iter = _key_events.find(event.code());
         if(iter != _key_events.end() && !iter->second.empty())
+        {
             iter->second.top().onEvent(*this, event);
-        return true;
+            return true;
+        }
     }
     else if(action == Event::ACTION_DOWN || action == Event::ACTION_UP || action == Event::ACTION_MOVE || action == Event::ACTION_CANCEL)
     {

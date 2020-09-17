@@ -16,17 +16,27 @@ public:
     StateMachine();
 
 //  [[script::bindings::auto]]
-    sp<Command> addCommand(const sp<Runnable>& onActive = nullptr, uint32_t category = 0);
+    sp<Command> addCommand(const sp<Runnable>& onActive = nullptr, uint32_t mask = 0);
 
 //  [[script::bindings::auto]]
-    sp<State> addState(const sp<Runnable>& onActivate = nullptr, int32_t flag = 0);
+    sp<State> addState(const sp<Runnable>& onActivate = nullptr, const sp<State>& fallback = nullptr);
 
-    const std::vector<State>& states() const;
+//  [[script::bindings::auto]]
+    void start(State& entry);
+
+//  [[script::bindings::auto]]
+    void transit(State& next);
+
+    void activateCommand(Command& command);
+    void deactivateCommand(Command& command);
+
+    const std::vector<sp<State>>& states() const;
 
 private:
-    uint32_t _command_id_base;
+    std::vector<sp<State>> _states;
+    std::vector<sp<Command>> _commands;
 
-    std::vector<State> _states;
+    State* _active_state;
 
     friend class Command;
     friend class State;
