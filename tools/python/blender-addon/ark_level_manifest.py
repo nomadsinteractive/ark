@@ -1,11 +1,11 @@
 from typing import Union
 
-import bpy
-from bpy_extras.io_utils import ExportHelper
-from bpy.props import StringProperty, BoolProperty, EnumProperty
+from bpy.props import StringProperty, EnumProperty
 from bpy.types import Operator
 from mathutils import Quaternion, Vector
 
+import bpy
+from bpy_extras.io_utils import ExportHelper
 
 bl_info = {
     "name": "Ark Level Manifest",
@@ -54,12 +54,12 @@ class XmlWriter:
 
 
 class ArkScene:
-    def __init__(self, layer_collection):
+    def __init__(self, layer_collection, named_layers):
         self._collections = bpy.data.collections
         instance_collections = set(filter(None, (i.instance_collection for i in bpy.data.objects)))
         self._libraries = [ArkInstanceCollection(i, j) for i, j in enumerate(instance_collections)]
         collections_not_excluded = [i.collection for i in layer_collection.children if not i.exclude]
-        self._layers = [ArkLayer(self, i) for i in collections_not_excluded if not i.library]
+        self._layers = [ArkLayer(self, i, i in named_layers) for i in collections_not_excluded if not i.library]
 
     def find_library(self, collection):
         for i in self._libraries:
@@ -102,9 +102,9 @@ class ArkInstanceCollection:
 
 
 class ArkLayer:
-    def __init__(self, scene: ArkScene, collection):
+    def __init__(self, scene: ArkScene, collection, export_names):
         self._name = collection.name
-        self._render_objects = [ArkRenderObject(scene, i) for i in collection.objects]
+        self._render_objects = [ArkRenderObject(scene, i, export_names) for i in collection.objects]
 
     def to_json(self, indent):
         lines = [i.to_json(indent) for i in self._render_objects]
@@ -121,8 +121,9 @@ class ArkLayer:
 
 
 class ArkRenderObject:
-    def __init__(self, scene: ArkScene, obj):
+    def __init__(self, scene: ArkScene, obj, export_names: bool):
         self._object = obj
+        self._export_names = export_names
         self._class = obj.type if obj.type != 'EMPTY' else None
         self._position = obj.location
         self._scale = obj.scale
@@ -148,8 +149,9 @@ class ArkRenderObject:
     def write(self, writer):
         writer.begin_element('render-object')
 
-        if self._class:
+        if self._class or self._export_names:
             writer.write_property('name', self._object.name)
+        if self._class:
             writer.write_property('class', self._class)
             if self._object.type == 'CAMERA':
                 writer.write_property('fov', self._object.data.angle)
@@ -166,11 +168,18 @@ class ArkRenderObject:
         return writer.to_str()
 
 
-def generate_level_manifest(context, filepath, opt_name):
-
+def get_root_layer_collection():
     view_layers = sum([i.view_layers.values() for i in bpy.data.scenes], [])
-    if view_layers:
-        scene = ArkScene(view_layers[0].layer_collection)
+    return view_layers[0].layer_collection if view_layers else None
+
+
+def generate_level_manifest(self, filepath, opt_name):
+
+    root_layer_collection = get_root_layer_collection()
+    if root_layer_collection:
+        collections_not_excluded = [i.collection for i in root_layer_collection.children if not i.exclude]
+        name_layers = set(i for i in collections_not_excluded if i.name in self.properties.named_layers)
+        scene = ArkScene(root_layer_collection, name_layers)
 
         content = scene.to_xml(0) if opt_name == 'OPT_XML' else scene.to_json(0)
         with open(filepath, 'wt', encoding='utf-8') as fp:
@@ -181,6 +190,27 @@ def generate_level_manifest(context, filepath, opt_name):
 
 def on_file_selector_data_format_update(self, context):
     ArkLevelManifestExporter.filename_ext = '.' + self.data_format.split('_')[-1].lower()
+
+
+def make_layer_item_callback():
+
+    # https://docs.blender.org/api/blender_python_api_master/bpy.props.html#bpy.props.EnumProperty
+    # Warning: There is a known bug with using a callback, Python must keep a reference to the strings returned or Blender will misbehave or even crash.
+
+    item_names = []
+
+    def get_items(self, context):
+        root_layer_collection = get_root_layer_collection()
+        collections_not_excluded = [i.collection for i in root_layer_collection.children if not i.exclude]
+        names = [i.name for i in collections_not_excluded]
+
+        if len(item_names) != len(names) or any(i != j for i, j in zip(names, item_names)):
+            item_names.clear()
+            item_names.extend(names)
+
+        return tuple((i, i, '') for i in item_names)
+
+    return get_items
 
 
 class ArkLevelManifestExporter(Operator, ExportHelper):
@@ -201,22 +231,45 @@ class ArkLevelManifestExporter(Operator, ExportHelper):
         update=on_file_selector_data_format_update
     )
 
+    named_layers: EnumProperty(
+        name="Named Layers",
+        options={'ENUM_FLAG'},
+        items=make_layer_item_callback(),
+        description="Select the layers which will export their children's names"
+    )
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+
+        layout.column().prop(self, "data_format")
+        layout.column().prop(self, "named_layers")
+
     def execute(self, context):
-        return generate_level_manifest(context, self.filepath, self.data_format)
+        return generate_level_manifest(self, self.filepath, self.data_format)
 
 
 def menu_func_export_button(self, context):
     self.layout.operator(ArkLevelManifestExporter.bl_idname, text="Ark Level Manifest")
 
 
+classes = (
+    ArkLevelManifestExporter,
+)
+
+
 def register():
-    bpy.utils.register_class(ArkLevelManifestExporter)
+    for i in classes:
+        bpy.utils.register_class(i)
+
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export_button)
 
 
 def unregister():
-    bpy.utils.unregister_class(ArkLevelManifestExporter)
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export_button)
+
+    for i in classes:
+        bpy.utils.unregister_class(i)
 
 
 if __name__ == "__main__":
