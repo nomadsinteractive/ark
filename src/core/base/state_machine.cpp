@@ -9,9 +9,9 @@ StateMachine::StateMachine()
 {
 }
 
-sp<Command> StateMachine::addCommand(const sp<Runnable>& onActive, uint32_t mask)
+sp<Command> StateMachine::addCommand(const sp<Runnable>& onActive, const sp<CommandGroup>& commandGroup)
 {
-    sp<Command> cmd = sp<Command>::make(*this, onActive, mask);
+    sp<Command> cmd = sp<Command>::make(*this, onActive, commandGroup);
     _commands.push_back(cmd);
     return cmd;
 }

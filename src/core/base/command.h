@@ -1,11 +1,8 @@
 #ifndef ARK_CORE_BASE_COMMAND_H_
 #define ARK_CORE_BASE_COMMAND_H_
 
-#include <set>
-
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/inf/runnable.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -19,8 +16,19 @@ public:
         STATE_COUNT
     };
 
+    class StateHolder {
+    public:
+        StateHolder(State state);
+
+        State state() const;
+        void setState(State state);
+
+    private:
+        State _state;
+    };
+
 public:
-    Command(StateMachine& stateMachine, const sp<Runnable>& onActive, uint32_t mask);
+    Command(StateMachine& stateMachine, sp<Runnable> onActivate, sp<CommandGroup> commandGroup);
 
 //  [[script::bindings::auto]]
     void activate();
@@ -37,10 +45,10 @@ public:
 
 private:
     StateMachine& _state_machine;
-    sp<Runnable> _on_active;
-    uint32_t _mask;
+    sp<Runnable> _on_activate;
+    sp<CommandGroup> _command_group;
 
-    State _state;
+    sp<StateHolder> _state_holder;
 
 };
 

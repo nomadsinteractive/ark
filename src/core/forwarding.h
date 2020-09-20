@@ -42,6 +42,7 @@ class Class;
 class ClassHierarychyManager;
 class Clock;
 class Command;
+class CommandGroup;
 class DOMDocument;
 class DOMAttribute;
 class DOMElement;
