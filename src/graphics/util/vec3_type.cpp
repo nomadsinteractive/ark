@@ -277,6 +277,12 @@ sp<Vec3> Vec3Type::integral(const sp<Vec3>& self, const sp<Numeric>& t)
     return sp<Integral<V3>>::make(self, std::move(duration));
 }
 
+sp<Numeric> Vec3Type::distanceTo(const sp<Vec3>& self, const sp<Vec3>& other)
+{
+    sp<Vec3> delta = sub(self, other);
+    return Math::sqrt(Math::dot(delta, delta));
+}
+
 sp<Vec3Impl> Vec3Type::ensureImpl(const sp<Vec3>& self)
 {
     const sp<Vec3Impl> impl = self.as<Vec3Impl>();

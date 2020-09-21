@@ -7,8 +7,10 @@
 namespace ark {
 
 Command::Command(StateMachine& stateMachine, sp<Runnable> onActivate, sp<CommandGroup> commandGroup)
-    : _state_machine(stateMachine), _on_activate(std::move(onActivate)), _command_group(std::move(commandGroup)), _state_holder(_command_group ? _command_group->stateHolder() : sp<StateHolder>::make(STATE_DEACTIVATED))
+    : _state_machine(stateMachine), _command_group(std::move(commandGroup)), _state_holder(sp<StateHolder>::make(std::move(onActivate), nullptr))
 {
+    if(_command_group)
+        _command_group->_commands.push_back(this);
 }
 
 void Command::activate()
@@ -39,12 +41,17 @@ Command::State Command::state() const
 void Command::setState(Command::State state)
 {
     _state_holder->setState(state);
-    if(state == STATE_ACTIVATED && _on_activate)
-        _on_activate->run();
+    if(state == STATE_ACTIVATED && _command_group->stateHolder()->state() != state)
+        _command_group->activate();
 }
 
-Command::StateHolder::StateHolder(Command::State state)
-    : _state(state)
+const sp<CommandGroup>& Command::commandGroup() const
+{
+    return _command_group;
+}
+
+Command::StateHolder::StateHolder(sp<Runnable> onActivate, sp<Runnable> onDeactivate)
+    : _state(STATE_DEACTIVATED), _on_activate(std::move(onActivate)), _on_deactivate(std::move(onDeactivate))
 {
 }
 
@@ -55,7 +62,23 @@ Command::State Command::StateHolder::state() const
 
 void Command::StateHolder::setState(Command::State state)
 {
-    _state = state;
+    if(_state != state)
+    {
+        _state = state;
+        switch(_state)
+        {
+            case STATE_ACTIVATED:
+                if(_on_activate)
+                    _on_activate->run();
+            break;
+            case STATE_DEACTIVATED:
+                if(_on_deactivate)
+                    _on_deactivate->run();
+            break;
+            default:
+            break;
+        }
+    }
 }
 
 }

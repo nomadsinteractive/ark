@@ -18,13 +18,16 @@ public:
 
     class StateHolder {
     public:
-        StateHolder(State state);
+        StateHolder(sp<Runnable> onActivate, sp<Runnable> onDeactivate);
 
         State state() const;
         void setState(State state);
 
     private:
         State _state;
+
+        sp<Runnable> _on_activate;
+        sp<Runnable> _on_deactivate;
     };
 
 public:
@@ -43,9 +46,10 @@ public:
     State state() const;
     void setState(State state);
 
+    const sp<CommandGroup>& commandGroup() const;
+
 private:
     StateMachine& _state_machine;
-    sp<Runnable> _on_activate;
     sp<CommandGroup> _command_group;
 
     sp<StateHolder> _state_holder;

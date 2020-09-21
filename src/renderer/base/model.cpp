@@ -60,10 +60,10 @@ void Model::setAnimateMakers(Table<String, sp<AnimateMaker>> animates)
     _animate_makers = std::move(animates);
 }
 
-sp<Flatable> Model::makeAnimate(const String& name, const sp<Numeric>& duration) const
+sp<Flatable> Model::makeAnimate(const String& name, const sp<Numeric>& t) const
 {
     DCHECK(_animate_makers.has(name), "Model has no animate(%s) defined", name.c_str());
-    return _animate_makers.at(name)->makeAnimate(duration);
+    return _animate_makers.at(name)->makeAnimate(t);
 }
 
 const std::vector<String>& Model::animates() const

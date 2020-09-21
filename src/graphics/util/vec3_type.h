@@ -88,6 +88,9 @@ public:
 //[[script::bindings::classmethod]]
     static sp<Vec3> integral(const sp<Vec3>& self, const sp<Numeric>& t = nullptr);
 
+//[[script::bindings::classmethod]]
+    static sp<Numeric> distanceTo(const sp<Vec3>& self, const sp<Vec3>& other);
+
 private:
     static sp<Vec3Impl> ensureImpl(const sp<Vec3>& self);
 

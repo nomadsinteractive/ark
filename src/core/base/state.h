@@ -26,6 +26,8 @@ public:
 
 //  [[script::bindings::auto]]
     void linkCommand(Command& command);
+//  [[script::bindings::auto]]
+    void linkCommandGroup(CommandGroup& commandGroup);
 
     int32_t resolveConflicts(const Command& command, Command::State state, Command::State toState) const;
 

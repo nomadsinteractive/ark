@@ -1,6 +1,7 @@
 #include "core/base/state_machine.h"
 
 #include "core/base/command.h"
+#include "core/base/command_group.h"
 #include "core/base/state.h"
 
 namespace ark {
@@ -48,6 +49,8 @@ void StateMachine::deactivateCommand(Command& command)
 {
     DCHECK(command.state() != Command::STATE_DEACTIVATED, "Illegal state, Command has been terminated already");
     command.setState(Command::STATE_DEACTIVATED);
+    if(command.commandGroup() && command.commandGroup()->resolveConflicts(command, Command::STATE_SUPPRESSED, Command::STATE_ACTIVATED) == 0)
+        command.commandGroup()->deactivate();
     if(_active_state->resolveConflicts(command, Command::STATE_SUPPRESSED, Command::STATE_ACTIVATED) == 0 && _active_state->_fallback)
         transit(*_active_state->_fallback);
 }

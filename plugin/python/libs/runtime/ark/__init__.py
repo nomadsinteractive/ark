@@ -521,11 +521,10 @@ class Vec2:
         pass
 
     @property
-    def delegate(self) -> 'Vec2':
+    def delegate(self):
         return self
 
-    @delegate.setter
-    def delegate(self, delegate: 'Vec2'):
+    def set(self, val):
         pass
 
     def transform(self, transform):
@@ -553,6 +552,9 @@ class Vec2:
         pass
 
     def normalize(self):
+        pass
+
+    def distance_to(self, other) -> Numeric:
         pass
 
     def __add__(self, other):
@@ -987,7 +989,7 @@ class Event:
 
 
 class Rotation:
-    def __init__(self, theta: Union[float, Numeric], axis: Optional[Vec3] = None):
+    def __init__(self, theta: Union[float, Numeric], axis: Optional[Vec3, tuple] = None):
         self._theta = theta
         self._axis = axis
 
@@ -999,7 +1001,7 @@ class Rotation:
     def axis(self) -> Vec3:
         return self._axis
 
-    def set_rotation(self, theta: Union[float, Numeric], axis: Optional[Vec3]):
+    def set_rotation(self, theta: Union[float, Numeric], axis: Optional[Vec3, tuple]):
         pass
 
     def set_euler(self, pitch: Union[float, Numeric], yaw: Union[float, Numeric], roll: Union[float, Numeric]):
@@ -1465,6 +1467,15 @@ class Command:
         pass
 
 
+class CommandGroup:
+    def __init__(self, mask: int, on_activate: Optional[Callable] = None, on_deactivate: Optional[Callable] = None):
+        self._mask = 0
+
+    @property
+    def mask(self):
+        return self._mask
+
+
 class State:
 
     @property
@@ -1474,15 +1485,18 @@ class State:
     def link_command(self, command: Command):
         pass
 
+    def link_command_group(self, command_group: CommandGroup):
+        pass
+
 
 class StateMachine:
     def __init__(self):
         pass
 
-    def add_command(self, on_active: Union[Callable, None] = None, category: int = 0) -> Command:
+    def add_command(self, on_active: Optional[Callable] = None, category: CommandGroup = None) -> Command:
         pass
 
-    def add_state(self, on_active: Union[Callable, None] = None, fallback_state: Union[State, None] = None) -> State:
+    def add_state(self, on_active: Optional[Callable] = None, fallback_state: Optional[State] = None) -> State:
         pass
 
     def start(self, entry: State):

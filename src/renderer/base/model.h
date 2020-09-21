@@ -37,7 +37,7 @@ public:
 //[[script::bindings::property]]
     const std::vector<String>& animates() const;
 //[[script::bindings::auto]]
-    sp<Flatable> makeAnimate(const String& name, const sp<Numeric>& duration) const;
+    sp<Flatable> makeAnimate(const String& name, const sp<Numeric>& t) const;
 
     const Table<String, sp<AnimateMaker>>& animateMakers() const;
     void setAnimateMakers(Table<String, sp<AnimateMaker>> animateMakers);

@@ -11,19 +11,27 @@ namespace ark {
 class ARK_API CommandGroup {
 public:
 //  [[script::bindings::auto]]
-    CommandGroup(const sp<Runnable>& onActivate, const sp<Runnable>& onDeactivate, uint32_t mask);
+    CommandGroup(uint32_t mask, const sp<Runnable>& onActivate = nullptr, const sp<Runnable>& onDeactivate = nullptr);
 
 //  [[script::bindings::property]]
     uint32_t mask() const;
     
+    void activate();
+    void deactivate();
+
+    int32_t resolveConflicts(const Command& command, Command::State state, Command::State toState) const;
+
     const sp<Command::StateHolder>& stateHolder() const;
 
 private:
-    sp<Runnable> _on_activate;
-    sp<Runnable> _on_deactivate;
     uint32_t _mask;
     
     sp<Command::StateHolder> _state_holder;
+
+    std::vector<Command*> _commands;
+
+    friend class Command;
+    friend class State;
 };
 
 }
