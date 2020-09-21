@@ -10,7 +10,7 @@ Use it for:
 
 """
 
-from typing import Callable, List, Type, TypeVar, Union, Optional
+from typing import Callable, List, Type, TypeVar, Union, Optional, Dict
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'Numeric', 'Layer', 'Vec2', 'Vec3',
                            'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotate', 'Size', 'StringBundle', 'Tilemap', 'TilemapImporter', 'Tileset',
@@ -661,15 +661,25 @@ class Mat4:
         pass
 
 
-class Animate:
-    def __init__(self, delegate: 'Animate'):
+class Input:
+    def __init__(self, delegate: 'Input'):
         pass
 
     @property
     def size(self):
         return 0
 
-    def set(self, delegate: 'Animate'):
+    def set(self, delegate: 'Input'):
+        pass
+
+
+class Animation:
+
+    @property
+    def duration(self) -> float:
+        return 0
+
+    def make_transforms(self, t: Numeric) -> Input:
         pass
 
 
@@ -684,10 +694,10 @@ class Model:
         return 0
 
     @property
-    def animates(self) -> List[str]:
-        return []
+    def animations(self) -> Dict[str, Animation]:
+        return {}
 
-    def make_animate(self, name: str, duration: Numeric) -> Animate:
+    def get_animation(self, name: str) -> Animation:
         pass
 
 

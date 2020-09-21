@@ -44,7 +44,7 @@ public:
 
     void addAttribute(const String& name, const String& type);
     void addSnippet(const sp<Snippet>& snippet);
-    void addUniform(const String& name, Uniform::Type type, uint32_t length, const sp<Flatable>& flatable, int32_t binding);
+    void addUniform(const String& name, Uniform::Type type, uint32_t length, const sp<Input>& flatable, int32_t binding);
     void addUniform(const sp<Uniform>& uniform);
 
     void addInputAttribute(const String& name, const String& type);

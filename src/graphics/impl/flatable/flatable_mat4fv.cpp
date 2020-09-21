@@ -10,11 +10,11 @@ namespace ark {
 
 namespace {
 
-class FlatableMat4fvFlatableArray : public Flatable {
+class FlatableMat4fvFlatableArray : public Input {
 public:
-    FlatableMat4fvFlatableArray(sp<Array<sp<Flatable>>> flatables)
+    FlatableMat4fvFlatableArray(sp<Array<sp<Input>>> flatables)
         : _flatables(std::move(flatables)), _size(0) {
-        for(const sp<Flatable>& i : * _flatables) {
+        for(const sp<Input>& i : * _flatables) {
             uint32_t s = i->size();
             DASSERT((s % 64) == 0);
             _size += s;
@@ -23,7 +23,7 @@ public:
 
     virtual bool update(uint64_t timestamp) override {
         bool dirty = false;
-        for(const sp<Flatable>& i : * _flatables)
+        for(const sp<Input>& i : * _flatables)
             dirty = i->update(timestamp) || dirty;
         return dirty;
     }
@@ -31,7 +31,7 @@ public:
     virtual void flat(void* buf) override {
         uint32_t offset = 0;
         uint8_t* ptr = reinterpret_cast<uint8_t*>(buf);
-        for(const sp<Flatable>& i : * _flatables) {
+        for(const sp<Input>& i : * _flatables) {
             uint32_t s = i->size();
             i->flat(ptr + offset);
             offset += s;
@@ -43,7 +43,7 @@ public:
     }
 
 private:
-    sp<Array<sp<Flatable>>> _flatables;
+    sp<Array<sp<Input>>> _flatables;
     uint32_t _size;
 };
 
@@ -80,7 +80,7 @@ FlatableMat4fv::BUILDER::BUILDER(BeanFactory& factory, const String& value)
 {
 }
 
-sp<Flatable> FlatableMat4fv::BUILDER::build(const Scope& args)
+sp<Input> FlatableMat4fv::BUILDER::build(const Scope& args)
 {
     if(_id.isArg())
     {
@@ -88,11 +88,11 @@ sp<Flatable> FlatableMat4fv::BUILDER::build(const Scope& args)
         if(mats)
             return sp<FlatableMat4fv>::make(std::move(mats));
 
-        sp<Flatable> flatable = args.get<Flatable>(_id.arg());
+        sp<Input> flatable = args.get<Input>(_id.arg());
         if(flatable)
             return flatable;
 
-        array<sp<Flatable>> flatables = args.get<Array<sp<Flatable>>>(_id.arg());
+        array<sp<Input>> flatables = args.get<Array<sp<Input>>>(_id.arg());
         if(flatables)
             return sp<FlatableMat4fvFlatableArray>::make(std::move(flatables));
     }

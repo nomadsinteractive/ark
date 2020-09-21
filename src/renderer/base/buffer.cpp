@@ -40,7 +40,7 @@ private:
 
 class UploaderByFlatable : public Uploader {
 public:
-    UploaderByFlatable(sp<Flatable> flatable)
+    UploaderByFlatable(sp<Input> flatable)
         : Uploader(flatable->size()), _flatable(std::move(flatable)) {
 
     }
@@ -52,12 +52,12 @@ public:
     }
 
 private:
-    sp<Flatable> _flatable;
+    sp<Input> _flatable;
 };
 
 class BufferObjectUploader : public Uploader {
 public:
-    BufferObjectUploader(std::vector<sp<Flatable>> vars, size_t stride, size_t length)
+    BufferObjectUploader(std::vector<sp<Input>> vars, size_t stride, size_t length)
         : Uploader(stride * length), _stride(stride), _length(length), _vars(std::move(vars)) {
     }
 
@@ -65,7 +65,7 @@ public:
         std::vector<int8_t> buf(_stride);
         for(size_t i = 0; i < _length; ++i) {
             size_t offset = 0;
-            for(const sp<Flatable>& j : _vars) {
+            for(const sp<Input>& j : _vars) {
                 j->flat(&buf[offset]);
                 offset += j->size();
             }
@@ -74,9 +74,9 @@ public:
     }
 
 private:
-    size_t calcUploaderSize(const std::vector<sp<Flatable>>& vars) const {
+    size_t calcUploaderSize(const std::vector<sp<Input>>& vars) const {
         size_t size = 0;
-        for(const sp<Flatable>& i : vars)
+        for(const sp<Input>& i : vars)
             size += i->size();
         return size;
     }
@@ -84,7 +84,7 @@ private:
 private:
     size_t _stride;
     size_t _length;
-    std::vector<sp<Flatable>> _vars;
+    std::vector<sp<Input>> _vars;
 };
 
 class PreRenderUpdate : public Updatable {
@@ -246,7 +246,7 @@ Buffer::Block::Block(size_t offset, const ByteArray::Borrowed& content)
 }
 
 Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _flatable(factory.getBuilder<Flatable>(manifest, "data")), _length(factory.getBuilder<Integer>(manifest, "length")),
+    : _resource_loader_context(resourceLoaderContext), _flatable(factory.getBuilder<Input>(manifest, "data")), _length(factory.getBuilder<Integer>(manifest, "length")),
       _stride(factory.getBuilder<Integer>(manifest, "stride")), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_DYNAMIC))
 {
     DCHECK(_flatable || _length, "You must specify either \"data\" or \"length\" to define a buffer");
@@ -254,22 +254,22 @@ Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const s
     {
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
-        _vars.push_back(factory.ensureBuilderByTypeValue<Flatable>(type, value));
+        _vars.push_back(factory.ensureBuilderByTypeValue<Input>(type, value));
     }
 }
 
 sp<Buffer> Buffer::BUILDER::build(const Scope& args)
 {
     size_t stride = 0;
-    std::vector<sp<Flatable>> vars;
-    for(const sp<Builder<Flatable>>& i : _vars)
+    std::vector<sp<Input>> vars;
+    for(const sp<Builder<Input>>& i : _vars)
     {
-        sp<Flatable> var = i->build(args);
+        sp<Input> var = i->build(args);
         stride += var->size();
         vars.push_back(std::move(var));
     }
     const sp<RenderController>& renderController = _resource_loader_context->renderController();
-    sp<Flatable> flatable = _flatable ? _flatable->build(args) : nullptr;
+    sp<Input> flatable = _flatable ? _flatable->build(args) : nullptr;
     sp<Uploader> uploader = flatable ? sp<Uploader>::make<UploaderByFlatable>(flatable)
                                      : sp<Uploader>::make<BufferObjectUploader>(std::move(vars), _stride ? static_cast<uint32_t>(_stride->build(args)->val()) : stride, _length->build(args)->val());
     sp<Buffer> buffer = sp<Buffer>::make(renderController->makeBuffer(Buffer::TYPE_STORAGE, _usage, uploader));

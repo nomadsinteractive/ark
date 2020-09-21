@@ -3,24 +3,24 @@
 #include "core/base/observer.h"
 #include "core/epi/notifier.h"
 #include "core/inf/array.h"
-#include "core/inf/flatable.h"
+#include "core/inf/input.h"
 #include "core/inf/variable.h"
 #include "core/util/boolean_util.h"
 #include "core/util/strings.h"
 
 namespace ark {
 
-Uniform::Uniform(const String& name, const String& declaredType, Uniform::Type type, size_t size, uint32_t length, const sp<Flatable>& flatable, int32_t binding)
+Uniform::Uniform(const String& name, const String& declaredType, Uniform::Type type, size_t size, uint32_t length, const sp<Input>& flatable, int32_t binding)
     : _name(name), _declared_type(declaredType), _type(type), _size(size), _length(length), _flatable(flatable), _binding(binding)
 {
 }
 
-Uniform::Uniform(const String& name, const String& type, uint32_t length, const sp<Flatable>& flatable, int32_t binding)
+Uniform::Uniform(const String& name, const String& type, uint32_t length, const sp<Input>& flatable, int32_t binding)
     : Uniform(name, type, toType(type), getTypeSize(toType(type)), length, flatable, binding)
 {
 }
 
-Uniform::Uniform(const String& name, Uniform::Type type, uint32_t length, const sp<Flatable>& flatable, int32_t binding)
+Uniform::Uniform(const String& name, Uniform::Type type, uint32_t length, const sp<Input>& flatable, int32_t binding)
     : Uniform(name, toDeclaredType(type), type, getTypeSize(type), length, flatable, binding)
 {
 }
@@ -123,12 +123,12 @@ const String& Uniform::declaredType() const
     return _declared_type;
 }
 
-const sp<Flatable>& Uniform::flatable() const
+const sp<Input>& Uniform::flatable() const
 {
     return _flatable;
 }
 
-void Uniform::setFlatable(const sp<Flatable>& flatable)
+void Uniform::setFlatable(const sp<Input>& flatable)
 {
     _flatable = flatable;
 }

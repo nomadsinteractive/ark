@@ -16,14 +16,14 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-class PyArrayDuckType : public Duck<Array<sp<Mat3>>>, public Duck<Array<sp<Mat4>>>, public Duck<Array<sp<Flatable>>>,
-        public Implements<PyArrayDuckType, Duck<Array<sp<Mat3>>>, Duck<Array<sp<Mat4>>>, Duck<Array<sp<Flatable>>>> {
+class PyArrayDuckType : public Duck<Array<sp<Mat3>>>, public Duck<Array<sp<Mat4>>>, public Duck<Array<sp<Input>>>,
+        public Implements<PyArrayDuckType, Duck<Array<sp<Mat3>>>, Duck<Array<sp<Mat4>>>, Duck<Array<sp<Input>>>> {
 public:
     PyArrayDuckType(PyInstance inst);
 
     virtual void to(sp<Array<sp<Mat3>>>& inst) override;
     virtual void to(sp<Array<sp<Mat4>>>& inst) override;
-    virtual void to(sp<Array<sp<Flatable>>>& inst) override;
+    virtual void to(sp<Array<sp<Input>>>& inst) override;
 
 private:
     PyInstance _instance;

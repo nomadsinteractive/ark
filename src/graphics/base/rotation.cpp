@@ -84,7 +84,7 @@ void Rotation::setEuler(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const 
 
 template<> ARK_API sp<Rotation> Null::ptr()
 {
-    return sp<Rotation>::make(sp<Numeric>::make<Numeric::Const>(0));
+    return sp<Rotation>::make(sp<Numeric>::make<Numeric::Const>(0.0f));
 }
 
 Rotation::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

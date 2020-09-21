@@ -4,7 +4,7 @@
 
 #include "core/base/string_buffer.h"
 #include "core/epi/notifier.h"
-#include "core/inf/flatable.h"
+#include "core/inf/input.h"
 #include "core/util/strings.h"
 
 #include "renderer/base/pipeline_layout.h"
@@ -18,9 +18,9 @@ namespace ark {
 
 namespace {
 
-class AlignedFlatable : public Flatable {
+class AlignedFlatable : public Input {
 public:
-    AlignedFlatable(const sp<Flatable>& delegate, size_t alignedSize)
+    AlignedFlatable(const sp<Input>& delegate, size_t alignedSize)
         : _delegate(delegate), _aligned_size(alignedSize) {
         DCHECK(_delegate->size() <= _aligned_size, "Alignment is lesser than delegate's size(%d)", _delegate->size());
     }
@@ -38,7 +38,7 @@ public:
     }
 
 private:
-    sp<Flatable> _delegate;
+    sp<Input> _delegate;
 
     size_t _aligned_size;
 };
@@ -183,7 +183,7 @@ void PipelineBuildingContext::addSnippet(const sp<Snippet>& snippet)
     _snippet = _snippet ? sp<Snippet>::make<SnippetLinkedChain>(_snippet, snippet) : snippet;
 }
 
-void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type, uint32_t length, const sp<Flatable>& flatable, int32_t binding)
+void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type, uint32_t length, const sp<Input>& flatable, int32_t binding)
 {
     _uniforms.push_back(name, sp<Uniform>::make(name, type, length, flatable, binding));
 }
@@ -264,7 +264,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
         int32_t binding = Documents::getAttribute<int32_t>(i, Constants::Attributes::BINDING, -1);
-        const sp<Flatable> flatable = factory.ensure<Flatable>(type, value, args);
+        const sp<Input> flatable = factory.ensure<Input>(type, value, args);
         const uint32_t size = flatable->size();
         Uniform::Type uType = Uniform::TYPE_F1;
         switch (size) {
@@ -296,7 +296,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
             else
                 FATAL("Unknow type \"%s\"", type.c_str());
         }
-        addUniform(name, uType, 1, uType == Uniform::TYPE_F3 ? sp<Flatable>::make<AlignedFlatable>(flatable, 16) : flatable, binding);
+        addUniform(name, uType, 1, uType == Uniform::TYPE_F3 ? sp<Input>::make<AlignedFlatable>(flatable, 16) : flatable, binding);
     }
 }
 

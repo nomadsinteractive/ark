@@ -17,7 +17,7 @@
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
-#include "renderer/inf/animate_maker.h"
+#include "renderer/inf/animation.h"
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/pipeline.h"
 #include "renderer/inf/pipeline_factory.h"

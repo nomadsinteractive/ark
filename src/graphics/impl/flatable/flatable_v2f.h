@@ -11,11 +11,11 @@ namespace ark {
 class FlatableV2f {
 public:
 //  [[plugin::builder::by-value("v2f")]]
-    class BUILDER : public Builder<Flatable> {
+    class BUILDER : public Builder<Input> {
     public:
         BUILDER(BeanFactory& factory, const String& value);
 
-        virtual sp<Flatable> build(const Scope& args) override;
+        virtual sp<Input> build(const Scope& args) override;
 
     private:
         sp<Builder<Vec2>> _vec2;

@@ -24,9 +24,9 @@ void PyArrayDuckType::to(sp<Array<sp<Mat4>>>& inst)
     inst = PythonInterpreter::instance()->toSharedPtrArray<Mat4>(_instance.pyObject(), false);
 }
 
-void PyArrayDuckType::to(sp<Array<sp<Flatable>>>& inst)
+void PyArrayDuckType::to(sp<Array<sp<Input>>>& inst)
 {
-    inst = PythonInterpreter::instance()->toSharedPtrArray<Flatable>(_instance.pyObject(), false);
+    inst = PythonInterpreter::instance()->toSharedPtrArray<Input>(_instance.pyObject(), false);
 }
 
 }

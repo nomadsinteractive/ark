@@ -22,7 +22,7 @@
 #include "renderer/inf/uploader.h"
 
 #include "assimp/forwarding.h"
-#include "assimp/impl/animate_maker/animate_maker_assimp_nodes.h"
+#include "assimp/impl/animation/animation_assimp_nodes.h"
 
 namespace ark {
 namespace plugin {
@@ -51,8 +51,8 @@ private:
     Mesh loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, element_index_t vertexBase, NodeTable& boneMapping) const;
     NodeTable loadNodes(const aiNode* node, Model& model) const;
     void loadBones(const aiMesh* mesh, NodeTable& boneMapping, Array<Mesh::BoneInfo>& bones) const;
-    void loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimateMakerAssimpNodes::NodeLoaderCallback& callback) const;
-    void loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, sp<Assimp::Importer> importer, NodeTable nodes, AnimateMakerAssimpNodes::NodeLoaderCallback callback, String name, String alias) const;
+    void loadAnimates(Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimationAssimpNodes::NodeLoaderCallback& callback) const;
+    void loadAnimates(Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, sp<Assimp::Importer> importer, NodeTable nodes, AnimationAssimpNodes::NodeLoaderCallback callback, String name, String alias) const;
 
     bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
     array<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;

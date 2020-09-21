@@ -8,7 +8,7 @@
 #include "core/base/string.h"
 #include "core/inf/array.h"
 #include "core/inf/builder.h"
-#include "core/inf/flatable.h"
+#include "core/inf/input.h"
 #include "core/inf/holder.h"
 #include "core/types/shared_ptr.h"
 
@@ -22,14 +22,14 @@ class ARK_API Varyings : public Holder {
 private:
     class Varying {
     public:
-        Varying(const sp<Flatable>& flatable, int32_t offset = -1);
+        Varying(const sp<Input>& flatable, int32_t offset = -1);
         Varying();
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Varying);
 
         void apply(uint8_t* ptr) const;
 
     private:
-        sp<Flatable> _flatable;
+        sp<Input> _flatable;
         int32_t _offset;
 
         friend class Varyings;
@@ -68,11 +68,11 @@ public:
     private:
         class VaryingBuilder {
         public:
-            VaryingBuilder(const String& name, const sp<Builder<Flatable>>& flatable);
+            VaryingBuilder(const String& name, const sp<Builder<Input>>& flatable);
             DEFAULT_COPY_AND_ASSIGN(VaryingBuilder);
 
             String _name;
-            sp<Builder<Flatable>> _flatable;
+            sp<Builder<Input>> _flatable;
         };
 
     public:
@@ -85,7 +85,7 @@ public:
     };
 
 private:
-    void setVarying(const String& name, sp<Flatable> flatable);
+    void setVarying(const String& name, sp<Input> flatable);
 
 private:
     sp<PipelineInput> _pipeline_input;

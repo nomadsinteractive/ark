@@ -5,7 +5,7 @@
 #include "core/dom/dom_document.h"
 #include "core/epi/notifier.h"
 #include "core/inf/array.h"
-#include "core/inf/flatable.h"
+#include "core/inf/input.h"
 #include "core/util/documents.h"
 
 #include "graphics/base/camera.h"
@@ -89,7 +89,7 @@ void PipelineLayout::initialize(const Camera& camera)
     _input->initialize(_building_context);
 }
 
-void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Flatable>& flatable)
+void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Input>& flatable)
 {
     sp<Uniform> uniform = shaderPreprocessor.getUniformInput(name, Uniform::TYPE_MAT4);
     if(uniform)

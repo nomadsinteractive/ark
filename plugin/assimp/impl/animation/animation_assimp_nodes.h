@@ -1,5 +1,5 @@
-#ifndef ARK_PLUGIN_ASSIMP_IMPL_ANIMATE_MAKER_ANIMATE_MAKER_ASSIMP_NODES_H_
-#define ARK_PLUGIN_ASSIMP_IMPL_ANIMATE_MAKER_ANIMATE_MAKER_ASSIMP_NODES_H_
+#ifndef ARK_PLUGIN_ASSIMP_IMPL_ANIMATE_MAKER_ANIMATION_ASSIMP_NODES_H_
+#define ARK_PLUGIN_ASSIMP_IMPL_ANIMATE_MAKER_ANIMATION_ASSIMP_NODES_H_
 
 #include <unordered_map>
 
@@ -10,12 +10,12 @@
 
 #include "core/base/string.h"
 #include "core/collection/table.h"
-#include "core/inf/flatable.h"
+#include "core/inf/input.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/mat.h"
 
-#include "renderer/inf/animate_maker.h"
+#include "renderer/inf/animation.h"
 
 #include "assimp/base/node_table.h"
 #include "assimp/util/animate_util.h"
@@ -24,18 +24,19 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-class AnimateMakerAssimpNodes : public AnimateMaker {
+class AnimationAssimpNodes : public Animation {
 public:
     typedef std::function<void(Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& globalTransformation)> NodeLoaderCallback;
 
-    AnimateMakerAssimpNodes(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, NodeTable nodes, NodeLoaderCallback callback);
+    AnimationAssimpNodes(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, NodeTable nodes, NodeLoaderCallback callback);
 
-    virtual sp<Flatable> makeAnimate(const sp<Numeric>& duration) override;
+    virtual sp<Input> makeTransforms(const sp<Numeric>& duration) override;
+    virtual float duration() override;
 
 private:
-    class AnimateImpl : public Flatable {
+    class AnimateImpl : public Input {
     public:
-        AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, const aiMatrix4x4& globalTransform, const Table<String, Node>& nodes, NodeLoaderCallback callback);
+        AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, float ticksPerSecond, const aiMatrix4x4& globalTransform, const Table<String, Node>& nodes, NodeLoaderCallback callback);
 
         virtual bool update(uint64_t timestamp) override;
 
@@ -65,10 +66,13 @@ private:
     sp<Assimp::Importer> _importer;
     const aiAnimation* _animation;
     const aiNode* _root_node;
+    float _ticks_per_sec;
+
     aiMatrix4x4 _global_transform;
 
     NodeTable _nodes;
     NodeLoaderCallback _callback;
+
 };
 
 }

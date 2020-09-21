@@ -10,11 +10,11 @@ FlatableNumeric::BUILDER::BUILDER(BeanFactory& factory, const String& value)
 {
 }
 
-sp<Flatable> FlatableNumeric::BUILDER::build(const Scope& args)
+sp<Input> FlatableNumeric::BUILDER::build(const Scope& args)
 {
     const sp<Numeric> numeric = _numeric->build(args);
     const sp<Notifier> notifier = numeric.as<Notifier>();
-    sp<Flatable> flatable = sp<FlatableByVariable<float>>::make(numeric);
+    sp<Input> flatable = sp<FlatableByVariable<float>>::make(numeric);
     if(notifier)
         flatable.absorb<Notifier>(notifier);
     return flatable;

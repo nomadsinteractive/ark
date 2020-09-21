@@ -10,11 +10,11 @@ namespace ark {
 class FlatableUint8 {
 public:
 //  [[plugin::builder::by-value("uint8")]]
-    class BUILDER : public Builder<Flatable> {
+    class BUILDER : public Builder<Input> {
     public:
         BUILDER(BeanFactory& factory, const String& value);
 
-        virtual sp<Flatable> build(const Scope& args) override;
+        virtual sp<Input> build(const Scope& args) override;
 
     private:
         sp<Builder<Integer>> _var;

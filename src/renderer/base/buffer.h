@@ -126,12 +126,12 @@ public:
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
 
-        sp<Builder<Flatable>> _flatable;
+        sp<Builder<Input>> _flatable;
         sp<Builder<Integer>> _length;
         SafePtr<Builder<Integer>> _stride;
         Usage _usage;
 
-        std::vector<sp<Builder<Flatable>>> _vars;
+        std::vector<sp<Builder<Input>>> _vars;
     };
 
 private:

@@ -3,7 +3,7 @@
 #include "core/ark.h"
 #include "core/base/allocator.h"
 #include "core/base/bean_factory.h"
-#include "core/inf/flatable.h"
+#include "core/inf/input.h"
 #include "core/inf/variable.h"
 #include "core/impl/flatable/flatable_by_variable.h"
 #include "core/util/holder_util.h"
@@ -37,7 +37,7 @@ bool Varyings::update(uint64_t timestamp) const
     return dirty;
 }
 
-void Varyings::setVarying(const String& name, sp<Flatable> flatable)
+void Varyings::setVarying(const String& name, sp<Input> flatable)
 {
     auto iter = _varyings.find(name);
     if(iter == _varyings.end())
@@ -54,22 +54,22 @@ void Varyings::setVarying(const String& name, sp<Flatable> flatable)
 
 void Varyings::set(const String& name, const sp<Numeric>& var)
 {
-    setVarying(name, sp<Flatable>::make<FlatableByVariable<float>>(var));
+    setVarying(name, sp<Input>::make<FlatableByVariable<float>>(var));
 }
 
 void Varyings::set(const String& name, const sp<Vec2>& var)
 {
-    setVarying(name, sp<Flatable>::make<FlatableByVariable<V2>>(var));
+    setVarying(name, sp<Input>::make<FlatableByVariable<V2>>(var));
 }
 
 void Varyings::set(const String& name, const sp<Vec3>& var)
 {
-    setVarying(name, sp<Flatable>::make<FlatableByVariable<V3>>(var));
+    setVarying(name, sp<Input>::make<FlatableByVariable<V3>>(var));
 }
 
 void Varyings::set(const String& name, const sp<Vec4>& var)
 {
-    setVarying(name, sp<Flatable>::make<FlatableByVariable<V4>>(var));
+    setVarying(name, sp<Input>::make<FlatableByVariable<V4>>(var));
 }
 
 Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Allocator& allocator)
@@ -101,7 +101,7 @@ Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
         const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
         const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
-        _varying_builders.emplace_back(name, factory.ensureBuilderByTypeValue<Flatable>(type, value));
+        _varying_builders.emplace_back(name, factory.ensureBuilderByTypeValue<Input>(type, value));
     }
 }
 
@@ -121,7 +121,7 @@ template<> ARK_API sp<Varyings> Null::ptr()
     return sp<Varyings>::make();
 }
 
-Varyings::Varying::Varying(const sp<Flatable>& flatable, int32_t offset)
+Varyings::Varying::Varying(const sp<Input>& flatable, int32_t offset)
     : _flatable(flatable), _offset(offset)
 {
 }
@@ -137,7 +137,7 @@ void Varyings::Varying::apply(uint8_t* ptr) const
     _flatable->flat(ptr + _offset);
 }
 
-Varyings::BUILDER::VaryingBuilder::VaryingBuilder(const String& name, const sp<Builder<Flatable>>& flatable)
+Varyings::BUILDER::VaryingBuilder::VaryingBuilder(const String& name, const sp<Builder<Input>>& flatable)
     : _name(name), _flatable(flatable)
 {
 }

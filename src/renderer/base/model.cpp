@@ -3,7 +3,7 @@
 #include "core/inf/variable.h"
 
 #include "renderer/base/mesh.h"
-#include "renderer/inf/animate_maker.h"
+#include "renderer/inf/animation.h"
 #include "renderer/inf/uploader.h"
 #include "renderer/inf/vertices.h"
 
@@ -50,25 +50,20 @@ size_t Model::vertexLength() const
     return _vertices->length();
 }
 
-const Table<String, sp<AnimateMaker>>& Model::animateMakers() const
+const Table<String, sp<Animation>>& Model::animations() const
 {
-    return _animate_makers;
+    return _animations;
 }
 
-void Model::setAnimateMakers(Table<String, sp<AnimateMaker>> animates)
+void Model::setAnimations(Table<String, sp<Animation>> animates)
 {
-    _animate_makers = std::move(animates);
+    _animations = std::move(animates);
 }
 
-sp<Flatable> Model::makeAnimate(const String& name, const sp<Numeric>& t) const
+const sp<Animation>& Model::getAnimation(const String& name) const
 {
-    DCHECK(_animate_makers.has(name), "Model has no animate(%s) defined", name.c_str());
-    return _animate_makers.at(name)->makeAnimate(t);
-}
-
-const std::vector<String>& Model::animates() const
-{
-    return _animate_makers.keys();
+    DCHECK(_animations.has(name), "Model has no animate(%s) defined", name.c_str());
+    return _animations.at(name);
 }
 
 V3 Model::toScale(const V3& renderObjectSize) const

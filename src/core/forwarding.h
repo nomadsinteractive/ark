@@ -49,7 +49,7 @@ class DOMElement;
 class Duration;
 class Executor;
 class Expectation;
-class Flatable;
+class Input;
 class Function;
 class Future;
 class Holder;

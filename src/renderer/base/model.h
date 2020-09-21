@@ -34,13 +34,12 @@ public:
 //[[script::bindings::property]]
     size_t vertexLength() const;
 
-//[[script::bindings::property]]
-    const std::vector<String>& animates() const;
-//[[script::bindings::auto]]
-    sp<Flatable> makeAnimate(const String& name, const sp<Numeric>& t) const;
+//  [[script::bindings::property]]
+    const Table<String, sp<Animation>>& animations() const;
+    void setAnimations(Table<String, sp<Animation>> animations);
 
-    const Table<String, sp<AnimateMaker>>& animateMakers() const;
-    void setAnimateMakers(Table<String, sp<AnimateMaker>> animateMakers);
+//  [[script::bindings::auto]]
+    const sp<Animation>& getAnimation(const String& name) const;
 
     void writeToStream(VertexStream& buf, const V3& size) const;
 
@@ -80,7 +79,7 @@ private:
     sp<Vertices> _vertices;
     sp<Array<Mesh>> _meshes;
 
-    Table<String, sp<AnimateMaker>> _animate_makers;
+    Table<String, sp<Animation>> _animations;
     Metrics _metrics;
 };
 

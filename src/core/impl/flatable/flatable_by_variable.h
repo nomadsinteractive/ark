@@ -1,7 +1,7 @@
 #ifndef ARK_CORE_IMPL_FLATABLE_FLATABLE_BY_VARIABLE_H_
 #define ARK_CORE_IMPL_FLATABLE_FLATABLE_BY_VARIABLE_H_
 
-#include "core/inf/flatable.h"
+#include "core/inf/input.h"
 #include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
@@ -10,7 +10,7 @@
 
 namespace ark {
 
-template<typename T, typename S = T> class FlatableByVariable : public Flatable, public Holder, Implements<FlatableByVariable<T, S>, Flatable, Holder> {
+template<typename T, typename S = T> class FlatableByVariable : public Input, public Holder, Implements<FlatableByVariable<T, S>, Input, Holder> {
 public:
     typedef Variable<S> VarType;
 

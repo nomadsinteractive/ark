@@ -28,7 +28,7 @@
 #include "renderer/inf/render_command_composer.h"
 
 #include "assimp/base/node_table.h"
-#include "assimp/impl/animate_maker/animate_maker_assimp_nodes.h"
+#include "assimp/impl/animation/animation_assimp_nodes.h"
 #include "assimp/impl/io/ark_io_system.h"
 
 
@@ -85,16 +85,16 @@ void ModelImporterAssimp::loadNodeHierarchy(const aiNode* node, NodeTable& nodes
         loadNodeHierarchy(node->mChildren[i], nodes, nodeIds);
 }
 
-void ModelImporterAssimp::loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimateMakerAssimpNodes::NodeLoaderCallback& callback) const
+void ModelImporterAssimp::loadAnimates(Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimationAssimpNodes::NodeLoaderCallback& callback) const
 {
     for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
     {
         const aiAnimation* animation = scene->mAnimations[i];
-        animates.push_back(animation->mName.C_Str(), sp<AnimateMakerAssimpNodes>::make(importer, animation, scene->mRootNode, globalTransformation, nodes, callback));
+        animates.push_back(animation->mName.C_Str(), sp<AnimationAssimpNodes>::make(importer, animation, scene->mRootNode, globalTransformation, nodes, callback));
     }
 }
 
-void ModelImporterAssimp::loadAnimates(Table<String, sp<AnimateMaker>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, sp<Assimp::Importer> importer, NodeTable nodes, AnimateMakerAssimpNodes::NodeLoaderCallback callback, String name, String alias) const
+void ModelImporterAssimp::loadAnimates(Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, sp<Assimp::Importer> importer, NodeTable nodes, AnimationAssimpNodes::NodeLoaderCallback callback, String name, String alias) const
 {
     for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
     {
@@ -106,9 +106,9 @@ void ModelImporterAssimp::loadAnimates(Table<String, sp<AnimateMaker>>& animates
                 if(animates.has(name))
                     name = std::move(alias);
                 else
-                    animates.push_back(std::move(alias), sp<AnimateMakerAssimpNodes>::make(importer, animation, scene->mRootNode, globalTransformation, nodes, callback));
+                    animates.push_back(std::move(alias), sp<AnimationAssimpNodes>::make(importer, animation, scene->mRootNode, globalTransformation, nodes, callback));
             }
-            animates.push_back(std::move(name), sp<AnimateMakerAssimpNodes>::make(std::move(importer), animation, scene->mRootNode, globalTransformation, std::move(nodes), std::move(callback)));
+            animates.push_back(std::move(name), sp<AnimationAssimpNodes>::make(std::move(importer), animation, scene->mRootNode, globalTransformation, std::move(nodes), std::move(callback)));
             break;
         }
     }
@@ -226,8 +226,8 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
     if(hasAnimation)
     {
         bool noBones = bones.nodes().size() == 0;
-        Table<String, sp<AnimateMaker>> animates;
-        AnimateMakerAssimpNodes::NodeLoaderCallback callback = noBones ? callbackNodeAnimation : callbackBoneAnimation;
+        Table<String, sp<Animation>> animates;
+        AnimationAssimpNodes::NodeLoaderCallback callback = noBones ? callbackNodeAnimation : callbackBoneAnimation;
         NodeTable nodes = noBones ? loadNodes(scene->mRootNode, model) : std::move(bones);
         loadAnimates(animates, scene, globalAnimationTransform, importer, nodes, callbackNodeAnimation);
         for(const auto& i : animateManifests)
@@ -243,7 +243,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
                 loadAnimates(animates, animateScene, globalAnimationTransform, importer, nodes, callback);
         }
 
-        model.setAnimateMakers(std::move(animates));
+        model.setAnimations(std::move(animates));
     }
 
     return model;

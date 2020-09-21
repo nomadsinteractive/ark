@@ -38,7 +38,7 @@ ark_link_libraries(assimp)
 
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(base LOCAL_SRC_LIST)
-aux_source_directory(impl/animate_maker LOCAL_SRC_LIST)
+aux_source_directory(impl/animation LOCAL_SRC_LIST)
 aux_source_directory(impl/io LOCAL_SRC_LIST)
 aux_source_directory(impl/model_loader LOCAL_SRC_LIST)
 aux_source_directory(util LOCAL_SRC_LIST)

@@ -32,7 +32,7 @@ public:
 
 private:
     void initialize(const Camera& camera);
-    void tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Flatable>& flatable);
+    void tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Input>& flatable);
 
 private:
     sp<PipelineBuildingContext> _building_context;

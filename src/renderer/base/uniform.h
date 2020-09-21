@@ -35,9 +35,9 @@ public:
         TYPE_COUNT
     };
 
-    Uniform(const String& name, const String& declaredType, Type type, size_t size, uint32_t length, const sp<Flatable>& flatable, int32_t binding = -1);
-    Uniform(const String& name, const String& type, uint32_t length, const sp<Flatable>& flatable, int32_t binding = -1);
-    Uniform(const String& name, Type type, uint32_t length, const sp<Flatable>& flatable, int32_t binding = -1);
+    Uniform(const String& name, const String& declaredType, Type type, size_t size, uint32_t length, const sp<Input>& flatable, int32_t binding = -1);
+    Uniform(const String& name, const String& type, uint32_t length, const sp<Input>& flatable, int32_t binding = -1);
+    Uniform(const String& name, Type type, uint32_t length, const sp<Input>& flatable, int32_t binding = -1);
     DEFAULT_COPY_AND_ASSIGN(Uniform);
 
     const String& name() const;
@@ -52,8 +52,8 @@ public:
 
     const String& declaredType() const;
 
-    const sp<Flatable>& flatable() const;
-    void setFlatable(const sp<Flatable>& flatable);
+    const sp<Input>& flatable() const;
+    void setFlatable(const sp<Input>& flatable);
 
     int32_t binding() const;
     void setBinding(int32_t binding);
@@ -67,7 +67,7 @@ private:
     Type _type;
     size_t _size;
     uint32_t _length;
-    sp<Flatable> _flatable;
+    sp<Input> _flatable;
     int32_t _binding;
 };
 
