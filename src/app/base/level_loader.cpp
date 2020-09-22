@@ -4,9 +4,6 @@
 
 #include "core/ark.h"
 
-#include "core/base/bean_factory.h"
-#include "core/util/documents.h"
-
 #include "graphics/base/render_object.h"
 #include "graphics/base/transform.h"
 #include "graphics/util/vec3_type.h"
@@ -16,15 +13,15 @@
 
 namespace ark {
 
-LevelLoader::LevelLoader(std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights, std::map<String, LevelLoader::InstanceLibrary> instanceLabraries)
-    : _cameras(std::move(cameras)), _lights(std::move(lights)), _instance_libraries(std::move(instanceLabraries))
+LevelLoader::LevelLoader(std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights, std::map<String, RenderObjectLibrary::Instance> renderObjects, std::map<String, RigidBodyLibrary::Instance> rigidBodies)
+    : _cameras(std::move(cameras)), _lights(std::move(lights)), _render_object_libraries(std::move(renderObjects)), _rigid_body_libraries(std::move(rigidBodies))
 {
 }
 
 void LevelLoader::load(const String& src)
 {
     const document manifest = Ark::instance().applicationContext()->applicationResource()->loadDocument(src);
-    std::unordered_map<int32_t, InstanceLibrary> typeMapping;
+    std::unordered_map<int32_t, RenderObjectLibrary::Instance> typeMapping;
 
     for(const document& i : manifest->children("library"))
     {
@@ -32,8 +29,8 @@ void LevelLoader::load(const String& src)
         const int32_t id = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::ID);
         DWARN(typeMapping.find(id) == typeMapping.end(), "Overwriting instance library mapping(%d), originally mapped to type(%d)", id, typeMapping.find(id)->second._type);
 
-        const auto iter = _instance_libraries.find(name);
-        DCHECK(iter != _instance_libraries.end(), "Cannot find instance library(%s)", name.c_str());
+        const auto iter = _render_object_libraries.find(name);
+        DCHECK(iter != _render_object_libraries.end(), "Cannot find instance library(%s)", name.c_str());
         typeMapping[id] = iter->second;
     }
 
@@ -115,15 +112,13 @@ sp<Transform> LevelLoader::makeTransform(const String& rotation, const String& s
 }
 
 LevelLoader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _render_object_libraries(loadNamedTypes<Layer>(factory, manifest, Constants::Attributes::RENDER_OBJECT, Constants::Attributes::LAYER)),
+      _rigid_object_libraries(loadNamedTypes<Collider>(factory, manifest, "rigid-body", "collider"))
 {
     for(const document& i : manifest->children("camera"))
         _cameras.push_back({Documents::ensureAttribute(i, Constants::Attributes::NAME), factory.ensureBuilder<Camera>(i, Constants::Attributes::REF)});
     for(const document& i : manifest->children("light"))
         _lights.push_back({Documents::ensureAttribute(i, Constants::Attributes::NAME), factory.ensureBuilder<Vec3>(i, Constants::Attributes::REF)});
-
-    for(const document& i : manifest->children("library"))
-        _libraries.push_back({Documents::ensureAttribute(i, Constants::Attributes::NAME), Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE),
-                              factory.ensureBuilder<Layer>(i, Constants::Attributes::LAYER)});
 }
 
 sp<LevelLoader> LevelLoader::BUILDER::build(const Scope& args)
@@ -136,11 +131,10 @@ sp<LevelLoader> LevelLoader::BUILDER::build(const Scope& args)
     for(const auto& i : _lights)
         lights[i.first] = i.second->build(args);
 
-    std::map<String, InstanceLibrary> instanceLibraries;
-    for(const Library& i : _libraries)
-        instanceLibraries[i._name] = {i._type, i._layer->build(args)};
+    std::map<String, RenderObjectLibrary::Instance> instanceLibraries = loadNamedTypeInstances<Layer>(_render_object_libraries, args);
+    std::map<String, RigidBodyLibrary::Instance> rigidBodies = loadNamedTypeInstances<Collider>(_rigid_object_libraries, args);
 
-    return sp<LevelLoader>::make(std::move(cameras), std::move(lights), std::move(instanceLibraries));
+    return sp<LevelLoader>::make(std::move(cameras), std::move(lights), std::move(instanceLibraries), std::move(rigidBodies));
 }
 
 }

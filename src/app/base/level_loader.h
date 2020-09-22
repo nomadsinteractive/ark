@@ -5,26 +5,39 @@
 #include <vector>
 
 #include "core/base/api.h"
+#include "core/base/bean_factory.h"
 #include "core/base/string.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
+#include "core/util/documents.h"
 #include "core/util/strings.h"
 
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
 
+#include "app/forwarding.h"
+
 namespace ark {
 
 class ARK_API LevelLoader {
 public:
-    struct InstanceLibrary {
+    template<typename T> struct NamedType {
+        String _name;
         int32_t _type;
-        sp<Layer> _layer;
+        sp<Builder<T>> _builder;
+
+        struct Instance {
+            int32_t _type;
+            sp<T> _layer;
+        };
     };
 
+    typedef NamedType<Layer> RenderObjectLibrary;
+    typedef NamedType<Collider> RigidBodyLibrary;
+
 public:
-    LevelLoader(std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights, std::map<String, InstanceLibrary> instanceLabraries);
+    LevelLoader(std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights, std::map<String, RenderObjectLibrary::Instance> renderObjects, std::map<String, RigidBodyLibrary::Instance> rigidBodies);
 
 //  [[script::bindings::auto]]
     void load(const String& src);
@@ -46,14 +59,24 @@ public:
         virtual sp<LevelLoader> build(const Scope& args) override;
 
     private:
-        struct Library {
-            String _name;
-            int32_t _type;
-            sp<Builder<Layer>> _layer;
-        };
+        template<typename T> std::vector<NamedType<T>> loadNamedTypes(BeanFactory& factory, const document& manifest, const String& name, const String& builderName) const {
+            std::vector<NamedType<T>> namedTypes;
+            for(const document& i : manifest->children(name))
+                namedTypes.push_back({Documents::ensureAttribute(i, Constants::Attributes::NAME), Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE),
+                                      factory.ensureBuilder<T>(i, builderName)});
+            return namedTypes;
+        }
+
+        template<typename T> std::map<String, typename NamedType<T>::Instance> loadNamedTypeInstances(const std::vector<NamedType<T>>& namedTypes, const Scope& args) const {
+            std::map<String, typename NamedType<T>::Instance> instances;
+            for(const NamedType<T>& i : namedTypes)
+                instances[i._name] = {i._type, i._builder->build(args)};
+            return instances;
+        }
 
     private:
-        std::vector<Library> _libraries;
+        std::vector<RenderObjectLibrary> _render_object_libraries;
+        std::vector<RigidBodyLibrary> _rigid_object_libraries;
         std::vector<std::pair<String, sp<Builder<Camera>>>> _cameras;
         std::vector<std::pair<String, sp<Builder<Vec3>>>> _lights;
     };
@@ -74,7 +97,12 @@ private:
     std::map<String, sp<Camera>> _cameras;
     std::map<String, sp<Vec3>> _lights;
     std::map<String, sp<RenderObject>> _render_objects;
-    std::map<String, InstanceLibrary> _instance_libraries;
+
+    std::map<String, sp<RigidBody>> _rigid_objects;
+    std::vector<sp<RigidBody>> _unnamed_rigid_objects;
+
+    std::map<String, RenderObjectLibrary::Instance> _render_object_libraries;
+    std::map<String, RigidBodyLibrary::Instance> _rigid_body_libraries;
 };
 
 }

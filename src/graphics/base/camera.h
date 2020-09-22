@@ -97,6 +97,8 @@ public:
 
 //  [[script::bindings::property]]
     sp<Vec3> position() const;
+//  [[script::bindings::property]]
+    sp<Vec3> target() const;
 
     const sp<Holder>& view() const;
     const sp<Holder>& projection() const;
@@ -117,6 +119,7 @@ private:
     sp<Holder> _vp;
 
     sp<VariableWrapper<V3>> _position;
+    sp<VariableWrapper<V3>> _target;
 };
 
 }
