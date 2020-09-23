@@ -25,6 +25,7 @@ namespace bullet {
 ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
     : _stub(sp<Stub>::make(gravity, std::move(modelLoader)))
 {
+    _stub->_dynamics_world->setInternalTickCallback(myInternalTickCallback);
 }
 
 sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate)
@@ -120,6 +121,34 @@ const std::unordered_map<int32_t, sp<CollisionShape>>& ColliderBullet::collision
 std::unordered_map<int32_t, sp<CollisionShape>>& ColliderBullet::collisionShapes()
 {
     return _stub->_collision_shapes;
+}
+
+void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
+{
+    int32_t numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
+    for(int32_t i = 0; i < numManifolds; ++i)
+    {
+        btPersistentManifold *contactManifold = dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+
+        const RigidBodyBullet objA(getRigidBodyFromCollisionObject(contactManifold->getBody0()));
+        const sp<CollisionCallback>& ccObjA = objA.collisionCallback();
+        const RigidBodyBullet objB(getRigidBodyFromCollisionObject(contactManifold->getBody1()));
+        const sp<CollisionCallback>& ccObjB = objB.collisionCallback();
+
+        int32_t numContacts = contactManifold->getNumContacts();
+        for(int32_t j = 0; j < numContacts; ++j)
+        {
+            btManifoldPoint& pt = contactManifold->getContactPoint(j);
+            const btVector3& ptA = pt.getPositionWorldOnA();
+            const btVector3& ptB = pt.getPositionWorldOnB();
+            const btVector3& normalOnB = pt.m_normalWorldOnB;
+        }
+    }
+}
+
+RigidBodyBullet ColliderBullet::getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject)
+{
+    return RigidBodyBullet(*reinterpret_cast<sp<RigidBody::Stub>*>(collisionObject->getUserPointer()));
 }
 
 ColliderBullet::Stub::Stub(const V3& gravity, sp<ModelLoader> modelLoader)

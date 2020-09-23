@@ -707,7 +707,7 @@ class ModelBundle:
         pass
 
 
-class LevelLoader:
+class Level:
 
     def load(self, src: str):
         pass

@@ -1,5 +1,5 @@
-#ifndef ARK_APP_BASE_LEVEL_LOADER_H_
-#define ARK_APP_BASE_LEVEL_LOADER_H_
+#ifndef ARK_APP_BASE_LEVEL_H_
+#define ARK_APP_BASE_LEVEL_H_
 
 #include <map>
 #include <vector>
@@ -20,7 +20,7 @@
 
 namespace ark {
 
-class ARK_API LevelLoader {
+class ARK_API Level {
 public:
     template<typename T> struct NamedType {
         String _name;
@@ -29,7 +29,7 @@ public:
 
         struct Instance {
             int32_t _type;
-            sp<T> _layer;
+            sp<T> _object;
         };
     };
 
@@ -37,7 +37,7 @@ public:
     typedef NamedType<Collider> RigidBodyLibrary;
 
 public:
-    LevelLoader(std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights, std::map<String, RenderObjectLibrary::Instance> renderObjects, std::map<String, RigidBodyLibrary::Instance> rigidBodies);
+    Level(std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights, std::map<String, RenderObjectLibrary::Instance> renderObjects, std::map<String, RigidBodyLibrary::Instance> rigidBodies);
 
 //  [[script::bindings::auto]]
     void load(const String& src);
@@ -52,11 +52,11 @@ public:
     sp<RenderObject> getRenderObject(const String& name) const;
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<LevelLoader> {
+    class BUILDER : public Builder<Level> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<LevelLoader> build(const Scope& args) override;
+        virtual sp<Level> build(const Scope& args) override;
 
     private:
         template<typename T> std::vector<NamedType<T>> loadNamedTypes(BeanFactory& factory, const document& manifest, const String& name, const String& builderName) const {

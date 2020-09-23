@@ -100,6 +100,9 @@ private:
         float _time_step;
     };
 
+    static void myInternalTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
+    static RigidBodyBullet getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject);
+
 private:
     sp<Stub> _stub;
 };

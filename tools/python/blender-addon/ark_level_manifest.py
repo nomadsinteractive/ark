@@ -98,7 +98,14 @@ class ArkInstanceCollection:
         return self._collection
 
     def to_xml(self, indent):
-        return '%s<library id="%d" name="%s"/>' % (_INDENT_BLOCK * indent, self._id, self._name)
+        obj = self._collection.objects[0] if self._collection.objects else None
+        if obj:
+            bb = obj.bound_box
+            d = Vector(tuple(max(bb[i][j] for i in range(8)) - min(bb[i][j] for i in range(8)) for j in range(3)))
+            dimensions = ', '.join(str(abs(i)) for i in (obj.matrix_world @ d))
+        else:
+            dimensions = '0, 0, 0'
+        return '%s<library id="%d" name="%s" dimensions="(%s)"/>' % (_INDENT_BLOCK * indent, self._id, self._name, dimensions)
 
 
 class ArkLayer:

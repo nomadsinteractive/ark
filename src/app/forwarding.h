@@ -21,7 +21,7 @@ class EventListenerList;
 class Layout;
 class LayoutParam;
 class LayoutHierarchy;
-class LevelLoader;
+class Level;
 class MessageLoopThread;
 class Model;
 class RendererWithState;

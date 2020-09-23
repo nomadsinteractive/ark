@@ -1,4 +1,4 @@
-#include "app/base/level_loader.h"
+#include "app/base/level.h"
 
 #include <unordered_map>
 
@@ -10,28 +10,47 @@
 
 #include "app/base/application_context.h"
 #include "app/base/application_resource.h"
+#include "app/base/rigid_body.h"
+#include "app/inf/collider.h"
+
 
 namespace ark {
 
-LevelLoader::LevelLoader(std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights, std::map<String, RenderObjectLibrary::Instance> renderObjects, std::map<String, RigidBodyLibrary::Instance> rigidBodies)
+namespace {
+
+struct Library {
+    Library(const Level::RenderObjectLibrary::Instance& renderObjectInstance, const Level::RigidBodyLibrary::Instance* rigidBodyInstance, const V3& dimensions)
+        : _render_object_instance(&renderObjectInstance), _rigid_body_instance(rigidBodyInstance), _dimensions(dimensions) {
+    }
+
+    const Level::RenderObjectLibrary::Instance* _render_object_instance;
+    const Level::RigidBodyLibrary::Instance* _rigid_body_instance;
+    V3 _dimensions;
+};
+
+}
+
+Level::Level(std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights, std::map<String, RenderObjectLibrary::Instance> renderObjects, std::map<String, RigidBodyLibrary::Instance> rigidBodies)
     : _cameras(std::move(cameras)), _lights(std::move(lights)), _render_object_libraries(std::move(renderObjects)), _rigid_body_libraries(std::move(rigidBodies))
 {
 }
 
-void LevelLoader::load(const String& src)
+void Level::load(const String& src)
 {
     const document manifest = Ark::instance().applicationContext()->applicationResource()->loadDocument(src);
-    std::unordered_map<int32_t, RenderObjectLibrary::Instance> typeMapping;
+    std::unordered_map<int32_t, Library> libraryMapping;
 
     for(const document& i : manifest->children("library"))
     {
         const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
+        const String& dimensions = Documents::ensureAttribute(i, "dimensions");
         const int32_t id = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::ID);
-        DWARN(typeMapping.find(id) == typeMapping.end(), "Overwriting instance library mapping(%d), originally mapped to type(%d)", id, typeMapping.find(id)->second._type);
+        DWARN(libraryMapping.find(id) == libraryMapping.end(), "Overwriting instance library mapping(%d), originally mapped to type(%d)", id, libraryMapping.find(id)->second._render_object_instance->_type);
 
-        const auto iter = _render_object_libraries.find(name);
-        DCHECK(iter != _render_object_libraries.end(), "Cannot find instance library(%s)", name.c_str());
-        typeMapping[id] = iter->second;
+        const auto it1 = _render_object_libraries.find(name);
+        DCHECK(it1 != _render_object_libraries.end(), "Cannot find instance library(%s)", name.c_str());
+        const auto it2 = _rigid_body_libraries.find(name);
+        libraryMapping.insert(std::make_pair(id, Library(it1->second, it2 == _rigid_body_libraries.end() ? nullptr : &it2->second, parseVector<V3>(dimensions))));
     }
 
     for(const document& i : manifest->children("layer"))
@@ -42,10 +61,11 @@ void LevelLoader::load(const String& src)
             const String clazz = Documents::getAttribute(j, "class");
             if(instanceOf != -1)
             {
-                const auto iter = typeMapping.find(instanceOf);
-                DASSERT(iter != typeMapping.end());
-                int32_t type = iter->second._type;
-                const sp<Layer>& layer = iter->second._layer;
+                const auto it1 = libraryMapping.find(instanceOf);
+                DASSERT(it1 != libraryMapping.end());
+                const Level::RenderObjectLibrary::Instance* instance = it1->second._render_object_instance;
+                int32_t type = instance->_type;
+                const sp<Layer>& layer = instance->_object;
                 String name = Documents::getAttribute(j, "name");
                 const String& position = Documents::ensureAttribute(j, "position");
                 const String& scale = Documents::ensureAttribute(j, "scale");
@@ -53,7 +73,16 @@ void LevelLoader::load(const String& src)
                 sp<Transform> transform = makeTransform(rotation, scale);
                 sp<RenderObject> renderObject = sp<RenderObject>::make(type, sp<Vec3::Const>::make(parseVector<V3>(position)), nullptr, transform);
                 if(name)
+                {
                     _render_objects[name] = renderObject;
+                    const RigidBodyLibrary::Instance* rigidBodyLibray = it1->second._rigid_body_instance;
+                    if(rigidBodyLibray)
+                    {
+                        const V3& dimension = it1->second._dimensions;
+                        _rigid_objects[name] = rigidBodyLibray->_object->createBody(Collider::BODY_TYPE_STATIC, rigidBodyLibray->_type, renderObject->position(), sp<Size>::make(dimension.x(), dimension.y(), dimension.z()), renderObject->transform()->rotation());
+                        _rigid_objects[name]->bind(renderObject);
+                    }
+                }
                 layer->addRenderObject(renderObject);
             }
             else if(clazz == "CAMERA")
@@ -86,32 +115,32 @@ void LevelLoader::load(const String& src)
     }
 }
 
-sp<Camera> LevelLoader::getCamera(const String& name) const
+sp<Camera> Level::getCamera(const String& name) const
 {
     const auto iter = _cameras.find(name);
     return iter != _cameras.end() ? iter->second : nullptr;
 }
 
-sp<Vec3> LevelLoader::getLight(const String& name) const
+sp<Vec3> Level::getLight(const String& name) const
 {
     const auto iter = _lights.find(name);
     return iter != _lights.end() ? iter->second : nullptr;
 }
 
-sp<RenderObject> LevelLoader::getRenderObject(const String& name) const
+sp<RenderObject> Level::getRenderObject(const String& name) const
 {
     const auto iter = _render_objects.find(name);
     return iter != _render_objects.end() ? iter->second : nullptr;
 }
 
-sp<Transform> LevelLoader::makeTransform(const String& rotation, const String& scale) const
+sp<Transform> Level::makeTransform(const String& rotation, const String& scale) const
 {
     const V3 s = scale ? parseVector<V3>(scale) : V3(1.0f);
     const V4 rot = parseVector<V4>(rotation);
     return sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(nullptr, nullptr, sp<Vec4::Const>::make(V4(rot.y(), rot.z(), rot.w(), rot.x()))), sp<Vec3::Const>::make(s));
 }
 
-LevelLoader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+Level::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _render_object_libraries(loadNamedTypes<Layer>(factory, manifest, Constants::Attributes::RENDER_OBJECT, Constants::Attributes::LAYER)),
       _rigid_object_libraries(loadNamedTypes<Collider>(factory, manifest, "rigid-body", "collider"))
 {
@@ -121,7 +150,7 @@ LevelLoader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
         _lights.push_back({Documents::ensureAttribute(i, Constants::Attributes::NAME), factory.ensureBuilder<Vec3>(i, Constants::Attributes::REF)});
 }
 
-sp<LevelLoader> LevelLoader::BUILDER::build(const Scope& args)
+sp<Level> Level::BUILDER::build(const Scope& args)
 {
     std::map<String, sp<Camera>> cameras;
     for(const auto& i : _cameras)
@@ -134,7 +163,7 @@ sp<LevelLoader> LevelLoader::BUILDER::build(const Scope& args)
     std::map<String, RenderObjectLibrary::Instance> instanceLibraries = loadNamedTypeInstances<Layer>(_render_object_libraries, args);
     std::map<String, RigidBodyLibrary::Instance> rigidBodies = loadNamedTypeInstances<Collider>(_rigid_object_libraries, args);
 
-    return sp<LevelLoader>::make(std::move(cameras), std::move(lights), std::move(instanceLibraries), std::move(rigidBodies));
+    return sp<Level>::make(std::move(cameras), std::move(lights), std::move(instanceLibraries), std::move(rigidBodies));
 }
 
 }
