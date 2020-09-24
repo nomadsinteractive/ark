@@ -7,6 +7,7 @@ namespace bullet {
 
 class Body;
 class BodyCreateInfo;
+class BtRigidBodyRef;
 class CollisionShape;
 class ColliderBullet;
 class RigidBodyBullet;

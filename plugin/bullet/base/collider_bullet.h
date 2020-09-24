@@ -1,6 +1,7 @@
 #ifndef ARK_PLUGIN_BULLET_BASE_COLLIDER_BULLET_H_
 #define ARK_PLUGIN_BULLET_BASE_COLLIDER_BULLET_H_
 
+#include <map>
 #include <vector>
 
 #include "core/forwarding.h"
@@ -100,11 +101,19 @@ private:
         float _time_step;
     };
 
+    struct ContactInfo {
+        std::set<sp<BtRigidBodyRef>> _last_tick;
+        std::set<sp<BtRigidBodyRef>> _current_tick;
+    };
+
     static void myInternalTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
     static RigidBodyBullet getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject);
 
+    void addTickContactInfo(const sp<BtRigidBodyRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<BtRigidBodyRef>& contact, const V3& cp, const V3& normal);
+
 private:
     sp<Stub> _stub;
+    std::map<sp<BtRigidBodyRef>, ContactInfo> _contact_infos;
 };
 
 }

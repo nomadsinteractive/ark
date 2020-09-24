@@ -15,6 +15,7 @@
 #include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
 
+#include "bullet/base/bt_rigid_body_ref.h"
 #include "bullet/base/collision_shape.h"
 #include "bullet/rigid_body/rigid_body_bullet.h"
 
@@ -25,7 +26,7 @@ namespace bullet {
 ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
     : _stub(sp<Stub>::make(gravity, std::move(modelLoader)))
 {
-    _stub->_dynamics_world->setInternalTickCallback(myInternalTickCallback);
+    _stub->_dynamics_world->setInternalTickCallback(myInternalTickCallback, this);
 }
 
 sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate)
@@ -126,29 +127,74 @@ std::unordered_map<int32_t, sp<CollisionShape>>& ColliderBullet::collisionShapes
 void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
 {
     int32_t numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
+    ColliderBullet* self = reinterpret_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
     for(int32_t i = 0; i < numManifolds; ++i)
     {
-        btPersistentManifold *contactManifold = dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+        btPersistentManifold* contactManifold = dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
 
-        const RigidBodyBullet objA(getRigidBodyFromCollisionObject(contactManifold->getBody0()));
-        const sp<CollisionCallback>& ccObjA = objA.collisionCallback();
-        const RigidBodyBullet objB(getRigidBodyFromCollisionObject(contactManifold->getBody1()));
-        const sp<CollisionCallback>& ccObjB = objB.collisionCallback();
-
-        int32_t numContacts = contactManifold->getNumContacts();
-        for(int32_t j = 0; j < numContacts; ++j)
+        if(contactManifold->getNumContacts() > 0)
         {
-            btManifoldPoint& pt = contactManifold->getContactPoint(j);
-            const btVector3& ptA = pt.getPositionWorldOnA();
-            const btVector3& ptB = pt.getPositionWorldOnB();
-            const btVector3& normalOnB = pt.m_normalWorldOnB;
+            RigidBodyBullet objA(getRigidBodyFromCollisionObject(contactManifold->getBody0()));
+            const sp<CollisionCallback>& ccObjA = objA.collisionCallback();
+            RigidBodyBullet objB(getRigidBodyFromCollisionObject(contactManifold->getBody1()));
+            const sp<CollisionCallback>& ccObjB = objB.collisionCallback();
+
+            const sp<BtRigidBodyRef>& refA = objA.rigidBody();
+            const sp<BtRigidBodyRef>& refB = objB.rigidBody();
+
+            if(ccObjA || ccObjB)
+            {
+                btManifoldPoint& pt = contactManifold->getContactPoint(0);
+                const btVector3& ptA = pt.getPositionWorldOnA();
+                const btVector3& normalOnB = pt.m_normalWorldOnB;
+                const V3 cp(ptA.x(), ptA.y(), ptA.z());
+                const V3 normal(normalOnB.x(), normalOnB.y(), normalOnB.z());
+
+                if(ccObjA)
+                    self->addTickContactInfo(refA, ccObjA, refB, cp, normal);
+
+                if(ccObjB)
+                    self->addTickContactInfo(refB, ccObjB, refA, cp, -normal);
+            }
         }
+    }
+
+    for(auto iter = self->_contact_infos.begin(); iter != self->_contact_infos.end(); ++iter)
+    {
+        const sp<BtRigidBodyRef>& rigidBody = iter->first;
+        ContactInfo& contactInfo = iter->second;
+        if(rigidBody->ptr() == nullptr)
+            contactInfo._last_tick.clear();
+        else
+        {
+            RigidBodyBullet obj = getRigidBodyFromCollisionObject(iter->first->ptr());
+            for(const sp<BtRigidBodyRef>& i : contactInfo._last_tick)
+                if(i->ptr())
+                {
+                    if(contactInfo._current_tick.find(i) == contactInfo._current_tick.end())
+                        if(obj.collisionCallback())
+                            obj.collisionCallback()->onEndContact(sp<RigidBodyBullet>::make(getRigidBodyFromCollisionObject(i->ptr())));
+                }
+
+            contactInfo._last_tick = std::move(contactInfo._current_tick);
+        }
+        if(contactInfo._last_tick.empty())
+            if((iter = self->_contact_infos.erase(iter)) == self->_contact_infos.end())
+                break;
     }
 }
 
 RigidBodyBullet ColliderBullet::getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject)
 {
     return RigidBodyBullet(*reinterpret_cast<sp<RigidBody::Stub>*>(collisionObject->getUserPointer()));
+}
+
+void ColliderBullet::addTickContactInfo(const sp<BtRigidBodyRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<BtRigidBodyRef>& contact, const V3& cp, const V3& normal)
+{
+    ContactInfo& contactInfo = _contact_infos[rigidBody];
+    contactInfo._current_tick.insert(contact);
+    if(contactInfo._last_tick.find(contact) == contactInfo._last_tick.end())
+        callback->onBeginContact(sp<RigidBodyBullet>::make(getRigidBodyFromCollisionObject(contact->ptr())), CollisionManifold(cp, normal));
 }
 
 ColliderBullet::Stub::Stub(const V3& gravity, sp<ModelLoader> modelLoader)

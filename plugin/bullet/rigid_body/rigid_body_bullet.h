@@ -46,8 +46,10 @@ public:
 //  [[script::bindings::property]]
     void setAngularFactor(const V3& factor);
 
+    const sp<BtRigidBodyRef>& rigidBody() const;
+
 private:
-    class Stub;
+    struct Stub;
 
     class Position : public Vec3 {
     public:
@@ -77,28 +79,20 @@ private:
         sp<Stub> _stub;
     };
 
-    class Stub {
-    public:
+    struct Stub {
         Stub(ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, Collider::BodyType bodyType, btScalar mass);
         ~Stub();
 
-    private:
         btMotionState* makeMotionState(const btTransform& transform) const;
-        btRigidBody* makeRigidBody(btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass) const;
+        sp<BtRigidBodyRef> makeRigidBody(btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass) const;
 
-    private:
         ColliderBullet _world;
         sp<CollisionShape> _shape;
 
         op<btMotionState> _motion_state;
-        op<btRigidBody> _rigid_body;
+        sp<BtRigidBodyRef> _rigid_body;
 
-        btVector3 _local_inertia;
         Collider::BodyType _body_type;
-
-        friend class RigidBodyBullet;
-        friend class Position;
-        friend class TransformDelegate;
     };
 
 private:

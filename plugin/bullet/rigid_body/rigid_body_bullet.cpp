@@ -1,6 +1,7 @@
 #include "bullet/rigid_body/rigid_body_bullet.h"
 
 #include "bullet/base/collision_shape.h"
+#include "bullet/base/bt_rigid_body_ref.h"
 
 namespace ark {
 namespace plugin {
@@ -13,7 +14,8 @@ RigidBodyBullet::Stub::Stub(ColliderBullet world, sp<CollisionShape> shape, cons
 
 RigidBodyBullet::Stub::~Stub()
 {
-    _world.btDynamicWorld()->removeRigidBody(_rigid_body);
+    _world.btDynamicWorld()->removeRigidBody(_rigid_body->ptr());
+    _rigid_body->reset();
 }
 
 btMotionState* RigidBodyBullet::Stub::makeMotionState(const btTransform& transform) const
@@ -21,7 +23,7 @@ btMotionState* RigidBodyBullet::Stub::makeMotionState(const btTransform& transfo
     return new btDefaultMotionState(transform);
 }
 
-btRigidBody* RigidBodyBullet::Stub::makeRigidBody(btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass) const
+sp<BtRigidBodyRef> RigidBodyBullet::Stub::makeRigidBody(btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass) const
 {
     DASSERT(bodyType == Collider::BODY_TYPE_STATIC || bodyType == Collider::BODY_TYPE_DYNAMIC || bodyType == Collider::BODY_TYPE_KINEMATIC);
     btVector3 localInertia(0, 0, 0);
@@ -38,7 +40,7 @@ btRigidBody* RigidBodyBullet::Stub::makeRigidBody(btCollisionShape* shape, btMot
     }
     _world.btDynamicWorld()->addRigidBody(rigidBody);
     rigidBody->setUserIndex(-1);
-    return rigidBody;
+    return sp<BtRigidBodyRef>::make(rigidBody);
 }
 
 RigidBodyBullet::RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass)
@@ -46,7 +48,7 @@ RigidBodyBullet::RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBu
 {
     stub()->_position = sp<Position>::make(_stub);
     stub()->_transform = sp<Transform>::make(sp<TransformDelegate>::make(_stub));
-    _stub->_rigid_body->setUserPointer(reinterpret_cast<void*>(&stub()));
+    _stub->_rigid_body->ptr()->setUserPointer(reinterpret_cast<void*>(&stub()));
 }
 
 RigidBodyBullet::RigidBodyBullet(const sp<RigidBody::Stub>& other)
@@ -60,40 +62,45 @@ void RigidBodyBullet::dispose()
 
 void RigidBodyBullet::applyCentralForce(const V3& force)
 {
-    _stub->_rigid_body->applyCentralForce(btVector3(force.x(), force.y(), force.z()));
+    _stub->_rigid_body->ptr()->applyCentralForce(btVector3(force.x(), force.y(), force.z()));
 }
 
 V3 RigidBodyBullet::linearVelocity() const
 {
-    const btVector3& velocity = _stub->_rigid_body->getLinearVelocity();
+    const btVector3& velocity = _stub->_rigid_body->ptr()->getLinearVelocity();
     return V3(velocity.x(), velocity.y(), velocity.z());
 }
 
 void RigidBodyBullet::setLinearVelocity(const V3& velocity)
 {
-    _stub->_rigid_body->setActivationState(DISABLE_DEACTIVATION);
-    _stub->_rigid_body->setLinearVelocity(btVector3(velocity.x(), velocity.y(), velocity.z()));
+    _stub->_rigid_body->ptr()->setActivationState(DISABLE_DEACTIVATION);
+    _stub->_rigid_body->ptr()->setLinearVelocity(btVector3(velocity.x(), velocity.y(), velocity.z()));
 }
 
 float RigidBodyBullet::friction() const
 {
-    return _stub->_rigid_body->getFriction();
+    return _stub->_rigid_body->ptr()->getFriction();
 }
 
 void RigidBodyBullet::setFriction(float friction)
 {
-    _stub->_rigid_body->setFriction(friction);
+    _stub->_rigid_body->ptr()->setFriction(friction);
 }
 
 V3 RigidBodyBullet::angularFactor() const
 {
-    const btVector3& factor = _stub->_rigid_body->getAngularFactor();
+    const btVector3& factor = _stub->_rigid_body->ptr()->getAngularFactor();
     return V3(factor.x(), factor.y(), factor.z());
 }
 
 void RigidBodyBullet::setAngularFactor(const V3& factor)
 {
-    _stub->_rigid_body->setAngularFactor(btVector3(factor.x(), factor.y(), factor.z()));
+    _stub->_rigid_body->ptr()->setAngularFactor(btVector3(factor.x(), factor.y(), factor.z()));
+}
+
+const sp<BtRigidBodyRef>& RigidBodyBullet::rigidBody() const
+{
+    return _stub->_rigid_body;
 }
 
 RigidBodyBullet::Position::Position(const sp<RigidBodyBullet::Stub>& stub)

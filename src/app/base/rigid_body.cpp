@@ -155,6 +155,7 @@ RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec3>& posit
 RigidBody::Stub::~Stub()
 {
     _disposed->dispose();
+    LOGD("RigidBody(%d) disposed", _id);
 }
 
 void RigidBody::Callback::onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
