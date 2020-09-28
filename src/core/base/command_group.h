@@ -1,6 +1,8 @@
 #ifndef ARK_CORE_BASE_COMMAND_GROUP_H_
 #define ARK_CORE_BASE_COMMAND_GROUP_H_
 
+#include <vector>
+
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/command.h"

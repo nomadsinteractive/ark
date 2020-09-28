@@ -155,6 +155,13 @@ private:
         return pyList;
     }
 
+    template<typename T> PyObject* fromIterable_sfinae(const T& map, typename std::remove_reference<decltype(map.begin()->second)>::type*) {
+        PyObject* pyDict = PyDict_New();
+        for(const auto& i : map)
+            PyDict_SetItem(pyDict, toPyObject(i.first), toPyObject(i.second));
+        return pyDict;
+    }
+
     template<typename T> PyObject* fromIterable_sfinae(const T& iterable, ...) {
         PyObject* pySet = PySet_New(0);
         for(const auto& i : iterable) {
