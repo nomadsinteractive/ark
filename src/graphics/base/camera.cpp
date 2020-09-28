@@ -19,6 +19,7 @@
 #include "graphics/util/matrix_util.h"
 
 #include "renderer/base/render_engine.h"
+#include "renderer/base/render_engine_context.h"
 
 #include "app/base/application_context.h"
 
@@ -142,13 +143,7 @@ V3 Camera::getRayDirection(float screenX, float screenY) const
 {
     M4 vp;
     _vp->flat(&vp);
-
-    const Viewport& viewport = Ark::instance().applicationContext()->renderEngine()->viewport();
-
-    float ndcx = (screenX * 2 - viewport.width()) / viewport.width();
-    float ndcy = (screenY * 2 - viewport.height()) / viewport.height();
-    const V4 pos = MatrixUtil::mul(MatrixUtil::inverse(vp), V4(ndcx, _coordinate_system == Ark::COORDINATE_SYSTEM_LHS ? -ndcy : ndcy, 1.0f, 1.0f));
-    return V3(pos.x() / pos.w(), pos.y() / pos.w(), pos.z() / pos.w());
+    return Ark::instance().applicationContext()->renderEngine()->toRayDirection(vp, screenX, screenY);
 }
 
 sp<Vec3> Camera::position() const

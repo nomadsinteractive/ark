@@ -24,6 +24,7 @@ public:
 
     float toLayoutDirection(float direction) const;
     Rect toRendererScissor(const Rect& scissor, Ark::RendererCoordinateSystem cs = Ark::COORDINATE_SYSTEM_DEFAULT) const;
+    V3 toRayDirection(const M4& vpMatrix, float screenX, float screenY) const;
 
     void onSurfaceCreated();
 
