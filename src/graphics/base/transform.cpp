@@ -3,6 +3,7 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
+#include "core/types/global.h"
 #include "core/types/null.h"
 #include "core/util/conversions.h"
 #include "core/util/documents.h"
@@ -18,6 +19,33 @@
 #include "graphics/util/matrix_util.h"
 
 namespace ark {
+
+namespace {
+
+class TransformMat4 : public Mat4 {
+public:
+    TransformMat4(const sp<Transform>& transform)
+        : _transform(transform) {
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        if(_transform->update(timestamp)) {
+            _value = _transform->snapshot().toMatrix();
+            return true;
+        }
+        return false;
+    }
+
+    virtual M4 val() override {
+        return _value;
+    }
+
+private:
+    sp<Transform> _transform;
+    M4 _value;
+};
+
+}
 
 Transform::Transform(Type type, const sp<Rotation>& rotate, const sp<Vec3>& scale, const sp<Vec3>& translate)
     : _type(type), _rotation(rotate, V4(0, 0, 0, 1.0f)), _scale(scale, V3(1.0f)), _pivot(translate), _delegate(makeDelegate())
@@ -79,6 +107,11 @@ void Transform::setPivot(const sp<Vec3>& pivot)
     updateDelegate();
 }
 
+sp<Mat4> Transform::toMatrix(const sp<Transform>& self)
+{
+    return sp<TransformMat4>::make(self);
+}
+
 void Transform::updateDelegate()
 {
     _delegate = makeDelegate();
@@ -97,12 +130,12 @@ sp<Transform::Delegate> Transform::makeDelegate() const
 
 sp<Transform::Delegate> Transform::makeTransformLinear() const
 {
-    return _type == TYPE_LINEAR_2D ? sp<Transform::Delegate>::make<TransformLinear2D>() : sp<Transform::Delegate>::make<TransformLinear3D>();
+    return _type == TYPE_LINEAR_2D ? Global<TransformLinear2D>().cast<Transform::Delegate>() : Global<TransformLinear3D>().cast<Transform::Delegate>();
 }
 
 sp<Transform::Delegate> Transform::makeTransformSimple() const
 {
-    return _type == TYPE_LINEAR_2D ? sp<Transform::Delegate>::make<TransformSimple2D>() : sp<Transform::Delegate>::make<TransformSimple2D>();
+    return _type == TYPE_LINEAR_2D ? Global<TransformSimple2D>().cast<Transform::Delegate>() : Global<TransformSimple3D>().cast<Transform::Delegate>();
 }
 
 Transform::Snapshot::Snapshot(const Transform& transform)

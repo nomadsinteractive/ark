@@ -94,6 +94,9 @@ public:
 //  [[script::bindings::property]]
     void setPivot(const sp<Vec3>& pivot);
 
+//  [[script::bindings::classmethod]]
+    static sp<Mat4> toMatrix(const sp<Transform>& self);
+
 //  [[plugin::builder]]
     class BUILDER : public Builder<Transform> {
     public:

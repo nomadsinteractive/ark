@@ -635,6 +635,9 @@ class Mat2:
     def __mul__(self, other):
         pass
 
+    def __matmul__(self, other):
+        pass
+
     def rotate(self, rot: Union[float, Numeric, 'Rotation']) -> 'Mat2':
         pass
 
@@ -652,12 +655,18 @@ class Mat3:
     def __mul__(self, other):
         return None
 
+    def __matmul__(self, other):
+        pass
+
 
 class Mat4:
     def __init__(self, t=None, b=None, n=None, w=None):
         pass
 
     def __mul__(self, other):
+        pass
+
+    def __matmul__(self, other):
         pass
 
 
@@ -673,13 +682,23 @@ class Input:
         pass
 
 
+class AnimationInput(Input):
+
+    def get_node_matrix(self, node_name: str) -> Mat4:
+        pass
+
+
 class Animation:
 
     @property
     def duration(self) -> float:
         return 0
 
-    def make_transforms(self, t: Numeric) -> Input:
+    @property
+    def node_names(self) -> List[str]:
+        return []
+
+    def make_transforms(self, t: Numeric) -> AnimationInput:
         pass
 
 
@@ -1051,6 +1070,9 @@ class Transform:
     @pivot.setter
     def pivot(self, v):
         self._pivot = v
+
+    def to_matrix(self) -> Mat4:
+        pass
 
 
 class Random:

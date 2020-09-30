@@ -32,17 +32,19 @@ void Atlas::load(BeanFactory& factory, const document& manifest, const Scope& ar
         {
             DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
             int32_t type = Documents::getAttribute<int32_t>(i, Constants::Attributes::TYPE, 0);
-            if(type == 0)
-            {
-                const String character = Documents::getAttribute(i, "character");
-                if(character)
-                    type = static_cast<int32_t>(character.at(0));
-            }
-            const Rect r = Rect::parse(i);
             float px = Documents::getAttribute<float>(i, "pivot-x", 0);
             float py = Documents::getAttribute<float>(i, "pivot-x", 0);
-            add(type, static_cast<uint32_t>(r.left()), static_cast<uint32_t>(r.top()), static_cast<uint32_t>(r.right()), static_cast<uint32_t>(r.bottom()),
-                Rect(0, 0, 1.0f, 1.0f), V2(r.width(), r.height()), V2(px, py));
+            if(has(type))
+            {
+                const Item& item = at(type);
+                _items[type] = Item(item.ux(), item.uy(), item.vx(), item.vy(), Rect(-px, -py, 1.0f - px, 1.0f - py), item.size());
+            }
+            else
+            {
+                const Rect r = Rect::parse(i);
+                add(type, static_cast<uint32_t>(r.left()), static_cast<uint32_t>(r.top()), static_cast<uint32_t>(r.right()), static_cast<uint32_t>(r.bottom()),
+                    Rect(0, 0, 1.0f, 1.0f), V2(r.width(), r.height()), V2(px, py));
+            }
         }
     }
 }
@@ -94,6 +96,7 @@ void Atlas::add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, 
 
 const Atlas::Item& Atlas::at(int32_t id) const
 {
+    DCHECK((_allow_default_item || id == 0) || has(id), "Item(%d) does not exist", id);
     return _allow_default_item || id == 0 ? (has(id) ? _items.at(id) : _default_item) : _items.at(id);
 }
 

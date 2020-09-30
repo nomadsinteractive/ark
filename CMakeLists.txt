@@ -226,7 +226,7 @@ endif()
 
 ark_gen_plugin_class(app builtin ark application_plugin src/app)
 
-ark_gen_class_hierarchy(ark ark ${ARK_SRC_DIR}/src core graphics renderer/base renderer/impl app)
+ark_gen_class_hierarchy(ark ark ${ARK_SRC_DIR}/src core graphics renderer/base renderer/impl renderer/inf app)
 
 ark_gen_string_table(shaders ark::res src/renderer/shaders)
 ark_gen_bootstrap(ark_bootstrap)

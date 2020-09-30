@@ -1,5 +1,6 @@
 #include "graphics/impl/transform/transform_none.h"
 
+#include "core/types/global.h"
 #include "core/types/null.h"
 
 #include "graphics/base/mat.h"
@@ -23,9 +24,7 @@ M4 TransformNone::toMatrix(const Transform::Snapshot& /*snapshot*/) const
 
 template<> ARK_API sp<Transform::Delegate> Null::ptr()
 {
-    static sp<Transform::Delegate> TRANSFORM_NONE = sp<TransformNone>::make();
-    return TRANSFORM_NONE;
+    return Global<TransformNone>().cast<Transform::Delegate>();
 }
-
 
 }

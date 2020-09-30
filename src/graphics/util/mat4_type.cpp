@@ -24,25 +24,55 @@ sp<Mat4> Mat4Type::create(const V4& t, const V4& b, const V4& n, const V4& w)
 
 sp<Mat4> Mat4Type::mul(const sp<Mat4>& lvalue, const sp<Mat4>& rvalue)
 {
+    DWARN(false, "\"*\" operator on Mat4 has been deprecated, use \"@\" operator");
+    return matmul(lvalue, rvalue);
+}
+
+sp<Mat4> Mat4Type::matmul(const sp<Mat4>& lvalue, const sp<Mat4>& rvalue)
+{
     return sp<VariableOP2<sp<Mat4>, sp<Mat4>, Operators::Mul<M4, M4>>>::make(lvalue, rvalue);
 }
 
 sp<Vec4> Mat4Type::mul(const sp<Mat4>& lvalue, const sp<Vec4>& rvalue)
+{
+    DWARN(false, "\"*\" operator on Mat4 has been deprecated, use \"@\" operator");
+    return matmul(lvalue, rvalue);
+}
+
+sp<Vec4> Mat4Type::matmul(const sp<Mat4>& lvalue, const sp<Vec4>& rvalue)
 {
     return sp<VariableOP2<sp<Mat4>, sp<Vec4>, Operators::Mul<M4, V4>>>::make(lvalue, rvalue);
 }
 
 sp<Vec4> Mat4Type::mul(const sp<Mat4>& lvalue, const V4& rvalue)
 {
+    DWARN(false, "\"*\" operator on Mat4 has been deprecated, use \"@\" operator");
+    return matmul(lvalue, rvalue);
+}
+
+sp<Vec4> Mat4Type::matmul(const sp<Mat4>& lvalue, const V4& rvalue)
+{
     return sp<VariableOP2<sp<Mat4>, V4, Operators::Mul<M4, V4>>>::make(lvalue, rvalue);
 }
 
 sp<Vec3> Mat4Type::mul(const sp<Mat4>& lvalue, const sp<Vec3>& rvalue)
 {
+    DWARN(false, "\"*\" operator on Mat4 has been deprecated, use \"@\" operator");
+    return matmul(lvalue, rvalue);
+}
+
+sp<Vec3> Mat4Type::matmul(const sp<Mat4>& lvalue, const sp<Vec3>& rvalue)
+{
     return sp<VariableOP2<sp<Mat4>, sp<Vec3>, Operators::Mul<M4, V3>>>::make(lvalue, rvalue);
 }
 
 sp<Vec3> Mat4Type::mul(const sp<Mat4>& lvalue, const V3& rvalue)
+{
+    DWARN(false, "\"*\" operator on Mat4 has been deprecated, use \"@\" operator");
+    return matmul(lvalue, rvalue);
+}
+
+sp<Vec3> Mat4Type::matmul(const sp<Mat4>& lvalue, const V3& rvalue)
 {
     return sp<VariableOP2<sp<Mat4>, V3, Operators::Mul<M4, V3>>>::make(lvalue, rvalue);
 }

@@ -36,11 +36,6 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-ModelImporterAssimp::ModelImporterAssimp(Ark::RendererCoordinateSystem coordinateSystem)
-    : _coordinate_system(coordinateSystem)
-{
-}
-
 bitmap ModelImporterAssimp::loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const
 {
     if(tex->mHeight == 0)
@@ -229,7 +224,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         Table<String, sp<Animation>> animates;
         AnimationAssimpNodes::NodeLoaderCallback callback = noBones ? callbackNodeAnimation : callbackBoneAnimation;
         NodeTable nodes = noBones ? loadNodes(scene->mRootNode, model) : std::move(bones);
-        loadAnimates(animates, scene, globalAnimationTransform, importer, nodes, callbackNodeAnimation);
+        loadAnimates(animates, scene, globalAnimationTransform, importer, nodes, callback);
         for(const auto& i : animateManifests)
         {
             sp<Assimp::Importer> importer = sp<Assimp::Importer>::make();
@@ -306,14 +301,9 @@ void ModelImporterAssimp::callbackBoneAnimation(Table<String, Node>& nodes, cons
     }
 }
 
-ModelImporterAssimp::BUILDER::BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _coordinate_system(resourceLoaderContext->renderController()->renderEngine()->context()->coordinateSystem())
-{
-}
-
 sp<ModelLoader::Importer> ModelImporterAssimp::BUILDER::build(const Scope& /*args*/)
 {
-    return sp<ModelImporterAssimp>::make(_coordinate_system);
+    return sp<ModelImporterAssimp>::make();
 }
 
 }

@@ -4,6 +4,7 @@
 namespace ark {
 
 class Animation;
+class AnimationInput;
 class Atlas;
 class Attribute;
 class Buffer;

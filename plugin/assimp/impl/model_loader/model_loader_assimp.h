@@ -30,19 +30,16 @@ namespace assimp {
 
 class ModelImporterAssimp : public ModelLoader::Importer {
 public:
-    ModelImporterAssimp(Ark::RendererCoordinateSystem coordinateSystem);
 
     virtual Model import(const document& manifest, MaterialBundle& materialBundle) override;
 
-//  [[plugin::resource-loader::by-value("assimp")]]
+//  [[plugin::builder::by-value("assimp")]]
     class BUILDER : public Builder<ModelLoader::Importer> {
     public:
-        BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER() = default;
 
         virtual sp<ModelLoader::Importer> build(const Scope& args) override;
 
-    private:
-        Ark::RendererCoordinateSystem _coordinate_system;
     };
 
 private:
@@ -66,9 +63,8 @@ private:
     static void callbackNodeAnimation(Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform);
     static void callbackBoneAnimation(Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform);
 private:
-    Ark::RendererCoordinateSystem _coordinate_system;
-
     std::vector<sp<Texture>> _textures;
+
 };
 
 }

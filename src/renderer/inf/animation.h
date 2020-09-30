@@ -1,6 +1,8 @@
 #ifndef ARK_RENDERER_INF_ANIMATION_H_
 #define ARK_RENDERER_INF_ANIMATION_H_
 
+#include <vector>
+
 #include "core/base/api.h"
 #include "core/forwarding.h"
 
@@ -15,10 +17,12 @@ public:
     virtual ~Animation() = default;
 
 //  [[script::bindings::auto]]
-    virtual sp<Input> makeTransforms(const sp<Numeric>& duration) = 0;
+    virtual sp<AnimationInput> makeTransforms(const sp<Numeric>& duration) = 0;
 
 //  [[script::bindings::property]]
     virtual float duration() = 0;
+//  [[script::bindings::property]]
+    virtual const std::vector<String>& nodeNames() = 0;
 
 };
 

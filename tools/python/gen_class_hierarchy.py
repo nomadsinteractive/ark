@@ -13,8 +13,8 @@ CLASS_PATTERN = re.compile(r'(\[\[core::class\]\])?([\w<():=,>\s]+)class\s+(ARK_
 INDENT = '\n    '
 
 
-CORE_INTERFACES = ('Numeric', 'Integer', 'Resource', 'EventListener', 'Renderer', 'Notifier', 'Block', 'ModelLoader',
-                   'Boolean', 'Runnable', 'Vec2', 'Vec3', 'Vec4', 'Mat3', 'Holder', 'LayoutEventListener')
+CORE_INTERFACES = ('Numeric', 'Integer', 'Resource', 'EventListener', 'Input', 'Renderer', 'Notifier', 'Block', 'ModelLoader',
+                   'Boolean', 'Runnable', 'Vec2', 'Vec3', 'Vec4', 'Mat3', 'Mat4', 'Holder', 'LayoutEventListener')
 
 
 class GenClass:

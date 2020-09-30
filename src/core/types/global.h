@@ -24,6 +24,10 @@ public:
         return *_inst;
     }
 
+    template<typename U> sp<U> cast() const {
+        return _inst.template cast<U>();
+    }
+
 private:
     const sp<T>& _inst;
 };

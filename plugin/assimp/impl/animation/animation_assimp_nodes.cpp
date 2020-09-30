@@ -14,9 +14,9 @@ AnimationAssimpNodes::AnimationAssimpNodes(sp<Assimp::Importer> importer, const 
 {
 }
 
-sp<Input> AnimationAssimpNodes::makeTransforms(const sp<Numeric>& duration)
+sp<AnimationInput> AnimationAssimpNodes::makeTransforms(const sp<Numeric>& duration)
 {
-    return sp<AnimateImpl>::make(duration, _animation, _root_node, _ticks_per_sec, _global_transform, _nodes.nodes(), _callback);
+    return sp<AnimationInput>::make<AnimationInputImpl>(duration, _animation, _root_node, _ticks_per_sec, _global_transform, _nodes.nodes(), _callback);
 }
 
 float AnimationAssimpNodes::duration()
@@ -24,7 +24,39 @@ float AnimationAssimpNodes::duration()
     return static_cast<float>(_animation->mDuration) / _ticks_per_sec;
 }
 
-AnimationAssimpNodes::AnimateImpl::AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, float ticksPerSecond, const aiMatrix4x4& globalTransform, const Table<String, Node>& nodes, NodeLoaderCallback callback)
+const std::vector<String>& AnimationAssimpNodes::nodeNames()
+{
+    return _nodes.nodes().keys();
+}
+
+AnimationAssimpNodes::AnimationInputImpl::AnimationInputImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, float ticksPerSecond, const aiMatrix4x4& globalTransform, const Table<String, Node>& nodes, NodeLoaderCallback callback)
+    : _stub(sp<Stub>::make(duration, animation, node, ticksPerSecond, globalTransform, nodes, std::move(callback)))
+{
+}
+
+sp<Mat4> AnimationAssimpNodes::AnimationInputImpl::getNodeMatrix(const String& name)
+{
+    return sp<NodeMatrix>::make(_stub, name);
+}
+
+bool AnimationAssimpNodes::AnimationInputImpl::update(uint64_t timestamp)
+{
+    return _stub->update(timestamp);
+}
+
+void AnimationAssimpNodes::AnimationInputImpl::flat(void* buf)
+{
+    M4* mat = reinterpret_cast<M4*>(buf);
+    for(size_t i = 0; i < _stub->_nodes.size(); ++i)
+        mat[i] = _stub->_nodes.values().at(i)._final;
+}
+
+uint32_t AnimationAssimpNodes::AnimationInputImpl::size()
+{
+    return _stub->_nodes.size() * sizeof(M4);
+}
+
+AnimationAssimpNodes::AnimationInputImpl::Stub::Stub(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, float ticksPerSecond, const aiMatrix4x4& globalTransform, const Table<String, Node>& nodes, AnimationAssimpNodes::NodeLoaderCallback callback)
     : _ticks_per_sec(ticksPerSecond), _duration_in_ticks(static_cast<float>(animation->mDuration)), _global_inversed_transform(node->mTransformation * globalTransform),
       _duration(duration), _animation(animation), _root_node(node), _nodes(nodes), _callback(std::move(callback))
 {
@@ -32,7 +64,7 @@ AnimationAssimpNodes::AnimateImpl::AnimateImpl(const sp<Numeric>& duration, cons
     updateHierarchy(_duration->val());
 }
 
-bool AnimationAssimpNodes::AnimateImpl::update(uint64_t timestamp)
+bool AnimationAssimpNodes::AnimationInputImpl::Stub::update(uint64_t timestamp)
 {
     if(_duration->update(timestamp))
     {
@@ -42,19 +74,7 @@ bool AnimationAssimpNodes::AnimateImpl::update(uint64_t timestamp)
     return false;
 }
 
-void AnimationAssimpNodes::AnimateImpl::flat(void* buf)
-{
-    M4* mat = reinterpret_cast<M4*>(buf);
-    for(size_t i = 0; i < _nodes.size(); ++i)
-        mat[i] = _nodes.values().at(i)._final;
-}
-
-uint32_t AnimationAssimpNodes::AnimateImpl::size()
-{
-    return _nodes.size() * sizeof(M4);
-}
-
-void AnimationAssimpNodes::AnimateImpl::updateHierarchy(float time)
+void AnimationAssimpNodes::AnimationInputImpl::Stub::updateHierarchy(float time)
 {
     float animationTime = fmod(time * _ticks_per_sec, _duration_in_ticks);
     loadNodeHierarchy(animationTime, _root_node, aiMatrix4x4(), _callback);
@@ -65,7 +85,7 @@ void AnimationAssimpNodes::AnimateImpl::updateHierarchy(float time)
     }
 }
 
-void AnimationAssimpNodes::AnimateImpl::loadNodeHierarchy(float duration, const aiNode* node, const aiMatrix4x4& parentTransform, const NodeLoaderCallback& callback)
+void AnimationAssimpNodes::AnimationInputImpl::Stub::loadNodeHierarchy(float duration, const aiNode* node, const aiMatrix4x4& parentTransform, const NodeLoaderCallback& callback)
 {
     const String nodeName(node->mName.data);
     const aiNodeAnim* pNodeAnim = AnimateUtil::findNodeAnim(_animation, nodeName);
@@ -86,6 +106,21 @@ void AnimationAssimpNodes::AnimateImpl::loadNodeHierarchy(float duration, const 
 
     for (uint32_t i = 0; i < node->mNumChildren; i++)
         loadNodeHierarchy(duration, node->mChildren[i], globalTransformation, callback);
+}
+
+AnimationAssimpNodes::AnimationInputImpl::NodeMatrix::NodeMatrix(const sp<Stub>& stub, const String& name)
+    : _stub(stub), _node(_stub->_nodes.at(name))
+{
+}
+
+bool AnimationAssimpNodes::AnimationInputImpl::NodeMatrix::update(uint64_t timestamp)
+{
+    return _stub->update(timestamp);
+}
+
+M4 AnimationAssimpNodes::AnimationInputImpl::NodeMatrix::val()
+{
+    return _node._final;
 }
 
 }

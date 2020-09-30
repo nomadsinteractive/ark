@@ -10,12 +10,14 @@
 
 #include "core/base/string.h"
 #include "core/collection/table.h"
-#include "core/inf/input.h"
+#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/forwarding.h"
 #include "graphics/base/mat.h"
 
 #include "renderer/inf/animation.h"
+#include "renderer/inf/animation_input.h"
 
 #include "assimp/base/node_table.h"
 #include "assimp/util/animate_util.h"
@@ -30,13 +32,16 @@ public:
 
     AnimationAssimpNodes(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, NodeTable nodes, NodeLoaderCallback callback);
 
-    virtual sp<Input> makeTransforms(const sp<Numeric>& duration) override;
+    virtual sp<AnimationInput> makeTransforms(const sp<Numeric>& duration) override;
     virtual float duration() override;
+    virtual const std::vector<String>& nodeNames() override;
 
 private:
-    class AnimateImpl : public Input {
+    class AnimationInputImpl : public AnimationInput {
     public:
-        AnimateImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, float ticksPerSecond, const aiMatrix4x4& globalTransform, const Table<String, Node>& nodes, NodeLoaderCallback callback);
+        AnimationInputImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, float ticksPerSecond, const aiMatrix4x4& globalTransform, const Table<String, Node>& nodes, NodeLoaderCallback callback);
+
+        virtual sp<Mat4> getNodeMatrix(const String& name) override;
 
         virtual bool update(uint64_t timestamp) override;
 
@@ -44,22 +49,42 @@ private:
         virtual uint32_t size() override;
 
     private:
-        void updateHierarchy(float time);
-        void loadNodeHierarchy(float duration, const aiNode* node, const aiMatrix4x4& parentTransform, const NodeLoaderCallback& callback);
+        struct Stub {
+            Stub(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, float ticksPerSecond, const aiMatrix4x4& globalTransform, const Table<String, Node>& nodes, NodeLoaderCallback callback);
 
+            bool update(uint64_t timestamp);
+
+            void updateHierarchy(float time);
+            void loadNodeHierarchy(float duration, const aiNode* node, const aiMatrix4x4& parentTransform, const NodeLoaderCallback& callback);
+
+            float _ticks_per_sec;
+            float _duration_in_ticks;
+            aiMatrix4x4 _global_inversed_transform;
+
+            sp<Numeric> _duration;
+
+            const aiAnimation* _animation;
+            const aiNode* _root_node;
+
+            Table<String, Node> _nodes;
+            NodeLoaderCallback _callback;
+        };
+
+        class NodeMatrix : public Mat4 {
+        public:
+            NodeMatrix(const sp<Stub>& stub, const String& name);
+
+            virtual bool update(uint64_t timestamp) override;
+
+            virtual M4 val() override;
+
+        private:
+            sp<Stub> _stub;
+            const Node& _node;
+        };
 
     private:
-        float _ticks_per_sec;
-        float _duration_in_ticks;
-        aiMatrix4x4 _global_inversed_transform;
-
-        sp<Numeric> _duration;
-
-        const aiAnimation* _animation;
-        const aiNode* _root_node;
-
-        Table<String, Node> _nodes;
-        NodeLoaderCallback _callback;
+        sp<Stub> _stub;
     };
 
 private:

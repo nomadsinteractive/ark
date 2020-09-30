@@ -3,7 +3,6 @@
 #include "core/ark.h"
 #include "core/base/clock.h"
 #include "core/impl/variable/integral.h"
-#include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
 
@@ -87,6 +86,16 @@ sp<Vec4> Vec4Type::integral(const sp<Vec4>& self, const sp<Numeric>& t)
 {
     sp<Numeric> duration = t ? t : Ark::instance().clock()->duration();
     return sp<Integral<V4>>::make(self, std::move(duration));
+}
+
+void Vec4Type::set(const sp<VariableWrapper<V4>>& self, const V4& val)
+{
+    self->set(val);
+}
+
+void Vec4Type::set(const sp<VariableWrapper<V4>>& self, const sp<Vec4>& val)
+{
+    self->set(val);
 }
 
 void Vec4Type::set(const sp<Vec4>& self, const V4& val)
@@ -206,6 +215,16 @@ void Vec4Type::fix(const sp<Vec4>& self)
 sp<Vec4> Vec4Type::freeze(const sp<Vec4>& self)
 {
     return sp<Vec4::Const>::make(self->val());
+}
+
+sp<Vec4> Vec4Type::wrap(const sp<Vec4>& self)
+{
+    return sp<VariableWrapper<V4>>::make(self);
+}
+
+sp<Vec4> Vec4Type::synchronize(const sp<Vec4>& self, const sp<Boolean>& disposed)
+{
+    return Ark::instance().applicationContext()->synchronize(self, disposed);
 }
 
 sp<Vec4Impl> Vec4Type::ensureImpl(const sp<Vec4>& self)

@@ -5,7 +5,6 @@
 #include "core/ark.h"
 #include "core/base/clock.h"
 #include "core/impl/variable/integral.h"
-#include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
 #include "core/util/variable_util.h"
@@ -155,6 +154,16 @@ sp<Vec3> Vec3Type::negative(const sp<Vec3>& self)
     return sp<VecNeg<V3>>::make(self);
 }
 
+void Vec3Type::set(const sp<VariableWrapper<V3>>& self, const V3& val)
+{
+    self->set(val);
+}
+
+void Vec3Type::set(const sp<VariableWrapper<V3>>& self, const sp<Vec3>& val)
+{
+    self->set(val);
+}
+
 void Vec3Type::set(const sp<Vec3>& self, const V3& val)
 {
     ensureImpl(self)->set(val);
@@ -254,6 +263,16 @@ void Vec3Type::fix(const sp<Vec3>& self)
 sp<Vec3> Vec3Type::freeze(const sp<Vec3>& self)
 {
     return sp<Vec3::Const>::make(self->val());
+}
+
+sp<Vec3> Vec3Type::wrap(const sp<Vec3>& self)
+{
+    return sp<VariableWrapper<V3>>::make(self);
+}
+
+sp<Vec3> Vec3Type::synchronize(const sp<Vec3>& self, const sp<Boolean>& disposed)
+{
+    return Ark::instance().applicationContext()->synchronize(self, disposed);
 }
 
 sp<Vec3> Vec3Type::cross(const sp<Vec3>& self, const sp<Vec3>& other)

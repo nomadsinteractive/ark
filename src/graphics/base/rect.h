@@ -1,8 +1,6 @@
 #ifndef ARK_GRAPHICS_BASE_RECT_H_
 #define ARK_GRAPHICS_BASE_RECT_H_
 
-#include <map>
-
 #include "core/base/api.h"
 #include "core/util/documents.h"
 
@@ -18,6 +16,9 @@ public:
     }
     RectT(T left, T top, T right, T bottom) noexcept
         : _left(left), _top(top), _right(right), _bottom(bottom) {
+    }
+    template<typename U> RectT(const RectT<U>& other) noexcept
+        : _left(static_cast<T>(other.left())), _top(static_cast<T>(other.top())), _right(static_cast<T>(other.right())), _bottom(static_cast<T>(other.bottom())) {
     }
     RectT(const V4& vec4) noexcept
         : _left(static_cast<T>(vec4.x())), _top(vec4.y()), _right(vec4.z()), _bottom(vec4.w()) {
