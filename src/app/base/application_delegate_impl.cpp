@@ -78,7 +78,7 @@ void ApplicationDelegateImpl::onResume()
             i.run();
 }
 
-ApplicationDelegateImpl::ScriptTag::ScriptTag(ResourceLoader& resourceLoader, const document& manifest, const Scope& vars)
+ApplicationDelegateImpl::ScriptTag::ScriptTag(ResourceLoader& resourceLoader, const document& manifest, const sp<Scope>& vars)
     : _on(Documents::getAttribute(manifest, "on", SCRIPT_RUN_ON_CREATE)),
       _function_name(Documents::getAttribute(manifest, "function")),
       _script(resourceLoader.beanFactory().ensure<Script>(manifest, vars)), _vars(vars)

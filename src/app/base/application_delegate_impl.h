@@ -34,7 +34,7 @@ public:
 
 private:
     struct ScriptTag {
-        ScriptTag(ResourceLoader& resourceLoader, const document& manifest, const Scope& vars);
+        ScriptTag(ResourceLoader& resourceLoader, const document& manifest, const sp<Scope>& vars);
 
         void run() const;
 
@@ -45,7 +45,7 @@ private:
         sp<Asset> _source;
 
         sp<Script> _script;
-        Scope _vars;
+        sp<Scope> _vars;
     };
 
 private:
