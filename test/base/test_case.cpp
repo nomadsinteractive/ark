@@ -10,11 +10,16 @@
 namespace ark {
 namespace unittest {
 
+TestCase::TestCase(const String& factoryFile)
+    : _factory_file(factoryFile)
+{
+}
+
 sp<BeanFactory> TestCase::getBeanFactory() const
 {
-    const document doc = Documents::loadFromReadable(Ark::instance().openAsset("application.xml"));
+    const document doc = Documents::loadFromReadable(Ark::instance().openAsset(_factory_file));
     if(!doc) {
-        printf("application.xml not found!\n");
+        printf("%s not found!\n", _factory_file.c_str());
         return nullptr;
     }
     const sp<Dictionary<document>> byId = sp<DictionaryByAttributeName>::make(doc, "id");
@@ -23,7 +28,7 @@ sp<BeanFactory> TestCase::getBeanFactory() const
 
 sp<ResourceLoader> TestCase::getResourceLoader() const
 {
-    return Ark::instance().applicationContext()->createResourceLoader("application.xml", Scope());
+    return Ark::instance().applicationContext()->createResourceLoader(_factory_file, Scope());
 }
 
 }

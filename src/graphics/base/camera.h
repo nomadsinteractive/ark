@@ -35,42 +35,42 @@ public:
     public:
         virtual ~Delegate() = default;
 
-        virtual M4 frustum(float left, float right, float bottom, float top, float near, float far) = 0;
+        virtual M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) = 0;
         virtual M4 lookAt(const V3& position, const V3& target, const V3& up) = 0;
-        virtual M4 ortho(float left, float right, float bottom, float top, float near, float far) = 0;
-        virtual M4 perspective(float fov, float aspect, float near, float far) = 0;
+        virtual M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) = 0;
+        virtual M4 perspective(float fov, float aspect, float clipNear, float clipFar) = 0;
     };
 
     class DelegateLH_ZO : public Delegate {
     public:
-        virtual M4 frustum(float left, float right, float bottom, float top, float near, float far) override;
+        virtual M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
         virtual M4 lookAt(const V3& position, const V3& target, const V3& up) override;
-        virtual M4 ortho(float left, float right, float bottom, float top, float near, float far) override;
-        virtual M4 perspective(float fov, float aspect, float near, float far) override;
+        virtual M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
+        virtual M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
     };
 
     class DelegateRH_ZO : public Delegate {
     public:
-        virtual M4 frustum(float left, float right, float bottom, float top, float near, float far) override;
+        virtual M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
         virtual M4 lookAt(const V3& position, const V3& target, const V3& up) override;
-        virtual M4 ortho(float left, float right, float bottom, float top, float near, float far) override;
-        virtual M4 perspective(float fov, float aspect, float near, float far) override;
+        virtual M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
+        virtual M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
     };
 
     class DelegateLH_NO : public Delegate {
     public:
-        virtual M4 frustum(float left, float right, float bottom, float top, float near, float far) override;
+        virtual M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
         virtual M4 lookAt(const V3& position, const V3& target, const V3& up) override;
-        virtual M4 ortho(float left, float right, float bottom, float top, float near, float far) override;
-        virtual M4 perspective(float fov, float aspect, float near, float far) override;
+        virtual M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
+        virtual M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
     };
 
     class DelegateRH_NO : public Delegate {
     public:
-        virtual M4 frustum(float left, float right, float bottom, float top, float near, float far) override;
+        virtual M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
         virtual M4 lookAt(const V3& position, const V3& target, const V3& up) override;
-        virtual M4 ortho(float left, float right, float bottom, float top, float near, float far) override;
-        virtual M4 perspective(float fov, float aspect, float near, float far) override;
+        virtual M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
+        virtual M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
     };
 
 public:
@@ -80,12 +80,12 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Camera);
 
 //  [[script::bindings::auto]]
-    void ortho(float left, float right, float bottom, float top, float near, float far);
-    void ortho(float left, float right, float bottom, float top, float near, float far, Ark::RendererCoordinateSystem coordinateSystem);
+    void ortho(float left, float right, float bottom, float top, float clipNear, float clipFar);
+    void ortho(float left, float right, float bottom, float top, float clipNear, float clipFar, Ark::RendererCoordinateSystem coordinateSystem);
 //  [[script::bindings::auto]]
-    void frustum(float left, float right, float bottom, float top, float near, float far);
+    void frustum(float left, float right, float bottom, float top, float clipNear, float clipFar);
 //  [[script::bindings::auto]]
-    void perspective(float fov, float aspect, float near, float far);
+    void perspective(float fov, float aspect, float clipNear, float clipFar);
 
 //  [[script::bindings::auto]]
     void lookAt(const V3& position, const V3& target, const V3& up);
