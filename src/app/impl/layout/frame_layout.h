@@ -28,9 +28,9 @@ public:
 
 };
 
-class FrameLayoutNew : public LayoutNew {
+class FrameLayoutNew : public LayoutV2 {
 public:
-    virtual std::vector<sp<Numeric>> place(const std::vector<sp<Slot>>& children, const sp<Slot>& parent) override;
+    virtual std::vector<V2> place(const std::vector<sp<Slot>>& children, const sp<Slot>& parent) override;
 
 };
 

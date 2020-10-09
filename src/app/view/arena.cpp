@@ -139,7 +139,7 @@ sp<Arena> Arena::BUILDER::build(const Scope& args)
     const sp<ResourceLoader> resourceLoader = r1 ? r1 : sp<ResourceLoader>::make(_factory);
     const sp<Renderer> background = _background.empty() ? nullptr : resourceLoader->load<Renderer>(_background, args);
     const sp<Renderer> view = _view ? resourceLoader->load<Renderer>(_view, args) : nullptr;
-    const sp<Arena> arena = sp<Arena>::make(view ? view : sp<ViewGroup>::make(background, _layout->build(args), _layout_param->build(args)).cast<Renderer>(), resourceLoader);
+    const sp<Arena> arena = sp<Arena>::make(view ? view : sp<ViewGroup>::make(background, _layout->build(args), nullptr, _layout_param->build(args)).cast<Renderer>(), resourceLoader);
 
     BeanFactory& factory = resourceLoader->beanFactory();
     for(const document& i : _manifest->children())

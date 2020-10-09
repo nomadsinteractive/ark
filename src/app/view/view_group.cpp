@@ -15,10 +15,10 @@
 
 namespace ark {
 
-ViewGroup::ViewGroup(const Frame& background, const sp<Layout>& layout, const sp<LayoutParam>& layoutParam)
-    : View(!layoutParam && background ? sp<LayoutParam>::make(background.size()) : layoutParam), _background(background.renderer()), _layout_hierarchy(sp<LayoutHierarchy>::make(layout))
+ViewGroup::ViewGroup(const Frame& background, sp<Layout> layout, sp<LayoutV2> layoutV2, sp<LayoutParam> layoutParam)
+    : View(!layoutParam && background ? sp<LayoutParam>::make(background.size()) : std::move(layoutParam)), _background(background.renderer()), _layout_hierarchy(sp<LayoutHierarchy>::make(std::move(layout), std::move(layoutV2)))
 {
-    DCHECK(!layout || _layout_param, "Null LayoutParam. This would happen if your ViewGroup has neither background or size defined.");
+    DCHECK(!_layout_hierarchy->_layout || _layout_param, "Null LayoutParam. This would happen if your ViewGroup has neither background or size defined.");
     if(_layout_param && background)
         if(background.size() != _layout_param->size())
             background.size()->adopt(static_cast<sp<Size>>(_layout_param->size()));
@@ -70,7 +70,7 @@ ViewGroup::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Renderer> ViewGroup::BUILDER::build(const Scope& args)
 {
-    const sp<ViewGroup> viewGroup = sp<ViewGroup>::make(_background->build(args), _layout->build(args), _layout_param->build(args));
+    const sp<ViewGroup> viewGroup = sp<ViewGroup>::make(_background->build(args), _layout->build(args), nullptr, _layout_param->build(args));
     for(const document& i : _manifest->children())
     {
         const String& name = i->name();

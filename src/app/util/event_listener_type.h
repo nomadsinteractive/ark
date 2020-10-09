@@ -1,5 +1,5 @@
-#ifndef ARK_APP_UTIL_EVENT_LISTENER_UTIL_H_
-#define ARK_APP_UTIL_EVENT_LISTENER_UTIL_H_
+#ifndef ARK_APP_UTIL_EVENT_LISTENER_TYPE_H_
+#define ARK_APP_UTIL_EVENT_LISTENER_TYPE_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -11,7 +11,7 @@
 namespace ark {
 
 //[[script::bindings::class("EventListener")]]
-class ARK_API EventListenerUtil {
+class ARK_API EventListenerType {
 public:
 //[[script::bindings::constructor]]
     static sp<EventListener> create(const sp<EventListener>& eventListener);

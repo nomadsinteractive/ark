@@ -1,5 +1,5 @@
-#ifndef ARK_APP_VIEW_CALCULATED_LAYOUT_H_
-#define ARK_APP_VIEW_CALCULATED_LAYOUT_H_
+#ifndef ARK_APP_VIEW_LAYOUT_HIERARCHY_H_
+#define ARK_APP_VIEW_LAYOUT_HIERARCHY_H_
 
 #include <vector>
 
@@ -61,7 +61,7 @@ private:
     };
 
 public:
-    LayoutHierarchy(const sp<Layout>& layout);
+    LayoutHierarchy(sp<Layout> layout, sp<LayoutV2> layoutV2);
 
     virtual void traverse(const Visitor& visitor) override;
 
@@ -80,10 +80,13 @@ private:
 
 private:
     sp<Layout> _layout;
+    sp<LayoutV2> _layout_v2;
     V3 _layout_size;
 
     std::vector<sp<Slot>> _slots;
     std::vector<sp<Slot>> _incremental;
+
+    friend class ViewGroup;
 };
 
 }

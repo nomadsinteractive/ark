@@ -19,6 +19,7 @@ class EventDispatcher;
 class EventListener;
 class EventListenerList;
 class Layout;
+class LayoutV2;
 class LayoutParam;
 class LayoutHierarchy;
 class Level;

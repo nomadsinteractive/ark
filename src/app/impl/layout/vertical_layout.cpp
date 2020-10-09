@@ -17,10 +17,11 @@ VerticalLayout::VerticalLayout(const LayoutParam::Gravity gravity)
 
 void VerticalLayout::begin(Context& ctx, LayoutParam& /*layoutParam*/)
 {
+    float contentHeight = 0;
     for(const sp<LayoutParam>& i : ctx._layout_param_descriptor())
-        ctx._content_height += i->offsetHeight();
+        contentHeight += i->offsetHeight();
 
-    _content_available = ctx._client_height - ctx._content_height;
+    _content_available = ctx._client_height - contentHeight;
     _flowy = 0.0f;
     _max_width = 0.0f;
 }

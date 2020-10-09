@@ -32,8 +32,8 @@ template<> ARK_API View::State Conversions::to<String, View::State>(const String
     return View::STATE_DEFAULT;
 }
 
-View::View(const sp<LayoutParam>& layoutParam)
-    : _layout_param(layoutParam), _state(sp<State>::make(STATE_DEFAULT))
+View::View(sp<LayoutParam> layoutParam)
+    : _layout_param(std::move(layoutParam)), _state(sp<State>::make(STATE_DEFAULT))
 {
 }
 

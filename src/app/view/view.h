@@ -43,7 +43,7 @@ private:
     };
 
 public:
-    View(const sp<LayoutParam>& layoutParam);
+    View(sp<LayoutParam> layoutParam);
     View(const sp<Size>& size);
 
     virtual const sp<Size>& size() override;

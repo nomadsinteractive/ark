@@ -6,6 +6,7 @@
 #include "graphics/base/size.h"
 
 #include "app/impl/layout/gravity_layout.h"
+#include "app/util/layout_util.h"
 #include "app/view/view.h"
 
 
@@ -19,9 +20,10 @@ HorizontalLayout::HorizontalLayout(const LayoutParam::Gravity& gravity)
 
 void HorizontalLayout::begin(Context& ctx, LayoutParam& /*layoutParam*/)
 {
+    float contentWidth = 0;
     for(const sp<LayoutParam>& i : ctx._layout_param_descriptor())
-        ctx._content_width += i->offsetWidth();
-    _content_available = ctx._client_width - ctx._content_width;
+        contentWidth += i->offsetWidth();
+    _content_available = ctx._client_width - contentWidth;
     _flowx = 0.0f;
     _max_height = 0.0f;
 }
@@ -49,11 +51,6 @@ HorizontalLayout::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& doc)
 sp<Layout> HorizontalLayout::BUILDER::build(const Scope& /*args*/)
 {
     return sp<Layout>::adopt(new HorizontalLayout(_gravity));
-}
-
-std::vector<sp<Numeric>> HorizontalLayoutNew::place(const std::vector<sp<LayoutNew::Slot> >& children, const sp<Slot>& parent)
-{
-    return std::vector<sp<Numeric>>();
 }
 
 }

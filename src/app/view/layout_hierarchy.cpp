@@ -122,8 +122,8 @@ sp<LayoutParam> LayoutHierarchy::Slot::getLayoutParam() const
     return _view ? static_cast<sp<LayoutParam>>(_view->layoutParam()) : nullptr;
 }
 
-LayoutHierarchy::LayoutHierarchy(const sp<Layout>& layout)
-    : _layout(layout)
+LayoutHierarchy::LayoutHierarchy(sp<Layout> layout, sp<LayoutV2> layoutV2)
+    : _layout(std::move(layout)), _layout_v2(std::move(layoutV2))
 {
 }
 

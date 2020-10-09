@@ -38,12 +38,6 @@ private:
     float _max_height;
 };
 
-class HorizontalLayoutNew : public LayoutNew {
-public:
-    virtual std::vector<sp<Numeric>> place(const std::vector<sp<Slot>>& children, const sp<Slot>& parent) override;
-
-};
-
 }
 
 #endif
