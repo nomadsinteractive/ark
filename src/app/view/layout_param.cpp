@@ -23,8 +23,8 @@ template<> ARK_API LayoutParam::Display Conversions::to<String, LayoutParam::Dis
     return LayoutParam::DISPLAY_BLOCK;
 }
 
-LayoutParam::LayoutParam(const sp<Size>& size, LayoutParam::Display display, Gravity gravity)
-    : _size(Null::toSafe(size)), _margins(nullptr), _display(display), _gravity(gravity)
+LayoutParam::LayoutParam(const sp<Size>& size, LayoutParam::Display display, Gravity gravity, float weight)
+    : _size(Null::toSafe(size)), _margins(nullptr), _display(display), _gravity(gravity), _weight(weight)
 {
 }
 
@@ -122,6 +122,16 @@ void LayoutParam::setGravity(LayoutParam::Gravity gravity)
     _gravity = gravity;
 }
 
+float LayoutParam::weight() const
+{
+    return _weight;
+}
+
+void LayoutParam::setWeight(float weight)
+{
+    _weight = weight;
+}
+
 const SafeVar<Vec4>& LayoutParam::margins() const
 {
     return _margins;
@@ -174,10 +184,10 @@ template<> ARK_API sp<LayoutParam> Null::ptr()
 
 template<> ARK_API LayoutParam::Gravity Conversions::to<String, LayoutParam::Gravity>(const String& s)
 {
-    if(s == "none")
-        return LayoutParam::GRAVITY_NONE;
+    if(s == "default")
+        return LayoutParam::GRAVITY_DEFAULT;
 
-    uint32_t gravity = LayoutParam::GRAVITY_NONE;
+    uint32_t gravity = 0;
     for(const String& i : s.split('|'))
     {
         const String str = i.strip();

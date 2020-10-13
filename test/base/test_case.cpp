@@ -4,7 +4,6 @@
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/util/documents.h"
 
-
 #include "app/base/application_context.h"
 
 namespace ark {
@@ -18,10 +17,7 @@ TestCase::TestCase(const String& factoryFile)
 sp<BeanFactory> TestCase::getBeanFactory() const
 {
     const document doc = Documents::loadFromReadable(Ark::instance().openAsset(_factory_file));
-    if(!doc) {
-        printf("%s not found!\n", _factory_file.c_str());
-        return nullptr;
-    }
+    DCHECK(doc, "%s not found!", _factory_file.c_str());
     const sp<Dictionary<document>> byId = sp<DictionaryByAttributeName>::make(doc, "id");
     return Ark::instance().createBeanFactory(byId);
 }

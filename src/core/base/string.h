@@ -33,6 +33,9 @@ public:
     size_type find(char c, size_type pos = 0) const;
     size_type rfind(char c) const;
 
+    const char& front() const;
+    const char& back() const;
+
     String strip() const;
     String lstrip(char c) const;
     String rstrip(char c) const;

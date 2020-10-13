@@ -734,6 +734,9 @@ class Level:
     def get_render_object(self, name: str) -> 'RenderObject':
         pass
 
+    def get_rigid_body(self, name: str) -> 'RigidBody':
+        pass
+
 
 class RenderObject:
     def __init__(self, t, pos=None, size=None, transform=None, varyings=None):

@@ -12,9 +12,9 @@ namespace ark {
 class HorizontalLayoutV2 : public LayoutV2 {
 public:
 
-    virtual V2 inflate(const std::vector<sp<Slot>>& children) override;
+    virtual V2 inflate(const std::vector<sp<LayoutParam>>& slots) override;
 
-    virtual std::vector<V2> place(const std::vector<sp<Slot>>& children, const sp<Slot>& parent) override;
+    virtual std::vector<V2> place(const std::vector<sp<LayoutParam>>& children, const LayoutParam& parent) override;
 
 //  [[plugin::builder::by-value("horizontal")]]
     class BUILDER : public Builder<LayoutV2> {

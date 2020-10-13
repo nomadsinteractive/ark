@@ -116,7 +116,7 @@ aiMatrix4x4 AnimateUtil::interpolateScale(float time, const aiNodeAnim* pNodeAni
 
 const aiNodeAnim* AnimateUtil::findNodeAnim(const aiAnimation* animation, const String& nodeName)
 {
-    for (uint32_t i = 0; i < animation->mNumChannels; ++i)
+    for(uint32_t i = 0; i < animation->mNumChannels; ++i)
     {
         const aiNodeAnim* nodeAnim = animation->mChannels[i];
         if (nodeName == nodeAnim->mNodeName.C_Str())

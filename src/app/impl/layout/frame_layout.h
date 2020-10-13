@@ -20,7 +20,16 @@ public:
 //  [[plugin::builder("frame")]]
     class BUILDER : public Builder<Layout> {
     public:
-        BUILDER();
+        BUILDER() = default;
+
+        virtual sp<Layout> build(const Scope& args) override;
+
+    };
+
+//  [[plugin::builder::by-value("frame")]]
+    class DICTIONARY : public Builder<Layout> {
+    public:
+        DICTIONARY() = default;
 
         virtual sp<Layout> build(const Scope& args) override;
 
@@ -30,7 +39,7 @@ public:
 
 class FrameLayoutNew : public LayoutV2 {
 public:
-    virtual std::vector<V2> place(const std::vector<sp<Slot>>& children, const sp<Slot>& parent) override;
+    virtual std::vector<V2> place(const std::vector<sp<LayoutParam>>& slots, const LayoutParam& parent) override;
 
 };
 

@@ -29,7 +29,7 @@ Button::~Button()
 void Button::render(RenderRequest& renderRequest, const V3& position)
 {
     _background->render(renderRequest, position);
-    if(_gravity != LayoutParam::GRAVITY_NONE)
+    if(_gravity != LayoutParam::GRAVITY_DEFAULT)
     {
         const sp<Renderer>& fg = _foreground->getRendererByCurrentStatus();
         if(fg)

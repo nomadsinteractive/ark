@@ -16,20 +16,6 @@
 
 namespace ark {
 
-namespace {
-
-struct Library {
-    Library(const Level::RenderObjectLibrary::Instance& renderObjectInstance, const Level::RigidBodyLibrary::Instance* rigidBodyInstance, const V3& dimensions)
-        : _render_object_instance(&renderObjectInstance), _rigid_body_instance(rigidBodyInstance), _dimensions(dimensions) {
-    }
-
-    const Level::RenderObjectLibrary::Instance* _render_object_instance;
-    const Level::RigidBodyLibrary::Instance* _rigid_body_instance;
-    V3 _dimensions;
-};
-
-}
-
 Level::Level(std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights, std::map<String, RenderObjectLibrary::Instance> renderObjects, std::map<String, RigidBodyLibrary::Instance> rigidBodies)
     : _cameras(std::move(cameras)), _lights(std::move(lights)), _render_object_libraries(std::move(renderObjects)), _rigid_body_libraries(std::move(rigidBodies))
 {
@@ -72,17 +58,17 @@ void Level::load(const String& src)
                 const String& rotation = Documents::ensureAttribute(j, "rotation");
                 sp<Transform> transform = makeTransform(rotation, scale);
                 sp<RenderObject> renderObject = sp<RenderObject>::make(type, sp<Vec3::Const>::make(parseVector<V3>(position)), nullptr, transform);
+                sp<RigidBody> rigidBody = makeRigidBody(it1->second, renderObject);
                 if(name)
-                {
                     _render_objects[name] = renderObject;
-                    const RigidBodyLibrary::Instance* rigidBodyLibray = it1->second._rigid_body_instance;
-                    if(rigidBodyLibray)
-                    {
-                        const V3& dimension = it1->second._dimensions;
-                        _rigid_objects[name] = rigidBodyLibray->_object->createBody(Collider::BODY_TYPE_STATIC, rigidBodyLibray->_type, renderObject->position(), sp<Size>::make(dimension.x(), dimension.y(), dimension.z()), renderObject->transform()->rotation());
-                        _rigid_objects[name]->bind(renderObject);
-                    }
+                if(rigidBody)
+                {
+                    if(name)
+                        _rigid_objects[name] = std::move(rigidBody);
+                    else
+                        _unnamed_rigid_objects.push_back(std::move(rigidBody));
                 }
+
                 layer->addRenderObject(renderObject);
             }
             else if(clazz == "CAMERA")
@@ -133,6 +119,24 @@ sp<RenderObject> Level::getRenderObject(const String& name) const
     return iter != _render_objects.end() ? iter->second : nullptr;
 }
 
+sp<RigidBody> Level::getRigidBody(const String& name) const
+{
+    const auto iter = _rigid_objects.find(name);
+    return iter != _rigid_objects.end() ? iter->second : nullptr;
+}
+
+sp<RigidBody> Level::makeRigidBody(const Library& library, const sp<RenderObject>& renderObject) const
+{
+    const RigidBodyLibrary::Instance* rigidBodyLibray = library._rigid_body_instance;
+    if(!rigidBodyLibray)
+        return nullptr;
+
+    const V3& dimension = library._dimensions;
+    sp<RigidBody> rigidBody = rigidBodyLibray->_object->createBody(Collider::BODY_TYPE_STATIC, rigidBodyLibray->_type, renderObject->position(), sp<Size>::make(dimension.x(), dimension.y(), dimension.z()), renderObject->transform()->rotation());
+    rigidBody->bind(renderObject);
+    return rigidBody;
+}
+
 sp<Transform> Level::makeTransform(const String& rotation, const String& scale) const
 {
     const V3 s = scale ? parseVector<V3>(scale) : V3(1.0f);
@@ -164,6 +168,11 @@ sp<Level> Level::BUILDER::build(const Scope& args)
     std::map<String, RigidBodyLibrary::Instance> rigidBodies = loadNamedTypeInstances<Collider>(_rigid_object_libraries, args);
 
     return sp<Level>::make(std::move(cameras), std::move(lights), std::move(instanceLibraries), std::move(rigidBodies));
+}
+
+Level::Library::Library(const RenderObjectLibrary::Instance& renderObjectInstance, const RigidBodyLibrary::Instance* rigidBodyInstance, const V3& dimensions)
+    : _render_object_instance(&renderObjectInstance), _rigid_body_instance(rigidBodyInstance), _dimensions(dimensions)
+{
 }
 
 }

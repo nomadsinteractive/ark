@@ -1,4 +1,4 @@
-#include "graphics/impl/flatable/flatable_color4f_array.h"
+#include "graphics/impl/input/flatable_color4f_array.h"
 
 #include "core/inf/array.h"
 #include "core/base/bean_factory.h"

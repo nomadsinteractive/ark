@@ -12,7 +12,6 @@
 
 #include "app/forwarding.h"
 #include "app/view/view.h"
-#include "app/view/layout_param.h"
 
 namespace ark {
 
@@ -42,14 +41,8 @@ class ARK_API LayoutV2 {
 public:
     virtual ~LayoutV2() = default;
 
-    struct Slot {
-        V2 _size;
-        float _weight;
-        LayoutParam::Gravity _gravity;
-    };
-
-    virtual V2 inflate(const std::vector<sp<Slot>>& children) = 0;
-    virtual std::vector<V2> place(const std::vector<sp<Slot>>& children, const sp<Slot>& parent) = 0;
+    virtual V2 inflate(const std::vector<sp<LayoutParam>>& slots) = 0;
+    virtual std::vector<V2> place(const std::vector<sp<LayoutParam>>& slots, const LayoutParam& parent) = 0;
 
 };
 

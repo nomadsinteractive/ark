@@ -1,4 +1,4 @@
-#include "graphics/impl/flatable/flatable_v2f.h"
+#include "graphics/impl/input/flatable_v2f.h"
 
 #include "core/base/bean_factory.h"
 #include "core/base/bean_factory.h"

@@ -77,6 +77,7 @@ private:
     bool isLayoutNeeded(const LayoutParam& layoutParam);
 
     std::vector<sp<LayoutParam>> getLayoutParams() const;
+    std::pair<std::vector<sp<Slot>>, std::vector<sp<LayoutParam>>> getLayoutItems() const;
 
 private:
     sp<Layout> _layout;

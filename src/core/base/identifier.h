@@ -28,6 +28,7 @@ public:
     const String& arg() const;
     const String& ref() const;
     const String& val() const;
+    const String& valType() const;
 
     const Table<String, String>& queries() const;
 
@@ -48,6 +49,7 @@ private:
     Identifier(IdType type, const String& package, const String& val, const String& queries);
 
     static bool parseAndVaildate(const String& s, String& package, String& val, String& queries, Format format);
+    static void parseValueType(const String& s, String& value, String& type);
 
     void parseQueries(const String& queries);
 
@@ -55,7 +57,9 @@ private:
     IdType _type;
 
     String _package;
+
     String _value;
+    String _value_type;
 
     Table<String, String> _queries;
 

@@ -15,6 +15,8 @@ RigidBodyBullet::Stub::Stub(ColliderBullet world, sp<CollisionShape> shape, cons
 RigidBodyBullet::Stub::~Stub()
 {
     _world.btDynamicWorld()->removeRigidBody(_rigid_body->ptr());
+    delete reinterpret_cast<WeakPtr<RigidBody::Stub>*>(_rigid_body->ptr()->getUserPointer());
+    _rigid_body->ptr()->setUserPointer(nullptr);
     _rigid_body->reset();
 }
 
@@ -48,11 +50,11 @@ RigidBodyBullet::RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBu
 {
     stub()->_position = sp<Position>::make(_stub);
     stub()->_transform = sp<Transform>::make(sp<TransformDelegate>::make(_stub));
-    _stub->_rigid_body->ptr()->setUserPointer(reinterpret_cast<void*>(&stub()));
+    _stub->_rigid_body->ptr()->setUserPointer(reinterpret_cast<void*>(new WeakPtr<RigidBody::Stub>(stub())));
 }
 
-RigidBodyBullet::RigidBodyBullet(const sp<RigidBody::Stub>& other)
-    : RigidBody(other), _stub(stub()->_impl.unpack<Stub>())
+RigidBodyBullet::RigidBodyBullet(sp<RigidBody::Stub> other)
+    : RigidBody(std::move(other)), _stub(stub()->_impl.unpack<Stub>())
 {
 }
 

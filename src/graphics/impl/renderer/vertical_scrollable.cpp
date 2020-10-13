@@ -101,7 +101,7 @@ void VerticalScrollable::ensureTile(RendererTile& tile, int32_t position)
 
 float VerticalScrollable::toTileOffset(int32_t offset, int32_t gs)
 {
-    return _height - _tile_height - offset + gs;
+    return static_cast<float>(_height - _tile_height - offset + gs);
 }
 
 VerticalScrollable::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

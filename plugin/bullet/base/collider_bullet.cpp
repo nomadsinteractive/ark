@@ -82,8 +82,7 @@ void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<Colli
         btVector3 p = btFrom.lerp(btTo, closestResults.m_closestHitFraction);
         const btVector3& n = closestResults.m_hitNormalWorld;
         CollisionManifold manifold(V3(p.x(), p.y(), p.z()), V3(n.x(), n.y(), n.z()));
-        sp<RigidBody::Stub>& stub = *reinterpret_cast<sp<RigidBody::Stub>*>(closestResults.m_collisionObject->getUserPointer());
-        callback->onBeginContact(sp<RigidBodyBullet>::make(stub), manifold);
+        callback->onBeginContact(sp<RigidBodyBullet>::make(getRigidBodyFromCollisionObject(closestResults.m_collisionObject)), manifold);
     }
 }
 
@@ -186,7 +185,10 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
 
 RigidBodyBullet ColliderBullet::getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject)
 {
-    return RigidBodyBullet(*reinterpret_cast<sp<RigidBody::Stub>*>(collisionObject->getUserPointer()));
+    WeakPtr<RigidBody::Stub>* stubPtr = reinterpret_cast<WeakPtr<RigidBody::Stub>*>(collisionObject->getUserPointer());
+    sp<RigidBody::Stub> stub = stubPtr->lock();
+    DCHECK(stub, "Unable to aquire RigidBody reference, this could happen when you've not keep the reference of the RigidBody");
+    return RigidBodyBullet(std::move(stub));
 }
 
 void ColliderBullet::addTickContactInfo(const sp<BtRigidBodyRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<BtRigidBodyRef>& contact, const V3& cp, const V3& normal)

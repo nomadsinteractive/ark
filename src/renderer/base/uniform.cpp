@@ -128,7 +128,7 @@ const sp<Input>& Uniform::flatable() const
     return _flatable;
 }
 
-void Uniform::setFlatable(const sp<Input>& flatable)
+void Uniform::setInput(const sp<Input>& flatable)
 {
     _flatable = flatable;
 }

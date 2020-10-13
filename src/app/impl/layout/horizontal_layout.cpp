@@ -53,4 +53,14 @@ sp<Layout> HorizontalLayout::BUILDER::build(const Scope& /*args*/)
     return sp<Layout>::adopt(new HorizontalLayout(_gravity));
 }
 
+HorizontalLayout::DICTIONARY::DICTIONARY(const String& value)
+    : _gravity(Strings::parse<LayoutParam::Gravity>(value))
+{
+}
+
+sp<Layout> HorizontalLayout::DICTIONARY::build(const Scope& /*args*/)
+{
+    return sp<HorizontalLayout>::make(_gravity);
+}
+
 }

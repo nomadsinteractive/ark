@@ -1,44 +1,49 @@
 #include "app/impl/layout/horizontal_layout_v2.h"
 
+#include "core/util/math.h"
+
 #include "app/util/layout_util.h"
 #include "app/view/view.h"
 
 namespace ark {
 
-V2 HorizontalLayoutV2::inflate(const std::vector<sp<LayoutV2::Slot>>& children)
+V2 HorizontalLayoutV2::inflate(const std::vector<sp<LayoutParam>>& children)
 {
     float width = 0, height = 0;
-    for(const sp<LayoutV2::Slot>& i : children)
+    for(const sp<LayoutParam>& i : children)
     {
-        width += i->_size.x();
-        height = std::max(i->_size.y(), height);
+        width += i->offsetWidth();
+        height = std::max(i->offsetHeight(), height);
     }
     return V2(width, height);
 }
 
-std::vector<V2> HorizontalLayoutV2::place(const std::vector<sp<LayoutV2::Slot>>& children, const sp<Slot>& parent)
+std::vector<V2> HorizontalLayoutV2::place(const std::vector<sp<LayoutParam>>& slots, const LayoutParam& parent)
 {
-    std::vector<V2> slots;
+    std::vector<V2> positions;
     float weights = 0;
-    float spaceAvailable = parent->_size.x();
-    for(const sp<LayoutV2::Slot>& i : children)
+    float spaceAvailable = parent.contentWidth();
+    for(const sp<LayoutParam>& i : slots)
     {
-        weights += i->_weight;
-        spaceAvailable -= i->_size.x();
+        weights += i->weight();
+        spaceAvailable -= i->offsetWidth();
     }
 
     float unitWeight = weights == 0 ? 0 : spaceAvailable / weights;
-    Rect r(0, 0, parent->_size.x(), parent->_size.y());
+    Rect r(0, 0, parent.contentWidth(), parent.contentHeight());
 
-    for(const sp<LayoutV2::Slot>& i : children)
+    for(const sp<LayoutParam>& i : slots)
     {
-        float width = i->_weight == 0 ? i->_size.x() : i->_weight * unitWeight;
-        spaceAvailable -= i->_size.x();
-        slots.push_back(LayoutUtil::place(i->_gravity, V2(width, i->_size.y()), r));
-        r.setLeft(r.left() + width);
+        float width = i->weight() == 0 ? i->offsetWidth() : i->weight() * unitWeight;
+        const V2 pos = LayoutUtil::place(i->gravity(), V2(width, i->offsetHeight()), r);
+        positions.push_back(pos);
+        if(Math::almostEqual(pos.x(), r.left()))
+            r.setLeft(r.left() + width);
+        else
+            r.setRight(r.left());
     }
 
-    return slots;
+    return positions;
 }
 
 sp<LayoutV2> HorizontalLayoutV2::BUILDER::build(const Scope& /*args*/)

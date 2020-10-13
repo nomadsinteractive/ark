@@ -1,4 +1,4 @@
-#include "graphics/impl/flatable/flatable_color3b.h"
+#include "graphics/impl/input/flatable_color3b.h"
 
 #include "core/inf/variable.h"
 #include "core/inf/variable.h"

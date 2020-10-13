@@ -13,6 +13,7 @@
 #include "core/util/strings.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/v3.h"
 
 #include "renderer/forwarding.h"
 
@@ -51,6 +52,9 @@ public:
 //  [[script::bindings::auto]]
     sp<RenderObject> getRenderObject(const String& name) const;
 
+//  [[script::bindings::auto]]
+    sp<RigidBody> getRigidBody(const String& name) const;
+
 //  [[plugin::builder]]
     class BUILDER : public Builder<Level> {
     public:
@@ -82,6 +86,14 @@ public:
     };
 
 private:
+    struct Library {
+        Library(const RenderObjectLibrary::Instance& renderObjectInstance, const RigidBodyLibrary::Instance* rigidBodyInstance, const V3& dimensions);
+
+        const RenderObjectLibrary::Instance* _render_object_instance;
+        const RigidBodyLibrary::Instance* _rigid_body_instance;
+        V3 _dimensions;
+    };
+
     template<typename T> T parseVector(const String& value) const {
         T vector(0);
         std::vector<String> splitted = Strings::unwrap(value, '(', ')').split(',');
@@ -91,6 +103,7 @@ private:
         return vector;
     }
 
+    sp<RigidBody> makeRigidBody(const Library& library, const sp<RenderObject>& renderObject) const;
     sp<Transform> makeTransform(const String& rotation, const String& scale) const;
 
 private:

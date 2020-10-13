@@ -1,4 +1,4 @@
-#include "graphics/impl/flatable/flatable_mat4fv.h"
+#include "graphics/impl/input/flatable_mat4fv.h"
 
 #include "core/inf/array.h"
 #include "core/inf/variable.h"

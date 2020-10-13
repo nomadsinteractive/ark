@@ -21,22 +21,21 @@ public:
     };
 //  [[script::bindings::enumeration]]
     enum Gravity {
-        GRAVITY_NONE = 0,
+        GRAVITY_DEFAULT = 0,
         GRAVITY_LEFT = 1,
         GRAVITY_RIGHT = 2,
         GRAVITY_CENTER_HORIZONTAL = 3,
         GRAVITY_TOP = 4,
         GRAVITY_BOTTOM = 8,
         GRAVITY_CENTER_VERTICAL = 12,
-        GRAVITY_CENTER = GRAVITY_CENTER_VERTICAL | GRAVITY_CENTER_HORIZONTAL,
-        GRAVITY_DEFAULT = GRAVITY_CENTER
+        GRAVITY_CENTER = GRAVITY_CENTER_VERTICAL | GRAVITY_CENTER_HORIZONTAL
     };
 
     static const int32_t MATCH_PARENT;
     static const int32_t WRAP_CONTENT;
 
 public:
-    LayoutParam(const sp<Size>& size, Display display = DISPLAY_BLOCK, Gravity gravity = GRAVITY_NONE);
+    LayoutParam(const sp<Size>& size, Display display = DISPLAY_BLOCK, Gravity gravity = GRAVITY_DEFAULT, float weight = 0);
     LayoutParam(const LayoutParam& other) = default;
 
     float calcLayoutWidth(float available);
@@ -63,11 +62,20 @@ public:
     const sp<Boolean>& stopPropagation() const;
     void setStopPropagation(sp<Boolean> stopPropagation);
 
-    Display display() const;
-    void setDisplay(Display display);
+//  [[script::bindings::property]]
+    LayoutParam::Display display() const;
+//  [[script::bindings::property]]
+    void setDisplay(LayoutParam::Display display);
 
-    Gravity gravity() const;
-    void setGravity(Gravity gravity);
+//  [[script::bindings::property]]
+    LayoutParam::Gravity gravity() const;
+//  [[script::bindings::property]]
+    void setGravity(LayoutParam::Gravity gravity);
+
+//  [[script::bindings::property]]
+    float weight() const;
+//  [[script::bindings::property]]
+    void setWeight(float weight);
 
     const SafeVar<Vec4>& margins() const;
     void setMargins(sp<Vec4> margins);
@@ -98,6 +106,7 @@ private:
 
     Display _display;
     Gravity _gravity;
+    float _weight;
 };
 
 }

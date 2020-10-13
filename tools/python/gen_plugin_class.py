@@ -149,7 +149,7 @@ class Decorator(Annotation):
 
 
 def find_main_class(content):
-    m = re.search(r'class\s+(?:[\w\d]+\s+)*?([\w\d]+)(?:\s+final\s*)?(?:\s*:[^{]+|\s*)\{', content)
+    m = re.search(r'class\s+(?:[\w\d]+\s+)*?([\w\d]+)(?:\s+final\s*)?(?:\s*:[^{]+|\s*){', content)
     return m.group(1) if m else None
 
 
@@ -159,12 +159,14 @@ def parse_function_arguments(funcname, content):
 
 
 def parse_arguments(args):
-    l = [i.split() for i in args.split(',')]
+    arglist = [i.split() for i in args.split(',')]
+
     def parse_type_name(s):
         if len(s) == 1:
-            return (s[-1].strip('&'), '')
-        return (s[-2].strip('&'), s[-1].strip('&'))
-    return [parse_type_name(i) for i in l if len(i)]
+            return s[-1].strip('&'), ''
+        return s[-2].strip('&'), s[-1].strip('&')
+
+    return [parse_type_name(i) for i in arglist if len(i)]
 
 
 def get_plugin_arguments():

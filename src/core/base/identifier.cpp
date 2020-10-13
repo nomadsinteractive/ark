@@ -10,6 +10,9 @@ Identifier::Identifier(IdType type, const String& package, const String& value, 
 {
     if(queries)
         parseQueries(queries);
+
+    if(type == ID_TYPE_VALUE)
+        parseValueType(String(_value), _value_type, _value);
 }
 
 Identifier Identifier::parse(const String& s, Format format)
@@ -56,6 +59,11 @@ const String& Identifier::val() const
     return _type == ID_TYPE_VALUE ? _value : String::null();
 }
 
+const String& Identifier::valType() const
+{
+    return _type == ID_TYPE_VALUE ? _value_type : String::null();
+}
+
 const Table<String, String>& Identifier::queries() const
 {
     return _queries;
@@ -97,6 +105,17 @@ bool Identifier::parseAndVaildate(const String& s, String& package, String& valu
     if(FORMAT_NAMESPACE_STRICT == format)
         return Strings::isVariableName(package) && Strings::isVariableName(value);
     return true;
+}
+
+void Identifier::parseValueType(const String& s, String& value, String& type)
+{
+    const auto pos = s.find('(');
+    if(pos != String::npos)
+    {
+        DCHECK(s.back() == ')', "Illegal type-value string: %s", s.c_str());
+        value = s.substr(0, pos);
+        type = s.substr(pos + 1, s.length() - 1);
+    }
 }
 
 void Identifier::parseQueries(const String& queries)

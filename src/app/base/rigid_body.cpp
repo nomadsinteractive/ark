@@ -27,8 +27,8 @@ RigidBody::RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& positi
 {
 }
 
-RigidBody::RigidBody(const sp<RigidBody::Stub>& stub)
-    : _stub(stub)
+RigidBody::RigidBody(sp<Stub> stub)
+    : _stub(std::move(stub))
 {
 }
 

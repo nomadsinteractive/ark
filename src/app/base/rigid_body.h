@@ -40,6 +40,8 @@ public:
         Stub(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, Box impl, const sp<Disposed>& disposed = nullptr);
         ~Stub();
 
+        DISALLOW_COPY_AND_ASSIGN(Stub);
+
         int32_t _id;
         Collider::BodyType _type;
         SafePtr<Vec3> _position;
@@ -59,7 +61,7 @@ public:
     virtual ~RigidBody() override = default;
 
     RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, Box impl, const sp<Disposed>& disposed = nullptr);
-    RigidBody(const sp<Stub>& stub);
+    RigidBody(sp<Stub> stub);
 
 //  [[script::bindings::auto]]
     virtual void dispose() = 0;

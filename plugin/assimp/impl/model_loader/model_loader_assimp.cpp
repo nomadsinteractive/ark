@@ -80,30 +80,31 @@ void ModelImporterAssimp::loadNodeHierarchy(const aiNode* node, NodeTable& nodes
         loadNodeHierarchy(node->mChildren[i], nodes, nodeIds);
 }
 
-void ModelImporterAssimp::loadAnimates(Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, const sp<Assimp::Importer>& importer, const NodeTable& nodes, const AnimationAssimpNodes::NodeLoaderCallback& callback) const
+void ModelImporterAssimp::loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, Node>& nodes, const AnimationAssimpNodes::NodeLoaderCallback& callback) const
 {
     for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
     {
         const aiAnimation* animation = scene->mAnimations[i];
-        animates.push_back(animation->mName.C_Str(), sp<AnimationAssimpNodes>::make(importer, animation, scene->mRootNode, globalTransformation, nodes, callback));
+        animates.push_back(animation->mName.C_Str(), sp<AnimationAssimpNodes>::make(tps, animation, scene->mRootNode, globalTransformation, nodes, callback));
     }
 }
 
-void ModelImporterAssimp::loadAnimates(Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, sp<Assimp::Importer> importer, NodeTable nodes, AnimationAssimpNodes::NodeLoaderCallback callback, String name, String alias) const
+void ModelImporterAssimp::loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, Node>& nodes, const AnimationAssimpNodes::NodeLoaderCallback& callback, String name, String alias) const
 {
     for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
     {
-        const aiAnimation* animation = scene->mAnimations[i];
-        if(name == animation->mName.C_Str())
+        const aiAnimation* animate = scene->mAnimations[i];
+        if(name == animate->mName.C_Str())
         {
+            sp<Animation> animation = sp<AnimationAssimpNodes>::make(tps, animate, scene->mRootNode, globalTransformation, nodes, callback);
             if(alias)
             {
                 if(animates.has(name))
                     name = std::move(alias);
                 else
-                    animates.push_back(std::move(alias), sp<AnimationAssimpNodes>::make(importer, animation, scene->mRootNode, globalTransformation, nodes, callback));
+                    animates.push_back(std::move(alias), animation);
             }
-            animates.push_back(std::move(name), sp<AnimationAssimpNodes>::make(std::move(importer), animation, scene->mRootNode, globalTransformation, std::move(nodes), std::move(callback)));
+            animates.push_back(std::move(name), std::move(animation));
             break;
         }
     }
@@ -113,7 +114,7 @@ Model ModelImporterAssimp::import(const document& manifest, MaterialBundle& mate
 {
     const sp<Assimp::Importer> importer = sp<Assimp::Importer>::make();
     const String& src = Documents::ensureAttribute(manifest, Constants::Attributes::SRC);
-    return loadModel(loadScene(importer, src), materialBundle, importer, manifest);
+    return loadModel(loadScene(importer, src), materialBundle, manifest);
 }
 
 const aiScene* ModelImporterAssimp::loadScene(const sp<Assimp::Importer>& importer, const String& src, bool checkMeshes) const
@@ -174,7 +175,7 @@ NodeTable ModelImporterAssimp::loadNodes(const aiNode* node, Model& model) const
     return nodes;
 }
 
-Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& materialBundle, const sp<Assimp::Importer>& importer, const document& manifest) const
+Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& materialBundle, const document& manifest) const
 {
     std::vector<Mesh> meshes;
     element_index_t vertexBase = 0;
@@ -224,18 +225,20 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         Table<String, sp<Animation>> animates;
         AnimationAssimpNodes::NodeLoaderCallback callback = noBones ? callbackNodeAnimation : callbackBoneAnimation;
         NodeTable nodes = noBones ? loadNodes(scene->mRootNode, model) : std::move(bones);
-        loadAnimates(animates, scene, globalAnimationTransform, importer, nodes, callback);
+        float defaultTps = Documents::getAttribute<float>(manifest, "tps", 60.0f);
+        loadAnimates(defaultTps, animates, scene, globalAnimationTransform, nodes.nodes(), callback);
         for(const auto& i : animateManifests)
         {
             sp<Assimp::Importer> importer = sp<Assimp::Importer>::make();
             const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
             String name = Documents::getAttribute(i, Constants::Attributes::NAME);
             String alias = Documents::getAttribute(i, "alias");
+            float tps = Documents::getAttribute<float>(i, "tps", defaultTps);
             const aiScene* animateScene = loadScene(importer, src, false);
             if(name)
-                loadAnimates(animates, animateScene, globalAnimationTransform, std::move(importer), nodes, callback, std::move(name), std::move(alias));
+                loadAnimates(tps, animates, animateScene, globalAnimationTransform, nodes.nodes(), callback, std::move(name), std::move(alias));
             else
-                loadAnimates(animates, animateScene, globalAnimationTransform, importer, nodes, callback);
+                loadAnimates(tps, animates, animateScene, globalAnimationTransform, nodes.nodes(), callback);
         }
 
         model.setAnimations(std::move(animates));
@@ -281,24 +284,14 @@ V3 ModelImporterAssimp::yUp2zUp(const V3& p, bool upSign)
     return V3(p.x(), upSign ? -p.z() : p.z(), upSign ? p.y() : -p.y());
 }
 
-void ModelImporterAssimp::callbackNodeAnimation(Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform)
+aiMatrix4x4 ModelImporterAssimp::callbackNodeAnimation(const Node& /*node*/, const aiMatrix4x4& transform)
 {
-    const auto iter = nodes.find(nodeName);
-    if(iter != nodes.end())
-    {
-        Node& node = iter->second;
-        node._intermediate = transform;
-    }
+    return transform;
 }
 
-void ModelImporterAssimp::callbackBoneAnimation(Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& transform)
+aiMatrix4x4 ModelImporterAssimp::callbackBoneAnimation(const Node& node, const aiMatrix4x4& transform)
 {
-    const auto iter = nodes.find(nodeName);
-    if (iter != nodes.end())
-    {
-        Node& node = iter->second;
-        node._intermediate = transform * node._offset;
-    }
+    return transform * node._offset;
 }
 
 sp<ModelLoader::Importer> ModelImporterAssimp::BUILDER::build(const Scope& /*args*/)

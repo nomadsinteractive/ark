@@ -69,7 +69,7 @@ void GravityLayout::begin(Context& /*ctx*/, LayoutParam& /*layoutParam*/)
 
 Rect GravityLayout::place(Context& ctx, LayoutParam& layoutParam)
 {
-    LayoutParam::Gravity gravity = layoutParam.gravity() == LayoutParam::GRAVITY_NONE ? _gravity : layoutParam.gravity();
+    LayoutParam::Gravity gravity = layoutParam.gravity() == LayoutParam::GRAVITY_DEFAULT ? _gravity : layoutParam.gravity();
     return GravityLayout::place(gravity, ctx._client_width, ctx._client_height, layoutParam.calcLayoutWidth(ctx._client_width), layoutParam.calcLayoutHeight(ctx._client_height));
 }
 
@@ -86,6 +86,16 @@ GravityLayout::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& manife
 sp<Layout> GravityLayout::BUILDER::build(const Scope& /*args*/)
 {
     return sp<Layout>::adopt(new GravityLayout(_gravity));
+}
+
+GravityLayout::DICTIONARY::DICTIONARY()
+    : _gravity(LayoutParam::GRAVITY_CENTER)
+{
+}
+
+sp<Layout> GravityLayout::DICTIONARY::build(const Scope& /*args*/)
+{
+    return sp<GravityLayout>::make(_gravity);
 }
 
 }

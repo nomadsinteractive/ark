@@ -89,12 +89,12 @@ void PipelineLayout::initialize(const Camera& camera)
     _input->initialize(_building_context);
 }
 
-void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Input>& flatable)
+void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Input>& input)
 {
     sp<Uniform> uniform = shaderPreprocessor.getUniformInput(name, Uniform::TYPE_MAT4);
     if(uniform)
     {
-        uniform->setFlatable(flatable);
+        uniform->setInput(input);
         _building_context->addUniform(uniform);
     }
 }

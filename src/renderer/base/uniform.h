@@ -53,7 +53,7 @@ public:
     const String& declaredType() const;
 
     const sp<Input>& flatable() const;
-    void setFlatable(const sp<Input>& flatable);
+    void setInput(const sp<Input>& flatable);
 
     int32_t binding() const;
     void setBinding(int32_t binding);

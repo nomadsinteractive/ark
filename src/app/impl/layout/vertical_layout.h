@@ -29,6 +29,17 @@ public:
 
     };
 
+//  [[plugin::builder::by-value("vertical")]]
+    class DICTIONARY : public Builder<Layout> {
+    public:
+        DICTIONARY(const String& value);
+
+        virtual sp<Layout> build(const Scope& args) override;
+
+    private:
+        LayoutParam::Gravity _gravity;
+    };
+
 private:
     LayoutParam::Gravity _place_gravity, _end_gravity;
     float _content_available;

@@ -32,7 +32,17 @@ public:
 
     private:
         LayoutParam::Gravity _gravity;
+    };
 
+//  [[plugin::builder::by-value("gravity")]]
+    class DICTIONARY : public Builder<Layout> {
+    public:
+        DICTIONARY();
+
+        virtual sp<Layout> build(const Scope& args) override;
+
+    private:
+        LayoutParam::Gravity _gravity;
     };
 
 private:

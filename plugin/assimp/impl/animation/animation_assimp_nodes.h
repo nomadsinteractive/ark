@@ -28,9 +28,9 @@ namespace assimp {
 
 class AnimationAssimpNodes : public Animation {
 public:
-    typedef std::function<void(Table<String, Node>& nodes, const String& nodeName, const aiMatrix4x4& globalTransformation)> NodeLoaderCallback;
+    typedef std::function<aiMatrix4x4(const Node& node, const aiMatrix4x4& globalTransformation)> NodeLoaderCallback;
 
-    AnimationAssimpNodes(sp<Assimp::Importer> importer, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, NodeTable nodes, NodeLoaderCallback callback);
+    AnimationAssimpNodes(float tps, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, Table<String, Node>& nodes, const NodeLoaderCallback& callback);
 
     virtual sp<AnimationInput> makeTransforms(const sp<Numeric>& duration) override;
     virtual float duration() override;
@@ -39,7 +39,7 @@ public:
 private:
     class AnimationInputImpl : public AnimationInput {
     public:
-        AnimationInputImpl(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, float ticksPerSecond, const aiMatrix4x4& globalTransform, const Table<String, Node>& nodes, NodeLoaderCallback callback);
+        AnimationInputImpl(const sp<Numeric>& duration, float ticksPerSecond, float durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<M4>>& matrics);
 
         virtual sp<Mat4> getNodeMatrix(const String& name) override;
 
@@ -50,24 +50,23 @@ private:
 
     private:
         struct Stub {
-            Stub(const sp<Numeric>& duration, const aiAnimation* animation, const aiNode* node, float ticksPerSecond, const aiMatrix4x4& globalTransform, const Table<String, Node>& nodes, NodeLoaderCallback callback);
+            Stub(const sp<Numeric>& duration, float ticksPerSecond, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& nodes, const sp<std::vector<M4>>& matrics);
 
             bool update(uint64_t timestamp);
+            void flat(void* buf);
 
-            void updateHierarchy(float time);
-            void loadNodeHierarchy(float duration, const aiNode* node, const aiMatrix4x4& parentTransform, const NodeLoaderCallback& callback);
+            const M4* getFrameInput() const;
 
             float _ticks_per_sec;
-            float _duration_in_ticks;
-            aiMatrix4x4 _global_inversed_transform;
+            uint32_t _duration_in_ticks;
 
             sp<Numeric> _duration;
 
-            const aiAnimation* _animation;
-            const aiNode* _root_node;
+            sp<Table<String, uint32_t>> _nodes;
+            sp<std::vector<M4>> _matrics;
+            size_t _node_size;
 
-            Table<String, Node> _nodes;
-            NodeLoaderCallback _callback;
+            uint32_t _tick;
         };
 
         class NodeMatrix : public Mat4 {
@@ -80,7 +79,7 @@ private:
 
         private:
             sp<Stub> _stub;
-            const Node& _node;
+            uint32_t _node_index;
         };
 
     private:
@@ -88,16 +87,17 @@ private:
     };
 
 private:
-    sp<Assimp::Importer> _importer;
-    const aiAnimation* _animation;
-    const aiNode* _root_node;
+    static void loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, Node>& nodes, const NodeLoaderCallback& callback, std::vector<M4>& output);
+    static void loadNodeHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, Node>& nodes, const NodeLoaderCallback& callback);
+
+private:
     float _ticks_per_sec;
+    uint32_t _duration_in_ticks;
 
-    aiMatrix4x4 _global_transform;
+    sp<Table<String, uint32_t>> _nodes;
+    sp<std::vector<M4>> _matrics;
 
-    NodeTable _nodes;
-    NodeLoaderCallback _callback;
-
+    float _duration;
 };
 
 }

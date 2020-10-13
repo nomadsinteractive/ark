@@ -82,6 +82,16 @@ String::size_type String::rfind(char c) const
     return _str.rfind(c);
 }
 
+const char& String::front() const
+{
+    return _str.front();
+}
+
+const char& String::back() const
+{
+    return _str.back();
+}
+
 String String::strip() const
 {
     const char* front = _str.c_str();

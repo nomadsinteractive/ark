@@ -51,4 +51,14 @@ sp<Layout> VerticalLayout::BUILDER::build(const Scope& /*args*/)
     return sp<VerticalLayout>::make(_gravity);
 }
 
+VerticalLayout::DICTIONARY::DICTIONARY(const String& value)
+    : _gravity(Strings::parse<LayoutParam::Gravity>(value))
+{
+}
+
+sp<Layout> VerticalLayout::DICTIONARY::build(const Scope& /*args*/)
+{
+    return sp<VerticalLayout>::make(_gravity);
+}
+
 }
