@@ -17,6 +17,8 @@
 #include "graphics/base/mat.h"
 #include "graphics/base/viewport.h"
 #include "graphics/util/matrix_util.h"
+#include "graphics/util/mat4_type.h"
+#include "graphics/util/vec3_type.h"
 
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
@@ -91,8 +93,8 @@ Camera::Camera()
 }
 
 Camera::Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate)
-    : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _projection(sp<Holder>::make(sp<Mat4::Const>::make(M4()))),
-      _vp(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _position(sp<VariableWrapper<V3>>::make(V3(0))), _target(sp<VariableWrapper<V3>>::make(V3(0)))
+    : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Holder>::make(sp<Mat4::Const>::make(M4::identity()))), _projection(sp<Holder>::make(sp<Mat4::Const>::make(M4::identity()))),
+      _vp(sp<Holder>::make(sp<Mat4::Const>::make(M4::identity()))), _position(sp<VariableWrapper<V3>>::make(V3(0))), _target(sp<VariableWrapper<V3>>::make(V3(0)))
 {
 }
 
@@ -106,7 +108,8 @@ void Camera::ortho(float left, float right, float bottom, float top, float clipN
     if(coordinateSystem  < 0)
         std::swap(top, bottom);
 
-    _vp->setMatrix(sp<Mat4::Const>::make(_delegate->ortho(left, right, bottom, top, clipNear * 2 - clipFar, clipFar)));
+    _projection->setMatrix(sp<Mat4::Const>::make(_delegate->ortho(left, right, bottom, top, clipNear, clipFar)));
+    updateViewProjection();
 }
 
 void Camera::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
@@ -146,6 +149,12 @@ V3 Camera::getRayDirection(float screenX, float screenY) const
     return Ark::instance().applicationContext()->renderEngine()->toRayDirection(vp, screenX, screenY);
 }
 
+sp<Vec3> Camera::toScreenPosition(const sp<Vec3>& position) const
+{
+    const Viewport& viewport = Ark::instance().applicationContext()->renderEngine()->viewport();
+    return Vec3Type::mul(Vec3Type::truediv(Vec3Type::add(Mat4Type::mul(_vp, position), V3(1.0f, 1.0f, 1.0f)), V3(2.0f, 2.0f, 2.0f)), V3(viewport.width(), viewport.height(), 1.0f));
+}
+
 sp<Vec3> Camera::position() const
 {
     return _position;
@@ -154,6 +163,21 @@ sp<Vec3> Camera::position() const
 sp<Vec3> Camera::target() const
 {
     return _target;
+}
+
+sp<Mat4> Camera::matrixView() const
+{
+    return _view;
+}
+
+sp<Mat4> Camera::matrixProjection() const
+{
+    return _projection;
+}
+
+sp<Mat4> Camera::matrixViewProjection() const
+{
+    return _vp;
 }
 
 const sp<Camera::Holder>& Camera::view() const
@@ -200,6 +224,11 @@ uint32_t Camera::Holder::size()
 bool Camera::Holder::update(uint64_t timestamp)
 {
     return _matrix->update(timestamp) || _timestamp.update(timestamp);
+}
+
+M4 Camera::Holder::val()
+{
+    return _matrix->val();
 }
 
 const sp<Mat4>& Camera::Holder::matrix() const

@@ -27,16 +27,14 @@ Identifier Identifier::parse(const String& s, Format format)
     if(idType == ID_TYPE_ARGUMENT && parseAndVaildate(s.substr(1), package, value, queries, format))
         return Identifier(ID_TYPE_ARGUMENT, package, value, queries);
 
-    parseAndVaildate(s, package, value, queries, FORMAT_NAMESPACE);
-    return Identifier(ID_TYPE_VALUE, package, value, queries);
+    return parseAndVaildate(s, package, value, queries, FORMAT_NAMESPACE) ? Identifier(ID_TYPE_VALUE, package, value, queries) : Identifier(ID_TYPE_VALUE, "", s, queries);
 }
 
 Identifier Identifier::parseRef(const String& s)
 {
     DCHECK(s, "Illegal identifier: empty string");
     String package, ref, queries;
-    parseAndVaildate(s, package, ref, queries, FORMAT_NAMESPACE_STRICT);
-    return Identifier(ID_TYPE_REFERENCE, package, ref, queries);
+    return parseAndVaildate(s, package, ref, queries, FORMAT_NAMESPACE_STRICT) ? Identifier(ID_TYPE_REFERENCE, package, ref, queries) : Identifier(ID_TYPE_REFERENCE, "", s, queries);
 }
 
 const String& Identifier::package() const
@@ -104,13 +102,13 @@ bool Identifier::parseAndVaildate(const String& s, String& package, String& valu
     Strings::cut(packageAndName, package, value, ':');
     if(FORMAT_NAMESPACE_STRICT == format)
         return Strings::isVariableName(package) && Strings::isVariableName(value);
-    return true;
+    return Strings::isVariableName(package);
 }
 
 void Identifier::parseValueType(const String& s, String& value, String& type)
 {
-    const auto pos = s.find('(');
-    if(pos != String::npos)
+    const String::size_type pos = s.find('(');
+    if(pos > 0 && pos != String::npos)
     {
         DCHECK(s.back() == ')', "Illegal type-value string: %s", s.c_str());
         value = s.substr(0, pos);

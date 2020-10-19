@@ -4,8 +4,8 @@
 
 namespace ark {
 
-Expectation::Expectation(const sp<Numeric>& delegate, Notifier notifier)
-    : Delegate<Numeric>(delegate), _notifier(std::move(notifier))
+Expectation::Expectation(sp<Numeric> delegate, Notifier notifier)
+    : Delegate<Numeric>(std::move(delegate)), _notifier(std::move(notifier))
 {
 }
 

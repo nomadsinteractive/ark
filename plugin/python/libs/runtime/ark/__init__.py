@@ -340,7 +340,22 @@ class Camera:
     def position(self) -> 'Vec3':
         return None
 
+    @property
+    def matrix_view(self) -> 'Mat4':
+        return None
+
+    @property
+    def matrix_projection(self) -> 'Mat4':
+        return None
+
+    @property
+    def matrix_view_projection(self) -> 'Mat4':
+        return None
+
     def ortho(self, left, right, top, bottom, near, far):
+        pass
+
+    def frustum(self, left, right, top, bottom, near, far):
         pass
 
     def perspective(self, fov, aspect, near, far):
@@ -698,7 +713,7 @@ class Animation:
     def node_names(self) -> List[str]:
         return []
 
-    def make_transforms(self, t: Numeric) -> AnimationInput:
+    def make_transforms(self, t: Numeric, on_complete) -> AnimationInput:
         pass
 
 
@@ -1528,7 +1543,7 @@ class StateMachine:
     def __init__(self):
         pass
 
-    def add_command(self, on_active: Optional[Callable] = None, category: CommandGroup = None) -> Command:
+    def add_command(self, on_active: Optional[Callable] = None, command_group: CommandGroup = None) -> Command:
         pass
 
     def add_state(self, on_active: Optional[Callable] = None, fallback_state: Optional[State] = None) -> State:

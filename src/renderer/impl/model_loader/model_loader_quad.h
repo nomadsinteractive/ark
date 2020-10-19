@@ -19,9 +19,10 @@ public:
 
     virtual Model loadModel(int32_t type) override;
 
-    class BUILDER : public Builder<ModelLoader> {
+//  [[plugin::builder::by-value("quad")]]
+    class MAKER : public Builder<ModelLoader> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest);
+        MAKER(BeanFactory& factory, const String& atlas);
 
         virtual sp<ModelLoader> build(const Scope& args) override;
 

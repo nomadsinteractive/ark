@@ -29,9 +29,9 @@ AnimationAssimpNodes::AnimationAssimpNodes(float tps, const aiAnimation* animati
          _nodes->push_back(iter.first, index++);
 }
 
-sp<AnimationInput> AnimationAssimpNodes::makeTransforms(const sp<Numeric>& duration)
+sp<AnimationInput> AnimationAssimpNodes::makeTransforms(sp<Numeric> duration)
 {
-    return sp<AnimationInput>::make<AnimationInputImpl>(duration, _ticks_per_sec, _duration_in_ticks, _nodes, _matrics);
+    return sp<AnimationInput>::make<AnimationInputImpl>(std::move(duration), _ticks_per_sec, _duration_in_ticks, _nodes, _matrics);
 }
 
 float AnimationAssimpNodes::duration()
@@ -44,8 +44,8 @@ const std::vector<String>& AnimationAssimpNodes::nodeNames()
     return _nodes->keys();
 }
 
-AnimationAssimpNodes::AnimationInputImpl::AnimationInputImpl(const sp<Numeric>& duration, float ticksPerSecond, float durationInTicks, const sp<Table<String, uint32_t> >& node, const sp<std::vector<M4>>& matrics)
-    : _stub(sp<Stub>::make(duration, ticksPerSecond, durationInTicks, node, matrics))
+AnimationAssimpNodes::AnimationInputImpl::AnimationInputImpl(sp<Numeric> duration, float ticksPerSecond, float durationInTicks, const sp<Table<String, uint32_t> >& node, const sp<std::vector<M4>>& matrics)
+    : _stub(sp<Stub>::make(std::move(duration), ticksPerSecond, durationInTicks, node, matrics))
 {
 }
 
@@ -69,8 +69,8 @@ uint32_t AnimationAssimpNodes::AnimationInputImpl::size()
     return _stub->_node_size * sizeof(M4);
 }
 
-AnimationAssimpNodes::AnimationInputImpl::Stub::Stub(const sp<Numeric>& duration, float ticksPerSecond, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& nodes, const sp<std::vector<M4>>& matrics)
-    : _ticks_per_sec(ticksPerSecond), _duration_in_ticks(durationInTicks), _duration(duration), _nodes(nodes), _matrics(matrics), _node_size(_nodes->size()), _tick(0)
+AnimationAssimpNodes::AnimationInputImpl::Stub::Stub(sp<Numeric> duration, float ticksPerSecond, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& nodes, const sp<std::vector<M4>>& matrics)
+    : _ticks_per_sec(ticksPerSecond), _duration_in_ticks(durationInTicks), _duration(std::move(duration)), _nodes(nodes), _matrics(matrics), _node_size(_nodes->size()), _tick(0)
 {
 }
 

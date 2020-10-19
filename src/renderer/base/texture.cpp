@@ -277,6 +277,7 @@ sp<Texture> Texture::BUILDER::build(const Scope& args)
        return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
+    DCHECK(size->width() != 0 && size->height() != 0, "Cannot build texture from \"%s\"", Documents::toString(_manifest).c_str());
     sp<Texture::Uploader> uploader = _uploader->build(args);
     return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? uploader : makeBlankUploader(size, parameters));
 }

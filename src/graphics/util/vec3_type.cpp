@@ -113,6 +113,11 @@ sp<Vec3> Vec3Type::create(const sp<Vec2>& vec2)
     return sp<Vec2ToVec3>::make(vec2);
 }
 
+sp<Vec3> Vec3Type::add(const sp<Vec3>& lvalue, const V3& rvalue)
+{
+    return sp<VariableOP2<sp<Vec3>, V3, Operators::Add<V3>>>::make(lvalue, rvalue);
+}
+
 sp<Vec3> Vec3Type::add(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
     return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Add<V3>>>::make(lvalue, rvalue);
@@ -121,6 +126,11 @@ sp<Vec3> Vec3Type::add(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 sp<Vec3> Vec3Type::sub(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
     return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Sub<V3>>>::make(lvalue, rvalue);
+}
+
+sp<Vec3> Vec3Type::mul(const sp<Vec3>& lvalue, const V3& rvalue)
+{
+    return sp<VariableOP2<sp<Vec3>, V3, Operators::Mul<V3>>>::make(lvalue, rvalue);
 }
 
 sp<Vec3> Vec3Type::mul(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
@@ -136,6 +146,11 @@ sp<Vec3> Vec3Type::mul(const sp<Vec3>& lvalue, float rvalue)
 sp<Vec3> Vec3Type::mul(const sp<Vec3>& lvalue, sp<Numeric>& rvalue)
 {
     return sp<VariableOP2<sp<Vec3>, sp<Numeric>, Operators::Mul<V3, float>>>::make(lvalue, rvalue);
+}
+
+sp<Vec3> Vec3Type::truediv(const sp<Vec3>& lvalue, const V3& rvalue)
+{
+    return sp<VariableOP2<sp<Vec3>, V3, Operators::Div<V3>>>::make(lvalue, rvalue);
 }
 
 sp<Vec3> Vec3Type::truediv(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)

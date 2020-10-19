@@ -16,7 +16,7 @@ namespace ark {
 //[[script::bindings::extends(Numeric)]]
 class ARK_API Expectation : public Numeric, public Delegate<Numeric>, public Holder {
 public:
-    Expectation(const sp<Numeric>& delegate, Notifier notifier);
+    Expectation(sp<Numeric> delegate, Notifier notifier);
 
     virtual float val() override;
     virtual bool update(uint64_t timestamp) override;

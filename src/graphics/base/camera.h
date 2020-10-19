@@ -15,13 +15,15 @@ namespace ark {
 
 class ARK_API Camera {
 public:
-    class Holder : public Input {
+    class Holder : public Input, public Mat4 {
     public:
         Holder(sp<Mat4> value);
 
         virtual void flat(void* buf) override;
         virtual uint32_t size() override;
         virtual bool update(uint64_t timestamp) override;
+
+        virtual M4 val() override;
 
         const sp<Mat4>& matrix() const;
         void setMatrix(sp<Mat4> matrix);
@@ -95,10 +97,20 @@ public:
 //  [[script::bindings::auto]]
     V3 getRayDirection(float screenX, float screenY) const;
 
+//  [[script::bindings::auto]]
+    sp<Vec3> toScreenPosition(const sp<Vec3>& position) const;
+
 //  [[script::bindings::property]]
     sp<Vec3> position() const;
 //  [[script::bindings::property]]
     sp<Vec3> target() const;
+
+//  [[script::bindings::property]]
+    sp<Mat4> matrixView() const;
+//  [[script::bindings::property]]
+    sp<Mat4> matrixProjection() const;
+//  [[script::bindings::property]]
+    sp<Mat4> matrixViewProjection() const;
 
     const sp<Holder>& view() const;
     const sp<Holder>& projection() const;

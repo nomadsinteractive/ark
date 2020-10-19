@@ -32,14 +32,14 @@ public:
 
     AnimationAssimpNodes(float tps, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, Table<String, Node>& nodes, const NodeLoaderCallback& callback);
 
-    virtual sp<AnimationInput> makeTransforms(const sp<Numeric>& duration) override;
+    virtual sp<AnimationInput> makeTransforms(sp<Numeric> duration) override;
     virtual float duration() override;
     virtual const std::vector<String>& nodeNames() override;
 
 private:
     class AnimationInputImpl : public AnimationInput {
     public:
-        AnimationInputImpl(const sp<Numeric>& duration, float ticksPerSecond, float durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<M4>>& matrics);
+        AnimationInputImpl(sp<Numeric> duration, float ticksPerSecond, float durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<M4>>& matrics);
 
         virtual sp<Mat4> getNodeMatrix(const String& name) override;
 
@@ -50,7 +50,7 @@ private:
 
     private:
         struct Stub {
-            Stub(const sp<Numeric>& duration, float ticksPerSecond, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& nodes, const sp<std::vector<M4>>& matrics);
+            Stub(sp<Numeric> duration, float ticksPerSecond, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& nodes, const sp<std::vector<M4>>& matrics);
 
             bool update(uint64_t timestamp);
             void flat(void* buf);

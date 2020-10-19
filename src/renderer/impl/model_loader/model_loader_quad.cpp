@@ -36,12 +36,12 @@ Model ModelLoaderQuad::loadModel(int32_t type)
     return Model(nullptr, sp<VerticesQuad>::make(texCoord), {V3(size, 0), V3(size, 0), V3(0)});
 }
 
-ModelLoaderQuad::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _atlas(factory.ensureConcreteClassBuilder<Atlas>(manifest, Constants::Attributes::ATLAS))
+ModelLoaderQuad::MAKER::MAKER(BeanFactory& factory, const String& atlas)
+    : _atlas(factory.ensureBuilder<Atlas>(atlas))
 {
 }
 
-sp<ModelLoader> ModelLoaderQuad::BUILDER::build(const Scope& args)
+sp<ModelLoader> ModelLoaderQuad::MAKER::build(const Scope& args)
 {
     return sp<ModelLoaderQuad>::make(_atlas->build(args));
 }

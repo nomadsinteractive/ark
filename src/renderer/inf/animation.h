@@ -16,14 +16,9 @@ class ARK_API Animation {
 public:
     virtual ~Animation() = default;
 
-//  [[script::bindings::auto]]
-    virtual sp<AnimationInput> makeTransforms(const sp<Numeric>& duration) = 0;
-
-//  [[script::bindings::property]]
     virtual float duration() = 0;
-//  [[script::bindings::property]]
+    virtual sp<AnimationInput> makeTransforms(sp<Numeric> duration) = 0;
     virtual const std::vector<String>& nodeNames() = 0;
-
 };
 
 }

@@ -22,15 +22,21 @@ public:
     static sp<Vec3> create(const sp<Vec2>& vec2);
 
 //  [[script::bindings::operator(+)]]
+    static sp<Vec3> add(const sp<Vec3>& lvalue, const V3& rvalue);
+//  [[script::bindings::operator(+)]]
     static sp<Vec3> add(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //  [[script::bindings::operator(-)]]
     static sp<Vec3> sub(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
+//  [[script::bindings::operator(*)]]
+    static sp<Vec3> mul(const sp<Vec3>& lvalue, const V3& rvalue);
 //  [[script::bindings::operator(*)]]
     static sp<Vec3> mul(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //  [[script::bindings::operator(*)]]
     static sp<Vec3> mul(const sp<Vec3>& lvalue, float rvalue);
 //  [[script::bindings::operator(*)]]
     static sp<Vec3> mul(const sp<Vec3>& lvalue, sp<Numeric>& rvalue);
+//  [[script::bindings::operator(/)]]
+    static sp<Vec3> truediv(const sp<Vec3>& lvalue, const V3& rvalue);
 //  [[script::bindings::operator(/)]]
     static sp<Vec3> truediv(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //  [[script::bindings::operator(//)]]
