@@ -364,7 +364,7 @@ class Camera:
     def look_at(self, position, target, up):
         pass
 
-    def get_ray_direction(self, screen_x: float, screen_y: float) -> tuple:
+    def to_world_position(self, screen_x: float, screen_y: float, z: float) -> tuple:
         pass
 
 

@@ -6,6 +6,7 @@
 #include "core/ark.h"
 
 #include "core/base/observer.h"
+#include "core/base/manifest.h"
 #include "core/epi/notifier.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
@@ -100,16 +101,15 @@ Camera::Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate)
 
 void Camera::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)
 {
-    ortho(left, right, bottom, top, clipNear, clipFar, _coordinate_system);
+    _projection->setMatrix(sp<Mat4::Const>::make(_delegate->ortho(left, right, bottom, top, clipNear, clipFar)));
+    updateViewProjection();
 }
 
 void Camera::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar, Ark::RendererCoordinateSystem coordinateSystem)
 {
-    if(coordinateSystem  < 0)
+    if(coordinateSystem < 0)
         std::swap(top, bottom);
-
-    _projection->setMatrix(sp<Mat4::Const>::make(_delegate->ortho(left, right, bottom, top, clipNear, clipFar)));
-    updateViewProjection();
+    ortho(left, right, bottom, top, clipNear, clipFar);
 }
 
 void Camera::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
@@ -152,7 +152,8 @@ V3 Camera::toWorldPosition(float screenX, float screenY, float z) const
 sp<Vec3> Camera::toScreenPosition(const sp<Vec3>& position) const
 {
     const Viewport& viewport = Ark::instance().applicationContext()->renderEngine()->viewport();
-    return Vec3Type::mul(Vec3Type::truediv(Vec3Type::add(Mat4Type::mul(_vp, position), V3(1.0f, 1.0f, 1.0f)), V3(2.0f, 2.0f, 2.0f)), V3(viewport.width(), viewport.height(), 1.0f));
+    const V3 scale = Ark::instance().manifest()->renderer()._coordinate_system == _coordinate_system ? V3(0.5f, 0.5f, 0.5f) : V3(0.5f, -0.5f, 0.5f);
+    return Vec3Type::mul(Vec3Type::add(Vec3Type::mul(Mat4Type::mul(_vp, position), scale), V3(0.5f, 0.5f, 0.5f)), V3(viewport.width(), viewport.height(), 1.0f));
 }
 
 sp<Vec3> Camera::position() const
@@ -279,7 +280,7 @@ M4 Camera::DelegateRH_ZO::ortho(float left, float right, float bottom, float top
 
 M4 Camera::DelegateRH_ZO::perspective(float fov, float aspect, float clipNear, float clipFar)
 {
-    return M4(glm::perspectiveRH_ZO(fov, -aspect, clipNear, clipFar));
+    return M4(glm::perspectiveRH_ZO(fov, aspect, clipNear, clipFar));
 }
 
 M4 Camera::DelegateLH_NO::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
