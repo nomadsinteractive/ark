@@ -50,13 +50,14 @@ Rect RenderEngine::toRendererScissor(const Rect& scissor, Ark::RendererCoordinat
     return s;
 }
 
-V3 RenderEngine::toRayDirection(const M4& vpMatrix, float screenX, float screenY) const
+V3 RenderEngine::toWorldPosition(const M4& vpMatrix, float screenX, float screenY, float z) const
 {
     const Viewport& viewport = _render_context->viewport();
 
     float ndcx = (screenX * 2 - viewport.width()) / viewport.width();
     float ndcy = (screenY * 2 - viewport.height()) / viewport.height();
-    const V4 pos = MatrixUtil::mul(MatrixUtil::inverse(vpMatrix), V4(ndcx, _coordinate_system != _render_context->coordinateSystem() ? -ndcy : ndcy, 1.0f, 1.0f));
+    const M4 vpInverse = MatrixUtil::inverse(vpMatrix);
+    const V4 pos = MatrixUtil::mul(vpInverse, V4(ndcx, _coordinate_system != _render_context->coordinateSystem() ? -ndcy : ndcy, z, 1.0f));
     return V3(pos.x() / pos.w(), pos.y() / pos.w(), pos.z() / pos.w());
 }
 

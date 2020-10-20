@@ -142,11 +142,11 @@ void Camera::lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<V
     updateViewProjection();
 }
 
-V3 Camera::getRayDirection(float screenX, float screenY) const
+V3 Camera::toWorldPosition(float screenX, float screenY, float z) const
 {
     M4 vp;
     _vp->flat(&vp);
-    return Ark::instance().applicationContext()->renderEngine()->toRayDirection(vp, screenX, screenY);
+    return Ark::instance().applicationContext()->renderEngine()->toWorldPosition(vp, screenX, screenY, z);
 }
 
 sp<Vec3> Camera::toScreenPosition(const sp<Vec3>& position) const

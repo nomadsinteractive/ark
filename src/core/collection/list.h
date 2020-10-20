@@ -73,17 +73,19 @@ public:
     template<typename U> class Iterator : public IteratorBase<U> {
     public:
         Iterator(_List& list, U iterator)
-            : IteratorBase<U>(iterator), _list(list) {
+            : IteratorBase<U>(std::move(iterator)), _list(list) {
             forward();
         }
 
         const Iterator<U>& operator ++() {
+            DASSERT(this->_iterator != _list.end());
             ++(this->_iterator);
             forward();
             return *this;
         }
 
         const Iterator<U> operator ++(int) {
+            DASSERT(this->_iterator != _list.end());
             U iter = this->_iterator;
             ++(this->_iterator);
             forward();

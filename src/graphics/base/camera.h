@@ -95,8 +95,7 @@ public:
     void lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up);
 
 //  [[script::bindings::auto]]
-    V3 getRayDirection(float screenX, float screenY) const;
-
+    V3 toWorldPosition(float screenX, float screenY, float z) const;
 //  [[script::bindings::auto]]
     sp<Vec3> toScreenPosition(const sp<Vec3>& position) const;
 

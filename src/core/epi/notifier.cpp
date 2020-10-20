@@ -43,7 +43,8 @@ Notifier::Notifier()
 
 void Notifier::notify() const
 {
-    for(const sp<Observer>& i : *_observers)
+    const auto observers = _observers;
+    for(const sp<Observer>& i : *observers)
         i->update();
 }
 

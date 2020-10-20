@@ -57,17 +57,6 @@ public:
         return _iterator != other._iterator;
     }
 
-    const IteratorBase<T>& operator ++ () {
-        ++_iterator;
-        return *this;
-    }
-
-    const IteratorBase<T> operator ++ (int) {
-        T iter = _iterator;
-        ++_iterator;
-        return iter;
-    }
-
 protected:
     T _iterator;
 };
