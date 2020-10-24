@@ -4,6 +4,7 @@
 
 #include "core/ark.h"
 #include "core/base/clock.h"
+#include "core/impl/numeric/stalker.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
@@ -288,6 +289,12 @@ sp<Vec3> Vec3Type::wrap(const sp<Vec3>& self)
 sp<Vec3> Vec3Type::synchronize(const sp<Vec3>& self, const sp<Boolean>& disposed)
 {
     return Ark::instance().applicationContext()->synchronize(self, disposed);
+}
+
+sp<Vec3> Vec3Type::attract(const sp<Vec3>& self, const V3& s0, float duration, const sp<Numeric>& t)
+{
+    sp<Numeric> ts = t ? t : Ark::instance().clock()->duration();
+    return sp<Vec3Impl>::make(sp<Stalker>::make(ts, vx(self), s0.x(), duration), sp<Stalker>::make(ts, vy(self), s0.y(), duration), sp<Stalker>::make(ts, vz(self), s0.z(), duration));
 }
 
 sp<Vec3> Vec3Type::cross(const sp<Vec3>& self, const sp<Vec3>& other)

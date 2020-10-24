@@ -201,6 +201,12 @@ const sp<Visibility>& RenderObject::visible()
     return _visible.ensure();
 }
 
+void RenderObject::setVisible(bool visible)
+{
+    _visible.ensure()->set(visible);
+    _timestamp.setDirty();
+}
+
 void RenderObject::setVisible(const sp<Boolean>& visible)
 {
     _visible.ensure()->set(visible);

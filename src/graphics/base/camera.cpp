@@ -153,7 +153,7 @@ sp<Vec3> Camera::toScreenPosition(const sp<Vec3>& position) const
 {
     const Viewport& viewport = Ark::instance().applicationContext()->renderEngine()->viewport();
     const V3 scale = Ark::instance().manifest()->renderer()._coordinate_system == _coordinate_system ? V3(0.5f, 0.5f, 0.5f) : V3(0.5f, -0.5f, 0.5f);
-    return Vec3Type::mul(Vec3Type::add(Vec3Type::mul(Mat4Type::mul(_vp, position), scale), V3(0.5f, 0.5f, 0.5f)), V3(viewport.width(), viewport.height(), 1.0f));
+    return Vec3Type::mul(Vec3Type::add(Vec3Type::mul(Mat4Type::matmul(_vp, position), scale), V3(0.5f, 0.5f, 0.5f)), V3(viewport.width(), viewport.height(), 1.0f));
 }
 
 sp<Vec3> Camera::position() const

@@ -367,6 +367,9 @@ class Camera:
     def to_world_position(self, screen_x: float, screen_y: float, z: float) -> tuple:
         pass
 
+    def to_screen_position(self, position: Union['Vec3', tuple]) -> 'Vec3':
+        pass
+
 
 class Boolean(_Var):
     def __init__(self, value):
@@ -553,6 +556,9 @@ class Vec2:
 
     def synchronize(self, disposed: Optional[Boolean] = None) -> 'Vec2':
         return Vec2(self._x, self._y)
+
+    def attract(self, s0: Union[tuple, 'Vec2'], duration: float, t: Optional[Numeric] = None) -> 'Vec2':
+        pass
 
     def fence(self, plane: Union['Vec3', tuple], observer: Union[Observer, Callable[[], None]]) -> 'Vec2':
         return Vec2(self._x, self._y)
@@ -822,6 +828,14 @@ class RenderObject:
 
     @varyings.setter
     def varyings(self, v):
+        pass
+
+    @property
+    def visible(self) -> Boolean:
+        return Boolean(True)
+
+    @visible.setter
+    def visible(self, val: Union[Boolean, bool]):
         pass
 
     @property

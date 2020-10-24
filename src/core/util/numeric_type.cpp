@@ -401,6 +401,11 @@ sp<Numeric> NumericType::boost(const sp<Numeric>& self, float v0, const sp<Numer
     return sp<Boost<float>>::make(self, v0, cd, t ? t : Ark::instance().clock()->duration());
 }
 
+sp<Numeric> NumericType::attract(const sp<Numeric>& self, float s0, float duration, const sp<Numeric>& t)
+{
+    return sp<Stalker>::make(t ? t : Ark::instance().clock()->duration(), self, s0, duration);
+}
+
 sp<Numeric> NumericType::integral(const sp<Numeric>& self, const sp<Numeric>& t)
 {
     return sp<Integral<float>>::make(self, t ? t : Ark::instance().clock()->duration());

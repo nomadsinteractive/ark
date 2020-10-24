@@ -96,6 +96,9 @@ public:
     static sp<Vec2> synchronize(const sp<Vec2>& self, const sp<Boolean>& disposed = nullptr);
 
 //  [[script::bindings::classmethod]]
+    static sp<Vec2> attract(const sp<Vec2>& self, const V2& s0, float duration, const sp<Numeric>& t = nullptr);
+
+//  [[script::bindings::classmethod]]
     static sp<Vec2> fence(const sp<Vec2>& self, const sp<Vec3>& plane, const sp<Observer>& observer);
 //  [[script::bindings::classmethod]]
     static sp<Vec2> ifElse(const sp<Vec2>& self, const sp<Boolean>& condition, const sp<Vec2>& negative);

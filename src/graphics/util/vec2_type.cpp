@@ -6,6 +6,7 @@
 #include "core/base/clock.h"
 #include "core/base/observer.h"
 #include "core/inf/holder.h"
+#include "core/impl/numeric/stalker.h"
 #include "core/impl/variable/boost.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/variable_op1.h"
@@ -309,6 +310,12 @@ sp<Vec2> Vec2Type::wrap(const sp<Vec2>& self)
 sp<Vec2> Vec2Type::synchronize(const sp<Vec2>& self, const sp<Boolean>& disposed)
 {
     return Ark::instance().applicationContext()->synchronize(self, disposed);
+}
+
+sp<Vec2> Vec2Type::attract(const sp<Vec2>& self, const V2& s0, float duration, const sp<Numeric>& t)
+{
+    sp<Numeric> ts = t ? t : Ark::instance().clock()->duration();
+    return sp<Vec2Impl>::make(sp<Stalker>::make(ts, vx(self), s0.x(), duration), sp<Stalker>::make(ts, vy(self), s0.y(), duration));
 }
 
 sp<Vec2> Vec2Type::fence(const sp<Vec2>& self, const sp<Vec3>& plane, const sp<Observer>& observer)

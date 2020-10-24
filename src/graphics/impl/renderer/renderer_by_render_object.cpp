@@ -46,7 +46,7 @@ void RendererByRenderObject::measure(Size& size)
 }
 
 RendererByRenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _render_object(factory.ensureBuilder<RenderObject>(manifest)), _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_UNSPECIFIED))
+    : _render_object(factory.ensureConcreteClassBuilder<RenderObject>(manifest, Constants::Attributes::RENDER_OBJECT)), _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_UNSPECIFIED))
 {
 }
 

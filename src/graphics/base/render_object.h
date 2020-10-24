@@ -96,6 +96,8 @@ public:
 //  [[script::bindings::property]]
     const sp<Visibility>& visible();
 //  [[script::bindings::property]]
+    void setVisible(bool visible);
+//  [[script::bindings::property]]
     void setVisible(const sp<Boolean>& visible);
 
 //  [[script::bindings::auto]]

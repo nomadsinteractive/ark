@@ -96,6 +96,9 @@ public:
     static sp<Vec3> synchronize(const sp<Vec3>& self, const sp<Boolean>& disposed = nullptr);
 
 //  [[script::bindings::classmethod]]
+    static sp<Vec3> attract(const sp<Vec3>& self, const V3& s0, float duration, const sp<Numeric>& t = nullptr);
+
+//  [[script::bindings::classmethod]]
     static sp<Vec3> cross(const sp<Vec3>& self, const sp<Vec3>& other);
 //  [[script::bindings::classmethod]]
     static sp<Vec3> cross(const sp<Vec3>& self, const V3& other);

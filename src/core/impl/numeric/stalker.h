@@ -15,7 +15,8 @@ public:
     virtual bool update(uint64_t timestamp) override;
 
 private:
-    void doChase(float s0, float v0, float target, float dt);
+    void doUpdate(float t0, bool targetDirty);
+    void doChase(float v0, float target, float dt);
 
 private:
     sp<Numeric> _t;
@@ -28,7 +29,7 @@ private:
     float _eta;
     float _t_modifier;
 
-    float _target_locked;
+    float _s;
 };
 
 }
