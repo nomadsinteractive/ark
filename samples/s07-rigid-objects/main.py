@@ -1,7 +1,6 @@
 import math
 import random
 
-import ark
 from ark import dear_imgui, ApplicationFacade, Arena, Event, Integer, Collider, RenderObject, Size, Camera, Vec3, Numeric
 
 

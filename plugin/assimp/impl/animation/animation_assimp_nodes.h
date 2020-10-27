@@ -37,9 +37,11 @@ public:
     virtual const std::vector<String>& nodeNames() override;
 
 private:
+    typedef std::vector<M4> AnimationFrame;
+
     class AnimationInputImpl : public AnimationInput {
     public:
-        AnimationInputImpl(sp<Numeric> duration, float ticksPerSecond, float durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<M4>>& matrics);
+        AnimationInputImpl(sp<Numeric> duration, float ticksPerSecond, float durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<sp<AnimationFrame>>>& animationFrames);
 
         virtual sp<Mat4> getNodeMatrix(const String& name) override;
 
@@ -50,7 +52,7 @@ private:
 
     private:
         struct Stub {
-            Stub(sp<Numeric> duration, float ticksPerSecond, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& nodes, const sp<std::vector<M4>>& matrics);
+            Stub(sp<Numeric> duration, float ticksPerSecond, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& nodes, const sp<std::vector<sp<AnimationFrame>>>& animationFrames);
 
             bool update(uint64_t timestamp);
             void flat(void* buf);
@@ -63,8 +65,8 @@ private:
             sp<Numeric> _duration;
 
             sp<Table<String, uint32_t>> _nodes;
-            sp<std::vector<M4>> _matrics;
-            size_t _node_size;
+            sp<std::vector<sp<AnimationFrame>>> _animation_frames;
+            size_t _size;
 
             uint32_t _tick;
         };
@@ -87,7 +89,7 @@ private:
     };
 
 private:
-    static void loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, Node>& nodes, const NodeLoaderCallback& callback, std::vector<M4>& output);
+    static void loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, Node>& nodes, const NodeLoaderCallback& callback, AnimationFrame& output);
     static void loadNodeHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, Node>& nodes, const NodeLoaderCallback& callback);
 
 private:
@@ -95,7 +97,7 @@ private:
     uint32_t _duration_in_ticks;
 
     sp<Table<String, uint32_t>> _nodes;
-    sp<std::vector<M4>> _matrics;
+    sp<std::vector<sp<AnimationFrame>>> _animation_frames;
 
     float _duration;
 };
