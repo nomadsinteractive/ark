@@ -284,18 +284,10 @@ bool PythonInterpreter::isNoneOrNull(PyObject* pyObject) const
 
 void PythonInterpreter::logErr() const
 {
-#ifdef ARK_FLAG_DEBUG
     PyErr_Print();
     PyObject* ferr = PySys_GetObject("stderr");
     PyObject* ret = ferr ? PyObject_CallMethod(ferr, "flush", nullptr) : nullptr;
     Py_XDECREF(ret);
-#else
-    PyObject *ptype, *pvalue, *ptraceback;
-    PyErr_Fetch(&ptype, &pvalue, &ptraceback);
-    const char* pStrErrorMessage = PyUnicode_AsUTF8(pvalue);
-    LOGE("%s", pStrErrorMessage);
-    PyErr_Restore(ptype, pvalue, ptraceback);
-#endif
     PyErr_Clear();
 }
 
