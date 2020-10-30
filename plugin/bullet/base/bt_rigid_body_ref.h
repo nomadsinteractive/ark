@@ -14,14 +14,15 @@ namespace bullet {
 
 class BtRigidBodyRef  {
 public:
-    BtRigidBodyRef(btRigidBody* rigidBody);
+    BtRigidBodyRef(btCollisionObject* rigidBody);
 
-    btRigidBody* ptr() const;
+    btRigidBody* rigidBody() const;
+    btCollisionObject* collisionObject() const;
 
     void reset();
 
 private:
-    op<btRigidBody> _rigid_body;
+    op<btCollisionObject> _rigid_body;
 };
 
 }

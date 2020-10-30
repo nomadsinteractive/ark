@@ -40,11 +40,7 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape,
 
     sp<CollisionShape> cs;
     const auto iter = _stub->_collision_shapes.find(shape);
-    if(iter != _stub->_collision_shapes.end())
-    {
-        cs = iter->second;
-    }
-    else
+    if(iter == _stub->_collision_shapes.end())
     {
         btCollisionShape* btShape;
         switch(shape)
@@ -63,9 +59,11 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape,
             DFATAL("Undefined RigidBody(%d) in this world", shape);
             break;
         }
-
         cs = sp<CollisionShape>::make(btShape, 1.0f);
     }
+    else
+        cs = iter->second;
+
     return sp<RigidBodyBullet>::make(++ _stub->_body_id_base, type, *this, std::move(cs), transform, type == Collider::BODY_TYPE_DYNAMIC ? cs->mass() : 0);
 }
 
@@ -162,17 +160,17 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
     {
         const sp<BtRigidBodyRef>& rigidBody = iter->first;
         ContactInfo& contactInfo = iter->second;
-        if(rigidBody->ptr() == nullptr)
+        if(rigidBody->collisionObject() == nullptr)
             contactInfo._last_tick.clear();
         else
         {
-            RigidBodyBullet obj = getRigidBodyFromCollisionObject(iter->first->ptr());
+            RigidBodyBullet obj = getRigidBodyFromCollisionObject(iter->first->collisionObject());
             for(const sp<BtRigidBodyRef>& i : contactInfo._last_tick)
-                if(i->ptr())
+                if(i->collisionObject())
                 {
                     if(contactInfo._current_tick.find(i) == contactInfo._current_tick.end())
                         if(obj.collisionCallback())
-                            obj.collisionCallback()->onEndContact(sp<RigidBodyBullet>::make(getRigidBodyFromCollisionObject(i->ptr())));
+                            obj.collisionCallback()->onEndContact(sp<RigidBodyBullet>::make(getRigidBodyFromCollisionObject(i->collisionObject())));
                 }
 
             contactInfo._last_tick = std::move(contactInfo._current_tick);
@@ -196,7 +194,7 @@ void ColliderBullet::addTickContactInfo(const sp<BtRigidBodyRef>& rigidBody, con
     ContactInfo& contactInfo = _contact_infos[rigidBody];
     contactInfo._current_tick.insert(contact);
     if(contactInfo._last_tick.find(contact) == contactInfo._last_tick.end())
-        callback->onBeginContact(sp<RigidBodyBullet>::make(getRigidBodyFromCollisionObject(contact->ptr())), CollisionManifold(cp, normal));
+        callback->onBeginContact(sp<RigidBodyBullet>::make(getRigidBodyFromCollisionObject(contact->collisionObject())), CollisionManifold(cp, normal));
 }
 
 ColliderBullet::Stub::Stub(const V3& gravity, sp<ModelLoader> modelLoader)

@@ -19,25 +19,23 @@ Arc::Arc(uint32_t sampleCount, float a, float b)
 
 void Arc::apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo)
 {
+    DWARN(Math::almostEqual<float>(size->width(), size->height()), "RigidBody size: (%.2f, %.2f) is not a circle", size->width(), size->height());
+
     b2ChainShape shape;
-
-    DWARN(size->width() == size->height(), "RigidBody size: (%.2f, %.2f) is not a circle", size->width(), size->height());
-
     float radius = (size->width() + size->height()) / 4.0f;
 
     if(_b < _a)
         _b += 360.0f;
 
-    b2Vec2* vecs = new b2Vec2[_sample_count + 1];
-    float step = (_b - _a) / _sample_count * Math::PI / 180;
+    std::vector<b2Vec2> vecs(_sample_count + 1);
+    float step = (_b - _a) * Math::PI / 180.0f / static_cast<float>(_sample_count);
     float da = _a / 180 * Math::PI;
     for(uint32_t i = 0; i <= _sample_count; i ++)
     {
-        float degree = da + step * i;
+        float degree = da + step * static_cast<float>(i);
         vecs[i].Set(Math::cos(degree) * radius, Math::sin(degree) * radius);
     }
-    shape.CreateChain(vecs, _sample_count + 1);
-    delete[] vecs;
+    shape.CreateChain(vecs.data(), _sample_count + 1);
 
     b2FixtureDef fixtureDef = createInfo.toFixtureDef(&shape);
     body->CreateFixture(&fixtureDef);

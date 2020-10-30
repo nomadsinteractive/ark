@@ -51,9 +51,9 @@ public:
 private:
     struct Stub;
 
-    class Position : public Vec3 {
+    class DynamicPosition : public Vec3 {
     public:
-        Position(const sp<Stub>& stub);
+        DynamicPosition(const sp<Stub>& stub);
 
         virtual bool update(uint64_t timestamp) override;
 
@@ -67,9 +67,9 @@ private:
         bool _is_static_body;
     };
 
-    class TransformDelegate : public Transform::Delegate {
+    class DynamicTransform : public Transform::Delegate {
     public:
-        TransformDelegate(const sp<Stub>& stub);
+        DynamicTransform(const sp<Stub>& stub);
 
         virtual void snapshot(const Transform& transform, Transform::Snapshot& snapshot) const override;
         virtual V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override;
@@ -83,13 +83,12 @@ private:
         Stub(ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, Collider::BodyType bodyType, btScalar mass);
         ~Stub();
 
-        btMotionState* makeMotionState(const btTransform& transform) const;
         sp<BtRigidBodyRef> makeRigidBody(btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass) const;
 
         ColliderBullet _world;
-        sp<CollisionShape> _shape;
 
-        op<btMotionState> _motion_state;
+        sp<CollisionShape> _shape;
+        sp<btMotionState> _motion_state;
         sp<BtRigidBodyRef> _rigid_body;
 
         Collider::BodyType _body_type;
