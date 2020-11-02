@@ -37,7 +37,7 @@ public:
     };
 
     struct ARK_API Stub {
-        Stub(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, Box impl, const sp<Disposed>& disposed = nullptr);
+        Stub(int32_t id, Collider::BodyType type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Disposed> disposed = nullptr);
         ~Stub();
 
         DISALLOW_COPY_AND_ASSIGN(Stub);

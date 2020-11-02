@@ -23,7 +23,7 @@ namespace bullet {
 //[[script::bindings::name("RigidBody")]]
 class ARK_PLUGIN_BULLET_API RigidBodyBullet : public RigidBody, Implements<RigidBodyBullet, RigidBody, Holder>  {
 public:
-    RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, btScalar mass);
+    RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Transform> transform, sp<BtRigidBodyRef> rigidBody);
     RigidBodyBullet(sp<Stub> other);
 
     virtual void dispose() override;
@@ -49,49 +49,17 @@ public:
     const sp<BtRigidBodyRef>& rigidBody() const;
 
 private:
-    struct Stub;
-
-    class DynamicPosition : public Vec3 {
-    public:
-        DynamicPosition(const sp<Stub>& stub);
-
-        virtual bool update(uint64_t timestamp) override;
-
-        virtual V3 val() override;
-
-    private:
-        V3 getWorldPosition() const;
-
-    private:
-        sp<Stub> _stub;
-        bool _is_static_body;
-    };
-
-    class DynamicTransform : public Transform::Delegate {
-    public:
-        DynamicTransform(const sp<Stub>& stub);
-
-        virtual void snapshot(const Transform& transform, Transform::Snapshot& snapshot) const override;
-        virtual V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override;
-        virtual M4 toMatrix(const Transform::Snapshot& snapshot) const override;
-
-    private:
-        sp<Stub> _stub;
-    };
-
     struct Stub {
-        Stub(ColliderBullet world, sp<CollisionShape> shape, const btTransform& transform, Collider::BodyType bodyType, btScalar mass);
+        Stub(ColliderBullet world, sp<CollisionShape> collisionShape, sp<BtRigidBodyRef> rigidBody);
         ~Stub();
-
-        sp<BtRigidBodyRef> makeRigidBody(btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass) const;
 
         ColliderBullet _world;
 
-        sp<CollisionShape> _shape;
-        sp<btMotionState> _motion_state;
+        sp<CollisionShape> _collision_shape;
+//        sp<btMotionState> _motion_state;
         sp<BtRigidBodyRef> _rigid_body;
 
-        Collider::BodyType _body_type;
+//        Collider::BodyType _body_type;
     };
 
 private:

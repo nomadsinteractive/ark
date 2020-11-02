@@ -7,9 +7,12 @@
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
+#include "core/inf/variable.h"
 #include "core/types/implements.h"
 #include "core/types/owned_ptr.h"
 #include "core/types/safe_ptr.h"
+
+#include "graphics/base/transform.h"
 
 #include "renderer/forwarding.h"
 
@@ -105,6 +108,37 @@ private:
         std::set<sp<BtRigidBodyRef>> _last_tick;
         std::set<sp<BtRigidBodyRef>> _current_tick;
     };
+
+    class DynamicPosition : public Vec3 {
+    public:
+        DynamicPosition(const sp<btMotionState>& motionState, bool isStaticBody);
+
+        virtual bool update(uint64_t timestamp) override;
+
+        virtual V3 val() override;
+
+    private:
+        V3 getWorldPosition() const;
+
+    private:
+        sp<btMotionState> _motion_state;
+        bool _is_static_body;
+    };
+
+    class DynamicTransform : public Transform::Delegate {
+    public:
+        DynamicTransform(const sp<btMotionState>& motionState);
+
+        virtual void snapshot(const Transform& transform, Transform::Snapshot& snapshot) const override;
+        virtual V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override;
+        virtual M4 toMatrix(const Transform::Snapshot& snapshot) const override;
+
+    private:
+        sp<btMotionState> _motion_state;
+    };
+
+    static sp<BtRigidBodyRef> makeRigidBody(btDynamicsWorld* world, btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass);
+    static sp<BtRigidBodyRef> makeGhostObject(btDynamicsWorld* world, btCollisionShape* shape, Collider::BodyType bodyType);
 
     static void myInternalTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
     static RigidBodyBullet getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject);

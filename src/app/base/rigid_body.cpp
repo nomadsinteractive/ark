@@ -23,7 +23,7 @@
 namespace ark {
 
 RigidBody::RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, Box impl, const sp<Disposed>& disposed)
-    : _stub(sp<Stub>::make(id, type, position, size, rotate, std::move(impl), disposed))
+    : _stub(sp<Stub>::make(id, type, position, size, sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate), std::move(impl), disposed))
 {
 }
 
@@ -147,8 +147,8 @@ template<> ARK_API Collider::BodyType Conversions::to<String, Collider::BodyType
     return Collider::BODY_TYPE_STATIC;
 }
 
-RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, Box impl, const sp<Disposed>& disposed)
-    : _id(id), _type(type), _position(position), _size(size), _transform(sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate)), _impl(std::move(impl)), _disposed(disposed), _callback(sp<Callback>::make())
+RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Disposed> disposed)
+    : _id(id), _type(type), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _impl(std::move(impl)), _disposed(std::move(disposed)), _callback(sp<Callback>::make())
 {
 }
 
