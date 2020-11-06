@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "core/forwarding.h"
+#include "core/collection/list.h"
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
@@ -44,7 +45,7 @@ public:
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size = nullptr, const sp<Rotation>& rotate = nullptr) override;
 
 //  [[script::bindings::auto]]
-    void rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback);
+    void rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup = 1, int32_t filterMask = -1);
 //  [[script::bindings::auto]]
     void rayCastAllHit(const V3& from, const V3& to, const sp<CollisionCallback>& callback);
 
@@ -82,6 +83,22 @@ public:
     };
 
 private:
+    struct KinematicObject {
+        KinematicObject(sp<Vec3> position, sp<Rotation> rotation, sp<BtRigidBodyRef> rigidBody);
+
+        SafePtr<Vec3> _position;
+        SafePtr<Rotation> _rotation;
+        sp<BtRigidBodyRef> _rigid_body;
+
+        class ListFilter {
+        public:
+            ListFilter(const sp<KinematicObject>& /*item*/);
+
+            FilterAction operator()(const sp<KinematicObject>& item) const;
+
+        };
+    };
+
     struct Stub {
         Stub(const V3& gravity, sp<ModelLoader> modelLoader);
         ~Stub();
@@ -98,6 +115,8 @@ private:
         op<btBroadphaseInterface> _broadphase;
         op<btConstraintSolver> _solver;
         op<btDiscreteDynamicsWorld> _dynamics_world;
+
+        List<KinematicObject, KinematicObject::ListFilter> _kinematic_objects;
 
         uint32_t _body_id_base;
 
@@ -140,7 +159,9 @@ private:
     static sp<BtRigidBodyRef> makeRigidBody(btDynamicsWorld* world, btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass);
     static sp<BtRigidBodyRef> makeGhostObject(btDynamicsWorld* world, btCollisionShape* shape, Collider::BodyType bodyType);
 
+    static void myInternalPreTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
     static void myInternalTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
+
     static RigidBodyBullet getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject);
 
     void addTickContactInfo(const sp<BtRigidBodyRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<BtRigidBodyRef>& contact, const V3& cp, const V3& normal);

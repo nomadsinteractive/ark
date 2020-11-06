@@ -140,7 +140,7 @@ Manifest::Renderer::Renderer()
 Viewport Manifest::Renderer::toViewport() const
 {
     DASSERT(_resolution);
-    return Viewport(0, 0, _resolution->width(), _resolution->height(), -1.0f, 1.0f);
+    return Viewport(0, 0, _resolution->width(), _resolution->height(), 0, 1.0f);
 }
 
 static Manifest::WindowFlag toOneWindowFlag(const String& val)

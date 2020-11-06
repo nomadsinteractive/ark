@@ -56,10 +56,7 @@ private:
         ColliderBullet _world;
 
         sp<CollisionShape> _collision_shape;
-//        sp<btMotionState> _motion_state;
         sp<BtRigidBodyRef> _rigid_body;
-
-//        Collider::BodyType _body_type;
     };
 
 private:

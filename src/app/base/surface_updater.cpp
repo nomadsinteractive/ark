@@ -10,14 +10,14 @@
 namespace ark {
 
 SurfaceUpdater::SurfaceUpdater(const sp<SurfaceController>& surfaceController, const sp<RenderController>& renderController)
-    : _surface_controller(surfaceController), _render_controller(renderController), _clock(Platform::getSteadyClock())
+    : _surface_controller(surfaceController), _render_controller(renderController)
 {
 }
 
 void SurfaceUpdater::run()
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
-    uint64_t timestamp = _clock->val();
+    uint64_t timestamp = _render_controller->updateTick();
     _render_controller->preUpdate(timestamp);
     _surface_controller->requestUpdate(timestamp);
 }

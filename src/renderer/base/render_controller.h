@@ -115,6 +115,9 @@ public:
     sp<SharedBuffer> getNamedBuffer(SharedBuffer::Name name);
     sp<SharedBuffer> getSharedBuffer(ModelLoader::RenderMode renderMode, const Model& model);
 
+    uint64_t updateTick();
+    uint64_t tick() const;
+
 private:
     class RenderResource {
     public:
@@ -164,6 +167,7 @@ private:
     sp<Recycler> _recycler;
     sp<Dictionary<bitmap>> _bitmap_loader;
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
+    sp<Variable<uint64_t>> _clock;
 
     LFQueue<PreparingResource> _preparing_items;
     std::set<RenderResource> _on_surface_ready_items;
@@ -173,6 +177,8 @@ private:
 
     std::vector<Box> _defered_instances;
     std::unordered_map<element_index_t, sp<SharedBuffer>> _shared_buffers;
+
+    uint64_t _tick;
 
     friend class TextureBundle;
 };

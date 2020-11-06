@@ -40,7 +40,7 @@ public:
 }
 
 RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
-    : _render_engine(renderEngine), _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader)
+    : _render_engine(renderEngine), _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _clock(Platform::getSteadyClock())
 {
 }
 
@@ -285,6 +285,17 @@ sp<SharedBuffer> RenderController::getSharedBuffer(ModelLoader::RenderMode rende
                                              [indexCount](size_t objectCount)->size_t { return indexCount * objectCount * sizeof(element_index_t); });
     _shared_buffers.insert(std::make_pair(hash, sharedBuffer));
     return sharedBuffer;
+}
+
+uint64_t RenderController::updateTick()
+{
+    _tick = _clock->val();
+    return _tick;
+}
+
+uint64_t RenderController::tick() const
+{
+    return _tick;
 }
 
 RenderController::RenderResource::RenderResource(const sp<Resource>& resource, const sp<Uploader>& uploader, UploadPriority uploadPriority)

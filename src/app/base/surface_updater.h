@@ -22,7 +22,6 @@ public:
 private:
     sp<SurfaceController> _surface_controller;
     sp<RenderController> _render_controller;
-    sp<Variable<uint64_t>> _clock;
 };
 
 }

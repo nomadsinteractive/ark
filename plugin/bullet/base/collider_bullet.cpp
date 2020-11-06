@@ -27,6 +27,7 @@ namespace bullet {
 ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
     : _stub(sp<Stub>::make(gravity, std::move(modelLoader)))
 {
+    _stub->_dynamics_world->setInternalTickCallback(myInternalPreTickCallback, this, true);
     _stub->_dynamics_world->setInternalTickCallback(myInternalTickCallback, this);
 }
 
@@ -65,22 +66,32 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape,
     else
         cs = iter->second;
 
+    if(type == Collider::BODY_TYPE_SENSOR)
+    {
+        sp<BtRigidBodyRef> rigidBody = makeGhostObject(btDynamicWorld(), cs->btShape(), type);
+        _stub->_kinematic_objects.push_back(sp<KinematicObject>::make(position, rotate, rigidBody));
+        return sp<RigidBodyBullet>::make(++ _stub->_body_id_base, type, *this, std::move(cs), position,
+                                         sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate), std::move(rigidBody));
+    }
+
     float mass = type == Collider::BODY_TYPE_DYNAMIC ? cs->mass() : 0;
     sp<btMotionState> motionState = sp<btDefaultMotionState>::make(transform);
-    sp<BtRigidBodyRef> rigidBody = type == Collider::BODY_TYPE_SENSOR ? makeGhostObject(btDynamicWorld(), cs->btShape(), type) : makeRigidBody(btDynamicWorld(), cs->btShape(), motionState.get(), type, mass);
+    sp<BtRigidBodyRef> rigidBody = makeRigidBody(btDynamicWorld(), cs->btShape(), motionState.get(), type, mass);
     return sp<RigidBodyBullet>::make(++ _stub->_body_id_base, type, *this, std::move(cs), sp<DynamicPosition>::make(motionState, type == Collider::BODY_TYPE_STATIC),
                                      sp<Transform>::make(sp<DynamicTransform>::make(motionState)), std::move(rigidBody));
 }
 
-void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback)
+void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup, int32_t filterMask)
 {
     btVector3 btFrom(from.x(), from.y(), from.z());
     btVector3 btTo(to.x(), to.y(), to.z());
     btCollisionWorld::ClosestRayResultCallback closestResults(btFrom, btTo);
     closestResults.m_flags |= btTriangleRaycastCallback::kF_FilterBackfaces;
+    closestResults.m_collisionFilterGroup = filterGroup;
+    closestResults.m_collisionFilterMask = filterMask;
 
     _stub->_dynamics_world->rayTest(btVector3(from.x(), from.y(), from.z()), btVector3(to.x(), to.y(), to.z()), closestResults);
-    if (closestResults.hasHit())
+    if(closestResults.hasHit())
     {
         btVector3 p = btFrom.lerp(btTo, closestResults.m_closestHitFraction);
         const btVector3& n = closestResults.m_hitNormalWorld;
@@ -97,7 +108,7 @@ void ColliderBullet::rayCastAllHit(const V3& from, const V3& to, const sp<Collis
     allHitResults.m_flags |= btTriangleRaycastCallback::kF_FilterBackfaces;
 
     _stub->_dynamics_world->rayTest(btVector3(from.x(), from.y(), from.z()), btVector3(to.x(), to.y(), to.z()), allHitResults);
-    if (allHitResults.hasHit())
+    if(allHitResults.hasHit())
     {
         btVector3 p = btFrom.lerp(btTo, allHitResults.m_closestHitFraction);
         const btVector3& n = allHitResults.m_hitNormalWorld[0];
@@ -124,6 +135,23 @@ const std::unordered_map<int32_t, sp<CollisionShape>>& ColliderBullet::collision
 std::unordered_map<int32_t, sp<CollisionShape>>& ColliderBullet::collisionShapes()
 {
     return _stub->_collision_shapes;
+}
+
+void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
+{
+    ColliderBullet* self = reinterpret_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
+    uint64_t tick = Ark::instance().applicationContext()->renderController()->tick();
+    for(const sp<KinematicObject>& i : self->_stub->_kinematic_objects)
+    {
+        i->_position->update(tick);
+        i->_rotation->update(tick);
+        V3 pos = i->_position->val();
+        const V4 quaternion =  i->_rotation->val();
+        btTransform transform;
+        transform.setRotation(btQuaternion(quaternion.x(), quaternion.y(), quaternion.z(), quaternion.w()));
+        transform.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
+        i->_rigid_body->collisionObject()->setWorldTransform(transform);
+    }
 }
 
 void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
@@ -316,7 +344,6 @@ sp<BtRigidBodyRef> ColliderBullet::makeGhostObject(btDynamicsWorld* world, btCol
     return sp<BtRigidBodyRef>::make(ghostObject);
 }
 
-
 ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _gravity(factory.ensureBuilder<Vec3>(manifest, "gravity")), _model_loader(factory.getBuilder<ModelLoader>(manifest, "model-loader")),
       _resource_loader_context(resourceLoaderContext)
@@ -343,6 +370,20 @@ ColliderBullet::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& factory, const documen
 sp<Collider> ColliderBullet::BUILDER_IMPL2::build(const Scope& args)
 {
     return _delegate.build(args);
+}
+
+ColliderBullet::KinematicObject::KinematicObject(sp<Vec3> position, sp<Rotation> rotation, sp<BtRigidBodyRef> rigidBody)
+    : _position(std::move(position)), _rotation(std::move(rotation)), _rigid_body(std::move(rigidBody))
+{
+}
+
+ColliderBullet::KinematicObject::ListFilter::ListFilter(const sp<ColliderBullet::KinematicObject>&)
+{
+}
+
+FilterAction ColliderBullet::KinematicObject::ListFilter::operator()(const sp<ColliderBullet::KinematicObject>& item) const
+{
+    return item->_rigid_body.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
 }
 
 }
