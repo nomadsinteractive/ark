@@ -11,10 +11,9 @@
 
 namespace ark {
 
-ModelLoaderNinePatch::ModelLoaderNinePatch(const document& manifest, const sp<Atlas>& atlas)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLE_STRIP), _atlas(atlas), _vertices(atlas->attachments().ensure<NinePatchVertices>())
+ModelLoaderNinePatch::ModelLoaderNinePatch(sp<Atlas> atlas)
+    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLE_STRIP), _atlas(std::move(atlas)), _vertices(_atlas->attachments().ensure<NinePatchVertices>())
 {
-    _vertices->import(atlas, manifest);
 }
 
 sp<RenderCommandComposer> ModelLoaderNinePatch::makeRenderCommandComposer()
@@ -36,16 +35,6 @@ Model ModelLoaderNinePatch::loadModel(int32_t type)
     const auto iter = _vertices->_vertices.find(type);
     DCHECK(iter != _vertices->_vertices.end(), "Cannot find type: %d", type);
     return Model(nullptr, iter->second);
-}
-
-ModelLoaderNinePatch::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _manifest(manifest), _atlas(factory.ensureConcreteClassBuilder<Atlas>(manifest, Constants::Attributes::ATLAS))
-{
-}
-
-sp<ModelLoader> ModelLoaderNinePatch::BUILDER::build(const Scope& args)
-{
-    return sp<ModelLoaderNinePatch>::make(_manifest, _atlas->build(args));
 }
 
 sp<Atlas::Importer> ModelLoaderNinePatch::ATLAS_IMPORTER_BUILDER::build(const Scope& /*args*/)
@@ -105,6 +94,16 @@ sp<Vertices> ModelLoaderNinePatch::NinePatchVertices::makeNinePatchVertices(uint
 {
     const Rect patches(paddings.left(), paddings.top(), bounds.width() - paddings.right(), bounds.height() - paddings.bottom());
     return sp<VerticesNinePatch>::make(bounds, patches, textureWidth, textureHeight);
+}
+
+ModelLoaderNinePatch::BUILDER::BUILDER(BeanFactory& factory, const String& atlas)
+    : _atlas(factory.ensureBuilder<Atlas>(atlas))
+{
+}
+
+sp<ModelLoader> ModelLoaderNinePatch::BUILDER::build(const Scope& args)
+{
+    return sp<ModelLoaderNinePatch>::make(_atlas->build(args));
 }
 
 }

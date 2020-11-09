@@ -10,7 +10,7 @@ namespace ark {
 
 class ModelLoaderNinePatch : public ModelLoader {
 public:
-    ModelLoaderNinePatch(const document& manifest, const sp<Atlas>& atlas);
+    ModelLoaderNinePatch(sp<Atlas> atlas);
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
 
@@ -19,25 +19,24 @@ public:
 
     virtual Model loadModel(int32_t type) override;
 
-    class BUILDER : public Builder<ModelLoader> {
-    public:
-        BUILDER(BeanFactory& factory, const document& manifest);
-
-        virtual sp<ModelLoader> build(const Scope& args) override;
-
-    private:
-        document _manifest;
-
-        sp<Builder<Atlas>> _atlas;
-
-    };
-
 //  [[plugin::builder("nine-patch")]]
     class ATLAS_IMPORTER_BUILDER : public Builder<Atlas::Importer> {
     public:
         ATLAS_IMPORTER_BUILDER() = default;
 
         virtual sp<Atlas::Importer> build(const Scope& args) override;
+    };
+
+//  [[plugin::builder::by-value("nine-patch")]]
+    class BUILDER : public Builder<ModelLoader> {
+    public:
+        BUILDER(BeanFactory& factory, const String& atlas);
+
+        virtual sp<ModelLoader> build(const Scope& args) override;
+
+    private:
+        sp<Builder<Atlas>> _atlas;
+
     };
 
 private:
