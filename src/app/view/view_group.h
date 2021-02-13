@@ -44,6 +44,7 @@ public:
         document _manifest;
 
         SafePtr<Builder<Layout>> _layout;
+        SafePtr<Builder<LayoutV2>> _layout_v2;
         SafePtr<Builder<Renderer>> _background;
         sp<Builder<LayoutParam>> _layout_param;
     };

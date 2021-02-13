@@ -17,7 +17,7 @@ class ARK_API LayoutUtil {
 public:
 
     static V2 place(LayoutParam::Gravity gravity, const V2& clientSize, const Rect& parent);
-    static float place(LayoutParam::Gravity gravity, float size, float available);
+    static float placeOne(LayoutParam::Gravity gravity, float size, float available);
 
 };
 

@@ -223,7 +223,7 @@ public:
     DeclarationList _declaration_samplers;
 
     sp<String> _pre_main;
-    sp<String> _output_var;
+    sp<String> _output_var_modifier;
     sp<String> _post_main;
 };
 

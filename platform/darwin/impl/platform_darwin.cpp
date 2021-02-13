@@ -52,7 +52,7 @@ sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPa
 
 sp<Alphabet> Platform::getSystemAlphabet(const Font& font, const String& lang)
 {
-    if(lang && isFile("/Library/Fonts/Arial Unicode.ttf"))
+    if(isFile("/Library/Fonts/Arial Unicode.ttf"))
         return sp<AlphabetTrueType>::make("Arial Unicode.ttf", font.size());
     return sp<AlphabetTrueType>::make("Arial.ttf", font.size());
 }

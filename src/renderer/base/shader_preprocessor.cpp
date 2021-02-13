@@ -47,7 +47,7 @@ ShaderPreprocessor::ShaderPreprocessor(sp<String> source, PipelineInput::ShaderS
     : _source(std::move(source)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declarations, shaderStage == PipelineInput::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
       _declaration_outs(_attribute_declarations, shaderStage == PipelineInput::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
       _declaration_uniforms(_uniform_declarations, "uniform"), _declaration_samplers(_uniform_declarations, "uniform"), _pre_main(sp<String>::make()),
-      _output_var(sp<String>::make()), _post_main(sp<String>::make())
+      _output_var_modifier(sp<String>::make()), _post_main(sp<String>::make())
 {
 }
 
@@ -63,7 +63,7 @@ void ShaderPreprocessor::addPostMainSource(const String& source)
 
 void ShaderPreprocessor::addModifier(const String& modifier)
 {
-    *_output_var = Strings::sprintf("%s * %s", _output_var->c_str(), modifier.c_str());
+    *_output_var_modifier = Strings::sprintf("%s * %s", _output_var_modifier->c_str(), modifier.c_str());
 }
 
 void ShaderPreprocessor::initialize(PipelineBuildingContext& context)
@@ -156,8 +156,8 @@ void ShaderPreprocessor::parseDeclarations()
         _main.push_back(_pre_main);
         if(outVar && _main_block->hasReturnValue())
             _main.push_back(sp<String>::make(Strings::sprintf(INDENT_STR "%s = ", outVar.c_str())));
-        *_output_var = _main_block->genOutCall(_pre_shader_stage, _shader_stage);
-        _main.push_back(_output_var);
+        _main.push_back(sp<String>::make(_main_block->genOutCall(_pre_shader_stage, _shader_stage)));
+        _main.push_back(_output_var_modifier);
         _main.push_back(sp<String>::make(";"));
         _main.push_back(_post_main);
         _main.push_back(sp<String>::make("\n}\n\n"));

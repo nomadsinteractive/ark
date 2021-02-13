@@ -6,34 +6,12 @@ namespace ark {
 
 V2 LayoutUtil::place(LayoutParam::Gravity gravity, const V2& clientSize, const Rect& parent)
 {
-    float x = 0, y = 0;
-    switch(gravity & LayoutParam::GRAVITY_CENTER_HORIZONTAL)
-    {
-        case LayoutParam::GRAVITY_LEFT:
-        break;
-        case LayoutParam::GRAVITY_RIGHT:
-            x = clientSize.x() - parent.width();
-        break;
-        case LayoutParam::GRAVITY_CENTER_HORIZONTAL:
-            x = (clientSize.x() - parent.width()) / 2;
-        break;
-    }
-    switch(gravity & LayoutParam::GRAVITY_CENTER_VERTICAL)
-    {
-        case LayoutParam::GRAVITY_TOP:
-            y = 0;
-        break;
-        case LayoutParam::GRAVITY_BOTTOM:
-            y = clientSize.y() - parent.height();
-        break;
-        case LayoutParam::GRAVITY_CENTER_VERTICAL:
-            y = (clientSize.y() - parent.height()) / 2;
-        break;
-    }
+    float x = placeOne(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::GRAVITY_CENTER_HORIZONTAL), clientSize.x(), parent.width());
+    float y = placeOne(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::GRAVITY_CENTER_VERTICAL), clientSize.y(), parent.height());
     return V2(x + parent.left(), y + parent.top());
 }
 
-float LayoutUtil::place(LayoutParam::Gravity gravity, float size, float available)
+float LayoutUtil::placeOne(LayoutParam::Gravity gravity, float size, float available)
 {
     switch(gravity)
     {

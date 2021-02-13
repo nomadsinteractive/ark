@@ -63,6 +63,7 @@ void ViewGroup::updateLayout() const
 ViewGroup::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _factory(factory), _manifest(manifest),
       _layout(factory.getBuilder<Layout>(manifest, Constants::Attributes::LAYOUT)),
+      _layout_v2(factory.getBuilder<LayoutV2>(manifest, "layout-v2")),
       _background(factory.getBuilder<Renderer>(manifest, Constants::Attributes::BACKGROUND)),
       _layout_param(factory.ensureBuilder<LayoutParam>(manifest))
 {
@@ -70,7 +71,7 @@ ViewGroup::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Renderer> ViewGroup::BUILDER::build(const Scope& args)
 {
-    const sp<ViewGroup> viewGroup = sp<ViewGroup>::make(_background->build(args), _layout->build(args), nullptr, _layout_param->build(args));
+    const sp<ViewGroup> viewGroup = sp<ViewGroup>::make(_background->build(args), _layout->build(args), _layout_v2->build(args), _layout_param->build(args));
     for(const document& i : _manifest->children())
     {
         const String& name = i->name();

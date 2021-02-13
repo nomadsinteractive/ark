@@ -9,9 +9,9 @@
 		<import class="characters" characters="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890/.(),- "
 				font-width="32" font-height="64"/>
 	</atlas>
-	<render-layer id="@rl001" class="image-layer" atlas="@alphabets"/>
+	<render-layer id="@rl001" class="image-layer" model="quad(@alphabets)"/>
 	<render-layer id="@rl002" class="text-layer" alphabet="@a001" text-color="#ffffffff"/>
-	<render-layer id="@rl003" class="image-layer" atlas="@blocks"/>
+	<render-layer id="@rl003" class="image-layer" model="quad(@blocks)"/>
 	<renderer id="fps-counter" class="fps-counter" render-layer="@rl001" message="%.2f / 60"/>
 	<renderer id="imgui" class="imgui">
 		<font src="fonts/Cousine-Regular.ttf" size="14"/>
