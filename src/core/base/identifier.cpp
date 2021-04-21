@@ -21,20 +21,22 @@ Identifier Identifier::parse(const String& s, Format format)
     String package, value, queries;
     IdType idType = static_cast<IdType>(s.at(0));
 
-    if(idType == ID_TYPE_REFERENCE && parseAndVaildate(s.substr(1), package, value, queries, format))
+    if(idType == ID_TYPE_REFERENCE && parseAndValidate(s.substr(1), package, value, queries, format))
         return Identifier(ID_TYPE_REFERENCE, package, value, queries);
 
-    if(idType == ID_TYPE_ARGUMENT && parseAndVaildate(s.substr(1), package, value, queries, format))
+    if(idType == ID_TYPE_ARGUMENT && parseAndValidate(s.substr(1), package, value, queries, format))
         return Identifier(ID_TYPE_ARGUMENT, package, value, queries);
 
-    return parseAndVaildate(s, package, value, queries, FORMAT_NAMESPACE) ? Identifier(ID_TYPE_VALUE, package, value, queries) : Identifier(ID_TYPE_VALUE, "", s, queries);
+    return parseAndValidate(s, package, value, queries, FORMAT_NAMESPACE) ? Identifier(ID_TYPE_VALUE, package, value, queries) : Identifier(ID_TYPE_VALUE, "", s, queries);
 }
 
-Identifier Identifier::parseRef(const String& s)
+Identifier Identifier::parseRef(const String& s, Format format)
 {
     DCHECK(s, "Illegal identifier: empty string");
     String package, ref, queries;
-    return parseAndVaildate(s, package, ref, queries, FORMAT_NAMESPACE_STRICT) ? Identifier(ID_TYPE_REFERENCE, package, ref, queries) : Identifier(ID_TYPE_REFERENCE, "", s, queries);
+    bool idValid = parseAndValidate(s, package, ref, queries, format);
+    DWARN(idValid, "Unvaild refid \"%s\"", s.c_str());
+    return idValid ? Identifier(ID_TYPE_REFERENCE, package, ref, queries) : Identifier(ID_TYPE_REFERENCE, "", s, queries);
 }
 
 const String& Identifier::package() const
@@ -95,7 +97,7 @@ bool Identifier::isVal() const
     return _type == ID_TYPE_VALUE;
 }
 
-bool Identifier::parseAndVaildate(const String& s, String& package, String& value, String& queries, Format format)
+bool Identifier::parseAndValidate(const String& s, String& package, String& value, String& queries, Format format)
 {
     String packageAndName = s;
     Strings::cut(s, packageAndName, queries, '?', false);

@@ -6,6 +6,9 @@ include(CMakeDependentOption)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libs")
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(ARK_SRC_DIR ${PROJECT_SOURCE_DIR})
 set(ARK_TOOLS_DIR ${ARK_SRC_DIR}/tools/cmake)
 set(ARK_3RDPARTY_DIR ${ARK_SRC_DIR}/3rdparty)
@@ -22,6 +25,9 @@ set(ARK_STATIC_LIBRARIES ${ARK_RUNTIME_STATIC_LIBRARY})
 include(${ARK_TOOLS_DIR}/core.cmake)
 
 set(ARK_SYSTEM_NAME ${SYSTEM} CACHE STRING "Target system name of ARK was built for")
+
+ark_add_resource_dir(src platform plugin tools test samples)
+ark_add_resource_file(ark-config.cmake.in README.md LICENSE)
 
 option(ARK_BUILD_STATIC_LIBRARY "Build static library" OFF)
 option(ARK_BUILD_SAMPLES "Build samples" ON)

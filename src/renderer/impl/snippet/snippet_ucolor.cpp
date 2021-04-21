@@ -8,8 +8,8 @@
 
 namespace ark {
 
-SnippetUColor::SnippetUColor(const sp<Vec4>& color)
-    : _color(color)
+SnippetUColor::SnippetUColor(sp<Vec4> color)
+    : _color(std::move(color))
 {
 }
 
@@ -17,7 +17,7 @@ void SnippetUColor::preInitialize(PipelineBuildingContext& context)
 {
     ShaderPreprocessor& fragment = context.getStage(PipelineInput::SHADER_STAGE_FRAGMENT);
     context.addUniform("u_Color", Uniform::TYPE_F4, 1, sp<FlatableByVariable<V4>>::make(_color), -1);
-    fragment.addModifier("u_Color");
+    fragment.addOutputVarModifier("u_Color");
 }
 
 SnippetUColor::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)

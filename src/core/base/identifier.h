@@ -22,7 +22,7 @@ public:
     Identifier(Identifier&& other) = default;
 
     static Identifier parse(const String& s, Format format = FORMAT_NAMESPACE_STRICT);
-    static Identifier parseRef(const String& s);
+    static Identifier parseRef(const String& s, Format format = FORMAT_NAMESPACE_STRICT);
 
     const String& package() const;
     const String& arg() const;
@@ -48,7 +48,7 @@ public:
 private:
     Identifier(IdType type, const String& package, const String& val, const String& queries);
 
-    static bool parseAndVaildate(const String& s, String& package, String& val, String& queries, Format format);
+    static bool parseAndValidate(const String& s, String& package, String& val, String& queries, Format format);
     static void parseValueType(const String& s, String& value, String& type);
 
     void parseQueries(const String& queries);

@@ -8,7 +8,7 @@ void SnippetAcolor::preInitialize(PipelineBuildingContext& context)
 {
     ShaderPreprocessor& fragment = context.getStage(PipelineInput::SHADER_STAGE_FRAGMENT);
     context.addPredefinedAttribute("Color", "vec4", PipelineInput::SHADER_STAGE_FRAGMENT);
-    fragment.addModifier("v_Color");
+    fragment.addOutputVarModifier("v_Color");
 }
 
 sp<Snippet> SnippetAcolor::DICTIONARY::build(const Scope& /*args*/)

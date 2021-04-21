@@ -14,7 +14,7 @@ class AppWorld:
         self._alpha = -math.pi / 2
         self._beta = 0
         self._camera = Camera()
-        self._camera.perspective(math.pi / 4, resolution.width / resolution.height, 100, 1000)
+        self._camera.perspective(math.pi / 4, resolution.width / resolution.height, 0.1, 20)
         self._camera.look_at(self._position, self._target, Vec3(0, 0, 1))
         self._tangent_space = self._create_tangent_matrix()
         self._light_position_impl = light_position

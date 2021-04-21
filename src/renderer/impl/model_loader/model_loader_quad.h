@@ -10,7 +10,7 @@ namespace ark {
 
 class ModelLoaderQuad : public ModelLoader {
 public:
-    ModelLoaderQuad(const sp<Atlas>& atlas);
+    ModelLoaderQuad(sp<Atlas> atlas);
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
 

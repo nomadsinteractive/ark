@@ -31,8 +31,8 @@ public:
         ShaderPreprocessor& vertex = context.getStage(PipelineInput::SHADER_STAGE_VERTEX);
         ShaderPreprocessor& fragment = context.getStage(PipelineInput::SHADER_STAGE_FRAGMENT);
 
-        fragment.addModifier("vec4(1.0, 1.0, 1.0, v_Alpha01)");
-        fragment.addModifier("u_Color01");
+        fragment.addOutputVarModifier("vec4(1.0, 1.0, 1.0, v_Alpha01)");
+        fragment.addOutputVarModifier("u_Color01");
         vertex.addPostMainSource("gl_PointSize = a_PointSize;");
     }
 };

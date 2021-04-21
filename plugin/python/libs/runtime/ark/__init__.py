@@ -13,7 +13,7 @@ Use it for:
 from typing import Callable, List, Type, TypeVar, Union, Optional, Dict
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'Numeric', 'Layer', 'Vec2', 'Vec3',
-                           'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotate', 'Size', 'StringBundle', 'Tilemap', 'TilemapImporter', 'Tileset',
+                           'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap', 'TilemapImporter', 'Tileset',
                            'TilesetImporter', 'Transform', 'Varyings')
 
 

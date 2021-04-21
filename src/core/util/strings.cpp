@@ -86,7 +86,7 @@ public:
             const String& s = match[2].str();
             if(p == "$")
                 return sp<StringBuilderImpl2>::make(s);
-            Identifier id = Identifier::parseRef(s);
+            Identifier id = Identifier::parseRef(s, Identifier::FORMAT_NAMESPACE);
             return sp<StringBuilderImpl1>::make(id.package(), id.ref());
         });
     }

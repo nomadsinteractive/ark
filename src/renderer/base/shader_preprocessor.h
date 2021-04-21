@@ -153,7 +153,7 @@ public:
 
     void addPreMainSource(const String& source);
     void addPostMainSource(const String& source);
-    void addModifier(const String& modifier);
+    void addOutputVarModifier(String modifier);
 
     void initialize(PipelineBuildingContext& context);
     void initializeAsFirst(PipelineBuildingContext& context);
@@ -214,6 +214,7 @@ public:
 
     std::vector<String> _predefined_macros;
     std::vector<Parameter> _predefined_parameters;
+    std::vector<String> _output_var_modifiers;
 
     std::map<std::string, int32_t> _ssbos;
 
@@ -223,7 +224,6 @@ public:
     DeclarationList _declaration_samplers;
 
     sp<String> _pre_main;
-    sp<String> _output_var_modifier;
     sp<String> _post_main;
 };
 

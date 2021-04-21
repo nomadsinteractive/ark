@@ -14,7 +14,7 @@ namespace ark {
 
 class SnippetUColor : public Snippet {
 public:
-    SnippetUColor(const sp<Vec4>& color);
+    SnippetUColor(sp<Vec4> color);
 
     virtual void preInitialize(PipelineBuildingContext& context) override;
 
