@@ -28,12 +28,6 @@ sp<Layout> FrameLayout::BUILDER::build(const Scope& /*args*/)
     return sp<Layout>::adopt(new FrameLayout());
 }
 
-std::vector<V2> FrameLayoutNew::place(const std::vector<sp<LayoutParam>>& children, const LayoutParam& /*parent*/)
-{
-    std::vector<V2> slots(children.size());
-    return slots;
-}
-
 sp<Layout> FrameLayout::DICTIONARY::build(const Scope& /*args*/)
 {
     return sp<FrameLayout>::make();

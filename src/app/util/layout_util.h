@@ -16,9 +16,15 @@ namespace ark {
 class ARK_API LayoutUtil {
 public:
 
-    static V2 place(LayoutParam::Gravity gravity, const V2& clientSize, const Rect& parent);
-    static float placeOne(LayoutParam::Gravity gravity, float size, float available);
+    static V2 inflate(const std::vector<sp<LayoutParam>>& slots);
 
+    static V2 place(LayoutParam::Gravity gravity, const V2& size, const Rect& available);
+    static V2 place(LayoutParam::Gravity gravity, LayoutParam::FlexFlow flexFlow, const V2& size, Rect& available);
+
+private:
+    static float placeOneDimension(LayoutParam::Gravity gravity, float size, float available);
+
+    static Rect flow(LayoutParam::FlexFlow flexFlow, const V2& size, Rect& available);
 };
 
 }

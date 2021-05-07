@@ -78,12 +78,12 @@ float Size::depth() const
 
 void Size::setDepth(float depth)
 {
-    _impl->y()->set(depth);
+    _impl->z()->set(depth);
 }
 
 void Size::setDepth(const sp<Numeric>& depth)
 {
-    _impl->y()->set(depth);
+    _impl->z()->set(depth);
 }
 
 const sp<Numeric> Size::vwidth() const

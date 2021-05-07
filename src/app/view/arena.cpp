@@ -139,6 +139,7 @@ sp<Arena> Arena::BUILDER::build(const Scope& args)
     const sp<ResourceLoader> resourceLoader = r1 ? r1 : sp<ResourceLoader>::make(_factory);
     const sp<Renderer> background = _background.empty() ? nullptr : resourceLoader->load<Renderer>(_background, args);
     const sp<Renderer> view = _view ? resourceLoader->load<Renderer>(_view, args) : nullptr;
+    DCHECK(view || background, "Either \"view\" or \"background\" must be specified");
     const sp<Arena> arena = sp<Arena>::make(view ? view : sp<ViewGroup>::make(background, _layout->build(args), nullptr, _layout_param->build(args)).cast<Renderer>(), resourceLoader);
 
     BeanFactory& factory = resourceLoader->beanFactory();

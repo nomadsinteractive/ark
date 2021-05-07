@@ -5,7 +5,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
-#include "core/util/boolean_util.h"
+#include "core/util/boolean_type.h"
 
 #include "graphics/base/quaternion.h"
 #include "graphics/base/size.h"

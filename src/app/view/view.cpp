@@ -327,6 +327,18 @@ sp<Renderer> View::STYLE_SIZE::build(const Scope& args)
     return renderer;
 }
 
+View::STYLE_LAYOUT_WEIGHT::STYLE_LAYOUT_WEIGHT(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
+    : _delegate(delegate), _layout_weight(beanFactory.ensureBuilder<Numeric>(style))
+{
+}
+
+sp<Renderer> View::STYLE_LAYOUT_WEIGHT::build(const Scope& args)
+{
+    sp<Renderer> renderer = _delegate->build(args);
+    bindView(renderer)->layoutParam()->setWeight(_layout_weight->build(args)->val());
+    return renderer;
+}
+
 View::STYLE_ON_ENTER::STYLE_ON_ENTER(BeanFactory& beanFactory, const sp<Builder<Renderer> >& delegate, const String& style)
     : _delegate(delegate), _on_enter(beanFactory.ensureBuilder<Runnable>(style))
 {

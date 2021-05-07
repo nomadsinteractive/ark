@@ -32,6 +32,20 @@ void LayoutHierarchy::Slot::traverse(const Holder::Visitor& visitor)
         HolderUtil::visit(_renderer, visitor);
 }
 
+void LayoutHierarchy::Slot::updateLayoutPosition(const V2& position, float clientHeight)
+{
+    if(_view)
+    {
+        const sp<LayoutParam>& layoutParam = _view->layoutParam();
+        DASSERT(layoutParam);
+        if(layoutParam->display() == LayoutParam::DISPLAY_BLOCK)
+        {
+            const V4 margins = layoutParam->margins().val();
+            _position = V2(position.x() + margins.w(), clientHeight - layoutParam->contentHeight() - position.y() - margins.x());
+        }
+    }
+}
+
 bool LayoutHierarchy::Slot::isDisposed() const
 {
     return _disposed && _disposed->val();
@@ -223,21 +237,18 @@ void LayoutHierarchy::updateLayout(LayoutParam& layoutParam)
         if(_layout_v2)
         {
             const auto items = getLayoutItems();
+            const V2 contentSize = _layout_v2->inflate(items.second);
 
-            if(layoutParam.isWrapContent())
-            {
-                const V2 size = _layout_v2->inflate(items.second);
-                if(layoutParam.isWidthWrapContent())
-                    layoutParam.setContentWidth(size.x());
-                if(layoutParam.isHeightWrapContent())
-                    layoutParam.setContentHeight(size.y());
-            }
+            if(layoutParam.isWidthWrapContent())
+                layoutParam.setContentWidth(contentSize.x());
+            if(layoutParam.isHeightWrapContent())
+                layoutParam.setContentHeight(contentSize.y());
 
-            const std::vector<V2> positions = _layout_v2->place(items.second, layoutParam);
+            const std::vector<V2> positions = _layout_v2->place(items.second, layoutParam, contentSize);
             DASSERT(positions.size() == items.first.size());
 
             for(size_t i = 0; i < positions.size(); ++i)
-                items.first.at(i)->_position = positions.at(i);
+                items.first.at(i)->updateLayoutPosition(positions.at(i), layoutParam.contentHeight());
         }
         else if(_layout)
         {

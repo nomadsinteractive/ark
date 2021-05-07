@@ -7,7 +7,7 @@
 #include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/util/boolean_util.h"
+#include "core/util/boolean_type.h"
 #include "core/util/holder_util.h"
 #include "core/util/operators.h"
 

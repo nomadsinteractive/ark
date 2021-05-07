@@ -79,10 +79,8 @@ PyObject* PyInstance::call(PyObject* args)
         return PyObject_Call(_ref->instance(), args, nullptr);
     }
     catch(const std::exception& e) {
-        PyObject* repr = PyObject_Repr(_ref->instance());
-        LOGE("Exception occured while calling method \"%s\"", PythonInterpreter::instance()->toString(repr).c_str());
-        Py_XDECREF(repr);
-        throw e;
+        PyErr_SetString(PyExc_RuntimeError, e.what());
+        Py_RETURN_NONE;
     }
 }
 

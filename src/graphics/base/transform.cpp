@@ -156,7 +156,7 @@ V3 Transform::Snapshot::transform(const V3& p) const
 
 Transform::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _type(Documents::getAttribute(manifest, Constants::Attributes::TYPE, Transform::TYPE_LINEAR_3D)),
-      _rotation(factory.getBuilder<Rotation>(manifest, Constants::Attributes::ROTATE)), _scale(factory.getBuilder<Vec3>(manifest, "scale")),
+      _rotation(factory.getBuilder<Rotation>(manifest, Constants::Attributes::ROTATION)), _scale(factory.getBuilder<Vec3>(manifest, "scale")),
       _pivot(factory.getBuilder<Vec3>(manifest, "pivot"))
 {
 }

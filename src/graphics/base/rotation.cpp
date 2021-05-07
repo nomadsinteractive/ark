@@ -51,6 +51,15 @@ const sp<Numeric>& Rotation::theta() const
     return _theta;
 }
 
+void Rotation::setTheta(const sp<Numeric>& theta)
+{
+    DCHECK(_theta, "Theta can only be set in Theta-Axis mode");
+    _theta = theta;
+
+    _quaternion = sp<Quaternion>::make(_theta, _axis);
+    _timestamp.setDirty();
+}
+
 const sp<Vec3>& Rotation::axis() const
 {
     return _axis;
@@ -72,12 +81,14 @@ void Rotation::setRotation(const sp<Numeric>& theta, const sp<Vec3>& axis)
 
 void Rotation::setEuler(float pitch, float yaw, float roll)
 {
-    _quaternion = sp<Quaternion>::make(sp<Numeric::Const>::make(pitch), sp<Numeric::Const>::make(yaw), sp<Numeric::Const>::make(roll));
-    _timestamp.setDirty();
+    setEuler(sp<Numeric::Const>::make(pitch), sp<Numeric::Const>::make(yaw), sp<Numeric::Const>::make(roll));
 }
 
 void Rotation::setEuler(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll)
 {
+    _theta = nullptr;
+    _axis = nullptr;
+
     _quaternion = sp<Quaternion>::make(pitch, yaw, roll);
     _timestamp.setDirty();
 }
@@ -88,7 +99,7 @@ template<> ARK_API sp<Rotation> Null::ptr()
 }
 
 Rotation::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _theta(factory.getBuilder<Numeric>(manifest, Constants::Attributes::ROTATE)), _axis(factory.getBuilder<Vec3>(manifest, "axis"))
+    : _theta(factory.getBuilder<Numeric>(manifest, "theta")), _axis(factory.getBuilder<Vec3>(manifest, "axis"))
 {
 }
 

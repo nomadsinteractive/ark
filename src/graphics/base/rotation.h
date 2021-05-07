@@ -34,6 +34,8 @@ public:
 //  [[script::bindings::property]]
     const sp<Numeric>& theta() const;
 //  [[script::bindings::property]]
+    void setTheta(const sp<Numeric>& theta);
+//  [[script::bindings::property]]
     const sp<Vec3>& axis() const;
 
 //  [[script::bindings::auto]]

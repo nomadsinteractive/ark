@@ -1,4 +1,4 @@
-#include "core/util/boolean_util.h"
+#include "core/util/boolean_type.h"
 
 #include <regex>
 

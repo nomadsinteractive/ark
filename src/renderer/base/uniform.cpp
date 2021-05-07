@@ -5,7 +5,7 @@
 #include "core/inf/array.h"
 #include "core/inf/input.h"
 #include "core/inf/variable.h"
-#include "core/util/boolean_util.h"
+#include "core/util/boolean_type.h"
 #include "core/util/strings.h"
 
 namespace ark {

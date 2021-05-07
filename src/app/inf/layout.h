@@ -42,7 +42,7 @@ public:
     virtual ~LayoutV2() = default;
 
     virtual V2 inflate(const std::vector<sp<LayoutParam>>& slots) = 0;
-    virtual std::vector<V2> place(const std::vector<sp<LayoutParam>>& slots, const LayoutParam& parent) = 0;
+    virtual std::vector<V2> place(const std::vector<sp<LayoutParam>>& slots, const LayoutParam& parent, const V2& contentSize) = 0;
 
 };
 

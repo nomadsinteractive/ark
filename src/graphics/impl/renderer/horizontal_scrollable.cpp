@@ -27,7 +27,7 @@ void HorizontalScrollable::render(RenderRequest& renderRequest, const V3& positi
     {
         RendererTile& tile = _tiles[(i - _grid_position) / _tile_width];
         ensureTile(tile, i);
-        tile.render(renderRequest, position + V3(tile.offset() - gs, 0, 0));
+        tile.render(renderRequest, position + V3(static_cast<float>(tile.offset() - gs), 0, 0));
     }
 }
 

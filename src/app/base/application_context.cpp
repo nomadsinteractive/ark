@@ -224,14 +224,14 @@ void ApplicationContext::addStringBundle(const String& name, const sp<StringBund
 sp<String> ApplicationContext::getString(const String& resid)
 {
     DASSERT(resid);
-    const Identifier id = resid.at(0) == '@' ? Identifier::parse(resid, Identifier::FORMAT_NAMESPACE) : Identifier::parseRef(resid, Identifier::FORMAT_NAMESPACE);
+    const Identifier id = resid.at(0) == '@' ? Identifier::parse(resid, Identifier::ID_TYPE_AUTO, false) : Identifier::parseRef(resid, false);
     return _string_table->getString(id.package(), id.ref(), true);
 }
 
 std::vector<String> ApplicationContext::getStringArray(const String& resid)
 {
     DASSERT(resid);
-    const Identifier id = resid.at(0) == '@' ? Identifier::parse(resid, Identifier::FORMAT_NAMESPACE) : Identifier::parseRef(resid, Identifier::FORMAT_NAMESPACE);
+    const Identifier id = resid.at(0) == '@' ? Identifier::parse(resid, Identifier::ID_TYPE_AUTO, false) : Identifier::parseRef(resid, false);
     return _string_table->getStringArray(id.package(), id.ref(), true);
 }
 

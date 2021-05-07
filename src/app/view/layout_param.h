@@ -19,6 +19,7 @@ public:
         DISPLAY_FLOAT,
         DISPLAY_ABSOLUTE
     };
+
 //  [[script::bindings::enumeration]]
     enum Gravity {
         GRAVITY_DEFAULT = 0,
@@ -29,6 +30,14 @@ public:
         GRAVITY_BOTTOM = 8,
         GRAVITY_CENTER_VERTICAL = 12,
         GRAVITY_CENTER = GRAVITY_CENTER_VERTICAL | GRAVITY_CENTER_HORIZONTAL
+    };
+
+    enum FlexFlow {
+        FLEX_FLOW_NONE,
+        FLEX_FLOW_COLUMN,
+        FLEX_FLOW_COLUMN_REVERSE,
+        FLEX_FLOW_ROW,
+        FLEX_FLOW_ROW_REVERSE
     };
 
     static const int32_t MATCH_PARENT;
@@ -46,12 +55,12 @@ public:
 //  [[script::bindings::property]]
     void setContentWidth(float contentWidth);
 
-    float offsetWidth() const;
-
 //  [[script::bindings::property]]
     float contentHeight() const;
 //  [[script::bindings::property]]
     void setContentHeight(float contentHeight);
+
+    float offsetWidth() const;
     float offsetHeight() const;
 
 //  [[script::bindings::property]]
@@ -76,6 +85,7 @@ public:
     float weight() const;
 //  [[script::bindings::property]]
     void setWeight(float weight);
+    bool hasWeight() const;
 
     const SafeVar<Vec4>& margins() const;
     void setMargins(sp<Vec4> margins);
@@ -83,6 +93,10 @@ public:
     bool isWrapContent() const;
     bool isWidthWrapContent() const;
     bool isHeightWrapContent() const;
+
+    bool isMatchParent() const;
+    bool isWidthMatchParent() const;
+    bool isHeightMatchParent() const;
 
     static bool isMatchParent(float unit);
     static bool isWrapContent(float unit);

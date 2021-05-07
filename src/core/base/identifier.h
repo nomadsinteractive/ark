@@ -10,19 +10,23 @@ namespace ark {
 
 class ARK_API Identifier {
 public:
-    enum Format {
-        FORMAT_NONE,
-        FORMAT_NAMESPACE,
-        FORMAT_NAMESPACE_STRICT,
-        FORMAT_URL,
-        FORMAT_URL_STRICT
+    enum Type {
+        ID_TYPE_AUTO = 0,
+        ID_TYPE_VALUE = 1,
+        ID_TYPE_VALUE_AND_TYPE = 2,
+        ID_TYPE_REFERENCE = '@',
+        ID_TYPE_ARGUMENT = '$',
+        ID_TYPE_EXPRESSION = '{',
+        ID_TYPE_QUERY = '?'
     };
 
     Identifier(const Identifier& other) = default;
     Identifier(Identifier&& other) = default;
 
-    static Identifier parse(const String& s, Format format = FORMAT_NAMESPACE_STRICT);
-    static Identifier parseRef(const String& s, Format format = FORMAT_NAMESPACE_STRICT);
+    static Identifier parse(const String& s, Type idType = ID_TYPE_AUTO, bool strictMode = true);
+    static Identifier parseRef(const String& s, bool strictMode = true);
+
+    Type type() const;
 
     const String& package() const;
     const String& arg() const;
@@ -38,23 +42,16 @@ public:
     bool isArg() const;
     bool isVal() const;
 
-    enum IdType {
-        ID_TYPE_VALUE = 0,
-        ID_TYPE_REFERENCE = '@',
-        ID_TYPE_ARGUMENT = '$',
-        ID_TYPE_QUERY = '?'
-    };
-
 private:
-    Identifier(IdType type, const String& package, const String& val, const String& queries);
+    Identifier(Type type, String package, String val, String valueType, const String& queries);
 
-    static bool parseAndValidate(const String& s, String& package, String& val, String& queries, Format format);
-    static void parseValueType(const String& s, String& value, String& type);
+    static bool parseAndValidate(const String& s, String& package, String& val, String& queries, bool strictMode);
+    static bool parseTypeAndValue(const String& s, String& type, String& value);
 
     void parseQueries(const String& queries);
 
 private:
-    IdType _type;
+    Type _type;
 
     String _package;
 

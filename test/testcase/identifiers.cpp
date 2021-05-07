@@ -7,10 +7,10 @@ namespace unittest {
 
 class IdentifierTestCase : public TestCase {
 public:
-    virtual int launch() {
+    virtual int launch() override {
 
         {
-            const Identifier id = Identifier::parse("horizontal(center)");
+            const Identifier id = Identifier::parse("#horizontal(center)");
             TESTCASE_VALIDATE(id.isVal());
             TESTCASE_VALIDATE(id.val() == "center");
             TESTCASE_VALIDATE(id.valType() == "horizontal");
@@ -33,7 +33,7 @@ public:
         }
 
         {
-            const Identifier id = Identifier::parse("quad(@app:at001)");
+            const Identifier id = Identifier::parse("quad[@app:at001]");
             TESTCASE_VALIDATE(id.isVal());
             TESTCASE_VALIDATE(id.ref() == "");
             TESTCASE_VALIDATE(id.arg() == "");

@@ -108,6 +108,18 @@ public:
         sp<Builder<Size>> _size;
     };
 
+//  [[plugin::style("layout-weight")]]
+    class STYLE_LAYOUT_WEIGHT : public Builder<Renderer> {
+    public:
+        STYLE_LAYOUT_WEIGHT(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
+
+        virtual sp<Renderer> build(const Scope& args) override;
+
+    private:
+        sp<Builder<Renderer>> _delegate;
+        sp<Builder<Numeric>> _layout_weight;
+    };
+
 //  [[plugin::style("margins")]]
     class STYLE_MARGINS : public Builder<Renderer> {
     public:

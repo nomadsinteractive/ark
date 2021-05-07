@@ -86,7 +86,7 @@ public:
             const String& s = match[2].str();
             if(p == "$")
                 return sp<StringBuilderImpl2>::make(s);
-            Identifier id = Identifier::parseRef(s, Identifier::FORMAT_NAMESPACE);
+            Identifier id = Identifier::parseRef(s, false);
             return sp<StringBuilderImpl1>::make(id.package(), id.ref());
         });
     }
@@ -113,7 +113,7 @@ sp<Builder<String>> Strings::load(const String& resid)
     if(!resid || resid.find('{') != String::npos)
         return sp<StringBuilderImpl3>::make(resid);
 
-    const Identifier id = Identifier::parse(resid, Identifier::FORMAT_NAMESPACE);
+    const Identifier id = Identifier::parse(resid, Identifier::ID_TYPE_AUTO, false);
     if(id.isRef())
         return sp<StringBuilderImpl1>::make(id.package(), id.ref());
     if(id.isArg())

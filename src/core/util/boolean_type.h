@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_UTIL_BOOLEAN_UTIL_H_
-#define ARK_CORE_UTIL_BOOLEAN_UTIL_H_
+#ifndef ARK_CORE_UTIL_BOOLEAN_TYPE_H_
+#define ARK_CORE_UTIL_BOOLEAN_TYPE_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"

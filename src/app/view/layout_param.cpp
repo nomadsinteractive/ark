@@ -132,6 +132,11 @@ void LayoutParam::setWeight(float weight)
     _weight = weight;
 }
 
+bool LayoutParam::hasWeight() const
+{
+    return _weight != 0.0f;
+}
+
 const SafeVar<Vec4>& LayoutParam::margins() const
 {
     return _margins;
@@ -155,6 +160,21 @@ bool LayoutParam::isWidthWrapContent() const
 bool LayoutParam::isHeightWrapContent() const
 {
     return isWrapContent(_size->height());
+}
+
+bool LayoutParam::isMatchParent() const
+{
+    return isWidthMatchParent() || isHeightMatchParent();
+}
+
+bool LayoutParam::isWidthMatchParent() const
+{
+    return isMatchParent(_size->width());
+}
+
+bool LayoutParam::isHeightMatchParent() const
+{
+    return isMatchParent(_size->height());
 }
 
 bool LayoutParam::isMatchParent(float unit)

@@ -7,6 +7,11 @@
 
 namespace ark {
 
+VerticalLayoutV2::VerticalLayoutV2(LayoutParam::Gravity layoutGravity)
+    : _layout_gravity(layoutGravity)
+{
+}
+
 V2 VerticalLayoutV2::inflate(const std::vector<sp<LayoutParam>>& children)
 {
     float width = 0, height = 0;
@@ -18,7 +23,7 @@ V2 VerticalLayoutV2::inflate(const std::vector<sp<LayoutParam>>& children)
     return V2(width, height);
 }
 
-std::vector<V2> VerticalLayoutV2::place(const std::vector<sp<LayoutParam>>& slots, const LayoutParam& parent)
+std::vector<V2> VerticalLayoutV2::place(const std::vector<sp<LayoutParam>>& slots, const LayoutParam& parent, const V2& contentSize)
 {
     std::vector<V2> positions;
     float weights = 0;
@@ -29,26 +34,30 @@ std::vector<V2> VerticalLayoutV2::place(const std::vector<sp<LayoutParam>>& slot
         spaceAvailable -= i->offsetHeight();
     }
 
-    float unitWeight = weights == 0 ? 0 : spaceAvailable / weights;
-    Rect r(0, 0, parent.contentWidth(), parent.contentHeight());
+    bool hasWeight = weights != 0.0f;
+    float unitWeight = hasWeight ? spaceAvailable / weights : 0;
+    const V2 layoutPos = LayoutUtil::place(_layout_gravity, contentSize, Rect(0, 0, parent.contentWidth(), parent.contentHeight()));
+    Rect r = hasWeight ? Rect(0, 0, parent.contentWidth(), parent.contentWidth()) : Rect(layoutPos.x(), layoutPos.y(), contentSize.x(), contentSize.y());
 
+    LayoutParam::FlexFlow ff = LayoutParam::FLEX_FLOW_ROW;
     for(const sp<LayoutParam>& i : slots)
     {
-        float height = i->weight() == 0 ? i->offsetHeight() : i->weight() * unitWeight;
-        const V2 pos = LayoutUtil::place(i->gravity(), V2(i->offsetWidth(), height), r);
-        positions.push_back(pos);
-        if(Math::almostEqual(pos.x(), r.left()))
-            r.setTop(r.top() + height);
-        else
-            r.setBottom(r.top());
+        float width = i->calcLayoutWidth(parent.contentWidth());
+        float height = i->calcLayoutHeight(i->hasWeight() ? i->weight() * unitWeight : parent.contentHeight());
+        positions.push_back(LayoutUtil::place(i->gravity(), ff, V2(width, height), r));
     }
 
     return positions;
 }
 
+VerticalLayoutV2::BUILDER::BUILDER(const String& gravity)
+    : _layout_gravity(Strings::parse<LayoutParam::Gravity>(gravity))
+{
+}
+
 sp<LayoutV2> VerticalLayoutV2::BUILDER::build(const Scope& /*args*/)
 {
-    return sp<VerticalLayoutV2>::make();
+    return sp<VerticalLayoutV2>::make(_layout_gravity);
 }
 
 }

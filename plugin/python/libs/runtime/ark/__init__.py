@@ -1497,7 +1497,7 @@ class SurfaceController:
     def add_renderer(self, renderer: Renderer):
         pass
 
-    def add_controller(self, renderer: Renderer):
+    def add_control_layer(self, renderer: Renderer):
         pass
 
     def add_layer(self, renderer: Renderer):

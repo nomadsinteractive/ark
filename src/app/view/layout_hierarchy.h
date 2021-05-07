@@ -30,6 +30,8 @@ private:
 
         virtual void traverse(const Visitor& visitor) override;
 
+        void updateLayoutPosition(const V2& position, float clientHeight);
+
         bool isDisposed() const;
         bool layoutRequested() const;
 

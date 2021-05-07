@@ -37,12 +37,6 @@ public:
 
 };
 
-class FrameLayoutNew : public LayoutV2 {
-public:
-    virtual std::vector<V2> place(const std::vector<sp<LayoutParam>>& slots, const LayoutParam& parent) override;
-
-};
-
 }
 
 #endif

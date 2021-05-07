@@ -292,11 +292,11 @@ public:
         return obj;
     }
 
-    template<typename T> sp<Builder<T>> getBuilder(const String& id) {
+    template<typename T> sp<Builder<T>> getBuilder(const String& id, Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
         if(id.empty())
             return nullptr;
 
-        const Identifier f = Identifier::parse(id);
+        const Identifier f = Identifier::parse(id, idType);
         if(std::is_same<T, String>::value)
             return f.isArg() ? getBuilderByArg<T>(f) : findBuilderByValue<T>(id);
         if(f.isRef())
@@ -304,7 +304,13 @@ public:
         if(f.isArg())
             return getBuilderByArg<T>(f);
 
-        return f.valType() ? findBuilderByTypeValue<T>(f.valType(), f.val()) : findBuilderByValue<T>(id);
+        if(f.type() == Identifier::ID_TYPE_VALUE_AND_TYPE)
+            return findBuilderByTypeValue<T>(f.valType(), f.val());
+
+        if(f.type() == Identifier::ID_TYPE_EXPRESSION)
+            return findBuilderByValue<T>(f.val());
+
+        return findBuilderByValue<T>(id);
     }
 
     template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr, const String& defValue = String()) {
@@ -364,9 +370,9 @@ public:
     template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id);
     template<typename T> sp<Builder<T>> getBuilderByRef(const Identifier& id, BeanFactory& factory);
 
-    template<typename T> sp<Builder<T>> ensureBuilder(const String& id) {
+    template<typename T> sp<Builder<T>> ensureBuilder(const String& id, Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
         DCHECK(id, "Empty value being built");
-        const sp<Builder<T>> builder = getBuilder<T>(id);
+        const sp<Builder<T>> builder = getBuilder<T>(id, idType);
         DCHECK(builder, "Cannot find builder \"%s\"", id.c_str());
         return builder;
     }
