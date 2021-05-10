@@ -5,13 +5,15 @@
 
 namespace ark {
 
-void AtlasImporterGenericXML::import(Atlas& atlas, BeanFactory& factory, const document& manifest)
+AtlasImporterGenericXML::AtlasImporterGenericXML(String src, float px, float py)
+    : _src(std::move(src)), _px(px), _py(py)
 {
-    const String& path = Documents::ensureAttribute(manifest, Constants::Attributes::SRC);
-    const document src = Documents::loadFromReadable(Ark::instance().openAsset(path));
-    float defPx = Documents::getAttribute<float>(manifest, "px", 0.5f);
-    float defPy = Documents::getAttribute<float>(manifest, "py", 0.5f);
-    DCHECK(src, "Cannot load %s", path.c_str());
+}
+
+void AtlasImporterGenericXML::import(Atlas& atlas)
+{
+    const document src = Documents::loadFromReadable(Ark::instance().openAsset(_src));
+    DCHECK(src, "Cannot load %s", _src.c_str());
     for(const document& i : src->children())
     {
         int32_t n = Documents::ensureAttribute<int32_t>(i, "n");
@@ -23,17 +25,23 @@ void AtlasImporterGenericXML::import(Atlas& atlas, BeanFactory& factory, const d
         uint32_t oy = Documents::getAttribute<uint32_t>(i, "oY", 0);
         float ow = static_cast<float>(Documents::getAttribute<uint32_t>(i, "oW", w));
         float oh = static_cast<float>(Documents::getAttribute<uint32_t>(i, "oH", h));
-        float px = Documents::getAttribute<float>(i, "pX", defPx);
-        float py = Documents::getAttribute<float>(i, "pY", defPy);
+        float px = Documents::getAttribute<float>(i, "pX", _px);
+        float py = Documents::getAttribute<float>(i, "pY", _py);
         Rect bounds(ox / ow, oy / oh, (ox + w) / ow, (oy + h) / oh);
         bounds.vflip(1.0f);
         atlas.add(n, x, y, x + w, y + h, bounds, V2(ow, oh), V2(px, 1.0f - py));
     }
 }
 
-sp<Atlas::Importer> AtlasImporterGenericXML::BUILDER::build(const Scope& /*args*/)
+AtlasImporterGenericXML::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _src(factory.ensureBuilder<String>(manifest, Constants::Attributes::SRC)), _px(Documents::getAttribute<float>(manifest, "px", 0.5f)),
+      _py(Documents::getAttribute<float>(manifest, "py", 0.5f))
 {
-    return sp<AtlasImporterGenericXML>::make();
+}
+
+sp<Atlas::Importer> AtlasImporterGenericXML::BUILDER::build(const Scope& args)
+{
+    return sp<AtlasImporterGenericXML>::make(_src->build(args), _px, _py);
 }
 
 }

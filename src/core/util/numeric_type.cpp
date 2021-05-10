@@ -12,6 +12,7 @@
 #include "core/impl/numeric/vibrate.h"
 #include "core/impl/variable/boost.h"
 #include "core/impl/variable/integral.h"
+#include "core/impl/variable/interpolate.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/util/operators.h"
@@ -394,6 +395,11 @@ sp<Numeric> NumericType::vibrate(float s0, float v0, float s1, float v1, float d
     float multiplier = (t1 - t0) / duration;
     const sp<Numeric> b = sp<Numeric::Const>::make(t1 - t0);
     return sp<Vibrate>::make(boundary(mul(t ? t : Ark::instance().clock()->duration(), multiplier), b)->delegate(), a, t0, o);
+}
+
+sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t)
+{
+    return sp<Interpolate<float>>::make(self, b, t);
 }
 
 sp<Numeric> NumericType::boost(const sp<Numeric>& self, float v0, const sp<Numeric>& cd, const sp<Numeric>& t)

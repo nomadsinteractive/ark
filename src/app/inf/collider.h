@@ -5,6 +5,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/v3.h"
 
 #include "app/forwarding.h"
 
@@ -38,6 +39,8 @@ public:
 
 //  [[script::bindings::auto]]
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size = nullptr, const sp<Rotation>& rotate = nullptr) = 0;
+//  [[script::bindings::auto]]
+    virtual void rayCast(const V3& from, const V3& to, const sp<CollisionCallback>& callback) = 0;
 
 };
 

@@ -1,4 +1,4 @@
-#include "core/impl/dictionary/yaml_string_bundle.h"
+#include "core/impl/string_bundle/string_bundle_yaml.h"
 
 #include <yaml.h>
 
@@ -21,13 +21,13 @@ static int _yaml_read_handler(void* data, unsigned char* buffer, size_t size, si
     return 1;
 }
 
-YAMLStringBundle::YAMLStringBundle(const sp<AssetBundle>& resource)
+StringBundleYAML::StringBundleYAML(const sp<AssetBundle>& resource)
     : _resource(resource)
 {
     DASSERT(_resource);
 }
 
-sp<String> YAMLStringBundle::getString(const String& resid)
+sp<String> StringBundleYAML::getString(const String& resid)
 {
     String nodename, arrayname;
     int32_t arrayindex;
@@ -65,7 +65,7 @@ sp<String> YAMLStringBundle::getString(const String& resid)
     return sp<String>::make("[" + resid + "]");
 }
 
-std::vector<String> YAMLStringBundle::getStringArray(const String& resid)
+std::vector<String> StringBundleYAML::getStringArray(const String& resid)
 {
     String nodename, arrayname;
     const std::map<String, sp<Item>>& bundle = getPackageBundle(resid, nodename);
@@ -81,7 +81,7 @@ std::vector<String> YAMLStringBundle::getStringArray(const String& resid)
     return {};
 }
 
-void YAMLStringBundle::loadBundle(const String& name)
+void StringBundleYAML::loadBundle(const String& name)
 {
     const sp<Asset> asset = _resource->get(name + ".yaml");
     DCHECK(asset, "Unable to load %s.yaml", name.c_str());
@@ -148,7 +148,7 @@ void YAMLStringBundle::loadBundle(const String& name)
     yaml_parser_delete(&parser);
 }
 
-const std::map<String, sp<YAMLStringBundle::Item>>& YAMLStringBundle::getPackageBundle(const String& resid, String& nodename)
+const std::map<String, sp<StringBundleYAML::Item>>& StringBundleYAML::getPackageBundle(const String& resid, String& nodename)
 {
     String package;
     Strings::cut(resid, package, nodename, '/');
@@ -160,7 +160,7 @@ const std::map<String, sp<YAMLStringBundle::Item>>& YAMLStringBundle::getPackage
     return _bundle[package];
 }
 
-sp<YAMLStringBundle::Item>& YAMLStringBundle::makeKey(std::map<String, sp<Item>>& bundle, const std::vector<String>& keys) const
+sp<StringBundleYAML::Item>& StringBundleYAML::makeKey(std::map<String, sp<Item>>& bundle, const std::vector<String>& keys) const
 {
     StringBuffer sb;
     bool dirty = false;
@@ -176,43 +176,43 @@ sp<YAMLStringBundle::Item>& YAMLStringBundle::makeKey(std::map<String, sp<Item>>
     return bundle[sb.str()];
 }
 
-YAMLStringBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+StringBundleYAML::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _src(factory.ensureBuilder<String>(manifest, Constants::Attributes::SRC))
 {
 }
 
-sp<StringBundle> YAMLStringBundle::BUILDER::build(const Scope& args)
+sp<StringBundle> StringBundleYAML::BUILDER::build(const Scope& args)
 {
-    return sp<YAMLStringBundle>::make(Ark::instance().getAssetBundle(_src->build(args)));
+    return sp<StringBundleYAML>::make(Ark::instance().getAssetBundle(_src->build(args)));
 }
 
-void YAMLStringBundle::Item::setValue(String value)
+void StringBundleYAML::Item::setValue(String value)
 {
     _value = sp<String>::make(std::move(value));
 }
 
-void YAMLStringBundle::Item::addSequenceValue(String value)
+void StringBundleYAML::Item::addSequenceValue(String value)
 {
     DASSERT(_sequence);
     _sequence->push_back(std::move(value));
 }
 
-void YAMLStringBundle::Item::makeSequence()
+void StringBundleYAML::Item::makeSequence()
 {
     _sequence = sp<std::vector<String>>::make();
 }
 
-bool YAMLStringBundle::Item::isSequence() const
+bool StringBundleYAML::Item::isSequence() const
 {
     return static_cast<bool>(_sequence);
 }
 
-const sp<String>& YAMLStringBundle::Item::value() const
+const sp<String>& StringBundleYAML::Item::value() const
 {
     return _value;
 }
 
-const sp<std::vector<String> >& YAMLStringBundle::Item::sequence() const
+const sp<std::vector<String> >& StringBundleYAML::Item::sequence() const
 {
     return _sequence;
 }

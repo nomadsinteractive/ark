@@ -91,6 +91,16 @@ void C2RigidBody::collideManifold(const C2RigidBody& other, c2Manifold* m) const
         }
 }
 
+bool C2RigidBody::rayCast(c2Ray ray, c2Raycast* out) const
+{
+    c2x x1;
+    std::vector<C2Shape> s1 = transform(x1);
+    for(const C2Shape& i : s1)
+        if(c2CastRay(ray, &i.s, &x1, i.t, out))
+            return true;
+    return false;
+}
+
 bool C2RigidBody::isStaticBody() const
 {
     return _is_static_body;

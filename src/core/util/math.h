@@ -128,6 +128,8 @@ public:
 //  [[script::bindings::auto]]
     static ARK_API float atan2(float y, float x);
 //  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> atan2(const sp<Numeric>& dy, const sp<Numeric>& dx);
+//  [[script::bindings::auto]]
     static ARK_API float radians(float degree);
 
 //  [[script::bindings::auto]]
@@ -156,6 +158,15 @@ public:
     static ARK_API sp<Numeric> dot(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //  [[script::bindings::auto]]
     static ARK_API sp<Numeric> dot(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
+
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> lerp(const sp<Numeric>& a, const sp<Numeric>& b, const sp<Numeric>& t);
+//  [[script::bindings::auto]]
+    static ARK_API sp<Vec2> lerp(const sp<Vec2>& a, const sp<Vec2>& b, const sp<Numeric>& t);
+//  [[script::bindings::auto]]
+    static ARK_API sp<Vec3> lerp(const sp<Vec3>& a, const sp<Vec3>& b, const sp<Numeric>& t);
+//  [[script::bindings::auto]]
+    static ARK_API sp<Vec4> lerp(const sp<Vec4>& a, const sp<Vec4>& b, const sp<Numeric>& t);
 
 //  [[script::bindings::auto]]
     static ARK_API V3 quadratic(float a, float b, float c);

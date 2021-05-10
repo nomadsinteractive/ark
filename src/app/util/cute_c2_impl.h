@@ -36,6 +36,8 @@ public:
     void setShapes(const std::vector<C2Shape>& shapes, const V2& scale);
 
     void collideManifold(const C2RigidBody& other, c2Manifold* m) const;
+    bool rayCast(c2Ray ray, c2Raycast* out) const;
+
     bool isStaticBody() const;
 
 private:

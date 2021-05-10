@@ -36,7 +36,7 @@ public:
     virtual sp<Object> createSystemCursor(ApplicationController::SystemCursorName name) = 0;
 
 //  [[script::bindings::auto]]
-    virtual void showCursor(const sp<Object>& cursor) = 0;
+    virtual void showCursor(const sp<Object>& cursor = nullptr) = 0;
 //  [[script::bindings::auto]]
     virtual void hideCursor() = 0;
 //  [[script::bindings::auto]]

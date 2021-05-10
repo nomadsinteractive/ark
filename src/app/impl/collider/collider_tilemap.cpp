@@ -77,6 +77,11 @@ sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, 
     return rigidBody;
 }
 
+void TiledCollider::rayCast(const V3& from, const V3& to, const sp<CollisionCallback>& callback)
+{
+    DFATAL("Unimplemented");
+}
+
 TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Tilemap>& tileMap)
     : RigidBody(id, type, position, size, Null::toSafe<Rotation>(nullptr), Box()), _tilemap(tileMap), _rigid_body_shadow(sp<RigidBodyShadow>::make(tileMap->tileset()->tileWidth(), tileMap->tileset()->tileHeight()))
 {

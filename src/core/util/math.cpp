@@ -5,12 +5,16 @@
 #include <stdlib.h>
 
 #include "core/inf/variable.h"
+#include "core/impl/variable/interpolate.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
 #include "core/util/log.h"
 
 #include "graphics/base/v4.h"
+#include "graphics/impl/vec/vec2_impl.h"
+#include "graphics/impl/vec/vec3_impl.h"
+#include "graphics/impl/vec/vec4_impl.h"
 
 
 namespace ark {
@@ -93,6 +97,11 @@ sp<Numeric> Math::acos(const sp<Numeric>& x)
 float Math::atan2(float y, float x)
 {
     return std::atan2(y, x);
+}
+
+sp<Numeric> Math::atan2(const sp<Numeric>& dy, const sp<Numeric>& dx)
+{
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Atan2>>::make(dy, dx);
 }
 
 float Math::radians(float degree)
@@ -179,6 +188,26 @@ sp<Numeric> Math::dot(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 sp<Numeric> Math::dot(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
 {
     return sp<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Dot<V4>>>::make(lvalue, rvalue);
+}
+
+sp<Numeric> Math::lerp(const sp<Numeric>& a, const sp<Numeric>& b, const sp<Numeric>& t)
+{
+    return sp<Interpolate<float>>::make(a, b, t);
+}
+
+sp<Vec2> Math::lerp(const sp<Vec2>& a, const sp<Vec2>& b, const sp<Numeric>& t)
+{
+    return sp<Interpolate<V2>>::make(a, b, sp<Vec2Impl>::make(t, t));
+}
+
+sp<Vec3> Math::lerp(const sp<Vec3>& a, const sp<Vec3>& b, const sp<Numeric>& t)
+{
+    return sp<Interpolate<V3>>::make(a, b, sp<Vec3Impl>::make(t, t, t));
+}
+
+sp<Vec4> Math::lerp(const sp<Vec4>& a, const sp<Vec4>& b, const sp<Numeric>& t)
+{
+    return sp<Interpolate<V4>>::make(a, b, sp<Vec4Impl>::make(t, t, t, t));
 }
 
 V3 Math::quadratic(float a, float b, float c)

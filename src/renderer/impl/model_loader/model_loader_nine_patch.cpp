@@ -37,15 +37,25 @@ Model ModelLoaderNinePatch::loadModel(int32_t type)
     return Model(nullptr, iter->second);
 }
 
-sp<Atlas::Importer> ModelLoaderNinePatch::ATLAS_IMPORTER_BUILDER::build(const Scope& /*args*/)
+ModelLoaderNinePatch::ATLAS_IMPORTER_BUILDER::ATLAS_IMPORTER_BUILDER(const document& manifest)
+    : _manifest(manifest)
 {
-    return sp<NinePatchAtlasImporter>::make();
 }
 
-void ModelLoaderNinePatch::NinePatchAtlasImporter::import(Atlas& atlas, BeanFactory& /*factory*/, const document& manifest)
+sp<Atlas::Importer> ModelLoaderNinePatch::ATLAS_IMPORTER_BUILDER::build(const Scope& /*args*/)
+{
+    return sp<NinePatchAtlasImporter>::make(_manifest);
+}
+
+ModelLoaderNinePatch::NinePatchAtlasImporter::NinePatchAtlasImporter(document manifest)
+    : _manifest(std::move(manifest))
+{
+}
+
+void ModelLoaderNinePatch::NinePatchAtlasImporter::import(Atlas& atlas)
 {
     const sp<NinePatchVertices>& vertices = atlas.attachments().ensure<NinePatchVertices>();
-    vertices->import(atlas, manifest);
+    vertices->import(atlas, _manifest);
 }
 
 void ModelLoaderNinePatch::NinePatchVertices::import(Atlas& atlas, const document& manifest)

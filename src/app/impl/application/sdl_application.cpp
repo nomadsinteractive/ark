@@ -123,10 +123,12 @@ public:
         if(SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE)
             SDL_ShowCursor(SDL_ENABLE);
 
-        const sp<SDLCursor> s = cursor.as<SDLCursor>();
-        DCHECK(s, "Object is not a SDLCursor instance");
-        if(s)
-            SDL_SetCursor(s->cursor());
+        if(cursor) {
+            const sp<SDLCursor> s = cursor.as<SDLCursor>();
+            DCHECK(s, "Object is not a SDLCursor instance");
+            if(s)
+                SDL_SetCursor(s->cursor());
+        }
     }
 
     virtual void hideCursor() override {

@@ -63,6 +63,11 @@ sp<RigidBody> ColliderBox2D::createBody(Collider::BodyType type, int32_t shape, 
     return body;
 }
 
+void ColliderBox2D::rayCast(const V3& from, const V3& to, const sp<CollisionCallback>& callback)
+{
+    DFATAL("Unimplemented");
+}
+
 b2World& ColliderBox2D::world() const
 {
     return _stub->_world;

@@ -10,22 +10,24 @@ namespace ark {
 
 class AtlasImporterMaxRects : public Atlas::Importer {
 public:
-    AtlasImporterMaxRects(const sp<ResourceLoaderContext>& resourceLoaderContext);
+    AtlasImporterMaxRects(document manifest, sp<ResourceLoaderContext> resourceLoaderContext);
 
-    virtual void import(Atlas& atlas, BeanFactory& factory, const document& manifest) override;
+    virtual void import(Atlas& atlas) override;
 
 //  [[plugin::resource-loader("max-rects")]]
     class BUILDER : public Builder<Atlas::Importer> {
     public:
-        BUILDER(const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         virtual sp<Atlas::Importer> build(const Scope& args) override;
 
     private:
+        document _manifest;
         sp<ResourceLoaderContext> _resource_loader_context;
     };
 
 private:
+    document _manifest;
     sp<ResourceLoaderContext> _resource_loader_context;
 
 };

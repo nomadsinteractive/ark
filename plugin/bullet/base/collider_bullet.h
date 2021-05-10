@@ -43,11 +43,11 @@ public:
 
 //  [[script::bindings::auto]]
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size = nullptr, const sp<Rotation>& rotate = nullptr) override;
+//  [[script::bindings::auto]]
+    virtual void rayCast(const V3& from, const V3& to, const sp<CollisionCallback>& callback) override;
 
 //  [[script::bindings::auto]]
     void rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup = 1, int32_t filterMask = -1);
-//  [[script::bindings::auto]]
-    void rayCastAllHit(const V3& from, const V3& to, const sp<CollisionCallback>& callback);
 
     virtual void run() override;
 

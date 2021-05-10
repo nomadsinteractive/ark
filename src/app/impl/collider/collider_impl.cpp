@@ -75,8 +75,10 @@ sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, c
 {
     DASSERT(position);
     DASSERT(size);
+    DCHECK(type == Collider::BODY_TYPE_KINEMATIC || type == Collider::BODY_TYPE_STATIC || type == Collider::BODY_TYPE_SENSOR, "Unknown BodyType: %d", type);
+
     const sp<Disposed> disposed = sp<Disposed>::make();
-    if(type == Collider::BODY_TYPE_DYNAMIC)
+    if(type != Collider::BODY_TYPE_STATIC)
     {
         const sp<DynamicPosition> dpos = sp<DynamicPosition>::make(_stub, position);
         const sp<Vec3> pos = _resource_loader_context->synchronize<V3>(dpos, disposed);
@@ -84,8 +86,12 @@ sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, c
         dpos->setRigidBody(rigidBody->shadow());
         return rigidBody;
     }
-    DCHECK(type == Collider::BODY_TYPE_KINEMATIC || type == Collider::BODY_TYPE_STATIC, "Unknown BodyType: %d", type);
     return _stub->createRigidBody(type, shape, position, size, rotate, disposed, _stub);
+}
+
+void ColliderImpl::rayCast(const V3& from, const V3& to, const sp<CollisionCallback>& callback)
+{
+    _stub->rayCast(V2(from.x(), from.y()), V2(to.x(), to.y()), callback);
 }
 
 ColliderImpl::Stub::Stub(const sp<Tracker>& tracker, const document& manifest, ResourceLoaderContext& resourceLoaderContext)
@@ -154,6 +160,19 @@ const sp<ColliderImpl::RigidBodyShadow> ColliderImpl::Stub::findRigidBody(int32_
     return iter != _rigid_bodies.end() ? iter->second : sp<RigidBodyShadow>();
 }
 
+void ColliderImpl::Stub::rayCast(const V2& from, const V2& to, const sp<CollisionCallback>& callback) const
+{
+    std::unordered_set<int32_t> candidates = _tracker->search(V3((from + to) / 2, 0), V3(std::abs(from.x() - to.x()), std::abs(from.y() - to.y()), 0));
+    const c2Ray ray = makeRay(from, to);
+    for(int32_t id : candidates)
+    {
+        const sp<RigidBodyShadow>& rigidBody = ensureRigidBody(id);
+        c2Raycast raycast;
+        if(rigidBody->_c2_rigid_body.rayCast(ray, &raycast))
+            callback->onBeginContact(rigidBody, CollisionManifold(V3(), V3(raycast.n.x, raycast.n.y, 0)));
+    }
+}
+
 void ColliderImpl::Stub::loadShapes(const document& manifest)
 {
     for(const document& i : manifest->children("body"))
@@ -216,6 +235,25 @@ void ColliderImpl::Stub::loadShapes(const document& manifest)
         shapes.unit = unit;
         _c2_shapes[shapeId] = std::move(shapes);
     }
+}
+
+c2Ray ColliderImpl::Stub::makeRay(const V2& from, const V2& to) const
+{
+    const V2 delta = to - from;
+    c2Ray ray;
+    ray.p = { from.x(), from.y() };
+    if(delta.length() > 0.01f)
+    {
+        const V2 nd = delta.normalize();
+        ray.d = { nd.x(), nd.y() };
+        ray.t = delta.length();
+    }
+    else
+    {
+        ray.d = { 0, 1.0f };
+        ray.t = 0.01f;
+    }
+    return ray;
 }
 
 ColliderImpl::RigidBodyImpl::RigidBodyImpl(const sp<ColliderImpl::Stub>& collider, const sp<RigidBodyShadow>& shadow)

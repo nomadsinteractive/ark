@@ -16,6 +16,7 @@ RendererStylePosition::RendererStylePosition(const sp<Renderer>& renderer, const
 
 void RendererStylePosition::render(RenderRequest& renderRequest, const V3& position)
 {
+    _position->update(renderRequest.timestamp());
     _renderer->render(renderRequest, position + _position->val());
 }
 
@@ -27,7 +28,7 @@ RendererStylePosition::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Rende
 sp<Renderer> RendererStylePosition::STYLE::build(const Scope& args)
 {
     const sp<Renderer> bean = _delegate->build(args);
-    return sp<Renderer>::adopt(new RendererStylePosition(bean, _position->build(args))).absorb(bean);
+    return sp<Renderer>::make<RendererStylePosition>(bean, _position->build(args)).absorb(bean);
 }
 
 }

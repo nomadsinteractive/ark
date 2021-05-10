@@ -19,33 +19,22 @@ Atlas::Atlas(const sp<Texture>& texture, bool allowDefaultItem)
 {
 }
 
-void Atlas::load(BeanFactory& factory, const document& manifest, const Scope& args)
+void Atlas::loadItem(const document& manifest)
 {
-    for(const document& i : manifest->children())
+    DCHECK(manifest->name() == "item", "No rule to import item \"%s\"", Documents::toString(manifest).c_str());
+    int32_t type = Documents::getAttribute<int32_t>(manifest, Constants::Attributes::TYPE, 0);
+    float px = Documents::getAttribute<float>(manifest, "pivot-x", 0);
+    float py = Documents::getAttribute<float>(manifest, "pivot-x", 0);
+    if(has(type))
     {
-        if(i->name() == "import")
-        {
-            const sp<Atlas::Importer> importer = factory.ensure<Atlas::Importer>(i, args);
-            importer->import(*this, factory, i);
-        }
-        else if(i->name() != Constants::Attributes::TEXTURE)
-        {
-            DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
-            int32_t type = Documents::getAttribute<int32_t>(i, Constants::Attributes::TYPE, 0);
-            float px = Documents::getAttribute<float>(i, "pivot-x", 0);
-            float py = Documents::getAttribute<float>(i, "pivot-x", 0);
-            if(has(type))
-            {
-                const Item& item = at(type);
-                _items[type] = Item(item.ux(), item.uy(), item.vx(), item.vy(), Rect(-px, -py, 1.0f - px, 1.0f - py), item.size());
-            }
-            else
-            {
-                const Rect r = Rect::parse(i);
-                add(type, static_cast<uint32_t>(r.left()), static_cast<uint32_t>(r.top()), static_cast<uint32_t>(r.right()), static_cast<uint32_t>(r.bottom()),
-                    Rect(0, 0, 1.0f, 1.0f), V2(r.width(), r.height()), V2(px, py));
-            }
-        }
+        const Item& item = at(type);
+        _items[type] = Item(item.ux(), item.uy(), item.vx(), item.vy(), Rect(-px, -py, 1.0f - px, 1.0f - py), item.size());
+    }
+    else
+    {
+        const Rect r = Rect::parse(manifest);
+        add(type, static_cast<uint32_t>(r.left()), static_cast<uint32_t>(r.top()), static_cast<uint32_t>(r.right()), static_cast<uint32_t>(r.bottom()),
+            Rect(0, 0, 1.0f, 1.0f), V2(r.width(), r.height()), V2(px, py));
     }
 }
 
@@ -128,16 +117,29 @@ Atlas::Item Atlas::makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, 
 }
 
 Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _factory(factory), _manifest(manifest), _texture(factory.ensureConcreteClassBuilder<Texture>(manifest, Constants::Attributes::TEXTURE))
+    : _texture(factory.ensureConcreteClassBuilder<Texture>(manifest, Constants::Attributes::TEXTURE))
 {
+    for(const document& i : manifest->children())
+        if(i->name() == "import")
+            _importers.push_back(factory.ensureBuilder<Importer>(i));
+        else if(i->name() != Constants::Attributes::TEXTURE)
+        {
+            DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
+            _items.push_back(i);
+        }
 }
 
 sp<Atlas> Atlas::BUILDER::build(const Scope& args)
 {
     const sp<Texture> texture = _texture->build(args);
-    DCHECK(texture, "Build texture from \"%s\" failed", Documents::toString(_manifest).c_str());
+    DASSERT(texture);
     const sp<Atlas> atlas = sp<Atlas>::make(texture);
-    atlas->load(_factory, _manifest, args);
+
+    for(const document& i : _items)
+        atlas->loadItem(i);
+
+    for(const sp<Builder<Importer>>& i : _importers)
+        i->build(args)->import(atlas);
     return atlas;
 }
 

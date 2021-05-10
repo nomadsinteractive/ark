@@ -1,7 +1,5 @@
 #include "core/base/scope.h"
 
-#include "core/base/string.h"
-
 namespace ark {
 
 Scope::Scope(std::map<String, Box> variables, sp<Queries> queries)
@@ -28,11 +26,6 @@ Box Scope::getObject(const String& name) const
 {
     const auto iter = _variables.find(name);
     return iter != _variables.end() ? iter->second : Box();
-}
-
-Scope::Queries::Queries(BeanFactory factory, Table<String, String> queries)
-    : _bean_factory(std::move(factory)), _queries(std::move(queries))
-{
 }
 
 }

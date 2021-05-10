@@ -122,6 +122,9 @@ public:
 
 //  [[script::bindings::classmethod]]
     static sp<Numeric> attract(const sp<Numeric>& self, float s0, float duration, const sp<Numeric>& t = nullptr);
+//  [[script::bindings::classmethod]]
+    static sp<Numeric> lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t);
+
 //  [[script::bindings::auto]]
     static sp<Numeric> pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t = nullptr);
 //  [[script::bindings::auto]]

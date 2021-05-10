@@ -9,16 +9,23 @@ namespace ark {
 
 class AtlasImporterTiles : public Atlas::Importer {
 public:
+    AtlasImporterTiles(document manifest);
 
-    virtual void import(Atlas& atlas, BeanFactory& factory, const document& manifest) override;
+    virtual void import(Atlas& atlas) override;
 
 //  [[plugin::builder("tiles")]]
     class BUILDER : public Builder<Atlas::Importer> {
     public:
-        BUILDER() = default;
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Atlas::Importer> build(const Scope& args) override;
+
+    private:
+        document _manifest;
     };
+
+private:
+    document _manifest;
 
 };
 

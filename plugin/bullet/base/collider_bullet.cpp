@@ -100,7 +100,7 @@ void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<Colli
     }
 }
 
-void ColliderBullet::rayCastAllHit(const V3& from, const V3& to, const sp<CollisionCallback>& callback)
+void ColliderBullet::rayCast(const V3& from, const V3& to, const sp<CollisionCallback>& callback)
 {
     btVector3 btFrom(from.x(), from.y(), from.z());
     btVector3 btTo(to.x(), to.y(), to.z());

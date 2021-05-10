@@ -97,6 +97,8 @@ public:
 
 //  [[script::bindings::classmethod]]
     static sp<Vec3> attract(const sp<Vec3>& self, const V3& s0, float duration, const sp<Numeric>& t = nullptr);
+//  [[script::bindings::classmethod]]
+    static sp<Vec3> lerp(const sp<Vec3>& self, const sp<Vec3>& b, const sp<Numeric>& t);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec3> cross(const sp<Vec3>& self, const sp<Vec3>& other);

@@ -22,9 +22,12 @@ public:
 //  [[plugin::builder("nine-patch")]]
     class ATLAS_IMPORTER_BUILDER : public Builder<Atlas::Importer> {
     public:
-        ATLAS_IMPORTER_BUILDER() = default;
+        ATLAS_IMPORTER_BUILDER(const document& manifest);
 
         virtual sp<Atlas::Importer> build(const Scope& args) override;
+
+    private:
+        document _manifest;
     };
 
 //  [[plugin::builder::by-value("nine-patch")]]
@@ -54,7 +57,12 @@ private:
 
     class NinePatchAtlasImporter : public Atlas::Importer {
     public:
-        virtual void import(Atlas& atlas, BeanFactory& factory, const document& manifest) override;
+        NinePatchAtlasImporter(document manifest);
+
+        virtual void import(Atlas& atlas) override;
+
+    private:
+        document _manifest;
     };
 
 private:

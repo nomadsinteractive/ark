@@ -135,6 +135,13 @@ public:
         }
     };
 
+    class Atan2 {
+    public:
+        float operator()(float v1, float v2) {
+            return Math::atan2(v1, v2);
+        }
+    };
+
     template<typename T, typename OP> class Builder : public ark::Builder<Variable<T>> {
     public:
         typedef sp<ark::Builder<Variable<T>>> BuilderType;

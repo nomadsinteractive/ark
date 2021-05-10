@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_IMPL_DIRECTORY_YAML_STRING_BUNDLE_H_
-#define ARK_CORE_IMPL_DIRECTORY_YAML_STRING_BUNDLE_H_
+#ifndef ARK_CORE_IMPL_STRING_BUNDLE_STRING_BUNDLE_YAML_H_
+#define ARK_CORE_IMPL_STRING_BUNDLE_STRING_BUNDLE_YAML_H_
 
 #include <map>
 
@@ -11,9 +11,9 @@
 
 namespace ark {
 
-class YAMLStringBundle : public StringBundle {
+class StringBundleYAML : public StringBundle {
 public:
-    YAMLStringBundle(const sp<AssetBundle>& resource);
+    StringBundleYAML(const sp<AssetBundle>& resource);
 
     virtual sp<String> getString(const String& resid) override;
     virtual std::vector<String> getStringArray(const String& resid) override;
@@ -23,7 +23,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& doc);
 
-        virtual sp<StringBundle> build(const Scope& args);
+        virtual sp<StringBundle> build(const Scope& args) override;
 
     private:
         sp<Builder<String>> _src;

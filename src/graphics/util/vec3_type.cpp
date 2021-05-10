@@ -6,6 +6,7 @@
 #include "core/base/clock.h"
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/variable/integral.h"
+#include "core/impl/variable/interpolate.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
 #include "core/util/variable_util.h"
@@ -295,6 +296,11 @@ sp<Vec3> Vec3Type::attract(const sp<Vec3>& self, const V3& s0, float duration, c
 {
     sp<Numeric> ts = t ? t : Ark::instance().clock()->duration();
     return sp<Vec3Impl>::make(sp<Stalker>::make(ts, vx(self), s0.x(), duration), sp<Stalker>::make(ts, vy(self), s0.y(), duration), sp<Stalker>::make(ts, vz(self), s0.z(), duration));
+}
+
+sp<Vec3> Vec3Type::lerp(const sp<Vec3>& self, const sp<Vec3>& b, const sp<Numeric>& t)
+{
+    return sp<Interpolate<V3>>::make(self, b, sp<Vec3Impl>::make(t, t, t));
 }
 
 sp<Vec3> Vec3Type::cross(const sp<Vec3>& self, const sp<Vec3>& other)

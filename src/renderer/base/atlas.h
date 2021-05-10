@@ -27,7 +27,7 @@ public:
     public:
         virtual ~Importer() = default;
 
-        virtual void import(Atlas& atlas, BeanFactory& factory, const document& manifest) = 0;
+        virtual void import(Atlas& atlas/*, BeanFactory& factory, const document& manifest*/) = 0;
     };
 
     class ARK_API Item {
@@ -53,7 +53,7 @@ public:
         V2 _size;
     };
 
-    void load(BeanFactory& factory, const document& manifest, const Scope& args);
+    void loadItem(const document& manifest);
 
 //  [[script::bindings::property]]
     const sp<Texture>& texture() const;
@@ -91,8 +91,8 @@ public:
         virtual sp<Atlas> build(const Scope& args) override;
 
     private:
-        BeanFactory _factory;
-        document _manifest;
+        std::vector<document> _items;
+        std::vector<sp<Builder<Importer>>> _importers;
         SafePtr<Builder<Texture>> _texture;
     };
 

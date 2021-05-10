@@ -80,8 +80,41 @@ class _Var:
     def fix(self):
         pass
 
+    def freeze(self):
+        pass
+
     def __int__(self):
         return 0
+
+    def __add__(self, other):
+        return 0
+
+    def __radd__(self, other):
+        pass
+
+    def __mul__(self, other):
+        pass
+
+    def __rmul__(self, other):
+        pass
+
+    def __sub__(self, other):
+        pass
+
+    def __rsub__(self, other):
+        pass
+
+    def __truediv__(self, other):
+        pass
+
+    def __gt__(self, other) -> 'Boolean':
+        return Boolean(False)
+
+    def __lt__(self, other) -> 'Boolean':
+        return Boolean(False)
+
+    def __eq__(self, other) -> 'Boolean':
+        return Boolean(False)
 
     def __float__(self):
         return 0.0
@@ -187,7 +220,7 @@ class ApplicationController:
     def create_system_cursor(self, name: int):
         return None
 
-    def show_cursor(self, cursor):
+    def show_cursor(self, cursor: Optional = None):
         pass
 
     def hide_cursor(self):
@@ -418,36 +451,6 @@ class Numeric(_Var):
 
     def synchronize(self, disposed: Boolean) -> 'Numeric':
         pass
-
-    def __add__(self, other) -> 'Numeric':
-        pass
-
-    def __radd__(self, other) -> 'Numeric':
-        pass
-
-    def __mul__(self, other) -> 'Numeric':
-        pass
-
-    def __rmul__(self, other) -> 'Numeric':
-        pass
-
-    def __sub__(self, other) -> 'Numeric':
-        pass
-
-    def __rsub__(self, other) -> 'Numeric':
-        pass
-
-    def __truediv__(self, other) -> 'Numeric':
-        return Numeric(0)
-
-    def __gt__(self, other) -> 'Boolean':
-        return Boolean(False)
-
-    def __lt__(self, other) -> 'Boolean':
-        return Boolean(False)
-
-    def __eq__(self, other) -> 'Boolean':
-        return Boolean(False)
 
     @staticmethod
     def pursue(from_value: float, to_value, duration: float, t=None):
@@ -799,11 +802,15 @@ class RenderObject:
         pass
 
     @property
-    def x(self):
+    def x(self) -> float:
         return 0
 
     @property
-    def y(self):
+    def y(self) -> float:
+        return 0
+
+    @property
+    def z(self) -> float:
         return 0
 
     @property
@@ -1058,6 +1065,10 @@ class Rotation:
     def theta(self) -> Numeric:
         return self._theta
 
+    @theta.setter
+    def theta(self, theta: Union[float, Numeric]):
+        pass
+
     @property
     def axis(self) -> Vec3:
         return self._axis
@@ -1180,6 +1191,10 @@ class Math:
 
     @staticmethod
     def atan2(dy, dx):
+        return 0
+
+    @staticmethod
+    def lerp(a, b, t):
         return 0
 
     @staticmethod
@@ -1521,6 +1536,9 @@ class Collider:
     BODY_FLAG_MANUAL_ROTATION = 16
 
     def create_body(self, type, shape, position, size=None, rotate=None, is_sensor=False) -> RigidBody:
+        pass
+
+    def ray_cast(self, ray_from, ray_to, collision_callback):
         pass
 
 

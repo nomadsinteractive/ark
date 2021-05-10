@@ -525,7 +525,7 @@ public:
     virtual sp<T> build(const Scope& args) override {
         const sp<Scope> reference = _references.lock();
         DCHECK(reference, "BeanFactory has been disposed");
-        sp<T> inst = reference->get<T>(_name);
+        sp<T> inst = reference->build<T>(_name, args);
         if(!inst) {
             inst = _delegate->build(args);
             DCHECK(inst, "Cannot build \"%s\"", _name.c_str());
@@ -552,7 +552,7 @@ public:
         if(!value) {
             const sp<Scope> references = _references.lock();
             DCHECK(references, "BeanFactory has been disposed");
-            value = references->get<T>(_name);
+            value = references->build<T>(_name, args);
         }
         DCHECK(value || _fallback, "Cannot get argument \"%s\"", _name.c_str());
         return value ? value : _fallback->build(args);
@@ -567,7 +567,7 @@ private:
 template<typename T> class BuilderWithQueries : public Builder<T> {
 public:
     BuilderWithQueries(sp<Builder<T>> delegate, BeanFactory factory, const Identifier& id)
-        : _delegate(std::move(delegate)), _queries(sp<Scope::Queries>::make(std::move(factory), id.queries())) {
+        : _delegate(std::move(delegate)), _queries(sp<Queries>::make(std::move(factory), id.queries())) {
     }
 
     virtual sp<T> build(const Scope& args) override {
@@ -577,7 +577,7 @@ public:
 
 private:
     sp<Builder<T>> _delegate;
-    sp<Scope::Queries> _queries;
+    sp<Queries> _queries;
 };
 
 }
@@ -601,9 +601,9 @@ template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const Identifie
 
 template<typename T> sp<Builder<T>> BeanFactory::getBuilderByRef(const Identifier& id, BeanFactory& factory) {
     String refid = id.ref();
-    const sp<T> inst = _stub->_references->get<T>(refid);
+    sp<T> inst = _stub->_references->get(refid).template as<T>();
     if(inst)
-       return sp<typename Builder<T>::Prebuilt>::make(inst);
+       return sp<typename Builder<T>::Prebuilt>::make(std::move(inst));
 
     for(const Factory& i : _stub->_factories) {
        const sp<Builder<T>> builder = i.findBuilder<T>(refid, *this);

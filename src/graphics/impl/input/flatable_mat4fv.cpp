@@ -84,15 +84,15 @@ sp<Input> FlatableMat4fv::BUILDER::build(const Scope& args)
 {
     if(_id.isArg())
     {
-        array<sp<Mat4>> mats = args.get<Array<sp<Mat4>>>(_id.arg());
+        array<sp<Mat4>> mats = args.build<Array<sp<Mat4>>>(_id.arg(), args);
         if(mats)
             return sp<FlatableMat4fv>::make(std::move(mats));
 
-        sp<Input> flatable = args.get<Input>(_id.arg());
+        sp<Input> flatable = args.build<Input>(_id.arg(), args);
         if(flatable)
             return flatable;
 
-        array<sp<Input>> flatables = args.get<Array<sp<Input>>>(_id.arg());
+        array<sp<Input>> flatables = args.build<Array<sp<Input>>>(_id.arg(), args);
         if(flatables)
             return sp<FlatableMat4fvFlatableArray>::make(std::move(flatables));
     }
