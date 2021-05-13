@@ -52,14 +52,17 @@ public:
 
     bool update(uint64_t timestamp) const;
 
-//[[script::bindings::auto]]
-    void set(const String& name, const sp<Numeric>& var);
-//[[script::bindings::auto]]
-    void set(const String& name, const sp<Vec2>& var);
-//[[script::bindings::auto]]
-    void set(const String& name, const sp<Vec3>& var);
-//[[script::bindings::auto]]
-    void set(const String& name, const sp<Vec4>& var);
+//[[script::bindings::getprop]]
+    Box getProperty(const String& name) const;
+
+//[[script::bindings::setprop]]
+    void setProperty(const String& name, const sp<Numeric>& var);
+//[[script::bindings::setprop]]
+    void setProperty(const String& name, const sp<Vec2>& var);
+//[[script::bindings::setprop]]
+    void setProperty(const String& name, const sp<Vec3>& var);
+//[[script::bindings::setprop]]
+    void setProperty(const String& name, const sp<Vec4>& var);
 
     Snapshot snapshot(const PipelineInput& pipelineInput, Allocator& allocator);
 
@@ -88,6 +91,7 @@ private:
     void setVarying(const String& name, sp<Input> flatable);
 
 private:
+    std::map<String, Box> _properties;
     sp<PipelineInput> _pipeline_input;
     std::map<String, Varying> _varyings;
     uint32_t _size;

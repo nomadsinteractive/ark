@@ -13,7 +13,7 @@
 namespace ark {
 
 //[[script::bindings::holder]]
-class ARK_API LayerContext : public Holder{
+class ARK_API LayerContext : public Holder {
 private:
     struct Item {
         Item(const sp<Renderable>& renderable, const sp<Boolean>& disposed);

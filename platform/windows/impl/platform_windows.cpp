@@ -93,13 +93,14 @@ sp<Alphabet> Platform::getSystemAlphabet(const Font& font, const String& lang)
 //    font.lfCharSet = DEFAULT_CHARSET;
 //    EnumFontFamiliesEx(hdc, &font, _enumerate_font_callback, 0, 0);
     const String fontsDirectory = getDefaultFontDirectory();
+    AlphabetTrueType::TextSize textSize(font.size(), AlphabetTrueType::TextSize::TEXT_SIZE_UNIT_PT);
     if(isFile(fontsDirectory + "\\ArialUni.ttf"))
-        return sp<AlphabetTrueType>::make("ArialUni.ttf", font.size());
+        return sp<AlphabetTrueType>::make("ArialUni.ttf", textSize);
     if(isFile(fontsDirectory + "\\simfang.ttf"))
-        return sp<AlphabetTrueType>::make("simfang.ttf", font.size());
+        return sp<AlphabetTrueType>::make("simfang.ttf", textSize);
     if(isFile(fontsDirectory + "\\Arial.ttf"))
-        return sp<AlphabetTrueType>::make("Arial.ttf", font.size());
-    return sp<AlphabetTrueType>::make("l_10646.ttf", font.size());
+        return sp<AlphabetTrueType>::make("Arial.ttf", textSize);
+    return sp<AlphabetTrueType>::make("l_10646.ttf", textSize);
 }
 
 void Platform::glInitialize()

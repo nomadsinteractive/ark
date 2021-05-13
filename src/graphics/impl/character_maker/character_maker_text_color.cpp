@@ -15,8 +15,8 @@ CharacterMakerTextColor::CharacterMakerTextColor(sp<CharacterMaker> delegate, sp
 
 sp<RenderObject> CharacterMakerTextColor::makeCharacter(int32_t type, const V3& position, const sp<Size>& size)
 {
-    const sp<RenderObject> renderObject = sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(position), size);
-    renderObject->varyings()->set("Color", _color);
+    const sp<RenderObject> renderObject = _delegate->makeCharacter(type, position, size);
+    renderObject->varyings()->setProperty("Color", _color);
     return renderObject;
 }
 

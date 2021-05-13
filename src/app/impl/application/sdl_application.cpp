@@ -52,7 +52,7 @@ public:
         : _cursor(cursor) {
     }
 
-    ~SDLCursor() {
+    ~SDLCursor() override {
         if(_cursor)
             SDL_FreeCursor(_cursor);
     }
@@ -142,14 +142,15 @@ public:
 
 class SDLPollEventTask : public Runnable {
 public:
-    SDLPollEventTask(SDLApplication& application)
-        : _application(application) {
+    SDLPollEventTask(SDLApplication& application, sp<Clock> clock)
+        : _application(application), _clock(std::move(clock)) {
     }
 
     virtual void run() override {
         SDL_Event event;
         while(SDL_PollEvent(&event))
         {
+            uint64_t timestamp = _clock->tick();
             switch(event.type)
             {
             case SDL_QUIT:
@@ -160,7 +161,7 @@ public:
                 {
                     Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
                     Event::ButtonInfo bi(_application.toViewportPosition(V2(static_cast<float>(event.button.x), static_cast<float>(event.button.y))), which);
-                    Event e(event.type == SDL_MOUSEBUTTONDOWN ? Event::ACTION_DOWN : Event::ACTION_UP, event.button.timestamp, bi);
+                    Event e(event.type == SDL_MOUSEBUTTONDOWN ? Event::ACTION_DOWN : Event::ACTION_UP, timestamp, bi);
                     _application.onEvent(e);
                     break;
                 }
@@ -168,7 +169,7 @@ public:
                 {
                     Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
                     Event::MotionInfo mi(_application.toViewportPosition(V2(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y))), which, event.motion.state);
-                    Event e(Event::ACTION_MOVE, event.motion.timestamp, mi);
+                    Event e(Event::ACTION_MOVE, timestamp, mi);
                     _application.onEvent(e);
                     break;
                 }
@@ -176,14 +177,14 @@ public:
                 {
                     Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
                     Event::MotionInfo mi(V2(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y)), which, event.motion.state);
-                    Event e(Event::ACTION_WHEEL, event.motion.timestamp, mi);
+                    Event e(Event::ACTION_WHEEL, timestamp, mi);
                     _application.onEvent(e);
                     break;
                 }
             case SDL_KEYDOWN:
             case SDL_KEYUP:
                 {
-                    Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_KEYDOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), event.key.timestamp, sdlScanCodeToEventCode(event.key.keysym.scancode));
+                    Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_KEYDOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), timestamp, sdlScanCodeToEventCode(event.key.keysym.scancode));
                     _application.onEvent(e);
                     break;
                 }
@@ -224,7 +225,7 @@ public:
         case SDL_SCANCODE_UP:
             return Event::CODE_KEYBOARD_UP;
         case SDL_SCANCODE_RETURN:
-            return Event::CODE_KEYBOARD_RETURN;
+            return Event::CODE_KEYBOARD_ENTER;
         case SDL_SCANCODE_ESCAPE:
             return Event::CODE_KEYBOARD_ESCAPE;
         case SDL_SCANCODE_BACKSPACE:
@@ -249,6 +250,7 @@ public:
 
 private:
     SDLApplication& _application;
+    sp<Clock> _clock;
 
 };
 
@@ -315,7 +317,7 @@ int SDLApplication::run()
     onSurfaceCreated();
     _application_context->updateRenderState();
 
-    const sp<SDLPollEventTask> pollevent = sp<SDLPollEventTask>::make(*this);
+    const sp<SDLPollEventTask> pollevent = sp<SDLPollEventTask>::make(*this, _application_context->clock());
 
     while(!gQuit)
     {

@@ -88,25 +88,27 @@ RICH_COMPARE_OPS = {
     '>=': 'Py_GE'
 }
 
-ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+\]\])*'
-AUTOBIND_CONSTANT_PATTERN = re.compile(r'\[\[script::bindings::constant\(([\w_]+)\s*=\s*([^;\r\n]*)\)\]\]')
-AUTOBIND_ENUMERATION_PATTERN = re.compile(r'\[\[script::bindings::enumeration\]\]\s*enum\s+(\w+)\s*\{([^}]+)};')
-AUTOBIND_PROPERTY_PATTERN = re.compile(r'\[\[script::bindings::property\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
-AUTOBIND_GETPROP_PATTERN = re.compile(r'\[\[script::bindings::getprop\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
-AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader\]\]\s+template<typename T>\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;{]*{')
-AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor)\]\]\s+([^(\r\n]+)\(([^\r\n]*)\)[^;\r\n]*;')
-AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)\]\]\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;')
-AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::(class|name)\(([^)]+)\)\]\]')
-AUTOBIND_EXTENDS_PATTERN = re.compile(r'\[\[script::bindings::extends\((\w+)\)\]\]')
-AUTOBIND_TYPEDEF_PATTERN = re.compile(r'\[\[script::bindings::auto\]\]\s+typedef\s+\w[\w<>\s]+\s+(\w+);')
-AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container|holder)\]\]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
-AUTOBIND_META_PATTERN = re.compile(r'\[\[script::bindings::meta\(([^)]+)\([^)]*\)\)\]\]')
+ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+]])*'
+METHOD_PATTERN = r'([^(\r\n]+)\(([^\r\n]*)\)[^;\r\n]*;'
+AUTOBIND_CONSTANT_PATTERN = re.compile(r'\[\[script::bindings::constant\(([\w_]+)\s*=\s*([^;\r\n]*)\)]]')
+AUTOBIND_ENUMERATION_PATTERN = re.compile(r'\[\[script::bindings::enumeration]]\s*enum\s+(\w+)\s*{([^}]+)};')
+AUTOBIND_PROPERTY_PATTERN = re.compile(r'\[\[script::bindings::property]]\s+%s' % METHOD_PATTERN)
+AUTOBIND_GETPROP_PATTERN = re.compile(r'\[\[script::bindings::getprop]]\s+%s' % METHOD_PATTERN)
+AUTOBIND_SETPROP_PATTERN = re.compile(r'\[\[script::bindings::setprop]]\s+%s' % METHOD_PATTERN)
+AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader]]\s+template<typename T>\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;{]*{')
+AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor)]]\s+%s' % METHOD_PATTERN)
+AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
+AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::(class|name)\(([^)]+)\)]]')
+AUTOBIND_EXTENDS_PATTERN = re.compile(r'\[\[script::bindings::extends\((\w+)\)]]')
+AUTOBIND_TYPEDEF_PATTERN = re.compile(r'\[\[script::bindings::auto]]\s+typedef\s+\w[\w<>\s]+\s+(\w+);')
+AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container|holder)]]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
+AUTOBIND_META_PATTERN = re.compile(r'\[\[script::bindings::meta\(([^)]+)\([^)]*\)\)]]')
 
-BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^\]]*\]\]\s+class\s+[\w\d_]+\s*:\s*public\s+Builder<([^{]+)>\s*{')
+BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^]]*]]\s+class\s+[\w\d_]+\s*:\s*public\s+Builder<([^{]+)>\s*{')
 
 CLASS_DELIMITER = '\n//%s\n' % ('-' * 120)
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
-TYPE_DEFINED_OBJ = ('V', 'V2', 'V3', 'V4')
+TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4')
 ARK_CORE_BUILDABLES = {'AudioPlayer', 'Object'}
 
 INDENT = '    '
@@ -294,6 +296,12 @@ def gen_class_body_source(genclass, includes, lines, buildables):
             if len(getprop_methods) > 1:
                 print("WARNING: at least two getprop methods defined in %s, which is probably not right", genclass.classname)
             tp_method_lines.append('pyTypeObject->tp_getattro = (getattrofunc) %s;' % getprop_methods[0].name)
+
+        setprop_methods = genclass.setprop_methods()
+        if setprop_methods:
+            if len(setprop_methods) > 1:
+                print("WARNING: at least two setprop methods defined in %s, which is probably not right", genclass.classname)
+            tp_method_lines.append('pyTypeObject->tp_setattro = (setattrofunc) %s;' % setprop_methods[0].name)
 
         operator_defs = genclass.gen_operator_defs()
         if operator_defs:
@@ -885,6 +893,35 @@ class GenGetPropMethod(GenMethod):
                 '\n']
 
 
+class GenSetPropMethod(GenMethod):
+    def __init__(self, name, args, return_type):
+        GenMethod.__init__(self, name, args, return_type)
+
+    def gen_py_return(self):
+        return 'int'
+
+    @property
+    def err_return_value(self):
+        return 'return -1'
+
+    def _gen_parse_tuple_code(self, lines, declares, args):
+        pass
+
+    def gen_py_arguments(self):
+        return 'Instance* self, PyObject* arg0, PyObject* arg1'
+
+    def gen_py_argc(self):
+        return 2
+
+    @staticmethod
+    def overload(m1, m2):
+        try:
+            m1.add_overloaded_method(m2)
+            return m1
+        except AttributeError:
+            return create_overloaded_method_type(GenSetPropMethod)(m1, m2)
+
+
 class GenLoaderMethod(GenMethod):
     def __init__(self, name, args):
         GenMethod.__init__(self, name, ['TypeId typeId'] + args, 'PyObject*')
@@ -1196,6 +1233,9 @@ class GenClass(object):
     def getprop_methods(self):
         return self.find_methods_by_type(GenGetPropMethod)
 
+    def setprop_methods(self):
+        return self.find_methods_by_type(GenSetPropMethod)
+
     def find_methods_by_type(self, method_type):
         return [i for i in self.methods if isinstance(i, method_type)]
 
@@ -1299,6 +1339,16 @@ def main(params, paths):
         genclass = get_result_class(results, filename, main_class)
         genclass.base_classname = x
 
+    class AutoMethodCall:
+        def __init__(self, auto_method_type, argc=4):
+            self._auto_method_type = auto_method_type
+            self._argc = argc
+
+        def __call__(self, filename, content, main_class, x):
+            genclass = get_result_class(results, filename, main_class)
+            splitted = GenMethod.split(x)
+            genclass.add_method(self._auto_method_type(*splitted[:self._argc]))
+
     def autoloader(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
         name, args, return_type, is_static = GenMethod.split(x)
@@ -1347,9 +1397,10 @@ def main(params, paths):
                               HeaderPattern(AUTOBIND_OPERATOR_PATTERN, autooperator),
                               HeaderPattern(AUTOBIND_CLASS_PATTERN, autoclass),
                               HeaderPattern(AUTOBIND_EXTENDS_PATTERN, autoextends),
-                              HeaderPattern(AUTOBIND_LOADER_PATTERN, autoloader),
-                              HeaderPattern(AUTOBIND_PROPERTY_PATTERN, autoproperty),
-                              HeaderPattern(AUTOBIND_GETPROP_PATTERN, autogetprop),
+                              HeaderPattern(AUTOBIND_LOADER_PATTERN, AutoMethodCall(GenLoaderMethod, 2)),
+                              HeaderPattern(AUTOBIND_PROPERTY_PATTERN, AutoMethodCall(GenPropertyMethod)),
+                              HeaderPattern(AUTOBIND_GETPROP_PATTERN, AutoMethodCall(GenGetPropMethod, 3)),
+                              HeaderPattern(AUTOBIND_SETPROP_PATTERN, AutoMethodCall(GenSetPropMethod, 3)),
                               HeaderPattern(AUTOBIND_CONSTANT_PATTERN, autoconstant),
                               HeaderPattern(AUTOBIND_ENUMERATION_PATTERN, autoenumeration),
                               HeaderPattern(AUTOBIND_META_PATTERN, autometa),

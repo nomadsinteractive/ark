@@ -216,28 +216,29 @@ template<> ARK_API Texture::CONSTANT Conversions::to<String, Texture::CONSTANT>(
     return Texture::CONSTANT_NEAREST;
 }
 
-Texture::Parameters::Parameters(Type type, const document& parameters, Format format, Texture::Feature features)
+Texture::Parameters::Parameters(Type type, int, const document& parameters, Format format, Texture::Feature features)
     : _type(type), _usage(parameters ? Documents::getAttribute<Texture::Usage>(parameters, "usage", Texture::USAGE_COLOR_ATTACHMENT) : Texture::USAGE_COLOR_ATTACHMENT),
       _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
       _features(parameters ? Documents::getAttribute<Texture::Feature>(parameters, "feature", features) : features),
       _min_filter((features & Texture::FEATURE_MIPMAPS) ? CONSTANT_LINEAR_MIPMAP : CONSTANT_LINEAR), _mag_filter(CONSTANT_LINEAR),
       _wrap_s(CONSTANT_CLAMP_TO_EDGE), _wrap_t(CONSTANT_CLAMP_TO_EDGE), _wrap_r(CONSTANT_CLAMP_TO_EDGE)
 {
-    if(parameters)
-    {
-        DictionaryByAttributeName byName(parameters, Constants::Attributes::NAME);
-        _min_filter = getEnumValue(byName, "min_filter", _min_filter);
-        _mag_filter = getEnumValue(byName, "mag_filter", _mag_filter);
-        _wrap_s = getEnumValue(byName, "wrap_s", _wrap_s);
-        _wrap_t = getEnumValue(byName, "wrap_t", _wrap_t);
-        _wrap_r = getEnumValue(byName, "wrap_r", _wrap_r);
-    }
 }
 
-Texture::CONSTANT Texture::Parameters::getEnumValue(Dictionary<document>& dict, const String& name, Texture::CONSTANT defValue)
+void Texture::Parameters::loadParameters(const document& parameters, BeanFactory& factory, const Scope& args)
+{
+    DictionaryByAttributeName byName(parameters, Constants::Attributes::NAME);
+    _min_filter = getEnumValue(byName, "min_filter", factory, args, _min_filter);
+    _mag_filter = getEnumValue(byName, "mag_filter", factory, args, _mag_filter);
+    _wrap_s = getEnumValue(byName, "wrap_s", factory, args, _wrap_s);
+    _wrap_t = getEnumValue(byName, "wrap_t", factory, args, _wrap_t);
+    _wrap_r = getEnumValue(byName, "wrap_r", factory, args, _wrap_r);
+}
+
+Texture::CONSTANT Texture::Parameters::getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, Texture::CONSTANT defValue)
 {
     const document doc = dict.get(name);
-    return doc ? Documents::getAttribute<Texture::CONSTANT>(doc, Constants::Attributes::VALUE, defValue) : defValue;
+    return doc ? Strings::parse<Texture::CONSTANT>(factory.ensure<String>(doc, Constants::Attributes::VALUE, args)) : defValue;
 }
 
 Texture::Delegate::Delegate(Texture::Type type)
@@ -270,8 +271,8 @@ Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const 
 sp<Texture> Texture::BUILDER::build(const Scope& args)
 {
     Type type = Documents::getAttribute<Type>(_manifest, Constants::Attributes::TYPE, TYPE_2D);
-    const sp<Texture::Parameters> parameters = sp<Texture::Parameters>::make(type, _manifest);
-
+    const sp<Texture::Parameters> parameters = sp<Texture::Parameters>::make(type, 0, _manifest);
+    parameters->loadParameters(_manifest, _factory, args);
     const sp<String> src = _src->build(args);
     if(src)
        return _resource_loader_context->textureBundle()->createTexture(*src, parameters);

@@ -60,7 +60,9 @@ public:
     };
 
     struct ARK_API Parameters {
-        Parameters(Type type, const document& parameters = nullptr, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
+        Parameters(Type type, int, const document& parameters = nullptr, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
+
+        void loadParameters(const document& parameters, BeanFactory& factory, const Scope& args);
 
         Type _type;
         Usage _usage;
@@ -75,7 +77,7 @@ public:
         CONSTANT _wrap_r;
 
     private:
-        CONSTANT getEnumValue(Dictionary<document>& dict, const String& name, Texture::CONSTANT defValue);
+        CONSTANT getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, Texture::CONSTANT defValue);
     };
 
     class ARK_API Delegate : public Resource {

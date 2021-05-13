@@ -35,7 +35,7 @@ private:
         sp<Size> _size;
         sp<Texture> _texture;
 
-        uint32_t _flowx, _flowy;
+        int32_t _flowx, _flowy;
         int32_t _max_glyph_height;
 
         friend class ModelLoaderText;
@@ -52,6 +52,7 @@ public:
 
     virtual Model loadModel(int32_t type) override;
 
+//  [[plugin::resource-loader("text")]]
     class BUILDER : public Builder<ModelLoader> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);

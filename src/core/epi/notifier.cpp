@@ -63,16 +63,16 @@ sp<Boolean> Notifier::createDirtyFlag(bool dirty) const
     return dirtyFlag;
 }
 
-Notifier::ObserverFilter::ObserverFilter(const sp<Observer>& /*item*/, sp<Boolean> dirtyFlag)
-    : _dirty_flag(std::move(dirtyFlag))
+Notifier::ObserverFilter::ObserverFilter(const sp<Observer>& observer, sp<Boolean> dirtyFlag)
+    : _observer(observer), _dirty_flag(std::move(dirtyFlag))
 {
 }
 
-FilterAction Notifier::ObserverFilter::operator()(const sp<Observer>& item) const
+FilterAction Notifier::ObserverFilter::operator() () const
 {
     if(_dirty_flag)
         return _dirty_flag.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
-    return item.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+    return _observer.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
 }
 
 }

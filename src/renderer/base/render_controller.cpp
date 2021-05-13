@@ -177,7 +177,7 @@ sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameter
 
 sp<Texture> RenderController::createTexture2D(sp<Size> size, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us)
 {
-    return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D), std::move(uploader), us);
+    return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D, 0), std::move(uploader), us);
 }
 
 Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader)
@@ -233,10 +233,10 @@ void RenderController::preUpdate(uint64_t timestamp)
 #endif
     _defered_instances.clear();
 
-    for(const sp<Updatable>& i : _on_pre_updatable)
+    for(const sp<Updatable>& i : _on_pre_updatable.update(timestamp))
         i->update(timestamp);
 
-    for(const sp<Runnable>& runnable : _on_pre_update_request)
+    for(const sp<Runnable>& runnable : _on_pre_update_request.update(timestamp))
         runnable->run();
 }
 

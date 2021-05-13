@@ -3,6 +3,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
+#include "core/types/safe_ptr.h"
 
 #include "graphics/inf/character_maker.h"
 #include "graphics/base/v2.h"
@@ -26,8 +27,7 @@ public:
 
     private:
         BeanFactory _bean_factory;
-        sp<Builder<String>> _class_name;
-
+        SafePtr<Builder<String>> _class_name;
     };
 
 private:

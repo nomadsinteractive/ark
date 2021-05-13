@@ -1,5 +1,7 @@
 #include "app/impl/event_listener/event_listener_list.h"
 
+#include "app/base/event.h"
+
 namespace ark {
 
 void EventListenerList::addEventListener(const sp<EventListener>& eventListener, int32_t priority)
@@ -17,7 +19,7 @@ bool EventListenerList::onEvent(const Event& event)
             iter = _event_listeners.erase(iter);
         else
         {
-            for(const sp<EventListener>& i : eventListener)
+            for(const sp<EventListener>& i : eventListener.update(event.timestamp()))
                 if(i->onEvent(event))
                     return true;
             ++iter;

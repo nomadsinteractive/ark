@@ -12,6 +12,7 @@
 #include "core/types/implements.h"
 #include "core/types/owned_ptr.h"
 #include "core/types/safe_ptr.h"
+#include "core/types/weak_ptr.h"
 
 #include "graphics/base/transform.h"
 
@@ -92,10 +93,12 @@ private:
 
         class ListFilter {
         public:
-            ListFilter(const sp<KinematicObject>& /*item*/);
+            ListFilter(const sp<KinematicObject>& item);
 
-            FilterAction operator()(const sp<KinematicObject>& item) const;
+            FilterAction operator() () const;
 
+        private:
+            WeakPtr<BtRigidBodyRef> _rigid_body;
         };
     };
 

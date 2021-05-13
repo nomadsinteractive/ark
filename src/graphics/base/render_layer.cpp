@@ -47,7 +47,7 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
     Layer::Type combined = Layer::TYPE_UNSPECIFIED;
 
     _stub->_layer->context()->takeSnapshot(*this, renderRequest);
-    for(const sp<LayerContext>& i : stub->_layer_contexts)
+    for(const sp<LayerContext>& i : stub->_layer_contexts.update(renderRequest.timestamp()))
     {
         i->takeSnapshot(*this, renderRequest);
         DWARN(combined != Layer::TYPE_STATIC || i->layerType() != Layer::TYPE_DYNAMIC, "Combining static and dynamic layers together leads to low efficiency");
@@ -147,14 +147,14 @@ sp<Renderer> RenderLayer::RENDERER_BUILDER::build(const Scope& args)
     return _impl.build(args);
 }
 
-RenderLayer::LayerContextFilter::LayerContextFilter(const sp<LayerContext>& /*item*/, const sp<Notifier>& notifier)
-    : _notifier(notifier)
+RenderLayer::LayerContextFilter::LayerContextFilter(const sp<LayerContext>& item, sp<Notifier> notifier)
+    : _item(item), _notifier(std::move(notifier))
 {
 }
 
-FilterAction RenderLayer::LayerContextFilter::operator()(const sp<LayerContext>& item) const
+FilterAction RenderLayer::LayerContextFilter::operator() (uint64_t) const
 {
-    if(item.unique())
+    if(_item.unique())
     {
         _notifier->notify();
         return FILTER_ACTION_REMOVE;

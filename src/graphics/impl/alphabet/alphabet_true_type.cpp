@@ -11,13 +11,39 @@
 
 namespace ark {
 
-AlphabetTrueType::AlphabetTrueType(const String& src, uint32_t textSize)
+AlphabetTrueType::TextSize::TextSize(const String& size)
+{
+    _unit = TEXT_SIZE_UNIT_PT;
+
+    if(size.endsWith("px"))
+    {
+        _unit = TEXT_SIZE_UNIT_PX;
+        _value = Strings::parse<uint32_t>(size.substr(0, size.length() - 2));
+    }
+    else if(size.endsWith("pt"))
+        _value = Strings::parse<uint32_t>(size.substr(0, size.length() - 2));
+    else
+        _value = Strings::parse<uint32_t>(size);
+}
+
+AlphabetTrueType::TextSize::TextSize(uint32_t value, AlphabetTrueType::TextSize::Unit unit)
+    : _value(value), _unit(unit)
+{
+}
+
+AlphabetTrueType::AlphabetTrueType(const String& src, const TextSize& textSize)
     : _free_types(Ark::instance().ensure<FreeTypes>())
 {
     const sp<Readable> readable = getFontResource(src);
     DCHECK(readable, "Font \"%s\" does not exists", src.c_str());
     _free_types->ftNewFaceFromReadable(readable, 0, &_ft_font_face);
-    FT_Set_Char_Size(_ft_font_face, FreeTypes::ftF26Dot6(textSize, 0), 0, 96, 0);
+    if(textSize._unit == TextSize::TEXT_SIZE_UNIT_PT)
+        FT_Set_Char_Size(_ft_font_face, FreeTypes::ftF26Dot6(textSize._value, 0), 0, 96, 0);
+    else
+    {
+        DASSERT(textSize._unit == TextSize::TEXT_SIZE_UNIT_PX);
+        FT_Set_Pixel_Sizes(_ft_font_face, textSize._value, textSize._value);
+    }
     _line_height_in_pixel = FreeTypes::ftCalculateLineHeight(_ft_font_face);
     _base_line_position = _line_height_in_pixel + FreeTypes::ftCalculateBaseLinePosition(_ft_font_face);
 }
@@ -59,7 +85,7 @@ bool AlphabetTrueType::draw(uint32_t c, const bitmap& image, int32_t x, int32_t 
         DFATAL("Error loading glyph, character: %d", c);
     FT_GlyphSlot slot = _ft_font_face->glyph;
     DCHECK(slot, "Glyph not loaded");
-    image->draw(slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, x, y, slot->bitmap.pitch);
+    image->draw(slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, x, y, static_cast<uint32_t>(slot->bitmap.pitch));
     return true;
 }
 
@@ -73,13 +99,13 @@ sp<Readable> AlphabetTrueType::getFontResource(const String& name) const
 
 AlphabetTrueType::BUILDER::BUILDER(BeanFactory& factory, const document manifest)
     : _src(factory.ensureBuilder<String>(manifest, Constants::Attributes::SRC)),
-      _text_size(Documents::getAttribute<uint32_t>(manifest, Constants::Attributes::TEXT_SIZE, 24))
+      _text_size(factory.ensureBuilder<String>(manifest, Constants::Attributes::TEXT_SIZE))
 {
 }
 
 sp<Alphabet> AlphabetTrueType::BUILDER::build(const Scope& args)
 {
-    return sp<AlphabetTrueType>::make(_src->build(args), _text_size);
+    return sp<AlphabetTrueType>::make(_src->build(args), TextSize(_text_size->build(args)));
 }
 
 }

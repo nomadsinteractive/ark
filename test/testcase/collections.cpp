@@ -14,16 +14,6 @@
 namespace ark {
 namespace unittest {
 
-template<typename T> class Filter {
-public:
-    Filter(const sp<T>& v) {
-    }
-
-    template<typename U> bool operator()(U& list, typename U::iterator& iterator) const {
-        return true;
-    }
-};
-
 class CollectionsTestCase : public TestCase {
 public:
     virtual int launch() override {
@@ -40,29 +30,10 @@ public:
         expirable->dispose();
 
         uint32_t sum = 0;
-        for(const sp<uint32_t>& i : expirableList)
+        for(const sp<uint32_t>& i : expirableList.update(0))
             sum += *i.get();
 
         TESTCASE_VALIDATE(sum == 30);
-
-        WeakRefList<uint32_t> s2;
-        const sp<uint32_t> i1 = sp<uint32_t>::make(1);
-        {
-            const sp<uint32_t> i2 = sp<uint32_t>::make(2);
-            s2.push_back(i1);
-            s2.push_back(i2);
-            s2.push_back(sp<uint32_t>::make(4));
-
-            sum = 0;
-            for(const sp<uint32_t>& i : s2)
-                sum += *i.get();
-            TESTCASE_VALIDATE(sum == 3);
-        }
-
-        sum = 0;
-        for(const sp<uint32_t>& i : s2)
-            sum += *i.get();
-        TESTCASE_VALIDATE(sum == 1);
 
         LFStack<uint32_t> slist;
         slist.push(10);

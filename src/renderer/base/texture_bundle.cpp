@@ -42,7 +42,7 @@ const sp<Texture>& TextureBundle::getTexture(const String& src)
     if(texture)
         return texture;
 
-    texture = doCreateTexture(src, sp<Texture::Parameters>::make(Texture::TYPE_2D));
+    texture = doCreateTexture(src, sp<Texture::Parameters>::make(Texture::TYPE_2D, 0));
     return texture;
 }
 

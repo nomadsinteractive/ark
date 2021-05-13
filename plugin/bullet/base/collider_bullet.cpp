@@ -377,13 +377,14 @@ ColliderBullet::KinematicObject::KinematicObject(sp<Vec3> position, sp<Rotation>
 {
 }
 
-ColliderBullet::KinematicObject::ListFilter::ListFilter(const sp<ColliderBullet::KinematicObject>&)
+ColliderBullet::KinematicObject::ListFilter::ListFilter(const sp<ColliderBullet::KinematicObject>& item)
+    : _rigid_body(item->_rigid_body)
 {
 }
 
-FilterAction ColliderBullet::KinematicObject::ListFilter::operator()(const sp<ColliderBullet::KinematicObject>& item) const
+FilterAction ColliderBullet::KinematicObject::ListFilter::operator() () const
 {
-    return item->_rigid_body.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+    return _rigid_body.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
 }
 
 }

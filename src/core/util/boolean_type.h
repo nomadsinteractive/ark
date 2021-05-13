@@ -21,8 +21,6 @@ public:
     static sp<Boolean> __and__(const sp<Boolean>& self, const sp<Boolean>& rvalue);
 //[[script::bindings::operator(||)]]
     static sp<Boolean> __or__(const sp<Boolean>& self, const sp<Boolean>& rvalue);
-//[[script::bindings::operator(neg)]]
-    static sp<Boolean> negative(const sp<Boolean>& self);
 //[[script::bindings::operator(bool)]]
     static bool toBool(const sp<Boolean>& self);
 
@@ -36,6 +34,9 @@ public:
     static const sp<Boolean>& delegate(const sp<Boolean>& self);
 //[[script::bindings::property]]
     static void setDelegate(const sp<Boolean>& self, const sp<Boolean>& delegate);
+
+//[[script::bindings::classmethod]]
+    static sp<Boolean> negative(const sp<Boolean>& self);
 
 //[[script::bindings::classmethod]]
     static void set(const sp<Boolean::Impl>& self, bool value);

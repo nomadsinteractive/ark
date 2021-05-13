@@ -16,8 +16,22 @@ namespace ark {
 
 class AlphabetTrueType : public Alphabet {
 public:
-    AlphabetTrueType(const String& src, uint32_t textSize);
-    ~AlphabetTrueType();
+    struct TextSize {
+        enum Unit {
+            TEXT_SIZE_UNIT_PX = 0,
+            TEXT_SIZE_UNIT_PT = 1
+        };
+
+        TextSize(const String& size);
+        TextSize(uint32_t value, Unit unit);
+
+        uint32_t _value;
+        Unit _unit;
+    };
+
+public:
+    AlphabetTrueType(const String& src, const TextSize& textSize);
+    ~AlphabetTrueType() override;
 
     virtual bool measure(int32_t c, Metrics& metrics, bool hasFallback) override;
     virtual bool draw(uint32_t c, const bitmap& image, int32_t x, int32_t y) override;
@@ -31,7 +45,7 @@ public:
 
     private:
         sp<Builder<String>> _src;
-        uint32_t _text_size;
+        sp<Builder<String>> _text_size;
     };
 private:
     sp<Readable> getFontResource(const String& path) const;

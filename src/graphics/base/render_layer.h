@@ -6,6 +6,7 @@
 
 #include "core/collection/list.h"
 #include "core/types/shared_ptr.h"
+#include "core/types/weak_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/layer.h"
@@ -26,13 +27,13 @@ public:
 private:
     class LayerContextFilter {
     public:
-        LayerContextFilter(const sp<LayerContext>& item, const sp<Notifier>& notifier);
+        LayerContextFilter(const sp<LayerContext>& item, sp<Notifier> notifier);
 
-        FilterAction operator()(const sp<LayerContext>& item) const;
+        FilterAction operator() (uint64_t ) const;
 
     private:
+        WeakPtr<LayerContext> _item;
         sp<Notifier> _notifier;
-
     };
 
     struct Stub {

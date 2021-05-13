@@ -2,56 +2,43 @@
 #define ARK_CORE_COLLECTION_LIST_H_
 
 #include <list>
+#include <stdint.h>
 
 #include "core/forwarding.h"
 #include "core/epi/disposed.h"
 #include "core/inf/variable.h"
 #include "core/collection/iterable.h"
-#include "core/types/shared_ptr.h"
+#include "core/types/safe_var.h"
 
 namespace ark {
 
 enum FilterAction {
     FILTER_ACTION_NONE,
-    FILTER_ACTION_SKIP,
-    FILTER_ACTION_REMOVE,
-    FILTER_ACTION_REMOVE_AFTER
+    FILTER_ACTION_REMOVE
 };
 
 class ListFilters {
 public:
-
     template<typename T> class IsDisposed {
     public:
         IsDisposed(const sp<T>& item)
             : IsDisposed(item, item.template as<Disposed>()) {
         }
         IsDisposed(const sp<T>& /*item*/, const sp<Boolean>& disposed)
-            : _disposed(disposed) {
+            : _disposed(disposed, false) {
         }
         IsDisposed(const sp<T>& /*item*/, const sp<Disposed>& disposed)
-            : _disposed(disposed) {
+            : _disposed(disposed, false) {
         }
 
-        FilterAction operator()(const sp<T>& /*item*/) const {
-            return _disposed && _disposed->val() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+        FilterAction operator() (uint64_t timestamp) const {
+            _disposed.update(timestamp);
+            return _disposed.val() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
         }
 
     private:
-        sp<Boolean> _disposed;
+        SafeVar<Boolean> _disposed;
     };
-
-    template<typename T> class IsUnique {
-    public:
-        IsUnique(const sp<T>& /*item*/) {
-        }
-
-        FilterAction operator()(const sp<T>& item) const {
-            return item.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
-        }
-
-    };
-
 };
 
 template<typename T, typename Filter> class List {
@@ -70,21 +57,21 @@ private:
     typedef std::list<Item> _List;
 
 public:
-    template<typename U> class Iterator : public IteratorBase<U> {
+    template<typename U> class FilteredIterator : public IteratorBase<U> {
     public:
-        Iterator(_List& list, U iterator)
+        FilteredIterator(_List& list, U iterator)
             : IteratorBase<U>(std::move(iterator)), _list(list) {
             forward();
         }
 
-        const Iterator<U>& operator ++() {
+        const FilteredIterator<U>& operator ++() {
             DASSERT(this->_iterator != _list.end());
             ++(this->_iterator);
             forward();
             return *this;
         }
 
-        const Iterator<U> operator ++(int) {
+        const FilteredIterator<U> operator ++(int) {
             DASSERT(this->_iterator != _list.end());
             U iter = this->_iterator;
             ++(this->_iterator);
@@ -93,24 +80,19 @@ public:
         }
 
         sp<T>& operator *() {
-            return _filter_action == FILTER_ACTION_REMOVE_AFTER ? _removed_after : (*this->_iterator)._item;
+            return (*this->_iterator)._item;
         }
 
     private:
         void forward() {
             do {
-                if(_filter_action == FILTER_ACTION_REMOVE_AFTER)
-                    _removed_after = nullptr;
-
                 if(this->_iterator == _list.end())
                     break;
                 const auto& i = *(this->_iterator);
-                _filter_action = i._filter(i._item);
+                _filter_action = i._filter();
                 if(_filter_action == FILTER_ACTION_NONE)
                     break;
-                if(_filter_action == FILTER_ACTION_REMOVE || _filter_action == FILTER_ACTION_REMOVE_AFTER) {
-                    if(_filter_action == FILTER_ACTION_REMOVE_AFTER)
-                        _removed_after = (*this->_iterator)._item;
+                if(_filter_action == FILTER_ACTION_REMOVE) {
                     this->_iterator = _list.erase(this->_iterator);
                 }
             } while(true);
@@ -119,30 +101,83 @@ public:
     private:
         _List& _list;
         FilterAction _filter_action;
-        sp<T> _removed_after;
     };
 
-public:
+    template<typename U> class Iterator : public IteratorBase<U> {
+    public:
+        Iterator(_List& list, U iterator)
+            : IteratorBase<U>(std::move(iterator)), _list(list) {
+        }
+
+        const Iterator<U>& operator ++() {
+            DASSERT(this->_iterator != _list.end());
+            ++(this->_iterator);
+            return *this;
+        }
+
+        const Iterator<U> operator ++(int) {
+            DASSERT(this->_iterator != _list.end());
+            U iter = this->_iterator;
+            ++(this->_iterator);
+            return iter;
+        }
+
+        sp<T>& operator *() {
+            return (*this->_iterator)._item;
+        }
+
+    private:
+        _List& _list;
+    };
+
+    typedef FilteredIterator<typename _List::iterator> filtered_iterator;
     typedef Iterator<typename _List::iterator> iterator;
+
+    class UpdatedList {
+    public:
+        UpdatedList(_List& items)
+            : _items(items) {
+        }
+
+        iterator begin() {
+            return iterator(_items, _items.begin());
+        }
+
+        iterator end() {
+            return iterator(_items, _items.end());
+        }
+
+    private:
+        _List& _items;
+    };
 
     template<typename... Args> void push_back(const sp<T>& item, Args&&... args) {
         _items.emplace_back(item, Filter(item, std::forward<Args>(args)...));
+    }
+
+    UpdatedList update(uint64_t timestamp) {
+        for(auto iter = _items.begin(); iter != _items.end(); ++iter) {
+            const auto& i = *(iter);
+            const FilterAction fa = i._filter(timestamp);
+            if(fa == FILTER_ACTION_REMOVE) {
+                iter = _items.erase(iter);
+                if(iter == _items.end())
+                    break;
+            }
+        }
+        return UpdatedList(_items);
     }
 
     const _List& items() const {
         return _items;
     }
 
-    void clear() {
-        _items.clear();
+    filtered_iterator begin() {
+        return filtered_iterator(_items, _items.begin());
     }
 
-    iterator begin() {
-        return iterator(_items, _items.begin());
-    }
-
-    iterator end() {
-        return iterator(_items, _items.end());
+    filtered_iterator end() {
+        return filtered_iterator(_items, _items.end());
     }
 
 private:
@@ -151,7 +186,6 @@ private:
 
 
 template <typename T> using DisposableItemList = List<T, typename ListFilters::IsDisposed<T>>;
-template <typename T> using WeakRefList = List<T, typename ListFilters::IsUnique<T>>;
 
 }
 

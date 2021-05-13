@@ -21,7 +21,7 @@ void RendererGroup::addRenderer(const sp<Renderer>& renderer)
 
 void RendererGroup::render(RenderRequest& renderRequest, const V3& position)
 {
-    for(const sp<Renderer>& i : _items)
+    for(const sp<Renderer>& i : _items.update(renderRequest.timestamp()))
         i->render(renderRequest, position);
 }
 

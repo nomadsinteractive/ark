@@ -2,7 +2,7 @@
 
 namespace ark {
 
-Event::Event(Event::Action action, uint32_t timestamp, const EventInfo& info)
+Event::Event(Event::Action action, uint64_t timestamp, const EventInfo& info)
     : _action(action), _timestamp(timestamp), _info(info)
 {
 }
@@ -38,7 +38,7 @@ V2 Event::xy() const
     return _info._button._xy;
 }
 
-uint32_t Event::timestamp() const
+uint64_t Event::timestamp() const
 {
     return _timestamp;
 }

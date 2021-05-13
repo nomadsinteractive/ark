@@ -79,7 +79,7 @@ public:
         CODE_KEYBOARD_LEFT,
         CODE_KEYBOARD_DOWN,
         CODE_KEYBOARD_UP,
-        CODE_KEYBOARD_RETURN = 13,
+        CODE_KEYBOARD_ENTER = 13,
         CODE_KEYBOARD_ESCAPE = 27,
         CODE_KEYBOARD_BACKSPACE = 8,
         CODE_KEYBOARD_TAB = '\t',
@@ -131,7 +131,7 @@ public:
         MotionInfo _motion;
     };
 
-    Event(Action action, uint32_t timestamp, const EventInfo& info);
+    Event(Action action, uint64_t timestamp, const EventInfo& info);
     Event(const Event& other, const V2& xy);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Event);
 
@@ -147,7 +147,7 @@ public:
     V2 xy() const;
 
 //  [[script::bindings::property]]
-    uint32_t timestamp() const;
+    uint64_t timestamp() const;
 
 //  [[script::bindings::property]]
     Event::Code code() const;
@@ -158,7 +158,7 @@ public:
 
 private:
     Action _action;
-    uint32_t _timestamp;
+    uint64_t _timestamp;
     EventInfo _info;
 };
 

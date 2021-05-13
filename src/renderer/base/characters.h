@@ -69,15 +69,39 @@ public:
     };
 
 private:
+    typedef std::function<sp<RenderObject>(int32_t, const V3&, float, float)> ContentMaker;
+
+    class CharacterContentMaker {
+    public:
+        CharacterContentMaker(sp<CharacterMaker> characterMaker);
+
+        sp<RenderObject> operator() (int32_t type, const V3&position, float width, float height);
+
+    private:
+        sp<CharacterMaker> _character_maker;
+    };
+
+    class RelayoutContentMaker {
+    public:
+        RelayoutContentMaker(std::list<sp<RenderObject>> characters);
+
+        sp<RenderObject> operator() (int32_t type, const V3& position, float width, float height);
+
+    private:
+        std::list<sp<RenderObject>> _characters;
+    };
+
     void createContent();
     void createRichContent(const Scope& args);
-    float createContentWithBoundary(CharacterMaker& cm, float& flowx, float& flowy, const std::wstring& text, float boundary);
-    float createContentNoBoundary(CharacterMaker& cm, float& flowx, float flowy, const std::wstring& text);
+    float createContentWithBoundary(const ContentMaker& cm, const V2& s, float& flowx, float& flowy, const std::wstring& text, float boundary);
+    float createContentNoBoundary(const ContentMaker& cm, const V2& s, float& flowx, float flowy, const std::wstring& text);
 
-    float doCreateContent(CharacterMaker& cm, float& flowx, float& flowy, const std::wstring& text, float boundary);
-    float doCreateRichContent(CharacterMaker& cm, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary);
+    float doCreateContent(const ContentMaker& cm, const V2& s, float& flowx, float& flowy, const std::wstring& text, float boundary);
+    float doCreateRichContent(const ContentMaker& cm, const V2& s, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary);
+    void doLayoutContent();
 
     void createLayerContent(float width, float height);
+
 
     struct LayoutChar {
         LayoutChar(int32_t type, const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak);
@@ -90,18 +114,17 @@ private:
         bool _is_line_break;
     };
 
-    void place(CharacterMaker& cm, const std::vector<LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
-    void placeOne(CharacterMaker& cm, const Metrics& metrics, int32_t type, float& flowx, float flowy, float* fontHeight = nullptr);
+    void place(const ContentMaker& cm, const V2& s, const std::vector<LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
+    void placeOne(const ContentMaker& cm, const V2& s, const Metrics& metrics, int32_t type, float& flowx, float flowy, float* fontHeight = nullptr);
 
     void nextLine(float fontHeight, float& flowx, float& flowy) const;
     float getFlowY() const;
 
-    std::vector<LayoutChar> getCharacterMetrics(CharacterMaker& cm, const std::wstring& text) const;
+    std::vector<LayoutChar> getCharacterMetrics(const V2& s, const std::wstring& text) const;
     bool isCJK(int32_t c) const;
     bool isWordBreaker(wchar_t c) const;
 
     int32_t toType(wchar_t c) const;
-    sp<RenderObject> makeCharacter(int32_t type, const V3& position, const sp<Size>& size) const;
 
 private:
     BeanFactory::WeakRef _bean_factory;

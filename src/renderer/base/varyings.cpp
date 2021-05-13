@@ -37,6 +37,13 @@ bool Varyings::update(uint64_t timestamp) const
     return dirty;
 }
 
+Box Varyings::getProperty(const String& name) const
+{
+    const auto iter = _properties.find(name);
+    DCHECK(iter != _properties.end(), "Varyings has no property \"%s\"", name.c_str());
+    return iter->second;
+}
+
 void Varyings::setVarying(const String& name, sp<Input> flatable)
 {
     auto iter = _varyings.find(name);
@@ -52,23 +59,27 @@ void Varyings::setVarying(const String& name, sp<Input> flatable)
     }
 }
 
-void Varyings::set(const String& name, const sp<Numeric>& var)
+void Varyings::setProperty(const String& name, const sp<Numeric>& var)
 {
+    _properties[name] = var;
     setVarying(name, sp<Input>::make<FlatableByVariable<float>>(var));
 }
 
-void Varyings::set(const String& name, const sp<Vec2>& var)
+void Varyings::setProperty(const String& name, const sp<Vec2>& var)
 {
+    _properties[name] = var;
     setVarying(name, sp<Input>::make<FlatableByVariable<V2>>(var));
 }
 
-void Varyings::set(const String& name, const sp<Vec3>& var)
+void Varyings::setProperty(const String& name, const sp<Vec3>& var)
 {
+    _properties[name] = var;
     setVarying(name, sp<Input>::make<FlatableByVariable<V3>>(var));
 }
 
-void Varyings::set(const String& name, const sp<Vec4>& var)
+void Varyings::setProperty(const String& name, const sp<Vec4>& var)
 {
+    _properties[name] = var;
     setVarying(name, sp<Input>::make<FlatableByVariable<V4>>(var));
 }
 

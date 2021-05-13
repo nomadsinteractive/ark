@@ -10,7 +10,7 @@ Use it for:
 
 """
 
-from typing import Callable, List, Type, TypeVar, Union, Optional, Dict
+from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'Numeric', 'Layer', 'Vec2', 'Vec3',
                            'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap', 'TilemapImporter', 'Tileset',
@@ -409,16 +409,19 @@ class Boolean(_Var):
         _Var.__init__(self, value)
 
     def ternary(self, positive, negative):
-        return None
+        pass
 
     def toggle(self):
-        return None
+        pass
 
-    def __or__(self, other):
-        return None
+    def negative(self) -> 'Boolean':
+        pass
 
-    def __and__(self, other):
-        return None
+    def __or__(self, other) -> 'Boolean':
+        pass
+
+    def __and__(self, other) -> 'Boolean':
+        pass
 
 
 class Numeric(_Var):
@@ -846,8 +849,12 @@ class RenderObject:
         pass
 
     @property
-    def xy(self):
+    def xy(self) -> Tuple[float, float]:
         return 0, 0
+
+    @property
+    def xyz(self) -> Tuple[float, float, float]:
+        return 0, 0, 0
 
     def absorb(self, o):
         pass
@@ -881,6 +888,7 @@ class LayerContext:
 
 
 class RenderLayer(Renderer):
+
     @property
     def context(self) -> LayerContext:
         return LayerContext()
@@ -889,16 +897,20 @@ class RenderLayer(Renderer):
     def layer(self) -> 'Layer':
         return Layer(self)
 
+    def make_layer(self, layer_type: int) -> 'Layer':
+        pass
+
     def make_context(self, layer_type) -> LayerContext:
-        return LayerContext()
+        pass
 
 
-class Layer:
+class Layer(Renderer):
     TYPE_UNSPECIFIED = 0
     TYPE_DYNAMIC = 1
     TYPE_STATIC = 2
 
     def __init__(self, render_layer: Union[RenderLayer, None]):
+        super().__init__()
         self._render_layer = render_layer
 
     @property
@@ -944,7 +956,10 @@ class Arena:
     def resource_loader(self):
         return None
 
-    def add_renderer(self, renderer):
+    def add_renderer(self, renderer: Renderer):
+        pass
+
+    def add_layer(self, renderer: Renderer):
         pass
 
     def load_renderer(self, name: str, **kwargs):
@@ -1022,7 +1037,7 @@ class Event:
     CODE_KEYBOARD_LEFT = 41
     CODE_KEYBOARD_DOWN = 42
     CODE_KEYBOARD_UP = 43
-    CODE_KEYBOARD_RETURN = 44
+    CODE_KEYBOARD_ENTER = 44
     CODE_KEYBOARD_ESCAPE = 45
     CODE_KEYBOARD_BACKSPACE = 46
     CODE_KEYBOARD_TAB = 47
@@ -1403,8 +1418,13 @@ class Color(Vec4):
 
 
 class Varyings:
+    def __init__(self):
+        pass
 
-    def set(self, name: str, obj: Union[Numeric, Vec2, Vec3, Vec4, Color]):
+    def __setattr__(self, key, value):
+        pass
+
+    def __getattribute__(self, item):
         pass
 
 

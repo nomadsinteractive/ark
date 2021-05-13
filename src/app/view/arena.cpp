@@ -35,7 +35,7 @@ void Arena::render(RenderRequest& renderRequest, const V3& position)
 {
     DASSERT(_view_group);
     _view_group->render(renderRequest, position);
-    for(const sp<Renderer>& i : _layers)
+    for(const sp<Renderer>& i : _layers.update(renderRequest.timestamp()))
         i->render(renderRequest, position);
 }
 
@@ -48,8 +48,8 @@ bool Arena::onEvent(const Event& event)
 void Arena::traverse(const Holder::Visitor& visitor)
 {
     HolderUtil::visit(_view_group, visitor);
-    for(const sp<Renderer>& i : _layers)
-        HolderUtil::visit(i, visitor);
+    for(const auto& i : _layers.items())
+        HolderUtil::visit(i._item, visitor);
 }
 
 sp<Renderer> Arena::loadRenderer(const String& name, const Scope& args)

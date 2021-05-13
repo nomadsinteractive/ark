@@ -13,6 +13,7 @@
 namespace ark {
 
 //[[script::bindings::holder]]
+//[[script::bindings::extends(Renderer)]]
 class ARK_API Layer : public Renderer, public Holder {
 public:
 //  [[script::bindings::enumeration]]
