@@ -5,30 +5,46 @@
 
 #include "core/base/api.h"
 #include "core/base/delegate.h"
-#include "core/epi/notifier.h"
+#include "core/base/observer.h"
+#include "core/base/notifier.h"
 #include "core/inf/holder.h"
 #include "core/inf/variable.h"
+#include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-//[[script::bindings::holder]]
-//[[script::bindings::extends(Numeric)]]
-class ARK_API Expectation : public Numeric, public Delegate<Numeric>, public Holder {
+template<typename T> class Expectation : public Variable<T>, public Delegate<Variable<T>>, public Holder, public Implements<Expectation<T>, Variable<T>, Delegate<Variable<T>>, Holder> {
 public:
-    Expectation(sp<Numeric> delegate, Notifier notifier);
+    Expectation(sp<Variable<T>> delegate, Notifier notifier)
+        : Delegate<Variable<T>>(std::move(delegate)), _notifier(std::move(notifier)) {
+    }
 
-    virtual float val() override;
-    virtual bool update(uint64_t timestamp) override;
+    virtual T val() override {
+        return this->_delegate->val();
+    }
 
-    virtual void traverse(const Visitor& visitor) override;
+    virtual bool update(uint64_t timestamp) override {
+        return this->_delegate->update(timestamp);
+    }
 
-//[[script::bindings::auto]]
-    sp<Observer> createObserver(const sp<Runnable>& callback, bool oneshot = true);
-//[[script::bindings::auto]]
-    const sp<Observer>& addObserver(const sp<Runnable>& callback, bool oneshot = true);
-//[[script::bindings::auto]]
-    void clear();
+    virtual void traverse(const Visitor& visitor) override {
+        for(const sp<Observer>& i : _observers)
+            i->traverse(visitor);
+    }
+
+    sp<Observer> createObserver(const sp<Runnable>& callback, bool oneshot = true) {
+        return _notifier.createObserver(callback, oneshot);
+    }
+
+    const sp<Observer>& addObserver(const sp<Runnable>& callback, bool oneshot = true) {
+        _observers.push_back(_notifier.createObserver(callback, oneshot));
+        return _observers.back();
+    }
+
+    void clear() {
+        _observers.clear();
+    }
 
 private:
     Notifier _notifier;

@@ -3,6 +3,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/expectation_f.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
@@ -102,17 +103,17 @@ public:
     static sp<Numeric> synchronize(const sp<Numeric>& self, const sp<Boolean>& disposed = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<Expectation> approach(const sp<Numeric>& self, const sp<Numeric>& a1);
+    static sp<ExpectationF> approach(const sp<Numeric>& self, const sp<Numeric>& a1);
 //  [[script::bindings::classmethod]]
-    static sp<Expectation> atLeast(const sp<Numeric>& self, const sp<Numeric>& a1);
+    static sp<ExpectationF> atLeast(const sp<Numeric>& self, const sp<Numeric>& a1);
 //  [[script::bindings::classmethod]]
-    static sp<Expectation> atMost(const sp<Numeric>& self, const sp<Numeric>& a1);
+    static sp<ExpectationF> atMost(const sp<Numeric>& self, const sp<Numeric>& a1);
 //  [[script::bindings::classmethod]]
-    static sp<Expectation> boundary(const sp<Numeric>& self, const sp<Numeric>& a1);
+    static sp<ExpectationF> boundary(const sp<Numeric>& self, const sp<Numeric>& a1);
 //  [[script::bindings::classmethod]]
-    static sp<Expectation> clamp(const sp<Numeric>& self, const sp<Numeric>& min, const sp<Numeric>& max);
+    static sp<ExpectationF> clamp(const sp<Numeric>& self, const sp<Numeric>& min, const sp<Numeric>& max);
 //  [[script::bindings::classmethod]]
-    static sp<Expectation> fence(const sp<Numeric>& self, const sp<Numeric>& a1);
+    static sp<ExpectationF> fence(const sp<Numeric>& self, const sp<Numeric>& a1);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> ifElse(const sp<Numeric>& self, const sp<Boolean>& condition, const sp<Numeric>& negative);
 //  [[script::bindings::classmethod]]
@@ -124,6 +125,9 @@ public:
     static sp<Numeric> attract(const sp<Numeric>& self, float s0, float duration, const sp<Numeric>& t = nullptr);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t);
+
+//  [[script::bindings::classmethod]]
+    static sp<Numeric> periodic(const sp<Numeric>& self, const sp<Numeric>& interval = nullptr, const sp<Numeric>& duration = nullptr);
 
 //  [[script::bindings::auto]]
     static sp<Numeric> pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t = nullptr);

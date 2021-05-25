@@ -14,6 +14,7 @@
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/base/collision_manifold.h"
+#include "app/base/raycast_manifold.h"
 #include "app/inf/collision_callback.h"
 
 #include "box2d/impl/rigid_body_box2d.h"
@@ -63,9 +64,10 @@ sp<RigidBody> ColliderBox2D::createBody(Collider::BodyType type, int32_t shape, 
     return body;
 }
 
-void ColliderBox2D::rayCast(const V3& from, const V3& to, const sp<CollisionCallback>& callback)
+std::vector<RayCastManifold> ColliderBox2D::rayCast(const V3& from, const V3& to)
 {
     DFATAL("Unimplemented");
+    return {};
 }
 
 b2World& ColliderBox2D::world() const

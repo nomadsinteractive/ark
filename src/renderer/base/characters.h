@@ -62,42 +62,43 @@ public:
         SafePtr<Builder<CharacterMapper>> _character_mapper;
         SafePtr<Builder<CharacterMaker>> _character_maker;
 
-        float _text_scale;
+        sp<Builder<String>> _text_scale;
         float _letter_spacing;
         float _line_height;
         float _line_indent;
     };
 
 private:
-    typedef std::function<sp<RenderObject>(int32_t, const V3&, float, float)> ContentMaker;
+//    typedef std::function<sp<RenderObject>(int32_t, const V3&, float, float)> ContentMaker;
+    typedef std::vector<Glyph> ContentMaker;
 
-    class CharacterContentMaker {
-    public:
-        CharacterContentMaker(sp<CharacterMaker> characterMaker);
+//    class CharacterContentMaker {
+//    public:
+//        CharacterContentMaker(sp<CharacterMaker> characterMaker);
 
-        sp<RenderObject> operator() (int32_t type, const V3&position, float width, float height);
+//        sp<RenderObject> operator() (int32_t type, const V3&position, float width, float height);
 
-    private:
-        sp<CharacterMaker> _character_maker;
-    };
+//    private:
+//        sp<CharacterMaker> _character_maker;
+//    };
 
-    class RelayoutContentMaker {
-    public:
-        RelayoutContentMaker(std::list<sp<RenderObject>> characters);
+//    class RelayoutContentMaker {
+//    public:
+//        RelayoutContentMaker(std::list<sp<RenderObject>> characters);
 
-        sp<RenderObject> operator() (int32_t type, const V3& position, float width, float height);
+//        sp<RenderObject> operator() (int32_t type, const V3& position, float width, float height);
 
-    private:
-        std::list<sp<RenderObject>> _characters;
-    };
+//    private:
+//        std::list<sp<RenderObject>> _characters;
+//    };
 
     void createContent();
     void createRichContent(const Scope& args);
-    float createContentWithBoundary(const ContentMaker& cm, const V2& s, float& flowx, float& flowy, const std::wstring& text, float boundary);
-    float createContentNoBoundary(const ContentMaker& cm, const V2& s, float& flowx, float flowy, const std::wstring& text);
+    float createContentWithBoundary(ContentMaker& cm, const V2& s, float& flowx, float& flowy, const std::wstring& text, float boundary);
+    float createContentNoBoundary(ContentMaker& cm, const V2& s, float& flowx, float flowy, const std::wstring& text);
 
-    float doCreateContent(const ContentMaker& cm, const V2& s, float& flowx, float& flowy, const std::wstring& text, float boundary);
-    float doCreateRichContent(const ContentMaker& cm, const V2& s, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary);
+    float doCreateContent(ContentMaker& cm, const V2& s, float& flowx, float& flowy, const std::wstring& text, float boundary);
+    float doCreateRichContent(ContentMaker& cm, const V2& s, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary);
     void doLayoutContent();
 
     void createLayerContent(float width, float height);
@@ -114,8 +115,8 @@ private:
         bool _is_line_break;
     };
 
-    void place(const ContentMaker& cm, const V2& s, const std::vector<LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
-    void placeOne(const ContentMaker& cm, const V2& s, const Metrics& metrics, int32_t type, float& flowx, float flowy, float* fontHeight = nullptr);
+    void place(ContentMaker& cm, const V2& s, const std::vector<LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
+    void placeOne(ContentMaker& cm, const V2& s, const Metrics& metrics, int32_t type, float& flowx, float flowy, float* fontHeight = nullptr);
 
     void nextLine(float fontHeight, float& flowx, float& flowy) const;
     float getFlowY() const;

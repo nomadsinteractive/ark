@@ -16,6 +16,7 @@
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/base/collision_manifold.h"
+#include "app/base/raycast_manifold.h"
 #include "app/base/rigid_body.h"
 #include "app/inf/collision_callback.h"
 
@@ -77,9 +78,10 @@ sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, 
     return rigidBody;
 }
 
-void TiledCollider::rayCast(const V3& from, const V3& to, const sp<CollisionCallback>& callback)
+std::vector<RayCastManifold> TiledCollider::rayCast(const V3& from, const V3& to)
 {
     DFATAL("Unimplemented");
+    return {};
 }
 
 TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Tilemap>& tileMap)

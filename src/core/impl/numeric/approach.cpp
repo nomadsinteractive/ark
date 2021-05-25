@@ -1,6 +1,6 @@
 #include "core/impl/numeric/approach.h"
 
-#include "core/epi/notifier.h"
+#include "core/base/notifier.h"
 #include "core/util/math.h"
 #include "core/util/variable_util.h"
 

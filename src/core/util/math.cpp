@@ -175,6 +175,36 @@ sp<Numeric> Math::sqrt(const sp<Numeric>& x)
     return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::sqrt), x);
 }
 
+float Math::distance(const V2& lvalue, const V2& rvalue)
+{
+    return (lvalue - rvalue).length();
+}
+
+float Math::distance(const V3& lvalue, const V3& rvalue)
+{
+    return (lvalue - rvalue).length();
+}
+
+float Math::distance(const V4& lvalue, const V4& rvalue)
+{
+    return (lvalue - rvalue).length();
+}
+
+sp<Numeric> Math::distance(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
+{
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Distance<V2>>>::make(lvalue, rvalue);
+}
+
+sp<Numeric> Math::distance(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
+{
+    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Distance<V3>>>::make(lvalue, rvalue);
+}
+
+sp<Numeric> Math::distance(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
+{
+    return sp<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Distance<V4>>>::make(lvalue, rvalue);
+}
+
 sp<Numeric> Math::dot(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
     return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Dot<V2>>>::make(lvalue, rvalue);

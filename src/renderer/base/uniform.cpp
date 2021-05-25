@@ -1,7 +1,7 @@
 #include "renderer/base/uniform.h"
 
 #include "core/base/observer.h"
-#include "core/epi/notifier.h"
+#include "core/base/notifier.h"
 #include "core/inf/array.h"
 #include "core/inf/input.h"
 #include "core/inf/variable.h"

@@ -7,7 +7,7 @@
 
 #include "core/base/observer.h"
 #include "core/base/manifest.h"
-#include "core/epi/notifier.h"
+#include "core/base/notifier.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/impl/variable/variable_op2.h"

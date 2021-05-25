@@ -83,6 +83,12 @@ class _Var:
     def freeze(self):
         pass
 
+    def wrap(self):
+        pass
+
+    def periodic(self, interval: Optional['Numeric'] = None, duration: Optional['Numeric'] = None):
+        pass
+
     def __int__(self):
         return 0
 
@@ -428,20 +434,20 @@ class Numeric(_Var):
     def __init__(self, val):
         _Var.__init__(self, val)
 
-    def approach(self, expectation) -> 'Expectation':
-        return Expectation(self)
+    def approach(self, expectation) -> 'ExpectationF':
+        return ExpectationF(self)
 
-    def at_least(self, least) -> 'Expectation':
-        return Expectation(self)
+    def at_least(self, least) -> 'ExpectationF':
+        return ExpectationF(self)
 
-    def at_most(self, most) -> 'Expectation':
-        return Expectation(self)
+    def at_most(self, most) -> 'ExpectationF':
+        return ExpectationF(self)
 
-    def boundary(self, boundary) -> 'Expectation':
-        return Expectation(self)
+    def boundary(self, boundary) -> 'ExpectationF':
+        return ExpectationF(self)
 
-    def fence(self, fence) -> 'Expectation':
-        return Expectation(self)
+    def fence(self, fence) -> 'ExpectationF':
+        return ExpectationF(self)
 
     def integral(self, t: Optional['Numeric'] = None) -> 'Numeric':
         pass
@@ -466,8 +472,10 @@ class Numeric(_Var):
 
 class Integer(_Var):
     REPEAT_NONE = 0
-    REPEAT_RESTART = 1
-    REPEAT_REVERSE = 2
+    REPEAT_LAST = 1
+    REPEAT_RESTART = 2
+    REPEAT_REVERSE = 3
+    REPEAT_REVERSE_RESTART = 4
 
     def __init__(self, value: Union[int, 'Integer', list, tuple]):
         super().__init__(value)
@@ -475,11 +483,12 @@ class Integer(_Var):
     def __int__(self) -> int:
         return 0
 
-    def repeat(self, repeat: int) -> 'Integer':
-        return Integer(0)
+    @staticmethod
+    def repeat(array: List[int], repeat: int) -> 'ExpectationI':
+        pass
 
     def animate(self, interval: Union[Numeric, float] = None, duration: Union[Numeric, float] = None) -> 'Integer':
-        return Integer(0)
+        pass
 
 
 class Disposed:
@@ -869,18 +878,26 @@ class RenderObject:
         pass
 
 
-class Expectation(Numeric):
-    def __init__(self, val):
-        super().__init__(val)
-
-    def update(self):
-        pass
+class Expectation:
 
     def create_observer(self, callback: Callable, oneshot=True) -> Observer:
         pass
 
     def add_observer(self, callback: Callable, oneshot=True) -> Observer:
         pass
+
+    def clear(self):
+        pass
+
+
+class ExpectationF(Numeric, Expectation):
+    def __init__(self, val):
+        super().__init__(val)
+
+
+class ExpectationI(Integer, Expectation):
+    def __init__(self, val):
+        super().__init__(val)
 
 
 class LayerContext:
@@ -1193,6 +1210,10 @@ class Math:
         pass
 
     @staticmethod
+    def distance(a, b):
+        pass
+
+    @staticmethod
     def randf() -> float:
         return 0
 
@@ -1372,6 +1393,21 @@ class EventDispatcher(EventListener):
         pass
 
 
+class Glyph:
+
+    @property
+    def character(self) -> int:
+        return 0
+
+    @property
+    def position(self) -> Tuple[float, float, float]:
+        return 0, 0, 0
+
+    @property
+    def size(self) -> Tuple[float, float]:
+        return 0, 0
+
+
 class Characters:
     def __init__(self, layer: Union[Layer, RenderLayer, LayerContext], text_scale=1.0, letter_spacing=0, line_height=0, line_indent=0):
         self._size = Size(0, 0)
@@ -1539,6 +1575,28 @@ class SurfaceController:
         pass
 
 
+class CollisionManifold:
+
+    @property
+    def contact_point(self) -> Tuple[float, float, float]:
+        return 0, 0, 0
+
+    @property
+    def normal(self) -> Tuple[float, float, float]:
+        return 0, 0, 0
+
+
+class RayCastManifold:
+
+    @property
+    def distance(self) -> float:
+        return 0
+
+    @property
+    def normal(self) -> Tuple[float, float, float]:
+        return 0, 0, 0
+
+
 class Collider:
 
     BODY_SHAPE_AABB = -1
@@ -1558,7 +1616,7 @@ class Collider:
     def create_body(self, type, shape, position, size=None, rotate=None, is_sensor=False) -> RigidBody:
         pass
 
-    def ray_cast(self, ray_from, ray_to, collision_callback):
+    def ray_cast(self, ray_from, ray_to) -> List[RayCastManifold]:
         pass
 
 
@@ -1627,17 +1685,6 @@ class Texture:
     @property
     def size(self) -> Size:
         return Size(0, 0)
-
-
-class CollisionManifold:
-
-    @property
-    def contact_point(self) -> tuple:
-        return 0, 0, 0
-
-    @property
-    def normal(self) -> tuple:
-        return 0, 0, 0
 
 
 class Emitter:

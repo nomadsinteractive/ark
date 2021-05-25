@@ -10,6 +10,7 @@
 
 #include "graphics/base/layer.h"
 #include "graphics/base/layer_context.h"
+#include "graphics/base/glyph.h"
 #include "graphics/base/render_layer.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/size.h"
@@ -110,14 +111,15 @@ void Characters::renderRequest(const V3& position)
 
 void Characters::createContent()
 {
-    _contents.clear();
     float boundary = _layout_param ? _layout_param->contentWidth() : 0;
     float flowx = boundary > 0 ? 0 : -_letter_spacing, flowy = getFlowY();
-    flowy = doCreateContent(CharacterContentMaker(_character_maker), _character_maker->scale(), flowx, flowy, _text, boundary);
+    ContentMaker cm;
+    flowy = doCreateContent(cm, _character_maker->scale(), flowx, flowy, _text, boundary);
+    _contents = _character_maker->makeCharacter(cm);
     createLayerContent(flowx, flowy);
 }
 
-float Characters::doCreateContent(const ContentMaker& cm, const V2& s, float& flowx, float& flowy, const std::wstring& text, float boundary)
+float Characters::doCreateContent(ContentMaker& cm, const V2& s, float& flowx, float& flowy, const std::wstring& text, float boundary)
 {
     return boundary > 0 ? createContentWithBoundary(cm, s, flowx, flowy, text, boundary) : createContentNoBoundary(cm, s, flowx, getFlowY(), text);
 }
@@ -129,11 +131,15 @@ void Characters::createRichContent(const Scope& args)
     float flowx = boundary > 0 ? 0 : -_letter_spacing, flowy = getFlowY();
     BeanFactory factory = _bean_factory.ensure();
     const document richtext = Documents::parseFull(Strings::toUTF8(_text));
-    float height = doCreateRichContent(CharacterContentMaker(factory.ensure<CharacterMaker>(richtext, args)), _character_maker->scale(), richtext, factory, args, flowx, flowy, boundary);
+    const sp<CharacterMaker> characterMaker = factory.ensure<CharacterMaker>(richtext, args);
+    ContentMaker cm;
+    float height = doCreateRichContent(cm, _character_maker->scale(), richtext, factory, args, flowx, flowy, boundary);
+    const auto contents = characterMaker->makeCharacter(cm);
+    _contents.insert(_contents.end(), contents.begin(), contents.end());
     createLayerContent(flowx, height);
 }
 
-float Characters::doCreateRichContent(const ContentMaker& cm, const V2& s, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary)
+float Characters::doCreateRichContent(ContentMaker& cm, const V2& s, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary)
 {
     float height = 0;
     for(const document& i : richtext->children())
@@ -142,9 +148,11 @@ float Characters::doCreateRichContent(const ContentMaker& cm, const V2& s, const
             height = doCreateContent(cm, s, flowx, flowy, Strings::fromUTF8(i->value()), boundary);
         else if(i->type() == DOMElement::ELEMENT_TYPE_ELEMENT)
         {
-            sp<CharacterMaker> characterMaker = factory.ensure<CharacterMaker>(i, args);
-            const V2 cms = characterMaker->scale();
-            height = doCreateRichContent(CharacterContentMaker(std::move(characterMaker)), cms, i, factory, args, flowx, flowy, boundary);
+            ContentMaker cm;
+            const sp<CharacterMaker> characterMaker = factory.ensure<CharacterMaker>(i, args);
+            height = doCreateRichContent(cm, characterMaker->scale(), i, factory, args, flowx, flowy, boundary);
+            const auto contents = characterMaker->makeCharacter(cm);
+            _contents.insert(_contents.end(), contents.begin(), contents.end());
         }
     }
     return height;
@@ -153,12 +161,12 @@ float Characters::doCreateRichContent(const ContentMaker& cm, const V2& s, const
 void Characters::doLayoutContent()
 {
     DCHECK(_contents.size() == _text.length(), "Contents have changed, cannot do relayout");
-
-    RelayoutContentMaker rcm(std::list<sp<RenderObject>>(_contents.begin(), _contents.end()));
-    _contents.clear();
     float boundary = _layout_param ? _layout_param->contentWidth() : 0;
     float flowx = boundary > 0 ? 0 : -_letter_spacing, flowy = getFlowY();
-    flowy = doCreateContent(rcm, _character_maker->scale(), flowx, flowy, _text, boundary);
+    ContentMaker cm;
+    flowy = doCreateContent(cm, _character_maker->scale(), flowx, flowy, _text, boundary);
+    for(size_t i = 0; i < _contents.size(); ++i)
+        _contents.at(i)->setPosition(sp<Vec3::Const>::make(cm.at(i).position()));
     _size->setWidth(flowx);
     _size->setHeight(flowy);
 }
@@ -177,7 +185,7 @@ void Characters::createLayerContent(float width, float height)
     }
 }
 
-float Characters::createContentWithBoundary(const ContentMaker& cm, const V2& s, float& flowx, float& flowy, const std::wstring& text, float boundary)
+float Characters::createContentWithBoundary(ContentMaker& cm, const V2& s, float& flowx, float& flowy, const std::wstring& text, float boundary)
 {
     const std::vector<LayoutChar> layoutChars = Characters::getCharacterMetrics(s, text);
     float fontHeight = layoutChars.size() > 0 ? layoutChars.at(0)._metrics.bounds.y() * _text_scale * s.y() : 0;
@@ -209,7 +217,7 @@ float Characters::createContentWithBoundary(const ContentMaker& cm, const V2& s,
     return std::abs(flowy) + fontHeight;
 }
 
-float Characters::createContentNoBoundary(const ContentMaker& cm, const V2& s, float& flowx, float flowy, const std::wstring& text)
+float Characters::createContentNoBoundary(ContentMaker& cm, const V2& s, float& flowx, float flowy, const std::wstring& text)
 {
     float fontHeight = 0;
     for(wchar_t c : text)
@@ -222,7 +230,7 @@ float Characters::createContentNoBoundary(const ContentMaker& cm, const V2& s, f
     return std::abs(flowy) + fontHeight;
 }
 
-void Characters::place(const ContentMaker& cm, const V2& s, const std::vector<Characters::LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy)
+void Characters::place(ContentMaker& cm, const V2& s, const std::vector<Characters::LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy)
 {
     for(size_t i = begin; i < end; ++i)
     {
@@ -234,7 +242,7 @@ void Characters::place(const ContentMaker& cm, const V2& s, const std::vector<Ch
     }
 }
 
-void Characters::placeOne(const ContentMaker& cm, const V2& s, const Metrics& metrics, int32_t type, float& flowx, float flowy, float* fontHeight)
+void Characters::placeOne(ContentMaker& cm, const V2& s, const Metrics& metrics, int32_t type, float& flowx, float flowy, float* fontHeight)
 {
     const V2 scale = s * _text_scale;
     float bitmapWidth = scale.x() * metrics.size.x();
@@ -245,7 +253,7 @@ void Characters::placeOne(const ContentMaker& cm, const V2& s, const Metrics& me
     float bitmapY = scale.y() * metrics.xyz.y();
     if(fontHeight)
         *fontHeight = std::max(height, *fontHeight);
-    _contents.push_back(cm(type, V3(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight, 0), bitmapWidth, bitmapHeight));
+    cm.emplace_back(type, V3(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight, 0), V2(bitmapWidth, bitmapHeight));
     flowx += width;
 }
 
@@ -313,42 +321,20 @@ int32_t Characters::toType(wchar_t c) const
 Characters::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _bean_factory(factory), _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_DYNAMIC)),
       _character_mapper(factory.getBuilder<CharacterMapper>(manifest, "character-mapper")), _character_maker(factory.getBuilder<CharacterMaker>(manifest, "character-maker")),
-      _text_scale(Documents::getAttribute<float>(manifest, "text-scale", 1.0f)), _letter_spacing(Documents::getAttribute<float>(manifest, "letter-spacing", 0.0f)),
+      _text_scale(factory.getBuilder<String>(manifest, "text-scale")), _letter_spacing(Documents::getAttribute<float>(manifest, "letter-spacing", 0.0f)),
       _line_height(Documents::getAttribute<float>(manifest, "line-height", 0.0f)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))
 {
 }
 
 sp<Characters> Characters::BUILDER::build(const Scope& args)
 {
-    return sp<Characters>::make(_bean_factory, _layer_context->build(args), _character_mapper->build(args), _character_maker->build(args), _text_scale, _letter_spacing, _line_height, _line_indent);
+    float textScale = _text_scale ? Strings::parse<float>(_text_scale->build(args)) : 1.0f;
+    return sp<Characters>::make(_bean_factory, _layer_context->build(args), _character_mapper->build(args), _character_maker->build(args), textScale, _letter_spacing, _line_height, _line_indent);
 }
 
 Characters::LayoutChar::LayoutChar(int32_t type, const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak)
     : _type(type), _metrics(metrics), _width_integral(widthIntegral), _is_cjk(isCJK), _is_word_break(isWordBreak), _is_line_break(isLineBreak)
 {
-}
-
-Characters::CharacterContentMaker::CharacterContentMaker(sp<CharacterMaker> characterMaker)
-    : _character_maker(std::move(characterMaker))
-{
-}
-
-sp<RenderObject> Characters::CharacterContentMaker::operator()(int32_t type, const V3& position, float width, float height)
-{
-    return _character_maker->makeCharacter(type, position, sp<Size>::make(width, height));
-}
-
-Characters::RelayoutContentMaker::RelayoutContentMaker(std::list<sp<RenderObject>> characters)
-    : _characters(std::move(characters))
-{
-}
-
-sp<RenderObject> Characters::RelayoutContentMaker::operator()(int32_t /*type*/, const V3& position, float /*width*/, float /*height*/)
-{
-    sp<RenderObject> renderObject = _characters.front();
-    renderObject->setPosition(sp<Vec3::Const>::make(position));
-    _characters.pop_front();
-    return renderObject;
 }
 
 }

@@ -15,7 +15,7 @@ public:
     CharacterMakerSpan(const V2& scale);
     CharacterMakerSpan(const V2& scale, BeanFactory& factory, const sp<String>& className);
 
-    virtual sp<RenderObject> makeCharacter(int32_t type, const V3& position, const sp<Size>& size) override;
+    virtual std::vector<sp<RenderObject>> makeCharacter(const std::vector<Glyph>& glyphs) override;
     virtual V2 scale() override;
 
 //[[plugin::builder]]

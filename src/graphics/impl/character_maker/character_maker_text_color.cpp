@@ -13,11 +13,12 @@ CharacterMakerTextColor::CharacterMakerTextColor(sp<CharacterMaker> delegate, sp
 {
 }
 
-sp<RenderObject> CharacterMakerTextColor::makeCharacter(int32_t type, const V3& position, const sp<Size>& size)
+std::vector<sp<RenderObject>> CharacterMakerTextColor::makeCharacter(const std::vector<Glyph>& glyphs)
 {
-    const sp<RenderObject> renderObject = _delegate->makeCharacter(type, position, size);
-    renderObject->varyings()->setProperty("Color", _color);
-    return renderObject;
+    std::vector<sp<RenderObject>> renderObjects = _delegate->makeCharacter(glyphs);
+    for(const sp<RenderObject>& i : renderObjects)
+        i->varyings()->setProperty("Color", _color);
+    return renderObjects;
 }
 
 V2 CharacterMakerTextColor::scale()

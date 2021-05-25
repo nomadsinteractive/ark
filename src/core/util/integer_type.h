@@ -1,10 +1,11 @@
-#ifndef ARK_CORE_UTIL_INTEGER_UTIL_H_
-#define ARK_CORE_UTIL_INTEGER_UTIL_H_
+#ifndef ARK_CORE_UTIL_INTEGER_TYPE_H_
+#define ARK_CORE_UTIL_INTEGER_TYPE_H_
 
 #include <vector>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/expectation_i.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
@@ -13,11 +14,12 @@
 namespace ark {
 
 //[[script::bindings::class("Integer")]]
-class ARK_API IntegerUtil final {
+class ARK_API IntegerType final {
 public:
 //  [[script::bindings::enumeration]]
     enum Repeat {
         REPEAT_NONE,
+        REPEAT_LAST,
         REPEAT_RESTART,
         REPEAT_REVERSE,
         REPEAT_REVERSE_RESTART
@@ -28,7 +30,7 @@ public:
 //[[script::bindings::constructor]]
     static sp<Integer> create(const sp<Integer>& value);
 //[[script::bindings::constructor]]
-    static sp<Integer> create(std::vector<int32_t> values);
+    static sp<Integer> create(const sp<Numeric>& value);
 
 //[[script::bindings::operator(+)]]
     static sp<Integer> add(const sp<Integer>& self, const sp<Integer>& rvalue);
@@ -73,6 +75,9 @@ public:
 //[[script::bindings::property]]
     static void setDelegate(const sp<Integer>& self, const sp<Integer>& delegate);
 
+//[[script::bindings::auto]]
+    static sp<ExpectationI> repeat(std::vector<int32_t> array, IntegerType::Repeat repeat = IntegerType::REPEAT_NONE);
+
 //[[script::bindings::classmethod]]
     static void set(const sp<Integer::Impl>& self, int32_t value);
 //[[script::bindings::classmethod]]
@@ -86,9 +91,13 @@ public:
     static sp<Integer> wrap(const sp<Integer>& self);
 
 //[[script::bindings::classmethod]]
-    static sp<Integer> repeat(const sp<Integer>& self, IntegerUtil::Repeat repeat = IntegerUtil::REPEAT_NONE);
-//[[script::bindings::classmethod]]
     static sp<Integer> animate(const sp<Integer>& self, const sp<Numeric>& interval = nullptr, const sp<Numeric>& duration = nullptr);
+
+//  [[script::bindings::classmethod]]
+    static sp<ExpectationI> clamp(const sp<Integer>& self, const sp<Integer>& min, const sp<Integer>& max);
+//  [[script::bindings::classmethod]]
+    static sp<ExpectationI> fence(const sp<Integer>& self, const sp<Integer>& a1);
+
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Integer> {

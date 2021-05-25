@@ -100,7 +100,7 @@ void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<Colli
     }
 }
 
-void ColliderBullet::rayCast(const V3& from, const V3& to, const sp<CollisionCallback>& callback)
+std::vector<RayCastManifold> ColliderBullet::rayCast(const V3& from, const V3& to)
 {
     btVector3 btFrom(from.x(), from.y(), from.z());
     btVector3 btTo(to.x(), to.y(), to.z());
@@ -108,13 +108,18 @@ void ColliderBullet::rayCast(const V3& from, const V3& to, const sp<CollisionCal
     allHitResults.m_flags |= btTriangleRaycastCallback::kF_FilterBackfaces;
 
     _stub->_dynamics_world->rayTest(btVector3(from.x(), from.y(), from.z()), btVector3(to.x(), to.y(), to.z()), allHitResults);
+
+    std::vector<RayCastManifold> manifolds;
     if(allHitResults.hasHit())
     {
-        btVector3 p = btFrom.lerp(btTo, allHitResults.m_closestHitFraction);
-        const btVector3& n = allHitResults.m_hitNormalWorld[0];
-        CollisionManifold manifold(V3(p.x(), p.y(), p.z()), V3(n.x(), n.y(), n.z()));
-        callback->onBeginContact(nullptr, manifold);
+        for(size_t i = 0; i < allHitResults.m_hitFractions.size(); ++i)
+        {
+            const btVector3& n = allHitResults.m_hitNormalWorld.at(i);
+            sp<RigidBody> rigidBody = sp<RigidBodyBullet>::make(getRigidBodyFromCollisionObject(allHitResults.m_collisionObjects.at(i)));
+            manifolds.emplace_back(allHitResults.m_hitFractions.at(i), V3(n.x(), n.y(), n.z()), std::move(rigidBody));
+        }
     }
+    return manifolds;
 }
 
 void ColliderBullet::run()

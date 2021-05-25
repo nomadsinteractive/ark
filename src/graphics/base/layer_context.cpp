@@ -1,7 +1,7 @@
 #include "graphics/base/layer_context.h"
 
 #include "core/epi/disposed.h"
-#include "core/epi/notifier.h"
+#include "core/base/notifier.h"
 #include "core/util/holder_util.h"
 
 #include "graphics/base/layer.h"
@@ -53,7 +53,7 @@ void LayerContext::renderRequest(const V3& position)
 void LayerContext::add(const sp<Renderable>& renderable, const sp<Boolean>& disposed)
 {
     DASSERT(renderable);
-    _renderables.emplace_back(renderable, disposed);
+    _renderable_emplaced.emplace_back(renderable, disposed);
     _notifier->notify();
 }
 
@@ -72,6 +72,12 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
 {
     bool notify = false;
     const sp<PipelineInput>& pipelineInput = output._stub->_shader->input();
+
+    if(_renderable_emplaced.size() > 0)
+    {
+        const std::vector<Item> emplaced(std::move(_renderable_emplaced));
+        _renderables.insert(_renderables.end(), emplaced.begin(), emplaced.end());
+    }
 
     for(auto iter = _renderables.begin(); iter != _renderables.end(); )
     {

@@ -1,7 +1,7 @@
 #include "graphics/base/render_layer.h"
 
 #include "core/base/observer.h"
-#include "core/epi/notifier.h"
+#include "core/base/notifier.h"
 
 #include "graphics/base/camera.h"
 #include "graphics/base/layer_context.h"

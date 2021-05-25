@@ -15,6 +15,7 @@ class CharacterMapper;
 class Color;
 class Font;
 class Frame;
+class Glyph;
 class Scrollable;
 class RenderLayer;
 class Mat2Impl;

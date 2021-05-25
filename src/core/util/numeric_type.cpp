@@ -3,16 +3,16 @@
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
 #include "core/base/delegate.h"
-#include "core/base/expectation.h"
 #include "core/base/expression.h"
 #include "core/impl/numeric/approach.h"
-#include "core/impl/numeric/clamp.h"
-#include "core/impl/numeric/fence.h"
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/numeric/vibrate.h"
+#include "core/impl/variable/clamp.h"
 #include "core/impl/variable/boost.h"
+#include "core/impl/variable/fence.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/interpolate.h"
+#include "core/impl/variable/periodic.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/util/operators.h"
@@ -337,44 +337,48 @@ sp<Numeric> NumericType::synchronize(const sp<Numeric>& self, const sp<Boolean>&
     return Ark::instance().applicationContext()->synchronize(self, disposed);
 }
 
-sp<Expectation> NumericType::approach(const sp<Numeric>& self, const sp<Numeric>& a1)
+sp<ExpectationF> NumericType::approach(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
     Notifier notifier;
-    return sp<Expectation>::make(sp<Approach>::make(self, a1, notifier), std::move(notifier));
+    return sp<ExpectationF>::make(sp<Approach>::make(self, a1, notifier), std::move(notifier));
 }
 
-sp<Expectation> NumericType::atLeast(const sp<Numeric>& self, const sp<Numeric>& a1)
-{
-    DASSERT(self && a1);
-    Notifier notifier;
-    return sp<Expectation>::make(sp<AtLeast>::make(self, a1, notifier), std::move(notifier));
-}
-
-sp<Expectation> NumericType::atMost(const sp<Numeric>& self, const sp<Numeric>& a1)
+sp<ExpectationF> NumericType::atLeast(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
     DASSERT(self && a1);
     Notifier notifier;
-    return sp<Expectation>::make(sp<AtMost>::make(self, a1, notifier), std::move(notifier));
+    sp<Numeric> delegate = sp<AtLeast>::make(self, a1, notifier);
+    return sp<ExpectationF>::make(sp<AtLeast>::make(self, a1, notifier), std::move(notifier));
 }
 
-sp<Expectation> NumericType::boundary(const sp<Numeric>& self, const sp<Numeric>& a1)
+sp<ExpectationF> NumericType::atMost(const sp<Numeric>& self, const sp<Numeric>& a1)
+{
+    DASSERT(self && a1);
+    Notifier notifier;
+    sp<Numeric> delegate = sp<AtMost>::make(self, a1, notifier);
+    return sp<ExpectationF>::make(std::move(delegate), std::move(notifier));
+}
+
+sp<ExpectationF> NumericType::boundary(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
     DASSERT(self && a1);
     return self->val() < a1->val() ? atMost(self, a1) : atLeast(self, a1);
 }
 
-sp<Expectation> NumericType::clamp(const sp<Numeric>& self, const sp<Numeric>& min, const sp<Numeric>& max)
+sp<ExpectationF> NumericType::clamp(const sp<Numeric>& self, const sp<Numeric>& min, const sp<Numeric>& max)
 {
     DASSERT(self && min && max);
     Notifier notifier;
-    return sp<Expectation>::make(sp<Clamp>::make(self, min, max, notifier), std::move(notifier));
+    sp<Numeric> delegate = sp<Clamp<float>>::make(self, min, max, notifier);
+    return sp<ExpectationF>::make(std::move(delegate), std::move(notifier));
 }
 
-sp<Expectation> NumericType::fence(const sp<Numeric>& self, const sp<Numeric>& a1)
+sp<ExpectationF> NumericType::fence(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
     DASSERT(self && a1);
     Notifier notifier;
-    return sp<Expectation>::make(sp<Fence>::make(self, a1, notifier), std::move(notifier));
+    sp<Numeric> delegate = sp<Fence<float>>::make(self, a1, notifier);
+    return sp<ExpectationF>::make(std::move(delegate), std::move(notifier));
 }
 
 sp<Numeric> NumericType::ifElse(const sp<Numeric>& self, const sp<Boolean>& condition, const sp<Numeric>& negative)
@@ -400,6 +404,11 @@ sp<Numeric> NumericType::vibrate(float s0, float v0, float s1, float v1, float d
 sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t)
 {
     return sp<Interpolate<float>>::make(self, b, t);
+}
+
+sp<Numeric> NumericType::periodic(const sp<Numeric>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)
+{
+    return sp<Periodic<float>>::make(self, interval ? interval : sp<Numeric>::make<Numeric::Const>(1.0f / 24), duration ? duration : Ark::instance().clock()->duration());
 }
 
 sp<Numeric> NumericType::boost(const sp<Numeric>& self, float v0, const sp<Numeric>& cd, const sp<Numeric>& t)

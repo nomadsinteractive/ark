@@ -10,7 +10,9 @@ namespace ark {
 
 class ARK_API Notifier {
 public:
+//  [[script::bindings::auto]]
     Notifier();
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Notifier);
 
 //  [[script::bindings::auto]]
     void notify() const;

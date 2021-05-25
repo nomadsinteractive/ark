@@ -42,7 +42,7 @@ public:
 //  [[script::bindings::auto]]
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size = nullptr, const sp<Rotation>& rotate = nullptr) override;
 //  [[script::bindings::auto]]
-    virtual void rayCast(const V3& from, const V3& to, const sp<CollisionCallback>& callback) override;
+    virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to) override;
 
     b2World& world() const;
 

@@ -5,11 +5,11 @@
 
 namespace ark {
 
-IntegerByArray::IntegerByArray(const sp<IntArray>& array, IntegerUtil::Repeat repeat)
-    : Delegate(array), _repeat(repeat), _position(0), _step(1)
+IntegerByArray::IntegerByArray(const sp<IntArray>& array, IntegerType::Repeat repeat, Notifier notifier)
+    : Delegate(array), _repeat(repeat), _position(0), _step(1), _notifier(std::move(notifier))
 {
     DCHECK(array && array->length() > 0, "Empty array");
-    DCHECK(repeat != IntegerUtil::REPEAT_REVERSE || array->length() > 1, "A reversable array must have at least 2 elements");
+    DCHECK(repeat != IntegerType::REPEAT_REVERSE || array->length() > 1, "A reversable array must have at least 2 elements");
 }
 
 int32_t IntegerByArray::val()
@@ -21,14 +21,25 @@ int32_t IntegerByArray::val()
         _position += _step;
         if(_position == length)
         {
-            if(_repeat == IntegerUtil::REPEAT_NONE)
+            if(_repeat == IntegerType::REPEAT_NONE)
             {
                 _step = 0;
+                _position = length - 1;
+                _notifier.notify();
                 return -1;
             }
-            else if(_repeat == IntegerUtil::REPEAT_RESTART)
+            if(_repeat == IntegerType::REPEAT_LAST)
+            {
+                _step = 0;
+                _position = length - 1;
+                _notifier.notify();
+            }
+            else if(_repeat == IntegerType::REPEAT_RESTART)
+            {
                 _position = 0;
-            else if(_repeat == IntegerUtil::REPEAT_REVERSE)
+                _notifier.notify();
+            }
+            else if(_repeat == IntegerType::REPEAT_REVERSE || _repeat == IntegerType::REPEAT_REVERSE_RESTART)
             {
                 _position = length - 2;
                 _step = -1;
@@ -36,8 +47,17 @@ int32_t IntegerByArray::val()
         }
         else if(_position == -1)
         {
-            _position = 1;
-            _step = 1;
+            if(_repeat == IntegerType::REPEAT_REVERSE)
+            {
+                _position = 0;
+                _step = 0;
+            }
+            else
+            {
+                _position = 1;
+                _step = 1;
+            }
+            _notifier.notify();
         }
     }
     return v;

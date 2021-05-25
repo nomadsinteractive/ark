@@ -2,6 +2,7 @@
 
 #include "core/base/observer.h"
 
+#include "graphics/base/glyph.h"
 #include "graphics/inf/character_maker.h"
 #include "graphics/inf/character_mapper.h"
 
@@ -20,30 +21,30 @@ namespace {
 class PythonCallableCharacterMaker : public CharacterMaker {
 public:
     PythonCallableCharacterMaker(PyInstance callable)
-        : _callable(std::move(callable)), _args(PyInstance::steal(PyTuple_New(3))) {
+        : _callable(std::move(callable)) {
     }
 
-    virtual sp<RenderObject> makeCharacter(int32_t type, const V3& position, const sp<Size>& size) override {
+    virtual std::vector<sp<RenderObject>> makeCharacter(const std::vector<Glyph>& glyphs) override {
         DCHECK_THREAD_FLAG();
 
         const sp<PythonInterpreter>& interpreter = PythonInterpreter::instance();
-        PyObject* pyType = interpreter->toPyObject<int32_t>(type);
-        PyObject* pyPosition = interpreter->toPyObject<V3>(position);
-        PyObject* pySize = interpreter->toPyObject<sp<Size>>(size);
-        PyTuple_SetItem(_args.pyObject(), 0, pyType);
-        PyTuple_SetItem(_args.pyObject(), 1, pyPosition);
-        PyTuple_SetItem(_args.pyObject(), 2, pySize);
-        PyObject* ret = _callable.call(_args.pyObject());
+        PyInstance args(PyInstance::steal(PyTuple_New(1)));
+
+        PyObject* pyArg = PyList_New(static_cast<Py_ssize_t>(glyphs.size()));
+        for(size_t i = 0; i < glyphs.size(); ++i)
+            PyList_SetItem(pyArg, static_cast<Py_ssize_t>(i), interpreter->toPyObject(sp<Glyph>::make(glyphs.at(i))));
+        PyTuple_SetItem(args.pyObject(), 0, pyArg);
+        PyObject* ret = _callable.call(args.pyObject());
         if(ret)
         {
-            const sp<RenderObject> renderObject = ret == Py_None ? nullptr : PythonInterpreter::instance()->toCppObject<sp<RenderObject>>(ret);
+            const std::vector<sp<RenderObject>> renderObjects = ret == Py_None ? std::vector<sp<RenderObject>>() : PythonInterpreter::instance()->toCppObject<std::vector<sp<RenderObject>>>(ret);
             Py_DECREF(ret);
-            return renderObject;
+            return renderObjects;
         }
         else
             PythonInterpreter::instance()->logErr();
 
-        return nullptr;
+        return {};
     }
 
     virtual V2 scale() override {
@@ -52,8 +53,6 @@ public:
 
 private:
     PyInstance _callable;
-    PyInstance _args;
-
 };
 
 class PythonCallableCharacterMapper : public CharacterMapper {

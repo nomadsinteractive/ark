@@ -25,7 +25,7 @@ public:
     ColliderImpl(const sp<Tracker>& tracker, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate) override;
-    virtual void rayCast(const V3& from, const V3& to, const sp<CollisionCallback>& callback) override;
+    virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to) override;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Collider> {
@@ -59,7 +59,7 @@ public:
         const sp<RigidBodyShadow>& ensureRigidBody(int32_t id) const;
         const sp<RigidBodyShadow> findRigidBody(int32_t id) const;
 
-        void rayCast(const V2& from, const V2& to, const sp<CollisionCallback>& callback) const;
+        std::vector<RayCastManifold> rayCast(const V2& from, const V2& to) const;
 
         sp<Tracker> _tracker;
 

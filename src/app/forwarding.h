@@ -25,6 +25,7 @@ class LayoutHierarchy;
 class Level;
 class MessageLoopThread;
 class Model;
+class RayCastManifold;
 class RendererWithState;
 class ResourceLoader;
 class RigidBody;

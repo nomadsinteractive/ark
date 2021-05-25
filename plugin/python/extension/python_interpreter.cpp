@@ -13,6 +13,7 @@
 #include "graphics/util/vec3_type.h"
 
 #include "app/base/event.h"
+#include "app/base/raycast_manifold.h"
 
 #include "python/api.h"
 #include "python/extension/python_interpreter.h"
@@ -474,6 +475,11 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Rect>(con
 template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Color>(const Color& color)
 {
     return PythonInterpreter::instance()->fromSharedPtr<Color>(sp<Color>::make(color));
+}
+
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<RayCastManifold>(const RayCastManifold& manifold)
+{
+    return PythonInterpreter::instance()->fromSharedPtr<RayCastManifold>(sp<RayCastManifold>::make(manifold));
 }
 
 }

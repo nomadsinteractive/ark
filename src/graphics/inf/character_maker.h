@@ -1,6 +1,8 @@
 #ifndef ARK_GRAPHICS_INF_CHARACTER_MAKER_H_
 #define ARK_GRAPHICS_INF_CHARACTER_MAKER_H_
 
+#include <vector>
+
 #include "graphics/forwarding.h"
 #include "graphics/base/v2.h"
 
@@ -10,7 +12,7 @@ class CharacterMaker {
 public:
     virtual ~CharacterMaker() = default;
 
-    virtual sp<RenderObject> makeCharacter(int32_t type, const V3& position, const sp<Size>& size) = 0;
+    virtual std::vector<sp<RenderObject>> makeCharacter(const std::vector<Glyph>& glyphs) = 0;
     virtual V2 scale() = 0;
 
 };

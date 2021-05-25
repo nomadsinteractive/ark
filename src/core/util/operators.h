@@ -86,6 +86,13 @@ public:
         }
     };
 
+    template<typename T, typename P = T> class Distance {
+    public:
+        float operator()(const T& v1, const P& v2) {
+            return (v1 - v2).length();
+        }
+    };
+
     template<typename T, typename P = T> class Mod {
     public:
         auto operator()(T v1, P v2)->decltype(v1 / v2) {

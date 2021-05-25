@@ -153,6 +153,20 @@ public:
     static ARK_API sp<Numeric> sqrt(const sp<Numeric>& number);
 
 //  [[script::bindings::auto]]
+    static ARK_API float distance(const V2& lvalue, const V2& rvalue);
+//  [[script::bindings::auto]]
+    static ARK_API float distance(const V3& lvalue, const V3& rvalue);
+//  [[script::bindings::auto]]
+    static ARK_API float distance(const V4& lvalue, const V4& rvalue);
+
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> distance(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> distance(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
+//  [[script::bindings::auto]]
+    static ARK_API sp<Numeric> distance(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
+
+//  [[script::bindings::auto]]
     static ARK_API sp<Numeric> dot(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
 //  [[script::bindings::auto]]
     static ARK_API sp<Numeric> dot(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);

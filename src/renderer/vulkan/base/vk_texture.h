@@ -1,7 +1,7 @@
 #ifndef ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_H_
 #define ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_H_
 
-#include "core/epi/notifier.h"
+#include "core/base/notifier.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"

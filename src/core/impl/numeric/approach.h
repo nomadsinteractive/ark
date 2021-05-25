@@ -2,7 +2,7 @@
 #define ARK_CORE_IMPL_NUMERIC_APPROACH_H_
 
 #include "core/forwarding.h"
-#include "core/epi/notifier.h"
+#include "core/base/notifier.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 

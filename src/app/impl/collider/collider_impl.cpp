@@ -15,6 +15,7 @@
 
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
+#include "app/base/raycast_manifold.h"
 #include "app/base/rigid_body.h"
 #include "app/inf/collision_callback.h"
 #include "app/inf/tracker.h"
@@ -89,9 +90,9 @@ sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, c
     return _stub->createRigidBody(type, shape, position, size, rotate, disposed, _stub);
 }
 
-void ColliderImpl::rayCast(const V3& from, const V3& to, const sp<CollisionCallback>& callback)
+std::vector<RayCastManifold> ColliderImpl::rayCast(const V3& from, const V3& to)
 {
-    _stub->rayCast(V2(from.x(), from.y()), V2(to.x(), to.y()), callback);
+    return _stub->rayCast(V2(from.x(), from.y()), V2(to.x(), to.y()));
 }
 
 ColliderImpl::Stub::Stub(const sp<Tracker>& tracker, const document& manifest, ResourceLoaderContext& resourceLoaderContext)
@@ -160,17 +161,19 @@ const sp<ColliderImpl::RigidBodyShadow> ColliderImpl::Stub::findRigidBody(int32_
     return iter != _rigid_bodies.end() ? iter->second : sp<RigidBodyShadow>();
 }
 
-void ColliderImpl::Stub::rayCast(const V2& from, const V2& to, const sp<CollisionCallback>& callback) const
+std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V2& to) const
 {
     std::unordered_set<int32_t> candidates = _tracker->search(V3((from + to) / 2, 0), V3(std::abs(from.x() - to.x()), std::abs(from.y() - to.y()), 0));
     const c2Ray ray = makeRay(from, to);
+    std::vector<RayCastManifold> manifolds;
     for(int32_t id : candidates)
     {
-        const sp<RigidBodyShadow>& rigidBody = ensureRigidBody(id);
         c2Raycast raycast;
+        const sp<RigidBodyShadow>& rigidBody = ensureRigidBody(id);
         if(rigidBody->_c2_rigid_body.rayCast(ray, &raycast))
-            callback->onBeginContact(rigidBody, CollisionManifold(V3(), V3(raycast.n.x, raycast.n.y, 0)));
+            manifolds.emplace_back(raycast.t, V3(raycast.n.x, raycast.n.y, 0), rigidBody);
     }
+    return manifolds;
 }
 
 void ColliderImpl::Stub::loadShapes(const document& manifest)

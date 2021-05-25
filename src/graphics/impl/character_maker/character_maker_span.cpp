@@ -3,8 +3,8 @@
 #include "core/inf/variable.h"
 #include "core/util/documents.h"
 
+#include "graphics/base/glyph.h"
 #include "graphics/base/render_object.h"
-
 
 namespace ark {
 
@@ -19,17 +19,25 @@ CharacterMakerSpan::CharacterMakerSpan(const V2& scale, BeanFactory& factory, co
     DCHECK(!className || _character_builder, "Cann not build RenderObject, class: \"%s\"", className->c_str());
 }
 
-sp<RenderObject> CharacterMakerSpan::makeCharacter(int32_t type, const V3& position, const sp<Size>& size)
+std::vector<sp<RenderObject>> CharacterMakerSpan::makeCharacter(const std::vector<Glyph>& glyphs)
 {
-    if(_character_builder)
+    const Scope scope;
+    std::vector<sp<RenderObject>> renderObjects;
+    for(const Glyph& i : glyphs)
     {
-        const sp<RenderObject> renderObject = _character_builder->build(Scope());
-        renderObject->setType(type);
-        renderObject->setPosition(sp<Vec3::Const>::make(position));
-        renderObject->setSize(size);
-        return renderObject;
+        sp<Size> size = sp<Size>::make(i.size().x(), i.size().y());
+        if(_character_builder)
+        {
+            sp<RenderObject> renderObject = _character_builder->build(scope);
+            renderObject->setType(i.character());
+            renderObject->setPosition(sp<Vec3::Const>::make(i.position()));
+            renderObject->setSize(size);
+            renderObjects.push_back(std::move(renderObject));
+        }
+        else
+            renderObjects.push_back(sp<RenderObject>::make(i.character(), sp<Vec3>::make<Vec3::Const>(i.position()), std::move(size)));
     }
-    return sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(position), size);
+    return renderObjects;
 }
 
 V2 CharacterMakerSpan::scale()
