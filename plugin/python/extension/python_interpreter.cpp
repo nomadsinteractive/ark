@@ -106,7 +106,7 @@ std::wstring PythonInterpreter::toWString(PyObject* object) const
 
 sp<Vec2> PythonInterpreter::toVec2(PyObject* object, bool alert)
 {
-    if(PyTuple_Check(object))
+    if(PyTuple_Check(object) && PyObject_Length(object) == 2)
     {
         PyObject* x, *y;
         if(PyArg_ParseTuple(object, "OO", &x, &y))
@@ -120,7 +120,7 @@ sp<Vec3> PythonInterpreter::toVec3(PyObject* object, bool alert)
     if(isNoneOrNull(object))
         return nullptr;
 
-    if(PyTuple_Check(object))
+    if(PyTuple_Check(object) && (PyObject_Length(object) == 2 || PyObject_Length(object) == 3))
     {
         PyObject* x, *y, *z = nullptr;
         if(PyArg_ParseTuple(object, "OO|O", &x, &y, &z))
