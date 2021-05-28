@@ -77,7 +77,7 @@ class StringBundle;
 class StringBuffer;
 class StringTable;
 class Thread;
-class ThreadPoolExecutor;
+class ExecutorThreadPool;
 class Updatable;
 class Visibility;
 class Writable;

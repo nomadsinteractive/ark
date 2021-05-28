@@ -31,16 +31,6 @@ void MessageLoopThread::schedule(const sp<Runnable>& task, float interval)
     _thread.notify();
 }
 
-void MessageLoopThread::pause()
-{
-    _thread.pause();
-}
-
-void MessageLoopThread::resume()
-{
-    _thread.resume();
-}
-
 const Thread& MessageLoopThread::thread() const
 {
     return _thread;

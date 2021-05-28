@@ -83,7 +83,7 @@ public:
             }
         }
         {
-            const sp<Executor>& executor = Ark::instance().applicationContext()->executor();
+            const sp<Executor>& executor = Ark::instance().applicationContext()->executorPooled();
             const sp<LFStack<int32_t>> stack = sp<LFStack<int32_t>>::make();
 
             bool flag1 = true, flag2 = true, flag3 = true;
@@ -94,7 +94,7 @@ public:
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
         {
-            const sp<Executor>& executor = Ark::instance().applicationContext()->executor();
+            const sp<Executor>& executor = Ark::instance().applicationContext()->executorPooled();
             const sp<LFQueue<int32_t>> queue = sp<LFQueue<int32_t>>::make();
 
             bool flag1 = true, flag2 = true, flag3 = true;

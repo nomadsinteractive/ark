@@ -2,6 +2,7 @@
 #define ARK_CORE_IMPL_MESSAGE_LOOP_MESSAGE_LOOP_DEFAULT_H_
 
 #include <list>
+#include <vector>
 
 #include "core/base/api.h"
 #include "core/concurrent/lf_stack.h"
@@ -14,7 +15,8 @@ namespace ark {
 
 class MessageLoopDefault : public MessageLoop {
 public:
-    MessageLoopDefault(const sp<Variable<uint64_t>>& clock);
+    MessageLoopDefault(sp<Variable<uint64_t>> clock);
+    MessageLoopDefault(sp<Variable<uint64_t>> clock, sp<Executor> executor);
 
     virtual void post(const sp<Runnable>& task, float delay) override;
     virtual void schedule(const sp<Runnable>& task, float interval) override;
@@ -42,9 +44,11 @@ private:
     };
 
     void requestNextTask(Task task);
+    void runScheduledTask(std::vector<sp<Runnable>> scheduled);
 
 private:
     sp<Variable<uint64_t>> _clock;
+    sp<Executor> _executor;
 
     std::list<Task> _tasks;
     LFStack<Task> _scheduled;

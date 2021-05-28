@@ -93,7 +93,7 @@ void Application::onCreate()
     stringTable->addStringBundle("asset", sp<AssetStringBundle>::make());
     const sp<RenderView> renderView = _application_context->renderEngine()->createRenderView(_application_context->renderController(), _viewport);
     _surface = sp<Surface>::make(renderView, _application_context);
-    _application_context->post([this] () {
+    _application_context->runAtMainThread([this] () {
         onCreateTask();
     });
 }
@@ -102,7 +102,7 @@ void Application::onPause()
 {
     LOGD("");
     _alive = false;
-    _application_context->post([this] () {
+    _application_context->runAtMainThread([this] () {
         onPauseTask();
     });
     _application_context->pause();
@@ -111,7 +111,7 @@ void Application::onPause()
 void Application::onResume()
 {
     LOGD("");
-    _application_context->post([this] () {
+    _application_context->runAtMainThread([this] () {
         onResumeTask();
         _alive = true;
     });
@@ -125,7 +125,7 @@ void Application::onDestroy()
     const sp<ApplicationDelegate> applicationDelegate = _application_delegate;
     const sp<ApplicationContext> applicationContext = _application_context;
     _application_context->resume();
-    _application_context->post([applicationDelegate, applicationContext] () {
+    _application_context->runAtMainThread([applicationDelegate, applicationContext] () {
         applicationDelegate->onDestroy();
     });
 }
@@ -145,7 +145,7 @@ void Application::onSurfaceChanged(uint32_t width, uint32_t height)
     LOGD("width = %d, height = %d", width, height);
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
-    _application_context->post([this] () {
+    _application_context->runAtMainThread([this] () {
         _application_context->renderController()->reset();
     });
 
@@ -170,7 +170,7 @@ void Application::onSurfaceUpdate()
 
 bool Application::onEvent(const Event& event)
 {
-    _application_context->post([this, event] () {
+    _application_context->runAtMainThread([this, event] () {
         onEventTask(event);
     });
     return true;

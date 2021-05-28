@@ -2,7 +2,6 @@
 
 #include "core/inf/executor.h"
 #include "core/inf/runnable.h"
-#include "core/impl/runnable/runnable_with_callback.h"
 
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/base/surface_controller.h"
@@ -77,7 +76,7 @@ void RenderRequest::addRequest(sp<RenderCommand> renderCommand) const
 
 void RenderRequest::addBackgroundRequest(const RenderLayer& layer, const V3& position)
 {
-    const sp<BackgroundRenderCommand> renderCommand = sp<BackgroundRenderCommand>::make(*this, layer, position);
+    sp<BackgroundRenderCommand> renderCommand = sp<BackgroundRenderCommand>::make(*this, layer, position);
     ++(_stub->_background_renderer_count);
     _stub->_executor->execute(renderCommand);
     _stub->_render_command_pipe_line->add(std::move(renderCommand));

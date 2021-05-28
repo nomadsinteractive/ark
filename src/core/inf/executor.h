@@ -8,8 +8,9 @@ namespace ark {
 
 class ARK_API Executor {
 public:
-    virtual void execute(const sp<Runnable>& task) = 0;
+    virtual ~Executor() = default;
 
+    virtual void execute(const sp<Runnable>& task) = 0;
 };
 
 }

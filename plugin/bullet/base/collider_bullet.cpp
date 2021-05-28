@@ -112,7 +112,7 @@ std::vector<RayCastManifold> ColliderBullet::rayCast(const V3& from, const V3& t
     std::vector<RayCastManifold> manifolds;
     if(allHitResults.hasHit())
     {
-        for(size_t i = 0; i < allHitResults.m_hitFractions.size(); ++i)
+        for(int32_t i = 0; i < allHitResults.m_hitFractions.size(); ++i)
         {
             const btVector3& n = allHitResults.m_hitNormalWorld.at(i);
             sp<RigidBody> rigidBody = sp<RigidBodyBullet>::make(getRigidBodyFromCollisionObject(allHitResults.m_collisionObjects.at(i)));

@@ -8,6 +8,7 @@
 #include "core/inf/message_loop.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
+#include "core/impl/executor/executor_worker_thread.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/owned_ptr.h"
 
@@ -33,7 +34,9 @@ public:
     const sp<RenderEngine>& renderEngine() const;
     const sp<RenderController>& renderController() const;
     const sp<ResourceLoader>& resourceLoader() const;
-    const sp<Executor>& executor() const;
+
+    const sp<Executor>& executorMain() const;
+    const sp<Executor>& executorPooled() const;
 
     const std::vector<String>& argv() const;
 
@@ -49,10 +52,7 @@ public:
     void post(const sp<Runnable>& task, float delay = 0);
     void schedule(const sp<Runnable>& task, float interval);
 
-    void post(std::function<void()> task, float delay = 0);
-    void schedule(std::function<bool()> task, float interval);
-
-    void postToRenderer(std::function<void()> task);
+    void runAtMainThread(std::function<void()> task);
 
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
     sp<String> getString(const String& resid);
@@ -98,6 +98,17 @@ private:
         std::atomic<uint64_t> _val;
     };
 
+    class ExecutorWorkerStrategy : public ExecutorWorkerThread::Strategy {
+    public:
+        virtual void onStart() override;
+        virtual void onExit() override;
+
+        virtual uint64_t onBusy() override;
+        virtual uint64_t onIdle(Thread& thread) override;
+
+        virtual void onException(const std::exception& e) override;
+    };
+
 private:
     std::vector<String> _argv;
     sp<Ticker> _ticker;
@@ -107,9 +118,12 @@ private:
     sp<RenderEngine> _render_engine;
     sp<RenderController> _render_controller;
     sp<Clock> _clock;
+    sp<ExecutorWorkerStrategy> _worker_strategy;
+    sp<Executor> _executor_main;
+
     sp<MessageLoopDefault> _render_message_loop;
     sp<MessageLoop> _message_loop;
-    sp<Executor> _executor;
+    sp<Executor> _executor_pooled;
 
     op<EventListenerList> _event_listeners;
     sp<EventListener> _default_event_listener;

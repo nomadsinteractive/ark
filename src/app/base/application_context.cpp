@@ -6,11 +6,11 @@
 #include "core/base/plugin_manager.h"
 #include "core/base/string_table.h"
 #include "core/base/thread.h"
-#include "core/base/thread_pool_executor.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
+#include "core/impl/executor/executor_worker_thread.h"
+#include "core/impl/executor/executor_thread_pool.h"
 #include "core/impl/message_loop/message_loop_default.h"
 #include "core/impl/runnable/runnable_by_function.h"
-#include "core/impl/runnable/runnable_by_function_with_expired.h"
 
 #include "core/inf/runnable.h"
 #include "core/types/global.h"
@@ -53,8 +53,9 @@ private:
 
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources, const sp<RenderEngine>& renderEngine)
     : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->recycler(), applicationResources->bitmapBundle(), applicationResources->bitmapBoundsBundle())),
-      _clock(sp<Clock>::make(_ticker)), _message_loop(makeMessageLoop()), _executor(sp<ThreadPoolExecutor>::make(_message_loop)), _event_listeners(new EventListenerList()),
-      _string_table(Global<StringTable>()), _background_color(Color::BLACK), _paused(false)
+      _clock(sp<Clock>::make(_ticker)), _worker_strategy(sp<ExecutorWorkerStrategy>::make()), _executor_main(sp<ExecutorWorkerThread>::make(_worker_strategy)), _message_loop(makeMessageLoop()),
+      _executor_pooled(sp<ExecutorThreadPool>::make(_message_loop)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK),
+      _paused(false)
 {
     Ark& ark = Ark::instance();
 
@@ -99,7 +100,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoaderImpl(const document& 
     const document doc = createResourceLoaderManifest(manifest);
     const sp<DictionaryByAttributeName> documentDictionary = sp<DictionaryByAttributeName>::make(doc, Constants::Attributes::ID);
     const sp<BeanFactory> beanFactory = Ark::instance().createBeanFactory(documentDictionary);
-    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), _application_resource->bitmapBundle(), _application_resource->bitmapBoundsBundle(), _executor, _render_controller);
+    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), _application_resource->bitmapBundle(), _application_resource->bitmapBoundsBundle(), _executor_pooled, _render_controller);
 
     const Global<PluginManager> pluginManager;
     pluginManager->each([&] (const sp<Plugin>& plugin)->bool {
@@ -149,9 +150,14 @@ const sp<ResourceLoader>& ApplicationContext::resourceLoader() const
     return _resource_loader;
 }
 
-const sp<Executor>& ApplicationContext::executor() const
+const sp<Executor>& ApplicationContext::executorMain() const
 {
-    return _executor;
+    return _executor_main;
+}
+
+const sp<Executor>& ApplicationContext::executorPooled() const
+{
+    return _executor_pooled;
 }
 
 const std::vector<String>& ApplicationContext::argv() const
@@ -201,19 +207,9 @@ void ApplicationContext::schedule(const sp<Runnable>& task, float interval)
     _message_loop->schedule(task, interval);
 }
 
-void ApplicationContext::post(std::function<void()> task, float delay)
+void ApplicationContext::runAtMainThread(std::function<void()> task)
 {
-    _message_loop->post(sp<RunnableByFunction>::make(std::move(task)), delay);
-}
-
-void ApplicationContext::schedule(std::function<bool()> task, float interval)
-{
-    _message_loop->schedule(sp<RunnableByFunctionWithExpired>::make(std::move(task)), interval);
-}
-
-void ApplicationContext::postToRenderer(std::function<void()> task)
-{
-    _render_message_loop->post(sp<RunnableByFunction>::make(std::move(task)), 0);
+    _message_loop->post(sp<RunnableByFunction>::make(std::move(task)), 0);
 }
 
 void ApplicationContext::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)
@@ -287,6 +283,29 @@ bool ApplicationContext::Ticker::update(uint64_t /*timestamp*/)
 uint64_t ApplicationContext::Ticker::val()
 {
     return _val;
+}
+
+void ApplicationContext::ExecutorWorkerStrategy::onStart()
+{
+}
+
+void ApplicationContext::ExecutorWorkerStrategy::onExit()
+{
+}
+
+uint64_t ApplicationContext::ExecutorWorkerStrategy::onBusy()
+{
+    return 0;
+}
+
+uint64_t ApplicationContext::ExecutorWorkerStrategy::onIdle(Thread& /*thread*/)
+{
+    return 20000;
+}
+
+void ApplicationContext::ExecutorWorkerStrategy::onException(const std::exception& e)
+{
+    throw e;
 }
 
 }

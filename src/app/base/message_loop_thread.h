@@ -21,9 +21,6 @@ public:
     virtual void post(const sp<Runnable>& task, float delay) override;
     virtual void schedule(const sp<Runnable>& task, float interval) override;
 
-    void pause();
-    void resume();
-
     const Thread& thread() const;
 
 private:
