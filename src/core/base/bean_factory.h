@@ -370,6 +370,8 @@ public:
     template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id);
     template<typename T> sp<Builder<T>> getBuilderByRef(const Identifier& id, BeanFactory& factory);
 
+    template<typename T> sp<T> buildWithQueries(const String& name, const Queries& queries, const Scope& args);
+
     template<typename T> sp<Builder<T>> ensureBuilder(const String& id, Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
         DCHECK(id, "Empty value being built");
         const sp<Builder<T>> builder = getBuilder<T>(id, idType);
@@ -426,26 +428,26 @@ public:
         return nb;
     }
 
-    class WeakRef {
-    public:
-        WeakRef() = default;
-        WeakRef(const BeanFactory& other)
-            : _stub(other._stub) {
-        }
+//    class WeakRef {
+//    public:
+//        WeakRef() = default;
+//        WeakRef(const BeanFactory& other)
+//            : _stub(other._stub) {
+//        }
 
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(WeakRef);
+//        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(WeakRef);
 
-        BeanFactory lock() const {
-            return BeanFactory(_stub.lock());
-        }
+//        BeanFactory lock() const {
+//            return BeanFactory(_stub.lock());
+//        }
 
-        BeanFactory ensure() const {
-            return BeanFactory(_stub.ensure());
-        }
+//        BeanFactory ensure() const {
+//            return BeanFactory(_stub.ensure());
+//        }
 
-    private:
-        WeakPtr<Stub> _stub;
-    };
+//    private:
+//        WeakPtr<Stub> _stub;
+//    };
 
 private:
     template<typename T> sp<Builder<T>> findBuilderByDocument(const document& doc) {
@@ -501,6 +503,7 @@ private:
     sp<Stub> _stub;
 
     friend class WeakRef;
+    friend class BeanFactoryWeakRef;
 };
 
 }
@@ -511,6 +514,7 @@ private:
 #define ARK_CORE_BEAN_FACTORY_H_APPENDIX_
 
 #include "core/base/scope.h"
+#include "core/base/queries.h"
 
 namespace ark {
 
@@ -566,8 +570,8 @@ private:
 
 template<typename T> class BuilderWithQueries : public Builder<T> {
 public:
-    BuilderWithQueries(sp<Builder<T>> delegate, BeanFactory factory, const Identifier& id)
-        : _delegate(std::move(delegate)), _queries(sp<Queries>::make(std::move(factory), id.queries())) {
+    BuilderWithQueries(sp<Builder<T>> delegate, const BeanFactory& factory, const Identifier& id)
+        : _delegate(std::move(delegate)), _queries(sp<Queries>::make(factory, id.queries())) {
     }
 
     virtual sp<T> build(const Scope& args) override {
@@ -613,6 +617,13 @@ template<typename T> sp<Builder<T>> BeanFactory::getBuilderByRef(const Identifie
            return builder;
        }
     }
+    return nullptr;
+}
+
+template<typename T> sp<T> BeanFactory::buildWithQueries(const String& name, const Queries& queries, const Scope& args) {
+    const auto iter = queries._queries.find(name);
+    if(iter != queries._queries.end())
+        return build<T>(iter->second, args);
     return nullptr;
 }
 

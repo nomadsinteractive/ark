@@ -12,7 +12,7 @@ namespace ark {
 template<typename T> class Clamp : public Variable<T>::Updatable {
 public:
     Clamp(const sp<Variable<T>>& delegate, const sp<Variable<T>>& min, const sp<Variable<T>>& max, Notifier notifier)
-        : Updatable(delegate->val()), _delegate(delegate), _min(min), _max(max), _notifier(std::move(notifier)) {
+        : Variable<T>::Updatable(delegate->val()), _delegate(delegate), _min(min), _max(max), _notifier(std::move(notifier)) {
     }
 
     virtual bool doUpdate(uint64_t timestamp, T& value) override {

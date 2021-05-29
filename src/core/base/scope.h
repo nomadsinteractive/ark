@@ -4,7 +4,6 @@
 #include <map>
 
 #include "core/base/api.h"
-#include "core/collection/table.h"
 #include "core/inf/dictionary.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
@@ -49,14 +48,15 @@ private:
 #ifndef ARK_CORE_BASE_SCOPE_H_APPENDIX_
 #define ARK_CORE_BASE_SCOPE_H_APPENDIX_
 
+#include "core/base/bean_factory.h"
 #include "core/base/queries.h"
 
 namespace ark {
 
 template<typename T> sp<T> Scope::build(const String& name, const Scope& args) const {
-    sp<T> obj = getObject(name).template as<T>();
+    const sp<T> obj = getObject(name).template as<T>();
     if(!obj && _queries)
-        obj = _queries->build<T>(name, args);
+        return _queries->_bean_factory.ensure().buildWithQueries<T>(name, _queries, args);
     return obj;
 }
 

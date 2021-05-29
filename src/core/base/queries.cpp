@@ -2,8 +2,8 @@
 
 namespace ark {
 
-Queries::Queries(BeanFactory factory, Table<String, String> queries)
-    : _bean_factory(std::move(factory)), _queries(std::move(queries))
+Queries::Queries(const BeanFactory& factory, Table<String, String> queries)
+    : _bean_factory(factory), _queries(std::move(queries))
 {
 }
 

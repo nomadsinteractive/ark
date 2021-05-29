@@ -6,6 +6,7 @@
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
+#include "core/base/bean_factory_weak_ref.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -128,7 +129,7 @@ private:
     int32_t toType(wchar_t c) const;
 
 private:
-    BeanFactory::WeakRef _bean_factory;
+    BeanFactoryWeakRef _bean_factory;
     sp<LayerContext> _layer_context;
     float _text_scale;
     sp<LayoutParam> _layout_param;

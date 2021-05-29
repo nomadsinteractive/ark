@@ -12,7 +12,7 @@ namespace ark {
 template<typename T> class Periodic : public Variable<T>::Updatable, public Delegate<Variable<T>>, public Implements<Periodic<T>, Variable<T>, Delegate<Variable<T>>> {
 public:
     Periodic(sp<Variable<T>> delegate, sp<Numeric> interval, sp<Numeric> duration)
-        : Updatable(delegate->val()), Delegate<Variable<T>>(std::move(delegate)), _interval(std::move(interval)), _duration(std::move(duration)),
+        : Variable<T>::Updatable(delegate->val()), Delegate<Variable<T>>(std::move(delegate)), _interval(std::move(interval)), _duration(std::move(duration)),
           _next_update_time(_duration->val() + _interval->val()) {
     }
 

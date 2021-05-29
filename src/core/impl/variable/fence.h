@@ -12,7 +12,7 @@ namespace ark {
 template<typename T> class Fence : public Variable<T>::Updatable {
 public:
     Fence(const sp<Variable<T>>& delegate, const sp<Variable<T>>& expectation, Notifier notifier)
-        : Updatable(delegate->val()), _delegate(delegate), _expectation(expectation), _notifer(std::move(notifier)), _is_greater(val() > expectation->val()) {
+        : Variable<T>::Updatable(delegate->val()), _delegate(delegate), _expectation(expectation), _notifer(std::move(notifier)), _is_greater(this->val() > expectation->val()) {
     }
 
     virtual bool doUpdate(uint64_t timestamp, T& value) override {

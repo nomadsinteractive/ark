@@ -37,6 +37,7 @@ class Allocator;
 class Asset;
 class AssetBundle;
 class BeanFactory;
+class BeanFactoryWeakRef;
 class Box;
 class ByType;
 class Class;
