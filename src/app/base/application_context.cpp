@@ -3,13 +3,13 @@
 #include "core/ark.h"
 #include "core/base/clock.h"
 #include "core/base/manifest.h"
+#include "core/base/message_loop.h"
 #include "core/base/plugin_manager.h"
 #include "core/base/string_table.h"
 #include "core/base/thread.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/impl/executor/executor_worker_thread.h"
 #include "core/impl/executor/executor_thread_pool.h"
-#include "core/impl/message_loop/message_loop_default.h"
 #include "core/impl/runnable/runnable_by_function.h"
 
 #include "core/inf/runnable.h"
@@ -36,8 +36,8 @@ namespace {
 
 class DeferedRunnable : public Runnable {
 public:
-    DeferedRunnable(const sp<MessageLoop>& messageLoop, const sp<Runnable>& runnable)
-        : _message_loop(messageLoop), _runnable(runnable) {
+    DeferedRunnable(const sp<MessageLoop>& messageLoop, sp<Runnable> runnable)
+        : _message_loop(messageLoop), _runnable(std::move(runnable)) {
     }
 
     virtual void run() override {
@@ -53,8 +53,8 @@ private:
 
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources, const sp<RenderEngine>& renderEngine)
     : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->recycler(), applicationResources->bitmapBundle(), applicationResources->bitmapBoundsBundle())),
-      _clock(sp<Clock>::make(_ticker)), _worker_strategy(sp<ExecutorWorkerStrategy>::make()), _executor_main(sp<ExecutorWorkerThread>::make(_worker_strategy)), _message_loop(makeMessageLoop()),
-      _executor_pooled(sp<ExecutorThreadPool>::make(_message_loop)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK),
+      _clock(sp<Clock>::make(_ticker)), _worker_strategy(sp<ExecutorWorkerStrategy>::make(_ticker)), _executor_main(sp<ExecutorWorkerThread>::make(_worker_strategy)), _message_loop(makeMessageLoop()),
+      _executor_pooled(sp<ExecutorThreadPool>::make(_executor_main)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK),
       _paused(false)
 {
     Ark& ark = Ark::instance();
@@ -122,12 +122,13 @@ document ApplicationContext::createResourceLoaderManifest(const document& manife
 
 sp<MessageLoop> ApplicationContext::makeMessageLoop()
 {
-    _render_message_loop = sp<MessageLoopDefault>::make(_ticker);
+    _render_message_loop = sp<MessageLoop>::make(_ticker);
 
     const Ark& ark = Ark::instance();
     if(ark.manifest()->application()._message_loop == Manifest::MESSAGE_LOOP_TYPE_RENDER)
         return _render_message_loop;
-    return sp<MessageLoopThread>::make(_ticker);
+//    return sp<MessageLoopThread>::make(_ticker);
+    return _worker_strategy->_message_loop;
 }
 
 const sp<ApplicationResource>& ApplicationContext::applicationResource() const
@@ -205,6 +206,13 @@ void ApplicationContext::post(const sp<Runnable>& task, float delay)
 void ApplicationContext::schedule(const sp<Runnable>& task, float interval)
 {
     _message_loop->schedule(task, interval);
+}
+
+sp<MessageLoop> ApplicationContext::makeMessageLoop(const sp<Clock>& clock)
+{
+    sp<MessageLoop> messageLoop = sp<MessageLoop>::make(clock->ticker());
+    _worker_strategy->_app_message_loops.push_back(messageLoop);
+    return messageLoop;
 }
 
 void ApplicationContext::runAtMainThread(std::function<void()> task)
@@ -285,6 +293,11 @@ uint64_t ApplicationContext::Ticker::val()
     return _val;
 }
 
+ApplicationContext::ExecutorWorkerStrategy::ExecutorWorkerStrategy(sp<Variable<uint64_t>> ticker)
+    : _message_loop(sp<MessageLoop>::make(std::move(ticker)))
+{
+}
+
 void ApplicationContext::ExecutorWorkerStrategy::onStart()
 {
 }
@@ -295,17 +308,30 @@ void ApplicationContext::ExecutorWorkerStrategy::onExit()
 
 uint64_t ApplicationContext::ExecutorWorkerStrategy::onBusy()
 {
+    _message_loop->pollOnce();
+    for(const sp<MessageLoop>& i : _app_message_loops)
+        i->pollOnce();
     return 0;
 }
 
 uint64_t ApplicationContext::ExecutorWorkerStrategy::onIdle(Thread& /*thread*/)
 {
-    return 20000;
+    return onBusy();
 }
 
 void ApplicationContext::ExecutorWorkerStrategy::onException(const std::exception& e)
 {
     throw e;
+}
+
+ApplicationContext::MessageLoopFilter::MessageLoopFilter(const sp<MessageLoop>& messageLoop)
+    : _message_loop(messageLoop)
+{
+}
+
+FilterAction ApplicationContext::MessageLoopFilter::operator()() const
+{
+    return _message_loop.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
 }
 
 }

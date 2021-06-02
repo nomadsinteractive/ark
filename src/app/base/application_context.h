@@ -3,14 +3,16 @@
 
 #include <map>
 
-#include "core/base/api.h"
 #include "core/forwarding.h"
-#include "core/inf/message_loop.h"
+#include "core/base/api.h"
+#include "core/base/message_loop.h"
+#include "core/collection/list.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/impl/executor/executor_worker_thread.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/owned_ptr.h"
+#include "core/types/weak_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/color.h"
@@ -51,6 +53,8 @@ public:
 
     void post(const sp<Runnable>& task, float delay = 0);
     void schedule(const sp<Runnable>& task, float interval);
+
+    sp<MessageLoop> makeMessageLoop(const sp<Clock>& clock);
 
     void runAtMainThread(std::function<void()> task);
 
@@ -98,8 +102,20 @@ private:
         std::atomic<uint64_t> _val;
     };
 
+    class MessageLoopFilter {
+    public:
+        MessageLoopFilter(const sp<MessageLoop>& messageLoop);
+
+        FilterAction operator() () const;
+
+    private:
+        WeakPtr<MessageLoop> _message_loop;
+    };
+
     class ExecutorWorkerStrategy : public ExecutorWorkerThread::Strategy {
     public:
+        ExecutorWorkerStrategy(sp<Variable<uint64_t>> ticker);
+
         virtual void onStart() override;
         virtual void onExit() override;
 
@@ -107,6 +123,9 @@ private:
         virtual uint64_t onIdle(Thread& thread) override;
 
         virtual void onException(const std::exception& e) override;
+
+        sp<MessageLoop> _message_loop;
+        List<MessageLoop, MessageLoopFilter> _app_message_loops;
     };
 
 private:
@@ -121,7 +140,7 @@ private:
     sp<ExecutorWorkerStrategy> _worker_strategy;
     sp<Executor> _executor_main;
 
-    sp<MessageLoopDefault> _render_message_loop;
+    sp<MessageLoop> _render_message_loop;
     sp<MessageLoop> _message_loop;
     sp<Executor> _executor_pooled;
 

@@ -84,6 +84,11 @@ sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name, c
     return _context->createResourceLoader(name, args);
 }
 
+sp<MessageLoop> ApplicationFacade::makeMessageLoop(const sp<Clock>& clock)
+{
+    return _context->makeMessageLoop(clock);
+}
+
 const std::vector<String>& ApplicationFacade::argv() const
 {
     return _context->argv();

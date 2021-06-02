@@ -107,8 +107,11 @@ void Camera::ortho(float left, float right, float bottom, float top, float clipN
 
 void Camera::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar, Ark::RendererCoordinateSystem coordinateSystem)
 {
-    if(coordinateSystem < 0)
+    if(coordinateSystem == Ark::COORDINATE_SYSTEM_LHS)
+    {
         std::swap(top, bottom);
+        std::swap(clipNear, clipFar);
+    }
     ortho(left, right, bottom, top, clipNear, clipFar);
 }
 

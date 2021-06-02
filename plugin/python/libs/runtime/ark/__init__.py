@@ -126,6 +126,15 @@ class _Var:
         return 0.0
 
 
+class MessageLoop:
+
+    def post(self, task: Callable[[], None], delay: float):
+        pass
+
+    def schedule(self, task: Callable[[], None], interval: float):
+        pass
+
+
 class ApplicationFacade:
 
     def __init__(self):
@@ -175,6 +184,9 @@ class ApplicationFacade:
         pass
 
     def create_resource_loader(self, name: str, **kwargs) -> 'ResourceLoader':
+        pass
+
+    def make_message_loop(self, clock: 'Clock') -> MessageLoop:
         pass
 
     def add_pre_render_task(self, task: Callable, expired: 'Boolean' = None):
@@ -988,10 +1000,20 @@ class Arena:
 
 class Clock:
 
+    @property
+    def tick(self) -> int:
+        return 0
+
     def duration(self) -> 'Numeric':
         pass
 
     def timeout(self, seconds: float) -> 'Boolean':
+        pass
+
+    def pause(self):
+        pass
+
+    def resume(self):
         pass
 
 

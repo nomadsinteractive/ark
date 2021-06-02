@@ -12,7 +12,7 @@ namespace plugin {
 namespace python {
 
 PythonCallableRunnable::PythonCallableRunnable(PyInstance callable)
-    : Disposed(sp<Result>::make()), _callable(std::move(callable)), _result(_disposed->delegate())
+    : _callable(std::move(callable))
 {
 }
 
@@ -26,13 +26,7 @@ void PythonCallableRunnable::run()
         PyInstance args(PyInstance::steal(PyTuple_New(0)));
         PyObject* ret = _callable.call(args.pyObject());
         if(ret)
-        {
-            if(ret == Py_None)
-                _result->setFunctionResult(FUNCTION_RESULT_NONE);
-            else
-                _result->setFunctionResult(PyObject_IsTrue(ret) ? FUNCTION_RESULT_TRUE : FUNCTION_RESULT_FALSE);
             Py_DECREF(ret);
-        }
         else
             PythonInterpreter::instance()->logErr();
     }
@@ -41,28 +35,6 @@ void PythonCallableRunnable::run()
 void PythonCallableRunnable::traverse(const Holder::Visitor& visitor)
 {
     visitor(_callable.ref());
-}
-
-PythonCallableRunnable::Result::Result()
-    : _function_result(FUNCTION_RESULT_NONE)
-{
-}
-
-bool PythonCallableRunnable::Result::val()
-{
-    DWARN(_function_result != FUNCTION_RESULT_NONE, "'None' returned, which is ambiguous. Better returning True or False instead.");
-    return _function_result != FUNCTION_RESULT_TRUE;
-
-}
-
-bool PythonCallableRunnable::Result::update(uint64_t)
-{
-    return true;
-}
-
-void PythonCallableRunnable::Result::setFunctionResult(PythonCallableRunnable::FunctionResult functionResult)
-{
-    _function_result = functionResult;
 }
 
 }

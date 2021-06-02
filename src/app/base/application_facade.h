@@ -38,6 +38,8 @@ public:
 
 //  [[script::bindings::auto]]
     sp<ResourceLoader> createResourceLoader(const String& name, const Scope& args);
+//  [[script::bindings::auto]]
+    sp<MessageLoop> makeMessageLoop(const sp<Clock>& clock);
 
 //  [[script::bindings::property]]
     const std::vector<String>& argv() const;

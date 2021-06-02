@@ -46,6 +46,16 @@ private:
         LFQueue<sp<Runnable>> _pending_tasks;
     };
 
+    class WaitPredicate {
+    public:
+        WaitPredicate(const TimePoint& until);
+
+        bool operator() () const;
+
+    private:
+        TimePoint _until;
+    };
+
 private:
     Thread _thread;
     sp<Worker> _worker;

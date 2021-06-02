@@ -37,12 +37,15 @@ public:
     };
 
 public:
+//  [[script::bindings::auto]]
+    Clock();
     Clock(const sp<Variable<uint64_t>>& ticker);
     Clock(const Clock& other) = default;
 
     virtual uint64_t val() override;
     virtual bool update(uint64_t timestamp) override;
 
+//  [[script::bindings::property]]
     uint64_t tick() const;
 
     const sp<Variable<uint64_t>> ticker() const;

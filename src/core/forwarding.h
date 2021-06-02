@@ -1,6 +1,8 @@
 #ifndef ARK_CORE_FORWARDING_H_
 #define ARK_CORE_FORWARDING_H_
 
+#include <chrono>
+
 #include <stdint.h>
 
 namespace ark {
@@ -60,7 +62,6 @@ class Notifier;
 class Manifest;
 class MemoryPool;
 class MessageLoop;
-class MessageLoopDefault;
 class Mutex;
 class Object;
 class Observer;
@@ -114,6 +115,8 @@ typedef sp<ByteArray> bytearray;
 typedef sp<IntArray> intarray;
 typedef sp<IndexArray> indexarray;
 typedef sp<FloatArray> floatarray;
+
+typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
 
 }
 

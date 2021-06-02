@@ -29,10 +29,9 @@ void ExecutorWorkerThread::Worker::run()
 {
     _strategy->onStart();
 
-    uint64_t waitms = 1000;
     while(_thread.status() != Thread::THREAD_STATE_TERMINATED)
     {
-        _thread.wait(std::chrono::microseconds(std::max<uint64_t>(1000, waitms)));
+        _thread.wait(std::chrono::milliseconds(1));
 
         sp<Runnable> task;
         bool hasTask = _pending_tasks.pop(task);
@@ -49,13 +48,23 @@ void ExecutorWorkerThread::Worker::run()
                 }
             } while(_pending_tasks.pop(task));
 
-            waitms = _strategy->onBusy();
+            _strategy->onBusy();
         }
         else
-            waitms = _strategy->onIdle(_thread);
+            _strategy->onIdle(_thread);
     }
 
     _strategy->onExit();
+}
+
+ExecutorWorkerThread::WaitPredicate::WaitPredicate(const TimePoint& until)
+    : _until(until)
+{
+}
+
+bool ExecutorWorkerThread::WaitPredicate::operator()() const
+{
+    return std::chrono::steady_clock::now() >= _until;
 }
 
 }

@@ -1,14 +1,13 @@
 #include "app/base/message_loop_thread.h"
 
 #include "core/inf/variable.h"
-#include "core/impl/message_loop/message_loop_default.h"
 
 #include "platform/platform.h"
 
 namespace ark {
 
 MessageLoopThread::MessageLoopThread(const sp<Variable<uint64_t>>& ticker)
-    : _message_loop(sp<MessageLoopDefault>::make(ticker)), _runnable_impl(sp<RunnableImpl>::make(_thread, _message_loop, ticker))
+    : _message_loop(sp<MessageLoop>::make(ticker)), _runnable_impl(sp<RunnableImpl>::make(_thread, _message_loop, ticker))
 {
     _thread.setEntry(_runnable_impl);
     _thread.start();
@@ -36,7 +35,7 @@ const Thread& MessageLoopThread::thread() const
     return _thread;
 }
 
-MessageLoopThread::RunnableImpl::RunnableImpl(const Thread& thread, const sp<MessageLoopDefault>& messageLoop, const sp<Variable<uint64_t>>& ticker)
+MessageLoopThread::RunnableImpl::RunnableImpl(const Thread& thread, const sp<MessageLoop>& messageLoop, const sp<Variable<uint64_t>>& ticker)
     : _thread(thread), _message_loop(messageLoop), _ticker(ticker), _wait_duration(std::chrono::milliseconds(1))
 {
 }

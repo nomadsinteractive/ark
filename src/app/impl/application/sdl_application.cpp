@@ -14,8 +14,8 @@
 
 #include "core/base/clock.h"
 #include "core/base/manifest.h"
+#include "core/base/message_loop.h"
 #include "core/base/object.h"
-#include "core/impl/message_loop/message_loop_default.h"
 #include "core/inf/runnable.h"
 #include "core/types/implements.h"
 #include "core/util/math.h"

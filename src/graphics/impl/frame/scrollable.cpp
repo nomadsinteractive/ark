@@ -2,7 +2,6 @@
 
 #include "core/base/bean_factory.h"
 #include "core/inf/array.h"
-#include "core/inf/message_loop.h"
 #include "core/inf/variable.h"
 #include "core/util/math.h"
 #include "core/util/log.h"

@@ -121,6 +121,11 @@ Clock::Interval Clock::Elapsing::elapsed()
     return interval;
 }
 
+Clock::Clock()
+    : Clock(Platform::getSteadyClock())
+{
+}
+
 Clock::Clock(const sp<Variable<uint64_t>>& ticker)
     : _ticker(sp<Ticker>::make(ticker))
 {
