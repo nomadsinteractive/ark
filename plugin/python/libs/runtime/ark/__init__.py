@@ -481,6 +481,9 @@ class Numeric(_Var):
     def vibrate(s0: float, v0: float, s1: float, v1: float, duration: float, t=None):
         return None
 
+    def __floordiv__(self, other):
+        pass
+
 
 class Integer(_Var):
     REPEAT_NONE = 0
@@ -497,6 +500,9 @@ class Integer(_Var):
 
     @staticmethod
     def repeat(array: List[int], repeat: int) -> 'ExpectationI':
+        pass
+
+    def if_else(self, condition: Boolean, negative: 'Integer') -> 'Integer':
         pass
 
     def animate(self, interval: Union[Numeric, float] = None, duration: Union[Numeric, float] = None) -> 'Integer':

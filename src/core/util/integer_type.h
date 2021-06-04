@@ -98,6 +98,8 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<ExpectationI> fence(const sp<Integer>& self, const sp<Integer>& a1);
 
+//  [[script::bindings::classmethod]]
+    static sp<Integer> ifElse(const sp<Integer>& self, const sp<Boolean>& condition, const sp<Integer>& negative);
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Integer> {

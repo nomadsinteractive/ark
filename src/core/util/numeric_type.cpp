@@ -13,6 +13,7 @@
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/interpolate.h"
 #include "core/impl/variable/periodic.h"
+#include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/util/operators.h"
@@ -185,10 +186,14 @@ sp<Numeric> NumericType::truediv(float lvalue, const sp<Numeric>& rvalue)
     return sp<VariableOP2<float, sp<Numeric>, Operators::Div<float>>>::make(lvalue, rvalue);
 }
 
-sp<Numeric> NumericType::floordiv(const sp<Numeric>& self, const sp<Numeric>& rvalue)
+sp<Numeric> NumericType::floordiv(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
 {
-    FATAL("Unimplemented");
-    return nullptr;
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::NumericFloorDiv<float>>>::make(lvalue, rvalue);
+}
+
+sp<Numeric> NumericType::floordiv(const sp<Numeric>& lvalue, const sp<Integer>& rvalue)
+{
+    return sp<VariableOP2<sp<Numeric>, sp<Integer>, Operators::NumericFloorDiv<float, int32_t>>>::make(lvalue, rvalue);
 }
 
 sp<Numeric> NumericType::mod(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
@@ -234,6 +239,11 @@ int32_t NumericType::toInt32(const sp<Numeric>& self)
 float NumericType::toFloat(const sp<Numeric>& self)
 {
     return self->val();
+}
+
+sp<Integer> NumericType::toInteger(const sp<Numeric>& self)
+{
+    return sp<VariableOP1<int32_t, float>>::make(Operators::Cast<float, int32_t>(), self);
 }
 
 sp<Boolean> NumericType::gt(const sp<Numeric>& self, const sp<Numeric>& other)

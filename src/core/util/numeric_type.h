@@ -44,7 +44,9 @@ public:
 //  [[script::bindings::operator(/)]]
     static sp<Numeric> truediv(float lvalue, const sp<Numeric>& rvalue);
 //  [[script::bindings::operator(//)]]
-    static sp<Numeric> floordiv(const sp<Numeric>& self, const sp<Numeric>& rvalue);
+    static sp<Numeric> floordiv(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
+//  [[script::bindings::operator(//)]]
+    static sp<Numeric> floordiv(const sp<Numeric>& lvalue, const sp<Integer>& rvalue);
 //  [[script::bindings::operator(%)]]
     static sp<Numeric> mod(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
 //  [[script::bindings::operator(%)]]
@@ -63,6 +65,9 @@ public:
     static int32_t toInt32(const sp<Numeric>& self);
 //  [[script::bindings::operator(float)]]
     static float toFloat(const sp<Numeric>& self);
+
+//  [[script::bindings::classmethod]]
+    static sp<Integer> toInteger(const sp<Numeric>& self);
 
 //  [[script::bindings::operator(>)]]
     static sp<Boolean> gt(const sp<Numeric>& self, const sp<Numeric>& other);

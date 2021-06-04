@@ -79,6 +79,20 @@ public:
         }
     };
 
+    template<typename T, typename P = T> class NumericFloorDiv {
+    public:
+        float operator()(T v1, P v2) {
+            return std::floor(v1 / v2);
+        }
+    };
+
+    template<typename T, typename P = T> class IntegerFloorDiv {
+    public:
+        int32_t operator()(T v1, P v2) {
+            return static_cast<int32_t>(v1 / v2);
+        }
+    };
+
     template<typename T, typename P = T> class Dot {
     public:
         auto operator()(const T& v1, const P& v2)->decltype(v1.dot(v2)) {
@@ -139,6 +153,13 @@ public:
     public:
         T operator()(T v1, T v2) {
             return v1 > v2 ? v1 : v2;
+        }
+    };
+
+    template<typename T, typename P> class Cast {
+    public:
+        P operator()(T v1) {
+            return static_cast<P>(v1);
         }
     };
 

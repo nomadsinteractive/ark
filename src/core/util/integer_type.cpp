@@ -10,6 +10,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
+#include "core/impl/variable/variable_ternary.h"
 #include "core/util/conversions.h"
 #include "core/util/operators.h"
 #include "core/util/strings.h"
@@ -76,14 +77,12 @@ sp<Integer> IntegerType::mul(const sp<Integer>& self, const sp<Integer>& rvalue)
 
 sp<Integer> IntegerType::mod(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
-    FATAL("Unimplemented");
-    return nullptr;
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Mod<int32_t>>>::make(self, rvalue);
 }
 
 sp<Numeric> IntegerType::truediv(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
-    FATAL("Unimplemented");
-    return nullptr;
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Div<float, int32_t>>>::make(self, rvalue);
 }
 
 sp<Integer> IntegerType::floordiv(const sp<Integer>& self, const sp<Integer>& rvalue)
@@ -218,6 +217,11 @@ sp<ExpectationI> IntegerType::fence(const sp<Integer>& self, const sp<Integer>& 
     DASSERT(self && a1);
     Notifier notifier;
     return sp<ExpectationI>::make(sp<Fence<int32_t>>::make(self, a1, notifier), std::move(notifier));
+}
+
+sp<Integer> IntegerType::ifElse(const sp<Integer>& self, const sp<Boolean>& condition, const sp<Integer>& negative)
+{
+    return sp<VariableTernary<int32_t>>::make(condition, self, negative);
 }
 
 IntegerType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)

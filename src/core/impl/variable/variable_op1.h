@@ -17,8 +17,8 @@ private:
     typedef std::function<T(U)> OPFunc;
 
 public:
-    VariableOP1(OPFunc func, const sp<Variable<U>>& arg)
-        : _func(std::move(func)), _arg(arg), _val(_func(_arg->val())) {
+    VariableOP1(OPFunc func, sp<Variable<U>> arg)
+        : _func(std::move(func)), _arg(std::move(arg)), _val(_func(_arg->val())) {
     }
 
     virtual T val() override {
