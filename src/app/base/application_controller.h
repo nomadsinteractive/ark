@@ -39,6 +39,10 @@ public:
     virtual void showCursor(const sp<Object>& cursor = nullptr) = 0;
 //  [[script::bindings::auto]]
     virtual void hideCursor() = 0;
+
+//  [[script::bindings::auto]]
+    virtual void setMouseCapture(bool enabled) = 0;
+
 //  [[script::bindings::auto]]
     virtual void exit() = 0;
 

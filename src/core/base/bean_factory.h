@@ -428,27 +428,6 @@ public:
         return nb;
     }
 
-//    class WeakRef {
-//    public:
-//        WeakRef() = default;
-//        WeakRef(const BeanFactory& other)
-//            : _stub(other._stub) {
-//        }
-
-//        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(WeakRef);
-
-//        BeanFactory lock() const {
-//            return BeanFactory(_stub.lock());
-//        }
-
-//        BeanFactory ensure() const {
-//            return BeanFactory(_stub.ensure());
-//        }
-
-//    private:
-//        WeakPtr<Stub> _stub;
-//    };
-
 private:
     template<typename T> sp<Builder<T>> findBuilderByDocument(const document& doc) {
         const String className = Documents::getAttribute(doc, Constants::Attributes::CLASS);

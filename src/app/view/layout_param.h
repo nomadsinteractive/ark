@@ -44,7 +44,8 @@ public:
     static const int32_t WRAP_CONTENT;
 
 public:
-    LayoutParam(const sp<Size>& size, Display display = DISPLAY_BLOCK, Gravity gravity = GRAVITY_DEFAULT, float weight = 0);
+//  [[script::bindings::auto]]
+    LayoutParam(const sp<Size>& size, LayoutParam::Display display = LayoutParam::DISPLAY_BLOCK, LayoutParam::Gravity gravity = LayoutParam::GRAVITY_DEFAULT, float weight = 0);
     LayoutParam(const LayoutParam& other) = default;
 
     float calcLayoutWidth(float available);

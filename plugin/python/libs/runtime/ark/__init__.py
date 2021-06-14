@@ -233,15 +233,18 @@ class ApplicationController:
     SYSTEM_CURSOR_HAND = 11
 
     def create_cursor(self, bitmap: 'Bitmap', x: int, y: int):
-        return None
+        pass
 
     def create_system_cursor(self, name: int):
-        return None
+        pass
 
     def show_cursor(self, cursor: Optional = None):
         pass
 
     def hide_cursor(self):
+        pass
+
+    def set_mouse_capture(self, enabled: bool):
         pass
 
     def exit(self):
@@ -266,6 +269,25 @@ class Buffer:
     @property
     def id(self) -> int:
         return 0
+
+
+class Future:
+    def __init__(self):
+        pass
+
+    def cancel(self):
+        pass
+
+    def done(self):
+        pass
+
+    @property
+    def is_cancelled(self) -> bool:
+        return False
+
+    @property
+    def is_done(self) -> bool:
+        return False
 
 
 class Tracker:
@@ -1732,9 +1754,7 @@ class Emitter:
         pass
 
 
-
 class LayoutParam:
-
     DISPLAY_BLOCK = 0
     DISPLAY_FLOAT = 1
     DISPLAY_ABSOLUTE = 2
@@ -1748,6 +1768,9 @@ class LayoutParam:
     GRAVITY_CENTER_VERTICAL = 12
     GRAVITY_CENTER = GRAVITY_CENTER_VERTICAL | GRAVITY_CENTER_HORIZONTAL
     GRAVITY_DEFAULT = GRAVITY_CENTER
+
+    def __init__(self, size: Size, display: int = DISPLAY_BLOCK, gravity: int = GRAVITY_DEFAULT, weight: float = 0):
+        pass
 
 
 def __trace__():

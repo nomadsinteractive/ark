@@ -135,9 +135,15 @@ public:
         SDL_ShowCursor(SDL_DISABLE);
     }
 
+    virtual void setMouseCapture(bool enabled) override {
+        int32_t r = SDL_CaptureMouse(enabled ? SDL_TRUE : SDL_FALSE);
+        DWARN(r == 0, "Error calling SDL_CaptureMouse, enabled: %d, return: %d", enabled, r);
+    }
+
     virtual void exit() override {
         gQuit = true;
     }
+
 };
 
 class SDLPollEventTask : public Runnable {
@@ -208,11 +214,11 @@ public:
 
     Event::Code sdlScanCodeToEventCode(SDL_Scancode sc) {
         if(Math::between<SDL_Scancode>(SDL_SCANCODE_A, SDL_SCANCODE_Z, sc))
-            return static_cast<Event::Code>(Event::CODE_KEYBOARD_A + sc - SDL_SCANCODE_A);
+            return static_cast<Event::Code>(static_cast<int32_t>(Event::CODE_KEYBOARD_A) + sc - SDL_SCANCODE_A);
         if(Math::between<SDL_Scancode>(SDL_SCANCODE_F1, SDL_SCANCODE_F12, sc))
-            return static_cast<Event::Code>(Event::CODE_KEYBOARD_F1 + sc - SDL_SCANCODE_F1);
+            return static_cast<Event::Code>(static_cast<int32_t>(Event::CODE_KEYBOARD_F1) + sc - SDL_SCANCODE_F1);
         if(Math::between<SDL_Scancode>(SDL_SCANCODE_1, SDL_SCANCODE_9, sc))
-            return static_cast<Event::Code>(Event::CODE_KEYBOARD_1 + sc - SDL_SCANCODE_1);
+            return static_cast<Event::Code>(static_cast<int32_t>(Event::CODE_KEYBOARD_1) + sc - SDL_SCANCODE_1);
         switch(sc) {
         case SDL_SCANCODE_GRAVE:
             return Event::CODE_KEYBOARD_GRAVE;

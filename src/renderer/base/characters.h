@@ -31,7 +31,9 @@ public:
 
     Characters(const BeanFactory& factory, const sp<LayerContext>& layerContext, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
+//  [[script::bindings::property]]
     const sp<LayoutParam>& layoutParam() const;
+//  [[script::bindings::property]]
     void setLayoutParam(const sp<LayoutParam>& layoutParam);
 
 //  [[script::bindings::property]]
@@ -70,28 +72,7 @@ public:
     };
 
 private:
-//    typedef std::function<sp<RenderObject>(int32_t, const V3&, float, float)> ContentMaker;
     typedef std::vector<Glyph> ContentMaker;
-
-//    class CharacterContentMaker {
-//    public:
-//        CharacterContentMaker(sp<CharacterMaker> characterMaker);
-
-//        sp<RenderObject> operator() (int32_t type, const V3&position, float width, float height);
-
-//    private:
-//        sp<CharacterMaker> _character_maker;
-//    };
-
-//    class RelayoutContentMaker {
-//    public:
-//        RelayoutContentMaker(std::list<sp<RenderObject>> characters);
-
-//        sp<RenderObject> operator() (int32_t type, const V3& position, float width, float height);
-
-//    private:
-//        std::list<sp<RenderObject>> _characters;
-//    };
 
     void createContent();
     void createRichContent(const Scope& args);
