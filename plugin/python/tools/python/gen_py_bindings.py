@@ -629,11 +629,11 @@ class GenMethod(object):
     def check_argument_type(self):
         return True
 
-    def _gen_body_lines(self, genclass):
-        return []
-
-    def _gen_call_statement(self, genclass, argnames):
+    def _gen_calling_statement(self, genclass, argnames):
         return 'unpacked->%s(%s);' % (self._name, argnames)
+
+    def _gen_calling_body(self, genclass, calling_lines):
+        return calling_lines
 
     @staticmethod
     def gen_return_statement(return_type, py_return):
@@ -701,7 +701,7 @@ class GenMethod(object):
         return '\n    '.join(lines)
 
     def gen_definition_body(self, genclass, lines, not_overloaded_args, gen_type_check_args, exact_cast, check_args=False):
-        bodylines = self._gen_body_lines(genclass)
+        bodylines = []
         args = [(i, j) for i, j in enumerate(not_overloaded_args) if j]
         argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i, exact_cast) for i, j in args]
         self_type_checks = []
@@ -716,7 +716,7 @@ class GenMethod(object):
         r = acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
         argtypes = [i.gen_declare('t', 't').split()[0] for i in self._arguments]
         argnames = ', '.join(gen_method_call_arg(i, j.str(), argtypes[i]) for i, j in enumerate(self._arguments))
-        callstatement = self._gen_call_statement(genclass, argnames)
+        callstatement = self._gen_calling_statement(genclass, argnames)
         py_return = self.gen_py_return()
         pyret = ['return 0;'] if py_return == 'int' else self.gen_return_statement(r, py_return)
         if r != 'void' and r:
@@ -729,7 +729,7 @@ class GenMethod(object):
                 lines.insert(0, 'Py_ssize_t argc = %s;' % self.gen_py_argc())
             nullptr_check = self_type_checks + nullptr_check
             calling_lines = ['if(%s)' % ' && '.join(nullptr_check), '{'] + [INDENT + i for i in calling_lines] + ['}']
-        lines.extend(bodylines + calling_lines)
+        lines.extend(bodylines + self._gen_calling_body(genclass, calling_lines))
 
     @staticmethod
     def split(repl):
@@ -746,7 +746,7 @@ class GenConstructorMethod(GenMethod):
         self._funcname = name
         self._is_static = is_static
 
-    def _gen_call_statement(self, genclass, argnames):
+    def _gen_calling_statement(self, genclass, argnames):
         if self._is_static:
             return 'self->box = new Box(%s::%s(%s));' % (genclass.classname, self._funcname, argnames)
         return 'self->box = new Box(sp<%s>::make(%s));' % (self._funcname, argnames)
@@ -834,7 +834,7 @@ class GenPropertyMethod(GenMethod):
         else:
             property_def[1] = '(getter) %s::%s' % (genclass.py_class_name, self._name)
 
-    def _gen_call_statement(self, genclass, argnames):
+    def _gen_calling_statement(self, genclass, argnames):
         self_statement = self.gen_self_statement(genclass)
         if self._is_static:
             lines = ['%s::%s(%s%s);' % (genclass.classname, self._name, self_statement, argnames and ', ' + argnames)]
@@ -884,13 +884,19 @@ class GenGetPropMethod(GenMethod):
     def gen_py_argc(self):
         return 1
 
-    def _gen_body_lines(self, genclass):
+    def _gen_calling_body(self, genclass, calling_lines):
         return ['PyObject* attr = PyObject_GenericGetAttr(reinterpret_cast<PyObject*>(self), arg0);',
                 'if(attr)',
-                '    return attr;',
+                INDENT + 'return attr;',
                 'if(!PythonInterpreter::instance()->exceptErr(PyExc_AttributeError))',
-                '	Py_RETURN_NONE;'
-                '\n']
+                INDENT + 'Py_RETURN_NONE;'
+                '\n',
+                'try {'] + [INDENT + i for i in calling_lines] + [
+                '} catch(const std::exception& ex) {',
+                INDENT + 'PyErr_SetString(PyExc_AttributeError, Strings::sprintf("\'%s\' object has no attribute \'%%s\'. \\nCaused by: %%s", obj0.c_str(), ex.what()).c_str());' % genclass.classname,
+                INDENT + 'return nullptr;',
+                '}'
+        ]
 
 
 class GenSetPropMethod(GenMethod):
@@ -929,7 +935,7 @@ class GenLoaderMethod(GenMethod):
     def gen_py_method_def(self, genclass):
         return '{"%s", (PyCFunction) %s::%s, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.py_class_name, self._name, self._flags)
 
-    def _gen_call_statement(self, genclass, argnames):
+    def _gen_calling_statement(self, genclass, argnames):
         return 'PythonInterpreter::instance()->ensurePyArkType(reinterpret_cast<PyObject*>(self))->load(*self, "%s", %s);' % (self._name, argnames)
 
     def need_unpack_statement(self):
@@ -965,7 +971,7 @@ class GenStaticMethod(GenMethod):
     def need_unpack_statement(self):
         return False
 
-    def _gen_call_statement(self, genclass, argnames):
+    def _gen_calling_statement(self, genclass, argnames):
         return '%s::%s(%s);' % (genclass.classname, self._name, argnames)
 
     @staticmethod
@@ -986,7 +992,7 @@ class GenStaticMemberMethod(GenMethod):
     def gen_py_method_def(self, genclass):
         return '{"%s", (PyCFunction) %s::%s, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.py_class_name, self._name, self._flags)
 
-    def _gen_call_statement(self, genclass, argnames):
+    def _gen_calling_statement(self, genclass, argnames):
         return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
 
     @staticmethod
@@ -1027,7 +1033,7 @@ class GenOperatorMethod(GenMethod):
     def gen_py_argc(self):
         return len(self._arguments)
 
-    def _gen_call_statement(self, genclass, argnames):
+    def _gen_calling_statement(self, genclass, argnames):
         if self._is_static:
             return '%s::%s(%s);' % (genclass.classname, self._name, argnames)
         return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
@@ -1067,7 +1073,7 @@ class GenRichCompareMethod(GenMethod):
     def gen_py_return(self):
         return 'PyObject*'
 
-    def _gen_call_statement(self, genclass, argnames):
+    def _gen_calling_statement(self, genclass, argnames):
         return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
 
     @staticmethod
