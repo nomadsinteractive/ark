@@ -53,8 +53,7 @@ private:
 
 ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources, const sp<RenderEngine>& renderEngine)
     : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->recycler(), applicationResources->bitmapBundle(), applicationResources->bitmapBoundsBundle())),
-      _clock(sp<Clock>::make(_ticker)), _worker_strategy(sp<ExecutorWorkerStrategy>::make(_ticker)), _executor_main(sp<ExecutorWorkerThread>::make(_worker_strategy)), _message_loop(makeMessageLoop()),
-      _executor_pooled(sp<ExecutorThreadPool>::make(_executor_main)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK),
+      _clock(sp<Clock>::make(_ticker)), _worker_strategy(sp<ExecutorWorkerStrategy>::make(_ticker)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK),
       _paused(false)
 {
     Ark& ark = Ark::instance();
@@ -72,6 +71,13 @@ void ApplicationContext::initResourceLoader(const document& manifest)
     const document doc = createResourceLoaderManifest(manifest);
     _resource_loader = createResourceLoaderImpl(manifest, nullptr);
     _resource_loader->import(doc, _resource_loader->beanFactory());
+}
+
+void ApplicationContext::initMessageLoop()
+{
+    _executor_main = sp<ExecutorWorkerThread>::make(_worker_strategy, "Executor");
+    _message_loop = makeMessageLoop();
+    _executor_pooled = sp<ExecutorThreadPool>::make(_executor_main);
 }
 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const Scope& args)
@@ -215,7 +221,7 @@ sp<MessageLoop> ApplicationContext::makeMessageLoop(const sp<Clock>& clock)
     return messageLoop;
 }
 
-void ApplicationContext::runAtMainThread(std::function<void()> task)
+void ApplicationContext::runAtCoreThread(std::function<void()> task)
 {
     _message_loop->post(sp<RunnableByFunction>::make(std::move(task)), 0);
 }

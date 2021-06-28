@@ -1,16 +1,12 @@
 #ifndef ARK_CORE_PLUGIN_PLUGIN_H_
 #define ARK_CORE_PLUGIN_PLUGIN_H_
 
+#include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/base/library.h"
-#include "core/collection/by_type.h"
-#include "core/types/weak_ptr.h"
-#include "core/forwarding.h"
 
 #include "renderer/forwarding.h"
-
-#include "app/base/resource_loader.h"
 
 namespace ark {
 

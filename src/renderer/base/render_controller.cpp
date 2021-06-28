@@ -227,6 +227,7 @@ void RenderController::preUpdate(uint64_t timestamp)
     static int i = 0;
     if(i ++ == 600)
     {
+        LOGD("_on_pre_updatable: %d", _on_pre_updatable.items().size());
         LOGD("_on_pre_update_request: %d", _on_pre_update_request.items().size());
         i = 0;
     }

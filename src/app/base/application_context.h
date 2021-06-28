@@ -56,7 +56,7 @@ public:
 
     sp<MessageLoop> makeMessageLoop(const sp<Clock>& clock);
 
-    void runAtMainThread(std::function<void()> task);
+    void runAtCoreThread(std::function<void()> task);
 
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
     sp<String> getString(const String& resid);
@@ -84,6 +84,7 @@ public:
 
 private:
     void initResourceLoader(const document& manifest);
+    void initMessageLoop();
 
     sp<ResourceLoader> createResourceLoaderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
     document createResourceLoaderManifest(const document& manifest);

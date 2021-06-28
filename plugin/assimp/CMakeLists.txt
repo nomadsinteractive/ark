@@ -20,9 +20,6 @@ if(ANDROID)
     set(ASSIMP_BUILD_X3D_IMPORTER OFF)
 endif()
 
-# Assimp(v4.1.0) tries to include config.h in the source directory prior to the one generated in the binary directory,
-# which might cause compiler errors. So here is a workaround below
-#include_directories(${CMAKE_CURRENT_BINARY_DIR}/3rdparty/assimp/include)
 add_subdirectory(3rdparty/assimp)
 
 get_filename_component(LOCAL_PLUGIN_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)

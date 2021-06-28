@@ -54,8 +54,9 @@ class Annotation(object):
         self._main_class = main_class
         self._arguments = arguments
 
-    def include(self):
-        return '#include "%s"' % self._filename
+    def include(self, include_dir):
+        includes = [include_dir, self._filename] if include_dir else [self._filename]
+        return '#include "%s"' % '/'.join(includes)
 
     def _build_arguments(self, func_arguments, lambda_arguments):
         func_args = dict(func_arguments)
@@ -258,8 +259,8 @@ def search_for_plugins(paths):
     return result
 
 
-def generate(generator, result):
-    return sorted(set(getattr(i, generator)() for i in result if hasattr(i, generator)))
+def generate(generator, result, *args):
+    return sorted(set(getattr(i, generator)(*args) for i in result if hasattr(i, generator)))
 
 
 def generate_method_body(generator, result, template):
@@ -267,8 +268,8 @@ def generate_method_body(generator, result, template):
     return template % INDENT.join(lines) if lines else 'return BeanFactory::Factory();'
 
 
-def generate_plugin_includes(config, result):
-    includes = generate('include', result)
+def generate_plugin_includes(config, result, include_dir):
+    includes = generate('include', result, include_dir)
     return '\n'.join(sorted(includes))
 
 
@@ -304,15 +305,16 @@ void __ark_bootstrap_%s__()
 ''' % (func_name, classname)
 
 
-if __name__ == '__main__':
-    opts, args = getopt.getopt(sys.argv[1:], 'c:n:o:s:b:t:')
+def main():
+    opts, args = getopt.getopt(sys.argv[1:], 'c:n:o:s:b:t:i:')
     params = dict((i.lstrip('-'), j) for i, j in opts)
     if any(i not in params for i in []) or len(args) == 0:
-        print('Usage: %s [-c config_file] [-n name] [-t type] [-o output_file] [-s namespace] [-b bootstrapfunc] src_paths...' % sys.argv[0])
+        print('Usage: %s [-c config_file] [-n name] [-t type] [-o output_file] [-s namespace] [-b bootstrapfunc] [-i include_dir] src_paths...' % sys.argv[0])
         sys.exit(0)
 
     output_file = params['o'] if 'o' in params else None
     bootstrap_func = params['b'].strip() if 'b' in params else None
+    include_dir = params.get('i', None)
     config = parse_app_arguments(params, type=params['t'].strip() if 't' in params else 'core')
 
     result = search_for_plugins(args)
@@ -322,14 +324,14 @@ if __name__ == '__main__':
     plugin_name = config['plugin_name'] if 'plugin_name' in config else acg.toCamelName(file_path.split('_'))
     ark_namespace = 'ark::' if 'ark' not in config['namespace'] else ''
 
-    refBuilder = generate_method_def('refBuilder', result, REF_BUILDER_TEMPLATE, plugin_name=plugin_name)
-    refBuilderDeclare = acg.format('virtual ${ns}BeanFactory::Factory createBeanFactory(const ${ns}BeanFactory& beanFactory, const ${ns}sp<${ns}Dictionary<${ns}document>>& documentById) override;', ns=ark_namespace) if refBuilder else ''
+    ref_builder = generate_method_def('refBuilder', result, REF_BUILDER_TEMPLATE, plugin_name=plugin_name)
+    ref_builder_declare = acg.format('virtual ${ns}BeanFactory::Factory createBeanFactory(const ${ns}BeanFactory& beanFactory, const ${ns}sp<${ns}Dictionary<${ns}document>>& documentById) override;', ns=ark_namespace) if ref_builder else ''
 
-    resBuilder = generate_method_def('resBuilder', result, RES_BUILDER_TEMPLATE, plugin_name=plugin_name)
-    resBuilderDeclare = acg.format('virtual ${ns}BeanFactory::Factory createResourceLoader(const ${ns}BeanFactory& beanFactory, const ${ns}sp<${ns}Dictionary<${ns}document>>& documentById, const ${ns}sp<${ns}ResourceLoaderContext>& resourceLoaderContext) override;', ns=ark_namespace) if resBuilder else ''
+    res_builder = generate_method_def('resBuilder', result, RES_BUILDER_TEMPLATE, plugin_name=plugin_name)
+    res_builder_declare = acg.format('virtual ${ns}BeanFactory::Factory createResourceLoader(const ${ns}BeanFactory& beanFactory, const ${ns}sp<${ns}Dictionary<${ns}document>>& documentById, const ${ns}sp<${ns}ResourceLoaderContext>& resourceLoaderContext) override;', ns=ark_namespace) if res_builder else ''
 
-    funcBuilder = generate_method_def('func', result, FUNC_BUILDER_TEMPLATE, plugin_name=plugin_name)
-    functionDeclare = acg.format('virtual ${ns}Library createLibrary() override;', ns=ark_namespace) if funcBuilder else ''
+    func_builder = generate_method_def('func', result, FUNC_BUILDER_TEMPLATE, plugin_name=plugin_name)
+    function_declare = acg.format('virtual ${ns}Library createLibrary() override;', ns=ark_namespace) if func_builder else ''
 
     classdeclare = acg.format('''class ${plugin_name} : public ${ns}Plugin {
 public:
@@ -340,7 +342,7 @@ public:
     ${functionDeclare}
 ${member_declare}
 };
-''', plugin_name=plugin_name, ns=ark_namespace, member_declare=get_member_declare(), plugin_arguments=get_plugin_arguments(), refBuilderDeclare=refBuilderDeclare, resBuilderDeclare=resBuilderDeclare, functionDeclare=functionDeclare)
+''', plugin_name=plugin_name, ns=ark_namespace, member_declare=get_member_declare(), plugin_arguments=get_plugin_arguments(), refBuilderDeclare=ref_builder_declare, resBuilderDeclare=res_builder_declare, functionDeclare=function_declare)
     content = acg.format('''#ifndef ${header_macro}_PLUGIN_H_
 #define ${header_macro}_PLUGIN_H_
 
@@ -363,7 +365,7 @@ ${classdeclare}
     classdefine = acg.format('''${plugin_name}::${plugin_name}(${plugin_arguments})
     : Plugin("${name}", Plugin::PLUGIN_TYPE_${type})${plugin_arguments_assigment} {
 }
-${refBuilder}${resBuilder}${funcBuilder}${plugin_member_getter}''', name=config['name'], type=config['type'].upper(), plugin_name=plugin_name, plugin_arguments=get_plugin_arguments(), plugin_arguments_assigment=get_plugin_arguments_assigment(), refBuilder=refBuilder, resBuilder=resBuilder, funcBuilder=funcBuilder, plugin_member_getter=get_plugin_member_getter(plugin_name))
+${refBuilder}${resBuilder}${funcBuilder}${plugin_member_getter}''', name=config['name'], type=config['type'].upper(), plugin_name=plugin_name, plugin_arguments=get_plugin_arguments(), plugin_arguments_assigment=get_plugin_arguments_assigment(), refBuilder=ref_builder, resBuilder=res_builder, funcBuilder=func_builder, plugin_member_getter=get_plugin_member_getter(plugin_name))
     using_namespace = 'using namespace ark;' if 'ark' not in config['namespace'] else ''
     content = acg.format('''#include "${file_path}.h"
 
@@ -373,5 +375,9 @@ ${refBuilder}${resBuilder}${funcBuilder}${plugin_member_getter}''', name=config[
 ${plugin_includes}
 ${using_namespace}
 ${classdefine}
-${bootstrap_func}''', file_path=file_path, plugin_includes=generate_plugin_includes(config, result), using_namespace=using_namespace, classdefine=declare_namespaces(config['namespace'], classdefine), bootstrap_func=generate_bootstrap_func(bootstrap_func, config['namespace'], plugin_name) if bootstrap_func else '')
+${bootstrap_func}''', file_path=file_path, plugin_includes=generate_plugin_includes(config, result, include_dir), using_namespace=using_namespace, classdefine=declare_namespaces(config['namespace'], classdefine), bootstrap_func=generate_bootstrap_func(bootstrap_func, config['namespace'], plugin_name) if bootstrap_func else '')
     acg.write_to_file(output_file + '.cpp' if output_file else None, content)
+
+
+if __name__ == '__main__':
+    main()

@@ -27,7 +27,7 @@ public:
     };
 
 public:
-    ExecutorWorkerThread(sp<Strategy> strategy);
+    ExecutorWorkerThread(sp<Strategy> strategy, String name);
 
     virtual void execute(const sp<Runnable>& task) override;
 

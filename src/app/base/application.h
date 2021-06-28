@@ -51,8 +51,10 @@ private:
     void onDestroyTask();
     void onEventTask(const Event& event);
 
+    sp<Runnable> makeOnSurfaceUpdate(bool alive) const;
+
 private:
-    bool _alive;
+    sp<Runnable> _on_surface_update;
 };
 
 }

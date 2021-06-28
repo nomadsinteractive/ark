@@ -7,9 +7,9 @@
 #include "graphics/impl/vec/vec2_impl.h"
 
 #include "app/base/application.h"
-#include "app/base/application_controller.h"
 #include "app/base/application_context.h"
 #include "app/base/surface.h"
+#include "app/inf/application_controller.h"
 #include "app/view/arena.h"
 
 namespace ark {

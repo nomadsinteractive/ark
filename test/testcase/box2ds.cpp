@@ -13,6 +13,8 @@
 
 #include "graphics/base/v3.h"
 
+#include "app/base/resource_loader.h"
+
 #include "platform/platform.h"
 
 namespace ark {

@@ -18,6 +18,7 @@ namespace ark {
 class RendererByRenderObject : public Renderer, public Block {
 public:
     RendererByRenderObject(sp<LayerContext> layerContext, sp<RenderObject> renderObject);
+    ~RendererByRenderObject() override;
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 

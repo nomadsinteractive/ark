@@ -1,5 +1,5 @@
-#ifndef ARK_APP_BASE_APPLICATION_CONTROLLER_H_
-#define ARK_APP_BASE_APPLICATION_CONTROLLER_H_
+#ifndef ARK_APP_INF_APPLICATION_CONTROLLER_H_
+#define ARK_APP_INF_APPLICATION_CONTROLLER_H_
 
 #include "core/base/api.h"
 #include "core/forwarding.h"

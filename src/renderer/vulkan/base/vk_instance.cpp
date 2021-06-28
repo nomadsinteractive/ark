@@ -9,7 +9,7 @@
 
 #include "renderer/vulkan/util/vk_util.h"
 
-#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN) && !defined(ARK_PLATFORM_ANDROID)
+#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN) && !defined(ARK_PLATFORM_ANDROID) && 0
 #define ARK_VK_DEBUG_LAYER_ENABLED  1
 #else
 #define ARK_VK_DEBUG_LAYER_ENABLED  0

@@ -2,6 +2,7 @@
 #define ARK_GRAPHICS_IMPL_ALPHABET_TRUE_TYPE_ALPHABET_H_
 
 #include <mutex>
+#include <unordered_map>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -58,7 +59,7 @@ private:
     int32_t _line_height_in_pixel;
 
     std::mutex _mutex;
-
+    std::unordered_map<int32_t, Metrics> _metrics_cache;
 };
 
 }

@@ -40,11 +40,44 @@ public:
     }
 };
 
+class OnSurfaceUpdatePreCreated : public Runnable {
+public:
+    OnSurfaceUpdatePreCreated(sp<ApplicationContext> applicationContext)
+        : _application_context(std::move(applicationContext)) {
+    }
+
+    virtual void run() override {
+        _application_context->updateRenderState();
+    }
+
+private:
+    sp<ApplicationContext> _application_context;
+};
+
+class OnSurfaceUpdatePostCreated : public Runnable {
+public:
+    OnSurfaceUpdatePostCreated(sp<Runnable> runAtCore, sp<ApplicationContext> applicationContext, sp<ApplicationDelegate> applicationDelegate)
+        : _run_at_core(std::move(runAtCore)), _application_context(std::move(applicationContext)), _application_delegate(std::move(applicationDelegate)) {
+    }
+
+    virtual void run() override {
+        DPROFILER_TRACE("MainFrame", ApplicationProfiler::CATEGORY_RENDER_FRAME);
+        _application_context->post(_run_at_core);
+        _application_context->updateRenderState();
+        _application_delegate->onSurfaceDraw();
+    }
+
+private:
+    sp<Runnable> _run_at_core;
+    sp<ApplicationContext> _application_context;
+    sp<ApplicationDelegate> _application_delegate;
+};
+
 }
 
 Application::Application(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport)
-    : _application_delegate(applicationDelegate), _application_context(applicationContext),
-      _viewport(viewport), _width(width), _height(height), _alive(false)
+    : _application_delegate(applicationDelegate), _application_context(applicationContext), _viewport(viewport), _width(width), _height(height),
+      _on_surface_update(makeOnSurfaceUpdate(false))
 {
 }
 
@@ -66,7 +99,7 @@ void Application::onCreateTask()
 {
     __thread_init__<THREAD_ID_CORE>();
     _application_delegate->onCreate(*this, _surface);
-    _alive = true;
+    _on_surface_update = makeOnSurfaceUpdate(true);
 }
 
 void Application::onPauseTask()
@@ -85,6 +118,13 @@ void Application::onEventTask(const Event& event)
     _application_delegate->onEvent(event);
 }
 
+sp<Runnable> Application::makeOnSurfaceUpdate(bool alive) const
+{
+    if(alive)
+        return sp<OnSurfaceUpdatePostCreated>::make(_surface->updater(), _application_context, _application_delegate);
+    return sp<OnSurfaceUpdatePreCreated>::make(_application_context);
+}
+
 void Application::onCreate()
 {
     LOGD("");
@@ -93,7 +133,7 @@ void Application::onCreate()
     stringTable->addStringBundle("asset", sp<AssetStringBundle>::make());
     const sp<RenderView> renderView = _application_context->renderEngine()->createRenderView(_application_context->renderController(), _viewport);
     _surface = sp<Surface>::make(renderView, _application_context);
-    _application_context->runAtMainThread([this] () {
+    _application_context->runAtCoreThread([this] () {
         onCreateTask();
     });
 }
@@ -101,8 +141,8 @@ void Application::onCreate()
 void Application::onPause()
 {
     LOGD("");
-    _alive = false;
-    _application_context->runAtMainThread([this] () {
+    _on_surface_update = makeOnSurfaceUpdate(false);
+    _application_context->runAtCoreThread([this] () {
         onPauseTask();
     });
     _application_context->pause();
@@ -111,9 +151,9 @@ void Application::onPause()
 void Application::onResume()
 {
     LOGD("");
-    _application_context->runAtMainThread([this] () {
+    _application_context->runAtCoreThread([this] () {
         onResumeTask();
-        _alive = true;
+        _on_surface_update = makeOnSurfaceUpdate(true);
     });
     _application_context->resume();
 }
@@ -121,11 +161,11 @@ void Application::onResume()
 void Application::onDestroy()
 {
     LOGD("");
-    _alive = false;
+    _on_surface_update = makeOnSurfaceUpdate(false);
     const sp<ApplicationDelegate> applicationDelegate = _application_delegate;
     const sp<ApplicationContext> applicationContext = _application_context;
     _application_context->resume();
-    _application_context->runAtMainThread([applicationDelegate, applicationContext] () {
+    _application_context->runAtCoreThread([applicationDelegate, applicationContext] () {
         applicationDelegate->onDestroy();
     });
 }
@@ -145,7 +185,7 @@ void Application::onSurfaceChanged(uint32_t width, uint32_t height)
     LOGD("width = %d, height = %d", width, height);
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
-    _application_context->runAtMainThread([this] () {
+    _application_context->runAtCoreThread([this] () {
         _application_context->renderController()->reset();
     });
 
@@ -158,19 +198,12 @@ void Application::onSurfaceChanged(uint32_t width, uint32_t height)
 
 void Application::onSurfaceUpdate()
 {
-    if(_alive)
-    {
-        _application_context->post(_surface->updater());
-        _application_context->updateRenderState();
-        _application_delegate->onSurfaceDraw();
-    }
-    else
-        _application_context->updateRenderState();
+    _on_surface_update->run();
 }
 
 bool Application::onEvent(const Event& event)
 {
-    _application_context->runAtMainThread([this, event] () {
+    _application_context->runAtCoreThread([this, event] () {
         onEventTask(event);
     });
     return true;

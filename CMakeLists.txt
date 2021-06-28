@@ -203,6 +203,7 @@ ark_add_plugin_directory(assimp plugin/assimp)
 ark_add_plugin_directory(cmft plugin/cmft)
 ark_add_plugin_directory(dear_imgui plugin/dear-imgui)
 ark_add_plugin_directory(bullet plugin/bullet)
+ark_add_plugin_directory(optick plugin/optick)
 
 if(NOT (ANDROID OR IOS))
 if(${BUILD_SHARED_LIBS})

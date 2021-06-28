@@ -13,9 +13,9 @@
 #include "renderer/base/render_engine_context.h"
 
 #include "app/base/application_context.h"
-#include "app/base/application_controller.h"
 #include "app/base/event.h"
 #include "app/base/surface.h"
+#include "app/inf/application_controller.h"
 
 #include "impl/platform_android.h"
 

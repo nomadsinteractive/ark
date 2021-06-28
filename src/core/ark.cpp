@@ -61,7 +61,6 @@ namespace ark {
 Ark* Ark::_instance = nullptr;
 std::list<Ark*> Ark::_instance_stack;
 
-
 class Ark::ArkAssetBundle {
 public:
     ArkAssetBundle(const sp<AssetBundle>& builtInAssetBundle, BeanFactory& factory, const std::vector<Manifest::Asset>& assets)
@@ -273,12 +272,24 @@ const sp<ApplicationContext>& Ark::applicationContext() const
     return _application_context;
 }
 
+const sp<ApplicationProfiler>& Ark::applicationProfiler() const
+{
+    return _application_profiler;
+}
+
+op<ApplicationProfiler::Tracer> Ark::makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category) const
+{
+    return _application_profiler ? _application_profiler->makeTracer(func, filename, lineno, name, category) : op<ApplicationProfiler::Tracer>();
+}
+
 sp<ApplicationContext> Ark::createApplicationContext(const Manifest& manifest, const sp<ApplicationResource>& appResource, const sp<RenderEngine>& renderEngine)
 {
     const Global<PluginManager> pluginManager;
     const sp<ApplicationContext> applicationContext = sp<ApplicationContext>::make(appResource, renderEngine);
     pluginManager->addPlugin(sp<ApplicationPlugin>::make(applicationContext));
     applicationContext->initResourceLoader(manifest.resourceLoader());
+    _application_profiler = applicationContext->resourceLoader()->beanFactory().build<ApplicationProfiler>(document::make("root"), Scope());
+    applicationContext->initMessageLoop();
     return applicationContext;
 }
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.6)
+cmake_minimum_required(VERSION 3.9)
 
 set(PY_VERSION_MAJOR 3)
 set(PY_VERSION_MINOR 6)
@@ -14,7 +14,11 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Release")
 endif()
 
-project(Python C ASM)
+if(MSVC)
+    project(Python LANGUAGES C ASM_MASM)
+else()
+    project(Python LANGUAGES C ASM)
+endif()
 
 if(POLICY CMP0042)
     cmake_policy(SET CMP0042 OLD)

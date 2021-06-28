@@ -12,6 +12,7 @@
 #include "core/inf/runnable.h"
 #include "core/types/global.h"
 
+#include "app/base/resource_loader.h"
 #include "app/base/application_context.h"
 #include "app/inf/audio_player.h"
 
@@ -23,7 +24,7 @@ namespace unittest {
 
 class VorbisTestCase : public TestCase {
 public:
-    virtual int launch() {
+    virtual int launch() override {
         const sp<ResourceLoader> resourceLoader = getResourceLoader();
         const Scope args;
         const sp<AudioPlayer> portaudioPlayer = resourceLoader->load<AudioPlayer>("audio_player", args);

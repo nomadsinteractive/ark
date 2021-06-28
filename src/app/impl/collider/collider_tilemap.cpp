@@ -85,7 +85,7 @@ std::vector<RayCastManifold> TiledCollider::rayCast(const V3& from, const V3& to
 }
 
 TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Tilemap>& tileMap)
-    : RigidBody(id, type, position, size, Null::toSafe<Rotation>(nullptr), Box()), _tilemap(tileMap), _rigid_body_shadow(sp<RigidBodyShadow>::make(tileMap->tileset()->tileWidth(), tileMap->tileset()->tileHeight()))
+    : RigidBody(id, type, position, size, Null::toSafe<Rotation>(nullptr), Box(), nullptr), _tilemap(tileMap), _rigid_body_shadow(sp<RigidBodyShadow>::make(tileMap->tileset()->tileWidth(), tileMap->tileset()->tileHeight()))
 {
 }
 
@@ -166,7 +166,7 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
 }
 
 TiledCollider::RigidBodyShadow::RigidBodyShadow(uint32_t width, uint32_t height)
-    : RigidBody(0, Collider::BODY_TYPE_STATIC, sp<Vec3::Impl>::make(V3()), sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), nullptr, Box())
+    : RigidBody(0, Collider::BODY_TYPE_STATIC, sp<Vec3::Impl>::make(V3()), sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), nullptr, Box(), nullptr)
 {
     _position = position();
 }

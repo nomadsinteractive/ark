@@ -39,10 +39,13 @@
 
 #if defined(__clang__)
 #   define __ARK_FUNCTION__     __PRETTY_FUNCTION__
+#   define __ARK_FUNCTION_SIGANTURE__     __PRETTY_FUNCTION__
 #elif defined(__GNUC__) || defined(__GNUG__)
 #   define __ARK_FUNCTION__     __PRETTY_FUNCTION__
+#   define __ARK_FUNCTION_SIGANTURE__     __PRETTY_FUNCTION__
 #elif defined(_MSC_VER)
 #   define __ARK_FUNCTION__     __FUNCTION__
+#   define __ARK_FUNCTION_SIGANTURE__     __FUNCSIG__
 #endif
 
 #define FATAL(...) ark::__fatal__(__ARK_FUNCTION__, nullptr, __VA_ARGS__)
@@ -55,12 +58,15 @@
 #   define DWARN(cond, ...) WARN(cond, __VA_ARGS__)
 #   define DTRACE(cond) if(cond) __trace__()
 #   define DTHREAD_CHECK(threadId) __thread_check__<threadId>(__ARK_FUNCTION__)
+#   define DPROFILER_TRACE(name, ...) static auto _ag_tracer_##__LINE__ = Ark::instance().makeProfilerTracer(__ARK_FUNCTION_SIGANTURE__, __FILE__, __LINE__, name, __VA_ARGS__); \
+                                      const auto _ag_scope_##__LINE__ = _ag_tracer_##__LINE__ ? _ag_tracer_##__LINE__->trace() : nullptr
 #else
 #   define DFATAL(...)
 #   define DCHECK(cond, ...) (void (cond))
 #   define DWARN(cond, ...) (void (cond))
 #   define DTRACE(cond) (void (cond))
 #   define DTHREAD_CHECK(threadId) (void (threadId))
+#   define DPROFILER_TRACE(name, ...)
 #endif
 
 #define DASSERT(x) DCHECK(x, "Assertion failed")

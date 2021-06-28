@@ -23,12 +23,17 @@ RendererByRenderObject::RendererByRenderObject(sp<LayerContext> layerContext, sp
         measure(_render_object->_size.ensure());
 }
 
+RendererByRenderObject::~RendererByRenderObject()
+{
+    _render_object->dispose();
+}
+
 void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, const V3& position)
 {
     if(!_renderable)
     {
          _renderable = sp<RenderablePassive>::make(_render_object);
-         _layer_context->add(_renderable, _renderable->renderObject()->disposed());
+         _layer_context->add(_renderable, _render_object->disposed());
     }
     _renderable->requestUpdate(position);
 }

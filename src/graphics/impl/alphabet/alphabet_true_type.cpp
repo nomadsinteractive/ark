@@ -57,6 +57,13 @@ bool AlphabetTrueType::measure(int32_t c, Metrics& metrics, bool hasFallback)
 {
     const std::lock_guard<std::mutex> lock(_mutex);
 
+    const auto iter = _metrics_cache.find(c);
+    if(iter != _metrics_cache.end())
+    {
+        metrics = iter->second;
+        return true;
+    }
+
     FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
     if(hasFallback && !glyphIndex)
         return false;
@@ -71,6 +78,7 @@ bool AlphabetTrueType::measure(int32_t c, Metrics& metrics, bool hasFallback)
     metrics.bitmap_height = slot->metrics.height >> 6;
     metrics.bitmap_x = slot->metrics.horiBearingX >> 6;
     metrics.bitmap_y = _base_line_position - (slot->metrics.horiBearingY >> 6);
+    _metrics_cache[c] = metrics;
     return true;
 }
 

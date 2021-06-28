@@ -42,7 +42,7 @@ void ExecutorThreadPool::execute(const sp<Runnable>& task)
 
 sp<ExecutorWorkerThread> ExecutorThreadPool::createWorkerThread()
 {
-    const sp<ExecutorWorkerThread> workerThread = sp<ExecutorWorkerThread>::make(sp<WorkerThreadStrategy>::make(_stub));
+    const sp<ExecutorWorkerThread> workerThread = sp<ExecutorWorkerThread>::make(sp<WorkerThreadStrategy>::make(_stub), "Worker");
     _stub->_worker_threads.push(workerThread);
     _stub->_worker_count ++;
     return workerThread;

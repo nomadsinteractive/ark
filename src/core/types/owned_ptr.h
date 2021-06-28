@@ -8,6 +8,9 @@ namespace ark {
 
 template<typename T> class OwnedPtr {
 public:
+    _CONSTEXPR OwnedPtr(std::nullptr_t null) noexcept
+        : _inst(null), _auto_release(false) {
+    }
     OwnedPtr(T* instance = nullptr, bool autoRelease = true) noexcept
         : _inst(instance), _auto_release(autoRelease) {
     }

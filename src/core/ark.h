@@ -12,6 +12,7 @@
 #include "renderer/forwarding.h"
 
 #include "app/forwarding.h"
+#include "app/inf/application_profiler.h"
 
 namespace ark {
 
@@ -75,6 +76,9 @@ public:
 
     const sp<Clock>& clock() const;
     const sp<ApplicationContext>& applicationContext() const;
+    const sp<ApplicationProfiler>& applicationProfiler() const;
+
+    op<ApplicationProfiler::Tracer> makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category = ApplicationProfiler::CATEGORY_DEFAULT) const;
 
     int32_t runTests(int argc, const char* argv[]) const;
 
@@ -94,6 +98,7 @@ private:
     const char** _argv;
 
     sp<ApplicationContext> _application_context;
+    sp<ApplicationProfiler> _application_profiler;
     ByType _interfaces;
 
     sp<ArkAssetBundle> _asset_bundle;

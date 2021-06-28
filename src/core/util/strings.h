@@ -89,9 +89,9 @@ public:
     static String sprintf(const char* format, ...);
     static String svprintf(const char* format, va_list args);
 
-    template<typename T> static String join(const T* data, uint32_t offset, uint32_t length) {
+    template<typename T> static String join(const T* data, size_t offset, size_t length) {
         StringBuffer sb;
-        for(uint32_t i = 0; i < length; i++) {
+        for(size_t i = 0; i < length; i++) {
             if(i != 0)
                 sb << ", ";
             sb << toString<T>(data[offset + i]);

@@ -28,9 +28,9 @@
 #include "renderer/base/render_engine_context.h"
 
 #include "app/base/application_context.h"
-#include "app/base/application_controller.h"
 #include "app/base/surface.h"
 #include "app/base/surface_updater.h"
+#include "app/inf/application_controller.h"
 
 #include "platform/platform.h"
 

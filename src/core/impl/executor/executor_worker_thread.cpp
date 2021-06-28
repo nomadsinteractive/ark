@@ -1,8 +1,10 @@
 #include "core/impl/executor/executor_worker_thread.h"
 
+#include "core/ark.h"
+
 namespace ark {
 
-ExecutorWorkerThread::ExecutorWorkerThread(sp<ExecutorWorkerThread::Strategy> strategy)
+ExecutorWorkerThread::ExecutorWorkerThread(sp<ExecutorWorkerThread::Strategy> strategy, String name)
     : _worker(sp<Worker>::make(_thread, std::move(strategy)))
 {
     _thread.setEntry(_worker);
@@ -27,6 +29,7 @@ ExecutorWorkerThread::Worker::Worker(Thread thread, sp<Strategy> strategy)
 
 void ExecutorWorkerThread::Worker::run()
 {
+    DPROFILER_TRACE("Worker", ApplicationProfiler::CATEGORY_START_THREAD);
     _strategy->onStart();
 
     while(_thread.status() != Thread::THREAD_STATE_TERMINATED)

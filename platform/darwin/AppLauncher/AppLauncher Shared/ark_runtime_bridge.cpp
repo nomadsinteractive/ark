@@ -14,9 +14,9 @@
 
 #include "app/base/application.h"
 #include "app/base/application_context.h"
-#include "app/base/application_controller.h"
 #include "app/base/application_delegate_impl.h"
 #include "app/base/event.h"
+#include "app/inf/application_controller.h"
 
 extern "C" {
     void ark_runtime_on_create();
