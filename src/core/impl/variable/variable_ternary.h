@@ -19,8 +19,8 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        _condition->update(timestamp);
-        return _condition->val() ? _a->update(timestamp) : _b->update(timestamp);
+        bool dirty = _condition->update(timestamp);
+        return (_condition->val() ? _a->update(timestamp) : _b->update(timestamp)) || dirty;
     }
 
 private:
