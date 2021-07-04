@@ -24,8 +24,8 @@ RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec3>& position, co
 {
 }
 
-RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings, const sp<Disposed>& disposed)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _disposed(disposed, false), _visible(nullptr, true)
+RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings, const sp<Disposed>& disposed, sp<Visibility> visible)
+    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _disposed(disposed, false), _visible(std::move(visible), true)
 {
 }
 

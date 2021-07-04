@@ -28,8 +28,7 @@ public:
     Characters(const sp<RenderLayer>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
 //  [[script::bindings::auto]]
     Characters(const sp<LayerContext>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
-
-    Characters(const BeanFactory& factory, const sp<LayerContext>& layerContext, const sp<CharacterMapper>& characterMapper, const sp<CharacterMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
+    Characters(const BeanFactory& factory, const sp<LayerContext>& layerContext, const sp<GlyphMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
 //  [[script::bindings::property]]
     const sp<LayoutParam>& layoutParam() const;
@@ -62,8 +61,7 @@ public:
     private:
         BeanFactory _bean_factory;
         sp<Builder<LayerContext>> _layer_context;
-        SafePtr<Builder<CharacterMapper>> _character_mapper;
-        SafePtr<Builder<CharacterMaker>> _character_maker;
+        SafePtr<Builder<GlyphMaker>> _glyph_maker;
 
         sp<Builder<String>> _text_scale;
         float _letter_spacing;
@@ -72,24 +70,22 @@ public:
     };
 
 private:
-    typedef std::vector<Glyph> ContentMaker;
+    typedef std::vector<sp<Glyph>> GlyphContents;
 
     void createContent();
     void createRichContent(const Scope& args);
-    float createContentWithBoundary(ContentMaker& cm, const V2& s, float& flowx, float& flowy, const std::wstring& text, float boundary);
-    float createContentNoBoundary(ContentMaker& cm, const V2& s, float& flowx, float flowy, const std::wstring& text);
+    float doLayoutWithBoundary(GlyphContents& cm, float& flowx, float& flowy, float boundary);
+    float doLayoutWithoutBoundary(GlyphContents& cm, float& flowx, float flowy);
 
-    float doCreateContent(ContentMaker& cm, const V2& s, float& flowx, float& flowy, const std::wstring& text, float boundary);
-    float doCreateRichContent(ContentMaker& cm, const V2& s, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary);
-    void doLayoutContent();
+    float doLayoutContent(GlyphContents& cm, float& flowx, float& flowy, float boundary);
+    float doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary);
+    void layoutContent();
 
     void createLayerContent(float width, float height);
 
-
     struct LayoutChar {
-        LayoutChar(int32_t type, const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak);
+        LayoutChar(const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak);
 
-        int32_t _type;
         Metrics _metrics;
         float _width_integral;
         bool _is_cjk;
@@ -97,26 +93,26 @@ private:
         bool _is_line_break;
     };
 
-    void place(ContentMaker& cm, const V2& s, const std::vector<LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
-    void placeOne(ContentMaker& cm, const V2& s, const Metrics& metrics, int32_t type, float& flowx, float flowy, float* fontHeight = nullptr);
+    void place(GlyphContents& cm, const std::vector<LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
+    void placeOne(Glyph& cm, const Metrics& metrics, float& flowx, float flowy, float* fontHeight = nullptr);
 
     void nextLine(float fontHeight, float& flowx, float& flowy) const;
     float getFlowY() const;
 
-    std::vector<LayoutChar> getCharacterMetrics(const V2& s, const std::wstring& text) const;
+    std::vector<LayoutChar> getCharacterMetrics(const GlyphContents& glyphs) const;
     bool isCJK(int32_t c) const;
     bool isWordBreaker(wchar_t c) const;
 
-    int32_t toType(wchar_t c) const;
+    GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text);
 
 private:
     BeanFactoryWeakRef _bean_factory;
     sp<LayerContext> _layer_context;
     float _text_scale;
     sp<LayoutParam> _layout_param;
-    sp<CharacterMapper> _character_mapper;
-    sp<CharacterMaker> _character_maker;
+    sp<GlyphMaker> _glyph_maker;
 
+    std::vector<sp<Glyph>> _glyphs;
     std::vector<sp<RenderObject>> _contents;
     std::vector<sp<RenderablePassive>> _renderables;
     std::wstring _text;

@@ -3,8 +3,7 @@
 #include "core/base/observer.h"
 
 #include "graphics/base/glyph.h"
-#include "graphics/inf/character_maker.h"
-#include "graphics/inf/character_mapper.h"
+#include "graphics/inf/glyph_maker.h"
 
 #include "python/impl/adapter/python_callable_runnable.h"
 #include "python/impl/adapter/python_callable_event_listener.h"
@@ -18,28 +17,28 @@ namespace python {
 
 namespace {
 
-class PythonCallableCharacterMaker : public CharacterMaker {
+class PythonCallableCharacterMaker : public GlyphMaker {
 public:
     PythonCallableCharacterMaker(PyInstance callable)
         : _callable(std::move(callable)) {
     }
 
-    virtual std::vector<sp<RenderObject>> makeCharacter(const std::vector<Glyph>& glyphs) override {
+    virtual std::vector<sp<Glyph>> makeGlyphs(const std::wstring& text) override {
         DCHECK_THREAD_FLAG();
 
         const sp<PythonInterpreter>& interpreter = PythonInterpreter::instance();
         PyInstance args(PyInstance::steal(PyTuple_New(1)));
 
-        PyObject* pyArg = PyList_New(static_cast<Py_ssize_t>(glyphs.size()));
-        for(size_t i = 0; i < glyphs.size(); ++i)
-            PyList_SetItem(pyArg, static_cast<Py_ssize_t>(i), interpreter->toPyObject(sp<Glyph>::make(glyphs.at(i))));
-        PyTuple_SetItem(args.pyObject(), 0, pyArg);
+//        PyObject* pyArg = PyList_New(static_cast<Py_ssize_t>(glyphs.size()));
+//        for(size_t i = 0; i < glyphs.size(); ++i)
+//            PyList_SetItem(pyArg, static_cast<Py_ssize_t>(i), interpreter->toPyObject(sp<Glyph>::make(glyphs.at(i))));
+        PyTuple_SetItem(args.pyObject(), 0, interpreter->toPyObject(text));
         PyObject* ret = _callable.call(args.pyObject());
         if(ret)
         {
-            const std::vector<sp<RenderObject>> renderObjects = ret == Py_None ? std::vector<sp<RenderObject>>() : PythonInterpreter::instance()->toCppObject<std::vector<sp<RenderObject>>>(ret);
+            const std::vector<sp<Glyph>> glyphs = ret == Py_None ? std::vector<sp<Glyph>>() : PythonInterpreter::instance()->toCppObject<std::vector<sp<Glyph>>>(ret);
             Py_DECREF(ret);
-            return renderObjects;
+            return glyphs;
         }
         else
             PythonInterpreter::instance()->logErr();
@@ -47,38 +46,12 @@ public:
         return {};
     }
 
-    virtual V2 scale() override {
-        return V2(1.0f);
-    }
+//    virtual V2 scale() override {
+//        return V2(1.0f);
+//    }
 
 private:
     PyInstance _callable;
-};
-
-class PythonCallableCharacterMapper : public CharacterMapper {
-public:
-    PythonCallableCharacterMapper(PyInstance callable)
-        : _callable(std::move(callable)), _args(PyInstance::steal(PyTuple_New(1))) {
-    }
-
-    virtual int32_t mapCharacter(int32_t c) override {
-        DCHECK_THREAD_FLAG();
-
-        const sp<PythonInterpreter>& interpreter = PythonInterpreter::instance();
-        PyObject* pyType = interpreter->toPyObject<int32_t>(c);
-        PyTuple_SetItem(_args.pyObject(), 0, pyType);
-        PyInstance ret = PyInstance::steal(_callable.call(_args.pyObject()));
-        if(ret)
-            return PythonInterpreter::instance()->toCppObject<int32_t>(ret.pyObject());
-
-        PythonInterpreter::instance()->logErr();
-        return 0;
-    }
-
-private:
-    PyInstance _callable;
-    PyInstance _args;
-
 };
 
 }
@@ -104,14 +77,9 @@ void PyCallableDuckType::to(sp<EventListener>& inst)
     inst = sp<PythonCallableEventListener>::make(_instance);
 }
 
-void PyCallableDuckType::to(sp<CharacterMaker>& inst)
+void PyCallableDuckType::to(sp<GlyphMaker>& inst)
 {
     inst = sp<PythonCallableCharacterMaker>::make(_instance);
-}
-
-void PyCallableDuckType::to(sp<CharacterMapper>& inst)
-{
-    inst = sp<PythonCallableCharacterMapper>::make(_instance);
 }
 
 void PyCallableDuckType::to(sp<RendererMaker>& inst)
