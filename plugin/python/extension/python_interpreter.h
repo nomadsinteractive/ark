@@ -189,7 +189,7 @@ private:
     template<typename T> PyObject* toPyObject_sfinae(const T& ptr, typename T::_PtrType*) {
         return fromSharedPtr(static_cast<sp<typename T::_PtrType>>(ptr));
     }
-    template<typename T> PyObject* toPyObject_sfinae(const T& iterable, decltype(iterable.begin())*) {
+    template<typename T> PyObject* toPyObject_sfinae(const T& iterable, typename std::enable_if<!(std::is_same<T, std::string>::value  || std::is_same<T, std::wstring>::value), decltype(iterable.begin())>::type*) {
         return fromIterable_sfinae<T>(iterable, nullptr);
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& value, decltype(value.second)*) {

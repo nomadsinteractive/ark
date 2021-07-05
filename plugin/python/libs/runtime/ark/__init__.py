@@ -1444,18 +1444,20 @@ class EventDispatcher(EventListener):
 
 
 class Glyph:
+    def __init__(self, _type: Integer, position: Optional[Vec3] = None, transform: Optional[Transform] = None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, disposed: Optional[Disposed] = None):
+        pass
 
     @property
-    def character(self) -> int:
-        return 0
+    def type(self) -> Optional[Integer]:
+        return None
 
     @property
-    def position(self) -> Tuple[float, float, float]:
-        return 0, 0, 0
+    def position(self) -> Optional[Vec3]:
+        return None
 
     @property
-    def size(self) -> Tuple[float, float]:
-        return 0, 0
+    def transform(self) -> Optional[Transform]:
+        return None
 
 
 class Characters:

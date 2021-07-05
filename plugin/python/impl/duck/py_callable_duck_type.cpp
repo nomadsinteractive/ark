@@ -28,10 +28,6 @@ public:
 
         const sp<PythonInterpreter>& interpreter = PythonInterpreter::instance();
         PyInstance args(PyInstance::steal(PyTuple_New(1)));
-
-//        PyObject* pyArg = PyList_New(static_cast<Py_ssize_t>(glyphs.size()));
-//        for(size_t i = 0; i < glyphs.size(); ++i)
-//            PyList_SetItem(pyArg, static_cast<Py_ssize_t>(i), interpreter->toPyObject(sp<Glyph>::make(glyphs.at(i))));
         PyTuple_SetItem(args.pyObject(), 0, interpreter->toPyObject(text));
         PyObject* ret = _callable.call(args.pyObject());
         if(ret)
@@ -45,10 +41,6 @@ public:
 
         return {};
     }
-
-//    virtual V2 scale() override {
-//        return V2(1.0f);
-//    }
 
 private:
     PyInstance _callable;
