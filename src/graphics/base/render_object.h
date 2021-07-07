@@ -22,10 +22,9 @@ namespace ark {
 class ARK_API RenderObject : public Holder, public Renderable {
 public:
 //  [[script::bindings::auto]]
-    RenderObject(int32_t type, const sp<Vec3>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
+    RenderObject(int32_t type, const sp<Vec3>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr, sp<Visibility> visible = nullptr, sp<Disposed> disposed = nullptr);
 //  [[script::bindings::auto]]
-    RenderObject(const sp<Integer>& type, const sp<Vec3>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr);
-    RenderObject(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings, const sp<Disposed>& disposed, sp<Visibility> visible = nullptr);
+    RenderObject(const sp<Integer>& type, const sp<Vec3>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr, sp<Visibility> visible = nullptr, sp<Disposed> disposed = nullptr);
 
     virtual void traverse(const Visitor& visitor) override;
 
@@ -137,8 +136,8 @@ private:
     SafePtr<Transform> _transform;
     SafePtr<Varyings> _varyings;
 
-    SafeVar<Disposed> _disposed;
     SafeVar<Visibility> _visible;
+    SafeVar<Disposed> _disposed;
 
     Box _tag;
 

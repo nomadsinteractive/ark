@@ -48,7 +48,7 @@ const sp<Visibility>& Glyph::visible() const
 
 sp<RenderObject> Glyph::toRenderObject() const
 {
-    return sp<RenderObject>::make(_type, toRenderObjectPosition(), sp<Size>::make(_layout_size.x(), _layout_size.y()), _transform, _varyings, _disposed, _visible);
+    return sp<RenderObject>::make(_type, toRenderObjectPosition(), sp<Size>::make(_layout_size.x(), _layout_size.y()), _transform, _varyings, _visible, _disposed);
 }
 
 sp<Vec3> Glyph::toRenderObjectPosition() const

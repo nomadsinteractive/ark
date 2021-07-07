@@ -37,6 +37,7 @@ public:
     PythonInterpreter();
 
     sp<Numeric> toNumeric(PyObject* object, bool alert = true);
+    sp<Boolean> toBoolean(PyObject* object, bool alert = true);
     String toString(PyObject* object, const char* encoding = nullptr, const char* error = nullptr) const;
     Scope toScope(PyObject* kws) const;
 
@@ -259,6 +260,11 @@ template<> inline sp<Numeric> PythonInterpreter::toSharedPtr<Numeric>(PyObject* 
 template<> inline sp<Integer> PythonInterpreter::toSharedPtr<Integer>(PyObject* object, bool alert)
 {
     return toInteger(object, alert);
+}
+
+template<> inline sp<Boolean> PythonInterpreter::toSharedPtr<Boolean>(PyObject* object, bool alert)
+{
+    return toBoolean(object, alert);
 }
 
 template<> inline sp<Runnable> PythonInterpreter::toSharedPtr<Runnable>(PyObject* object, bool alert)

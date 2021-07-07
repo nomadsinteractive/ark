@@ -156,6 +156,17 @@ sp<Numeric> PythonInterpreter::toNumeric(PyObject* object, bool alert)
     return toSharedPtrImpl<Numeric>(object, alert);
 }
 
+sp<Boolean> PythonInterpreter::toBoolean(PyObject* object, bool alert)
+{
+    if(isNoneOrNull(object))
+        return sp<Boolean>::make<Boolean::Const>(false);
+
+    if(PyBool_Check(object))
+        return sp<Boolean>::make<Boolean::Const>(PyObject_IsTrue(object));
+
+    return toSharedPtrImpl<Boolean>(object, alert);
+}
+
 sp<Integer> PythonInterpreter::toInteger(PyObject* object, bool alert)
 {
     if(PyLong_CheckExact(object))

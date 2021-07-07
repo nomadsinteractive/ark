@@ -64,7 +64,7 @@ public:
         SafePtr<Builder<GlyphMaker>> _glyph_maker;
 
         sp<Builder<String>> _text_scale;
-        float _letter_spacing;
+        sp<Builder<Numeric>> _letter_spacing;
         float _line_height;
         float _line_indent;
     };

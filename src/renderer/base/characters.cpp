@@ -6,6 +6,7 @@
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
+#include "core/util/bean_utils.h"
 #include "core/util/math.h"
 
 #include "graphics/base/layer.h"
@@ -323,7 +324,7 @@ Characters::GlyphContents Characters::makeGlyphs(GlyphMaker& gm, const std::wstr
 
 Characters::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _bean_factory(factory), _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_DYNAMIC)), _glyph_maker(factory.getBuilder<GlyphMaker>(manifest, "glyph-maker")),
-      _text_scale(factory.getBuilder<String>(manifest, "text-scale")), _letter_spacing(Documents::getAttribute<float>(manifest, "letter-spacing", 0.0f)),
+      _text_scale(factory.getBuilder<String>(manifest, "text-scale")), _letter_spacing(factory.getBuilder<Numeric>(manifest, "letter-spacing")),
       _line_height(Documents::getAttribute<float>(manifest, "line-height", 0.0f)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))
 {
 }
@@ -331,7 +332,7 @@ Characters::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<Characters> Characters::BUILDER::build(const Scope& args)
 {
     float textScale = _text_scale ? Strings::parse<float>(_text_scale->build(args)) : 1.0f;
-    return sp<Characters>::make(_bean_factory, _layer_context->build(args), _glyph_maker->build(args), textScale, _letter_spacing, _line_height, _line_indent);
+    return sp<Characters>::make(_bean_factory, _layer_context->build(args), _glyph_maker->build(args), textScale, BeanUtils::toFloat(_letter_spacing, args, 0.0f), _line_height, _line_indent);
 }
 
 Characters::LayoutChar::LayoutChar(const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak)

@@ -489,7 +489,7 @@ class Numeric(_Var):
     def boost(self, v0: float, cd: Union[float, 'Numeric'], t: Optional['Numeric'] = None) -> 'Numeric':
         pass
 
-    def if_else(self, condition: Boolean, negative: 'Numeric') -> 'Numeric':
+    def if_else(self, condition: Union[bool, Boolean], negative: Union[float, 'Numeric']) -> 'Numeric':
         pass
 
     def synchronize(self, disposed: Boolean) -> 'Numeric':
@@ -815,7 +815,7 @@ class Level:
 
 
 class RenderObject:
-    def __init__(self, t, pos=None, size=None, transform=None, varyings=None):
+    def __init__(self, t, pos=None, size=None, transform=None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, disposed: Optional[Disposed] = None):
         self._position = pos
         self._size = size
         self._transform = transform
@@ -1444,7 +1444,7 @@ class EventDispatcher(EventListener):
 
 
 class Glyph:
-    def __init__(self, _type: Integer, position: Optional[Vec3] = None, transform: Optional[Transform] = None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, disposed: Optional[Disposed] = None):
+    def __init__(self, _type: Union[Integer, int], position: Optional[Vec3] = None, transform: Optional[Transform] = None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, disposed: Optional[Disposed] = None):
         pass
 
     @property
