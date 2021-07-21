@@ -40,8 +40,10 @@ public:
         FLEX_FLOW_ROW_REVERSE
     };
 
-    static const int32_t MATCH_PARENT;
-    static const int32_t WRAP_CONTENT;
+    enum SizeConstraint {
+        SIZE_CONSTRAINT_MATCH_PARENT = -1,
+        SIZE_CONSTRAINT_WRAP_CONTENT = -2
+    };
 
 public:
 //  [[script::bindings::auto]]

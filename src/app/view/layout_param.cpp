@@ -11,9 +11,6 @@
 
 namespace ark {
 
-const int32_t LayoutParam::MATCH_PARENT = -1;
-const int32_t LayoutParam::WRAP_CONTENT = -2;
-
 template<> ARK_API LayoutParam::Display Conversions::to<String, LayoutParam::Display>(const String& str)
 {
     if(str == "float")
@@ -179,12 +176,12 @@ bool LayoutParam::isHeightMatchParent() const
 
 bool LayoutParam::isMatchParent(float unit)
 {
-    return static_cast<int32_t>(unit) == MATCH_PARENT;
+    return static_cast<int32_t>(unit) == SIZE_CONSTRAINT_MATCH_PARENT;
 }
 
 bool LayoutParam::isWrapContent(float unit)
 {
-    return static_cast<int32_t>(unit) == WRAP_CONTENT;
+    return static_cast<int32_t>(unit) == SIZE_CONSTRAINT_WRAP_CONTENT;
 }
 
 LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -199,7 +196,7 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
 
 template<> ARK_API sp<LayoutParam> Null::ptr()
 {
-    return sp<LayoutParam>::make(sp<Size>::make(static_cast<float>(LayoutParam::MATCH_PARENT), static_cast<float>(LayoutParam::MATCH_PARENT)));
+    return sp<LayoutParam>::make(sp<Size>::make(static_cast<float>(LayoutParam::SIZE_CONSTRAINT_MATCH_PARENT), static_cast<float>(LayoutParam::SIZE_CONSTRAINT_MATCH_PARENT)));
 }
 
 template<> ARK_API LayoutParam::Gravity Conversions::to<String, LayoutParam::Gravity>(const String& s)
