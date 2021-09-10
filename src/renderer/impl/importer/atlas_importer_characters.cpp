@@ -12,7 +12,7 @@ AtlasImporterCharacters::AtlasImporterCharacters(String characters, uint32_t fon
 {
 }
 
-void AtlasImporterCharacters::import(Atlas& atlas)
+void AtlasImporterCharacters::import(Atlas& atlas, const sp<Readable>& /*readable*/)
 {
     uint32_t flowx = 0;
     uint32_t flowy = 0;
@@ -35,7 +35,7 @@ AtlasImporterCharacters::BUILDER::BUILDER(BeanFactory& /*factory*/, const docume
 {
 }
 
-sp<Atlas::Importer> AtlasImporterCharacters::BUILDER::build(const Scope& /*args*/)
+sp<AtlasImporter> AtlasImporterCharacters::BUILDER::build(const Scope& /*args*/)
 {
     return sp<AtlasImporterCharacters>::make(_characters, _font_width, _font_height);
 }

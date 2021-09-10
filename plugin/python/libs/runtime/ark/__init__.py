@@ -54,6 +54,10 @@ class Object:
     pass
 
 
+class Readable:
+    pass
+
+
 class _Var:
     def __init__(self, v):
         pass
@@ -251,13 +255,20 @@ class ApplicationController:
         pass
 
 
+class AtlasImporter:
+    pass
+
+
 class Atlas:
 
     def has(self, c: int) -> bool:
-        return False
+        pass
 
     def get_original_size(self, c:  int) -> tuple:
-        return 0, 0
+        pass
+
+    def add_importer(self, importer: AtlasImporter, readable: Optional[Readable] = None):
+        pass
 
 
 class Buffer:
@@ -299,7 +310,7 @@ class AudioPlayer:
     PLAY_OPTION_LOOP_OFF = 0
     PLAY_OPTION_LOOP_ON = 1
 
-    def play(self, source: Union[str, 'Readable'], options: int = PLAY_OPTION_DEFAULT):
+    def play(self, source: Union[str, Readable], options: int = PLAY_OPTION_DEFAULT):
         pass
 
 
@@ -918,8 +929,7 @@ class RenderObject:
         pass
 
 
-class Expectation:
-
+class _Expectation:
     def create_observer(self, callback: Callable, oneshot=True) -> Observer:
         pass
 
@@ -930,12 +940,12 @@ class Expectation:
         pass
 
 
-class ExpectationF(Numeric, Expectation):
+class ExpectationF(Numeric, _Expectation):
     def __init__(self, val):
         super().__init__(val)
 
 
-class ExpectationI(Integer, Expectation):
+class ExpectationI(Integer, _Expectation):
     def __init__(self, val):
         super().__init__(val)
 
@@ -1292,10 +1302,6 @@ class Math:
         return 0, 0
 
 
-class Readable:
-    pass
-
-
 class Size:
     def __init__(self, w, h, d = None):
         pass
@@ -1647,6 +1653,10 @@ class RayCastManifold:
     @property
     def normal(self) -> Tuple[float, float, float]:
         return 0, 0, 0
+
+    @property
+    def rigid_body(self) -> Optional[RigidBody]:
+        return None
 
 
 class Collider:

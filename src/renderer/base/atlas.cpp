@@ -2,6 +2,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/dom/dom_document.h"
+#include "core/inf/importer.h"
 #include "core/inf/dictionary.h"
 #include "core/util/math.h"
 #include "core/util/documents.h"
@@ -14,8 +15,8 @@
 
 namespace ark {
 
-Atlas::Atlas(const sp<Texture>& texture, bool allowDefaultItem)
-    : _texture(texture), _width(static_cast<float>(_texture->width())), _height(static_cast<float>(_texture->height())), _allow_default_item(allowDefaultItem)
+Atlas::Atlas(sp<Texture> texture, bool allowDefaultItem)
+    : _texture(std::move(texture)), _width(static_cast<float>(_texture->width())), _height(static_cast<float>(_texture->height())), _allow_default_item(allowDefaultItem)
 {
 }
 
@@ -73,6 +74,11 @@ Rect Atlas::getItemUV(int32_t c) const
     return at(c).uv();
 }
 
+void Atlas::addImporter(const sp<AtlasImporter>& importer, const sp<Readable>& /*readable*/)
+{
+    importer->import(*this, nullptr);
+}
+
 ByType& Atlas::attachments()
 {
     return _attachments;
@@ -121,7 +127,7 @@ Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
     for(const document& i : manifest->children())
         if(i->name() == "import")
-            _importers.push_back(factory.ensureBuilder<Importer>(i));
+            _importers.push_back(factory.ensureBuilder<AtlasImporter>(i));
         else if(i->name() != Constants::Attributes::TEXTURE)
         {
             DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
@@ -131,15 +137,16 @@ Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Atlas> Atlas::BUILDER::build(const Scope& args)
 {
-    const sp<Texture> texture = _texture->build(args);
+    sp<Texture> texture = _texture->build(args);
     DASSERT(texture);
-    const sp<Atlas> atlas = sp<Atlas>::make(texture);
+    const sp<Atlas> atlas = sp<Atlas>::make(std::move(texture));
 
     for(const document& i : _items)
         atlas->loadItem(i);
 
-    for(const sp<Builder<Importer>>& i : _importers)
-        i->build(args)->import(atlas);
+    for(const sp<Builder<AtlasImporter>>& i : _importers)
+        i->build(args)->import(atlas, nullptr);
+
     return atlas;
 }
 

@@ -18,7 +18,7 @@ AtlasImporterMaxRects::AtlasImporterMaxRects(document manifest, sp<ResourceLoade
 {
 }
 
-void AtlasImporterMaxRects::import(Atlas& atlas)
+void AtlasImporterMaxRects::import(Atlas& atlas, const sp<Readable>& /*readable*/)
 {
     TexturePacker texturePacker(_resource_loader_context, atlas.texture());
     MaxRectsBinPack binPack(atlas.texture()->width(), atlas.texture()->height(), false);
@@ -48,7 +48,7 @@ AtlasImporterMaxRects::BUILDER::BUILDER(const document& manifest, const sp<Resou
 {
 }
 
-sp<Atlas::Importer> AtlasImporterMaxRects::BUILDER::build(const Scope& /*args*/)
+sp<AtlasImporter> AtlasImporterMaxRects::BUILDER::build(const Scope& /*args*/)
 {
     return sp<AtlasImporterMaxRects>::make(_manifest, _resource_loader_context);
 }

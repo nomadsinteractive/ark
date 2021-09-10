@@ -3,6 +3,10 @@
 #include "core/ark.h"
 #include "core/util/documents.h"
 
+#include "graphics/base/rect.h"
+
+#include "renderer/base/atlas.h"
+
 namespace ark {
 
 AtlasImporterGenericXML::AtlasImporterGenericXML(String src, float px, float py)
@@ -10,7 +14,7 @@ AtlasImporterGenericXML::AtlasImporterGenericXML(String src, float px, float py)
 {
 }
 
-void AtlasImporterGenericXML::import(Atlas& atlas)
+void AtlasImporterGenericXML::import(Atlas& atlas, const sp<Readable>& /*readable*/)
 {
     const document src = Documents::loadFromReadable(Ark::instance().openAsset(_src));
     DCHECK(src, "Cannot load %s", _src.c_str());
@@ -39,7 +43,7 @@ AtlasImporterGenericXML::BUILDER::BUILDER(BeanFactory& factory, const document& 
 {
 }
 
-sp<Atlas::Importer> AtlasImporterGenericXML::BUILDER::build(const Scope& args)
+sp<AtlasImporter> AtlasImporterGenericXML::BUILDER::build(const Scope& args)
 {
     return sp<AtlasImporterGenericXML>::make(_src->build(args), _px, _py);
 }

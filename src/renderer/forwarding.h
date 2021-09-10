@@ -1,6 +1,8 @@
 #ifndef ARK_RENDERER_BASE_FORWARDING_H_
 #define ARK_RENDERER_BASE_FORWARDING_H_
 
+#include "core/forwarding.h"
+
 namespace ark {
 
 class Animation;
@@ -48,6 +50,9 @@ class VertexStream;
 class Vertices;
 class Uniform;
 class Uploader;
+
+//[[script::bindings::auto]]
+typedef Importer<Atlas> AtlasImporter;
 
 }
 

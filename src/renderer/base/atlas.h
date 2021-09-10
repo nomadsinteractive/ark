@@ -21,14 +21,7 @@ namespace ark {
 
 class ARK_API Atlas {
 public:
-    Atlas(const sp<Texture>& texture, bool allowDefaultItem = false);
-
-    class ARK_API Importer {
-    public:
-        virtual ~Importer() = default;
-
-        virtual void import(Atlas& atlas/*, BeanFactory& factory, const document& manifest*/) = 0;
-    };
+    Atlas(sp<Texture> texture, bool allowDefaultItem = false);
 
     class ARK_API Item {
     public:
@@ -70,6 +63,9 @@ public:
 //  [[script::bindings::auto]]
     Rect getItemUV(int32_t c) const;
 
+//  [[script::bindings::auto]]
+    void addImporter(const sp<AtlasImporter>& importer, const sp<Readable>& readable = nullptr);
+
     ByType& attachments();
 
     const std::unordered_map<int32_t, Item>& items() const;
@@ -92,7 +88,7 @@ public:
 
     private:
         std::vector<document> _items;
-        std::vector<sp<Builder<Importer>>> _importers;
+        std::vector<sp<Builder<AtlasImporter>>> _importers;
         SafePtr<Builder<Texture>> _texture;
     };
 

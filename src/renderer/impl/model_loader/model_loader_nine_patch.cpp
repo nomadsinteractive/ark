@@ -42,7 +42,7 @@ ModelLoaderNinePatch::ATLAS_IMPORTER_BUILDER::ATLAS_IMPORTER_BUILDER(const docum
 {
 }
 
-sp<Atlas::Importer> ModelLoaderNinePatch::ATLAS_IMPORTER_BUILDER::build(const Scope& /*args*/)
+sp<AtlasImporter> ModelLoaderNinePatch::ATLAS_IMPORTER_BUILDER::build(const Scope& /*args*/)
 {
     return sp<NinePatchAtlasImporter>::make(_manifest);
 }
@@ -52,7 +52,7 @@ ModelLoaderNinePatch::NinePatchAtlasImporter::NinePatchAtlasImporter(document ma
 {
 }
 
-void ModelLoaderNinePatch::NinePatchAtlasImporter::import(Atlas& atlas)
+void ModelLoaderNinePatch::NinePatchAtlasImporter::import(Atlas& atlas, const sp<Readable>& /*readable*/)
 {
     const sp<NinePatchVertices>& vertices = atlas.attachments().ensure<NinePatchVertices>();
     vertices->import(atlas, _manifest);

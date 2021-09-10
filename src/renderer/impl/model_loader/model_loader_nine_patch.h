@@ -1,9 +1,10 @@
 #ifndef ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_NINE_PATCH_H_
 #define ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_NINE_PATCH_H_
 
+#include "core/inf/importer.h"
 #include "core/types/shared_ptr.h"
 
-#include "renderer/base/atlas.h"
+#include "renderer/forwarding.h"
 #include "renderer/inf/model_loader.h"
 
 namespace ark {
@@ -20,11 +21,11 @@ public:
     virtual Model loadModel(int32_t type) override;
 
 //  [[plugin::builder("nine-patch")]]
-    class ATLAS_IMPORTER_BUILDER : public Builder<Atlas::Importer> {
+    class ATLAS_IMPORTER_BUILDER : public Builder<AtlasImporter> {
     public:
         ATLAS_IMPORTER_BUILDER(const document& manifest);
 
-        virtual sp<Atlas::Importer> build(const Scope& args) override;
+        virtual sp<AtlasImporter> build(const Scope& args) override;
 
     private:
         document _manifest;
@@ -55,11 +56,11 @@ private:
         std::unordered_map<int32_t, sp<Vertices>> _vertices;
     };
 
-    class NinePatchAtlasImporter : public Atlas::Importer {
+    class NinePatchAtlasImporter : public AtlasImporter {
     public:
         NinePatchAtlasImporter(document manifest);
 
-        virtual void import(Atlas& atlas) override;
+        virtual void import(Atlas& atlas, const sp<Readable>& readable) override;
 
     private:
         document _manifest;
