@@ -1,0 +1,721 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B01385FA22E33006002CD329 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01385F922E33006002CD329 /* AppDelegate.swift */; };
+		B01385FC22E33006002CD329 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01385FB22E33006002CD329 /* GameViewController.swift */; };
+		B01385FF22E33006002CD329 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B01385FD22E33006002CD329 /* Main.storyboard */; };
+		B013860222E33006002CD329 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B013860022E33006002CD329 /* LaunchScreen.storyboard */; };
+		B013860B22E33006002CD329 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B013860A22E33006002CD329 /* AppDelegate.swift */; };
+		B013860D22E33006002CD329 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B013860C22E33006002CD329 /* GameViewController.swift */; };
+		B013861022E33006002CD329 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B013860E22E33006002CD329 /* Main.storyboard */; };
+		B013861422E33006002CD329 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01385EF22E33004002CD329 /* Renderer.swift */; };
+		B013861522E33006002CD329 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01385EF22E33004002CD329 /* Renderer.swift */; };
+		B013861822E33006002CD329 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B01385F122E33005002CD329 /* Assets.xcassets */; };
+		B013861922E33006002CD329 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B01385F122E33005002CD329 /* Assets.xcassets */; };
+		B013862322E3311D002CD329 /* ark_runtime_bridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B013862222E3311D002CD329 /* ark_runtime_bridge.cpp */; settings = {COMPILER_FLAGS = "-DARK_PLATFORM_DARWIN"; }; };
+		B013862422E331D4002CD329 /* ark_runtime_bridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B013862222E3311D002CD329 /* ark_runtime_bridge.cpp */; settings = {COMPILER_FLAGS = "-DARK_PLATFORM_DARWIN"; }; };
+		B013862722E334AC002CD329 /* libark.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B013862622E334AC002CD329 /* libark.dylib */; };
+		B013862822E334B5002CD329 /* libark.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = B013862622E334AC002CD329 /* libark.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		B013866E22E4D2C4002CD329 /* libark.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = B013866D22E4D2C4002CD329 /* libark.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		B013867022E4D2EB002CD329 /* libark.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B013866D22E4D2C4002CD329 /* libark.dylib */; };
+		B013867C22EDC17F002CD329 /* MainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B013867B22EDC17F002CD329 /* MainWindowController.swift */; };
+		B013867D22EE0C98002CD329 /* manifest.xml in Resources */ = {isa = PBXBuildFile; fileRef = B013864522E350DD002CD329 /* manifest.xml */; };
+		B013867E22EE0C98002CD329 /* main.py in Resources */ = {isa = PBXBuildFile; fileRef = B013863E22E34592002CD329 /* main.py */; };
+		B013867F22EE0C98002CD329 /* main.xml in Resources */ = {isa = PBXBuildFile; fileRef = B013863D22E34592002CD329 /* main.xml */; };
+		B013868022EE0C98002CD329 /* alphabet.png in Resources */ = {isa = PBXBuildFile; fileRef = B013863022E33563002CD329 /* alphabet.png */; };
+		B013868122EE0C98002CD329 /* app.xml in Resources */ = {isa = PBXBuildFile; fileRef = B013862D22E33563002CD329 /* app.xml */; };
+		B013868222EE0C98002CD329 /* blocks.png in Resources */ = {isa = PBXBuildFile; fileRef = B013862C22E33563002CD329 /* blocks.png */; };
+		B013868322EE0C98002CD329 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = B013862B22E33563002CD329 /* fonts */; };
+		B013868422EE0C98002CD329 /* prefab.xml in Resources */ = {isa = PBXBuildFile; fileRef = B013863122E33563002CD329 /* prefab.xml */; };
+		B013868522EE0C98002CD329 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = B013862F22E33563002CD329 /* scripts */; };
+		B013868622EE0C98002CD329 /* t001.png in Resources */ = {isa = PBXBuildFile; fileRef = B013862E22E33563002CD329 /* t001.png */; };
+		B036DB1322F54191008B7A2D /* android.info in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0122F54190008B7A2D /* android.info */; };
+		B036DB1422F54191008B7A2D /* android.info in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0122F54190008B7A2D /* android.info */; };
+		B036DB1522F54191008B7A2D /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0222F54190008B7A2D /* scripts */; };
+		B036DB1622F54191008B7A2D /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0222F54190008B7A2D /* scripts */; };
+		B036DB1722F54191008B7A2D /* var.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0322F54190008B7A2D /* var.xml */; };
+		B036DB1822F54191008B7A2D /* var.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0322F54190008B7A2D /* var.xml */; };
+		B036DB1922F54191008B7A2D /* application.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0422F54190008B7A2D /* application.xml */; };
+		B036DB1A22F54191008B7A2D /* application.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0422F54190008B7A2D /* application.xml */; };
+		B036DB1B22F54191008B7A2D /* main.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0522F54190008B7A2D /* main.xml */; };
+		B036DB1C22F54191008B7A2D /* main.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0522F54190008B7A2D /* main.xml */; };
+		B036DB1D22F54191008B7A2D /* t001.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0622F54190008B7A2D /* t001.xml */; };
+		B036DB1E22F54191008B7A2D /* t001.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0622F54190008B7A2D /* t001.xml */; };
+		B036DB1F22F54191008B7A2D /* t002.png in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0722F54190008B7A2D /* t002.png */; };
+		B036DB2022F54191008B7A2D /* t002.png in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0722F54190008B7A2D /* t002.png */; };
+		B036DB2122F54191008B7A2D /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0822F54190008B7A2D /* fonts */; };
+		B036DB2222F54191008B7A2D /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0822F54190008B7A2D /* fonts */; };
+		B036DB2322F54191008B7A2D /* stage.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0922F54190008B7A2D /* stage.xml */; };
+		B036DB2422F54191008B7A2D /* stage.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0922F54190008B7A2D /* stage.xml */; };
+		B036DB2522F54191008B7A2D /* locales in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0A22F54190008B7A2D /* locales */; };
+		B036DB2622F54191008B7A2D /* locales in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0A22F54190008B7A2D /* locales */; };
+		B036DB2722F54191008B7A2D /* sfx in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0B22F54190008B7A2D /* sfx */; };
+		B036DB2822F54191008B7A2D /* sfx in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0B22F54190008B7A2D /* sfx */; };
+		B036DB2922F54191008B7A2D /* t002.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0C22F54190008B7A2D /* t002.xml */; };
+		B036DB2A22F54191008B7A2D /* t002.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0C22F54190008B7A2D /* t002.xml */; };
+		B036DB2B22F54191008B7A2D /* manifest.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0D22F54190008B7A2D /* manifest.xml */; };
+		B036DB2C22F54191008B7A2D /* manifest.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0D22F54190008B7A2D /* manifest.xml */; };
+		B036DB2D22F54191008B7A2D /* alphabet.png in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0E22F54190008B7A2D /* alphabet.png */; };
+		B036DB2E22F54191008B7A2D /* alphabet.png in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0E22F54190008B7A2D /* alphabet.png */; };
+		B036DB2F22F54191008B7A2D /* prefab.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0F22F54191008B7A2D /* prefab.xml */; };
+		B036DB3022F54191008B7A2D /* prefab.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB0F22F54191008B7A2D /* prefab.xml */; };
+		B036DB3122F54191008B7A2D /* t000.png in Resources */ = {isa = PBXBuildFile; fileRef = B036DB1022F54191008B7A2D /* t000.png */; };
+		B036DB3222F54191008B7A2D /* t000.png in Resources */ = {isa = PBXBuildFile; fileRef = B036DB1022F54191008B7A2D /* t000.png */; };
+		B036DB3322F54191008B7A2D /* t000.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB1122F54191008B7A2D /* t000.xml */; };
+		B036DB3422F54191008B7A2D /* t000.xml in Resources */ = {isa = PBXBuildFile; fileRef = B036DB1122F54191008B7A2D /* t000.xml */; };
+		B036DB3522F54191008B7A2D /* t001.png in Resources */ = {isa = PBXBuildFile; fileRef = B036DB1222F54191008B7A2D /* t001.png */; };
+		B036DB3622F54191008B7A2D /* t001.png in Resources */ = {isa = PBXBuildFile; fileRef = B036DB1222F54191008B7A2D /* t001.png */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B013862922E334B5002CD329 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				B013862822E334B5002CD329 /* libark.dylib in Embed Libraries */,
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B013866F22E4D2C4002CD329 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				B013866E22E4D2C4002CD329 /* libark.dylib in Embed Libraries */,
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		B01385EF22E33004002CD329 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		B01385F122E33005002CD329 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B01385F622E33006002CD329 /* AppLauncher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppLauncher.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B01385F922E33006002CD329 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		B01385FB22E33006002CD329 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
+		B01385FE22E33006002CD329 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		B013860122E33006002CD329 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		B013860322E33006002CD329 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B013860822E33006002CD329 /* AppLauncher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppLauncher.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B013860A22E33006002CD329 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		B013860C22E33006002CD329 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
+		B013860F22E33006002CD329 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		B013861122E33006002CD329 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B013862222E3311D002CD329 /* ark_runtime_bridge.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ark_runtime_bridge.cpp; sourceTree = "<group>"; };
+		B013862622E334AC002CD329 /* libark.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libark.dylib; path = ../../../out/ios/libark.dylib; sourceTree = "<group>"; };
+		B013862B22E33563002CD329 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = ../../../samples/assets/fonts; sourceTree = "<group>"; };
+		B013862C22E33563002CD329 /* blocks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = blocks.png; path = ../../../samples/assets/blocks.png; sourceTree = "<group>"; };
+		B013862D22E33563002CD329 /* app.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = app.xml; path = ../../../samples/assets/app.xml; sourceTree = "<group>"; };
+		B013862E22E33563002CD329 /* t001.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = t001.png; path = ../../../samples/assets/t001.png; sourceTree = "<group>"; };
+		B013862F22E33563002CD329 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../../../samples/assets/scripts; sourceTree = "<group>"; };
+		B013863022E33563002CD329 /* alphabet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = alphabet.png; path = ../../../samples/assets/alphabet.png; sourceTree = "<group>"; };
+		B013863122E33563002CD329 /* prefab.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = prefab.xml; path = ../../../samples/assets/prefab.xml; sourceTree = "<group>"; };
+		B013863D22E34592002CD329 /* main.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = main.xml; path = "../../../samples/s04-ui/main.xml"; sourceTree = "<group>"; };
+		B013863E22E34592002CD329 /* main.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; name = main.py; path = "../../../samples/s04-ui/main.py"; sourceTree = "<group>"; };
+		B013864522E350DD002CD329 /* manifest.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = manifest.xml; path = "../../../samples/s04-ui/manifest.xml"; sourceTree = "<group>"; };
+		B013866C22E4D066002CD329 /* ark_runtime_bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ark_runtime_bridge.h; sourceTree = "<group>"; };
+		B013866D22E4D2C4002CD329 /* libark.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libark.dylib; path = ../../../out/darwin/libark.dylib; sourceTree = "<group>"; };
+		B013867B22EDC17F002CD329 /* MainWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowController.swift; sourceTree = "<group>"; };
+		B036DB0122F54190008B7A2D /* android.info */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = android.info; path = "../../../../nomads-takoyaki/assets/android.info"; sourceTree = "<group>"; };
+		B036DB0222F54190008B7A2D /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = "../../../../nomads-takoyaki/assets/scripts"; sourceTree = "<group>"; };
+		B036DB0322F54190008B7A2D /* var.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = var.xml; path = "../../../../nomads-takoyaki/assets/var.xml"; sourceTree = "<group>"; };
+		B036DB0422F54190008B7A2D /* application.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = application.xml; path = "../../../../nomads-takoyaki/assets/application.xml"; sourceTree = "<group>"; };
+		B036DB0522F54190008B7A2D /* main.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = main.xml; path = "../../../../nomads-takoyaki/assets/main.xml"; sourceTree = "<group>"; };
+		B036DB0622F54190008B7A2D /* t001.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = t001.xml; path = "../../../../nomads-takoyaki/assets/t001.xml"; sourceTree = "<group>"; };
+		B036DB0722F54190008B7A2D /* t002.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = t002.png; path = "../../../../nomads-takoyaki/assets/t002.png"; sourceTree = "<group>"; };
+		B036DB0822F54190008B7A2D /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = "../../../../nomads-takoyaki/assets/fonts"; sourceTree = "<group>"; };
+		B036DB0922F54190008B7A2D /* stage.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = stage.xml; path = "../../../../nomads-takoyaki/assets/stage.xml"; sourceTree = "<group>"; };
+		B036DB0A22F54190008B7A2D /* locales */ = {isa = PBXFileReference; lastKnownFileType = folder; name = locales; path = "../../../../nomads-takoyaki/assets/locales"; sourceTree = "<group>"; };
+		B036DB0B22F54190008B7A2D /* sfx */ = {isa = PBXFileReference; lastKnownFileType = folder; name = sfx; path = "../../../../nomads-takoyaki/assets/sfx"; sourceTree = "<group>"; };
+		B036DB0C22F54190008B7A2D /* t002.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = t002.xml; path = "../../../../nomads-takoyaki/assets/t002.xml"; sourceTree = "<group>"; };
+		B036DB0D22F54190008B7A2D /* manifest.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = manifest.xml; path = "../../../../nomads-takoyaki/assets/manifest.xml"; sourceTree = "<group>"; };
+		B036DB0E22F54190008B7A2D /* alphabet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = alphabet.png; path = "../../../../nomads-takoyaki/assets/alphabet.png"; sourceTree = "<group>"; };
+		B036DB0F22F54191008B7A2D /* prefab.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = prefab.xml; path = "../../../../nomads-takoyaki/assets/prefab.xml"; sourceTree = "<group>"; };
+		B036DB1022F54191008B7A2D /* t000.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = t000.png; path = "../../../../nomads-takoyaki/assets/t000.png"; sourceTree = "<group>"; };
+		B036DB1122F54191008B7A2D /* t000.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = t000.xml; path = "../../../../nomads-takoyaki/assets/t000.xml"; sourceTree = "<group>"; };
+		B036DB1222F54191008B7A2D /* t001.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = t001.png; path = "../../../../nomads-takoyaki/assets/t001.png"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B01385F322E33006002CD329 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B013862722E334AC002CD329 /* libark.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B013860522E33006002CD329 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B013867022E4D2EB002CD329 /* libark.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B01385E822E33003002CD329 = {
+			isa = PBXGroup;
+			children = (
+				B036DB0022F5413B008B7A2D /* Assets Takoyaki */,
+				B013866D22E4D2C4002CD329 /* libark.dylib */,
+				B013862A22E3353A002CD329 /* Assets */,
+				B01385ED22E33004002CD329 /* AppLauncher Shared */,
+				B01385F822E33006002CD329 /* AppLauncher iOS */,
+				B013860922E33006002CD329 /* AppLauncher macOS */,
+				B01385F722E33006002CD329 /* Products */,
+				B013862522E334AC002CD329 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		B01385ED22E33004002CD329 /* AppLauncher Shared */ = {
+			isa = PBXGroup;
+			children = (
+				B013866C22E4D066002CD329 /* ark_runtime_bridge.h */,
+				B013862222E3311D002CD329 /* ark_runtime_bridge.cpp */,
+				B01385EF22E33004002CD329 /* Renderer.swift */,
+				B01385F122E33005002CD329 /* Assets.xcassets */,
+			);
+			path = "AppLauncher Shared";
+			sourceTree = "<group>";
+		};
+		B01385F722E33006002CD329 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B01385F622E33006002CD329 /* AppLauncher.app */,
+				B013860822E33006002CD329 /* AppLauncher.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B01385F822E33006002CD329 /* AppLauncher iOS */ = {
+			isa = PBXGroup;
+			children = (
+				B01385F922E33006002CD329 /* AppDelegate.swift */,
+				B01385FB22E33006002CD329 /* GameViewController.swift */,
+				B01385FD22E33006002CD329 /* Main.storyboard */,
+				B013860022E33006002CD329 /* LaunchScreen.storyboard */,
+				B013860322E33006002CD329 /* Info.plist */,
+			);
+			path = "AppLauncher iOS";
+			sourceTree = "<group>";
+		};
+		B013860922E33006002CD329 /* AppLauncher macOS */ = {
+			isa = PBXGroup;
+			children = (
+				B013860A22E33006002CD329 /* AppDelegate.swift */,
+				B013860C22E33006002CD329 /* GameViewController.swift */,
+				B013860E22E33006002CD329 /* Main.storyboard */,
+				B013867B22EDC17F002CD329 /* MainWindowController.swift */,
+				B013861122E33006002CD329 /* Info.plist */,
+			);
+			path = "AppLauncher macOS";
+			sourceTree = "<group>";
+		};
+		B013862522E334AC002CD329 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B013862622E334AC002CD329 /* libark.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B013862A22E3353A002CD329 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				B013864522E350DD002CD329 /* manifest.xml */,
+				B013863E22E34592002CD329 /* main.py */,
+				B013863D22E34592002CD329 /* main.xml */,
+				B013863022E33563002CD329 /* alphabet.png */,
+				B013862D22E33563002CD329 /* app.xml */,
+				B013862C22E33563002CD329 /* blocks.png */,
+				B013862B22E33563002CD329 /* fonts */,
+				B013863122E33563002CD329 /* prefab.xml */,
+				B013862F22E33563002CD329 /* scripts */,
+				B013862E22E33563002CD329 /* t001.png */,
+			);
+			name = Assets;
+			sourceTree = "<group>";
+		};
+		B036DB0022F5413B008B7A2D /* Assets Takoyaki */ = {
+			isa = PBXGroup;
+			children = (
+				B036DB0E22F54190008B7A2D /* alphabet.png */,
+				B036DB0122F54190008B7A2D /* android.info */,
+				B036DB0422F54190008B7A2D /* application.xml */,
+				B036DB0822F54190008B7A2D /* fonts */,
+				B036DB0A22F54190008B7A2D /* locales */,
+				B036DB0522F54190008B7A2D /* main.xml */,
+				B036DB0D22F54190008B7A2D /* manifest.xml */,
+				B036DB0F22F54191008B7A2D /* prefab.xml */,
+				B036DB0222F54190008B7A2D /* scripts */,
+				B036DB0B22F54190008B7A2D /* sfx */,
+				B036DB0922F54190008B7A2D /* stage.xml */,
+				B036DB1022F54191008B7A2D /* t000.png */,
+				B036DB1122F54191008B7A2D /* t000.xml */,
+				B036DB1222F54191008B7A2D /* t001.png */,
+				B036DB0622F54190008B7A2D /* t001.xml */,
+				B036DB0722F54190008B7A2D /* t002.png */,
+				B036DB0C22F54190008B7A2D /* t002.xml */,
+				B036DB0322F54190008B7A2D /* var.xml */,
+			);
+			name = "Assets Takoyaki";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B01385F522E33006002CD329 /* AppLauncher iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B013861C22E33006002CD329 /* Build configuration list for PBXNativeTarget "AppLauncher iOS" */;
+			buildPhases = (
+				B01385F222E33006002CD329 /* Sources */,
+				B01385F322E33006002CD329 /* Frameworks */,
+				B01385F422E33006002CD329 /* Resources */,
+				B013862922E334B5002CD329 /* Embed Libraries */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "AppLauncher iOS";
+			productName = "AppLauncher iOS";
+			productReference = B01385F622E33006002CD329 /* AppLauncher.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B013860722E33006002CD329 /* AppLauncher macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B013861F22E33006002CD329 /* Build configuration list for PBXNativeTarget "AppLauncher macOS" */;
+			buildPhases = (
+				B013860422E33006002CD329 /* Sources */,
+				B013860522E33006002CD329 /* Frameworks */,
+				B013860622E33006002CD329 /* Resources */,
+				B013866F22E4D2C4002CD329 /* Embed Libraries */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "AppLauncher macOS";
+			productName = "AppLauncher macOS";
+			productReference = B013860822E33006002CD329 /* AppLauncher.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B01385E922E33003002CD329 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1020;
+				LastUpgradeCheck = 1020;
+				ORGANIZATIONNAME = "Nomads Interactive";
+				TargetAttributes = {
+					B01385F522E33006002CD329 = {
+						CreatedOnToolsVersion = 10.2.1;
+					};
+					B013860722E33006002CD329 = {
+						CreatedOnToolsVersion = 10.2.1;
+					};
+				};
+			};
+			buildConfigurationList = B01385EC22E33003002CD329 /* Build configuration list for PBXProject "AppLauncher" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B01385E822E33003002CD329;
+			productRefGroup = B01385F722E33006002CD329 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B01385F522E33006002CD329 /* AppLauncher iOS */,
+				B013860722E33006002CD329 /* AppLauncher macOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B01385F422E33006002CD329 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B036DB2122F54191008B7A2D /* fonts in Resources */,
+				B036DB2D22F54191008B7A2D /* alphabet.png in Resources */,
+				B01385FF22E33006002CD329 /* Main.storyboard in Resources */,
+				B036DB2B22F54191008B7A2D /* manifest.xml in Resources */,
+				B036DB1F22F54191008B7A2D /* t002.png in Resources */,
+				B013861822E33006002CD329 /* Assets.xcassets in Resources */,
+				B036DB2722F54191008B7A2D /* sfx in Resources */,
+				B036DB2322F54191008B7A2D /* stage.xml in Resources */,
+				B036DB2922F54191008B7A2D /* t002.xml in Resources */,
+				B036DB2F22F54191008B7A2D /* prefab.xml in Resources */,
+				B036DB1922F54191008B7A2D /* application.xml in Resources */,
+				B036DB3322F54191008B7A2D /* t000.xml in Resources */,
+				B036DB1D22F54191008B7A2D /* t001.xml in Resources */,
+				B036DB3122F54191008B7A2D /* t000.png in Resources */,
+				B013860222E33006002CD329 /* LaunchScreen.storyboard in Resources */,
+				B036DB2522F54191008B7A2D /* locales in Resources */,
+				B036DB1B22F54191008B7A2D /* main.xml in Resources */,
+				B036DB3522F54191008B7A2D /* t001.png in Resources */,
+				B036DB1722F54191008B7A2D /* var.xml in Resources */,
+				B036DB1522F54191008B7A2D /* scripts in Resources */,
+				B036DB1322F54191008B7A2D /* android.info in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B013860622E33006002CD329 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B036DB2E22F54191008B7A2D /* alphabet.png in Resources */,
+				B036DB1C22F54191008B7A2D /* main.xml in Resources */,
+				B036DB2C22F54191008B7A2D /* manifest.xml in Resources */,
+				B013867D22EE0C98002CD329 /* manifest.xml in Resources */,
+				B036DB2622F54191008B7A2D /* locales in Resources */,
+				B036DB1622F54191008B7A2D /* scripts in Resources */,
+				B036DB1A22F54191008B7A2D /* application.xml in Resources */,
+				B013867E22EE0C98002CD329 /* main.py in Resources */,
+				B013867F22EE0C98002CD329 /* main.xml in Resources */,
+				B036DB3022F54191008B7A2D /* prefab.xml in Resources */,
+				B013868022EE0C98002CD329 /* alphabet.png in Resources */,
+				B036DB1422F54191008B7A2D /* android.info in Resources */,
+				B036DB1822F54191008B7A2D /* var.xml in Resources */,
+				B013868122EE0C98002CD329 /* app.xml in Resources */,
+				B013868222EE0C98002CD329 /* blocks.png in Resources */,
+				B036DB2222F54191008B7A2D /* fonts in Resources */,
+				B013868322EE0C98002CD329 /* fonts in Resources */,
+				B036DB2422F54191008B7A2D /* stage.xml in Resources */,
+				B036DB2022F54191008B7A2D /* t002.png in Resources */,
+				B036DB3422F54191008B7A2D /* t000.xml in Resources */,
+				B036DB1E22F54191008B7A2D /* t001.xml in Resources */,
+				B036DB2822F54191008B7A2D /* sfx in Resources */,
+				B013868422EE0C98002CD329 /* prefab.xml in Resources */,
+				B013868522EE0C98002CD329 /* scripts in Resources */,
+				B013868622EE0C98002CD329 /* t001.png in Resources */,
+				B036DB2A22F54191008B7A2D /* t002.xml in Resources */,
+				B036DB3622F54191008B7A2D /* t001.png in Resources */,
+				B013861022E33006002CD329 /* Main.storyboard in Resources */,
+				B013861922E33006002CD329 /* Assets.xcassets in Resources */,
+				B036DB3222F54191008B7A2D /* t000.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B01385F222E33006002CD329 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B013862322E3311D002CD329 /* ark_runtime_bridge.cpp in Sources */,
+				B013861422E33006002CD329 /* Renderer.swift in Sources */,
+				B01385FC22E33006002CD329 /* GameViewController.swift in Sources */,
+				B01385FA22E33006002CD329 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B013860422E33006002CD329 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B013862422E331D4002CD329 /* ark_runtime_bridge.cpp in Sources */,
+				B013861522E33006002CD329 /* Renderer.swift in Sources */,
+				B013860D22E33006002CD329 /* GameViewController.swift in Sources */,
+				B013860B22E33006002CD329 /* AppDelegate.swift in Sources */,
+				B013867C22EDC17F002CD329 /* MainWindowController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		B01385FD22E33006002CD329 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B01385FE22E33006002CD329 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		B013860022E33006002CD329 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B013860122E33006002CD329 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		B013860E22E33006002CD329 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B013860F22E33006002CD329 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		B013861A22E33006002CD329 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ark/include;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		B013861B22E33006002CD329 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ark/include;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		B013861D22E33006002CD329 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMPRESS_PNG_FILES = NO;
+				DEVELOPMENT_TEAM = 38TCB398MK;
+				INFOPLIST_FILE = "AppLauncher iOS/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = ark/iOS;
+				PRODUCT_BUNDLE_IDENTIFIER = nomadsinteractive.AppLauncher;
+				PRODUCT_NAME = AppLauncher;
+				SDKROOT = iphoneos;
+				STRIP_PNG_TEXT = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "AppLauncher Shared/ark_runtime_bridge.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "arm64 arm64e";
+			};
+			name = Debug;
+		};
+		B013861E22E33006002CD329 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMPRESS_PNG_FILES = NO;
+				DEVELOPMENT_TEAM = 38TCB398MK;
+				INFOPLIST_FILE = "AppLauncher iOS/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = ark/iOS;
+				PRODUCT_BUNDLE_IDENTIFIER = nomadsinteractive.AppLauncher;
+				PRODUCT_NAME = AppLauncher;
+				SDKROOT = iphoneos;
+				STRIP_PNG_TEXT = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "AppLauncher Shared/ark_runtime_bridge.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = "arm64 arm64e";
+			};
+			name = Release;
+		};
+		B013862022E33006002CD329 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 38TCB398MK;
+				INFOPLIST_FILE = "AppLauncher macOS/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = ark/macOS;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				PRODUCT_BUNDLE_IDENTIFIER = nomadsinteractive.AppLauncher;
+				PRODUCT_NAME = AppLauncher;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "AppLauncher Shared/ark_runtime_bridge.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		B013862122E33006002CD329 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 38TCB398MK;
+				INFOPLIST_FILE = "AppLauncher macOS/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = ark/macOS;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				PRODUCT_BUNDLE_IDENTIFIER = nomadsinteractive.AppLauncher;
+				PRODUCT_NAME = AppLauncher;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "AppLauncher Shared/ark_runtime_bridge.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B01385EC22E33003002CD329 /* Build configuration list for PBXProject "AppLauncher" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B013861A22E33006002CD329 /* Debug */,
+				B013861B22E33006002CD329 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B013861C22E33006002CD329 /* Build configuration list for PBXNativeTarget "AppLauncher iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B013861D22E33006002CD329 /* Debug */,
+				B013861E22E33006002CD329 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B013861F22E33006002CD329 /* Build configuration list for PBXNativeTarget "AppLauncher macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B013862022E33006002CD329 /* Debug */,
+				B013862122E33006002CD329 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B01385E922E33003002CD329 /* Project object */;
+}
