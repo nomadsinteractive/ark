@@ -525,7 +525,7 @@ class Integer(_Var):
     REPEAT_REVERSE = 3
     REPEAT_REVERSE_RESTART = 4
 
-    def __init__(self, value: Union[int, 'Integer', list, tuple]):
+    def __init__(self, value: Union[int, 'Integer', Numeric]):
         super().__init__(value)
 
     def __int__(self) -> int:
@@ -1351,6 +1351,8 @@ class Tileset:
 
 
 class TilemapLayer:
+    def __init__(self, tilemap: 'Tilemap', row_count: int, col_count: int, position: Union[Vec2, Vec3], flag: int):
+        pass
 
     @property
     def flag(self) -> int:
@@ -1366,6 +1368,7 @@ class Tilemap(Renderer):
     LAYER_FLAG_DEFAULT = 0
 
     def __init__(self, layer: LayerContext, w: int, h: int, tileset: Tileset):
+        super().__init__()
         self._tileset = tileset
 
     def clear(self):

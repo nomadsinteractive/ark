@@ -82,7 +82,7 @@ void Level::load(const String& src)
                 if(camera)
                 {
                     const V3 p = parseVector<V3>(position);
-                    const Transform::Snapshot ts = transform->snapshot();
+                    const Transform::Snapshot ts = transform->snapshot(V3(0));
                     camera->lookAt(p, ts.transform(V3(0, 0, -1)) + p, ts.transform(V3(0, 1, 0)));
                 }
             }

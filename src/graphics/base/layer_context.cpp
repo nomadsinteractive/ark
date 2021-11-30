@@ -83,8 +83,8 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
     {
         const Item& i = *iter;
         i._disposed.update(renderRequest.timestamp());
-        Renderable::Snapshot snapshot = i._disposed.val() ? Renderable::Snapshot() : i._renderable->snapshot(pipelineInput, renderRequest);
-        snapshot._position += _position;
+        Renderable::Snapshot snapshot = i._disposed.val() ? Renderable::Snapshot() : i._renderable->snapshot(pipelineInput, renderRequest, _position);
+//        snapshot._position += _position;
         if(snapshot._disposed || snapshot._type == -1)
         {
             notify = true;

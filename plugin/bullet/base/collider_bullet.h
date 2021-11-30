@@ -151,7 +151,7 @@ private:
     public:
         DynamicTransform(const sp<btMotionState>& motionState);
 
-        virtual void snapshot(const Transform& transform, Transform::Snapshot& snapshot) const override;
+        virtual void snapshot(const Transform& transform, const V3& postTranslate, Transform::Snapshot& snapshot) const override;
         virtual V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override;
         virtual M4 toMatrix(const Transform::Snapshot& snapshot) const override;
 

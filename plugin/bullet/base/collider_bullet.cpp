@@ -297,7 +297,7 @@ ColliderBullet::DynamicTransform::DynamicTransform(const sp<btMotionState>& moti
 {
 }
 
-void ColliderBullet::DynamicTransform::snapshot(const Transform& /*transform*/, Transform::Snapshot& snapshot) const
+void ColliderBullet::DynamicTransform::snapshot(const Transform& /*transform*/, const V3& /*postTranslate*/, Transform::Snapshot& snapshot) const
 {
     btTransform transform;
     _motion_state->getWorldTransform(transform);

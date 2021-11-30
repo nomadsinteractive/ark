@@ -30,7 +30,7 @@ public:
 
     virtual bool update(uint64_t timestamp) override {
         if(_transform->update(timestamp)) {
-            _value = _transform->snapshot().toMatrix();
+            _value = _transform->snapshot(V3(0)).toMatrix();
             return true;
         }
         return false;
@@ -64,9 +64,9 @@ void Transform::traverse(const Holder::Visitor& visitor)
     HolderUtil::visit(_pivot.delegate(), visitor);
 }
 
-Transform::Snapshot Transform::snapshot() const
+Transform::Snapshot Transform::snapshot(const V3& postTranslate) const
 {
-    return Snapshot(*this);
+    return Snapshot(*this, postTranslate);
 }
 
 bool Transform::update(uint64_t timestamp)
@@ -138,10 +138,10 @@ sp<Transform::Delegate> Transform::makeTransformSimple() const
     return _type == TYPE_LINEAR_2D ? Global<TransformSimple2D>().cast<Transform::Delegate>() : Global<TransformSimple3D>().cast<Transform::Delegate>();
 }
 
-Transform::Snapshot::Snapshot(const Transform& transform)
+Transform::Snapshot::Snapshot(const Transform& transform, const V3& postTranslate)
     : _delegate(transform._delegate)
 {
-    _delegate->snapshot(transform, *this);
+    _delegate->snapshot(transform, postTranslate, *this);
 }
 
 M4 Transform::Snapshot::toMatrix() const

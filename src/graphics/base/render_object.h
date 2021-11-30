@@ -110,7 +110,7 @@ public:
     bool isDisposed() const;
     bool isVisible() const;
 
-    virtual Renderable::Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest) override;
+    virtual Renderable::Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate) override;
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<RenderObject> {

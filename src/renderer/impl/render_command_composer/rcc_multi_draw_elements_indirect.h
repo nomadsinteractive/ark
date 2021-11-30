@@ -16,7 +16,7 @@ namespace ark {
 
 class ARK_API RCCMultiDrawElementsIndirect : public RenderCommandComposer {
 public:
-    RCCMultiDrawElementsIndirect(const sp<ModelBundle>& multiModels);
+    RCCMultiDrawElementsIndirect(sp<ModelBundle> multiModels);
 
     virtual sp<ShaderBindings> makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode) override;
 
@@ -29,7 +29,7 @@ private:
     public:
         VerticesUploader(const sp<ModelBundle>& multiModels, const sp<PipelineInput>& pipelineInput);
 
-        void upload(Writable& uploader);
+        void upload(Writable& uploader) override;
 
     private:
         sp<ModelBundle> _model_bundle;
@@ -40,7 +40,7 @@ private:
     public:
         IndicesUploader(const sp<ModelBundle>& multiModels);
 
-        void upload(Writable& uploader);
+        void upload(Writable& uploader) override;
 
     private:
         sp<ModelBundle> _model_bundle;

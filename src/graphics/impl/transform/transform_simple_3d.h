@@ -9,7 +9,7 @@ namespace ark {
 class TransformSimple3D : public Transform::Delegate {
 public:
 
-    virtual void snapshot(const Transform& transform, Transform::Snapshot& snapshot) const override;
+    virtual void snapshot(const Transform& transform, const V3& postTranslate, Transform::Snapshot& snapshot) const override;
     virtual V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override;
     virtual M4 toMatrix(const Transform::Snapshot& snapshot) const override;
 
@@ -17,7 +17,8 @@ private:
     struct Snapshot {
         uint32_t magic;
         V3 scale;
-        V3 pivot;
+        V3 preTranslate;
+        V3 postTranslate;
     };
 };
 

@@ -238,13 +238,13 @@ bool RenderObject::isVisible() const
     return _visible.val();
 }
 
-Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest)
+Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate)
 {
     if(_disposed.update(renderRequest.timestamp()) && _disposed.val())
         return Renderable::Snapshot();
 
     bool dirty = VariableUtil::update(renderRequest.timestamp(), _visible, _type, _position, _size, _transform, _varyings, _visible) || _timestamp.update(renderRequest.timestamp());
-    return Renderable::Snapshot(false, dirty, _visible.val(), _type->val(), _position.val(), _size.val(), _transform->snapshot(), _varyings->snapshot(pipelineInput, renderRequest.allocator()));
+    return Renderable::Snapshot(false, dirty, _visible.val(), _type->val(), _position.val(), _size.val(), _transform->snapshot(postTranslate), _varyings->snapshot(pipelineInput, renderRequest.allocator()));
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

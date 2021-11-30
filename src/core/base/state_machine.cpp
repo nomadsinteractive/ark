@@ -7,6 +7,7 @@
 namespace ark {
 
 StateMachine::StateMachine()
+    : _active_state(nullptr)
 {
 }
 

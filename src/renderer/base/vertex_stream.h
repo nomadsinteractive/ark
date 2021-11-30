@@ -17,7 +17,7 @@ class ARK_API VertexStream {
 public:
     class Writer : public Writable {
     public:
-        virtual ~Writer() = default;
+        virtual ~Writer() override = default;
 
         virtual void next() = 0;
         virtual void writePosition(const V3& position) = 0;

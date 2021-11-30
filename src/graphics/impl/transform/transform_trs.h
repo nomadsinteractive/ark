@@ -1,12 +1,13 @@
-#ifndef ARK_GRAPHICS_IMPL_TRANSFORM_TRANSFORM_SIMPLE_2D_H_
-#define ARK_GRAPHICS_IMPL_TRANSFORM_TRANSFORM_SIMPLE_2D_H_
+#ifndef ARK_GRAPHICS_IMPL_TRANSFORM_TRANSFORM_TRS_H_
+#define ARK_GRAPHICS_IMPL_TRANSFORM_TRANSFORM_TRS_H_
 
 #include "graphics/forwarding.h"
+#include "graphics/base/mat.h"
 #include "graphics/base/transform.h"
 
 namespace ark {
 
-class TransformSimple2D : public Transform::Delegate {
+class TransformTRS : public Transform::Delegate {
 public:
 
     virtual void snapshot(const Transform& transform, const V3& postTranslate, Transform::Snapshot& snapshot) const override;
@@ -15,10 +16,7 @@ public:
 
 private:
     struct Snapshot {
-        uint32_t magic;
-        V2 scale;
-        V2 preTranslate;
-        V2 postTranslate;
+        M3 matrix;
     };
 };
 

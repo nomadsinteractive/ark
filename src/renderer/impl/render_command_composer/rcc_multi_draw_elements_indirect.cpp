@@ -17,8 +17,8 @@
 
 namespace ark {
 
-RCCMultiDrawElementsIndirect::RCCMultiDrawElementsIndirect(const sp<ModelBundle>& multiModels)
-    : _model_bundle(multiModels)
+RCCMultiDrawElementsIndirect::RCCMultiDrawElementsIndirect(sp<ModelBundle> multiModels)
+    : _model_bundle(std::move(multiModels))
 {
 }
 

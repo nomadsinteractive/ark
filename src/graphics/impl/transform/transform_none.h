@@ -9,9 +9,14 @@ namespace ark {
 class TransformNone : public Transform::Delegate {
 public:
 
-    virtual void snapshot(const Transform& transform, Transform::Snapshot& snapshot) const override;
+    virtual void snapshot(const Transform& transform, const V3& postTranslate, Transform::Snapshot& snapshot) const override;
     virtual V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override;
     virtual M4 toMatrix(const Transform::Snapshot& snapshot) const override;
+
+private:
+    struct Snapshot {
+        V3 postTranslate;
+    };
 
 };
 
