@@ -60,15 +60,15 @@
 #   define DWARN(cond, ...) WARN(cond, __VA_ARGS__)
 #   define DTRACE(cond) if(cond) __trace__()
 #   define DTHREAD_CHECK(threadId) __thread_check__<threadId>(__ARK_FUNCTION__)
-#   define DPROFILER_TRACE(name, ...) static auto ARK_CONCAT(_ag_tracer_, __LINE__) = Ark::instance().makeProfilerTracer(__ARK_FUNCTION_SIGANTURE__, __FILE__, __LINE__, name, __VA_ARGS__); \
-                                      const auto ARK_CONCAT(_ag_scope_, __LINE__) = ARK_CONCAT(_ag_tracer_, __LINE__) ? ARK_CONCAT(_ag_tracer_, __LINE__)->trace() : nullptr
+#   define DPROFILER_TRACE(...) static auto ARK_CONCAT(_ag_tracer_, __LINE__) = Ark::instance().makeProfilerTracer(__ARK_FUNCTION_SIGANTURE__, __FILE__, __LINE__, __VA_ARGS__); \
+                                const auto ARK_CONCAT(_ag_scope_, __LINE__) = ARK_CONCAT(_ag_tracer_, __LINE__) ? ARK_CONCAT(_ag_tracer_, __LINE__)->trace() : nullptr
 #else
 #   define DFATAL(...)
 #   define DCHECK(cond, ...) (void (cond))
 #   define DWARN(cond, ...) (void (cond))
 #   define DTRACE(cond) (void (cond))
 #   define DTHREAD_CHECK(threadId) (void (threadId))
-#   define DPROFILER_TRACE(name, ...)
+#   define DPROFILER_TRACE(...)
 #endif
 
 #define DASSERT(x) DCHECK(x, "Assertion failed")
