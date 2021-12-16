@@ -23,8 +23,8 @@ namespace {
 
 class TilemapLayerMaker : public RendererMaker {
 public:
-    TilemapLayerMaker(Tilemap& tilemap, sp<RendererMaker> delegate)
-        : _tilemap(tilemap), _delegate(std::move(delegate)) {
+    TilemapLayerMaker(Tilemap& tilemap, sp<RendererMaker> delegate, sp<Vec3> scroller)
+        : _tilemap(tilemap), _delegate(std::move(delegate)), _scroller(std::move(scroller)) {
     }
 
     virtual sp<Renderer> make(int32_t x, int32_t y) override {
@@ -32,7 +32,8 @@ public:
         sp<TilemapLayer> tilemapLayer = renderer.as<TilemapLayer>();
         DWARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
         if(tilemapLayer) {
-            tilemapLayer->setFlag(static_cast<Tilemap::LayerFlag>(tilemapLayer->flag() | Tilemap::LAYER_FLAG_SCROLLABLE));
+            tilemapLayer->setScroller(_scroller);
+            tilemapLayer->setFlag(static_cast<Tilemap::LayerFlag>(tilemapLayer->flag() | Tilemap::LAYER_FLAG_SCROLLABLE | Tilemap::LAYER_FLAG_INVISIBLE));
             _tilemap.addLayer(tilemapLayer);
         }
         return renderer;
@@ -41,6 +42,7 @@ public:
     virtual void recycle(const sp<Renderer>& renderer) override {
         sp<TilemapLayer> tilemapLayer = renderer.as<TilemapLayer>();
         DWARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
+        _delegate->recycle(renderer);
         if(tilemapLayer)
             _tilemap.removeLayer(tilemapLayer);
     }
@@ -48,7 +50,7 @@ public:
 private:
     Tilemap& _tilemap;
     sp<RendererMaker> _delegate;
-
+    sp<Vec3> _scroller;
 };
 
 }
@@ -67,7 +69,8 @@ void Tilemap::render(RenderRequest& renderRequest, const V3& position)
         _scrollable->render(renderRequest, V3(0));
 
     for(const sp<TilemapLayer>& i : _layers)
-        i->render(renderRequest, V3(0));
+        if(!(i->flag() & LAYER_FLAG_INVISIBLE))
+            i->render(renderRequest, V3(0));
 }
 
 const sp<Size>& Tilemap::size()
@@ -108,16 +111,6 @@ const sp<Tileset>& Tilemap::tileset() const
     return _tileset;
 }
 
-const sp<Vec3>& Tilemap::scroller() const
-{
-    return _scroller;
-}
-
-void Tilemap::setScroller(const sp<Vec3>& scroller)
-{
-    _scroller = scroller;
-}
-
 void Tilemap::load(const sp<Readable>& readable)
 {
     DASSERT(_importer);
@@ -129,9 +122,9 @@ void Tilemap::load(const String& src)
     load(Ark::instance().openAsset(src));
 }
 
-sp<TilemapLayer> Tilemap::makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position, Tilemap::LayerFlag layerFlag)
+sp<TilemapLayer> Tilemap::makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position, const sp<Vec3>& scroller, Tilemap::LayerFlag layerFlag)
 {
-    sp<TilemapLayer> layer = sp<TilemapLayer>::make(*this, rowCount, colCount, position, layerFlag);
+    sp<TilemapLayer> layer = sp<TilemapLayer>::make(*this, rowCount, colCount, position, scroller, layerFlag);
     _layers.push_back(layer);
     return layer;
 }
@@ -156,8 +149,7 @@ const std::list<sp<TilemapLayer>>& Tilemap::layers() const
 
 Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_TRANSIENT)), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _tileset(factory.ensureBuilder<Tileset>(manifest, "tileset")), _importer(factory.getBuilder<TilemapImporter>(manifest, "importer")), _scrollable(manifest->getChild("scrollable")),
-      _renderer_maker(_scrollable ? factory.ensureBuilder<RendererMaker>(_scrollable, "renderer-maker") : nullptr)
+      _tileset(factory.ensureBuilder<Tileset>(manifest, "tileset")), _importer(factory.getBuilder<TilemapImporter>(manifest, "importer")), _scrollable(factory.getBuilder<Scrollable>(manifest, "scrollable"))
 {
 }
 
@@ -165,7 +157,11 @@ sp<Tilemap> Tilemap::BUILDER::build(const Scope& args)
 {
     sp<Tilemap> tilemap = sp<Tilemap>::make(_layer_context->build(args), _size->build(args), _tileset->build(args), _importer->build(args));
     if(_scrollable)
-        tilemap->_scrollable = sp<Scrollable>::make(tilemap->_scroller, sp<TilemapLayerMaker>::make(tilemap, _renderer_maker->build(args)), tilemap->_size, Scrollable::Params(_scrollable));
+    {
+        sp<Scrollable> scrollable = _scrollable->build(args);
+        scrollable->setRendererMaker(sp<TilemapLayerMaker>::make(tilemap, scrollable->rendererMaker(), scrollable->scroller()));
+        tilemap->_scrollable = std::move(scrollable);
+    }
     return tilemap;
 }
 

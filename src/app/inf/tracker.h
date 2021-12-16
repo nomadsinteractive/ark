@@ -18,7 +18,7 @@ public:
     virtual ~Tracker() = default;
 
 //  [[script::bindings::auto]]
-    virtual sp<Vec3> create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& aabb) = 0;
+    virtual sp<Vec3> create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& size) = 0;
 //  [[script::bindings::auto]]
     virtual void remove(int32_t id) = 0;
 

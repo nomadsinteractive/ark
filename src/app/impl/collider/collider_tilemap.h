@@ -18,9 +18,9 @@
 
 namespace ark {
 
-class TiledCollider : public Collider {
+class ColliderTilemap : public Collider {
 public:
-    TiledCollider(const sp<Tilemap>& tilemap, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    ColliderTilemap(const sp<Tilemap>& tilemap, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate) override;
     virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to) override;
@@ -69,7 +69,7 @@ public:
 
         virtual void dispose() override;
 
-        void collision(const Rect& rect);
+        void collision(const Rect& aabb);
 
     private:
         void updateRigidBodyShadow(const Contact& contact);

@@ -17,58 +17,72 @@ namespace ark {
 class ARK_API Scrollable : public Renderer, public Block {
 public:
     struct ARK_API Params {
-        Params(int32_t rowCount, int32_t colCount, int32_t rowIndex, int32_t colIndex, int32_t tileWidth, int32_t tileHeight);
-        Params(const document& manifest);
+        Params(int32_t rowCount, int32_t colCount, int32_t rowIndex, int32_t colIndex, int32_t rendererWidth, int32_t rendererHeight);
 
         int32_t _row_count;
         int32_t _col_count;
         int32_t _row_index;
         int32_t _col_index;
-        int32_t _tile_width;
-        int32_t _tile_height;
+        int32_t _renderer_width;
+        int32_t _renderer_height;
     };
 
 private:
-    class RollingAdapter {
+    class RendererPool {
     public:
-        RollingAdapter(const Params& params);
-        RollingAdapter(const RollingAdapter& other);
+        RendererPool(int32_t rendererWidth, int32_t rendererHeight);
 
-        void setScrollXY(int32_t x, int32_t y);
-        int32_t scrollX() const;
-        int32_t scrollY() const;
-
-        void roll(const RollingAdapter& rollingView, RendererMaker& tileMaker, int32_t tileWidth, int32_t tileHeight);
-
-        const sp<Renderer>& getTile(RendererMaker& tileMaker, int32_t rowIndex, int32_t colIndex) const;
-        void putTile(int32_t rowIndex, int32_t colIndex, const sp<Renderer>& tile);
+        const sp<Renderer>& ensureRenderer(RendererMaker& rendererMaker, int32_t x, int32_t y, const RectI& viewport);
 
     private:
-        const Params& _params;
-        array<sp<Renderer>> _tiles;
-        int32_t _scroll_x;
-        int32_t _scroll_y;
+        void recycleOutOfViewportRenderers(RendererMaker& rendererMaker, const RectI& viewport);
+
+    private:
+        typedef std::pair<int32_t, int32_t> RendererKey;
+
+        int32_t _renderer_width;
+        int32_t _renderer_height;
+        std::map<RendererKey, sp<Renderer>> _renderers;
     };
 
 public:
-    Scrollable(const sp<Vec3>& scroller, const sp<RendererMaker>& tileMaker, const sp<Size>& size, const Params& params);
+    Scrollable(sp<Vec3> scroller, sp<RendererMaker> rendererMaker, sp<Size> size, const Scrollable::Params& params);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     virtual const sp<Size>& size() override;
 
-//  [[plugin::builder("scrollable")]]
-    class BUILDER : public Builder<Renderer> {
+    const sp<Vec3>& scroller() const;
+    const sp<RendererMaker>& rendererMaker() const;
+    void setRendererMaker(const sp<RendererMaker>& rendererMaker);
+
+//  [[plugin::builder]]
+    class BUILDER_SCROLLABLE : public Builder<Scrollable> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest);
+        BUILDER_SCROLLABLE(BeanFactory& factory, const document& manifest);
+
+        virtual sp<Scrollable> build(const Scope& args) override;
+
+    private:
+        sp<Builder<Vec3>> _scroller;
+        sp<Builder<RendererMaker>> _renderer_maker;
+        sp<Builder<Size>> _size;
+
+        int32_t _row_count;
+        int32_t _col_count;
+        sp<Builder<Numeric>> _renderer_width;
+        sp<Builder<Numeric>> _renderer_height;
+    };
+
+//  [[plugin::builder("scrollable")]]
+    class BUILDER_RENDERER : public Builder<Renderer> {
+    public:
+        BUILDER_RENDERER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        sp<Builder<Vec3>> _scroller;
-        sp<Builder<RendererMaker>> _tile_maker;
-        sp<Builder<Size>> _size;
-        Params _params;
+        BUILDER_SCROLLABLE _impl;
     };
 
 private:
@@ -80,14 +94,12 @@ private:
 
 private:
     Params _params;
-    RollingAdapter _rolling_view;
+    RendererPool _renderer_pool;
     sp<Vec3> _scroller;
     sp<RendererMaker> _renderer_maker;
     SafePtr<Size> _size;
     int32_t _scroll_x;
     int32_t _scroll_y;
-
-
 };
 
 }

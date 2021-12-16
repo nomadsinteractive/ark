@@ -23,6 +23,7 @@ public:
     enum LayerFlag {
         LAYER_FLAG_COLLIDABLE = 1,
         LAYER_FLAG_SCROLLABLE = 2,
+        LAYER_FLAG_INVISIBLE = 4,
         LAYER_FLAG_DEFAULT = 0
     };
 
@@ -35,7 +36,7 @@ public:
     virtual const sp<Size>& size() override;
 
 // [[script::bindings::auto]]
-    sp<TilemapLayer> makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
+    sp<TilemapLayer> makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position = nullptr, const sp<Vec3>& scroller = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
 
 // [[script::bindings::auto]]
     const sp<RenderObject>& getTile(uint32_t rowId, uint32_t colId) const;
@@ -51,11 +52,6 @@ public:
 
 // [[script::bindings::property]]
     const sp<Tileset>& tileset() const;
-
-// [[script::bindings::property]]
-    const sp<Vec3>& scroller() const;
-// [[script::bindings::property]]
-    void setScroller(const sp<Vec3>& scroller);
 
 //  [[script::bindings::property]]
     const std::list<sp<TilemapLayer>>& layers() const;
@@ -83,8 +79,7 @@ public:
         sp<Builder<Tileset>> _tileset;
         sp<Builder<TilemapImporter>> _importer;
 
-        document _scrollable;
-        sp<Builder<RendererMaker>> _renderer_maker;
+        sp<Builder<Scrollable>> _scrollable;
     };
 
 private:
@@ -92,7 +87,6 @@ private:
     SafePtr<Size> _size;
     sp<Tileset> _tileset;
     sp<TilemapImporter> _importer;
-    SafePtr<Vec3> _scroller;
 
     std::list<sp<TilemapLayer>> _layers;
     sp<Scrollable> _scrollable;

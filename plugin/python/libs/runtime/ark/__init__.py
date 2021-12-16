@@ -497,7 +497,7 @@ class Numeric(_Var):
     def integral(self, t: Optional['Numeric'] = None) -> 'Numeric':
         pass
 
-    def boost(self, v0: float, cd: Union[float, 'Numeric'], t: Optional['Numeric'] = None) -> 'Numeric':
+    def integral_with_resistance(self, v0: float, cd: Union[float, 'Numeric'], t: Optional['Numeric'] = None) -> 'Numeric':
         pass
 
     def if_else(self, condition: Union[bool, Boolean], negative: Union[float, 'Numeric']) -> 'Numeric':
@@ -614,7 +614,10 @@ class Vec2:
     def transform(self, transform):
         return self._x, self._y
 
-    def integral(self, t: Optional[Numeric] = None):
+    def integral(self, t: Optional[Numeric] = None) -> 'Vec2':
+        pass
+
+    def integral_with_resistance(self, v0: Tuple[float, float], cd: Union[float, 'Numeric'], t: Optional['Numeric'] = None) -> 'Vec2':
         pass
 
     def wrap(self) -> 'Vec2':
@@ -1351,7 +1354,7 @@ class Tileset:
 
 
 class TilemapLayer:
-    def __init__(self, tilemap: 'Tilemap', row_count: int, col_count: int, position: Union[Vec2, Vec3], flag: int):
+    def __init__(self, tilemap: 'Tilemap', row_count: int, col_count: int, position: Union[Vec2, Vec3, None], scroller: Union[Vec2, Vec3, None], flag: int):
         pass
 
     @property
@@ -1362,9 +1365,13 @@ class TilemapLayer:
     def flag(self, flag):
         pass
 
+    def set_tile(self, row: int, col: int, tile: Union[int, RenderObject]):
+        pass
+
 
 class Tilemap(Renderer):
     LAYER_FLAG_COLLIDABLE = 1
+    LAYER_FLAG_SCROLLABLE = 2
     LAYER_FLAG_DEFAULT = 0
 
     def __init__(self, layer: LayerContext, w: int, h: int, tileset: Tileset):

@@ -16,9 +16,9 @@
 
 namespace ark {
 
-TilemapLayer::TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position, Tilemap::LayerFlag flag)
-    : _col_count(colCount), _row_count(rowCount), _layer_context(tilemap._layer_context), _size(tilemap._size), _tileset(tilemap._tileset), _position(position),
-      _scroller(tilemap._scroller), _flag(flag), _tiles(_col_count * _row_count)
+TilemapLayer::TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, Tilemap::LayerFlag flag)
+    : _col_count(colCount), _row_count(rowCount), _layer_context(tilemap._layer_context), _size(tilemap._size), _tileset(tilemap._tileset), _position(std::move(position)),
+      _scroller(std::move(scroller)), _flag(flag), _tiles(_col_count * _row_count)
 {
 }
 
@@ -28,42 +28,52 @@ void TilemapLayer::render(RenderRequest& /*renderRequest*/, const V3& position)
     float height = _size->height();
     float tileWidth = static_cast<float>(_tileset->tileWidth()), tileHeight = static_cast<float>(_tileset->tileHeight());
 
-    const V3 pos = _position->val();
-    const V3 scroll = _scroller->val();
-    float vsx = scroll.x() - pos.x(), vsy = scroll.y() - pos.y();
-    float sx, ex, sy, ey, ox, oy;
+    const V3 scroll = _flag & Tilemap::LAYER_FLAG_SCROLLABLE ? _scroller->val() : V3();
+    const Rect viewport(scroll.x(), scroll.y(), scroll.x() + width, scroll.y() + height);
 
-    if(_flag & Tilemap::LAYER_FLAG_SCROLLABLE)
+    V3 selectionPosition;
+    RectI selectionRange;
+    if(getSelectionTileRange(viewport, selectionPosition, selectionRange))
     {
-        viewportIntersect(vsx, vsx + width, _col_count * tileWidth, sx, ex);
-        viewportIntersect(vsy, vsy + height, _row_count * tileHeight, sy, ey);
-        ox = sx - Math::modFloor(sx, tileWidth) - tileWidth / 2.0f;
-        oy = sy - Math::modFloor(sy, tileWidth) - tileHeight / 2.0f;
-    }
-    else
-    {
-        sx = sy = 0;
-        ex = width;
-        ey = height;
-        ox = -pos.x() - tileWidth / 2.0f;
-        oy = -pos.y() - tileHeight / 2.0f;
-    }
-
-    int32_t rowStart = std::max(static_cast<int32_t>(sy / tileHeight) - 1, 0);
-    int32_t colStart = std::max(static_cast<int32_t>(sx / tileWidth) - 1, 0);
-    int32_t rowEnd = std::min<int32_t>(static_cast<int32_t>(_row_count), static_cast<int32_t>(ey / tileHeight) + 1);
-    int32_t colEnd = std::min<int32_t>(static_cast<int32_t>(_col_count), static_cast<int32_t>(ex / tileWidth) + 1);
-
-    for(int32_t i = rowStart; i < rowEnd; ++i)
-    {
-        float dy = (i - rowStart) * tileHeight - oy;
-        for(int32_t j = colStart; j < colEnd; ++j)
+        const float ox = selectionPosition.x() + tileWidth / 2.0f - scroll.x();
+        const float oy = selectionPosition.y() + tileHeight / 2.0f - scroll.y();
+        for(int32_t i = selectionRange.top(); i < selectionRange.bottom(); ++i)
         {
-            const sp<RenderablePassive>& tile = _tiles.at(i * _col_count + j);
-            if(tile)
-                tile->requestUpdate(V3((j - colStart) * tileWidth - ox, dy, 0) + position);
+            float dy = (i - selectionRange.top()) * tileHeight + oy;
+            for(int32_t j = selectionRange.left(); j < selectionRange.right(); ++j)
+            {
+                const sp<RenderablePassive>& tile = _tiles.at(i * _col_count + j);
+                if(tile)
+                    tile->requestUpdate(V3((j - selectionRange.left()) * tileWidth + ox, dy, 0) + position);
+            }
         }
     }
+}
+
+bool TilemapLayer::getSelectionTileRange(const Rect& aabb, V3& selectionPosition, RectI& selectionRange) const
+{
+    float width = _size->width();
+    float height = _size->height();
+    float tileWidth = static_cast<float>(_tileset->tileWidth()), tileHeight = static_cast<float>(_tileset->tileHeight());
+    const V3 pos = _position->val();
+
+    float sx, ex, sy, ey;
+
+    Rect intersection;
+    const Rect aabbRel(aabb.left() - pos.x(), aabb.top() - pos.y(), aabb.right() - pos.x(), aabb.bottom() - pos.y());
+    if(!aabbRel.intersect(Rect(0, 0, width, height), intersection))
+        return false;
+    Math::modBetween<float>(intersection.left(), intersection.right(), _tileset->tileWidth(), sx, ex);
+    Math::modBetween<float>(intersection.top(), intersection.bottom(), _tileset->tileHeight(), sy, ey);
+
+    int32_t rowStart = std::max(static_cast<int32_t>(sy / tileHeight), 0);
+    int32_t colStart = std::max(static_cast<int32_t>(sx / tileWidth), 0);
+    int32_t rowEnd = std::min<int32_t>(static_cast<int32_t>(_row_count), static_cast<int32_t>(ey / tileHeight));
+    int32_t colEnd = std::min<int32_t>(static_cast<int32_t>(_col_count), static_cast<int32_t>(ex / tileWidth));
+
+    selectionPosition = V3(sx, sy, 0) + _position->val();
+    selectionRange = RectI(colStart, rowStart, colEnd, rowEnd);
+    return true;
 }
 
 const sp<Vec3>& TilemapLayer::position() const
@@ -89,6 +99,16 @@ uint32_t TilemapLayer::colCount() const
 uint32_t TilemapLayer::rowCount() const
 {
     return _row_count;
+}
+
+const sp<Vec3>& TilemapLayer::scroller() const
+{
+    return _scroller;
+}
+
+void TilemapLayer::setScroller(const sp<Vec3>& scroller)
+{
+    _scroller = scroller;
 }
 
 const sp<RenderObject>& TilemapLayer::getTile(uint32_t rowId, uint32_t colId) const
@@ -138,12 +158,6 @@ Tilemap::LayerFlag TilemapLayer::flag() const
 void TilemapLayer::setFlag(Tilemap::LayerFlag flag)
 {
     _flag = flag;
-}
-
-void TilemapLayer::viewportIntersect(float vs, float ve, float width, float& start, float& end)
-{
-    start = std::max(0.0f, vs);
-    end = std::min(ve, width);
 }
 
 }

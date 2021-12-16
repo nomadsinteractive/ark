@@ -93,8 +93,21 @@ public:
             return false;
         return true;
     }
-    bool overlaps(const RectT& other) const {
+
+    bool intersect(const RectT& other) const {
         return _left < other._right && _right > other._left && _top < other._bottom && _bottom > other._top;
+    }
+
+    bool intersect(const RectT& other, RectT& intersection) const {
+        T leftX = std::max(_left, other._left);
+        T rightX = std::min(_right, other._right);
+        T topY = std::max(_top, other._top);
+        T bottomY = std::min(_bottom, other._bottom);
+        if(leftX < rightX && topY < bottomY) {
+            intersection = RectT(leftX, topY, rightX, bottomY);
+            return true;
+        }
+        return false;
     }
 
     void setCenter(T x, T y) {

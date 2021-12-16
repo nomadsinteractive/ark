@@ -22,8 +22,8 @@
 
 namespace ark {
 
-RigidBody::RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, Box impl, const sp<Disposed>& disposed)
-    : _stub(sp<Stub>::make(id, type, position, size, sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate), std::move(impl), disposed))
+RigidBody::RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, Box impl, sp<Disposed> disposed)
+    : _stub(sp<Stub>::make(id, type, position, size, sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate), std::move(impl), std::move(disposed)))
 {
 }
 

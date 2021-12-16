@@ -124,7 +124,7 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Numeric> integral(const sp<Numeric>& self, const sp<Numeric>& t = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> boost(const sp<Numeric>& self, float v0, const sp<Numeric>& cd, const sp<Numeric>& t = nullptr);
+    static sp<Numeric> integralWithResistance(const sp<Numeric>& self, float v0, const sp<Numeric>& cd, const sp<Numeric>& t = nullptr);
 
 //  [[script::bindings::classmethod]]
     static sp<Numeric> attract(const sp<Numeric>& self, float s0, float duration, const sp<Numeric>& t = nullptr);

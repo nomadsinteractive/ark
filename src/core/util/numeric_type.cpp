@@ -8,9 +8,9 @@
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/numeric/vibrate.h"
 #include "core/impl/variable/clamp.h"
-#include "core/impl/variable/boost.h"
 #include "core/impl/variable/fence.h"
 #include "core/impl/variable/integral.h"
+#include "core/impl/variable/integral_with_resistance.h"
 #include "core/impl/variable/interpolate.h"
 #include "core/impl/variable/periodic.h"
 #include "core/impl/variable/variable_op1.h"
@@ -421,9 +421,9 @@ sp<Numeric> NumericType::periodic(const sp<Numeric>& self, const sp<Numeric>& in
     return sp<Periodic<float>>::make(self, interval ? interval : sp<Numeric>::make<Numeric::Const>(1.0f / 24), duration ? duration : Ark::instance().clock()->duration());
 }
 
-sp<Numeric> NumericType::boost(const sp<Numeric>& self, float v0, const sp<Numeric>& cd, const sp<Numeric>& t)
+sp<Numeric> NumericType::integralWithResistance(const sp<Numeric>& self, float v0, const sp<Numeric>& cd, const sp<Numeric>& t)
 {
-    return sp<Boost<float>>::make(self, v0, cd, t ? t : Ark::instance().clock()->duration());
+    return sp<IntegralWithResistance<float>>::make(v0, self, cd, t ? t : Ark::instance().clock()->duration());
 }
 
 sp<Numeric> NumericType::attract(const sp<Numeric>& self, float s0, float duration, const sp<Numeric>& t)

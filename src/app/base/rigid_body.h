@@ -60,7 +60,7 @@ public:
 public:
     virtual ~RigidBody() override = default;
 
-    RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, Box impl, const sp<Disposed>& disposed);
+    RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, Box impl, sp<Disposed> disposed);
     RigidBody(sp<Stub> stub);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RigidBody);
 

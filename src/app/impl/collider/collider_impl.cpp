@@ -126,7 +126,8 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
 
     DWARN(_c2_shapes.find(BODY_SHAPE_AABB) == _c2_shapes.end()
           && _c2_shapes.find(BODY_SHAPE_BALL) == _c2_shapes.end()
-          && _c2_shapes.find(BODY_SHAPE_BOX) == _c2_shapes.end(), "Default shape being overrided");
+          && _c2_shapes.find(BODY_SHAPE_BOX) == _c2_shapes.end()
+          && _c2_shapes.find(BODY_SHAPE_CAPSULE) == _c2_shapes.end(), "Default shape being overrided");
     switch(shape)
     {
     case BODY_SHAPE_AABB:
@@ -266,7 +267,7 @@ ColliderImpl::RigidBodyImpl::RigidBodyImpl(const sp<ColliderImpl::Stub>& collide
 
 ColliderImpl::RigidBodyImpl::~RigidBodyImpl()
 {
-    dispose();
+    doDispose();
 }
 
 const sp<ColliderImpl::RigidBodyShadow>& ColliderImpl::RigidBodyImpl::shadow() const
@@ -274,9 +275,14 @@ const sp<ColliderImpl::RigidBodyShadow>& ColliderImpl::RigidBodyImpl::shadow() c
     return _shadow;
 }
 
+void ColliderImpl::RigidBodyImpl::doDispose()
+{
+    _shadow->doDispose(_collider);
+}
+
 void ColliderImpl::RigidBodyImpl::dispose()
 {
-    _shadow->dispose(_collider);
+    doDispose();
 }
 
 ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, const sp<Disposed>& disposed)
@@ -323,10 +329,9 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
 {
     if(_dispose_requested)
     {
-        dispose(collider);
+        doDispose(collider);
         return;
     }
-
     std::unordered_set<int32_t> candidates = collider._tracker->search(V3(position, 0), V3(aabb.width(), aabb.height(), 0));
     if(candidates.size())
     {
@@ -370,7 +375,7 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
     }
 }
 
-void ColliderImpl::RigidBodyShadow::dispose(ColliderImpl::Stub& stub)
+void ColliderImpl::RigidBodyShadow::doDispose(ColliderImpl::Stub& stub)
 {
     if(!isDisposed())
     {

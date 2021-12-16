@@ -109,7 +109,6 @@ public:
         }
         else
             glDisable(GL_CULL_FACE);
-
     }
 
     virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {

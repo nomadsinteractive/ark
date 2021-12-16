@@ -38,10 +38,13 @@ public:
         return value - Math::mod<T>(value, mod);
     }
 
+    template<typename T> static T modCeil(T value, T mod) {
+        return modFloor<T>(value, mod) + mod;
+    }
+
     template<typename T> static void modBetween(T start, T end, T mod, T& modFloor, T& modCelling) {
-        T m = Math::mod<T>(start, mod);
-        modFloor = start - m;
-        modCelling = Math::modFloor<T>(end, mod) + (m == 0 ? 0 : mod);
+        modFloor = Math::modFloor<T>(start, mod);
+        modCelling = Math::modCeil<T>(end, mod);
     }
 
     template<typename T> static bool signEquals(T v1, T v2) {

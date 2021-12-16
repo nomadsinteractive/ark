@@ -7,8 +7,8 @@
 #include "core/base/observer.h"
 #include "core/inf/holder.h"
 #include "core/impl/numeric/stalker.h"
-#include "core/impl/variable/boost.h"
 #include "core/impl/variable/integral.h"
+#include "core/impl/variable/integral_with_resistance.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
@@ -195,9 +195,9 @@ sp<Vec2> Vec2Type::integral(const sp<Vec2>& self, const sp<Numeric>& t)
     return sp<Integral<V2>>::make(self, std::move(duration));
 }
 
-sp<Vec2> Vec2Type::boost(const sp<Vec2>& self, const V2& v0, const sp<Numeric>& cd, const sp<Numeric>& t)
+sp<Vec2> Vec2Type::integralWithResistance(const sp<Vec2>& self, const V2& v0, const sp<Numeric>& cd, const sp<Numeric>& t)
 {
-    return sp<Boost<V2>>::make(self, v0, cd, t ? t : Ark::instance().clock()->duration());
+    return sp<IntegralWithResistance<V2>>::make(v0, self, cd, t ? t : Ark::instance().clock()->duration());
 }
 
 void Vec2Type::set(const sp<VariableWrapper<V2>>& self, const V2& val)

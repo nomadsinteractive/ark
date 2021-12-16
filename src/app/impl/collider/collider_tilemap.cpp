@@ -26,13 +26,13 @@ namespace {
 
 class DynamicPosition : public Vec3 {
 public:
-    DynamicPosition(const sp<TiledCollider::RigidBodyImpl>& rigidBody, const sp<Vec3>& delegate)
+    DynamicPosition(const sp<ColliderTilemap::RigidBodyImpl>& rigidBody, const sp<Vec3>& delegate)
         : _rigid_body(rigidBody), _delegate(delegate), _bounds(0, 0, rigidBody->size()->width(), rigidBody->size()->height()) {
     }
 
     virtual V3 val() override {
         const V3 position = _delegate->val();
-        const sp<TiledCollider::RigidBodyImpl> rigidBody = _rigid_body.lock();
+        const sp<ColliderTilemap::RigidBodyImpl> rigidBody = _rigid_body.lock();
         if(rigidBody) {
             _bounds.setCenter(position.x(), position.y());
             rigidBody->collision(_bounds);
@@ -45,7 +45,7 @@ public:
     }
 
 private:
-    WeakPtr<TiledCollider::RigidBodyImpl> _rigid_body;
+    WeakPtr<ColliderTilemap::RigidBodyImpl> _rigid_body;
     sp<Vec3> _delegate;
     Rect _bounds;
 
@@ -53,24 +53,24 @@ private:
 
 }
 
-TiledCollider::TiledCollider(const sp<Tilemap>& tilemap, const sp<ResourceLoaderContext>& resourceLoaderContext)
+ColliderTilemap::ColliderTilemap(const sp<Tilemap>& tilemap, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _tilemap(tilemap), _resource_loader_context(resourceLoaderContext), _rigid_body_base(0)
 {
 }
 
-TiledCollider::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+ColliderTilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _tilemap(factory.ensureBuilder<Tilemap>(manifest, "tilemap")), _resource_loader_context(resourceLoaderContext)
 {
 }
 
-sp<Collider> TiledCollider::BUILDER::build(const Scope& args)
+sp<Collider> ColliderTilemap::BUILDER::build(const Scope& args)
 {
-    return sp<TiledCollider>::make(_tilemap->build(args), _resource_loader_context);
+    return sp<ColliderTilemap>::make(_tilemap->build(args), _resource_loader_context);
 }
 
-sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& /*rotate*/)
+sp<RigidBody> ColliderTilemap::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& /*rotate*/)
 {
-    DCHECK(type != Collider::BODY_TYPE_STATIC, "Cannot create static body in TiledCollider");
+    DCHECK(type != Collider::BODY_TYPE_STATIC, "Cannot create static body in ColliderTilemap");
     DASSERT(position && size);
 
     const sp<RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(++_rigid_body_base, type, position, size, _tilemap);
@@ -78,29 +78,29 @@ sp<RigidBody> TiledCollider::createBody(Collider::BodyType type, int32_t shape, 
     return rigidBody;
 }
 
-std::vector<RayCastManifold> TiledCollider::rayCast(const V3& from, const V3& to)
+std::vector<RayCastManifold> ColliderTilemap::rayCast(const V3& from, const V3& to)
 {
     DFATAL("Unimplemented");
     return {};
 }
 
-TiledCollider::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Tilemap>& tileMap)
+ColliderTilemap::RigidBodyImpl::RigidBodyImpl(uint32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Tilemap>& tileMap)
     : RigidBody(id, type, position, size, Null::toSafe<Rotation>(nullptr), Box(), nullptr), _tilemap(tileMap), _rigid_body_shadow(sp<RigidBodyShadow>::make(tileMap->tileset()->tileWidth(), tileMap->tileset()->tileHeight()))
 {
 }
 
-void TiledCollider::RigidBodyImpl::updateRigidBodyShadow(const Contact& contact)
+void ColliderTilemap::RigidBodyImpl::updateRigidBodyShadow(const Contact& contact)
 {
     _rigid_body_shadow->setId(contact._id);
     _rigid_body_shadow->_position->set(V3(contact._position, 0));
     _rigid_body_shadow->stub()->_render_object = contact._render_object;
 }
 
-void TiledCollider::RigidBodyImpl::dispose()
+void ColliderTilemap::RigidBodyImpl::dispose()
 {
 }
 
-void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
+void ColliderTilemap::RigidBodyImpl::collision(const Rect& aabb)
 {
     if(!callback()->hasCallback())
         return;
@@ -113,25 +113,22 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
     {
         if(i->flag() & Tilemap::LAYER_FLAG_COLLIDABLE)
         {
-            const V3 position = i->position()->val();
-            float left = rect.left() - position.x();
-            float right = rect.right() - position.x();
-            float top = rect.top() - position.y();
-            float bottom = rect.bottom() - position.y();
-            float tileWidth = static_cast<float>(i->tileset()->tileWidth());
-            float tileHeight = static_cast<float>(i->tileset()->tileHeight());
+            V3 selectionPoint;
+            RectI selectionRange;
+            if(i->getSelectionTileRange(aabb, selectionPoint, selectionRange))
+            {
+                const V3 position = i->position()->val();
+                float tileWidth = static_cast<float>(i->tileset()->tileWidth());
+                float tileHeight = static_cast<float>(i->tileset()->tileHeight());
 
-            int32_t bColId = static_cast<int32_t>(left / tileWidth) - (left < 0 ? 1 : 0);
-            int32_t eColId = static_cast<int32_t>(right / tileWidth) - (right < 0 ? 1 : 0);
-            int32_t bRowId = static_cast<int32_t>(top / tileHeight) - (top < 0 ? 1 : 0);
-            int32_t eRowId = static_cast<int32_t>(bottom / tileHeight) - (bottom < 0 ? 1 : 0);
+                uint32_t colCount = i->colCount();
+                int32_t bColId = selectionRange.left();
+                int32_t eColId = selectionRange.right() - 1;
+                int32_t bRowId = selectionRange.top();
+                int32_t eRowId = selectionRange.bottom() - 1;
 
-            uint32_t colCount = i->colCount();
-            uint32_t rowCount = i->rowCount();
-
-            for(int32_t col = bColId; col <= eColId; col ++)
-                for(int32_t row = bRowId; row <= eRowId; row ++)
-                    if(col >= 0 && row >= 0 && col < colCount && row < rowCount)
+                for(int32_t col = bColId; col <= eColId; col ++)
+                    for(int32_t row = bRowId; row <= eRowId; row ++)
                     {
                         const sp<RenderObject>& tile = i->getTile(row, col);
                         if(tile)
@@ -145,13 +142,15 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
                             if(notInContacts)
                             {
                                 updateRigidBodyShadow(contact);
-                                const V3 normal(col == bColId ? 1.0f : (col == eColId ? -1.0f : 0.0f),
-                                               row == bRowId ? 1.0f : (row == eRowId ? -1.0f : 0.0f), 0);
+                                const V3 normal(col == bColId || col == eColId ? (aabb.left() + aabb.right() > contactPoint.x() * 2 ? 1.0f : -1.0f) : 0.0f,
+                                                row == bRowId || row == eRowId ? (aabb.top() + aabb.bottom() > contactPoint.y() * 2 ? 1.0f : -1.0f) : 0.0f,
+                                                0);
                                 if(callback()->hasCallback())
                                     callback()->onBeginContact(_rigid_body_shadow, CollisionManifold(contactPoint, normal));
                             }
                         }
                     }
+            }
         }
         ++layerId;
     }
@@ -165,27 +164,27 @@ void TiledCollider::RigidBodyImpl::collision(const Rect& rect)
     _contacts = contacts;
 }
 
-TiledCollider::RigidBodyShadow::RigidBodyShadow(uint32_t width, uint32_t height)
+ColliderTilemap::RigidBodyShadow::RigidBodyShadow(uint32_t width, uint32_t height)
     : RigidBody(0, Collider::BODY_TYPE_STATIC, sp<Vec3::Impl>::make(V3()), sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), nullptr, Box(), nullptr)
 {
     _position = position();
 }
 
-void TiledCollider::RigidBodyShadow::setId(uint32_t id)
+void ColliderTilemap::RigidBodyShadow::setId(uint32_t id)
 {
     stub()->_id = id;
 }
 
-void TiledCollider::RigidBodyShadow::dispose()
+void ColliderTilemap::RigidBodyShadow::dispose()
 {
 }
 
-TiledCollider::Contact::Contact(uint32_t layerId, uint32_t row, uint32_t col, uint32_t colCount, const V2& position, const sp<RenderObject>& renderObject)
+ColliderTilemap::Contact::Contact(uint32_t layerId, uint32_t row, uint32_t col, uint32_t colCount, const V2& position, const sp<RenderObject>& renderObject)
     : _id((layerId << 24) + (row * colCount + col)), _position(position), _render_object(renderObject)
 {
 }
 
-bool TiledCollider::Contact::operator <(const TiledCollider::Contact& other) const
+bool ColliderTilemap::Contact::operator <(const ColliderTilemap::Contact& other) const
 {
     return _id < other._id;
 }

@@ -87,7 +87,7 @@ public:
 
         void collision(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const V3& position, const Rect& aabb);
 
-        void dispose(ColliderImpl::Stub& stub);
+        void doDispose(ColliderImpl::Stub& stub);
 
     private:
         Rect makeRigidBodyAABB() const;
@@ -110,6 +110,9 @@ public:
         virtual void dispose() override;
 
         const sp<RigidBodyShadow>& shadow() const;
+
+    private:
+        void doDispose();
 
     private:
         sp<ColliderImpl::Stub> _collider;

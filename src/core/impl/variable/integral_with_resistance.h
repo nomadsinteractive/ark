@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_IMPL_VARIABLE_BOOST_H_
-#define ARK_CORE_IMPL_VARIABLE_BOOST_H_
+#ifndef ARK_CORE_IMPL_VARIABLE_INTEGRAL_WITH_RESISTANCE_H_
+#define ARK_CORE_IMPL_VARIABLE_INTEGRAL_WITH_RESISTANCE_H_
 
 #include "core/forwarding.h"
 #include "core/inf/variable.h"
@@ -7,10 +7,10 @@
 
 namespace ark {
 
-template<typename T> class Boost : public Variable<T> {
+template<typename T> class IntegralWithResistance : public Variable<T> {
 public:
-    Boost(const sp<Variable<T>>& a, const T& v0, const sp<Numeric>& cd, const sp<Numeric>& t)
-        : _v(v0), _a(a), _cd(cd), _t(t), _last_t(_t->val()) {
+    IntegralWithResistance(const T& v0, sp<Variable<T>> a, sp<Numeric> cd, sp<Numeric> t)
+        : _v(v0), _a(std::move(a)), _cd(std::move(cd)), _t(std::move(t)), _last_t(_t->val()) {
         DWARN(_cd->val() >= 0, "The drag coefficient factor should be greater than 0, got %.2f", _cd->val());
     }
 
@@ -29,7 +29,6 @@ public:
     }
 
 private:
-
     template<typename U> U getRC_sfinae(const U& v, float cd, decltype(v.length())*) const {
         auto length = v.length();
         return v * length * cd;

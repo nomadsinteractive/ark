@@ -14,9 +14,11 @@ namespace ark {
 class ARK_API TilemapLayer : public Renderer {
 public:
 // [[script::bindings::auto]]
-    TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position = nullptr, Tilemap::LayerFlag flag = Tilemap::LAYER_FLAG_DEFAULT);
+    TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, sp<Vec3> position = nullptr, sp<Vec3> scroller = nullptr, Tilemap::LayerFlag flag = Tilemap::LAYER_FLAG_DEFAULT);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
+
+    bool getSelectionTileRange(const Rect& aabb, V3& selectionPosition, RectI& selectionRange) const;
 
 // [[script::bindings::property]]
     const sp<Vec3>& position() const;
@@ -36,6 +38,11 @@ public:
 // [[script::bindings::property]]
     uint32_t rowCount() const;
 
+// [[script::bindings::property]]
+    const sp<Vec3>& scroller() const;
+// [[script::bindings::property]]
+    void setScroller(const sp<Vec3>& scroller);
+
 // [[script::bindings::auto]]
     const sp<RenderObject>& getTile(uint32_t rowId, uint32_t colId) const;
 // [[script::bindings::auto]]
@@ -49,9 +56,6 @@ public:
 
 // [[script::bindings::auto]]
     void reset();
-
-private:
-    void viewportIntersect(float vs, float ve, float width, float& start, float& end);
 
 private:
     uint32_t _col_count;
