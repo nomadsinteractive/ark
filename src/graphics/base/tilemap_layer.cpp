@@ -28,8 +28,11 @@ void TilemapLayer::render(RenderRequest& /*renderRequest*/, const V3& position)
     float height = _size->height();
     float tileWidth = static_cast<float>(_tileset->tileWidth()), tileHeight = static_cast<float>(_tileset->tileHeight());
 
-    const V3 scroll = _flag & Tilemap::LAYER_FLAG_SCROLLABLE ? _scroller->val() : V3();
-    const Rect viewport(scroll.x(), scroll.y(), scroll.x() + width, scroll.y() + height);
+    const bool isScrollable = _flag & Tilemap::LAYER_FLAG_SCROLLABLE;
+    const V3 scroll = isScrollable ? _scroller->val() : V3();
+    const V3 pos = _position->val();
+    const Rect viewport = isScrollable ? Rect(scroll.x(), scroll.y(), std::max(scroll.x(), pos.x()) + width, std::max(scroll.y(), pos.y()) + height) :
+                                         Rect(pos.x(), pos.y(), pos.x() + width, pos.y() + height);
 
     V3 selectionPosition;
     RectI selectionRange;
@@ -37,16 +40,7 @@ void TilemapLayer::render(RenderRequest& /*renderRequest*/, const V3& position)
     {
         const float ox = selectionPosition.x() + tileWidth / 2.0f - scroll.x();
         const float oy = selectionPosition.y() + tileHeight / 2.0f - scroll.y();
-        for(int32_t i = selectionRange.top(); i < selectionRange.bottom(); ++i)
-        {
-            float dy = (i - selectionRange.top()) * tileHeight + oy;
-            for(int32_t j = selectionRange.left(); j < selectionRange.right(); ++j)
-            {
-                const sp<RenderablePassive>& tile = _tiles.at(i * _col_count + j);
-                if(tile)
-                    tile->requestUpdate(V3((j - selectionRange.left()) * tileWidth + ox, dy, 0) + position);
-            }
-        }
+        renderTiles(position + V3(ox, oy, 0), selectionRange);
     }
 }
 
@@ -71,7 +65,7 @@ bool TilemapLayer::getSelectionTileRange(const Rect& aabb, V3& selectionPosition
     int32_t rowEnd = std::min<int32_t>(static_cast<int32_t>(_row_count), static_cast<int32_t>(ey / tileHeight));
     int32_t colEnd = std::min<int32_t>(static_cast<int32_t>(_col_count), static_cast<int32_t>(ex / tileWidth));
 
-    selectionPosition = V3(sx, sy, 0) + _position->val();
+    selectionPosition = V3(sx, sy, 0) + pos;
     selectionRange = RectI(colStart, rowStart, colEnd, rowEnd);
     return true;
 }
@@ -148,6 +142,22 @@ void TilemapLayer::setTile(uint32_t row, uint32_t col, int32_t tileId)
 void TilemapLayer::reset()
 {
     std::fill(_tiles.begin(), _tiles.end(), nullptr);
+}
+
+void TilemapLayer::renderTiles(const V3& position, const RectI& renderRange)
+{
+    float tileWidth = static_cast<float>(_tileset->tileWidth());
+    float tileHeight = static_cast<float>(_tileset->tileHeight());
+    for(int32_t i = renderRange.top(); i < renderRange.bottom(); ++i)
+    {
+        float dy = (i - renderRange.top()) * tileHeight;
+        for(int32_t j = renderRange.left(); j < renderRange.right(); ++j)
+        {
+            const sp<RenderablePassive>& tile = _tiles.at(i * _col_count + j);
+            if(tile)
+                tile->requestUpdate(V3((j - renderRange.left()) * tileWidth, dy, 0) + position);
+        }
+    }
 }
 
 Tilemap::LayerFlag TilemapLayer::flag() const

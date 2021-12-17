@@ -58,6 +58,9 @@ public:
     void reset();
 
 private:
+    void renderTiles(const V3& position, const RectI& renderRange);
+
+private:
     uint32_t _col_count;
     uint32_t _row_count;
     sp<LayerContext> _layer_context;

@@ -23,6 +23,9 @@ public:
     RectT(const V4& vec4) noexcept
         : _left(static_cast<T>(vec4.x())), _top(vec4.y()), _right(vec4.z()), _bottom(vec4.w()) {
     }
+    RectT(const V2& topLeft, const V2& bottomRight) noexcept
+        : _left(static_cast<T>(topLeft.x())), _top(topLeft.y()), _right(bottomRight.x()), _bottom(bottomRight.y()) {
+    }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RectT);
 
     T left() const {
