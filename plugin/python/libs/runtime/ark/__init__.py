@@ -1354,8 +1354,12 @@ class Tileset:
 
 
 class TilemapLayer:
-    def __init__(self, tilemap: 'Tilemap', row_count: int, col_count: int, position: Union[Vec2, Vec3, None], scroller: Union[Vec2, Vec3, None], flag: int):
+    def __init__(self, tilemap: 'Tilemap', name: str, row_count: int, col_count: int, position: Union[Vec2, Vec3, None], scroller: Union[Vec2, Vec3, None], flag: int):
         pass
+
+    @property
+    def name(self) -> str:
+        return ''
 
     @property
     def flag(self) -> int:

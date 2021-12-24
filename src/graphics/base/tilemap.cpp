@@ -122,9 +122,9 @@ void Tilemap::load(const String& src)
     load(Ark::instance().openAsset(src));
 }
 
-sp<TilemapLayer> Tilemap::makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position, const sp<Vec3>& scroller, Tilemap::LayerFlag layerFlag)
+sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position, const sp<Vec3>& scroller, Tilemap::LayerFlag layerFlag)
 {
-    sp<TilemapLayer> layer = sp<TilemapLayer>::make(*this, rowCount, colCount, position, scroller, layerFlag);
+    sp<TilemapLayer> layer = sp<TilemapLayer>::make(*this, name, rowCount, colCount, position, scroller, layerFlag);
     _layers.push_back(layer);
     return layer;
 }

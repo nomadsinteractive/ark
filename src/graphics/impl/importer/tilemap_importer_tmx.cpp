@@ -17,10 +17,11 @@ void TilemapImporterTmx::import(Tilemap& tilemap, const sp<Readable>& src)
 
     for(const document& i : manifest->children("layer"))
     {
+        String name = Documents::getAttribute<String>(i, "name", "");
         uint32_t rowCount = Documents::ensureAttribute<uint32_t>(i, "height");
         uint32_t colCount = Documents::ensureAttribute<uint32_t>(i, "width");
 
-        const sp<TilemapLayer> layer = tilemap.makeLayer(rowCount, colCount);
+        const sp<TilemapLayer> layer = tilemap.makeLayer(std::move(name), rowCount, colCount);
         const document data = i->getChild("data");
         DASSERT(data);
         uint32_t row = 1;

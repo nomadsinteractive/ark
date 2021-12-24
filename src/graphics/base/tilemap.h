@@ -36,7 +36,7 @@ public:
     virtual const sp<Size>& size() override;
 
 // [[script::bindings::auto]]
-    sp<TilemapLayer> makeLayer(uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position = nullptr, const sp<Vec3>& scroller = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
+    sp<TilemapLayer> makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position = nullptr, const sp<Vec3>& scroller = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
 
 // [[script::bindings::auto]]
     const sp<RenderObject>& getTile(uint32_t rowId, uint32_t colId) const;

@@ -16,9 +16,9 @@
 
 namespace ark {
 
-TilemapLayer::TilemapLayer(const Tilemap& tilemap, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, Tilemap::LayerFlag flag)
-    : _col_count(colCount), _row_count(rowCount), _layer_context(tilemap._layer_context), _size(tilemap._size), _tileset(tilemap._tileset), _position(std::move(position)),
-      _scroller(std::move(scroller)), _flag(flag), _tiles(_col_count * _row_count)
+TilemapLayer::TilemapLayer(const Tilemap& tilemap, String name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, Tilemap::LayerFlag flag)
+    : _name(std::move(name)), _col_count(colCount), _row_count(rowCount), _layer_context(tilemap._layer_context), _size(tilemap._size), _tileset(tilemap._tileset),
+      _position(std::move(position)), _scroller(std::move(scroller)), _flag(flag), _tiles(_col_count * _row_count)
 {
 }
 
@@ -68,6 +68,11 @@ bool TilemapLayer::getSelectionTileRange(const Rect& aabb, V3& selectionPosition
     selectionPosition = V3(sx, sy, 0) + pos;
     selectionRange = RectI(colStart, rowStart, colEnd, rowEnd);
     return true;
+}
+
+const String& TilemapLayer::name() const
+{
+    return _name;
 }
 
 const sp<Vec3>& TilemapLayer::position() const
