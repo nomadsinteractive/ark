@@ -1,0 +1,52 @@
+#ifndef ARK_APP_INF_BROAD_PHRASE_H_
+#define ARK_APP_INF_BROAD_PHRASE_H_
+
+#include <map>
+#include <unordered_set>
+
+#include "core/forwarding.h"
+#include "core/base/api.h"
+
+#include "graphics/forwarding.h"
+#include "graphics/base/v3.h"
+
+#include "app/forwarding.h"
+
+namespace ark {
+
+class ARK_API BroadPhrase {
+public:
+    struct Candidate {
+        Candidate() = default;
+        Candidate(const V2& position, float rotation, int32_t shapeId)
+            : position(position), rotation(rotation), shape_id(shapeId) {
+        }
+
+        V2 position;
+        float rotation;
+        int32_t shape_id;
+    };
+
+    struct Result {
+        Result(std::unordered_set<int32_t> dynamicCandidates, std::map<int32_t, Candidate> staticCandidates)
+            : dynamic_candidates(std::move(dynamicCandidates)), static_candidates(std::move(staticCandidates)) {
+        }
+
+        std::unordered_set<int32_t> dynamic_candidates;
+        std::map<int32_t, Candidate> static_candidates;
+    };
+
+public:
+    virtual ~BroadPhrase() = default;
+
+    virtual sp<Vec3> create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& aabb) = 0;
+    virtual void remove(int32_t id) = 0;
+
+    virtual Result search(const V3& position, const V3& aabb) = 0;
+    virtual Result rayCast(const V3& from, const V3& to) = 0;
+
+};
+
+}
+
+#endif

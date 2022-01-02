@@ -426,6 +426,11 @@ sp<Numeric> NumericType::integralWithResistance(const sp<Numeric>& self, float v
     return sp<IntegralWithResistance<float>>::make(v0, self, cd, t ? t : Ark::instance().clock()->duration());
 }
 
+sp<Numeric> NumericType::modFloor(const sp<Numeric>& self, const sp<Numeric>& mod)
+{
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::ModFloor<float>>>::make(self, mod);
+}
+
 sp<Numeric> NumericType::attract(const sp<Numeric>& self, float s0, float duration, const sp<Numeric>& t)
 {
     return sp<Stalker>::make(t ? t : Ark::instance().clock()->duration(), self, s0, duration);

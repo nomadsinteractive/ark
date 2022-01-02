@@ -10,6 +10,7 @@ namespace ark {
 
 class ARK_API CollisionManifold {
 public:
+    CollisionManifold() = default;
     CollisionManifold(const V3& contactPoint, const V3& normal);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(CollisionManifold);
 

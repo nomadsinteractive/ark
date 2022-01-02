@@ -20,7 +20,7 @@
 #include "app/base/rigid_body.h"
 #include "app/inf/collider.h"
 #include "app/inf/collision_callback.h"
-#include "app/inf/tracker.h"
+#include "app/inf/broad_phrase.h"
 
 #include "platform/platform.h"
 
@@ -73,7 +73,7 @@ public:
         Scope args;
         args.put("t", duration);
         const sp<Collider> collider = resourceLoader->load<Collider>("collider-001", args);
-        const sp<Tracker> tracker = resourceLoader->load<Tracker>("tracker-001", args);
+        const sp<BroadPhrase> tracker = resourceLoader->load<BroadPhrase>("tracker-001", args);
         const sp<RenderObject> c001 = resourceLoader->load<RenderObject>("c001", args);
         const sp<RigidBody> rigidBody001 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, Collider::BODY_SHAPE_AABB, c001->position(), c001->size());
         const sp<RenderObject> c002 = resourceLoader->load<RenderObject>("c002", args);
@@ -84,11 +84,11 @@ public:
         const sp<CollisionCallbackImpl> collisionCallbackImpl003 = sp<CollisionCallbackImpl>::make(c003);
         rigidBody001->setCollisionCallback(collisionCallbackImpl001);
         rigidBody003->setCollisionCallback(collisionCallbackImpl003);
-        const std::unordered_set<int32_t> s1 = tracker->search(V3(120, 380, 0), V3(60, 60, 0));
+        const std::unordered_set<int32_t> s1 = tracker->search(V3(120, 380, 0), V3(60, 60, 0)).dynamic_candidates;
         TESTCASE_VALIDATE(s1.find(rigidBody001->id()) != s1.end());
-        const std::unordered_set<int32_t> s2 = tracker->search(V3(40, 380, 0), V3(60, 60, 0));
+        const std::unordered_set<int32_t> s2 = tracker->search(V3(40, 380, 0), V3(60, 60, 0)).dynamic_candidates;
         TESTCASE_VALIDATE(s2.find(rigidBody001->id()) == s2.end());
-        const std::unordered_set<int32_t> s3 = tracker->search(V3(120, 450, 0), V3(60, 60, 0));
+        const std::unordered_set<int32_t> s3 = tracker->search(V3(120, 450, 0), V3(60, 60, 0)).dynamic_candidates;
         TESTCASE_VALIDATE(s3.find(rigidBody001->id()) == s3.end());
 
         while(duration->val() < 3.0f) {

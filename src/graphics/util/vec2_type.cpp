@@ -13,6 +13,7 @@
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/util/holder_util.h"
+#include "core/util/numeric_type.h"
 #include "core/util/operators.h"
 #include "core/util/variable_util.h"
 
@@ -310,6 +311,11 @@ sp<Vec2> Vec2Type::wrap(const sp<Vec2>& self)
 sp<Vec2> Vec2Type::synchronize(const sp<Vec2>& self, const sp<Boolean>& disposed)
 {
     return Ark::instance().applicationContext()->synchronize(self, disposed);
+}
+
+sp<Vec2> Vec2Type::modFloor(const sp<Vec2>& self, const sp<Numeric>& mod)
+{
+    return create(NumericType::modFloor(vx(self), mod), NumericType::modFloor(vy(self), mod));
 }
 
 sp<Vec2> Vec2Type::attract(const sp<Vec2>& self, const V2& s0, float duration, const sp<Numeric>& t)

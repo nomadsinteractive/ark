@@ -16,13 +16,14 @@
 #include "app/base/rigid_body.h"
 #include "app/impl/collider/axis_segments.h"
 #include "app/inf/collider.h"
-#include "app/util/cute_c2_impl.h"
+#include "app/inf/broad_phrase.h"
+//#include "app/util/cute_c2_impl.h"
 
 namespace ark {
 
 class ColliderImpl : public Collider {
 public:
-    ColliderImpl(const sp<Tracker>& tracker, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    ColliderImpl(sp<BroadPhrase> broadPhrase, sp<NarrowPhrase> narrowPhrase, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate) override;
     virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to) override;
@@ -37,39 +38,54 @@ public:
     private:
         document _manifest;
         sp<ResourceLoaderContext> _resource_loader_context;
-        sp<Builder<Tracker>> _tracker;
-
+        sp<Builder<BroadPhrase>> _broad_phrase;
+        sp<Builder<NarrowPhrase>> _narrow_phrase;
     };
 
 public:
     class RigidBodyImpl;
     class RigidBodyShadow;
 
-    struct ShapeManifest {
-        V2 unit;
-        std::vector<C2Shape> shapes;
-    };
+//    struct ShapeManifest {
+//        std::vector<C2Shape> shapes;
+//    };
 
     struct Stub {
-        Stub(const sp<Tracker>& tracker, const document& manifest, ResourceLoaderContext& resourceLoaderContext);
+        Stub(sp<BroadPhrase> broadPhrase, sp<NarrowPhrase> narrowPhrase, const document& manifest, ResourceLoaderContext& resourceLoaderContext);
 
         void remove(const RigidBody& rigidBody);
 
         sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, const sp<Disposed>& disposed, const sp<Stub>& self);
         const sp<RigidBodyShadow>& ensureRigidBody(int32_t id) const;
         const sp<RigidBodyShadow> findRigidBody(int32_t id) const;
+        const sp<RigidBodyShadow> ensureRigidBody(int32_t id, bool isDynamicRigidBody) const;
+
+        std::map<int32_t, BroadPhrase::Candidate> toDynamicCandidates(const std::unordered_set<int32_t>& candidateSet) const;
 
         std::vector<RayCastManifold> rayCast(const V2& from, const V2& to) const;
 
-        sp<Tracker> _tracker;
+        void resolveCandidates(const sp<RigidBody>& self, const BroadPhrase::Candidate& candidateSelf, const std::map<int32_t, BroadPhrase::Candidate>& candidates, bool isDynamicCandidates, RigidBody::Callback& callback, std::set<int32_t>& c);
+
+        sp<BroadPhrase> _broad_phrase;
+        sp<NarrowPhrase> _narrow_phrase;
 
         std::unordered_map<int32_t, sp<RigidBodyShadow>> _rigid_bodies;
-        std::unordered_map<int32_t, ShapeManifest> _c2_shapes;
+//        std::unordered_map<int32_t, ShapeManifest> _c2_shapes;
         int32_t _rigid_body_base_id;
 
     private:
+        void addAABBShape(uint32_t id, const RigidBodyShadow& rigidBody);
+        void addBoxShape(uint32_t id, const RigidBodyShadow& rigidBody);
+        void addBallShape(uint32_t id, const RigidBodyShadow& rigidBody);
+        void addCapsuleShape(uint32_t id, const RigidBodyShadow& rigidBody);
+        void addPolyShape(uint32_t id, const RigidBodyShadow& rigidBody);
+
         void loadShapes(const document& manifest);
-        c2Ray makeRay(const V2& from, const V2& to) const;
+//        c2Ray makeRay(const V2& from, const V2& to) const;
+
+    private:
+        sp<RigidBodyShadow> _static_rigid_body_shadow;
+
     };
 
     class RigidBodyShadow : public RigidBody {
@@ -78,24 +94,29 @@ public:
 
         virtual void dispose() override;
 
+        bool isStatic() const;
+        void setId(uint32_t id);
+
         void makeAABB();
         void makeBall();
         void makeBox();
-        void setShapes(const std::vector<C2Shape>& shape, const V2& scale);
+        void makeCapsule();
+//        void setShapes(const std::vector<C2Shape>& shape, const V2& scale);
 
         bool isDisposed() const;
 
-        void collision(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const V3& position, const Rect& aabb);
+        void collision(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const V3& position, const V3& size);
 
         void doDispose(ColliderImpl::Stub& stub);
 
-    private:
-        Rect makeRigidBodyAABB() const;
+        Rect getRigidBodyAABB() const;
 
     private:
-        C2RigidBody _c2_rigid_body;
+//        C2RigidBody _c2_rigid_body;
+        bool _is_static;
 
-        std::unordered_set<int32_t> _contacts;
+        std::set<int32_t> _dynamic_contacts;
+        std::set<int32_t> _static_contacts;
         bool _dispose_requested;
 
         friend class RigidBodyImpl;

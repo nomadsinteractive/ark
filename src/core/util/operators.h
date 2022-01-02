@@ -114,6 +114,13 @@ public:
         }
     };
 
+    template<typename T, typename P = T> class ModFloor {
+    public:
+        auto operator()(T v1, P v2)->decltype(v1 / v2) {
+            return Math::modFloor(v1, v2);
+        }
+    };
+
     template<typename T, typename P = T> class Pow {
     public:
         float operator()(T v1, P v2) {

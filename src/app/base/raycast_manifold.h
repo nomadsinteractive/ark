@@ -13,6 +13,7 @@ namespace ark {
 
 class ARK_API RayCastManifold {
 public:
+    RayCastManifold() = default;
     RayCastManifold(float distance, const V3& normal, sp<RigidBody> rigidBody);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RayCastManifold);
 

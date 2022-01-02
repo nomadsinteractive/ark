@@ -1,31 +1,36 @@
-#include "app/impl/tracker/tracker_grid.h"
+#include "app/impl/broad_phrase/broad_phrase_grid.h"
 
 #include "core/base/bean_factory.h"
 #include "core/util/math.h"
 
 namespace ark {
 
-TrackerGrid::TrackerGrid(uint32_t dimension, const V3& cell)
+BroadPhraseGrid::BroadPhraseGrid(uint32_t dimension, const V3& cell)
     : _stub(sp<Stub>::make(dimension, cell))
 {
 }
 
-sp<Vec3> TrackerGrid::create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& size)
+sp<Vec3> BroadPhraseGrid::create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& size)
 {
     return sp<TrackedPosition>::make(id, _stub, position, size);
 }
 
-void TrackerGrid::remove(int32_t id)
+void BroadPhraseGrid::remove(int32_t id)
 {
     _stub->remove(id);
 }
 
-std::unordered_set<int32_t> TrackerGrid::search(const V3& position, const V3& size)
+BroadPhrase::Result BroadPhraseGrid::search(const V3& position, const V3& size)
 {
-    return _stub->search(position, size);
+    return BroadPhrase::Result(_stub->search(position, size), {});
 }
 
-TrackerGrid::Stub::Stub(uint32_t dimension, const V3& cell)
+BroadPhrase::Result BroadPhraseGrid::rayCast(const V3& from, const V3& to)
+{
+    return search(V3((from + to) / 2, 0), V3(std::abs(from.x() - to.x()), std::abs(from.y() - to.y()), 0));
+}
+
+BroadPhraseGrid::Stub::Stub(uint32_t dimension, const V3& cell)
     : _dimension(dimension), _axes(new Axis[dimension])
 {
     DCHECK(_dimension < 4, "Dimension should be either 2(V2) or 3(V3)");
@@ -37,18 +42,18 @@ TrackerGrid::Stub::Stub(uint32_t dimension, const V3& cell)
     }
 }
 
-TrackerGrid::Stub::~Stub()
+BroadPhraseGrid::Stub::~Stub()
 {
     delete[] _axes;
 }
 
-void TrackerGrid::Stub::remove(int32_t id)
+void BroadPhraseGrid::Stub::remove(int32_t id)
 {
     for(uint32_t i = 0; i < _dimension; i++)
         _axes[i].remove(id);
 }
 
-void TrackerGrid::Stub::create(int32_t id, const V3& position, const V3& size)
+void BroadPhraseGrid::Stub::create(int32_t id, const V3& position, const V3& size)
 {
     for(uint32_t i = 0; i < _dimension; i++)
     {
@@ -58,7 +63,7 @@ void TrackerGrid::Stub::create(int32_t id, const V3& position, const V3& size)
     }
 }
 
-void TrackerGrid::Stub::update(int32_t id, const V3& position, const V3& size)
+void BroadPhraseGrid::Stub::update(int32_t id, const V3& position, const V3& size)
 {
     for(uint32_t i = 0; i < _dimension; i++)
     {
@@ -68,7 +73,7 @@ void TrackerGrid::Stub::update(int32_t id, const V3& position, const V3& size)
     }
 }
 
-std::unordered_set<int32_t> TrackerGrid::Stub::search(const V3& position, const V3& size) const
+std::unordered_set<int32_t> BroadPhraseGrid::Stub::search(const V3& position, const V3& size) const
 {
     std::unordered_set<int32_t> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
     for(uint32_t i = 1; i < _dimension && !candidates.empty(); i++)
@@ -82,7 +87,7 @@ std::unordered_set<int32_t> TrackerGrid::Stub::search(const V3& position, const 
     return candidates;
 }
 
-void TrackerGrid::Axis::create(int32_t id, float position, float low, float high)
+void BroadPhraseGrid::Axis::create(int32_t id, float position, float low, float high)
 {
     int32_t mp = Math::modFloor<int32_t>(static_cast<int32_t>(position), _stride);
     int32_t remainder;
@@ -92,7 +97,7 @@ void TrackerGrid::Axis::create(int32_t id, float position, float low, float high
     updateRange(id, cur, Range());
 }
 
-void TrackerGrid::Axis::update(int32_t id, float position, float low, float high)
+void BroadPhraseGrid::Axis::update(int32_t id, float position, float low, float high)
 {
     int32_t mp = Math::modFloor<int32_t>(static_cast<int32_t>(position), _stride);
     const auto iter = _trackee_ranges.find(id);
@@ -107,7 +112,7 @@ void TrackerGrid::Axis::update(int32_t id, float position, float low, float high
     }
 }
 
-void TrackerGrid::Axis::updateRange(int32_t id, const Range& cur, const Range& prev)
+void BroadPhraseGrid::Axis::updateRange(int32_t id, const Range& cur, const Range& prev)
 {
     for(int32_t i = prev._begin; i < prev._end; i++)
         if(!cur.within(i))
@@ -120,7 +125,7 @@ void TrackerGrid::Axis::updateRange(int32_t id, const Range& cur, const Range& p
     _trackee_ranges[id] = cur;
 }
 
-std::unordered_set<int32_t> TrackerGrid::Axis::search(float low, float high) const
+std::unordered_set<int32_t> BroadPhraseGrid::Axis::search(float low, float high) const
 {
     std::unordered_set<int32_t> candidates;
     int32_t remainder;
@@ -135,7 +140,7 @@ std::unordered_set<int32_t> TrackerGrid::Axis::search(float low, float high) con
     return candidates;
 }
 
-void TrackerGrid::Axis::remove(int32_t id)
+void BroadPhraseGrid::Axis::remove(int32_t id)
 {
     const auto it1 = _trackee_ranges.find(id);
     if(it1 != _trackee_ranges.end())
@@ -149,7 +154,7 @@ void TrackerGrid::Axis::remove(int32_t id)
     }
 }
 
-void TrackerGrid::Axis::remove(int32_t id, int32_t rangeId)
+void BroadPhraseGrid::Axis::remove(int32_t id, int32_t rangeId)
 {
     const auto range = _trackee_range_ids.equal_range(rangeId);
     for(auto iter = range.first; iter != range.second; ++iter)
@@ -161,27 +166,27 @@ void TrackerGrid::Axis::remove(int32_t id, int32_t rangeId)
         }
 }
 
-TrackerGrid::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+BroadPhraseGrid::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _dimension(Documents::getAttribute(manifest, "dimension", 2)), _cell(factory.ensureBuilder<Vec3>(manifest, "cell"))
 {
 }
 
-sp<Tracker> TrackerGrid::BUILDER::build(const Scope& args)
+sp<BroadPhrase> BroadPhraseGrid::BUILDER::build(const Scope& args)
 {
-    return sp<TrackerGrid>::make(_dimension, _cell->build(args)->val());
+    return sp<BroadPhraseGrid>::make(_dimension, _cell->build(args)->val());
 }
 
-TrackerGrid::Axis::Range::Range()
+BroadPhraseGrid::Axis::Range::Range()
     : _position(0), _begin(0), _end(0)
 {
 }
 
-TrackerGrid::Axis::Range::Range(int32_t position, int32_t begin, int32_t end)
+BroadPhraseGrid::Axis::Range::Range(int32_t position, int32_t begin, int32_t end)
     : _position(position), _begin(begin), _end(end)
 {
 }
 
-bool TrackerGrid::Axis::Range::within(int32_t r) const
+bool BroadPhraseGrid::Axis::Range::within(int32_t r) const
 {
     return r >= _begin && r < _end;
 }

@@ -1,5 +1,5 @@
-#ifndef ARK_APP_IMPL_TRACKER_TRACKER_GRID_H_
-#define ARK_APP_IMPL_TRACKER_TRACKER_GRID_H_
+#ifndef ARK_APP_IMPL_BROAD_PHRASE_BROAD_PHRASE_GRID_H_
+#define ARK_APP_IMPL_BROAD_PHRASE_BROAD_PHRASE_GRID_H_
 
 #include <unordered_map>
 
@@ -11,18 +11,19 @@
 #include "graphics/forwarding.h"
 #include "graphics/base/v3.h"
 
-#include "app/inf/tracker.h"
+#include "app/inf/broad_phrase.h"
 
 namespace ark {
 
-class TrackerGrid : public Tracker {
+class BroadPhraseGrid : public BroadPhrase {
 public:
-    TrackerGrid(uint32_t dimension, const V3& cell);
+    BroadPhraseGrid(uint32_t dimension, const V3& cell);
 
     virtual sp<Vec3> create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& size) override;
     virtual void remove(int32_t id) override;
 
-    virtual std::unordered_set<int32_t> search(const V3& position, const V3& size) override;
+    virtual Result search(const V3& position, const V3& size) override;
+    virtual Result rayCast(const V3& from, const V3& to) override;
 
 public:
     class Stub;
@@ -76,11 +77,11 @@ public:
     };
 
 //  [[plugin::builder("grid")]]
-    class BUILDER : public Builder<Tracker> {
+    class BUILDER : public Builder<BroadPhrase> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Tracker> build(const Scope& args) override;
+        virtual sp<BroadPhrase> build(const Scope& args) override;
 
     private:
         uint32_t _dimension;
@@ -91,7 +92,7 @@ public:
 private:
     class TrackedPosition : public Vec3 {
     public:
-        TrackedPosition(int32_t id, const sp<TrackerGrid::Stub>& stub, const sp<Vec3>& position, const sp<Vec3>& size)
+        TrackedPosition(int32_t id, const sp<BroadPhraseGrid::Stub>& stub, const sp<Vec3>& position, const sp<Vec3>& size)
             : _id(id), _stub(stub), _position(position), _size(size) {
             const V3 p = _position->val();
             const V3 s = _size->val();
@@ -114,7 +115,7 @@ private:
 
     private:
         int32_t _id;
-        sp<TrackerGrid::Stub> _stub;
+        sp<BroadPhraseGrid::Stub> _stub;
         sp<Vec3> _position;
         sp<Vec3> _size;
     };
