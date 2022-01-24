@@ -22,6 +22,7 @@ Arena::Arena(const sp<ViewGroup>& view, const sp<ResourceLoader>& resourceLoader
 
 Arena::~Arena()
 {
+    Ark::instance().applicationContext()->deferUnref(std::move(_view_group));
     LOGD("");
 }
 
@@ -37,6 +38,8 @@ void Arena::render(RenderRequest& renderRequest, const V3& position)
     _view_group->render(renderRequest, position);
     for(const sp<Renderer>& i : _layers.update(renderRequest.timestamp()))
         i->render(renderRequest, position);
+    for(const sp<Renderer>& i : _render_layers.update(renderRequest.timestamp()))
+        i->render(renderRequest, position);
 }
 
 bool Arena::onEvent(const Event& event)
@@ -49,6 +52,8 @@ void Arena::traverse(const Holder::Visitor& visitor)
 {
     HolderUtil::visit(_view_group, visitor);
     for(const auto& i : _layers.items())
+        HolderUtil::visit(i._item, visitor);
+    for(const auto& i : _render_layers.items())
         HolderUtil::visit(i._item, visitor);
 }
 
@@ -99,9 +104,14 @@ void Arena::addEventListener(const sp<EventListener>& eventListener, int32_t pri
     _event_listeners->addEventListener(eventListener, priority);
 }
 
-void Arena::addLayer(const sp<Renderer>& layer)
+void Arena::addLayer(sp<Renderer> layer)
 {
-    _layers.push_back(layer);
+    _layers.push_back(std::move(layer));
+}
+
+void Arena::addRenderLayer(sp<Renderer> renderLayer)
+{
+    _render_layers.push_back(std::move(renderLayer));
 }
 
 void Arena::setView(const sp<Renderer>& view)
@@ -113,15 +123,6 @@ void Arena::setView(const sp<Renderer>& view)
 const sp<ViewGroup>& Arena::view() const
 {
     return _view_group;
-}
-
-template<typename T> void addDecoratedLayer(Arena& arena, BeanFactory& factory, const document& manifest, const Scope& args)
-{
-    const sp<Renderer> layer = factory.build<Renderer>(manifest, args);
-    if(layer)
-        arena.addLayer(layer);
-    else
-        arena.addLayer(factory.ensureDecorated<Renderer, T>(manifest, args));
 }
 
 Arena::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -148,9 +149,9 @@ sp<Arena> Arena::BUILDER::build(const Scope& args)
         if(name == Constants::Attributes::EVENT_LISTENER)
             arena->addEventListener(factory.ensure<EventListener>(i, args));
         else if(name == Constants::Attributes::RENDER_LAYER)
-            addDecoratedLayer<RenderLayer>(arena, factory, i, args);
+            arena->addRenderLayer(factory.ensureDecorated<Renderer, RenderLayer>(i, args));
         else if(name == Constants::Attributes::LAYER)
-            addDecoratedLayer<Layer>(arena, factory, i, args);
+            arena->addLayer(factory.ensureDecorated<Renderer, Layer>(i, args));
         else
         {
             DWARN(name == Constants::Attributes::RENDERER || name == Constants::Attributes::VIEW, "[Renderer, RenderLayer, Layer, View] expected, \"%s\" found", name.c_str());

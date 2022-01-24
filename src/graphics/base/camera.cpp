@@ -30,6 +30,43 @@ namespace ark {
 
 namespace {
 
+class OrthoMatrixVariable : public Mat4 {
+public:
+    OrthoMatrixVariable(sp<Camera::Delegate> delegate, sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip)
+        : _delegate(std::move(delegate)), _left_top(std::move(leftTop)), _right_bottom(std::move(rightBottom)), _clip(std::move(clip)),
+          _matrix(calcMatrix()) {
+    }
+
+    virtual M4 val() override {
+        return _matrix;
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        if(VariableUtil::update(timestamp, _left_top, _right_bottom, _clip)) {
+            _matrix = calcMatrix();
+            return true;
+        }
+        return false;
+    }
+
+private:
+    M4 calcMatrix() const {
+        const V2 leftTop = _left_top->val();
+        const V2 rightBottom = _right_bottom->val();
+        const V2 clip = _clip->val();
+        return _delegate->ortho(leftTop.x(), rightBottom.x(), rightBottom.y(), leftTop.y(), clip.x(), clip.y());
+    }
+
+private:
+    sp<Camera::Delegate> _delegate;
+
+    sp<Vec2> _left_top;
+    sp<Vec2> _right_bottom;
+    sp<Vec2> _clip;
+
+    M4 _matrix;
+};
+
 class FrustumMatrixVariable : public Mat4 {
 public:
     FrustumMatrixVariable(sp<Camera::Delegate> delegate, sp<Vec3> position, sp<Vec3> target, sp<Vec3> up)
@@ -97,6 +134,17 @@ Camera::Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate)
     : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Holder>::make(sp<Mat4::Const>::make(M4::identity()))), _projection(sp<Holder>::make(sp<Mat4::Const>::make(M4::identity()))),
       _vp(sp<Holder>::make(sp<Mat4::Const>::make(M4::identity()))), _position(sp<VariableWrapper<V3>>::make(V3(0))), _target(sp<VariableWrapper<V3>>::make(V3(0)))
 {
+}
+
+void Camera::ortho(const V2& leftTop, const V2& rightBottom, const V2& clip)
+{
+    ortho(leftTop.x(), rightBottom.x(), rightBottom.y(), leftTop.y(), clip.x(), clip.y());
+}
+
+void Camera::ortho(sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip)
+{
+    _projection->setMatrix(sp<OrthoMatrixVariable>::make(_delegate, std::move(leftTop), std::move(rightBottom), std::move(clip)));
+    updateViewProjection();
 }
 
 void Camera::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)

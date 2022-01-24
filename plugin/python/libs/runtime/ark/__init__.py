@@ -12,9 +12,16 @@ Use it for:
 
 from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple
 
-_BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'Numeric', 'Layer', 'Vec2', 'Vec3',
-                           'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap', 'TilemapImporter', 'Tileset',
-                           'TilesetImporter', 'Transform', 'Varyings')
+_BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'Numeric', 'NarrowPhrase', 'Layer',
+                           'Vec2', 'Vec3', 'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap', 'TilemapImporter',
+                           'Tileset', 'TilesetImporter', 'Transform', 'Varyings')
+
+
+TYPE_INT_OR_FLOAT = Union[int, float]
+TYPE_NUMERIC = Union[TYPE_INT_OR_FLOAT, 'Numeric']
+TYPE_RECT = Tuple[TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT]
+TYPE_VEC2 = Union[Tuple[TYPE_NUMERIC, TYPE_NUMERIC], 'Vec2']
+TYPE_VEC3 = Union[Tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], 'Vec3']
 
 
 def logd(*args):
@@ -301,7 +308,7 @@ class Future:
         return False
 
 
-class Tracker:
+class BroadPhrase:
     pass
 
 
@@ -354,6 +361,10 @@ class Observer:
 
     def update(self):
         pass
+
+
+class Shader:
+    pass
 
 
 class Renderer:
@@ -436,7 +447,7 @@ class Camera:
     def matrix_view_projection(self) -> 'Mat4':
         return None
 
-    def ortho(self, left, right, top, bottom, near, far):
+    def ortho(self, left_top: TYPE_VEC2, right_bottom: TYPE_VEC2, clip: TYPE_VEC2):
         pass
 
     def frustum(self, left, right, top, bottom, near, far):
@@ -451,7 +462,7 @@ class Camera:
     def to_world_position(self, screen_x: float, screen_y: float, z: float) -> tuple:
         pass
 
-    def to_screen_position(self, position: Union['Vec3', tuple]) -> 'Vec3':
+    def to_screen_position(self, position: TYPE_VEC3) -> 'Vec3':
         pass
 
 
@@ -979,14 +990,6 @@ class Layer(Renderer):
     TYPE_DYNAMIC = 1
     TYPE_STATIC = 2
 
-    def __init__(self, render_layer: Union[RenderLayer, None]):
-        super().__init__()
-        self._render_layer = render_layer
-
-    @property
-    def renderer(self):
-        return self._render_layer
-
     @property
     def context(self) -> LayerContext:
         return LayerContext()
@@ -1020,7 +1023,7 @@ class Arena:
         return None
 
     def get_reference(self, name: str):
-        return None
+        pass
 
     @property
     def resource_loader(self):
@@ -1029,7 +1032,10 @@ class Arena:
     def add_renderer(self, renderer: Renderer):
         pass
 
-    def add_layer(self, renderer: Renderer):
+    def add_layer(self, layer: Layer):
+        pass
+
+    def add_render_layer(self, render_layer: RenderLayer):
         pass
 
     def load_renderer(self, name: str, **kwargs):
@@ -1673,6 +1679,15 @@ class RayCastManifold:
         return None
 
 
+class NarrowPhrase:
+
+    def add_aabb_shape(self, shape_id: int, bounds: TYPE_RECT):
+        pass
+
+    def add_box_shape(self, shape_id: int, bounds: TYPE_RECT):
+        pass
+
+
 class Collider:
 
     BODY_SHAPE_AABB = -1
@@ -1689,7 +1704,7 @@ class Collider:
     BODY_FLAG_MANUAL_POSITION = 8
     BODY_FLAG_MANUAL_ROTATION = 16
 
-    def create_body(self, type, shape, position, size=None, rotate=None, is_sensor=False) -> RigidBody:
+    def create_body(self, type, shape, position, size=None, rotate=None) -> RigidBody:
         pass
 
     def ray_cast(self, ray_from, ray_to) -> List[RayCastManifold]:

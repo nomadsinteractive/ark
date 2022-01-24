@@ -3,6 +3,7 @@
 
 #include <map>
 #include <unordered_set>
+#include <vector>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -18,22 +19,29 @@ class ARK_API BroadPhrase {
 public:
     struct Candidate {
         Candidate() = default;
-        Candidate(const V2& position, float rotation, int32_t shapeId)
-            : position(position), rotation(rotation), shape_id(shapeId) {
+        Candidate(int32_t id, const V2& position, float rotation, int32_t shapeId)
+            : id(id), position(position), rotation(rotation), shape_id(shapeId) {
         }
 
+        int32_t id;
         V2 position;
         float rotation;
         int32_t shape_id;
     };
 
     struct Result {
-        Result(std::unordered_set<int32_t> dynamicCandidates, std::map<int32_t, Candidate> staticCandidates)
+        Result() = default;
+        Result(std::unordered_set<int32_t> dynamicCandidates, std::vector<Candidate> staticCandidates)
             : dynamic_candidates(std::move(dynamicCandidates)), static_candidates(std::move(staticCandidates)) {
         }
 
+        void merge(const Result& other) {
+            std::copy(other.dynamic_candidates.begin(), other.dynamic_candidates.end(), std::inserter(dynamic_candidates, dynamic_candidates.begin()));
+            std::copy(other.static_candidates.begin(), other.static_candidates.end(), std::back_inserter(static_candidates));
+        }
+
         std::unordered_set<int32_t> dynamic_candidates;
-        std::map<int32_t, Candidate> static_candidates;
+        std::vector<Candidate> static_candidates;
     };
 
 public:

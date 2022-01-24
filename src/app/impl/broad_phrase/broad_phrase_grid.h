@@ -76,7 +76,7 @@ public:
         Axis* _axes;
     };
 
-//  [[plugin::builder("grid")]]
+//  [[plugin::builder("broad-phrase-grid")]]
     class BUILDER : public Builder<BroadPhrase> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);

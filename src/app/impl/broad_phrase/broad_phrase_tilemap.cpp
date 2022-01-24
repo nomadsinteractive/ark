@@ -1,5 +1,6 @@
 #include "app/impl/broad_phrase/broad_phrase_tilemap.h"
 
+#include "core/inf/importer.h"
 #include "core/base/bean_factory.h"
 
 #include "graphics/base/rect.h"
@@ -8,12 +9,14 @@
 #include "graphics/base/tilemap_layer.h"
 #include "graphics/base/tileset.h"
 
+#include "renderer/base/resource_loader_context.h"
+
 #include "app/inf/collider.h"
 
 namespace ark {
 
-BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap)
-    : _tilemap(std::move(tilemap))
+BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap, IntMap shapeIdMappings)
+    : _tilemap(std::move(tilemap)), _shape_id_mappings(std::move(shapeIdMappings))
 {
 }
 
@@ -28,7 +31,7 @@ void BroadPhraseTilemap::remove(int32_t /*id*/)
 
 BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& size)
 {
-    std::map<int32_t, Candidate> candidates;
+    std::vector<Candidate> candidates;
     const V2 sizeHalf = size / V2(2.0, 2.0);
     const Rect aabb(V2(position) - sizeHalf, V2(position) + sizeHalf);
     float tileWidth = _tilemap->tileset()->tileWidth();
@@ -41,7 +44,6 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
             V3 selectionPoint;
             RectI selectionRange;
             if(i->getSelectionTileRange(aabb, selectionPoint, selectionRange))
-            {
                 for(int32_t j = selectionRange.left(); j < selectionRange.right(); ++j)
                 {
                     float px = selectionPoint.x() + (j - selectionRange.left()) * tileWidth + tileWidth / 2;
@@ -50,12 +52,12 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
                         const sp<RenderObject>& renderObject = i->getTile(k, j);
                         if(renderObject)
                         {
-                            Candidate candidate(V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileHeight + tileHeight / 2), 0, toCandidateShapeId(renderObject, k, j));
-                            candidates.emplace(std::make_pair(toCandidateId(layerId, k, j), candidate));
+                            int32_t shapeId = toCandidateShapeId(renderObject, k, j);
+                            if(shapeId != Collider::BODY_SHAPE_NONE)
+                                candidates.emplace_back(toCandidateId(layerId, k, j), V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileHeight + tileHeight / 2), 0, shapeId);
                         }
                     }
                 }
-            }
         }
     }
     return BroadPhrase::Result({}, std::move(candidates));
@@ -81,11 +83,24 @@ int32_t BroadPhraseTilemap::toCandidateShapeId(const sp<RenderObject>& renderObj
 BroadPhraseTilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _tilemap(factory.ensureBuilder<Tilemap>(manifest, "tilemap"))
 {
+    const document importerManifest = manifest->getChild("import");
+    if(importerManifest)
+    {
+        _importer_src = Documents::ensureAttribute<String>(importerManifest, Constants::Attributes::SRC);
+        _id_mapping_importer = factory.ensureBuilder<IntMapImporter>(importerManifest);
+    }
 }
 
 sp<BroadPhrase> BroadPhraseTilemap::BUILDER::build(const Scope& args)
 {
-    return sp<BroadPhraseTilemap>::make(_tilemap->build(args));
+    if(_id_mapping_importer)
+    {
+        IntMap idMap;
+        const sp<IntMapImporter> importer = _id_mapping_importer->build(args);
+        importer->import(idMap, Ark::instance().getAsset(_importer_src)->open());
+        return sp<BroadPhraseTilemap>::make(_tilemap->build(args), std::move(idMap));
+    }
+    return sp<BroadPhraseTilemap>::make(_tilemap->build(args), IntMap());
 }
 
 }

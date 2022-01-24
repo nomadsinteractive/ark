@@ -59,20 +59,24 @@ private:
 
 }
 
-ColliderImpl::ColliderImpl(sp<BroadPhrase> broadPhrase, sp<NarrowPhrase> narrowPhrase, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+ColliderImpl::ColliderImpl(std::vector<sp<BroadPhrase>> broadPhrase, sp<NarrowPhrase> narrowPhrase, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _stub(sp<Stub>::make(std::move(broadPhrase), std::move(narrowPhrase), manifest, resourceLoaderContext)), _resource_loader_context(resourceLoaderContext)
 {
 }
 
 ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _broad_phrase(factory.ensureBuilder<BroadPhrase>(manifest, "broad-phrase")),
+    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _broad_phrases(factory.getBuilderList<BroadPhrase>(manifest, "broad-phrase")),
       _narrow_phrase(factory.ensureBuilder<NarrowPhrase>(manifest, "narrow-phrase"))
 {
+    DCHECK(_broad_phrases.size() > 0, "Collider should have at least one BroadPhrase");
 }
 
 sp<Collider> ColliderImpl::BUILDER::build(const Scope& args)
 {
-    return sp<ColliderImpl>::make(_broad_phrase->build(args), _narrow_phrase->build(args), _manifest, _resource_loader_context);
+    std::vector<sp<BroadPhrase>> broadPhrases;
+    for(const auto& i : _broad_phrases)
+        broadPhrases.push_back(i->build(args));
+    return sp<ColliderImpl>::make(std::move(broadPhrases), _narrow_phrase->build(args), _manifest, _resource_loader_context);
 }
 
 sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate)
@@ -98,14 +102,35 @@ std::vector<RayCastManifold> ColliderImpl::rayCast(const V3& from, const V3& to)
     return _stub->rayCast(V2(from.x(), from.y()), V2(to.x(), to.y()));
 }
 
-ColliderImpl::Stub::Stub(sp<BroadPhrase> broadPhrase, sp<NarrowPhrase> narrowPhrase, const document& manifest, ResourceLoaderContext& resourceLoaderContext)
-    : _broad_phrase(std::move(broadPhrase)), _narrow_phrase(std::move(narrowPhrase)), _rigid_body_base_id(0), _static_rigid_body_shadow(sp<RigidBodyShadow>::make(0, Collider::BODY_TYPE_STATIC, nullptr, nullptr, nullptr, nullptr))
+ColliderImpl::Stub::Stub(std::vector<sp<BroadPhrase>> broadPhrases, sp<NarrowPhrase> narrowPhrase, const document& manifest, ResourceLoaderContext& resourceLoaderContext)
+    : _rigid_body_base_id(0), _broad_phrases(std::move(broadPhrases)), _narrow_phrase(std::move(narrowPhrase)), _static_rigid_body_shadow(sp<RigidBodyShadow>::make(0, Collider::BODY_TYPE_STATIC, nullptr, nullptr, nullptr, nullptr))
 {
+}
+
+BroadPhrase::Result ColliderImpl::Stub::search(const V3& position, const V3& aabb) const
+{
+    if(_broad_phrases.size() == 1)
+        return _broad_phrases.at(0)->search(position, aabb);
+
+    BroadPhrase::Result result;
+    for(const sp<BroadPhrase>& i : _broad_phrases)
+        result.merge(i->search(position, aabb));
+
+    return result;
+}
+
+sp<Vec3> ColliderImpl::Stub::createBroadPhrasePosition(int32_t id, const sp<Vec3>& position, const sp<Vec3>& aabb)
+{
+    sp<Vec3> pos = position;
+    for(const sp<BroadPhrase>& i : _broad_phrases)
+        pos = i->create(id, pos, aabb);
+    return pos;
 }
 
 void ColliderImpl::Stub::remove(const RigidBody& rigidBody)
 {
-    _broad_phrase->remove(rigidBody.id());
+    for(const sp<BroadPhrase>& i : _broad_phrases)
+        i->remove(rigidBody.id());
     const auto iter = _rigid_bodies.find(rigidBody.id());
     DCHECK(iter != _rigid_bodies.end(), "RigidBody(%d) not found", rigidBody.id());
     LOGD("Removing RigidBody(%d)", rigidBody.id());
@@ -116,7 +141,7 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
 {
     int32_t rigidBodyId = ++_rigid_body_base_id;
     float s = std::max(size->width(), size->height());
-    const sp<Vec3> dp = _broad_phrase->create(rigidBodyId, position, sp<Vec3::Const>::make(V3(s)));
+    const sp<Vec3> dp = createBroadPhrasePosition(rigidBodyId, position, sp<Vec3::Const>::make(V3(s)));
     const sp<RigidBodyShadow> rigidBodyShadow = sp<RigidBodyShadow>::make(rigidBodyId, type, dp, size, rotate, disposed);
     const sp<RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(self, rigidBodyShadow);
 
@@ -166,50 +191,46 @@ const sp<ColliderImpl::RigidBodyShadow> ColliderImpl::Stub::findRigidBody(int32_
     return iter != _rigid_bodies.end() ? iter->second : sp<RigidBodyShadow>();
 }
 
-std::map<int32_t, BroadPhrase::Candidate> ColliderImpl::Stub::toDynamicCandidates(const std::unordered_set<int32_t>& candidateSet) const
+std::vector<BroadPhrase::Candidate> ColliderImpl::Stub::toDynamicCandidates(const std::unordered_set<int32_t>& candidateSet) const
 {
-    std::map<int32_t, BroadPhrase::Candidate> candidates;
+    std::vector<BroadPhrase::Candidate> candidates;
     for(int32_t i : candidateSet)
     {
         const sp<RigidBodyShadow>& rigidBody = ensureRigidBody(i);
-        candidates.emplace(std::make_pair(i, BroadPhrase::Candidate(rigidBody->position()->val(), rigidBody->transform()->rotation()->theta()->val(), i)));
+        candidates.emplace_back(i, rigidBody->position()->val(), rigidBody->transform()->rotation()->theta()->val(), i);
     }
     return candidates;
 }
 
 std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V2& to) const
 {
-    const NarrowPhrase::Ray ray = _narrow_phrase->toRay(from, to);
     std::vector<RayCastManifold> manifolds;
-    const BroadPhrase::Result result = _broad_phrase->rayCast(V3(from.x(), from.y(), 0), V3(to.x(), to.y(), 0));
-    for(const auto iter : toDynamicCandidates(result.dynamic_candidates))
+    const NarrowPhrase::Ray ray = _narrow_phrase->toRay(from, to);
+    const BroadPhrase::Result result = _broad_phrases.at(0)->rayCast(V3(from.x(), from.y(), 0), V3(to.x(), to.y(), 0));
+    for(const auto& i : toDynamicCandidates(result.dynamic_candidates))
     {
         RayCastManifold raycast;
-        const BroadPhrase::Candidate& candidate = iter.second;
-        if(_narrow_phrase->rayCastManifold(ray, candidate, raycast))
+        if(_narrow_phrase->rayCastManifold(ray, i, raycast))
             manifolds.push_back(raycast);
     }
     return manifolds;
 }
 
-void ColliderImpl::Stub::resolveCandidates(const sp<RigidBody>& self, const BroadPhrase::Candidate& candidateSelf, const std::map<int32_t, BroadPhrase::Candidate>& candidates, bool isDynamicCandidates, RigidBody::Callback& callback, std::set<int32_t>& c)
+void ColliderImpl::Stub::resolveCandidates(const sp<RigidBody>& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, bool isDynamicCandidates, RigidBody::Callback& callback, std::set<int32_t>& c)
 {
     std::set<int32_t> contacts = c;
     std::set<int32_t> contactsOut;
-    for(const auto iter : candidates)
+    for(const auto& i : candidates)
     {
-        int32_t id = iter.first;
-        const BroadPhrase::Candidate& candidate = iter.second;
-
         CollisionManifold manifold;
-        if(_narrow_phrase->collisionManifold(candidateSelf, candidate, manifold))
+        if(_narrow_phrase->collisionManifold(candidateSelf, i, manifold))
         {
-            auto iter2 = contacts.find(id);
+            auto iter2 = contacts.find(i.id);
             if(iter2 == contacts.end())
-                callback.onBeginContact(self, ensureRigidBody(id, isDynamicCandidates), manifold);
+                callback.onBeginContact(self, ensureRigidBody(i.id, isDynamicCandidates), manifold);
             else
                 contacts.erase(iter2);
-            contactsOut.insert(id);
+            contactsOut.insert(i.id);
         }
     }
     for(int32_t i : contacts)
@@ -298,15 +319,15 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
         return;
     }
 
-    const BroadPhrase::Result result = collider._broad_phrase->search(position, size);
-    std::unordered_set<int32_t> candidates = std::move(result.dynamic_candidates);
+    const BroadPhrase::Result result = collider.search(position, size);
+    std::unordered_set<int32_t> dynamicCandidates = std::move(result.dynamic_candidates);
     const Stub& shadowStub = stub();
-    const auto iter = candidates.find(shadowStub._id);
-    if(iter != candidates.end())
-        candidates.erase(iter);
+    const auto iter = dynamicCandidates.find(shadowStub._id);
+    if(iter != dynamicCandidates.end())
+        dynamicCandidates.erase(iter);
 
-    const BroadPhrase::Candidate candidateSelf(position, self->transform()->rotation()->theta()->val(), self->id());
-    collider.resolveCandidates(self, candidateSelf, collider.toDynamicCandidates(result.dynamic_candidates), true, shadowStub._callback, _dynamic_contacts);
+    const BroadPhrase::Candidate candidateSelf(self->id(), position, self->transform()->rotation()->theta()->val(), self->id());
+    collider.resolveCandidates(self, candidateSelf, collider.toDynamicCandidates(dynamicCandidates), true, shadowStub._callback, _dynamic_contacts);
     collider.resolveCandidates(self, candidateSelf, result.static_candidates, false, shadowStub._callback, _static_contacts);
 }
 

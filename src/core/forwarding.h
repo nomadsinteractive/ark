@@ -4,6 +4,7 @@
 #include <chrono>
 
 #include <stdint.h>
+#include <unordered_map>
 
 namespace ark {
 
@@ -90,11 +91,12 @@ typedef Variable<bool> Boolean;
 typedef Variable<int32_t> Integer;
 typedef Variable<float> Numeric;
 
-typedef Loader<DOMDocument> DocumentLoader;
-
 typedef VariableWrapper<bool> BooleanWrapper;
 typedef VariableWrapper<int32_t> IntegerWrapper;
 typedef VariableWrapper<float> NumericWrapper;
+
+typedef std::unordered_map<int32_t, int32_t> IntMap;
+typedef Importer<IntMap> IntMapImporter;
 
 typedef Loader<DOMDocument> DocumentLoader;
 typedef LoaderBundle<DOMDocument> DocumentBundle;

@@ -16,6 +16,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/rect.h"
 
 #include "app/forwarding.h"
 
@@ -28,6 +29,9 @@ namespace plugin {
 namespace python {
 
 class ReferenceManager;
+
+template <typename T> using remove_cvref_t = typename std::remove_reference<typename std::remove_cv<T>::value>::type;
+
 
 class ARK_PLUGIN_PYTHON_API PythonInterpreter {
 public:
@@ -186,7 +190,6 @@ private:
     template<typename T> T toCppObject_sfinae(PyObject* obj, ...) {
         return toType<T>(obj);
     }
-
     template<typename T> PyObject* toPyObject_sfinae(const T& ptr, typename T::_PtrType*) {
         return fromSharedPtr(static_cast<sp<typename T::_PtrType>>(ptr));
     }

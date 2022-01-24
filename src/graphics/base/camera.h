@@ -82,8 +82,12 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Camera);
 
 //  [[script::bindings::auto]]
+    void ortho(const V2& leftTop, const V2& rightBottom, const V2& clip);
+//  [[script::bindings::auto]]
+    void ortho(sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip);
     void ortho(float left, float right, float bottom, float top, float clipNear, float clipFar);
     void ortho(float left, float right, float bottom, float top, float clipNear, float clipFar, Ark::RendererCoordinateSystem coordinateSystem);
+
 //  [[script::bindings::auto]]
     void frustum(float left, float right, float bottom, float top, float clipNear, float clipFar);
 //  [[script::bindings::auto]]

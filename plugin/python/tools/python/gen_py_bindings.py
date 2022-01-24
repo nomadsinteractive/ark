@@ -108,7 +108,7 @@ BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^]]*]]\
 
 CLASS_DELIMITER = '\n//%s\n' % ('-' * 120)
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
-TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4')
+TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4', 'Rect', 'RectI', 'RectF')
 ARK_CORE_BUILDABLES = {'AudioPlayer', 'Object'}
 
 INDENT = '    '

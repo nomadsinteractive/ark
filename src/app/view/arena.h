@@ -63,7 +63,9 @@ public:
 //  [[script::bindings::auto]]
     void addEventListener(const sp<EventListener>& eventListener, int32_t priority = 0);
 //  [[script::bindings::auto]]
-    void addLayer(const sp<Renderer>& layer);
+    void addLayer(sp<Renderer> layer);
+//  [[script::bindings::auto]]
+    void addRenderLayer(sp<Renderer> renderLayer);
 
 //  [[script::bindings::property]]
     void setView(const sp<Renderer>& view);
@@ -92,7 +94,7 @@ private:
     sp<ViewGroup> _view_group;
     sp<ResourceLoader> _resource_loader;
     DisposableItemList<Renderer> _layers;
-
+    DisposableItemList<Renderer> _render_layers;
 };
 
 }

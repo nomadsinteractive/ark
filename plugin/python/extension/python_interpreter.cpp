@@ -412,6 +412,27 @@ template<> ARK_PLUGIN_PYTHON_API V4 PythonInterpreter::toType<V4>(PyObject* obje
     return V4();
 }
 
+template<typename T> RectT<T> toRectType(PyObject* obj)
+{
+    DCHECK(PyTuple_Check(obj) && PyTuple_Size(obj) == 4, "Rect object should be 4-length tuple");
+    PythonInterpreter& interpreter = PythonInterpreter::instance();
+    const T arg0 = interpreter.toType<T>(PyTuple_GetItem(obj, 0));
+    const T arg1 = interpreter.toType<T>(PyTuple_GetItem(obj, 1));
+    const T arg2 = interpreter.toType<T>(PyTuple_GetItem(obj, 2));
+    const T arg3 = interpreter.toType<T>(PyTuple_GetItem(obj, 3));
+    return RectT<T>(arg0, arg1, arg2, arg3);
+}
+
+template<> ARK_PLUGIN_PYTHON_API RectF PythonInterpreter::toType<RectF>(PyObject* object)
+{
+    return toRectType<float>(object);
+}
+
+template<> ARK_PLUGIN_PYTHON_API RectI PythonInterpreter::toType<RectI>(PyObject* object)
+{
+    return toRectType<int32_t>(object);
+}
+
 template<> ARK_PLUGIN_PYTHON_API Color PythonInterpreter::toType<Color>(PyObject* object)
 {
     if(PyLong_Check(object))
