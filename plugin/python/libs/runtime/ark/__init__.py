@@ -1332,6 +1332,31 @@ class Size:
         pass
 
 
+class Tile:
+    def __init__(self, _id: int, _type: int = 0, render_object: Optional[RenderObject] = None):
+        pass
+
+    @property
+    def id(self) -> int:
+        return 0
+
+    @property
+    def type(self) -> int:
+        return 0
+
+    @type.setter
+    def type(self, t):
+        pass
+
+    @property
+    def render_object(self) -> Optional[RenderObject]:
+        return None
+
+    @render_object.setter
+    def render_object(self, render_object: Optional[RenderObject]):
+        pass
+
+
 class TilemapImporter:
     pass
 
@@ -1349,11 +1374,11 @@ class Tileset:
     def tile_height(self) -> int:
         return self._tile_height
 
-    def add_tile(self, tile_id: int, tile: RenderObject):
+    def add_tile(self, tile: Tile):
         pass
 
-    def get_tile(self, tile_id: int) -> Union[RenderObject, None]:
-        return None
+    def get_tile(self, tile_id: int) -> Optional[Tile]:
+        pass
 
     def load(self, src: Union[Readable, str]):
         pass
@@ -1375,7 +1400,17 @@ class TilemapLayer:
     def flag(self, flag):
         pass
 
-    def set_tile(self, row: int, col: int, tile: Union[int, RenderObject]):
+    @property
+    def tileset(self) -> Tileset:
+        pass
+
+    def get_tile(self, row: int, col: int) -> Optional[Tile]:
+        pass
+
+    def set_tile(self, row: int, col: int, tile: Union[int, RenderObject, Tile]):
+        pass
+
+    def copy_tiles(self, tiles: List[int], dest: Tuple[int, int, int, int]):
         pass
 
 
@@ -1390,15 +1425,6 @@ class Tilemap(Renderer):
 
     def clear(self):
         pass
-
-    def set_tile(self, row_id: int, col_id: int, obj: Optional[int, RenderObject]):
-        pass
-
-    def get_tile(self, row: int, col: int) -> RenderObject:
-        return RenderObject(0)
-
-    def get_tile_type(self, row: int, col: int) -> int:
-        return 0
 
     @property
     def tileset(self) -> Tileset:

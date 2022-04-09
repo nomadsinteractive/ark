@@ -14,7 +14,7 @@ namespace ark {
 
 class BroadPhraseTilemap : public BroadPhrase {
 public:
-    BroadPhraseTilemap(sp<Tilemap> tilemap, IntMap shapeIdMappings);
+    BroadPhraseTilemap(sp<Tilemap> tilemap);
 
     virtual sp<Vec3> create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& size) override;
     virtual void remove(int32_t id) override;
@@ -30,9 +30,7 @@ public:
         virtual sp<BroadPhrase> build(const Scope& args) override;
 
     private:
-        String _importer_src;
         sp<Builder<Tilemap>> _tilemap;
-        sp<Builder<IntMapImporter>> _id_mapping_importer;
     };
 
 private:
@@ -41,7 +39,6 @@ private:
 
 private:
     sp<Tilemap> _tilemap;
-    IntMap _shape_id_mappings;
 };
 
 }

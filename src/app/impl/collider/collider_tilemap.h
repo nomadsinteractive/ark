@@ -53,12 +53,12 @@ private:
 public:
 
     struct Contact {
-        Contact(uint32_t layerId, uint32_t row, uint32_t col, uint32_t colCount, const V2& position, const sp<RenderObject>& renderObject);
+        Contact(uint32_t layerId, uint32_t row, uint32_t col, uint32_t colCount, const V2& position, sp<Tile> tile);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Contact);
 
         uint32_t _id;
         V2 _position;
-        sp<RenderObject> _render_object;
+        sp<Tile> _tile;
 
         bool operator <(const Contact& other) const;
     };

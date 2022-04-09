@@ -7,6 +7,7 @@
 #include "core/util/documents.h"
 
 #include "graphics/base/render_object.h"
+#include "graphics/base/tile.h"
 
 namespace ark {
 
@@ -25,17 +26,17 @@ uint32_t Tileset::tileHeight() const
     return _tile_height;
 }
 
-void Tileset::addTile(int32_t id, const sp<RenderObject>& t)
+void Tileset::addTile(sp<Tile> t)
 {
-    sp<RenderObject>& tile = _tiles[id];
-    DWARN(!tile, "Overriding existing tile: %d", id);
-    tile = t;
+    sp<Tile>& tile = _tiles[t->id()];
+    DWARN(!tile, "Overriding existing tile: %d", t->id());
+    tile = std::move(t);
 }
 
-const sp<RenderObject>& Tileset::getTile(int32_t id) const
+const sp<Tile>& Tileset::getTile(int32_t id) const
 {
     const auto iter = _tiles.find(id);
-    return iter != _tiles.end() ? iter->second : sp<RenderObject>::null();
+    return iter != _tiles.end() ? iter->second : sp<Tile>::null();
 }
 
 void Tileset::load(const sp<Readable>& readable)

@@ -526,8 +526,8 @@ private:
 
 template<typename T> class BuilderByArgument : public Builder<T> {
 public:
-    BuilderByArgument(const WeakPtr<Scope>& references, const String& name, const sp<Builder<T>> fallback = nullptr)
-        : _references(references), _name(name), _fallback(std::move(fallback)) {
+    BuilderByArgument(WeakPtr<Scope> references, String name, sp<Builder<T>> fallback = nullptr)
+        : _references(std::move(references)), _name(std::move(name)), _fallback(std::move(fallback)) {
     }
 
     virtual sp<T> build(const Scope& args) override {

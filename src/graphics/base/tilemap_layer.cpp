@@ -11,6 +11,7 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/size.h"
+#include "graphics/base/tile.h"
 #include "graphics/base/tilemap.h"
 #include "graphics/base/tileset.h"
 
@@ -18,7 +19,7 @@ namespace ark {
 
 TilemapLayer::TilemapLayer(const Tilemap& tilemap, String name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, Tilemap::LayerFlag flag)
     : _name(std::move(name)), _col_count(colCount), _row_count(rowCount), _layer_context(tilemap._layer_context), _size(tilemap._size), _tileset(tilemap._tileset),
-      _position(std::move(position)), _scroller(std::move(scroller)), _flag(flag), _tiles(_col_count * _row_count)
+      _position(std::move(position)), _scroller(std::move(scroller)), _flag(flag), _layer_tiles(_col_count * _row_count)
 {
 }
 
@@ -110,43 +111,46 @@ void TilemapLayer::setScroller(const sp<Vec3>& scroller)
     _scroller = scroller;
 }
 
-const sp<RenderObject>& TilemapLayer::getTile(uint32_t rowId, uint32_t colId) const
+const sp<Tile>& TilemapLayer::getTile(uint32_t rowId, uint32_t colId) const
 {
     DCHECK(rowId < _row_count && colId < _col_count, "Invaild tile id:(%d, %d), tile map size(%d, %d)", rowId, colId, _row_count, _col_count);
-    const sp<RenderablePassive>& renderable = _tiles[rowId * _col_count + colId];
-    return renderable ? renderable->renderObject() : sp<RenderObject>::null();
+    const LayerTile& layerTile = _layer_tiles.at(rowId * _col_count + colId);
+    return layerTile.tile;
 }
 
-int32_t TilemapLayer::getTileType(uint32_t rowId, uint32_t colId) const
-{
-    const sp<RenderObject>& renderObject = getTile(rowId, colId);
-    return renderObject ? renderObject->type()->val() : -1;
-}
-
-const sp<RenderObject>& TilemapLayer::getTileByPosition(float x, float y) const
+const sp<Tile>& TilemapLayer::getTileByPosition(float x, float y) const
 {
     return getTile(static_cast<uint32_t>(y / _tileset->tileHeight()), static_cast<uint32_t>(x / _tileset->tileWidth()));
 }
 
 void TilemapLayer::setTile(uint32_t row, uint32_t col, const sp<RenderObject>& renderObject)
 {
-    DCHECK(row < _row_count && col < _col_count, "Invaild tile position:(%d, %d), tilemap size(%d, %d)", row, col, _row_count, _col_count);
-    sp<RenderablePassive> renderable = renderObject ? sp<RenderablePassive>::make(renderObject) : nullptr;
-    if(renderObject)
-        _layer_context->add(renderable, sp<BooleanByWeakRef<Renderable>>::make(renderable, 1));
-    _tiles[row * _col_count + col] = std::move(renderable);
+    setTile(row, col, nullptr, renderObject);
 }
 
 void TilemapLayer::setTile(uint32_t row, uint32_t col, int32_t tileId)
 {
-    const sp<RenderObject>& tile = _tileset->getTile(tileId);
+    const sp<Tile>& tile = _tileset->getTile(tileId);
     DCHECK(tile, "TileId %d does not exist", tileId);
     setTile(row, col, tile);
 }
 
+void TilemapLayer::setTile(uint32_t row, uint32_t col, const sp<Tile>& tile)
+{
+    setTile(row, col, tile, nullptr);
+}
+
+void TilemapLayer::copyTiles(const std::vector<int32_t>& tiles, const RectI& dest)
+{
+    const int32_t destColCount = dest.width();
+    for(int32_t i = dest.top(); i < dest.bottom(); ++i)
+        for(int32_t j = dest.left(); j < dest.right(); ++j)
+            setTile(i, j, tiles.at((i - dest.top()) * destColCount + j - dest.left()));
+}
+
 void TilemapLayer::reset()
 {
-    std::fill(_tiles.begin(), _tiles.end(), nullptr);
+    std::fill(_layer_tiles.begin(), _layer_tiles.end(), LayerTile());
 }
 
 void TilemapLayer::renderTiles(const V3& position, const RectI& renderRange)
@@ -158,11 +162,22 @@ void TilemapLayer::renderTiles(const V3& position, const RectI& renderRange)
         float dy = (i - renderRange.top()) * tileHeight;
         for(int32_t j = renderRange.left(); j < renderRange.right(); ++j)
         {
-            const sp<RenderablePassive>& tile = _tiles.at(i * _col_count + j);
-            if(tile)
-                tile->requestUpdate(V3((j - renderRange.left()) * tileWidth, dy, 0) + position);
+            const LayerTile& tile = _layer_tiles.at(i * _col_count + j);
+            if(tile.renderable)
+                tile.renderable->requestUpdate(V3((j - renderRange.left()) * tileWidth, dy, 0) + position);
         }
     }
+}
+
+void TilemapLayer::setTile(uint32_t row, uint32_t col, const sp<Tile>& tile, const sp<RenderObject>& renderObject)
+{
+    DCHECK(row < _row_count && col < _col_count, "Invaild tile position:(%d, %d), tilemap size(%d, %d)", row, col, _row_count, _col_count);
+    uint32_t index = row * _col_count + col;
+    const sp<RenderObject>& ro = renderObject ? renderObject : (tile ? tile->renderObject() : nullptr);
+    sp<RenderablePassive> renderable = ro ? sp<RenderablePassive>::make(ro) : nullptr;
+    if(renderable)
+        _layer_context->add(renderable, sp<BooleanByWeakRef<Renderable>>::make(renderable, 1));
+    _layer_tiles[index] = LayerTile(renderObject ? sp<Tile>::make(tile ? tile->id() : 0, tile ? tile->type() : 0, renderObject) : tile, std::move(renderable));
 }
 
 Tilemap::LayerFlag TilemapLayer::flag() const
@@ -173,6 +188,10 @@ Tilemap::LayerFlag TilemapLayer::flag() const
 void TilemapLayer::setFlag(Tilemap::LayerFlag flag)
 {
     _flag = flag;
+}
+
+TilemapLayer::LayerTile::LayerTile(sp<Tile> tile, sp<RenderablePassive> renderable)
+    : tile(std::move(tile)), renderable(std::move(renderable)) {
 }
 
 }

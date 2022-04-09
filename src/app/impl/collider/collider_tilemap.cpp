@@ -11,6 +11,7 @@
 #include "graphics/base/tilemap.h"
 #include "graphics/base/tilemap_layer.h"
 #include "graphics/base/tileset.h"
+#include "graphics/base/tile.h"
 #include "graphics/base/v2.h"
 
 #include "renderer/base/resource_loader_context.h"
@@ -93,7 +94,7 @@ void ColliderTilemap::RigidBodyImpl::updateRigidBodyShadow(const Contact& contac
 {
     _rigid_body_shadow->setId(contact._id);
     _rigid_body_shadow->_position->set(V3(contact._position, 0));
-    _rigid_body_shadow->stub()->_render_object = contact._render_object;
+    _rigid_body_shadow->stub()->_render_object = contact._tile->renderObject();
 }
 
 void ColliderTilemap::RigidBodyImpl::dispose()
@@ -130,7 +131,7 @@ void ColliderTilemap::RigidBodyImpl::collision(const Rect& aabb)
                 for(int32_t col = bColId; col <= eColId; col ++)
                     for(int32_t row = bRowId; row <= eRowId; row ++)
                     {
-                        const sp<RenderObject>& tile = i->getTile(row, col);
+                        const sp<Tile>& tile = i->getTile(row, col);
                         if(tile)
                         {
                             const V3 contactPoint = position + V3((col + 0.5f) * tileWidth, (row + 0.5f) * tileHeight, 0);
@@ -179,8 +180,8 @@ void ColliderTilemap::RigidBodyShadow::dispose()
 {
 }
 
-ColliderTilemap::Contact::Contact(uint32_t layerId, uint32_t row, uint32_t col, uint32_t colCount, const V2& position, const sp<RenderObject>& renderObject)
-    : _id((layerId << 24) + (row * colCount + col)), _position(position), _render_object(renderObject)
+ColliderTilemap::Contact::Contact(uint32_t layerId, uint32_t row, uint32_t col, uint32_t colCount, const V2& position, sp<Tile> tile)
+    : _id((layerId << 24) + (row * colCount + col)), _position(position), _tile(tile)
 {
 }
 

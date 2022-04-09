@@ -5,6 +5,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/rect.h"
 #include "graphics/base/tilemap.h"
 #include "graphics/impl/renderable/renderable_passive.h"
 
@@ -47,21 +48,32 @@ public:
     void setScroller(const sp<Vec3>& scroller);
 
 // [[script::bindings::auto]]
-    const sp<RenderObject>& getTile(uint32_t rowId, uint32_t colId) const;
+    const sp<Tile>& getTile(uint32_t rowId, uint32_t colId) const;
 // [[script::bindings::auto]]
-    int32_t getTileType(uint32_t rowId, uint32_t colId) const;
-// [[script::bindings::auto]]
-    const sp<RenderObject>& getTileByPosition(float x, float y) const;
+    const sp<Tile>& getTileByPosition(float x, float y) const;
 // [[script::bindings::auto]]
     void setTile(uint32_t row, uint32_t col, const sp<RenderObject>& renderObject);
 // [[script::bindings::auto]]
     void setTile(uint32_t row, uint32_t col, int32_t tileId);
+// [[script::bindings::auto]]
+    void setTile(uint32_t row, uint32_t col, const sp<Tile>& tile);
+// [[script::bindings::auto]]
+    void copyTiles(const std::vector<int32_t>& tiles, const RectI& dest = RectI());
 
 // [[script::bindings::auto]]
     void reset();
 
 private:
     void renderTiles(const V3& position, const RectI& renderRange);
+    void setTile(uint32_t row, uint32_t col, const sp<Tile>& tile, const sp<RenderObject>& renderObject);
+
+    struct LayerTile {
+        LayerTile() = default;
+        LayerTile(sp<Tile> tile, sp<RenderablePassive> renderable);
+
+        sp<Tile> tile;
+        sp<RenderablePassive> renderable;
+    };
 
 private:
     String _name;
@@ -76,7 +88,7 @@ private:
 
     Tilemap::LayerFlag _flag;
 
-    std::vector<sp<RenderablePassive>> _tiles;
+    std::vector<LayerTile> _layer_tiles;
 
     friend class Tilemap;
 };

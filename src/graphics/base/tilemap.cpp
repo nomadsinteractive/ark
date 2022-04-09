@@ -11,6 +11,7 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/size.h"
+#include "graphics/base/tile.h"
 #include "graphics/base/tilemap_layer.h"
 #include "graphics/base/tileset.h"
 #include "graphics/base/v2.h"
@@ -23,8 +24,8 @@ namespace {
 
 class TilemapLayerMaker : public RendererMaker {
 public:
-    TilemapLayerMaker(Tilemap& tilemap, sp<RendererMaker> delegate, sp<Vec3> scroller)
-        : _tilemap(tilemap), _delegate(std::move(delegate)), _scroller(std::move(scroller)) {
+    TilemapLayerMaker(Tilemap& tilemap, sp<RendererMaker> delegate)
+        : _tilemap(tilemap), _delegate(std::move(delegate)) {
     }
 
     virtual sp<Renderer> make(int32_t x, int32_t y) override {
@@ -32,8 +33,7 @@ public:
         sp<TilemapLayer> tilemapLayer = renderer.as<TilemapLayer>();
         DWARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
         if(tilemapLayer) {
-            tilemapLayer->setScroller(_scroller);
-            tilemapLayer->setFlag(static_cast<Tilemap::LayerFlag>(tilemapLayer->flag() | Tilemap::LAYER_FLAG_SCROLLABLE | Tilemap::LAYER_FLAG_INVISIBLE));
+            tilemapLayer->setFlag(static_cast<Tilemap::LayerFlag>(tilemapLayer->flag() | Tilemap::LAYER_FLAG_INVISIBLE));
             _tilemap.addLayer(tilemapLayer);
         }
         return renderer;
@@ -50,7 +50,6 @@ public:
 private:
     Tilemap& _tilemap;
     sp<RendererMaker> _delegate;
-    sp<Vec3> _scroller;
 };
 
 }
@@ -76,29 +75,6 @@ void Tilemap::render(RenderRequest& renderRequest, const V3& position)
 const sp<Size>& Tilemap::size()
 {
     return _size;
-}
-
-const sp<RenderObject>& Tilemap::getTile(uint32_t rowId, uint32_t colId) const
-{
-    return _layers.back()->getTile(rowId, colId);
-}
-
-int32_t Tilemap::getTileType(uint32_t rowId, uint32_t colId) const
-{
-    const sp<RenderObject>& renderObject = getTile(rowId, colId);
-    return renderObject ? renderObject->type()->val() : -1;
-}
-
-void Tilemap::setTile(uint32_t rowId, uint32_t colId, const sp<RenderObject>& renderObject)
-{
-    _layers.back()->setTile(rowId, colId, renderObject);
-}
-
-void Tilemap::setTile(uint32_t rowId, uint32_t colId, int32_t tileId)
-{
-    const sp<RenderObject>& tile = _tileset->getTile(tileId);
-    DCHECK(tile, "TileId %d does not exist", tileId);
-    setTile(rowId, colId, tile);
 }
 
 void Tilemap::clear()
@@ -159,7 +135,7 @@ sp<Tilemap> Tilemap::BUILDER::build(const Scope& args)
     if(_scrollable)
     {
         sp<Scrollable> scrollable = _scrollable->build(args);
-        scrollable->setRendererMaker(sp<TilemapLayerMaker>::make(tilemap, scrollable->rendererMaker(), scrollable->scroller()));
+        scrollable->setRendererMaker(sp<TilemapLayerMaker>::make(tilemap, scrollable->rendererMaker()));
         tilemap->_scrollable = std::move(scrollable);
     }
     return tilemap;

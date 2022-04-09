@@ -42,6 +42,7 @@ class RendererGroup;
 class Rotation;
 class Size;
 class SurfaceController;
+class Tile;
 class Tilemap;
 class TilemapLayer;
 class Tileset;

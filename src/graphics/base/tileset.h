@@ -22,9 +22,9 @@ public:
     uint32_t tileHeight() const;
 
 //  [[script::bindings::auto]]
-    void addTile(int32_t id, const sp<RenderObject>& tile);
+    void addTile(sp<Tile> t);
 //  [[script::bindings::auto]]
-    const sp<RenderObject>& getTile(int32_t id) const;
+    const sp<Tile>& getTile(int32_t id) const;
 
 //  [[script::bindings::auto]]
     void load(const sp<Readable>& readable);
@@ -49,7 +49,7 @@ private:
     uint32_t _tile_height;
     sp<TilesetImporter> _importer;
 
-    std::unordered_map<int32_t, sp<RenderObject>> _tiles;
+    std::unordered_map<int32_t, sp<Tile>> _tiles;
 };
 
 }
