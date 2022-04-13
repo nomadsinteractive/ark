@@ -171,6 +171,8 @@ list(APPEND LOCAL_INCLUDE_DIRS 3rdparty/glm)
 ark_ensure_dependency(3rdparty/cute_headers)
 ark_include_directories(3rdparty/cute_headers)
 
+ark_include_directories(3rdparty/json/include)
+
 if(ARK_USE_LIBPNG)
     set(SKIP_INSTALL_ALL ON)
     set(PNG_TESTS OFF)

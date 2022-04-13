@@ -48,7 +48,7 @@ const sp<PyInstanceRef>& PyInstance::ref() const
 
 PyInstance::operator bool()
 {
-    return _ref && Py_None != _ref->instance();
+    return _ref && !isNone();
 }
 
 PyObject* PyInstance::type()
@@ -87,6 +87,11 @@ PyObject* PyInstance::call(PyObject* args)
 bool PyInstance::isCallable() const
 {
     return PyCallable_Check(_ref->instance()) != 0;
+}
+
+bool PyInstance::isNone() const
+{
+    return _ref != nullptr && _ref->instance() == Py_None;
 }
 
 PyObject* PyInstance::pyObject() const

@@ -1415,9 +1415,10 @@ class TilemapLayer:
 
 
 class Tilemap(Renderer):
+    LAYER_FLAG_DEFAULT = 0
     LAYER_FLAG_COLLIDABLE = 1
     LAYER_FLAG_SCROLLABLE = 2
-    LAYER_FLAG_DEFAULT = 0
+    LAYER_FLAG_INVISIBLE = 4
 
     def __init__(self, layer: LayerContext, w: int, h: int, tileset: Tileset):
         super().__init__()

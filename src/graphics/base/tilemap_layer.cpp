@@ -130,9 +130,12 @@ void TilemapLayer::setTile(uint32_t row, uint32_t col, const sp<RenderObject>& r
 
 void TilemapLayer::setTile(uint32_t row, uint32_t col, int32_t tileId)
 {
-    const sp<Tile>& tile = _tileset->getTile(tileId);
-    DCHECK(tile, "TileId %d does not exist", tileId);
-    setTile(row, col, tile);
+    if(tileId >= 0)
+    {
+        const sp<Tile>& tile = _tileset->getTile(tileId);
+        DCHECK(tile, "TileId %d does not exist", tileId);
+        setTile(row, col, tile);
+    }
 }
 
 void TilemapLayer::setTile(uint32_t row, uint32_t col, const sp<Tile>& tile)
