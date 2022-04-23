@@ -1,8 +1,8 @@
-#ifndef ARK_GRAPHICS_IMPL_IMPORTER_TILESET_IMPORTER_TSX_H_
-#define ARK_GRAPHICS_IMPL_IMPORTER_TILESET_IMPORTER_TSX_H_
+#ifndef ARK_GRAPHICS_IMPL_STORAGE_TILESET_IMPORTER_TSX_H_
+#define ARK_GRAPHICS_IMPL_STORAGE_TILESET_IMPORTER_TSX_H_
 
 #include "core/inf/builder.h"
-#include "core/inf/importer.h"
+#include "core/inf/storage.h"
 
 #include "graphics/forwarding.h"
 

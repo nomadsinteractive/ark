@@ -3,7 +3,7 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/asset.h"
-#include "core/inf/importer.h"
+#include "core/inf/storage.h"
 #include "core/util/documents.h"
 
 #include "graphics/base/render_object.h"

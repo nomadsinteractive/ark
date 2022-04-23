@@ -80,10 +80,16 @@ def wrapByNamespaces(namespaces, source):
 
 
 def strip_key_words(statement, keywords):
-    return ' '.join(i for i in (statement.split() if type(statement) is str else statement) if i and i not in keywords)
+    splitted_statement = statement.split() if type(statement) is str else statement
+    while splitted_statement:
+        if splitted_statement[0] in keywords:
+            splitted_statement = splitted_statement[1:]
+        else:
+            break
+    return ' '.join(splitted_statement)
 
 
-def getSharedPtrType(typename):
+def get_shared_ptr_type(typename):
     t = strip_key_words(typename, ['const']).replace('&', '').strip()
     return t[3:-1] if t.startswith('sp<') and t.endswith('>') else t
 

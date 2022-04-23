@@ -1,4 +1,4 @@
-#include "graphics/impl/importer/tilemap_importer_tmj.h"
+#include "graphics/impl/storage/tilemap_importer_tmj.h"
 
 #include "core/base/json.h"
 #include "core/util/documents.h"
@@ -47,7 +47,7 @@ void TilemapImporterTmj::import(Tilemap& tilemap, const sp<Readable>& src)
     }
 }
 
-sp<TilemapImporter> TilemapImporterTmj::DICTIONARY::build(const Scope& /*args*/)
+sp<Importer<Tilemap>> TilemapImporterTmj::DICTIONARY::build(const Scope& /*args*/)
 {
     return sp<TilemapImporterTmj>::make();
 }

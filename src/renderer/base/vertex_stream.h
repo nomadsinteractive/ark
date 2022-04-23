@@ -57,7 +57,9 @@ private:
 
         virtual void next() override;
         virtual void writePosition(const V3& position) override;
+
         virtual uint32_t write(const void* ptr, uint32_t size, uint32_t offset) override;
+        virtual void flush() override;
 
     private:
         uint8_t* _ptr;

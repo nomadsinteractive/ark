@@ -80,8 +80,6 @@ typedef Loader<Bitmap> BitmapLoader;
 typedef LoaderBundle<Bitmap> BitmapBundle;
 
 //[[script::bindings::auto]]
-typedef Importer<Tilemap> TilemapImporter;
-//[[script::bindings::auto]]
 typedef Importer<Tileset> TilesetImporter;
 
 }

@@ -452,7 +452,7 @@ class GenArgument:
             return '%s %s = %s;' % (typename, objname, gen_cast_call(typename, argname))
         if self.typename == self._meta.cast_signature:
             return '%s %s = %s;' % (typename, objname, argname)
-        m = acg.getSharedPtrType(self._accept_type)
+        m = acg.get_shared_ptr_type(self._accept_type)
         if m == 'Scope':
             return acg.format('const Scope ${objname} = PythonInterpreter::instance()->toScope(kws);',
                               objname=objname, argname=argname)
@@ -643,7 +643,7 @@ class GenMethod(object):
 
         if return_type == 'void':
             return ['Py_RETURN_NONE;']
-        m = acg.getSharedPtrType(return_type)
+        m = acg.get_shared_ptr_type(return_type)
         if m in ('std::wstring',):
             fromcall = 'template fromType<%s>' % m
         else:
@@ -673,7 +673,7 @@ class GenMethod(object):
     def gen_self_statement(self, genclass):
         cast_statement = ''
         if self._self_argument and not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
-            cast_statement = '.cast<%s>()' % acg.getSharedPtrType(self._self_argument.accept_type)
+            cast_statement = '.cast<%s>()' % acg.get_shared_ptr_type(self._self_argument.accept_type)
         return 'unpacked' + cast_statement
 
     def gen_declaration(self):
@@ -705,7 +705,7 @@ class GenMethod(object):
         self_type_checks = []
         if self._self_argument:
             if not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
-                self_type_checks.append('unpacked.is<%s>()' % acg.getSharedPtrType(self._self_argument.accept_type))
+                self_type_checks.append('unpacked.is<%s>()' % acg.get_shared_ptr_type(self._self_argument.accept_type))
         self._gen_convert_args_code(bodylines, argdeclare)
 
         if check_args and args:
@@ -734,8 +734,28 @@ class GenMethod(object):
         name = repl[0].split()[-1]
         rs = repl[0].split()[:-1]
         return_type = ' '.join(i for i in rs if i not in('static', 'ARK_API'))
-        args = [i.strip() for i in repl[1].split(',') if i]
+        # args = [i.strip() for i in repl[1].split(',') if i]
+        args = [i.strip() for i in GenMethod._bracket_match_split(repl[1], '<(', '>)', ',') if i]
         return name, args, return_type, 'static' in rs
+
+    @staticmethod
+    def _bracket_match_split(content, bracket_open, bracket_close, splitter):
+        balance = 0
+        results = []
+        split_start = 0
+        for i, j in enumerate(content):
+            if j in bracket_open:
+                balance += 1
+            elif j in bracket_close:
+                assert balance > 0
+                balance -= 1
+            elif j == splitter and balance == 0:
+                results.append(content[split_start: i])
+                split_start = i + 1
+        assert balance == 0
+        if split_start < len(content):
+            results.append(content[split_start:])
+        return results
 
 
 class GenConstructorMethod(GenMethod):

@@ -25,6 +25,9 @@ public:
         return size;
     }
 
+    virtual void flush() override {
+    }
+
 private:
     GLenum _type;
     size_t _size;

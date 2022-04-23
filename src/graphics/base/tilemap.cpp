@@ -4,7 +4,7 @@
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
-#include "core/inf/importer.h"
+#include "core/inf/storage.h"
 #include "core/inf/variable.h"
 #include "core/util/math.h"
 
@@ -54,8 +54,8 @@ private:
 
 }
 
-Tilemap::Tilemap(const sp<LayerContext>& layerContext, const sp<Size>& size, const sp<Tileset>& tileset, const sp<TilemapImporter>& importer)
-    : _layer_context(layerContext), _size(size), _tileset(tileset), _importer(importer)
+Tilemap::Tilemap(const sp<LayerContext>& layerContext, const sp<Size>& size, const sp<Tileset>& tileset, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)
+    : _layer_context(layerContext), _size(size), _tileset(tileset), _storage(sp<Storage::Composite<Tilemap>>::make(*this, std::move(importer), std::move(outputer)))
 {
     DASSERT(_layer_context);
 }
@@ -69,7 +69,7 @@ void Tilemap::render(RenderRequest& renderRequest, const V3& position)
 
     for(const sp<TilemapLayer>& i : _layers)
         if(!(i->flag() & LAYER_FLAG_INVISIBLE))
-            i->render(renderRequest, V3(0));
+            i->render(renderRequest, V3());
 }
 
 const sp<Size>& Tilemap::size()
@@ -87,10 +87,14 @@ const sp<Tileset>& Tilemap::tileset() const
     return _tileset;
 }
 
+const sp<Storage>& Tilemap::storage() const
+{
+    return _storage;
+}
+
 void Tilemap::load(const sp<Readable>& readable)
 {
-    DASSERT(_importer);
-    _importer->import(*this, readable);
+    _storage->import(readable);
 }
 
 void Tilemap::load(const String& src)
@@ -125,13 +129,14 @@ const std::list<sp<TilemapLayer>>& Tilemap::layers() const
 
 Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_TRANSIENT)), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _tileset(factory.ensureBuilder<Tileset>(manifest, "tileset")), _importer(factory.getBuilder<TilemapImporter>(manifest, "importer")), _scrollable(factory.getBuilder<Scrollable>(manifest, "scrollable"))
+      _tileset(factory.ensureBuilder<Tileset>(manifest, "tileset")), _importer(factory.getBuilder<Importer<Tilemap>>(manifest, "importer")), _outputer(factory.getBuilder<Outputer<Tilemap>>(manifest, "outputer")),
+      _scrollable(factory.getBuilder<Scrollable>(manifest, "scrollable"))
 {
 }
 
 sp<Tilemap> Tilemap::BUILDER::build(const Scope& args)
 {
-    sp<Tilemap> tilemap = sp<Tilemap>::make(_layer_context->build(args), _size->build(args), _tileset->build(args), _importer->build(args));
+    sp<Tilemap> tilemap = sp<Tilemap>::make(_layer_context->build(args), _size->build(args), _tileset->build(args), _importer->build(args), _outputer->build(args));
     if(_scrollable)
     {
         sp<Scrollable> scrollable = _scrollable->build(args);

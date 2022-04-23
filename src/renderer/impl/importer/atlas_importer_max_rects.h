@@ -2,7 +2,7 @@
 #define ARK_RENDERER_IMPL_IMPORTER_ATLAS_IMPORTER_MAX_RECTS_H_
 
 #include "core/inf/builder.h"
-#include "core/inf/importer.h"
+#include "core/inf/storage.h"
 
 #include "renderer/forwarding.h"
 

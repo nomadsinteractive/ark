@@ -133,7 +133,6 @@ sp<MessageLoop> ApplicationContext::makeMessageLoop()
     const Ark& ark = Ark::instance();
     if(ark.manifest()->application()._message_loop == Manifest::MESSAGE_LOOP_TYPE_RENDER)
         return _render_message_loop;
-//    return sp<MessageLoopThread>::make(_ticker);
     return _worker_strategy->_message_loop;
 }
 

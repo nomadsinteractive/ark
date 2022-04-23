@@ -1,4 +1,4 @@
-#include "graphics/impl/importer/tilemap_importer_tmx.h"
+#include "graphics/impl/storage/tilemap_importer_tmx.h"
 
 #include "core/util/documents.h"
 #include "core/util/strings.h"
@@ -40,7 +40,7 @@ void TilemapImporterTmx::import(Tilemap& tilemap, const sp<Readable>& src)
     }
 }
 
-sp<TilemapImporter> TilemapImporterTmx::DICTIONARY::build(const Scope& /*args*/)
+sp<Importer<Tilemap> > TilemapImporterTmx::DICTIONARY::build(const Scope& /*args*/)
 {
     return sp<TilemapImporterTmx>::make();
 }

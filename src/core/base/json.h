@@ -12,7 +12,20 @@ public:
     struct Stub;
 
 //  [[script::bindings::auto]]
-    Json();
+    Json(const sp<Json>& other = nullptr);
+//  [[script::bindings::auto]]
+    Json(const String& value);
+//  [[script::bindings::auto]]
+    Json(int32_t value);
+//  [[script::bindings::auto]]
+    Json(float value);
+//  [[script::bindings::auto]]
+    Json(const sp<ByteArray>& value);
+//  [[script::bindings::auto]]
+    Json(const sp<IntArray>& value);
+//  [[script::bindings::auto]]
+    Json(const sp<FloatArray>& value);
+
     Json(sp<Stub> stub);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Json);
     ~Json();
@@ -30,6 +43,13 @@ public:
     float getFloat(const String& key, float defValue = 0) const;
 
 //  [[script::bindings::auto]]
+    void setString(const String& key, const String& value) const;
+//  [[script::bindings::auto]]
+    void setInt(const String& key, int32_t value) const;
+//  [[script::bindings::auto]]
+    void setFloat(const String& key, float value) const;
+
+//  [[script::bindings::auto]]
     String toString() const;
 //  [[script::bindings::auto]]
     int32_t toInt() const;
@@ -37,9 +57,27 @@ public:
     float toFloat() const;
 
 //  [[script::bindings::auto]]
+    bytearray toByteArray() const;
+//  [[script::bindings::auto]]
+    intarray toIntArray() const;
+//  [[script::bindings::auto]]
+    floatarray toFloatArray() const;
+
+//  [[script::bindings::auto]]
     sp<Json> get(const String& key) const;
+
+//  [[script::bindings::auto]]
+    void set(const String& key, const Json& value) const;
+
 //  [[script::bindings::auto]]
     sp<Json> at(int32_t index) const;
+
+//  [[script::bindings::auto]]
+    void append(const Json& value);
+//  [[script::bindings::auto]]
+    void append(int32_t value);
+//  [[script::bindings::auto]]
+    void append(float value);
 
 //  [[script::bindings::auto]]
     bool isArray() const;
@@ -62,6 +100,9 @@ public:
 
 //  [[script::bindings::auto]]
     String dump() const;
+
+//  [[script::bindings::auto]]
+    sp<Writable> makeWritable();
 
 private:
     sp<Stub> _stub;

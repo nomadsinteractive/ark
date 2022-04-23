@@ -29,20 +29,23 @@ public:
 
 public:
 // [[script::bindings::auto]]
-    Tilemap(const sp<LayerContext>& layerContext, const sp<Size>& size, const sp<Tileset>& tileset, const sp<TilemapImporter>& importer = nullptr);
+    Tilemap(const sp<LayerContext>& layerContext, const sp<Size>& size, const sp<Tileset>& tileset, sp<Importer<Tilemap>> importer = nullptr, sp<Outputer<Tilemap>> outputer = nullptr);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 // [[script::bindings::property]]
     virtual const sp<Size>& size() override;
+
+// [[script::bindings::property]]
+    const sp<Tileset>& tileset() const;
+
+// [[script::bindings::property]]
+    const sp<Storage>& storage() const;
 
 // [[script::bindings::auto]]
     sp<TilemapLayer> makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position = nullptr, const sp<Vec3>& scroller = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
 
 // [[script::bindings::auto]]
     void clear();
-
-// [[script::bindings::property]]
-    const sp<Tileset>& tileset() const;
 
 //  [[script::bindings::property]]
     const std::list<sp<TilemapLayer>>& layers() const;
@@ -68,7 +71,8 @@ public:
         sp<Builder<LayerContext>> _layer_context;
         sp<Builder<Size>> _size;
         sp<Builder<Tileset>> _tileset;
-        sp<Builder<TilemapImporter>> _importer;
+        SafePtr<Builder<Importer<Tilemap>>> _importer;
+        SafePtr<Builder<Outputer<Tilemap>>> _outputer;
 
         sp<Builder<Scrollable>> _scrollable;
     };
@@ -77,7 +81,7 @@ private:
     sp<LayerContext> _layer_context;
     SafePtr<Size> _size;
     sp<Tileset> _tileset;
-    sp<TilemapImporter> _importer;
+    sp<Storage> _storage;
 
     std::list<sp<TilemapLayer>> _layers;
     sp<Scrollable> _scrollable;

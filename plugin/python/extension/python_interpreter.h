@@ -22,7 +22,7 @@
 
 #include "python/api.h"
 #include "python/extension/py_ark_type.h"
-#include "python/extension/py_instance_ref.h"
+#include "python/extension/py_instance.h"
 
 namespace ark {
 namespace plugin {
@@ -67,31 +67,43 @@ public:
         return sp<typename Array<sp<T>>::Vector>::make(std::move(arr));
     }
 
-    PyObject* fromSharedPtr(const sp<PyInstanceRef>& inst) {
-        PyObject* obj = inst->instance();
-        Py_XINCREF(obj);
+    PyObject* toPyObject_SharedPtr(const sp<PyInstanceRef>& inst);
+    PyObject* toPyObject_SharedPtr(const sp<String>& inst);
+    PyObject* toPyObject_SharedPtr(const bytearray& bytes);
+
+    template<typename T> PyObject* toPyObject_SharedPtr(const sp<T>& object) {
+        return toPyObject_SharedPtr_sfinae(object, nullptr);
+    }
+
+    template<typename T> PyObject* toPyObject_SharedPtr_sfinae(const sp<Array<T>>& arrayObject, typename std::enable_if<std::is_integral<T>::value>::type* ) {
+        const uint32_t arrayLength = arrayObject->length();
+        const T* arrayBuf = arrayObject->buf();
+        PyObject* obj = PyList_New(arrayLength);
+        for(uint32_t i = 0; i < arrayLength; ++i)
+            PyList_SetItem(i, std::is_signed<T>::value ? PyLong_FromLong(arrayBuf[i]) : PyLong_FromUnsignedLong(arrayBuf[i]));
         return obj;
     }
 
-    PyObject* fromSharedPtr(const sp<String>& inst) {
-        if(inst)
-            return PyUnicode_FromString(inst->c_str());
-        Py_RETURN_NONE;
+    template<typename T> PyObject* toPyObject_SharedPtr_sfinae(const sp<Array<T>>& arrayObject, typename std::enable_if<std::is_floating_point<T>::value>::type* ) {
+        const uint32_t arrayLength = arrayObject->length();
+        const T* arrayBuf = arrayObject->buf();
+        PyObject* obj = PyList_New(arrayLength);
+        for(uint32_t i = 0; i < arrayLength; ++i)
+            PyList_SetItem(i, PyFloat_FromDouble(arrayBuf[i]));
+        return obj;
     }
 
-    PyObject* fromByteArray(const bytearray& bytes) const;
+    template<typename T> PyObject* toPyObject_SharedPtr_sfinae(const sp<T>& object, nullptr_t ) {
+        if(!object)
+            Py_RETURN_NONE;
+        return pyNewObject<T>(object);
+    }
 
     template<typename T> T toType(PyObject* object);
     template<typename T> PyObject* fromType(const T& value);
 
     template<typename T> sp<T> toSharedPtr(PyObject* object, bool alert = true) {
         return toSharedPtrImpl<T>(object, alert);
-    }
-
-    template<typename T> PyObject* fromSharedPtr(const sp<T>& object) {
-        if(!object)
-            Py_RETURN_NONE;
-        return pyNewObject<T>(object);
     }
 
     template<typename T> int addPyArkType(PyArkType* pyArkType) {
@@ -187,11 +199,33 @@ private:
     template<typename T> T toCppObject_sfinae(PyObject* obj, typename std::enable_if<std::is_enum<T>::value>::type*) {
         return static_cast<T>(toType<int32_t>(obj));
     }
+    template<typename... Args> PyObject* makeArgumentTuple(Args... args) {
+        PyObject* tuple = PyTuple_New(sizeof...(Args));
+        reduceArgumentTuple(tuple, 0, args...);
+        return tuple;
+    }
+    template<typename T, typename... Args> void reduceArgumentTuple(PyObject *tuple, uint32_t idx, T arg, Args... args) {
+        PyTuple_SetItem(tuple, idx, toPyObject(std::forward<T>(arg)));
+        reduceArgumentTuple(tuple, idx + 1, args...);
+    }
+    void reduceArgumentTuple(PyObject *tuple, uint32_t idx) {
+    }
+    template<typename R, typename... Args> std::function<R(Args...)> toCppObject_function(PyObject* obj, std::function<R(Args...)>* func) {
+        PyInstance pyObj(PyInstance::own(obj));
+        return [this, pyObj](Args... args) -> R {
+            PyInstance tuple = PyInstance::steal(makeArgumentTuple<Args...>(args...));
+            PyInstance result = PyInstance::steal(pyObj.call(tuple.pyObject()));
+            return toCppObject<R>(result.pyObject());
+        };
+    }
+    template<typename T> T toCppObject_sfinae(PyObject* obj, typename T::result_type*) {
+        return toCppObject_function(obj, reinterpret_cast<T*>(nullptr));
+    }
     template<typename T> T toCppObject_sfinae(PyObject* obj, ...) {
         return toType<T>(obj);
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& ptr, typename T::_PtrType*) {
-        return fromSharedPtr(static_cast<sp<typename T::_PtrType>>(ptr));
+        return toPyObject_SharedPtr(static_cast<sp<typename T::_PtrType>>(ptr));
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& iterable, typename std::enable_if<!(std::is_same<T, std::string>::value  || std::is_same<T, std::wstring>::value), decltype(iterable.begin())>::type*) {
         return fromIterable_sfinae<T>(iterable, nullptr);
@@ -298,11 +332,6 @@ template<> inline sp<Vec2> PythonInterpreter::toSharedPtr<Vec2>(PyObject* object
 template<> inline sp<Vec3> PythonInterpreter::toSharedPtr<Vec3>(PyObject* object, bool alert)
 {
     return toVec3(object, alert);
-}
-
-template<> inline PyObject* PythonInterpreter::fromSharedPtr<Array<uint8_t>>(const bytearray& bytes)
-{
-    return fromByteArray(bytes);
 }
 
 }

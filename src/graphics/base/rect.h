@@ -98,19 +98,27 @@ public:
     }
 
     bool intersect(const RectT& other) const {
-        return _left < other._right && _right > other._left && _top < other._bottom && _bottom > other._top;
+        return upright().intersectUprightImpl(other.upright());
     }
 
     bool intersect(const RectT& other, RectT& intersection) const {
-        T leftX = std::max(_left, other._left);
-        T rightX = std::min(_right, other._right);
-        T topY = std::max(_top, other._top);
-        T bottomY = std::min(_bottom, other._bottom);
-        if(leftX < rightX && topY < bottomY) {
-            intersection = RectT(leftX, topY, rightX, bottomY);
-            return true;
+        bool r = intersectUprightImpl(other.upright(), intersection);
+        if(r) {
+            if(other._left > other._right)
+                std::swap(intersection._left, intersection._right);
+            if(other._top > other._bottom)
+                std::swap(intersection._top, intersection._bottom);
         }
-        return false;
+        return r;
+    }
+
+    RectT upright() const {
+        RectT r(*this);
+        if(r._left > r._right)
+            std::swap(r._left, r._right);
+        if(r._top > r._bottom)
+            std::swap(r._top, r._bottom);
+        return r;
     }
 
     void setCenter(T x, T y) {
@@ -131,6 +139,22 @@ public:
         return RectT(bounds.left(), bounds.top(), bounds.left() + bounds.right(), bounds.top() + bounds.bottom());
     }
 
+private:
+    bool intersectUprightImpl(const RectT& other) const {
+        return _left < other._right && _right > other._left && _top < other._bottom && _bottom > other._top;
+    }
+
+    bool intersectUprightImpl(const RectT& other, RectT& intersection) const {
+        T leftX = std::max(_left, other._left);
+        T rightX = std::min(_right, other._right);
+        T topY = std::max(_top, other._top);
+        T bottomY = std::min(_bottom, other._bottom);
+        if(leftX < rightX && topY < bottomY) {
+            intersection = RectT(leftX, topY, rightX, bottomY);
+            return true;
+        }
+        return false;
+    }
 
 private:
     T _left;

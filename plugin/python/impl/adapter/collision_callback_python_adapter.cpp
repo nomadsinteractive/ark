@@ -30,7 +30,7 @@ void CollisionCallbackPythonAdapter::onBeginContact(const sp<RigidBody>& rigidBo
         PyObject* args = PyTuple_New(2);
 
         PyTuple_SetItem(args, 0, toPyObject(rigidBody));
-        PyTuple_SetItem(args, 1, PythonInterpreter::instance()->fromSharedPtr<CollisionManifold>(_collision_manifold));
+        PyTuple_SetItem(args, 1, PythonInterpreter::instance()->toPyObject(_collision_manifold));
 
 /* Check again, in case of GC */
         if(_on_begin_contact)
@@ -79,7 +79,7 @@ PyObject* CollisionCallbackPythonAdapter::toPyObject(const sp<RigidBody>& rigidB
     TypeId concreteTypeId = rigidBody.ensureInterfaces()->typeId();
     if(PythonInterpreter::instance()->isPyObject(concreteTypeId))
         return PythonInterpreter::instance()->toPyObject(Box(rigidBody).toConcrete());
-    return PythonInterpreter::instance()->fromSharedPtr<RigidBody>(rigidBody);
+    return PythonInterpreter::instance()->toPyObject(rigidBody);
 }
 
 }

@@ -138,9 +138,9 @@ sp<Vec3> PythonInterpreter::toVec3(PyObject* object, bool alert)
     return Vec3Type::create(vec2);
 }
 
-PyObject* PythonInterpreter::fromByteArray(const bytearray& bytes) const
+PyObject* PythonInterpreter::toPyObject_SharedPtr(const bytearray& bytes)
 {
-    return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(bytes->buf()), bytes->length());
+    return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(bytes->buf()), static_cast<size_t>(bytes->length()));
 }
 
 sp<Numeric> PythonInterpreter::toNumeric(PyObject* object, bool alert)
@@ -203,6 +203,19 @@ Scope PythonInterpreter::toScope(PyObject* kws) const
         Py_DECREF(keys);
     }
     return scope;
+}
+
+PyObject* PythonInterpreter::toPyObject_SharedPtr(const sp<PyInstanceRef>& inst)
+{
+    PyObject* obj = inst->instance();
+    Py_XINCREF(obj);
+    return obj;
+}
+
+PyObject* PythonInterpreter::toPyObject_SharedPtr(const sp<String>& inst) {
+    if(inst)
+        return PyUnicode_FromString(inst->c_str());
+    Py_RETURN_NONE;
 }
 
 String PythonInterpreter::unicodeToUTF8String(PyObject* object, const char* encoding, const char* error) const
@@ -335,6 +348,8 @@ template<> ARK_PLUGIN_PYTHON_API Box PythonInterpreter::toType<Box>(PyObject* ob
 
 template<> ARK_PLUGIN_PYTHON_API bool PythonInterpreter::toType<bool>(PyObject* object)
 {
+    if(object == Py_None)
+        return false;
     if(PyBool_Check(object))
         return object == Py_True;
     if(PyLong_Check(object))
@@ -386,11 +401,11 @@ template<> ARK_PLUGIN_PYTHON_API V3 PythonInterpreter::toType<V3>(PyObject* obje
 {
     if(PyTuple_Check(object))
     {
-        float x, y, z;
-        if(PyArg_ParseTuple(object, "fff", &x, &y, &z))
+        float x, y, z = 0;
+        if(PyArg_ParseTuple(object, "ff|f", &x, &y, &z))
             return V3(x, y, z);
     }
-    const sp<Vec3> vec3 = toSharedPtrImpl<Vec3>(object);
+    const sp<Vec3> vec3 = toSharedPtr<Vec3>(object);
     if(vec3)
         return vec3->val();
     DFATAL("V3 object should be either Vec3 or length-3 tuple (eg. (1.0, 1.0, 1.0))");
@@ -401,11 +416,11 @@ template<> ARK_PLUGIN_PYTHON_API V4 PythonInterpreter::toType<V4>(PyObject* obje
 {
     if(PyTuple_Check(object))
     {
-        float x, y, z, w;
-        if(PyArg_ParseTuple(object, "ffff", &x, &y, &z, &w))
+        float x, y, z = 0, w = 0;
+        if(PyArg_ParseTuple(object, "ff|ff", &x, &y, &z, &w))
             return V4(x, y, z, w);
     }
-    const sp<Vec4> vec4 = toSharedPtrImpl<Vec4>(object);
+    const sp<Vec4> vec4 = toSharedPtr<Vec4>(object);
     if(vec4)
         return vec4->val();
     DFATAL("V4 object should be either Vec4 or length-4 tuple (eg. (1.0, 1.0, 1.0, 1.0))");
@@ -506,12 +521,12 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Rect>(con
 
 template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Color>(const Color& color)
 {
-    return PythonInterpreter::instance()->fromSharedPtr<Color>(sp<Color>::make(color));
+    return PythonInterpreter::instance()->toPyObject_SharedPtr<Color>(sp<Color>::make(color));
 }
 
 template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<RayCastManifold>(const RayCastManifold& manifold)
 {
-    return PythonInterpreter::instance()->fromSharedPtr<RayCastManifold>(sp<RayCastManifold>::make(manifold));
+    return PythonInterpreter::instance()->toPyObject_SharedPtr<RayCastManifold>(sp<RayCastManifold>::make(manifold));
 }
 
 }

@@ -65,6 +65,10 @@ class Readable:
     pass
 
 
+class Writable:
+    pass
+
+
 class _Var:
     def __init__(self, v):
         pass
@@ -137,12 +141,26 @@ class _Var:
         return 0.0
 
 
+class Json:
+    def __init__(self):
+        pass
+
+
 class MessageLoop:
 
     def post(self, task: Callable[[], None], delay: float):
         pass
 
     def schedule(self, task: Callable[[], None], interval: float):
+        pass
+
+
+class Storage:
+
+    def load(self, readable: Readable):
+        pass
+
+    def save(self, writable: Writable):
         pass
 
 
@@ -553,7 +571,7 @@ class Integer(_Var):
         pass
 
 
-class Disposed:
+class Disposed(Boolean):
     def __init__(self, disposed=False):
         pass
 
@@ -561,9 +579,6 @@ class Disposed:
         pass
 
     def observe(self, observer: Observer) -> Boolean:
-        return Boolean(False)
-
-    def to_boolean(self) -> Boolean:
         return Boolean(False)
 
     def __bool__(self):
@@ -1413,6 +1428,9 @@ class TilemapLayer:
     def copy_tiles(self, tiles: List[int], dest: Tuple[int, int, int, int]):
         pass
 
+    def foreach_tile(self, callback: Callable[[int, int, Tile], bool]):
+        pass
+
 
 class Tilemap(Renderer):
     LAYER_FLAG_DEFAULT = 0
@@ -1458,6 +1476,10 @@ class Tilemap(Renderer):
     @property
     def layers(self) -> List[TilemapLayer]:
         return []
+
+    @property
+    def storage(self) -> Optional[Storage]:
+        return None
 
     def add_layer(self, layer: TilemapLayer):
         pass

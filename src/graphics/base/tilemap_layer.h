@@ -63,6 +63,9 @@ public:
 // [[script::bindings::auto]]
     void reset();
 
+// [[script::bindings::auto]]
+    void foreachTile(const std::function<bool(uint32_t, uint32_t, const sp<Tile>&)>& callback) const;
+
 private:
     void renderTiles(const V3& position, const RectI& renderRange);
     void setTile(uint32_t row, uint32_t col, const sp<Tile>& tile, const sp<RenderObject>& renderObject);

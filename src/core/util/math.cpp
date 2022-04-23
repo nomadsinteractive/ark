@@ -220,6 +220,11 @@ sp<Numeric> Math::dot(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
     return sp<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Dot<V4>>>::make(lvalue, rvalue);
 }
 
+float Math::lerp(float a, float b, float t)
+{
+    return a + (b - a) * t;
+}
+
 sp<Numeric> Math::lerp(const sp<Numeric>& a, const sp<Numeric>& b, const sp<Numeric>& t)
 {
     return sp<Interpolate<float>>::make(a, b, t);

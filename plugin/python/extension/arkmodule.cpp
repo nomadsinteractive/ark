@@ -118,7 +118,7 @@ PyObject* ark_openAsset(PyObject* /*self*/, PyObject* args)
     if(!PyArg_ParseTuple(args, "s", &arg0))
         Py_RETURN_NONE;
     const sp<Readable> readable = Ark::instance().tryOpenAsset(arg0);
-    return PythonInterpreter::instance()->fromSharedPtr<Readable>(readable);
+    return PythonInterpreter::instance()->toPyObject(readable);
 }
 
 PyObject* ark_getAssetResource(PyObject* /*self*/, PyObject* args)
@@ -128,7 +128,7 @@ PyObject* ark_getAssetResource(PyObject* /*self*/, PyObject* args)
         Py_RETURN_NONE;
     const sp<AssetBundle> resource = Ark::instance().getAssetBundle(*arg0 ? arg0 : "/");
     if(resource)
-        return PythonInterpreter::instance()->template fromSharedPtr<AssetBundle>(resource);
+        return PythonInterpreter::instance()->toPyObject(resource);
     Py_RETURN_NONE;
 }
 
@@ -221,6 +221,7 @@ PyMODINIT_FUNC PyInit_ark(void)
     for(const String& str : ark::plugin::python::_PYTHON_PATH)
         PyList_SetItem(path, i++, PyUnicode_FromString(str.c_str()));
     PyObject_SetAttrString(module, "path", path);
+    Py_DECREF(path);
     return module;
 }
 

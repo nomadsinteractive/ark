@@ -10,6 +10,7 @@ public:
     WritableMemory(void* ptr);
 
     virtual uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override;
+    virtual void flush() override;
 
 private:
     uint8_t* _ptr;

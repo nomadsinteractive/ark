@@ -2,7 +2,7 @@
 #define ARK_CORE_IMPL_IMPORTER_INT_MAP_IMPORTER_PLAIN_H_
 
 #include "core/inf/builder.h"
-#include "core/inf/importer.h"
+#include "core/inf/storage.h"
 
 namespace ark {
 

@@ -99,7 +99,7 @@ bool NarrowPhraseCuteC2::collisionManifold(const BroadPhrase::Candidate& candida
 bool NarrowPhraseCuteC2::rayCastManifold(const Ray& ray, const BroadPhrase::Candidate& candidate, RayCastManifold& rayCastManifold)
 {
     const auto iter = _shapes.find(candidate.shape_id);
-    DCHECK(iter != _shapes.end(), "Shape %d not found", candidate);
+    DCHECK(iter != _shapes.end(), "Shape %d not found", candidate.shape_id);
     for(const ShapeCuteC2& i : iter->second)
     {
         const ShapeCuteC2 transformed(i, candidate.position, candidate.rotation);

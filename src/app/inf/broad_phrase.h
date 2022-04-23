@@ -2,6 +2,7 @@
 #define ARK_APP_INF_BROAD_PHRASE_H_
 
 #include <map>
+#include <iterator>
 #include <unordered_set>
 #include <vector>
 

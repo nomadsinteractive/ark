@@ -5,12 +5,10 @@
 
 namespace ark {
 
+//[[script::bindings::auto]]
 class ARK_API Object {
 public:
     virtual ~Object() = default;
-
-//  [[script::bindings::meta(expire())]]
-
 };
 
 }

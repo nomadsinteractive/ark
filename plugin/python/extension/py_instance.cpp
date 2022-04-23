@@ -73,7 +73,7 @@ PyInstance PyInstance::getAttr(const char* name) const
     return attr;
 }
 
-PyObject* PyInstance::call(PyObject* args)
+PyObject* PyInstance::call(PyObject* args) const
 {
     try {
         return PyObject_Call(_ref->instance(), args, nullptr);

@@ -37,7 +37,7 @@ public:
     bool hasAttr(const char* name) const;
     PyInstance getAttr(const char* name) const;
 
-    PyObject* call(PyObject* args);
+    PyObject* call(PyObject* args) const;
 
     bool isCallable() const;
     bool isNone() const;

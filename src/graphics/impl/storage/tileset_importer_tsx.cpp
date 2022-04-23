@@ -1,4 +1,4 @@
-#include "graphics/impl/importer/tileset_importer_tsx.h"
+#include "graphics/impl/storage/tileset_importer_tsx.h"
 
 #include "core/util/documents.h"
 #include "core/util/strings.h"

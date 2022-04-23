@@ -177,6 +177,8 @@ public:
     static ARK_API sp<Numeric> dot(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
 
 //  [[script::bindings::auto]]
+    static ARK_API float lerp(float a, float b, float t);
+//  [[script::bindings::auto]]
     static ARK_API sp<Numeric> lerp(const sp<Numeric>& a, const sp<Numeric>& b, const sp<Numeric>& t);
 //  [[script::bindings::auto]]
     static ARK_API sp<Vec2> lerp(const sp<Vec2>& a, const sp<Vec2>& b, const sp<Numeric>& t);

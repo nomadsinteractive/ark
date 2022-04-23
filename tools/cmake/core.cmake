@@ -141,7 +141,7 @@ list(APPEND LOCAL_GENERATED_SRC_LIST ${GENERATED_FILE_NAMES})
 endmacro()
 
 function(ark_add_denpendency PATH LIB_NAME)
-    ark_ensure_dependency(${PATH})
+#    ark_ensure_dependency(${PATH})
     add_subdirectory(${PATH})
     ark_link_libraries(${LIB_NAME})
     ark_export_dependency_libraries(${LIB_NAME})

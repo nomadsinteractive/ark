@@ -8,7 +8,7 @@ namespace ark {
 
 class ARK_API Input : public Updatable {
 public:
-    virtual ~Input() = default;
+    virtual ~Input() override = default;
 
     virtual void flat(void* buf) = 0;
     virtual uint32_t size() = 0;

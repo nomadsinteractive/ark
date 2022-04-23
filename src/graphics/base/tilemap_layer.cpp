@@ -58,8 +58,8 @@ bool TilemapLayer::getSelectionTileRange(const Rect& aabb, V3& selectionPosition
     const Rect aabbRel(aabb.left() - pos.x(), aabb.top() - pos.y(), aabb.right() - pos.x(), aabb.bottom() - pos.y());
     if(!aabbRel.intersect(Rect(0, 0, width, height), intersection))
         return false;
-    Math::modBetween<float>(intersection.left(), intersection.right(), _tileset->tileWidth(), sx, ex);
-    Math::modBetween<float>(intersection.top(), intersection.bottom(), _tileset->tileHeight(), sy, ey);
+    Math::modBetween<float>(intersection.left(), intersection.right(), static_cast<float>(_tileset->tileWidth()), sx, ex);
+    Math::modBetween<float>(intersection.top(), intersection.bottom(), static_cast<float>(_tileset->tileHeight()), sy, ey);
 
     int32_t rowStart = std::max(static_cast<int32_t>(sy / tileHeight), 0);
     int32_t colStart = std::max(static_cast<int32_t>(sx / tileWidth), 0);
@@ -156,13 +156,24 @@ void TilemapLayer::reset()
     std::fill(_layer_tiles.begin(), _layer_tiles.end(), LayerTile());
 }
 
+void TilemapLayer::foreachTile(const std::function<bool (uint32_t, uint32_t, const sp<Tile>&)>& callback) const
+{
+    for(uint32_t i = 0; i < _row_count; ++i)
+        for(uint32_t j = 0; j < _col_count; ++j)
+        {
+            const LayerTile& layerTile = _layer_tiles.at(i * _col_count + j);
+            if(layerTile.tile && !callback(i, j, layerTile.tile))
+                return;
+        }
+}
+
 void TilemapLayer::renderTiles(const V3& position, const RectI& renderRange)
 {
     float tileWidth = static_cast<float>(_tileset->tileWidth());
     float tileHeight = static_cast<float>(_tileset->tileHeight());
     for(int32_t i = renderRange.top(); i < renderRange.bottom(); ++i)
     {
-        float dy = (i - renderRange.top()) * tileHeight;
+        float dy = static_cast<float>(i - renderRange.top()) * tileHeight;
         for(int32_t j = renderRange.left(); j < renderRange.right(); ++j)
         {
             const LayerTile& tile = _layer_tiles.at(i * _col_count + j);

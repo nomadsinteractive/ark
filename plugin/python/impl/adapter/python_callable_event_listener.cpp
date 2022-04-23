@@ -19,7 +19,7 @@ bool PythonCallableEventListener::onEvent(const Event& event)
 {
     DCHECK_THREAD_FLAG();
 
-    PyObject* pyEvent = PythonInterpreter::instance()->fromSharedPtr<Event>(sp<Event>::make(event));
+    PyObject* pyEvent = PythonInterpreter::instance()->toPyObject(sp<Event>::make(event));
     PyTuple_SetItem(_args.pyObject(), 0, pyEvent);
     PyObject* ret = _callable.call(_args.pyObject());
     bool consumed = false;

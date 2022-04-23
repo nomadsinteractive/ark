@@ -14,4 +14,8 @@ uint32_t WritableMemory::write(const void* buffer, uint32_t size, uint32_t offse
     return size;
 }
 
+void WritableMemory::flush()
+{
+}
+
 }

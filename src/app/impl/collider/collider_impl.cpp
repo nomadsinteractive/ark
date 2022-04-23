@@ -213,6 +213,12 @@ std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V
         if(_narrow_phrase->rayCastManifold(ray, i, raycast))
             manifolds.push_back(raycast);
     }
+    RayCastManifold raycast;
+    for(const auto& i : result.static_candidates)
+    {
+        if(_narrow_phrase->rayCastManifold(ray, i, raycast))
+            manifolds.emplace_back(raycast.distance(), raycast.normal(), sp<RigidBodyShadow>::make(i.id, Collider::BODY_TYPE_STATIC, sp<Vec3::Const>::make(V3(i.position.x(), i.position.y(), 0)), nullptr, nullptr, nullptr));
+    }
     return manifolds;
 }
 
