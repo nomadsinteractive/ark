@@ -32,6 +32,8 @@ public:
     static sp<Vec4> floordiv(const sp<Vec4>& self, const sp<Vec4>& rvalue);
 //  [[script::bindings::operator(neg)]]
     static sp<Vec4> negative(const sp<Vec4>& self);
+//  [[script::bindings::operator(abs)]]
+    static sp<Vec4> absolute(const sp<Vec4>& self);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec4> transform(const sp<Vec4>& self, const sp<Transform>& transform, const sp<Vec4>& org);

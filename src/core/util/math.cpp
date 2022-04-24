@@ -54,6 +54,26 @@ uint32_t Math::log2(uint32_t value)
     return tab32[static_cast<uint32_t>((value * 0x07C4ACDD) >> 27)];
 }
 
+float Math::abs(float x)
+{
+    return std::abs(x);
+}
+
+V2 Math::abs(const V2& x)
+{
+    return V2(std::abs(x.x()), std::abs(x.y()));
+}
+
+V3 Math::abs(const V3& x)
+{
+    return V3(std::abs(x.x()), std::abs(x.y()), std::abs(x.z()));
+}
+
+V4 Math::abs(const V4& x)
+{
+    return V4(std::abs(x.x()), std::abs(x.y()), std::abs(x.z()), std::abs(x.w()));
+}
+
 float Math::sin(float x)
 {
     return std::sin(x);

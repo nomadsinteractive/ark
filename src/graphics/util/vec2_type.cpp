@@ -25,30 +25,6 @@ namespace ark {
 
 namespace {
 
-class Vec2Numeric : public Numeric, public Holder, Implements<Vec2Numeric, Numeric, Holder> {
-public:
-    Vec2Numeric(const sp<Vec2>& delegate, int32_t dim)
-        : _delegate(delegate), _dim(dim) {
-    }
-
-    virtual float val() override {
-        return _delegate->val()[_dim];
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return _delegate->update(timestamp);
-    }
-
-    virtual void traverse(const Visitor& visitor) override {
-        HolderUtil::visit(_delegate, visitor);
-    }
-
-private:
-    sp<Vec2> _delegate;
-    int32_t _dim;
-
-};
-
 class Vec2Normalize : public Vec2, public Holder, Implements<Vec2Normalize, Vec2, Holder> {
 public:
     Vec2Normalize(const sp<Vec2>& value)
@@ -180,6 +156,11 @@ sp<Vec2> Vec2Type::negative(const sp<Vec2>& self)
     return sp<VecNeg<V2>>::make(self);
 }
 
+sp<Vec2> Vec2Type::absolute(const sp<Vec2>& self)
+{
+    return sp<VariableOP1<V2, V2>>::make(Operators::Abs<V2>(), self);
+}
+
 sp<Vec2> Vec2Type::transform(const sp<Vec2>& self, const sp<Transform>& transform)
 {
     return sp<Vec2WithTransform>::make(self, transform);
@@ -266,7 +247,7 @@ void Vec2Type::setY(const sp<Vec2>& self, const sp<Numeric>& y)
 sp<Numeric> Vec2Type::vx(const sp<Vec2>& self)
 {
     const sp<Vec2Impl> impl = self.as<Vec2Impl>();
-    return impl ? static_cast<sp<Numeric>>(impl->x()) : static_cast<sp<Numeric>>(sp<Vec2Numeric>::make(self, 0));
+    return impl ? static_cast<sp<Numeric>>(impl->x()) : sp<Numeric>::make<VariableOP1<float, V2>>(Operators::RandomAccess<V2, float>(0), self);
 }
 
 void Vec2Type::setVx(const sp<Vec2>& self, const sp<Numeric>& x)
@@ -277,7 +258,7 @@ void Vec2Type::setVx(const sp<Vec2>& self, const sp<Numeric>& x)
 sp<Numeric> Vec2Type::vy(const sp<Vec2>& self)
 {
     const sp<Vec2Impl> impl = self.as<Vec2Impl>();
-    return impl ? static_cast<sp<Numeric>>(impl->y()) : static_cast<sp<Numeric>>(sp<Vec2Numeric>::make(self, 1));
+    return impl ? static_cast<sp<Numeric>>(impl->y()) : sp<Numeric>::make<VariableOP1<float, V2>>(Operators::RandomAccess<V2, float>(1), self);
 }
 
 void Vec2Type::setVy(const sp<Vec2>& self, const sp<Numeric>& y)

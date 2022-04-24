@@ -3,6 +3,7 @@
 #include "core/ark.h"
 #include "core/base/clock.h"
 #include "core/impl/variable/integral.h"
+#include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
 
@@ -10,30 +11,6 @@
 #include "graphics/impl/vec/vec_neg.h"
 
 namespace ark {
-
-namespace {
-
-class _Vec4Numeric : public Numeric {
-public:
-    _Vec4Numeric(const sp<Vec4>& delegate, int32_t dim)
-        : _delegate(delegate), _dim(dim) {
-    }
-
-    virtual float val() override {
-        return _delegate->val()[_dim];
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return _delegate->update(timestamp);
-    }
-
-private:
-    sp<Vec4> _delegate;
-    int32_t _dim;
-
-};
-
-}
 
 sp<Vec4> Vec4Type::create(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z, const sp<Numeric>& w)
 {
@@ -74,6 +51,11 @@ sp<Vec4> Vec4Type::floordiv(const sp<Vec4>& self, const sp<Vec4>& rvalue)
 sp<Vec4> Vec4Type::negative(const sp<Vec4>& self)
 {
     return sp<VecNeg<V4>>::make(self);
+}
+
+sp<Vec4> Vec4Type::absolute(const sp<Vec4>& self)
+{
+    return sp<VariableOP1<V4, V4>>::make(Operators::Abs<V4>(), self);
 }
 
 sp<Vec4> Vec4Type::transform(const sp<Vec4>& self, const sp<Transform>& transform, const sp<Vec4>& org)
@@ -186,25 +168,25 @@ void Vec4Type::setW(const sp<Vec4>& self, const sp<Numeric>& w)
 sp<Numeric> Vec4Type::vx(const sp<Vec4>& self)
 {
     const sp<Vec4Impl> impl = self.as<Vec4Impl>();
-    return impl ? static_cast<sp<Numeric>>(impl->x()) : static_cast<sp<Numeric>>(sp<_Vec4Numeric>::make(self, 0));
+    return impl ? static_cast<sp<Numeric>>(impl->x()) : sp<Numeric>::make<VariableOP1<float, V4>>(Operators::RandomAccess<V4, float>(0), self);
 }
 
 sp<Numeric> Vec4Type::vy(const sp<Vec4>& self)
 {
     const sp<Vec4Impl> impl = self.as<Vec4Impl>();
-    return impl ? static_cast<sp<Numeric>>(impl->y()) : static_cast<sp<Numeric>>(sp<_Vec4Numeric>::make(self, 1));
+    return impl ? static_cast<sp<Numeric>>(impl->y()) : sp<Numeric>::make<VariableOP1<float, V4>>(Operators::RandomAccess<V4, float>(1), self);
 }
 
 sp<Numeric> Vec4Type::vz(const sp<Vec4>& self)
 {
     const sp<Vec4Impl> impl = self.as<Vec4Impl>();
-    return impl ? static_cast<sp<Numeric>>(impl->z()) : static_cast<sp<Numeric>>(sp<_Vec4Numeric>::make(self, 2));
+    return impl ? static_cast<sp<Numeric>>(impl->z()) : sp<Numeric>::make<VariableOP1<float, V4>>(Operators::RandomAccess<V4, float>(2), self);
 }
 
 sp<Numeric> Vec4Type::vw(const sp<Vec4>& self)
 {
     const sp<Vec4Impl> impl = self.as<Vec4Impl>();
-    return impl ? static_cast<sp<Numeric>>(impl->w()) : static_cast<sp<Numeric>>(sp<_Vec4Numeric>::make(self, 3));
+    return impl ? static_cast<sp<Numeric>>(impl->w()) : sp<Numeric>::make<VariableOP1<float, V4>>(Operators::RandomAccess<V4, float>(3), self);
 }
 
 void Vec4Type::fix(const sp<Vec4>& self)

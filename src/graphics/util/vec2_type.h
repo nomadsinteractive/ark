@@ -40,6 +40,8 @@ public:
     static sp<Vec2> truediv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue);
 //  [[script::bindings::operator(neg)]]
     static sp<Vec2> negative(const sp<Vec2>& self);
+//  [[script::bindings::operator(abs)]]
+    static sp<Vec2> absolute(const sp<Vec2>& self);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec2> transform(const sp<Vec2>& self, const sp<Transform>& transform);

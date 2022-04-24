@@ -7,6 +7,7 @@
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/interpolate.h"
+#include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
 #include "core/util/variable_util.h"
@@ -17,25 +18,6 @@
 namespace ark {
 
 namespace {
-
-class _Vec3Numeric : public Numeric {
-public:
-    _Vec3Numeric(const sp<Vec3>& delegate, int32_t dim)
-        : _delegate(delegate), _dim(dim) {
-    }
-
-    virtual float val() override {
-        return _delegate->val()[_dim];
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return _delegate->update(timestamp);
-    }
-
-private:
-    sp<Vec3> _delegate;
-    int32_t _dim;
-};
 
 class Vec3Cross : public Vec3 {
 public:
@@ -171,6 +153,11 @@ sp<Vec3> Vec3Type::negative(const sp<Vec3>& self)
     return sp<VecNeg<V3>>::make(self);
 }
 
+sp<Vec3> Vec3Type::absolute(const sp<Vec3>& self)
+{
+    return sp<VariableOP1<V3, V3>>::make(Operators::Abs<V3>(), self);
+}
+
 void Vec3Type::set(const sp<VariableWrapper<V3>>& self, const V3& val)
 {
     self->set(val);
@@ -257,19 +244,19 @@ void Vec3Type::setZ(const sp<Vec3>& self, const sp<Numeric>& z)
 sp<Numeric> Vec3Type::vx(const sp<Vec3>& self)
 {
     const sp<Vec3Impl> impl = self.as<Vec3Impl>();
-    return impl ? static_cast<sp<Numeric>>(impl->x()) : static_cast<sp<Numeric>>(sp<_Vec3Numeric>::make(self, 0));
+    return impl ? static_cast<sp<Numeric>>(impl->x()) : sp<Numeric>::make<VariableOP1<float, V3>>(Operators::RandomAccess<V3, float>(0), self);
 }
 
 sp<Numeric> Vec3Type::vy(const sp<Vec3>& self)
 {
     const sp<Vec3Impl> impl = self.as<Vec3Impl>();
-    return impl ? static_cast<sp<Numeric>>(impl->y()) : static_cast<sp<Numeric>>(sp<_Vec3Numeric>::make(self, 1));
+    return impl ? static_cast<sp<Numeric>>(impl->y()) : sp<Numeric>::make<VariableOP1<float, V3>>(Operators::RandomAccess<V3, float>(1), self);
 }
 
 sp<Numeric> Vec3Type::vz(const sp<Vec3>& self)
 {
     const sp<Vec3Impl> impl = self.as<Vec3Impl>();
-    return impl ? static_cast<sp<Numeric>>(impl->z()) : static_cast<sp<Numeric>>(sp<_Vec3Numeric>::make(self, 2));
+    return impl ? static_cast<sp<Numeric>>(impl->z()) : sp<Numeric>::make<VariableOP1<float, V3>>(Operators::RandomAccess<V3, float>(2), self);
 }
 
 void Vec3Type::fix(const sp<Vec3>& self)

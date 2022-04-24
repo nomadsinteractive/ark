@@ -105,6 +105,11 @@ public:
 
     static ARK_API uint32_t log2(uint32_t x);
 
+    static ARK_API float abs(float x);
+    static ARK_API V2 abs(const V2& x);
+    static ARK_API V3 abs(const V3& x);
+    static ARK_API V4 abs(const V4& x);
+
 //  [[script::bindings::auto]]
     static ARK_API float sin(float x);
 //  [[plugin::function("sin")]]

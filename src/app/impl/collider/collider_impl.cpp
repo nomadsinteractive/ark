@@ -5,6 +5,7 @@
 
 #include "core/types/null.h"
 #include "core/util/log.h"
+#include "core/util/variable_util.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/base/render_object.h"
@@ -27,13 +28,13 @@ namespace {
 
 class DynamicPosition : public Vec3 {
 public:
-    DynamicPosition(const sp<ColliderImpl::Stub>& collider, const sp<Vec3>& position)
-        : _collider(collider), _position(position) {
+    DynamicPosition(const sp<ColliderImpl::Stub>& collider, sp<Vec3> position)
+        : _collider(collider), _position(std::move(position)) {
     }
 
     void setRigidBody(const sp<ColliderImpl::RigidBodyShadow>& rigidBody) {
         _rigid_body_shadow = rigidBody;
-        _size = _rigid_body_shadow->size()->val();
+        _size = _rigid_body_shadow->size();
     }
 
     virtual V3 val() override {
@@ -41,20 +42,20 @@ public:
         if(_rigid_body_shadow && _rigid_body_shadow->isDisposed())
             _rigid_body_shadow = nullptr;
         if(_rigid_body_shadow) {
-            _rigid_body_shadow->collision(_rigid_body_shadow, _collider, position, _size);
+            _rigid_body_shadow->collision(_rigid_body_shadow, _collider, position, _size->val());
         }
         return position;
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return _position->update(timestamp);
+        return VariableUtil::update(timestamp, _position, _size);
     }
 
 private:
+    sp<ColliderImpl::RigidBodyShadow> _rigid_body_shadow;
     sp<ColliderImpl::Stub> _collider;
     sp<Vec3> _position;
-    V3 _size;
-    sp<ColliderImpl::RigidBodyShadow> _rigid_body_shadow;
+    sp<Size> _size;
 };
 
 }
@@ -102,7 +103,7 @@ std::vector<RayCastManifold> ColliderImpl::rayCast(const V3& from, const V3& to)
     return _stub->rayCast(V2(from.x(), from.y()), V2(to.x(), to.y()));
 }
 
-ColliderImpl::Stub::Stub(std::vector<sp<BroadPhrase>> broadPhrases, sp<NarrowPhrase> narrowPhrase, const document& manifest, ResourceLoaderContext& resourceLoaderContext)
+ColliderImpl::Stub::Stub(std::vector<sp<BroadPhrase>> broadPhrases, sp<NarrowPhrase> narrowPhrase, const document& /*manifest*/, ResourceLoaderContext& /*resourceLoaderContext*/)
     : _rigid_body_base_id(0), _broad_phrases(std::move(broadPhrases)), _narrow_phrase(std::move(narrowPhrase)), _static_rigid_body_shadow(sp<RigidBodyShadow>::make(0, Collider::BODY_TYPE_STATIC, nullptr, nullptr, nullptr, nullptr))
 {
 }
@@ -224,7 +225,7 @@ std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V
 
 void ColliderImpl::Stub::resolveCandidates(const sp<RigidBody>& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, bool isDynamicCandidates, RigidBody::Callback& callback, std::set<int32_t>& c)
 {
-    std::set<int32_t> contacts = c;
+    std::set<int32_t> contacts = std::move(c);
     std::set<int32_t> contactsOut;
     for(const auto& i : candidates)
     {

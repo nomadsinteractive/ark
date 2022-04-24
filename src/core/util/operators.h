@@ -149,6 +149,13 @@ public:
         }
     };
 
+    template<typename T> class Abs {
+    public:
+        T operator()(const T& val) {
+            return Math::abs(val);
+        }
+    };
+
     template<typename T> class Min {
     public:
         T operator()(T v1, T v2) {
@@ -175,6 +182,20 @@ public:
         float operator()(float v1, float v2) {
             return Math::atan2(v1, v2);
         }
+    };
+
+    template<typename T, typename U> class RandomAccess {
+    public:
+        RandomAccess(int32_t idx)
+            : _idx(idx) {
+        }
+
+        U operator()(const T& val) {
+            return static_cast<U>(val[_idx]);
+        }
+
+    private:
+        int32_t _idx;
     };
 
     template<typename T, typename OP> class Builder : public ark::Builder<Variable<T>> {

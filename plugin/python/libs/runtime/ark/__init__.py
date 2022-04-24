@@ -141,6 +141,12 @@ class Json:
     def __init__(self):
         pass
 
+    def dump(self) -> str:
+        pass
+
+    def to_bson(self) -> bytes:
+        pass
+
 
 class MessageLoop:
 
@@ -157,6 +163,12 @@ class Storage:
         pass
 
     def save(self, writable: Writable):
+        pass
+
+    def json_load(self, json: Json):
+        pass
+
+    def json_dump(self) -> Json:
         pass
 
 

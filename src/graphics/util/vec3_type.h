@@ -43,6 +43,8 @@ public:
     static sp<Vec3> floordiv(const sp<Vec3>& self, const sp<Vec3>& rvalue);
 //  [[script::bindings::operator(neg)]]
     static sp<Vec3> negative(const sp<Vec3>& self);
+//  [[script::bindings::operator(abs)]]
+    static sp<Vec3> absolute(const sp<Vec3>& self);
 
 //  [[script::bindings::classmethod]]
     static void set(const sp<VariableWrapper<V3>>& self, const V3& val);
