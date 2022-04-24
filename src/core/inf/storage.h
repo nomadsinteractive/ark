@@ -15,6 +15,9 @@ public:
     virtual void import(const sp<Readable>& src) = 0;
     virtual void output(const sp<Writable>& out) = 0;
 
+    virtual void jsonLoad(const Json& json) = 0;
+    virtual Json jsonDump() = 0;
+
     template<typename T> class Composite;
 };
 
@@ -34,7 +37,7 @@ public:
         _outputer->output(_obj, out);
     }
 
-private:
+protected:
     T& _obj;
     sp<Importer<T>> _importer;
     sp<Outputer<T>> _outputer;

@@ -53,10 +53,6 @@ def is_debug_build():
     return True
 
 
-class _ArkObject:
-    pass
-
-
 class Object:
     pass
 
@@ -1147,6 +1143,14 @@ class Event:
     CODE_KEYBOARD_BACK = 49
     CODE_KEYBOARD_MENU = 50
 
+    BUTTON_MOUSE_LEFT = 0
+    BUTTON_MOUSE_MIDDLE = 1
+    BUTTON_MOUSE_RIGHT = 2
+    BUTTON_MOTION_POINTER1 = 3
+    BUTTON_MOTION_POINTER2 = 4
+    BUTTON_MOTION_POINTER3 = 5
+    BUTTON_MOTION_POINTER4 = 6
+
     @property
     def action(self) -> int:
         return self.ACTION_KEY_DOWN
@@ -1154,6 +1158,10 @@ class Event:
     @property
     def code(self) -> int:
         return self.CODE_NONE
+
+    @property
+    def button(self) -> int:
+        return self.BUTTON_MOUSE_LEFT
 
     @property
     def x(self) -> int:

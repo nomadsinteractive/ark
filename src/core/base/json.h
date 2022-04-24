@@ -101,9 +101,6 @@ public:
 //  [[script::bindings::auto]]
     String dump() const;
 
-//  [[script::bindings::auto]]
-    sp<Writable> makeWritable();
-
 private:
     sp<Stub> _stub;
 };

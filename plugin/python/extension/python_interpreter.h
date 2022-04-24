@@ -99,8 +99,8 @@ public:
         return pyNewObject<T>(object);
     }
 
-    template<typename T> T toType(PyObject* object);
-    template<typename T> PyObject* fromType(const T& value);
+    template<typename T> T toCppObject_impl(PyObject* object);
+    template<typename T> PyObject* toPyObject_impl(const T& value);
 
     template<typename T> sp<T> toSharedPtr(PyObject* object, bool alert = true) {
         return toSharedPtrImpl<T>(object, alert);
@@ -197,7 +197,7 @@ private:
         return toCppCollectionObject_sfinae<T, U>(obj, nullptr);
     }
     template<typename T> T toCppObject_sfinae(PyObject* obj, typename std::enable_if<std::is_enum<T>::value>::type*) {
-        return static_cast<T>(toType<int32_t>(obj));
+        return static_cast<T>(toCppObject_impl<int32_t>(obj));
     }
     template<typename... Args> PyObject* makeArgumentTuple(Args... args) {
         PyObject* tuple = PyTuple_New(sizeof...(Args));
@@ -222,7 +222,7 @@ private:
         return toCppObject_function(obj, reinterpret_cast<T*>(nullptr));
     }
     template<typename T> T toCppObject_sfinae(PyObject* obj, ...) {
-        return toType<T>(obj);
+        return toCppObject_impl<T>(obj);
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& ptr, typename T::_PtrType*) {
         return toPyObject_SharedPtr(static_cast<sp<typename T::_PtrType>>(ptr));
@@ -249,11 +249,11 @@ private:
         return PyFloat_FromDouble(value);
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& value, ...) {
-        return fromType<T>(value);
+        return toPyObject_impl<T>(value);
     }
 
     template<typename T, typename U> T toCppCollectionObject_sfinae(PyObject* obj, typename std::enable_if<std::is_same<T, std::string>::value || std::is_same<T, std::wstring>::value>::type*) {
-        return toType<T>(obj);
+        return toCppObject_impl<T>(obj);
     }
     template<typename T, typename U> T toCppCollectionObject_sfinae(PyObject* obj, ...) {
         T col;

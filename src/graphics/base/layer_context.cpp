@@ -70,10 +70,10 @@ void LayerContext::clear()
 
 void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderRequest& renderRequest)
 {
-    bool notify = false;
+    bool notify = _renderable_emplaced.size() > 0;
     const sp<PipelineInput>& pipelineInput = output._stub->_shader->input();
 
-    if(_renderable_emplaced.size() > 0)
+    if(notify)
     {
         const std::vector<Item> emplaced(std::move(_renderable_emplaced));
         _renderables.insert(_renderables.end(), emplaced.begin(), emplaced.end());
@@ -84,7 +84,6 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
         const Item& i = *iter;
         i._disposed.update(renderRequest.timestamp());
         Renderable::Snapshot snapshot = i._disposed.val() ? Renderable::Snapshot() : i._renderable->snapshot(pipelineInput, renderRequest, _position);
-//        snapshot._position += _position;
         if(snapshot._disposed || snapshot._type == -1)
         {
             notify = true;

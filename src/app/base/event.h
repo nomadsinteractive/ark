@@ -24,6 +24,7 @@ public:
         ACTION_CANCEL,
         ACTION_USER_DEFINED = 10000
     };
+
 //  [[script::bindings::enumeration]]
     enum Code {
         CODE_NONE,
@@ -96,6 +97,7 @@ public:
         CODE_USER_DEFINED = 10000
     };
 
+//  [[script::bindings::enumeration]]
     enum Button {
         BUTTON_MOUSE_LEFT,
         BUTTON_MOUSE_MIDDLE,

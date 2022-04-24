@@ -4,6 +4,7 @@
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
+#include "core/base/json.h"
 #include "core/inf/storage.h"
 #include "core/inf/variable.h"
 #include "core/util/math.h"
@@ -52,10 +53,27 @@ private:
     sp<RendererMaker> _delegate;
 };
 
+
+class TilemapStorage : public Storage::Composite<Tilemap> {
+public:
+    TilemapStorage(Tilemap& tilemap, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)
+        : Storage::Composite<Tilemap>(tilemap, std::move(importer), std::move(outputer)) {
+    }
+
+    virtual void jsonLoad(const Json& json) override {
+        _obj.jsonLoad(json);
+    }
+
+    virtual Json jsonDump() override {
+        return _obj.jsonDump();
+    }
+
+};
+
 }
 
 Tilemap::Tilemap(const sp<LayerContext>& layerContext, const sp<Size>& size, const sp<Tileset>& tileset, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)
-    : _layer_context(layerContext), _size(size), _tileset(tileset), _storage(sp<Storage::Composite<Tilemap>>::make(*this, std::move(importer), std::move(outputer)))
+    : _layer_context(layerContext), _size(size), _tileset(tileset), _storage(sp<TilemapStorage>::make(*this, std::move(importer), std::move(outputer)))
 {
     DASSERT(_layer_context);
 }
@@ -120,6 +138,68 @@ void Tilemap::removeLayer(const sp<TilemapLayer>& layer)
     const auto iter = std::find(_layers.begin(), _layers.end(), layer);
     DCHECK(iter != _layers.end(), "Layer does not belong to this Tilemap");
     _layers.erase(iter);
+}
+
+void Tilemap::jsonLoad(const Json& json)
+{
+    clear();
+
+    const sp<Json> layers = json.get("layers");
+    DASSERT(layers->isArray());
+    for(uint32_t i = 0; i < layers->size(); ++i)
+    {
+        const sp<Json> layer = layers->at(static_cast<int32_t>(i));
+        DASSERT(layer);
+        String name = layer->getString("name");
+        uint32_t rowCount = static_cast<uint32_t>(layer->getInt("height"));
+        uint32_t colCount = static_cast<uint32_t>(layer->getInt("width"));
+
+        const sp<TilemapLayer> tilemapLayer = makeLayer(std::move(name), rowCount, colCount);
+        const sp<Json> data = layer->get("data");
+        DASSERT(data);
+        DASSERT(data->isArray());
+        uint32_t row = 1;
+        uint32_t col = 0;
+        data->foreach([&tilemapLayer, &row, &col, rowCount, colCount](const Json& idx) {
+            int32_t type = idx.toInt();
+            if(type > 0) {
+                tilemapLayer->setTile(rowCount - row, col, type - 1);
+            }
+            if(++col == colCount) {
+                col = 0;
+                ++row;
+            }
+            return true;
+        });
+    }
+}
+
+Json Tilemap::jsonDump() const
+{
+    Json jLayers;
+
+    for(const sp<TilemapLayer>& i : layers())
+    {
+        Json jLayer;
+        uint32_t rowCount = i->rowCount();
+        uint32_t colCount = i->colCount();
+        jLayer.setString("name", i->name());
+        jLayer.setInt("width", static_cast<int32_t>(colCount));
+        jLayer.setInt("height", static_cast<int32_t>(rowCount));
+
+        std::vector<int32_t> tiles(colCount * rowCount, 0);
+        i->foreachTile([&tiles, rowCount, colCount] (uint32_t row, uint32_t col, const sp<Tile>& tile) {
+            tiles[(rowCount - 1 - row) * colCount + col] = tile->id() + 1;
+            return true;
+        });
+        jLayer.set("data", sp<Json>::make(sp<IntArray>::make<IntArray::Vector>(std::move(tiles))));
+
+        jLayers.append(jLayer);
+    }
+
+    Json jTilemap;
+    jTilemap.set("layers", jLayers);
+    return jTilemap;
 }
 
 const std::list<sp<TilemapLayer>>& Tilemap::layers() const

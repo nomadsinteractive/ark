@@ -65,7 +65,7 @@ private:
 
     V3 _position;
 
-    std::vector<Item> _renderables;
+    std::list<Item> _renderables;
     std::vector<Item> _renderable_emplaced;
 
 };

@@ -13,7 +13,6 @@ public:
     virtual ~Writable() = default;
 
     virtual uint32_t write(const void* buffer, uint32_t size, uint32_t offset) = 0;
-    virtual void flush() = 0;
 
 };
 

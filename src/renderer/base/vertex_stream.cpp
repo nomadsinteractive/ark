@@ -102,8 +102,4 @@ uint32_t VertexStream::WriterMemory::write(const void* ptr, uint32_t size, uint3
     return size;
 }
 
-void VertexStream::WriterMemory::flush()
-{
-}
-
 }

@@ -22,7 +22,7 @@ import com.nomadsinteractive.ark.GL2JNIView;
 import com.nomadsinteractive.ark.JNILib;
 
 public class MainActivity extends Activity {
-    private static String TAG = "MainActivity";
+    private static final String TAG = "MainActivity";
     
     private GL2JNIView mView;
     private boolean mInitialized = false;

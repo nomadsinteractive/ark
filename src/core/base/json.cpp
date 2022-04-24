@@ -30,33 +30,6 @@ struct Json::Stub {
     nlohmann::json _json;
 };
 
-namespace {
-
-class JsonWritable : public Writable {
-public:
-    JsonWritable(sp<Json::Stub> stub)
-        : _stub(std::move(stub)) {
-
-    }
-
-    virtual uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
-        _string_buf << std::string(reinterpret_cast<const char*>(buffer) + offset, size);
-        return size;
-    }
-
-    virtual void flush() override {
-        _stub->_json = nlohmann::json::parse(_string_buf.str().c_str());
-        _string_buf = StringBuffer();
-    }
-
-private:
-    sp<Json::Stub> _stub;
-    StringBuffer _string_buf;
-
-};
-
-}
-
 Json::Json(const sp<Json>& other)
     : _stub(sp<Stub>::make())
 {
@@ -283,11 +256,6 @@ bytearray Json::toBson() const
 String Json::dump() const
 {
     return _stub->_json.dump();
-}
-
-sp<Writable> Json::makeWritable()
-{
-    return sp<JsonWritable>::make(_stub);
 }
 
 }

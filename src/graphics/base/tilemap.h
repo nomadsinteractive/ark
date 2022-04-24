@@ -60,6 +60,9 @@ public:
 //  [[script::bindings::auto]]
     void removeLayer(const sp<TilemapLayer>& layer);
 
+    void jsonLoad(const Json& json);
+    Json jsonDump() const;
+
 //  [[plugin::builder]]
     class BUILDER : public Builder<Tilemap> {
     public:

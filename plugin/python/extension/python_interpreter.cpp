@@ -1,5 +1,6 @@
 #include "python/extension/python_interpreter.h"
 
+#include "core/base/json.h"
 #include "core/base/observer.h"
 #include "core/base/scope.h"
 #include "core/inf/variable.h"
@@ -331,22 +332,27 @@ bool PythonInterpreter::exceptErr(PyObject* type) const
     return false;
 }
 
-template<> ARK_PLUGIN_PYTHON_API String PythonInterpreter::toType<String>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API String PythonInterpreter::toCppObject_impl<String>(PyObject* object)
 {
     return toString(object);
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::wstring PythonInterpreter::toType<std::wstring>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API std::wstring PythonInterpreter::toCppObject_impl<std::wstring>(PyObject* object)
 {
     return toWString(object);
 }
 
-template<> ARK_PLUGIN_PYTHON_API Box PythonInterpreter::toType<Box>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Json PythonInterpreter::toCppObject_impl<Json>(PyObject* object)
+{
+    return *toSharedPtr<Json>(object);
+}
+
+template<> ARK_PLUGIN_PYTHON_API Box PythonInterpreter::toCppObject_impl<Box>(PyObject* object)
 {
     return object != Py_None ? Box(PyInstance::track(object).ref()) : Box();
 }
 
-template<> ARK_PLUGIN_PYTHON_API bool PythonInterpreter::toType<bool>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API bool PythonInterpreter::toCppObject_impl<bool>(PyObject* object)
 {
     if(object == Py_None)
         return false;
@@ -359,13 +365,13 @@ template<> ARK_PLUGIN_PYTHON_API bool PythonInterpreter::toType<bool>(PyObject* 
     return b->val();
 }
 
-template<> ARK_PLUGIN_PYTHON_API float PythonInterpreter::toType<float>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API float PythonInterpreter::toCppObject_impl<float>(PyObject* object)
 {
     DCHECK(PyNumber_Check(object), "Cannot cast Python object \"%s\" to float", object->ob_type->tp_name);
     return static_cast<float>(PyFloat_AsDouble(object));
 }
 
-template<> ARK_PLUGIN_PYTHON_API uint32_t PythonInterpreter::toType<uint32_t>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API uint32_t PythonInterpreter::toCppObject_impl<uint32_t>(PyObject* object)
 {
     if(isPyArkTypeObject(object))
     {
@@ -376,13 +382,13 @@ template<> ARK_PLUGIN_PYTHON_API uint32_t PythonInterpreter::toType<uint32_t>(Py
     return PyLong_AsUnsignedLong(object);
 }
 
-template<> ARK_PLUGIN_PYTHON_API int32_t PythonInterpreter::toType<int32_t>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API int32_t PythonInterpreter::toCppObject_impl<int32_t>(PyObject* object)
 {
     DCHECK(PyNumber_Check(object), "Cannot cast Python object \"%s\" to int32_t", object->ob_type->tp_name);
     return static_cast<int32_t>(PyLong_AsLong(object));
 }
 
-template<> ARK_PLUGIN_PYTHON_API V2 PythonInterpreter::toType<V2>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API V2 PythonInterpreter::toCppObject_impl<V2>(PyObject* object)
 {
     if(PyTuple_Check(object))
     {
@@ -397,7 +403,7 @@ template<> ARK_PLUGIN_PYTHON_API V2 PythonInterpreter::toType<V2>(PyObject* obje
     return V2();
 }
 
-template<> ARK_PLUGIN_PYTHON_API V3 PythonInterpreter::toType<V3>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API V3 PythonInterpreter::toCppObject_impl<V3>(PyObject* object)
 {
     if(PyTuple_Check(object))
     {
@@ -412,7 +418,7 @@ template<> ARK_PLUGIN_PYTHON_API V3 PythonInterpreter::toType<V3>(PyObject* obje
     return V3();
 }
 
-template<> ARK_PLUGIN_PYTHON_API V4 PythonInterpreter::toType<V4>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API V4 PythonInterpreter::toCppObject_impl<V4>(PyObject* object)
 {
     if(PyTuple_Check(object))
     {
@@ -431,24 +437,24 @@ template<typename T> RectT<T> toRectType(PyObject* obj)
 {
     DCHECK(PyTuple_Check(obj) && PyTuple_Size(obj) == 4, "Rect object should be 4-length tuple");
     PythonInterpreter& interpreter = PythonInterpreter::instance();
-    const T arg0 = interpreter.toType<T>(PyTuple_GetItem(obj, 0));
-    const T arg1 = interpreter.toType<T>(PyTuple_GetItem(obj, 1));
-    const T arg2 = interpreter.toType<T>(PyTuple_GetItem(obj, 2));
-    const T arg3 = interpreter.toType<T>(PyTuple_GetItem(obj, 3));
+    const T arg0 = interpreter.toCppObject_impl<T>(PyTuple_GetItem(obj, 0));
+    const T arg1 = interpreter.toCppObject_impl<T>(PyTuple_GetItem(obj, 1));
+    const T arg2 = interpreter.toCppObject_impl<T>(PyTuple_GetItem(obj, 2));
+    const T arg3 = interpreter.toCppObject_impl<T>(PyTuple_GetItem(obj, 3));
     return RectT<T>(arg0, arg1, arg2, arg3);
 }
 
-template<> ARK_PLUGIN_PYTHON_API RectF PythonInterpreter::toType<RectF>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API RectF PythonInterpreter::toCppObject_impl<RectF>(PyObject* object)
 {
     return toRectType<float>(object);
 }
 
-template<> ARK_PLUGIN_PYTHON_API RectI PythonInterpreter::toType<RectI>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API RectI PythonInterpreter::toCppObject_impl<RectI>(PyObject* object)
 {
     return toRectType<int32_t>(object);
 }
 
-template<> ARK_PLUGIN_PYTHON_API Color PythonInterpreter::toType<Color>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Color PythonInterpreter::toCppObject_impl<Color>(PyObject* object)
 {
     if(PyLong_Check(object))
         return Color(static_cast<uint32_t>(PyLong_AsLongLong(object)));
@@ -462,27 +468,32 @@ template<> ARK_PLUGIN_PYTHON_API Color PythonInterpreter::toType<Color>(PyObject
     return Color();
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Box>(const Box& value)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::toPyObject_impl<Box>(const Box& value)
 {
-    return PythonInterpreter::instance()->toPyObject(value);
+    return toPyObject(value);
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<String>(const String& value)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::toPyObject_impl<String>(const String& value)
 {
     return PyUnicode_FromString(value.c_str());
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<std::wstring>(const std::wstring& value)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::toPyObject_impl<std::wstring>(const std::wstring& value)
 {
     return PyUnicode_FromKindAndData(sizeof(wchar_t), value.c_str(), value.length());
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<bool>(const bool& value)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::toPyObject_impl<Json>(const Json& value)
+{
+    return toPyObject_SharedPtr<Json>(sp<Json>::make(value));
+}
+
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::toPyObject_impl<bool>(const bool& value)
 {
     return PyBool_FromLong(value);
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<V2>(const V2& value)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::toPyObject_impl<V2>(const V2& value)
 {
     PyObject* v2 = PyTuple_New(2);
     PyTuple_SetItem(v2, 0, PyFloat_FromDouble(value.x()));
@@ -490,7 +501,7 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<V2>(const
     return v2;
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<V3>(const V3& value)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::toPyObject_impl<V3>(const V3& value)
 {
     PyObject* v3 = PyTuple_New(3);
     PyTuple_SetItem(v3, 0, PyFloat_FromDouble(value.x()));
@@ -499,7 +510,7 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<V3>(const
     return v3;
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<V4>(const V4& value)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::toPyObject_impl<V4>(const V4& value)
 {
     PyObject* v4 = PyTuple_New(4);
     PyTuple_SetItem(v4, 0, PyFloat_FromDouble(value.x()));
@@ -509,7 +520,7 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<V4>(const
     return v4;
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Rect>(const Rect& value)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::toPyObject_impl<Rect>(const Rect& value)
 {
     PyObject* v4 = PyTuple_New(4);
     PyTuple_SetItem(v4, 0, PyFloat_FromDouble(value.left()));
@@ -519,12 +530,12 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Rect>(con
     return v4;
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<Color>(const Color& color)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::toPyObject_impl<Color>(const Color& color)
 {
     return PythonInterpreter::instance()->toPyObject_SharedPtr<Color>(sp<Color>::make(color));
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::fromType<RayCastManifold>(const RayCastManifold& manifold)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PythonInterpreter::toPyObject_impl<RayCastManifold>(const RayCastManifold& manifold)
 {
     return PythonInterpreter::instance()->toPyObject_SharedPtr<RayCastManifold>(sp<RayCastManifold>::make(manifold));
 }

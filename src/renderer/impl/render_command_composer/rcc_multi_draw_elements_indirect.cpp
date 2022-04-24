@@ -154,9 +154,6 @@ public:
         return size;
     }
 
-    virtual void flush() override {
-    }
-
 private:
     Writable& _delegate;
     uint32_t _offset;

@@ -34,9 +34,6 @@ public:
         return size;
     }
 
-    virtual void flush() override {
-    }
-
     element_index_t _hash;
 };
 

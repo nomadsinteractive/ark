@@ -457,9 +457,9 @@ class GenArgument:
             return acg.format('const Scope ${objname} = PythonInterpreter::instance()->toScope(kws);',
                               objname=objname, argname=argname)
         if m == 'char*':
-            return self._gen_var_declare('String', objname, 'toType', 'String', argname)
+            return self._gen_var_declare('String', objname, 'toCppObject', 'String', argname)
         if m in TYPE_DEFINED_OBJ:
-            return self._gen_var_declare(m, objname, 'toType', m, argname)
+            return self._gen_var_declare(m, objname, 'toCppObject', m, argname)
         if m in TYPE_DEFINED_SP:
             return self._gen_var_declare(m, objname, 'toCppObject', m, argname)
         typename = remove_crv(typename)
@@ -645,7 +645,7 @@ class GenMethod(object):
             return ['Py_RETURN_NONE;']
         m = acg.get_shared_ptr_type(return_type)
         if m in ('std::wstring',):
-            fromcall = 'template fromType<%s>' % m
+            fromcall = 'template toPyObject<%s>' % m
         else:
             fromcall = 'toPyObject'
         return ['return PythonInterpreter::instance()->%s(ret);' % fromcall]
