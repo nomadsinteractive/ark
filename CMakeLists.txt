@@ -4,6 +4,8 @@ project(ark VERSION 0.9.4)
 
 include(CMakeDependentOption)
 
+find_package(Python COMPONENTS Interpreter)
+
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libs")
 
 set(CMAKE_CXX_STANDARD 11)
@@ -257,7 +259,7 @@ if(ARK_BUILD_TESTS)
     aux_source_directory(test/base TEST_SRC_LIST)
     aux_source_directory(test/testcase TEST_SRC_LIST)
     add_custom_command(OUTPUT ${GENERATED_RUN_TESTS}
-        COMMAND python ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py ${ARK_SRC_DIR}/test/testcase ${GENERATED_RUN_TESTS}
+        COMMAND ${Python_EXECUTABLE} ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py ${ARK_SRC_DIR}/test/testcase ${GENERATED_RUN_TESTS}
         DEPENDS ${TEST_SRC_LIST} ${ARK_SRC_DIR}/tools/python/gen_testcase_launchpad.py
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
     list(APPEND TEST_SRC_LIST ${GENERATED_RUN_TESTS})

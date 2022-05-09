@@ -149,7 +149,7 @@ def gen_cmakelist_source(arguments, paths, output_dir, output_file, results):
     arguments_without_o = ' '.join('-%s %s' % (j, k) for j, k in arguments.items() if j not in ('c', 'o'))
     return acg.format('''macro(ark_add_py_binding SRC_PATH SRC_ABS_PATH)
     add_custom_command(OUTPUT #{ARGN}
-        COMMAND python ${script_path} -b "${bindable_paths}" ${arguments_without_o} #{SRC_PATH}
+        COMMAND #{Python_EXECUTABLE} ${script_path} -b "${bindable_paths}" ${arguments_without_o} #{SRC_PATH}
         DEPENDS #{SRC_ABS_PATH} ${script_path}
         WORKING_DIRECTORY ${working_dir})
     if(MSVC)
@@ -167,7 +167,7 @@ set(LOCAL_PY_TYPE_DEPENDENCY_LIST
 %s
 
 add_custom_command(OUTPUT ${output_files}
-        COMMAND python ${script_path} ${arguments_without_d} ${paths}
+        COMMAND #{Python_EXECUTABLE} ${script_path} ${arguments_without_d} ${paths}
         DEPENDS #{LOCAL_PY_TYPE_DEPENDENCY_LIST}  ${script_path}
         WORKING_DIRECTORY ${working_dir})
 list(APPEND LOCAL_GENERATED_SRC_LIST ${output_files})

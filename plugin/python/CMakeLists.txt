@@ -52,7 +52,7 @@ aux_source_directory(impl/duck LOCAL_SRC_LIST)
 aux_source_directory(impl/script LOCAL_SRC_LIST)
 
 execute_process(
-    COMMAND python plugin/python/tools/python/gen_py_bindings.py -d ${ARK_GENERATED_FILE_DIRECTORY} -c ${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cmake -p ark::plugin::python -m ark -o ${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings -l "${ARK_SRC_DIR}/tools/python" src/app src/core src/graphics src/renderer platform plugin/python/extension
+    COMMAND ${Python_EXECUTABLE} plugin/python/tools/python/gen_py_bindings.py -d ${ARK_GENERATED_FILE_DIRECTORY} -c ${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cmake -p ark::plugin::python -m ark -o ${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings -l "${ARK_SRC_DIR}/tools/python" src/app src/core src/graphics src/renderer platform plugin/python/extension
     WORKING_DIRECTORY ${ARK_SRC_DIR}
 )
 include(${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cmake)

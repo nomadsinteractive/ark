@@ -12,7 +12,7 @@ else()
     set(LOCAL_OPTION_B "")
 endif()
 add_custom_command(OUTPUT ${LOCAL_PLUGIN_FILE_NAME}.h ${LOCAL_PLUGIN_FILE_NAME}.cpp
-    COMMAND python ${ARK_SRC_DIR}/tools/python/gen_plugin_class.py ${PARAM_NAME} -t ${TYPE} ${PARAM_NAME_SPACE} -o ${LOCAL_PLUGIN_FILE_NAME} ${LOCAL_OPTION_B} ${ARGN}
+    COMMAND ${Python_EXECUTABLE} ${ARK_SRC_DIR}/tools/python/gen_plugin_class.py ${PARAM_NAME} -t ${TYPE} ${PARAM_NAME_SPACE} -o ${LOCAL_PLUGIN_FILE_NAME} ${LOCAL_OPTION_B} ${ARGN}
     DEPENDS ${FILE_DEPENDS} ${ARK_SRC_DIR}/tools/python/gen_plugin_class.py
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 list(APPEND LOCAL_GENERATED_SRC_LIST ${LOCAL_PLUGIN_FILE_NAME}.h)

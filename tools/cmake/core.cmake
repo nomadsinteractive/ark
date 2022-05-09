@@ -120,7 +120,7 @@ else()
     set(LOCAL_SCRIPT_PATH ${ARK_SRC_DIR}/${SCRIPT_PATH})
 endif()
 add_custom_command(OUTPUT ${LOCAL_GENERATED_FILE_NAME}.h ${LOCAL_GENERATED_FILE_NAME}.cpp
-    COMMAND python ${LOCAL_SCRIPT_PATH} ${ARGN}
+    COMMAND ${Python_EXECUTABLE} ${LOCAL_SCRIPT_PATH} ${ARGN}
     DEPENDS ${FILE_DEPENDS} ${LOCAL_SCRIPT_PATH}
     WORKING_DIRECTORY ${WORKING_DIR})
 list(APPEND LOCAL_GENERATED_SRC_LIST ${LOCAL_GENERATED_FILE_NAME}.h)
@@ -129,7 +129,7 @@ endmacro()
 
 macro(ark_add_generated_file GENERATOR GENERATED_FILE_NAMES WORKING_DIR DEPENDENCY_LIST)
 if(${GENERATOR} MATCHES "[.]py$")
-    set(LOCAL_GENERATOR_COMMAND python ${GENERATOR})
+    set(LOCAL_GENERATOR_COMMAND ${Python_EXECUTABLE} ${GENERATOR})
 else()
     set(LOCAL_GENERATOR_COMMAND ${GENERATOR})
 endif()
@@ -234,7 +234,7 @@ endmacro()
 
 macro(ark_ensure_dependency TARGET_DIR)
     if(ARK_DOWNLOAD_DEPENDENCIES)
-        execute_process(COMMAND python ${ARK_SRC_DIR}/tools/python/dependency.py ${TARGET_DIR} ${ARGN}
+        execute_process(COMMAND ${Python_EXECUTABLE} ${ARK_SRC_DIR}/tools/python/dependency.py ${TARGET_DIR} ${ARGN}
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     endif()
 endmacro()

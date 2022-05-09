@@ -6,7 +6,7 @@ file(GLOB LOCAL_FILES "${WORKING_DIRECTORY}/${i}/*.h")
 list(APPEND LOCAL_FILE_DEPENDS ${LOCAL_FILES})
 endforeach()
 add_custom_command(OUTPUT ${LOCAL_CPP_FILEPATH}
-    COMMAND python ${ARK_SRC_DIR}/tools/python/gen_class_hierarchy.py -o ${LOCAL_CPP_FILEPATH} -n ${CLASS_HIERARCHY_NAME} -s ${NAMESPACES} ${ARGN}
+    COMMAND ${Python_EXECUTABLE} ${ARK_SRC_DIR}/tools/python/gen_class_hierarchy.py -o ${LOCAL_CPP_FILEPATH} -n ${CLASS_HIERARCHY_NAME} -s ${NAMESPACES} ${ARGN}
     DEPENDS ${ARK_SRC_DIR}/tools/python/gen_class_hierarchy.py ${LOCAL_FILE_DEPENDS}
     WORKING_DIRECTORY ${WORKING_DIRECTORY})
 list(APPEND LOCAL_GENERATED_SRC_LIST ${LOCAL_CPP_FILEPATH})
