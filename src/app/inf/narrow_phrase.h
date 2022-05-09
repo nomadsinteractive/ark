@@ -33,15 +33,15 @@ public:
     virtual ~NarrowPhrase() = default;
 
 //  [[script::bindings::auto]]
-    virtual void addAABBShape(int32_t shapeId, const Rect& aabb) = 0;
+    virtual Box makeAABBShape(const Rect& aabb) = 0;
 //  [[script::bindings::auto]]
-    virtual void addBallShape(int32_t shapeId, const V2& position, float radius) = 0;
+    virtual Box makeBallShape(const V2& position, float radius) = 0;
 //  [[script::bindings::auto]]
-    virtual void addBoxShape(int32_t shapeId, const Rect& bounds) = 0;
+    virtual Box makeBoxShape(const Rect& bounds) = 0;
 //  [[script::bindings::auto]]
-    virtual void addCapsuleShape(int32_t shapeId, const V2& p1, const V2& p2, float radius) = 0;
+    virtual Box makeCapsuleShape(const V2& p1, const V2& p2, float radius) = 0;
 //  [[script::bindings::auto]]
-    virtual void addPolygonShape(int32_t shapeId, const std::vector<V2>& vertices) = 0;
+    virtual Box makePolygonShape(const std::vector<V2>& vertices) = 0;
 
     virtual Ray toRay(const V2& from, const V2& to) = 0;
 

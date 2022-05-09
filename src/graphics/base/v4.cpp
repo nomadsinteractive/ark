@@ -143,6 +143,11 @@ V4 V4::normalize() const
     return V4(_x / hypot, _y / hypot, _z / hypot, _w / hypot);
 }
 
+V4 V4::floorDiv(const V4& other) const
+{
+    return V4(Math::floorDiv(_x, other._x), Math::floorDiv(_y, other._y), Math::floorDiv(_z, other._z), Math::floorDiv(_w, other._w));
+}
+
 template<> ARK_API V4 Conversions::to<String, V4>(const String& s)
 {
     const array<float> val = Strings::toArray<float>(Strings::unwrap(s, '(', ')'));

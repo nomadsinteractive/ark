@@ -128,6 +128,8 @@ public:
 
 //  [[script::bindings::classmethod]]
     static sp<Numeric> modFloor(const sp<Numeric>& self, const sp<Numeric>& mod);
+//  [[script::bindings::classmethod]]
+    static sp<Numeric> modCeil(const sp<Numeric>& self, const sp<Numeric>& mod);
 
 //  [[script::bindings::classmethod]]
     static sp<Numeric> attract(const sp<Numeric>& self, float s0, float duration, const sp<Numeric>& t = nullptr);

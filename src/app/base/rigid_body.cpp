@@ -22,8 +22,8 @@
 
 namespace ark {
 
-RigidBody::RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, Box impl, sp<Disposed> disposed)
-    : _stub(sp<Stub>::make(id, type, position, size, sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate), std::move(impl), std::move(disposed)))
+RigidBody::RigidBody(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, Box impl, sp<Disposed> disposed)
+    : _stub(sp<Stub>::make(id, type, shapeId, std::move(position), std::move(size), sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate), std::move(impl), std::move(disposed)))
 {
 }
 
@@ -53,6 +53,11 @@ int32_t RigidBody::id() const
 Collider::BodyType RigidBody::type() const
 {
     return _stub->_type;
+}
+
+int32_t RigidBody::shapeId() const
+{
+    return _stub->_shape_id;
 }
 
 V2 RigidBody::xy() const
@@ -125,11 +130,6 @@ const sp<RigidBody::Stub>& RigidBody::stub() const
     return _stub;
 }
 
-sp<RigidBody::Stub>& RigidBody::stub()
-{
-    return _stub;
-}
-
 const sp<RigidBody::Callback>& RigidBody::callback() const
 {
     return _stub->_callback;
@@ -147,8 +147,8 @@ template<> ARK_API Collider::BodyType Conversions::to<String, Collider::BodyType
     return Collider::BODY_TYPE_STATIC;
 }
 
-RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Disposed> disposed)
-    : _id(id), _type(type), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _impl(std::move(impl)), _disposed(std::move(disposed)), _callback(sp<Callback>::make())
+RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Disposed> disposed)
+    : _id(id), _type(type), _shape_id(shapeId), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _impl(std::move(impl)), _disposed(std::move(disposed)), _callback(sp<Callback>::make())
 {
 }
 

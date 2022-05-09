@@ -49,22 +49,23 @@ public:
         Stub(std::vector<sp<BroadPhrase>> broadPhrases, sp<NarrowPhrase> narrowPhrase, const document& manifest, ResourceLoaderContext& resourceLoaderContext);
 
         BroadPhrase::Result search(const V3& position, const V3& aabb) const;
-        sp<Vec3> createBroadPhrasePosition(int32_t id, const sp<Vec3>& position, const sp<Vec3>& aabb);
+        std::vector<RayCastManifold> rayCast(const V2& from, const V2& to) const;
 
         void remove(const RigidBody& rigidBody);
 
-        sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, const sp<Disposed>& disposed, const sp<Stub>& self);
+        int32_t generateRigidBodyId();
+
+        sp<RigidBodyImpl> createRigidBody(int32_t rigidBodyId, Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, const sp<Disposed>& disposed, const sp<Stub>& self);
         const sp<RigidBodyShadow>& ensureRigidBody(int32_t id) const;
-        const sp<RigidBodyShadow> findRigidBody(int32_t id) const;
-        const sp<RigidBodyShadow> ensureRigidBody(int32_t id, bool isDynamicRigidBody) const;
+        sp<RigidBodyShadow> ensureRigidBody(int32_t id, int32_t shapeId, const V3& position, bool isDynamicRigidBody) const;
+
+        sp<RigidBodyShadow> findRigidBody(int32_t id) const;
 
         std::vector<BroadPhrase::Candidate> toDynamicCandidates(const std::unordered_set<int32_t>& candidateSet) const;
 
-        std::vector<RayCastManifold> rayCast(const V2& from, const V2& to) const;
-
         void resolveCandidates(const sp<RigidBody>& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, bool isDynamicCandidates, RigidBody::Callback& callback, std::set<int32_t>& c);
 
-        std::unordered_map<int32_t, sp<RigidBodyShadow>> _rigid_bodies;
+        const sp<NarrowPhrase>& narrowPhrase() const;
 
     private:
         void addAABBShape(uint32_t id, const RigidBodyShadow& rigidBody);
@@ -73,21 +74,20 @@ public:
         void addCapsuleShape(uint32_t id, const RigidBodyShadow& rigidBody);
         void addPolyShape(uint32_t id, const RigidBodyShadow& rigidBody);
 
+        sp<Vec3> createBroadPhrasePosition(int32_t id, const sp<Vec3>& position, const sp<Vec3>& aabb);
+
     private:
         int32_t _rigid_body_base_id;
         std::vector<sp<BroadPhrase>> _broad_phrases;
         sp<NarrowPhrase> _narrow_phrase;
-        sp<RigidBodyShadow> _static_rigid_body_shadow;
+        std::unordered_map<int32_t, sp<RigidBodyShadow>> _rigid_bodies;
     };
 
     class RigidBodyShadow : public RigidBody {
     public:
-        RigidBodyShadow(uint32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, const sp<Disposed>& disposed);
+        RigidBodyShadow(uint32_t id, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, sp<Disposed> disposed);
 
         virtual void dispose() override;
-
-        bool isStatic() const;
-        void setId(uint32_t id);
 
         bool isDisposed() const;
 
@@ -95,17 +95,18 @@ public:
 
         void doDispose(ColliderImpl::Stub& stub);
 
-        Rect getRigidBodyAABB() const;
+        const std::vector<Box>& shapes() const;
+
+        void updateShapes(NarrowPhrase& narrowPhrase, const V3& size);
 
     private:
-        bool _is_static;
-
         std::set<int32_t> _dynamic_contacts;
         std::set<int32_t> _static_contacts;
         bool _dispose_requested;
 
+        std::vector<Box> _shapes;
+
         friend class RigidBodyImpl;
-        friend struct ColliderImpl::Stub;
     };
 
     class RigidBodyImpl : public RigidBody, Implements<RigidBodyImpl, RigidBody, Holder> {

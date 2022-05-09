@@ -31,7 +31,7 @@ ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
     _stub->_dynamics_world->setInternalTickCallback(myInternalTickCallback, this);
 }
 
-sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate)
+sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shapeId, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate)
 {
     btTransform transform;
     const V3 pos = position->val();
@@ -41,11 +41,11 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape,
     transform.setRotation(btQuaternion(quat.x(), quat.y(), quat.z(), quat.w()));
 
     sp<CollisionShape> cs;
-    const auto iter = _stub->_collision_shapes.find(shape);
+    const auto iter = _stub->_collision_shapes.find(shapeId);
     if(iter == _stub->_collision_shapes.end())
     {
         btCollisionShape* btShape;
-        switch(shape)
+        switch(shapeId)
         {
         case Collider::BODY_SHAPE_BOX:
             btShape = new btBoxShape(btVector3(size->width() / 2, size->height() / 2, size->depth() / 2));
@@ -58,7 +58,7 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shape,
             btShape = new btCapsuleShapeZ(size->width() / 2, size->height() - size->width());
             break;
         default:
-            DFATAL("Undefined RigidBody(%d) in this world", shape);
+            DFATAL("Undefined RigidBody(%d) in this world", shapeId);
             break;
         }
         cs = sp<CollisionShape>::make(btShape, 1.0f);

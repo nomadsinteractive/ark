@@ -20,14 +20,15 @@ class ARK_API BroadPhrase {
 public:
     struct Candidate {
         Candidate() = default;
-        Candidate(int32_t id, const V2& position, float rotation, int32_t shapeId)
-            : id(id), position(position), rotation(rotation), shape_id(shapeId) {
+        Candidate(int32_t id, const V2& position, float rotation, int32_t shapeId, std::vector<Box> shapes)
+            : id(id), position(position), rotation(rotation), shape_id(shapeId), shapes(std::move(shapes)) {
         }
 
         int32_t id;
         V2 position;
         float rotation;
         int32_t shape_id;
+        std::vector<Box> shapes;
     };
 
     struct Result {

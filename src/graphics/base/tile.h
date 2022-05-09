@@ -11,7 +11,7 @@ namespace ark {
 class ARK_API Tile {
 public:
 //  [[script::bindings::auto]]
-    Tile(int32_t id, int32_t type = 0, sp<RenderObject> renderObject = nullptr);
+    Tile(int32_t id, int32_t shapeId = 0, sp<RenderObject> renderObject = nullptr);
 
 //  [[script::bindings::property]]
     int32_t id() const;

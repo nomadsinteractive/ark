@@ -1420,8 +1420,16 @@ class Tileset:
 
 
 class TilemapLayer:
-    def __init__(self, tilemap: 'Tilemap', name: str, row_count: int, col_count: int, position: Union[Vec2, Vec3, None], scroller: Union[Vec2, Vec3, None], flag: int):
+    def __init__(self, tilemap: 'Tilemap', name: str, row_count: int, col_count: int, position: Union[Vec2, Vec3, None]=None, scroller: Union[Vec2, Vec3, None]=None, flag: int = 0):
         pass
+
+    @property
+    def col_count(self) -> int:
+        return 0
+
+    @property
+    def row_count(self) -> int:
+        return 0
 
     @property
     def name(self) -> str:
@@ -1658,6 +1666,10 @@ class RigidBody:
         return 0
 
     @property
+    def shape_id(self) -> int:
+        return 0
+
+    @property
     def xy(self) -> tuple:
         return 0, 0
 
@@ -1749,12 +1761,7 @@ class RayCastManifold:
 
 
 class NarrowPhrase:
-
-    def add_aabb_shape(self, shape_id: int, bounds: TYPE_RECT):
-        pass
-
-    def add_box_shape(self, shape_id: int, bounds: TYPE_RECT):
-        pass
+    pass
 
 
 class Collider:

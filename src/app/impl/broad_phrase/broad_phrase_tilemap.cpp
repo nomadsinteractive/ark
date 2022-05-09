@@ -14,12 +14,16 @@
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/inf/collider.h"
+#include "app/inf/narrow_phrase.h"
 
 namespace ark {
 
-BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap)
+BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap, NarrowPhrase& narrowPhrase)
     : _tilemap(std::move(tilemap))
 {
+    const Tileset& tileset = _tilemap->tileset();
+    const Rect tileBounds(tileset.tileWidth() / -2.0f, tileset.tileHeight() / -2.0f, tileset.tileWidth() / 2.0f, tileset.tileHeight() / 2.0f);
+    _tile_shapes.push_back(narrowPhrase.makeAABBShape(tileBounds));
 }
 
 sp<Vec3> BroadPhraseTilemap::create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& size)
@@ -36,8 +40,7 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
     std::vector<Candidate> candidates;
     const V2 sizeHalf = size / V2(2.0, 2.0);
     const Rect aabb(V2(position) - sizeHalf, V2(position) + sizeHalf);
-    float tileWidth = static_cast<float>(_tilemap->tileset()->tileWidth());
-    float tileHeight = static_cast<float>(_tilemap->tileset()->tileHeight());
+    const V2 tileSize(static_cast<float>(_tilemap->tileset()->tileWidth()), static_cast<float>(_tilemap->tileset()->tileHeight()));
     for(const sp<TilemapLayer>& i : _tilemap->layers())
         if(i->flag() & Tilemap::LAYER_FLAG_COLLIDABLE)
         {
@@ -47,7 +50,7 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
             if(i->getSelectionTileRange(aabb, selectionPoint, selectionRange))
                 for(int32_t j = selectionRange.left(); j < selectionRange.right(); ++j)
                 {
-                    float px = selectionPoint.x() + (j - selectionRange.left()) * tileWidth + tileWidth / 2;
+                    float px = selectionPoint.x() + (j - selectionRange.left()) * tileSize.x() + tileSize.x() / 2;
                     for(int32_t k = selectionRange.top(); k < selectionRange.bottom(); ++k)
                     {
                         const sp<Tile>& tile = i->getTile(k, j);
@@ -55,7 +58,10 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
                         {
                             int32_t shapeId = tile->type();
                             if(shapeId != Collider::BODY_SHAPE_NONE)
-                                candidates.emplace_back(toCandidateId(layerId, k, j), V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileHeight + tileHeight / 2), 0, shapeId);
+                            {
+                                std::vector<Box> shapes = shapeId == Collider::BODY_SHAPE_AABB ? _tile_shapes : std::vector<Box>();
+                                candidates.push_back(makeCandidate(toCandidateId(layerId, k, j), shapeId, V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2)));
+                            }
                         }
                     }
                 }
@@ -132,20 +138,26 @@ void BroadPhraseTilemap::addCandidate(const TilemapLayer& tilemapLayer, std::set
             {
                 int32_t shapeId = tile->type();
                 if(shapeId != Collider::BODY_SHAPE_NONE)
-                    candidates.emplace_back(candidateId, tl + V2(col * tileSize.x(), row * tileSize.y()), 0, shapeId);
+                    candidates.push_back(makeCandidate(candidateId, shapeId, tl + V2(col * tileSize.x(), row * tileSize.y())));
             }
         }
     }
 }
 
+BroadPhrase::Candidate BroadPhraseTilemap::makeCandidate(int32_t candidateId, int32_t shapeId, const V2& position) const
+{
+    std::vector<Box> shapes = shapeId == Collider::BODY_SHAPE_AABB ? _tile_shapes : std::vector<Box>();
+    return Candidate(candidateId, position, 0, shapeId, std::move(shapes));
+}
+
 BroadPhraseTilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _tilemap(factory.ensureBuilder<Tilemap>(manifest, "tilemap"))
+    : _tilemap(factory.ensureBuilder<Tilemap>(manifest, "tilemap")), _narrow_phrase(factory.ensureBuilder<NarrowPhrase>(manifest, "narrow-phrase"))
 {
 }
 
 sp<BroadPhrase> BroadPhraseTilemap::BUILDER::build(const Scope& args)
 {
-    return sp<BroadPhraseTilemap>::make(_tilemap->build(args));
+    return sp<BroadPhraseTilemap>::make(_tilemap->build(args), _narrow_phrase->build(args));
 }
 
 }

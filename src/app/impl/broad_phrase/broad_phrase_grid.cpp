@@ -89,7 +89,7 @@ std::unordered_set<int32_t> BroadPhraseGrid::Stub::search(const V3& position, co
 
 void BroadPhraseGrid::Axis::create(int32_t id, float position, float low, float high)
 {
-    int32_t mp = Math::modFloor<int32_t>(static_cast<int32_t>(position), _stride);
+    int32_t mp = Math::modFloor(static_cast<int32_t>(position), _stride);
     int32_t remainder;
     int32_t begin = Math::divmod(static_cast<int32_t>(low), _stride, remainder);
     int32_t end = Math::divmod(static_cast<int32_t>(high), _stride, remainder) + 1;
@@ -99,7 +99,7 @@ void BroadPhraseGrid::Axis::create(int32_t id, float position, float low, float 
 
 void BroadPhraseGrid::Axis::update(int32_t id, float position, float low, float high)
 {
-    int32_t mp = Math::modFloor<int32_t>(static_cast<int32_t>(position), _stride);
+    int32_t mp = Math::modFloor(static_cast<int32_t>(position), _stride);
     const auto iter = _trackee_ranges.find(id);
     if(iter != _trackee_ranges.end() && iter->second._position != mp)
     {

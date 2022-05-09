@@ -97,6 +97,14 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Vec4> synchronize(const sp<Vec4>& self, const sp<Boolean>& disposed = nullptr);
 
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> modFloor(const sp<Vec4>& self, const sp<Numeric>& mod);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> modFloor(const sp<Vec4>& self, const sp<Vec4>& mod);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> modCeil(const sp<Vec4>& self, const sp<Numeric>& mod);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> modCeil(const sp<Vec4>& self, const sp<Vec4>& mod);
 
 private:
     static sp<Vec4Impl> ensureImpl(const sp<Vec4>& self);

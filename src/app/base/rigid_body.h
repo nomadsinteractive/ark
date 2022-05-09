@@ -37,13 +37,14 @@ public:
     };
 
     struct ARK_API Stub {
-        Stub(int32_t id, Collider::BodyType type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Disposed> disposed = nullptr);
+        Stub(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Disposed> disposed = nullptr);
         ~Stub();
 
         DISALLOW_COPY_AND_ASSIGN(Stub);
 
         int32_t _id;
         Collider::BodyType _type;
+        int32_t _shape_id;
         SafePtr<Vec3> _position;
         SafePtr<Size> _size;
         sp<Transform> _transform;
@@ -60,7 +61,7 @@ public:
 public:
     virtual ~RigidBody() override = default;
 
-    RigidBody(int32_t id, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, Box impl, sp<Disposed> disposed);
+    RigidBody(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, Box impl, sp<Disposed> disposed);
     RigidBody(sp<Stub> stub);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RigidBody);
 
@@ -75,6 +76,8 @@ public:
     int32_t id() const;
 //  [[script::bindings::property]]
     Collider::BodyType type() const;
+//  [[script::bindings::property]]
+    int32_t shapeId() const;
 
 //  [[script::bindings::property]]
     V2 xy() const;
@@ -110,8 +113,6 @@ public:
     void setCollisionCallback(const sp<CollisionCallback>& collisionCallback);
 
     const sp<Stub>& stub() const;
-    sp<Stub>& stub();
-
     const sp<Callback>& callback() const;
 
 //  [[plugin::style("rigid-body")]]

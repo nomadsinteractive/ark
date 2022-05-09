@@ -37,7 +37,9 @@ public:
 
     float dot(const V4& other) const;
     float length() const;
+
     V4 normalize() const;
+    V4 floorDiv(const V4& other) const;
 
 private:
     float _w;

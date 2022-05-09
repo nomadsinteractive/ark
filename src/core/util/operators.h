@@ -79,6 +79,13 @@ public:
         }
     };
 
+    template<typename T> class FloorDiv {
+    public:
+        T operator()(T&& v1, T&& v2) {
+            return Math::floorDiv(std::forward<T>(v1), std::forward<T>(v2));
+        }
+    };
+
     template<typename T, typename P = T> class NumericFloorDiv {
     public:
         float operator()(T v1, P v2) {
@@ -114,10 +121,17 @@ public:
         }
     };
 
-    template<typename T, typename P = T> class ModFloor {
+    template<typename T> class ModFloor {
     public:
-        auto operator()(T v1, P v2)->decltype(v1 / v2) {
+        T operator()(const T& v1, const T& v2) {
             return Math::modFloor(v1, v2);
+        }
+    };
+
+    template<typename T> class ModCeil {
+    public:
+        T operator()(const T& v1, const T& v2) {
+            return Math::modCeil(v1, v2);
         }
     };
 

@@ -26,8 +26,8 @@ void Scrollable::render(RenderRequest& renderRequest, const V3& position)
     int32_t sy, ey;
     const RectI viewport(_scroll_x, _scroll_y, _scroll_x + width(), _scroll_y + height());
     const RectI viewportCache(viewport.left() - width(), viewport.top() - height(), viewport.right() + width(), viewport.bottom() + height());
-    Math::modBetween<int32_t>(viewport.left(), viewport.right(), _params._renderer_width, sx, ex);
-    Math::modBetween<int32_t>(viewport.top(), viewport.bottom(), _params._renderer_height, sy, ey);
+    Math::modBetween<int32_t>(viewport.left(), viewport.right(), static_cast<int32_t>(_params._renderer_width), sx, ex);
+    Math::modBetween<int32_t>(viewport.top(), viewport.bottom(), static_cast<int32_t>(_params._renderer_height), sy, ey);
     for(int32_t i = sy; i < ey; i += _params._renderer_height)
         for(int32_t j = sx; j < ex; j += _params._renderer_width)
         {

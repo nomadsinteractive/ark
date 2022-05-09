@@ -38,6 +38,12 @@ public:
     static sp<Vec2> truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
 //  [[script::bindings::operator(/)]]
     static sp<Vec2> truediv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue);
+//  [[script::bindings::operator(//)]]
+    static sp<Vec2> floordiv(const sp<Vec2>& lvalue, float rvalue);
+//  [[script::bindings::operator(//)]]
+    static sp<Vec2> floordiv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue);
+//  [[script::bindings::operator(//)]]
+    static sp<Vec2> floordiv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
 //  [[script::bindings::operator(neg)]]
     static sp<Vec2> negative(const sp<Vec2>& self);
 //  [[script::bindings::operator(abs)]]
@@ -99,6 +105,12 @@ public:
 
 //  [[script::bindings::classmethod]]
     static sp<Vec2> modFloor(const sp<Vec2>& self, const sp<Numeric>& mod);
+//  [[script::bindings::classmethod]]
+    static sp<Vec2> modFloor(const sp<Vec2>& self, const sp<Vec2>& mod);
+//  [[script::bindings::classmethod]]
+    static sp<Vec2> modCeil(const sp<Vec2>& self, const sp<Numeric>& mod);
+//  [[script::bindings::classmethod]]
+    static sp<Vec2> modCeil(const sp<Vec2>& self, const sp<Vec2>& mod);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec2> attract(const sp<Vec2>& self, const V2& s0, float duration, const sp<Numeric>& t = nullptr);

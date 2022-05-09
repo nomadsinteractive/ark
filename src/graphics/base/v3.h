@@ -37,6 +37,8 @@ public:
 
     float dot(const V3& other) const;
     float length() const;
+
+    V3 floorDiv(const V3& other) const;
     V3 normalize() const;
 
     V3 cross(const V3& other) const;

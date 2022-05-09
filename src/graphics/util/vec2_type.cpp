@@ -146,6 +146,21 @@ sp<Vec2> Vec2Type::truediv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue)
     return sp<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Div<V2, float>>>::make(lvalue, rvalue);
 }
 
+sp<Vec2> Vec2Type::floordiv(const sp<Vec2>& lvalue, float rvalue)
+{
+    return sp<VariableOP2<sp<Vec2>, V2, Operators::FloorDiv<V2>>>::make(lvalue, V2(rvalue, rvalue));
+}
+
+sp<Vec2> Vec2Type::floordiv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue)
+{
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::FloorDiv<V2>>>::make(lvalue, Vec2Type::create(rvalue, rvalue));
+}
+
+sp<Vec2> Vec2Type::floordiv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
+{
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::FloorDiv<V2>>>::make(lvalue, rvalue);
+}
+
 sp<Vec2> Vec2Type::truediv(const sp<Vec2>& lvalue, float rvalue)
 {
     return sp<VariableOP2<sp<Vec2>, float, Operators::Div<V2, float>>>::make(lvalue, rvalue);
@@ -296,7 +311,22 @@ sp<Vec2> Vec2Type::synchronize(const sp<Vec2>& self, const sp<Boolean>& disposed
 
 sp<Vec2> Vec2Type::modFloor(const sp<Vec2>& self, const sp<Numeric>& mod)
 {
-    return create(NumericType::modFloor(vx(self), mod), NumericType::modFloor(vy(self), mod));
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::ModFloor<V2>>>::make(self, create(mod, mod));
+}
+
+sp<Vec2> Vec2Type::modFloor(const sp<Vec2>& self, const sp<Vec2>& mod)
+{
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::ModFloor<V2>>>::make(self, mod);
+}
+
+sp<Vec2> Vec2Type::modCeil(const sp<Vec2>& self, const sp<Numeric>& mod)
+{
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::ModCeil<V2>>>::make(self, create(mod, mod));
+}
+
+sp<Vec2> Vec2Type::modCeil(const sp<Vec2>& self, const sp<Vec2>& mod)
+{
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::ModCeil<V2>>>::make(self, mod);
 }
 
 sp<Vec2> Vec2Type::attract(const sp<Vec2>& self, const V2& s0, float duration, const sp<Numeric>& t)

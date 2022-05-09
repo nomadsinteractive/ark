@@ -279,6 +279,26 @@ sp<Vec3> Vec3Type::synchronize(const sp<Vec3>& self, const sp<Boolean>& disposed
     return Ark::instance().applicationContext()->synchronize(self, disposed);
 }
 
+sp<Vec3> Vec3Type::modFloor(const sp<Vec3>& self, const sp<Numeric>& mod)
+{
+    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::ModFloor<V3>>>::make(self, create(mod, mod, mod));
+}
+
+sp<Vec3> Vec3Type::modFloor(const sp<Vec3>& self, const sp<Vec3>& mod)
+{
+    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::ModFloor<V3>>>::make(self, mod);
+}
+
+sp<Vec3> Vec3Type::modCeil(const sp<Vec3>& self, const sp<Numeric>& mod)
+{
+    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::ModCeil<V3>>>::make(self, create(mod, mod, mod));
+}
+
+sp<Vec3> Vec3Type::modCeil(const sp<Vec3>& self, const sp<Vec3>& mod)
+{
+    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::ModCeil<V3>>>::make(self, mod);
+}
+
 sp<Vec3> Vec3Type::attract(const sp<Vec3>& self, const V3& s0, float duration, const sp<Numeric>& t)
 {
     sp<Numeric> ts = t ? t : Ark::instance().clock()->duration();

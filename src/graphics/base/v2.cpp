@@ -130,6 +130,11 @@ float V2::length() const
     return Math::sqrt(_x * _x + _y * _y);
 }
 
+V2 V2::floorDiv(const V2& other) const
+{
+    return V2(Math::floorDiv(_x, other._x), Math::floorDiv(_y, other._y));
+}
+
 V2 V2::normalize() const
 {
     float hypot = std::max(length(), MIN_NORMALIZE_LENGTH);

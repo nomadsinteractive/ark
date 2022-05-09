@@ -431,6 +431,11 @@ sp<Numeric> NumericType::modFloor(const sp<Numeric>& self, const sp<Numeric>& mo
     return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::ModFloor<float>>>::make(self, mod);
 }
 
+sp<Numeric> NumericType::modCeil(const sp<Numeric>& self, const sp<Numeric>& mod)
+{
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::ModCeil<float>>>::make(self, mod);
+}
+
 sp<Numeric> NumericType::attract(const sp<Numeric>& self, float s0, float duration, const sp<Numeric>& t)
 {
     return sp<Stalker>::make(t ? t : Ark::instance().clock()->duration(), self, s0, duration);

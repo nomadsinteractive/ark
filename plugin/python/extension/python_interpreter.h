@@ -210,16 +210,18 @@ private:
     }
     void reduceArgumentTuple(PyObject *tuple, uint32_t idx) {
     }
-    template<typename R, typename... Args> std::function<R(Args...)> toCppObject_function(PyObject* obj, std::function<R(Args...)>* func) {
+    template<typename R, typename... Args> std::function<R(Args...)> toCppObject_function(PyObject* obj, std::function<R(Args...)>*) {
         PyInstance pyObj(PyInstance::own(obj));
         return [this, pyObj](Args... args) -> R {
             PyInstance tuple = PyInstance::steal(makeArgumentTuple<Args...>(args...));
             PyInstance result = PyInstance::steal(pyObj.call(tuple.pyObject()));
+            if(!result.pyObject())
+                logErr();
             return toCppObject<R>(result.pyObject());
         };
     }
     template<typename T> T toCppObject_sfinae(PyObject* obj, typename T::result_type*) {
-        return toCppObject_function(obj, reinterpret_cast<T*>(nullptr));
+        return toCppObject_function(obj, reinterpret_cast<T*>(0));
     }
     template<typename T> T toCppObject_sfinae(PyObject* obj, ...) {
         return toCppObject_impl<T>(obj);

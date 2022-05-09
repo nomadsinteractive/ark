@@ -209,6 +209,26 @@ sp<Vec4> Vec4Type::synchronize(const sp<Vec4>& self, const sp<Boolean>& disposed
     return Ark::instance().applicationContext()->synchronize(self, disposed);
 }
 
+sp<Vec4> Vec4Type::modFloor(const sp<Vec4>& self, const sp<Numeric>& mod)
+{
+    return sp<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::ModFloor<V4>>>::make(self, create(mod, mod, mod, mod));
+}
+
+sp<Vec4> Vec4Type::modFloor(const sp<Vec4>& self, const sp<Vec4>& mod)
+{
+    return sp<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::ModFloor<V4>>>::make(self, mod);
+}
+
+sp<Vec4> Vec4Type::modCeil(const sp<Vec4>& self, const sp<Numeric>& mod)
+{
+    return sp<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::ModCeil<V4>>>::make(self, create(mod, mod, mod, mod));
+}
+
+sp<Vec4> Vec4Type::modCeil(const sp<Vec4>& self, const sp<Vec4>& mod)
+{
+    return sp<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::ModCeil<V4>>>::make(self, mod);
+}
+
 sp<Vec4Impl> Vec4Type::ensureImpl(const sp<Vec4>& self)
 {
     const sp<Vec4Impl> impl = self.as<Vec4Impl>();

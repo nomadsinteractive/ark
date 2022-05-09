@@ -40,6 +40,8 @@ public:
 
     float dot(const V2& other) const;
     float length() const;
+
+    V2 floorDiv(const V2& other) const;
     V2 normalize() const;
 
     const float& operator[](int32_t p) const;
