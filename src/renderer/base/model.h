@@ -9,6 +9,7 @@
 
 #include "graphics/base/metrics.h"
 #include "graphics/base/v3.h"
+#include "graphics/inf/renderable.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/inf/vertices.h"
@@ -30,9 +31,9 @@ public:
     const Metrics& metrics() const;
 
 //[[script::bindings::property]]
-    size_t indexLength() const;
+    size_t indexCount() const;
 //[[script::bindings::property]]
-    size_t vertexLength() const;
+    size_t vertexCount() const;
 
 //  [[script::bindings::property]]
     const Table<String, sp<Animation>>& animations() const;
@@ -42,6 +43,8 @@ public:
     const sp<Animation>& getAnimation(const String& name) const;
 
     void writeToStream(VertexStream& buf, const V3& size) const;
+
+    void writeRenderable(VertexStream& buf, const Renderable::Snapshot& renderable) const;
 
 private:
     V3 toScale(const V3& renderObjectSize) const;

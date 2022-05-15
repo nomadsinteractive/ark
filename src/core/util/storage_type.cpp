@@ -5,22 +5,22 @@
 
 namespace ark {
 
-void StorageUtil::load(const sp<Storage>& self, const sp<Readable>& src)
+void StorageType::load(const sp<Storage>& self, const sp<Readable>& src)
 {
     self->import(src);
 }
 
-void StorageUtil::save(const sp<Storage>& self, const sp<Writable>& out)
+void StorageType::save(const sp<Storage>& self, const sp<Writable>& out)
 {
     self->output(out);
 }
 
-void StorageUtil::jsonLoad(const sp<Storage>& self, const Json& json)
+void StorageType::jsonLoad(const sp<Storage>& self, const Json& json)
 {
     self->jsonLoad(json);
 }
 
-Json StorageUtil::jsonDump(const sp<Storage>& self)
+Json StorageType::jsonDump(const sp<Storage>& self)
 {
     return self->jsonDump();
 }

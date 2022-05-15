@@ -34,15 +34,15 @@ RenderLayer::Stub::Stub(const sp<ModelLoader>& modelLoader, const sp<Shader>& sh
     DCHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
 }
 
-sp<LayerContext> RenderLayer::Stub::makeLayerContext(Layer::Type layerType)
+sp<LayerContext> RenderLayer::Stub::makeLayerContext(Layer::Type layerType, sp<ModelLoader> modelLoader)
 {
-    const sp<LayerContext> layerContext = sp<LayerContext>::make(_model_loader, _notifier, layerType);
+    const sp<LayerContext> layerContext = modelLoader ? sp<LayerContext>::make(std::move(modelLoader), _notifier, layerType) : sp<LayerContext>::make(_model_loader, _notifier, layerType);
     _layer_contexts.push_back(layerContext, _notifier);
     return layerContext;
 }
 
 RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& stub)
-    : _stub(stub)
+    : _stub(stub), _index_count(0)
 {
     Layer::Type combined = Layer::TYPE_UNSPECIFIED;
 
@@ -56,6 +56,8 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
     }
 
     _stub->_model_loader->postSnapshot(_stub->_render_controller, *this);
+    postSnapshot();
+
     _stub->_render_command_composer->postSnapshot(_stub->_render_controller, *this);
 
     _ubos = _stub->_shader->takeUBOSnapshot(renderRequest);
@@ -78,6 +80,17 @@ sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderReque
 
     DrawingContext drawingContext(_stub->_shader_bindings, nullptr, std::move(_ubos), std::move(_ssbos));
     return drawingContext.toBindCommand();
+}
+
+void RenderLayer::Snapshot::postSnapshot()
+{
+    ModelLoader& modelLoader = _stub->_model_loader;
+    for(Renderable::Snapshot& i : _items)
+    {
+        if(!i._model)
+            i._model = modelLoader.loadModel(i._type);
+        _index_count += i._model->indexCount();
+    }
 }
 
 RenderLayer::RenderLayer(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -105,14 +118,14 @@ const sp<Layer>& RenderLayer::layer() const
     return _stub->_layer;
 }
 
-sp<LayerContext> RenderLayer::makeContext(Layer::Type layerType) const
+sp<LayerContext> RenderLayer::makeContext(Layer::Type layerType, sp<ModelLoader> modelLoader) const
 {
-    return _stub->makeLayerContext(layerType);
+    return _stub->makeLayerContext(layerType, std::move(modelLoader));
 }
 
-sp<Layer> RenderLayer::makeLayer(Layer::Type layerType) const
+sp<Layer> RenderLayer::makeLayer(Layer::Type layerType, sp<ModelLoader> modelLoader) const
 {
-    return sp<Layer>::make(makeContext(layerType));
+    return sp<Layer>::make(makeContext(layerType, std::move(modelLoader)));
 }
 
 void RenderLayer::render(RenderRequest& renderRequest, const V3& position)

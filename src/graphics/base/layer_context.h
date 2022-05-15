@@ -24,7 +24,7 @@ private:
     };
 
 public:
-    LayerContext(const sp<ModelLoader>& modelLoader, const sp<Notifier>& notifier, Layer::Type type);
+    LayerContext(sp<ModelLoader> modelLoader, sp<Notifier> notifier, Layer::Type type);
 
     virtual void traverse(const Visitor& visitor) override;
 

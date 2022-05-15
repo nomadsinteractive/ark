@@ -12,6 +12,7 @@
 #include "core/util/operators.h"
 #include "core/util/variable_util.h"
 
+#include "graphics/base/size.h"
 #include "graphics/impl/vec/vec3_impl.h"
 #include "graphics/impl/vec/vec_neg.h"
 
@@ -59,8 +60,8 @@ public:
 
 class Vec2ToVec3 : public Vec3, public Holder, Implements<Vec2ToVec3, Vec3, Holder> {
 public:
-    Vec2ToVec3(const sp<Vec2>& vec2)
-        : _vec2(vec2) {
+    Vec2ToVec3(sp<Vec2> vec2)
+        : _vec2(std::move(vec2)) {
     }
 
     virtual V3 val() override {
@@ -267,6 +268,11 @@ void Vec3Type::fix(const sp<Vec3>& self)
 sp<Vec3> Vec3Type::freeze(const sp<Vec3>& self)
 {
     return sp<Vec3::Const>::make(self->val());
+}
+
+sp<Size> Vec3Type::toSize(const sp<Vec3>& self)
+{
+    return sp<Size>::make(vx(self), vy(self), vz(self));
 }
 
 sp<Vec3> Vec3Type::wrap(const sp<Vec3>& self)

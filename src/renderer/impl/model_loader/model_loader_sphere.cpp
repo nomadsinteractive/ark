@@ -110,9 +110,9 @@ void ModelLoaderSphere::postSnapshot(RenderController& /*renderController*/, Ren
 {
 }
 
-Model ModelLoaderSphere::loadModel(int32_t type)
+sp<Model> ModelLoaderSphere::loadModel(int32_t type)
 {
-    return Model(nullptr, sp<VerticesSphere>::make(_vertices, _atlas->getItemUV(type)));
+    return sp<Model>::make(nullptr, sp<VerticesSphere>::make(_vertices, _atlas->getItemUV(type)));
 }
 
 ModelLoaderSphere::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

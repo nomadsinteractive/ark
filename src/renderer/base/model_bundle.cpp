@@ -44,14 +44,14 @@ const ModelBundle::ModelInfo& ModelBundle::ensure(int32_t type) const
     return _stub->ensure(type);
 }
 
-Model ModelBundle::loadModel(int32_t type)
+sp<Model> ModelBundle::loadModel(int32_t type)
 {
     return ensure(type)._model;
 }
 
 sp<Model> ModelBundle::load(int32_t type)
 {
-    return sp<Model>::make(loadModel(type));
+    return loadModel(type);
 }
 
 const Table<int32_t, ModelBundle::ModelInfo>& ModelBundle::models() const
@@ -82,9 +82,9 @@ void ModelBundle::Stub::import(BeanFactory& factory, const document& manifest, c
 ModelBundle::ModelInfo& ModelBundle::Stub::addModel(int32_t type, const Model& model)
 {
     ModelInfo& modelInfo = _models[type];
-    modelInfo = {model, _vertex_length, _index_length};
-    _vertex_length += model.vertexLength();
-    _index_length += model.indexLength();
+    modelInfo = {sp<Model>::make(model), _vertex_length, _index_length};
+    _vertex_length += model.vertexCount();
+    _index_length += model.indexCount();
     return modelInfo;
 }
 

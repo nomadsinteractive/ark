@@ -253,7 +253,7 @@ sp<SharedBuffer> RenderController::getNamedBuffer(SharedBuffer::Name name)
     case SharedBuffer::NAME_QUADS:
         return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLES, RenderUtil::makeUnitQuadModel());
     case SharedBuffer::NAME_NINE_PATCH:
-        return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLE_STRIP, RenderUtil::makeUnitNinePatchModel());
+        return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLE_STRIP, RenderUtil::makeUnitNinePatchTriangleStripModel());
     case SharedBuffer::NAME_POINTS:
         return getSharedBuffer(ModelLoader::RENDER_MODE_POINTS, RenderUtil::makeUnitPointModel());
     default:
@@ -272,18 +272,18 @@ sp<SharedBuffer> RenderController::getSharedBuffer(ModelLoader::RenderMode rende
         return iter->second;
 
     bool degenerate = renderMode == ModelLoader::RENDER_MODE_TRIANGLE_STRIP;
-    size_t indexCount = model.indexLength();
-    size_t vertexCount = model.vertexLength();
+    size_t modelIndexCount = model.indexCount();
+    size_t modelVertexCount = model.vertexCount();
 
     sp<SharedBuffer> sharedBuffer;
     if(degenerate)
         sharedBuffer = sp<SharedBuffer>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
-                                             [indices, vertexCount](size_t objectCount)->sp<Uploader> { return sp<SharedBuffer::Degenerate>::make(objectCount, vertexCount, indices); },
-                                             [indexCount](size_t objectCount)->size_t { return ((indexCount + 2) * objectCount - 2) * sizeof(element_index_t); });
+                                             [indices, modelVertexCount](size_t primitiveCount)->sp<Uploader> { return sp<SharedBuffer::Degenerate>::make(primitiveCount, modelVertexCount, indices); },
+                                             [modelIndexCount](size_t primitiveCount)->size_t { return ((modelIndexCount + 2) * primitiveCount - 2) * sizeof(element_index_t); });
     else
         sharedBuffer = sp<SharedBuffer>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
-                                             [indices, vertexCount](size_t objectCount)->sp<Uploader> { return sp<SharedBuffer::Concat>::make(objectCount, vertexCount, indices); },
-                                             [indexCount](size_t objectCount)->size_t { return indexCount * objectCount * sizeof(element_index_t); });
+                                             [indices, modelVertexCount](size_t primitiveCount)->sp<Uploader> { return sp<SharedBuffer::Concat>::make(primitiveCount, modelVertexCount, indices); },
+                                             [modelIndexCount](size_t primitiveCount)->size_t { return modelIndexCount * primitiveCount * sizeof(element_index_t); });
     _shared_buffers.insert(std::make_pair(hash, sharedBuffer));
     return sharedBuffer;
 }

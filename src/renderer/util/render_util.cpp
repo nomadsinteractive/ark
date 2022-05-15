@@ -92,9 +92,14 @@ Model RenderUtil::makeUnitQuadModel()
     return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<6>>::make(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1}))), sp<VerticesQuad>::make(), Metrics{V3(1.0f), V3(1.0f), V3(0)});
 }
 
-Model RenderUtil::makeUnitNinePatchModel()
+Model RenderUtil::makeUnitNinePatchTriangleStripModel()
 {
     return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<28>>::make(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15}))), sp<VerticesNinePatch>::make());
+}
+
+Model RenderUtil::makeUnitNinePatchModel()
+{
+    return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<54>>::make(std::initializer_list<element_index_t>({0, 4, 1, 4, 1, 5, 1, 5, 2, 5, 2, 6, 2, 6, 3, 6, 3, 7, 4, 8, 5, 8, 5, 9, 5, 9, 6, 9, 6, 10, 6, 10, 7, 10, 7, 11, 8, 12, 9, 12, 9, 13, 9, 13, 10, 13, 10, 14, 10, 14, 11, 14, 11, 15}))), sp<VerticesNinePatch>::make());
 }
 
 Model RenderUtil::makeUnitPointModel()

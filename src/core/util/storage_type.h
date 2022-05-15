@@ -8,7 +8,7 @@
 namespace ark {
 
 //[[script::bindings::class("Storage")]]
-class ARK_API StorageUtil {
+class ARK_API StorageType {
 public:
 
 //[[script::bindings::classmethod]]

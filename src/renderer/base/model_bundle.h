@@ -14,7 +14,7 @@ namespace ark {
 class ARK_API ModelBundle : public ModelLoader {
 public:
     struct ModelInfo {
-        Model _model;
+        sp<Model> _model;
         size_t _vertex_offset;
         size_t _index_offset;
     };
@@ -44,7 +44,7 @@ public:
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
     virtual void initialize(ShaderBindings& shaderBindings) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
-    virtual Model loadModel(int32_t type) override;
+    virtual sp<Model> loadModel(int32_t type) override;
 
     const ModelInfo& ensure(int32_t type) const;
 

@@ -221,7 +221,7 @@ float Characters::doLayoutWithoutBoundary(GlyphContents& cm, float& flowx, float
     float fontHeight = 0;
     for(Glyph& i : cm)
     {
-        const Metrics& metrics = _model_loader->loadModel(i.type()->val()).metrics();
+        const Metrics& metrics = _model_loader->loadModel(i.type()->val())->metrics();
         flowx += _letter_spacing;
         placeOne(i, metrics, flowx, flowy, &fontHeight);
     }
@@ -290,7 +290,7 @@ std::vector<Characters::LayoutChar> Characters::getCharacterMetrics(const GlyphC
         else
         {
             int32_t type = static_cast<int32_t>(c);
-            const Metrics& m = _model_loader->loadModel(type).metrics();
+            const Metrics& m = _model_loader->loadModel(type)->metrics();
             bool iscjk = isCJK(c);
             bool iswordbreak = isWordBreaker(c);
             integral += xScale * m.bounds.x();

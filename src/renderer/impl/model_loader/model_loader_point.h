@@ -17,7 +17,7 @@ public:
     virtual void initialize(ShaderBindings& shaderBindings) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
-    virtual Model loadModel(int32_t type) override;
+    virtual sp<Model> loadModel(int32_t type) override;
 
     class BUILDER : public Builder<ModelLoader> {
     public:

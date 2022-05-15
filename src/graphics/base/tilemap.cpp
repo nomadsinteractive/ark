@@ -72,8 +72,8 @@ public:
 
 }
 
-Tilemap::Tilemap(const sp<LayerContext>& layerContext, const sp<Size>& size, const sp<Tileset>& tileset, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)
-    : _layer_context(layerContext), _size(size), _tileset(tileset), _storage(sp<TilemapStorage>::make(*this, std::move(importer), std::move(outputer)))
+Tilemap::Tilemap(sp<LayerContext> layerContext, sp<Size> size, sp<Tileset> tileset, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)
+    : _layer_context(std::move(layerContext)), _size(std::move(size)), _tileset(std::move(tileset)), _storage(sp<TilemapStorage>::make(*this, std::move(importer), std::move(outputer)))
 {
     DASSERT(_layer_context);
 }

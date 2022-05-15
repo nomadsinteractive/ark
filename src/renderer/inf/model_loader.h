@@ -13,6 +13,7 @@ namespace ark {
 
 class ARK_API ModelLoader {
 public:
+//  [[script::bindings::enumeration]]
     enum RenderMode {
         RENDER_MODE_NONE = -1,
         RENDER_MODE_LINES,
@@ -25,7 +26,8 @@ public:
     ModelLoader(RenderMode renderMode);
     virtual ~ModelLoader() = default;
 
-    RenderMode renderMode() const;
+//[[script::bindings::property]]
+    ModelLoader::RenderMode renderMode() const;
 
     class ARK_API Importer {
     public:
@@ -39,7 +41,8 @@ public:
     virtual void initialize(ShaderBindings& shaderBindings) = 0;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) = 0;
 
-    virtual Model loadModel(int32_t type) = 0;
+//[[script::bindings::auto]]
+    virtual sp<Model> loadModel(int32_t type) = 0;
 
 private:
     RenderMode _render_mode;

@@ -17,7 +17,7 @@ public:
     virtual void initialize(ShaderBindings& shaderBindings) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
-    virtual Model loadModel(int32_t type) override;
+    virtual sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::builder::by-value("quad")]]
     class MAKER : public Builder<ModelLoader> {
@@ -33,7 +33,7 @@ public:
 
 private:
     sp<Atlas> _atlas;
-
+    Model _unit_model;
 };
 
 }

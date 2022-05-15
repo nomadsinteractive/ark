@@ -50,7 +50,7 @@ public:
     virtual void initialize(ShaderBindings& shaderBindings) override;
     virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
-    virtual Model loadModel(int32_t type) override;
+    virtual sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::resource-loader("text")]]
     class BUILDER : public Builder<ModelLoader> {

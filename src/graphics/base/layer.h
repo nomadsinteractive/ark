@@ -6,9 +6,12 @@
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
 #include "core/types/shared_ptr.h"
+#include "core/types/safe_ptr.h"
 
 #include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
+
+#include "renderer/forwarding.h"
 
 namespace ark {
 
@@ -25,7 +28,7 @@ public:
     };
 
 public:
-    Layer(const sp<LayerContext>& layerContext);
+    Layer(sp<LayerContext> layerContext);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
     virtual void traverse(const Visitor& visitor) override;
@@ -51,6 +54,7 @@ public:
     private:
         Layer::Type _type;
         sp<Builder<RenderLayer>> _render_layer;
+        SafePtr<Builder<ModelLoader>> _model_loader;
         std::vector<sp<Builder<RenderObject>>> _render_objects;
     };
 

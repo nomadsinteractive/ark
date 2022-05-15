@@ -10,8 +10,8 @@
 
 namespace ark {
 
-Layer::Layer(const sp<LayerContext>& layerContext)
-    : _layer_context(layerContext)
+Layer::Layer(sp<LayerContext> layerContext)
+    : _layer_context(std::move(layerContext))
 {
 }
 
@@ -47,16 +47,15 @@ void Layer::clear()
 }
 
 Layer::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest)
-    : _type(Documents::getAttribute(manifest, Constants::Attributes::TYPE, Layer::TYPE_DYNAMIC)), _render_layer(factory.ensureBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER))
+    : _type(Documents::getAttribute(manifest, Constants::Attributes::TYPE, Layer::TYPE_DYNAMIC)), _render_layer(factory.ensureBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER)),
+      _model_loader(factory.getBuilder<ModelLoader>(manifest, Constants::Attributes::MODEL)), _render_objects(factory.getBuilderList<RenderObject>(manifest, Constants::Attributes::RENDER_OBJECT))
 {
-    for(const document& i : manifest->children(Constants::Attributes::RENDER_OBJECT))
-        _render_objects.push_back(factory.ensureBuilder<RenderObject>(i));
 }
 
 sp<Layer> Layer::BUILDER_IMPL1::build(const Scope& args)
 {
     const sp<RenderLayer> renderLayer = _render_layer->build(args);
-    const sp<Layer> layer = sp<Layer>::make(renderLayer->makeContext(_type));
+    const sp<Layer> layer = sp<Layer>::make(renderLayer->makeContext(_type, _model_loader->build(args)));
     const sp<LayerContext>& layerContext = layer->context();
     for(const sp<Builder<RenderObject>>& i : _render_objects)
         layerContext->addRenderObject(i->build(args));

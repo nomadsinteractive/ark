@@ -12,9 +12,9 @@ Use it for:
 
 from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple
 
-_BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'Numeric', 'NarrowPhrase', 'Layer',
-                           'Vec2', 'Vec3', 'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap', 'TilemapImporter',
-                           'Tileset', 'TilesetImporter', 'Transform', 'Varyings')
+_BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'ModelLoader', 'Numeric', 'NarrowPhrase',
+                           'Layer', 'Vec2', 'Vec3', 'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
+                           'TilemapImporter', 'Tileset', 'TilesetImporter', 'Transform', 'Varyings')
 
 
 TYPE_INT_OR_FLOAT = Union[int, float]
@@ -65,9 +65,11 @@ class Writable:
     pass
 
 
+class ModelLoader:
+    pass
+
+
 class _Var:
-    def __init__(self, v):
-        pass
 
     @property
     def val(self):
@@ -98,6 +100,12 @@ class _Var:
         pass
 
     def periodic(self, interval: Optional['Numeric'] = None, duration: Optional['Numeric'] = None):
+        pass
+
+    def mod_floor(self, mod):
+        pass
+
+    def mod_ceil(self, mod):
         pass
 
     def __int__(self):
@@ -593,7 +601,7 @@ class Disposed(Boolean):
         return False
 
 
-class Vec2:
+class Vec2(_Var):
     def __init__(self, x, y):
         self._x = x
         self._y = y
@@ -666,12 +674,6 @@ class Vec2:
     def fence(self, plane: Union['Vec3', tuple], observer: Union[Observer, Callable[[], None]]) -> 'Vec2':
         return Vec2(self._x, self._y)
 
-    def fix(self):
-        pass
-
-    def freeze(self):
-        pass
-
     def atan2(self) -> Numeric:
         pass
 
@@ -681,17 +683,8 @@ class Vec2:
     def distance_to(self, other) -> Numeric:
         pass
 
-    def __add__(self, other):
-        return None
-
-    def __sub__(self, other):
-        return None
-
-    def __mul__(self, other):
-        return None
-
-    def __truediv__(self, other):
-        return None
+    def to_size(self) -> 'Size':
+        pass
 
     def __str__(self):
         return '(%.1f, %.1f)' % (self._x, self._y)
@@ -1478,14 +1471,6 @@ class Tilemap(Renderer):
         return self._tileset
 
     @property
-    def row_count(self):
-        return 0
-
-    @property
-    def col_count(self):
-        return 0
-
-    @property
     def position(self):
         return None
 
@@ -1510,6 +1495,9 @@ class Tilemap(Renderer):
         return None
 
     def add_layer(self, layer: TilemapLayer):
+        pass
+
+    def remove_layer(self, layer: TilemapLayer):
         pass
 
     def load(self, src: Union[Readable, str]):

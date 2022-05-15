@@ -29,7 +29,7 @@ public:
 
 public:
 // [[script::bindings::auto]]
-    Tilemap(const sp<LayerContext>& layerContext, const sp<Size>& size, const sp<Tileset>& tileset, sp<Importer<Tilemap>> importer = nullptr, sp<Outputer<Tilemap>> outputer = nullptr);
+    Tilemap(sp<LayerContext> layerContext, sp<Size> size, sp<Tileset> tileset, sp<Importer<Tilemap>> importer = nullptr, sp<Outputer<Tilemap>> outputer = nullptr);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 // [[script::bindings::property]]

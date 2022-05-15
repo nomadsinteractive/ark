@@ -17,6 +17,7 @@
 #include "core/util/operators.h"
 #include "core/util/variable_util.h"
 
+#include "graphics/base/size.h"
 #include "graphics/impl/vec/vec2_impl.h"
 #include "graphics/impl/vec/vec_neg.h"
 #include "graphics/impl/vec/vec2_with_transform.h"
@@ -297,6 +298,11 @@ void Vec2Type::fix(const sp<Vec2>& self)
 sp<Vec2> Vec2Type::freeze(const sp<Vec2>& self)
 {
     return sp<Vec2::Const>::make(self->val());
+}
+
+sp<Size> Vec2Type::toSize(const sp<Vec2>& self)
+{
+    return sp<Size>::make(vx(self), vy(self));
 }
 
 sp<Vec2> Vec2Type::wrap(const sp<Vec2>& self)

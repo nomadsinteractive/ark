@@ -60,7 +60,7 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
     }
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), std::move(snapshot._ssbos),
-                                  buf.vertices().toSnapshot(_vertices), buf.indices(), DrawingContext::ParamDrawElementsInstanced(0, static_cast<uint32_t>(_model.indexLength()), static_cast<int32_t>(items.size()), buf.makeDividedBufferSnapshots()));
+                                  buf.vertices().toSnapshot(_vertices), buf.indices(), DrawingContext::ParamDrawElementsInstanced(0, static_cast<uint32_t>(_model.indexCount()), static_cast<int32_t>(items.size()), buf.makeDividedBufferSnapshots()));
 
     if(snapshot._stub->_scissor)
         drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);

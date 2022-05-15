@@ -30,11 +30,11 @@ void ModelLoaderPoint::postSnapshot(RenderController& /*renderController*/, Rend
 {
 }
 
-Model ModelLoaderPoint::loadModel(int32_t type)
+sp<Model> ModelLoaderPoint::loadModel(int32_t type)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
     const V2& size = texCoord.size();
-    return Model(nullptr, sp<VerticesPoint>::make(texCoord), {V3(size, 0), V3(size, 0), V3(0)});
+    return sp<Model>::make(nullptr, sp<VerticesPoint>::make(texCoord), Metrics{V3(size, 0), V3(size, 0), V3(0)});
 }
 
 ModelLoaderPoint::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

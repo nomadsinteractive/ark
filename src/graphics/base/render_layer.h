@@ -40,7 +40,7 @@ private:
         Stub(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
         sp<RenderCommand> render(const Snapshot& snapshot, float x, float y);
-        sp<LayerContext> makeLayerContext(Layer::Type layerType);
+        sp<LayerContext> makeLayerContext(Layer::Type layerType, sp<ModelLoader> modelLoader);
 
         sp<ModelLoader> _model_loader;
         sp<Shader> _shader;
@@ -78,6 +78,9 @@ public:
         sp<RenderCommand> render(const RenderRequest& renderRequest, const V3& position);
 
         sp<Stub> _stub;
+
+        size_t _index_count;
+
         std::vector<UBOSnapshot> _ubos;
         std::vector<Buffer::Snapshot> _ssbos;
         std::vector<Renderable::Snapshot> _items;
@@ -89,6 +92,8 @@ public:
         SnapshotFlag _flag;
 
         DISALLOW_COPY_AND_ASSIGN(Snapshot);
+
+        void postSnapshot();
 
     private:
         Snapshot(RenderRequest& renderRequest, const sp<Stub>& stub);
@@ -112,9 +117,9 @@ public:
     const sp<LayerContext>& context() const;
 
 //[[script::bindings::auto]]
-    sp<LayerContext> makeContext(Layer::Type layerType) const;
+    sp<LayerContext> makeContext(Layer::Type layerType, sp<ModelLoader> modelLoader = nullptr) const;
 //[[script::bindings::auto]]
-    sp<Layer> makeLayer(Layer::Type layerType) const;
+    sp<Layer> makeLayer(Layer::Type layerType, sp<ModelLoader> modelLoader = nullptr) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<RenderLayer> {

@@ -3,6 +3,7 @@
 #include "core/inf/variable.h"
 
 #include "renderer/base/mesh.h"
+#include "renderer/base/vertex_stream.h"
 #include "renderer/inf/animation.h"
 #include "renderer/inf/uploader.h"
 #include "renderer/inf/vertices.h"
@@ -40,12 +41,12 @@ const Metrics& Model::metrics() const
     return _metrics;
 }
 
-size_t Model::indexLength() const
+size_t Model::indexCount() const
 {
     return _indices->size() / sizeof(element_index_t);
 }
 
-size_t Model::vertexLength() const
+size_t Model::vertexCount() const
 {
     return _vertices->length();
 }
@@ -74,6 +75,12 @@ V3 Model::toScale(const V3& renderObjectSize) const
 void Model::writeToStream(VertexStream& buf, const V3& size) const
 {
     _vertices->write(buf, toScale(size));
+}
+
+void Model::writeRenderable(VertexStream& writer, const Renderable::Snapshot& renderable) const
+{
+    writer.setRenderObject(renderable);
+    writeToStream(writer, renderable._size);
 }
 
 Model::MeshIndicesUploader::MeshIndicesUploader(sp<ark::Array<Mesh>> meshes)

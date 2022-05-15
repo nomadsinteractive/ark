@@ -27,6 +27,7 @@ public:
         bool _dirty;
         bool _visible;
         int32_t _type;
+        sp<Model> _model;
         V3 _position;
         V3 _size;
         Transform::Snapshot _transform;

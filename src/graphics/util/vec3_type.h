@@ -93,6 +93,9 @@ public:
     static sp<Vec3> freeze(const sp<Vec3>& self);
 
 //  [[script::bindings::classmethod]]
+    static sp<Size> toSize(const sp<Vec3>& self);
+
+//  [[script::bindings::classmethod]]
     static sp<Vec3> wrap(const sp<Vec3>& self);
 //  [[script::bindings::classmethod]]
     static sp<Vec3> synchronize(const sp<Vec3>& self, const sp<Boolean>& disposed = nullptr);

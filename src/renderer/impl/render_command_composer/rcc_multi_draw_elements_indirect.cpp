@@ -52,7 +52,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
             if(modelIndirect._snapshot_offsets.empty())
             {
                 const ModelBundle::ModelInfo& modelInfo = _model_bundle->ensure(i._type);
-                modelIndirect._command = {static_cast<uint32_t>(modelInfo._model.indexLength()), 0, static_cast<uint32_t>(modelInfo._index_offset), static_cast<uint32_t>(modelInfo._vertex_offset), 0};
+                modelIndirect._command = {static_cast<uint32_t>(modelInfo._model->indexCount()), 0, static_cast<uint32_t>(modelInfo._index_offset), static_cast<uint32_t>(modelInfo._vertex_offset), 0};
             }
 
             ++ (modelIndirect._command._instance_count);
@@ -97,7 +97,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
             if(reload || s._dirty)
             {
                 const ModelBundle::ModelInfo& modelInfo = _model_bundle->ensure(s._type);
-                const Metrics& metrics = modelInfo._model.metrics();
+                const Metrics& metrics = modelInfo._model->metrics();
                 VertexStream writer = buf.makeDividedVertexStream(renderRequest, 1, offset, 1);
                 writer.next();
                 writer.write(MatrixUtil::translate(M4::identity(), s._position) * MatrixUtil::scale(s._transform.toMatrix(), toScale(s._size, metrics)));
@@ -130,7 +130,7 @@ void RCCMultiDrawElementsIndirect::VerticesUploader::upload(Writable& uploader)
         uint32_t size = static_cast<uint32_t>(model.vertices()->length() * stride);
         std::vector<uint8_t> buf(size);
         VertexStream stream(attributes, false, buf.data(), size, stride);
-        i.second._model.writeToStream(stream, V3(1.0f));
+        i.second._model->writeToStream(stream, V3(1.0f));
         uploader.write(buf.data(), size, offset);
         offset += size;
     }
@@ -167,7 +167,7 @@ void RCCMultiDrawElementsIndirect::IndicesUploader::upload(Writable& uploader)
     uint32_t offset = 0;
     for(const auto& i: _model_bundle->models())
     {
-        const sp<Uploader>& indices = i.second._model.indices();
+        const sp<Uploader>& indices = i.second._model->indices();
         uint32_t size = static_cast<uint32_t>(indices->size());
         WritableWithOffset writable(uploader, offset);
         indices->upload(writable);

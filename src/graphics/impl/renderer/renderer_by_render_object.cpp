@@ -45,7 +45,7 @@ const sp<Size>& RendererByRenderObject::size()
 
 void RendererByRenderObject::measure(Size& size)
 {
-    const Metrics& metrics = _layer_context->modelLoader()->loadModel(_render_object->type()->val()).metrics();
+    const Metrics& metrics = _layer_context->modelLoader()->loadModel(_render_object->type()->val())->metrics();
     size.setWidth(metrics.size.x());
     size.setHeight(metrics.size.y());
 }

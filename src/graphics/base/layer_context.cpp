@@ -20,8 +20,8 @@ LayerContext::Item::Item(const sp<Renderable>& renderable, const sp<Boolean>& di
     DASSERT(_renderable);
 }
 
-LayerContext::LayerContext(const sp<ModelLoader>& models, const sp<Notifier>& notifier, Layer::Type type)
-    : _model_loader(models), _notifier(notifier), _layer_type(type), _render_requested(false), _render_done(false), _position_changed(false)
+LayerContext::LayerContext(sp<ModelLoader> models, sp<Notifier> notifier, Layer::Type type)
+    : _model_loader(std::move(models)), _notifier(std::move(notifier)), _layer_type(type), _render_requested(false), _render_done(false), _position_changed(false)
 {
 }
 
@@ -93,7 +93,7 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
         {
             snapshot._dirty = snapshot._dirty || _position_changed || _render_done != _render_requested;
             snapshot._visible = _render_requested && snapshot._visible;
-            output._items.emplace_back(std::move(snapshot));
+            output._items.push_back(std::move(snapshot));
             ++iter;
         }
     }
