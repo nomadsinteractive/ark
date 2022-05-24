@@ -17,6 +17,7 @@
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
+#include "renderer/impl/model_loader/model_loader_cached.h"
 #include "renderer/inf/animation.h"
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/pipeline.h"
@@ -25,10 +26,10 @@
 
 namespace ark {
 
-RenderLayer::Stub::Stub(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _model_loader(modelLoader), _shader(shader), _scissor(scissor), _render_controller(resourceLoaderContext->renderController()), _render_command_composer(_model_loader->makeRenderCommandComposer()),
+RenderLayer::Stub::Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)
+    : _model_loader(sp<ModelLoaderCached>::make(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)), _render_controller(std::move(renderController)), _render_command_composer(_model_loader->makeRenderCommandComposer()),
       _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _notifier(sp<Notifier>::make()),
-      _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(_model_loader, _notifier, Layer::TYPE_DYNAMIC))), _stride(shader->input()->getStream(0).stride())
+      _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(_model_loader, _notifier, Layer::TYPE_DYNAMIC))), _stride(_shader->input()->getStream(0).stride())
 {
     _model_loader->initialize(_shader_bindings);
     DCHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
@@ -44,6 +45,7 @@ sp<LayerContext> RenderLayer::Stub::makeLayerContext(Layer::Type layerType, sp<M
 RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& stub)
     : _stub(stub), _index_count(0)
 {
+    DPROFILER_TRACE("Snapshot");
     Layer::Type combined = Layer::TYPE_UNSPECIFIED;
 
     _stub->_layer->context()->takeSnapshot(*this, renderRequest);
@@ -54,9 +56,6 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
         if(combined != Layer::TYPE_DYNAMIC)
             combined = i->layerType();
     }
-
-    _stub->_model_loader->postSnapshot(_stub->_render_controller, *this);
-    postSnapshot();
 
     _stub->_render_command_composer->postSnapshot(_stub->_render_controller, *this);
 
@@ -71,6 +70,8 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
         _flag = dirty ? SNAPSHOT_FLAG_RELOAD : SNAPSHOT_FLAG_DYNAMIC_UPDATE;
     else
         _flag = dirty ? SNAPSHOT_FLAG_STATIC_MODIFIED : SNAPSHOT_FLAG_STATIC_REUSE;
+
+    DPROFILER_LOG("Dirty", dirty);
 }
 
 sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderRequest, const V3& /*position*/)
@@ -93,8 +94,8 @@ void RenderLayer::Snapshot::postSnapshot()
     }
 }
 
-RenderLayer::RenderLayer(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : RenderLayer(sp<Stub>::make(modelLoader, shader, scissor, resourceLoaderContext))
+RenderLayer::RenderLayer(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)
+    : RenderLayer(sp<Stub>::make(std::move(modelLoader), std::move(shader), std::move(scissor), std::move(renderController)))
 {
 }
 
@@ -147,7 +148,7 @@ RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, co
 
 sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
 {
-    return sp<RenderLayer>::make(_model_loader->build(args), _shader->build(args), _scissor->build(args), _resource_loader_context);
+    return sp<RenderLayer>::make(_model_loader->build(args), _shader->build(args), _scissor->build(args), _resource_loader_context->renderController());
 }
 
 RenderLayer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

@@ -291,6 +291,11 @@ private:
     sp<ReferenceManager> _reference_manager;
 };
 
+template<> inline sp<String> PythonInterpreter::toSharedPtr<String>(PyObject* object, bool alert)
+{
+    return object == Py_None ? sp<String>::null() : sp<String>::make(toString(object));
+}
+
 template<> inline sp<Numeric> PythonInterpreter::toSharedPtr<Numeric>(PyObject* object, bool alert)
 {
     return toNumeric(object, alert);

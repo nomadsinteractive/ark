@@ -76,8 +76,8 @@ typedef Variable<V2> Vec2;
 typedef Variable<V3> Vec3;
 typedef Variable<V4> Vec4;
 
-typedef Loader<Bitmap> BitmapLoader;
-typedef LoaderBundle<Bitmap> BitmapBundle;
+typedef Loader<sp<Bitmap>> BitmapLoader;
+typedef LoaderBundle<sp<Bitmap>> BitmapLoaderBundle;
 
 //[[script::bindings::auto]]
 typedef Importer<Tileset> TilesetImporter;

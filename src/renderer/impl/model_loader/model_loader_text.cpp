@@ -1,5 +1,6 @@
 #include "renderer/impl/model_loader/model_loader_text.h"
 
+#include "core/base/future.h"
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
@@ -24,28 +25,13 @@ namespace ark {
 ModelLoaderText::Stub::Stub(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
     : _render_controller(renderController), _alphabet(alphabet), _size(sp<Size>::make())
 {
-    reset(textureWidth, textureHeight);
+    resize(textureWidth, textureHeight);
 }
 
 ModelLoaderText::Stub::Stub(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, sp<Texture> texture)
     : _render_controller(renderController), _alphabet(alphabet), _size(sp<Size>::make()), _texture(std::move(texture))
 {
-    reset(_texture->width(), _texture->height());
-}
-
-void ModelLoaderText::Stub::reset(uint32_t textureWidth, uint32_t textureHeight)
-{
-    _size->setWidth(static_cast<float>(textureWidth));
-    _size->setHeight(static_cast<float>(textureHeight));
-    _font_glyph = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1), true);
-    sp<Texture::Uploader> uploader = sp<Texture::UploaderBitmap>::make(_font_glyph);
-    if(_texture)
-        _texture->setDelegate(_render_controller->createTexture(_size, _texture->parameters(), std::move(uploader), RenderController::US_ONCE_AND_ON_SURFACE_READY)->delegate(), _size);
-    else
-        _texture = _render_controller->createTexture2D(_size, std::move(uploader), RenderController::US_ONCE_AND_ON_SURFACE_READY);
-    _atlas = sp<Atlas>::make(_texture, true);
-    _delegate = sp<ModelLoaderQuad>::make(_atlas);
-    clear();
+    resize(static_cast<uint32_t>(_texture->width()), static_cast<uint32_t>(_texture->height()));
 }
 
 bool ModelLoaderText::Stub::prepareOne(int32_t c)
@@ -75,39 +61,52 @@ bool ModelLoaderText::Stub::prepareOne(int32_t c)
     return true;
 }
 
-bool ModelLoaderText::Stub::checkUnpreparedCharacter(const RenderLayer::Snapshot& renderContext)
+void ModelLoaderText::Stub::ensureCharacter(int32_t c)
 {
-    for(const Renderable::Snapshot& i : renderContext._items)
+    if(!_atlas->has(c))
     {
-        if(!_atlas->has(i._type))
-            return true;
+        while(!prepareOne(c))
+        {
+            uint32_t width = _font_glyph->width() * 2;
+            uint32_t height = _font_glyph->height() * 2;
+            LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _atlas->items().size());
+            resize(width, height);
+        }
+        reloadTexture();
     }
-    return false;
 }
 
-void ModelLoaderText::Stub::clear()
+bool ModelLoaderText::Stub::resize(uint32_t textureWidth, uint32_t textureHeight)
 {
+    const sp<Atlas> oldAtlas = _atlas;
+    _size->setWidth(static_cast<float>(textureWidth));
+    _size->setHeight(static_cast<float>(textureHeight));
+    _font_glyph = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1), true);
+    memset(_font_glyph->at(0, 0), 0, _font_glyph->width() * _font_glyph->height());
     _flowx = _flowy = 0;
     _max_glyph_height = 0;
-    _atlas->clear();
-    memset(_font_glyph->at(0, 0), 0, _font_glyph->width() * _font_glyph->height());
+
+    if(oldAtlas)
+        for(const auto& i : oldAtlas->items())
+            if(!prepareOne(i.first))
+                return false;
+
+    if(_texture)
+        reloadTexture();
+    else
+        _texture = _render_controller->createTexture2D(_size, sp<Texture::UploaderBitmap>::make(_font_glyph), RenderController::US_ONCE_AND_ON_SURFACE_READY);
+
+    _atlas = sp<Atlas>::make(_texture, true);
+    _delegate = sp<ModelLoaderQuad>::make(_atlas);
+    return true;
 }
 
-bool ModelLoaderText::Stub::prepare(const RenderLayer::Snapshot& snapshot, bool allowReset)
+void ModelLoaderText::Stub::reloadTexture()
 {
-    for(const Renderable::Snapshot& i : snapshot._items)
-    {
-        if(!_atlas->has(i._type) && !prepareOne(i._type))
-        {
-            if(allowReset)
-            {
-                clear();
-                return prepare(snapshot, false);
-            }
-            return false;
-        }
-    }
-    return true;
+    _texture->setDelegate(_render_controller->createTexture(_size, _texture->parameters(), sp<Texture::UploaderBitmap>::make(_font_glyph), RenderController::US_ONCE_AND_ON_SURFACE_READY)->delegate(), _size);
+    if(_texture_reload_future)
+        _texture_reload_future->cancel();
+    _texture_reload_future = _render_controller->upload(_texture, nullptr, RenderController::US_RELOAD);
 }
 
 ModelLoaderText::ModelLoaderText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
@@ -130,25 +129,10 @@ void ModelLoaderText::initialize(ShaderBindings& shaderBindings)
     shaderBindings.pipelineBindings()->bindSampler(_stub->_texture);
 }
 
-void ModelLoaderText::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
-{
-    if(_stub->checkUnpreparedCharacter(snapshot))
-    {
-        while(!_stub->prepare(snapshot, true))
-        {
-            uint32_t width = _stub->_font_glyph->width() * 2;
-            uint32_t height = _stub->_font_glyph->height() * 2;
-            LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _stub->_atlas->items().size());
-            _stub->reset(width, height);
-        }
-        _stub->_render_controller->upload(_stub->_texture, nullptr, RenderController::US_RELOAD);
-    }
-    _stub->_delegate->postSnapshot(renderController, snapshot);
-}
-
 sp<Model> ModelLoaderText::loadModel(int32_t type)
 {
     Alphabet::Metrics metrics;
+    _stub->ensureCharacter(type);
     bool r = _stub->_alphabet->measure(type, metrics, false);
     DCHECK(r, "Measuring failed, type: %d", type);
     V3 bounds(static_cast<float>(metrics.width), static_cast<float>(metrics.height), 0);

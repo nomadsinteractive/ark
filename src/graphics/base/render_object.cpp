@@ -19,17 +19,12 @@ RenderObject::RenderObject(int32_t type, const sp<Vec3>& position, const sp<Size
 {
 }
 
-//RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings)
-//    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _disposed(type.as<Disposed>(), false), _visible(nullptr, true)
-//{
-//}
-
 RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings, sp<Visibility> visible, sp<Disposed> disposed)
     : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _visible(std::move(visible), true), _disposed(std::move(disposed), false)
 {
 }
 
-const sp<Integer> RenderObject::type() const
+sp<Integer> RenderObject::type() const
 {
     return _type;
 }

@@ -79,14 +79,15 @@ public:
     const sp<ApplicationProfiler>& applicationProfiler() const;
 
     op<ApplicationProfiler::Tracer> makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category = ApplicationProfiler::CATEGORY_DEFAULT) const;
+    op<ApplicationProfiler::Logger> makeProfilerLogger(const char* func, const char* filename, int32_t lineno, const char* name) const;
 
     int32_t runTests(int argc, const char* argv[]) const;
 
 private:
     class ArkAssetBundle;
 
-    sp<ApplicationContext> createApplicationContext(const Manifest& manifest, const sp<ApplicationResource>& resource, const sp<RenderEngine>& renderEngine);
-    sp<RenderEngine> createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationResource>& appResource);
+    sp<ApplicationContext> createApplicationContext(const Manifest& manifest, const sp<ApplicationBundle>& resource, const sp<RenderEngine>& renderEngine);
+    sp<RenderEngine> createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& appResource);
 
     void loadPlugins(const Manifest& manifest) const;
 

@@ -4,7 +4,8 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/texture.h"
-#include "renderer/impl/vertices/vertices_nine_patch.h"
+#include "renderer/impl/vertices/vertices_nine_patch_quads.h"
+#include "renderer/impl/vertices/vertices_nine_patch_triangle_strips.h"
 
 namespace ark {
 
@@ -68,19 +69,22 @@ void AtlasImporterNinePatch::Attachment::add(int32_t type, uint32_t textureWidth
 
 void AtlasImporterNinePatch::Attachment::add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Rect& bounds)
 {
-    _vertices[type] = makeNinePatchVertices(textureWidth, textureHeight, paddings, bounds);
-}
-
-sp<Vertices> AtlasImporterNinePatch::Attachment::makeNinePatchVertices(uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Rect& bounds) const
-{
     const Rect patches(paddings.left(), paddings.top(), bounds.width() - paddings.right(), bounds.height() - paddings.bottom());
-    return sp<VerticesNinePatch>::make(bounds, patches, textureWidth, textureHeight);
+    _vertices_triangle_strips[type] = sp<VerticesNinePatchTriangleStrips>::make(bounds, patches, textureWidth, textureHeight);
+    _vertices_quads[type] = sp<VerticesNinePatchQuads>::make(bounds, patches, textureWidth, textureHeight);
 }
 
-const sp<Vertices>& AtlasImporterNinePatch::Attachment::ensureVertices(int32_t type) const
+const sp<Vertices>& AtlasImporterNinePatch::Attachment::ensureVerticesTriangleStrips(int32_t type) const
 {
-    const auto iter = _vertices.find(type);
-    DCHECK(iter != _vertices.end(), "Cannot find type: %d", type);
+    const auto iter = _vertices_triangle_strips.find(type);
+    DCHECK(iter != _vertices_triangle_strips.end(), "Cannot find type: %d", type);
+    return iter->second;
+}
+
+const sp<Vertices>& AtlasImporterNinePatch::Attachment::ensureVerticesQuads(int32_t type) const
+{
+    const auto iter = _vertices_quads.find(type);
+    DCHECK(iter != _vertices_quads.end(), "Cannot find type: %d", type);
     return iter->second;
 }
 

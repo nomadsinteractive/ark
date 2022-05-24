@@ -101,9 +101,6 @@ typedef VariableWrapper<float> NumericWrapper;
 typedef std::unordered_map<int32_t, int32_t> IntMap;
 typedef Importer<IntMap> IntMapImporter;
 
-typedef Loader<DOMDocument> DocumentLoader;
-typedef LoaderBundle<DOMDocument> DocumentBundle;
-
 typedef uint16_t element_index_t;
 
 typedef Array<uint8_t>  ByteArray;
@@ -122,6 +119,15 @@ typedef sp<IndexArray> indexarray;
 typedef sp<FloatArray> floatarray;
 
 typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
+
+typedef Loader<document> DocumentLoader;
+typedef LoaderBundle<document> DocumentLoaderBundle;
+
+typedef Loader<Json> JsonLoader;
+typedef LoaderBundle<Json> JsonLoaderBundle;
+
+typedef Loader<String> StringLoader;
+typedef LoaderBundle<String> StringLoaderBundle;
 
 }
 

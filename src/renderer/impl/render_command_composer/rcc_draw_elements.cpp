@@ -35,27 +35,25 @@ void RCCDrawElements::postSnapshot(RenderController& renderController, RenderLay
 sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot)
 {
     size_t verticesLength = _model.vertices()->length();
-    const std::vector<Renderable::Snapshot>& items = snapshot._items;
-    const sp<ModelLoader>& modelLoader = snapshot._stub->_model_loader;
 
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
     buf.setIndices(snapshot._index_buffer);
 
     if(snapshot._flag == RenderLayer::SNAPSHOT_FLAG_RELOAD || _vertices.size() == 0)
     {
-        VertexStream writer = buf.makeVertexStream(renderRequest, verticesLength * items.size(), 0);
-        for(const Renderable::Snapshot& i : items)
-            (i._model ? i._model : modelLoader->loadModel(i._type))->writeRenderable(writer, i);
+        VertexStream writer = buf.makeVertexStream(renderRequest, verticesLength * snapshot._items.size(), 0);
+        for(const Renderable::Snapshot& i : snapshot._items)
+            i._model->writeRenderable(writer, i);
     }
     else
     {
         size_t offset = 0;
-        for(const Renderable::Snapshot& i : items)
+        for(const Renderable::Snapshot& i : snapshot._items)
         {
             if(i._dirty)
             {
                 VertexStream writer = buf.makeVertexStream(renderRequest, verticesLength, offset);
-                (i._model ? i._model : modelLoader->loadModel(i._type))->writeRenderable(writer, i);
+                i._model->writeRenderable(writer, i);
             }
             offset += verticesLength;
         }

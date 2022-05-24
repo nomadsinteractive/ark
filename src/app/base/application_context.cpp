@@ -21,7 +21,7 @@
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/renderer_factory.h"
 
-#include "app/base/application_resource.h"
+#include "app/base/application_bundle.h"
 #include "app/base/event.h"
 #include "app/base/message_loop_thread.h"
 #include "app/base/resource_loader.h"
@@ -51,7 +51,7 @@ private:
 
 }
 
-ApplicationContext::ApplicationContext(const sp<ApplicationResource>& applicationResources, const sp<RenderEngine>& renderEngine)
+ApplicationContext::ApplicationContext(const sp<ApplicationBundle>& applicationResources, const sp<RenderEngine>& renderEngine)
     : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->recycler(), applicationResources->bitmapBundle(), applicationResources->bitmapBoundsBundle())),
       _clock(sp<Clock>::make(_ticker)), _worker_strategy(sp<ExecutorWorkerStrategy>::make(_ticker)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK),
       _paused(false)
@@ -136,7 +136,7 @@ sp<MessageLoop> ApplicationContext::makeMessageLoop()
     return _worker_strategy->_message_loop;
 }
 
-const sp<ApplicationResource>& ApplicationContext::applicationResource() const
+const sp<ApplicationBundle>& ApplicationContext::applicationBundle() const
 {
     return _application_resource;
 }
@@ -203,14 +203,14 @@ void ApplicationContext::setDefaultEventListener(const sp<EventListener>& eventL
     _default_event_listener = eventListener;
 }
 
-void ApplicationContext::post(const sp<Runnable>& task, float delay)
+void ApplicationContext::post(sp<Runnable> task, float delay, sp<Future> future)
 {
-    _message_loop->post(task, delay);
+    _message_loop->post(std::move(task), delay, std::move(future));
 }
 
-void ApplicationContext::schedule(const sp<Runnable>& task, float interval)
+void ApplicationContext::schedule(sp<Runnable> task, float interval, sp<Future> future)
 {
-    _message_loop->schedule(task, interval);
+    _message_loop->schedule(std::move(task), interval, std::move(future));
 }
 
 sp<MessageLoop> ApplicationContext::makeMessageLoop(const sp<Clock>& clock)
@@ -230,11 +230,11 @@ void ApplicationContext::addStringBundle(const String& name, const sp<StringBund
     _string_table->addStringBundle(name, stringBundle);
 }
 
-sp<String> ApplicationContext::getString(const String& resid)
+sp<String> ApplicationContext::getString(const String& resid, bool alert)
 {
     DASSERT(resid);
     const Identifier id = resid.at(0) == '@' ? Identifier::parse(resid, Identifier::ID_TYPE_AUTO, false) : Identifier::parseRef(resid, false);
-    return _string_table->getString(id.package(), id.ref(), true);
+    return _string_table->getString(id.package(), id.ref(), alert);
 }
 
 std::vector<String> ApplicationContext::getStringArray(const String& resid)

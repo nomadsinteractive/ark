@@ -22,7 +22,11 @@ private:
         bool checkUnpreparedCharacter(const RenderLayer::Snapshot& renderContext);
         bool prepare(const RenderLayer::Snapshot& snapshot, bool allowReset);
 
+        void ensureCharacter(int32_t c);
+        bool resize(uint32_t textureWidth, uint32_t textureHeight);
+
     private:
+        void reloadTexture();
         bool prepareOne(int32_t c);
         void clear();
 
@@ -34,6 +38,7 @@ private:
         sp<ModelLoader> _delegate;
         sp<Size> _size;
         sp<Texture> _texture;
+        sp<Future> _texture_reload_future;
 
         int32_t _flowx, _flowy;
         int32_t _max_glyph_height;
@@ -48,7 +53,6 @@ public:
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
 
     virtual void initialize(ShaderBindings& shaderBindings) override;
-    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
     virtual sp<Model> loadModel(int32_t type) override;
 

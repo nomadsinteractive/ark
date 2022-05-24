@@ -130,27 +130,29 @@ void NarrowPhraseCuteC2::loadShapes(const document& manifest)
         else
         {
             const document& fixtures = i->ensureChild("fixtures");
-            const document& fixture = fixtures->ensureChild("fixture");
-            const document& fixture_type = fixture->ensureChild("fixture_type");
-            DCHECK(fixture_type->value() == "POLYGON", "Unsupported fixture_type: %s", fixture_type->value().c_str());
-
-            const document& polygons = fixture->ensureChild("polygons");
-            for(const document& j : polygons->children("polygon"))
+            for(const document& j : fixtures->children("fixture"))
             {
-                const std::vector<String> values = j->value().split(',');
-                DCHECK(values.size() % 2 == 0, "Illegal vertex points: %s", j->value().c_str());
-                ShapeCuteC2 shape;
+                const document& fixture_type = j->ensureChild("fixture_type");
+                DCHECK(fixture_type->value() == "POLYGON", "Unsupported fixture_type: %s", fixture_type->value().c_str());
 
-                for(size_t k = 0; k < values.size(); k += 2)
+                const document& polygons = j->ensureChild("polygons");
+                for(const document& k : polygons->children("polygon"))
                 {
-                    DCHECK(k / 2 < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
-                    shape.s.poly.verts[k / 2].x = Strings::parse<float>(values.at(k));
-                    shape.s.poly.verts[k / 2].y = Strings::parse<float>(values.at(k + 1));
+                    const std::vector<String> values = k->value().split(',');
+                    DCHECK(values.size() % 2 == 0, "Illegal vertex points: %s", k->value().c_str());
+                    ShapeCuteC2 shape;
+
+                    for(size_t k = 0; k < values.size(); k += 2)
+                    {
+                        DCHECK(k / 2 < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
+                        shape.s.poly.verts[k / 2].x = Strings::parse<float>(values.at(k));
+                        shape.s.poly.verts[k / 2].y = Strings::parse<float>(values.at(k + 1));
+                    }
+                    shape.t = C2_TYPE_POLY;
+                    shape.s.poly.count = static_cast<int32_t>(values.size() / 2);
+                    c2MakePoly(&shape.s.poly);
+                    shapes.push_back(sp<ShapeCuteC2>::make(shape));
                 }
-                shape.t = C2_TYPE_POLY;
-                shape.s.poly.count = static_cast<int32_t>(values.size() / 2);
-                c2MakePoly(&shape.s.poly);
-                shapes.push_back(sp<ShapeCuteC2>::make(shape));
             }
         }
         _shapes[shapeId] = std::move(shapes);
@@ -225,18 +227,18 @@ ShapeCuteC2 NarrowPhraseCuteC2::makePolygonShapeImpl(const std::vector<V2>& vert
 
     for(size_t i = 0; i < vertices.size(); ++i)
         poly.verts[i] = { vertices.at(i).x(), vertices.at(i).y() };
-    poly.count = vertices.size();
+    poly.count = static_cast<int32_t>(vertices.size());
 
     c2MakePoly(&poly);
     return shape;
 }
 
-NarrowPhraseCuteC2::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+NarrowPhraseCuteC2::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _manifest(manifest), _resource_loader_context(resourceLoaderContext)
 {
 }
 
-sp<NarrowPhrase> NarrowPhraseCuteC2::BUILDER::build(const Scope& args)
+sp<NarrowPhrase> NarrowPhraseCuteC2::BUILDER::build(const Scope& /*args*/)
 {
     return sp<NarrowPhraseCuteC2>::make(_manifest, _resource_loader_context);
 }

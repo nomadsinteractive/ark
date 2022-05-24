@@ -18,16 +18,16 @@ public:
     MessageLoop(sp<Variable<uint64_t>> clock, sp<Executor> executor);
 
 //  [[script::bindings::auto]]
-    void post(const sp<Runnable>& task, float delay);
+    void post(sp<Runnable> runnable, float delay, sp<Future> future = nullptr);
 //  [[script::bindings::auto]]
-    sp<Future> schedule(const sp<Runnable>& task, float interval);
+    sp<Future> schedule(sp<Runnable> runnable, float interval, sp<Future> future = nullptr);
 
     uint64_t pollOnce();
 
 private:
     class Task : public Runnable {
     public:
-        Task(sp<Runnable> target, uint64_t nextFireTick, uint32_t interval);
+//        Task(sp<Runnable> target, uint64_t nextFireTick, uint32_t interval);
         Task(sp<Runnable> target, sp<Future> future, uint64_t nextFireTick, uint32_t interval);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Task);
 

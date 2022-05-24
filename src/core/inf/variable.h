@@ -10,7 +10,7 @@ namespace ark {
 
 template<typename T> class Variable : public Updatable {
 public:
-    virtual ~Variable() = default;
+    virtual ~Variable() override = default;
 
     virtual T val() = 0;
 

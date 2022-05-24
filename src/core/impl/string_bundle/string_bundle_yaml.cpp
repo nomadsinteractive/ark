@@ -62,7 +62,8 @@ sp<String> StringBundleYAML::getString(const String& resid)
         }
         return iter->second->value();
     } while(false);
-    return sp<String>::make("[" + resid + "]");
+
+    return nullptr;
 }
 
 std::vector<String> StringBundleYAML::getStringArray(const String& resid)

@@ -51,7 +51,7 @@ private:
     void loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, Node>& nodes, const AnimationAssimpNodes::NodeLoaderCallback& callback) const;
     void loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, Node>& nodes, const AnimationAssimpNodes::NodeLoaderCallback& callback, String name, String alias) const;
 
-    bitmap loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const;
+    bitmap loadBitmap(const sp<BitmapLoaderBundle>& imageResource, const aiTexture* tex) const;
     array<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;
 
     void loadNodeHierarchy(const aiNode* node, NodeTable& nodes, std::unordered_map<uint32_t, uint32_t>& nodeIds) const;

@@ -40,7 +40,7 @@ void TilemapImporterTmx::import(Tilemap& tilemap, const sp<Readable>& src)
     }
 }
 
-sp<Importer<Tilemap> > TilemapImporterTmx::DICTIONARY::build(const Scope& /*args*/)
+sp<Importer<Tilemap>> TilemapImporterTmx::DICTIONARY::build(const Scope& /*args*/)
 {
     return sp<TilemapImporterTmx>::make();
 }

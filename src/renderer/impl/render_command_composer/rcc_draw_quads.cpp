@@ -29,19 +29,18 @@ sp<ShaderBindings> RCCDrawQuads::makeShaderBindings(Shader& shader, RenderContro
 
 void RCCDrawQuads::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
 {
-    snapshot._index_buffer = _shared_buffer->snapshot(renderController, snapshot._index_count / 6, snapshot._items.size());
+    size_t primitiveCount = snapshot._index_count / 6;
+    snapshot._index_buffer = _shared_buffer->snapshot(renderController, primitiveCount, primitiveCount);
 }
 
 sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot)
 {
-    const std::vector<Renderable::Snapshot>& items = snapshot._items;
-
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
     buf.setIndices(snapshot._index_buffer);
 
     size_t offset = 0;
     bool reload = snapshot._flag == RenderLayer::SNAPSHOT_FLAG_RELOAD || _vertices.size() == 0;
-    for(const Renderable::Snapshot& i : items)
+    for(const Renderable::Snapshot& i : snapshot._items)
     {
         size_t vertexCount = i._model->vertexCount();
         if(reload || i._dirty)

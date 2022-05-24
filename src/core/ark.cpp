@@ -46,7 +46,7 @@ limitations under the License.
 #endif
 
 #include "app/base/application_context.h"
-#include "app/base/application_resource.h"
+#include "app/base/application_bundle.h"
 
 #include "platform/platform.h"
 
@@ -205,7 +205,7 @@ void Ark::initialize(const sp<Manifest>& manifest)
 
     const sp<BeanFactory> factory = createBeanFactory(sp<DictionaryImpl<document>>::make());
     _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleUtil::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->appDir()), factory, _manifest->assets());
-    const sp<ApplicationResource> appResource = sp<ApplicationResource>::make(_asset_bundle->getAssetBundle("/"));
+    const sp<ApplicationBundle> appResource = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
     const sp<RenderEngine> renderEngine = createRenderEngine(_manifest->renderer()._version, _manifest->renderer()._coordinate_system, appResource);
     _application_context = createApplicationContext(_manifest, appResource, renderEngine);
 }
@@ -282,7 +282,12 @@ op<ApplicationProfiler::Tracer> Ark::makeProfilerTracer(const char* func, const 
     return _application_profiler ? _application_profiler->makeTracer(func, filename, lineno, name, category) : op<ApplicationProfiler::Tracer>();
 }
 
-sp<ApplicationContext> Ark::createApplicationContext(const Manifest& manifest, const sp<ApplicationResource>& appResource, const sp<RenderEngine>& renderEngine)
+op<ApplicationProfiler::Logger> Ark::makeProfilerLogger(const char* func, const char* filename, int32_t lineno, const char* name) const
+{
+    return _application_profiler ? _application_profiler->makeLogger(func, filename, lineno, name) : op<ApplicationProfiler::Logger>();
+}
+
+sp<ApplicationContext> Ark::createApplicationContext(const Manifest& manifest, const sp<ApplicationBundle>& appResource, const sp<RenderEngine>& renderEngine)
 {
     const Global<PluginManager> pluginManager;
     const sp<ApplicationContext> applicationContext = sp<ApplicationContext>::make(appResource, renderEngine);
@@ -293,7 +298,7 @@ sp<ApplicationContext> Ark::createApplicationContext(const Manifest& manifest, c
     return applicationContext;
 }
 
-sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationResource>& appResource)
+sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& appResource)
 {
     switch(version) {
     case AUTO:

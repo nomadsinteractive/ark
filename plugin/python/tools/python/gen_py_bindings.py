@@ -542,7 +542,7 @@ def parse_method_arguments(arguments):
 def gen_method_call_arg(i, targettype, argtype):
     ctype = remove_crv(argtype)
     equals = acg.typeCompare(targettype, ctype)
-    argname = 'obj%d' % i if equals or '<' in argtype else gen_cast_call(targettype, 'obj%d' % i)
+    argname = 'obj%d' % i if equals else gen_cast_call(targettype, 'obj%d' % i)
     if ctype in ARK_PY_ARGUMENT_CHECKERS:
         return ARK_PY_ARGUMENT_CHECKERS[ctype].cast(argname)
     return argname

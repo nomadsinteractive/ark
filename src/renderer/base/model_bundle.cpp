@@ -35,10 +35,6 @@ void ModelBundle::initialize(ShaderBindings& /*shaderBindings*/)
 {
 }
 
-void ModelBundle::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& /*snapshot*/)
-{
-}
-
 const ModelBundle::ModelInfo& ModelBundle::ensure(int32_t type) const
 {
     return _stub->ensure(type);

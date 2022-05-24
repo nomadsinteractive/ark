@@ -106,10 +106,6 @@ void ModelLoaderSphere::initialize(ShaderBindings& shaderBindings)
     shaderBindings.pipelineBindings()->bindSampler(_atlas->texture());
 }
 
-void ModelLoaderSphere::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& /*snapshot*/)
-{
-}
-
 sp<Model> ModelLoaderSphere::loadModel(int32_t type)
 {
     return sp<Model>::make(nullptr, sp<VerticesSphere>::make(_vertices, _atlas->getItemUV(type)));

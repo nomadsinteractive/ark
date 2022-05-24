@@ -36,7 +36,7 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-bitmap ModelImporterAssimp::loadBitmap(const sp<BitmapBundle>& imageResource, const aiTexture* tex) const
+bitmap ModelImporterAssimp::loadBitmap(const sp<BitmapLoaderBundle>& imageResource, const aiTexture* tex) const
 {
     if(tex->mHeight == 0)
     {

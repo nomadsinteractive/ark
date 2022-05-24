@@ -18,7 +18,8 @@ public:
 
     class Attachment {
     public:
-        const sp<Vertices>& ensureVertices(int32_t type) const;
+        const sp<Vertices>& ensureVerticesTriangleStrips(int32_t type) const;
+        const sp<Vertices>& ensureVerticesQuads(int32_t type) const;
 
     private:
         void import(Atlas& atlas, const document& manifest);
@@ -29,7 +30,8 @@ public:
         sp<Vertices> makeNinePatchVertices(uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Rect& bounds) const;
 
     private:
-        std::unordered_map<int32_t, sp<Vertices>> _vertices;
+        std::unordered_map<int32_t, sp<Vertices>> _vertices_triangle_strips;
+        std::unordered_map<int32_t, sp<Vertices>> _vertices_quads;
 
         friend class AtlasImporterNinePatch;
     };

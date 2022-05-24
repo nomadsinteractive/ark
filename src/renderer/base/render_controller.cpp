@@ -1,6 +1,7 @@
 #include "renderer/base/render_controller.h"
 
 #include "core/base/manifest.h"
+#include "core/base/future.h"
 #include "core/inf/runnable.h"
 #include "core/util/log.h"
 
@@ -60,14 +61,14 @@ void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<Prepari
 {
     PreparingResource front;
     while(items.pop(front)) {
-        if(!front._resource.isExpired() || front._strategy == RenderController::US_RELOAD)
+        if(!front._resource.isCancelled() && (!front._resource.isExpired() || front._strategy == RenderController::US_RELOAD))
         {
             if(front._strategy == RenderController::US_RELOAD && front._resource.resource()->id() != 0)
                 front._resource.recycle(graphicsContext);
 
             front._resource.upload(graphicsContext);
             if(front._strategy == RenderController::US_ONCE_AND_ON_SURFACE_READY)
-                _on_surface_ready_items.insert(front._resource);
+                _on_surface_ready_items.insert(std::move(front._resource));
         }
     }
 }
@@ -83,24 +84,31 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
         _recycler->doRecycling(graphicsContext);
 }
 
-void RenderController::upload(const sp<Resource>& resource, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, RenderController::UploadPriority priority)
+sp<Future> RenderController::upload(sp<Resource> resource, sp<Uploader> uploader, RenderController::UploadStrategy strategy, RenderController::UploadPriority priority)
 {
     switch(strategy & 3)
     {
     case RenderController::US_ONCE_AND_ON_SURFACE_READY:
     case RenderController::US_ONCE:
     case RenderController::US_RELOAD:
-        _preparing_items.push(PreparingResource(RenderResource(resource, uploader, priority), strategy));
-        break;
+        {
+            sp<Future> future = sp<Future>::make();
+            _preparing_items.push(PreparingResource(RenderResource(std::move(resource), std::move(uploader), future, priority), strategy));
+            return future;
+        }
     case RenderController::US_ON_SURFACE_READY:
-        _on_surface_ready_items.insert(RenderResource(resource, uploader, priority));
-        break;
+        {
+            sp<Future> future = sp<Future>::make();
+            _on_surface_ready_items.insert(RenderResource(std::move(resource), std::move(uploader), future, priority));
+            return future;
+        }
     }
+    return nullptr;
 }
 
-void RenderController::uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, RenderController::UploadPriority priority)
+sp<Future> RenderController::uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, RenderController::UploadPriority priority)
 {
-    upload(buffer._delegate, uploader, strategy, priority);
+    return upload(buffer._delegate, uploader, strategy, priority);
 }
 
 const sp<Recycler>& RenderController::recycler() const
@@ -113,7 +121,7 @@ void RenderController::doRecycling(GraphicsContext& graphicsContext)
     for(auto iter = _on_surface_ready_items.begin(); iter != _on_surface_ready_items.end(); )
     {
         const RenderResource& resource = *iter;
-        if(resource.isExpired())
+        if(resource.isExpired() || resource.isCancelled())
         {
             resource.recycle(graphicsContext);
             iter = _on_surface_ready_items.erase(iter);
@@ -171,7 +179,8 @@ sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameter
     sp<Texture::Delegate> delegate = _render_engine->rendererFactory()->createTexture(size, parameters, std::move(uploader));
     DCHECK(delegate, "Unsupported TextureType: %d", parameters->_type);
     const sp<Texture> texture = sp<Texture>::make(std::move(delegate), std::move(size), std::move(parameters));
-    upload(texture, nullptr, us);
+    if(us != RenderController::US_MANUAL)
+        upload(texture, nullptr, us);
     return texture;
 }
 
@@ -253,7 +262,7 @@ sp<SharedBuffer> RenderController::getNamedBuffer(SharedBuffer::Name name)
     case SharedBuffer::NAME_QUADS:
         return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLES, RenderUtil::makeUnitQuadModel());
     case SharedBuffer::NAME_NINE_PATCH:
-        return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLE_STRIP, RenderUtil::makeUnitNinePatchTriangleStripModel());
+        return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLE_STRIP, RenderUtil::makeUnitNinePatchTriangleStripsModel());
     case SharedBuffer::NAME_POINTS:
         return getSharedBuffer(ModelLoader::RENDER_MODE_POINTS, RenderUtil::makeUnitPointModel());
     default:
@@ -299,8 +308,8 @@ uint64_t RenderController::tick() const
     return _tick;
 }
 
-RenderController::RenderResource::RenderResource(const sp<Resource>& resource, const sp<Uploader>& uploader, UploadPriority uploadPriority)
-    : _resource(resource), _uploader(uploader), _upload_priority(uploadPriority)
+RenderController::RenderResource::RenderResource(sp<Resource> resource, sp<Uploader> uploader, sp<Future> future, UploadPriority uploadPriority)
+    : _resource(std::move(resource)), _uploader(std::move(uploader)), _future(std::move(future)), _upload_priority(uploadPriority)
 {
 }
 
@@ -312,6 +321,11 @@ const sp<Resource>& RenderController::RenderResource::resource() const
 bool RenderController::RenderResource::isExpired() const
 {
     return _resource.unique();
+}
+
+bool RenderController::RenderResource::isCancelled() const
+{
+    return _future->isCancelled();
 }
 
 void RenderController::RenderResource::upload(GraphicsContext& graphicsContext) const
@@ -339,8 +353,8 @@ bool RenderController::RenderResource::operator <(const RenderController::Render
     return _resource < other._resource;
 }
 
-RenderController::PreparingResource::PreparingResource(const RenderController::RenderResource& resource, RenderController::UploadStrategy strategy)
-    : _resource(resource), _strategy(strategy)
+RenderController::PreparingResource::PreparingResource(RenderResource resource, RenderController::UploadStrategy strategy)
+    : _resource(std::move(resource)), _strategy(strategy)
 {
 }
 

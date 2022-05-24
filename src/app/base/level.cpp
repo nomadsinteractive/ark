@@ -9,7 +9,7 @@
 #include "graphics/util/vec3_type.h"
 
 #include "app/base/application_context.h"
-#include "app/base/application_resource.h"
+#include "app/base/application_bundle.h"
 #include "app/base/rigid_body.h"
 #include "app/inf/collider.h"
 
@@ -23,7 +23,7 @@ Level::Level(std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> li
 
 void Level::load(const String& src)
 {
-    const document manifest = Ark::instance().applicationContext()->applicationResource()->loadDocument(src);
+    const document manifest = Ark::instance().applicationContext()->applicationBundle()->loadDocument(src);
     std::unordered_map<int32_t, Library> libraryMapping;
 
     for(const document& i : manifest->children("library"))

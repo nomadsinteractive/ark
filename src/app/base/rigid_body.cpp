@@ -36,7 +36,7 @@ void RigidBody::bind(const sp<RenderObject>& renderObject)
 {
     renderObject->setPosition(position());
     renderObject->setTransform(_stub->_transform);
-    _stub->_render_object = renderObject;
+    setRenderObject(renderObject);
 }
 
 void RigidBody::traverse(const Holder::Visitor& visitor)
@@ -108,6 +108,11 @@ void RigidBody::setTag(const Box& box) const
 sp<RenderObject> RigidBody::renderObject() const
 {
     return _stub->_render_object.lock();
+}
+
+void RigidBody::setRenderObject(const sp<RenderObject>& renderObject)
+{
+    _stub->_render_object = renderObject;
 }
 
 const sp<Disposed>& RigidBody::disposed() const

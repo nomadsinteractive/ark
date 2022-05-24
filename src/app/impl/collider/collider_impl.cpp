@@ -177,7 +177,7 @@ std::vector<BroadPhrase::Candidate> ColliderImpl::Stub::toDynamicCandidates(cons
     for(int32_t i : candidateSet)
     {
         const sp<RigidBodyShadow>& rigidBody = ensureRigidBody(i);
-        candidates.emplace_back(i, rigidBody->position()->val(), rigidBody->transform()->rotation()->theta()->val(), i, rigidBody->shapes());
+        candidates.emplace_back(i, rigidBody->position()->val(), rigidBody->transform()->rotation()->theta()->val(), rigidBody->shapeId(), rigidBody->shapes());
     }
     return candidates;
 }

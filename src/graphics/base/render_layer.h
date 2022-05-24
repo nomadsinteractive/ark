@@ -1,6 +1,7 @@
 #ifndef ARK_GRAPHICS_INF_RENDER_LAYER_H_
 #define ARK_GRAPHICS_INF_RENDER_LAYER_H_
 
+#include <deque>
 #include <vector>
 #include <unordered_map>
 
@@ -37,7 +38,7 @@ private:
     };
 
     struct Stub {
-        Stub(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController);
 
         sp<RenderCommand> render(const Snapshot& snapshot, float x, float y);
         sp<LayerContext> makeLayerContext(Layer::Type layerType, sp<ModelLoader> modelLoader);
@@ -83,7 +84,7 @@ public:
 
         std::vector<UBOSnapshot> _ubos;
         std::vector<Buffer::Snapshot> _ssbos;
-        std::vector<Renderable::Snapshot> _items;
+        std::deque<Renderable::Snapshot> _items;
 
         Buffer::Snapshot _index_buffer;
 
@@ -105,7 +106,7 @@ public:
     };
 
 public:
-    RenderLayer(const sp<ModelLoader>& modelLoader, const sp<Shader>& shader, const sp<Vec4>& scissor, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    RenderLayer(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 

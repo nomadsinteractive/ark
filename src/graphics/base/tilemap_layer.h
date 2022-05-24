@@ -15,7 +15,8 @@ namespace ark {
 class ARK_API TilemapLayer : public Renderer {
 public:
 // [[script::bindings::auto]]
-    TilemapLayer(const Tilemap& tilemap, String name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position = nullptr, sp<Vec3> scroller = nullptr, Tilemap::LayerFlag flag = Tilemap::LAYER_FLAG_DEFAULT);
+    TilemapLayer(Layer& layer, sp<Tileset> tileset, String name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position = nullptr, sp<Vec3> scroller = nullptr, Tilemap::LayerFlag flag = Tilemap::LAYER_FLAG_DEFAULT);
+    TilemapLayer(sp<LayerContext> layerContext, sp<Tileset> tileset, String name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, Tilemap::LayerFlag flag);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -50,6 +51,8 @@ public:
 // [[script::bindings::auto]]
     const sp<Tile>& getTile(uint32_t rowId, uint32_t colId) const;
 // [[script::bindings::auto]]
+    std::vector<int32_t> getTileRect(const RectI& rect) const;
+// [[script::bindings::auto]]
     const sp<Tile>& getTileByPosition(float x, float y) const;
 // [[script::bindings::auto]]
     void setTile(uint32_t row, uint32_t col, const sp<RenderObject>& renderObject);
@@ -83,8 +86,8 @@ private:
     uint32_t _col_count;
     uint32_t _row_count;
     sp<LayerContext> _layer_context;
-    sp<Size> _size;
     sp<Tileset> _tileset;
+    sp<Size> _size;
 
     SafePtr<Vec3> _position;
     SafePtr<Vec3> _scroller;

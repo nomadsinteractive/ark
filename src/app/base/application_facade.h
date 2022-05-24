@@ -23,6 +23,8 @@ public:
 // [[script::bindings::property]]
     const sp<ApplicationController>& applicationController() const;
 // [[script::bindings::property]]
+    const sp<ApplicationBundle>& applicationBundle() const;
+// [[script::bindings::property]]
     const sp<SurfaceController>& surfaceController() const;
 // [[script::bindings::property]]
     const sp<Camera>& camera() const;
@@ -57,14 +59,14 @@ public:
     void exit();
 
 //  [[script::bindings::auto]]
-    void post(const sp<Runnable>& task, float delay = 0.0f);
+    void post(sp<Runnable> task, float delay = 0.0f, sp<Future> future = nullptr);
 //  [[script::bindings::auto]]
-    void schedule(const sp<Runnable>& task, float interval);
+    void schedule(sp<Runnable> task, float interval, sp<Future> future = nullptr);
 
 //  [[script::bindings::auto]]
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
 //  [[script::bindings::auto]]
-    sp<String> getString(const String& resid);
+    sp<String> getString(const String& resid, const sp<String>& defValue = nullptr);
 //  [[script::bindings::auto]]
     std::vector<String> getStringArray(const String& resid);
 

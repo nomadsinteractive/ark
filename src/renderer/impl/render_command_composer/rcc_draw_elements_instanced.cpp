@@ -36,7 +36,6 @@ void RCCDrawElementsInstanced::postSnapshot(RenderController& /*renderController
 sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot)
 {
     size_t verticesLength = _model.vertices()->length();
-    const std::vector<Renderable::Snapshot>& items = snapshot._items;
     const sp<ModelLoader>& modelLoader = snapshot._stub->_model_loader;
 
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
@@ -49,8 +48,8 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
         model.writeToStream(writer, V3(1.0f));
     }
 
-    VertexStream writer = buf.makeDividedVertexStream(renderRequest, items.size(), 0, 1);
-    for(const Renderable::Snapshot& i : items)
+    VertexStream writer = buf.makeDividedVertexStream(renderRequest, snapshot._items.size(), 0, 1);
+    for(const Renderable::Snapshot& i : snapshot._items)
     {
         writer.next();
         writer.write(MatrixUtil::translate(M4::identity(), i._position) * MatrixUtil::scale(i._transform.toMatrix(), i._size));
@@ -60,7 +59,7 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
     }
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), std::move(snapshot._ssbos),
-                                  buf.vertices().toSnapshot(_vertices), buf.indices(), DrawingContext::ParamDrawElementsInstanced(0, static_cast<uint32_t>(_model.indexCount()), static_cast<int32_t>(items.size()), buf.makeDividedBufferSnapshots()));
+                                  buf.vertices().toSnapshot(_vertices), buf.indices(), DrawingContext::ParamDrawElementsInstanced(0, static_cast<uint32_t>(_model.indexCount()), static_cast<int32_t>(snapshot._items.size()), buf.makeDividedBufferSnapshots()));
 
     if(snapshot._stub->_scissor)
         drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);

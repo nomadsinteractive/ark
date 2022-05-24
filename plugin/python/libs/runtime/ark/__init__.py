@@ -21,7 +21,8 @@ TYPE_INT_OR_FLOAT = Union[int, float]
 TYPE_NUMERIC = Union[TYPE_INT_OR_FLOAT, 'Numeric']
 TYPE_RECT = Tuple[TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT]
 TYPE_VEC2 = Union[Tuple[TYPE_NUMERIC, TYPE_NUMERIC], 'Vec2']
-TYPE_VEC3 = Union[Tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], 'Vec3']
+TYPE_VEC3 = Union[Tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], TYPE_VEC2, 'Vec3']
+TYPE_RECTI = Tuple[int, int, int, int]
 
 
 def logd(*args):
@@ -180,6 +181,18 @@ class Storage:
         pass
 
 
+class ApplicationBundle:
+
+    def load_doucment(self, resid: str):
+        pass
+
+    def load_json(self, resid: str) -> Json:
+        pass
+
+    def load_string(self, resid: str) -> str:
+        pass
+
+
 class ApplicationFacade:
 
     def __init__(self):
@@ -196,6 +209,10 @@ class ApplicationFacade:
     @property
     def application_controller(self) -> 'ApplicationController':
         return ApplicationController()
+
+    @property
+    def application_bundle(self) -> ApplicationBundle:
+        return ApplicationBundle()
 
     @property
     def surface_controller(self) -> 'SurfaceController':
@@ -246,7 +263,7 @@ class ApplicationFacade:
     def set_default_event_listener(self, event_listener: Callable[['Event'], bool]):
         pass
 
-    def get_string(self, resid: str) -> str:
+    def get_string(self, resid: str, def_value: Optional[str] = None) -> str:
         pass
 
     def get_string_array(self, resid: str) -> List[str]:
@@ -994,7 +1011,7 @@ class RenderLayer(Renderer):
     def layer(self) -> 'Layer':
         return Layer(self)
 
-    def make_layer(self, layer_type: int) -> 'Layer':
+    def make_layer(self, layer_type: int, model_loader: Optional[ModelLoader] = None) -> 'Layer':
         pass
 
     def make_context(self, layer_type) -> LayerContext:
@@ -1122,6 +1139,16 @@ class Event:
     CODE_KEYBOARD_X = 24
     CODE_KEYBOARD_Y = 25
     CODE_KEYBOARD_Z = 26
+    CODE_KEYBOARD_0 = ord('0')
+    CODE_KEYBOARD_1 = ord('1')
+    CODE_KEYBOARD_2 = ord('2')
+    CODE_KEYBOARD_3 = ord('3')
+    CODE_KEYBOARD_4 = ord('4')
+    CODE_KEYBOARD_5 = ord('5')
+    CODE_KEYBOARD_6 = ord('6')
+    CODE_KEYBOARD_7 = ord('7')
+    CODE_KEYBOARD_8 = ord('8')
+    CODE_KEYBOARD_9 = ord('9')
     CODE_KEYBOARD_F1 = 27
     CODE_KEYBOARD_F2 = 28
     CODE_KEYBOARD_F3 = 29
@@ -1339,9 +1366,9 @@ class Math:
         return 0, 0
 
 
-class Size:
-    def __init__(self, w, h, d = None):
-        pass
+class Size(Vec3):
+    def __init__(self, w, h, d=None):
+        super().__init__(w, h, d)
 
     @property
     def width(self):
@@ -1413,7 +1440,15 @@ class Tileset:
 
 
 class TilemapLayer:
-    def __init__(self, tilemap: 'Tilemap', name: str, row_count: int, col_count: int, position: Union[Vec2, Vec3, None]=None, scroller: Union[Vec2, Vec3, None]=None, flag: int = 0):
+    def __init__(self, layer: Layer, tileset: Tileset, name: str, row_count: int, col_count: int, position: Optional[TYPE_VEC3] = None, scroller: Optional[TYPE_VEC3] = None, flag: int = 0):
+        pass
+
+    @property
+    def position(self) -> Optional[Vec3]:
+        return None
+
+    @position.setter
+    def position(self, position: Optional[TYPE_VEC3]):
         pass
 
     @property
@@ -1443,10 +1478,13 @@ class TilemapLayer:
     def get_tile(self, row: int, col: int) -> Optional[Tile]:
         pass
 
+    def get_tile_rect(self, rect: TYPE_RECTI) -> List[int]:
+        pass
+
     def set_tile(self, row: int, col: int, tile: Union[int, RenderObject, Tile]):
         pass
 
-    def copy_tiles(self, tiles: List[int], dest: Tuple[int, int, int, int]):
+    def copy_tiles(self, tiles: List[int], dest: TYPE_RECTI):
         pass
 
     def foreach_tile(self, callback: Callable[[int, int, Tile], bool]):
@@ -1493,6 +1531,9 @@ class Tilemap(Renderer):
     @property
     def storage(self) -> Optional[Storage]:
         return None
+
+    def make_layer(self, name: str, row_count: int, col_count: int, position: Optional[Vec3] = None, scroller: Optional[Vec3] = None, layer_flag: int = 0) -> TilemapLayer:
+        pass
 
     def add_layer(self, layer: TilemapLayer):
         pass

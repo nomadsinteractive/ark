@@ -11,6 +11,7 @@ class ApplicationProfilerOptick : public ApplicationProfiler {
 public:
 
     virtual op<Tracer> makeTracer(const char* func, const char* filename, int32_t lineno, const char* name, Category category) override;
+    virtual op<Logger> makeLogger(const char* func, const char* filename, int32_t lineno, const char* name) override;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<ApplicationProfiler> {
@@ -25,6 +26,7 @@ private:
     void onStartThread(const String& name, Runnable& delegate);
 
     void onEvent(const String& name, Runnable& delegate, ApplicationProfiler::Category category);
+
 };
 
 }

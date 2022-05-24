@@ -53,7 +53,9 @@
 #define WARN(cond, ...) if(!(cond)) ark::__warning__(__ARK_FUNCTION__, __VA_ARGS__)
 
 #ifdef ARK_FLAG_DEBUG
-#   define ARK_CONCAT(x, y) (x##y)
+#   define ARK_CONCAT_IMPL(x, y) x##y
+#   define ARK_CONCAT(x, y) ARK_CONCAT_IMPL(x, y)
+
 
 #   define DFATAL(...) FATAL(__VA_ARGS__)
 #   define DCHECK(cond, ...) CHECK(cond, __VA_ARGS__)
@@ -62,6 +64,8 @@
 #   define DTHREAD_CHECK(threadId) __thread_check__<threadId>(__ARK_FUNCTION__)
 #   define DPROFILER_TRACE(...) static auto ARK_CONCAT(_ag_tracer_, __LINE__) = Ark::instance().makeProfilerTracer(__ARK_FUNCTION_SIGANTURE__, __FILE__, __LINE__, __VA_ARGS__); \
                                 const auto ARK_CONCAT(_ag_scope_, __LINE__) = ARK_CONCAT(_ag_tracer_, __LINE__) ? ARK_CONCAT(_ag_tracer_, __LINE__)->trace() : nullptr
+#   define DPROFILER_LOG(name, ...)   static auto ARK_CONCAT(_ag_logger_, __LINE__) = Ark::instance().makeProfilerLogger(__ARK_FUNCTION_SIGANTURE__, __FILE__, __LINE__, name); \
+                                      if(ARK_CONCAT(_ag_logger_, __LINE__)) ARK_CONCAT(_ag_logger_, __LINE__)->log(__VA_ARGS__)
 #else
 #   define DFATAL(...)
 #   define DCHECK(cond, ...) (void (cond))
@@ -69,6 +73,7 @@
 #   define DTRACE(cond) (void (cond))
 #   define DTHREAD_CHECK(threadId) (void (threadId))
 #   define DPROFILER_TRACE(...)
+#   define DPROFILER_LOG(...)
 #endif
 
 #define DASSERT(x) DCHECK(x, "Assertion failed")

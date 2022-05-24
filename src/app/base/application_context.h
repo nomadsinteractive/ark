@@ -26,13 +26,13 @@ namespace ark {
 
 class ARK_API ApplicationContext {
 public:
-    ApplicationContext(const sp<ApplicationResource>& applicationResource, const sp<RenderEngine>& renderEngine);
+    ApplicationContext(const sp<ApplicationBundle>& applicationResource, const sp<RenderEngine>& renderEngine);
     ~ApplicationContext();
 
     sp<ResourceLoader> createResourceLoader(const String& name, const Scope& args);
     sp<ResourceLoader> createResourceLoader(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    const sp<ApplicationResource>& applicationResource() const;
+    const sp<ApplicationBundle>& applicationBundle() const;
     const sp<RenderEngine>& renderEngine() const;
     const sp<RenderController>& renderController() const;
     const sp<ResourceLoader>& resourceLoader() const;
@@ -51,15 +51,15 @@ public:
     void addEventListener(const sp<EventListener>& eventListener, int32_t priority);
     void setDefaultEventListener(const sp<EventListener>& eventListener);
 
-    void post(const sp<Runnable>& task, float delay = 0);
-    void schedule(const sp<Runnable>& task, float interval);
+    void post(sp<Runnable> task, float delay = 0, sp<Future> future = nullptr);
+    void schedule(sp<Runnable> task, float interval, sp<Future> future = nullptr);
 
     sp<MessageLoop> makeMessageLoop(const sp<Clock>& clock);
 
     void runAtCoreThread(std::function<void()> task);
 
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
-    sp<String> getString(const String& resid);
+    sp<String> getString(const String& resid, bool alert);
     std::vector<String> getStringArray(const String& resid);
 
     sp<Runnable> defer(const sp<Runnable>& task) const;
@@ -134,7 +134,7 @@ private:
     sp<Ticker> _ticker;
     sp<Vec2Impl> _cursor_position;
 
-    sp<ApplicationResource> _application_resource;
+    sp<ApplicationBundle> _application_resource;
     sp<RenderEngine> _render_engine;
     sp<RenderController> _render_controller;
     sp<Clock> _clock;

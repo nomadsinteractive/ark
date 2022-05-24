@@ -1,5 +1,6 @@
 #include "graphics/base/layer_context.h"
 
+#include "core/ark.h"
 #include "core/epi/disposed.h"
 #include "core/base/notifier.h"
 #include "core/util/holder_util.h"
@@ -7,6 +8,7 @@
 #include "graphics/base/layer.h"
 #include "graphics/base/render_object.h"
 
+#include "renderer/base/model.h"
 #include "renderer/base/shader.h"
 
 #include "core/util/log.h"
@@ -70,6 +72,7 @@ void LayerContext::clear()
 
 void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderRequest& renderRequest)
 {
+    DPROFILER_TRACE("TakeSnapshot");
     bool notify = _renderable_emplaced.size() > 0;
     const sp<PipelineInput>& pipelineInput = output._stub->_shader->input();
 
@@ -93,6 +96,8 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
         {
             snapshot._dirty = snapshot._dirty || _position_changed || _render_done != _render_requested;
             snapshot._visible = _render_requested && snapshot._visible;
+            snapshot._model = _model_loader->loadModel(snapshot._type);
+            output._index_count += snapshot._model->indexCount();
             output._items.push_back(std::move(snapshot));
             ++iter;
         }
@@ -103,6 +108,9 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
 
     _render_done = _render_requested;
     _render_requested = false;
+
+    DPROFILER_LOG("Renderables", _renderables.size());
+    DPROFILER_LOG("Notify", notify);
 }
 
 LayerContext::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, Layer::Type layerType)

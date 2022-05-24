@@ -130,7 +130,7 @@ public:
 
     private:
         sp<Builder<String>> _src;
-        sp<BitmapBundle> _bitmap_bundle;
+        sp<BitmapLoaderBundle> _bitmap_bundle;
     };
 
 //  [[plugin::resource-loader::by-value]]
@@ -142,7 +142,7 @@ public:
 
     private:
         String _src;
-        sp<BitmapBundle> _bitmap_bundle;
+        sp<BitmapLoaderBundle> _bitmap_bundle;
     };
 
 private:

@@ -43,7 +43,6 @@ public:
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
     virtual void initialize(ShaderBindings& shaderBindings) override;
-    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
     virtual sp<Model> loadModel(int32_t type) override;
 
     const ModelInfo& ensure(int32_t type) const;

@@ -21,7 +21,7 @@ namespace ark {
 
 class ARK_API ResourceLoaderContext {
 public:
-    ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<BitmapBundle>& bitmapBundle, const sp<BitmapBundle>& bitmapBoundsBundle,
+    ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<BitmapLoaderBundle>& bitmapBundle, const sp<BitmapLoaderBundle>& bitmapBoundsBundle,
                           const sp<Executor>& executor, const sp<RenderController>& renderController);
     ~ResourceLoaderContext();
 
@@ -30,8 +30,8 @@ public:
     const sp<RenderController>& renderController() const;
     const sp<Executor>& executor() const;
 
-    const sp<BitmapBundle>& bitmapBundle() const;
-    const sp<BitmapBundle>& bitmapBoundsBundle() const;
+    const sp<BitmapLoaderBundle>& bitmapBundle() const;
+    const sp<BitmapLoaderBundle>& bitmapBoundsBundle() const;
     const sp<TextureBundle>& textureBundle() const;
 
     sp<Boolean> disposed() const;
@@ -42,8 +42,8 @@ public:
 
 private:
     sp<Dictionary<document>> _documents;
-    sp<BitmapBundle> _bitmap_bundle;
-    sp<BitmapBundle> _bitmap_bounds_bundle;
+    sp<BitmapLoaderBundle> _bitmap_bundle;
+    sp<BitmapLoaderBundle> _bitmap_bounds_bundle;
     sp<Executor> _executor;
     sp<RenderController> _render_controller;
     sp<TextureBundle> _texture_bundle;

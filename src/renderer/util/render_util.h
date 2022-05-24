@@ -16,8 +16,8 @@ public:
     static bytearray makeUnitCubeVertices(bool flipWindingOrder);
     static Attribute makePredefinedAttribute(const String& name, const String& type);
 
-    static Model makeUnitNinePatchTriangleStripModel();
-    static Model makeUnitNinePatchModel();
+    static Model makeUnitNinePatchTriangleStripsModel();
+    static Model makeUnitNinePatchQuadsModel();
     static Model makeUnitPointModel();
     static Model makeUnitQuadModel();
 

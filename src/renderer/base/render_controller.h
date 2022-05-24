@@ -28,6 +28,7 @@ namespace ark {
 class ARK_API RenderController {
 public:
     enum UploadStrategy {
+        US_MANUAL = -1,
         US_ONCE = 0,
         US_RELOAD = 1,
         US_ON_SURFACE_READY = 2,
@@ -76,8 +77,8 @@ public:
 
     void onDrawFrame(GraphicsContext& graphicsContext);
 
-    void upload(const sp<Resource>& resource, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
-    void uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
+    sp<Future> upload(sp<Resource> resource, sp<Uploader> uploader, RenderController::UploadStrategy strategy, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
+    sp<Future> uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
 
     template<typename T, typename... Args> sp<T> createResource(Args&&... args) {
         const sp<T> res = sp<T>::make(std::forward<Args>(args)...);
@@ -122,12 +123,13 @@ private:
     class RenderResource {
     public:
         RenderResource() = default;
-        RenderResource(const sp<Resource>& resource, const sp<Uploader>& uploader, UploadPriority uploadPriority);
-        RenderResource(const RenderResource& other) = default;
+        RenderResource(sp<Resource> resource, sp<Uploader> uploader, sp<Future> future, UploadPriority uploadPriority);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RenderResource);
 
         const sp<Resource>& resource() const;
 
         bool isExpired() const;
+        bool isCancelled() const;
 
         void upload(GraphicsContext& graphicsContext) const;
         void recycle(GraphicsContext& graphicsContext) const;
@@ -140,13 +142,14 @@ private:
     private:
         sp<Resource> _resource;
         sp<Uploader> _uploader;
+        sp<Future> _future;
         UploadPriority _upload_priority;
     };
 
     struct PreparingResource {
         PreparingResource() = default;
-        PreparingResource(const RenderResource& resource, RenderController::UploadStrategy strategy);
-        PreparingResource(const PreparingResource& other) = default;
+        PreparingResource(RenderResource resource, RenderController::UploadStrategy strategy);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PreparingResource);
 
         RenderResource _resource;
         RenderController::UploadStrategy _strategy;

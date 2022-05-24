@@ -9,7 +9,7 @@ template<class T> class Loader {
 public:
     virtual ~Loader() = default;
 
-    virtual sp<T> load(const sp<Readable>& readable) = 0;
+    virtual T load(const sp<Readable>& readable) = 0;
 
 };
 

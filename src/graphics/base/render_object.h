@@ -29,7 +29,7 @@ public:
     virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::property]]
-    const sp<Integer> type() const;
+    sp<Integer> type() const;
 
 //  [[script::bindings::property]]
     float width();

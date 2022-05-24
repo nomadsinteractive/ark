@@ -25,10 +25,6 @@ void ModelLoaderQuad::initialize(ShaderBindings& shaderBindings)
     shaderBindings.pipelineBindings()->bindSampler(_atlas->texture());
 }
 
-void ModelLoaderQuad::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& snapshot)
-{
-}
-
 sp<Model> ModelLoaderQuad::loadModel(int32_t type)
 {
     const Atlas::Item& texCoord = _atlas->at(type);

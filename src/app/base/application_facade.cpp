@@ -34,6 +34,11 @@ const sp<ApplicationController>& ApplicationFacade::applicationController() cons
     return _controller;
 }
 
+const sp<ApplicationBundle>& ApplicationFacade::applicationBundle() const
+{
+    return _context->applicationBundle();
+}
+
 const sp<SurfaceController>& ApplicationFacade::surfaceController() const
 {
     return _surface_controller;
@@ -119,14 +124,14 @@ void ApplicationFacade::exit()
     _controller->exit();
 }
 
-void ApplicationFacade::post(const sp<Runnable>& task, float delay)
+void ApplicationFacade::post(sp<Runnable> task, float delay, sp<Future> future)
 {
-    _context->post(task, delay);
+    _context->post(std::move(task), delay, std::move(future));
 }
 
-void ApplicationFacade::schedule(const sp<Runnable>& task, float interval)
+void ApplicationFacade::schedule(sp<Runnable> task, float interval, sp<Future> future)
 {
-    _context->schedule(task, interval);
+    _context->schedule(std::move(task), interval, std::move(future));
 }
 
 void ApplicationFacade::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)
@@ -134,9 +139,10 @@ void ApplicationFacade::addStringBundle(const String& name, const sp<StringBundl
     _context->addStringBundle(name, stringBundle);
 }
 
-sp<String> ApplicationFacade::getString(const String& resid)
+sp<String> ApplicationFacade::getString(const String& resid,  const sp<String>& defValue)
 {
-    return _context->getString(resid);
+    sp<String> val = _context->getString(resid, !static_cast<bool>(defValue));
+    return val ? val : defValue;
 }
 
 std::vector<String> ApplicationFacade::getStringArray(const String& resid)

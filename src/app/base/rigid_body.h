@@ -103,6 +103,8 @@ public:
 
 //  [[script::bindings::property]]
     sp<RenderObject> renderObject() const;
+//  [[script::bindings::property]]
+    void setRenderObject(const sp<RenderObject>& renderObject);
 
 //  [[script::bindings::property]]
     const sp<Disposed>& disposed() const;

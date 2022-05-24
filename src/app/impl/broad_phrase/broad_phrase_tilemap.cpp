@@ -26,7 +26,7 @@ BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap, NarrowPhrase& narrow
     _tile_shapes.push_back(narrowPhrase.makeAABBShape(tileBounds));
 }
 
-sp<Vec3> BroadPhraseTilemap::create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& size)
+sp<Vec3> BroadPhraseTilemap::create(int32_t /*id*/, const sp<Vec3>& position, const sp<Vec3>& /*size*/)
 {
     return position;
 }

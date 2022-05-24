@@ -17,8 +17,13 @@
 
 namespace ark {
 
-TilemapLayer::TilemapLayer(const Tilemap& tilemap, String name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, Tilemap::LayerFlag flag)
-    : _name(std::move(name)), _col_count(colCount), _row_count(rowCount), _layer_context(tilemap._layer_context), _size(tilemap._size), _tileset(tilemap._tileset),
+TilemapLayer::TilemapLayer(Layer& layer, sp<Tileset> tileset, String name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, Tilemap::LayerFlag flag)
+    : TilemapLayer(layer.context(), std::move(tileset), std::move(name), rowCount, colCount, std::move(position), std::move(scroller), flag)
+{
+}
+
+TilemapLayer::TilemapLayer(sp<LayerContext> layerContext, sp<Tileset> tileset, String name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, Tilemap::LayerFlag flag)
+    : _name(std::move(name)), _col_count(colCount), _row_count(rowCount), _layer_context(std::move(layerContext)), _tileset(std::move(tileset)), _size(sp<Size>::make(_tileset->tileWidth() * colCount, _tileset->tileHeight() * rowCount)),
       _position(std::move(position)), _scroller(std::move(scroller)), _flag(flag), _layer_tiles(_col_count * _row_count)
 {
 }
@@ -118,6 +123,21 @@ const sp<Tile>& TilemapLayer::getTile(uint32_t rowId, uint32_t colId) const
     return layerTile.tile;
 }
 
+std::vector<int32_t> TilemapLayer::getTileRect(const RectI& rect) const
+{
+    const RectI srcRect = rect.upright();
+    DASSERT(srcRect.top() >= 0 && srcRect.left() >= 0);
+    DCHECK(srcRect.right() <= _col_count && srcRect.bottom() <= _row_count, "Rect out of layer bounds: rect.right: %d, colCount: %d, rect.bottom: %d, rowCount: %d", rect.right(), _col_count, rect.bottom(), _row_count);
+    std::vector<int32_t> tiles(static_cast<size_t>(srcRect.width() * srcRect.height()));
+    for(int32_t i = srcRect.top(); i < srcRect.bottom(); ++i)
+        for(int32_t j = srcRect.left(); j < srcRect.right(); ++j)
+        {
+            const sp<Tile>& tile = _layer_tiles.at(i * _col_count + j).tile;
+            tiles[static_cast<size_t>((i - srcRect.top()) * srcRect.width() + j - srcRect.left())] = tile ? tile->id() : -1;
+        }
+    return tiles;
+}
+
 const sp<Tile>& TilemapLayer::getTileByPosition(float x, float y) const
 {
     return getTile(static_cast<uint32_t>(y / _tileset->tileHeight()), static_cast<uint32_t>(x / _tileset->tileWidth()));
@@ -148,7 +168,7 @@ void TilemapLayer::copyTiles(const std::vector<int32_t>& tiles, const RectI& des
     const int32_t destColCount = dest.width();
     for(int32_t i = dest.top(); i < dest.bottom(); ++i)
         for(int32_t j = dest.left(); j < dest.right(); ++j)
-            setTile(i, j, tiles.at((i - dest.top()) * destColCount + j - dest.left()));
+            setTile(i, j, tiles.at(static_cast<size_t>((i - dest.top()) * destColCount + j - dest.left())));
 }
 
 void TilemapLayer::reset()
@@ -176,7 +196,7 @@ void TilemapLayer::renderTiles(const V3& position, const RectI& renderRange)
         float dy = static_cast<float>(i - renderRange.top()) * tileHeight;
         for(int32_t j = renderRange.left(); j < renderRange.right(); ++j)
         {
-            const LayerTile& tile = _layer_tiles.at(i * _col_count + j);
+            const LayerTile& tile = _layer_tiles.at(static_cast<size_t>(i * _col_count + j));
             if(tile.renderable)
                 tile.renderable->requestUpdate(V3((j - renderRange.left()) * tileWidth, dy, 0) + position);
         }
@@ -188,7 +208,7 @@ void TilemapLayer::setTile(uint32_t row, uint32_t col, const sp<Tile>& tile, con
     DCHECK(row < _row_count && col < _col_count, "Invaild tile position:(%d, %d), tilemap size(%d, %d)", row, col, _row_count, _col_count);
     uint32_t index = row * _col_count + col;
     const sp<RenderObject>& ro = renderObject ? renderObject : (tile ? tile->renderObject() : nullptr);
-    sp<RenderablePassive> renderable = ro ? sp<RenderablePassive>::make(ro) : nullptr;
+    sp<RenderablePassive> renderable = (ro && _layer_context) ? sp<RenderablePassive>::make(ro) : nullptr;
     if(renderable)
         _layer_context->add(renderable, sp<BooleanByWeakRef<Renderable>>::make(renderable, 1));
     _layer_tiles[index] = LayerTile(renderObject ? sp<Tile>::make(tile ? tile->id() : 0, tile ? tile->type() : 0, renderObject) : tile, std::move(renderable));

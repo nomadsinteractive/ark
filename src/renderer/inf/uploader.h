@@ -42,7 +42,7 @@ public:
     }
 
     virtual void upload(Writable& uploader) override {
-        uploader.write(_array->buf(), _array->size(), 0);
+        uploader.write(_array->buf(), static_cast<uint32_t>(_array->size()), 0);
     }
 
 private:

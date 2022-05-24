@@ -36,8 +36,6 @@ void RCCMultiDrawElementsIndirect::postSnapshot(RenderController& /*renderContro
 
 sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot)
 {
-    const std::vector<Renderable::Snapshot>& items = snapshot._items;
-
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
     sp<Uploader> indirectUploader = nullptr;
     bool reload = snapshot._flag == RenderLayer::SNAPSHOT_FLAG_RELOAD || _vertices.size() == 0;
@@ -46,7 +44,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
     {
         _indirect_cmds.clear();
         size_t offset = 0;
-        for(const Renderable::Snapshot& i : items)
+        for(const Renderable::Snapshot& i : snapshot._items)
         {
             IndirectCmd& modelIndirect = _indirect_cmds[i._type];
             if(modelIndirect._snapshot_offsets.empty())

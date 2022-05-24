@@ -20,17 +20,16 @@ MessageLoop::MessageLoop(sp<Variable<uint64_t>> clock, sp<Executor> executor)
 {
 }
 
-void MessageLoop::post(const sp<Runnable>& task, float delay)
+void MessageLoop::post(sp<Runnable> runnable, float delay, sp<Future> future)
 {
-    DASSERT(task);
-    _scheduled.push(sp<Task>::make(task, delay == 0 ? 0 : static_cast<uint64_t>(_clock->val() + delay * 1000000), 0));
+    DASSERT(runnable);
+    _scheduled.push(sp<Task>::make(std::move(runnable), std::move(future), delay == 0 ? 0 : static_cast<uint64_t>(_clock->val() + delay * 1000000), 0));
 }
 
-sp<Future> MessageLoop::schedule(const sp<Runnable>& task, float interval)
+sp<Future> MessageLoop::schedule(sp<Runnable> runnable, float interval, sp<Future> future)
 {
-    DASSERT(task);
-    const sp<Future> future = sp<Future>::make();
-    _scheduled.push(sp<Task>::make(task, future, 0, static_cast<uint32_t>(interval * 1000000)));
+    DASSERT(runnable);
+    _scheduled.push(sp<Task>::make(std::move(runnable), std::move(future), 0, static_cast<uint32_t>(interval * 1000000)));
     return future;
 }
 
@@ -93,10 +92,10 @@ void MessageLoop::runScheduledTask(std::vector<sp<Runnable>> scheduled)
     }
 }
 
-MessageLoop::Task::Task(sp<Runnable> target, uint64_t nextFireTick, uint32_t interval)
-    : _target(std::move(target)), _next_fire_tick(nextFireTick), _interval(interval)
-{
-}
+//MessageLoop::Task::Task(sp<Runnable> target, uint64_t nextFireTick, uint32_t interval)
+//    : _target(std::move(target)), _next_fire_tick(nextFireTick), _interval(interval)
+//{
+//}
 
 MessageLoop::Task::Task(sp<Runnable> target, sp<Future> future, uint64_t nextFireTick, uint32_t interval)
     : _target(std::move(target)), _future(std::move(future)), _next_fire_tick(nextFireTick), _interval(interval)

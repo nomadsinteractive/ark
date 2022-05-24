@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_NINE_PATCH_H_
-#define ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_NINE_PATCH_H_
+#ifndef ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_NINE_PATCH_TRIANGLE_STRIPS_H_
+#define ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_NINE_PATCH_TRIANGLE_STRIPS_H_
 
 #include "core/inf/storage.h"
 #include "core/types/shared_ptr.h"
@@ -11,18 +11,17 @@
 
 namespace ark {
 
-class ModelLoaderNinePatch : public ModelLoader {
+class ModelLoaderNinePatchTriangleStrips : public ModelLoader {
 public:
-    ModelLoaderNinePatch(sp<Atlas> atlas);
+    ModelLoaderNinePatchTriangleStrips(sp<Atlas> atlas);
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
 
     virtual void initialize(ShaderBindings& shaderBindings) override;
-    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
 
     virtual sp<Model> loadModel(int32_t type) override;
 
-//  [[plugin::builder::by-value("nine-patch")]]
+//  [[plugin::builder::by-value("nine-patch-triangle-strips")]]
     class BUILDER : public Builder<ModelLoader> {
     public:
         BUILDER(BeanFactory& factory, const String& atlas);
@@ -31,17 +30,6 @@ public:
 
     private:
         sp<Builder<Atlas>> _atlas;
-    };
-
-//  [[plugin::builder("nine-patch")]]
-    class BUILDER_IMPL : public Builder<ModelLoader> {
-    public:
-        BUILDER_IMPL(BeanFactory& factory, const document& manifest);
-
-        virtual sp<ModelLoader> build(const Scope& args) override;
-
-    private:
-        BUILDER _builder;
     };
 
 private:

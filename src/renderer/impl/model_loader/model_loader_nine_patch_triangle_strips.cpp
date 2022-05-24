@@ -1,0 +1,43 @@
+#include "renderer/impl/model_loader/model_loader_nine_patch_triangle_strips.h"
+
+#include "renderer/base/atlas.h"
+#include "renderer/base/model.h"
+#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/shader_bindings.h"
+#include "renderer/impl/render_command_composer/rcc_draw_elements.h"
+#include "renderer/util/render_util.h"
+
+namespace ark {
+
+ModelLoaderNinePatchTriangleStrips::ModelLoaderNinePatchTriangleStrips(sp<Atlas> atlas)
+    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLE_STRIP), _atlas(std::move(atlas)), _nine_patch_attachment(_atlas->attachments().ensure<AtlasImporterNinePatch::Attachment>()),
+      _unit_model(RenderUtil::makeUnitNinePatchTriangleStripsModel())
+{
+}
+
+sp<RenderCommandComposer> ModelLoaderNinePatchTriangleStrips::makeRenderCommandComposer()
+{
+    return sp<RCCDrawElements>::make(_unit_model);
+}
+
+void ModelLoaderNinePatchTriangleStrips::initialize(ShaderBindings& shaderBindings)
+{
+    shaderBindings.pipelineBindings()->bindSampler(_atlas->texture());
+}
+
+sp<Model> ModelLoaderNinePatchTriangleStrips::loadModel(int32_t type)
+{
+    return sp<Model>::make(_unit_model.indices(), _nine_patch_attachment->ensureVerticesTriangleStrips(type));
+}
+
+ModelLoaderNinePatchTriangleStrips::BUILDER::BUILDER(BeanFactory& factory, const String& atlas)
+    : _atlas(factory.ensureBuilder<Atlas>(atlas))
+{
+}
+
+sp<ModelLoader> ModelLoaderNinePatchTriangleStrips::BUILDER::build(const Scope& args)
+{
+    return sp<ModelLoaderNinePatchTriangleStrips>::make(_atlas->build(args));
+}
+
+}

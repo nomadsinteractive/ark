@@ -39,7 +39,6 @@ public:
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() = 0;
 
     virtual void initialize(ShaderBindings& shaderBindings) = 0;
-    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) = 0;
 
 //[[script::bindings::auto]]
     virtual sp<Model> loadModel(int32_t type) = 0;

@@ -13,7 +13,7 @@
 
 namespace ark {
 
-template<typename T> class LoaderBundle : public Dictionary<sp<T>> {
+template<typename T> class LoaderBundle : public Dictionary<T> {
 private:
     typedef Loader<T> LoaderType;
 
@@ -22,7 +22,7 @@ public:
         : _asset_bundle(std::move(assetBundle)), _default_loader(std::move(defaultLoader)) {
     }
 
-    virtual sp<T> get(const String& name) override {
+    virtual T get(const String& name) override {
         String fname, fext;
         Strings::rcut(name, fname, fext, '.');
 

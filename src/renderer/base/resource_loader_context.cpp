@@ -10,7 +10,7 @@
 
 namespace ark {
 
-ResourceLoaderContext::ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<BitmapBundle>& bitmapBundle, const sp<BitmapBundle>& bitmapBoundsBundle,
+ResourceLoaderContext::ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<BitmapLoaderBundle>& bitmapBundle, const sp<BitmapLoaderBundle>& bitmapBoundsBundle,
                                              const sp<Executor>& executor, const sp<RenderController>& renderController)
     : _documents(documents), _bitmap_bundle(bitmapBundle), _bitmap_bounds_bundle(bitmapBoundsBundle), _executor(executor), _render_controller(renderController),
       _texture_bundle(sp<TextureBundle>::make(renderController)), _disposed(sp<Boolean::Impl>::make(false))
@@ -28,12 +28,12 @@ const sp<Dictionary<document>>& ResourceLoaderContext::documents() const
     return _documents;
 }
 
-const sp<BitmapBundle>& ResourceLoaderContext::bitmapBundle() const
+const sp<BitmapLoaderBundle>& ResourceLoaderContext::bitmapBundle() const
 {
     return _bitmap_bundle;
 }
 
-const sp<BitmapBundle>& ResourceLoaderContext::bitmapBoundsBundle() const
+const sp<BitmapLoaderBundle>& ResourceLoaderContext::bitmapBoundsBundle() const
 {
     return _bitmap_bounds_bundle;
 }

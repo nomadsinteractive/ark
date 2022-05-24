@@ -11,7 +11,7 @@ namespace {
 
 class BitmapProvider : public Variable<bitmap> {
 public:
-    BitmapProvider(sp<BitmapBundle> bitmapBundle, String src)
+    BitmapProvider(sp<BitmapLoaderBundle> bitmapBundle, String src)
         : _bitmap_bundle(std::move(bitmapBundle)), _src(std::move(src)) {
 
     }
@@ -25,7 +25,7 @@ public:
     }
 
 private:
-    sp<BitmapBundle> _bitmap_bundle;
+    sp<BitmapLoaderBundle> _bitmap_bundle;
     String _src;
 };
 
