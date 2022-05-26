@@ -4,8 +4,6 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/texture.h"
-#include "renderer/impl/vertices/vertices_nine_patch_quads.h"
-#include "renderer/impl/vertices/vertices_nine_patch_triangle_strips.h"
 
 namespace ark {
 
@@ -26,66 +24,8 @@ AtlasImporterNinePatch::AtlasImporterNinePatch(document manifest)
 
 void AtlasImporterNinePatch::import(Atlas& atlas, const sp<Readable>& /*readable*/)
 {
-    const sp<Attachment>& vertices = atlas.attachments().ensure<Attachment>();
+    const sp<Atlas::AttachmentNinePatch>& vertices = atlas.attachments().ensure<Atlas::AttachmentNinePatch>();
     vertices->import(atlas, _manifest);
-}
-
-void AtlasImporterNinePatch::Attachment::import(Atlas& atlas, const document& manifest)
-{
-    uint32_t textureWidth = atlas.width();
-    uint32_t textureHeight = atlas.height();
-    for(const document& i : manifest->children())
-    {
-        const String name = i->name();
-        const Rect paddings = Documents::ensureAttribute<Rect>(i, Constants::Attributes::NINE_PATCH_PADDINGS);
-        if(name == "default")
-        {
-            for(const auto& i : atlas.items())
-                add(i.first, textureWidth, textureHeight, paddings, atlas);
-        }
-        else
-        {
-            DWARN(name == "nine-patch", "\"%s\" nodeName should be \"nine-patch\"", Documents::toString(i).c_str());
-            int32_t type = Documents::getAttribute<int32_t>(i, Constants::Attributes::TYPE, 0);
-            bool hasBounds = atlas.has(type);
-            if(hasBounds)
-                add(type, textureWidth, textureHeight, paddings, atlas);
-            else
-            {
-                const Rect bounds = Rect::parse(i);
-                add(type, textureWidth, textureHeight, paddings, bounds);
-            }
-        }
-    }
-}
-
-void AtlasImporterNinePatch::Attachment::add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Atlas& atlas)
-{
-    const Atlas::Item& item = atlas.at(type);
-    const Rect bounds(item.ux() * textureWidth / 65536.0f, item.vy() * textureHeight / 65536.0f,
-                      item.vx() * textureWidth / 65536.0f, item.uy() * textureHeight / 65536.0f);
-    add(type, textureWidth, textureHeight, paddings, bounds);
-}
-
-void AtlasImporterNinePatch::Attachment::add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Rect& bounds)
-{
-    const Rect patches(paddings.left(), paddings.top(), bounds.width() - paddings.right(), bounds.height() - paddings.bottom());
-    _vertices_triangle_strips[type] = sp<VerticesNinePatchTriangleStrips>::make(bounds, patches, textureWidth, textureHeight);
-    _vertices_quads[type] = sp<VerticesNinePatchQuads>::make(bounds, patches, textureWidth, textureHeight);
-}
-
-const sp<Vertices>& AtlasImporterNinePatch::Attachment::ensureVerticesTriangleStrips(int32_t type) const
-{
-    const auto iter = _vertices_triangle_strips.find(type);
-    DCHECK(iter != _vertices_triangle_strips.end(), "Cannot find type: %d", type);
-    return iter->second;
-}
-
-const sp<Vertices>& AtlasImporterNinePatch::Attachment::ensureVerticesQuads(int32_t type) const
-{
-    const auto iter = _vertices_quads.find(type);
-    DCHECK(iter != _vertices_quads.end(), "Cannot find type: %d", type);
-    return iter->second;
 }
 
 }

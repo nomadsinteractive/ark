@@ -16,26 +16,6 @@ public:
 
     virtual void import(Atlas& atlas, const sp<Readable>& readable) override;
 
-    class Attachment {
-    public:
-        const sp<Vertices>& ensureVerticesTriangleStrips(int32_t type) const;
-        const sp<Vertices>& ensureVerticesQuads(int32_t type) const;
-
-    private:
-        void import(Atlas& atlas, const document& manifest);
-
-        void add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Atlas& atlas);
-        void add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Rect& bounds);
-
-        sp<Vertices> makeNinePatchVertices(uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Rect& bounds) const;
-
-    private:
-        std::unordered_map<int32_t, sp<Vertices>> _vertices_triangle_strips;
-        std::unordered_map<int32_t, sp<Vertices>> _vertices_quads;
-
-        friend class AtlasImporterNinePatch;
-    };
-
 //  [[plugin::builder("nine-patch")]]
     class BUILDER : public Builder<AtlasImporter> {
     public:

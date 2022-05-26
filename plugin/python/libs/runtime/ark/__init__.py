@@ -17,6 +17,7 @@ _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean'
                            'TilemapImporter', 'Tileset', 'TilesetImporter', 'Transform', 'Varyings')
 
 
+TYPE_INTEGER = Union[int, 'Integer']
 TYPE_INT_OR_FLOAT = Union[int, float]
 TYPE_NUMERIC = Union[TYPE_INT_OR_FLOAT, 'Numeric']
 TYPE_RECT = Tuple[TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT]
@@ -1491,7 +1492,7 @@ class TilemapLayer:
         pass
 
 
-class Tilemap(Renderer):
+class Tilemap:
     LAYER_FLAG_DEFAULT = 0
     LAYER_FLAG_COLLIDABLE = 1
     LAYER_FLAG_SCROLLABLE = 2
@@ -1531,6 +1532,9 @@ class Tilemap(Renderer):
     @property
     def storage(self) -> Optional[Storage]:
         return None
+
+    def make_renderer(self, layer: Optional[Layer] = None) -> Renderer:
+        pass
 
     def make_layer(self, name: str, row_count: int, col_count: int, position: Optional[Vec3] = None, scroller: Optional[Vec3] = None, layer_flag: int = 0) -> TilemapLayer:
         pass

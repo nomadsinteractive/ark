@@ -73,21 +73,9 @@ public:
 }
 
 Tilemap::Tilemap(sp<LayerContext> layerContext, sp<Size> size, sp<Tileset> tileset, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)
-    : _layer_context(std::move(layerContext)), _size(std::move(size)), _tileset(std::move(tileset)), _storage(sp<TilemapStorage>::make(*this, std::move(importer), std::move(outputer)))
+    : _layer_context(std::move(layerContext)), _size(std::move(size)), _tileset(std::move(tileset)), _storage(sp<TilemapStorage>::make(*this, std::move(importer), std::move(outputer))),
+      _stub(sp<Stub>::make())
 {
-    DASSERT(_layer_context);
-}
-
-void Tilemap::render(RenderRequest& renderRequest, const V3& position)
-{
-    _layer_context->renderRequest(position);
-
-    if(_scrollable)
-        _scrollable->render(renderRequest, V3(0));
-
-    for(const sp<TilemapLayer>& i : _layers)
-        if(!(i->flag() & LAYER_FLAG_INVISIBLE))
-            i->render(renderRequest, V3());
 }
 
 const sp<Size>& Tilemap::size()
@@ -97,7 +85,7 @@ const sp<Size>& Tilemap::size()
 
 void Tilemap::clear()
 {
-    _layers.clear();
+    _stub->_layers.clear();
 }
 
 const sp<Tileset>& Tilemap::tileset() const
@@ -108,6 +96,12 @@ const sp<Tileset>& Tilemap::tileset() const
 const sp<Storage>& Tilemap::storage() const
 {
     return _storage;
+}
+
+sp<Renderer> Tilemap::makeRenderer(const sp<Layer>& layer) const
+{
+    DCHECK(layer || _layer_context, "No LayerContext specified");
+    return sp<TilemapRenderer>::make(layer ? layer->context() : _layer_context, _stub);
 }
 
 void Tilemap::load(const sp<Readable>& readable)
@@ -122,22 +116,22 @@ void Tilemap::load(const String& src)
 
 sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position, const sp<Vec3>& scroller, Tilemap::LayerFlag layerFlag)
 {
-    sp<TilemapLayer> layer = sp<TilemapLayer>::make(*this, name, rowCount, colCount, position, scroller, layerFlag);
-    _layers.push_back(layer);
+    sp<TilemapLayer> layer = sp<TilemapLayer>::make(_layer_context, _tileset, name, rowCount, colCount, position, scroller, layerFlag);
+    _stub->_layers.push_back(layer);
     return layer;
 }
 
-void Tilemap::addLayer(const sp<TilemapLayer>& layer)
+void Tilemap::addLayer(sp<TilemapLayer> layer)
 {
     layer->_layer_context = _layer_context;
-    _layers.push_back(layer);
+    _stub->_layers.push_back(std::move(layer));
 }
 
 void Tilemap::removeLayer(const sp<TilemapLayer>& layer)
 {
-    const auto iter = std::find(_layers.begin(), _layers.end(), layer);
-    DCHECK(iter != _layers.end(), "Layer does not belong to this Tilemap");
-    _layers.erase(iter);
+    const auto iter = std::find(_stub->_layers.begin(), _stub->_layers.end(), layer);
+    DCHECK(iter != _stub->_layers.end(), "Layer does not belong to this Tilemap");
+    _stub->_layers.erase(iter);
 }
 
 void Tilemap::jsonLoad(const Json& json)
@@ -204,11 +198,11 @@ Json Tilemap::jsonDump() const
 
 const std::list<sp<TilemapLayer>>& Tilemap::layers() const
 {
-    return _layers;
+    return _stub->_layers;
 }
 
 Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_TRANSIENT)), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+    : _layer(factory.getBuilder<Layer>(manifest, Constants::Attributes::LAYER)), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _tileset(factory.ensureBuilder<Tileset>(manifest, "tileset")), _importer(factory.getBuilder<Importer<Tilemap>>(manifest, "importer")), _outputer(factory.getBuilder<Outputer<Tilemap>>(manifest, "outputer")),
       _scrollable(factory.getBuilder<Scrollable>(manifest, "scrollable"))
 {
@@ -216,14 +210,32 @@ Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Tilemap> Tilemap::BUILDER::build(const Scope& args)
 {
-    sp<Tilemap> tilemap = sp<Tilemap>::make(_layer_context->build(args), _size->build(args), _tileset->build(args), _importer->build(args), _outputer->build(args));
+    sp<Layer> layer = _layer->build(args);
+    sp<Tilemap> tilemap = sp<Tilemap>::make(layer ? layer->context() : nullptr, _size->build(args), _tileset->build(args), _importer->build(args), _outputer->build(args));
     if(_scrollable)
     {
         sp<Scrollable> scrollable = _scrollable->build(args);
         scrollable->setRendererMaker(sp<TilemapLayerMaker>::make(tilemap, scrollable->rendererMaker()));
-        tilemap->_scrollable = std::move(scrollable);
+        tilemap->_stub->_scrollable = std::move(scrollable);
     }
     return tilemap;
+}
+
+Tilemap::TilemapRenderer::TilemapRenderer(sp<LayerContext> layerContext, sp<Stub> stub)
+    : _layer_context(std::move(layerContext)), _stub(std::move(stub))
+{
+}
+
+void Tilemap::TilemapRenderer::render(RenderRequest& renderRequest, const V3& position)
+{
+    _layer_context->renderRequest(position);
+
+    if(_stub->_scrollable)
+        _stub->_scrollable->render(renderRequest, V3(0));
+
+    for(const sp<TilemapLayer>& i : _stub->_layers)
+        if(!(i->flag() & LAYER_FLAG_INVISIBLE))
+            i->render(renderRequest, V3());
 }
 
 }

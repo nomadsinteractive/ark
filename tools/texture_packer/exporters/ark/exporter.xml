@@ -1,0 +1,89 @@
+<exporter version="1.0">
+    <!-- identifier of the exporter -->
+    <name>ark</name>
+	
+    <!-- display name of the exporter for the combo box -->
+    <displayName>Ark</displayName>
+	
+    <!-- description of the exporter -->
+    <description></description>
+
+    <!-- exporter version -->
+    <version>1.0</version>
+	
+    <files>
+        <file>
+            <!-- name of this file variable -->
+            <name>xml</name>
+
+            <!-- human readable name (for GUI) -->
+            <displayName>XML file</displayName>
+
+            <!-- file extension for the file -->
+            <fileExtension>xml</fileExtension>
+
+            <!-- description what the file contains, used in tooltips in the GUI -->
+            <description></description>
+
+            <!-- name of the template file -->
+            <template>template.xml</template>
+        </file>
+    </files>
+
+    <!-- target framework supports trimming -->
+    <supportsTrimming>true</supportsTrimming>
+
+    <!-- target framework supports rotated sprites -->
+    <supportsRotation>false</supportsRotation>
+
+    <!-- rotated sprites direction (cw/ccw) -->
+    <rotationDirection>cw</rotationDirection>
+
+    <!-- If enabled TexturePacker allows the user to choose non-power-of-2 sizes for sprite
+         sheets. Otherwise only power-of-2 (POT) sizes are enabled in the user interface. -->
+    <supportsNPOT>false</supportsNPOT>
+
+    <!-- the following flags are optional: -->
+
+    <!-- framework supports tightly packed textures, i.e. it can extract sprites
+         from a sheet using polygon paths instead of bounding boxes (default=false) -->
+    <supportsPolygonPacking>false</supportsPolygonPacking>
+
+    <!-- target framework supports pivot point settings (default=false) -->
+    <supportsPivotPoint>true</supportsPivotPoint>
+
+    <!-- target framework accepts sprite names without file name extension. (default=false) -->
+    <supportsTrimSpriteNames>true</supportsTrimSpriteNames>
+
+    <!-- framework can read in border values for 9-patch scaling of sprites (default=false) -->
+    <supportsScale9>true</supportsScale9>
+
+    <!-- supports texure subpath -->
+    <supportsTextureSubPath>false</supportsTextureSubPath>
+	
+	<!-- origin of the coordinate system of a sprite in the target framework,
+         needed for pivot point placement. (default=TopLeft) -->
+    <spriteOrigin>BottomLeft</spriteOrigin> <!-- TopLeft or BottomLeft -->
+
+    <!-- ui properties -->
+    <properties>
+    </properties>
+
+    <!-- default values, applied when the exporter is activated in the UI or command line -->
+    <defaults>
+        <extrude>0</extrude>
+        <shapePadding>1</shapePadding>
+        <borderPadding>1</borderPadding>
+        <trimMode>Trim</trimMode>                  <!-- None, Trim, Crop, CropKeepPos, Polygon -->
+        <sizeConstraints>POT</sizeConstraints>     <!-- POT, WordAligned, AnySize -->
+        <writePivotPoints>true</writePivotPoints>  <!-- true, false -->
+        <defaultPivotPoint>0.5,0.5</defaultPivotPoint>
+    </defaults>
+
+    <!-- scaling variant presets -->
+    <variantPresets>
+    </variantPresets>
+
+</exporter>
+
+

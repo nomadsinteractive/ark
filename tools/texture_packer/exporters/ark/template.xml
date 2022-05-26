@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- {{smartUpdateKey}} -->
+<ark-atlas version="1.0">{% for sprite in allSprites %}
+    <sprite n="{{sprite.trimmedName}}" x="{{sprite.frameRect.x}}" y="{{sprite.frameRect.y}}" w="{{sprite.frameRect.width}}" h="{{sprite.frameRect.height}}"{% if sprite.trimmed %} oX="{{sprite.sourceRect.x}}" oY="{{sprite.sourceRect.y}}" oW="{{sprite.untrimmedSize.width}}" oH="{{sprite.untrimmedSize.height}}"{% endif %}{% if settings.writePivotPoints %} pX="{{sprite.pivotPointNorm.x}}" pY="{{sprite.pivotPointNorm.y}}"{% endif %}{% if sprite.scale9Enabled %} s9="{{sprite.scale9Borders.x}},{{sprite.scale9Borders.y}},{{sprite.scale9Borders.width}},{{sprite.scale9Borders.height}}"{% endif %}/>{% endfor %}
+</ark-atlas>

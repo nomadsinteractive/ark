@@ -16,8 +16,7 @@
 
 namespace ark {
 
-//[[script::bindings::extends(Renderer)]]
-class ARK_API Tilemap : public Renderer, Block {
+class ARK_API Tilemap {
 public:
 //  [[script::bindings::enumeration]]
     enum LayerFlag {
@@ -31,9 +30,8 @@ public:
 // [[script::bindings::auto]]
     Tilemap(sp<LayerContext> layerContext, sp<Size> size, sp<Tileset> tileset, sp<Importer<Tilemap>> importer = nullptr, sp<Outputer<Tilemap>> outputer = nullptr);
 
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 // [[script::bindings::property]]
-    virtual const sp<Size>& size() override;
+    const sp<Size>& size();
 
 // [[script::bindings::property]]
     const sp<Tileset>& tileset() const;
@@ -42,6 +40,9 @@ public:
     const sp<Storage>& storage() const;
 
 // [[script::bindings::auto]]
+    sp<Renderer> makeRenderer(const sp<Layer>& layer = nullptr) const;
+
+    // [[script::bindings::auto]]
     sp<TilemapLayer> makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position = nullptr, const sp<Vec3>& scroller = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
 
 // [[script::bindings::auto]]
@@ -56,7 +57,7 @@ public:
     void load(const String& src);
 
 //  [[script::bindings::auto]]
-    void addLayer(const sp<TilemapLayer>& layer);
+    void addLayer(sp<TilemapLayer> layer);
 //  [[script::bindings::auto]]
     void removeLayer(const sp<TilemapLayer>& layer);
 
@@ -71,7 +72,7 @@ public:
         virtual sp<Tilemap> build(const Scope& args) override;
 
     private:
-        sp<Builder<LayerContext>> _layer_context;
+        SafePtr<Builder<Layer>> _layer;
         sp<Builder<Size>> _size;
         sp<Builder<Tileset>> _tileset;
         SafePtr<Builder<Importer<Tilemap>>> _importer;
@@ -81,13 +82,30 @@ public:
     };
 
 private:
+    struct Stub {
+        std::list<sp<TilemapLayer>> _layers;
+        sp<Scrollable> _scrollable;
+    };
+
+    class TilemapRenderer : public Renderer {
+    public:
+        TilemapRenderer(sp<LayerContext> layerContext, sp<Stub> stub);
+
+        virtual void render(RenderRequest& renderRequest, const V3& position) override;
+
+    private:
+        sp<LayerContext> _layer_context;
+        sp<Stub> _stub;
+
+    };
+
+private:
     sp<LayerContext> _layer_context;
     SafePtr<Size> _size;
     sp<Tileset> _tileset;
     sp<Storage> _storage;
 
-    std::list<sp<TilemapLayer>> _layers;
-    sp<Scrollable> _scrollable;
+    sp<Stub> _stub;
 
     friend class TilemapLayer;
     friend class BUILDER;

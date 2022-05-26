@@ -79,6 +79,25 @@ public:
 
     static uint16_t unnormalize(uint32_t x, uint32_t s);
 
+    class AttachmentNinePatch {
+    public:
+        const sp<Vertices>& ensureVerticesTriangleStrips(int32_t type) const;
+        const sp<Vertices>& ensureVerticesQuads(int32_t type) const;
+
+        void import(Atlas& atlas, const document& manifest);
+
+        void add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Atlas& atlas);
+
+    private:
+        void add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Rect& bounds);
+
+        sp<Vertices> makeNinePatchVertices(uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Rect& bounds) const;
+
+    private:
+        std::unordered_map<int32_t, sp<Vertices>> _vertices_triangle_strips;
+        std::unordered_map<int32_t, sp<Vertices>> _vertices_quads;
+    };
+
 //  [[plugin::builder]]
     class BUILDER : public Builder<Atlas> {
     public:

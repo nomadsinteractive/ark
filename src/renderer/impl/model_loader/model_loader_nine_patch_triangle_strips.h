@@ -5,9 +5,9 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
 #include "renderer/inf/model_loader.h"
-#include "renderer/impl/importer/atlas_importer_nine_patch.h"
 
 namespace ark {
 
@@ -34,7 +34,7 @@ public:
 
 private:
     sp<Atlas> _atlas;
-    sp<AtlasImporterNinePatch::Attachment> _nine_patch_attachment;
+    sp<Atlas::AttachmentNinePatch> _nine_patch_attachment;
     Model _unit_model;
 };
 
