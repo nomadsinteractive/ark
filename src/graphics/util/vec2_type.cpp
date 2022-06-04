@@ -198,6 +198,11 @@ sp<Vec2> Vec2Type::integralWithResistance(const sp<Vec2>& self, const V2& v0, co
     return sp<IntegralWithResistance<V2>>::make(v0, self, cd, t ? t : Ark::instance().clock()->duration());
 }
 
+sp<Numeric> Vec2Type::distanceTo(const sp<Vec2>& self, const sp<Vec2>& other)
+{
+    return Math::distance(self, other);
+}
+
 void Vec2Type::set(const sp<VariableWrapper<V2>>& self, const V2& val)
 {
     self->set(val);

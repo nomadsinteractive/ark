@@ -6,6 +6,7 @@
 
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/types/global.h"
+#include "core/util/text_type.h"
 
 #include "graphics/base/size.h"
 #include "graphics/impl/vec/vec3_impl.h"
@@ -60,10 +61,10 @@ private:
     bool _open;
 };
 
-class Text : public Widget {
+class WidgetText : public Widget {
 public:
-    Text(std::function<void(const char*)> func, const String& content)
-        : _func(std::move(func)), _content(content) {
+    WidgetText(std::function<void(const char*)> func, String content)
+        : _func(std::move(func)), _content(std::move(content)) {
     }
 
     virtual void render() override {
@@ -74,7 +75,6 @@ private:
     std::function<void(const char*)> _func;
     String _content;
 };
-
 
 class Image : public Widget {
 public:
@@ -124,8 +124,8 @@ private:
 
 template<typename T> class Input : public Widget {
 public:
-    Input(std::function<bool(const char*, T*)> func, const String& label, const sp<Variable<T>>& value)
-        : _func(std::move(func)), _label(label), _value(value.template as<VariableWrapper<T>>()) {
+    Input(std::function<bool(const char*, T*)> func, String label, const sp<Variable<T>>& value)
+        : _func(std::move(func)), _label(std::move(label)), _value(value.template as<VariableWrapper<T>>()) {
         DCHECK(_value, "Value should be a Wrapper class");
     }
 
@@ -137,14 +137,14 @@ public:
 
 private:
     std::function<bool(const char*, T*)> _func;
-    const String _label;
+    String _label;
     sp<VariableWrapper<T>> _value;
 };
 
-template<typename T, typename U> class InputVec : public Widget {
+template<typename T, typename U> class InputWithType : public Widget {
 public:
-    InputVec(std::function<bool(const char*, T*)> func, const String& label, const sp<Variable<T>>& value)
-        : _func(std::move(func)), _label(label), _value(value) {
+    InputWithType(std::function<bool(const char*, T*)> func, String label, sp<Variable<T>> value)
+        : _func(std::move(func)), _label(std::move(label)), _value(std::move(value)) {
     }
 
     virtual void render() override {
@@ -157,6 +157,38 @@ private:
     std::function<bool(const char*, T*)> _func;
     const String _label;
     sp<Variable<T>> _value;
+};
+
+template<typename T> class WidgetInputText : public Widget {
+public:
+    WidgetInputText(String label, sp<T> value, size_t maxLength, sp<Text> hint, sp<Observer> observer, ImGuiInputTextFlags flags)
+        : _label(std::move(label)), _value(std::move(value)), _hint(std::move(hint)), _observer(std::move(observer)), _flags(flags), _text_buf(maxLength) {
+    }
+
+    virtual void render() override {
+        const String v = _value->val();
+        if(ImGui::InputTextWithHint(_label.c_str(), _hint ? _hint->val()->c_str() : nullptr, &_text_buf[0], _text_buf.size(), _flags)) {
+            TextType::set(_value, sp<String>::make(_text_buf.data()));
+            if(_observer) {
+                _observer->update();
+                updateInputText();
+            }
+        }
+    }
+
+private:
+    void updateInputText() {
+        std::strncpy(&_text_buf[0], _value->val()->c_str(), _text_buf.size());
+    }
+
+private:
+    std::function<bool(const char*, char*, size_t)> _func;
+    String _label;
+    sp<T> _value;
+    sp<Text> _hint;
+    sp<Observer> _observer;
+    ImGuiInputTextFlags _flags;
+    std::vector<char> _text_buf;
 };
 
 class DemoWindow : public Widget {
@@ -177,8 +209,8 @@ private:
 
 class RendererWidget : public Renderer {
 public:
-    RendererWidget(const sp<Widget>& widget)
-        : _widget(widget) {
+    RendererWidget(sp<Widget> widget)
+        : _widget(std::move(widget)) {
     }
 
     virtual void render(RenderRequest& /*renderRequest*/, const V3& /*position*/) override {
@@ -221,7 +253,7 @@ void RendererBuilder::end()
 
 void RendererBuilder::bulletText(const String& content)
 {
-    addWidget(sp<Text>::make(ImGui::BulletText, content));
+    addWidget(sp<WidgetText>::make(ImGui::BulletText, content));
 }
 
 sp<Observer> RendererBuilder::button(const String& label, const V2& size)
@@ -264,7 +296,7 @@ void RendererBuilder::combo(const String& label, const sp<Integer>& option, cons
 
 void RendererBuilder::listBox(const String& label, const sp<Integer>& option, const std::vector<String>& items)
 {
-    addWidget(sp<Input<int32_t>>::make([items](const char* l, int32_t* v) { return ImGui::ListBox(l, v, Items_VectorGetter, (void*) &items, items.size()); }, label, option));
+    addWidget(sp<Input<int32_t>>::make([items](const char* l, int32_t* v) { return ImGui::ListBox(l, v, Items_VectorGetter, reinterpret_cast<void*>(const_cast<std::vector<String>*>(&items)), static_cast<int32_t>(items.size())); }, label, option));
 }
 
 void RendererBuilder::indent(float w)
@@ -279,7 +311,14 @@ void RendererBuilder::unindent(float w)
 
 void RendererBuilder::text(const String& content)
 {
-    addWidget(sp<Text>::make(ImGui::Text, content));
+    addWidget(sp<WidgetText>::make(ImGui::Text, content));
+}
+
+sp<Observer> RendererBuilder::inputText(String label, sp<Text::Impl> value, size_t maxLength, int32_t flags)
+{
+    sp<Observer> observer = sp<Observer>::make(nullptr, false);
+    addWidget(sp<WidgetInputText<Text::Impl>>::make(std::move(label), std::move(value), maxLength, nullptr, observer, flags));
+    return observer;
 }
 
 void RendererBuilder::inputInt(const String& label, const sp<Integer>& value, int32_t step, int32_t step_fast, int32_t flags)
@@ -294,7 +333,7 @@ void RendererBuilder::inputFloat(const String& label, const sp<Numeric>& value, 
 
 void RendererBuilder::inputFloat2(const String& label, const sp<Vec2>& value, const String& format, int32_t flags)
 {
-    addWidget(sp<InputVec<V2, Vec2Type>>::make([format, flags](const char* l, V2* v) { return ImGui::InputFloat2(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
+    addWidget(sp<InputWithType<V2, Vec2Type>>::make([format, flags](const char* l, V2* v) { return ImGui::InputFloat2(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
 void RendererBuilder::inputFloat3(const String& label, const sp<Size>& size, const String& format, int32_t flags)
@@ -304,12 +343,12 @@ void RendererBuilder::inputFloat3(const String& label, const sp<Size>& size, con
 
 void RendererBuilder::inputFloat3(const String& label, const sp<Vec3>& value, const String& format, int32_t flags)
 {
-    addWidget(sp<InputVec<V3, Vec3Type>>::make([format, flags](const char* l, V3* v) { return ImGui::InputFloat3(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
+    addWidget(sp<InputWithType<V3, Vec3Type>>::make([format, flags](const char* l, V3* v) { return ImGui::InputFloat3(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
 void RendererBuilder::inputFloat4(const String& label, const sp<Vec4>& value, const String& format, int32_t flags)
 {
-    addWidget(sp<InputVec<V4, Vec4Type>>::make([format, flags](const char* l, V4* v) { return ImGui::InputFloat4(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
+    addWidget(sp<InputWithType<V4, Vec4Type>>::make([format, flags](const char* l, V4* v) { return ImGui::InputFloat4(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
 void RendererBuilder::sliderFloat(const String& label, const sp<Numeric>& value, float v_min, float v_max, const String& format, float power)
@@ -319,7 +358,7 @@ void RendererBuilder::sliderFloat(const String& label, const sp<Numeric>& value,
 
 void RendererBuilder::sliderFloat2(const String& label, const sp<Vec2>& value, float v_min, float v_max, const String& format, float power)
 {
-    addWidget(sp<InputVec<V2, Vec2Type>>::make([v_min, v_max, format, power](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<InputWithType<V2, Vec2Type>>::make([v_min, v_max, format, power](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
 }
 
 void RendererBuilder::sliderFloat3(const String& label, const sp<Size>& size, float v_min, float v_max, const String& format, float power)
@@ -329,32 +368,32 @@ void RendererBuilder::sliderFloat3(const String& label, const sp<Size>& size, fl
 
 void RendererBuilder::sliderFloat3(const String& label, const sp<Vec3>& value, float v_min, float v_max, const String& format, float power)
 {
-    addWidget(sp<InputVec<V3, Vec3Type>>::make([v_min, v_max, format, power](const char* l, V3* v) { return ImGui::SliderFloat3(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<InputWithType<V3, Vec3Type>>::make([v_min, v_max, format, power](const char* l, V3* v) { return ImGui::SliderFloat3(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
 }
 
 void RendererBuilder::sliderFloat4(const String& label, const sp<Vec4>& value, float v_min, float v_max, const String& format, float power)
 {
-    addWidget(sp<InputVec<V4, Vec4Type>>::make([v_min, v_max, format, power](const char* l, V4* v) { return ImGui::SliderFloat4(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<InputWithType<V4, Vec4Type>>::make([v_min, v_max, format, power](const char* l, V4* v) { return ImGui::SliderFloat4(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
 }
 
 void RendererBuilder::colorEdit3(const String& label, const sp<Vec3>& value)
 {
-    addWidget(sp<InputVec<V3, Vec3Type>>::make([](const char* l, V3* v) { return ImGui::ColorEdit3(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<InputWithType<V3, Vec3Type>>::make([](const char* l, V3* v) { return ImGui::ColorEdit3(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void RendererBuilder::colorEdit4(const String& label, const sp<Vec4>& value)
 {
-    addWidget(sp<InputVec<V4, Vec4Type>>::make([](const char* l, V4* v) { return ImGui::ColorEdit4(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<InputWithType<V4, Vec4Type>>::make([](const char* l, V4* v) { return ImGui::ColorEdit4(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void RendererBuilder::colorPicker3(const String& label, const sp<Vec3>& value)
 {
-    addWidget(sp<InputVec<V3, Vec3Type>>::make([](const char* l, V3* v) { return ImGui::ColorPicker3(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<InputWithType<V3, Vec3Type>>::make([](const char* l, V3* v) { return ImGui::ColorPicker3(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void RendererBuilder::colorPicker4(const String& label, const sp<Vec4>& value)
 {
-    addWidget(sp<InputVec<V4, Vec4Type>>::make([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<InputWithType<V4, Vec4Type>>::make([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void RendererBuilder::image(const sp<Texture>& texture, const sp<Vec2>& size, const V2& uv0, const V2& uv1, const sp<Vec4>& color, const sp<Vec4>& borderColor)

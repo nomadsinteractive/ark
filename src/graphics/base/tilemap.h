@@ -42,7 +42,7 @@ public:
 // [[script::bindings::auto]]
     sp<Renderer> makeRenderer(const sp<Layer>& layer = nullptr) const;
 
-    // [[script::bindings::auto]]
+// [[script::bindings::auto]]
     sp<TilemapLayer> makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position = nullptr, const sp<Vec3>& scroller = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
 
 // [[script::bindings::auto]]

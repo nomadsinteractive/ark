@@ -140,32 +140,28 @@ void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
         else
         {
             DWARN(name == "nine-patch", "\"%s\" nodeName should be \"nine-patch\"", Documents::toString(i).c_str());
-            int32_t type = Documents::getAttribute<int32_t>(i, Constants::Attributes::TYPE, 0);
-            bool hasBounds = atlas.has(type);
-            if(hasBounds)
-                add(type, textureWidth, textureHeight, paddings, atlas);
-            else
-            {
-                const Rect bounds = Rect::parse(i);
-                add(type, textureWidth, textureHeight, paddings, bounds);
-            }
+            int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
+            add(type, textureWidth, textureHeight, paddings, atlas);
         }
     }
 }
 
 void Atlas::AttachmentNinePatch::add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Atlas& atlas)
 {
-    const Atlas::Item& item = atlas.at(type);
-    const Rect bounds(item.ux() * textureWidth / 65536.0f, item.vy() * textureHeight / 65536.0f,
-                      item.vx() * textureWidth / 65536.0f, item.uy() * textureHeight / 65536.0f);
-    add(type, textureWidth, textureHeight, paddings, bounds);
+    const Rect bounds = atlas.getOriginalPosition(type);
+    const Rect ninePatches(paddings.left(), paddings.top(), bounds.width() - paddings.right(), bounds.height() - paddings.bottom());
+    addNinePatch(type, textureWidth, textureHeight, ninePatches, atlas.getOriginalPosition(type));
 }
 
-void Atlas::AttachmentNinePatch::add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Rect& bounds)
+void Atlas::AttachmentNinePatch::addNinePatch(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Atlas& atlas)
 {
-    const Rect patches(paddings.left(), paddings.top(), bounds.width() - paddings.right(), bounds.height() - paddings.bottom());
-    _vertices_triangle_strips[type] = sp<VerticesNinePatchTriangleStrips>::make(bounds, patches, textureWidth, textureHeight);
-    _vertices_quads[type] = sp<VerticesNinePatchQuads>::make(bounds, patches, textureWidth, textureHeight);
+    addNinePatch(type, textureWidth, textureHeight, ninePatch, atlas.getOriginalPosition(type));
+}
+
+void Atlas::AttachmentNinePatch::addNinePatch(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Rect& bounds)
+{
+    _vertices_triangle_strips[type] = sp<VerticesNinePatchTriangleStrips>::make(bounds, ninePatch, textureWidth, textureHeight);
+    _vertices_quads[type] = sp<VerticesNinePatchQuads>::make(bounds, ninePatch, textureWidth, textureHeight);
 }
 
 const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesTriangleStrips(int32_t type) const

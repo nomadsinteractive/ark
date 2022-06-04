@@ -32,7 +32,7 @@ private:
     public:
         RendererPool(int32_t rendererWidth, int32_t rendererHeight);
 
-        const sp<Renderer>& ensureRenderer(RendererMaker& rendererMaker, int32_t x, int32_t y, const RectI& viewport);
+        const std::vector<sp<Renderer>>& ensureRenderer(RendererMaker& rendererMaker, int32_t x, int32_t y, const RectI& viewport);
 
     private:
         void recycleOutOfViewportRenderers(RendererMaker& rendererMaker, const RectI& viewport);
@@ -42,7 +42,7 @@ private:
 
         int32_t _renderer_width;
         int32_t _renderer_height;
-        std::map<RendererKey, sp<Renderer>> _renderers;
+        std::map<RendererKey, std::vector<sp<Renderer>>> _renderers;
     };
 
 public:

@@ -18,8 +18,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN(String);
 
     String(const char* s);
-    String(const std::string& str);
-    String(std::string&& str);
+    String(std::string str);
     ~String();
 
     String& operator =(const char* other);

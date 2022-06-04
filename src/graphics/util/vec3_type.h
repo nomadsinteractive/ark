@@ -54,6 +54,8 @@ public:
     static void set(const sp<Vec3>& self, const V3& val);
 
 //  [[script::bindings::property]]
+    static V3 val(const sp<Vec3>& self);
+//  [[script::bindings::property]]
     static V3 xyz(const sp<Vec3>& self);
 //  [[script::bindings::property]]
     static void setXyz(const sp<Vec3>& self, const V3& xyz);

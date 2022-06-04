@@ -518,12 +518,18 @@ class Camera:
         pass
 
 
+class Text:
+    def __init__(self, value):
+        pass
+
+    @property
+    def val(self) -> str:
+        return ''
+
+
 class Boolean(_Var):
     def __init__(self, value):
         _Var.__init__(self, value)
-
-    def ternary(self, positive, negative):
-        pass
 
     def toggle(self):
         pass
@@ -1440,9 +1446,9 @@ class Tileset:
         pass
 
 
-class TilemapLayer:
+class TilemapLayer(Renderer):
     def __init__(self, layer: Layer, tileset: Tileset, name: str, row_count: int, col_count: int, position: Optional[TYPE_VEC3] = None, scroller: Optional[TYPE_VEC3] = None, flag: int = 0):
-        pass
+        super().__init__()
 
     @property
     def position(self) -> Optional[Vec3]:

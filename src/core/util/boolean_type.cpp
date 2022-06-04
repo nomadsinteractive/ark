@@ -35,7 +35,7 @@ public:
     }
 
     virtual sp<Boolean> build(const Scope& args) override {
-        return BooleanUtil::negative(_a1->build(args));
+        return BooleanType::negative(_a1->build(args));
     }
 
 private:
@@ -108,111 +108,96 @@ static bool _operator_not(bool val)
 
 }
 
-sp<Boolean> BooleanUtil::create(const sp<Boolean>& value)
+sp<Boolean> BooleanType::create(const sp<Boolean>& value)
 {
     return sp<BooleanWrapper>::make(value);
 }
 
-sp<Boolean> BooleanUtil::create(bool value)
+sp<Boolean> BooleanType::create(bool value)
 {
     return sp<BooleanWrapper>::make(value);
 }
 
-sp<Boolean> BooleanUtil::__and__(const sp<Boolean>& self, const sp<Boolean>& rvalue)
+sp<Boolean> BooleanType::__and__(const sp<Boolean>& self, const sp<Boolean>& rvalue)
 {
     return sp<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::And<bool>>>::make(self, rvalue);
 }
 
-sp<Boolean> BooleanUtil::__or__(const sp<Boolean>& self, const sp<Boolean>& rvalue)
+sp<Boolean> BooleanType::__or__(const sp<Boolean>& self, const sp<Boolean>& rvalue)
 {
     return sp<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::Or<bool>>>::make(self, rvalue);
 }
 
-sp<Boolean> BooleanUtil::negative(const sp<Boolean>& self)
+sp<Boolean> BooleanType::negative(const sp<Boolean>& self)
 {
     return sp<VariableOP1<bool>>::make(_operator_not, self);
 }
 
-bool BooleanUtil::toBool(const sp<Boolean>& self)
+bool BooleanType::toBool(const sp<Boolean>& self)
 {
     return self->val();
 }
 
-bool BooleanUtil::val(const sp<Boolean>& self)
+bool BooleanType::val(const sp<Boolean>& self)
 {
     return self->val();
 }
 
-void BooleanUtil::setVal(const sp<Boolean::Impl>& self, bool value)
+void BooleanType::setVal(const sp<Boolean::Impl>& self, bool value)
 {
     self->set(value);
 }
 
-void BooleanUtil::setVal(const sp<BooleanWrapper>& self, bool value)
+void BooleanType::setVal(const sp<BooleanWrapper>& self, bool value)
 {
     self->set(value);
 }
 
-const sp<Boolean>& BooleanUtil::delegate(const sp<Boolean>& self)
+const sp<Boolean>& BooleanType::delegate(const sp<Boolean>& self)
 {
     const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
     DWARN(ib, "Non-BooleanWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
     return ib ? ib->delegate() : sp<Boolean>::null();
 }
 
-void BooleanUtil::setDelegate(const sp<Boolean>& self, const sp<Boolean>& delegate)
+void BooleanType::setDelegate(const sp<Boolean>& self, const sp<Boolean>& delegate)
 {
     const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
     DCHECK(ib, "Must be a BooleanWrapper instance to set its delegate attribute");
     ib->set(delegate);
 }
 
-void BooleanUtil::set(const sp<Boolean::Impl>& self, bool value)
+void BooleanType::set(const sp<Boolean::Impl>& self, bool value)
 {
     self->set(value);
 }
 
-void BooleanUtil::set(const sp<BooleanWrapper>& self, bool value)
+void BooleanType::set(const sp<BooleanWrapper>& self, bool value)
 {
     self->set(value);
 }
 
-void BooleanUtil::set(const sp<BooleanWrapper>& self, const sp<Boolean>& delegate)
+void BooleanType::set(const sp<BooleanWrapper>& self, const sp<Boolean>& delegate)
 {
     self->set(delegate);
 }
 
-void BooleanUtil::toggle(const sp<Boolean::Impl>& self)
+void BooleanType::toggle(const sp<Boolean::Impl>& self)
 {
     self->set(!self->val());
 }
 
-void BooleanUtil::toggle(const sp<BooleanWrapper>& self)
+void BooleanType::toggle(const sp<BooleanWrapper>& self)
 {
     self->set(!self->val());
 }
 
-sp<Boolean> BooleanUtil::observe(const sp<Boolean>& self, const sp<Observer>& observer)
+sp<Boolean> BooleanType::observe(const sp<Boolean>& self, const sp<Observer>& observer)
 {
     return sp<VariableObserver<bool>>::make(self, observer);
 }
 
-sp<Numeric> BooleanUtil::ternary(const sp<Boolean>& self, const sp<Numeric>& postive, const sp<Numeric>& negative)
-{
-    return sp<VariableTernary<float>>::make(self, postive, negative);
-}
-
-sp<Vec2> BooleanUtil::ternary(const sp<Boolean>& self, const sp<Vec2>& postive, const sp<Vec2>& negative)
-{
-    return sp<VariableTernary<V2>>::make(self, postive, negative);
-}
-
-sp<Vec3> BooleanUtil::ternary(const sp<Boolean>& self, const sp<Vec3>& postive, const sp<Vec3>& negative)
-{
-    return sp<VariableTernary<V3>>::make(self, postive, negative);
-}
-
-void BooleanUtil::fix(const sp<Boolean>& self)
+void BooleanType::fix(const sp<Boolean>& self)
 {
     const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
     DWARN(ib, "Calling fix on non-BooleanWrapper has no effect.");
@@ -220,27 +205,27 @@ void BooleanUtil::fix(const sp<Boolean>& self)
         ib->fix();
 }
 
-BooleanUtil::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
+BooleanType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
     : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, expr.strip()))
 {
     DCHECK(_value, "Boolean expression compile failed: %s", expr.c_str());
 }
 
-sp<Boolean> BooleanUtil::DICTIONARY::build(const Scope& args)
+sp<Boolean> BooleanType::DICTIONARY::build(const Scope& args)
 {
     return _value->build(args);
 }
 
-BooleanUtil::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+BooleanType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, getValue(manifest))) {
 }
 
-sp<Boolean> BooleanUtil::BUILDER::build(const Scope& args)
+sp<Boolean> BooleanType::BUILDER::build(const Scope& args)
 {
     return _value->build(args);
 }
 
-String BooleanUtil::BUILDER::getValue(const document& manifest) const
+String BooleanType::BUILDER::getValue(const document& manifest) const
 {
     DCHECK(!manifest->getAttribute(Constants::Attributes::CLASS), "Document \"%s\" has class named \"%s\", which cannot been built into a Boolean object",
            Documents::toString(manifest).c_str(), manifest->getAttribute(Constants::Attributes::CLASS)->value().c_str());

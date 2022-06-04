@@ -31,8 +31,8 @@ void Scrollable::render(RenderRequest& renderRequest, const V3& position)
     for(int32_t i = sy; i < ey; i += _params._renderer_height)
         for(int32_t j = sx; j < ex; j += _params._renderer_width)
         {
-            const sp<Renderer>& renderer = _renderer_pool.ensureRenderer(_renderer_maker, j, i, viewportCache);
-            renderer->render(renderRequest, position);
+            for(const sp<Renderer>& k : _renderer_pool.ensureRenderer(_renderer_maker, j, i, viewportCache))
+                k->render(renderRequest, position);
         }
 }
 
@@ -83,13 +83,13 @@ Scrollable::RendererPool::RendererPool(int32_t rendererWidth, int32_t rendererHe
 {
 }
 
-const sp<Renderer>& Scrollable::RendererPool::ensureRenderer(RendererMaker& rendererMaker, int32_t x, int32_t y, const RectI& viewport)
+const std::vector<sp<Renderer>>& Scrollable::RendererPool::ensureRenderer(RendererMaker& rendererMaker, int32_t x, int32_t y, const RectI& viewport)
 {
     const auto iter = _renderers.find(RendererKey(x, y));
     if(iter != _renderers.end())
         return iter->second;
 
-    sp<Renderer> renderer = rendererMaker.make(x, y);
+    std::vector<sp<Renderer>> renderer = rendererMaker.make(x, y);
     recycleOutOfViewportRenderers(rendererMaker, viewport);
     return _renderers[RendererKey(x, y)] = std::move(renderer);
 }
@@ -101,7 +101,8 @@ void Scrollable::RendererPool::recycleOutOfViewportRenderers(RendererMaker& rend
         const RendererKey& key = iter->first;
         if(!viewport.intersect(RectI(key.first, key.second, key.first + _renderer_width, key.second + _renderer_height)))
         {
-            rendererMaker.recycle(iter->second);
+            for(const sp<Renderer>& i : iter->second)
+                rendererMaker.recycle(i);
             if((iter = _renderers.erase(iter)) == _renderers.end())
                 break;
         }

@@ -131,17 +131,16 @@ bool RendererImgui::onEvent(const Event& event)
                 case Event::CODE_KEYBOARD_BACKSPACE:
                     updateKeyStatus(io, ImGuiKey_Backspace, isKeyDown);
                     break;
+                case Event::CODE_KEYBOARD_ENTER:
+                    updateKeyStatus(io, ImGuiKey_Enter, isKeyDown);
+                    break;
                 default:
                     break;
             }
-            if(!isKeyDown)
-                break;
+            break;
         }
-    case Event::ACTION_KEY_REPEAT:
-        if(event.code() < Event::CODE_NO_ASCII) {
-            wchar_t c = event.toCharacter();
-            io.AddInputCharacter(static_cast<ImWchar>(io.KeyShift ? std::toupper(c) : c));
-        }
+    case Event::ACTION_TEXT_INPUT:
+        io.AddInputCharactersUTF8(event.textInput());
         break;
     default:
         break;
@@ -160,8 +159,8 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
     {
         const ImDrawList* cmd_list = draw_data->CmdLists[i];
 
-        bytearray vb = sp<ByteArray::Borrowed>::make(renderRequest.allocator().sbrk(cmd_list->VtxBuffer.size_in_bytes()));
-        bytearray ib = sp<ByteArray::Borrowed>::make(renderRequest.allocator().sbrk(cmd_list->IdxBuffer.size_in_bytes()));
+        bytearray vb = sp<ByteArray::Borrowed>::make(renderRequest.allocator().sbrk(static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes())));
+        bytearray ib = sp<ByteArray::Borrowed>::make(renderRequest.allocator().sbrk(static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes())));
 
         memcpy(vb->buf(), cmd_list->VtxBuffer.Data, static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes()));
         memcpy(ib->buf(), cmd_list->IdxBuffer.Data, static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes()));

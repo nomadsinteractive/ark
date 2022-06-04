@@ -42,6 +42,8 @@ void StateMachine::activateCommand(Command& command)
 {
     DCHECK(command.state() != Command::STATE_ACTIVATED, "Illegal state, Command has been executed already");
     command.setState(Command::STATE_ACTIVATED);
+    if(command.commandGroup())
+        command.commandGroup()->resolveConflicts(command, Command::STATE_ACTIVATED, Command::STATE_SUPPRESSED);
     if(command.mask())
         _active_state->resolveConflicts(command, Command::STATE_ACTIVATED, Command::STATE_SUPPRESSED);
 }
@@ -56,7 +58,7 @@ void StateMachine::deactivateCommand(Command& command)
         transit(*_active_state->_fallback);
 }
 
-const std::vector<sp<State> >& StateMachine::states() const
+const std::vector<sp<State>>& StateMachine::states() const
 {
     return _states;
 }

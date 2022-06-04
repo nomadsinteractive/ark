@@ -8,6 +8,7 @@
 #include "core/forwarding.h"
 #include "core/base/observer.h"
 #include "core/base/string.h"
+#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -65,6 +66,9 @@ public:
     void spacing();
 // [[script::bindings::auto]]
     void text(const String& name);
+
+// [[script::bindings::auto]]
+    sp<Observer> inputText(String label, sp<Text::Impl> value, size_t maxLength = 64, int32_t flags = 0);
 
 // [[script::bindings::auto]]
     void inputInt(const String& label, const sp<Integer>& value, int32_t step = 1, int32_t step_fast = 100, int32_t flags = 0);

@@ -9,9 +9,17 @@ RendererTile::RendererTile()
 {
 }
 
-RendererTile::RendererTile(const sp<Renderer>& renderer, int32_t offset)
-    : _renderer(renderer), _layout_event_listener(renderer.as<LayoutEventListener>()), _offset(offset), _position(-1)
+RendererTile::RendererTile(std::vector<sp<Renderer> > renderers, int32_t offset)
+    : _renderers(std::move(renderers)), _layout_event_listeners(makeLayoutEventListeners()), _offset(offset), _position(-1)
 {
+}
+
+bool RendererTile::onEvent(const Event& event, float x, float y, bool ptin)
+{
+    for(const sp<LayoutEventListener>& i : _layout_event_listeners)
+        if(i->onEvent(event, x, y, ptin))
+            return true;
+    return false;
 }
 
 int32_t RendererTile::offset() const
@@ -39,26 +47,33 @@ void RendererTile::setPosition(int32_t position)
     _position = position;
 }
 
-void RendererTile::setRenderer(sp<Renderer> renderer)
+void RendererTile::setRenderer(std::vector<sp<Renderer>> renderers)
 {
-    _layout_event_listener = renderer.as<LayoutEventListener>();
-    _renderer = std::move(renderer);
+    _renderers = std::move(renderers);
+    _layout_event_listeners = makeLayoutEventListeners();
 }
 
 void RendererTile::render(RenderRequest& renderRequest, const V3& position)
 {
-    if(_renderer)
-        _renderer->render(renderRequest, position);
+    for(const sp<Renderer>& i : _renderers)
+        i->render(renderRequest, position);
 }
 
-const sp<LayoutEventListener>& RendererTile::layoutEventListener() const
+std::vector<sp<LayoutEventListener>> RendererTile::makeLayoutEventListeners() const
 {
-    return _layout_event_listener;
+    std::vector<sp<LayoutEventListener>> listeners;
+    for(const sp<Renderer>& i : _renderers)
+    {
+        sp<LayoutEventListener> layoutEventListener = i.as<LayoutEventListener>();
+        if(layoutEventListener)
+            listeners.push_back(std::move(layoutEventListener));
+    }
+    return listeners;
 }
 
-ark::RendererTile::operator bool() const
+RendererTile::operator bool() const
 {
-    return static_cast<bool>(_renderer);
+    return _renderers.size() > 0;
 }
 
 RollingList::RollingList(uint32_t itemCount)
@@ -73,7 +88,7 @@ RollingList::~RollingList()
 
 void RollingList::roll(int32_t offset)
 {
-    _head = (_head + (offset >= 0 ? offset : offset + _item_count)) % _item_count;
+    _head = (_head + (offset >= 0 ? static_cast<uint32_t>(offset) : offset + _item_count)) % _item_count;
 }
 
 RendererTile& RollingList::operator[](uint32_t index)

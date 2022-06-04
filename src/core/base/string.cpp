@@ -18,12 +18,7 @@ String::String(const char* s)
 {
 }
 
-String::String(const std::string& str)
-    : _str(str)
-{
-}
-
-String::String(std::string&& str)
+String::String(std::string str)
     : _str(std::move(str))
 {
 }

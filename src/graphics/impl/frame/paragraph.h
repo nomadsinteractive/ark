@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_IMPL_FRAME_TEXT_H_
-#define ARK_GRAPHICS_IMPL_FRAME_TEXT_H_
+#ifndef ARK_GRAPHICS_IMPL_FRAME_PARAGRAPH_H_
+#define ARK_GRAPHICS_IMPL_FRAME_PARAGRAPH_H_
 
 #include "core/inf/builder.h"
 #include "core/types/safe_ptr.h"
@@ -16,15 +16,15 @@
 namespace ark {
 
 //[[core::class]]
-class Text : public Renderer, public Block {
+class Paragraph : public Renderer, public Block {
 public:
-    Text(const sp<Characters>& characters);
+    Paragraph(const sp<Characters>& characters);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     virtual const sp<Size>& size() override;
 
-//  [[plugin::builder("text")]]
+//  [[plugin::builder("paragraph")]]
     class BUILDER : public Builder<Renderer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
@@ -34,7 +34,7 @@ public:
     private:
         sp<Builder<Characters>> _characters;
         sp<Builder<LayoutParam>> _layout_param;
-        SafePtr<Builder<String>> _text;
+        SafePtr<Builder<String>> _string;
     };
 
 private:

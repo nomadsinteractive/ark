@@ -31,9 +31,17 @@ void AtlasImporterGenericXML::import(Atlas& atlas, const sp<Readable>& /*readabl
         float oh = static_cast<float>(Documents::getAttribute<uint32_t>(i, "oH", h));
         float px = Documents::getAttribute<float>(i, "pX", _px);
         float py = Documents::getAttribute<float>(i, "pY", _py);
-        Rect bounds(ox / ow, oy / oh, (ox + w) / ow, (oy + h) / oh);
+        Rect bounds(static_cast<float>(ox) / ow, static_cast<float>(oy) / oh, static_cast<float>(ox + w) / ow, static_cast<float>(oy + h) / oh);
         bounds.vflip(1.0f);
         atlas.add(n, x, y, x + w, y + h, bounds, V2(ow, oh), V2(px, 1.0f - py));
+
+        const String s9 = Documents::getAttribute(i, "s9", "");
+        if(s9.length() > 0)
+        {
+            const Rect s9Rect = Strings::parse<Rect>(s9);
+            Atlas::AttachmentNinePatch& aNinePatch = atlas.attachments().ensure<Atlas::AttachmentNinePatch>();
+            aNinePatch.addNinePatch(n, atlas.width(), atlas.height(), Rect(s9Rect.left(), s9Rect.top(), s9Rect.left() + s9Rect.right(), s9Rect.top() + s9Rect.bottom()), atlas);
+        }
     }
 }
 

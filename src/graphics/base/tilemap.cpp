@@ -29,15 +29,17 @@ public:
         : _tilemap(tilemap), _delegate(std::move(delegate)) {
     }
 
-    virtual sp<Renderer> make(int32_t x, int32_t y) override {
-        sp<Renderer> renderer = _delegate->make(x, y);
-        sp<TilemapLayer> tilemapLayer = renderer.as<TilemapLayer>();
-        DWARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
-        if(tilemapLayer) {
-            tilemapLayer->setFlag(static_cast<Tilemap::LayerFlag>(tilemapLayer->flag() | Tilemap::LAYER_FLAG_INVISIBLE));
-            _tilemap.addLayer(tilemapLayer);
+    virtual std::vector<sp<Renderer>> make(int32_t x, int32_t y) override {
+        std::vector<sp<Renderer>> renderers = _delegate->make(x, y);
+        for(const sp<Renderer>& i : renderers) {
+            sp<TilemapLayer> tilemapLayer = i.as<TilemapLayer>();
+            DWARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
+            if(tilemapLayer) {
+                tilemapLayer->setFlag(static_cast<Tilemap::LayerFlag>(tilemapLayer->flag() | Tilemap::LAYER_FLAG_INVISIBLE));
+                _tilemap.addLayer(tilemapLayer);
+            }
         }
-        return renderer;
+        return renderers;
     }
 
     virtual void recycle(const sp<Renderer>& renderer) override {

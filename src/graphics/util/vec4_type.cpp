@@ -70,6 +70,11 @@ sp<Vec4> Vec4Type::integral(const sp<Vec4>& self, const sp<Numeric>& t)
     return sp<Integral<V4>>::make(self, std::move(duration));
 }
 
+sp<Numeric> Vec4Type::distanceTo(const sp<Vec4>& self, const sp<Vec4>& other)
+{
+    return Math::distance(self, other);
+}
+
 void Vec4Type::set(const sp<VariableWrapper<V4>>& self, const V4& val)
 {
     self->set(val);
@@ -83,6 +88,11 @@ void Vec4Type::set(const sp<VariableWrapper<V4>>& self, const sp<Vec4>& val)
 void Vec4Type::set(const sp<Vec4>& self, const V4& val)
 {
     ensureImpl(self)->set(val);
+}
+
+V4 Vec4Type::val(const sp<Vec4>& self)
+{
+    return self->val();
 }
 
 V3 Vec4Type::xyz(const sp<Vec4>& self)

@@ -53,7 +53,7 @@ bool VerticalScrollable::onEvent(const Event& event, float x, float y, bool ptin
         RendererTile& tile = _tiles[(i - _grid_position) / _tile_height];
         ensureTile(tile, i);
         float ty = y + toTileOffset(tile.offset(), gs);
-        if(tile.layoutEventListener() && tile.layoutEventListener()->onEvent(event, x, ty, ptin && event.y() >= ty && event.y() <= ty + _tile_height))
+        if(tile.onEvent(event, x, ty, ptin && event.y() >= ty && event.y() <= ty + _tile_height))
             return true;
     }
     return false;

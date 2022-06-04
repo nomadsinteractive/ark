@@ -22,6 +22,7 @@ public:
         ACTION_WHEEL,
         ACTION_BACK_PRESSED,
         ACTION_CANCEL,
+        ACTION_TEXT_INPUT,
         ACTION_USER_DEFINED = 10000
     };
 
@@ -64,7 +65,7 @@ public:
         CODE_KEYBOARD_7,
         CODE_KEYBOARD_8,
         CODE_KEYBOARD_9,
-        CODE_KEYBOARD_F1,
+        CODE_KEYBOARD_F1 = 250,
         CODE_KEYBOARD_F2,
         CODE_KEYBOARD_F3,
         CODE_KEYBOARD_F4,
@@ -86,6 +87,17 @@ public:
         CODE_KEYBOARD_TAB = '\t',
         CODE_KEYBOARD_SPACE = ' ',
         CODE_KEYBOARD_GRAVE = '`',
+        CODE_KEYBOARD_COMMA = ',',
+        CODE_KEYBOARD_PERIOD = '.',
+        CODE_KEYBOARD_SLASH = '/',
+        CODE_KEYBOARD_SEMICOLON = ';',
+        CODE_KEYBOARD_APOSTROPHE = '\'',
+        CODE_KEYBOARD_MINUS = '-',
+        CODE_KEYBOARD_EQUALS = '=',
+        CODE_KEYBOARD_LEFTBRACKET = '[',
+        CODE_KEYBOARD_RIGHTBRACKET = ']',
+        CODE_KEYBOARD_BACKSLASH = '\\',
+
         CODE_KEYBOARD_DELETE = 224,
         CODE_NO_ASCII = 1000,
         CODE_KEYBOARD_LSHIFT,
@@ -108,6 +120,23 @@ public:
         BUTTON_MOTION_POINTER4
     };
 
+    enum Constant {
+        CONSTANT_TEXT_INPUT_TEXT_SIZE = 32
+    };
+
+    struct KeyboardInfo {
+        KeyboardInfo(Code code, wchar_t character);
+
+        Code _code;
+        wchar_t _character;
+    };
+
+    struct TextInputInfo {
+        TextInputInfo(const String& text);
+
+        char _text[CONSTANT_TEXT_INPUT_TEXT_SIZE];
+    };
+
     struct ButtonInfo {
         ButtonInfo(const V2& xy, Button which);
 
@@ -124,11 +153,13 @@ public:
     };
 
     union EventInfo {
-        EventInfo(Code code);
+        EventInfo(const TextInputInfo& textInput);
+        EventInfo(const KeyboardInfo& keyboard);
         EventInfo(const ButtonInfo& button);
         EventInfo(const MotionInfo& motion);
 
-        Code _code;
+        TextInputInfo _text_input;
+        KeyboardInfo _keyboard;
         ButtonInfo _button;
         MotionInfo _motion;
     };
@@ -156,7 +187,8 @@ public:
 //  [[script::bindings::property]]
     Event::Button button() const;
 
-    wchar_t toCharacter() const;
+    wchar_t character() const;
+    const char* textInput() const;
 
 private:
     Action _action;

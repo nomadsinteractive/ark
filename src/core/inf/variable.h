@@ -34,8 +34,8 @@ public:
         return _timestamp.update(timestamp);
     }
 
-    void set(const T& value) {
-        _value = value;
+    void set(T value) {
+        _value = std::move(value);
         _timestamp.setDirty();
     }
 

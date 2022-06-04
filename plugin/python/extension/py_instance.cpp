@@ -14,24 +14,24 @@ PyInstance::PyInstance()
 {
 }
 
-PyInstance::PyInstance(const sp<PyInstanceRef>& ref)
-    : _ref(ref)
+PyInstance::PyInstance(sp<PyInstanceRef> ref)
+    : _ref(std::move(ref))
 {
 }
 
 PyInstance PyInstance::borrow(PyObject* object)
 {
-    return PyInstance(sp<Borrowed>::make(object));
+    return PyInstance(object ? sp<Borrowed>::make(object) : nullptr);
 }
 
 PyInstance PyInstance::steal(PyObject* object)
 {
-    return PyInstance(sp<Stolen>::make(object));
+    return PyInstance(object ? sp<Stolen>::make(object) : nullptr);
 }
 
 PyInstance PyInstance::own(PyObject* object)
 {
-    return PyInstance(sp<Owned>::make(object));
+    return PyInstance(object ? sp<Owned>::make(object) : nullptr);
 }
 
 PyInstance PyInstance::track(PyObject* object)
@@ -89,9 +89,19 @@ bool PyInstance::isCallable() const
     return PyCallable_Check(_ref->instance()) != 0;
 }
 
+bool PyInstance::isList() const
+{
+    return PyList_Check(_ref->instance()) != 0;
+}
+
 bool PyInstance::isNone() const
 {
     return _ref != nullptr && _ref->instance() == Py_None;
+}
+
+bool PyInstance::isNullptr() const
+{
+    return _ref == nullptr;
 }
 
 PyObject* PyInstance::pyObject() const

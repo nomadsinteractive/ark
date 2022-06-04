@@ -12,15 +12,9 @@
 
 #include "app/forwarding.h"
 #include "app/inf/layout.h"
+#include "app/inf/layout_event_listener.h"
 
 namespace ark {
-
-class ARK_API LayoutEventListener {
-public:
-    virtual ~LayoutEventListener() = default;
-
-    virtual bool onEvent(const Event& event, float x, float y, bool ptin) = 0;
-};
 
 class LayoutHierarchy : public Holder {
 private:

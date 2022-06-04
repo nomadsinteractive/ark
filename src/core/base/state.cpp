@@ -3,6 +3,7 @@
 #include "core/base/command.h"
 #include "core/base/command_group.h"
 #include "core/inf/runnable.h"
+#include "core/util/log.h"
 
 namespace ark {
 

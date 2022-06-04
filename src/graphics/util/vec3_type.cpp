@@ -174,6 +174,11 @@ void Vec3Type::set(const sp<Vec3>& self, const V3& val)
     ensureImpl(self)->set(val);
 }
 
+V3 Vec3Type::val(const sp<Vec3>& self)
+{
+    return self->val();
+}
+
 V3 Vec3Type::xyz(const sp<Vec3>& self)
 {
     return self->val();
@@ -339,8 +344,7 @@ sp<Vec3> Vec3Type::integral(const sp<Vec3>& self, const sp<Numeric>& t)
 
 sp<Numeric> Vec3Type::distanceTo(const sp<Vec3>& self, const sp<Vec3>& other)
 {
-    sp<Vec3> delta = sub(self, other);
-    return Math::sqrt(Math::dot(delta, delta));
+    return Math::distance(self, other);
 }
 
 sp<Vec3Impl> Vec3Type::ensureImpl(const sp<Vec3>& self)

@@ -41,12 +41,17 @@ public:
     static sp<Vec4> integral(const sp<Vec4>& self, const sp<Numeric>& t = nullptr);
 
 //  [[script::bindings::classmethod]]
+    static sp<Numeric> distanceTo(const sp<Vec4>& self, const sp<Vec4>& other);
+
+//  [[script::bindings::classmethod]]
     static void set(const sp<VariableWrapper<V4>>& self, const V4& val);
 //  [[script::bindings::classmethod]]
     static void set(const sp<VariableWrapper<V4>>& self, const sp<Vec4>& val);
 //  [[script::bindings::classmethod]]
     static void set(const sp<Vec4>& self, const V4& val);
 
+//  [[script::bindings::property]]
+    static V4 val(const sp<Vec4>& self);
 //  [[script::bindings::property]]
     static V3 xyz(const sp<Vec4>& self);
 //  [[script::bindings::property]]

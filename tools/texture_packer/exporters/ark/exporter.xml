@@ -63,7 +63,7 @@
 	
 	<!-- origin of the coordinate system of a sprite in the target framework,
          needed for pivot point placement. (default=TopLeft) -->
-    <spriteOrigin>BottomLeft</spriteOrigin> <!-- TopLeft or BottomLeft -->
+    <spriteOrigin>TopLeft</spriteOrigin> <!-- TopLeft or BottomLeft -->
 
     <!-- ui properties -->
     <properties>

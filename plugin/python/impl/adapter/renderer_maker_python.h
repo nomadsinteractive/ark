@@ -19,7 +19,7 @@ public:
     RendererMakerPython(PyInstance maker);
     RendererMakerPython(PyInstance maker, PyInstance recycler);
 
-    virtual sp<Renderer> make(int32_t x, int32_t y) override;
+    virtual std::vector<sp<Renderer>> make(int32_t x, int32_t y) override;
     virtual void recycle(const sp<Renderer>& renderer) override;
 
     virtual void traverse(const Visitor& visitor) override;

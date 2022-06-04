@@ -42,9 +42,12 @@ private:
 
 class RendererMakerImpl : public RendererMaker {
 public:
-    virtual sp<Renderer> make(int32_t x, int32_t y) override {
+    virtual std::vector<sp<Renderer>> make(int32_t x, int32_t y) override {
         printf("makeTile(%d, %d)\n", x, y);
-        return sp<TileRendererImpl>::make(x, y);
+        return {sp<TileRendererImpl>::make(x, y)};
+    }
+
+    virtual void recycle(const sp<Renderer>& /*renderer*/) override {
     }
 };
 
@@ -52,7 +55,7 @@ public:
 
 class TilesTestCase : public TestCase {
 public:
-    virtual int launch() {
+    virtual int launch() override {
         const sp<BeanFactory> beanFactory = this->getBeanFactory();
         const sp<RendererMaker> rendererMaker = sp<RendererMakerImpl>::make();
         const sp<Scope> args = sp<Scope>::make();

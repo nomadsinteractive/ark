@@ -190,7 +190,14 @@ public:
             case SDL_KEYDOWN:
             case SDL_KEYUP:
                 {
-                    Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_KEYDOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), timestamp, sdlScanCodeToEventCode(event.key.keysym.scancode));
+                    Event::KeyboardInfo keyboardInfo(sdlScanCodeToEventCode(event.key.keysym.scancode), static_cast<wchar_t>(event.key.keysym.sym));
+                    Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_KEYDOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), timestamp, keyboardInfo);
+                    _application.onEvent(e);
+                    break;
+                }
+            case SDL_TEXTINPUT:
+                {
+                    Event e(Event::ACTION_TEXT_INPUT, timestamp, Event::TextInputInfo(event.text.text));
                     _application.onEvent(e);
                     break;
                 }
@@ -248,6 +255,26 @@ public:
             return Event::CODE_KEYBOARD_LSHIFT;
         case SDL_SCANCODE_RSHIFT:
             return Event::CODE_KEYBOARD_RSHIFT;
+        case SDL_SCANCODE_COMMA:
+            return Event::CODE_KEYBOARD_COMMA;
+        case SDL_SCANCODE_PERIOD:
+            return Event::CODE_KEYBOARD_PERIOD;
+        case SDL_SCANCODE_SLASH:
+            return Event::CODE_KEYBOARD_SLASH;
+        case SDL_SCANCODE_SEMICOLON:
+            return Event::CODE_KEYBOARD_SEMICOLON;
+        case SDL_SCANCODE_APOSTROPHE:
+            return Event::CODE_KEYBOARD_APOSTROPHE;
+        case SDL_SCANCODE_MINUS:
+            return Event::CODE_KEYBOARD_MINUS;
+        case SDL_SCANCODE_EQUALS:
+            return Event::CODE_KEYBOARD_EQUALS;
+        case SDL_SCANCODE_LEFTBRACKET:
+            return Event::CODE_KEYBOARD_LEFTBRACKET;
+        case SDL_SCANCODE_RIGHTBRACKET:
+            return Event::CODE_KEYBOARD_RIGHTBRACKET;
+        case SDL_SCANCODE_BACKSLASH:
+            return Event::CODE_KEYBOARD_BACKSLASH;
         default:
             break;
         }

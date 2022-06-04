@@ -45,7 +45,7 @@ uint64_t Event::timestamp() const
 
 Event::Code Event::code() const
 {
-    return _info._code;
+    return _info._keyboard._code;
 }
 
 Event::Button Event::button() const
@@ -53,13 +53,33 @@ Event::Button Event::button() const
     return _info._button._which;
 }
 
-wchar_t Event::toCharacter() const
+wchar_t Event::character() const
 {
-    return static_cast<wchar_t>(_info._code);
+    return _info._keyboard._character;
 }
 
-Event::EventInfo::EventInfo(Event::Code code)
-    : _code(code)
+const char* Event::textInput() const
+{
+    return _info._text_input._text;
+}
+
+Event::TextInputInfo::TextInputInfo(const String& text)
+{
+    std::strncpy(_text, text.c_str(), sizeof(_text));
+}
+
+Event::KeyboardInfo::KeyboardInfo(Code code, wchar_t character)
+    : _code(code), _character(character)
+{
+}
+
+Event::EventInfo::EventInfo(const TextInputInfo& textInput)
+    : _text_input(textInput)
+{
+}
+
+Event::EventInfo::EventInfo(const KeyboardInfo& keyboard)
+    : _keyboard(keyboard)
 {
 }
 

@@ -595,7 +595,7 @@ class GenMethod(object):
                         dvalue = 'nullptr'
                 elif j.default_value is not None:
                     dmap = {'true': '1', 'false': '0'}
-                    if j.typename in ('uint32_t', 'int32_t', 'float'):
+                    if j.typename in ('uint32_t', 'int32_t', 'float', 'size_t'):
                         dvalue = j.default_value if j.default_value not in dmap else dmap[j.default_value]
                     elif realtypename == 'bool' and j.accept_type == 'bool':
                         dvalue = 'true' if j.default_value == 'true' else 'false'
@@ -1409,7 +1409,7 @@ def main(params, paths):
 
     def autoenumeration(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
-        for i in x[1].split(','):
+        for i in x[1].split(',\n'):
             varname = i.split('=')[0].strip()
             if varname:
                 genclass.add_constant(varname, '%s::%s' % (main_class, varname))

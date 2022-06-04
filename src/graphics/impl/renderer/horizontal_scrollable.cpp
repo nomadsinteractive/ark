@@ -47,7 +47,7 @@ bool HorizontalScrollable::onEvent(const Event& event, float x, float y, bool pt
     {
         RendererTile& tile = _tiles[(i - _grid_position) / _tile_width];
         ensureTile(tile, i);
-        if(tile.layoutEventListener() && tile.layoutEventListener()->onEvent(event, x + tile.offset() - gs, y, ptin))
+        if(tile.onEvent(event, x + tile.offset() - gs, y, ptin))
             return true;
     }
     return false;

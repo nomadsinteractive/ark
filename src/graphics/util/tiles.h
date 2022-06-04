@@ -7,21 +7,22 @@
 #include "graphics/forwarding.h"
 #include "graphics/inf/tile_maker.h"
 
+#include "app/inf/layout_event_listener.h"
+
 namespace ark {
 
-class LayoutEventListener;
-
-class RendererTile {
+class RendererTile : public LayoutEventListener{
 public:
     RendererTile();
-    RendererTile(const sp<Renderer>& renderer, int32_t offset);
+    RendererTile(std::vector<sp<Renderer>> renderers, int32_t offset);
 
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RendererTile);
+
+    virtual bool onEvent(const Event& event, float x, float y, bool ptin) override;
 
     explicit operator bool() const;
 
     int32_t offset() const;
-
     void setOffset(int32_t offset);
 
     void roll(int32_t offset);
@@ -29,18 +30,18 @@ public:
     int32_t position() const;
     void setPosition(int32_t position);
 
-    void setRenderer(sp<Renderer> renderer);
+    void setRenderer(std::vector<sp<Renderer>> renderers);
     void render(RenderRequest& renderRequest, const V3& position);
 
-    const sp<LayoutEventListener>& layoutEventListener() const;
+private:
+    std::vector<sp<LayoutEventListener>> makeLayoutEventListeners() const;
 
 private:
-    sp<Renderer> _renderer;
-    sp<LayoutEventListener> _layout_event_listener;
+    std::vector<sp<Renderer>> _renderers;
+    std::vector<sp<LayoutEventListener>> _layout_event_listeners;
 
     int32_t _offset;
     int32_t _position;
-
 };
 
 class RollingList {

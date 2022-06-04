@@ -215,7 +215,7 @@ private:
         return [this, pyObj](Args... args) -> R {
             PyInstance tuple = PyInstance::steal(makeArgumentTuple<Args...>(args...));
             PyInstance result = PyInstance::steal(pyObj.call(tuple.pyObject()));
-            if(!result.pyObject())
+            if(result.isNullptr())
                 logErr();
             return toCppObject<R>(result.pyObject());
         };
@@ -245,7 +245,7 @@ private:
         return PyLong_FromLong(value);
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, bool>::value && std::is_unsigned<T>::value>::type*) {
-        return PyLong_FromUnsignedLong(value);
+        return PyLong_FromUnsignedLong(static_cast<uint32_t>(value));
     }
     template<typename T> PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_floating_point<T>::value>::type*) {
         return PyFloat_FromDouble(value);
@@ -262,7 +262,7 @@ private:
         Py_ssize_t len = PyObject_Length(obj);
         DCHECK(len != -1, "Object \"%s\" has no length", Py_TYPE(obj)->tp_name);
         for(Py_ssize_t i = 0; i < len; ++i) {
-            PyObject* key = PyLong_FromLong(i);
+            PyObject* key = PyLong_FromLong(static_cast<int32_t>(i));
             PyObject* item = PyObject_GetItem(obj, key);
             col.push_back(toCppObject<U>(item));
             Py_XDECREF(item);

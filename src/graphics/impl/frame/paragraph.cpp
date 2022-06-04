@@ -1,4 +1,4 @@
-#include "graphics/impl/frame/text.h"
+#include "graphics/impl/frame/paragraph.h"
 
 #include "core/base/bean_factory.h"
 #include "core/util/documents.h"
@@ -11,37 +11,37 @@
 
 namespace ark {
 
-Text::Text(const sp<Characters>& characters)
+Paragraph::Paragraph(const sp<Characters>& characters)
     : _characters(characters)
 {
 }
 
-void Text::render(RenderRequest& /*pipeline*/, const V3& position)
+void Paragraph::render(RenderRequest& /*pipeline*/, const V3& position)
 {
     _characters->renderRequest(position);
 }
 
-const sp<Size>& Text::size()
+const sp<Size>& Paragraph::size()
 {
     return _characters->layoutParam()->size();
 }
 
-Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+Paragraph::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _characters(factory.ensureConcreteClassBuilder<Characters>(manifest, "characters")), _layout_param(factory.ensureBuilder<LayoutParam>(manifest)),
-      _text(factory.getBuilder<String>(manifest, Constants::Attributes::TEXT))
+      _string(factory.getBuilder<String>(manifest, Constants::Attributes::TEXT))
 {
 }
 
-sp<Renderer> Text::BUILDER::build(const Scope& args)
+sp<Renderer> Paragraph::BUILDER::build(const Scope& args)
 {
     const sp<Characters> chars = _characters->build(args);
     const sp<LayoutParam> layoutParam = _layout_param->build(args);
-    const sp<String> text = _text->build(args);
+    const sp<String> string = _string->build(args);
     if(layoutParam)
         chars->setLayoutParam(layoutParam);
-    if(text)
-        chars->setText(Strings::fromUTF8(text));
-    return sp<Text>::make(chars);
+    if(string)
+        chars->setText(Strings::fromUTF8(string));
+    return sp<Paragraph>::make(chars);
 }
 
 }

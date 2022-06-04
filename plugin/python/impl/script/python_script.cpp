@@ -122,7 +122,7 @@ void PythonScript::run(const sp<Asset>& script, const Scope& vars)
     addScopeToDict(globals, vars);
     PyInstance co = PyInstance::steal(Py_CompileStringExFlags(Strings::loadFromReadable(script->open()).c_str(), script->location().c_str(), Py_file_input, nullptr, -1));
     PyInstance v = PyInstance::steal(PyEval_EvalCode(co.pyObject(), globals, globals));
-    if (v.pyObject() == nullptr)
+    if (v.isNullptr() || v.pyObject() == nullptr)
     {
         PythonInterpreter::instance()->logErr();
         return;

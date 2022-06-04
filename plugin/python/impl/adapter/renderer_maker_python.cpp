@@ -18,7 +18,7 @@ RendererMakerPython::RendererMakerPython(PyInstance maker, PyInstance recycler)
 {
 }
 
-sp<Renderer> RendererMakerPython::make(int32_t x, int32_t y)
+std::vector<sp<Renderer>> RendererMakerPython::make(int32_t x, int32_t y)
 {
     DCHECK_THREAD_FLAG();
 
@@ -27,17 +27,18 @@ sp<Renderer> RendererMakerPython::make(int32_t x, int32_t y)
     PyObject* pyY = PythonInterpreter::instance()->toPyObject<int32_t>(y);
     PyTuple_SetItem(args.pyObject(), 0, pyX);
     PyTuple_SetItem(args.pyObject(), 1, pyY);
-    PyObject* ret = _maker.call(args.pyObject());
-    if(ret)
+    PyInstance ret = PyInstance::steal(_maker.call(args.pyObject()));
+    if(!ret.isNullptr())
     {
-        const sp<Renderer> renderer = PythonInterpreter::instance()->toSharedPtr<Renderer>(ret);
-        Py_DECREF(ret);
-        return renderer;
+        if(ret.isList())
+            return PythonInterpreter::instance()->toCppObject<std::vector<sp<Renderer>>>(ret.pyObject());
+
+        return {PythonInterpreter::instance()->toSharedPtr<Renderer>(ret.pyObject())};
     }
     else
         PythonInterpreter::instance()->logErr();
 
-    return nullptr;
+    return {};
 }
 
 void RendererMakerPython::recycle(const sp<Renderer>& renderer)

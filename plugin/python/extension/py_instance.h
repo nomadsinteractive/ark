@@ -17,7 +17,7 @@ namespace python {
 class PyInstance {
 public:
     PyInstance();
-    PyInstance(const sp<PyInstanceRef>& ref);
+    PyInstance(sp<PyInstanceRef> ref);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PyInstance);
 
     static PyInstance borrow(PyObject* object);
@@ -40,7 +40,10 @@ public:
     PyObject* call(PyObject* args) const;
 
     bool isCallable() const;
+    bool isList() const;
+
     bool isNone() const;
+    bool isNullptr() const;
 
     void clear();
 
