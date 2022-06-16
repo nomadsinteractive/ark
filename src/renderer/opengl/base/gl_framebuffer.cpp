@@ -119,7 +119,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-Resource::RecycleFunc GLFramebuffer::recycle()
+ResourceRecycleFunc GLFramebuffer::recycle()
 {
     uint32_t id = _id;
     _id = 0;

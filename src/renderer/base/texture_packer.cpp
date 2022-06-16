@@ -82,7 +82,7 @@ void TexturePacker::PackedTextureUploader::upload(GraphicsContext& graphicsConte
     for(const PackedBitmap& i : _bitmaps)
     {
         const bitmap s = i._bitmap_provider->val();
-        content->draw(s->bytes()->buf(), s->width(), s->height(), i._x, i._y, s->rowBytes());
+        content->draw(i._x, i._y, s->bytes()->buf(), s->width(), s->height(), s->rowBytes());
     }
     delegate.uploadBitmap(graphicsContext, content, {content->bytes()});
 }

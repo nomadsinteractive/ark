@@ -10,7 +10,7 @@ Use it for:
 
 """
 
-from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple
+from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'ModelLoader', 'Numeric', 'NarrowPhrase',
                            'Layer', 'Vec2', 'Vec3', 'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
@@ -72,6 +72,8 @@ class ModelLoader:
 
 
 class _Var:
+    def __init__(self, val: Any):
+        pass
 
     @property
     def val(self):
@@ -323,7 +325,10 @@ class Atlas:
     def has(self, c: int) -> bool:
         pass
 
-    def get_original_size(self, c:  int) -> tuple:
+    def get_original_size(self, c:  int) -> Tuple[float, float]:
+        pass
+
+    def get_pivot(self, c:  int) -> Tuple[float, float]:
         pass
 
     def add_importer(self, importer: AtlasImporter, readable: Optional[Readable] = None):
@@ -526,6 +531,9 @@ class Text:
     def val(self) -> str:
         return ''
 
+    def set(self, val: str):
+        pass
+
 
 class Boolean(_Var):
     def __init__(self, value):
@@ -589,10 +597,10 @@ class Numeric(_Var):
 
 class Integer(_Var):
     REPEAT_NONE = 0
-    REPEAT_LAST = 1
-    REPEAT_RESTART = 2
-    REPEAT_REVERSE = 3
-    REPEAT_REVERSE_RESTART = 4
+    REPEAT_REVERSE = 1
+    REPEAT_LOOP = 4
+    REPEAT_LAST = 8
+    REPEAT_NOTIFY = 16
 
     def __init__(self, value: Union[int, 'Integer', Numeric]):
         super().__init__(value)
@@ -602,6 +610,10 @@ class Integer(_Var):
 
     @staticmethod
     def repeat(array: List[int], repeat: int) -> 'ExpectationI':
+        pass
+
+    @staticmethod
+    def to_repeat(repeat: str) -> int:
         pass
 
     def if_else(self, condition: Boolean, negative: 'Integer') -> 'Integer':
@@ -1105,7 +1117,7 @@ class Clock:
 
 
 class Event:
-    ACTION_KEY_NONE = 0
+    ACTION_NONE = 0
     ACTION_KEY_DOWN = 1
     ACTION_KEY_UP = 2
     ACTION_KEY_REPEAT = 3
@@ -1362,7 +1374,11 @@ class Math:
 
     @staticmethod
     def lerp(a, b, t):
-        return 0
+        pass
+
+    @staticmethod
+    def bezier(p0, p1, p2, t):
+        pass
 
     @staticmethod
     def quadratic(a, b, c):
@@ -1395,7 +1411,7 @@ class Size(Vec3):
 
 
 class Tile:
-    def __init__(self, _id: int, _type: int = 0, render_object: Optional[RenderObject] = None):
+    def __init__(self, id_: int, type_: str = '', shape_id: int = -1, width: int = 0, height: int = 0, render_object_id: int = 0):
         pass
 
     @property
@@ -1403,11 +1419,19 @@ class Tile:
         return 0
 
     @property
-    def type(self) -> int:
-        return 0
+    def type(self) -> str:
+        return ''
 
     @type.setter
-    def type(self, t):
+    def type(self, t: str):
+        pass
+
+    @property
+    def shape_id(self) -> int:
+        return 0
+
+    @shape_id.setter
+    def shape_id(self, shape_id: int):
         pass
 
     @property
@@ -1427,6 +1451,10 @@ class Tileset:
     def __init__(self, tile_width: int, tile_height: int):
         self._tile_width = tile_width
         self._tile_height = tile_height
+
+    @property
+    def tiles(self) -> Dict[int, Tile]:
+        return {}
 
     @property
     def tile_width(self) -> int:
@@ -1670,6 +1698,12 @@ class Visibility:
     def visible(self, v):
         self._visible = v
 
+    def show(self):
+        pass
+
+    def hide(self):
+        pass
+
 
 class Platform:
     @staticmethod
@@ -1771,6 +1805,23 @@ class SurfaceController:
 
     def add_layer(self, renderer: Renderer):
         pass
+
+
+class CollisionFilter:
+    def __init__(self, category_bits: int = 1, mask_bits: int = 0xffffffff, group_index: int = 0):
+        pass
+
+    @property
+    def category_bits(self) -> int:
+        return 0
+
+    @property
+    def mask_bits(self) -> int:
+        return 0
+
+    @property
+    def group_index(self) -> int:
+        return 0
 
 
 class CollisionManifold:

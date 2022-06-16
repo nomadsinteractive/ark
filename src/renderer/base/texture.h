@@ -80,19 +80,7 @@ public:
         CONSTANT getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, Texture::CONSTANT defValue);
     };
 
-    class ARK_API Delegate : public Resource {
-    public:
-        Delegate(Type type);
-        virtual ~Delegate() = default;
-
-        Type type() const;
-
-        virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) = 0;
-        virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) = 0;
-
-    private:
-        Type _type;
-    };
+    class Delegate;
 
     class ARK_API Uploader {
     public:
@@ -100,6 +88,24 @@ public:
 
         virtual void upload(GraphicsContext& graphicsContext, Delegate& delegate) = 0;
 
+    };
+
+    class ARK_API Delegate {
+    public:
+        Delegate(Type type);
+        virtual ~Delegate() = default;
+
+        Type type() const;
+
+        virtual uint64_t id() = 0;
+        virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) = 0;
+        virtual ResourceRecycleFunc recycle() = 0;
+
+        virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) = 0;
+        virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) = 0;
+
+    private:
+        Type _type;
     };
 
     class ARK_API UploaderBitmap : public Uploader {
@@ -112,12 +118,12 @@ public:
         bitmap _bitmap;
     };
 
-    Texture(sp<Delegate> delegate, sp<Size> size, sp<Parameters> parameters);
+    Texture(sp<Delegate> delegate, sp<Size> size, sp<Uploader> uploader, sp<Parameters> parameters);
     ~Texture() override;
 
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext, const sp<ark::Uploader>& uploader) override;
-    virtual RecycleFunc recycle() override;
+    virtual ResourceRecycleFunc recycle() override;
 
     Type type() const;
     Usage usage() const;
@@ -136,6 +142,8 @@ public:
     const sp<Delegate>& delegate() const;
     void setDelegate(sp<Delegate> delegate);
     void setDelegate(sp<Delegate> delegate, sp<Size> size);
+
+    const sp<Uploader>& uploader() const;
 
     const Notifier& notifier() const;
 
@@ -175,6 +183,7 @@ public:
 private:
     sp<Delegate> _delegate;
     sp<Size> _size;
+    sp<Uploader> _uploader;
     sp<Parameters> _parameters;
 
     Notifier _notifier;

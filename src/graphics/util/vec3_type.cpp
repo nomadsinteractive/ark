@@ -318,7 +318,7 @@ sp<Vec3> Vec3Type::attract(const sp<Vec3>& self, const V3& s0, float duration, c
 
 sp<Vec3> Vec3Type::lerp(const sp<Vec3>& self, const sp<Vec3>& b, const sp<Numeric>& t)
 {
-    return sp<Interpolate<V3>>::make(self, b, sp<Vec3Impl>::make(t, t, t));
+    return sp<Interpolate<V3, float>>::make(self, b, t);
 }
 
 sp<Vec3> Vec3Type::cross(const sp<Vec3>& self, const sp<Vec3>& other)

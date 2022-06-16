@@ -30,7 +30,7 @@ void GLRenderbuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploa
         glGenRenderbuffers(1, &_id);
 }
 
-Resource::RecycleFunc GLRenderbuffer::recycle()
+ResourceRecycleFunc GLRenderbuffer::recycle()
 {
     uint32_t id = _id;
     _id = 0;

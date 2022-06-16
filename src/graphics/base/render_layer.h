@@ -30,7 +30,7 @@ private:
     public:
         LayerContextFilter(const sp<LayerContext>& item, sp<Notifier> notifier);
 
-        FilterAction operator() (uint64_t ) const;
+        FilterAction operator() () const;
 
     private:
         WeakPtr<LayerContext> _item;

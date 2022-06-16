@@ -26,11 +26,12 @@ public:
     class ARK_API Item {
     public:
         Item();
-        Item(uint16_t ux, uint16_t uy, uint16_t vx, uint16_t vy, const Rect& bounds, const V2& size);
+        Item(uint16_t ux, uint16_t uy, uint16_t vx, uint16_t vy, const Rect& bounds, const V2& size, const V2& pivot);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
 
         const Rect& bounds() const;
         const V2& size() const;
+        const V2& pivot() const;
 
         Rect uv() const;
 
@@ -44,6 +45,7 @@ public:
         uint16_t _vx, _vy;
         Rect _bounds;
         V2 _size;
+        V2 _pivot;
     };
 
     void loadItem(const document& manifest);
@@ -61,7 +63,12 @@ public:
 //  [[script::bindings::auto]]
     const V2& getOriginalSize(int32_t c) const;
 //  [[script::bindings::auto]]
+    const V2& getPivot(int32_t c) const;
+//  [[script::bindings::auto]]
     Rect getItemUV(int32_t c) const;
+
+//  [[script::bindings::auto]]
+    sp<BitmapBundle> makeBitmapBundle() const;
 
 //  [[script::bindings::auto]]
     void addImporter(const sp<AtlasImporter>& importer, const sp<Readable>& readable = nullptr);

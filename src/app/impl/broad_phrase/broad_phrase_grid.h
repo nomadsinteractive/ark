@@ -17,9 +17,10 @@ namespace ark {
 
 class BroadPhraseGrid : public BroadPhrase {
 public:
-    BroadPhraseGrid(uint32_t dimension, const V3& cell);
+    BroadPhraseGrid(int32_t dimension, const V3& cell);
 
-    virtual sp<Vec3> create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& size) override;
+    virtual void create(int32_t id, const V3& position, const V3& aabb) override;
+    virtual void update(int32_t id, const V3& position, const V3& aabb) override;
     virtual void remove(int32_t id) override;
 
     virtual Result search(const V3& position, const V3& size) override;
@@ -62,7 +63,7 @@ public:
 
     class Stub {
     public:
-        Stub(uint32_t dimension, const V3& cell);
+        Stub(int32_t dimension, const V3& cell);
         ~Stub();
 
         void remove(int32_t id);
@@ -72,7 +73,7 @@ public:
         std::unordered_set<int32_t> search(const V3& position, const V3& size) const;
 
     private:
-        uint32_t _dimension;
+        int32_t _dimension;
         Axis* _axes;
     };
 
@@ -84,40 +85,9 @@ public:
         virtual sp<BroadPhrase> build(const Scope& args) override;
 
     private:
-        uint32_t _dimension;
+        int32_t _dimension;
         sp<Builder<Vec3>> _cell;
 
-    };
-
-private:
-    class TrackedPosition : public Vec3 {
-    public:
-        TrackedPosition(int32_t id, const sp<BroadPhraseGrid::Stub>& stub, const sp<Vec3>& position, const sp<Vec3>& size)
-            : _id(id), _stub(stub), _position(position), _size(size) {
-            const V3 p = _position->val();
-            const V3 s = _size->val();
-            _stub->create(_id, p, s);
-        }
-        ~TrackedPosition() override {
-            _stub->remove(_id);
-        }
-
-        virtual V3 val() override {
-            const V3 p = _position->val();
-            const V3 s = _size->val();
-            _stub->update(_id, p, s);
-            return p;
-        }
-
-        virtual bool update(uint64_t timestamp) override {
-            return VariableUtil::update(timestamp, _position, _size);
-        }
-
-    private:
-        int32_t _id;
-        sp<BroadPhraseGrid::Stub> _stub;
-        sp<Vec3> _position;
-        sp<Vec3> _size;
     };
 
 private:

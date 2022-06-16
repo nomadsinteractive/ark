@@ -234,7 +234,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
 
     glViewport(0, 0, width, height);
     glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-    for (uint32_t i = 0; i < 6; ++i)
+    for(uint32_t i = 0; i < 6; ++i)
     {
         glPipeline->getUniform("u_View").setUniformMatrix4fv(1, GL_FALSE, reinterpret_cast<const GLfloat*>(&captureViews[i]));
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, id, 0);
@@ -256,7 +256,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
 
 void GLUtil::glTexImage2D(uint32_t index, int32_t n, void* data)
 {
-    ::glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + index), 0, (GLint) GL_RGBA8, n, n, 0, GL_RGBA, GL_FLOAT, data);
+    ::glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + index), 0, static_cast<GLint>(GL_RGBA8), n, n, 0, GL_RGBA, GL_FLOAT, data);
 }
 
 }

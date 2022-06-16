@@ -200,13 +200,16 @@ public:
 //  [[script::bindings::auto]]
     static ARK_API float lerp(float a, float b, float t);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> lerp(const sp<Numeric>& a, const sp<Numeric>& b, const sp<Numeric>& t);
+    static ARK_API sp<Numeric> lerp(sp<Numeric> a, sp<Numeric> b, sp<Numeric> t);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Vec2> lerp(const sp<Vec2>& a, const sp<Vec2>& b, const sp<Numeric>& t);
+    static ARK_API sp<Vec2> lerp(sp<Vec2> a, sp<Vec2> b, sp<Numeric> t);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Vec3> lerp(const sp<Vec3>& a, const sp<Vec3>& b, const sp<Numeric>& t);
+    static ARK_API sp<Vec3> lerp(sp<Vec3> a, sp<Vec3> b, sp<Numeric> t);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Vec4> lerp(const sp<Vec4>& a, const sp<Vec4>& b, const sp<Numeric>& t);
+    static ARK_API sp<Vec4> lerp(sp<Vec4> a, sp<Vec4> b, sp<Numeric> t);
+
+//  [[script::bindings::auto]]
+    static ARK_API sp<Vec2> bezier(sp<Vec2> p0, sp<Vec2> p1, sp<Vec2> p2, sp<Numeric> t);
 
 //  [[script::bindings::auto]]
     static ARK_API V3 quadratic(float a, float b, float c);

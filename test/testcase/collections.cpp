@@ -18,7 +18,7 @@ class CollectionsTestCase : public TestCase {
 public:
     virtual int launch() override {
         sp<Disposed> expirable = sp<Disposed>::make();
-        DisposableItemList<uint32_t> expirableList;
+        DList<uint32_t> expirableList;
 
         for(uint32_t i = 0; i < 10; i++)
         {

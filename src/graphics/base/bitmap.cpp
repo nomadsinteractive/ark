@@ -48,9 +48,14 @@ uint8_t Bitmap::channels() const
     return _channels;
 }
 
+uint32_t Bitmap::componentSize() const
+{
+    return _row_bytes / _width;
+}
+
 uint32_t Bitmap::depth() const
 {
-    return _row_bytes / _channels / _width;
+    return componentSize() / _channels;
 }
 
 uint32_t Bitmap::rowBytes() const
@@ -90,7 +95,7 @@ Bitmap Bitmap::crop(uint32_t x, uint32_t y, uint32_t w, uint32_t h) const
     return s;
 }
 
-void Bitmap::draw(void* buf, uint32_t width, uint32_t height, int32_t x, int32_t y, uint32_t stride)
+void Bitmap::draw(int32_t x, int32_t y, void* buf, uint32_t width, uint32_t height, uint32_t stride)
 {
     if(buf == nullptr || width == 0 || height == 0)
         return;

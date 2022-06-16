@@ -1,6 +1,8 @@
 #ifndef ARK_RENDERER_BASE_FORWARDING_H_
 #define ARK_RENDERER_BASE_FORWARDING_H_
 
+#include <functional>
+
 #include "core/forwarding.h"
 
 namespace ark {
@@ -9,6 +11,7 @@ class Animation;
 class AnimationInput;
 class Atlas;
 class Attribute;
+class BitmapBundle;
 class Buffer;
 class Characters;
 class ComputeContext;
@@ -53,6 +56,8 @@ class Uploader;
 
 //[[script::bindings::auto]]
 typedef Importer<Atlas> AtlasImporter;
+
+typedef std::function<void(GraphicsContext&)> ResourceRecycleFunc;
 
 }
 

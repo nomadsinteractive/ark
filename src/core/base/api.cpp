@@ -30,7 +30,7 @@ void __warning__(const char* func, const char* format, ...)
 
 void __trace__()
 {
-    LOGD(">>>__TRACE HERE___<<<");
+     LOGD(">>>__TRACE HERE___<<<");
 }
 
 }

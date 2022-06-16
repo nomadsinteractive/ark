@@ -14,7 +14,7 @@ bool EventListenerList::onEvent(const Event& event)
 {
     for(auto iter = _event_listeners.begin(); iter != _event_listeners.end(); )
     {
-        DisposableItemList<EventListener>& eventListener = iter->second;
+        DList<EventListener>& eventListener = iter->second;
         if(eventListener.items().size() == 0)
             iter = _event_listeners.erase(iter);
         else

@@ -16,6 +16,11 @@ Tileset::Tileset(uint32_t tileWidth, uint32_t tileHeight, const sp<TilesetImport
 {
 }
 
+const std::unordered_map<int32_t, sp<Tile>>& Tileset::tiles() const
+{
+    return _tiles;
+}
+
 uint32_t Tileset::tileWidth() const
 {
     return _tile_width;

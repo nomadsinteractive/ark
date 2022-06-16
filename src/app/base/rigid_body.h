@@ -53,6 +53,7 @@ public:
         SafePtr<Disposed> _disposed;
 
         sp<Callback> _callback;
+        sp<CollisionFilter> _collision_filter;
         WeakPtr<RenderObject> _render_object;
 
         Box _tag;
@@ -76,6 +77,8 @@ public:
     int32_t id() const;
 //  [[script::bindings::property]]
     Collider::BodyType type() const;
+//  [[script::bindings::property]]
+    Collider::BodyType rigidType() const;
 //  [[script::bindings::property]]
     int32_t shapeId() const;
 
@@ -112,7 +115,12 @@ public:
 //  [[script::bindings::property]]
     const sp<CollisionCallback>& collisionCallback() const;
 //  [[script::bindings::property]]
-    void setCollisionCallback(const sp<CollisionCallback>& collisionCallback);
+    void setCollisionCallback(sp<CollisionCallback> collisionCallback);
+
+//  [[script::bindings::property]]
+    const sp<CollisionFilter>& collisionFilter() const;
+//  [[script::bindings::property]]
+    void setCollisionFilter(sp<CollisionFilter> collisionFilter);
 
     const sp<Stub>& stub() const;
     const sp<Callback>& callback() const;

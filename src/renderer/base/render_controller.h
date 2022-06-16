@@ -44,8 +44,8 @@ public:
 private:
     template<typename T> class SynchronizedVar : public Updatable {
     public:
-        SynchronizedVar(const sp<Variable<T>>& delegate)
-            : _delegate(delegate), _var(sp<typename Variable<T>::Impl>::make(_delegate->val())) {
+        SynchronizedVar(sp<Variable<T>> delegate)
+            : _delegate(std::move(delegate)), _var(sp<typename Variable<T>::Impl>::make(_delegate->val())) {
         }
 
         const sp<typename Variable<T>::Impl>& var() const {
@@ -100,10 +100,10 @@ public:
 
     sp<Framebuffer> makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
 
-    template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& disposed) {
-        const sp<SynchronizedVar<T>> s = sp<SynchronizedVar<T>>::make(delegate);
+    template<typename T> sp<Variable<T>> synchronize(sp<Variable<T>> delegate, sp<Boolean> disposed) {
+        const sp<SynchronizedVar<T>> s = sp<SynchronizedVar<T>>::make(std::move(delegate));
         const sp<Variable<T>>& var = s->var();
-        _on_pre_updatable.push_back(s, disposed ? disposed : sp<Boolean>::make<BooleanByWeakRef<Variable<T>>>(var, 1));
+        _on_pre_updatable.push_back(s, disposed ? std::move(disposed) : sp<Boolean>::make<BooleanByWeakRef<Variable<T>>>(var, 1));
         return var;
     }
 
@@ -175,8 +175,8 @@ private:
     LFQueue<PreparingResource> _preparing_items;
     std::set<RenderResource> _on_surface_ready_items;
 
-    DisposableItemList<Updatable> _on_pre_updatable;
-    DisposableItemList<Runnable> _on_pre_update_request;
+    DList<Updatable> _on_pre_updatable;
+    DList<Runnable> _on_pre_update_request;
 
     std::vector<Box> _defered_instances;
     std::unordered_map<element_index_t, sp<SharedBuffer>> _shared_buffers;

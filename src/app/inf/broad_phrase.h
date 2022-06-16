@@ -8,6 +8,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v3.h"
@@ -20,14 +21,15 @@ class ARK_API BroadPhrase {
 public:
     struct Candidate {
         Candidate() = default;
-        Candidate(int32_t id, const V2& position, float rotation, int32_t shapeId, std::vector<Box> shapes)
-            : id(id), position(position), rotation(rotation), shape_id(shapeId), shapes(std::move(shapes)) {
+        Candidate(int32_t id, const V2& position, float rotation, int32_t shapeId, sp<CollisionFilter> collisionFilter, std::vector<Box> shapes)
+            : id(id), position(position), rotation(rotation), shape_id(shapeId), _collision_filter(std::move(collisionFilter)), shapes(std::move(shapes)) {
         }
 
         int32_t id;
         V2 position;
         float rotation;
         int32_t shape_id;
+        sp<CollisionFilter> _collision_filter;
         std::vector<Box> shapes;
     };
 
@@ -49,7 +51,8 @@ public:
 public:
     virtual ~BroadPhrase() = default;
 
-    virtual sp<Vec3> create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& aabb) = 0;
+    virtual void create(int32_t id, const V3& position, const V3& aabb) = 0;
+    virtual void update(int32_t id, const V3& position, const V3& aabb) = 0;
     virtual void remove(int32_t id) = 0;
 
     virtual Result search(const V3& position, const V3& aabb) = 0;

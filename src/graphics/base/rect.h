@@ -149,7 +149,7 @@ private:
         T rightX = std::min(_right, other._right);
         T topY = std::max(_top, other._top);
         T bottomY = std::min(_bottom, other._bottom);
-        if(leftX < rightX && topY < bottomY) {
+        if((leftX < rightX || (other._left == other._right && leftX == rightX)) && (topY < bottomY || (other._top == other._bottom && topY == bottomY))) {
             intersection = RectT(leftX, topY, rightX, bottomY);
             return true;
         }

@@ -11,9 +11,9 @@
 
 namespace ark {
 
-template<typename T> class Interpolate : public Variable<T>, public Holder, Implements<Interpolate<T>, Variable<T>, Holder> {
+template<typename T, typename U> class Interpolate : public Variable<T>, public Holder, Implements<Interpolate<T, U>, Variable<T>, Holder> {
 public:
-    Interpolate(sp<Variable<T>> a, sp<Variable<T>> b, sp<Variable<T>> v)
+    Interpolate(sp<Variable<T>> a, sp<Variable<T>> b, sp<Variable<U>> v)
         : _a(std::move(a)), _b(std::move(b)), _v(std::move(v)), _a_freezed(_a->val()), _delta_freezed(_b->val() - _a_freezed), _val(_a_freezed + _delta_freezed * _v->val()) {
     }
 
@@ -43,7 +43,7 @@ public:
 private:
     sp<Variable<T>> _a;
     sp<Variable<T>> _b;
-    sp<Variable<T>> _v;
+    sp<Variable<U>> _v;
 
     T _a_freezed;
     T _delta_freezed;

@@ -12,8 +12,7 @@ namespace opengl {
 
 class ARK_API GLCubemap : public GLTexture {
 public:
-    GLCubemap(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, std::vector<sp<Variable<bitmap>>> bitmaps);
-    GLCubemap(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader);
+    GLCubemap(sp<Recycler> recycler, sp<Size> size, sp<Texture::Parameters> parameters);
 
     virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
     virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;

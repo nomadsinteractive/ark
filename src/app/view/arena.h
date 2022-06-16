@@ -93,8 +93,8 @@ private:
     op<EventListenerList> _event_listeners;
     sp<ViewGroup> _view_group;
     sp<ResourceLoader> _resource_loader;
-    DisposableItemList<Renderer> _layers;
-    DisposableItemList<Renderer> _render_layers;
+    DList<Renderer> _layers;
+    DList<Renderer> _render_layers;
 };
 
 }

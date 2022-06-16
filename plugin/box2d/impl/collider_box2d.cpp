@@ -83,7 +83,7 @@ b2Body* ColliderBox2D::createBody(const b2BodyDef& bodyDef) const
 b2Body* ColliderBox2D::createBody(Collider::BodyType type, const V3& position, const sp<Size>& size, const BodyCreateInfo& createInfo) const
 {
     b2BodyDef bodyDef;
-    switch(type & Collider::BODY_TYPE_MASK)
+    switch(type & Collider::BODY_TYPE_RIGID)
     {
     case Collider::BODY_TYPE_DYNAMIC:
         bodyDef.type = b2_dynamicBody;

@@ -193,6 +193,29 @@ sp<Integer> IntegerType::wrap(const sp<Integer>& self)
     return sp<IntegerWrapper>::make(self);
 }
 
+int32_t IntegerType::toRepeat(const String& repeat)
+{
+    int32_t action = 0, flags = 0;
+    for(const String& i : repeat.split('|'))
+    {
+        const String s = i.strip().toLower();
+        if(s == "none")
+            action = IntegerType::REPEAT_NONE;
+        else if(s == "reverse")
+            action = IntegerType::REPEAT_REVERSE;
+        else if(s == "last")
+            flags |= IntegerType::REPEAT_LAST;
+        else if(s == "loop")
+            flags |= IntegerType::REPEAT_LOOP;
+        else
+        {
+            DCHECK(s == "notify", "Unknow Repeat: \"%s, supported enums are [\"none\", \"last\", \"reverse\", \"loop\", \"notify\"]", s.c_str());
+            flags |= IntegerType::REPEAT_NOTIFY;
+        }
+    }
+    return static_cast<IntegerType::Repeat>(action | flags);
+}
+
 sp<ExpectationI> IntegerType::repeat(std::vector<int32_t> array, IntegerType::Repeat repeat)
 {
     Notifier notifier;
@@ -265,15 +288,7 @@ sp<Integer> IntegerType::BUILDER::build(const Scope& args)
 
 template<> ARK_API IntegerType::Repeat Conversions::to<String, IntegerType::Repeat>(const String& str)
 {
-    const String repeat = str.toLower();
-    if(repeat == "restart")
-        return IntegerType::REPEAT_RESTART;
-    if(repeat == "reverse")
-        return IntegerType::REPEAT_REVERSE;
-    if(repeat == "reverse_restart")
-        return IntegerType::REPEAT_REVERSE_RESTART;
-    WARN(str == "none", "Unknow Repeat: \"%s, supported enums are [\"none\", \"restart\", \"reverse\", \"reverse_restart\", ...]", str.c_str());
-    return IntegerType::REPEAT_NONE;
+    return static_cast<IntegerType::Repeat>(IntegerType::toRepeat(str));
 }
 
 }

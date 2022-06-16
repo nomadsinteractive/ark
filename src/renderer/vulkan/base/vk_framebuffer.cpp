@@ -39,7 +39,7 @@ void VKFramebuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Upload
     _stub->initialize();
 }
 
-Resource::RecycleFunc VKFramebuffer::recycle()
+ResourceRecycleFunc VKFramebuffer::recycle()
 {
     const sp<VKDevice> device = _stub->_renderer->device();
 

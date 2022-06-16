@@ -13,7 +13,7 @@ namespace opengl {
 
 class GLTexture2D : public GLTexture {
 public:
-    GLTexture2D(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader);
+    GLTexture2D(sp<Recycler> recycler, sp<Size> size, sp<Texture::Parameters> parameters);
 
     virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
     virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;

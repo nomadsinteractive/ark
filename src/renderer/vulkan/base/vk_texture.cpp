@@ -17,15 +17,15 @@
 namespace ark {
 namespace vulkan {
 
-VKTexture::VKTexture(const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, uint32_t width, uint32_t height, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
-    : Texture::Delegate(parameters->_type), _recycler(recycler), _renderer(renderer), _width(width), _height(height), _parameters(parameters), _uploader(uploader), _num_faces(_parameters->_type == Texture::TYPE_2D ? 1 : 6),
-      _image(VK_NULL_HANDLE), _memory(VK_NULL_HANDLE), _descriptor{}
+VKTexture::VKTexture(sp<Recycler> recycler, sp<VKRenderer> renderer, uint32_t width, uint32_t height, sp<Texture::Parameters> parameters)
+    : Texture::Delegate(parameters->_type), _recycler(std::move(recycler)), _renderer(std::move(renderer)), _width(width), _height(height), _parameters(std::move(parameters)),
+      _num_faces(_parameters->_type == Texture::TYPE_2D ? 1 : 6), _image(VK_NULL_HANDLE), _memory(VK_NULL_HANDLE), _descriptor{}
 {
 }
 
 VKTexture::~VKTexture()
 {
-    _recycler->recycle(*this);
+    _recycler->recycle(doRecycle());
 }
 
 uint64_t VKTexture::id()
@@ -33,10 +33,10 @@ uint64_t VKTexture::id()
     return (uint64_t)(_image);
 }
 
-void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
+void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader)
 {
-    if(_uploader)
-        _uploader->upload(graphicsContext, *this);
+    if(uploader)
+        uploader->upload(graphicsContext, *this);
     else
     {
         Texture::Format format = _parameters->_format;
@@ -52,22 +52,9 @@ void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*u
     }
 }
 
-Resource::RecycleFunc VKTexture::recycle()
+ResourceRecycleFunc VKTexture::recycle()
 {
-    const sp<VKDevice> device = _renderer->device();
-    VkDescriptorImageInfo descriptor = _descriptor;
-    VkImage image = _image;
-    VkDeviceMemory memory = _memory;
-
-    _image = VK_NULL_HANDLE;
-    _memory = VK_NULL_HANDLE;
-
-    return [device, descriptor, image, memory](GraphicsContext&) {
-        vkDestroyImageView(device->vkLogicalDevice(), descriptor.imageView, nullptr);
-        vkDestroyImage(device->vkLogicalDevice(), image, nullptr);
-        vkDestroySampler(device->vkLogicalDevice(), descriptor.sampler, nullptr);
-        vkFreeMemory(device->vkLogicalDevice(), memory, nullptr);
-    };
+    return doRecycle();
 }
 
 bool VKTexture::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
@@ -349,6 +336,24 @@ void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const
     // Clean up staging resources
     vkFreeMemory(logicalDevice, stagingMemory, nullptr);
     vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
+}
+
+ResourceRecycleFunc VKTexture::doRecycle()
+{
+    const sp<VKDevice> device = _renderer->device();
+    VkDescriptorImageInfo descriptor = _descriptor;
+    VkImage image = _image;
+    VkDeviceMemory memory = _memory;
+
+    _image = VK_NULL_HANDLE;
+    _memory = VK_NULL_HANDLE;
+
+    return [device, descriptor, image, memory](GraphicsContext&) {
+        vkDestroyImageView(device->vkLogicalDevice(), descriptor.imageView, nullptr);
+        vkDestroyImage(device->vkLogicalDevice(), image, nullptr);
+        vkDestroySampler(device->vkLogicalDevice(), descriptor.sampler, nullptr);
+        vkFreeMemory(device->vkLogicalDevice(), memory, nullptr);
+    };
 }
 
 void VKTexture::copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, size_t imageDataSize)

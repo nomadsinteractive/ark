@@ -121,12 +121,12 @@ sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()
     return sp<PipelineFactoryOpenGL>::make();
 }
 
-sp<Texture::Delegate> RendererFactoryOpenGL::createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
+sp<Texture::Delegate> RendererFactoryOpenGL::createTexture(sp<Size> size, sp<Texture::Parameters> parameters)
 {
     if(parameters->_type == Texture::TYPE_2D)
-        return sp<GLTexture2D>::make(_recycler, size, sp<Texture::Parameters>::make(parameters), uploader);
+        return sp<GLTexture2D>::make(_recycler, std::move(size), std::move(parameters));
     else if(parameters->_type == Texture::TYPE_CUBEMAP)
-        return sp<GLCubemap>::make(_recycler, size, sp<Texture::Parameters>::make(parameters), uploader);
+        return sp<GLCubemap>::make(_recycler, std::move(size), std::move(parameters));
     DFATAL("Unsupported texture type: %d", parameters->_type);
     return nullptr;
 }

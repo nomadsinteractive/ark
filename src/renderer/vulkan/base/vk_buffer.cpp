@@ -57,7 +57,7 @@ void VKBuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uplo
     }
 }
 
-Resource::RecycleFunc VKBuffer::recycle()
+ResourceRecycleFunc VKBuffer::recycle()
 {
     const sp<VKDevice> device = _renderer->device();
     const sp<VKHeap> heap = _renderer->heap();

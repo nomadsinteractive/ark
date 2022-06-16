@@ -15,15 +15,18 @@ void TilesetImporterTsx::import(Tileset& tileset, const sp<Readable>& src)
     for(const document& i : manifest->children("tile"))
     {
         int32_t id = Documents::ensureAttribute<int32_t>(i, "id");
-        int32_t type = Documents::getAttribute<int32_t>(i, "type", 0);
+        String type = Documents::getAttribute(i, "type");
+        int32_t shapeId = Documents::getAttribute<int32_t>(i, "shape_id", -1);
         const document image = i->getChild("image");
         DASSERT(image);
+        uint32_t width = Documents::getAttribute<uint32_t>(image, "width", 0);
+        uint32_t height = Documents::getAttribute<uint32_t>(image, "height", 0);
         const String source = Documents::ensureAttribute(image, "source");
         String path, name;
         Strings::rcut(source, path, name, '/');
         String stem, ext;
         Strings::rcut(name, stem, ext, '.');
-        tileset.addTile(sp<Tile>::make(id, type, sp<RenderObject>::make(Strings::parse<int32_t>(stem))));
+        tileset.addTile(sp<Tile>::make(id, std::move(type), shapeId, width, height, Strings::parse<int32_t>(stem)));
     }
 }
 

@@ -14,50 +14,54 @@ IntegerByArray::IntegerByArray(const sp<IntArray>& array, IntegerType::Repeat re
 
 int32_t IntegerByArray::val()
 {
+    if(_position < 0)
+        return -1;
+
+    int32_t length = static_cast<int32_t>(_delegate->length());
+
+    if(_position >= length)
+        return -1;
+
     int32_t v = _delegate->buf()[_position];
     if(_step)
     {
-        int32_t length = static_cast<int32_t>(_delegate->length());
         _position += _step;
         if(_position == length)
         {
-            if(_repeat == IntegerType::REPEAT_NONE)
-            {
-                _step = 0;
-                _position = length - 1;
-                _notifier.notify();
-                return -1;
-            }
-            if(_repeat == IntegerType::REPEAT_LAST)
-            {
-                _step = 0;
-                _position = length - 1;
-                _notifier.notify();
-            }
-            else if(_repeat == IntegerType::REPEAT_RESTART)
-            {
-                _position = 0;
-                _notifier.notify();
-            }
-            else if(_repeat == IntegerType::REPEAT_REVERSE || _repeat == IntegerType::REPEAT_REVERSE_RESTART)
+            IntegerType::Repeat action = static_cast<IntegerType::Repeat>(_repeat & IntegerType::REPEAT_ACTION_MASK);
+            if(action == IntegerType::REPEAT_REVERSE)
             {
                 _position = length - 2;
                 _step = -1;
             }
+            else
+            {
+                if(_repeat & IntegerType::REPEAT_LAST)
+                {
+                    _step = 0;
+                    _position = length - 1;
+                }
+                else if(_repeat & IntegerType::REPEAT_LOOP)
+                    _position = 0;
+
+                if(_repeat & IntegerType::REPEAT_NOTIFY)
+                    _notifier.notify();
+            }
         }
         else if(_position == -1)
         {
-            if(_repeat == IntegerType::REPEAT_REVERSE)
+            if(_repeat & IntegerType::REPEAT_LAST)
             {
                 _position = 0;
                 _step = 0;
             }
-            else
+            else if(_repeat & IntegerType::REPEAT_LOOP)
             {
                 _position = 1;
                 _step = 1;
             }
-            _notifier.notify();
+            if(_repeat & IntegerType::REPEAT_NOTIFY)
+                _notifier.notify();
         }
     }
     return v;

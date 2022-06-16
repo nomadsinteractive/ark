@@ -33,7 +33,7 @@ public:
     };
 
 private:
-    DisposableItemList<Renderer> _items;
+    DVList<Renderer> _items;
 
 };
 

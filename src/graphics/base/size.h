@@ -14,7 +14,7 @@
 namespace ark {
 
 //[[script::bindings::holder]]
-//[[core::class]]
+//[[script::bindings::extends(Vec3)]]
 class ARK_API Size : public Vec3, public Holder {
 public:
     Size();

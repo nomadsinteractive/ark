@@ -1,5 +1,5 @@
-#ifndef ARK_APP_UTIL_SHAPE_CUTE_C2_IMPL_H_
-#define ARK_APP_UTIL_SHAPE_CUTE_C2_IMPL_H_
+#ifndef ARK_APP_UTIL_SHAPE_CUTE_C2_H_
+#define ARK_APP_UTIL_SHAPE_CUTE_C2_H_
 
 #include <vector>
 
@@ -8,16 +8,21 @@
 #include "graphics/forwarding.h"
 
 #include "app/forwarding.h"
+#include "app/base/collision_filter.h"
 
 namespace ark {
 
 class ShapeCuteC2 {
 public:
     ShapeCuteC2();
-    ShapeCuteC2(const ShapeCuteC2& other, const V2& translate, float rotation);
 
     bool collideManifold(const ShapeCuteC2& other, CollisionManifold& collisionManifold) const;
     bool rayCastManifold(const c2Ray& ray, RayCastManifold& rayCastManifold) const;
+
+    ShapeCuteC2 transform(const V2& position, float rotation) const;
+
+    uint32_t width;
+    uint32_t height;
 
     C2_TYPE t;
     union {
@@ -28,8 +33,12 @@ public:
     } s;
     c2x x;
 
+    CollisionFilter _collision_filter;
+
 private:
-    void transform(const V2& position, float rotation);
+    ShapeCuteC2(const ShapeCuteC2& other, const V2& translate, float rotation);
+
+    void doTransform(const V2& position, float rotation);
 };
 
 }

@@ -22,6 +22,11 @@ void PyVecDuckType::to(sp<Vec3>& inst)
     inst = PythonInterpreter::instance()->toCppObject<sp<Vec3>>(_instance.pyObject());
 }
 
+void PyVecDuckType::to(sp<Size>& inst)
+{
+    inst = PythonInterpreter::instance()->toCppObject<sp<Size>>(_instance.pyObject());
+}
+
 void PyVecDuckType::to(sp<Vec4>& inst)
 {
     inst = PythonInterpreter::instance()->toCppObject<sp<Vec4>>(_instance.pyObject());

@@ -32,7 +32,7 @@ void GLVertexArray::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
     LOGD("id = %d", _id);
 }
 
-Resource::RecycleFunc GLVertexArray::recycle()
+ResourceRecycleFunc GLVertexArray::recycle()
 {
     uint32_t id = _id;
     _id = 0;

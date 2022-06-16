@@ -182,7 +182,7 @@ void TilemapLayer::foreachTile(const std::function<bool (uint32_t, uint32_t, con
         for(uint32_t j = 0; j < _col_count; ++j)
         {
             const LayerTile& layerTile = _layer_tiles.at(i * _col_count + j);
-            if(layerTile.tile && !callback(i, j, layerTile.tile))
+            if(layerTile.tile && !callback(j, i, layerTile.tile))
                 return;
         }
 }
@@ -207,11 +207,12 @@ void TilemapLayer::setTile(uint32_t row, uint32_t col, const sp<Tile>& tile, con
 {
     DCHECK(row < _row_count && col < _col_count, "Invaild tile position:(%d, %d), tilemap size(%d, %d)", row, col, _row_count, _col_count);
     uint32_t index = row * _col_count + col;
-    const sp<RenderObject>& ro = renderObject ? renderObject : (tile ? tile->renderObject() : nullptr);
+    const sp<RenderObject>& ro = renderObject ? renderObject : (tile ? tile->ensureRenderObject() : nullptr);
     sp<RenderablePassive> renderable = (ro && _layer_context) ? sp<RenderablePassive>::make(ro) : nullptr;
     if(renderable)
         _layer_context->add(renderable, sp<BooleanByWeakRef<Renderable>>::make(renderable, 1));
-    _layer_tiles[index] = LayerTile(renderObject ? sp<Tile>::make(tile ? tile->id() : 0, tile ? tile->type() : 0, renderObject) : tile, std::move(renderable));
+    sp<Tile> tileDup = renderObject ? (tile ? sp<Tile>::make(tile->id(), tile->type(), tile->shapeId(), tile->width(), tile->height(), renderObject) : sp<Tile>::make(0, "", -1, 0, 0, renderObject)) : tile;
+    _layer_tiles[index] = LayerTile(std::move(tileDup), std::move(renderable));
 }
 
 Tilemap::LayerFlag TilemapLayer::flag() const

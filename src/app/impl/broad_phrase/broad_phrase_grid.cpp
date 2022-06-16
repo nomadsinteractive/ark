@@ -5,14 +5,19 @@
 
 namespace ark {
 
-BroadPhraseGrid::BroadPhraseGrid(uint32_t dimension, const V3& cell)
+BroadPhraseGrid::BroadPhraseGrid(int32_t dimension, const V3& cell)
     : _stub(sp<Stub>::make(dimension, cell))
 {
 }
 
-sp<Vec3> BroadPhraseGrid::create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& size)
+void BroadPhraseGrid::create(int32_t id, const V3& position, const V3& aabb)
 {
-    return sp<TrackedPosition>::make(id, _stub, position, size);
+    _stub->create(id, position, aabb);
+}
+
+void BroadPhraseGrid::update(int32_t id, const V3& position, const V3& aabb)
+{
+    _stub->update(id, position, aabb);
 }
 
 void BroadPhraseGrid::remove(int32_t id)
@@ -30,12 +35,12 @@ BroadPhrase::Result BroadPhraseGrid::rayCast(const V3& from, const V3& to)
     return search(V3((from + to) / 2, 0), V3(std::abs(from.x() - to.x()), std::abs(from.y() - to.y()), 0));
 }
 
-BroadPhraseGrid::Stub::Stub(uint32_t dimension, const V3& cell)
+BroadPhraseGrid::Stub::Stub(int32_t dimension, const V3& cell)
     : _dimension(dimension), _axes(new Axis[dimension])
 {
     DCHECK(_dimension < 4, "Dimension should be either 2(V2) or 3(V3)");
 
-    for(uint32_t i = 0; i < _dimension; i++)
+    for(int32_t i = 0; i < _dimension; i++)
     {
         _axes[i]._stride = static_cast<int32_t>(cell[i]);
         DASSERT(_axes[i]._stride > 0);
@@ -49,13 +54,13 @@ BroadPhraseGrid::Stub::~Stub()
 
 void BroadPhraseGrid::Stub::remove(int32_t id)
 {
-    for(uint32_t i = 0; i < _dimension; i++)
+    for(int32_t i = 0; i < _dimension; i++)
         _axes[i].remove(id);
 }
 
 void BroadPhraseGrid::Stub::create(int32_t id, const V3& position, const V3& size)
 {
-    for(uint32_t i = 0; i < _dimension; i++)
+    for(int32_t i = 0; i < _dimension; i++)
     {
         float p = position[i];
         float s = size[i];
@@ -65,7 +70,7 @@ void BroadPhraseGrid::Stub::create(int32_t id, const V3& position, const V3& siz
 
 void BroadPhraseGrid::Stub::update(int32_t id, const V3& position, const V3& size)
 {
-    for(uint32_t i = 0; i < _dimension; i++)
+    for(int32_t i = 0; i < _dimension; i++)
     {
         float p = position[i];
         float s = size[i];
@@ -76,7 +81,7 @@ void BroadPhraseGrid::Stub::update(int32_t id, const V3& position, const V3& siz
 std::unordered_set<int32_t> BroadPhraseGrid::Stub::search(const V3& position, const V3& size) const
 {
     std::unordered_set<int32_t> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
-    for(uint32_t i = 1; i < _dimension && !candidates.empty(); i++)
+    for(int32_t i = 1; i < _dimension && !candidates.empty(); i++)
     {
         const std::unordered_set<int32_t> s1 = std::move(candidates);
         const std::unordered_set<int32_t> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
@@ -167,7 +172,7 @@ void BroadPhraseGrid::Axis::remove(int32_t id, int32_t rangeId)
 }
 
 BroadPhraseGrid::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _dimension(Documents::getAttribute(manifest, "dimension", 2)), _cell(factory.ensureBuilder<Vec3>(manifest, "cell"))
+    : _dimension(Documents::getAttribute<int32_t>(manifest, "dimension", 2)), _cell(factory.ensureBuilder<Vec3>(manifest, "cell"))
 {
 }
 

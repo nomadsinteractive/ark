@@ -26,9 +26,12 @@ BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap, NarrowPhrase& narrow
     _tile_shapes.push_back(narrowPhrase.makeAABBShape(tileBounds));
 }
 
-sp<Vec3> BroadPhraseTilemap::create(int32_t /*id*/, const sp<Vec3>& position, const sp<Vec3>& /*size*/)
+void BroadPhraseTilemap::create(int32_t /*id*/, const V3& /*position*/, const V3& /*aabb*/)
 {
-    return position;
+}
+
+void BroadPhraseTilemap::update(int32_t /*id*/, const V3& /*position*/, const V3& /*aabb*/)
+{
 }
 
 void BroadPhraseTilemap::remove(int32_t /*id*/)
@@ -56,12 +59,9 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
                         const sp<Tile>& tile = i->getTile(k, j);
                         if(tile)
                         {
-                            int32_t shapeId = tile->type();
+                            int32_t shapeId = tile->shapeId();
                             if(shapeId != Collider::BODY_SHAPE_NONE)
-                            {
-                                std::vector<Box> shapes = shapeId == Collider::BODY_SHAPE_AABB ? _tile_shapes : std::vector<Box>();
                                 candidates.push_back(makeCandidate(toCandidateId(layerId, k, j), shapeId, V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2)));
-                            }
                         }
                     }
                 }
@@ -129,14 +129,14 @@ void BroadPhraseTilemap::addCandidate(const TilemapLayer& tilemapLayer, std::set
 {
     if(row >= 0 && static_cast<uint32_t>(row) < tilemapLayer.rowCount() && col >= 0 && static_cast<uint32_t>(col) < tilemapLayer.colCount())
     {
-        const int32_t candidateId = toCandidateId(layerId, static_cast<int32_t>(row), static_cast<int32_t>(col));
+        const int32_t candidateId = toCandidateId(layerId, row, col);
         if(candidateIdSet.find(candidateId) == candidateIdSet.end())
         {
-            const sp<Tile>& tile = tilemapLayer.getTile(row, col);
+            const sp<Tile>& tile = tilemapLayer.getTile(static_cast<uint32_t>(row), static_cast<uint32_t>(col));
             candidateIdSet.insert(candidateId);
             if(tile)
             {
-                int32_t shapeId = tile->type();
+                int32_t shapeId = tile->shapeId();
                 if(shapeId != Collider::BODY_SHAPE_NONE)
                     candidates.push_back(makeCandidate(candidateId, shapeId, tl + V2(col * tileSize.x(), row * tileSize.y())));
             }
@@ -147,7 +147,7 @@ void BroadPhraseTilemap::addCandidate(const TilemapLayer& tilemapLayer, std::set
 BroadPhrase::Candidate BroadPhraseTilemap::makeCandidate(int32_t candidateId, int32_t shapeId, const V2& position) const
 {
     std::vector<Box> shapes = shapeId == Collider::BODY_SHAPE_AABB ? _tile_shapes : std::vector<Box>();
-    return Candidate(candidateId, position, 0, shapeId, std::move(shapes));
+    return Candidate(candidateId, position, 0, shapeId, nullptr, std::move(shapes));
 }
 
 BroadPhraseTilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

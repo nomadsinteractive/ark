@@ -68,9 +68,20 @@ private:
 class SDLApplicationController : public ApplicationController {
 public:
     virtual sp<Object> createCursor(const sp<Bitmap>& bitmap, int32_t hotX, int32_t hotY) override {
+        Uint32 rmask, gmask, bmask, amask;
+        #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+            rmask = 0xff000000;
+            gmask = 0x00ff0000;
+            bmask = 0x0000ff00;
+            amask = 0x000000ff;
+        #else // little endian, like x86
+            rmask = 0x000000ff;
+            gmask = 0x0000ff00;
+            bmask = 0x00ff0000;
+            amask = 0xff000000;
+        #endif
         SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(bitmap->at(0, 0), static_cast<int32_t>(bitmap->width()), static_cast<int32_t>(bitmap->height()),
-                                                        32, static_cast<int32_t>(bitmap->rowBytes()), 0x00FF0000, 0x0000FF00,
-                                                        0x000000FF, 0xFF000000);
+                                                        32, static_cast<int32_t>(bitmap->rowBytes()), rmask, gmask, bmask, amask);
         SDL_Cursor* cursor = SDL_CreateColorCursor(surface, hotX, hotY);
         SDL_FreeSurface(surface);
         return sp<SDLCursor>::make(cursor);

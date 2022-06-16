@@ -21,6 +21,11 @@ sp<Text> TextType::create(sp<String> value)
     return sp<Text::Impl>::make(std::move(value));
 }
 
+sp<Text> TextType::create()
+{
+    return sp<Text::Impl>::make(sp<String>::null());
+}
+
 String TextType::val(const sp<Text>& self)
 {
     return self->val();

@@ -103,10 +103,11 @@ bool ModelLoaderText::Stub::resize(uint32_t textureWidth, uint32_t textureHeight
 
 void ModelLoaderText::Stub::reloadTexture()
 {
-    _texture->setDelegate(_render_controller->createTexture(_size, _texture->parameters(), sp<Texture::UploaderBitmap>::make(_font_glyph), RenderController::US_ONCE_AND_ON_SURFACE_READY)->delegate(), _size);
+    sp<Texture> texture = _render_controller->createTexture(_size, _texture->parameters(), sp<Texture::UploaderBitmap>::make(_font_glyph), RenderController::US_MANUAL);
+    _texture->setDelegate(texture->delegate(), _size);
     if(_texture_reload_future)
         _texture_reload_future->cancel();
-    _texture_reload_future = _render_controller->upload(_texture, nullptr, RenderController::US_RELOAD);
+    _texture_reload_future = _render_controller->upload(texture, nullptr, RenderController::US_RELOAD);
 }
 
 ModelLoaderText::ModelLoaderText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)

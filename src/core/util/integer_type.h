@@ -18,11 +18,12 @@ class ARK_API IntegerType final {
 public:
 //  [[script::bindings::enumeration]]
     enum Repeat {
-        REPEAT_NONE,
-        REPEAT_LAST,
-        REPEAT_RESTART,
-        REPEAT_REVERSE,
-        REPEAT_REVERSE_RESTART
+        REPEAT_NONE = 0,
+        REPEAT_REVERSE = 1,
+        REPEAT_ACTION_MASK = 3,
+        REPEAT_LOOP = 4,
+        REPEAT_LAST = 8,
+        REPEAT_NOTIFY = 16
     };
 
 //[[script::bindings::constructor]]
@@ -75,6 +76,8 @@ public:
 //[[script::bindings::property]]
     static void setDelegate(const sp<Integer>& self, const sp<Integer>& delegate);
 
+//[[script::bindings::auto]]
+    static int32_t toRepeat(const String& repeat);
 //[[script::bindings::auto]]
     static sp<ExpectationI> repeat(std::vector<int32_t> array, IntegerType::Repeat repeat = IntegerType::REPEAT_NONE);
 

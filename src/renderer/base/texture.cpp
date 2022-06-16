@@ -41,8 +41,8 @@ private:
 
 }
 
-Texture::Texture(sp<Delegate> delegate, sp<Size> size, sp<Parameters> parameters)
-    : _delegate(std::move(delegate)), _size(std::move(size)), _parameters(std::move(parameters))
+Texture::Texture(sp<Delegate> delegate, sp<Size> size, sp<Texture::Uploader> uploader, sp<Parameters> parameters)
+    : _delegate(std::move(delegate)), _size(std::move(size)), _uploader(std::move(uploader)), _parameters(std::move(parameters))
 {
 }
 
@@ -50,13 +50,13 @@ Texture::~Texture()
 {
 }
 
-void Texture::upload(GraphicsContext& graphicsContext, const sp<ark::Uploader>& uploader)
+void Texture::upload(GraphicsContext& graphicsContext, const sp<ark::Uploader>& /*uploader*/)
 {
-    _delegate->upload(graphicsContext, uploader);
+    _delegate->upload(graphicsContext, _uploader);
     _notifier.notify();
 }
 
-Resource::RecycleFunc Texture::recycle()
+ResourceRecycleFunc Texture::recycle()
 {
     return _delegate->recycle();
 }
@@ -115,6 +115,11 @@ void Texture::setDelegate(sp<Delegate> delegate, sp<Size> size)
 {
     _delegate = std::move(delegate);
     _size = std::move(size);
+}
+
+const sp<Texture::Uploader>& Texture::uploader() const
+{
+    return _uploader;
 }
 
 const Notifier& Texture::notifier() const
@@ -280,7 +285,7 @@ sp<Texture> Texture::BUILDER::build(const Scope& args)
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
     DCHECK(size->width() != 0 && size->height() != 0, "Cannot build texture from \"%s\"", Documents::toString(_manifest).c_str());
     sp<Texture::Uploader> uploader = _uploader->build(args);
-    return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? uploader : makeBlankUploader(size, parameters));
+    return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? std::move(uploader) : makeBlankUploader(size, parameters));
 }
 
 sp<Texture::Uploader> Texture::BUILDER::makeBlankUploader(const sp<Size>& size, const Texture::Parameters& params)

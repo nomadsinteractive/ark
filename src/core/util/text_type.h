@@ -16,6 +16,7 @@ public:
     static sp<Text> create(sp<Text> value);
 //[[script::bindings::constructor]]
     static sp<Text> create(sp<String> value);
+    static sp<Text> create();
 
 //[[script::bindings::property]]
     static String val(const sp<Text>& self);

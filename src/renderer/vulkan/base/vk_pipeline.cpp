@@ -88,7 +88,7 @@ void VKPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*
     }
 }
 
-Resource::RecycleFunc VKPipeline::recycle()
+ResourceRecycleFunc VKPipeline::recycle()
 {
     const sp<VKDevice> device = _renderer->device();
 

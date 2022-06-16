@@ -23,12 +23,10 @@ namespace ark {
 class ARK_API Characters {
 public:
 //  [[script::bindings::auto]]
-    Characters(const sp<Layer>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+    Characters(const sp<Layer>& layer, sp<Text> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
 //  [[script::bindings::auto]]
-    Characters(const sp<RenderLayer>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
-//  [[script::bindings::auto]]
-    Characters(const sp<LayerContext>& layer, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
-    Characters(const BeanFactory& factory, const sp<LayerContext>& layerContext, const sp<GlyphMaker>& characterMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
+    Characters(const sp<LayerContext>& layer, sp<Text> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+    Characters(const BeanFactory& factory, const sp<LayerContext>& layerContext, sp<Text> text, const sp<GlyphMaker>& glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
 //  [[script::bindings::property]]
     const sp<LayoutParam>& layoutParam() const;
@@ -49,7 +47,7 @@ public:
 //  [[script::bindings::auto]]
     void setRichText(const std::wstring& richText, const Scope& args);
 
-    void renderRequest(const V3& position);
+    void renderRequest(RenderRequest& renderRequest, const V3& position);
 
 //[[plugin::builder]]
     class BUILDER : public Builder<Characters> {
@@ -60,6 +58,7 @@ public:
 
     private:
         BeanFactory _bean_factory;
+        SafePtr<Builder<Text>> _text;
         sp<Builder<LayerContext>> _layer_context;
         SafePtr<Builder<GlyphMaker>> _glyph_maker;
 
@@ -108,6 +107,7 @@ private:
 private:
     BeanFactoryWeakRef _bean_factory;
     sp<LayerContext> _layer_context;
+    sp<Text> _text;
     float _text_scale;
     sp<LayoutParam> _layout_param;
     sp<GlyphMaker> _glyph_maker;
@@ -115,7 +115,7 @@ private:
     std::vector<sp<Glyph>> _glyphs;
     std::vector<sp<RenderObject>> _contents;
     std::vector<sp<RenderablePassive>> _renderables;
-    std::wstring _text;
+    std::wstring _text_unicode;
 
     float _letter_spacing;
     float _layout_direction;

@@ -27,6 +27,7 @@ private:
         void updateLayoutPosition(const V2& position, float clientHeight);
 
         bool isDisposed() const;
+        bool isVisible() const;
         bool layoutRequested() const;
 
         void updateLayout();
@@ -50,7 +51,7 @@ private:
         sp<ViewGroup> _view_group;
         sp<LayoutEventListener> _layout_event_listener;
         sp<Disposed> _disposed;
-        sp<Visibility> _visibility;
+        sp<Visibility> _visible;
 
         friend class LayoutHierarchy;
 

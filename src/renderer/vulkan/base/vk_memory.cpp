@@ -32,7 +32,7 @@ void VKMemory::Stub::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploa
     VKUtil::checkResult(vkAllocateMemory(_device->vkLogicalDevice(), &_allocation_info, nullptr, &_memory));
 }
 
-Resource::RecycleFunc VKMemory::Stub::recycle()
+ResourceRecycleFunc VKMemory::Stub::recycle()
 {
     const sp<VKDevice> device = _device;
     VkDeviceMemory memory = _memory;

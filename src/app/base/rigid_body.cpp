@@ -55,6 +55,11 @@ Collider::BodyType RigidBody::type() const
     return _stub->_type;
 }
 
+Collider::BodyType RigidBody::rigidType() const
+{
+    return static_cast<Collider::BodyType>(_stub->_type & Collider::BODY_TYPE_RIGID);
+}
+
 int32_t RigidBody::shapeId() const
 {
     return _stub->_shape_id;
@@ -125,9 +130,19 @@ const sp<CollisionCallback>& RigidBody::collisionCallback() const
     return _stub->_callback->_collision_callback;
 }
 
-void RigidBody::setCollisionCallback(const sp<CollisionCallback>& collisionCallback)
+void RigidBody::setCollisionCallback(sp<CollisionCallback> collisionCallback)
 {
-    _stub->_callback->_collision_callback = collisionCallback;
+    _stub->_callback->_collision_callback = std::move(collisionCallback);
+}
+
+const sp<CollisionFilter>& RigidBody::collisionFilter() const
+{
+    return _stub->_collision_filter;
+}
+
+void RigidBody::setCollisionFilter(sp<CollisionFilter> collisionFilter)
+{
+    _stub->_collision_filter = std::move(collisionFilter);
 }
 
 const sp<RigidBody::Stub>& RigidBody::stub() const
@@ -165,26 +180,28 @@ RigidBody::Stub::~Stub()
 
 void RigidBody::Callback::onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
 {
-    if(_collision_callback)
+    if(_collision_callback && rigidBody->type() != Collider::BODY_TYPE_SENSOR)
         _collision_callback->onBeginContact(rigidBody, manifold);
 }
 
 void RigidBody::Callback::onEndContact(const sp<RigidBody>& rigidBody)
 {
-    if(_collision_callback)
+    if(_collision_callback && rigidBody->type() != Collider::BODY_TYPE_SENSOR)
         _collision_callback->onEndContact(rigidBody);
 }
 
 void RigidBody::Callback::onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
 {
     onBeginContact(rigidBody, manifold);
-    rigidBody->callback()->onBeginContact(self, CollisionManifold(manifold.contactPoint(), -manifold.normal()));
+    if(rigidBody->rigidType() == Collider::BODY_TYPE_STATIC)
+        rigidBody->callback()->onBeginContact(self, CollisionManifold(manifold.contactPoint(), -manifold.normal()));
 }
 
 void RigidBody::Callback::onEndContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody)
 {
     onEndContact(rigidBody);
-    rigidBody->callback()->onEndContact(self);
+    if(rigidBody->rigidType() == Collider::BODY_TYPE_STATIC)
+        rigidBody->callback()->onEndContact(self);
 }
 
 bool RigidBody::Callback::hasCallback() const

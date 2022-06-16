@@ -24,14 +24,16 @@ static void translate(float x, float y, const V2& translate, float& ox, float& o
 }
 
 ShapeCuteC2::ShapeCuteC2()
+    : width(0), height(0), t(C2_TYPE_NONE)
 {
-    memset(this, 0, sizeof(*this));
+    memset(&s, 0, sizeof(s));
+    memset(&x, 0, sizeof(x));
 }
 
 ShapeCuteC2::ShapeCuteC2(const ShapeCuteC2& other, const V2& translate, float rotation)
-    : t(other.t), s(other.s)
+    : t(other.t), s(other.s), _collision_filter(other._collision_filter)
 {
-    transform(translate, rotation);
+    doTransform(translate, rotation);
 }
 
 bool ShapeCuteC2::collideManifold(const ShapeCuteC2& other, CollisionManifold& collisionManifold) const
@@ -52,11 +54,16 @@ bool ShapeCuteC2::rayCastManifold(const c2Ray& ray, RayCastManifold& rayCastMani
     c2Raycast raycast;
     bool r = c2CastRay(ray, &s, &x, t, &raycast);
     if(r)
-        rayCastManifold = RayCastManifold(raycast.t, V3(raycast.n.x, raycast.n.y, 0), nullptr);
+        rayCastManifold = RayCastManifold(raycast.t, V3(raycast.n.x, raycast.n.y, 0), rayCastManifold.rigidBody());
     return r;
 }
 
-void ShapeCuteC2::transform(const V2& position, float rotation)
+ShapeCuteC2 ShapeCuteC2::transform(const V2& position, float rotation) const
+{
+    return ShapeCuteC2(*this, position, rotation);
+}
+
+void ShapeCuteC2::doTransform(const V2& position, float rotation)
 {
     switch(t)
     {

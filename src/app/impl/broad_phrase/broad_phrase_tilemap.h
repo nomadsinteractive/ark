@@ -16,7 +16,8 @@ class BroadPhraseTilemap : public BroadPhrase {
 public:
     BroadPhraseTilemap(sp<Tilemap> tilemap, NarrowPhrase& narrowPhrase);
 
-    virtual sp<Vec3> create(int32_t id, const sp<Vec3>& position, const sp<Vec3>& size) override;
+    virtual void create(int32_t id, const V3& position, const V3& aabb) override;
+    virtual void update(int32_t id, const V3& position, const V3& aabb) override;
     virtual void remove(int32_t id) override;
 
     virtual Result search(const V3& position, const V3& size) override;

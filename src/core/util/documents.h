@@ -29,6 +29,10 @@ public:
     static const String getAttribute(const document& doc, const String& name, const String& defValue = String());
     static const String& ensureAttribute(const document& doc, const String& name);
 
+    template<typename T> static T getValue(const document& doc, const String& name, const T& defValue) {
+        const document& child = doc->getChild(name);
+        return child ? Strings::parse<T>(child->value()) : defValue;
+    }
     template<typename T> static T getAttribute(const document& doc, const String& name, const T& defValue) {
         const attribute& attr = doc->getAttribute(name);
         return attr ? Strings::parse<T>(attr->value()) : defValue;

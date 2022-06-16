@@ -7,9 +7,12 @@
 #include "core/util/math.h"
 #include "core/util/documents.h"
 
+#include "graphics/base/bitmap.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/size.h"
 
+#include "renderer/base/bitmap_bundle.h"
+#include "renderer/base/graphics_context.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/impl/vertices/vertices_nine_patch_quads.h"
@@ -31,7 +34,7 @@ void Atlas::loadItem(const document& manifest)
     if(has(type))
     {
         const Item& item = at(type);
-        _items[type] = Item(item.ux(), item.uy(), item.vx(), item.vy(), Rect(-px, -py, 1.0f - px, 1.0f - py), item.size());
+        _items[type] = Item(item.ux(), item.uy(), item.vx(), item.vy(), Rect(-px, -py, 1.0f - px, 1.0f - py), item.size(), V2(px, py));
     }
     else
     {
@@ -71,9 +74,57 @@ const V2& Atlas::getOriginalSize(int32_t c) const
     return at(c).size();
 }
 
+const V2& Atlas::getPivot(int32_t c) const
+{
+    return at(c).pivot();
+}
+
 Rect Atlas::getItemUV(int32_t c) const
 {
     return at(c).uv();
+}
+
+class GetTextureBitmap : public Texture::Delegate {
+public:
+    GetTextureBitmap(sp<Texture::Delegate> delegate)
+        : Texture::Delegate(delegate->type()), _delegate(std::move(delegate)) {
+    }
+
+    virtual uint64_t id() override {
+        return _delegate->id();
+    }
+
+    virtual void upload(GraphicsContext& graphicsContext, const ark::sp<Texture::Uploader>& uploader) override {
+        _delegate->upload(graphicsContext, uploader);
+    }
+
+    virtual ResourceRecycleFunc recycle() override {
+        return _delegate->recycle();
+    }
+
+    virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override {
+        return _delegate->download(graphicsContext, bitmap);
+    }
+
+    virtual void uploadBitmap(GraphicsContext& /*graphicsContext*/, const Bitmap& bitmap, const std::vector<ark::sp<ByteArray>>& imagedata) override {
+        _bitmap = sp<Bitmap>::make(bitmap.width(), bitmap.height(), bitmap.rowBytes(), bitmap.channels(), imagedata.at(0));
+    }
+
+    const sp<Bitmap>& bitmap() const {
+        return _bitmap;
+    }
+
+private:
+    sp<Texture::Delegate> _delegate;
+    sp<Bitmap> _bitmap;
+};
+
+sp<BitmapBundle> Atlas::makeBitmapBundle() const
+{
+    GetTextureBitmap textureBitmap(_texture->delegate());
+    GraphicsContext graphicsContext(nullptr, nullptr);
+    _texture->uploader()->upload(graphicsContext, textureBitmap);
+    return sp<BitmapBundle>::make(*this, textureBitmap.bitmap());
 }
 
 void Atlas::addImporter(const sp<AtlasImporter>& importer, const sp<Readable>& /*readable*/)
@@ -121,7 +172,7 @@ Atlas::Item Atlas::makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, 
     uint16_t t = unnormalize(uy, static_cast<uint32_t>(_height));
     uint16_t r = unnormalize(vx, static_cast<uint32_t>(_width));
     uint16_t b = unnormalize(vy, static_cast<uint32_t>(_height));
-    return Item(l, b, r, t, Rect(bounds.left() - pivot.x(), bounds.top() - pivot.y(), bounds.right() - pivot.x(), bounds.bottom() - pivot.y()), size);
+    return Item(l, b, r, t, Rect(bounds.left() - pivot.x(), bounds.top() - pivot.y(), bounds.right() - pivot.x(), bounds.bottom() - pivot.y()), size, pivot);
 }
 
 void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
@@ -211,8 +262,8 @@ Atlas::Item::Item()
 {
 }
 
-Atlas::Item::Item(uint16_t ux, uint16_t uy, uint16_t vx, uint16_t vy, const Rect& bounds, const V2& size)
-    : _ux(ux), _uy(uy), _vx(vx), _vy(vy), _bounds(bounds), _size(size)
+Atlas::Item::Item(uint16_t ux, uint16_t uy, uint16_t vx, uint16_t vy, const Rect& bounds, const V2& size, const V2& pivot)
+    : _ux(ux), _uy(uy), _vx(vx), _vy(vy), _bounds(bounds), _size(size), _pivot(pivot)
 {
 }
 
@@ -224,6 +275,11 @@ const Rect& Atlas::Item::bounds() const
 const V2& Atlas::Item::size() const
 {
     return _size;
+}
+
+const V2& Atlas::Item::pivot() const
+{
+    return _pivot;
 }
 
 Rect Atlas::Item::uv() const

@@ -11,9 +11,9 @@ Label::Label(const sp<Characters>& characters)
 {
 }
 
-void Label::render(RenderRequest& /*pipeline*/, const V3& position)
+void Label::render(RenderRequest& renderequest, const V3& position)
 {
-    _characters->renderRequest(position);
+    _characters->renderRequest(renderequest, position);
 }
 
 const sp<Size>& Label::size()

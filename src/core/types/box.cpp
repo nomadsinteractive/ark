@@ -5,6 +5,10 @@
 
 namespace ark {
 
+Box::Box(std::nullptr_t)
+{
+}
+
 Box::Box(const void* sharedPtr, const void* instancePtr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor) noexcept
     : _stub(std::make_shared<Stub>(sharedPtr, instancePtr, typeId, interfaces, destructor))
 {

@@ -8,6 +8,7 @@
 
 #include "renderer/forwarding.h"
 
+#include "app/forwarding.h"
 #include "app/inf/narrow_phrase.h"
 #include "app/util/shape_cute_c2.h"
 
@@ -41,22 +42,24 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
     };
 
+    static ShapeCuteC2 makeAABBShapeImpl(const Rect& bounds);
+    static ShapeCuteC2 makeBallShapeImpl(const V2& position, float radius);
+    static ShapeCuteC2 makeBoxShapeImpl(const Rect& bounds);
+    static ShapeCuteC2 makeCapsuleShapeImpl(const V2& p1, const V2& p2, float radius);
+    static ShapeCuteC2 makePolygonShapeImpl(const std::vector<V2>& vertices);
+
 private:
     void toRay(const V2& from, const V2& to, c2Ray& ray) const;
     void loadShapes(const document& manifest);
+
+    const CollisionFilter& getCollisionFilter(const CollisionFilter& oneFilter, const sp<CollisionFilter>& specifiedFilter);
 
     const std::vector<sp<ShapeCuteC2>>& ensureShape(const BroadPhrase::Candidate& candidate, std::vector<sp<ShapeCuteC2>>& predefined) const;
 
     std::vector<sp<ShapeCuteC2>> toCuteC2Shapes(const std::vector<Box>& boxes) const;
 
-    ShapeCuteC2 makeAABBShapeImpl(const Rect& bounds) const;
-    ShapeCuteC2 makeBallShapeImpl(const V2& position, float radius) const;
-    ShapeCuteC2 makeBoxShapeImpl(const Rect& bounds) const;
-    ShapeCuteC2 makeCapsuleShapeImpl(const V2& p1, const V2& p2, float radius) const;
-    ShapeCuteC2 makePolygonShapeImpl(const std::vector<V2>& vertices) const;
-
 private:
-    std::unordered_map<int32_t, std::vector<sp<ShapeCuteC2>>> _shapes;
+    std::unordered_map<int32_t, sp<BodyDefCuteC2>> _body_defs;
 };
 
 }

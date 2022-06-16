@@ -77,25 +77,6 @@ private:
     Notifier _notifer;
 };
 
-class Absolute : public Numeric {
-public:
-    Absolute(const sp<Numeric>& a1)
-        : _a1(a1) {
-    }
-
-    virtual float val() override {
-        return std::abs(_a1->val());
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return _a1->update(timestamp);
-    }
-
-private:
-    sp<Numeric> _a1;
-
-};
-
 class Negative : public Numeric {
 public:
     Negative(const sp<Numeric>& a1)
@@ -218,7 +199,7 @@ sp<Numeric> NumericType::negative(const sp<Numeric>& self)
 
 sp<Numeric> NumericType::absolute(const sp<Numeric>& self)
 {
-    return sp<Absolute>::make(self);
+    return sp<VariableOP1<float, float>>::make(Operators::Abs<float>(), self);
 }
 
 sp<Numeric> NumericType::pow(const sp<Numeric>& x, const sp<Integer>& y, const sp<Integer>& /*z*/)
@@ -413,7 +394,7 @@ sp<Numeric> NumericType::vibrate(float s0, float v0, float s1, float v1, float d
 
 sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t)
 {
-    return sp<Interpolate<float>>::make(self, b, t);
+    return sp<Interpolate<float, float>>::make(self, b, t);
 }
 
 sp<Numeric> NumericType::periodic(const sp<Numeric>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)

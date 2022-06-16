@@ -10,7 +10,7 @@ void Recycler::recycle(Resource& resource)
         _recyclers.push(resource.recycle());
 }
 
-void Recycler::recycle(Resource::RecycleFunc recycler)
+void Recycler::recycle(ResourceRecycleFunc recycler)
 {
     _recyclers.push(std::move(recycler));
 }

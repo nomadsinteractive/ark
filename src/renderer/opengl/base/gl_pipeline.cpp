@@ -275,7 +275,7 @@ void GLPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*
     LOGD("GLProgram[%d]:", id);
 }
 
-Resource::RecycleFunc GLPipeline::recycle()
+ResourceRecycleFunc GLPipeline::recycle()
 {
     uint32_t id = _stub->_id;
     _stub->_id = 0;

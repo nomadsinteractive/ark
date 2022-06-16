@@ -45,13 +45,8 @@ private:
 }
 
 
-GLCubemap::GLCubemap(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, std::vector<sp<Variable<bitmap>>> bitmaps)
-    : GLCubemap(recycler, size, parameters, sp<TextureUploaderCubemap>::make(std::move(bitmaps)))
-{
-}
-
-GLCubemap::GLCubemap(const sp<Recycler>& recycler, const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
-    : GLTexture(recycler, size, static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), Texture::TYPE_CUBEMAP, parameters, uploader)
+GLCubemap::GLCubemap(sp<Recycler> recycler, sp<Size> size, sp<Texture::Parameters> parameters)
+    : GLTexture(std::move(recycler), std::move(size), static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), Texture::TYPE_CUBEMAP, std::move(parameters))
 {
 }
 

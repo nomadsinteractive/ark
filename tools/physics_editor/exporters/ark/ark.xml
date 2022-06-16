@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- created with http://www.physicseditor.de -->
+<bodydef version="1.0">
+	<bodies>
+{% for body in bodies %}
+		<body name="{{body.name}}" width="{{body.size.width}}" height="{{body.size.height}}">
+            <anchorpoint>{{body.anchorPointRel.x|floatformat:4}},{{body.anchorPointRel.y|floatformat:4}}</anchorpoint>
+			<fixtures>
+{% for fixture in body.fixtures %}
+				<fixture>
+					<density>{{fixture.density}}</density>
+					<friction>{{fixture.friction}}</friction>
+					<restitution>{{fixture.restitution}}</restitution>
+					<filter_categoryBits>{{fixture.filter_categoryBits}}</filter_categoryBits>
+					<filter_groupIndex>{{fixture.filter_groupIndex}}</filter_groupIndex>
+					<filter_maskBits>{{fixture.filter_maskBits}}</filter_maskBits>
+					<fixture_type>{{fixture.type}}</fixture_type>
+{% if fixture.isSensor %}
+					<isSensor/>
+{% endif %}
+{% if fixture.isCircle %}
+                    <circle r="{{fixture.radius|floatformat:3}}" x="{{fixture.center.x|floatformat:3}}" y="{{fixture.center.y|floatformat:3}}"/>
+{% else %}
+					<polygons>
+{% for polygon in fixture.polygons %}
+                        <polygon>{% for point in polygon %} {% if not forloop.first %}, {% endif %} {{point.x|floatformat:4}}, {{point.y|floatformat:4}} {% endfor %}</polygon>
+{% endfor %}
+					</polygons>
+{% endif %}
+				</fixture>
+{% endfor %}
+			</fixtures>
+		</body>
+{% endfor %}
+	</bodies>
+	<metadata>
+		<format>1</format>
+		<ptm_ratio>{{global.ptm_ratio}}</ptm_ratio>
+	</metadata>
+</bodydef>
+
+
+

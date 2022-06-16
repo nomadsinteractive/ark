@@ -176,9 +176,9 @@ sp<PipelineFactory> RenderController::createPipelineFactory() const
 
 sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us)
 {
-    sp<Texture::Delegate> delegate = _render_engine->rendererFactory()->createTexture(size, parameters, std::move(uploader));
+    sp<Texture::Delegate> delegate = _render_engine->rendererFactory()->createTexture(size, parameters);
     DCHECK(delegate, "Unsupported TextureType: %d", parameters->_type);
-    const sp<Texture> texture = sp<Texture>::make(std::move(delegate), std::move(size), std::move(parameters));
+    const sp<Texture> texture = sp<Texture>::make(std::move(delegate), std::move(size), std::move(uploader), std::move(parameters));
     if(us != RenderController::US_MANUAL)
         upload(texture, nullptr, us);
     return texture;

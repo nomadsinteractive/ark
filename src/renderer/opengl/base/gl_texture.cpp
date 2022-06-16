@@ -19,17 +19,18 @@
 namespace ark {
 namespace opengl {
 
-GLTexture::GLTexture(const sp<Recycler>& recycler, const sp<Size>& size, uint32_t target, Texture::Type type, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
-    : Texture::Delegate(type), _recycler(recycler), _size(size), _target(target), _parameters(parameters), _uploader(uploader), _id(0)
+GLTexture::GLTexture(sp<Recycler> recycler, sp<Size> size, uint32_t target, Texture::Type type, sp<Texture::Parameters> parameters)
+    : Texture::Delegate(type), _recycler(std::move(recycler)), _size(std::move(size)), _target(target), _parameters(std::move(parameters)), _id(0)
 {
 }
 
 GLTexture::~GLTexture()
 {
-    _recycler->recycle(*this);
+    if(_id)
+        _recycler->recycle(doRecycle());
 }
 
-void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
+void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader)
 {
     if(_id == 0)
     {
@@ -39,8 +40,8 @@ void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*u
 
     glBindTexture(static_cast<GLenum>(_target), _id);
 
-    if(_uploader)
-        _uploader->upload(graphicsContext, *this);
+    if(uploader)
+        uploader->upload(graphicsContext, *this);
 
     if(_parameters->_features & Texture::FEATURE_MIPMAPS)
         glGenerateMipmap(static_cast<GLenum>(_target));
@@ -54,14 +55,9 @@ void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*u
     glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_R, static_cast<GLint>(glParameters[_parameters->_wrap_r]));
 }
 
-Resource::RecycleFunc GLTexture::recycle()
+ResourceRecycleFunc GLTexture::recycle()
 {
-    uint32_t id = _id;
-    _id = 0;
-    return [id](GraphicsContext&) {
-        LOGD("Deleting GLTexture[%d]", id);
-        glDeleteTextures(1, &id);
-    };
+    return doRecycle();
 }
 
 int32_t GLTexture::width() const
@@ -87,6 +83,16 @@ const sp<GLRenderbuffer>& GLTexture::renderbuffer() const
 void GLTexture::setRenderbuffer(sp<GLRenderbuffer> renderbuffer)
 {
     _renderbuffer = std::move(renderbuffer);
+}
+
+ResourceRecycleFunc GLTexture::doRecycle()
+{
+    uint32_t id = _id;
+    _id = 0;
+    return [id](GraphicsContext&) {
+        LOGD("Deleting GLTexture[%d]", id);
+        glDeleteTextures(1, &id);
+    };
 }
 
 uint64_t GLTexture::id()

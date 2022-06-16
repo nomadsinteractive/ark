@@ -163,16 +163,23 @@ template<typename T> class WidgetInputText : public Widget {
 public:
     WidgetInputText(String label, sp<T> value, size_t maxLength, sp<Text> hint, sp<Observer> observer, ImGuiInputTextFlags flags)
         : _label(std::move(label)), _value(std::move(value)), _hint(std::move(hint)), _observer(std::move(observer)), _flags(flags), _text_buf(maxLength) {
+        updateInputText();
     }
 
     virtual void render() override {
         const String v = _value->val();
-        if(ImGui::InputTextWithHint(_label.c_str(), _hint ? _hint->val()->c_str() : nullptr, &_text_buf[0], _text_buf.size(), _flags)) {
+        bool renderResult = ImGui::InputTextWithHint(_label.c_str(), _hint ? _hint->val()->c_str() : nullptr, &_text_buf[0], _text_buf.size(), _flags);
+        if(renderResult) {
             TextType::set(_value, sp<String>::make(_text_buf.data()));
             if(_observer) {
                 _observer->update();
                 updateInputText();
             }
+        }
+        if(_flags & ImGuiInputTextFlags_EnterReturnsTrue) {
+            ImGui::SetItemDefaultFocus();
+            if (renderResult)
+                ImGui::SetKeyboardFocusHere(-1);
         }
     }
 

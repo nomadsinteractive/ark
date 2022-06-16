@@ -1,0 +1,137 @@
+<exporter>
+    
+    <!-- identifier of the exporter -->
+	<name>ark.xml</name>
+	
+	<!-- name for the dropbox -->
+    <displayName>Ark(XML)</displayName>
+	
+	<!-- description of the exporter -->
+    <description>Generic XML for Ark</description>
+	
+	<!-- exporter version -->
+	<version>1.0</version>
+	
+	<!-- direction of the y axis: up / down -->
+	<yAxisDirection>up</yAxisDirection>
+	
+	<!-- physics engine to use: box2d, chipmunk -->
+	<physicsEngine>box2d</physicsEngine>
+	
+	<!-- name of the template file -->
+    <template>ark.xml</template>
+	
+	<!-- file exension for the data file -->
+	<fileExtension>xml</fileExtension>
+	
+	<!-- anchor point settings -->
+	<anchorPoint>
+	    <!-- are anchor points supported ? yes/no -->
+		<enabled>yes</enabled>
+		
+		<!-- relative position of the default anchor point -->
+		<relX>0.5</relX>		
+		<relY>0.5</relY>
+	</anchorPoint>
+
+    <origin>
+        <!--
+        origin (0/0) point of the polygons 
+        can be set to "anchorPoint" or "fixed"
+        Use 
+		<relX>0.5</relX>		
+		<relY>0.5</relY>
+		to specify a fixed origin.
+		Default is 0.5/0.5
+        -->
+        <type>anchorPoint</type>
+    </origin>
+	
+	<!-- custom global parameters -->
+	<global>
+		<parameter>
+			<name>ptm_ratio</name>
+			<displayName>PTM-Ratio</displayName>
+			<description>PTM ratio of the sprites. Must be multiplied by 2 when working with hd (retina display) sprites</description>
+			<shortDescription>PTM ratio of the sprites. Must be multiplied by 2 when working with hd (retina display) sprites.</shortDescription>
+			<type>float</type>
+                        <default>32.0</default>
+		</parameter>
+	</global>
+	
+	<!-- custom body parameters -->
+	<body>
+	</body>
+	
+	<!-- custom fixture parameters -->
+	<fixture>
+		<parameter>
+			<name>density</name>
+			<displayName>Density</displayName>
+			<description>Density of the shape. Used for calculating the mass.</description>
+			<shortDescription>Density of the shape. Used for calculating the mass.</shortDescription>
+			<type>float</type>
+			<default>2.0</default>
+		</parameter>
+		<parameter>
+			<name>restitution</name>
+			<displayName>Restitution</displayName>
+			<description>Restitution defines how much a shape bounces.</description>
+			<shortDescription>Density of the shape. Used for calculating the mass.</shortDescription>
+			<min>0.0</min>
+			<min>1.0</min>
+			<type>float</type>
+			<default>0.0</default>
+		</parameter>
+
+		<parameter>
+			<name>friction</name>
+			<description>Fricion.</description>
+			<shortDescription>Friction.</shortDescription>
+			<displayName>Friction</displayName>
+			<type>float</type>
+			<default>0.0</default>
+		</parameter>
+		<parameter>
+			<name>isSensor</name>
+			<displayName>Is Sensor</displayName>
+			<description>If set the physial </description>
+			<type>bool</type>
+			<default>false</default>
+		</parameter>
+        <parameter>
+            <name>filter_groupIndex</name>
+            <displayName>Group</displayName>
+            <description>Collision group.</description>
+            <shortDescription></shortDescription>
+            <type>int</type>
+            <default>0</default>
+        </parameter>
+
+        <parameter>
+            <name>filter_bitfield</name>
+            <type>bitfield</type>
+            <size>16</size>
+        </parameter>
+
+        <parameter>
+            <name>filter_categoryBits</name>
+            <displayName>Cat.</displayName>
+            <description>Collision category</description>
+            <shortDescription>Collision category</shortDescription>
+            <type>uint16</type>
+            <default>1</default>
+            <bitfield>yes</bitfield>
+        </parameter>
+        <parameter>
+            <name>filter_maskBits</name>
+            <displayName>Mask</displayName>
+            <description>Collision mask</description>
+            <shortDescription>Collision mask</shortDescription>
+            <type>uint16</type>
+            <default>65535</default>
+            <bitfield>yes</bitfield>
+        </parameter>
+    </fixture>
+</exporter>
+

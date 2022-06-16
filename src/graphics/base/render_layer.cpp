@@ -166,7 +166,7 @@ RenderLayer::LayerContextFilter::LayerContextFilter(const sp<LayerContext>& item
 {
 }
 
-FilterAction RenderLayer::LayerContextFilter::operator() (uint64_t) const
+FilterAction RenderLayer::LayerContextFilter::operator() () const
 {
     if(_item.unique())
     {

@@ -245,24 +245,31 @@ float Math::lerp(float a, float b, float t)
     return a + (b - a) * t;
 }
 
-sp<Numeric> Math::lerp(const sp<Numeric>& a, const sp<Numeric>& b, const sp<Numeric>& t)
+sp<Numeric> Math::lerp(sp<Numeric> a, sp<Numeric> b, sp<Numeric> t)
 {
-    return sp<Interpolate<float>>::make(a, b, t);
+    return sp<Interpolate<float, float>>::make(std::move(a), std::move(b), std::move(t));
 }
 
-sp<Vec2> Math::lerp(const sp<Vec2>& a, const sp<Vec2>& b, const sp<Numeric>& t)
+sp<Vec2> Math::lerp(sp<Vec2> a, sp<Vec2> b, sp<Numeric> t)
 {
-    return sp<Interpolate<V2>>::make(a, b, sp<Vec2Impl>::make(t, t));
+    return sp<Interpolate<V2, float>>::make(std::move(a), std::move(b), std::move(t));
 }
 
-sp<Vec3> Math::lerp(const sp<Vec3>& a, const sp<Vec3>& b, const sp<Numeric>& t)
+sp<Vec3> Math::lerp(sp<Vec3> a, sp<Vec3> b, sp<Numeric> t)
 {
-    return sp<Interpolate<V3>>::make(a, b, sp<Vec3Impl>::make(t, t, t));
+    return sp<Interpolate<V3, float>>::make(std::move(a), std::move(b), std::move(t));
 }
 
-sp<Vec4> Math::lerp(const sp<Vec4>& a, const sp<Vec4>& b, const sp<Numeric>& t)
+sp<Vec4> Math::lerp(sp<Vec4> a, sp<Vec4> b, sp<Numeric> t)
 {
-    return sp<Interpolate<V4>>::make(a, b, sp<Vec4Impl>::make(t, t, t, t));
+    return sp<Interpolate<V4, float>>::make(std::move(a), std::move(b), std::move(t));
+}
+
+sp<Vec2> Math::bezier(sp<Vec2> p0, sp<Vec2> p1, sp<Vec2> p2, sp<Numeric> t)
+{
+    sp<Vec2> i1 = lerp(std::move(p0), p1, t);
+    sp<Vec2> i2 = lerp(std::move(p1), std::move(p2), t);
+    return lerp(std::move(i1), std::move(i2), std::move(t));
 }
 
 V3 Math::quadratic(float a, float b, float c)

@@ -22,7 +22,7 @@ namespace ark {
 
 class ColliderImpl : public Collider {
 public:
-    ColliderImpl(std::vector<sp<BroadPhrase>> broadPhrase, sp<NarrowPhrase> narrowPhrase, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    ColliderImpl(std::vector<sp<BroadPhrase>> broadPhrase, sp<NarrowPhrase> narrowPhrase, const document& manifest, const sp<RenderController>& renderController);
 
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate) override;
     virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to) override;
@@ -36,9 +36,9 @@ public:
 
     private:
         document _manifest;
-        sp<ResourceLoaderContext> _resource_loader_context;
         std::vector<sp<Builder<BroadPhrase>>> _broad_phrases;
         sp<Builder<NarrowPhrase>> _narrow_phrase;
+        sp<RenderController> _render_controller;
     };
 
 public:
@@ -46,41 +46,41 @@ public:
     class RigidBodyShadow;
 
     struct Stub {
-        Stub(std::vector<sp<BroadPhrase>> broadPhrases, sp<NarrowPhrase> narrowPhrase, const document& manifest, ResourceLoaderContext& resourceLoaderContext);
+        Stub(std::vector<sp<BroadPhrase>> broadPhrases, sp<NarrowPhrase> narrowPhrase);
 
-        BroadPhrase::Result search(const V3& position, const V3& aabb) const;
         std::vector<RayCastManifold> rayCast(const V2& from, const V2& to) const;
 
         void remove(const RigidBody& rigidBody);
 
         int32_t generateRigidBodyId();
 
-        sp<RigidBodyImpl> createRigidBody(int32_t rigidBodyId, Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, const sp<Disposed>& disposed, const sp<Stub>& self);
+        sp<RigidBodyImpl> createRigidBody(int32_t rigidBodyId, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, sp<Disposed> disposed, sp<ColliderImpl::Stub> self);
+
         const sp<RigidBodyShadow>& ensureRigidBody(int32_t id) const;
         sp<RigidBodyShadow> ensureRigidBody(int32_t id, int32_t shapeId, const V3& position, bool isDynamicRigidBody) const;
-
         sp<RigidBodyShadow> findRigidBody(int32_t id) const;
 
-        std::vector<BroadPhrase::Candidate> toDynamicCandidates(const std::unordered_set<int32_t>& candidateSet) const;
+        std::vector<sp<RigidBodyShadow>> toRigidBodyShadows(const std::unordered_set<int32_t>& candidateSet, uint32_t filter) const;
+        std::vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const std::unordered_set<int32_t>& candidateSet, uint32_t filter) const;
+        BroadPhrase::Candidate toBroadPhraseCandidate(const RigidBodyShadow& rigidBody) const;
 
         void resolveCandidates(const sp<RigidBody>& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, bool isDynamicCandidates, RigidBody::Callback& callback, std::set<int32_t>& c);
 
         const sp<NarrowPhrase>& narrowPhrase() const;
 
-    private:
-        void addAABBShape(uint32_t id, const RigidBodyShadow& rigidBody);
-        void addBoxShape(uint32_t id, const RigidBodyShadow& rigidBody);
-        void addBallShape(uint32_t id, const RigidBodyShadow& rigidBody);
-        void addCapsuleShape(uint32_t id, const RigidBodyShadow& rigidBody);
-        void addPolyShape(uint32_t id, const RigidBodyShadow& rigidBody);
+        void updateBroadPhraseCandidate(int32_t id, const V3& position, const V3& aabb);
 
-        sp<Vec3> createBroadPhrasePosition(int32_t id, const sp<Vec3>& position, const sp<Vec3>& aabb);
+    private:
+        BroadPhrase::Result broadPhraseSearch(const V3& position, const V3& aabb) const;
+        BroadPhrase::Result broadPhraseRayCast(const V3& from, const V3& to) const;
 
     private:
         int32_t _rigid_body_base_id;
         std::vector<sp<BroadPhrase>> _broad_phrases;
         sp<NarrowPhrase> _narrow_phrase;
         std::unordered_map<int32_t, sp<RigidBodyShadow>> _rigid_bodies;
+
+        friend class RigidBodyShadow;
     };
 
     class RigidBodyShadow : public RigidBody {
@@ -111,7 +111,7 @@ public:
 
     class RigidBodyImpl : public RigidBody, Implements<RigidBodyImpl, RigidBody, Holder> {
     public:
-        RigidBodyImpl(const sp<ColliderImpl::Stub>& collider, const sp<RigidBodyShadow>& shadow);
+        RigidBodyImpl(sp<ColliderImpl::Stub> collider, sp<RigidBodyShadow> shadow);
         ~RigidBodyImpl() override;
 
         virtual void dispose() override;
@@ -128,7 +128,7 @@ public:
 
 private:
     sp<Stub> _stub;
-    sp<ResourceLoaderContext> _resource_loader_context;
+    sp<RenderController> _render_controller;
 };
 
 }

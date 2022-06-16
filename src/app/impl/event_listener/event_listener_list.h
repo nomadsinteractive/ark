@@ -16,7 +16,7 @@ public:
     virtual bool onEvent(const Event& event);
 
 private:
-    std::map<int32_t, DisposableItemList<EventListener>> _event_listeners;
+    std::map<int32_t, DList<EventListener>> _event_listeners;
 };
 
 }

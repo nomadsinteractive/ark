@@ -36,8 +36,8 @@ public:
 
     sp<Boolean> disposed() const;
 
-    template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& disposed = nullptr) {
-        return _render_controller->synchronize<T>(delegate, disposed);
+    template<typename T> sp<Variable<T>> synchronize(sp<Variable<T>> delegate, sp<Boolean> disposed = nullptr) {
+        return _render_controller->synchronize<T>(std::move(delegate), std::move(disposed));
     }
 
 private:

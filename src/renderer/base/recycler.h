@@ -14,13 +14,13 @@ class ARK_API Recycler {
 public:
 
     void recycle(Resource& resource);
-    void recycle(Resource::RecycleFunc recycler);
+    void recycle(ResourceRecycleFunc recycler);
 
 private:
     void doRecycling(GraphicsContext& graphicsContext);
 
 private:
-    LFStack<Resource::RecycleFunc> _recyclers;
+    LFStack<ResourceRecycleFunc> _recyclers;
 
     friend class ResourceManager;
     friend class RenderController;

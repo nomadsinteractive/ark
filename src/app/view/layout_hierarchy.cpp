@@ -19,7 +19,7 @@ namespace ark {
 
 LayoutHierarchy::Slot::Slot(const sp<Renderer>& renderer, bool layoutRequested)
     : _layout_requested(layoutRequested), _renderer(renderer), _view(_renderer.as<View>()), _view_group(_renderer.as<ViewGroup>()),
-      _layout_event_listener(renderer.as<LayoutEventListener>()), _disposed(renderer.as<Disposed>()), _visibility(_renderer.as<Visibility>())
+      _layout_event_listener(renderer.as<LayoutEventListener>()), _disposed(renderer.as<Disposed>()), _visible(_renderer.as<Visibility>())
 {
     DASSERT(_renderer);
 }
@@ -49,6 +49,11 @@ void LayoutHierarchy::Slot::updateLayoutPosition(const V2& position, float clien
 bool LayoutHierarchy::Slot::isDisposed() const
 {
     return _disposed && _disposed->val();
+}
+
+bool LayoutHierarchy::Slot::isVisible() const
+{
+    return !_visible || _visible->val();
 }
 
 bool LayoutHierarchy::Slot::layoutRequested() const
@@ -117,7 +122,7 @@ void LayoutHierarchy::Slot::render(RenderRequest& renderRequest, const V3& posit
 
 bool LayoutHierarchy::Slot::onEventDispatch(const Event& event, float x, float y)
 {
-    if(_view && (!_visibility || _visibility->val()))
+    if(_view && isVisible())
     {
         const sp<LayoutParam>& layoutParam = _view->layoutParam();
         const V2 pos = _position;
@@ -152,7 +157,8 @@ void LayoutHierarchy::traverse(const Holder::Visitor& visitor)
 void LayoutHierarchy::render(RenderRequest& renderRequest, const V3& position) const
 {
     for(const sp<Slot>& i: _slots)
-        i->render(renderRequest, position);
+        if(i->isVisible())
+            i->render(renderRequest, position);
 }
 
 bool LayoutHierarchy::onEvent(const Event& event, float x, float y) const
@@ -225,8 +231,8 @@ void LayoutHierarchy::updateLayout(LayoutParam& layoutParam)
 {
     if(_incremental.size())
     {
-        for(const sp<Slot>& i : _incremental)
-            _slots.push_back(i);
+        for(sp<Slot>& i : _incremental)
+            _slots.push_back(std::move(i));
         _incremental.clear();
     }
     if(isLayoutNeeded(layoutParam))

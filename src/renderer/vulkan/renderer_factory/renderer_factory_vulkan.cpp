@@ -113,10 +113,10 @@ sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
     return sp<PipelineFactoryVulkan>::make(_recycler, _renderer);
 }
 
-sp<Texture::Delegate> RendererFactoryVulkan::createTexture(const sp<Size>& size, const sp<Texture::Parameters>& parameters, const sp<Texture::Uploader>& uploader)
+sp<Texture::Delegate> RendererFactoryVulkan::createTexture(sp<Size> size, sp<Texture::Parameters> parameters)
 {
     if(parameters->_type == Texture::TYPE_2D || parameters->_type == Texture::TYPE_CUBEMAP)
-        return sp<VKTexture>::make(_recycler, _renderer, static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), parameters, uploader);
+        return sp<VKTexture>::make(_recycler, _renderer, static_cast<uint32_t>(size->width()), static_cast<uint32_t>(size->height()), std::move(parameters));
     return nullptr;
 }
 

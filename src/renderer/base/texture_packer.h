@@ -39,7 +39,7 @@ private:
     public:
         PackedTextureUploader(uint32_t width, uint32_t height, uint8_t channels, std::vector<PackedBitmap> bitmaps);
 
-        void upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate);
+        virtual void upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
 
     private:
         uint32_t _width;
