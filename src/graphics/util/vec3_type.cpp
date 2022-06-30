@@ -9,6 +9,7 @@
 #include "core/impl/variable/interpolate.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
+#include "core/impl/variable/variable_ternary.h"
 #include "core/util/operators.h"
 #include "core/util/variable_util.h"
 
@@ -308,6 +309,11 @@ sp<Vec3> Vec3Type::modCeil(const sp<Vec3>& self, const sp<Numeric>& mod)
 sp<Vec3> Vec3Type::modCeil(const sp<Vec3>& self, const sp<Vec3>& mod)
 {
     return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::ModCeil<V3>>>::make(self, mod);
+}
+
+sp<Vec3> Vec3Type::ifElse(const sp<Vec3>& self, const sp<Boolean>& condition, const sp<Vec3>& otherwise)
+{
+    return sp<VariableTernary<V3>>::make(condition, self, otherwise);
 }
 
 sp<Vec3> Vec3Type::attract(const sp<Vec3>& self, const V3& s0, float duration, const sp<Numeric>& t)

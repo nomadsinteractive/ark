@@ -351,9 +351,9 @@ sp<Vec2> Vec2Type::fence(const sp<Vec2>& self, const sp<Vec3>& plane, const sp<O
     return sp<Vec2Fence>::make(self, plane, observer);
 }
 
-sp<Vec2> Vec2Type::ifElse(const sp<Vec2>& self, const sp<Boolean>& condition, const sp<Vec2>& negative)
+sp<Vec2> Vec2Type::ifElse(const sp<Vec2>& self, const sp<Boolean>& condition, const sp<Vec2>& otherwise)
 {
-    return sp<VariableTernary<V2>>::make(condition, self, negative);
+    return sp<VariableTernary<V2>>::make(condition, self, otherwise);
 }
 
 sp<Numeric> Vec2Type::atan2(const sp<Vec2>& self)

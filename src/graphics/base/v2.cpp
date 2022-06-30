@@ -143,7 +143,7 @@ V2 V2::normalize() const
 
 const float& V2::operator[](int32_t p) const
 {
-    DCHECK(p >=0, "Index out bounds: %d", p);
+    DCHECK(p >= 0, "Index out bounds: %d", p);
     return reinterpret_cast<const float*>(this)[p];
 }
 

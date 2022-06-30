@@ -124,7 +124,7 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Vec2> fence(const sp<Vec2>& self, const sp<Vec3>& plane, const sp<Observer>& observer);
 //  [[script::bindings::classmethod]]
-    static sp<Vec2> ifElse(const sp<Vec2>& self, const sp<Boolean>& condition, const sp<Vec2>& negative);
+    static sp<Vec2> ifElse(const sp<Vec2>& self, const sp<Boolean>& condition, const sp<Vec2>& otherwise);
 
 //  [[script::bindings::classmethod]]
     static sp<Numeric> atan2(const sp<Vec2>& self);

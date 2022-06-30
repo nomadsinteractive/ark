@@ -125,19 +125,6 @@ public:
     const sp<Stub>& stub() const;
     const sp<Callback>& callback() const;
 
-//  [[plugin::style("rigid-body")]]
-    class RIGID_BODY_STYLE : public Builder<RenderObject> {
-    public:
-        RIGID_BODY_STYLE(BeanFactory& factory, const sp<Builder<RenderObject>>& delegate, const String& value);
-
-        virtual sp<RenderObject> build(const Scope& args) override;
-
-    private:
-        sp<Builder<RenderObject>> _delegate;
-        sp<Builder<RigidBody>> _rigid_body;
-
-    };
-
 private:
     sp<Stub> _stub;
 

@@ -28,7 +28,6 @@ namespace ark {
 class ARK_API RenderController {
 public:
     enum UploadStrategy {
-        US_MANUAL = -1,
         US_ONCE = 0,
         US_RELOAD = 1,
         US_ON_SURFACE_READY = 2,
@@ -77,8 +76,8 @@ public:
 
     void onDrawFrame(GraphicsContext& graphicsContext);
 
-    sp<Future> upload(sp<Resource> resource, sp<Uploader> uploader, RenderController::UploadStrategy strategy, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
-    sp<Future> uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
+    void upload(sp<Resource> resource, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
+    void uploadBuffer(const Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
 
     template<typename T, typename... Args> sp<T> createResource(Args&&... args) {
         const sp<T> res = sp<T>::make(std::forward<Args>(args)...);
@@ -91,8 +90,8 @@ public:
     sp<Camera> createCamera() const;
     sp<PipelineFactory> createPipelineFactory() const;
 
-    sp<Texture> createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
-    sp<Texture> createTexture2D(sp<Size> size, sp<Texture::Uploader> uploader, UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY);
+    sp<Texture> createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
+    sp<Texture> createTexture2D(sp<Size> size, sp<Texture::Uploader> uploader, UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
 
     Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader);
     Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr);

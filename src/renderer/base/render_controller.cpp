@@ -84,31 +84,24 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
         _recycler->doRecycling(graphicsContext);
 }
 
-sp<Future> RenderController::upload(sp<Resource> resource, sp<Uploader> uploader, RenderController::UploadStrategy strategy, RenderController::UploadPriority priority)
+void RenderController::upload(sp<Resource> resource, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
 {
     switch(strategy & 3)
     {
     case RenderController::US_ONCE_AND_ON_SURFACE_READY:
     case RenderController::US_ONCE:
     case RenderController::US_RELOAD:
-        {
-            sp<Future> future = sp<Future>::make();
-            _preparing_items.push(PreparingResource(RenderResource(std::move(resource), std::move(uploader), future, priority), strategy));
-            return future;
-        }
+        _preparing_items.push(PreparingResource(RenderResource(std::move(resource), std::move(uploader), std::move(future), priority), strategy));
+        break;
     case RenderController::US_ON_SURFACE_READY:
-        {
-            sp<Future> future = sp<Future>::make();
-            _on_surface_ready_items.insert(RenderResource(std::move(resource), std::move(uploader), future, priority));
-            return future;
-        }
+        _on_surface_ready_items.insert(RenderResource(std::move(resource), std::move(uploader), std::move(future), priority));
+        break;
     }
-    return nullptr;
 }
 
-sp<Future> RenderController::uploadBuffer(const Buffer& buffer, const sp<Uploader>& uploader, RenderController::UploadStrategy strategy, RenderController::UploadPriority priority)
+void RenderController::uploadBuffer(const Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
 {
-    return upload(buffer._delegate, uploader, strategy, priority);
+    return upload(buffer._delegate, std::move(uploader), strategy, std::move(future), priority);
 }
 
 const sp<Recycler>& RenderController::recycler() const
@@ -174,19 +167,18 @@ sp<PipelineFactory> RenderController::createPipelineFactory() const
     return _render_engine->rendererFactory()->createPipelineFactory();
 }
 
-sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us)
+sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future)
 {
     sp<Texture::Delegate> delegate = _render_engine->rendererFactory()->createTexture(size, parameters);
     DCHECK(delegate, "Unsupported TextureType: %d", parameters->_type);
     const sp<Texture> texture = sp<Texture>::make(std::move(delegate), std::move(size), std::move(uploader), std::move(parameters));
-    if(us != RenderController::US_MANUAL)
-        upload(texture, nullptr, us);
+    upload(texture, nullptr, us, std::move(future));
     return texture;
 }
 
-sp<Texture> RenderController::createTexture2D(sp<Size> size, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us)
+sp<Texture> RenderController::createTexture2D(sp<Size> size, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future)
 {
-    return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D, 0), std::move(uploader), us);
+    return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D, 0), std::move(uploader), us, std::move(future));
 }
 
 Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader)
@@ -202,7 +194,7 @@ Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Uploader>
 sp<Framebuffer> RenderController::makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
 {
     const sp<Framebuffer> framebuffer = renderEngine()->rendererFactory()->createFramebuffer(std::move(renderer), std::move(colorAttachments), std::move(depthStencilAttachments), clearMask);
-    upload(framebuffer->delegate(), nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY, UPLOAD_PRIORITY_LOW);
+    upload(framebuffer->delegate(), nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY, nullptr, UPLOAD_PRIORITY_LOW);
     return framebuffer;
 }
 
@@ -232,20 +224,15 @@ void RenderController::addPreRenderRunRequest(const sp<Runnable>& task, const sp
 
 void RenderController::preUpdate(uint64_t timestamp)
 {
-#ifdef ARK_FLAG_DEBUG
-    static int i = 0;
-    if(i ++ == 600)
-    {
-        LOGD("_on_pre_updatable: %d", _on_pre_updatable.items().size());
-        LOGD("_on_pre_update_request: %d", _on_pre_update_request.items().size());
-        i = 0;
-    }
-#endif
+    DPROFILER_TRACE("RendererPreUpdate");
+
     _defered_instances.clear();
 
+    DPROFILER_LOG("Updatables", _on_pre_updatable.items().size());
     for(const sp<Updatable>& i : _on_pre_updatable.update(timestamp))
         i->update(timestamp);
 
+    DPROFILER_LOG("Runnables", _on_pre_update_request.items().size());
     for(const sp<Runnable>& runnable : _on_pre_update_request.update(timestamp))
         runnable->run();
 }
@@ -325,7 +312,7 @@ bool RenderController::RenderResource::isExpired() const
 
 bool RenderController::RenderResource::isCancelled() const
 {
-    return _future->isCancelled();
+    return _future ? _future->isCancelled() : false;
 }
 
 void RenderController::RenderResource::upload(GraphicsContext& graphicsContext) const

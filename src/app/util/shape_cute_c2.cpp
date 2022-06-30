@@ -63,6 +63,40 @@ ShapeCuteC2 ShapeCuteC2::transform(const V2& position, float rotation) const
     return ShapeCuteC2(*this, position, rotation);
 }
 
+void ShapeCuteC2::resize(const V2& scale)
+{
+    switch(t)
+    {
+    case C2_TYPE_CIRCLE:
+        s.circle.p.x *= scale.x();
+        s.circle.p.y *= scale.y();
+        s.circle.r *= scale.x();
+        break;
+    case C2_TYPE_AABB:
+        s.aabb.min.x *= scale.x();
+        s.aabb.max.x *= scale.x();
+        s.aabb.min.y *= scale.y();
+        s.aabb.max.y *= scale.y();
+        break;
+    case C2_TYPE_CAPSULE:
+        s.capsule.a.x *= scale.x();
+        s.capsule.b.x *= scale.x();
+        s.capsule.a.y *= scale.y();
+        s.capsule.b.y *= scale.y();
+        s.capsule.r *= scale.x();
+        break;
+    case C2_TYPE_POLY:
+        for(int32_t i = 0; i < s.poly.count; ++i)
+        {
+            s.poly.verts[i].x *= scale.x();
+            s.poly.verts[i].y *= scale.y();
+        }
+        break;
+    case C2_TYPE_NONE:
+        break;
+    }
+}
+
 void ShapeCuteC2::doTransform(const V2& position, float rotation)
 {
     switch(t)

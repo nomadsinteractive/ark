@@ -47,8 +47,8 @@ private:
 
 }
 
-Transform::Transform(Type type, const sp<Rotation>& rotate, const sp<Vec3>& scale, const sp<Vec3>& translate)
-    : _type(type), _rotation(rotate, V4(0, 0, 0, 1.0f)), _scale(scale, V3(1.0f)), _pivot(translate), _delegate(makeDelegate())
+Transform::Transform(Type type, sp<Rotation> rotate, sp<Vec3> scale, sp<Vec3> pivot)
+    : _type(type), _rotation(std::move(rotate), V4(0, 0, 0, 1.0f)), _scale(std::move(scale), V3(1.0f)), _pivot(std::move(pivot)), _delegate(makeDelegate())
 {
 }
 

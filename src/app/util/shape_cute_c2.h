@@ -15,6 +15,7 @@ namespace ark {
 class ShapeCuteC2 {
 public:
     ShapeCuteC2();
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(ShapeCuteC2);
 
     bool collideManifold(const ShapeCuteC2& other, CollisionManifold& collisionManifold) const;
     bool rayCastManifold(const c2Ray& ray, RayCastManifold& rayCastManifold) const;
@@ -34,6 +35,8 @@ public:
     c2x x;
 
     CollisionFilter _collision_filter;
+
+    void resize(const V2& scale);
 
 private:
     ShapeCuteC2(const ShapeCuteC2& other, const V2& translate, float rotation);

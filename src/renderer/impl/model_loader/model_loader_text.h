@@ -4,6 +4,8 @@
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/util/max_rects_bin_pack.h"
+
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
 #include "renderer/inf/model_loader.h"
@@ -40,9 +42,7 @@ private:
         sp<Texture> _texture;
         sp<Future> _texture_reload_future;
 
-        int32_t _flowx, _flowy;
-        int32_t _max_glyph_height;
-
+        MaxRectsBinPack _bin_pack;
         friend class ModelLoaderText;
     };
 

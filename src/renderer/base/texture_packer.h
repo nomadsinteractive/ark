@@ -19,7 +19,7 @@ public:
     TexturePacker(const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Texture> texture);
 
     RectI addBitmap(MaxRectsBinPack& binPack, const String& src);
-    RectI addBitmap(MaxRectsBinPack& binPack, sp<Variable<bitmap>> bitmapProvider);
+    RectI addBitmap(MaxRectsBinPack& binPack, bitmap fragment);
     RectI addBitmap(MaxRectsBinPack& binPack, const bitmap& bounds, sp<Variable<bitmap>> bitmapProvider);
 
     void addPackedBitmap(int32_t x, int32_t y, const bitmap& bounds, sp<Variable<bitmap>> bitmapProvider);

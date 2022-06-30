@@ -42,19 +42,12 @@ bool ModelLoaderText::Stub::prepareOne(int32_t c)
         int32_t width = metrics.width;
         int32_t height = metrics.height;
         DCHECK(width > 0 && height > 0, "Error loading character %d: width = %d, height = %d", c, width, height);
-        if(_flowx + width > _atlas->width())
-        {
-            _flowy += (_max_glyph_height + 1);
-            _max_glyph_height = _flowx = 0;
-        }
-        if(_flowy + metrics.bitmap_height > _atlas->height())
+        const MaxRectsBinPack::Rect bounds = _bin_pack.Insert(metrics.bitmap_width, metrics.bitmap_height, MaxRectsBinPack::RectBestShortSideFit);
+        if(bounds.height != metrics.bitmap_height)
             return false;
 
-        if(_max_glyph_height < metrics.bitmap_height)
-            _max_glyph_height = metrics.bitmap_height;
-        _atlas->add(c, _flowx, _flowy, _flowx + metrics.bitmap_width, _flowy + metrics.bitmap_height, Rect(0, 0, 1.0f, 1.0f), V2(metrics.bitmap_width, metrics.bitmap_height), V2(0));
-        _alphabet->draw(c, _font_glyph, _flowx, _flowy);
-        _flowx += (metrics.bitmap_width + 1);
+        _atlas->add(c, bounds.x, bounds.y, bounds.x + metrics.bitmap_width, bounds.y + metrics.bitmap_height, Rect(0, 0, 1.0f, 1.0f), V2(metrics.bitmap_width, metrics.bitmap_height), V2(0));
+        _alphabet->draw(c, _font_glyph, bounds.x, bounds.y);
     }
     else
         DWARN(false, "Error loading character %d", c);
@@ -82,9 +75,8 @@ bool ModelLoaderText::Stub::resize(uint32_t textureWidth, uint32_t textureHeight
     _size->setWidth(static_cast<float>(textureWidth));
     _size->setHeight(static_cast<float>(textureHeight));
     _font_glyph = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1), true);
-    memset(_font_glyph->at(0, 0), 0, _font_glyph->width() * _font_glyph->height());
-    _flowx = _flowy = 0;
-    _max_glyph_height = 0;
+    memset(_font_glyph->at(0, 0), 0, _font_glyph->rowBytes() * _font_glyph->height());
+    _bin_pack.Init(textureWidth, textureHeight, false);
 
     if(oldAtlas)
         for(const auto& i : oldAtlas->items())
@@ -103,11 +95,12 @@ bool ModelLoaderText::Stub::resize(uint32_t textureWidth, uint32_t textureHeight
 
 void ModelLoaderText::Stub::reloadTexture()
 {
-    sp<Texture> texture = _render_controller->createTexture(_size, _texture->parameters(), sp<Texture::UploaderBitmap>::make(_font_glyph), RenderController::US_MANUAL);
-    _texture->setDelegate(texture->delegate(), _size);
     if(_texture_reload_future)
         _texture_reload_future->cancel();
-    _texture_reload_future = _render_controller->upload(texture, nullptr, RenderController::US_RELOAD);
+
+    _texture_reload_future = sp<Future>::make();
+    sp<Texture> texture = _render_controller->createTexture(_size, _texture->parameters(), sp<Texture::UploaderBitmap>::make(_font_glyph), RenderController::US_RELOAD, _texture_reload_future);
+    _texture->setDelegate(texture->delegate(), _size);
 }
 
 ModelLoaderText::ModelLoaderText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)

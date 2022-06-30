@@ -1,7 +1,7 @@
 #ifndef ARK_APP_INF_NARROW_PHRASE_H_
 #define ARK_APP_INF_NARROW_PHRASE_H_
 
-#include <unordered_set>
+#include <vector>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -14,6 +14,7 @@
 
 namespace ark {
 
+//  [[script::bindings::auto]]
 class ARK_API NarrowPhrase {
 public:
     class Ray {
@@ -29,19 +30,11 @@ public:
     private:
         int32_t _data[8];
     };
+
 public:
     virtual ~NarrowPhrase() = default;
 
-//  [[script::bindings::auto]]
-    virtual Box makeAABBShape(const Rect& aabb) = 0;
-//  [[script::bindings::auto]]
-    virtual Box makeBallShape(const V2& position, float radius) = 0;
-//  [[script::bindings::auto]]
-    virtual Box makeBoxShape(const Rect& bounds) = 0;
-//  [[script::bindings::auto]]
-    virtual Box makeCapsuleShape(const V2& p1, const V2& p2, float radius) = 0;
-//  [[script::bindings::auto]]
-    virtual Box makePolygonShape(const std::vector<V2>& vertices) = 0;
+    virtual RigidBodyDef makeBodyDef(int32_t shapeId, const sp<Size>& size) = 0;
 
     virtual Ray toRay(const V2& from, const V2& to) = 0;
 

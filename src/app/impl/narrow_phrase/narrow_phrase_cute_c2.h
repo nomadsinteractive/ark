@@ -10,6 +10,7 @@
 
 #include "app/forwarding.h"
 #include "app/inf/narrow_phrase.h"
+
 #include "app/util/shape_cute_c2.h"
 
 namespace ark {
@@ -18,11 +19,7 @@ class NarrowPhraseCuteC2 : public NarrowPhrase {
 public:
     NarrowPhraseCuteC2(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual Box makeAABBShape(const Rect& aabb) override;
-    virtual Box makeBallShape(const V2& position, float radius) override;
-    virtual Box makeBoxShape(const Rect& bounds) override;
-    virtual Box makeCapsuleShape(const V2& p1, const V2& p2, float radius) override;
-    virtual Box makePolygonShape(const std::vector<V2>& vertices) override;
+    virtual RigidBodyDef makeBodyDef(int32_t shapeId, const sp<Size>& size) override;
 
     virtual Ray toRay(const V2& from, const V2& to) override;
 
@@ -42,6 +39,28 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
     };
 
+private:
+
+    class BodyDefCuteC2 {
+    public:
+        BodyDefCuteC2(const V2& size, const V2& pivot, std::vector<ShapeCuteC2> shapes);
+        BodyDefCuteC2(const document& manifest);
+        DEFAULT_COPY_AND_ASSIGN(BodyDefCuteC2);
+
+        const V2& size() const;
+        const V2& pivot() const;
+
+        const std::vector<ShapeCuteC2>& shapes() const;
+
+        void resize(const V2& size);
+
+    private:
+        V2 _size;
+        V2 _pivot;
+        std::vector<ShapeCuteC2> _shapes;
+
+    };
+
     static ShapeCuteC2 makeAABBShapeImpl(const Rect& bounds);
     static ShapeCuteC2 makeBallShapeImpl(const V2& position, float radius);
     static ShapeCuteC2 makeBoxShapeImpl(const Rect& bounds);
@@ -49,17 +68,24 @@ public:
     static ShapeCuteC2 makePolygonShapeImpl(const std::vector<V2>& vertices);
 
 private:
+    sp<BodyDefCuteC2> makeBodyAABB(const Rect& aabb);
+    sp<BodyDefCuteC2> makeBodyBall(const V2& position, float radius);
+    sp<BodyDefCuteC2> makeBodyBox(const Rect& bounds);
+    sp<BodyDefCuteC2> makeBodyCapsule(const V2& p1, const V2& p2, float radius);
+
     void toRay(const V2& from, const V2& to, c2Ray& ray) const;
     void loadShapes(const document& manifest);
 
     const CollisionFilter& getCollisionFilter(const CollisionFilter& oneFilter, const sp<CollisionFilter>& specifiedFilter);
 
-    const std::vector<sp<ShapeCuteC2>>& ensureShape(const BroadPhrase::Candidate& candidate, std::vector<sp<ShapeCuteC2>>& predefined) const;
+    sp<BodyDefCuteC2> findBodyDef(int32_t shapeId) const;
+    sp<BodyDefCuteC2> ensureBodyDef(const BroadPhrase::Candidate& candidate) const;
 
-    std::vector<sp<ShapeCuteC2>> toCuteC2Shapes(const std::vector<Box>& boxes) const;
+    std::vector<ShapeCuteC2> toCuteC2Shapes(const ShapeCuteC2& shape) const;
 
 private:
     std::unordered_map<int32_t, sp<BodyDefCuteC2>> _body_defs;
+
 };
 
 }

@@ -15,6 +15,7 @@
 
 #include "app/inf/collider.h"
 #include "app/inf/narrow_phrase.h"
+#include "app/util/rigid_body_def.h"
 
 namespace ark {
 
@@ -22,8 +23,7 @@ BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap, NarrowPhrase& narrow
     : _tilemap(std::move(tilemap))
 {
     const Tileset& tileset = _tilemap->tileset();
-    const Rect tileBounds(tileset.tileWidth() / -2.0f, tileset.tileHeight() / -2.0f, tileset.tileWidth() / 2.0f, tileset.tileHeight() / 2.0f);
-    _tile_shapes.push_back(narrowPhrase.makeAABBShape(tileBounds));
+    _body_def_tile = narrowPhrase.makeBodyDef(Collider::BODY_SHAPE_AABB, sp<Size>::make(tileset.tileWidth(), tileset.tileHeight())).impl();
 }
 
 void BroadPhraseTilemap::create(int32_t /*id*/, const V3& /*position*/, const V3& /*aabb*/)
@@ -146,8 +146,8 @@ void BroadPhraseTilemap::addCandidate(const TilemapLayer& tilemapLayer, std::set
 
 BroadPhrase::Candidate BroadPhraseTilemap::makeCandidate(int32_t candidateId, int32_t shapeId, const V2& position) const
 {
-    std::vector<Box> shapes = shapeId == Collider::BODY_SHAPE_AABB ? _tile_shapes : std::vector<Box>();
-    return Candidate(candidateId, position, 0, shapeId, nullptr, std::move(shapes));
+    Box bodyDef = shapeId == Collider::BODY_SHAPE_AABB ? _body_def_tile : Box();
+    return Candidate(candidateId, position, 0, shapeId, nullptr, std::move(bodyDef));
 }
 
 BroadPhraseTilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

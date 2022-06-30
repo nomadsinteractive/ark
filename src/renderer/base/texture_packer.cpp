@@ -41,10 +41,9 @@ RectI TexturePacker::addBitmap(MaxRectsBinPack& binPack, const String& src)
     return addBitmap(binPack, _resource_loader_context->bitmapBoundsBundle()->get(src), sp<BitmapProvider>::make(_resource_loader_context->bitmapBundle(), src));
 }
 
-RectI TexturePacker::addBitmap(MaxRectsBinPack& binPack, sp<Variable<bitmap>> bitmapProvider)
+RectI TexturePacker::addBitmap(MaxRectsBinPack& binPack, bitmap fragment)
 {
-    const bitmap bitmap = bitmapProvider->val();
-    return addBitmap(binPack, bitmap, std::move(bitmapProvider));
+    return addBitmap(binPack, fragment, sp<Variable<bitmap>::Const>::make(std::move(fragment)));
 }
 
 void TexturePacker::updateTexture()

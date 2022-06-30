@@ -55,8 +55,6 @@ AlphabetTrueType::~AlphabetTrueType()
 
 bool AlphabetTrueType::measure(int32_t c, Metrics& metrics, bool hasFallback)
 {
-    const std::lock_guard<std::mutex> lock(_mutex);
-
     const auto iter = _metrics_cache.find(c);
     if(iter != _metrics_cache.end())
     {
@@ -84,8 +82,6 @@ bool AlphabetTrueType::measure(int32_t c, Metrics& metrics, bool hasFallback)
 
 bool AlphabetTrueType::draw(uint32_t c, const bitmap& image, int32_t x, int32_t y)
 {
-    const std::lock_guard<std::mutex> lock(_mutex);
-
     FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
     if(!glyphIndex)
         return false;

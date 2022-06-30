@@ -14,7 +14,7 @@ template<typename T> auto _op_type_sfinae(const T& p, decltype(p->val())*) -> de
 template<typename T> T _op_type_sfinae(const T& /*p*/, ...);
 
 template<typename T, typename U, typename OP2, typename LTYPE = decltype(_op_type_sfinae<T>(std::declval<T>(), nullptr)), typename RTYPE = decltype(_op_type_sfinae<U>(std::declval<U>(), nullptr)),
-         typename OPType = typename std::result_of<OP2(LTYPE, RTYPE)>::type> class VariableOP2 : public Variable<OPType>, public Holder, Implements<VariableOP2<T, U, OP2, LTYPE, RTYPE, OPType>, Variable<OPType>, Holder> {
+         typename OPType = std::invoke_result_t<OP2, LTYPE, RTYPE>> class VariableOP2 : public Variable<OPType>, public Holder, Implements<VariableOP2<T, U, OP2, LTYPE, RTYPE, OPType>, Variable<OPType>, Holder> {
 public:
     VariableOP2(const T& p1, const U& p2)
         : _lv(p1), _rv(p2) {

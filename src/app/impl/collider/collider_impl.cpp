@@ -21,6 +21,7 @@
 #include "app/inf/broad_phrase.h"
 #include "app/inf/narrow_phrase.h"
 #include "app/inf/collision_callback.h"
+#include "app/util/rigid_body_def.h"
 
 namespace ark {
 
@@ -36,23 +37,23 @@ public:
         const V3 position = _position->val();
         sp<ColliderImpl::RigidBodyShadow> rigidBody = _collider->findRigidBody(_rigid_body_id);
         if(rigidBody) {
-            const V3 size = _size->val();
             if(_size_updated || _position_updated) {
                 if(_size_updated) {
-                    rigidBody->updateShapes(_collider->narrowPhrase(), size);
+                    rigidBody->updateBodyDef(_collider->narrowPhrase(), _size);
                     _size_updated = false;
                 }
-                float s = std::max(size.x(), size.y());
-                _collider->updateBroadPhraseCandidate(_rigid_body_id, position, V3(s, s, 0));
+                float r = rigidBody->bodyDef().occupyRadius();
+                _collider->updateBroadPhraseCandidate(_rigid_body_id, position, V3(r * 2));
                 _position_updated = false;
             }
-            rigidBody->collision(rigidBody, _collider, position, size);
+            rigidBody->collision(rigidBody, _collider, position, V3(rigidBody->bodyDef().occupyRadius() * 2));
         }
         return position;
     }
 
     virtual bool update(uint64_t timestamp) override {
-        _size_updated = _size_updated | _size->update(timestamp);
+        if(_size)
+            _size_updated = _size_updated | _size->update(timestamp);
         _position_updated = _position_updated | _position->update(timestamp);
         return true;
     }
@@ -68,9 +69,10 @@ private:
 
 }
 
-ColliderImpl::ColliderImpl(std::vector<sp<BroadPhrase>> broadPhrase, sp<NarrowPhrase> narrowPhrase, const document& manifest, const sp<RenderController>& renderController)
+ColliderImpl::ColliderImpl(std::vector<sp<BroadPhrase>> broadPhrase, sp<NarrowPhrase> narrowPhrase, const document& /*manifest*/, const sp<RenderController>& renderController)
     : _stub(sp<Stub>::make(std::move(broadPhrase), std::move(narrowPhrase))), _render_controller(renderController)
 {
+    _render_controller->addPreRenderRunRequest(_stub, sp<BooleanByWeakRef<Stub>>::make(_stub, 1));
 }
 
 sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate)
@@ -130,14 +132,28 @@ void ColliderImpl::Stub::updateBroadPhraseCandidate(int32_t id, const V3& positi
         i->update(id, position, aabb);
 }
 
-void ColliderImpl::Stub::remove(const RigidBody& rigidBody)
+void ColliderImpl::Stub::removeBroadPhraseCandidate(int32_t id)
 {
     for(const sp<BroadPhrase>& i : _broad_phrases)
-        i->remove(rigidBody.id());
-    const auto iter = _rigid_bodies.find(rigidBody.id());
-    DCHECK(iter != _rigid_bodies.end(), "RigidBody(%d) not found", rigidBody.id());
-    LOGD("Removing RigidBody(%d)", rigidBody.id());
-    _rigid_bodies.erase(iter);
+        i->remove(id);
+}
+
+void ColliderImpl::Stub::run()
+{
+    for(int32_t i : _phrase_remove)
+    {
+        const auto iter = _rigid_bodies.find(i);
+        DCHECK(iter != _rigid_bodies.end(), "RigidBody(%d) not found", i);
+        LOGD("Removing RigidBody(%d)", i);
+        _rigid_bodies.erase(iter);
+    }
+    _phrase_remove = std::move(_phrase_dispose);
+}
+
+void ColliderImpl::Stub::removeRigidBody(int32_t rigidBodyId)
+{
+    removeBroadPhraseCandidate(rigidBodyId);
+    _phrase_dispose.push_back(rigidBodyId);
 }
 
 int32_t ColliderImpl::Stub::generateRigidBodyId()
@@ -148,14 +164,13 @@ int32_t ColliderImpl::Stub::generateRigidBodyId()
 sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(int32_t rigidBodyId, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, sp<Disposed> disposed, sp<ColliderImpl::Stub> self)
 {
     const V3 posVal = position->val();
-    const V3 sizeVal = size->val();
-    sp<RigidBodyShadow> rigidBodyShadow = sp<RigidBodyShadow>::make(rigidBodyId, type, shape, std::move(position), std::move(size), std::move(rotate), std::move(disposed));
-    rigidBodyShadow->updateShapes(_narrow_phrase, sizeVal);
+    sp<RigidBodyShadow> rigidBodyShadow = sp<RigidBodyShadow>::make(rigidBodyId, type, shape, std::move(position), size, std::move(rotate), std::move(disposed));
+    const RigidBodyDef& rigidBodyDef = rigidBodyShadow->updateBodyDef(_narrow_phrase, size);
     _rigid_bodies[rigidBodyShadow->id()] = rigidBodyShadow;
 
-    float s = std::max(sizeVal.x(), sizeVal.y());
+    float s = rigidBodyDef.occupyRadius() * 2;
     for(const sp<BroadPhrase>& i : _broad_phrases)
-        i->create(rigidBodyId, posVal, V3(s, s, s));
+        i->create(rigidBodyId, posVal, V3(s));
 
     return sp<RigidBodyImpl>::make(self, std::move(rigidBodyShadow));
 }
@@ -205,7 +220,7 @@ std::vector<BroadPhrase::Candidate> ColliderImpl::Stub::toBroadPhraseCandidates(
 
 BroadPhrase::Candidate ColliderImpl::Stub::toBroadPhraseCandidate(const RigidBodyShadow& rigidBody) const
 {
-    return BroadPhrase::Candidate(rigidBody.id(), rigidBody.position()->val(), rigidBody.transform()->rotation()->theta()->val(), rigidBody.shapeId(), rigidBody.collisionFilter(), rigidBody.shapes());
+    return BroadPhrase::Candidate(rigidBody.id(), rigidBody.position()->val(), rigidBody.transform()->rotation()->theta()->val(), rigidBody.shapeId(), rigidBody.collisionFilter(), rigidBody.bodyDef().impl());
 }
 
 std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V2& to) const
@@ -284,8 +299,9 @@ void ColliderImpl::RigidBodyImpl::dispose()
     doDispose();
 }
 
-ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, sp<Disposed> disposed)
-    : RigidBody(id, type, shapeId, std::move(position), std::move(size), std::move(rotate), Box(), std::move(disposed)), _dispose_requested(false)
+ColliderImpl::RigidBodyShadow::RigidBodyShadow(uint32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotation, sp<Disposed> disposed)
+    : RigidBody(sp<RigidBody::Stub>::make(id, type, shapeId, std::move(position), std::move(size), sp<Transform>::make(Transform::TYPE_LINEAR_2D, std::move(rotation)), Box(),
+                                          std::move(disposed))), _dispose_requested(false)
 {
 }
 
@@ -302,59 +318,45 @@ void ColliderImpl::RigidBodyShadow::collision(const sp<RigidBodyShadow>& self, C
         return;
     }
 
-    const BroadPhrase::Result result = collider.broadPhraseSearch(position, size);
-    std::unordered_set<int32_t> dynamicCandidates = std::move(result.dynamic_candidates);
+    BroadPhrase::Result result;
+    std::unordered_set<int32_t> dynamicCandidates;
     const Stub& shadowStub = stub();
-    const auto iter = dynamicCandidates.find(shadowStub._id);
-    if(iter != dynamicCandidates.end())
-        dynamicCandidates.erase(iter);
 
-    const BroadPhrase::Candidate candidateSelf(self->id(), position, self->transform()->rotation()->theta()->val(), self->shapeId(), self->collisionFilter(), self->shapes());
-    collider.resolveCandidates(self, candidateSelf, collider.toBroadPhraseCandidates(dynamicCandidates, Collider::BODY_TYPE_ALL), true, shadowStub._callback, _dynamic_contacts);
-    collider.resolveCandidates(self, candidateSelf, result.static_candidates, false, shadowStub._callback, _static_contacts);
+    {
+        DPROFILER_TRACE("BroadPhrase");
+        result = collider.broadPhraseSearch(position, size);
+        dynamicCandidates = std::move(result.dynamic_candidates);
+        const auto iter = dynamicCandidates.find(shadowStub._id);
+        if(iter != dynamicCandidates.end())
+            dynamicCandidates.erase(iter);
+    }
+
+    {
+        DPROFILER_TRACE("NarrowPhrase");
+        const BroadPhrase::Candidate candidateSelf(self->id(), position, self->transform()->rotation()->theta()->val(), self->shapeId(), self->collisionFilter(), self->bodyDef().impl());
+        collider.resolveCandidates(self, candidateSelf, collider.toBroadPhraseCandidates(dynamicCandidates, Collider::BODY_TYPE_ALL), true, shadowStub._callback, _dynamic_contacts);
+        collider.resolveCandidates(self, candidateSelf, result.static_candidates, false, shadowStub._callback, _static_contacts);
+    }
 }
 
 void ColliderImpl::RigidBodyShadow::doDispose(ColliderImpl::Stub& stub)
 {
     if(!isDisposed())
     {
-        stub.remove(*this);
+        stub.removeRigidBody(id());
         disposed()->dispose();
     }
 }
 
-const std::vector<Box>& ColliderImpl::RigidBodyShadow::shapes() const
+const RigidBodyDef& ColliderImpl::RigidBodyShadow::bodyDef() const
 {
-    return _shapes;
+    return _body_def;
 }
 
-void ColliderImpl::RigidBodyShadow::updateShapes(NarrowPhrase& narrowPhrase, const V3& size)
+const RigidBodyDef& ColliderImpl::RigidBodyShadow::updateBodyDef(NarrowPhrase& narrowPhrase, const sp<Size>& size)
 {
-    const Rect bounds(size.x() / -2.0f, size.y() / -2.0f, size.x() / 2.0f, size.y() / 2.0f);
-    switch(shapeId())
-    {
-    case Collider::BODY_SHAPE_BALL:
-        _shapes = { narrowPhrase.makeBallShape(V2(0, 0), size.x()) };
-        break;
-    case Collider::BODY_SHAPE_AABB:
-    {
-        _shapes = { narrowPhrase.makeAABBShape(bounds) };
-        break;
-    }
-    case Collider::BODY_SHAPE_CAPSULE:
-    {
-        float radius = bounds.width() / 2;
-        float x = (bounds.left() + bounds.right()) / 2;
-        DCHECK(radius < bounds.height() / 2, "Capsule too narrow, width = %.2f, height = %.2f, radius = %.2f", bounds.width(), bounds.height(), radius);
-        _shapes = { narrowPhrase.makeCapsuleShape(V2(x, bounds.top() + radius), V2(x, bounds.bottom() - radius), radius) };
-        break;
-    }
-    case Collider::BODY_SHAPE_BOX:
-        _shapes = { narrowPhrase.makeBoxShape(bounds) };
-        break;
-    default:
-        break;
-    }
+    _body_def = narrowPhrase.makeBodyDef(shapeId(), size);
+    return _body_def;
 }
 
 bool ColliderImpl::RigidBodyShadow::isDisposed() const

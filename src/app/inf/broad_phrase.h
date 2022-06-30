@@ -21,16 +21,16 @@ class ARK_API BroadPhrase {
 public:
     struct Candidate {
         Candidate() = default;
-        Candidate(int32_t id, const V2& position, float rotation, int32_t shapeId, sp<CollisionFilter> collisionFilter, std::vector<Box> shapes)
-            : id(id), position(position), rotation(rotation), shape_id(shapeId), _collision_filter(std::move(collisionFilter)), shapes(std::move(shapes)) {
+        Candidate(int32_t id, const V2& position, float rotation, int32_t shapeId, sp<CollisionFilter> collisionFilter, Box bodyDef)
+            : id(id), position(position), rotation(rotation), shape_id(shapeId), collision_filter(std::move(collisionFilter)), body_def(std::move(bodyDef)) {
         }
 
         int32_t id;
         V2 position;
         float rotation;
         int32_t shape_id;
-        sp<CollisionFilter> _collision_filter;
-        std::vector<Box> shapes;
+        sp<CollisionFilter> collision_filter;
+        Box body_def;
     };
 
     struct Result {

@@ -24,21 +24,12 @@ void AtlasImporterMaxRects::import(Atlas& atlas, const sp<Readable>& /*readable*
     MaxRectsBinPack binPack(atlas.texture()->width(), atlas.texture()->height(), false);
     for(const document& i : _manifest->children())
     {
-//        if(i->name() == Constants::Attributes::ATLAS)
-//        {
-//            Atlas imported(nullptr);
-//            const sp<Atlas::Importer> importer = factory.ensure<Atlas::Importer>(i, Scope());
-//            importer->import(imported, factory, i);
-//        }
-//        else
-//        {
-            DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
+        DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
 
-            const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
-            int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
-            const RectI rect = texturePacker.addBitmap(binPack, src);
-            atlas.add(type, rect.left(), rect.top(), rect.right(), rect.bottom(), Rect(0, 0, 1.0f, 1.0f), V2(rect.width(), rect.height()), V2(0.5f, 0.5f));
-//        }
+        const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
+        int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
+        const RectI rect = texturePacker.addBitmap(binPack, src);
+        atlas.add(type, rect.left(), rect.top(), rect.right(), rect.bottom(), Rect(0, 0, 1.0f, 1.0f), V2(rect.width(), rect.height()), V2(0.5f, 0.5f));
     }
     texturePacker.updateTexture();
 }

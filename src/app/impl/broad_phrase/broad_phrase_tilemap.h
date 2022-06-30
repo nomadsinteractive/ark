@@ -44,7 +44,7 @@ private:
 
 private:
     sp<Tilemap> _tilemap;
-    std::vector<Box> _tile_shapes;
+    Box _body_def_tile;
 };
 
 }

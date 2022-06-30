@@ -194,6 +194,8 @@ template<THREAD_ID ID> void __thread_check__(const char* func) {
 }
 
 void ARK_API __trace__();
+bool ARK_API __trace_flag__();
+void ARK_API __set_trace_flag__();
 
 }
 

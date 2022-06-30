@@ -209,17 +209,4 @@ bool RigidBody::Callback::hasCallback() const
     return static_cast<bool>(_collision_callback);
 }
 
-RigidBody::RIGID_BODY_STYLE::RIGID_BODY_STYLE(BeanFactory& factory, const sp<Builder<RenderObject>>& delegate, const String& value)
-    : _delegate(delegate), _rigid_body(factory.ensureBuilder<RigidBody>(value))
-{
-}
-
-sp<RenderObject> RigidBody::RIGID_BODY_STYLE::build(const Scope& args)
-{
-    const sp<RenderObject> renderObject = _delegate->build(args);
-    const sp<RigidBody> rigidBody = _rigid_body->build(args);
-    rigidBody->bind(renderObject);
-    return renderObject;
-}
-
 }

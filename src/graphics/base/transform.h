@@ -42,7 +42,7 @@ public:
     };
 
 //  [[script::bindings::auto]]
-    Transform(Transform::Type type = Transform::TYPE_LINEAR_3D, const sp<Rotation>& rotation = nullptr, const sp<Vec3>& scale = nullptr, const sp<Vec3>& pivot = nullptr);
+    Transform(Transform::Type type = Transform::TYPE_LINEAR_3D, sp<Rotation> rotation = nullptr, sp<Vec3> scale = nullptr, sp<Vec3> pivot = nullptr);
     Transform(sp<Delegate> delegate);
 
     virtual void traverse(const Visitor& visitor) override;

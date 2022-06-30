@@ -10,8 +10,8 @@ namespace ark {
 
 template<typename T> class VariableTernary : public Variable<T> {
 public:
-    VariableTernary(const sp<Boolean>& condition, const sp<Variable<T>>& a, const sp<Variable<T>>& b)
-        : _condition(condition), _a(a), _b(b) {
+    VariableTernary(sp<Boolean> condition, sp<Variable<T>> a, sp<Variable<T>> b)
+        : _condition(std::move(condition)), _a(std::move(a)), _b(std::move(b)) {
     }
 
     virtual T val() override {

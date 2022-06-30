@@ -9,6 +9,8 @@
 
 namespace ark {
 
+static bool gTraceFlag = false;
+
 void __fatal__(const char* func, const char* condition, const char* format, ...)
 {
     va_list args;
@@ -30,7 +32,18 @@ void __warning__(const char* func, const char* format, ...)
 
 void __trace__()
 {
-     LOGD(">>>__TRACE HERE___<<<");
+    LOGD(">>>__TRACE HERE___<<<");
+    gTraceFlag = false;
+}
+
+bool __trace_flag__()
+{
+    return gTraceFlag;
+}
+
+void __set_trace_flag__()
+{
+    gTraceFlag = true;
 }
 
 }

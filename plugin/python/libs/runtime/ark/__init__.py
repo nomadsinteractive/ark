@@ -38,6 +38,10 @@ def loge(*args):
     print(*args)
 
 
+def set_trace_flag():
+    pass
+
+
 def load_asset(filename) -> str:
     with open(filename, 'rt') as fp:
         return fp.read()
@@ -110,6 +114,9 @@ class _Var:
         pass
 
     def mod_ceil(self, mod):
+        pass
+
+    def if_else(self, condition, otherwise):
         pass
 
     def __int__(self):
@@ -851,7 +858,7 @@ class Animation:
     def node_names(self) -> List[str]:
         return []
 
-    def make_transforms(self, t: Numeric, on_complete) -> AnimationInput:
+    def make_transforms(self, t: Numeric, on_complete: Optional[Callable] = None) -> AnimationInput:
         pass
 
 
@@ -1780,6 +1787,14 @@ class RigidBody:
 
     @collision_callback.setter
     def collision_callback(self, collision_callback):
+        pass
+
+    @property
+    def collision_filter(self) -> Optional['CollisionFilter']:
+        return None
+
+    @collision_filter.setter
+    def collision_filter(self, collision_filter: Optional['CollisionFilter']):
         pass
 
     @property

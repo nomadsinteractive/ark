@@ -5,6 +5,8 @@
 #include <unordered_set>
 #include <unordered_map>
 
+#include <core/inf/runnable.h>
+
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
@@ -17,6 +19,7 @@
 #include "app/impl/collider/axis_segments.h"
 #include "app/inf/collider.h"
 #include "app/inf/broad_phrase.h"
+#include "app/util/rigid_body_def.h"
 
 namespace ark {
 
@@ -45,12 +48,12 @@ public:
     class RigidBodyImpl;
     class RigidBodyShadow;
 
-    struct Stub {
+    struct Stub : public Runnable {
         Stub(std::vector<sp<BroadPhrase>> broadPhrases, sp<NarrowPhrase> narrowPhrase);
 
         std::vector<RayCastManifold> rayCast(const V2& from, const V2& to) const;
 
-        void remove(const RigidBody& rigidBody);
+        void removeRigidBody(int32_t rigidBodyId);
 
         int32_t generateRigidBodyId();
 
@@ -69,6 +72,9 @@ public:
         const sp<NarrowPhrase>& narrowPhrase() const;
 
         void updateBroadPhraseCandidate(int32_t id, const V3& position, const V3& aabb);
+        void removeBroadPhraseCandidate(int32_t id);
+
+        virtual void run() override;
 
     private:
         BroadPhrase::Result broadPhraseSearch(const V3& position, const V3& aabb) const;
@@ -80,12 +86,15 @@ public:
         sp<NarrowPhrase> _narrow_phrase;
         std::unordered_map<int32_t, sp<RigidBodyShadow>> _rigid_bodies;
 
+        std::vector<int32_t> _phrase_dispose;
+        std::vector<int32_t> _phrase_remove;
+
         friend class RigidBodyShadow;
     };
 
     class RigidBodyShadow : public RigidBody {
     public:
-        RigidBodyShadow(uint32_t id, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, sp<Disposed> disposed);
+        RigidBodyShadow(uint32_t id, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotation, sp<Disposed> disposed);
 
         virtual void dispose() override;
 
@@ -95,16 +104,15 @@ public:
 
         void doDispose(ColliderImpl::Stub& stub);
 
-        const std::vector<Box>& shapes() const;
-
-        void updateShapes(NarrowPhrase& narrowPhrase, const V3& size);
+        const RigidBodyDef& bodyDef() const;
+        const RigidBodyDef& updateBodyDef(NarrowPhrase& narrowPhrase, const sp<Size>& size);
 
     private:
         std::set<int32_t> _dynamic_contacts;
         std::set<int32_t> _static_contacts;
         bool _dispose_requested;
 
-        std::vector<Box> _shapes;
+        RigidBodyDef _body_def;
 
         friend class RigidBodyImpl;
     };

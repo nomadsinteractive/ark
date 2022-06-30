@@ -61,12 +61,14 @@
         </transform>
     </render-object>
     <numeric id="c001-fall" class="accelerate" s="400" a="-500"/>
-    <collider id="collider-001">
-        <body name="0" shape-type="polygon">
+    <broad-phrase id="@tracker-01" class="broad-phrase-grid" cell="10, 10"/>
+    <broad-phrase id="@tracker-02" class="broad-phrase-trie" cell="10, 10"/>
+    <narrow-phrase id="@narrow-phrase-01" class="cute-c2"/>
+    <collider id="collider-01" narrow-phrase="@narrow-phrase-01" broad-phrase="@tracker-01">
+        <body name="1" shape-type="polygon" width="40" height="40">
             <vertex x="-20" y="-10"/>
             <vertex x="0" y="20"/>
             <vertex x="20" y="-10"/>
         </body>
-        <tracker id="@tracker-001" class="grid" cell="10, 10"/>
     </collider>
 </resources>

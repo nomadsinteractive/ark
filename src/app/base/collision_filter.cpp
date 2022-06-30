@@ -41,7 +41,7 @@ bool CollisionFilter::collisionTest(const CollisionFilter& other) const
 {
     if(_group_index != 0 && other._group_index != 0 && _group_index == other._group_index)
         return _group_index > 0;
-    return (_mask_bits & other._category_bits) && (_category_bits & other._mask_bits);
+    return (_mask_bits & other._category_bits) && ((_category_bits & other._mask_bits) || _category_bits == 0);
 }
 
 }

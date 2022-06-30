@@ -1,13 +1,15 @@
 #include "app/impl/narrow_phrase/narrow_phrase_cute_c2.h"
 
 #include "core/types/box.h"
+#include "core/util/math.h"
 
 #include "graphics/base/rect.h"
+#include "graphics/base/size.h"
 
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/inf/collider.h"
-#include "app/util/body_def_cute_c2.h"
+#include "app/util/rigid_body_def.h"
 
 namespace ark {
 
@@ -22,29 +24,76 @@ NarrowPhraseCuteC2::NarrowPhraseCuteC2(const document& manifest, const sp<Resour
     }
 }
 
-Box NarrowPhraseCuteC2::makeAABBShape(const Rect& aabb)
+sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::makeBodyAABB(const Rect& aabb)
 {
-    return sp<ShapeCuteC2>::make(makeAABBShapeImpl(aabb));
+    return sp<BodyDefCuteC2>::make(V2(aabb.width(), aabb.height()), V2(0.5f), toCuteC2Shapes(makeAABBShapeImpl(aabb)));
 }
 
-Box NarrowPhraseCuteC2::makeBallShape(const V2& position, float radius)
+sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::makeBodyBall(const V2& position, float radius)
 {
-    return sp<ShapeCuteC2>::make(makeBallShapeImpl(position, radius));
+    return sp<BodyDefCuteC2>::make(V2(radius, radius), V2(0.5f), toCuteC2Shapes(makeBallShapeImpl(position, radius)));
 }
 
-Box NarrowPhraseCuteC2::makeBoxShape(const Rect& bounds)
+sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::makeBodyBox(const Rect& bounds)
 {
-    return sp<ShapeCuteC2>::make(makeBoxShapeImpl(bounds));
+    return sp<BodyDefCuteC2>::make(V2(bounds.width(), bounds.height()), V2(0.5f), toCuteC2Shapes(makeBoxShapeImpl(bounds)));
 }
 
-Box NarrowPhraseCuteC2::makeCapsuleShape(const V2& p1, const V2& p2, float radius)
+sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::makeBodyCapsule(const V2& p1, const V2& p2, float radius)
 {
-    return sp<ShapeCuteC2>::make(makeCapsuleShapeImpl(p1, p2, radius));
+    const V2 size = Math::abs(p1 - p2) + V2(radius * 2);
+    return sp<BodyDefCuteC2>::make(size, V2(0.5f), toCuteC2Shapes(makeCapsuleShapeImpl(p1, p2, radius)));
 }
 
-Box NarrowPhraseCuteC2::makePolygonShape(const std::vector<V2>& vertices)
+RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(int32_t shapeId, const sp<Size>& size)
 {
-    return sp<ShapeCuteC2>::make(makePolygonShapeImpl(vertices));
+    V3 sizeVal;
+    sp<BodyDefCuteC2> bodyDef = findBodyDef(shapeId);
+    if(bodyDef)
+    {
+        if(!size)
+            sizeVal = V3(bodyDef->size(), 0);
+        else
+        {
+            sizeVal = size->val();
+            if(bodyDef->size() != V2(sizeVal.x(), sizeVal.y()))
+            {
+                bodyDef = sp<BodyDefCuteC2>::make(*bodyDef);
+                bodyDef->resize(sizeVal);
+            }
+        }
+    }
+    else
+    {
+        DCHECK(size, "Size required for predefined shapes");
+        sizeVal = size->val();
+
+        const Rect bounds(sizeVal.x() / -2.0f, sizeVal.y() / -2.0f, sizeVal.x() / 2.0f, sizeVal.y() / 2.0f);
+        switch(shapeId)
+        {
+            case Collider::BODY_SHAPE_BALL:
+                bodyDef = makeBodyBall(V2(0, 0), sizeVal.x());
+            break;
+            case Collider::BODY_SHAPE_AABB:
+                bodyDef = makeBodyAABB(bounds);
+            break;
+            case Collider::BODY_SHAPE_CAPSULE:
+            {
+                float radius = bounds.width() / 2;
+                float x = (bounds.left() + bounds.right()) / 2;
+                DCHECK(radius < bounds.height() / 2, "Capsule too narrow, width = %.2f, height = %.2f, radius = %.2f", bounds.width(), bounds.height(), radius);
+                bodyDef = makeBodyCapsule(V2(x, bounds.top() + radius), V2(x, bounds.bottom() - radius), radius);
+                break;
+            }
+            case Collider::BODY_SHAPE_BOX:
+                bodyDef = makeBodyBox(bounds);
+            break;
+            default:
+                DFATAL("Shape %d not found", shapeId);
+                break;
+        }
+    }
+    return RigidBodyDef(sizeVal, V3(bodyDef->pivot(), 0), bodyDef);
 }
 
 NarrowPhrase::Ray NarrowPhraseCuteC2::toRay(const V2& from, const V2& to)
@@ -56,13 +105,12 @@ NarrowPhrase::Ray NarrowPhraseCuteC2::toRay(const V2& from, const V2& to)
 
 bool NarrowPhraseCuteC2::collisionManifold(const BroadPhrase::Candidate& candidateOne, const BroadPhrase::Candidate& candidateOther, CollisionManifold& collisionManifold)
 {
-    std::vector<sp<ShapeCuteC2>> p1, p2;
-    for(const ShapeCuteC2& i : ensureShape(candidateOne, p1))
+    for(const ShapeCuteC2& i : ensureBodyDef(candidateOne)->shapes())
     {
         const ShapeCuteC2 transformed = i.transform(candidateOne.position, candidateOne.rotation);
-        const CollisionFilter& oneFilter = getCollisionFilter(transformed._collision_filter, candidateOne._collision_filter);
-        for(const ShapeCuteC2& j : ensureShape(candidateOther, p2))
-            if(oneFilter.collisionTest(getCollisionFilter(j._collision_filter, candidateOther._collision_filter)) &&
+        const CollisionFilter& oneFilter = getCollisionFilter(transformed._collision_filter, candidateOne.collision_filter);
+        for(const ShapeCuteC2& j : ensureBodyDef(candidateOther)->shapes())
+            if(oneFilter.collisionTest(getCollisionFilter(j._collision_filter, candidateOther.collision_filter)) &&
                     transformed.collideManifold(j.transform(candidateOther.position, candidateOther.rotation), collisionManifold))
                 return true;
     }
@@ -71,8 +119,7 @@ bool NarrowPhraseCuteC2::collisionManifold(const BroadPhrase::Candidate& candida
 
 bool NarrowPhraseCuteC2::rayCastManifold(const Ray& ray, const BroadPhrase::Candidate& candidate, RayCastManifold& rayCastManifold)
 {
-    std::vector<sp<ShapeCuteC2>> predefined;
-    for(const ShapeCuteC2& i : ensureShape(candidate, predefined))
+    for(const ShapeCuteC2& i : ensureBodyDef(candidate)->shapes())
     {
         const ShapeCuteC2 transformed = i.transform(candidate.position, candidate.rotation);
         if(transformed.rayCastManifold(*ray.data<c2Ray>(), rayCastManifold))
@@ -102,8 +149,8 @@ void NarrowPhraseCuteC2::loadShapes(const document& manifest)
 {
     for(const document& i : manifest->children("body"))
     {
-        sp<BodyDefCuteC2> bodyDef = sp<BodyDefCuteC2>::make(i);
-        _body_defs[bodyDef->shapeId()] = std::move(bodyDef);
+        int32_t shapeId = Documents::ensureAttribute<int32_t>(i, "name");
+        _body_defs[shapeId] = sp<BodyDefCuteC2>::make(i);
     }
 }
 
@@ -112,24 +159,24 @@ const CollisionFilter& NarrowPhraseCuteC2::getCollisionFilter(const CollisionFil
     return specifiedFilter ? *specifiedFilter : oneFilter;
 }
 
-const std::vector<sp<ShapeCuteC2>>& NarrowPhraseCuteC2::ensureShape(const BroadPhrase::Candidate& candidate, std::vector<sp<ShapeCuteC2>>& predefined) const
+sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::findBodyDef(int32_t shapeId) const
 {
-    if(candidate.shapes.size() > 0)
-    {
-        predefined = toCuteC2Shapes(candidate.shapes);
-        return predefined;
-    }
-    const auto iter = _body_defs.find(candidate.shape_id);
-    DCHECK(iter != _body_defs.end(), "Shape %d not found", candidate.shape_id);
-    return iter->second->shapes();
+    const auto iter = _body_defs.find(shapeId);
+    return iter != _body_defs.end() ? iter->second : nullptr;
 }
 
-std::vector<sp<ShapeCuteC2>> NarrowPhraseCuteC2::toCuteC2Shapes(const std::vector<Box>& boxes) const
+sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::ensureBodyDef(const BroadPhrase::Candidate& candidate) const
 {
-    std::vector<sp<ShapeCuteC2>> shapes;
-    for(const Box& i : boxes)
-        shapes.push_back(i.unpack<ShapeCuteC2>());
-    return shapes;
+    if(candidate.body_def)
+        return candidate.body_def.unpack<BodyDefCuteC2>();
+    sp<BodyDefCuteC2> bodyDef = findBodyDef(candidate.shape_id);
+    DCHECK(bodyDef, "Shape %d not found", candidate.shape_id);
+    return bodyDef;
+}
+
+std::vector<ShapeCuteC2> NarrowPhraseCuteC2::toCuteC2Shapes(const ShapeCuteC2& shape) const
+{
+    return std::vector<ShapeCuteC2>{ shape };
 }
 
 ShapeCuteC2 NarrowPhraseCuteC2::makeAABBShapeImpl(const Rect& bounds)
@@ -184,6 +231,97 @@ ShapeCuteC2 NarrowPhraseCuteC2::makePolygonShapeImpl(const std::vector<V2>& vert
 
     c2MakePoly(&poly);
     return shape;
+}
+
+NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const V2& size, const V2& pivot, std::vector<ShapeCuteC2> shapes)
+    : _size(size), _pivot(pivot), _shapes(std::move(shapes))
+{
+}
+
+NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest)
+    : _size(Documents::getAttribute<float>(manifest, "width", 0), Documents::getAttribute<float>(manifest, "height", 0)), _pivot(0.5f)
+{
+    const String shapeType = Documents::getAttribute(manifest, "shape-type");
+    if(shapeType == "capsule")
+    {
+        const float ax = Documents::ensureAttribute<float>(manifest, "ax");
+        const float ay = Documents::ensureAttribute<float>(manifest, "ay");
+        const float bx = Documents::ensureAttribute<float>(manifest, "bx");
+        const float by = Documents::ensureAttribute<float>(manifest, "by");
+        const float r = Documents::ensureAttribute<float>(manifest, "r");
+        _shapes.push_back(NarrowPhraseCuteC2::makeCapsuleShapeImpl(V2(ax, ay), V2(bx, by), r));
+    }
+    else if(shapeType == "polygon")
+    {
+        int32_t c = 0;
+        ShapeCuteC2 shape;
+        for(const document& j : manifest->children())
+        {
+            DCHECK(c < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
+            shape.s.poly.verts[c].x = Documents::ensureAttribute<float>(j, "x");
+            shape.s.poly.verts[c].y = Documents::ensureAttribute<float>(j, "y");
+            c++;
+        }
+        shape.t = C2_TYPE_POLY;
+        shape.s.poly.count = c;
+        c2MakePoly(&shape.s.poly);
+        _shapes.push_back(shape);
+    }
+    else
+    {
+        const document anchorpoint = manifest->getChild("anchorpoint");
+        const document& fixtures = manifest->ensureChild("fixtures");
+        if(anchorpoint)
+            _pivot = Strings::parse<V2>(anchorpoint->value());
+        for(const document& j : fixtures->children("fixture"))
+        {
+            const document& fixture_type = j->ensureChild("fixture_type");
+            DCHECK(fixture_type->value() == "POLYGON", "Unsupported fixture_type: %s", fixture_type->value().c_str());
+            const document& polygons = j->ensureChild("polygons");
+            for(const document& k : polygons->children("polygon"))
+            {
+                const std::vector<String> values = k->value().split(',');
+                DCHECK(values.size() % 2 == 0, "Illegal vertex points: %s", k->value().c_str());
+                ShapeCuteC2 shape;
+                shape._collision_filter.setCategoryBits(Documents::getValue<uint32_t>(j, "filter_categoryBits", 1));
+                shape._collision_filter.setMaskBits(Documents::getValue<uint32_t>(j, "filter_maskBits", 0xffffffff));
+                shape._collision_filter.setGroupIndex(Documents::getValue<int32_t>(j, "filter_groupIndex", 0));
+                for(size_t k = 0; k < values.size(); k += 2)
+                {
+                    DCHECK(k / 2 < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
+                    shape.s.poly.verts[k / 2].x = Strings::parse<float>(values.at(k));
+                    shape.s.poly.verts[k / 2].y = Strings::parse<float>(values.at(k + 1));
+                }
+                shape.t = C2_TYPE_POLY;
+                shape.s.poly.count = static_cast<int32_t>(values.size() / 2);
+                c2MakePoly(&shape.s.poly);
+                _shapes.push_back(shape);
+            }
+        }
+    }
+}
+
+const V2& NarrowPhraseCuteC2::BodyDefCuteC2::size() const
+{
+    return _size;
+}
+
+const V2& NarrowPhraseCuteC2::BodyDefCuteC2::pivot() const
+{
+    return _pivot;
+}
+
+const std::vector<ShapeCuteC2>& NarrowPhraseCuteC2::BodyDefCuteC2::shapes() const
+{
+    return _shapes;
+}
+
+void NarrowPhraseCuteC2::BodyDefCuteC2::resize(const V2& size)
+{
+    const V2 scale(size.x() / _size.x(), size.y() / _size.y());
+    for(ShapeCuteC2& i : _shapes)
+        i.resize(scale);
+    _size = size;
 }
 
 NarrowPhraseCuteC2::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

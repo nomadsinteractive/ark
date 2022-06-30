@@ -33,6 +33,7 @@ static PyObject* ark_log(Log::LogLevel level, PyObject* args);
 static PyObject* ark_logd(PyObject* self, PyObject* args);
 static PyObject* ark_logw(PyObject* self, PyObject* args);
 static PyObject* ark_loge(PyObject* self, PyObject* args);
+static PyObject* ark_set_trace_flag(PyObject* self, PyObject* args);
 static PyObject* ark_loadAsset(PyObject* self, PyObject* args);
 static PyObject* ark_openAsset(PyObject* self, PyObject* args);
 static PyObject* ark_getAssetResource(PyObject* self, PyObject* args);
@@ -53,6 +54,7 @@ static PyMethodDef ARK_METHODS[] = {
     {"logd",  ark_logd, METH_VARARGS, "LOG_DEBUG"},
     {"logw",  ark_logw, METH_VARARGS, "LOG_WARN"},
     {"loge",  ark_loge, METH_VARARGS, "LOG_ERROR"},
+    {"set_trace_flag",  ark_set_trace_flag, METH_VARARGS, "ark_set_trace_flag"},
     {"load_asset",  ark_loadAsset, METH_VARARGS, "loadAsset"},
     {"open_asset",  ark_openAsset, METH_VARARGS, "openAsset"},
     {"get_asset_resource",  ark_getAssetResource, METH_VARARGS, "getAssetResource"},
@@ -99,6 +101,12 @@ PyObject* ark_logw(PyObject* /*self*/, PyObject* args)
 PyObject* ark_loge(PyObject* /*self*/, PyObject* args)
 {
     return ark_log(Log::LOG_LEVEL_ERROR, args);
+}
+
+PyObject* ark_set_trace_flag(PyObject* /*self*/, PyObject* /*args*/)
+{
+    __set_trace_flag__();
+    Py_RETURN_NONE;
 }
 
 PyObject* ark_loadAsset(PyObject* /*self*/, PyObject* args)
