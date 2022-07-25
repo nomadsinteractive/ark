@@ -95,7 +95,7 @@ void Characters::setRichText(const std::wstring& richText, const Scope& args)
     createRichContent(args);
 }
 
-void Characters::renderRequest(RenderRequest& renderRequest, const V3& position)
+void Characters::render(RenderRequest& renderRequest, const V3& position)
 {
     if(_text->update(renderRequest.timestamp()))
         setText(Strings::fromUTF8(*_text->val()));

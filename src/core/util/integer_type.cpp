@@ -4,6 +4,8 @@
 #include "core/base/clock.h"
 #include "core/base/expression.h"
 #include "core/impl/integer/integer_by_array.h"
+#include "core/impl/variable/at_least.h"
+#include "core/impl/variable/at_most.h"
 #include "core/impl/variable/clamp.h"
 #include "core/impl/variable/fence.h"
 #include "core/impl/variable/periodic.h"
@@ -226,6 +228,20 @@ sp<ExpectationI> IntegerType::repeat(std::vector<int32_t> array, IntegerType::Re
 sp<Integer> IntegerType::animate(const sp<Integer>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)
 {
     return sp<Periodic<int32_t>>::make(self, interval ? interval : sp<Numeric>::make<Numeric::Const>(1.0f / 24), duration ? duration : Ark::instance().clock()->duration());
+}
+
+sp<ExpectationI> IntegerType::atLeast(sp<Integer> self, sp<Integer> a1)
+{
+    Notifier notifier;
+    sp<Integer> delegate = sp<AtLeast<int32_t>>::make(std::move(self), std::move(a1), notifier);
+    return sp<ExpectationI>::make(std::move(delegate), std::move(notifier));
+}
+
+sp<ExpectationI> IntegerType::atMost(sp<Integer> self, sp<Integer> a1)
+{
+    Notifier notifier;
+    sp<Integer> delegate = sp<AtMost<int32_t>>::make(std::move(self), std::move(a1), notifier);
+    return sp<ExpectationI>::make(std::move(delegate), std::move(notifier));
 }
 
 sp<ExpectationI> IntegerType::clamp(const sp<Integer>& self, const sp<Integer>& min, const sp<Integer>& max)

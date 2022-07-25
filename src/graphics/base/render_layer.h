@@ -93,9 +93,6 @@ public:
         SnapshotFlag _flag;
 
         DISALLOW_COPY_AND_ASSIGN(Snapshot);
-
-        void postSnapshot();
-
     private:
         Snapshot(RenderRequest& renderRequest, const sp<Stub>& stub);
 

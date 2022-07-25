@@ -13,8 +13,8 @@ Renderable::Snapshot RenderablePassive::snapshot(const PipelineInput& pipelineIn
 {
     Renderable::Snapshot snapshot = _render_object ? _render_object->snapshot(pipelineInput, renderRequest, postTranslate + _position) : Renderable::Snapshot(false);
     snapshot._dirty = snapshot._dirty || _position_changed || (_visible != _render_requested);
-    snapshot._visible = _visible = snapshot._visible && _render_requested;
-//    snapshot._position += _position;
+    snapshot._visible = snapshot._visible && _render_requested;
+    _visible = snapshot._visible;
     _render_requested = false;
     _position_changed = false;
     return snapshot;

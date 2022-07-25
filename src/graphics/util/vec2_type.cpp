@@ -19,7 +19,6 @@
 
 #include "graphics/base/size.h"
 #include "graphics/impl/vec/vec2_impl.h"
-#include "graphics/impl/vec/vec_neg.h"
 #include "graphics/impl/vec/vec2_with_transform.h"
 
 namespace ark {
@@ -169,12 +168,12 @@ sp<Vec2> Vec2Type::truediv(const sp<Vec2>& lvalue, float rvalue)
 
 sp<Vec2> Vec2Type::negative(const sp<Vec2>& self)
 {
-    return sp<VecNeg<V2>>::make(self);
+    return sp<VariableOP1<V2>>::make(Operators::Neg<V2>(), self);
 }
 
 sp<Vec2> Vec2Type::absolute(const sp<Vec2>& self)
 {
-    return sp<VariableOP1<V2, V2>>::make(Operators::Abs<V2>(), self);
+    return sp<VariableOP1<V2>>::make(Operators::Abs<V2>(), self);
 }
 
 sp<Vec2> Vec2Type::transform(const sp<Vec2>& self, const sp<Transform>& transform)

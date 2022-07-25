@@ -7,6 +7,8 @@
 #include "core/impl/numeric/approach.h"
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/numeric/vibrate.h"
+#include "core/impl/variable/at_least.h"
+#include "core/impl/variable/at_most.h"
 #include "core/impl/variable/clamp.h"
 #include "core/impl/variable/fence.h"
 #include "core/impl/variable/integral.h"
@@ -21,81 +23,6 @@
 #include "core/util/variable_util.h"
 
 namespace ark {
-
-namespace {
-
-class AtLeast : public Numeric, public Delegate<Numeric>, Implements<AtLeast, Numeric, Delegate<Numeric>> {
-public:
-    AtLeast(const sp<Numeric>& delegate, const sp<Numeric>& boundary, Notifier notifier)
-         : Delegate<Numeric>(delegate), _boundary(boundary), _notifer(std::move(notifier)) {
-    }
-
-    virtual float val() override {
-        float value = _delegate->val();
-        float boundary = _boundary->val();
-        if(value < boundary) {
-            _notifer.notify();
-            return boundary;
-        }
-        return value;
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return VariableUtil::update(timestamp, _delegate, _boundary);
-    }
-
-private:
-    sp<Numeric> _boundary;
-
-    Notifier _notifer;
-};
-
-
-class AtMost : public Numeric, public Delegate<Numeric>, Implements<AtMost, Numeric, Delegate<Numeric>> {
-public:
-    AtMost(const sp<Numeric>& delegate, const sp<Numeric>& boundary, Notifier notifier)
-         : Delegate<Numeric>(delegate), _boundary(boundary), _notifer(std::move(notifier)) {
-    }
-
-    virtual float val() override {
-        float value = _delegate->val();
-        float boundary = _boundary->val();
-        if(value > boundary) {
-            _notifer.notify();
-            return boundary;
-        }
-        return value;
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return VariableUtil::update(timestamp, _delegate, _boundary);
-    }
-
-private:
-    sp<Numeric> _boundary;
-
-    Notifier _notifer;
-};
-
-class Negative : public Numeric {
-public:
-    Negative(const sp<Numeric>& a1)
-        : _a1(a1) {
-    }
-
-    virtual float val() override {
-        return -_a1->val();
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return _a1->update(timestamp);
-    }
-
-private:
-    sp<Numeric> _a1;
-};
-
-}
 
 sp<Numeric> NumericType::create(const sp<Numeric>& value)
 {
@@ -194,12 +121,12 @@ sp<Numeric> NumericType::mod(float lvalue, const sp<Numeric>& rvalue)
 
 sp<Numeric> NumericType::negative(const sp<Numeric>& self)
 {
-    return sp<Negative>::make(self);
+    return sp<VariableOP1<float>>::make(Operators::Neg<float>(), self);
 }
 
 sp<Numeric> NumericType::absolute(const sp<Numeric>& self)
 {
-    return sp<VariableOP1<float, float>>::make(Operators::Abs<float>(), self);
+    return sp<VariableOP1<float>>::make(Operators::Abs<float>(), self);
 }
 
 sp<Numeric> NumericType::pow(const sp<Numeric>& x, const sp<Integer>& y, const sp<Integer>& /*z*/)
@@ -336,17 +263,15 @@ sp<ExpectationF> NumericType::approach(const sp<Numeric>& self, const sp<Numeric
 
 sp<ExpectationF> NumericType::atLeast(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
-    DASSERT(self && a1);
     Notifier notifier;
-    sp<Numeric> delegate = sp<AtLeast>::make(self, a1, notifier);
-    return sp<ExpectationF>::make(sp<AtLeast>::make(self, a1, notifier), std::move(notifier));
+    sp<Numeric> delegate = sp<AtLeast<float>>::make(self, a1, notifier);
+    return sp<ExpectationF>::make(std::move(delegate), std::move(notifier));
 }
 
 sp<ExpectationF> NumericType::atMost(const sp<Numeric>& self, const sp<Numeric>& a1)
 {
-    DASSERT(self && a1);
     Notifier notifier;
-    sp<Numeric> delegate = sp<AtMost>::make(self, a1, notifier);
+    sp<Numeric> delegate = sp<AtMost<float>>::make(self, a1, notifier);
     return sp<ExpectationF>::make(std::move(delegate), std::move(notifier));
 }
 

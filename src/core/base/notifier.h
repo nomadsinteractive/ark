@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_EPI_NOTIFIER_H_
-#define ARK_CORE_EPI_NOTIFIER_H_
+#ifndef ARK_CORE_BASE_NOTIFIER_H_
+#define ARK_CORE_BASE_NOTIFIER_H_
 
 #include "core/forwarding.h"
 #include "core/base/api.h"

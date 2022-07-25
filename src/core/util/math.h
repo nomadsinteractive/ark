@@ -87,8 +87,7 @@ public:
                || std::abs(x - y) < std::numeric_limits<T>::min();
     }
 
-    template<typename T>
-    typename T::size_type levensteinDistance(const T& source, const T& target) {
+    template<typename T> static typename T::size_type levensteinDistance(const T& source, const T& target) {
         if (source.size() > target.size()) {
             return levensteinDistance(target, source);
         }
@@ -117,6 +116,19 @@ public:
         }
 
         return lev_dist[min_size];
+    }
+
+    template<typename T, typename U> static std::pair<T, typename T::size_type> levensteinNearest(const T& source, const U& candidates) {
+        T nearest;
+        T::size_type ldmin = std::numeric_limits<T::size_type>::max();
+        for(const auto& j : candidates) {
+            T::size_type ld = levensteinDistance(source, j);
+            if(ld < ldmin) {
+                ldmin = ld;
+                nearest = j;
+            }
+        }
+        return std::make_pair(nearest, ldmin);
     }
 
     static ARK_API uint32_t log2(uint32_t x);

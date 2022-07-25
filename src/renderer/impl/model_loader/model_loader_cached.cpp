@@ -1,5 +1,7 @@
 #include "renderer/impl/model_loader/model_loader_cached.h"
 
+#include "renderer/base/model.h"
+
 namespace ark {
 
 ModelLoaderCached::ModelLoaderCached(sp<ModelLoader> delegate)
@@ -20,7 +22,7 @@ void ModelLoaderCached::initialize(ShaderBindings& shaderBindings)
 sp<Model> ModelLoaderCached::loadModel(int32_t type)
 {
     const auto iter = _cached_models.find(type);
-    if(iter != _cached_models.end())
+    if(!(iter == _cached_models.end() || iter->second->isDisposed()))
         return iter->second;
 
     sp<Model>& model = _cached_models[type];

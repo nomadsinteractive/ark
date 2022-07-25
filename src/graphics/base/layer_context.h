@@ -10,6 +10,8 @@
 #include "graphics/base/render_layer.h"
 #include "graphics/base/layer.h"
 
+#include "renderer/forwarding.h"
+
 namespace ark {
 
 //[[script::bindings::holder]]
@@ -24,7 +26,7 @@ private:
     };
 
 public:
-    LayerContext(sp<ModelLoader> modelLoader, sp<Notifier> notifier, Layer::Type type);
+    LayerContext(sp<ModelLoader> modelLoader, sp<Varyings> varyings, sp<Notifier> notifier, Layer::Type type);
 
     virtual void traverse(const Visitor& visitor) override;
 
@@ -39,6 +41,11 @@ public:
     void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = nullptr);
 //  [[script::bindings::auto]]
     void clear();
+
+//  [[script::bindings::property]]
+    const sp<Varyings>& varyings() const;
+//  [[script::bindings::property]]
+    void setVaryings(sp<Varyings> varyings);
 
     void takeSnapshot(RenderLayer::Snapshot& output, const RenderRequest& renderRequest);
 
@@ -56,6 +63,7 @@ public:
 
 private:
     sp<ModelLoader> _model_loader;
+    sp<Varyings> _varyings;
     sp<Notifier> _notifier;
     Layer::Type _layer_type;
 
@@ -67,7 +75,6 @@ private:
 
     std::list<Item> _renderables;
     std::vector<Item> _renderable_emplaced;
-
 };
 
 }

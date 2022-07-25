@@ -13,7 +13,7 @@ Label::Label(const sp<Characters>& characters)
 
 void Label::render(RenderRequest& renderequest, const V3& position)
 {
-    _characters->renderRequest(renderequest, position);
+    _characters->render(renderequest, position);
 }
 
 const sp<Size>& Label::size()

@@ -163,6 +163,13 @@ public:
         }
     };
 
+    template<typename T> class Neg {
+    public:
+        T operator()(const T& val) {
+            return -val;
+        }
+    };
+
     template<typename T> class Abs {
     public:
         T operator()(const T& val) {

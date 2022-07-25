@@ -82,7 +82,7 @@ public:
 protected:
     virtual bool doUpdate(uint64_t /*timestamp*/, T& value) = 0;
 
-private:
+protected:
     T _value;
 };
 

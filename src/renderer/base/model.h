@@ -46,6 +46,9 @@ public:
 
     void writeRenderable(VertexStream& buf, const Renderable::Snapshot& renderable) const;
 
+    void dispose();
+    bool isDisposed() const;
+
 private:
     V3 toScale(const V3& renderObjectSize) const;
 

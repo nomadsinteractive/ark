@@ -144,7 +144,6 @@ private:
     Timestamp _timestamp;
 
     friend class RendererByRenderObject;
-
 };
 
 }

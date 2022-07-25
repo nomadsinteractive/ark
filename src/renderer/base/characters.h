@@ -13,6 +13,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/metrics.h"
+#include "graphics/inf/renderer.h"
 
 #include "renderer/forwarding.h"
 
@@ -20,7 +21,8 @@
 
 namespace ark {
 
-class ARK_API Characters {
+//[[script::bindings::extends(Renderer)]]
+class ARK_API Characters : public Renderer {
 public:
 //  [[script::bindings::auto]]
     Characters(const sp<Layer>& layer, sp<Text> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
@@ -47,7 +49,7 @@ public:
 //  [[script::bindings::auto]]
     void setRichText(const std::wstring& richText, const Scope& args);
 
-    void renderRequest(RenderRequest& renderRequest, const V3& position);
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
 //[[plugin::builder]]
     class BUILDER : public Builder<Characters> {

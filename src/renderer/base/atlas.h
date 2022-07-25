@@ -76,8 +76,10 @@ public:
     ByType& attachments();
 
     const std::unordered_map<int32_t, Item>& items() const;
+    std::unordered_map<int32_t, Item>& items();
 
     void add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot);
+    Item makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const;
 
     const Item& at(int32_t id) const;
     Rect getOriginalPosition(int32_t id) const;
@@ -120,13 +122,7 @@ public:
     };
 
 private:
-    Item makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const;
-
-private:
     sp<Texture> _texture;
-
-    float _width;
-    float _height;
 
     bool _allow_default_item;
     Item _default_item;

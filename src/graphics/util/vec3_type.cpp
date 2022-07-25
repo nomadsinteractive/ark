@@ -15,7 +15,6 @@
 
 #include "graphics/base/size.h"
 #include "graphics/impl/vec/vec3_impl.h"
-#include "graphics/impl/vec/vec_neg.h"
 
 namespace ark {
 
@@ -152,12 +151,12 @@ sp<Vec3> Vec3Type::floordiv(const sp<Vec3>& self, const sp<Vec3>& rvalue)
 
 sp<Vec3> Vec3Type::negative(const sp<Vec3>& self)
 {
-    return sp<VecNeg<V3>>::make(self);
+    return sp<VariableOP1<V3>>::make(Operators::Neg<V3>(), self);
 }
 
 sp<Vec3> Vec3Type::absolute(const sp<Vec3>& self)
 {
-    return sp<VariableOP1<V3, V3>>::make(Operators::Abs<V3>(), self);
+    return sp<VariableOP1<V3>>::make(Operators::Abs<V3>(), self);
 }
 
 void Vec3Type::set(const sp<VariableWrapper<V3>>& self, const V3& val)
@@ -197,7 +196,7 @@ V2 Vec3Type::xy(const sp<Vec3>& self)
 
 void Vec3Type::setXy(const sp<Vec3>& self, const V2& xy)
 {
-    ensureImpl(self)->set(V3(xy, 0));
+    ensureImpl(self)->set(V3(xy, self->val().z()));
 }
 
 float Vec3Type::x(const sp<Vec3>& self)

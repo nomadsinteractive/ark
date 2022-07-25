@@ -22,8 +22,8 @@ LayerContext::Item::Item(const sp<Renderable>& renderable, const sp<Boolean>& di
     DASSERT(_renderable);
 }
 
-LayerContext::LayerContext(sp<ModelLoader> models, sp<Notifier> notifier, Layer::Type type)
-    : _model_loader(std::move(models)), _notifier(std::move(notifier)), _layer_type(type), _render_requested(false), _render_done(false), _position_changed(false)
+LayerContext::LayerContext(sp<ModelLoader> models, sp<Varyings> varyings, sp<Notifier> notifier, Layer::Type type)
+    : _model_loader(std::move(models)), _varyings(std::move(varyings)), _notifier(std::move(notifier)), _layer_type(type), _render_requested(false), _render_done(false), _position_changed(false)
 {
 }
 
@@ -70,6 +70,16 @@ void LayerContext::clear()
     _notifier->notify();
 }
 
+const sp<Varyings>& LayerContext::varyings() const
+{
+    return _varyings;
+}
+
+void LayerContext::setVaryings(sp<Varyings> varyings)
+{
+    _varyings = std::move(varyings);
+}
+
 void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderRequest& renderRequest)
 {
     DPROFILER_TRACE("TakeSnapshot");
@@ -82,10 +92,15 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
         _renderables.insert(_renderables.end(), emplaced.begin(), emplaced.end());
     }
 
+    const bool contextDirty = _position_changed || _render_done != _render_requested;
+    const bool hasDefaultVaryings = static_cast<bool>(_varyings);
+    const Varyings::Snapshot defaultVaryingsSnapshot = hasDefaultVaryings ? _varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
+    const uint64_t timestamp = renderRequest.timestamp();
+
     for(auto iter = _renderables.begin(); iter != _renderables.end(); )
     {
         const Item& i = *iter;
-        i._disposed.update(renderRequest.timestamp());
+        i._disposed.update(timestamp);
         Renderable::Snapshot snapshot = i._disposed.val() ? Renderable::Snapshot() : i._renderable->snapshot(pipelineInput, renderRequest, _position);
         if(snapshot._disposed || snapshot._type == -1)
         {
@@ -94,9 +109,11 @@ void LayerContext::takeSnapshot(RenderLayer::Snapshot& output, const RenderReque
         }
         else
         {
-            snapshot._dirty = snapshot._dirty || _position_changed || _render_done != _render_requested;
+            snapshot._dirty = snapshot._dirty || contextDirty;
             snapshot._visible = _render_requested && snapshot._visible;
             snapshot._model = _model_loader->loadModel(snapshot._type);
+            if(hasDefaultVaryings && !snapshot._varyings)
+                snapshot._varyings = defaultVaryingsSnapshot;
             output._index_count += snapshot._model->indexCount();
             output._items.push_back(std::move(snapshot));
             ++iter;

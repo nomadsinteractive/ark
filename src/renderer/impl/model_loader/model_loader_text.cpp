@@ -1,5 +1,6 @@
 #include "renderer/impl/model_loader/model_loader_text.h"
 
+#include "core/base/clock.h"
 #include "core/base/future.h"
 #include "core/util/log.h"
 
@@ -10,31 +11,59 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/drawing_buffer.h"
-#include "renderer/base/model.h"
 #include "renderer/base/pipeline_bindings.h"
+#include "renderer/impl/render_command_composer/rcc_draw_quads.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
-#include "renderer/impl/model_loader/model_loader_quad.h"
+#include "renderer/impl/vertices/vertices_quad.h"
+#include "renderer/util/render_util.h"
 
 
 namespace ark {
 
-ModelLoaderText::Stub::Stub(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
-    : _render_controller(renderController), _alphabet(alphabet), _size(sp<Size>::make())
+ModelLoaderText::ModelLoaderText(sp<RenderController> renderController, sp<Alphabet> alphabet, sp<Atlas> atlas, const Font::TextSize& textSize)
+    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _atlas(std::move(atlas)), _atlas_attachment(_atlas->attachments().ensure<AtlasAttachment>(*_atlas, std::move(renderController))),
+      _glyph_bundle(_atlas_attachment->makeGlyphBundle(std::move(alphabet), textSize))
 {
-    resize(textureWidth, textureHeight);
 }
 
-ModelLoaderText::Stub::Stub(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, sp<Texture> texture)
-    : _render_controller(renderController), _alphabet(alphabet), _size(sp<Size>::make()), _texture(std::move(texture))
+sp<RenderCommandComposer> ModelLoaderText::makeRenderCommandComposer()
 {
-    resize(static_cast<uint32_t>(_texture->width()), static_cast<uint32_t>(_texture->height()));
+    return sp<RCCDrawQuads>::make(_atlas_attachment->_unit_model);
 }
 
-bool ModelLoaderText::Stub::prepareOne(int32_t c)
+void ModelLoaderText::initialize(ShaderBindings& shaderBindings)
+{
+    shaderBindings.pipelineBindings()->bindSampler(_atlas->texture());
+}
+
+sp<Model> ModelLoaderText::loadModel(int32_t type)
+{
+    GlyphModel& glyph = _glyph_bundle->ensureGlyphModel(Ark::instance().clock()->tick(), type, true);
+    return glyph._model;
+}
+
+ModelLoaderText::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _resource_loader_context(resourceLoaderContext), _alphabet(factory.ensureBuilder<Alphabet>(manifest, Constants::Attributes::ALPHABET)),
+      _atlas(factory.ensureBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)), _text_size(factory.getBuilder<String>(manifest, Constants::Attributes::TEXT_SIZE))
+{
+}
+
+sp<ModelLoader> ModelLoaderText::BUILDER::build(const Scope& args)
+{
+    const sp<String> textSize = _text_size->build(args);
+    return sp<ModelLoaderText>::make(_resource_loader_context->renderController(), _alphabet->build(args), _atlas->build(args), textSize ? Font::TextSize(*textSize) : Font::TextSize());
+}
+
+ModelLoaderText::GlyphBundle::GlyphBundle(AtlasAttachment& atlasAttachment, sp<Alphabet> alphabet, const Font::TextSize& textSize)
+    : _atlas_attachment(atlasAttachment), _alphabet(std::move(alphabet)), _text_size(textSize)
+{
+}
+
+bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c)
 {
     Alphabet::Metrics metrics;
     if(_alphabet->measure(c, metrics, false))
@@ -42,112 +71,114 @@ bool ModelLoaderText::Stub::prepareOne(int32_t c)
         int32_t width = metrics.width;
         int32_t height = metrics.height;
         DCHECK(width > 0 && height > 0, "Error loading character %d: width = %d, height = %d", c, width, height);
-        const MaxRectsBinPack::Rect bounds = _bin_pack.Insert(metrics.bitmap_width, metrics.bitmap_height, MaxRectsBinPack::RectBestShortSideFit);
-        if(bounds.height != metrics.bitmap_height)
+        const MaxRectsBinPack::Rect packedBounds = _atlas_attachment._bin_pack.Insert(metrics.bitmap_width, metrics.bitmap_height, MaxRectsBinPack::RectBestShortSideFit);
+        if(packedBounds.height != metrics.bitmap_height)
             return false;
 
-        _atlas->add(c, bounds.x, bounds.y, bounds.x + metrics.bitmap_width, bounds.y + metrics.bitmap_height, Rect(0, 0, 1.0f, 1.0f), V2(metrics.bitmap_width, metrics.bitmap_height), V2(0));
-        _alphabet->draw(c, _font_glyph, bounds.x, bounds.y);
+        _alphabet->draw(c, _atlas_attachment._glyph_bitmap, packedBounds.x, packedBounds.y);
+
+        Atlas::Item item = _atlas_attachment._atlas.makeItem(packedBounds.x, packedBounds.y, packedBounds.x + metrics.bitmap_width, packedBounds.y + metrics.bitmap_height, Rect(0, 0, 1.0f, 1.0f), V2(metrics.bitmap_width, metrics.bitmap_height), V2(0));
+        V3 bounds(static_cast<float>(metrics.width), static_cast<float>(metrics.height), 0);
+        V3 size(static_cast<float>(metrics.bitmap_width), static_cast<float>(metrics.bitmap_height), 0);
+        V3 xyz = V3(static_cast<float>(metrics.bitmap_x), static_cast<float>(metrics.bitmap_y), 0);
+        _glyphs[c] = GlyphModel(sp<Model>::make(_atlas_attachment._unit_model.indices(), sp<VerticesQuad>::make(item), Metrics{bounds, size, xyz}), timestamp);
     }
     else
         DWARN(false, "Error loading character %d", c);
     return true;
 }
 
-void ModelLoaderText::Stub::ensureCharacter(int32_t c)
+void ModelLoaderText::GlyphBundle::update(uint64_t timestamp)
 {
-    if(!_atlas->has(c))
+    std::vector<int32_t> reloadVector;
+    for(const auto& i : _glyphs)
     {
-        while(!prepareOne(c))
-        {
-            uint32_t width = _font_glyph->width() * 2;
-            uint32_t height = _font_glyph->height() * 2;
-            LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _atlas->items().size());
-            resize(width, height);
-        }
-        reloadTexture();
+        i.second._model->dispose();
+        if(timestamp - i.second._timestamp < 1000000)
+            reloadVector.push_back(i.first);
     }
+
+    _alphabet->setTextSize(_text_size);
+    for(int32_t i : reloadVector)
+        ensureGlyphModel(timestamp, i, false);
 }
 
-bool ModelLoaderText::Stub::resize(uint32_t textureWidth, uint32_t textureHeight)
+ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(uint64_t timestamp, int32_t c, bool oneshot)
 {
-    const sp<Atlas> oldAtlas = _atlas;
-    _size->setWidth(static_cast<float>(textureWidth));
-    _size->setHeight(static_cast<float>(textureHeight));
-    _font_glyph = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1), true);
-    memset(_font_glyph->at(0, 0), 0, _font_glyph->rowBytes() * _font_glyph->height());
+    const auto iter = _glyphs.find(c);
+    if(iter == _glyphs.end())
+    {
+        if(oneshot)
+            _alphabet->setTextSize(_text_size);
+
+        while(!prepareOne(timestamp, c))
+        {
+            uint32_t width = _atlas_attachment._glyph_bitmap->width() * 2;
+            uint32_t height = _atlas_attachment._glyph_bitmap->height() * 2;
+            LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _glyphs.size());
+            _atlas_attachment.resize(width, height);
+        }
+
+        if(oneshot)
+            _atlas_attachment.reloadTexture();
+    }
+    ModelLoaderText::GlyphModel& gm = iter == _glyphs.end() ? _glyphs[c] : iter->second;
+    gm._timestamp = timestamp;
+    return gm;
+}
+
+ModelLoaderText::AtlasAttachment::AtlasAttachment(Atlas& atlas, sp<RenderController> renderController)
+    : _atlas(atlas), _render_controller(std::move(renderController)), _unit_model(RenderUtil::makeUnitQuadModel())
+{
+    initialize(_atlas.width(), _atlas.height());
+}
+
+sp<ModelLoaderText::GlyphBundle> ModelLoaderText::AtlasAttachment::makeGlyphBundle(sp<Alphabet> alphabet, const Font::TextSize& textSize)
+{
+    sp<GlyphBundle> glyphBundle = sp<GlyphBundle>::make(*this, std::move(alphabet), textSize);
+    _glyph_bundles.push_back(glyphBundle);
+    return glyphBundle;
+}
+
+void ModelLoaderText::AtlasAttachment::initialize(uint32_t textureWidth, uint32_t textureHeight)
+{
+    _glyph_bitmap = bitmap::make(textureWidth, textureHeight, textureWidth, static_cast<uint8_t>(1), true);
+    memset(_glyph_bitmap->at(0, 0), 0, _glyph_bitmap->rowBytes() * _glyph_bitmap->height());
     _bin_pack.Init(textureWidth, textureHeight, false);
+}
 
-    if(oldAtlas)
-        for(const auto& i : oldAtlas->items())
-            if(!prepareOne(i.first))
-                return false;
+bool ModelLoaderText::AtlasAttachment::resize(uint32_t textureWidth, uint32_t textureHeight)
+{
+    uint64_t timestamp = Ark::instance().clock()->tick();
 
-    if(_texture)
-        reloadTexture();
-    else
-        _texture = _render_controller->createTexture2D(_size, sp<Texture::UploaderBitmap>::make(_font_glyph), RenderController::US_ONCE_AND_ON_SURFACE_READY);
+    initialize(textureWidth, textureHeight);
 
-    _atlas = sp<Atlas>::make(_texture, true);
-    _delegate = sp<ModelLoaderQuad>::make(_atlas);
+    for(const sp<GlyphBundle>& i : _glyph_bundles)
+        i->update(timestamp);
+
+    reloadTexture();
     return true;
 }
 
-void ModelLoaderText::Stub::reloadTexture()
+void ModelLoaderText::AtlasAttachment::reloadTexture()
 {
     if(_texture_reload_future)
         _texture_reload_future->cancel();
 
     _texture_reload_future = sp<Future>::make();
-    sp<Texture> texture = _render_controller->createTexture(_size, _texture->parameters(), sp<Texture::UploaderBitmap>::make(_font_glyph), RenderController::US_RELOAD, _texture_reload_future);
-    _texture->setDelegate(texture->delegate(), _size);
+    sp<Size> size = sp<Size>::make(_glyph_bitmap->width(), _glyph_bitmap->height());
+    sp<Texture> texture = _render_controller->createTexture(size, _atlas.texture()->parameters(), sp<Texture::UploaderBitmap>::make(_glyph_bitmap), RenderController::US_RELOAD, _texture_reload_future);
+    _atlas.texture()->setDelegate(texture->delegate(), std::move(size));
 }
 
-ModelLoaderText::ModelLoaderText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, uint32_t textureWidth, uint32_t textureHeight)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(renderController, alphabet, textureWidth, textureHeight))
+ModelLoaderText::GlyphModel::GlyphModel()
+    : _timestamp(0)
 {
 }
 
-ModelLoaderText::ModelLoaderText(const sp<RenderController>& renderController, const sp<Alphabet>& alphabet, sp<Texture> texture)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(renderController, alphabet, std::move(texture)))
+ModelLoaderText::GlyphModel::GlyphModel(sp<Model> model, uint64_t timestamp)
+    : _model(std::move(model)), _timestamp(timestamp)
 {
-}
-
-sp<RenderCommandComposer> ModelLoaderText::makeRenderCommandComposer()
-{
-    return _stub->_delegate->makeRenderCommandComposer();
-}
-
-void ModelLoaderText::initialize(ShaderBindings& shaderBindings)
-{
-    shaderBindings.pipelineBindings()->bindSampler(_stub->_texture);
-}
-
-sp<Model> ModelLoaderText::loadModel(int32_t type)
-{
-    Alphabet::Metrics metrics;
-    _stub->ensureCharacter(type);
-    bool r = _stub->_alphabet->measure(type, metrics, false);
-    DCHECK(r, "Measuring failed, type: %d", type);
-    V3 bounds(static_cast<float>(metrics.width), static_cast<float>(metrics.height), 0);
-    V3 size(static_cast<float>(metrics.bitmap_width), static_cast<float>(metrics.bitmap_height), 0);
-    V3 xyz = V3(static_cast<float>(metrics.bitmap_x), static_cast<float>(metrics.bitmap_y), 0);
-    Model model = _stub->_delegate->loadModel(type);
-    return sp<Model>::make(model.indices(), model.vertices(), Metrics{bounds, size, xyz});
-}
-
-ModelLoaderText::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _alphabet(factory.ensureBuilder<Alphabet>(manifest, Constants::Attributes::ALPHABET)),
-      _texture(factory.getBuilder<Texture>(manifest, Constants::Attributes::TEXTURE)),
-      _texture_width(Documents::getAttribute<uint32_t>(manifest, "texture-width", 256)), _texture_height(Documents::getAttribute<uint32_t>(manifest, "texture-height", 256))
-{
-}
-
-sp<ModelLoader> ModelLoaderText::BUILDER::build(const Scope& args)
-{
-    if(_texture)
-        return sp<ModelLoaderText>::make(_resource_loader_context->renderController(), _alphabet->build(args), _texture->build(args));
-    return sp<ModelLoaderText>::make(_resource_loader_context->renderController(), _alphabet->build(args), _texture_width, _texture_height);
 }
 
 }

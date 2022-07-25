@@ -21,7 +21,7 @@
 namespace ark {
 
 Atlas::Atlas(sp<Texture> texture, bool allowDefaultItem)
-    : _texture(std::move(texture)), _width(static_cast<float>(_texture->width())), _height(static_cast<float>(_texture->height())), _allow_default_item(allowDefaultItem)
+    : _texture(std::move(texture)), _allow_default_item(allowDefaultItem)
 {
 }
 
@@ -54,14 +54,19 @@ const std::unordered_map<int32_t, Atlas::Item>& Atlas::items() const
     return _items;
 }
 
+std::unordered_map<int32_t, Atlas::Item>& Atlas::items()
+{
+    return _items;
+}
+
 uint32_t Atlas::width() const
 {
-    return static_cast<uint32_t>(_width);
+    return static_cast<uint32_t>(_texture->width());
 }
 
 uint32_t Atlas::height() const
 {
-    return static_cast<uint32_t>(_height);
+    return static_cast<uint32_t>(_texture->height());
 }
 
 bool Atlas::has(int32_t c) const
@@ -151,14 +156,9 @@ const Atlas::Item& Atlas::at(int32_t id) const
 Rect Atlas::getOriginalPosition(int32_t id) const
 {
     const Atlas::Item& item = at(id);
-    float nw = _width / 65536.0f;
-    float nh = _height / 65536.0f;
+    float nw = _texture->width() / 65536.0f;
+    float nh = _texture->height() / 65536.0f;
     return Rect(item.ux() * nw, item.vy() * nh, item.vx() * nw, item.uy() * nh);
-}
-
-void Atlas::clear()
-{
-    _items.clear();
 }
 
 uint16_t Atlas::unnormalize(uint32_t x, uint32_t s)
@@ -168,10 +168,10 @@ uint16_t Atlas::unnormalize(uint32_t x, uint32_t s)
 
 Atlas::Item Atlas::makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const
 {
-    uint16_t l = unnormalize(ux, static_cast<uint32_t>(_width));
-    uint16_t t = unnormalize(uy, static_cast<uint32_t>(_height));
-    uint16_t r = unnormalize(vx, static_cast<uint32_t>(_width));
-    uint16_t b = unnormalize(vy, static_cast<uint32_t>(_height));
+    uint16_t l = unnormalize(ux, static_cast<uint32_t>(_texture->width()));
+    uint16_t t = unnormalize(uy, static_cast<uint32_t>(_texture->height()));
+    uint16_t r = unnormalize(vx, static_cast<uint32_t>(_texture->width()));
+    uint16_t b = unnormalize(vy, static_cast<uint32_t>(_texture->height()));
     return Item(l, b, r, t, Rect(bounds.left() - pivot.x(), bounds.top() - pivot.y(), bounds.right() - pivot.x(), bounds.bottom() - pivot.y()), size, pivot);
 }
 

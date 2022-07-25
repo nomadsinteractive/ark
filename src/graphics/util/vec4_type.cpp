@@ -8,7 +8,6 @@
 #include "core/util/operators.h"
 
 #include "graphics/impl/vec/vec4_impl.h"
-#include "graphics/impl/vec/vec_neg.h"
 
 namespace ark {
 
@@ -50,12 +49,12 @@ sp<Vec4> Vec4Type::floordiv(const sp<Vec4>& self, const sp<Vec4>& rvalue)
 
 sp<Vec4> Vec4Type::negative(const sp<Vec4>& self)
 {
-    return sp<VecNeg<V4>>::make(self);
+    return sp<VariableOP1<V4>>::make(Operators::Neg<V4>(), self);
 }
 
 sp<Vec4> Vec4Type::absolute(const sp<Vec4>& self)
 {
-    return sp<VariableOP1<V4, V4>>::make(Operators::Abs<V4>(), self);
+    return sp<VariableOP1<V4>>::make(Operators::Abs<V4>(), self);
 }
 
 sp<Vec4> Vec4Type::transform(const sp<Vec4>& self, const sp<Transform>& transform, const sp<Vec4>& org)

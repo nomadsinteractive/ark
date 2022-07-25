@@ -48,6 +48,11 @@ String::size_type String::length() const
     return _str.size();
 }
 
+String::size_type String::size() const
+{
+    return _str.size();
+}
+
 bool String::empty() const
 {
     return _str.empty();

@@ -18,7 +18,7 @@ Paragraph::Paragraph(const sp<Characters>& characters)
 
 void Paragraph::render(RenderRequest& renderequest, const V3& position)
 {
-    _characters->renderRequest(renderequest, position);
+    _characters->render(renderequest, position);
 }
 
 const sp<Size>& Paragraph::size()

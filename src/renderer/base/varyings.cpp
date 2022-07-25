@@ -7,6 +7,7 @@
 #include "core/inf/variable.h"
 #include "core/impl/flatable/flatable_by_variable.h"
 #include "core/util/holder_util.h"
+#include "core/util/math.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/base/v4.h"
@@ -40,7 +41,7 @@ bool Varyings::update(uint64_t timestamp) const
 Box Varyings::getProperty(const String& name) const
 {
     const auto iter = _properties.find(name);
-    DCHECK(iter != _properties.end(), "Varyings has no property \"%s\"", name.c_str());
+    CHECK(iter != _properties.end(), "Varyings has no property \"%s\"", name.c_str());
     return iter->second;
 }
 
@@ -94,7 +95,8 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Alloca
         for(auto& i : _varyings)
         {
             i.second._offset = varyingStream.getAttributeOffset(i.first);
-            DCHECK(i.second._offset >= 0, "Illegal Varying, name: \"%s\", offset: %d", i.first.c_str(), i.second._offset);
+            DCHECK(i.second._offset >= 0, "Varying has no attribute \"%s\", offset: %d. Did you mean \"%s\"?", i.first.c_str(), i.second._offset,
+                   Math::levensteinNearest(i.first, varyingStream.attributes().keys()).first.c_str());
             _size = std::max<uint32_t>(static_cast<uint32_t>(i.second._offset) + i.second._flatable->size(), _size);
         }
     }
@@ -161,6 +163,11 @@ Varyings::Snapshot::Snapshot()
 Varyings::Snapshot::Snapshot(ByteArray::Borrowed memory)
     : _memory(memory)
 {
+}
+
+Varyings::Snapshot::operator bool() const
+{
+    return _memory.buf() != nullptr;
 }
 
 }

@@ -42,6 +42,8 @@ public:
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
         ByteArray::Borrowed _memory;
+
+        explicit operator bool() const;
     };
 
 public:

@@ -5,6 +5,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/font.h"
 
 namespace ark {
 
@@ -19,7 +20,7 @@ public:
         virtual sp<Alphabet> build(const Scope& args) override;
 
     private:
-        uint32_t _text_size;
+        Font::TextSize _text_size;
         sp<Builder<String>> _lang;
     };
 

@@ -166,6 +166,10 @@ class Json:
     def to_bson(self) -> bytes:
         pass
 
+    @staticmethod
+    def from_bson(content: bytes) -> 'Json':
+        pass
+
 
 class MessageLoop:
 
@@ -456,7 +460,7 @@ class Renderer:
     def translate(self, position: Union[tuple, 'Vec2']) -> 'Renderer':
         return self
 
-    def make_disposable(self, disposed: Optional[bool, 'Disposed'] = None) -> 'Renderer':
+    def make_disposable(self, disposed: Union[bool, 'Disposed'] = None) -> 'Renderer':
         pass
 
     def make_visible(self, visibility: Union[bool, 'Boolean', 'Visibility']) -> 'Renderer':
@@ -1239,7 +1243,7 @@ class Event:
 
 
 class Rotation:
-    def __init__(self, theta: Union[float, Numeric], axis: Optional[Vec3, tuple] = None):
+    def __init__(self, theta: Union[float, Numeric], axis: Union[Vec3, tuple] = None):
         self._theta = theta
         self._axis = axis
 
@@ -1255,7 +1259,7 @@ class Rotation:
     def axis(self) -> Vec3:
         return self._axis
 
-    def set_rotation(self, theta: Union[float, Numeric], axis: Optional[Vec3, tuple]):
+    def set_rotation(self, theta: Union[float, Numeric], axis: Union[Vec3, tuple]):
         pass
 
     def set_euler(self, pitch: Union[float, Numeric], yaw: Union[float, Numeric], roll: Union[float, Numeric]):
@@ -1266,7 +1270,7 @@ class Transform:
     TYPE_LINEAR_2D = 0
     TYPE_LINEAR_3D = 1
 
-    def __init__(self, t: int = TYPE_LINEAR_3D, rotation: Optional[Rotation] = None, scale: Optional[Vec3, Vec2] = None, pivot: Optional[Vec3, Vec2] = None):
+    def __init__(self, t: int = TYPE_LINEAR_3D, rotation: Optional[Rotation] = None, scale: Union[Vec3, Vec2] = None, pivot: Union[Vec3, Vec2] = None):
         self._type = t
         self._rotation = rotation
         self._scale = scale
@@ -1547,6 +1551,10 @@ class Tilemap:
         pass
 
     @property
+    def size(self) -> Size:
+        return None
+
+    @property
     def tileset(self) -> Tileset:
         return self._tileset
 
@@ -1637,9 +1645,10 @@ class Glyph:
         return None
 
 
-class Characters:
-    def __init__(self, layer: Union[Layer, RenderLayer, LayerContext], text_scale=1.0, letter_spacing=0, line_height=0, line_indent=0):
-        self._size = Size(0, 0)
+class Characters(Renderer):
+    def __init__(self, layer: Union[Layer, RenderLayer, LayerContext], text: Union[Text, str, None] = None, text_scale=1.0, letter_spacing=0, line_height=0,
+                 line_indent=0):
+        super().__init__()
 
     @property
     def text(self) -> str:
@@ -1652,10 +1661,6 @@ class Characters:
     @property
     def contents(self) -> List[RenderObject]:
         return []
-
-    @property
-    def size(self) -> Size:
-        return self._size
 
     def set_rich_text(self, text: str, **kwargs):
         pass
@@ -1677,7 +1682,7 @@ class Color(Vec4):
     def assign(self, other: 'Color'):
         pass
 
-    @propertry
+    @property
     def value(self) -> int:
         return 0
 

@@ -29,7 +29,7 @@ namespace ark {
 RenderLayer::Stub::Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)
     : _model_loader(sp<ModelLoaderCached>::make(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)), _render_controller(std::move(renderController)), _render_command_composer(_model_loader->makeRenderCommandComposer()),
       _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _notifier(sp<Notifier>::make()),
-      _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(_model_loader, _notifier, Layer::TYPE_DYNAMIC))), _stride(_shader->input()->getStream(0).stride())
+      _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(_model_loader, nullptr, _notifier, Layer::TYPE_DYNAMIC))), _stride(_shader->input()->getStream(0).stride())
 {
     _model_loader->initialize(_shader_bindings);
     DCHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
@@ -37,7 +37,7 @@ RenderLayer::Stub::Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4>
 
 sp<LayerContext> RenderLayer::Stub::makeLayerContext(Layer::Type layerType, sp<ModelLoader> modelLoader)
 {
-    const sp<LayerContext> layerContext = modelLoader ? sp<LayerContext>::make(std::move(modelLoader), _notifier, layerType) : sp<LayerContext>::make(_model_loader, _notifier, layerType);
+    const sp<LayerContext> layerContext = sp<LayerContext>::make(modelLoader ? sp<ModelLoaderCached>::make(std::move(modelLoader)) : _model_loader, _layer->context()->varyings(), _notifier, layerType);
     _layer_contexts.push_back(layerContext, _notifier);
     return layerContext;
 }
@@ -81,17 +81,6 @@ sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderReque
 
     DrawingContext drawingContext(_stub->_shader_bindings, nullptr, std::move(_ubos), std::move(_ssbos));
     return drawingContext.toBindCommand();
-}
-
-void RenderLayer::Snapshot::postSnapshot()
-{
-    ModelLoader& modelLoader = _stub->_model_loader;
-    for(Renderable::Snapshot& i : _items)
-    {
-        if(!i._model)
-            i._model = modelLoader.loadModel(i._type);
-        _index_count += i._model->indexCount();
-    }
 }
 
 RenderLayer::RenderLayer(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)

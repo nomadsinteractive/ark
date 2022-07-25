@@ -13,12 +13,19 @@ template<typename T> class Clamp : public Variable<T>::Updatable {
 public:
     Clamp(const sp<Variable<T>>& delegate, const sp<Variable<T>>& min, const sp<Variable<T>>& max, Notifier notifier)
         : Variable<T>::Updatable(delegate->val()), _delegate(delegate), _min(min), _max(max), _notifier(std::move(notifier)) {
+        doClamp(_value);
     }
 
     virtual bool doUpdate(uint64_t timestamp, T& value) override {
         if(!VariableUtil::update(timestamp, _delegate, _min, _max))
             return false;
 
+        doClamp(value);
+        return true;
+    }
+
+private:
+    void doClamp(T& value) {
         value = _delegate->val();
         T t;
         if((t = _min->val()) > value) {
@@ -28,8 +35,6 @@ public:
             _notifier.notify();
             value = t;
         }
-
-        return true;
     }
 
 private:

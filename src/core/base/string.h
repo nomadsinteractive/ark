@@ -26,6 +26,7 @@ public:
     char at(size_type i) const;
     const char* c_str() const;
     size_type length() const;
+    size_type size() const;
     bool empty() const;
     size_type hash() const;
     size_type find(const String& str, size_type pos = 0) const;

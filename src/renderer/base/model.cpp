@@ -83,6 +83,19 @@ void Model::writeRenderable(VertexStream& writer, const Renderable::Snapshot& re
     writeToStream(writer, renderable._size);
 }
 
+void Model::dispose()
+{
+    _indices = nullptr;
+    _vertices = nullptr;
+    _meshes = nullptr;
+    _animations.clear();
+}
+
+bool Model::isDisposed() const
+{
+    return !static_cast<bool>(_indices);
+}
+
 Model::MeshIndicesUploader::MeshIndicesUploader(sp<ark::Array<Mesh>> meshes)
     : Uploader(calcIndicesSize(meshes)), _meshes(std::move(meshes))
 {

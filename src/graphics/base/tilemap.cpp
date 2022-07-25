@@ -125,7 +125,7 @@ sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t rowCount, uint3
 
 void Tilemap::addLayer(sp<TilemapLayer> layer)
 {
-    layer->_layer_context = _layer_context;
+    layer->setLayerContext(_layer_context);
     _stub->_layers.push_back(std::move(layer));
 }
 
@@ -184,7 +184,7 @@ Json Tilemap::jsonDump() const
         jLayer.setInt("height", static_cast<int32_t>(rowCount));
 
         std::vector<int32_t> tiles(colCount * rowCount, 0);
-        i->foreachTile([&tiles, rowCount, colCount] (uint32_t row, uint32_t col, const sp<Tile>& tile) {
+        i->foreachTile([&tiles, rowCount, colCount] (uint32_t col, uint32_t row, const sp<Tile>& tile) {
             tiles[(rowCount - 1 - row) * colCount + col] = tile->id() + 1;
             return true;
         });

@@ -97,6 +97,8 @@ public:
 
 //  [[script::bindings::auto]]
     bytearray toBson() const;
+//  [[script::bindings::auto]]
+    static Json fromBson(ByteArray& content);
 
 //  [[script::bindings::auto]]
     String dump() const;

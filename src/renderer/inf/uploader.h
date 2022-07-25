@@ -37,8 +37,8 @@ protected:
 
 template<typename T> class Uploader::Array : public Uploader {
 public:
-    Array(const sp<ark::Array<T>>& array)
-        : Uploader(array->size()), _array(array) {
+    Array(sp<ark::Array<T>> array)
+        : Uploader(array->size()), _array(std::move(array)) {
     }
 
     virtual void upload(Writable& uploader) override {

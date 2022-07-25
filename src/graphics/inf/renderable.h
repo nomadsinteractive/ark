@@ -35,7 +35,6 @@ public:
     };
 
     virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate) = 0;
-
 };
 
 }

@@ -187,6 +187,22 @@ void TilemapLayer::foreachTile(const std::function<bool (uint32_t, uint32_t, con
         }
 }
 
+void TilemapLayer::setLayerContext(sp<LayerContext> layerContext)
+{
+    if(layerContext)
+    {
+        LayerContext& lc = layerContext;
+        for(LayerTile& i : _layer_tiles)
+            if(i.tile)
+            {
+                sp<RenderablePassive> renderable = sp<RenderablePassive>::make(i.tile->ensureRenderObject());
+                lc.add(renderable, sp<BooleanByWeakRef<Renderable>>::make(renderable, 1));
+                i.renderable = std::move(renderable);
+            }
+    }
+    _layer_context = std::move(layerContext);
+}
+
 void TilemapLayer::renderTiles(const V3& position, const RectI& renderRange)
 {
     float tileWidth = static_cast<float>(_tileset->tileWidth());

@@ -341,6 +341,15 @@ template<> inline sp<Vec3> PythonInterpreter::toSharedPtr<Vec3>(PyObject* object
     return toVec3(object, alert);
 }
 
+template<> inline bytearray PythonInterpreter::toSharedPtr<ByteArray>(PyObject* object, bool alert) {
+    bool isBytes = PyBytes_Check(object);
+    DCHECK(isBytes || !alert, "Object \"%s\" is not a bytes object", Py_TYPE(object)->tp_name);
+    if(!isBytes)
+        return nullptr;
+    Py_ssize_t len = PyBytes_Size(object);
+    return sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(PyBytes_AsString(object)), len);
+}
+
 }
 }
 }

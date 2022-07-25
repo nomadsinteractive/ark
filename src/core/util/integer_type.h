@@ -97,6 +97,11 @@ public:
     static sp<Integer> animate(const sp<Integer>& self, const sp<Numeric>& interval = nullptr, const sp<Numeric>& duration = nullptr);
 
 //  [[script::bindings::classmethod]]
+    static sp<ExpectationI> atLeast(sp<Integer> self, sp<Integer> a1);
+//  [[script::bindings::classmethod]]
+    static sp<ExpectationI> atMost(sp<Integer> self, sp<Integer> a1);
+
+//  [[script::bindings::classmethod]]
     static sp<ExpectationI> clamp(const sp<Integer>& self, const sp<Integer>& min, const sp<Integer>& max);
 //  [[script::bindings::classmethod]]
     static sp<ExpectationI> fence(const sp<Integer>& self, const sp<Integer>& a1);
