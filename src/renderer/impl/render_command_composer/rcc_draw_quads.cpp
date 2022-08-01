@@ -22,9 +22,8 @@ RCCDrawQuads::RCCDrawQuads(Model model)
 
 sp<ShaderBindings> RCCDrawQuads::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
 {
-    _vertices = renderController.makeVertexBuffer();
     _shared_buffer = renderController.getSharedBuffer(renderMode, _model);
-    return shader.makeBindings(renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS);
+    return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS);
 }
 
 void RCCDrawQuads::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
@@ -35,15 +34,17 @@ void RCCDrawQuads::postSnapshot(RenderController& renderController, RenderLayer:
 
 sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot)
 {
+    const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
+
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
     buf.setIndices(snapshot._index_buffer);
 
     size_t offset = 0;
-    bool reload = snapshot._flag == RenderLayer::SNAPSHOT_FLAG_RELOAD || _vertices.size() == 0;
+    bool reload = snapshot.needsReload();
     for(const Renderable::Snapshot& i : snapshot._items)
     {
         size_t vertexCount = i._model->vertexCount();
-        if(reload || i._dirty)
+        if(reload || i.getState(Renderable::RENDERABLE_STATE_DIRTY))
         {
             VertexStream writer = buf.makeVertexStream(renderRequest, vertexCount, offset);
             i._model->writeRenderable(writer, i);
@@ -52,7 +53,7 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
     }
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), std::move(snapshot._ssbos),
-                                  buf.vertices().toSnapshot(_vertices), buf.indices(), DrawingContext::ParamDrawElements(0, buf.indices().length<element_index_t>()));
+                                  buf.vertices().toSnapshot(vertices), buf.indices(), DrawingContext::ParamDrawElements(0, buf.indices().length<element_index_t>()));
 
     if(snapshot._stub->_scissor)
         drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);

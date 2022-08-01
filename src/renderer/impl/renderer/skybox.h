@@ -45,8 +45,6 @@ private:
     sp<Shader> _shader;
     sp<ShaderBindings> _shader_bindings;
 
-    Buffer _vertices;
-
     Buffer::Snapshot _index_buffer;
 };
 

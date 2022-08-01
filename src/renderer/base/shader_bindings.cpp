@@ -8,10 +8,20 @@
 
 namespace ark {
 
-ShaderBindings::ShaderBindings(const sp<PipelineFactory>& pipelineFactory, const sp<PipelineBindings>& pipelineBindings, RenderController& renderController)
-    : _pipeline_factory(pipelineFactory), _pipeline_bindings(pipelineBindings), _snippet(_pipeline_bindings->layout()->snippet()), _divisors(makeDivisors(renderController)),
-      _attachments(sp<ByType>::make())
+ShaderBindings::ShaderBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineBindings> pipelineBindings, RenderController& renderController)
+    : _vertices(std::move(vertices)), _pipeline_factory(std::move(pipelineFactory)), _pipeline_bindings(std::move(pipelineBindings)), _snippet(_pipeline_bindings->layout()->snippet()),
+      _divisors(makeDivisors(renderController)), _attachments(sp<ByType>::make())
 {
+}
+
+const Buffer& ShaderBindings::vertices() const
+{
+    return _vertices;
+}
+
+Buffer& ShaderBindings::vertices()
+{
+    return _vertices;
 }
 
 const sp<PipelineFactory>& ShaderBindings::pipelineFactory() const

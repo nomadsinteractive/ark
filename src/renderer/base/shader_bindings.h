@@ -18,7 +18,10 @@ namespace ark {
 
 class ARK_API ShaderBindings {
 public:
-    ShaderBindings(const sp<PipelineFactory>& pipelineFactory, const sp<PipelineBindings>& pipelineBindings, RenderController& renderController);
+    ShaderBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineBindings> pipelineBindings, RenderController& renderController);
+
+    const Buffer& vertices() const;
+    Buffer& vertices();
 
     const sp<PipelineFactory>& pipelineFactory() const;
     const sp<PipelineBindings>& pipelineBindings() const;
@@ -40,6 +43,7 @@ private:
     sp<std::map<uint32_t, Buffer>> makeDivisors(RenderController& renderController) const;
 
 private:
+    Buffer _vertices;
     sp<PipelineFactory> _pipeline_factory;
     sp<PipelineBindings> _pipeline_bindings;
     sp<Snippet> _snippet;

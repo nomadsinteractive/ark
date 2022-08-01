@@ -233,13 +233,18 @@ bool RenderObject::isVisible() const
     return _visible.val();
 }
 
-Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate)
+Renderable::State RenderObject::updateState(const RenderRequest& renderRequest)
 {
-    if(_disposed.update(renderRequest.timestamp()) && _disposed.val())
-        return Renderable::Snapshot();
-
+    bool disposed = _disposed.update(renderRequest.timestamp()) && _disposed.val();
     bool dirty = VariableUtil::update(renderRequest.timestamp(), _visible, _type, _position, _size, _transform, _varyings, _visible) || _timestamp.update(renderRequest.timestamp());
-    return Renderable::Snapshot(false, dirty, _visible.val(), _type->val(), _position.val(), _size.val(), _transform->snapshot(postTranslate), _varyings->snapshot(pipelineInput, renderRequest.allocator()));
+    return Renderable::toState(disposed || _type->val() == -1, dirty, _visible.val());
+}
+
+Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, State state)
+{
+    if(state & Renderable::RENDERABLE_STATE_DIRTY)
+        return Renderable::Snapshot(state, _type->val(), _position.val(), _size.val(), _transform->snapshot(postTranslate), _varyings->snapshot(pipelineInput, renderRequest.allocator()));
+    return Renderable::Snapshot(state, _type->val(), V3(), V3(), Transform::Snapshot(), Varyings::Snapshot());
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

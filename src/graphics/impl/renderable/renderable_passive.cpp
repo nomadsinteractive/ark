@@ -9,20 +9,23 @@ RenderablePassive::RenderablePassive(sp<RenderObject> renderObject)
 {
 }
 
-Renderable::Snapshot RenderablePassive::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate)
+Renderable::State RenderablePassive::updateState(const RenderRequest& renderRequest)
 {
-    Renderable::Snapshot snapshot = _render_object ? _render_object->snapshot(pipelineInput, renderRequest, postTranslate + _position) : Renderable::Snapshot(false);
-    snapshot._dirty = snapshot._dirty || _position_changed || (_visible != _render_requested);
-    snapshot._visible = snapshot._visible && _render_requested;
-    _visible = snapshot._visible;
+    Renderable::State state = _render_object ? _render_object->updateState(renderRequest) : Renderable::RENDERABLE_STATE_NORMAL;
+    bool dirty = (state & Renderable::RENDERABLE_STATE_DIRTY) || _position_changed || (_visible != _render_requested);
+    _visible = (state & Renderable::RENDERABLE_STATE_VISIBLE) && _render_requested;
+    return Renderable::toState(state & Renderable::RENDERABLE_STATE_DISPOSED, dirty, _visible);
+}
+
+Renderable::Snapshot RenderablePassive::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, State state)
+{
+    Renderable::Snapshot snapshot = _render_object ? _render_object->snapshot(pipelineInput, renderRequest, postTranslate + _position, state) : Renderable::Snapshot(state);
+//    snapshot.setState(Renderable::RENDERABLE_STATE_DIRTY, snapshot.getState(Renderable::RENDERABLE_STATE_DIRTY) || _position_changed || (_visible != _render_requested));
+//    snapshot.setState(Renderable::RENDERABLE_STATE_VISIBLE, _visible && _render_requested);
+//    _visible = snapshot.getState(Renderable::RENDERABLE_STATE_VISIBLE);
     _render_requested = false;
     _position_changed = false;
     return snapshot;
-}
-
-const sp<RenderObject>& RenderablePassive::renderObject() const
-{
-    return _render_object;
 }
 
 void RenderablePassive::requestUpdate(const V3& position)

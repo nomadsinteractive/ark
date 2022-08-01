@@ -122,9 +122,9 @@ const sp<PipelineLayout>& Shader::layout() const
     return _pipeline_layout;
 }
 
-sp<ShaderBindings> Shader::makeBindings(ModelLoader::RenderMode mode, PipelineBindings::RenderProcedure renderProcedure) const
+sp<ShaderBindings> Shader::makeBindings(Buffer vertices, ModelLoader::RenderMode mode, PipelineBindings::RenderProcedure renderProcedure) const
 {
-    return sp<ShaderBindings>::make(_pipeline_factory, sp<PipelineBindings>::make(mode, renderProcedure, _binding_params, _pipeline_layout), _render_controller);
+    return sp<ShaderBindings>::make(std::move(vertices), _pipeline_factory, sp<PipelineBindings>::make(mode, renderProcedure, _binding_params, _pipeline_layout), _render_controller);
 }
 
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

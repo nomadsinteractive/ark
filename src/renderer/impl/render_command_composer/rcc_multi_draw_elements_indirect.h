@@ -59,7 +59,6 @@ private:
 private:
     sp<ModelBundle> _model_bundle;
 
-    Buffer _vertices;
     Buffer _indices;
     Buffer _draw_indirect;
 

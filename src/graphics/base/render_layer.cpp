@@ -28,8 +28,8 @@ namespace ark {
 
 RenderLayer::Stub::Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)
     : _model_loader(sp<ModelLoaderCached>::make(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)), _render_controller(std::move(renderController)), _render_command_composer(_model_loader->makeRenderCommandComposer()),
-      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _notifier(sp<Notifier>::make()),
-      _dirty(_notifier->createDirtyFlag()), _layer(sp<Layer>::make(sp<LayerContext>::make(_model_loader, nullptr, _notifier, Layer::TYPE_DYNAMIC))), _stride(_shader->input()->getStream(0).stride())
+      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _layer(sp<Layer>::make(sp<LayerContext>::make(_model_loader, nullptr, Layer::TYPE_DYNAMIC))),
+      _stride(_shader->input()->getStream(0).stride())
 {
     _model_loader->initialize(_shader_bindings);
     DCHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
@@ -37,8 +37,8 @@ RenderLayer::Stub::Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4>
 
 sp<LayerContext> RenderLayer::Stub::makeLayerContext(Layer::Type layerType, sp<ModelLoader> modelLoader)
 {
-    const sp<LayerContext> layerContext = sp<LayerContext>::make(modelLoader ? sp<ModelLoaderCached>::make(std::move(modelLoader)) : _model_loader, _layer->context()->varyings(), _notifier, layerType);
-    _layer_contexts.push_back(layerContext, _notifier);
+    const sp<LayerContext> layerContext = sp<LayerContext>::make(modelLoader ? sp<ModelLoaderCached>::make(std::move(modelLoader)) : _model_loader, _layer->context()->varyings(), layerType);
+    _layer_contexts.push_back(layerContext);
     return layerContext;
 }
 
@@ -48,14 +48,32 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
     DPROFILER_TRACE("Snapshot");
     Layer::Type combined = Layer::TYPE_UNSPECIFIED;
 
+    bool needsReload = _stub->_layer->context()->preSnapshot(renderRequest);
+
+    for(auto iter = _stub->_layer_contexts.begin(); iter != _stub->_layer_contexts.end(); )
+        if(iter->unique())
+        {
+            iter = _stub->_layer_contexts.erase(iter);
+            needsReload = true;
+        }
+        else
+        {
+            const sp<LayerContext>& i = *iter;
+            needsReload = i->preSnapshot(renderRequest) || needsReload;
+            DWARN(combined != Layer::TYPE_STATIC || i->layerType() != Layer::TYPE_DYNAMIC, "Combining static and dynamic layers together leads to low efficiency");
+            if(combined != Layer::TYPE_DYNAMIC)
+                combined = i->layerType();
+            ++iter;
+        }
+
+    if(combined != Layer::TYPE_STATIC)
+        _flag = needsReload ? SNAPSHOT_FLAG_RELOAD : SNAPSHOT_FLAG_DYNAMIC_UPDATE;
+    else
+        _flag = needsReload ? SNAPSHOT_FLAG_STATIC_MODIFIED : SNAPSHOT_FLAG_STATIC_REUSE;
+
     _stub->_layer->context()->takeSnapshot(*this, renderRequest);
-    for(const sp<LayerContext>& i : stub->_layer_contexts.update(renderRequest.timestamp()))
-    {
+    for(const sp<LayerContext>& i : stub->_layer_contexts)
         i->takeSnapshot(*this, renderRequest);
-        DWARN(combined != Layer::TYPE_STATIC || i->layerType() != Layer::TYPE_DYNAMIC, "Combining static and dynamic layers together leads to low efficiency");
-        if(combined != Layer::TYPE_DYNAMIC)
-            combined = i->layerType();
-    }
 
     _stub->_render_command_composer->postSnapshot(_stub->_render_controller, *this);
 
@@ -65,13 +83,7 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
     if(_stub->_scissor && _stub->_scissor->update(renderRequest.timestamp()))
         _scissor = Rect(_stub->_scissor->val());
 
-    bool dirty = _stub->_dirty->val();
-    if(combined != Layer::TYPE_STATIC)
-        _flag = dirty ? SNAPSHOT_FLAG_RELOAD : SNAPSHOT_FLAG_DYNAMIC_UPDATE;
-    else
-        _flag = dirty ? SNAPSHOT_FLAG_STATIC_MODIFIED : SNAPSHOT_FLAG_STATIC_REUSE;
-
-    DPROFILER_LOG("Dirty", dirty);
+    DPROFILER_LOG("NeedsReload", needsReload);
 }
 
 sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderRequest, const V3& /*position*/)
@@ -81,6 +93,11 @@ sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderReque
 
     DrawingContext drawingContext(_stub->_shader_bindings, nullptr, std::move(_ubos), std::move(_ssbos));
     return drawingContext.toBindCommand();
+}
+
+bool RenderLayer::Snapshot::needsReload() const
+{
+    return _flag == RenderLayer::SNAPSHOT_FLAG_RELOAD || _stub->_shader_bindings->vertices().size() == 0;
 }
 
 RenderLayer::RenderLayer(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)
@@ -148,21 +165,6 @@ RenderLayer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const docu
 sp<Renderer> RenderLayer::RENDERER_BUILDER::build(const Scope& args)
 {
     return _impl.build(args);
-}
-
-RenderLayer::LayerContextFilter::LayerContextFilter(const sp<LayerContext>& item, sp<Notifier> notifier)
-    : _item(item), _notifier(std::move(notifier))
-{
-}
-
-FilterAction RenderLayer::LayerContextFilter::operator() () const
-{
-    if(_item.unique())
-    {
-        _notifier->notify();
-        return FILTER_ACTION_REMOVE;
-    }
-    return FILTER_ACTION_NONE;
 }
 
 }

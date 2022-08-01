@@ -110,7 +110,7 @@ public:
     }
 
     bool unique() const {
-        return _ptr.unique();
+        return _ptr.use_count() == 1;
     }
 
 private:

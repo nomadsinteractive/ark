@@ -40,7 +40,6 @@ public:
 
 private:
     sp<Shader> _shader;
-    Buffer _vertex_buffer;
     Buffer _index_buffer;
     sp<Integer> _draw_count;
     sp<ShaderBindings> _shader_bindings;

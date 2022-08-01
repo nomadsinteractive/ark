@@ -26,17 +26,6 @@ public:
     struct Snapshot;
 
 private:
-    class LayerContextFilter {
-    public:
-        LayerContextFilter(const sp<LayerContext>& item, sp<Notifier> notifier);
-
-        FilterAction operator() () const;
-
-    private:
-        WeakPtr<LayerContext> _item;
-        sp<Notifier> _notifier;
-    };
-
     struct Stub {
         Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController);
 
@@ -51,9 +40,7 @@ private:
         sp<RenderCommandComposer> _render_command_composer;
         sp<ShaderBindings> _shader_bindings;
 
-        sp<Notifier> _notifier;
-        sp<Boolean> _dirty;
-        List<LayerContext, LayerContextFilter> _layer_contexts;
+        std::vector<sp<LayerContext>> _layer_contexts;
         sp<Layer> _layer;
 
         uint32_t _stride;
@@ -77,6 +64,8 @@ public:
         Snapshot(Snapshot&& other) = default;
 
         sp<RenderCommand> render(const RenderRequest& renderRequest, const V3& position);
+
+        bool needsReload() const;
 
         sp<Stub> _stub;
 

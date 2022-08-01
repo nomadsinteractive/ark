@@ -18,7 +18,6 @@ public:
 
 private:
     Model _model;
-    Buffer _vertices;
     Buffer _indices;
 };
 

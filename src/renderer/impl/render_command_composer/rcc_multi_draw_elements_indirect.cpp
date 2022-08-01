@@ -24,10 +24,9 @@ RCCMultiDrawElementsIndirect::RCCMultiDrawElementsIndirect(sp<ModelBundle> multi
 
 sp<ShaderBindings> RCCMultiDrawElementsIndirect::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
 {
-    _vertices = renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<VerticesUploader>::make(_model_bundle, shader.input()));
     _indices = renderController.makeIndexBuffer(Buffer::USAGE_STATIC, sp<IndicesUploader>::make(_model_bundle));
     _draw_indirect = renderController.makeBuffer(Buffer::TYPE_DRAW_INDIRECT, Buffer::USAGE_DYNAMIC, nullptr);
-    return shader.makeBindings(renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT);
+    return shader.makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<VerticesUploader>::make(_model_bundle, shader.input())), renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT);
 }
 
 void RCCMultiDrawElementsIndirect::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& /*snapshot*/)
@@ -38,7 +37,8 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
 {
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
     sp<Uploader> indirectUploader = nullptr;
-    bool reload = snapshot._flag == RenderLayer::SNAPSHOT_FLAG_RELOAD || _vertices.size() == 0;
+    const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
+    bool reload = snapshot.needsReload();
 
     if(reload)
     {
@@ -62,7 +62,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
     writeModelMatices(renderRequest, buf, snapshot, reload);
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), std::move(snapshot._ssbos),
-                                  _vertices.snapshot(), _indices.snapshot(),
+                                  vertices.snapshot(), _indices.snapshot(),
                                   DrawingContext::ParamDrawMultiElementsIndirect(buf.makeDividedBufferSnapshots(), _draw_indirect.snapshot(indirectUploader), static_cast<uint32_t>(_indirect_cmds.size())));
 
     if(snapshot._stub->_scissor)
@@ -92,7 +92,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
         for(size_t j : i.second._snapshot_offsets)
         {
             const Renderable::Snapshot& s = snapshot._items.at(j);
-            if(reload || s._dirty)
+            if(reload || s.getState(Renderable::RENDERABLE_STATE_DIRTY))
             {
                 const ModelBundle::ModelInfo& modelInfo = _model_bundle->ensure(s._type);
                 const Metrics& metrics = modelInfo._model->metrics();

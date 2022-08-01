@@ -18,7 +18,7 @@
 namespace ark {
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderController& renderController)
-    : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS)),
+    : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(Buffer(), ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS)),
       _vertex_buffer(renderController.makeVertexBuffer()), _index_buffer(renderController.getNamedBuffer(SharedBuffer::NAME_QUADS)->snapshot(renderController, 1))
 {
 }

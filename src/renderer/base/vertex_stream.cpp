@@ -49,7 +49,7 @@ void VertexStream::setRenderObject(const Renderable::Snapshot& renderObject)
     _transform = &renderObject._transform;
     _translate = renderObject._position;
     _varyings = renderObject._varyings;
-    _visible = renderObject._visible;
+    _visible = renderObject.getState(Renderable::RENDERABLE_STATE_VISIBLE);
 }
 
 void VertexStream::writeNormal(const V3& normal)

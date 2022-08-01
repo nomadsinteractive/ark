@@ -19,7 +19,6 @@ public:
 
 private:
     Model _model;
-    Buffer _vertices;
     sp<SharedBuffer> _shared_buffer;
 };
 

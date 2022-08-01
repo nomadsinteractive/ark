@@ -10,9 +10,8 @@ class RenderablePassive : public Renderable {
 public:
     RenderablePassive(sp<RenderObject> renderObject);
 
-    virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate) override;
-
-    const sp<RenderObject>& renderObject() const;
+    virtual State updateState(const RenderRequest& renderRequest) override;
+    virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, State state) override;
 
     void requestUpdate(const V3& position);
 

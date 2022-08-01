@@ -9,6 +9,7 @@
 #include "graphics/base/v2.h"
 #include "graphics/base/render_layer.h"
 #include "graphics/base/layer.h"
+#include "graphics/inf/renderable.h"
 
 #include "renderer/forwarding.h"
 
@@ -23,10 +24,11 @@ private:
 
         sp<Renderable> _renderable;
         SafeVar<Boolean> _disposed;
+        Renderable::State _state;
     };
 
 public:
-    LayerContext(sp<ModelLoader> modelLoader, sp<Varyings> varyings, sp<Notifier> notifier, Layer::Type type);
+    LayerContext(sp<ModelLoader> modelLoader, sp<Varyings> varyings, Layer::Type type);
 
     virtual void traverse(const Visitor& visitor) override;
 
@@ -47,6 +49,7 @@ public:
 //  [[script::bindings::property]]
     void setVaryings(sp<Varyings> varyings);
 
+    bool preSnapshot(const RenderRequest& renderRequest);
     void takeSnapshot(RenderLayer::Snapshot& output, const RenderRequest& renderRequest);
 
     class BUILDER : public Builder<LayerContext> {
@@ -64,9 +67,9 @@ public:
 private:
     sp<ModelLoader> _model_loader;
     sp<Varyings> _varyings;
-    sp<Notifier> _notifier;
     Layer::Type _layer_type;
 
+    bool _reload_requested;
     bool _render_requested;
     bool _render_done;
     bool _position_changed;

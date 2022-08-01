@@ -36,7 +36,7 @@ public:
     const sp<PipelineInput>& input() const;
     const sp<PipelineLayout>& layout() const;
 
-    sp<ShaderBindings> makeBindings(ModelLoader::RenderMode mode, PipelineBindings::RenderProcedure renderProcedure) const;
+    sp<ShaderBindings> makeBindings(Buffer vertices, ModelLoader::RenderMode mode, PipelineBindings::RenderProcedure renderProcedure) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Shader> {

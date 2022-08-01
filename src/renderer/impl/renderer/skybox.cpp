@@ -21,8 +21,7 @@
 namespace ark {
 
 Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, RenderController& renderController)
-    : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS)),
-      _vertices(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(makeUnitCubeVertices(renderController)))),
+    : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(makeUnitCubeVertices(renderController))), ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS)),
       _index_buffer(renderController.getNamedBuffer(SharedBuffer::NAME_QUADS)->snapshot(renderController, 6))
 {
     _shader_bindings->pipelineBindings()->bindSampler(texture);
@@ -30,7 +29,7 @@ Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>
 
 void Skybox::render(RenderRequest& renderRequest, const V3& /*position*/)
 {
-    DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), _vertices.snapshot(), _index_buffer, DrawingContext::ParamDrawElements(0, _index_buffer.length<element_index_t>()));
+    DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), _shader_bindings->vertices().snapshot(), _index_buffer, DrawingContext::ParamDrawElements(0, _index_buffer.length<element_index_t>()));
     renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
 }
 

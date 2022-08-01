@@ -23,9 +23,8 @@ RCCDrawElementsInstanced::RCCDrawElementsInstanced(Model model)
 
 sp<ShaderBindings> RCCDrawElementsInstanced::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
 {
-    _vertices = renderController.makeVertexBuffer();
     _indices = renderController.makeIndexBuffer(Buffer::USAGE_STATIC, _model.indices());
-    return shader.makeBindings(renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED);
+    return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED);
 }
 
 void RCCDrawElementsInstanced::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& snapshot)
@@ -37,11 +36,12 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
 {
     size_t verticesLength = _model.vertices()->length();
     const sp<ModelLoader>& modelLoader = snapshot._stub->_model_loader;
+    const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
 
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
     buf.setIndices(snapshot._index_buffer);
 
-    if(snapshot._flag == RenderLayer::SNAPSHOT_FLAG_RELOAD || _vertices.size() == 0)
+    if(snapshot.needsReload())
     {
         VertexStream writer = buf.makeVertexStream(renderRequest, verticesLength, 0);
         const Model model = modelLoader->loadModel(0);
@@ -59,7 +59,7 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
     }
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), std::move(snapshot._ssbos),
-                                  buf.vertices().toSnapshot(_vertices), buf.indices(), DrawingContext::ParamDrawElementsInstanced(0, static_cast<uint32_t>(_model.indexCount()), static_cast<int32_t>(snapshot._items.size()), buf.makeDividedBufferSnapshots()));
+                                  buf.vertices().toSnapshot(vertices), buf.indices(), DrawingContext::ParamDrawElementsInstanced(0, static_cast<uint32_t>(_model.indexCount()), static_cast<int32_t>(snapshot._items.size()), buf.makeDividedBufferSnapshots()));
 
     if(snapshot._stub->_scissor)
         drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);
