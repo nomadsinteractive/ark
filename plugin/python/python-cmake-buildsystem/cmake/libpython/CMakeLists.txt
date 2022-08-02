@@ -241,22 +241,22 @@ endif(UNIX)
 get_property(builtin_extensions GLOBAL PROPERTY builtin_extensions)
 
 # Collect builtin extension sources
-set(builtin_extension_sources)
-foreach(name ${builtin_extensions})
-    get_property(extension_${name}_sources GLOBAL PROPERTY extension_${name}_sources)
-    list(APPEND builtin_extension_sources ${extension_${name}_sources})
-endforeach()
+#set(builtin_extension_sources)
+#foreach(name ${builtin_extensions})
+#    get_property(extension_${name}_sources GLOBAL PROPERTY extension_${name}_sources)
+#    list(APPEND builtin_extension_sources ${extension_${name}_sources})
+#endforeach()
 
 # XXX Associate Py_NO_ENABLE_SHARED with "_ctypes/callbacks.c" if corresponding
 #     extension is builtin.
-if(WIN32)
-    foreach(src ${builtin_extension_sources})
-        get_filename_component(filename ${src} NAME)
-        if("${filename}" STREQUAL "callbacks.c")
-            set_property(SOURCE ${src} APPEND PROPERTY COMPILE_DEFINITIONS Py_NO_ENABLE_SHARED)
-        endif()
-    endforeach()
-endif()
+#if(WIN32)
+#    foreach(src ${builtin_extension_sources})
+#        get_filename_component(filename ${src} NAME)
+#        if("${filename}" STREQUAL "callbacks.c")
+#            set_property(SOURCE ${src} APPEND PROPERTY COMPILE_DEFINITIONS Py_NO_ENABLE_SHARED)
+#        endif()
+#    endforeach()
+#endif()
 
 # Collect builtin extension link libraries
 set(builtin_link_libraries)
@@ -266,20 +266,20 @@ foreach(name ${builtin_extensions})
 endforeach()
 
 # Collect builtin extension includedirs
-set(builtin_includedirs)
-foreach(name ${builtin_extensions})
-    get_property(extension_${name}_includedirs GLOBAL PROPERTY extension_${name}_includedirs)
-    list(APPEND builtin_includedirs ${extension_${name}_includedirs})
-endforeach()
+#set(builtin_includedirs)
+#foreach(name ${builtin_extensions})
+#    get_property(extension_${name}_includedirs GLOBAL PROPERTY extension_${name}_includedirs)
+#    list(APPEND builtin_includedirs ${extension_${name}_includedirs})
+#endforeach()
 
-# Collect builtin extension definitions
-foreach(name ${builtin_extensions})
-    get_property(extension_${name}_definitions GLOBAL PROPERTY extension_${name}_definitions)
-    if(extension_${name}_definitions)
-        set_property(SOURCE ${extension_${name}_sources}
-            APPEND PROPERTY COMPILE_DEFINITIONS ${extension_${name}_definitions})
-    endif()
-endforeach()
+## Collect builtin extension definitions
+#foreach(name ${builtin_extensions})
+#    get_property(extension_${name}_definitions GLOBAL PROPERTY extension_${name}_definitions)
+#    if(extension_${name}_definitions)
+#        set_property(SOURCE ${extension_${name}_sources}
+#            APPEND PROPERTY COMPILE_DEFINITIONS ${extension_${name}_definitions})
+#    endif()
+#endforeach()
 
 # Create the parts of config.c for platform-specific and user-controlled
 # builtin modules.

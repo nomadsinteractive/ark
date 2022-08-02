@@ -82,8 +82,6 @@ list(APPEND _decimal_SOURCES
     _decimal/libmpdec/mpdecimal.c
 )
 if(MSVC)
-    enable_language(ASM_MASM)
-    set(CMAKE_ASM_MASM_COMPILE_OBJECT ${CMAKE_ASM_MASM_COMPILER} CACHE INTERNAL "MASM compiler" FORCE)
     set(_decimal_DEFINITIONS MASM)
 else()
     set(_decimal_DEFINITIONS ASM)
@@ -103,7 +101,7 @@ add_python_extension(_decimal SOURCES
     DEFINITIONS ${_decimal_DEFINITIONS}
     INCLUDEDIRS
         ${SRC_DIR}/Modules/_decimal
-#        ${SRC_DIR}/Modules/_decimal/libmpdec
+        ${SRC_DIR}/Modules/_decimal/libmpdec
 )
 
 add_python_extension(_queue SOURCES _queuemodule.c)

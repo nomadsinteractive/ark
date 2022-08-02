@@ -233,10 +233,10 @@ macro(ark_test_big_endian)
 endmacro()
 
 macro(ark_ensure_dependency TARGET_DIR)
-    if(ARK_DOWNLOAD_DEPENDENCIES)
-        execute_process(COMMAND ${Python_EXECUTABLE} ${ARK_SRC_DIR}/tools/python/dependency.py ${TARGET_DIR} ${ARGN}
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-    endif()
+#    if(ARK_DOWNLOAD_DEPENDENCIES)
+#        execute_process(COMMAND ${Python_EXECUTABLE} ${ARK_SRC_DIR}/tools/python/dependency.py ${TARGET_DIR} ${ARGN}
+#                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+#    endif()
 endmacro()
 
 macro(ark_find_vulkan)

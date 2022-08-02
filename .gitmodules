@@ -43,3 +43,6 @@
 [submodule "3rdparty/zlib"]
 	path = 3rdparty/zlib
 	url = https://github.com/madler/zlib.git
+[submodule "plugin/python/3rdparty/Python"]
+	path = plugin/python/3rdparty/Python
+	url = https://github.com/python/cpython.git
