@@ -1,4 +1,4 @@
-project(ark-python)
+project(ark-python LANGUAGES C CXX ASM_MASM)
 cmake_minimum_required(VERSION 3.0)
 
 set(SRC_DIR ${ARK_SRC_DIR}/plugin/python/3rdparty/Python)
@@ -30,12 +30,14 @@ else()
     list(APPEND ARK_PYTHON_LIBRARIES libpython-shared)
 endif()
 
+get_filename_component(PLUGIN_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
+
+find_package(libffi CONFIG REQUIRED)
+
 ark_ensure_dependency(3rdparty/Python)
 add_subdirectory(python-cmake-buildsystem)
 
 ark_link_libraries(${ARK_PYTHON_LIBRARIES})
-
-get_filename_component(PLUGIN_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
 
 list(APPEND LOCAL_INCLUDE_DIRS .)
 list(APPEND LOCAL_INCLUDE_DIRS ${PLUGIN_ROOT_DIR})
@@ -57,7 +59,7 @@ execute_process(
 )
 include(${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cmake)
 if(NOT (ANDROID OR IOS))
-    ark_add_generated_file(_freeze_importlib ${CMAKE_CURRENT_SOURCE_DIR}/extension/ark_py_importlib.h ${CMAKE_CURRENT_SOURCE_DIR}/extension extension/_ark_bootstrap.py _ark_bootstrap.py)
+    ark_add_generated_file(_freeze_importlib ${CMAKE_CURRENT_SOURCE_DIR}/extension/ark_py_importlib.h ${CMAKE_CURRENT_SOURCE_DIR}/extension extension/_ark_bootstrap.py ark_importlib _ark_bootstrap.py)
 endif()
 
 ark_setup_tools(ark_gen_plugin_class)
@@ -73,6 +75,10 @@ ark_unset_local_variables()
 
 list(APPEND LOCAL_LIBS libpython-static)
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_PYTHON_INCLUDE_DIR})
+
+if(WIN32)
+    list(APPEND LOCAL_LIBS version.lib Shlwapi.lib Pathcch.lib Iphlpapi.lib)
+endif()
 
 if(NOT (ANDROID OR IOS))
     ark_add_executable(_freeze_importlib ${SRC_DIR}/Programs/_freeze_importlib.c)

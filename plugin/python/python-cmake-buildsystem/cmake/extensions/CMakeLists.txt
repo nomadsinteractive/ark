@@ -77,7 +77,8 @@ list(APPEND _decimal_SOURCES
     _decimal/libmpdec/fourstep.c
     _decimal/libmpdec/crt.c
     _decimal/libmpdec/io.c
-    _decimal/libmpdec/memory.c
+#    _decimal/libmpdec/memory.c
+    _decimal/libmpdec/mpalloc.c
     _decimal/libmpdec/mpdecimal.c
 )
 if(MSVC)
@@ -100,7 +101,10 @@ endif()
 add_python_extension(_decimal SOURCES
     ${_decimal_SOURCES}
     DEFINITIONS ${_decimal_DEFINITIONS}
-    INCLUDEDIRS ${SRC_DIR}/Modules/_decimal)
+    INCLUDEDIRS
+        ${SRC_DIR}/Modules/_decimal
+#        ${SRC_DIR}/Modules/_decimal/libmpdec
+)
 
 add_python_extension(_queue SOURCES _queuemodule.c)
 
@@ -147,7 +151,7 @@ add_python_extension(math ${MSVC_BUILTIN} SOURCES _math.c mathmodule.c)
 add_python_extension(mmap ${MSVC_BUILTIN} SOURCES mmapmodule.c)
 add_python_extension(_multibytecodec ${MSVC_BUILTIN} SOURCES cjkcodecs/multibytecodec.c)
 #add_python_extension(operator ${MSVC_BUILTIN} SOURCES operator.c)
-add_python_extension(parser ${MSVC_BUILTIN} SOURCES parsermodule.c)
+#add_python_extension(parser ${MSVC_BUILTIN} SOURCES parsermodule.c)
 add_python_extension(_random ${MSVC_BUILTIN} SOURCES _randommodule.c)
 #add_python_extension(strop ${MSVC_BUILTIN} SOURCES stropmodule.c)
 add_python_extension(_struct ${MSVC_BUILTIN} SOURCES _struct.c)
@@ -265,12 +269,12 @@ if(WIN32)
         DEFINITIONS X86_WIN32
       )
     else(MINGW) # Visual Studio
-      if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
-          enable_language(ASM_MASM)
-          set(_ctype_arch_impl win64.asm)
-      else(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
-          set(_ctype_arch_impl win32.c)
-      endif(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+#      if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+#          enable_language(ASM_MASM)
+#          set(_ctype_arch_impl win64.asm)
+#      else(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+#          set(_ctype_arch_impl win32.c)
+#      endif(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
       add_python_extension(_ctypes
           SOURCES _ctypes/_ctypes.c
                   _ctypes/callbacks.c
@@ -278,11 +282,13 @@ if(WIN32)
                   _ctypes/cfield.c
                   _ctypes/malloc_closure.c
                   _ctypes/stgdict.c
-                  _ctypes/libffi_msvc/prep_cif.c
-                  _ctypes/libffi_msvc/ffi.c
+#                  _ctypes/libffi_msvc/prep_cif.c
+#                  _ctypes/libffi_msvc/ffi.c
                   _ctypes/libffi_msvc/${_ctype_arch_impl}
           REQUIRES BUILD_SHARED
-          INCLUDEDIRS ${SRC_DIR}/Modules/_ctypes/libffi_msvc
+          INCLUDEDIRS
+              ${libffi_INCLUDE_DIRS}
+          LIBRARIES libffi
         )
     endif(MINGW)
 else(WIN32)
@@ -351,7 +357,7 @@ else(EXPAT_LIBRARIES AND EXPAT_INCLUDE_DIRS)
     endif(UNIX)
     add_python_extension(pyexpat
         SOURCES pyexpat.c
-                expat/loadlibrary.c
+#                expat/loadlibrary.c
                 expat/xmlparse.c
                 expat/xmlrole.c
                 expat/xmltok.c

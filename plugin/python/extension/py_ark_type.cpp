@@ -168,10 +168,10 @@ PyTypeObject* PyArkType::basetype()
         sizeof(PyArkType::Instance),
         0,
         reinterpret_cast<destructor>(__dealloc__),          /* tp_dealloc */
-        nullptr,                                            /* tp_print */
+        0,                                                  /* tp_vectorcall_offset */
         nullptr,                                            /* tp_getattr */
         nullptr,                                            /* tp_setattr */
-        nullptr,                                            /* tp_reserved */
+        nullptr,                                            /* tp_as_async */
         nullptr,                                            /* tp_repr */
         nullptr,                                            /* tp_as_number */
         nullptr,                                            /* tp_as_sequence */

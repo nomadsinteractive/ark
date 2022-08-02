@@ -190,9 +190,8 @@ function(add_python_extension name)
         endif()
 
         if(ADD_PYTHON_EXTENSION_DEFINITIONS)
-            set_target_properties(${target_name} PROPERTIES
-                COMPILE_DEFINITIONS "${ADD_PYTHON_EXTENSION_DEFINITIONS}")
-        endif(ADD_PYTHON_EXTENSION_DEFINITIONS)
+            target_compile_definitions(${target_name} PUBLIC ${ADD_PYTHON_EXTENSION_DEFINITIONS})
+        endif()
 
         install(TARGETS ${target_name}
                 ARCHIVE DESTINATION ${ARCHIVEDIR}

@@ -55,8 +55,8 @@ PythonScript::PythonScript(const String& name, const document& libraries)
             i->name = pt->name;
             if(strcmp(pt->name, "_frozen_importlib") == 0)
             {
-                i->code = _Py_M__importlib;
-                i->size = sizeof(_Py_M__importlib);
+                i->code = _Py_M__ark_importlib;
+                i->size = sizeof(_Py_M__ark_importlib);
                 i++;
                 i->code = pt->code;
                 i->size = pt->size;

@@ -1,6 +1,12 @@
 add_definitions(-DPy_BUILD_CORE)
 add_definitions(-DNDEBUG)
 
+if(BUILD_EXTENSIONS_AS_BUILTIN)
+    add_definitions(-DPy_BUILD_CORE_BUILTIN)
+else()
+    add_definitions(-DPy_BUILD_CORE_MODULE)
+endif()
+
 set(LIBPYTHON_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/config.c
 #    ${SRC_DIR}/Modules/_codecsmodule.c
@@ -15,8 +21,8 @@ set(LIBPYTHON_SOURCES
     ${SRC_DIR}/Modules/_tracemalloc.c
 #    ${SRC_DIR}/Modules/_weakref.c
     ${SRC_DIR}/Modules/xxsubtype.c
-    ${SRC_DIR}/Modules/zipimport.c
-    ${SRC_DIR}/Modules/hashtable.c
+#    ${SRC_DIR}/Modules/zipimport.c
+#    ${SRC_DIR}/Modules/hashtable.c
     ${SRC_DIR}/Modules/_bisectmodule.c
     ${SRC_DIR}/Objects/abstract.c
     ${SRC_DIR}/Objects/accu.c
@@ -40,8 +46,10 @@ set(LIBPYTHON_SOURCES
     ${SRC_DIR}/Objects/floatobject.c
     ${SRC_DIR}/Objects/frameobject.c
     ${SRC_DIR}/Objects/funcobject.c
+    ${SRC_DIR}/Objects/genericaliasobject.c
     ${SRC_DIR}/Objects/genobject.c
 #    ${SRC_DIR}/Objects/intobject.c
+    ${SRC_DIR}/Objects/interpreteridobject.c
     ${SRC_DIR}/Objects/iterobject.c
     ${SRC_DIR}/Objects/listobject.c
     ${SRC_DIR}/Objects/longobject.c
@@ -52,6 +60,7 @@ set(LIBPYTHON_SOURCES
     ${SRC_DIR}/Objects/object.c
     ${SRC_DIR}/Objects/obmalloc.c
     ${SRC_DIR}/Objects/odictobject.c
+    ${SRC_DIR}/Objects/picklebufobject.c
     ${SRC_DIR}/Objects/rangeobject.c
     ${SRC_DIR}/Objects/setobject.c
     ${SRC_DIR}/Objects/sliceobject.c
@@ -61,19 +70,23 @@ set(LIBPYTHON_SOURCES
     ${SRC_DIR}/Objects/typeobject.c
     ${SRC_DIR}/Objects/unicodectype.c
     ${SRC_DIR}/Objects/unicodeobject.c
+    ${SRC_DIR}/Objects/unionobject.c
     ${SRC_DIR}/Objects/weakrefobject.c
-    ${SRC_DIR}/Parser/acceler.c
-    ${SRC_DIR}/Parser/bitset.c
-    ${SRC_DIR}/Parser/firstsets.c
-    ${SRC_DIR}/Parser/grammar1.c
-    ${SRC_DIR}/Parser/grammar.c
-    ${SRC_DIR}/Parser/listnode.c
-    ${SRC_DIR}/Parser/metagrammar.c
+#    ${SRC_DIR}/Parser/acceler.c
+#    ${SRC_DIR}/Parser/bitset.c
+#    ${SRC_DIR}/Parser/firstsets.c
+#    ${SRC_DIR}/Parser/grammar1.c
+#    ${SRC_DIR}/Parser/grammar.c
+#    ${SRC_DIR}/Parser/listnode.c
+#    ${SRC_DIR}/Parser/metagrammar.c
     ${SRC_DIR}/Parser/myreadline.c
-    ${SRC_DIR}/Parser/node.c
+#    ${SRC_DIR}/Parser/node.c
     ${SRC_DIR}/Parser/parser.c
-    ${SRC_DIR}/Parser/parsetok.c
-    ${SRC_DIR}/Parser/pgen.c
+#    ${SRC_DIR}/Parser/parsetok.c
+    ${SRC_DIR}/Parser/peg_api.c
+    ${SRC_DIR}/Parser/pegen.c
+    ${SRC_DIR}/Parser/string_parser.c
+    ${SRC_DIR}/Parser/token.c
     ${SRC_DIR}/Parser/tokenizer.c
     ${SRC_DIR}/Python/asdl.c
     ${SRC_DIR}/Python/ast.c
@@ -98,16 +111,19 @@ set(LIBPYTHON_SOURCES
     ${SRC_DIR}/Python/getopt.c
     ${SRC_DIR}/Python/getplatform.c
     ${SRC_DIR}/Python/getversion.c
-    ${SRC_DIR}/Python/graminit.c
+#    ${SRC_DIR}/Python/graminit.c
     ${SRC_DIR}/Python/hamt.c
+    ${SRC_DIR}/Python/hashtable.c
     ${SRC_DIR}/Python/import.c
     ${SRC_DIR}/Python/importdl.c
+    ${SRC_DIR}/Python/initconfig.c
     ${SRC_DIR}/Python/marshal.c
     ${SRC_DIR}/Python/modsupport.c
     ${SRC_DIR}/Python/mysnprintf.c
     ${SRC_DIR}/Python/mystrtoul.c
     ${SRC_DIR}/Python/pathconfig.c
-    ${SRC_DIR}/Python/peephole.c
+    ${SRC_DIR}/Python/preconfig.c
+#    ${SRC_DIR}/Python/peephole.c
     ${SRC_DIR}/Python/pyarena.c
     ${SRC_DIR}/Python/pyctype.c
     ${SRC_DIR}/Python/pyfpe.c
@@ -123,15 +139,13 @@ set(LIBPYTHON_SOURCES
     ${SRC_DIR}/Python/pythonrun.c
 #    ${SRC_DIR}/Python/random.c
     ${SRC_DIR}/Python/structmember.c
+    ${SRC_DIR}/Python/suggestions.c
     ${SRC_DIR}/Python/symtable.c
     ${SRC_DIR}/Python/sysmodule.c
     ${SRC_DIR}/Python/traceback.c
     ${SRC_DIR}/Python/thread.c
     ${SRC_DIR}/Python/_warnings.c
 )
-
-#aux_source_directory(${SRC_DIR}/Objects LIBPYTHON_SOURCES)
-#aux_source_directory(${SRC_DIR}/Python LIBPYTHON_SOURCES)
 
 if(CMAKE_C_COMPILER_ID MATCHES GNU)
     foreach(filename class complex float int method string type unicode weakref)
@@ -220,6 +234,7 @@ elseif(WIN32)
         SOURCE ${SRC_DIR}/PC/dl_nt.c
         PROPERTY COMPILE_DEFINITIONS Py_ENABLE_SHARED
     )
+    add_definitions(-DPY3_DLLNAME="python310.dll" -DMS_DLL_ID="3.10")
 endif(UNIX)
 
 # List of builtin extensions
@@ -237,7 +252,7 @@ endforeach()
 if(WIN32)
     foreach(src ${builtin_extension_sources})
         get_filename_component(filename ${src} NAME)
-        if(${filename} STREQUAL "callbacks.c")
+        if("${filename}" STREQUAL "callbacks.c")
             set_property(SOURCE ${src} APPEND PROPERTY COMPILE_DEFINITIONS Py_NO_ENABLE_SHARED)
         endif()
     endforeach()
@@ -336,7 +351,7 @@ if(BUILD_SHARED)
 #            APPEND PROPERTY COMPILE_DEFINITIONS WITH_NEXT_FRAMEWORK)
     endif(APPLE)
     if(WIN32)
-        target_link_libraries(libpython-shared version.lib Shlwapi.lib)
+        target_link_libraries(libpython-shared version.lib Shlwapi.lib Pathcch.lib Iphlpapi.lib)
     endif()
     if(ARK_PYTHON_PATCH_LIBS)
         target_link_libraries(libpython-shared ${ARK_PYTHON_PATCH_LIBS})
@@ -359,9 +374,9 @@ if(BUILD_STATIC)
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${LIBPYTHON_STATIC_ARCHIVEDIR}
     )
     install(TARGETS libpython-static ARCHIVE DESTINATION ${PYTHONHOME}/config/)
-    if(WIN32)
-        target_link_libraries(libpython-static version.lib Shlwapi.lib)
-    endif()
+#    if(WIN32)
+#        target_link_libraries(libpython-static version.lib Shlwapi.lib Pathcch.lib Iphlpapi.lib)
+#    endif()
     if(ARK_PYTHON_PATCH_LIBS)
         target_link_libraries(libpython-static ${ARK_PYTHON_PATCH_LIBS})
     endif()

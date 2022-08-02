@@ -102,7 +102,6 @@ class ArkModuleFinder:
 def _install(sys_module, _imp_module):
 
     _bootstrap = _imp_module.init_frozen('_frozen_importlib_org')
-    _util = _imp_module.init_frozen('_frozen_importlib_external')
     _ark = _imp_module.create_builtin(_bootstrap.ModuleSpec('ark', None))
 
     __name__ = _bootstrap.__name__
@@ -110,4 +109,6 @@ def _install(sys_module, _imp_module):
     globals().update(_bootstrap.__dict__)
     _bootstrap._install(sys_module, _imp_module)
     globals().update(_bootstrap.__dict__)
+
+    _util = _imp_module.init_frozen('_frozen_importlib_external')
     sys_module.meta_path.append(ArkModuleFinder(_ark, _bootstrap, _util, ArkModuleLoader, _ark.path))

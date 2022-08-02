@@ -254,7 +254,8 @@ install(FILES ${PYCONFIG_BUILD_DIR}/pyconfig.h
 # Set include directories
 include_directories(${INCLUDE_BUILD_DIR})
 include_directories(${PYCONFIG_BUILD_DIR})
-include_directories(${SRC_DIR}/Python)
+#include_directories(${SRC_DIR}/Python)
+include_directories(${SRC_DIR}/Include/internal)
 
 # Set cflags used by all components
 if(CMAKE_C_COMPILER_ID MATCHES GNU)
