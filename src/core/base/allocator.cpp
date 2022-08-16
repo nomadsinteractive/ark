@@ -11,7 +11,7 @@ Allocator::Allocator(const sp<MemoryPool>& memoryPool, size_t blockSize)
 
 ByteArray::Borrowed Allocator::sbrk(size_t size, size_t alignment)
 {
-    std::lock_guard<std::mutex> lock(_mutex);
+    std::scoped_lock<std::mutex> lock(_mutex);
     size_t m = size % alignment;
     size_t sizeNeeded = size + (m ? alignment - m : 0);
 

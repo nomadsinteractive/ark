@@ -51,7 +51,6 @@ endmacro()
 function(ark_apply_target_properties name)
     target_compile_definitions(${name} PRIVATE ${LOCAL_COMPILE_DEFINITIONS})
     target_compile_options(${name} PRIVATE ${LOCAL_COMPILE_OPTIONS})
-    target_compile_features(${name} PRIVATE ${LOCAL_COMPILE_FEATURES})
     target_include_directories(${name} PRIVATE ${LOCAL_INCLUDE_DIRS})
 endfunction()
 
@@ -199,10 +198,6 @@ endmacro()
 
 macro(ark_compile_options)
     list(APPEND LOCAL_COMPILE_OPTIONS ${ARGN})
-endmacro()
-
-macro(ark_compile_features)
-    list(APPEND LOCAL_COMPILE_FEATURES ${ARGN})
 endmacro()
 
 macro(ark_include_directories)

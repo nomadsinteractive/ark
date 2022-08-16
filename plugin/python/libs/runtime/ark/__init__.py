@@ -59,6 +59,10 @@ def is_debug_build():
     return True
 
 
+def is_publishing_build():
+    return False
+
+
 class Object:
     pass
 

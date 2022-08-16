@@ -77,7 +77,7 @@ private:
 
 Application::Application(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport)
     : _application_delegate(applicationDelegate), _application_context(applicationContext), _viewport(viewport), _width(width), _height(height),
-      _on_surface_update(makeOnSurfaceUpdate(false))
+      _surface_updater_pre_created(sp<OnSurfaceUpdatePreCreated>::make(_application_context)), _surface_updater(_surface_updater_pre_created.get())
 {
 }
 
@@ -99,7 +99,7 @@ void Application::onCreateTask()
 {
     __thread_init__<THREAD_ID_CORE>();
     _application_delegate->onCreate(*this, _surface);
-    _on_surface_update = makeOnSurfaceUpdate(true);
+    setSurfaceUpdater(true);
 }
 
 void Application::onPauseTask()
@@ -118,11 +118,9 @@ void Application::onEventTask(const Event& event)
     _application_delegate->onEvent(event);
 }
 
-sp<Runnable> Application::makeOnSurfaceUpdate(bool alive) const
+void Application::setSurfaceUpdater(bool alive)
 {
-    if(alive)
-        return sp<OnSurfaceUpdatePostCreated>::make(_surface->updater(), _application_context, _application_delegate);
-    return sp<OnSurfaceUpdatePreCreated>::make(_application_context);
+    _surface_updater = alive ? _surface_updater_created.get() : _surface_updater_pre_created.get();
 }
 
 void Application::onCreate()
@@ -131,8 +129,9 @@ void Application::onCreate()
     __thread_init__<THREAD_ID_MAIN>();
     const Global<StringTable> stringTable;
     stringTable->addStringBundle("asset", sp<AssetStringBundle>::make());
-    const sp<RenderView> renderView = _application_context->renderEngine()->createRenderView(_application_context->renderController(), _viewport);
-    _surface = sp<Surface>::make(renderView, _application_context);
+    sp<RenderView> renderView = _application_context->renderEngine()->createRenderView(_application_context->renderController(), _viewport);
+    _surface = sp<Surface>::make(std::move(renderView), _application_context);
+    _surface_updater_created = sp<OnSurfaceUpdatePostCreated>::make(_surface->updater(), _application_context, _application_delegate);
     _application_context->runAtCoreThread([this] () {
         onCreateTask();
     });
@@ -141,7 +140,7 @@ void Application::onCreate()
 void Application::onPause()
 {
     LOGD("");
-    _on_surface_update = makeOnSurfaceUpdate(false);
+    setSurfaceUpdater(false);
     _application_context->runAtCoreThread([this] () {
         onPauseTask();
     });
@@ -153,7 +152,7 @@ void Application::onResume()
     LOGD("");
     _application_context->runAtCoreThread([this] () {
         onResumeTask();
-        _on_surface_update = makeOnSurfaceUpdate(true);
+        setSurfaceUpdater(true);
     });
     _application_context->resume();
 }
@@ -161,7 +160,7 @@ void Application::onResume()
 void Application::onDestroy()
 {
     LOGD("");
-    _on_surface_update = makeOnSurfaceUpdate(false);
+    setSurfaceUpdater(false);
     const sp<ApplicationDelegate> applicationDelegate = _application_delegate;
     const sp<ApplicationContext> applicationContext = _application_context;
     _application_context->resume();
@@ -198,7 +197,7 @@ void Application::onSurfaceChanged(uint32_t width, uint32_t height)
 
 void Application::onSurfaceUpdate()
 {
-    _on_surface_update->run();
+    _surface_updater->run();
 }
 
 bool Application::onEvent(const Event& event)

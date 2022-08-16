@@ -59,7 +59,9 @@ public:
     void exit();
 
 //  [[script::bindings::auto]]
-    void post(sp<Runnable> task, float delay = 0.0f, sp<Future> future = nullptr);
+    void post(sp<Runnable> task, float delay, sp<Future> future = nullptr);
+//  [[script::bindings::auto]]
+    void post(sp<Runnable> task, const std::vector<float>& delay, sp<Future> future = nullptr);
 //  [[script::bindings::auto]]
     void schedule(sp<Runnable> task, float interval, sp<Future> future = nullptr);
 

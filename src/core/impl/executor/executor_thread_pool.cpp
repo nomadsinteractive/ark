@@ -73,7 +73,7 @@ uint64_t ExecutorThreadPool::WorkerThreadStrategy::onBusy()
 void ExecutorThreadPool::WorkerThreadStrategy::onExit()
 {
     bool removed = false;
-    const std::lock_guard<std::mutex> guard(_stub->_mutex);
+    const std::scoped_lock<std::mutex> guard(_stub->_mutex);
     for(const sp<ExecutorWorkerThread>& i : _stub->_worker_threads.clear())
         if(i->strategy().get() != this)
             _stub->_worker_threads.push(i);

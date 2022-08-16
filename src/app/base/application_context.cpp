@@ -75,8 +75,10 @@ void ApplicationContext::initResourceLoader(const document& manifest)
 
 void ApplicationContext::initMessageLoop()
 {
+    const Ark& ark = Ark::instance();
     _executor_main = sp<ExecutorWorkerThread>::make(_worker_strategy, "Executor");
-    _message_loop = makeMessageLoop();
+    _message_loop_renderer = sp<MessageLoop>::make(_ticker);
+    _message_loop_core = ark.manifest()->application()._message_loop == Manifest::MESSAGE_LOOP_TYPE_RENDER ? _message_loop_renderer : _worker_strategy->_message_loop;
     _executor_pooled = sp<ExecutorThreadPool>::make(_executor_main);
 }
 
@@ -124,16 +126,6 @@ document ApplicationContext::createResourceLoaderManifest(const document& manife
     const document doc = src ? _application_resource->loadDocument(src) : manifest;
     DWARN(doc == manifest || manifest->children().size() == 0, "\"%s\" has already specified a ResourceLoader src \"%s\", its content will be ignored", Documents::toString(manifest).c_str(), src.c_str());
     return doc;
-}
-
-sp<MessageLoop> ApplicationContext::makeMessageLoop()
-{
-    _render_message_loop = sp<MessageLoop>::make(_ticker);
-
-    const Ark& ark = Ark::instance();
-    if(ark.manifest()->application()._message_loop == Manifest::MESSAGE_LOOP_TYPE_RENDER)
-        return _render_message_loop;
-    return _worker_strategy->_message_loop;
 }
 
 const sp<ApplicationBundle>& ApplicationContext::applicationBundle() const
@@ -205,12 +197,12 @@ void ApplicationContext::setDefaultEventListener(const sp<EventListener>& eventL
 
 void ApplicationContext::post(sp<Runnable> task, float delay, sp<Future> future)
 {
-    _message_loop->post(std::move(task), delay, std::move(future));
+    _message_loop_core->post(std::move(task), delay, std::move(future));
 }
 
 void ApplicationContext::schedule(sp<Runnable> task, float interval, sp<Future> future)
 {
-    _message_loop->schedule(std::move(task), interval, std::move(future));
+    _message_loop_core->schedule(std::move(task), interval, std::move(future));
 }
 
 sp<MessageLoop> ApplicationContext::makeMessageLoop(const sp<Clock>& clock)
@@ -222,7 +214,7 @@ sp<MessageLoop> ApplicationContext::makeMessageLoop(const sp<Clock>& clock)
 
 void ApplicationContext::runAtCoreThread(std::function<void()> task)
 {
-    _message_loop->post(sp<RunnableByFunction>::make(std::move(task)), 0);
+    _message_loop_core->post(sp<RunnableByFunction>::make(std::move(task)), 0);
 }
 
 void ApplicationContext::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)
@@ -246,7 +238,7 @@ std::vector<String> ApplicationContext::getStringArray(const String& resid)
 
 sp<Runnable> ApplicationContext::defer(const sp<Runnable>& task) const
 {
-    return sp<DeferedRunnable>::make(_message_loop, task);
+    return sp<DeferedRunnable>::make(_message_loop_core, task);
 }
 
 const Color& ApplicationContext::backgroundColor() const
@@ -274,7 +266,7 @@ void ApplicationContext::resume()
 void ApplicationContext::updateRenderState()
 {
     _ticker->update(0);
-    _render_message_loop->pollOnce();
+    _message_loop_renderer->pollOnce(_ticker->val());
 }
 
 bool ApplicationContext::isPaused() const
@@ -299,7 +291,7 @@ uint64_t ApplicationContext::Ticker::val()
 }
 
 ApplicationContext::ExecutorWorkerStrategy::ExecutorWorkerStrategy(sp<Variable<uint64_t>> ticker)
-    : _message_loop(sp<MessageLoop>::make(std::move(ticker)))
+    : _ticker(ticker), _message_loop(sp<MessageLoop>::make(std::move(ticker)))
 {
 }
 
@@ -313,7 +305,7 @@ void ApplicationContext::ExecutorWorkerStrategy::onExit()
 
 uint64_t ApplicationContext::ExecutorWorkerStrategy::onBusy()
 {
-    _message_loop->pollOnce();
+    _message_loop->pollOnce(_ticker->val());
     for(const sp<MessageLoop>& i : _app_message_loops)
         i->pollOnce();
     return 0;

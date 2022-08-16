@@ -14,6 +14,8 @@ namespace ark {
 
 class ARK_API MessageLoop {
 public:
+    typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
+
     MessageLoop(sp<Variable<uint64_t>> clock);
     MessageLoop(sp<Variable<uint64_t>> clock, sp<Executor> executor);
 
@@ -22,12 +24,11 @@ public:
 //  [[script::bindings::auto]]
     sp<Future> schedule(sp<Runnable> runnable, float interval, sp<Future> future = nullptr);
 
-    uint64_t pollOnce();
+    uint64_t pollOnce(uint64_t now = 0);
 
 private:
     class Task : public Runnable {
     public:
-//        Task(sp<Runnable> target, uint64_t nextFireTick, uint32_t interval);
         Task(sp<Runnable> target, sp<Future> future, uint64_t nextFireTick, uint32_t interval);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Task);
 

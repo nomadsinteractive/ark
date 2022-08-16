@@ -129,6 +129,12 @@ void ApplicationFacade::post(sp<Runnable> task, float delay, sp<Future> future)
     _context->post(std::move(task), delay, std::move(future));
 }
 
+void ApplicationFacade::post(sp<Runnable> task, const std::vector<float>& delays, sp<Future> future)
+{
+    for(float i : delays)
+        post(task, i, future);
+}
+
 void ApplicationFacade::schedule(sp<Runnable> task, float interval, sp<Future> future)
 {
     _context->schedule(std::move(task), interval, std::move(future));

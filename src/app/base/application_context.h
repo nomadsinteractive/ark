@@ -89,8 +89,6 @@ private:
     sp<ResourceLoader> createResourceLoaderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
     document createResourceLoaderManifest(const document& manifest);
 
-    sp<MessageLoop> makeMessageLoop();
-
     class Ticker : public Variable<uint64_t> {
     public:
         Ticker();
@@ -125,6 +123,7 @@ private:
 
         virtual void onException(const std::exception& e) override;
 
+        sp<Variable<uint64_t>> _ticker;
         sp<MessageLoop> _message_loop;
         List<MessageLoop, MessageLoopFilter> _app_message_loops;
     };
@@ -141,8 +140,8 @@ private:
     sp<ExecutorWorkerStrategy> _worker_strategy;
     sp<Executor> _executor_main;
 
-    sp<MessageLoop> _render_message_loop;
-    sp<MessageLoop> _message_loop;
+    sp<MessageLoop> _message_loop_renderer;
+    sp<MessageLoop> _message_loop_core;
     sp<Executor> _executor_pooled;
 
     op<EventListenerList> _event_listeners;

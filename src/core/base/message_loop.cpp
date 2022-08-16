@@ -1,5 +1,7 @@
 #include "core/base/message_loop.h"
 
+#include "core/ark.h"
+
 #include "core/epi/disposed.h"
 #include "core/base/future.h"
 #include "core/inf/runnable.h"
@@ -33,9 +35,13 @@ sp<Future> MessageLoop::schedule(sp<Runnable> runnable, float interval, sp<Futur
     return future;
 }
 
-uint64_t MessageLoop::pollOnce()
+uint64_t MessageLoop::pollOnce(uint64_t now)
 {
-    uint64_t now = _clock->val();
+    DPROFILER_TRACE("MessageLoop");
+    if(now == 0)
+        now = _clock->val();
+
+    uint64_t nextFireTick = now + 10000;
     for(sp<Task>& task : _scheduled.clear())
         requestNextTask(std::move(task));
 
@@ -59,12 +65,12 @@ uint64_t MessageLoop::pollOnce()
         }
         else
         {
-            runScheduledTask(std::move(scheduled));
-            return front.nextFireTick();
+            nextFireTick = front.nextFireTick();
+            break;
         }
     }
     runScheduledTask(std::move(scheduled));
-    return now + 1000;
+    return nextFireTick;
 }
 
 void MessageLoop::requestNextTask(sp<Task> task)
@@ -91,11 +97,6 @@ void MessageLoop::runScheduledTask(std::vector<sp<Runnable>> scheduled)
             _executor->execute(sp<RunnableComposite>::make(std::move(scheduled)));
     }
 }
-
-//MessageLoop::Task::Task(sp<Runnable> target, uint64_t nextFireTick, uint32_t interval)
-//    : _target(std::move(target)), _next_fire_tick(nextFireTick), _interval(interval)
-//{
-//}
 
 MessageLoop::Task::Task(sp<Runnable> target, sp<Future> future, uint64_t nextFireTick, uint32_t interval)
     : _target(std::move(target)), _future(std::move(future)), _next_fire_tick(nextFireTick), _interval(interval)

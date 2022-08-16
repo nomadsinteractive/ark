@@ -49,12 +49,13 @@ ark_compile_definition_option(ARK_USE_STB_IMAGE "Use stb image decoding library"
 ark_compile_definition_option(ARK_USE_OPEN_GL "Use OpenGL rendering library" ON)
 ark_compile_definition_option(ARK_USE_VULKAN  "Use Vulkan rendering library" OFF)
 
+ark_compile_definition_option(ARK_FLAG_PUBLISHING_BUILD "This is a release build for publishing. Disabling all the unnecessary modules" OFF)
+
 list(APPEND LOCAL_INCLUDE_DIRS .)
 list(APPEND LOCAL_INCLUDE_DIRS src)
 
 message("Building for ${ARK_SYSTEM_NAME} - ${CMAKE_BUILD_TYPE}; build-share-libs: ${BUILD_SHARED_LIBS}\nCompiler: ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
 ark_compile_definitions(-DARK_SYSTEM_NAME="${ARK_SYSTEM_NAME}")
-ark_compile_features(cxx_std_11)
 
 ark_add_debug_flag()
 

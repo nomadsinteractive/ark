@@ -5,14 +5,14 @@ Ark module Finder and Loader.
 
 class ArkModuleLoader:
 
-    def __init__(self, bootstrap, source, path, package, name, filepath, ark_is_debug_build):
+    def __init__(self, bootstrap, source, path, package, name, filepath, ark_is_publishing_build):
         self._bootstrap = bootstrap
         self._source = source
         self._path = path
         self._package = package
         self._name = name
         self._filepath = filepath
-        self._module_executor = self._exec_module_debug if ark_is_debug_build else self._exec_module_release
+        self._module_executor = self._exec_module_release if ark_is_publishing_build else self._exec_module_debug
 
     def create_module(self, spec):
         return None
@@ -56,7 +56,7 @@ class ArkModuleFinder:
                 if spec:
                     return spec
             else:
-                self._ark.logw('No protocol based url "%s" is no longer supported', i)
+                self._ark.logw('None-URL based protocol "%s" is no longer supported', i)
 
         return None
 
@@ -79,7 +79,7 @@ class ArkModuleFinder:
         return None
 
     def _create_module_spec(self, fullname, source, path, package, filepath):
-        loader = self._ark_asset_loader_type(self._bootstrap, source, path, package, fullname, filepath, self._ark.is_debug_build())
+        loader = self._ark_asset_loader_type(self._bootstrap, source, path, package, fullname, filepath, self._ark.is_publishing_build())
         spec = self._bootstrap.ModuleSpec(fullname, loader, origin=filepath, is_package=bool(path))
         spec.has_location = bool(filepath)
         return spec

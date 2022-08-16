@@ -74,6 +74,18 @@ protected:
     std::map<String, int32_t> _constants;
     std::map<String, std::map<TypeId, LoaderFunction>> _loaders;
 
+    template<typename T> static bool isNotEmpty(const T& val) {
+        return isNotEmpty_sfinae(val, nullptr);
+    }
+
+    template<typename T> static bool isNotEmpty_sfinae(const T& val, decltype(val.size())* ) {
+        return val.size() != 0;
+    }
+
+    template<typename T> static bool isNotEmpty_sfinae(const T& val, ...) {
+        return static_cast<bool>(val);
+    }
+
 private:
     void doInitConstants();
 

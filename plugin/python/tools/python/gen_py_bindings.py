@@ -504,6 +504,7 @@ ARK_PY_ARGUMENT_CHECKERS = {
     'int32_t': GenConverter('PyLong_CheckExact({0})', '{0}'),
     'uint32_t': GenConverter('PyLong_CheckExact({0})', '{0}'),
     'float': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', '{0}'),
+    'std::vector<float>': GenConverter('(PyList_CheckExact({0}) || PyTuple_CheckExact({0}))', 'std::move({0})'),
     'std::vector<int32_t>': GenConverter('(PyList_CheckExact({0}) || PyTuple_CheckExact({0}))', 'std::move({0})'),
     'V2': GenConverter('(PyTuple_CheckExact({0}) && PyObject_Length({0}) == 2)', '{0}'),
     'V3': GenConverter('(PyTuple_CheckExact({0}) && PyObject_Length({0}) == 3)', '{0}'),
@@ -721,7 +722,7 @@ class GenMethod(object):
             callstatement = '%s ret = %s' % (acg.strip_key_words(self._return_type, ['virtual']), callstatement)
         calling_lines = [callstatement] + pyret
         type_checks = [(i, j.gen_type_check('t')) for i, j in enumerate(gen_type_check_args) if j]
-        nullptr_check = ['(obj%d || %d >= argc)' % (i, i) for i, j in type_checks if not j]
+        nullptr_check = ['(isNotEmpty(obj%d) || %d >= argc)' % (i, i) for i, j in type_checks if not j]
         if self_type_checks or nullptr_check:
             if nullptr_check:
                 lines.insert(0, 'Py_ssize_t argc = %s;' % self.gen_py_argc())
