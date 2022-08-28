@@ -149,7 +149,7 @@ void Atlas::add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, 
 
 const Atlas::Item& Atlas::at(int32_t id) const
 {
-    DCHECK((_allow_default_item || id == 0) || has(id), "Item(%d) does not exist", id);
+    CHECK((_allow_default_item || id == 0) || has(id), "Item(%d) does not exist", id);
     return _allow_default_item || id == 0 ? (has(id) ? _items.at(id) : _default_item) : _items.at(id);
 }
 
@@ -218,14 +218,14 @@ void Atlas::AttachmentNinePatch::addNinePatch(int32_t type, uint32_t textureWidt
 const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesTriangleStrips(int32_t type) const
 {
     const auto iter = _vertices_triangle_strips.find(type);
-    DCHECK(iter != _vertices_triangle_strips.end(), "Cannot find type: %d", type);
+    CHECK(iter != _vertices_triangle_strips.end(), "Cannot find type: %d", type);
     return iter->second;
 }
 
 const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesQuads(int32_t type) const
 {
     const auto iter = _vertices_quads.find(type);
-    DCHECK(iter != _vertices_quads.end(), "Cannot find type: %d", type);
+    CHECK(iter != _vertices_quads.end(), "Cannot find type: %d", type);
     return iter->second;
 }
 

@@ -25,7 +25,7 @@ MessageLoop::MessageLoop(sp<Variable<uint64_t>> clock, sp<Executor> executor)
 void MessageLoop::post(sp<Runnable> runnable, float delay, sp<Future> future)
 {
     DASSERT(runnable);
-    _scheduled.push(sp<Task>::make(std::move(runnable), std::move(future), delay == 0 ? 0 : static_cast<uint64_t>(_clock->val() + delay * 1000000), 0));
+    _scheduled.push(sp<Task>::make(std::move(runnable), std::move(future), delay == 0 ? 0 : _clock->val() + static_cast<uint64_t>(delay * 1000000), 0));
 }
 
 sp<Future> MessageLoop::schedule(sp<Runnable> runnable, float interval, sp<Future> future)
@@ -78,7 +78,7 @@ void MessageLoop::requestNextTask(sp<Task> task)
     for(auto iter = _tasks.begin(); iter != _tasks.end(); ++iter)
     {
         const sp<Task>& i = (*iter);
-        if(i->nextFireTick() >= task->nextFireTick())
+        if(i->nextFireTick() > task->nextFireTick())
         {
             _tasks.insert(iter, std::move(task));
             return;
