@@ -1,4 +1,4 @@
-#include "graphics/impl/input/flatable_color3b.h"
+#include "graphics/impl/input/input_color3b.h"
 
 #include "core/inf/variable.h"
 #include "core/inf/variable.h"
@@ -8,12 +8,12 @@
 
 namespace ark {
 
-FlatableColor3b::FlatableColor3b(const sp<Vec4>& color)
+InputColor3b::InputColor3b(const sp<Vec4>& color)
     : _color(color)
 {
 }
 
-void FlatableColor3b::flat(void* buf)
+void InputColor3b::flat(void* buf)
 {
     const V4 color = _color->val();
 
@@ -23,24 +23,24 @@ void FlatableColor3b::flat(void* buf)
     ptr[2] = static_cast<uint8_t>(color.z() * 255);
 }
 
-uint32_t FlatableColor3b::size()
+uint32_t InputColor3b::size()
 {
     return 3;
 }
 
-bool FlatableColor3b::update(uint64_t timestamp)
+bool InputColor3b::update(uint64_t timestamp)
 {
     return _color->update(timestamp);
 }
 
-FlatableColor3b::BUILDER::BUILDER(BeanFactory& parent, const String& value)
+InputColor3b::BUILDER::BUILDER(BeanFactory& parent, const String& value)
     : _color(parent.ensureBuilder<Vec4>(value))
 {
 }
 
-sp<Input> FlatableColor3b::BUILDER::build(const Scope& args)
+sp<Input> InputColor3b::BUILDER::build(const Scope& args)
 {
-    return sp<FlatableColor3b>::make(_color->build(args));
+    return sp<InputColor3b>::make(_color->build(args));
 }
 
 }

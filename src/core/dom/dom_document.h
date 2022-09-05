@@ -5,11 +5,12 @@
 
 #include "core/base/api.h"
 #include "core/dom/dom_element.h"
+#include "core/types/implements.h"
 
 namespace ark {
 
 //[[script::bindings::extends(DOMElement)]]
-class ARK_API DOMDocument : public DOMElement {
+class ARK_API DOMDocument : public DOMElement, public Implements<DOMDocument, DOMElement, DOMAttribute> {
 public:
 //  [[script::bindings::auto]]
     DOMDocument(const String& name, const String& value = "", DOMElement::ElementType type = DOMElement::ELEMENT_TYPE_ELEMENT);

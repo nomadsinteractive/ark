@@ -27,7 +27,7 @@ public:
         Strings::rcut(name, fname, fext, '.');
 
         const sp<Asset> asset = _asset_bundle->get(name);
-        DCHECK(asset, "Asset %s not found", name.c_str());
+        CHECK(asset, "Asset %s not found", name.c_str());
 
         return getLoader(fext)->load(asset->open());
     }
@@ -40,7 +40,7 @@ public:
         const auto iter = _loaders.find(ext);
         if(iter != _loaders.end())
             return iter->second;
-        DCHECK(_default_loader, "Cannot find loader for the extension \"%s\"", ext.c_str());
+        CHECK(_default_loader, "Cannot find loader for the extension \"%s\"", ext.c_str());
         return _default_loader;
     }
 

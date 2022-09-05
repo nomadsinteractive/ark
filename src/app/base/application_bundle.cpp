@@ -59,15 +59,17 @@ String ApplicationBundle::loadString(const String& resid) const
 
 sp<DocumentLoaderBundle> ApplicationBundle::createDocumentLoaderBundle() const
 {
-    const sp<DocumentLoaderBundle> documentBundle = sp<DocumentLoaderBundle>::make(_asset_bundle);
-    documentBundle->addLoader("xml", sp<DocumentLoaderXML>::make());
+    sp<DocumentLoader> xmlLoader = sp<DocumentLoaderXML>::make();
+    sp<DocumentLoaderBundle> documentBundle = sp<DocumentLoaderBundle>::make(_asset_bundle, xmlLoader);
+    documentBundle->addLoader("xml", std::move(xmlLoader));
     return documentBundle;
 }
 
 sp<JsonLoaderBundle> ApplicationBundle::createJsonLoaderBundle() const
 {
-    const sp<JsonLoaderBundle> documentBundle = sp<JsonLoaderBundle>::make(_asset_bundle);
-    documentBundle->addLoader("json", sp<JsonLoaderText>::make());
+    sp<JsonLoader> jsonLoader = sp<JsonLoaderText>::make();
+    sp<JsonLoaderBundle> documentBundle = sp<JsonLoaderBundle>::make(_asset_bundle, jsonLoader);
+    documentBundle->addLoader("json", std::move(jsonLoader));
     return documentBundle;
 }
 

@@ -1,13 +1,20 @@
 #include "core/util/input_type.h"
 
+#include "core/inf/array.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/impl/input/input_mat4fv.h"
 
 namespace ark {
 
 sp<Input> InputType::create(const sp<Input>& value)
 {
     return sp<InputWrapper>::make(value);
+}
+
+sp<Input> InputType::create(std::vector<sp<Mat4>> value)
+{
+    return sp<InputMat4fv>::make(sp<Array<sp<Mat4>>::Vector>::make(std::move(value)));
 }
 
 void InputType::set(const sp<Input>& self, const sp<Input>& delegate)

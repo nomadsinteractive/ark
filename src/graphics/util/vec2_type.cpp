@@ -9,6 +9,7 @@
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/integral_with_resistance.h"
+#include "core/impl/variable/second_order_dynamics.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
@@ -337,6 +338,13 @@ sp<Vec2> Vec2Type::modCeil(const sp<Vec2>& self, const sp<Numeric>& mod)
 sp<Vec2> Vec2Type::modCeil(const sp<Vec2>& self, const sp<Vec2>& mod)
 {
     return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::ModCeil<V2>>>::make(self, mod);
+}
+
+sp<Vec2> Vec2Type::sod(sp<Vec2> self, float k, float z, float r, sp<Numeric> t)
+{
+    if(t == nullptr)
+        t = Ark::instance().clock()->duration();
+    return sp<SecondOrderDynamics<V2>>::make(std::move(self), std::move(t), k, z, r);
 }
 
 sp<Vec2> Vec2Type::attract(const sp<Vec2>& self, const V2& s0, float duration, const sp<Numeric>& t)

@@ -7,12 +7,12 @@
 
 namespace ark {
 
-FlatableColor4fArray::FlatableColor4fArray(const sp<ark::Array<Color>>& colorArray)
+InputColor4fv::InputColor4fv(const sp<ark::Array<Color>>& colorArray)
     : _color_array(colorArray)
 {
 }
 
-void FlatableColor4fArray::flat(void* buf)
+void InputColor4fv::flat(void* buf)
 {
     Color* colors = _color_array->buf();
     V4* vbuf = reinterpret_cast<V4*>(buf);
@@ -20,12 +20,12 @@ void FlatableColor4fArray::flat(void* buf)
         vbuf[i] = colors[i].val();
 }
 
-uint32_t FlatableColor4fArray::size()
+uint32_t InputColor4fv::size()
 {
     return _color_array->length() * sizeof(V4);
 }
 
-bool FlatableColor4fArray::update(uint64_t timestamp)
+bool InputColor4fv::update(uint64_t timestamp)
 {
     bool dirty = false;
     size_t len = _color_array->length();
@@ -35,14 +35,14 @@ bool FlatableColor4fArray::update(uint64_t timestamp)
     return dirty;
 }
 
-FlatableColor4fArray::BUILDER::BUILDER(BeanFactory& parent, const String& value)
+InputColor4fv::BUILDER::BUILDER(BeanFactory& parent, const String& value)
     : _color_array(parent.ensureBuilder<ark::Array<Color>>(value))
 {
 }
 
-sp<Input> FlatableColor4fArray::BUILDER::build(const Scope& args)
+sp<Input> InputColor4fv::BUILDER::build(const Scope& args)
 {
-    return sp<FlatableColor4fArray>::make(_color_array->build(args));
+    return sp<InputColor4fv>::make(_color_array->build(args));
 }
 
 }

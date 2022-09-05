@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_IMPL_FLATABLE_FLATABLE_COLOR4F_ARRAY_H_
-#define ARK_GRAPHICS_IMPL_FLATABLE_FLATABLE_COLOR4F_ARRAY_H_
+#ifndef ARK_GRAPHICS_IMPL_FLATABLE_FLATABLE_COLOR4FV_H_
+#define ARK_GRAPHICS_IMPL_FLATABLE_FLATABLE_COLOR4FV_H_
 
 #include "core/inf/builder.h"
 #include "core/inf/input.h"
@@ -9,9 +9,9 @@
 
 namespace ark {
 
-class FlatableColor4fArray : public Input {
+class InputColor4fv : public Input {
 public:
-    FlatableColor4fArray(const sp<ark::Array<Color>>& colorArray);
+    InputColor4fv(const sp<ark::Array<Color>>& colorArray);
 
     virtual void flat(void* buf) override;
     virtual uint32_t size() override;

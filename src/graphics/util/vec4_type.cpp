@@ -3,6 +3,8 @@
 #include "core/ark.h"
 #include "core/base/clock.h"
 #include "core/impl/variable/integral.h"
+#include "core/impl/variable/interpolate.h"
+#include "core/impl/variable/second_order_dynamics.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
@@ -43,8 +45,7 @@ sp<Vec4> Vec4Type::truediv(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
 
 sp<Vec4> Vec4Type::floordiv(const sp<Vec4>& self, const sp<Vec4>& rvalue)
 {
-    FATAL("Unimplemented");
-    return nullptr;
+    return sp<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::FloorDiv<V4>>>::make(self, rvalue);
 }
 
 sp<Vec4> Vec4Type::negative(const sp<Vec4>& self)
@@ -236,6 +237,18 @@ sp<Vec4> Vec4Type::modCeil(const sp<Vec4>& self, const sp<Numeric>& mod)
 sp<Vec4> Vec4Type::modCeil(const sp<Vec4>& self, const sp<Vec4>& mod)
 {
     return sp<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::ModCeil<V4>>>::make(self, mod);
+}
+
+sp<Vec4> Vec4Type::lerp(const sp<Vec4>& self, const sp<Vec4>& b, const sp<Numeric>& t)
+{
+    return sp<Interpolate<V4, float>>::make(self, b, t);
+}
+
+sp<Vec4> Vec4Type::sod(sp<Vec4> self, float k, float z, float r, sp<Numeric> t)
+{
+    if(t == nullptr)
+        t = Ark::instance().clock()->duration();
+    return sp<SecondOrderDynamics<V4>>::make(std::move(self), std::move(t), k, z, r);
 }
 
 sp<Vec4Impl> Vec4Type::ensureImpl(const sp<Vec4>& self)

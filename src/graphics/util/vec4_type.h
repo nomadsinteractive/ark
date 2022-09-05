@@ -111,6 +111,12 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Vec4> modCeil(const sp<Vec4>& self, const sp<Vec4>& mod);
 
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> lerp(const sp<Vec4>& self, const sp<Vec4>& b, const sp<Numeric>& t);
+
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> sod(sp<Vec4> self, float k, float z, float r, sp<Numeric> t = nullptr);
+
 private:
     static sp<Vec4Impl> ensureImpl(const sp<Vec4>& self);
 

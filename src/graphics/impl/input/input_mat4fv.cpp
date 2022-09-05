@@ -1,4 +1,4 @@
-#include "graphics/impl/input/flatable_mat4fv.h"
+#include "graphics/impl/input/input_mat4fv.h"
 
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
@@ -49,12 +49,12 @@ private:
 
 }
 
-FlatableMat4fv::FlatableMat4fv(array<sp<Mat4>> array)
+InputMat4fv::InputMat4fv(array<sp<Mat4>> array)
     : _array(std::move(array))
 {
 }
 
-void FlatableMat4fv::flat(void* buf)
+void InputMat4fv::flat(void* buf)
 {
     M4* vbuf = reinterpret_cast<M4*>(buf);
     uint32_t idx = 0;
@@ -62,12 +62,12 @@ void FlatableMat4fv::flat(void* buf)
         vbuf[idx++] = i->val();
 }
 
-uint32_t FlatableMat4fv::size()
+uint32_t InputMat4fv::size()
 {
     return _array->length() * sizeof(M4);
 }
 
-bool FlatableMat4fv::update(uint64_t timestamp)
+bool InputMat4fv::update(uint64_t timestamp)
 {
     bool dirty = false;
     for(const sp<Mat4>& i : *_array)
@@ -75,18 +75,18 @@ bool FlatableMat4fv::update(uint64_t timestamp)
     return dirty;
 }
 
-FlatableMat4fv::BUILDER::BUILDER(BeanFactory& factory, const String& value)
+InputMat4fv::BUILDER::BUILDER(BeanFactory& factory, const String& value)
     : _id(Identifier::parse(value)), _array(factory.getBuilder<Array<sp<Mat4>>>(value))
 {
 }
 
-sp<Input> FlatableMat4fv::BUILDER::build(const Scope& args)
+sp<Input> InputMat4fv::BUILDER::build(const Scope& args)
 {
     if(_id.isArg())
     {
         array<sp<Mat4>> mats = args.build<Array<sp<Mat4>>>(_id.arg(), args);
         if(mats)
-            return sp<FlatableMat4fv>::make(std::move(mats));
+            return sp<InputMat4fv>::make(std::move(mats));
 
         sp<Input> flatable = args.build<Input>(_id.arg(), args);
         if(flatable)
@@ -97,7 +97,7 @@ sp<Input> FlatableMat4fv::BUILDER::build(const Scope& args)
             return sp<FlatableMat4fvFlatableArray>::make(std::move(flatables));
     }
 
-    return sp<FlatableMat4fv>::make(_array->build(args));
+    return sp<InputMat4fv>::make(_array->build(args));
 }
 
 }

@@ -7,6 +7,7 @@
 #include "core/impl/numeric/stalker.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/interpolate.h"
+#include "core/impl/variable/second_order_dynamics.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
@@ -145,8 +146,7 @@ sp<Vec3> Vec3Type::truediv(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 
 sp<Vec3> Vec3Type::floordiv(const sp<Vec3>& self, const sp<Vec3>& rvalue)
 {
-    FATAL("Unimplemented");
-    return nullptr;
+    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::FloorDiv<V3>>>::make(self, rvalue);
 }
 
 sp<Vec3> Vec3Type::negative(const sp<Vec3>& self)
@@ -324,6 +324,13 @@ sp<Vec3> Vec3Type::attract(const sp<Vec3>& self, const V3& s0, float duration, c
 sp<Vec3> Vec3Type::lerp(const sp<Vec3>& self, const sp<Vec3>& b, const sp<Numeric>& t)
 {
     return sp<Interpolate<V3, float>>::make(self, b, t);
+}
+
+sp<Vec3> Vec3Type::sod(sp<Vec3> self, float k, float z, float r, sp<Numeric> t)
+{
+    if(t == nullptr)
+        t = Ark::instance().clock()->duration();
+    return sp<SecondOrderDynamics<V3>>::make(std::move(self), std::move(t), k, z, r);
 }
 
 sp<Vec3> Vec3Type::cross(const sp<Vec3>& self, const sp<Vec3>& other)

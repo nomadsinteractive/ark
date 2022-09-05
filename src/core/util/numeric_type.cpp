@@ -15,6 +15,7 @@
 #include "core/impl/variable/integral_with_resistance.h"
 #include "core/impl/variable/interpolate.h"
 #include "core/impl/variable/periodic.h"
+#include "core/impl/variable/second_order_dynamics.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
@@ -320,6 +321,13 @@ sp<Numeric> NumericType::vibrate(float s0, float v0, float s1, float v1, float d
 sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t)
 {
     return sp<Interpolate<float, float>>::make(self, b, t);
+}
+
+sp<Numeric> NumericType::sod(sp<Numeric> self, float k, float z, float r, sp<Numeric> t)
+{
+    if(t == nullptr)
+        t = Ark::instance().clock()->duration();
+    return sp<SecondOrderDynamics<float>>::make(std::move(self), std::move(t), k, z, r);
 }
 
 sp<Numeric> NumericType::periodic(const sp<Numeric>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)

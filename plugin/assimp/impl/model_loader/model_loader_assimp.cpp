@@ -61,7 +61,7 @@ array<element_index_t> ModelImporterAssimp::loadIndices(const aiMesh* mesh, elem
         const aiFace& face = mesh->mFaces[i];
         DASSERT(face.mNumIndices == 3);
         for(uint32_t j = 0; j < 3; ++j)
-            *(buf++) = static_cast<element_index_t>(face.mIndices[j]) + vertexBase;
+            *(buf++) = face.mNumIndices == 3 ? static_cast<element_index_t>(face.mIndices[j]) + vertexBase : 0;
     }
     return s;
 }

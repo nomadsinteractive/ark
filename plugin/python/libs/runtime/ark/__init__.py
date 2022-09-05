@@ -175,6 +175,39 @@ class Json:
         pass
 
 
+class DOMDocument:
+    def __init__(self, name: str, value: str = '', type_: int = 0):
+        pass
+
+    @property
+    def name(self) -> str:
+        return ''
+
+    @property
+    def type(self) -> int:
+        return 0
+
+    @property
+    def attributes(self) -> list:
+        return []
+
+    @property
+    def children(self) -> list['DOMDocument']:
+        return []
+
+    def get_attribute(self, name: str):
+        pass
+
+    def get_child(self, name: str) -> 'DOMDocument':
+        pass
+
+    def ensure_child(self, name: str) -> 'DOMDocument':
+        pass
+
+    def add_child(self, doc: 'DOMDocument'):
+        pass
+
+
 class MessageLoop:
 
     def post(self, task: Callable[[], None], delay: float):
@@ -201,7 +234,7 @@ class Storage:
 
 class ApplicationBundle:
 
-    def load_doucment(self, resid: str):
+    def load_document(self, resid: str) -> DOMDocument:
         pass
 
     def load_json(self, resid: str) -> Json:
@@ -620,18 +653,12 @@ class Integer(_Var):
     def __init__(self, value: Union[int, 'Integer', Numeric]):
         super().__init__(value)
 
-    def __int__(self) -> int:
-        return 0
-
     @staticmethod
     def repeat(array: List[int], repeat: int) -> 'ExpectationI':
         pass
 
     @staticmethod
     def to_repeat(repeat: str) -> int:
-        pass
-
-    def if_else(self, condition: Boolean, negative: 'Integer') -> 'Integer':
         pass
 
     def animate(self, interval: Union[Numeric, float] = None, duration: Union[Numeric, float] = None) -> 'Integer':
@@ -796,50 +823,44 @@ class Vec4(Vec3):
         pass
 
 
-class Mat2:
+class _Mat:
+    def __mul__(self, other):
+        pass
+
+    def __matmul__(self, other):
+        pass
+
+    def rotate(self, rot: Union[float, Numeric, 'Rotation']):
+        pass
+
+    def freeze(self):
+        pass
+
+    def if_else(self, condition: Boolean, other):
+        pass
+
+    @staticmethod
+    def identity():
+        pass
+
+
+class Mat2(_Mat):
     def __init__(self, t=None, b=None):
         pass
 
-    def __mul__(self, other):
-        pass
 
-    def __matmul__(self, other):
-        pass
-
-    def rotate(self, rot: Union[float, Numeric, 'Rotation']) -> 'Mat2':
-        pass
-
-    def freeze(self) -> 'Mat2':
-        pass
-
-    def if_else(self, condition: Boolean, other: 'Mat2') -> 'Mat2':
-        pass
-
-
-class Mat3:
+class Mat3(_Mat):
     def __init__(self, t=None, b=None, n=None):
         pass
 
-    def __mul__(self, other):
-        return None
 
-    def __matmul__(self, other):
-        pass
-
-
-class Mat4:
+class Mat4(_Mat):
     def __init__(self, t=None, b=None, n=None, w=None):
-        pass
-
-    def __mul__(self, other):
-        pass
-
-    def __matmul__(self, other):
         pass
 
 
 class Input:
-    def __init__(self, delegate: 'Input'):
+    def __init__(self, delegate: ['Input', list[_Mat]]):
         pass
 
     @property

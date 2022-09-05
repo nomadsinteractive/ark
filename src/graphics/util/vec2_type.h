@@ -119,6 +119,9 @@ public:
     static sp<Vec2> modCeil(const sp<Vec2>& self, const sp<Vec2>& mod);
 
 //  [[script::bindings::classmethod]]
+    static sp<Vec2> sod(sp<Vec2> self, float k, float z, float r, sp<Numeric> t = nullptr);
+
+//  [[script::bindings::classmethod]]
     static sp<Vec2> attract(const sp<Vec2>& self, const V2& s0, float duration, const sp<Numeric>& t = nullptr);
 
 //  [[script::bindings::classmethod]]

@@ -26,7 +26,7 @@ DOMElement::ElementType DOMElement::type() const
     return _type;
 }
 
-const std::vector<attribute>& DOMElement::attributes() const
+const std::vector<sp<DOMAttribute>>& DOMElement::attributes() const
 {
     return _attributes.values();
 }

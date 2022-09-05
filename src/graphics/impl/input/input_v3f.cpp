@@ -1,4 +1,4 @@
-#include "graphics/impl/input/flatable_v3f.h"
+#include "graphics/impl/input/input_v3f.h"
 
 #include "core/inf/variable.h"
 #include "core/base/bean_factory.h"

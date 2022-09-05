@@ -16,6 +16,8 @@ class ARK_API InputType {
 public:
 //[[script::bindings::constructor]]
     static sp<Input> create(const sp<Input>& value);
+//[[script::bindings::constructor]]
+    static sp<Input> create(std::vector<sp<Mat4>> value);
 
 //[[script::bindings::classmethod]]
     static void set(const sp<Input>& self, const sp<Input>& delegate);
@@ -28,9 +30,7 @@ private:
         InputWrapper(sp<Input> delegate);
 
         virtual bool update(uint64_t timestamp) override;
-
         virtual void flat(void* buf) override;
-
         virtual uint32_t size() override;
 
         void setDelegate(sp<Input> delegate);

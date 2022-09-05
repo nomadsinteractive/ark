@@ -1,17 +1,16 @@
 #ifndef ARK_CORE_DOM_ELEMENT_H_
 #define ARK_CORE_DOM_ELEMENT_H_
 
-#include <map>
-
 #include "core/base/api.h"
 #include "core/dom/dom_attribute.h"
 #include "core/collection/iterable.h"
 #include "core/collection/table.h"
+#include "core/types/implements.h"
 
 namespace ark {
 
 //[[script::bindings::extends(DOMAttribute)]]
-class ARK_API DOMElement : public DOMAttribute {
+class ARK_API DOMElement : public DOMAttribute, public Implements<DOMElement, DOMAttribute> {
 public:
     enum ElementType {
         ELEMENT_TYPE_ELEMENT,
@@ -20,8 +19,6 @@ public:
         ELEMENT_TYPE_UNKNOWN
     };
 public:
-    typedef std::map<String, attribute>::iterator Iterator;
-
     DOMElement();
     DOMElement(const String& name, DOMElement::ElementType type = DOMElement::ELEMENT_TYPE_ELEMENT);
 //  [[script::bindings::auto]]
@@ -30,7 +27,7 @@ public:
 //  [[script::bindings::property]]
     DOMElement::ElementType type() const;
 //  [[script::bindings::property]]
-    const std::vector<attribute>& attributes() const;
+    const std::vector<sp<DOMAttribute>>& attributes() const;
 
 //  [[script::bindings::auto]]
     const sp<DOMAttribute>& getAttribute(const String& name) const;
